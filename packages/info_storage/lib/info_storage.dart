@@ -39,6 +39,7 @@ class EncryptedInformationRepository implements InformationRepository {
   final _proposals = <String, ImportProposal>{};
   final _updates = <String, UpdateProposal>{};
   final _revisions = <InformationRevision>[];
+  final _revisionPurges = <RevisionPurgeFact>[];
   final _recycle = <String, RecycleEntry>{};
   final _recycleFacts = <RecycleFact>[];
   final _deletes = <String, DeleteProposal>{};
@@ -119,6 +120,18 @@ class EncryptedInformationRepository implements InformationRepository {
   }
 
   Future<void> _load() async {
+    for (final row
+        in await _db
+            .customSelect('SELECT * FROM revision_purge_facts ORDER BY rowid')
+            .get()) {
+      _revisionPurges.add(
+        RevisionPurgeFact(
+          row.read<String>('item_id'),
+          row.read<int>('version'),
+          DateTime.parse(row.read<String>('purged_at')),
+        ),
+      );
+    }
     for (final row
         in await _db
             .customSelect('SELECT payload FROM recycle_entries ORDER BY rowid')
@@ -566,6 +579,7 @@ class EncryptedInformationRepository implements InformationRepository {
     _proposals.clear();
     _updates.clear();
     _revisions.clear();
+    _revisionPurges.clear();
     try {
       await _db.close();
     } finally {
@@ -584,6 +598,50 @@ class EncryptedInformationRepository implements InformationRepository {
   List<InformationRevision> get informationRevisions {
     if (_closed) throw const StorageFailure('library_closed');
     return List.unmodifiable(_revisions);
+  }
+
+  @override
+  List<RevisionPurgeFact> get revisionPurgeFacts {
+    if (_closed) throw const StorageFailure('library_closed');
+    return List.unmodifiable(_revisionPurges);
+  }
+
+  @override
+  Future<void> pruneInformationRevisions(
+    DateTime cutoff,
+    DateTime purgedAt,
+  ) async {
+    if (_closed) throw const StorageFailure('library_closed');
+    final expired = _revisions
+        .where((r) => !r.replacedAt.isAfter(cutoff))
+        .toList();
+    if (expired.isEmpty) return;
+    try {
+      await _db.transaction(() async {
+        for (final revision in expired) {
+          await _db.customStatement(
+            'INSERT INTO revision_purge_facts(item_id,version,purged_at) VALUES(?,?,?) ON CONFLICT(item_id,version) DO NOTHING',
+            [
+              revision.item.id,
+              revision.item.version,
+              purgedAt.toUtc().toIso8601String(),
+            ],
+          );
+          await _db.customStatement(
+            'DELETE FROM information_revisions WHERE item_id=? AND version=?',
+            [revision.item.id, revision.item.version],
+          );
+        }
+      });
+      for (final revision in expired) {
+        _revisionPurges.add(
+          RevisionPurgeFact(revision.item.id, revision.item.version, purgedAt),
+        );
+      }
+      _revisions.removeWhere((r) => !r.replacedAt.isAfter(cutoff));
+    } catch (_) {
+      throw const StorageFailure('revision_cleanup_failed');
+    }
   }
 
   Future<void> _writeUpdate(UpdateProposal proposal) => _db.customStatement(
@@ -761,12 +819,13 @@ class EncryptedInformationRepository implements InformationRepository {
 class _InformationDatabase extends GeneratedDatabase {
   _InformationDatabase(super.executor);
   @override
-  int get schemaVersion => 9;
+  int get schemaVersion => 10;
   @override
   Iterable<TableInfo<Table, Object?>> get allTables => const [];
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (_) async {
+      await _createRevisionPurges();
       await _createRecycle();
       await _createAudit();
       await _createUpdates();
@@ -785,7 +844,8 @@ class _InformationDatabase extends GeneratedDatabase {
       await _backupSchema();
     },
     onUpgrade: (_, from, to) async {
-      if (from < 1 || to != 9) throw const StorageFailure('unsupported_schema');
+      if (from < 1 || to != 10)
+        throw const StorageFailure('unsupported_schema');
       await transaction(() async {
         if (from < 2) {
           await customStatement(
@@ -810,6 +870,7 @@ class _InformationDatabase extends GeneratedDatabase {
         if (from < 7) await _createAudit();
         if (from < 8) await _createUpdates();
         if (from < 9) await _createRecycle();
+        if (from < 10) await _createRevisionPurges();
       });
     },
     beforeOpen: (details) async {
@@ -822,6 +883,10 @@ class _InformationDatabase extends GeneratedDatabase {
       // tables. Backfill only after rejecting unknown future versions.
       await _createAudit();
     },
+  );
+
+  Future<void> _createRevisionPurges() => customStatement(
+    'CREATE TABLE revision_purge_facts(item_id TEXT NOT NULL,version INTEGER NOT NULL,purged_at TEXT NOT NULL,PRIMARY KEY(item_id,version))',
   );
 
   Future<void> _createRecycle() async {

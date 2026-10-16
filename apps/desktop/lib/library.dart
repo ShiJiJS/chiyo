@@ -3,6 +3,7 @@ import 'package:info_core/info_core.dart';
 import 'organization.dart';
 import 'templates.dart';
 import 'recycle.dart';
+import 'revisions.dart';
 
 class InformationLibrary extends StatefulWidget {
   const InformationLibrary({super.key, required this.owner, this.refresh});
@@ -206,6 +207,20 @@ class _InformationLibraryState extends State<InformationLibrary> {
               title: Text(item.name),
               subtitle: Text(item.description),
               children: [
+                TextButton(
+                  onPressed: () async {
+                    await Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => RevisionHistoryPage(
+                          owner: widget.owner,
+                          itemId: item.id,
+                        ),
+                      ),
+                    );
+                    if (mounted) setState(() {});
+                  },
+                  child: const Text('修改历史'),
+                ),
                 TextButton.icon(
                   onPressed: () async {
                     await confirmInformationDeletion(

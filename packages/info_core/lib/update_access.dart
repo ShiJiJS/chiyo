@@ -76,8 +76,15 @@ extension AgentUpdates on AgentAccess {
 extension OwnerUpdates on OwnerAccess {
   List<UpdateProposal> get updateProposals =>
       _service._repository.updateProposals;
-  List<InformationRevision> get informationRevisions =>
-      _service._repository.informationRevisions;
+  List<InformationRevision> get informationRevisions => _service
+      ._repository
+      .informationRevisions
+      .where(
+        (r) => _service._clock().isBefore(
+          r.replacedAt.add(const Duration(days: 30)),
+        ),
+      )
+      .toList();
   UpdateProposal _update(String id) {
     if (_service._closed) throw const AccessFailure('service_unavailable');
     final found = updateProposals.where((p) => p.id == id);
