@@ -62,10 +62,7 @@ Map<String, dynamic> _backupJson(Map<String, Object?> row) {
   return decoded;
 }
 
-void _validateBackupHistory(
-  Map<String, List<Map<String, Object?>>> tables,
-  DateTime createdAt,
-) {
+void _validateBackupHistory(Map<String, List<Map<String, Object?>>> tables) {
   final directories = tables['information_directories']!
       .map((r) => r['id'])
       .toSet();
@@ -86,22 +83,26 @@ void _validateBackupHistory(
   for (final field in tables['information_fields']!) {
     fieldOwner(field['id'] as String, field['item_id'] as String);
   }
-  DateTime past(Object? value) {
-    final date = _backupDate(value);
-    if (date.isAfter(createdAt)) _backupInvalid();
-    return date;
-  }
+  // These are recorded wall-clock facts, which may cross the export timestamp
+  // when the OS clock moves back. Validate representation, not chronology.
+  DateTime recordedDate(Object? value) => _backupDate(value);
 
   InformationItem snapshot(Object? raw) {
-    final item = _backupObject(raw, {
-      'id',
-      'name',
-      'description',
-      'version',
-      'directoryId',
-      'tagIds',
-      'fields',
-    });
+    final item = _backupObject(
+      raw,
+      {
+        'id',
+        'name',
+        'description',
+        'version',
+        'directoryId',
+        'tagIds',
+        'fields',
+      },
+      {'createdAt', 'modifiedAt'},
+    );
+    if (item['createdAt'] != null) _backupDate(item['createdAt']);
+    if (item['modifiedAt'] != null) _backupDate(item['modifiedAt']);
     final itemId = _backupId(item, 'id');
     _backupText(item, 'name', 200, required: true);
     _backupText(item, 'description', 2000);
@@ -145,7 +146,7 @@ void _validateBackupHistory(
         item.version != row['version'] ||
         !revisionPairs.add(jsonEncode([item.id, item.version])))
       _backupInvalid();
-    past(row['replaced_at']);
+    recordedDate(row['replaced_at']);
   }
   final entryIds = <String>{};
   for (final row in tables['recycle_entries']!) {
@@ -169,7 +170,7 @@ void _validateBackupHistory(
         j['wholeItem'] is! bool)
       _backupInvalid();
     final version = _backupVersion(j);
-    final deletedAt = past(j['deletedAt']);
+    final deletedAt = recordedDate(j['deletedAt']);
     final expiresAt = _backupDate(j['expiresAt']);
     if (expiresAt.difference(deletedAt) != const Duration(days: 30) ||
         !RecycleState.values.any((v) => v.name == j['state']))
@@ -197,7 +198,7 @@ void _validateBackupHistory(
     _backupId(j, 'entryId');
     final item = _backupId(j, 'itemId');
     _backupVersion(j);
-    past(j['at']);
+    recordedDate(j['at']);
     if (!RecycleFactKind.values.any((v) => v.name == j['kind']) ||
         !facts.add(jsonEncode(j)))
       _backupInvalid();
@@ -215,7 +216,7 @@ void _validateBackupHistory(
     final j = Map<String, dynamic>.from(row);
     _backupId(j, 'item_id');
     _backupVersion(j);
-    past(j['purged_at']);
+    recordedDate(j['purged_at']);
     if (!purgePairs.add(jsonEncode([j['item_id'], j['version']])))
       _backupInvalid();
   }
@@ -239,7 +240,7 @@ void _validateBackupHistory(
     _backupId(j, 'requestId');
     _backupId(j, 'sessionId');
     _backupText(j, 'chatLabel', 200, required: true);
-    final approvedAt = past(j['approvedAt']);
+    final approvedAt = recordedDate(j['approvedAt']);
     final expiresAt = _backupDate(j['expiresAt']);
     if (id != row['id'] ||
         row['approved_at'] != approvedAt.millisecondsSinceEpoch ||
@@ -247,7 +248,7 @@ void _validateBackupHistory(
         expiresAt.difference(approvedAt) < const Duration(minutes: 1) ||
         expiresAt.difference(approvedAt) > const Duration(days: 7))
       _backupInvalid();
-    if (j.containsKey('restoredAt')) past(j['restoredAt']);
+    if (j.containsKey('restoredAt')) recordedDate(j['restoredAt']);
     final fields = _backupList(j['fields'], 200);
     final seen = <String>{};
     if (fields.isEmpty) _backupInvalid();
@@ -270,10 +271,10 @@ void _validateBackupHistory(
     if (events.isEmpty) _backupInvalid();
     for (var index = 0; index < events.length; index++) {
       final e = _backupObject(events[index], {'kind', 'at'});
-      final at = past(e['at']);
+      final at = recordedDate(e['at']);
       if (!GrantEventKind.values.any((v) => v.name == e['kind']) ||
           (index == 0 && (e['kind'] != 'approved' || at != approvedAt)) ||
-          (index > 0 && (e['kind'] == 'approved' || at.isBefore(approvedAt))))
+          (index > 0 && e['kind'] == 'approved'))
         _backupInvalid();
     }
   }
@@ -290,7 +291,7 @@ void _validateBackupHistory(
       'fieldId',
     });
     final id = _backupId(j, 'id');
-    final at = past(j['at']);
+    final at = recordedDate(j['at']);
     if (id != row['id'] ||
         row['recorded_at'] != at.millisecondsSinceEpoch ||
         !accessIds.add(id) ||

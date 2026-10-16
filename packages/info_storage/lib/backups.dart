@@ -20,7 +20,7 @@ class BackupContents {
 }
 
 /// Owner-only manual backup capability. It is never part of the agent server.
-/// Both supported payload versions use the existing SQLCipher 4 envelope.
+/// All supported payload versions use the existing SQLCipher 4 envelope.
 class InformationBackups {
   InformationBackups._(this._repository);
   final EncryptedInformationRepository _repository;
@@ -28,17 +28,18 @@ class InformationBackups {
   static const _format = 'agent-info-manage-current-data';
   static const maxFileBytes = 128 * 1024 * 1024;
   static const maxPayloadBytes = 64 * 1024 * 1024;
+  static const _itemColumns = [
+    'id',
+    'name',
+    'description',
+    'version',
+    'directory_id',
+  ];
   static const _columns = <String, List<String>>{
     'information_directories': ['id', 'name', 'parent_id', 'version'],
     'information_tags': ['id', 'name', 'version'],
     'field_templates': ['id', 'name', 'description', 'version', 'fields_json'],
-    'information_items': [
-      'id',
-      'name',
-      'description',
-      'version',
-      'directory_id',
-    ],
+    'information_items': _itemColumns,
     'information_fields': [
       'id',
       'item_id',
@@ -59,7 +60,11 @@ class InformationBackups {
     'grant_history': ['id', 'approved_at', 'payload'],
     'access_records': ['id', 'recorded_at', 'payload'],
   };
-  static const _allColumns = {..._columns, ..._historyColumns};
+  static const _v2Columns = {..._columns, ..._historyColumns};
+  static final _allColumns = Map<String, List<String>>.unmodifiable({
+    ..._v2Columns,
+    'information_items': [..._itemColumns, 'created_at', 'modified_at'],
+  });
 
   void _checkOpen() {
     if (_repository._closed) throw const StorageFailure('library_closed');
@@ -194,7 +199,7 @@ class InformationBackups {
       return _retain(
         _validate({
           'format': _format,
-          'version': 2,
+          'version': 3,
           'createdAt': now.toIso8601String(),
           'tables': tables,
         }),
@@ -216,7 +221,7 @@ class InformationBackups {
       final snapshot = await _snapshot();
       final payload = jsonEncode({
         'format': _format,
-        'version': 2,
+        'version': 3,
         'createdAt': snapshot.createdAt.toIso8601String(),
         'tables': snapshot._tables,
       });
@@ -401,7 +406,7 @@ class InformationBackups {
     if (decoded is! Map<String, dynamic>) invalid();
     if (decoded['format'] != _format ||
         decoded['version'] is! int ||
-        ![1, 2].contains(decoded['version']))
+        ![1, 2, 3].contains(decoded['version']))
       throw const StorageFailure('unsupported_backup');
     if (decoded.length != 4 ||
         decoded['tables'] is! Map<String, dynamic> ||
@@ -409,7 +414,11 @@ class InformationBackups {
         (decoded['createdAt'] as String).length > 64)
       invalid();
     final createdAt = _backupDate(decoded['createdAt']);
-    final columns = decoded['version'] == 1 ? _columns : _allColumns;
+    final columns = switch (decoded['version']) {
+      1 => _columns,
+      2 => _v2Columns,
+      _ => _allColumns,
+    };
     final data = decoded['tables'] as Map<String, dynamic>;
     if (data.length != columns.length ||
         data.keys.any((key) => !columns.containsKey(key)))
@@ -439,6 +448,16 @@ class InformationBackups {
     }
     for (final table in _historyColumns.keys) {
       tables.putIfAbsent(table, () => const []);
+    }
+    if (decoded['version'] != 3) {
+      tables['information_items'] = [
+        for (final row in tables['information_items']!)
+          Map<String, Object?>.unmodifiable({
+            ...row,
+            'created_at': null,
+            'modified_at': null,
+          }),
+      ];
     }
     String text(
       Map<String, Object?> row,
@@ -501,6 +520,8 @@ class InformationBackups {
     }
     for (final row in tables['information_items']!) {
       text(row, 'description', 2000);
+      if (row['created_at'] != null) _backupDate(row['created_at']);
+      if (row['modified_at'] != null) _backupDate(row['modified_at']);
       final directory = row['directory_id'];
       if (directory != null &&
           (directory is! String || !directories.contains(directory)))
@@ -554,7 +575,7 @@ class InformationBackups {
       if (name == 'auditRetentionDays' && ![30, 90, 180, 365].contains(value))
         invalid();
     }
-    _validateBackupHistory(tables, createdAt);
+    _validateBackupHistory(tables);
     return BackupContents._(
       Map.unmodifiable(tables),
       createdAt,

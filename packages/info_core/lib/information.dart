@@ -49,6 +49,8 @@ class InformationItem {
     this.version,
     List<InformationField> fields, {
     this.directoryId,
+    this.createdAt,
+    this.modifiedAt,
     Iterable<String> tagIds = const [],
   }) : fields = List.unmodifiable(fields),
        tagIds = List.unmodifiable(tagIds);
@@ -56,6 +58,10 @@ class InformationItem {
   final int version;
   final List<InformationField> fields;
   final String? directoryId;
+
+  /// Owner-only wall-clock facts; null means the original time is unknown.
+  /// Versions order changes even when the system clock moves backwards.
+  final DateTime? createdAt, modifiedAt;
   final List<String> tagIds;
 }
 

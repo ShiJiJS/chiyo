@@ -146,6 +146,8 @@ extension OwnerRecycle on OwnerAccess {
         removed,
         directoryId: before.directoryId,
         tagIds: before.tagIds,
+        createdAt: before.createdAt,
+        modifiedAt: before.modifiedAt,
       ),
     );
   }
@@ -203,6 +205,8 @@ extension OwnerRecycle on OwnerAccess {
             remaining,
             directoryId: before.directoryId,
             tagIds: before.tagIds,
+            createdAt: before.createdAt,
+            modifiedAt: _service._clock(),
           );
     final entry = _recycle(before, after);
     await _service._repository.commitRecycleChange(
@@ -263,6 +267,8 @@ extension OwnerRecycle on OwnerAccess {
       ],
       directoryId: source.directoryId,
       tagIds: source.tagIds,
+      createdAt: source.createdAt,
+      modifiedAt: _service._clock(),
     );
     if (restored.fields.length > 200) {
       throw const AccessFailure('recycle_conflict');

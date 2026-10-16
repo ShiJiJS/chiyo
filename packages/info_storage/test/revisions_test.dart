@@ -32,6 +32,8 @@ void main() {
       fixture.execute('PRAGMA key = "x\'$hex\'"');
       fixture.execute('DROP TABLE revision_purge_facts');
       fixture.execute('PRAGMA user_version = 9');
+      fixture.execute('ALTER TABLE information_items DROP COLUMN created_at');
+      fixture.execute('ALTER TABLE information_items DROP COLUMN modified_at');
       fixture.close();
       store = await EncryptedInformationRepository.open(folder.path, keys);
       service = InformationService(repository: store);

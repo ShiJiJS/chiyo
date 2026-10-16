@@ -152,6 +152,8 @@ extension OwnerUpdates on OwnerAccess {
       fields,
       directoryId: previous.directoryId,
       tagIds: previous.tagIds,
+      createdAt: previous.createdAt,
+      modifiedAt: _service._clock(),
     );
   }
 

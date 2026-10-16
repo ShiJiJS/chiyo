@@ -53,6 +53,8 @@ extension OwnerRevisions on OwnerAccess {
       ],
       directoryId: old.directoryId,
       tagIds: old.tagIds,
+      createdAt: current.createdAt,
+      modifiedAt: _service._clock(),
     );
     return RevisionPreview(revision, current, restored);
   }
