@@ -12,8 +12,11 @@ bundled-instruction correction. This supersedes the 0.3.0 desktop-created task
 flow. Real native acceptance remains partial: the user confirmed two explicitly
 selected imports in0.2.2 and approved a real0.3.1 CLI organization request for
 those two items. Metadata read, automatic classification and post-completion denial
-passed; result-screen feedback and content partial approval/read/revocation/restart
-remain pending. See the dated Windows acceptance record.
+passed. A later fictional batch confirmed2items/5fields with category/tag reuse;
+the final content grant contained both requested fields, and both read successfully
+three times without a renewed scope/deadline. Partial approval/unapproved-field
+denial, revocation/restart and native result-screen feedback remain pending.
+See the dated Windows acceptance record.
 
 - Agent CLI sends an organization request into the existing approval inbox.
   The user selects a fixed subset and approves metadata access plus automatic
@@ -52,7 +55,9 @@ Before upgrading real data, export a backup and save its recovery key separately
 in the current app, fully quit the old tray process, then run the new package.
 Build preparation did not launch/control the desktop, change real data/config or
 run hosted macOS jobs. The later user-approved live CLI run changed only the two
-requested items' categories/tags; no field values or user config were accessed.
+requested items' categories/tags. The later user-confirmed synthetic batch added
+two fictional items; only its two explicitly approved fields were read. No real
+infos field values or user configuration were accessed during these runs.
 See [Windows acceptance](../development/windows-acceptance.md)
 and [review record](../development/review-agent-led-organization-2026-10-16.md).
 Issue#1 is synchronized; PR#20 stays draft and all native acceptance gates remain
