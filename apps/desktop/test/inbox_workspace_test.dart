@@ -102,7 +102,7 @@ void main() {
       reason: 'The focused lifetime editor owns the slash text key.',
     );
     await tester.enterText(input, '90');
-      await tester.pumpAndSettle();
+    await tester.pumpAndSettle();
     await tester.tap(find.text('保存期限'));
     await tester.pumpAndSettle();
     expect(
