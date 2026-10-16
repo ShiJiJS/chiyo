@@ -81,7 +81,7 @@ class _DesktopShellState extends State<DesktopShell> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 26, 16, 28),
+            padding: const EdgeInsets.fromLTRB(20, 8, 16, 24),
             child: Row(
               children: [
                 const Icon(
@@ -98,10 +98,6 @@ class _DesktopShellState extends State<DesktopShell> {
                 ),
               ],
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(24, 0, 16, 10),
-            child: Text('工作区', style: Theme.of(context).textTheme.bodySmall),
           ),
           for (var i = 0; i < 5; i++)
             Padding(

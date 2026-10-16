@@ -105,19 +105,7 @@ class _DesktopWindowFrameState extends State<DesktopWindowFrame> {
                       behavior: HitTestBehavior.opaque,
                       onPanStart: (_) => _command('drag'),
                       onDoubleTap: () => _command('toggleMaximize'),
-                      child: const Padding(
-                        padding: EdgeInsets.only(left: 16),
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            '信息授权',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: UiColors.muted,
-                            ),
-                          ),
-                        ),
-                      ),
+                      child: const SizedBox.expand(),
                     ),
                   ),
                   _button('最小化', Icons.remove, 'minimize'),
