@@ -48,7 +48,7 @@ void main() {
   );
 
   test(
-    'an authorized in-flight read waits for durable history; later reads cannot pass revoke',
+    'revoke during durable recording prevents both pending delivery and later reads',
     () async {
       final repository = DelayedAuditRepository();
       final service = InformationService(repository: repository);
@@ -67,16 +67,21 @@ void main() {
         delivered = true;
         return value;
       });
+      final revokedRead = expectLater(reading, throwsA(isA<AccessFailure>()));
       await Future<void>.delayed(Duration.zero);
       expect(delivered, isFalse);
       service.owner.revoke(request.id);
-      final denied = service.agent.read(grant.token, field);
+      final denied = expectLater(
+        service.agent.read(grant.token, field),
+        throwsA(isA<AccessFailure>()),
+      );
       repository.ready.complete();
-      expect(await reading, 'private.invalid');
-      await expectLater(denied, throwsA(isA<AccessFailure>()));
+      await revokedRead;
+      expect(delivered, isFalse);
+      await denied;
       final history = await service.owner.history();
       expect(history.accesses.map((record) => record.outcome), [
-        AccessOutcome.allowed,
+        AccessOutcome.unauthorized,
         AccessOutcome.unauthorized,
       ]);
       await service.close();

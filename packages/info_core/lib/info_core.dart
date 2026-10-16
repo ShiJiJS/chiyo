@@ -68,6 +68,7 @@ class OwnerRequestSnapshot {
     required Iterable<FieldRef> fields,
     required Iterable<FieldRef>? approvedFields,
     required this.grantExpiresAt,
+    this.sessionEnded = false,
   }) : fields = List.unmodifiable(fields),
        approvedFields = approvedFields == null
            ? null
@@ -83,6 +84,7 @@ class OwnerRequestSnapshot {
   final List<FieldRef> fields;
   final List<FieldRef>? approvedFields;
   final DateTime? grantExpiresAt;
+  final bool sessionEnded;
 }
 
 class _Request {
@@ -163,6 +165,8 @@ class InformationService {
   late final owner = OwnerAccess._(this);
   final _grants = <String, _Request>{};
   final _sessions = <String, String>{};
+  final _endedSessions = <String>{};
+  final _endCapabilities = <String, String>{};
   final _sessionBindings = <String, String>{};
   final _requests = <String, _Request>{};
   final _submitted = StreamController<String>.broadcast();
@@ -179,6 +183,8 @@ class InformationService {
       _finishHistory(request, GrantEventKind.applicationClosed);
     }
     _sessions.clear();
+    _endCapabilities.clear();
+    _endedSessions.clear();
     _sessionBindings.clear();
     _requests.clear();
     _grants.clear();
@@ -189,6 +195,42 @@ class InformationService {
   final _random = Random.secure();
   String _secret() =>
       base64Url.encode(List.generate(32, (_) => _random.nextInt(256)));
+
+  bool _sessionActive(String session) =>
+      !_closed &&
+      _sessions.containsKey(session) &&
+      !_endedSessions.contains(session);
+
+  void _requireSession(String session) {
+    if (!_sessionActive(session)) throw const AccessFailure('unauthorized');
+  }
+
+  bool _canRead(_Request? request, FieldRef field) {
+    if (request == null) return false;
+    _expire(request);
+    return _sessionActive(request.session) &&
+        request.state == AccessRequestState.approved &&
+        request.grant!.fields.contains(field) &&
+        !request.invalidatedFields.contains(field) &&
+        _field(field) != null;
+  }
+
+  void _endSession(String session) {
+    if (!_sessions.containsKey(session)) {
+      throw const AccessFailure('unauthorized');
+    }
+    if (!_endedSessions.add(session)) return;
+    // Latch before audit persistence: every later request/read observes end.
+    for (final request in _requests.values.where((r) => r.session == session)) {
+      _expire(request);
+      if (request.state == AccessRequestState.pending) {
+        request.state = AccessRequestState.cancelled;
+      } else if (request.state == AccessRequestState.approved) {
+        request.state = AccessRequestState.revoked;
+        _finishHistory(request, GrantEventKind.ended);
+      }
+    }
+  }
 
   void _expire(_Request request) {
     if (request.state == AccessRequestState.pending &&
@@ -216,6 +258,12 @@ class AgentAccess {
   AgentAccess._(this._service);
   final InformationService _service;
   String openSession(String chatLabel) {
+    return openSessionWithEndCapability(chatLabel).sessionSecret;
+  }
+
+  /// Both independent capabilities are issued only for a new unapproved session.
+  /// Adapters must keep the end capability out of ordinary command output.
+  OpenedSession openSessionWithEndCapability(String chatLabel) {
     if (_service._closed) throw const AccessFailure('service_unavailable');
     if (chatLabel.trim().isEmpty || chatLabel.length > 200) {
       throw const AccessFailure('invalid_request');
@@ -223,7 +271,20 @@ class AgentAccess {
     final secret = _service._secret();
     _service._sessions[secret] = chatLabel;
     _service._sessionBindings[secret] = _service._secret();
-    return secret;
+    final endCapability = _service._secret();
+    _service._endCapabilities[endCapability] = secret;
+    return OpenedSession(secret, endCapability);
+  }
+
+  void validateSession(String session) => _service._requireSession(session);
+
+  void endSession(String session) => _service._endSession(session);
+
+  /// This credential can only end its session, never recover read capability.
+  void endSessionWithCapability(String capability) {
+    final session = _service._endCapabilities[capability];
+    if (session == null) throw const AccessFailure('unauthorized');
+    _service._endSession(session);
   }
 
   RequestReceipt request(
@@ -231,9 +292,7 @@ class AgentAccess {
     String purpose,
     List<FieldRef> fields,
   ) {
-    if (!_service._sessions.containsKey(session)) {
-      throw const AccessFailure('unauthorized');
-    }
+    _service._requireSession(session);
     if (purpose.trim().isEmpty ||
         purpose.length > 2000 ||
         fields.isEmpty ||
@@ -257,7 +316,7 @@ class AgentAccess {
 
   _Request _request(String session, String id) {
     final request = _service._requests[id];
-    if (!_service._sessions.containsKey(session) ||
+    if (!_service._sessionActive(session) ||
         request == null ||
         request.session != session) {
       throw const AccessFailure('unauthorized');
@@ -292,21 +351,8 @@ class AgentAccess {
     return request.grant!;
   }
 
-  Future<String> read(String token, FieldRef field) async {
-    if (_service._closed) throw const AccessFailure('service_unavailable');
-    final request = _service._grants[token];
-    if (request != null) _service._expire(request);
-    final grant = request?.grant;
-    final allowed =
-        !(grant == null ||
-            request!.state != AccessRequestState.approved ||
-            !grant.fields.contains(field) ||
-            request.invalidatedFields.contains(field));
-    final value = allowed ? _service._field(field)?.value : null;
-    await _service._recordAccess(request, field, allowed && value != null);
-    if (!allowed || value == null) throw const AccessFailure('unauthorized');
-    return value;
-  }
+  Future<String> read(String token, FieldRef field) =>
+      _service._readWithAudit(_service._grants[token], field);
 
   List<Map<String, Object?>> catalog() => searchCatalog().items;
 
@@ -332,6 +378,12 @@ class AgentAccess {
         },
       )
       .toList();
+}
+
+class OpenedSession {
+  const OpenedSession(this.sessionSecret, this.endCapability);
+  final String sessionSecret;
+  final String endCapability;
 }
 
 class ClaimedGrant {
@@ -592,6 +644,7 @@ class OwnerAccess {
       fields: r.fields,
       approvedFields: r.grant?.fields,
       grantExpiresAt: r.grant?.expiresAt,
+      sessionEnded: _service._endedSessions.contains(r.session),
     );
   }).toList();
   void revoke(String requestId) {
@@ -615,6 +668,7 @@ class OwnerAccess {
     final request = _service._requests[requestId];
     if (request != null) _service._expire(request);
     if (request == null ||
+        !_service._sessionActive(request.session) ||
         request.state != AccessRequestState.pending ||
         request.grant != null) {
       throw const AccessFailure('invalid_request');

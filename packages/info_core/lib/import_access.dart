@@ -37,9 +37,7 @@ extension AgentImports on AgentAccess {
     String session,
     List<ImportItemInput> items,
   ) => _service.owner._serialize(() async {
-    if (!_service._sessions.containsKey(session)) {
-      throw const AccessFailure('unauthorized');
-    }
+    _service._requireSession(session);
     _validateImport(items);
     // Bound retained pending work per chat without revealing other sessions.
     if (_service._repository.importProposals
@@ -64,6 +62,7 @@ extension AgentImports on AgentAccess {
   });
 
   Map<String, Object?> importStatus(String session, String id) {
+    _service._requireSession(session);
     final binding = _service._sessionBindings[session];
     final matches = _service._repository.importProposals.where(
       (p) => p.id == id && p.sessionBinding == binding,

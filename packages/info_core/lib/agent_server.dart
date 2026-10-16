@@ -128,10 +128,21 @@ class AgentServer {
           'nextOffset': page.nextOffset,
         };
       case '/session':
+      case '/session/lifecycle':
+        final session = _agent.openSessionWithEndCapability(
+          _text(body, 'chatLabel'),
+        );
         return {
           'status': 'ok',
-          'sessionSecret': _agent.openSession(_text(body, 'chatLabel')),
+          'sessionSecret': session.sessionSecret,
+          if (path == '/session/lifecycle') 'endCapability': session.endCapability,
         };
+      case '/session/check':
+        _agent.validateSession(_text(body, 'sessionSecret'));
+        return {'status': 'ok'};
+      case '/session/end':
+        _agent.endSessionWithCapability(_text(body, 'endCapability'));
+        return {'status': 'ended'};
       case '/request':
         final raw = body['fields'];
         if (raw is! List || raw.length > 200) {
