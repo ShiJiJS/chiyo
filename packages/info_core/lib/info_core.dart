@@ -94,7 +94,9 @@ class InformationService {
   }
 
   final DateTime Function() _clock;
-  Duration _requestLifetime = const Duration(minutes: 30);
+  Duration get _requestLifetime => Duration(
+    milliseconds: _repository.readSetting('requestLifetimeMs') ?? 1800000,
+  );
   late final agent = AgentAccess._(this);
   late final owner = OwnerAccess._(this);
   final _grants = <String, ClaimedGrant>{};
@@ -260,12 +262,17 @@ class OwnerAccess {
   final InformationService _service;
   Stream<String> get requestSubmitted => _service._submitted.stream;
   Duration get requestLifetime => _service._requestLifetime;
-  void setRequestLifetime(Duration duration) {
+  Future<void> setRequestLifetime(Duration duration) {
     if (duration < const Duration(minutes: 1) ||
         duration > const Duration(days: 7)) {
       throw const AccessFailure('invalid_request');
     }
-    _service._requestLifetime = duration;
+    return _serialize(
+      () => _service._repository.writeSetting(
+        'requestLifetimeMs',
+        duration.inMilliseconds,
+      ),
+    );
   }
 
   List<InformationItem> get information => _service._repository.items;
@@ -395,4 +402,3 @@ class OwnerAccess {
     request.outcome = 'approved';
   }
 }
-

@@ -44,7 +44,7 @@ void main() {
       const FieldRef('item-1', 'field-1'),
       'fictional corrected',
     );
-    await store.writeSetting('requestLifetimeMinutes', 45);
+    await service.owner.setRequestLifetime(const Duration(minutes: 45));
     await store.close();
     store = await EncryptedInformationRepository.open(directory.path, keys);
     expect(
@@ -53,7 +53,10 @@ void main() {
       ).owner.information.single.fields.single.version,
       2,
     );
-    expect(store.readSetting('requestLifetimeMinutes'), 45);
+    expect(
+      InformationService(repository: store).owner.requestLifetime,
+      const Duration(minutes: 45),
+    );
     await store.close();
   });
   test(

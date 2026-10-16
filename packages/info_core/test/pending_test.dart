@@ -3,6 +3,25 @@ import 'package:test/test.dart';
 
 void main() {
   test(
+    'request lifetime survives service restart while authorizations do not',
+    () async {
+      final repository = MemoryInformationRepository();
+      final core = InformationService(repository: repository);
+      final oldSession = core.agent.openSession('old');
+      await Future<void>.sync(
+        () => core.owner.setRequestLifetime(const Duration(minutes: 15)),
+      );
+      core.close();
+      final restarted = InformationService(repository: repository);
+      expect(restarted.owner.requestLifetime, const Duration(minutes: 15));
+      expect(
+        () => restarted.agent.status(oldSession, 'old-request'),
+        throwsA(isA<AccessFailure>()),
+      );
+      restarted.close();
+    },
+  );
+  test(
     'polling original request never adds pending notification events',
     () async {
       final core = InformationService.fictional();
@@ -67,14 +86,14 @@ void main() {
   );
   test(
     'owner sets lifetime for new requests without extending old requests',
-    () {
+    () async {
       var now = DateTime.utc(2026, 10, 16);
       final core = InformationService.fictional(clock: () => now);
       final session = core.agent.openSession('chat');
       final old = core.agent.request(session, 'old', [
         const FieldRef('demo-server', 'host'),
       ]);
-      core.owner.setRequestLifetime(const Duration(minutes: 5));
+      await core.owner.setRequestLifetime(const Duration(minutes: 5));
       final recent = core.agent.request(session, 'new', [
         const FieldRef('demo-server', 'host'),
       ]);

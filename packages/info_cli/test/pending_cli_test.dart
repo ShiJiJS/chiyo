@@ -7,7 +7,8 @@ void main() {
   test(
     'CLI cancellation is scoped to session and rejected states are final',
     () async {
-      final core = InformationService.fictional();
+      var now = DateTime.utc(2026, 10, 16);
+      final core = InformationService.fictional(clock: () => now);
       final server = await AgentServer.start(core.agent, port: 0);
       final client = AgentClient(server.port);
       final other = AgentClient(server.port);
@@ -43,6 +44,37 @@ void main() {
         'cancelled',
       );
       expect(core.owner.requests, hasLength(1));
+      final denied = await client.execute({
+        'command': 'request',
+        'purpose': 'demo',
+        'fields': [
+          {'itemId': 'demo-server', 'fieldId': 'host'},
+        ],
+      });
+      core.owner.deny(denied['requestId'] as String);
+      expect(
+        (await client.execute({
+          'command': 'wait',
+          'requestId': denied['requestId'],
+        }))['status'],
+        'denied',
+      );
+      final expired = await client.execute({
+        'command': 'request',
+        'purpose': 'demo',
+        'fields': [
+          {'itemId': 'demo-server', 'fieldId': 'host'},
+        ],
+      });
+      now = now.add(const Duration(minutes: 30));
+      expect(
+        (await client.execute({
+          'command': 'wait',
+          'requestId': expired['requestId'],
+        }))['status'],
+        'expired',
+      );
+      expect(core.owner.requests, hasLength(3));
     },
   );
 }
