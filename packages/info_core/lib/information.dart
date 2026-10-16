@@ -1,3 +1,5 @@
+import 'organization.dart';
+export 'organization.dart';
 import 'templates.dart';
 
 enum FieldKind { structured, textNote }
@@ -36,17 +38,26 @@ class InformationItem {
     this.name,
     this.description,
     this.version,
-    List<InformationField> fields,
-  ) : fields = List.unmodifiable(fields);
+    List<InformationField> fields, {
+    this.directoryId,
+    Iterable<String> tagIds = const [],
+  }) : fields = List.unmodifiable(fields),
+       tagIds = List.unmodifiable(tagIds);
   final String id, name, description;
   final int version;
   final List<InformationField> fields;
+  final String? directoryId;
+  final List<String> tagIds;
 }
 
 /// Owner-side storage seam. Agent transports never receive this capability.
 abstract interface class InformationRepository {
   List<InformationItem> get items;
   Future<void> save(InformationItem item);
+  List<InformationDirectory> get directories;
+  List<InformationTag> get tags;
+  Future<void> saveDirectory(InformationDirectory directory);
+  Future<void> saveTag(InformationTag tag);
   int? readSetting(String key);
   Future<void> writeSetting(String key, int value);
   List<InformationTemplate> get templates;
@@ -61,6 +72,18 @@ class MemoryInformationRepository implements InformationRepository {
   }
   final _items = <String, InformationItem>{};
   final _settings = <String, int>{};
+  final _directories = <String, InformationDirectory>{};
+  final _tags = <String, InformationTag>{};
+  @override
+  List<InformationDirectory> get directories =>
+      List.unmodifiable(_directories.values);
+  @override
+  List<InformationTag> get tags => List.unmodifiable(_tags.values);
+  @override
+  Future<void> saveDirectory(InformationDirectory directory) async =>
+      _directories[directory.id] = directory;
+  @override
+  Future<void> saveTag(InformationTag tag) async => _tags[tag.id] = tag;
   final _templates = <String, InformationTemplate>{};
   @override
   List<InformationTemplate> get templates =>

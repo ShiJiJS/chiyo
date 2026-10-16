@@ -72,7 +72,32 @@ class AgentServer {
   Map<String, Object?> _dispatch(String path, Map<String, dynamic> body) {
     switch (path) {
       case '/catalog':
-        return {'status': 'ok', 'items': _agent.catalog()};
+        final query = body['query'] ?? '';
+        final directoryId = body['directoryId'];
+        final tagId = body['tagId'];
+        final offset = body['offset'] ?? 0;
+        final limit = body['limit'] ?? 20;
+        if (query is! String ||
+            (directoryId != null && directoryId is! String) ||
+            (tagId != null && tagId is! String) ||
+            offset is! int ||
+            limit is! int) {
+          throw const AccessFailure('invalid_request');
+        }
+        final page = _agent.searchCatalog(
+          query: query,
+          directoryId: directoryId as String?,
+          tagId: tagId as String?,
+          offset: offset,
+          limit: limit,
+        );
+        return {
+          'status': 'ok',
+          'items': page.items,
+          'total': page.total,
+          'offset': offset,
+          'nextOffset': page.nextOffset,
+        };
       case '/session':
         return {
           'status': 'ok',

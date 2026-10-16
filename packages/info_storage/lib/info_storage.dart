@@ -29,6 +29,8 @@ class EncryptedInformationRepository implements InformationRepository {
   final String cipherVersion;
   final _items = <String, InformationItem>{};
   final _settings = <String, int>{};
+  final _directories = <String, InformationDirectory>{};
+  final _tags = <String, InformationTag>{};
   final _templates = <String, InformationTemplate>{};
   bool _closed = false;
   static final _openDirectories = <String>{};
@@ -108,6 +110,34 @@ class EncryptedInformationRepository implements InformationRepository {
   Future<void> _load() async {
     for (final row
         in await _db
+            .customSelect(
+              'SELECT * FROM information_directories ORDER BY rowid',
+            )
+            .get()) {
+      final value = InformationDirectory(
+        row.read<String>('id'),
+        row.read<String>('name'),
+        row.readNullable<String>('parent_id'),
+        row.read<int>('version'),
+      );
+      _directories[value.id] = value;
+    }
+    for (final row
+        in await _db
+            .customSelect('SELECT * FROM information_tags ORDER BY rowid')
+            .get()) {
+      final value = InformationTag(
+        row.read<String>('id'),
+        row.read<String>('name'),
+        row.read<int>('version'),
+      );
+      _tags[value.id] = value;
+    }
+    final itemTags = await _db
+        .customSelect('SELECT * FROM information_item_tags ORDER BY rowid')
+        .get();
+    for (final row
+        in await _db
             .customSelect('SELECT * FROM field_templates ORDER BY rowid')
             .get()) {
       final fields = (jsonDecode(row.read<String>('fields_json')) as List)
@@ -157,6 +187,10 @@ class EncryptedInformationRepository implements InformationRepository {
               ),
             )
             .toList(),
+        directoryId: item.readNullable<String>('directory_id'),
+        tagIds: itemTags
+            .where((t) => t.read<String>('item_id') == id)
+            .map((t) => t.read<String>('tag_id')),
       );
     }
   }
@@ -205,6 +239,46 @@ class EncryptedInformationRepository implements InformationRepository {
   }
 
   @override
+  List<InformationDirectory> get directories {
+    if (_closed) throw const StorageFailure('library_closed');
+    return List.unmodifiable(_directories.values);
+  }
+
+  @override
+  List<InformationTag> get tags {
+    if (_closed) throw const StorageFailure('library_closed');
+    return List.unmodifiable(_tags.values);
+  }
+
+  @override
+  Future<void> saveDirectory(InformationDirectory directory) async {
+    if (_closed) throw const StorageFailure('library_closed');
+    try {
+      await _db.customStatement(
+        'INSERT INTO information_directories(id,name,parent_id,version) VALUES(?,?,?,?) ON CONFLICT(id) DO UPDATE SET name=excluded.name,parent_id=excluded.parent_id,version=excluded.version',
+        [directory.id, directory.name, directory.parentId, directory.version],
+      );
+      _directories[directory.id] = directory;
+    } catch (_) {
+      throw const StorageFailure('save_failed');
+    }
+  }
+
+  @override
+  Future<void> saveTag(InformationTag tag) async {
+    if (_closed) throw const StorageFailure('library_closed');
+    try {
+      await _db.customStatement(
+        'INSERT INTO information_tags(id,name,version) VALUES(?,?,?) ON CONFLICT(id) DO UPDATE SET name=excluded.name,version=excluded.version',
+        [tag.id, tag.name, tag.version],
+      );
+      _tags[tag.id] = tag;
+    } catch (_) {
+      throw const StorageFailure('save_failed');
+    }
+  }
+
+  @override
   int? readSetting(String key) {
     if (_closed) throw const StorageFailure('library_closed');
     return _settings[key];
@@ -230,12 +304,28 @@ class EncryptedInformationRepository implements InformationRepository {
     try {
       await _db.transaction(() async {
         await _db.customStatement(
-          'INSERT INTO information_items(id,name,description,version) VALUES(?,?,?,?) ON CONFLICT(id) DO UPDATE SET name=excluded.name,description=excluded.description,version=excluded.version',
-          [item.id, item.name, item.description, item.version],
+          'INSERT INTO information_items(id,name,description,version,directory_id) VALUES(?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET name=excluded.name,description=excluded.description,version=excluded.version,directory_id=excluded.directory_id',
+          [
+            item.id,
+            item.name,
+            item.description,
+            item.version,
+            item.directoryId,
+          ],
         );
+        await _db.customStatement(
+          'DELETE FROM information_item_tags WHERE item_id=?',
+          [item.id],
+        );
+        for (final tag in item.tagIds) {
+          await _db.customStatement(
+            'INSERT INTO information_item_tags(item_id,tag_id) VALUES(?,?)',
+            [item.id, tag],
+          );
+        }
         for (final field in item.fields) {
           await _db.customStatement(
-            'INSERT INTO information_fields(id,item_id,name,description,value,version,kind) VALUES(?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET value=excluded.value,version=excluded.version',
+            'INSERT INTO information_fields(id,item_id,name,description,value,version,kind) VALUES(?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET name=excluded.name,description=excluded.description,value=excluded.value,version=excluded.version,kind=excluded.kind',
             [
               field.id,
               item.id,
@@ -258,6 +348,8 @@ class EncryptedInformationRepository implements InformationRepository {
     if (_closed) return;
     _closed = true;
     _items.clear();
+    _directories.clear();
+    _tags.clear();
     _templates.clear();
     try {
       await _db.close();
@@ -287,6 +379,7 @@ class _InformationDatabase extends GeneratedDatabase {
       await customStatement(
         'CREATE TABLE information_fields(id TEXT PRIMARY KEY,item_id TEXT NOT NULL REFERENCES information_items(id),name TEXT NOT NULL,description TEXT NOT NULL,value TEXT NOT NULL,version INTEGER NOT NULL DEFAULT 1,kind TEXT NOT NULL DEFAULT \'structured\')',
       );
+      await _organizationSchema();
     },
     onUpgrade: (_, from, to) async {
       if (from < 1 || to != 4) throw const StorageFailure('unsupported_schema');
@@ -302,6 +395,7 @@ class _InformationDatabase extends GeneratedDatabase {
             'ALTER TABLE information_fields ADD COLUMN version INTEGER NOT NULL DEFAULT 1',
           );
         }
+        if (from < 3) await _organizationSchema();
         if (from < 4) {
           await _createTemplates();
           await customStatement(
@@ -315,6 +409,22 @@ class _InformationDatabase extends GeneratedDatabase {
         throw const StorageFailure('unsupported_schema');
     },
   );
+
+  Future<void> _organizationSchema() async {
+    await customStatement(
+      'CREATE TABLE information_directories(id TEXT PRIMARY KEY,name TEXT NOT NULL,parent_id TEXT REFERENCES information_directories(id),version INTEGER NOT NULL)',
+    );
+    await customStatement(
+      'CREATE TABLE information_tags(id TEXT PRIMARY KEY,name TEXT NOT NULL,version INTEGER NOT NULL)',
+    );
+    await customStatement(
+      'ALTER TABLE information_items ADD COLUMN directory_id TEXT REFERENCES information_directories(id)',
+    );
+    await customStatement(
+      'CREATE TABLE information_item_tags(item_id TEXT NOT NULL REFERENCES information_items(id),tag_id TEXT NOT NULL REFERENCES information_tags(id),PRIMARY KEY(item_id,tag_id))',
+    );
+  }
+
   Future<void> _createTemplates() => customStatement(
     'CREATE TABLE field_templates(id TEXT PRIMARY KEY,name TEXT NOT NULL,description TEXT NOT NULL,version INTEGER NOT NULL,fields_json TEXT NOT NULL)',
   );
