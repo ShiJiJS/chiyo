@@ -52,7 +52,7 @@ void main() {
         'PRIVATE-RENAMED-34982',
       );
       await service.owner.updateTag(tag.id, 'PRIVATE-RENAMED-TAG-34982');
-      service.close();
+      await service.close();
       await store.close();
       store = await EncryptedInformationRepository.open(folder.path, keys);
       addTearDown(store.close);
@@ -160,7 +160,7 @@ void main() {
       final request = service.agent.request(session, 'test', [field]);
       service.owner.approve(request.id, [field]);
       final token = service.agent.claim(session, request.id).token;
-      service.close();
+      await service.close();
       await store.close();
       store = await EncryptedInformationRepository.open(directory.path, keys);
       addTearDown(store.close);

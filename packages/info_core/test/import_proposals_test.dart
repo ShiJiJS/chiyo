@@ -1,7 +1,7 @@
 import 'package:info_core/info_core.dart';
 import 'package:test/test.dart';
 
-void main() {
+void main() async {
   test(
     'import submission cannot overwrite existing values or expand existing grants',
     () async {
@@ -22,7 +22,7 @@ void main() {
           const FieldInput('Host', '', 'new.invalid'),
         ]),
       ]);
-      expect(service.agent.read(grant.token, ref), 'original.invalid');
+      expect(await service.agent.read(grant.token, ref), 'original.invalid');
       final added = (await service.owner.confirmImport(
         id,
         1,
@@ -30,7 +30,7 @@ void main() {
       )).single;
       expect(added.id, isNot(original.id));
       expect(added.fields.single.id, isNot(original.fields.single.id));
-      expect(service.agent.read(grant.token, ref), 'original.invalid');
+      expect(await service.agent.read(grant.token, ref), 'original.invalid');
       expect(
         () => service.agent.read(
           grant.token,
@@ -45,7 +45,7 @@ void main() {
         FieldRef(added.id, added.fields.single.id),
       ]);
       expect(
-        service.agent.read(
+        await service.agent.read(
           service.agent.claim(session, next.id).token,
           FieldRef(added.id, added.fields.single.id),
         ),

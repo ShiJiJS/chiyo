@@ -14,7 +14,11 @@ void main() {
       final service = InformationService(
         repository: MemoryInformationRepository(),
       );
-      addTearDown(service.close);
+      addTearDown(() async {
+        final closing = service.close();
+        await tester.pump();
+        await closing;
+      });
       final item = await service.owner.createInformation(
         'Old name',
         'Old public description',

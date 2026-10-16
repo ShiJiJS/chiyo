@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'dart:math';
 import 'information.dart';
 import 'templates.dart';
+import 'history.dart';
+export 'history.dart';
 import 'import_proposals.dart';
 import 'update_proposals.dart';
 export 'information.dart';
@@ -10,6 +12,7 @@ export 'templates.dart';
 export 'import_proposals.dart';
 export 'update_proposals.dart';
 part 'organization_access.dart';
+part 'history_access.dart';
 part 'import_access.dart';
 part 'update_access.dart';
 
@@ -93,6 +96,8 @@ class _Request {
   final DateTime expiresAt;
   AccessRequestState state = AccessRequestState.pending;
   ClaimedGrant? grant;
+  DateTime? approvedAt;
+  GrantHistory? history;
   final invalidatedFields = <FieldRef>{};
 }
 
@@ -103,7 +108,9 @@ class InformationService {
     required InformationRepository repository,
     DateTime Function()? clock,
   }) : _repository = repository,
-       _clock = clock ?? DateTime.now;
+       _clock = clock ?? DateTime.now {
+    _recoverAudit();
+  }
   InformationService.fictional({DateTime Function()? clock})
     : _clock = clock ?? DateTime.now,
       _repository = MemoryInformationRepository([
@@ -154,13 +161,23 @@ class InformationService {
   final _requests = <String, _Request>{};
   final _submitted = StreamController<String>.broadcast();
   bool _closed = false;
-  void close() {
+  Future<void> _auditWrites = Future.value();
+  final _auditPending = <Future<void> Function()>[];
+  bool _auditFailed = false;
+  AuditRetentionPreview? _retentionPreview;
+  Future<void> close() {
+    if (_closed) return owner.retryAuditStorage();
     _closed = true;
+    for (final request in _requests.values) {
+      _expire(request);
+      _finishHistory(request, GrantEventKind.applicationClosed);
+    }
     _sessions.clear();
     _sessionBindings.clear();
     _requests.clear();
     _grants.clear();
     _submitted.close();
+    return owner.retryAuditStorage();
   }
 
   final _random = Random.secure();
@@ -174,7 +191,7 @@ class InformationService {
     } else if (request.state == AccessRequestState.approved &&
         !_clock().isBefore(request.grant!.expiresAt)) {
       request.state = AccessRequestState.expired;
-      _grants.remove(request.grant!.token);
+      _finishHistory(request, GrantEventKind.expired);
     }
   }
 
@@ -269,19 +286,20 @@ class AgentAccess {
     return request.grant!;
   }
 
-  String read(String token, FieldRef field) {
+  Future<String> read(String token, FieldRef field) async {
+    if (_service._closed) throw const AccessFailure('service_unavailable');
     final request = _service._grants[token];
     if (request != null) _service._expire(request);
     final grant = request?.grant;
-    if (grant == null ||
-        request!.state != AccessRequestState.approved ||
-        !grant.fields.contains(field) ||
-        request.invalidatedFields.contains(field)) {
-      throw const AccessFailure('unauthorized');
-    }
-    final value = _service._field(field);
-    if (value == null) throw const AccessFailure('unauthorized');
-    return value.value;
+    final allowed =
+        !(grant == null ||
+            request!.state != AccessRequestState.approved ||
+            !grant.fields.contains(field) ||
+            request.invalidatedFields.contains(field));
+    final value = allowed ? _service._field(field)?.value : null;
+    await _service._recordAccess(request, field, allowed && value != null);
+    if (!allowed || value == null) throw const AccessFailure('unauthorized');
+    return value;
   }
 
   List<Map<String, Object?>> catalog() => searchCatalog().items;
@@ -574,7 +592,7 @@ class OwnerAccess {
     final request = _service._requests[requestId];
     if (request?.grant == null) throw const AccessFailure('invalid_request');
     request!.state = AccessRequestState.revoked;
-    _service._grants.remove(request.grant!.token);
+    _service._finishHistory(request, GrantEventKind.revoked);
   }
 
   void deny(String requestId) {
@@ -604,12 +622,15 @@ class OwnerAccess {
         lifetime > const Duration(days: 7)) {
       throw const AccessFailure('invalid_duration');
     }
+    final approvedAt = _service._clock();
+    request.approvedAt = approvedAt;
     request.grant = ClaimedGrant(
       _service._secret(),
       fields.toSet().toList(),
-      _service._clock().add(lifetime),
+      approvedAt.add(lifetime),
     );
     _service._grants[request.grant!.token] = request;
     request.state = AccessRequestState.approved;
+    _service._approveHistory(request);
   }
 }

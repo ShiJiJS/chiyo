@@ -1,8 +1,8 @@
 import 'package:info_core/info_core.dart';
 import 'package:test/test.dart';
 
-void main() {
-  test('expiry observed by read cannot revive after clock rollback', () {
+void main() async {
+  test('expiry observed by read cannot revive after clock rollback', () async {
     var now = DateTime.utc(2026, 10, 16);
     final service = InformationService.fictional(clock: () => now);
     addTearDown(service.close);
@@ -34,7 +34,7 @@ void main() {
     expect(service.agent.status(session, request.id)['status'], 'expired');
   });
 
-  test('expiry observed by claim cannot revive after clock rollback', () {
+  test('expiry observed by claim cannot revive after clock rollback', () async {
     var now = DateTime.utc(2026, 10, 16);
     final service = InformationService.fictional(clock: () => now);
     addTearDown(service.close);
@@ -66,7 +66,7 @@ void main() {
     expect(service.agent.status(session, request.id)['status'], 'expired');
   });
 
-  test('expiry observed by status cannot revive after clock rollback', () {
+  test('expiry observed by status cannot revive after clock rollback', () async {
     var now = DateTime.utc(2026, 10, 16);
     final service = InformationService.fictional(clock: () => now);
     addTearDown(service.close);
@@ -93,7 +93,7 @@ void main() {
     );
   });
 
-  test('repeat reads never extend the absolute eight hour expiry', () {
+  test('repeat reads never extend the absolute eight hour expiry', () async {
     var now = DateTime.utc(2026, 10, 16);
     final service = InformationService.fictional(clock: () => now);
     final session = service.agent.openSession('chat');
@@ -105,7 +105,7 @@ void main() {
     expect(grant.expiresAt, DateTime.utc(2026, 10, 16, 8));
     now = DateTime.utc(2026, 10, 16, 7, 59);
     expect(
-      service.agent.read(grant.token, const FieldRef('demo-server', 'host')),
+      await service.agent.read(grant.token, const FieldRef('demo-server', 'host')),
       'demo.example.invalid',
     );
     now = DateTime.utc(2026, 10, 16, 8);

@@ -58,7 +58,7 @@ void main() {
         await process.stdin.close();
         process.kill();
         await lines.cancel();
-        service.close();
+        await service.close();
       });
       Future<Map<String, dynamic>> command(Map<String, dynamic> input) async {
         process.stdin.writeln(jsonEncode(input));

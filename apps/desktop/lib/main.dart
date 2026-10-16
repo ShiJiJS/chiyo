@@ -9,6 +9,7 @@ import 'library.dart';
 import 'import_proposals.dart';
 import 'desktop_runtime.dart';
 import 'backups.dart';
+import 'history.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -54,7 +55,7 @@ Future<void> main() async {
       ),
     );
   } on Object {
-    service?.close();
+    await service?.close();
     await repository?.close();
     runApp(
       const MaterialApp(
@@ -91,7 +92,7 @@ class InformationApp extends StatefulWidget {
 class _InformationAppState extends State<InformationApp>
     with SingleTickerProviderStateMixin {
   late final _tabs = TabController(
-    length: widget.backups == null ? 3 : 4,
+    length: widget.backups == null ? 4 : 5,
     vsync: this,
   );
   int _openRevision = 0;
@@ -136,7 +137,13 @@ class _InformationAppState extends State<InformationApp>
             ),
             TextButton(
               onPressed: runtime.quitting ? null : runtime.quit,
-              child: Text(runtime.quitting ? '正在退出…' : '完全退出'),
+              child: Text(
+                runtime.quitting
+                    ? '正在退出…'
+                    : runtime.shutdownFailed
+                    ? '重试保存并退出'
+                    : '完全退出',
+              ),
             ),
           ],
         ],
@@ -146,12 +153,18 @@ class _InformationAppState extends State<InformationApp>
             Tab(text: '访问审批'),
             Tab(text: '我的信息'),
             Tab(text: '录入提案'),
+            Tab(text: '授权历史'),
             if (widget.backups != null) Tab(text: '备份恢复'),
           ],
         ),
       ),
       body: Column(
         children: [
+          if (widget.runtime?.shutdownFailed == true)
+            const Padding(
+              padding: EdgeInsets.all(8),
+              child: Text('访问服务已停止，但记录尚未保存，应用未退出。请修复存储后重试保存并退出；重新启动后需要重新申请授权。'),
+            ),
           if (widget.runtime case final runtime?)
             Padding(
               padding: const EdgeInsets.all(8),
@@ -172,6 +185,7 @@ class _InformationAppState extends State<InformationApp>
                 Approvals(service: widget.service, port: widget.port),
                 InformationLibrary(owner: widget.service.owner, refresh: _tabs),
                 ImportProposalsPage(owner: widget.service.owner),
+                AuthorizationHistory(owner: widget.service.owner),
                 if (widget.backups case final backups?)
                   BackupLibrary(backups: backups, files: widget.backupFiles),
               ],

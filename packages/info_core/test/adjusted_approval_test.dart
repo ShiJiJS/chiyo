@@ -1,7 +1,7 @@
 import 'package:info_core/info_core.dart';
 import 'package:test/test.dart';
 
-void main() {
+void main() async {
   test('owner substitutes and adds fields across information items', () async {
     final service = InformationService(
       repository: MemoryInformationRepository(),
@@ -31,11 +31,11 @@ void main() {
     expect(service.owner.requests.single.fields, [requested]);
     expect(service.owner.requests.single.approvedFields, selected);
     expect(
-      service.agent.read(grant.token, selected.first),
+      await service.agent.read(grant.token, selected.first),
       'b.example.invalid',
     );
     expect(
-      service.agent.read(grant.token, selected.last),
+      await service.agent.read(grant.token, selected.last),
       'Connect through the test network',
     );
     expect(
@@ -47,7 +47,7 @@ void main() {
     expect(grant.fields, hasLength(2));
   });
 
-  test('selected duration starts at approval and reads do not extend it', () {
+  test('selected duration starts at approval and reads do not extend it', () async {
     var now = DateTime.utc(2026, 10, 16);
     final service = InformationService.fictional(clock: () => now);
     addTearDown(service.close);
@@ -63,7 +63,7 @@ void main() {
     expect(grant.expiresAt, DateTime.utc(2026, 10, 16, 0, 25));
     now = now.add(const Duration(minutes: 14));
     expect(
-      service.agent.read(grant.token, const FieldRef('demo-server', 'host')),
+      await service.agent.read(grant.token, const FieldRef('demo-server', 'host')),
       'demo.example.invalid',
     );
     expect(
@@ -181,7 +181,7 @@ void main() {
         '',
         [const FieldInput('Address', '', 'b.invalid')],
       );
-      expect(service.agent.read(grant.token, address), 'updated.invalid');
+      expect(await service.agent.read(grant.token, address), 'updated.invalid');
       expect(grant.fields, [address]);
       expect(
         () => service.agent.read(grant.token, FieldRef(item.id, 'new-field')),

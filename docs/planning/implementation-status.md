@@ -52,11 +52,15 @@ At `3d3f393`, #5/#9/#10 are merged and their combined tree passed **51 headless 
 
 User confirmed the audit retention policy: default 90 days, selectable 30/90/180/365 days with confirmation before shortening/cleaning older records. Local specification and GitHub #1 were synchronized at `201a5b7`.
 
-#8 background lifecycle, #11 reviewed import proposals, and #12 independent encrypted backup are now being implemented in separate worktrees. #11 starts after the merged #9/#10 contracts. Desktop/manual and macOS acceptance remain open for every new feature; none of these test counts are real GUI evidence.
+#8 background lifecycle, #11 reviewed import proposals, and #12 independent encrypted backup were started in separate worktrees. #11 followed the merged #9/#10 contracts. Desktop/manual and macOS acceptance remain open for every new feature; none of these test counts are real GUI evidence.
 
 At `bab2e95`, #8 and #11 are also merged. Their combined branch passed **62 headless tests** (core 29, CLI 10, storage 8, widgets 15), with four package analyses clean. The preceding #8 branch independently compiled the native Windows runner with tray support; native tray/notification interactions were not launched. #11 stores only an independent random proposal-session binding, never the session secret, and its full-app widget test verifies confirmed imports immediately appear after switching back to the library. Evidence: [background runtime](../development/background-runtime.md), [reviewed import proposals](../development/import-proposals.md).
 
 Next in progress: #12 encrypted backup, #13 versioned reviewed updates (after #5/#11), and #16 grant/access history (after #4/#5). User also confirmed that audit write failures pause content delivery rather than allowing unrecorded reads; local spec and GitHub #1 were synchronized at `4ce3048`.
+
+At `2cd07cb`, #13 and #16 are merged. The combined tree passed **79 headless tests** (core 38, CLI 11, storage 11, widgets 19), with all analysis clean. [Reviewed updates](../development/reviewed-updates.md) add versioned diffs, explicit correction/add/meaning replacement/removal, current-version publication and owner-only prior snapshots. Removed field identities stay blocked in old grants. [Grant/access history](../implementation-ticket-16.md) records value-free facts and normalized IDs, snapshots original approved names, and implements the confirmed retention and failure policies. Audit writes complete before content delivery; failures retain pending facts for explicit retry. Async close flushes records before closing storage; a failed full quit remains visible for save/retry rather than discarding its queue.
+
+#12 backup and #14 recycle/restore are currently in progress. The user approved the complete #17 backup scope (current data, organization, unexpired recycle/versions/grant/access history; no pending proposals, requests or live credentials), synchronized in the local spec and GitHub #1 at `0fb03d0`. #12 still declares its initial current-data scope; complete history recovery is not yet implemented. #7 real Codex child/root lifecycle and final distribution/platform acceptance remain open.
 
 ## Completion rules
 

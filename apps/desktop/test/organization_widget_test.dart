@@ -12,7 +12,11 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
     final service = InformationService.fictional();
-    addTearDown(service.close);
+    addTearDown(() async {
+      final closing = service.close();
+      await tester.pump();
+      await closing;
+    });
     await service.owner.createInformation('Other item', '', [
       const FieldInput('Host', '', 'other.invalid'),
     ]);
@@ -93,7 +97,11 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
     final service = InformationService.fictional();
-    addTearDown(service.close);
+    addTearDown(() async {
+      final closing = service.close();
+      await tester.pump();
+      await closing;
+    });
     await tester.pumpWidget(
       MaterialApp(home: InformationLibrary(owner: service.owner)),
     );
