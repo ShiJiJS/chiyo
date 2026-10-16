@@ -14,6 +14,7 @@ class Approvals extends StatefulWidget {
 class ApprovalsState extends State<Approvals> {
   Timer? _refresh;
   final _selection = <String, Set<FieldRef>>{};
+  final _grantMinutes = <String, int>{};
   @override
   void initState() {
     super.initState();
@@ -32,9 +33,16 @@ class ApprovalsState extends State<Approvals> {
     try {
       action();
       setState(() {});
-    } on AccessFailure {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('请求状态已变化，请重新检查。')));
+    } on AccessFailure catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(switch (error.status) {
+            'invalid_scope' => '所选字段已不可用，或超过 200 个。请重新检查最终选择。',
+            'invalid_duration' => '授权有效期须为 1 至 10080 分钟。',
+            _ => '请求状态已变化，请重新检查。',
+          }),
+        ),
+      );
       setState(() {});
     }
   }
@@ -118,6 +126,13 @@ class ApprovalsState extends State<Approvals> {
     final id = request.id;
     final fields = request.fields;
     final selected = _selection.putIfAbsent(id, () => fields.toSet());
+    final minutes = _grantMinutes[id] ?? 480;
+    final validDuration = minutes >= 1 && minutes <= 10080;
+    final available = widget.service.owner.information
+        .expand(
+          (item) => item.fields.map((field) => FieldRef(item.id, field.id)),
+        )
+        .toSet();
     final state = request.state;
     return Card(
       margin: const EdgeInsets.only(bottom: 20),
@@ -137,16 +152,30 @@ class ApprovalsState extends State<Approvals> {
               style: TextStyle(color: Colors.grey),
             ),
             const SizedBox(height: 12),
+            const Text(
+              'Agent 申请范围',
+              style: TextStyle(fontWeight: FontWeight.w600),
+            ),
+            for (final field in fields) Text(_fieldLabel(field)),
+            const SizedBox(height: 12),
             if (state == AccessRequestState.pending) ...[
               Text(
                 '待审批剩余：${request.remainingSeconds ~/ 60} 分 ${request.remainingSeconds % 60} 秒',
               ),
-              for (final field in fields)
+              const Text('最终选择', style: TextStyle(fontWeight: FontWeight.w600)),
+              const Text('可取消申请字段，也可从资料库补选或改选。文本说明同样按字段授权。'),
+              for (final field in {...available, ...selected})
                 CheckboxListTile(
                   key: ValueKey('field-${field.fieldId}'),
                   contentPadding: EdgeInsets.zero,
                   title: Text(_fieldLabel(field)),
-                  subtitle: Text('${field.itemId} / ${field.fieldId}'),
+                  subtitle: Text(
+                    !available.contains(field)
+                        ? '字段已不可用，请取消选择或改选其他字段'
+                        : fields.contains(field)
+                        ? 'Agent 已申请'
+                        : '可补选字段',
+                  ),
                   value: selected.contains(field),
                   onChanged: (value) => setState(() {
                     if (value == true) {
@@ -156,14 +185,33 @@ class ApprovalsState extends State<Approvals> {
                     }
                   }),
                 ),
-              const Text('有效期：批准后 8 小时，读取不会延长有效期。'),
+              Text(
+                '最终选择：${selected.isEmpty ? '尚未选择字段' : selected.map(_fieldLabel).join('、')}',
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                key: ValueKey('grant-lifetime-$id'),
+                initialValue: '480',
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  labelText: '授权有效期（分钟）',
+                  helperText: '默认 480 分钟（8 小时），可填 1–10080 分钟。读取不会延长有效期。',
+                  errorText: validDuration ? null : '请输入 1 至 10080 的整数',
+                ),
+                onChanged: (value) => setState(() {
+                  _grantMinutes[id] = int.tryParse(value) ?? 0;
+                }),
+              ),
               const SizedBox(height: 12),
               FilledButton(
-                onPressed: selected.isEmpty
+                onPressed: selected.isEmpty || !validDuration
                     ? null
                     : () => _manage(
-                        () =>
-                            widget.service.owner.approve(id, selected.toList()),
+                        () => widget.service.owner.approve(
+                          id,
+                          selected.toList(),
+                          lifetime: Duration(minutes: minutes),
+                        ),
                       ),
                 child: const Text('批准所选字段'),
               ),
@@ -182,7 +230,7 @@ class ApprovalsState extends State<Approvals> {
               }),
               if (request.approvedFields != null) ...[
                 Text(
-                  '已批准字段：${request.approvedFields!.map((f) => f.fieldId).join(', ')}',
+                  '已批准字段：${request.approvedFields!.map(_fieldLabel).join('、')}',
                 ),
                 Text(
                   '到期时间：${request.grantExpiresAt?.toUtc().toIso8601String()}',
