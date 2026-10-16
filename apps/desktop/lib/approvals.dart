@@ -58,6 +58,8 @@ class ApprovalsState extends State<Approvals> {
           child: ListView(
             padding: const EdgeInsets.all(24),
             children: [
+              if (widget.service.owner.auditStorageUnavailable)
+                const Text('记录保存异常，信息读取已暂停。请修复存储后到“授权历史”重试保存记录。'),
               const Text(
                 '决定本次聊天可以读取什么',
                 style: TextStyle(fontSize: 28, fontWeight: FontWeight.w600),

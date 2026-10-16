@@ -1,8 +1,8 @@
 import 'package:info_core/info_core.dart';
 import 'package:test/test.dart';
 
-void main() {
-  test('owner approves one fixed field and only that field can be read', () {
+void main() async {
+  test('owner approves one fixed field and only that field can be read', () async {
     final service = InformationService.fictional();
     final session = service.agent.openSession('chat-a');
     final receipt = service.agent.request(session, 'Need connection details', [
@@ -12,7 +12,7 @@ void main() {
     service.owner.approve(receipt.id, [const FieldRef('demo-server', 'host')]);
     final grant = service.agent.claim(session, receipt.id);
     expect(
-      service.agent.read(grant.token, const FieldRef('demo-server', 'host')),
+      await service.agent.read(grant.token, const FieldRef('demo-server', 'host')),
       'demo.example.invalid',
     );
     expect(

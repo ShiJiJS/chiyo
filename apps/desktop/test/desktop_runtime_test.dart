@@ -9,6 +9,49 @@ import 'support/desktop_platform_fixture.dart';
 
 void main() {
   test(
+    'full quit waits for audit writes and preserves the open library if flush fails',
+    () async {
+      final repository = FailingHistoryRepository();
+      final service = InformationService(repository: repository);
+      final item = await service.owner.createInformation(
+        'Server',
+        'Description',
+        [const FieldInput('Host', 'Address', 'fictional.invalid')],
+      );
+      final session = service.agent.openSession('chat');
+      final field = FieldRef(item.id, item.fields.single.id);
+      final request = service.agent.request(session, 'Address', [field]);
+      service.owner.approve(request.id, [field]);
+      final native = NativeDesktopFixture();
+      var libraryClosed = false;
+      final runtime = DesktopRuntime(
+        service: service,
+        platform: native,
+        closeServer: () async {},
+        closeRepository: () async {
+          libraryClosed = true;
+        },
+      );
+      await runtime.start();
+      await runtime.quit();
+      expect(libraryClosed, isFalse);
+      expect(native.terminated, isFalse);
+      expect(runtime.shutdownFailed, isTrue);
+      expect(
+        () => service.agent.openSession('new'),
+        throwsA(isA<AccessFailure>()),
+      );
+      repository.failing = false;
+      await runtime.quit();
+      expect(libraryClosed, isTrue);
+      expect(native.terminated, isTrue);
+      expect(
+        repository.grantHistory.single.events.last.kind,
+        GrantEventKind.applicationClosed,
+      );
+    },
+  );
+  test(
     'failed notification delivery retains the request and reports its unavailable state',
     () async {
       final service = InformationService.fictional();
@@ -134,4 +177,13 @@ void main() {
       );
     },
   );
+}
+
+class FailingHistoryRepository extends MemoryInformationRepository {
+  bool failing = true;
+  @override
+  Future<void> saveGrantHistory(GrantHistory history) async {
+    if (failing) throw StateError('storage unavailable');
+    return super.saveGrantHistory(history);
+  }
 }

@@ -32,6 +32,8 @@ class EncryptedInformationRepository implements InformationRepository {
   final _directories = <String, InformationDirectory>{};
   final _tags = <String, InformationTag>{};
   final _templates = <String, InformationTemplate>{};
+  final _history = <String, GrantHistory>{};
+  final _accesses = <String, AccessRecord>{};
   final _proposals = <String, ImportProposal>{};
   final _updates = <String, UpdateProposal>{};
   final _revisions = <InformationRevision>[];
@@ -141,6 +143,23 @@ class EncryptedInformationRepository implements InformationRepository {
         jsonDecode(row.read<String>('payload')) as Map<String, dynamic>,
       );
       _deletes[proposal.id] = proposal;
+    }
+    for (final row in await _db
+            .customSelect('SELECT payload FROM grant_history ORDER BY rowid')
+            .get()) {
+      final history = GrantHistory.fromJson(
+        jsonDecode(row.read<String>('payload')) as Map<String, dynamic>,
+      );
+      _history[history.id] = history;
+    }
+    for (final row
+        in await _db
+            .customSelect('SELECT payload FROM access_records ORDER BY rowid')
+            .get()) {
+      final record = AccessRecord.fromJson(
+        jsonDecode(row.read<String>('payload')) as Map<String, dynamic>,
+      );
+      _accesses[record.id] = record;
     }
     for (final row
         in await _db
@@ -264,6 +283,75 @@ class EncryptedInformationRepository implements InformationRepository {
             .where((t) => t.read<String>('item_id') == id)
             .map((t) => t.read<String>('tag_id')),
       );
+    }
+  }
+
+  @override
+  List<GrantHistory> get grantHistory {
+    if (_closed) throw const StorageFailure('library_closed');
+    return List.unmodifiable(_history.values);
+  }
+
+  @override
+  List<AccessRecord> get accessRecords {
+    if (_closed) throw const StorageFailure('library_closed');
+    return List.unmodifiable(_accesses.values);
+  }
+
+  @override
+  Future<void> saveGrantHistory(GrantHistory history) async {
+    if (_closed) throw const StorageFailure('library_closed');
+    try {
+      await _db.customStatement(
+        'INSERT INTO grant_history(id,approved_at,payload) VALUES(?,?,?) ON CONFLICT(id) DO UPDATE SET payload=excluded.payload',
+        [
+          history.id,
+          history.approvedAt.toUtc().millisecondsSinceEpoch,
+          jsonEncode(history.toJson()),
+        ],
+      );
+      _history[history.id] = history;
+    } on Object {
+      throw const StorageFailure('audit_save_failed');
+    }
+  }
+
+  @override
+  Future<void> saveAccessRecord(AccessRecord record) async {
+    if (_closed) throw const StorageFailure('library_closed');
+    try {
+      await _db.customStatement(
+        'INSERT INTO access_records(id,recorded_at,payload) VALUES(?,?,?) ON CONFLICT(id) DO UPDATE SET payload=excluded.payload',
+        [
+          record.id,
+          record.at.toUtc().millisecondsSinceEpoch,
+          jsonEncode(record.toJson()),
+        ],
+      );
+      _accesses[record.id] = record;
+    } on Object {
+      throw const StorageFailure('audit_save_failed');
+    }
+  }
+
+  @override
+  Future<void> pruneAudit(DateTime cutoff) async {
+    if (_closed) throw const StorageFailure('library_closed');
+    try {
+      await _db.transaction(() async {
+        await _db.customStatement(
+          'DELETE FROM grant_history WHERE approved_at < ?',
+          [cutoff.toUtc().millisecondsSinceEpoch],
+        );
+        await _db.customStatement(
+          'DELETE FROM access_records WHERE recorded_at < ?',
+          [cutoff.toUtc().millisecondsSinceEpoch],
+        );
+      });
+      _history.removeWhere((_, h) => h.approvedAt.isBefore(cutoff));
+      _accesses.removeWhere((_, a) => a.at.isBefore(cutoff));
+    } on Object {
+      throw const StorageFailure('audit_save_failed');
     }
   }
 
@@ -469,6 +557,8 @@ class EncryptedInformationRepository implements InformationRepository {
     _directories.clear();
     _tags.clear();
     _templates.clear();
+    _history.clear();
+    _accesses.clear();
     _proposals.clear();
     _updates.clear();
     _revisions.clear();
@@ -674,6 +764,7 @@ class _InformationDatabase extends GeneratedDatabase {
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (_) async {
       await _createRecycle();
+      await _createAudit();
       await _createUpdates();
       await _createProposals();
       await _createTemplates();
@@ -711,7 +802,7 @@ class _InformationDatabase extends GeneratedDatabase {
         }
         // Schema 5 is reserved for the independent backup configuration.
         if (from < 6) await _createProposals();
-        // Schema 7 is reserved for authorization history and access records.
+        if (from < 7) await _createAudit();
         if (from < 8) await _createUpdates();
         if (from < 9) await _createRecycle();
       });
@@ -719,6 +810,9 @@ class _InformationDatabase extends GeneratedDatabase {
     beforeOpen: (details) async {
       if (details.versionNow > schemaVersion)
         throw const StorageFailure('unsupported_schema');
+      // An unpublished development schema 8 preceded the reserved audit
+      // tables. Backfill only after rejecting unknown future versions.
+      await _createAudit();
     },
   );
 
@@ -762,4 +856,19 @@ class _InformationDatabase extends GeneratedDatabase {
   Future<void> _createTemplates() => customStatement(
     'CREATE TABLE field_templates(id TEXT PRIMARY KEY,name TEXT NOT NULL,description TEXT NOT NULL,version INTEGER NOT NULL,fields_json TEXT NOT NULL)',
   );
+
+  Future<void> _createAudit() async {
+    await customStatement(
+      'CREATE TABLE IF NOT EXISTS grant_history(id TEXT PRIMARY KEY,approved_at INTEGER NOT NULL,payload TEXT NOT NULL)',
+    );
+    await customStatement(
+      'CREATE TABLE IF NOT EXISTS access_records(id TEXT PRIMARY KEY,recorded_at INTEGER NOT NULL,payload TEXT NOT NULL)',
+    );
+    await customStatement(
+      'CREATE INDEX IF NOT EXISTS grant_history_retention ON grant_history(approved_at)',
+    );
+    await customStatement(
+      'CREATE INDEX IF NOT EXISTS access_records_retention ON access_records(recorded_at)',
+    );
+  }
 }

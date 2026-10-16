@@ -1,7 +1,7 @@
 import 'package:info_core/info_core.dart';
 import 'package:test/test.dart';
 
-void main() {
+void main() async {
   test(
     'extending and replacing template definitions leaves existing information and grants unchanged',
     () async {
@@ -39,7 +39,7 @@ void main() {
           ]);
       expect(expanded.fields.first.id, original.fields.single.id);
       expect(service.owner.information.single.fields, hasLength(1));
-      expect(service.agent.read(grant.token, ref), 'first.invalid');
+      expect(await service.agent.read(grant.token, ref), 'first.invalid');
       final next = await service.owner
           .createInformationFromTemplate(expanded.id, 2, 'Second', '', {
             expanded.fields.first.id: 'second.invalid',
@@ -62,7 +62,7 @@ void main() {
           ]);
       expect(replaced.fields.single.id, isNot(original.fields.single.id));
       expect(service.owner.information.first.fields.single.name, 'Address');
-      expect(service.agent.read(grant.token, ref), 'first.invalid');
+      expect(await service.agent.read(grant.token, ref), 'first.invalid');
       await expectLater(
         service.owner.createInformationFromTemplate(
           original.id,

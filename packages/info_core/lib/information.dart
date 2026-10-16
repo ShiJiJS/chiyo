@@ -1,6 +1,7 @@
 import 'organization.dart';
 export 'organization.dart';
 import 'templates.dart';
+import 'history.dart';
 import 'import_proposals.dart';
 import 'update_proposals.dart';
 import 'recycle.dart';
@@ -55,6 +56,11 @@ class InformationItem {
 
 /// Owner-side storage seam. Agent transports never receive this capability.
 abstract interface class InformationRepository {
+  List<GrantHistory> get grantHistory;
+  List<AccessRecord> get accessRecords;
+  Future<void> saveGrantHistory(GrantHistory history);
+  Future<void> saveAccessRecord(AccessRecord record);
+  Future<void> pruneAudit(DateTime cutoff);
   List<InformationItem> get items;
   Future<void> save(InformationItem item);
   List<InformationDirectory> get directories;
@@ -108,6 +114,24 @@ class MemoryInformationRepository implements InformationRepository {
     }
   }
   final _items = <String, InformationItem>{};
+  final _history = <String, GrantHistory>{};
+  final _accesses = <String, AccessRecord>{};
+  @override
+  List<GrantHistory> get grantHistory => List.unmodifiable(_history.values);
+  @override
+  List<AccessRecord> get accessRecords => List.unmodifiable(_accesses.values);
+  @override
+  Future<void> saveGrantHistory(GrantHistory history) async =>
+      _history[history.id] = history;
+  @override
+  Future<void> saveAccessRecord(AccessRecord record) async =>
+      _accesses[record.id] = record;
+  @override
+  Future<void> pruneAudit(DateTime cutoff) async {
+    _history.removeWhere((_, value) => value.approvedAt.isBefore(cutoff));
+    _accesses.removeWhere((_, value) => value.at.isBefore(cutoff));
+  }
+
   final _settings = <String, int>{};
   final _recycle = <String, RecycleEntry>{};
   final _recycleFacts = <RecycleFact>[];

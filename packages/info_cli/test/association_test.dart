@@ -16,7 +16,7 @@ void main() {
       addTearDown(() async {
         client.close();
         await server.close();
-        core.close();
+        await core.close();
       });
       final result = await client.execute({
         'command': 'request',

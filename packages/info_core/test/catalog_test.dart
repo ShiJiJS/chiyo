@@ -1,7 +1,7 @@
 import 'package:info_core/info_core.dart';
 import 'package:test/test.dart';
 
-void main() {
+void main() async {
   test(
     'catalog searches only saved public metadata and pages matching items',
     () async {
@@ -118,7 +118,7 @@ void main() {
         tagIds: [tag.id],
       );
       expect(service.owner.fieldsInDirectory(project.id), hasLength(2));
-      expect(service.agent.read(grant.token, selected.single), 'first.invalid');
+      expect(await service.agent.read(grant.token, selected.single), 'first.invalid');
       expect(
         () => service.agent.read(
           grant.token,
