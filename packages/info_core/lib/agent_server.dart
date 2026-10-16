@@ -214,8 +214,9 @@ class AgentServer {
   Future<Map<String, Object?>> _submitDelete(Map<String, dynamic> body) async {
     final version = body['baseVersion'];
     if (version is! int ||
-        (body['fieldId'] != null && body['fieldId'] is! String))
+        (body['fieldId'] != null && body['fieldId'] is! String)) {
       throw const AccessFailure('invalid_request');
+    }
     final session = _text(body, 'sessionSecret');
     final id = await _agent.submitDelete(
       session,

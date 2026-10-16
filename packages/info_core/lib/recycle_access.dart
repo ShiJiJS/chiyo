@@ -22,8 +22,9 @@ extension AgentDeletes on AgentAccess {
                   p.state == DeleteProposalState.pending,
             )
             .length >=
-        20)
+        20) {
       throw const AccessFailure('proposal_limit');
+    }
     final proposal = DeleteProposal(
       id: _service._secret(),
       sessionBinding: binding,
@@ -41,8 +42,9 @@ extension AgentDeletes on AgentAccess {
     final found = _service._repository.deleteProposals.where(
       (p) => p.id == id && p.sessionBinding == binding,
     );
-    if (binding == null || found.isEmpty)
+    if (binding == null || found.isEmpty) {
       throw const AccessFailure('unauthorized');
+    }
     return {'status': found.single.state.name, 'proposalId': id};
   }
 }
@@ -59,8 +61,9 @@ extension OwnerRecycle on OwnerAccess {
 
   InformationItem previewDelete(String id) {
     final proposal = _deleteProposal(id);
-    if (proposal.state != DeleteProposalState.pending)
+    if (proposal.state != DeleteProposalState.pending) {
       throw const AccessFailure('proposal_changed');
+    }
     final found = information.where((i) => i.id == proposal.itemId);
     if (found.isEmpty ||
         found.single.version != proposal.baseVersion ||
@@ -74,13 +77,15 @@ extension OwnerRecycle on OwnerAccess {
   Future<RecycleEntry> confirmDelete(String id, int proposalVersion) =>
       _serialize(() async {
         final proposal = _deleteProposal(id);
-        if (proposal.state == DeleteProposalState.confirmed)
+        if (proposal.state == DeleteProposalState.confirmed) {
           return _service._repository.recycleEntries.firstWhere(
             (e) => e.id == proposal.entryId,
           );
+        }
         if (proposal.state != DeleteProposalState.pending ||
-            proposal.version != proposalVersion)
+            proposal.version != proposalVersion) {
           throw const AccessFailure('proposal_changed');
+        }
         try {
           previewDelete(id);
           return await _deleteInformation(
@@ -90,10 +95,11 @@ extension OwnerRecycle on OwnerAccess {
             proposal: proposal,
           );
         } on AccessFailure catch (error) {
-          if (error.status == 'proposal_conflict')
+          if (error.status == 'proposal_conflict') {
             await _service._repository.saveDeleteProposal(
               proposal.finish(DeleteProposalState.conflicted),
             );
+          }
           rethrow;
         }
       });
@@ -101,8 +107,9 @@ extension OwnerRecycle on OwnerAccess {
       _serialize(() async {
         final proposal = _deleteProposal(id);
         if (proposal.state != DeleteProposalState.pending ||
-            proposal.version != proposalVersion)
+            proposal.version != proposalVersion) {
           throw const AccessFailure('proposal_changed');
+        }
         await _service._repository.saveDeleteProposal(
           proposal.finish(DeleteProposalState.rejected),
         );
@@ -155,8 +162,9 @@ extension OwnerRecycle on OwnerAccess {
     for (final field in before.fields.where((f) => !retained.contains(f.id))) {
       final ref = FieldRef(before.id, field.id);
       for (final request in _service._requests.values) {
-        if (request.grant?.fields.contains(ref) ?? false)
+        if (request.grant?.fields.contains(ref) ?? false) {
           request.invalidatedFields.add(ref);
+        }
       }
     }
   }
@@ -254,8 +262,9 @@ extension OwnerRecycle on OwnerAccess {
       directoryId: source.directoryId,
       tagIds: source.tagIds,
     );
-    if (restored.fields.length > 200)
+    if (restored.fields.length > 200) {
       throw const AccessFailure('recycle_conflict');
+    }
     await _service._repository.commitRecycleChange(
       itemId: restored.id,
       item: restored,

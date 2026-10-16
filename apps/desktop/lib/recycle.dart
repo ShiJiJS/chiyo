@@ -58,11 +58,12 @@ class _DeleteInformationState extends State<_DeleteInformation> {
       }
       if (mounted) Navigator.pop(context);
     } catch (_) {
-      if (mounted)
+      if (mounted) {
         setState(() {
           _saving = false;
           _error = '资料或提案状态已经变化，或存储失败。请关闭后刷新检查；未成功删除的资料仍保留。';
         });
+      }
     }
   }
 
@@ -230,7 +231,7 @@ class DeleteProposalsList extends StatelessWidget {
                     onPressed: () async {
                       try {
                         final item = owner.previewDelete(p.id);
-                        if (context.mounted)
+                        if (context.mounted) {
                           await confirmInformationDeletion(
                             context,
                             owner,
@@ -238,8 +239,9 @@ class DeleteProposalsList extends StatelessWidget {
                             fieldId: p.fieldId,
                             proposal: p,
                           );
+                        }
                       } catch (_) {
-                        if (context.mounted)
+                        if (context.mounted) {
                           await showDialog<void>(
                             context: context,
                             builder: (context) => AlertDialog(
@@ -254,14 +256,29 @@ class DeleteProposalsList extends StatelessWidget {
                                 ),
                                 TextButton(
                                   onPressed: () async {
-                                    await owner.rejectDelete(p.id, p.version);
-                                    if (context.mounted) Navigator.pop(context);
+                                    try {
+                                      await owner.rejectDelete(p.id, p.version);
+                                      if (context.mounted) {
+                                        Navigator.pop(context);
+                                      }
+                                    } catch (_) {
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          const SnackBar(
+                                            content: Text('无法保存拒绝结果，请检查存储后重试。'),
+                                          ),
+                                        );
+                                      }
+                                    }
                                   },
                                   child: const Text('拒绝删除'),
                                 ),
                               ],
                             ),
                           );
+                        }
                       }
                       onChanged();
                     },

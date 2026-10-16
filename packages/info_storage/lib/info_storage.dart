@@ -144,7 +144,8 @@ class EncryptedInformationRepository implements InformationRepository {
       );
       _deletes[proposal.id] = proposal;
     }
-    for (final row in await _db
+    for (final row
+        in await _db
             .customSelect('SELECT payload FROM grant_history ORDER BY rowid')
             .get()) {
       final history = GrantHistory.fromJson(

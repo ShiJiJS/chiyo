@@ -9,6 +9,29 @@ import 'support/desktop_platform_fixture.dart';
 
 void main() {
   test(
+    'background startup purges expired recycle content before accepting owner use',
+    () async {
+      var now = DateTime.utc(2026, 10, 16);
+      final service = InformationService.fictional(clock: () => now);
+      final entry = await service.owner.deleteInformation('demo-server', 1);
+      now = now.add(const Duration(days: 30));
+      final runtime = DesktopRuntime(
+        service: service,
+        platform: NativeDesktopFixture(),
+        closeServer: () async {},
+        closeRepository: () async {},
+      );
+      await runtime.start();
+      expect(service.owner.recycleFacts.last.kind, RecycleFactKind.purged);
+      now = now.subtract(const Duration(days: 1));
+      await expectLater(
+        service.owner.restoreRecycled(entry.id),
+        throwsA(isA<AccessFailure>()),
+      );
+      await runtime.quit();
+    },
+  );
+  test(
     'full quit waits for audit writes and preserves the open library if flush fails',
     () async {
       final repository = FailingHistoryRepository();

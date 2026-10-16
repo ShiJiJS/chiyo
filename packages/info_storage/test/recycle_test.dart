@@ -1,10 +1,100 @@
 import 'dart:io';
+import 'dart:convert';
 import 'package:info_core/info_core.dart';
 import 'package:info_storage/info_storage.dart';
 import 'package:test/test.dart';
 import 'storage_test.dart' show TestKeyStore;
+import 'package:sqlite3/sqlite3.dart';
 
 void main() {
+  test(
+    'development schema eight migrates and terminal import payloads are scrubbed without losing receipt or pending work',
+    () async {
+      final folder = await Directory.systemTemp.createTemp(
+        'info-recycle-migration-',
+      );
+      addTearDown(() => folder.delete(recursive: true));
+      final keys = TestKeyStore();
+      final initial = await EncryptedInformationRepository.open(
+        folder.path,
+        keys,
+      );
+      await initial.close();
+      final fixture = sqlite3.open('${folder.path}/library.db');
+      final hex = keys.key!
+          .map((v) => v.toRadixString(16).padLeft(2, '0'))
+          .join();
+      fixture.execute('PRAGMA key = "x\'$hex\'"');
+      fixture.execute('DROP TABLE recycle_entries');
+      fixture.execute('DROP TABLE recycle_facts');
+      fixture.execute('DROP TABLE delete_proposals');
+      fixture.execute('PRAGMA user_version = 8');
+      for (final state in ['confirmed', 'rejected', 'pending']) {
+        final payload = {
+          'id': state,
+          'sessionBinding': 'non-secret-correlation',
+          'chatLabel': 'old chat',
+          'createdAt': '2026-10-16T00:00:00.000Z',
+          'version': state == 'pending' ? 1 : 2,
+          'state': state,
+          'createdItemIds': state == 'confirmed' ? ['past-item'] : <String>[],
+          'items': [
+            {
+              'name': 'old',
+              'description': '',
+              'fields': [
+                {
+                  'name': 'secret',
+                  'description': '',
+                  'value': 'LEGACY-SECRET',
+                  'kind': 'structured',
+                },
+              ],
+            },
+          ],
+        };
+        fixture.execute(
+          'INSERT INTO import_proposals(id,payload) VALUES(?,?)',
+          [state, jsonEncode(payload)],
+        );
+      }
+      fixture.close();
+      final store = await EncryptedInformationRepository.open(
+        folder.path,
+        keys,
+      );
+      final service = InformationService(repository: store);
+      addTearDown(() async {
+        await service.close();
+        await store.close();
+      });
+      for (final p in service.owner.importProposals.where(
+        (p) => p.state != ImportProposalState.pending,
+      )) {
+        expect(p.toJson().toString(), isNot(contains('LEGACY-SECRET')));
+        expect(p.itemCount, 1);
+      }
+      expect(
+        service.owner.importProposals.last.items.single.fields.single.value,
+        'LEGACY-SECRET',
+      );
+      final receipt = (await service.owner.confirmImport(
+        'confirmed',
+        1,
+        const [],
+      )).single;
+      expect(receipt.id, 'past-item');
+      expect(receipt.version, 1);
+      expect(service.owner.information, isEmpty);
+      final item = await service.owner.createInformation('after upgrade', '', [
+        const FieldInput('host', '', 'new.invalid'),
+      ]);
+      expect(
+        (await service.owner.deleteInformation(item.id, 1)).snapshot!.id,
+        item.id,
+      );
+    },
+  );
   test(
     'deleted content and facts survive encrypted reopen then restore with monotonic identity and purge',
     () async {

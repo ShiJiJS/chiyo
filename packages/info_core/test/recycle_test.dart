@@ -3,6 +3,66 @@ import 'package:test/test.dart';
 
 void main() {
   test(
+    'concurrent delete and update have one version winner and duplicate restore does not apply twice',
+    () async {
+      final service = InformationService.fictional();
+      addTearDown(service.close);
+      final session = service.agent.openSession('writer');
+      final update = await service.agent.submitUpdate(
+        session,
+        UpdateInput('demo-server', 1, const [
+          FieldChange.correct('host', 'new.invalid'),
+        ]),
+      );
+      final results = await Future.wait<Object>([
+        service.owner
+            .deleteInformation('demo-server', 1, fieldId: 'host')
+            .then<Object>((e) => e, onError: (Object e) => e),
+        service.owner
+            .confirmUpdate(update, 1)
+            .then<Object>((e) => e, onError: (Object e) => e),
+      ]);
+      expect(results.whereType<RecycleEntry>(), hasLength(1));
+      expect(
+        results.whereType<AccessFailure>().single.status,
+        'proposal_conflict',
+      );
+      final id = results.whereType<RecycleEntry>().single.id;
+      final restores = await Future.wait<Object>([
+        for (var i = 0; i < 2; i++)
+          service.owner
+              .restoreRecycled(id)
+              .then<Object>((e) => e, onError: (Object e) => e),
+      ]);
+      expect(restores.whereType<InformationItem>().single.version, 3);
+      expect(restores.whereType<AccessFailure>(), hasLength(1));
+      expect(service.owner.information.single.fields, hasLength(2));
+    },
+  );
+  test(
+    'failed persistent deletion preserves current content and existing grant',
+    () async {
+      final repo = FailedRecycleRepository();
+      final service = InformationService(repository: repo);
+      addTearDown(service.close);
+      final item = await service.owner.createInformation('server', '', [
+        const FieldInput('host', '', 'safe.invalid'),
+      ]);
+      final session = service.agent.openSession('reader');
+      final ref = FieldRef(item.id, item.fields.single.id);
+      final request = service.agent.request(session, 'read', [ref]);
+      service.owner.approve(request.id, [ref]);
+      final token = service.agent.claim(session, request.id).token;
+      await expectLater(
+        service.owner.deleteInformation(item.id, 1),
+        throwsA(isA<StateError>()),
+      );
+      expect(await service.agent.read(token, ref), 'safe.invalid');
+      expect(service.owner.recycleEntries, isEmpty);
+      expect(service.owner.information.single.version, 1);
+    },
+  );
+  test(
     'terminal imports retain value-free receipts and retry after deletion never recreates content',
     () async {
       final service = InformationService(
@@ -151,4 +211,16 @@ void main() {
       ]);
     },
   );
+}
+
+class FailedRecycleRepository extends MemoryInformationRepository {
+  @override
+  Future<void> commitRecycleChange({
+    required String itemId,
+    InformationItem? item,
+    InformationRevision? previous,
+    required List<RecycleEntry> entries,
+    required List<RecycleFact> facts,
+    DeleteProposal? proposal,
+  }) async => throw StateError('external store unavailable');
 }

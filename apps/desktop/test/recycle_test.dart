@@ -13,7 +13,11 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
       final service = InformationService.fictional();
-      addTearDown(service.close);
+      addTearDown(() async {
+        final closing = service.close();
+        await tester.pump();
+        await closing;
+      });
       await tester.pumpWidget(
         MaterialApp(home: InformationLibrary(owner: service.owner)),
       );
@@ -43,7 +47,11 @@ void main() {
     'agent field deletion preview names only selected target before explicit confirmation',
     (tester) async {
       final service = InformationService.fictional();
-      addTearDown(service.close);
+      addTearDown(() async {
+        final closing = service.close();
+        await tester.pump();
+        await closing;
+      });
       final session = service.agent.openSession('proposer');
       final id = await service.agent.submitDelete(
         session,
