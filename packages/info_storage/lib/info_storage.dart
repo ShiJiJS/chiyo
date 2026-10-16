@@ -667,6 +667,9 @@ class _InformationDatabase extends GeneratedDatabase {
     beforeOpen: (details) async {
       if (details.versionNow > schemaVersion)
         throw const StorageFailure('unsupported_schema');
+      // An unpublished development schema 8 preceded the reserved audit
+      // tables. Backfill only after rejecting unknown future versions.
+      await _createAudit();
     },
   );
 
@@ -703,16 +706,16 @@ class _InformationDatabase extends GeneratedDatabase {
 
   Future<void> _createAudit() async {
     await customStatement(
-      'CREATE TABLE grant_history(id TEXT PRIMARY KEY,approved_at INTEGER NOT NULL,payload TEXT NOT NULL)',
+      'CREATE TABLE IF NOT EXISTS grant_history(id TEXT PRIMARY KEY,approved_at INTEGER NOT NULL,payload TEXT NOT NULL)',
     );
     await customStatement(
-      'CREATE TABLE access_records(id TEXT PRIMARY KEY,recorded_at INTEGER NOT NULL,payload TEXT NOT NULL)',
+      'CREATE TABLE IF NOT EXISTS access_records(id TEXT PRIMARY KEY,recorded_at INTEGER NOT NULL,payload TEXT NOT NULL)',
     );
     await customStatement(
-      'CREATE INDEX grant_history_retention ON grant_history(approved_at)',
+      'CREATE INDEX IF NOT EXISTS grant_history_retention ON grant_history(approved_at)',
     );
     await customStatement(
-      'CREATE INDEX access_records_retention ON access_records(recorded_at)',
+      'CREATE INDEX IF NOT EXISTS access_records_retention ON access_records(recorded_at)',
     );
   }
 }
