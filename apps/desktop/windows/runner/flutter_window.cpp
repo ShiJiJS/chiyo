@@ -83,6 +83,8 @@ bool FlutterWindow::OnCreate() {
     return false;
   }
   RegisterPlugins(flutter_controller_->engine());
+  backup_files_ = std::make_unique<BackupFileDialogs>(
+      flutter_controller_->engine()->messenger(), GetHandle());
   SetChildContent(flutter_controller_->view()->GetNativeWindow());
   taskbar_created_ = RegisterWindowMessageW(L"TaskbarCreated");
   desktop_channel_ = std::make_unique<flutter::MethodChannel<flutter::EncodableValue>>(
@@ -141,6 +143,7 @@ bool FlutterWindow::OnCreate() {
 }
 
 void FlutterWindow::OnDestroy() {
+  backup_files_.reset();
   RemoveTrayIcon();
   desktop_ready_ = false;
   desktop_channel_ = nullptr;
