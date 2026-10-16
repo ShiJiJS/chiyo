@@ -1,0 +1,19 @@
+name: info_storage
+description: Owner-only encrypted information storage and OS key protection.
+version: 0.1.0
+publish_to: none
+environment:
+  sdk: '>=3.10.0 <4.0.0'
+dependencies:
+  info_core:
+    path: ../info_core
+  drift: 2.35.2
+  sqlite3: 3.7.1
+  ffi: 2.2.0
+dev_dependencies:
+  test: ^1.26.3
+  lints: ^6.0.0
+hooks:
+  user_defines:
+    sqlite3:
+      source: sqlcipher
