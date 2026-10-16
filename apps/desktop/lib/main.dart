@@ -11,6 +11,8 @@ import 'desktop_runtime.dart';
 import 'desktop_bootstrap.dart';
 import 'backups.dart';
 import 'history.dart';
+import 'desktop_shell.dart';
+import 'ui.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -83,6 +85,8 @@ class _DesktopLauncherState extends State<DesktopLauncher> {
         );
       }
       return MaterialApp(
+        theme: informationTheme(),
+        debugShowCheckedModeBanner: false,
         home: Scaffold(
           body: Center(
             child: startup.state != DesktopStartupState.failed
@@ -142,10 +146,22 @@ class _InformationAppState extends State<InformationApp>
   );
   int _openRevision = 0;
   int _libraryRevision = 0;
+  final _visited = <int>{0};
+  int _activeTab = 0;
   @override
   void initState() {
     super.initState();
     widget.runtime?.addListener(_runtimeChanged);
+    _tabs.addListener(_tabChanged);
+  }
+
+  void _tabChanged() {
+    if (!mounted) return;
+    setState(() {
+      if (_activeTab != _tabs.index && _tabs.index == 3) _libraryRevision++;
+      _activeTab = _tabs.index;
+      _visited.add(_tabs.index);
+    });
   }
 
   void _runtimeChanged() {
@@ -160,6 +176,7 @@ class _InformationAppState extends State<InformationApp>
   @override
   void dispose() {
     widget.runtime?.removeListener(_runtimeChanged);
+    _tabs.removeListener(_tabChanged);
     _tabs.dispose();
     super.dispose();
   }
@@ -168,96 +185,51 @@ class _InformationAppState extends State<InformationApp>
   Widget build(BuildContext context) => MaterialApp(
     title: '信息访问授权',
     debugShowCheckedModeBanner: false,
-    theme: ThemeData(
-      colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xff245c51)),
-      useMaterial3: true,
-    ),
-    home: Scaffold(
-      appBar: AppBar(
-        title: const Text('信息访问授权'),
-        actions: [
-          if (widget.runtime case final runtime?) ...[
-            TextButton(
-              onPressed: runtime.quitting ? null : runtime.enableNotifications,
-              child: const Text('启用或检查通知'),
-            ),
-            TextButton(
-              onPressed: runtime.quitting ? null : runtime.quit,
-              child: Text(
-                runtime.quitting
-                    ? '正在退出…'
-                    : runtime.shutdownFailed
-                    ? '重试保存并退出'
-                    : '完全退出',
-              ),
-            ),
-          ],
-        ],
-        bottom: TabBar(
-          controller: _tabs,
-          tabs: [
-            Tab(text: '访问审批'),
-            Tab(text: '我的信息'),
-            Tab(text: '录入提案'),
-            Tab(text: '授权历史'),
-            if (widget.backups != null) Tab(text: '备份恢复'),
-          ],
+    theme: informationTheme(),
+    home: Builder(
+      builder: (context) => DesktopShell(
+        service: widget.service,
+        port: widget.port,
+        index: _tabs.index,
+        onSelected: (index) => _tabs.animateTo(
+          index,
+          duration: MediaQuery.maybeOf(context)?.disableAnimations == true
+              ? Duration.zero
+              : const Duration(milliseconds: 220),
         ),
-      ),
-      body: Column(
-        children: [
-          if (widget.runtime?.recycleCleanupFailed == true)
-            const Padding(
-              padding: EdgeInsets.all(8),
-              child: Text('回收站到期清理暂时失败，请检查存储。到期内容无法恢复，应用会再次尝试清理。'),
-            ),
-          if (widget.runtime?.revisionCleanupFailed == true)
-            const Padding(
-              padding: EdgeInsets.all(8),
-              child: Text('修改历史到期清理暂时失败，请检查存储。到期版本无法查看或恢复，应用会再次尝试清理。'),
-            ),
-          if (widget.runtime?.shutdownFailed == true)
-            const Padding(
-              padding: EdgeInsets.all(8),
-              child: Text('访问服务已停止，但记录尚未保存，应用未退出。请修复存储后重试保存并退出；重新启动后需要重新申请授权。'),
-            ),
-          if (widget.runtime case final runtime?)
-            Padding(
-              padding: const EdgeInsets.all(8),
-              child: Text(
-                '${runtime.availability.tray ? '关窗后继续运行，可从托盘或菜单栏打开审批。' : '托盘或菜单栏不可用，关闭按钮将保留窗口；可选择完全退出。'} '
-                '${switch (runtime.availability.notifications) {
-                  NotificationAvailability.enabled => '系统通知已启用，可能受系统勿扰设置影响。',
-                  NotificationAvailability.notEnabled => '系统通知尚未启用，待办仍保留在访问审批。',
-                  NotificationAvailability.denied => '系统通知已被拒绝，请在系统设置中允许后检查。',
-                  NotificationAvailability.unavailable => '系统通知暂不可用，请在访问审批中查看新申请。',
-                }}',
-              ),
-            ),
-          Expanded(
-            child: TabBarView(
-              controller: _tabs,
-              children: [
-                Approvals(service: widget.service, port: widget.port),
-                InformationLibrary(owner: widget.service.owner, refresh: _tabs),
-                ImportProposalsPage(owner: widget.service.owner),
-                AuthorizationHistory(
-                  key: ValueKey(_libraryRevision),
-                  owner: widget.service.owner,
-                ),
-                if (widget.backups case final backups?)
-                  BackupLibrary(
-                    backups: backups,
-                    owner: widget.service.owner,
-                    files: widget.backupFiles,
-                    onRestored: () {
-                      if (mounted) setState(() => _libraryRevision++);
-                    },
-                  ),
-              ],
-            ),
-          ),
-        ],
+        runtime: widget.runtime,
+        hasBackups: widget.backups != null,
+        child: IndexedStack(
+          index: _tabs.index,
+          children:
+              [
+                    Approvals(service: widget.service, port: widget.port),
+                    InformationLibrary(
+                      owner: widget.service.owner,
+                      refresh: _tabs,
+                    ),
+                    ImportProposalsPage(owner: widget.service.owner),
+                    AuthorizationHistory(
+                      key: ValueKey(_libraryRevision),
+                      owner: widget.service.owner,
+                    ),
+                    if (widget.backups case final backups?)
+                      BackupLibrary(
+                        backups: backups,
+                        owner: widget.service.owner,
+                        files: widget.backupFiles,
+                        onRestored: () {
+                          if (mounted) setState(() => _libraryRevision++);
+                        },
+                      ),
+                  ].indexed
+                  .map(
+                    (entry) => _visited.contains(entry.$1)
+                        ? entry.$2
+                        : const SizedBox(),
+                  )
+                  .toList(),
+        ),
       ),
     ),
   );

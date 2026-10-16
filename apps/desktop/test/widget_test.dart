@@ -7,6 +7,10 @@ void main() {
   testWidgets('desktop approves only selected field then revokes the grant', (
     tester,
   ) async {
+    tester.view.physicalSize = const Size(1280, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
     final core = InformationService.fictional();
     final session = core.agent.openSession('demo-chat');
     final request = core.agent.request(session, 'Need address', [
@@ -14,7 +18,7 @@ void main() {
       const FieldRef('demo-server', 'username'),
     ]);
     await tester.pumpWidget(InformationApp(service: core, port: 47125));
-    expect(find.text('Need address'), findsOneWidget);
+    expect(find.text('Need address'), findsWidgets);
     await tester.ensureVisible(find.byKey(const ValueKey('field-username')));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('field-username')));

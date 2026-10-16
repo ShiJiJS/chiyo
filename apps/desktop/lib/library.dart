@@ -4,6 +4,7 @@ import 'organization.dart';
 import 'templates.dart';
 import 'recycle.dart';
 import 'revisions.dart';
+import 'ui.dart';
 
 class InformationLibrary extends StatefulWidget {
   const InformationLibrary({super.key, required this.owner, this.refresh});
@@ -121,92 +122,205 @@ class _InformationLibraryState extends State<InformationLibrary> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(
-      title: const Text('我的信息'),
-      actions: [
-        TextButton(
-          onPressed: () async {
-            await Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (_) => RecyclePage(owner: widget.owner),
+    body: Padding(
+      padding: const EdgeInsets.fromLTRB(26, 25, 26, 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          PageHeading(
+            '资料库',
+            subtitle:
+          '${widget.owner.information.length} 条信息 · 字段值按授权范围提供给 Agent',
+            actions: [
+              TextButton(
+                onPressed: () async {
+                  await Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => RecyclePage(owner: widget.owner),
+                    ),
+                  );
+                  if (mounted) setState(() {});
+                },
+                child: const Text('回收站'),
               ),
-            );
-            if (mounted) setState(() {});
-          },
-          child: const Text('回收站'),
-        ),
-        TextButton(
-          onPressed: () async {
-            await manageOrganization(context, widget.owner);
-            if (mounted) setState(() {});
-          },
-          child: const Text('目录与标签'),
-        ),
-        TextButton.icon(
-          onPressed: () async {
-            await Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (_) => TemplateLibrary(owner: widget.owner),
+              OutlinedButton(
+                onPressed: () async {
+                  await manageOrganization(context, widget.owner);
+                  if (mounted) setState(() {});
+                },
+                child: const Text('目录与标签'),
               ),
-            );
-            if (mounted) setState(() {});
-          },
-          icon: const Icon(Icons.view_list_outlined),
-          label: const Text('字段模板'),
-        ),
-        TextButton.icon(
-          onPressed: _create,
-          icon: const Icon(Icons.add),
-          label: const Text('新建信息'),
-        ),
-      ],
-    ),
-    body: ListView(
-      padding: const EdgeInsets.all(24),
-      children: [
-        const Text(
-          '当前为开发版本，恢复链路尚未验收，请只使用虚构资料。名称、公开描述和字段说明会出现在 Agent 目录中，请勿在这些位置填写秘密。',
-        ),
-        const SizedBox(height: 20),
-        Wrap(
-          spacing: 24,
-          children: [
-            DropdownButton<String>(
-              key: const ValueKey('browse-directory'),
-              value: _directoryFilter,
-              hint: const Text('全部目录'),
-              items: [
-                const DropdownMenuItem(value: null, child: Text('全部目录')),
-                for (final directory in widget.owner.directories)
-                  DropdownMenuItem(
-                    value: directory.id,
-                    child: Text(directoryPath(widget.owner, directory.id)),
+              OutlinedButton.icon(
+                onPressed: () async {
+                  await Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => TemplateLibrary(owner: widget.owner),
+                    ),
+                  );
+                  if (mounted) setState(() {});
+                },
+                icon: const Icon(Icons.view_list_outlined, size: 17),
+                label: const Text('字段模板'),
+              ),
+              FilledButton.icon(
+                onPressed: _create,
+                icon: const Icon(Icons.add, size: 18),
+                label: const Text('新建信息'),
+              ),
+            ],
+          ),
+          Expanded(
+            child: ListView(
+              children: [
+                Wrap(
+                  spacing: 20,
+                  runSpacing: 8,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    DropdownButton<String>(
+                      key: const ValueKey('browse-directory'),
+                      value: _directoryFilter,
+                      hint: const Text('全部目录'),
+                      items: [
+                        const DropdownMenuItem(
+                          value: null,
+                          child: Text('全部目录'),
+                        ),
+                        for (final directory in widget.owner.directories)
+                          DropdownMenuItem(
+                            value: directory.id,
+                            child: Text(
+                              directoryPath(widget.owner, directory.id),
+                            ),
+                          ),
+                      ],
+                      onChanged: (value) =>
+                          setState(() => _directoryFilter = value),
+                    ),
+                    DropdownButton<String>(
+                      key: const ValueKey('browse-tag'),
+                      value: _tagFilter,
+                      hint: const Text('全部标签'),
+                      items: [
+                        const DropdownMenuItem(
+                          value: null,
+                          child: Text('全部标签'),
+                        ),
+                        for (final tag in widget.owner.tags)
+                          DropdownMenuItem(
+                            value: tag.id,
+                            child: Text(tag.name),
+                          ),
+                      ],
+                      onChanged: (value) => setState(() => _tagFilter = value),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                const QuietNotice('名称、公开描述和字段说明会出现在 Agent 目录中，请勿在这些位置填写秘密。'),
+                const SizedBox(height: 12),
+                if (widget.owner.information.isEmpty)
+                  const SizedBox(
+                    height: 320,
+                    child: EmptyWorkspace(
+                      icon: Icons.folder_open_outlined,
+                      title: '还没有信息，可以手动新建。',
+                      description: '也可以让 Agent 整理资料并提交录入提案，由你预览后确认入库。',
+                    ),
+                  ),
+                if (widget.owner.information.isNotEmpty &&
+                    _visibleInformation.isEmpty)
+                  const Padding(
+                    padding: EdgeInsets.all(28),
+                    child: Text('当前目录和标签下没有信息。'),
+                  ),
+                if (_visibleInformation.isNotEmpty)
+                  Material(
+                    color: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(9),
+                      side: const BorderSide(color: UiColors.line),
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: Column(
+                      children: [
+                        for (
+                          var i = 0;
+                          i < _visibleInformation.length;
+                          i++
+                        ) ...[
+                          if (i > 0) const Divider(),
+                          _informationRow(_visibleInformation[i]),
+                        ],
+                      ],
+                    ),
                   ),
               ],
-              onChanged: (value) => setState(() => _directoryFilter = value),
             ),
-            DropdownButton<String>(
-              key: const ValueKey('browse-tag'),
-              value: _tagFilter,
-              hint: const Text('全部标签'),
-              items: [
-                const DropdownMenuItem(value: null, child: Text('全部标签')),
-                for (final tag in widget.owner.tags)
-                  DropdownMenuItem(value: tag.id, child: Text(tag.name)),
-              ],
-              onChanged: (value) => setState(() => _tagFilter = value),
-            ),
-          ],
-        ),
-        if (widget.owner.information.isEmpty) const Text('还没有信息，可以手动新建。'),
-        if (widget.owner.information.isNotEmpty && _visibleInformation.isEmpty)
-          const Text('当前目录和标签下没有信息。'),
-        for (final item in _visibleInformation)
-          Card(
-            child: ExpansionTile(
-              title: Text(item.name),
-              subtitle: Text(item.description),
+          ),
+        ],
+      ),
+    ),
+  );
+
+  Widget _informationRow(InformationItem item) => ExpansionTile(
+    key: ValueKey(item.id),
+    expandedCrossAxisAlignment: CrossAxisAlignment.stretch,
+    expandedAlignment: Alignment.centerLeft,
+    tilePadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 9),
+    leading: const Padding(
+      padding: EdgeInsets.only(top: 4),
+      child: Icon(Icons.description_outlined, size: 21, color: UiColors.muted),
+    ),
+    title: Text(item.name, style: Theme.of(context).textTheme.titleMedium),
+    subtitle: Text(
+      item.description,
+      style: Theme.of(context).textTheme.bodySmall,
+    ),
+    children: [
+      Padding(
+        padding: const EdgeInsets.fromLTRB(18, 0, 18, 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              crossAxisAlignment: WrapCrossAlignment.center,
               children: [
+                Text(
+                  directoryPath(widget.owner, item.directoryId),
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+                for (final tag in widget.owner.tags.where(
+                  (t) => item.tagIds.contains(t.id),
+                ))
+                  Text(
+                    '· ${tag.name}',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 6,
+              children: [
+                TextButton.icon(
+                  onPressed: () async {
+                    await editCatalogMetadata(context, widget.owner, item);
+                    if (mounted) setState(() {});
+                  },
+                  icon: const Icon(Icons.edit_outlined, size: 16),
+                  label: const Text('编辑公开说明'),
+                ),
+                TextButton(
+                  onPressed: () async {
+                    await organizeItem(context, widget.owner, item);
+                    if (mounted) setState(() {});
+                  },
+                  child: const Text('整理位置和标签'),
+                ),
                 TextButton(
                   onPressed: () async {
                     await Navigator.of(context).push(
@@ -222,6 +336,7 @@ class _InformationLibraryState extends State<InformationLibrary> {
                   child: const Text('修改历史'),
                 ),
                 TextButton.icon(
+                  style: TextButton.styleFrom(foregroundColor: UiColors.danger),
                   onPressed: () async {
                     await confirmInformationDeletion(
                       context,
@@ -230,65 +345,55 @@ class _InformationLibraryState extends State<InformationLibrary> {
                     );
                     if (mounted) setState(() {});
                   },
-                  icon: const Icon(Icons.delete_outline),
+                  icon: const Icon(Icons.delete_outline, size: 16),
                   label: const Text('删除整条信息'),
                 ),
-                Text(directoryPath(widget.owner, item.directoryId)),
-                Wrap(
-                  children: [
-                    for (final tag in widget.owner.tags.where(
-                      (t) => item.tagIds.contains(t.id),
-                    ))
-                      Chip(label: Text(tag.name)),
-                  ],
-                ),
-                TextButton(
-                  onPressed: () async {
-                    await organizeItem(context, widget.owner, item);
-                    if (mounted) setState(() {});
-                  },
-                  child: const Text('整理位置和标签'),
-                ),
-                TextButton(
-                  onPressed: () async {
-                    await editCatalogMetadata(context, widget.owner, item);
-                    if (mounted) setState(() {});
-                  },
-                  child: const Text('编辑公开说明'),
-                ),
-                for (final field in item.fields)
-                  ListTile(
-                    title: Text(field.name),
-                    subtitle: SelectableText(field.value),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        IconButton(
-                          tooltip: '修正值',
-                          icon: const Icon(Icons.edit_outlined),
-                          onPressed: () => _correct(item, field),
-                        ),
-                        IconButton(
-                          tooltip: '删除字段',
-                          icon: const Icon(Icons.delete_outline),
-                          onPressed: () async {
-                            await confirmInformationDeletion(
-                              context,
-                              widget.owner,
-                              item,
-                              fieldId: field.id,
-                            );
-                            if (mounted) setState(() {});
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
               ],
             ),
+          ],
+        ),
+      ),
+      const Divider(),
+      for (final field in item.fields)
+        ListTile(
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 20,
+            vertical: 8,
           ),
-      ],
-    ),
+          title: Text(field.name, style: Theme.of(context).textTheme.bodySmall),
+          subtitle: Padding(
+            padding: const EdgeInsets.only(top: 5),
+            child: SelectableText(
+              field.value,
+              style: Theme.of(context).textTheme.bodyLarge,
+            ),
+          ),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                tooltip: '修正值',
+                icon: const Icon(Icons.edit_outlined, size: 18),
+                onPressed: () => _correct(item, field),
+              ),
+              IconButton(
+                tooltip: '删除字段',
+                icon: const Icon(Icons.delete_outline, size: 18),
+                onPressed: () async {
+                  await confirmInformationDeletion(
+                    context,
+                    widget.owner,
+                    item,
+                    fieldId: field.id,
+                  );
+                  if (mounted) setState(() {});
+                },
+              ),
+            ],
+          ),
+        ),
+      const SizedBox(height: 8),
+    ],
   );
 }
 

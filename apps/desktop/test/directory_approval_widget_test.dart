@@ -38,6 +38,8 @@ void main() {
       MaterialApp(home: Approvals(service: service, port: 47125)),
     );
     await tester.tap(find.byKey(ValueKey('field-${requested.fieldId}')));
+    await tester.tap(find.text('补选或改选字段'));
+    await tester.pumpAndSettle();
     await tester.tap(
       find.byKey(ValueKey('directory-${request.id}-${directory.id}')),
     );

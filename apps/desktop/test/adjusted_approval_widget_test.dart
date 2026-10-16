@@ -7,6 +7,10 @@ void main() async {
   testWidgets(
     'owner can remove a requested field that is no longer available',
     (tester) async {
+      tester.view.physicalSize = const Size(1280, 800);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
       final repository = MemoryInformationRepository();
       final core = InformationService(repository: repository);
       final item = await core.owner.createInformation('Server', '', [
@@ -26,6 +30,8 @@ void main() async {
       await tester.ensureVisible(unavailable);
       await tester.pumpAndSettle();
       await tester.tap(unavailable);
+      await tester.tap(find.text('补选或改选字段'));
+      await tester.pumpAndSettle();
       await tester.ensureVisible(
         find.byKey(ValueKey('field-${remaining.fieldId}')),
       );
@@ -44,6 +50,10 @@ void main() async {
   testWidgets('owner replaces a requested field and selects a shorter grant', (
     tester,
   ) async {
+    tester.view.physicalSize = const Size(1280, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
     final core = InformationService(
       repository: MemoryInformationRepository(),
       clock: () => DateTime.utc(2026, 10, 16),
@@ -68,6 +78,8 @@ void main() async {
     );
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(ValueKey('field-${requested.fieldId}')));
+    await tester.tap(find.text('补选或改选字段'));
+    await tester.pumpAndSettle();
     await tester.ensureVisible(
       find.byKey(ValueKey('field-${replacement.fieldId}')),
     );

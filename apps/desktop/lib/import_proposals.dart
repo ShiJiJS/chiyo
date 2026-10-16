@@ -4,6 +4,7 @@ import 'package:info_core/info_core.dart';
 import 'organization.dart';
 import 'update_proposals.dart';
 import 'recycle.dart';
+import 'ui.dart';
 
 class ImportProposalsPage extends StatefulWidget {
   const ImportProposalsPage({super.key, required this.owner});
@@ -39,10 +40,11 @@ class _ImportProposalsPageState extends State<ImportProposalsPage> {
 
   @override
   Widget build(BuildContext context) => ListView(
-    padding: const EdgeInsets.all(24),
+    padding: const EdgeInsets.fromLTRB(26, 25, 26, 20),
     children: [
-      const Text('Agent 提交的内容需要你确认后才会入库。公开名称、描述和字段说明会出现在公开目录；字段值需另行授权。'),
-      const SizedBox(height: 16),
+      const PageHeading('待确认的提案', subtitle: '先查看和调整内容，确认后才会写入资料库。'),
+      const QuietNotice('公开名称、描述和字段说明会进入 Agent 目录；字段值仍需另行授权。'),
+      const SizedBox(height: 14),
       DeleteProposalsList(
         owner: widget.owner,
         onChanged: () => setState(() {}),
@@ -54,7 +56,14 @@ class _ImportProposalsPageState extends State<ImportProposalsPage> {
       if (widget.owner.importProposals.isEmpty &&
           widget.owner.updateProposals.isEmpty &&
           widget.owner.deleteProposals.isEmpty)
-        const Text('暂无录入提案。'),
+        const SizedBox(
+          height: 320,
+          child: EmptyWorkspace(
+            icon: Icons.playlist_add_outlined,
+            title: '暂无录入提案。',
+            description: '让 Agent 整理信息并提交提案，你可以在这里批量预览与确认。',
+          ),
+        ),
       for (final proposal in widget.owner.importProposals.reversed)
         Card(
           child: ListTile(

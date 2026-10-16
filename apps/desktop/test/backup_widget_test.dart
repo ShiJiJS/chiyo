@@ -47,6 +47,10 @@ void main() {
   testWidgets(
     'restore preview imports into empty library and refreshed information tab shows data',
     (tester) async {
+      tester.view.physicalSize = const Size(1280, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
       late final Directory root;
       late EncryptedInformationRepository recipient;
       late String key;
@@ -101,6 +105,8 @@ void main() {
       await tester.pump(const Duration(milliseconds: 400));
       await _settleIO(tester, find.text('暂无授权历史。'));
       await tester.tap(find.text('备份恢复'));
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text('从备份恢复'));
       await tester.pump(const Duration(milliseconds: 400));
       await _settleIO(tester, find.text('从备份恢复'));
       await tester.ensureVisible(find.text('从备份恢复'));
@@ -172,6 +178,8 @@ void main() {
       await _settleIO(tester, find.text('恢复密钥已另存，请与备份分开保管。'));
       expect(File('${root.path}/recovery.txt').existsSync(), isTrue);
       await tester.tap(find.text('完成'));
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text('导出加密备份'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('导出加密备份'));
       await _settleIO(tester, find.text('加密备份已导出。'));

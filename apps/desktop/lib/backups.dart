@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:info_storage/info_storage.dart';
 import 'package:info_core/info_core.dart';
+import 'ui.dart';
 
 /// The OS file-dialog boundary. Widget tests supply paths, never open dialogs.
 abstract class BackupFilePicker {
@@ -187,68 +188,81 @@ class _BackupLibraryState extends State<BackupLibrary> {
   }
 
   @override
-  Widget build(BuildContext context) => ListView(
-    padding: const EdgeInsets.all(24),
-    children: [
-      Text('手动加密备份', style: Theme.of(context).textTheme.headlineSmall),
-      const SizedBox(height: 12),
-      const Text('当前为开发版本，请仅使用虚构资料。跨平台及真实桌面恢复仍待验收。'),
-      const SizedBox(height: 12),
-      const Text(
-        '备份包含当前信息、目录、标签、字段模板及设置，以及尚在各自保留期内的修改版本、回收站、授权历史和访问记录。保留无内容的删除及版本标识，以维持数据关系。不保存提案、待审批、有效凭据、本机数据库密钥或恢复密钥。',
-      ),
-      const SizedBox(height: 12),
-      const Text(
-        '已导出的离线备份不会随应用中的到期清理而删除旧内容；请自行管理和删除离线备份。恢复时再次按原时间清理到期内容，不延长保留期。恢复期间暂缓 Agent 访问，完成后需要重新申请。',
-      ),
-      const SizedBox(height: 20),
-      const Text(
-        '恢复密钥与本机数据库密钥独立，日常打开应用无需输入。请把恢复密钥另存到安全位置，与备份分开保管；任何同时拿到备份和恢复密钥的人都能读取其中的资料。',
-      ),
-      const SizedBox(height: 20),
-      Wrap(
-        spacing: 12,
-        runSpacing: 12,
+  Widget build(BuildContext context) => Align(
+    alignment: Alignment.topLeft,
+    child: SizedBox(
+      width: 960,
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(26, 25, 26, 20),
         children: [
-          if (!_enabled)
-            FilledButton(
-              onPressed: _busy
-                  ? null
-                  : () => _run(() => _showKey(enable: true)),
-              child: const Text('启用手动备份'),
-            ),
-          if (_enabled)
-            OutlinedButton(
-              onPressed: _busy ? null : () => _run(_showKey),
-              child: const Text('查看并保存恢复密钥'),
-            ),
-          FilledButton(
-            onPressed: _busy || !_enabled ? null : () => _run(_export),
-            child: const Text('导出加密备份'),
+          const PageHeading('备份与恢复', subtitle: '使用独立恢复密钥，将资料带到另一台设备。'),
+          const QuietNotice('跨平台与真实桌面恢复尚未验收，请只使用虚构资料。'),
+          const SizedBox(height: 16),
+          Text('手动加密备份', style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: 12),
+          const Text(
+            '包含当前信息、目录、标签、模板、设置，以及保留期内的修改版本、回收站、授权历史和访问记录。为维持数据关系，另保留不含内容的删除与版本标识。\n不含提案、待审批、有效凭据、本机数据库密钥或恢复密钥。',
           ),
+          const SizedBox(height: 12),
+          const Text(
+            '离线备份需自行管理，不随应用清理旧内容。恢复按原时间清理到期内容，不延长保留期；期间暂缓 Agent 访问，完成后需要重新申请。',
+          ),
+          const SizedBox(height: 24),
+          Text('恢复密钥', style: Theme.of(context).textTheme.titleSmall),
+          const SizedBox(height: 8),
+          const Text(
+            '恢复密钥独立于本机数据库密钥，日常打开应用无需输入。\n请另存并与备份分开保管：同时持有备份和恢复密钥即可读取资料。',
+          ),
+          const SizedBox(height: 20),
+          Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            children: [
+              if (!_enabled)
+                FilledButton(
+                  onPressed: _busy
+                      ? null
+                      : () => _run(() => _showKey(enable: true)),
+                  child: const Text('启用手动备份'),
+                ),
+              if (_enabled)
+                OutlinedButton(
+                  onPressed: _busy ? null : () => _run(_showKey),
+                  child: const Text('查看并保存恢复密钥'),
+                ),
+              FilledButton(
+                onPressed: _busy || !_enabled ? null : () => _run(_export),
+                child: const Text('导出加密备份'),
+              ),
+            ],
+          ),
+          const SizedBox(height: 32),
+          const Divider(),
+          const SizedBox(height: 24),
+          Text('在新设备恢复', style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: 10),
+          const Text('仅支持空资料库；已有资料时拒绝恢复，不覆盖或合并。确认恢复成功前，请保留原设备和原备份。'),
+          const SizedBox(height: 12),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: OutlinedButton(
+              onPressed: _busy ? null : () => _run(_restore),
+              child: const Text('从备份恢复'),
+            ),
+          ),
+          if (_busy)
+            const Padding(
+              padding: EdgeInsets.all(16),
+              child: LinearProgressIndicator(),
+            ),
+          if (_message != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 20),
+              child: Text(_message!, key: const ValueKey('backup-result')),
+            ),
         ],
       ),
-      const SizedBox(height: 32),
-      const Text('恢复仅支持新设备或空资料库，已有资料时会拒绝恢复，不会自动覆盖或合并。请保留原设备及原备份，确认恢复成功后再处理它们。'),
-      const SizedBox(height: 12),
-      Align(
-        alignment: Alignment.centerLeft,
-        child: OutlinedButton(
-          onPressed: _busy ? null : () => _run(_restore),
-          child: const Text('从备份恢复'),
-        ),
-      ),
-      if (_busy)
-        const Padding(
-          padding: EdgeInsets.all(16),
-          child: LinearProgressIndicator(),
-        ),
-      if (_message != null)
-        Padding(
-          padding: const EdgeInsets.only(top: 20),
-          child: Text(_message!, key: const ValueKey('backup-result')),
-        ),
-    ],
+    ),
   );
 }
 

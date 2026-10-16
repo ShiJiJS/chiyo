@@ -40,7 +40,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Need address'), findsOneWidget);
       expect(service.agent.status(session, request.id)['status'], 'pending');
-      await tester.tap(find.text('启用或检查通知'));
+      await tester.tap(find.byTooltip('启用或检查通知'));
       await tester.pump();
       expect(native.permissionRequests, 1);
       await tester.pumpWidget(const SizedBox());

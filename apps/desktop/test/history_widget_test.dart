@@ -62,7 +62,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(
         find.textContaining('Fictional demo server · Address'),
-        findsOneWidget,
+        findsWidgets,
       );
       expect(find.textContaining('读取获准'), findsOneWidget);
       expect(find.textContaining('demo.example.invalid'), findsNothing);
