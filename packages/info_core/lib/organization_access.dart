@@ -124,6 +124,8 @@ extension OwnerOrganization on OwnerAccess {
       ],
       directoryId: old.directoryId,
       tagIds: old.tagIds,
+      createdAt: old.createdAt,
+      modifiedAt: _service._clock(),
     );
     await _service._repository.saveInformationRevision(
       item,
@@ -155,6 +157,8 @@ extension OwnerOrganization on OwnerAccess {
       old.fields,
       directoryId: directoryId,
       tagIds: selectedTags,
+      createdAt: old.createdAt,
+      modifiedAt: _service._clock(),
     );
     await _service._repository.saveInformationRevision(
       item,

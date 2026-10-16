@@ -45,6 +45,12 @@ InformationItem _informationFromRows(
       ),
   ],
   directoryId: row['directory_id'] as String?,
+  createdAt: row['created_at'] == null
+      ? null
+      : DateTime.parse(row['created_at'] as String),
+  modifiedAt: row['modified_at'] == null
+      ? null
+      : DateTime.parse(row['modified_at'] as String),
   tagIds: links
       .where((l) => l['item_id'] == row['id'])
       .map((l) => l['tag_id'] as String),
@@ -508,8 +514,16 @@ class EncryptedInformationRepository implements InformationRepository {
 
   Future<void> _writeItem(InformationItem item) async {
     await _db.customStatement(
-      'INSERT INTO information_items(id,name,description,version,directory_id) VALUES(?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET name=excluded.name,description=excluded.description,version=excluded.version,directory_id=excluded.directory_id',
-      [item.id, item.name, item.description, item.version, item.directoryId],
+      'INSERT INTO information_items(id,name,description,version,directory_id,created_at,modified_at) VALUES(?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET name=excluded.name,description=excluded.description,version=excluded.version,directory_id=excluded.directory_id,created_at=excluded.created_at,modified_at=excluded.modified_at',
+      [
+        item.id,
+        item.name,
+        item.description,
+        item.version,
+        item.directoryId,
+        item.createdAt?.toUtc().toIso8601String(),
+        item.modifiedAt?.toUtc().toIso8601String(),
+      ],
     );
     await _db.customStatement(
       'DELETE FROM information_item_tags WHERE item_id=?',
@@ -837,7 +851,7 @@ class EncryptedInformationRepository implements InformationRepository {
 class _InformationDatabase extends GeneratedDatabase {
   _InformationDatabase(super.executor);
   @override
-  int get schemaVersion => 10;
+  int get schemaVersion => 11;
   @override
   Iterable<TableInfo<Table, Object?>> get allTables => const [];
   @override
@@ -853,7 +867,7 @@ class _InformationDatabase extends GeneratedDatabase {
         'CREATE TABLE settings(name TEXT PRIMARY KEY,value INTEGER NOT NULL)',
       );
       await customStatement(
-        'CREATE TABLE information_items(id TEXT PRIMARY KEY,name TEXT NOT NULL,description TEXT NOT NULL,version INTEGER NOT NULL DEFAULT 1)',
+        'CREATE TABLE information_items(id TEXT PRIMARY KEY,name TEXT NOT NULL,description TEXT NOT NULL,version INTEGER NOT NULL DEFAULT 1,created_at TEXT,modified_at TEXT)',
       );
       await customStatement(
         'CREATE TABLE information_fields(id TEXT PRIMARY KEY,item_id TEXT NOT NULL REFERENCES information_items(id),name TEXT NOT NULL,description TEXT NOT NULL,value TEXT NOT NULL,version INTEGER NOT NULL DEFAULT 1,kind TEXT NOT NULL DEFAULT \'structured\')',
@@ -862,7 +876,7 @@ class _InformationDatabase extends GeneratedDatabase {
       await _backupSchema();
     },
     onUpgrade: (_, from, to) async {
-      if (from < 1 || to != 10)
+      if (from < 1 || to != 11)
         throw const StorageFailure('unsupported_schema');
       await transaction(() async {
         if (from < 2) {
@@ -889,6 +903,14 @@ class _InformationDatabase extends GeneratedDatabase {
         if (from < 8) await _createUpdates();
         if (from < 9) await _createRecycle();
         if (from < 10) await _createRevisionPurges();
+        if (from < 11) {
+          await customStatement(
+            'ALTER TABLE information_items ADD COLUMN created_at TEXT',
+          );
+          await customStatement(
+            'ALTER TABLE information_items ADD COLUMN modified_at TEXT',
+          );
+        }
       });
     },
     beforeOpen: (details) async {

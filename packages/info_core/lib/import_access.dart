@@ -114,6 +114,7 @@ extension OwnerImports on OwnerAccess {
         throw const AccessFailure('invalid_proposal');
       }
     }
+    final confirmedAt = _service._clock();
     final items = [
       for (final input in reviewed)
         InformationItem(
@@ -134,6 +135,8 @@ extension OwnerImports on OwnerAccess {
           ],
           directoryId: input.directoryId,
           tagIds: input.tagIds.toSet(),
+          createdAt: confirmedAt,
+          modifiedAt: confirmedAt,
         ),
     ];
     final confirmed = ImportProposal(

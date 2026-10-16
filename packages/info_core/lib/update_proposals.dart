@@ -180,6 +180,8 @@ Map<String, Object?> informationToJson(InformationItem item) => {
   'version': item.version,
   'directoryId': item.directoryId,
   'tagIds': item.tagIds,
+  'createdAt': item.createdAt?.toUtc().toIso8601String(),
+  'modifiedAt': item.modifiedAt?.toUtc().toIso8601String(),
   'fields': [
     for (final f in item.fields)
       {
@@ -212,4 +214,10 @@ InformationItem informationFromJson(Map<String, dynamic> json) =>
           .toList(),
       directoryId: json['directoryId'] as String?,
       tagIds: (json['tagIds'] as List).cast<String>(),
+      createdAt: json['createdAt'] == null
+          ? null
+          : DateTime.parse(json['createdAt'] as String),
+      modifiedAt: json['modifiedAt'] == null
+          ? null
+          : DateTime.parse(json['modifiedAt'] as String),
     );

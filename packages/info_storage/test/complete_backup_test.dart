@@ -54,6 +54,130 @@ Future<void> _rewrite(
 }
 
 void main() {
+  test(
+    'clock rollback never makes legitimate grant history unexportable or restores live authority',
+    () async {
+      final root = await Directory.systemTemp.createTemp(
+        'backup-clock-rollback-',
+      );
+      addTearDown(() => root.delete(recursive: true));
+      final approvedAt = DateTime.utc(2026, 10, 16, 12);
+      var now = approvedAt;
+      final source = await EncryptedInformationRepository.open(
+        '${root.path}/source',
+        _Keys(),
+        clock: () => now,
+      );
+      addTearDown(source.close);
+      final service = InformationService(repository: source, clock: () => now);
+      addTearDown(service.close);
+      final item = await service.owner.createInformation('Server', '', [
+        const FieldInput('Host', '', 'host.invalid'),
+      ]);
+      final ref = FieldRef(item.id, item.fields.single.id);
+      final session = service.agent.openSession('reader');
+      final request = service.agent.request(session, 'host', [ref]);
+      service.owner.approve(request.id, [ref]);
+      final token = service.agent.claim(session, request.id).token;
+      await service.agent.read(token, ref);
+      final key = await source.backups.enable();
+      await service.owner.exportLibrary(
+        () => source.backups.exportTo('${root.path}/before.aimbackup'),
+      );
+      now = approvedAt.subtract(const Duration(hours: 1));
+      await service.owner.exportLibrary(
+        () => source.backups.exportTo('${root.path}/rolled-back.aimbackup'),
+      );
+      service.owner.revoke(request.id);
+      now = approvedAt.add(const Duration(hours: 1));
+      await service.owner.exportLibrary(
+        () => source.backups.exportTo('${root.path}/revoked.aimbackup'),
+      );
+      for (final name in ['rolled-back', 'revoked']) {
+        final target = await EncryptedInformationRepository.open(
+          '${root.path}/target-$name',
+          _Keys(),
+          clock: () => now,
+        );
+        addTearDown(target.close);
+        final restored = InformationService(
+          repository: target,
+          clock: () => now,
+        );
+        addTearDown(restored.close);
+        await restored.owner.restoreLibrary(
+          () => target.backups.restoreFrom('${root.path}/$name.aimbackup', key),
+        );
+        final history = (await restored.owner.history()).grants.single;
+        expect(history.active, isFalse);
+        expect(history.approvedAt, approvedAt);
+        if (name == 'revoked') {
+          expect(history.events.last.kind, GrantEventKind.revoked);
+          expect(
+            history.events.last.at,
+            approvedAt.subtract(const Duration(hours: 1)),
+          );
+        }
+        await expectLater(
+          restored.agent.read(token, ref),
+          throwsA(isA<AccessFailure>()),
+        );
+      }
+    },
+  );
+
+  test(
+    'format 3 preserves original information times through complete restore and rejects malformed dates atomically',
+    () async {
+      final root = await Directory.systemTemp.createTemp(
+        'backup-information-time-',
+      );
+      addTearDown(() => root.delete(recursive: true));
+      final created = DateTime.utc(2026, 10, 16, 12);
+      var now = created;
+      final source = await EncryptedInformationRepository.open(
+        '${root.path}/source',
+        _Keys(),
+        clock: () => now,
+      );
+      addTearDown(source.close);
+      final service = InformationService(repository: source, clock: () => now);
+      addTearDown(service.close);
+      final item = await service.owner.createInformation('Item', '', [
+        const FieldInput('Value', '', 'before'),
+      ]);
+      now = created.subtract(const Duration(hours: 1));
+      await service.owner.correctValue(
+        FieldRef(item.id, item.fields.single.id),
+        'after',
+      );
+      final key = await source.backups.enable();
+      final path = '${root.path}/times.aimbackup';
+      await service.owner.exportLibrary(() => source.backups.exportTo(path));
+      expect(_payload(path, key)['version'], 3);
+      final target = await EncryptedInformationRepository.open(
+        '${root.path}/target',
+        _Keys(),
+        clock: () => created.add(const Duration(days: 1)),
+      );
+      addTearDown(target.close);
+      await _rewrite(path, '${root.path}/bad-time.aimbackup', key, (p) {
+        p['tables']['information_items'][0]['modified_at'] =
+            '2026-02-30T00:00:00.000Z';
+      });
+      await expectLater(
+        target.backups.restoreFrom('${root.path}/bad-time.aimbackup', key),
+        throwsA(isA<StorageFailure>()),
+      );
+      expect(target.items, isEmpty);
+      await target.backups.restoreFrom(path, key);
+      expect(target.items.single.createdAt, created);
+      expect(target.items.single.modifiedAt, now);
+      expect(target.informationRevisions.single.item.createdAt, created);
+      expect(target.informationRevisions.single.item.modifiedAt, created);
+    },
+  );
+
   for (final operation in ['replace', 'rollback']) {
     test(
       'complete backup preserves grouped recycle fields from $operation',
@@ -314,60 +438,79 @@ void main() {
     },
   );
 
-  test(
-    'original current-data format upgrades without inventing history or credentials',
-    () async {
-      final root = await Directory.systemTemp.createTemp('backup-v1-');
-      addTearDown(() => root.delete(recursive: true));
-      final source = await EncryptedInformationRepository.open(
-        '${root.path}/source',
-        _Keys(),
-      );
-      final service = InformationService(repository: source);
-      final item = await service.owner.createInformation('Legacy item', '', [
-        const FieldInput('Value', '', 'legacy value'),
-      ]);
-      await service.owner.correctValue(
-        FieldRef(item.id, item.fields.single.id),
-        'current value',
-      );
-      final key = await source.backups.enable();
-      final path = '${root.path}/v2.aimbackup';
-      await source.backups.exportTo(path);
-      await _rewrite(path, '${root.path}/v1.aimbackup', key, (p) {
-        p['version'] = 1;
-        for (final t in [
-          'information_revisions',
-          'recycle_entries',
-          'recycle_facts',
-          'revision_purge_facts',
-          'grant_history',
-          'access_records',
-        ]) {
-          (p['tables'] as Map).remove(t);
+  for (final legacyVersion in [1, 2]) {
+    test(
+      'legacy format $legacyVersion restores unknown dates without inventing history or credentials',
+      () async {
+        final root = await Directory.systemTemp.createTemp('backup-v1-');
+        addTearDown(() => root.delete(recursive: true));
+        final source = await EncryptedInformationRepository.open(
+          '${root.path}/source',
+          _Keys(),
+        );
+        final service = InformationService(repository: source);
+        final item = await service.owner.createInformation('Legacy item', '', [
+          const FieldInput('Value', '', 'legacy value'),
+        ]);
+        await service.owner.correctValue(
+          FieldRef(item.id, item.fields.single.id),
+          'current value',
+        );
+        final key = await source.backups.enable();
+        final path = '${root.path}/v3.aimbackup';
+        await source.backups.exportTo(path);
+        await _rewrite(path, '${root.path}/v1.aimbackup', key, (p) {
+          p['version'] = legacyVersion;
+          for (final row in p['tables']['information_items'] as List) {
+            (row as Map).remove('created_at');
+            row.remove('modified_at');
+          }
+          for (final row in p['tables']['information_revisions'] as List) {
+            final old = jsonDecode(row['payload'] as String) as Map;
+            old.remove('createdAt');
+            old.remove('modifiedAt');
+            row['payload'] = jsonEncode(old);
+          }
+          if (legacyVersion == 1)
+            for (final t in [
+              'information_revisions',
+              'recycle_entries',
+              'recycle_facts',
+              'revision_purge_facts',
+              'grant_history',
+              'access_records',
+            ]) {
+              (p['tables'] as Map).remove(t);
+            }
+        });
+        final target = await EncryptedInformationRepository.open(
+          '${root.path}/target',
+          _Keys(),
+        );
+        final preview = await target.backups.restoreFrom(
+          '${root.path}/v1.aimbackup',
+          key,
+        );
+        expect(preview.formatVersion, legacyVersion);
+        expect(preview.revisionCount, legacyVersion == 1 ? 0 : 1);
+        expect(preview.recycleCount, 0);
+        expect(preview.grantHistoryCount, 0);
+        expect(target.items.single.id, item.id);
+        expect(target.items.single.version, 2);
+        expect(target.items.single.fields.single.value, 'current value');
+        expect(target.items.single.createdAt, isNull);
+        expect(target.items.single.modifiedAt, isNull);
+        if (legacyVersion == 2) {
+          expect(target.informationRevisions.single.item.createdAt, isNull);
+          expect(target.informationRevisions.single.item.modifiedAt, isNull);
         }
-      });
-      final target = await EncryptedInformationRepository.open(
-        '${root.path}/target',
-        _Keys(),
-      );
-      final preview = await target.backups.restoreFrom(
-        '${root.path}/v1.aimbackup',
-        key,
-      );
-      expect(preview.formatVersion, 1);
-      expect(preview.revisionCount, 0);
-      expect(preview.recycleCount, 0);
-      expect(preview.grantHistoryCount, 0);
-      expect(target.items.single.id, item.id);
-      expect(target.items.single.version, 2);
-      expect(target.items.single.fields.single.value, 'current value');
-      expect(target.revisionPurgeFacts, isEmpty);
-      await target.close();
-      await service.close();
-      await source.close();
-    },
-  );
+        expect(target.revisionPurgeFacts, isEmpty);
+        await target.close();
+        await service.close();
+        await source.close();
+      },
+    );
+  }
 
   test(
     'authenticated hostile history payloads fail before changing recipient preferences',
@@ -419,6 +562,17 @@ void main() {
       }
 
       final changes = <void Function(Map<String, dynamic>)>[
+        (p) {
+          p['version'] = 999;
+        },
+        (p) {
+          p['tables']['information_items'][0]['created_at'] = 123;
+        },
+        (p) {
+          nested(p, 'information_revisions', (j) {
+            j['modifiedAt'] = 'not-a-date';
+          });
+        },
         (p) {
           (p['tables']['information_revisions'] as List).add(
             (p['tables']['information_revisions'] as List).first,
@@ -726,7 +880,7 @@ void main() {
       final path = '${root.path}/complete.aimbackup';
       await source.backups.exportTo(path);
       final payload = _payload(path, key);
-      expect(payload['version'], 2);
+      expect(payload['version'], 3);
       final tables = payload['tables'] as Map<String, dynamic>;
       expect(tables.keys.toSet(), {
         'information_directories',

@@ -598,6 +598,7 @@ class OwnerAccess {
         )) {
       throw const AccessFailure('invalid_information');
     }
+    final now = _service._clock();
     final item = InformationItem(
       _service._secret(),
       name.trim(),
@@ -615,6 +616,8 @@ class OwnerAccess {
             ),
           )
           .toList(),
+      createdAt: now,
+      modifiedAt: now,
     );
     await _service._repository.save(item);
     return item;
@@ -639,6 +642,8 @@ class OwnerAccess {
               .toList(),
           directoryId: previous.directoryId,
           tagIds: previous.tagIds,
+          createdAt: previous.createdAt,
+          modifiedAt: _service._clock(),
         );
         await _service._repository.saveInformationRevision(
           item,
