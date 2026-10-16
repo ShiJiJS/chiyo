@@ -64,6 +64,11 @@ class DesktopBootstrap extends ChangeNotifier {
         cleanupPending = true;
       }
       state = DesktopStartupState.failed;
+      try {
+        await platform.showWindow();
+      } on Object {
+        // Native startup may also have failed; still render the error screen.
+      }
     }
     notifyListeners();
   }
