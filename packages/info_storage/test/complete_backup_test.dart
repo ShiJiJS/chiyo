@@ -54,6 +54,201 @@ Future<void> _rewrite(
 }
 
 void main() {
+  for (final operation in ['replace', 'rollback']) {
+    test(
+      'complete backup preserves grouped recycle fields from $operation',
+      () async {
+        final root = await Directory.systemTemp.createTemp(
+          'backup-recycle-$operation-',
+        );
+        addTearDown(() => root.delete(recursive: true));
+        final source = await EncryptedInformationRepository.open(
+          '${root.path}/source',
+          _Keys(),
+        );
+        addTearDown(source.close);
+        final service = InformationService(repository: source);
+        addTearDown(service.close);
+        final initial = await service.owner.createInformation('Server', '', [
+          const FieldInput('Keep', '', 'keep'),
+        ]);
+        final session = service.agent.openSession('editor');
+        final addition = await service.agent.submitUpdate(
+          session,
+          UpdateInput(initial.id, 1, const [
+            FieldChange.add(FieldInput('First', '', 'first value')),
+            FieldChange.add(
+              FieldInput(
+                'Second',
+                '',
+                'second value',
+                kind: FieldKind.textNote,
+              ),
+            ),
+          ]),
+        );
+        await service.owner.confirmUpdate(addition, 1);
+        final fields = service.owner.information.single.fields.skip(1).toList();
+        final refs = fields.map((f) => FieldRef(initial.id, f.id)).toList();
+        final request = service.agent.request(session, 'before removal', refs);
+        service.owner.approve(request.id, refs);
+        final oldToken = service.agent.claim(session, request.id).token;
+        if (operation == 'replace') {
+          final replacement = await service.agent.submitUpdate(
+            session,
+            UpdateInput(initial.id, 2, [
+              for (final field in fields)
+                FieldChange.replace(
+                  field.id,
+                  FieldInput('New ${field.name}', '', 'new meaning'),
+                ),
+            ]),
+          );
+          await service.owner.confirmUpdate(replacement, 1);
+        } else {
+          await service.owner.restoreRevision(initial.id, 1, 2);
+        }
+        final entry = service.owner.recycleEntries.single;
+        expect(entry.snapshot!.fields, hasLength(2));
+        final key = await source.backups.enable();
+        final path = '${root.path}/saved.aimbackup';
+        await service.owner.exportLibrary(() => source.backups.exportTo(path));
+        await service.owner.restoreRecycled(entry.id);
+        for (final ref in refs) {
+          await expectLater(
+            service.agent.read(oldToken, ref),
+            throwsA(isA<AccessFailure>()),
+          );
+        }
+        final target = await EncryptedInformationRepository.open(
+          '${root.path}/target',
+          _Keys(),
+        );
+        addTearDown(target.close);
+        final restored = InformationService(repository: target);
+        addTearDown(restored.close);
+        await restored.owner.restoreLibrary(
+          () => target.backups.restoreFrom(path, key),
+        );
+        final recovered = await restored.owner.restoreRecycled(entry.id);
+        for (final field in fields) {
+          final saved = recovered.fields.singleWhere((f) => f.id == field.id);
+          expect(saved.value, field.value);
+          expect(saved.kind, field.kind);
+          expect(saved.version, greaterThan(field.version));
+          await expectLater(
+            restored.agent.read(oldToken, FieldRef(initial.id, field.id)),
+            throwsA(isA<AccessFailure>()),
+          );
+        }
+      },
+    );
+  }
+
+  test(
+    'complete backup roundtrips grouped removed fields and zero-field whole-item metadata',
+    () async {
+      final root = await Directory.systemTemp.createTemp(
+        'backup-grouped-recycle-',
+      );
+      addTearDown(() => root.delete(recursive: true));
+      final source = await EncryptedInformationRepository.open(
+        '${root.path}/source',
+        _Keys(),
+      );
+      addTearDown(source.close);
+      final service = InformationService(repository: source);
+      addTearDown(service.close);
+      final item = await service.owner.createInformation('Server', '', [
+        const FieldInput('Host', '', 'host.invalid'),
+        const FieldInput('User', '', 'fictional user'),
+        const FieldInput('Note', '', 'keep', kind: FieldKind.textNote),
+      ]);
+      final refs = item.fields.map((f) => FieldRef(item.id, f.id)).toList();
+      final session = service.agent.openSession('editor');
+      final request = service.agent.request(session, 'old fields', refs);
+      service.owner.approve(request.id, refs);
+      final token = service.agent.claim(session, request.id).token;
+      final proposal = await service.agent.submitUpdate(
+        session,
+        UpdateInput(
+          item.id,
+          1,
+          refs.take(2).map((f) => FieldChange.remove(f.fieldId)).toList(),
+        ),
+      );
+      await service.owner.confirmUpdate(proposal, 1);
+      final grouped = service.owner.recycleEntries.single;
+      expect(grouped.snapshot!.fields, hasLength(2));
+      final metadata = await service.owner.createInformation(
+        'Metadata only',
+        'preserve',
+        [const FieldInput('Temporary', '', 'private')],
+      );
+      await service.owner.deleteInformation(
+        metadata.id,
+        1,
+        fieldId: metadata.fields.single.id,
+      );
+      final whole = await service.owner.deleteInformation(metadata.id, 2);
+      expect(whole.snapshot!.fields, isEmpty);
+      final key = await source.backups.enable();
+      final path = '${root.path}/grouped.aimbackup';
+      await service.owner.exportLibrary(() => source.backups.exportTo(path));
+
+      final target = await EncryptedInformationRepository.open(
+        '${root.path}/target',
+        _Keys(),
+      );
+      addTearDown(target.close);
+      final restored = InformationService(repository: target);
+      addTearDown(restored.close);
+      await restored.owner.restoreLibrary(
+        () => target.backups.restoreFrom(path, key),
+      );
+      final recovered = await restored.owner.restoreRecycled(grouped.id);
+      expect(
+        recovered.fields.map((f) => f.id).toSet(),
+        refs.map((f) => f.fieldId).toSet(),
+      );
+      expect(recovered.fields.map((f) => f.value).toSet(), {
+        'host.invalid',
+        'fictional user',
+        'keep',
+      });
+      final empty = await restored.owner.restoreRecycled(whole.id);
+      expect(empty.fields, isEmpty);
+      expect(empty.description, 'preserve');
+      for (final ref in refs.take(2)) {
+        await expectLater(
+          restored.agent.read(token, ref),
+          throwsA(isA<AccessFailure>()),
+        );
+      }
+      await service.owner.restoreRecycled(grouped.id);
+      for (final ref in refs.take(2)) {
+        await expectLater(
+          service.agent.read(token, ref),
+          throwsA(isA<AccessFailure>()),
+        );
+      }
+      final freshSession = restored.agent.openSession('new read');
+      final fresh = restored.agent.request(
+        freshSession,
+        'recovered fields',
+        refs.take(2).toList(),
+      );
+      restored.owner.approve(fresh.id, refs.take(2).toList());
+      expect(
+        await restored.agent.read(
+          restored.agent.claim(freshSession, fresh.id).token,
+          refs.first,
+        ),
+        'host.invalid',
+      );
+    },
+  );
+
   test(
     'each audit retention setting keeps its exact boundary and expires it on later restore',
     () async {
@@ -252,6 +447,12 @@ void main() {
         (p) {
           nested(p, 'recycle_entries', (j) {
             j['state'] = 'restored';
+          });
+        },
+        (p) {
+          nested(p, 'recycle_entries', (j) {
+            j['wholeItem'] = false;
+            j['snapshot']['fields'] = [];
           });
         },
         (p) {
