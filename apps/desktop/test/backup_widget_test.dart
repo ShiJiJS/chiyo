@@ -49,7 +49,7 @@ Future<void> _settleIO(WidgetTester tester, Finder target) async {
 
 void main() {
   testWidgets(
-    'restore preview imports into empty library and refreshed information tab shows data',
+    'restore refreshes mounted preference controls, keeps the settings section and imports information',
     (tester) async {
       tester.view.physicalSize = const Size(1280, 900);
       tester.view.devicePixelRatio = 1;
@@ -82,6 +82,11 @@ void main() {
         );
         await source.backups.enable();
         await sourceService.owner.setColorTheme(DesktopColorTheme.green);
+        await sourceService.owner.setRequestLifetime(
+          const Duration(minutes: 5),
+        );
+        await sourceService.owner.setAuditRetention(180);
+        await sourceService.owner.setNotificationsEnabled(false);
         await source.backups.saveRecoveryKeyTo(
           '${root.path}/source-recovery.txt',
         );
@@ -119,6 +124,47 @@ void main() {
       await _settleIO(tester, find.text('暂无授权历史。'));
       await tester.tap(find.byKey(const ValueKey('nav-4')));
       await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('settings-section-records')));
+      await tester.pumpAndSettle();
+      expect(
+        tester
+            .widget<DropdownButton<int>>(
+              find.byKey(const ValueKey('timeout-30')),
+            )
+            .value,
+        30,
+      );
+      expect(
+        tester
+            .widget<DropdownButton<int>>(
+              find.byKey(const ValueKey('retention-90')),
+            )
+            .value,
+        90,
+      );
+      await tester.tap(
+        find.byKey(const ValueKey('settings-section-notifications')),
+      );
+      await tester.pumpAndSettle();
+      // Return to enabled through the visible control, leaving a mounted draft
+      // that differs from the disabled preference in the source backup.
+      for (var i = 0; i < 2; i++) {
+        await tester.tap(
+          find.byKey(const ValueKey('settings-notifications-switch')),
+        );
+        await _settleIO(tester, find.text('设置已保存。'));
+      }
+      expect(
+        tester
+            .widget<Semantics>(
+              find.byWidgetPredicate(
+                (w) => w is Semantics && w.properties.label == '访问申请通知',
+              ),
+            )
+            .properties
+            .toggled,
+        isTrue,
+      );
       await tester.tap(find.text('备份与恢复'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('查看恢复步骤'));
@@ -175,6 +221,40 @@ void main() {
       );
       await tester.tap(find.text('×'));
       await tester.pumpAndSettle();
+      expect(find.text('手动加密备份'), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey('settings-section-records')));
+      await tester.pumpAndSettle();
+      expect(
+        tester
+            .widget<DropdownButton<int>>(
+              find.byKey(const ValueKey('timeout-5')),
+            )
+            .value,
+        5,
+      );
+      expect(
+        tester
+            .widget<DropdownButton<int>>(
+              find.byKey(const ValueKey('retention-180')),
+            )
+            .value,
+        180,
+      );
+      await tester.tap(
+        find.byKey(const ValueKey('settings-section-notifications')),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        tester
+            .widget<Semantics>(
+              find.byWidgetPredicate(
+                (w) => w is Semantics && w.properties.label == '访问申请通知',
+              ),
+            )
+            .properties
+            .toggled,
+        isFalse,
+      );
       await tester.tap(find.text('授权历史'));
       await tester.pump(const Duration(milliseconds: 400));
       await _settleIO(tester, find.text('从备份恢复的历史记录'));
