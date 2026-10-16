@@ -4,16 +4,25 @@
 CLI、SDK-free Codex 接入材料生成器、合成资料控制台检查、依赖许可和来源清单。
 它用于配合验收；Issue #18 的干净环境、真实桌面和 Codex 检查仍开放。
 
-## 当前界面修正包
+## 当前录入与整理改进包
 
-0.2.2+4，源码 `f973cc8b99d355d28dbca3de07fec8ba2fc00a88`。
-本地交付目录 `build/windows-brand-trim-0.2.2/`，包含完整 ZIP 及已展开的
-`AgentInfoManage/app/info_desktop.exe`。本轮去掉窗口条重复小标题和“工作区”，
-保留侧栏带图标的大标题并上移；沿用此前的设置收口、页面对齐及窗口条。
-原生边框、拖动、缩放与关闭手感仍待用户打开验证。
-详细范围见 [设计记录](../design/desktop-reshape-proposal.md)。
-准确归档名、哈希、测试结果见 [当前实施进度](../planning/implementation-status.md#sidebar-branding-trim--current-022-preview)。
-先完全退出旧版本，再打开新版；本轮没有启动窗口或变更用户配置。
+**0.3.0+5**，源码 `d20decb5d6883ee50fb19c1983d30b6282b14b2c`。
+本地目录 `build/windows-import-review-0.3.0/`，完整 ZIP 为
+`agent-info-manage-0.3.0+5-dev.d20decb5d688-windows-x64.zip`（46,085,409字节）。
+SHA-256：`56a378dddefd3c4365f49be2e7bedca43bc2db254c5544ac9cf6e46f7eafacc7`。
+已展开 EXE 位于 `AgentInfoManage/app/info_desktop.exe`，须保留其全部相邻文件。
+
+录入提案默认阅读卡片、逐项独立编辑；列表明确自述提交者、聊天、用途和摘要，已确认
+可只读查看当前资料。分类建议随整批确认保存。资料库的 Agent 整理由用户限定范围及聊天，
+仅提供元数据，提交后由用户整批确认，不在应用内启动模型。见[协议及限制](organization-tasks.md)。
+
+schema12从当前11增量升级。打开新版前，请在旧版导出备份并单独保存恢复密钥，再完全
+退出旧版托盘进程。不要直接用旧程序重新打开已升级的数据库；需要回退时使用独立备份
+和新资料库，按支持的恢复流程操作。自动检查只使用合成资料，未直接迁移用户当前库。
+
+完整189项无窗口测试、四包分析、Windows编译、11项独立CLI/hook及SQLCipher/DPAPI诊断
+通过，桌面55项连续三轮通过。实际Flutter离屏画面已查看；原生手感及新版实际整理流程
+仍待用户打开验证，真实验收只完成旧版两条录入确认。详情见[当前实施进度](../planning/implementation-status.md)。
 
 ## 使用预览包
 

@@ -4,6 +4,47 @@ Integration branch: `integration/local-information-access`.
 
 Source of truth: [specification #1](https://github.com/ShiJiJS/agent-info-manage/issues/1), its 18 sub-issues, and their native GitHub blocking relationships. The initial documentation baseline is `9df5f7a`. The approved ticket bodies are also preserved in `published-tickets/`.
 
+## Current preview · readable import and scoped organization · 0.3.0
+
+Current source **`d20decb5d6883ee50fb19c1983d30b6282b14b2c`**, version **0.3.0+5**.
+This supersedes the 0.2.x preview entries below. The user has now confirmed two
+real, explicitly selected service-entry imports in 0.2.2; no full Windows or
+Codex lifecycle acceptance is implied. Read/partial approval/revocation/restart
+and the new organization flow remain pending in the native app.
+
+- Read-only import cards with separate item editing, self-reported agent/chat,
+  purpose/count/title summaries, and read-only current details after confirmation.
+- Suggested categories/tags apply atomically with confirmed imports, reuse names,
+  and do not create labels during preview. Existing unclassified entries can be
+  organized using the new explicitly assigned task.
+- User-approved metadata-only organization is scoped to fixed items and a selected
+  private session, at most30minutes; no values. Submission ends access. Whole-batch
+  version checks and confirmation apply labels/organization/revisions together.
+  Original field identities/grants remain unchanged. Schema12 is additive; tasks
+  are excluded from backups and cannot regain access after session end/restart.
+- Standards review:0 documented breaches,1 optional duplicate validation removed.
+  Spec review:1P2 terminal title-summary gap fixed. Both reviewers verified closure.
+  One unscored UI review and targeted follow-up resolved scope visibility and
+  conflict action wording. Actual synthetic Flutter renders inspected, including
+  long content,200%text,deleted,rejected,save failure and conflict.
+- Full package pipeline passed **189 headless tests** (CLI18,core76,storage40,
+  desktop55), four analyses, native Windows release and four AOT CLI builds,
+  synthetic SQLCipher4.19.0/DPAPI diagnostics and **11 extracted SDK-free CLI/hook
+  checks**. The final55 desktop tests also passed three consecutive root runs.
+- EXE:`build/windows-import-review-0.3.0/AgentInfoManage/app/info_desktop.exe`.
+- ZIP:`build/windows-import-review-0.3.0/agent-info-manage-0.3.0+5-dev.d20decb5d688-windows-x64.zip`.
+- Size:46,085,409bytes; SHA-256:`56a378dddefd3c4365f49be2e7bedca43bc2db254c5544ac9cf6e46f7eafacc7`.
+- Manifest:`build/windows-import-review-0.3.0/AgentInfoManage/manifest.json`.
+- Build log:`.scratch/import-review-2026-10-16/package.log`.
+
+The build did not launch/control the desktop, change Codex configuration, read
+real application data or run hosted macOS jobs. Before upgrading real data, export
+a backup and save its recovery key separately in the current app; fully quit the
+old tray process, then run the new package. See [Windows acceptance](../development/windows-acceptance.md)
+and [review record](../development/review-import-organization-2026-10-16.md).
+Issue#1 contains the newly approved scope; PR#20 stays draft and all acceptance
+gates remain open. Earlier paragraphs below record historical snapshots.
+
 ## 2026-10-16
 
 - Initialized the previously documentation-only checkout and empty remote repository. Published the documentation baseline on `main`.
