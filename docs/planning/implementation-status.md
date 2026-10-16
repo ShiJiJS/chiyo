@@ -191,6 +191,45 @@ desktop was opened and no user data or Codex configuration was changed. Real
 Windows interaction and macOS acceptance remain outstanding; previous
 preview directories remain intact.
 
+## Product-wide desktop reshape · current 0.2.0 preview
+
+The user explicitly revoked the earlier A/inbox visual constraints. Those preview
+sections above are historical delivery records, not accepted visual specifications.
+The current product-wide implementation is **`cd25320d46da4e739d41edeb9bc56e7eb98f2d74`**,
+version **0.2.0+2**. [Design proposal and limitations](../design/desktop-reshape-proposal.md)
+record the real references, three internal directions, the user-provided LIMS
+reference, representative approval/editor work, shared controls and all-page migration.
+
+The user requested an actual package, with no screenshot collection and no automatic
+desktop interaction. Real Flutter offscreen views were internally inspected for
+ordinary/long information, 1280×800, 200% text, empty and critical error states,
+including revision/delete/recovery dialogs. Three fresh Pro reviewers scored
+7 → 8 → 8/10; the three-round limit was reached. The identified corrections and
+improvements were verified, with remaining local typography/density refinement and
+native interaction explicitly unaccepted. This does not claim user visual approval.
+
+All **44 widget/interaction tests passed three consecutive runs**. Packaging again
+passed all four analyses and **169 headless tests** (CLI 17, core 71, storage 37,
+widgets 44), Windows release compilation, relocated synthetic SQLCipher/DPAPI
+validation and **11 extracted SDK-free CLI/hook checks**. Both shipped AppSans font
+weights and hashes match the source, and the OFL notice is included. No native
+application was launched, no actual user library was opened, no hook/configuration
+was installed, no GitHub release was published, and no hosted macOS job was run.
+
+- Executable: `build/windows-product-reshape-0.2.0/AgentInfoManage/app/info_desktop.exe`.
+- ZIP: `build/windows-product-reshape-0.2.0/agent-info-manage-0.2.0+2-dev.cd25320d46da-windows-x64.zip`.
+- Archive size: 46,029,710 bytes.
+- SHA-256: `8b4705da90fe95c290b3042e90f4bac75e07a0bf8fd7770e5bbe7f6893ab4412`.
+- Manifest: `build/windows-product-reshape-0.2.0/AgentInfoManage/manifest.json`.
+- Build log: `.scratch/product-reshape-2026-10-16/package.log`.
+
+Fully exit the older tray instance before opening the new executable, and keep all
+adjacent DLL/data files; the ZIP is the complete portable preview. Source, data path,
+authorization rules and CLI/hook interfaces remain compatible. Actual Windows window,
+focus/scroll/animation feel, native file dialogs, tray/notification and real Codex
+acceptance remain for the user. macOS still awaits the user's own Mac. All required
+platform acceptance issues remain open; PR #20 remains draft.
+
 ## Completion rules
 
 The user has asked that further development not manipulate their visible desktop. Run headless tests and compile builds; leave native window interaction and user-visible Codex configuration checks for coordinated user validation. Do not launch the desktop application or native GUI tests without renewed agreement.

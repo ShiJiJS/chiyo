@@ -4,6 +4,15 @@
 CLI、SDK-free Codex 接入材料生成器、合成资料控制台检查、依赖许可和来源清单。
 它用于配合验收；Issue #18 的干净环境、真实桌面和 Codex 检查仍开放。
 
+## 当前 UI 重塑包
+
+0.2.0+2，源码 `cd25320d46da4e739d41edeb9bc56e7eb98f2d74`。
+本地交付目录 `build/windows-product-reshape-0.2.0/`，包含完整 ZIP 及已展开的
+`AgentInfoManage/app/info_desktop.exe`。本轮改变整套桌面布局、控件和表单，
+详细范围与尚未验证部分见 [设计草案](../design/desktop-reshape-proposal.md)。
+准确归档名、哈希、测试结果见 [当前实施进度](../planning/implementation-status.md#product-wide-desktop-reshape--current-020-preview)。
+先完全退出旧版本，再打开新版；本轮没有启动窗口或变更用户配置。
+
 ## 使用预览包
 
 1. 对照一起提供的 `.sha256` 文件核对 ZIP 的 SHA-256，然后完整解压到一个稳定
