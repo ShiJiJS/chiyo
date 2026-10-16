@@ -62,7 +62,7 @@ Mac 后续验证，当前不运行托管 Mac 作业。生产发布及跨平台�
 ## 从源码重建
 
 在带 Flutter 及 Visual Studio C++ 桌面工作负载和 Windows SDK 的 Windows x64
-开发环境，从干净已提交源码执行：
+开发环境（本次使用 PowerShell 7），从干净已提交源码执行：
 
 ```powershell
 .\scripts\package-windows.ps1 -FlutterBin 'C:\SDK\flutter\bin' -OutputDirectory 'C:\Artifacts\agent-info-new' -Offline

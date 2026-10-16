@@ -34,7 +34,7 @@ try {
         throw 'Unlisted payload files.'
     }
     # Restrict only this process and its children. Do not change the user's PATH.
-    $env:PATH = "$env:SystemRoot\System32;$env:SystemRoot"
+    $env:PATH = "$env:SystemRoot\System32;$env:SystemRoot;$env:SystemRoot\System32\WindowsPowerShell\v1.0"
     $storage = Join-Path $payload 'diagnostics/bin/info-storage-check.exe'
     & $storage
     if ($LASTEXITCODE -ne 0) { throw 'Extracted SQLCipher/DPAPI release probe failed.' }

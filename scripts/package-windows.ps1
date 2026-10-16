@@ -128,12 +128,15 @@ try {
     Copy-Item -LiteralPath 'docs/development/windows-acceptance.md' -Destination (Join-Path $payload 'ACCEPTANCE.md')
     $flutterVersion = (& $flutter --version --machine | Out-String | ConvertFrom-Json)
     if ($LASTEXITCODE -ne 0) { throw 'Cannot record Flutter SDK version.' }
+    # Record revisions and versions without publishing the builder's username
+    # or absolute SDK installation directory.
+    $flutterVersion.PSObject.Properties.Remove('flutterRoot')
     $dartVersion = (& $dart --version 2>&1 | Out-String).Trim()
     $runnerProject = 'apps/desktop/build/windows/x64/runner/info_desktop.vcxproj'
     $windowsSdk = (Select-String -LiteralPath $runnerProject -Pattern '<WindowsTargetPlatformVersion>([^<]+)</WindowsTargetPlatformVersion>').Matches.Groups[1].Value
     $msvcToolset = @((Select-String -LiteralPath $runnerProject -Pattern '<PlatformToolset>([^<]+)</PlatformToolset>').Matches | ForEach-Object { $_.Groups[1].Value } | Sort-Object -Unique)
     $vswhere = Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio/Installer/vswhere.exe'
-    $visualStudio = @(& $vswhere -products '*' -format json | ConvertFrom-Json | Select-Object displayName, installationVersion)
+    $visualStudio = @(& $vswhere -products '*' -format json | ConvertFrom-Json | Select-Object productId, installationVersion)
     $files = @(Get-ChildItem -LiteralPath $payload -File -Recurse | Sort-Object FullName | ForEach-Object {
         [ordered]@{
             path = $_.FullName.Substring($payload.Length + 1).Replace('\', '/')
@@ -141,6 +144,8 @@ try {
             sha256 = (Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
         }
     })
+    Assert-CleanSources
+    if ((git rev-parse HEAD).Trim() -ne $commit) { throw 'Sources changed during packaging.' }
     Write-Json (Join-Path $payload 'manifest.json') ([ordered]@{
         format = 1; product = 'Agent Info Manage'; release = $identity
         sourceCommit = $commit; sourceDirty = $false; architecture = 'windows-x64'
