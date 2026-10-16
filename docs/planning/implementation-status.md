@@ -158,6 +158,39 @@ Fully exit an older tray instance before opening this executable. This is
 an unsigned development preview; use fictional information for validation.
 No new GitHub release or hosted macOS job was created.
 
+## Desktop controls and typography preview
+
+The user rejected the previous Material appearance and requested a new
+Windows package directly, without screenshot collections or comparison
+pages. Source **`f9c8876c480eb61257aa3c7741a10153629bd3a7`** keeps the
+approved inbox layout but replaces the forms, selectors and dialog framing,
+uses neutral navigation and fixed desktop control density, and bundles
+Noto Sans SC Regular/Medium for consistent Chinese/Latin typography. Ordinary
+text and controls use weight 400; headings use 500. Platform window titles
+and default Flutter icons were also replaced; no authorization rule changed.
+
+The Windows package pipeline passed all four analyses and **166 headless
+tests** (CLI 17, core 71, storage 37, widgets 41), native release compilation,
+the relocated SQLCipher/DPAPI diagnostic and **11 extracted CLI/hook tests**.
+The relevant 29 UI/interaction checks additionally passed three consecutive
+runs before packaging. Both shipped font hashes match the source assets, and
+their OFL license is included in the application and delivery notices.
+
+- Executable:
+  `build/windows-desktop-ui-v2-f9c8876/AgentInfoManage/app/info_desktop.exe`.
+- Archive:
+  `build/windows-desktop-ui-v2-f9c8876/agent-info-manage-0.1.0+1-dev.f9c8876c480e-windows-x64.zip`.
+- SHA-256:
+  `f4657ca23b06095ec75dbc3332465a27d64508a40120f02d38429aa7b7ed153d`.
+- Build log: `.scratch/desktop-ui-v2/package.log`.
+
+Only two representative views were internally checked; no comparison page
+was produced. An independent, unscored polish review was performed and its
+control-size, alignment, weight and state-color feedback addressed. No native
+desktop was opened and no user data or Codex configuration was changed. Real
+Windows interaction and macOS acceptance remain outstanding; previous
+preview directories remain intact.
+
 ## Completion rules
 
 The user has asked that further development not manipulate their visible desktop. Run headless tests and compile builds; leave native window interaction and user-visible Codex configuration checks for coordinated user validation. Do not launch the desktop application or native GUI tests without renewed agreement.
