@@ -4,25 +4,31 @@
 CLI、SDK-free Codex 接入材料生成器、合成资料控制台检查、依赖许可和来源清单。
 它用于配合验收；Issue #18 的干净环境、真实桌面和 Codex 检查仍开放。
 
-## 当前录入与整理改进包
+## 当前 Agent 发起整理与界面改进包
 
-**0.3.0+5**，源码 `d20decb5d6883ee50fb19c1983d30b6282b14b2c`。
-本地目录 `build/windows-import-review-0.3.0/`，完整 ZIP 为
-`agent-info-manage-0.3.0+5-dev.d20decb5d688-windows-x64.zip`（46,085,409字节）。
-SHA-256：`56a378dddefd3c4365f49be2e7bedca43bc2db254c5544ac9cf6e46f7eafacc7`。
+**0.3.1+6**。准确源码、构建时间及逐文件校验值见本包 `manifest.json`，
+ZIP 校验值见随附的同名 `.sha256` 文件。具体本地交付路径及大小记录在
+[实施进度](https://github.com/ShiJiJS/agent-info-manage/blob/integration/local-information-access/docs/planning/implementation-status.md)，不在随包说明中写入自身归档的哈希。
 已展开 EXE 位于 `AgentInfoManage/app/info_desktop.exe`，须保留其全部相邻文件。
 
 录入提案默认阅读卡片、逐项独立编辑；列表明确自述提交者、聊天、用途和摘要，已确认
-可只读查看当前资料。分类建议随整批确认保存。资料库的 Agent 整理由用户限定范围及聊天，
-仅提供元数据，提交后由用户整批确认，不在应用内启动模型。见[协议及限制](organization-tasks.md)。
+可只读查看当前资料。分类建议随整批确认保存。列表动作位于右侧，来源、用途、标题摘要、
+时间及状态分层展示；资料详情和回收站沿用同一套简洁控件。
 
-schema12从当前11增量升级。打开新版前，请在旧版导出备份并单独保存恢复密钥，再完全
+整理从 Codex 等外部聊天发起：Agent 经 CLI 提交整理请求，用户在现有“访问审批”选择
+资料范围并批准一次，之后 Agent 可自动应用分类及标签。无需在应用创建任务或再次确认
+整理方案。只提供所选标题、说明、目录和标签元数据，不含字段值；批准最长30分钟，
+完成、撤销、到期或会话结束即失效。旧版待确认方案保持原确认要求，不升级其写入能力。
+协议详见[整理流程说明](https://github.com/ShiJiJS/agent-info-manage/blob/integration/local-information-access/docs/development/organization-tasks.md)。
+
+本版保持schema12，与0.3.0兼容；0.2.2的schema11需增量升级。打开新版前，请在旧版
+导出备份并单独保存恢复密钥，再完全
 退出旧版托盘进程。不要直接用旧程序重新打开已升级的数据库；需要回退时使用独立备份
 和新资料库，按支持的恢复流程操作。自动检查只使用合成资料，未直接迁移用户当前库。
 
-完整189项无窗口测试、四包分析、Windows编译、11项独立CLI/hook及SQLCipher/DPAPI诊断
+完整194项无窗口测试、四包分析、Windows编译、11项独立CLI/hook及SQLCipher/DPAPI诊断
 通过，桌面55项连续三轮通过。实际Flutter离屏画面已查看；原生手感及新版实际整理流程
-仍待用户打开验证，真实验收只完成旧版两条录入确认。详情见[当前实施进度](../planning/implementation-status.md)。
+仍待用户打开验证，真实验收只完成旧版两条录入确认。
 
 ## 使用预览包
 
