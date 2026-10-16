@@ -2,10 +2,53 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:info_core/info_core.dart';
 import 'package:info_desktop/desktop_bootstrap.dart';
+import 'package:info_desktop/desktop_runtime.dart';
 import 'package:info_desktop/main.dart';
 import 'support/desktop_platform_fixture.dart';
 
 void main() {
+  for (final event in [DesktopEvent.closeWindow, DesktopEvent.quit]) {
+    test('cleaned startup failure still handles native $event', () async {
+      final repository = TransientAuditRepository();
+      final native = NativeDesktopFixture();
+      var libraryClosed = false;
+      final bootstrap = DesktopBootstrap(
+        port: 0,
+        platform: native,
+        openLibrary: () async {
+          final service = InformationService(repository: repository);
+          final item = await service.owner.createInformation('Server', '', [
+            const FieldInput('Host', '', 'fictional.invalid'),
+          ]);
+          final ref = FieldRef(item.id, item.fields.single.id);
+          final request = service.agent.request(
+            service.agent.openSession('chat'),
+            'host',
+            [ref],
+          );
+          service.owner.approve(request.id, [ref]);
+          return DesktopLibrary(
+            service: service,
+            close: () async {
+              libraryClosed = true;
+            },
+          );
+        },
+      );
+      await bootstrap.start();
+      expect(bootstrap.state, DesktopStartupState.failed);
+      expect(bootstrap.cleanupPending, isFalse);
+      expect(libraryClosed, isTrue);
+      expect(bootstrap.runtime, isNull);
+      expect(
+        repository.grantHistory.single.events.last.kind,
+        GrantEventKind.applicationClosed,
+      );
+      await native.events!(event);
+      expect(native.terminated, isTrue);
+    });
+  }
+
   test(
     'occupied startup port retains failed audit writes until cleanup can finish',
     () async {
@@ -96,11 +139,12 @@ void main() {
     'failed startup keeps unsaved facts, stops its server and retries before reopening the library',
     () async {
       final repository = FailingAuditRepository();
+      final native = NativeDesktopFixture()..hidden = true;
       var libraryClosed = false;
       var opened = 0;
       final bootstrap = DesktopBootstrap(
         port: 0,
-        platform: NativeDesktopFixture(),
+        platform: native,
         openLibrary: () async {
           if (opened++ > 0) expect(libraryClosed, isTrue);
           libraryClosed = false;
@@ -149,6 +193,11 @@ void main() {
       expect(bootstrap.cleanupPending, isTrue);
       expect(libraryClosed, isFalse);
       expect(repository.grantHistory, isEmpty);
+      expect(native.hidden, isFalse);
+      await native.events!(DesktopEvent.closeWindow);
+      await native.events!(DesktopEvent.quit);
+      expect(native.terminated, isFalse);
+      expect(libraryClosed, isFalse);
       final failedPort = bootstrap.boundPort!;
       await expectLater(
         Socket.connect(InternetAddress.loopbackIPv4, failedPort),
@@ -171,6 +220,13 @@ void main() {
         AccessOutcome.auditUnavailable,
       );
       expect(bootstrap.cleanupPending, isFalse);
+      await native.events!(DesktopEvent.closeWindow);
+      expect(native.hidden, isTrue);
+      expect(native.terminated, isFalse);
+      await native.events!(DesktopEvent.openApprovals);
+      expect(native.hidden, isFalse);
+      await native.events!(DesktopEvent.quit);
+      expect(native.terminated, isTrue);
     },
   );
 }
@@ -180,6 +236,16 @@ class FailingAuditRepository extends MemoryInformationRepository {
   @override
   Future<void> saveGrantHistory(GrantHistory history) async {
     if (failing) throw StateError('storage unavailable');
+    await super.saveGrantHistory(history);
+  }
+}
+
+class TransientAuditRepository extends MemoryInformationRepository {
+  int writes = 0;
+  @override
+  Future<void> saveGrantHistory(GrantHistory history) async {
+    // The first write and startup retry fail; cleanup can save both facts.
+    if (writes++ < 2) throw StateError('temporarily unavailable');
     await super.saveGrantHistory(history);
   }
 }

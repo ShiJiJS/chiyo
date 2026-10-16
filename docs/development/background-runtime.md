@@ -111,3 +111,10 @@ persists the application-closed fact before reopening, an occupied port follows
 the same cleanup policy, and a widget error/retry surface stays visible. The
 unsafe cleanup first failed this regression with `audit_unavailable`. All checks
 are headless; actual native startup/error-window acceptance remains outstanding.
+
+Native callbacks may outlive successful startup-failure cleanup. Once audit
+flushing and library closure have both succeeded, close/full-quit callbacks may
+terminate the application and an open callback still reveals the error window.
+Pending cleanup never permits that termination. Startup errors request a visible
+window; headless callback tests cover both fully cleaned failure exits and repair
+followed by normal background hide/open/full-quit behavior.
