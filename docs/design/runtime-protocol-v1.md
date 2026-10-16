@@ -56,7 +56,11 @@ argv 项只能是字符串或恰含 `file` 的对象；env 值只能是字符串
 
 这些限制定义经验证的接收配置，不能以程序名相同宣称排除了任意恶意二进制或同用户进程。接收配置隔离的是认证来源，具体业务读写由完整命令审批决定，不能把验收用例误实现为只读或单一操作白名单。exe 需要规范路径并在批准时记录文件大小、修改时间与 SHA-256；启动前重新核对，变化返回 `executable_changed`，消耗本次尝试并要求新申请。执行器附加的配置路径使用类型化内部 material 引用，在 UI 显示“空配置/已确认主机快照”；不能偷偷增加未展示的网络或命令参数。SSH known_hosts 未准备好时在申请阶段返回 `receiver_not_ready` 并指向桌面配置入口。
 
-不继承父进程环境。Windows 基础仅 `SystemRoot,WINDIR,COMSPEC`（供 DLL/工具定位，不允许 shell 接收配置）、受控 `TEMP/TMP`、`PATH=<SystemRoot>\\System32;<exe目录>`；Unix 仅 `PATH=/usr/bin:/bin`、受控 `TMPDIR`、`LANG=C.UTF-8`。HOME/USERPROFILE/APPDATA/XDG_CONFIG_HOME 指向每次私有空配置目录。应用会话、grants、Git、SSH、云账号、代理认证等其他变量一律不继承。显式 env 中不能覆盖配置隔离变量或注入 `PATH,COMSPEC,LD_PRELOAD,DYLD_*,PYTHONPATH,NODE_OPTIONS` 等程序加载控制；接收配置仅允许表中认证变量和已列出的非秘密常量。无法核实当前工具版本的账号优先级时返回 `unsupported_tool_version`，不能用原用户环境重试。
+不继承父进程环境。Windows 基础仅 `SystemRoot,WINDIR,COMSPEC`（供 DLL/工具定位，不允许 shell 接收配置）、受控 `TEMP/TMP`、`PATH=<SystemRoot>\\System32;<exe目录>`，并由执行器把 `ProgramData` 设置为本次私有空目录，不继承系统共享目录；Unix 仅 `PATH=/usr/bin:/bin`、受控 `TMPDIR`、`LANG=C.UTF-8`。HOME/USERPROFILE/APPDATA/LOCALAPPDATA/XDG_CONFIG_HOME 指向每次私有空配置目录。应用会话、grants、Git、SSH、云账号、代理认证等其他变量一律不继承。显式 env 中不能覆盖配置隔离变量（包括 `ProgramData`）或注入 `PATH,COMSPEC,LD_PRELOAD,DYLD_*,PYTHONPATH,NODE_OPTIONS` 等程序加载控制；接收配置仅允许表中认证变量和已列出的非秘密常量。无法核实当前工具版本的账号优先级时返回 `unsupported_tool_version`，不能用原用户环境重试。
+
+2026-10-17 接收预检修订：本机 Windows OpenSSH 9.5p2 在缺少 `ProgramData` 时，连 `-V` 也退出255且没有可用标准错误；设置为本次空目录即可初始化。该变量是执行器生成的隔离配置位置，不是增加可继承认证来源。SSH 同时显式设置 `GlobalKnownHostsFile` 为受管空文件，`UserKnownHostsFile` 为已确认快照，两项均作为内部类型化材料纳入 effective argv 与 planHash；不能只隔离用户 known_hosts 而遗漏全局文件。依据及真实工具预检边界见[运行工具预检](../development/runtime-receiver-preflight.md)。
+
+同轮 gh 预检发现：空 `GH_CONFIG_DIR` 不保证没有系统 keyring 认证。`gh_token` 执行器在私有材料准备后、启动前必须确认 `GH_TOKEN` 的非空值恰来自本次获批字符串；缺失、空值或绑定错误一律准备失败且不启动，不能通过不设置该变量让 gh 自行选账号。申请层和私有材料层均核对，测试覆盖“空 Token 时未创建进程”。真实工具负向验收始终带非空合成 Token，预期401；缺 Token 的对照只在受控程序/注入测试中执行，不再让真实 gh 查询用户已有账号。
 
 ## 决定、领取与一次启动
 
