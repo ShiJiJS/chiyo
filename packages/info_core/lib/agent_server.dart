@@ -128,13 +128,14 @@ class AgentServer {
           'nextOffset': page.nextOffset,
         };
       case '/session':
+      case '/session/lifecycle':
         final session = _agent.openSessionWithEndCapability(
           _text(body, 'chatLabel'),
         );
         return {
           'status': 'ok',
           'sessionSecret': session.sessionSecret,
-          'endCapability': session.endCapability,
+          if (path == '/session/lifecycle') 'endCapability': session.endCapability,
         };
       case '/session/check':
         _agent.validateSession(_text(body, 'sessionSecret'));

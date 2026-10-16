@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:info_cli/agent_client.dart';
@@ -7,6 +8,8 @@ import 'package:info_cli/codex_end_index.dart';
 /// Receives documented SessionStart JSON on stdin. Never reads transcripts.
 Future<void> main(List<String> args) async {
   final elapsed = Stopwatch()..start();
+  // Reserve 100 ms for bounded output/termination within the 2 second callback.
+  const operationBudget = Duration(milliseconds: 1900);
   AgentClient? client;
   try {
     var port = 47125;
@@ -30,16 +33,23 @@ Future<void> main(List<String> args) async {
             'source': 'startup',
             'session_id': Platform.environment['CODEX_THREAD_ID'],
           }
-        : await readInput().timeout(const Duration(seconds: 2));
+        : await readInput(operationBudget - elapsed.elapsed);
     if (input['hook_event_name'] == 'SessionEnd') {
       final chat = input['session_id'];
       if (chat is! String || !validChatId(chat)) throw const FormatException();
-      final rest = const Duration(seconds: 2) - elapsed.elapsed;
+      final rest = operationBudget - elapsed.elapsed;
       final status = rest <= Duration.zero
           ? 'end_unavailable'
           : await CodexEndIndex(root).end(chat, timeout: rest);
       stdout.writeln(jsonEncode({'systemMessage': 'Agent Info: $status.'}));
-      return;
+      // End has no work that may outlive the callback. Stop any timed-out OS
+      // operation rather than leaving a pending HTTP/file Future in the VM.
+      try {
+        await stdout.flush().timeout(const Duration(milliseconds: 100));
+      } on Object {
+        /* Hook deadline wins. */
+      }
+      exit(0);
     }
     if (input['hook_event_name'] == 'SubagentStart') {
       stdout.writeln(
@@ -77,10 +87,7 @@ Future<void> main(List<String> args) async {
       throw const FormatException();
     }
     client = AgentClient(port);
-    final result = await client.execute({
-      'command': 'session',
-      'chatLabel': 'Codex $chat',
-    });
+    final result = await client.openLifecycleSession('Codex $chat');
     if (result['status'] != 'ok') {
       stdout.writeln(
         jsonEncode({
@@ -126,11 +133,21 @@ Future<void> main(List<String> args) async {
   }
 }
 
-Future<Map<String, dynamic>> readInput() async {
+Future<Map<String, dynamic>> readInput(Duration budget) async {
   final bytes = <int>[];
-  await for (final chunk in stdin) {
-    if (bytes.length + chunk.length > 16384) throw const FormatException();
-    bytes.addAll(chunk);
+  final watch = Stopwatch()..start();
+  final input = StreamIterator<List<int>>(stdin);
+  try {
+    while (true) {
+      final remaining = budget - watch.elapsed;
+      if (remaining <= Duration.zero) throw TimeoutException('input_deadline');
+      if (!await input.moveNext().timeout(remaining)) break;
+      final chunk = input.current;
+      if (bytes.length + chunk.length > 16384) throw const FormatException();
+      bytes.addAll(chunk);
+    }
+  } finally {
+    await input.cancel();
   }
   return jsonDecode(utf8.decode(bytes)) as Map<String, dynamic>;
 }

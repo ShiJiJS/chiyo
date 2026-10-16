@@ -71,7 +71,10 @@ void main() {
       await Future<void>.delayed(Duration.zero);
       expect(delivered, isFalse);
       service.owner.revoke(request.id);
-      final denied = expectLater(service.agent.read(grant.token, field), throwsA(isA<AccessFailure>()));
+      final denied = expectLater(
+        service.agent.read(grant.token, field),
+        throwsA(isA<AccessFailure>()),
+      );
       repository.ready.complete();
       await revokedRead;
       expect(delivered, isFalse);

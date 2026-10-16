@@ -27,7 +27,9 @@ void main() {
             as Map<String, dynamic>;
       }
 
-      final opened = await call('/session', {'chatLabel': 'public-chat-id'});
+      final ordinary = await call('/session', {'chatLabel': 'ordinary-cli'});
+      expect(ordinary.keys.toSet(), {'status', 'sessionSecret'});
+      final opened = await call('/session/lifecycle', {'chatLabel': 'public-chat-id'});
       final session = opened['sessionSecret'] as String;
       final end = opened['endCapability'] as String;
       final pending = await call('/request', {

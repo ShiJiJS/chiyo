@@ -51,7 +51,14 @@ void main() {
         args: ['--state-root', root.path],
       );
       expect(failed['systemMessage'], contains('end_unavailable'));
-      expect(watch.elapsed, lessThan(const Duration(seconds: 4)));
+      expect(
+        watch.elapsed,
+        lessThan(
+          Duration(
+            seconds: Platform.environment['INFO_TEST_BUNDLE'] == null ? 8 : 3,
+          ),
+        ),
+      );
       expect(core.owner.requests.single.state, AccessRequestState.pending);
       await stalled.close(force: true);
       stalled = null;

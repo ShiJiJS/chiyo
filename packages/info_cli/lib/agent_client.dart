@@ -13,6 +13,20 @@ class AgentClient {
   String? get sessionSecret => _session;
   String? get endCapability => _endCapability;
   final _tokens = <String, String>{};
+
+  /// Trusted hook bootstrap only; creates a fresh, unapproved session.
+  /// Ordinary CLI commands retain the original response contract.
+  Future<Map<String, dynamic>> openLifecycleSession(String label) async {
+    if (_session != null) return {'status': 'invalid_request'};
+    final result = await _call('/session/lifecycle', {'chatLabel': label});
+    final secret = result.remove('sessionSecret');
+    final endCapability = result.remove('endCapability');
+    if (result['status'] == 'ok' && secret is String && endCapability is String) {
+      _session = secret;
+      _endCapability = endCapability;
+    }
+    return result;
+  }
   void close() {
     _tokens.clear();
     _session = null;

@@ -177,7 +177,9 @@ class CodexEndIndex {
     }
     final data = jsonDecode(await file.readAsString());
     if (data is! Map ||
-        data.keys.any((key) => !['version', 'chatId', 'records'].contains(key)) ||
+        data.keys.any(
+          (key) => !['version', 'chatId', 'records'].contains(key),
+        ) ||
         data['version'] != 1 ||
         data['chatId'] != chat ||
         data['records'] is! List) {

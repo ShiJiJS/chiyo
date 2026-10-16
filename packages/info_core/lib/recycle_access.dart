@@ -7,6 +7,7 @@ extension AgentDeletes on AgentAccess {
     int baseVersion, {
     String? fieldId,
   }) => _service.owner._serialize(() async {
+    _service._requireSession(session);
     final binding = _service._sessionBindings[session];
     if (binding == null) throw const AccessFailure('unauthorized');
     if (itemId.isEmpty ||
@@ -38,6 +39,7 @@ extension AgentDeletes on AgentAccess {
     return proposal.id;
   });
   Map<String, Object?> deleteStatus(String session, String id) {
+    _service._requireSession(session);
     final binding = _service._sessionBindings[session];
     final found = _service._repository.deleteProposals.where(
       (p) => p.id == id && p.sessionBinding == binding,

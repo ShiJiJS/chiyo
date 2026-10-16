@@ -348,16 +348,8 @@ class AgentAccess {
     return request.grant!;
   }
 
-  Future<String> read(String token, FieldRef field) async {
-    if (_service._closed) throw const AccessFailure('service_unavailable');
-    final request = _service._grants[token];
-    final allowed = _service._canRead(request, field);
-    await _service._recordAccess(request, field, allowed);
-    if (!allowed || !_service._canRead(request, field)) {
-      throw const AccessFailure('unauthorized');
-    }
-    return _service._field(field)!.value;
-  }
+  Future<String> read(String token, FieldRef field) =>
+      _service._readWithAudit(_service._grants[token], field);
 
   List<Map<String, Object?>> catalog() => searchCatalog().items;
 

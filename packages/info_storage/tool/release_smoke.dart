@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'package:info_core/info_core.dart';
 import 'package:info_storage/info_storage.dart';
 import 'package:sqlite3/sqlite3.dart';
@@ -52,15 +53,13 @@ Future<void> main() async {
     service = null;
     await repository.close();
     for (final file in directory.listSync().whereType<File>()) {
-      if (String.fromCharCodes(
-        file.readAsBytesSync(),
-      ).contains('FICTIONAL-RELEASE-MARKER-13869'))
+      if (String.fromCharCodes(file.readAsBytesSync())
+          .contains('FICTIONAL-RELEASE-MARKER-13869'))
         throw StateError('Plaintext marker found');
     }
     // Build a prior-schema encrypted fixture using this same protected key.
-    final migrationDirectory = await Directory(
-      '${directory.path}/migration',
-    ).create();
+    final migrationDirectory = await Directory('${directory.path}/migration')
+        .create();
     final migrationKeys = WindowsDatabaseKeyStore(
       '${migrationDirectory.path}/smoke.dpapi',
     );
@@ -83,11 +82,9 @@ Future<void> main() async {
       migrationKeys,
     );
     service = InformationService(repository: repository);
-    await service.owner.createInformation(
-      'Migrated',
-      '',
-      [const FieldInput('Notes', '', 'fictional')],
-    );
+    await service.owner.createInformation('Migrated', '', [
+      const FieldInput('Notes', '', 'fictional'),
+    ]);
     await service.close();
     service = null;
     await repository.close();

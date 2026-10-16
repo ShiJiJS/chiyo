@@ -65,11 +65,9 @@ extension _AuditService on InformationService {
     });
   }
 
-  Future<void> _recordAccess(
-    _Request? request,
-    FieldRef target,
-    bool allowed,
-  ) async {
+  Future<String> _readWithAudit(_Request? request, FieldRef target) async {
+    if (_closed) throw const AccessFailure('service_unavailable');
+    final allowed = _canRead(request, target);
     // Unknown caller-supplied identifiers are not copied to the audit store.
     // A request without a recognized bearer is deliberately not associated
     // with a private target, even if the supplied name happens to exist.
@@ -93,7 +91,8 @@ extension _AuditService on InformationService {
     _enqueueAudit(() => _repository.saveAccessRecord(record));
     _pruneAudit();
     await _auditWrites;
-    if (allowed && !_canRead(request, target)) {
+    final deliver = allowed && _canRead(request, target);
+    if (allowed && !deliver) {
       // Permission may end while durable recording is pending. No value is delivered;
       // replace that operation's provisional allowed fact before returning.
       record = AccessRecord(
@@ -123,6 +122,10 @@ extension _AuditService on InformationService {
       _enqueueAudit(() => _repository.saveAccessRecord(record));
       throw const AccessFailure('audit_unavailable');
     }
+    if (!deliver) throw const AccessFailure('unauthorized');
+    // No await separates the final permission check and completing the value.
+    // This is the read's delivery point in the core's owning isolate.
+    return _field(target)!.value;
   }
 }
 

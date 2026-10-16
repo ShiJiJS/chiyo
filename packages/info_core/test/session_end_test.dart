@@ -3,6 +3,72 @@ import 'package:info_core/info_core.dart';
 import 'package:test/test.dart';
 
 void main() {
+  for (final transition in ['expiry', 'delete', 'delete and restore']) {
+    test(
+      '$transition during durable recording blocks cached delivery and records denial',
+      () async {
+        var now = DateTime.utc(2026, 10, 16);
+        final repository = WaitingAuditRepository();
+        final service = InformationService(
+          repository: repository,
+          clock: () => now,
+        );
+        final item = await service.owner.createInformation(
+          'Server',
+          'Description',
+          [const FieldInput('Address', 'Host', 'private.invalid')],
+        );
+        final field = FieldRef(item.id, item.fields.single.id);
+        final session = service.agent.openSession('chat');
+        final receipt = service.agent.request(session, 'Address', [field]);
+        service.owner.approve(receipt.id, [
+          field,
+        ], lifetime: const Duration(minutes: 1));
+        final grant = service.agent.claim(session, receipt.id);
+        final denied = expectLater(
+          service.agent.read(grant.token, field),
+          throwsA(isA<AccessFailure>()),
+        );
+        await repository.started.future;
+        if (transition == 'expiry') {
+          now = now.add(const Duration(minutes: 2));
+        } else {
+          final entry = await service.owner.deleteInformation(
+            item.id,
+            item.version,
+          );
+          if (transition == 'delete and restore') {
+            await service.owner.restoreRecycled(entry.id);
+          }
+        }
+        repository.ready.complete();
+        await denied;
+        expect(
+          (await service.owner.history()).accesses.single.outcome,
+          AccessOutcome.unauthorized,
+        );
+        await service.close();
+      },
+    );
+  }
+  test(
+    'ended sessions cannot submit or query deletion proposals after integration',
+    () async {
+      final service = InformationService.fictional();
+      addTearDown(service.close);
+      final session = service.agent.openSession('chat');
+      final id = await service.agent.submitDelete(session, 'demo-server', 1);
+      service.agent.endSession(session);
+      expect(
+        () => service.agent.deleteStatus(session, id),
+        throwsA(isA<AccessFailure>()),
+      );
+      await expectLater(
+        service.agent.submitDelete(session, 'demo-server', 1),
+        throwsA(isA<AccessFailure>()),
+      );
+    },
+  );
   test(
     'end capability only terminates its own session and leaves prior terminal facts intact',
     () async {
