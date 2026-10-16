@@ -55,6 +55,71 @@ Future<void> _rewrite(
 
 void main() {
   test(
+    'each audit retention setting keeps its exact boundary and expires it on later restore',
+    () async {
+      final root = await Directory.systemTemp.createTemp(
+        'backup-audit-settings-',
+      );
+      addTearDown(() => root.delete(recursive: true));
+      var now = DateTime.utc(2026, 10, 16, 12);
+      for (final days in [30, 90, 180, 365]) {
+        final source = await EncryptedInformationRepository.open(
+          '${root.path}/source-$days',
+          _Keys(),
+          clock: () => now,
+        );
+        final service = InformationService(
+          repository: source,
+          clock: () => now,
+        );
+        final preview = await service.owner.previewAuditRetention(days);
+        await service.owner.setAuditRetention(days, confirmation: preview);
+        final cutoff = now.subtract(Duration(days: days));
+        await source.saveAccessRecord(
+          AccessRecord(
+            id: 'exact-boundary',
+            at: cutoff,
+            outcome: AccessOutcome.unauthorized,
+            grantId: 'already-pruned-grant',
+          ),
+        );
+        await source.saveAccessRecord(
+          AccessRecord(
+            id: 'too-old',
+            at: cutoff.subtract(const Duration(milliseconds: 1)),
+            outcome: AccessOutcome.unauthorized,
+          ),
+        );
+        await source.saveAccessRecord(
+          AccessRecord(
+            id: 'recent',
+            at: now,
+            outcome: AccessOutcome.unauthorized,
+          ),
+        );
+        final key = await source.backups.enable();
+        final path = '${root.path}/audit-$days.aimbackup';
+        await source.backups.exportTo(path);
+        final target = await EncryptedInformationRepository.open(
+          '${root.path}/target-$days',
+          _Keys(),
+          clock: () => now,
+        );
+        final snapshot = await target.backups.inspect(path, key);
+        expect(snapshot.accessRecordCount, 2, reason: '$days days');
+        now = now.add(const Duration(milliseconds: 1));
+        final result = await target.backups.restore(snapshot);
+        expect(result.accessRecordCount, 1, reason: '$days days');
+        expect(target.accessRecords.single.id, 'recent');
+        expect(target.readSetting('auditRetentionDays'), days);
+        await target.close();
+        await service.close();
+        await source.close();
+      }
+    },
+  );
+
+  test(
     'original current-data format upgrades without inventing history or credentials',
     () async {
       final root = await Directory.systemTemp.createTemp('backup-v1-');
