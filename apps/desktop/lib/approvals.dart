@@ -43,7 +43,6 @@ class ApprovalsState extends State<Approvals> {
   Widget build(BuildContext context) {
     final requests = widget.service.owner.requests;
     return Scaffold(
-      appBar: AppBar(title: const Text('信息访问授权 · 开发演示')),
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 960),

@@ -15,6 +15,8 @@ void main() {
     ]);
     await tester.pumpWidget(InformationApp(service: core, port: 47125));
     expect(find.text('Need address'), findsOneWidget);
+    await tester.ensureVisible(find.byKey(const ValueKey('field-username')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('field-username')));
     await tester.pump();
     await tester.ensureVisible(find.text('批准所选字段'));
