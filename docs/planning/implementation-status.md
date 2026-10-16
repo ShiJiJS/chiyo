@@ -9,7 +9,11 @@ Source of truth: [specification #1](https://github.com/ShiJiJS/agent-info-manage
 - Initialized the previously documentation-only checkout and empty remote repository. Published the documentation baseline on `main`.
 - Read all 19 issue bodies, labels, states, and comments; verified 18 native sub-issues and 27 blocking edges. All implementation issues remain open.
 - Started #2 in an isolated worktree using the already approved core-service public interface test boundary. Its initial data is fictional and in memory.
-- Preparing Flutter/Dart and the Windows C++ build tools. No real personal information has been migrated.
+- Installed and verified Flutter 3.47.7, Dart 3.13.5, Visual Studio Build Tools 2022 17.14.41, and Windows SDK 10.0.26100.0. Flutter doctor recognizes the Windows desktop toolchain. No real personal information has been migrated.
+
+Local SDK: `C:/Users/Todoki/.local/share/flutter`. The installation did not change the user's global PATH. For a PowerShell development session, prepend its `bin` directory to that process's PATH. Android tooling is not installed or required for this release.
+
+The optional Windows ATL component is absent; an attempt to add it was rejected by automatic approval. This does not block #2. Before #3, validate either the selected key-storage plugin's build prerequisites or a documented current-user Windows DPAPI adapter. Do not silently substitute a plaintext key file. macOS native build and Keychain acceptance have not run.
 
 ## Completion rules
 
