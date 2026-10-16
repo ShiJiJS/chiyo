@@ -1,0 +1,208 @@
+[
+  {
+    "draft": 1,
+    "number": 2,
+    "id": 5877286330,
+    "title": "跑通一次申请、桌面批准与限定字段读取",
+    "url": "https://github.com/ShiJiJS/agent-info-manage/issues/2",
+    "file": "01-first-approved-read.md",
+    "dependencies": []
+  },
+  {
+    "draft": 2,
+    "number": 3,
+    "id": 5877287713,
+    "title": "手动录入并在重启后安全读取信息",
+    "url": "https://github.com/ShiJiJS/agent-info-manage/issues/3",
+    "file": "02-encrypted-manual-information.md",
+    "dependencies": [
+      1
+    ]
+  },
+  {
+    "draft": 3,
+    "number": 4,
+    "id": 5877289498,
+    "title": "等待、拒绝或过期后查询原申请",
+    "url": "https://github.com/ShiJiJS/agent-info-manage/issues/4",
+    "file": "03-pending-request-workflow.md",
+    "dependencies": [
+      1
+    ]
+  },
+  {
+    "draft": 4,
+    "number": 5,
+    "id": 5877291091,
+    "title": "一次审批调整字段范围和有效期",
+    "url": "https://github.com/ShiJiJS/agent-info-manage/issues/5",
+    "file": "04-adjust-approved-scope.md",
+    "dependencies": [
+      2
+    ]
+  },
+  {
+    "draft": 5,
+    "number": 6,
+    "id": 5877292697,
+    "title": "让一个 Codex 聊天自动关联并复用授权",
+    "url": "https://github.com/ShiJiJS/agent-info-manage/issues/6",
+    "file": "05-codex-session-access.md",
+    "dependencies": [
+      1
+    ]
+  },
+  {
+    "draft": 6,
+    "number": 7,
+    "id": 5877294196,
+    "title": "共享主子 Agent 授权并在聊天结束时失效",
+    "url": "https://github.com/ShiJiJS/agent-info-manage/issues/7",
+    "file": "06-codex-children-and-lifecycle.md",
+    "dependencies": [
+      5,
+      3
+    ]
+  },
+  {
+    "draft": 7,
+    "number": 8,
+    "id": 5877296078,
+    "title": "关窗后继续服务并通知新申请",
+    "url": "https://github.com/ShiJiJS/agent-info-manage/issues/8",
+    "file": "07-background-and-notifications.md",
+    "dependencies": [
+      3
+    ]
+  },
+  {
+    "draft": 8,
+    "number": 9,
+    "id": 5877297637,
+    "title": "整理目录与标签，让 Agent 检索公开目录",
+    "url": "https://github.com/ShiJiJS/agent-info-manage/issues/9",
+    "file": "08-organized-public-catalog.md",
+    "dependencies": [
+      2
+    ]
+  },
+  {
+    "draft": 9,
+    "number": 10,
+    "id": 5877299514,
+    "title": "使用可扩展字段模板录入信息",
+    "url": "https://github.com/ShiJiJS/agent-info-manage/issues/10",
+    "file": "09-field-templates.md",
+    "dependencies": [
+      2
+    ]
+  },
+  {
+    "draft": 10,
+    "number": 11,
+    "id": 5877301595,
+    "title": "批量预览并确认 Agent 的录入提案",
+    "url": "https://github.com/ShiJiJS/agent-info-manage/issues/11",
+    "file": "10-batch-import-proposals.md",
+    "dependencies": [
+      8,
+      9
+    ]
+  },
+  {
+    "draft": 11,
+    "number": 12,
+    "id": 5877303911,
+    "title": "导出加密备份并在独立密钥环境恢复",
+    "url": "https://github.com/ShiJiJS/agent-info-manage/issues/12",
+    "file": "11-initial-encrypted-backup.md",
+    "dependencies": [
+      2
+    ]
+  },
+  {
+    "draft": 12,
+    "number": 13,
+    "id": 5877305805,
+    "title": "确认修改差异并读取已授权字段的新值",
+    "url": "https://github.com/ShiJiJS/agent-info-manage/issues/13",
+    "file": "12-reviewed-information-updates.md",
+    "dependencies": [
+      4,
+      10
+    ]
+  },
+  {
+    "draft": 13,
+    "number": 14,
+    "id": 5877307803,
+    "title": "确认删除、回收站恢复与重新授权",
+    "url": "https://github.com/ShiJiJS/agent-info-manage/issues/14",
+    "file": "13-delete-and-restore-information.md",
+    "dependencies": [
+      12
+    ]
+  },
+  {
+    "draft": 14,
+    "number": 15,
+    "id": 5877309231,
+    "title": "查看和恢复修改历史，保持旧值仅用户可见",
+    "url": "https://github.com/ShiJiJS/agent-info-manage/issues/15",
+    "file": "14-content-version-history.md",
+    "dependencies": [
+      13
+    ]
+  },
+  {
+    "draft": 15,
+    "number": 16,
+    "id": 5877310847,
+    "title": "查看授权历史与访问记录，并从历史撤销",
+    "url": "https://github.com/ShiJiJS/agent-info-manage/issues/16",
+    "file": "15-grant-history-and-access-records.md",
+    "dependencies": [
+      3,
+      4
+    ]
+  },
+  {
+    "draft": 16,
+    "number": 17,
+    "id": 5877312570,
+    "title": "将完整支持范围的资料恢复到另一平台",
+    "url": "https://github.com/ShiJiJS/agent-info-manage/issues/17",
+    "file": "16-complete-library-recovery.md",
+    "dependencies": [
+      11,
+      14,
+      15
+    ]
+  },
+  {
+    "draft": 17,
+    "number": 18,
+    "id": 5877314817,
+    "title": "在干净 Windows 环境安装并完成单机流程",
+    "url": "https://github.com/ShiJiJS/agent-info-manage/issues/18",
+    "file": "17-windows-installation-acceptance.md",
+    "dependencies": [
+      6,
+      7,
+      16
+    ]
+  },
+  {
+    "draft": 18,
+    "number": 19,
+    "id": 5877317154,
+    "title": "在干净 macOS 环境安装并完成单机流程",
+    "url": "https://github.com/ShiJiJS/agent-info-manage/issues/19",
+    "file": "18-macos-installation-acceptance.md",
+    "dependencies": [
+      6,
+      7,
+      16
+    ]
+  }
+]
