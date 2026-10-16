@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:info_core/info_core.dart';
+import 'organization.dart';
 
 class Approvals extends StatefulWidget {
   const Approvals({super.key, required this.service, required this.port});
@@ -164,6 +165,8 @@ class ApprovalsState extends State<Approvals> {
               ),
               const Text('最终选择', style: TextStyle(fontWeight: FontWeight.w600)),
               const Text('可取消申请字段，也可从资料库补选或改选。文本说明同样按字段授权。'),
+              for (final directory in widget.service.owner.directories)
+                _directorySelection(id, directory, selected),
               for (final field in {...available, ...selected})
                 CheckboxListTile(
                   key: ValueKey('field-${field.fieldId}'),
@@ -253,14 +256,44 @@ class ApprovalsState extends State<Approvals> {
   }
 
   String _fieldLabel(FieldRef ref) {
-    for (final item in widget.service.agent.catalog()) {
-      if (item['id'] != ref.itemId) continue;
-      for (final field in item['fields'] as List) {
-        if (field['id'] == ref.fieldId) {
-          return '${item['name']} · ${field['name']}';
+    for (final item in widget.service.owner.information) {
+      if (item.id != ref.itemId) continue;
+      for (final field in item.fields) {
+        if (field.id == ref.fieldId) {
+          return '${item.name} · ${field.name}';
         }
       }
     }
     return '${ref.itemId} / ${ref.fieldId}';
+  }
+
+  Widget _directorySelection(
+    String requestId,
+    InformationDirectory directory,
+    Set<FieldRef> selected,
+  ) {
+    final fields = widget.service.owner.fieldsInDirectory(directory.id);
+    final count = fields.where(selected.contains).length;
+    return CheckboxListTile(
+      key: ValueKey('directory-$requestId-${directory.id}'),
+      contentPadding: EdgeInsets.zero,
+      title: Text('按目录选择：${directoryPath(widget.service.owner, directory.id)}'),
+      subtitle: Text('包含下级目录当前 ${fields.length} 个字段；批准后不会自动加入新内容。'),
+      tristate: true,
+      value: count == 0
+          ? false
+          : count == fields.length
+          ? true
+          : null,
+      onChanged: fields.isEmpty
+          ? null
+          : (value) => setState(() {
+              if (value == true) {
+                selected.addAll(fields);
+              } else {
+                selected.removeAll(fields);
+              }
+            }),
+    );
   }
 }
