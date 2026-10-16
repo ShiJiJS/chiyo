@@ -212,11 +212,13 @@ class _BackupLibraryState extends State<BackupLibrary> {
               ? '当前信息库为空，可以选择备份和恢复密钥，核对预览后恢复。'
               : '当前信息库中有 ${widget.owner.information.length} 条信息，暂时不能恢复。\n资料、提案或历史记录使目标库非空，不能覆盖或合并恢复。',
           control: settingsAction(context, '查看恢复步骤', _busy ? null : _open),
+          bottomPadding: 23,
         ),
         const SettingsNotice(
           '历史授权不会重新生效',
           '恢复后保留原记录的时间与事实。Agent 需要重新发起访问申请。',
           icon: PrototypeIconGlyph.clock,
+          verticalPadding: 15.5,
         ),
         if (_error != null) SettingsNotice('备份服务不可用', _error!, error: true),
         if (_busy) const LinearProgressIndicator(),

@@ -33,6 +33,7 @@ class _Files extends BackupFilePicker {
 }
 
 void main() {
+  const microOnly = bool.fromEnvironment('AUX_MICRO_ONLY');
   TestWidgetsFlutterBinding.ensureInitialized();
   setUpAll(() async {
     await (FontLoader(
@@ -150,6 +151,15 @@ void main() {
       }
 
       Future<void> capture(String name) async {
+        if (microOnly &&
+            !const {
+              'settings-template-dialog',
+              'settings-notifications',
+              'settings-retention',
+              'settings-backups',
+            }.contains(name)) {
+          return;
+        }
         await io();
         await tester.pumpAndSettle();
         final render =
@@ -187,12 +197,14 @@ void main() {
       await capture('settings-template-dialog');
       await tester.tap(find.text('取消'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('新建模板'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('保存模板'));
-      await capture('settings-template-error');
-      await tester.tap(find.text('取消'));
-      await tester.pumpAndSettle();
+      if (!microOnly) {
+        await tester.tap(find.text('新建模板'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('保存模板'));
+        await capture('settings-template-error');
+        await tester.tap(find.text('取消'));
+        await tester.pumpAndSettle();
+      }
       await settings('notifications');
       await capture('settings-notifications');
       await settings('records');
@@ -205,71 +217,73 @@ void main() {
       await tester.pumpAndSettle();
       await settings('backups');
       await capture('settings-backups');
-      await tester.tap(find.text('导出加密备份'));
-      await capture('settings-backup-flow');
-      await tester.tap(find.text('检查备份与恢复密钥'));
-      await capture('settings-backup-error');
-      await tester.tap(find.text('创建恢复密钥'));
-      await io(find.text('保存恢复密钥文件'));
-      await tester.tap(find.text('保存恢复密钥文件'));
-      await io(find.text('恢复密钥已另存，请与备份分开保管。'));
-      await tester.tap(
-        find.descendant(
-          of: find.byType(BackupFlowDialog),
-          matching: find.text('导出加密备份'),
-        ),
-      );
-      await io(find.text('加密备份已导出。'));
-      await tester.runAsync(() async {
-        await recipient.backups.enable();
-        await recipient.backups.saveRecoveryKeyTo(
-          '${root.path}/recipient/recovery.txt',
+      if (!microOnly) {
+        await tester.tap(find.text('导出加密备份'));
+        await capture('settings-backup-flow');
+        await tester.tap(find.text('检查备份与恢复密钥'));
+        await capture('settings-backup-error');
+        await tester.tap(find.text('创建恢复密钥'));
+        await io(find.text('保存恢复密钥文件'));
+        await tester.tap(find.text('保存恢复密钥文件'));
+        await io(find.text('恢复密钥已另存，请与备份分开保管。'));
+        await tester.tap(
+          find.descendant(
+            of: find.byType(BackupFlowDialog),
+            matching: find.text('导出加密备份'),
+          ),
         );
-      });
-      await mount(target, backups: recipient.backups, mode: 'recipient');
-      await settings('backups');
-      await capture('settings-backups-empty');
-      await tester.tap(find.text('查看恢复步骤'));
-      await io(find.text('恢复密钥已另存'));
-      await tester.tap(find.byKey(const ValueKey('backup-select-file')));
-      await io(find.text('export.aimbackup'));
-      await tester.tap(find.byKey(const ValueKey('backup-select-key')));
-      await io(find.text('recovery.txt'));
-      await tester.tap(find.text('检查备份与恢复密钥'));
-      await io(find.text('恢复预览'));
-      await capture('settings-restore-preview');
-      await tester.ensureVisible(find.text('确认恢复到空库'));
-      await tester.pumpAndSettle();
-      await capture('settings-restore-preview-bottom');
-      await tester.tap(find.text('确认恢复到空库'));
-      await io(find.text('资料已恢复，请到“信息库”查看。Agent 需要重新申请访问。'));
-      await capture('settings-restore-complete');
-      await tester.tap(find.text('×'));
-      await tester.pumpAndSettle();
-      tester.platformDispatcher.textScaleFactorTestValue = 2;
-      await settings('records');
-      await capture('settings-records-200');
-      await tester.tap(find.byKey(const ValueKey('timeout-30')));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('1 小时').last);
-      await io();
-      expect(target.owner.requestLifetime, const Duration(hours: 1));
-      await capture('settings-records-200-changed');
-      await settings('templates');
-      await tester.tap(find.text('新建模板'));
-      await capture('settings-template-200');
-      await tester.tap(find.text('取消'));
-      await tester.pumpAndSettle();
-      tester.platformDispatcher.clearTextScaleFactorTestValue();
-      await mount(target, backups: recipient.backups, mode: 'backup-200');
-      await settings('backups');
-      await tester.ensureVisible(find.text('查看恢复步骤'));
-      await tester.tap(find.text('查看恢复步骤'));
-      tester.platformDispatcher.textScaleFactorTestValue = 2;
-      await capture('settings-backup-flow-200');
-      await tester.ensureVisible(find.text('检查备份与恢复密钥'));
-      await capture('settings-backup-flow-bottom-200');
-      tester.platformDispatcher.clearTextScaleFactorTestValue();
+        await io(find.text('加密备份已导出。'));
+        await tester.runAsync(() async {
+          await recipient.backups.enable();
+          await recipient.backups.saveRecoveryKeyTo(
+            '${root.path}/recipient/recovery.txt',
+          );
+        });
+        await mount(target, backups: recipient.backups, mode: 'recipient');
+        await settings('backups');
+        await capture('settings-backups-empty');
+        await tester.tap(find.text('查看恢复步骤'));
+        await io(find.text('恢复密钥已另存'));
+        await tester.tap(find.byKey(const ValueKey('backup-select-file')));
+        await io(find.text('export.aimbackup'));
+        await tester.tap(find.byKey(const ValueKey('backup-select-key')));
+        await io(find.text('recovery.txt'));
+        await tester.tap(find.text('检查备份与恢复密钥'));
+        await io(find.text('恢复预览'));
+        await capture('settings-restore-preview');
+        await tester.ensureVisible(find.text('确认恢复到空库'));
+        await tester.pumpAndSettle();
+        await capture('settings-restore-preview-bottom');
+        await tester.tap(find.text('确认恢复到空库'));
+        await io(find.text('资料已恢复，请到“信息库”查看。Agent 需要重新申请访问。'));
+        await capture('settings-restore-complete');
+        await tester.tap(find.text('×'));
+        await tester.pumpAndSettle();
+        tester.platformDispatcher.textScaleFactorTestValue = 2;
+        await settings('records');
+        await capture('settings-records-200');
+        await tester.tap(find.byKey(const ValueKey('timeout-30')));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('1 小时').last);
+        await io();
+        expect(target.owner.requestLifetime, const Duration(hours: 1));
+        await capture('settings-records-200-changed');
+        await settings('templates');
+        await tester.tap(find.text('新建模板'));
+        await capture('settings-template-200');
+        await tester.tap(find.text('取消'));
+        await tester.pumpAndSettle();
+        tester.platformDispatcher.clearTextScaleFactorTestValue();
+        await mount(target, backups: recipient.backups, mode: 'backup-200');
+        await settings('backups');
+        await tester.ensureVisible(find.text('查看恢复步骤'));
+        await tester.tap(find.text('查看恢复步骤'));
+        tester.platformDispatcher.textScaleFactorTestValue = 2;
+        await capture('settings-backup-flow-200');
+        await tester.ensureVisible(find.text('检查备份与恢复密钥'));
+        await capture('settings-backup-flow-bottom-200');
+        tester.platformDispatcher.clearTextScaleFactorTestValue();
+      }
       await tester.pumpWidget(const SizedBox());
       var closed = false;
       final closing = Future.wait([

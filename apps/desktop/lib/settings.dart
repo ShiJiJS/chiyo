@@ -142,7 +142,8 @@ class _SettingsPageState extends State<SettingsPage> {
                 '清理后无法从本机找回，信息库内容不受影响。',
                 warning: true,
                 icon: PrototypeIconGlyph.clock,
-                verticalPadding: 24,
+                contentPadding: const EdgeInsets.fromLTRB(19, 14, 19, 32),
+                messageSize: 14,
                 messageColor: UiPalette.of(context).muted,
               ),
             ],
@@ -500,6 +501,7 @@ class _SettingsPageState extends State<SettingsPage> {
           '不在系统通知中展示字段值、密钥或其他信息内容。打开应用后再查看申请范围。',
           icon: PrototypeIconGlyph.inbox,
           marginTop: 30,
+          verticalPadding: 15.5,
         ),
       ],
     );

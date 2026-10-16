@@ -61,10 +61,12 @@ class SettingsRow extends StatelessWidget {
     super.key,
     required this.control,
     this.first = false,
+    this.bottomPadding = 22,
   });
   final String title, description;
   final Widget control;
   final bool first;
+  final double bottomPadding;
   @override
   Widget build(BuildContext context) {
     final body = Column(
@@ -84,7 +86,7 @@ class SettingsRow extends StatelessWidget {
       ],
     );
     return Container(
-      padding: EdgeInsets.only(top: first ? 0 : 22, bottom: 22),
+      padding: EdgeInsets.only(top: first ? 0 : 22, bottom: bottomPadding),
       decoration: BoxDecoration(
         border: Border(bottom: BorderSide(color: UiPalette.of(context).line)),
       ),
@@ -121,6 +123,8 @@ class SettingsNotice extends StatelessWidget {
     this.lineGap = 3,
     this.marginTop = 22,
     this.messageColor,
+    this.contentPadding,
+    this.messageSize = 13,
   });
   final String title, message;
   final bool warning, error;
@@ -129,6 +133,8 @@ class SettingsNotice extends StatelessWidget {
   final double textOffset, lineGap;
   final double marginTop;
   final Color? messageColor;
+  final EdgeInsets? contentPadding;
+  final double messageSize;
   @override
   Widget build(BuildContext context) {
     final c = UiPalette.of(context);
@@ -139,7 +145,9 @@ class SettingsNotice extends StatelessWidget {
         : c.ink;
     return Container(
       margin: EdgeInsets.only(top: marginTop),
-      padding: EdgeInsets.symmetric(horizontal: 19, vertical: verticalPadding),
+      padding:
+          contentPadding ??
+          EdgeInsets.symmetric(horizontal: 19, vertical: verticalPadding),
       decoration: BoxDecoration(
         color: warning ? c.noticeWarningBackground : c.rail,
         border: Border.all(color: warning ? c.noticeWarningBorder : c.line),
@@ -173,7 +181,7 @@ class SettingsNotice extends StatelessWidget {
                     message,
                     style: prototypeText(
                       context,
-                      13,
+                      messageSize,
                       height: 1.9,
                       color: messageColor ?? ink,
                     ),
