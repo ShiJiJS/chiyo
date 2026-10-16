@@ -4,13 +4,45 @@ import 'organization.dart';
 import 'templates.dart';
 
 class InformationLibrary extends StatefulWidget {
-  const InformationLibrary({super.key, required this.owner});
+  const InformationLibrary({super.key, required this.owner, this.refresh});
   final OwnerAccess owner;
+  final Listenable? refresh;
   @override
   State<InformationLibrary> createState() => _InformationLibraryState();
 }
 
 class _InformationLibraryState extends State<InformationLibrary> {
+  Listenable? _refresh;
+  void _refreshInformation() {
+    if (mounted) setState(() {});
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _bindRefresh();
+  }
+
+  @override
+  void didUpdateWidget(covariant InformationLibrary oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _bindRefresh();
+  }
+
+  void _bindRefresh() {
+    final next = widget.refresh ?? DefaultTabController.maybeOf(context);
+    if (identical(next, _refresh)) return;
+    _refresh?.removeListener(_refreshInformation);
+    _refresh = next;
+    _refresh?.addListener(_refreshInformation);
+  }
+
+  @override
+  void dispose() {
+    _refresh?.removeListener(_refreshInformation);
+    super.dispose();
+  }
+
   String? _directoryFilter;
   String? _tagFilter;
   List<InformationItem> get _visibleInformation {

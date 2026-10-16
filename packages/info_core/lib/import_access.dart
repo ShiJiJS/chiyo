@@ -1,0 +1,171 @@
+part of 'info_core.dart';
+
+void _validateImport(List<ImportItemInput> items) {
+  if (items.isEmpty ||
+      items.length > 20 ||
+      items.fold<int>(0, (n, i) => n + i.fields.length) > 200 ||
+      utf8.encode(jsonEncode(items.map((i) => i.toJson()).toList())).length >
+          240000 ||
+      items.any(
+        (i) =>
+            i.name.trim().isEmpty ||
+            i.name.length > 200 ||
+            i.description.length > 2000 ||
+            i.fields.isEmpty ||
+            i.fields.length > 50 ||
+            i.suggestedDirectory.length > 200 ||
+            i.suggestedTemplate.length > 200 ||
+            i.suggestedTags.length > 100 ||
+            i.suggestedTags.any((t) => t.length > 200) ||
+            i.tagIds.length > 100 ||
+            i.tagIds.any((t) => t.length > 200) ||
+            (i.directoryId != null && i.directoryId!.length > 200) ||
+            i.fields.any(
+              (f) =>
+                  f.name.trim().isEmpty ||
+                  f.name.length > 200 ||
+                  f.description.length > 2000 ||
+                  f.value.length > 64000,
+            ),
+      )) {
+    throw const AccessFailure('invalid_proposal');
+  }
+}
+
+extension AgentImports on AgentAccess {
+  Future<String> submitImport(
+    String session,
+    List<ImportItemInput> items,
+  ) => _service.owner._serialize(() async {
+    if (!_service._sessions.containsKey(session)) {
+      throw const AccessFailure('unauthorized');
+    }
+    _validateImport(items);
+    // Bound retained pending work per chat without revealing other sessions.
+    if (_service._repository.importProposals
+            .where(
+              (p) =>
+                  p.sessionBinding == _service._sessionBindings[session] &&
+                  p.state == ImportProposalState.pending,
+            )
+            .length >=
+        20) {
+      throw const AccessFailure('proposal_limit');
+    }
+    final proposal = ImportProposal(
+      id: _service._secret(),
+      sessionBinding: _service._sessionBindings[session]!,
+      chatLabel: _service._sessions[session]!,
+      createdAt: _service._clock(),
+      items: items,
+    );
+    await _service._repository.saveImportProposal(proposal);
+    return proposal.id;
+  });
+
+  Map<String, Object?> importStatus(String session, String id) {
+    final binding = _service._sessionBindings[session];
+    final matches = _service._repository.importProposals.where(
+      (p) => p.id == id && p.sessionBinding == binding,
+    );
+    if (binding == null || matches.isEmpty) {
+      throw const AccessFailure('unauthorized');
+    }
+    final proposal = matches.single;
+    return {
+      'status': proposal.state.name,
+      'proposalId': proposal.id,
+      'createdAt': proposal.createdAt.toUtc().toIso8601String(),
+      if (proposal.state == ImportProposalState.confirmed)
+        'itemIds': proposal.createdItemIds,
+    };
+  }
+}
+
+extension OwnerImports on OwnerAccess {
+  List<ImportProposal> get importProposals =>
+      _service._repository.importProposals;
+
+  ImportProposal _pendingImport(String id, int version) {
+    if (_service._closed) throw const AccessFailure('service_unavailable');
+    final matches = importProposals.where((p) => p.id == id);
+    if (matches.isEmpty ||
+        matches.single.state != ImportProposalState.pending ||
+        matches.single.version != version) {
+      throw const AccessFailure('proposal_changed');
+    }
+    return matches.single;
+  }
+
+  Future<List<InformationItem>> confirmImport(
+    String id,
+    int version,
+    List<ImportItemInput> reviewed,
+  ) => _serialize(() async {
+    final found = importProposals.where((p) => p.id == id);
+    if (found.isNotEmpty &&
+        found.single.state == ImportProposalState.confirmed) {
+      return List.unmodifiable([
+        for (final itemId in found.single.createdItemIds)
+          information.firstWhere((i) => i.id == itemId),
+      ]);
+    }
+    final previous = _pendingImport(id, version);
+    _validateImport(reviewed);
+    for (final item in reviewed) {
+      _checkParent(item.directoryId);
+      if (item.tagIds.any((id) => !tags.any((t) => t.id == id))) {
+        throw const AccessFailure('invalid_proposal');
+      }
+    }
+    final items = [
+      for (final input in reviewed)
+        InformationItem(
+          _service._secret(),
+          input.name.trim(),
+          input.description,
+          1,
+          [
+            for (final f in input.fields)
+              InformationField(
+                _service._secret(),
+                f.name.trim(),
+                f.description,
+                f.value,
+                1,
+                kind: f.kind,
+              ),
+          ],
+          directoryId: input.directoryId,
+          tagIds: input.tagIds.toSet(),
+        ),
+    ];
+    final confirmed = ImportProposal(
+      id: previous.id,
+      sessionBinding: previous.sessionBinding,
+      chatLabel: previous.chatLabel,
+      createdAt: previous.createdAt,
+      items: reviewed,
+      state: ImportProposalState.confirmed,
+      version: previous.version + 1,
+      createdItemIds: items.map((i) => i.id),
+    );
+    await _service._repository.confirmImportProposal(confirmed, items);
+    return List.unmodifiable(items);
+  });
+
+  Future<void> rejectImport(String id, int version) => _serialize(() async {
+    final previous = _pendingImport(id, version);
+    await _service._repository.saveImportProposal(
+      ImportProposal(
+        id: previous.id,
+        sessionBinding: previous.sessionBinding,
+        chatLabel: previous.chatLabel,
+        createdAt: previous.createdAt,
+        items: previous.items,
+        state: ImportProposalState.rejected,
+        version: previous.version + 1,
+      ),
+    );
+  });
+}

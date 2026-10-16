@@ -6,6 +6,7 @@ import 'package:info_core/agent_server.dart';
 import 'package:info_core/info_core.dart';
 import 'package:info_storage/info_storage.dart';
 import 'library.dart';
+import 'import_proposals.dart';
 import 'desktop_runtime.dart';
 
 Future<void> main() async {
@@ -79,7 +80,7 @@ class InformationApp extends StatefulWidget {
 
 class _InformationAppState extends State<InformationApp>
     with SingleTickerProviderStateMixin {
-  late final _tabs = TabController(length: 2, vsync: this);
+  late final _tabs = TabController(length: 3, vsync: this);
   int _openRevision = 0;
   @override
   void initState() {
@@ -131,6 +132,7 @@ class _InformationAppState extends State<InformationApp>
           tabs: [
             Tab(text: '访问审批'),
             Tab(text: '我的信息'),
+            Tab(text: '录入提案'),
           ],
         ),
       ),
@@ -154,7 +156,8 @@ class _InformationAppState extends State<InformationApp>
               controller: _tabs,
               children: [
                 Approvals(service: widget.service, port: widget.port),
-                InformationLibrary(owner: widget.service.owner),
+                InformationLibrary(owner: widget.service.owner, refresh: _tabs),
+                ImportProposalsPage(owner: widget.service.owner),
               ],
             ),
           ),
