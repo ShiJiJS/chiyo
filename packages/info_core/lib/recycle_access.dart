@@ -191,7 +191,7 @@ extension OwnerRecycle on OwnerAccess {
     }
     final before = found.single;
     final remaining = before.fields.where((f) => f.id != fieldId).toList();
-    final after = fieldId == null || remaining.isEmpty
+    final after = fieldId == null
         ? null
         : InformationItem(
             before.id,

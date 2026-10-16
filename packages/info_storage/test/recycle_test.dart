@@ -8,6 +8,48 @@ import 'package:sqlite3/sqlite3.dart';
 
 void main() {
   test(
+    'current-data backup restores metadata retained after deleting the last field',
+    () async {
+      final folder = await Directory.systemTemp.createTemp(
+        'info-recycle-backup-',
+      );
+      addTearDown(() => folder.delete(recursive: true));
+      final source = await EncryptedInformationRepository.open(
+        '${folder.path}/source',
+        TestKeyStore(),
+      );
+      final service = InformationService(repository: source);
+      addTearDown(() async {
+        await service.close();
+        await source.close();
+      });
+      final item = await service.owner.createInformation(
+        'retained metadata',
+        'public description',
+        [const FieldInput('host', '', 'private.invalid')],
+      );
+      await service.owner.deleteInformation(
+        item.id,
+        1,
+        fieldId: item.fields.single.id,
+      );
+      final recovery = await source.backups.enable();
+      final backup = '${folder.path}/empty-fields.aimbackup';
+      await source.backups.exportTo(backup);
+      await service.close();
+      await source.close();
+      final recipient = await EncryptedInformationRepository.open(
+        '${folder.path}/recipient',
+        TestKeyStore(),
+      );
+      addTearDown(recipient.close);
+      await recipient.backups.restoreFrom(backup, recovery);
+      expect(recipient.items.single.name, 'retained metadata');
+      expect(recipient.items.single.version, 2);
+      expect(recipient.items.single.fields, isEmpty);
+    },
+  );
+  test(
     'development schema eight migrates and terminal import payloads are scrubbed without losing receipt or pending work',
     () async {
       final folder = await Directory.systemTemp.createTemp(

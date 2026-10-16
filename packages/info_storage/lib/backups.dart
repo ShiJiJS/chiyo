@@ -469,7 +469,9 @@ class InformationBackups {
           (directory is! String || !directories.contains(directory)))
         invalid();
       final count = fieldCounts[row['id']] ?? 0;
-      if (count < 1 || count > 200) invalid();
+      // Explicit field deletion can leave an information item's public metadata
+      // with zero fields. Only whole-item deletion removes that identity.
+      if (count > 200) invalid();
     }
     for (final row in tables['information_fields']!) {
       if (!items.contains(id(row, 'item_id'))) invalid();

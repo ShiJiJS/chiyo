@@ -3,6 +3,32 @@ import 'package:test/test.dart';
 
 void main() {
   test(
+    'deleting a last field leaves the information metadata until explicit whole-item deletion',
+    () async {
+      final service = InformationService(
+        repository: MemoryInformationRepository(),
+      );
+      addTearDown(service.close);
+      final item = await service.owner.createInformation(
+        'metadata remains',
+        'public',
+        [const FieldInput('only field', '', 'private')],
+      );
+      final entry = await service.owner.deleteInformation(
+        item.id,
+        1,
+        fieldId: item.fields.single.id,
+      );
+      expect(service.owner.information.single.id, item.id);
+      expect(service.owner.information.single.fields, isEmpty);
+      expect(entry.wholeItem, isFalse);
+      expect(
+        (await service.owner.restoreRecycled(entry.id)).fields.single.id,
+        item.fields.single.id,
+      );
+    },
+  );
+  test(
     'concurrent delete and update have one version winner and duplicate restore does not apply twice',
     () async {
       final service = InformationService.fictional();
