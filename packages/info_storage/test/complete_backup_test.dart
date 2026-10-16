@@ -478,7 +478,8 @@ void main() {
       );
       final ref = FieldRef(item.id, item.fields.first.id);
       await service.owner.correctValue(ref, 'new.invalid');
-      final session = service.agent.openSession('Source chat');
+      final opened = service.agent.openSessionWithEndCapability('Source chat');
+      final session = opened.sessionSecret;
       final request = service.agent.request(session, 'fictional read', [ref]);
       service.owner.approve(request.id, [ref]);
       final token = service.agent.claim(session, request.id).token;
@@ -487,6 +488,25 @@ void main() {
         service.agent.read('unknown-token', ref),
         throwsA(isA<AccessFailure>()),
       );
+      final firstNoteDeletion = await service.owner.deleteInformation(
+        item.id,
+        3,
+        fieldId: item.fields.last.id,
+      );
+      await service.owner.restoreRecycled(firstNoteDeletion.id);
+      final noteDeletion = await service.owner.deleteInformation(
+        item.id,
+        5,
+        fieldId: item.fields.last.id,
+      );
+      final revokedSession = service.agent.openSession('Revoked source chat');
+      final revoked = service.agent.request(revokedSession, 'read', [ref]);
+      service.owner.approve(revoked.id, [ref]);
+      service.owner.revoke(revoked.id);
+      final endedSession = service.agent.openSession('Ended source chat');
+      final ended = service.agent.request(endedSession, 'read', [ref]);
+      service.owner.approve(ended.id, [ref]);
+      service.agent.endSession(endedSession);
       final deleted = await service.owner.createInformation('Deleted', '', [
         const FieldInput('Value', '', 'recoverable fictional content'),
       ]);
@@ -523,7 +543,15 @@ void main() {
         'access_records',
       });
       final encoded = jsonEncode(payload);
-      for (final excluded in [session, token, key, 'EXCLUDED-PENDING-123']) {
+      for (final excluded in [
+        session,
+        token,
+        opened.endCapability,
+        revokedSession,
+        endedSession,
+        key,
+        'EXCLUDED-PENDING-123',
+      ]) {
         expect(encoded, isNot(contains(excluded)));
       }
       final recipientKeys = _Keys();
@@ -532,21 +560,35 @@ void main() {
         recipientKeys,
       );
       final summary = await recipient.backups.restoreFrom(path, key);
-      expect(summary.revisionCount, 3);
-      expect(summary.recycleCount, 1);
-      expect(summary.grantHistoryCount, 1);
+      expect(summary.revisionCount, 6);
+      expect(summary.recycleCount, 2);
+      expect(summary.grantHistoryCount, 3);
       expect(summary.accessRecordCount, 2);
       var restored = InformationService(repository: recipient);
       expect(restored.owner.information.single.id, item.id);
-      expect(restored.owner.information.single.version, 3);
+      expect(restored.owner.information.single.version, 6);
       expect(restored.owner.information.single.directoryId, child.id);
       expect(restored.owner.information.single.tagIds, [tag.id]);
       final audit = await restored.owner.history();
-      expect(audit.grants.single.active, isFalse);
-      expect(audit.grants.single.restoredAt, isNotNull);
-      expect(audit.grants.single.events.single.kind, GrantEventKind.approved);
+      expect(
+        audit.grants.every((g) => !g.active && g.restoredAt != null),
+        isTrue,
+      );
+      expect(audit.grants.first.events.single.kind, GrantEventKind.approved);
+      expect(
+        audit.grants
+            .where((g) => g.events.last.kind == GrantEventKind.revoked)
+            .length,
+        1,
+      );
+      expect(
+        audit.grants
+            .where((g) => g.events.last.kind == GrantEventKind.ended)
+            .length,
+        1,
+      );
       await expectLater(
-        restored.owner.revokeFromHistory(audit.grants.single.id),
+        restored.owner.revokeFromHistory(audit.grants.first.id),
         throwsA(isA<AccessFailure>()),
       );
       expect(restored.owner.requests, isEmpty);
@@ -565,9 +607,17 @@ void main() {
         recipientKeys,
       );
       restored = InformationService(repository: recipient);
-      expect(recipient.informationRevisions.length, 3);
-      expect(recipient.recycleFacts.length, 2);
-      expect((await restored.owner.history()).grants.single.active, isFalse);
+      expect(recipient.informationRevisions.length, 6);
+      expect(recipient.recycleFacts.length, 5);
+      expect(
+        (await restored.owner.history()).grants.every((g) => !g.active),
+        isTrue,
+      );
+      final withNote = await restored.owner.restoreRecycled(noteDeletion.id);
+      expect(withNote.version, 7);
+      expect(withNote.fields.last.id, item.fields.last.id);
+      expect(withNote.fields.last.version, 3);
+      expect(withNote.fields.last.kind, FieldKind.textNote);
       await restored.close();
       await recipient.close();
       await service.close();
