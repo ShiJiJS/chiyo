@@ -2,6 +2,7 @@ import 'organization.dart';
 export 'organization.dart';
 import 'templates.dart';
 import 'import_proposals.dart';
+import 'update_proposals.dart';
 
 enum FieldKind { structured, textNote }
 
@@ -71,6 +72,18 @@ abstract interface class InformationRepository {
     ImportProposal proposal,
     List<InformationItem> items,
   );
+  List<UpdateProposal> get updateProposals;
+  List<InformationRevision> get informationRevisions;
+  Future<void> saveUpdateProposal(UpdateProposal proposal);
+  Future<void> saveInformationRevision(
+    InformationItem item,
+    InformationRevision previous,
+  );
+  Future<void> confirmUpdateProposal(
+    UpdateProposal proposal,
+    InformationItem item,
+    InformationRevision previous,
+  );
 }
 
 class MemoryInformationRepository implements InformationRepository {
@@ -95,6 +108,39 @@ class MemoryInformationRepository implements InformationRepository {
   Future<void> saveTag(InformationTag tag) async => _tags[tag.id] = tag;
   final _templates = <String, InformationTemplate>{};
   final _proposals = <String, ImportProposal>{};
+  final _updates = <String, UpdateProposal>{};
+  final _revisions = <InformationRevision>[];
+  @override
+  List<UpdateProposal> get updateProposals =>
+      List.unmodifiable(_updates.values);
+  @override
+  List<InformationRevision> get informationRevisions =>
+      List.unmodifiable(_revisions);
+  @override
+  Future<void> saveUpdateProposal(UpdateProposal proposal) async {
+    _updates[proposal.id] = proposal;
+  }
+
+  @override
+  Future<void> saveInformationRevision(
+    InformationItem item,
+    InformationRevision previous,
+  ) async {
+    _items[item.id] = item;
+    _revisions.add(previous);
+  }
+
+  @override
+  Future<void> confirmUpdateProposal(
+    UpdateProposal proposal,
+    InformationItem item,
+    InformationRevision previous,
+  ) async {
+    _items[item.id] = item;
+    _revisions.add(previous);
+    _updates[proposal.id] = proposal;
+  }
+
   @override
   List<ImportProposal> get importProposals =>
       List.unmodifiable(_proposals.values);

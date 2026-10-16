@@ -69,6 +69,19 @@ library. New-item proposals cannot update existing items; reviewed updates use a
 separate workflow. Restart ends the old session association, even when an owner
 can still review its encrypted pending proposal.
 
+For requested changes, use `update-submit` with `update` containing `itemId`,
+the current catalog `version` as `baseVersion`, and `changes`. Each operation is
+explicit: `correct` takes `fieldId` and `value` and preserves meaning; `add`
+takes a new `field`; `replace` takes `fieldId` and a new `field` for changed
+meaning; `remove` takes `fieldId`. A field contains `name`, `description`,
+`value`, and `kind`. Optional item `name` and `description` change public metadata.
+Query the returned `proposalId` with `update-status`. Only the owner can preview
+old values and differences or confirm changes. Obtain normal read authorization
+when you need existing values. `conflicted` leaves current information intact;
+explain the conflict before preparing a replacement. `rejected` stops the change.
+Confirmed corrections keep existing grants; added or replaced fields need new
+approval, and removed fields cease to be readable under old grants.
+
 Current integration is a development preview: use fictional data. Startup,
 clear, and fork create new associations; resume and compact preserve the reference
 already in this chat, with no ID-based recovery or renewal. Root/child propagation and
