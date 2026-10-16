@@ -76,6 +76,8 @@ At `584047d`, #7 is merged. Its tree passed **126 headless tests** (CLI 16, core
 
 Two-axis code review is running against the pinned increment `df5c744...584047d`. #17 is developing separately, and required real Windows desktop/Codex evidence is still outstanding. No hooks were installed, trusted or copied into the user's Codex configuration.
 
+The Windows native release at `584047d` also compiled successfully in the detached validation worktree, including #7/#15. [The pinned review](../development/review-batch-2026-10-16.md) reported Standards: 0 documented breaches and 1 judgment-only duplication observation; Spec: 2 P2 defects (retryable startup failure cleanup and reviewed updates of valid zero-field items). One isolated implementer is fixing all three with regression tests. These corrections and #17 still need integration and final combined verification.
+
 ## Completion rules
 
 The user has asked that further development not manipulate their visible desktop. Run headless tests and compile builds; leave native window interaction and user-visible Codex configuration checks for coordinated user validation. Do not launch the desktop application or native GUI tests without renewed agreement.

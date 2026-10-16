@@ -141,6 +141,7 @@ class _InformationAppState extends State<InformationApp>
     vsync: this,
   );
   int _openRevision = 0;
+  int _libraryRevision = 0;
   @override
   void initState() {
     super.initState();
@@ -240,9 +241,19 @@ class _InformationAppState extends State<InformationApp>
                 Approvals(service: widget.service, port: widget.port),
                 InformationLibrary(owner: widget.service.owner, refresh: _tabs),
                 ImportProposalsPage(owner: widget.service.owner),
-                AuthorizationHistory(owner: widget.service.owner),
+                AuthorizationHistory(
+                  key: ValueKey(_libraryRevision),
+                  owner: widget.service.owner,
+                ),
                 if (widget.backups case final backups?)
-                  BackupLibrary(backups: backups, files: widget.backupFiles),
+                  BackupLibrary(
+                    backups: backups,
+                    owner: widget.service.owner,
+                    files: widget.backupFiles,
+                    onRestored: () {
+                      if (mounted) setState(() => _libraryRevision++);
+                    },
+                  ),
               ],
             ),
           ),

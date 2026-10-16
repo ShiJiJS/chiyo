@@ -8,6 +8,7 @@ import 'package:sqlite3/sqlite3.dart' as sqlite;
 import 'backup_publish.dart';
 export 'platform_keys.dart';
 part 'backups.dart';
+part 'backup_history.dart';
 
 class StorageFailure implements Exception {
   const StorageFailure(this.code);
@@ -25,7 +26,13 @@ abstract interface class DatabaseKeyStore {
 
 /// A desktop-only capability. The CLI depends on info_core, never this package.
 class EncryptedInformationRepository implements InformationRepository {
-  EncryptedInformationRepository._(this._db, this._lock, this.cipherVersion);
+  EncryptedInformationRepository._(
+    this._db,
+    this._lock,
+    this.cipherVersion,
+    this._clock,
+  );
+  final DateTime Function() _clock;
   final _InformationDatabase _db;
   final RandomAccessFile _lock;
   final String cipherVersion;
@@ -50,8 +57,9 @@ class EncryptedInformationRepository implements InformationRepository {
 
   static Future<EncryptedInformationRepository> open(
     String directory,
-    DatabaseKeyStore keys,
-  ) async {
+    DatabaseKeyStore keys, {
+    DateTime Function()? clock,
+  }) async {
     final folder = Directory(directory);
     await folder.create(recursive: true);
     final canonical = await folder.resolveSymbolicLinks();
@@ -105,8 +113,12 @@ class EncryptedInformationRepository implements InformationRepository {
       native.execute('PRAGMA foreign_keys = ON');
       db = _InformationDatabase(NativeDatabase.opened(native));
       native = null; // Drift owns the handle now.
-      final repository = EncryptedInformationRepository._(db, lock, version)
-        .._directory = canonical;
+      final repository = EncryptedInformationRepository._(
+        db,
+        lock,
+        version,
+        clock ?? DateTime.now,
+      ).._directory = canonical;
       await repository._load();
       return repository;
     } catch (error) {

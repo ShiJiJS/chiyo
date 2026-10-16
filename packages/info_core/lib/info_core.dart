@@ -21,6 +21,7 @@ part 'import_access.dart';
 part 'update_access.dart';
 part 'recycle_access.dart';
 part 'revision_access.dart';
+part 'backup_access.dart';
 
 class AccessFailure implements Exception {
   const AccessFailure(this.status);
@@ -171,11 +172,18 @@ class InformationService {
   final _requests = <String, _Request>{};
   final _submitted = StreamController<String>.broadcast();
   bool _closed = false;
+  bool _backupBusy = false;
+  Completer<void>? _backupBarrier;
+  int _libraryGeneration = 0;
+  final _reads = <Future<void>>{};
   Future<void> _auditWrites = Future.value();
   final _auditPending = <Future<void> Function()>[];
   bool _auditFailed = false;
   AuditRetentionPreview? _retentionPreview;
   Future<void> close() {
+    if (_backupBarrier case final barrier?) {
+      return barrier.future.then((_) => close());
+    }
     if (_closed) return owner.retryAuditStorage();
     _closed = true;
     for (final request in _requests.values) {
@@ -198,10 +206,12 @@ class InformationService {
 
   bool _sessionActive(String session) =>
       !_closed &&
+      !_backupBusy &&
       _sessions.containsKey(session) &&
       !_endedSessions.contains(session);
 
   void _requireSession(String session) {
+    if (_backupBusy) throw const AccessFailure('service_unavailable');
     if (!_sessionActive(session)) throw const AccessFailure('unauthorized');
   }
 
@@ -216,6 +226,7 @@ class InformationService {
   }
 
   void _endSession(String session) {
+    if (_backupBusy) throw const AccessFailure('service_unavailable');
     if (!_sessions.containsKey(session)) {
       throw const AccessFailure('unauthorized');
     }
@@ -233,6 +244,7 @@ class InformationService {
   }
 
   void _expire(_Request request) {
+    if (_backupBusy) return;
     if (request.state == AccessRequestState.pending &&
         !_clock().isBefore(request.expiresAt)) {
       request.state = AccessRequestState.expired;
@@ -264,7 +276,9 @@ class AgentAccess {
   /// Both independent capabilities are issued only for a new unapproved session.
   /// Adapters must keep the end capability out of ordinary command output.
   OpenedSession openSessionWithEndCapability(String chatLabel) {
-    if (_service._closed) throw const AccessFailure('service_unavailable');
+    if (_service._closed || _service._backupBusy) {
+      throw const AccessFailure('service_unavailable');
+    }
     if (chatLabel.trim().isEmpty || chatLabel.length > 200) {
       throw const AccessFailure('invalid_request');
     }
@@ -315,6 +329,7 @@ class AgentAccess {
   }
 
   _Request _request(String session, String id) {
+    if (_service._backupBusy) throw const AccessFailure('service_unavailable');
     final request = _service._requests[id];
     if (!_service._sessionActive(session) ||
         request == null ||
@@ -351,8 +366,16 @@ class AgentAccess {
     return request.grant!;
   }
 
-  Future<String> read(String token, FieldRef field) =>
-      _service._readWithAudit(_service._grants[token], field);
+  Future<String> read(String token, FieldRef field) {
+    final reading = _service._readWithAudit(_service._grants[token], field);
+    final settled = reading.then<void>(
+      (_) {},
+      onError: (Object _, StackTrace _) {},
+    );
+    _service._reads.add(settled);
+    settled.then((_) => _service._reads.remove(settled));
+    return reading;
+  }
 
   List<Map<String, Object?>> catalog() => searchCatalog().items;
 
@@ -538,7 +561,13 @@ class OwnerAccess {
   });
   Future<void> _writes = Future.value();
   Future<T> _serialize<T>(Future<T> Function() action) {
-    final result = _writes.then((_) => action());
+    final generation = _service._libraryGeneration;
+    final result = _writes.then((_) {
+      if (generation != _service._libraryGeneration) {
+        throw const AccessFailure('library_changed');
+      }
+      return action();
+    });
     _writes = result.then<void>((_) {}, onError: (Object _, StackTrace _) {});
     return result;
   }
@@ -637,6 +666,7 @@ class OwnerAccess {
     );
   }).toList();
   void revoke(String requestId) {
+    if (_service._backupBusy) throw const AccessFailure('service_unavailable');
     final request = _service._requests[requestId];
     if (request?.grant == null) throw const AccessFailure('invalid_request');
     request!.state = AccessRequestState.revoked;
@@ -644,6 +674,7 @@ class OwnerAccess {
   }
 
   void deny(String requestId) {
+    if (_service._backupBusy) throw const AccessFailure('service_unavailable');
     final request = _service._requests[requestId];
     if (request == null) throw const AccessFailure('invalid_request');
     _service._finishPending(request, AccessRequestState.denied);
@@ -654,6 +685,7 @@ class OwnerAccess {
     List<FieldRef> fields, {
     Duration lifetime = const Duration(hours: 8),
   }) {
+    if (_service._backupBusy) throw const AccessFailure('service_unavailable');
     final request = _service._requests[requestId];
     if (request != null) _service._expire(request);
     if (request == null ||
