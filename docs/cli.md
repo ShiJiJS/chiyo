@@ -51,3 +51,18 @@ CLI 使用标准输入逐行 JSON，标准输出每行一个结果。保持同�
 桌面上的聊天名称及用途是 agent 自述，不能作为可信身份凭据。CLI 没有批准或拒绝入口。收到拒绝或过期时，agent 不得自动循环重提、自动扩展范围，或将重新提交当作轮询手段。
 
 自动化已覆盖核心公开接口、真实 CLI 子进程及 Flutter 无窗口组件测试。真实桌面手动执行“等待超时后批准，再查询原结果”的验收仍需用户配合；本任务没有操作用户桌面。
+
+## 修改提案
+
+`catalog` 的每条信息包含当前 `version`。选择目标及基础版本，通过标准输入提交明确操作：
+
+```json
+{"command":"update-submit","update":{"itemId":"ITEM_ID","baseVersion":1,"description":"修订后的公开描述","changes":[{"operation":"correct","fieldId":"FIELD_ID","value":"修正后的值"}]}}
+{"command":"update-status","proposalId":"PROPOSAL_ID"}
+```
+
+`correct` 仅修正值并保留字段身份；`add` 使用 `field` 对象新增字段；`replace` 使用 `fieldId` 和 `field` 替换业务含义；`remove` 使用 `fieldId` 移除字段。`field` 对象包含 `name`、`description`、`value` 和 `kind`（`structured` 或 `textNote`）。新增和替换使用新字段身份，原授权不会自动包含它们。移除后旧授权永久停止提供该字段，其余获准字段仍可读。`name`、`description` 是可选的信息项公开元数据修改。
+
+提交仅返回 `pending` 和 `proposalId`，不读取当前值、不直接覆盖资料。每次提案最多 200 个操作，单值最多 64000 字符，提案 JSON 最多 240000 UTF-8 字节。相同字段只能出现一个操作；最终信息必须保留至少一个字段。提案状态仅创建它的私密会话可查询，且不返回变更内容、原值或差异。Agent 无预览、确认、拒绝或历史读取入口；需要原值时先申请正常读取授权。
+
+用户在“录入提案”中查看修改前后信息和公开描述，明确确认或拒绝。状态为 `confirmed`、`rejected` 或 `conflicted`；版本冲突不会覆盖当前资料。冲突后根据当前目录版本和用户要求重新准备提案，避免自动重提。用户确认修正后，仍有效的原字段授权可读取最新值。确认操作可安全重试，不会重复增加版本或历史。
