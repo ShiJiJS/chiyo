@@ -94,3 +94,19 @@ $cmake = ((Select-String -LiteralPath apps/desktop/build/windows/x64/CMakeCache.
 最终独立定向复核已收口：scope组锚265/366/467/568/669、placeholder374、关闭叉1042–1055；handled期限555/595与摘要线616；整理期限455/495、完成摘要线516均对应。mono常规/整理/离线未见明显主题渗色。主Agent已实际查看scope、complete、mono、empty、audit及200%首末字段，并以HTML为参考做最后compare；不将差分指标当通过评分。结论只限本票已提供状态，不推断全软件已还原。
 
 最后源码的Windows原生闭环再次通过（`.scratch/d1-final-source-native.log`），包含真实CLI申请/范围/默认8h/重复读取/拒绝未批/撤销、一次整理与无改动结束、真实结果入口及加密库主题重开；最终命令和范围见上文。主Agent接下来在主集成独立复验。本票未执行人工系统气泡点击，不能据此关闭通知定位验收条目。
+
+## 显式手动 Windows 通知探针（后续验收入口）
+
+主集成 `1852f8c` 已合并回独立工作树。新增入口只涉及 integration test、隔离 fixture 适配参数和脚本，不改生产 UI 或通知协议。`IsolatedDesktopFixture.start` 默认仍用惰性平台；只有显式手动探针注入 `NativeDesktopPlatform`。可选 `prepareLibrary` 在 runtime 订阅请求事件前预置25条合成请求，不会向真实 Shell 连发25条通知。
+
+探针选择真实排序中首屏以外的申请，先留下无匹配搜索并切至信息库，隐藏本隔离 runner，再只投递该申请的一条真实系统气泡。输出 `D1_NOTIFICATION_READY requestId=… remainingSeconds=…` 后由操作人员点击气泡；从投递起最多60秒等待。只有原生回调带回同一 ID、`runtime.openRequestId`/revision 更新、实际详情 `detail-<ID>` 和队列选中目标可见、用途与目标吻合且旧搜索清空，才输出 `D1_NOTIFICATION_VERIFIED`。没有直接调用 `handleEvent`、伪造 MethodChannel 回调或设置 `openedRequestId`。Shell拒绝、通知不可用和60秒无真实点击都明确失败，不作为验收通过。
+
+```powershell
+# cwd C:\Project\network_config\info-manage-worktrees\23-workspace
+# 必须先安排一次操作人员可点击的空窗；未传 -Run 时脚本直接拒绝启动。
+./scripts/test-windows-notification-manual.ps1 -FlutterBin C:\Users\Todoki\.local\share\flutter\bin -Run
+```
+
+该脚本只对专用 integration test 传 `D1_MANUAL_NOTIFICATION=true`；不带 define 的测试默认跳过，不由常规 `check.ps1` 或 `test-windows-native.ps1` 执行。使用临时 SQLCipher/DPAPI 目录与 port0，结束沿原 fixture 路径边界校验清理；不打开默认用户库、不改系统通知权限/设置，不隐藏或关闭已有用户 app。
+
+准备阶段已通过 `flutter analyze --no-pub`、PowerShell AST 语法检查和 `git diff --check`。此记录时尚未启动真实气泡探针，等待主Agent安排空窗；上述静态检查不是人工通知点击证据。
