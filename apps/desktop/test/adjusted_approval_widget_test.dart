@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:info_core/info_core.dart';
 import 'package:info_desktop/main.dart';
 
-void main() {
+void main() async {
   testWidgets(
     'owner can remove a requested field that is no longer available',
     (tester) async {
@@ -89,7 +89,7 @@ void main() {
     final grant = core.agent.claim(session, request.id);
     expect(grant.fields, [replacement]);
     expect(grant.expiresAt, DateTime.utc(2026, 10, 16, 0, 30));
-    expect(core.agent.read(grant.token, replacement), 'Use test network');
+    expect(await core.agent.read(grant.token, replacement), 'Use test network');
     expect(
       () => core.agent.read(grant.token, requested),
       throwsA(isA<AccessFailure>()),

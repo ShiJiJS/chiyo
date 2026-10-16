@@ -93,14 +93,17 @@ class MemoryInformationRepository implements InformationRepository {
   @override
   List<AccessRecord> get accessRecords => List.unmodifiable(_accesses.values);
   @override
-  Future<void> saveGrantHistory(GrantHistory history) async => _history[history.id] = history;
+  Future<void> saveGrantHistory(GrantHistory history) async =>
+      _history[history.id] = history;
   @override
-  Future<void> saveAccessRecord(AccessRecord record) async => _accesses[record.id] = record;
+  Future<void> saveAccessRecord(AccessRecord record) async =>
+      _accesses[record.id] = record;
   @override
   Future<void> pruneAudit(DateTime cutoff) async {
     _history.removeWhere((_, value) => value.approvedAt.isBefore(cutoff));
     _accesses.removeWhere((_, value) => value.at.isBefore(cutoff));
   }
+
   final _settings = <String, int>{};
   final _directories = <String, InformationDirectory>{};
   final _tags = <String, InformationTag>{};

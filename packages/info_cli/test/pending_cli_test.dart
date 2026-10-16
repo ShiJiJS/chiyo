@@ -16,7 +16,7 @@ void main() {
         client.close();
         other.close();
         await server.close();
-        core.close();
+        await core.close();
       });
       await client.execute({'command': 'session', 'chatLabel': 'chat'});
       await other.execute({'command': 'session', 'chatLabel': 'other'});

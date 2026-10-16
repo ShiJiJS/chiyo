@@ -1,7 +1,7 @@
 import 'package:info_core/info_core.dart';
 import 'package:test/test.dart';
 
-void main() {
+void main() async {
   test(
     'owner saves fields; approved reads see corrections but not other fields',
     () async {
@@ -22,7 +22,7 @@ void main() {
       service.owner.approve(request.id, [address]);
       final grant = service.agent.claim(session, request.id);
       expect(
-        service.agent.read(grant.token, address),
+        await service.agent.read(grant.token, address),
         'fictional-secret.invalid',
       );
       expect(
@@ -36,7 +36,7 @@ void main() {
       expect(revised.id, item.id);
       expect(revised.version, 2);
       expect(revised.fields.first.version, 2);
-      expect(service.agent.read(grant.token, address), 'corrected.invalid');
+      expect(await service.agent.read(grant.token, address), 'corrected.invalid');
       expect(
         () => service.agent.read(
           grant.token,

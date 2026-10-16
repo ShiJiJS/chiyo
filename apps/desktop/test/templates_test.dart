@@ -14,7 +14,11 @@ void main() {
       final service = InformationService(
         repository: MemoryInformationRepository(),
       );
-      addTearDown(service.close);
+      addTearDown(() async {
+        final closing = service.close();
+        await tester.pump();
+        await closing;
+      });
       await tester.pumpWidget(
         MaterialApp(home: InformationLibrary(owner: service.owner)),
       );

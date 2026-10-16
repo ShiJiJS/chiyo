@@ -98,6 +98,7 @@ class DesktopRuntime extends ChangeNotifier {
   DesktopAvailability availability = DesktopAvailability.unavailable;
   int openApprovalsRevision = 0;
   bool quitting = false;
+  bool shutdownFailed = false;
   StreamSubscription<String>? _requests;
   Future<void>? _quit;
   final _ready = Completer<void>();
@@ -185,17 +186,24 @@ class DesktopRuntime extends ChangeNotifier {
   Future<void> _shutdown() async {
     quitting = true;
     notifyListeners();
-    service
-        .close(); // Synchronously reject capabilities before asynchronous cleanup.
-    await _requests?.cancel();
     try {
-      await closeServer();
-    } finally {
+      // close synchronously rejects capabilities, then waits for queued facts.
+      // The database must stay open when those facts cannot yet be saved.
+      await Future.wait([service.close(), closeServer()]);
+    } on Object {
+      shutdownFailed = true;
+      quitting = false;
+      _quit = null;
       try {
-        await closeRepository();
-      } finally {
-        await platform.terminate();
+        await platform.showWindow();
+      } on Object {
+        /* Preserve unsaved facts. */
       }
+      notifyListeners();
+      return;
     }
+    await _requests?.cancel();
+    await closeRepository();
+    await platform.terminate();
   }
 }

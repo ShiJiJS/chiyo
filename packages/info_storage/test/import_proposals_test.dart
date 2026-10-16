@@ -41,7 +41,7 @@ void main() {
           ),
         ]),
       ]);
-      service.close();
+      await service.close();
       await store.close();
       store = await EncryptedInformationRepository.open(directory.path, keys);
       service = InformationService(repository: store);
@@ -60,7 +60,7 @@ void main() {
         pending.version,
         pending.items,
       );
-      service.close();
+      await service.close();
       await store.close();
       store = await EncryptedInformationRepository.open(directory.path, keys);
       service = InformationService(repository: store);
@@ -71,7 +71,7 @@ void main() {
         service.owner.information.last.fields.single.kind,
         FieldKind.textNote,
       );
-      service.close();
+      await service.close();
       await store.close();
       for (final file in directory.listSync().whereType<File>()) {
         final bytes = String.fromCharCodes(file.readAsBytesSync());

@@ -70,7 +70,10 @@ class AgentServer {
     }
   }
 
-  Future<Map<String, Object?>> _dispatch(String path, Map<String, dynamic> body) async {
+  Future<Map<String, Object?>> _dispatch(
+    String path,
+    Map<String, dynamic> body,
+  ) async {
     switch (path) {
       case '/import/submit':
         return _submitImport(body);

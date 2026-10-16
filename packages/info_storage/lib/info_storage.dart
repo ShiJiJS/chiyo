@@ -111,12 +111,22 @@ class EncryptedInformationRepository implements InformationRepository {
   }
 
   Future<void> _load() async {
-    for (final row in await _db.customSelect('SELECT payload FROM grant_history ORDER BY rowid').get()) {
-      final history = GrantHistory.fromJson(jsonDecode(row.read<String>('payload')) as Map<String,dynamic>);
+    for (final row
+        in await _db
+            .customSelect('SELECT payload FROM grant_history ORDER BY rowid')
+            .get()) {
+      final history = GrantHistory.fromJson(
+        jsonDecode(row.read<String>('payload')) as Map<String, dynamic>,
+      );
       _history[history.id] = history;
     }
-    for (final row in await _db.customSelect('SELECT payload FROM access_records ORDER BY rowid').get()) {
-      final record = AccessRecord.fromJson(jsonDecode(row.read<String>('payload')) as Map<String,dynamic>);
+    for (final row
+        in await _db
+            .customSelect('SELECT payload FROM access_records ORDER BY rowid')
+            .get()) {
+      final record = AccessRecord.fromJson(
+        jsonDecode(row.read<String>('payload')) as Map<String, dynamic>,
+      );
       _accesses[record.id] = record;
     }
     for (final row
@@ -231,18 +241,36 @@ class EncryptedInformationRepository implements InformationRepository {
   Future<void> saveGrantHistory(GrantHistory history) async {
     if (_closed) throw const StorageFailure('library_closed');
     try {
-      await _db.customStatement('INSERT INTO grant_history(id,approved_at,payload) VALUES(?,?,?) ON CONFLICT(id) DO UPDATE SET payload=excluded.payload',[history.id,history.approvedAt.toUtc().millisecondsSinceEpoch,jsonEncode(history.toJson())]);
+      await _db.customStatement(
+        'INSERT INTO grant_history(id,approved_at,payload) VALUES(?,?,?) ON CONFLICT(id) DO UPDATE SET payload=excluded.payload',
+        [
+          history.id,
+          history.approvedAt.toUtc().millisecondsSinceEpoch,
+          jsonEncode(history.toJson()),
+        ],
+      );
       _history[history.id] = history;
-    } on Object { throw const StorageFailure('audit_save_failed'); }
+    } on Object {
+      throw const StorageFailure('audit_save_failed');
+    }
   }
 
   @override
   Future<void> saveAccessRecord(AccessRecord record) async {
     if (_closed) throw const StorageFailure('library_closed');
     try {
-      await _db.customStatement('INSERT INTO access_records(id,recorded_at,payload) VALUES(?,?,?) ON CONFLICT(id) DO UPDATE SET payload=excluded.payload',[record.id,record.at.toUtc().millisecondsSinceEpoch,jsonEncode(record.toJson())]);
+      await _db.customStatement(
+        'INSERT INTO access_records(id,recorded_at,payload) VALUES(?,?,?) ON CONFLICT(id) DO UPDATE SET payload=excluded.payload',
+        [
+          record.id,
+          record.at.toUtc().millisecondsSinceEpoch,
+          jsonEncode(record.toJson()),
+        ],
+      );
       _accesses[record.id] = record;
-    } on Object { throw const StorageFailure('audit_save_failed'); }
+    } on Object {
+      throw const StorageFailure('audit_save_failed');
+    }
   }
 
   @override
@@ -250,12 +278,20 @@ class EncryptedInformationRepository implements InformationRepository {
     if (_closed) throw const StorageFailure('library_closed');
     try {
       await _db.transaction(() async {
-        await _db.customStatement('DELETE FROM grant_history WHERE approved_at < ?',[cutoff.toUtc().millisecondsSinceEpoch]);
-        await _db.customStatement('DELETE FROM access_records WHERE recorded_at < ?',[cutoff.toUtc().millisecondsSinceEpoch]);
+        await _db.customStatement(
+          'DELETE FROM grant_history WHERE approved_at < ?',
+          [cutoff.toUtc().millisecondsSinceEpoch],
+        );
+        await _db.customStatement(
+          'DELETE FROM access_records WHERE recorded_at < ?',
+          [cutoff.toUtc().millisecondsSinceEpoch],
+        );
       });
-      _history.removeWhere((_,h)=>h.approvedAt.isBefore(cutoff));
-      _accesses.removeWhere((_,a)=>a.at.isBefore(cutoff));
-    } on Object { throw const StorageFailure('audit_save_failed'); }
+      _history.removeWhere((_, h) => h.approvedAt.isBefore(cutoff));
+      _accesses.removeWhere((_, a) => a.at.isBefore(cutoff));
+    } on Object {
+      throw const StorageFailure('audit_save_failed');
+    }
   }
 
   @override
@@ -547,9 +583,17 @@ class _InformationDatabase extends GeneratedDatabase {
   );
 
   Future<void> _createAudit() async {
-    await customStatement('CREATE TABLE grant_history(id TEXT PRIMARY KEY,approved_at INTEGER NOT NULL,payload TEXT NOT NULL)');
-    await customStatement('CREATE TABLE access_records(id TEXT PRIMARY KEY,recorded_at INTEGER NOT NULL,payload TEXT NOT NULL)');
-    await customStatement('CREATE INDEX grant_history_retention ON grant_history(approved_at)');
-    await customStatement('CREATE INDEX access_records_retention ON access_records(recorded_at)');
+    await customStatement(
+      'CREATE TABLE grant_history(id TEXT PRIMARY KEY,approved_at INTEGER NOT NULL,payload TEXT NOT NULL)',
+    );
+    await customStatement(
+      'CREATE TABLE access_records(id TEXT PRIMARY KEY,recorded_at INTEGER NOT NULL,payload TEXT NOT NULL)',
+    );
+    await customStatement(
+      'CREATE INDEX grant_history_retention ON grant_history(approved_at)',
+    );
+    await customStatement(
+      'CREATE INDEX access_records_retention ON access_records(recorded_at)',
+    );
   }
 }

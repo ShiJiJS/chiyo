@@ -93,6 +93,7 @@ class _Request {
   final DateTime expiresAt;
   AccessRequestState state = AccessRequestState.pending;
   ClaimedGrant? grant;
+  DateTime? approvedAt;
   GrantHistory? history;
 }
 
@@ -164,6 +165,7 @@ class InformationService {
     if (_closed) return owner.retryAuditStorage();
     _closed = true;
     for (final request in _requests.values) {
+      _expire(request);
       _finishHistory(request, GrantEventKind.applicationClosed);
     }
     _sessions.clear();
@@ -285,9 +287,10 @@ class AgentAccess {
     final request = _service._grants[token];
     if (request != null) _service._expire(request);
     final grant = request?.grant;
-    final allowed = !(grant == null ||
-        request!.state != AccessRequestState.approved ||
-        !grant.fields.contains(field));
+    final allowed =
+        !(grant == null ||
+            request!.state != AccessRequestState.approved ||
+            !grant.fields.contains(field));
     final value = allowed ? _service._field(field)?.value : null;
     await _service._recordAccess(request, field, allowed && value != null);
     if (!allowed || value == null) throw const AccessFailure('unauthorized');
@@ -610,10 +613,12 @@ class OwnerAccess {
         lifetime > const Duration(days: 7)) {
       throw const AccessFailure('invalid_duration');
     }
+    final approvedAt = _service._clock();
+    request.approvedAt = approvedAt;
     request.grant = ClaimedGrant(
       _service._secret(),
       fields.toSet().toList(),
-      _service._clock().add(lifetime),
+      approvedAt.add(lifetime),
     );
     _service._grants[request.grant!.token] = request;
     request.state = AccessRequestState.approved;
