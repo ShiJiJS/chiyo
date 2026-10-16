@@ -1,5 +1,7 @@
 # Implementation status
 
+2026-10-16：用户要求更新方案与GitHub tickets；[新计划](design-audit-2026-10-16/README.md)跟踪round05界面与凭据注入。任务按依赖推进，D0先补齐原型及协议。仅完成规划发布，未新增生产实现或实机验收；下方旧实现进度保留为基线事实。
+
 Integration branch: `integration/local-information-access`.
 
 Source of truth: [specification #1](https://github.com/ShiJiJS/agent-info-manage/issues/1), its 18 sub-issues, and their native GitHub blocking relationships. The initial documentation baseline is `9df5f7a`. The approved ticket bodies are also preserved in `published-tickets/`.
