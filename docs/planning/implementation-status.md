@@ -40,13 +40,19 @@ One confirmed P2 defect was fixed: an expired grant could become readable after 
 
 Review totals: Standards 3 observations addressed (production acceptance still pending); Spec 1 defect fixed. No remaining code finding was reported in the correction review.
 
-The draft [PR #20](https://github.com/ShiJiJS/agent-info-manage/pull/20) remains an integration surface, not a completed release. All issues remain open. Later features—scope/duration editing, child-agent/end lifecycle, background notifications, organization/templates/import proposals, recovery, deletion/history and distribution—remain to be implemented. See [manual acceptance](../development/manual-acceptance.md) for concrete user-coordinated checks.
+The draft [PR #20](https://github.com/ShiJiJS/agent-info-manage/pull/20) remains an integration surface, not a completed release. All issues remain open. Later batches below update the implementation frontier; see [manual acceptance](../development/manual-acceptance.md) and the per-ticket evidence for user-coordinated checks.
 
 ## Next development batch: #5, #9, #10
 
 The user explicitly requested continuing dependent implementation on 2026-10-16. These tickets now build on the merged and headlessly verified #3 information-repository contract: #5 adjusts the approved scope/duration, #9 adds organization and public catalog search, and #10 adds field templates. Each uses an isolated worktree and TDD at the already agreed public-service/CLI/widget boundaries. Their start does not change the outstanding acceptance status of #3/#4/#6 or close any GitHub dependency.
 
 Implementation dependencies and acceptance gates are tracked separately so unavailable desktop/macOS checks do not force unrelated code work to stop. Only the implemented upstream contracts are reused; unsupported behavior is not assumed. Required real-platform checks remain a release gate.
+
+At `3d3f393`, #5/#9/#10 are merged and their combined tree passed **51 headless tests** (core 25, CLI 9, storage 7, widgets 10), with all static analysis clean. Evidence: [adjusted approval](../development/adjusted-approval.md), [organized catalog](../development/organized-catalog.md), [field templates](../development/field-templates.md). Owner approval can replace/add fields and set a duration, resolve a directory to fixed field IDs, and show requested versus selected names. Saved metadata is searchable with bounded pagination; directory/tag labels remain owner-only. Template changes do not rewrite existing items or grants. Schema 4 combines organization and template migrations and preserves field types.
+
+User confirmed the audit retention policy: default 90 days, selectable 30/90/180/365 days with confirmation before shortening/cleaning older records. Local specification and GitHub #1 were synchronized at `201a5b7`.
+
+#8 background lifecycle, #11 reviewed import proposals, and #12 independent encrypted backup are now being implemented in separate worktrees. #11 starts after the merged #9/#10 contracts. Desktop/manual and macOS acceptance remain open for every new feature; none of these test counts are real GUI evidence.
 
 ## Completion rules
 

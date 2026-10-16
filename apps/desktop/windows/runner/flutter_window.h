@@ -3,6 +3,9 @@
 
 #include <flutter/dart_project.h>
 #include <flutter/flutter_view_controller.h>
+#include <flutter/method_channel.h>
+#include <flutter/encodable_value.h>
+#include <shellapi.h>
 
 #include <memory>
 
@@ -24,6 +27,16 @@ class FlutterWindow : public Win32Window {
                          LPARAM const lparam) noexcept override;
 
  private:
+  bool AddTrayIcon();
+  void RemoveTrayIcon();
+  void OpenApprovals();
+  void SendDesktopEvent(const char* event);
+  flutter::EncodableValue DesktopAvailability();
+  std::unique_ptr<flutter::MethodChannel<flutter::EncodableValue>> desktop_channel_;
+  bool desktop_ready_ = false;
+  bool tray_available_ = false;
+  bool notifications_enabled_ = true;
+  UINT taskbar_created_ = 0;
   // The project to run.
   flutter::DartProject project_;
 
