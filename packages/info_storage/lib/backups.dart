@@ -312,11 +312,14 @@ class InformationBackups {
   static BackupContents _validate(Object? decoded) {
     Never invalid() => throw const StorageFailure('invalid_backup');
     if (decoded is! Map<String, dynamic>) invalid();
-    if (decoded['format'] != _format || decoded['version'] != 1)
+    if (decoded['format'] != _format ||
+        decoded['version'] is! int ||
+        decoded['version'] != 1)
       throw const StorageFailure('unsupported_backup');
     if (decoded.length != 4 ||
         decoded['tables'] is! Map<String, dynamic> ||
-        decoded['createdAt'] is! String)
+        decoded['createdAt'] is! String ||
+        (decoded['createdAt'] as String).length > 64)
       invalid();
     final createdAt = DateTime.tryParse(decoded['createdAt'] as String);
     if (createdAt == null) invalid();
@@ -327,7 +330,12 @@ class InformationBackups {
     final tables = <String, List<Map<String, Object?>>>{};
     for (final table in _columns.entries) {
       final rows = data[table.key];
-      if (rows is! List || rows.length > 200000) invalid();
+      final maximum = switch (table.key) {
+        'information_fields' || 'information_item_tags' => 200000,
+        'field_templates' || 'settings' => 1000,
+        _ => 10000,
+      };
+      if (rows is! List || rows.length > maximum) invalid();
       tables[table.key] = rows
           .map((value) {
             if (value is! Map<String, dynamic> ||
@@ -374,19 +382,28 @@ class InformationBackups {
     final items = identities('information_items');
     identities('information_fields');
     identities('field_templates');
+    final parents = <String, String?>{};
     for (final row in tables['information_directories']!) {
       final parent = row['parent_id'];
       if (parent != null &&
           (parent is! String || !directories.contains(parent)))
         invalid();
-      var current = parent;
-      final seen = <String>{id(row)};
-      while (current != null) {
-        if (!seen.add(current as String)) invalid();
-        current = tables['information_directories']!.firstWhere(
-          (r) => r['id'] == current,
-        )['parent_id'];
+      parents[id(row)] = parent as String?;
+    }
+    final checked = <String>{};
+    for (final directory in parents.keys) {
+      final seen = <String>{};
+      String? current = directory;
+      while (current != null && !checked.contains(current)) {
+        if (!seen.add(current)) invalid();
+        current = parents[current];
       }
+      checked.addAll(seen);
+    }
+    final fieldCounts = <String, int>{};
+    for (final field in tables['information_fields']!) {
+      final item = id(field, 'item_id');
+      fieldCounts[item] = (fieldCounts[item] ?? 0) + 1;
     }
     for (final row in tables['information_items']!) {
       text(row, 'description', 2000);
@@ -394,10 +411,8 @@ class InformationBackups {
       if (directory != null &&
           (directory is! String || !directories.contains(directory)))
         invalid();
-      final fields = tables['information_fields']!.where(
-        (f) => f['item_id'] == row['id'],
-      );
-      if (fields.isEmpty || fields.length > 200) invalid();
+      final count = fieldCounts[row['id']] ?? 0;
+      if (count < 1 || count > 200) invalid();
     }
     for (final row in tables['information_fields']!) {
       if (!items.contains(id(row, 'item_id'))) invalid();
@@ -406,11 +421,15 @@ class InformationBackups {
       if (!FieldKind.values.any((kind) => kind.name == row['kind'])) invalid();
     }
     final associations = <String>{};
+    final tagCounts = <String, int>{};
     for (final row in tables['information_item_tags']!) {
       if (!items.contains(id(row, 'item_id')) ||
           !tags.contains(id(row, 'tag_id')) ||
           !associations.add(jsonEncode([row['item_id'], row['tag_id']])))
         invalid();
+      final item = id(row, 'item_id');
+      tagCounts[item] = (tagCounts[item] ?? 0) + 1;
+      if (tagCounts[item]! > 100) invalid();
     }
     for (final row in tables['field_templates']!) {
       text(row, 'description', 2000);

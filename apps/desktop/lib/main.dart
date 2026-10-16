@@ -7,6 +7,7 @@ import 'package:info_core/info_core.dart';
 import 'package:info_storage/info_storage.dart';
 import 'library.dart';
 import 'desktop_runtime.dart';
+import 'backups.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -44,7 +45,12 @@ Future<void> main() async {
     );
     await runtime.start();
     runApp(
-      InformationApp(service: service, port: server.port, runtime: runtime),
+      InformationApp(
+        service: service,
+        port: server.port,
+        runtime: runtime,
+        backups: repository.backups,
+      ),
     );
   } on Object {
     service?.close();
@@ -69,17 +75,24 @@ class InformationApp extends StatefulWidget {
     required this.service,
     required this.port,
     this.runtime,
+    this.backups,
+    this.backupFiles = const NativeBackupFilePicker(),
   });
   final InformationService service;
   final int port;
   final DesktopRuntime? runtime;
+  final InformationBackups? backups;
+  final BackupFilePicker backupFiles;
   @override
   State<InformationApp> createState() => _InformationAppState();
 }
 
 class _InformationAppState extends State<InformationApp>
     with SingleTickerProviderStateMixin {
-  late final _tabs = TabController(length: 2, vsync: this);
+  late final _tabs = TabController(
+    length: widget.backups == null ? 2 : 3,
+    vsync: this,
+  );
   int _openRevision = 0;
   @override
   void initState() {
@@ -131,6 +144,7 @@ class _InformationAppState extends State<InformationApp>
           tabs: [
             Tab(text: '访问审批'),
             Tab(text: '我的信息'),
+            if (widget.backups != null) Tab(text: '备份恢复'),
           ],
         ),
       ),
@@ -155,6 +169,8 @@ class _InformationAppState extends State<InformationApp>
               children: [
                 Approvals(service: widget.service, port: widget.port),
                 InformationLibrary(owner: widget.service.owner),
+                if (widget.backups case final backups?)
+                  BackupLibrary(backups: backups, files: widget.backupFiles),
               ],
             ),
           ),

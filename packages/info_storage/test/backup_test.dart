@@ -15,6 +15,52 @@ class _Keys implements DatabaseKeyStore {
 
 void main() {
   test(
+    'Windows recovery works with fresh DPAPI key after original envelope is gone',
+    () async {
+      final root = await Directory.systemTemp.createTemp('info-backup-dpapi-');
+      addTearDown(() => root.delete(recursive: true));
+      final originalKeys = WindowsDatabaseKeyStore(
+        '${root.path}/original/key.dpapi',
+      );
+      final source = await EncryptedInformationRepository.open(
+        '${root.path}/original',
+        originalKeys,
+      );
+      await InformationService(repository: source).owner.createInformation(
+        'Fictional independent',
+        '',
+        [const FieldInput('Value', '', 'FICTIONAL-DPAPI-BACKUP-41232')],
+      );
+      final originalKey = await originalKeys.read();
+      final recovery = await source.backups.enable();
+      final backup = '${root.path}/independent.aimbackup';
+      await source.backups.exportTo(backup);
+      await source.close();
+      await File(originalKeys.path).delete();
+      expect(await originalKeys.read(), isNull);
+      final freshKeys = WindowsDatabaseKeyStore('${root.path}/fresh/key.dpapi');
+      final recipient = await EncryptedInformationRepository.open(
+        '${root.path}/fresh',
+        freshKeys,
+      );
+      await recipient.backups.restoreFrom(backup, recovery);
+      expect(await freshKeys.read(), isNot(originalKey));
+      expect(
+        recipient.items.single.fields.single.value,
+        'FICTIONAL-DPAPI-BACKUP-41232',
+      );
+      await recipient.close();
+      for (final file in root.listSync(recursive: true).whereType<File>()) {
+        expect(
+          String.fromCharCodes(file.readAsBytesSync()),
+          isNot(contains('FICTIONAL-DPAPI-BACKUP-41232')),
+        );
+      }
+    },
+    skip: !Platform.isWindows,
+  );
+
+  test(
     'independent recovery key restores current information without live access',
     () async {
       final root = await Directory.systemTemp.createTemp('info-backup-');
@@ -148,7 +194,6 @@ void main() {
         '${root.path}/source',
         _Keys(),
       );
-      addTearDown(source.close);
       await InformationService(repository: source).owner.createInformation(
         'Backup source',
         '',
@@ -157,6 +202,15 @@ void main() {
       final recovery = await source.backups.enable();
       final backup = '${root.path}/source.aimbackup';
       await source.backups.exportTo(backup);
+      final before = File(backup).readAsBytesSync();
+      await expectLater(
+        source.backups.exportTo(backup),
+        throwsA(
+          isA<StorageFailure>().having((e) => e.code, 'code', 'output_exists'),
+        ),
+      );
+      expect(File(backup).readAsBytesSync(), before);
+      await source.close();
       final recipient = await EncryptedInformationRepository.open(
         '${root.path}/recipient',
         _Keys(),
@@ -189,13 +243,6 @@ void main() {
         'fictional original',
       );
       expect(targetOwner.requestLifetime, const Duration(minutes: 15));
-      final before = File(backup).readAsBytesSync();
-      await expectLater(
-        source.backups.exportTo(backup),
-        throwsA(
-          isA<StorageFailure>().having((e) => e.code, 'code', 'output_exists'),
-        ),
-      );
       expect(File(backup).readAsBytesSync(), before);
     },
   );
@@ -275,7 +322,18 @@ void main() {
       payload['version'] = 99;
       db.execute('UPDATE backup_snapshot SET payload=?', [jsonEncode(payload)]);
       db.close();
-      for (final file in ['damaged', 'truncated', 'unknown']) {
+      final malformed = '${root.path}/malformed.aimbackup';
+      await File(path).copy(malformed);
+      final malformedDb = sqlite3.open(malformed);
+      malformedDb.execute('PRAGMA key = "x\'$hex\'"');
+      payload['version'] = 1;
+      (payload['tables']['information_fields'] as List).single['kind'] =
+          'unknown';
+      malformedDb.execute('UPDATE backup_snapshot SET payload=?', [
+        jsonEncode(payload),
+      ]);
+      malformedDb.close();
+      for (final file in ['damaged', 'truncated', 'unknown', 'malformed']) {
         await expectLater(
           recipient.backups.restoreFrom(
             '${root.path}/$file.aimbackup',
