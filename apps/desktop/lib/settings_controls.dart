@@ -186,7 +186,7 @@ class SettingsNotice extends StatelessWidget {
                       color: messageColor ?? ink,
                     ),
                   ),
-                  SizedBox(height: 3 - lineGap),
+                  SizedBox(height: lineGap < 3 ? 3 - lineGap : 0),
                 ],
               ),
             ),
