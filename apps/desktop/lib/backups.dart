@@ -199,7 +199,7 @@ class _BackupLibraryState extends State<BackupLibrary> {
       ),
       const SizedBox(height: 12),
       const Text(
-        '已导出的离线备份不会随应用中的到期清理而删除旧内容；请自行管理和删除离线备份。恢复时再次按原时间清理到期内容，不延长保留期。导出和恢复期间暂缓 Agent 访问，完成后可重试。',
+        '已导出的离线备份不会随应用中的到期清理而删除旧内容；请自行管理和删除离线备份。恢复时再次按原时间清理到期内容，不延长保留期。恢复期间暂缓 Agent 访问，完成后需要重新申请。',
       ),
       const SizedBox(height: 20),
       const Text(

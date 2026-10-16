@@ -14,6 +14,63 @@ class _DelayedStorage extends MemoryInformationRepository {
 }
 
 void main() {
+  for (final transition in ['none', 'end', 'revoke', 'expire']) {
+    test(
+      'export retains normal in-flight delivery and respects $transition while its snapshot is pending',
+      () async {
+        var now = DateTime.utc(2026, 10, 16);
+        final repository = _DelayedStorage();
+        final service = InformationService(
+          repository: repository,
+          clock: () => now,
+        );
+        final item = await service.owner.createInformation('Source', '', [
+          const FieldInput('Value', '', 'private'),
+        ]);
+        final field = FieldRef(item.id, item.fields.single.id);
+        final session = service.agent.openSession('chat');
+        final request = service.agent.request(session, 'read', [field]);
+        service.owner.approve(request.id, [
+          field,
+        ], lifetime: const Duration(minutes: 1));
+        final token = service.agent.claim(session, request.id).token;
+        repository.hold = Completer<void>();
+        final read = service.agent.read(token, field);
+        final entered = Completer<void>();
+        final finish = Completer<void>();
+        final export = service.owner.exportLibrary(() async {
+          entered.complete();
+          await finish.future;
+        });
+        await Future<void>.delayed(Duration.zero);
+        repository.hold!.complete();
+        expect(await read, 'private');
+        await entered.future;
+        switch (transition) {
+          case 'end':
+            service.agent.endSession(session);
+          case 'revoke':
+            service.owner.revoke(request.id);
+          case 'expire':
+            now = now.add(const Duration(minutes: 2));
+        }
+        if (transition == 'none') {
+          expect(await service.agent.read(token, field), 'private');
+        } else {
+          await expectLater(
+            service.agent.read(token, field),
+            throwsA(isA<AccessFailure>()),
+          );
+        }
+        finish.complete();
+        await export;
+        if (transition == 'none')
+          expect(await service.agent.read(token, field), 'private');
+        await service.close();
+      },
+    );
+  }
+
   test(
     'owner restore waits for in-flight denials and discards every prior session capability only after success',
     () async {

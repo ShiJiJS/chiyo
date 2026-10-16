@@ -17,10 +17,11 @@ extension OwnerLibraryBackup on OwnerAccess {
     if (_service._closed) throw const AccessFailure('service_unavailable');
     final barrier = Completer<void>();
     _service._backupBarrier = barrier;
-    _service._backupBusy = true;
+    _service._backupBusy = restore;
     try {
-      // Reads already admitted must complete their denial record in the old
-      // library before any replacement. New reads cannot enqueue audit writes.
+      // Restore latches content delivery before replacing a library. An export
+      // drains existing reads normally and leaves end/revoke/expiry effective;
+      // its read-only SQL transaction captures a consistent durable snapshot.
       await Future.wait(_service._reads.toList());
       await _retryAuditStorage();
       final result = await action();
