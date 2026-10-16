@@ -512,6 +512,8 @@ class InformationBackups {
       if (value < 0 || value > 9007199254740991) invalid();
       if (name == 'requestLifetimeMs' && (value < 60000 || value > 604800000))
         invalid();
+      if (name == 'auditRetentionDays' && ![30, 90, 180, 365].contains(value))
+        invalid();
     }
     return BackupContents._(Map.unmodifiable(tables), createdAt);
   }

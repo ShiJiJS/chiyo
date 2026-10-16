@@ -127,6 +127,7 @@ void main() {
       );
       final backup = '${root.path}/fictional.aimbackup';
       await source.backups.exportTo(backup);
+      await ownerService.close();
       await source.close();
       source = await EncryptedInformationRepository.open(
         '${root.path}/source',
@@ -171,7 +172,7 @@ void main() {
         throwsA(isA<AccessFailure>()),
       );
       expect(await recipient.backups.recoveryKey(), isNull);
-      restored.close();
+      await restored.close();
       await recipient.close();
       recipient = await EncryptedInformationRepository.open(
         '${root.path}/recipient',
@@ -179,7 +180,7 @@ void main() {
       );
       restored = InformationService(repository: recipient);
       expect(restored.owner.information.single.fields.single.version, 2);
-      restored.close();
+      await restored.close();
       await recipient.close();
       for (final file in root.listSync(recursive: true).whereType<File>()) {
         final content = String.fromCharCodes(file.readAsBytesSync());
@@ -340,7 +341,26 @@ void main() {
         jsonEncode(payload),
       ]);
       malformedDb.close();
-      for (final file in ['damaged', 'truncated', 'unknown', 'malformed']) {
+      final invalidRetention = '${root.path}/bad-retention.aimbackup';
+      await File(path).copy(invalidRetention);
+      final retentionDb = sqlite3.open(invalidRetention);
+      retentionDb.execute('PRAGMA key = "x\'$hex\'"');
+      (payload['tables']['information_fields'] as List).single['kind'] =
+          'structured';
+      payload['tables']['settings'] = [
+        {'name': 'auditRetentionDays', 'value': 9007199254740991},
+      ];
+      retentionDb.execute('UPDATE backup_snapshot SET payload=?', [
+        jsonEncode(payload),
+      ]);
+      retentionDb.close();
+      for (final file in [
+        'damaged',
+        'truncated',
+        'unknown',
+        'malformed',
+        'bad-retention',
+      ]) {
         await expectLater(
           recipient.backups.restoreFrom(
             '${root.path}/$file.aimbackup',

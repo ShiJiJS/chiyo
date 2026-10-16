@@ -99,7 +99,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('restored.invalid'), findsOneWidget);
       await tester.pumpWidget(const SizedBox());
-      service.close();
+      await service.close();
       await tester.runAsync(() async {
         await recipient.close();
         await root.delete(recursive: true);
