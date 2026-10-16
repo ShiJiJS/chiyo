@@ -6,12 +6,15 @@ import 'templates.dart';
 import 'history.dart';
 export 'history.dart';
 import 'import_proposals.dart';
+import 'update_proposals.dart';
 export 'information.dart';
 export 'templates.dart';
 export 'import_proposals.dart';
+export 'update_proposals.dart';
 part 'organization_access.dart';
 part 'history_access.dart';
 part 'import_access.dart';
+part 'update_access.dart';
 
 class AccessFailure implements Exception {
   const AccessFailure(this.status);
@@ -95,6 +98,7 @@ class _Request {
   ClaimedGrant? grant;
   DateTime? approvedAt;
   GrantHistory? history;
+  final invalidatedFields = <FieldRef>{};
 }
 
 /// In-memory authorization state over an injected information repository.
@@ -290,7 +294,8 @@ class AgentAccess {
     final allowed =
         !(grant == null ||
             request!.state != AccessRequestState.approved ||
-            !grant.fields.contains(field));
+            !grant.fields.contains(field) ||
+            request.invalidatedFields.contains(field));
     final value = allowed ? _service._field(field)?.value : null;
     await _service._recordAccess(request, field, allowed && value != null);
     if (!allowed || value == null) throw const AccessFailure('unauthorized');
@@ -303,6 +308,7 @@ class AgentAccess {
       .map(
         (item) => <String, Object?>{
           'id': item.id,
+          'version': item.version,
           'name': item.name,
           'description': item.description,
           'directoryId': item.directoryId,
@@ -558,7 +564,10 @@ class OwnerAccess {
           directoryId: previous.directoryId,
           tagIds: previous.tagIds,
         );
-        await _service._repository.save(item);
+        await _service._repository.saveInformationRevision(
+          item,
+          InformationRevision(previous, _service._clock()),
+        );
         return item;
       });
   List<OwnerRequestSnapshot> get requests => _service._requests.values.map((r) {

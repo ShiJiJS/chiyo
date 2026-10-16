@@ -125,7 +125,10 @@ extension OwnerOrganization on OwnerAccess {
       directoryId: old.directoryId,
       tagIds: old.tagIds,
     );
-    await _service._repository.save(item);
+    await _service._repository.saveInformationRevision(
+      item,
+      InformationRevision(old, _service._clock()),
+    );
     return item;
   });
 
@@ -153,7 +156,10 @@ extension OwnerOrganization on OwnerAccess {
       directoryId: directoryId,
       tagIds: selectedTags,
     );
-    await _service._repository.save(item);
+    await _service._repository.saveInformationRevision(
+      item,
+      InformationRevision(old, _service._clock()),
+    );
     return item;
   });
 

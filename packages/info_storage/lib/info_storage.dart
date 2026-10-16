@@ -35,6 +35,8 @@ class EncryptedInformationRepository implements InformationRepository {
   final _history = <String, GrantHistory>{};
   final _accesses = <String, AccessRecord>{};
   final _proposals = <String, ImportProposal>{};
+  final _updates = <String, UpdateProposal>{};
+  final _revisions = <InformationRevision>[];
   bool _closed = false;
   static final _openDirectories = <String>{};
   late final String _directory;
@@ -128,6 +130,30 @@ class EncryptedInformationRepository implements InformationRepository {
         jsonDecode(row.read<String>('payload')) as Map<String, dynamic>,
       );
       _accesses[record.id] = record;
+    }
+    for (final row
+        in await _db
+            .customSelect('SELECT payload FROM update_proposals ORDER BY rowid')
+            .get()) {
+      final proposal = UpdateProposal.fromJson(
+        jsonDecode(row.read<String>('payload')) as Map<String, dynamic>,
+      );
+      _updates[proposal.id] = proposal;
+    }
+    for (final row
+        in await _db
+            .customSelect(
+              'SELECT payload,replaced_at FROM information_revisions ORDER BY rowid',
+            )
+            .get()) {
+      _revisions.add(
+        InformationRevision(
+          informationFromJson(
+            jsonDecode(row.read<String>('payload')) as Map<String, dynamic>,
+          ),
+          DateTime.parse(row.read<String>('replaced_at')),
+        ),
+      );
     }
     for (final row
         in await _db
@@ -425,6 +451,10 @@ class EncryptedInformationRepository implements InformationRepository {
         [item.id, tag],
       );
     }
+    await _db.customStatement(
+      'DELETE FROM information_fields WHERE item_id=?',
+      [item.id],
+    );
     for (final field in item.fields) {
       await _db.customStatement(
         'INSERT INTO information_fields(id,item_id,name,description,value,version,kind) VALUES(?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET name=excluded.name,description=excluded.description,value=excluded.value,version=excluded.version,kind=excluded.kind',
@@ -495,6 +525,8 @@ class EncryptedInformationRepository implements InformationRepository {
     _history.clear();
     _accesses.clear();
     _proposals.clear();
+    _updates.clear();
+    _revisions.clear();
     try {
       await _db.close();
     } finally {
@@ -502,18 +534,96 @@ class EncryptedInformationRepository implements InformationRepository {
       _openDirectories.remove(_directory);
     }
   }
+
+  @override
+  List<UpdateProposal> get updateProposals {
+    if (_closed) throw const StorageFailure('library_closed');
+    return List.unmodifiable(_updates.values);
+  }
+
+  @override
+  List<InformationRevision> get informationRevisions {
+    if (_closed) throw const StorageFailure('library_closed');
+    return List.unmodifiable(_revisions);
+  }
+
+  Future<void> _writeUpdate(UpdateProposal proposal) => _db.customStatement(
+    'INSERT INTO update_proposals(id,payload) VALUES(?,?) ON CONFLICT(id) DO UPDATE SET payload=excluded.payload',
+    [proposal.id, jsonEncode(proposal.toJson())],
+  );
+  Future<void> _writeRevision(
+    InformationRevision revision,
+  ) => _db.customStatement(
+    'INSERT INTO information_revisions(item_id,version,replaced_at,payload) VALUES(?,?,?,?)',
+    [
+      revision.item.id,
+      revision.item.version,
+      revision.replacedAt.toUtc().toIso8601String(),
+      jsonEncode(informationToJson(revision.item)),
+    ],
+  );
+  @override
+  Future<void> saveUpdateProposal(UpdateProposal proposal) async {
+    if (_closed) throw const StorageFailure('library_closed');
+    try {
+      await _writeUpdate(proposal);
+      _updates[proposal.id] = proposal;
+    } catch (_) {
+      throw const StorageFailure('save_failed');
+    }
+  }
+
+  @override
+  Future<void> saveInformationRevision(
+    InformationItem item,
+    InformationRevision previous,
+  ) async {
+    if (_closed) throw const StorageFailure('library_closed');
+    try {
+      await _db.transaction(() async {
+        await _writeItem(item);
+        await _writeRevision(previous);
+      });
+      _items[item.id] = item;
+      _revisions.add(previous);
+    } catch (_) {
+      throw const StorageFailure('save_failed');
+    }
+  }
+
+  @override
+  Future<void> confirmUpdateProposal(
+    UpdateProposal proposal,
+    InformationItem item,
+    InformationRevision previous,
+  ) async {
+    if (_closed) throw const StorageFailure('library_closed');
+    try {
+      await _db.transaction(() async {
+        await _writeItem(item);
+        await _writeRevision(previous);
+        await _writeUpdate(proposal);
+      });
+      _items[item.id] = item;
+      _revisions.add(previous);
+      _updates[proposal.id] = proposal;
+    } catch (_) {
+      throw const StorageFailure('save_failed');
+    }
+  }
 }
 
 class _InformationDatabase extends GeneratedDatabase {
   _InformationDatabase(super.executor);
   @override
-  int get schemaVersion => 7;
+  int get schemaVersion => 8;
   @override
   Iterable<TableInfo<Table, Object?>> get allTables => const [];
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (_) async {
       await _createAudit();
+      await _createUpdates();
       await _createProposals();
       await _createTemplates();
       await customStatement(
@@ -528,7 +638,7 @@ class _InformationDatabase extends GeneratedDatabase {
       await _organizationSchema();
     },
     onUpgrade: (_, from, to) async {
-      if (from < 1 || to != 7) throw const StorageFailure('unsupported_schema');
+      if (from < 1 || to != 8) throw const StorageFailure('unsupported_schema');
       await transaction(() async {
         if (from < 2) {
           await customStatement(
@@ -551,6 +661,7 @@ class _InformationDatabase extends GeneratedDatabase {
         // Schema 5 is reserved for the independent backup configuration.
         if (from < 6) await _createProposals();
         if (from < 7) await _createAudit();
+        if (from < 8) await _createUpdates();
       });
     },
     beforeOpen: (details) async {
@@ -562,6 +673,14 @@ class _InformationDatabase extends GeneratedDatabase {
   Future<void> _createProposals() => customStatement(
     'CREATE TABLE import_proposals(id TEXT PRIMARY KEY,payload TEXT NOT NULL)',
   );
+  Future<void> _createUpdates() async {
+    await customStatement(
+      'CREATE TABLE update_proposals(id TEXT PRIMARY KEY,payload TEXT NOT NULL)',
+    );
+    await customStatement(
+      'CREATE TABLE information_revisions(item_id TEXT NOT NULL,version INTEGER NOT NULL,replaced_at TEXT NOT NULL,payload TEXT NOT NULL,PRIMARY KEY(item_id,version))',
+    );
+  }
 
   Future<void> _organizationSchema() async {
     await customStatement(
