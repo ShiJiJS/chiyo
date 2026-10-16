@@ -58,7 +58,8 @@ InformationItem _informationFromRows(
 );
 
 /// A desktop-only capability. The CLI depends on info_core, never this package.
-class EncryptedInformationRepository implements InformationRepository, CredentialRepository {
+class EncryptedInformationRepository
+    implements InformationRepository, CredentialRepository {
   EncryptedInformationRepository._(
     this._db,
     this._lock,
@@ -75,6 +76,7 @@ class EncryptedInformationRepository implements InformationRepository, Credentia
   final _tags = <String, InformationTag>{};
   final _templates = <String, InformationTemplate>{};
   final _history = <String, GrantHistory>{};
+  final _requestHistory = <String, RequestHistory>{};
   final _accesses = <String, AccessRecord>{};
   final _organizationTasks = <String, OrganizationTask>{};
   final _proposals = <String, ImportProposal>{};
@@ -87,11 +89,16 @@ class EncryptedInformationRepository implements InformationRepository, Credentia
   final _credentials = <ManagedCredential>[];
   final _credentialMaterials = <CredentialMaterial>[];
   @override
-  List<ManagedCredential> get managedCredentials => List.unmodifiable(_credentials);
+  List<ManagedCredential> get managedCredentials =>
+      List.unmodifiable(_credentials);
   @override
-  List<CredentialMaterial> get credentialMaterials => List.unmodifiable(_credentialMaterials);
+  List<CredentialMaterial> get credentialMaterials =>
+      List.unmodifiable(_credentialMaterials);
   @override
-  Future<void> commitCredentials(List<ManagedCredential> credentials, List<CredentialMaterial> materials) async {
+  Future<void> commitCredentials(
+    List<ManagedCredential> credentials,
+    List<CredentialMaterial> materials,
+  ) async {
     if (_closed) throw const StorageFailure('library_closed');
     _validateVault(credentials, materials);
     try {
@@ -99,18 +106,29 @@ class EncryptedInformationRepository implements InformationRepository, Credentia
         await _db.customStatement('DELETE FROM credential_materials');
         await _db.customStatement('DELETE FROM managed_credentials');
         for (final c in credentials) {
-          await _db.customStatement('INSERT INTO managed_credentials(id,payload) VALUES(?,?)', [c.id,jsonEncode(c.toJson())]);
+          await _db.customStatement(
+            'INSERT INTO managed_credentials(id,payload) VALUES(?,?)',
+            [c.id, jsonEncode(c.toJson())],
+          );
         }
         for (final m in materials) {
-          await _db.customStatement('INSERT INTO credential_materials(credential_id,version,payload) VALUES(?,?,?)', [m.credentialId,m.version,jsonEncode(m.toStorageJson())]);
+          await _db.customStatement(
+            'INSERT INTO credential_materials(credential_id,version,payload) VALUES(?,?,?)',
+            [m.credentialId, m.version, jsonEncode(m.toStorageJson())],
+          );
         }
       });
-      _credentials..clear()..addAll(credentials);
-      _credentialMaterials..clear()..addAll(materials);
+      _credentials
+        ..clear()
+        ..addAll(credentials);
+      _credentialMaterials
+        ..clear()
+        ..addAll(materials);
     } catch (_) {
       throw const StorageFailure('credential_save_failed');
     }
   }
+
   bool _closed = false;
   static final _openDirectories = <String>{};
   late final String _directory;
@@ -124,8 +142,9 @@ class EncryptedInformationRepository implements InformationRepository, Credentia
     final folder = Directory(directory);
     await folder.create(recursive: true);
     final canonical = await folder.resolveSymbolicLinks();
-    if (!_openDirectories.add(canonical))
+    if (!_openDirectories.add(canonical)) {
       throw const StorageFailure('library_in_use');
+    }
     RandomAccessFile? lock;
     sqlite.Database? native;
     _InformationDatabase? db;
@@ -150,18 +169,21 @@ class EncryptedInformationRepository implements InformationRepository, Credentia
           throw const StorageFailure('key_unavailable');
         }
       }
-      if (key.length != 32 || key.any((v) => v < 0 || v > 255))
+      if (key.length != 32 || key.any((v) => v < 0 || v > 255)) {
         throw const StorageFailure('invalid_key');
+      }
       // Probe before creating or opening the user's file: plaintext fallback is forbidden.
       final probe = sqlite.sqlite3.openInMemory();
       String version;
       try {
         final rows = probe.select('PRAGMA cipher_version');
-        if (rows.isEmpty || !(rows.first.values.first is String))
+        if (rows.isEmpty || !(rows.first.values.first is String)) {
           throw const StorageFailure('cipher_unavailable');
+        }
         version = rows.first.values.first as String;
-        if (!version.startsWith('4.'))
+        if (!version.startsWith('4.')) {
           throw const StorageFailure('cipher_unavailable');
+        }
       } finally {
         probe.close();
       }
@@ -195,14 +217,34 @@ class EncryptedInformationRepository implements InformationRepository, Credentia
   Future<void> _load() async {
     _credentials.clear();
     _credentialMaterials.clear();
-    for (final row in await _db.customSelect('SELECT payload FROM managed_credentials ORDER BY rowid').get()) {
-      _credentials.add(ManagedCredential.fromJson(jsonDecode(row.read<String>('payload')) as Map<String, dynamic>));
+    for (final row
+        in await _db
+            .customSelect(
+              'SELECT payload FROM managed_credentials ORDER BY rowid',
+            )
+            .get()) {
+      _credentials.add(
+        ManagedCredential.fromJson(
+          jsonDecode(row.read<String>('payload')) as Map<String, dynamic>,
+        ),
+      );
     }
-    for (final row in await _db.customSelect('SELECT payload FROM credential_materials ORDER BY rowid').get()) {
-      _credentialMaterials.add(CredentialMaterial.fromStorageJson(jsonDecode(row.read<String>('payload')) as Map<String, dynamic>));
+    for (final row
+        in await _db
+            .customSelect(
+              'SELECT payload FROM credential_materials ORDER BY rowid',
+            )
+            .get()) {
+      _credentialMaterials.add(
+        CredentialMaterial.fromStorageJson(
+          jsonDecode(row.read<String>('payload')) as Map<String, dynamic>,
+        ),
+      );
     }
     final cutoff = _clock().subtract(const Duration(days: 30));
-    final retained = _credentialMaterials.where((m) => m.retiredAt == null || m.retiredAt!.isAfter(cutoff)).toList();
+    final retained = _credentialMaterials
+        .where((m) => m.retiredAt == null || m.retiredAt!.isAfter(cutoff))
+        .toList();
     if (retained.length != _credentialMaterials.length) {
       await commitCredentials(_credentials.toList(), retained);
     }
@@ -257,6 +299,15 @@ class EncryptedInformationRepository implements InformationRepository, Credentia
         jsonDecode(row.read<String>('payload')) as Map<String, dynamic>,
       );
       _deletes[proposal.id] = proposal;
+    }
+    for (final row
+        in await _db
+            .customSelect('SELECT payload FROM request_history ORDER BY rowid')
+            .get()) {
+      final fact = RequestHistory.fromJson(
+        jsonDecode(row.read<String>('payload')) as Map<String, dynamic>,
+      );
+      _requestHistory[fact.id] = fact;
     }
     for (final row
         in await _db
@@ -382,6 +433,30 @@ class EncryptedInformationRepository implements InformationRepository, Credentia
   }
 
   @override
+  List<RequestHistory> get requestHistory {
+    if (_closed) throw const StorageFailure('library_closed');
+    return List.unmodifiable(_requestHistory.values);
+  }
+
+  @override
+  Future<void> saveRequestHistory(RequestHistory history) async {
+    if (_closed) throw const StorageFailure('library_closed');
+    try {
+      await _db.customStatement(
+        'INSERT INTO request_history(id,created_at,payload) VALUES(?,?,?) ON CONFLICT(id) DO UPDATE SET payload=excluded.payload',
+        [
+          history.id,
+          history.createdAt.toUtc().millisecondsSinceEpoch,
+          jsonEncode(history.toJson()),
+        ],
+      );
+      _requestHistory[history.id] = history;
+    } on Object {
+      throw const StorageFailure('audit_save_failed');
+    }
+  }
+
+  @override
   List<GrantHistory> get grantHistory {
     if (_closed) throw const StorageFailure('library_closed');
     return List.unmodifiable(_history.values);
@@ -430,10 +505,33 @@ class EncryptedInformationRepository implements InformationRepository, Credentia
   }
 
   @override
+  Future<void> pruneOrganizationHistory(Set<String> ids) async {
+    if (_closed) throw const StorageFailure('library_closed');
+    if (ids.isEmpty) return;
+    try {
+      await _db.transaction(() async {
+        for (final id in ids) {
+          await _db.customStatement(
+            'DELETE FROM organization_tasks WHERE id=?',
+            [id],
+          );
+        }
+      });
+      _organizationTasks.removeWhere((id, _) => ids.contains(id));
+    } on Object {
+      throw const StorageFailure('audit_save_failed');
+    }
+  }
+
+  @override
   Future<void> pruneAudit(DateTime cutoff) async {
     if (_closed) throw const StorageFailure('library_closed');
     try {
       await _db.transaction(() async {
+        await _db.customStatement(
+          'DELETE FROM request_history WHERE created_at < ?',
+          [cutoff.toUtc().millisecondsSinceEpoch],
+        );
         await _db.customStatement(
           'DELETE FROM grant_history WHERE approved_at < ?',
           [cutoff.toUtc().millisecondsSinceEpoch],
@@ -444,6 +542,7 @@ class EncryptedInformationRepository implements InformationRepository, Credentia
         );
       });
       _history.removeWhere((_, h) => h.approvedAt.isBefore(cutoff));
+      _requestHistory.removeWhere((_, r) => r.createdAt.isBefore(cutoff));
       _accesses.removeWhere((_, a) => a.at.isBefore(cutoff));
     } on Object {
       throw const StorageFailure('audit_save_failed');
@@ -454,6 +553,17 @@ class EncryptedInformationRepository implements InformationRepository, Credentia
   List<InformationTemplate> get templates {
     if (_closed) throw const StorageFailure('library_closed');
     return List.unmodifiable(_templates.values);
+  }
+
+  @override
+  Future<void> deleteTemplate(String id) async {
+    if (_closed) throw const StorageFailure('library_closed');
+    try {
+      await _db.customStatement('DELETE FROM field_templates WHERE id=?', [id]);
+      _templates.remove(id);
+    } catch (_) {
+      throw const StorageFailure('save_failed');
+    }
   }
 
   @override
@@ -746,6 +856,7 @@ class EncryptedInformationRepository implements InformationRepository, Credentia
     _tags.clear();
     _templates.clear();
     _history.clear();
+    _requestHistory.clear();
     _accesses.clear();
     _organizationTasks.clear();
     _proposals.clear();
@@ -998,10 +1109,10 @@ class _InformationDatabase extends GeneratedDatabase {
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (_) async {
       await _createCredentials();
-      await _createRequestHistory();
       await _createRevisionPurges();
       await _createRecycle();
       await _createAudit();
+      await _createRequestHistory();
       await _createUpdates();
       await _createProposals();
       await _createOrganizationTasks();
@@ -1019,10 +1130,10 @@ class _InformationDatabase extends GeneratedDatabase {
       await _backupSchema();
     },
     onUpgrade: (_, from, to) async {
-      if (from < 1 || to != 14)
+      if (from < 1 || to != 14) {
         throw const StorageFailure('unsupported_schema');
+      }
       await transaction(() async {
-        if (from < 13) await _createRequestHistory();
         if (from < 14) await _createCredentials();
         if (from < 2) {
           await customStatement(
@@ -1049,6 +1160,7 @@ class _InformationDatabase extends GeneratedDatabase {
         if (from < 9) await _createRecycle();
         if (from < 10) await _createRevisionPurges();
         if (from < 12) await _createOrganizationTasks();
+        if (from < 13) await _createRequestHistory();
         if (from < 11) {
           await customStatement(
             'ALTER TABLE information_items ADD COLUMN created_at TEXT',
@@ -1060,8 +1172,9 @@ class _InformationDatabase extends GeneratedDatabase {
       });
     },
     beforeOpen: (details) async {
-      if (details.versionNow > schemaVersion)
+      if (details.versionNow > schemaVersion) {
         throw const StorageFailure('unsupported_schema');
+      }
       // Some pre-merge development schema 6 databases reserved version 5 but
       // did not create its backup table. Backfill only this additive structure.
       await _backupSchema();
@@ -1075,12 +1188,21 @@ class _InformationDatabase extends GeneratedDatabase {
     'CREATE TABLE revision_purge_facts(item_id TEXT NOT NULL,version INTEGER NOT NULL,purged_at TEXT NOT NULL,PRIMARY KEY(item_id,version))',
   );
   Future<void> _createCredentials() async {
-    await customStatement('CREATE TABLE IF NOT EXISTS managed_credentials(id TEXT PRIMARY KEY,payload TEXT NOT NULL)');
-    await customStatement('CREATE TABLE IF NOT EXISTS credential_materials(credential_id TEXT NOT NULL,version INTEGER NOT NULL,payload TEXT NOT NULL,PRIMARY KEY(credential_id,version))');
+    await customStatement(
+      'CREATE TABLE IF NOT EXISTS managed_credentials(id TEXT PRIMARY KEY,payload TEXT NOT NULL)',
+    );
+    await customStatement(
+      'CREATE TABLE IF NOT EXISTS credential_materials(credential_id TEXT NOT NULL,version INTEGER NOT NULL,payload TEXT NOT NULL,PRIMARY KEY(credential_id,version))',
+    );
   }
+
   Future<void> _createRequestHistory() async {
-    await customStatement('CREATE TABLE IF NOT EXISTS request_history(id TEXT PRIMARY KEY,created_at INTEGER NOT NULL,payload TEXT NOT NULL)');
-    await customStatement('CREATE INDEX IF NOT EXISTS request_history_retention ON request_history(created_at)');
+    await customStatement(
+      'CREATE TABLE IF NOT EXISTS request_history(id TEXT PRIMARY KEY,created_at INTEGER NOT NULL,payload TEXT NOT NULL)',
+    );
+    await customStatement(
+      'CREATE INDEX IF NOT EXISTS request_history_retention ON request_history(created_at)',
+    );
   }
 
   Future<void> _createRecycle() async {
@@ -1129,12 +1251,19 @@ class _InformationDatabase extends GeneratedDatabase {
   );
 
   Future<void> _backupSchema() async {
-    await customStatement('CREATE TABLE IF NOT EXISTS backup_configuration(singleton INTEGER PRIMARY KEY CHECK(singleton=1),recovery_key TEXT NOT NULL,recovery_saved INTEGER NOT NULL DEFAULT 0)');
-    final columns = await customSelect('PRAGMA table_info(backup_configuration)').get();
+    await customStatement(
+      'CREATE TABLE IF NOT EXISTS backup_configuration(singleton INTEGER PRIMARY KEY CHECK(singleton=1),recovery_key TEXT NOT NULL,recovery_saved INTEGER NOT NULL DEFAULT 0)',
+    );
+    final columns = await customSelect(
+      'PRAGMA table_info(backup_configuration)',
+    ).get();
     if (!columns.any((row) => row.read<String>('name') == 'recovery_saved')) {
-      await customStatement('ALTER TABLE backup_configuration ADD COLUMN recovery_saved INTEGER NOT NULL DEFAULT 0');
+      await customStatement(
+        'ALTER TABLE backup_configuration ADD COLUMN recovery_saved INTEGER NOT NULL DEFAULT 0',
+      );
     }
   }
+
   Future<void> _createAudit() async {
     await customStatement(
       'CREATE TABLE IF NOT EXISTS grant_history(id TEXT PRIMARY KEY,approved_at INTEGER NOT NULL,payload TEXT NOT NULL)',

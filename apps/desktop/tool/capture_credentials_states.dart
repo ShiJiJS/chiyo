@@ -107,8 +107,9 @@ void main() {
           'purple-1280',
           'mono-1440',
           'mono-1280',
-        }.contains(scenario.name))
+        }.contains(scenario.name)) {
       continue;
+    }
     testWidgets('credential states ${scenario.name}', (tester) async {
       debugDisableShadows = false;
       tester.view.physicalSize = scenario.size;

@@ -87,12 +87,12 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
         } catch {
           result(FlutterError(code: "backup_staging_failed", message: "Backup staging cleanup incomplete", details: nil))
         }
-      } else if call.method == "backupInput" || call.method == "credentialInput" {
+      } else if call.method == "backupInput" || call.method == "recoveryKeyInput" || call.method == "credentialInput" {
         let panel = NSOpenPanel()
         panel.canChooseDirectories = false
         panel.canChooseFiles = true
         panel.allowsMultipleSelection = false
-        if call.method == "backupInput" { panel.allowedFileTypes = ["aimbackup"] }
+        if call.method != "credentialInput" { panel.allowedFileTypes = [call.method == "recoveryKeyInput" ? "txt" : "aimbackup"] }
         panel.beginSheetModal(for: window) { response in
           result(response == .OK ? panel.url?.path : nil)
         }

@@ -174,6 +174,7 @@ class DesktopRuntime extends ChangeNotifier {
   Future<void> _notify(String requestId) async {
     await _ready.future;
     if (quitting ||
+        !service.owner.notificationsEnabled ||
         availability.notifications != NotificationAvailability.enabled) {
       return;
     }

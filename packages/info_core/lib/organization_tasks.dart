@@ -55,13 +55,18 @@ class OrganizationTask {
     this.state = OrganizationTaskState.active,
     this.agentName = '',
     this.approvedAt,
+    this.completedAt,
+    Map<String, String> itemNames = const {},
     this.autoApply = false,
     Iterable<OrganizationChange> changes = const [],
   }) : itemVersions = Map.unmodifiable(itemVersions),
+       itemNames = Map.unmodifiable(itemNames),
        changes = List.unmodifiable(changes);
   final String id, sessionBinding, chatLabel, purpose;
   final DateTime createdAt, expiresAt;
   final DateTime? approvedAt;
+  final DateTime? completedAt;
+  final Map<String, String> itemNames;
   final String agentName;
   final bool autoApply;
   final Map<String, int> itemVersions;
@@ -73,6 +78,8 @@ class OrganizationTask {
     Map<String, int>? itemVersions,
     DateTime? expiresAt,
     DateTime? approvedAt,
+    DateTime? completedAt,
+    Map<String, String>? itemNames,
     bool? autoApply,
   }) => OrganizationTask(
     id: id,
@@ -84,6 +91,8 @@ class OrganizationTask {
     itemVersions: itemVersions ?? this.itemVersions,
     agentName: agentName,
     approvedAt: approvedAt ?? this.approvedAt,
+    completedAt: completedAt ?? this.completedAt,
+    itemNames: itemNames ?? this.itemNames,
     autoApply: autoApply ?? this.autoApply,
     state: state,
     changes: changes ?? this.changes,
@@ -99,6 +108,8 @@ class OrganizationTask {
     'state': state.name,
     'agentName': agentName,
     'approvedAt': approvedAt?.toUtc().toIso8601String(),
+    'completedAt': completedAt?.toUtc().toIso8601String(),
+    'itemNames': itemNames,
     'autoApply': autoApply,
     'changes': changes.map((c) => c.toJson()).toList(),
   };
@@ -111,6 +122,11 @@ class OrganizationTask {
     approvedAt: j['approvedAt'] == null
         ? null
         : DateTime.parse(j['approvedAt'] as String),
+    completedAt: j['completedAt'] == null
+        ? null
+        : DateTime.parse(j['completedAt'] as String),
+    itemNames: (j['itemNames'] as Map<String, dynamic>? ?? const {})
+        .cast<String, String>(),
     autoApply: j['autoApply'] as bool? ?? false,
     createdAt: DateTime.parse(j['createdAt'] as String),
     expiresAt: DateTime.parse(j['expiresAt'] as String),

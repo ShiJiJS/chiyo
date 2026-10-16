@@ -9,6 +9,8 @@ void main() {
   testWidgets(
     'unavailable background entry keeps window reachable; notification denial leaves pending approvals usable',
     (tester) async {
+      tester.view.physicalSize=const Size(1440,900);tester.view.devicePixelRatio=1;
+      addTearDown(tester.view.resetPhysicalSize);addTearDown(tester.view.resetDevicePixelRatio);
       final service = InformationService.fictional();
       final native = NativeDesktopFixture()
         ..availability = const DesktopAvailability(
@@ -41,6 +43,10 @@ void main() {
       expect(find.text('test chat'), findsWidgets);
       expect(service.agent.status(session, request.id)['status'], 'pending');
       await tester.tap(find.byKey(const ValueKey('nav-4')));
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.byKey(const ValueKey('settings-section-notifications')),
+      );
       await tester.pumpAndSettle();
       await tester.tap(find.text('开启或检查提醒'));
       await tester.pump();

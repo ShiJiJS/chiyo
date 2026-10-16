@@ -17,6 +17,7 @@ class BackupContents {
       .length;
   int get grantHistoryCount => _tables['grant_history']!.length;
   int get accessRecordCount => _tables['access_records']!.length;
+  int get requestHistoryCount => _tables['request_history']!.length;
 }
 
 /// Owner-only manual backup capability. It is never part of the agent server.
@@ -61,9 +62,13 @@ class InformationBackups {
     'access_records': ['id', 'recorded_at', 'payload'],
   };
   static const _v2Columns = {..._columns, ..._historyColumns};
-  static final _allColumns = Map<String, List<String>>.unmodifiable({
+  static final _v3Columns = Map<String, List<String>>.unmodifiable({
     ..._v2Columns,
     'information_items': [..._itemColumns, 'created_at', 'modified_at'],
+  });
+  static final _allColumns = Map<String, List<String>>.unmodifiable({
+    ..._v3Columns,
+    'request_history': ['id', 'created_at', 'payload'],
   });
 
   void _checkOpen() {
@@ -109,6 +114,31 @@ class InformationBackups {
     }
   }
 
+  Future<bool> recoveryKeySaved() async {
+    _checkOpen();
+    final rows = await _repository._db
+        .customSelect(
+          'SELECT recovery_saved FROM backup_configuration WHERE singleton=1',
+        )
+        .get();
+    return rows.isNotEmpty && rows.single.read<int>('recovery_saved') == 1;
+  }
+
+  Future<String> readRecoveryKeyFrom(String path) async {
+    try {
+      if (await FileSystemEntity.type(path, followLinks: false) !=
+              FileSystemEntityType.file ||
+          await File(path).length() > 256) {
+        throw const StorageFailure('invalid_recovery_key');
+      }
+      final key = (await File(path).readAsString()).trim();
+      _decodeKey(key);
+      return key;
+    } catch (_) {
+      throw const StorageFailure('invalid_recovery_key');
+    }
+  }
+
   /// An explicit owner export of the recovery secret. The file is plaintext by
   /// design so it can be kept independently, and is never bundled with backups.
   Future<void> saveRecoveryKeyTo(String path) async {
@@ -124,6 +154,10 @@ class InformationBackups {
       await file.create(exclusive: true);
       created = true;
       await file.writeAsString('$key\n', flush: true);
+      // Independent file I/O must succeed before export can be enabled.
+      await _repository._db.customStatement(
+        'UPDATE backup_configuration SET recovery_saved=1 WHERE singleton=1',
+      );
     } catch (error) {
       if (created) {
         try {
@@ -199,13 +233,36 @@ class InformationBackups {
       return _retain(
         _validate({
           'format': _format,
-          'version': 3,
+          'version': 4,
           'createdAt': now.toIso8601String(),
           'tables': tables,
         }),
         now,
       );
     });
+  }
+
+  /// Advisory preview only; restore rechecks every table inside its transaction.
+  Future<bool> recipientEmpty() async {
+    _checkOpen();
+    final tables = await _repository._db
+        .customSelect(
+          "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'",
+        )
+        .get();
+    for (final table
+        in tables
+            .map((r) => r.read<String>('name'))
+            .where(
+              (name) => name != 'settings' && name != 'backup_configuration',
+            )) {
+      final quoted = table.replaceAll('"', '""');
+      final count = await _repository._db
+          .customSelect('SELECT count(*) AS n FROM "$quoted"')
+          .getSingle();
+      if (count.read<int>('n') != 0) return false;
+    }
+    return true;
   }
 
   /// An existing output is always refused, even when the file dialog confirmed
@@ -223,15 +280,19 @@ class InformationBackups {
       _requireCipher();
       final key = await recoveryKey();
       if (key == null) throw const StorageFailure('backup_not_enabled');
+      if (!await recoveryKeySaved()) {
+        throw const StorageFailure('recovery_key_not_saved');
+      }
       final snapshot = await _snapshot();
       final payload = jsonEncode({
         'format': _format,
-        'version': 3,
+        'version': 4,
         'createdAt': snapshot.createdAt.toIso8601String(),
         'tables': snapshot._tables,
       });
-      if (utf8.encode(payload).length > maxPayloadBytes)
+      if (utf8.encode(payload).length > maxPayloadBytes) {
         throw const StorageFailure('backup_too_large');
+      }
       final output = File(path);
       if (await FileSystemEntity.type(path, followLinks: false) !=
           FileSystemEntityType.notFound) {
@@ -308,8 +369,9 @@ class InformationBackups {
       _key(db, recoveryKey);
       db.execute('BEGIN');
       // SQLCipher authenticates every page before any schema or payload parsing.
-      if (db.select('PRAGMA cipher_integrity_check').isNotEmpty)
+      if (db.select('PRAGMA cipher_integrity_check').isNotEmpty) {
         throw const StorageFailure('invalid_backup');
+      }
       final objects = db.select(
         "SELECT type,name FROM sqlite_master WHERE name NOT LIKE 'sqlite_%'",
       );
@@ -319,8 +381,9 @@ class InformationBackups {
         throw const StorageFailure('unsupported_backup');
       }
       final integrity = db.select('PRAGMA integrity_check');
-      if (integrity.length != 1 || integrity.single.values.single != 'ok')
+      if (integrity.length != 1 || integrity.single.values.single != 'ok') {
         throw const StorageFailure('invalid_backup');
+      }
       final rows = db.select(
         'SELECT singleton,length(CAST(payload AS BLOB)) AS size FROM backup_snapshot',
       );
@@ -385,8 +448,9 @@ class InformationBackups {
           final rows = await _repository._db
               .customSelect('SELECT count(*) AS n FROM "$quoted"')
               .getSingle();
-          if (rows.read<int>('n') != 0)
+          if (rows.read<int>('n') != 0) {
             throw const StorageFailure('recipient_not_empty');
+          }
         }
         await _repository._db.customStatement('DELETE FROM settings');
         await _repository._db.customStatement('DELETE FROM organization_tasks');
@@ -415,23 +479,27 @@ class InformationBackups {
     if (decoded is! Map<String, dynamic>) invalid();
     if (decoded['format'] != _format ||
         decoded['version'] is! int ||
-        ![1, 2, 3].contains(decoded['version']))
+        ![1, 2, 3, 4].contains(decoded['version'])) {
       throw const StorageFailure('unsupported_backup');
+    }
     if (decoded.length != 4 ||
         decoded['tables'] is! Map<String, dynamic> ||
         decoded['createdAt'] is! String ||
-        (decoded['createdAt'] as String).length > 64)
+        (decoded['createdAt'] as String).length > 64) {
       invalid();
+    }
     final createdAt = _backupDate(decoded['createdAt']);
     final columns = switch (decoded['version']) {
       1 => _columns,
       2 => _v2Columns,
+      3 => _v3Columns,
       _ => _allColumns,
     };
     final data = decoded['tables'] as Map<String, dynamic>;
     if (data.length != columns.length ||
-        data.keys.any((key) => !columns.containsKey(key)))
+        data.keys.any((key) => !columns.containsKey(key))) {
       invalid();
+    }
     final tables = <String, List<Map<String, Object?>>>{};
     var totalRows = 0;
     for (final table in columns.entries) {
@@ -449,8 +517,9 @@ class InformationBackups {
           .map((value) {
             if (value is! Map<String, dynamic> ||
                 value.length != table.value.length ||
-                value.keys.any((key) => !table.value.contains(key)))
+                value.keys.any((key) => !table.value.contains(key))) {
               invalid();
+            }
             return Map<String, Object?>.unmodifiable(value);
           })
           .toList(growable: false);
@@ -458,7 +527,8 @@ class InformationBackups {
     for (final table in _historyColumns.keys) {
       tables.putIfAbsent(table, () => const []);
     }
-    if (decoded['version'] != 3) {
+    tables.putIfAbsent('request_history', () => const []);
+    if ((decoded['version'] as int) < 3) {
       tables['information_items'] = [
         for (final row in tables['information_items']!)
           Map<String, Object?>.unmodifiable({
@@ -477,8 +547,9 @@ class InformationBackups {
       final value = row[key];
       if (value is! String ||
           value.length > max ||
-          (required && value.trim().isEmpty))
+          (required && value.trim().isEmpty)) {
         invalid();
+      }
       return value;
     }
 
@@ -508,8 +579,9 @@ class InformationBackups {
     for (final row in tables['information_directories']!) {
       final parent = row['parent_id'];
       if (parent != null &&
-          (parent is! String || !directories.contains(parent)))
+          (parent is! String || !directories.contains(parent))) {
         invalid();
+      }
       parents[id(row)] = parent as String?;
     }
     final checked = <String>{};
@@ -533,8 +605,9 @@ class InformationBackups {
       if (row['modified_at'] != null) _backupDate(row['modified_at']);
       final directory = row['directory_id'];
       if (directory != null &&
-          (directory is! String || !directories.contains(directory)))
+          (directory is! String || !directories.contains(directory))) {
         invalid();
+      }
       final count = fieldCounts[row['id']] ?? 0;
       // Explicit field deletion can leave an information item's public metadata
       // with zero fields. Only whole-item deletion removes that identity.
@@ -551,8 +624,9 @@ class InformationBackups {
     for (final row in tables['information_item_tags']!) {
       if (!items.contains(id(row, 'item_id')) ||
           !tags.contains(id(row, 'tag_id')) ||
-          !associations.add(jsonEncode([row['item_id'], row['tag_id']])))
+          !associations.add(jsonEncode([row['item_id'], row['tag_id']]))) {
         invalid();
+      }
       final item = id(row, 'item_id');
       tagCounts[item] = (tagCounts[item] ?? 0) + 1;
       if (tagCounts[item]! > 100) invalid();
@@ -565,12 +639,14 @@ class InformationBackups {
       for (final field in fields) {
         if (field is! Map<String, dynamic> ||
             field.length != 4 ||
-            !seen.add(id(field)))
+            !seen.add(id(field))) {
           invalid();
+        }
         text(field, 'name', 200, required: true);
         text(field, 'description', 2000);
-        if (!FieldKind.values.any((kind) => kind.name == field['kind']))
+        if (!FieldKind.values.any((kind) => kind.name == field['kind'])) {
           invalid();
+        }
       }
     }
     final settings = <String>{};
@@ -579,10 +655,12 @@ class InformationBackups {
       if (!settings.add(name) || row['value'] is! int) invalid();
       final value = row['value'] as int;
       if (value < 0 || value > 9007199254740991) invalid();
-      if (name == 'requestLifetimeMs' && (value < 60000 || value > 604800000))
+      if (name == 'requestLifetimeMs' && (value < 60000 || value > 604800000)) {
         invalid();
-      if (name == 'auditRetentionDays' && ![30, 90, 180, 365].contains(value))
+      }
+      if (name == 'auditRetentionDays' && ![30, 90, 180, 365].contains(value)) {
         invalid();
+      }
     }
     _validateBackupHistory(tables);
     return BackupContents._(

@@ -7,6 +7,7 @@ import 'organization_tasks.dart';
 import 'ui.dart';
 import 'inbox_queue.dart';
 import 'prototype_ui.dart';
+import 'prototype_dialog.dart';
 import 'package:flutter/services.dart';
 
 class SearchInboxIntent extends Intent {
@@ -34,11 +35,13 @@ class Approvals extends StatefulWidget {
     required this.port,
     this.focusRequestId,
     this.focusRevision = 0,
+    this.onOpenSettings,
   });
   final InformationService service;
   final int port;
   final String? focusRequestId;
   final int focusRevision;
+  final VoidCallback? onOpenSettings;
   @override
   State<Approvals> createState() => ApprovalsState();
 }
@@ -155,71 +158,80 @@ class ApprovalsState extends State<Approvals> {
     }
   }
 
-  Future<void> _settings() => showDialog<void>(
-    context: context,
-    builder: (context) => StatefulBuilder(
-      builder: (context, update) => DesktopDialog(
-        title: const Text('请求设置'),
-        content: SizedBox(
-          width: 360,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('待审批有效期'),
-              const SizedBox(height: 12),
-              DesktopSelect<int>(
-                key: const ValueKey('request-lifetime'),
-                value: widget.service.owner.requestLifetime.inMinutes,
-                isExpanded: true,
-                items:
-                    {
-                          5,
-                          15,
-                          30,
-                          60,
-                          120,
-                          widget.service.owner.requestLifetime.inMinutes,
-                        }
-                        .map(
-                          (minutes) => DropdownMenuItem(
-                            value: minutes,
-                            child: Text('$minutes 分钟'),
-                          ),
-                        )
-                        .toList(),
-                onChanged: (minutes) async {
-                  if (minutes == null) return;
-                  try {
-                    await Future<void>.sync(
-                      () => widget.service.owner.setRequestLifetime(
-                        Duration(minutes: minutes),
-                      ),
-                    );
-                    if (context.mounted) update(() {});
-                  } on Object {
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('设置未保存，请重试。')),
+  Future<void> _settings() async {
+    if (widget.onOpenSettings != null) {
+      widget.onOpenSettings!();
+      return;
+    }
+    await showDialog<void>(
+      context: context,
+      barrierColor: const Color(0x4f241b27),
+      builder: (context) => StatefulBuilder(
+        builder: (context, update) => PrototypeDialog(
+          title: '请求设置',
+          onClose: () => Navigator.pop(context),
+          body: SizedBox(
+            width: 360,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('待审批有效期'),
+                const SizedBox(height: 12),
+                DesktopSelect<int>(
+                  key: const ValueKey('request-lifetime'),
+                  value: widget.service.owner.requestLifetime.inMinutes,
+                  isExpanded: true,
+                  items:
+                      {
+                            5,
+                            15,
+                            30,
+                            60,
+                            120,
+                            widget.service.owner.requestLifetime.inMinutes,
+                          }
+                          .map(
+                            (minutes) => DropdownMenuItem(
+                              value: minutes,
+                              child: Text('$minutes 分钟'),
+                            ),
+                          )
+                          .toList(),
+                  onChanged: (minutes) async {
+                    if (minutes == null) return;
+                    try {
+                      await Future<void>.sync(
+                        () => widget.service.owner.setRequestLifetime(
+                          Duration(minutes: minutes),
+                        ),
                       );
+                      if (context.mounted) update(() {});
+                    } on Object {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('设置未保存，请重试。')),
+                        );
+                      }
                     }
-                  }
-                },
-              ),
-              const SizedBox(height: 12),
-              const Text('仅影响新申请，已经提交的申请不会延长。'),
-            ],
+                  },
+                ),
+                const SizedBox(height: 12),
+                const Text('仅影响新申请，已经提交的申请不会延长。'),
+              ],
+            ),
           ),
+          actions: [
+            TextButton(
+              style: prototypeSecondary(context),
+              onPressed: () => Navigator.pop(context),
+              child: const Text('完成'),
+            ),
+          ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('完成'),
-          ),
-        ],
       ),
-    ),
-  );
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -336,7 +348,7 @@ class ApprovalsState extends State<Approvals> {
         ],
         if (offline)
           const QuietNotice(
-            '本机服务暂不可用。当前选择已保留，请恢复服务；资料库不会被覆盖。',
+            '本机服务暂不可用。当前选择已保留，请恢复服务；信息库不会被覆盖。',
             warning: true,
             panel: true,
           ),
@@ -1485,13 +1497,15 @@ class ApprovalsState extends State<Approvals> {
     var draft = '$minutes';
     await showDialog<void>(
       context: context,
+      barrierColor: const Color(0x4f241b27),
       builder: (context) => StatefulBuilder(
         builder: (context, update) {
           final n = int.tryParse(draft);
           final valid = n != null && n >= 1 && n <= 10080;
-          return DesktopDialog(
-            title: const Text('自定义授权期限'),
-            content: DesktopTextFormField(
+          return PrototypeDialog(
+            title: '自定义授权期限',
+            onClose: () => Navigator.pop(context),
+            body: DesktopTextFormField(
               initialValue: draft,
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
@@ -1503,10 +1517,12 @@ class ApprovalsState extends State<Approvals> {
             ),
             actions: [
               TextButton(
+                style: prototypeSecondary(context),
                 onPressed: () => Navigator.pop(context),
                 child: const Text('取消'),
               ),
-              FilledButton(
+              TextButton(
+                style: prototypePrimary(context),
                 onPressed: !valid
                     ? null
                     : () {
@@ -1713,10 +1729,12 @@ class ApprovalsState extends State<Approvals> {
                     TextButton(
                       onPressed: () => showDialog<void>(
                         context: context,
-                        builder: (context) => DesktopDialog(
-                          title: Text('本次授权范围 · ${selected.length} 个字段'),
-                          content: SizedBox(
-                            width: 600,
+                        barrierColor: const Color(0x4f241b27),
+                        builder: (context) => PrototypeDialog(
+                          title: '本次授权范围 · ${selected.length} 个字段',
+                          flow: true,
+                          onClose: () => Navigator.pop(context),
+                          body: SizedBox(
                             height: 420,
                             child: SingleChildScrollView(
                               child: _scopeGroups(selected),
@@ -1724,6 +1742,7 @@ class ApprovalsState extends State<Approvals> {
                           ),
                           actions: [
                             TextButton(
+                              style: prototypeSecondary(context),
                               onPressed: () => Navigator.pop(context),
                               child: const Text('返回审批'),
                             ),
@@ -1909,17 +1928,28 @@ class ApprovalsState extends State<Approvals> {
             style: prototypeButton(context),
             onPressed: () => showDialog<void>(
               context: context,
-              builder: (_) => DesktopDialog(
-                title: const Text('查看完整字段值'),
-                content: SizedBox(
-                  width: 680,
+              barrierColor: const Color(0x4f241b27),
+              builder: (context) => PrototypeDialog(
+                title: '查看完整字段值',
+                flow: true,
+                onClose: () => Navigator.pop(context),
+                body: SizedBox(
                   height: 420,
                   child: SingleChildScrollView(
-                    child: SelectableText(field.value),
+                    child: SelectableText(
+                      field.value,
+                      style: prototypeText(
+                        context,
+                        13,
+                        family: 'Consolas',
+                        height: 1.7,
+                      ),
+                    ),
                   ),
                 ),
                 actions: [
                   TextButton(
+                    style: prototypeSecondary(context),
                     onPressed: () => Navigator.pop(context),
                     child: const Text('返回审批'),
                   ),
