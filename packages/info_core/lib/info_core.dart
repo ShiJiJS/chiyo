@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:math';
 import 'information.dart';
 export 'information.dart';
+part 'organization_access.dart';
 
 class AccessFailure implements Exception {
   const AccessFailure(this.status);
@@ -270,12 +271,16 @@ class AgentAccess {
     return value.value;
   }
 
-  List<Map<String, Object?>> catalog() => _service._repository.items
+  List<Map<String, Object?>> catalog() => searchCatalog().items;
+
+  List<Map<String, Object?>> _catalogMetadata() => _service._repository.items
       .map(
         (item) => <String, Object?>{
           'id': item.id,
           'name': item.name,
           'description': item.description,
+          'directoryId': item.directoryId,
+          'tagIds': item.tagIds,
           'fields': item.fields
               .map(
                 (field) => {
@@ -393,6 +398,8 @@ class OwnerAccess {
                     : f,
               )
               .toList(),
+          directoryId: previous.directoryId,
+          tagIds: previous.tagIds,
         );
         await _service._repository.save(item);
         return item;

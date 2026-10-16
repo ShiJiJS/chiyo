@@ -21,7 +21,16 @@ class AgentClient {
     final command = input['command'];
     switch (command) {
       case 'catalog':
-        return _call('/catalog', {});
+        return _call('/catalog', {
+          for (final key in [
+            'query',
+            'directoryId',
+            'tagId',
+            'offset',
+            'limit',
+          ])
+            if (input.containsKey(key)) key: input[key],
+        });
       case 'session':
         if (_session != null) return {'status': 'invalid_request'};
         final result = await _call('/session', {

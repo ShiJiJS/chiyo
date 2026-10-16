@@ -15,6 +15,78 @@ class TestKeyStore implements DatabaseKeyStore {
 }
 
 void main() {
+  test(
+    'encrypted catalog organization and reviewed descriptions survive reopening',
+    () async {
+      final folder = await Directory.systemTemp.createTemp(
+        'info-organization-',
+      );
+      addTearDown(() => folder.delete(recursive: true));
+      final keys = TestKeyStore();
+      var store = await EncryptedInformationRepository.open(folder.path, keys);
+      var service = InformationService(repository: store);
+      final directory = await service.owner.createDirectory(
+        'PRIVATE-ORGANIZATION-34982',
+      );
+      final child = await service.owner.createDirectory(
+        'Child',
+        parentId: directory.id,
+      );
+      final tag = await service.owner.createTag('PRIVATE-TAG-34982');
+      final item = await service.owner.createInformation('Original', 'Public', [
+        const FieldInput('Host', 'Address', 'fictional.invalid'),
+      ]);
+      await service.owner.organizeInformation(
+        item.id,
+        directoryId: child.id,
+        tagIds: [tag.id],
+      );
+      await service.owner.updateCatalogMetadata(
+        item.id,
+        name: 'Reviewed',
+        description: 'New public description',
+        fieldDescriptions: {item.fields.single.id: 'Reviewed host'},
+      );
+      await service.owner.updateDirectory(
+        directory.id,
+        'PRIVATE-RENAMED-34982',
+      );
+      await service.owner.updateTag(tag.id, 'PRIVATE-RENAMED-TAG-34982');
+      service.close();
+      await store.close();
+      store = await EncryptedInformationRepository.open(folder.path, keys);
+      addTearDown(store.close);
+      service = InformationService(repository: store);
+      addTearDown(service.close);
+      expect(service.owner.directories.first.id, directory.id);
+      expect(service.owner.directories.first.version, 2);
+      expect(service.owner.directories.last.parentId, directory.id);
+      expect(service.owner.tags.single.id, tag.id);
+      expect(service.owner.tags.single.version, 2);
+      expect(service.owner.information.single.directoryId, child.id);
+      expect(service.owner.information.single.tagIds, [tag.id]);
+      expect(service.owner.information.single.version, 3);
+      expect(
+        service.agent
+            .searchCatalog(
+              query: 'Reviewed host',
+              directoryId: directory.id,
+              tagId: tag.id,
+            )
+            .items
+            .single['name'],
+        'Reviewed',
+      );
+      for (final file in folder.listSync().whereType<File>().where(
+        (file) => !file.path.endsWith('.lock'),
+      )) {
+        expect(
+          String.fromCharCodes(file.readAsBytesSync()),
+          isNot(contains('PRIVATE-')),
+        );
+      }
+    },
+  );
   test('encrypted schema v1 migrates once and settings survive reopening', () async {
     final directory = await Directory.systemTemp.createTemp(
       'info-migration-test-',

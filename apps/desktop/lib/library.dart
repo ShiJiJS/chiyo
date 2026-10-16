@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:info_core/info_core.dart';
+import 'organization.dart';
 
 class InformationLibrary extends StatefulWidget {
   const InformationLibrary({super.key, required this.owner});
@@ -9,6 +10,24 @@ class InformationLibrary extends StatefulWidget {
 }
 
 class _InformationLibraryState extends State<InformationLibrary> {
+  String? _directoryFilter;
+  String? _tagFilter;
+  List<InformationItem> get _visibleInformation {
+    final ids = _directoryFilter == null
+        ? null
+        : widget.owner
+              .fieldsInDirectory(_directoryFilter!)
+              .map((f) => f.itemId)
+              .toSet();
+    return widget.owner.information
+        .where(
+          (item) =>
+              (ids == null || ids.contains(item.id)) &&
+              (_tagFilter == null || item.tagIds.contains(_tagFilter)),
+        )
+        .toList();
+  }
+
   Future<void> _create() async {
     await showDialog<void>(
       context: context,
@@ -70,6 +89,13 @@ class _InformationLibraryState extends State<InformationLibrary> {
     appBar: AppBar(
       title: const Text('我的信息'),
       actions: [
+        TextButton(
+          onPressed: () async {
+            await manageOrganization(context, widget.owner);
+            if (mounted) setState(() {});
+          },
+          child: const Text('目录与标签'),
+        ),
         TextButton.icon(
           onPressed: _create,
           icon: const Icon(Icons.add),
@@ -84,13 +110,68 @@ class _InformationLibraryState extends State<InformationLibrary> {
           '当前为开发版本，恢复链路尚未验收，请只使用虚构资料。名称、公开描述和字段说明会出现在 Agent 目录中，请勿在这些位置填写秘密。',
         ),
         const SizedBox(height: 20),
+        Wrap(
+          spacing: 24,
+          children: [
+            DropdownButton<String>(
+              key: const ValueKey('browse-directory'),
+              value: _directoryFilter,
+              hint: const Text('全部目录'),
+              items: [
+                const DropdownMenuItem(value: null, child: Text('全部目录')),
+                for (final directory in widget.owner.directories)
+                  DropdownMenuItem(
+                    value: directory.id,
+                    child: Text(directoryPath(widget.owner, directory.id)),
+                  ),
+              ],
+              onChanged: (value) => setState(() => _directoryFilter = value),
+            ),
+            DropdownButton<String>(
+              key: const ValueKey('browse-tag'),
+              value: _tagFilter,
+              hint: const Text('全部标签'),
+              items: [
+                const DropdownMenuItem(value: null, child: Text('全部标签')),
+                for (final tag in widget.owner.tags)
+                  DropdownMenuItem(value: tag.id, child: Text(tag.name)),
+              ],
+              onChanged: (value) => setState(() => _tagFilter = value),
+            ),
+          ],
+        ),
         if (widget.owner.information.isEmpty) const Text('还没有信息，可以手动新建。'),
-        for (final item in widget.owner.information)
+        if (widget.owner.information.isNotEmpty && _visibleInformation.isEmpty)
+          const Text('当前目录和标签下没有信息。'),
+        for (final item in _visibleInformation)
           Card(
             child: ExpansionTile(
               title: Text(item.name),
               subtitle: Text(item.description),
               children: [
+                Text(directoryPath(widget.owner, item.directoryId)),
+                Wrap(
+                  children: [
+                    for (final tag in widget.owner.tags.where(
+                      (t) => item.tagIds.contains(t.id),
+                    ))
+                      Chip(label: Text(tag.name)),
+                  ],
+                ),
+                TextButton(
+                  onPressed: () async {
+                    await organizeItem(context, widget.owner, item);
+                    if (mounted) setState(() {});
+                  },
+                  child: const Text('整理位置和标签'),
+                ),
+                TextButton(
+                  onPressed: () async {
+                    await editCatalogMetadata(context, widget.owner, item);
+                    if (mounted) setState(() {});
+                  },
+                  child: const Text('编辑公开说明'),
+                ),
                 for (final field in item.fields)
                   ListTile(
                     title: Text(field.name),
