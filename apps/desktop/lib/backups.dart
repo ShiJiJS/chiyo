@@ -1,15 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:info_storage/info_storage.dart';
 
 /// The OS file-dialog boundary. Widget tests supply paths, never open dialogs.
-abstract interface class BackupFilePicker {
+abstract class BackupFilePicker {
+  const BackupFilePicker();
   Future<String?> recoveryKeyOutput();
   Future<String?> backupOutput();
   Future<String?> backupInput();
+  Future<BackupStaging?> prepareStaging(String output) async => null;
+  Future<void> releaseStaging(BackupStaging staging) async {}
 }
 
-class NativeBackupFilePicker implements BackupFilePicker {
+class BackupStaging {
+  const BackupStaging(this.directory, this.token);
+  final String directory, token;
+}
+
+class NativeBackupFilePicker extends BackupFilePicker {
   const NativeBackupFilePicker();
   static const _channel = MethodChannel('agent_info_manage/backup_files');
   @override
@@ -20,6 +29,22 @@ class NativeBackupFilePicker implements BackupFilePicker {
       _channel.invokeMethod<String>('backupOutput');
   @override
   Future<String?> backupInput() => _channel.invokeMethod<String>('backupInput');
+  @override
+  Future<BackupStaging?> prepareStaging(String output) async {
+    if (defaultTargetPlatform != TargetPlatform.macOS) return null;
+    final value = await _channel.invokeMapMethod<String, String>(
+      'prepareBackupStaging',
+      output,
+    );
+    if (value == null || value['directory'] == null || value['token'] == null) {
+      throw const StorageFailure('backup_staging_failed');
+    }
+    return BackupStaging(value['directory']!, value['token']!);
+  }
+
+  @override
+  Future<void> releaseStaging(BackupStaging staging) =>
+      _channel.invokeMethod<void>('releaseBackupStaging', staging.token);
 }
 
 class BackupLibrary extends StatefulWidget {
@@ -57,7 +82,7 @@ class _BackupLibraryState extends State<BackupLibrary> {
   String _failure(Object error) => switch (error) {
     StorageFailure(code: 'output_exists') => '所选文件已存在，请选择新的文件名，原文件未覆盖。',
     StorageFailure(code: 'recipient_not_empty') =>
-      '当前资料库不为空，无法恢复。请在新设备的空资料库中恢复，现有资料保持不变。',
+      '当前资料库已有资料或提案，无法恢复。请在新设备的空资料库中恢复，现有资料保持不变。',
     StorageFailure(code: 'unsupported_backup') => '该备份格式或版本不受支持，资料未恢复。',
     StorageFailure(code: 'invalid_recovery_key') => '恢复密钥格式不正确，请检查另存的完整密钥。',
     StorageFailure(code: 'invalid_backup') => '密钥不匹配、文件损坏或备份内容无效，资料未恢复。',
@@ -101,7 +126,18 @@ class _BackupLibraryState extends State<BackupLibrary> {
   Future<void> _export() async {
     final path = await widget.files.backupOutput();
     if (path == null) return;
-    await widget.backups.exportTo(path);
+    final staging = await widget.files.prepareStaging(path);
+    try {
+      await widget.backups.exportTo(path, stagingParent: staging?.directory);
+    } finally {
+      if (staging != null) {
+        try {
+          await widget.files.releaseStaging(staging);
+        } catch (_) {
+          /* Keep encrypted leftovers without changing the export outcome. */
+        }
+      }
+    }
     if (mounted) setState(() => _message = '加密备份已导出。');
   }
 

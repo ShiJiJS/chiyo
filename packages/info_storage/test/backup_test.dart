@@ -114,6 +114,12 @@ void main() {
       final request = ownerService.agent.request(session, 'test', [ref]);
       ownerService.owner.approve(request.id, [ref]);
       final token = ownerService.agent.claim(session, request.id).token;
+      await ownerService.agent.submitImport(session, [
+        ImportItemInput('Unconfirmed', '', [
+          const FieldInput('Private', '', 'FICTIONAL-PENDING-EXCLUDED'),
+        ]),
+      ]);
+      ownerService.agent.request(session, 'still pending', [ref]);
       final recovery = await source.backups.enable();
       expect(
         base64Url.decode(recovery.substring('aim-recovery-v1:'.length)),
@@ -159,8 +165,9 @@ void main() {
         FieldKind.textNote,
       );
       expect(restored.owner.requests, isEmpty);
-      expect(
-        () => restored.agent.read(token, ref),
+      expect(restored.owner.importProposals, isEmpty);
+      await expectLater(
+        () async => restored.agent.read(token, ref),
         throwsA(isA<AccessFailure>()),
       );
       expect(await recipient.backups.recoveryKey(), isNull);
@@ -347,4 +354,22 @@ void main() {
       expect(File(path).readAsBytesSync(), bytes);
     },
   );
+
+  test('restore refuses a recipient with unconfirmed proposals', () async {
+    final root = await Directory.systemTemp.createTemp('backup-proposal-preserve-');
+    addTearDown(() => root.delete(recursive: true));
+    final source = await EncryptedInformationRepository.open('${root.path}/source', _Keys());
+    final key = await source.backups.enable();
+    final backup = '${root.path}/empty.aimbackup';
+    await source.backups.exportTo(backup);
+    await source.close();
+    final target = await EncryptedInformationRepository.open('${root.path}/recipient', _Keys());
+    addTearDown(target.close);
+    final service = InformationService(repository: target);
+    final session = service.agent.openSession('fictional import');
+    await service.agent.submitImport(session, [ImportItemInput('Unconfirmed', '', [const FieldInput('Value', '', 'fictional proposal')])]);
+    await expectLater(target.backups.restoreFrom(backup, key), throwsA(isA<StorageFailure>().having((e) => e.code, 'code', 'recipient_not_empty')));
+    expect(service.owner.importProposals.single.items.single.name, 'Unconfirmed');
+    expect(service.owner.information, isEmpty);
+  });
 }

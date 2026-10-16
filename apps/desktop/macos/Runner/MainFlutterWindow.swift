@@ -8,6 +8,8 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
   private var statusItem: NSStatusItem?
   private(set) var desktopReady = false
   private var notificationsEnabled = false
+  private var backupOutputs: [String: URL] = [:]
+  private var backupStaging: [String: URL] = [:]
 
   override func awakeFromNib() {
     let flutterViewController = FlutterViewController()
@@ -58,7 +60,33 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
       guard let window = self else {
         result(FlutterError(code: "file_dialog_failed", message: "Window unavailable", details: nil)); return
       }
-      if call.method == "backupInput" {
+      if call.method == "prepareBackupStaging" {
+        guard let path = call.arguments as? String, let destination = window.backupOutputs.removeValue(forKey: path) else {
+          result(FlutterError(code: "backup_staging_failed", message: "No selected backup destination", details: nil)); return
+        }
+        do {
+          let directory = try FileManager.default.url(for: .itemReplacementDirectory, in: .userDomainMask, appropriateFor: destination, create: true)
+          let token = UUID().uuidString
+          window.backupStaging[token] = directory
+          result(["directory": directory.path, "token": token])
+        } catch {
+          result(FlutterError(code: "backup_staging_failed", message: "Backup staging unavailable", details: nil))
+        }
+      } else if call.method == "releaseBackupStaging" {
+        guard let token = call.arguments as? String, let directory = window.backupStaging.removeValue(forKey: token) else {
+          result(FlutterError(code: "backup_staging_failed", message: "Unknown backup staging", details: nil)); return
+        }
+        // Only this native-created URL can be released; no arbitrary paths or
+        // recursive deletion supplied by Dart. Failed cleanup preserves files.
+        do {
+          if try FileManager.default.contentsOfDirectory(atPath: directory.path).isEmpty {
+            try FileManager.default.removeItem(at: directory)
+          }
+          result(nil)
+        } catch {
+          result(FlutterError(code: "backup_staging_failed", message: "Backup staging cleanup incomplete", details: nil))
+        }
+      } else if call.method == "backupInput" {
         let panel = NSOpenPanel()
         panel.canChooseDirectories = false
         panel.canChooseFiles = true
@@ -74,6 +102,7 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
         panel.nameFieldStringValue = recovery ? "agent-info-recovery-key.txt" : "information-backup.aimbackup"
         panel.canCreateDirectories = true
         panel.beginSheetModal(for: window) { response in
+          if response == .OK, !recovery, let url = panel.url { window.backupOutputs[url.path] = url }
           result(response == .OK ? panel.url?.path : nil)
         }
       } else { result(FlutterMethodNotImplemented) }

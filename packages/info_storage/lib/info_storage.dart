@@ -5,6 +5,7 @@ import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:info_core/info_core.dart';
 import 'package:sqlite3/sqlite3.dart' as sqlite;
+import 'backup_publish.dart';
 export 'platform_keys.dart';
 part 'backups.dart';
 

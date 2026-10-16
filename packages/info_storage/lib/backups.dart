@@ -148,6 +148,20 @@ class InformationBackups {
     db.execute('PRAGMA trusted_schema = OFF');
   }
 
+  static void _requireCipher() {
+    final probe = sqlite.sqlite3.openInMemory();
+    try {
+      final result = probe.select('PRAGMA cipher_version');
+      if (result.isEmpty ||
+          result.first.values.first is! String ||
+          !(result.first.values.first as String).startsWith('4.')) {
+        throw const StorageFailure('cipher_unavailable');
+      }
+    } finally {
+      probe.close();
+    }
+  }
+
   Future<BackupContents> _snapshot() async {
     _checkOpen();
     return _repository._db.transaction(() async {
@@ -171,11 +185,12 @@ class InformationBackups {
 
   /// An existing output is always refused, even when the file dialog confirmed
   /// overwrite. A failed/interrupted export leaves existing backups untouched.
-  Future<void> exportTo(String path) async {
+  Future<void> exportTo(String path, {String? stagingParent}) async {
     _checkOpen();
     sqlite.Database? db;
-    File? owned;
+    Directory? staging;
     try {
+      _requireCipher();
       final key = await recoveryKey();
       if (key == null) throw const StorageFailure('backup_not_enabled');
       final snapshot = await _snapshot();
@@ -192,9 +207,11 @@ class InformationBackups {
           FileSystemEntityType.notFound) {
         throw const StorageFailure('output_exists');
       }
-      await output.create(exclusive: true);
-      owned = output;
-      db = sqlite.sqlite3.open(output.path);
+      staging = await Directory(
+        stagingParent ?? output.parent.path,
+      ).createTemp('.agent-info-backup-');
+      final temporary = File('${staging.path}/backup.partial');
+      db = sqlite.sqlite3.open(temporary.path);
       _key(db, key);
       db.execute(
         'CREATE TABLE backup_snapshot(singleton INTEGER PRIMARY KEY CHECK(singleton=1),payload TEXT NOT NULL)',
@@ -204,19 +221,43 @@ class InformationBackups {
       ]);
       db.close();
       db = null;
-      await inspect(path, key);
-      owned = null;
+      await inspect(temporary.path, key);
+      try {
+        publishNewBackup(temporary.absolute.path, output.absolute.path);
+      } catch (_) {
+        if (await FileSystemEntity.type(path, followLinks: false) !=
+            FileSystemEntityType.notFound) {
+          throw const StorageFailure('output_exists');
+        }
+        throw const StorageFailure('backup_publish_failed');
+      }
     } catch (error) {
       db?.close();
-      if (owned != null) {
-        try {
-          await owned.delete();
-        } catch (_) {
-          /* Preserve failure without logging paths or secrets. */
-        }
-      }
       if (error is StorageFailure) rethrow;
       throw const StorageFailure('backup_export_failed');
+    } finally {
+      if (staging != null) {
+        // Remove only known generated files; never recursively delete an output
+        // directory or follow an unrelated filesystem entry.
+        for (final name in [
+          'backup.partial',
+          'backup.partial-journal',
+          'backup.partial-wal',
+          'backup.partial-shm',
+        ]) {
+          try {
+            final file = File('${staging.path}/$name');
+            if (await file.exists()) await file.delete();
+          } catch (_) {
+            /* Keep encrypted leftovers on cleanup failure. */
+          }
+        }
+        try {
+          await staging.delete();
+        } catch (_) {
+          /* No path or secret diagnostics. */
+        }
+      }
     }
   }
 
@@ -224,6 +265,7 @@ class InformationBackups {
     _decodeKey(recoveryKey);
     sqlite.Database? db;
     try {
+      _requireCipher();
       if (await FileSystemEntity.type(path, followLinks: false) !=
           FileSystemEntityType.file) {
         throw const StorageFailure('invalid_backup');
@@ -280,7 +322,10 @@ class InformationBackups {
     _checkOpen();
     try {
       await _repository._db.transaction(() async {
-        for (final table in _columns.keys.where((name) => name != 'settings')) {
+        for (final table in [
+          ..._columns.keys.where((name) => name != 'settings'),
+          'import_proposals',
+        ]) {
           final rows = await _repository._db
               .customSelect('SELECT count(*) AS n FROM $table')
               .getSingle();
