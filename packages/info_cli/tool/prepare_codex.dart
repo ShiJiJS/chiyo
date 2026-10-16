@@ -1,5 +1,5 @@
-import 'dart:convert';
 import 'dart:io';
+import 'package:info_cli/codex_bundle.dart';
 
 /// Creates a reviewable bundle only. Does not install or trust any hooks.
 Future<void> main(List<String> args) async {
@@ -20,7 +20,6 @@ Future<void> main(List<String> args) async {
   final repository = package.parent.parent;
   await output.create(recursive: true);
   final suffix = Platform.isWindows ? '.exe' : '';
-  final hook = '${output.path}/info-codex-hook$suffix';
   for (final entry in {
     'codex_hook': 'info-codex-hook',
     'codex_info': 'info-codex',
@@ -38,54 +37,10 @@ Future<void> main(List<String> args) async {
       return;
     }
   }
-  String shellQuote(String value) => "'${value.replaceAll("'", "'\"'\"'")}'";
-  final windowsCommand = "& '${hook.replaceAll("'", "''")}'";
-  final encoded = <int>[];
-  for (final unit in windowsCommand.codeUnits) {
-    encoded.add(unit & 255);
-    encoded.add(unit >> 8);
-  }
-  Map<String, Object> hookDefinition(int timeout) => {
-    'type': 'command',
-    'command': shellQuote(hook),
-    'commandWindows':
-        'powershell.exe -NoProfile -NonInteractive -EncodedCommand ${base64Encode(encoded)}',
-    'timeout': timeout,
-    'additionalContextLimit': 0,
-  };
-  final config = {
-    'description':
-        'Agent Info development integration. Review before enabling.',
-    'hooks': {
-      'SessionStart': [
-        {
-          'matcher': '^(startup|resume|clear|compact|fork)\u0024',
-          'hooks': [hookDefinition(15)],
-        },
-      ],
-      'SubagentStart': [
-        {
-          'hooks': [hookDefinition(5)],
-        },
-      ],
-      'SessionEnd': [
-        {
-          'hooks': [hookDefinition(3)],
-        },
-      ],
-    },
-  };
-  await File(
-    '${output.path}/hooks.json',
-  ).writeAsString(const JsonEncoder.withIndent('  ').convert(config));
-  final skill = Directory('${output.path}/skills/agent-info-access');
-  await skill.create(recursive: true);
   final source = await File(
     '${repository.path}/integrations/codex/skills/agent-info-access/SKILL.md',
   ).readAsString();
-  await File('${skill.path}/SKILL.md').writeAsString(
-    '$source\nBundle executable: `${output.path}/info-codex$suffix`.\n',
-  );
+  await writeCodexConfiguration(output, source);
   stdout.writeln('Prepared bundle: ${output.path}');
   stdout.writeln(
     'No hooks installed or trusted. Follow integrations/codex/README.md.',

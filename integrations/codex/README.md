@@ -56,6 +56,10 @@ SessionEnd；Stop、Interrupt、SubagentStop、CLI 结束及切换聊天均不�
 
 ## 生成可审查安装材料
 
+Windows 开发预览 ZIP 还提供无需 SDK 的 `cli/info-prepare-codex.exe`。它把编译的
+CLI/hook 复制到用户选定的新稳定目录，生成最终路径的 hook 和 Skill，拒绝覆盖
+已有目录；安装/信任仍需单独配合。详见 [Windows 交付说明](../../docs/development/windows-delivery.md)。
+
 从 `packages/info_cli` 执行（先 `dart pub get`）：
 
 ```text
