@@ -6,13 +6,13 @@ CLI、SDK-free Codex 接入材料生成器、合成资料控制台检查、依�
 
 ## 当前界面修正包
 
-0.2.1+3，源码 `a5a56e2093d8c34e18899f62ab844ac64ccd7924`。
-本地交付目录 `build/windows-desktop-fixes-0.2.1/`，包含完整 ZIP 及已展开的
-`AgentInfoManage/app/info_desktop.exe`。本轮修复菜单双重选中与页面对齐，
-将备份、通知、录入模板和完全退出收进“设置”，并以应用窗口条替换 Windows
-原生标题栏。原生边框、拖动、缩放与关闭手感仍待用户打开验证。
+0.2.2+4，源码 `f973cc8b99d355d28dbca3de07fec8ba2fc00a88`。
+本地交付目录 `build/windows-brand-trim-0.2.2/`，包含完整 ZIP 及已展开的
+`AgentInfoManage/app/info_desktop.exe`。本轮去掉窗口条重复小标题和“工作区”，
+保留侧栏带图标的大标题并上移；沿用此前的设置收口、页面对齐及窗口条。
+原生边框、拖动、缩放与关闭手感仍待用户打开验证。
 详细范围见 [设计记录](../design/desktop-reshape-proposal.md)。
-准确归档名、哈希、测试结果见 [当前实施进度](../planning/implementation-status.md#desktop-feedback-corrections--current-021-preview)。
+准确归档名、哈希、测试结果见 [当前实施进度](../planning/implementation-status.md#sidebar-branding-trim--current-022-preview)。
 先完全退出旧版本，再打开新版；本轮没有启动窗口或变更用户配置。
 
 ## 使用预览包

@@ -230,7 +230,7 @@ focus/scroll/animation feel, native file dialogs, tray/notification and real Cod
 acceptance remain for the user. macOS still awaits the user's own Mac. All required
 platform acceptance issues remain open; PR #20 remains draft.
 
-## Desktop feedback corrections · current 0.2.1 preview
+## Desktop feedback corrections · previous 0.2.1 preview
 
 The user positively received the LIMS direction and requested focused corrections.
 Source **`a5a56e2093d8c34e18899f62ab844ac64ccd7924`**, version **0.2.1+3**:
@@ -269,6 +269,32 @@ Codex configuration accessed/changed, release published or hosted macOS job run.
 Native caption dragging/resizing/maximize/close feel, real notification display,
 clean-machine and macOS acceptance remain open. Data and authorization/CLI/hook
 boundaries are unchanged; PR #20 stays draft and platform acceptance tickets stay open.
+
+## Sidebar branding trim · current 0.2.2 preview
+
+At the user's request, removed the duplicate small title from the Windows window
+bar, retained the sidebar's large icon/name, raised that group by 18px, and removed
+the Workspace caption. Main-page origins and window commands retain their behavior.
+Source **`f973cc8b99d355d28dbca3de07fec8ba2fc00a88`**, version **0.2.2+4**.
+
+Actual Flutter approval/settings renders were inspected in
+`.scratch/desktop-brand-trim-2026-10-16/screens/`. Related 10 existing interaction
+checks and analysis passed. Final packaging again passed all four analyses and
+**174 headless tests** (CLI 17, core 71, storage 37, desktop 49), Windows release
+compilation, relocated synthetic SQLCipher/DPAPI validation and **11 extracted
+SDK-free CLI/hook tests**. No native application was launched.
+
+- Executable: `build/windows-brand-trim-0.2.2/AgentInfoManage/app/info_desktop.exe`.
+- ZIP: `build/windows-brand-trim-0.2.2/agent-info-manage-0.2.2+4-dev.f973cc8b99d3-windows-x64.zip`.
+- Archive size: 46,035,427 bytes.
+- SHA-256: `76a63117296e16a09c2e0b1704faddcd5aa8790959990d6fa8971bc897dd1ae8`.
+- Manifest: `build/windows-brand-trim-0.2.2/AgentInfoManage/manifest.json`.
+- Build log: `.scratch/desktop-brand-trim-2026-10-16/package.log`.
+
+The user authorized pushing the accumulated local UI changes to the existing
+integration branch. PR #20 remains draft; platform acceptance is still open.
+Fully exit the older tray instance before using this package, and keep all adjacent
+DLL/data files. This remains an unsigned Windows x64 development preview.
 
 ## Completion rules
 
