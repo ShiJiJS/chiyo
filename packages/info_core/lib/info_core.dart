@@ -2,7 +2,9 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 import 'information.dart';
+import 'templates.dart';
 export 'information.dart';
+export 'templates.dart';
 part 'organization_access.dart';
 
 class AccessFailure implements Exception {
@@ -287,6 +289,7 @@ class AgentAccess {
                   'id': field.id,
                   'name': field.name,
                   'description': field.description,
+                  'kind': field.kind.name,
                 },
               )
               .toList(),
@@ -323,6 +326,128 @@ class OwnerAccess {
   }
 
   List<InformationItem> get information => _service._repository.items;
+  List<InformationTemplate> get templates => _service._repository.templates;
+
+  Future<InformationTemplate> createTemplate(
+    String name,
+    String description,
+    List<TemplateFieldInput> fields,
+  ) => _serialize(() async {
+    if (_service._closed) throw const AccessFailure('service_unavailable');
+    _validateTemplate(name, description, fields);
+    final template = InformationTemplate(
+      _service._secret(),
+      name.trim(),
+      description,
+      1,
+      fields.map(
+        (f) => TemplateFieldDefinition(
+          _service._secret(),
+          f.name.trim(),
+          f.description,
+          f.kind,
+        ),
+      ),
+    );
+    await _service._repository.saveTemplate(template);
+    return template;
+  });
+
+  void _validateTemplate(
+    String name,
+    String description,
+    List<TemplateFieldInput> fields,
+  ) {
+    if (name.trim().isEmpty ||
+        name.length > 200 ||
+        description.length > 2000 ||
+        fields.isEmpty ||
+        fields.length > 200 ||
+        fields.any(
+          (f) =>
+              f.name.trim().isEmpty ||
+              f.name.length > 200 ||
+              f.description.length > 2000,
+        )) {
+      throw const AccessFailure('invalid_template');
+    }
+  }
+
+  /// Template edits affect future forms only. A changed definition receives a
+  /// new ID, even when the caller supplies the previous definition's identity.
+  Future<InformationTemplate> updateTemplate(
+    String id,
+    int expectedVersion,
+    String name,
+    String description,
+    List<TemplateFieldInput> fields,
+  ) => _serialize(() async {
+    if (_service._closed) throw const AccessFailure('service_unavailable');
+    _validateTemplate(name, description, fields);
+    final matches = templates.where((t) => t.id == id);
+    if (matches.isEmpty || matches.single.version != expectedVersion) {
+      throw const AccessFailure('template_changed');
+    }
+    final previous = matches.single;
+    final suppliedIds = fields
+        .map((f) => f.definitionId)
+        .whereType<String>()
+        .toList();
+    if (suppliedIds.toSet().length != suppliedIds.length ||
+        suppliedIds.any((id) => !previous.fields.any((f) => f.id == id))) {
+      throw const AccessFailure('invalid_template');
+    }
+    final template = InformationTemplate(
+      id,
+      name.trim(),
+      description,
+      previous.version + 1,
+      fields.map((input) {
+        final old = previous.fields.where((f) => f.id == input.definitionId);
+        final unchanged =
+            old.isNotEmpty &&
+            old.single.name == input.name.trim() &&
+            old.single.description == input.description &&
+            old.single.kind == input.kind;
+        return TemplateFieldDefinition(
+          unchanged ? old.single.id : _service._secret(),
+          input.name.trim(),
+          input.description,
+          input.kind,
+        );
+      }),
+    );
+    await _service._repository.saveTemplate(template);
+    return template;
+  });
+
+  Future<InformationItem> createInformationFromTemplate(
+    String templateId,
+    int templateVersion,
+    String name,
+    String description,
+    Map<String, String> values,
+  ) => _serialize(() async {
+    final matches = templates.where((t) => t.id == templateId);
+    if (matches.isEmpty || matches.single.version != templateVersion) {
+      throw const AccessFailure('template_changed');
+    }
+    final template = matches.single;
+    if (values.length != template.fields.length ||
+        template.fields.any((f) => !values.containsKey(f.id))) {
+      throw const AccessFailure('invalid_information');
+    }
+    return _createInformation(
+      name,
+      description,
+      template.fields
+          .map(
+            (f) =>
+                FieldInput(f.name, f.description, values[f.id]!, kind: f.kind),
+          )
+          .toList(),
+    );
+  });
   Future<void> _writes = Future.value();
   Future<T> _serialize<T>(Future<T> Function() action) {
     final result = _writes.then((_) => action());
@@ -334,7 +459,13 @@ class OwnerAccess {
     String name,
     String description,
     List<FieldInput> fields,
-  ) => _serialize(() async {
+  ) => _serialize(() => _createInformation(name, description, fields));
+
+  Future<InformationItem> _createInformation(
+    String name,
+    String description,
+    List<FieldInput> fields,
+  ) async {
     if (_service._closed) throw const AccessFailure('service_unavailable');
     if (name.trim().isEmpty ||
         name.length > 200 ||
@@ -363,13 +494,14 @@ class OwnerAccess {
               f.description,
               f.value,
               1,
+              kind: f.kind,
             ),
           )
           .toList(),
     );
     await _service._repository.save(item);
     return item;
-  });
+  }
 
   /// Ordinary value correction preserves meaning and identity. Semantic replacement
   /// will be a separate operation; it must never reuse an already authorized ID.
@@ -394,6 +526,7 @@ class OwnerAccess {
                         f.description,
                         value,
                         f.version + 1,
+                        kind: f.kind,
                       )
                     : f,
               )
@@ -435,20 +568,31 @@ class OwnerAccess {
     _service._finishPending(request, AccessRequestState.denied);
   }
 
-  void approve(String requestId, List<FieldRef> fields) {
+  void approve(
+    String requestId,
+    List<FieldRef> fields, {
+    Duration lifetime = const Duration(hours: 8),
+  }) {
     final request = _service._requests[requestId];
     if (request != null) _service._expire(request);
     if (request == null ||
         request.state != AccessRequestState.pending ||
-        request.grant != null ||
-        fields.isEmpty ||
-        fields.any((f) => !request.fields.contains(f))) {
+        request.grant != null) {
       throw const AccessFailure('invalid_request');
+    }
+    if (fields.isEmpty ||
+        fields.length > 200 ||
+        fields.any((f) => _service._field(f) == null)) {
+      throw const AccessFailure('invalid_scope');
+    }
+    if (lifetime < const Duration(minutes: 1) ||
+        lifetime > const Duration(days: 7)) {
+      throw const AccessFailure('invalid_duration');
     }
     request.grant = ClaimedGrant(
       _service._secret(),
       fields.toSet().toList(),
-      _service._clock().add(const Duration(hours: 8)),
+      _service._clock().add(lifetime),
     );
     _service._grants[request.grant!.token] = request;
     request.state = AccessRequestState.approved;

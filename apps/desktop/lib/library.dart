@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:info_core/info_core.dart';
 import 'organization.dart';
+import 'templates.dart';
 
 class InformationLibrary extends StatefulWidget {
   const InformationLibrary({super.key, required this.owner});
@@ -95,6 +96,18 @@ class _InformationLibraryState extends State<InformationLibrary> {
             if (mounted) setState(() {});
           },
           child: const Text('目录与标签'),
+        ),
+        TextButton.icon(
+          onPressed: () async {
+            await Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => TemplateLibrary(owner: widget.owner),
+              ),
+            );
+            if (mounted) setState(() {});
+          },
+          icon: const Icon(Icons.view_list_outlined),
+          label: const Text('字段模板'),
         ),
         TextButton.icon(
           onPressed: _create,

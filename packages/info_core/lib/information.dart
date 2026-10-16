@@ -1,12 +1,21 @@
 import 'organization.dart';
 export 'organization.dart';
+import 'templates.dart';
+
+enum FieldKind { structured, textNote }
 
 /// Public metadata is kept distinct from controlled field values.
 class FieldInput {
-  const FieldInput(this.name, this.description, this.value);
+  const FieldInput(
+    this.name,
+    this.description,
+    this.value, {
+    this.kind = FieldKind.structured,
+  });
   final String name;
   final String description;
   final String value;
+  final FieldKind kind;
 }
 
 class InformationField {
@@ -15,10 +24,12 @@ class InformationField {
     this.name,
     this.description,
     this.value,
-    this.version,
-  );
+    this.version, {
+    this.kind = FieldKind.structured,
+  });
   final String id, name, description, value;
   final int version;
+  final FieldKind kind;
 }
 
 class InformationItem {
@@ -49,6 +60,8 @@ abstract interface class InformationRepository {
   Future<void> saveTag(InformationTag tag);
   int? readSetting(String key);
   Future<void> writeSetting(String key, int value);
+  List<InformationTemplate> get templates;
+  Future<void> saveTemplate(InformationTemplate template);
 }
 
 class MemoryInformationRepository implements InformationRepository {
@@ -71,6 +84,15 @@ class MemoryInformationRepository implements InformationRepository {
       _directories[directory.id] = directory;
   @override
   Future<void> saveTag(InformationTag tag) async => _tags[tag.id] = tag;
+  final _templates = <String, InformationTemplate>{};
+  @override
+  List<InformationTemplate> get templates =>
+      List.unmodifiable(_templates.values);
+  @override
+  Future<void> saveTemplate(InformationTemplate template) async {
+    _templates[template.id] = template;
+  }
+
   @override
   List<InformationItem> get items => List.unmodifiable(_items.values);
   @override

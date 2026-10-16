@@ -117,6 +117,7 @@ extension OwnerOrganization on OwnerAccess {
               fieldDescriptions[field.id]!,
               field.value,
               field.version + 1,
+              kind: field.kind,
             )
           else
             field,
