@@ -100,12 +100,21 @@ class DesktopRuntime extends ChangeNotifier {
   bool quitting = false;
   bool shutdownFailed = false;
   StreamSubscription<String>? _requests;
+  Timer? _maintenanceTimer;
+  Future<void> _maintenance = Future.value();
+  bool recycleCleanupFailed = false;
   Future<void>? _quit;
   final _ready = Completer<void>();
 
   Future<void> start() async {
+    // Subscribe before any asynchronous maintenance: a request arriving during
+    // cleanup must still be delivered once native initialization is ready.
     _requests = service.owner.requestSubmitted.listen((_) {
       unawaited(_notify());
+    });
+    await _maintain();
+    _maintenanceTimer = Timer.periodic(const Duration(minutes: 1), (_) {
+      unawaited(_maintain());
     });
     try {
       availability = await platform.initialize(handleEvent);
@@ -115,6 +124,17 @@ class DesktopRuntime extends ChangeNotifier {
     _ready.complete();
     notifyListeners();
   }
+
+  Future<void> _maintain() => _maintenance = _maintenance.then((_) async {
+    if (quitting) return;
+    try {
+      await service.owner.purgeRecycle();
+      recycleCleanupFailed = false;
+    } catch (_) {
+      recycleCleanupFailed = true;
+    }
+    notifyListeners();
+  });
 
   Future<void> _notify() async {
     await _ready.future;
@@ -185,11 +205,12 @@ class DesktopRuntime extends ChangeNotifier {
   Future<void> quit() => _quit ??= _shutdown();
   Future<void> _shutdown() async {
     quitting = true;
+    _maintenanceTimer?.cancel();
     notifyListeners();
     try {
       // close synchronously rejects capabilities, then waits for queued facts.
       // The database must stay open when those facts cannot yet be saved.
-      await Future.wait([service.close(), closeServer()]);
+      await Future.wait([service.close(), closeServer(), _maintenance]);
     } on Object {
       shutdownFailed = true;
       quitting = false;

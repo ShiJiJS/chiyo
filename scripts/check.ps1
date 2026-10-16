@@ -1,10 +1,14 @@
 param(
     [string]$FlutterBin,
     [switch]$WindowsRelease,
+    [switch]$MacosRelease,
     [switch]$Offline
 )
 
 $ErrorActionPreference = 'Stop'
+if ($WindowsRelease -and $MacosRelease) {
+    throw 'Choose the release target matching this host.'
+}
 $projectRoot = Split-Path -Parent $PSScriptRoot
 if ($FlutterBin) {
     $env:PATH = "$FlutterBin;$env:PATH"
@@ -42,6 +46,9 @@ try {
     Invoke-Checked $flutterCommand @('test', 'test/')
     if ($WindowsRelease) {
         Invoke-Checked $flutterCommand @('build', 'windows', '--release')
+    }
+    if ($MacosRelease) {
+        Invoke-Checked $flutterCommand @('build', 'macos', '--release')
     }
 } finally { Pop-Location }
 

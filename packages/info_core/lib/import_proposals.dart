@@ -2,6 +2,13 @@ import 'information.dart';
 
 enum ImportProposalState { pending, confirmed, rejected }
 
+/// Confirmation facts remain available even after the resulting item is deleted.
+class ImportReceipt {
+  const ImportReceipt(this.id, this.version);
+  final String id;
+  final int version;
+}
+
 /// New information only: no existing item or field identities can be supplied.
 class ImportItemInput {
   ImportItemInput(
@@ -74,14 +81,30 @@ class ImportProposal {
     this.state = ImportProposalState.pending,
     this.version = 1,
     Iterable<String> createdItemIds = const [],
-  }) : items = List.unmodifiable(items),
-       createdItemIds = List.unmodifiable(createdItemIds);
+    Iterable<int> createdItemVersions = const [],
+    int? itemCount,
+  }) : items = state == ImportProposalState.pending
+           ? List.unmodifiable(items)
+           : const [],
+       itemCount = itemCount ?? items.length,
+       createdItemIds = List.unmodifiable(createdItemIds),
+       createdItemVersions = List.unmodifiable(
+         createdItemVersions.isEmpty
+             ? createdItemIds.map((_) => 1)
+             : createdItemVersions,
+       );
   final String id, sessionBinding, chatLabel;
   final DateTime createdAt;
   final List<ImportItemInput> items;
   final ImportProposalState state;
   final int version;
   final List<String> createdItemIds;
+  final List<int> createdItemVersions;
+  final int itemCount;
+  List<ImportReceipt> get receipts => List.unmodifiable([
+    for (var i = 0; i < createdItemIds.length; i++)
+      ImportReceipt(createdItemIds[i], createdItemVersions[i]),
+  ]);
   Map<String, Object?> toJson() => {
     'id': id,
     'sessionBinding': sessionBinding,
@@ -91,6 +114,8 @@ class ImportProposal {
     'state': state.name,
     'items': items.map((i) => i.toJson()).toList(),
     'createdItemIds': createdItemIds,
+    'createdItemVersions': createdItemVersions,
+    'itemCount': itemCount,
   };
   factory ImportProposal.fromJson(Map<String, dynamic> json) => ImportProposal(
     id: json['id'] as String,
@@ -103,5 +128,8 @@ class ImportProposal {
     state: ImportProposalState.values.byName(json['state'] as String),
     version: json['version'] as int,
     createdItemIds: (json['createdItemIds'] as List).cast<String>(),
+    createdItemVersions: (json['createdItemVersions'] as List? ?? [])
+        .cast<int>(),
+    itemCount: json['itemCount'] as int?,
   );
 }

@@ -8,6 +8,7 @@ import 'package:info_storage/info_storage.dart';
 import 'library.dart';
 import 'import_proposals.dart';
 import 'desktop_runtime.dart';
+import 'backups.dart';
 import 'history.dart';
 
 Future<void> main() async {
@@ -46,7 +47,12 @@ Future<void> main() async {
     );
     await runtime.start();
     runApp(
-      InformationApp(service: service, port: server.port, runtime: runtime),
+      InformationApp(
+        service: service,
+        port: server.port,
+        runtime: runtime,
+        backups: repository.backups,
+      ),
     );
   } on Object {
     await service?.close();
@@ -71,17 +77,24 @@ class InformationApp extends StatefulWidget {
     required this.service,
     required this.port,
     this.runtime,
+    this.backups,
+    this.backupFiles = const NativeBackupFilePicker(),
   });
   final InformationService service;
   final int port;
   final DesktopRuntime? runtime;
+  final InformationBackups? backups;
+  final BackupFilePicker backupFiles;
   @override
   State<InformationApp> createState() => _InformationAppState();
 }
 
 class _InformationAppState extends State<InformationApp>
     with SingleTickerProviderStateMixin {
-  late final _tabs = TabController(length: 4, vsync: this);
+  late final _tabs = TabController(
+    length: widget.backups == null ? 4 : 5,
+    vsync: this,
+  );
   int _openRevision = 0;
   @override
   void initState() {
@@ -141,11 +154,17 @@ class _InformationAppState extends State<InformationApp>
             Tab(text: '我的信息'),
             Tab(text: '录入提案'),
             Tab(text: '授权历史'),
+            if (widget.backups != null) Tab(text: '备份恢复'),
           ],
         ),
       ),
       body: Column(
         children: [
+          if (widget.runtime?.recycleCleanupFailed == true)
+            const Padding(
+              padding: EdgeInsets.all(8),
+              child: Text('回收站到期清理暂时失败，请检查存储。到期内容无法恢复，应用会再次尝试清理。'),
+            ),
           if (widget.runtime?.shutdownFailed == true)
             const Padding(
               padding: EdgeInsets.all(8),
@@ -172,6 +191,8 @@ class _InformationAppState extends State<InformationApp>
                 InformationLibrary(owner: widget.service.owner, refresh: _tabs),
                 ImportProposalsPage(owner: widget.service.owner),
                 AuthorizationHistory(owner: widget.service.owner),
+                if (widget.backups case final backups?)
+                  BackupLibrary(backups: backups, files: widget.backupFiles),
               ],
             ),
           ),

@@ -5,7 +5,9 @@ import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:info_core/info_core.dart';
 import 'package:sqlite3/sqlite3.dart' as sqlite;
+import 'backup_publish.dart';
 export 'platform_keys.dart';
+part 'backups.dart';
 
 class StorageFailure implements Exception {
   const StorageFailure(this.code);
@@ -37,9 +39,13 @@ class EncryptedInformationRepository implements InformationRepository {
   final _proposals = <String, ImportProposal>{};
   final _updates = <String, UpdateProposal>{};
   final _revisions = <InformationRevision>[];
+  final _recycle = <String, RecycleEntry>{};
+  final _recycleFacts = <RecycleFact>[];
+  final _deletes = <String, DeleteProposal>{};
   bool _closed = false;
   static final _openDirectories = <String>{};
   late final String _directory;
+  late final backups = InformationBackups._(this);
 
   static Future<EncryptedInformationRepository> open(
     String directory,
@@ -115,6 +121,34 @@ class EncryptedInformationRepository implements InformationRepository {
   Future<void> _load() async {
     for (final row
         in await _db
+            .customSelect('SELECT payload FROM recycle_entries ORDER BY rowid')
+            .get()) {
+      final entry = RecycleEntry.fromJson(
+        jsonDecode(row.read<String>('payload')) as Map<String, dynamic>,
+      );
+      _recycle[entry.id] = entry;
+    }
+    for (final row
+        in await _db
+            .customSelect('SELECT payload FROM recycle_facts ORDER BY rowid')
+            .get()) {
+      _recycleFacts.add(
+        RecycleFact.fromJson(
+          jsonDecode(row.read<String>('payload')) as Map<String, dynamic>,
+        ),
+      );
+    }
+    for (final row
+        in await _db
+            .customSelect('SELECT payload FROM delete_proposals ORDER BY rowid')
+            .get()) {
+      final proposal = DeleteProposal.fromJson(
+        jsonDecode(row.read<String>('payload')) as Map<String, dynamic>,
+      );
+      _deletes[proposal.id] = proposal;
+    }
+    for (final row
+        in await _db
             .customSelect('SELECT payload FROM grant_history ORDER BY rowid')
             .get()) {
       final history = GrantHistory.fromJson(
@@ -163,6 +197,11 @@ class EncryptedInformationRepository implements InformationRepository {
         jsonDecode(row.read<String>('payload')) as Map<String, dynamic>,
       );
       _proposals[proposal.id] = proposal;
+      if (proposal.state != ImportProposalState.pending) {
+        // Scrub values retained by earlier development versions. Pending work
+        // remains untouched; terminal receipts do not depend on current items.
+        await _writeProposal(proposal);
+      }
     }
     for (final row
         in await _db
@@ -595,18 +634,124 @@ class EncryptedInformationRepository implements InformationRepository {
   Future<void> confirmUpdateProposal(
     UpdateProposal proposal,
     InformationItem item,
-    InformationRevision previous,
-  ) async {
+    InformationRevision previous, {
+    List<RecycleEntry> recycled = const [],
+    List<RecycleFact> facts = const [],
+  }) async {
     if (_closed) throw const StorageFailure('library_closed');
     try {
       await _db.transaction(() async {
         await _writeItem(item);
         await _writeRevision(previous);
         await _writeUpdate(proposal);
+        await _writeRecycle(recycled, facts);
       });
       _items[item.id] = item;
       _revisions.add(previous);
       _updates[proposal.id] = proposal;
+      for (final entry in recycled) {
+        _recycle[entry.id] = entry;
+      }
+      _recycleFacts.addAll(facts);
+    } catch (_) {
+      throw const StorageFailure('save_failed');
+    }
+  }
+
+  @override
+  List<RecycleEntry> get recycleEntries {
+    if (_closed) throw const StorageFailure('library_closed');
+    return List.unmodifiable(_recycle.values);
+  }
+
+  @override
+  List<RecycleFact> get recycleFacts {
+    if (_closed) throw const StorageFailure('library_closed');
+    return List.unmodifiable(_recycleFacts);
+  }
+
+  @override
+  List<DeleteProposal> get deleteProposals {
+    if (_closed) throw const StorageFailure('library_closed');
+    return List.unmodifiable(_deletes.values);
+  }
+
+  Future<void> _writeDelete(DeleteProposal proposal) => _db.customStatement(
+    'INSERT INTO delete_proposals(id,payload) VALUES(?,?) ON CONFLICT(id) DO UPDATE SET payload=excluded.payload',
+    [proposal.id, jsonEncode(proposal.toJson())],
+  );
+  @override
+  Future<void> saveDeleteProposal(DeleteProposal proposal) async {
+    if (_closed) throw const StorageFailure('library_closed');
+    try {
+      await _writeDelete(proposal);
+      _deletes[proposal.id] = proposal;
+    } catch (_) {
+      throw const StorageFailure('save_failed');
+    }
+  }
+
+  Future<void> _writeRecycle(
+    List<RecycleEntry> entries,
+    List<RecycleFact> facts,
+  ) async {
+    for (final entry in entries) {
+      await _db.customStatement(
+        'INSERT INTO recycle_entries(id,payload) VALUES(?,?) ON CONFLICT(id) DO UPDATE SET payload=excluded.payload',
+        [entry.id, jsonEncode(entry.toJson())],
+      );
+    }
+    for (final fact in facts) {
+      await _db.customStatement(
+        'INSERT INTO recycle_facts(payload) VALUES(?)',
+        [jsonEncode(fact.toJson())],
+      );
+    }
+  }
+
+  @override
+  Future<void> commitRecycleChange({
+    required String itemId,
+    InformationItem? item,
+    InformationRevision? previous,
+    required List<RecycleEntry> entries,
+    required List<RecycleFact> facts,
+    DeleteProposal? proposal,
+  }) async {
+    if (_closed) throw const StorageFailure('library_closed');
+    try {
+      await _db.transaction(() async {
+        if (item != null) {
+          await _writeItem(item);
+        } else {
+          await _db.customStatement(
+            'DELETE FROM information_item_tags WHERE item_id=?',
+            [itemId],
+          );
+          await _db.customStatement(
+            'DELETE FROM information_fields WHERE item_id=?',
+            [itemId],
+          );
+          await _db.customStatement(
+            'DELETE FROM information_items WHERE id=?',
+            [itemId],
+          );
+        }
+        if (previous != null) await _writeRevision(previous);
+        await _writeRecycle(entries, facts);
+        if (proposal != null) await _writeDelete(proposal);
+      });
+      if (item == null) {
+        _items.remove(itemId);
+      } else {
+        _items[itemId] = item;
+      }
+      if (previous != null) _revisions.add(previous);
+      for (final entry in entries) {
+        _recycle[entry.id] = entry;
+      }
+      _recycleFacts.addAll(facts);
+      if (proposal != null) _deletes[proposal.id] = proposal;
     } catch (_) {
       throw const StorageFailure('save_failed');
     }
@@ -616,12 +761,13 @@ class EncryptedInformationRepository implements InformationRepository {
 class _InformationDatabase extends GeneratedDatabase {
   _InformationDatabase(super.executor);
   @override
-  int get schemaVersion => 8;
+  int get schemaVersion => 9;
   @override
   Iterable<TableInfo<Table, Object?>> get allTables => const [];
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (_) async {
+      await _createRecycle();
       await _createAudit();
       await _createUpdates();
       await _createProposals();
@@ -636,9 +782,10 @@ class _InformationDatabase extends GeneratedDatabase {
         'CREATE TABLE information_fields(id TEXT PRIMARY KEY,item_id TEXT NOT NULL REFERENCES information_items(id),name TEXT NOT NULL,description TEXT NOT NULL,value TEXT NOT NULL,version INTEGER NOT NULL DEFAULT 1,kind TEXT NOT NULL DEFAULT \'structured\')',
       );
       await _organizationSchema();
+      await _backupSchema();
     },
     onUpgrade: (_, from, to) async {
-      if (from < 1 || to != 8) throw const StorageFailure('unsupported_schema');
+      if (from < 1 || to != 9) throw const StorageFailure('unsupported_schema');
       await transaction(() async {
         if (from < 2) {
           await customStatement(
@@ -658,20 +805,34 @@ class _InformationDatabase extends GeneratedDatabase {
             'ALTER TABLE information_fields ADD COLUMN kind TEXT NOT NULL DEFAULT \'structured\'',
           );
         }
-        // Schema 5 is reserved for the independent backup configuration.
+        if (from < 5) await _backupSchema();
         if (from < 6) await _createProposals();
         if (from < 7) await _createAudit();
         if (from < 8) await _createUpdates();
+        if (from < 9) await _createRecycle();
       });
     },
     beforeOpen: (details) async {
       if (details.versionNow > schemaVersion)
         throw const StorageFailure('unsupported_schema');
+      // Some pre-merge development schema 6 databases reserved version 5 but
+      // did not create its backup table. Backfill only this additive structure.
+      await _backupSchema();
       // An unpublished development schema 8 preceded the reserved audit
       // tables. Backfill only after rejecting unknown future versions.
       await _createAudit();
     },
   );
+
+  Future<void> _createRecycle() async {
+    await customStatement(
+      'CREATE TABLE recycle_entries(id TEXT PRIMARY KEY,payload TEXT NOT NULL)',
+    );
+    await customStatement('CREATE TABLE recycle_facts(payload TEXT NOT NULL)');
+    await customStatement(
+      'CREATE TABLE delete_proposals(id TEXT PRIMARY KEY,payload TEXT NOT NULL)',
+    );
+  }
 
   Future<void> _createProposals() => customStatement(
     'CREATE TABLE import_proposals(id TEXT PRIMARY KEY,payload TEXT NOT NULL)',
@@ -704,6 +865,9 @@ class _InformationDatabase extends GeneratedDatabase {
     'CREATE TABLE field_templates(id TEXT PRIMARY KEY,name TEXT NOT NULL,description TEXT NOT NULL,version INTEGER NOT NULL,fields_json TEXT NOT NULL)',
   );
 
+  Future<void> _backupSchema() => customStatement(
+    'CREATE TABLE IF NOT EXISTS backup_configuration(singleton INTEGER PRIMARY KEY CHECK(singleton=1),recovery_key TEXT NOT NULL)',
+  );
   Future<void> _createAudit() async {
     await customStatement(
       'CREATE TABLE IF NOT EXISTS grant_history(id TEXT PRIMARY KEY,approved_at INTEGER NOT NULL,payload TEXT NOT NULL)',
