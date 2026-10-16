@@ -43,6 +43,22 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('确认整批调整'), findsNothing);
       expect(find.text('分类：服务器'), findsOneWidget);
+      await tester.tap(find.text('关闭'));
+      await tester.pumpAndSettle();
+      final unchanged = await service.agent.requestOrganization(
+        session,
+        '检查现有分类',
+        ['demo-server'],
+      );
+      await service.owner.approveOrganization(unchanged.id, ['demo-server']);
+      await service.agent.submitOrganization(session, unchanged.id, []);
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('查看结果').first);
+      await tester.pumpAndSettle();
+      expect(find.text('本次未改动分类或标签。'), findsOneWidget);
+      expect(service.owner.information.single.version, 2);
+
       await tester.pumpWidget(const SizedBox());
       await tester.runAsync(service.close);
     },

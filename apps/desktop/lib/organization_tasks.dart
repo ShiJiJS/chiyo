@@ -222,7 +222,8 @@ class OrganizationResultsList extends StatelessWidget {
   Widget build(BuildContext context) => Column(
     children: [
       for (final task in owner.organizationTasks.reversed.where(
-        (t) => t.changes.isNotEmpty || t.state == OrganizationTaskState.confirmed,
+        (t) =>
+            t.changes.isNotEmpty || t.state == OrganizationTaskState.confirmed,
       ))
         WorkspaceRecord(
           title: const Text('分类整理'),
@@ -318,7 +319,9 @@ class _ReviewOrganizationState extends State<_ReviewOrganization> {
     title: Text(_pending ? '查看整理方案' : '整理结果'),
     content: SizedBox(
       width: 760,
-      height: 620,
+      height: (220 + widget.task.changes.length * 150)
+          .clamp(220, 620)
+          .toDouble(),
       child: Column(
         children: [
           Expanded(
