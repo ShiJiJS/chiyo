@@ -180,7 +180,7 @@ class _RecyclePageState extends State<RecyclePage> {
         height:
             entry.snapshot!.fields.length <= 2 &&
                 entry.snapshot!.fields.every((f) => f.value.length < 200)
-            ? 320
+            ? 360
             : 500,
         child: ListView(
           children: [

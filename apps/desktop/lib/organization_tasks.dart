@@ -222,7 +222,7 @@ class OrganizationResultsList extends StatelessWidget {
   Widget build(BuildContext context) => Column(
     children: [
       for (final task in owner.organizationTasks.reversed.where(
-        (t) => t.changes.isNotEmpty,
+        (t) => t.changes.isNotEmpty || t.state == OrganizationTaskState.confirmed,
       ))
         WorkspaceRecord(
           title: const Text('分类整理'),
