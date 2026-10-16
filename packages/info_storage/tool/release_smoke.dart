@@ -11,13 +11,14 @@ Future<void> main() async {
     'info-release-smoke-',
   );
   EncryptedInformationRepository? repository;
+  InformationService? service;
   try {
     final keys = WindowsDatabaseKeyStore('${directory.path}/smoke.dpapi');
     repository = await EncryptedInformationRepository.open(
       directory.path,
       keys,
     );
-    var service = InformationService(repository: repository);
+    service = InformationService(repository: repository);
     final item = await service.owner.createInformation(
       'Fictional smoke',
       'Public',
@@ -30,6 +31,7 @@ Future<void> main() async {
     final token = service.agent.claim(session, request.id).token;
     final version = repository.cipherVersion;
     await service.close();
+    service = null;
     await repository.close();
     repository = await EncryptedInformationRepository.open(
       directory.path,
@@ -41,11 +43,13 @@ Future<void> main() async {
       throw StateError('Reopen failed');
     var denied = false;
     try {
-      service.agent.read(token, ref);
+      await service.agent.read(token, ref);
     } on AccessFailure {
       denied = true;
     }
     if (!denied) throw StateError('Old token survived');
+    await service.close();
+    service = null;
     await repository.close();
     for (final file in directory.listSync().whereType<File>()) {
       if (String.fromCharCodes(
@@ -78,11 +82,14 @@ Future<void> main() async {
       migrationDirectory.path,
       migrationKeys,
     );
-    await InformationService(repository: repository).owner.createInformation(
+    service = InformationService(repository: repository);
+    await service.owner.createInformation(
       'Migrated',
       '',
       [const FieldInput('Notes', '', 'fictional')],
     );
+    await service.close();
+    service = null;
     await repository.close();
     repository = await EncryptedInformationRepository.open(
       migrationDirectory.path,
@@ -94,6 +101,7 @@ Future<void> main() async {
       'PASS: SQLCipher $version; current-user DPAPI, encrypted reopen, token invalidation, plaintext scan, schema migration',
     );
   } finally {
+    await service?.close();
     await repository?.close();
     await directory.delete(recursive: true);
   }

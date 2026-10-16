@@ -225,6 +225,8 @@ class ApprovalsState extends State<Approvals> {
                 child: const Text('拒绝申请'),
               ),
             ] else ...[
+              if (request.sessionEnded)
+                const Text('聊天已结束。恢复聊天需要重新连接并申请授权。'),
               Text(switch (state) {
                 AccessRequestState.pending => '待审批',
                 AccessRequestState.approved => '已批准',

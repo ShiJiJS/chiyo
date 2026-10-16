@@ -2,9 +2,11 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:info_cli/agent_client.dart';
 import 'package:info_cli/codex_association.dart';
+import 'package:info_cli/codex_end_index.dart';
 
 /// Receives documented SessionStart JSON on stdin. Never reads transcripts.
 Future<void> main(List<String> args) async {
+  final elapsed = Stopwatch()..start();
   AgentClient? client;
   try {
     var port = 47125;
@@ -28,7 +30,29 @@ Future<void> main(List<String> args) async {
             'source': 'startup',
             'session_id': Platform.environment['CODEX_THREAD_ID'],
           }
-        : await readInput();
+        : await readInput().timeout(const Duration(seconds: 2));
+    if (input['hook_event_name'] == 'SessionEnd') {
+      final chat = input['session_id'];
+      if (chat is! String || !validChatId(chat)) throw const FormatException();
+      final rest = const Duration(seconds: 2) - elapsed.elapsed;
+      final status = rest <= Duration.zero
+          ? 'end_unavailable'
+          : await CodexEndIndex(root).end(chat, timeout: rest);
+      stdout.writeln(jsonEncode({'systemMessage': 'Agent Info: $status.'}));
+      return;
+    }
+    if (input['hook_event_name'] == 'SubagentStart') {
+      stdout.writeln(
+        jsonEncode({
+          'hookSpecificOutput': {
+            'hookEventName': 'SubagentStart',
+            'additionalContext':
+                'Agent Info children use only a private child-bound association explicitly delegated by the parent with its existing proof. Ask the parent to delegate if missing. A parent/root chat ID cannot retrieve a capability. Child completion does not end the root authorization session.',
+          },
+        }),
+      );
+      return;
+    }
     if (input['hook_event_name'] != 'SessionStart') {
       throw const FormatException();
     }
@@ -49,7 +73,7 @@ Future<void> main(List<String> args) async {
       throw const FormatException();
     }
     final chat = input['session_id'];
-    if (chat is! String || chat.isEmpty || chat.length > 150) {
+    if (chat is! String || !validChatId(chat)) {
       throw const FormatException();
     }
     client = AgentClient(port);
@@ -71,6 +95,13 @@ Future<void> main(List<String> args) async {
       port,
       client.sessionSecret!,
     ).save(root);
+    try {
+      await CodexEndIndex(root).register(chat, port, client.endCapability!);
+    } on Object {
+      // This new session was never approved or delivered. Preserve other files.
+      await File(reference).delete();
+      rethrow;
+    }
     stdout.writeln(
       jsonEncode({
         'hookSpecificOutput': {
@@ -78,7 +109,7 @@ Future<void> main(List<String> args) async {
           'additionalContext': jsonEncode({
             'association': reference,
             'instruction':
-                'Use this new private reference only in this chat with codex_info stdin; supersedes inherited references. Do not print, read, search, share, or commit this capability file. Use the agent-info-access Skill. No fields have been authorized.',
+                'Use this new private reference in this chat with codex_info stdin; supersedes inherited references. Delegate child-bound references only to this root chat\'s children using the existing proof. Keep capability files out of ordinary output, searches and commits. Use the agent-info-access Skill. No fields have been authorized.',
           }),
         },
       }),

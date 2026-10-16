@@ -5,7 +5,341 @@ import 'package:info_core/info_core.dart';
 import 'package:test/test.dart';
 
 void main() {
+  test(
+    'a stalled end call stops within its deadline and retains capabilities for a later retry',
+    () async {
+      final core = InformationService.fictional();
+      var server = await AgentServer.start(core.agent, port: 0);
+      final port = server.port;
+      final root = await Directory.systemTemp.createTemp('info-deadline-test-');
+      HttpServer? stalled;
+      addTearDown(() async {
+        await stalled?.close(force: true);
+        await server.close();
+        await core.close();
+        await root.delete(recursive: true);
+      });
+      final start = await invoke(
+        'bin/codex_hook.dart',
+        {
+          'hook_event_name': 'SessionStart',
+          'source': 'startup',
+          'session_id': 'deadline-root',
+        },
+        args: ['--port', '$port', '--state-root', root.path],
+      );
+      final reference = jsonDecode(
+        start['hookSpecificOutput']['additionalContext'] as String,
+      )['association'];
+      final requested = await invoke('bin/codex_info.dart', {
+        'association': reference,
+        'command': 'request',
+        'purpose': 'Address',
+        'fields': [
+          {'itemId': 'demo-server', 'fieldId': 'host'},
+        ],
+      }, chat: 'deadline-root');
+      await server.close();
+      stalled = await HttpServer.bind(InternetAddress.loopbackIPv4, port);
+      stalled.listen((request) {
+        request.drain<void>();
+      }); // Deliberately never responds.
+      final watch = Stopwatch()..start();
+      final failed = await invoke(
+        'bin/codex_hook.dart',
+        {'hook_event_name': 'SessionEnd', 'session_id': 'deadline-root'},
+        args: ['--state-root', root.path],
+      );
+      expect(failed['systemMessage'], contains('end_unavailable'));
+      expect(watch.elapsed, lessThan(const Duration(seconds: 4)));
+      expect(core.owner.requests.single.state, AccessRequestState.pending);
+      await stalled.close(force: true);
+      stalled = null;
+      server = await AgentServer.start(core.agent, port: port);
+      final retried = await invoke(
+        'bin/codex_hook.dart',
+        {'hook_event_name': 'SessionEnd', 'session_id': 'deadline-root'},
+        args: ['--state-root', root.path],
+      );
+      expect(retried['systemMessage'], contains('ended'));
+      expect(core.owner.requests.single.id, requested['requestId']);
+      expect(core.owner.requests.single.state, AccessRequestState.cancelled);
+    },
+  );
+  test(
+    'root SessionEnd ends every startup generation and its delegated child without reading a transcript',
+    () async {
+      final core = InformationService.fictional();
+      final server = await AgentServer.start(core.agent, port: 0);
+      final root = await Directory.systemTemp.createTemp('info-end-test-');
+      addTearDown(() async {
+        await server.close();
+        await core.close();
+        await root.delete(recursive: true);
+      });
+      final refs = <String>[];
+      final ids = <String>[];
+      for (var i = 0; i < 2; i++) {
+        final start = await invoke(
+          'bin/codex_hook.dart',
+          {
+            'hook_event_name': 'SessionStart',
+            'source': 'startup',
+            'session_id': 'same-root',
+          },
+          args: ['--port', '${server.port}', '--state-root', root.path],
+        );
+        final reference =
+            jsonDecode(
+                  start['hookSpecificOutput']['additionalContext'] as String,
+                )['association']
+                as String;
+        refs.add(reference);
+        final request = await invoke('bin/codex_info.dart', {
+          'association': reference,
+          'command': 'request',
+          'purpose': 'Address',
+          'fields': [
+            {'itemId': 'demo-server', 'fieldId': 'host'},
+          ],
+        }, chat: 'same-root');
+        ids.add(request['requestId'] as String);
+        core.owner.approve(ids.last, [const FieldRef('demo-server', 'host')]);
+      }
+      final child = await invoke('bin/codex_info.dart', {
+        'association': refs.first,
+        'command': 'delegate',
+        'childChatId': 'child',
+      }, chat: 'same-root');
+      final guidance = await invoke(
+        'bin/codex_hook.dart',
+        {
+          'hook_event_name': 'SubagentStart',
+          'session_id': 'same-root',
+          'agent_id': 'child',
+        },
+        args: ['--state-root', root.path],
+      );
+      expect(
+        guidance['hookSpecificOutput']['additionalContext'],
+        isNot(contains(refs.first)),
+      );
+      for (final event in ['Stop', 'Interrupt', 'SubagentStop']) {
+        await invoke(
+          'bin/codex_hook.dart',
+          {'hook_event_name': event, 'session_id': 'same-root'},
+          args: ['--state-root', root.path],
+        );
+      }
+      expect(
+        (await invoke('bin/codex_info.dart', {
+          'association': child['privateAssociation'],
+          'command': 'read',
+          'requestId': ids.first,
+          'itemId': 'demo-server',
+          'fieldId': 'host',
+        }, chat: 'child'))['status'],
+        'ok',
+      );
+      final ended = await invoke(
+        'bin/codex_hook.dart',
+        {
+          'hook_event_name': 'SessionEnd',
+          'session_id': 'same-root',
+          'reason': 'other',
+          'transcript_path': '${root.path}/nonexistent',
+        },
+        args: ['--state-root', root.path],
+      );
+      expect(ended['systemMessage'], contains('ended'));
+      for (var i = 0; i < refs.length; i++) {
+        expect(
+          (await invoke('bin/codex_info.dart', {
+            'association': refs[i],
+            'command': 'claim',
+            'requestId': ids[i],
+          }, chat: 'same-root'))['status'],
+          'unauthorized',
+        );
+      }
+      expect(
+        (await invoke('bin/codex_info.dart', {
+          'association': child['privateAssociation'],
+          'command': 'read',
+          'requestId': ids.first,
+          'itemId': 'demo-server',
+          'fieldId': 'host',
+        }, chat: 'child'))['status'],
+        'unauthorized',
+      );
+      expect(
+        core.owner.requests.every((r) => r.state == AccessRequestState.revoked),
+        isTrue,
+      );
+      final duplicate = await invoke(
+        'bin/codex_hook.dart',
+        {'hook_event_name': 'SessionEnd', 'session_id': 'same-root'},
+        args: ['--state-root', root.path],
+      );
+      expect(duplicate['systemMessage'], contains('no_active_session'));
+    },
+  );
+  test(
+    'a parent proof delegates only the same grant and deadline to its intended child',
+    () async {
+      final core = InformationService.fictional();
+      final server = await AgentServer.start(core.agent, port: 0);
+      final root = await Directory.systemTemp.createTemp('info-child-test-');
+      addTearDown(() async {
+        await server.close();
+        await core.close();
+        await root.delete(recursive: true);
+      });
+      final start = await invoke(
+        'bin/codex_hook.dart',
+        {
+          'hook_event_name': 'SessionStart',
+          'source': 'startup',
+          'session_id': 'root-chat',
+        },
+        args: ['--port', '${server.port}', '--state-root', root.path],
+      );
+      final parent = jsonDecode(
+        start['hookSpecificOutput']['additionalContext'] as String,
+      )['association'];
+      final request = await invoke('bin/codex_info.dart', {
+        'association': parent,
+        'command': 'request',
+        'purpose': 'Address',
+        'fields': [
+          {'itemId': 'demo-server', 'fieldId': 'host'},
+        ],
+      }, chat: 'root-chat');
+      final id = request['requestId'] as String;
+      core.owner.approve(id, [const FieldRef('demo-server', 'host')]);
+      final parentGrant = await invoke('bin/codex_info.dart', {
+        'association': parent,
+        'command': 'claim',
+        'requestId': id,
+      }, chat: 'root-chat');
+      final delegated = await invoke('bin/codex_info.dart', {
+        'association': parent,
+        'command': 'delegate',
+        'childChatId': 'child-chat',
+      }, chat: 'root-chat');
+      expect(delegated['status'], 'ok');
+      final child = delegated['privateAssociation'];
+      expect(child, isNot(parent));
+      expect(
+        (await invoke('bin/codex_info.dart', {
+          'association': child,
+          'command': 'claim',
+          'requestId': id,
+        }, chat: 'child-chat'))['expiresAt'],
+        parentGrant['expiresAt'],
+      );
+      for (final field in ['host', 'username']) {
+        final value = await invoke('bin/codex_info.dart', {
+          'association': child,
+          'command': 'read',
+          'requestId': id,
+          'itemId': 'demo-server',
+          'fieldId': field,
+        }, chat: 'child-chat');
+        expect(value['status'], field == 'host' ? 'ok' : 'unauthorized');
+      }
+      expect(
+        (await invoke('bin/codex_info.dart', {
+          'association': child,
+          'command': 'claim',
+          'requestId': id,
+        }, chat: 'unrelated-chat'))['status'],
+        'association_unavailable',
+      );
+      expect(
+        (await invoke('bin/codex_info.dart', {
+          'association': 'root-chat',
+          'command': 'delegate',
+          'childChatId': 'other-child',
+        }, chat: 'root-chat'))['status'],
+        'association_unavailable',
+      );
+      expect(core.owner.requests, hasLength(1));
+    },
+  );
   if (Platform.isWindows && Platform.environment['INFO_TEST_BUNDLE'] != null) {
+    test(
+      'the generated Windows SessionEnd command terminates a live session within its 3 second hook timeout',
+      () async {
+        final bundle = Platform.environment['INFO_TEST_BUNDLE']!;
+        final config = jsonDecode(
+          await File('$bundle/hooks.json').readAsString(),
+        );
+        expect((config['hooks'] as Map).keys.toSet(), {
+          'SessionStart',
+          'SubagentStart',
+          'SessionEnd',
+        });
+        final definition = config['hooks']['SessionEnd'][0]['hooks'][0];
+        expect(definition['timeout'], 3);
+        final core = InformationService.fictional();
+        final server = await AgentServer.start(core.agent, port: 0);
+        final local = await Directory.systemTemp.createTemp(
+          'info-rendered-end-',
+        );
+        addTearDown(() async {
+          await server.close();
+          await core.close();
+          await local.delete(recursive: true);
+        });
+        final start = await invoke(
+          'bin/codex_hook.dart',
+          {
+            'hook_event_name': 'SessionStart',
+            'source': 'startup',
+            'session_id': 'rendered-end',
+          },
+          args: [
+            '--port',
+            '${server.port}',
+            '--state-root',
+            '${local.path}/AgentInfo/codex',
+          ],
+        );
+        final reference = jsonDecode(
+          start['hookSpecificOutput']['additionalContext'] as String,
+        )['association'];
+        await invoke('bin/codex_info.dart', {
+          'association': reference,
+          'command': 'request',
+          'purpose': 'Address',
+          'fields': [
+            {'itemId': 'demo-server', 'fieldId': 'host'},
+          ],
+        }, chat: 'rendered-end');
+        final command = (definition['commandWindows'] as String).split(' ');
+        final watch = Stopwatch()..start();
+        final process = await Process.start(
+          command.first,
+          command.sublist(1),
+          environment: {'LOCALAPPDATA': local.path},
+        );
+        final output = process.stdout.transform(utf8.decoder).join();
+        final errors = process.stderr.transform(utf8.decoder).join();
+        process.stdin.writeln(
+          jsonEncode({
+            'hook_event_name': 'SessionEnd',
+            'session_id': 'rendered-end',
+          }),
+        );
+        await process.stdin.close();
+        expect(await process.exitCode.timeout(const Duration(seconds: 3)), 0);
+        expect(watch.elapsed, lessThan(const Duration(seconds: 3)));
+        expect(await errors, isEmpty);
+        expect(jsonDecode(await output)['systemMessage'], contains('ended'));
+        expect(core.owner.requests.single.state, AccessRequestState.cancelled);
+      },
+    );
     test(
       'rendered Windows hook command forwards documented JSON stdin',
       () async {
@@ -174,7 +508,10 @@ void main() {
         {'hook_event_name': 'SubagentStart', 'session_id': 'known-chat'},
         args: ['--state-root', root.path],
       );
-      expect(invalid['systemMessage'], contains('association_unavailable'));
+      expect(
+        invalid['hookSpecificOutput']['additionalContext'],
+        contains('private child-bound association'),
+      );
       expect(await root.list().length, 0);
     },
   );
@@ -241,7 +578,10 @@ void main() {
         resumed['hookSpecificOutput']['additionalContext'],
         contains('Retain'),
       );
-      expect(await root.list().length, 1);
+      expect(
+        await root.list().length,
+        2,
+      ); // Association plus the end-only index directory.
       for (var i = 0; i < 2; i++) {
         expect(
           await call({
@@ -313,5 +653,6 @@ Future<Map<String, dynamic>> invoke(
   final raw = await out;
   expect(raw, isNot(contains('sessionSecret')));
   expect(raw, isNot(contains('"token"')));
+  expect(raw, isNot(contains('"endCapability"')));
   return jsonDecode(raw) as Map<String, dynamic>;
 }

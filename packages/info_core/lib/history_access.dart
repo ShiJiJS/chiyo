@@ -93,6 +93,21 @@ extension _AuditService on InformationService {
     _enqueueAudit(() => _repository.saveAccessRecord(record));
     _pruneAudit();
     await _auditWrites;
+    if (allowed && !_canRead(request, target)) {
+      // Permission may end while durable recording is pending. No value is delivered;
+      // replace that operation's provisional allowed fact before returning.
+      record = AccessRecord(
+        id: record.id,
+        at: record.at,
+        outcome: AccessOutcome.unauthorized,
+        sessionId: record.sessionId,
+        grantId: record.grantId,
+        itemId: record.itemId,
+        fieldId: record.fieldId,
+      );
+      _enqueueAudit(() => _repository.saveAccessRecord(record));
+      await _auditWrites;
+    }
     if (_auditFailed) {
       // This read did not disclose a value. The pending write is retained and
       // records that result when the owner retries after repairing storage.

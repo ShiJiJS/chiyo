@@ -20,7 +20,26 @@ Future<void> main(List<String> args) async {
       Platform.environment['CODEX_THREAD_ID'] ?? '',
     );
     client = AgentClient(association.port, sessionSecret: association.secret);
-    if (input['command'] == 'read') {
+    if (input['command'] == 'delegate') {
+      final child = input['childChatId'];
+      if (child is! String ||
+          !validChatId(child) ||
+          child == association.chatId) {
+        throw const FormatException();
+      }
+      final live = await client.execute({'command': 'session-check'});
+      if (live['status'] != 'ok') {
+        result = live;
+      } else {
+        final reference = await CodexAssociation(
+          child,
+          association.port,
+          association.secret,
+          rootChatId: association.rootChatId,
+        ).save(File(input['association'] as String).parent);
+        result = {'status': 'ok', 'privateAssociation': reference};
+      }
+    } else if (input['command'] == 'read') {
       final claim = await client.execute({
         'command': 'claim',
         'requestId': input['requestId'],

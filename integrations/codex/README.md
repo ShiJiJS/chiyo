@@ -1,4 +1,4 @@
-# Codex 接入开发预览（Issue #6）
+# Codex 接入开发预览（Issue #6、#7）
 
 这份接入用官方 SessionStart hook 提供当前聊天的私密关联。用户不需要
 手工生成 token。它仍须真实桌面两聊天验收；当前实现不等于已安装或已验收。
@@ -23,10 +23,36 @@
 - startup/clear/fork 创建新的未授权会话，重复启动也不会按 ID 复活旧授权。
   resume/compact 不新建关联，提示保留上下文已有引用；服务逐次核查是否仍有效，
   不续期、不复活已结束或撤销的授权。若引用丢失则需明确重新连接，不搜索磁盘。
-  旧会话直到撤销、到期或服务退出前仍可能有效；SessionEnd 清理由 #7 实现。
+  同根聊天每次 startup 的仅撤销凭据分别保留，SessionEnd 会结束快照中所有代际；
+  恢复不会把已结束、过期、撤销或旧应用实例的权限变成有效。
 - 应用退出或重启后，磁盘关联文件不会恢复服务端权限。连接失败、损坏文件、
   聊天不匹配分别给出 service_unavailable/association_unavailable，不自动申请。
-  私有文件目前由用户在完全退出后清理；自动生命周期清理仍待 #7。
+  成功结束只清理已确认的仅撤销索引记录，保留无秘密的锁文件。读取关联文件
+  留在原私有目录但不能复活服务权限；不在结束回调中按 ID 搜索或读取它们。
+
+## 主子 agent 与自动结束
+
+父 agent 通过现有私密关联调用 `delegate`，指定实际 childChatId，取得新的
+随机 child-bound `privateAssociation`；只直接交给本聊天的该子 agent。子引用
+携带同一服务会话证明，范围及到期时间不变。仅有父/子公开 ID 无法委托或领取
+授权。SubagentStart 只提供使用指引，不通过父 ID 查询读取能力。
+
+SessionEnd 使用独立随机 256-bit 仅撤销能力，由私有 `end-only/` 索引关联：
+索引只有公开聊天 ID、随机代际、本机端口与仅撤销凭据，没有读取关联路径、
+会话读取证明、字段值、token 或数据库密钥。文件名为有界聊天 ID 的 SHA-256，
+每根聊天最多保留 64 个未确认结束的代际，文件上限 32 KiB；加锁更新、临时文件
+落盘后原子替换。满额或损坏时停止创建关联，不静默丢弃旧结束能力。
+
+服务验证仅撤销凭据后先不可逆结束内存会话，再异步保存历史。等待访问记录写入
+的读取在交付前再次检查结束状态，结束先发生时不交付内容。已拒绝、已过期等
+既有终态保持不变，拥有者仍能看到聊天标签及“会话已结束”的历史。
+
+已确认的 [ADR 0005](../../docs/adr/0005-end-only-codex-lifecycle.md) 允许仿造或
+延迟的本机公开 ID 结束事件导致提前断开；这只产生撤销，不能获取资料或审批。
+结束回调使用单次 2 秒单调时钟预算，hook timeout 为 3 秒；不在结束路径创建
+目录、执行 ACL 设置、启动 UI 或等待审计存储。失败保留仅撤销索引以便重试，
+未送达事件依靠固定到期兜底。生成材料只注册 SessionStart、SubagentStart 和
+SessionEnd；Stop、Interrupt、SubagentStop、CLI 结束及切换聊天均不结束根会话。
 
 ## 生成可审查安装材料
 
@@ -42,7 +68,7 @@ dart run tool/prepare_codex.dart ../../build/codex-preview
 
 准备用户实测时，再经用户明确授权：
 
-1. 保留已有配置，只把 bundle 的 SessionStart 条目合入测试项目的
+1. 保留已有配置，只把 bundle 的 SessionStart、SubagentStart、SessionEnd 条目合入测试项目的
    `.codex/hooks.json`。先确认没有同一 hook 的重复安装。不要覆盖现有 hook。
 2. 将 bundle `skills/agent-info-access` 放到测试项目 `.agents/skills/`，或按
    当前 Codex 的技能安装流程安装此目录。检查 Skill 中的可执行文件绝对路径。
@@ -75,7 +101,8 @@ dart run tool/prepare_codex.dart ../../build/codex-preview
    新申请才能获准。记录 Windows/macOS、Codex 版本、信任入口和实际结果。
 
 CLI 一次 stdin JSON 的内容见 Skill。通用 `info` 仍支持 JSON-lines；Codex 适配
-独立于业务命令。wait/cancel 由 #4 提供，主子 agent 和结束事件由 #7 完成。
+独立于业务命令。wait/cancel 由 #4 提供；主子 agent 与结束适配的实际 Codex 验收
+使用 [Issue #7 检查清单](../../docs/development/chat-lifecycle.md)。
 
 ## 已验证与未验证
 
@@ -84,5 +111,11 @@ CLI 的复用、固定到期、撤销、已知 ID 无法领取、同 ID 重新�
 聊天引用误用、缺失/错误关联、服务端会话失效、不读取 transcript_path。
 这些测试不创建真实 Codex 聊天，不打开应用窗口。
 
-尚未验证：真实桌面安装/信任、两聊天及压缩体验、macOS 执行与权限、主子 agent、
-SessionEnd。Issue #6 的真实接入验收在这些必要用户步骤完成前保持未完成。
+真实 CLI 子进程还覆盖子引用委托、同一范围与固定到期、多个启动代际结束、
+结束后子读取失败、忽略非根结束事件，以及服务无响应时的预算和失败后重试。
+这些是适配器和受控 payload 验证，不代表真实 Codex 发送过事件。
+
+尚未验证：真实 Windows Codex 桌面安装/信任、两聊天及压缩体验、主子 agent
+上下文交付、SessionEnd 送达/顺序与 fork 上下文。先完成 Windows 验收；用户自有
+Mac 的验证后续安排，不运行托管 macOS 验证。Issue #6/#7 的真实接入验收在必要
+用户步骤完成前保持未完成。

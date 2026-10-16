@@ -5,8 +5,9 @@ description: Request user-approved personal information through Agent Info, or s
 
 Use the Agent Info association supplied by this chat's latest SessionStart hook.
 The association is a private capability reference. Never print its contents,
-search for other associations, infer a path from a chat ID, or copy it to another
-chat. Do not read Codex transcripts or authentication files. If the reference is
+search for other associations, infer a path from a chat ID, or copy it to an
+unrelated chat. Same-root children receive an explicitly delegated child-bound
+reference through the private procedure below. Do not read Codex transcripts or authentication files. If the reference is
 missing or unavailable, stop private access and ask the user to reconnect the
 integration. Only after that request, run the bundled `info-codex-hook --connect`
 to obtain a fresh context reference for the current CODEX_THREAD_ID. This is a
@@ -82,8 +83,25 @@ explain the conflict before preparing a replacement. `rejected` stops the change
 Confirmed corrections keep existing grants; added or replaced fields need new
 approval, and removed fields cease to be readable under old grants.
 
-Current integration is a development preview: use fictional data. Startup,
-clear, and fork create new associations; resume and compact preserve the reference
-already in this chat, with no ID-based recovery or renewal. Root/child propagation and
-SessionEnd are separate implementation work; do not promise them yet. Do not
-install hooks or change user configuration without explicit authorization.
+For a child of this root chat, use `delegate` with this parent's existing
+`association` and the intended `childChatId`. Its `privateAssociation` response is
+sensitive delivery: pass it directly in that child's private task/context, never
+in ordinary status, a user-visible report, or an unrelated chat. The child then
+uses that reference on stdin under its own CODEX_THREAD_ID. Delegation shares the
+same session and approved fields; it grants no extra fields and does not renew
+expiry. If the child ID becomes known only after spawning, send its delegated
+reference directly afterward. SubagentStart provides guidance only; a parent ID
+cannot retrieve a reference. A child missing its proof asks its parent to delegate.
+
+Startup, clear, and fork create new unapproved associations. Resume and compact
+retain only the reference already in context. Root SessionEnd permanently ends
+that session and its children; subsequent reads fail and pending requests are
+cancelled. Ordinary CLI exit, child completion, and switching chats do not end
+the root. An ended session requires an explicitly requested reconnect and new
+approval. Missing end callbacks rely on fixed expiry. Automatic end uses a
+separate end-only credential; invoking it cannot retrieve private information.
+
+Current integration is a development preview: use fictional data. Real Codex
+child propagation and end delivery still need Windows acceptance; macOS
+validation is deferred. Install hooks or change user configuration only after
+explicit user authorization.

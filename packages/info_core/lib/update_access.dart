@@ -36,6 +36,7 @@ extension AgentUpdates on AgentAccess {
     String session,
     UpdateInput input,
   ) => _service.owner._serialize(() async {
+    _service._requireSession(session);
     final binding = _service._sessionBindings[session];
     if (binding == null) throw const AccessFailure('unauthorized');
     _validateUpdate(input);
@@ -62,6 +63,7 @@ extension AgentUpdates on AgentAccess {
     return proposal.id;
   });
   Map<String, Object?> updateStatus(String session, String id) {
+    _service._requireSession(session);
     final binding = _service._sessionBindings[session];
     final found = _service._repository.updateProposals.where(
       (p) => p.id == id && p.sessionBinding == binding,

@@ -7,13 +7,16 @@ class AgentClient {
   final int port;
   final _http = HttpClient()..connectionTimeout = const Duration(seconds: 3);
   String? _session;
+  String? _endCapability;
 
   /// Private capability, for trusted adapters only. Never include in diagnostics.
   String? get sessionSecret => _session;
+  String? get endCapability => _endCapability;
   final _tokens = <String, String>{};
   void close() {
     _tokens.clear();
     _session = null;
+    _endCapability = null;
     _http.close(force: true);
   }
 
@@ -67,8 +70,15 @@ class AgentClient {
           'chatLabel': input['chatLabel'],
         });
         final secret = result.remove('sessionSecret');
+        final endCapability = result.remove('endCapability');
         if (result['status'] == 'ok' && secret is String) _session = secret;
+        if (result['status'] == 'ok' && endCapability is String) {
+          _endCapability = endCapability;
+        }
         return result;
+      case 'session-check':
+        if (_session == null) return {'status': 'unauthorized'};
+        return _call('/session/check', {'sessionSecret': _session});
       case 'request':
         if (_session == null) return {'status': 'unauthorized'};
         return _call('/request', {

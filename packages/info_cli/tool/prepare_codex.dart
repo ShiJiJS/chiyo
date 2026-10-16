@@ -45,6 +45,14 @@ Future<void> main(List<String> args) async {
     encoded.add(unit & 255);
     encoded.add(unit >> 8);
   }
+  Map<String, Object> hookDefinition(int timeout) => {
+    'type': 'command',
+    'command': shellQuote(hook),
+    'commandWindows':
+        'powershell.exe -NoProfile -NonInteractive -EncodedCommand ${base64Encode(encoded)}',
+    'timeout': timeout,
+    'additionalContextLimit': 0,
+  };
   final config = {
     'description':
         'Agent Info development integration. Review before enabling.',
@@ -52,16 +60,17 @@ Future<void> main(List<String> args) async {
       'SessionStart': [
         {
           'matcher': '^(startup|resume|clear|compact|fork)\u0024',
-          'hooks': [
-            {
-              'type': 'command',
-              'command': shellQuote(hook),
-              'commandWindows':
-                  'powershell.exe -NoProfile -NonInteractive -EncodedCommand ${base64Encode(encoded)}',
-              'timeout': 15,
-              'additionalContextLimit': 0,
-            },
-          ],
+          'hooks': [hookDefinition(15)],
+        },
+      ],
+      'SubagentStart': [
+        {
+          'hooks': [hookDefinition(5)],
+        },
+      ],
+      'SessionEnd': [
+        {
+          'hooks': [hookDefinition(3)],
         },
       ],
     },
