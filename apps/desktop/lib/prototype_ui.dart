@@ -45,7 +45,9 @@ TextStyle prototypeText(
   String? family,
 }) => TextStyle(
   fontFamily: family ?? 'ProductSans',
-  fontFamilyFallback: const ['Songti SC', 'AppSans'],
+  // Resolve CJK through the bundled face before a platform-only family, while
+  // keeping an explicitly selected code or serif face for its supported glyphs.
+  fontFamilyFallback: const ['ProductSans', 'AppSans', 'Songti SC'],
   fontSize: size,
   fontWeight: weight,
   height: height,

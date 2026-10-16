@@ -14,6 +14,7 @@ class PrototypeDialog extends StatelessWidget {
     this.onClose,
     this.flow = false,
     this.scrollGutter = 15,
+    this.bottomPadding,
   });
   final String title;
   final Widget body;
@@ -21,6 +22,7 @@ class PrototypeDialog extends StatelessWidget {
   final VoidCallback? onClose;
   final bool flow;
   final double scrollGutter;
+  final double? bottomPadding;
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +36,12 @@ class PrototypeDialog extends StatelessWidget {
           constraints: BoxConstraints(
             maxHeight: flow ? viewport.height - 64 : viewport.height * .85,
           ),
-          padding: EdgeInsets.fromLTRB(32, 28, flow ? 47 : 32, flow ? 34 : 28),
+          padding: EdgeInsets.fromLTRB(
+            32,
+            28,
+            flow ? 47 : 32,
+            bottomPadding ?? (flow ? 34 : 28),
+          ),
           decoration: BoxDecoration(
             color: p.paper,
             border: Border.all(color: p.line),

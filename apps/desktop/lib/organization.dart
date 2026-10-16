@@ -157,6 +157,7 @@ class _OrganizationManagerState extends State<_OrganizationManager> {
   Widget build(BuildContext context) => PrototypeDialog(
     flow: true,
     scrollGutter: 0,
+    bottomPadding: 28,
     title: '目录与标签',
     onClose: () => Navigator.pop(context),
     body: Column(

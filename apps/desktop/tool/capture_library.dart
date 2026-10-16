@@ -424,6 +424,18 @@ void main() {
         await tester.ensureVisible(find.text('Stress field 23'));
         await tester.pumpAndSettle();
         await capture('-last');
+        final detailScroll = tester
+            .widget<SingleChildScrollView>(
+              find.descendant(
+                of: find.byKey(const ValueKey('library-detail')),
+                matching: find.byType(SingleChildScrollView),
+              ),
+            )
+            .controller!;
+        detailScroll.jumpTo(detailScroll.position.maxScrollExtent);
+        await tester.pumpAndSettle();
+        expect(find.text('Agent 能看到什么？').hitTestable(), findsOneWidget);
+        await capture('-bottom');
       }
       await tester.pumpWidget(const SizedBox());
       await tester.runAsync(service.close);
