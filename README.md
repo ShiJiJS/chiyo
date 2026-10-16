@@ -23,4 +23,6 @@
 
 `flutter build windows --release` 只编译。`flutter run`、运行桌面可执行文件及指定桌面设备的 `integration_test` 会打开可见窗口，应安排好手动验证后再执行。
 
+Windows 也可以运行 `./scripts/check.ps1 -FlutterBin <Flutter安装目录>/bin`，统一检查各 Dart 包和桌面 widget 测试。添加 `-WindowsRelease` 会编译发行包，仍不会启动窗口；依赖已缓存时可添加 `-Offline`。
+
 CLI 不直接打开资料库，也不提供批准申请的管理接口。开发与测试使用虚构资料；真实资料迁移需要先完成加密、系统密钥保管和备份恢复验收。
