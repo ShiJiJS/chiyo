@@ -9,12 +9,26 @@ Source of truth: [specification #1](https://github.com/ShiJiJS/agent-info-manage
 - Initialized the previously documentation-only checkout and empty remote repository. Published the documentation baseline on `main`.
 - Read all 19 issue bodies, labels, states, and comments; verified 18 native sub-issues and 27 blocking edges. All implementation issues remain open.
 - Implemented and merged #2 at `6a21789`. Core, real CLI subprocess, widget, and native Windows desktop/CLI tests passed; the Windows release build succeeded. The user confirmed the supplied screenshot shows the expected application. Its initial data is fictional and in memory. Evidence: [first authorization slice](../development/first-authorization-slice.md).
-- Started #3, #4, and #6 in separate worktrees based on `6a21789`. These are implementation work in progress, not accepted tickets.
+- Implemented #3, #4, and #6 in separate worktrees and merged them into the integration branch. Their code and headless checks are integrated; required manual/platform acceptance remains open as listed below.
 - Installed and verified Flutter 3.47.7, Dart 3.13.5, Visual Studio Build Tools 2022 17.14.41, and Windows SDK 10.0.26100.0. Flutter doctor recognizes the Windows desktop toolchain. No real personal information has been migrated.
 
 Local SDK: `C:/Users/Todoki/.local/share/flutter`. The installation did not change the user's global PATH. For a PowerShell development session, prepend its `bin` directory to that process's PATH. Android tooling is not installed or required for this release.
 
-The optional Windows ATL component is absent; an attempt to add it was rejected by automatic approval. This does not block #2. Before #3, validate either the selected key-storage plugin's build prerequisites or a documented current-user Windows DPAPI adapter. Do not silently substitute a plaintext key file. macOS native build and Keychain acceptance have not run.
+The optional Windows ATL component is absent; an attempt to add it was rejected by automatic approval. #3 uses a current-user DPAPI adapter through Dart FFI instead. Actual DPAPI and SQLCipher have passed isolated Windows tests and an AOT console probe. This did not retry the rejected installation or substitute a plaintext key file. macOS native build and Keychain acceptance have not run.
+
+## Integrated batch: #3, #4, #6
+
+| Ticket | Implemented and automatically checked | Still required |
+| --- | --- | --- |
+| #3 | Owner creation/correction, encrypted persistence and migration, current-user DPAPI, fail-closed key/engine checks, real CLI access to reopened data, Windows release build | Real Windows desktop create/edit/restart; macOS release and Keychain create/reopen/upgrade/failure checks |
+| #4 | Fixed pending deadline, reject/cancel/expiry, bounded CLI wait and later status query, encrypted settings, approval widgets | User and CLI jointly demonstrate waiting, later approval, and querying the original request in the actual desktop |
+| #6 | Private random chat association, real hook/CLI subprocess reuse, isolation from other chat identifiers, no extension/revival, compiled Windows adapter tests | Install/trust only with user coordination, actual Codex two-chat and compaction/resume tests, macOS checks |
+
+Evidence: [encrypted information](../implementation-ticket-3.md), [pending workflow](../development/pending-request-workflow.md), [Codex adapter](../../integrations/codex/README.md). The resulting Windows application has not been launched by the agent. No Codex hooks were installed and no existing Codex configuration was changed.
+
+The consolidated branch at `3b23fb4` passed all analysis, 30 headless tests (core 14, CLI 7, storage 5, widgets 4), and Windows release compilation. Follow-up review corrections and their final verification are recorded below when complete. Earlier per-ticket test counts in evidence documents describe those ticket snapshots, not the final consolidated suite.
+
+The draft [PR #20](https://github.com/ShiJiJS/agent-info-manage/pull/20) remains an integration surface, not a completed release. All issues remain open. Later features—scope/duration editing, child-agent/end lifecycle, background notifications, organization/templates/import proposals, recovery, deletion/history and distribution—remain to be implemented. See [manual acceptance](../development/manual-acceptance.md) for concrete user-coordinated checks.
 
 ## Completion rules
 
