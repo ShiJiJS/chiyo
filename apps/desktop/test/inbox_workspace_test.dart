@@ -27,6 +27,95 @@ class _AuditRepository extends MemoryInformationRepository {
 
 void main() {
   testWidgets(
+    'slash focuses inbox outside editing and passes through in search input',
+    (tester) async {
+      tester.view.physicalSize = const Size(1440, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final service = InformationService.fictional();
+      addTearDown(() async {
+        final closing = service.close();
+        await tester.pump();
+        await closing;
+      });
+      await tester.pumpWidget(InformationApp(service: service, port: 0));
+      await tester.pumpAndSettle();
+      final search = find.byKey(const ValueKey('inbox-search'));
+      await tester.sendKeyEvent(LogicalKeyboardKey.slash);
+      await tester.pump();
+      final field = tester.widget<TextField>(search);
+      expect(field.focusNode!.hasFocus, isTrue);
+      final handled = await tester.sendKeyEvent(LogicalKeyboardKey.slash);
+      await tester.pump();
+      expect(field.focusNode!.hasFocus, isTrue);
+      expect(
+        handled,
+        isFalse,
+        reason: 'The focused editor must receive the slash text key.',
+      );
+      await tester.enterText(search, '/');
+      expect(field.controller!.text, '/');
+      await tester.pumpWidget(const SizedBox());
+    },
+  );
+  testWidgets('slash preserves the custom lifetime editor focus and text key', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1440, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final service = InformationService.fictional();
+    addTearDown(() async {
+      final closing = service.close();
+      await tester.pump();
+      await closing;
+    });
+    final session = service.agent.openSession('Keyboard lifetime draft');
+    final request = service.agent.request(session, 'Synthetic keyboard check', [
+      const FieldRef('demo-server', 'host'),
+    ]);
+    await tester.pumpWidget(InformationApp(service: service, port: 0));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(ValueKey('grant-lifetime-${request.id}')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('自定义…').last);
+    await tester.pumpAndSettle();
+    final input = find.byType(TextFormField);
+    await tester.tap(input);
+    await tester.pumpAndSettle();
+    final editor = tester.widget<EditableText>(
+      find.descendant(of: input, matching: find.byType(EditableText)),
+    );
+    expect(editor.focusNode.hasFocus, isTrue);
+    final handled = await tester.sendKeyEvent(LogicalKeyboardKey.slash);
+    await tester.pump();
+    expect(
+      editor.focusNode.hasFocus,
+      isTrue,
+      reason: 'Editing a lifetime must not focus the underlying inbox.',
+    );
+    expect(
+      handled,
+      isFalse,
+      reason: 'The focused lifetime editor owns the slash text key.',
+    );
+    await tester.enterText(input, '90');
+      await tester.pumpAndSettle();
+    await tester.tap(find.text('保存期限'));
+    await tester.pumpAndSettle();
+    expect(
+      tester
+          .widget<DropdownButton<int>>(
+            find.byKey(ValueKey('grant-lifetime-${request.id}')),
+          )
+          .value,
+      90,
+    );
+    await tester.pumpWidget(const SizedBox());
+  });
+  testWidgets(
     'a changed target preserves the pending selection and can be corrected',
     (tester) async {
       tester.view.physicalSize = const Size(1440, 900);

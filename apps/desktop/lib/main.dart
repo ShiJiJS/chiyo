@@ -223,8 +223,7 @@ class _InformationAppState extends State<InformationApp>
     theme: informationTheme(_colorTheme),
     shortcuts: {
       ...WidgetsApp.defaultShortcuts,
-      const SingleActivator(LogicalKeyboardKey.slash):
-          const SearchInboxIntent(),
+      const SearchInboxActivator(): const SearchInboxIntent(),
     },
     actions: {
       SearchInboxIntent: CallbackAction<SearchInboxIntent>(
