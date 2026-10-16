@@ -428,20 +428,31 @@ class OwnerAccess {
     _service._finishPending(request, AccessRequestState.denied);
   }
 
-  void approve(String requestId, List<FieldRef> fields) {
+  void approve(
+    String requestId,
+    List<FieldRef> fields, {
+    Duration lifetime = const Duration(hours: 8),
+  }) {
     final request = _service._requests[requestId];
     if (request != null) _service._expire(request);
     if (request == null ||
         request.state != AccessRequestState.pending ||
-        request.grant != null ||
-        fields.isEmpty ||
-        fields.any((f) => !request.fields.contains(f))) {
+        request.grant != null) {
       throw const AccessFailure('invalid_request');
+    }
+    if (fields.isEmpty ||
+        fields.length > 200 ||
+        fields.any((f) => _service._field(f) == null)) {
+      throw const AccessFailure('invalid_scope');
+    }
+    if (lifetime < const Duration(minutes: 1) ||
+        lifetime > const Duration(days: 7)) {
+      throw const AccessFailure('invalid_duration');
     }
     request.grant = ClaimedGrant(
       _service._secret(),
       fields.toSet().toList(),
-      _service._clock().add(const Duration(hours: 8)),
+      _service._clock().add(lifetime),
     );
     _service._grants[request.grant!.token] = request;
     request.state = AccessRequestState.approved;
