@@ -4,6 +4,8 @@ import 'package:flutter/services.dart';
 import 'package:info_storage/info_storage.dart';
 import 'package:info_core/info_core.dart';
 import 'ui.dart';
+import 'prototype_ui.dart';
+import 'settings_controls.dart';
 
 /// The OS file-dialog boundary. Widget tests supply paths, never open dialogs.
 abstract class BackupFilePicker {
@@ -11,6 +13,7 @@ abstract class BackupFilePicker {
   Future<String?> recoveryKeyOutput();
   Future<String?> backupOutput();
   Future<String?> backupInput();
+  Future<String?> recoveryKeyInput() async => null;
   Future<BackupStaging?> prepareStaging(String output) async => null;
   Future<void> releaseStaging(BackupStaging staging) async {}
 }
@@ -32,6 +35,9 @@ class NativeBackupFilePicker extends BackupFilePicker {
   @override
   Future<String?> backupInput() => _channel.invokeMethod<String>('backupInput');
   @override
+  Future<String?> recoveryKeyInput() =>
+      _channel.invokeMethod<String>('recoveryKeyInput');
+  @override
   Future<BackupStaging?> prepareStaging(String output) async {
     if (defaultTargetPlatform != TargetPlatform.macOS) return null;
     final value = await _channel.invokeMapMethod<String, String>(
@@ -49,6 +55,17 @@ class NativeBackupFilePicker extends BackupFilePicker {
       _channel.invokeMethod<void>('releaseBackupStaging', staging.token);
 }
 
+String _backupFailure(Object error) => switch (error) {
+  StorageFailure(code: 'output_exists') => '所选文件已存在，请选择新的文件名，原文件未覆盖。',
+  StorageFailure(code: 'recipient_not_empty') =>
+    '当前信息库已有资料、提案或历史记录，不能覆盖或合并恢复。请在独立空库操作。',
+  StorageFailure(code: 'invalid_recovery_key') => '恢复密钥文件格式不正确，请选择独立另存的完整密钥。',
+  StorageFailure(code: 'invalid_backup') => '恢复密钥不匹配、文件损坏或备份内容无效。当前信息库未改变。',
+  StorageFailure(code: 'unsupported_backup') => '此备份格式或版本不受支持，当前信息库未改变。',
+  StorageFailure(code: 'recovery_key_not_saved') => '请先独立保存恢复密钥文件，保存成功后才能导出。',
+  _ => '操作未完成，请检查文件位置、恢复密钥及存储状态后重试。',
+};
+
 class BackupLibrary extends StatefulWidget {
   const BackupLibrary({
     super.key,
@@ -58,18 +75,180 @@ class BackupLibrary extends StatefulWidget {
     this.embedded = false,
     this.files = const NativeBackupFilePicker(),
   });
-  final bool embedded;
   final InformationBackups backups;
   final OwnerAccess owner;
   final VoidCallback? onRestored;
+  final bool embedded;
   final BackupFilePicker files;
   @override
   State<BackupLibrary> createState() => _BackupLibraryState();
 }
 
 class _BackupLibraryState extends State<BackupLibrary> {
-  bool _enabled = false, _busy = true;
-  String? _message;
+  bool _busy = true, _empty = false;
+  String? _error;
+  @override
+  void initState() {
+    super.initState();
+    _reload();
+  }
+
+  Future<void> _reload() async {
+    try {
+      final empty = await widget.backups.recipientEmpty();
+      if (mounted) {
+        setState(() {
+          _empty = empty;
+          _error = null;
+        });
+      }
+    } catch (_) {
+      if (mounted) setState(() => _error = '备份服务暂不可用，请检查信息库后重试。');
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _open() async {
+    await showSettingsDialog<void>(
+      context: context,
+      builder: (_) => BackupFlowDialog(
+        backups: widget.backups,
+        owner: widget.owner,
+        files: widget.files,
+        onRestored: widget.onRestored,
+      ),
+    );
+    if (mounted) await _reload();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final c = UiPalette.of(context);
+    final body = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (!widget.embedded)
+          const PageHeading('备份与恢复', subtitle: '使用独立恢复密钥，保存与恢复你的信息库。'),
+        Container(
+          padding: const EdgeInsets.all(26),
+          margin: const EdgeInsets.only(bottom: 27),
+          decoration: BoxDecoration(
+            color: c.paper,
+            border: Border.all(color: c.line),
+            borderRadius: BorderRadius.circular(7),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 48,
+                height: 51,
+                decoration: BoxDecoration(
+                  color: c.selected,
+                  border: Border.all(color: c.line),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Center(
+                  child: PrototypeIcon(
+                    PrototypeIconGlyph.shield,
+                    size: 26,
+                    color: c.accent,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 19),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '手动加密备份',
+                      style: prototypeText(
+                        context,
+                        18,
+                        weight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 9),
+                    Text(
+                      '备份文件需要恢复密钥才能打开。恢复密钥独立于本机数据库密钥，请与备份文件分开保管。',
+                      style: prototypeText(
+                        context,
+                        13,
+                        color: c.muted,
+                        height: 1.9,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Wrap(
+                      spacing: 12,
+                      runSpacing: 12,
+                      children: [
+                        settingsAction(
+                          context,
+                          '导出加密备份',
+                          _busy ? null : _open,
+                          primary: true,
+                          trailing: const Text('↗'),
+                        ),
+                        settingsAction(context, '恢复密钥说明', _busy ? null : _open),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        Text(
+          '从备份恢复',
+          style: prototypeText(context, 16, weight: FontWeight.w700),
+        ),
+        const SizedBox(height: 15),
+        SettingsRow(
+          '恢复到空的信息库',
+          _empty
+              ? '当前信息库为空，可以选择备份和恢复密钥，核对预览后恢复。'
+              : '当前信息库中有 ${widget.owner.information.length} 条信息，暂时不能恢复。\n资料、提案或历史记录使目标库非空，不能覆盖或合并恢复。',
+          control: settingsAction(context, '查看恢复步骤', _busy ? null : _open),
+        ),
+        const SettingsNotice(
+          '历史授权不会重新生效',
+          '恢复后保留原记录的时间与事实。Agent 需要重新发起访问申请。',
+          icon: PrototypeIconGlyph.clock,
+        ),
+        if (_error != null) SettingsNotice('备份服务不可用', _error!, error: true),
+        if (_busy) const LinearProgressIndicator(),
+      ],
+    );
+    return widget.embedded
+        ? body
+        : SingleChildScrollView(padding: UiSpace.page, child: body);
+  }
+}
+
+/// Production flow used by settings and isolated native acceptance alike.
+class BackupFlowDialog extends StatefulWidget {
+  const BackupFlowDialog({
+    super.key,
+    required this.backups,
+    required this.owner,
+    required this.files,
+    this.onRestored,
+  });
+  final InformationBackups backups;
+  final OwnerAccess owner;
+  final BackupFilePicker files;
+  final VoidCallback? onRestored;
+  @override
+  State<BackupFlowDialog> createState() => _BackupFlowDialogState();
+}
+
+class _BackupFlowDialogState extends State<BackupFlowDialog> {
+  bool _busy = true, _saved = false, _empty = false, _completed = false;
+  String? _localKey, _backupPath, _keyPath, _error, _result;
+  BackupContents? _preview;
   @override
   void initState() {
     super.initState();
@@ -77,61 +256,55 @@ class _BackupLibraryState extends State<BackupLibrary> {
   }
 
   Future<void> _initialize() async {
-    try {
+    await _run(() async {
       final key = await widget.backups.recoveryKey();
-      if (mounted) setState(() => _enabled = key != null);
-    } catch (_) {
-      if (mounted) setState(() => _message = '备份设置无法读取，请保留现有资料。');
-    } finally {
-      if (mounted) setState(() => _busy = false);
-    }
+      final saved = await widget.backups.recoveryKeySaved();
+      final empty = await widget.backups.recipientEmpty();
+      if (mounted) {
+        setState(() {
+          _localKey = key;
+          _saved = saved;
+          _empty = empty;
+        });
+      }
+    }, initial: true);
   }
 
-  String _failure(Object error) => switch (error) {
-    StorageFailure(code: 'output_exists') => '所选文件已存在，请选择新的文件名，原文件未覆盖。',
-    StorageFailure(code: 'recipient_not_empty') =>
-      '当前资料库已有资料、提案或历史记录，无法恢复。请在新设备的空资料库中恢复，现有资料保持不变。',
-    StorageFailure(code: 'unsupported_backup') => '该备份格式或版本不受支持，资料未恢复。',
-    StorageFailure(code: 'invalid_recovery_key') => '恢复密钥格式不正确，请检查另存的完整密钥。',
-    StorageFailure(code: 'invalid_backup') => '密钥不匹配、文件损坏或备份内容无效，资料未恢复。',
-    _ => '操作未完成，请检查文件位置、恢复密钥及资料库状态。',
-  };
-  Future<void> _run(Future<void> Function() action) async {
-    if (_busy) return;
+  Future<void> _run(
+    Future<void> Function() action, {
+    bool initial = false,
+  }) async {
+    if (_busy && !initial) return;
     setState(() {
       _busy = true;
-      _message = null;
+      _error = null;
     });
     try {
       await action();
     } catch (error) {
-      if (mounted) setState(() => _message = _failure(error));
+      if (mounted) setState(() => _error = _backupFailure(error));
     } finally {
       if (mounted) setState(() => _busy = false);
     }
   }
 
-  Future<void> _showKey({bool enable = false}) async {
-    final key = enable
-        ? await widget.backups.enable()
-        : await widget.backups.recoveryKey();
-    if (!mounted || key == null) return;
-    setState(() => _enabled = true);
-    await showDialog<void>(
-      context: context,
-      builder: (context) => _RecoveryKeyDialog(
-        recoveryKey: key,
-        save: () async {
-          final path = await widget.files.recoveryKeyOutput();
-          if (path == null) return false;
-          await widget.backups.saveRecoveryKeyTo(path);
-          return true;
-        },
-      ),
-    );
-  }
-
-  Future<void> _export() async {
+  Future<void> _createKey() => _run(() async {
+    final key = await widget.backups.enable();
+    if (mounted) setState(() => _localKey = key);
+  });
+  Future<void> _saveKey() => _run(() async {
+    final path = await widget.files.recoveryKeyOutput();
+    if (path == null) return;
+    await widget.backups.saveRecoveryKeyTo(path);
+    final saved = await widget.backups.recoveryKeySaved();
+    if (mounted) {
+      setState(() {
+        _saved = saved;
+        _result = '恢复密钥已另存，请与备份分开保管。';
+      });
+    }
+  });
+  Future<void> _export() => _run(() async {
     final path = await widget.files.backupOutput();
     if (path == null) return;
     final staging = await widget.files.prepareStaging(path);
@@ -144,274 +317,252 @@ class _BackupLibraryState extends State<BackupLibrary> {
         try {
           await widget.files.releaseStaging(staging);
         } catch (_) {
-          /* Keep encrypted leftovers without changing the export outcome. */
+          /* Encrypted staging stays isolated if cleanup fails. */
         }
       }
     }
-    if (mounted) setState(() => _message = '加密备份已导出。');
-  }
-
-  Future<void> _restore() async {
-    final path = await widget.files.backupInput();
-    if (!mounted || path == null) return;
-    final key = await showDialog<String>(
-      context: context,
-      builder: (_) => const _RestoreKeyDialog(),
-    );
-    if (!mounted || key == null) return;
-    final snapshot = await widget.backups.inspect(path, key);
-    if (!mounted) return;
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (context) => DesktopDialog(
-        title: const Text('确认恢复资料库'),
-        content: Text(
-          '备份时间：${snapshot.createdAt.toLocal()}\n信息 ${snapshot.informationCount} 项，目录 ${snapshot.directoryCount} 个，标签 ${snapshot.tagCount} 个，模板 ${snapshot.templateCount} 个。\n'
-          '修改版本 ${snapshot.revisionCount} 条，可恢复回收站 ${snapshot.recycleCount} 条，授权历史 ${snapshot.grantHistoryCount} 条，访问记录 ${snapshot.accessRecordCount} 条。\n\n'
-          '${snapshot.formatVersion == 1 ? '这是早期格式，仅含当前资料及设置，不含历史或回收站。' : '历史按各自原保留时间恢复，到期内容不会重新获得保留期。'}'
-          '\n仅能恢复到空资料库，不会覆盖或合并现有资料。不含提案、待审批或有效凭据；本机已有会话凭据也会失效。授权历史仅作为过去事实恢复，Agent 需要重新申请。',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('取消'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('恢复到空资料库'),
-          ),
-        ],
-      ),
-    );
-    if (confirm != true) return;
-    await widget.owner.restoreLibrary(() => widget.backups.restore(snapshot));
+    if (mounted) setState(() => _result = '加密备份已导出。');
+  });
+  Future<void> _select(bool recovery) => _run(() async {
+    final path = await (recovery
+        ? widget.files.recoveryKeyInput()
+        : widget.files.backupInput());
+    if (path == null) return;
+    if (mounted) {
+      setState(() {
+        if (recovery) {
+          _keyPath = path;
+        } else {
+          _backupPath = path;
+        }
+        _preview = null;
+        _completed = false;
+      });
+    }
+  });
+  Future<void> _inspect() => _run(() async {
+    if (_backupPath == null || _keyPath == null) {
+      setState(() => _error = '请选择备份文件和恢复密钥文件。');
+      return;
+    }
+    final empty = await widget.backups.recipientEmpty();
+    if (!empty) {
+      setState(() {
+        _empty = false;
+        _preview = null;
+        _error = '目标信息库非空，不能覆盖或合并恢复。请在独立空库操作。';
+      });
+      return;
+    }
+    final key = await widget.backups.readRecoveryKeyFrom(_keyPath!);
+    final preview = await widget.backups.inspect(_backupPath!, key);
+    if (mounted) {
+      setState(() {
+        _empty = true;
+        _preview = preview;
+        _completed = false;
+      });
+    }
+  });
+  Future<void> _restore() => _run(() async {
+    if (_preview == null || _completed) return;
+    await widget.owner.restoreLibrary(() => widget.backups.restore(_preview!));
     widget.onRestored?.call();
-    if (mounted) setState(() => _message = '资料已恢复，请到“资料库”查看。Agent 需要重新申请访问。');
+    if (mounted) {
+      setState(() {
+        _completed = true;
+        _empty = false;
+        _result = '资料已恢复，请到“信息库”查看。Agent 需要重新申请访问。';
+      });
+    }
+  });
+  Widget _paragraph(String text) => Align(
+    alignment: Alignment.centerLeft,
+    child: ConstrainedBox(
+      constraints: BoxConstraints(
+        maxWidth: 400 * MediaQuery.textScalerOf(context).scale(14) / 14,
+      ),
+      child: Text(
+        text,
+        style: prototypeText(
+          context,
+          14,
+          color: UiPalette.of(context).muted,
+          height: 1.85,
+        ),
+      ),
+    ),
+  );
+  Widget _heading(String text) => Padding(
+    padding: const EdgeInsets.only(top: 18, bottom: 12),
+    child: Text(
+      text,
+      style: prototypeText(context, 16, weight: FontWeight.w700),
+    ),
+  );
+  Widget _fileControl(bool recovery) {
+    final c = UiPalette.of(context), path = recovery ? _keyPath : _backupPath;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(recovery ? '恢复密钥文件' : '备份文件', style: prototypeText(context, 13)),
+        const SizedBox(height: 7),
+        Container(
+          padding: const EdgeInsets.all(9),
+          decoration: BoxDecoration(
+            color: c.paper,
+            border: Border.all(color: c.line),
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: Row(
+            children: [
+              TextButton(
+                key: ValueKey(
+                  recovery ? 'backup-select-key' : 'backup-select-file',
+                ),
+                onPressed: _busy ? null : () => _select(recovery),
+                style: prototypeButton(
+                  context,
+                  size: 13,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 7,
+                    vertical: 3,
+                  ),
+                  background: const Color(0xffefefef),
+                  side: const BorderSide(color: Color(0xff767676)),
+                  radius: 2,
+                ),
+                child: const Text('选择文件'),
+              ),
+              const SizedBox(width: 5),
+              Expanded(
+                child: Text(
+                  path == null
+                      ? '未选择任何文件'
+                      : path.replaceAll('\\', '/').split('/').last,
+                  overflow: TextOverflow.ellipsis,
+                  style: prototypeText(context, 13),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
   }
 
   @override
-  Widget build(BuildContext context) => ReadingWorkspace(
-    child: ListView(
-      padding: widget.embedded ? EdgeInsets.zero : UiSpace.page,
+  Widget build(BuildContext context) => SettingsDialog(
+    title: '备份与恢复',
+    flow: true,
+    busy: _busy,
+    actions: const [],
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (!widget.embedded)
-          const PageHeading('备份与恢复', subtitle: '使用独立恢复密钥，将资料带到另一台设备。'),
-        LayoutBuilder(
-          builder: (context, bounds) {
-            final export = FormSection(
-              title: '手动加密备份',
-              detail: _enabled ? '已启用' : '尚未启用',
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const Text(
-                    '包含当前信息、目录、标签、模板、设置，以及保留期内的修改版本、回收站、授权历史和访问记录。为维持数据关系，另保留不含内容的删除与版本标识。',
-                  ),
-                  const SizedBox(height: 12),
-                  const QuietNotice('不含提案、待审批、有效凭据、本机数据库密钥或恢复密钥。'),
-                  const SizedBox(height: 16),
-                  Wrap(
-                    spacing: 10,
-                    runSpacing: 10,
-                    children: [
-                      if (!_enabled)
-                        FilledButton(
-                          onPressed: _busy
-                              ? null
-                              : () => _run(() => _showKey(enable: true)),
-                          child: const Text('启用手动备份'),
-                        ),
-                      if (_enabled)
-                        FilledButton(
-                          onPressed: _busy ? null : () => _run(_export),
-                          child: const Text('导出加密备份'),
-                        ),
-                      if (!_enabled)
-                        OutlinedButton(
-                          onPressed: null,
-                          child: const Text('导出加密备份'),
-                        ),
-                    ],
-                  ),
-                ],
-              ),
-            );
-            final key = FormSection(
-              title: '恢复密钥',
-              protected: true,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const Text('独立于本机数据库密钥，日常打开应用无需输入。请另存，并与备份分开保管。'),
-                  const SizedBox(height: 12),
-                  const QuietNotice('同时持有备份和恢复密钥即可读取资料。'),
-                  if (_enabled)
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: OutlinedButton(
-                        onPressed: _busy ? null : () => _run(_showKey),
-                        child: const Text('查看并保存恢复密钥'),
-                      ),
-                    ),
-                ],
-              ),
-            );
-            if (bounds.maxWidth < 1000 ||
-                MediaQuery.textScalerOf(context).scale(14) > 20) {
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [export, key],
-              );
-            }
-            return Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(flex: 3, child: export),
-                const SizedBox(width: 20),
-                Expanded(flex: 2, child: key),
-              ],
-            );
-          },
+        _paragraph('使用独立恢复密钥加密备份。信息、设置和保留期内旧版本入备份；临时授权、待处理请求和运行材料不入备份。'),
+        _heading(
+          _saved
+              ? '恢复密钥已另存'
+              : _localKey == null
+              ? '首次启用备份'
+              : '恢复密钥待另存',
         ),
-        const SizedBox(height: 8),
-        const SectionHeading('在新设备恢复'),
-        const Text('仅支持空资料库；已有资料时拒绝恢复，不覆盖或合并。确认恢复成功前，请保留原设备和原备份。'),
-        const SizedBox(height: 12),
-        const Text('恢复按原时间清理到期内容，不延长保留期；期间暂缓 Agent 访问，完成后需要重新申请。'),
-        const SizedBox(height: 16),
+        _paragraph(
+          _saved
+              ? '每次导出前检查目标位置。不要把恢复密钥交给 Agent。'
+              : '创建并另存恢复密钥后才能导出。请与备份文件分开保存。',
+        ),
+        const SizedBox(height: 15),
+        if (_localKey == null)
+          Align(
+            alignment: Alignment.centerLeft,
+            child: settingsAction(context, '创建恢复密钥', _busy ? null : _createKey),
+          ),
+        if (_localKey != null && !_saved) ...[
+          SelectableText(
+            _localKey!,
+            style: prototypeText(context, 12, family: 'Consolas'),
+          ),
+          const SizedBox(height: 12),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: settingsAction(context, '保存恢复密钥文件', _busy ? null : _saveKey),
+          ),
+        ],
+        if (_saved)
+          settingsAction(
+            context,
+            '导出加密备份',
+            _busy ? null : _export,
+            primary: true,
+          ),
+        if (_result != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 14),
+            child: Text(
+              _result!,
+              key: const ValueKey('backup-result'),
+              style: prototypeText(
+                context,
+                13,
+                color: UiPalette.of(context).statusLive,
+              ),
+            ),
+          ),
+        _heading('恢复到空的信息库'),
+        _paragraph(_empty ? '当前目标库为空，可以检查备份。' : '目标库非空，不能覆盖或合并恢复。'),
+        const SizedBox(height: 26),
+        LayoutBuilder(
+          builder: (context, box) =>
+              MediaQuery.textScalerOf(context).scale(14) > 20 ||
+                  box.maxWidth < 480
+              ? Column(
+                  children: [
+                    _fileControl(false),
+                    const SizedBox(height: 15),
+                    _fileControl(true),
+                  ],
+                )
+              : Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(child: _fileControl(false)),
+                    const SizedBox(width: 15),
+                    Expanded(child: _fileControl(true)),
+                  ],
+                ),
+        ),
+        const SizedBox(height: 10),
         Align(
           alignment: Alignment.centerLeft,
-          child: OutlinedButton(
-            onPressed: _busy ? null : () => _run(_restore),
-            child: const Text('从备份恢复'),
-          ),
+          child: settingsAction(context, '检查备份与恢复密钥', _busy ? null : _inspect),
         ),
-        const SizedBox(height: 24),
-        const Divider(),
-        const QuietNotice('离线备份需自行管理，不随应用清理旧内容。'),
+        if (_error != null) SettingsNotice('操作未完成', _error!, error: true),
+        if (_preview case final p?) ...[
+          _heading('恢复预览'),
+          _paragraph(
+            '${p.informationCount} 条信息、${p.directoryCount} 个目录、${p.tagCount} 个标签、${p.templateCount} 个模板。修改版本 ${p.revisionCount} 条，可恢复回收站 ${p.recycleCount} 条，授权历史 ${p.grantHistoryCount} 条，访问记录 ${p.accessRecordCount} 条，请求记录 ${p.requestHistoryCount} 条。',
+          ),
+          const SizedBox(height: 12),
+          _paragraph(
+            '备份格式 ${p.formatVersion}；历史按原时间与保留期限恢复，只表示过去事实。不会恢复活动会话、待审批、授权凭证、整理任务或整理结果。',
+          ),
+          const SizedBox(height: 15),
+          settingsAction(
+            context,
+            '确认恢复到空库',
+            _busy || _completed ? null : _restore,
+            primary: true,
+          ),
+        ],
         if (_busy)
           const Padding(
-            padding: EdgeInsets.symmetric(vertical: 16),
+            padding: EdgeInsets.only(top: 14),
             child: LinearProgressIndicator(),
           ),
-        if (_message != null)
-          Padding(
-            padding: const EdgeInsets.only(top: 16),
-            child: Text(_message!, key: const ValueKey('backup-result')),
-          ),
+        const SizedBox(height: 36),
       ],
     ),
-  );
-}
-
-class _RecoveryKeyDialog extends StatefulWidget {
-  const _RecoveryKeyDialog({required this.recoveryKey, required this.save});
-  final String recoveryKey;
-  final Future<bool> Function() save;
-  @override
-  State<_RecoveryKeyDialog> createState() => _RecoveryKeyDialogState();
-}
-
-class _RecoveryKeyDialogState extends State<_RecoveryKeyDialog> {
-  bool _saving = false;
-  String? _message;
-  @override
-  Widget build(BuildContext context) => DesktopDialog(
-    title: const Text('请另行保存恢复密钥'),
-    content: SizedBox(
-      width: 540,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            '此密钥能解开你的备份。请勿发给 Agent 或写入日志，也不要与备份放在同一个文件里。保存的是可独立使用的明文密钥，请选择安全位置。',
-          ),
-          const SizedBox(height: 16),
-          SelectableText(
-            widget.recoveryKey,
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
-          if (_message != null)
-            Padding(
-              padding: const EdgeInsets.only(top: 16),
-              child: Text(_message!),
-            ),
-        ],
-      ),
-    ),
-    actions: [
-      TextButton(
-        onPressed: _saving ? null : () => Navigator.pop(context),
-        child: const Text('完成'),
-      ),
-      FilledButton(
-        onPressed: _saving
-            ? null
-            : () async {
-                setState(() => _saving = true);
-                try {
-                  final saved = await widget.save();
-                  if (mounted && saved) {
-                    setState(() => _message = '恢复密钥已另存，请与备份分开保管。');
-                  }
-                } on StorageFailure catch (error) {
-                  if (mounted) {
-                    setState(
-                      () => _message = error.code == 'output_exists'
-                          ? '所选文件已存在，请换一个文件名。'
-                          : '密钥保存失败，请检查文件位置。',
-                    );
-                  }
-                } catch (_) {
-                  if (mounted) setState(() => _message = '密钥保存失败，请检查文件位置。');
-                } finally {
-                  if (mounted) setState(() => _saving = false);
-                }
-              },
-        child: const Text('保存恢复密钥文件'),
-      ),
-    ],
-  );
-}
-
-class _RestoreKeyDialog extends StatefulWidget {
-  const _RestoreKeyDialog();
-  @override
-  State<_RestoreKeyDialog> createState() => _RestoreKeyDialogState();
-}
-
-class _RestoreKeyDialogState extends State<_RestoreKeyDialog> {
-  final _key = TextEditingController();
-  @override
-  void dispose() {
-    _key.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) => DesktopDialog(
-    title: const Text('输入恢复密钥'),
-    content: SizedBox(
-      width: 540,
-      child: DesktopTextField(
-        controller: _key,
-        obscureText: true,
-        enableSuggestions: false,
-        autocorrect: false,
-        maxLength: 128,
-        decoration: const InputDecoration(labelText: '另存的完整恢复密钥'),
-      ),
-    ),
-    actions: [
-      TextButton(
-        onPressed: () => Navigator.pop(context),
-        child: const Text('取消'),
-      ),
-      FilledButton(
-        onPressed: () => Navigator.pop(context, _key.text.trim()),
-        child: const Text('检查备份'),
-      ),
-    ],
   );
 }

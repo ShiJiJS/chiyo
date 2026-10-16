@@ -9,8 +9,9 @@ DateTime _backupDate(Object? value) {
       !parsed.isUtc ||
       parsed.year < 1970 ||
       parsed.year > 9999 ||
-      parsed.toIso8601String() != value)
+      parsed.toIso8601String() != value) {
     _backupInvalid();
+  }
   return parsed;
 }
 
@@ -23,8 +24,9 @@ String _backupText(
   final value = row[key];
   if (value is! String ||
       value.length > limit ||
-      (required && value.trim().isEmpty))
+      (required && value.trim().isEmpty)) {
     _backupInvalid();
+  }
   return value;
 }
 
@@ -43,8 +45,9 @@ Map<String, dynamic> _backupObject(
 ]) {
   if (value is! Map<String, dynamic> ||
       !value.keys.toSet().containsAll(required) ||
-      value.keys.any((k) => !required.contains(k) && !optional.contains(k)))
+      value.keys.any((k) => !required.contains(k) && !optional.contains(k))) {
     _backupInvalid();
+  }
   return value;
 }
 
@@ -55,8 +58,10 @@ List<dynamic> _backupList(Object? value, int limit) {
 
 Map<String, dynamic> _backupJson(Map<String, Object?> row) {
   final payload = row['payload'];
-  if (payload is! String || payload.length > InformationBackups.maxPayloadBytes)
+  if (payload is! String ||
+      payload.length > InformationBackups.maxPayloadBytes) {
     _backupInvalid();
+  }
   final decoded = jsonDecode(payload);
   if (decoded is! Map<String, dynamic>) _backupInvalid();
   return decoded;
@@ -108,12 +113,14 @@ void _validateBackupHistory(Map<String, List<Map<String, Object?>>> tables) {
     _backupText(item, 'description', 2000);
     _backupVersion(item);
     if (item['directoryId'] != null &&
-        !directories.contains(item['directoryId']))
+        !directories.contains(item['directoryId'])) {
       _backupInvalid();
+    }
     final itemTags = _backupList(item['tagIds'], 100);
     if (itemTags.toSet().length != itemTags.length ||
-        itemTags.any((t) => t is! String || !tags.contains(t)))
+        itemTags.any((t) => t is! String || !tags.contains(t))) {
       _backupInvalid();
+    }
     final fields = _backupList(item['fields'], 200);
     count(fields.length + itemTags.length);
     final seen = <String>{};
@@ -133,8 +140,9 @@ void _validateBackupHistory(Map<String, List<Map<String, Object?>>> tables) {
       _backupText(field, 'description', 2000);
       _backupText(field, 'value', 1000000);
       _backupVersion(field);
-      if (!FieldKind.values.any((v) => v.name == field['kind']))
+      if (!FieldKind.values.any((v) => v.name == field['kind'])) {
         _backupInvalid();
+      }
     }
     return informationFromJson(item);
   }
@@ -144,8 +152,9 @@ void _validateBackupHistory(Map<String, List<Map<String, Object?>>> tables) {
     final item = snapshot(_backupJson(row));
     if (item.id != row['item_id'] ||
         item.version != row['version'] ||
-        !revisionPairs.add(jsonEncode([item.id, item.version])))
+        !revisionPairs.add(jsonEncode([item.id, item.version]))) {
       _backupInvalid();
+    }
     recordedDate(row['replaced_at']);
   }
   final entryIds = <String>{};
@@ -167,47 +176,69 @@ void _validateBackupHistory(Map<String, List<Map<String, Object?>>> tables) {
     final itemId = _backupId(j, 'itemId');
     if (entryId != row['id'] ||
         !entryIds.add(entryId) ||
-        j['wholeItem'] is! bool)
+        j['wholeItem'] is! bool) {
       _backupInvalid();
+    }
     final version = _backupVersion(j);
     final deletedAt = recordedDate(j['deletedAt']);
     final expiresAt = _backupDate(j['expiresAt']);
     if (expiresAt.difference(deletedAt) != const Duration(days: 30) ||
-        !RecycleState.values.any((v) => v.name == j['state']))
+        !RecycleState.values.any((v) => v.name == j['state'])) {
       _backupInvalid();
+    }
     if (j['state'] == 'available') {
       final item = snapshot(j['snapshot']);
       if (item.id != itemId ||
           item.version >= version ||
-          (j['wholeItem'] == false && item.fields.isEmpty))
+          (j['wholeItem'] == false && item.fields.isEmpty)) {
         _backupInvalid();
+      }
     } else if (j.containsKey('snapshot')) {
       _backupInvalid();
     }
   }
   final facts = <String>{};
   for (final row in tables['recycle_facts']!) {
-    final j = _backupObject(_backupJson(row), {
-      'entryId',
-      'itemId',
-      'fieldIds',
-      'version',
-      'kind',
-      'at',
-    });
+    final j = _backupObject(
+      _backupJson(row),
+      {'entryId', 'itemId', 'fieldIds', 'version', 'kind', 'at'},
+      {'restoredFieldIds'},
+    );
     _backupId(j, 'entryId');
     final item = _backupId(j, 'itemId');
     _backupVersion(j);
     recordedDate(j['at']);
     if (!RecycleFactKind.values.any((v) => v.name == j['kind']) ||
-        !facts.add(jsonEncode(j)))
+        !facts.add(jsonEncode(j))) {
       _backupInvalid();
+    }
     final fields = _backupList(j['fieldIds'], 200);
+    final restored = j['restoredFieldIds'];
+    if (restored != null) {
+      if (restored is! Map<String, dynamic> ||
+          restored.length > 200 ||
+          j['kind'] != 'restored') {
+        _backupInvalid();
+      }
+      final targets = <String>{};
+      for (final entry in restored.entries) {
+        if (!fields.contains(entry.key) ||
+            entry.value is! String ||
+            entry.value == entry.key ||
+            (entry.value as String).isEmpty ||
+            (entry.value as String).length > 200 ||
+            !targets.add(entry.value as String)) {
+          _backupInvalid();
+        }
+        fieldOwner(entry.value as String, item);
+      }
+    }
     count(fields.length);
     if (fields.toSet().length != fields.length) _backupInvalid();
     for (final field in fields) {
-      if (field is! String || field.isEmpty || field.length > 200)
+      if (field is! String || field.isEmpty || field.length > 200) {
         _backupInvalid();
+      }
       fieldOwner(field, item);
     }
   }
@@ -217,10 +248,70 @@ void _validateBackupHistory(Map<String, List<Map<String, Object?>>> tables) {
     _backupId(j, 'item_id');
     _backupVersion(j);
     recordedDate(j['purged_at']);
-    if (!purgePairs.add(jsonEncode([j['item_id'], j['version']])))
+    if (!purgePairs.add(jsonEncode([j['item_id'], j['version']]))) {
       _backupInvalid();
+    }
   }
   final grantIds = <String>{};
+  final requestIds = <String>{};
+  for (final row in tables['request_history']!) {
+    final j = _backupObject(
+      _backupJson(row),
+      {
+        'id',
+        'sessionId',
+        'chatLabel',
+        'purpose',
+        'createdAt',
+        'requestExpiresAt',
+        'recordedAt',
+        'state',
+        'fields',
+        'grantId',
+        'sessionEnded',
+        'applicationClosed',
+      },
+      {'restoredAt'},
+    );
+    final id = _backupId(j, 'id');
+    _backupId(j, 'sessionId');
+    _backupText(j, 'chatLabel', 200, required: true);
+    _backupText(j, 'purpose', 2000, required: true);
+    final created = recordedDate(j['createdAt']);
+    final expires = _backupDate(j['requestExpiresAt']);
+    recordedDate(j['recordedAt']);
+    if (id != row['id'] ||
+        row['created_at'] != created.millisecondsSinceEpoch ||
+        !requestIds.add(id) ||
+        !expires.isAfter(created) ||
+        expires.difference(created) > const Duration(days: 7) ||
+        !AccessRequestState.values
+            .where((s) => s != AccessRequestState.pending)
+            .any((s) => s.name == j['state']) ||
+        j['sessionEnded'] is! bool ||
+        j['applicationClosed'] is! bool) {
+      _backupInvalid();
+    }
+    if (j['grantId'] != null) _backupId(j, 'grantId');
+    if (j['restoredAt'] != null) recordedDate(j['restoredAt']);
+    final fields = _backupList(j['fields'], 200);
+    if (fields.isEmpty) _backupInvalid();
+    final seen = <String>{};
+    for (final raw in fields) {
+      final field = _backupObject(raw, {
+        'itemId',
+        'fieldId',
+        'itemName',
+        'fieldName',
+      });
+      final itemId = _backupId(field, 'itemId');
+      final fieldId = _backupId(field, 'fieldId');
+      if (!seen.add(jsonEncode([itemId, fieldId]))) _backupInvalid();
+      fieldOwner(fieldId, itemId);
+      _backupText(field, 'itemName', 200, required: true);
+      _backupText(field, 'fieldName', 200, required: true);
+    }
+  }
   for (final row in tables['grant_history']!) {
     final j = _backupObject(
       _backupJson(row),
@@ -246,8 +337,9 @@ void _validateBackupHistory(Map<String, List<Map<String, Object?>>> tables) {
         row['approved_at'] != approvedAt.millisecondsSinceEpoch ||
         !grantIds.add(id) ||
         expiresAt.difference(approvedAt) < const Duration(minutes: 1) ||
-        expiresAt.difference(approvedAt) > const Duration(days: 7))
+        expiresAt.difference(approvedAt) > const Duration(days: 7)) {
       _backupInvalid();
+    }
     if (j.containsKey('restoredAt')) recordedDate(j['restoredAt']);
     final fields = _backupList(j['fields'], 200);
     final seen = <String>{};
@@ -274,36 +366,51 @@ void _validateBackupHistory(Map<String, List<Map<String, Object?>>> tables) {
       final at = recordedDate(e['at']);
       if (!GrantEventKind.values.any((v) => v.name == e['kind']) ||
           (index == 0 && (e['kind'] != 'approved' || at != approvedAt)) ||
-          (index > 0 && e['kind'] == 'approved'))
+          (index > 0 && e['kind'] == 'approved')) {
         _backupInvalid();
+      }
     }
   }
   final accessIds = <String>{};
   for (final row in tables['access_records']!) {
-    final j = _backupObject(_backupJson(row), {
-      'id',
-      'at',
-      'operation',
-      'outcome',
-      'sessionId',
-      'grantId',
-      'itemId',
-      'fieldId',
-    });
+    final j = _backupObject(
+      _backupJson(row),
+      {
+        'id',
+        'at',
+        'operation',
+        'outcome',
+        'sessionId',
+        'grantId',
+        'itemId',
+        'fieldId',
+      },
+      {'itemName', 'fieldName'},
+    );
+    if (j['itemName'] != null) _backupText(j, 'itemName', 200, required: true);
+    if (j['fieldName'] != null) {
+      _backupText(j, 'fieldName', 200, required: true);
+    }
+    if ((j['itemName'] != null || j['fieldName'] != null) &&
+        j['itemId'] == null) {
+      _backupInvalid();
+    }
     final id = _backupId(j, 'id');
     final at = recordedDate(j['at']);
     if (id != row['id'] ||
         row['recorded_at'] != at.millisecondsSinceEpoch ||
         !accessIds.add(id) ||
         j['operation'] != 'read' ||
-        !AccessOutcome.values.any((v) => v.name == j['outcome']))
+        !AccessOutcome.values.any((v) => v.name == j['outcome'])) {
       _backupInvalid();
+    }
     for (final key in ['sessionId', 'grantId', 'itemId', 'fieldId']) {
       if (j[key] != null) _backupId(j, key);
     }
     if ((j['itemId'] == null) != (j['fieldId'] == null)) _backupInvalid();
-    if (j['itemId'] != null)
+    if (j['itemId'] != null) {
       fieldOwner(j['fieldId'] as String, j['itemId'] as String);
+    }
   }
 }
 
@@ -313,8 +420,9 @@ extension _CompleteBackups on InformationBackups {
     DateTime now, {
     bool restored = false,
   }) {
-    if (contents.createdAt.isAfter(now.add(const Duration(minutes: 5))))
+    if (contents.createdAt.isAfter(now.add(const Duration(minutes: 5)))) {
       _backupInvalid();
+    }
     final tables = {
       for (final table in contents._tables.entries)
         table.key: table.value.toList(),
@@ -326,19 +434,21 @@ extension _CompleteBackups on InformationBackups {
     };
     tables['information_revisions']!.removeWhere((row) {
       if (_backupDate(row['replaced_at']).isAfter(cutoff)) return false;
-      if (purges.add(jsonEncode([row['item_id'], row['version']])))
+      if (purges.add(jsonEncode([row['item_id'], row['version']]))) {
         tables['revision_purge_facts']!.add({
           'item_id': row['item_id'],
           'version': row['version'],
           'purged_at': now.toIso8601String(),
         });
+      }
       return true;
     });
     tables['recycle_entries'] = tables['recycle_entries']!.map((row) {
       final entry = RecycleEntry.fromJson(_backupJson(row));
       if (entry.state != RecycleState.available ||
-          now.isBefore(entry.expiresAt))
+          now.isBefore(entry.expiresAt)) {
         return row;
+      }
       tables['recycle_facts']!.add({
         'payload': jsonEncode(
           RecycleFact(
@@ -358,8 +468,9 @@ extension _CompleteBackups on InformationBackups {
     }).toList();
     var days = 90;
     for (final setting in tables['settings']!) {
-      if (setting['name'] == 'auditRetentionDays')
+      if (setting['name'] == 'auditRetentionDays') {
         days = setting['value'] as int;
+      }
     }
     final auditCutoff = now.subtract(Duration(days: days));
     tables['grant_history']!.removeWhere(
@@ -374,7 +485,27 @@ extension _CompleteBackups on InformationBackups {
         isUtc: true,
       ).isBefore(auditCutoff),
     );
-    if (restored)
+    tables['request_history']!.removeWhere(
+      (row) => DateTime.fromMillisecondsSinceEpoch(
+        row['created_at'] as int,
+        isUtc: true,
+      ).isBefore(auditCutoff),
+    );
+    if (restored) {
+      tables['request_history'] = tables['request_history']!
+          .map(
+            (row) => {
+              ...row,
+              'payload': jsonEncode(
+                RequestHistory.fromJson(
+                  _backupJson(row),
+                ).asRestored(now).toJson(),
+              ),
+            },
+          )
+          .toList();
+    }
+    if (restored) {
       tables['grant_history'] = tables['grant_history']!
           .map(
             (row) => {
@@ -387,6 +518,7 @@ extension _CompleteBackups on InformationBackups {
             },
           )
           .toList();
+    }
     return BackupContents._(
       Map.unmodifiable({
         for (final t in tables.entries)
@@ -447,6 +579,9 @@ extension _CompleteBackups on InformationBackups {
     final accesses = tables['access_records']!
         .map((r) => AccessRecord.fromJson(_backupJson(r)))
         .toList();
+    final requests = tables['request_history']!
+        .map((r) => RequestHistory.fromJson(_backupJson(r)))
+        .toList();
     final revisions = tables['information_revisions']!
         .map(
           (r) => InformationRevision(
@@ -493,6 +628,9 @@ extension _CompleteBackups on InformationBackups {
       _repository._accesses
         ..clear()
         ..addEntries(accesses.map((v) => MapEntry(v.id, v)));
+      _repository._requestHistory
+        ..clear()
+        ..addEntries(requests.map((v) => MapEntry(v.id, v)));
       _repository._revisions
         ..clear()
         ..addAll(revisions);

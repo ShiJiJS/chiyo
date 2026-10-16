@@ -164,6 +164,15 @@ class _InformationAppState extends State<InformationApp>
   late DesktopColorTheme _colorTheme = widget.service.owner.colorTheme;
   bool _themeBusy = false;
   String? _themeError;
+  int _settingsNavigationRevision = 0;
+  SettingsSection _settingsSection = SettingsSection.appearance;
+  void _openRecordSettings() {
+    setState(() {
+      _settingsSection = SettingsSection.records;
+      _settingsNavigationRevision++;
+    });
+    _tabs.index = 4;
+  }
 
   Future<void> _changeTheme(DesktopColorTheme theme) async {
     if (_themeBusy) return;
@@ -257,6 +266,7 @@ class _InformationAppState extends State<InformationApp>
                       port: widget.port,
                       focusRequestId: widget.runtime?.openRequestId,
                       focusRevision: _openRevision,
+                      onOpenSettings: _openRecordSettings,
                     ),
                     InformationLibrary(
                       owner: widget.service.owner,
@@ -266,14 +276,26 @@ class _InformationAppState extends State<InformationApp>
                     AuthorizationHistory(
                       key: ValueKey(_libraryRevision),
                       owner: widget.service.owner,
+                      onOpenRecordSettings: _openRecordSettings,
                     ),
                     SettingsPage(
                       owner: widget.service.owner,
                       runtime: widget.runtime,
                       backups: widget.backups,
                       files: widget.backupFiles,
+                      initialSection: _settingsSection,
+                      navigationRevision: _settingsNavigationRevision,
+                      onOpenApprovals: () => _tabs.index = 0,
+                      onThemeChanged: _changeTheme,
+                      themeBusy: _themeBusy,
+                      themeError: _themeError,
                       onRestored: () {
-                        if (mounted) setState(() => _libraryRevision++);
+                        if (mounted) {
+                          setState(() {
+                            _libraryRevision++;
+                            _colorTheme = widget.service.owner.colorTheme;
+                          });
+                        }
                       },
                     ),
                   ].indexed

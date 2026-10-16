@@ -11,7 +11,7 @@ void main() {
     await tester.pumpWidget(InformationApp(service: core, port: 47125));
     await tester.tap(find.text('请求设置'));
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const ValueKey('request-lifetime')));
+    await tester.tap(find.byKey(const ValueKey('timeout-30')));
     await tester.pumpAndSettle();
     await tester.tap(find.text('5 分钟').last);
     await tester.pumpAndSettle();

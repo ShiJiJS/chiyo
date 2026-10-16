@@ -1,3 +1,4 @@
+import 'backup_setup.dart';
 import 'dart:io';
 import 'package:info_core/info_core.dart';
 import 'package:info_storage/info_storage.dart';
@@ -62,7 +63,7 @@ void main() {
       );
       expect(service.owner.directories.single.name, 'Services');
       expect(service.owner.tags.single.name, 'Notes');
-      final recovery = await store.backups.enable();
+      final recovery = await enableTestBackups(store.backups);
       await store.backups.exportTo('${folder.path}/snapshot.aimbackup');
       final recipient = await EncryptedInformationRepository.open(
         '${folder.path}/recipient',

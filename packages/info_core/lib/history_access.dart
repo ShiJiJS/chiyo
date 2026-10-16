@@ -1,6 +1,29 @@
 part of 'info_core.dart';
 
 extension _AuditService on InformationService {
+  void _recordRequest(
+    _Request request, {
+    bool sessionEnded = false,
+    bool applicationClosed = false,
+  }) {
+    if (request.state == AccessRequestState.pending) return;
+    final history = RequestHistory(
+      id: request.id,
+      sessionId: _sessionBindings[request.session]!,
+      chatLabel: _sessions[request.session]!,
+      purpose: request.purpose,
+      createdAt: request.createdAt,
+      requestExpiresAt: request.expiresAt,
+      recordedAt: _clock(),
+      state: request.state,
+      fields: request.recordedFields,
+      grantId: request.history?.id,
+      sessionEnded: sessionEnded || _endedSessions.contains(request.session),
+      applicationClosed: applicationClosed,
+    );
+    _enqueueAudit(() => _repository.saveRequestHistory(history));
+  }
+
   void _recoverAudit() {
     for (final history in _repository.grantHistory.where((g) => g.active)) {
       final expired = !_clock().isBefore(history.expiresAt);
@@ -13,11 +36,26 @@ extension _AuditService on InformationService {
     _pruneAudit();
   }
 
-  void _pruneAudit() => _enqueueAudit(
-    () => _repository.pruneAudit(
-      _clock().subtract(Duration(days: owner.auditRetentionDays)),
-    ),
-  );
+  bool _endedOrganization(OrganizationTask task) =>
+      switch (owner.organizationState(task)) {
+        OrganizationTaskState.pending ||
+        OrganizationTaskState.active ||
+        OrganizationTaskState.proposed => false,
+        _ => true,
+      };
+
+  void _pruneAudit() => _enqueueAudit(() async {
+    final cutoff = _clock().subtract(Duration(days: owner.auditRetentionDays));
+    await _repository.pruneAudit(cutoff);
+    // Proposed results still await an owner decision. Live tasks keep their
+    // capability; only ended facts are subject to audit-history cleanup.
+    await _repository.pruneOrganizationHistory({
+      for (final task in _repository.organizationTasks)
+        if (_endedOrganization(task) &&
+            (task.approvedAt ?? task.createdAt).isBefore(cutoff))
+          task.id,
+    });
+  });
 
   void _approveHistory(_Request request) {
     final grant = request.grant!;
@@ -81,6 +119,12 @@ extension _AuditService on InformationService {
         ) ??
         false;
     final normalized = known != null || previouslyApproved;
+    final recorded = request?.history?.fields
+        .where((f) => f.itemId == target.itemId && f.fieldId == target.fieldId)
+        .firstOrNull;
+    final namedItem = normalized
+        ? _repository.items.where((i) => i.id == target.itemId).firstOrNull
+        : null;
     var record = AccessRecord(
       id: _secret(),
       at: _clock(),
@@ -89,6 +133,8 @@ extension _AuditService on InformationService {
       grantId: request?.history?.id,
       itemId: normalized ? target.itemId : null,
       fieldId: normalized ? target.fieldId : null,
+      itemName: recorded?.itemName ?? namedItem?.name,
+      fieldName: recorded?.fieldName ?? known?.name,
     );
     _enqueueAudit(() => _repository.saveAccessRecord(record));
     _pruneAudit();
@@ -105,6 +151,8 @@ extension _AuditService on InformationService {
         grantId: record.grantId,
         itemId: record.itemId,
         fieldId: record.fieldId,
+        itemName: record.itemName,
+        fieldName: record.fieldName,
       );
       _enqueueAudit(() => _repository.saveAccessRecord(record));
       await _auditWrites;
@@ -120,6 +168,8 @@ extension _AuditService on InformationService {
         grantId: record.grantId,
         itemId: record.itemId,
         fieldId: record.fieldId,
+        itemName: record.itemName,
+        fieldName: record.fieldName,
       );
       _enqueueAudit(() => _repository.saveAccessRecord(record));
       throw const AccessFailure('audit_unavailable');
@@ -160,6 +210,14 @@ extension OwnerAuditAccess on OwnerAccess {
     return AuditHistory(
       _service._repository.grantHistory,
       _service._repository.accessRecords,
+      _service._repository.requestHistory,
+      _service._repository.organizationTasks.where(
+        (t) =>
+            organizationState(t) != OrganizationTaskState.pending &&
+            !(t.approvedAt ?? t.createdAt).isBefore(
+              _service._clock().subtract(Duration(days: auditRetentionDays)),
+            ),
+      ),
     );
   }
 
@@ -174,6 +232,14 @@ extension OwnerAuditAccess on OwnerAccess {
       current.grants.where((g) => g.approvedAt.isBefore(cutoff)).length,
       current.accesses.where((a) => a.at.isBefore(cutoff)).length,
       cutoff,
+      current.requests.where((r) => r.createdAt.isBefore(cutoff)).length,
+      current.organizations
+          .where(
+            (t) =>
+                _service._endedOrganization(t) &&
+                (t.approvedAt ?? t.createdAt).isBefore(cutoff),
+          )
+          .length,
     );
     _service._retentionPreview = preview;
     return preview;

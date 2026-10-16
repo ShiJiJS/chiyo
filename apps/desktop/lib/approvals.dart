@@ -20,11 +20,13 @@ class Approvals extends StatefulWidget {
     required this.port,
     this.focusRequestId,
     this.focusRevision = 0,
+    this.onOpenSettings,
   });
   final InformationService service;
   final int port;
   final String? focusRequestId;
   final int focusRevision;
+  final VoidCallback? onOpenSettings;
   @override
   State<Approvals> createState() => ApprovalsState();
 }
@@ -141,71 +143,77 @@ class ApprovalsState extends State<Approvals> {
     }
   }
 
-  Future<void> _settings() => showDialog<void>(
-    context: context,
-    builder: (context) => StatefulBuilder(
-      builder: (context, update) => DesktopDialog(
-        title: const Text('请求设置'),
-        content: SizedBox(
-          width: 360,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('待审批有效期'),
-              const SizedBox(height: 12),
-              DesktopSelect<int>(
-                key: const ValueKey('request-lifetime'),
-                value: widget.service.owner.requestLifetime.inMinutes,
-                isExpanded: true,
-                items:
-                    {
-                          5,
-                          15,
-                          30,
-                          60,
-                          120,
-                          widget.service.owner.requestLifetime.inMinutes,
-                        }
-                        .map(
-                          (minutes) => DropdownMenuItem(
-                            value: minutes,
-                            child: Text('$minutes 分钟'),
-                          ),
-                        )
-                        .toList(),
-                onChanged: (minutes) async {
-                  if (minutes == null) return;
-                  try {
-                    await Future<void>.sync(
-                      () => widget.service.owner.setRequestLifetime(
-                        Duration(minutes: minutes),
-                      ),
-                    );
-                    if (context.mounted) update(() {});
-                  } on Object {
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('设置未保存，请重试。')),
+  Future<void> _settings() async {
+    if (widget.onOpenSettings != null) {
+      widget.onOpenSettings!();
+      return;
+    }
+    await showDialog<void>(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, update) => DesktopDialog(
+          title: const Text('请求设置'),
+          content: SizedBox(
+            width: 360,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('待审批有效期'),
+                const SizedBox(height: 12),
+                DesktopSelect<int>(
+                  key: const ValueKey('request-lifetime'),
+                  value: widget.service.owner.requestLifetime.inMinutes,
+                  isExpanded: true,
+                  items:
+                      {
+                            5,
+                            15,
+                            30,
+                            60,
+                            120,
+                            widget.service.owner.requestLifetime.inMinutes,
+                          }
+                          .map(
+                            (minutes) => DropdownMenuItem(
+                              value: minutes,
+                              child: Text('$minutes 分钟'),
+                            ),
+                          )
+                          .toList(),
+                  onChanged: (minutes) async {
+                    if (minutes == null) return;
+                    try {
+                      await Future<void>.sync(
+                        () => widget.service.owner.setRequestLifetime(
+                          Duration(minutes: minutes),
+                        ),
                       );
+                      if (context.mounted) update(() {});
+                    } on Object {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('设置未保存，请重试。')),
+                        );
+                      }
                     }
-                  }
-                },
-              ),
-              const SizedBox(height: 12),
-              const Text('仅影响新申请，已经提交的申请不会延长。'),
-            ],
+                  },
+                ),
+                const SizedBox(height: 12),
+                const Text('仅影响新申请，已经提交的申请不会延长。'),
+              ],
+            ),
           ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('完成'),
+            ),
+          ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('完成'),
-          ),
-        ],
       ),
-    ),
-  );
+    );
+  }
 
   @override
   Widget build(BuildContext context) {

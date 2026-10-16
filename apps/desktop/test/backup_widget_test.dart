@@ -17,12 +17,16 @@ class _Keys implements DatabaseKeyStore {
 class _Files extends BackupFilePicker {
   _Files(this.root);
   final String root;
+  String? keyInputOverride;
   @override
   Future<String?> recoveryKeyOutput() async => '$root/recovery.txt';
   @override
   Future<String?> backupOutput() async => '$root/export.aimbackup';
   @override
   Future<String?> backupInput() async => '$root/export.aimbackup';
+  @override
+  Future<String?> recoveryKeyInput() async =>
+      keyInputOverride ?? '$root/source-recovery.txt';
 }
 
 Future<void> _settleIO(WidgetTester tester, Finder target) async {
@@ -53,7 +57,6 @@ void main() {
       addTearDown(tester.view.resetDevicePixelRatio);
       late final Directory root;
       late EncryptedInformationRepository recipient;
-      late String key;
       await tester.runAsync(() async {
         root = await Directory.systemTemp.createTemp('backup-restore-widget-');
         final source = await EncryptedInformationRepository.open(
@@ -77,7 +80,11 @@ void main() {
           sourceService.agent.claim(session, request.id).token,
           field,
         );
-        key = await source.backups.enable();
+        await source.backups.enable();
+        await sourceService.owner.setColorTheme(DesktopColorTheme.green);
+        await source.backups.saveRecoveryKeyTo(
+          '${root.path}/source-recovery.txt',
+        );
         await source.backups.exportTo('${root.path}/export.aimbackup');
         await sourceService.close();
         await source.close();
@@ -85,8 +92,13 @@ void main() {
           '${root.path}/recipient',
           _Keys(),
         );
+        await File(
+          '${root.path}/bad-recovery.txt',
+        ).writeAsString('invalid isolated test key');
       });
       final service = InformationService(repository: recipient);
+      final files = _Files(root.path)
+        ..keyInputOverride = '${root.path}/bad-recovery.txt';
       final oldSession = service.agent.openSessionWithEndCapability(
         'old empty runtime',
       );
@@ -95,7 +107,7 @@ void main() {
           service: service,
           port: 47125,
           backups: recipient.backups,
-          backupFiles: _Files(root.path),
+          backupFiles: files,
         ),
       );
       await tester.tap(find.byKey(const ValueKey('nav-1')));
@@ -108,19 +120,33 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('备份与恢复'));
       await tester.pumpAndSettle();
-      await tester.ensureVisible(find.text('从备份恢复'));
-      await tester.pump(const Duration(milliseconds: 400));
-      await _settleIO(tester, find.text('从备份恢复'));
-      await tester.ensureVisible(find.text('从备份恢复'));
-      await tester.tap(find.text('从备份恢复'));
-      await _settleIO(tester, find.text('输入恢复密钥'));
-      await tester.enterText(find.byType(TextField), key);
-      await tester.tap(find.text('检查备份'));
-      await _settleIO(tester, find.text('确认恢复资料库'));
+      await tester.tap(find.text('查看恢复步骤'));
+      await _settleIO(tester, find.text('首次启用备份'));
+      await tester.tap(find.byKey(const ValueKey('backup-select-file')));
+      await _settleIO(tester, find.text('export.aimbackup'));
+      await tester.tap(find.byKey(const ValueKey('backup-select-key')));
+      await _settleIO(tester, find.text('bad-recovery.txt'));
+      await tester.tap(find.text('检查备份与恢复密钥'));
+      await _settleIO(tester, find.text('操作未完成'));
+      expect(find.text('export.aimbackup'), findsOneWidget);
+      expect(service.owner.information, isEmpty);
+      files.keyInputOverride = null;
+      await tester.tap(find.byKey(const ValueKey('backup-select-key')));
+      await _settleIO(tester, find.text('source-recovery.txt'));
+      await tester.tap(find.text('检查备份与恢复密钥'));
+      await _settleIO(tester, find.text('恢复预览'));
       expect(find.textContaining('修改版本 1 条'), findsOneWidget);
       expect(find.textContaining('授权历史 1 条，访问记录 1 条'), findsOneWidget);
-      await tester.tap(find.text('恢复到空资料库'));
-      await _settleIO(tester, find.text('资料已恢复，请到“资料库”查看。Agent 需要重新申请访问。'));
+      await tester.ensureVisible(find.text('确认恢复到空库'));
+      await tester.tap(find.text('确认恢复到空库'));
+      await _settleIO(tester, find.text('资料已恢复，请到“信息库”查看。Agent 需要重新申请访问。'));
+      await tester.pumpAndSettle();
+      expect(
+        Theme.of(
+          tester.element(find.text('资料已恢复，请到“信息库”查看。Agent 需要重新申请访问。')),
+        ).colorScheme.primary,
+        const Color(0xff296a53),
+      );
       expect(
         () => service.agent.validateSession(oldSession.sessionSecret),
         throwsA(isA<AccessFailure>()),
@@ -129,9 +155,11 @@ void main() {
         () => service.agent.endSessionWithCapability(oldSession.endCapability),
         throwsA(isA<AccessFailure>()),
       );
+      await tester.tap(find.text('×'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('授权历史'));
       await tester.pump(const Duration(milliseconds: 400));
-      await _settleIO(tester, find.text('从备份恢复的历史事实，不代表当前有效授权。'));
+      await _settleIO(tester, find.text('从备份恢复的历史记录'));
       expect(find.text('撤销授权'), findsNothing);
       await tester.tap(find.byKey(const ValueKey('nav-1')));
       await tester.pumpAndSettle();
@@ -151,6 +179,10 @@ void main() {
   testWidgets(
     'owner enables backup and separately saves key before exporting',
     (tester) async {
+      tester.view.physicalSize = const Size(1440, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
       late final Directory root;
       EncryptedInformationRepository? repository;
       await tester.runAsync(() async {
@@ -173,17 +205,27 @@ void main() {
           ),
         ),
       );
-      await _settleIO(tester, find.text('启用手动备份'));
-      await tester.tap(find.text('启用手动备份'));
-      await _settleIO(tester, find.text('请另行保存恢复密钥'));
+      await _settleIO(tester, find.text('导出加密备份'));
+      await tester.tap(find.text('导出加密备份'));
+      await _settleIO(tester, find.text('首次启用备份'));
+      await tester.tap(find.text('创建恢复密钥'));
+      await _settleIO(tester, find.text('保存恢复密钥文件'));
       await tester.tap(find.text('保存恢复密钥文件'));
       await _settleIO(tester, find.text('恢复密钥已另存，请与备份分开保管。'));
       expect(File('${root.path}/recovery.txt').existsSync(), isTrue);
-      await tester.tap(find.text('完成'));
+      await tester.ensureVisible(
+        find.descendant(
+          of: find.byType(BackupFlowDialog),
+          matching: find.text('导出加密备份'),
+        ),
+      );
       await tester.pumpAndSettle();
-      await tester.ensureVisible(find.text('导出加密备份'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('导出加密备份'));
+      await tester.tap(
+        find.descendant(
+          of: find.byType(BackupFlowDialog),
+          matching: find.text('导出加密备份'),
+        ),
+      );
       await _settleIO(tester, find.text('加密备份已导出。'));
       expect(File('${root.path}/export.aimbackup').existsSync(), isTrue);
       await tester.pumpWidget(const SizedBox());
