@@ -2,15 +2,23 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
+bool validChatId(String value) =>
+    RegExp(r'^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$').hasMatch(value);
+
 /// Immutable private association. The random file reference is a bearer
 /// capability, not an identity lookup. Never index or discover it by chat ID.
 class CodexAssociation {
-  CodexAssociation(this.chatId, this.port, this.secret);
+  CodexAssociation(this.chatId, this.port, this.secret, {String? rootChatId})
+    : rootChatId = rootChatId ?? chatId;
   final String chatId;
   final int port;
   final String secret;
+  final String rootChatId;
 
   Future<String> save(Directory root) async {
+    if (!validChatId(chatId) || !validChatId(rootChatId)) {
+      throw const FormatException();
+    }
     await root.create(recursive: true);
     if (await FileSystemEntity.type(root.path, followLinks: false) !=
         FileSystemEntityType.directory) {
@@ -25,10 +33,12 @@ class CodexAssociation {
     final file = File(
       '${root.absolute.path}${Platform.pathSeparator}$name.json',
     );
+    await file.create(exclusive: true);
     await file.writeAsString(
       jsonEncode({
-        'version': 1,
+        'version': 2,
         'chatId': chatId,
+        'rootChatId': rootChatId,
         'port': port,
         'secret': secret,
       }),
@@ -39,7 +49,7 @@ class CodexAssociation {
 
   static Future<CodexAssociation> load(String reference, String chatId) async {
     final file = File(reference);
-    if (chatId.isEmpty ||
+    if (!validChatId(chatId) ||
         !file.isAbsolute ||
         !RegExp(r'[/\\][0-9a-f]{64}\.json$').hasMatch(reference) ||
         await FileSystemEntity.type(reference, followLinks: false) !=
@@ -48,8 +58,11 @@ class CodexAssociation {
       throw const FormatException();
     }
     final data = jsonDecode(await file.readAsString()) as Map<String, dynamic>;
-    if (data['version'] != 1 ||
+    if ((data['version'] != 1 && data['version'] != 2) ||
         data['chatId'] != chatId ||
+        (data['version'] == 2 &&
+            (data['rootChatId'] is! String ||
+                !validChatId(data['rootChatId'] as String))) ||
         data['port'] is! int ||
         data['port'] < 1 ||
         data['port'] > 65535 ||
@@ -61,6 +74,7 @@ class CodexAssociation {
       chatId,
       data['port'] as int,
       data['secret'] as String,
+      rootChatId: data['rootChatId'] as String? ?? chatId,
     );
   }
 
