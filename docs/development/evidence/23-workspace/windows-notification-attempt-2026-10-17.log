@@ -30,7 +30,7 @@ The test description was:
 01:02 +0 -1: manual Windows balloon opens the exact synthetic request across pages [E]
   Test failed. See exception logs above.
   The test description was: manual Windows balloon opens the exact synthetic request across pages
-  
+
 01:02 +0 -1: (tearDownAll)
 01:02 +0 -1: Some tests failed.
 

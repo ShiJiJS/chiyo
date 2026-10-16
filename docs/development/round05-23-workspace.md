@@ -116,3 +116,11 @@ $cmake = ((Select-String -LiteralPath apps/desktop/build/windows/x64/CMakeCache.
 主Agent确认完整检查/原生窗口空窗后，执行上述带 `-Run` 的命令。真实 Windows runner 编译成功，Shell `notify` 返回 true 并输出 `D1_NOTIFICATION_READY`（剩余59秒）。从投递起60秒内未收到携带目标 ID 的真实点击，`runtime.openRequestId` 仍为 null；断言明确失败，测试与脚本非零退出，没有输出 `D1_NOTIFICATION_VERIFIED`。原始日志保存在 [windows-notification-attempt-2026-10-17.log](evidence/23-workspace/windows-notification-attempt-2026-10-17.log)。
 
 这证明本次探针实际运行、Native adapter 接受一次投递及等待超时，不能证明气泡已展示或已点击，也不能据此断言系统通知权限关闭。没有补注入回调使测试通过，没有自动循环重试。fixture 完成停止/关闭/临时目录删除，进程与 `aim-native-approval-*` 目录检查均无本次残留；没有触碰用户 app 或默认 profile。交付前另合并了主集成文档基线 `5842e6a`。
+
+第一次的实际人工观察由主Agent完成：仅在 `DISPATCH` 后、`READY` 确认前调用一次 `Sky.list_windows`，列表未出现通知窗口或已隐藏 runner；没有发出任何点击。这一时间点和窗口枚举不足以判定 Shell 气泡是否展示，不能作为系统权限故障证据。
+
+### 2026-10-17 第二次也是本轮最后一次尝试：未验成功
+
+主Agent明确授权第二次有界尝试，通知投递/等待/断言逻辑保持相同。真实 runner 再次编译成功，Shell accepted 并输出 `D1_NOTIFICATION_READY`（剩余59秒）；主Agent收到 READY 后立即连续两次调用 `Sky.list_windows`、一次 `list_apps`，均未获得“信息访问授权”气泡或通知宿主的可操作窗口，主动隐藏的 runner 也未返回。没有执行任何点击，也没有猜坐标操作未观测的 toast；这些枚举结果不等于 OS 未展示，更不能据此判断系统权限故障。
+
+本次自然等待满60秒，`runtime.openRequestId` 仍为 null，测试/脚本明确失败且没有 `D1_NOTIFICATION_VERIFIED`。独立日志见 [windows-notification-attempt-2-2026-10-17.log](evidence/23-workspace/windows-notification-attempt-2-2026-10-17.log)；两份日志仅规范了行末空白，未改事件/断言内容。运行结束无本隔离 runner 进程或临时目录残留。没有继续自动重试、修改系统设置/权限或伪造回调，真实人工 Windows 系统气泡点击保留在整体平台验收中，后续可沿本显式入口继续；本轮没有将此项判定通过。
