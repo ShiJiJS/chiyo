@@ -72,6 +72,12 @@ At `785d44c`, #15 is merged. Its tree passed **114 headless tests** (CLI 13, cor
 
 The Windows native release compiled successfully in a detached validation worktree at `d256a8a` (through #12/#14). The original checkout's release executable was locked by the existing application; it was left running and unchanged. Later #15/#7/#17 changes still require a combined rebuild. No new desktop window was launched. #17 has now started from #15 to extend the full supported backup scope and coordinate successful restore with runtime credential invalidation.
 
+At `584047d`, #7 is merged. Its tree passed **126 headless tests** (CLI 16, core 58, storage 23, widgets 29) with all analysis clean, plus **9 freshly compiled Windows bundle subprocess tests** and an actual isolated Windows AOT SQLCipher/DPAPI probe. [Chat lifecycle evidence](../development/chat-lifecycle.md) covers proof-delegated children, the separate end-only capability/index, bounded SessionEnd, terminal session behavior, and rechecking every permission after waiting for durable audit. Ordinary revoke, expiry, field deletion and deletion/restoration during a pending read all block disclosure and record the denied result. The release probe's async read/close callers were corrected and its encrypted reopen, old-token invalidation, plaintext-marker scan and schema migration checks passed.
+
+Two-axis code review is running against the pinned increment `df5c744...584047d`. #17 is developing separately, and required real Windows desktop/Codex evidence is still outstanding. No hooks were installed, trusted or copied into the user's Codex configuration.
+
+The Windows native release at `584047d` also compiled successfully in the detached validation worktree, including #7/#15. [The pinned review](../development/review-batch-2026-10-16.md) reported Standards: 0 documented breaches and 1 judgment-only duplication observation; Spec: 2 P2 defects (retryable startup failure cleanup and reviewed updates of valid zero-field items). One isolated implementer is fixing all three with regression tests. These corrections and #17 still need integration and final combined verification.
+
 ## Completion rules
 
 The user has asked that further development not manipulate their visible desktop. Run headless tests and compile builds; leave native window interaction and user-visible Codex configuration checks for coordinated user validation. Do not launch the desktop application or native GUI tests without renewed agreement.
