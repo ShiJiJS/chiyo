@@ -27,7 +27,7 @@ void main() {
       });
       expect(result['status'], 'pending');
       expect(result.containsKey('sessionSecret'), false);
-      expect(core.owner.requests.single['chatLabel'], 'independent-label');
+      expect(core.owner.requests.single.chatLabel, 'independent-label');
     },
   );
 }

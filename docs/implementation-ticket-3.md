@@ -8,6 +8,12 @@ The owner uses `InformationService.owner` to create an information item, inspect
 
 There is no plaintext or empty-library fallback on key/database errors. Existing DB files are never deleted/recreated by open. Native SQLCipher errors are converted to value-free `StorageFailure` codes. A library lock prevents multiple instances writing through independent repositories. A missing key for an existing database fails closed.
 
+## Dependency acceptance status
+
+The exact Drift 2.35.2, sqlite3 3.7.1 and ffi 2.2.0 constraints and committed lockfiles are **provisional, reproducible development pins**, not accepted production dependency versions. The current Windows probe reports SQLCipher 4.19.0 community; this observation does not establish macOS or distribution acceptance. The SQLCipher source selection remains mandatory and has no plaintext fallback.
+
+ADR 0004's final dependency acceptance gate is unchanged: both platform release packages must demonstrate the actual SQLCipher engine, fail-closed behavior without a key or encryption, wrong-key rejection, auxiliary-file/log confidentiality, key access after application upgrade, and independent-environment backup recovery. These checks must all pass before the development pins can become the supported production baseline. The unverified macOS release/Keychain/upgrade checks and unimplemented independent backup remain blockers to that acceptance; a successful Windows build or console probe does not waive them.
+
 ## Platform keys
 
 Windows uses current-user DPAPI through `Crypt32.dll` FFI with `CRYPTPROTECT_UI_FORBIDDEN`, not machine-wide protection. A versioned encrypted envelope is stored beside the DB under the current user's LocalAppData `AgentInfoManage` directory; the directory inherits that user's profile permissions. Exclusive envelope creation prevents overwrite. The library lock spans creation and readback; a partial/invalid envelope fails closed and is not silently replaced. Plaintext native buffers are cleared before freeing. Dart managed values cannot promise complete memory erasure; this remains the accepted same-user application security boundary.

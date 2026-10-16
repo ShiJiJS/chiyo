@@ -28,6 +28,45 @@ class RequestReceipt {
   final String id;
 }
 
+enum AccessRequestState {
+  pending,
+  approved,
+  denied,
+  expired,
+  cancelled,
+  revoked,
+}
+
+/// An owner-facing view of a request, without session secrets or grant tokens.
+class OwnerRequestSnapshot {
+  OwnerRequestSnapshot({
+    required this.id,
+    required this.state,
+    required this.chatLabel,
+    required this.purpose,
+    required this.createdAt,
+    required this.requestExpiresAt,
+    required this.remainingSeconds,
+    required Iterable<FieldRef> fields,
+    required Iterable<FieldRef>? approvedFields,
+    required this.grantExpiresAt,
+  }) : fields = List.unmodifiable(fields),
+       approvedFields = approvedFields == null
+           ? null
+           : List.unmodifiable(approvedFields);
+
+  final String id;
+  final AccessRequestState state;
+  final String chatLabel;
+  final String purpose;
+  final DateTime createdAt;
+  final DateTime requestExpiresAt;
+  final int remainingSeconds;
+  final List<FieldRef> fields;
+  final List<FieldRef>? approvedFields;
+  final DateTime? grantExpiresAt;
+}
+
 class _Request {
   _Request(
     this.id,
@@ -43,12 +82,12 @@ class _Request {
   final Set<FieldRef> fields;
   final DateTime createdAt;
   final DateTime expiresAt;
-  String outcome = 'pending';
+  AccessRequestState state = AccessRequestState.pending;
   ClaimedGrant? grant;
-  bool revoked = false;
 }
 
-/// In-memory fictional data for the first authorization slice. Not a data store.
+/// In-memory authorization state over an injected information repository.
+/// Only the fictional constructor supplies development data.
 class InformationService {
   InformationService({
     required InformationRepository repository,
@@ -99,7 +138,7 @@ class InformationService {
   );
   late final agent = AgentAccess._(this);
   late final owner = OwnerAccess._(this);
-  final _grants = <String, ClaimedGrant>{};
+  final _grants = <String, _Request>{};
   final _sessions = <String, String>{};
   final _requests = <String, _Request>{};
   final _submitted = StreamController<String>.broadcast();
@@ -117,19 +156,24 @@ class InformationService {
       base64Url.encode(List.generate(32, (_) => _random.nextInt(256)));
 
   void _expire(_Request request) {
-    if (request.outcome == 'pending' && !_clock().isBefore(request.expiresAt)) {
-      request.outcome = 'expired';
+    if (request.state == AccessRequestState.pending &&
+        !_clock().isBefore(request.expiresAt)) {
+      request.state = AccessRequestState.expired;
+    } else if (request.state == AccessRequestState.approved &&
+        !_clock().isBefore(request.grant!.expiresAt)) {
+      request.state = AccessRequestState.expired;
+      _grants.remove(request.grant!.token);
     }
   }
 
   // Decisions are synchronous in the core's owning isolate: validation and
   // transition cannot interleave, so the first terminal decision wins.
-  void _finishPending(_Request request, String outcome) {
+  void _finishPending(_Request request, AccessRequestState state) {
     _expire(request);
-    if (request.outcome != 'pending') {
+    if (request.state != AccessRequestState.pending) {
       throw const AccessFailure('invalid_request');
     }
-    request.outcome = outcome;
+    request.state = state;
   }
 }
 
@@ -189,13 +233,7 @@ class AgentAccess {
   Map<String, Object?> status(String session, String id) {
     final request = _request(session, id);
     return {
-      'status': request.revoked
-          ? 'revoked'
-          : (request.grant == null
-                ? request.outcome
-                : (!_service._clock().isBefore(request.grant!.expiresAt)
-                      ? 'expired'
-                      : 'approved')),
+      'status': request.state.name,
       'requestId': id,
       'createdAt': request.createdAt.toUtc().toIso8601String(),
       'requestExpiresAt': request.expiresAt.toUtc().toIso8601String(),
@@ -203,23 +241,27 @@ class AgentAccess {
   }
 
   void cancel(String session, String id) {
-    _service._finishPending(_request(session, id), 'cancelled');
+    _service._finishPending(
+      _request(session, id),
+      AccessRequestState.cancelled,
+    );
   }
 
   ClaimedGrant claim(String session, String id) {
     final request = _request(session, id);
-    if (request.revoked) throw const AccessFailure('unauthorized');
-    if (request.grant == null) throw AccessFailure(request.outcome);
-    if (!_service._clock().isBefore(request.grant!.expiresAt)) {
+    if (request.grant == null) throw AccessFailure(request.state.name);
+    if (request.state != AccessRequestState.approved) {
       throw const AccessFailure('unauthorized');
     }
     return request.grant!;
   }
 
   String read(String token, FieldRef field) {
-    final grant = _service._grants[token];
+    final request = _service._grants[token];
+    if (request != null) _service._expire(request);
+    final grant = request?.grant;
     if (grant == null ||
-        !_service._clock().isBefore(grant.expiresAt) ||
+        request!.state != AccessRequestState.approved ||
         !grant.fields.contains(field)) {
       throw const AccessFailure('unauthorized');
     }
@@ -355,40 +397,42 @@ class OwnerAccess {
         await _service._repository.save(item);
         return item;
       });
-  List<Map<String, Object?>> get requests => _service._requests.values
-      .map(
-        (r) => <String, Object?>{
-          ..._service.agent.status(r.session, r.id),
-          'chatLabel': _service._sessions[r.session],
-          'purpose': r.purpose,
-          'remainingSeconds': max(
-            0,
-            r.expiresAt.difference(_service._clock()).inSeconds,
-          ),
-          'fields': r.fields.map((f) => f.toJson()).toList(),
-          'approvedFields': r.grant?.fields.map((f) => f.toJson()).toList(),
-          'expiresAt': r.grant?.expiresAt.toUtc().toIso8601String(),
-        },
-      )
-      .toList();
+  List<OwnerRequestSnapshot> get requests => _service._requests.values.map((r) {
+    _service._expire(r);
+    return OwnerRequestSnapshot(
+      id: r.id,
+      state: r.state,
+      chatLabel: _service._sessions[r.session]!,
+      purpose: r.purpose,
+      createdAt: r.createdAt,
+      requestExpiresAt: r.expiresAt,
+      remainingSeconds: max(
+        0,
+        r.expiresAt.difference(_service._clock()).inSeconds,
+      ),
+      fields: r.fields,
+      approvedFields: r.grant?.fields,
+      grantExpiresAt: r.grant?.expiresAt,
+    );
+  }).toList();
   void revoke(String requestId) {
     final request = _service._requests[requestId];
     if (request?.grant == null) throw const AccessFailure('invalid_request');
-    request!.revoked = true;
+    request!.state = AccessRequestState.revoked;
     _service._grants.remove(request.grant!.token);
   }
 
   void deny(String requestId) {
     final request = _service._requests[requestId];
     if (request == null) throw const AccessFailure('invalid_request');
-    _service._finishPending(request, 'denied');
+    _service._finishPending(request, AccessRequestState.denied);
   }
 
   void approve(String requestId, List<FieldRef> fields) {
     final request = _service._requests[requestId];
     if (request != null) _service._expire(request);
     if (request == null ||
-        request.outcome != 'pending' ||
+        request.state != AccessRequestState.pending ||
         request.grant != null ||
         fields.isEmpty ||
         fields.any((f) => !request.fields.contains(f))) {
@@ -399,7 +443,7 @@ class OwnerAccess {
       fields.toSet().toList(),
       _service._clock().add(const Duration(hours: 8)),
     );
-    _service._grants[request.grant!.token] = request.grant!;
-    request.outcome = 'approved';
+    _service._grants[request.grant!.token] = request;
+    request.state = AccessRequestState.approved;
   }
 }
