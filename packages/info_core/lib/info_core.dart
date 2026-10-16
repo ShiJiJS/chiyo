@@ -3,9 +3,12 @@ import 'dart:convert';
 import 'dart:math';
 import 'information.dart';
 import 'templates.dart';
+import 'import_proposals.dart';
 export 'information.dart';
 export 'templates.dart';
+export 'import_proposals.dart';
 part 'organization_access.dart';
+part 'import_access.dart';
 
 class AccessFailure implements Exception {
   const AccessFailure(this.status);
@@ -143,12 +146,14 @@ class InformationService {
   late final owner = OwnerAccess._(this);
   final _grants = <String, _Request>{};
   final _sessions = <String, String>{};
+  final _sessionBindings = <String, String>{};
   final _requests = <String, _Request>{};
   final _submitted = StreamController<String>.broadcast();
   bool _closed = false;
   void close() {
     _closed = true;
     _sessions.clear();
+    _sessionBindings.clear();
     _requests.clear();
     _grants.clear();
     _submitted.close();
@@ -190,6 +195,7 @@ class AgentAccess {
     }
     final secret = _service._secret();
     _service._sessions[secret] = chatLabel;
+    _service._sessionBindings[secret] = _service._secret();
     return secret;
   }
 

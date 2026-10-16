@@ -19,7 +19,23 @@ class AgentClient {
 
   Future<Map<String, dynamic>> execute(Map<String, dynamic> input) async {
     final command = input['command'];
+    if (utf8.encode(jsonEncode(input)).length >
+        (command == 'import-submit' ? 262144 : 16384)) {
+      return {'status': 'invalid_request'};
+    }
     switch (command) {
+      case 'import-submit':
+        if (_session == null) return {'status': 'unauthorized'};
+        return _call('/import/submit', {
+          'sessionSecret': _session,
+          'items': input['items'],
+        });
+      case 'import-status':
+        if (_session == null) return {'status': 'unauthorized'};
+        return _call('/import/status', {
+          'sessionSecret': _session,
+          'proposalId': input['proposalId'],
+        });
       case 'catalog':
         return _call('/catalog', {
           for (final key in [

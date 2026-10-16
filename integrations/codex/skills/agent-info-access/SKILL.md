@@ -1,6 +1,6 @@
 ---
 name: agent-info-access
-description: Request user-approved personal information through Agent Info when a task needs saved connection details, personal fields, or other private information; reuse this chat's approved fields and handle pending or denied access.
+description: Request user-approved personal information through Agent Info, or submit user-designated source information as an import proposal for desktop review; reuse this chat's approved fields and handle pending or denied access.
 ---
 
 Use the Agent Info association supplied by this chat's latest SessionStart hook.
@@ -46,6 +46,28 @@ Example input shape (replace placeholders without printing the reference):
 Approved fields keep fixed identities. New fields or information items require
 another request. Reading does not grant import, approval, or history access.
 Revocation stops future reads and cannot remove information already disclosed.
+
+For user-requested imports, first explain that the importing agent has already
+seen the designated source data. Submit only that source, never scan unrelated
+personal files. Use `import-submit` with `items`: each has `name`, `description`,
+and `fields` containing `name`, `description`, `value`, and `kind` (`structured`
+or `textNote`). Names, descriptions, and field descriptions become public catalog
+metadata after confirmation: keep private facts in values. Optional
+`suggestedDirectory`, `suggestedTags`, and `suggestedTemplate` are review hints;
+they do not create organization labels or reuse a template field's identity.
+Keep batches within 20 items, 200 total fields, 50 fields per item, and 240000
+UTF-8 bytes of item JSON. Each value is at most 64000 characters.
+
+Save the returned `proposalId` and query it with `import-status` using this same
+private association. Pending proposals are owner-only previews, absent from the
+public catalog. Querying returns status, never private proposal contents or
+credentials. Wait for desktop confirmation; do not retry submission merely
+because confirmation is slow. `rejected` means stop this import. Confirmed items
+still require a normal access request before reading: submission does not grant
+read access, overwrite existing information, approve requests, or export the
+library. New-item proposals cannot update existing items; reviewed updates use a
+separate workflow. Restart ends the old session association, even when an owner
+can still review its encrypted pending proposal.
 
 Current integration is a development preview: use fictional data. Startup,
 clear, and fork create new associations; resume and compact preserve the reference

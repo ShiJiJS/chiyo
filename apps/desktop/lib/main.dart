@@ -6,6 +6,7 @@ import 'package:info_core/agent_server.dart';
 import 'package:info_core/info_core.dart';
 import 'package:info_storage/info_storage.dart';
 import 'library.dart';
+import 'import_proposals.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -66,7 +67,7 @@ class InformationApp extends StatelessWidget {
       useMaterial3: true,
     ),
     home: DefaultTabController(
-      length: 2,
+      length: 3,
       child: Scaffold(
         appBar: AppBar(
           title: const Text('信息访问授权'),
@@ -74,6 +75,7 @@ class InformationApp extends StatelessWidget {
             tabs: [
               Tab(text: '访问审批'),
               Tab(text: '我的信息'),
+              Tab(text: '录入提案'),
             ],
           ),
         ),
@@ -81,6 +83,7 @@ class InformationApp extends StatelessWidget {
           children: [
             Approvals(service: service, port: port),
             InformationLibrary(owner: service.owner),
+            ImportProposalsPage(owner: service.owner),
           ],
         ),
       ),

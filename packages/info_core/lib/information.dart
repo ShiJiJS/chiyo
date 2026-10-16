@@ -1,6 +1,7 @@
 import 'organization.dart';
 export 'organization.dart';
 import 'templates.dart';
+import 'import_proposals.dart';
 
 enum FieldKind { structured, textNote }
 
@@ -62,6 +63,14 @@ abstract interface class InformationRepository {
   Future<void> writeSetting(String key, int value);
   List<InformationTemplate> get templates;
   Future<void> saveTemplate(InformationTemplate template);
+  List<ImportProposal> get importProposals;
+  Future<void> saveImportProposal(ImportProposal proposal);
+
+  /// Commits the entire batch and its terminal proposal state atomically.
+  Future<void> confirmImportProposal(
+    ImportProposal proposal,
+    List<InformationItem> items,
+  );
 }
 
 class MemoryInformationRepository implements InformationRepository {
@@ -85,6 +94,26 @@ class MemoryInformationRepository implements InformationRepository {
   @override
   Future<void> saveTag(InformationTag tag) async => _tags[tag.id] = tag;
   final _templates = <String, InformationTemplate>{};
+  final _proposals = <String, ImportProposal>{};
+  @override
+  List<ImportProposal> get importProposals =>
+      List.unmodifiable(_proposals.values);
+  @override
+  Future<void> saveImportProposal(ImportProposal proposal) async {
+    _proposals[proposal.id] = proposal;
+  }
+
+  @override
+  Future<void> confirmImportProposal(
+    ImportProposal proposal,
+    List<InformationItem> items,
+  ) async {
+    for (final item in items) {
+      _items[item.id] = item;
+    }
+    _proposals[proposal.id] = proposal;
+  }
+
   @override
   List<InformationTemplate> get templates =>
       List.unmodifiable(_templates.values);
