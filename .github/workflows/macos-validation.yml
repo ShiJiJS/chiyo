@@ -1,0 +1,53 @@
+name: macOS headless validation
+
+# Integration pushes and PR updates intentionally do not schedule paid runners.
+# Push the reviewed integration commit to this dedicated branch only after the
+# repository owner agrees to use their private-repository Actions quota/budget.
+on:
+  push:
+    branches: [ci/macos-validation]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: macos-validation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  macos:
+    runs-on: macos-15
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Get the matching official Flutter SDK
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: flutter/flutter
+          ref: abaf9c523780a608bd46686fd5e53740a07077f8 # 3.47.7
+          path: .ci/flutter
+          persist-credentials: false
+      - name: Configure the isolated runner toolchain
+        shell: bash
+        run: |
+          echo "$GITHUB_WORKSPACE/.ci/flutter/bin" >> "$GITHUB_PATH"
+          .ci/flutter/bin/flutter --disable-analytics
+          .ci/flutter/bin/dart --disable-analytics
+          .ci/flutter/bin/flutter precache --macos
+          .ci/flutter/bin/flutter --version
+          xcodebuild -version
+      - name: Analyze, test and compile the macOS release
+        shell: pwsh
+        run: ./scripts/check.ps1 -FlutterBin "$env:GITHUB_WORKSPACE/.ci/flutter/bin" -MacosRelease
+      - name: Compile the uninstalled Codex bundle and test its subprocesses
+        shell: pwsh
+        working-directory: packages/info_cli
+        run: |
+          dart run tool/prepare_codex.dart ../../build/codex-ci
+          if ($LASTEXITCODE -ne 0) { throw 'Codex bundle compilation failed.' }
+          $env:INFO_TEST_BUNDLE = "$env:GITHUB_WORKSPACE/build/codex-ci"
+          dart test test/codex_process_test.dart
+          if ($LASTEXITCODE -ne 0) { throw 'Compiled Codex subprocess tests failed.' }
