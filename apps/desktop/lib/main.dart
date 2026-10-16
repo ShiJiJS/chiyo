@@ -6,6 +6,7 @@ import 'package:info_core/agent_server.dart';
 import 'package:info_core/info_core.dart';
 import 'package:info_storage/info_storage.dart';
 import 'library.dart';
+import 'import_proposals.dart';
 import 'desktop_runtime.dart';
 import 'backups.dart';
 
@@ -90,7 +91,7 @@ class InformationApp extends StatefulWidget {
 class _InformationAppState extends State<InformationApp>
     with SingleTickerProviderStateMixin {
   late final _tabs = TabController(
-    length: widget.backups == null ? 2 : 3,
+    length: widget.backups == null ? 3 : 4,
     vsync: this,
   );
   int _openRevision = 0;
@@ -144,6 +145,7 @@ class _InformationAppState extends State<InformationApp>
           tabs: [
             Tab(text: '访问审批'),
             Tab(text: '我的信息'),
+            Tab(text: '录入提案'),
             if (widget.backups != null) Tab(text: '备份恢复'),
           ],
         ),
@@ -168,7 +170,8 @@ class _InformationAppState extends State<InformationApp>
               controller: _tabs,
               children: [
                 Approvals(service: widget.service, port: widget.port),
-                InformationLibrary(owner: widget.service.owner),
+                InformationLibrary(owner: widget.service.owner, refresh: _tabs),
+                ImportProposalsPage(owner: widget.service.owner),
                 if (widget.backups case final backups?)
                   BackupLibrary(backups: backups, files: widget.backupFiles),
               ],

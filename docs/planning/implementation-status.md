@@ -54,6 +54,10 @@ User confirmed the audit retention policy: default 90 days, selectable 30/90/180
 
 #8 background lifecycle, #11 reviewed import proposals, and #12 independent encrypted backup are now being implemented in separate worktrees. #11 starts after the merged #9/#10 contracts. Desktop/manual and macOS acceptance remain open for every new feature; none of these test counts are real GUI evidence.
 
+At `bab2e95`, #8 and #11 are also merged. Their combined branch passed **62 headless tests** (core 29, CLI 10, storage 8, widgets 15), with four package analyses clean. The preceding #8 branch independently compiled the native Windows runner with tray support; native tray/notification interactions were not launched. #11 stores only an independent random proposal-session binding, never the session secret, and its full-app widget test verifies confirmed imports immediately appear after switching back to the library. Evidence: [background runtime](../development/background-runtime.md), [reviewed import proposals](../development/import-proposals.md).
+
+Next in progress: #12 encrypted backup, #13 versioned reviewed updates (after #5/#11), and #16 grant/access history (after #4/#5). User also confirmed that audit write failures pause content delivery rather than allowing unrecorded reads; local spec and GitHub #1 were synchronized at `4ce3048`.
+
 ## Completion rules
 
 The user has asked that further development not manipulate their visible desktop. Run headless tests and compile builds; leave native window interaction and user-visible Codex configuration checks for coordinated user validation. Do not launch the desktop application or native GUI tests without renewed agreement.

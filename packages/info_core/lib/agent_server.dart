@@ -32,12 +32,13 @@ class AgentServer {
           request.headers.contentType?.mimeType != 'application/json') {
         throw const AccessFailure('unauthorized');
       }
-      if (request.contentLength > 16384) {
+      final limit = request.uri.path == '/import/submit' ? 262144 : 16384;
+      if (request.contentLength > limit) {
         throw const AccessFailure('invalid_request');
       }
       final bytes = <int>[];
       await for (final chunk in request.timeout(const Duration(seconds: 5))) {
-        if (bytes.length + chunk.length > 16384) {
+        if (bytes.length + chunk.length > limit) {
           throw const AccessFailure('invalid_request');
         }
         bytes.addAll(chunk);
@@ -46,7 +47,7 @@ class AgentServer {
       if (body is! Map<String, dynamic>) {
         throw const AccessFailure('invalid_request');
       }
-      result = _dispatch(request.uri.path, body);
+      result = await _dispatch(request.uri.path, body);
     } on AccessFailure catch (error) {
       result = {'status': error.status};
     } on Object {
@@ -69,8 +70,18 @@ class AgentServer {
     }
   }
 
-  Map<String, Object?> _dispatch(String path, Map<String, dynamic> body) {
+  FutureOr<Map<String, Object?>> _dispatch(
+    String path,
+    Map<String, dynamic> body,
+  ) {
     switch (path) {
+      case '/import/submit':
+        return _submitImport(body);
+      case '/import/status':
+        return _agent.importStatus(
+          _text(body, 'sessionSecret'),
+          _text(body, 'proposalId'),
+        );
       case '/catalog':
         final query = body['query'] ?? '';
         final directoryId = body['directoryId'];
@@ -154,6 +165,22 @@ class AgentServer {
       default:
         throw const AccessFailure('unauthorized');
     }
+  }
+
+  Future<Map<String, Object?>> _submitImport(Map<String, dynamic> body) async {
+    final raw = body['items'];
+    if (raw is! List ||
+        raw.isEmpty ||
+        raw.length > 20 ||
+        raw.any((i) => i is! Map<String, dynamic>)) {
+      throw const AccessFailure('invalid_request');
+    }
+    final session = _text(body, 'sessionSecret');
+    final items = raw
+        .map((i) => ImportItemInput.fromJson(i as Map<String, dynamic>))
+        .toList();
+    final id = await _agent.submitImport(session, items);
+    return _agent.importStatus(session, id);
   }
 
   String _text(Map<String, dynamic> body, String key) {

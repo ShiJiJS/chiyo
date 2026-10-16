@@ -24,7 +24,7 @@ Future<void> main(List<String> args) async {
         in stdin.transform(utf8.decoder).transform(const LineSplitter())) {
       Map<String, dynamic> output;
       try {
-        if (line.length > 16384) throw const FormatException();
+        if (line.length > 262144) throw const FormatException();
         final command = jsonDecode(line);
         if (command is! Map<String, dynamic>) throw const FormatException();
         output = await client.execute(command);
