@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'dart:math';
+import 'information.dart';
+export 'information.dart';
 
 class AccessFailure implements Exception {
   const AccessFailure(this.status);
@@ -37,8 +39,49 @@ class _Request {
 
 /// In-memory fictional data for the first authorization slice. Not a data store.
 class InformationService {
+  InformationService({
+    required InformationRepository repository,
+    DateTime Function()? clock,
+  }) : _repository = repository,
+       _clock = clock ?? DateTime.now;
   InformationService.fictional({DateTime Function()? clock})
-    : _clock = clock ?? DateTime.now;
+    : _clock = clock ?? DateTime.now,
+      _repository = MemoryInformationRepository([
+        InformationItem(
+          'demo-server',
+          'Fictional demo server',
+          'Fictional connection information for development only',
+          1,
+          const [
+            InformationField(
+              'host',
+              'Address',
+              'Server host name',
+              'demo.example.invalid',
+              1,
+            ),
+            InformationField(
+              'username',
+              'Username',
+              'Login name',
+              'demo-user',
+              1,
+            ),
+          ],
+        ),
+      ]);
+  final InformationRepository _repository;
+  InformationField? _field(FieldRef ref) {
+    for (final item in _repository.items) {
+      if (item.id == ref.itemId) {
+        for (final field in item.fields) {
+          if (field.id == ref.fieldId) return field;
+        }
+      }
+    }
+    return null;
+  }
+
   final DateTime Function() _clock;
   late final agent = AgentAccess._(this);
   late final owner = OwnerAccess._(this);
@@ -83,11 +126,7 @@ class AgentAccess {
         purpose.length > 2000 ||
         fields.isEmpty ||
         fields.length > 200 ||
-        fields.any(
-          (f) =>
-              f.itemId != 'demo-server' ||
-              !{'host', 'username'}.contains(f.fieldId),
-        )) {
+        fields.any((f) => _service._field(f) == null)) {
       throw const AccessFailure('invalid_request');
     }
     final id = _service._secret();
@@ -141,20 +180,29 @@ class AgentAccess {
         !grant.fields.contains(field)) {
       throw const AccessFailure('unauthorized');
     }
-    return field.fieldId == 'host' ? 'demo.example.invalid' : 'demo-user';
+    final value = _service._field(field);
+    if (value == null) throw const AccessFailure('unauthorized');
+    return value.value;
   }
 
-  List<Map<String, Object?>> catalog() => [
-    {
-      'id': 'demo-server',
-      'name': 'Fictional demo server',
-      'description': 'Fictional connection information for development only',
-      'fields': [
-        {'id': 'host', 'name': 'Address', 'description': 'Server host name'},
-        {'id': 'username', 'name': 'Username', 'description': 'Login name'},
-      ],
-    },
-  ];
+  List<Map<String, Object?>> catalog() => _service._repository.items
+      .map(
+        (item) => <String, Object?>{
+          'id': item.id,
+          'name': item.name,
+          'description': item.description,
+          'fields': item.fields
+              .map(
+                (field) => {
+                  'id': field.id,
+                  'name': field.name,
+                  'description': field.description,
+                },
+              )
+              .toList(),
+        },
+      )
+      .toList();
 }
 
 class ClaimedGrant {
@@ -169,6 +217,85 @@ class ClaimedGrant {
 class OwnerAccess {
   OwnerAccess._(this._service);
   final InformationService _service;
+  List<InformationItem> get information => _service._repository.items;
+  Future<void> _writes = Future.value();
+  Future<T> _serialize<T>(Future<T> Function() action) {
+    final result = _writes.then((_) => action());
+    _writes = result.then<void>((_) {}, onError: (Object _, StackTrace __) {});
+    return result;
+  }
+
+  Future<InformationItem> createInformation(
+    String name,
+    String description,
+    List<FieldInput> fields,
+  ) => _serialize(() async {
+    if (_service._closed) throw const AccessFailure('service_unavailable');
+    if (name.trim().isEmpty ||
+        name.length > 200 ||
+        description.length > 2000 ||
+        fields.isEmpty ||
+        fields.length > 200 ||
+        fields.any(
+          (f) =>
+              f.name.trim().isEmpty ||
+              f.name.length > 200 ||
+              f.description.length > 2000 ||
+              f.value.length > 1000000,
+        )) {
+      throw const AccessFailure('invalid_information');
+    }
+    final item = InformationItem(
+      _service._secret(),
+      name.trim(),
+      description,
+      1,
+      fields
+          .map(
+            (f) => InformationField(
+              _service._secret(),
+              f.name.trim(),
+              f.description,
+              f.value,
+              1,
+            ),
+          )
+          .toList(),
+    );
+    await _service._repository.save(item);
+    return item;
+  });
+
+  /// Ordinary value correction preserves meaning and identity. Semantic replacement
+  /// will be a separate operation; it must never reuse an already authorized ID.
+  Future<InformationItem> correctValue(FieldRef ref, String value) =>
+      _serialize(() async {
+        if (_service._closed) throw const AccessFailure('service_unavailable');
+        if (value.length > 1000000 || _service._field(ref) == null)
+          throw const AccessFailure('invalid_information');
+        final previous = information.firstWhere((i) => i.id == ref.itemId);
+        final item = InformationItem(
+          previous.id,
+          previous.name,
+          previous.description,
+          previous.version + 1,
+          previous.fields
+              .map(
+                (f) => f.id == ref.fieldId
+                    ? InformationField(
+                        f.id,
+                        f.name,
+                        f.description,
+                        value,
+                        f.version + 1,
+                      )
+                    : f,
+              )
+              .toList(),
+        );
+        await _service._repository.save(item);
+        return item;
+      });
   List<Map<String, Object?>> get requests => _service._requests.values
       .map(
         (r) => <String, Object?>{
