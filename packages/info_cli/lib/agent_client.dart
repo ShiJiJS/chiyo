@@ -26,6 +26,20 @@ class AgentClient {
       return {'status': 'invalid_request'};
     }
     switch (command) {
+      case 'delete-submit':
+        if (_session == null) return {'status': 'unauthorized'};
+        return _call('/delete/submit', {
+          'sessionSecret': _session,
+          'itemId': input['itemId'],
+          'baseVersion': input['baseVersion'],
+          if (input['fieldId'] != null) 'fieldId': input['fieldId'],
+        });
+      case 'delete-status':
+        if (_session == null) return {'status': 'unauthorized'};
+        return _call('/delete/status', {
+          'sessionSecret': _session,
+          'proposalId': input['proposalId'],
+        });
       case 'update-submit':
         if (_session == null) return {'status': 'unauthorized'};
         return _call('/update/submit', {

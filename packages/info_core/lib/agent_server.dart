@@ -79,6 +79,13 @@ class AgentServer {
     Map<String, dynamic> body,
   ) {
     switch (path) {
+      case '/delete/submit':
+        return _submitDelete(body);
+      case '/delete/status':
+        return _agent.deleteStatus(
+          _text(body, 'sessionSecret'),
+          _text(body, 'proposalId'),
+        );
       case '/update/submit':
         return _submitUpdate(body);
       case '/update/status':
@@ -202,6 +209,21 @@ class AgentServer {
     final session = _text(body, 'sessionSecret');
     final id = await _agent.submitUpdate(session, UpdateInput.fromJson(raw));
     return _agent.updateStatus(session, id);
+  }
+
+  Future<Map<String, Object?>> _submitDelete(Map<String, dynamic> body) async {
+    final version = body['baseVersion'];
+    if (version is! int ||
+        (body['fieldId'] != null && body['fieldId'] is! String))
+      throw const AccessFailure('invalid_request');
+    final session = _text(body, 'sessionSecret');
+    final id = await _agent.submitDelete(
+      session,
+      _text(body, 'itemId'),
+      version,
+      fieldId: body['fieldId'] == null ? null : _text(body, 'fieldId'),
+    );
+    return _agent.deleteStatus(session, id);
   }
 
   String _text(Map<String, dynamic> body, String key) {

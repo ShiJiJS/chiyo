@@ -35,6 +35,9 @@ class EncryptedInformationRepository implements InformationRepository {
   final _proposals = <String, ImportProposal>{};
   final _updates = <String, UpdateProposal>{};
   final _revisions = <InformationRevision>[];
+  final _recycle = <String, RecycleEntry>{};
+  final _recycleFacts = <RecycleFact>[];
+  final _deletes = <String, DeleteProposal>{};
   bool _closed = false;
   static final _openDirectories = <String>{};
   late final String _directory;
@@ -113,6 +116,34 @@ class EncryptedInformationRepository implements InformationRepository {
   Future<void> _load() async {
     for (final row
         in await _db
+            .customSelect('SELECT payload FROM recycle_entries ORDER BY rowid')
+            .get()) {
+      final entry = RecycleEntry.fromJson(
+        jsonDecode(row.read<String>('payload')) as Map<String, dynamic>,
+      );
+      _recycle[entry.id] = entry;
+    }
+    for (final row
+        in await _db
+            .customSelect('SELECT payload FROM recycle_facts ORDER BY rowid')
+            .get()) {
+      _recycleFacts.add(
+        RecycleFact.fromJson(
+          jsonDecode(row.read<String>('payload')) as Map<String, dynamic>,
+        ),
+      );
+    }
+    for (final row
+        in await _db
+            .customSelect('SELECT payload FROM delete_proposals ORDER BY rowid')
+            .get()) {
+      final proposal = DeleteProposal.fromJson(
+        jsonDecode(row.read<String>('payload')) as Map<String, dynamic>,
+      );
+      _deletes[proposal.id] = proposal;
+    }
+    for (final row
+        in await _db
             .customSelect('SELECT payload FROM update_proposals ORDER BY rowid')
             .get()) {
       final proposal = UpdateProposal.fromJson(
@@ -143,6 +174,11 @@ class EncryptedInformationRepository implements InformationRepository {
         jsonDecode(row.read<String>('payload')) as Map<String, dynamic>,
       );
       _proposals[proposal.id] = proposal;
+      if (proposal.state != ImportProposalState.pending) {
+        // Scrub values retained by earlier development versions. Pending work
+        // remains untouched; terminal receipts do not depend on current items.
+        await _writeProposal(proposal);
+      }
     }
     for (final row
         in await _db
@@ -504,18 +540,124 @@ class EncryptedInformationRepository implements InformationRepository {
   Future<void> confirmUpdateProposal(
     UpdateProposal proposal,
     InformationItem item,
-    InformationRevision previous,
-  ) async {
+    InformationRevision previous, {
+    List<RecycleEntry> recycled = const [],
+    List<RecycleFact> facts = const [],
+  }) async {
     if (_closed) throw const StorageFailure('library_closed');
     try {
       await _db.transaction(() async {
         await _writeItem(item);
         await _writeRevision(previous);
         await _writeUpdate(proposal);
+        await _writeRecycle(recycled, facts);
       });
       _items[item.id] = item;
       _revisions.add(previous);
       _updates[proposal.id] = proposal;
+      for (final entry in recycled) {
+        _recycle[entry.id] = entry;
+      }
+      _recycleFacts.addAll(facts);
+    } catch (_) {
+      throw const StorageFailure('save_failed');
+    }
+  }
+
+  @override
+  List<RecycleEntry> get recycleEntries {
+    if (_closed) throw const StorageFailure('library_closed');
+    return List.unmodifiable(_recycle.values);
+  }
+
+  @override
+  List<RecycleFact> get recycleFacts {
+    if (_closed) throw const StorageFailure('library_closed');
+    return List.unmodifiable(_recycleFacts);
+  }
+
+  @override
+  List<DeleteProposal> get deleteProposals {
+    if (_closed) throw const StorageFailure('library_closed');
+    return List.unmodifiable(_deletes.values);
+  }
+
+  Future<void> _writeDelete(DeleteProposal proposal) => _db.customStatement(
+    'INSERT INTO delete_proposals(id,payload) VALUES(?,?) ON CONFLICT(id) DO UPDATE SET payload=excluded.payload',
+    [proposal.id, jsonEncode(proposal.toJson())],
+  );
+  @override
+  Future<void> saveDeleteProposal(DeleteProposal proposal) async {
+    if (_closed) throw const StorageFailure('library_closed');
+    try {
+      await _writeDelete(proposal);
+      _deletes[proposal.id] = proposal;
+    } catch (_) {
+      throw const StorageFailure('save_failed');
+    }
+  }
+
+  Future<void> _writeRecycle(
+    List<RecycleEntry> entries,
+    List<RecycleFact> facts,
+  ) async {
+    for (final entry in entries) {
+      await _db.customStatement(
+        'INSERT INTO recycle_entries(id,payload) VALUES(?,?) ON CONFLICT(id) DO UPDATE SET payload=excluded.payload',
+        [entry.id, jsonEncode(entry.toJson())],
+      );
+    }
+    for (final fact in facts) {
+      await _db.customStatement(
+        'INSERT INTO recycle_facts(payload) VALUES(?)',
+        [jsonEncode(fact.toJson())],
+      );
+    }
+  }
+
+  @override
+  Future<void> commitRecycleChange({
+    required String itemId,
+    InformationItem? item,
+    InformationRevision? previous,
+    required List<RecycleEntry> entries,
+    required List<RecycleFact> facts,
+    DeleteProposal? proposal,
+  }) async {
+    if (_closed) throw const StorageFailure('library_closed');
+    try {
+      await _db.transaction(() async {
+        if (item != null) {
+          await _writeItem(item);
+        } else {
+          await _db.customStatement(
+            'DELETE FROM information_item_tags WHERE item_id=?',
+            [itemId],
+          );
+          await _db.customStatement(
+            'DELETE FROM information_fields WHERE item_id=?',
+            [itemId],
+          );
+          await _db.customStatement(
+            'DELETE FROM information_items WHERE id=?',
+            [itemId],
+          );
+        }
+        if (previous != null) await _writeRevision(previous);
+        await _writeRecycle(entries, facts);
+        if (proposal != null) await _writeDelete(proposal);
+      });
+      if (item == null) {
+        _items.remove(itemId);
+      } else {
+        _items[itemId] = item;
+      }
+      if (previous != null) _revisions.add(previous);
+      for (final entry in entries) {
+        _recycle[entry.id] = entry;
+      }
+      _recycleFacts.addAll(facts);
+      if (proposal != null) _deletes[proposal.id] = proposal;
     } catch (_) {
       throw const StorageFailure('save_failed');
     }
@@ -525,12 +667,13 @@ class EncryptedInformationRepository implements InformationRepository {
 class _InformationDatabase extends GeneratedDatabase {
   _InformationDatabase(super.executor);
   @override
-  int get schemaVersion => 8;
+  int get schemaVersion => 9;
   @override
   Iterable<TableInfo<Table, Object?>> get allTables => const [];
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (_) async {
+      await _createRecycle();
       await _createUpdates();
       await _createProposals();
       await _createTemplates();
@@ -546,7 +689,7 @@ class _InformationDatabase extends GeneratedDatabase {
       await _organizationSchema();
     },
     onUpgrade: (_, from, to) async {
-      if (from < 1 || to != 8) throw const StorageFailure('unsupported_schema');
+      if (from < 1 || to != 9) throw const StorageFailure('unsupported_schema');
       await transaction(() async {
         if (from < 2) {
           await customStatement(
@@ -570,6 +713,7 @@ class _InformationDatabase extends GeneratedDatabase {
         if (from < 6) await _createProposals();
         // Schema 7 is reserved for authorization history and access records.
         if (from < 8) await _createUpdates();
+        if (from < 9) await _createRecycle();
       });
     },
     beforeOpen: (details) async {
@@ -577,6 +721,16 @@ class _InformationDatabase extends GeneratedDatabase {
         throw const StorageFailure('unsupported_schema');
     },
   );
+
+  Future<void> _createRecycle() async {
+    await customStatement(
+      'CREATE TABLE recycle_entries(id TEXT PRIMARY KEY,payload TEXT NOT NULL)',
+    );
+    await customStatement('CREATE TABLE recycle_facts(payload TEXT NOT NULL)');
+    await customStatement(
+      'CREATE TABLE delete_proposals(id TEXT PRIMARY KEY,payload TEXT NOT NULL)',
+    );
+  }
 
   Future<void> _createProposals() => customStatement(
     'CREATE TABLE import_proposals(id TEXT PRIMARY KEY,payload TEXT NOT NULL)',

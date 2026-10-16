@@ -23,11 +23,14 @@ void main() {
         ]),
       ]);
       expect(service.agent.read(grant.token, ref), 'original.invalid');
-      final added = (await service.owner.confirmImport(
+      final receipt = (await service.owner.confirmImport(
         id,
         1,
         service.owner.importProposals.single.items,
       )).single;
+      final added = service.owner.information.singleWhere(
+        (i) => i.id == receipt.id,
+      );
       expect(added.id, isNot(original.id));
       expect(added.fields.single.id, isNot(original.fields.single.id));
       expect(service.agent.read(grant.token, ref), 'original.invalid');
@@ -146,8 +149,11 @@ void main() {
       ];
       final result = await service.owner.confirmImport(id, 1, reviewed);
       expect(result, hasLength(2));
-      expect(result.first.directoryId, directory.id);
-      expect(result.first.tagIds, [tag.id]);
+      final created = service.owner.information.firstWhere(
+        (i) => i.id == result.first.id,
+      );
+      expect(created.directoryId, directory.id);
+      expect(created.tagIds, [tag.id]);
       expect(service.agent.importStatus(session, id)['status'], 'confirmed');
       expect(service.agent.catalog(), hasLength(2));
       final retry = await service.owner.confirmImport(id, 1, reviewed);
@@ -156,7 +162,7 @@ void main() {
       expect(
         () => service.agent.read(
           id,
-          FieldRef(result.first.id, result.first.fields.first.id),
+          FieldRef(created.id, created.fields.first.id),
         ),
         throwsA(isA<AccessFailure>()),
       );

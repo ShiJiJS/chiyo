@@ -97,7 +97,7 @@ extension OwnerImports on OwnerAccess {
     return matches.single;
   }
 
-  Future<List<InformationItem>> confirmImport(
+  Future<List<ImportReceipt>> confirmImport(
     String id,
     int version,
     List<ImportItemInput> reviewed,
@@ -105,10 +105,7 @@ extension OwnerImports on OwnerAccess {
     final found = importProposals.where((p) => p.id == id);
     if (found.isNotEmpty &&
         found.single.state == ImportProposalState.confirmed) {
-      return List.unmodifiable([
-        for (final itemId in found.single.createdItemIds)
-          information.firstWhere((i) => i.id == itemId),
-      ]);
+      return found.single.receipts;
     }
     final previous = _pendingImport(id, version);
     _validateImport(reviewed);
@@ -149,9 +146,10 @@ extension OwnerImports on OwnerAccess {
       state: ImportProposalState.confirmed,
       version: previous.version + 1,
       createdItemIds: items.map((i) => i.id),
+      createdItemVersions: items.map((i) => i.version),
     );
     await _service._repository.confirmImportProposal(confirmed, items);
-    return List.unmodifiable(items);
+    return confirmed.receipts;
   });
 
   Future<void> rejectImport(String id, int version) => _serialize(() async {
