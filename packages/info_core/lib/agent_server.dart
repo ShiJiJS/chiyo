@@ -94,7 +94,12 @@ class AgentServer {
           _text(body, 'purpose'),
           fields,
         );
-        return {'status': 'pending', 'requestId': receipt.id};
+        return _agent.status(_text(body, 'sessionSecret'), receipt.id);
+      case '/cancel':
+        final session = _text(body, 'sessionSecret');
+        final id = _text(body, 'requestId');
+        _agent.cancel(session, id);
+        return _agent.status(session, id);
       case '/status':
         return _agent.status(
           _text(body, 'sessionSecret'),

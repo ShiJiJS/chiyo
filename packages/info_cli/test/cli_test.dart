@@ -57,7 +57,24 @@ void main() {
         (await command({'command': 'claim', 'requestId': id}))['status'],
         'pending',
       );
+      final waited = await command({
+        'command': 'wait',
+        'requestId': id,
+        'timeoutMs': 20,
+      });
+      expect(waited['status'], 'pending');
+      expect(waited['waitTimedOut'], isTrue);
+      expect(waited['requestId'], id);
+      expect(core.owner.requests, hasLength(1));
       core.owner.approve(id, [const FieldRef('demo-server', 'host')]);
+      expect(
+        (await command({
+          'command': 'wait',
+          'requestId': id,
+          'timeoutMs': 0,
+        }))['status'],
+        'approved',
+      );
       final claim = await command({'command': 'claim', 'requestId': id});
       expect(claim['status'], 'ok');
       expect(claim.containsKey('token'), isFalse);

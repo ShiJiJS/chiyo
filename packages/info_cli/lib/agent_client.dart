@@ -1,0 +1,109 @@
+import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
+
+class AgentClient {
+  AgentClient(this.port, {String? sessionSecret}) : _session = sessionSecret;
+  final int port;
+  final _http = HttpClient()..connectionTimeout = const Duration(seconds: 3);
+  String? _session;
+
+  /// Private capability, for trusted adapters only. Never include in diagnostics.
+  String? get sessionSecret => _session;
+  final _tokens = <String, String>{};
+  void close() {
+    _tokens.clear();
+    _session = null;
+    _http.close(force: true);
+  }
+
+  Future<Map<String, dynamic>> execute(Map<String, dynamic> input) async {
+    final command = input['command'];
+    switch (command) {
+      case 'catalog':
+        return _call('/catalog', {});
+      case 'session':
+        if (_session != null) return {'status': 'invalid_request'};
+        final result = await _call('/session', {
+          'chatLabel': input['chatLabel'],
+        });
+        final secret = result.remove('sessionSecret');
+        if (result['status'] == 'ok' && secret is String) _session = secret;
+        return result;
+      case 'request':
+        if (_session == null) return {'status': 'unauthorized'};
+        return _call('/request', {
+          'sessionSecret': _session,
+          'purpose': input['purpose'],
+          'fields': input['fields'],
+        });
+      case 'status':
+      case 'cancel':
+      case 'claim':
+        if (_session == null) return {'status': 'unauthorized'};
+        final id = input['requestId'];
+        if (id is! String) return {'status': 'invalid_request'};
+        final result = await _call('/$command', {
+          'sessionSecret': _session,
+          'requestId': id,
+        });
+        final token = result.remove('token');
+        if (command == 'claim' && result['status'] == 'ok' && token is String) {
+          _tokens[id] = token;
+        }
+        return result;
+      case 'wait':
+        if (_session == null) return {'status': 'unauthorized'};
+        final id = input['requestId'];
+        final timeout = input['timeoutMs'] ?? 30000;
+        if (id is! String ||
+            timeout is! int ||
+            timeout < 0 ||
+            timeout > 300000) {
+          return {'status': 'invalid_request'};
+        }
+        final elapsed = Stopwatch()..start();
+        while (true) {
+          final result = await _call('/status', {
+            'sessionSecret': _session,
+            'requestId': id,
+          });
+          if (result['status'] != 'pending') return result;
+          final remaining = timeout - elapsed.elapsedMilliseconds;
+          if (remaining <= 0) return {...result, 'waitTimedOut': true};
+          await Future<void>.delayed(
+            Duration(milliseconds: remaining < 250 ? remaining : 250),
+          );
+        }
+      case 'read':
+        final token = _tokens[input['requestId']];
+        if (token == null) return {'status': 'unauthorized'};
+        return _call('/read', {
+          'token': token,
+          'itemId': input['itemId'],
+          'fieldId': input['fieldId'],
+        });
+      default:
+        return {'status': 'invalid_request'};
+    }
+  }
+
+  Future<Map<String, dynamic>> _call(
+    String path,
+    Map<String, dynamic> data,
+  ) async {
+    try {
+      return await (() async {
+        final request = await _http.post('127.0.0.1', port, path);
+        request.headers.contentType = ContentType.json;
+        request.followRedirects = false;
+        request.write(jsonEncode(data));
+        final response = await request.close();
+        final text = await utf8.decoder.bind(response).join();
+        return jsonDecode(text) as Map<String, dynamic>;
+      })().timeout(const Duration(seconds: 5));
+    } on Object {
+      return {'status': 'service_unavailable'};
+    }
+  }
+}
