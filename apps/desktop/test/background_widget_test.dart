@@ -38,7 +38,7 @@ void main() {
       await tester.pumpAndSettle();
       await native.events!(DesktopEvent.openApprovals);
       await tester.pumpAndSettle();
-      expect(find.text('Need address'), findsOneWidget);
+      expect(find.text('test chat'), findsWidgets);
       expect(service.agent.status(session, request.id)['status'], 'pending');
       await tester.tap(find.byKey(const ValueKey('nav-4')));
       await tester.pumpAndSettle();

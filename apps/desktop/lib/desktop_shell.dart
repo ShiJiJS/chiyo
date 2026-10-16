@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:info_core/info_core.dart';
 import 'desktop_runtime.dart';
 import 'ui.dart';
+import 'prototype_ui.dart';
 
 class DesktopShell extends StatefulWidget {
   const DesktopShell({
@@ -14,6 +15,10 @@ class DesktopShell extends StatefulWidget {
     required this.child,
     required this.hasBackups,
     this.runtime,
+    this.colorTheme = DesktopColorTheme.purple,
+    required this.onThemeChanged,
+    this.themeBusy = false,
+    this.themeError,
   });
   final InformationService service;
   final int port, index;
@@ -21,6 +26,10 @@ class DesktopShell extends StatefulWidget {
   final Widget child;
   final bool hasBackups;
   final DesktopRuntime? runtime;
+  final DesktopColorTheme colorTheme;
+  final ValueChanged<DesktopColorTheme> onThemeChanged;
+  final bool themeBusy;
+  final String? themeError;
   @override
   State<DesktopShell> createState() => _DesktopShellState();
 }
@@ -31,137 +40,280 @@ class _DesktopShellState extends State<DesktopShell> {
   @override
   void initState() {
     super.initState();
-    _pending = _pendingCount;
-    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
-      final count = _pendingCount;
-      if (mounted && count != _pending) setState(() => _pending = count);
-    });
+    _updateCount();
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) => _updateCount());
   }
 
-  int get _pendingCount =>
-      widget.service.owner.requests
-          .where((r) => r.state == AccessRequestState.pending)
-          .length +
-      widget.service.owner.organizationTasks
-          .where(
-            (t) =>
-                widget.service.owner.organizationState(t) ==
-                OrganizationTaskState.pending,
-          )
-          .length;
+  void _updateCount() {
+    if (!widget.service.owner.serviceAvailable) return;
+    final count = widget.service.owner.queryInbox(limit: 1).pendingCount;
+    if (count != _pending && mounted) setState(() => _pending = count);
+  }
+
   @override
   void dispose() {
     _timer?.cancel();
     super.dispose();
   }
 
-  static const _labels = ['访问审批', '资料库', '录入提案', '授权历史', '设置'];
+  static const _labels = ['访问审批', '信息库', '录入提案', '授权历史', '设置'];
   static const _icons = [
-    Icons.rule_outlined,
-    Icons.folder_open_outlined,
-    Icons.playlist_add_outlined,
-    Icons.history_outlined,
-    Icons.settings_outlined,
+    PrototypeIconGlyph.inbox,
+    PrototypeIconGlyph.folder,
+    PrototypeIconGlyph.plus,
+    PrototypeIconGlyph.clock,
+    PrototypeIconGlyph.tune,
   ];
+  static const _themeNames = ['紫棠', '松石', '雾蓝', '黑白'];
 
-  Widget _status(bool compact) {
-    final runtime = widget.runtime;
-    final stopped =
-        runtime?.quitting == true || runtime?.shutdownFailed == true;
-    return Tooltip(
-      message:
-          '127.0.0.1:${widget.port}。${runtime?.availability.tray == true ? '关窗后继续运行，可从托盘或菜单栏打开审批。' : '托盘或菜单栏不可用，关闭按钮将保留窗口。'}',
-      child: compact
-          ? Icon(
-              stopped ? Icons.link_off : Icons.circle,
-              size: 9,
-              color: UiColors.muted,
-            )
-          : StatusLabel(stopped ? '服务已停止' : '本机服务已启动'),
+  Widget _destination(int index) {
+    final c = UiPalette.of(context);
+    final selected = widget.index == index;
+    final ink = selected ? c.strong : c.muted;
+    return Container(
+      height: 72,
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(
+            color: selected ? c.accent : Colors.transparent,
+            width: 3,
+          ),
+        ),
+      ),
+      child: TextButton(
+        key: ValueKey('nav-$index'),
+        onPressed: () => widget.onSelected(index),
+        style: prototypeButton(context, size: 14, foreground: ink, radius: 0),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            PrototypeIcon(_icons[index], color: ink),
+            const SizedBox(width: 8),
+            Text(
+              _labels[index],
+              style: prototypeText(
+                context,
+                14,
+                color: ink,
+                weight: selected ? FontWeight.w600 : FontWeight.w400,
+              ),
+            ),
+            if (index == 0 && _pending > 0) ...[
+              const SizedBox(width: 10),
+              Text(
+                '$_pending',
+                style: prototypeText(
+                  context,
+                  13,
+                  color: ink,
+                  family: 'Georgia',
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
     );
   }
 
-  Widget _navigationRail() => Material(
-    color: UiColors.rail,
-    child: SizedBox(
-      width: 194,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 8, 16, 24),
-            child: Row(
-              children: [
-                const Icon(
-                  Icons.layers_outlined,
-                  color: UiColors.brand,
-                  size: 27,
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    '信息授权',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          for (var i = 0; i < 5; i++)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
-              child: _destination(i, _labels[i], rail: true),
-            ),
-          const Spacer(),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(24, 16, 16, 14),
-            child: _status(false),
-          ),
-        ],
-      ),
-    ),
-  );
-
-  Widget _compactNavigation() => Material(
-    color: UiColors.rail,
-    child: Container(
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 11),
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: UiColors.line)),
+  Widget _themes() {
+    final c = UiPalette.of(context);
+    return Container(
+      width: 244 * MediaQuery.textScalerOf(context).scale(12) / 12,
+      margin: const EdgeInsets.only(top: 1),
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: c.canvas,
+        border: Border.all(color: c.line),
+        borderRadius: BorderRadius.circular(7),
       ),
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          const Tooltip(
-            message: '信息授权',
-            child: Icon(Icons.layers_outlined, color: UiColors.brand, size: 26),
-          ),
-          const SizedBox(width: 24),
-          Expanded(
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  for (var i = 0; i < 5; i++) _destination(i, _labels[i]),
-                ],
+          for (final theme in DesktopColorTheme.values) ...[
+            if (theme.index > 0) const SizedBox(width: 2),
+            Expanded(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(4),
+                  boxShadow: widget.colorTheme == theme
+                      ? const [
+                          BoxShadow(
+                            color: Color(0x06000000),
+                            offset: Offset(0, 1),
+                            blurRadius: 2,
+                          ),
+                        ]
+                      : null,
+                ),
+                child: TextButton(
+                  key: ValueKey('theme-${theme.name}'),
+                  onPressed: widget.themeBusy
+                      ? null
+                      : () => widget.onThemeChanged(theme),
+                  style: prototypeButton(
+                    context,
+                    foreground: widget.colorTheme == theme ? c.strong : c.muted,
+                    background: widget.colorTheme == theme
+                        ? c.paper
+                        : Colors.transparent,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 6,
+                    ),
+                    side: BorderSide(
+                      color: widget.colorTheme == theme
+                          ? c.line
+                          : Colors.transparent,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 9,
+                        height: 9,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: UiPalette.forTheme(theme).accent,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(_themeNames[theme.index]),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = UiPalette.of(context);
+    final runtime = widget.runtime;
+    return Scaffold(
+      backgroundColor: colors.canvas,
+      body: Column(
+        children: [
+          Material(
+            color: colors.paper,
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border(bottom: BorderSide(color: colors.line)),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 28),
+              child: LayoutBuilder(
+                builder: (context, bounds) {
+                  final compact =
+                      bounds.maxWidth < 1000 ||
+                      MediaQuery.textScalerOf(context).scale(14) > 20;
+                  final brand = Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      PrototypeIcon(
+                        PrototypeIconGlyph.layers,
+                        size: 26,
+                        color: colors.strong,
+                      ),
+                      const SizedBox(width: 10),
+                      Text(
+                        '信息授权',
+                        style: prototypeText(
+                          context,
+                          18,
+                          color: colors.strong,
+                          weight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  );
+                  final nav = SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        for (var i = 0; i < 5; i++) ...[
+                          if (i > 0) const SizedBox(width: 23),
+                          _destination(i),
+                        ],
+                      ],
+                    ),
+                  );
+                  if (compact) {
+                    return Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          child: Row(
+                            children: [brand, const Spacer(), _themes()],
+                          ),
+                        ),
+                        nav,
+                      ],
+                    );
+                  }
+                  return SizedBox(
+                    height: 71,
+                    child: Row(
+                      children: [
+                        brand,
+                        const SizedBox(width: 24),
+                        nav,
+                        const Spacer(),
+                        _themes(),
+                        if (bounds.maxWidth + 56 > 1320) ...[
+                          const SizedBox(width: 30),
+                          SizedBox(
+                            width: 72,
+                            child: Tooltip(
+                              message: '127.0.0.1:${widget.port}',
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Container(
+                                    width: 5,
+                                    height: 5,
+                                    decoration: BoxDecoration(
+                                      color: runtime?.quitting == true
+                                          ? colors.muted
+                                          : colors.accent ==
+                                                const Color(0xff333333)
+                                          ? const Color(0xff59595f)
+                                          : const Color(0xff56795c),
+                                      shape: BoxShape.circle,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    runtime?.quitting == true
+                                        ? '服务已停止'
+                                        : '本机已连接',
+                                    style: prototypeText(
+                                      context,
+                                      11,
+                                      color: colors.muted,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  );
+                },
               ),
             ),
           ),
-          const SizedBox(width: 12),
-          _status(true),
-        ],
-      ),
-    ),
-  );
-
-  @override
-  Widget build(BuildContext context) => LayoutBuilder(
-    builder: (context, box) {
-      final runtime = widget.runtime;
-      final rail =
-          box.maxWidth >= 1120 &&
-          MediaQuery.textScalerOf(context).scale(14) <= 20;
-      final workspace = Column(
-        children: [
+          if (widget.themeError != null)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: QuietNotice(widget.themeError!, warning: true),
+            ),
           if (runtime != null &&
               (!runtime.availability.tray ||
                   runtime.availability.notifications ==
@@ -196,66 +348,11 @@ class _DesktopShellState extends State<DesktopShell> {
                 warning: true,
               ),
             ),
-
-          Expanded(child: WorkspaceEntrance(child: widget.child)),
+          Expanded(
+            key: const ValueKey('desktop-workspace'),
+            child: WorkspaceEntrance(child: widget.child),
+          ),
         ],
-      );
-      return Scaffold(
-        backgroundColor: Colors.white,
-        body: Flex(
-          direction: rail ? Axis.horizontal : Axis.vertical,
-          children: [
-            if (rail) _navigationRail() else _compactNavigation(),
-            if (rail) const VerticalDivider(width: 1),
-            Expanded(key: const ValueKey('desktop-workspace'), child: workspace),
-          ],
-        ),
-      );
-    },
-  );
-
-  Widget _destination(int index, String label, {bool rail = false}) {
-    final selected = index == widget.index;
-    return Padding(
-      padding: EdgeInsets.only(right: rail ? 0 : 5),
-      child: Semantics(
-        selected: selected,
-        child: Container(
-          decoration: BoxDecoration(
-            color: selected ? UiColors.selected : Colors.transparent,
-            borderRadius: BorderRadius.circular(6),
-          ),
-          child: TextButton(
-            key: ValueKey('nav-$index'),
-            onPressed: () => widget.onSelected(index),
-            style: TextButton.styleFrom(
-              animationDuration: Duration.zero,
-              overlayColor: const Color(0x0a000000),
-              alignment: rail ? Alignment.centerLeft : null,
-              foregroundColor: selected ? UiColors.accent : UiColors.muted,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
-            ),
-            child: Row(
-              mainAxisSize: rail ? MainAxisSize.max : MainAxisSize.min,
-              children: [
-                if (rail) ...[
-                  Icon(_icons[index], size: 18),
-                  const SizedBox(width: 12),
-                ],
-                Flexible(child: Text(label)),
-                if (index == 0 && _pending > 0) ...[
-                  const SizedBox(width: 8),
-                  Text(
-                    '$_pending',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: selected ? UiColors.accent : null,
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-        ),
       ),
     );
   }

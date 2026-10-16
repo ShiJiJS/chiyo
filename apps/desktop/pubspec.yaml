@@ -24,6 +24,10 @@ flutter:
   assets:
     - assets/fonts/OFL.txt
   fonts:
+    - family: ProductSans
+      fonts:
+        - asset: assets/fonts/NotoSansSC-Regular.otf
+          weight: 400
     - family: AppSans
       fonts:
         - asset: assets/fonts/NotoSansSC-Regular.otf

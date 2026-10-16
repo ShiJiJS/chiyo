@@ -1,19 +1,8 @@
 import 'package:flutter/material.dart';
 export 'desktop_controls.dart';
-
-abstract final class UiColors {
-  static const ink = Color(0xff26343a);
-  static const muted = Color(0xff61717b);
-  static const canvas = Color(0xfff0f4f6);
-  static const rail = Color(0xfff7f9fa);
-  static const line = Color(0xffe1e7eb);
-  static const accent = Color(0xff285ab0);
-  static const selected = Color(0xffeaf0fa);
-  static const brand = Color(0xff28695f);
-  static const success = Color(0xff27735f);
-  static const danger = Color(0xffb54143);
-  static const warning = Color(0xff8d651e);
-}
+import 'package:info_core/info_core.dart';
+import 'ui_palette.dart';
+export 'ui_palette.dart';
 
 abstract final class UiSpace {
   static const page = EdgeInsets.fromLTRB(24, 20, 24, 20);
@@ -25,14 +14,17 @@ abstract final class UiMotion {
   static const entrance = Duration(milliseconds: 150);
 }
 
-ThemeData informationTheme() {
-  const body = TextStyle(
-    fontFamily: 'AppSans',
+ThemeData informationTheme([
+  DesktopColorTheme colorTheme = DesktopColorTheme.purple,
+]) {
+  final colors = UiPalette.forTheme(colorTheme);
+  final body = TextStyle(
+    fontFamily: 'ProductSans',
     fontSize: 14,
     fontWeight: FontWeight.w400,
     letterSpacing: 0,
-    height: 1.55,
-    color: UiColors.ink,
+    height: 1.5,
+    color: colors.ink,
   );
   final texts = TextTheme(
     displayLarge: body.copyWith(fontSize: 26, fontWeight: FontWeight.w500),
@@ -46,7 +38,7 @@ ThemeData informationTheme() {
     titleSmall: body.copyWith(fontWeight: FontWeight.w500),
     bodyLarge: body,
     bodyMedium: body,
-    bodySmall: body.copyWith(fontSize: 13, color: UiColors.muted),
+    bodySmall: body.copyWith(fontSize: 13, color: colors.muted),
     labelLarge: body,
     labelMedium: body,
     labelSmall: body.copyWith(fontSize: 13),
@@ -55,126 +47,136 @@ ThemeData informationTheme() {
     borderRadius: BorderRadius.all(Radius.circular(6)),
   );
   final button = ButtonStyle(
-    textStyle: const WidgetStatePropertyAll(body),
-    minimumSize: const WidgetStatePropertyAll(Size(64, 36)),
-    padding: const WidgetStatePropertyAll(
+    textStyle: WidgetStatePropertyAll(body),
+    minimumSize: WidgetStatePropertyAll(Size(64, 36)),
+    padding: WidgetStatePropertyAll(
       EdgeInsets.symmetric(horizontal: 12, vertical: 5),
     ),
-    shape: const WidgetStatePropertyAll(shape),
+    shape: WidgetStatePropertyAll(shape),
     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
     animationDuration: UiMotion.feedback,
   );
   final controlInk = WidgetStateProperty.resolveWith<Color>(
     (states) => states.contains(WidgetState.disabled)
-        ? UiColors.muted.withValues(alpha: .4)
-        : UiColors.ink,
+        ? colors.muted.withValues(alpha: .4)
+        : colors.ink,
   );
   final secondaryInk = WidgetStateProperty.resolveWith<Color>(
     (states) => states.contains(WidgetState.disabled)
-        ? UiColors.muted.withValues(alpha: .4)
-        : UiColors.muted,
+        ? colors.muted.withValues(alpha: .4)
+        : colors.muted,
   );
-  const border = OutlineInputBorder(
+  final border = OutlineInputBorder(
     borderRadius: BorderRadius.all(Radius.circular(6)),
-    borderSide: BorderSide(color: Color(0xffc0cbd2)),
+    borderSide: BorderSide(color: colors.line),
   );
   return ThemeData(
+    extensions: [colors],
     useMaterial3: true,
-    pageTransitionsTheme: const PageTransitionsTheme(
+    pageTransitionsTheme: PageTransitionsTheme(
       builders: {
         TargetPlatform.windows: DesktopPageTransitionsBuilder(),
         TargetPlatform.macOS: DesktopPageTransitionsBuilder(),
         TargetPlatform.linux: DesktopPageTransitionsBuilder(),
       },
     ),
-    fontFamily: 'AppSans',
+    fontFamily: 'ProductSans',
     textTheme: texts,
     primaryTextTheme: texts,
-    colorScheme: const ColorScheme.light(
-      primary: UiColors.accent,
-      onPrimary: Colors.white,
-      secondary: UiColors.accent,
-      onSecondary: Colors.white,
-      surface: Colors.white,
-      surfaceContainerLow: UiColors.rail,
-      onSurface: UiColors.ink,
-      onSurfaceVariant: UiColors.muted,
-      outline: Color(0xffa5a8b0),
-      outlineVariant: UiColors.line,
-      error: UiColors.danger,
+    colorScheme: ColorScheme.light(
+      primary: colors.accent,
+      onPrimary: colors.paper,
+      secondary: colors.accent,
+      onSecondary: colors.paper,
+      surface: colors.paper,
+      surfaceContainerLow: colors.rail,
+      onSurface: colors.ink,
+      onSurfaceVariant: colors.muted,
+      outline: colors.line,
+      outlineVariant: colors.line,
+      error: colors.danger,
     ),
-    scaffoldBackgroundColor: Colors.white,
+    scaffoldBackgroundColor: colors.paper,
     visualDensity: VisualDensity.standard,
-    dividerColor: UiColors.line,
-    progressIndicatorTheme: const ProgressIndicatorThemeData(
-      color: UiColors.accent,
-      linearTrackColor: UiColors.line,
-      circularTrackColor: UiColors.line,
+    dividerColor: colors.line,
+    scrollbarTheme: ScrollbarThemeData(
+      thumbColor: WidgetStateProperty.resolveWith(
+        (states) => colors.muted.withValues(
+          alpha:
+              states.contains(WidgetState.hovered) ||
+                  states.contains(WidgetState.dragged)
+              ? .7
+              : .4,
+        ),
+      ),
+      thickness: const WidgetStatePropertyAll(5),
+      radius: const Radius.circular(4),
+      crossAxisMargin: 2,
+      mainAxisMargin: 2,
+    ),
+    progressIndicatorTheme: ProgressIndicatorThemeData(
+      color: colors.accent,
+      linearTrackColor: colors.line,
+      circularTrackColor: colors.line,
     ),
     splashFactory: NoSplash.splashFactory,
     highlightColor: Colors.transparent,
-    hoverColor: const Color(0x08747b88),
-    focusColor: const Color(0x16345b8c),
+    hoverColor: colors.muted.withValues(alpha: .06),
+    focusColor: colors.accent.withValues(alpha: .14),
     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-    iconTheme: const IconThemeData(size: 17, color: UiColors.muted),
-    dividerTheme: const DividerThemeData(
-      color: UiColors.line,
-      thickness: 1,
-      space: 1,
-    ),
+    iconTheme: IconThemeData(size: 17, color: colors.muted),
+    dividerTheme: DividerThemeData(color: colors.line, thickness: 1, space: 1),
     filledButtonTheme: FilledButtonThemeData(style: button),
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: button.copyWith(
         foregroundColor: controlInk,
-        side: const WidgetStatePropertyAll(
-          BorderSide(color: Color(0xffc0cbd2)),
-        ),
+        side: WidgetStatePropertyAll(BorderSide(color: colors.line)),
       ),
     ),
     textButtonTheme: TextButtonThemeData(
       style: button.copyWith(
         foregroundColor: secondaryInk,
-        minimumSize: const WidgetStatePropertyAll(Size(40, 34)),
-        padding: const WidgetStatePropertyAll(
+        minimumSize: WidgetStatePropertyAll(Size(40, 34)),
+        padding: WidgetStatePropertyAll(
           EdgeInsets.symmetric(horizontal: 8, vertical: 5),
         ),
       ),
     ),
     iconButtonTheme: IconButtonThemeData(
       style: button.copyWith(
-        minimumSize: const WidgetStatePropertyAll(Size(30, 30)),
-        padding: const WidgetStatePropertyAll(EdgeInsets.all(5)),
-        iconSize: const WidgetStatePropertyAll(17),
+        minimumSize: WidgetStatePropertyAll(Size(30, 30)),
+        padding: WidgetStatePropertyAll(EdgeInsets.all(5)),
+        iconSize: WidgetStatePropertyAll(17),
         foregroundColor: secondaryInk,
       ),
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
-      fillColor: Colors.white,
+      fillColor: colors.paper,
       isDense: true,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 11, vertical: 9),
+      contentPadding: EdgeInsets.symmetric(horizontal: 11, vertical: 9),
       border: border,
       enabledBorder: border,
       focusedBorder: border.copyWith(
-        borderSide: const BorderSide(color: UiColors.accent, width: 1.25),
+        borderSide: BorderSide(color: colors.accent, width: 1.25),
       ),
       disabledBorder: border.copyWith(
-        borderSide: const BorderSide(color: UiColors.line),
+        borderSide: BorderSide(color: colors.line),
       ),
       errorBorder: border.copyWith(
-        borderSide: const BorderSide(color: UiColors.danger),
+        borderSide: BorderSide(color: colors.danger),
       ),
       focusedErrorBorder: border.copyWith(
-        borderSide: const BorderSide(color: UiColors.danger, width: 1.25),
+        borderSide: BorderSide(color: colors.danger, width: 1.25),
       ),
       helperMaxLines: 2,
       errorMaxLines: 3,
       helperStyle: texts.bodySmall,
-      errorStyle: texts.bodySmall!.copyWith(color: UiColors.danger),
+      errorStyle: texts.bodySmall!.copyWith(color: colors.danger),
     ),
     checkboxTheme: CheckboxThemeData(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(3)),
-      side: const BorderSide(color: Color(0xffa7abb3), width: 1),
+      side: BorderSide(color: Color(0xffa7abb3), width: 1),
       visualDensity: VisualDensity.compact,
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
     ),
@@ -187,36 +189,36 @@ ThemeData informationTheme() {
       subtitleTextStyle: texts.bodySmall,
     ),
     expansionTileTheme: ExpansionTileThemeData(
-      backgroundColor: Colors.white,
-      collapsedBackgroundColor: Colors.white,
-      shape: const Border(),
-      collapsedShape: const Border(),
-      iconColor: UiColors.muted,
-      collapsedIconColor: UiColors.muted,
-      textColor: UiColors.ink,
-      collapsedTextColor: UiColors.ink,
+      backgroundColor: colors.paper,
+      collapsedBackgroundColor: colors.paper,
+      shape: Border(),
+      collapsedShape: Border(),
+      iconColor: colors.muted,
+      collapsedIconColor: colors.muted,
+      textColor: colors.ink,
+      collapsedTextColor: colors.ink,
       childrenPadding: EdgeInsets.zero,
     ),
     dialogTheme: DialogThemeData(
-      backgroundColor: Colors.white,
+      backgroundColor: colors.paper,
       surfaceTintColor: Colors.transparent,
       elevation: 10,
-      shadowColor: const Color(0x22000000),
-      barrierColor: const Color(0x33000000),
+      shadowColor: Color(0x22000000),
+      barrierColor: Color(0x33000000),
       titleTextStyle: texts.titleMedium!.copyWith(fontSize: 16),
       contentTextStyle: texts.bodyMedium,
-      shape: const RoundedRectangleBorder(
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.all(Radius.circular(10)),
-        side: BorderSide(color: UiColors.line),
+        side: BorderSide(color: colors.line),
       ),
     ),
-    menuTheme: const MenuThemeData(
+    menuTheme: MenuThemeData(
       style: MenuStyle(
-        backgroundColor: WidgetStatePropertyAll(Colors.white),
+        backgroundColor: WidgetStatePropertyAll(colors.paper),
         surfaceTintColor: WidgetStatePropertyAll(Colors.transparent),
         elevation: WidgetStatePropertyAll(6),
         shadowColor: WidgetStatePropertyAll(Color(0x22000000)),
-        side: WidgetStatePropertyAll(BorderSide(color: UiColors.line)),
+        side: WidgetStatePropertyAll(BorderSide(color: colors.line)),
         shape: WidgetStatePropertyAll(shape),
         maximumSize: WidgetStatePropertyAll(Size(640, 360)),
         padding: WidgetStatePropertyAll(EdgeInsets.all(4)),
@@ -225,36 +227,36 @@ ThemeData informationTheme() {
     menuButtonTheme: MenuButtonThemeData(
       style: button.copyWith(
         alignment: Alignment.centerLeft,
-        minimumSize: const WidgetStatePropertyAll(Size(140, 30)),
+        minimumSize: WidgetStatePropertyAll(Size(140, 30)),
         foregroundColor: controlInk,
       ),
     ),
     chipTheme: ChipThemeData(
       labelStyle: texts.bodyMedium,
-      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+      padding: EdgeInsets.symmetric(horizontal: 5, vertical: 2),
       shape: shape,
-      side: const BorderSide(color: UiColors.line),
-      backgroundColor: Colors.white,
-      selectedColor: UiColors.selected,
+      side: BorderSide(color: colors.line),
+      backgroundColor: colors.paper,
+      selectedColor: colors.selected,
       showCheckmark: true,
     ),
     tooltipTheme: TooltipThemeData(
-      textStyle: texts.bodySmall!.copyWith(color: Colors.white),
+      textStyle: texts.bodySmall!.copyWith(color: colors.paper),
       decoration: BoxDecoration(
-        color: UiColors.ink,
+        color: colors.ink,
         borderRadius: BorderRadius.circular(4),
       ),
-      waitDuration: const Duration(milliseconds: 450),
+      waitDuration: Duration(milliseconds: 450),
     ),
-    snackBarTheme: const SnackBarThemeData(
+    snackBarTheme: SnackBarThemeData(
       behavior: SnackBarBehavior.floating,
-      backgroundColor: UiColors.ink,
+      backgroundColor: colors.ink,
       shape: shape,
       contentTextStyle: TextStyle(
-        fontFamily: 'AppSans',
+        fontFamily: 'ProductSans',
         fontSize: 14,
         fontWeight: FontWeight.w400,
-        color: Colors.white,
+        color: colors.paper,
       ),
     ),
   );
@@ -352,32 +354,72 @@ class PageHeading extends StatelessWidget {
 }
 
 class QuietNotice extends StatelessWidget {
-  const QuietNotice(this.text, {super.key, this.warning = false});
+  const QuietNotice(
+    this.text, {
+    super.key,
+    this.warning = false,
+    this.panel = false,
+  });
   final String text;
   final bool warning;
+  final bool panel;
   @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 8),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Icon(
-          warning ? Icons.error_outline : Icons.info_outline,
-          size: 17,
-          color: warning ? UiColors.danger : UiColors.muted,
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Text(
-            text,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: warning ? UiColors.danger : null,
+  Widget build(BuildContext context) => panel
+      ? Container(
+          margin: const EdgeInsets.symmetric(vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 19, vertical: 16),
+          decoration: BoxDecoration(
+            color: UiPalette.of(context).noticeWarningBackground,
+            border: Border.all(
+              color: UiPalette.of(context).noticeWarningBorder,
             ),
           ),
-        ),
-      ],
-    ),
-  );
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(
+                Icons.info_outline,
+                size: 18,
+                color: UiPalette.of(context).noticeWarningInk,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  text,
+                  style: TextStyle(
+                    fontSize: 13,
+                    height: 1.9,
+                    color: UiPalette.of(context).noticeWarningInk,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        )
+      : Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(
+                warning ? Icons.error_outline : Icons.info_outline,
+                size: 17,
+                color: warning
+                    ? UiPalette.of(context).danger
+                    : UiPalette.of(context).muted,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  text,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: warning ? UiPalette.of(context).danger : null,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
 }
 
 class StatusLabel extends StatelessWidget {
@@ -399,10 +441,10 @@ class StatusLabel extends StatelessWidget {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: active
-              ? UiColors.success
+              ? UiPalette.of(context).statusLive
               : attention
-              ? UiColors.warning
-              : UiColors.muted,
+              ? UiPalette.of(context).statusAttention
+              : UiPalette.of(context).muted,
         ),
       ),
       const SizedBox(width: 6),
@@ -411,10 +453,10 @@ class StatusLabel extends StatelessWidget {
           label,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
             color: active
-                ? UiColors.success
+                ? UiPalette.of(context).statusLive
                 : attention
-                ? UiColors.warning
-                : UiColors.muted,
+                ? UiPalette.of(context).statusAttention
+                : UiPalette.of(context).muted,
           ),
         ),
       ),
@@ -467,7 +509,7 @@ class DesktopSubpage extends StatelessWidget {
     body: Column(
       children: [
         Container(
-          color: UiColors.rail,
+          color: UiPalette.of(context).rail,
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
           child: Row(
             children: [
@@ -538,8 +580,8 @@ class RecordSurface extends StatelessWidget {
   final Widget child;
   @override
   Widget build(BuildContext context) => Container(
-    decoration: const BoxDecoration(
-      border: Border(bottom: BorderSide(color: UiColors.line)),
+    decoration: BoxDecoration(
+      border: Border(bottom: BorderSide(color: UiPalette.of(context).line)),
     ),
     child: child,
   );
@@ -620,8 +662,10 @@ class FormSection extends StatelessWidget {
     margin: const EdgeInsets.only(bottom: 20),
     padding: const EdgeInsets.all(20),
     decoration: BoxDecoration(
-      color: protected ? UiColors.rail : Colors.white,
-      border: Border.all(color: UiColors.line),
+      color: protected
+          ? UiPalette.of(context).rail
+          : UiPalette.of(context).paper,
+      border: Border.all(color: UiPalette.of(context).line),
       borderRadius: BorderRadius.circular(6),
     ),
     child: Column(
@@ -697,7 +741,7 @@ class _InformationValueState extends State<InformationValue> {
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: UiColors.rail,
+              color: UiPalette.of(context).rail,
               borderRadius: BorderRadius.circular(6),
             ),
             child: Column(
@@ -743,7 +787,7 @@ class EmptyWorkspace extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 34, color: UiColors.muted),
+            Icon(icon, size: 34, color: UiPalette.of(context).muted),
             const SizedBox(height: 18),
             Text(
               title,

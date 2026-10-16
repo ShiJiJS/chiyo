@@ -18,14 +18,26 @@ void main() {
       ], agentName: 'Codex');
       await tester.pumpWidget(InformationApp(service: service, port: 0));
       await tester.pumpAndSettle();
-      expect(find.text('整理分类与标签'), findsOneWidget);
+      expect(find.text('允许整理的资料'), findsOneWidget);
       expect(find.textContaining('无需再次确认'), findsOneWidget);
       expect(find.text('fictional.example.invalid'), findsNothing);
-      await tester.tap(find.text('批准整理'));
+      await tester.tap(
+        find.byKey(ValueKey('organization-lifetime-${task.id}')),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('15 分钟').last);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('批准整理范围'));
       await tester.pumpAndSettle();
       expect(
         service.agent.organizationStatus(session, task.id)['status'],
         'active',
+      );
+      expect(
+        service.owner.organizationTasks.single.expiresAt.difference(
+          service.owner.organizationTasks.single.approvedAt!,
+        ),
+        const Duration(minutes: 15),
       );
       await service.agent.submitOrganization(session, task.id, [
         OrganizationChange(
@@ -83,20 +95,37 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(ValueKey('organize-item-${extra.id}')));
       await tester.pumpAndSettle();
+      addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
       tester.platformDispatcher.textScaleFactorTestValue = 2;
       await tester.pumpAndSettle();
-      expect(find.text('整理分类与标签'), findsOneWidget);
+      expect(find.text('允许整理的资料'), findsOneWidget);
+      await tester.scrollUntilVisible(
+        find.byKey(ValueKey('organize-item-${extra.id}')),
+        200,
+        scrollable: find
+            .descendant(
+              of: find.byKey(
+                PageStorageKey('organization-document-${task.id}'),
+              ),
+              matching: find.byType(Scrollable),
+            )
+            .first,
+      );
+      await tester.pumpAndSettle();
       expect(
         tester
-            .widget<CheckboxListTile>(
-              find.byKey(ValueKey('organize-item-${extra.id}')),
+            .widget<Checkbox>(
+              find.descendant(
+                of: find.byKey(ValueKey('organize-item-${extra.id}')),
+                matching: find.byType(Checkbox),
+              ),
             )
             .value,
         false,
       );
       tester.platformDispatcher.clearTextScaleFactorTestValue();
       await tester.pumpAndSettle();
-      await tester.tap(find.text('批准整理'));
+      await tester.tap(find.text('批准整理范围'));
       await tester.pumpAndSettle();
       expect(service.owner.organizationTasks.single.itemVersions.keys, [
         'demo-server',
@@ -110,7 +139,7 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      await tester.tap(find.text('拒绝'));
+      await tester.tap(find.text('拒绝请求'));
       await tester.pumpAndSettle();
       expect(
         service.owner.organizationTasks.last.state,
@@ -139,7 +168,7 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(ValueKey('request-${task.id}')));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('批准整理'));
+      await tester.tap(find.text('批准整理范围'));
       await tester.pumpAndSettle();
       expect(service.agent.status(session, content.id)['status'], 'pending');
       await tester.tap(find.byKey(ValueKey('request-${content.id}')));

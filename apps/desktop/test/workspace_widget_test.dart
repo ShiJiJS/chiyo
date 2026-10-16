@@ -1,3 +1,4 @@
+import 'support/approval_interactions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:info_core/info_core.dart';
@@ -36,10 +37,11 @@ void main() {
         await tester.pumpAndSettle();
         final approve = find.byKey(const ValueKey('approve-selection'));
         expect(approve.hitTestable(), findsOneWidget);
-        expect(find.text('拒绝申请').hitTestable(), findsOneWidget);
-        await tester.enterText(
+        expect(find.text('拒绝请求').hitTestable(), findsOneWidget);
+        await selectGrantMinutes(
+          tester,
           find.byKey(ValueKey('grant-lifetime-${request.id}')),
-          '15',
+          15,
         );
         await tester.pumpAndSettle();
         expect(approve.hitTestable(), findsOneWidget);
@@ -70,10 +72,13 @@ void main() {
       final second = service.agent.request(b, 'Second purpose', [username]);
       await tester.pumpWidget(InformationApp(service: service, port: 47125));
       await tester.pumpAndSettle();
+      await tester.tap(find.byKey(ValueKey('request-${first.id}')));
+      await tester.pumpAndSettle();
       await tester.tap(find.byKey(const ValueKey('field-host')));
-      await tester.enterText(
+      await selectGrantMinutes(
+        tester,
         find.byKey(ValueKey('grant-lifetime-${first.id}')),
-        '15',
+        15,
       );
       await tester.tap(find.byKey(ValueKey('request-${second.id}')));
       await tester.pumpAndSettle();
@@ -83,13 +88,14 @@ void main() {
       expect(service.agent.status(a, first.id)['status'], 'pending');
       await tester.tap(find.byKey(ValueKey('request-${first.id}')));
       await tester.pumpAndSettle();
-      final input = tester.widget<TextFormField>(
-        find.descendant(
-          of: find.byKey(ValueKey('grant-lifetime-${first.id}')),
-          matching: find.byType(TextFormField),
-        ),
+      expect(
+        tester
+            .widget<DropdownButton<int>>(
+              find.byKey(ValueKey('grant-lifetime-${first.id}')),
+            )
+            .value,
+        15,
       );
-      expect(input.initialValue, '15');
       expect(
         tester
             .widget<FilledButton>(

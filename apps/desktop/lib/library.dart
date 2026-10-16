@@ -114,7 +114,7 @@ class _InformationLibraryState extends State<InformationLibrary> {
               ),
               FilledButton.icon(
                 onPressed: _create,
-                icon: const Icon(Icons.add, size: 18),
+                icon: Icon(Icons.add, size: 18),
                 label: const Text('新建信息'),
               ),
             ],
@@ -183,7 +183,7 @@ class _InformationLibraryState extends State<InformationLibrary> {
                 padding: const EdgeInsets.only(bottom: 4),
                 child: Material(
                   color: item.id == current.id
-                      ? UiColors.selected
+                      ? UiPalette.of(context).selected
                       : Colors.transparent,
                   borderRadius: BorderRadius.circular(6),
                   child: InkWell(
@@ -264,12 +264,12 @@ class _InformationLibraryState extends State<InformationLibrary> {
               await editCatalogMetadata(context, widget.owner, item);
               if (mounted) setState(() {});
             },
-            icon: const Icon(Icons.edit_outlined, size: 16),
+            icon: Icon(Icons.edit_outlined, size: 16),
             label: const Text('编辑'),
           ),
           IconButton(
             tooltip: '历史',
-            icon: const Icon(Icons.history_outlined),
+            icon: Icon(Icons.history_outlined),
             onPressed: () async {
               await Navigator.of(context).push(
                 MaterialPageRoute<void>(
@@ -282,8 +282,8 @@ class _InformationLibraryState extends State<InformationLibrary> {
           ),
           IconButton(
             tooltip: '删除',
-            icon: const Icon(Icons.delete_outline),
-            color: UiColors.danger,
+            icon: Icon(Icons.delete_outline),
+            color: UiPalette.of(context).danger,
             onPressed: () async {
               await confirmInformationDeletion(context, widget.owner, item);
               if (mounted) setState(() {});
@@ -336,7 +336,7 @@ class _InformationLibraryState extends State<InformationLibrary> {
               await organizeItem(context, widget.owner, item);
               if (mounted) setState(() {});
             },
-            icon: const Icon(Icons.folder_outlined, size: 16),
+            icon: Icon(Icons.folder_outlined, size: 16),
             label: Text(directoryPath(widget.owner, item.directoryId)),
           ),
           for (final tag in widget.owner.tags.where(
@@ -533,7 +533,7 @@ class _CreateInformationState extends State<_CreateInformation> {
           onPressed: _saving || _fields.length >= 200
               ? null
               : () => setState(() => _fields.add(_FieldControllers())),
-          icon: const Icon(Icons.add, size: 16),
+          icon: Icon(Icons.add, size: 16),
           label: const Text('添加字段'),
         ),
       ),

@@ -151,7 +151,7 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const ValueKey('request-picker')));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Second · 待审批').last);
+      await tester.tap(find.text('Second · 待处理').last);
       await tester.pumpAndSettle();
       expect(find.text('Second purpose'), findsOneWidget);
       await tester.tap(find.text('最终选择 1 个字段'));

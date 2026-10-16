@@ -25,6 +25,7 @@ part 'update_access.dart';
 part 'recycle_access.dart';
 part 'revision_access.dart';
 part 'backup_access.dart';
+part 'workspace_access.dart';
 
 class AccessFailure implements Exception {
   const AccessFailure(this.status);
@@ -72,6 +73,7 @@ class OwnerRequestSnapshot {
     required Iterable<FieldRef> fields,
     required Iterable<FieldRef>? approvedFields,
     required this.grantExpiresAt,
+    this.grantLifetime,
     this.sessionEnded = false,
   }) : fields = List.unmodifiable(fields),
        approvedFields = approvedFields == null
@@ -88,6 +90,7 @@ class OwnerRequestSnapshot {
   final List<FieldRef> fields;
   final List<FieldRef>? approvedFields;
   final DateTime? grantExpiresAt;
+  final Duration? grantLifetime;
   final bool sessionEnded;
 }
 
@@ -671,6 +674,9 @@ class OwnerAccess {
       fields: r.fields,
       approvedFields: r.grant?.fields,
       grantExpiresAt: r.grant?.expiresAt,
+      grantLifetime: r.approvedAt == null
+          ? null
+          : r.grant?.expiresAt.difference(r.approvedAt!),
       sessionEnded: _service._endedSessions.contains(r.session),
     );
   }).toList();

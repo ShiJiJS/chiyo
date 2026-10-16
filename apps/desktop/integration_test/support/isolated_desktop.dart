@@ -92,6 +92,8 @@ class IsolatedDesktopFixture {
 /// send notifications, or terminate the integration runner during teardown.
 class _AcceptancePlatform implements DesktopPlatform {
   @override
+  String? get openedRequestId => null;
+  @override
   Future<DesktopAvailability> initialize(
     Future<void> Function(DesktopEvent) onEvent,
   ) async => DesktopAvailability.unavailable;
@@ -100,7 +102,7 @@ class _AcceptancePlatform implements DesktopPlatform {
   @override
   Future<void> showWindow() async {}
   @override
-  Future<bool> notifyNewRequest() async => false;
+  Future<bool> notifyNewRequest(String requestId) async => false;
   @override
   Future<bool> notifyTest() async => false;
   @override

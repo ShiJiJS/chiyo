@@ -392,7 +392,7 @@ class _ReviewImportState extends State<_ReviewImport> {
                     padding: const EdgeInsets.all(20),
                     margin: const EdgeInsets.only(bottom: 16),
                     decoration: BoxDecoration(
-                      border: Border.all(color: UiColors.line),
+                      border: Border.all(color: UiPalette.of(context).line),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Column(
@@ -411,7 +411,7 @@ class _ReviewImportState extends State<_ReviewImport> {
                               TextButton.icon(
                                 key: ValueKey('edit-import-$index'),
                                 onPressed: _saving ? null : () => _edit(index),
-                                icon: const Icon(Icons.edit_outlined, size: 16),
+                                icon: Icon(Icons.edit_outlined, size: 16),
                                 label: const Text('编辑'),
                               ),
                           ],

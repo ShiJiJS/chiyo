@@ -101,7 +101,7 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
                     ),
                     TextButton.icon(
                       onPressed: _busy ? null : _reload,
-                      icon: const Icon(Icons.refresh, size: 17),
+                      icon: Icon(Icons.refresh, size: 17),
                       label: const Text('刷新记录'),
                     ),
                   ],
@@ -228,7 +228,11 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
                 padding: const EdgeInsets.symmetric(vertical: 5),
                 child: Row(
                   children: [
-                    const Icon(Icons.check, size: 16, color: UiColors.accent),
+                    Icon(
+                      Icons.check,
+                      size: 16,
+                      color: UiPalette.of(context).accent,
+                    ),
                     const SizedBox(width: 9),
                     Expanded(
                       child: Text('${field.itemName} · ${field.fieldName}'),

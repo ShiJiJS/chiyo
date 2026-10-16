@@ -80,8 +80,10 @@ class _DesktopWindowFrameState extends State<DesktopWindowFrame> {
         padding: EdgeInsets.zero,
         minimumSize: Size.zero,
         shape: const RoundedRectangleBorder(),
-        foregroundColor: UiColors.ink,
-        overlayColor: command == 'close' ? Colors.red : UiColors.muted,
+        foregroundColor: UiPalette.of(context).ink,
+        overlayColor: command == 'close'
+            ? Colors.red
+            : UiPalette.of(context).muted,
       ),
       child: Tooltip(message: label, child: Icon(icon, size: 15)),
     ),
@@ -94,7 +96,7 @@ class _DesktopWindowFrameState extends State<DesktopWindowFrame> {
       child: Column(
         children: [
           Material(
-            color: UiColors.rail,
+            color: UiPalette.of(context).rail,
             child: SizedBox(
               height: 34,
               child: Row(
