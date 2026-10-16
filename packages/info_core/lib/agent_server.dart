@@ -1,0 +1,136 @@
+import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
+import 'info_core.dart';
+
+/// Agent-only transport. OwnerAccess is intentionally not a dependency.
+class AgentServer {
+  AgentServer._(this._server, this._agent) {
+    _server.listen(_handle);
+  }
+  final HttpServer _server;
+  final AgentAccess _agent;
+  int get port => _server.port;
+  static Future<AgentServer> start(
+    AgentAccess agent, {
+    int port = 47125,
+  }) async => AgentServer._(
+    await HttpServer.bind(InternetAddress.loopbackIPv4, port, shared: false),
+    agent,
+  );
+  Future<void> close() async {
+    await _server.close(force: true);
+  }
+
+  Future<void> _handle(HttpRequest request) async {
+    Map<String, Object?> result;
+    try {
+      if (request.method != 'POST' ||
+          request.headers.value('origin') != null ||
+          request.headers.host != '127.0.0.1' ||
+          request.headers.port != port ||
+          request.headers.contentType?.mimeType != 'application/json') {
+        throw const AccessFailure('unauthorized');
+      }
+      if (request.contentLength > 16384) {
+        throw const AccessFailure('invalid_request');
+      }
+      final bytes = <int>[];
+      await for (final chunk in request.timeout(const Duration(seconds: 5))) {
+        if (bytes.length + chunk.length > 16384) {
+          throw const AccessFailure('invalid_request');
+        }
+        bytes.addAll(chunk);
+      }
+      final body = jsonDecode(utf8.decode(bytes));
+      if (body is! Map<String, dynamic>) {
+        throw const AccessFailure('invalid_request');
+      }
+      result = _dispatch(request.uri.path, body);
+    } on AccessFailure catch (error) {
+      result = {'status': error.status};
+    } on Object {
+      // Never echo submitted text, authorization material, or internal errors.
+      result = {'status': 'invalid_request'};
+    }
+    request.response.headers.contentType = ContentType.json;
+    request.response.headers.set('Cache-Control', 'no-store');
+    request.response.headers.set('X-Content-Type-Options', 'nosniff');
+    request.response.statusCode = result['status'] == 'unauthorized'
+        ? 403
+        : result['status'] == 'invalid_request'
+        ? 400
+        : 200;
+    try {
+      request.response.write(jsonEncode(result));
+      await request.response.close();
+    } on Object {
+      /* A disconnected caller must not terminate the desktop. */
+    }
+  }
+
+  Map<String, Object?> _dispatch(String path, Map<String, dynamic> body) {
+    switch (path) {
+      case '/catalog':
+        return {'status': 'ok', 'items': _agent.catalog()};
+      case '/session':
+        return {
+          'status': 'ok',
+          'sessionSecret': _agent.openSession(_text(body, 'chatLabel')),
+        };
+      case '/request':
+        final raw = body['fields'];
+        if (raw is! List || raw.length > 200) {
+          throw const AccessFailure('invalid_request');
+        }
+        final fields = raw.map((f) {
+          if (f is! Map<String, dynamic>) {
+            throw const AccessFailure('invalid_request');
+          }
+          return FieldRef(_text(f, 'itemId'), _text(f, 'fieldId'));
+        }).toList();
+        final receipt = _agent.request(
+          _text(body, 'sessionSecret'),
+          _text(body, 'purpose'),
+          fields,
+        );
+        return {'status': 'pending', 'requestId': receipt.id};
+      case '/status':
+        return _agent.status(
+          _text(body, 'sessionSecret'),
+          _text(body, 'requestId'),
+        );
+      case '/claim':
+        final grant = _agent.claim(
+          _text(body, 'sessionSecret'),
+          _text(body, 'requestId'),
+        );
+        return {
+          'status': 'ok',
+          'token': grant.token,
+          'fields': grant.fields.map((f) => f.toJson()).toList(),
+          'expiresAt': grant.expiresAt.toUtc().toIso8601String(),
+          'scopeNotice':
+              'Only these item and field identities are approved. New items and fields require a new request.',
+        };
+      case '/read':
+        return {
+          'status': 'ok',
+          'value': _agent.read(
+            _text(body, 'token'),
+            FieldRef(_text(body, 'itemId'), _text(body, 'fieldId')),
+          ),
+        };
+      default:
+        throw const AccessFailure('unauthorized');
+    }
+  }
+
+  String _text(Map<String, dynamic> body, String key) {
+    final value = body[key];
+    if (value is! String || value.isEmpty || value.length > 2000) {
+      throw const AccessFailure('invalid_request');
+    }
+    return value;
+  }
+}
