@@ -28,3 +28,16 @@
 | `settings-appearance-purple-` | `page=settings`，原型默认外观 |
 
 [页面布局与变体](../round05-page-layouts.md)记录关键最终尺寸；不能以D1审批卡片替代其他页面自己的结构。这里仍只有HTML参照，没有其他页面Flutter通过结论。
+
+## 凭据与使用流程
+
+同源紫色双视口补充，后缀含义同上：
+
+| 前缀 | query / 操作 |
+| --- | --- |
+| `credential-file-purple-` | `page=credentials`，默认文件凭据详情 |
+| `credential-add-file-purple-` | `page=credentials`，添加凭据后选择文件形式 |
+| `use-file-purple-` | `state=use-file`，完整非交互SSH文件参数申请 |
+| `use-file-env-purple-` | `state=file-env`，AWS文件路径环境变量申请 |
+
+局部差异见[凭据布局与流程变体](../round05-credential-layouts.md)。参考含虚构凭据/授权事实；实现只能用隔离合成资料建立可比画面，不能据此宣称托管凭据或执行能力已交付。
