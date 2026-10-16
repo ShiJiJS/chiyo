@@ -177,22 +177,20 @@ extension OwnerUpdates on OwnerAccess {
         }
         final item = preview.after;
         final receipt = UpdateReceipt(item.id, item.version);
+        final removed = preview.before.fields.any(
+          (f) => !item.fields.any((n) => n.id == f.id),
+        );
+        final recycled = removed ? _recycle(preview.before, item) : null;
         await _service._repository.confirmUpdateProposal(
           proposal.finish(UpdateProposalState.confirmed, result: receipt),
           item,
           InformationRevision(preview.before, _service._clock()),
+          recycled: recycled == null ? const [] : [recycled],
+          facts: recycled == null
+              ? const []
+              : [_fact(recycled, RecycleFactKind.deleted, item.version)],
         );
-        final retained = item.fields.map((f) => f.id).toSet();
-        for (final removed in preview.before.fields.where(
-          (f) => !retained.contains(f.id),
-        )) {
-          final ref = FieldRef(item.id, removed.id);
-          for (final request in _service._requests.values) {
-            if (request.grant?.fields.contains(ref) ?? false) {
-              request.invalidatedFields.add(ref);
-            }
-          }
-        }
+        _invalidateRemoved(preview.before, item);
         return receipt;
       });
   Future<void> rejectUpdate(String id, int proposalVersion) =>

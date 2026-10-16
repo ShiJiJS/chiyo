@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:info_core/info_core.dart';
 import 'organization.dart';
 import 'templates.dart';
+import 'recycle.dart';
 
 class InformationLibrary extends StatefulWidget {
   const InformationLibrary({super.key, required this.owner, this.refresh});
@@ -124,6 +125,17 @@ class _InformationLibraryState extends State<InformationLibrary> {
       actions: [
         TextButton(
           onPressed: () async {
+            await Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => RecyclePage(owner: widget.owner),
+              ),
+            );
+            if (mounted) setState(() {});
+          },
+          child: const Text('回收站'),
+        ),
+        TextButton(
+          onPressed: () async {
             await manageOrganization(context, widget.owner);
             if (mounted) setState(() {});
           },
@@ -194,6 +206,18 @@ class _InformationLibraryState extends State<InformationLibrary> {
               title: Text(item.name),
               subtitle: Text(item.description),
               children: [
+                TextButton.icon(
+                  onPressed: () async {
+                    await confirmInformationDeletion(
+                      context,
+                      widget.owner,
+                      item,
+                    );
+                    if (mounted) setState(() {});
+                  },
+                  icon: const Icon(Icons.delete_outline),
+                  label: const Text('删除整条信息'),
+                ),
                 Text(directoryPath(widget.owner, item.directoryId)),
                 Wrap(
                   children: [
@@ -221,10 +245,28 @@ class _InformationLibraryState extends State<InformationLibrary> {
                   ListTile(
                     title: Text(field.name),
                     subtitle: SelectableText(field.value),
-                    trailing: IconButton(
-                      tooltip: '修正值',
-                      icon: const Icon(Icons.edit_outlined),
-                      onPressed: () => _correct(item, field),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          tooltip: '修正值',
+                          icon: const Icon(Icons.edit_outlined),
+                          onPressed: () => _correct(item, field),
+                        ),
+                        IconButton(
+                          tooltip: '删除字段',
+                          icon: const Icon(Icons.delete_outline),
+                          onPressed: () async {
+                            await confirmInformationDeletion(
+                              context,
+                              widget.owner,
+                              item,
+                              fieldId: field.id,
+                            );
+                            if (mounted) setState(() {});
+                          },
+                        ),
+                      ],
                     ),
                   ),
               ],

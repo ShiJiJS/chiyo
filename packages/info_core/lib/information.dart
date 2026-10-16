@@ -4,6 +4,7 @@ import 'templates.dart';
 import 'history.dart';
 import 'import_proposals.dart';
 import 'update_proposals.dart';
+import 'recycle.dart';
 
 enum FieldKind { structured, textNote }
 
@@ -88,8 +89,22 @@ abstract interface class InformationRepository {
   Future<void> confirmUpdateProposal(
     UpdateProposal proposal,
     InformationItem item,
-    InformationRevision previous,
-  );
+    InformationRevision previous, {
+    List<RecycleEntry> recycled = const [],
+    List<RecycleFact> facts = const [],
+  });
+  List<RecycleEntry> get recycleEntries;
+  List<RecycleFact> get recycleFacts;
+  List<DeleteProposal> get deleteProposals;
+  Future<void> saveDeleteProposal(DeleteProposal proposal);
+  Future<void> commitRecycleChange({
+    required String itemId,
+    InformationItem? item,
+    InformationRevision? previous,
+    required List<RecycleEntry> entries,
+    required List<RecycleFact> facts,
+    DeleteProposal? proposal,
+  });
 }
 
 class MemoryInformationRepository implements InformationRepository {
@@ -118,6 +133,43 @@ class MemoryInformationRepository implements InformationRepository {
   }
 
   final _settings = <String, int>{};
+  final _recycle = <String, RecycleEntry>{};
+  final _recycleFacts = <RecycleFact>[];
+  final _deletes = <String, DeleteProposal>{};
+  @override
+  List<RecycleEntry> get recycleEntries => List.unmodifiable(_recycle.values);
+  @override
+  List<RecycleFact> get recycleFacts => List.unmodifiable(_recycleFacts);
+  @override
+  List<DeleteProposal> get deleteProposals =>
+      List.unmodifiable(_deletes.values);
+  @override
+  Future<void> saveDeleteProposal(DeleteProposal proposal) async {
+    _deletes[proposal.id] = proposal;
+  }
+
+  @override
+  Future<void> commitRecycleChange({
+    required String itemId,
+    InformationItem? item,
+    InformationRevision? previous,
+    required List<RecycleEntry> entries,
+    required List<RecycleFact> facts,
+    DeleteProposal? proposal,
+  }) async {
+    if (item == null) {
+      _items.remove(itemId);
+    } else {
+      _items[itemId] = item;
+    }
+    if (previous != null) _revisions.add(previous);
+    for (final entry in entries) {
+      _recycle[entry.id] = entry;
+    }
+    _recycleFacts.addAll(facts);
+    if (proposal != null) _deletes[proposal.id] = proposal;
+  }
+
   final _directories = <String, InformationDirectory>{};
   final _tags = <String, InformationTag>{};
   @override
@@ -158,11 +210,17 @@ class MemoryInformationRepository implements InformationRepository {
   Future<void> confirmUpdateProposal(
     UpdateProposal proposal,
     InformationItem item,
-    InformationRevision previous,
-  ) async {
+    InformationRevision previous, {
+    List<RecycleEntry> recycled = const [],
+    List<RecycleFact> facts = const [],
+  }) async {
     _items[item.id] = item;
     _revisions.add(previous);
     _updates[proposal.id] = proposal;
+    for (final entry in recycled) {
+      _recycle[entry.id] = entry;
+    }
+    _recycleFacts.addAll(facts);
   }
 
   @override

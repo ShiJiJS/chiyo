@@ -160,6 +160,11 @@ class _InformationAppState extends State<InformationApp>
       ),
       body: Column(
         children: [
+          if (widget.runtime?.recycleCleanupFailed == true)
+            const Padding(
+              padding: EdgeInsets.all(8),
+              child: Text('回收站到期清理暂时失败，请检查存储。到期内容无法恢复，应用会再次尝试清理。'),
+            ),
           if (widget.runtime?.shutdownFailed == true)
             const Padding(
               padding: EdgeInsets.all(8),
