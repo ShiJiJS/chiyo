@@ -11,7 +11,7 @@ Future<void> main(List<String> args) async {
     if (args.isNotEmpty) throw const FormatException();
     final bytes = <int>[];
     await for (final chunk in stdin) {
-      if (bytes.length + chunk.length > 16384) throw const FormatException();
+      if (bytes.length + chunk.length > 262144) throw const FormatException();
       bytes.addAll(chunk);
     }
     final input = jsonDecode(utf8.decode(bytes)) as Map<String, dynamic>;

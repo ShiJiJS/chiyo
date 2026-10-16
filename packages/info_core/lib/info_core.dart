@@ -5,10 +5,13 @@ import 'information.dart';
 import 'templates.dart';
 import 'history.dart';
 export 'history.dart';
+import 'import_proposals.dart';
 export 'information.dart';
 export 'templates.dart';
+export 'import_proposals.dart';
 part 'organization_access.dart';
 part 'history_access.dart';
+part 'import_access.dart';
 
 class AccessFailure implements Exception {
   const AccessFailure(this.status);
