@@ -15,11 +15,17 @@ class IsolatedDesktopFixture {
   InformationService get service => bootstrap.library!.service;
   int get port => bootstrap.boundPort!;
 
-  static Future<IsolatedDesktopFixture> start() async {
+  /// Normal native tests retain the inert OS adapter. Only an explicit manual
+  /// probe supplies a native platform; preparation runs before runtime request
+  /// subscriptions so preloading a queue never emits a burst of OS balloons.
+  static Future<IsolatedDesktopFixture> start({
+    DesktopPlatform? platform,
+    Future<void> Function(InformationService)? prepareLibrary,
+  }) async {
     final root = await Directory.systemTemp.createTemp('aim-native-approval-');
     final bootstrap = DesktopBootstrap(
       port: 0,
-      platform: _AcceptancePlatform(),
+      platform: platform ?? _AcceptancePlatform(),
       openLibrary: () async {
         final repository = await EncryptedInformationRepository.open(
           root.path,
@@ -35,6 +41,7 @@ class IsolatedDesktopFixture {
               FieldInput('Username', 'Fictional login', 'native-demo-user'),
             ],
           );
+          await prepareLibrary?.call(service);
         } catch (_) {
           await service.close();
           await repository.close();

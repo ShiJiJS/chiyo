@@ -94,3 +94,33 @@ $cmake = ((Select-String -LiteralPath apps/desktop/build/windows/x64/CMakeCache.
 最终独立定向复核已收口：scope组锚265/366/467/568/669、placeholder374、关闭叉1042–1055；handled期限555/595与摘要线616；整理期限455/495、完成摘要线516均对应。mono常规/整理/离线未见明显主题渗色。主Agent已实际查看scope、complete、mono、empty、audit及200%首末字段，并以HTML为参考做最后compare；不将差分指标当通过评分。结论只限本票已提供状态，不推断全软件已还原。
 
 最后源码的Windows原生闭环再次通过（`.scratch/d1-final-source-native.log`），包含真实CLI申请/范围/默认8h/重复读取/拒绝未批/撤销、一次整理与无改动结束、真实结果入口及加密库主题重开；最终命令和范围见上文。主Agent接下来在主集成独立复验。本票未执行人工系统气泡点击，不能据此关闭通知定位验收条目。
+
+## 显式手动 Windows 通知探针（后续验收入口）
+
+主集成 `1852f8c` 已合并回独立工作树。新增入口只涉及 integration test、隔离 fixture 适配参数和脚本，不改生产 UI 或通知协议。`IsolatedDesktopFixture.start` 默认仍用惰性平台；只有显式手动探针注入 `NativeDesktopPlatform`。可选 `prepareLibrary` 在 runtime 订阅请求事件前预置25条合成请求，不会向真实 Shell 连发25条通知。
+
+探针选择真实排序中首屏以外的申请，先留下无匹配搜索并切至信息库，隐藏本隔离 runner，再只投递该申请的一条真实系统气泡。输出 `D1_NOTIFICATION_READY requestId=… remainingSeconds=…` 后由操作人员点击气泡；从投递起最多60秒等待。只有原生回调带回同一 ID、`runtime.openRequestId`/revision 更新、实际详情 `detail-<ID>` 和队列选中目标可见、用途与目标吻合且旧搜索清空，才输出 `D1_NOTIFICATION_VERIFIED`。没有直接调用 `handleEvent`、伪造 MethodChannel 回调或设置 `openedRequestId`。Shell拒绝、通知不可用和60秒无真实点击都明确失败，不作为验收通过。
+
+```powershell
+# cwd C:\Project\network_config\info-manage-worktrees\23-workspace
+# 必须先安排一次操作人员可点击的空窗；未传 -Run 时脚本直接拒绝启动。
+./scripts/test-windows-notification-manual.ps1 -FlutterBin C:\Users\Todoki\.local\share\flutter\bin -Run
+```
+
+该脚本只对专用 integration test 传 `D1_MANUAL_NOTIFICATION=true`；不带 define 的测试默认跳过，不由常规 `check.ps1` 或 `test-windows-native.ps1` 执行。使用临时 SQLCipher/DPAPI 目录与 port0，结束沿原 fixture 路径边界校验清理；不打开默认用户库、不改系统通知权限/设置，不隐藏或关闭已有用户 app。
+
+准备阶段已通过 `flutter analyze --no-pub`、PowerShell AST 语法检查和 `git diff --check`。此记录时尚未启动真实气泡探针，等待主Agent安排空窗；上述静态检查不是人工通知点击证据。
+
+### 2026-10-17 第一次实际尝试：未验成功
+
+主Agent确认完整检查/原生窗口空窗后，执行上述带 `-Run` 的命令。真实 Windows runner 编译成功，Shell `notify` 返回 true 并输出 `D1_NOTIFICATION_READY`（剩余59秒）。从投递起60秒内未收到携带目标 ID 的真实点击，`runtime.openRequestId` 仍为 null；断言明确失败，测试与脚本非零退出，没有输出 `D1_NOTIFICATION_VERIFIED`。原始日志保存在 [windows-notification-attempt-2026-10-17.log](evidence/23-workspace/windows-notification-attempt-2026-10-17.log)。
+
+这证明本次探针实际运行、Native adapter 接受一次投递及等待超时，不能证明气泡已展示或已点击，也不能据此断言系统通知权限关闭。没有补注入回调使测试通过，没有自动循环重试。fixture 完成停止/关闭/临时目录删除，进程与 `aim-native-approval-*` 目录检查均无本次残留；没有触碰用户 app 或默认 profile。交付前另合并了主集成文档基线 `5842e6a`。
+
+第一次的实际人工观察由主Agent完成：仅在 `DISPATCH` 后、`READY` 确认前调用一次 `Sky.list_windows`，列表未出现通知窗口或已隐藏 runner；没有发出任何点击。这一时间点和窗口枚举不足以判定 Shell 气泡是否展示，不能作为系统权限故障证据。
+
+### 2026-10-17 第二次也是本轮最后一次尝试：未验成功
+
+主Agent明确授权第二次有界尝试，通知投递/等待/断言逻辑保持相同。真实 runner 再次编译成功，Shell accepted 并输出 `D1_NOTIFICATION_READY`（剩余59秒）；主Agent收到 READY 后立即连续两次调用 `Sky.list_windows`、一次 `list_apps`，均未获得“信息访问授权”气泡或通知宿主的可操作窗口，主动隐藏的 runner 也未返回。没有执行任何点击，也没有猜坐标操作未观测的 toast；这些枚举结果不等于 OS 未展示，更不能据此判断系统权限故障。
+
+本次自然等待满60秒，`runtime.openRequestId` 仍为 null，测试/脚本明确失败且没有 `D1_NOTIFICATION_VERIFIED`。独立日志见 [windows-notification-attempt-2-2026-10-17.log](evidence/23-workspace/windows-notification-attempt-2-2026-10-17.log)；两份日志仅规范了行末空白，未改事件/断言内容。运行结束无本隔离 runner 进程或临时目录残留。没有继续自动重试、修改系统设置/权限或伪造回调，真实人工 Windows 系统气泡点击保留在整体平台验收中，后续可沿本显式入口继续；本轮没有将此项判定通过。
