@@ -279,7 +279,7 @@ class OwnerAccess {
   Future<void> _writes = Future.value();
   Future<T> _serialize<T>(Future<T> Function() action) {
     final result = _writes.then((_) => action());
-    _writes = result.then<void>((_) {}, onError: (Object _, StackTrace __) {});
+    _writes = result.then<void>((_) {}, onError: (Object _, StackTrace _) {});
     return result;
   }
 
@@ -329,8 +329,9 @@ class OwnerAccess {
   Future<InformationItem> correctValue(FieldRef ref, String value) =>
       _serialize(() async {
         if (_service._closed) throw const AccessFailure('service_unavailable');
-        if (value.length > 1000000 || _service._field(ref) == null)
+        if (value.length > 1000000 || _service._field(ref) == null) {
           throw const AccessFailure('invalid_information');
+        }
         final previous = information.firstWhere((i) => i.id == ref.itemId);
         final item = InformationItem(
           previous.id,

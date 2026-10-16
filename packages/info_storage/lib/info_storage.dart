@@ -77,7 +77,7 @@ class EncryptedInformationRepository implements InformationRepository {
         if (!version.startsWith('4.'))
           throw const StorageFailure('cipher_unavailable');
       } finally {
-        probe.dispose();
+        probe.close();
       }
       native = sqlite.sqlite3.open(file.path);
       final hex = key.map((b) => b.toRadixString(16).padLeft(2, '0')).join();
@@ -94,7 +94,7 @@ class EncryptedInformationRepository implements InformationRepository {
       return repository;
     } catch (error) {
       if (db != null) await db.close();
-      native?.dispose();
+      native?.close();
       await lock?.close();
       _openDirectories.remove(canonical);
       if (error is StorageFailure) rethrow;

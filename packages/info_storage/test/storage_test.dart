@@ -36,7 +36,7 @@ void main() {
       "INSERT INTO information_fields VALUES('field-1','item-1','Old field','description','fictional old content')",
     );
     fixture.execute('PRAGMA user_version = 1');
-    fixture.dispose();
+    fixture.close();
     var store = await EncryptedInformationRepository.open(directory.path, keys);
     final service = InformationService(repository: store);
     expect(service.owner.information.single.version, 1);
