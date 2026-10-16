@@ -47,6 +47,32 @@ class MainFlutterWindow: NSWindow {
       } else { result(FlutterMethodNotImplemented) }
     }
 
+    let backupFiles = FlutterMethodChannel(name: "agent_info_manage/backup_files", binaryMessenger: flutterViewController.engine.binaryMessenger)
+    backupFiles.setMethodCallHandler { [weak self] call, result in
+      guard let window = self else {
+        result(FlutterError(code: "file_dialog_failed", message: "Window unavailable", details: nil)); return
+      }
+      if call.method == "backupInput" {
+        let panel = NSOpenPanel()
+        panel.canChooseDirectories = false
+        panel.canChooseFiles = true
+        panel.allowsMultipleSelection = false
+        panel.allowedFileTypes = ["aimbackup"]
+        panel.beginSheetModal(for: window) { response in
+          result(response == .OK ? panel.url?.path : nil)
+        }
+      } else if call.method == "backupOutput" || call.method == "recoveryKeyOutput" {
+        let recovery = call.method == "recoveryKeyOutput"
+        let panel = NSSavePanel()
+        panel.allowedFileTypes = [recovery ? "txt" : "aimbackup"]
+        panel.nameFieldStringValue = recovery ? "agent-info-recovery-key.txt" : "information-backup.aimbackup"
+        panel.canCreateDirectories = true
+        panel.beginSheetModal(for: window) { response in
+          result(response == .OK ? panel.url?.path : nil)
+        }
+      } else { result(FlutterMethodNotImplemented) }
+    }
+
     super.awakeFromNib()
   }
 }
