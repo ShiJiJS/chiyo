@@ -3,9 +3,71 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:info_core/info_core.dart';
 import 'package:info_desktop/credentials.dart';
 import 'package:info_desktop/information_workspace.dart';
+import 'package:info_desktop/credential_dialogs.dart';
 import 'package:info_desktop/ui.dart';
 
+class FailingCredentialRepository extends MemoryInformationRepository {
+  int writes = 0;
+  @override
+  Future<void> commitCredentials(
+    List<ManagedCredential> credentials,
+    List<CredentialMaterial> materials,
+  ) async {
+    writes++;
+    throw const AccessFailure('synthetic_write_failure');
+  }
+}
+
 void main() {
+  testWidgets(
+    '1280 failure keeps complete save action reachable without shrinking the form',
+    (tester) async {
+      tester.view.physicalSize = const Size(1280, 800);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final repository = FailingCredentialRepository();
+      final service = InformationService(repository: repository);
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: informationTheme(),
+          home: Builder(
+            builder: (context) => Scaffold(
+              body: TextButton(
+                onPressed: () => showDialog<void>(
+                  context: context,
+                  builder: (_) => CredentialEditor(owner: service.owner),
+                ),
+                child: const Text('open'),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.byKey(const ValueKey('credential-name')),
+        'Synthetic',
+      );
+      await tester.enterText(
+        find.byKey(const ValueKey('credential-secret')),
+        'fictional',
+      );
+      await tester.pumpAndSettle();
+      final save = find.byKey(const ValueKey('save-credential'));
+      await tester.tap(save);
+      await tester.pumpAndSettle();
+      expect(repository.writes, 1);
+      final bottom = tester.getRect(save).bottomCenter - const Offset(0, 2);
+      await tester.tapAt(bottom);
+      await tester.pumpAndSettle();
+      expect(repository.writes, 2);
+      expect(service.owner.credentials, isEmpty);
+      await tester.pumpWidget(const SizedBox());
+      await tester.runAsync(service.close);
+    },
+  );
   testWidgets(
     '200 percent credential actions have a visible horizontal scrollbar and remain operable',
     (tester) async {

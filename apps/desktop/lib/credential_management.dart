@@ -133,17 +133,34 @@ class _CredentialManagementState extends State<CredentialManagement> {
   @override
   Widget build(BuildContext context) {
     final p = UiPalette.of(context), owner = widget.owner;
-    Widget paragraph(String text) => Padding(
+    Widget paragraph(String text, {String? leadingStrong}) => Padding(
       padding: const EdgeInsets.only(bottom: 14),
       child: Align(
         alignment: Alignment.centerLeft,
         child: ConstrainedBox(
           constraints: BoxConstraints(maxWidth: prototypeCh(context, 14, 48)),
-          child: Text(text, style: prototypeText(context, 14, height: 1.85)),
+          child: Text.rich(
+            TextSpan(
+              children: [
+                if (leadingStrong != null)
+                  TextSpan(
+                    text: leadingStrong,
+                    style: const TextStyle(fontWeight: FontWeight.w700),
+                  ),
+                TextSpan(text: text),
+              ],
+            ),
+            style: prototypeText(context, 14, height: 1.85),
+          ),
         ),
       ),
     );
-    Widget fact(String title, String value, {bool code = false}) => Container(
+    Widget fact(
+      String title,
+      String value, {
+      bool code = false,
+      bool strong = false,
+    }) => Container(
       padding: const EdgeInsets.symmetric(vertical: 13),
       decoration: BoxDecoration(
         border: Border(bottom: BorderSide(color: p.line)),
@@ -161,6 +178,7 @@ class _CredentialManagementState extends State<CredentialManagement> {
                 context,
                 13,
                 family: code ? 'Consolas' : null,
+                weight: strong ? FontWeight.w700 : FontWeight.w400,
               ),
             ),
           ),
@@ -178,7 +196,8 @@ class _CredentialManagementState extends State<CredentialManagement> {
         mainAxisSize: MainAxisSize.min,
         children: [
           paragraph(
-            '${c.name} · 当前版本 ${c.version} · ${credentialStatus(owner, c)}',
+            ' · 当前版本 ${c.version} · ${credentialStatus(owner, c)}',
+            leadingStrong: c.name,
           ),
           if (action == 'rotate') ...[
             if (c.form == CredentialForm.string)
@@ -275,9 +294,28 @@ class _CredentialManagementState extends State<CredentialManagement> {
               ),
             ),
             fact('公开引用', '${c.id} · v${c.version}', code: true),
-            fact('公开名称与用途', '${c.name} · ${c.publicPurpose}'),
+            fact('公开名称与用途', '${c.name} · ${c.publicPurpose}', strong: true),
             fact('公开形式与状态', '${c.form.name} · ${credentialStatus(owner, c)}'),
-            credentialHelp(context, '默认关闭；不披露原文、导入源路径和私有备注。关联某信息不自动公开。'),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxWidth: prototypeCh(context, 13, 48),
+                  ),
+                  child: Text(
+                    '默认关闭；不披露原文、导入源路径和私有备注。关联某信息不自动公开。',
+                    style: prototypeText(
+                      context,
+                      13,
+                      color: p.muted,
+                      height: 1.85,
+                    ),
+                  ),
+                ),
+              ),
+            ),
             credentialInput(
               context,
               '到期时间',
@@ -312,7 +350,6 @@ class _CredentialManagementState extends State<CredentialManagement> {
           if (action == 'delete') ...[
             paragraph('移入凭据回收站 30 天，待启动许可立即失效。关联信息不会删除；离线备份中的副本仍可能保留。'),
             fact('关联信息', '${owner.informationForCredential(c.id).length} 条'),
-            credentialHelp(context, '凭据使用流程尚未接入；本次不报告尚未实现的使用许可数量。'),
           ],
           if (action == 'restore')
             paragraph('恢复为停用状态并建立新版本；重新启用并重新申请后才可使用。旧许可不会恢复。'),

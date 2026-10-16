@@ -17,6 +17,8 @@ class PrototypeDialog extends StatelessWidget {
     this.bottomPadding,
     this.width,
     this.simpleFlow = false,
+    this.actionDivider = true,
+    this.actionPaddingTop = 16,
   });
   final String title;
   final Widget body;
@@ -26,6 +28,8 @@ class PrototypeDialog extends StatelessWidget {
   final double scrollGutter;
   final double? bottomPadding;
   final double? width;
+  final bool actionDivider;
+  final double actionPaddingTop;
 
   /// Template-based credential flows keep the original unruled actions and
   /// nested bottom spacing; panel-based editors retain the separated footer.
@@ -116,9 +120,11 @@ class PrototypeDialog extends StatelessWidget {
                 ),
                 if (actions.isNotEmpty)
                   Container(
-                    padding: EdgeInsets.only(top: simpleFlow ? 0 : 16),
+                    padding: EdgeInsets.only(
+                      top: simpleFlow ? 0 : actionPaddingTop,
+                    ),
                     decoration: BoxDecoration(
-                      border: simpleFlow
+                      border: simpleFlow || !actionDivider
                           ? null
                           : Border(top: BorderSide(color: p.line)),
                     ),

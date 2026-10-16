@@ -76,6 +76,7 @@ class _CredentialLibraryState extends State<CredentialLibrary> {
     FontWeight weight = FontWeight.w400,
     double height = 1.5,
     String? family,
+    double letterSpacing = 0,
     int? lines,
   }) => Text(
     text,
@@ -88,7 +89,7 @@ class _CredentialLibraryState extends State<CredentialLibrary> {
       weight: weight,
       height: height,
       family: family,
-    ),
+    ).copyWith(letterSpacing: letterSpacing),
   );
   Widget button(
     String text,
@@ -812,6 +813,7 @@ class _CredentialLibraryState extends State<CredentialLibrary> {
                                           : '•••• •••• •••• ••••',
                                       15,
                                       family: 'Consolas',
+                                      letterSpacing: 1,
                                       height: 1.2,
                                     ),
                                     const SizedBox(height: 7),
@@ -849,14 +851,53 @@ class _CredentialLibraryState extends State<CredentialLibrary> {
                         if (owner.credentialAvailability(c) !=
                             CredentialAvailability.available)
                           Container(
-                            margin: const EdgeInsets.only(top: 18),
-                            padding: const EdgeInsets.all(16),
-                            color: p.noticeWarningBackground,
-                            child: t(
-                              '此凭据当前不可使用\n过期或停用的凭据不能批准新的使用申请。',
-                              13,
-                              color: p.noticeWarningInk,
-                              height: 1.8,
+                            key: const ValueKey(
+                              'credential-unavailable-notice',
+                            ),
+                            margin: const EdgeInsets.only(top: 22),
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 16,
+                              horizontal: 19,
+                            ),
+                            decoration: BoxDecoration(
+                              color: p.noticeWarningBackground,
+                              border: Border.all(color: p.noticeWarningBorder),
+                            ),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 3),
+                                  child: PrototypeIcon(
+                                    PrototypeIconGlyph.clock,
+                                    size: 18,
+                                    color: p.accent,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      t(
+                                        '此凭据当前不可使用',
+                                        13,
+                                        color: p.noticeWarningInk,
+                                        height: 1.9,
+                                        weight: FontWeight.w700,
+                                      ),
+                                      const SizedBox(height: 3),
+                                      t(
+                                        '过期或停用的凭据不能批准新的使用申请。',
+                                        13,
+                                        color: p.noticeWarningInk,
+                                        height: 1.9,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         const SizedBox(height: 20),

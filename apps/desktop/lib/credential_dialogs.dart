@@ -220,6 +220,8 @@ class _CredentialEditorState extends State<CredentialEditor> {
       },
       child: PrototypeDialog(
         width: 650,
+        actionDivider: false,
+        actionPaddingTop: 22,
         title: '添加凭据',
         onClose: _busy ? null : _close,
         body: Column(
@@ -362,33 +364,28 @@ class _CredentialEditorState extends State<CredentialEditor> {
               '别名可用字母、数字和下划线；环境变量建议用大写字母。这里只保存建议；每次申请另行声明参数位置或目标程序认识的环境变量名。',
             ),
             if (_error != null) credentialFlowError(context, _error!),
-            const SizedBox(height: 22),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                TextButton(
-                  onPressed: _busy ? null : _close,
-                  style: prototypeSecondary(context),
-                  child: const Text('取消'),
-                ),
-                const SizedBox(width: 12),
-                TextButton(
-                  key: const ValueKey('save-credential'),
-                  onPressed: !_busy && ready ? _save : null,
-                  style: prototypePrimary(context).copyWith(
-                    foregroundColor: WidgetStatePropertyAll(p.paper),
-                    backgroundColor: WidgetStateProperty.resolveWith(
-                      (states) => states.contains(WidgetState.disabled)
-                          ? Color.lerp(p.paper, p.accent, .45)
-                          : p.accent,
-                    ),
-                  ),
-                  child: Text(_busy ? (_importing ? '导入中…' : '保存中…') : '保存凭据'),
-                ),
-              ],
-            ),
           ],
         ),
+        actions: [
+          TextButton(
+            onPressed: _busy ? null : _close,
+            style: prototypeSecondary(context),
+            child: const Text('取消'),
+          ),
+          TextButton(
+            key: const ValueKey('save-credential'),
+            onPressed: !_busy && ready ? _save : null,
+            style: prototypePrimary(context).copyWith(
+              foregroundColor: WidgetStatePropertyAll(p.paper),
+              backgroundColor: WidgetStateProperty.resolveWith(
+                (states) => states.contains(WidgetState.disabled)
+                    ? Color.lerp(p.paper, p.accent, .45)
+                    : p.accent,
+              ),
+            ),
+            child: Text(_busy ? (_importing ? '导入中…' : '保存中…') : '保存凭据'),
+          ),
+        ],
       ),
     );
   }
@@ -446,17 +443,43 @@ Future<void> manageCredentialLinks(
                     SizedBox(
                       width: 17,
                       height: 17,
-                      child: PrototypeCheck(
-                        size: 17,
-                        key: ValueKey('credential-link-${c.id}'),
-                        value: selected.contains(c.id),
-                        onChanged: busy
-                            ? null
-                            : (v) => change(
-                                () => v == true
-                                    ? selected.add(c.id)
-                                    : selected.remove(c.id),
-                              ),
+                      child: Theme(
+                        data:
+                            owner.credentialAvailability(c) !=
+                                    CredentialAvailability.available &&
+                                !selected.contains(c.id)
+                            ? Theme.of(context).copyWith(
+                                extensions: [
+                                  UiPalette.of(
+                                    context,
+                                  ).copyWith(muted: const Color(0xffb8b8b8)),
+                                ],
+                                checkboxTheme: Theme.of(context).checkboxTheme
+                                    .copyWith(
+                                      fillColor:
+                                          WidgetStateProperty.resolveWith(
+                                            (states) =>
+                                                states.contains(
+                                                  WidgetState.selected,
+                                                )
+                                                ? null
+                                                : const Color(0xffefefef),
+                                          ),
+                                    ),
+                              )
+                            : Theme.of(context),
+                        child: PrototypeCheck(
+                          size: 17,
+                          key: ValueKey('credential-link-${c.id}'),
+                          value: selected.contains(c.id),
+                          onChanged: busy
+                              ? null
+                              : (v) => change(
+                                  () => v == true
+                                      ? selected.add(c.id)
+                                      : selected.remove(c.id),
+                                ),
+                        ),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -480,9 +503,24 @@ Future<void> manageCredentialLinks(
                         ],
                       ),
                     ),
-                    Text(
-                      credentialStatus(owner, c),
-                      style: prototypeText(context, 11),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 2,
+                        horizontal: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: UiPalette.of(context).paper,
+                        border: Border.all(color: UiPalette.of(context).line),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        credentialStatus(owner, c),
+                        style: prototypeText(
+                          context,
+                          11,
+                          color: UiPalette.of(context).muted,
+                        ),
+                      ),
                     ),
                   ],
                 ),
