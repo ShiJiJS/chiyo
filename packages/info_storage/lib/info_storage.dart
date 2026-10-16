@@ -5,7 +5,9 @@ import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:info_core/info_core.dart';
 import 'package:sqlite3/sqlite3.dart' as sqlite;
+import 'backup_publish.dart';
 export 'platform_keys.dart';
+part 'backups.dart';
 
 class StorageFailure implements Exception {
   const StorageFailure(this.code);
@@ -43,6 +45,7 @@ class EncryptedInformationRepository implements InformationRepository {
   bool _closed = false;
   static final _openDirectories = <String>{};
   late final String _directory;
+  late final backups = InformationBackups._(this);
 
   static Future<EncryptedInformationRepository> open(
     String directory,
@@ -779,6 +782,7 @@ class _InformationDatabase extends GeneratedDatabase {
         'CREATE TABLE information_fields(id TEXT PRIMARY KEY,item_id TEXT NOT NULL REFERENCES information_items(id),name TEXT NOT NULL,description TEXT NOT NULL,value TEXT NOT NULL,version INTEGER NOT NULL DEFAULT 1,kind TEXT NOT NULL DEFAULT \'structured\')',
       );
       await _organizationSchema();
+      await _backupSchema();
     },
     onUpgrade: (_, from, to) async {
       if (from < 1 || to != 9) throw const StorageFailure('unsupported_schema');
@@ -801,7 +805,7 @@ class _InformationDatabase extends GeneratedDatabase {
             'ALTER TABLE information_fields ADD COLUMN kind TEXT NOT NULL DEFAULT \'structured\'',
           );
         }
-        // Schema 5 is reserved for the independent backup configuration.
+        if (from < 5) await _backupSchema();
         if (from < 6) await _createProposals();
         if (from < 7) await _createAudit();
         if (from < 8) await _createUpdates();
@@ -811,6 +815,9 @@ class _InformationDatabase extends GeneratedDatabase {
     beforeOpen: (details) async {
       if (details.versionNow > schemaVersion)
         throw const StorageFailure('unsupported_schema');
+      // Some pre-merge development schema 6 databases reserved version 5 but
+      // did not create its backup table. Backfill only this additive structure.
+      await _backupSchema();
       // An unpublished development schema 8 preceded the reserved audit
       // tables. Backfill only after rejecting unknown future versions.
       await _createAudit();
@@ -858,6 +865,9 @@ class _InformationDatabase extends GeneratedDatabase {
     'CREATE TABLE field_templates(id TEXT PRIMARY KEY,name TEXT NOT NULL,description TEXT NOT NULL,version INTEGER NOT NULL,fields_json TEXT NOT NULL)',
   );
 
+  Future<void> _backupSchema() => customStatement(
+    'CREATE TABLE IF NOT EXISTS backup_configuration(singleton INTEGER PRIMARY KEY CHECK(singleton=1),recovery_key TEXT NOT NULL)',
+  );
   Future<void> _createAudit() async {
     await customStatement(
       'CREATE TABLE IF NOT EXISTS grant_history(id TEXT PRIMARY KEY,approved_at INTEGER NOT NULL,payload TEXT NOT NULL)',
