@@ -5,6 +5,7 @@ import 'history.dart';
 import 'import_proposals.dart';
 import 'update_proposals.dart';
 import 'recycle.dart';
+import 'revisions.dart';
 
 enum FieldKind { structured, textNote }
 
@@ -81,6 +82,8 @@ abstract interface class InformationRepository {
   );
   List<UpdateProposal> get updateProposals;
   List<InformationRevision> get informationRevisions;
+  List<RevisionPurgeFact> get revisionPurgeFacts;
+  Future<void> pruneInformationRevisions(DateTime cutoff, DateTime purgedAt);
   Future<void> saveUpdateProposal(UpdateProposal proposal);
   Future<void> saveInformationRevision(
     InformationItem item,
@@ -186,6 +189,25 @@ class MemoryInformationRepository implements InformationRepository {
   final _proposals = <String, ImportProposal>{};
   final _updates = <String, UpdateProposal>{};
   final _revisions = <InformationRevision>[];
+  final _revisionPurges = <RevisionPurgeFact>[];
+  @override
+  List<RevisionPurgeFact> get revisionPurgeFacts =>
+      List.unmodifiable(_revisionPurges);
+  @override
+  Future<void> pruneInformationRevisions(
+    DateTime cutoff,
+    DateTime purgedAt,
+  ) async {
+    for (final revision in _revisions.where(
+      (r) => !r.replacedAt.isAfter(cutoff),
+    )) {
+      _revisionPurges.add(
+        RevisionPurgeFact(revision.item.id, revision.item.version, purgedAt),
+      );
+    }
+    _revisions.removeWhere((r) => !r.replacedAt.isAfter(cutoff));
+  }
+
   @override
   List<UpdateProposal> get updateProposals =>
       List.unmodifiable(_updates.values);

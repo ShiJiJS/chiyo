@@ -13,11 +13,14 @@ export 'templates.dart';
 export 'import_proposals.dart';
 export 'update_proposals.dart';
 export 'recycle.dart';
+export 'revisions.dart';
+import 'revisions.dart';
 part 'organization_access.dart';
 part 'history_access.dart';
 part 'import_access.dart';
 part 'update_access.dart';
 part 'recycle_access.dart';
+part 'revision_access.dart';
 
 class AccessFailure implements Exception {
   const AccessFailure(this.status);
