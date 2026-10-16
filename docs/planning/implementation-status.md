@@ -42,6 +42,12 @@ Review totals: Standards 3 observations addressed (production acceptance still p
 
 The draft [PR #20](https://github.com/ShiJiJS/agent-info-manage/pull/20) remains an integration surface, not a completed release. All issues remain open. Later features—scope/duration editing, child-agent/end lifecycle, background notifications, organization/templates/import proposals, recovery, deletion/history and distribution—remain to be implemented. See [manual acceptance](../development/manual-acceptance.md) for concrete user-coordinated checks.
 
+## Next development batch: #5, #9, #10
+
+The user explicitly requested continuing dependent implementation on 2026-10-16. These tickets now build on the merged and headlessly verified #3 information-repository contract: #5 adjusts the approved scope/duration, #9 adds organization and public catalog search, and #10 adds field templates. Each uses an isolated worktree and TDD at the already agreed public-service/CLI/widget boundaries. Their start does not change the outstanding acceptance status of #3/#4/#6 or close any GitHub dependency.
+
+Implementation dependencies and acceptance gates are tracked separately so unavailable desktop/macOS checks do not force unrelated code work to stop. Only the implemented upstream contracts are reused; unsupported behavior is not assumed. Required real-platform checks remain a release gate.
+
 ## Completion rules
 
 The user has asked that further development not manipulate their visible desktop. Run headless tests and compile builds; leave native window interaction and user-visible Codex configuration checks for coordinated user validation. Do not launch the desktop application or native GUI tests without renewed agreement.
