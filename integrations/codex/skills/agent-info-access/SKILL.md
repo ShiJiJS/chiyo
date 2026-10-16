@@ -16,6 +16,10 @@ Public chat IDs are not credentials.
 1. Call `info-codex` with one JSON object on stdin, including `association` and
    `command`. No command-line arguments. The executable is in the reviewed
    integration bundle; do not locate it by reading private session files.
+   Send the JSON through the execution tool's stdin/input channel. Never embed
+   the private reference in a shell command or here-string: the parent shell's
+   arguments and command logs would then contain it. If the available tool
+   cannot provide stdin separately, stop and report that integration limitation.
 2. `catalog` returns only public metadata. Choose all fields needed for this
    task and send one `request` with `purpose` and `fields` (objects containing
    `itemId` and `fieldId`). Save the returned public `requestId` in chat context.
@@ -27,7 +31,7 @@ Public chat IDs are not credentials.
    Respect the user's actual selection. Use `read` with `requestId`, `itemId`,
    and `fieldId`. Each new process privately claims the existing grant before
    reading, so neither approval nor expiry is renewed by repeated use.
-5. Stop on `rejected`, `expired`, `cancelled`, `revoked`, or `unauthorized`.
+5. Stop on `denied`, `expired`, `cancelled`, `revoked`, or `unauthorized`.
    Explain the result and ask only if a new need justifies a new request. Do not
    automatically retry approval. `service_unavailable` means resume querying
    the same request after the service returns; after restart old associations

@@ -52,7 +52,8 @@ class EncryptedInformationRepository implements InformationRepository {
       var key = await keys.read();
       if (key == null) {
         if (exists) throw const StorageFailure('key_unavailable');
-        key = List.generate(32, (_) => Random.secure().nextInt(256));
+        final random = Random.secure();
+        key = List.generate(32, (_) => random.nextInt(256));
         await keys.create(key);
         final saved = await keys.read();
         if (saved == null ||
