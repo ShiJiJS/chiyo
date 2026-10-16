@@ -65,3 +65,20 @@ delegate 返回 invalid_request、SubagentStart 没有指引、桌面缺少结�
 
 实际 Codex 子 ID、上下文交付时机、fork 行为、根结束事件顺序/送达尚未实测。
 因此 #7 继续保留真实接入验收缺口。
+
+## 本次执行证据（2026-10-16，Windows）
+
+- 在合入 integration `e9f0954`（含 schema 10）后执行
+  `scripts/check.ps1 -FlutterBin C:/Users/Todoki/.local/share/flutter/bin -Offline`：
+  CLI 16、核心 58、SQLCipher 存储 23、Flutter widget/runtime 29，共 126 项通过；
+  各包 analyze 无问题。没有执行桌面 native integration runner 或启动应用。
+- `dart run tool/prepare_codex.dart ../../build/codex-ticket-7-v2` 生成新的本机 AOT
+  材料后，以 INFO_TEST_BUNDLE 指向该目录执行 codex_process_test：9 项通过，含
+  生成的完整 Windows PowerShell SessionEnd 命令在 3 秒 hook 时限内结束实际核心会话。
+  无响应端点在内部预算到期后返回失败，恢复端点后同一索引可重试结束。
+- 修正 release_smoke 工具中 read/close 的异步调用后，执行
+  `dart build cli --target=tool/release_smoke.dart --output=build/release-smoke-ticket7`
+  并运行生成的控制台程序：SQLCipher 4.19.0 community、当前用户 DPAPI、加密重开、
+  旧 token 失效、磁盘虚构标记扫描及旧 schema 迁移全部通过。此项不是 Flutter 启动。
+- 构建位置仅供开发测试，未安装 hook 或 Skill，未修改用户 Codex 配置。合入后应在
+  稳定主工作区重新生成 bundle；工作树构建中的绝对路径不用于实际安装。
