@@ -254,7 +254,7 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const ValueKey('nav-1')));
       await tester.pumpAndSettle();
-      final green = Theme.of(tester.element(find.text('新建信息'))).colorScheme;
+      final green = Theme.of(tester.element(find.byKey(const ValueKey('new-information')))).colorScheme;
       expect(green.primary, isNot(initial.primary));
       expect(green.surfaceContainerLow, isNot(initial.surfaceContainerLow));
       expect(service.owner.colorTheme, DesktopColorTheme.green);
@@ -263,7 +263,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.textContaining('主题未保存'), findsOneWidget);
       expect(
-        Theme.of(tester.element(find.text('新建信息'))).colorScheme.primary,
+        Theme.of(tester.element(find.byKey(const ValueKey('new-information')))).colorScheme.primary,
         green.primary,
       );
       repository.fail = false;

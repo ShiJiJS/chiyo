@@ -53,6 +53,16 @@ TextStyle prototypeText(
   color: color ?? UiPalette.of(context).ink,
 );
 
+/// CSS ch is the advance of the active font's zero, not a fixed em fraction.
+double prototypeCh(BuildContext context, double size, double count) {
+  final painter = TextPainter(
+    text: TextSpan(text: '0', style: prototypeText(context, size)),
+    textDirection: Directionality.of(context),
+    textScaler: MediaQuery.textScalerOf(context),
+  )..layout();
+  return painter.width * count;
+}
+
 /// Removes Material's implicit minimum size while retaining focus/keyboard behavior.
 ButtonStyle prototypeButton(
   BuildContext context, {

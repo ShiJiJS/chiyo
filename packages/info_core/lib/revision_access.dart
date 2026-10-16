@@ -1,6 +1,31 @@
 part of 'info_core.dart';
 
 extension OwnerRevisions on OwnerAccess {
+  String _currentRevisionFieldId(
+    String itemId,
+    String original,
+    InformationItem current,
+  ) {
+    var id = original;
+    final seen = <String>{};
+    final links = <String, Set<String>>{};
+    for (final fact in recycleFacts.where(
+      (f) => f.itemId == itemId && f.kind == RecycleFactKind.restored,
+    )) {
+      for (final entry in fact.restoredFieldIds.entries) {
+        links.putIfAbsent(entry.key, () => <String>{}).add(entry.value);
+      }
+    }
+    while (seen.length <= 10000 && seen.add(id)) {
+      if (current.fields.any((f) => f.id == id)) return id;
+      final next = links[id];
+      if (next == null) return original;
+      if (next.length != 1) throw const AccessFailure('revision_conflict');
+      id = next.single;
+    }
+    throw const AccessFailure('revision_conflict');
+  }
+
   Future<List<InformationRevision>> revisionsFor(String itemId) =>
       _serialize(() async {
         await _purgeRevisions();
@@ -27,6 +52,13 @@ extension OwnerRevisions on OwnerAccess {
         .firstOrNull;
     if (revision == null) throw const AccessFailure('revision_unavailable');
     final old = revision.item;
+    final resolved = {
+      for (final f in old.fields)
+        f.id: _currentRevisionFieldId(itemId, f.id, current),
+    };
+    if (resolved.values.toSet().length != resolved.length) {
+      throw const AccessFailure('revision_conflict');
+    }
     final restored = InformationItem(
       current.id,
       old.name,
@@ -35,14 +67,14 @@ extension OwnerRevisions on OwnerAccess {
       [
         for (final f in old.fields)
           InformationField(
-            f.id,
+            resolved[f.id]!,
             f.name,
             f.description,
             f.value,
             max(
                   f.version,
                   current.fields
-                          .where((c) => c.id == f.id)
+                          .where((c) => c.id == resolved[f.id])
                           .firstOrNull
                           ?.version ??
                       0,

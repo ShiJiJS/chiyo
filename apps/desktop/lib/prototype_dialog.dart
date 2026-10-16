@@ -1,0 +1,164 @@
+import 'dart:math' as math;
+import 'dart:ui';
+import 'package:flutter/material.dart';
+import 'prototype_ui.dart';
+import 'ui_palette.dart';
+
+/// The final round-05 modal surface. Callers own their draft and save behavior.
+class PrototypeDialog extends StatelessWidget {
+  const PrototypeDialog({
+    super.key,
+    required this.title,
+    required this.body,
+    this.actions = const [],
+    this.onClose,
+    this.flow = false,
+    this.scrollGutter = 15,
+  });
+  final String title;
+  final Widget body;
+  final List<Widget> actions;
+  final VoidCallback? onClose;
+  final bool flow;
+  final double scrollGutter;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = UiPalette.of(context);
+    final viewport = MediaQuery.sizeOf(context);
+    return BackdropFilter(
+      filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
+      child: Center(
+        child: Container(
+          width: math.min(flow ? 780 : 590, viewport.width - 48),
+          constraints: BoxConstraints(
+            maxHeight: flow ? viewport.height - 64 : viewport.height * .85,
+          ),
+          padding: EdgeInsets.fromLTRB(32, 28, flow ? 47 : 32, flow ? 34 : 28),
+          decoration: BoxDecoration(
+            color: p.paper,
+            border: Border.all(color: p.line),
+            borderRadius: BorderRadius.circular(9),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x33211a26),
+                offset: Offset(0, 20),
+                blurRadius: 80,
+              ),
+            ],
+          ),
+          child: Material(
+            type: MaterialType.transparency,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        title,
+                        style: prototypeText(
+                          context,
+                          23,
+                          family: 'SimSun',
+                          weight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                    Transform.translate(
+                      offset: const Offset(2, 3),
+                      child: SizedBox(
+                        width: 30,
+                        height: 30,
+                        child: TextButton(
+                          onPressed: onClose,
+                          style: prototypeButton(context, size: 22),
+                          child: const Text('×'),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: flow ? 13.5 : 20),
+                Flexible(
+                  child: SingleChildScrollView(
+                    padding: EdgeInsets.only(
+                      right: flow ? scrollGutter : 0,
+                      bottom: flow ? 16 : 0,
+                    ),
+                    child: body,
+                  ),
+                ),
+                if (actions.isNotEmpty)
+                  Container(
+                    padding: const EdgeInsets.only(top: 16),
+                    decoration: BoxDecoration(
+                      border: Border(top: BorderSide(color: p.line)),
+                    ),
+                    child: Wrap(
+                      alignment: WrapAlignment.end,
+                      spacing: 12,
+                      runSpacing: 8,
+                      children: actions,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+ButtonStyle prototypeSecondary(BuildContext context) => prototypeButton(
+  context,
+  size: 13,
+  foreground: UiPalette.of(context).ink,
+  background: UiPalette.of(context).paper,
+  padding: const EdgeInsets.symmetric(horizontal: 17, vertical: 11),
+  side: BorderSide(color: UiPalette.of(context).line),
+);
+
+ButtonStyle prototypePrimary(BuildContext context) => prototypeButton(
+  context,
+  size: 13,
+  weight: FontWeight.w600,
+  foreground: UiPalette.of(context).paper,
+  background: UiPalette.of(context).accent,
+  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 11),
+);
+
+Future<bool> prototypeConfirm(
+  BuildContext context, {
+  required String title,
+  required String message,
+  required String action,
+}) async =>
+    await showDialog<bool>(
+      context: context,
+      barrierColor: const Color(0x4f241b27),
+      builder: (dialogContext) => PrototypeDialog(
+        title: title,
+        onClose: () => Navigator.pop(dialogContext, false),
+        body: Padding(
+          padding: const EdgeInsets.only(bottom: 22),
+          child: Text(message, style: prototypeText(context, 14, height: 1.9)),
+        ),
+        actions: [
+          TextButton(
+            style: prototypeSecondary(context),
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('取消'),
+          ),
+          TextButton(
+            style: prototypePrimary(context),
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(action),
+          ),
+        ],
+      ),
+    ) ??
+    false;

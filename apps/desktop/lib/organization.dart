@@ -1,6 +1,8 @@
 import 'ui.dart';
 import 'package:flutter/material.dart';
 import 'package:info_core/info_core.dart';
+import 'prototype_dialog.dart';
+import 'prototype_ui.dart';
 
 String directoryPath(OwnerAccess owner, String? id) {
   final names = <String>[];
@@ -14,40 +16,52 @@ String directoryPath(OwnerAccess owner, String? id) {
   return names.isEmpty ? '未分类' : names.join(' / ');
 }
 
-Future<void> manageOrganization(BuildContext context, OwnerAccess owner) =>
-    showDialog<void>(
-      context: context,
-      builder: (_) => _OrganizationManager(owner: owner),
-    );
+Future<void> manageOrganization(
+  BuildContext context,
+  OwnerAccess owner, {
+  ValueChanged<String>? onSelectDirectory,
+}) => showDialog<void>(
+  context: context,
+  barrierColor: const Color(0x4f241b27),
+  builder: (_) =>
+      _OrganizationManager(owner: owner, onSelectDirectory: onSelectDirectory),
+);
 
 class _OrganizationManager extends StatefulWidget {
-  const _OrganizationManager({required this.owner});
+  const _OrganizationManager({required this.owner, this.onSelectDirectory});
   final OwnerAccess owner;
+  final ValueChanged<String>? onSelectDirectory;
   @override
   State<_OrganizationManager> createState() => _OrganizationManagerState();
 }
 
 class _OrganizationManagerState extends State<_OrganizationManager> {
+  final _newName = TextEditingController();
+  @override
+  void dispose() {
+    _newName.dispose();
+    super.dispose();
+  }
+
   Future<void> _edit({
     InformationDirectory? directory,
     InformationTag? tag,
     bool isTag = false,
   }) async {
-    var name = directory?.name ?? tag?.name ?? '';
+    var name = directory?.name ?? tag?.name ?? (isTag ? '' : _newName.text);
     String? parentId = directory?.parentId;
     var saving = false;
     String? error;
     await showDialog<void>(
       context: context,
+      barrierColor: const Color(0x4f241b27),
       builder: (context) => StatefulBuilder(
-        builder: (context, setDialogState) => DesktopDialog(
-          title: Text(
-            isTag
-                ? (tag == null ? '新建标签' : '编辑标签')
-                : (directory == null ? '新建目录' : '编辑目录'),
-          ),
-          content: SizedBox(
-            width: 450,
+        builder: (context, setDialogState) => PrototypeDialog(
+          title: isTag
+              ? (tag == null ? '新建标签' : '编辑标签')
+              : (directory == null ? '新建目录' : '编辑目录'),
+          onClose: saving ? null : () => Navigator.pop(context),
+          body: SizedBox(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -86,10 +100,12 @@ class _OrganizationManagerState extends State<_OrganizationManager> {
           ),
           actions: [
             TextButton(
+              style: prototypeSecondary(context),
               onPressed: saving ? null : () => Navigator.pop(context),
               child: const Text('取消'),
             ),
             FilledButton(
+              style: prototypePrimary(context),
               onPressed: saving
                   ? null
                   : () async {
@@ -138,60 +154,121 @@ class _OrganizationManagerState extends State<_OrganizationManager> {
   }
 
   @override
-  Widget build(BuildContext context) => DesktopDialog(
-    title: const Text('目录与标签'),
-    content: SizedBox(
-      width: 650,
-      height: 420,
-      child: ListView(
-        children: [
-          const Text('目录和标签用于整理。名称仅在客户端展示；Agent 目录只提供必要标识及已保存的公开说明。'),
-          const SizedBox(height: 18),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: TextButton.icon(
-              onPressed: () => _edit(),
-              icon: const Icon(Icons.create_new_folder_outlined),
-              label: const Text('新建目录'),
-            ),
-          ),
-          for (final directory in widget.owner.directories)
-            ListTile(
-              title: Text(directoryPath(widget.owner, directory.id)),
-              trailing: IconButton(
-                tooltip: '编辑目录',
-                icon: const Icon(Icons.edit_outlined),
-                onPressed: () => _edit(directory: directory),
+  Widget build(BuildContext context) => PrototypeDialog(
+    flow: true,
+    scrollGutter: 0,
+    title: '目录与标签',
+    onClose: () => Navigator.pop(context),
+    body: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Align(
+          alignment: Alignment.centerLeft,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: prototypeCh(context, 14, 48)),
+            child: Text(
+              '目录可有父子层级，移动目录保留信息身份。标签用于跨目录筛选。',
+              style: prototypeText(
+                context,
+                14,
+                height: 1.85,
+                color: UiPalette.of(context).muted,
               ),
             ),
-          const Divider(),
-          const SizedBox(height: 16),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: TextButton.icon(
-              onPressed: () => _edit(isTag: true),
-              icon: const Icon(Icons.new_label_outlined),
-              label: const Text('新建标签'),
-            ),
           ),
-          for (final tag in widget.owner.tags)
-            ListTile(
-              title: Text(tag.name),
-              trailing: IconButton(
-                tooltip: '编辑标签',
-                icon: const Icon(Icons.edit_outlined),
-                onPressed: () => _edit(tag: tag, isTag: true),
+        ),
+        const SizedBox(height: 12.3),
+        Text('新目录名称', style: prototypeText(context, 13)),
+        const SizedBox(height: 8),
+        SizedBox(
+          height: 39.5,
+          child: TextField(
+            controller: _newName,
+            style: prototypeText(context, 13),
+            decoration: InputDecoration(
+              isDense: true,
+              contentPadding: const EdgeInsets.all(9),
+              hintText: '工作/北辰项目/运维',
+              filled: true,
+              fillColor: UiPalette.of(context).paper,
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(4),
+                borderSide: BorderSide(color: UiPalette.of(context).line),
               ),
             ),
-        ],
-      ),
+          ),
+        ),
+        const SizedBox(height: 18),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: TextButton(
+            onPressed: () => _edit(),
+            style: prototypeSecondary(context),
+            child: const Text('添加目录'),
+          ),
+        ),
+        for (final directory in widget.owner.directories)
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 22.75),
+            decoration: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(color: UiPalette.of(context).line),
+              ),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    directoryPath(widget.owner, directory.id),
+                    style: prototypeText(context, 13),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(right: 12),
+                  child: TextButton(
+                    style: prototypeButton(context, size: 12),
+                    onPressed: () => _edit(directory: directory),
+                    child: const Text('编辑'),
+                  ),
+                ),
+                TextButton(
+                  style: prototypeButton(
+                    context,
+                    size: 13,
+                    foreground: UiPalette.of(context).accent,
+                  ),
+                  onPressed: () {
+                    widget.onSelectDirectory?.call(directory.id);
+                    Navigator.pop(context);
+                  },
+                  child: const Text('查看信息 →'),
+                ),
+              ],
+            ),
+          ),
+        const Divider(),
+        const SizedBox(height: 16),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: TextButton.icon(
+            onPressed: () => _edit(isTag: true),
+            style: prototypeSecondary(context),
+            icon: const Icon(Icons.new_label_outlined),
+            label: const Text('新建标签'),
+          ),
+        ),
+        for (final tag in widget.owner.tags)
+          ListTile(
+            title: Text(tag.name),
+            trailing: IconButton(
+              tooltip: '编辑标签',
+              icon: const Icon(Icons.edit_outlined),
+              onPressed: () => _edit(tag: tag, isTag: true),
+            ),
+          ),
+      ],
     ),
-    actions: [
-      TextButton(
-        onPressed: () => Navigator.pop(context),
-        child: const Text('完成'),
-      ),
-    ],
   );
 }
 

@@ -83,12 +83,18 @@ void main() {
         throwsA(isA<AccessFailure>()),
       );
       expect(await service.agent.read(token, user), 'demo-user');
-      final fresh = service.agent.request(session, 'restored host', [host]);
-      service.owner.approve(fresh.id, [host]);
+      final restoredHost = FieldRef(
+        'demo-server',
+        restored.fields.firstWhere((f) => f.id != 'username').id,
+      );
+      final fresh = service.agent.request(session, 'restored host', [
+        restoredHost,
+      ]);
+      service.owner.approve(fresh.id, [restoredHost]);
       expect(
         await service.agent.read(
           service.agent.claim(session, fresh.id).token,
-          host,
+          restoredHost,
         ),
         'demo.example.invalid',
       );
