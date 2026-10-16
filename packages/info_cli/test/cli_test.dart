@@ -12,12 +12,17 @@ void main() {
     () async {
       final core = InformationService.fictional();
       final server = await AgentServer.start(core.agent, port: 0);
-      final process = await Process.start(Platform.resolvedExecutable, [
-        'run',
-        'bin/info.dart',
-        '--port',
-        '${server.port}',
-      ]);
+      final delivered = Platform.environment['INFO_TEST_DELIVERY'];
+      final process = await Process.start(
+        delivered == null
+            ? Platform.resolvedExecutable
+            : '$delivered/cli/info.exe',
+        [
+          if (delivered == null) ...['run', 'bin/info.dart'],
+          '--port',
+          '${server.port}',
+        ],
+      );
       final lines = StreamIterator(
         process.stdout.transform(utf8.decoder).transform(const LineSplitter()),
       );
