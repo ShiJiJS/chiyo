@@ -25,7 +25,7 @@ void main() {
     );
     await tester.tap(find.text('目录与标签'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('新建目录'));
+    await tester.tap(find.text('添加目录'));
     await tester.pumpAndSettle();
     await tester.enterText(
       find.byKey(const ValueKey('organization-name')),
@@ -33,7 +33,7 @@ void main() {
     );
     await tester.tap(find.text('保存'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('新建目录'));
+    await tester.tap(find.text('添加目录'));
     await tester.pumpAndSettle();
     await tester.enterText(
       find.byKey(const ValueKey('organization-name')),
@@ -53,7 +53,7 @@ void main() {
     );
     await tester.tap(find.text('保存'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('完成'));
+    await tester.tap(find.text('×'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Fictional demo server').first);
     await tester.pumpAndSettle();
@@ -63,8 +63,12 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Project / Servers').last);
     await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('item-tags')));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Work').last);
-    await tester.tap(find.text('保存整理'));
+    await tester.tap(find.text('使用所选标签'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('save-information')));
     await tester.pumpAndSettle();
     expect(
       service.owner.directories.last.parentId,
@@ -82,9 +86,7 @@ void main() {
       service.agent.searchCatalog(tagId: service.owner.tags.single.id).total,
       1,
     );
-    await tester.tap(find.byKey(const ValueKey('browse-directory')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Project').last);
+    await tester.tap(find.byKey(ValueKey('directory-${service.owner.directories.first.id}')));
     await tester.pumpAndSettle();
     expect(find.text('Other item'), findsNothing);
     expect(find.text('Fictional demo server'), findsNWidgets(2));
@@ -110,32 +112,34 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('edit-information-description')));
     await tester.pumpAndSettle();
     await tester.enterText(
-      find.byKey(const ValueKey('catalog-name')),
+      find.byKey(const ValueKey('item-name')),
       'Reviewed server',
     );
     await tester.enterText(
-      find.byKey(const ValueKey('catalog-description')),
+      find.byKey(const ValueKey('item-description')),
       'Reviewed purpose',
     );
     await tester.enterText(
-      find.byKey(const ValueKey('catalog-field-host')),
+      find.byKey(const ValueKey('field-description-0')),
       'Reviewed address',
     );
     expect(service.agent.catalog().single['name'], 'Fictional demo server');
     await tester.tap(find.text('取消'));
     await tester.pumpAndSettle();
+    await tester.tap(find.text('放弃更改'));
+    await tester.pumpAndSettle();
     expect(service.agent.catalog().single['name'], 'Fictional demo server');
     await tester.tap(find.byKey(const ValueKey('edit-information-description')));
     await tester.pumpAndSettle();
     await tester.enterText(
-      find.byKey(const ValueKey('catalog-name')),
+      find.byKey(const ValueKey('item-name')),
       'Reviewed server',
     );
     await tester.enterText(
-      find.byKey(const ValueKey('catalog-field-host')),
+      find.byKey(const ValueKey('field-description-0')),
       'Reviewed address',
     );
-    await tester.tap(find.text('保存'));
+    await tester.tap(find.byKey(const ValueKey('save-information')));
     await tester.pumpAndSettle();
     expect(
       service.agent

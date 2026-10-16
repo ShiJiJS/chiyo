@@ -26,6 +26,7 @@ part 'recycle_access.dart';
 part 'revision_access.dart';
 part 'backup_access.dart';
 part 'workspace_access.dart';
+part 'library_access.dart';
 
 class AccessFailure implements Exception {
   const AccessFailure(this.status);
@@ -544,8 +545,10 @@ class OwnerAccess {
     int templateVersion,
     String name,
     String description,
-    Map<String, String> values,
-  ) => _serialize(() async {
+    Map<String, String> values, {
+    String? directoryId,
+    Iterable<String> tagIds = const [],
+  }) => _serialize(() async {
     final matches = templates.where((t) => t.id == templateId);
     if (matches.isEmpty || matches.single.version != templateVersion) {
       throw const AccessFailure('template_changed');
@@ -564,6 +567,8 @@ class OwnerAccess {
                 FieldInput(f.name, f.description, values[f.id]!, kind: f.kind),
           )
           .toList(),
+      directoryId: directoryId,
+      tagIds: tagIds,
     );
   });
   Future<void> _writes = Future.value();
@@ -582,15 +587,33 @@ class OwnerAccess {
   Future<InformationItem> createInformation(
     String name,
     String description,
-    List<FieldInput> fields,
-  ) => _serialize(() => _createInformation(name, description, fields));
+    List<FieldInput> fields, {
+    String? directoryId,
+    Iterable<String> tagIds = const [],
+  }) => _serialize(
+    () => _createInformation(
+      name,
+      description,
+      fields,
+      directoryId: directoryId,
+      tagIds: tagIds,
+    ),
+  );
 
   Future<InformationItem> _createInformation(
     String name,
     String description,
-    List<FieldInput> fields,
-  ) async {
+    List<FieldInput> fields, {
+    String? directoryId,
+    Iterable<String> tagIds = const [],
+  }) async {
     if (_service._closed) throw const AccessFailure('service_unavailable');
+    _checkParent(directoryId);
+    final selectedTags = tagIds.toSet();
+    if (selectedTags.length > 100 ||
+        selectedTags.any((id) => !tags.any((t) => t.id == id))) {
+      throw const AccessFailure('invalid_information');
+    }
     if (name.trim().isEmpty ||
         name.length > 200 ||
         description.length > 2000 ||
@@ -625,6 +648,8 @@ class OwnerAccess {
           .toList(),
       createdAt: now,
       modifiedAt: now,
+      directoryId: directoryId,
+      tagIds: selectedTags,
     );
     await _service._repository.save(item);
     return item;

@@ -186,15 +186,13 @@ void _validateBackupHistory(Map<String, List<Map<String, Object?>>> tables) {
     }
   }
   final facts = <String>{};
+  final restoredTargets = <String>{};
   for (final row in tables['recycle_facts']!) {
-    final j = _backupObject(_backupJson(row), {
-      'entryId',
-      'itemId',
-      'fieldIds',
-      'version',
-      'kind',
-      'at',
-    });
+    final j = _backupObject(
+      _backupJson(row),
+      {'entryId', 'itemId', 'fieldIds', 'version', 'kind', 'at'},
+      {'restoredFieldIds'},
+    );
     _backupId(j, 'entryId');
     final item = _backupId(j, 'itemId');
     _backupVersion(j);
@@ -209,6 +207,25 @@ void _validateBackupHistory(Map<String, List<Map<String, Object?>>> tables) {
       if (field is! String || field.isEmpty || field.length > 200)
         _backupInvalid();
       fieldOwner(field, item);
+    }
+    if (j.containsKey('restoredFieldIds')) {
+      final mapping = j['restoredFieldIds'];
+      if (j['kind'] != RecycleFactKind.restored.name ||
+          mapping is! Map<String, dynamic> ||
+          mapping.length > 200)
+        _backupInvalid();
+      for (final link in mapping.entries) {
+        final target = link.value;
+        if (!fields.contains(link.key) ||
+            target is! String ||
+            target.isEmpty ||
+            target.length > 200 ||
+            target == link.key ||
+            !restoredTargets.add(target))
+          _backupInvalid();
+        count(1);
+        fieldOwner(target, item);
+      }
     }
   }
   final purgePairs = <String>{};

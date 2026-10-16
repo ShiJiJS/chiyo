@@ -45,13 +45,25 @@ TextStyle prototypeText(
   String? family,
 }) => TextStyle(
   fontFamily: family ?? 'ProductSans',
-  fontFamilyFallback: const ['Songti SC', 'AppSans'],
+  // Resolve CJK through the bundled face before a platform-only family, while
+  // keeping an explicitly selected code or serif face for its supported glyphs.
+  fontFamilyFallback: const ['ProductSans', 'AppSans', 'Songti SC'],
   fontSize: size,
   fontWeight: weight,
   height: height,
   letterSpacing: 0,
   color: color ?? UiPalette.of(context).ink,
 );
+
+/// CSS ch is the advance of the active font's zero, not a fixed em fraction.
+double prototypeCh(BuildContext context, double size, double count) {
+  final painter = TextPainter(
+    text: TextSpan(text: '0', style: prototypeText(context, size)),
+    textDirection: Directionality.of(context),
+    textScaler: MediaQuery.textScalerOf(context),
+  )..layout();
+  return painter.width * count;
+}
 
 /// Removes Material's implicit minimum size while retaining focus/keyboard behavior.
 ButtonStyle prototypeButton(

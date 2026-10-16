@@ -24,7 +24,7 @@ void main() {
       expect(entry.wholeItem, isFalse);
       expect(
         (await service.owner.restoreRecycled(entry.id)).fields.single.id,
-        item.fields.single.id,
+        isNot(item.fields.single.id),
       );
     },
   );
@@ -214,19 +214,23 @@ void main() {
       );
       final restored = await service.owner.restoreRecycled(deleted.id);
       expect(restored.version, 3);
-      expect(restored.fields.any((f) => f.id == 'host'), isTrue);
+      expect(restored.fields.any((f) => f.id == 'host'), isFalse);
+      final restoredHost = FieldRef(
+        'demo-server',
+        restored.fields.firstWhere((f) => f.id != 'username').id,
+      );
       await expectLater(
         Future.sync(() => service.agent.read(token, host)),
         throwsA(isA<AccessFailure>()),
       );
       expect(await Future.value(service.agent.read(token, user)), 'demo-user');
-      final fresh = service.agent.request(session, 'restored', [host]);
-      service.owner.approve(fresh.id, [host]);
+      final fresh = service.agent.request(session, 'restored', [restoredHost]);
+      service.owner.approve(fresh.id, [restoredHost]);
       expect(
         await Future.value(
           service.agent.read(
             service.agent.claim(session, fresh.id).token,
-            host,
+            restoredHost,
           ),
         ),
         'demo.example.invalid',
