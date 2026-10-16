@@ -1,6 +1,6 @@
 # Windows 运行工具接收预检
 
-2026-10-17。此记录为 #28/#29 准备真实工具，不是产品申请、审批、run-use、一次消耗或清理已经通过。所有材料均为新生成的虚构内容，没有使用个人 infos、已有登录或真实密钥；测试服务只发布临时回环端口。原型还原与各票验收继续独立推进，服务器同步尚未开始。
+2026-10-17。此记录为 #28/#29 准备真实工具，不是产品申请、审批、run-use、一次消耗或清理已经通过。主动提供的材料均为新生成的虚构内容，没有读取个人 infos 或真实密钥；AWS/SSH 测试服务只发布临时回环端口。下文单列 gh 缺 Token 对照意外使用已有认证的缺口与修正，不能笼统声称所有对照均隔离成功。原型还原与各票验收继续独立推进，服务器同步尚未开始。
 
 ## Windows AWS CLI v2
 
@@ -21,6 +21,10 @@
 脚本及非秘密结果在 `.scratch/ssh-receiver-fixture/{probe.py,probe-result.json,Dockerfile,sshd_config,start.py}`。本轮是直接客户端接收预检，未经过产品凭据库、申请/审批、run-use，也未验证产品受管文件清理或进程树监护。合成测试目录保留以供问题复现，不进备份或发行包。
 
 ## 暴露并明确修订的工程约定
+
+gh 2.102.0 的真实负向预检使用空临时 profile、极简环境、固定 github.com 和非空合成 `GH_TOKEN`，`api user --method GET` 返回401、退出1，说明假 Token 没有被用户已有账号替代。但缺 Token 的对照意外退出0；这不符合“空配置就没有认证”的预期，不能算隔离通过。该对照只作一次 GET /user，没有写操作；返回的账号正文没有打印或保存，临时 profile 已移除，也没有读取、输出或修改实际 Token。没有为了让对照变绿而删除系统认证。
+
+官方 [AuthConfig.ActiveToken](https://github.com/cli/cli/blob/trunk/internal/config/config.go#L235) 在环境/配置无 Token 时可继续读取系统 keyring；[环境优先级实现](https://github.com/cli/go-gh/blob/trunk/pkg/auth/auth.go#L57) 优先返回非空 GH_TOKEN。这解释了本机现象，但本轮没有直接读取 keyring 来确认具体来源。已删除预检脚本的真实缺 Token 对照；协议要求申请与启动前双重核对非空获批 Token，缺失时准备失败且不创建子进程。后续受控测试证明缺失路径被拒绝，真实 gh 只带合成非空 Token 运行；不能把 GH_CONFIG_DIR 本身当成 Windows 凭据管理器隔离。
 
 - 原协议的 Windows 最小环境未设置 `ProgramData`。实测只给 SystemRoot/WINDIR/COMSPEC 时，`ssh -V` 退出255、stdout/stderr均空；分别补 USERNAME 或 USERDOMAIN 无效，仅补 ProgramData 后正常。设为任务的私有空目录也正常，随后完成上述真实 SSH 四用例。上游 [Win32 初始化源码](https://github.com/PowerShell/openssh-portable/blob/latestw_all/contrib/win32/win32compat/w32fd.c#L218)读取此变量并在缺失时 fatal，与本机观察相符；不声称当前上游分支等同本机二进制源码。因此协议明确执行器生成私有 ProgramData，禁止申请覆盖，不回退系统共享配置或整个父环境。
 - SSH 有用户和全局两类 host 数据库。仅空 `-F` 与指定 UserKnownHostsFile 不作为全局数据库隔离证明；协议现已明确两类文件均进入已展示的 effective argv/planHash。

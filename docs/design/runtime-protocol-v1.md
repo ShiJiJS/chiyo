@@ -60,6 +60,8 @@ argv 项只能是字符串或恰含 `file` 的对象；env 值只能是字符串
 
 2026-10-17 接收预检修订：本机 Windows OpenSSH 9.5p2 在缺少 `ProgramData` 时，连 `-V` 也退出255且没有可用标准错误；设置为本次空目录即可初始化。该变量是执行器生成的隔离配置位置，不是增加可继承认证来源。SSH 同时显式设置 `GlobalKnownHostsFile` 为受管空文件，`UserKnownHostsFile` 为已确认快照，两项均作为内部类型化材料纳入 effective argv 与 planHash；不能只隔离用户 known_hosts 而遗漏全局文件。依据及真实工具预检边界见[运行工具预检](../development/runtime-receiver-preflight.md)。
 
+同轮 gh 预检发现：空 `GH_CONFIG_DIR` 不保证没有系统 keyring 认证。`gh_token` 执行器在私有材料准备后、启动前必须确认 `GH_TOKEN` 的非空值恰来自本次获批字符串；缺失、空值或绑定错误一律准备失败且不启动，不能通过不设置该变量让 gh 自行选账号。申请层和私有材料层均核对，测试覆盖“空 Token 时未创建进程”。真实工具负向验收始终带非空合成 Token，预期401；缺 Token 的对照只在受控程序/注入测试中执行，不再让真实 gh 查询用户已有账号。
+
 ## 决定、领取与一次启动
 
 桌面决定在一个事务中记录请求终态及两个独立许可。`status` / `wait` 沿用请求 ID 和私密会话，新增 `approved|partially_approved` 响应：

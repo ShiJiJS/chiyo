@@ -39,3 +39,5 @@
 AWS变量/配置优先级和隔离参数依据官方[环境变量](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html)与[配置文件](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html)文档核查；接收配置的限制是本产品的实现约定，不是AWS自动提供的隔离。
 
 主任务的[Windows 真实工具预检](../development/runtime-receiver-preflight.md)已验证任务目录 AWS CLI 的独立 SigV4 读写接收、Windows SSH 对新生成本地主机/密钥的接受与三类明确拒绝。它们不计作产品 run-use 或 #28/#29 完成。实测暴露 Windows OpenSSH 初始化依赖 `ProgramData`，协议现明确由执行器设置私有空目录，禁止继承原系统共享目录或接受申请覆盖；同时明确 SSH 的用户与全局 known_hosts 均隔离并进入已审批计划。#28/#29 应消费该修订并核验受管文件真实 DACL，不在实现时静默放宽父环境。
+
+同轮 gh 缺 Token 的真实 GET 对照意外退出0，空配置未隔离已有认证；该对照已停止，未输出/保存账号正文或读取/修改实际 Token。#28 须在申请和启动前核对非空获批 GH_TOKEN，缺失时不创建子进程；受控测试覆盖拒绝，真实 gh 仅带非空合成 Token 验证401。官方 keyring 回退与环境优先级代码、观察和限制见上述预检记录，不将“空 GH_CONFIG_DIR”当作完整认证来源隔离证明。
