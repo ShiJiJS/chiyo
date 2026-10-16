@@ -51,12 +51,10 @@ void main() {
       expect(find.text('整理完成'), findsWidgets);
       await tester.tap(find.byKey(const ValueKey('nav-2')));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('查看结果'));
+      await tester.tap(find.byKey(const ValueKey('proposal-filter-handled')));
       await tester.pumpAndSettle();
       expect(find.text('确认整批调整'), findsNothing);
-      expect(find.text('分类：服务器'), findsOneWidget);
-      await tester.tap(find.text('关闭'));
-      await tester.pumpAndSettle();
+      expect(find.text('服务器'), findsOneWidget);
       final unchanged = await service.agent.requestOrganization(
         session,
         '检查现有分类',
@@ -66,9 +64,9 @@ void main() {
       await service.agent.submitOrganization(session, unchanged.id, []);
       await tester.pump(const Duration(seconds: 1));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('查看结果').first);
+      await tester.tap(find.byKey(ValueKey('proposal-entry-${unchanged.id}')));
       await tester.pumpAndSettle();
-      expect(find.text('本次未改动分类或标签。'), findsOneWidget);
+      expect(find.textContaining('没有分类或标签变化'), findsOneWidget);
       expect(service.owner.information.single.version, 2);
 
       await tester.pumpWidget(const SizedBox());

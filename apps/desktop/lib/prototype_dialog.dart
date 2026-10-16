@@ -15,6 +15,8 @@ class PrototypeDialog extends StatelessWidget {
     this.flow = false,
     this.scrollGutter = 15,
     this.bottomPadding,
+    this.bodyBottomPadding,
+    this.actionDivider = true,
   });
   final String title;
   final Widget body;
@@ -23,6 +25,8 @@ class PrototypeDialog extends StatelessWidget {
   final bool flow;
   final double scrollGutter;
   final double? bottomPadding;
+  final double? bodyBottomPadding;
+  final bool actionDivider;
 
   @override
   Widget build(BuildContext context) {
@@ -64,15 +68,17 @@ class PrototypeDialog extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
-                      child: Text(
-                        title,
-                        style: prototypeText(
-                          context,
-                          23,
-                          family: 'SimSun',
-                          weight: FontWeight.w500,
-                        ),
-                      ),
+                      child: title.isEmpty
+                          ? const SizedBox.shrink()
+                          : Text(
+                              title,
+                              style: prototypeText(
+                                context,
+                                23,
+                                family: 'SimSun',
+                                weight: FontWeight.w500,
+                              ),
+                            ),
                     ),
                     Transform.translate(
                       offset: const Offset(2, 3),
@@ -93,16 +99,18 @@ class PrototypeDialog extends StatelessWidget {
                   child: SingleChildScrollView(
                     padding: EdgeInsets.only(
                       right: flow ? scrollGutter : 0,
-                      bottom: flow ? 16 : 0,
+                      bottom: bodyBottomPadding ?? (flow ? 16 : 0),
                     ),
                     child: body,
                   ),
                 ),
                 if (actions.isNotEmpty)
                   Container(
-                    padding: const EdgeInsets.only(top: 16),
+                    padding: EdgeInsets.only(top: actionDivider ? 16 : 26),
                     decoration: BoxDecoration(
-                      border: Border(top: BorderSide(color: p.line)),
+                      border: actionDivider
+                          ? Border(top: BorderSide(color: p.line))
+                          : null,
                     ),
                     child: Wrap(
                       alignment: WrapAlignment.end,

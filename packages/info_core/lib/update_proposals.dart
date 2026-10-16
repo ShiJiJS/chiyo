@@ -166,6 +166,21 @@ class UpdatePreview {
   final InformationItem before, after;
 }
 
+/// Owner-only, unsaved review input. Target and base version cannot be changed.
+class UpdateReview {
+  UpdateReview(
+    this.input, {
+    this.directoryId,
+    Iterable<String> tagIds = const [],
+    Map<String, String> fieldDescriptions = const {},
+  }) : tagIds = List.unmodifiable(tagIds),
+       fieldDescriptions = Map.unmodifiable(fieldDescriptions);
+  final UpdateInput input;
+  final String? directoryId;
+  final List<String> tagIds;
+  final Map<String, String> fieldDescriptions;
+}
+
 /// A past content version, only available to the owner. Persisted encrypted.
 class InformationRevision {
   const InformationRevision(this.item, this.replacedAt);

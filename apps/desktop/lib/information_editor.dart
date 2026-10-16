@@ -13,16 +13,20 @@ class EditableInformationField {
     String? description,
     String? value,
     FieldKind? kind,
+    this.replaceIdentity = false,
   }) : name = name ?? original?.name ?? '',
        description = description ?? original?.description ?? '',
        value = value ?? original?.value ?? '',
        kind = kind ?? original?.kind ?? FieldKind.structured;
   final InformationField? original;
+  final bool replaceIdentity;
   String name, description, value;
   FieldKind kind;
   bool get replacesIdentity =>
       original != null &&
-      (name.trim() != original!.name || kind != original!.kind);
+      (replaceIdentity ||
+          name.trim() != original!.name ||
+          kind != original!.kind);
   FieldInput get input => FieldInput(name, description, value, kind: kind);
 }
 
@@ -33,11 +37,14 @@ class InformationEditorDraft {
     String? description,
     String? directoryId,
     Iterable<String>? tagIds,
+    this.suggestedDirectory = '',
+    Iterable<String> suggestedTags = const [],
     List<EditableInformationField>? fields,
   }) : name = name ?? original?.name ?? '',
        description = description ?? original?.description ?? '',
        directoryId = directoryId ?? original?.directoryId,
        tagIds = {...?tagIds ?? original?.tagIds},
+       suggestedTags = {...suggestedTags},
        fields =
            fields ??
            (original?.fields
@@ -48,6 +55,8 @@ class InformationEditorDraft {
   String name, description;
   String? directoryId;
   final Set<String> tagIds;
+  String suggestedDirectory;
+  final Set<String> suggestedTags;
   final List<EditableInformationField> fields;
   List<FieldChange> get changes => [
     for (final old in original?.fields ?? <InformationField>[])
@@ -356,6 +365,17 @@ class _InformationEditorState extends State<InformationEditor> {
                     d.directoryId,
                     [
                       const DropdownMenuItem(value: null, child: Text('未分类')),
+                      if (d.directoryId != null &&
+                          !widget.directories.any(
+                            (directory) => directory.id == d.directoryId,
+                          ))
+                        DropdownMenuItem(
+                          value: d.directoryId,
+                          child: Text(
+                            '不可用目录（${d.directoryId}）',
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
                       for (final directory in widget.directories)
                         DropdownMenuItem(
                           value: directory.id,
@@ -365,12 +385,31 @@ class _InformationEditorState extends State<InformationEditor> {
                           ),
                         ),
                     ],
-                    (v) => d.directoryId = v,
+                    (v) {
+                      d.directoryId = v;
+                      d.suggestedDirectory = '';
+                    },
                     key: const ValueKey('item-directory'),
                   ),
                 ),
               ],
             ),
+            if (d.suggestedDirectory.isNotEmpty)
+              Wrap(
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: 12,
+                children: [
+                  Text(
+                    'Agent 建议创建目录：${d.suggestedDirectory}',
+                    style: prototypeText(context, 12, color: p.muted),
+                  ),
+                  TextButton(
+                    style: prototypeButton(context, size: 12),
+                    onPressed: () => _changed(() => d.suggestedDirectory = ''),
+                    child: const Text('忽略目录建议'),
+                  ),
+                ],
+              ),
             _input(
               '公开说明',
               d.description,
@@ -409,6 +448,16 @@ class _InformationEditorState extends State<InformationEditor> {
                           widget.tags
                               .where((tag) => d.tagIds.contains(tag.id))
                               .map((tag) => tag.name)
+                              .followedBy(
+                                d.tagIds
+                                    .where(
+                                      (id) => !widget.tags.any(
+                                        (tag) => tag.id == id,
+                                      ),
+                                    )
+                                    .map((id) => '不可用标签（$id）'),
+                              )
+                              .followedBy(d.suggestedTags)
                               .join('、'),
                         ),
                       ),
@@ -528,13 +577,15 @@ class _InformationEditorState extends State<InformationEditor> {
             onPressed: _saving ? null : _save,
             child: _saving
                 ? const Text('正在保存…')
-                : widget.saveLabel == '保存信息'
-                ? const SizedBox(
-                    width: 70,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [Text('保存'), Text('信息')],
-                    ),
+                : widget.saveLabel.startsWith('保存') &&
+                      widget.saveLabel.length > 2
+                ? Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text('保存'),
+                      const SizedBox(width: 18),
+                      Text(widget.saveLabel.substring(2)),
+                    ],
                   )
                 : Text(widget.saveLabel),
           ),
@@ -545,6 +596,14 @@ class _InformationEditorState extends State<InformationEditor> {
 
   Future<void> _chooseTags() async {
     final selected = d.tagIds.toSet();
+    final suggestions = d.suggestedTags.toSet();
+    final choices = {
+      for (final tag in widget.tags) tag.id: tag.name,
+      for (final id in selected.where(
+        (id) => !widget.tags.any((tag) => tag.id == id),
+      ))
+        id: '不可用标签（$id）',
+    };
     final applied = await showDialog<bool>(
       context: context,
       barrierColor: const Color(0x4f241b27),
@@ -555,29 +614,57 @@ class _InformationEditorState extends State<InformationEditor> {
           body: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (widget.tags.isEmpty) const Text('暂无标签，请先在目录与标签中创建。'),
-              for (final tag in widget.tags)
+              if (choices.isEmpty) const Text('暂无标签，请先在目录与标签中创建。'),
+              for (final tag in choices.entries)
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   child: Row(
                     children: [
                       PrototypeCheck(
-                        value: selected.contains(tag.id),
+                        value: selected.contains(tag.key),
                         onChanged: (v) => update(
                           () => v == true
-                              ? selected.add(tag.id)
-                              : selected.remove(tag.id),
+                              ? selected.add(tag.key)
+                              : selected.remove(tag.key),
                         ),
                       ),
                       const SizedBox(width: 12),
                       TextButton(
                         style: prototypeButton(context, size: 13),
                         onPressed: () => update(
-                          () => selected.contains(tag.id)
-                              ? selected.remove(tag.id)
-                              : selected.add(tag.id),
+                          () => selected.contains(tag.key)
+                              ? selected.remove(tag.key)
+                              : selected.add(tag.key),
                         ),
-                        child: Text(tag.name),
+                        child: Text(tag.value),
+                      ),
+                    ],
+                  ),
+                ),
+              for (final name in d.suggestedTags)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Row(
+                    children: [
+                      PrototypeCheck(
+                        value: suggestions.contains(name),
+                        onChanged: (value) => update(
+                          () => value == true
+                              ? suggestions.add(name)
+                              : suggestions.remove(name),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: TextButton(
+                          style: prototypeButton(context, size: 13),
+                          onPressed: () => update(
+                            () => suggestions.contains(name)
+                                ? suggestions.remove(name)
+                                : suggestions.add(name),
+                          ),
+                          child: Text('Agent 建议：$name'),
+                        ),
                       ),
                     ],
                   ),
@@ -599,6 +686,9 @@ class _InformationEditorState extends State<InformationEditor> {
         d.tagIds
           ..clear()
           ..addAll(selected);
+        d.suggestedTags
+          ..clear()
+          ..addAll(suggestions);
       });
     }
   }
