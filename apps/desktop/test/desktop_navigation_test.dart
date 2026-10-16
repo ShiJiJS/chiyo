@@ -51,7 +51,11 @@ void main() {
           checkSelection(i);
         }
         await tester.pumpAndSettle();
-        final title = i == 0
+        final title = i == 3
+            ? find.text('授权与访问记录')
+            : i == 4
+            ? find.text('外观').first
+            : i == 0
             ? find.text('请求收件箱')
             : i == 1
             ? find.descendant(
@@ -81,16 +85,19 @@ void main() {
       expect(find.text('备份与恢复'), findsNothing);
       await tester.tap(find.byKey(const ValueKey('nav-4')));
       await tester.pumpAndSettle();
-      expect(find.text('完全退出'), findsOneWidget);
+      expect(find.text('外观'), findsWidgets);
       expect(find.text('备份与恢复'), findsOneWidget);
-      expect(find.textContaining('模板不保存字段值'), findsOneWidget);
-      await tester.tap(find.text('管理录入模板'));
+      await tester.tap(
+        find.byKey(const ValueKey('settings-section-application')),
+      );
       await tester.pumpAndSettle();
-      expect(find.text('录入模板'), findsOneWidget);
-      expect(find.textContaining('修改模板不会修改已有资料或授权'), findsOneWidget);
-      await tester.tap(find.byKey(const ValueKey('subpage-back')));
+      expect(find.text('完全退出'), findsOneWidget);
+      await tester.tap(
+        find.byKey(const ValueKey('settings-section-templates')),
+      );
       await tester.pumpAndSettle();
-      expect(find.text('管理录入模板'), findsOneWidget);
+      expect(find.textContaining('模板只包含字段名称与结构'), findsOneWidget);
+      expect(find.text('新建模板'), findsOneWidget);
       expect(tester.takeException(), isNull);
       await tester.pumpWidget(const SizedBox());
       await tester.runAsync(service.close);
@@ -100,6 +107,8 @@ void main() {
   testWidgets(
     'notification settings show permission and test-delivery outcomes without changing access',
     (tester) async {
+      tester.view.physicalSize=const Size(1440,900);tester.view.devicePixelRatio=1;
+      addTearDown(tester.view.resetPhysicalSize);addTearDown(tester.view.resetDevicePixelRatio);
       final service = InformationService.fictional();
       final native = NativeDesktopFixture();
       final runtime = DesktopRuntime(
@@ -113,6 +122,10 @@ void main() {
         InformationApp(service: service, port: 47125, runtime: runtime),
       );
       await tester.tap(find.byKey(const ValueKey('nav-4')));
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.byKey(const ValueKey('settings-section-notifications')),
+      );
       await tester.pumpAndSettle();
       await tester.tap(find.text('开启或检查提醒'));
       await tester.pumpAndSettle();
@@ -142,9 +155,7 @@ void main() {
       expect(find.text('请在系统设置中允许本应用发送通知，然后重试。'), findsOneWidget);
       expect(
         tester
-            .widget<OutlinedButton>(
-              find.widgetWithText(OutlinedButton, '发送测试通知'),
-            )
+            .widget<TextButton>(find.widgetWithText(TextButton, '发送测试通知'))
             .onPressed,
         isNull,
       );

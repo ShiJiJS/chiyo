@@ -14,8 +14,8 @@ BackupFileDialogs::BackupFileDialogs(flutter::BinaryMessenger* messenger,
   channel_->SetMethodCallHandler(
       [owner](const flutter::MethodCall<flutter::EncodableValue>& call,
               std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
-        const bool input = call.method_name() == "backupInput";
-        const bool recovery = call.method_name() == "recoveryKeyOutput";
+        const bool input = call.method_name() == "backupInput" || call.method_name() == "recoveryKeyInput";
+        const bool recovery = call.method_name() == "recoveryKeyOutput" || call.method_name() == "recoveryKeyInput";
         if (!input && !recovery && call.method_name() != "backupOutput") {
           result->NotImplemented();
           return;
@@ -33,7 +33,7 @@ BackupFileDialogs::BackupFileDialogs(flutter::BinaryMessenger* messenger,
         dialog.nMaxFile = static_cast<DWORD>(path.size());
         dialog.lpstrFilter = recovery ? L"Recovery key (*.txt)\0*.txt\0All files\0*.*\0\0"
                                      : L"Encrypted backup (*.aimbackup)\0*.aimbackup\0All files\0*.*\0\0";
-        dialog.lpstrTitle = input ? L"Choose encrypted backup"
+        dialog.lpstrTitle = input ? (recovery ? L"Choose recovery key file" : L"Choose encrypted backup")
                                  : (recovery ? L"Save recovery key separately"
                                              : L"Export encrypted backup to a new file");
         dialog.lpstrDefExt = recovery ? L"txt" : L"aimbackup";
