@@ -27,4 +27,6 @@ permissions, real Codex lifecycle, signing/notarization, clean-machine install,
 or Windows/macOS desktop backup exchange. Record these separately in the
 ticket evidence and keep the corresponding acceptance criteria open.
 
-Workflow status: prepared on Windows; not executed on macOS yet.
+Workflow status: prepared on Windows; not executed on macOS. The user asked to
+finish Windows first and use their own Mac later. Do not start a hosted run
+under the current authorization.

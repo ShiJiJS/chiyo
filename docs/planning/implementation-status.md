@@ -66,7 +66,7 @@ At `731a044`, #12 and #14 are also merged. Their combined tree passed **103 head
 
 The user accepted the separate revoke-only Codex hook capability and the risk that a forged or delayed local end event could disconnect access early; it cannot obtain information. This is recorded in [ADR 0005](../adr/0005-end-only-codex-lifecycle.md), the local spec, and GitHub #1. #7 is implementing this boundary; #15 has started after #14 for owner-only version history, retention and restoration. #17 full-history backup remains downstream, and real Codex/macOS/distribution acceptance is still open.
 
-An [opt-in macOS validation workflow](../development/macos-ci-validation.md) is prepared to compile and test on a hosted Mac without operating the user's desktop. Ordinary integration pushes do not trigger it. Execution awaits the user's decision about private-repository Actions quota/cost; no macOS result is claimed yet.
+An [opt-in macOS validation workflow](../development/macos-ci-validation.md) is prepared to compile and test on a hosted Mac without operating the user's desktop. Ordinary integration pushes do not trigger it. The user asked to defer hosted validation and finish Windows first, then use their own Mac; no hosted run was started and no macOS result is claimed.
 
 ## Completion rules
 
