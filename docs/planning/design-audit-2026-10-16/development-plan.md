@@ -9,9 +9,9 @@
 | E0 | [#21 按已确认原型升级桌面流程，并加入托管凭据运行时使用](https://github.com/ShiJiJS/agent-info-manage/issues/21) | 子任务汇总 |
 | D0 | [#22 补齐全流程原型和实施契约](https://github.com/ShiJiJS/agent-info-manage/issues/22) | 无 |
 | D1 | [#23 在新收件箱中处理普通读取与整理申请](https://github.com/ShiJiJS/agent-info-manage/issues/23) | #22 |
-| D2 | [#24 信息库三栏承载完整管理与恢复](https://github.com/ShiJiJS/agent-info-manage/issues/24) | #23 |
+| D2 | [#24 信息库三栏承载完整管理与恢复](https://github.com/ShiJiJS/agent-info-manage/issues/24) | #23公共接口已交付，剩余人工点击不阻塞实现 |
 | D3 | [#25 完整核对录入、修改、删除与整理结果](https://github.com/ShiJiJS/agent-info-manage/issues/25) | #24 |
-| D4 | [#26 授权历史、设置与现有备份恢复闭环](https://github.com/ShiJiJS/agent-info-manage/issues/26) | #23 |
+| D4 | [#26 授权历史、设置与现有备份恢复闭环](https://github.com/ShiJiJS/agent-info-manage/issues/26) | #23公共接口已交付，剩余人工点击不阻塞实现 |
 | D5 | [#27 保存、发现和关联托管凭据](https://github.com/ShiJiJS/agent-info-manage/issues/27) | #24 |
 | D6 | [#28 通过一次批准用Token启动一个命令](https://github.com/ShiJiJS/agent-info-manage/issues/28) | #27 |
 | D7 | [#29 文件凭据以参数和环境变量路径交付](https://github.com/ShiJiJS/agent-info-manage/issues/29) | #28 |
@@ -34,9 +34,9 @@ D9在D5/D6模型稳定后即可开展，不必等所有界面完工。D5–D9未
 
 ## 当前执行与衔接
 
-- 用户追加明确要求：全部软件样式严格按已确认HTML原型还原，逐页同尺寸对照，不一致持续修正，并在服务器同步前完成。#23当前截图属于待修正WIP，验收按[忠实还原规则](../../design/prototype-fidelity.md)，原结构评审不算样式通过。
+- 用户追加明确要求：全部软件样式严格按已确认HTML原型还原，逐页同尺寸对照，不一致持续修正，并在服务器同步前完成。#23历史WIP已由精确修正取代，本票所提供状态经独立对照收口、公共工作区合入并主复验通过；实际系统气泡点击仍未验成功，保留OPEN。验收继续按[忠实还原规则](../../design/prototype-fidelity.md)，不将有限结论推广到其他页面。
 - D0已经冻结[协议v1](../../design/runtime-protocol-v1.md)、[请求schema](../../design/runtime-request-v1.schema.json)及[F01–F14覆盖表](../../design/round05-flow-coverage.md)。后续票直接按此实现；原型和Windows业务验收分别记录。
-- D1合入并复验后，D2和D4可以并行；D2交付共享编辑草稿后，D3复用它。D5依赖D2的信息身份及关联入口。每个合入点重查真实阻塞边，不因旧跨平台票仍OPEN而重复实现既有能力。
+- D1公共接口已在1852f8c合入并主复验，D2和D4可以并行。剩余人工通知点击不改变其代码前置，两票保留#23来源关联、移除仅为该实现建立的原生阻塞边；不豁免该残余验收。D2交付共享编辑草稿后，D3复用它；D5依赖D2的信息身份及关联入口。每个合入点重查真实阻塞边，不因旧跨平台票仍OPEN而重复实现既有能力。
 - [接口与数据格式协调](../round05-interface-coordination.md)统一主题、编辑草稿、字段恢复身份及数据库/备份版本分配。D4负责普通请求终态的非秘密历史；D1不把活动会话持久化为可恢复许可。D5与D9接续凭据及完整备份，不各自跳过并行任务的迁移。
 - 当前集成分支为`codex/round05-windows-sync`，草稿PR #32；PR #20保留旧实现基线。Mac实机与跨平台验收按新授权暂缓，#17/#19保留开放。完成Windows后继续另立服务器同步规格、任务及实现，见[完整执行范围](../windows-and-sync-execution.md)。
 
