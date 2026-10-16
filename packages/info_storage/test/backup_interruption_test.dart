@@ -25,7 +25,8 @@ void main() {
         '${root.path}/source',
         _Keys(),
       );
-      final owner = InformationService(repository: source).owner;
+      final service = InformationService(repository: source);
+      final owner = service.owner;
       for (var index = 0; index < 50; index++) {
         await owner.createInformation('Fictional $index', '', [
           for (var field = 0; field < 200; field++)
@@ -36,10 +37,24 @@ void main() {
             ),
         ]);
       }
+      final first = owner.information.first;
+      final field = FieldRef(first.id, first.fields.first.id);
+      await owner.correctValue(field, 'updated fictional value');
+      await owner.deleteInformation(first.id, 2, fieldId: first.fields.last.id);
+      final session = service.agent.openSession('fictional interruption chat');
+      final request = service.agent.request(session, 'verify backup history', [
+        field,
+      ]);
+      owner.approve(request.id, [field]);
+      await service.agent.read(
+        service.agent.claim(session, request.id).token,
+        field,
+      );
       await owner.setRequestLifetime(const Duration(minutes: 45));
       final key = await source.backups.enable();
       final backup = '${root.path}/many.aimbackup';
       await source.backups.exportTo(backup);
+      await service.close();
       await source.close();
       final targetPath = '${root.path}/recipient';
       final keys = WindowsDatabaseKeyStore('$targetPath/key.dpapi');
@@ -124,10 +139,21 @@ void main() {
       recipient = await EncryptedInformationRepository.open(targetPath, keys);
       final restoredOwner = InformationService(repository: recipient).owner;
       expect(restoredOwner.information, isEmpty);
+      expect(recipient.informationRevisions, isEmpty);
+      expect(recipient.recycleEntries, isEmpty);
+      expect(recipient.grantHistory, isEmpty);
+      expect(recipient.accessRecords, isEmpty);
       expect(restoredOwner.requestLifetime, const Duration(minutes: 15));
       await recipient.backups.restoreFrom(backup, key);
       expect(restoredOwner.information.length, 50);
       expect(restoredOwner.information.last.fields.length, 200);
+      expect(recipient.informationRevisions.length, 2);
+      expect(
+        recipient.recycleEntries.single.snapshot!.fields.single.id,
+        first.fields.last.id,
+      );
+      expect(recipient.grantHistory.single.active, isFalse);
+      expect(recipient.accessRecords.single.outcome, AccessOutcome.allowed);
       expect(restoredOwner.requestLifetime, const Duration(minutes: 45));
       await recipient.close();
     },

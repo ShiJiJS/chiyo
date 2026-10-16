@@ -140,6 +140,8 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
                             fontWeight: FontWeight.w600,
                           ),
                         ),
+                        if (grant.restoredAt != null)
+                          const Text('从备份恢复的历史事实，不代表当前有效授权。'),
                         const Text('聊天名称由 agent 自述；下面的会话标识由本机服务生成。'),
                         SelectableText('会话：${grant.sessionId}'),
                         Text(

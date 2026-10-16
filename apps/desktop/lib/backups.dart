@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:info_storage/info_storage.dart';
+import 'package:info_core/info_core.dart';
 
 /// The OS file-dialog boundary. Widget tests supply paths, never open dialogs.
 abstract class BackupFilePicker {
@@ -51,9 +52,13 @@ class BackupLibrary extends StatefulWidget {
   const BackupLibrary({
     super.key,
     required this.backups,
+    required this.owner,
+    this.onRestored,
     this.files = const NativeBackupFilePicker(),
   });
   final InformationBackups backups;
+  final OwnerAccess owner;
+  final VoidCallback? onRestored;
   final BackupFilePicker files;
   @override
   State<BackupLibrary> createState() => _BackupLibraryState();
@@ -128,7 +133,9 @@ class _BackupLibraryState extends State<BackupLibrary> {
     if (path == null) return;
     final staging = await widget.files.prepareStaging(path);
     try {
-      await widget.backups.exportTo(path, stagingParent: staging?.directory);
+      await widget.owner.exportLibrary(
+        () => widget.backups.exportTo(path, stagingParent: staging?.directory),
+      );
     } finally {
       if (staging != null) {
         try {
@@ -154,9 +161,12 @@ class _BackupLibraryState extends State<BackupLibrary> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('确认恢复当前资料'),
+        title: const Text('确认恢复资料库'),
         content: Text(
-          '备份时间：${snapshot.createdAt.toLocal()}\n信息 ${snapshot.informationCount} 项，目录 ${snapshot.directoryCount} 个，标签 ${snapshot.tagCount} 个，模板 ${snapshot.templateCount} 个。\n\n仅能恢复到空资料库，不会覆盖或合并现有资料。备份仅含当前资料及设置，不含待处理提案、审批、有效授权、历史版本、回收站或访问历史。恢复后 Agent 需要重新申请。',
+          '备份时间：${snapshot.createdAt.toLocal()}\n信息 ${snapshot.informationCount} 项，目录 ${snapshot.directoryCount} 个，标签 ${snapshot.tagCount} 个，模板 ${snapshot.templateCount} 个。\n'
+          '修改版本 ${snapshot.revisionCount} 条，可恢复回收站 ${snapshot.recycleCount} 条，授权历史 ${snapshot.grantHistoryCount} 条，访问记录 ${snapshot.accessRecordCount} 条。\n\n'
+          '${snapshot.formatVersion == 1 ? '这是早期格式，仅含当前资料及设置，不含历史或回收站。' : '历史按各自原保留时间恢复，到期内容不会重新获得保留期。'}'
+          '\n仅能恢复到空资料库，不会覆盖或合并现有资料。不含提案、待审批或有效凭据；本机已有会话凭据也会失效。授权历史仅作为过去事实恢复，Agent 需要重新申请。',
         ),
         actions: [
           TextButton(
@@ -171,7 +181,8 @@ class _BackupLibraryState extends State<BackupLibrary> {
       ),
     );
     if (confirm != true) return;
-    await widget.backups.restore(snapshot);
+    await widget.owner.restoreLibrary(() => widget.backups.restore(snapshot));
+    widget.onRestored?.call();
     if (mounted) setState(() => _message = '资料已恢复，请到“我的信息”查看。Agent 需要重新申请访问。');
   }
 
@@ -184,7 +195,11 @@ class _BackupLibraryState extends State<BackupLibrary> {
       const Text('当前为开发版本，请仅使用虚构资料。跨平台及真实桌面恢复仍待验收。'),
       const SizedBox(height: 12),
       const Text(
-        '备份包含当前信息、目录、标签、字段模板及设置。历史版本、回收站、访问历史、待处理提案及审批不在此版备份范围内。备份不会保存有效授权或本机数据库密钥。',
+        '备份包含当前信息、目录、标签、字段模板及设置，以及尚在各自保留期内的修改版本、回收站、授权历史和访问记录。保留无内容的删除及版本标识，以维持数据关系。不保存提案、待审批、有效凭据、本机数据库密钥或恢复密钥。',
+      ),
+      const SizedBox(height: 12),
+      const Text(
+        '已导出的离线备份不会随应用中的到期清理而删除旧内容；请自行管理和删除离线备份。恢复时再次按原时间清理到期内容，不延长保留期。恢复期间暂缓 Agent 访问，完成后需要重新申请。',
       ),
       const SizedBox(height: 20),
       const Text(

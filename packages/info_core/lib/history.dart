@@ -44,13 +44,29 @@ class GrantHistory {
     required this.expiresAt,
     required Iterable<RecordedField> fields,
     required Iterable<GrantEvent> events,
+    this.restoredAt,
   }) : fields = List.unmodifiable(fields),
        events = List.unmodifiable(events);
   final String id, requestId, sessionId, chatLabel;
   final DateTime approvedAt, expiresAt;
+
+  /// Imported facts never represent a live permission in this installation.
+  final DateTime? restoredAt;
   final List<RecordedField> fields;
   final List<GrantEvent> events;
-  bool get active => events.last.kind == GrantEventKind.approved;
+  bool get active =>
+      restoredAt == null && events.last.kind == GrantEventKind.approved;
+  GrantHistory asRestored(DateTime at) => GrantHistory(
+    id: id,
+    requestId: requestId,
+    sessionId: sessionId,
+    chatLabel: chatLabel,
+    approvedAt: approvedAt,
+    expiresAt: expiresAt,
+    fields: fields,
+    events: events,
+    restoredAt: at,
+  );
   GrantHistory finish(GrantEventKind kind, DateTime at) => GrantHistory(
     id: id,
     requestId: requestId,
@@ -60,6 +76,7 @@ class GrantHistory {
     expiresAt: expiresAt,
     fields: fields,
     events: [...events, GrantEvent(kind, at)],
+    restoredAt: restoredAt,
   );
   Map<String, Object?> toJson() => {
     'id': id,
@@ -70,6 +87,7 @@ class GrantHistory {
     'expiresAt': expiresAt.toUtc().toIso8601String(),
     'fields': fields.map((f) => f.toJson()).toList(),
     'events': events.map((e) => e.toJson()).toList(),
+    if (restoredAt != null) 'restoredAt': restoredAt!.toUtc().toIso8601String(),
   };
   factory GrantHistory.fromJson(Map<String, dynamic> json) => GrantHistory(
     id: json['id'] as String,
@@ -84,6 +102,9 @@ class GrantHistory {
     events: (json['events'] as List).map(
       (e) => GrantEvent.fromJson(e as Map<String, dynamic>),
     ),
+    restoredAt: json['restoredAt'] == null
+        ? null
+        : DateTime.parse(json['restoredAt'] as String),
   );
 }
 

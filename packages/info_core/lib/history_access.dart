@@ -66,7 +66,9 @@ extension _AuditService on InformationService {
   }
 
   Future<String> _readWithAudit(_Request? request, FieldRef target) async {
-    if (_closed) throw const AccessFailure('service_unavailable');
+    if (_closed || _backupBusy) {
+      throw const AccessFailure('service_unavailable');
+    }
     final allowed = _canRead(request, target);
     // Unknown caller-supplied identifiers are not copied to the audit store.
     // A request without a recognized bearer is deliberately not associated
@@ -132,6 +134,11 @@ extension _AuditService on InformationService {
 extension OwnerAuditAccess on OwnerAccess {
   bool get auditStorageUnavailable => _service._auditFailed;
   Future<void> retryAuditStorage() async {
+    if (_service._backupBusy) throw const AccessFailure('service_unavailable');
+    await _retryAuditStorage();
+  }
+
+  Future<void> _retryAuditStorage() async {
     await _service._auditWrites;
     _service._auditFailed = false;
     _service._enqueueAudit(() async {});
@@ -143,6 +150,7 @@ extension OwnerAuditAccess on OwnerAccess {
       _service._repository.readSetting('auditRetentionDays') ?? 90;
 
   Future<AuditHistory> history() async {
+    if (_service._backupBusy) throw const AccessFailure('service_unavailable');
     for (final request in _service._requests.values) {
       _service._expire(request);
     }

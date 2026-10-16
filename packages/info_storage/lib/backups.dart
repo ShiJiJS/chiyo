@@ -1,19 +1,26 @@
 part of 'info_storage.dart';
 
-/// A fully authenticated and validated current-data snapshot, held in memory.
+/// A fully authenticated and validated snapshot, held in memory.
 /// It carries no usable grant, pending request or source database key.
 class BackupContents {
-  BackupContents._(this._tables, this.createdAt);
+  BackupContents._(this._tables, this.createdAt, this.formatVersion);
   final Map<String, List<Map<String, Object?>>> _tables;
   final DateTime createdAt;
+  final int formatVersion;
   int get informationCount => _tables['information_items']!.length;
   int get directoryCount => _tables['information_directories']!.length;
   int get tagCount => _tables['information_tags']!.length;
   int get templateCount => _tables['field_templates']!.length;
+  int get revisionCount => _tables['information_revisions']!.length;
+  int get recycleCount => _tables['recycle_entries']!
+      .where((r) => jsonDecode(r['payload'] as String)['state'] == 'available')
+      .length;
+  int get grantHistoryCount => _tables['grant_history']!.length;
+  int get accessRecordCount => _tables['access_records']!.length;
 }
 
 /// Owner-only manual backup capability. It is never part of the agent server.
-/// Format 1 is a SQLCipher 4 encrypted envelope containing a logical snapshot.
+/// Both supported payload versions use the existing SQLCipher 4 envelope.
 class InformationBackups {
   InformationBackups._(this._repository);
   final EncryptedInformationRepository _repository;
@@ -44,6 +51,15 @@ class InformationBackups {
     'information_item_tags': ['item_id', 'tag_id'],
     'settings': ['name', 'value'],
   };
+  static const _historyColumns = <String, List<String>>{
+    'information_revisions': ['item_id', 'version', 'replaced_at', 'payload'],
+    'recycle_entries': ['id', 'payload'],
+    'recycle_facts': ['payload'],
+    'revision_purge_facts': ['item_id', 'version', 'purged_at'],
+    'grant_history': ['id', 'approved_at', 'payload'],
+    'access_records': ['id', 'recorded_at', 'payload'],
+  };
+  static const _allColumns = {..._columns, ..._historyColumns};
 
   void _checkOpen() {
     if (_repository._closed) throw const StorageFailure('library_closed');
@@ -166,7 +182,8 @@ class InformationBackups {
     _checkOpen();
     return _repository._db.transaction(() async {
       final tables = <String, Object?>{};
-      for (final table in _columns.entries) {
+      final now = _repository._clock().toUtc();
+      for (final table in _allColumns.entries) {
         final rows = await _repository._db
             .customSelect(
               'SELECT ${table.value.join(',')} FROM ${table.key} ORDER BY rowid',
@@ -174,12 +191,15 @@ class InformationBackups {
             .get();
         tables[table.key] = rows.map((row) => row.data).toList();
       }
-      return _validate({
-        'format': _format,
-        'version': 1,
-        'createdAt': DateTime.now().toUtc().toIso8601String(),
-        'tables': tables,
-      });
+      return _retain(
+        _validate({
+          'format': _format,
+          'version': 2,
+          'createdAt': now.toIso8601String(),
+          'tables': tables,
+        }),
+        now,
+      );
     });
   }
 
@@ -196,7 +216,7 @@ class InformationBackups {
       final snapshot = await _snapshot();
       final payload = jsonEncode({
         'format': _format,
-        'version': 1,
+        'version': 2,
         'createdAt': snapshot.createdAt.toIso8601String(),
         'tables': snapshot._tables,
       });
@@ -304,7 +324,10 @@ class InformationBackups {
           .select('SELECT payload FROM backup_snapshot')
           .single['payload'];
       if (payload is! String) throw const StorageFailure('invalid_backup');
-      return _validate(jsonDecode(payload));
+      return _retain(
+        _validate(jsonDecode(payload)),
+        _repository._clock().toUtc(),
+      );
     } catch (error) {
       if (error is StorageFailure) rethrow;
       throw const StorageFailure('invalid_backup');
@@ -321,6 +344,14 @@ class InformationBackups {
   Future<BackupContents> restore(BackupContents contents) async {
     _checkOpen();
     try {
+      contents = _retain(
+        contents,
+        _repository._clock().toUtc(),
+        restored: true,
+      );
+      // Construct all models before committing; cache publication cannot fail
+      // afterward due to a payload decode or a second database read.
+      final install = _prepareInstall(contents);
       await _repository._db.transaction(() async {
         final existingTables = await _repository._db
             .customSelect(
@@ -347,7 +378,7 @@ class InformationBackups {
         await _repository._db.customStatement('DELETE FROM settings');
         // Directory parents may appear after a moved child in source row order.
         await _repository._db.customStatement('PRAGMA defer_foreign_keys = ON');
-        for (final table in _columns.entries) {
+        for (final table in _allColumns.entries) {
           final placeholders = List.filled(table.value.length, '?').join(',');
           for (final row in contents._tables[table.key]!) {
             await _repository._db.customStatement(
@@ -357,8 +388,7 @@ class InformationBackups {
           }
         }
       });
-      _repository._settings.clear();
-      await _repository._load();
+      install();
       return contents;
     } catch (error) {
       if (error is StorageFailure) rethrow;
@@ -371,28 +401,32 @@ class InformationBackups {
     if (decoded is! Map<String, dynamic>) invalid();
     if (decoded['format'] != _format ||
         decoded['version'] is! int ||
-        decoded['version'] != 1)
+        ![1, 2].contains(decoded['version']))
       throw const StorageFailure('unsupported_backup');
     if (decoded.length != 4 ||
         decoded['tables'] is! Map<String, dynamic> ||
         decoded['createdAt'] is! String ||
         (decoded['createdAt'] as String).length > 64)
       invalid();
-    final createdAt = DateTime.tryParse(decoded['createdAt'] as String);
-    if (createdAt == null) invalid();
+    final createdAt = _backupDate(decoded['createdAt']);
+    final columns = decoded['version'] == 1 ? _columns : _allColumns;
     final data = decoded['tables'] as Map<String, dynamic>;
-    if (data.length != _columns.length ||
-        data.keys.any((key) => !_columns.containsKey(key)))
+    if (data.length != columns.length ||
+        data.keys.any((key) => !columns.containsKey(key)))
       invalid();
     final tables = <String, List<Map<String, Object?>>>{};
-    for (final table in _columns.entries) {
+    var totalRows = 0;
+    for (final table in columns.entries) {
       final rows = data[table.key];
       final maximum = switch (table.key) {
         'information_fields' || 'information_item_tags' => 200000,
         'field_templates' || 'settings' => 1000,
+        'access_records' || 'recycle_facts' || 'revision_purge_facts' => 200000,
         _ => 10000,
       };
       if (rows is! List || rows.length > maximum) invalid();
+      totalRows += rows.length;
+      if (totalRows > 500000) invalid();
       tables[table.key] = rows
           .map((value) {
             if (value is! Map<String, dynamic> ||
@@ -402,6 +436,9 @@ class InformationBackups {
             return Map<String, Object?>.unmodifiable(value);
           })
           .toList(growable: false);
+    }
+    for (final table in _historyColumns.keys) {
+      tables.putIfAbsent(table, () => const []);
     }
     String text(
       Map<String, Object?> row,
@@ -517,6 +554,11 @@ class InformationBackups {
       if (name == 'auditRetentionDays' && ![30, 90, 180, 365].contains(value))
         invalid();
     }
-    return BackupContents._(Map.unmodifiable(tables), createdAt);
+    _validateBackupHistory(tables, createdAt);
+    return BackupContents._(
+      Map.unmodifiable(tables),
+      createdAt,
+      decoded['version'] as int,
+    );
   }
 }
