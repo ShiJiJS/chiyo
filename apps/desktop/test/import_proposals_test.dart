@@ -23,7 +23,7 @@ void main() {
       final tag = await service.owner.createTag('Reviewed tag');
       await tester.pumpWidget(InformationApp(service: service, port: 0));
       // Mount the library first, so switching back proves it refreshes existing UI.
-      await tester.tap(find.text('我的信息'));
+      await tester.tap(find.byKey(const ValueKey('nav-1')));
       await tester.pumpAndSettle();
       final session = service.agent.openSession('importing chat');
       final id = await service.agent.submitImport(session, [
@@ -67,9 +67,9 @@ void main() {
         service.owner.information.first.fields.single.value,
         'reviewed.invalid',
       );
-      await tester.tap(find.text('我的信息'));
+      await tester.tap(find.byKey(const ValueKey('nav-1')));
       await tester.pumpAndSettle();
-      expect(find.text('Reviewed item'), findsOneWidget);
+      expect(find.text('Reviewed item'), findsNWidgets(2));
       expect(find.text('Second suggestion'), findsOneWidget);
       expect(tester.takeException(), isNull);
       await tester.pumpWidget(const SizedBox());

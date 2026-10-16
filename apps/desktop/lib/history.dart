@@ -66,106 +66,109 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
   }
 
   @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.fromLTRB(26, 25, 26, 20),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        const PageHeading('授权与访问记录', subtitle: '查看批准范围、有效期，以及之后的实际访问。'),
-        Expanded(
-          child: ListView(
-            children: [
-              Wrap(
-                spacing: 14,
-                runSpacing: 8,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                children: [
-                  const Text('记录保留时间'),
-                  DesktopSelect<int>(
-                    key: const ValueKey('audit-retention'),
-                    value: widget.owner.auditRetentionDays,
-                    items: [30, 90, 180, 365]
-                        .map(
-                          (days) => DropdownMenuItem(
-                            value: days,
-                            child: Text('$days 天'),
+  Widget build(BuildContext context) => ReadingWorkspace(
+    child: Padding(
+      padding: UiSpace.page,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const PageHeading('授权与访问记录', subtitle: '查看批准范围、有效期，以及之后的实际访问。'),
+          Expanded(
+            child: ListView(
+              children: [
+                Wrap(
+                  spacing: 14,
+                  runSpacing: 8,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    const Text('记录保留时间'),
+                    DesktopSelect<int>(
+                      key: const ValueKey('audit-retention'),
+                      value: widget.owner.auditRetentionDays,
+                      items: [30, 90, 180, 365]
+                          .map(
+                            (days) => DropdownMenuItem(
+                              value: days,
+                              child: Text('$days 天'),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: _busy
+                          ? null
+                          : (days) {
+                              if (days != null) _run(() => _retention(days));
+                            },
+                    ),
+                    TextButton.icon(
+                      onPressed: _busy ? null : _reload,
+                      icon: const Icon(Icons.refresh, size: 17),
+                      label: const Text('刷新记录'),
+                    ),
+                  ],
+                ),
+                const QuietNotice('记录不含字段值、访问凭据或密钥。撤销只阻止后续读取，无法收回已提供的内容。'),
+                const SizedBox(height: 20),
+                const Divider(),
+                FutureBuilder<AuditHistory>(
+                  future: _history,
+                  builder: (context, snapshot) {
+                    if (snapshot.hasError) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const QuietNotice(
+                            '授权历史暂不可用。记录保存异常时，信息读取已暂停；修复存储后可重试保存。',
+                            warning: true,
                           ),
-                        )
-                        .toList(),
-                    onChanged: _busy
-                        ? null
-                        : (days) {
-                            if (days != null) _run(() => _retention(days));
-                          },
-                  ),
-                  TextButton.icon(
-                    onPressed: _busy ? null : _reload,
-                    icon: const Icon(Icons.refresh, size: 17),
-                    label: const Text('刷新记录'),
-                  ),
-                ],
-              ),
-              const QuietNotice('记录不含字段值、访问凭据或密钥。撤销只阻止后续读取，无法收回已提供的内容。'),
-              const SizedBox(height: 14),
-              FutureBuilder<AuditHistory>(
-                future: _history,
-                builder: (context, snapshot) {
-                  if (snapshot.hasError) {
+                          FilledButton(
+                            onPressed: _busy
+                                ? null
+                                : () => _run(widget.owner.retryAuditStorage),
+                            child: const Text('重试保存记录'),
+                          ),
+                        ],
+                      );
+                    }
+                    final history = snapshot.data;
+                    if (history == null) return const LinearProgressIndicator();
+                    final ids = history.grants.map((g) => g.id).toSet();
                     return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        const QuietNotice(
-                          '授权历史暂不可用。记录保存异常时，信息读取已暂停；修复存储后可重试保存。',
-                          warning: true,
-                        ),
-                        FilledButton(
-                          onPressed: _busy
-                              ? null
-                              : () => _run(widget.owner.retryAuditStorage),
-                          child: const Text('重试保存记录'),
-                        ),
+                        if (history.grants.isEmpty)
+                          const SizedBox(
+                            height: 270,
+                            child: EmptyWorkspace(
+                              icon: Icons.history,
+                              title: '暂无授权历史。',
+                              description: '批准申请后，可以在这里查看实际提供的范围，并撤销仍然有效的授权。',
+                            ),
+                          ),
+                        for (final grant in history.grants.reversed)
+                          _grant(grant, history),
+                        if (history.accesses.any(
+                          (r) => !ids.contains(r.grantId),
+                        )) ...[
+                          const SizedBox(height: 24),
+                          Text(
+                            '未关联保留中授权的读取尝试',
+                            style: Theme.of(context).textTheme.titleSmall,
+                          ),
+                          const QuietNotice('包含无法识别凭据的请求，或原授权已按期限清理的读取。'),
+                          for (final record in history.accesses.where(
+                            (r) => !ids.contains(r.grantId),
+                          ))
+                            _record(record),
+                        ],
                       ],
                     );
-                  }
-                  final history = snapshot.data;
-                  if (history == null) return const LinearProgressIndicator();
-                  final ids = history.grants.map((g) => g.id).toSet();
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      if (history.grants.isEmpty)
-                        const SizedBox(
-                          height: 270,
-                          child: EmptyWorkspace(
-                            icon: Icons.history,
-                            title: '暂无授权历史。',
-                            description: '批准申请后，可以在这里查看实际提供的范围，并撤销仍然有效的授权。',
-                          ),
-                        ),
-                      for (final grant in history.grants.reversed)
-                        _grant(grant, history),
-                      if (history.accesses.any(
-                        (r) => !ids.contains(r.grantId),
-                      )) ...[
-                        const SizedBox(height: 24),
-                        Text(
-                          '未关联保留中授权的读取尝试',
-                          style: Theme.of(context).textTheme.titleMedium,
-                        ),
-                        const QuietNotice('包含无法识别凭据的请求，或原授权已按期限清理的读取。'),
-                        for (final record in history.accesses.where(
-                          (r) => !ids.contains(r.grantId),
-                        ))
-                          _record(record),
-                      ],
-                    ],
-                  );
-                },
-              ),
-            ],
+                  },
+                ),
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     ),
   );
 
@@ -176,9 +179,9 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
     final events = grant.events
         .where((event) => event.kind != GrantEventKind.approved)
         .toList();
-    return Card(
+    return RecordSurface(
       child: Padding(
-        padding: const EdgeInsets.all(21),
+        padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 4),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -188,7 +191,7 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
                 Expanded(
                   child: Text(
                     '聊天：${grant.chatLabel}',
-                    style: Theme.of(context).textTheme.titleMedium,
+                    style: Theme.of(context).textTheme.titleSmall,
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -225,7 +228,7 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
                 padding: const EdgeInsets.symmetric(vertical: 5),
                 child: Row(
                   children: [
-                    const Icon(Icons.check, size: 16, color: UiColors.green),
+                    const Icon(Icons.check, size: 16, color: UiColors.accent),
                     const SizedBox(width: 9),
                     Expanded(
                       child: Text('${field.itemName} · ${field.fieldName}'),

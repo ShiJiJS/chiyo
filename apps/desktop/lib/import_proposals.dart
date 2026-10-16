@@ -39,34 +39,43 @@ class _ImportProposalsPageState extends State<ImportProposalsPage> {
   }
 
   @override
-  Widget build(BuildContext context) => ListView(
-    padding: const EdgeInsets.fromLTRB(26, 25, 26, 20),
-    children: [
-      const PageHeading('待确认的提案', subtitle: '先查看和调整内容，确认后才会写入资料库。'),
-      const QuietNotice('公开名称、描述和字段说明会进入 Agent 目录；字段值仍需另行授权。'),
-      const SizedBox(height: 14),
-      DeleteProposalsList(
-        owner: widget.owner,
-        onChanged: () => setState(() {}),
-      ),
-      UpdateProposalsList(
-        owner: widget.owner,
-        onChanged: () => setState(() {}),
-      ),
-      if (widget.owner.importProposals.isEmpty &&
-          widget.owner.updateProposals.isEmpty &&
-          widget.owner.deleteProposals.isEmpty)
-        const SizedBox(
-          height: 320,
-          child: EmptyWorkspace(
-            icon: Icons.playlist_add_outlined,
-            title: '暂无录入提案。',
-            description: '让 Agent 整理信息并提交提案，你可以在这里批量预览与确认。',
-          ),
+  Widget build(BuildContext context) => ReadingWorkspace(
+    width: 1080,
+    child: ListView(
+      padding: UiSpace.page,
+      children: [
+        const PageHeading('录入与变更提案', subtitle: '先查看和调整内容，确认后才会写入资料库。'),
+        const QuietNotice('公开名称、描述和字段说明会进入 Agent 目录；字段值仍需另行授权。'),
+        const SizedBox(height: 14),
+        if (widget.owner.updateProposals.isNotEmpty ||
+            widget.owner.deleteProposals.isNotEmpty)
+          const SectionHeading('变更与删除'),
+        DeleteProposalsList(
+          owner: widget.owner,
+          onChanged: () => setState(() {}),
         ),
-      for (final proposal in widget.owner.importProposals.reversed)
-        Card(
-          child: ListTile(
+        UpdateProposalsList(
+          owner: widget.owner,
+          onChanged: () => setState(() {}),
+        ),
+        if (widget.owner.importProposals.isEmpty &&
+            widget.owner.updateProposals.isEmpty &&
+            widget.owner.deleteProposals.isEmpty)
+          const SizedBox(
+            height: 320,
+            child: EmptyWorkspace(
+              icon: Icons.playlist_add_outlined,
+              title: '暂无录入提案。',
+              description: '让 Agent 整理信息并提交提案，你可以在这里批量预览与确认。',
+            ),
+          ),
+        if (widget.owner.importProposals.isNotEmpty)
+          const Padding(
+            padding: EdgeInsets.only(top: 24),
+            child: SectionHeading('新增信息'),
+          ),
+        for (final proposal in widget.owner.importProposals.reversed)
+          WorkspaceRecord(
             title: Text('${proposal.chatLabel} · ${proposal.itemCount} 条信息'),
             subtitle: Text(switch (proposal.state) {
               ImportProposalState.pending => '待确认',
@@ -80,8 +89,8 @@ class _ImportProposalsPageState extends State<ImportProposalsPage> {
                   )
                 : null,
           ),
-        ),
-    ],
+      ],
+    ),
   );
 }
 
@@ -185,7 +194,7 @@ class _ReviewImportState extends State<_ReviewImport> {
   Widget build(BuildContext context) => DesktopDialog(
     title: Text('确认 ${_items.length} 条新增信息'),
     content: SizedBox(
-      width: 760,
+      width: 860,
       height: 720,
       child: SingleChildScrollView(
         child: Column(
@@ -194,139 +203,166 @@ class _ReviewImportState extends State<_ReviewImport> {
             const Text('请检查公开描述是否含隐私。入库不会给提交提案的 Agent 自动授权，也不会覆盖已有信息。'),
             for (var i = 0; i < _items.length; i++) ...[
               const Divider(height: 32),
-              Text('信息 ${i + 1}'),
-              if (_items[i].original.suggestedDirectory.isNotEmpty ||
-                  _items[i].original.suggestedTags.isNotEmpty ||
-                  _items[i].original.suggestedTemplate.isNotEmpty)
-                Text(
-                  'Agent 建议：目录 ${_items[i].original.suggestedDirectory}；标签 ${_items[i].original.suggestedTags.join('、')}；模板 ${_items[i].original.suggestedTemplate}（仅作参考，不自动创建或套用）',
-                ),
-              DesktopTextField(
-                key: ValueKey('proposal-name-$i'),
-                controller: _items[i].name,
-                enabled: !_saving,
-                maxLength: 200,
-                decoration: const InputDecoration(labelText: '信息名称（公开）'),
-              ),
-              DesktopTextField(
-                key: ValueKey('proposal-description-$i'),
-                controller: _items[i].description,
-                enabled: !_saving,
-                maxLength: 2000,
-                decoration: const InputDecoration(labelText: '公开描述'),
-              ),
-              DesktopSelect<String>(
-                key: ValueKey('proposal-directory-$i'),
-                initialValue:
-                    widget.owner.directories.any(
-                      (d) => d.id == _items[i].directoryId,
-                    )
-                    ? _items[i].directoryId
-                    : null,
-                decoration: const InputDecoration(labelText: '目录（本人整理）'),
-                isExpanded: true,
-                items: [
-                  const DropdownMenuItem(value: null, child: Text('未分类')),
-                  for (final d in widget.owner.directories)
-                    DropdownMenuItem(
-                      value: d.id,
-                      child: Text(directoryPath(widget.owner, d.id)),
-                    ),
-                ],
-                onChanged: _saving
-                    ? null
-                    : (id) => setState(() => _items[i].directoryId = id),
-              ),
-              Wrap(
-                spacing: 8,
-                children: [
-                  for (var t = 0; t < widget.owner.tags.length; t++)
-                    FilterChip(
-                      key: ValueKey('proposal-tag-$i-$t'),
-                      label: Text(widget.owner.tags[t].name),
-                      selected: _items[i].tagIds.contains(
-                        widget.owner.tags[t].id,
+              SectionHeading('信息 ${i + 1}'),
+              const SizedBox(height: 8),
+              EditorColumns(
+                metadata: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const SectionHeading('公开目录', detail: 'Agent 可见'),
+                    if (_items[i].original.suggestedDirectory.isNotEmpty ||
+                        _items[i].original.suggestedTags.isNotEmpty ||
+                        _items[i].original.suggestedTemplate.isNotEmpty)
+                      Text(
+                        'Agent 建议：目录 ${_items[i].original.suggestedDirectory}；标签 ${_items[i].original.suggestedTags.join('、')}；模板 ${_items[i].original.suggestedTemplate}（仅作参考，不自动创建或套用）',
                       ),
-                      onSelected: _saving
+                    DesktopTextField(
+                      key: ValueKey('proposal-name-$i'),
+                      controller: _items[i].name,
+                      enabled: !_saving,
+                      maxLength: 200,
+                      decoration: const InputDecoration(labelText: '信息名称（公开）'),
+                    ),
+                    DesktopTextField(
+                      key: ValueKey('proposal-description-$i'),
+                      controller: _items[i].description,
+                      enabled: !_saving,
+                      maxLength: 2000,
+                      decoration: const InputDecoration(labelText: '公开描述'),
+                    ),
+                    DesktopSelect<String>(
+                      key: ValueKey('proposal-directory-$i'),
+                      initialValue:
+                          widget.owner.directories.any(
+                            (d) => d.id == _items[i].directoryId,
+                          )
+                          ? _items[i].directoryId
+                          : null,
+                      decoration: const InputDecoration(labelText: '目录（本人整理）'),
+                      isExpanded: true,
+                      items: [
+                        const DropdownMenuItem(value: null, child: Text('未分类')),
+                        for (final d in widget.owner.directories)
+                          DropdownMenuItem(
+                            value: d.id,
+                            child: Text(directoryPath(widget.owner, d.id)),
+                          ),
+                      ],
+                      onChanged: _saving
                           ? null
-                          : (selected) => setState(() {
-                              if (selected) {
-                                _items[i].tagIds.add(widget.owner.tags[t].id);
-                              } else {
-                                _items[i].tagIds.remove(
-                                  widget.owner.tags[t].id,
-                                );
-                              }
-                            }),
+                          : (id) => setState(() => _items[i].directoryId = id),
                     ),
-                ],
-              ),
-              for (var f = 0; f < _items[i].fields.length; f++) ...[
-                DesktopTextField(
-                  key: ValueKey('proposal-field-name-$i-$f'),
-                  controller: _items[i].fields[f].name,
-                  enabled: !_saving,
-                  maxLength: 200,
-                  decoration: const InputDecoration(labelText: '字段名称（公开）'),
-                ),
-                DesktopTextField(
-                  key: ValueKey('proposal-field-description-$i-$f'),
-                  controller: _items[i].fields[f].description,
-                  enabled: !_saving,
-                  maxLength: 2000,
-                  decoration: const InputDecoration(labelText: '字段说明（公开）'),
-                ),
-                DesktopSelect<FieldKind>(
-                  initialValue: _items[i].fields[f].kind,
-                  decoration: const InputDecoration(labelText: '字段类型'),
-                  items: const [
-                    DropdownMenuItem(
-                      value: FieldKind.structured,
-                      child: Text('结构化字段'),
-                    ),
-                    DropdownMenuItem(
-                      value: FieldKind.textNote,
-                      child: Text('文本说明'),
+                    Wrap(
+                      spacing: 8,
+                      children: [
+                        for (var t = 0; t < widget.owner.tags.length; t++)
+                          FilterChip(
+                            key: ValueKey('proposal-tag-$i-$t'),
+                            label: Text(widget.owner.tags[t].name),
+                            selected: _items[i].tagIds.contains(
+                              widget.owner.tags[t].id,
+                            ),
+                            onSelected: _saving
+                                ? null
+                                : (selected) => setState(() {
+                                    if (selected) {
+                                      _items[i].tagIds.add(
+                                        widget.owner.tags[t].id,
+                                      );
+                                    } else {
+                                      _items[i].tagIds.remove(
+                                        widget.owner.tags[t].id,
+                                      );
+                                    }
+                                  }),
+                          ),
+                      ],
                     ),
                   ],
-                  onChanged: _saving
-                      ? null
-                      : (kind) =>
-                            setState(() => _items[i].fields[f].kind = kind!),
                 ),
-                DesktopTextField(
-                  key: ValueKey('proposal-value-$i-$f'),
-                  controller: _items[i].fields[f].value,
-                  enabled: !_saving,
-                  maxLength: 64000,
-                  minLines: 1,
-                  maxLines: 4,
-                  decoration: const InputDecoration(labelText: '字段值（需要授权）'),
-                ),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: _saving || _items[i].fields.length <= 1
-                        ? null
-                        : () => setState(() {
-                            _items[i].fields.removeAt(f).dispose();
-                          }),
-                    child: const Text('移除此字段'),
-                  ),
-                ),
-              ],
-              TextButton(
-                onPressed: _saving || _items[i].fields.length >= 50
-                    ? null
-                    : () => setState(
-                        () => _items[i].fields.add(
-                          _DraftField(const FieldInput('', '', '')),
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const SectionHeading('信息字段', detail: '字段值需另行授权'),
+                    for (var f = 0; f < _items[i].fields.length; f++) ...[
+                      const SizedBox(height: 16),
+                      DesktopTextField(
+                        key: ValueKey('proposal-field-name-$i-$f'),
+                        controller: _items[i].fields[f].name,
+                        enabled: !_saving,
+                        maxLength: 200,
+                        decoration: const InputDecoration(
+                          labelText: '字段名称（公开）',
                         ),
                       ),
-                child: const Text('添加字段'),
+                      DesktopTextField(
+                        key: ValueKey('proposal-field-description-$i-$f'),
+                        controller: _items[i].fields[f].description,
+                        enabled: !_saving,
+                        maxLength: 2000,
+                        decoration: const InputDecoration(
+                          labelText: '字段说明（公开）',
+                        ),
+                      ),
+                      DesktopSelect<FieldKind>(
+                        initialValue: _items[i].fields[f].kind,
+                        decoration: const InputDecoration(labelText: '字段类型'),
+                        items: const [
+                          DropdownMenuItem(
+                            value: FieldKind.structured,
+                            child: Text('结构化字段'),
+                          ),
+                          DropdownMenuItem(
+                            value: FieldKind.textNote,
+                            child: Text('文本说明'),
+                          ),
+                        ],
+                        onChanged: _saving
+                            ? null
+                            : (kind) => setState(
+                                () => _items[i].fields[f].kind = kind!,
+                              ),
+                      ),
+                      DesktopTextField(
+                        key: ValueKey('proposal-value-$i-$f'),
+                        controller: _items[i].fields[f].value,
+                        enabled: !_saving,
+                        maxLength: 64000,
+                        minLines: 1,
+                        maxLines: 4,
+                        decoration: const InputDecoration(
+                          labelText: '字段值（需要授权）',
+                        ),
+                      ),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton(
+                          onPressed: _saving || _items[i].fields.length <= 1
+                              ? null
+                              : () => setState(() {
+                                  _items[i].fields.removeAt(f).dispose();
+                                }),
+                          child: const Text('移除此字段'),
+                        ),
+                      ),
+                    ],
+                    TextButton(
+                      onPressed: _saving || _items[i].fields.length >= 50
+                          ? null
+                          : () => setState(
+                              () => _items[i].fields.add(
+                                _DraftField(const FieldInput('', '', '')),
+                              ),
+                            ),
+                      child: const Text('添加字段'),
+                    ),
+                  ],
+                ),
               ),
             ],
-            if (_error != null) Text(_error!),
+            if (_error != null) QuietNotice(_error!, warning: true),
           ],
         ),
       ),

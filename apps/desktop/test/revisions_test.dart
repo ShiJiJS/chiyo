@@ -50,7 +50,8 @@ void main() {
         service.owner.recycleEntries.where((e) => e.id == entry.id),
         isEmpty,
       );
-      await tester.pageBack();
+      await tester.tap(find.byKey(const ValueKey('subpage-back')));
+      await tester.pumpAndSettle();
       await tester.pumpAndSettle();
       await tester.tap(find.text('查看差异').last);
       await tester.pumpAndSettle();
@@ -91,7 +92,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(home: InformationLibrary(owner: service.owner)),
       );
-      await tester.tap(find.text('Fictional demo server'));
+      await tester.tap(find.text('Fictional demo server').first);
       await tester.pumpAndSettle();
       await tester.tap(find.text('修改历史'));
       await tester.pumpAndSettle();

@@ -25,6 +25,6 @@ void main() {
       service.owner.information.single.fields.single.value,
       'fictional.invalid',
     );
-    expect(find.text('虚构服务器'), findsOneWidget);
+    expect(find.text('虚构服务器'), findsNWidgets(2));
   });
 }

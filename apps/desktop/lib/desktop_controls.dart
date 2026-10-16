@@ -112,28 +112,38 @@ class _FieldFrame extends StatelessWidget {
   final String? label;
   final Widget child;
   @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.only(bottom: 14),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        if (label != null) ...[
-          Semantics(
-            label: label,
-            child: ExcludeSemantics(
+  Widget build(BuildContext context) {
+    final protected = label?.contains('需要授权') == true;
+    return Container(
+      margin: const EdgeInsets.only(bottom: 14),
+      padding: protected
+          ? const EdgeInsets.fromLTRB(14, 12, 14, 0)
+          : EdgeInsets.zero,
+      decoration: protected
+          ? BoxDecoration(
+              color: Theme.of(context).colorScheme.surfaceContainerLow,
+              borderRadius: BorderRadius.circular(6),
+            )
+          : null,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (label != null) ...[
+            ExcludeSemantics(
               child: Text(
                 label!,
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
             ),
-          ),
-          const SizedBox(height: 6),
+            const SizedBox(height: 6),
+          ],
+          Semantics(label: label, child: child),
+          if (protected) const SizedBox(height: 14),
         ],
-        Semantics(label: label, child: child),
-      ],
-    ),
-  );
+      ),
+    );
+  }
 }
 
 // MenuAnchor supplies desktop pointer and keyboard navigation. Item identity
@@ -218,6 +228,7 @@ class _DesktopSelectState<T> extends State<DesktopSelect<T>> {
               : null,
           style: OutlinedButton.styleFrom(
             backgroundColor: Colors.white,
+            alignment: Alignment.centerLeft,
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
           ),
           child: Row(
@@ -245,11 +256,12 @@ class DesktopDialog extends StatelessWidget {
   final List<Widget>? actions;
   @override
   Widget build(BuildContext context) => AlertDialog(
+    insetPadding: const EdgeInsets.symmetric(horizontal: 28, vertical: 28),
     titlePadding: EdgeInsets.zero,
     title: title == null
         ? null
         : Container(
-            padding: const EdgeInsets.fromLTRB(22, 18, 22, 18),
+            padding: const EdgeInsets.fromLTRB(24, 19, 24, 19),
             decoration: BoxDecoration(
               border: Border(
                 bottom: BorderSide(color: Theme.of(context).dividerColor),
@@ -257,9 +269,9 @@ class DesktopDialog extends StatelessWidget {
             ),
             child: title,
           ),
-    contentPadding: const EdgeInsets.fromLTRB(22, 20, 22, 8),
+    contentPadding: const EdgeInsets.fromLTRB(24, 24, 24, 12),
     content: content,
-    actionsPadding: const EdgeInsets.fromLTRB(18, 10, 18, 16),
+    actionsPadding: const EdgeInsets.fromLTRB(24, 12, 24, 20),
     actions: actions,
   );
 }

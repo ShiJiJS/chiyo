@@ -184,84 +184,122 @@ class _BackupLibraryState extends State<BackupLibrary> {
     if (confirm != true) return;
     await widget.owner.restoreLibrary(() => widget.backups.restore(snapshot));
     widget.onRestored?.call();
-    if (mounted) setState(() => _message = '资料已恢复，请到“我的信息”查看。Agent 需要重新申请访问。');
+    if (mounted) setState(() => _message = '资料已恢复，请到“资料库”查看。Agent 需要重新申请访问。');
   }
 
   @override
-  Widget build(BuildContext context) => Align(
-    alignment: Alignment.topLeft,
-    child: SizedBox(
-      width: 960,
-      child: ListView(
-        padding: const EdgeInsets.fromLTRB(26, 25, 26, 20),
-        children: [
-          const PageHeading('备份与恢复', subtitle: '使用独立恢复密钥，将资料带到另一台设备。'),
-          const QuietNotice('跨平台与真实桌面恢复尚未验收，请只使用虚构资料。'),
-          const SizedBox(height: 16),
-          Text('手动加密备份', style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: 12),
-          const Text(
-            '包含当前信息、目录、标签、模板、设置，以及保留期内的修改版本、回收站、授权历史和访问记录。为维持数据关系，另保留不含内容的删除与版本标识。\n不含提案、待审批、有效凭据、本机数据库密钥或恢复密钥。',
-          ),
-          const SizedBox(height: 12),
-          const Text(
-            '离线备份需自行管理，不随应用清理旧内容。恢复按原时间清理到期内容，不延长保留期；期间暂缓 Agent 访问，完成后需要重新申请。',
-          ),
-          const SizedBox(height: 24),
-          Text('恢复密钥', style: Theme.of(context).textTheme.titleSmall),
-          const SizedBox(height: 8),
-          const Text(
-            '恢复密钥独立于本机数据库密钥，日常打开应用无需输入。\n请另存并与备份分开保管：同时持有备份和恢复密钥即可读取资料。',
-          ),
-          const SizedBox(height: 20),
-          Wrap(
-            spacing: 12,
-            runSpacing: 12,
-            children: [
-              if (!_enabled)
-                FilledButton(
-                  onPressed: _busy
-                      ? null
-                      : () => _run(() => _showKey(enable: true)),
-                  child: const Text('启用手动备份'),
-                ),
-              if (_enabled)
-                OutlinedButton(
-                  onPressed: _busy ? null : () => _run(_showKey),
-                  child: const Text('查看并保存恢复密钥'),
-                ),
-              FilledButton(
-                onPressed: _busy || !_enabled ? null : () => _run(_export),
-                child: const Text('导出加密备份'),
+  Widget build(BuildContext context) => ReadingWorkspace(
+    width: 1160,
+    child: ListView(
+      padding: UiSpace.page,
+      children: [
+        const PageHeading('备份与恢复', subtitle: '使用独立恢复密钥，将资料带到另一台设备。'),
+        const QuietNotice('跨平台与真实桌面恢复尚未验收，请只使用虚构资料。'),
+        const SizedBox(height: 20),
+        LayoutBuilder(
+          builder: (context, bounds) {
+            final export = FormSection(
+              title: '手动加密备份',
+              detail: _enabled ? '已启用' : '尚未启用',
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const Text(
+                    '包含当前信息、目录、标签、模板、设置，以及保留期内的修改版本、回收站、授权历史和访问记录。为维持数据关系，另保留不含内容的删除与版本标识。',
+                  ),
+                  const SizedBox(height: 12),
+                  const QuietNotice('不含提案、待审批、有效凭据、本机数据库密钥或恢复密钥。'),
+                  const SizedBox(height: 16),
+                  Wrap(
+                    spacing: 10,
+                    runSpacing: 10,
+                    children: [
+                      if (!_enabled)
+                        FilledButton(
+                          onPressed: _busy
+                              ? null
+                              : () => _run(() => _showKey(enable: true)),
+                          child: const Text('启用手动备份'),
+                        ),
+                      if (_enabled)
+                        FilledButton(
+                          onPressed: _busy ? null : () => _run(_export),
+                          child: const Text('导出加密备份'),
+                        ),
+                      if (!_enabled)
+                        OutlinedButton(
+                          onPressed: null,
+                          child: const Text('导出加密备份'),
+                        ),
+                    ],
+                  ),
+                ],
               ),
-            ],
+            );
+            final key = FormSection(
+              title: '恢复密钥',
+              protected: true,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const Text('独立于本机数据库密钥，日常打开应用无需输入。请另存，并与备份分开保管。'),
+                  const SizedBox(height: 12),
+                  const QuietNotice('同时持有备份和恢复密钥即可读取资料。'),
+                  if (_enabled)
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: OutlinedButton(
+                        onPressed: _busy ? null : () => _run(_showKey),
+                        child: const Text('查看并保存恢复密钥'),
+                      ),
+                    ),
+                ],
+              ),
+            );
+            if (bounds.maxWidth < 1000 ||
+                MediaQuery.textScalerOf(context).scale(14) > 20) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [export, key],
+              );
+            }
+            return Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(flex: 3, child: export),
+                const SizedBox(width: 20),
+                Expanded(flex: 2, child: key),
+              ],
+            );
+          },
+        ),
+        const SizedBox(height: 8),
+        const SectionHeading('在新设备恢复'),
+        const Text('仅支持空资料库；已有资料时拒绝恢复，不覆盖或合并。确认恢复成功前，请保留原设备和原备份。'),
+        const SizedBox(height: 12),
+        const Text('恢复按原时间清理到期内容，不延长保留期；期间暂缓 Agent 访问，完成后需要重新申请。'),
+        const SizedBox(height: 16),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: OutlinedButton(
+            onPressed: _busy ? null : () => _run(_restore),
+            child: const Text('从备份恢复'),
           ),
-          const SizedBox(height: 32),
-          const Divider(),
-          const SizedBox(height: 24),
-          Text('在新设备恢复', style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: 10),
-          const Text('仅支持空资料库；已有资料时拒绝恢复，不覆盖或合并。确认恢复成功前，请保留原设备和原备份。'),
-          const SizedBox(height: 12),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: OutlinedButton(
-              onPressed: _busy ? null : () => _run(_restore),
-              child: const Text('从备份恢复'),
-            ),
+        ),
+        const SizedBox(height: 24),
+        const Divider(),
+        const QuietNotice('离线备份需自行管理，不随应用清理旧内容。'),
+        if (_busy)
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 16),
+            child: LinearProgressIndicator(),
           ),
-          if (_busy)
-            const Padding(
-              padding: EdgeInsets.all(16),
-              child: LinearProgressIndicator(),
-            ),
-          if (_message != null)
-            Padding(
-              padding: const EdgeInsets.only(top: 20),
-              child: Text(_message!, key: const ValueKey('backup-result')),
-            ),
-        ],
-      ),
+        if (_message != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 16),
+            child: Text(_message!, key: const ValueKey('backup-result')),
+          ),
+      ],
     ),
   );
 }

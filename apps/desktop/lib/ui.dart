@@ -2,20 +2,33 @@ import 'package:flutter/material.dart';
 export 'desktop_controls.dart';
 
 abstract final class UiColors {
-  static const ink = Color(0xff26272c);
-  static const muted = Color(0xff666a73);
-  static const canvas = Color(0xfffcfcfd);
-  static const rail = Color(0xfff3f4f6);
-  static const line = Color(0xffe1e3e7);
-  static const green = Color(0xff28695f);
-  static const selected = Color(0xffe7e9ed);
-  static const danger = Color(0xffb44742);
+  static const ink = Color(0xff26343a);
+  static const muted = Color(0xff61717b);
+  static const canvas = Color(0xfff0f4f6);
+  static const rail = Color(0xfff7f9fa);
+  static const line = Color(0xffe1e7eb);
+  static const accent = Color(0xff285ab0);
+  static const selected = Color(0xffeaf0fa);
+  static const brand = Color(0xff28695f);
+  static const success = Color(0xff27735f);
+  static const danger = Color(0xffb54143);
+  static const warning = Color(0xff8d651e);
+}
+
+abstract final class UiSpace {
+  static const page = EdgeInsets.fromLTRB(24, 20, 24, 20);
+}
+
+abstract final class UiMotion {
+  static const feedback = Duration(milliseconds: 120);
+  static const panel = Duration(milliseconds: 180);
+  static const entrance = Duration(milliseconds: 150);
 }
 
 ThemeData informationTheme() {
   const body = TextStyle(
     fontFamily: 'AppSans',
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: FontWeight.w400,
     letterSpacing: 0,
     height: 1.55,
@@ -28,28 +41,28 @@ ThemeData informationTheme() {
     headlineLarge: body.copyWith(fontSize: 22, fontWeight: FontWeight.w500),
     headlineMedium: body.copyWith(fontSize: 20, fontWeight: FontWeight.w500),
     headlineSmall: body.copyWith(fontSize: 18, fontWeight: FontWeight.w500),
-    titleLarge: body.copyWith(fontSize: 18, fontWeight: FontWeight.w500),
-    titleMedium: body.copyWith(fontSize: 14, fontWeight: FontWeight.w500),
+    titleLarge: body.copyWith(fontSize: 20, fontWeight: FontWeight.w500),
+    titleMedium: body.copyWith(fontSize: 16, fontWeight: FontWeight.w500),
     titleSmall: body.copyWith(fontWeight: FontWeight.w500),
     bodyLarge: body,
     bodyMedium: body,
-    bodySmall: body.copyWith(fontSize: 12, color: UiColors.muted),
+    bodySmall: body.copyWith(fontSize: 13, color: UiColors.muted),
     labelLarge: body,
     labelMedium: body,
-    labelSmall: body.copyWith(fontSize: 12),
+    labelSmall: body.copyWith(fontSize: 13),
   );
   const shape = RoundedRectangleBorder(
-    borderRadius: BorderRadius.all(Radius.circular(5)),
+    borderRadius: BorderRadius.all(Radius.circular(6)),
   );
   final button = ButtonStyle(
     textStyle: const WidgetStatePropertyAll(body),
-    minimumSize: const WidgetStatePropertyAll(Size(56, 32)),
+    minimumSize: const WidgetStatePropertyAll(Size(64, 36)),
     padding: const WidgetStatePropertyAll(
       EdgeInsets.symmetric(horizontal: 12, vertical: 5),
     ),
     shape: const WidgetStatePropertyAll(shape),
     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-    animationDuration: const Duration(milliseconds: 110),
+    animationDuration: UiMotion.feedback,
   );
   final controlInk = WidgetStateProperty.resolveWith<Color>(
     (states) => states.contains(WidgetState.disabled)
@@ -62,8 +75,8 @@ ThemeData informationTheme() {
         : UiColors.muted,
   );
   const border = OutlineInputBorder(
-    borderRadius: BorderRadius.all(Radius.circular(5)),
-    borderSide: BorderSide(color: Color(0xffcdd0d6)),
+    borderRadius: BorderRadius.all(Radius.circular(6)),
+    borderSide: BorderSide(color: Color(0xffc0cbd2)),
   );
   return ThemeData(
     useMaterial3: true,
@@ -78,60 +91,50 @@ ThemeData informationTheme() {
     textTheme: texts,
     primaryTextTheme: texts,
     colorScheme: const ColorScheme.light(
-      primary: UiColors.green,
+      primary: UiColors.accent,
       onPrimary: Colors.white,
+      secondary: UiColors.accent,
+      onSecondary: Colors.white,
       surface: Colors.white,
+      surfaceContainerLow: UiColors.rail,
       onSurface: UiColors.ink,
       onSurfaceVariant: UiColors.muted,
       outline: Color(0xffa5a8b0),
       outlineVariant: UiColors.line,
       error: UiColors.danger,
     ),
-    scaffoldBackgroundColor: UiColors.canvas,
+    scaffoldBackgroundColor: Colors.white,
     visualDensity: VisualDensity.standard,
     dividerColor: UiColors.line,
+    progressIndicatorTheme: const ProgressIndicatorThemeData(
+      color: UiColors.accent,
+      linearTrackColor: UiColors.line,
+      circularTrackColor: UiColors.line,
+    ),
     splashFactory: NoSplash.splashFactory,
     highlightColor: Colors.transparent,
     hoverColor: const Color(0x08747b88),
-    focusColor: const Color(0x1628695f),
+    focusColor: const Color(0x16345b8c),
     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
     iconTheme: const IconThemeData(size: 17, color: UiColors.muted),
-    appBarTheme: AppBarTheme(
-      backgroundColor: UiColors.canvas,
-      surfaceTintColor: Colors.transparent,
-      elevation: 0,
-      scrolledUnderElevation: 0,
-      titleTextStyle: texts.titleMedium,
-      iconTheme: const IconThemeData(size: 18, color: UiColors.ink),
-    ),
     dividerTheme: const DividerThemeData(
       color: UiColors.line,
       thickness: 1,
       space: 1,
-    ),
-    cardTheme: const CardThemeData(
-      color: Colors.white,
-      surfaceTintColor: Colors.transparent,
-      elevation: 0,
-      margin: EdgeInsets.symmetric(vertical: 5),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(7)),
-        side: BorderSide(color: UiColors.line),
-      ),
     ),
     filledButtonTheme: FilledButtonThemeData(style: button),
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: button.copyWith(
         foregroundColor: controlInk,
         side: const WidgetStatePropertyAll(
-          BorderSide(color: Color(0xffd4d7dd)),
+          BorderSide(color: Color(0xffc0cbd2)),
         ),
       ),
     ),
     textButtonTheme: TextButtonThemeData(
       style: button.copyWith(
         foregroundColor: secondaryInk,
-        minimumSize: const WidgetStatePropertyAll(Size(40, 30)),
+        minimumSize: const WidgetStatePropertyAll(Size(40, 34)),
         padding: const WidgetStatePropertyAll(
           EdgeInsets.symmetric(horizontal: 8, vertical: 5),
         ),
@@ -149,11 +152,11 @@ ThemeData informationTheme() {
       filled: true,
       fillColor: Colors.white,
       isDense: true,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 11, vertical: 9),
       border: border,
       enabledBorder: border,
       focusedBorder: border.copyWith(
-        borderSide: const BorderSide(color: Color(0xff747c89), width: 1.25),
+        borderSide: const BorderSide(color: UiColors.accent, width: 1.25),
       ),
       disabledBorder: border.copyWith(
         borderSide: const BorderSide(color: UiColors.line),
@@ -203,7 +206,7 @@ ThemeData informationTheme() {
       titleTextStyle: texts.titleMedium!.copyWith(fontSize: 16),
       contentTextStyle: texts.bodyMedium,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(8)),
+        borderRadius: BorderRadius.all(Radius.circular(10)),
         side: BorderSide(color: UiColors.line),
       ),
     ),
@@ -249,7 +252,7 @@ ThemeData informationTheme() {
       shape: shape,
       contentTextStyle: TextStyle(
         fontFamily: 'AppSans',
-        fontSize: 13,
+        fontSize: 14,
         fontWeight: FontWeight.w400,
         color: Colors.white,
       ),
@@ -260,7 +263,7 @@ ThemeData informationTheme() {
 class DesktopPageTransitionsBuilder extends PageTransitionsBuilder {
   const DesktopPageTransitionsBuilder();
   @override
-  Duration get transitionDuration => const Duration(milliseconds: 120);
+  Duration get transitionDuration => UiMotion.feedback;
   @override
   Widget buildTransitions<T>(
     PageRoute<T> route,
@@ -285,43 +288,56 @@ class PageHeading extends StatelessWidget {
   final List<Widget> actions;
   @override
   Widget build(BuildContext context) => LayoutBuilder(
-    builder: (context, constraints) {
-      final heading = Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(title, style: Theme.of(context).textTheme.titleLarge),
-          if (subtitle != null) ...[
-            const SizedBox(height: 5),
-            Text(subtitle!, style: Theme.of(context).textTheme.bodySmall),
-          ],
-        ],
+    builder: (context, bounds) {
+      final titleText = Text(
+        title,
+        style: Theme.of(context).textTheme.titleLarge,
       );
-      final controls = Wrap(spacing: 8, runSpacing: 8, children: actions);
+      final controls = Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        alignment: WrapAlignment.end,
+        children: actions,
+      );
       return Padding(
-        padding: const EdgeInsets.only(bottom: 22),
-        child:
-            constraints.maxWidth <
-                800 * (MediaQuery.textScalerOf(context).scale(14) / 14)
-            ? Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+        padding: const EdgeInsets.only(bottom: 18),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (bounds.maxWidth >= 700)
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  heading,
+                  Expanded(child: titleText),
                   if (actions.isNotEmpty) ...[
-                    const SizedBox(height: 14),
-                    controls,
+                    const SizedBox(width: 20),
+                    ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxWidth: bounds.maxWidth * .68,
+                      ),
+                      child: controls,
+                    ),
                   ],
                 ],
               )
-            : Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(child: heading),
-                  if (actions.isNotEmpty) ...[
-                    const SizedBox(width: 20),
-                    controls,
-                  ],
-                ],
+            else
+              titleText,
+            if (subtitle != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 5),
+                child: Text(
+                  subtitle!,
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
               ),
+            if (bounds.maxWidth < 700 && actions.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 12),
+                child: Align(alignment: Alignment.centerLeft, child: controls),
+              ),
+          ],
+        ),
       );
     },
   );
@@ -357,9 +373,14 @@ class QuietNotice extends StatelessWidget {
 }
 
 class StatusLabel extends StatelessWidget {
-  const StatusLabel(this.label, {super.key, this.active = false});
+  const StatusLabel(
+    this.label, {
+    super.key,
+    this.active = false,
+    this.attention = false,
+  });
   final String label;
-  final bool active;
+  final bool active, attention;
   @override
   Widget build(BuildContext context) => Row(
     mainAxisSize: MainAxisSize.min,
@@ -369,7 +390,11 @@ class StatusLabel extends StatelessWidget {
         height: 6,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: active ? UiColors.green : UiColors.muted,
+          color: active
+              ? UiColors.success
+              : attention
+              ? UiColors.warning
+              : UiColors.muted,
         ),
       ),
       const SizedBox(width: 6),
@@ -377,12 +402,324 @@ class StatusLabel extends StatelessWidget {
         child: Text(
           label,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: active ? UiColors.green : UiColors.muted,
+            color: active
+                ? UiColors.success
+                : attention
+                ? UiColors.warning
+                : UiColors.muted,
           ),
         ),
       ),
     ],
   );
+}
+
+class SectionHeading extends StatelessWidget {
+  const SectionHeading(this.title, {super.key, this.detail});
+  final String title;
+  final String? detail;
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(bottom: 12),
+    child: Wrap(
+      spacing: 12,
+      runSpacing: 4,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        Text(title, style: Theme.of(context).textTheme.titleSmall),
+        if (detail != null)
+          Text(detail!, style: Theme.of(context).textTheme.bodySmall),
+      ],
+    ),
+  );
+}
+
+class ReadingWorkspace extends StatelessWidget {
+  const ReadingWorkspace({super.key, required this.child, this.width = 1080});
+  final Widget child;
+  final double width;
+  @override
+  Widget build(BuildContext context) => Align(
+    alignment: Alignment.topCenter,
+    child: ConstrainedBox(
+      constraints: BoxConstraints(
+        maxWidth: MediaQuery.textScalerOf(context).scale(14) > 20
+            ? double.infinity
+            : width,
+      ),
+      child: child,
+    ),
+  );
+}
+
+class DesktopSubpage extends StatelessWidget {
+  const DesktopSubpage({
+    super.key,
+    required this.title,
+    required this.body,
+    this.actions = const [],
+  });
+  final String title;
+  final Widget body;
+  final List<Widget> actions;
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    body: Column(
+      children: [
+        Container(
+          color: UiColors.rail,
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+          child: Row(
+            children: [
+              TextButton.icon(
+                key: const ValueKey('subpage-back'),
+                onPressed: () => Navigator.of(context).pop(),
+                icon: const Icon(Icons.arrow_back, size: 16),
+                label: const Text('资料库'),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Text(
+                  title,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+              ),
+              ...actions,
+            ],
+          ),
+        ),
+        const Divider(),
+        Expanded(child: body),
+      ],
+    ),
+  );
+}
+
+class EditorColumns extends StatelessWidget {
+  const EditorColumns({
+    super.key,
+    required this.metadata,
+    required this.content,
+  });
+  final Widget metadata, content;
+  @override
+  Widget build(BuildContext context) {
+    final wide =
+        MediaQuery.sizeOf(context).width >= 1080 &&
+        MediaQuery.textScalerOf(context).scale(14) <= 20;
+    if (!wide) {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          metadata,
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 20),
+            child: Divider(),
+          ),
+          content,
+        ],
+      );
+    }
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(width: 240, child: metadata),
+        const SizedBox(width: 32),
+        Expanded(child: content),
+      ],
+    );
+  }
+}
+
+// Flat record rows and section surfaces are shared by all desktop workspaces.
+class RecordSurface extends StatelessWidget {
+  const RecordSurface({super.key, required this.child});
+  final Widget child;
+  @override
+  Widget build(BuildContext context) => Container(
+    decoration: const BoxDecoration(
+      border: Border(bottom: BorderSide(color: UiColors.line)),
+    ),
+    child: child,
+  );
+}
+
+class WorkspaceRecord extends StatelessWidget {
+  const WorkspaceRecord({
+    super.key,
+    required this.title,
+    this.subtitle,
+    this.trailing,
+  });
+  final Widget title;
+  final Widget? subtitle, trailing;
+  @override
+  Widget build(BuildContext context) => RecordSurface(
+    child: Padding(
+      padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 4),
+      child: LayoutBuilder(
+        builder: (context, bounds) {
+          final text = Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              DefaultTextStyle(
+                style: Theme.of(context).textTheme.titleSmall!,
+                child: title,
+              ),
+              if (subtitle != null) ...[
+                const SizedBox(height: 6),
+                DefaultTextStyle(
+                  style: Theme.of(context).textTheme.bodySmall!,
+                  child: subtitle!,
+                ),
+              ],
+            ],
+          );
+          if (bounds.maxWidth <
+              640 * (MediaQuery.textScalerOf(context).scale(14) / 14)) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                text,
+                if (trailing != null) ...[
+                  const SizedBox(height: 12),
+                  trailing!,
+                ],
+              ],
+            );
+          }
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Flexible(fit: FlexFit.loose, child: text),
+              if (trailing != null) ...[const SizedBox(width: 24), trailing!],
+            ],
+          );
+        },
+      ),
+    ),
+  );
+}
+
+class FormSection extends StatelessWidget {
+  const FormSection({
+    super.key,
+    required this.title,
+    required this.child,
+    this.detail,
+    this.protected = false,
+  });
+  final String title;
+  final String? detail;
+  final Widget child;
+  final bool protected;
+  @override
+  Widget build(BuildContext context) => Container(
+    margin: const EdgeInsets.only(bottom: 20),
+    padding: const EdgeInsets.all(20),
+    decoration: BoxDecoration(
+      color: protected ? UiColors.rail : Colors.white,
+      border: Border.all(color: UiColors.line),
+      borderRadius: BorderRadius.circular(6),
+    ),
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SectionHeading(title, detail: detail),
+        child,
+      ],
+    ),
+  );
+}
+
+class InformationValue extends StatefulWidget {
+  const InformationValue({
+    super.key,
+    required this.name,
+    required this.value,
+    this.description,
+    this.actions = const [],
+  });
+  final String name, value;
+  final String? description;
+  final List<Widget> actions;
+  @override
+  State<InformationValue> createState() => _InformationValueState();
+}
+
+class _InformationValueState extends State<InformationValue> {
+  bool _expanded = false;
+  @override
+  void didUpdateWidget(covariant InformationValue oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.name != widget.name || oldWidget.value != widget.value) {
+      _expanded = false;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final lines = widget.value.split('\n');
+    final long = widget.value.length > 800 || lines.length > 8;
+    final linePreview = lines.take(8).join('\n');
+    final preview = linePreview.length > 800
+        ? linePreview.substring(0, 800)
+        : linePreview;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  widget.name,
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+              ),
+              ...widget.actions,
+            ],
+          ),
+          if (widget.description != null && widget.description!.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 3),
+              child: Text(
+                widget.description!,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ),
+          const SizedBox(height: 10),
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: UiColors.rail,
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SelectableText(long && !_expanded ? '$preview…' : widget.value),
+                if (long)
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: TextButton(
+                      onPressed: () => setState(() => _expanded = !_expanded),
+                      child: Text(_expanded ? '收起内容' : '展开完整内容'),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class EmptyWorkspace extends StatelessWidget {
@@ -431,7 +768,7 @@ class WorkspaceEntrance extends StatelessWidget {
     tween: Tween(begin: 0, end: 1),
     duration: MediaQuery.disableAnimationsOf(context)
         ? Duration.zero
-        : const Duration(milliseconds: 220),
+        : UiMotion.entrance,
     curve: Curves.easeOutCubic,
     child: child,
     builder: (context, value, child) => Opacity(
@@ -450,3 +787,6 @@ String uiTime(DateTime? value) {
   String two(int n) => n.toString().padLeft(2, '0');
   return '${local.year}/${two(local.month)}/${two(local.day)} ${two(local.hour)}:${two(local.minute)}';
 }
+
+double uiIconSize(BuildContext context, [double base = 17]) =>
+    base * (MediaQuery.textScalerOf(context).scale(14) / 14).clamp(1, 1.75);

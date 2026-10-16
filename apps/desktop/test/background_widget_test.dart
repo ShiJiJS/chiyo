@@ -34,7 +34,7 @@ void main() {
       expect(native.permissionRequests, 0);
       await native.events!(DesktopEvent.closeWindow);
       expect(native.hidden, isFalse);
-      await tester.tap(find.text('我的信息'));
+      await tester.tap(find.byKey(const ValueKey('nav-1')));
       await tester.pumpAndSettle();
       await native.events!(DesktopEvent.openApprovals);
       await tester.pumpAndSettle();

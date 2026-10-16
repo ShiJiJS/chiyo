@@ -142,14 +142,18 @@ class _OrganizationManagerState extends State<_OrganizationManager> {
     title: const Text('目录与标签'),
     content: SizedBox(
       width: 650,
-      height: 500,
+      height: 420,
       child: ListView(
         children: [
           const Text('目录和标签用于整理。名称仅在客户端展示；Agent 目录只提供必要标识及已保存的公开说明。'),
-          TextButton.icon(
-            onPressed: () => _edit(),
-            icon: const Icon(Icons.create_new_folder_outlined),
-            label: const Text('新建目录'),
+          const SizedBox(height: 18),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton.icon(
+              onPressed: () => _edit(),
+              icon: const Icon(Icons.create_new_folder_outlined),
+              label: const Text('新建目录'),
+            ),
           ),
           for (final directory in widget.owner.directories)
             ListTile(
@@ -161,10 +165,14 @@ class _OrganizationManagerState extends State<_OrganizationManager> {
               ),
             ),
           const Divider(),
-          TextButton.icon(
-            onPressed: () => _edit(isTag: true),
-            icon: const Icon(Icons.new_label_outlined),
-            label: const Text('新建标签'),
+          const SizedBox(height: 16),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton.icon(
+              onPressed: () => _edit(isTag: true),
+              icon: const Icon(Icons.new_label_outlined),
+              label: const Text('新建标签'),
+            ),
           ),
           for (final tag in widget.owner.tags)
             ListTile(
@@ -352,10 +360,13 @@ class _CatalogEditorState extends State<_CatalogEditor> {
       child: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const Text(
               '保存后 Agent 无需内容授权即可看到以下文字，请检查是否适合公开。字段名称表示固定含义；若含义改变，请新建信息并重新申请授权。',
             ),
+            const SizedBox(height: 20),
+            const SectionHeading('公开目录', detail: 'Agent 可见'),
             DesktopTextField(
               key: const ValueKey('catalog-name'),
               controller: _name,
@@ -368,6 +379,8 @@ class _CatalogEditorState extends State<_CatalogEditor> {
               maxLength: 2000,
               decoration: const InputDecoration(labelText: '公开描述'),
             ),
+            const SizedBox(height: 12),
+            const SectionHeading('字段说明', detail: '字段含义保持不变'),
             for (final field in widget.item.fields)
               DesktopTextField(
                 key: ValueKey('catalog-field-${field.id}'),
@@ -377,7 +390,7 @@ class _CatalogEditorState extends State<_CatalogEditor> {
                   labelText: '${field.name}：字段说明（公开）',
                 ),
               ),
-            if (_error != null) Text(_error!),
+            if (_error != null) QuietNotice(_error!, warning: true),
           ],
         ),
       ),

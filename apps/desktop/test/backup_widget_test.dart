@@ -98,13 +98,13 @@ void main() {
           backupFiles: _Files(root.path),
         ),
       );
-      await tester.tap(find.text('我的信息'));
+      await tester.tap(find.byKey(const ValueKey('nav-1')));
       await tester.pumpAndSettle();
       expect(find.text('还没有信息，可以手动新建。'), findsOneWidget);
       await tester.tap(find.text('授权历史'));
       await tester.pump(const Duration(milliseconds: 400));
       await _settleIO(tester, find.text('暂无授权历史。'));
-      await tester.tap(find.text('备份恢复'));
+      await tester.tap(find.byKey(const ValueKey('nav-4')));
       await tester.pumpAndSettle();
       await tester.ensureVisible(find.text('从备份恢复'));
       await tester.pump(const Duration(milliseconds: 400));
@@ -118,7 +118,7 @@ void main() {
       expect(find.textContaining('修改版本 1 条'), findsOneWidget);
       expect(find.textContaining('授权历史 1 条，访问记录 1 条'), findsOneWidget);
       await tester.tap(find.text('恢复到空资料库'));
-      await _settleIO(tester, find.text('资料已恢复，请到“我的信息”查看。Agent 需要重新申请访问。'));
+      await _settleIO(tester, find.text('资料已恢复，请到“资料库”查看。Agent 需要重新申请访问。'));
       expect(
         () => service.agent.validateSession(oldSession.sessionSecret),
         throwsA(isA<AccessFailure>()),
@@ -131,10 +131,10 @@ void main() {
       await tester.pump(const Duration(milliseconds: 400));
       await _settleIO(tester, find.text('从备份恢复的历史事实，不代表当前有效授权。'));
       expect(find.text('撤销授权'), findsNothing);
-      await tester.tap(find.text('我的信息'));
+      await tester.tap(find.byKey(const ValueKey('nav-1')));
       await tester.pumpAndSettle();
-      expect(find.text('Restored fictional server'), findsOneWidget);
-      await tester.tap(find.text('Restored fictional server'));
+      expect(find.text('Restored fictional server'), findsNWidgets(2));
+      await tester.tap(find.text('Restored fictional server').first);
       await tester.pumpAndSettle();
       expect(find.text('restored.invalid'), findsOneWidget);
       await tester.pumpWidget(const SizedBox());

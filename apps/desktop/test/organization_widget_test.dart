@@ -55,7 +55,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('完成'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Fictional demo server'));
+    await tester.tap(find.text('Fictional demo server').first);
     await tester.pumpAndSettle();
     await tester.tap(find.text('整理位置和标签'));
     await tester.pumpAndSettle();
@@ -87,7 +87,7 @@ void main() {
     await tester.tap(find.text('Project').last);
     await tester.pumpAndSettle();
     expect(find.text('Other item'), findsNothing);
-    expect(find.text('Fictional demo server'), findsOneWidget);
+    expect(find.text('Fictional demo server'), findsNWidgets(2));
   });
   testWidgets('public description drafts stay private until owner saves', (
     tester,
@@ -105,7 +105,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(home: InformationLibrary(owner: service.owner)),
     );
-    await tester.tap(find.text('Fictional demo server'));
+    await tester.tap(find.text('Fictional demo server').first);
     await tester.pumpAndSettle();
     await tester.tap(find.text('编辑公开说明'));
     await tester.pumpAndSettle();

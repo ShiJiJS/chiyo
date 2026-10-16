@@ -87,11 +87,12 @@ class _DeleteInformationState extends State<_DeleteInformation> {
             for (final field in widget.item.fields.where(
               (f) => widget.fieldId == null || f.id == widget.fieldId,
             ))
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                child: SelectableText('${field.name}\n${field.value}'),
+              InformationValue(
+                name: field.name,
+                description: field.description,
+                value: field.value,
               ),
-            if (_error != null) Text(_error!),
+            if (_error != null) QuietNotice(_error!, warning: true),
           ],
         ),
       ),
@@ -167,24 +168,24 @@ class _RecyclePageState extends State<RecyclePage> {
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('回收站')),
+  Widget build(BuildContext context) => DesktopSubpage(
+    title: '回收站',
     body: ListView(
-      padding: const EdgeInsets.all(24),
+      padding: UiSpace.page,
       children: [
         const Text('默认保留 30 天，到期清理。这里的旧值仅供你查看和恢复；Agent 无法访问。已导出的备份不随清理而删除。'),
-        if (_error != null) Text(_error!),
+        if (_error != null) QuietNotice(_error!, warning: true),
         if (_loading) const LinearProgressIndicator(),
         if (!_loading && widget.owner.recycleEntries.isEmpty)
           const Text('回收站为空。'),
         for (final entry in widget.owner.recycleEntries)
-          Card(
+          RecordSurface(
             child: ExpansionTile(
               title: Text(
                 '${entry.snapshot!.name} · ${entry.wholeItem ? '整条信息' : '选定字段'}',
               ),
               subtitle: Text(
-                '删除于 ${entry.deletedAt.toLocal()}\n保留至 ${entry.expiresAt.toLocal()}',
+                '删除于 ${uiTime(entry.deletedAt)} · 保留至 ${uiTime(entry.expiresAt)}',
               ),
               trailing: TextButton(
                 onPressed: () => _restore(entry),
@@ -192,9 +193,9 @@ class _RecyclePageState extends State<RecyclePage> {
               ),
               children: [
                 for (final f in entry.snapshot!.fields)
-                  ListTile(
-                    title: Text(f.name),
-                    subtitle: SelectableText(f.value),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: InformationValue(name: f.name, value: f.value),
                   ),
               ],
             ),
@@ -216,76 +217,74 @@ class DeleteProposalsList extends StatelessWidget {
   Widget build(BuildContext context) => Column(
     children: [
       for (final p in owner.deleteProposals.reversed)
-        Card(
-          child: ListTile(
-            title: Text('${p.chatLabel} · 删除提案'),
-            subtitle: Text(switch (p.state) {
-              DeleteProposalState.pending =>
-                '待确认 · ${p.fieldId == null ? '整条信息' : '选定字段'}',
-              DeleteProposalState.confirmed => '已确认删除',
-              DeleteProposalState.rejected => '已拒绝',
-              DeleteProposalState.conflicted => '目标版本已变化，请重新提交',
-            }),
-            trailing: p.state != DeleteProposalState.pending
-                ? null
-                : FilledButton(
-                    onPressed: () async {
-                      try {
-                        final item = owner.previewDelete(p.id);
-                        if (context.mounted) {
-                          await confirmInformationDeletion(
-                            context,
-                            owner,
-                            item,
-                            fieldId: p.fieldId,
-                            proposal: p,
-                          );
-                        }
-                      } catch (_) {
-                        if (context.mounted) {
-                          await showDialog<void>(
-                            context: context,
-                            builder: (context) => DesktopDialog(
-                              title: const Text('删除目标已变化'),
-                              content: const Text(
-                                '未删除任何资料。请拒绝此提案，让 Agent 根据当前目录重新提交。',
-                              ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.pop(context),
-                                  child: const Text('关闭'),
-                                ),
-                                TextButton(
-                                  onPressed: () async {
-                                    try {
-                                      await owner.rejectDelete(p.id, p.version);
-                                      if (context.mounted) {
-                                        Navigator.pop(context);
-                                      }
-                                    } catch (_) {
-                                      if (context.mounted) {
-                                        ScaffoldMessenger.of(
-                                          context,
-                                        ).showSnackBar(
-                                          const SnackBar(
-                                            content: Text('无法保存拒绝结果，请检查存储后重试。'),
-                                          ),
-                                        );
-                                      }
-                                    }
-                                  },
-                                  child: const Text('拒绝删除'),
-                                ),
-                              ],
-                            ),
-                          );
-                        }
+        WorkspaceRecord(
+          title: Text('${p.chatLabel} · 删除提案'),
+          subtitle: Text(switch (p.state) {
+            DeleteProposalState.pending =>
+              '待确认 · ${p.fieldId == null ? '整条信息' : '选定字段'}',
+            DeleteProposalState.confirmed => '已确认删除',
+            DeleteProposalState.rejected => '已拒绝',
+            DeleteProposalState.conflicted => '目标版本已变化，请重新提交',
+          }),
+          trailing: p.state != DeleteProposalState.pending
+              ? null
+              : FilledButton(
+                  onPressed: () async {
+                    try {
+                      final item = owner.previewDelete(p.id);
+                      if (context.mounted) {
+                        await confirmInformationDeletion(
+                          context,
+                          owner,
+                          item,
+                          fieldId: p.fieldId,
+                          proposal: p,
+                        );
                       }
-                      onChanged();
-                    },
-                    child: const Text('查看删除范围'),
-                  ),
-          ),
+                    } catch (_) {
+                      if (context.mounted) {
+                        await showDialog<void>(
+                          context: context,
+                          builder: (context) => DesktopDialog(
+                            title: const Text('删除目标已变化'),
+                            content: const Text(
+                              '未删除任何资料。请拒绝此提案，让 Agent 根据当前目录重新提交。',
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: const Text('关闭'),
+                              ),
+                              TextButton(
+                                onPressed: () async {
+                                  try {
+                                    await owner.rejectDelete(p.id, p.version);
+                                    if (context.mounted) {
+                                      Navigator.pop(context);
+                                    }
+                                  } catch (_) {
+                                    if (context.mounted) {
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        const SnackBar(
+                                          content: Text('无法保存拒绝结果，请检查存储后重试。'),
+                                        ),
+                                      );
+                                    }
+                                  }
+                                },
+                                child: const Text('拒绝删除'),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+                    }
+                    onChanged();
+                  },
+                  child: const Text('查看删除范围'),
+                ),
         ),
     ],
   );

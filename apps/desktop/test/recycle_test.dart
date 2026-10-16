@@ -21,7 +21,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(home: InformationLibrary(owner: service.owner)),
       );
-      await tester.tap(find.text('Fictional demo server'));
+      await tester.tap(find.text('Fictional demo server').first);
       await tester.pumpAndSettle();
       await tester.tap(find.byTooltip('删除字段').first);
       await tester.pumpAndSettle();

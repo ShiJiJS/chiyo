@@ -31,298 +31,299 @@ class _DesktopShellState extends State<DesktopShell> {
   @override
   void initState() {
     super.initState();
-    _pending = widget.service.owner.requests
-        .where((r) => r.state == AccessRequestState.pending)
-        .length;
+    _pending = _pendingCount;
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
-      final count = widget.service.owner.requests
-          .where((r) => r.state == AccessRequestState.pending)
-          .length;
+      final count = _pendingCount;
       if (mounted && count != _pending) setState(() => _pending = count);
     });
   }
 
+  int get _pendingCount => widget.service.owner.requests
+      .where((r) => r.state == AccessRequestState.pending)
+      .length;
   @override
   void dispose() {
     _timer?.cancel();
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) => LayoutBuilder(
-    builder: (context, constraints) {
-      final largeText = MediaQuery.textScalerOf(context).scale(14) > 20;
-      final compact =
-          constraints.maxWidth < 720 ||
-          (largeText && constraints.maxWidth < 1100);
-      final runtime = widget.runtime;
-      final stopped =
-          runtime?.quitting == true || runtime?.shutdownFailed == true;
-      return Scaffold(
-        body: Row(
-          children: [
-            Container(
-              width: compact
-                  ? 64
-                  : largeText
-                  ? 232
-                  : 184,
-              decoration: const BoxDecoration(
-                color: UiColors.rail,
-                border: Border(right: BorderSide(color: UiColors.line)),
-              ),
-              child: SafeArea(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.fromLTRB(
-                        compact ? 20 : 18,
-                        22,
-                        12,
-                        22,
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(
-                            Icons.layers_outlined,
-                            size: 20,
-                            color: UiColors.green,
-                          ),
-                          if (!compact) ...[
-                            const SizedBox(width: 9),
-                            const Expanded(
-                              child: Text(
-                                '信息授权',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w400,
-                                  fontSize: 13,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
-                    _destination(
-                      0,
-                      '访问审批',
-                      Icons.inbox_outlined,
-                      compact,
-                      count: _pending,
-                    ),
-                    _destination(1, '我的信息', Icons.folder_outlined, compact),
-                    _destination(
-                      2,
-                      '录入提案',
-                      Icons.playlist_add_outlined,
-                      compact,
-                    ),
-                    const Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 18,
-                        vertical: 15,
-                      ),
-                      child: Divider(),
-                    ),
-                    _destination(3, '授权历史', Icons.history_outlined, compact),
-                    if (widget.hasBackups)
-                      _destination(4, '备份恢复', Icons.backup_outlined, compact),
-                    const Spacer(),
-                    if (runtime != null) ...[
-                      _utility(
-                        '通知权限',
-                        Icons.notifications_outlined,
-                        runtime.quitting ? null : runtime.enableNotifications,
-                        compact,
-                        tooltip: '启用或检查通知',
-                      ),
-                      _utility(
-                        runtime.quitting
-                            ? '正在退出…'
-                            : runtime.shutdownFailed
-                            ? '重试保存并退出'
-                            : '完全退出',
-                        Icons.power_settings_new,
-                        runtime.quitting ? null : runtime.quit,
-                        compact,
-                      ),
-                    ],
-                    const SizedBox(height: 16),
-                    Tooltip(
-                      message:
-                          '127.0.0.1:${widget.port}。${runtime?.availability.tray == true ? '关窗后继续运行，可从托盘或菜单栏打开审批。' : '托盘或菜单栏不可用，关闭按钮将保留窗口。'}',
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 18),
-                        child: compact
-                            ? Icon(
-                                stopped ? Icons.link_off : Icons.circle,
-                                size: 12,
-                                color: UiColors.muted,
-                              )
-                            : StatusLabel(
-                                stopped ? '服务已停止' : '服务已启动',
-                                active: false,
-                              ),
-                      ),
-                    ),
-                    if (!compact)
-                      const Padding(
-                        padding: EdgeInsets.fromLTRB(18, 12, 18, 20),
-                        child: Text(
-                          '开发预览\n请只使用虚构资料',
-                          style: TextStyle(
-                            color: UiColors.muted,
-                            fontSize: 12,
-                            height: 1.6,
-                          ),
-                        ),
-                      ),
-                    if (compact) const SizedBox(height: 22),
-                  ],
+  static const _labels = ['访问审批', '资料库', '录入提案', '授权历史', '备份与恢复'];
+  static const _icons = [
+    Icons.rule_outlined,
+    Icons.folder_open_outlined,
+    Icons.playlist_add_outlined,
+    Icons.history_outlined,
+    Icons.inventory_2_outlined,
+  ];
+
+  Widget _status(bool compact) {
+    final runtime = widget.runtime;
+    final stopped =
+        runtime?.quitting == true || runtime?.shutdownFailed == true;
+    return Tooltip(
+      message:
+          '127.0.0.1:${widget.port}。${runtime?.availability.tray == true ? '关窗后继续运行，可从托盘或菜单栏打开审批。' : '托盘或菜单栏不可用，关闭按钮将保留窗口。'}',
+      child: compact
+          ? Icon(
+              stopped ? Icons.link_off : Icons.circle,
+              size: 9,
+              color: UiColors.muted,
+            )
+          : StatusLabel(stopped ? '服务已停止' : '本机服务已启动'),
+    );
+  }
+
+  Widget _quit({bool compact = false}) {
+    final runtime = widget.runtime!;
+    final label = runtime.quitting
+        ? '正在退出…'
+        : runtime.shutdownFailed
+        ? '重试保存并退出'
+        : '完全退出';
+    if (compact) {
+      return IconButton(
+        tooltip: label,
+        onPressed: runtime.quitting ? null : runtime.quit,
+        icon: const Icon(Icons.power_settings_new, size: 18),
+      );
+    }
+    return TextButton.icon(
+      onPressed: runtime.quitting ? null : runtime.quit,
+      icon: const Icon(Icons.power_settings_new, size: 17),
+      label: Text(label),
+    );
+  }
+
+  Widget _navigationRail() => Material(
+    color: UiColors.rail,
+    child: SizedBox(
+      width: 194,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 26, 16, 28),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.layers_outlined,
+                  color: UiColors.brand,
+                  size: 27,
                 ),
-              ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    '信息授权',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                ),
+              ],
             ),
-            Expanded(
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24, 0, 16, 10),
+            child: Text('工作区', style: Theme.of(context).textTheme.bodySmall),
+          ),
+          for (var i = 0; i < (widget.hasBackups ? 5 : 4); i++)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
+              child: _destination(i, _labels[i], rail: true),
+            ),
+          const Spacer(),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24, 16, 16, 14),
+            child: _status(false),
+          ),
+          if (widget.runtime != null)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 12, 14),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  if (runtime != null &&
-                      (!runtime.availability.tray ||
-                          runtime.availability.notifications ==
-                              NotificationAvailability.denied))
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
-                      child: QuietNotice(
-                        '${!runtime.availability.tray ? '托盘或菜单栏不可用，关闭按钮将保留窗口。' : ''}${runtime.availability.notifications == NotificationAvailability.denied ? '系统通知已被拒绝，待办仍可在应用内处理。' : ''}',
-                      ),
-                    ),
-                  if (runtime?.recycleCleanupFailed == true)
-                    const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 24),
-                      child: QuietNotice(
-                        '回收站到期清理暂时失败，请检查存储。到期内容无法恢复，应用会再次尝试清理。',
-                        warning: true,
-                      ),
-                    ),
-                  if (runtime?.revisionCleanupFailed == true)
-                    const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 24),
-                      child: QuietNotice(
-                        '修改历史到期清理暂时失败，请检查存储。到期版本无法查看或恢复，应用会再次尝试清理。',
-                        warning: true,
-                      ),
-                    ),
-                  if (runtime?.shutdownFailed == true)
-                    const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 24),
-                      child: QuietNotice(
-                        '访问服务已停止，但记录尚未保存，应用未退出。请修复存储后重试保存并退出；重新启动后需要重新申请授权。',
-                        warning: true,
-                      ),
-                    ),
-                  Expanded(child: WorkspaceEntrance(child: widget.child)),
+                  TextButton.icon(
+                    onPressed: widget.runtime!.quitting
+                        ? null
+                        : widget.runtime!.enableNotifications,
+                    icon: const Icon(Icons.notifications_none, size: 17),
+                    label: const Text('启用或检查通知'),
+                  ),
+                  _quit(),
                 ],
               ),
             ),
+        ],
+      ),
+    ),
+  );
+
+  Widget _compactNavigation() => Material(
+    color: UiColors.rail,
+    child: Container(
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 11),
+      decoration: const BoxDecoration(
+        border: Border(bottom: BorderSide(color: UiColors.line)),
+      ),
+      child: Row(
+        children: [
+          const Tooltip(
+            message: '信息授权',
+            child: Icon(Icons.layers_outlined, color: UiColors.brand, size: 26),
+          ),
+          const SizedBox(width: 24),
+          Expanded(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  for (var i = 0; i < (widget.hasBackups ? 5 : 4); i++)
+                    _destination(i, _labels[i]),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          _status(true),
+          if (widget.runtime != null) ...[
+            const SizedBox(width: 8),
+            IconButton(
+              tooltip: '启用或检查通知',
+              onPressed: widget.runtime!.quitting
+                  ? null
+                  : widget.runtime!.enableNotifications,
+              icon: const Icon(Icons.notifications_none, size: 19),
+            ),
+            _quit(compact: true),
           ],
-        ),
+        ],
+      ),
+    ),
+  );
+
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, box) {
+      final runtime = widget.runtime;
+      final rail =
+          box.maxWidth >= 1120 &&
+          MediaQuery.textScalerOf(context).scale(14) <= 20;
+      final workspace = Column(
+        children: [
+          if (runtime != null &&
+              (!runtime.availability.tray ||
+                  runtime.availability.notifications ==
+                      NotificationAvailability.denied))
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: QuietNotice(
+                '${!runtime.availability.tray ? '托盘或菜单栏不可用，关闭按钮将保留窗口。' : ''}${runtime.availability.notifications == NotificationAvailability.denied ? '系统通知已被拒绝，待办仍可在应用内处理。' : ''}',
+              ),
+            ),
+          if (runtime?.recycleCleanupFailed == true)
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 24),
+              child: QuietNotice(
+                '回收站到期清理暂时失败，请检查存储。到期内容无法恢复，应用会再次尝试清理。',
+                warning: true,
+              ),
+            ),
+          if (runtime?.revisionCleanupFailed == true)
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 24),
+              child: QuietNotice(
+                '修改历史到期清理暂时失败，请检查存储。到期版本无法查看或恢复，应用会再次尝试清理。',
+                warning: true,
+              ),
+            ),
+          if (runtime?.shutdownFailed == true)
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 24),
+              child: QuietNotice(
+                '访问服务已停止，但记录尚未保存，应用未退出。请修复存储后重试保存并退出；重新启动后需要重新申请授权。',
+                warning: true,
+              ),
+            ),
+
+          Expanded(child: WorkspaceEntrance(child: widget.child)),
+          Container(
+            color: UiColors.rail,
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 7),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    '开发预览 · 请使用虚构资料',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      );
+      return Scaffold(
+        backgroundColor: Colors.white,
+        body: rail
+            ? Row(
+                children: [
+                  _navigationRail(),
+                  const VerticalDivider(width: 1),
+                  Expanded(child: workspace),
+                ],
+              )
+            : Column(
+                children: [
+                  _compactNavigation(),
+                  Expanded(child: workspace),
+                ],
+              ),
       );
     },
   );
 
-  Widget _destination(
-    int index,
-    String label,
-    IconData icon,
-    bool compact, {
-    int count = 0,
-  }) {
-    final selected = widget.index == index;
+  Widget _destination(int index, String label, {bool rail = false}) {
+    final selected = index == widget.index;
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-      child: Tooltip(
-        message: compact ? label : '',
-        child: Semantics(
-          selected: selected,
-          child: AnimatedContainer(
-            duration: MediaQuery.disableAnimationsOf(context)
-                ? Duration.zero
-                : const Duration(milliseconds: 160),
-            decoration: BoxDecoration(
-              color: selected ? UiColors.selected : Colors.transparent,
-              borderRadius: BorderRadius.circular(7),
+      padding: EdgeInsets.only(right: rail ? 0 : 5),
+      child: Semantics(
+        selected: selected,
+        child: AnimatedContainer(
+          duration: MediaQuery.disableAnimationsOf(context)
+              ? Duration.zero
+              : UiMotion.feedback,
+          decoration: BoxDecoration(
+            color: selected ? UiColors.selected : Colors.transparent,
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: TextButton(
+            key: ValueKey('nav-$index'),
+            onPressed: () => widget.onSelected(index),
+            style: TextButton.styleFrom(
+              alignment: rail ? Alignment.centerLeft : null,
+              foregroundColor: selected ? UiColors.accent : UiColors.muted,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
             ),
-            child: InkWell(
-              key: ValueKey('nav-$index'),
-              borderRadius: BorderRadius.circular(7),
-              onTap: () => widget.onSelected(index),
-              child: Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: compact ? 12 : 11,
-                  vertical: 8,
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      icon,
-                      size: 17,
-                      color: selected ? UiColors.ink : UiColors.muted,
+            child: Row(
+              mainAxisSize: rail ? MainAxisSize.max : MainAxisSize.min,
+              children: [
+                if (rail) ...[
+                  Icon(_icons[index], size: 18),
+                  const SizedBox(width: 12),
+                ],
+                Flexible(child: Text(label)),
+                if (index == 0 && _pending > 0) ...[
+                  const SizedBox(width: 8),
+                  Text(
+                    '$_pending',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: selected ? UiColors.accent : null,
                     ),
-                    if (!compact) ...[
-                      const SizedBox(width: 11),
-                      Expanded(
-                        child: Text(
-                          label,
-                          style: TextStyle(
-                            color: UiColors.ink,
-                            fontWeight: FontWeight.w400,
-                          ),
-                        ),
-                      ),
-                      if (count > 0)
-                        Text(
-                          '$count',
-                          style: const TextStyle(
-                            color: UiColors.muted,
-                            fontWeight: FontWeight.w400,
-                          ),
-                        ),
-                    ],
-                  ],
-                ),
-              ),
+                  ),
+                ],
+              ],
             ),
           ),
         ),
       ),
     );
   }
-
-  Widget _utility(
-    String label,
-    IconData icon,
-    VoidCallback? action,
-    bool compact, {
-    String? tooltip,
-  }) => Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 9),
-    child: compact
-        ? IconButton(
-            tooltip: tooltip ?? label,
-            onPressed: action,
-            icon: Icon(icon, size: 19),
-          )
-        : Tooltip(
-            message: tooltip ?? label,
-            child: TextButton.icon(
-              onPressed: action,
-              style: TextButton.styleFrom(
-                alignment: Alignment.centerLeft,
-                foregroundColor: UiColors.muted,
-              ),
-              icon: Icon(icon, size: 17),
-              label: Text(label, style: const TextStyle(fontSize: 13)),
-            ),
-          ),
-  );
 }

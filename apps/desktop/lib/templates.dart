@@ -19,72 +19,109 @@ class _TemplateLibraryState extends State<TemplateLibrary> {
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(
-      title: const Text('字段模板'),
-      actions: [
-        TextButton.icon(
-          onPressed: () => _edit(),
-          icon: const Icon(Icons.add),
-          label: const Text('新建模板'),
-        ),
-      ],
-    ),
-    body: ListView(
-      padding: const EdgeInsets.all(24),
-      children: [
-        const Text(
-          '模板用于辅助录入。修改或扩展模板不会修改已有信息，也不会扩大已有授权。模板中的名称和说明将用作新信息的公开字段说明，请勿填写秘密。',
-        ),
-        if (widget.owner.templates.isEmpty)
-          const Padding(
-            padding: EdgeInsets.only(top: 24),
-            child: Text('还没有字段模板。'),
+  Widget build(BuildContext context) => DesktopSubpage(
+    title: '字段模板',
+    actions: [
+      TextButton.icon(
+        onPressed: () => _edit(),
+        icon: const Icon(Icons.add),
+        label: const Text('新建模板'),
+      ),
+    ],
+    body: ReadingWorkspace(
+      child: ListView(
+        padding: const EdgeInsets.all(24),
+        children: [
+          const Text(
+            '模板用于辅助录入。修改或扩展模板不会修改已有信息，也不会扩大已有授权。模板中的名称和说明将用作新信息的公开字段说明，请勿填写秘密。',
           ),
-        for (final template in widget.owner.templates)
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+          if (widget.owner.templates.isEmpty)
+            const Padding(
+              padding: EdgeInsets.only(top: 24),
+              child: Text('还没有字段模板。'),
+            ),
+          for (final template in widget.owner.templates) ...[
+            const SizedBox(height: 20),
+            WorkspaceRecord(
+              title: Text(
+                template.name,
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              subtitle: Text(template.description),
+              trailing: Wrap(
+                spacing: 8,
+                runSpacing: 8,
                 children: [
-                  Text(
-                    template.name,
-                    style: Theme.of(context).textTheme.titleLarge,
+                  OutlinedButton(
+                    onPressed: () => _edit(template),
+                    child: const Text('修改模板'),
                   ),
-                  Text(template.description),
-                  Text(
-                    template.fields
-                        .map(
-                          (f) =>
-                              '${f.name}（${f.kind == FieldKind.textNote ? '文本说明' : '结构化字段'}）',
-                        )
-                        .join('、'),
-                  ),
-                  Wrap(
-                    spacing: 12,
-                    children: [
-                      TextButton(
-                        onPressed: () => _edit(template),
-                        child: const Text('修改模板'),
+                  FilledButton(
+                    onPressed: () => showDialog<void>(
+                      context: context,
+                      builder: (_) => _TemplateInformation(
+                        owner: widget.owner,
+                        template: template,
                       ),
-                      FilledButton(
-                        onPressed: () => showDialog<void>(
-                          context: context,
-                          builder: (_) => _TemplateInformation(
-                            owner: widget.owner,
-                            template: template,
-                          ),
-                        ),
-                        child: const Text('使用模板'),
-                      ),
-                    ],
+                    ),
+                    child: const Text('使用模板'),
                   ),
                 ],
               ),
             ),
-          ),
-      ],
+            const SizedBox(height: 18),
+            SectionHeading(
+              '字段定义',
+              detail: '${template.fields.length} 个字段 · 不包含字段值',
+            ),
+            for (final field in template.fields)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: LayoutBuilder(
+                  builder: (context, bounds) {
+                    final kind = field.kind == FieldKind.textNote
+                        ? '文本说明'
+                        : '结构化字段';
+                    if (bounds.maxWidth < 700 ||
+                        MediaQuery.textScalerOf(context).scale(14) > 20) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('${field.name} · $kind'),
+                          if (field.description.isNotEmpty)
+                            Text(
+                              field.description,
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                        ],
+                      );
+                    }
+                    return Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(width: 200, child: Text(field.name)),
+                        SizedBox(
+                          width: 160,
+                          child: Text(
+                            kind,
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ),
+                        Expanded(
+                          child: Text(
+                            field.description,
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ),
+            const SizedBox(height: 18),
+          ],
+        ],
+      ),
     ),
   );
 }
@@ -182,80 +219,122 @@ class _TemplateEditorState extends State<_TemplateEditor> {
   Widget build(BuildContext context) => DesktopDialog(
     title: Text(widget.template == null ? '新建模板' : '修改模板'),
     content: SizedBox(
-      width: 600,
+      width: 860,
       child: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text('保存模板不会修改已有信息或授权。修改字段含义或类型会生成新的字段定义；已有信息保留原值。'),
-            DesktopTextField(
-              key: const ValueKey('template-name'),
-              controller: _name,
-              maxLength: 200,
-              decoration: const InputDecoration(labelText: '模板名称'),
-            ),
-            DesktopTextField(
-              controller: _description,
-              maxLength: 2000,
-              decoration: const InputDecoration(labelText: '模板说明'),
-            ),
-            for (var i = 0; i < _fields.length; i++)
-              Padding(
-                key: ObjectKey(_fields[i]),
-                padding: const EdgeInsets.only(top: 12),
-                child: Column(
-                  children: [
-                    const Divider(),
-                    DesktopTextField(
-                      key: ValueKey('template-field-name-$i'),
-                      controller: _fields[i].name,
-                      maxLength: 200,
-                      decoration: const InputDecoration(labelText: '字段名称（公开）'),
-                    ),
-                    DesktopTextField(
-                      controller: _fields[i].description,
-                      maxLength: 2000,
-                      decoration: const InputDecoration(labelText: '字段说明（公开）'),
-                    ),
-                    DesktopSelect<FieldKind>(
-                      initialValue: _fields[i].kind,
-                      decoration: const InputDecoration(labelText: '内容形式'),
-                      items: const [
-                        DropdownMenuItem(
-                          value: FieldKind.structured,
-                          child: Text('结构化字段'),
+            const QuietNotice('保存模板不会修改已有信息或授权。修改字段含义或类型会生成新的字段定义；已有信息保留原值。'),
+            const SizedBox(height: 16),
+            EditorColumns(
+              metadata: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  DesktopTextField(
+                    key: const ValueKey('template-name'),
+                    controller: _name,
+                    maxLength: 200,
+                    decoration: const InputDecoration(labelText: '模板名称'),
+                  ),
+                  DesktopTextField(
+                    controller: _description,
+                    maxLength: 2000,
+                    decoration: const InputDecoration(labelText: '模板说明'),
+                  ),
+                ],
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Expanded(
+                        child: SectionHeading('字段定义', detail: '名称和说明公开'),
+                      ),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: TextButton(
+                          onPressed: _saving || _fields.length >= 200
+                              ? null
+                              : () => setState(
+                                  () => _fields.add(_DefinitionControllers()),
+                                ),
+                          child: const Text('添加字段定义'),
                         ),
-                        DropdownMenuItem(
-                          value: FieldKind.textNote,
-                          child: Text('文本说明'),
-                        ),
-                      ],
-                      onChanged: _saving
-                          ? null
-                          : (value) => setState(() => _fields[i].kind = value!),
-                    ),
-                    TextButton(
-                      onPressed: _saving || _fields.length == 1
-                          ? null
-                          : () => setState(
-                              () => _removed.add(_fields.removeAt(i)),
+                      ),
+                    ],
+                  ),
+                  for (var i = 0; i < _fields.length; i++)
+                    Padding(
+                      key: ObjectKey(_fields[i]),
+                      padding: const EdgeInsets.only(top: 12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          if (i > 0)
+                            const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 16),
+                              child: Divider(),
                             ),
-                      child: const Text('移除此字段定义'),
+                          SectionHeading('字段 ${i + 1}'),
+                          DesktopTextField(
+                            key: ValueKey('template-field-name-$i'),
+                            controller: _fields[i].name,
+                            maxLength: 200,
+                            decoration: const InputDecoration(
+                              labelText: '字段名称（公开）',
+                            ),
+                          ),
+                          DesktopTextField(
+                            controller: _fields[i].description,
+                            maxLength: 2000,
+                            decoration: const InputDecoration(
+                              labelText: '字段说明（公开）',
+                            ),
+                          ),
+                          DesktopSelect<FieldKind>(
+                            initialValue: _fields[i].kind,
+                            decoration: const InputDecoration(
+                              labelText: '内容形式',
+                            ),
+                            items: const [
+                              DropdownMenuItem(
+                                value: FieldKind.structured,
+                                child: Text('结构化字段'),
+                              ),
+                              DropdownMenuItem(
+                                value: FieldKind.textNote,
+                                child: Text('文本说明'),
+                              ),
+                            ],
+                            onChanged: _saving
+                                ? null
+                                : (value) =>
+                                      setState(() => _fields[i].kind = value!),
+                          ),
+                          if (_fields.length > 1)
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: TextButton(
+                                onPressed: _saving || _fields.length == 1
+                                    ? null
+                                    : () => setState(
+                                        () => _removed.add(_fields.removeAt(i)),
+                                      ),
+                                child: const Text('移除此字段定义'),
+                              ),
+                            ),
+                        ],
+                      ),
                     ),
-                  ],
-                ),
+                ],
               ),
-            TextButton(
-              onPressed: _saving || _fields.length >= 200
-                  ? null
-                  : () => setState(() => _fields.add(_DefinitionControllers())),
-              child: const Text('添加字段定义'),
             ),
-            if (_error != null)
-              Text(
-                _error!,
-                style: TextStyle(color: Theme.of(context).colorScheme.error),
-              ),
+            if (_error != null) QuietNotice(_error!, warning: true),
           ],
         ),
       ),
@@ -329,50 +408,69 @@ class _TemplateInformationState extends State<_TemplateInformation> {
   Widget build(BuildContext context) => DesktopDialog(
     title: Text('使用模板：${widget.template.name}'),
     content: SizedBox(
-      width: 600,
+      width: 860,
       child: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text('请检查公开说明和内容。只有点击“保存信息”才会写入资料库；新信息需要另行申请授权。'),
-            DesktopTextField(
-              key: const ValueKey('template-item-name'),
-              controller: _name,
-              maxLength: 200,
-              decoration: const InputDecoration(labelText: '信息名称（公开）'),
-            ),
-            DesktopTextField(
-              controller: _description,
-              maxLength: 2000,
-              decoration: const InputDecoration(labelText: '公开描述'),
-            ),
-            for (var i = 0; i < widget.template.fields.length; i++) ...[
-              const Divider(),
-              Text('${widget.template.fields[i].name}（公开）'),
-              Text(widget.template.fields[i].description),
-              DesktopTextField(
-                key: ValueKey('template-value-$i'),
-                controller: _values[widget.template.fields[i].id],
-                minLines: widget.template.fields[i].kind == FieldKind.textNote
-                    ? 3
-                    : 1,
-                maxLines: widget.template.fields[i].kind == FieldKind.textNote
-                    ? 10
-                    : 4,
-                maxLength: 1000000,
-                decoration: InputDecoration(
-                  labelText:
-                      widget.template.fields[i].kind == FieldKind.textNote
-                      ? '文本说明（需要授权）'
-                      : '字段值（需要授权）',
-                ),
+            const QuietNotice('只有点击“保存信息”才会写入资料库；新信息需要另行申请授权。'),
+            const SizedBox(height: 16),
+            EditorColumns(
+              metadata: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const SectionHeading('公开目录', detail: 'Agent 可见'),
+                  DesktopTextField(
+                    key: const ValueKey('template-item-name'),
+                    controller: _name,
+                    maxLength: 200,
+                    decoration: const InputDecoration(labelText: '信息名称（公开）'),
+                  ),
+                  DesktopTextField(
+                    controller: _description,
+                    maxLength: 2000,
+                    decoration: const InputDecoration(labelText: '公开描述'),
+                  ),
+                ],
               ),
-            ],
-            if (_error != null)
-              Text(
-                _error!,
-                style: TextStyle(color: Theme.of(context).colorScheme.error),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const SectionHeading('信息字段', detail: '按字段授权'),
+                  for (var i = 0; i < widget.template.fields.length; i++) ...[
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                      child: Divider(),
+                    ),
+                    Text('${widget.template.fields[i].name}（公开）'),
+                    Text(widget.template.fields[i].description),
+                    DesktopTextField(
+                      key: ValueKey('template-value-$i'),
+                      controller: _values[widget.template.fields[i].id],
+                      minLines:
+                          widget.template.fields[i].kind == FieldKind.textNote
+                          ? 3
+                          : 1,
+                      maxLines:
+                          widget.template.fields[i].kind == FieldKind.textNote
+                          ? 10
+                          : 4,
+                      maxLength: 1000000,
+                      decoration: InputDecoration(
+                        labelText:
+                            widget.template.fields[i].kind == FieldKind.textNote
+                            ? '文本说明（需要授权）'
+                            : '字段值（需要授权）',
+                      ),
+                    ),
+                  ],
+                ],
               ),
+            ),
+            if (_error != null) QuietNotice(_error!, warning: true),
           ],
         ),
       ),

@@ -15,31 +15,29 @@ class UpdateProposalsList extends StatelessWidget {
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
       for (final proposal in owner.updateProposals.reversed)
-        Card(
-          child: ListTile(
-            title: Text('${proposal.chatLabel} · 修改提案'),
-            subtitle: Text(switch (proposal.state) {
-              UpdateProposalState.pending =>
-                '待确认 · 基础版本 ${proposal.input.baseVersion}',
-              UpdateProposalState.confirmed => '已确认修改',
-              UpdateProposalState.rejected => '已拒绝',
-              UpdateProposalState.conflicted => '版本冲突，请提交新的提案',
-            }),
-            trailing: proposal.state == UpdateProposalState.pending
-                ? FilledButton(
-                    onPressed: () async {
-                      await showDialog<void>(
-                        context: context,
-                        barrierDismissible: false,
-                        builder: (_) =>
-                            _ReviewUpdate(owner: owner, proposal: proposal),
-                      );
-                      onChanged();
-                    },
-                    child: const Text('查看修改差异'),
-                  )
-                : null,
-          ),
+        WorkspaceRecord(
+          title: Text('${proposal.chatLabel} · 修改提案'),
+          subtitle: Text(switch (proposal.state) {
+            UpdateProposalState.pending =>
+              '待确认 · 基础版本 ${proposal.input.baseVersion}',
+            UpdateProposalState.confirmed => '已确认修改',
+            UpdateProposalState.rejected => '已拒绝',
+            UpdateProposalState.conflicted => '版本冲突，请提交新的提案',
+          }),
+          trailing: proposal.state == UpdateProposalState.pending
+              ? FilledButton(
+                  onPressed: () async {
+                    await showDialog<void>(
+                      context: context,
+                      barrierDismissible: false,
+                      builder: (_) =>
+                          _ReviewUpdate(owner: owner, proposal: proposal),
+                    );
+                    onChanged();
+                  },
+                  child: const Text('查看修改差异'),
+                )
+              : null,
         ),
     ],
   );
@@ -106,16 +104,18 @@ class _ReviewUpdateState extends State<_ReviewUpdate> {
   }
 
   Widget _snapshot(String title, InformationItem item) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    mainAxisSize: MainAxisSize.min,
     children: [
-      Text(title, style: const TextStyle(fontWeight: FontWeight.w500)),
-      SelectableText('信息名称（公开）：${item.name}\n公开描述：${item.description}'),
+      SectionHeading(title),
+      Text(item.name, style: Theme.of(context).textTheme.titleMedium),
+      const SizedBox(height: 6),
+      SelectableText(item.description),
       for (final f in item.fields)
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          child: SelectableText(
-            '字段名称（公开）：${f.name}\n字段说明（公开）：${f.description}\n类型：${f.kind == FieldKind.textNote ? '文本说明' : '结构化字段'}\n字段值：${f.value}',
-          ),
+        InformationValue(
+          name: f.name,
+          description: f.description,
+          value: f.value,
         ),
     ],
   );
@@ -154,7 +154,7 @@ class _ReviewUpdateState extends State<_ReviewUpdate> {
                   Expanded(child: _snapshot('修改后', _preview!.after)),
                 ],
               ),
-            if (_error != null) Text(_error!),
+            if (_error != null) QuietNotice(_error!, warning: true),
           ],
         ),
       ),

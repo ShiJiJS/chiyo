@@ -73,10 +73,10 @@ class _RevisionHistoryPageState extends State<RevisionHistoryPage> {
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('修改历史')),
+  Widget build(BuildContext context) => DesktopSubpage(
+    title: '修改历史',
     body: ListView(
-      padding: const EdgeInsets.all(24),
+      padding: UiSpace.page,
       children: [
         const Text('修改历史仅供你查看，默认保留 30 天。恢复会创建新的当前版本，不会回退授权、其他资料或应用设置。'),
         if (_failed) ...[
@@ -91,18 +91,16 @@ class _RevisionHistoryPageState extends State<RevisionHistoryPage> {
           )
         else
           for (final revision in _revisions!)
-            Card(
-              child: ListTile(
-                title: Text(
-                  '版本 ${revision.item.version} · ${revision.item.name}',
-                ),
-                subtitle: Text(
-                  '替换时间：${revision.replacedAt.toLocal()}\n保留至：${revision.replacedAt.add(const Duration(days: 30)).toLocal()}',
-                ),
-                trailing: TextButton(
-                  onPressed: () => _preview(revision),
-                  child: const Text('查看差异'),
-                ),
+            WorkspaceRecord(
+              title: Text(
+                '版本 ${revision.item.version} · ${revision.item.name}',
+              ),
+              subtitle: Text(
+                '替换时间：${revision.replacedAt.toLocal()}\n保留至：${revision.replacedAt.add(const Duration(days: 30)).toLocal()}',
+              ),
+              trailing: TextButton(
+                onPressed: () => _preview(revision),
+                child: const Text('查看差异'),
               ),
             ),
       ],
@@ -159,13 +157,14 @@ class _RestoreRevisionState extends State<_RestoreRevision> {
   }
 
   Widget _difference(String title, String before, String after) => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 8),
+    padding: const EdgeInsets.symmetric(vertical: 16),
     child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(title, style: const TextStyle(fontWeight: FontWeight.w500)),
-        SelectableText('当前：$before'),
-        SelectableText('恢复后：$after'),
+        SectionHeading(title),
+        InformationValue(name: '当前', value: before),
+        InformationValue(name: '恢复后', value: after),
+        const Divider(),
       ],
     ),
   );
