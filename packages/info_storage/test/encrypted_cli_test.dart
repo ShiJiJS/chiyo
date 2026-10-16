@@ -19,11 +19,25 @@ void main() {
         directory.path,
         keys,
       );
-      final item = await InformationService(repository: store).owner
-          .createInformation('Fictional server', '', [
-            const FieldInput('Address', '', 'fictional-reopened.invalid'),
-            const FieldInput('Notes', '', 'not-approved-fictional'),
-          ]);
+      final owner = InformationService(repository: store).owner;
+      final template = await owner.createTemplate('Server', '', [
+        const TemplateFieldInput('Address', 'Host name'),
+        const TemplateFieldInput(
+          'Notes',
+          'Operational notes',
+          kind: FieldKind.textNote,
+        ),
+      ]);
+      final item = await owner.createInformationFromTemplate(
+        template.id,
+        1,
+        'Fictional server',
+        '',
+        {
+          template.fields.first.id: 'fictional-reopened.invalid',
+          template.fields.last.id: 'not-approved-fictional',
+        },
+      );
       await store.close();
       store = await EncryptedInformationRepository.open(directory.path, keys);
       addTearDown(store.close);
@@ -55,12 +69,17 @@ void main() {
         return jsonDecode(lines.current) as Map<String, dynamic>;
       }
 
-      expect(
-        (await command({'command': 'catalog'})).toString(),
-        isNot(contains('fictional-reopened.invalid')),
-      );
+      final catalog = await command({'command': 'catalog'});
+      expect(catalog.toString(), isNot(contains('fictional-reopened.invalid')));
+      final listed = (catalog['items'] as List).single as Map<String, dynamic>;
+      final publicFields = (listed['fields'] as List)
+          .cast<Map<String, dynamic>>();
+      expect(publicFields.last['kind'], 'textNote');
       await command({'command': 'session', 'chatLabel': 'encrypted fixture'});
-      final ref = FieldRef(item.id, item.fields.first.id);
+      final ref = FieldRef(
+        listed['id'] as String,
+        publicFields.first['id'] as String,
+      );
       final request = await command({
         'command': 'request',
         'purpose': 'test',
