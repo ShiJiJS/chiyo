@@ -97,7 +97,9 @@ For user-requested organization, use this chat's existing private association:
    `directoryName`, and the complete desired `tagIds`/new `tagNames` lists.
    No value/field/content edits or out-of-scope items. Limits:200items,100tags/item,
    200-character names,240000UTF-8bytes of changes. `confirmed` means the whole
-   batch was applied; no second user confirmation is needed. Report the result.
+   batch was applied; no second user confirmation is needed. If no changes are
+   needed, submit an empty `changes` list to finish without rewriting items. Report
+   the result.
 5. On an uncertain response, query the same status before retrying. Stop on
    `confirmed`, `rejected`, `cancelled`, `expired`, `conflicted` or `unauthorized`;
    never silently recreate an expired/conflicting request. If still `active` after

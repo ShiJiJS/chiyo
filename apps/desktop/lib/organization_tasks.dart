@@ -231,9 +231,23 @@ class OrganizationResultsList extends StatelessWidget {
             children: [
               Text(task.purpose),
               const SizedBox(height: 6),
+              Text(
+                '提交 Agent  ${task.agentName.isEmpty ? '名称未记录' : task.agentName}',
+              ),
+              const SizedBox(height: 6),
               Text('聊天  ${task.chatLabel}'),
               const SizedBox(height: 6),
-              Text('${task.changes.length} 条信息'),
+              Text('提交时间  ${uiTime(task.createdAt)}'),
+              const SizedBox(height: 6),
+              Text('调整 ${task.changes.length} 条信息'),
+              for (final item
+                  in owner.information
+                      .where((i) => task.itemVersions.containsKey(i.id))
+                      .take(3))
+                Padding(
+                  padding: const EdgeInsets.only(top: 6),
+                  child: Text(item.name),
+                ),
               const SizedBox(height: 6),
               StatusLabel(
                 organizationStateLabel(owner.organizationState(task)),
@@ -313,7 +327,23 @@ class _ReviewOrganizationState extends State<_ReviewOrganization> {
                 Text(
                   '聊天：${widget.task.chatLabel}\n${widget.task.changes.length} 条整理结果',
                 ),
-                const QuietNotice('只调整分类与标签，不修改内容，也不会增加已有授权的范围。'),
+                StatusLabel(
+                  organizationStateLabel(
+                    widget.owner.organizationState(widget.task),
+                  ),
+                  active: widget.task.state == OrganizationTaskState.confirmed,
+                ),
+                QuietNotice(
+                  _pending
+                      ? '这是旧版待确认方案，确认后才调整分类与标签。'
+                      : widget.task.state == OrganizationTaskState.confirmed
+                      ? (widget.task.changes.isEmpty
+                            ? '本次未改动分类或标签。'
+                            : '分类和标签调整已生效，内容和已有授权范围保持原样。')
+                      : '本次方案未应用，未调整分类或标签。',
+                  warning:
+                      widget.task.state == OrganizationTaskState.conflicted,
+                ),
                 for (final change in widget.task.changes)
                   Builder(
                     builder: (context) {
@@ -369,9 +399,11 @@ class _ReviewOrganizationState extends State<_ReviewOrganization> {
                                     : null,
                               ),
                             ] else ...[
-                              Text('分类：$proposedFolder'),
                               Text(
-                                '标签：${proposedTags.isEmpty ? '无' : proposedTags}',
+                                '${widget.task.state == OrganizationTaskState.confirmed ? '分类' : '拟调整分类'}：$proposedFolder',
+                              ),
+                              Text(
+                                '${widget.task.state == OrganizationTaskState.confirmed ? '标签' : '拟调整标签'}：${proposedTags.isEmpty ? '无' : proposedTags}',
                               ),
                               if (item != null)
                                 Text('当前分类：${_folder(item.directoryId)}'),

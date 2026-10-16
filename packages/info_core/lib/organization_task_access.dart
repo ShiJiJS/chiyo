@@ -104,9 +104,9 @@ extension OwnerOrganizationTasks on OwnerAccess {
     OrganizationTask task, {
     void Function()? validate,
   }) async {
-    if (task.changes.any(
-      (c) => !information.any(
-        (i) => i.id == c.itemId && i.version == c.baseVersion,
+    if (task.itemVersions.entries.any(
+      (expected) => !information.any(
+        (item) => item.id == expected.key && item.version == expected.value,
       ),
     )) {
       await _service._repository.saveOrganizationTask(
@@ -300,7 +300,7 @@ extension AgentOrganizationTasks on AgentAccess {
     if (_service.owner.organizationNeedsRenewal(task)) {
       throw const AccessFailure('expired');
     }
-    if (changes.isEmpty ||
+    if ((!task.autoApply && changes.isEmpty) ||
         changes.length > 200 ||
         changes.map((c) => c.itemId).toSet().length != changes.length ||
         utf8

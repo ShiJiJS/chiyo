@@ -58,7 +58,7 @@ class _ImportProposalsPageState extends State<ImportProposalsPage> {
     child: ListView(
       padding: UiSpace.page,
       children: [
-        const PageHeading('录入与变更提案', subtitle: '先查看和调整内容，确认后才会写入资料库。'),
+        const PageHeading('录入与变更提案', subtitle: '核对待确认内容，查看处理结果。'),
         const QuietNotice('提交者由 Agent 自述。标题和说明对 Agent 可见，内容仍需另行授权。'),
         const SizedBox(height: 14),
         if (widget.owner.updateProposals.isNotEmpty ||
@@ -79,7 +79,11 @@ class _ImportProposalsPageState extends State<ImportProposalsPage> {
         if (widget.owner.importProposals.isEmpty &&
             widget.owner.updateProposals.isEmpty &&
             widget.owner.deleteProposals.isEmpty &&
-            !widget.owner.organizationTasks.any((t) => t.changes.isNotEmpty))
+            !widget.owner.organizationTasks.any(
+              (t) =>
+                  t.changes.isNotEmpty ||
+                  t.state == OrganizationTaskState.confirmed,
+            ))
           const SizedBox(
             height: 320,
             child: EmptyWorkspace(

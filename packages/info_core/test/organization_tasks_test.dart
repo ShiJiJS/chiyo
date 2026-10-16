@@ -246,7 +246,7 @@ void main() {
       );
       await expectLater(
         service.agent.submitOrganization(session, task.id, [
-          for (final i in items)
+          for (final i in items.take(1))
             OrganizationChange(
               itemId: i.id,
               baseVersion: i.version,
@@ -456,6 +456,29 @@ void main() {
         expect(service.owner.informationRevisions, isEmpty);
         await service.close();
       }
+    },
+  );
+  test(
+    'an approved organization with no changes completes without rewriting information or history',
+    () async {
+      final service = InformationService.fictional();
+      addTearDown(service.close);
+      final session = service.agent.openSession('Codex');
+      final request = await service.agent.requestOrganization(session, '检查分类', [
+        'demo-server',
+      ]);
+      await service.owner.approveOrganization(request.id, ['demo-server']);
+      await service.agent.submitOrganization(session, request.id, []);
+      expect(
+        service.agent.organizationStatus(session, request.id)['status'],
+        'confirmed',
+      );
+      expect(service.owner.information.single.version, 1);
+      expect(service.owner.informationRevisions, isEmpty);
+      await expectLater(
+        service.agent.organizationMetadata(session, request.id),
+        throwsA(isA<AccessFailure>()),
+      );
     },
   );
 }

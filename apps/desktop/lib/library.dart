@@ -45,6 +45,7 @@ class _InformationLibraryState extends State<InformationLibrary> {
     super.dispose();
   }
 
+  final _expandedDescriptions = <String>{};
   String? _selectedId;
   String? _directoryFilter;
   String? _tagFilter;
@@ -293,7 +294,35 @@ class _InformationLibraryState extends State<InformationLibrary> {
       if (item.description.isNotEmpty)
         Padding(
           padding: const EdgeInsets.only(top: 8),
-          child: Text(item.description),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                item.description,
+                maxLines:
+                    item.description.length > 240 &&
+                        !_expandedDescriptions.contains(item.id)
+                    ? 4
+                    : null,
+                overflow:
+                    item.description.length > 240 &&
+                        !_expandedDescriptions.contains(item.id)
+                    ? TextOverflow.ellipsis
+                    : null,
+              ),
+              if (item.description.length > 240)
+                TextButton(
+                  onPressed: () => setState(() {
+                    _expandedDescriptions.contains(item.id)
+                        ? _expandedDescriptions.remove(item.id)
+                        : _expandedDescriptions.add(item.id);
+                  }),
+                  child: Text(
+                    _expandedDescriptions.contains(item.id) ? '收起说明' : '展开说明',
+                  ),
+                ),
+            ],
+          ),
         ),
       const SizedBox(height: 10),
       Wrap(

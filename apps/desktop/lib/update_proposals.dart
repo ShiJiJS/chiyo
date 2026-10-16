@@ -26,6 +26,8 @@ class UpdateProposalsList extends StatelessWidget {
               const SizedBox(height: 6),
               Text('基础版本 ${proposal.input.baseVersion}'),
               const SizedBox(height: 6),
+              Text('提交时间  ${uiTime(proposal.createdAt)}'),
+              const SizedBox(height: 6),
               StatusLabel(
                 switch (proposal.state) {
                   UpdateProposalState.pending => '待确认',

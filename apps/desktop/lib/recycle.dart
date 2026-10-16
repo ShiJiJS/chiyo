@@ -177,7 +177,11 @@ class _RecyclePageState extends State<RecyclePage> {
       title: Text(entry.snapshot!.name),
       content: SizedBox(
         width: 700,
-        height: 500,
+        height:
+            entry.snapshot!.fields.length <= 2 &&
+                entry.snapshot!.fields.every((f) => f.value.length < 200)
+            ? 320
+            : 500,
         child: ListView(
           children: [
             Text(
@@ -282,6 +286,8 @@ class DeleteProposalsList extends StatelessWidget {
               Text('聊天  ${p.chatLabel}'),
               const SizedBox(height: 6),
               Text(p.fieldId == null ? '整条信息' : '选定字段'),
+              const SizedBox(height: 6),
+              Text('提交时间  ${uiTime(p.createdAt)}'),
               const SizedBox(height: 6),
               StatusLabel(switch (p.state) {
                 DeleteProposalState.pending => '待确认',
