@@ -76,19 +76,22 @@ void main() {
         })).toString(),
         isNot(contains('PRIVATE')),
       );
-    Future<void> rejectedSize(String path, Map<String, Object?> input) async {
-      try {
-        expect(await call(path, input), {'status': 'invalid_request'});
-      } on HttpException {
-        // Cancelling an oversized chunked HTTP body may close its connection.
-        // Either result rejects it without retaining or processing the batch.
+      Future<void> rejectedSize(String path, Map<String, Object?> input) async {
+        try {
+          expect(await call(path, input), {'status': 'invalid_request'});
+        } on HttpException {
+          // Cancelling an oversized chunked HTTP body may close its connection.
+          // Either result rejects it without retaining or processing the batch.
+        }
       }
-    }
-    await rejectedSize('/import/submit', {
-      'sessionSecret': session, 'items': [], 'padding': 'x' * 263000,
-    });
-    await rejectedSize('/catalog', {'padding': 'x' * 17000});
-    expect((await call('/catalog', {}))['status'], 'ok');
+
+      await rejectedSize('/import/submit', {
+        'sessionSecret': session,
+        'items': [],
+        'padding': 'x' * 263000,
+      });
+      await rejectedSize('/catalog', {'padding': 'x' * 17000});
+      expect((await call('/catalog', {}))['status'], 'ok');
       expect(service.owner.importProposals, hasLength(1));
       expect(service.agent.catalog(), isEmpty);
     },
