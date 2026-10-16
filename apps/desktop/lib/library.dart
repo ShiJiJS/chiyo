@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:info_core/info_core.dart';
 import 'organization.dart';
+import 'organization_tasks.dart';
 import 'recycle.dart';
 import 'revisions.dart';
 import 'ui.dart';
@@ -93,6 +94,21 @@ class _InformationLibraryState extends State<InformationLibrary> {
             subtitle:
                 '${widget.owner.information.length} 条信息 · 字段值按授权范围提供给 Agent',
             actions: [
+              TextButton.icon(
+                onPressed: () async {
+                  await Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => OrganizationTasksPage(
+                        owner: widget.owner,
+                        itemIds: _visibleInformation.map((i) => i.id).toList(),
+                      ),
+                    ),
+                  );
+                  if (mounted) setState(() {});
+                },
+                icon: const Icon(Icons.auto_awesome_outlined, size: 17),
+                label: const Text('Agent 整理'),
+              ),
               TextButton(
                 onPressed: () async {
                   await Navigator.of(context).push(

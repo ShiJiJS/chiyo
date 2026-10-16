@@ -1,5 +1,62 @@
 part of 'info_core.dart';
 
+/// Builds labels without publishing them until the surrounding batch commits.
+class _OrganizationPlan {
+  _OrganizationPlan(this.owner);
+  final OwnerAccess owner;
+  final newDirectories = <InformationDirectory>[];
+  final newTags = <InformationTag>[];
+  (String?, Set<String>) resolve(
+    String? id,
+    Iterable<String> tags,
+    String suggestedDirectory,
+    Iterable<String> suggestedTags,
+  ) {
+    owner._checkParent(id);
+    final selected = tags.toSet();
+    if (selected.any((id) => !owner.tags.any((t) => t.id == id))) {
+      throw const AccessFailure('invalid_proposal');
+    }
+    final name = suggestedDirectory.trim();
+    if (id == null && name.isNotEmpty) {
+      owner._checkOrganizationName(name);
+      final found = [...owner.directories, ...newDirectories].where(
+        (d) => d.parentId == null && d.name.toLowerCase() == name.toLowerCase(),
+      );
+      if (found.isNotEmpty) {
+        id = found.first.id;
+      } else {
+        final directory = InformationDirectory(
+          owner._service._secret(),
+          name,
+          null,
+          1,
+        );
+        newDirectories.add(directory);
+        id = directory.id;
+      }
+    }
+    for (final raw in suggestedTags) {
+      final name = raw.trim();
+      if (name.isEmpty) continue;
+      owner._checkOrganizationName(name);
+      final found = [
+        ...owner.tags,
+        ...newTags,
+      ].where((t) => t.name.toLowerCase() == name.toLowerCase());
+      if (found.isNotEmpty) {
+        selected.add(found.first.id);
+      } else {
+        final tag = InformationTag(owner._service._secret(), name, 1);
+        newTags.add(tag);
+        selected.add(tag.id);
+      }
+    }
+    if (selected.length > 100) throw const AccessFailure('invalid_proposal');
+    return (id, selected);
+  }
+}
+
 extension OwnerOrganization on OwnerAccess {
   List<InformationDirectory> get directories =>
       _service._repository.directories;

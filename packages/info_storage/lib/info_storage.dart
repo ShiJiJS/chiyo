@@ -75,6 +75,7 @@ class EncryptedInformationRepository implements InformationRepository {
   final _templates = <String, InformationTemplate>{};
   final _history = <String, GrantHistory>{};
   final _accesses = <String, AccessRecord>{};
+  final _organizationTasks = <String, OrganizationTask>{};
   final _proposals = <String, ImportProposal>{};
   final _updates = <String, UpdateProposal>{};
   final _revisions = <InformationRevision>[];
@@ -164,6 +165,18 @@ class EncryptedInformationRepository implements InformationRepository {
   }
 
   Future<void> _load() async {
+    for (final row
+        in await _db
+            .customSelect(
+              'SELECT payload FROM organization_tasks ORDER BY rowid',
+            )
+            .get()) {
+      final task = OrganizationTask.fromJson(
+        jsonDecode(row.read<String>('payload')) as Map<String, dynamic>,
+      );
+      _organizationTasks[task.id] = task;
+    }
+
     for (final row
         in await _db
             .customSelect('SELECT * FROM revision_purge_facts ORDER BY rowid')
@@ -451,14 +464,22 @@ class EncryptedInformationRepository implements InformationRepository {
     return List.unmodifiable(_tags.values);
   }
 
+  Future<void> _writeDirectory(
+    InformationDirectory directory,
+  ) => _db.customStatement(
+    'INSERT INTO information_directories(id,name,parent_id,version) VALUES(?,?,?,?) ON CONFLICT(id) DO UPDATE SET name=excluded.name,parent_id=excluded.parent_id,version=excluded.version',
+    [directory.id, directory.name, directory.parentId, directory.version],
+  );
+  Future<void> _writeTag(InformationTag tag) => _db.customStatement(
+    'INSERT INTO information_tags(id,name,version) VALUES(?,?,?) ON CONFLICT(id) DO UPDATE SET name=excluded.name,version=excluded.version',
+    [tag.id, tag.name, tag.version],
+  );
+
   @override
   Future<void> saveDirectory(InformationDirectory directory) async {
     if (_closed) throw const StorageFailure('library_closed');
     try {
-      await _db.customStatement(
-        'INSERT INTO information_directories(id,name,parent_id,version) VALUES(?,?,?,?) ON CONFLICT(id) DO UPDATE SET name=excluded.name,parent_id=excluded.parent_id,version=excluded.version',
-        [directory.id, directory.name, directory.parentId, directory.version],
-      );
+      await _writeDirectory(directory);
       _directories[directory.id] = directory;
     } catch (_) {
       throw const StorageFailure('save_failed');
@@ -469,10 +490,7 @@ class EncryptedInformationRepository implements InformationRepository {
   Future<void> saveTag(InformationTag tag) async {
     if (_closed) throw const StorageFailure('library_closed');
     try {
-      await _db.customStatement(
-        'INSERT INTO information_tags(id,name,version) VALUES(?,?,?) ON CONFLICT(id) DO UPDATE SET name=excluded.name,version=excluded.version',
-        [tag.id, tag.name, tag.version],
-      );
+      await _writeTag(tag);
       _tags[tag.id] = tag;
     } catch (_) {
       throw const StorageFailure('save_failed');
@@ -556,6 +574,70 @@ class EncryptedInformationRepository implements InformationRepository {
   }
 
   @override
+  List<OrganizationTask> get organizationTasks {
+    if (_closed) throw const StorageFailure('library_closed');
+    return List.unmodifiable(_organizationTasks.values);
+  }
+
+  Future<void> _writeOrganizationTask(
+    OrganizationTask task,
+  ) => _db.customStatement(
+    'INSERT INTO organization_tasks(id,payload) VALUES(?,?) ON CONFLICT(id) DO UPDATE SET payload=excluded.payload',
+    [task.id, jsonEncode(task.toJson())],
+  );
+  @override
+  Future<void> saveOrganizationTask(OrganizationTask task) async {
+    if (_closed) throw const StorageFailure('library_closed');
+    try {
+      await _writeOrganizationTask(task);
+      _organizationTasks[task.id] = task;
+    } catch (_) {
+      throw const StorageFailure('save_failed');
+    }
+  }
+
+  @override
+  Future<void> confirmOrganizationTask(
+    OrganizationTask task,
+    List<InformationItem> items,
+    List<InformationRevision> previous, {
+    List<InformationDirectory> newDirectories = const [],
+    List<InformationTag> newTags = const [],
+  }) async {
+    if (_closed) throw const StorageFailure('library_closed');
+    try {
+      await _db.transaction(() async {
+        for (final d in newDirectories) {
+          await _writeDirectory(d);
+        }
+        for (final t in newTags) {
+          await _writeTag(t);
+        }
+        for (final i in items) {
+          await _writeItem(i);
+        }
+        for (final r in previous) {
+          await _writeRevision(r);
+        }
+        await _writeOrganizationTask(task);
+      });
+      for (final d in newDirectories) {
+        _directories[d.id] = d;
+      }
+      for (final t in newTags) {
+        _tags[t.id] = t;
+      }
+      for (final i in items) {
+        _items[i.id] = i;
+      }
+      _revisions.addAll(previous);
+      _organizationTasks[task.id] = task;
+    } catch (_) {
+      throw const StorageFailure('save_failed');
+    }
+  }
+
+  @override
   List<ImportProposal> get importProposals {
     if (_closed) throw const StorageFailure('library_closed');
     return List.unmodifiable(_proposals.values);
@@ -580,16 +662,30 @@ class EncryptedInformationRepository implements InformationRepository {
   @override
   Future<void> confirmImportProposal(
     ImportProposal proposal,
-    List<InformationItem> items,
-  ) async {
+    List<InformationItem> items, {
+    List<InformationDirectory> newDirectories = const [],
+    List<InformationTag> newTags = const [],
+  }) async {
     if (_closed) throw const StorageFailure('library_closed');
     try {
       await _db.transaction(() async {
+        for (final directory in newDirectories) {
+          await _writeDirectory(directory);
+        }
+        for (final tag in newTags) {
+          await _writeTag(tag);
+        }
         for (final item in items) {
           await _writeItem(item);
         }
         await _writeProposal(proposal);
       });
+      for (final directory in newDirectories) {
+        _directories[directory.id] = directory;
+      }
+      for (final tag in newTags) {
+        _tags[tag.id] = tag;
+      }
       for (final item in items) {
         _items[item.id] = item;
       }
@@ -608,6 +704,7 @@ class EncryptedInformationRepository implements InformationRepository {
     _templates.clear();
     _history.clear();
     _accesses.clear();
+    _organizationTasks.clear();
     _proposals.clear();
     _updates.clear();
     _revisions.clear();
@@ -851,7 +948,7 @@ class EncryptedInformationRepository implements InformationRepository {
 class _InformationDatabase extends GeneratedDatabase {
   _InformationDatabase(super.executor);
   @override
-  int get schemaVersion => 11;
+  int get schemaVersion => 12;
   @override
   Iterable<TableInfo<Table, Object?>> get allTables => const [];
   @override
@@ -862,6 +959,7 @@ class _InformationDatabase extends GeneratedDatabase {
       await _createAudit();
       await _createUpdates();
       await _createProposals();
+      await _createOrganizationTasks();
       await _createTemplates();
       await customStatement(
         'CREATE TABLE settings(name TEXT PRIMARY KEY,value INTEGER NOT NULL)',
@@ -876,7 +974,7 @@ class _InformationDatabase extends GeneratedDatabase {
       await _backupSchema();
     },
     onUpgrade: (_, from, to) async {
-      if (from < 1 || to != 11)
+      if (from < 1 || to != 12)
         throw const StorageFailure('unsupported_schema');
       await transaction(() async {
         if (from < 2) {
@@ -903,6 +1001,7 @@ class _InformationDatabase extends GeneratedDatabase {
         if (from < 8) await _createUpdates();
         if (from < 9) await _createRecycle();
         if (from < 10) await _createRevisionPurges();
+        if (from < 12) await _createOrganizationTasks();
         if (from < 11) {
           await customStatement(
             'ALTER TABLE information_items ADD COLUMN created_at TEXT',
@@ -938,6 +1037,10 @@ class _InformationDatabase extends GeneratedDatabase {
       'CREATE TABLE delete_proposals(id TEXT PRIMARY KEY,payload TEXT NOT NULL)',
     );
   }
+
+  Future<void> _createOrganizationTasks() => customStatement(
+    'CREATE TABLE organization_tasks(id TEXT PRIMARY KEY,payload TEXT NOT NULL)',
+  );
 
   Future<void> _createProposals() => customStatement(
     'CREATE TABLE import_proposals(id TEXT PRIMARY KEY,payload TEXT NOT NULL)',

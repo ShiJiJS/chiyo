@@ -19,7 +19,11 @@ Future<void> main(List<String> args) async {
       input['association'] as String,
       Platform.environment['CODEX_THREAD_ID'] ?? '',
     );
-    client = AgentClient(association.port, sessionSecret: association.secret);
+    client = AgentClient(
+      association.port,
+      sessionSecret: association.secret,
+      sourceAgent: 'Codex',
+    );
     if (input['command'] == 'delegate') {
       final child = input['childChatId'];
       if (child is! String ||

@@ -3,8 +3,10 @@ import 'dart:convert';
 import 'dart:io';
 
 class AgentClient {
-  AgentClient(this.port, {String? sessionSecret}) : _session = sessionSecret;
+  AgentClient(this.port, {String? sessionSecret, this.sourceAgent = '通用 CLI'})
+    : _session = sessionSecret;
   final int port;
+  final String sourceAgent;
   final _http = HttpClient()..connectionTimeout = const Duration(seconds: 3);
   String? _session;
   String? _endCapability;
@@ -21,12 +23,15 @@ class AgentClient {
     final result = await _call('/session/lifecycle', {'chatLabel': label});
     final secret = result.remove('sessionSecret');
     final endCapability = result.remove('endCapability');
-    if (result['status'] == 'ok' && secret is String && endCapability is String) {
+    if (result['status'] == 'ok' &&
+        secret is String &&
+        endCapability is String) {
       _session = secret;
       _endCapability = endCapability;
     }
     return result;
   }
+
   void close() {
     _tokens.clear();
     _session = null;
@@ -37,12 +42,30 @@ class AgentClient {
   Future<Map<String, dynamic>> execute(Map<String, dynamic> input) async {
     final command = input['command'];
     if (utf8.encode(jsonEncode(input)).length >
-        (command == 'import-submit' || command == 'update-submit'
+        (command == 'import-submit' ||
+                command == 'update-submit' ||
+                command == 'organize-submit'
             ? 262144
             : 16384)) {
       return {'status': 'invalid_request'};
     }
     switch (command) {
+      case 'organize-tasks':
+        if (_session == null) return {'status': 'unauthorized'};
+        return _call('/organization/tasks', {'sessionSecret': _session});
+      case 'organize-metadata':
+        if (_session == null) return {'status': 'unauthorized'};
+        return _call('/organization/metadata', {
+          'sessionSecret': _session,
+          'taskId': input['taskId'],
+        });
+      case 'organize-submit':
+        if (_session == null) return {'status': 'unauthorized'};
+        return _call('/organization/submit', {
+          'sessionSecret': _session,
+          'taskId': input['taskId'],
+          'changes': input['changes'],
+        });
       case 'delete-submit':
         if (_session == null) return {'status': 'unauthorized'};
         return _call('/delete/submit', {
@@ -74,6 +97,8 @@ class AgentClient {
         return _call('/import/submit', {
           'sessionSecret': _session,
           'items': input['items'],
+          'agentName': input['agentName'] ?? sourceAgent,
+          if (input.containsKey('purpose')) 'purpose': input['purpose'],
         });
       case 'import-status':
         if (_session == null) return {'status': 'unauthorized'};

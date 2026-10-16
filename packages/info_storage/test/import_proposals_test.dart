@@ -28,19 +28,28 @@ void main() {
       );
       var service = InformationService(repository: store);
       final session = service.agent.openSession('Private importing chat');
-      final id = await service.agent.submitImport(session, [
-        ImportItemInput('PENDING-PROPOSAL-MARKER-999', '', [
-          const FieldInput('Host', '', 'PRIVATE-PROPOSAL-MARKER-999'),
-        ]),
-        ImportItemInput('Second', '', [
-          const FieldInput(
-            'Notes',
+      final id = await service.agent.submitImport(
+        session,
+        [
+          ImportItemInput(
+            'PENDING-PROPOSAL-MARKER-999',
             '',
-            'Private note',
-            kind: FieldKind.textNote,
+            [const FieldInput('Host', '', 'PRIVATE-PROPOSAL-MARKER-999')],
+            suggestedDirectory: 'Services',
+            suggestedTags: ['Notes'],
           ),
-        ]),
-      ]);
+          ImportItemInput('Second', '', [
+            const FieldInput(
+              'Notes',
+              '',
+              'Private note',
+              kind: FieldKind.textNote,
+            ),
+          ]),
+        ],
+        agentName: 'Codex',
+        purpose: '整理指定入口',
+      );
       await service.close();
       await store.close();
       store = await EncryptedInformationRepository.open(directory.path, keys);
@@ -51,6 +60,8 @@ void main() {
         throwsA(isA<AccessFailure>()),
       );
       final pending = service.owner.importProposals.single;
+      expect(pending.agentName, 'Codex');
+      expect(pending.purpose, '整理指定入口');
       expect(
         pending.items.first.fields.single.value,
         'PRIVATE-PROPOSAL-MARKER-999',
@@ -67,6 +78,10 @@ void main() {
       final retry = await service.owner.confirmImport(id, 1, pending.items);
       expect(retry.map((i) => i.id), items.map((i) => i.id));
       expect(service.owner.information, hasLength(2));
+      expect(service.owner.directories.single.name, 'Services');
+      expect(service.owner.tags.single.name, 'Notes');
+      expect(service.owner.importProposals.single.items, isEmpty);
+      expect(service.owner.importProposals.single.fieldCount, 2);
       expect(
         service.owner.information.last.fields.single.kind,
         FieldKind.textNote,

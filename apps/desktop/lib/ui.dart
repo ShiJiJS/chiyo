@@ -704,7 +704,10 @@ class _InformationValueState extends State<InformationValue> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               mainAxisSize: MainAxisSize.min,
               children: [
-                SelectableText(long && !_expanded ? '$preview…' : widget.value),
+                SelectableText(
+                  long && !_expanded ? '$preview…' : widget.value,
+                  maxLines: long && !_expanded ? 8 : null,
+                ),
                 if (long)
                   Align(
                     alignment: Alignment.centerLeft,

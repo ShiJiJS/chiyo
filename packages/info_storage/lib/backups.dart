@@ -381,6 +381,7 @@ class InformationBackups {
             throw const StorageFailure('recipient_not_empty');
         }
         await _repository._db.customStatement('DELETE FROM settings');
+        await _repository._db.customStatement('DELETE FROM organization_tasks');
         // Directory parents may appear after a moved child in source row order.
         await _repository._db.customStatement('PRAGMA defer_foreign_keys = ON');
         for (final table in _allColumns.entries) {

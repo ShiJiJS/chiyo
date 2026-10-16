@@ -26,22 +26,32 @@ void main() {
       await tester.tap(find.byKey(const ValueKey('nav-1')));
       await tester.pumpAndSettle();
       final session = service.agent.openSession('importing chat');
-      final id = await service.agent.submitImport(session, [
-        ImportItemInput('Suggested', 'Public suggestion', [
-          const FieldInput('Host', 'Address', 'private.invalid'),
-        ], suggestedDirectory: 'Servers'),
-        ImportItemInput('Second suggestion', '', [
-          const FieldInput(
-            'Notes',
-            '',
-            'private note',
-            kind: FieldKind.textNote,
-          ),
-        ]),
-      ]);
+      final id = await service.agent.submitImport(
+        session,
+        [
+          ImportItemInput('Suggested', 'Public suggestion', [
+            const FieldInput('Host', 'Address', 'private.invalid'),
+          ], suggestedDirectory: 'Servers'),
+          ImportItemInput('Second suggestion', '', [
+            const FieldInput(
+              'Notes',
+              '',
+              'private note',
+              kind: FieldKind.textNote,
+            ),
+          ]),
+        ],
+        agentName: 'Codex',
+        purpose: '录入指定的服务信息',
+      );
       await tester.tap(find.text('录入提案'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('预览并调整'));
+      expect(find.text('Codex 提交了 2 条信息'), findsOneWidget);
+      expect(find.text('用途：录入指定的服务信息'), findsOneWidget);
+      await tester.tap(find.text('查看提案'));
+      await tester.pumpAndSettle();
+      expect(find.byType(TextField), findsNothing);
+      await tester.tap(find.byKey(const ValueKey('edit-import-0')));
       await tester.pumpAndSettle();
       await tester.enterText(
         find.byKey(const ValueKey('proposal-name-0')),
@@ -58,6 +68,10 @@ void main() {
       await tester.tap(find.byKey(const ValueKey('proposal-tag-0-0')));
       await tester.pumpAndSettle();
       expect(service.owner.information, isEmpty);
+      await tester.tap(find.text('保存更改'));
+      await tester.pumpAndSettle();
+      expect(find.byType(TextField), findsNothing);
+      expect(find.text('reviewed.invalid'), findsOneWidget);
       await tester.tap(find.text('确认全部入库'));
       await tester.pumpAndSettle();
       expect(service.agent.importStatus(session, id)['status'], 'confirmed');
@@ -67,6 +81,13 @@ void main() {
         service.owner.information.first.fields.single.value,
         'reviewed.invalid',
       );
+      await tester.tap(find.text('查看详情'));
+      await tester.pumpAndSettle();
+      expect(find.byType(TextField), findsNothing);
+      expect(find.text('编辑'), findsNothing);
+      expect(find.text('reviewed.invalid'), findsOneWidget);
+      await tester.tap(find.text('关闭'));
+      await tester.pumpAndSettle();
       await tester.tap(find.byKey(const ValueKey('nav-1')));
       await tester.pumpAndSettle();
       expect(find.text('Reviewed item'), findsNWidgets(2));

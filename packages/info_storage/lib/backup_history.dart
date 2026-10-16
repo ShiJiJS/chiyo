@@ -508,6 +508,7 @@ extension _CompleteBackups on InformationBackups {
       _repository._settings
         ..clear()
         ..addAll(settings);
+      _repository._organizationTasks.clear();
       _repository._proposals.clear();
       _repository._updates.clear();
       _repository._deletes.clear();

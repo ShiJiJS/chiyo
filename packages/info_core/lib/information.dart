@@ -1,3 +1,4 @@
+import 'organization_tasks.dart';
 import 'organization.dart';
 export 'organization.dart';
 import 'templates.dart';
@@ -67,6 +68,16 @@ class InformationItem {
 
 /// Owner-side storage seam. Agent transports never receive this capability.
 abstract interface class InformationRepository {
+  List<OrganizationTask> get organizationTasks;
+  Future<void> saveOrganizationTask(OrganizationTask task);
+  Future<void> confirmOrganizationTask(
+    OrganizationTask task,
+    List<InformationItem> items,
+    List<InformationRevision> previous, {
+    List<InformationDirectory> newDirectories = const [],
+    List<InformationTag> newTags = const [],
+  });
+
   List<GrantHistory> get grantHistory;
   List<AccessRecord> get accessRecords;
   Future<void> saveGrantHistory(GrantHistory history);
@@ -88,8 +99,10 @@ abstract interface class InformationRepository {
   /// Commits the entire batch and its terminal proposal state atomically.
   Future<void> confirmImportProposal(
     ImportProposal proposal,
-    List<InformationItem> items,
-  );
+    List<InformationItem> items, {
+    List<InformationDirectory> newDirectories = const [],
+    List<InformationTag> newTags = const [],
+  });
   List<UpdateProposal> get updateProposals;
   List<InformationRevision> get informationRevisions;
   List<RevisionPurgeFact> get revisionPurgeFacts;
@@ -127,6 +140,36 @@ class MemoryInformationRepository implements InformationRepository {
     }
   }
   final _items = <String, InformationItem>{};
+  final _organizationTasks = <String, OrganizationTask>{};
+  @override
+  List<OrganizationTask> get organizationTasks =>
+      List.unmodifiable(_organizationTasks.values);
+  @override
+  Future<void> saveOrganizationTask(OrganizationTask task) async {
+    _organizationTasks[task.id] = task;
+  }
+
+  @override
+  Future<void> confirmOrganizationTask(
+    OrganizationTask task,
+    List<InformationItem> items,
+    List<InformationRevision> previous, {
+    List<InformationDirectory> newDirectories = const [],
+    List<InformationTag> newTags = const [],
+  }) async {
+    for (final directory in newDirectories) {
+      _directories[directory.id] = directory;
+    }
+    for (final tag in newTags) {
+      _tags[tag.id] = tag;
+    }
+    for (final item in items) {
+      _items[item.id] = item;
+    }
+    _revisions.addAll(previous);
+    _organizationTasks[task.id] = task;
+  }
+
   final _history = <String, GrantHistory>{};
   final _accesses = <String, AccessRecord>{};
   @override
@@ -266,8 +309,16 @@ class MemoryInformationRepository implements InformationRepository {
   @override
   Future<void> confirmImportProposal(
     ImportProposal proposal,
-    List<InformationItem> items,
-  ) async {
+    List<InformationItem> items, {
+    List<InformationDirectory> newDirectories = const [],
+    List<InformationTag> newTags = const [],
+  }) async {
+    for (final directory in newDirectories) {
+      _directories[directory.id] = directory;
+    }
+    for (final tag in newTags) {
+      _tags[tag.id] = tag;
+    }
     for (final item in items) {
       _items[item.id] = item;
     }

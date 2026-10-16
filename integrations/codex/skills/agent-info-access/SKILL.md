@@ -1,6 +1,6 @@
 ---
 name: agent-info-access
-description: Request user-approved personal information through Agent Info, or submit user-designated source information as an import proposal for desktop review; reuse this chat's approved fields and handle pending or denied access.
+description: Request user-approved personal information through Agent Info, submit user-designated source information for review, or complete a user-assigned metadata-only organization task; reuse this chat's approved fields and handle pending or denied access.
 ---
 
 Use the Agent Info association supplied by this chat's latest SessionStart hook.
@@ -48,6 +48,14 @@ Approved fields keep fixed identities. New fields or information items require
 another request. Reading does not grant import, approval, or history access.
 Revocation stops future reads and cannot remove information already disclosed.
 
+For user-requested imports, include `agentName` (for example, `Codex`) and a
+short `purpose` explaining this batch. These are self-reported labels, not verified
+identity. Give items meaningful names; avoid test/session labels as item titles.
+Choose a sensible `suggestedDirectory` and optional `suggestedTags` for each item.
+The owner sees these defaults in read-only preview; confirmation reuses matching
+labels or creates the proposed labels atomically with the information. An owner
+can edit exceptions before confirming. Use private facts only in field values.
+
 For user-requested imports, first explain that the importing agent has already
 seen the designated source data. Submit only that source, never scan unrelated
 personal files. Use `import-submit` with `items`: each has `name`, `description`,
@@ -55,7 +63,8 @@ and `fields` containing `name`, `description`, `value`, and `kind` (`structured`
 or `textNote`). Names, descriptions, and field descriptions become public catalog
 metadata after confirmation: keep private facts in values. Optional
 `suggestedDirectory`, `suggestedTags`, and `suggestedTemplate` are review hints;
-they do not create organization labels or reuse a template field's identity.
+directory/tag suggestions are applied only when the owner confirms the batch;
+templates remain hints and never reuse an existing field identity.
 Keep batches within 20 items, 200 total fields, 50 fields per item, and 240000
 UTF-8 bytes of item JSON. Each value is at most 64000 characters.
 
@@ -69,6 +78,29 @@ read access, overwrite existing information, approve requests, or export the
 library. New-item proposals cannot update existing items; reviewed updates use a
 separate workflow. Restart ends the old session association, even when an owner
 can still review its encrypted pending proposal.
+
+For user-assigned organization, call `organize-tasks` under this chat's existing
+association. It lists only tasks explicitly assigned to this authorization session.
+If none is available, ask the user to create one in Library → Agent organize and
+select this chat; do not search another chat's references or request content access.
+
+1. Call `organize-metadata` with `taskId`. Use its scoped item titles/descriptions,
+   item versions, directory tree and tag names. It contains no field values.
+2. Prefer existing directory/tag IDs and shallow, reusable categories. Submit one
+   `organize-submit` with `taskId` and `changes`. Each change has `itemId`, the
+   supplied `baseVersion`, optional existing `directoryId` or a new root
+   `directoryName`, and the desired complete `tagIds` / new `tagNames` lists.
+   Do not include values, field edits or items outside the task. Limits: 200 items,
+   100 tags per item, 200-character label names, 240000 bytes of change JSON.
+3. Stop after `proposed`; the owner reviews and confirms the batch. Submission
+   ends metadata access for that task. Query `organize-tasks` for its state rather
+   than resubmitting. `confirmed` means applied; `rejected`, `cancelled`, `expired`,
+   `conflicted` or `unauthorized` means stop and explain the result. Conflicts
+   require the user to start a fresh task; no automatic recreation.
+
+Task access lasts at most 30 minutes and ends with its session, cancellation or
+submission. It cannot be recovered after restart or used to read values, approve
+access requests, modify content or bypass a normal content-access request.
 
 For requested changes, use `update-submit` with `update` containing `itemId`,
 the current catalog `version` as `baseVersion`, and `changes`. Each operation is

@@ -83,10 +83,15 @@ class ImportProposal {
     Iterable<String> createdItemIds = const [],
     Iterable<int> createdItemVersions = const [],
     int? itemCount,
+    this.agentName = '',
+    this.purpose = '',
+    int? fieldCount,
   }) : items = state == ImportProposalState.pending
            ? List.unmodifiable(items)
            : const [],
        itemCount = itemCount ?? items.length,
+       fieldCount =
+           fieldCount ?? items.fold<int>(0, (n, i) => n + i.fields.length),
        createdItemIds = List.unmodifiable(createdItemIds),
        createdItemVersions = List.unmodifiable(
          createdItemVersions.isEmpty
@@ -94,6 +99,7 @@ class ImportProposal {
              : createdItemVersions,
        );
   final String id, sessionBinding, chatLabel;
+  final String agentName, purpose;
   final DateTime createdAt;
   final List<ImportItemInput> items;
   final ImportProposalState state;
@@ -101,6 +107,7 @@ class ImportProposal {
   final List<String> createdItemIds;
   final List<int> createdItemVersions;
   final int itemCount;
+  final int fieldCount;
   List<ImportReceipt> get receipts => List.unmodifiable([
     for (var i = 0; i < createdItemIds.length; i++)
       ImportReceipt(createdItemIds[i], createdItemVersions[i]),
@@ -116,6 +123,9 @@ class ImportProposal {
     'createdItemIds': createdItemIds,
     'createdItemVersions': createdItemVersions,
     'itemCount': itemCount,
+    'agentName': agentName,
+    'purpose': purpose,
+    'fieldCount': fieldCount,
   };
   factory ImportProposal.fromJson(Map<String, dynamic> json) => ImportProposal(
     id: json['id'] as String,
@@ -131,5 +141,8 @@ class ImportProposal {
     createdItemVersions: (json['createdItemVersions'] as List? ?? [])
         .cast<int>(),
     itemCount: json['itemCount'] as int?,
+    agentName: json['agentName'] as String? ?? '',
+    purpose: json['purpose'] as String? ?? '',
+    fieldCount: json['fieldCount'] as int?,
   );
 }

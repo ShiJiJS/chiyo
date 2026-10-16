@@ -34,6 +34,7 @@ class AgentServer {
       }
       final limit =
           request.uri.path == '/import/submit' ||
+              request.uri.path == '/organization/submit' ||
               request.uri.path == '/update/submit'
           ? 262144
           : 16384;
@@ -100,6 +101,49 @@ class AgentServer {
           _text(body, 'sessionSecret'),
           _text(body, 'proposalId'),
         );
+      case '/organization/tasks':
+        return {
+          'status': 'ok',
+          'tasks': _agent.organizationTasks(_text(body, 'sessionSecret')),
+        };
+      case '/organization/metadata':
+        return _agent.organizationMetadata(
+          _text(body, 'sessionSecret'),
+          _text(body, 'taskId'),
+        );
+      case '/organization/submit':
+        final raw = body['changes'];
+        if (raw is! List ||
+            raw.length > 200 ||
+            raw.any((c) => c is! Map<String, dynamic>)) {
+          throw const AccessFailure('invalid_request');
+        }
+        final allowed = {
+          'itemId',
+          'baseVersion',
+          'directoryId',
+          'directoryName',
+          'tagIds',
+          'tagNames',
+        };
+        if (raw.any(
+          (dynamic c) => (c as Map<String, dynamic>).keys.any(
+            (key) => !allowed.contains(key),
+          ),
+        )) {
+          throw const AccessFailure('invalid_request');
+        }
+        await _agent.submitOrganization(
+          _text(body, 'sessionSecret'),
+          _text(body, 'taskId'),
+          raw
+              .map(
+                (dynamic c) =>
+                    OrganizationChange.fromJson(c as Map<String, dynamic>),
+              )
+              .toList(),
+        );
+        return {'status': 'proposed', 'taskId': body['taskId']};
       case '/catalog':
         final query = body['query'] ?? '';
         final directoryId = body['directoryId'];
@@ -135,7 +179,8 @@ class AgentServer {
         return {
           'status': 'ok',
           'sessionSecret': session.sessionSecret,
-          if (path == '/session/lifecycle') 'endCapability': session.endCapability,
+          if (path == '/session/lifecycle')
+            'endCapability': session.endCapability,
         };
       case '/session/check':
         _agent.validateSession(_text(body, 'sessionSecret'));
@@ -204,11 +249,21 @@ class AgentServer {
         raw.any((i) => i is! Map<String, dynamic>)) {
       throw const AccessFailure('invalid_request');
     }
+    for (final key in ['agentName', 'purpose']) {
+      if (body.containsKey(key) && body[key] is! String) {
+        throw const AccessFailure('invalid_request');
+      }
+    }
     final session = _text(body, 'sessionSecret');
     final items = raw
         .map((i) => ImportItemInput.fromJson(i as Map<String, dynamic>))
         .toList();
-    final id = await _agent.submitImport(session, items);
+    final id = await _agent.submitImport(
+      session,
+      items,
+      agentName: body['agentName'] is String ? body['agentName'] as String : '',
+      purpose: body['purpose'] is String ? body['purpose'] as String : '',
+    );
     return _agent.importStatus(session, id);
   }
 

@@ -35,10 +35,15 @@ void _validateImport(List<ImportItemInput> items) {
 extension AgentImports on AgentAccess {
   Future<String> submitImport(
     String session,
-    List<ImportItemInput> items,
-  ) => _service.owner._serialize(() async {
+    List<ImportItemInput> items, {
+    String agentName = '',
+    String purpose = '',
+  }) => _service.owner._serialize(() async {
     _service._requireSession(session);
     _validateImport(items);
+    if (agentName.length > 200 || purpose.length > 2000) {
+      throw const AccessFailure('invalid_proposal');
+    }
     // Bound retained pending work per chat without revealing other sessions.
     if (_service._repository.importProposals
             .where(
@@ -56,6 +61,8 @@ extension AgentImports on AgentAccess {
       chatLabel: _service._sessions[session]!,
       createdAt: _service._clock(),
       items: items,
+      agentName: agentName.trim(),
+      purpose: purpose.trim(),
     );
     await _service._repository.saveImportProposal(proposal);
     return proposal.id;
@@ -115,8 +122,18 @@ extension OwnerImports on OwnerAccess {
       }
     }
     final confirmedAt = _service._clock();
-    final items = [
+    final organization = _OrganizationPlan(this);
+    final locations = [
       for (final input in reviewed)
+        organization.resolve(
+          input.directoryId,
+          input.tagIds,
+          input.suggestedDirectory,
+          input.suggestedTags,
+        ),
+    ];
+    final items = [
+      for (final (index, input) in reviewed.indexed)
         InformationItem(
           _service._secret(),
           input.name.trim(),
@@ -133,8 +150,8 @@ extension OwnerImports on OwnerAccess {
                 kind: f.kind,
               ),
           ],
-          directoryId: input.directoryId,
-          tagIds: input.tagIds.toSet(),
+          directoryId: locations[index].$1,
+          tagIds: locations[index].$2,
           createdAt: confirmedAt,
           modifiedAt: confirmedAt,
         ),
@@ -149,8 +166,16 @@ extension OwnerImports on OwnerAccess {
       version: previous.version + 1,
       createdItemIds: items.map((i) => i.id),
       createdItemVersions: items.map((i) => i.version),
+      agentName: previous.agentName,
+      purpose: previous.purpose,
+      fieldCount: items.fold<int>(0, (n, i) => n + i.fields.length),
     );
-    await _service._repository.confirmImportProposal(confirmed, items);
+    await _service._repository.confirmImportProposal(
+      confirmed,
+      items,
+      newDirectories: organization.newDirectories,
+      newTags: organization.newTags,
+    );
     return confirmed.receipts;
   });
 
@@ -165,6 +190,9 @@ extension OwnerImports on OwnerAccess {
         items: previous.items,
         state: ImportProposalState.rejected,
         version: previous.version + 1,
+        agentName: previous.agentName,
+        purpose: previous.purpose,
+        fieldCount: previous.fieldCount,
       ),
     );
   });
