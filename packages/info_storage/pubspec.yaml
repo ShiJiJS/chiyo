@@ -7,6 +7,8 @@ environment:
 dependencies:
   info_core:
     path: ../info_core
+  # Provisional reproducible development pins; not a production acceptance.
+  # ADR 0004 gates remain open; see docs/implementation-ticket-3.md.
   drift: 2.35.2
   sqlite3: 3.7.1
   ffi: 2.2.0

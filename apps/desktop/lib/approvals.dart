@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:info_core/info_core.dart';
 
@@ -32,9 +33,8 @@ class ApprovalsState extends State<Approvals> {
       action();
       setState(() {});
     } on AccessFailure {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('请求状态已变化，请重新检查。')));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('请求状态已变化，请重新检查。')));
       setState(() {});
     }
   }
@@ -114,13 +114,11 @@ class ApprovalsState extends State<Approvals> {
     );
   }
 
-  Widget _requestView(Map<String, Object?> request) {
-    final id = request['requestId'] as String;
-    final fields = (request['fields'] as List)
-        .map((f) => FieldRef(f['itemId'] as String, f['fieldId'] as String))
-        .toList();
+  Widget _requestView(OwnerRequestSnapshot request) {
+    final id = request.id;
+    final fields = request.fields;
     final selected = _selection.putIfAbsent(id, () => fields.toSet());
-    final state = request['status'];
+    final state = request.state;
     return Card(
       margin: const EdgeInsets.only(bottom: 20),
       child: Padding(
@@ -129,19 +127,19 @@ class ApprovalsState extends State<Approvals> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '聊天：${request['chatLabel']}',
+              '聊天：${request.chatLabel}',
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 8),
-            Text(request['purpose'] as String),
+            Text(request.purpose),
             const Text(
               '聊天名称与用途由 agent 自述，仅供判断。',
               style: TextStyle(color: Colors.grey),
             ),
             const SizedBox(height: 12),
-            if (state == 'pending') ...[
+            if (state == AccessRequestState.pending) ...[
               Text(
-                '待审批剩余：${(request['remainingSeconds'] as int) ~/ 60} 分 ${(request['remainingSeconds'] as int) % 60} 秒',
+                '待审批剩余：${request.remainingSeconds ~/ 60} 分 ${request.remainingSeconds % 60} 秒',
               ),
               for (final field in fields)
                 CheckboxListTile(
@@ -174,24 +172,23 @@ class ApprovalsState extends State<Approvals> {
                 child: const Text('拒绝申请'),
               ),
             ] else ...[
-              Text(
-                state == 'approved'
-                    ? '已批准'
-                    : state == 'revoked'
-                    ? '已撤销'
-                    : state == 'denied'
-                    ? '已拒绝'
-                    : state == 'cancelled'
-                    ? '已取消'
-                    : '已过期',
-              ),
-              if (request['approvedFields'] != null) ...[
+              Text(switch (state) {
+                AccessRequestState.pending => '待审批',
+                AccessRequestState.approved => '已批准',
+                AccessRequestState.revoked => '已撤销',
+                AccessRequestState.denied => '已拒绝',
+                AccessRequestState.cancelled => '已取消',
+                AccessRequestState.expired => '已过期',
+              }),
+              if (request.approvedFields != null) ...[
                 Text(
-                  '已批准字段：${(request['approvedFields'] as List).map((f) => f['fieldId']).join(', ')}',
+                  '已批准字段：${request.approvedFields!.map((f) => f.fieldId).join(', ')}',
                 ),
-                Text('到期时间：${request['expiresAt']}'),
+                Text(
+                  '到期时间：${request.grantExpiresAt?.toUtc().toIso8601String()}',
+                ),
               ],
-              if (state == 'approved')
+              if (state == AccessRequestState.approved)
                 Padding(
                   padding: const EdgeInsets.only(top: 12),
                   child: OutlinedButton(
