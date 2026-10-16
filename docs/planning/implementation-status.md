@@ -191,7 +191,7 @@ desktop was opened and no user data or Codex configuration was changed. Real
 Windows interaction and macOS acceptance remain outstanding; previous
 preview directories remain intact.
 
-## Product-wide desktop reshape · current 0.2.0 preview
+## Product-wide desktop reshape · previous 0.2.0 preview
 
 The user explicitly revoked the earlier A/inbox visual constraints. Those preview
 sections above are historical delivery records, not accepted visual specifications.
@@ -229,6 +229,46 @@ authorization rules and CLI/hook interfaces remain compatible. Actual Windows wi
 focus/scroll/animation feel, native file dialogs, tray/notification and real Codex
 acceptance remain for the user. macOS still awaits the user's own Mac. All required
 platform acceptance issues remain open; PR #20 remains draft.
+
+## Desktop feedback corrections · current 0.2.1 preview
+
+The user positively received the LIMS direction and requested focused corrections.
+Source **`a5a56e2093d8c34e18899f62ab844ac64ccd7924`**, version **0.2.1+3**:
+instant single-item menu selection; shared primary-page header origin; a Settings
+workspace containing notifications, blank-field entry templates, backup/recovery and
+full quit; explicit notification permission/test results; removal of static development
+warnings; and a custom Windows caption retaining native resize borders and the
+existing close-to-background/fully-quit behavior. The startup-to-ready handover keeps
+native maximize-state updates connected. macOS keeps its system window controls.
+
+Real Flutter headless renders were inspected across all five main pages, templates,
+backup, editing, notification success/failure, a 24-field long request, 1280×800 and
+200% text. One independent, unscored existing-UI review found a notification-state
+conflict; the corrected error appearance and guidance were re-rendered and verified.
+Evidence: `.scratch/desktop-fixes-2026-10-16/screens/` and `review.md`.
+
+All **49 desktop tests passed three consecutive runs**. Final packaging passed four
+analyses, **174 headless tests** (CLI 17, core 71, storage 37, desktop 49), Windows
+release compilation, relocated synthetic SQLCipher/DPAPI checks and **11 extracted
+SDK-free CLI/hook tests**. A first packaging run hit a preexisting backup-interruption
+fixture startup exit 255; its isolated retry and the complete packaging rerun passed.
+Those logs are retained in the same task directory. Shipped font hashes match the
+source and the exe's FileVersion/ProductVersion are `0.2.1+3`.
+
+- Executable: `build/windows-desktop-fixes-0.2.1/AgentInfoManage/app/info_desktop.exe`.
+- ZIP: `build/windows-desktop-fixes-0.2.1/agent-info-manage-0.2.1+3-dev.a5a56e2093d8-windows-x64.zip`.
+- Archive size: 46,035,946 bytes.
+- SHA-256: `f6801059e75012c41d6774cb2dfe8ab8ef09512f03bf4b4dad1811754830b77f`.
+- Manifest: `build/windows-desktop-fixes-0.2.1/AgentInfoManage/manifest.json`.
+- Build log: `.scratch/desktop-fixes-2026-10-16/package.log`.
+
+Fully exit the older tray instance before opening the new exe. In this version full
+quit lives in **Settings → Notifications and app → Full quit**. Keep the adjacent
+DLL/data files or unpack the whole ZIP. No desktop was launched, real user data or
+Codex configuration accessed/changed, release published or hosted macOS job run.
+Native caption dragging/resizing/maximize/close feel, real notification display,
+clean-machine and macOS acceptance remain open. Data and authorization/CLI/hook
+boundaries are unchanged; PR #20 stays draft and platform acceptance tickets stay open.
 
 ## Completion rules
 

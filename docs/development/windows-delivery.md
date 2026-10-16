@@ -4,13 +4,15 @@
 CLI、SDK-free Codex 接入材料生成器、合成资料控制台检查、依赖许可和来源清单。
 它用于配合验收；Issue #18 的干净环境、真实桌面和 Codex 检查仍开放。
 
-## 当前 UI 重塑包
+## 当前界面修正包
 
-0.2.0+2，源码 `cd25320d46da4e739d41edeb9bc56e7eb98f2d74`。
-本地交付目录 `build/windows-product-reshape-0.2.0/`，包含完整 ZIP 及已展开的
-`AgentInfoManage/app/info_desktop.exe`。本轮改变整套桌面布局、控件和表单，
-详细范围与尚未验证部分见 [设计草案](../design/desktop-reshape-proposal.md)。
-准确归档名、哈希、测试结果见 [当前实施进度](../planning/implementation-status.md#product-wide-desktop-reshape--current-020-preview)。
+0.2.1+3，源码 `a5a56e2093d8c34e18899f62ab844ac64ccd7924`。
+本地交付目录 `build/windows-desktop-fixes-0.2.1/`，包含完整 ZIP 及已展开的
+`AgentInfoManage/app/info_desktop.exe`。本轮修复菜单双重选中与页面对齐，
+将备份、通知、录入模板和完全退出收进“设置”，并以应用窗口条替换 Windows
+原生标题栏。原生边框、拖动、缩放与关闭手感仍待用户打开验证。
+详细范围见 [设计记录](../design/desktop-reshape-proposal.md)。
+准确归档名、哈希、测试结果见 [当前实施进度](../planning/implementation-status.md#desktop-feedback-corrections--current-021-preview)。
 先完全退出旧版本，再打开新版；本轮没有启动窗口或变更用户配置。
 
 ## 使用预览包
@@ -24,7 +26,7 @@ CLI、SDK-free Codex 接入材料生成器、合成资料控制台检查、依�
    安装。当前编译及无窗口检查环境为 Windows 11 Home x64（10.0.26300）；
    Windows 10、ARM64、32 位、无开发工具干净机器尚未实测，不承诺支持。
 3. 用户准备好后启动 `app/info_desktop.exe`。关闭窗口保留托盘和本机服务；
-   使用应用的“完全退出”停止服务。先使用虚构信息。
+   使用“设置 → 通知与应用 → 完全退出”停止服务。先使用虚构信息。
 4. CLI 可用完整路径调用 `cli/info.exe`（通用 JSON-lines），无需安装 Dart、
    Flutter 或 Java；不自动修改 PATH。Codex 使用下面的独立接入步骤。
 
