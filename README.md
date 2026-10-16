@@ -8,6 +8,7 @@
 - [18 张实施任务与依赖](docs/planning/ticket-breakdown.md)
 - [领域术语](GLOSSARY.md) · [架构决策](docs/adr/)
 - [第一条授权流程与运行方法](docs/development/first-authorization-slice.md)
+- [当前批次手动验收](docs/development/manual-acceptance.md) · [Codex 接入开发预览](integrations/codex/README.md)
 
 ## 开发
 
@@ -19,6 +20,7 @@
 | --- | --- |
 | `packages/info_core` | `dart pub get`、`dart analyze`、`dart test` |
 | `packages/info_cli` | `dart pub get`、`dart analyze`、`dart test` |
+| `packages/info_storage` | `dart pub get`、`dart analyze`、`dart test` |
 | `apps/desktop` | `flutter pub get`、`flutter analyze`、`flutter test` |
 
 `flutter build windows --release` 只编译。`flutter run`、运行桌面可执行文件及指定桌面设备的 `integration_test` 会打开可见窗口，应安排好手动验证后再执行。
