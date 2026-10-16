@@ -214,26 +214,6 @@ void _validateBackupHistory(Map<String, List<Map<String, Object?>>> tables) {
       _backupInvalid();
     }
     final fields = _backupList(j['fieldIds'], 200);
-    final restored = j['restoredFieldIds'];
-    if (restored != null) {
-      if (restored is! Map<String, dynamic> ||
-          restored.length > 200 ||
-          j['kind'] != 'restored') {
-        _backupInvalid();
-      }
-      final targets = <String>{};
-      for (final entry in restored.entries) {
-        if (!fields.contains(entry.key) ||
-            entry.value is! String ||
-            entry.value == entry.key ||
-            (entry.value as String).isEmpty ||
-            (entry.value as String).length > 200 ||
-            !targets.add(entry.value as String)) {
-          _backupInvalid();
-        }
-        fieldOwner(entry.value as String, item);
-      }
-    }
     count(fields.length);
     if (fields.toSet().length != fields.length) _backupInvalid();
     for (final field in fields) {

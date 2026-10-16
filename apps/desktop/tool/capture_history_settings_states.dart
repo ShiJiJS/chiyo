@@ -8,6 +8,8 @@ import 'package:info_core/info_core.dart';
 import 'package:info_storage/info_storage.dart';
 import 'package:info_desktop/main.dart';
 import 'package:info_desktop/backups.dart';
+import 'package:info_desktop/desktop_bootstrap.dart';
+import '../test/support/desktop_platform_fixture.dart';
 
 class _Keys implements DatabaseKeyStore {
   List<int>? key;
@@ -36,6 +38,15 @@ class _UnavailableAudit extends MemoryInformationRepository {
   @override
   Future<void> pruneAudit(DateTime cutoff) async {
     throw StateError('isolated audit I/O failure');
+  }
+}
+
+class _MissingKeys implements DatabaseKeyStore {
+  @override
+  Future<List<int>?> read() async => null;
+  @override
+  Future<void> create(List<int> key) async {
+    throw const StorageFailure('key_unavailable');
   }
 }
 
@@ -190,6 +201,10 @@ void main() {
       await mount(sourceService, backups: source.backups);
       await settings('templates');
       await capture('settings-templates');
+      await tester.tap(find.text('使用模板 →'));
+      await capture('settings-template-use');
+      await tester.tap(find.text('取消'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('修改模板'));
       await capture('settings-template-dialog');
       await tester.tap(find.text('取消'));
@@ -229,11 +244,17 @@ void main() {
         ),
       );
       await io(find.text('加密备份已导出。'));
+      await tester.runAsync(() async {
+        await recipient.backups.enable();
+        await recipient.backups.saveRecoveryKeyTo(
+          '${root.path}/recipient/recovery.txt',
+        );
+      });
       await mount(target, backups: recipient.backups, mode: 'recipient');
       await settings('backups');
       await capture('settings-backups-empty');
       await tester.tap(find.text('查看恢复步骤'));
-      await io(find.text('首次启用备份'));
+      await io(find.text('恢复密钥已另存'));
       await tester.tap(find.byKey(const ValueKey('backup-select-file')));
       await io(find.text('export.aimbackup'));
       await tester.tap(find.byKey(const ValueKey('backup-select-key')));
@@ -316,7 +337,39 @@ void main() {
       await tester.ensureVisible(find.text('检查备份与恢复密钥'));
       await capture('settings-backup-flow-bottom-200');
       tester.platformDispatcher.clearTextScaleFactorTestValue();
+      late DesktopBootstrap failedBootstrap;
+      await tester.runAsync(() async {
+        final original = await EncryptedInformationRepository.open(
+          '${root.path}/missing-key',
+          _Keys(),
+        );
+        await original.close();
+        failedBootstrap = DesktopBootstrap(
+          port: 0,
+          platform: NativeDesktopFixture(),
+          openLibrary: () async {
+            final locked = await EncryptedInformationRepository.open(
+              '${root.path}/missing-key',
+              _MissingKeys(),
+            );
+            return DesktopLibrary(
+              service: InformationService(repository: locked),
+              close: locked.close,
+            );
+          },
+        );
+        await failedBootstrap.start();
+      });
+      expect(failedBootstrap.state, DesktopStartupState.failed);
+      await tester.pumpWidget(
+        RepaintBoundary(
+          key: boundary,
+          child: DesktopLauncher(bootstrap: failedBootstrap),
+        ),
+      );
+      await capture('startup-key-unavailable');
       await tester.pumpWidget(const SizedBox());
+      failedBootstrap.dispose();
       await empty.close();
       await long.close();
       var closed = false;

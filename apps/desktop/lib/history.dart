@@ -55,6 +55,7 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
   int _filter = 0, _page = 0, _tab = 0;
   bool _busy = false;
   bool _focusPending = true;
+  bool _focusMissing = false;
   @override
   void initState() {
     super.initState();
@@ -66,6 +67,9 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.initialRecordId != widget.initialRecordId) {
       _focusPending = true;
+      _focusMissing = false;
+      _selected = null;
+      _page = 0;
       _search.clear();
       _filter = 0;
       _tab = 0;
@@ -306,6 +310,7 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
                             contentPadding: EdgeInsets.zero,
                           ),
                           onChanged: (_) => setState(() {
+                            _focusMissing = false;
                             _page = 0;
                             _selected = null;
                           }),
@@ -334,6 +339,7 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
                           key: ValueKey('history-filter-$i'),
                           onPressed: () => setState(() {
                             _filter = i;
+                            _focusMissing = false;
                             _page = 0;
                             _selected = null;
                           }),
@@ -405,6 +411,7 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
                       key: ValueKey('history-entry-${e.id}'),
                       onPressed: () => setState(() {
                         _selected = e.id;
+                        _focusMissing = false;
                         _tab = 0;
                       }),
                       style: prototypeButton(
@@ -1154,6 +1161,7 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
       if (_focusPending) {
         _focusPending = false;
         final index = all.indexWhere((e) => e.id == widget.initialRecordId);
+        _focusMissing = widget.initialRecordId != null && index < 0;
         if (index >= 0) {
           _page = index ~/ 8;
           _selected = all[index].id;
@@ -1175,7 +1183,7 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
           .toList();
       _page = math.min(_page, math.max(0, ((filtered.length - 1) / 8).floor()));
       final visible = filtered.skip(_page * 8).take(8).toList();
-      if (!visible.any((e) => e.id == _selected)) {
+      if (!_focusMissing && !visible.any((e) => e.id == _selected)) {
         _selected = visible.firstOrNull?.id;
         _tab = 0;
       }
@@ -1238,7 +1246,14 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                _text(all.isEmpty ? '暂无授权历史。' : '没有匹配的内容', 18),
+                                _text(
+                                  _focusMissing
+                                      ? '这条记录不在当前保留范围内或未记录。'
+                                      : all.isEmpty
+                                      ? '暂无授权历史。'
+                                      : '没有匹配的内容',
+                                  18,
+                                ),
                                 const SizedBox(height: 10),
                                 _text('调整左侧搜索或筛选后，继续查看详情。', 14, color: c.muted),
                               ],

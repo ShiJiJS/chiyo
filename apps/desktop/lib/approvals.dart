@@ -7,6 +7,7 @@ import 'organization_tasks.dart';
 import 'ui.dart';
 import 'inbox_queue.dart';
 import 'prototype_ui.dart';
+import 'prototype_dialog.dart';
 import 'package:flutter/services.dart';
 
 class SearchInboxIntent extends Intent {
@@ -164,10 +165,12 @@ class ApprovalsState extends State<Approvals> {
     }
     await showDialog<void>(
       context: context,
+      barrierColor: const Color(0x4f241b27),
       builder: (context) => StatefulBuilder(
-        builder: (context, update) => DesktopDialog(
-          title: const Text('请求设置'),
-          content: SizedBox(
+        builder: (context, update) => PrototypeDialog(
+          title: '请求设置',
+          onClose: () => Navigator.pop(context),
+          body: SizedBox(
             width: 360,
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -220,6 +223,7 @@ class ApprovalsState extends State<Approvals> {
           ),
           actions: [
             TextButton(
+              style: prototypeSecondary(context),
               onPressed: () => Navigator.pop(context),
               child: const Text('完成'),
             ),
@@ -344,7 +348,7 @@ class ApprovalsState extends State<Approvals> {
         ],
         if (offline)
           const QuietNotice(
-            '本机服务暂不可用。当前选择已保留，请恢复服务；资料库不会被覆盖。',
+            '本机服务暂不可用。当前选择已保留，请恢复服务；信息库不会被覆盖。',
             warning: true,
             panel: true,
           ),
@@ -1493,13 +1497,15 @@ class ApprovalsState extends State<Approvals> {
     var draft = '$minutes';
     await showDialog<void>(
       context: context,
+      barrierColor: const Color(0x4f241b27),
       builder: (context) => StatefulBuilder(
         builder: (context, update) {
           final n = int.tryParse(draft);
           final valid = n != null && n >= 1 && n <= 10080;
-          return DesktopDialog(
-            title: const Text('自定义授权期限'),
-            content: DesktopTextFormField(
+          return PrototypeDialog(
+            title: '自定义授权期限',
+            onClose: () => Navigator.pop(context),
+            body: DesktopTextFormField(
               initialValue: draft,
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
@@ -1511,10 +1517,12 @@ class ApprovalsState extends State<Approvals> {
             ),
             actions: [
               TextButton(
+                style: prototypeSecondary(context),
                 onPressed: () => Navigator.pop(context),
                 child: const Text('取消'),
               ),
-              FilledButton(
+              TextButton(
+                style: prototypePrimary(context),
                 onPressed: !valid
                     ? null
                     : () {
@@ -1721,10 +1729,12 @@ class ApprovalsState extends State<Approvals> {
                     TextButton(
                       onPressed: () => showDialog<void>(
                         context: context,
-                        builder: (context) => DesktopDialog(
-                          title: Text('本次授权范围 · ${selected.length} 个字段'),
-                          content: SizedBox(
-                            width: 600,
+                        barrierColor: const Color(0x4f241b27),
+                        builder: (context) => PrototypeDialog(
+                          title: '本次授权范围 · ${selected.length} 个字段',
+                          flow: true,
+                          onClose: () => Navigator.pop(context),
+                          body: SizedBox(
                             height: 420,
                             child: SingleChildScrollView(
                               child: _scopeGroups(selected),
@@ -1732,6 +1742,7 @@ class ApprovalsState extends State<Approvals> {
                           ),
                           actions: [
                             TextButton(
+                              style: prototypeSecondary(context),
                               onPressed: () => Navigator.pop(context),
                               child: const Text('返回审批'),
                             ),
@@ -1917,17 +1928,28 @@ class ApprovalsState extends State<Approvals> {
             style: prototypeButton(context),
             onPressed: () => showDialog<void>(
               context: context,
-              builder: (_) => DesktopDialog(
-                title: const Text('查看完整字段值'),
-                content: SizedBox(
-                  width: 680,
+              barrierColor: const Color(0x4f241b27),
+              builder: (context) => PrototypeDialog(
+                title: '查看完整字段值',
+                flow: true,
+                onClose: () => Navigator.pop(context),
+                body: SizedBox(
                   height: 420,
                   child: SingleChildScrollView(
-                    child: SelectableText(field.value),
+                    child: SelectableText(
+                      field.value,
+                      style: prototypeText(
+                        context,
+                        13,
+                        family: 'Consolas',
+                        height: 1.7,
+                      ),
+                    ),
                   ),
                 ),
                 actions: [
                   TextButton(
+                    style: prototypeSecondary(context),
                     onPressed: () => Navigator.pop(context),
                     child: const Text('返回审批'),
                   ),

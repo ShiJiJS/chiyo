@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:info_core/info_core.dart';
 import 'package:info_desktop/main.dart';
+import 'package:info_desktop/information_editor.dart';
 
 void main() {
   testWidgets(
@@ -22,7 +23,9 @@ void main() {
       await tester.pumpWidget(InformationApp(service: service, port: 47125));
       await tester.tap(find.byKey(const ValueKey('nav-4')));
       await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const ValueKey('settings-section-templates')));
+      await tester.tap(
+        find.byKey(const ValueKey('settings-section-templates')),
+      );
       await tester.pumpAndSettle();
       await tester.tap(find.text('新建模板'));
       await tester.pumpAndSettle();
@@ -40,16 +43,14 @@ void main() {
       expect(service.owner.information, isEmpty);
       await tester.tap(find.text('使用模板 →'));
       await tester.pumpAndSettle();
+      expect(find.byType(InformationEditor), findsOneWidget);
+      await tester.enterText(find.byKey(const ValueKey('item-name')), '虚构测试机');
       await tester.enterText(
-        find.byKey(const ValueKey('template-item-name')),
-        '虚构测试机',
-      );
-      await tester.enterText(
-        find.byKey(const ValueKey('template-value-0')),
+        find.byKey(const ValueKey('field-value-0')),
         'fictional.invalid',
       );
       expect(service.owner.information, isEmpty);
-      await tester.tap(find.text('保存信息'));
+      await tester.tap(find.byKey(const ValueKey('save-information')));
       await tester.pumpAndSettle();
       expect(
         service.owner.information.single.fields.single.value,

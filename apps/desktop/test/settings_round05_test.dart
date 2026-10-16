@@ -52,6 +52,19 @@ void main() {
       expect(find.text('2 / 2'), findsOneWidget);
       expect(find.text('整理任务 0'), findsNWidgets(2));
       expect(find.text('撤销授权'), findsNothing);
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: informationTheme(),
+          home: Scaffold(
+            body: AuthorizationHistory(
+              owner: service.owner,
+              initialRecordId: 'missing-retained-task',
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('这条记录不在当前保留范围内或未记录。'), findsOneWidget);
       await tester.pumpWidget(const SizedBox());
       await service.close();
     },

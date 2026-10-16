@@ -84,6 +84,9 @@ void main() {
         FieldRef(item.id, item.fields.single.id),
       ]);
       service.owner.deny(request.id);
+      await service.owner.setNotificationsEnabled(false);
+      await service.owner.setRequestLifetime(const Duration(minutes: 15));
+      await service.owner.setColorTheme(DesktopColorTheme.blue);
       final key = await source.backups.enable();
       await source.backups.saveRecoveryKeyTo('${folder.path}/key.txt');
       await service.owner.exportLibrary(
@@ -110,6 +113,9 @@ void main() {
       expect(history.requests.single.purpose, 'Deploy site');
       expect(history.requests.single.restoredAt, isNotNull);
       expect(target.owner.requests, isEmpty);
+      expect(target.owner.notificationsEnabled, isFalse);
+      expect(target.owner.requestLifetime, const Duration(minutes: 15));
+      expect(target.owner.colorTheme, DesktopColorTheme.blue);
       expect(target.owner.organizationTasks, isEmpty);
       expect(
         () => target.agent.status(session, request.id),
@@ -154,10 +160,16 @@ void main() {
         fieldDescriptions: {field.fieldId: 'Address'},
       );
       await service.owner.history();
+      await service.owner.setNotificationsEnabled(false);
+      await service.owner.setRequestLifetime(const Duration(hours: 1));
+      await service.owner.setColorTheme(DesktopColorTheme.mono);
       await service.close();
       await repo.close();
       repo = await EncryptedInformationRepository.open(folder.path, keys);
       service = InformationService(repository: repo);
+      expect(service.owner.notificationsEnabled, isFalse);
+      expect(service.owner.requestLifetime, const Duration(hours: 1));
+      expect(service.owner.colorTheme, DesktopColorTheme.mono);
       final history = await service.owner.history();
       expect(
         history.requests.map((r) => r.state),

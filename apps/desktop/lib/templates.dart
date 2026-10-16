@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:info_core/info_core.dart';
 import 'prototype_ui.dart';
 import 'settings_controls.dart';
+import 'information_editor.dart';
 
 class TemplateLibrary extends StatefulWidget {
   const TemplateLibrary({
@@ -225,13 +226,7 @@ class _TemplateLibraryState extends State<TemplateLibrary> {
                                     ),
                                     foreground: c.strong,
                                   ),
-                                  onPressed: () => showDialog<void>(
-                                    context: context,
-                                    builder: (_) => _TemplateInformation(
-                                      owner: widget.owner,
-                                      template: selected,
-                                    ),
-                                  ),
+                                  onPressed: () => _useTemplate(selected),
                                   child: const Text('使用模板 →'),
                                 ),
                                 settingsAction(
@@ -259,6 +254,42 @@ class _TemplateLibraryState extends State<TemplateLibrary> {
     await showSettingsDialog<void>(
       context: context,
       builder: (_) => _TemplateEditor(owner: widget.owner, template: template),
+    );
+    if (mounted) setState(() {});
+  }
+
+  Future<void> _useTemplate(InformationTemplate template) async {
+    final draft = InformationEditorDraft(
+      fields: template.fields
+          .map(
+            (f) => EditableInformationField(
+              name: f.name,
+              description: f.description,
+              kind: f.kind,
+            ),
+          )
+          .toList(),
+      description: template.description,
+    );
+    await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      barrierColor: const Color(0x4f241b27),
+      builder: (_) => InformationEditor(
+        draft: draft,
+        title: '使用模板：${template.name}',
+        directories: widget.owner.directories,
+        tags: widget.owner.tags,
+        onSave: (d) async {
+          await widget.owner.createInformation(
+            d.name,
+            d.description,
+            d.fields.map((f) => f.input).toList(),
+            directoryId: d.directoryId,
+            tagIds: d.tagIds,
+          );
+        },
+      ),
     );
     if (mounted) setState(() {});
   }
@@ -305,13 +336,7 @@ class _TemplateLibraryState extends State<TemplateLibrary> {
                           child: const Text('修改模板'),
                         ),
                         FilledButton(
-                          onPressed: () => showDialog<void>(
-                            context: context,
-                            builder: (_) => _TemplateInformation(
-                              owner: widget.owner,
-                              template: template,
-                            ),
-                          ),
+                          onPressed: () => _useTemplate(template),
                           child: const Text('使用模板'),
                         ),
                       ],
@@ -641,141 +666,5 @@ class _TemplateEditorState extends State<_TemplateEditor> {
         if (_error != null) SettingsNotice('模板尚未保存', _error!, error: true),
       ],
     ),
-  );
-}
-
-class _TemplateInformation extends StatefulWidget {
-  const _TemplateInformation({required this.owner, required this.template});
-  final OwnerAccess owner;
-  final InformationTemplate template;
-  @override
-  State<_TemplateInformation> createState() => _TemplateInformationState();
-}
-
-class _TemplateInformationState extends State<_TemplateInformation> {
-  final _name = TextEditingController();
-  final _description = TextEditingController();
-  late final _values = {
-    for (final f in widget.template.fields) f.id: TextEditingController(),
-  };
-  bool _saving = false;
-  String? _error;
-  @override
-  void dispose() {
-    _name.dispose();
-    _description.dispose();
-    for (final value in _values.values) {
-      value.dispose();
-    }
-    super.dispose();
-  }
-
-  Future<void> _save() async {
-    setState(() {
-      _saving = true;
-      _error = null;
-    });
-    try {
-      await widget.owner.createInformationFromTemplate(
-        widget.template.id,
-        widget.template.version,
-        _name.text,
-        _description.text,
-        _values.map((id, value) => MapEntry(id, value.text)),
-      );
-      if (mounted) Navigator.pop(context);
-    } catch (error) {
-      if (mounted) {
-        setState(() {
-          _saving = false;
-          _error = error is AccessFailure && error.status == 'template_changed'
-              ? '模板已更新。当前草稿尚未保存，请复制需保留的内容，取消后重新使用模板。'
-              : '保存失败，请填写信息名称并检查存储状态。';
-        });
-      }
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) => DesktopDialog(
-    title: Text('使用模板：${widget.template.name}'),
-    content: SizedBox(
-      width: 860,
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const QuietNotice('只有点击“保存信息”才会写入信息库；新信息需要另行申请授权。'),
-            const SizedBox(height: 16),
-            EditorColumns(
-              metadata: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const SectionHeading('公开目录', detail: 'Agent 可见'),
-                  DesktopTextField(
-                    key: const ValueKey('template-item-name'),
-                    controller: _name,
-                    maxLength: 200,
-                    decoration: const InputDecoration(labelText: '信息名称（公开）'),
-                  ),
-                  DesktopTextField(
-                    controller: _description,
-                    maxLength: 2000,
-                    decoration: const InputDecoration(labelText: '公开描述'),
-                  ),
-                ],
-              ),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const SectionHeading('信息字段', detail: '按字段授权'),
-                  for (var i = 0; i < widget.template.fields.length; i++) ...[
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 16),
-                      child: Divider(),
-                    ),
-                    Text('${widget.template.fields[i].name}（公开）'),
-                    Text(widget.template.fields[i].description),
-                    DesktopTextField(
-                      key: ValueKey('template-value-$i'),
-                      controller: _values[widget.template.fields[i].id],
-                      minLines:
-                          widget.template.fields[i].kind == FieldKind.textNote
-                          ? 3
-                          : 1,
-                      maxLines:
-                          widget.template.fields[i].kind == FieldKind.textNote
-                          ? 10
-                          : 4,
-                      maxLength: 1000000,
-                      decoration: InputDecoration(
-                        labelText:
-                            widget.template.fields[i].kind == FieldKind.textNote
-                            ? '文本说明（需要授权）'
-                            : '字段值（需要授权）',
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-            if (_error != null) QuietNotice(_error!, warning: true),
-          ],
-        ),
-      ),
-    ),
-    actions: [
-      TextButton(
-        onPressed: _saving ? null : () => Navigator.pop(context),
-        child: const Text('取消'),
-      ),
-      FilledButton(
-        onPressed: _saving ? null : _save,
-        child: const Text('保存信息'),
-      ),
-    ],
   );
 }

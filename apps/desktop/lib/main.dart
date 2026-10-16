@@ -16,6 +16,7 @@ import 'history.dart';
 import 'desktop_shell.dart';
 import 'ui.dart';
 import 'window_frame.dart';
+import 'prototype_dialog.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -105,19 +106,20 @@ class _DesktopLauncherState extends State<DesktopLauncher> {
                     child: ConstrainedBox(
                       constraints: const BoxConstraints(maxWidth: 620),
                       child: FormSection(
-                        title: '无法打开资料库',
+                        title: '无法打开信息库',
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             const Text(
-                              '资料库或本机服务无法启动。请检查系统密钥是否可用、应用是否已运行。原有资料不会被重建或覆盖；请保留资料库与密钥文件。',
+                              '信息库或本机服务无法启动。请检查系统密钥是否可用、应用是否已运行。原有资料不会被重建或覆盖；请保留信息库与密钥文件。',
                             ),
                             if (startup.cleanupPending)
                               const Text(
-                                '访问服务已停止，但记录尚未保存或资料库尚未关闭。请保留此窗口，修复存储后重试；记录保存成功后才会重新启动。',
+                                '访问服务已停止，但记录尚未保存或信息库尚未关闭。请保留此窗口，修复存储后重试；记录保存成功后才会重新启动。',
                               ),
                             const SizedBox(height: 16),
-                            FilledButton(
+                            TextButton(
+                              style: prototypePrimary(context),
                               onPressed: startup.start,
                               child: Text(
                                 startup.cleanupPending ? '重试保存并启动' : '重试启动',
