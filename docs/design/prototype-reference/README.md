@@ -15,3 +15,16 @@
 可复现：从原型目录启动本地HTTP预览，再运行oil-ui-pro的`shoot.mjs`，使用表中视口、query与点击动作。不能直接只临时托管单个HTML文件而漏掉相邻CSS/脚本。
 
 这些是参照，不能用实现中间稿覆盖。实际Flutter证据另放各任务的`docs/development/evidence/`，标明源码、运行方式和视口。数据量不同时区分自然内容高度与固定框/控件的样式差异；例如scope的836px是大量内容触发最大高度，非所有弹窗固定高度。真实来源名称、随机请求ID、时间与倒计时可以不同，不能为对图伪造事实。文字的Chromium次像素/Flutter灰阶抗锯齿单独记录，不调整主题实色来补偿。
+
+## 其他页面首屏
+
+同源追加四页紫色双视口，命名后缀`1440`为1440×900、`1280`为1280×800：
+
+| 前缀 | query / 选择 |
+| --- | --- |
+| `library-default-purple-` | `page=library`，原型默认文档服务；240＋340＋剩余三栏 |
+| `proposal-new-purple-` | `page=proposals`，原型默认新增提案 |
+| `history-scope-purple-` | `page=history`，原型默认批准范围 |
+| `settings-appearance-purple-` | `page=settings`，原型默认外观 |
+
+[页面布局与变体](../round05-page-layouts.md)记录关键最终尺寸；不能以D1审批卡片替代其他页面自己的结构。这里仍只有HTML参照，没有其他页面Flutter通过结论。
