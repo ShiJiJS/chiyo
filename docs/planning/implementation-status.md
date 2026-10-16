@@ -127,6 +127,37 @@ and upgrade. #17's actual two-platform exchange and #19's macOS delivery are
 deferred to the user's own Mac. No hosted Mac job was run. All Issues remain
 open and PR #20 remains draft until their required acceptance is complete.
 
+## Redesigned Windows preview
+
+The user's requested UI preview is packaged from
+**`d23a11cd178c2baef5679a58fbbfea90a0aa45eb`**. The authorization inbox,
+shared desktop theme and navigation, information details, proposals, history
+and backup views are included. The build ran in an isolated worktree so an
+older desktop process was left untouched.
+
+All four analyses and **164 headless tests** passed (CLI 17, core 71,
+storage 37, widgets 39). The Windows release compiled, and the packaged
+SQLCipher/DPAPI diagnostic and **11 extracted CLI/hook subprocess tests**
+passed. No desktop was launched or Codex configuration installed/trusted;
+native visual, notification, tray and clean-machine acceptance remain open.
+
+- Already expanded executable:
+  `build/windows-ui-preview-d23a11c/AgentInfoManage/app/info_desktop.exe`.
+  Keep its neighboring DLLs and `data/` directory.
+- ZIP:
+  `build/windows-ui-preview-d23a11c/agent-info-manage-0.1.0+1-dev.d23a11cd178c-windows-x64.zip`
+  (31,487,819 bytes).
+- SHA-256:
+  `442e563c3fe74a675ed20004ad71872c51c9db97aa75a89a141be8dd0cd7a46b`.
+  The adjacent checksum file and `AgentInfoManage/manifest.json` record the
+  archive hash, exact source and per-file checksums.
+- Build log: `.scratch/windows-ui-package-d23a11c.log`.
+
+This supersedes the older preview for viewing the redesigned interface.
+Fully exit an older tray instance before opening this executable. This is
+an unsigned development preview; use fictional information for validation.
+No new GitHub release or hosted macOS job was created.
+
 ## Completion rules
 
 The user has asked that further development not manipulate their visible desktop. Run headless tests and compile builds; leave native window interaction and user-visible Codex configuration checks for coordinated user validation. Do not launch the desktop application or native GUI tests without renewed agreement.
