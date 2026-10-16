@@ -6,7 +6,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:info_core/info_core.dart';
 import 'package:info_storage/info_storage.dart';
-import 'library.dart';
+import 'information_workspace.dart';
+import 'credential_files.dart';
 import 'import_proposals.dart';
 import 'desktop_runtime.dart';
 import 'desktop_bootstrap.dart';
@@ -143,12 +144,14 @@ class InformationApp extends StatefulWidget {
     this.runtime,
     this.backups,
     this.backupFiles = const NativeBackupFilePicker(),
+    this.credentialFiles = const NativeCredentialFilePicker(),
   });
   final InformationService service;
   final int port;
   final DesktopRuntime? runtime;
   final InformationBackups? backups;
   final BackupFilePicker backupFiles;
+  final CredentialFilePicker credentialFiles;
   @override
   State<InformationApp> createState() => _InformationAppState();
 }
@@ -160,6 +163,17 @@ class _InformationAppState extends State<InformationApp>
   int _libraryRevision = 0;
   final _visited = <int>{0};
   int _activeTab = 0;
+  String? _focusedInformationId;
+  int _informationFocusRevision = 0;
+  void _openInformation(String id) {
+    setState(() {
+      _focusedInformationId = id;
+      _informationFocusRevision++;
+      _visited.add(1);
+    });
+    _tabs.index = 1;
+  }
+
   final _approvalsKey = GlobalKey<ApprovalsState>();
   late DesktopColorTheme _colorTheme = widget.service.owner.colorTheme;
   bool _themeBusy = false;
@@ -257,9 +271,13 @@ class _InformationAppState extends State<InformationApp>
                       focusRequestId: widget.runtime?.openRequestId,
                       focusRevision: _openRevision,
                     ),
-                    InformationLibrary(
+                    InformationWorkspace(
                       owner: widget.service.owner,
                       refresh: _tabs,
+                      focusItemId: _focusedInformationId,
+                      focusRevision: _informationFocusRevision,
+                      onOpenInformation: _openInformation,
+                      files: widget.credentialFiles,
                     ),
                     ImportProposalsPage(owner: widget.service.owner),
                     AuthorizationHistory(

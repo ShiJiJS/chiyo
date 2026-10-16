@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:info_cli/agent_client.dart';
 import 'package:info_cli/codex_association.dart';
+import 'package:info_core/protocol_json.dart';
 
 /// One command per process, with a private reference passed on stdin, not argv.
 Future<void> main(List<String> args) async {
@@ -14,7 +15,8 @@ Future<void> main(List<String> args) async {
       if (bytes.length + chunk.length > 262144) throw const FormatException();
       bytes.addAll(chunk);
     }
-    final input = jsonDecode(utf8.decode(bytes)) as Map<String, dynamic>;
+    final input = decodeProtocolObject(utf8.decode(bytes));
+    final commandInput = Map<String,dynamic>.of(input)..remove('association');
     final association = await CodexAssociation.load(
       input['association'] as String,
       Platform.environment['CODEX_THREAD_ID'] ?? '',
@@ -48,11 +50,11 @@ Future<void> main(List<String> args) async {
         'command': 'claim',
         'requestId': input['requestId'],
       });
-      result = claim['status'] == 'ok' ? await client.execute(input) : claim;
+      result = claim['status'] == 'ok' ? await client.execute(commandInput) : claim;
     } else if (input['command'] == 'session') {
       result = {'status': 'invalid_request'};
     } else {
-      result = await client.execute(input);
+      result = await client.execute(commandInput);
     }
   } on Object {
     result = {'status': 'association_unavailable'};

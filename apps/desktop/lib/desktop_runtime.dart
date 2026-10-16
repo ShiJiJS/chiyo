@@ -123,6 +123,7 @@ class DesktopRuntime extends ChangeNotifier {
   Future<void> _maintenance = Future.value();
   bool recycleCleanupFailed = false;
   bool revisionCleanupFailed = false;
+  bool credentialCleanupFailed = false;
   Future<void>? _quit;
   Future<void>? _stop;
   bool _stopped = false;
@@ -160,6 +161,12 @@ class DesktopRuntime extends ChangeNotifier {
       revisionCleanupFailed = false;
     } catch (_) {
       revisionCleanupFailed = true;
+    }
+    try {
+      await service.owner.purgeExpiredCredentialMaterial();
+      credentialCleanupFailed = false;
+    } catch (_) {
+      credentialCleanupFailed = true;
     }
     notifyListeners();
   });

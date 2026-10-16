@@ -8,6 +8,20 @@ import 'package:info_desktop/desktop_runtime.dart';
 import 'support/desktop_platform_fixture.dart';
 
 void main() {
+  test('startup maintenance removes retired credential material without reviving it after clock rollback', () async {
+    var now = DateTime.utc(2026, 10, 1);
+    final service = InformationService(repository: MemoryInformationRepository(), clock: () => now);
+    var c = await service.owner.createStringCredential(name: 'Synthetic', publicPurpose: '', secret: 'fictional-old');
+    c = await service.owner.rotateStringCredential(c.id, c.revision, 'fictional-current');
+    now = now.add(const Duration(days: 31));
+    final runtime = DesktopRuntime(service: service, platform: NativeDesktopFixture(), closeServer: () async {}, closeRepository: () async {});
+    await runtime.start();
+    now = now.subtract(const Duration(days: 2));
+    await expectLater(service.owner.restoreCredentialVersion(c.id,c.revision,1), throwsA(isA<AccessFailure>()
+      .having((e)=>e.status,'status','credential_material_purged')));
+    expect(service.owner.credential(c.id).version,2);
+    await runtime.quit();
+  });
   test(
     'background startup durably purges expired revisions while preserving current content',
     () async {

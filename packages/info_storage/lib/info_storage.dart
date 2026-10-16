@@ -9,6 +9,7 @@ import 'backup_publish.dart';
 export 'platform_keys.dart';
 part 'backups.dart';
 part 'backup_history.dart';
+part 'credentials_storage.dart';
 
 class StorageFailure implements Exception {
   const StorageFailure(this.code);
@@ -57,7 +58,7 @@ InformationItem _informationFromRows(
 );
 
 /// A desktop-only capability. The CLI depends on info_core, never this package.
-class EncryptedInformationRepository implements InformationRepository {
+class EncryptedInformationRepository implements InformationRepository, CredentialRepository {
   EncryptedInformationRepository._(
     this._db,
     this._lock,
@@ -83,6 +84,33 @@ class EncryptedInformationRepository implements InformationRepository {
   final _recycle = <String, RecycleEntry>{};
   final _recycleFacts = <RecycleFact>[];
   final _deletes = <String, DeleteProposal>{};
+  final _credentials = <ManagedCredential>[];
+  final _credentialMaterials = <CredentialMaterial>[];
+  @override
+  List<ManagedCredential> get managedCredentials => List.unmodifiable(_credentials);
+  @override
+  List<CredentialMaterial> get credentialMaterials => List.unmodifiable(_credentialMaterials);
+  @override
+  Future<void> commitCredentials(List<ManagedCredential> credentials, List<CredentialMaterial> materials) async {
+    if (_closed) throw const StorageFailure('library_closed');
+    _validateVault(credentials, materials);
+    try {
+      await _db.transaction(() async {
+        await _db.customStatement('DELETE FROM credential_materials');
+        await _db.customStatement('DELETE FROM managed_credentials');
+        for (final c in credentials) {
+          await _db.customStatement('INSERT INTO managed_credentials(id,payload) VALUES(?,?)', [c.id,jsonEncode(c.toJson())]);
+        }
+        for (final m in materials) {
+          await _db.customStatement('INSERT INTO credential_materials(credential_id,version,payload) VALUES(?,?,?)', [m.credentialId,m.version,jsonEncode(m.toStorageJson())]);
+        }
+      });
+      _credentials..clear()..addAll(credentials);
+      _credentialMaterials..clear()..addAll(materials);
+    } catch (_) {
+      throw const StorageFailure('credential_save_failed');
+    }
+  }
   bool _closed = false;
   static final _openDirectories = <String>{};
   late final String _directory;
@@ -165,6 +193,19 @@ class EncryptedInformationRepository implements InformationRepository {
   }
 
   Future<void> _load() async {
+    _credentials.clear();
+    _credentialMaterials.clear();
+    for (final row in await _db.customSelect('SELECT payload FROM managed_credentials ORDER BY rowid').get()) {
+      _credentials.add(ManagedCredential.fromJson(jsonDecode(row.read<String>('payload')) as Map<String, dynamic>));
+    }
+    for (final row in await _db.customSelect('SELECT payload FROM credential_materials ORDER BY rowid').get()) {
+      _credentialMaterials.add(CredentialMaterial.fromStorageJson(jsonDecode(row.read<String>('payload')) as Map<String, dynamic>));
+    }
+    final cutoff = _clock().subtract(const Duration(days: 30));
+    final retained = _credentialMaterials.where((m) => m.retiredAt == null || m.retiredAt!.isAfter(cutoff)).toList();
+    if (retained.length != _credentialMaterials.length) {
+      await commitCredentials(_credentials.toList(), retained);
+    }
     for (final row
         in await _db
             .customSelect(
@@ -950,12 +991,14 @@ class EncryptedInformationRepository implements InformationRepository {
 class _InformationDatabase extends GeneratedDatabase {
   _InformationDatabase(super.executor);
   @override
-  int get schemaVersion => 12;
+  int get schemaVersion => 14;
   @override
   Iterable<TableInfo<Table, Object?>> get allTables => const [];
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (_) async {
+      await _createCredentials();
+      await _createRequestHistory();
       await _createRevisionPurges();
       await _createRecycle();
       await _createAudit();
@@ -976,9 +1019,11 @@ class _InformationDatabase extends GeneratedDatabase {
       await _backupSchema();
     },
     onUpgrade: (_, from, to) async {
-      if (from < 1 || to != 12)
+      if (from < 1 || to != 14)
         throw const StorageFailure('unsupported_schema');
       await transaction(() async {
+        if (from < 13) await _createRequestHistory();
+        if (from < 14) await _createCredentials();
         if (from < 2) {
           await customStatement(
             'CREATE TABLE settings(name TEXT PRIMARY KEY,value INTEGER NOT NULL)',
@@ -1029,6 +1074,14 @@ class _InformationDatabase extends GeneratedDatabase {
   Future<void> _createRevisionPurges() => customStatement(
     'CREATE TABLE revision_purge_facts(item_id TEXT NOT NULL,version INTEGER NOT NULL,purged_at TEXT NOT NULL,PRIMARY KEY(item_id,version))',
   );
+  Future<void> _createCredentials() async {
+    await customStatement('CREATE TABLE IF NOT EXISTS managed_credentials(id TEXT PRIMARY KEY,payload TEXT NOT NULL)');
+    await customStatement('CREATE TABLE IF NOT EXISTS credential_materials(credential_id TEXT NOT NULL,version INTEGER NOT NULL,payload TEXT NOT NULL,PRIMARY KEY(credential_id,version))');
+  }
+  Future<void> _createRequestHistory() async {
+    await customStatement('CREATE TABLE IF NOT EXISTS request_history(id TEXT PRIMARY KEY,created_at INTEGER NOT NULL,payload TEXT NOT NULL)');
+    await customStatement('CREATE INDEX IF NOT EXISTS request_history_retention ON request_history(created_at)');
+  }
 
   Future<void> _createRecycle() async {
     await customStatement(
@@ -1075,9 +1128,13 @@ class _InformationDatabase extends GeneratedDatabase {
     'CREATE TABLE field_templates(id TEXT PRIMARY KEY,name TEXT NOT NULL,description TEXT NOT NULL,version INTEGER NOT NULL,fields_json TEXT NOT NULL)',
   );
 
-  Future<void> _backupSchema() => customStatement(
-    'CREATE TABLE IF NOT EXISTS backup_configuration(singleton INTEGER PRIMARY KEY CHECK(singleton=1),recovery_key TEXT NOT NULL)',
-  );
+  Future<void> _backupSchema() async {
+    await customStatement('CREATE TABLE IF NOT EXISTS backup_configuration(singleton INTEGER PRIMARY KEY CHECK(singleton=1),recovery_key TEXT NOT NULL,recovery_saved INTEGER NOT NULL DEFAULT 0)');
+    final columns = await customSelect('PRAGMA table_info(backup_configuration)').get();
+    if (!columns.any((row) => row.read<String>('name') == 'recovery_saved')) {
+      await customStatement('ALTER TABLE backup_configuration ADD COLUMN recovery_saved INTEGER NOT NULL DEFAULT 0');
+    }
+  }
   Future<void> _createAudit() async {
     await customStatement(
       'CREATE TABLE IF NOT EXISTS grant_history(id TEXT PRIMARY KEY,approved_at INTEGER NOT NULL,payload TEXT NOT NULL)',

@@ -8,6 +8,7 @@ import 'prototype_ui.dart';
 import 'recycle.dart';
 import 'revisions.dart';
 import 'ui.dart';
+import 'credential_dialogs.dart';
 
 class InformationLibrary extends StatefulWidget {
   const InformationLibrary({
@@ -17,11 +18,15 @@ class InformationLibrary extends StatefulWidget {
     this.initialDirectoryId,
     this.initialItemId,
     this.onMigrateSecretFields,
+    this.onOpenCredentials,
+    this.onOpenCredential,
   });
   final OwnerAccess owner;
   final Listenable? refresh;
   final String? initialDirectoryId, initialItemId;
   final Future<void> Function(InformationItem item)? onMigrateSecretFields;
+  final VoidCallback? onOpenCredentials;
+  final ValueChanged<String>? onOpenCredential;
   @override
   State<InformationLibrary> createState() => _InformationLibraryState();
 }
@@ -34,6 +39,7 @@ class _InformationLibraryState extends State<InformationLibrary> {
   final _collapsed = <String>{}, _tagIds = <String>{};
   String? _directoryId, _selectedId;
   bool _descendants = true;
+  bool _focusMissing = false;
   int _offset = 0;
   String? _queryError;
   static const _limit = 50;
@@ -44,7 +50,10 @@ class _InformationLibraryState extends State<InformationLibrary> {
     super.initState();
     _directoryId = widget.initialDirectoryId;
     _selectedId = widget.initialItemId;
-    if (owner.serviceAvailable && _selectedId != null) {
+    _focusMissing =
+        _selectedId != null &&
+        !owner.information.any((i) => i.id == _selectedId);
+    if (owner.serviceAvailable && _selectedId != null && !_focusMissing) {
       _offset = owner
           .queryInformation(
             directoryId: _directoryId,
@@ -81,6 +90,7 @@ class _InformationLibraryState extends State<InformationLibrary> {
 
   void _filter({String? directory, bool all = false}) {
     setState(() {
+      _focusMissing = false;
       _directoryId = directory;
       _offset = 0;
       _selectedId = null;
@@ -131,6 +141,7 @@ class _InformationLibraryState extends State<InformationLibrary> {
     if (mounted) {
       setState(() {
         if (saved != null) {
+          _focusMissing = false;
           _directoryId = null;
           _tagIds.clear();
           _search.clear();
@@ -235,9 +246,10 @@ class _InformationLibraryState extends State<InformationLibrary> {
       _queryError = '信息库查询失败，请检查筛选条件或服务状态后重试。';
       page = InformationPage(const [], 0, 0, _limit);
     }
-    final current =
-        page.items.where((i) => i.id == _selectedId).firstOrNull ??
-        page.items.firstOrNull;
+    final current = _focusMissing
+        ? null
+        : page.items.where((i) => i.id == _selectedId).firstOrNull ??
+              page.items.firstOrNull;
     _selectedId = current?.id;
     return Material(
       color: p.canvas,
@@ -332,12 +344,16 @@ class _InformationLibraryState extends State<InformationLibrary> {
                     ),
                     const SizedBox(width: 3),
                     Expanded(
-                      child: Tooltip(
-                        message: '托管凭据由独立凭据工作区管理',
-                        child: Padding(
+                      child: TextButton(
+                        key: const ValueKey('library-credentials-mode'),
+                        onPressed: widget.onOpenCredentials,
+                        style: prototypeButton(
+                          context,
+                          size: 13,
+                          foreground: p.muted,
                           padding: const EdgeInsets.all(7),
-                          child: Center(child: t('凭据', 13, color: p.muted)),
                         ),
+                        child: const Text('凭据'),
                       ),
                     ),
                   ],
@@ -528,7 +544,7 @@ class _InformationLibraryState extends State<InformationLibrary> {
               ),
               const SizedBox(width: 7),
               t(
-                owner.serviceAvailable ? '信息保存在本机' : '资料库暂不可用',
+                owner.serviceAvailable ? '信息保存在本机' : '信息库暂不可用',
                 11,
                 color: p.muted,
               ),
@@ -703,7 +719,10 @@ class _InformationLibraryState extends State<InformationLibrary> {
                           foreground: p.ink,
                           padding: EdgeInsets.zero,
                         ),
-                        onPressed: () => setState(() => _selectedId = item.id),
+                        onPressed: () => setState(() {
+                          _focusMissing = false;
+                          _selectedId = item.id;
+                        }),
                         child: Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 13,
@@ -878,7 +897,13 @@ class _InformationLibraryState extends State<InformationLibrary> {
       ),
       clipBehavior: Clip.antiAlias,
       child: item == null
-          ? Center(child: t('请选择一条信息', 16, color: p.muted))
+          ? Center(
+              child: t(
+                _focusMissing ? '当前信息已不存在，请重新选择或检查回收站。' : '请选择一条信息',
+                16,
+                color: p.muted,
+              ),
+            )
           : Column(
               key: ValueKey('information-${item.id}'),
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1072,17 +1097,14 @@ class _InformationLibraryState extends State<InformationLibrary> {
                                   const Spacer(),
                                   b(
                                     '管理关联',
-                                    () => showDialog<void>(
-                                      context: context,
-                                      barrierColor: const Color(0x4f241b27),
-                                      builder: (_) => PrototypeDialog(
-                                        title: '关联凭据',
-                                        onClose: () => Navigator.pop(context),
-                                        body: const Text(
-                                          '此信息尚未关联托管凭据。凭据与信息字段独立保存。',
-                                        ),
-                                      ),
-                                    ),
+                                    () async {
+                                      await manageCredentialLinks(
+                                        context,
+                                        owner,
+                                        item,
+                                      );
+                                      _refresh();
+                                    },
                                     border: true,
                                     icon: PrototypeIconGlyph.link,
                                   ),
@@ -1096,7 +1118,55 @@ class _InformationLibraryState extends State<InformationLibrary> {
                                 color: p.muted,
                               ),
                               const SizedBox(height: 13),
-                              t('尚未关联凭据', 13, color: p.muted),
+                              if (owner
+                                  .credentialsForInformation(item.id)
+                                  .isEmpty)
+                                t('尚未关联凭据', 13, color: p.muted),
+                              for (final c in owner.credentialsForInformation(
+                                item.id,
+                              ))
+                                TextButton(
+                                  onPressed: widget.onOpenCredential == null
+                                      ? null
+                                      : () => widget.onOpenCredential!(c.id),
+                                  style: prototypeButton(
+                                    context,
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 13,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      const PrototypeIcon(
+                                        PrototypeIconGlyph.key,
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            t(
+                                              c.name,
+                                              14,
+                                              weight: FontWeight.w500,
+                                            ),
+                                            const SizedBox(height: 5),
+                                            t(
+                                              '${c.publicPurpose} · ${credentialStatus(owner, c)}',
+                                              12,
+                                              color: p.muted,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      const PrototypeIcon(
+                                        PrototypeIconGlyph.chev,
+                                        size: 13,
+                                      ),
+                                    ],
+                                  ),
+                                ),
                             ],
                           ),
                         ),
