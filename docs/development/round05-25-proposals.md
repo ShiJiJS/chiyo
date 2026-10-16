@@ -26,7 +26,7 @@ Issue #25，基于已合入 D2 的 `df63de6`。本票复用既有录入、修改
 
 预先确认的 seam 为 owner 服务公开行为、真实仓储重开与真实 widgets；没有测试私有函数。新增逐行为 red→green 包括 UpdateReview、队列元数据、缺失字段冲突、单项草稿、显式 replacement 身份、确认期间竞争、整理无改动结果、服务停止清值、Esc归还焦点、不可用分类修复、分类建议舍弃、目录清空后重开，以及外部提案身份定位。已有批量事务/重试和分页搜索行为另作特征验证，不把首次已绿的断言描述成先红。
 
-当前等价完整分包检查：CLI18、Core95、Storage43、Desktop76，共232项通过，各包 analyze 无问题。`check.ps1 -Offline` 首次在新文件一处括号风格 info 停止；修正后从 core/storage/desktop 逐包完成 analyze/test，CLI18保持同源已通过。最终根分支合并后追加统一脚本结果。
+D3合并根之前的等价完整分包检查：CLI18、Core95、Storage43、Desktop76，共232项通过，各包 analyze 无问题。`check.ps1 -Offline` 首次在新文件一处括号风格 info 停止；修正后从 core/storage/desktop 逐包完成 analyze/test，CLI18保持同源已通过。合并后的受影响检查另见末尾；统一脚本最终复验仍由主集成完成。
 
 `packages/info_storage/test/proposal_review_test.dart` 用真实 SQLCipher 仓储确认：无效审阅整批不变，修改与元数据/字段公开说明同次提交，替换字段新ID、普通字段保留ID；重开后身份、旧版本、回收快照和清值终态保留，重复确认不产生额外版本。
 
@@ -46,8 +46,14 @@ Mac真实测试按用户指示延期；真实通知气泡/系统窗口控制不�
 
 `review-round2` 固定40张 Flutter与10张原HTML双视口参考图，manifest记录PNG及源码SHA。1440×900与1280×800包括新增、完整编辑、确认、差异、冲突、删除、整理、终态当前/改值/删除、失败/无结果/离线、200%首末、20条200字段长批次首末。长内容的末屏是真正 maxScrollExtent，普通截图与压力图分开。`compare-round2` 十对退出0；差分用于定位，不以一个像素比例宣布通过。
 
-`review-round3` 固定46张Flutter与24张HTML，共70张PNG及源码hash，补齐整理无改动、冲突、撤销。D0原HTML为delete/organized/terminal-proposal/organization-noop/conflict/revoked；失败参考通过原型已有save-failed状态、关闭编辑面板、切到提案并确认触发，不注入新页面或修改脚本。新错误面板按真实HTML排为错误说明→未应用标题→返回核对，保留780宽与原先空标题/关闭区；notice父行高与说明间隔、整理链接padding也在本轮按参考收敛。旧固定轮不覆盖。`compare-round3` 24对正在执行，最终结果另记。
+`review-round3` 固定46张Flutter与24张HTML，共70张PNG及源码hash，补齐整理无改动、冲突、撤销。D0原HTML为delete/organized/terminal-proposal/organization-noop/conflict/revoked；失败参考通过原型已有save-failed状态、关闭编辑面板、切到提案并确认触发，不注入新页面或修改脚本。新错误面板按真实HTML排为错误说明→未应用标题→返回核对，保留780宽与原先空标题/关闭区；notice父行高与说明间隔、整理链接padding也在本轮按参考收敛。旧固定轮不覆盖。`compare-round3` 24对均退出0，所有report无issues/lint；70张固定图逐张SHA复验零不符。
 
 已知数据差异：生产使用真实 opaque ID；旧 update/delete 模型没有 Agent 名称与用途，诚实显示 Agent/核对提示，不能补造 Codex 身份。合成当前目录、标签、版本及结果数量来自真实服务调用；不为比图篡改身份或历史。Chromium与Flutter字边缘差异不能通过改原型或改颜色掩盖。
 
 独立静态视觉审查尚在进行；这里只记录实现与证据范围，没有声称样式验收完成。主入口组合导航和最终根分支复验也仍单独跟踪。没有推送或写入 GitHub。
+
+## 固定候选与合并后检查
+
+实现固定于 `a92803c`，随后无冲突合并根 `1741886`（含#26）得到 `d5bcb07`。保留双方 `info_core.dart` part导出与导航测试；没有修改 main/library。合并后 core 11、storage 16、desktop 20项定向检查全部通过，core/storage/desktop analyze无问题。Storage覆盖本票审阅重开、#26请求历史及完整备份；desktop覆盖12项新提案行为、原导入/失败/删除当前值、导航和历史定位。
+
+该候选为独立视觉审查释放执行槽，仍须闭合静态审查意见；#27按统一接缝接入三个导航回调后，还需主入口组合验收与最后源原生复验。当前无本票正在运行的Flutter/native窗口或比较任务。工作树保持干净，不据此关闭Issue。
