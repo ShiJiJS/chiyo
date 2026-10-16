@@ -110,3 +110,9 @@ $cmake = ((Select-String -LiteralPath apps/desktop/build/windows/x64/CMakeCache.
 该脚本只对专用 integration test 传 `D1_MANUAL_NOTIFICATION=true`；不带 define 的测试默认跳过，不由常规 `check.ps1` 或 `test-windows-native.ps1` 执行。使用临时 SQLCipher/DPAPI 目录与 port0，结束沿原 fixture 路径边界校验清理；不打开默认用户库、不改系统通知权限/设置，不隐藏或关闭已有用户 app。
 
 准备阶段已通过 `flutter analyze --no-pub`、PowerShell AST 语法检查和 `git diff --check`。此记录时尚未启动真实气泡探针，等待主Agent安排空窗；上述静态检查不是人工通知点击证据。
+
+### 2026-10-17 第一次实际尝试：未验成功
+
+主Agent确认完整检查/原生窗口空窗后，执行上述带 `-Run` 的命令。真实 Windows runner 编译成功，Shell `notify` 返回 true 并输出 `D1_NOTIFICATION_READY`（剩余59秒）。从投递起60秒内未收到携带目标 ID 的真实点击，`runtime.openRequestId` 仍为 null；断言明确失败，测试与脚本非零退出，没有输出 `D1_NOTIFICATION_VERIFIED`。原始日志保存在 [windows-notification-attempt-2026-10-17.log](evidence/23-workspace/windows-notification-attempt-2026-10-17.log)。
+
+这证明本次探针实际运行、Native adapter 接受一次投递及等待超时，不能证明气泡已展示或已点击，也不能据此断言系统通知权限关闭。没有补注入回调使测试通过，没有自动循环重试。fixture 完成停止/关闭/临时目录删除，进程与 `aim-native-approval-*` 目录检查均无本次残留；没有触碰用户 app 或默认 profile。交付前另合并了主集成文档基线 `5842e6a`。

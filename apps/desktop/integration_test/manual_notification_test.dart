@@ -34,9 +34,12 @@ void main() {
         },
       );
       addTearDown(() async {
-        await platform.showWindow();
-        await tester.pumpWidget(const SizedBox());
-        await fixture.close();
+        try {
+          await platform.showWindow();
+          await tester.pumpWidget(const SizedBox());
+        } finally {
+          await fixture.close();
+        }
       });
       final runtime = fixture.bootstrap.runtime!;
       expect(
