@@ -58,8 +58,11 @@ native OS surface replaced by a supported platform fixture:
    reachable, denied notifications preserve pending approvals, reopening selects
    the approvals tab, and permission is requested only by the explicit action.
 
-`flutter analyze` and `flutter test test/` pass. Windows release compilation of
-the real native runner succeeds. Compilation does not run the program, initialize
+After merging integration `84e51ec`, `scripts/check.ps1 -FlutterBin
+C:/Users/Todoki/.local/share/flutter/bin -Offline -WindowsRelease` passed:
+CLI 9, core 25, encrypted storage 7 and Flutter 14 tests (55 total), all analysis
+clean, and Windows release compilation of the real native runner successful.
+Compilation does not run the program, initialize
 a tray icon, request permission or prove OS delivery. Widget tests and real-loopback
 HTTP tests run in separate test libraries because the widget test binding replaces
 HTTP globally within its test isolate.
