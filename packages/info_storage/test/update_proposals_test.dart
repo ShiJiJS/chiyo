@@ -28,7 +28,7 @@ void main() {
           ),
         ], description: 'New public'),
       );
-      service.close();
+      await service.close();
       await store.close();
       store = await EncryptedInformationRepository.open(folder.path, keys);
       service = InformationService(repository: store);
@@ -37,7 +37,7 @@ void main() {
         'OLD-SECRET-92342',
       );
       await service.owner.confirmUpdate(id, 1);
-      service.close();
+      await service.close();
       await store.close();
       store = await EncryptedInformationRepository.open(folder.path, keys);
       addTearDown(store.close);
