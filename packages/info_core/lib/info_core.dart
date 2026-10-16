@@ -211,6 +211,7 @@ class InformationService {
       !_endedSessions.contains(session);
 
   void _requireSession(String session) {
+    if (_backupBusy) throw const AccessFailure('service_unavailable');
     if (!_sessionActive(session)) throw const AccessFailure('unauthorized');
   }
 
@@ -328,6 +329,7 @@ class AgentAccess {
   }
 
   _Request _request(String session, String id) {
+    if (_service._backupBusy) throw const AccessFailure('service_unavailable');
     final request = _service._requests[id];
     if (!_service._sessionActive(session) ||
         request == null ||

@@ -64,8 +64,9 @@ void main() {
         }
         finish.complete();
         await export;
-        if (transition == 'none')
+        if (transition == 'none') {
           expect(await service.agent.read(token, field), 'private');
+        }
         await service.close();
       },
     );
@@ -108,6 +109,23 @@ void main() {
       repository.hold!.complete();
       await entered.future;
       await denied;
+      final temporarilyUnavailable = throwsA(
+        isA<AccessFailure>().having(
+          (e) => e.status,
+          'status',
+          'service_unavailable',
+        ),
+      );
+      expect(
+        () => service.agent.request(session.sessionSecret, 'during restore', [
+          field,
+        ]),
+        temporarilyUnavailable,
+      );
+      expect(
+        () => service.agent.status(session.sessionSecret, request.id),
+        temporarilyUnavailable,
+      );
       expect(
         () => service.agent.openSession('during restore'),
         throwsA(isA<AccessFailure>()),
