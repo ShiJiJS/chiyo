@@ -9,6 +9,28 @@ import 'support/desktop_platform_fixture.dart';
 
 void main() {
   test(
+    'requests submitted while startup cleanup is pending still notify once',
+    () async {
+      final service = InformationService.fictional();
+      final native = NativeDesktopFixture();
+      final runtime = DesktopRuntime(
+        service: service,
+        platform: native,
+        closeServer: () async {},
+        closeRepository: () async {},
+      );
+      final starting = runtime.start();
+      final session = service.agent.openSession('during cleanup');
+      service.agent.request(session, 'connect', [
+        const FieldRef('demo-server', 'host'),
+      ]);
+      await starting;
+      await Future<void>.delayed(Duration.zero);
+      expect(native.notices, ['new_request']);
+      await runtime.quit();
+    },
+  );
+  test(
     'background startup purges expired recycle content before accepting owner use',
     () async {
       var now = DateTime.utc(2026, 10, 16);

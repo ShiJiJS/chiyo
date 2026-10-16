@@ -107,12 +107,14 @@ class DesktopRuntime extends ChangeNotifier {
   final _ready = Completer<void>();
 
   Future<void> start() async {
+    // Subscribe before any asynchronous maintenance: a request arriving during
+    // cleanup must still be delivered once native initialization is ready.
+    _requests = service.owner.requestSubmitted.listen((_) {
+      unawaited(_notify());
+    });
     await _maintain();
     _maintenanceTimer = Timer.periodic(const Duration(minutes: 1), (_) {
       unawaited(_maintain());
-    });
-    _requests = service.owner.requestSubmitted.listen((_) {
-      unawaited(_notify());
     });
     try {
       availability = await platform.initialize(handleEvent);
