@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:info_core/info_core.dart';
 import 'organization.dart';
-import 'organization_tasks.dart';
 import 'recycle.dart';
 import 'revisions.dart';
 import 'ui.dart';
@@ -94,21 +93,6 @@ class _InformationLibraryState extends State<InformationLibrary> {
             subtitle:
                 '${widget.owner.information.length} 条信息 · 字段值按授权范围提供给 Agent',
             actions: [
-              TextButton.icon(
-                onPressed: () async {
-                  await Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (_) => OrganizationTasksPage(
-                        owner: widget.owner,
-                        itemIds: _visibleInformation.map((i) => i.id).toList(),
-                      ),
-                    ),
-                  );
-                  if (mounted) setState(() {});
-                },
-                icon: const Icon(Icons.auto_awesome_outlined, size: 17),
-                label: const Text('Agent 整理'),
-              ),
               TextButton(
                 onPressed: () async {
                   await Navigator.of(context).push(
@@ -264,48 +248,27 @@ class _InformationLibraryState extends State<InformationLibrary> {
   Widget _informationDocument(InformationItem item) => Column(
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
-      Text(item.name, style: Theme.of(context).textTheme.headlineLarge),
-      if (item.description.isNotEmpty)
-        Padding(
-          padding: const EdgeInsets.only(top: 8),
-          child: Text(item.description),
-        ),
-      const SizedBox(height: 10),
-      Wrap(
-        spacing: 12,
-        runSpacing: 6,
+      Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            directoryPath(widget.owner, item.directoryId),
-            style: Theme.of(context).textTheme.bodySmall,
+          Expanded(
+            child: Text(
+              item.name,
+              style: Theme.of(context).textTheme.headlineLarge,
+            ),
           ),
-          for (final tag in widget.owner.tags.where(
-            (t) => item.tagIds.contains(t.id),
-          ))
-            Text(tag.name, style: Theme.of(context).textTheme.bodySmall),
-        ],
-      ),
-      const SizedBox(height: 16),
-      Wrap(
-        spacing: 4,
-        runSpacing: 6,
-        children: [
           TextButton.icon(
+            key: const ValueKey('edit-information-description'),
             onPressed: () async {
               await editCatalogMetadata(context, widget.owner, item);
               if (mounted) setState(() {});
             },
             icon: const Icon(Icons.edit_outlined, size: 16),
-            label: const Text('编辑公开说明'),
+            label: const Text('编辑'),
           ),
-          TextButton(
-            onPressed: () async {
-              await organizeItem(context, widget.owner, item);
-              if (mounted) setState(() {});
-            },
-            child: const Text('整理位置和标签'),
-          ),
-          TextButton(
+          IconButton(
+            tooltip: '历史',
+            icon: const Icon(Icons.history_outlined),
             onPressed: () async {
               await Navigator.of(context).push(
                 MaterialPageRoute<void>(
@@ -315,21 +278,45 @@ class _InformationLibraryState extends State<InformationLibrary> {
               );
               if (mounted) setState(() {});
             },
-            child: const Text('修改历史'),
           ),
-          TextButton.icon(
-            style: TextButton.styleFrom(foregroundColor: UiColors.danger),
+          IconButton(
+            tooltip: '删除',
+            icon: const Icon(Icons.delete_outline),
+            color: UiColors.danger,
             onPressed: () async {
               await confirmInformationDeletion(context, widget.owner, item);
               if (mounted) setState(() {});
             },
-            icon: const Icon(Icons.delete_outline, size: 16),
-            label: const Text('删除整条信息'),
           ),
         ],
       ),
-      const SizedBox(height: 18),
-      SectionHeading('字段内容', detail: '${item.fields.length} 个字段 · 按字段授权'),
+      if (item.description.isNotEmpty)
+        Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: Text(item.description),
+        ),
+      const SizedBox(height: 10),
+      Wrap(
+        spacing: 8,
+        runSpacing: 6,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [
+          TextButton.icon(
+            key: const ValueKey('edit-information-category'),
+            onPressed: () async {
+              await organizeItem(context, widget.owner, item);
+              if (mounted) setState(() {});
+            },
+            icon: const Icon(Icons.folder_outlined, size: 16),
+            label: Text(directoryPath(widget.owner, item.directoryId)),
+          ),
+          for (final tag in widget.owner.tags.where(
+            (t) => item.tagIds.contains(t.id),
+          ))
+            Text(tag.name, style: Theme.of(context).textTheme.bodySmall),
+        ],
+      ),
+      const SizedBox(height: 16),
       const Divider(),
       for (final field in item.fields) ...[
         InformationValue(

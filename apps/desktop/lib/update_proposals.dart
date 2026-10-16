@@ -16,16 +16,30 @@ class UpdateProposalsList extends StatelessWidget {
     children: [
       for (final proposal in owner.updateProposals.reversed)
         WorkspaceRecord(
-          title: Text('${proposal.chatLabel} · 修改提案'),
-          subtitle: Text(switch (proposal.state) {
-            UpdateProposalState.pending =>
-              '待确认 · 基础版本 ${proposal.input.baseVersion}',
-            UpdateProposalState.confirmed => '已确认修改',
-            UpdateProposalState.rejected => '已拒绝',
-            UpdateProposalState.conflicted => '版本冲突，请提交新的提案',
-          }),
+          title: Text(
+            '修改 ${owner.information.where((i) => i.id == proposal.input.itemId).firstOrNull?.name ?? '信息'}',
+          ),
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('聊天  ${proposal.chatLabel}'),
+              const SizedBox(height: 6),
+              Text('基础版本 ${proposal.input.baseVersion}'),
+              const SizedBox(height: 6),
+              StatusLabel(
+                switch (proposal.state) {
+                  UpdateProposalState.pending => '待确认',
+                  UpdateProposalState.confirmed => '已确认修改',
+                  UpdateProposalState.rejected => '已拒绝',
+                  UpdateProposalState.conflicted => '版本冲突，请提交新的提案',
+                },
+                attention: proposal.state == UpdateProposalState.pending,
+                active: proposal.state == UpdateProposalState.confirmed,
+              ),
+            ],
+          ),
           trailing: proposal.state == UpdateProposalState.pending
-              ? FilledButton(
+              ? OutlinedButton(
                   onPressed: () async {
                     await showDialog<void>(
                       context: context,

@@ -593,7 +593,7 @@ class WorkspaceRecord extends StatelessWidget {
           return Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Flexible(fit: FlexFit.loose, child: text),
+              Expanded(child: text),
               if (trailing != null) ...[const SizedBox(width: 24), trailing!],
             ],
           );

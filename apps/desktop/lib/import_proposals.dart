@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:info_core/info_core.dart';
 import 'organization.dart';
+import 'organization_tasks.dart';
 import 'update_proposals.dart';
 import 'recycle.dart';
 import 'ui.dart';
@@ -38,7 +39,7 @@ class _ImportProposalsPageState extends State<ImportProposalsPage> {
     if (mounted) setState(() {});
   }
 
-  String _names(ImportProposal proposal) {
+  List<String> _names(ImportProposal proposal) {
     var names = proposal.state == ImportProposalState.pending
         ? proposal.items.map((i) => i.name).toList()
         : [
@@ -49,7 +50,7 @@ class _ImportProposalsPageState extends State<ImportProposalsPage> {
                 item.name,
           ];
     if (names.isEmpty) names = proposal.itemNames;
-    return names.take(3).join(' · ') + (names.length > 3 ? ' 等' : '');
+    return names.take(3).toList();
   }
 
   @override
@@ -63,6 +64,10 @@ class _ImportProposalsPageState extends State<ImportProposalsPage> {
         if (widget.owner.updateProposals.isNotEmpty ||
             widget.owner.deleteProposals.isNotEmpty)
           const SectionHeading('变更与删除'),
+        OrganizationResultsList(
+          owner: widget.owner,
+          onChanged: () => setState(() {}),
+        ),
         DeleteProposalsList(
           owner: widget.owner,
           onChanged: () => setState(() {}),
@@ -73,7 +78,8 @@ class _ImportProposalsPageState extends State<ImportProposalsPage> {
         ),
         if (widget.owner.importProposals.isEmpty &&
             widget.owner.updateProposals.isEmpty &&
-            widget.owner.deleteProposals.isEmpty)
+            widget.owner.deleteProposals.isEmpty &&
+            !widget.owner.organizationTasks.any((t) => t.changes.isNotEmpty))
           const SizedBox(
             height: 320,
             child: EmptyWorkspace(
@@ -102,17 +108,28 @@ class _ImportProposalsPageState extends State<ImportProposalsPage> {
                         ? '用途：提交时未记录'
                         : '用途：${proposal.purpose}',
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '聊天：${proposal.chatLabel} · ${uiTime(proposal.createdAt)}${proposal.fieldCount > 0 ? ' · ${proposal.fieldCount} 个字段' : ''}',
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 20,
+                    runSpacing: 6,
+                    children: [
+                      Text('聊天  ${proposal.chatLabel}'),
+                      Text('提交时间  ${uiTime(proposal.createdAt)}'),
+                      if (proposal.fieldCount > 0)
+                        Text('${proposal.fieldCount} 个字段'),
+                    ],
                   ),
                   if (_names(proposal).isNotEmpty) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      _names(proposal),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                    const SizedBox(height: 8),
+                    for (final name in _names(proposal))
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 4),
+                        child: Text(
+                          name,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
                   ],
                   const SizedBox(height: 8),
                   StatusLabel(
@@ -326,7 +343,7 @@ class _ReviewImportState extends State<_ReviewImport> {
     return [
       folder.isEmpty ? '未分类' : folder,
       if (tags.isNotEmpty) tags.join('、'),
-    ].join(' · ');
+    ].join('、');
   }
 
   @override

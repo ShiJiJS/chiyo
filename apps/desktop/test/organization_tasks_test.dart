@@ -5,134 +5,130 @@ import 'package:info_desktop/main.dart';
 
 void main() {
   testWidgets(
-    'owner assigns scoped organization and reviews a read-only batch before applying',
+    'Agent requests in approval inbox; one approval enables automatic classification and read-only result',
     (tester) async {
       tester.view.physicalSize = const Size(1440, 1000);
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
-      final service = InformationService(
-        repository: MemoryInformationRepository(),
-      );
-      final item = await service.owner.createInformation('笔记服务', '公开说明', [
-        const FieldInput('地址', '', 'PRIVATE-CONTENT'),
-      ]);
-      final session = service.agent.openSession('Codex · 整理资料');
+      final service = InformationService.fictional();
+      final session = service.agent.openSession('Codex 整理资料');
+      final task = await service.agent.requestOrganization(session, '整理服务器分类', [
+        'demo-server',
+      ], agentName: 'Codex');
       await tester.pumpWidget(InformationApp(service: service, port: 0));
-      await tester.tap(find.byKey(const ValueKey('nav-1')));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Agent 整理'));
+      expect(find.text('整理分类与标签'), findsOneWidget);
+      expect(find.textContaining('无需再次确认'), findsOneWidget);
+      expect(find.text('fictional.example.invalid'), findsNothing);
+      await tester.tap(find.text('批准整理'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('创建整理任务'));
-      await tester.pumpAndSettle();
-      expect(find.textContaining('不会提供字段值'), findsOneWidget);
-      expect(find.text('笔记服务'), findsOneWidget);
-      expect(find.text('PRIVATE-CONTENT'), findsNothing);
-      await tester.tap(find.text('创建任务'));
-      await tester.pumpAndSettle();
-      final task = service.owner.organizationTasks.single;
-      expect(task.itemVersions.keys, [item.id]);
-      expect(service.owner.information.single.directoryId, isNull);
+      expect(
+        service.agent.organizationStatus(session, task.id)['status'],
+        'active',
+      );
       await service.agent.submitOrganization(session, task.id, [
         OrganizationChange(
-          itemId: item.id,
+          itemId: 'demo-server',
           baseVersion: 1,
-          directoryName: '服务入口',
-          tagNames: ['笔记'],
+          directoryName: '服务器',
         ),
       ]);
       await tester.pump(const Duration(seconds: 1));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('查看整理方案'));
+      expect(find.text('整理完成'), findsWidgets);
+      await tester.tap(find.byKey(const ValueKey('nav-2')));
       await tester.pumpAndSettle();
-      expect(find.text('分类：未分类 → 服务入口'), findsOneWidget);
-      expect(find.byType(TextField), findsNothing);
-      expect(find.text('PRIVATE-CONTENT'), findsNothing);
-      await tester.tap(find.text('确认整批调整'));
+      await tester.tap(find.text('查看结果'));
       await tester.pumpAndSettle();
-      expect(
-        service.owner.organizationTasks.single.state,
-        OrganizationTaskState.confirmed,
-      );
-      expect(service.owner.directories.single.name, '服务入口');
-      expect(
-        service.owner.information.single.fields.single.value,
-        'PRIVATE-CONTENT',
-      );
-      await tester.tap(find.byKey(const ValueKey('subpage-back')));
-      await tester.pumpAndSettle();
-      expect(find.textContaining('服务入口'), findsWidgets);
+      expect(find.text('确认整批调整'), findsNothing);
+      expect(find.text('分类：服务器'), findsOneWidget);
       await tester.pumpWidget(const SizedBox());
       await tester.runAsync(service.close);
     },
   );
   testWidgets(
-    'organization cannot be started without a receiving agent session',
-    (tester) async {
-      final service = InformationService.fictional();
-      await tester.pumpWidget(InformationApp(service: service, port: 0));
-      await tester.tap(find.byKey(const ValueKey('nav-1')));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Agent 整理'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('创建整理任务'));
-      await tester.pumpAndSettle();
-      expect(find.textContaining('还没有有效的 Agent 聊天'), findsOneWidget);
-      expect(
-        tester
-            .widget<FilledButton>(find.widgetWithText(FilledButton, '创建任务'))
-            .onPressed,
-        isNull,
-      );
-      await tester.pumpWidget(const SizedBox());
-      await tester.runAsync(service.close);
-    },
-  );
-  testWidgets(
-    'conflicted organization closes the stale plan and cannot apply a partial batch',
+    'owner can narrow metadata scope and reject a later Agent request',
     (tester) async {
       tester.view.physicalSize = const Size(1440, 1000);
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
-      final service = InformationService(
-        repository: MemoryInformationRepository(),
-      );
-      final item = await service.owner.createInformation('服务', '', [
-        const FieldInput('地址', '', 'private.invalid'),
+      final service = InformationService.fictional();
+      final extra = await service.owner.createInformation('其他资料', '', [
+        const FieldInput('值', '', 'private'),
       ]);
       final session = service.agent.openSession('Codex');
-      final task = await service.owner.startOrganizationTask(
-        service.owner.organizationAgents.single.id,
-        [item.id],
-      );
-      await service.agent.submitOrganization(session, task.id, [
-        OrganizationChange(
-          itemId: item.id,
-          baseVersion: 1,
-          directoryName: '服务入口',
-        ),
+      final task = await service.agent.requestOrganization(session, '整理资料', [
+        'demo-server',
+        extra.id,
       ]);
-      await service.owner.correctValue(
-        FieldRef(item.id, item.fields.single.id),
-        'changed.invalid',
-      );
       await tester.pumpWidget(InformationApp(service: service, port: 0));
-      await tester.tap(find.byKey(const ValueKey('nav-1')));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Agent 整理'));
+      await tester.tap(find.byKey(ValueKey('organize-item-${extra.id}')));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('查看整理方案'));
+      tester.platformDispatcher.textScaleFactorTestValue = 2;
       await tester.pumpAndSettle();
-      await tester.tap(find.text('确认整批调整'));
+      expect(find.text('整理分类与标签'), findsOneWidget);
+      expect(
+        tester
+            .widget<CheckboxListTile>(
+              find.byKey(ValueKey('organize-item-${extra.id}')),
+            )
+            .value,
+        false,
+      );
+      tester.platformDispatcher.clearTextScaleFactorTestValue();
       await tester.pumpAndSettle();
-      expect(find.textContaining('整批未应用'), findsOneWidget);
-      expect(find.text('确认整批调整'), findsNothing);
-      expect(find.text('暂不处理'), findsNothing);
-      expect(service.owner.directories, isEmpty);
-      await tester.tap(find.text('关闭'));
+      await tester.tap(find.text('批准整理'));
       await tester.pumpAndSettle();
-      expect(find.text('资料已变化，需重新整理'), findsOneWidget);
+      expect(service.owner.organizationTasks.single.itemVersions.keys, [
+        'demo-server',
+      ]);
+      await service.agent.requestOrganization(session, '再次申请', [extra.id]);
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.byKey(
+          ValueKey('request-${service.owner.organizationTasks.last.id}'),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('拒绝'));
+      await tester.pumpAndSettle();
+      expect(
+        service.owner.organizationTasks.last.state,
+        OrganizationTaskState.rejected,
+      );
+      expect(
+        service.agent.organizationStatus(session, task.id)['status'],
+        'active',
+      );
+      await tester.pumpWidget(const SizedBox());
+      await tester.runAsync(service.close);
+    },
+  );
+  testWidgets(
+    'organization shares the inbox with content requests without changing content approval',
+    (tester) async {
+      final service = InformationService.fictional();
+      final session = service.agent.openSession('Codex');
+      final content = service.agent.request(session, '检查地址', [
+        const FieldRef('demo-server', 'host'),
+      ]);
+      final task = await service.agent.requestOrganization(session, '分类整理', [
+        'demo-server',
+      ]);
+      await tester.pumpWidget(InformationApp(service: service, port: 0));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(ValueKey('request-${task.id}')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('批准整理'));
+      await tester.pumpAndSettle();
+      expect(service.agent.status(session, content.id)['status'], 'pending');
+      await tester.tap(find.byKey(ValueKey('request-${content.id}')));
+      await tester.pumpAndSettle();
+      expect(find.text('批准所选字段'), findsOneWidget);
       await tester.pumpWidget(const SizedBox());
       await tester.runAsync(service.close);
     },

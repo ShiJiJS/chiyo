@@ -38,9 +38,17 @@ class _DesktopShellState extends State<DesktopShell> {
     });
   }
 
-  int get _pendingCount => widget.service.owner.requests
-      .where((r) => r.state == AccessRequestState.pending)
-      .length;
+  int get _pendingCount =>
+      widget.service.owner.requests
+          .where((r) => r.state == AccessRequestState.pending)
+          .length +
+      widget.service.owner.organizationTasks
+          .where(
+            (t) =>
+                widget.service.owner.organizationState(t) ==
+                OrganizationTaskState.pending,
+          )
+          .length;
   @override
   void dispose() {
     _timer?.cancel();
@@ -194,20 +202,14 @@ class _DesktopShellState extends State<DesktopShell> {
       );
       return Scaffold(
         backgroundColor: Colors.white,
-        body: rail
-            ? Row(
-                children: [
-                  _navigationRail(),
-                  const VerticalDivider(width: 1),
-                  Expanded(child: workspace),
-                ],
-              )
-            : Column(
-                children: [
-                  _compactNavigation(),
-                  Expanded(child: workspace),
-                ],
-              ),
+        body: Flex(
+          direction: rail ? Axis.horizontal : Axis.vertical,
+          children: [
+            if (rail) _navigationRail() else _compactNavigation(),
+            if (rail) const VerticalDivider(width: 1),
+            Expanded(key: const ValueKey('desktop-workspace'), child: workspace),
+          ],
+        ),
       );
     },
   );

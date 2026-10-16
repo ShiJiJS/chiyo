@@ -1,6 +1,6 @@
 ---
 name: agent-info-access
-description: Request user-approved personal information through Agent Info, submit user-designated source information for review, or complete a user-assigned metadata-only organization task; reuse this chat's approved fields and handle pending or denied access.
+description: Request user-approved personal information through Agent Info, submit user-designated source information for review, or request and perform user-authorized classification changes; reuse this chat's approved fields and handle pending or denied access.
 ---
 
 Use the Agent Info association supplied by this chat's latest SessionStart hook.
@@ -79,28 +79,34 @@ library. New-item proposals cannot update existing items; reviewed updates use a
 separate workflow. Restart ends the old session association, even when an owner
 can still review its encrypted pending proposal.
 
-For user-assigned organization, call `organize-tasks` under this chat's existing
-association. It lists only tasks explicitly assigned to this authorization session.
-If none is available, ask the user to create one in Library → Agent organize and
-select this chat; do not search another chat's references or request content access.
+For user-requested organization, use this chat's existing private association:
 
-1. Call `organize-metadata` with `taskId`. Use its scoped item titles/descriptions,
-   item versions, directory tree and tag names. It contains no field values.
-2. Prefer existing directory/tag IDs and shallow, reusable categories. Submit one
-   `organize-submit` with `taskId` and `changes`. Each change has `itemId`, the
-   supplied `baseVersion`, optional existing `directoryId` or a new root
-   `directoryName`, and the desired complete `tagIds` / new `tagNames` lists.
-   Do not include values, field edits or items outside the task. Limits: 200 items,
-   100 tags per item, 200-character label names, 240000 bytes of change JSON.
-3. Stop after `proposed`; the owner reviews and confirms the batch. Submission
-   ends metadata access for that task. Query `organize-tasks` for its state rather
-   than resubmitting. `confirmed` means applied; `rejected`, `cancelled`, `expired`,
-   `conflicted` or `unauthorized` means stop and explain the result. Conflicts
-   require the user to start a fresh task; no automatic recreation.
+1. Use the public catalog to select the information IDs relevant to the user's
+   request. Send one `organize-request` with `purpose`, `itemIds` and `agentName`.
+   Keep its returned `taskId`. The desktop shows this request in Access approvals;
+   never ask the user to create a task, select a chat or copy a task prompt.
+2. Continue independent work while `pending`. Use `organize-wait` with the same
+   `taskId` (`timeoutMs`0–300000), or `organize-status`. A timeout leaves that
+   request pending: never automatically resubmit it. Approval permits metadata
+   access AND automatic category/tag changes only for the user's final selection.
+3. When `active`, call `organize-metadata`. Use only its final item IDs/versions,
+   titles, public descriptions and category/tag names. It contains no field values.
+   Prefer existing category/tag IDs and shallow reusable categories.
+4. Call `organize-submit` once with `taskId` and `changes`. Each change contains
+   `itemId`, supplied `baseVersion`, existing `directoryId` or new root
+   `directoryName`, and the complete desired `tagIds`/new `tagNames` lists.
+   No value/field/content edits or out-of-scope items. Limits:200items,100tags/item,
+   200-character names,240000UTF-8bytes of changes. `confirmed` means the whole
+   batch was applied; no second user confirmation is needed. Report the result.
+5. On an uncertain response, query the same status before retrying. Stop on
+   `confirmed`, `rejected`, `cancelled`, `expired`, `conflicted` or `unauthorized`;
+   never silently recreate an expired/conflicting request. If still `active` after
+   a storage failure, retry the same plan only within its original deadline.
 
-Task access lasts at most 30 minutes and ends with its session, cancellation or
-submission. It cannot be recovered after restart or used to read values, approve
-access requests, modify content or bypass a normal content-access request.
+Access lasts at most30minutes after approval and ends on completion, revocation,
+expiry, session end or restart. This does not grant values, content edits, approval
+powers or a larger normal content grant. Legacy `proposed` results still require
+owner review; do not treat a legacy metadata grant as automatic-write permission.
 
 For requested changes, use `update-submit` with `update` containing `itemId`,
 the current catalog `version` as `baseVersion`, and `changes`. Each operation is

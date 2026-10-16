@@ -101,6 +101,26 @@ class AgentServer {
           _text(body, 'sessionSecret'),
           _text(body, 'proposalId'),
         );
+      case '/organization/request':
+        final ids = body['itemIds'];
+        final agentName = body['agentName'] ?? '';
+        if (ids is! List ||
+            ids.any((id) => id is! String) ||
+            agentName is! String) {
+          throw const AccessFailure('invalid_request');
+        }
+        final task = await _agent.requestOrganization(
+          _text(body, 'sessionSecret'),
+          _text(body, 'purpose'),
+          ids.cast<String>(),
+          agentName: agentName,
+        );
+        return _agent.organizationStatus(_text(body, 'sessionSecret'), task.id);
+      case '/organization/status':
+        return _agent.organizationStatus(
+          _text(body, 'sessionSecret'),
+          _text(body, 'taskId'),
+        );
       case '/organization/tasks':
         return {
           'status': 'ok',
@@ -143,7 +163,10 @@ class AgentServer {
               )
               .toList(),
         );
-        return {'status': 'proposed', 'taskId': body['taskId']};
+        return _agent.organizationStatus(
+          _text(body, 'sessionSecret'),
+          _text(body, 'taskId'),
+        );
       case '/catalog':
         final query = body['query'] ?? '';
         final directoryId = body['directoryId'];

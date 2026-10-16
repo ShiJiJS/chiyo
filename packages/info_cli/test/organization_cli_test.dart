@@ -24,12 +24,28 @@ void main() {
       });
       await a.execute({'command': 'session', 'chatLabel': 'Assigned'});
       await b.execute({'command': 'session', 'chatLabel': 'Other'});
-      final agent = service.owner.organizationAgents.firstWhere(
-        (a) => a.chatLabel == 'Assigned',
+      final request = await a.execute({
+        'command': 'organize-request',
+        'itemIds': [item.id],
+        'purpose': '整理分类',
+      });
+      final taskId = request['taskId'] as String;
+      expect(request['status'], 'pending');
+      final waited = await a.execute({
+        'command': 'organize-wait',
+        'taskId': taskId,
+        'timeoutMs': 0,
+      });
+      expect(waited['waitTimedOut'], true);
+      expect(service.owner.organizationTasks, hasLength(1));
+      expect(
+        (await a.execute({
+          'command': 'organize-metadata',
+          'taskId': taskId,
+        }))['status'],
+        'pending',
       );
-      final task = await service.owner.startOrganizationTask(agent.id, [
-        item.id,
-      ]);
+      await service.owner.approveOrganization(taskId, [item.id]);
       expect(
         (await a.execute({'command': 'organize-tasks'}))['tasks'],
         hasLength(1),
@@ -41,20 +57,20 @@ void main() {
       expect(
         (await b.execute({
           'command': 'organize-metadata',
-          'taskId': task.id,
+          'taskId': taskId,
         }))['status'],
         'unauthorized',
       );
       final metadata = await a.execute({
         'command': 'organize-metadata',
-        'taskId': task.id,
+        'taskId': taskId,
       });
       expect(metadata['status'], 'ok');
       expect(metadata.toString(), contains('Owner category'));
       expect(metadata.toString(), isNot(contains('PRIVATE-URL')));
       final invalid = await a.execute({
         'command': 'organize-submit',
-        'taskId': task.id,
+        'taskId': taskId,
         'changes': [
           {'itemId': item.id, 'baseVersion': 1, 'value': 'overwritten'},
         ],
@@ -62,7 +78,7 @@ void main() {
       expect(invalid['status'], 'invalid_request');
       final submitted = await a.execute({
         'command': 'organize-submit',
-        'taskId': task.id,
+        'taskId': taskId,
         'changes': [
           OrganizationChange(
             itemId: item.id,
@@ -71,16 +87,16 @@ void main() {
           ).toJson(),
         ],
       });
-      expect(submitted['status'], 'proposed');
-      expect(service.owner.information.single.directoryId, isNull);
+      expect(submitted['status'], 'confirmed');
+      expect(service.owner.information.single.directoryId, directory.id);
       expect(
         (await a.execute({
           'command': 'organize-confirm',
-          'taskId': task.id,
+          'taskId': taskId,
         }))['status'],
         'invalid_request',
       );
-      await service.owner.confirmOrganization(task.id);
+      await service.owner.confirmOrganization(taskId);
       expect(service.owner.information.single.directoryId, directory.id);
       expect(
         service.owner.information.single.fields.single.value,

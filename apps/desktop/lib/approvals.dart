@@ -2,7 +2,24 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:info_core/info_core.dart';
 import 'organization.dart';
+import 'organization_tasks.dart';
 import 'ui.dart';
+
+class _ApprovalEntry {
+  _ApprovalEntry.access(this.access)
+    : organization = null,
+      organizationState = null;
+  _ApprovalEntry.organization(this.organization, this.organizationState)
+    : access = null;
+  final OwnerRequestSnapshot? access;
+  final OrganizationTask? organization;
+  final OrganizationTaskState? organizationState;
+  String get id => access?.id ?? organization!.id;
+  String get chatLabel => access?.chatLabel ?? organization!.chatLabel;
+  bool get pending =>
+      access?.state == AccessRequestState.pending ||
+      organizationState == OrganizationTaskState.pending;
+}
 
 class Approvals extends StatefulWidget {
   const Approvals({super.key, required this.service, required this.port});
@@ -19,6 +36,7 @@ class ApprovalsState extends State<Approvals> {
   String? _actionError;
   String? _focused;
   final _selection = <String, Set<FieldRef>>{};
+  final _organizationSelection = <String, Set<String>>{};
   final _grantMinutes = <String, int>{};
   final _expandedScope = <String>{};
   @override
@@ -120,19 +138,20 @@ class ApprovalsState extends State<Approvals> {
 
   @override
   Widget build(BuildContext context) {
-    final requests = widget.service.owner.requests.toList();
-    requests.sort(
-      (a, b) => (a.state == AccessRequestState.pending ? 0 : 1).compareTo(
-        b.state == AccessRequestState.pending ? 0 : 1,
-      ),
-    );
+    final requests = [
+      for (final r in widget.service.owner.requests) _ApprovalEntry.access(r),
+      for (final task in widget.service.owner.organizationTasks)
+        _ApprovalEntry.organization(
+          task,
+          widget.service.owner.organizationState(task),
+        ),
+    ];
+    requests.sort((a, b) => (a.pending ? 0 : 1).compareTo(b.pending ? 0 : 1));
     if (!requests.any((r) => r.id == _focused)) {
       _focused = requests.firstOrNull?.id;
     }
     final current = requests.where((r) => r.id == _focused).firstOrNull;
-    final pending = requests
-        .where((r) => r.state == AccessRequestState.pending)
-        .length;
+    final pending = requests.where((r) => r.pending).length;
     final largeType = MediaQuery.textScalerOf(context).scale(14) > 20;
     return Scaffold(
       body: Padding(
@@ -156,7 +175,7 @@ class ApprovalsState extends State<Approvals> {
                                   DropdownMenuItem(
                                     value: r.id,
                                     child: Text(
-                                      '${r.chatLabel} · ${_state(r.state)}',
+                                      '${r.chatLabel} · ${_entryState(r)}',
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                     ),
@@ -225,7 +244,18 @@ class ApprovalsState extends State<Approvals> {
                       title: '暂无访问请求',
                       description: 'Agent 提交申请后，这里会列出用途和所需信息。\n批准前可以调整提供范围。',
                     )
-                  : _requestView(current),
+                  : current.organization != null
+                  ? OrganizationApprovalPanel(
+                      key: ValueKey(current.id),
+                      owner: widget.service.owner,
+                      task: current.organization!,
+                      selected: _organizationSelection.putIfAbsent(
+                        current.id,
+                        () => current.organization!.itemVersions.keys.toSet(),
+                      ),
+                      onChanged: () => setState(() {}),
+                    )
+                  : _requestView(current.access!),
             ),
           ],
         ),
@@ -233,7 +263,10 @@ class ApprovalsState extends State<Approvals> {
     );
   }
 
-  Widget _requestChoice(OwnerRequestSnapshot request) {
+  String _entryState(_ApprovalEntry entry) => entry.access != null
+      ? _state(entry.access!.state)
+      : '整理 · ${organizationStateLabel(entry.organizationState!)}';
+  Widget _requestChoice(_ApprovalEntry request) {
     final selected = _focused == request.id;
     return SizedBox(
       width: 320,
@@ -267,11 +300,9 @@ class ApprovalsState extends State<Approvals> {
                 ),
                 const SizedBox(width: 12),
                 Text(
-                  _state(request.state),
+                  _entryState(request),
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: request.state == AccessRequestState.pending
-                        ? UiColors.warning
-                        : null,
+                    color: request.pending ? UiColors.warning : null,
                   ),
                 ),
               ],

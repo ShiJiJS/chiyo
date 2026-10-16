@@ -50,6 +50,42 @@ class AgentClient {
       return {'status': 'invalid_request'};
     }
     switch (command) {
+      case 'organize-request':
+        if (_session == null) return {'status': 'unauthorized'};
+        return _call('/organization/request', {
+          'sessionSecret': _session,
+          'purpose': input['purpose'],
+          'itemIds': input['itemIds'],
+          'agentName': input['agentName'] ?? sourceAgent,
+        });
+      case 'organize-status':
+        if (_session == null) return {'status': 'unauthorized'};
+        return _call('/organization/status', {
+          'sessionSecret': _session,
+          'taskId': input['taskId'],
+        });
+      case 'organize-wait':
+        if (_session == null) return {'status': 'unauthorized'};
+        final timeout = input['timeoutMs'] ?? 30000;
+        if (timeout is! int || timeout < 0 || timeout > 300000) {
+          return {'status': 'invalid_request'};
+        }
+        final watch = Stopwatch()..start();
+        while (true) {
+          final status = await _call('/organization/status', {
+            'sessionSecret': _session,
+            'taskId': input['taskId'],
+          });
+          if (status['status'] != 'pending') return status;
+          if (watch.elapsedMilliseconds >= timeout) {
+            return {...status, 'waitTimedOut': true};
+          }
+          await Future<void>.delayed(
+            Duration(
+              milliseconds: (timeout - watch.elapsedMilliseconds).clamp(1, 250),
+            ),
+          );
+        }
       case 'organize-tasks':
         if (_session == null) return {'status': 'unauthorized'};
         return _call('/organization/tasks', {'sessionSecret': _session});

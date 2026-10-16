@@ -1,293 +1,260 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:info_core/info_core.dart';
 import 'organization.dart';
 import 'ui.dart';
 
-class OrganizationTasksPage extends StatefulWidget {
-  const OrganizationTasksPage({
+String organizationStateLabel(OrganizationTaskState state) => switch (state) {
+  OrganizationTaskState.pending => '待审批',
+  OrganizationTaskState.active => '正在整理',
+  OrganizationTaskState.proposed => '旧版方案待确认',
+  OrganizationTaskState.confirmed => '整理完成',
+  OrganizationTaskState.rejected => '已拒绝',
+  OrganizationTaskState.cancelled => '已取消',
+  OrganizationTaskState.expired => '已到期',
+  OrganizationTaskState.conflicted => '资料已变化，整批未应用',
+};
+
+class OrganizationApprovalPanel extends StatefulWidget {
+  const OrganizationApprovalPanel({
     super.key,
     required this.owner,
-    required this.itemIds,
+    required this.task,
+    required this.selected,
+    required this.onChanged,
   });
   final OwnerAccess owner;
-  final List<String> itemIds;
+  final OrganizationTask task;
+  final Set<String> selected;
+  final VoidCallback onChanged;
   @override
-  State<OrganizationTasksPage> createState() => _OrganizationTasksPageState();
+  State<OrganizationApprovalPanel> createState() =>
+      _OrganizationApprovalPanelState();
 }
 
-class _OrganizationTasksPageState extends State<OrganizationTasksPage> {
-  late final Timer _refresh;
+class _OrganizationApprovalPanelState extends State<OrganizationApprovalPanel> {
+  bool _busy = false;
   String? _error;
-  @override
-  void initState() {
-    super.initState();
-    _refresh = Timer.periodic(const Duration(seconds: 1), (_) {
-      if (mounted) setState(() {});
-    });
-  }
-
-  @override
-  void dispose() {
-    _refresh.cancel();
-    super.dispose();
-  }
-
-  Future<void> _start() async {
-    await showDialog<void>(
-      context: context,
-      builder: (_) =>
-          _StartOrganization(owner: widget.owner, itemIds: widget.itemIds),
-    );
-    if (mounted) setState(() {});
-  }
-
-  Future<void> _cancel(String id) async {
-    try {
-      await widget.owner.cancelOrganization(id);
-      if (mounted) setState(() => _error = null);
-    } catch (_) {
-      if (mounted) setState(() => _error = '未能取消任务，请重试。');
-    }
-  }
-
-  Future<void> _view(OrganizationTask task) async {
-    await showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => _ReviewOrganization(owner: widget.owner, task: task),
-    );
-    if (mounted) setState(() {});
-  }
-
-  String _state(OrganizationTask t) => widget.owner.organizationNeedsRenewal(t)
-      ? '需重新发起'
-      : switch (t.state) {
-          OrganizationTaskState.active => '等待 Agent 提交',
-          OrganizationTaskState.proposed => '方案待确认',
-          OrganizationTaskState.confirmed => '已应用',
-          OrganizationTaskState.rejected => '已拒绝',
-          OrganizationTaskState.cancelled => '已取消',
-          OrganizationTaskState.expired => '已到期',
-          OrganizationTaskState.conflicted => '资料已变化，需重新整理',
-        };
-  @override
-  Widget build(BuildContext context) => DesktopSubpage(
-    title: 'Agent 整理',
-    actions: [
-      FilledButton.icon(
-        onPressed: widget.itemIds.isEmpty || widget.itemIds.length > 200
-            ? null
-            : _start,
-        icon: const Icon(Icons.auto_awesome_outlined, size: 17),
-        label: const Text('创建整理任务'),
-      ),
-    ],
-    body: Padding(
-      padding: UiSpace.page,
-      child: ListView(
-        children: [
-          Text(
-            '为当前列表的 ${widget.itemIds.length} 条信息整理分类与标签。Agent 提交方案后，你一次确认整批调整。',
-          ),
-          if (widget.itemIds.length > 200)
-            const QuietNotice('每次最多整理 200 条，请先在资料库筛选范围。'),
-          const SizedBox(height: 20),
-          if (widget.owner.organizationTasks.isEmpty)
-            const EmptyWorkspace(
-              icon: Icons.auto_awesome_outlined,
-              title: '还没有整理任务',
-              description: '先创建一次任务，再让对应聊天中的 Agent 领取并提交方案。',
-            ),
-          for (final task in widget.owner.organizationTasks.reversed)
-            WorkspaceRecord(
-              title: Text(task.purpose),
-              subtitle: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '${task.chatLabel} · ${task.itemVersions.length} 条信息 · ${uiTime(task.createdAt)}',
-                  ),
-                  const SizedBox(height: 6),
-                  StatusLabel(
-                    _state(task),
-                    active: task.state == OrganizationTaskState.confirmed,
-                    attention: task.state == OrganizationTaskState.proposed,
-                  ),
-                  if (task.state == OrganizationTaskState.active &&
-                      !widget.owner.organizationNeedsRenewal(task))
-                    const Padding(
-                      padding: EdgeInsets.only(top: 8),
-                      child: Text('创建后，在对应 Agent 聊天中让它领取本次任务。'),
-                    ),
-                ],
-              ),
-              trailing: Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  if (task.state == OrganizationTaskState.active &&
-                      !widget.owner.organizationNeedsRenewal(task))
-                    TextButton(
-                      onPressed: () async {
-                        await Clipboard.setData(
-                          ClipboardData(
-                            text:
-                                '请领取信息授权中的整理任务 ${task.id}，根据本次获准的元数据整理分类与标签，并提交方案供我确认。',
-                          ),
-                        );
-                      },
-                      child: const Text('复制任务提示'),
-                    ),
-                  if (task.state == OrganizationTaskState.active)
-                    TextButton(
-                      onPressed: () => _cancel(task.id),
-                      child: const Text('取消任务'),
-                    ),
-                  if (task.changes.isNotEmpty)
-                    OutlinedButton(
-                      onPressed: () => _view(task),
-                      child: Text(
-                        task.state == OrganizationTaskState.proposed
-                            ? '查看整理方案'
-                            : '查看结果',
-                      ),
-                    ),
-                ],
-              ),
-            ),
-          if (_error != null) QuietNotice(_error!, warning: true),
-        ],
-      ),
-    ),
-  );
-}
-
-class _StartOrganization extends StatefulWidget {
-  const _StartOrganization({required this.owner, required this.itemIds});
-  final OwnerAccess owner;
-  final List<String> itemIds;
-  @override
-  State<_StartOrganization> createState() => _StartOrganizationState();
-}
-
-class _StartOrganizationState extends State<_StartOrganization> {
-  late String? _agent = widget.owner.organizationAgents.lastOrNull?.id;
-  final _purpose = TextEditingController(text: '整理资料的分类与标签');
-  final _scopeScroll = ScrollController();
-  bool _saving = false;
-  String? _error;
-  @override
-  void dispose() {
-    _purpose.dispose();
-    _scopeScroll.dispose();
-    super.dispose();
-  }
-
-  Future<void> _create() async {
+  Future<void> _decide(bool approve) async {
     setState(() {
-      _saving = true;
+      _busy = true;
       _error = null;
     });
     try {
-      await widget.owner.startOrganizationTask(
-        _agent!,
-        widget.itemIds,
-        purpose: _purpose.text,
-      );
-      if (mounted) Navigator.pop(context);
-    } catch (_) {
-      if (mounted) {
-        setState(() {
-          _saving = false;
-          _error = '未能创建任务，请检查聊天是否有效、资料是否已变化，然后重试。';
-        });
+      if (approve) {
+        await widget.owner.approveOrganization(
+          widget.task.id,
+          widget.selected.toList(),
+        );
+      } else {
+        await widget.owner.denyOrganization(widget.task.id);
       }
+      widget.onChanged();
+    } catch (_) {
+      if (mounted) setState(() => _error = '未能保存决定，请检查范围、请求状态或存储后重试。');
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _cancel() async {
+    try {
+      await widget.owner.cancelOrganization(widget.task.id);
+      widget.onChanged();
+    } catch (_) {
+      if (mounted) setState(() => _error = '未能撤销整理，请重试。');
     }
   }
 
   @override
-  Widget build(BuildContext context) => DesktopDialog(
-    title: const Text('创建整理任务'),
-    content: SizedBox(
-      width: 600,
-      height: 540,
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text('本次范围：当前列表的 ${widget.itemIds.length} 条信息。'),
-            const SizedBox(height: 8),
-            ConstrainedBox(
-              constraints: const BoxConstraints(maxHeight: 150),
-              child: Scrollbar(
-                controller: _scopeScroll,
-                thumbVisibility: true,
-                child: ListView(
-                  controller: _scopeScroll,
-                  shrinkWrap: true,
-                  children: [
-                    for (final id in widget.itemIds)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 3),
-                        child: Text(
-                          widget.owner.information
-                                  .where((i) => i.id == id)
-                                  .firstOrNull
-                                  ?.name ??
-                              '资料已删除',
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 14),
-            const Text(
-              '仅提供这些信息的标题、公开说明，以及现有分类和标签名称。不会提供字段值。元数据访问最长 30 分钟，提交方案后结束；确认方案后才调整分类。',
-            ),
-            const SizedBox(height: 18),
-            if (widget.owner.organizationAgents.isEmpty)
-              const QuietNotice(
-                '还没有有效的 Agent 聊天。请先让 Agent 通过 CLI 建立会话，再回到这里创建任务。',
-              )
-            else
-              DesktopSelect<String>(
-                key: const ValueKey('organization-agent'),
-                initialValue: _agent,
-                isExpanded: true,
-                decoration: const InputDecoration(
-                  labelText: '接收任务的聊天（Agent 自述）',
-                ),
-                items: [
-                  for (final a in widget.owner.organizationAgents)
-                    DropdownMenuItem(value: a.id, child: Text(a.chatLabel)),
-                ],
-                onChanged: _saving ? null : (id) => setState(() => _agent = id),
-              ),
-            DesktopTextField(
-              key: const ValueKey('organization-purpose'),
-              controller: _purpose,
-              enabled: !_saving,
-              maxLength: 2000,
-              decoration: const InputDecoration(labelText: '整理目的'),
-            ),
-            if (_error != null) QuietNotice(_error!, warning: true),
-          ],
+  Widget build(BuildContext context) {
+    final task = widget.task;
+    final state = widget.owner.organizationState(task);
+    final pending = state == OrganizationTaskState.pending;
+    final document = ListView(
+      children: [
+        Text('整理分类与标签', style: Theme.of(context).textTheme.headlineSmall),
+        const SizedBox(height: 12),
+        Text(task.purpose),
+        const SizedBox(height: 8),
+        Text(
+          '提交 Agent（自述）：${task.agentName.isEmpty ? '名称未记录' : task.agentName}',
+          style: Theme.of(context).textTheme.bodySmall,
         ),
+        Text(
+          '聊天：${task.chatLabel}',
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
+        const SizedBox(height: 20),
+        const QuietNotice(
+          '仅提供所选信息的标题、说明和现有分类/标签名称，不提供字段值。批准后，Agent 可直接调整所选信息的分类与标签，无需再次确认。',
+        ),
+        const SizedBox(height: 12),
+        for (final id in task.itemVersions.keys)
+          Builder(
+            builder: (context) {
+              final item = widget.owner.information
+                  .where((i) => i.id == id)
+                  .firstOrNull;
+              return pending
+                  ? CheckboxListTile(
+                      key: ValueKey('organize-item-$id'),
+                      value: widget.selected.contains(id),
+                      onChanged: _busy || item == null
+                          ? null
+                          : (value) => setState(() {
+                              value == true
+                                  ? widget.selected.add(id)
+                                  : widget.selected.remove(id);
+                            }),
+                      contentPadding: EdgeInsets.zero,
+                      controlAffinity: ListTileControlAffinity.leading,
+                      title: Text(item?.name ?? '资料已删除'),
+                      subtitle: item == null
+                          ? null
+                          : Text(
+                              item.description.isEmpty
+                                  ? directoryPath(
+                                      widget.owner,
+                                      item.directoryId,
+                                    )
+                                  : item.description,
+                            ),
+                    )
+                  : WorkspaceRecord(title: Text(item?.name ?? '资料已删除'));
+            },
+          ),
+      ],
+    );
+    final decision = Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: UiColors.rail,
+        border: Border.all(color: UiColors.line),
+        borderRadius: BorderRadius.circular(6),
       ),
-    ),
-    actions: [
-      TextButton(
-        onPressed: _saving ? null : () => Navigator.pop(context),
-        child: const Text('取消'),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          StatusLabel(
+            organizationStateLabel(state),
+            active: state == OrganizationTaskState.confirmed,
+            attention: pending,
+          ),
+          const SizedBox(height: 12),
+          Text(
+            '${pending ? widget.selected.length : task.itemVersions.length} 条信息',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            pending ? '批准后最长 30 分钟，完成后结束访问。' : '截止 ${uiTime(task.expiresAt)}',
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+          if (_error != null) QuietNotice(_error!, warning: true),
+          const SizedBox(height: 12),
+          if (pending)
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                TextButton(
+                  onPressed: _busy ? null : () => _decide(false),
+                  child: const Text('拒绝'),
+                ),
+                FilledButton(
+                  onPressed: _busy || widget.selected.isEmpty
+                      ? null
+                      : () => _decide(true),
+                  child: Text(_busy ? '正在保存…' : '批准整理'),
+                ),
+              ],
+            )
+          else if (state == OrganizationTaskState.active)
+            OutlinedButton(
+              onPressed: _busy ? null : _cancel,
+              child: const Text('撤销整理'),
+            ),
+          if (state == OrganizationTaskState.conflicted)
+            const Text('请让 Agent 根据当前资料重新申请。'),
+        ],
       ),
-      FilledButton(
-        onPressed: _saving || _agent == null ? null : _create,
-        child: Text(_saving ? '正在创建…' : '创建任务'),
-      ),
+    );
+    return LayoutBuilder(
+      builder: (context, bounds) {
+        if (bounds.maxWidth >= 900 &&
+            MediaQuery.textScalerOf(context).scale(14) <= 20) {
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(child: document),
+              const SizedBox(width: 24),
+              SizedBox(
+                width: 340,
+                child: SingleChildScrollView(child: decision),
+              ),
+            ],
+          );
+        }
+        return Column(
+          children: [
+            Expanded(child: document),
+            ConstrainedBox(
+              constraints: BoxConstraints(maxHeight: bounds.maxHeight * .5),
+              child: SingleChildScrollView(child: decision),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class OrganizationResultsList extends StatelessWidget {
+  const OrganizationResultsList({
+    super.key,
+    required this.owner,
+    required this.onChanged,
+  });
+  final OwnerAccess owner;
+  final VoidCallback onChanged;
+  @override
+  Widget build(BuildContext context) => Column(
+    children: [
+      for (final task in owner.organizationTasks.reversed.where(
+        (t) => t.changes.isNotEmpty,
+      ))
+        WorkspaceRecord(
+          title: const Text('分类整理'),
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(task.purpose),
+              const SizedBox(height: 6),
+              Text('聊天  ${task.chatLabel}'),
+              const SizedBox(height: 6),
+              Text('${task.changes.length} 条信息'),
+              const SizedBox(height: 6),
+              StatusLabel(
+                organizationStateLabel(owner.organizationState(task)),
+                active: task.state == OrganizationTaskState.confirmed,
+              ),
+            ],
+          ),
+          trailing: OutlinedButton(
+            onPressed: () async {
+              await showDialog<void>(
+                context: context,
+                barrierDismissible: false,
+                builder: (_) => _ReviewOrganization(owner: owner, task: task),
+              );
+              onChanged();
+            },
+            child: Text(
+              task.state == OrganizationTaskState.proposed ? '查看旧版方案' : '查看结果',
+            ),
+          ),
+        ),
     ],
   );
 }
@@ -344,7 +311,7 @@ class _ReviewOrganizationState extends State<_ReviewOrganization> {
             child: ListView(
               children: [
                 Text(
-                  '${widget.task.chatLabel} · ${widget.task.changes.length} 条整理建议',
+                  '聊天：${widget.task.chatLabel}\n${widget.task.changes.length} 条整理结果',
                 ),
                 const QuietNotice('只调整分类与标签，不修改内容，也不会增加已有授权的范围。'),
                 for (final change in widget.task.changes)
@@ -402,9 +369,9 @@ class _ReviewOrganizationState extends State<_ReviewOrganization> {
                                     : null,
                               ),
                             ] else ...[
-                              Text('建议分类：$proposedFolder'),
+                              Text('分类：$proposedFolder'),
                               Text(
-                                '建议标签：${proposedTags.isEmpty ? '无' : proposedTags}',
+                                '标签：${proposedTags.isEmpty ? '无' : proposedTags}',
                               ),
                               if (item != null)
                                 Text('当前分类：${_folder(item.directoryId)}'),

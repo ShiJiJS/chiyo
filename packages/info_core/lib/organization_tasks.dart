@@ -1,4 +1,5 @@
 enum OrganizationTaskState {
+  pending,
   active,
   proposed,
   confirmed,
@@ -6,11 +7,6 @@ enum OrganizationTaskState {
   cancelled,
   expired,
   conflicted,
-}
-
-class OrganizationAgent {
-  const OrganizationAgent(this.id, this.chatLabel);
-  final String id, chatLabel;
 }
 
 class OrganizationChange {
@@ -57,25 +53,38 @@ class OrganizationTask {
     required this.expiresAt,
     required Map<String, int> itemVersions,
     this.state = OrganizationTaskState.active,
+    this.agentName = '',
+    this.approvedAt,
+    this.autoApply = false,
     Iterable<OrganizationChange> changes = const [],
   }) : itemVersions = Map.unmodifiable(itemVersions),
        changes = List.unmodifiable(changes);
   final String id, sessionBinding, chatLabel, purpose;
   final DateTime createdAt, expiresAt;
+  final DateTime? approvedAt;
+  final String agentName;
+  final bool autoApply;
   final Map<String, int> itemVersions;
   final OrganizationTaskState state;
   final List<OrganizationChange> changes;
   OrganizationTask withState(
     OrganizationTaskState state, {
     List<OrganizationChange>? changes,
+    Map<String, int>? itemVersions,
+    DateTime? expiresAt,
+    DateTime? approvedAt,
+    bool? autoApply,
   }) => OrganizationTask(
     id: id,
     sessionBinding: sessionBinding,
     chatLabel: chatLabel,
     purpose: purpose,
     createdAt: createdAt,
-    expiresAt: expiresAt,
-    itemVersions: itemVersions,
+    expiresAt: expiresAt ?? this.expiresAt,
+    itemVersions: itemVersions ?? this.itemVersions,
+    agentName: agentName,
+    approvedAt: approvedAt ?? this.approvedAt,
+    autoApply: autoApply ?? this.autoApply,
     state: state,
     changes: changes ?? this.changes,
   );
@@ -88,6 +97,9 @@ class OrganizationTask {
     'expiresAt': expiresAt.toUtc().toIso8601String(),
     'itemVersions': itemVersions,
     'state': state.name,
+    'agentName': agentName,
+    'approvedAt': approvedAt?.toUtc().toIso8601String(),
+    'autoApply': autoApply,
     'changes': changes.map((c) => c.toJson()).toList(),
   };
   factory OrganizationTask.fromJson(Map<String, dynamic> j) => OrganizationTask(
@@ -95,6 +107,11 @@ class OrganizationTask {
     sessionBinding: j['sessionBinding'] as String,
     chatLabel: j['chatLabel'] as String,
     purpose: j['purpose'] as String,
+    agentName: j['agentName'] as String? ?? '',
+    approvedAt: j['approvedAt'] == null
+        ? null
+        : DateTime.parse(j['approvedAt'] as String),
+    autoApply: j['autoApply'] as bool? ?? false,
     createdAt: DateTime.parse(j['createdAt'] as String),
     expiresAt: DateTime.parse(j['expiresAt'] as String),
     itemVersions: (j['itemVersions'] as Map<String, dynamic>)

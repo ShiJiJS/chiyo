@@ -1,6 +1,32 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:info_core/info_core.dart';
 import 'package:test/test.dart';
+
+class _DelayedOrganizationRepository extends MemoryInformationRepository {
+  final entered = Completer<void>();
+  final release = Completer<void>();
+  @override
+  Future<void> confirmOrganizationTask(
+    OrganizationTask task,
+    List<InformationItem> items,
+    List<InformationRevision> previous, {
+    List<InformationDirectory> newDirectories = const [],
+    List<InformationTag> newTags = const [],
+    void Function()? validate,
+  }) async {
+    entered.complete();
+    await release.future;
+    await super.confirmOrganizationTask(
+      task,
+      items,
+      previous,
+      newDirectories: newDirectories,
+      newTags: newTags,
+      validate: validate,
+    );
+  }
+}
 
 void main() {
   test(
@@ -84,12 +110,14 @@ void main() {
       final request = service.agent.request(session, 'read', [ref]);
       service.owner.approve(request.id, [ref]);
       final token = service.agent.claim(session, request.id).token;
-      final selected = service.owner.organizationAgents.firstWhere(
-        (a) => a.chatLabel == 'Organizer',
-      );
-      final task = await service.owner.startOrganizationTask(selected.id, [
+      final task = await service.agent.requestOrganization(session, '整理分类', [
         item.id,
-      ]);
+      ], agentName: 'Codex');
+      await expectLater(
+        service.agent.organizationMetadata(session, task.id),
+        throwsA(isA<AccessFailure>()),
+      );
+      await service.owner.approveOrganization(task.id, [item.id]);
       expect(service.agent.catalog().toString(), isNot(contains('仅本人目录名称')));
       expect(service.agent.organizationTasks(other), isEmpty);
       await expectLater(
@@ -119,7 +147,7 @@ void main() {
           tagNames: ['笔记'],
         ),
       ]);
-      expect(service.owner.information.first.directoryId, isNull);
+      expect(service.owner.information.first.directoryId, isNotNull);
       await expectLater(
         service.agent.organizationMetadata(session, task.id),
         throwsA(isA<AccessFailure>()),
@@ -145,16 +173,18 @@ void main() {
         const FieldInput('Value', '', 'private'),
       ]);
       final session = service.agent.openSession('A');
-      final binding = service.owner.organizationAgents.single.id;
-      final cancelled = await service.owner.startOrganizationTask(binding, [
-        item.id,
-      ]);
+      final cancelled = await service.agent.requestOrganization(
+        session,
+        '整理分类',
+        [item.id],
+      );
+      await service.owner.approveOrganization(cancelled.id, [item.id]);
       await service.owner.cancelOrganization(cancelled.id);
       await expectLater(
         service.agent.organizationMetadata(session, cancelled.id),
         throwsA(isA<AccessFailure>()),
       );
-      final expired = await service.owner.startOrganizationTask(binding, [
+      final expired = await service.agent.requestOrganization(session, '整理分类', [
         item.id,
       ]);
       now = now.add(const Duration(minutes: 31));
@@ -167,9 +197,10 @@ void main() {
         service.agent.organizationMetadata(session, expired.id),
         throwsA(isA<AccessFailure>()),
       );
-      final ended = await service.owner.startOrganizationTask(binding, [
+      final ended = await service.agent.requestOrganization(session, '整理分类', [
         item.id,
       ]);
+      await service.owner.approveOrganization(ended.id, [item.id]);
       service.agent.endSession(session);
       await expectLater(
         service.agent.organizationMetadata(session, ended.id),
@@ -200,24 +231,28 @@ void main() {
           ]),
       ];
       final session = service.agent.openSession('A');
-      final task = await service.owner.startOrganizationTask(
-        service.owner.organizationAgents.single.id,
+      final task = await service.agent.requestOrganization(
+        session,
+        '整理分类',
         items.map((i) => i.id).toList(),
       );
-      await service.agent.submitOrganization(session, task.id, [
-        for (final i in items)
-          OrganizationChange(
-            itemId: i.id,
-            baseVersion: i.version,
-            directoryName: 'New label',
-          ),
-      ]);
+      await service.owner.approveOrganization(
+        task.id,
+        items.map((i) => i.id).toList(),
+      );
       await service.owner.correctValue(
         FieldRef(items.last.id, items.last.fields.single.id),
         'changed',
       );
       await expectLater(
-        service.owner.confirmOrganization(task.id),
+        service.agent.submitOrganization(session, task.id, [
+          for (final i in items)
+            OrganizationChange(
+              itemId: i.id,
+              baseVersion: i.version,
+              directoryName: 'New label',
+            ),
+        ]),
         throwsA(isA<AccessFailure>()),
       );
       expect(service.owner.directories, isEmpty);
@@ -237,10 +272,10 @@ void main() {
       final service = InformationService.fictional();
       addTearDown(service.close);
       final session = service.agent.openSession('A');
-      final task = await service.owner.startOrganizationTask(
-        service.owner.organizationAgents.single.id,
-        ['demo-server'],
-      );
+      final task = await service.agent.requestOrganization(session, '整理分类', [
+        'demo-server',
+      ]);
+      await service.owner.approveOrganization(task.id, ['demo-server']);
       await expectLater(
         service.agent.submitOrganization(session, task.id, [
           OrganizationChange(
@@ -265,6 +300,162 @@ void main() {
         service.owner.organizationTasks.single.state,
         OrganizationTaskState.active,
       );
+    },
+  );
+  test(
+    'request waits for owner, partial approval limits reads and automatic writes, then cannot renew',
+    () async {
+      final service = InformationService.fictional();
+      addTearDown(service.close);
+      final other = await service.owner.createInformation('Outside', '', [
+        const FieldInput('V', '', 'PRIVATE'),
+      ]);
+      final session = service.agent.openSession('Codex');
+      final request = await service.agent.requestOrganization(session, '整理资料', [
+        'demo-server',
+        other.id,
+      ]);
+      expect(
+        service.agent.organizationStatus(session, request.id)['status'],
+        'pending',
+      );
+      await expectLater(
+        service.agent.submitOrganization(session, request.id, [
+          OrganizationChange(
+            itemId: 'demo-server',
+            baseVersion: 1,
+            directoryName: 'Before approval',
+          ),
+        ]),
+        throwsA(isA<AccessFailure>()),
+      );
+      await service.owner.approveOrganization(request.id, ['demo-server']);
+      final deadline = service.owner.organizationTasks.single.expiresAt;
+      final metadata = await service.agent.organizationMetadata(
+        session,
+        request.id,
+      );
+      expect((metadata['items'] as List).length, 1);
+      await expectLater(
+        service.agent.submitOrganization(session, request.id, [
+          OrganizationChange(
+            itemId: other.id,
+            baseVersion: 1,
+            directoryName: 'Forbidden',
+          ),
+        ]),
+        throwsA(isA<AccessFailure>()),
+      );
+      await service.agent.submitOrganization(session, request.id, [
+        OrganizationChange(
+          itemId: 'demo-server',
+          baseVersion: 1,
+          directoryName: 'Servers',
+        ),
+      ]);
+      expect(
+        service.agent.organizationStatus(session, request.id)['status'],
+        'confirmed',
+      );
+      expect(service.owner.information.first.version, 2);
+      expect(service.owner.information.last.directoryId, isNull);
+      expect(service.owner.organizationTasks.single.expiresAt, deadline);
+      await expectLater(
+        service.owner.approveOrganization(request.id, ['demo-server']),
+        throwsA(isA<AccessFailure>()),
+      );
+      await expectLater(
+        service.agent.submitOrganization(session, request.id, [
+          OrganizationChange(
+            itemId: 'demo-server',
+            baseVersion: 1,
+            directoryName: 'Again',
+          ),
+        ]),
+        throwsA(isA<AccessFailure>()),
+      );
+      expect(service.owner.information.first.version, 2);
+    },
+  );
+  test(
+    'denied and expired pending organization requests never authorize metadata or writes',
+    () async {
+      var now = DateTime.utc(2026, 10, 16);
+      final service = InformationService(
+        repository: MemoryInformationRepository(),
+        clock: () => now,
+      );
+      addTearDown(service.close);
+      final item = await service.owner.createInformation('Info', '', [
+        const FieldInput('V', '', 'private'),
+      ]);
+      final session = service.agent.openSession('Codex');
+      final denied = await service.agent.requestOrganization(session, '整理分类', [
+        item.id,
+      ]);
+      await service.owner.denyOrganization(denied.id);
+      await expectLater(
+        service.owner.approveOrganization(denied.id, [item.id]),
+        throwsA(isA<AccessFailure>()),
+      );
+      final expired = await service.agent.requestOrganization(session, '整理分类', [
+        item.id,
+      ]);
+      now = now.add(const Duration(minutes: 31));
+      expect(
+        service.agent.organizationStatus(session, expired.id)['status'],
+        'expired',
+      );
+      now = now.subtract(const Duration(hours: 1));
+      await expectLater(
+        service.owner.approveOrganization(expired.id, [item.id]),
+        throwsA(isA<AccessFailure>()),
+      );
+      await expectLater(
+        service.agent.organizationMetadata(session, denied.id),
+        throwsA(isA<AccessFailure>()),
+      );
+      expect(service.owner.directories, isEmpty);
+    },
+  );
+  test(
+    'session end or expiry while automatic write waits prevents committing labels or information',
+    () async {
+      for (final expire in [false, true]) {
+        var now = DateTime.utc(2026, 10, 16);
+        final repo = _DelayedOrganizationRepository();
+        final service = InformationService(repository: repo, clock: () => now);
+        final item = await service.owner.createInformation('Info', '', [
+          const FieldInput('V', '', 'private'),
+        ]);
+        final session = service.agent.openSession('Codex');
+        final request = await service.agent.requestOrganization(
+          session,
+          '整理分类',
+          [item.id],
+        );
+        await service.owner.approveOrganization(request.id, [item.id]);
+        final saving = service.agent.submitOrganization(session, request.id, [
+          OrganizationChange(
+            itemId: item.id,
+            baseVersion: 1,
+            directoryName: 'Must not appear',
+          ),
+        ]);
+        final denied = expectLater(saving, throwsA(isA<AccessFailure>()));
+        await repo.entered.future;
+        if (expire) {
+          now = now.add(const Duration(minutes: 31));
+        } else {
+          service.agent.endSession(session);
+        }
+        repo.release.complete();
+        await denied;
+        expect(service.owner.directories, isEmpty);
+        expect(service.owner.information.single.version, 1);
+        expect(service.owner.informationRevisions, isEmpty);
+        await service.close();
+      }
     },
   );
 }

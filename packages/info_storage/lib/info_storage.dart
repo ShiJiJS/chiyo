@@ -603,6 +603,7 @@ class EncryptedInformationRepository implements InformationRepository {
     List<InformationRevision> previous, {
     List<InformationDirectory> newDirectories = const [],
     List<InformationTag> newTags = const [],
+    void Function()? validate,
   }) async {
     if (_closed) throw const StorageFailure('library_closed');
     try {
@@ -620,6 +621,7 @@ class EncryptedInformationRepository implements InformationRepository {
           await _writeRevision(r);
         }
         await _writeOrganizationTask(task);
+        validate?.call();
       });
       for (final d in newDirectories) {
         _directories[d.id] = d;

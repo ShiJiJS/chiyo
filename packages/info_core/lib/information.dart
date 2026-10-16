@@ -76,6 +76,7 @@ abstract interface class InformationRepository {
     List<InformationRevision> previous, {
     List<InformationDirectory> newDirectories = const [],
     List<InformationTag> newTags = const [],
+    void Function()? validate,
   });
 
   List<GrantHistory> get grantHistory;
@@ -156,7 +157,9 @@ class MemoryInformationRepository implements InformationRepository {
     List<InformationRevision> previous, {
     List<InformationDirectory> newDirectories = const [],
     List<InformationTag> newTags = const [],
+    void Function()? validate,
   }) async {
+    validate?.call();
     for (final directory in newDirectories) {
       _directories[directory.id] = directory;
     }

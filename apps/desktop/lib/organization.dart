@@ -208,7 +208,7 @@ Future<void> organizeItem(
     context: context,
     builder: (context) => StatefulBuilder(
       builder: (context, setDialogState) => DesktopDialog(
-        title: const Text('整理位置和标签'),
+        title: const Text('调整分类'),
         content: SizedBox(
           width: 550,
           child: SingleChildScrollView(
@@ -354,7 +354,7 @@ class _CatalogEditorState extends State<_CatalogEditor> {
 
   @override
   Widget build(BuildContext context) => DesktopDialog(
-    title: const Text('编辑公开说明'),
+    title: const Text('编辑信息说明'),
     content: SizedBox(
       width: 600,
       child: SingleChildScrollView(
@@ -377,7 +377,7 @@ class _CatalogEditorState extends State<_CatalogEditor> {
               key: const ValueKey('catalog-description'),
               controller: _description,
               maxLength: 2000,
-              decoration: const InputDecoration(labelText: '公开描述'),
+              decoration: const InputDecoration(labelText: '信息说明（Agent 可见）'),
             ),
             const SizedBox(height: 12),
             const SectionHeading('字段说明', detail: '字段含义保持不变'),
@@ -400,10 +400,7 @@ class _CatalogEditorState extends State<_CatalogEditor> {
         onPressed: _saving ? null : () => Navigator.pop(context),
         child: const Text('取消'),
       ),
-      FilledButton(
-        onPressed: _saving ? null : _save,
-        child: const Text('保存公开说明'),
-      ),
+      FilledButton(onPressed: _saving ? null : _save, child: const Text('保存')),
     ],
   );
 }
