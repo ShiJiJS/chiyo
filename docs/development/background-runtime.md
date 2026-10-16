@@ -95,3 +95,19 @@ Primary references:
 [Shell_NotifyIconW](https://learn.microsoft.com/en-us/windows/win32/api/shellapi/nf-shellapi-shell_notifyiconw),
 [Apple notification authorization](https://developer.apple.com/documentation/usernotifications/asking-permission-to-use-notifications),
 [Flutter app delegate](https://github.com/flutter/engine/blob/main/shell/platform/darwin/macos/framework/Headers/FlutterAppDelegate.h).
+
+## Startup failure correction
+
+The startup owner now survives a failed launch and always renders a failure/retry
+screen. A partially bound server, request subscription and maintenance timer are
+stopped. If audit flushing fails, the same core, pending facts and open library
+remain owned in memory; retry saves those facts before closing and reopening the
+library. A failing cleanup cannot skip the error screen or silently discard facts.
+The shared runtime stop operation also preserves normal full-quit behavior.
+
+`desktop_bootstrap_test.dart` verifies a real ephemeral server is unreachable
+after failed startup, repeated failed saving does not reopen the library, repair
+persists the application-closed fact before reopening, an occupied port follows
+the same cleanup policy, and a widget error/retry surface stays visible. The
+unsafe cleanup first failed this regression with `audit_unavailable`. All checks
+are headless; actual native startup/error-window acceptance remains outstanding.

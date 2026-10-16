@@ -120,15 +120,7 @@ extension OwnerUpdates on OwnerAccess {
       }
       switch (change.kind) {
         case FieldChangeKind.correct:
-          final old = fields[index];
-          fields[index] = InformationField(
-            old.id,
-            old.name,
-            old.description,
-            change.value!,
-            old.version + 1,
-            kind: old.kind,
-          );
+          fields[index] = fields[index].correctValue(change.value!);
         case FieldChangeKind.remove:
           fields.removeAt(index);
         case FieldChangeKind.add:
@@ -149,7 +141,7 @@ extension OwnerUpdates on OwnerAccess {
           }
       }
     }
-    if (fields.isEmpty || fields.length > 200) {
+    if (fields.length > 200) {
       throw const AccessFailure('invalid_proposal');
     }
     return InformationItem(

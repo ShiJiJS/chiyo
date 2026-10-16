@@ -1,74 +1,119 @@
 import 'approvals.dart';
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:info_core/agent_server.dart';
 import 'package:info_core/info_core.dart';
 import 'package:info_storage/info_storage.dart';
 import 'library.dart';
 import 'import_proposals.dart';
 import 'desktop_runtime.dart';
+import 'desktop_bootstrap.dart';
 import 'backups.dart';
 import 'history.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  EncryptedInformationRepository? repository;
-  InformationService? service;
-  try {
-    final String directory;
-    final DatabaseKeyStore keys;
-    if (Platform.isWindows) {
-      final base = Platform.environment['LOCALAPPDATA'];
-      if (base == null || base.isEmpty) {
-        throw const StorageFailure('directory_unavailable');
-      }
-      directory = '$base/AgentInfoManage';
-      keys = WindowsDatabaseKeyStore('$directory/database-key.dpapi');
-    } else if (Platform.isMacOS) {
-      final base = Platform.environment['HOME'];
-      if (base == null || base.isEmpty) {
-        throw const StorageFailure('directory_unavailable');
-      }
-      directory = '$base/Library/Application Support/AgentInfoManage';
-      const channel = MethodChannel('agent_info_manage/database_key');
-      keys = MacOsDatabaseKeyStore(channel.invokeMethod<Object?>);
-    } else {
-      throw const StorageFailure('platform_unsupported');
-    }
-    repository = await EncryptedInformationRepository.open(directory, keys);
-    service = InformationService(repository: repository);
-    final server = await AgentServer.start(service.agent);
-    final runtime = DesktopRuntime(
-      service: service,
-      platform: NativeDesktopPlatform(),
-      closeServer: server.close,
-      closeRepository: repository.close,
-    );
-    await runtime.start();
-    runApp(
-      InformationApp(
-        service: service,
-        port: server.port,
-        runtime: runtime,
-        backups: repository.backups,
+  runApp(
+    DesktopLauncher(
+      bootstrap: DesktopBootstrap(
+        openLibrary: _openLibrary,
+        platform: NativeDesktopPlatform(),
       ),
-    );
-  } on Object {
-    await service?.close();
-    await repository?.close();
-    runApp(
-      const MaterialApp(
+    ),
+  );
+}
+
+Future<DesktopLibrary> _openLibrary() async {
+  final String directory;
+  final DatabaseKeyStore keys;
+  if (Platform.isWindows) {
+    final base = Platform.environment['LOCALAPPDATA'];
+    if (base == null || base.isEmpty) {
+      throw const StorageFailure('directory_unavailable');
+    }
+    directory = '$base/AgentInfoManage';
+    keys = WindowsDatabaseKeyStore('$directory/database-key.dpapi');
+  } else if (Platform.isMacOS) {
+    final base = Platform.environment['HOME'];
+    if (base == null || base.isEmpty) {
+      throw const StorageFailure('directory_unavailable');
+    }
+    directory = '$base/Library/Application Support/AgentInfoManage';
+    const channel = MethodChannel('agent_info_manage/database_key');
+    keys = MacOsDatabaseKeyStore(channel.invokeMethod<Object?>);
+  } else {
+    throw const StorageFailure('platform_unsupported');
+  }
+  final repository = await EncryptedInformationRepository.open(directory, keys);
+  return DesktopLibrary(
+    service: InformationService(repository: repository),
+    close: repository.close,
+    backups: repository.backups,
+  );
+}
+
+class DesktopLauncher extends StatefulWidget {
+  const DesktopLauncher({super.key, required this.bootstrap});
+  final DesktopBootstrap bootstrap;
+  @override
+  State<DesktopLauncher> createState() => _DesktopLauncherState();
+}
+
+class _DesktopLauncherState extends State<DesktopLauncher> {
+  @override
+  void initState() {
+    super.initState();
+    if (widget.bootstrap.state == DesktopStartupState.idle) {
+      unawaited(widget.bootstrap.start());
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => ListenableBuilder(
+    listenable: widget.bootstrap,
+    builder: (context, _) {
+      final startup = widget.bootstrap;
+      if (startup.state == DesktopStartupState.ready) {
+        return InformationApp(
+          service: startup.library!.service,
+          port: startup.boundPort!,
+          runtime: startup.runtime,
+          backups: startup.library!.backups,
+        );
+      }
+      return MaterialApp(
         home: Scaffold(
           body: Center(
-            child: Text(
-              '资料库或本机服务无法启动。请检查系统密钥是否可用、应用是否已运行。原有资料不会被重建或覆盖；请保留资料库与密钥文件。',
-            ),
+            child: startup.state != DesktopStartupState.failed
+                ? const CircularProgressIndicator()
+                : Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text(
+                          '资料库或本机服务无法启动。请检查系统密钥是否可用、应用是否已运行。原有资料不会被重建或覆盖；请保留资料库与密钥文件。',
+                        ),
+                        if (startup.cleanupPending)
+                          const Text(
+                            '访问服务已停止，但记录尚未保存或资料库尚未关闭。请保留此窗口，修复存储后重试；记录保存成功后才会重新启动。',
+                          ),
+                        const SizedBox(height: 16),
+                        FilledButton(
+                          onPressed: startup.start,
+                          child: Text(
+                            startup.cleanupPending ? '重试保存并启动' : '重试启动',
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
           ),
         ),
-      ),
-    );
-  }
+      );
+    },
+  );
 }
 
 class InformationApp extends StatefulWidget {
