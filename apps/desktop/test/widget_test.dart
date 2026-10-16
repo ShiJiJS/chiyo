@@ -17,10 +17,14 @@ void main() {
     expect(find.text('Need address'), findsOneWidget);
     await tester.tap(find.byKey(const ValueKey('field-username')));
     await tester.pump();
+    await tester.ensureVisible(find.text('批准所选字段'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('批准所选字段'));
     await tester.pump();
     final grant = core.agent.claim(session, request.id);
     expect(grant.fields, [const FieldRef('demo-server', 'host')]);
+    await tester.ensureVisible(find.text('撤销授权'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('撤销授权'));
     await tester.pump();
     expect(

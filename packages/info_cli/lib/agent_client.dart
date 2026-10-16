@@ -38,6 +38,7 @@ class AgentClient {
           'fields': input['fields'],
         });
       case 'status':
+      case 'cancel':
       case 'claim':
         if (_session == null) return {'status': 'unauthorized'};
         final id = input['requestId'];
@@ -51,6 +52,29 @@ class AgentClient {
           _tokens[id] = token;
         }
         return result;
+      case 'wait':
+        if (_session == null) return {'status': 'unauthorized'};
+        final id = input['requestId'];
+        final timeout = input['timeoutMs'] ?? 30000;
+        if (id is! String ||
+            timeout is! int ||
+            timeout < 0 ||
+            timeout > 300000) {
+          return {'status': 'invalid_request'};
+        }
+        final elapsed = Stopwatch()..start();
+        while (true) {
+          final result = await _call('/status', {
+            'sessionSecret': _session,
+            'requestId': id,
+          });
+          if (result['status'] != 'pending') return result;
+          final remaining = timeout - elapsed.elapsedMilliseconds;
+          if (remaining <= 0) return {...result, 'waitTimedOut': true};
+          await Future<void>.delayed(
+            Duration(milliseconds: remaining < 250 ? remaining : 250),
+          );
+        }
       case 'read':
         final token = _tokens[input['requestId']];
         if (token == null) return {'status': 'unauthorized'};
