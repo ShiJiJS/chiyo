@@ -1,0 +1,137 @@
+import 'dart:async';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:info_core/agent_server.dart';
+import 'package:info_core/info_core.dart';
+import 'package:info_cli/agent_client.dart';
+import 'package:info_desktop/desktop_runtime.dart';
+
+import 'support/desktop_platform_fixture.dart';
+
+void main() {
+  test(
+    'failed notification delivery retains the request and reports its unavailable state',
+    () async {
+      final service = InformationService.fictional();
+      final native = NativeDesktopFixture()..deliveryAvailable = false;
+      final runtime = DesktopRuntime(
+        service: service,
+        platform: native,
+        closeServer: () async {},
+        closeRepository: () async {},
+      );
+      await runtime.start();
+      final session = service.agent.openSession('test chat');
+      final request = service.agent.request(session, 'Need address', [
+        const FieldRef('demo-server', 'host'),
+      ]);
+      await Future<void>.delayed(Duration.zero);
+      expect(
+        runtime.availability.notifications,
+        NotificationAvailability.unavailable,
+      );
+      expect(service.agent.status(session, request.id)['status'], 'pending');
+      await runtime.quit();
+    },
+  );
+
+  test(
+    'new requests arriving during native startup notify once; polling and reopening never repeat',
+    () async {
+      final service = InformationService.fictional();
+      final server = await AgentServer.start(service.agent, port: 0);
+      final ready = Completer<void>();
+      final native = NativeDesktopFixture()..initialization = ready.future;
+      final runtime = DesktopRuntime(
+        service: service,
+        platform: native,
+        closeServer: server.close,
+        closeRepository: () async {},
+      );
+      final starting = runtime.start();
+      final client = AgentClient(server.port);
+      addTearDown(client.close);
+      await client.execute({'command': 'session', 'chatLabel': 'private chat'});
+      final request = await client.execute({
+        'command': 'request',
+        'purpose': 'private purpose',
+        'fields': [
+          {'itemId': 'demo-server', 'fieldId': 'host'},
+        ],
+      });
+      ready.complete();
+      await starting;
+      await Future<void>.delayed(Duration.zero);
+      expect(native.notices, ['new_request']);
+      final id = request['requestId'];
+      await client.execute({'command': 'status', 'requestId': id});
+      await client.execute({
+        'command': 'wait',
+        'requestId': id,
+        'timeoutMs': 0,
+      });
+      await native.events!(DesktopEvent.openApprovals);
+      expect(runtime.openApprovalsRevision, 1);
+      expect(native.notices, ['new_request']);
+      await runtime.quit();
+    },
+  );
+
+  test(
+    'hiding keeps approved CLI access; full quit stops it and invalidates old capabilities',
+    () async {
+      final service = InformationService.fictional();
+      final server = await AgentServer.start(service.agent, port: 0);
+      final native = NativeDesktopFixture();
+      var dataClosed = false;
+      final runtime = DesktopRuntime(
+        service: service,
+        platform: native,
+        closeServer: server.close,
+        closeRepository: () async {
+          dataClosed = true;
+        },
+      );
+      await runtime.start();
+      final client = AgentClient(server.port);
+      addTearDown(client.close);
+      await client.execute({'command': 'session', 'chatLabel': 'private chat'});
+      final request = await client.execute({
+        'command': 'request',
+        'purpose': 'private purpose',
+        'fields': [
+          {'itemId': 'demo-server', 'fieldId': 'host'},
+        ],
+      });
+      final id = request['requestId'] as String;
+      service.owner.approve(id, [const FieldRef('demo-server', 'host')]);
+      await client.execute({'command': 'claim', 'requestId': id});
+      await native.events!(DesktopEvent.closeWindow);
+      expect(native.hidden, isTrue);
+      expect(
+        await client.execute({
+          'command': 'read',
+          'requestId': id,
+          'itemId': 'demo-server',
+          'fieldId': 'host',
+        }),
+        {'status': 'ok', 'value': 'demo.example.invalid'},
+      );
+      await native.events!(DesktopEvent.quit);
+      expect(dataClosed, isTrue);
+      expect(native.terminated, isTrue);
+      expect(
+        (await client.execute({
+          'command': 'status',
+          'requestId': id,
+        }))['status'],
+        'service_unavailable',
+      );
+      final fresh = InformationService.fictional();
+      addTearDown(fresh.close);
+      expect(
+        () => fresh.agent.status(client.sessionSecret!, id),
+        throwsA(isA<AccessFailure>()),
+      );
+    },
+  );
+}
