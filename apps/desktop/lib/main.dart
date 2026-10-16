@@ -165,6 +165,11 @@ class _InformationAppState extends State<InformationApp>
               padding: EdgeInsets.all(8),
               child: Text('回收站到期清理暂时失败，请检查存储。到期内容无法恢复，应用会再次尝试清理。'),
             ),
+          if (widget.runtime?.revisionCleanupFailed == true)
+            const Padding(
+              padding: EdgeInsets.all(8),
+              child: Text('修改历史到期清理暂时失败，请检查存储。到期版本无法查看或恢复，应用会再次尝试清理。'),
+            ),
           if (widget.runtime?.shutdownFailed == true)
             const Padding(
               padding: EdgeInsets.all(8),

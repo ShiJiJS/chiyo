@@ -103,6 +103,7 @@ class DesktopRuntime extends ChangeNotifier {
   Timer? _maintenanceTimer;
   Future<void> _maintenance = Future.value();
   bool recycleCleanupFailed = false;
+  bool revisionCleanupFailed = false;
   Future<void>? _quit;
   final _ready = Completer<void>();
 
@@ -132,6 +133,12 @@ class DesktopRuntime extends ChangeNotifier {
       recycleCleanupFailed = false;
     } catch (_) {
       recycleCleanupFailed = true;
+    }
+    try {
+      await service.owner.purgeRevisions();
+      revisionCleanupFailed = false;
+    } catch (_) {
+      revisionCleanupFailed = true;
     }
     notifyListeners();
   });

@@ -9,6 +9,37 @@ import 'support/desktop_platform_fixture.dart';
 
 void main() {
   test(
+    'background startup durably purges expired revisions while preserving current content',
+    () async {
+      var now = DateTime.utc(2026, 10, 1);
+      final repository = MemoryInformationRepository();
+      final service = InformationService(
+        repository: repository,
+        clock: () => now,
+      );
+      final item = await service.owner.createInformation('Test', '', [
+        const FieldInput('Value', '', 'old'),
+      ]);
+      await service.owner.correctValue(
+        FieldRef(item.id, item.fields.single.id),
+        'current',
+      );
+      now = now.add(const Duration(days: 30));
+      final runtime = DesktopRuntime(
+        service: service,
+        platform: NativeDesktopFixture(),
+        closeServer: () async {},
+        closeRepository: () async {},
+      );
+      await runtime.start();
+      expect(repository.revisionPurgeFacts.single.version, 1);
+      expect(service.owner.information.single.fields.single.value, 'current');
+      now = now.subtract(const Duration(days: 1));
+      expect(service.owner.informationRevisions, isEmpty);
+      await runtime.quit();
+    },
+  );
+  test(
     'requests submitted while startup cleanup is pending still notify once',
     () async {
       final service = InformationService.fictional();

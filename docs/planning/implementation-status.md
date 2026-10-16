@@ -68,6 +68,10 @@ The user accepted the separate revoke-only Codex hook capability and the risk th
 
 An [opt-in macOS validation workflow](../development/macos-ci-validation.md) is prepared to compile and test on a hosted Mac without operating the user's desktop. Ordinary integration pushes do not trigger it. The user asked to defer hosted validation and finish Windows first, then use their own Mac; no hosted run was started and no macOS result is claimed.
 
+At `785d44c`, #15 is merged. Its tree passed **114 headless tests** (CLI 13, core 50, storage 23, widgets 28), with all analysis clean. [Version history](../implementation-ticket-15.md) provides owner-only 30-day history, differences, optimistic conflict checks and restoration as a new current version. Deleted identities must first be restored explicitly through the recycle bin; history cannot bypass that rule. Schema 10 retains value-free purge facts so cleaning content remains terminal after clock rollback and reopening.
+
+The Windows native release compiled successfully in a detached validation worktree at `d256a8a` (through #12/#14). The original checkout's release executable was locked by the existing application; it was left running and unchanged. Later #15/#7/#17 changes still require a combined rebuild. No new desktop window was launched. #17 has now started from #15 to extend the full supported backup scope and coordinate successful restore with runtime credential invalidation.
+
 ## Completion rules
 
 The user has asked that further development not manipulate their visible desktop. Run headless tests and compile builds; leave native window interaction and user-visible Codex configuration checks for coordinated user validation. Do not launch the desktop application or native GUI tests without renewed agreement.
