@@ -150,11 +150,12 @@ class _ReviewImportState extends State<_ReviewImport> {
       }
       if (mounted) Navigator.pop(context);
     } catch (_) {
-      if (mounted)
+      if (mounted) {
         setState(() {
           _saving = false;
           _error = '未能处理提案，请检查字段和分类，或关闭后刷新查看当前状态。';
         });
+      }
     }
   }
 
