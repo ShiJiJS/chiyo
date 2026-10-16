@@ -1,6 +1,9 @@
 import 'ui.dart';
 import 'package:flutter/material.dart';
 import 'package:info_core/info_core.dart';
+import 'prototype_dialog.dart';
+import 'prototype_ui.dart';
+import 'organization.dart';
 
 Future<void> confirmInformationDeletion(
   BuildContext context,
@@ -11,6 +14,7 @@ Future<void> confirmInformationDeletion(
 }) => showDialog<void>(
   context: context,
   barrierDismissible: false,
+  barrierColor: const Color(0x4f241b27),
   builder: (_) => _DeleteInformation(
     owner: owner,
     item: item,
@@ -69,10 +73,10 @@ class _DeleteInformationState extends State<_DeleteInformation> {
   }
 
   @override
-  Widget build(BuildContext context) => DesktopDialog(
-    title: Text(widget.fieldId == null ? '删除整条信息' : '删除选定字段'),
-    content: SizedBox(
-      width: 600,
+  Widget build(BuildContext context) => PrototypeDialog(
+    title: widget.fieldId == null ? '删除整条信息' : '删除选定字段',
+    onClose: _saving ? null : () => Navigator.pop(context),
+    body: SizedBox(
       child: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -100,6 +104,7 @@ class _DeleteInformationState extends State<_DeleteInformation> {
     ),
     actions: [
       TextButton(
+        style: prototypeSecondary(context),
         onPressed: _saving ? null : () => Navigator.pop(context),
         child: const Text('取消'),
       ),
@@ -109,6 +114,7 @@ class _DeleteInformationState extends State<_DeleteInformation> {
           child: const Text('拒绝删除'),
         ),
       FilledButton(
+        style: prototypePrimary(context),
         onPressed: _saving ? null : () => _decide(true),
         child: const Text('确认删除'),
       ),
@@ -117,8 +123,9 @@ class _DeleteInformationState extends State<_DeleteInformation> {
 }
 
 class RecyclePage extends StatefulWidget {
-  const RecyclePage({super.key, required this.owner});
+  const RecyclePage({super.key, required this.owner, this.asDialog = false});
   final OwnerAccess owner;
+  final bool asDialog;
   @override
   State<RecyclePage> createState() => _RecyclePageState();
 }
@@ -144,17 +151,24 @@ class _RecyclePageState extends State<RecyclePage> {
   Future<void> _restore(RecycleEntry entry) async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => DesktopDialog(
-        title: const Text('恢复信息'),
-        content: Text(
-          '恢复“${entry.snapshot!.name}”${entry.wholeItem ? '' : '中的选定字段'}。\n恢复后，Agent 需要重新批准才能读取，旧授权不会复活。',
+      barrierColor: const Color(0x4f241b27),
+      builder: (context) => PrototypeDialog(
+        title: '恢复信息',
+        onClose: () => Navigator.pop(context, false),
+        body: Padding(
+          padding: const EdgeInsets.only(bottom: 22),
+          child: Text(
+            '恢复“${entry.snapshot!.name}”${entry.wholeItem ? '' : '中的选定字段'}。\n恢复后，Agent 需要重新批准才能读取，旧授权不会复活。',
+          ),
         ),
         actions: [
           TextButton(
+            style: prototypeSecondary(context),
             onPressed: () => Navigator.pop(context, false),
             child: const Text('取消'),
           ),
           FilledButton(
+            style: prototypePrimary(context),
             onPressed: () => Navigator.pop(context, true),
             child: const Text('确认恢复'),
           ),
@@ -173,9 +187,12 @@ class _RecyclePageState extends State<RecyclePage> {
 
   Future<void> _view(RecycleEntry entry) => showDialog<void>(
     context: context,
-    builder: (context) => DesktopDialog(
-      title: Text(entry.snapshot!.name),
-      content: SizedBox(
+    barrierColor: const Color(0x4f241b27),
+    builder: (context) => PrototypeDialog(
+      flow: true,
+      title: entry.snapshot!.name,
+      onClose: () => Navigator.pop(context),
+      body: SizedBox(
         width: 700,
         height:
             entry.snapshot!.fields.length <= 2 &&
@@ -200,6 +217,7 @@ class _RecyclePageState extends State<RecyclePage> {
       ),
       actions: [
         TextButton(
+          style: prototypeSecondary(context),
           onPressed: () => Navigator.pop(context),
           child: const Text('关闭'),
         ),
@@ -207,12 +225,16 @@ class _RecyclePageState extends State<RecyclePage> {
     ),
   );
   @override
-  Widget build(BuildContext context) => DesktopSubpage(
-    title: '回收站',
-    body: ListView(
-      padding: UiSpace.page,
+  Widget build(BuildContext context) => _surface(
+    ListView(
+      shrinkWrap: widget.asDialog,
+      physics: widget.asDialog ? const NeverScrollableScrollPhysics() : null,
+      padding: widget.asDialog ? EdgeInsets.zero : UiSpace.page,
       children: [
-        const QuietNotice('删除的内容保留 30 天，恢复后需重新授权。已导出的备份不会随清理删除。'),
+        Text(
+          '删除的内容保留 30 天，恢复后需重新授权。已导出的备份不会随清理删除。',
+          style: prototypeText(context, 14, height: 1.85),
+        ),
         const SizedBox(height: 12),
         if (_error != null) QuietNotice(_error!, warning: true),
         if (_loading) const LinearProgressIndicator(),
@@ -261,6 +283,128 @@ class _RecyclePageState extends State<RecyclePage> {
           ),
       ],
     ),
+  );
+  Widget _surface(Widget body) => widget.asDialog
+      ? PrototypeDialog(
+          flow: true,
+          scrollGutter: 0,
+          title: '信息回收站',
+          onClose: () => Navigator.pop(context),
+          body: _dialogBody(),
+        )
+      : DesktopSubpage(title: '回收站', body: body);
+  Widget _dialogBody() => Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Align(
+        alignment: Alignment.centerLeft,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: prototypeCh(context, 14, 48)),
+          child: Text(
+            '保留 30 天。恢复信息不会恢复旧授权；关联凭据仍独立保存。',
+            style: prototypeText(
+              context,
+              14,
+              height: 1.85,
+              color: UiPalette.of(context).muted,
+            ),
+          ),
+        ),
+      ),
+      if (_loading) const LinearProgressIndicator(),
+      if (_error != null)
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          child: Text(
+            _error!,
+            style: prototypeText(
+              context,
+              13,
+              color: UiPalette.of(context).danger,
+            ),
+          ),
+        ),
+      if (!_loading && widget.owner.recycleEntries.isEmpty)
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 20),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: prototypeCh(context, 14, 48),
+              ),
+              child: Text(
+                '回收站为空。信息详情中的「移入回收站」会将信息保留在这里。',
+                style: prototypeText(context, 14, height: 1.85),
+              ),
+            ),
+          ),
+        ),
+      for (final entry in widget.owner.recycleEntries)
+        Container(
+          padding: const EdgeInsets.symmetric(vertical: 23),
+          decoration: BoxDecoration(
+            border: Border(
+              bottom: BorderSide(color: UiPalette.of(context).line),
+            ),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      entry.snapshot!.name,
+                      style: prototypeText(
+                        context,
+                        14,
+                        weight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      directoryPath(widget.owner, entry.snapshot!.directoryId),
+                      style: prototypeText(
+                        context,
+                        12,
+                        color: UiPalette.of(context).muted,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      '${entry.wholeItem ? '整条信息' : '选定字段'} · ${entry.snapshot!.fields.length} 个字段 · 保留至 ${uiTime(entry.expiresAt)}',
+                      style: prototypeText(
+                        context,
+                        12,
+                        color: UiPalette.of(context).muted,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              TextButton(
+                style: prototypeButton(
+                  context,
+                  size: 12,
+                  foreground: UiPalette.of(context).accent,
+                ),
+                onPressed: () => _view(entry),
+                child: const Text('查看内容'),
+              ),
+              const SizedBox(width: 12),
+              TextButton(
+                style: prototypeSecondary(context),
+                onPressed: () => _restore(entry),
+                child: const Text('恢复信息'),
+              ),
+            ],
+          ),
+        ),
+    ],
   );
 }
 

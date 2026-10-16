@@ -112,7 +112,8 @@ void main() {
       );
       await tester.tap(find.byKey(const ValueKey('nav-1')));
       await tester.pumpAndSettle();
-      expect(find.text('还没有信息，可以手动新建。'), findsOneWidget);
+      expect(find.text('没有匹配的信息'), findsOneWidget);
+      expect(find.text('请选择一条信息'), findsOneWidget);
       await tester.tap(find.text('授权历史'));
       await tester.pump(const Duration(milliseconds: 400));
       await _settleIO(tester, find.text('暂无授权历史。'));

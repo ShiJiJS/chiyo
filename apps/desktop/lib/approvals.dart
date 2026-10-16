@@ -13,6 +13,20 @@ class SearchInboxIntent extends Intent {
   const SearchInboxIntent();
 }
 
+/// A printable slash belongs to the focused editor, including modal dialogs.
+class SearchInboxActivator extends SingleActivator {
+  const SearchInboxActivator() : super(LogicalKeyboardKey.slash);
+
+  @override
+  bool accepts(KeyEvent event, HardwareKeyboard state) {
+    final focused = FocusManager.instance.primaryFocus?.context;
+    final editing =
+        focused?.widget is EditableText ||
+        focused?.findAncestorWidgetOfExactType<EditableText>() != null;
+    return !editing && super.accepts(event, state);
+  }
+}
+
 class Approvals extends StatefulWidget {
   const Approvals({
     super.key,
@@ -423,8 +437,7 @@ class ApprovalsState extends State<Approvals> {
     );
     return CallbackShortcuts(
       bindings: {
-        const SingleActivator(LogicalKeyboardKey.slash): () =>
-            _searchFocus.requestFocus(),
+        const SearchInboxActivator(): () => _searchFocus.requestFocus(),
       },
       child: Scaffold(
         backgroundColor: colors.canvas,

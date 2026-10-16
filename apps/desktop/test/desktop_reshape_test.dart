@@ -8,6 +8,11 @@ import 'package:info_desktop/ui.dart';
 class _FailingWrites extends MemoryInformationRepository {
   bool fail = false;
   @override
+  Future<void> commitRecycleChange({required String itemId,InformationItem? item,InformationRevision? previous,required List<RecycleEntry> entries,required List<RecycleFact> facts,DeleteProposal? proposal}) async {
+    if(fail) throw StateError('synthetic write failure');
+    await super.commitRecycleChange(itemId:itemId,item:item,previous:previous,entries:entries,facts:facts,proposal:proposal);
+  }
+  @override
   Future<void> save(InformationItem item) async {
     if (fail) throw StateError('synthetic write failure');
     await super.save(item);
@@ -44,14 +49,14 @@ void main() {
           home: InformationLibrary(owner: service.owner),
         ),
       );
-      await tester.tap(find.byTooltip('修正值'));
+      await tester.tap(find.byKey(const ValueKey('edit-information-description')));
       await tester.pumpAndSettle();
       await tester.enterText(
-        find.byKey(const ValueKey('correct-value')),
+        find.byKey(const ValueKey('field-value-0')),
         'reviewed.invalid',
       );
       repository.fail = true;
-      await tester.tap(find.text('保存修正'));
+      await tester.tap(find.byKey(const ValueKey('save-information')));
       await tester.pumpAndSettle();
       expect(find.textContaining('输入已保留'), findsOneWidget);
       expect(find.text('reviewed.invalid'), findsOneWidget);
@@ -60,7 +65,7 @@ void main() {
         'old.invalid',
       );
       repository.fail = false;
-      await tester.tap(find.text('保存修正'));
+      await tester.tap(find.byKey(const ValueKey('save-information')));
       await tester.pumpAndSettle();
       final saved = service.owner.information.single;
       expect(saved.fields.single.value, 'reviewed.invalid');
@@ -97,7 +102,7 @@ void main() {
           home: InformationLibrary(owner: service.owner),
         ),
       );
-      await tester.tap(find.text('新建信息'));
+      await tester.tap(find.byKey(const ValueKey('new-information')));
       await tester.pumpAndSettle();
       await tester.enterText(
         find.byKey(const ValueKey('item-name')),
@@ -112,14 +117,14 @@ void main() {
         'new.invalid',
       );
       repo.fail = true;
-      await tester.tap(find.text('保存信息'));
+      await tester.tap(find.byKey(const ValueKey('save-information')));
       await tester.pumpAndSettle();
       expect(service.owner.information, isEmpty);
       expect(find.textContaining('输入已保留'), findsOneWidget);
       expect(find.textContaining('请填写'), findsNothing);
       expect(find.text('new.invalid'), findsOneWidget);
       repo.fail = false;
-      await tester.tap(find.text('保存信息'));
+      await tester.tap(find.byKey(const ValueKey('save-information')));
       await tester.pumpAndSettle();
       expect(
         service.owner.information.single.fields.single.value,

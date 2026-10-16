@@ -76,17 +76,20 @@ void main() {
         service.agent.read(token, field),
         throwsA(isA<AccessFailure>()),
       );
-      await service.owner.restoreRecycled(recycled.id);
+      final restored = await service.owner.restoreRecycled(recycled.id);
       await expectLater(
         service.agent.read(token, field),
         throwsA(isA<AccessFailure>()),
       );
-      final fresh = service.agent.request(session, 'restored host', [field]);
-      service.owner.approve(fresh.id, [field]);
+      final restoredField = FieldRef(item.id, restored.fields.single.id);
+      final fresh = service.agent.request(session, 'restored host', [
+        restoredField,
+      ]);
+      service.owner.approve(fresh.id, [restoredField]);
       expect(
         await service.agent.read(
           service.agent.claim(session, fresh.id).token,
-          field,
+          restoredField,
         ),
         'private.invalid',
       );

@@ -57,6 +57,11 @@ void main() {
             ? find.text('外观').first
             : i == 0
             ? find.text('请求收件箱')
+            : i == 1
+            ? find.descendant(
+                of: find.byKey(const ValueKey('library-directory')),
+                matching: find.text('信息库'),
+              )
             : find.descendant(
                 of: find.byType(PageHeading),
                 matching: find.text(headings[i]),

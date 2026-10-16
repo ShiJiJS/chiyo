@@ -257,7 +257,16 @@ void main() {
         );
         final recovered = await restored.owner.restoreRecycled(entry.id);
         for (final field in fields) {
-          final saved = recovered.fields.singleWhere((f) => f.id == field.id);
+          final provenance = restored.owner.recycleFacts
+              .firstWhere(
+                (f) =>
+                    f.entryId == entry.id && f.kind == RecycleFactKind.restored,
+              )
+              .restoredFieldIds;
+          final saved = recovered.fields.singleWhere(
+            (f) => f.id == provenance[field.id],
+          );
+          expect(saved.id, isNot(field.id));
           expect(saved.value, field.value);
           expect(saved.kind, field.kind);
           expect(saved.version, greaterThan(field.version));
@@ -332,9 +341,11 @@ void main() {
         () => target.backups.restoreFrom(path, key),
       );
       final recovered = await restored.owner.restoreRecycled(grouped.id);
+      expect(recovered.fields, hasLength(3));
+      expect(recovered.fields.any((f) => f.id == refs.last.fieldId), isTrue);
       expect(
-        recovered.fields.map((f) => f.id).toSet(),
-        refs.map((f) => f.fieldId).toSet(),
+        recovered.fields.any((f) => refs.take(2).any((r) => r.fieldId == f.id)),
+        isFalse,
       );
       expect(recovered.fields.map((f) => f.value).toSet(), {
         'host.invalid',
@@ -358,16 +369,26 @@ void main() {
         );
       }
       final freshSession = restored.agent.openSession('new read');
+      final mapping = restored.owner.recycleFacts
+          .firstWhere(
+            (f) =>
+                f.entryId == grouped.id && f.kind == RecycleFactKind.restored,
+          )
+          .restoredFieldIds;
+      final freshRefs = refs
+          .take(2)
+          .map((f) => FieldRef(item.id, mapping[f.fieldId]!))
+          .toList();
       final fresh = restored.agent.request(
         freshSession,
         'recovered fields',
-        refs.take(2).toList(),
+        freshRefs,
       );
-      restored.owner.approve(fresh.id, refs.take(2).toList());
+      restored.owner.approve(fresh.id, freshRefs);
       expect(
         await restored.agent.read(
           restored.agent.claim(freshSession, fresh.id).token,
-          refs.first,
+          freshRefs.first,
         ),
         'host.invalid',
       );
@@ -850,11 +871,13 @@ void main() {
         3,
         fieldId: item.fields.last.id,
       );
-      await service.owner.restoreRecycled(firstNoteDeletion.id);
+      final firstRestored = await service.owner.restoreRecycled(
+        firstNoteDeletion.id,
+      );
       final noteDeletion = await service.owner.deleteInformation(
         item.id,
         5,
-        fieldId: item.fields.last.id,
+        fieldId: firstRestored.fields.last.id,
       );
       final revokedSession = service.agent.openSession('Revoked source chat');
       final revoked = service.agent.request(revokedSession, 'read', [ref]);
@@ -973,7 +996,8 @@ void main() {
       );
       final withNote = await restored.owner.restoreRecycled(noteDeletion.id);
       expect(withNote.version, 7);
-      expect(withNote.fields.last.id, item.fields.last.id);
+      expect(withNote.fields.last.id, isNot(item.fields.last.id));
+      expect(withNote.fields.last.id, isNot(firstRestored.fields.last.id));
       expect(withNote.fields.last.version, 3);
       expect(withNote.fields.last.kind, FieldKind.textNote);
       await restored.close();

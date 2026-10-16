@@ -94,10 +94,10 @@ void main() {
       );
       await tester.tap(find.text('Fictional demo server').first);
       await tester.pumpAndSettle();
-      await tester.tap(find.byTooltip('历史'));
+      await tester.tap(find.text('修改历史 ↗'));
       await tester.pumpAndSettle();
       expect(find.textContaining('30 天'), findsWidgets);
-      await tester.tap(find.text('查看差异'));
+      await tester.tap(find.text('恢复为新版本'));
       await tester.pumpAndSettle();
       expect(find.textContaining('changed.invalid'), findsWidgets);
       expect(find.textContaining('demo.example.invalid'), findsWidgets);
