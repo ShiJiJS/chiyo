@@ -90,3 +90,11 @@ Windows 四个真实系统文件 picker 的原生证据只覆盖文件 I/O 与�
 [aux-r3 manifest](evidence/26-history-settings/aux-r3/manifest.json) 单独冻结四个受影响画面的双视口共 8 张原图、源 SHA 和 8 组同尺寸 compare，不覆盖 aux-r2 或默认 r3。制作方 `self-check.json` 对照文字锚点和实体线；这些测量仍不是独立视觉通过。定向捕获两项与 desktop analyze 通过；未重跑不受影响的完整 229、导出恢复、OS picker、系统通知或生命周期验收。原生残余维持上文结论。
 
 复现使用 `tool/capture_history_settings_aux.dart`，指定 `--dart-define=AUX_MICRO_ONLY=true --dart-define=AUX_EVIDENCE_DIRECTORY=<新目录>`。micro 模式使用临时 SQLCipher 信息/模板 fixture，只走这四个实际页面，不执行备份业务链。候选等待父任务独立定向复核及合并。
+
+## 恢复后已挂载偏好控件回归
+
+在主集成 `1741886` 上核对恢复后的设置状态疑点。`SettingsPage` 的备份分支已在成功 `onRestored` 包装中重读等待期限、保留期限并清除通知草稿，再调用根回调；因此无需新增 revision，也不在每次 build 或普通主题切换时覆盖输入。
+
+`backup_widget_test.dart` 的真实根 `InformationApp` + SQLCipher 备份恢复回归，先通过可见控件缓存目标库的 30 分钟/90 天，并将通知关闭再开启，使挂载状态保留开启草稿。源备份设置为 5 分钟/180 天/关闭通知。真实文件验证、错误密钥重试、空库恢复后关闭弹窗，界面仍在备份分区；切回记录控件实际显示 5/180，通知 Semantics 实际为关闭，并继续验证恢复数据可见。只断言 owner 值不足以覆盖这一结果。
+
+该新增回归首次即通过，源码审计疑点未复现，没有制造失败或修改产品代码。该文件 2 项通过、文件静态分析无 issue，见 `evidence/26-history-settings/restored-preference-controls.log` 和 `restored-preference-controls-analyze.log`。既有失败保留草稿与根主题测试不重复扩展；未重跑完整套件、native 或已关闭视觉。真实 Windows 生命周期与 Mac 实测残余保持原结论。
