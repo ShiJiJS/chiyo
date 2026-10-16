@@ -10,8 +10,10 @@ Current package source **`ad997289237b9666302251de3ba83d812f5f466e`**, version *
 implementation is `67d1c825672a34aae07142cf77c383df319da2fa`, followed by the
 bundled-instruction correction. This supersedes the 0.3.0 desktop-created task
 flow. Real native acceptance remains partial: the user confirmed two explicitly
-selected imports in 0.2.2; partial approval/read/revocation/restart and the new
-organization flow have not been demonstrated in the native app.
+selected imports in0.2.2 and approved a real0.3.1 CLI organization request for
+those two items. Metadata read, automatic classification and post-completion denial
+passed; result-screen feedback and content partial approval/read/revocation/restart
+remain pending. See the dated Windows acceptance record.
 
 - Agent CLI sends an organization request into the existing approval inbox.
   The user selects a fixed subset and approves metadata access plus automatic
@@ -48,8 +50,10 @@ organization flow have not been demonstrated in the native app.
 Schema12 is unchanged from0.3.0;0.2.2/schema11 still needs additive migration.
 Before upgrading real data, export a backup and save its recovery key separately
 in the current app, fully quit the old tray process, then run the new package.
-No desktop was launched/controlled, no real data/config was changed, and no
-hosted macOS job ran. See [Windows acceptance](../development/windows-acceptance.md)
+Build preparation did not launch/control the desktop, change real data/config or
+run hosted macOS jobs. The later user-approved live CLI run changed only the two
+requested items' categories/tags; no field values or user config were accessed.
+See [Windows acceptance](../development/windows-acceptance.md)
 and [review record](../development/review-agent-led-organization-2026-10-16.md).
 Issue#1 is synchronized; PR#20 stays draft and all native acceptance gates remain
 open. Earlier paragraphs below record historical snapshots.

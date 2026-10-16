@@ -28,7 +28,8 @@ ZIP 校验值见随附的同名 `.sha256` 文件。具体本地交付路径及�
 
 完整194项无窗口测试、四包分析、Windows编译、11项独立CLI/hook及SQLCipher/DPAPI诊断
 通过，桌面55项连续三轮通过。实际Flutter离屏画面已查看；原生手感及新版实际整理流程
-仍待用户打开验证，真实验收只完成旧版两条录入确认。
+打包时尚待用户打开验证。后续实际CLI整理已通过；完整原生验收仍开放，详见
+[验收记录](https://github.com/ShiJiJS/agent-info-manage/blob/integration/local-information-access/docs/development/windows-acceptance.md)。
 
 ## 使用预览包
 
