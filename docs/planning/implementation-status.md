@@ -4,46 +4,55 @@ Integration branch: `integration/local-information-access`.
 
 Source of truth: [specification #1](https://github.com/ShiJiJS/agent-info-manage/issues/1), its 18 sub-issues, and their native GitHub blocking relationships. The initial documentation baseline is `9df5f7a`. The approved ticket bodies are also preserved in `published-tickets/`.
 
-## Current preview · readable import and scoped organization · 0.3.0
+## Current preview: Agent-initiated organization and simpler records, 0.3.1
 
-Current source **`d20decb5d6883ee50fb19c1983d30b6282b14b2c`**, version **0.3.0+5**.
-This supersedes the 0.2.x preview entries below. The user has now confirmed two
-real, explicitly selected service-entry imports in 0.2.2; no full Windows or
-Codex lifecycle acceptance is implied. Read/partial approval/revocation/restart
-and the new organization flow remain pending in the native app.
+Current package source **`ad997289237b9666302251de3ba83d812f5f466e`**, version **0.3.1+6**;
+implementation is `67d1c825672a34aae07142cf77c383df319da2fa`, followed by the
+bundled-instruction correction. This supersedes the 0.3.0 desktop-created task
+flow. Real native acceptance remains partial: the user confirmed two explicitly
+selected imports in 0.2.2; partial approval/read/revocation/restart and the new
+organization flow have not been demonstrated in the native app.
 
-- Read-only import cards with separate item editing, self-reported agent/chat,
-  purpose/count/title summaries, and read-only current details after confirmation.
-- Suggested categories/tags apply atomically with confirmed imports, reuse names,
-  and do not create labels during preview. Existing unclassified entries can be
-  organized using the new explicitly assigned task.
-- User-approved metadata-only organization is scoped to fixed items and a selected
-  private session, at most30minutes; no values. Submission ends access. Whole-batch
-  version checks and confirmation apply labels/organization/revisions together.
-  Original field identities/grants remain unchanged. Schema12 is additive; tasks
-  are excluded from backups and cannot regain access after session end/restart.
-- Standards review:0 documented breaches,1 optional duplicate validation removed.
-  Spec review:1P2 terminal title-summary gap fixed. Both reviewers verified closure.
-  One unscored UI review and targeted follow-up resolved scope visibility and
-  conflict action wording. Actual synthetic Flutter renders inspected, including
-  long content,200%text,deleted,rejected,save failure and conflict.
-- Full package pipeline passed **189 headless tests** (CLI18,core76,storage40,
-  desktop55), four analyses, native Windows release and four AOT CLI builds,
-  synthetic SQLCipher4.19.0/DPAPI diagnostics and **11 extracted SDK-free CLI/hook
-  checks**. The final55 desktop tests also passed three consecutive root runs.
-- EXE:`build/windows-import-review-0.3.0/AgentInfoManage/app/info_desktop.exe`.
-- ZIP:`build/windows-import-review-0.3.0/agent-info-manage-0.3.0+5-dev.d20decb5d688-windows-x64.zip`.
-- Size:46,085,409bytes; SHA-256:`56a378dddefd3c4365f49be2e7bedca43bc2db254c5544ac9cf6e46f7eafacc7`.
-- Manifest:`build/windows-import-review-0.3.0/AgentInfoManage/manifest.json`.
-- Build log:`.scratch/import-review-2026-10-16/package.log`.
+- Agent CLI sends an organization request into the existing approval inbox.
+  The user selects a fixed subset and approves metadata access plus automatic
+  category/tag updates once. No desktop task creation or second confirmation.
+  Metadata excludes fields/values; approval lasts at most30minutes, ends on
+  completion/revocation/session end/expiry, and does not survive restart.
+- The whole approved identity/version set is checked, even if only some items
+  change. Atomic writes include labels/items/revisions/result; commit validation
+  rejects a session ending or expiring while storage is awaited. Empty results
+  complete without new item versions and remain accessible read-only.
+  Old tasks without autoApply retain their original confirmation boundary.
+- Detail editing sits by the title/description, classification is clickable,
+  history/delete use concise icons, and the repeated field-count row is removed.
+  Recycle records have read-only details and a right-aligned restore action.
+  Import/change records split source, purpose, titles, time and status across
+  levels, with right-aligned actions and no middle-dot/hyphen metadata joins.
+- Standards:0 documented breaches/confirmed bugs;1 optional duplicate polling
+  observation deliberately retained. Spec:3 initial P2 findings and1 targeted
+  follow-up gap fixed and independently verified. Unscored UI review and
+  targeted follow-ups found no remaining static mandatory issue. Actual
+  fictional Flutter renders inspected, including long text,200%text,failures,
+  conflicts and unchanged results. Native motion/focus/scroll remain unverified.
+- Final clean-source pipeline passed **194 headless tests** (CLI18,core80,
+  storage41,desktop55), four analyses, native Windows release, four AOT CLI
+  builds, synthetic SQLCipher4.19.0/DPAPI diagnostics and **11 extracted
+  SDK-free CLI/hook checks**. Final55 desktop tests also passed three consecutive
+  root runs; the later source change only synchronizes bundled documentation.
+- EXE:`build/windows-agent-led-0.3.1-final/AgentInfoManage/app/info_desktop.exe`.
+- ZIP:`build/windows-agent-led-0.3.1-final/agent-info-manage-0.3.1+6-dev.ad997289237b-windows-x64.zip`.
+- Size:46,089,027bytes; SHA-256:`a1ec120bc5ac2a9a54417447c1d9b8d24392ae4c0e585d338eb2ccd8cff6e7c4`.
+- Manifest:`build/windows-agent-led-0.3.1-final/AgentInfoManage/manifest.json`.
+- Build log:`.scratch/agent-led-organization-2026-10-16/package-final.log`.
 
-The build did not launch/control the desktop, change Codex configuration, read
-real application data or run hosted macOS jobs. Before upgrading real data, export
-a backup and save its recovery key separately in the current app; fully quit the
-old tray process, then run the new package. See [Windows acceptance](../development/windows-acceptance.md)
-and [review record](../development/review-import-organization-2026-10-16.md).
-Issue#1 contains the newly approved scope; PR#20 stays draft and all acceptance
-gates remain open. Earlier paragraphs below record historical snapshots.
+Schema12 is unchanged from0.3.0;0.2.2/schema11 still needs additive migration.
+Before upgrading real data, export a backup and save its recovery key separately
+in the current app, fully quit the old tray process, then run the new package.
+No desktop was launched/controlled, no real data/config was changed, and no
+hosted macOS job ran. See [Windows acceptance](../development/windows-acceptance.md)
+and [review record](../development/review-agent-led-organization-2026-10-16.md).
+Issue#1 is synchronized; PR#20 stays draft and all native acceptance gates remain
+open. Earlier paragraphs below record historical snapshots.
 
 ## 2026-10-16
 
