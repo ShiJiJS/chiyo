@@ -11,6 +11,7 @@
 | r5 | 200% toolbar 可见滚动条与实际末端/轮换/删除操作，发现关闭字形裁切 |
 | r6 | 200% 最终5图，关闭控件随字号扩大；操作来自实际按钮和 owner，不填假callback |
 | r7 | 独立复核定向修正后的61张原始图；manifest逐项冻结SHA-256/UTC/尺寸及源码hash，不覆盖r4/r6 |
+| r8 | 仅过期未选框色值修正：紫色双视口与黑白双视口links共4图；manifest冻结，compare仅紫色links两图 |
 | compare-r1/r2/r4 | oil --compare 的自然尺寸 Flutter PNG 对原 HTML PNG 与差异定位报告 |
 | logs | 实际 native picker 首轮失败/修正后通过；协议和工具栏红绿记录；最终集成检查另行追加 |
 
@@ -21,3 +22,5 @@
 当前 D5 的 lifecycle 证据是 fixed-version/material/generation guard，真实使用申请的 pending/approved invalidation 留给 #28；不以没有实现的许可数量或执行记录冒充验收。#31格式5前禁止导出旧格式凭据备份，真实资料交付仍待后续集成。
 
 独立复核后的定向修正：1280失败时body滚动、动作保留完整独立footer；过期 notice恢复clock、1px warning边线、粗标题及13/1.9自然高度；links恢复paper状态tag和未选过期框灰态；discovery恢复48ch帮助文字及摘要/公开名称粗体；仅秘密概要文件名/隐藏标记恢复1px字距。删除modal移除工程进度说明，保留失效及离线备份副本边界。`compare-r7` 只覆盖这8种受影响状态×两视口；200%删除确认属于同语法延伸，不假称有专属参考。
+
+独立r2复核关闭其余项后，r8只调整未选过期框的浅填充和边框色，以paper混合中性色保留主题表面。紫1440原始参考和新图同一框内区域x449–458/y547–555的72像素均为#f8f7f7；参考直边#d1d0d0，控件采用同一边框色，边缘覆盖受Flutter栅格化影响。没有改变关联业务状态、标签或布局；未重复61图与全套检查。

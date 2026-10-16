@@ -6,7 +6,7 @@ const root=path.resolve(import.meta.dirname,'../../..');
 const evidence=path.join(root,'docs/development/evidence/27-credentials');
 const round=process.argv[2]??'r1';
 const prep='C:/Project/network_config/info-manage-worktrees/round05-credential-reference-prep/cases';
-const states=process.argv[3]==='review'?['file','string','expired','rotate','discovery','links','add-file','add-string']
+const states=process.argv[3]==='links'?['links']:process.argv[3]==='review'?['file','string','expired','rotate','discovery','links','add-file','add-string']
   :process.argv[3]==='aux'?['rotate','discovery','string','expired','links','server']:['file','add-file','add-string'];
 for(const width of [1440,1280])for(const state of states){
   const name=`purple-${width}-${state}`;

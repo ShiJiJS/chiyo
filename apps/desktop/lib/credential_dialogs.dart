@@ -450,22 +450,28 @@ Future<void> manageCredentialLinks(
                                 !selected.contains(c.id)
                             ? Theme.of(context).copyWith(
                                 extensions: [
-                                  UiPalette.of(
-                                    context,
-                                  ).copyWith(muted: const Color(0xffb8b8b8)),
-                                ],
-                                checkboxTheme: Theme.of(context).checkboxTheme
-                                    .copyWith(
-                                      fillColor:
-                                          WidgetStateProperty.resolveWith(
-                                            (states) =>
-                                                states.contains(
-                                                  WidgetState.selected,
-                                                )
-                                                ? null
-                                                : const Color(0xffefefef),
-                                          ),
+                                  UiPalette.of(context).copyWith(
+                                    muted: Color.lerp(
+                                      UiPalette.of(context).paper,
+                                      const Color(0xffb8b8b8),
+                                      .65,
                                     ),
+                                  ),
+                                ],
+                                checkboxTheme: Theme.of(context).checkboxTheme.copyWith(
+                                  fillColor: WidgetStateProperty.resolveWith(
+                                    (states) =>
+                                        states.contains(WidgetState.selected)
+                                        ? null
+                                        // Native inactive control colors retain the
+                                        // surrounding paper tint in each theme.
+                                        : Color.lerp(
+                                            UiPalette.of(context).paper,
+                                            const Color(0xffefefef),
+                                            .43,
+                                          ),
+                                  ),
+                                ),
                               )
                             : Theme.of(context),
                         child: PrototypeCheck(

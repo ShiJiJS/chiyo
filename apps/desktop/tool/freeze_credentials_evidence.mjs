@@ -21,7 +21,7 @@ const sourceFiles=['apps/desktop/lib/credential_dialogs.dart','apps/desktop/lib/
 const actual=fs.readdirSync(folder).filter(f=>f.endsWith('.png')).sort().map(f=>record(path.join(folder,f)));
 const prep='C:/Project/network_config/info-manage-worktrees/round05-credential-reference-prep/cases';
 const reference=[];
-for(const state of ['file','string','expired','rotate','discovery','links','add-file','add-string'])for(const width of[1440,1280]){
+for(const state of (process.argv[3]==='links'?['links']:['file','string','expired','rotate','discovery','links','add-file','add-string']))for(const width of[1440,1280]){
   reference.push(record(path.join(prep,`credential-${state}`,`page-${width}x${width===1440?900:800}.png`)));
 }
 fs.writeFileSync(output,JSON.stringify({round,frozenAt:new Date().toISOString(),baseCommit:execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim(),

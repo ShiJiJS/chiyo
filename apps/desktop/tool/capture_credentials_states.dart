@@ -22,6 +22,7 @@ class CaptureCredentialRepository extends MemoryInformationRepository {
 }
 
 void main() {
+  const linksOnly = bool.fromEnvironment('CAPTURE_LINKS_ONLY');
   TestWidgetsFlutterBinding.ensureInitialized();
   setUpAll(() async {
     for (final name in ['ProductSans', 'AppSans']) {
@@ -80,6 +81,13 @@ void main() {
       theme: DesktopColorTheme.mono,
       scale: 1.0,
     ),
+    if (linksOnly)
+      (
+        name: 'mono-1280',
+        size: const Size(1280, 800),
+        theme: DesktopColorTheme.mono,
+        scale: 1.0,
+      ),
     (
       name: 'purple-long',
       size: const Size(1440, 900),
@@ -93,6 +101,14 @@ void main() {
       scale: 2.0,
     ),
   ]) {
+    if (linksOnly &&
+        !{
+          'purple-1440',
+          'purple-1280',
+          'mono-1440',
+          'mono-1280',
+        }.contains(scenario.name))
+      continue;
     testWidgets('credential states ${scenario.name}', (tester) async {
       debugDisableShadows = false;
       tester.view.physicalSize = scenario.size;
@@ -208,6 +224,7 @@ void main() {
       );
       await tester.pumpAndSettle();
       Future<void> capture(String suffix) async {
+        if (linksOnly && suffix != '-links') return;
         expect(tester.takeException(), isNull);
         await tester.runAsync(() async {
           final boundary = tester.renderObject<RenderRepaintBoundary>(
@@ -238,7 +255,12 @@ void main() {
       }
 
       await capture('-file');
-      if (scenario.name == 'purple-long' || scenario.scale > 1) {
+      if (linksOnly) {
+        await tap(find.text('测试服务器').last);
+        await tap(find.text('管理关联'));
+        await capture('-links');
+        await tap(find.text('取消').last);
+      } else if (scenario.name == 'purple-long' || scenario.scale > 1) {
         final scroll = tester
             .widget<SingleChildScrollView>(
               find.byKey(const ValueKey('credential-detail-scroll')),
