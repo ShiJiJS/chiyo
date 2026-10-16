@@ -32,7 +32,11 @@ class AgentServer {
           request.headers.contentType?.mimeType != 'application/json') {
         throw const AccessFailure('unauthorized');
       }
-      final limit = request.uri.path == '/import/submit' ? 262144 : 16384;
+      final limit =
+          request.uri.path == '/import/submit' ||
+              request.uri.path == '/update/submit'
+          ? 262144
+          : 16384;
       if (request.contentLength > limit) {
         throw const AccessFailure('invalid_request');
       }
@@ -75,6 +79,13 @@ class AgentServer {
     Map<String, dynamic> body,
   ) {
     switch (path) {
+      case '/update/submit':
+        return _submitUpdate(body);
+      case '/update/status':
+        return _agent.updateStatus(
+          _text(body, 'sessionSecret'),
+          _text(body, 'proposalId'),
+        );
       case '/import/submit':
         return _submitImport(body);
       case '/import/status':
@@ -181,6 +192,16 @@ class AgentServer {
         .toList();
     final id = await _agent.submitImport(session, items);
     return _agent.importStatus(session, id);
+  }
+
+  Future<Map<String, Object?>> _submitUpdate(Map<String, dynamic> body) async {
+    final raw = body['update'];
+    if (raw is! Map<String, dynamic>) {
+      throw const AccessFailure('invalid_request');
+    }
+    final session = _text(body, 'sessionSecret');
+    final id = await _agent.submitUpdate(session, UpdateInput.fromJson(raw));
+    return _agent.updateStatus(session, id);
   }
 
   String _text(Map<String, dynamic> body, String key) {

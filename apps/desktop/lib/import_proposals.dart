@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:info_core/info_core.dart';
 import 'organization.dart';
+import 'update_proposals.dart';
 
 class ImportProposalsPage extends StatefulWidget {
   const ImportProposalsPage({super.key, required this.owner});
@@ -41,7 +42,13 @@ class _ImportProposalsPageState extends State<ImportProposalsPage> {
     children: [
       const Text('Agent 提交的内容需要你确认后才会入库。公开名称、描述和字段说明会出现在公开目录；字段值需另行授权。'),
       const SizedBox(height: 16),
-      if (widget.owner.importProposals.isEmpty) const Text('暂无录入提案。'),
+      UpdateProposalsList(
+        owner: widget.owner,
+        onChanged: () => setState(() {}),
+      ),
+      if (widget.owner.importProposals.isEmpty &&
+          widget.owner.updateProposals.isEmpty)
+        const Text('暂无录入提案。'),
       for (final proposal in widget.owner.importProposals.reversed)
         Card(
           child: ListTile(
