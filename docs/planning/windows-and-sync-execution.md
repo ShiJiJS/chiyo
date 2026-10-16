@@ -24,4 +24,7 @@
 - SDK：`C:/Users/Todoki/.local/share/flutter/bin`；Dart 可执行程序位于其 `cache/dart-sdk/bin/dart.exe`。
 - WSL 发行版 `Ubuntu-24.04`，Docker 服务版本 `29.9.1` 可调用；本次仅检查环境，尚未部署同步服务。
 - 在起点源码运行 `scripts/check.ps1 -FlutterBin C:/Users/Todoki/.local/share/flutter/bin -Offline`：所有 Dart 包与 Flutter 分析/既有无窗口测试通过，退出码 0；未启动桌面，也不代表新功能通过。
-- #22 已开始独立 worktree 实现。后续逐任务源码和验收证据保存在各自 development 记录与 GitHub 评论。
+- #22 设计已完成并合入：实现 `4c2a808`、集成 `2f6ffb4`、主复验 `2e16a71`；15项状态检查主集成连续3次通过，设计原型/协议/schema及独立评审修正有记录。
+- 隔离Windows原生验收入口已合入 `e280470`；实现 worktree与主集成均实际通过 Flutter窗口、SQLCipher/DPAPI、独立CLI的部分批准/重复读取/拒绝/撤销链路。系统托盘/通知在该入口使用测试适配，未声称实测。
+- #23 已按已完成的#22解除依赖并开始独立 worktree 实现。#24–#31及服务器同步仍需继续；不能将上述设计或原基线结果视为这些功能已完成。
+- 草稿 PR #32 跟踪本集成分支；旧 PR #20 保留旧基线。逐任务源码与验收证据保存在各自 development 记录和 GitHub。
