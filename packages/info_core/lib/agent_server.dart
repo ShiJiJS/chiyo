@@ -46,7 +46,7 @@ class AgentServer {
       if (body is! Map<String, dynamic>) {
         throw const AccessFailure('invalid_request');
       }
-      result = _dispatch(request.uri.path, body);
+      result = await _dispatch(request.uri.path, body);
     } on AccessFailure catch (error) {
       result = {'status': error.status};
     } on Object {
@@ -69,7 +69,7 @@ class AgentServer {
     }
   }
 
-  Map<String, Object?> _dispatch(String path, Map<String, dynamic> body) {
+  Future<Map<String, Object?>> _dispatch(String path, Map<String, dynamic> body) async {
     switch (path) {
       case '/catalog':
         final query = body['query'] ?? '';
@@ -146,7 +146,7 @@ class AgentServer {
       case '/read':
         return {
           'status': 'ok',
-          'value': _agent.read(
+          'value': await _agent.read(
             _text(body, 'token'),
             FieldRef(_text(body, 'itemId'), _text(body, 'fieldId')),
           ),

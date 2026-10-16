@@ -32,6 +32,8 @@ class EncryptedInformationRepository implements InformationRepository {
   final _directories = <String, InformationDirectory>{};
   final _tags = <String, InformationTag>{};
   final _templates = <String, InformationTemplate>{};
+  final _history = <String, GrantHistory>{};
+  final _accesses = <String, AccessRecord>{};
   bool _closed = false;
   static final _openDirectories = <String>{};
   late final String _directory;
@@ -108,6 +110,14 @@ class EncryptedInformationRepository implements InformationRepository {
   }
 
   Future<void> _load() async {
+    for (final row in await _db.customSelect('SELECT payload FROM grant_history ORDER BY rowid').get()) {
+      final history = GrantHistory.fromJson(jsonDecode(row.read<String>('payload')) as Map<String,dynamic>);
+      _history[history.id] = history;
+    }
+    for (final row in await _db.customSelect('SELECT payload FROM access_records ORDER BY rowid').get()) {
+      final record = AccessRecord.fromJson(jsonDecode(row.read<String>('payload')) as Map<String,dynamic>);
+      _accesses[record.id] = record;
+    }
     for (final row
         in await _db
             .customSelect(
@@ -193,6 +203,49 @@ class EncryptedInformationRepository implements InformationRepository {
             .map((t) => t.read<String>('tag_id')),
       );
     }
+  }
+
+  @override
+  List<GrantHistory> get grantHistory {
+    if (_closed) throw const StorageFailure('library_closed');
+    return List.unmodifiable(_history.values);
+  }
+
+  @override
+  List<AccessRecord> get accessRecords {
+    if (_closed) throw const StorageFailure('library_closed');
+    return List.unmodifiable(_accesses.values);
+  }
+
+  @override
+  Future<void> saveGrantHistory(GrantHistory history) async {
+    if (_closed) throw const StorageFailure('library_closed');
+    try {
+      await _db.customStatement('INSERT INTO grant_history(id,approved_at,payload) VALUES(?,?,?) ON CONFLICT(id) DO UPDATE SET payload=excluded.payload',[history.id,history.approvedAt.toUtc().millisecondsSinceEpoch,jsonEncode(history.toJson())]);
+      _history[history.id] = history;
+    } on Object { throw const StorageFailure('audit_save_failed'); }
+  }
+
+  @override
+  Future<void> saveAccessRecord(AccessRecord record) async {
+    if (_closed) throw const StorageFailure('library_closed');
+    try {
+      await _db.customStatement('INSERT INTO access_records(id,recorded_at,payload) VALUES(?,?,?) ON CONFLICT(id) DO UPDATE SET payload=excluded.payload',[record.id,record.at.toUtc().millisecondsSinceEpoch,jsonEncode(record.toJson())]);
+      _accesses[record.id] = record;
+    } on Object { throw const StorageFailure('audit_save_failed'); }
+  }
+
+  @override
+  Future<void> pruneAudit(DateTime cutoff) async {
+    if (_closed) throw const StorageFailure('library_closed');
+    try {
+      await _db.transaction(() async {
+        await _db.customStatement('DELETE FROM grant_history WHERE approved_at < ?',[cutoff.toUtc().millisecondsSinceEpoch]);
+        await _db.customStatement('DELETE FROM access_records WHERE recorded_at < ?',[cutoff.toUtc().millisecondsSinceEpoch]);
+      });
+      _history.removeWhere((_,h)=>h.approvedAt.isBefore(cutoff));
+      _accesses.removeWhere((_,a)=>a.at.isBefore(cutoff));
+    } on Object { throw const StorageFailure('audit_save_failed'); }
   }
 
   @override
@@ -351,6 +404,8 @@ class EncryptedInformationRepository implements InformationRepository {
     _directories.clear();
     _tags.clear();
     _templates.clear();
+    _history.clear();
+    _accesses.clear();
     try {
       await _db.close();
     } finally {
@@ -363,12 +418,13 @@ class EncryptedInformationRepository implements InformationRepository {
 class _InformationDatabase extends GeneratedDatabase {
   _InformationDatabase(super.executor);
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 7;
   @override
   Iterable<TableInfo<Table, Object?>> get allTables => const [];
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (_) async {
+      await _createAudit();
       await _createTemplates();
       await customStatement(
         'CREATE TABLE settings(name TEXT PRIMARY KEY,value INTEGER NOT NULL)',
@@ -382,7 +438,7 @@ class _InformationDatabase extends GeneratedDatabase {
       await _organizationSchema();
     },
     onUpgrade: (_, from, to) async {
-      if (from < 1 || to != 4) throw const StorageFailure('unsupported_schema');
+      if (from < 1 || to != 7) throw const StorageFailure('unsupported_schema');
       await transaction(() async {
         if (from < 2) {
           await customStatement(
@@ -402,6 +458,7 @@ class _InformationDatabase extends GeneratedDatabase {
             'ALTER TABLE information_fields ADD COLUMN kind TEXT NOT NULL DEFAULT \'structured\'',
           );
         }
+        if (from < 7) await _createAudit();
       });
     },
     beforeOpen: (details) async {
@@ -428,4 +485,11 @@ class _InformationDatabase extends GeneratedDatabase {
   Future<void> _createTemplates() => customStatement(
     'CREATE TABLE field_templates(id TEXT PRIMARY KEY,name TEXT NOT NULL,description TEXT NOT NULL,version INTEGER NOT NULL,fields_json TEXT NOT NULL)',
   );
+
+  Future<void> _createAudit() async {
+    await customStatement('CREATE TABLE grant_history(id TEXT PRIMARY KEY,approved_at INTEGER NOT NULL,payload TEXT NOT NULL)');
+    await customStatement('CREATE TABLE access_records(id TEXT PRIMARY KEY,recorded_at INTEGER NOT NULL,payload TEXT NOT NULL)');
+    await customStatement('CREATE INDEX grant_history_retention ON grant_history(approved_at)');
+    await customStatement('CREATE INDEX access_records_retention ON access_records(recorded_at)');
+  }
 }

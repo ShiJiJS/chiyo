@@ -3,9 +3,12 @@ import 'dart:convert';
 import 'dart:math';
 import 'information.dart';
 import 'templates.dart';
+import 'history.dart';
+export 'history.dart';
 export 'information.dart';
 export 'templates.dart';
 part 'organization_access.dart';
+part 'history_access.dart';
 
 class AccessFailure implements Exception {
   const AccessFailure(this.status);
@@ -87,6 +90,7 @@ class _Request {
   final DateTime expiresAt;
   AccessRequestState state = AccessRequestState.pending;
   ClaimedGrant? grant;
+  GrantHistory? history;
 }
 
 /// In-memory authorization state over an injected information repository.
@@ -96,7 +100,9 @@ class InformationService {
     required InformationRepository repository,
     DateTime Function()? clock,
   }) : _repository = repository,
-       _clock = clock ?? DateTime.now;
+       _clock = clock ?? DateTime.now {
+    _recoverAudit();
+  }
   InformationService.fictional({DateTime Function()? clock})
     : _clock = clock ?? DateTime.now,
       _repository = MemoryInformationRepository([
@@ -143,15 +149,26 @@ class InformationService {
   late final owner = OwnerAccess._(this);
   final _grants = <String, _Request>{};
   final _sessions = <String, String>{};
+  final _sessionBindings = <String, String>{};
   final _requests = <String, _Request>{};
   final _submitted = StreamController<String>.broadcast();
   bool _closed = false;
-  void close() {
+  Future<void> _auditWrites = Future.value();
+  final _auditPending = <Future<void> Function()>[];
+  bool _auditFailed = false;
+  AuditRetentionPreview? _retentionPreview;
+  Future<void> close() {
+    if (_closed) return owner.retryAuditStorage();
     _closed = true;
+    for (final request in _requests.values) {
+      _finishHistory(request, GrantEventKind.applicationClosed);
+    }
     _sessions.clear();
+    _sessionBindings.clear();
     _requests.clear();
     _grants.clear();
     _submitted.close();
+    return owner.retryAuditStorage();
   }
 
   final _random = Random.secure();
@@ -165,7 +182,7 @@ class InformationService {
     } else if (request.state == AccessRequestState.approved &&
         !_clock().isBefore(request.grant!.expiresAt)) {
       request.state = AccessRequestState.expired;
-      _grants.remove(request.grant!.token);
+      _finishHistory(request, GrantEventKind.expired);
     }
   }
 
@@ -190,6 +207,7 @@ class AgentAccess {
     }
     final secret = _service._secret();
     _service._sessions[secret] = chatLabel;
+    _service._sessionBindings[secret] = _service._secret();
     return secret;
   }
 
@@ -259,18 +277,18 @@ class AgentAccess {
     return request.grant!;
   }
 
-  String read(String token, FieldRef field) {
+  Future<String> read(String token, FieldRef field) async {
+    if (_service._closed) throw const AccessFailure('service_unavailable');
     final request = _service._grants[token];
     if (request != null) _service._expire(request);
     final grant = request?.grant;
-    if (grant == null ||
+    final allowed = !(grant == null ||
         request!.state != AccessRequestState.approved ||
-        !grant.fields.contains(field)) {
-      throw const AccessFailure('unauthorized');
-    }
-    final value = _service._field(field);
-    if (value == null) throw const AccessFailure('unauthorized');
-    return value.value;
+        !grant.fields.contains(field));
+    final value = allowed ? _service._field(field)?.value : null;
+    await _service._recordAccess(request, field, allowed && value != null);
+    if (!allowed || value == null) throw const AccessFailure('unauthorized');
+    return value;
   }
 
   List<Map<String, Object?>> catalog() => searchCatalog().items;
@@ -559,7 +577,7 @@ class OwnerAccess {
     final request = _service._requests[requestId];
     if (request?.grant == null) throw const AccessFailure('invalid_request');
     request!.state = AccessRequestState.revoked;
-    _service._grants.remove(request.grant!.token);
+    _service._finishHistory(request, GrantEventKind.revoked);
   }
 
   void deny(String requestId) {
@@ -596,5 +614,6 @@ class OwnerAccess {
     );
     _service._grants[request.grant!.token] = request;
     request.state = AccessRequestState.approved;
+    _service._approveHistory(request);
   }
 }
