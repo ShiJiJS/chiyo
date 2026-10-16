@@ -62,7 +62,7 @@ class ApprovalsState extends State<Approvals> {
                 style: TextStyle(fontSize: 28, fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 12),
-              const Text('当前为开发版本；恢复链路尚未验收，请只录入虚构资料。关闭应用会使当前授权失效。'),
+              const Text('当前为开发版本；恢复链路尚未验收，请只录入虚构资料。完全退出应用会使当前授权失效。'),
               const SizedBox(height: 8),
               Text(
                 '本机 CLI 服务已启动 · 127.0.0.1:${widget.port}',

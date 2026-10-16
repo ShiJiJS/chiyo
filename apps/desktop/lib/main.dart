@@ -6,6 +6,7 @@ import 'package:info_core/agent_server.dart';
 import 'package:info_core/info_core.dart';
 import 'package:info_storage/info_storage.dart';
 import 'library.dart';
+import 'desktop_runtime.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -35,7 +36,16 @@ Future<void> main() async {
     repository = await EncryptedInformationRepository.open(directory, keys);
     service = InformationService(repository: repository);
     final server = await AgentServer.start(service.agent);
-    runApp(InformationApp(service: service, port: server.port));
+    final runtime = DesktopRuntime(
+      service: service,
+      platform: NativeDesktopPlatform(),
+      closeServer: server.close,
+      closeRepository: repository.close,
+    );
+    await runtime.start();
+    runApp(
+      InformationApp(service: service, port: server.port, runtime: runtime),
+    );
   } on Object {
     service?.close();
     await repository?.close();
@@ -53,10 +63,46 @@ Future<void> main() async {
   }
 }
 
-class InformationApp extends StatelessWidget {
-  const InformationApp({super.key, required this.service, required this.port});
+class InformationApp extends StatefulWidget {
+  const InformationApp({
+    super.key,
+    required this.service,
+    required this.port,
+    this.runtime,
+  });
   final InformationService service;
   final int port;
+  final DesktopRuntime? runtime;
+  @override
+  State<InformationApp> createState() => _InformationAppState();
+}
+
+class _InformationAppState extends State<InformationApp>
+    with SingleTickerProviderStateMixin {
+  late final _tabs = TabController(length: 2, vsync: this);
+  int _openRevision = 0;
+  @override
+  void initState() {
+    super.initState();
+    widget.runtime?.addListener(_runtimeChanged);
+  }
+
+  void _runtimeChanged() {
+    final runtime = widget.runtime!;
+    if (runtime.openApprovalsRevision != _openRevision) {
+      _openRevision = runtime.openApprovalsRevision;
+      _tabs.animateTo(0);
+    }
+    if (mounted) setState(() {});
+  }
+
+  @override
+  void dispose() {
+    widget.runtime?.removeListener(_runtimeChanged);
+    _tabs.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) => MaterialApp(
     title: '信息访问授权',
@@ -65,24 +111,54 @@ class InformationApp extends StatelessWidget {
       colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xff245c51)),
       useMaterial3: true,
     ),
-    home: DefaultTabController(
-      length: 2,
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('信息访问授权'),
-          bottom: const TabBar(
-            tabs: [
-              Tab(text: '访问审批'),
-              Tab(text: '我的信息'),
-            ],
-          ),
-        ),
-        body: TabBarView(
-          children: [
-            Approvals(service: service, port: port),
-            InformationLibrary(owner: service.owner),
+    home: Scaffold(
+      appBar: AppBar(
+        title: const Text('信息访问授权'),
+        actions: [
+          if (widget.runtime case final runtime?) ...[
+            TextButton(
+              onPressed: runtime.quitting ? null : runtime.enableNotifications,
+              child: const Text('启用或检查通知'),
+            ),
+            TextButton(
+              onPressed: runtime.quitting ? null : runtime.quit,
+              child: Text(runtime.quitting ? '正在退出…' : '完全退出'),
+            ),
+          ],
+        ],
+        bottom: TabBar(
+          controller: _tabs,
+          tabs: [
+            Tab(text: '访问审批'),
+            Tab(text: '我的信息'),
           ],
         ),
+      ),
+      body: Column(
+        children: [
+          if (widget.runtime case final runtime?)
+            Padding(
+              padding: const EdgeInsets.all(8),
+              child: Text(
+                '${runtime.availability.tray ? '关窗后继续运行，可从托盘或菜单栏打开审批。' : '托盘或菜单栏不可用，关闭按钮将保留窗口；可选择完全退出。'} '
+                '${switch (runtime.availability.notifications) {
+                  NotificationAvailability.enabled => '系统通知已启用，可能受系统勿扰设置影响。',
+                  NotificationAvailability.notEnabled => '系统通知尚未启用，待办仍保留在访问审批。',
+                  NotificationAvailability.denied => '系统通知已被拒绝，请在系统设置中允许后检查。',
+                  NotificationAvailability.unavailable => '系统通知暂不可用，请在访问审批中查看新申请。',
+                }}',
+              ),
+            ),
+          Expanded(
+            child: TabBarView(
+              controller: _tabs,
+              children: [
+                Approvals(service: widget.service, port: widget.port),
+                InformationLibrary(owner: widget.service.owner),
+              ],
+            ),
+          ),
+        ],
       ),
     ),
   );
