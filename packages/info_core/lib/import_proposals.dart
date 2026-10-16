@@ -86,9 +86,11 @@ class ImportProposal {
     this.agentName = '',
     this.purpose = '',
     int? fieldCount,
+    Iterable<String>? itemNames,
   }) : items = state == ImportProposalState.pending
            ? List.unmodifiable(items)
            : const [],
+       itemNames = List.unmodifiable(itemNames ?? items.map((i) => i.name)),
        itemCount = itemCount ?? items.length,
        fieldCount =
            fieldCount ?? items.fold<int>(0, (n, i) => n + i.fields.length),
@@ -108,6 +110,9 @@ class ImportProposal {
   final List<int> createdItemVersions;
   final int itemCount;
   final int fieldCount;
+
+  /// Public titles only. Terminal proposals never retain private field snapshots.
+  final List<String> itemNames;
   List<ImportReceipt> get receipts => List.unmodifiable([
     for (var i = 0; i < createdItemIds.length; i++)
       ImportReceipt(createdItemIds[i], createdItemVersions[i]),
@@ -126,6 +131,7 @@ class ImportProposal {
     'agentName': agentName,
     'purpose': purpose,
     'fieldCount': fieldCount,
+    'itemNames': itemNames,
   };
   factory ImportProposal.fromJson(Map<String, dynamic> json) => ImportProposal(
     id: json['id'] as String,
@@ -144,5 +150,6 @@ class ImportProposal {
     agentName: json['agentName'] as String? ?? '',
     purpose: json['purpose'] as String? ?? '',
     fieldCount: json['fieldCount'] as int?,
+    itemNames: (json['itemNames'] as List?)?.cast<String>(),
   );
 }

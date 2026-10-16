@@ -115,12 +115,6 @@ extension OwnerImports on OwnerAccess {
     }
     final previous = _pendingImport(id, version);
     _validateImport(reviewed);
-    for (final item in reviewed) {
-      _checkParent(item.directoryId);
-      if (item.tagIds.any((id) => !tags.any((t) => t.id == id))) {
-        throw const AccessFailure('invalid_proposal');
-      }
-    }
     final confirmedAt = _service._clock();
     final organization = _OrganizationPlan(this);
     final locations = [

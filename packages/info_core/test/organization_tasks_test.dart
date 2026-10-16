@@ -46,7 +46,22 @@ void main() {
       expect(proposal.agentName, 'Codex');
       expect(proposal.purpose, '整理指定的入口');
       expect(proposal.fieldCount, 2);
+      expect(proposal.itemNames, ['A', 'B']);
+      expect(ImportProposal.fromJson(proposal.toJson()).itemNames, ['A', 'B']);
       expect(jsonEncode(proposal.toJson()), isNot(contains('secret.invalid')));
+      final rejectedId = await service.agent.submitImport(session, [
+        ImportItemInput('Not imported', '', [
+          const FieldInput('Value', '', 'NEVER-RETAIN-REJECTED-VALUE'),
+        ]),
+      ]);
+      await service.owner.rejectImport(rejectedId, 1);
+      final rejected = service.owner.importProposals.last;
+      expect(rejected.itemNames, ['Not imported']);
+      expect(rejected.items, isEmpty);
+      expect(
+        jsonEncode(rejected.toJson()),
+        isNot(contains('NEVER-RETAIN-REJECTED-VALUE')),
+      );
     },
   );
   test(

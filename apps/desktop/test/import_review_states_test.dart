@@ -112,11 +112,45 @@ void main() {
       await tester.tap(find.text('关闭'));
       await tester.pumpAndSettle();
       await service.owner.deleteInformation(receipt.id, 2);
+      await tester.pump(const Duration(seconds: 1));
+      expect(find.text('Archived'), findsOneWidget);
       await tester.tap(find.text('查看详情'));
       await tester.pumpAndSettle();
       expect(find.text('current-private-value'), findsNothing);
       expect(find.textContaining('部分资料已删除或不可用'), findsOneWidget);
       expect(service.owner.importProposals.single.items, isEmpty);
+      await tester.pumpWidget(const SizedBox());
+      await tester.runAsync(service.close);
+    },
+  );
+  testWidgets(
+    'rejected proposals retain public title summaries but no field values',
+    (tester) async {
+      final service = InformationService(
+        repository: MemoryInformationRepository(),
+      );
+      final session = service.agent.openSession('Codex');
+      final id = await service.agent.submitImport(
+        session,
+        [
+          ImportItemInput('笔记服务入口', '', [
+            const FieldInput('地址', '', 'NEVER-RETAIN-REJECTED-VALUE'),
+          ]),
+        ],
+        agentName: 'Codex',
+        purpose: '整理指定资料',
+      );
+      await service.owner.rejectImport(id, 1);
+      await tester.pumpWidget(InformationApp(service: service, port: 0));
+      await tester.tap(find.byKey(const ValueKey('nav-2')));
+      await tester.pumpAndSettle();
+      expect(find.text('笔记服务入口'), findsOneWidget);
+      expect(find.text('NEVER-RETAIN-REJECTED-VALUE'), findsNothing);
+      await tester.tap(find.text('查看详情'));
+      await tester.pumpAndSettle();
+      expect(find.text('编辑'), findsNothing);
+      expect(find.text('NEVER-RETAIN-REJECTED-VALUE'), findsNothing);
+      expect(find.textContaining('拟录入内容已清理'), findsOneWidget);
       await tester.pumpWidget(const SizedBox());
       await tester.runAsync(service.close);
     },

@@ -39,7 +39,7 @@ class _ImportProposalsPageState extends State<ImportProposalsPage> {
   }
 
   String _names(ImportProposal proposal) {
-    final names = proposal.state == ImportProposalState.pending
+    var names = proposal.state == ImportProposalState.pending
         ? proposal.items.map((i) => i.name).toList()
         : [
             for (final id in proposal.createdItemIds)
@@ -48,6 +48,7 @@ class _ImportProposalsPageState extends State<ImportProposalsPage> {
               ))
                 item.name,
           ];
+    if (names.isEmpty) names = proposal.itemNames;
     return names.take(3).join(' · ') + (names.length > 3 ? ' 等' : '');
   }
 
@@ -103,7 +104,7 @@ class _ImportProposalsPageState extends State<ImportProposalsPage> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '聊天：${proposal.chatLabel} · ${uiTime(proposal.createdAt)}${proposal.fieldCount > 0 ? ' · ${proposal.fieldCount} 项内容' : ''}',
+                    '聊天：${proposal.chatLabel} · ${uiTime(proposal.createdAt)}${proposal.fieldCount > 0 ? ' · ${proposal.fieldCount} 个字段' : ''}',
                   ),
                   if (_names(proposal).isNotEmpty) ...[
                     const SizedBox(height: 4),
@@ -346,7 +347,11 @@ class _ReviewImportState extends State<_ReviewImport> {
             child: ListView(
               children: [
                 Text(
-                  '提交者（自述）：${widget.proposal.agentName.isEmpty ? 'Agent（名称未记录）' : widget.proposal.agentName} · ${widget.proposal.chatLabel}',
+                  '提交 Agent（自述）：${widget.proposal.agentName.isEmpty ? '名称未记录' : widget.proposal.agentName}',
+                ),
+                Text(
+                  '聊天：${widget.proposal.chatLabel}',
+                  style: Theme.of(context).textTheme.bodySmall,
                 ),
                 if (widget.proposal.purpose.isNotEmpty)
                   Padding(
@@ -495,7 +500,7 @@ class _EditImportItemState extends State<_EditImportItem> {
                     if (_items[i].original.suggestedDirectory.isNotEmpty ||
                         _items[i].original.suggestedTags.isNotEmpty ||
                         _items[i].original.suggestedTemplate.isNotEmpty)
-                      Text('Agent 建议已预选，分类与标签会随整批入库一起保存。'),
+                      Text('已预选 Agent 建议，整批确认后保存。'),
                     DesktopTextField(
                       key: ValueKey('proposal-name-$i'),
                       controller: _items[i].name,

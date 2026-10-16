@@ -175,11 +175,13 @@ class _StartOrganization extends StatefulWidget {
 class _StartOrganizationState extends State<_StartOrganization> {
   late String? _agent = widget.owner.organizationAgents.lastOrNull?.id;
   final _purpose = TextEditingController(text: '整理资料的分类与标签');
+  final _scopeScroll = ScrollController();
   bool _saving = false;
   String? _error;
   @override
   void dispose() {
     _purpose.dispose();
+    _scopeScroll.dispose();
     super.dispose();
   }
 
@@ -209,42 +211,69 @@ class _StartOrganizationState extends State<_StartOrganization> {
   Widget build(BuildContext context) => DesktopDialog(
     title: const Text('创建整理任务'),
     content: SizedBox(
-      width: 540,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text('本次范围：当前列表的 ${widget.itemIds.length} 条信息。'),
-          const SizedBox(height: 14),
-          const Text(
-            '仅提供这些信息的标题、公开说明，以及现有分类和标签名称。不会提供字段值。元数据访问最长 30 分钟，提交方案后结束；确认方案后才调整分类。',
-          ),
-          const SizedBox(height: 18),
-          if (widget.owner.organizationAgents.isEmpty)
-            const QuietNotice(
-              '还没有有效的 Agent 聊天。请先让 Agent 通过 CLI 建立会话，再回到这里创建任务。',
-            )
-          else
-            DesktopSelect<String>(
-              key: const ValueKey('organization-agent'),
-              initialValue: _agent,
-              isExpanded: true,
-              decoration: const InputDecoration(labelText: '接收任务的聊天（Agent 自述）'),
-              items: [
-                for (final a in widget.owner.organizationAgents)
-                  DropdownMenuItem(value: a.id, child: Text(a.chatLabel)),
-              ],
-              onChanged: _saving ? null : (id) => setState(() => _agent = id),
+      width: 600,
+      height: 540,
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text('本次范围：当前列表的 ${widget.itemIds.length} 条信息。'),
+            const SizedBox(height: 8),
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxHeight: 150),
+              child: Scrollbar(
+                child: ListView(
+                  shrinkWrap: true,
+                  children: [
+                    for (final id in widget.itemIds)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 3),
+                        child: Text(
+                          widget.owner.information
+                                  .where((i) => i.id == id)
+                                  .firstOrNull
+                                  ?.name ??
+                              '资料已删除',
+                        ),
+                      ),
+                  ],
+                ),
+              ),
             ),
-          DesktopTextField(
-            key: const ValueKey('organization-purpose'),
-            controller: _purpose,
-            enabled: !_saving,
-            maxLength: 2000,
-            decoration: const InputDecoration(labelText: '整理目的'),
-          ),
-          if (_error != null) QuietNotice(_error!, warning: true),
-        ],
+            const SizedBox(height: 14),
+            const Text(
+              '仅提供这些信息的标题、公开说明，以及现有分类和标签名称。不会提供字段值。元数据访问最长 30 分钟，提交方案后结束；确认方案后才调整分类。',
+            ),
+            const SizedBox(height: 18),
+            if (widget.owner.organizationAgents.isEmpty)
+              const QuietNotice(
+                '还没有有效的 Agent 聊天。请先让 Agent 通过 CLI 建立会话，再回到这里创建任务。',
+              )
+            else
+              DesktopSelect<String>(
+                key: const ValueKey('organization-agent'),
+                initialValue: _agent,
+                isExpanded: true,
+                decoration: const InputDecoration(
+                  labelText: '接收任务的聊天（Agent 自述）',
+                ),
+                items: [
+                  for (final a in widget.owner.organizationAgents)
+                    DropdownMenuItem(value: a.id, child: Text(a.chatLabel)),
+                ],
+                onChanged: _saving ? null : (id) => setState(() => _agent = id),
+              ),
+            DesktopTextField(
+              key: const ValueKey('organization-purpose'),
+              controller: _purpose,
+              enabled: !_saving,
+              maxLength: 2000,
+              decoration: const InputDecoration(labelText: '整理目的'),
+            ),
+            if (_error != null) QuietNotice(_error!, warning: true),
+          ],
+        ),
       ),
     ),
     actions: [
@@ -312,7 +341,7 @@ class _ReviewOrganizationState extends State<_ReviewOrganization> {
             child: ListView(
               children: [
                 Text(
-                  '${widget.task.chatLabel} · ${widget.task.changes.length} 条分类调整',
+                  '${widget.task.chatLabel} · ${widget.task.changes.length} 条整理建议',
                 ),
                 const QuietNotice('只调整分类与标签，不修改内容，也不会增加已有授权的范围。'),
                 for (final change in widget.task.changes)
@@ -326,29 +355,26 @@ class _ReviewOrganizationState extends State<_ReviewOrganization> {
                           : change.directoryName.isEmpty
                           ? '未分类'
                           : change.directoryName;
-                      final proposedTags = [
-                        ...change.tagIds.map(
-                          (id) =>
-                              widget.owner.tags
+                      List<String> tagNames(Iterable<String> ids) => [
+                        for (final id in ids)
+                          widget.owner.tags
                                   .where((t) => t.id == id)
                                   .firstOrNull
                                   ?.name ??
                               '已移除标签',
-                        ),
+                      ];
+                      final proposedNames = {
+                        ...tagNames(change.tagIds),
                         ...change.tagNames,
-                      ].join('、');
-                      final oldTags =
-                          item?.tagIds
-                              .map(
-                                (id) =>
-                                    widget.owner.tags
-                                        .where((t) => t.id == id)
-                                        .firstOrNull
-                                        ?.name ??
-                                    '',
-                              )
-                              .join('、') ??
-                          '';
+                      };
+                      final oldNames = tagNames(item?.tagIds ?? []).toSet();
+                      final tagsUnchanged =
+                          oldNames.length == proposedNames.length &&
+                          oldNames.every(proposedNames.contains);
+                      final folderUnchanged =
+                          _folder(item?.directoryId) == proposedFolder;
+                      final proposedTags = proposedNames.join('、');
+                      final oldTags = oldNames.join('、');
                       return FormSection(
                         title: item?.name ?? '资料已删除',
                         child: Column(
@@ -356,11 +382,21 @@ class _ReviewOrganizationState extends State<_ReviewOrganization> {
                           children: [
                             if (_pending) ...[
                               Text(
-                                '分类：${_folder(item?.directoryId)} → $proposedFolder',
+                                folderUnchanged
+                                    ? '分类：$proposedFolder（保持）'
+                                    : '分类：${_folder(item?.directoryId)} → $proposedFolder',
+                                style: folderUnchanged
+                                    ? Theme.of(context).textTheme.bodySmall
+                                    : null,
                               ),
                               const SizedBox(height: 8),
                               Text(
-                                '标签：${oldTags.isEmpty ? '无' : oldTags} → ${proposedTags.isEmpty ? '无' : proposedTags}',
+                                tagsUnchanged
+                                    ? '标签：${proposedTags.isEmpty ? '无' : proposedTags}（保持）'
+                                    : '标签：${oldTags.isEmpty ? '无' : oldTags} → ${proposedTags.isEmpty ? '无' : proposedTags}',
+                                style: tagsUnchanged
+                                    ? Theme.of(context).textTheme.bodySmall
+                                    : null,
                               ),
                             ] else ...[
                               Text('建议分类：$proposedFolder'),
@@ -385,7 +421,7 @@ class _ReviewOrganizationState extends State<_ReviewOrganization> {
     actions: [
       TextButton(
         onPressed: _busy ? null : () => Navigator.pop(context),
-        child: Text(_pending ? '暂不处理' : '关闭'),
+        child: Text(_pending && !_conflict ? '暂不处理' : '关闭'),
       ),
       if (_pending && !_conflict) ...[
         TextButton(

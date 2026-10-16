@@ -82,6 +82,10 @@ void main() {
       expect(service.owner.tags.single.name, 'Notes');
       expect(service.owner.importProposals.single.items, isEmpty);
       expect(service.owner.importProposals.single.fieldCount, 2);
+      expect(service.owner.importProposals.single.itemNames, [
+        'PENDING-PROPOSAL-MARKER-999',
+        'Second',
+      ]);
       expect(
         service.owner.information.last.fields.single.kind,
         FieldKind.textNote,

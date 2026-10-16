@@ -26,6 +26,8 @@ void main() {
       await tester.tap(find.text('创建整理任务'));
       await tester.pumpAndSettle();
       expect(find.textContaining('不会提供字段值'), findsOneWidget);
+      expect(find.text('笔记服务'), findsOneWidget);
+      expect(find.text('PRIVATE-CONTENT'), findsNothing);
       await tester.tap(find.text('创建任务'));
       await tester.pumpAndSettle();
       final task = service.owner.organizationTasks.single;
@@ -82,6 +84,55 @@ void main() {
             .onPressed,
         isNull,
       );
+      await tester.pumpWidget(const SizedBox());
+      await tester.runAsync(service.close);
+    },
+  );
+  testWidgets(
+    'conflicted organization closes the stale plan and cannot apply a partial batch',
+    (tester) async {
+      tester.view.physicalSize = const Size(1440, 1000);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final service = InformationService(
+        repository: MemoryInformationRepository(),
+      );
+      final item = await service.owner.createInformation('服务', '', [
+        const FieldInput('地址', '', 'private.invalid'),
+      ]);
+      final session = service.agent.openSession('Codex');
+      final task = await service.owner.startOrganizationTask(
+        service.owner.organizationAgents.single.id,
+        [item.id],
+      );
+      await service.agent.submitOrganization(session, task.id, [
+        OrganizationChange(
+          itemId: item.id,
+          baseVersion: 1,
+          directoryName: '服务入口',
+        ),
+      ]);
+      await service.owner.correctValue(
+        FieldRef(item.id, item.fields.single.id),
+        'changed.invalid',
+      );
+      await tester.pumpWidget(InformationApp(service: service, port: 0));
+      await tester.tap(find.byKey(const ValueKey('nav-1')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Agent 整理'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('查看整理方案'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('确认整批调整'));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('整批未应用'), findsOneWidget);
+      expect(find.text('确认整批调整'), findsNothing);
+      expect(find.text('暂不处理'), findsNothing);
+      expect(service.owner.directories, isEmpty);
+      await tester.tap(find.text('关闭'));
+      await tester.pumpAndSettle();
+      expect(find.text('资料已变化，需重新整理'), findsOneWidget);
       await tester.pumpWidget(const SizedBox());
       await tester.runAsync(service.close);
     },
