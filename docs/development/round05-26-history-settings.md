@@ -56,6 +56,8 @@ TDD 的已确认接缝为公开 `InformationService.owner` 行为、真实仓储
 
 macOS 新文件选择 handler 已实现，本机没有 macOS 实机验收，按用户指示延后。#23 系统通知气泡实际点击仍未成功验收，本票没有重跑 probe，也没有把 Shell 接受请求当作点击成功。未修改用户 OS 设置、真实资料库、个人 infos 或 Codex 配置。没有写 GitHub、push 或关闭 issue。
 
+Windows 四个真实系统文件 picker 的原生证据只覆盖文件 I/O 与备份恢复。既有 fixture 的 OS tray adapter 为 unavailable，不能据此证明真实窗口关闭后台或完全退出；#8/#26 的这项实际生命周期验收仍 OPEN，由父任务补独立隔离原生验收或继续保留未验结论。
+
 ## 候选检查与后续独立复核
 
 合入主集成 `c8d4561`，回收来源 validator 只保留 #24 的一套全局 target 唯一/计数/fieldOwner 校验。合并新增的 library backup 场景也真正另存独立密钥文件后才导出。
@@ -80,3 +82,11 @@ macOS 新文件选择 handler 已实现，本机没有 macOS 实机验收，按�
 本轮只运行受影响范围：桌面四个既有测试文件 8 项通过；补强恢复完成态断言后该文件 2 项复跑通过；定向捕获 2 个视口通过，含真实备份 I/O、恢复与 200% 设置保存断言，无 overflow；desktop analyze 与新增断言文件分析均无 issue。完整 229 项仍是上一候选检查，未把它标为本轮重新执行。详见 aux-r2 的 `widgets.log`、`restore-contrast.log`、`capture.log` 和分析日志。
 
 待独立 reviewer 定向复核这六组修正以及修改影响；本段不提前关闭辅助视觉范围。Windows 最新集成的四个真实系统 picker 联合验收由父任务执行，macOS 实机仍按用户指示延后。
+
+## 辅助矩阵 aux-r3 微项候选
+
+独立 aux-r2 已关闭恢复预览共同结构、200% 单位、完成态禁用标签、模板输入/列表及设置箭头/主要间距。此次只修该轮剩余三处：保留确认框内图标/标题/解释排布（保留已恢复的框高和真实统计，解释采用专属 modal 的 14px）；模板字段移除叉恢复 20px 与参考中心；通知 notice 收回 1px，备份行盒补 1px、notice 收回 1px。
+
+[aux-r3 manifest](evidence/26-history-settings/aux-r3/manifest.json) 单独冻结四个受影响画面的双视口共 8 张原图、源 SHA 和 8 组同尺寸 compare，不覆盖 aux-r2 或默认 r3。制作方 `self-check.json` 对照文字锚点和实体线；这些测量仍不是独立视觉通过。定向捕获两项与 desktop analyze 通过；未重跑不受影响的完整 229、导出恢复、OS picker、系统通知或生命周期验收。原生残余维持上文结论。
+
+复现使用 `tool/capture_history_settings_aux.dart`，指定 `--dart-define=AUX_MICRO_ONLY=true --dart-define=AUX_EVIDENCE_DIRECTORY=<新目录>`。micro 模式使用临时 SQLCipher 信息/模板 fixture，只走这四个实际页面，不执行备份业务链。候选等待父任务独立定向复核及合并。
