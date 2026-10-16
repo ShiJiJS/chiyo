@@ -35,6 +35,10 @@ class InformationField {
   final String id, name, description, value;
   final int version;
   final FieldKind kind;
+
+  /// Corrects the current value without changing the field's meaning or identity.
+  InformationField correctValue(String value) =>
+      InformationField(id, name, description, value, version + 1, kind: kind);
 }
 
 class InformationItem {

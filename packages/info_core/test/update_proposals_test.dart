@@ -3,6 +3,97 @@ import 'package:test/test.dart';
 
 void main() {
   test(
+    'metadata updates on zero-field items still require the current version',
+    () async {
+      final service = InformationService(
+        repository: MemoryInformationRepository(),
+      );
+      addTearDown(service.close);
+      final item = await service.owner.createInformation(
+        'Empty later',
+        'old description',
+        [const FieldInput('Only field', '', 'private')],
+      );
+      await service.owner.deleteInformation(
+        item.id,
+        1,
+        fieldId: item.fields.single.id,
+      );
+      final session = service.agent.openSession('metadata editor');
+      final first = await service.agent.submitUpdate(
+        session,
+        UpdateInput(item.id, 2, const [], description: 'new description'),
+      );
+      final stale = await service.agent.submitUpdate(
+        session,
+        UpdateInput(item.id, 2, const [], description: 'stale description'),
+      );
+      expect(service.owner.previewUpdate(first).after.fields, isEmpty);
+      await service.owner.confirmUpdate(first, 1);
+      expect(service.owner.information.single.description, 'new description');
+      expect(service.owner.information.single.version, 3);
+      await expectLater(
+        service.owner.confirmUpdate(stale, 1),
+        throwsA(
+          isA<AccessFailure>().having(
+            (e) => e.status,
+            'status',
+            'proposal_conflict',
+          ),
+        ),
+      );
+      expect(service.owner.information.single.description, 'new description');
+    },
+  );
+
+  test(
+    'last-field update removal preserves metadata and cannot revive its grant',
+    () async {
+      final service = InformationService(
+        repository: MemoryInformationRepository(),
+      );
+      addTearDown(service.close);
+      final item = await service.owner.createInformation('Server', 'public', [
+        const FieldInput('Host', '', 'private.invalid'),
+      ]);
+      final field = FieldRef(item.id, item.fields.single.id);
+      final session = service.agent.openSession('editor');
+      final request = service.agent.request(session, 'read host', [field]);
+      service.owner.approve(request.id, [field]);
+      final token = service.agent.claim(session, request.id).token;
+      final proposal = await service.agent.submitUpdate(
+        session,
+        UpdateInput(item.id, 1, [FieldChange.remove(field.fieldId)]),
+      );
+      expect(service.owner.previewUpdate(proposal).after.fields, isEmpty);
+      await service.owner.confirmUpdate(proposal, 1);
+      expect(service.owner.information.single.name, 'Server');
+      expect(service.owner.information.single.fields, isEmpty);
+      expect(service.owner.information.single.version, 2);
+      final recycled = service.owner.recycleEntries.single;
+      expect(recycled.wholeItem, isFalse);
+      await expectLater(
+        service.agent.read(token, field),
+        throwsA(isA<AccessFailure>()),
+      );
+      await service.owner.restoreRecycled(recycled.id);
+      await expectLater(
+        service.agent.read(token, field),
+        throwsA(isA<AccessFailure>()),
+      );
+      final fresh = service.agent.request(session, 'restored host', [field]);
+      service.owner.approve(fresh.id, [field]);
+      expect(
+        await service.agent.read(
+          service.agent.claim(session, fresh.id).token,
+          field,
+        ),
+        'private.invalid',
+      );
+    },
+  );
+
+  test(
     'add replace and remove preserve only the still-authorized field identities',
     () async {
       final repository = MemoryInformationRepository();

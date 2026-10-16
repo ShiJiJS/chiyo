@@ -105,6 +105,8 @@ class DesktopRuntime extends ChangeNotifier {
   bool recycleCleanupFailed = false;
   bool revisionCleanupFailed = false;
   Future<void>? _quit;
+  Future<void>? _stop;
+  bool _stopped = false;
   final _ready = Completer<void>();
 
   Future<void> start() async {
@@ -175,6 +177,7 @@ class DesktopRuntime extends ChangeNotifier {
   }
 
   Future<void> handleEvent(DesktopEvent event) async {
+    if (_stopped) return;
     if (event == DesktopEvent.quit) {
       await quit();
       return;
@@ -210,14 +213,36 @@ class DesktopRuntime extends ChangeNotifier {
   }
 
   Future<void> quit() => _quit ??= _shutdown();
-  Future<void> _shutdown() async {
+
+  /// Stops a partially started runtime as well as a running one. Failed audit
+  /// writes keep the library open and are retried using this same owner.
+  Future<void> stop() => _stop ??= _stopResources();
+  Future<void> _stopResources() async {
     quitting = true;
     _maintenanceTimer?.cancel();
+    if (!_ready.isCompleted) _ready.complete();
     notifyListeners();
     try {
       // close synchronously rejects capabilities, then waits for queued facts.
       // The database must stay open when those facts cannot yet be saved.
-      await Future.wait([service.close(), closeServer(), _maintenance]);
+      await Future.wait([
+        service.close(),
+        closeServer(),
+        _maintenance,
+        if (_requests case final requests?) requests.cancel(),
+      ]);
+      await closeRepository();
+      _stopped = true;
+    } on Object {
+      _stop = null;
+      rethrow;
+    }
+  }
+
+  Future<void> _shutdown() async {
+    try {
+      await stop();
+      await platform.terminate();
     } on Object {
       shutdownFailed = true;
       quitting = false;
@@ -230,8 +255,5 @@ class DesktopRuntime extends ChangeNotifier {
       notifyListeners();
       return;
     }
-    await _requests?.cancel();
-    await closeRepository();
-    await platform.terminate();
   }
 }

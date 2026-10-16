@@ -606,18 +606,7 @@ class OwnerAccess {
           previous.description,
           previous.version + 1,
           previous.fields
-              .map(
-                (f) => f.id == ref.fieldId
-                    ? InformationField(
-                        f.id,
-                        f.name,
-                        f.description,
-                        value,
-                        f.version + 1,
-                        kind: f.kind,
-                      )
-                    : f,
-              )
+              .map((f) => f.id == ref.fieldId ? f.correctValue(value) : f)
               .toList(),
           directoryId: previous.directoryId,
           tagIds: previous.tagIds,
