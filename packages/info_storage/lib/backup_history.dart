@@ -178,7 +178,7 @@ void _validateBackupHistory(
       final item = snapshot(j['snapshot']);
       if (item.id != itemId ||
           item.version >= version ||
-          (j['wholeItem'] == false && item.fields.length != 1))
+          (j['wholeItem'] == false && item.fields.isEmpty))
         _backupInvalid();
     } else if (j.containsKey('snapshot')) {
       _backupInvalid();
@@ -404,27 +404,7 @@ extension _CompleteBackups on InformationBackups {
     final links = tables['information_item_tags']!;
     final items = [
       for (final row in tables['information_items']!)
-        InformationItem(
-          row['id'] as String,
-          row['name'] as String,
-          row['description'] as String,
-          row['version'] as int,
-          [
-            for (final f in fields.where((f) => f['item_id'] == row['id']))
-              InformationField(
-                f['id'] as String,
-                f['name'] as String,
-                f['description'] as String,
-                f['value'] as String,
-                f['version'] as int,
-                kind: FieldKind.values.byName(f['kind'] as String),
-              ),
-          ],
-          directoryId: row['directory_id'] as String?,
-          tagIds: links
-              .where((l) => l['item_id'] == row['id'])
-              .map((l) => l['tag_id'] as String),
-        ),
+        _informationFromRows(row, fields, links),
     ];
     final directories = [
       for (final r in tables['information_directories']!)

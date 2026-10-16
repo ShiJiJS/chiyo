@@ -24,6 +24,32 @@ abstract interface class DatabaseKeyStore {
   Future<void> create(List<int> key);
 }
 
+InformationItem _informationFromRows(
+  Map<String, Object?> row,
+  Iterable<Map<String, Object?>> fields,
+  Iterable<Map<String, Object?>> links,
+) => InformationItem(
+  row['id'] as String,
+  row['name'] as String,
+  row['description'] as String,
+  row['version'] as int,
+  [
+    for (final field in fields.where((f) => f['item_id'] == row['id']))
+      InformationField(
+        field['id'] as String,
+        field['name'] as String,
+        field['description'] as String,
+        field['value'] as String,
+        field['version'] as int,
+        kind: FieldKind.values.byName(field['kind'] as String),
+      ),
+  ],
+  directoryId: row['directory_id'] as String?,
+  tagIds: links
+      .where((l) => l['item_id'] == row['id'])
+      .map((l) => l['tag_id'] as String),
+);
+
 /// A desktop-only capability. The CLI depends on info_core, never this package.
 class EncryptedInformationRepository implements InformationRepository {
   EncryptedInformationRepository._(
@@ -287,31 +313,11 @@ class EncryptedInformationRepository implements InformationRepository {
     final fields = await _db
         .customSelect('SELECT * FROM information_fields ORDER BY rowid')
         .get();
+    final fieldRows = fields.map((row) => row.data).toList();
+    final tagRows = itemTags.map((row) => row.data).toList();
     for (final item in items) {
-      final id = item.read<String>('id');
-      _items[id] = InformationItem(
-        id,
-        item.read<String>('name'),
-        item.read<String>('description'),
-        item.read<int>('version'),
-        fields
-            .where((f) => f.read<String>('item_id') == id)
-            .map(
-              (f) => InformationField(
-                f.read<String>('id'),
-                f.read<String>('name'),
-                f.read<String>('description'),
-                f.read<String>('value'),
-                f.read<int>('version'),
-                kind: FieldKind.values.byName(f.read<String>('kind')),
-              ),
-            )
-            .toList(),
-        directoryId: item.readNullable<String>('directory_id'),
-        tagIds: itemTags
-            .where((t) => t.read<String>('item_id') == id)
-            .map((t) => t.read<String>('tag_id')),
-      );
+      final decoded = _informationFromRows(item.data, fieldRows, tagRows);
+      _items[decoded.id] = decoded;
     }
   }
 

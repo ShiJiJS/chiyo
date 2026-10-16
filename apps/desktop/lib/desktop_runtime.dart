@@ -177,7 +177,16 @@ class DesktopRuntime extends ChangeNotifier {
   }
 
   Future<void> handleEvent(DesktopEvent event) async {
-    if (_stopped) return;
+    if (_stopped) {
+      // Native close interception can outlive failed-startup cleanup. This
+      // runtime no longer owns data, but must keep the error window closable.
+      if (event == DesktopEvent.closeWindow || event == DesktopEvent.quit) {
+        await platform.terminate();
+      } else if (event == DesktopEvent.openApprovals) {
+        await platform.showWindow();
+      }
+      return;
+    }
     if (event == DesktopEvent.quit) {
       await quit();
       return;
