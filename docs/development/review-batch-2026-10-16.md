@@ -79,8 +79,31 @@ Two further P2 gaps were confirmed:
   authorization-duration checks must remain, but unsupported chronology
   assumptions cannot reject valid core states.
 
-The same isolated implementer is addressing these gaps. No additional
-implementer was used for review corrections. Combined totals so far: Standards
-0 documented breaches, 2 judgment observations; Spec 5 confirmed defects
-(1 P1, 4 P2). The outstanding time-fact and clock-rollback corrections and final
-delivery review are pending.
+The same isolated implementer corrected these gaps, integrated at `ff91943`.
+No additional implementer was used for review corrections. Combined totals:
+Standards 0 documented breaches, 2 judgment observations addressed; Spec 5
+confirmed defects fixed (1 P1, 4 P2).
+
+## Final correction and delivery review
+
+Both reviewers inspected the fixed increment `2fc45f9...e9e2724`, including
+schema 11, backup format 3 with legacy readers, startup cleanup and the #18
+Windows delivery scripts. Standards reported 0 remaining breaches or new
+judgment findings. Spec confirmed all five corrections and reported 0 new
+actionable findings or scope expansion. The spec reviewer reran 13 actual
+SQLCipher time/complete-backup tests and 12 headless startup/runtime tests;
+all passed. Real-platform acceptance remains open.
+
+The final package run then exposed a developer-harness failure: after PATH
+restriction, Flutter's `dart.bat` wrapper could not find Git to determine the
+engine version. The desktop release, AOT executables and relocated encrypted
+diagnostic had already passed. The same correction implementer changed the
+builder to use the specified SDK's actual `dart.exe` and made the extracted
+harness reject wrappers before extraction. All 11 extracted CLI/hook tests,
+SQLCipher/DPAPI diagnostics, wrapper rejection and PowerShell parsing passed.
+Both axes reviewed the pinned delta `e9e2724...6c96756` and found 0 issues.
+The fix was integrated at `cffc549`; the SDK-free consumer PATH and all
+authorization boundaries are unchanged. The exact-commit `cffc549` rebuild
+subsequently passed all 159 headless tests, Windows release/AOT compilation,
+11 extracted CLI/hook tests and actual SQLCipher/DPAPI diagnostics. Package
+identity and SHA-256 are recorded in the [implementation status](../planning/implementation-status.md).

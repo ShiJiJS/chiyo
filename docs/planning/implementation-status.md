@@ -82,6 +82,51 @@ The Windows native release at `584047d` also compiled successfully in the detach
 
 Final spec fact checks also identified missing item creation/modification timestamps and backup validation that rejects valid wall-clock rollback history. The same review implementer is adding preserved/unknown legacy time facts and correcting chronology assumptions. #18 has started from the implemented Windows contracts to prepare a reproducible unsigned ZIP, SDK-free CLI and final-path Codex materials; it does not install or trust user hooks or claim clean-machine/desktop acceptance. Its extracted-package tests caught and corrected a missing native-assets bundle in the SQLCipher diagnostic, which now runs from its relocated bin/lib layout. Final combined checks and the concrete user test package are still pending.
 
+## Windows preview: final automatic verification
+
+The Windows-first source at **`cffc549744fc467ba81f3e8ddb92e4ee6eb7d008`**
+passed the complete package pipeline on 2026-10-16. All four package analyses
+were clean and **159 headless tests** passed: CLI 17, core 71, storage 37,
+Flutter widgets 34. The native Windows release and four independent AOT CLI
+executables compiled successfully. After checksum verification and extraction
+to a path containing Chinese characters and spaces, **11 CLI/hook subprocess
+tests** passed with SDK/Git removed from the child PATH. The relocated console
+diagnostic actually loaded SQLCipher 4.19.0 community and verified current-user
+DPAPI, encrypted reopen, old-token invalidation, plaintext-marker absence and
+schema migration. No desktop executable was launched or Codex configuration
+installed/trusted. This verifies a development package on this Windows host,
+not a clean-machine, real desktop or Codex acceptance result.
+
+Local delivery (ignored build output, not committed binaries):
+
+- ZIP: `build/windows-preview-cffc549/agent-info-manage-0.1.0+1-dev.cffc549744fc-windows-x64.zip`.
+- SHA-256: `604d5144d335c606435a56d8cbadc1176bfa340833812fcd551cdb13ef1261d7`;
+  the adjacent `.zip.sha256` file contains the same value.
+- Already expanded application: `build/windows-preview-cffc549/AgentInfoManage/app/info_desktop.exe`;
+  keep the complete adjacent DLL/data directories. Source identity and every
+  payload file hash are in `AgentInfoManage/manifest.json`.
+- Build log: `.scratch/windows-package-cffc549.log`. Rebuild instructions and
+  runtime prerequisites: [Windows delivery](../development/windows-delivery.md).
+
+#17's complete supported backup implementation is integrated, including
+schema 11 item time facts, format 3 with 1/2 compatibility, grouped recycle,
+clock rollback and runtime permission invalidation. #18's unsigned x64 preview
+and SDK-free Codex material generator are ready for coordinated validation.
+The final [two-axis review](../development/review-batch-2026-10-16.md) reports
+all 5 spec defects and both judgment observations corrected, with no new
+findings in the correction/delivery or final harness reviews. A failed first
+package check exposed the developer-side Flutter wrapper's Git dependency;
+`cffc549` fixes it without adding SDK requirements to consumers.
+
+Next: the user fully exits any older demonstration, starts the application
+from the delivery directory above using fictional information, and verifies
+create/correct/restart before jointly exercising desktop approval with CLI.
+Continue the [Windows acceptance table](../development/windows-acceptance.md)
+for tray, notifications, native file dialogs, real Codex, clean environment
+and upgrade. #17's actual two-platform exchange and #19's macOS delivery are
+deferred to the user's own Mac. No hosted Mac job was run. All Issues remain
+open and PR #20 remains draft until their required acceptance is complete.
+
 ## Completion rules
 
 The user has asked that further development not manipulate their visible desktop. Run headless tests and compile builds; leave native window interaction and user-visible Codex configuration checks for coordinated user validation. Do not launch the desktop application or native GUI tests without renewed agreement.
