@@ -1,3 +1,4 @@
+import 'ui.dart';
 import 'package:flutter/material.dart';
 import 'package:info_core/info_core.dart';
 
@@ -68,7 +69,7 @@ class _DeleteInformationState extends State<_DeleteInformation> {
   }
 
   @override
-  Widget build(BuildContext context) => AlertDialog(
+  Widget build(BuildContext context) => DesktopDialog(
     title: Text(widget.fieldId == null ? '删除整条信息' : '删除选定字段'),
     content: SizedBox(
       width: 600,
@@ -141,7 +142,7 @@ class _RecyclePageState extends State<RecyclePage> {
   Future<void> _restore(RecycleEntry entry) async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (context) => DesktopDialog(
         title: const Text('恢复信息'),
         content: const Text('恢复资料后，Agent 需要重新批准才能读取恢复的字段，旧授权不会复活。'),
         actions: [
@@ -244,7 +245,7 @@ class DeleteProposalsList extends StatelessWidget {
                         if (context.mounted) {
                           await showDialog<void>(
                             context: context,
-                            builder: (context) => AlertDialog(
+                            builder: (context) => DesktopDialog(
                               title: const Text('删除目标已变化'),
                               content: const Text(
                                 '未删除任何资料。请拒绝此提案，让 Agent 根据当前目录重新提交。',

@@ -1,3 +1,4 @@
+import 'ui.dart';
 import 'package:flutter/material.dart';
 import 'package:info_core/info_core.dart';
 import 'organization.dart';
@@ -162,7 +163,7 @@ class _RestoreRevisionState extends State<_RestoreRevision> {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+        Text(title, style: const TextStyle(fontWeight: FontWeight.w500)),
         SelectableText('当前：$before'),
         SelectableText('恢复后：$after'),
       ],
@@ -176,7 +177,7 @@ class _RestoreRevisionState extends State<_RestoreRevision> {
   @override
   Widget build(BuildContext context) {
     final p = widget.preview;
-    return AlertDialog(
+    return DesktopDialog(
       title: Text('恢复版本 ${p.revision.item.version} 的内容'),
       content: SizedBox(
         width: 650,

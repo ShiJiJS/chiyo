@@ -53,7 +53,7 @@ class ApprovalsState extends State<Approvals> {
   Future<void> _settings() => showDialog<void>(
     context: context,
     builder: (context) => StatefulBuilder(
-      builder: (context, update) => AlertDialog(
+      builder: (context, update) => DesktopDialog(
         title: const Text('请求设置'),
         content: SizedBox(
           width: 360,
@@ -63,7 +63,7 @@ class ApprovalsState extends State<Approvals> {
             children: [
               const Text('待审批有效期'),
               const SizedBox(height: 12),
-              DropdownButton<int>(
+              DesktopSelect<int>(
                 key: const ValueKey('request-lifetime'),
                 value: widget.service.owner.requestLifetime.inMinutes,
                 isExpanded: true,
@@ -187,7 +187,7 @@ class ApprovalsState extends State<Approvals> {
                                   18,
                                   0,
                                 ),
-                                child: DropdownButton<String>(
+                                child: DesktopSelect<String>(
                                   isExpanded: true,
                                   value: _focused,
                                   items: requests
@@ -307,8 +307,8 @@ class ApprovalsState extends State<Approvals> {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
-                    color: selected ? UiColors.green : UiColors.ink,
+                    fontWeight: FontWeight.w400,
+                    color: UiColors.ink,
                   ),
                 ),
                 const SizedBox(height: 7),
@@ -324,7 +324,7 @@ class ApprovalsState extends State<Approvals> {
                     Expanded(
                       child: StatusLabel(
                         _state(request.state),
-                        active: request.state == AccessRequestState.pending,
+                        active: request.state == AccessRequestState.approved,
                       ),
                     ),
                     Text(
@@ -503,7 +503,7 @@ class ApprovalsState extends State<Approvals> {
                             '最终选择（${selected.length} 个字段）：${selected.isEmpty ? '尚未选择字段' : selected.map(_fieldLabel).join('、')}',
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(fontWeight: FontWeight.w500),
+                            style: const TextStyle(fontWeight: FontWeight.w400),
                           ),
                         ),
                       ],
@@ -516,7 +516,7 @@ class ApprovalsState extends State<Approvals> {
                         final stacked = constraints.maxWidth < 520 * textScale;
                         final lifetime = SizedBox(
                           width: stacked ? double.infinity : 210 * textScale,
-                          child: TextFormField(
+                          child: DesktopTextFormField(
                             key: ValueKey('grant-lifetime-$id'),
                             initialValue: '$minutes',
                             keyboardType: TextInputType.number,
@@ -618,17 +618,20 @@ class ApprovalsState extends State<Approvals> {
     margin: const EdgeInsets.symmetric(vertical: 3),
     decoration: BoxDecoration(
       color: selected.contains(field)
-          ? const Color(0xfff0f6f2)
-          : const Color(0xfffafbfa),
+          ? const Color(0xfff1f5f3)
+          : const Color(0xfffafafa),
       borderRadius: BorderRadius.circular(6),
     ),
     child: Material(
       type: MaterialType.transparency,
       child: CheckboxListTile(
         key: ValueKey('field-${field.fieldId}'),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
+        dense: true,
+        visualDensity: VisualDensity.compact,
+        minTileHeight: 38,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 1),
         controlAffinity: ListTileControlAffinity.leading,
-        title: Text(_fieldLabel(field), style: const TextStyle(fontSize: 14)),
+        title: Text(_fieldLabel(field)),
         subtitle: !available.contains(field)
             ? const Text(
                 '字段已不可用，请取消选择或改选其他字段',

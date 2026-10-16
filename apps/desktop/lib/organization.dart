@@ -1,3 +1,4 @@
+import 'ui.dart';
 import 'package:flutter/material.dart';
 import 'package:info_core/info_core.dart';
 
@@ -39,7 +40,7 @@ class _OrganizationManagerState extends State<_OrganizationManager> {
     await showDialog<void>(
       context: context,
       builder: (context) => StatefulBuilder(
-        builder: (context, setDialogState) => AlertDialog(
+        builder: (context, setDialogState) => DesktopDialog(
           title: Text(
             isTag
                 ? (tag == null ? '新建标签' : '编辑标签')
@@ -50,7 +51,7 @@ class _OrganizationManagerState extends State<_OrganizationManager> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                TextFormField(
+                DesktopTextFormField(
                   key: const ValueKey('organization-name'),
                   initialValue: name,
                   onChanged: (value) => name = value,
@@ -58,7 +59,7 @@ class _OrganizationManagerState extends State<_OrganizationManager> {
                   decoration: const InputDecoration(labelText: '名称（仅用于本人整理）'),
                 ),
                 if (!isTag)
-                  DropdownButtonFormField<String>(
+                  DesktopSelect<String>(
                     key: const ValueKey('organization-parent'),
                     initialValue: parentId,
                     isExpanded: true,
@@ -137,7 +138,7 @@ class _OrganizationManagerState extends State<_OrganizationManager> {
   }
 
   @override
-  Widget build(BuildContext context) => AlertDialog(
+  Widget build(BuildContext context) => DesktopDialog(
     title: const Text('目录与标签'),
     content: SizedBox(
       width: 650,
@@ -198,7 +199,7 @@ Future<void> organizeItem(
   await showDialog<void>(
     context: context,
     builder: (context) => StatefulBuilder(
-      builder: (context, setDialogState) => AlertDialog(
+      builder: (context, setDialogState) => DesktopDialog(
         title: const Text('整理位置和标签'),
         content: SizedBox(
           width: 550,
@@ -207,7 +208,7 @@ Future<void> organizeItem(
               mainAxisSize: MainAxisSize.min,
               children: [
                 const Text('移动和标签变化不改变既有授权范围。目录批量选择只包含批准当时的字段。'),
-                DropdownButtonFormField<String>(
+                DesktopSelect<String>(
                   key: const ValueKey('item-directory'),
                   initialValue: directoryId,
                   isExpanded: true,
@@ -344,7 +345,7 @@ class _CatalogEditorState extends State<_CatalogEditor> {
   }
 
   @override
-  Widget build(BuildContext context) => AlertDialog(
+  Widget build(BuildContext context) => DesktopDialog(
     title: const Text('编辑公开说明'),
     content: SizedBox(
       width: 600,
@@ -355,20 +356,20 @@ class _CatalogEditorState extends State<_CatalogEditor> {
             const Text(
               '保存后 Agent 无需内容授权即可看到以下文字，请检查是否适合公开。字段名称表示固定含义；若含义改变，请新建信息并重新申请授权。',
             ),
-            TextField(
+            DesktopTextField(
               key: const ValueKey('catalog-name'),
               controller: _name,
               maxLength: 200,
               decoration: const InputDecoration(labelText: '信息名称（公开）'),
             ),
-            TextField(
+            DesktopTextField(
               key: const ValueKey('catalog-description'),
               controller: _description,
               maxLength: 2000,
               decoration: const InputDecoration(labelText: '公开描述'),
             ),
             for (final field in widget.item.fields)
-              TextField(
+              DesktopTextField(
                 key: ValueKey('catalog-field-${field.id}'),
                 controller: _fields[field.id],
                 maxLength: 2000,

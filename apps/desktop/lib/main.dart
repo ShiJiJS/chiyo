@@ -2,6 +2,7 @@ import 'approvals.dart';
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:info_core/info_core.dart';
 import 'package:info_storage/info_storage.dart';
@@ -16,6 +17,11 @@ import 'ui.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  LicenseRegistry.addLicense(() async* {
+    yield LicenseEntryWithLineBreaks([
+      'Noto Sans SC',
+    ], await rootBundle.loadString('assets/fonts/OFL.txt'));
+  });
   runApp(
     DesktopLauncher(
       bootstrap: DesktopBootstrap(

@@ -84,7 +84,10 @@ void main() {
       await tester.tap(find.byKey(ValueKey('request-${first.id}')));
       await tester.pumpAndSettle();
       final input = tester.widget<TextFormField>(
-        find.byKey(ValueKey('grant-lifetime-${first.id}')),
+        find.descendant(
+          of: find.byKey(ValueKey('grant-lifetime-${first.id}')),
+          matching: find.byType(TextFormField),
+        ),
       );
       expect(input.initialValue, '15');
       expect(

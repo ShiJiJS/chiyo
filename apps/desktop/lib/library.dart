@@ -76,7 +76,7 @@ class _InformationLibraryState extends State<InformationLibrary> {
     var editedValue = field.value;
     final value = await showDialog<String>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (context) => DesktopDialog(
         title: Text('修正 ${field.name}'),
         content: SizedBox(
           width: 500,
@@ -84,7 +84,7 @@ class _InformationLibraryState extends State<InformationLibrary> {
             mainAxisSize: MainAxisSize.min,
             children: [
               const Text('仅修正同一含义的值，已有授权会读取新值。若内容含义改变，请新建信息；新信息需要另行授权。'),
-              TextFormField(
+              DesktopTextFormField(
                 initialValue: field.value,
                 onChanged: (value) => editedValue = value,
                 minLines: 2,
@@ -130,7 +130,7 @@ class _InformationLibraryState extends State<InformationLibrary> {
           PageHeading(
             '资料库',
             subtitle:
-          '${widget.owner.information.length} 条信息 · 字段值按授权范围提供给 Agent',
+                '${widget.owner.information.length} 条信息 · 字段值按授权范围提供给 Agent',
             actions: [
               TextButton(
                 onPressed: () async {
@@ -177,7 +177,7 @@ class _InformationLibraryState extends State<InformationLibrary> {
                   runSpacing: 8,
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
-                    DropdownButton<String>(
+                    DesktopSelect<String>(
                       key: const ValueKey('browse-directory'),
                       value: _directoryFilter,
                       hint: const Text('全部目录'),
@@ -197,7 +197,7 @@ class _InformationLibraryState extends State<InformationLibrary> {
                       onChanged: (value) =>
                           setState(() => _directoryFilter = value),
                     ),
-                    DropdownButton<String>(
+                    DesktopSelect<String>(
                       key: const ValueKey('browse-tag'),
                       value: _tagFilter,
                       hint: const Text('全部标签'),
@@ -458,7 +458,7 @@ class _CreateInformationState extends State<_CreateInformation> {
   }
 
   @override
-  Widget build(BuildContext context) => AlertDialog(
+  Widget build(BuildContext context) => DesktopDialog(
     title: const Text('新建信息'),
     content: SizedBox(
       width: 600,
@@ -466,31 +466,31 @@ class _CreateInformationState extends State<_CreateInformation> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TextField(
+            DesktopTextField(
               key: const ValueKey('item-name'),
               controller: _name,
               maxLength: 200,
               decoration: const InputDecoration(labelText: '信息名称（公开）'),
             ),
-            TextField(
+            DesktopTextField(
               controller: _description,
               maxLength: 2000,
               decoration: const InputDecoration(labelText: '公开描述'),
             ),
             for (var i = 0; i < _fields.length; i++) ...[
               const Divider(),
-              TextField(
+              DesktopTextField(
                 key: ValueKey('field-name-$i'),
                 controller: _fields[i].name,
                 maxLength: 200,
                 decoration: const InputDecoration(labelText: '字段名称（公开）'),
               ),
-              TextField(
+              DesktopTextField(
                 controller: _fields[i].description,
                 maxLength: 2000,
                 decoration: const InputDecoration(labelText: '字段说明（公开）'),
               ),
-              TextField(
+              DesktopTextField(
                 key: ValueKey('field-value-$i'),
                 controller: _fields[i].value,
                 minLines: 1,
@@ -499,11 +499,15 @@ class _CreateInformationState extends State<_CreateInformation> {
                 decoration: const InputDecoration(labelText: '字段值或文本说明（需要授权）'),
               ),
             ],
-            TextButton(
-              onPressed: _saving || _fields.length >= 200
-                  ? null
-                  : () => setState(() => _fields.add(_FieldControllers())),
-              child: const Text('添加字段'),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                onPressed: _saving || _fields.length >= 200
+                    ? null
+                    : () => setState(() => _fields.add(_FieldControllers())),
+                icon: const Icon(Icons.add, size: 16),
+                label: const Text('添加字段'),
+              ),
             ),
             if (_error != null)
               Text(

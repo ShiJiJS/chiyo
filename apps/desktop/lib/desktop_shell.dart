@@ -78,25 +78,25 @@ class _DesktopShellState extends State<DesktopShell> {
                     Padding(
                       padding: EdgeInsets.fromLTRB(
                         compact ? 20 : 18,
-                        24,
+                        22,
                         12,
-                        30,
+                        22,
                       ),
                       child: Row(
                         children: [
                           const Icon(
                             Icons.layers_outlined,
-                            size: 23,
+                            size: 20,
                             color: UiColors.green,
                           ),
                           if (!compact) ...[
-                            const SizedBox(width: 10),
+                            const SizedBox(width: 9),
                             const Expanded(
                               child: Text(
                                 '信息授权',
                                 style: TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 14,
+                                  fontWeight: FontWeight.w400,
+                                  fontSize: 13,
                                 ),
                               ),
                             ),
@@ -158,13 +158,11 @@ class _DesktopShellState extends State<DesktopShell> {
                             ? Icon(
                                 stopped ? Icons.link_off : Icons.circle,
                                 size: 12,
-                                color: stopped
-                                    ? UiColors.muted
-                                    : UiColors.green,
+                                color: UiColors.muted,
                               )
                             : StatusLabel(
                                 stopped ? '服务已停止' : '服务已启动',
-                                active: !stopped,
+                                active: false,
                               ),
                       ),
                     ),
@@ -261,14 +259,14 @@ class _DesktopShellState extends State<DesktopShell> {
               child: Padding(
                 padding: EdgeInsets.symmetric(
                   horizontal: compact ? 12 : 11,
-                  vertical: 13,
+                  vertical: 8,
                 ),
                 child: Row(
                   children: [
                     Icon(
                       icon,
-                      size: 19,
-                      color: selected ? UiColors.green : UiColors.muted,
+                      size: 17,
+                      color: selected ? UiColors.ink : UiColors.muted,
                     ),
                     if (!compact) ...[
                       const SizedBox(width: 11),
@@ -276,10 +274,8 @@ class _DesktopShellState extends State<DesktopShell> {
                         child: Text(
                           label,
                           style: TextStyle(
-                            color: selected ? UiColors.green : UiColors.ink,
-                            fontWeight: selected
-                                ? FontWeight.w600
-                                : FontWeight.w400,
+                            color: UiColors.ink,
+                            fontWeight: FontWeight.w400,
                           ),
                         ),
                       ),
@@ -287,8 +283,8 @@ class _DesktopShellState extends State<DesktopShell> {
                         Text(
                           '$count',
                           style: const TextStyle(
-                            color: UiColors.green,
-                            fontWeight: FontWeight.w600,
+                            color: UiColors.muted,
+                            fontWeight: FontWeight.w400,
                           ),
                         ),
                     ],

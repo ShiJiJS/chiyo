@@ -16,6 +16,7 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
     let windowFrame = self.frame
     self.contentViewController = flutterViewController
     self.setFrame(windowFrame, display: true)
+    self.title = "信息授权"
 
     RegisterGeneratedPlugins(registry: flutterViewController)
 

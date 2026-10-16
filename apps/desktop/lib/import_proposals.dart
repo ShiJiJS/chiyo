@@ -182,7 +182,7 @@ class _ReviewImportState extends State<_ReviewImport> {
   }
 
   @override
-  Widget build(BuildContext context) => AlertDialog(
+  Widget build(BuildContext context) => DesktopDialog(
     title: Text('确认 ${_items.length} 条新增信息'),
     content: SizedBox(
       width: 760,
@@ -201,21 +201,21 @@ class _ReviewImportState extends State<_ReviewImport> {
                 Text(
                   'Agent 建议：目录 ${_items[i].original.suggestedDirectory}；标签 ${_items[i].original.suggestedTags.join('、')}；模板 ${_items[i].original.suggestedTemplate}（仅作参考，不自动创建或套用）',
                 ),
-              TextField(
+              DesktopTextField(
                 key: ValueKey('proposal-name-$i'),
                 controller: _items[i].name,
                 enabled: !_saving,
                 maxLength: 200,
                 decoration: const InputDecoration(labelText: '信息名称（公开）'),
               ),
-              TextField(
+              DesktopTextField(
                 key: ValueKey('proposal-description-$i'),
                 controller: _items[i].description,
                 enabled: !_saving,
                 maxLength: 2000,
                 decoration: const InputDecoration(labelText: '公开描述'),
               ),
-              DropdownButtonFormField<String>(
+              DesktopSelect<String>(
                 key: ValueKey('proposal-directory-$i'),
                 initialValue:
                     widget.owner.directories.any(
@@ -262,21 +262,21 @@ class _ReviewImportState extends State<_ReviewImport> {
                 ],
               ),
               for (var f = 0; f < _items[i].fields.length; f++) ...[
-                TextField(
+                DesktopTextField(
                   key: ValueKey('proposal-field-name-$i-$f'),
                   controller: _items[i].fields[f].name,
                   enabled: !_saving,
                   maxLength: 200,
                   decoration: const InputDecoration(labelText: '字段名称（公开）'),
                 ),
-                TextField(
+                DesktopTextField(
                   key: ValueKey('proposal-field-description-$i-$f'),
                   controller: _items[i].fields[f].description,
                   enabled: !_saving,
                   maxLength: 2000,
                   decoration: const InputDecoration(labelText: '字段说明（公开）'),
                 ),
-                DropdownButtonFormField<FieldKind>(
+                DesktopSelect<FieldKind>(
                   initialValue: _items[i].fields[f].kind,
                   decoration: const InputDecoration(labelText: '字段类型'),
                   items: const [
@@ -294,7 +294,7 @@ class _ReviewImportState extends State<_ReviewImport> {
                       : (kind) =>
                             setState(() => _items[i].fields[f].kind = kind!),
                 ),
-                TextField(
+                DesktopTextField(
                   key: ValueKey('proposal-value-$i-$f'),
                   controller: _items[i].fields[f].value,
                   enabled: !_saving,

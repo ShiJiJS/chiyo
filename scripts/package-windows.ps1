@@ -102,6 +102,7 @@ try {
     Copy-Item -LiteralPath (Join-Path $flutterRoot 'bin/cache/LICENSE.dart_sdk_archive.md') -Destination (Join-Path $notices 'Dart-THIRD-PARTY-NOTICES.md')
     Copy-Item -LiteralPath (Join-Path $flutterRoot 'bin/cache/artifacts/engine/windows-x64-release/license.windows_flutter.md') -Destination (Join-Path $notices 'Flutter-engine-NOTICES.md')
     Copy-Item -LiteralPath 'third_party/SQLCipher-LICENSE.md' -Destination $notices
+    Copy-Item -LiteralPath 'apps/desktop/assets/fonts/OFL.txt' -Destination (Join-Path $notices 'NotoSansSC-OFL.txt')
     $packages = @{}
     foreach ($package in @('packages/info_cli', 'packages/info_core', 'packages/info_storage', 'apps/desktop')) {
         $configPath = [IO.Path]::GetFullPath((Join-Path $package '.dart_tool/package_config.json'))

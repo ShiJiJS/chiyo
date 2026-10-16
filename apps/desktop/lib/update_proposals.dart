@@ -1,3 +1,4 @@
+import 'ui.dart';
 import 'package:flutter/material.dart';
 import 'package:info_core/info_core.dart';
 
@@ -107,7 +108,7 @@ class _ReviewUpdateState extends State<_ReviewUpdate> {
   Widget _snapshot(String title, InformationItem item) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+      Text(title, style: const TextStyle(fontWeight: FontWeight.w500)),
       SelectableText('信息名称（公开）：${item.name}\n公开描述：${item.description}'),
       for (final f in item.fields)
         Padding(
@@ -119,7 +120,7 @@ class _ReviewUpdateState extends State<_ReviewUpdate> {
     ],
   );
   @override
-  Widget build(BuildContext context) => AlertDialog(
+  Widget build(BuildContext context) => DesktopDialog(
     title: const Text('确认修改差异'),
     content: SizedBox(
       width: 900,

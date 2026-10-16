@@ -1,3 +1,4 @@
+import 'ui.dart';
 import 'package:flutter/material.dart';
 import 'package:info_core/info_core.dart';
 
@@ -178,7 +179,7 @@ class _TemplateEditorState extends State<_TemplateEditor> {
   }
 
   @override
-  Widget build(BuildContext context) => AlertDialog(
+  Widget build(BuildContext context) => DesktopDialog(
     title: Text(widget.template == null ? '新建模板' : '修改模板'),
     content: SizedBox(
       width: 600,
@@ -187,13 +188,13 @@ class _TemplateEditorState extends State<_TemplateEditor> {
           mainAxisSize: MainAxisSize.min,
           children: [
             const Text('保存模板不会修改已有信息或授权。修改字段含义或类型会生成新的字段定义；已有信息保留原值。'),
-            TextField(
+            DesktopTextField(
               key: const ValueKey('template-name'),
               controller: _name,
               maxLength: 200,
               decoration: const InputDecoration(labelText: '模板名称'),
             ),
-            TextField(
+            DesktopTextField(
               controller: _description,
               maxLength: 2000,
               decoration: const InputDecoration(labelText: '模板说明'),
@@ -205,18 +206,18 @@ class _TemplateEditorState extends State<_TemplateEditor> {
                 child: Column(
                   children: [
                     const Divider(),
-                    TextField(
+                    DesktopTextField(
                       key: ValueKey('template-field-name-$i'),
                       controller: _fields[i].name,
                       maxLength: 200,
                       decoration: const InputDecoration(labelText: '字段名称（公开）'),
                     ),
-                    TextField(
+                    DesktopTextField(
                       controller: _fields[i].description,
                       maxLength: 2000,
                       decoration: const InputDecoration(labelText: '字段说明（公开）'),
                     ),
-                    DropdownButtonFormField<FieldKind>(
+                    DesktopSelect<FieldKind>(
                       initialValue: _fields[i].kind,
                       decoration: const InputDecoration(labelText: '内容形式'),
                       items: const [
@@ -325,7 +326,7 @@ class _TemplateInformationState extends State<_TemplateInformation> {
   }
 
   @override
-  Widget build(BuildContext context) => AlertDialog(
+  Widget build(BuildContext context) => DesktopDialog(
     title: Text('使用模板：${widget.template.name}'),
     content: SizedBox(
       width: 600,
@@ -334,13 +335,13 @@ class _TemplateInformationState extends State<_TemplateInformation> {
           mainAxisSize: MainAxisSize.min,
           children: [
             const Text('请检查公开说明和内容。只有点击“保存信息”才会写入资料库；新信息需要另行申请授权。'),
-            TextField(
+            DesktopTextField(
               key: const ValueKey('template-item-name'),
               controller: _name,
               maxLength: 200,
               decoration: const InputDecoration(labelText: '信息名称（公开）'),
             ),
-            TextField(
+            DesktopTextField(
               controller: _description,
               maxLength: 2000,
               decoration: const InputDecoration(labelText: '公开描述'),
@@ -349,7 +350,7 @@ class _TemplateInformationState extends State<_TemplateInformation> {
               const Divider(),
               Text('${widget.template.fields[i].name}（公开）'),
               Text(widget.template.fields[i].description),
-              TextField(
+              DesktopTextField(
                 key: ValueKey('template-value-$i'),
                 controller: _values[widget.template.fields[i].id],
                 minLines: widget.template.fields[i].kind == FieldKind.textNote

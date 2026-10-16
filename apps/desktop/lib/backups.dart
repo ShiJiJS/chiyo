@@ -161,7 +161,7 @@ class _BackupLibraryState extends State<BackupLibrary> {
     if (!mounted) return;
     final confirm = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (context) => DesktopDialog(
         title: const Text('确认恢复资料库'),
         content: Text(
           '备份时间：${snapshot.createdAt.toLocal()}\n信息 ${snapshot.informationCount} 项，目录 ${snapshot.directoryCount} 个，标签 ${snapshot.tagCount} 个，模板 ${snapshot.templateCount} 个。\n'
@@ -278,7 +278,7 @@ class _RecoveryKeyDialogState extends State<_RecoveryKeyDialog> {
   bool _saving = false;
   String? _message;
   @override
-  Widget build(BuildContext context) => AlertDialog(
+  Widget build(BuildContext context) => DesktopDialog(
     title: const Text('请另行保存恢复密钥'),
     content: SizedBox(
       width: 540,
@@ -292,7 +292,7 @@ class _RecoveryKeyDialogState extends State<_RecoveryKeyDialog> {
           const SizedBox(height: 16),
           SelectableText(
             widget.recoveryKey,
-            style: const TextStyle(fontFamily: 'monospace'),
+            style: Theme.of(context).textTheme.bodyMedium,
           ),
           if (_message != null)
             Padding(
@@ -352,11 +352,11 @@ class _RestoreKeyDialogState extends State<_RestoreKeyDialog> {
   }
 
   @override
-  Widget build(BuildContext context) => AlertDialog(
+  Widget build(BuildContext context) => DesktopDialog(
     title: const Text('输入恢复密钥'),
     content: SizedBox(
       width: 540,
-      child: TextField(
+      child: DesktopTextField(
         controller: _key,
         obscureText: true,
         enableSuggestions: false,

@@ -41,7 +41,7 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
       if (!mounted) return;
       final confirmed = await showDialog<bool>(
         context: context,
-        builder: (context) => AlertDialog(
+        builder: (context) => DesktopDialog(
           title: const Text('缩短记录保留时间'),
           content: Text(
             '将改为保留 $days 天，并清理更早的 ${preview.grants} 条授权历史和 ${preview.accesses} 条访问记录。之后延长期限也无法找回已清理记录。',
@@ -81,7 +81,7 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
                 crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
                   const Text('记录保留时间'),
-                  DropdownButton<int>(
+                  DesktopSelect<int>(
                     key: const ValueKey('audit-retention'),
                     value: widget.owner.auditRetentionDays,
                     items: [30, 90, 180, 365]
