@@ -5,6 +5,15 @@ enum InboxFilter { all, pending, handled }
 enum DesktopColorTheme { purple, green, blue, mono }
 
 extension OwnerDesktopPreferences on OwnerAccess {
+  bool get notificationsEnabled =>
+      _service._repository.readSetting('desktopNotificationsEnabled') != 0;
+  Future<void> setNotificationsEnabled(bool enabled) => _serialize(() async {
+    if (!serviceAvailable) throw const AccessFailure('service_unavailable');
+    await _service._repository.writeSetting(
+      'desktopNotificationsEnabled',
+      enabled ? 1 : 0,
+    );
+  });
   DesktopColorTheme get colorTheme {
     final value = _service._repository.readSetting('desktopColorTheme') ?? 0;
     return value >= 0 && value < DesktopColorTheme.values.length

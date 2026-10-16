@@ -55,6 +55,10 @@ extension OwnerOrganizationTasks on OwnerAccess {
         approvedAt: now,
         expiresAt: now.add(lifetime),
         autoApply: true,
+        itemNames: {
+          for (final item in information.where((i) => ids.contains(i.id)))
+            item.id: item.name,
+        },
         itemVersions: {
           for (final item in information.where((i) => ids.contains(i.id)))
             item.id: item.version,
@@ -148,7 +152,7 @@ extension OwnerOrganizationTasks on OwnerAccess {
       previous.add(InformationRevision(old, now));
     }
     await _service._repository.confirmOrganizationTask(
-      task.withState(OrganizationTaskState.confirmed),
+      task.withState(OrganizationTaskState.confirmed, completedAt: now),
       changed,
       previous,
       newDirectories: organization.newDirectories,

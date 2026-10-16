@@ -1,3 +1,4 @@
+import 'backup_setup.dart';
 import 'dart:io';
 import 'dart:convert';
 import 'package:info_core/info_core.dart';
@@ -33,7 +34,7 @@ void main() {
         1,
         fieldId: item.fields.single.id,
       );
-      final recovery = await source.backups.enable();
+      final recovery = await enableTestBackups(source.backups);
       final backup = '${folder.path}/empty-fields.aimbackup';
       await source.backups.exportTo(backup);
       await service.close();

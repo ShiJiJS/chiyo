@@ -133,7 +133,7 @@ void main() {
       expect(service.agent.status(session, request.id)['status'], 'approved');
       await tester.tap(find.byKey(const ValueKey('nav-3')));
       await tester.pumpAndSettle();
-      expect(find.text('聊天：New approved chat'), findsOneWidget);
+      expect(find.text('New approved chat'), findsOneWidget);
       await tester.pumpWidget(const SizedBox());
       await service.close();
     },

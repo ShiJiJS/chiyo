@@ -52,15 +52,6 @@ class RequestReceipt {
   final String id;
 }
 
-enum AccessRequestState {
-  pending,
-  approved,
-  denied,
-  expired,
-  cancelled,
-  revoked,
-}
-
 /// An owner-facing view of a request, without session secrets or grant tokens.
 class OwnerRequestSnapshot {
   OwnerRequestSnapshot({
@@ -114,6 +105,7 @@ class _Request {
   ClaimedGrant? grant;
   DateTime? approvedAt;
   GrantHistory? history;
+  List<RecordedField> recordedFields = const [];
   final invalidatedFields = <FieldRef>{};
 }
 
@@ -196,7 +188,15 @@ class InformationService {
     _closed = true;
     for (final request in _requests.values) {
       _expire(request);
+      if (request.state != AccessRequestState.pending &&
+          request.state != AccessRequestState.approved) {
+        continue;
+      }
       _finishHistory(request, GrantEventKind.applicationClosed);
+      if (request.state == AccessRequestState.pending) {
+        request.state = AccessRequestState.cancelled;
+      }
+      _recordRequest(request, applicationClosed: true);
     }
     _sessions.clear();
     _endCapabilities.clear();
@@ -244,9 +244,11 @@ class InformationService {
       _expire(request);
       if (request.state == AccessRequestState.pending) {
         request.state = AccessRequestState.cancelled;
+        _recordRequest(request, sessionEnded: true);
       } else if (request.state == AccessRequestState.approved) {
         request.state = AccessRequestState.revoked;
         _finishHistory(request, GrantEventKind.ended);
+        _recordRequest(request, sessionEnded: true);
       }
     }
   }
@@ -256,10 +258,12 @@ class InformationService {
     if (request.state == AccessRequestState.pending &&
         !_clock().isBefore(request.expiresAt)) {
       request.state = AccessRequestState.expired;
+      _recordRequest(request);
     } else if (request.state == AccessRequestState.approved &&
         !_clock().isBefore(request.grant!.expiresAt)) {
       request.state = AccessRequestState.expired;
       _finishHistory(request, GrantEventKind.expired);
+      _recordRequest(request);
     }
   }
 
@@ -271,6 +275,7 @@ class InformationService {
       throw const AccessFailure('invalid_request');
     }
     request.state = state;
+    _recordRequest(request);
   }
 }
 
@@ -324,14 +329,22 @@ class AgentAccess {
     }
     final id = _service._secret();
     final now = _service._clock();
-    _service._requests[id] = _Request(
-      id,
-      session,
-      purpose,
-      Set.unmodifiable(fields),
-      now,
-      now.add(_service._requestLifetime),
-    );
+    _service._requests[id] =
+        _Request(
+            id,
+            session,
+            purpose,
+            Set.unmodifiable(fields),
+            now,
+            now.add(_service._requestLifetime),
+          )
+          ..recordedFields = fields.toSet().map((ref) {
+            final item = _service._repository.items.firstWhere(
+              (i) => i.id == ref.itemId,
+            );
+            final field = item.fields.firstWhere((f) => f.id == ref.fieldId);
+            return RecordedField(item.id, field.id, item.name, field.name);
+          }).toList();
     _service._submitted.add(id);
     return RequestReceipt(id);
   }
@@ -446,6 +459,15 @@ class OwnerAccess {
 
   List<InformationItem> get information => _service._repository.items;
   List<InformationTemplate> get templates => _service._repository.templates;
+  Future<void> deleteTemplate(String id, int expectedVersion) =>
+      _serialize(() async {
+        if (!serviceAvailable) throw const AccessFailure('service_unavailable');
+        final current = templates.where((t) => t.id == id).firstOrNull;
+        if (current == null || current.version != expectedVersion) {
+          throw const AccessFailure('template_changed');
+        }
+        await _service._repository.deleteTemplate(id);
+      });
 
   Future<InformationTemplate> createTemplate(
     String name,
@@ -711,6 +733,7 @@ class OwnerAccess {
     if (request?.grant == null) throw const AccessFailure('invalid_request');
     request!.state = AccessRequestState.revoked;
     _service._finishHistory(request, GrantEventKind.revoked);
+    _service._recordRequest(request);
   }
 
   void deny(String requestId) {
@@ -753,5 +776,6 @@ class OwnerAccess {
     _service._grants[request.grant!.token] = request;
     request.state = AccessRequestState.approved;
     _service._approveHistory(request);
+    _service._recordRequest(request);
   }
 }

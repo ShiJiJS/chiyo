@@ -3,6 +3,7 @@ import 'package:info_core/info_core.dart';
 import 'package:info_storage/info_storage.dart';
 import 'package:test/test.dart';
 import 'storage_test.dart' show TestKeyStore;
+import 'backup_setup.dart';
 
 void main() {
   test(
@@ -49,7 +50,7 @@ void main() {
         )).fields.single.value,
         'original',
       );
-      final recovery = await repo.backups.enable();
+      final recovery = await enableTestBackups(repo.backups);
       final backup = '${dir.path}/full.aimbackup';
       await repo.backups.exportTo(backup);
       await service.close();

@@ -80,10 +80,13 @@ abstract interface class InformationRepository {
   });
 
   List<GrantHistory> get grantHistory;
+  List<RequestHistory> get requestHistory;
+  Future<void> saveRequestHistory(RequestHistory history);
   List<AccessRecord> get accessRecords;
   Future<void> saveGrantHistory(GrantHistory history);
   Future<void> saveAccessRecord(AccessRecord record);
   Future<void> pruneAudit(DateTime cutoff);
+  Future<void> pruneOrganizationHistory(Set<String> ids);
   List<InformationItem> get items;
   Future<void> save(InformationItem item);
   List<InformationDirectory> get directories;
@@ -94,6 +97,7 @@ abstract interface class InformationRepository {
   Future<void> writeSetting(String key, int value);
   List<InformationTemplate> get templates;
   Future<void> saveTemplate(InformationTemplate template);
+  Future<void> deleteTemplate(String id);
   List<ImportProposal> get importProposals;
   Future<void> saveImportProposal(ImportProposal proposal);
 
@@ -151,6 +155,11 @@ class MemoryInformationRepository implements InformationRepository {
   }
 
   @override
+  Future<void> pruneOrganizationHistory(Set<String> ids) async {
+    _organizationTasks.removeWhere((id, _) => ids.contains(id));
+  }
+
+  @override
   Future<void> confirmOrganizationTask(
     OrganizationTask task,
     List<InformationItem> items,
@@ -174,6 +183,13 @@ class MemoryInformationRepository implements InformationRepository {
   }
 
   final _history = <String, GrantHistory>{};
+  final _requestHistory = <String, RequestHistory>{};
+  @override
+  List<RequestHistory> get requestHistory =>
+      List.unmodifiable(_requestHistory.values);
+  @override
+  Future<void> saveRequestHistory(RequestHistory history) async =>
+      _requestHistory[history.id] = history;
   final _accesses = <String, AccessRecord>{};
   @override
   List<GrantHistory> get grantHistory => List.unmodifiable(_history.values);
@@ -188,6 +204,7 @@ class MemoryInformationRepository implements InformationRepository {
   @override
   Future<void> pruneAudit(DateTime cutoff) async {
     _history.removeWhere((_, value) => value.approvedAt.isBefore(cutoff));
+    _requestHistory.removeWhere((_, value) => value.createdAt.isBefore(cutoff));
     _accesses.removeWhere((_, value) => value.at.isBefore(cutoff));
   }
 
@@ -334,6 +351,11 @@ class MemoryInformationRepository implements InformationRepository {
   @override
   Future<void> saveTemplate(InformationTemplate template) async {
     _templates[template.id] = template;
+  }
+
+  @override
+  Future<void> deleteTemplate(String id) async {
+    _templates.remove(id);
   }
 
   @override

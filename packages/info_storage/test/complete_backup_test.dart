@@ -1,3 +1,4 @@
+import 'backup_setup.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'package:info_core/info_core.dart';
@@ -80,7 +81,7 @@ void main() {
       service.owner.approve(request.id, [ref]);
       final token = service.agent.claim(session, request.id).token;
       await service.agent.read(token, ref);
-      final key = await source.backups.enable();
+      final key = await enableTestBackups(source.backups);
       await service.owner.exportLibrary(
         () => source.backups.exportTo('${root.path}/before.aimbackup'),
       );
@@ -151,10 +152,10 @@ void main() {
         FieldRef(item.id, item.fields.single.id),
         'after',
       );
-      final key = await source.backups.enable();
+      final key = await enableTestBackups(source.backups);
       final path = '${root.path}/times.aimbackup';
       await service.owner.exportLibrary(() => source.backups.exportTo(path));
-      expect(_payload(path, key)['version'], 3);
+      expect(_payload(path, key)['version'], 4);
       final target = await EncryptedInformationRepository.open(
         '${root.path}/target',
         _Keys(),
@@ -234,7 +235,7 @@ void main() {
         }
         final entry = service.owner.recycleEntries.single;
         expect(entry.snapshot!.fields, hasLength(2));
-        final key = await source.backups.enable();
+        final key = await enableTestBackups(source.backups);
         final path = '${root.path}/saved.aimbackup';
         await service.owner.exportLibrary(() => source.backups.exportTo(path));
         await service.owner.restoreRecycled(entry.id);
@@ -325,7 +326,7 @@ void main() {
       );
       final whole = await service.owner.deleteInformation(metadata.id, 2);
       expect(whole.snapshot!.fields, isEmpty);
-      final key = await source.backups.enable();
+      final key = await enableTestBackups(source.backups);
       final path = '${root.path}/grouped.aimbackup';
       await service.owner.exportLibrary(() => source.backups.exportTo(path));
 
@@ -437,7 +438,7 @@ void main() {
             outcome: AccessOutcome.unauthorized,
           ),
         );
-        final key = await source.backups.enable();
+        final key = await enableTestBackups(source.backups);
         final path = '${root.path}/audit-$days.aimbackup';
         await source.backups.exportTo(path);
         final target = await EncryptedInformationRepository.open(
@@ -477,11 +478,12 @@ void main() {
           FieldRef(item.id, item.fields.single.id),
           'current value',
         );
-        final key = await source.backups.enable();
+        final key = await enableTestBackups(source.backups);
         final path = '${root.path}/v3.aimbackup';
         await source.backups.exportTo(path);
         await _rewrite(path, '${root.path}/v1.aimbackup', key, (p) {
           p['version'] = legacyVersion;
+          (p['tables'] as Map).remove('request_history');
           for (final row in p['tables']['information_items'] as List) {
             (row as Map).remove('created_at');
             row.remove('modified_at');
@@ -561,7 +563,7 @@ void main() {
         service.agent.claim(session, request.id).token,
         ref,
       );
-      final key = await source.backups.enable();
+      final key = await enableTestBackups(source.backups);
       final path = '${root.path}/good.aimbackup';
       await source.backups.exportTo(path);
       final target = await EncryptedInformationRepository.open(
@@ -775,7 +777,7 @@ void main() {
           outcome: AccessOutcome.unauthorized,
         ),
       );
-      final key = await source.backups.enable();
+      final key = await enableTestBackups(source.backups);
       final path = '${root.path}/retention.aimbackup';
       await source.backups.exportTo(path);
       final before = File(path).readAsBytesSync();
@@ -899,11 +901,11 @@ void main() {
       ]);
       service.agent.request(session, 'pending request', [ref]);
       await service.owner.retryAuditStorage();
-      final key = await source.backups.enable();
+      final key = await enableTestBackups(source.backups);
       final path = '${root.path}/complete.aimbackup';
       await source.backups.exportTo(path);
       final payload = _payload(path, key);
-      expect(payload['version'], 3);
+      expect(payload['version'], 4);
       final tables = payload['tables'] as Map<String, dynamic>;
       expect(tables.keys.toSet(), {
         'information_directories',
@@ -919,6 +921,7 @@ void main() {
         'revision_purge_facts',
         'grant_history',
         'access_records',
+        'request_history',
       });
       final encoded = jsonEncode(payload);
       for (final excluded in [
