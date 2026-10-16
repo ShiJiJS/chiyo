@@ -70,6 +70,8 @@ void main() {
       final second = service.agent.request(b, 'Second purpose', [username]);
       await tester.pumpWidget(InformationApp(service: service, port: 47125));
       await tester.pumpAndSettle();
+      await tester.tap(find.byKey(ValueKey('request-${first.id}')));
+      await tester.pumpAndSettle();
       await tester.tap(find.byKey(const ValueKey('field-host')));
       await tester.enterText(
         find.byKey(ValueKey('grant-lifetime-${first.id}')),

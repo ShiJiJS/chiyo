@@ -164,7 +164,7 @@ class _SettingsPageState extends State<SettingsPage> {
           onPressed: widget.runtime == null || widget.runtime!.quitting
               ? null
               : widget.runtime!.quit,
-          icon: const Icon(Icons.power_settings_new, size: 17),
+          icon: Icon(Icons.power_settings_new, size: 17),
           label: Text(
             widget.runtime?.quitting == true
                 ? '正在退出…'
@@ -194,7 +194,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     border: Border(
                       bottom: BorderSide(
                         color: _section == index
-                            ? UiColors.accent
+                            ? UiPalette.of(context).accent
                             : Colors.transparent,
                         width: 2,
                       ),
@@ -204,8 +204,8 @@ class _SettingsPageState extends State<SettingsPage> {
                     onPressed: () => setState(() => _section = index),
                     style: TextButton.styleFrom(
                       foregroundColor: _section == index
-                          ? UiColors.accent
-                          : UiColors.muted,
+                          ? UiPalette.of(context).accent
+                          : UiPalette.of(context).muted,
                     ),
                     child: Text(label),
                   ),

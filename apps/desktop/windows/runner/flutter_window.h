@@ -8,9 +8,11 @@
 #include <shellapi.h>
 
 #include <memory>
+#include <string>
 
 #include "win32_window.h"
 #include "backup_files.h"
+#include "notification_queue.h"
 
 // A window that does nothing but host a Flutter view.
 class FlutterWindow : public Win32Window {
@@ -29,7 +31,8 @@ class FlutterWindow : public Win32Window {
  private:
   bool AddTrayIcon();
   void RemoveTrayIcon();
-  void OpenApprovals();
+  void OpenApprovals(const std::string& request_id = "");
+  bool ShowNotification(const NotificationMessage& message);
   void SendDesktopEvent(const char* event);
   flutter::EncodableValue DesktopAvailability();
   std::unique_ptr<flutter::MethodChannel<flutter::EncodableValue>> desktop_channel_;
@@ -38,6 +41,10 @@ class FlutterWindow : public Win32Window {
   bool desktop_ready_ = false;
   bool tray_available_ = false;
   bool notifications_enabled_ = true;
+  UINT tray_id_ = 0;
+  NotificationQueue notifications_{[this](const NotificationMessage& message) {
+    return ShowNotification(message);
+  }};
   UINT taskbar_created_ = 0;
   // The project to run.
   flutter::DartProject project_;

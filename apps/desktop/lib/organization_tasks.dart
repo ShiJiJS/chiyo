@@ -57,11 +57,15 @@ class _OrganizationApprovalPanelState extends State<OrganizationApprovalPanel> {
   }
 
   Future<void> _cancel() async {
+    if (_busy) return;
+    setState(() => _busy = true);
     try {
       await widget.owner.cancelOrganization(widget.task.id);
       widget.onChanged();
     } catch (_) {
       if (mounted) setState(() => _error = '未能撤销整理，请重试。');
+    } finally {
+      if (mounted) setState(() => _busy = false);
     }
   }
 
@@ -71,6 +75,7 @@ class _OrganizationApprovalPanelState extends State<OrganizationApprovalPanel> {
     final state = widget.owner.organizationState(task);
     final pending = state == OrganizationTaskState.pending;
     final document = ListView(
+      key: PageStorageKey('organization-document-${task.id}'),
       children: [
         Text('整理分类与标签', style: Theme.of(context).textTheme.headlineSmall),
         const SizedBox(height: 12),
@@ -99,7 +104,10 @@ class _OrganizationApprovalPanelState extends State<OrganizationApprovalPanel> {
                   ? CheckboxListTile(
                       key: ValueKey('organize-item-$id'),
                       value: widget.selected.contains(id),
-                      onChanged: _busy || item == null
+                      onChanged:
+                          _busy ||
+                              !widget.owner.serviceAvailable ||
+                              item == null
                           ? null
                           : (value) => setState(() {
                               value == true
@@ -128,8 +136,8 @@ class _OrganizationApprovalPanelState extends State<OrganizationApprovalPanel> {
     final decision = Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: UiColors.rail,
-        border: Border.all(color: UiColors.line),
+        color: UiPalette.of(context).rail,
+        border: Border.all(color: UiPalette.of(context).line),
         borderRadius: BorderRadius.circular(6),
       ),
       child: Column(
@@ -159,11 +167,16 @@ class _OrganizationApprovalPanelState extends State<OrganizationApprovalPanel> {
               runSpacing: 8,
               children: [
                 TextButton(
-                  onPressed: _busy ? null : () => _decide(false),
+                  onPressed: _busy || !widget.owner.serviceAvailable
+                      ? null
+                      : () => _decide(false),
                   child: const Text('拒绝'),
                 ),
                 FilledButton(
-                  onPressed: _busy || widget.selected.isEmpty
+                  onPressed:
+                      _busy ||
+                          !widget.owner.serviceAvailable ||
+                          widget.selected.isEmpty
                       ? null
                       : () => _decide(true),
                   child: Text(_busy ? '正在保存…' : '批准整理'),
@@ -172,17 +185,29 @@ class _OrganizationApprovalPanelState extends State<OrganizationApprovalPanel> {
             )
           else if (state == OrganizationTaskState.active)
             OutlinedButton(
-              onPressed: _busy ? null : _cancel,
+              onPressed: _busy || !widget.owner.serviceAvailable
+                  ? null
+                  : _cancel,
               child: const Text('撤销整理'),
             ),
           if (state == OrganizationTaskState.conflicted)
             const Text('请让 Agent 根据当前资料重新申请。'),
+          if (state == OrganizationTaskState.confirmed ||
+              state == OrganizationTaskState.conflicted) ...[
+            const SizedBox(height: 12),
+            const Text('本次整理能力已结束，不能继续读取或调整分类。'),
+            TextButton(
+              onPressed: () =>
+                  showOrganizationResult(context, widget.owner, task.id),
+              child: const Text('查看整理结果'),
+            ),
+          ],
         ],
       ),
     );
     return LayoutBuilder(
       builder: (context, bounds) {
-        if (bounds.maxWidth >= 900 &&
+        if (bounds.maxWidth >= 780 &&
             MediaQuery.textScalerOf(context).scale(14) <= 20) {
           return Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -190,7 +215,7 @@ class _OrganizationApprovalPanelState extends State<OrganizationApprovalPanel> {
               Expanded(child: document),
               const SizedBox(width: 24),
               SizedBox(
-                width: 340,
+                width: 270,
                 child: SingleChildScrollView(child: decision),
               ),
             ],
@@ -208,6 +233,19 @@ class _OrganizationApprovalPanelState extends State<OrganizationApprovalPanel> {
       },
     );
   }
+}
+
+Future<void> showOrganizationResult(
+  BuildContext context,
+  OwnerAccess owner,
+  String taskId,
+) {
+  final task = owner.organizationTasks.where((t) => t.id == taskId).firstOrNull;
+  if (task == null) return Future.value();
+  return showDialog<void>(
+    context: context,
+    builder: (_) => _ReviewOrganization(owner: owner, task: task),
+  );
 }
 
 class OrganizationResultsList extends StatelessWidget {
@@ -330,6 +368,10 @@ class _ReviewOrganizationState extends State<_ReviewOrganization> {
                 Text(
                   '聊天：${widget.task.chatLabel}\n${widget.task.changes.length} 条整理结果',
                 ),
+                SelectableText('请求与授权：${widget.task.id}'),
+                Text(
+                  '批准时间：${uiTime(widget.task.approvedAt)} · 截止：${uiTime(widget.task.expiresAt)}',
+                ),
                 StatusLabel(
                   organizationStateLabel(
                     widget.owner.organizationState(widget.task),
@@ -425,16 +467,22 @@ class _ReviewOrganizationState extends State<_ReviewOrganization> {
     ),
     actions: [
       TextButton(
-        onPressed: _busy ? null : () => Navigator.pop(context),
+        onPressed: _busy || !widget.owner.serviceAvailable
+            ? null
+            : () => Navigator.pop(context),
         child: Text(_pending && !_conflict ? '暂不处理' : '关闭'),
       ),
       if (_pending && !_conflict) ...[
         TextButton(
-          onPressed: _busy ? null : () => _decide(false),
+          onPressed: _busy || !widget.owner.serviceAvailable
+              ? null
+              : () => _decide(false),
           child: const Text('拒绝方案'),
         ),
         FilledButton(
-          onPressed: _busy ? null : () => _decide(true),
+          onPressed: _busy || !widget.owner.serviceAvailable
+              ? null
+              : () => _decide(true),
           child: Text(_busy ? '正在应用…' : '确认整批调整'),
         ),
       ],

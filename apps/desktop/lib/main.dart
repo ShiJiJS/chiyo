@@ -160,6 +160,29 @@ class _InformationAppState extends State<InformationApp>
   int _libraryRevision = 0;
   final _visited = <int>{0};
   int _activeTab = 0;
+  final _approvalsKey = GlobalKey<ApprovalsState>();
+  late DesktopColorTheme _colorTheme = widget.service.owner.colorTheme;
+  bool _themeBusy = false;
+  String? _themeError;
+
+  Future<void> _changeTheme(DesktopColorTheme theme) async {
+    if (_themeBusy) return;
+    setState(() {
+      _themeBusy = true;
+      _themeError = null;
+    });
+    try {
+      await widget.service.owner.setColorTheme(theme);
+      if (mounted) {
+        setState(() => _colorTheme = widget.service.owner.colorTheme);
+      }
+    } catch (_) {
+      if (mounted) setState(() => _themeError = '主题未保存，仍使用上次的颜色。请重试。');
+    } finally {
+      if (mounted) setState(() => _themeBusy = false);
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -197,7 +220,20 @@ class _InformationAppState extends State<InformationApp>
   Widget build(BuildContext context) => MaterialApp(
     title: '信息访问授权',
     debugShowCheckedModeBanner: false,
-    theme: informationTheme(),
+    theme: informationTheme(_colorTheme),
+    shortcuts: {
+      ...WidgetsApp.defaultShortcuts,
+      const SingleActivator(LogicalKeyboardKey.slash):
+          const SearchInboxIntent(),
+    },
+    actions: {
+      SearchInboxIntent: CallbackAction<SearchInboxIntent>(
+        onInvoke: (_) {
+          if (_tabs.index == 0) _approvalsKey.currentState?.focusSearch();
+          return null;
+        },
+      ),
+    },
     builder: (_, child) => DesktopWindowFrame(child: child!),
     home: Builder(
       builder: (context) => DesktopShell(
@@ -207,11 +243,21 @@ class _InformationAppState extends State<InformationApp>
         onSelected: (index) => _tabs.index = index,
         runtime: widget.runtime,
         hasBackups: widget.backups != null,
+        colorTheme: _colorTheme,
+        onThemeChanged: _changeTheme,
+        themeBusy: _themeBusy,
+        themeError: _themeError,
         child: IndexedStack(
           index: _tabs.index,
           children:
               [
-                    Approvals(service: widget.service, port: widget.port),
+                    Approvals(
+                      key: _approvalsKey,
+                      service: widget.service,
+                      port: widget.port,
+                      focusRequestId: widget.runtime?.openRequestId,
+                      focusRevision: _openRevision,
+                    ),
                     InformationLibrary(
                       owner: widget.service.owner,
                       refresh: _tabs,

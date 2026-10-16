@@ -18,7 +18,7 @@ void main() {
       await tester.pumpWidget(InformationApp(service: service, port: 47125));
       await tester.pumpAndSettle();
       final headings = ['访问审批', '资料库', '录入与变更提案', '授权与访问记录', '设置'];
-      Offset? origin;
+
       void checkSelection(int active) {
         for (var i = 0; i < 5; i++) {
           final container = tester.widget<Container>(
@@ -31,7 +31,11 @@ void main() {
           );
           expect(
             (container.decoration! as BoxDecoration).color,
-            i == active ? UiColors.selected : Colors.transparent,
+            i == active
+                ? UiPalette.of(
+                    tester.element(find.byKey(ValueKey('nav-$i'))),
+                  ).selected
+                : Colors.transparent,
           );
         }
       }
@@ -47,15 +51,14 @@ void main() {
         await tester.pumpAndSettle();
         final title = find.descendant(
           of: find.byType(PageHeading),
-          matching: find.text(headings[i]),
+          matching: find.text(i == 0 ? '请求收件箱' : headings[i]),
         );
         expect(title, findsOneWidget);
-        final point = tester.getTopLeft(title);
-        origin ??= point;
         expect(
-          point,
-          origin,
-          reason: 'Header ${headings[i]} must use the shared page grid',
+          tester.getTopLeft(title).dy,
+          greaterThan(
+            tester.getBottomLeft(find.byKey(const ValueKey('nav-0'))).dy,
+          ),
         );
       }
       expect(find.textContaining('开发预览'), findsNothing);

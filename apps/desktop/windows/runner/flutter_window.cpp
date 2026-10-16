@@ -15,16 +15,17 @@ FlutterWindow::~FlutterWindow() {}
 namespace {
 constexpr UINT kTrayMessage = WM_APP + 1;
 constexpr UINT kTerminateMessage = WM_APP + 2;
-constexpr UINT kTrayId = 1;
 constexpr UINT kOpenApprovals = 1;
 constexpr UINT kQuit = 2;
 }
 
 bool FlutterWindow::AddTrayIcon() {
+  tray_id_ = (tray_id_ + 1) & 0xffff;
+  if (tray_id_ == 0) ++tray_id_;
   NOTIFYICONDATAW data{};
   data.cbSize = sizeof(data);
   data.hWnd = GetHandle();
-  data.uID = kTrayId;
+  data.uID = tray_id_;
   data.uFlags = NIF_MESSAGE | NIF_ICON | NIF_TIP;
   data.uCallbackMessage = kTrayMessage;
   data.hIcon = LoadIcon(GetModuleHandle(nullptr), MAKEINTRESOURCE(IDI_APP_ICON));
@@ -43,7 +44,7 @@ void FlutterWindow::RemoveTrayIcon() {
   NOTIFYICONDATAW data{};
   data.cbSize = sizeof(data);
   data.hWnd = GetHandle();
-  data.uID = kTrayId;
+  data.uID = tray_id_;
   Shell_NotifyIconW(NIM_DELETE, &data);
   tray_available_ = false;
 }
@@ -62,10 +63,25 @@ void FlutterWindow::SendDesktopEvent(const char* event) {
   }
 }
 
-void FlutterWindow::OpenApprovals() {
+void FlutterWindow::OpenApprovals(const std::string& request_id) {
   ShowWindow(GetHandle(), SW_RESTORE);
   SetForegroundWindow(GetHandle());
-  SendDesktopEvent("open");
+  if (desktop_ready_ && desktop_channel_) {
+    desktop_channel_->InvokeMethod("open", !request_id.empty()
+        ? std::make_unique<flutter::EncodableValue>(request_id) : nullptr);
+  }
+}
+
+bool FlutterWindow::ShowNotification(const NotificationMessage& message) {
+  NOTIFYICONDATAW data{};
+  data.cbSize = sizeof(data);
+  data.hWnd = GetHandle();
+  data.uID = tray_id_;
+  data.uFlags = NIF_INFO;
+  data.dwInfoFlags = NIIF_INFO | NIIF_RESPECT_QUIET_TIME;
+  wcscpy_s(data.szInfoTitle, L"信息访问授权");
+  wcscpy_s(data.szInfo, message.test ? L"这是一条测试通知。访问申请提醒已连接到系统。" : L"有新的访问请求。打开应用查看并审批。");
+  return tray_available_ && notifications_enabled_ && Shell_NotifyIconW(NIM_MODIFY, &data) != FALSE;
 }
 
 bool FlutterWindow::OnCreate() {
@@ -146,17 +162,14 @@ bool FlutterWindow::OnCreate() {
       SetForegroundWindow(GetHandle());
       result->Success();
     } else if (method == "notify" || method == "testNotify") {
-      NOTIFYICONDATAW data{};
-      data.cbSize = sizeof(data);
-      data.hWnd = GetHandle();
-      data.uID = kTrayId;
-      data.uFlags = NIF_INFO;
-      data.dwInfoFlags = NIIF_INFO | NIIF_RESPECT_QUIET_TIME;
-      wcscpy_s(data.szInfoTitle, L"信息访问授权");
-      wcscpy_s(data.szInfo, method == "testNotify" ? L"这是一条测试通知。访问申请提醒已连接到系统。" : L"有新的访问请求。打开应用查看并审批。");
-      const bool accepted = tray_available_ && notifications_enabled_ &&
-          Shell_NotifyIconW(NIM_MODIFY, &data) != FALSE;
-      result->Success(flutter::EncodableValue(accepted));
+      const auto* request_id = call.arguments() ? std::get_if<std::string>(call.arguments()) : nullptr;
+      auto response = std::shared_ptr<flutter::MethodResult<flutter::EncodableValue>>(std::move(result));
+      if (!tray_available_ || !notifications_enabled_) {
+        response->Success(flutter::EncodableValue(false));
+      } else {
+        notifications_.Enqueue({method == "notify" && request_id ? *request_id : "", method == "testNotify"},
+            [response](bool accepted) { response->Success(flutter::EncodableValue(accepted)); });
+      }
     } else if (method == "terminate") {
       result->Success();
       // Destroy only after the channel handler has unwound.
@@ -179,6 +192,7 @@ bool FlutterWindow::OnCreate() {
 }
 
 void FlutterWindow::OnDestroy() {
+  notifications_.Reset();
   backup_files_.reset();
   RemoveTrayIcon();
   desktop_ready_ = false;
@@ -220,6 +234,7 @@ FlutterWindow::MessageHandler(HWND hwnd, UINT const message,
   if (taskbar_created_ != 0 && message == taskbar_created_ && desktop_ready_) {
     // Explorer restarts lose the old icon. Restore a visible entry or window.
     tray_available_ = false;
+    notifications_.Reset();
     if (!AddTrayIcon()) {
       ShowWindow(hwnd, SW_RESTORE);
     }
@@ -235,8 +250,16 @@ FlutterWindow::MessageHandler(HWND hwnd, UINT const message,
     return 0;
   }
   if (message == kTrayMessage) {
+    if (HIWORD(lparam) != tray_id_) return 0;
     const UINT event = LOWORD(lparam);
-    if (event == NIN_SELECT || event == NIN_KEYSELECT || event == NIN_BALLOONUSERCLICK) {
+    if (event == NIN_BALLOONSHOW) {
+      notifications_.OnBalloonEvent(BalloonEvent::shown);
+    } else if (event == NIN_BALLOONHIDE || event == NIN_BALLOONTIMEOUT) {
+      notifications_.OnBalloonEvent(event == NIN_BALLOONHIDE ? BalloonEvent::hidden : BalloonEvent::timedOut);
+    } else if (event == NIN_BALLOONUSERCLICK) {
+      const auto clicked = notifications_.OnBalloonEvent(BalloonEvent::clicked);
+      if (clicked) OpenApprovals(clicked->request_id);
+    } else if (event == NIN_SELECT || event == NIN_KEYSELECT) {
       OpenApprovals();
     } else if (event == WM_CONTEXTMENU) {
       POINT cursor{};

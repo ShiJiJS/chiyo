@@ -25,6 +25,7 @@ part 'update_access.dart';
 part 'recycle_access.dart';
 part 'revision_access.dart';
 part 'backup_access.dart';
+part 'workspace_access.dart';
 
 class AccessFailure implements Exception {
   const AccessFailure(this.status);

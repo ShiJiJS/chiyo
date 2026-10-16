@@ -42,3 +42,8 @@ target_include_directories(${BINARY_NAME} PRIVATE "${CMAKE_SOURCE_DIR}")
 
 # Run the Flutter tool portions of the build. This must not be removed.
 add_dependencies(${BINARY_NAME} flutter_assemble)
+
+# Native adapter contract check; explicitly built with --target notification_queue_test.
+add_executable(notification_queue_test EXCLUDE_FROM_ALL "notification_queue_test.cpp")
+apply_standard_settings(notification_queue_test)
+target_compile_options(notification_queue_test PRIVATE /utf-8)
