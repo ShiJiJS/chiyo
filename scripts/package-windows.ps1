@@ -77,11 +77,14 @@ try {
     # This console probe uses only synthetic data in a newly created temp
     # directory and current-user DPAPI. It never opens the application database.
     $diagnostics = Join-Path $payload 'diagnostics'
-    New-Item -ItemType Directory -Path $diagnostics | Out-Null
+    $storageBuild = Join-Path $output 'storage-build'
     Push-Location 'packages/info_storage'
     try {
-        Invoke-Checked $dart @('compile', 'exe', '--target-os', 'windows', '--target-arch', 'x64', 'tool/release_smoke.dart', '-o', (Join-Path $diagnostics 'info-storage-check.exe'))
+        # Native code assets require dart build cli's relocatable bin/lib
+        # bundle. dart compile exe alone does not bundle their loader mapping.
+        Invoke-Checked $dart @('build', 'cli', '--target-os', 'windows', '--target-arch', 'x64', '--target', 'bin/info-storage-check.dart', '--output', $storageBuild)
     } finally { Pop-Location }
+    Copy-Item -LiteralPath (Join-Path $storageBuild 'bundle') -Destination $diagnostics -Recurse
 
     $notices = Join-Path $payload 'notices'
     $provenance = Join-Path $payload 'provenance'
@@ -113,7 +116,9 @@ try {
     $expectedCipher = (Select-String -LiteralPath $sqliteHashSource -Pattern "'sqlcipher.x64.windows.dll': '([a-f0-9]{64})'").Matches.Groups[1].Value
     $actualCipher = (Get-FileHash -LiteralPath (Join-Path $app 'sqlcipher.dll') -Algorithm SHA256).Hash.ToLowerInvariant()
     if ($expectedCipher -ne $actualCipher) { throw 'Desktop SQLCipher DLL differs from the pinned sqlite3 native asset.' }
-    foreach ($dll in Get-ChildItem -LiteralPath $diagnostics -Filter 'sqlcipher.dll' -Recurse) {
+    $diagnosticCipher = @(Get-ChildItem -LiteralPath $diagnostics -Filter 'sqlcipher.dll' -Recurse)
+    if ($diagnosticCipher.Count -ne 1) { throw 'Missing or ambiguous diagnostic SQLCipher DLL.' }
+    foreach ($dll in $diagnosticCipher) {
         if ((Get-FileHash -LiteralPath $dll.FullName -Algorithm SHA256).Hash.ToLowerInvariant() -ne $actualCipher) {
             throw 'Diagnostic and desktop SQLCipher DLLs differ.'
         }
@@ -124,6 +129,9 @@ try {
     $flutterVersion = (& $flutter --version --machine | Out-String | ConvertFrom-Json)
     if ($LASTEXITCODE -ne 0) { throw 'Cannot record Flutter SDK version.' }
     $dartVersion = (& $dart --version 2>&1 | Out-String).Trim()
+    $runnerProject = 'apps/desktop/build/windows/x64/runner/info_desktop.vcxproj'
+    $windowsSdk = (Select-String -LiteralPath $runnerProject -Pattern '<WindowsTargetPlatformVersion>([^<]+)</WindowsTargetPlatformVersion>').Matches.Groups[1].Value
+    $msvcToolset = @((Select-String -LiteralPath $runnerProject -Pattern '<PlatformToolset>([^<]+)</PlatformToolset>').Matches | ForEach-Object { $_.Groups[1].Value } | Sort-Object -Unique)
     $vswhere = Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio/Installer/vswhere.exe'
     $visualStudio = @(& $vswhere -products '*' -format json | ConvertFrom-Json | Select-Object displayName, installationVersion)
     $files = @(Get-ChildItem -LiteralPath $payload -File -Recurse | Sort-Object FullName | ForEach-Object {
@@ -141,6 +149,7 @@ try {
         runtimePrerequisite = 'Microsoft Visual C++ v14 x64 Redistributable (not included)'
         buildHost = [Environment]::OSVersion.VersionString
         flutter = $flutterVersion; dart = $dartVersion; visualStudio = $visualStudio
+        windowsSdk = $windowsSdk; msvcToolset = $msvcToolset
         sqlcipherSha256 = $actualCipher
         verification = 'Full headless check.ps1 and Windows release compilation; no desktop/Codex/clean-machine acceptance implied'
         files = $files

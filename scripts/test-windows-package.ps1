@@ -35,7 +35,7 @@ try {
     }
     # Restrict only this process and its children. Do not change the user's PATH.
     $env:PATH = "$env:SystemRoot\System32;$env:SystemRoot"
-    $storage = Join-Path $payload 'diagnostics/info-storage-check.exe'
+    $storage = Join-Path $payload 'diagnostics/bin/info-storage-check.exe'
     & $storage
     if ($LASTEXITCODE -ne 0) { throw 'Extracted SQLCipher/DPAPI release probe failed.' }
     $bundle = Join-Path $testRoot '最终 Codex bundle'
@@ -45,7 +45,7 @@ try {
     $env:INFO_TEST_BUNDLE = $bundle
     Push-Location (Join-Path (Split-Path -Parent $PSScriptRoot) 'packages/info_cli')
     try {
-        & $DartExecutable test test/bundle_preparation_test.dart test/codex_process_test.dart
+        & $DartExecutable test test/bundle_preparation_test.dart test/cli_test.dart test/codex_process_test.dart
         if ($LASTEXITCODE -ne 0) { throw 'Extracted CLI and rendered hooks failed.' }
     } finally { Pop-Location }
     Write-Host 'PASS: extracted checksums, SDK-free CLI/hooks, synthetic SQLCipher/DPAPI. Desktop and user configuration untouched.'

@@ -35,9 +35,11 @@ Get-FileHash -Algorithm SHA256 -LiteralPath '.\agent-info-manage-<版本>-window
 放置 Skill 并通过 Codex 正式入口信任准确的定义，保留现有配置。
 生成器只写指定的新目录；安装与信任仍需单独配合。不要将私密关联放进命令参数。
 
-`diagnostics/info-storage-check.exe` 仅在独立临时目录使用合成资料和当前用户
+`diagnostics/bin/info-storage-check.exe` 仅在独立临时目录使用合成资料和当前用户
 DPAPI 验证加密、重开、旧凭据失效及旧 schema 迁移，不打开实际资料库，也不启动
-桌面。其 SQLCipher DLL 校验值与桌面包相同；这不能代替真实桌面启动验收。
+桌面。保留旁边完整的 `diagnostics/lib/`；原生资产使用
+[Dart build cli 的 bin/lib 布局](https://dart.dev/tools/dart-build)。其 SQLCipher DLL
+校验值与桌面包相同；这不能代替真实桌面启动验收。
 
 ## 升级、数据和已知限制
 
