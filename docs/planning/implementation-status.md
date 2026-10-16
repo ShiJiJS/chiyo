@@ -28,6 +28,18 @@ Evidence: [encrypted information](../implementation-ticket-3.md), [pending workf
 
 The consolidated branch at `3b23fb4` passed all analysis, 30 headless tests (core 14, CLI 7, storage 5, widgets 4), and Windows release compilation. Follow-up review corrections and their final verification are recorded below when complete. Earlier per-ticket test counts in evidence documents describe those ticket snapshots, not the final consolidated suite.
 
+Final verification at `7ab89fd`: all static analysis passed; **33 headless tests** passed (core 17, CLI 7, storage 5, widgets 4), plus **5 compiled Codex bundle subprocess tests**. Windows release compilation succeeded after the review fixes. The executable is `apps/desktop/build/windows/x64/runner/Release/info_desktop.exe`; keep its DLLs and data directory alongside it. The reviewable, uninstalled Codex bundle is `build/codex-preview/`.
+
+### Standards
+
+Three review observations were addressed: lifecycle state is typed with an owner-facing snapshot and exhaustive UI rendering; the obsolete fictional-only service comment is corrected; exact dependency pins are explicitly provisional development versions. ADR 0004's macOS, upgrade and independent-recovery acceptance gates remain open and unchanged. Follow-up review of the corrections found no new issue.
+
+### Spec
+
+One confirmed P2 defect was fixed: an expired grant could become readable after the system clock moved backwards. Status, claim and read now share terminal expiry evaluation and remove the token mapping when expiry is observed. Three public-interface regressions cover the separate entry points; the reviewer verified the correction. This review covers the current implemented batch, not the still-unimplemented tickets or outstanding manual/platform acceptance.
+
+Review totals: Standards 3 observations addressed (production acceptance still pending); Spec 1 defect fixed. No remaining code finding was reported in the correction review.
+
 The draft [PR #20](https://github.com/ShiJiJS/agent-info-manage/pull/20) remains an integration surface, not a completed release. All issues remain open. Later features—scope/duration editing, child-agent/end lifecycle, background notifications, organization/templates/import proposals, recovery, deletion/history and distribution—remain to be implemented. See [manual acceptance](../development/manual-acceptance.md) for concrete user-coordinated checks.
 
 ## Completion rules
