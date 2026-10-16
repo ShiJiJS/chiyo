@@ -131,7 +131,7 @@ class _BackupLibraryState extends State<BackupLibrary> {
         if (!widget.embedded)
           const PageHeading('备份与恢复', subtitle: '使用独立恢复密钥，保存与恢复你的信息库。'),
         Container(
-          padding: const EdgeInsets.all(26),
+          padding: const EdgeInsets.fromLTRB(26, 26, 26, 25),
           margin: const EdgeInsets.only(bottom: 27),
           decoration: BoxDecoration(
             color: c.paper,
@@ -405,7 +405,13 @@ class _BackupFlowDialogState extends State<BackupFlowDialog> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(recovery ? '恢复密钥文件' : '备份文件', style: prototypeText(context, 13)),
+        SizedBox(
+          height: 19 * MediaQuery.textScalerOf(context).scale(1),
+          child: Text(
+            recovery ? '恢复密钥文件' : '备份文件',
+            style: prototypeText(context, 13),
+          ),
+        ),
         const SizedBox(height: 7),
         Container(
           padding: const EdgeInsets.all(9),
@@ -426,7 +432,7 @@ class _BackupFlowDialogState extends State<BackupFlowDialog> {
                   size: 13,
                   padding: const EdgeInsets.symmetric(
                     horizontal: 7,
-                    vertical: 3,
+                    vertical: 2.5,
                   ),
                   background: const Color(0xffefefef),
                   side: const BorderSide(color: Color(0xff767676)),
@@ -461,19 +467,27 @@ class _BackupFlowDialogState extends State<BackupFlowDialog> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _paragraph('使用独立恢复密钥加密备份。信息、设置和保留期内旧版本入备份；临时授权、待处理请求和运行材料不入备份。'),
-        _heading(
-          _saved
-              ? '恢复密钥已另存'
-              : _localKey == null
-              ? '首次启用备份'
-              : '恢复密钥待另存',
-        ),
-        _paragraph(
-          _saved
-              ? '每次导出前检查目标位置。不要把恢复密钥交给 Agent。'
-              : '创建并另存恢复密钥后才能导出。请与备份文件分开保存。',
-        ),
-        const SizedBox(height: 15),
+        if (_saved)
+          Padding(
+            // The saved-key result is a 14px status block, not a section h3.
+            padding: const EdgeInsets.only(top: 29, bottom: 32),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  '恢复密钥已另存',
+                  style: prototypeText(context, 14, weight: FontWeight.w700),
+                ),
+                const SizedBox(height: 8),
+                _paragraph('每次导出前检查目标位置。不要把恢复密钥交给 Agent。'),
+              ],
+            ),
+          )
+        else ...[
+          _heading(_localKey == null ? '首次启用备份' : '恢复密钥待另存'),
+          _paragraph('创建并另存恢复密钥后才能导出。请与备份文件分开保存。'),
+          const SizedBox(height: 15),
+        ],
         if (_localKey == null)
           Align(
             alignment: Alignment.centerLeft,
@@ -496,6 +510,7 @@ class _BackupFlowDialogState extends State<BackupFlowDialog> {
             '导出加密备份',
             _busy ? null : _export,
             primary: true,
+            verticalPadding: 13,
           ),
         if (_result != null)
           Padding(
@@ -512,7 +527,7 @@ class _BackupFlowDialogState extends State<BackupFlowDialog> {
           ),
         _heading('恢复到空的信息库'),
         _paragraph(_empty ? '当前目标库为空，可以检查备份。' : '目标库非空，不能覆盖或合并恢复。'),
-        const SizedBox(height: 26),
+        const SizedBox(height: 25),
         LayoutBuilder(
           builder: (context, box) =>
               MediaQuery.textScalerOf(context).scale(14) > 20 ||
@@ -554,6 +569,7 @@ class _BackupFlowDialogState extends State<BackupFlowDialog> {
             '确认恢复到空库',
             _busy || _completed ? null : _restore,
             primary: true,
+            verticalPadding: 13,
           ),
         ],
         if (_busy)

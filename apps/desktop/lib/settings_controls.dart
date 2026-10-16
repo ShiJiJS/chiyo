@@ -10,26 +10,42 @@ Widget settingsAction(
   bool primary = false,
   Key? key,
   Widget? trailing,
+  double verticalPadding = 11,
 }) => TextButton(
   key: key,
   onPressed: action,
-  style: prototypeButton(
-    context,
-    size: 13,
-    padding: EdgeInsets.symmetric(horizontal: primary ? 21 : 17, vertical: 11),
-    weight: primary ? FontWeight.w600 : FontWeight.w400,
-    foreground: primary
-        ? UiPalette.of(context).paper
-        : UiPalette.of(context).ink,
-    background: primary
-        ? UiPalette.of(context).accent
-        : UiPalette.of(context).paper,
-    side: BorderSide(
-      color: primary
-          ? UiPalette.of(context).accent
-          : UiPalette.of(context).line,
-    ),
-  ),
+  style:
+      prototypeButton(
+        context,
+        size: 13,
+        padding: EdgeInsets.symmetric(
+          horizontal: primary ? 21 : 17,
+          vertical: verticalPadding,
+        ),
+        weight: primary ? FontWeight.w600 : FontWeight.w400,
+        foreground: primary
+            ? UiPalette.of(context).paper
+            : UiPalette.of(context).ink,
+        background: primary
+            ? UiPalette.of(context).accent
+            : UiPalette.of(context).paper,
+        side: BorderSide(
+          color: primary
+              ? UiPalette.of(context).accent
+              : UiPalette.of(context).line,
+        ),
+      ).copyWith(
+        foregroundColor: primary
+            ? WidgetStatePropertyAll(
+                action == null
+                    ? UiPalette.of(context).strong
+                    : UiPalette.of(context).paper,
+              )
+            : null,
+        backgroundColor: primary && action == null
+            ? WidgetStatePropertyAll(UiPalette.of(context).selected)
+            : null,
+      ),
   child: trailing == null
       ? Text(label)
       : Row(
@@ -103,12 +119,16 @@ class SettingsNotice extends StatelessWidget {
     this.verticalPadding = 16,
     this.textOffset = 0,
     this.lineGap = 3,
+    this.marginTop = 22,
+    this.messageColor,
   });
   final String title, message;
   final bool warning, error;
   final PrototypeIconGlyph icon;
   final double verticalPadding;
   final double textOffset, lineGap;
+  final double marginTop;
+  final Color? messageColor;
   @override
   Widget build(BuildContext context) {
     final c = UiPalette.of(context);
@@ -118,7 +138,7 @@ class SettingsNotice extends StatelessWidget {
         ? c.noticeWarningInk
         : c.ink;
     return Container(
-      margin: const EdgeInsets.only(top: 22),
+      margin: EdgeInsets.only(top: marginTop),
       padding: EdgeInsets.symmetric(horizontal: 19, vertical: verticalPadding),
       decoration: BoxDecoration(
         color: warning ? c.noticeWarningBackground : c.rail,
@@ -151,7 +171,12 @@ class SettingsNotice extends StatelessWidget {
                   SizedBox(height: lineGap),
                   Text(
                     message,
-                    style: prototypeText(context, 13, height: 1.9, color: ink),
+                    style: prototypeText(
+                      context,
+                      13,
+                      height: 1.9,
+                      color: messageColor ?? ink,
+                    ),
                   ),
                   SizedBox(height: 3 - lineGap),
                 ],
@@ -238,7 +263,10 @@ class SettingsDialog extends StatelessWidget {
                   child: TextButton(
                     onPressed: busy ? null : () => Navigator.pop(context),
                     style: prototypeButton(context, size: 22),
-                    child: const Text('×', textScaler: TextScaler.noScaling),
+                    child: Transform.translate(
+                      offset: Offset(2, flow ? 0 : 1),
+                      child: const Text('×', textScaler: TextScaler.noScaling),
+                    ),
                   ),
                 ),
               ],

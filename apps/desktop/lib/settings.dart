@@ -142,6 +142,8 @@ class _SettingsPageState extends State<SettingsPage> {
                 '清理后无法从本机找回，信息库内容不受影响。',
                 warning: true,
                 icon: PrototypeIconGlyph.clock,
+                verticalPadding: 24,
+                messageColor: UiPalette.of(context).muted,
               ),
             ],
           ),
@@ -165,34 +167,37 @@ class _SettingsPageState extends State<SettingsPage> {
     Map<int, String> options,
     ValueChanged<int> changed,
     String identity,
-  ) => SizedBox(
-    width: 140,
-    child: DropdownButtonFormField<int>(
-      key: ValueKey('$identity-$value'),
-      initialValue: value,
-      isExpanded: true,
-      style: prototypeText(context, 13),
-      icon: const PrototypeSelectCaret(),
-      decoration: InputDecoration(
-        isDense: true,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 12,
-          vertical: 10,
-        ),
-        fillColor: UiPalette.of(context).paper,
-        border: OutlineInputBorder(
+  ) => Container(
+    width: 140 * MediaQuery.textScalerOf(context).scale(1),
+    padding: const EdgeInsets.fromLTRB(12, 10, 4, 10),
+    decoration: BoxDecoration(
+      color: UiPalette.of(context).paper,
+      border: Border.all(color: UiPalette.of(context).line),
+      borderRadius: BorderRadius.circular(4),
+    ),
+    child: SizedBox(
+      height: 20.5 * MediaQuery.textScalerOf(context).scale(1),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<int>(
+          key: ValueKey('$identity-$value'),
+          value: value,
+          isDense: true,
+          isExpanded: true,
+          style: prototypeText(context, 13),
+          icon: const PrototypeSelectCaret(),
+          iconSize: 10,
+          dropdownColor: UiPalette.of(context).paper,
           borderRadius: BorderRadius.circular(4),
-          borderSide: BorderSide(color: UiPalette.of(context).line),
+          items: options.entries
+              .map((e) => DropdownMenuItem(value: e.key, child: Text(e.value)))
+              .toList(),
+          onChanged: _busy
+              ? null
+              : (v) {
+                  if (v != null) changed(v);
+                },
         ),
       ),
-      items: options.entries
-          .map((e) => DropdownMenuItem(value: e.key, child: Text(e.value)))
-          .toList(),
-      onChanged: _busy
-          ? null
-          : (v) {
-              if (v != null) changed(v);
-            },
     ),
   );
   Widget _appearance() => Column(
@@ -494,6 +499,7 @@ class _SettingsPageState extends State<SettingsPage> {
           '提醒只包含请求概况',
           '不在系统通知中展示字段值、密钥或其他信息内容。打开应用后再查看申请范围。',
           icon: PrototypeIconGlyph.inbox,
+          marginTop: 30,
         ),
       ],
     );
@@ -534,6 +540,7 @@ class _SettingsPageState extends State<SettingsPage> {
             context,
             size: 13,
             foreground: UiPalette.of(context).strong,
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
           ),
           child: const Text('前往访问审批 →'),
         ),

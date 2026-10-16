@@ -142,6 +142,23 @@ void main() {
       await tester.tap(find.text('确认恢复到空库'));
       await _settleIO(tester, find.text('资料已恢复，请到“信息库”查看。Agent 需要重新申请访问。'));
       await tester.pumpAndSettle();
+      final completedAction = tester.widget<TextButton>(
+        find.ancestor(
+          of: find.text('确认恢复到空库'),
+          matching: find.byType(TextButton),
+        ),
+      );
+      expect(completedAction.onPressed, isNull);
+      final disabled = {WidgetState.disabled};
+      final label = completedAction.style!.foregroundColor!.resolve(disabled)!;
+      final surface = completedAction.style!.backgroundColor!.resolve(
+        disabled,
+      )!;
+      expect(
+        (surface.computeLuminance() + .05) / (label.computeLuminance() + .05),
+        greaterThanOrEqualTo(4.5),
+        reason: 'The completed restore remains disabled with a readable label.',
+      );
       expect(
         Theme.of(
           tester.element(find.text('资料已恢复，请到“信息库”查看。Agent 需要重新申请访问。')),

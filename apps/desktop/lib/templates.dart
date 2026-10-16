@@ -171,10 +171,18 @@ class _TemplateLibraryState extends State<TemplateLibrary> {
                                 : selected.description,
                             style: prototypeText(context, 13, color: c.muted),
                           ),
-                          const SizedBox(height: 18),
-                          for (final f in selected.fields)
+                          const SizedBox(height: 17.5),
+                          for (final (index, f) in selected.fields.indexed)
                             Container(
-                              padding: const EdgeInsets.symmetric(vertical: 15),
+                              // Match CSS's alternating 50/51px row edges while
+                              // allowing long field names to grow naturally.
+                              padding: EdgeInsets.symmetric(
+                                vertical: index == 0
+                                    ? 14.75
+                                    : index.isOdd
+                                    ? 14.5
+                                    : 15,
+                              ),
                               decoration: BoxDecoration(
                                 border: Border(
                                   bottom: BorderSide(color: c.line),
@@ -497,24 +505,38 @@ class _TemplateEditorState extends State<_TemplateEditor> {
     Key? key,
     String? hint,
     int maxLength = 200,
-  }) => TextField(
-    key: key,
-    controller: controller,
-    maxLength: maxLength,
-    enabled: !_saving,
-    style: prototypeText(context, 14),
-    decoration: InputDecoration(
-      hintText: hint,
-      counterText: '',
-      isDense: true,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-      enabledBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: UiPalette.of(context).line),
-        borderRadius: BorderRadius.circular(4),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: UiPalette.of(context).accent),
-        borderRadius: BorderRadius.circular(4),
+    double size = 14,
+  }) => SizedBox(
+    height: size * 1.5 * MediaQuery.textScalerOf(context).scale(1) + 24,
+    child: TextField(
+      key: key,
+      controller: controller,
+      maxLength: maxLength,
+      buildCounter:
+          (_, {required currentLength, required isFocused, maxLength}) => null,
+      enabled: !_saving,
+      textAlignVertical: TextAlignVertical.top,
+      style: prototypeText(context, size),
+      decoration: InputDecoration(
+        hintText: hint,
+        counterText: '',
+        isDense: true,
+        filled: true,
+        fillColor: UiPalette.of(context).rail,
+        contentPadding: EdgeInsets.fromLTRB(
+          9,
+          size == 13 ? 12 : 11,
+          9,
+          size == 13 ? 12 : 13,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: UiPalette.of(context).line),
+          borderRadius: BorderRadius.circular(4),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: UiPalette.of(context).accent),
+          borderRadius: BorderRadius.circular(4),
+        ),
       ),
     ),
   );
@@ -547,7 +569,12 @@ class _TemplateEditorState extends State<_TemplateEditor> {
         const SizedBox(height: 20),
         Text('模板名称', style: prototypeText(context, 13)),
         const SizedBox(height: 7),
-        _input(_name, key: const ValueKey('template-name'), hint: '例如：服务器'),
+        _input(
+          _name,
+          key: const ValueKey('template-name'),
+          hint: '例如：服务器',
+          size: 13,
+        ),
         const SizedBox(height: 20),
         for (var i = 0; i < _fields.length; i++)
           Padding(
@@ -607,7 +634,10 @@ class _TemplateEditorState extends State<_TemplateEditor> {
                         : () =>
                               setState(() => _removed.add(_fields.removeAt(i))),
                     style: prototypeButton(context, size: 18),
-                    child: const Text('×', textScaler: TextScaler.noScaling),
+                    child: Transform.translate(
+                      offset: const Offset(2, -4),
+                      child: const Text('×', textScaler: TextScaler.noScaling),
+                    ),
                   ),
                 ),
               ],
