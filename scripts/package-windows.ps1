@@ -15,7 +15,14 @@ $output = [IO.Path]::GetFullPath($OutputDirectory)
 if (Test-Path -LiteralPath $output) { throw 'Output directory already exists.' }
 $env:PATH = "$FlutterBin;$env:PATH"
 $flutter = (Get-Command flutter -ErrorAction Stop).Source
-$dart = (Get-Command dart -ErrorAction Stop).Source
+# Flutter's dart.bat wrapper needs Git on PATH even for `dart test`. The
+# extracted-package check deliberately removes SDK/Git entries from PATH, so
+# invoke the specified SDK's executable directly rather than its wrapper.
+$dartPath = Join-Path $FlutterBin 'cache/dart-sdk/bin/dart.exe'
+if (-not (Test-Path -LiteralPath $dartPath -PathType Leaf)) {
+    throw 'The specified FlutterBin does not contain cache/dart-sdk/bin/dart.exe.'
+}
+$dart = (Get-Item -LiteralPath $dartPath).FullName
 $utf8 = New-Object Text.UTF8Encoding($false)
 
 function Invoke-Checked {
