@@ -356,20 +356,44 @@ void main() {
   );
 
   test('restore refuses a recipient with unconfirmed proposals', () async {
-    final root = await Directory.systemTemp.createTemp('backup-proposal-preserve-');
+    final root = await Directory.systemTemp.createTemp(
+      'backup-proposal-preserve-',
+    );
     addTearDown(() => root.delete(recursive: true));
-    final source = await EncryptedInformationRepository.open('${root.path}/source', _Keys());
+    final source = await EncryptedInformationRepository.open(
+      '${root.path}/source',
+      _Keys(),
+    );
     final key = await source.backups.enable();
     final backup = '${root.path}/empty.aimbackup';
     await source.backups.exportTo(backup);
     await source.close();
-    final target = await EncryptedInformationRepository.open('${root.path}/recipient', _Keys());
+    final target = await EncryptedInformationRepository.open(
+      '${root.path}/recipient',
+      _Keys(),
+    );
     addTearDown(target.close);
     final service = InformationService(repository: target);
     final session = service.agent.openSession('fictional import');
-    await service.agent.submitImport(session, [ImportItemInput('Unconfirmed', '', [const FieldInput('Value', '', 'fictional proposal')])]);
-    await expectLater(target.backups.restoreFrom(backup, key), throwsA(isA<StorageFailure>().having((e) => e.code, 'code', 'recipient_not_empty')));
-    expect(service.owner.importProposals.single.items.single.name, 'Unconfirmed');
+    await service.agent.submitImport(session, [
+      ImportItemInput('Unconfirmed', '', [
+        const FieldInput('Value', '', 'fictional proposal'),
+      ]),
+    ]);
+    await expectLater(
+      target.backups.restoreFrom(backup, key),
+      throwsA(
+        isA<StorageFailure>().having(
+          (e) => e.code,
+          'code',
+          'recipient_not_empty',
+        ),
+      ),
+    );
+    expect(
+      service.owner.importProposals.single.items.single.name,
+      'Unconfirmed',
+    );
     expect(service.owner.information, isEmpty);
   });
 }

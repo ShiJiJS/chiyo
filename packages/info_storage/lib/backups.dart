@@ -322,12 +322,24 @@ class InformationBackups {
     _checkOpen();
     try {
       await _repository._db.transaction(() async {
-        for (final table in [
-          ..._columns.keys.where((name) => name != 'settings'),
-          'import_proposals',
-        ]) {
+        final existingTables = await _repository._db
+            .customSelect(
+              "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'",
+            )
+            .get();
+        // Preserve every existing owner record, including modules newer than
+        // this current-data format. Only preferences and local backup setup may
+        // exist in a recipient. Table names are quoted, never executable input.
+        for (final table
+            in existingTables
+                .map((r) => r.read<String>('name'))
+                .where(
+                  (name) =>
+                      name != 'settings' && name != 'backup_configuration',
+                )) {
+          final quoted = table.replaceAll('"', '""');
           final rows = await _repository._db
-              .customSelect('SELECT count(*) AS n FROM $table')
+              .customSelect('SELECT count(*) AS n FROM "$quoted"')
               .getSingle();
           if (rows.read<int>('n') != 0)
             throw const StorageFailure('recipient_not_empty');

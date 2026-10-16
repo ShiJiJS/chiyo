@@ -82,7 +82,7 @@ class _BackupLibraryState extends State<BackupLibrary> {
   String _failure(Object error) => switch (error) {
     StorageFailure(code: 'output_exists') => '所选文件已存在，请选择新的文件名，原文件未覆盖。',
     StorageFailure(code: 'recipient_not_empty') =>
-      '当前资料库已有资料或提案，无法恢复。请在新设备的空资料库中恢复，现有资料保持不变。',
+      '当前资料库已有资料、提案或历史记录，无法恢复。请在新设备的空资料库中恢复，现有资料保持不变。',
     StorageFailure(code: 'unsupported_backup') => '该备份格式或版本不受支持，资料未恢复。',
     StorageFailure(code: 'invalid_recovery_key') => '恢复密钥格式不正确，请检查另存的完整密钥。',
     StorageFailure(code: 'invalid_backup') => '密钥不匹配、文件损坏或备份内容无效，资料未恢复。',
