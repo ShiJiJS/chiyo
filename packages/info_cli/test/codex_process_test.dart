@@ -48,7 +48,7 @@ void main() {
       final root = await Directory.systemTemp.createTemp('info-codex-test-');
       addTearDown(() async {
         await server.close();
-        core.close();
+        await core.close();
         await root.delete(recursive: true);
       });
       final hook = await invoke(
@@ -84,7 +84,7 @@ void main() {
       final root = await Directory.systemTemp.createTemp('info-codex-test-');
       addTearDown(() async {
         await server.close();
-        core.close();
+        await core.close();
         await root.delete(recursive: true);
       });
       Future<String> start(String source) async {
@@ -127,7 +127,7 @@ void main() {
         );
       }
       expect(core.owner.requests.length, 1);
-      core.close();
+      await core.close();
       expect(
         (await invoke('bin/codex_info.dart', {
           'association': first,
@@ -187,7 +187,7 @@ void main() {
       final root = await Directory.systemTemp.createTemp('info-codex-test-');
       addTearDown(() async {
         await server.close();
-        core.close();
+        await core.close();
         await root.delete(recursive: true);
       });
       final hook = await invoke(

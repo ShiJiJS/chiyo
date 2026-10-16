@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:info_core/info_core.dart';
 import 'package:info_core/agent_server.dart';
 import 'package:test/test.dart';
@@ -26,7 +27,7 @@ void main() {
         process.kill();
         await lines.cancel();
         await server.close();
-        core.close();
+        await core.close();
       });
       Future<Map<String, dynamic>> command(Map<String, dynamic> input) async {
         process.stdin.writeln(jsonEncode(input));
@@ -96,7 +97,13 @@ void main() {
         }))['status'],
         'unauthorized',
       );
-      core.owner.revoke(id);
+      final beforeRevoke = await core.owner.history();
+      expect(beforeRevoke.grants.single.requestId, id);
+      expect(beforeRevoke.accesses.map((record) => record.outcome), [
+        AccessOutcome.allowed,
+        AccessOutcome.unauthorized,
+      ]);
+      await core.owner.revokeFromHistory(beforeRevoke.grants.single.id);
       expect(
         (await command({
           'command': 'read',
@@ -105,6 +112,16 @@ void main() {
           'fieldId': 'host',
         }))['status'],
         'unauthorized',
+      );
+      final afterRevoke = await core.owner.history();
+      expect(
+        afterRevoke.grants.single.events.last.kind,
+        GrantEventKind.revoked,
+      );
+      expect(afterRevoke.accesses.last.grantId, afterRevoke.grants.single.id);
+      expect(
+        afterRevoke.toJson().toString(),
+        isNot(contains('demo.example.invalid')),
       );
       await server.close();
       expect(

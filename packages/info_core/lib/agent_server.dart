@@ -74,10 +74,10 @@ class AgentServer {
     }
   }
 
-  FutureOr<Map<String, Object?>> _dispatch(
+  Future<Map<String, Object?>> _dispatch(
     String path,
     Map<String, dynamic> body,
-  ) {
+  ) async {
     switch (path) {
       case '/update/submit':
         return _submitUpdate(body);
@@ -168,7 +168,7 @@ class AgentServer {
       case '/read':
         return {
           'status': 'ok',
-          'value': _agent.read(
+          'value': await _agent.read(
             _text(body, 'token'),
             FieldRef(_text(body, 'itemId'), _text(body, 'fieldId')),
           ),

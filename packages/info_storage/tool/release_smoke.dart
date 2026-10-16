@@ -29,7 +29,7 @@ Future<void> main() async {
     service.owner.approve(request.id, [ref]);
     final token = service.agent.claim(session, request.id).token;
     final version = repository.cipherVersion;
-    service.close();
+    await service.close();
     await repository.close();
     repository = await EncryptedInformationRepository.open(
       directory.path,

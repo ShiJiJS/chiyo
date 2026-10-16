@@ -70,7 +70,7 @@ void main() {
             noteId: 'ENCRYPTED-NOTE-MARKER-9182',
             template.fields.last.id: 'new.invalid',
           });
-      service.close();
+      await service.close();
       await store.close();
       store = await EncryptedInformationRepository.open(directory.path, keys);
       service = InformationService(repository: store);
@@ -88,7 +88,7 @@ void main() {
         service.owner.information.last.fields.first.value,
         'ENCRYPTED-NOTE-MARKER-9182',
       );
-      service.close();
+      await service.close();
       await store.close();
       for (final file in directory.listSync().whereType<File>()) {
         final bytes = String.fromCharCodes(file.readAsBytesSync());
