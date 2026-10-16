@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:info_core/info_core.dart';
 import 'desktop_runtime.dart';
 import 'ui.dart';
+import 'prototype_ui.dart';
 
 class DesktopShell extends StatefulWidget {
   const DesktopShell({
@@ -57,23 +58,24 @@ class _DesktopShellState extends State<DesktopShell> {
 
   static const _labels = ['访问审批', '信息库', '录入提案', '授权历史', '设置'];
   static const _icons = [
-    Icons.rule_outlined,
-    Icons.folder_open_outlined,
-    Icons.playlist_add_outlined,
-    Icons.history_outlined,
-    Icons.settings_outlined,
+    PrototypeIconGlyph.inbox,
+    PrototypeIconGlyph.folder,
+    PrototypeIconGlyph.plus,
+    PrototypeIconGlyph.clock,
+    PrototypeIconGlyph.tune,
   ];
   static const _themeNames = ['紫棠', '松石', '雾蓝', '黑白'];
 
   Widget _destination(int index) {
-    final colors = UiPalette.of(context);
+    final c = UiPalette.of(context);
     final selected = widget.index == index;
+    final ink = selected ? c.strong : c.muted;
     return Container(
+      height: 72,
       decoration: BoxDecoration(
-        color: selected ? colors.selected : Colors.transparent,
         border: Border(
           bottom: BorderSide(
-            color: selected ? colors.accent : Colors.transparent,
+            color: selected ? c.accent : Colors.transparent,
             width: 3,
           ),
         ),
@@ -81,20 +83,32 @@ class _DesktopShellState extends State<DesktopShell> {
       child: TextButton(
         key: ValueKey('nav-$index'),
         onPressed: () => widget.onSelected(index),
-        style: TextButton.styleFrom(
-          foregroundColor: selected ? colors.strong : colors.muted,
-          padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 16),
-          shape: const RoundedRectangleBorder(),
-        ),
+        style: prototypeButton(context, size: 14, foreground: ink, radius: 0),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(_icons[index], size: 17),
-            const SizedBox(width: 7),
-            Text(_labels[index]),
+            PrototypeIcon(_icons[index], color: ink),
+            const SizedBox(width: 8),
+            Text(
+              _labels[index],
+              style: prototypeText(
+                context,
+                14,
+                color: ink,
+                weight: selected ? FontWeight.w600 : FontWeight.w400,
+              ),
+            ),
             if (index == 0 && _pending > 0) ...[
-              const SizedBox(width: 5),
-              Text('$_pending'),
+              const SizedBox(width: 10),
+              Text(
+                '$_pending',
+                style: prototypeText(
+                  context,
+                  13,
+                  color: ink,
+                  family: 'Georgia',
+                ),
+              ),
             ],
           ],
         ),
@@ -102,46 +116,80 @@ class _DesktopShellState extends State<DesktopShell> {
     );
   }
 
-  Widget _themes() => Wrap(
-    spacing: 2,
-    children: [
-      for (final theme in DesktopColorTheme.values)
-        Tooltip(
-          message: '切换为${_themeNames[theme.index]}',
-          child: TextButton(
-            key: ValueKey('theme-${theme.name}'),
-            onPressed: widget.themeBusy
-                ? null
-                : () => widget.onThemeChanged(theme),
-            style: TextButton.styleFrom(
-              backgroundColor: widget.colorTheme == theme
-                  ? UiPalette.of(context).selected
-                  : Colors.transparent,
-              minimumSize: const Size(32, 32),
-              padding: const EdgeInsets.symmetric(horizontal: 7),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 9,
-                  height: 9,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: UiPalette.forTheme(theme).accent,
+  Widget _themes() {
+    final c = UiPalette.of(context);
+    return Container(
+      width: 244 * MediaQuery.textScalerOf(context).scale(12) / 12,
+      margin: const EdgeInsets.only(top: 1),
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: c.canvas,
+        border: Border.all(color: c.line),
+        borderRadius: BorderRadius.circular(7),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          for (final theme in DesktopColorTheme.values) ...[
+            if (theme.index > 0) const SizedBox(width: 2),
+            Expanded(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(4),
+                  boxShadow: widget.colorTheme == theme
+                      ? const [
+                          BoxShadow(
+                            color: Color(0x06000000),
+                            offset: Offset(0, 1),
+                            blurRadius: 2,
+                          ),
+                        ]
+                      : null,
+                ),
+                child: TextButton(
+                  key: ValueKey('theme-${theme.name}'),
+                  onPressed: widget.themeBusy
+                      ? null
+                      : () => widget.onThemeChanged(theme),
+                  style: prototypeButton(
+                    context,
+                    foreground: widget.colorTheme == theme ? c.strong : c.muted,
+                    background: widget.colorTheme == theme
+                        ? c.paper
+                        : Colors.transparent,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 6,
+                    ),
+                    side: BorderSide(
+                      color: widget.colorTheme == theme
+                          ? c.line
+                          : Colors.transparent,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 9,
+                        height: 9,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: UiPalette.forTheme(theme).accent,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(_themeNames[theme.index]),
+                    ],
                   ),
                 ),
-                const SizedBox(width: 5),
-                Text(
-                  _themeNames[theme.index],
-                  style: const TextStyle(fontSize: 12),
-                ),
-              ],
+              ),
             ),
-          ),
-        ),
-    ],
-  );
+          ],
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -157,71 +205,106 @@ class _DesktopShellState extends State<DesktopShell> {
               decoration: BoxDecoration(
                 border: Border(bottom: BorderSide(color: colors.line)),
               ),
-              padding: const EdgeInsets.symmetric(horizontal: 24),
+              padding: const EdgeInsets.symmetric(horizontal: 28),
               child: LayoutBuilder(
                 builder: (context, bounds) {
                   final compact =
-                      bounds.maxWidth < 1100 ||
+                      bounds.maxWidth < 1000 ||
                       MediaQuery.textScalerOf(context).scale(14) > 20;
                   final brand = Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(
-                        Icons.layers_outlined,
+                      PrototypeIcon(
+                        PrototypeIconGlyph.layers,
                         size: 26,
                         color: colors.strong,
                       ),
                       const SizedBox(width: 10),
                       Text(
                         '信息授权',
-                        style: Theme.of(
+                        style: prototypeText(
                           context,
-                        ).textTheme.titleMedium?.copyWith(color: colors.strong),
+                          18,
+                          color: colors.strong,
+                          weight: FontWeight.w600,
+                        ),
                       ),
                     ],
                   );
                   final nav = SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: Row(
-                      children: [for (var i = 0; i < 5; i++) _destination(i)],
+                      children: [
+                        for (var i = 0; i < 5; i++) ...[
+                          if (i > 0) const SizedBox(width: 23),
+                          _destination(i),
+                        ],
+                      ],
                     ),
                   );
-                  return compact
-                      ? Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 8),
+                  if (compact) {
+                    return Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          child: Row(
+                            children: [brand, const Spacer(), _themes()],
+                          ),
+                        ),
+                        nav,
+                      ],
+                    );
+                  }
+                  return SizedBox(
+                    height: 71,
+                    child: Row(
+                      children: [
+                        brand,
+                        const SizedBox(width: 24),
+                        nav,
+                        const Spacer(),
+                        _themes(),
+                        if (bounds.maxWidth + 56 > 1320) ...[
+                          const SizedBox(width: 30),
+                          SizedBox(
+                            width: 72,
+                            child: Tooltip(
+                              message: '127.0.0.1:${widget.port}',
                               child: Row(
+                                mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  brand,
-                                  const Spacer(),
-                                  Flexible(child: _themes()),
+                                  Container(
+                                    width: 5,
+                                    height: 5,
+                                    decoration: BoxDecoration(
+                                      color: runtime?.quitting == true
+                                          ? colors.muted
+                                          : colors.accent ==
+                                                const Color(0xff333333)
+                                          ? const Color(0xff59595f)
+                                          : const Color(0xff56795c),
+                                      shape: BoxShape.circle,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    runtime?.quitting == true
+                                        ? '服务已停止'
+                                        : '本机已连接',
+                                    style: prototypeText(
+                                      context,
+                                      11,
+                                      color: colors.muted,
+                                    ),
+                                  ),
                                 ],
                               ),
                             ),
-                            nav,
-                          ],
-                        )
-                      : Row(
-                          children: [
-                            brand,
-                            const SizedBox(width: 28),
-                            Expanded(child: nav),
-                            const SizedBox(width: 12),
-                            _themes(),
-                            if (bounds.maxWidth > 1300) ...[
-                              const SizedBox(width: 18),
-                              Tooltip(
-                                message: '127.0.0.1:${widget.port}',
-                                child: StatusLabel(
-                                  runtime?.quitting == true ? '服务已停止' : '本机已连接',
-                                  active: runtime?.quitting != true,
-                                ),
-                              ),
-                            ],
-                          ],
-                        );
+                          ),
+                        ],
+                      ],
+                    ),
+                  );
                 },
               ),
             ),

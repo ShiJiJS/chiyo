@@ -30,6 +30,9 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
+      debugPrint(
+        'D1_NATIVE_VIEW physical=${tester.view.physicalSize} dpr=${tester.view.devicePixelRatio} logical=${tester.view.physicalSize / tester.view.devicePixelRatio} dpi=${96 * tester.view.devicePixelRatio}',
+      );
       await tester.tap(find.byKey(const ValueKey('theme-green')));
       await tester.pumpAndSettle();
       expect(fixture.service.owner.colorTheme, DesktopColorTheme.green);
@@ -109,18 +112,36 @@ void main() {
       expect((await read(addressId))['status'], 'unauthorized');
       await tester.pump(const Duration(seconds: 2));
       final usernameChoice = find.byKey(ValueKey('field-$usernameId'));
-      await tester.ensureVisible(usernameChoice);
+      await tester.scrollUntilVisible(
+        usernameChoice,
+        150,
+        scrollable: find
+            .descendant(
+              of: find.byKey(PageStorageKey('detail-$id')),
+              matching: find.byType(Scrollable),
+            )
+            .first,
+      );
       await tester.pumpAndSettle();
+      const hold = int.fromEnvironment('D1_VISUAL_HOLD_SECONDS');
+      if (hold > 0) {
+        debugPrint('D1_VISUAL_READY request=$id');
+        await tester.runAsync(
+          () => Future<void>.delayed(Duration(seconds: hold.clamp(0, 60))),
+        );
+      }
       await tester.tap(usernameChoice);
       await tester.pump();
-      await tester.tap(find.text('补选或改选字段'));
+      await tester.tap(find.text('调整提供范围 / 补选其他信息'));
       await tester.pumpAndSettle();
       final additionalChoice = find.byKey(
-        ValueKey('field-${additional.fields.single.id}'),
+        ValueKey('scope-field-${additional.fields.single.id}'),
       );
       await tester.ensureVisible(additionalChoice);
       await tester.pumpAndSettle();
       await tester.tap(additionalChoice);
+      await tester.tap(find.byKey(const ValueKey('scope-apply')));
+      await tester.pumpAndSettle();
       final approve = find.byKey(const ValueKey('approve-selection'));
       await tester.ensureVisible(approve);
       await tester.pumpAndSettle();
@@ -165,7 +186,7 @@ void main() {
       await tester.pump(const Duration(seconds: 2));
       await tester.tap(find.byKey(ValueKey('request-$taskId')));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('批准整理'));
+      await tester.tap(find.text('批准整理范围'));
       await tester.pumpAndSettle();
       expect(
         (await command({
@@ -188,6 +209,8 @@ void main() {
       );
       await tester.pump(const Duration(seconds: 1));
       expect(find.text('查看整理结果'), findsOneWidget);
+      await tester.ensureVisible(find.text('查看整理结果'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('查看整理结果'));
       await tester.pumpAndSettle();
       expect(find.text('本次未改动分类或标签。'), findsOneWidget);

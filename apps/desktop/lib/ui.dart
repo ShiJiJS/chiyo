@@ -19,11 +19,11 @@ ThemeData informationTheme([
 ]) {
   final colors = UiPalette.forTheme(colorTheme);
   final body = TextStyle(
-    fontFamily: 'AppSans',
+    fontFamily: 'ProductSans',
     fontSize: 14,
     fontWeight: FontWeight.w400,
     letterSpacing: 0,
-    height: 1.55,
+    height: 1.5,
     color: colors.ink,
   );
   final texts = TextTheme(
@@ -68,7 +68,7 @@ ThemeData informationTheme([
   );
   final border = OutlineInputBorder(
     borderRadius: BorderRadius.all(Radius.circular(6)),
-    borderSide: BorderSide(color: Color(0xffc0cbd2)),
+    borderSide: BorderSide(color: colors.line),
   );
   return ThemeData(
     extensions: [colors],
@@ -80,7 +80,7 @@ ThemeData informationTheme([
         TargetPlatform.linux: DesktopPageTransitionsBuilder(),
       },
     ),
-    fontFamily: 'AppSans',
+    fontFamily: 'ProductSans',
     textTheme: texts,
     primaryTextTheme: texts,
     colorScheme: ColorScheme.light(
@@ -92,7 +92,7 @@ ThemeData informationTheme([
       surfaceContainerLow: colors.rail,
       onSurface: colors.ink,
       onSurfaceVariant: colors.muted,
-      outline: Color(0xffa5a8b0),
+      outline: colors.line,
       outlineVariant: colors.line,
       error: colors.danger,
     ),
@@ -130,7 +130,7 @@ ThemeData informationTheme([
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: button.copyWith(
         foregroundColor: controlInk,
-        side: WidgetStatePropertyAll(BorderSide(color: Color(0xffc0cbd2))),
+        side: WidgetStatePropertyAll(BorderSide(color: colors.line)),
       ),
     ),
     textButtonTheme: TextButtonThemeData(
@@ -253,7 +253,7 @@ ThemeData informationTheme([
       backgroundColor: colors.ink,
       shape: shape,
       contentTextStyle: TextStyle(
-        fontFamily: 'AppSans',
+        fontFamily: 'ProductSans',
         fontSize: 14,
         fontWeight: FontWeight.w400,
         color: colors.paper,
@@ -354,34 +354,72 @@ class PageHeading extends StatelessWidget {
 }
 
 class QuietNotice extends StatelessWidget {
-  const QuietNotice(this.text, {super.key, this.warning = false});
+  const QuietNotice(
+    this.text, {
+    super.key,
+    this.warning = false,
+    this.panel = false,
+  });
   final String text;
   final bool warning;
+  final bool panel;
   @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 8),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Icon(
-          warning ? Icons.error_outline : Icons.info_outline,
-          size: 17,
-          color: warning
-              ? UiPalette.of(context).danger
-              : UiPalette.of(context).muted,
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Text(
-            text,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: warning ? UiPalette.of(context).danger : null,
+  Widget build(BuildContext context) => panel
+      ? Container(
+          margin: const EdgeInsets.symmetric(vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 19, vertical: 16),
+          decoration: BoxDecoration(
+            color: UiPalette.of(context).noticeWarningBackground,
+            border: Border.all(
+              color: UiPalette.of(context).noticeWarningBorder,
             ),
           ),
-        ),
-      ],
-    ),
-  );
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(
+                Icons.info_outline,
+                size: 18,
+                color: UiPalette.of(context).noticeWarningInk,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  text,
+                  style: TextStyle(
+                    fontSize: 13,
+                    height: 1.9,
+                    color: UiPalette.of(context).noticeWarningInk,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        )
+      : Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(
+                warning ? Icons.error_outline : Icons.info_outline,
+                size: 17,
+                color: warning
+                    ? UiPalette.of(context).danger
+                    : UiPalette.of(context).muted,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  text,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: warning ? UiPalette.of(context).danger : null,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
 }
 
 class StatusLabel extends StatelessWidget {
@@ -403,9 +441,9 @@ class StatusLabel extends StatelessWidget {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: active
-              ? UiPalette.of(context).success
+              ? UiPalette.of(context).statusLive
               : attention
-              ? UiPalette.of(context).warning
+              ? UiPalette.of(context).statusAttention
               : UiPalette.of(context).muted,
         ),
       ),
@@ -415,9 +453,9 @@ class StatusLabel extends StatelessWidget {
           label,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
             color: active
-                ? UiPalette.of(context).success
+                ? UiPalette.of(context).statusLive
                 : attention
-                ? UiPalette.of(context).warning
+                ? UiPalette.of(context).statusAttention
                 : UiPalette.of(context).muted,
           ),
         ),

@@ -2,16 +2,16 @@
 
 2026-10-17，Issue #23。延续 #22 已确认的顶部模块导航、左收件箱—文档核对—决定栏和紫棠、松石、雾蓝、灰底黑白四主题。只使用虚构资料、临时加密库、随机端口和隔离 DPAPI 密钥；没有访问真实 infos、应用资料库或 Codex 配置。
 
-**状态：WIP 检查点，D1 未完成。** 用户在看到实际截图后明确要求完全按 HTML 原型执行，当前 Flutter 的结构/功能验证和此前视觉润色复核不能作为忠实还原验收。以下记录已实现行为和中间证据；下一步按同尺寸原型精确还原字体字号、导航高度、列宽、留白、纸张边界、决定栏和全部控件，不关闭 Issue。
+**状态：本次提供的 #23 状态样式已完成独立定向复核，交主集成复验；D1 保持开放，人工系统气泡点击仍未验收。** `44c3318` 是此前行为/主题 WIP 检查点，不是视觉验收基线。用户要求实际 Flutter 严格按已确认 HTML，随后按 `prototype-fidelity.md` 和同尺寸 canonical 参照逐项修正；此记录区分已测业务、离屏视觉、真实窗口观察及未验项目，不以旧结构评审替代还原结论。
 
 ## 实现
 
-- `ui_palette.dart` 提供继承式 `UiPalette` ThemeExtension，所有桌面原 `UiColors` 引用、共享表面、输入、菜单、对话框和窗口条均改为从 context 读色。`informationTheme([DesktopColorTheme])` 是统一入口，不使用可变静态颜色。警告与危险状态保留语义颜色。顶部共享导航采用“信息库”；信息库内部页面迁移由 #24 承接。
-- `workspace_access.dart` 的 owner 公共接缝统一普通读取与整理请求：`queryInbox(search, filter, offset, limit, focusRequestId)` 返回有界 `InboxPage`，limit 为 1–100。先按 createdAt 倒序，再按 ID 排序；搜索聊天、用途、ID 和信息名称。默认页 20 条。底层仍扫描既有 repository 内存快照，不声称已经改成 SQL 游标加载。
+- `ui_palette.dart` 提供继承式 `UiPalette` ThemeExtension，所有桌面原 `UiColors` 引用、共享表面、输入、菜单、对话框和窗口条均改为从 context 读色。`informationTheme([DesktopColorTheme])` 是统一入口，不使用可变静态颜色。警告与危险状态保留语义颜色；mono的status与notice.warn按原CSS使用灰阶，表单/审计错误仍红色。顶部共享导航采用“信息库”；信息库内部页面迁移由 #24 承接。
+- `workspace_access.dart` 的 owner 公共接缝统一普通读取与整理请求：`queryInbox(search, filter, offset, limit, focusRequestId)` 返回有界 `InboxPage`，limit 为 1–100。先按 createdAt 倒序，再按 ID 排序；搜索聊天、用途、ID 和信息名称。公共查询默认页 20 条；审批界面按原型每页 8 条。底层仍扫描既有 repository 内存快照，不声称已经改成 SQL 游标加载。
 - 搜索/状态/翻页不保留不匹配的旧详情；当前对象、字段和期限草稿、请求列表/文档/最终范围滚动按稳定身份保存。新请求插入导致当前对象移到另一页时，仍定位正在核对的对象，避免批准错对象。`/` 聚焦搜索；大字模式保留请求选择、状态和翻页。
 - 普通读取继续显示原申请、最终选择、遗漏/补选数量，支持跨信息项补选和 1–10080 分钟自定义期限，独立申请默认 480 分钟。字段值先提供有界预览，长值可打开完整内容。已处理、取消、过期请求不出现批准/拒绝动作。
 - 决定按请求防重复操作。无效范围保持 pending 和原选择，可修正后重试；审计写入失败则重读真实 approved 终态、阻止内容读取，并提供“重试保存记录”，不会重复批准。服务不可用保留已有视图并停用决定。
-- 整理批准仍是一次决定：固定所选身份/版本、标题与说明及分类标签元数据，并允许分类标签写入，最长 30 分钟。完成（含无改动）即结束能力；冲突不应用整批。请求与结果使用同一个 task ID，结果入口复用真实记录，不新增第二次确认。旧版 proposed 方案继续沿原审阅语义处理。
+- 整理批准仍是一次决定：固定所选身份/版本、标题与说明及分类标签元数据，并允许分类标签写入，界面提供真实 15/30 分钟，未传参数仍默认 30 分钟，公开服务拒绝非正数或超过 30 分钟。期限草稿按请求保留。完成（含无改动）即结束能力；冲突不应用整批。请求与结果使用同一个 task ID，结果入口复用真实记录，不新增第二次确认。旧版 proposed 方案继续沿原审阅语义处理。
 - 原生通知只传不具备授权能力的 request ID。Windows 通知气泡与 macOS 通知点击将 ID 交回 owner 桌面；通用托盘打开不伪造请求定位。跳转清除旧搜索并定位到目标页，缺失对象给出明确反馈。通知正文不含 agent 用途、字段或授权材料。
 - Windows 原生 adapter 串行投递气泡，活动消息绑定固定 ID，后续请求/测试通知排队，只有 HIDE/TIMEOUT/USERCLICK 才推进。MethodResult 在实际 Shell 投递时完成；Explorer 重建时更新 tray ID，忽略旧图标回调并拒绝未投递项。依据 [Microsoft Shell_NotifyIcon 文档](https://learn.microsoft.com/en-us/windows/win32/api/shellapi/nf-shellapi-shell_notifyicona) 的排队及终态通知语义，避免“最后一次 notify ID”替代被点击气泡的 ID。native adapter 合约测试覆盖 A/B/测试通知交错、投递失败、隐藏/超时、点击与重置；不是人工气泡点击证据。
 
@@ -25,6 +25,9 @@
 | `_changeTheme` / DesktopShell 回调 | `apps/desktop/lib/main.dart` / desktop_shell.dart | MaterialApp 由保存后的偏好重建；#26 设置入口需将主题选择回调至 app，不能只写设置后局部换色 |
 | `queryInbox` / InboxEntry / InboxPage / InboxFilter | `workspace_access.dart` | owner-only；普通请求仍遵循现有内存生命周期，跨重启的非秘密终态历史由 #26 承接；不是 active grant 的持久化 |
 | `DesktopPlatform.openedRequestId`、`notifyNewRequest(String)` | `desktop_runtime.dart` | opaque ID 的 owner 路由；`runtime.openRequestId/openApprovalsRevision` 交给 Approvals 的 focusRequestId/focusRevision。用户通知启停偏好与运行时抑制由 #26 接入 |
+| `prototypeText / prototypeButton / PrototypeCheck / PrototypeSelectCaret / PrototypeSelfDescription` | `apps/desktop/lib/prototype_ui.dart` | CSS 字号/行高、四圆角按钮、17/16px复选框、native-select V、用途说明继承行盒；正文 ProductSans 仅 Regular400，用已有资产合成粗体。宋体/Georgia/Consolas 用系统，不打包闭源字体 |
+| `PrototypeIcon(PrototypeIconGlyph.*)` | `apps/desktop/lib/prototype_icons.dart` | 原型全部13枚SVG逐路径 painter；默认18、24viewBox、1.65圆描边。助手提交848bde8合入为4aedfee，不用Material近似轮廓 |
+| `OwnerRequestSnapshot.grantLifetime / InboxEntry.organizationRemainingSeconds` | `info_core.dart` / `workspace_access.dart` | 已处理显示真实决定期限，不猜默认值；整理待办倒计时来自服务注入clock，与普通一致，非DateTime.now另算 |
 | `InboxQueue` | `apps/desktop/lib/inbox_queue.dart` | 接受有界 page、独立 controller、选择/查询回调，不拥有业务决定或草稿 |
 
 保留 nav-0…、request-<requestId>、field-<fieldId>、approve-selection、grant-lifetime-<requestId> 等已有自动化语义 key。没有引入凭据申请卡片，后续由 D6 接入。
@@ -38,7 +41,12 @@ SDK：`C:\Users\Todoki\.local\share\flutter\bin`。命令从仓库根目录运�
 ./scripts/test-windows-native.ps1 -FlutterBin C:\Users\Todoki\.local\share\flutter\bin
 # cwd apps/desktop
 flutter test --no-pub test/inbox_workspace_test.dart test/workspace_widget_test.dart test/organization_tasks_test.dart
-flutter test --no-pub tool/capture_workspace.dart
+flutter test --no-pub tool/capture_workspace.dart tool/capture_fidelity.dart
+# 同尺寸四格/叠加/差分，仅QA，原始PNG不改写
+# cwd 仓库根目录
+python apps/desktop/tool/compare_fidelity.py
+# 可选真窗口短暂观察，正常默认0秒；有上限，不产生系统通知
+./scripts/test-windows-native.ps1 -FlutterBin C:\Users\Todoki\.local\share\flutter\bin -VisualHoldSeconds 60
 # cwd packages/info_core
 dart test test/workspace_test.dart
 # 仓库根目录；已有 Windows native build 配置后运行
@@ -51,10 +59,38 @@ $cmake = ((Select-String -LiteralPath apps/desktop/build/windows/x64/CMakeCache.
 
 原生 Windows 检查打开真实 Flutter 窗口，真实 JSON-lines CLI 经 loopback 申请→桌面移除原字段/跨项补选→claim 返回精确范围→重复读取→未批字段拒绝→撤销后拒绝。随后 CLI 发起整理→桌面一次批准→读取元数据→无改动完成→后续 metadata 只返回 `{status:confirmed}`，不返回元数据；桌面可打开同一整理结果。主题通过桌面控件保存，再关闭隔离库并用 SQLCipher/DPAPI 重新打开核对偏好。
 
-截图脚本加载现有 AppSans、MaterialIcons 和本机 Consolas，使用真实 Flutter 渲染，fixture 含 241 请求、24 字段和长字段名/长实际值。输出在 [evidence/23-workspace](evidence/23-workspace)：1280×800、1440×900、200% 字体、四主题；`*-last-field.png` 是实际滚到末字段后的画面。脚本同时验证首个完整字段在大字模式的决定区之前、滚到末字段仍能点击批准、决定位置不动、完整值入口可打开返回，没有 overflow。截图是离屏 Flutter 证据；真实原生窗口由独立 native 命令证明，两者没有混同。
+精确还原截图加载已有 NotoSansSC-Regular 为 ProductSans，另从 Windows Fonts 载入 SimSun、Georgia、Consolas（不写入发布资产），内容视口 DPR=1、文字100%。常规 fixture 为27条请求、8待办，选中“部署北辰文档站”，两信息/四字段；未申请的额外合成catalog只使补选弹窗具有与原型相近的真实内容密度。压力 fixture 独立为241请求/24字段。`debugDisableShadows=false` 用于截图真实blur；初次粗阴影是widget-test默认去blur后的实色offset影，已纠正，并在测试结束前恢复调试变量。
 
-独立无评分视觉评审一轮、定向复核一轮：原评审发现 200% 首屏没有完整字段、队列/正文滚动提示缺失、右摘要黑色粗滚动条。已合并大字控制区并去掉重复定位、保留完整字号与必要说明；三块滚动区统一细主题灰阶滚动条。主 Agent 和独立复核均查看修改后的首字段/末字段截图，三项可见问题已解决。未重新探索风格。没有网页截图工具的 lint 提示；视觉评审不替代功能/焦点/原生测试。
+| 证据 | 内容及限制 |
+| --- | --- |
+| `fidelity/purple-1440.png`、`green-1440.png`、`purple-1280.png` | 真实Flutter离屏，分别1440×900、1440×900、1280×800；和canonical同主题同视口，非HTML截图 |
+| `fidelity/purple-1440-scope.png` | 780宽、最大viewport-64，自然收缩；blur背景、父子各15px stable gutter、48ch两行说明、相邻margin折叠的28px字段节奏、固定footer；目录批量入口仍可操作 |
+| `*-organization.png`、`*-organization-active.png`、`*-organization-complete.png` | 真15分钟选择、切换离开再回来保留草稿，一次批准后autoapply、无改动完成；信息数量不同于canonical的预置四项完成记录，未补造业务范围 |
+| `*-handled.png`、`*-audit-failure.png`、`*-empty.png`、`*-offline.png` | 真实终态/保存失败后重试、无匹配结果、关闭隔离service后保留视图并停用决定；错误不写成“未创建授权” |
+| `*-comparison.png` | `compare_fidelity.py`生成的HTML/Flutter/50%overlay/3倍差异四格，无缩放；差异只是定位区域，不计算通过分数 |
+| `inbox-1280/1440/blue/mono/200*.png` | 压力样例四主题/200%和实际滚到末字段；验证首个完整字段、独立滚动、固定决定位置及完整值弹窗，不替代常规同内容对照 |
+
+独立 fidelity 评审指出并迭代修正：56高顶栏/嵌套决定卡/纵排字段等首版结构；随后定位并修正持续scroll thumb、期限框/V及动作边界、主题描边、请求标题0.5字距、用途说明父行内行盒、字段组间累积偏移、scope行margin折叠与双gutter、handled期限/clock层级、组织路径右对齐及整栏边线。常规实色线核对：范围456；字段614/654/772/812；批准620–664；tab分界249。已处理线404/562/602/720/760、组织线404/549/607也与对应HTML相同。这些坐标用于定位和防回归，不代替独立人眼最终结论。
+
+文字仍有 Chromium RGB 次像素与 Flutter 灰阶栅格的边缘差异；调色不补偿AA。公共色值与原CSS一致。200%采用同视觉语言的紧凑控制区和固定决定区，保留完整文字缩放；它是原型未覆盖的可访问性延伸，不能据此改正常首屏布局。
+
+真实 Windows 原生测试输出 physical2534×1414、DPR2、logical1267×707，推算192DPI。主Agent另用Computer Use观察并截图唯一隔离exe：真实中文宋体、顶栏/队列/主题已出现；窗口含原生caption和fixture惰性平台不可用提示，不冒充1280×800 canonical内容视口。观察中拉丁宋体有较细/稀疏笔画，可能与原生栅格/DPI/WGC有关，本轮未据此改字体/颜色，也未将其认定为所有原生字号已像素一致。
+
+原生初次复跑因懒加载字段未建树，改为真实滚动；下一次因小高度下结果入口在屏外，改为真实滚入再点，未删业务断言。最终真实CLI/窗口闭环通过。`-VisualHoldSeconds 0`默认不停留，显式1–60秒才在`D1_VISUAL_READY`后真实停留；该入口只为观察隔离窗口，不模拟任何通知点击。
 
 真实 macOS 运行、macOS 通知投递/点击及跨平台互通按用户指示延期；Windows 原生通知气泡点击没有人工操作验收，已验证 Dart owner 路由并实际编译对应 Windows runner。没有因此宣称全平台交付，也没有关闭 Issue 或修改 GitHub PR。
 
-当前完整 `scripts/check.ps1 -Offline` 通过：CLI、Core、Storage 全部分析/测试及 desktop analyze、60 项桌面测试。原生 Windows CLI 流程和主题重新打开检查通过；新增串行通知 adapter 的 C++ 合约检查通过。后续手动真实气泡入口暂按用户最新指示停止，先保存本检查点并完成精确还原。源码和集成基点见本记录所在 Git 提交；没有把上述检查写成 D1 的视觉完成。
+最终完整 `scripts/check.ps1 -Offline` 通过：CLI18、Core84、Storage41全部分析/测试及desktop analyze、60项桌面测试。原生 Windows CLI 流程和主题重新打开检查通过；新增串行通知 adapter 的 C++ 合约检查通过。为优先还原样式，本轮未执行人工系统气泡点击；仅有路由、队列及编译证据，后续Windows验收仍需尝试。本次精确还原结果另交主Agent复核。源码和集成基点见本记录所在 Git 提交；没有把上述检查写成 D1 的视觉完成。
+
+
+## 本轮保存范围
+
+最终基线合并到主集成 `a225606`（canonical状态参照与规范）；后续若主集成再前进，交付前再合并。没有修改GitHub/PR、没有关闭Issue，也没有开始服务器同步。为优先还原样式，本轮未执行人工系统气泡点击；通知定位的Dart与C++队列边界及原生编译已测，后续Windows验收仍需尝试真实气泡点击。
+
+
+最终针对采集为9项（常规紫/绿/1280/mono及压力四主题/200%），全部通过。mono另有整理/离线/审计失败状态图；警告panel取样为背景`#f4f4f5`、边线`#c6c6ca`、文字`#3f3f44`，审计错误保持红色。`QuietNotice(panel:true)`用于CSS notice.warn，默认inline warning历史调用仍表示表单/保存错误，避免把flow-error一并灰化。
+
+
+最终独立定向复核已收口：scope组锚265/366/467/568/669、placeholder374、关闭叉1042–1055；handled期限555/595与摘要线616；整理期限455/495、完成摘要线516均对应。mono常规/整理/离线未见明显主题渗色。主Agent已实际查看scope、complete、mono、empty、audit及200%首末字段，并以HTML为参考做最后compare；不将差分指标当通过评分。结论只限本票已提供状态，不推断全软件已还原。
+
+最后源码的Windows原生闭环再次通过（`.scratch/d1-final-source-native.log`），包含真实CLI申请/范围/默认8h/重复读取/拒绝未批/撤销、一次整理与无改动结束、真实结果入口及加密库主题重开；最终命令和范围见上文。主Agent接下来在主集成独立复验。本票未执行人工系统气泡点击，不能据此关闭通知定位验收条目。

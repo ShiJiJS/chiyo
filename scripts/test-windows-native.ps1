@@ -1,5 +1,6 @@
 param(
-    [Parameter(Mandatory = $true)][string]$FlutterBin
+    [Parameter(Mandatory = $true)][string]$FlutterBin,
+    [ValidateRange(0,60)][int]$VisualHoldSeconds=0
 )
 
 # Opens a real Flutter Windows test window with an isolated temporary library.
@@ -13,6 +14,6 @@ $dart = (Get-Item -LiteralPath (Join-Path $FlutterBin 'cache/dart-sdk/bin/dart.e
 $cliDirectory = (Get-Item -LiteralPath (Join-Path $projectRoot 'packages/info_cli')).FullName
 Push-Location (Join-Path $projectRoot 'apps/desktop')
 try {
-    & $flutter test integration_test/desktop_cli_test.dart -d windows "--dart-define=DART_EXECUTABLE=$dart" "--dart-define=CLI_DIRECTORY=$cliDirectory"
+    & $flutter test integration_test/desktop_cli_test.dart -d windows "--dart-define=DART_EXECUTABLE=$dart" "--dart-define=CLI_DIRECTORY=$cliDirectory" "--dart-define=D1_VISUAL_HOLD_SECONDS=$VisualHoldSeconds"
     if ($LASTEXITCODE -ne 0) { throw 'Isolated Windows native acceptance failed.' }
 } finally { Pop-Location }

@@ -11,6 +11,29 @@ class FailingSettings extends MemoryInformationRepository {
 }
 
 void main() {
+  test('handled inbox snapshot exposes the actual decided lifetime', () async {
+    final service = InformationService.fictional(
+      clock: () => DateTime.utc(2026, 10, 17),
+    );
+    addTearDown(service.close);
+    final session = service.agent.openSession('Lifetime');
+    final request = service.agent.request(session, 'Read', [
+      const FieldRef('demo-server', 'host'),
+    ]);
+    expect(service.owner.requests.single.grantLifetime, isNull);
+    service.owner.approve(request.id, [
+      const FieldRef('demo-server', 'host'),
+    ], lifetime: const Duration(minutes: 15));
+    expect(
+      service.owner.requests.single.grantLifetime,
+      const Duration(minutes: 15),
+    );
+    service.owner.revoke(request.id);
+    expect(
+      service.owner.requests.single.grantLifetime,
+      const Duration(minutes: 15),
+    );
+  });
   test(
     'theme survives reopening and failed changes keep the saved preference',
     () async {

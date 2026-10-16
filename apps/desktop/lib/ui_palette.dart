@@ -21,6 +21,17 @@ class UiPalette extends ThemeExtension<UiPalette> {
   Color get success => const Color(0xff27735f);
   Color get danger => const Color(0xffb54143);
   Color get warning => const Color(0xff8d651e);
+  bool get isMono => accent == const Color(0xff333333);
+  Color get statusAttention =>
+      isMono ? const Color(0xff505055) : const Color(0xff986409);
+  Color get statusLive =>
+      isMono ? const Color(0xff505055) : const Color(0xff38694c);
+  Color get noticeWarningBackground =>
+      isMono ? const Color(0xfff4f4f5) : const Color(0xfffaf5e9);
+  Color get noticeWarningBorder =>
+      isMono ? const Color(0xffc6c6ca) : const Color(0xffe4d4b2);
+  Color get noticeWarningInk =>
+      isMono ? const Color(0xff3f3f44) : const Color(0xff745521);
   static UiPalette of(BuildContext context) =>
       Theme.of(context).extension<UiPalette>() ??
       forTheme(DesktopColorTheme.purple);

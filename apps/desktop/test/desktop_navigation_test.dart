@@ -30,11 +30,13 @@ void main() {
                 .first,
           );
           expect(
-            (container.decoration! as BoxDecoration).color,
+            ((container.decoration! as BoxDecoration).border! as Border)
+                .bottom
+                .color,
             i == active
                 ? UiPalette.of(
                     tester.element(find.byKey(ValueKey('nav-$i'))),
-                  ).selected
+                  ).accent
                 : Colors.transparent,
           );
         }
@@ -49,10 +51,12 @@ void main() {
           checkSelection(i);
         }
         await tester.pumpAndSettle();
-        final title = find.descendant(
-          of: find.byType(PageHeading),
-          matching: find.text(i == 0 ? '请求收件箱' : headings[i]),
-        );
+        final title = i == 0
+            ? find.text('请求收件箱')
+            : find.descendant(
+                of: find.byType(PageHeading),
+                matching: find.text(headings[i]),
+              );
         expect(title, findsOneWidget);
         expect(
           tester.getTopLeft(title).dy,

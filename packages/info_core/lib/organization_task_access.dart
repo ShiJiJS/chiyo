@@ -26,36 +26,42 @@ extension OwnerOrganizationTasks on OwnerAccess {
       organizationState(task) == OrganizationTaskState.expired ||
       organizationState(task) == OrganizationTaskState.cancelled;
 
-  Future<void> approveOrganization(String id, List<String> selected) =>
-      _serialize(() async {
-        final task = _organization(id);
-        if (organizationState(task) != OrganizationTaskState.pending) {
-          throw const AccessFailure('invalid_request');
-        }
-        final ids = selected.toSet();
-        if (ids.isEmpty ||
-            ids.length != selected.length ||
-            ids.any(
-              (id) =>
-                  !task.itemVersions.containsKey(id) ||
-                  !information.any((i) => i.id == id),
-            )) {
-          throw const AccessFailure('invalid_scope');
-        }
-        final now = _service._clock();
-        await _service._repository.saveOrganizationTask(
-          task.withState(
-            OrganizationTaskState.active,
-            approvedAt: now,
-            expiresAt: now.add(const Duration(minutes: 30)),
-            autoApply: true,
-            itemVersions: {
-              for (final item in information.where((i) => ids.contains(i.id)))
-                item.id: item.version,
-            },
-          ),
-        );
-      });
+  Future<void> approveOrganization(
+    String id,
+    List<String> selected, {
+    Duration lifetime = const Duration(minutes: 30),
+  }) => _serialize(() async {
+    final task = _organization(id);
+    if (organizationState(task) != OrganizationTaskState.pending) {
+      throw const AccessFailure('invalid_request');
+    }
+    if (lifetime <= Duration.zero || lifetime > const Duration(minutes: 30)) {
+      throw const AccessFailure('invalid_duration');
+    }
+    final ids = selected.toSet();
+    if (ids.isEmpty ||
+        ids.length != selected.length ||
+        ids.any(
+          (id) =>
+              !task.itemVersions.containsKey(id) ||
+              !information.any((i) => i.id == id),
+        )) {
+      throw const AccessFailure('invalid_scope');
+    }
+    final now = _service._clock();
+    await _service._repository.saveOrganizationTask(
+      task.withState(
+        OrganizationTaskState.active,
+        approvedAt: now,
+        expiresAt: now.add(lifetime),
+        autoApply: true,
+        itemVersions: {
+          for (final item in information.where((i) => ids.contains(i.id)))
+            item.id: item.version,
+        },
+      ),
+    );
+  });
   Future<void> denyOrganization(String id) => _serialize(() async {
     final task = _organization(id);
     if (organizationState(task) != OrganizationTaskState.pending) {

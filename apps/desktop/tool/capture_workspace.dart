@@ -22,9 +22,27 @@ void main() {
           ))
           .load();
     }
+    for (final f in {
+      'SimSun': 'simsun.ttc',
+      'Georgia': 'georgia.ttf',
+    }.entries) {
+      await (FontLoader(f.key)..addFont(
+            Future.value(
+              ByteData.sublistView(
+                await File(
+                  '${Platform.environment['WINDIR']}/Fonts/${f.value}',
+                ).readAsBytes(),
+              ),
+            ),
+          ))
+          .load();
+    }
     await (FontLoader(
       'MaterialIcons',
     )..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'))).load();
+    await (FontLoader(
+      'ProductSans',
+    )..addFont(rootBundle.load('assets/fonts/NotoSansSC-Regular.otf'))).load();
     await (FontLoader('AppSans')
           ..addFont(rootBundle.load('assets/fonts/NotoSansSC-Regular.otf'))
           ..addFont(rootBundle.load('assets/fonts/NotoSansSC-Medium.otf')))
@@ -63,6 +81,8 @@ void main() {
     ),
   ]) {
     testWidgets('capture ${scenario.name}', (tester) async {
+      debugDisableShadows = false;
+      addTearDown(() => debugDisableShadows = true);
       tester.view.physicalSize = scenario.size;
       tester.view.devicePixelRatio = 1;
       tester.platformDispatcher.textScaleFactorTestValue = scenario.scale;
@@ -177,6 +197,7 @@ void main() {
       await tester.pumpAndSettle();
       await tester.pumpWidget(const SizedBox());
       await tester.runAsync(service.close);
+      debugDisableShadows = true;
     });
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:info_core/info_core.dart';
 import 'ui.dart';
+import 'prototype_ui.dart';
 
 /// Shared bounded inbox surface; detail/draft state remains with its workspace.
 class InboxQueue extends StatelessWidget {
@@ -30,73 +31,187 @@ class InboxQueue extends StatelessWidget {
   final ScrollController scrollController;
   @override
   Widget build(BuildContext context) {
-    final colors = UiPalette.of(context);
+    final c = UiPalette.of(context);
+    final muted = prototypeText(context, 11, color: c.muted);
     return Material(
-      color: colors.rail,
+      color: c.rail,
       child: Container(
         decoration: BoxDecoration(
-          border: Border(right: BorderSide(color: colors.line)),
+          border: Border(right: BorderSide(color: c.line)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
+              padding: const EdgeInsets.fromLTRB(21, 29, 21, 0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  PageHeading('请求收件箱', subtitle: '${page.pendingCount} 条待处理'),
-                  DesktopTextField(
-                    key: const ValueKey('inbox-search'),
-                    maxLength: 2000,
-                    controller: searchController,
-                    focusNode: searchFocus,
-                    decoration: InputDecoration(
-                      hintText: '搜索聊天、信息名称',
-                      prefixIcon: const Icon(Icons.search, size: 17),
-                      suffixIcon: searchController.text.isEmpty
-                          ? null
-                          : IconButton(
-                              tooltip: '清除搜索',
+                  Row(
+                    children: [
+                      Text(
+                        '请求收件箱',
+                        style: prototypeText(
+                          context,
+                          21,
+                          weight: FontWeight.w700,
+                        ),
+                      ),
+                      const Spacer(),
+                      Text(
+                        '${page.total}',
+                        style: prototypeText(
+                          context,
+                          24,
+                          color: c.muted,
+                          family: 'Georgia',
+                          height: 1.2,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 22),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 9.5,
+                    ),
+                    decoration: BoxDecoration(
+                      color: c.canvas,
+                      border: Border.all(color: c.line),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Row(
+                      children: [
+                        PrototypeIcon(
+                          PrototypeIconGlyph.search,
+                          color: c.muted,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: TextField(
+                            key: const ValueKey('inbox-search'),
+                            controller: searchController,
+                            focusNode: searchFocus,
+                            maxLength: 2000,
+                            style: prototypeText(context, 13),
+                            decoration: InputDecoration(
+                              isCollapsed: true,
+                              isDense: true,
+                              border: InputBorder.none,
+                              enabledBorder: InputBorder.none,
+                              focusedBorder: InputBorder.none,
+                              filled: false,
+                              hintText: '搜索聊天、信息名称',
+                              hintStyle: prototypeText(
+                                context,
+                                13,
+                                color: c.muted,
+                              ),
+                              counterText: '',
+                              contentPadding: EdgeInsets.zero,
+                            ),
+                            onChanged: onSearch,
+                          ),
+                        ),
+                        if (searchController.text.isEmpty)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 4,
+                              vertical: 1,
+                            ),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: c.line),
+                              borderRadius: BorderRadius.circular(3),
+                            ),
+                            child: Text(
+                              '/',
+                              style: prototypeText(
+                                context,
+                                12,
+                                color: c.muted,
+                                family: 'Consolas',
+                                height: 1.2,
+                              ),
+                            ),
+                          )
+                        else
+                          SizedBox(
+                            width: 18,
+                            height: 20,
+                            child: TextButton(
+                              style: prototypeButton(context),
                               onPressed: () {
                                 searchController.clear();
                                 onSearch('');
                               },
-                              icon: const Icon(Icons.close, size: 16),
+                              child: const Text('×'),
                             ),
-                    ),
-                    onChanged: onSearch,
-                  ),
-                  Wrap(
-                    spacing: 6,
-                    children: [
-                      for (final f in InboxFilter.values)
-                        TextButton(
-                          key: ValueKey('inbox-filter-${f.name}'),
-                          onPressed: () => onFilter(f),
-                          style: TextButton.styleFrom(
-                            foregroundColor: filter == f
-                                ? colors.strong
-                                : colors.muted,
-                            backgroundColor: filter == f
-                                ? colors.selected
-                                : null,
                           ),
-                          child: Text(switch (f) {
-                            InboxFilter.all => '全部',
-                            InboxFilter.pending => '待处理',
-                            InboxFilter.handled => '已处理',
-                          }),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 22),
+                  Row(
+                    children: [
+                      for (final f in InboxFilter.values) ...[
+                        if (f != InboxFilter.all) const SizedBox(width: 21),
+                        Container(
+                          decoration: BoxDecoration(
+                            border: Border(
+                              bottom: BorderSide(
+                                color: filter == f
+                                    ? c.accent
+                                    : Colors.transparent,
+                                width: 2,
+                              ),
+                            ),
+                          ),
+                          child: TextButton(
+                            key: ValueKey('inbox-filter-${f.name}'),
+                            onPressed: () => onFilter(f),
+                            style: prototypeButton(
+                              context,
+                              padding: const EdgeInsets.only(bottom: 12),
+                              foreground: filter == f ? c.strong : c.muted,
+                              radius: 0,
+                            ),
+                            child: Text(
+                              switch (f) {
+                                InboxFilter.all => '全部 ${page.total}',
+                                InboxFilter.pending =>
+                                  '待处理 ${page.pendingCount}',
+                                InboxFilter.handled =>
+                                  '已处理 ${page.total - page.pendingCount}',
+                              },
+                              style: prototypeText(
+                                context,
+                                12,
+                                color: filter == f ? c.strong : c.muted,
+                                weight: filter == f
+                                    ? FontWeight.w700
+                                    : FontWeight.w400,
+                              ),
+                            ),
+                          ),
                         ),
+                      ],
                     ],
                   ),
-                  const SizedBox(height: 12),
-                  Text('最新请求优先', style: Theme.of(context).textTheme.bodySmall),
-                  const SizedBox(height: 10),
                 ],
               ),
             ),
-            const Divider(),
+            Divider(height: 1, color: c.line),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(21, 18, 21, 12),
+              child: Row(
+                children: [
+                  Text('今天的请求', style: muted),
+                  const Spacer(),
+                  Text('最新请求优先', style: muted),
+                ],
+              ),
+            ),
             Expanded(
               child: page.entries.isEmpty
                   ? const EmptyWorkspace(
@@ -106,65 +221,119 @@ class InboxQueue extends StatelessWidget {
                     )
                   : Scrollbar(
                       controller: scrollController,
-                      thumbVisibility: true,
+                      thumbVisibility: page.total > 100,
                       child: ListView.builder(
                         controller: scrollController,
                         key: PageStorageKey(
                           'inbox-${filter.name}-${searchController.text}-${page.offset}',
                         ),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 10,
-                        ),
+                        padding: EdgeInsets.zero,
                         itemCount: page.entries.length,
                         itemBuilder: (context, index) {
                           final entry = page.entries[index];
-                          final selected = entry.id == focused;
-                          return Material(
-                            color: selected
-                                ? colors.selected
-                                : Colors.transparent,
-                            borderRadius: BorderRadius.circular(6),
-                            child: InkWell(
-                              key: ValueKey('request-${entry.id}'),
-                              onTap: () => onSelected(entry.id),
-                              borderRadius: BorderRadius.circular(6),
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  border: Border(
-                                    bottom: BorderSide(color: colors.line),
+                          final chosen = entry.id == focused;
+                          final count =
+                              entry.access?.fields.length ??
+                              entry.organization!.itemVersions.length;
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            child: Material(
+                              color: chosen ? c.selected : Colors.transparent,
+                              borderRadius: BorderRadius.circular(
+                                chosen ? 6 : 0,
+                              ),
+                              child: InkWell(
+                                key: ValueKey('request-${entry.id}'),
+                                onTap: () => onSelected(entry.id),
+                                borderRadius: BorderRadius.circular(6),
+                                child: Container(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: chosen ? 16 : 16.5,
                                   ),
-                                ),
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 15,
-                                ),
-                                child: Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.stretch,
-                                  children: [
-                                    Text(
-                                      entry.chatLabel,
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: Theme.of(
-                                        context,
-                                      ).textTheme.titleSmall,
+                                  decoration: BoxDecoration(
+                                    border: chosen
+                                        ? Border.all(
+                                            color: Color.lerp(
+                                              c.line,
+                                              c.accent,
+                                              .3,
+                                            )!,
+                                          )
+                                        : Border(
+                                            bottom: BorderSide(color: c.line),
+                                          ),
+                                    borderRadius: BorderRadius.circular(
+                                      chosen ? 6 : 0,
                                     ),
-                                    const SizedBox(height: 7),
-                                    Text(
-                                      '${entry.organization == null ? '信息读取' : '分类整理'} · ${stateLabel(entry)}',
-                                      style: Theme.of(
-                                        context,
-                                      ).textTheme.bodySmall,
-                                    ),
-                                    Text(
-                                      uiTime(entry.createdAt),
-                                      style: Theme.of(
-                                        context,
-                                      ).textTheme.bodySmall,
-                                    ),
-                                  ],
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      Row(
+                                        children: [
+                                          if (entry.pending) ...[
+                                            Container(
+                                              width: 5,
+                                              height: 5,
+                                              decoration: BoxDecoration(
+                                                color:
+                                                    c.accent ==
+                                                        const Color(0xff333333)
+                                                    ? const Color(0xff59595f)
+                                                    : const Color(0xffae822c),
+                                                shape: BoxShape.circle,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 7),
+                                          ],
+                                          Expanded(
+                                            child: Text(
+                                              entry.chatLabel,
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: prototypeText(
+                                                context,
+                                                13,
+                                                weight: FontWeight.w700,
+                                                height: 1.6,
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 7),
+                                          Text(
+                                            _time(entry.createdAt),
+                                            style: prototypeText(
+                                              context,
+                                              11,
+                                              color: c.muted,
+                                              family: 'Consolas',
+                                              height: 1.6,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 7),
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              '${entry.organization?.agentName.isNotEmpty == true ? entry.organization!.agentName : 'Agent'} · ${entry.organization == null ? '读取信息' : '整理资料'}',
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: muted,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Text(
+                                            entry.pending
+                                                ? '$count ${entry.organization == null ? '个字段' : '条信息'}'
+                                                : stateLabel(entry),
+                                            style: muted,
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),
@@ -173,32 +342,46 @@ class InboxQueue extends StatelessWidget {
                       ),
                     ),
             ),
-            const Divider(),
+            Divider(height: 1, color: c.line),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 17, vertical: 12),
               child: Row(
                 children: [
                   Expanded(
                     child: Text(
                       page.total == 0
                           ? '0 条请求'
-                          : '${page.offset + 1}–${(page.offset + page.entries.length)} / ${page.total}',
-                      style: Theme.of(context).textTheme.bodySmall,
+                          : '显示 ${page.offset + 1}–${page.offset + page.entries.length} / ${page.total} 条',
+                      style: muted,
                     ),
                   ),
-                  IconButton(
-                    tooltip: '上一页请求',
-                    onPressed: page.offset == 0
-                        ? null
-                        : () => onPage(page.offset - page.limit),
-                    icon: const Icon(Icons.chevron_left),
+                  SizedBox(
+                    width: 24,
+                    height: 26,
+                    child: TextButton(
+                      style: prototypeButton(context, size: 20),
+                      onPressed: page.offset == 0
+                          ? null
+                          : () => onPage(page.offset - page.limit),
+                      child: const Tooltip(message: '上一页请求', child: Text('‹')),
+                    ),
                   ),
-                  IconButton(
-                    tooltip: '下一页请求',
-                    onPressed: page.offset + page.limit >= page.total
-                        ? null
-                        : () => onPage(page.offset + page.limit),
-                    icon: const Icon(Icons.chevron_right),
+                  const SizedBox(width: 7),
+                  Text(
+                    '${page.offset ~/ page.limit + 1} / ${((page.total + page.limit - 1) ~/ page.limit).clamp(1, 999999)}',
+                    style: muted,
+                  ),
+                  const SizedBox(width: 7),
+                  SizedBox(
+                    width: 24,
+                    height: 26,
+                    child: TextButton(
+                      style: prototypeButton(context, size: 20),
+                      onPressed: page.offset + page.limit >= page.total
+                          ? null
+                          : () => onPage(page.offset + page.limit),
+                      child: const Tooltip(message: '下一页请求', child: Text('›')),
+                    ),
                   ),
                 ],
               ),
@@ -207,5 +390,10 @@ class InboxQueue extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _time(DateTime value) {
+    final d = value.toLocal();
+    return '${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}';
   }
 }

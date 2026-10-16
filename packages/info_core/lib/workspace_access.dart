@@ -22,12 +22,17 @@ extension OwnerDesktopPreferences on OwnerAccess {
 class InboxEntry {
   InboxEntry.access(this.access)
     : organization = null,
-      organizationState = null;
-  InboxEntry.organization(this.organization, this.organizationState)
-    : access = null;
+      organizationState = null,
+      organizationRemainingSeconds = 0;
+  InboxEntry.organization(
+    this.organization,
+    this.organizationState, {
+    this.organizationRemainingSeconds = 0,
+  }) : access = null;
   final OwnerRequestSnapshot? access;
   final OrganizationTask? organization;
   final OrganizationTaskState? organizationState;
+  final int organizationRemainingSeconds;
   String get id => access?.id ?? organization!.id;
   String get chatLabel => access?.chatLabel ?? organization!.chatLabel;
   String get purpose => access?.purpose ?? organization!.purpose;
@@ -71,7 +76,14 @@ extension OwnerInbox on OwnerAccess {
         <InboxEntry>[
           for (final request in requests) InboxEntry.access(request),
           for (final task in organizationTasks)
-            InboxEntry.organization(task, organizationState(task)),
+            InboxEntry.organization(
+              task,
+              organizationState(task),
+              organizationRemainingSeconds: max(
+                0,
+                task.expiresAt.difference(_service._clock()).inSeconds,
+              ),
+            ),
         ].where((entry) {
           if (needle.isEmpty) return true;
           final itemIds =

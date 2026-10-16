@@ -1,3 +1,4 @@
+import 'support/approval_interactions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -54,7 +55,14 @@ void main() {
       expect(service.agent.status(session, request.id)['status'], 'pending');
       expect(find.textContaining('所选字段已不可用，或超过200个'), findsOneWidget);
       final unavailable = find.byKey(ValueKey('field-${item.fields.last.id}'));
-      expect(tester.widget<CheckboxListTile>(unavailable).value, isTrue);
+      expect(
+        tester
+            .widget<Checkbox>(
+              find.descendant(of: unavailable, matching: find.byType(Checkbox)),
+            )
+            .value,
+        isTrue,
+      );
       await tester.tap(unavailable);
       await tester.tap(find.byKey(const ValueKey('approve-selection')));
       await tester.pumpAndSettle();
@@ -172,24 +180,20 @@ void main() {
       await tester.sendKeyEvent(LogicalKeyboardKey.slash);
       expect(
         tester
-            .widget<TextField>(
-              find.descendant(
-                of: find.byKey(const ValueKey('inbox-search')),
-                matching: find.byType(TextField),
-              ),
-            )
+            .widget<TextField>(find.byKey(const ValueKey('inbox-search')))
             .focusNode!
             .hasFocus,
         isTrue,
       );
-      await tester.enterText(
+      await selectGrantMinutes(
+        tester,
         find.byKey(ValueKey('grant-lifetime-${ids.last}')),
-        '15',
+        15,
       );
       await tester.tap(find.byKey(const ValueKey('field-host')));
       await tester.tap(find.byTooltip('下一页请求'));
       await tester.pumpAndSettle();
-      expect(find.text('Purpose 40'), findsOneWidget);
+      expect(find.text('Purpose 52'), findsOneWidget);
       await tester.tap(find.byTooltip('上一页请求'));
       await tester.pumpAndSettle();
       expect(find.text('Purpose 60'), findsOneWidget);
