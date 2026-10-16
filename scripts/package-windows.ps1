@@ -27,13 +27,22 @@ function Write-Json {
     param([string]$Path, [object]$Value)
     [IO.File]::WriteAllText($Path, ($Value | ConvertTo-Json -Depth 30), $utf8)
 }
+function Assert-CleanSources {
+    # Flutter rewrites generated registrants with host line endings. Ask Git
+    # about content rather than its cached stat-only porcelain dirty flags.
+    git diff --quiet
+    if ($LASTEXITCODE -ne 0) { throw 'Commit source changes before packaging.' }
+    git diff --cached --quiet
+    if ($LASTEXITCODE -ne 0) { throw 'Commit staged source changes before packaging.' }
+    $untracked = @(git ls-files --others --exclude-standard)
+    if ($LASTEXITCODE -ne 0 -or $untracked.Count -gt 0) {
+        throw 'Commit untracked source files before packaging.'
+    }
+}
 
 Push-Location $projectRoot
 try {
-    $changes = @(git status --porcelain --untracked-files=normal)
-    if ($LASTEXITCODE -ne 0 -or $changes.Count -gt 0) {
-        throw 'Commit all source changes before packaging; the manifest identifies an exact clean commit.'
-    }
+    Assert-CleanSources
     $commit = (git rev-parse HEAD).Trim()
     $version = ((Select-String -LiteralPath 'apps/desktop/pubspec.yaml' -Pattern '^version: (.+)$').Matches.Groups[1].Value).Trim()
     $identity = "$version-dev.$($commit.Substring(0, 12))"
@@ -42,7 +51,8 @@ try {
     & (Join-Path $PSScriptRoot 'check.ps1') @checkArguments
 
     # Refuse changes made while checks were running, including new files.
-    if (@(git status --porcelain --untracked-files=normal).Count -gt 0 -or (git rev-parse HEAD).Trim() -ne $commit) {
+    Assert-CleanSources
+    if ((git rev-parse HEAD).Trim() -ne $commit) {
         throw 'Sources changed during verification; rerun from a clean fixed commit.'
     }
     New-Item -ItemType Directory -Path $output | Out-Null
@@ -87,7 +97,7 @@ try {
         $configPath = [IO.Path]::GetFullPath((Join-Path $package '.dart_tool/package_config.json'))
         $config = Get-Content -LiteralPath $configPath -Raw | ConvertFrom-Json
         foreach ($dependency in $config.packages) {
-            $uri = New-Object Uri([Uri]$configPath, $dependency.rootUri)
+            $uri = [Uri]::new([Uri]$configPath, $dependency.rootUri)
             $root = $uri.LocalPath
             $key = $dependency.name
             if ($packages.ContainsKey($key)) { continue }
