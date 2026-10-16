@@ -106,6 +106,8 @@ void main() {
       await _settleIO(tester, find.text('暂无授权历史。'));
       await tester.tap(find.byKey(const ValueKey('nav-4')));
       await tester.pumpAndSettle();
+      await tester.tap(find.text('备份与恢复'));
+      await tester.pumpAndSettle();
       await tester.ensureVisible(find.text('从备份恢复'));
       await tester.pump(const Duration(milliseconds: 400));
       await _settleIO(tester, find.text('从备份恢复'));

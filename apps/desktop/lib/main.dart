@@ -11,9 +11,11 @@ import 'import_proposals.dart';
 import 'desktop_runtime.dart';
 import 'desktop_bootstrap.dart';
 import 'backups.dart';
+import 'settings.dart';
 import 'history.dart';
 import 'desktop_shell.dart';
 import 'ui.dart';
+import 'window_frame.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -92,6 +94,7 @@ class _DesktopLauncherState extends State<DesktopLauncher> {
       }
       return MaterialApp(
         theme: informationTheme(),
+        builder: (_, child) => DesktopWindowFrame(child: child!),
         debugShowCheckedModeBanner: false,
         home: Scaffold(
           body: Center(
@@ -152,10 +155,7 @@ class InformationApp extends StatefulWidget {
 
 class _InformationAppState extends State<InformationApp>
     with SingleTickerProviderStateMixin {
-  late final _tabs = TabController(
-    length: widget.backups == null ? 4 : 5,
-    vsync: this,
-  );
+  late final _tabs = TabController(length: 5, vsync: this);
   int _openRevision = 0;
   int _libraryRevision = 0;
   final _visited = <int>{0};
@@ -180,7 +180,7 @@ class _InformationAppState extends State<InformationApp>
     final runtime = widget.runtime!;
     if (runtime.openApprovalsRevision != _openRevision) {
       _openRevision = runtime.openApprovalsRevision;
-      _tabs.animateTo(0);
+      _tabs.index = 0;
     }
     if (mounted) setState(() {});
   }
@@ -198,17 +198,13 @@ class _InformationAppState extends State<InformationApp>
     title: '信息访问授权',
     debugShowCheckedModeBanner: false,
     theme: informationTheme(),
+    builder: (_, child) => DesktopWindowFrame(child: child!),
     home: Builder(
       builder: (context) => DesktopShell(
         service: widget.service,
         port: widget.port,
         index: _tabs.index,
-        onSelected: (index) => _tabs.animateTo(
-          index,
-          duration: MediaQuery.maybeOf(context)?.disableAnimations == true
-              ? Duration.zero
-              : const Duration(milliseconds: 220),
-        ),
+        onSelected: (index) => _tabs.index = index,
         runtime: widget.runtime,
         hasBackups: widget.backups != null,
         child: IndexedStack(
@@ -225,15 +221,15 @@ class _InformationAppState extends State<InformationApp>
                       key: ValueKey(_libraryRevision),
                       owner: widget.service.owner,
                     ),
-                    if (widget.backups case final backups?)
-                      BackupLibrary(
-                        backups: backups,
-                        owner: widget.service.owner,
-                        files: widget.backupFiles,
-                        onRestored: () {
-                          if (mounted) setState(() => _libraryRevision++);
-                        },
-                      ),
+                    SettingsPage(
+                      owner: widget.service.owner,
+                      runtime: widget.runtime,
+                      backups: widget.backups,
+                      files: widget.backupFiles,
+                      onRestored: () {
+                        if (mounted) setState(() => _libraryRevision++);
+                      },
+                    ),
                   ].indexed
                   .map(
                     (entry) => _visited.contains(entry.$1)

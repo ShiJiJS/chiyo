@@ -47,13 +47,13 @@ class _DesktopShellState extends State<DesktopShell> {
     super.dispose();
   }
 
-  static const _labels = ['访问审批', '资料库', '录入提案', '授权历史', '备份与恢复'];
+  static const _labels = ['访问审批', '资料库', '录入提案', '授权历史', '设置'];
   static const _icons = [
     Icons.rule_outlined,
     Icons.folder_open_outlined,
     Icons.playlist_add_outlined,
     Icons.history_outlined,
-    Icons.inventory_2_outlined,
+    Icons.settings_outlined,
   ];
 
   Widget _status(bool compact) {
@@ -70,27 +70,6 @@ class _DesktopShellState extends State<DesktopShell> {
               color: UiColors.muted,
             )
           : StatusLabel(stopped ? '服务已停止' : '本机服务已启动'),
-    );
-  }
-
-  Widget _quit({bool compact = false}) {
-    final runtime = widget.runtime!;
-    final label = runtime.quitting
-        ? '正在退出…'
-        : runtime.shutdownFailed
-        ? '重试保存并退出'
-        : '完全退出';
-    if (compact) {
-      return IconButton(
-        tooltip: label,
-        onPressed: runtime.quitting ? null : runtime.quit,
-        icon: const Icon(Icons.power_settings_new, size: 18),
-      );
-    }
-    return TextButton.icon(
-      onPressed: runtime.quitting ? null : runtime.quit,
-      icon: const Icon(Icons.power_settings_new, size: 17),
-      label: Text(label),
     );
   }
 
@@ -124,7 +103,7 @@ class _DesktopShellState extends State<DesktopShell> {
             padding: const EdgeInsets.fromLTRB(24, 0, 16, 10),
             child: Text('工作区', style: Theme.of(context).textTheme.bodySmall),
           ),
-          for (var i = 0; i < (widget.hasBackups ? 5 : 4); i++)
+          for (var i = 0; i < 5; i++)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
               child: _destination(i, _labels[i], rail: true),
@@ -134,23 +113,6 @@ class _DesktopShellState extends State<DesktopShell> {
             padding: const EdgeInsets.fromLTRB(24, 16, 16, 14),
             child: _status(false),
           ),
-          if (widget.runtime != null)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 12, 14),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  TextButton.icon(
-                    onPressed: widget.runtime!.quitting
-                        ? null
-                        : widget.runtime!.enableNotifications,
-                    icon: const Icon(Icons.notifications_none, size: 17),
-                    label: const Text('启用或检查通知'),
-                  ),
-                  _quit(),
-                ],
-              ),
-            ),
         ],
       ),
     ),
@@ -175,25 +137,13 @@ class _DesktopShellState extends State<DesktopShell> {
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: [
-                  for (var i = 0; i < (widget.hasBackups ? 5 : 4); i++)
-                    _destination(i, _labels[i]),
+                  for (var i = 0; i < 5; i++) _destination(i, _labels[i]),
                 ],
               ),
             ),
           ),
           const SizedBox(width: 12),
           _status(true),
-          if (widget.runtime != null) ...[
-            const SizedBox(width: 8),
-            IconButton(
-              tooltip: '启用或检查通知',
-              onPressed: widget.runtime!.quitting
-                  ? null
-                  : widget.runtime!.enableNotifications,
-              icon: const Icon(Icons.notifications_none, size: 19),
-            ),
-            _quit(compact: true),
-          ],
         ],
       ),
     ),
@@ -244,20 +194,6 @@ class _DesktopShellState extends State<DesktopShell> {
             ),
 
           Expanded(child: WorkspaceEntrance(child: widget.child)),
-          Container(
-            color: UiColors.rail,
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 7),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    '开发预览 · 请使用虚构资料',
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ),
-              ],
-            ),
-          ),
         ],
       );
       return Scaffold(
@@ -286,10 +222,7 @@ class _DesktopShellState extends State<DesktopShell> {
       padding: EdgeInsets.only(right: rail ? 0 : 5),
       child: Semantics(
         selected: selected,
-        child: AnimatedContainer(
-          duration: MediaQuery.disableAnimationsOf(context)
-              ? Duration.zero
-              : UiMotion.feedback,
+        child: Container(
           decoration: BoxDecoration(
             color: selected ? UiColors.selected : Colors.transparent,
             borderRadius: BorderRadius.circular(6),
@@ -298,6 +231,8 @@ class _DesktopShellState extends State<DesktopShell> {
             key: ValueKey('nav-$index'),
             onPressed: () => widget.onSelected(index),
             style: TextButton.styleFrom(
+              animationDuration: Duration.zero,
+              overlayColor: const Color(0x0a000000),
               alignment: rail ? Alignment.centerLeft : null,
               foregroundColor: selected ? UiColors.accent : UiColors.muted,
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),

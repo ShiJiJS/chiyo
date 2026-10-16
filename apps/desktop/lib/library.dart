@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:info_core/info_core.dart';
 import 'organization.dart';
-import 'templates.dart';
 import 'recycle.dart';
 import 'revisions.dart';
 import 'ui.dart';
@@ -111,18 +110,6 @@ class _InformationLibraryState extends State<InformationLibrary> {
                   if (mounted) setState(() {});
                 },
                 child: const Text('目录与标签'),
-              ),
-              OutlinedButton.icon(
-                onPressed: () async {
-                  await Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (_) => TemplateLibrary(owner: widget.owner),
-                    ),
-                  );
-                  if (mounted) setState(() {});
-                },
-                icon: const Icon(Icons.view_list_outlined, size: 17),
-                label: const Text('字段模板'),
               ),
               FilledButton.icon(
                 onPressed: _create,

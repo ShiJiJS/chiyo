@@ -33,6 +33,8 @@ class FlutterWindow : public Win32Window {
   void SendDesktopEvent(const char* event);
   flutter::EncodableValue DesktopAvailability();
   std::unique_ptr<flutter::MethodChannel<flutter::EncodableValue>> desktop_channel_;
+  std::unique_ptr<flutter::MethodChannel<flutter::EncodableValue>> window_channel_;
+  bool custom_frame_ = false;
   bool desktop_ready_ = false;
   bool tray_available_ = false;
   bool notifications_enabled_ = true;

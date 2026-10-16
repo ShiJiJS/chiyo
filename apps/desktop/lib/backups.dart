@@ -55,8 +55,10 @@ class BackupLibrary extends StatefulWidget {
     required this.backups,
     required this.owner,
     this.onRestored,
+    this.embedded = false,
     this.files = const NativeBackupFilePicker(),
   });
+  final bool embedded;
   final InformationBackups backups;
   final OwnerAccess owner;
   final VoidCallback? onRestored;
@@ -189,13 +191,11 @@ class _BackupLibraryState extends State<BackupLibrary> {
 
   @override
   Widget build(BuildContext context) => ReadingWorkspace(
-    width: 1160,
     child: ListView(
-      padding: UiSpace.page,
+      padding: widget.embedded ? EdgeInsets.zero : UiSpace.page,
       children: [
-        const PageHeading('备份与恢复', subtitle: '使用独立恢复密钥，将资料带到另一台设备。'),
-        const QuietNotice('跨平台与真实桌面恢复尚未验收，请只使用虚构资料。'),
-        const SizedBox(height: 20),
+        if (!widget.embedded)
+          const PageHeading('备份与恢复', subtitle: '使用独立恢复密钥，将资料带到另一台设备。'),
         LayoutBuilder(
           builder: (context, bounds) {
             final export = FormSection(

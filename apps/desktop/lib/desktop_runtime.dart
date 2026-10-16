@@ -27,6 +27,7 @@ abstract interface class DesktopPlatform {
   Future<bool> hideWindow();
   Future<void> showWindow();
   Future<bool> notifyNewRequest();
+  Future<bool> notifyTest();
   Future<DesktopAvailability> readAvailability();
   Future<DesktopAvailability> requestNotificationPermission();
   Future<void> terminate();
@@ -72,6 +73,9 @@ class NativeDesktopPlatform implements DesktopPlatform {
   @override
   Future<bool> notifyNewRequest() async =>
       await _channel.invokeMethod<bool>('notify') ?? false;
+  @override
+  Future<bool> notifyTest() async =>
+      await _channel.invokeMethod<bool>('testNotify') ?? false;
   @override
   Future<DesktopAvailability> requestNotificationPermission() async =>
       _decode(await _channel.invokeMethod<Object?>('enableNotifications'));
@@ -161,6 +165,18 @@ class DesktopRuntime extends ChangeNotifier {
       notifications: NotificationAvailability.unavailable,
     );
     notifyListeners();
+  }
+
+  Future<bool> testNotification() async {
+    if (quitting ||
+        availability.notifications != NotificationAvailability.enabled) {
+      return false;
+    }
+    try {
+      return await platform.notifyTest();
+    } catch (_) {
+      return false;
+    }
   }
 
   Future<void> enableNotifications() async {

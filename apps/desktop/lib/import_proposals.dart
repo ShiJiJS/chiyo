@@ -40,7 +40,6 @@ class _ImportProposalsPageState extends State<ImportProposalsPage> {
 
   @override
   Widget build(BuildContext context) => ReadingWorkspace(
-    width: 1080,
     child: ListView(
       padding: UiSpace.page,
       children: [

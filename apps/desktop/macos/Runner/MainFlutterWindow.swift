@@ -150,11 +150,11 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { _, _ in
           DispatchQueue.main.async { self.readAvailability(result) }
         }
-      case "notify":
+      case "notify", "testNotify":
         guard self.notificationsEnabled else { result(false); return }
         let content = UNMutableNotificationContent()
         content.title = "信息访问授权"
-        content.body = "有新的访问请求。打开应用查看并审批。"
+        content.body = call.method == "testNotify" ? "这是一条测试通知。访问申请提醒已连接到系统。" : "有新的访问请求。打开应用查看并审批。"
         let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
         UNUserNotificationCenter.current().add(request) { error in
           DispatchQueue.main.async { result(error == nil) }

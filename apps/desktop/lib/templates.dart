@@ -3,8 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:info_core/info_core.dart';
 
 class TemplateLibrary extends StatefulWidget {
-  const TemplateLibrary({super.key, required this.owner});
+  const TemplateLibrary({
+    super.key,
+    required this.owner,
+    this.backLabel = '设置',
+  });
   final OwnerAccess owner;
+  final String backLabel;
   @override
   State<TemplateLibrary> createState() => _TemplateLibraryState();
 }
@@ -20,7 +25,8 @@ class _TemplateLibraryState extends State<TemplateLibrary> {
 
   @override
   Widget build(BuildContext context) => DesktopSubpage(
-    title: '字段模板',
+    title: '录入模板',
+    backLabel: widget.backLabel,
     actions: [
       TextButton.icon(
         onPressed: () => _edit(),
@@ -33,12 +39,12 @@ class _TemplateLibraryState extends State<TemplateLibrary> {
         padding: const EdgeInsets.all(24),
         children: [
           const Text(
-            '模板用于辅助录入。修改或扩展模板不会修改已有信息，也不会扩大已有授权。模板中的名称和说明将用作新信息的公开字段说明，请勿填写秘密。',
+            '录入模板是一套可重复使用的空白字段。例如“服务器”模板可以预设地址、用户名和部署说明，新建资料时再填写各自的值。模板不保存字段值，修改模板不会修改已有资料或授权。',
           ),
           if (widget.owner.templates.isEmpty)
             const Padding(
               padding: EdgeInsets.only(top: 24),
-              child: Text('还没有字段模板。'),
+              child: Text('还没有录入模板。'),
             ),
           for (final template in widget.owner.templates) ...[
             const SizedBox(height: 20),

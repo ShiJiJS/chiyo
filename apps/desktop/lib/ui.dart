@@ -307,9 +307,17 @@ class PageHeading extends StatelessWidget {
           children: [
             if (bounds.maxWidth >= 700)
               Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(child: titleText),
+                  Expanded(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(minHeight: 36),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: titleText,
+                      ),
+                    ),
+                  ),
                   if (actions.isNotEmpty) ...[
                     const SizedBox(width: 20),
                     ConstrainedBox(
@@ -434,22 +442,12 @@ class SectionHeading extends StatelessWidget {
   );
 }
 
+/// Page width is owned by the shared shell, keeping every page on one grid.
 class ReadingWorkspace extends StatelessWidget {
-  const ReadingWorkspace({super.key, required this.child, this.width = 1080});
+  const ReadingWorkspace({super.key, required this.child});
   final Widget child;
-  final double width;
   @override
-  Widget build(BuildContext context) => Align(
-    alignment: Alignment.topCenter,
-    child: ConstrainedBox(
-      constraints: BoxConstraints(
-        maxWidth: MediaQuery.textScalerOf(context).scale(14) > 20
-            ? double.infinity
-            : width,
-      ),
-      child: child,
-    ),
-  );
+  Widget build(BuildContext context) => child;
 }
 
 class DesktopSubpage extends StatelessWidget {
@@ -458,8 +456,10 @@ class DesktopSubpage extends StatelessWidget {
     required this.title,
     required this.body,
     this.actions = const [],
+    this.backLabel = '资料库',
   });
   final String title;
+  final String backLabel;
   final Widget body;
   final List<Widget> actions;
   @override
@@ -475,7 +475,7 @@ class DesktopSubpage extends StatelessWidget {
                 key: const ValueKey('subpage-back'),
                 onPressed: () => Navigator.of(context).pop(),
                 icon: const Icon(Icons.arrow_back, size: 16),
-                label: const Text('资料库'),
+                label: Text(backLabel),
               ),
               const SizedBox(width: 16),
               Expanded(

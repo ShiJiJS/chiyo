@@ -40,9 +40,12 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Need address'), findsOneWidget);
       expect(service.agent.status(session, request.id)['status'], 'pending');
-      await tester.tap(find.byTooltip('启用或检查通知'));
+      await tester.tap(find.byKey(const ValueKey('nav-4')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('开启或检查提醒'));
       await tester.pump();
       expect(native.permissionRequests, 1);
+      expect(find.text('请在系统设置中允许本应用发送通知，然后重试。'), findsOneWidget);
       await tester.pumpWidget(const SizedBox());
       await tester.runAsync(runtime.quit);
     },

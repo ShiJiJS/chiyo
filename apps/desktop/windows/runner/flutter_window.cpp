@@ -1,6 +1,7 @@
 #include "flutter_window.h"
 
 #include <optional>
+#include <windowsx.h>
 #include <flutter/standard_method_codec.h>
 #include "resource.h"
 
@@ -86,6 +87,41 @@ bool FlutterWindow::OnCreate() {
   backup_files_ = std::make_unique<BackupFileDialogs>(
       flutter_controller_->engine()->messenger(), GetHandle());
   SetChildContent(flutter_controller_->view()->GetNativeWindow());
+  window_channel_ = std::make_unique<flutter::MethodChannel<flutter::EncodableValue>>(
+      flutter_controller_->engine()->messenger(), "agent_info_manage/window",
+      &flutter::StandardMethodCodec::GetInstance());
+  window_channel_->SetMethodCallHandler([this](const auto& call, auto result) {
+    const auto& method = call.method_name();
+    const HWND hwnd = GetHandle();
+    if (method == "enableCustomFrame") {
+      // Retain WS_OVERLAPPEDWINDOW: the OS still owns resizing and snapping.
+      custom_frame_ = true;
+      if (!SetWindowPos(hwnd, nullptr, 0, 0, 0, 0,
+          SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED)) {
+        custom_frame_ = false;
+        result->Error("frame_unavailable", "Cannot install custom frame.");
+        return;
+      }
+      result->Success(flutter::EncodableValue(IsZoomed(hwnd) != FALSE));
+    } else if (method == "minimize") {
+      ShowWindow(hwnd, SW_MINIMIZE);
+      result->Success();
+    } else if (method == "toggleMaximize") {
+      ShowWindow(hwnd, IsZoomed(hwnd) ? SW_RESTORE : SW_MAXIMIZE);
+      result->Success();
+    } else if (method == "drag") {
+      result->Success();
+      ReleaseCapture();
+      POINT cursor{};
+      GetCursorPos(&cursor);
+      PostMessage(hwnd, WM_NCLBUTTONDOWN, HTCAPTION, MAKELPARAM(cursor.x, cursor.y));
+    } else if (method == "close") {
+      result->Success();
+      PostMessage(hwnd, WM_CLOSE, 0, 0);
+    } else {
+      result->NotImplemented();
+    }
+  });
   taskbar_created_ = RegisterWindowMessageW(L"TaskbarCreated");
   desktop_channel_ = std::make_unique<flutter::MethodChannel<flutter::EncodableValue>>(
       flutter_controller_->engine()->messenger(), "agent_info_manage/desktop",
@@ -109,7 +145,7 @@ bool FlutterWindow::OnCreate() {
       ShowWindow(GetHandle(), SW_RESTORE);
       SetForegroundWindow(GetHandle());
       result->Success();
-    } else if (method == "notify") {
+    } else if (method == "notify" || method == "testNotify") {
       NOTIFYICONDATAW data{};
       data.cbSize = sizeof(data);
       data.hWnd = GetHandle();
@@ -117,7 +153,7 @@ bool FlutterWindow::OnCreate() {
       data.uFlags = NIF_INFO;
       data.dwInfoFlags = NIIF_INFO | NIIF_RESPECT_QUIET_TIME;
       wcscpy_s(data.szInfoTitle, L"信息访问授权");
-      wcscpy_s(data.szInfo, L"有新的访问请求。打开应用查看并审批。");
+      wcscpy_s(data.szInfo, method == "testNotify" ? L"这是一条测试通知。访问申请提醒已连接到系统。" : L"有新的访问请求。打开应用查看并审批。");
       const bool accepted = tray_available_ && notifications_enabled_ &&
           Shell_NotifyIconW(NIM_MODIFY, &data) != FALSE;
       result->Success(flutter::EncodableValue(accepted));
@@ -147,6 +183,7 @@ void FlutterWindow::OnDestroy() {
   RemoveTrayIcon();
   desktop_ready_ = false;
   desktop_channel_ = nullptr;
+  window_channel_ = nullptr;
   if (flutter_controller_) {
     flutter_controller_ = nullptr;
   }
@@ -158,6 +195,28 @@ LRESULT
 FlutterWindow::MessageHandler(HWND hwnd, UINT const message,
                               WPARAM const wparam,
                               LPARAM const lparam) noexcept {
+  if (custom_frame_ && message == WM_NCCALCSIZE && wparam) {
+    auto* params = reinterpret_cast<NCCALCSIZE_PARAMS*>(lparam);
+    const LONG original_top = params->rgrc[0].top;
+    // Keep the native sizing borders. Only reclaim the system caption strip.
+    const LRESULT result = DefWindowProc(hwnd, message, wparam, lparam);
+    const UINT dpi = GetDpiForWindow(hwnd);
+    params->rgrc[0].top = original_top +
+        GetSystemMetricsForDpi(SM_CYSIZEFRAME, dpi) +
+        GetSystemMetricsForDpi(SM_CXPADDEDBORDER, dpi);
+    return result;
+  }
+  if (custom_frame_ && message == WM_NCHITTEST) {
+    const LRESULT hit = DefWindowProc(hwnd, message, wparam, lparam);
+    // Native edges remain resize handles; the Flutter caption owns its controls.
+    if (hit == HTCAPTION || hit == HTMINBUTTON || hit == HTMAXBUTTON ||
+        hit == HTCLOSE || hit == HTSYSMENU) return HTCLIENT;
+    return hit;
+  }
+  if (custom_frame_ && message == WM_SIZE && window_channel_) {
+    window_channel_->InvokeMethod("state",
+        std::make_unique<flutter::EncodableValue>(IsZoomed(hwnd) != FALSE));
+  }
   if (taskbar_created_ != 0 && message == taskbar_created_ && desktop_ready_) {
     // Explorer restarts lose the old icon. Restore a visible entry or window.
     tray_available_ = false;

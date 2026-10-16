@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:info_core/info_core.dart';
-import 'package:info_desktop/library.dart';
+import 'package:info_desktop/main.dart';
 
 void main() {
   testWidgets(
@@ -19,10 +19,10 @@ void main() {
         await tester.pump();
         await closing;
       });
-      await tester.pumpWidget(
-        MaterialApp(home: InformationLibrary(owner: service.owner)),
-      );
-      await tester.tap(find.text('字段模板'));
+      await tester.pumpWidget(InformationApp(service: service, port: 47125));
+      await tester.tap(find.byKey(const ValueKey('nav-4')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('管理录入模板'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('新建模板'));
       await tester.pumpAndSettle();

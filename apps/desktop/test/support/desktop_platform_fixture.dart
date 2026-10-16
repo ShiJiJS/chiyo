@@ -40,6 +40,12 @@ class NativeDesktopFixture implements DesktopPlatform {
   }
 
   @override
+  Future<bool> notifyTest() async {
+    notices.add('test');
+    return deliveryAvailable;
+  }
+
+  @override
   Future<DesktopAvailability> requestNotificationPermission() async {
     permissionRequests++;
     return availability;
