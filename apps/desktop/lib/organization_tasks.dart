@@ -223,7 +223,10 @@ class _StartOrganizationState extends State<_StartOrganization> {
             ConstrainedBox(
               constraints: const BoxConstraints(maxHeight: 150),
               child: Scrollbar(
+                controller: _scopeScroll,
+                thumbVisibility: true,
                 child: ListView(
+                  controller: _scopeScroll,
                   shrinkWrap: true,
                   children: [
                     for (final id in widget.itemIds)
