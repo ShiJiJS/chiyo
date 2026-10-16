@@ -6,6 +6,11 @@ param(
 # Developer-side headless verification. Never starts the desktop executable.
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
+if (-not (Test-Path -LiteralPath $DartExecutable -PathType Leaf) -or
+    [IO.Path]::GetExtension($DartExecutable) -ine '.exe') {
+    throw 'Use the Dart SDK executable (cache/dart-sdk/bin/dart.exe), not the Flutter dart.bat wrapper.'
+}
+$dart = (Get-Item -LiteralPath $DartExecutable).FullName
 $archive = (Get-Item -LiteralPath $ArchivePath).FullName
 $expectedArchive = ((Get-Content -LiteralPath "$archive.sha256" -Raw).Split(' ')[0]).Trim()
 if ((Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash.ToLowerInvariant() -ne $expectedArchive) {
@@ -45,7 +50,7 @@ try {
     $env:INFO_TEST_BUNDLE = $bundle
     Push-Location (Join-Path (Split-Path -Parent $PSScriptRoot) 'packages/info_cli')
     try {
-        & $DartExecutable test test/bundle_preparation_test.dart test/cli_test.dart test/codex_process_test.dart
+        & $dart test test/bundle_preparation_test.dart test/cli_test.dart test/codex_process_test.dart
         if ($LASTEXITCODE -ne 0) { throw 'Extracted CLI and rendered hooks failed.' }
     } finally { Pop-Location }
     Write-Host 'PASS: extracted checksums, SDK-free CLI/hooks, synthetic SQLCipher/DPAPI. Desktop and user configuration untouched.'
