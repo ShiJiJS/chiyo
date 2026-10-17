@@ -42,14 +42,25 @@ class AgentClient {
   Future<Map<String, dynamic>> execute(Map<String, dynamic> input) async {
     final command = input['command'];
     if (utf8.encode(jsonEncode(input)).length >
-        (command == 'import-submit' ||
+        (command == 'credential-catalog' || command == 'import-submit' ||
                 command == 'update-submit' ||
                 command == 'organize-submit'
             ? 262144
             : 16384)) {
-      return {'status': 'invalid_request'};
+      return command == 'credential-catalog'
+        ? {'protocolVersion': 1, 'status': 'invalid_request', 'errorCode': 'limit_exceeded', 'retryable': false}
+        : {'status': 'invalid_request'};
     }
     switch (command) {
+      case 'credential-catalog':
+        if (input.keys.any((k) => !{'command','cursor','limit'}.contains(k))) {
+          return {'protocolVersion': 1, 'status': 'invalid_request', 'errorCode': 'unknown_field', 'retryable': false};
+        }
+        if (input['cursor'] != null && input['cursor'] is! String ||
+          input.containsKey('limit') && (input['limit'] is! int || (input['limit'] as int) < 1 || (input['limit'] as int) > 100)) {
+          return {'protocolVersion': 1, 'status': 'invalid_request', 'errorCode': 'invalid_type', 'retryable': false};
+        }
+        return _call('/credentials/catalog', {'cursor': input['cursor'], 'limit': input['limit'] ?? 50});
       case 'organize-request':
         if (_session == null) return {'status': 'unauthorized'};
         return _call('/organization/request', {

@@ -15,6 +15,10 @@ class PrototypeDialog extends StatelessWidget {
     this.flow = false,
     this.scrollGutter = 15,
     this.bottomPadding,
+    this.width,
+    this.simpleFlow = false,
+    this.actionDivider = true,
+    this.actionPaddingTop = 16,
   });
   final String title;
   final Widget body;
@@ -23,6 +27,13 @@ class PrototypeDialog extends StatelessWidget {
   final bool flow;
   final double scrollGutter;
   final double? bottomPadding;
+  final double? width;
+  final bool actionDivider;
+  final double actionPaddingTop;
+
+  /// Template-based credential flows keep the original unruled actions and
+  /// nested bottom spacing; panel-based editors retain the separated footer.
+  final bool simpleFlow;
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +43,7 @@ class PrototypeDialog extends StatelessWidget {
       filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
       child: Center(
         child: Container(
-          width: math.min(flow ? 780 : 590, viewport.width - 48),
+          width: math.min(width ?? (flow ? 780 : 590), viewport.width - 48),
           constraints: BoxConstraints(
             maxHeight: flow ? viewport.height - 64 : viewport.height * .85,
           ),
@@ -40,7 +51,12 @@ class PrototypeDialog extends StatelessWidget {
             32,
             28,
             flow ? 47 : 32,
-            bottomPadding ?? (flow ? 34 : 28),
+            bottomPadding ??
+                (simpleFlow
+                    ? 49
+                    : flow
+                    ? 34
+                    : 28),
           ),
           decoration: BoxDecoration(
             color: p.paper,
@@ -77,8 +93,8 @@ class PrototypeDialog extends StatelessWidget {
                     Transform.translate(
                       offset: const Offset(2, 3),
                       child: SizedBox(
-                        width: 30,
-                        height: 30,
+                        width: 30 * MediaQuery.textScalerOf(context).scale(1),
+                        height: 30 * MediaQuery.textScalerOf(context).scale(1),
                         child: TextButton(
                           onPressed: onClose,
                           style: prototypeButton(context, size: 22),
@@ -93,16 +109,24 @@ class PrototypeDialog extends StatelessWidget {
                   child: SingleChildScrollView(
                     padding: EdgeInsets.only(
                       right: flow ? scrollGutter : 0,
-                      bottom: flow ? 16 : 0,
+                      bottom: simpleFlow
+                          ? 14
+                          : flow
+                          ? 16
+                          : 0,
                     ),
                     child: body,
                   ),
                 ),
                 if (actions.isNotEmpty)
                   Container(
-                    padding: const EdgeInsets.only(top: 16),
+                    padding: EdgeInsets.only(
+                      top: simpleFlow ? 0 : actionPaddingTop,
+                    ),
                     decoration: BoxDecoration(
-                      border: Border(top: BorderSide(color: p.line)),
+                      border: simpleFlow || !actionDivider
+                          ? null
+                          : Border(top: BorderSide(color: p.line)),
                     ),
                     child: Wrap(
                       alignment: WrapAlignment.end,

@@ -7,6 +7,7 @@ import 'import_proposals.dart';
 import 'update_proposals.dart';
 import 'recycle.dart';
 import 'revisions.dart';
+import 'credentials.dart';
 
 enum FieldKind { structured, textNote }
 
@@ -138,7 +139,29 @@ abstract interface class InformationRepository {
   });
 }
 
-class MemoryInformationRepository implements InformationRepository {
+class MemoryInformationRepository
+    implements InformationRepository, CredentialRepository {
+  final _credentials = <ManagedCredential>[];
+  final _materials = <CredentialMaterial>[];
+  @override
+  List<ManagedCredential> get managedCredentials =>
+      List.unmodifiable(_credentials);
+  @override
+  List<CredentialMaterial> get credentialMaterials =>
+      List.unmodifiable(_materials);
+  @override
+  Future<void> commitCredentials(
+    List<ManagedCredential> credentials,
+    List<CredentialMaterial> materials,
+  ) async {
+    _credentials
+      ..clear()
+      ..addAll(credentials);
+    _materials
+      ..clear()
+      ..addAll(materials);
+  }
+
   MemoryInformationRepository([Iterable<InformationItem> items = const []]) {
     for (final item in items) {
       _items[item.id] = item;

@@ -340,6 +340,14 @@ class _DesktopShellState extends State<DesktopShell> {
                 warning: true,
               ),
             ),
+          if (runtime?.credentialCleanupFailed == true)
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 24),
+              child: QuietNotice(
+                '凭据旧版本与回收内容的到期清理暂时失败，请检查存储。超期内容无法恢复，应用会再次尝试清理。',
+                warning: true,
+              ),
+            ),
           if (runtime?.shutdownFailed == true)
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 24),

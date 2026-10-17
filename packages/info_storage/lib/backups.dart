@@ -269,6 +269,11 @@ class InformationBackups {
   /// overwrite. A failed/interrupted export leaves existing backups untouched.
   Future<void> exportTo(String path, {String? stagingParent}) async {
     _checkOpen();
+    // D9 supplies format 5. Never export an apparently complete backup that
+    // silently omits a nonempty credential vault during staged development.
+    if (_repository.managedCredentials.isNotEmpty) {
+      throw const StorageFailure('credentials_backup_not_supported');
+    }
     sqlite.Database? db;
     Directory? staging;
     try {
@@ -411,6 +416,9 @@ class InformationBackups {
   /// OS-protected database key is retained; the source device key is unnecessary.
   Future<BackupContents> restore(BackupContents contents) async {
     _checkOpen();
+    if (_repository.managedCredentials.isNotEmpty) {
+      throw const StorageFailure('recipient_not_empty');
+    }
     try {
       contents = _retain(
         contents,
