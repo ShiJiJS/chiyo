@@ -21,16 +21,26 @@ Future<void> main(List<String> args) async {
   }
   final client = AgentClient(port);
   try {
-    await for (final line
-        in stdin.transform(utf8.decoder).transform(const LineSplitter())) {
+    await for (final record in _boundedLines(stdin)) {
+      if (record.error != null) {
+        stdout.writeln(jsonEncode(_protocolError(record.error!)));
+        continue;
+      }
       Map<String, dynamic> output;
       try {
-        if (line.length > 262144) throw const FormatException();
-        Map<String,dynamic> command;
-        try {command = decodeProtocolObject(line);} on Object {
-            stdout.writeln(jsonEncode({'protocolVersion': 1, 'status': 'invalid_request',
-              'errorCode': 'invalid_json', 'retryable': false}));
-            continue;
+        Map<String, dynamic> command;
+        try {
+          command = decodeProtocolObject(record.line!);
+        } on Object {
+          stdout.writeln(
+            jsonEncode({
+              'protocolVersion': 1,
+              'status': 'invalid_request',
+              'errorCode': 'invalid_json',
+              'retryable': false,
+            }),
+          );
+          continue;
         }
         output = await client.execute(command);
       } on Object {
@@ -41,6 +51,50 @@ Future<void> main(List<String> args) async {
   } on Object {
     stdout.writeln(jsonEncode({'status': 'invalid_request'}));
   } finally {
+    await client.drainCredentialExecutions();
     client.close();
   }
+}
+
+Map<String, Object?> _protocolError(String code) => {
+  'protocolVersion': 1,
+  'status': 'invalid_request',
+  'errorCode': code,
+  'retryable': false,
+  'attemptConsumed': false,
+};
+
+// Bound storage before decoding, rather than letting LineSplitter accumulate an
+// unlimited line. A rejected byte line cannot terminate the protocol stream.
+Stream<({String? line, String? error})> _boundedLines(
+  Stream<List<int>> input,
+) async* {
+  final bytes = <int>[];
+  var overflow = false;
+  ({String? line, String? error}) finish() {
+    if (overflow) return (line: null, error: 'limit_exceeded');
+    try {
+      return (line: utf8.decode(bytes), error: null);
+    } on FormatException {
+      return (line: null, error: 'invalid_json');
+    }
+  }
+
+  await for (final chunk in input) {
+    for (final byte in chunk) {
+      if (byte == 10) {
+        yield finish();
+        bytes.clear();
+        overflow = false;
+      } else if (!overflow) {
+        if (bytes.length == 262143) {
+          overflow = true;
+          bytes.clear();
+        } else {
+          bytes.add(byte);
+        }
+      }
+    }
+  }
+  if (overflow || bytes.isNotEmpty) yield finish();
 }

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:info_core/info_core.dart';
 import 'organization.dart';
 import 'organization_tasks.dart';
+import 'credential_use_approval.dart';
 import 'ui.dart';
 import 'inbox_queue.dart';
 import 'prototype_ui.dart';
@@ -90,6 +91,7 @@ class ApprovalsState extends State<Approvals> {
   final _organizationSelection = <String, Set<String>>{};
   final _grantMinutes = <String, int>{};
   final _organizationMinutes = <String, int>{};
+  final _credentialDrafts=<String,CredentialUseApprovalDraft>{};
   @override
   void initState() {
     super.initState();
@@ -389,7 +391,9 @@ class ApprovalsState extends State<Approvals> {
                   ),
                   child: Material(
                     color: Colors.transparent,
-                    child: current.organization != null
+                    child: current.credentialUse!=null
+                        ? CredentialUseApprovalPanel(key:ValueKey(current.id),owner:owner,request:current.credentialUse!,draft:_credentialDrafts.putIfAbsent(current.id,()=>CredentialUseApprovalDraft(current.credentialUse!.fields)),onChanged:()=>setState((){}))
+                        : current.organization != null
                         ? OrganizationApprovalPanel(
                             key: ValueKey(current.id),
                             owner: owner,
@@ -612,6 +616,7 @@ class ApprovalsState extends State<Approvals> {
 
   String _entryState(InboxEntry entry) => entry.access != null
       ? _state(entry.access!.state)
+      : entry.credentialUse!=null?credentialUseStateLabel(entry.credentialUseState!)
       : organizationStateLabel(entry.organizationState!);
 
   Widget _requestView(OwnerRequestSnapshot request) {

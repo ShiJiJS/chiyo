@@ -234,6 +234,7 @@ class InboxQueue extends StatelessWidget {
                           final chosen = entry.id == focused;
                           final count =
                               entry.access?.fields.length ??
+                              (entry.credentialUse!=null?1:null) ??
                               entry.organization!.itemVersions.length;
                           return Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -317,7 +318,7 @@ class InboxQueue extends StatelessWidget {
                                         children: [
                                           Expanded(
                                             child: Text(
-                                              '${entry.organization?.agentName.isNotEmpty == true ? entry.organization!.agentName : 'Agent'} · ${entry.organization == null ? '读取信息' : '整理资料'}',
+                                              '${entry.organization?.agentName.isNotEmpty == true ? entry.organization!.agentName : 'Agent'} · ${entry.credentialUse!=null?'使用凭据':entry.organization == null ? '读取信息' : '整理资料'}',
                                               maxLines: 1,
                                               overflow: TextOverflow.ellipsis,
                                               style: muted,
@@ -326,7 +327,7 @@ class InboxQueue extends StatelessWidget {
                                           const SizedBox(width: 8),
                                           Text(
                                             entry.pending
-                                                ? '$count ${entry.organization == null ? '个字段' : '条信息'}'
+                                                ? '$count ${entry.credentialUse!=null?'项凭据':entry.organization == null ? '个字段' : '条信息'}'
                                                 : stateLabel(entry),
                                             style: muted,
                                           ),

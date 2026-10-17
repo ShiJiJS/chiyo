@@ -39,6 +39,7 @@ class AgentServer {
 
   Future<void> _handle(HttpRequest request) async {
     Map<String, Object?> result;
+    final runtime = request.uri.path.startsWith('/credential-use/');
     try {
       if (request.method != 'POST' ||
           request.headers.value('origin') != null ||
@@ -51,11 +52,12 @@ class AgentServer {
           request.uri.path == '/import/submit' ||
               request.uri.path == '/organization/submit' ||
               request.uri.path == '/update/submit' ||
-              request.uri.path == '/credentials/catalog'
+              request.uri.path == '/credentials/catalog' ||
+              runtime
           ? 262144
           : 16384;
       if (request.contentLength > limit) {
-        if (request.uri.path == '/credentials/catalog') {
+        if (request.uri.path == '/credentials/catalog' || runtime) {
           throw const _CredentialRequestFailure('limit_exceeded');
         }
         throw const AccessFailure('invalid_request');
@@ -63,24 +65,26 @@ class AgentServer {
       final bytes = <int>[];
       await for (final chunk in request.timeout(const Duration(seconds: 5))) {
         if (bytes.length + chunk.length > limit) {
-          if (request.uri.path == '/credentials/catalog') {
+          if (request.uri.path == '/credentials/catalog' || runtime) {
             throw const _CredentialRequestFailure('limit_exceeded');
           }
           throw const AccessFailure('invalid_request');
         }
         bytes.addAll(chunk);
       }
-      final body = request.uri.path == '/credentials/catalog'
+      final body = request.uri.path == '/credentials/catalog' || runtime
           ? decodeProtocolObject(utf8.decode(bytes))
           : jsonDecode(utf8.decode(bytes));
       if (body is! Map<String, dynamic>) {
         throw const AccessFailure('invalid_request');
       }
       result = await _dispatch(request.uri.path, body);
+    } on CredentialUseFailure catch (error) {
+      result = error.toJson();
     } on _CredentialRequestFailure catch (error) {
       result = _credentialFailure(error.code, fieldPath: error.fieldPath);
     } on FormatException {
-      result = request.uri.path == '/credentials/catalog'
+      result = request.uri.path == '/credentials/catalog' || runtime
           ? _credentialFailure('invalid_json')
           : {'status': 'invalid_request'};
     } on AccessFailure catch (error) {
@@ -89,7 +93,7 @@ class AgentServer {
       // Never echo submitted text, authorization material, or internal errors.
       result = {'status': 'invalid_request'};
     }
-    if (request.uri.path == '/credentials/catalog' &&
+    if ((request.uri.path == '/credentials/catalog' || runtime) &&
         result['protocolVersion'] == null) {
       result = {
         'protocolVersion': 1,
@@ -124,6 +128,37 @@ class AgentServer {
     Map<String, dynamic> body,
   ) async {
     switch (path) {
+      case '/credential-use/request':
+        final session = _text(body, 'sessionSecret');
+        final command = Map<String, dynamic>.from(body)
+          ..remove('sessionSecret');
+        final request = await _agent.requestCredentialUse(
+          session,
+          CredentialUseInput.fromJson(command),
+        );
+        return _agent.credentialUseStatus(session, request.id);
+      case '/credential-use/consume':
+        if (body.keys.any((k) => !{'sessionSecret', 'requestId'}.contains(k))) {
+          throw const CredentialUseFailure('unknown_field');
+        }
+        return (await _agent.consumeCredentialUse(
+          _text(body, 'sessionSecret'),
+          _text(body, 'requestId'),
+        )).toPrivateJson();
+      case '/credential-use/execution/report':
+        return (await _agent.reportCredentialExecution(
+          CredentialExecutionReport.fromPrivateJson(body),
+        )).toJson();
+      case '/credential-use/execution/status':
+        if (body.keys.any((k) => !{'sessionSecret', 'executionId'}.contains(k))) {
+          throw const CredentialUseFailure('unknown_field');
+        }
+        return _agent
+            .credentialExecutionStatus(
+              _text(body, 'sessionSecret'),
+              _text(body, 'executionId'),
+            )
+            .toJson();
       case '/credentials/catalog':
         if (body.keys.any((k) => !{'cursor', 'limit'}.contains(k))) {
           throw const _CredentialRequestFailure('unknown_field');

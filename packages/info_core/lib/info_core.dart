@@ -1,6 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
+import 'dart:io';
+import 'package:crypto/crypto.dart';
+import 'runtime_process_identity.dart';
+export 'runtime_process_identity.dart';
 import 'package:unorm_dart/unorm_dart.dart' as unorm;
 import 'credentials.dart';
 export 'credentials.dart';
@@ -31,6 +35,8 @@ part 'backup_access.dart';
 part 'workspace_access.dart';
 part 'library_access.dart';
 part 'credential_access.dart';
+part 'credential_runtime_models.dart';
+part 'credential_runtime_access.dart';
 part 'proposal_access.dart';
 
 class AccessFailure implements Exception {
@@ -120,12 +126,16 @@ class InformationService {
   InformationService({
     required InformationRepository repository,
     DateTime Function()? clock,
+    CredentialExecutableInspector? credentialExecutableInspector,
   }) : _repository = repository,
+       credentialExecutableInspector =
+           credentialExecutableInspector ?? inspectCredentialExecutable,
        _clock = clock ?? DateTime.now {
     _recoverAudit();
   }
   InformationService.fictional({DateTime Function()? clock})
-    : _clock = clock ?? DateTime.now,
+    : credentialExecutableInspector = inspectCredentialExecutable,
+      _clock = clock ?? DateTime.now,
       _repository = MemoryInformationRepository([
         InformationItem(
           'demo-server',
@@ -151,6 +161,9 @@ class InformationService {
         ),
       ]);
   final InformationRepository _repository;
+  final CredentialExecutableInspector credentialExecutableInspector;
+  final _credentialUseSessions = <String, String>{};
+  final _executionCapabilities = <String, String>{};
   InformationField? _field(FieldRef ref) {
     for (final item in _repository.items) {
       if (item.id == ref.itemId) {
@@ -367,6 +380,9 @@ class AgentAccess {
   }
 
   Map<String, Object?> status(String session, String id) {
+    if (_service._credentialUseSessions.containsKey(id)) {
+      return credentialUseStatus(session, id);
+    }
     final request = _request(session, id);
     return {
       'status': request.state.name,
@@ -384,6 +400,10 @@ class AgentAccess {
   }
 
   ClaimedGrant claim(String session, String id) {
+    if (_service._credentialUseSessions.containsKey(id) &&
+        _service._sessionUseRequest(session, id).approvedFields.isEmpty) {
+      throw const CredentialUseFailure('scope_not_approved');
+    }
     final request = _request(session, id);
     if (request.grant == null) throw AccessFailure(request.state.name);
     if (request.state != AccessRequestState.approved) {
