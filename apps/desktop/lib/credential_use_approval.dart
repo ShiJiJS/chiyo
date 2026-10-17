@@ -651,13 +651,18 @@ class _CredentialUseApprovalPanelState
                       ),
                     ),
                     SizedBox(
+                      width: MediaQuery.sizeOf(context).width <= 1300 ? 9 : 15,
+                    ),
+                    SizedBox(
                       width: 24,
                       child: Text(
                         '←',
                         style: prototypeText(context, 14, color: c.accent),
                       ),
                     ),
-                    const SizedBox(width: 15),
+                    SizedBox(
+                      width: MediaQuery.sizeOf(context).width <= 1300 ? 9 : 15,
+                    ),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,

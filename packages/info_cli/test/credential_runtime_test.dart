@@ -10,6 +10,135 @@ import 'support/runtime_harness.dart';
 
 void main() {
   test(
+    'an OS start failure consumes the attempt without claiming process creation or retrying',
+    () async {
+      final folder = await Directory.systemTemp.createTemp(
+        'runtime-start-failure-',
+      );
+      var starts = 0;
+      final h = await RuntimeHarness.create(
+        starter: (exe, argv, cwd, env) async {
+          starts++;
+          return Process.start(
+            '${folder.path}/missing-program.exe',
+            const [],
+            environment: env,
+            includeParentEnvironment: false,
+            runInShell: false,
+          );
+        },
+      );
+      addTearDown(() async {
+        await h.close();
+        await folder.delete();
+      });
+      final request = await h.approve();
+      final accepted = await h.client.execute({
+        'command': 'run-use',
+        'requestId': request,
+      });
+      expect(accepted['status'], 'accepted');
+      await h.client.drainCredentialExecutions();
+      final status = await h.client.execute({
+        'command': 'execution-status',
+        'executionId': accepted['executionId'],
+      });
+      expect(status['executionState'], 'start_failed');
+      expect(status['processStarted'], isFalse);
+      expect(status['errorCode'], 'process_start_failed');
+      expect(status['attemptConsumed'], isTrue);
+      expect(status['exitCode'], isNull);
+      expect(
+        (await h.client.execute({
+          'command': 'run-use',
+          'requestId': request,
+        }))['errorCode'],
+        'attempt_consumed',
+      );
+      expect(starts, 1);
+    },
+  );
+  test(
+    'empty or incorrectly bound private Token material never creates a process',
+    () async {
+      var starts = 0;
+      final h = await RuntimeHarness.create();
+      addTearDown(h.close);
+      for (final defect in ['empty', 'missing', 'wrong_alias']) {
+        final request = await h.approve();
+        final privateServer = await HttpServer.bind(
+          InternetAddress.loopbackIPv4,
+          0,
+        );
+        final handling = privateServer.listen((http) async {
+          final input =
+              jsonDecode(await utf8.decoder.bind(http).join())
+                  as Map<String, dynamic>;
+          Map<String, Object?> result;
+          if (http.uri.path == '/credential-use/consume') {
+            final material = await h.service.agent.consumeCredentialUse(
+              input['sessionSecret'] as String,
+              input['requestId'] as String,
+            );
+            final json =
+                jsonDecode(jsonEncode(material.toPrivateJson()))
+                    as Map<String, dynamic>;
+            if (defect == 'empty') {
+              (json['credentialMaterial']
+                      as Map<String, dynamic>)['bytesBase64'] =
+                  '';
+            } else {
+              (json['approvedPlan']
+                  as Map<String, dynamic>)['env'] = defect == 'missing'
+                  ? <String, Object?>{}
+                  : {
+                      'GH_TOKEN': {'secret': 'another_alias'},
+                    };
+            }
+            result = json;
+          } else {
+            await h.service.agent.reportCredentialExecution(
+              CredentialExecutionReport.fromPrivateJson(input),
+            );
+            result = {'status': 'ok'};
+          }
+          http.response.headers.contentType = ContentType.json;
+          http.response.write(jsonEncode(result));
+          await http.response.close();
+        });
+        final client = AgentClient(
+          privateServer.port,
+          sessionSecret: h.client.sessionSecret,
+          credentialProcessStarter: (exe, argv, cwd, env) async {
+            starts++;
+            throw StateError(
+              'Invalid private material must never reach the OS',
+            );
+          },
+        );
+        try {
+          expect(
+            (await client.execute({
+              'command': 'run-use',
+              'requestId': request,
+            }))['status'],
+            'accepted',
+          );
+          await client.drainCredentialExecutions();
+          final record = h.service.owner.credentialExecutions.last;
+          expect(record.state, 'prepare_failed');
+          expect(record.errorCode, 'material_prepare_failed');
+          expect(record.processStarted, isFalse);
+        } finally {
+          client.close();
+          await privateServer.close(force: true);
+          await handling.cancel();
+        }
+      }
+      expect(starts, 0);
+    },
+  );
+  test(
     'changing executable bytes while preserving size and modification time consumes the attempt without spawning',
     () async {
       final folder = await Directory.systemTemp.createTemp(
