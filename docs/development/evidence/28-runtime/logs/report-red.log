@@ -1,0 +1,16 @@
+00:00 +0: loading test/credential_use_test.dart
+00:00 +0: identical execution reports can be retried after a lost response without changing facts
+00:00 +0 -1: identical execution reports can be retried after a lost response without changing facts [E]
+  CredentialUseFailure(invalid_plan)
+  package:info_core/credential_runtime_access.dart 138:7  CredentialRuntimeAgentAccess.reportCredentialExecution.<fn>
+  package:info_core/info_core.dart 628:20                 OwnerAccess._serialize.<fn>
+  ===== asynchronous gap ===========================
+  test\credential_use_test.dart 90:22                     main.<fn>
+  
+00:00 +0 -1: Some tests failed.
+
+Failing tests:
+  test/credential_use_test.dart: identical execution reports can be retried after a lost response without changing facts
+
+Consider enabling the flag chain-stack-traces to receive more detailed exceptions.
+For example, 'dart test --chain-stack-traces'.

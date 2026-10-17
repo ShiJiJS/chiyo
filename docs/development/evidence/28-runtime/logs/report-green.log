@@ -1,0 +1,10 @@
+00:00 +0: loading test/credential_use_test.dart
+00:00 +0: identical execution reports can be retried after a lost response without changing facts
+00:00 +1: credential request is discoverable through the bounded owner inbox
+00:00 +2: execution report cannot invent the OS process creation identity
+00:00 +3: session ending after committed consumption records the failed preparation and never returns material
+00:00 +4: combined decision audit failure publishes neither independent permission nor half a decision
+00:00 +5: audit failure rolls back a start attempt before private material is delivered
+00:00 +6: credential invalidation is latched while field approval remains independent
+00:00 +7: approved fixed Token plan is consumed once and keeps its field permission
+00:00 +8: All tests passed!
