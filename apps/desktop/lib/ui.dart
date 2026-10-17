@@ -498,7 +498,7 @@ class DesktopSubpage extends StatelessWidget {
     required this.title,
     required this.body,
     this.actions = const [],
-    this.backLabel = '资料库',
+    this.backLabel = '信息库',
   });
   final String title;
   final String backLabel;

@@ -23,7 +23,9 @@ void main() {
       );
       await tester.tap(find.text('Fictional demo server').first);
       await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const ValueKey('edit-information-description')));
+      await tester.tap(
+        find.byKey(const ValueKey('edit-information-description')),
+      );
       await tester.pumpAndSettle();
       await tester.tap(find.text('移除字段').first);
       await tester.pumpAndSettle();
@@ -69,12 +71,12 @@ void main() {
           home: Scaffold(body: ImportProposalsPage(owner: service.owner)),
         ),
       );
-      await tester.tap(find.text('查看删除范围'));
-      await tester.pumpAndSettle();
       expect(find.textContaining('Address'), findsOneWidget);
       expect(find.textContaining('Username'), findsNothing);
       expect(service.owner.information.single.fields, hasLength(2));
-      await tester.tap(find.text('确认删除'));
+      await tester.tap(find.byKey(const ValueKey('proposal-action-confirm')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('confirm-proposal-decision')));
       await tester.pumpAndSettle();
       expect(service.agent.deleteStatus(session, id)['status'], 'confirmed');
       expect(service.owner.information.single.fields.single.id, 'username');

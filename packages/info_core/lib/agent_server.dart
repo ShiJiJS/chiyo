@@ -2,6 +2,21 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'info_core.dart';
+import 'protocol_json.dart';
+
+class _CredentialRequestFailure implements Exception {
+  const _CredentialRequestFailure(this.code, [this.fieldPath]);
+  final String code;
+  final String? fieldPath;
+}
+
+Map<String, Object?> _credentialFailure(String code, {String? fieldPath}) => {
+  'protocolVersion': 1,
+  'status': 'invalid_request',
+  'errorCode': code,
+  'retryable': false,
+  'fieldPath': ?fieldPath,
+};
 
 /// Agent-only transport. OwnerAccess is intentionally not a dependency.
 class AgentServer {
@@ -35,29 +50,58 @@ class AgentServer {
       final limit =
           request.uri.path == '/import/submit' ||
               request.uri.path == '/organization/submit' ||
-              request.uri.path == '/update/submit'
+              request.uri.path == '/update/submit' ||
+              request.uri.path == '/credentials/catalog'
           ? 262144
           : 16384;
       if (request.contentLength > limit) {
+        if (request.uri.path == '/credentials/catalog') {
+          throw const _CredentialRequestFailure('limit_exceeded');
+        }
         throw const AccessFailure('invalid_request');
       }
       final bytes = <int>[];
       await for (final chunk in request.timeout(const Duration(seconds: 5))) {
         if (bytes.length + chunk.length > limit) {
+          if (request.uri.path == '/credentials/catalog') {
+            throw const _CredentialRequestFailure('limit_exceeded');
+          }
           throw const AccessFailure('invalid_request');
         }
         bytes.addAll(chunk);
       }
-      final body = jsonDecode(utf8.decode(bytes));
+      final body = request.uri.path == '/credentials/catalog'
+          ? decodeProtocolObject(utf8.decode(bytes))
+          : jsonDecode(utf8.decode(bytes));
       if (body is! Map<String, dynamic>) {
         throw const AccessFailure('invalid_request');
       }
       result = await _dispatch(request.uri.path, body);
+    } on _CredentialRequestFailure catch (error) {
+      result = _credentialFailure(error.code, fieldPath: error.fieldPath);
+    } on FormatException {
+      result = request.uri.path == '/credentials/catalog'
+          ? _credentialFailure('invalid_json')
+          : {'status': 'invalid_request'};
     } on AccessFailure catch (error) {
       result = {'status': error.status};
     } on Object {
       // Never echo submitted text, authorization material, or internal errors.
       result = {'status': 'invalid_request'};
+    }
+    if (request.uri.path == '/credentials/catalog' &&
+        result['protocolVersion'] == null) {
+      result = {
+        'protocolVersion': 1,
+        'status':
+            {'service_unavailable', 'unauthorized'}.contains(result['status'])
+            ? result['status']
+            : 'invalid_request',
+        'errorCode': result['status'] == 'service_unavailable'
+            ? 'service_unavailable'
+            : 'invalid_reference',
+        'retryable': false,
+      };
     }
     request.response.headers.contentType = ContentType.json;
     request.response.headers.set('Cache-Control', 'no-store');
@@ -80,6 +124,26 @@ class AgentServer {
     Map<String, dynamic> body,
   ) async {
     switch (path) {
+      case '/credentials/catalog':
+        if (body.keys.any((k) => !{'cursor', 'limit'}.contains(k))) {
+          throw const _CredentialRequestFailure('unknown_field');
+        }
+        if (body['cursor'] != null && body['cursor'] is! String) {
+          throw const _CredentialRequestFailure('invalid_type', 'cursor');
+        }
+        if (body['limit'] != null && body['limit'] is! int) {
+          throw const _CredentialRequestFailure('invalid_type', 'limit');
+        }
+        if (body['limit'] is int &&
+            ((body['limit'] as int) < 1 || (body['limit'] as int) > 100)) {
+          throw const _CredentialRequestFailure('limit_exceeded', 'limit');
+        }
+        return _agent
+            .credentialCatalog(
+              cursor: body['cursor'] as String?,
+              limit: body['limit'] as int? ?? 50,
+            )
+            .toJson();
       case '/delete/submit':
         return _submitDelete(body);
       case '/delete/status':

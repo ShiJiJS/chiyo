@@ -1,6 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
+import 'package:unorm_dart/unorm_dart.dart' as unorm;
+import 'credentials.dart';
+export 'credentials.dart';
 import 'organization_tasks.dart';
 export 'organization_tasks.dart';
 import 'information.dart';
@@ -27,6 +30,8 @@ part 'revision_access.dart';
 part 'backup_access.dart';
 part 'workspace_access.dart';
 part 'library_access.dart';
+part 'credential_access.dart';
+part 'proposal_access.dart';
 
 class AccessFailure implements Exception {
   const AccessFailure(this.status);

@@ -1,0 +1,406 @@
+{
+  "base": "d2df00e7f77894671d44d80ce8f45b1485e22886",
+  "sources": [
+    {
+      "file": "apps/desktop/lib/proposal_workspace.dart",
+      "sha256": "c2b57f1868f79acc9800b7fe619e9551fdd3ac55ddf1888f6f467031ad18cb23"
+    },
+    {
+      "file": "apps/desktop/lib/proposal_queue.dart",
+      "sha256": "dedcbd0a708e5c641660ee9ff64033de60ef5341edc842b29bc3608a21d0fab6"
+    },
+    {
+      "file": "apps/desktop/lib/information_editor.dart",
+      "sha256": "3d414fcaf6352ba34b95f65dd171bc28f3d3da4106af787abece3190245adc2e"
+    },
+    {
+      "file": "apps/desktop/lib/prototype_dialog.dart",
+      "sha256": "f7376134de5ff96fd24f145de312236375b8272bc0998a3ad281d7fe9a80dbe0"
+    },
+    {
+      "file": "apps/desktop/tool/capture_proposals.dart",
+      "sha256": "02971e2505d12f774c867fa92f4a9bdd66ceb6170e66a961f700083998ff7a2e"
+    },
+    {
+      "file": "packages/info_core/lib/proposal_access.dart",
+      "sha256": "1a4617fe6ab9e91f39256a066f7d2c0d3138873ac0f73aaeee47ce6dd2d1ee6a"
+    }
+  ],
+  "files": [
+    {
+      "file": "purple-1280-200-bottom.png",
+      "sha256": "580522d821aafb82f1cb06851d500c88e79b43a192a91a6773034bfcc43f1358",
+      "role": "Flutter"
+    },
+    {
+      "file": "purple-1280-200-first.png",
+      "sha256": "de0f9fcf1d864fffa0f9318745f03507d14368991b9e00f5b80ea38c8d50a2e4",
+      "role": "Flutter"
+    },
+    {
+      "file": "purple-1280-confirm.png",
+      "sha256": "48c20663718e2bbe3ef9d62ab08177ffdb770f25c47e205d79a6de34c0f4f424",
+      "role": "Flutter"
+    },
+    {
+      "file": "purple-1280-confirmed-new.png",
+      "sha256": "e937af49394319374b110850cd4c5335174eb7b3a7a6e00f228173122d3fd38a",
+      "role": "Flutter"
+    },
+    {
+      "file": "purple-1280-confirmed.png",
+      "sha256": "3b1ff4655d08c7d2ebe106c2428e8adc21b54a2456a9e772398c914f2bcc6e67",
+      "role": "Flutter"
+    },
+    {
+      "file": "purple-1280-conflict.png",
+      "sha256": "b577a57855088c72722ba0413a75b8cd51448ec93b098b772811e073ca36677b",
+      "role": "Flutter"
+    },
+    {
+      "file": "purple-1280-current-missing.png",
+      "sha256": "4672154bd63d6d89e8dec0f99a388bded16e256a46dfe03095232e2cc99a09ca",
+      "role": "Flutter"
+    },
+    {
+      "file": "purple-1280-current-updated.png",
+      "sha256": "457ddc952acc9e0d00047964191c5206ff86ac151c3200dae6cb1d174df9a9ac",
+      "role": "Flutter"
+    },
+    {
+      "file": "purple-1280-current.png",
+      "sha256": "2cf99e157474ddb474fd60128925eff5df7fde35a6927cd28cb5b3be36eb40f2",
+      "role": "Flutter"
+    },
+    {
+      "file": "purple-1280-delete.png",
+      "sha256": "139f7af780c642593f26b9e399bda6383d46cbfedb7dea8653ecb92900c62223",
+      "role": "Flutter"
+    },
+    {
+      "file": "purple-1280-diff.png",
+      "sha256": "9a5007fe1e59946a72dba1e746ce593a18eaac70cbec7968711549dbd754225d",
+      "role": "Flutter"
+    },
+    {
+      "file": "purple-1280-editor.png",
+      "sha256": "8d8cce8c30355ac7876e8f0a2e985759713897c99e2862ad61f4e03d44a53855",
+      "role": "Flutter"
+    },
+    {
+      "file": "purple-1280-long-bottom.png",
+      "sha256": "bb6cb6973c66ff89a6e7d56ff640ca4a9af601d719685a4ee54d52bfb8739e00",
+      "role": "Flutter"
+    },
+    {
+      "file": "purple-1280-long-first.png",
+      "sha256": "5764291e1f589fd9d2519d9df3ffa9de538b035308bf30b64139e6c9698a4cbc",
+      "role": "Flutter"
+    },
+    {
+      "file": "purple-1280-new.png",
+      "sha256": "19285df599e5dece1874b52ebc8288d76e241b93da960eda85816d5e21e43078",
+      "role": "Flutter"
+    },
+    {
+      "file": "purple-1280-no-results.png",
+      "sha256": "0f9470d777a2da0c405ca2266e5f23a2c709d432130cde463805f8a319c050a2",
+      "role": "Flutter"
+    },
+    {
+      "file": "purple-1280-offline.png",
+      "sha256": "c05dbbedc8b81f2e3bfa1e928f58dc584b1314a4d633382797f3b5db4588669b",
+      "role": "Flutter"
+    },
+    {
+      "file": "purple-1280-organization-conflict.png",
+      "sha256": "6eafe1fddca274cc46a73986fd5ae9aa6fc1c14a1f30db37f175ada806bdfd3f",
+      "role": "Flutter"
+    },
+    {
+      "file": "purple-1280-organization-noop.png",
+      "sha256": "5400b59e8017716941e9dbf05f86e1f20d634388efa955d570bd7e449e4e7908",
+      "role": "Flutter"
+    },
+    {
+      "file": "purple-1280-organization-revoked.png",
+      "sha256": "ac8fbd490c7ed4e5866e95774e90a613c2a7cd858b1ef9e0c826cc23c74de4d8",
+      "role": "Flutter"
+    },
+    {
+      "file": "purple-1280-organization.png",
+      "sha256": "596bd3fff332ad77bd072166086901428d054ed7cf9b0f53d02d6500b02bced8",
+      "role": "Flutter"
+    },
+    {
+      "file": "purple-1280-save-failed.png",
+      "sha256": "ab77d33dcd77170f4f04b63555b0f7e5b5102a27e5073247d06fccf00a86ee65",
+      "role": "Flutter"
+    },
+    {
+      "file": "purple-1280-update-editor.png",
+      "sha256": "b6396913544d862917dfeb4e1543856d5b28144f6ff6cf2e468338ffb7a86fd8",
+      "role": "Flutter"
+    },
+    {
+      "file": "purple-1440-200-bottom.png",
+      "sha256": "be38e069d97dcc78223fe8bed38d2a3b772455c4e38b92aa0ee31a6659adafa3",
+      "role": "Flutter"
+    },
+    {
+      "file": "purple-1440-200-first.png",
+      "sha256": "90a035b06cb7afcfbe084ab22f908b755bbd49d3f0f7bc53edcf14fd6b4d88dd",
+      "role": "Flutter"
+    },
+    {
+      "file": "purple-1440-confirm.png",
+      "sha256": "373ddc793849f3a8cfb31367da0747e67bad60f262348ae9d14532018f9a77e6",
+      "role": "Flutter"
+    },
+    {
+      "file": "purple-1440-confirmed-new.png",
+      "sha256": "fd3137d4ee09110e9df7912aef71933a242bdc6721137a3c2ca5f365fcafbfd8",
+      "role": "Flutter"
+    },
+    {
+      "file": "purple-1440-confirmed.png",
+      "sha256": "fcd514de0ab94160229d76f82fbd80d250ae2492f037d46158c20d59f4518173",
+      "role": "Flutter"
+    },
+    {
+      "file": "purple-1440-conflict.png",
+      "sha256": "4e35bd3270d645e7b7d7bc7c16814330681d45138b9a899b1ce596d782a29a9e",
+      "role": "Flutter"
+    },
+    {
+      "file": "purple-1440-current-missing.png",
+      "sha256": "29070138b78f642ab81035bae05e00ffa483fe3bce542911d61fa456209a5238",
+      "role": "Flutter"
+    },
+    {
+      "file": "purple-1440-current-updated.png",
+      "sha256": "b71476f54eb25a0db8a121ec1a7880dd230d7c2ecab231b2db7c2a96039eb268",
+      "role": "Flutter"
+    },
+    {
+      "file": "purple-1440-current.png",
+      "sha256": "39ac838c35326e5b9c1af0343e334ddbef3317042ebdefccb136e9256ac60154",
+      "role": "Flutter"
+    },
+    {
+      "file": "purple-1440-delete.png",
+      "sha256": "be110d320113e6c9a7f95068407fc1500e6aab6b584da3d63aad12cbb00d1c63",
+      "role": "Flutter"
+    },
+    {
+      "file": "purple-1440-diff.png",
+      "sha256": "f5ae53cd220362a4be2cdbb7cfcc52c86ffcd9c77b5f7a449f01d2eb04eaa41d",
+      "role": "Flutter"
+    },
+    {
+      "file": "purple-1440-editor.png",
+      "sha256": "953284b8c4840de633f90f4282ada15ff9bed3da9cf440eef24e5eb65db43f4e",
+      "role": "Flutter"
+    },
+    {
+      "file": "purple-1440-long-bottom.png",
+      "sha256": "0f194c45a5a4e62599ee29b0d3a29321f897ff1025bf8aecd1bb0af90bc2be2d",
+      "role": "Flutter"
+    },
+    {
+      "file": "purple-1440-long-first.png",
+      "sha256": "ad540b7e66e177924ad3cdc8f8dbd226839be1ba6b90d7db37ee38b5a52b89c3",
+      "role": "Flutter"
+    },
+    {
+      "file": "purple-1440-new.png",
+      "sha256": "4e3f3a883286e06e97eb325176f7b8dd0667433ca6940f4014d2808744304f25",
+      "role": "Flutter"
+    },
+    {
+      "file": "purple-1440-no-results.png",
+      "sha256": "e3412d8431eaada44f1eec690a7088c1b83c1f5978d60f49107372fbeab8a12b",
+      "role": "Flutter"
+    },
+    {
+      "file": "purple-1440-offline.png",
+      "sha256": "55ee3f739ae9b3ddcca81d71cbe1198e0e02362c2670806157204190beb43133",
+      "role": "Flutter"
+    },
+    {
+      "file": "purple-1440-organization-conflict.png",
+      "sha256": "5b26b2111f24923a7783aee3607db103090160a1aa7912436f154bd0acbcabf9",
+      "role": "Flutter"
+    },
+    {
+      "file": "purple-1440-organization-noop.png",
+      "sha256": "89a68a0b0bfba0602df52be07b96f9ff0811aa28709843d083739ef3311b235f",
+      "role": "Flutter"
+    },
+    {
+      "file": "purple-1440-organization-revoked.png",
+      "sha256": "46ea5c71cc4025a35f5536f6b29c0fdb88e1c61683736c60298015468b846f2a",
+      "role": "Flutter"
+    },
+    {
+      "file": "purple-1440-organization.png",
+      "sha256": "5c8ab84c88161ff204719ee6a9cea7dd4d37725456b604f0a08aab2c1aa02975",
+      "role": "Flutter"
+    },
+    {
+      "file": "purple-1440-save-failed.png",
+      "sha256": "d049f61619c63dfcb7f005ee8260f7e18a29229b7b1231993d0146199f11f1e5",
+      "role": "Flutter"
+    },
+    {
+      "file": "purple-1440-update-editor.png",
+      "sha256": "d3d718d92909b4054e0b7fe0198ccfff5b1903b5f21a3eae6b7463149503d7df",
+      "role": "Flutter"
+    },
+    {
+      "file": "reference-purple-1440-new.png",
+      "sha256": "3b7fd9b1eaa04209b99135ef34cdbc6ba94c79f8e0cccc8cdd3f4f4c266e64cc",
+      "role": "HTML",
+      "source": "C:/Project/network_config/info-manage-worktrees/round05-page-reference-prep/cases/proposal-new/page-1440x900.png"
+    },
+    {
+      "file": "reference-purple-1440-editor.png",
+      "sha256": "9c30eeb0d34889c1f99585c2b4c58be4db5cece3e55cbc10e9c6ef781a79a9e9",
+      "role": "HTML",
+      "source": "C:/Project/network_config/info-manage-worktrees/round05-page-reference-prep/cases/proposal-editor/page-1440x900.png"
+    },
+    {
+      "file": "reference-purple-1440-confirm.png",
+      "sha256": "9117c6f81d43bb7eadb13f01bf34670c4168b771b30fbc866b0ee703df3fd68a",
+      "role": "HTML",
+      "source": "C:/Project/network_config/info-manage-worktrees/round05-page-reference-prep/cases/proposal-confirm/page-1440x900.png"
+    },
+    {
+      "file": "reference-purple-1440-diff.png",
+      "sha256": "3051381e097bfdd7002b955bb3a8a74e4e4673b6fded8f267389b1bc7b017c37",
+      "role": "HTML",
+      "source": "C:/Project/network_config/info-manage-worktrees/round05-page-reference-prep/cases/proposal-diff/page-1440x900.png"
+    },
+    {
+      "file": "reference-purple-1440-conflict.png",
+      "sha256": "65b1575a3da2d1f090979f1997204af62671594afa1eddb14b4742915744ff8f",
+      "role": "HTML",
+      "source": "C:/Project/network_config/info-manage-worktrees/round05-page-reference-prep/cases/proposal-conflict/page-1440x900.png"
+    },
+    {
+      "file": "reference-purple-1280-new.png",
+      "sha256": "59c0c0ba4f514ca0a864e372a714e2134575ff4c84da618baba7b87101925d0c",
+      "role": "HTML",
+      "source": "C:/Project/network_config/info-manage-worktrees/round05-page-reference-prep/cases/proposal-new/page-1280x800.png"
+    },
+    {
+      "file": "reference-purple-1280-editor.png",
+      "sha256": "2ebfd4196ce6a779fc0db9f64d5519bb0a050a3d9f7002b826ae15213eb9fda2",
+      "role": "HTML",
+      "source": "C:/Project/network_config/info-manage-worktrees/round05-page-reference-prep/cases/proposal-editor/page-1280x800.png"
+    },
+    {
+      "file": "reference-purple-1280-confirm.png",
+      "sha256": "3d8467257884700100a551504cb3b531321c49ae0455235852f5aa6b8dbe8899",
+      "role": "HTML",
+      "source": "C:/Project/network_config/info-manage-worktrees/round05-page-reference-prep/cases/proposal-confirm/page-1280x800.png"
+    },
+    {
+      "file": "reference-purple-1280-diff.png",
+      "sha256": "ae32214ab01e4da6f44d59d4ef11ef176ec7f86fc40da8b15a3ecdebb083f1f7",
+      "role": "HTML",
+      "source": "C:/Project/network_config/info-manage-worktrees/round05-page-reference-prep/cases/proposal-diff/page-1280x800.png"
+    },
+    {
+      "file": "reference-purple-1280-conflict.png",
+      "sha256": "270cb2a6615dce2d7c9b3659f79620327ffe8727b0332eba9d1b34e6c94538cc",
+      "role": "HTML",
+      "source": "C:/Project/network_config/info-manage-worktrees/round05-page-reference-prep/cases/proposal-conflict/page-1280x800.png"
+    },
+    {
+      "file": "reference-purple-1440-confirmed.png",
+      "sha256": "abdf368b22d670a1e889326f3036f67675271966b5817ea9a5750f81dc0a22d9",
+      "role": "HTML",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\25-proposals\\docs\\development\\evidence\\25-proposals\\reference-aux\\confirmed\\page-1440x900.png"
+    },
+    {
+      "file": "reference-purple-1280-confirmed.png",
+      "sha256": "ae8e5425568652461cbc6de139e6843dea0c5b1173514c5e096915631416aef2",
+      "role": "HTML",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\25-proposals\\docs\\development\\evidence\\25-proposals\\reference-aux\\confirmed\\page-1280x800.png"
+    },
+    {
+      "file": "reference-purple-1440-delete.png",
+      "sha256": "112a2f9168ae0ff06f954219d3ea7761141a2cbb8994f96dccc0dd02ba92b30c",
+      "role": "HTML",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\25-proposals\\docs\\development\\evidence\\25-proposals\\reference-aux\\delete\\page-1440x900.png"
+    },
+    {
+      "file": "reference-purple-1280-delete.png",
+      "sha256": "e62ef00b6e553a95055dcd1836221f560d5fe11697dd92718fc77d73d522507a",
+      "role": "HTML",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\25-proposals\\docs\\development\\evidence\\25-proposals\\reference-aux\\delete\\page-1280x800.png"
+    },
+    {
+      "file": "reference-purple-1440-organization.png",
+      "sha256": "dabc2709d4e1e377c38968533e066e71306e5ed527e324a1bfe491f381d1510e",
+      "role": "HTML",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\25-proposals\\docs\\development\\evidence\\25-proposals\\reference-aux\\organization\\page-1440x900.png"
+    },
+    {
+      "file": "reference-purple-1280-organization.png",
+      "sha256": "69c277208d2e7a12c2ef2ef93e37cc22328eea3217336f30465a1235b7fc6136",
+      "role": "HTML",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\25-proposals\\docs\\development\\evidence\\25-proposals\\reference-aux\\organization\\page-1280x800.png"
+    },
+    {
+      "file": "reference-purple-1440-organization-conflict.png",
+      "sha256": "a17b65dca438e5bfe18fc8f50c39c6040909c273314c33398266953a7df818d2",
+      "role": "HTML",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\25-proposals\\docs\\development\\evidence\\25-proposals\\reference-aux\\organization-conflict\\page-1440x900.png"
+    },
+    {
+      "file": "reference-purple-1280-organization-conflict.png",
+      "sha256": "d4058de9e60f31141768a3e5d50ed128921d789ca6ff72c20c452d17777369e7",
+      "role": "HTML",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\25-proposals\\docs\\development\\evidence\\25-proposals\\reference-aux\\organization-conflict\\page-1280x800.png"
+    },
+    {
+      "file": "reference-purple-1440-organization-noop.png",
+      "sha256": "4e59ba866eae8875b835a04c8d5cb64e8fd47869b4e50bc28edadcad40cac05d",
+      "role": "HTML",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\25-proposals\\docs\\development\\evidence\\25-proposals\\reference-aux\\organization-noop\\page-1440x900.png"
+    },
+    {
+      "file": "reference-purple-1280-organization-noop.png",
+      "sha256": "3fd62cb82c8fe89eac47a2499b7b65ddc583875ad05948f319187906f59c59d2",
+      "role": "HTML",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\25-proposals\\docs\\development\\evidence\\25-proposals\\reference-aux\\organization-noop\\page-1280x800.png"
+    },
+    {
+      "file": "reference-purple-1440-organization-revoked.png",
+      "sha256": "fd22e2a9fcf4f3428694e5ab389e8c136005a5a0334306bf2220bb2858b04d16",
+      "role": "HTML",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\25-proposals\\docs\\development\\evidence\\25-proposals\\reference-aux\\organization-revoked\\page-1440x900.png"
+    },
+    {
+      "file": "reference-purple-1280-organization-revoked.png",
+      "sha256": "e3c103b857c4a48ddeaaa070f2e2ffbbff4027072a51efec8acecefa12e15e82",
+      "role": "HTML",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\25-proposals\\docs\\development\\evidence\\25-proposals\\reference-aux\\organization-revoked\\page-1280x800.png"
+    },
+    {
+      "file": "reference-purple-1440-save-failed.png",
+      "sha256": "79a753f4cb6fd008d45e71571529f90aac4210b84281c2aa53b1f0715d14951c",
+      "role": "HTML",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\25-proposals\\docs\\development\\evidence\\25-proposals\\reference-aux\\save-failed\\page-1440x900.png"
+    },
+    {
+      "file": "reference-purple-1280-save-failed.png",
+      "sha256": "6553359c64330451dd3cffaca07a2635e571bc825d6cf1ea0748c366388665d0",
+      "role": "HTML",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\25-proposals\\docs\\development\\evidence\\25-proposals\\reference-aux\\save-failed\\page-1280x800.png"
+    }
+  ],
+  "limits": "Static screenshots only. Opaque proposal IDs and missing legacy update/delete self-description are real model differences; never fabricate identity or Agent attribution. 200% and long-batch captures are readability boundaries, not baseline substitution."
+}
