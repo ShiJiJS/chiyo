@@ -382,7 +382,7 @@ class _ImportProposalsPageState extends State<ImportProposalsPage> {
       }
     } catch (_) {
       if (mounted) {
-        await _showBatchFailure('整批确认失败，信息库未改变。提案和调整内容已保留，请重试。');
+        await _showBatchFailure('整批确认失败，信息库未改变。提案和调整内容已保留。');
         if (mounted) origin.requestFocus();
       }
     } finally {
@@ -514,6 +514,7 @@ class _ImportProposalsPageState extends State<ImportProposalsPage> {
                   search: _search,
                   searchFocus: _searchFocus,
                   selectedFocus: _queueFocus,
+                  queryFailed: queryError != null,
                   filter: _filter,
                   onSearch: (_) => _queryChanged(),
                   onFilter: (filter) {
@@ -591,8 +592,14 @@ class _ImportProposalsPageState extends State<ImportProposalsPage> {
                                               : '没有匹配的内容'),
                                       18,
                                     ),
-                                    const SizedBox(height: 12),
-                                    t('调整左侧搜索或筛选后，继续查看详情。', 14, color: p.muted),
+                                    if (queryError == null) ...[
+                                      const SizedBox(height: 12),
+                                      t(
+                                        '调整左侧搜索或筛选后，继续查看详情。',
+                                        14,
+                                        color: p.muted,
+                                      ),
+                                    ],
                                   ],
                                 ),
                               )
@@ -676,12 +683,15 @@ class _ImportProposalsPageState extends State<ImportProposalsPage> {
                   family: 'SimSun',
                   weight: FontWeight.w500,
                 ),
-                const SizedBox(height: 16),
+                // SimSun's 43.5px CSS line box is rounded to 44px by Flutter.
+                const SizedBox(height: 15.5),
                 Row(
                   children: [
                     Container(
-                      width: 28,
-                      height: 28,
+                      width:
+                          28 * MediaQuery.textScalerOf(context).scale(16) / 16,
+                      height:
+                          28 * MediaQuery.textScalerOf(context).scale(16) / 16,
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
                         color: p.selected,
@@ -710,6 +720,7 @@ class _ImportProposalsPageState extends State<ImportProposalsPage> {
                   entry.purpose.isEmpty ? '请核对下面的实际内容。' : entry.purpose,
                   14,
                   height: 1.9,
+                  color: p.muted,
                 ),
                 const SizedBox(height: 8),
                 t(
@@ -1657,6 +1668,20 @@ class _ImportProposalsPageState extends State<ImportProposalsPage> {
                                 : 'Consolas',
                             height: 1.6,
                           ),
+                          // Keep the CSS code line box when CJK uses fallback.
+                          strutStyle: StrutStyle(
+                            fontFamily: field.kind == FieldKind.textNote
+                                ? 'ProductSans'
+                                : 'Consolas',
+                            fontFamilyFallback: const [
+                              'ProductSans',
+                              'AppSans',
+                              'Songti SC',
+                            ],
+                            fontSize: 13,
+                            height: 1.6,
+                            forceStrutHeight: true,
+                          ),
                         ),
                       ),
                     ],
@@ -1673,10 +1698,8 @@ class _ImportProposalsPageState extends State<ImportProposalsPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         t('处理回执', 16, weight: FontWeight.w700),
-        const SizedBox(height: 12),
-        t('${entry.stateLabel} · ${entry.id}', 14, height: 1.85),
-        const SizedBox(height: 12),
-        t('回执保留处理事实，不重新显示提案中的字段内容。', 14, height: 1.85),
+        t('${entry.stateLabel} · ${entry.id}', 14),
+        t('回执保留处理事实，不重新显示提案中的字段内容。', 14),
         if (entry.kind == ProposalKind.addition)
           for (final name
               in owner.importProposals
@@ -1744,25 +1767,28 @@ class _ImportProposalsPageState extends State<ImportProposalsPage> {
                 backgroundColor: WidgetStatePropertyAll(p.accent),
                 minimumSize: const WidgetStatePropertyAll(Size(165, 0)),
                 padding: const WidgetStatePropertyAll(
-                  EdgeInsets.symmetric(horizontal: 22, vertical: 11),
+                  EdgeInsets.symmetric(horizontal: 22, vertical: 12),
                 ),
               ),
               onPressed: _busy || entry.status == ProposalStatus.conflicted
                   ? null
                   : () => _decide(entry, true),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    entry.kind == ProposalKind.addition
-                        ? '确认全部入库'
-                        : entry.kind == ProposalKind.deletion
-                        ? '确认移入回收站'
-                        : '确认这些修改',
-                  ),
-                  const SizedBox(width: 16),
-                  const Text('→'),
-                ],
+              child: SizedBox(
+                height: 19.5 * MediaQuery.textScalerOf(context).scale(1),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      entry.kind == ProposalKind.addition
+                          ? '确认全部入库'
+                          : entry.kind == ProposalKind.deletion
+                          ? '确认移入回收站'
+                          : '确认这些修改',
+                    ),
+                    const SizedBox(width: 16),
+                    const Text('→'),
+                  ],
+                ),
               ),
             ),
           ),
@@ -1772,7 +1798,10 @@ class _ImportProposalsPageState extends State<ImportProposalsPage> {
             onPressed: () => widget.onGoToLibrary != null
                 ? widget.onGoToLibrary!()
                 : _openResults(entry),
-            child: const Text('前往信息库'),
+            child: SizedBox(
+              height: 19.5 * MediaQuery.textScalerOf(context).scale(1),
+              child: const Text('前往信息库'),
+            ),
           ),
       ],
     ),
@@ -1810,6 +1839,14 @@ class _CurrentResultsState extends State<_CurrentResults> {
     super.dispose();
   }
 
+  Widget _paragraph(String value) => Align(
+    alignment: Alignment.centerLeft,
+    child: ConstrainedBox(
+      constraints: BoxConstraints(maxWidth: prototypeCh(context, 14, 48)),
+      child: Text(value, style: prototypeText(context, 14, height: 1.85)),
+    ),
+  );
+
   @override
   Widget build(BuildContext context) => PrototypeDialog(
     flow: true,
@@ -1820,10 +1857,7 @@ class _CurrentResultsState extends State<_CurrentResults> {
       mainAxisSize: MainAxisSize.min,
       children: [
         if (!widget.owner.serviceAvailable)
-          Text(
-            '信息库暂不可用，请恢复服务后重试。',
-            style: prototypeText(context, 14, height: 1.85),
-          )
+          _paragraph('信息库暂不可用，请恢复服务后重试。')
         else ...[
           for (final id in widget.ids)
             Builder(
@@ -1834,10 +1868,7 @@ class _CurrentResultsState extends State<_CurrentResults> {
                 if (item == null) {
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 18),
-                    child: Text(
-                      '当前信息已不存在（$id）。请前往回收站检查。',
-                      style: prototypeText(context, 14, height: 1.85),
-                    ),
+                    child: _paragraph('当前信息已不存在（$id）。请前往回收站检查。'),
                   );
                 }
                 return Padding(
@@ -1854,10 +1885,7 @@ class _CurrentResultsState extends State<_CurrentResults> {
                         ),
                       ),
                       const SizedBox(height: 10),
-                      Text(
-                        item.description,
-                        style: prototypeText(context, 14, height: 1.85),
-                      ),
+                      _paragraph(item.description),
                       for (final field in item.fields)
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 10),
@@ -1911,8 +1939,7 @@ class _CurrentResultsState extends State<_CurrentResults> {
                 );
               },
             ),
-          if (widget.ids.isEmpty)
-            Text('此回执没有已入库的信息身份。', style: prototypeText(context, 14)),
+          if (widget.ids.isEmpty) _paragraph('此回执没有已入库的信息身份。'),
         ],
       ],
     ),

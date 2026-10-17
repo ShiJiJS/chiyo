@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
@@ -252,6 +253,41 @@ void main() {
       await tester.pumpAndSettle();
       Future<void> capture(String state) async {
         expect(tester.takeException(), isNull);
+        if (state == 'new') {
+          final rectangles = <String, Object?>{};
+          for (final value in [
+            '录入提案',
+            '将要入库的内容',
+            '监测服务',
+            'https://status.beichen.example',
+            '项目维护组',
+            '备份安排',
+          ]) {
+            final finder = find.text(value);
+            if (finder.evaluate().length == 1) {
+              final rect = tester.getRect(finder);
+              rectangles[value] = [
+                rect.left,
+                rect.top,
+                rect.width,
+                rect.height,
+              ];
+            }
+          }
+          for (final id in [addition, modification, conflict, deletion]) {
+            final rect = tester.getRect(
+              find.byKey(ValueKey('proposal-entry-$id')),
+            );
+            rectangles[id] = [rect.left, rect.top, rect.width, rect.height];
+          }
+          await tester.runAsync(() async {
+            await File(
+              '../../docs/development/evidence/25-proposals/fidelity/geometry-$width-new.json',
+            ).writeAsString(
+              '${const JsonEncoder.withIndent('  ').convert(rectangles)}\n',
+            );
+          });
+        }
         final boundary = tester.renderObject<RenderRepaintBoundary>(
           find.byKey(boundaryKey),
         );

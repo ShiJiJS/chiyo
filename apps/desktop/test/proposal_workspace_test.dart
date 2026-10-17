@@ -26,6 +26,42 @@ class FailingImportRepository extends MemoryInformationRepository {
 
 void main() {
   testWidgets(
+    'a stopped query reports failure without claiming an empty successful result',
+    (tester) async {
+      tester.view.physicalSize = const Size(1440, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final service = InformationService(
+        repository: MemoryInformationRepository(),
+      );
+      await service.agent.submitImport(
+        service.agent.openSession('Stopped query'),
+        [
+          ImportItemInput('Pending item', '', [
+            const FieldInput('Value', '', 'pending value'),
+          ]),
+        ],
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: informationTheme(),
+          home: Scaffold(body: ImportProposalsPage(owner: service.owner)),
+        ),
+      );
+      expect(find.text('pending value'), findsOneWidget);
+      await service.close();
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pumpAndSettle();
+      expect(find.text('提案查询失败，请调整条件或检查服务状态。'), findsOneWidget);
+      expect(find.text('没有找到提案'), findsNothing);
+      expect(find.text('调整关键词或查看全部提案。'), findsNothing);
+      expect(find.text('调整左侧搜索或筛选后，继续查看详情。'), findsNothing);
+      expect(find.text('pending value'), findsNothing);
+      await tester.pumpWidget(const SizedBox());
+    },
+  );
+  testWidgets(
     'queue paging and search retain a reviewed item when new proposals arrive',
     (tester) async {
       tester.view.physicalSize = const Size(1440, 900);
@@ -544,7 +580,14 @@ void main() {
       );
       await service.owner.approveOrganization(task.id, [item.id]);
       await service.agent.submitOrganization(session, task.id, []);
-        expect(service.owner.queryProposals(filter: ProposalFilter.handled).entries.single.stateLabel, '无改动完成');
+      expect(
+        service.owner
+            .queryProposals(filter: ProposalFilter.handled)
+            .entries
+            .single
+            .stateLabel,
+        '无改动完成',
+      );
       String? openedGrant;
       await tester.pumpWidget(
         MaterialApp(

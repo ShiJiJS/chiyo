@@ -16,6 +16,7 @@ class ProposalQueue extends StatelessWidget {
     required this.onFilter,
     required this.onPage,
     required this.onSelect,
+    this.queryFailed = false,
   });
   final ProposalPage page;
   final String? focused;
@@ -23,6 +24,7 @@ class ProposalQueue extends StatelessWidget {
   final FocusNode searchFocus, selectedFocus;
   final ProposalFilter filter;
   final ValueChanged<String> onSearch, onSelect;
+  final bool queryFailed;
   final ValueChanged<ProposalFilter> onFilter;
   final ValueChanged<int> onPage;
   @override
@@ -60,21 +62,27 @@ class ProposalQueue extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Row(
-                  children: [
-                    text('录入提案', 21, weight: FontWeight.w600),
-                    const Spacer(),
-                    text(
-                      '${page.allCount}',
-                      24,
-                      color: p.muted,
-                      family: 'Georgia',
-                      height: 1.2,
-                    ),
-                  ],
+                ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight: 31.5 * MediaQuery.textScalerOf(context).scale(1),
+                  ),
+                  child: Row(
+                    children: [
+                      text('录入提案', 21, weight: FontWeight.w600),
+                      const Spacer(),
+                      text(
+                        queryFailed ? '—' : '${page.allCount}',
+                        24,
+                        color: p.muted,
+                        family: 'Georgia',
+                        height: 1.2,
+                      ),
+                    ],
+                  ),
                 ),
                 const SizedBox(height: 22),
                 Container(
+                  constraints: const BoxConstraints(minHeight: 41.5),
                   padding: const EdgeInsets.symmetric(
                     horizontal: 10,
                     vertical: 9.5,
@@ -148,10 +156,15 @@ class ProposalQueue extends StatelessWidget {
                             onPressed: () => onFilter(f),
                             child: Text(switch (f) {
                               ProposalFilter.pending =>
-                                '待确认 ${page.pendingCount}',
+                                queryFailed
+                                    ? '待确认'
+                                    : '待确认 ${page.pendingCount}',
                               ProposalFilter.handled =>
-                                '已处理 ${page.allCount - page.pendingCount}',
-                              ProposalFilter.all => '全部 ${page.allCount}',
+                                queryFailed
+                                    ? '已处理'
+                                    : '已处理 ${page.allCount - page.pendingCount}',
+                              ProposalFilter.all =>
+                                queryFailed ? '全部' : '全部 ${page.allCount}',
                             }),
                           ),
                         ),
@@ -217,32 +230,39 @@ class ProposalQueue extends StatelessWidget {
                           ),
                           child: Column(
                             children: [
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      entry.chatLabel.isEmpty
-                                          ? '${entry.kindLabel}提案'
-                                          : entry.chatLabel,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: prototypeText(
-                                        context,
-                                        14,
-                                        weight: FontWeight.w700,
-                                        height: 1.6,
+                              ConstrainedBox(
+                                constraints: BoxConstraints(
+                                  minHeight:
+                                      22.4 *
+                                      MediaQuery.textScalerOf(context).scale(1),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        entry.chatLabel.isEmpty
+                                            ? '${entry.kindLabel}提案'
+                                            : entry.chatLabel,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: prototypeText(
+                                          context,
+                                          14,
+                                          weight: FontWeight.w700,
+                                          height: 1.6,
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                  const SizedBox(width: 7),
-                                  text(
-                                    '${entry.createdAt.toLocal().hour.toString().padLeft(2, '0')}:${entry.createdAt.toLocal().minute.toString().padLeft(2, '0')}',
-                                    11,
-                                    color: p.muted,
-                                    family: 'Consolas',
-                                    height: 1.6,
-                                  ),
-                                ],
+                                    const SizedBox(width: 7),
+                                    text(
+                                      '${entry.createdAt.toLocal().hour.toString().padLeft(2, '0')}:${entry.createdAt.toLocal().minute.toString().padLeft(2, '0')}',
+                                      11,
+                                      color: p.muted,
+                                      family: 'Consolas',
+                                      height: 1.6,
+                                    ),
+                                  ],
+                                ),
                               ),
                               const SizedBox(height: 7),
                               Row(
@@ -278,9 +298,13 @@ class ProposalQueue extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        text('没有找到提案', 15),
+                        text(queryFailed ? '提案查询失败' : '没有找到提案', 15),
                         const SizedBox(height: 8),
-                        text('调整关键词或查看全部提案。', 13, color: p.muted),
+                        text(
+                          queryFailed ? '请检查服务状态后重试。' : '调整关键词或查看全部提案。',
+                          13,
+                          color: p.muted,
+                        ),
                         const SizedBox(height: 18),
                         TextButton(
                           style: prototypeButton(
@@ -312,7 +336,11 @@ class ProposalQueue extends StatelessWidget {
             ),
             child: Row(
               children: [
-                text('${page.total} 条提案', 12, color: p.muted),
+                text(
+                  queryFailed ? '查询失败' : '${page.total} 条提案',
+                  12,
+                  color: p.muted,
+                ),
                 const Spacer(),
                 SizedBox(
                   width: 24,
@@ -327,7 +355,9 @@ class ProposalQueue extends StatelessWidget {
                 ),
                 const SizedBox(width: 7),
                 text(
-                  '${page.offset ~/ page.limit + 1} / ${((page.total + page.limit - 1) ~/ page.limit).clamp(1, 999999)}',
+                  queryFailed
+                      ? '— / —'
+                      : '${page.offset ~/ page.limit + 1} / ${((page.total + page.limit - 1) ~/ page.limit).clamp(1, 999999)}',
                   12,
                   color: p.muted,
                 ),
