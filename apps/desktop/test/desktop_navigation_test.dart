@@ -62,6 +62,11 @@ void main() {
                 of: find.byKey(const ValueKey('library-directory')),
                 matching: find.text('信息库'),
               )
+            : i == 2
+            ? find.descendant(
+                of: find.byKey(const ValueKey('proposal-queue')),
+                matching: find.text('录入提案'),
+              )
             : find.descendant(
                 of: find.byType(PageHeading),
                 matching: find.text(headings[i]),
