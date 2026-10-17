@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:crypto/crypto.dart';
@@ -7,6 +8,115 @@ import 'package:info_core/agent_server.dart';
 import 'package:test/test.dart';
 
 void main() {
+  test(
+    'a transient running audit failure does not stop monitoring a live process',
+    () async {
+      final folder = await Directory.systemTemp.createTemp(
+        'runtime-monitor-test-',
+      );
+      final release = File('${folder.path}/release');
+      final repo = _FailFirstRunningAudit();
+      final executable = File(Platform.resolvedExecutable);
+      final stat = await executable.stat();
+      final service = InformationService(
+        repository: repo,
+        credentialExecutableInspector: (path, receiver) async =>
+            ExecutableIdentity(
+              path,
+              stat.size,
+              stat.modified.microsecondsSinceEpoch,
+              'sha256:${sha256.convert(await executable.readAsBytes())}',
+            ),
+      );
+      final server = await AgentServer.start(service.agent, port: 0);
+      final client = AgentClient(
+        server.port,
+        credentialProcessStarter: (exe, argv, cwd, env) => Process.start(
+          exe,
+          [
+            File('test/support/credential_waiting_child.dart').absolute.path,
+            release.path,
+          ],
+          workingDirectory: cwd,
+          environment: env,
+          includeParentEnvironment: false,
+        ),
+      );
+      addTearDown(() async {
+        await release.writeAsString('release');
+        await client.drainCredentialExecutions();
+        client.close();
+        await server.close();
+        await service.close();
+        await folder.delete(recursive: true);
+      });
+      var credential = await service.owner.createStringCredential(
+        name: 'Synthetic',
+        publicPurpose: '',
+        secret: 'synthetic-token',
+      );
+      credential = await service.owner.updateCredentialMetadata(
+        credential.id,
+        credential.revision,
+        name: credential.name,
+        publicPurpose: '',
+        privateNote: '',
+        suggestedBinding: 'GH_TOKEN',
+        discoverable: true,
+      );
+      await client.execute({'command': 'session', 'chatLabel': 'Audit outage'});
+      final request = await client.execute({
+        'command': 'request-use',
+        'purpose': 'Monitor despite audit outage',
+        'credentials': [
+          {'alias': 'token', 'credentialId': credential.id, 'version': 1},
+        ],
+        'launch': {
+          'receiver': 'gh_token',
+          'executable': executable.path,
+          'argv': ['api', 'user'],
+          'cwd': Directory.current.path,
+          'env': {
+            'GH_TOKEN': {'secret': 'token'},
+          },
+        },
+      });
+      expect(request['status'], 'pending');
+      await service.owner.decideCredentialUse(
+        request['requestId'] as String,
+        approveCredential: true,
+      );
+      final accepted = await client.execute({
+        'command': 'run-use',
+        'requestId': request['requestId'],
+      });
+      expect(accepted['status'], 'accepted');
+      await repo.failureObserved.future.timeout(const Duration(seconds: 10));
+      expect(
+        await client
+            .drainCredentialExecutions()
+            .then((_) => true)
+            .timeout(const Duration(milliseconds: 150), onTimeout: () => false),
+        isFalse,
+        reason:
+            'The child is still waiting; audit failure must not mark it complete.',
+      );
+      final output = await client.execute({
+        'command': 'execution-output',
+        'executionId': accepted['executionId'],
+      });
+      expect(output['outputComplete'], isFalse);
+      await release.writeAsString('release');
+      await client.drainCredentialExecutions();
+      final status = await client.execute({
+        'command': 'execution-status',
+        'executionId': accepted['executionId'],
+      });
+      expect(status['executionState'], 'exited');
+      expect(status['exitCode'], 0);
+      expect(repo.failures, 1);
+    },
+  );
   test(
     'private Token material launches a real controlled process and exposes only bounded execution events',
     () async {
@@ -131,4 +241,30 @@ void main() {
       );
     },
   );
+}
+
+class _FailFirstRunningAudit extends MemoryInformationRepository {
+  final failureObserved = Completer<void>();
+  int failures = 0;
+  @override
+  Future<void> commitCredentialRuntime(
+    List<CredentialUseRequest> requests,
+    List<CredentialExecution> executions, {
+    GrantHistory? fieldGrant,
+    RequestHistory? fieldRequest,
+    void Function()? validate,
+  }) async {
+    if (failures == 0 && executions.any((e) => e.state == 'running')) {
+      failures++;
+      failureObserved.complete();
+      throw StateError('synthetic audit outage');
+    }
+    await super.commitCredentialRuntime(
+      requests,
+      executions,
+      fieldGrant: fieldGrant,
+      fieldRequest: fieldRequest,
+      validate: validate,
+    );
+  }
 }

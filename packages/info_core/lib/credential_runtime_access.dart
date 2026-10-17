@@ -127,6 +127,17 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
         .firstOrNull;
     if (old == null) throw const CredentialUseFailure('session_mismatch');
     final next = report.state;
+    // An HTTP response can be lost after commit. Replaying the exact metadata
+    // is harmless; changing any existing fact is still rejected below.
+    if (old.state == next &&
+        old.pid == report.pid &&
+        old.processCreatedAt == report.processCreatedAt &&
+        old.startedAt == report.startedAt &&
+        old.finishedAt == report.finishedAt &&
+        old.exitCode == report.exitCode &&
+        old.errorCode == report.errorCode) {
+      return old;
+    }
     if (!(old.state == 'preparing' &&
             {
               'running',
@@ -159,12 +170,16 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
         }.contains(report.errorCode)) {
       throw const CredentialUseFailure('invalid_plan');
     }
-      if(next=='running') {
-        final identity=CredentialProcessIdentity.capture(report.pid!);
-        try {
-          if(identity==null||identity.value!=report.processCreatedAt)throw const CredentialUseFailure('invalid_plan');
-        } finally {identity?.close();}
+    if (next == 'running') {
+      final identity = CredentialProcessIdentity.capture(report.pid!);
+      try {
+        if (identity == null || identity.value != report.processCreatedAt) {
+          throw const CredentialUseFailure('invalid_plan');
+        }
+      } finally {
+        identity?.close();
       }
+    }
     final changed = CredentialExecution(
       id: old.id,
       requestId: old.requestId,
@@ -539,7 +554,9 @@ extension CredentialRuntimeOwnerAccess on OwnerAccess {
       throw const CredentialUseFailure('invalid_plan');
     }
     if (fields.toSet().length != fields.length ||
-        fields.any((f) => !r.fields.contains(f) || _service._field(f) == null)) {
+        fields.any(
+          (f) => !r.fields.contains(f) || _service._field(f) == null,
+        )) {
       throw const CredentialUseFailure('invalid_reference');
     }
     if (approveCredential) _service._useEligible(r);

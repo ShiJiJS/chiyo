@@ -264,6 +264,7 @@ class _CredentialRuntimeExecutor {
     CredentialProcessIdentity? processIdentity;
     DateTime? started;
     String? created;
+    Future<void>? stdoutDone, stderrDone;
     var preparing = true;
     Future<void> report(String state, {String? code, int? exit}) =>
         client._reportCredentialExecution(
@@ -348,23 +349,42 @@ class _CredentialRuntimeExecutor {
         plan.cwd,
         env,
       );
-      processIdentity=CredentialProcessIdentity.capture(process.pid);
+      // Drain immediately after OS creation, including when identity capture or
+      // audit reporting fails. Neither failure ends the child's lifetime.
+      stdoutDone = process.stdout
+          .listen((data) => output.add('stdout', data))
+          .asFuture<void>();
+      stderrDone = process.stderr
+          .listen((data) => output.add('stderr', data))
+          .asFuture<void>();
+      processIdentity = CredentialProcessIdentity.capture(process.pid);
       await process.stdin.close();
       started = DateTime.now().toUtc();
       created = processIdentity?.value;
-      if(created==null)throw const CredentialUseFailure('execution_unknown');
-      final stdoutDone = process.stdout
-          .listen((data) => output.add('stdout', data))
-          .asFuture<void>();
-      final stderrDone = process.stderr
-          .listen((data) => output.add('stderr', data))
-          .asFuture<void>();
-      await report('running');
+      if (created == null) {
+        throw const CredentialUseFailure('execution_unknown');
+      }
+      try {
+        await report('running');
+      } on Object {
+        // Retry metadata only; the consumed launch is never retried.
+        await report('running');
+      }
       final result = await process.exitCode;
       await Future.wait([stdoutDone, stderrDone]);
       output.complete = true;
       await report('exited', exit: result);
     } on Object catch (e) {
+      if (process != null) {
+        // A reporting/identity failure cannot release a live process's slot or
+        // dispose its isolated configuration while it still uses it.
+        await process.exitCode;
+        try {
+          await Future.wait([?stdoutDone, ?stderrDone]);
+        } on Object {
+          // Preserve unknown rather than infer success from a closed pipe.
+        }
+      }
       final code = e is CredentialUseFailure
           ? e.code
           : preparing
