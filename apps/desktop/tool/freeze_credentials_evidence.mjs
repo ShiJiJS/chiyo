@@ -16,15 +16,18 @@ function record(file){
     sha256:crypto.createHash('sha256').update(bytes).digest('hex'),
     ...(png?{width:bytes.readUInt32BE(16),height:bytes.readUInt32BE(20)}:{})};
 }
-const sourceFiles=['apps/desktop/lib/credential_dialogs.dart','apps/desktop/lib/credential_management.dart',
+const sourceFiles=process.argv[3]==='maintenance'?['apps/desktop/lib/desktop_shell.dart','apps/desktop/lib/desktop_runtime.dart',
+  'apps/desktop/tool/capture_credential_maintenance.dart','apps/desktop/test/credential_maintenance_test.dart','apps/desktop/test/support/credential_maintenance_fixture.dart']
+  :['apps/desktop/lib/credential_dialogs.dart','apps/desktop/lib/credential_management.dart',
   'apps/desktop/lib/credentials.dart','apps/desktop/lib/prototype_dialog.dart','apps/desktop/tool/capture_credentials_states.dart'];
 const actual=fs.readdirSync(folder).filter(f=>f.endsWith('.png')).sort().map(f=>record(path.join(folder,f)));
 const prep='C:/Project/network_config/info-manage-worktrees/round05-credential-reference-prep/cases';
 const reference=[];
-for(const state of (process.argv[3]==='links'?['links']:['file','string','expired','rotate','discovery','links','add-file','add-string']))for(const width of[1440,1280]){
+for(const state of (process.argv[3]==='maintenance'?[]:process.argv[3]==='links'?['links']:['file','string','expired','rotate','discovery','links','add-file','add-string']))for(const width of[1440,1280]){
   reference.push(record(path.join(prep,`credential-${state}`,`page-${width}x${width===1440?900:800}.png`)));
 }
 fs.writeFileSync(output,JSON.stringify({round,frozenAt:new Date().toISOString(),baseCommit:execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim(),
-  description:'Unmodified Flutter captures; ordinary predecessor r4, 200% predecessor r6. Source hashes identify the reviewed working snapshot.',
+  description:process.argv[3]==='maintenance'?'Actual periodic maintenance failure via the public repository boundary and runtime timer; shared QuietNotice extension without a dedicated HTML reference.'
+    :'Unmodified Flutter captures; ordinary predecessor r4, 200% predecessor r6. Source hashes identify the reviewed working snapshot.',
   sources:sourceFiles.map(f=>record(path.join(root,f))),actual,reference},null,2)+'\n');
 process.stdout.write(`Frozen ${actual.length} captures and ${reference.length} reference records.\n`);

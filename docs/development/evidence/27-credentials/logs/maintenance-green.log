@@ -1,0 +1,3 @@
+00:00 +0: loading C:/Project/network_config/info-manage-worktrees/27-credentials/apps/desktop/test/credential_maintenance_test.dart
+00:00 +0: runtime tick preserves failed expired credential material and clears its real notice after retry
+00:01 +1: All tests passed!
