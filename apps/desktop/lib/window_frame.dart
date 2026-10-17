@@ -94,7 +94,12 @@ class _DesktopWindowFrameState extends State<DesktopWindowFrame> {
     if (!_enabled) return widget.child;
     return Overlay.wrap(
       child: Column(
+        // A route blocks semantics painted before it. Paint the workspace
+        // first so its Navigator cannot hide the caption or its Tooltip anchor,
+        // while keeping the caption visually above the workspace.
+        verticalDirection: VerticalDirection.up,
         children: [
+          Expanded(child: widget.child),
           Material(
             color: UiPalette.of(context).rail,
             child: SizedBox(
@@ -121,7 +126,6 @@ class _DesktopWindowFrameState extends State<DesktopWindowFrame> {
               ),
             ),
           ),
-          Expanded(child: widget.child),
         ],
       ),
     );

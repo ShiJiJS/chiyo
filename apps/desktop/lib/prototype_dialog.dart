@@ -15,10 +15,11 @@ class PrototypeDialog extends StatelessWidget {
     this.flow = false,
     this.scrollGutter = 15,
     this.bottomPadding,
+    this.bodyBottomPadding,
     this.width,
     this.simpleFlow = false,
     this.actionDivider = true,
-    this.actionPaddingTop = 16,
+    this.actionPaddingTop,
   });
   final String title;
   final Widget body;
@@ -27,9 +28,10 @@ class PrototypeDialog extends StatelessWidget {
   final bool flow;
   final double scrollGutter;
   final double? bottomPadding;
+  final double? bodyBottomPadding;
   final double? width;
   final bool actionDivider;
-  final double actionPaddingTop;
+  final double? actionPaddingTop;
 
   /// Template-based credential flows keep the original unruled actions and
   /// nested bottom spacing; panel-based editors retain the separated footer.
@@ -80,15 +82,17 @@ class PrototypeDialog extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
-                      child: Text(
-                        title,
-                        style: prototypeText(
-                          context,
-                          23,
-                          family: 'SimSun',
-                          weight: FontWeight.w500,
-                        ),
-                      ),
+                      child: title.isEmpty
+                          ? const SizedBox.shrink()
+                          : Text(
+                              title,
+                              style: prototypeText(
+                                context,
+                                23,
+                                family: 'SimSun',
+                                weight: FontWeight.w500,
+                              ),
+                            ),
                     ),
                     Transform.translate(
                       offset: const Offset(2, 3),
@@ -109,11 +113,13 @@ class PrototypeDialog extends StatelessWidget {
                   child: SingleChildScrollView(
                     padding: EdgeInsets.only(
                       right: flow ? scrollGutter : 0,
-                      bottom: simpleFlow
-                          ? 14
-                          : flow
-                          ? 16
-                          : 0,
+                      bottom:
+                          bodyBottomPadding ??
+                          (simpleFlow
+                              ? 14
+                              : flow
+                              ? 16
+                              : 0),
                     ),
                     child: body,
                   ),
@@ -121,7 +127,9 @@ class PrototypeDialog extends StatelessWidget {
                 if (actions.isNotEmpty)
                   Container(
                     padding: EdgeInsets.only(
-                      top: simpleFlow ? 0 : actionPaddingTop,
+                      top: simpleFlow
+                          ? 0
+                          : actionPaddingTop ?? (actionDivider ? 16 : 26),
                     ),
                     decoration: BoxDecoration(
                       border: simpleFlow || !actionDivider

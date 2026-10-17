@@ -37,6 +37,7 @@ part 'library_access.dart';
 part 'credential_access.dart';
 part 'credential_runtime_models.dart';
 part 'credential_runtime_access.dart';
+part 'proposal_access.dart';
 
 class AccessFailure implements Exception {
   const AccessFailure(this.status);

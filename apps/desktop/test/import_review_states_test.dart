@@ -48,19 +48,21 @@ void main() {
       await tester.pumpWidget(InformationApp(service: service, port: 0));
       await tester.tap(find.byKey(const ValueKey('nav-2')));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('查看提案'));
-      await tester.pumpAndSettle();
       await tester.tap(find.byKey(const ValueKey('edit-import-0')));
       await tester.pumpAndSettle();
       await tester.enterText(
-        find.byKey(const ValueKey('proposal-value-0-0')),
+        find.byKey(const ValueKey('field-value-0')),
         'reviewed.invalid',
       );
-      await tester.tap(find.text('保存更改'));
+      await tester.tap(find.byKey(const ValueKey('save-information')));
       await tester.pumpAndSettle();
       await tester.tap(find.text('确认全部入库'));
       await tester.pumpAndSettle();
-      expect(find.textContaining('未能保存，提案和更改已保留'), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey('confirm-proposal-decision')));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('提案和调整内容已保留'), findsOneWidget);
+      await tester.tap(find.text('返回核对'));
+      await tester.pumpAndSettle();
       expect(find.text('reviewed.invalid'), findsOneWidget);
       expect(service.owner.information, isEmpty);
       expect(service.owner.directories, isEmpty);
@@ -69,6 +71,8 @@ void main() {
         ImportProposalState.pending,
       );
       await tester.tap(find.text('确认全部入库'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('confirm-proposal-decision')));
       await tester.pumpAndSettle();
       expect(
         service.owner.information.single.fields.single.value,
@@ -104,20 +108,24 @@ void main() {
       await tester.pumpWidget(InformationApp(service: service, port: 0));
       await tester.tap(find.byKey(const ValueKey('nav-2')));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('查看详情'));
+      await tester.tap(find.byKey(const ValueKey('proposal-filter-handled')));
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text('按信息身份查看当前内容 →'));
+      await tester.tap(find.text('按信息身份查看当前内容 →'));
       await tester.pumpAndSettle();
       expect(find.text('current-private-value'), findsOneWidget);
       expect(find.text('old-private-value'), findsNothing);
       expect(find.text('编辑'), findsNothing);
-      await tester.tap(find.text('关闭'));
+      await tester.tap(find.text('×').last);
       await tester.pumpAndSettle();
       await service.owner.deleteInformation(receipt.id, 2);
       await tester.pump(const Duration(seconds: 1));
       expect(find.text('Archived'), findsOneWidget);
-      await tester.tap(find.text('查看详情'));
+      await tester.ensureVisible(find.text('按信息身份查看当前内容 →'));
+      await tester.tap(find.text('按信息身份查看当前内容 →'));
       await tester.pumpAndSettle();
       expect(find.text('current-private-value'), findsNothing);
-      expect(find.textContaining('部分资料已删除或不可用'), findsOneWidget);
+      expect(find.textContaining('当前信息已不存在'), findsOneWidget);
       expect(service.owner.importProposals.single.items, isEmpty);
       await tester.pumpWidget(const SizedBox());
       await tester.runAsync(service.close);
@@ -144,13 +152,16 @@ void main() {
       await tester.pumpWidget(InformationApp(service: service, port: 0));
       await tester.tap(find.byKey(const ValueKey('nav-2')));
       await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('proposal-filter-handled')));
+      await tester.pumpAndSettle();
       expect(find.text('笔记服务入口'), findsOneWidget);
       expect(find.text('NEVER-RETAIN-REJECTED-VALUE'), findsNothing);
-      await tester.tap(find.text('查看详情'));
+      await tester.ensureVisible(find.text('按信息身份查看当前内容 →'));
+      await tester.tap(find.text('按信息身份查看当前内容 →'));
       await tester.pumpAndSettle();
       expect(find.text('编辑'), findsNothing);
       expect(find.text('NEVER-RETAIN-REJECTED-VALUE'), findsNothing);
-      expect(find.textContaining('拟录入内容已清理'), findsOneWidget);
+      expect(find.text('此回执没有已入库的信息身份。'), findsOneWidget);
       await tester.pumpWidget(const SizedBox());
       await tester.runAsync(service.close);
     },

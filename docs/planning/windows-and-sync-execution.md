@@ -31,5 +31,7 @@
 - #23公共工作区与所提供状态的精确样式修正已合入`1852f8c`，主集成完整203项检查及真实Windows CLI/桌面流程通过；隔离通知probe合入`e78673e`后默认原生流程再次通过。两次实际Shell接受投递，但工具没有可操作toast、没有点击回调，人工点击仍未验成功，#23保留OPEN及一项未勾选。详见[主复验](../development/round05-23-parent-verification.md)。
 - #24 信息库已由独立 merger 合入 `df63de6`；主任务完整217项及各analyze、真实Windows桌面/独立CLI/SQLCipher/DPAPI流程均通过。固定r4与独立规范对照闭合已提供画面的问题，见[信息库主复验](../development/round05-24-parent-verification.md)。#25提案与#27凭据管理基于该接口进入实施；#26历史/设置/备份继续收尾，不以默认页面的有限视觉结论代替全部子页和弹窗。
 - #26 历史/设置最终视觉候选合入 `26a1cca`，恢复后控件回归合入 `0c09d77`。主任务完整229项及各analyze通过；同一生产源码的四个真实文件选择器、独立密钥导出/空库恢复/旧授权拒绝/DPAPI重开通过。另用真实NativeDesktopPlatform验证关闭后台CLI读取、设置完全退出服务、重启旧授权拒绝与数据身份保留。详见[D4主复验](../development/round05-26-parent-verification.md)。原生辅助日志的11条AXTree诊断仍在定位，实际托盘/通知点击与Mac实测边界未消除。
+- #27公共接口候选 `fba0393` 已合入 `a5035f6`，主任务完整249项及全部analyze通过；固定版本/generation、不可变材料、受控目录及schema13→14完整迁移可由#28消费。#27保持OPEN，待#25主导航和联合native；其余已提供视觉范围经独立r3/r4定向收口。见[D5接口里程碑](../development/round05-27-parent-interface.md)。#28开始schema15的真实使用申请/一次启动实施，不把接口交付计为执行已完成。
+- #25最终候选 `b0826ac` 合入 `1d986be`，独立r2/r3已收口所提供静态余项；merger定向52项及三个analyze、8张共享弹窗合并回归通过，见[D3主集成](../development/round05-25-parent-integration.md)。main三导航由#27统一接线中，当前源码完整检查及联合native仍待执行，不将旧分支原生或D5的249项结果冒称本轮通过。
 - #23剩余人工通知点击继续跟踪，未冒充完成。#25–#31及服务器同步仍需继续，不把信息库结论推广为全软件样式已通过。#27固定版本使用资格与#28实际请求失效验收的归属已在[接口协调](round05-interface-coordination.md)明确，避免消费者前尚无使用请求模型却虚构通过或形成反向依赖。
 - 草稿 PR #32 跟踪本集成分支；旧 PR #20 保留旧基线。逐任务源码与验收证据保存在各自 development 记录和 GitHub。

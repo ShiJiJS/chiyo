@@ -46,8 +46,6 @@ void main() {
           home: Scaffold(body: ImportProposalsPage(owner: service.owner)),
         ),
       );
-      await tester.tap(find.text('查看修改差异'));
-      await tester.pumpAndSettle();
       expect(find.textContaining('Old public description'), findsOneWidget);
       expect(
         find.textContaining('Reviewed public description'),
@@ -57,6 +55,8 @@ void main() {
       expect(find.textContaining('NEW-DESKTOP-VALUE'), findsOneWidget);
       expect(service.owner.information.single.version, 1);
       await tester.tap(find.text('确认这些修改'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('confirm-proposal-decision')));
       await tester.pumpAndSettle();
       expect(service.owner.information.single.name, 'Reviewed name');
       expect(service.owner.information.single.version, 2);
