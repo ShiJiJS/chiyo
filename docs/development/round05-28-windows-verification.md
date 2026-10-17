@@ -1,5 +1,7 @@
 # D6 Windows 字符串凭据里程碑
 
+主集成复验：`2062cbb4eaf78d1d0b76246d67d4a83a08a39c03` 整套 **301项**（CLI33/Core119/Storage52/Desktop97）和各 analyze 通过，无跳过，包含新增的两个拒绝启动测试与 AOT CLI 崩溃测试。合并后的实际 Windows 审批→独立 AOT CLI/worker→gh→SQLCipher/DPAPI 重开又通过1次。原生测试已自动退出，未使用 Computer Use；[当前集成日志、哈希与进程核对](evidence/28-runtime/main-integration/verification.json)单独归档，不覆盖前轮原始证据。
+
 2026-10-17。运行实现 `bc02e5fe68bb5568551c7d5da161d41006447911`；补充启动失败/空材料测试及最后注入列间距 `bb0bbab084bf5bfc695fbacd453f1925a79dc2df`。本记录只覆盖 Windows 字符串接收配置，不表示整个软件完成。#28 保持 OPEN，Mac 默认执行器尚未适配；#29 文件、#30 完整历史及生命周期、#31 完整备份继续按原依赖推进。
 
 ## 已通过的链路

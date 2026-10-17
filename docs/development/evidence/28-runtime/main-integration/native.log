@@ -1,0 +1,8 @@
+Flutter assets will be downloaded from https://storage.flutter-io.cn. Make sure you trust this source!
+00:00 +0: loading C:/Project/network_config/info-manage/apps/desktop/integration_test/credential_runtime_native_test.dart
+Building Windows application...                                    12.8s
+√ Built build\windows\x64\runner\Debug\info_desktop.exe
+00:00 +0: Windows UI approves one synthetic Token launch through real CLI and gh without authenticating another account
+D6_NATIVE_VERIFIED UI → private consumption → CLI worker → real gh with nonempty synthetic Token → HTTP401/exit1; field grant independent; SQLCipher/DPAPI receipt reopened. No real account or keyring fallback queried.
+00:04 +1: (tearDownAll)
+00:04 +1: All tests passed!
