@@ -98,3 +98,7 @@ Windows 四个真实系统文件 picker 的原生证据只覆盖文件 I/O 与�
 `backup_widget_test.dart` 的真实根 `InformationApp` + SQLCipher 备份恢复回归，先通过可见控件缓存目标库的 30 分钟/90 天，并将通知关闭再开启，使挂载状态保留开启草稿。源备份设置为 5 分钟/180 天/关闭通知。真实文件验证、错误密钥重试、空库恢复后关闭弹窗，界面仍在备份分区；切回记录控件实际显示 5/180，通知 Semantics 实际为关闭，并继续验证恢复数据可见。只断言 owner 值不足以覆盖这一结果。
 
 该新增回归首次即通过，源码审计疑点未复现，没有制造失败或修改产品代码。该文件 2 项通过、文件静态分析无 issue，见 `evidence/26-history-settings/restored-preference-controls.log` 和 `restored-preference-controls-analyze.log`。既有失败保留草稿与根主题测试不重复扩展；未重跑完整套件、native 或已关闭视觉。真实 Windows 生命周期与 Mac 实测残余保持原结论。
+
+## 主集成后续复验
+
+以上为各固定候选当时的记录；后续主任务已在 `0c09d77` 的合并源码完成四个真实Windows文件选择器、完整备份恢复，以及独立原生关闭后台/设置完全退出/重启旧授权拒绝验证。最终aux-r3的三处视觉余项经独立复核已闭合。主任务完整229项、真实流程、首轮超时与重跑成功、原生AXTree诊断和未验边界见[主集成复验](round05-26-parent-verification.md)，原始证据单独归档，不覆盖上述历史日志。托盘/通知实际点击、Mac实机与尚待定位的AXTree诊断不因这些成功结果而宣称完成。
