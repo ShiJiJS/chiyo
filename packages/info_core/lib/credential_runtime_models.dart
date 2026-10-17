@@ -1,0 +1,700 @@
+part of 'info_core.dart';
+
+class CredentialUseFailure implements Exception {
+  const CredentialUseFailure(
+    this.code, {
+    this.fieldPath,
+    this.attemptConsumed = false,
+    this.executionId,
+  });
+  final String code;
+  final String? fieldPath, executionId;
+  final bool attemptConsumed;
+  Map<String, Object?> toJson() => {
+    'protocolVersion': 1,
+    'status': switch (code) {
+      'session_required' ||
+      'session_mismatch' ||
+      'scope_not_approved' => 'unauthorized',
+      'request_denied' => 'denied',
+      'grant_expired' || 'credential_expired' => 'expired',
+      'grant_revoked' ||
+      'credential_disabled' ||
+      'credential_deleted' => 'revoked',
+      'request_pending' ||
+      'request_terminal' ||
+      'attempt_consumed' ||
+      'credential_version_changed' ||
+      'executable_changed' ||
+      'plan_changed' ||
+      'execution_unknown' ||
+      'cleanup_busy' ||
+      'cleanup_failed' ||
+      'cleanup_identity_mismatch' => 'conflict',
+      'audit_unavailable' ||
+      'service_unavailable' ||
+      'execution_capacity' => 'service_unavailable',
+      _ => 'invalid_request',
+    },
+    'errorCode': code,
+    'retryable':
+        !attemptConsumed &&
+        {
+          'audit_unavailable',
+          'service_unavailable',
+          'execution_capacity',
+          'cleanup_busy',
+        }.contains(code),
+    'attemptConsumed': attemptConsumed,
+    if (fieldPath != null) 'fieldPath': fieldPath,
+    if (executionId != null) 'executionId': executionId,
+  };
+  @override
+  String toString() => 'CredentialUseFailure($code)';
+}
+
+void _useShape(
+  Map<String, dynamic> j,
+  Set<String> required, [
+  Set<String> optional = const {},
+]) {
+  if (j.keys.any((k) => !required.contains(k) && !optional.contains(k))) {
+    throw const CredentialUseFailure('unknown_field');
+  }
+  if (!j.keys.toSet().containsAll(required)) {
+    throw const CredentialUseFailure('invalid_type');
+  }
+}
+
+String _useText(
+  Object? value,
+  String path, {
+  int max = 8192,
+  bool empty = true,
+}) {
+  if (value is! String) {
+    throw CredentialUseFailure('invalid_type', fieldPath: path);
+  }
+  if (value.contains('\u0000') || value.length > max || !empty && value.isEmpty) {
+    throw CredentialUseFailure('invalid_plan', fieldPath: path);
+  }
+  return value;
+}
+
+String _useId(Object? value, String path) {
+  final text = _useText(value, path, max: 128, empty: false);
+  if (!RegExp(r'^[!-~]+$').hasMatch(text)) {
+    throw CredentialUseFailure('invalid_reference', fieldPath: path);
+  }
+  return text;
+}
+
+String _useAlias(Object? value, String path) {
+  final text = _useText(value, path, max: 64, empty: false);
+  if (!RegExp(r'^[A-Za-z_][A-Za-z0-9_]{0,63}$').hasMatch(text)) {
+    throw CredentialUseFailure('invalid_reference', fieldPath: path);
+  }
+  return text;
+}
+
+enum LaunchValueKind { literal, file, secret, internalMaterial }
+
+class LaunchValue {
+  const LaunchValue(this.kind, this.value);
+  final LaunchValueKind kind;
+  final String value;
+  factory LaunchValue.parse(
+    Object? raw,
+    String path, {
+    required bool environment,
+  }) {
+    if (raw is String) {
+      return LaunchValue(LaunchValueKind.literal, _useText(raw, path));
+    }
+    if (raw is! Map<String, dynamic> || raw.length != 1) {
+      throw CredentialUseFailure('invalid_type', fieldPath: path);
+    }
+    final kind = raw.keys.single;
+    if (kind != 'file' && (kind != 'secret' || !environment)) {
+      throw CredentialUseFailure('invalid_reference', fieldPath: path);
+    }
+    return LaunchValue(
+      kind == 'file' ? LaunchValueKind.file : LaunchValueKind.secret,
+      _useAlias(raw.values.single, path),
+    );
+  }
+  Object toJson() =>
+      kind == LaunchValueKind.literal ? value : {kind.name: value};
+}
+
+class CredentialUseInput {
+  CredentialUseInput._(
+    this.purpose,
+    this.alias,
+    this.credentialId,
+    this.version,
+    this.launch,
+    this.readFields,
+  );
+  final String purpose, alias, credentialId;
+  final int version;
+  final CredentialLaunchPlan launch;
+  final List<FieldRef> readFields;
+  factory CredentialUseInput.fromJson(Map<String, dynamic> j) {
+    _useShape(
+      j,
+      {'command', 'purpose', 'credentials', 'launch'},
+      {'readFields'},
+    );
+    if (j['command'] != 'request-use') {
+      throw const CredentialUseFailure('invalid_plan');
+    }
+    final purpose = _useText(j['purpose'], 'purpose', max: 2000, empty: false);
+    if (purpose.trim().isEmpty) {
+      throw const CredentialUseFailure('invalid_plan', fieldPath: 'purpose');
+    }
+    final credentials = j['credentials'];
+    if (credentials is! List ||
+        credentials.length != 1 ||
+        credentials.single is! Map<String, dynamic>) {
+      throw const CredentialUseFailure(
+        'invalid_type',
+        fieldPath: 'credentials',
+      );
+    }
+    final c = credentials.single as Map<String, dynamic>;
+    _useShape(c, {'alias', 'credentialId', 'version'});
+    final version = c['version'];
+    if (version is! int || version < 1 || version > 2147483647) {
+      throw const CredentialUseFailure(
+        'invalid_type',
+        fieldPath: 'credentials[0].version',
+      );
+    }
+    final launch = j['launch'];
+    if (launch is! Map<String, dynamic>) {
+      throw const CredentialUseFailure('invalid_type', fieldPath: 'launch');
+    }
+    final rawFields = j['readFields'] ?? [];
+    if (rawFields is! List || rawFields.length > 200) {
+      throw const CredentialUseFailure(
+        'limit_exceeded',
+        fieldPath: 'readFields',
+      );
+    }
+    final fields = <FieldRef>[];
+    for (final raw in rawFields) {
+      if (raw is! Map<String, dynamic>) {
+        throw const CredentialUseFailure(
+          'invalid_type',
+          fieldPath: 'readFields',
+        );
+      }
+      _useShape(raw, {'itemId', 'fieldId'});
+      fields.add(
+        FieldRef(
+          _useId(raw['itemId'], 'readFields.itemId'),
+          _useId(raw['fieldId'], 'readFields.fieldId'),
+        ),
+      );
+    }
+    if (fields.toSet().length != fields.length) {
+      throw const CredentialUseFailure(
+        'invalid_reference',
+        fieldPath: 'readFields',
+      );
+    }
+    return CredentialUseInput._(
+      purpose,
+      _useAlias(c['alias'], 'credentials[0].alias'),
+      _useId(c['credentialId'], 'credentials[0].credentialId'),
+      version,
+      CredentialLaunchPlan.parse(launch),
+      List.unmodifiable(fields),
+    );
+  }
+}
+
+typedef CredentialExecutableInspector =
+    Future<ExecutableIdentity> Function(String path, String receiver);
+
+class ExecutableIdentity {
+  const ExecutableIdentity(
+    this.path,
+    this.byteLength,
+    this.modifiedMicros,
+    this.sha256,
+  );
+  final String path, sha256;
+  final int byteLength, modifiedMicros;
+  Map<String, Object?> toJson() => {
+    'path': path,
+    'byteLength': byteLength,
+    'modifiedMicros': modifiedMicros,
+    'sha256': sha256,
+  };
+  factory ExecutableIdentity.fromJson(Map<String, dynamic> j) =>
+      ExecutableIdentity(
+        j['path'] as String,
+        j['byteLength'] as int,
+        j['modifiedMicros'] as int,
+        j['sha256'] as String,
+      );
+}
+
+Future<ExecutableIdentity> inspectCredentialExecutable(
+  String path,
+  String receiver,
+) async {
+  try {
+    final file = File(path);
+    final canonical = await file.resolveSymbolicLinks();
+    final stat = await file.stat();
+    if (stat.type != FileSystemEntityType.file) {
+      throw const CredentialUseFailure(
+        'invalid_plan',
+        fieldPath: 'launch.executable',
+      );
+    }
+    final name = canonical.split(RegExp(r'[/\\]')).last.toLowerCase();
+    if (receiver != 'gh_token' || !{'gh', 'gh.exe'}.contains(name)) {
+      throw const CredentialUseFailure('unsupported_tool_version');
+    }
+    final result = await Process.run(
+      canonical,
+      ['--version'],
+      environment: const {},
+      includeParentEnvironment: false,
+      runInShell: false,
+    ).timeout(const Duration(seconds: 5));
+    if (result.exitCode != 0 ||
+        !RegExp(
+          r'^gh version 2\.102\.0(?:\s|$)',
+        ).hasMatch(result.stdout as String)) {
+      throw const CredentialUseFailure('unsupported_tool_version');
+    }
+    return ExecutableIdentity(
+      canonical,
+      stat.size,
+      stat.modified.microsecondsSinceEpoch,
+      'sha256:${sha256.convert(await file.readAsBytes())}',
+    );
+  } on CredentialUseFailure {
+    rethrow;
+  } on Object {
+    throw const CredentialUseFailure(
+      'invalid_plan',
+      fieldPath: 'launch.executable',
+    );
+  }
+}
+
+class CredentialLaunchPlan {
+  CredentialLaunchPlan._(
+    this.receiver,
+    this.path,
+    this.argv,
+    this.cwd,
+    this.env, {
+    this.identity,
+  });
+  final String receiver, path, cwd;
+  final List<LaunchValue> argv;
+  final Map<String, LaunchValue> env;
+  final ExecutableIdentity? identity;
+  ExecutableIdentity get executable => identity!;
+  factory CredentialLaunchPlan.parse(Map<String, dynamic> j) {
+    _useShape(j, {'receiver', 'executable', 'argv', 'cwd', 'env'});
+    final receiver = _useText(
+      j['receiver'],
+      'launch.receiver',
+      max: 64,
+      empty: false,
+    );
+    if (!{
+      'gh_token',
+      'ssh_identity',
+      'aws_shared_credentials',
+    }.contains(receiver)) {
+      throw const CredentialUseFailure('unsupported_receiver');
+    }
+    final path = _useText(
+      j['executable'],
+      'launch.executable',
+      max: 4096,
+      empty: false,
+    );
+    final cwd = _useText(j['cwd'], 'launch.cwd', max: 4096, empty: false);
+    bool absolute(String p) => Platform.isWindows
+        ? RegExp(r'^[A-Za-z]:[/\\]').hasMatch(p)
+        : p.startsWith('/');
+    if (!absolute(path) || !absolute(cwd)) {
+      throw const CredentialUseFailure('invalid_plan');
+    }
+    final a = j['argv'], e = j['env'];
+    if (a is! List || e is! Map<String, dynamic>) {
+      throw const CredentialUseFailure('invalid_type');
+    }
+    if (a.length > 128 || e.length > 32) {
+      throw const CredentialUseFailure('limit_exceeded');
+    }
+    if (e.keys.map((k) => k.toLowerCase()).toSet().length != e.length) {
+      throw const CredentialUseFailure('invalid_env');
+    }
+    return CredentialLaunchPlan._(
+      receiver,
+      path,
+      List.unmodifiable([
+        for (var i = 0; i < a.length; i++)
+          LaunchValue.parse(a[i], 'launch.argv[$i]', environment: false),
+      ]),
+      cwd,
+      Map.unmodifiable({
+        for (final entry in e.entries)
+          _useAlias(entry.key, 'launch.env'): LaunchValue.parse(
+            entry.value,
+            'launch.env.${entry.key}',
+            environment: true,
+          ),
+      }),
+    );
+  }
+  CredentialLaunchPlan resolved(ExecutableIdentity identity, String cwd) =>
+      CredentialLaunchPlan._(
+        receiver,
+        identity.path,
+        argv,
+        cwd,
+        env,
+        identity: identity,
+      );
+  Map<String, Object?> toJson() => {
+    'receiver': receiver,
+    'executable': path,
+    'argv': argv.map((v) => v.toJson()).toList(),
+    'cwd': cwd,
+    'env': {for (final e in env.entries) e.key: e.value.toJson()},
+    if (identity != null) 'executableIdentity': identity!.toJson(),
+  };
+  factory CredentialLaunchPlan.fromStorageJson(Map<String, dynamic> j) {
+    final shape = Map<String, dynamic>.from(j)..remove('executableIdentity');
+    final plan = CredentialLaunchPlan.parse(shape);
+    return plan.resolved(
+      ExecutableIdentity.fromJson(
+        j['executableIdentity'] as Map<String, dynamic>,
+      ),
+      plan.cwd,
+    );
+  }
+  String get planHash {
+    Object? ordered(Object? v) => v is Map
+        ? {
+            for (final key in (v.keys.cast<String>().toList()..sort()))
+              key: ordered(v[key]),
+          }
+        : v is List
+        ? v.map(ordered).toList()
+        : v;
+    return 'sha256:${sha256.convert(utf8.encode(jsonEncode(ordered(toJson()))))}';
+  }
+}
+
+class CredentialUseRequest {
+  CredentialUseRequest({
+    required this.id,
+    required this.chatLabel,
+    required this.purpose,
+    required this.alias,
+    required this.credentialId,
+    required this.version,
+    required this.useGeneration,
+    required this.plan,
+    required this.createdAt,
+    required this.requestExpiresAt,
+    required Iterable<FieldRef> fields,
+    this.state = 'pending',
+    this.credentialApproved = false,
+    Iterable<FieldRef> approvedFields = const [],
+    this.credentialExpiresAt,
+    this.fieldExpiresAt,
+    this.executionId,
+    this.attemptConsumed = false,
+    this.invalidatedCode,
+  }) : fields = List.unmodifiable(fields),
+       approvedFields = List.unmodifiable(approvedFields);
+  final String id, chatLabel, purpose, alias, credentialId, state;
+  final int version, useGeneration;
+  final CredentialLaunchPlan plan;
+  final DateTime createdAt, requestExpiresAt;
+  final List<FieldRef> fields, approvedFields;
+  final bool credentialApproved, attemptConsumed;
+  final DateTime? credentialExpiresAt, fieldExpiresAt;
+  final String? executionId, invalidatedCode;
+  Map<String, Object?> toJson() => {
+    'id': id,
+    'chatLabel': chatLabel,
+    'purpose': purpose,
+    'alias': alias,
+    'credentialId': credentialId,
+    'version': version,
+    'useGeneration': useGeneration,
+    'plan': plan.toJson(),
+    'createdAt': createdAt.toUtc().toIso8601String(),
+    'requestExpiresAt': requestExpiresAt.toUtc().toIso8601String(),
+    'fields': fields.map((f) => f.toJson()).toList(),
+    'state': state,
+    'credentialApproved': credentialApproved,
+    'approvedFields': approvedFields.map((f) => f.toJson()).toList(),
+    'credentialExpiresAt': credentialExpiresAt?.toUtc().toIso8601String(),
+    'fieldExpiresAt': fieldExpiresAt?.toUtc().toIso8601String(),
+    'executionId': executionId,
+    'attemptConsumed': attemptConsumed,
+    'invalidatedCode': invalidatedCode,
+  };
+  factory CredentialUseRequest.fromJson(Map<String, dynamic> j) =>
+      CredentialUseRequest(
+        id: j['id'] as String,
+        chatLabel: j['chatLabel'] as String,
+        purpose: j['purpose'] as String,
+        alias: j['alias'] as String,
+        credentialId: j['credentialId'] as String,
+        version: j['version'] as int,
+        useGeneration: j['useGeneration'] as int,
+        plan: CredentialLaunchPlan.fromStorageJson(
+          j['plan'] as Map<String, dynamic>,
+        ),
+        createdAt: DateTime.parse(j['createdAt'] as String),
+        requestExpiresAt: DateTime.parse(j['requestExpiresAt'] as String),
+        fields: (j['fields'] as List).map(
+          (dynamic f) =>
+              FieldRef(f['itemId'] as String, f['fieldId'] as String),
+        ),
+        state: j['state'] as String,
+        credentialApproved: j['credentialApproved'] as bool,
+        approvedFields: (j['approvedFields'] as List).map(
+          (dynamic f) =>
+              FieldRef(f['itemId'] as String, f['fieldId'] as String),
+        ),
+        credentialExpiresAt: j['credentialExpiresAt'] == null
+            ? null
+            : DateTime.parse(j['credentialExpiresAt'] as String),
+        fieldExpiresAt: j['fieldExpiresAt'] == null
+            ? null
+            : DateTime.parse(j['fieldExpiresAt'] as String),
+        executionId: j['executionId'] as String?,
+        attemptConsumed: j['attemptConsumed'] as bool,
+        invalidatedCode: j['invalidatedCode'] as String?,
+      );
+  CredentialUseRequest changed(Map<String, Object?> values) =>
+      CredentialUseRequest.fromJson({...toJson(), ...values});
+}
+
+class CredentialExecution {
+  CredentialExecution({
+    required this.id,
+    required this.requestId,
+    this.state = 'preparing',
+    this.processStarted = false,
+    this.exitCode,
+    this.errorCode,
+    this.startedAt,
+    this.finishedAt,
+    this.cleanupState = 'not_needed',
+    this.pid,
+    this.processCreatedAt,
+  });
+  final String id, requestId, state, cleanupState;
+  final bool processStarted;
+  final int? exitCode, pid;
+  final String? errorCode, processCreatedAt;
+  final DateTime? startedAt, finishedAt;
+  Map<String, Object?> toJson() => {
+    'protocolVersion': 1,
+    'status': 'ok',
+    'executionId': id,
+    'requestId': requestId,
+    'executionState': state,
+    'attemptConsumed': true,
+    'processStarted': processStarted,
+    'exitCode': exitCode,
+    'errorCode': errorCode,
+    'startedAt': startedAt?.toUtc().toIso8601String(),
+    'finishedAt': finishedAt?.toUtc().toIso8601String(),
+    'cleanupState': cleanupState,
+    'outputAvailable': false,
+    'outputTruncated': false,
+  };
+  Map<String, Object?> toStorageJson() => {
+    ...toJson(),
+    'pid': pid,
+    'processCreatedAt': processCreatedAt,
+  };
+  factory CredentialExecution.fromJson(Map<String, dynamic> j) =>
+      CredentialExecution(
+        id: j['executionId'] as String,
+        requestId: j['requestId'] as String,
+        state: j['executionState'] as String,
+        processStarted: j['processStarted'] as bool,
+        exitCode: j['exitCode'] as int?,
+        errorCode: j['errorCode'] as String?,
+        startedAt: j['startedAt'] == null
+            ? null
+            : DateTime.parse(j['startedAt'] as String),
+        finishedAt: j['finishedAt'] == null
+            ? null
+            : DateTime.parse(j['finishedAt'] as String),
+        cleanupState: j['cleanupState'] as String,
+        pid: j['pid'] as int?,
+        processCreatedAt: j['processCreatedAt'] as String?,
+      );
+}
+
+class CredentialExecutionReport {
+  const CredentialExecutionReport({
+    required this.executionId,
+    required this.executionCapability,
+    required this.state,
+    this.pid,
+    this.processCreatedAt,
+    this.exitCode,
+    this.errorCode,
+    this.startedAt,
+    this.finishedAt,
+  });
+  final String executionId, executionCapability, state;
+  final int? pid, exitCode;
+  final String? processCreatedAt, errorCode;
+  final DateTime? startedAt, finishedAt;
+  Map<String, Object?> toPrivateJson() => {
+    'executionId': executionId,
+    'executionCapability': executionCapability,
+    'executionState': state,
+    'pid': pid,
+    'processCreatedAt': processCreatedAt,
+    'exitCode': exitCode,
+    'errorCode': errorCode,
+    'startedAt': startedAt?.toUtc().toIso8601String(),
+    'finishedAt': finishedAt?.toUtc().toIso8601String(),
+  };
+  factory CredentialExecutionReport.fromPrivateJson(Map<String, dynamic> j) {
+    _useShape(j, {
+      'executionId',
+      'executionCapability',
+      'executionState',
+      'pid',
+      'processCreatedAt',
+      'exitCode',
+      'errorCode',
+      'startedAt',
+      'finishedAt',
+    });
+    if (j['pid'] != null && j['pid'] is! int ||
+        j['exitCode'] != null && j['exitCode'] is! int) {
+      throw const CredentialUseFailure('invalid_type');
+    }
+    return CredentialExecutionReport(
+      executionId: _useId(j['executionId'], 'executionId'),
+      executionCapability: _useId(
+        j['executionCapability'],
+        'executionCapability',
+      ),
+      state: _useText(
+        j['executionState'],
+        'executionState',
+        max: 32,
+        empty: false,
+      ),
+      pid: j['pid'] as int?,
+      processCreatedAt: j['processCreatedAt'] as String?,
+      exitCode: j['exitCode'] as int?,
+      errorCode: j['errorCode'] as String?,
+      startedAt: j['startedAt'] == null
+          ? null
+          : DateTime.parse(j['startedAt'] as String),
+      finishedAt: j['finishedAt'] == null
+          ? null
+          : DateTime.parse(j['finishedAt'] as String),
+    );
+  }
+}
+
+abstract interface class CredentialRuntimeRepository {
+  List<CredentialUseRequest> get credentialUseRequests;
+  List<CredentialExecution> get credentialExecutions;
+
+  /// A decision's field audit and runtime facts form one transaction. No session
+  /// secret, read token or execution capability is part of this snapshot.
+  Future<void> commitCredentialRuntime(
+    List<CredentialUseRequest> requests,
+    List<CredentialExecution> executions, {
+    GrantHistory? fieldGrant,
+    RequestHistory? fieldRequest,
+    void Function()? validate,
+  });
+}
+
+/// Private channel DTO. Deliberately has no ordinary JSON serialization.
+class CredentialExecutionMaterial {
+  CredentialExecutionMaterial(
+    this.executionId,
+    this.executionCapability,
+    this.approvedPlan,
+    this.credentialMaterial,
+    this.alias,
+  );
+  final String executionId, executionCapability, alias;
+  final CredentialLaunchPlan approvedPlan;
+  final CredentialMaterialValue credentialMaterial;
+  Map<String, Object?> toPrivateJson() => {
+    'protocolVersion': 1,
+    'status': 'ok',
+    'executionId': executionId,
+    'executionCapability': executionCapability,
+    'approvedPlan': approvedPlan.toJson(),
+    'credentialMaterial': credentialMaterial.toPrivateJson(),
+    'alias': alias,
+  };
+  factory CredentialExecutionMaterial.fromPrivateJson(Map<String, dynamic> j) =>
+      CredentialExecutionMaterial(
+        j['executionId'] as String,
+        j['executionCapability'] as String,
+        CredentialLaunchPlan.fromStorageJson(
+          j['approvedPlan'] as Map<String, dynamic>,
+        ),
+        CredentialMaterialValue.fromPrivateJson(
+          j['credentialMaterial'] as Map<String, dynamic>,
+        ),
+        j['alias'] as String,
+      );
+  @override
+  String toString() => 'CredentialExecutionMaterial($executionId)';
+}
+
+class CredentialMaterialValue {
+  CredentialMaterialValue(
+    this.credentialId,
+    this.version,
+    this.form,
+    Iterable<int> bytes,
+  ) : bytes = List.unmodifiable(bytes);
+  final String credentialId;
+  final int version;
+  final CredentialForm form;
+  final List<int> bytes;
+  String get stringValue => utf8.decode(bytes);
+  Map<String, Object?> toPrivateJson() => {
+    'credentialId': credentialId,
+    'version': version,
+    'form': form.name,
+    'bytesBase64': base64Encode(bytes),
+  };
+  factory CredentialMaterialValue.fromPrivateJson(Map<String, dynamic> j) =>
+      CredentialMaterialValue(
+        j['credentialId'] as String,
+        j['version'] as int,
+        CredentialForm.values.byName(j['form'] as String),
+        base64Decode(j['bytesBase64'] as String),
+      );
+  @override
+  String toString() => 'CredentialMaterialValue($credentialId,v$version)';
+}

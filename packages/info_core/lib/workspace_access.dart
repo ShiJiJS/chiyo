@@ -30,24 +30,30 @@ extension OwnerDesktopPreferences on OwnerAccess {
 /// Owner-only request identity and display state. Never sent to AgentAccess.
 class InboxEntry {
   InboxEntry.access(this.access)
-    : organization = null,
+    : credentialUse = null,
+      credentialUseState = null,
+      organization = null,
       organizationState = null,
       organizationRemainingSeconds = 0;
   InboxEntry.organization(
     this.organization,
     this.organizationState, {
     this.organizationRemainingSeconds = 0,
-  }) : access = null;
+  }) : access = null,credentialUse=null,credentialUseState=null;
+  InboxEntry.credential(this.credentialUse,this.credentialUseState):access=null,organization=null,organizationState=null,organizationRemainingSeconds=0;
+  final CredentialUseRequest? credentialUse;
+  final String? credentialUseState;
   final OwnerRequestSnapshot? access;
   final OrganizationTask? organization;
   final OrganizationTaskState? organizationState;
   final int organizationRemainingSeconds;
-  String get id => access?.id ?? organization!.id;
-  String get chatLabel => access?.chatLabel ?? organization!.chatLabel;
-  String get purpose => access?.purpose ?? organization!.purpose;
-  DateTime get createdAt => access?.createdAt ?? organization!.createdAt;
+  String get id => access?.id ?? credentialUse?.id ?? organization!.id;
+  String get chatLabel => access?.chatLabel ?? credentialUse?.chatLabel ?? organization!.chatLabel;
+  String get purpose => access?.purpose ?? credentialUse?.purpose ?? organization!.purpose;
+  DateTime get createdAt => access?.createdAt ?? credentialUse?.createdAt ?? organization!.createdAt;
   bool get pending =>
       access?.state == AccessRequestState.pending ||
+      credentialUseState == 'pending' ||
       organizationState == OrganizationTaskState.pending;
 }
 
@@ -83,7 +89,9 @@ extension OwnerInbox on OwnerAccess {
     final names = {for (final item in information) item.id: item.name};
     final matching =
         <InboxEntry>[
-          for (final request in requests) InboxEntry.access(request),
+          for (final request in requests) if(!_service._credentialUseSessions.containsKey(request.id)) InboxEntry.access(request),
+          if(_service._repository is CredentialRuntimeRepository)
+            for(final request in credentialUseRequests) InboxEntry.credential(request,credentialUseState(request)),
           for (final task in organizationTasks)
             InboxEntry.organization(
               task,
@@ -97,6 +105,7 @@ extension OwnerInbox on OwnerAccess {
           if (needle.isEmpty) return true;
           final itemIds =
               entry.access?.fields.map((f) => f.itemId) ??
+              entry.credentialUse?.fields.map((f)=>f.itemId) ??
               entry.organization!.itemVersions.keys;
           return [
             entry.id,

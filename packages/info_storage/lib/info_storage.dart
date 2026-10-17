@@ -10,6 +10,7 @@ export 'platform_keys.dart';
 part 'backups.dart';
 part 'backup_history.dart';
 part 'credentials_storage.dart';
+part 'credential_runtime_storage.dart';
 
 class StorageFailure implements Exception {
   const StorageFailure(this.code);
@@ -59,7 +60,10 @@ InformationItem _informationFromRows(
 
 /// A desktop-only capability. The CLI depends on info_core, never this package.
 class EncryptedInformationRepository
-    implements InformationRepository, CredentialRepository {
+    implements
+        InformationRepository,
+        CredentialRepository,
+        CredentialRuntimeRepository {
   EncryptedInformationRepository._(
     this._db,
     this._lock,
@@ -88,6 +92,28 @@ class EncryptedInformationRepository
   final _deletes = <String, DeleteProposal>{};
   final _credentials = <ManagedCredential>[];
   final _credentialMaterials = <CredentialMaterial>[];
+  final _credentialUseRequests = <CredentialUseRequest>[];
+  final _credentialExecutions = <CredentialExecution>[];
+  @override
+  List<CredentialUseRequest> get credentialUseRequests =>
+      List.unmodifiable(_credentialUseRequests);
+  @override
+  List<CredentialExecution> get credentialExecutions =>
+      List.unmodifiable(_credentialExecutions);
+  @override
+  Future<void> commitCredentialRuntime(
+    List<CredentialUseRequest> requests,
+    List<CredentialExecution> executions, {
+    GrantHistory? fieldGrant,
+    RequestHistory? fieldRequest,
+    void Function()? validate,
+  }) => _commitRuntime(
+    requests,
+    executions,
+    fieldGrant: fieldGrant,
+    fieldRequest: fieldRequest,
+    validate: validate,
+  );
   @override
   List<ManagedCredential> get managedCredentials =>
       List.unmodifiable(_credentials);
@@ -215,6 +241,7 @@ class EncryptedInformationRepository
   }
 
   Future<void> _load() async {
+    await _loadRuntime();
     _credentials.clear();
     _credentialMaterials.clear();
     for (final row
@@ -1102,12 +1129,13 @@ class EncryptedInformationRepository
 class _InformationDatabase extends GeneratedDatabase {
   _InformationDatabase(super.executor);
   @override
-  int get schemaVersion => 14;
+  int get schemaVersion => 15;
   @override
   Iterable<TableInfo<Table, Object?>> get allTables => const [];
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (_) async {
+      await _createCredentialRuntime();
       await _createCredentials();
       await _createRevisionPurges();
       await _createRecycle();
@@ -1130,10 +1158,11 @@ class _InformationDatabase extends GeneratedDatabase {
       await _backupSchema();
     },
     onUpgrade: (_, from, to) async {
-      if (from < 1 || to != 14) {
+      if (from < 1 || to != 15) {
         throw const StorageFailure('unsupported_schema');
       }
       await transaction(() async {
+        if (from < 15) await _createCredentialRuntime();
         if (from < 14) await _createCredentials();
         if (from < 2) {
           await customStatement(
@@ -1193,6 +1222,15 @@ class _InformationDatabase extends GeneratedDatabase {
     );
     await customStatement(
       'CREATE TABLE IF NOT EXISTS credential_materials(credential_id TEXT NOT NULL,version INTEGER NOT NULL,payload TEXT NOT NULL,PRIMARY KEY(credential_id,version))',
+    );
+  }
+
+  Future<void> _createCredentialRuntime() async {
+    await customStatement(
+      'CREATE TABLE IF NOT EXISTS credential_use_requests(id TEXT PRIMARY KEY,payload TEXT NOT NULL)',
+    );
+    await customStatement(
+      'CREATE TABLE IF NOT EXISTS credential_executions(id TEXT PRIMARY KEY,request_id TEXT NOT NULL REFERENCES credential_use_requests(id),payload TEXT NOT NULL)',
     );
   }
 

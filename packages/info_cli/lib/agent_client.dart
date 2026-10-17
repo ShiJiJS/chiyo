@@ -1,10 +1,22 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:crypto/crypto.dart';
+import 'package:info_core/info_core.dart';
+part 'credential_runtime_client.dart';
 
 class AgentClient {
-  AgentClient(this.port, {String? sessionSecret, this.sourceAgent = '通用 CLI'})
-    : _session = sessionSecret;
+  AgentClient(
+    this.port, {
+    String? sessionSecret,
+    this.sourceAgent = '通用 CLI',
+    CredentialProcessStarter? credentialProcessStarter,
+  }) : _session = sessionSecret,
+       _credentialProcessStarter =
+           credentialProcessStarter ?? _startCredentialProcess;
+  final CredentialProcessStarter _credentialProcessStarter;
+  late final _credentialExecutions = _CredentialRuntimeExecutor(this);
+  Future<void> drainCredentialExecutions() => _credentialExecutions.drain();
   final int port;
   final String sourceAgent;
   final _http = HttpClient()..connectionTimeout = const Duration(seconds: 3);
@@ -41,26 +53,59 @@ class AgentClient {
 
   Future<Map<String, dynamic>> execute(Map<String, dynamic> input) async {
     final command = input['command'];
+    if ({
+      'request-use',
+      'run-use',
+      'execution-status',
+      'execution-output',
+      'cleanup-use',
+    }.contains(command)) {
+      return _executeCredentialCommand(input);
+    }
     if (utf8.encode(jsonEncode(input)).length >
-        (command == 'credential-catalog' || command == 'import-submit' ||
+        (command == 'credential-catalog' ||
+                command == 'import-submit' ||
                 command == 'update-submit' ||
                 command == 'organize-submit'
             ? 262144
             : 16384)) {
       return command == 'credential-catalog'
-        ? {'protocolVersion': 1, 'status': 'invalid_request', 'errorCode': 'limit_exceeded', 'retryable': false}
-        : {'status': 'invalid_request'};
+          ? {
+              'protocolVersion': 1,
+              'status': 'invalid_request',
+              'errorCode': 'limit_exceeded',
+              'retryable': false,
+            }
+          : {'status': 'invalid_request'};
     }
     switch (command) {
       case 'credential-catalog':
-        if (input.keys.any((k) => !{'command','cursor','limit'}.contains(k))) {
-          return {'protocolVersion': 1, 'status': 'invalid_request', 'errorCode': 'unknown_field', 'retryable': false};
+        if (input.keys.any(
+          (k) => !{'command', 'cursor', 'limit'}.contains(k),
+        )) {
+          return {
+            'protocolVersion': 1,
+            'status': 'invalid_request',
+            'errorCode': 'unknown_field',
+            'retryable': false,
+          };
         }
         if (input['cursor'] != null && input['cursor'] is! String ||
-          input.containsKey('limit') && (input['limit'] is! int || (input['limit'] as int) < 1 || (input['limit'] as int) > 100)) {
-          return {'protocolVersion': 1, 'status': 'invalid_request', 'errorCode': 'invalid_type', 'retryable': false};
+            input.containsKey('limit') &&
+                (input['limit'] is! int ||
+                    (input['limit'] as int) < 1 ||
+                    (input['limit'] as int) > 100)) {
+          return {
+            'protocolVersion': 1,
+            'status': 'invalid_request',
+            'errorCode': 'invalid_type',
+            'retryable': false,
+          };
         }
-        return _call('/credentials/catalog', {'cursor': input['cursor'], 'limit': input['limit'] ?? 50});
+        return _call('/credentials/catalog', {
+          'cursor': input['cursor'],
+          'limit': input['limit'] ?? 50,
+        });
       case 'organize-request':
         if (_session == null) return {'status': 'unauthorized'};
         return _call('/organization/request', {

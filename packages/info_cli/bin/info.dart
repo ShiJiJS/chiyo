@@ -26,11 +26,19 @@ Future<void> main(List<String> args) async {
       Map<String, dynamic> output;
       try {
         if (line.length > 262144) throw const FormatException();
-        Map<String,dynamic> command;
-        try {command = decodeProtocolObject(line);} on Object {
-            stdout.writeln(jsonEncode({'protocolVersion': 1, 'status': 'invalid_request',
-              'errorCode': 'invalid_json', 'retryable': false}));
-            continue;
+        Map<String, dynamic> command;
+        try {
+          command = decodeProtocolObject(line);
+        } on Object {
+          stdout.writeln(
+            jsonEncode({
+              'protocolVersion': 1,
+              'status': 'invalid_request',
+              'errorCode': 'invalid_json',
+              'retryable': false,
+            }),
+          );
+          continue;
         }
         output = await client.execute(command);
       } on Object {
@@ -41,6 +49,7 @@ Future<void> main(List<String> args) async {
   } on Object {
     stdout.writeln(jsonEncode({'status': 'invalid_request'}));
   } finally {
+    await client.drainCredentialExecutions();
     client.close();
   }
 }

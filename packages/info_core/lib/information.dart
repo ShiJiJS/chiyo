@@ -8,6 +8,8 @@ import 'update_proposals.dart';
 import 'recycle.dart';
 import 'revisions.dart';
 import 'credentials.dart';
+import 'info_core.dart'
+    show CredentialRuntimeRepository, CredentialUseRequest, CredentialExecution;
 
 enum FieldKind { structured, textNote }
 
@@ -140,7 +142,37 @@ abstract interface class InformationRepository {
 }
 
 class MemoryInformationRepository
-    implements InformationRepository, CredentialRepository {
+    implements
+        InformationRepository,
+        CredentialRepository,
+        CredentialRuntimeRepository {
+  final _credentialUseRequests = <CredentialUseRequest>[];
+  final _credentialExecutions = <CredentialExecution>[];
+  @override
+  List<CredentialUseRequest> get credentialUseRequests =>
+      List.unmodifiable(_credentialUseRequests);
+  @override
+  List<CredentialExecution> get credentialExecutions =>
+      List.unmodifiable(_credentialExecutions);
+  @override
+  Future<void> commitCredentialRuntime(
+    List<CredentialUseRequest> requests,
+    List<CredentialExecution> executions, {
+    GrantHistory? fieldGrant,
+    RequestHistory? fieldRequest,
+    void Function()? validate,
+  }) async {
+    validate?.call();
+    _credentialUseRequests
+      ..clear()
+      ..addAll(requests);
+    _credentialExecutions
+      ..clear()
+      ..addAll(executions);
+    if (fieldGrant != null) _history[fieldGrant.id] = fieldGrant;
+    if (fieldRequest != null) _requestHistory[fieldRequest.id] = fieldRequest;
+  }
+
   final _credentials = <ManagedCredential>[];
   final _materials = <CredentialMaterial>[];
   @override
