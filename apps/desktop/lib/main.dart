@@ -162,11 +162,13 @@ class _InformationAppState extends State<InformationApp>
     with SingleTickerProviderStateMixin {
   late final _tabs = TabController(length: 5, vsync: this);
   int _openRevision = 0;
+  // A restored data source can reset history; ordinary tabs refresh in place.
   int _libraryRevision = 0;
   final _visited = <int>{0};
-  int _activeTab = 0;
   String? _focusedInformationId;
   int _informationFocusRevision = 0;
+  String? _focusedHistoryId;
+  int _historyFocusRevision = 0;
   void _openInformation(String id) {
     setState(() {
       _focusedInformationId = id;
@@ -174,6 +176,15 @@ class _InformationAppState extends State<InformationApp>
       _visited.add(1);
     });
     _tabs.index = 1;
+  }
+
+  void _openOrganizationGrant(String taskId) {
+    setState(() {
+      _focusedHistoryId = taskId;
+      _historyFocusRevision++;
+      _visited.add(3);
+    });
+    _tabs.index = 3;
   }
 
   final _approvalsKey = GlobalKey<ApprovalsState>();
@@ -218,8 +229,6 @@ class _InformationAppState extends State<InformationApp>
   void _tabChanged() {
     if (!mounted) return;
     setState(() {
-      if (_activeTab != _tabs.index && _tabs.index == 3) _libraryRevision++;
-      _activeTab = _tabs.index;
       _visited.add(_tabs.index);
     });
   }
@@ -291,11 +300,19 @@ class _InformationAppState extends State<InformationApp>
                       onOpenInformation: _openInformation,
                       files: widget.credentialFiles,
                     ),
-                    ImportProposalsPage(owner: widget.service.owner),
+                    ImportProposalsPage(
+                      owner: widget.service.owner,
+                      onOpenInformation: _openInformation,
+                      onGoToLibrary: () => _tabs.index = 1,
+                      onOpenOrganizationGrant: _openOrganizationGrant,
+                    ),
                     AuthorizationHistory(
                       key: ValueKey(_libraryRevision),
                       owner: widget.service.owner,
                       onOpenRecordSettings: _openRecordSettings,
+                      initialRecordId: _focusedHistoryId,
+                      focusRevision: _historyFocusRevision,
+                      refresh: _tabs,
                     ),
                     SettingsPage(
                       owner: widget.service.owner,

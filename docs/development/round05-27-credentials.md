@@ -56,3 +56,11 @@
 已合root0c09d77的恢复控件回归，产品维护调度不另建副本。DesktopRuntime已有启动维护及一分钟串行tick调用`purgeExpiredCredentialMaterial`；清理成功后才发布仓储快照，失败保留原材料并置credentialCleanupFailed，下一tick可重试。现把这一真实失败状态接入DesktopShell的共享QuietNotice，文字说明超期内容无法恢复及检查存储后重试，成功时自动消失，不影响当前凭据版本。
 
 公开widget测试先红（tick确实失败但界面没有提示）、后绿：30天边界失败时保留旧材料、拒绝超期旧版恢复且当前版本仍符合使用资格；第二个真实定时tick成功清理并撤下提示。测试不直接改runtime flag、不睡一分钟，也不引入另一套timer或revision。r9冻结真实故障fixture下的1440/1280两张原始图及源码hash，复用既有QuietNotice，无专属HTML对照。定向行为1项及双视口捕获2项通过；完整checks和native留给所有接口合并后一次执行。
+
+## #25 跨页导航集成与 #30 可复用契约
+
+基于已合#25的root1d986be，main将三个回调接到现有页面：`onOpenInformation(id)`与凭据关联行共用`_openInformation`和InformationWorkspace的`focusItemId + focusRevision`；`onGoToLibrary()`只切tab，不清筛选/选中；`onOpenOrganizationGrant(taskId)`向历史传真实taskId和递增focusRevision。重复同ID属于新的明确定位，重置不兼容筛选；当前目标已删除时显示空态，不显示另一条信息或旧快照。
+
+AuthorizationHistory新增可选`refresh: Listenable?`和`focusRevision: int = 0`，继续接受已有`initialRecordId`。refresh只重新读取owner.history，保留搜索、筛选、分页和选中；ID或focusRevision明确变化时才重置冲突条件并在真实保留事实中定位，缺失ID保持明确空态。这两个输入可供#30接续；它们只控制owner界面，不创建或恢复授权。main普通tab不再换history key，恢复数据源时原有revision/key重建仍保留。listener在更新/销毁时解绑。既有_reload的Future赋值改成同步setState块，避免刷新时Flutter拒绝返回Future的callback；没有关闭任何断言。
+
+`cross_page_navigation_test.dart`两项先红后绿，以实际root页面点击覆盖提案当前结果、普通前往库、重复ID、凭据关联、删除后迟到ID、10条真实整理任务跨页定位、历史搜索/分页/选择保留、重复taskId和不存在记录。结合workspace_widget、credentials和settings_round05共15项定向通过，含已有“回历史看到新批准”的回归；desktop analyze无issue。未重做已关闭视觉截图，未运行完整checks或native；最终联合验证由父任务在全部集成后安排。日志见`evidence/27-credentials/navigation/`。
