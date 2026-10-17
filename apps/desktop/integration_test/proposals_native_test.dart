@@ -186,7 +186,10 @@ void main() {
       await tap(find.text('按信息身份查看当前内容 →'));
       expect(find.text('current.native.example'), findsOneWidget);
       expect(find.text('reviewed.native.example'), findsNothing);
-      await tap(find.text('×').last);
+      await tap(find.text('在信息库打开 →').first);
+      expect(find.byKey(ValueKey('information-${first.id}')), findsOneWidget);
+      expect(find.text('current.native.example'), findsOneWidget);
+      await tap(find.byKey(const ValueKey('nav-2')));
       final rejected = await command({
         'command': 'import-submit',
         'items': [
