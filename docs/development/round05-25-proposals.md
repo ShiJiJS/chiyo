@@ -69,3 +69,5 @@ Mac真实测试按用户指示延期；真实通知气泡/系统窗口控制不�
 `review-round4` 再固定46张Flutter与24张原HTML，共70张PNG，manifest记录该产品提交及源码SHA；逐张SHA复验零不符。旧固定轮未覆盖。双视口 capture 2组通过；`compare-round4` 24对退出0，所有 report 的 issues/lint 为空。这些自动结果仅证明取证及工具检查完成；实施方自看了普通新增/回执、差异/整理相邻区、失败/离线/缺失、200%首末及长内容末屏，独立定向复核仍待报告，不能据此声称视觉验收完成或四主题全部通过。
 
 最后源定向控件21项（proposal_workspace、import_proposals、import_review_states、organization_tasks、update_proposals）通过，desktop analyze 无问题；未重复无变化的完整 Core/Storage 矩阵。此前 native-r3 的通过范围不扩大，本轮未启动 native；主入口三个回调、最后源原生复验及Mac实际测试仍按前述边界跟踪。先合并根 `0c09d77`，收口再合并 `314b485`（后者仅#26主验收证据与文档），没有修改 main/library。
+
+主任务随后回报独立复核实看 r4 全部70张图，原五组问题均关闭；仅发现 current-missing 在48ch自然换行时句号开新行。`c5a8ea0b058ab4b12ff720831627ff9e04196df7` 只把回收站提示独立成行，完整保留真实ID，没有改宽度或其他已闭合样式。`review-round5` 仅补1440/1280两张原始PNG与源码hash；两组截图流程退出0，实施方已自看。r4的70图及完整独立报告均保留，本次不新增低影响文案测试、不扩展此前原生通过范围，也未合入尚待独立合并的#27候选。
