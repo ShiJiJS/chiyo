@@ -13,12 +13,19 @@ class AuthorizationHistory extends StatefulWidget {
     required this.owner,
     this.onOpenRecordSettings,
     this.initialRecordId,
+    this.focusRevision = 0,
+    this.refresh,
   });
   final OwnerAccess owner;
   final VoidCallback? onOpenRecordSettings;
 
   /// Selects an existing fact only; an absent ID never creates authorization.
   final String? initialRecordId;
+
+  /// Explicit repeated navigation resets incompatible filters; ordinary refresh
+  /// retains the current search, page and selection.
+  final int focusRevision;
+  final Listenable? refresh;
   @override
   State<AuthorizationHistory> createState() => _AuthorizationHistoryState();
 }
@@ -60,12 +67,18 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
   void initState() {
     super.initState();
     _history = widget.owner.history();
+    widget.refresh?.addListener(_refresh);
   }
 
   @override
   void didUpdateWidget(AuthorizationHistory oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.initialRecordId != widget.initialRecordId) {
+    if (oldWidget.refresh != widget.refresh) {
+      oldWidget.refresh?.removeListener(_refresh);
+      widget.refresh?.addListener(_refresh);
+    }
+    if (oldWidget.initialRecordId != widget.initialRecordId ||
+        oldWidget.focusRevision != widget.focusRevision) {
       _focusPending = true;
       _focusMissing = false;
       _selected = null;
@@ -79,6 +92,7 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
 
   @override
   void dispose() {
+    widget.refresh?.removeListener(_refresh);
     _search.dispose();
     for (final c in _scrolls.values) {
       c.dispose();
@@ -86,7 +100,17 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
     super.dispose();
   }
 
-  void _reload() => setState(() => _history = widget.owner.history());
+  void _reload() {
+    final next = widget.owner.history();
+    setState(() {
+      _history = next;
+    });
+  }
+
+  void _refresh() {
+    if (mounted) _reload();
+  }
+
   Future<void> _run(Future<void> Function() action) async {
     if (_busy) return;
     setState(() {
