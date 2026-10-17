@@ -1,0 +1,124 @@
+{
+  "date": "2026-10-17",
+  "sourceCommit": "0c09d771828c891713bc6ef670876c69c76b4260",
+  "fullSuiteCommit": "1741886c5b56c0926ff3874616894362532fc572",
+  "productionUnchangedBetweenTheseCommits": true,
+  "fullSuite": {
+    "cli": 18,
+    "core": 96,
+    "storage": 46,
+    "desktop": 69,
+    "total": 229,
+    "exitCode": 0
+  },
+  "picker": {
+    "firstAttempt": "timeout waiting SAVE_KEY; preserved failure; no success claimed",
+    "secondAttempt": "four real system pickers; all business assertions and runner passed",
+    "exitCode": 0,
+    "fixture": "aim-native-approval-3eab19a",
+    "usesRealUserProfile": false
+  },
+  "lifecycle": {
+    "plainFlutterQAEntry": true,
+    "syntheticAutoApprovalPreparation": true,
+    "osTrayAdapter": "real NativeDesktopPlatform",
+    "actualCloseButton": true,
+    "hiddenObservation": "Sky state: window is not a usable app window",
+    "backgroundSeparateCLIRead": "ok",
+    "restore": "real showWindow API; not tray click",
+    "actualSettingsQuit": true,
+    "restartOldRead": "unauthorized",
+    "stableInformationIdentity": true,
+    "finalExitCode": 0,
+    "actualTrayClickVerified": false,
+    "notificationClickVerified": false,
+    "accessibilityDiagnostics": 11,
+    "diagnosis": "pending; errors preserved",
+    "originalAppLogSha256": "f6c5ac6c5784d45e39866e22c7c407844d0e28dd6067b9a3b8d3d2576b5ea6a9"
+  },
+  "platform": "Windows; macOS actual acceptance deferred by user",
+  "files": [
+    {
+      "name": "full-check.log",
+      "bytes": 64277,
+      "sha256": "e225e008f759dea763b974f80ab297afdc3f4699c0f239a2d09a0c0ef6dab900"
+    },
+    {
+      "name": "native_lifecycle_app.dart.txt",
+      "bytes": 3705,
+      "sha256": "d40a51eef0e3301bf10534d09a999c1670707d8b97b70dec4414cb1dc39d4239"
+    },
+    {
+      "name": "native_lifecycle_controller.py",
+      "bytes": 5104,
+      "sha256": "1305e468b0f349335a10b07dcbfa99490f4744d734511b476a8213e15b160add"
+    },
+    {
+      "name": "native-lifecycle-accessibility.txt",
+      "bytes": 1694,
+      "sha256": "c40f7326893cd57c1ecafa4e43e52f9cf93fa0b2e2bd605fe5bbc55d04bc5523"
+    },
+    {
+      "name": "native-lifecycle-build.log",
+      "bytes": 133,
+      "sha256": "54f9bc26b698fcae8ab757e3ae6cefc5df4b0ee4d644da006adc1359d1995e9b"
+    },
+    {
+      "name": "native-lifecycle-result.json",
+      "bytes": 989,
+      "sha256": "b8927e13dcaa3aa160c90d2e5e5ba2fdd46641f3fb8407265b7c3ca7427a6c94"
+    },
+    {
+      "name": "native-picker-pass.log",
+      "bytes": 4317,
+      "sha256": "809daf0f959c5ef4e436512fb14fbd7074214a1c6c642b0324bb75b23770e0f7"
+    },
+    {
+      "name": "native-picker-timeout.log",
+      "bytes": 3154,
+      "sha256": "38fcf5a5acce815ae3cec56d110dbf8d674cbbe9ee3715cabdb148fc05b5baeb"
+    }
+  ],
+  "sourceFiles": [
+    {
+      "path": "apps/desktop/lib/main.dart",
+      "sha256": "79ee949309100f3ce8f24026a399a4326852d3e5462a885e7c3641841cfbebfa"
+    },
+    {
+      "path": "apps/desktop/lib/settings.dart",
+      "sha256": "95482fe9ece4ff2a19d18a7e01c6b1f7c92133e11cf942bed4ebbabbcc248de3"
+    },
+    {
+      "path": "apps/desktop/lib/history.dart",
+      "sha256": "def6ff713c236d342f74888338c5ca967aa719c31facfcc677b1f89c1d1c0f8f"
+    },
+    {
+      "path": "apps/desktop/lib/backups.dart",
+      "sha256": "0d4ec656c1d5b0c7f3bc9115e174c68db992d314feee3df4103e848e41cff50e"
+    },
+    {
+      "path": "apps/desktop/lib/desktop_bootstrap.dart",
+      "sha256": "c2bf396e6a6014dd03a82df608cabd6a81c65345da4ed345a88c829a3859dc9b"
+    },
+    {
+      "path": "apps/desktop/lib/desktop_runtime.dart",
+      "sha256": "4f415338a43b3313080e4e4b9657a73015c27b60b29f2943e28b2d4b251e76cd"
+    },
+    {
+      "path": "apps/desktop/integration_test/history_settings_native_test.dart",
+      "sha256": "8bb7678a69d36bb2f38e88ffff1e6c2e3c4c15c81c3751c720d329deed71c594"
+    },
+    {
+      "path": "apps/desktop/windows/runner/backup_files.cpp",
+      "sha256": "877d8ada79b6779203fbbb403b53fe1bd8933ed106f9904dd6ad7cc5782ec43e"
+    },
+    {
+      "path": "packages/info_core/lib/info_core.dart",
+      "sha256": "e5f2fa53d132f24e4e68229be6e476acfb2cb81ae4e8cebdbc77811675157a16"
+    },
+    {
+      "path": "packages/info_storage/lib/info_storage.dart",
+      "sha256": "3fe6b4f32a3ec0dd3f7a9ba989660348a2364df5f2fcb62949af126467e0eb11"
+    }
+  ]
+}
