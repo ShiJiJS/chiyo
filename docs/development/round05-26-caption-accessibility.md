@@ -31,7 +31,7 @@
 
 实际[恢复后的截图](evidence/26-history-settings/ax-caption/after-restored-tooltip.png)、[辅助树](evidence/26-history-settings/ax-caption/after-restored-tree.txt)、[后续设置辅助树](evidence/26-history-settings/ax-caption/after-settings-after-show-tree.txt)、增量、构建及红绿日志均按 SHA 固定。初次 QA helper 生成有语法/类型编译失败，修正后才开始原生运行；失败日志也保留，不能将 helper 编译失败算成产品失败或已完成验收。
 
-针对性检查：`window_frame_test.dart` 4项通过，两个修改的 Dart 文件 analyze 无问题。此次没有重跑无变化的四个文件选择器或整套229项，也没有把这些旧结果称为新候选的全量检查。原生两进程均正常退出，已向父任务和 #27 释放窗口。
+针对性检查：`window_frame_test.dart` 4项通过，两个修改的 Dart 文件 analyze 无问题。最终再合入父任务稳定 `1d986bec`（D3/D5），标题栏及回归测试文件与原生验证时字节一致；合并后首次 headless 加载因本工作区尚未解析新依赖 `unorm_dart` 失败，运行 offline pub get 后同4项与 analyze 再次通过，失败及后续日志均保留。此次没有重跑无变化的四个文件选择器或整套229项，也没有把这些旧结果称为新候选的全量检查。原生两进程均正常退出，已向父任务和 #27 释放窗口。
 
 这关闭的是本次有前后对照的 caption/Tooltip 路径。原父任务 plain 生命周期入口仍应由独立 merger 合入后的主任务复验；不据此宣称所有 Flutter Tooltip/ListView 情形、真实托盘点击、系统通知点击或 macOS 实机已通过。
 

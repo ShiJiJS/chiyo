@@ -652,11 +652,28 @@
     "after-build.log": {
       "sha256": "ed908c5f7a8d4bfe0a3fafa50bb8c111e6033a63f0e41fab7d924f01824e6843",
       "bytes": 133
+    },
+    "merged-missing-dependency.log": {
+      "sha256": "a0d2d31bc72e8b02f6dcece234196f2bf329509f60115d4bb168862de9743a90",
+      "bytes": 2199
+    },
+    "merged-offline-pub.log": {
+      "sha256": "6cca87fa330d05e08cc607e0cc666d08810e1e116bb434d2e65fe950b6e105ab",
+      "bytes": 272
+    },
+    "merged-caption-green.log": {
+      "sha256": "8f67e79459ec6f5f2c257b9a4c009ca59942197270cc128c8157c0965049accb",
+      "bytes": 458
+    },
+    "merged-caption-analyze.log": {
+      "sha256": "128449f8a393f620158e7a3ac7b004c562e7bd4581066bec3da8a9b3ac59d529",
+      "bytes": 98
     }
   },
   "product_sha256": {
     "apps/desktop/lib/window_frame.dart": "3d92058298a9998297bc5f1298318b627e34d8aab3b2652c44952ca2d5028a7b",
     "apps/desktop/test/window_frame_test.dart": "fa691a833c9c6797b414c9b8296f9b9b94b486314ae68665ba06f48053ea112f"
   },
-  "flutter_windows_dll_sha256": "b60f6940fdabeca7ea9688448852c705e76dbe6513902651dfb1e92bc1db9fd2"
+  "flutter_windows_dll_sha256": "b60f6940fdabeca7ea9688448852c705e76dbe6513902651dfb1e92bc1db9fd2",
+  "final_parent_integration": "1d986becb4170b9b723cfa01af54a7c9c7a8410d"
 }
