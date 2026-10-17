@@ -1,0 +1,2 @@
+# Keep diagnostic evidence and manifest hashes byte-exact on Windows checkouts.
+* -text

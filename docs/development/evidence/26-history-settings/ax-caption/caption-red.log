@@ -1,0 +1,39 @@
+00:00 +0: loading C:/Project/network_config/info-manage-worktrees/26-history-settings/apps/desktop/test/window_frame_test.dart
+00:00 +0: caption controls remain accessible above the workspace route
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: contains all of [
+            <has semantics with tooltip: 最小化 with actions: [tap]  with flags: isButton >,
+            <has semantics with tooltip: 最大化 with actions: [tap]  with flags: isButton >,
+            <has semantics with tooltip: 关闭窗口 with actions: [tap]  with flags: isButton >,
+            <has semantics with label: Workspace>
+          ]
+  Actual: SubListIterable<SemanticsNode>:[
+            SemanticsNode:SemanticsNode#4(Rect.fromLTRB(0.0, 0.0, 128.3, 20.0), label: "Workspace",
+textDirection: ltr)
+          ]
+   Which: has too few elements (1 < 4)
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (file:///C:/Project/network_config/info-manage-worktrees/26-history-settings/apps/desktop/test/window_frame_test.dart:33:5)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///C:/Project/network_config/info-manage-worktrees/26-history-settings/apps/desktop/test/window_frame_test.dart line 33
+The test description was:
+  caption controls remain accessible above the workspace route
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:00 +0 -1: caption controls remain accessible above the workspace route [E]
+  Test failed. See exception logs above.
+  The test description was: caption controls remain accessible above the workspace route
+  
+00:00 +0 -1: Some tests failed.
+
+Failing tests:
+  C:/Project/network_config/info-manage-worktrees/26-history-settings/apps/desktop/test/window_frame_test.dart: caption controls remain accessible above the workspace route
