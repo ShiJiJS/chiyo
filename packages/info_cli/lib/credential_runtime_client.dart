@@ -12,14 +12,141 @@ Future<Process> _startCredentialProcess(
   List<String> argv,
   String cwd,
   Map<String, String> environment,
-) => Process.start(
-  executable,
-  argv,
-  workingDirectory: cwd,
-  environment: environment,
-  includeParentEnvironment: false,
-  runInShell: false,
-);
+) async {
+  if (!Platform.isWindows) {
+    throw const CredentialUseFailure('unsupported_tool_version');
+  }
+  final runtime = Platform.resolvedExecutable;
+  final interpreted = runtime.toLowerCase().endsWith('dart.exe');
+  final worker = interpreted
+      ? (await Isolate.resolvePackageUri(
+          Uri.parse('package:info_cli/runtime_worker.dart'),
+        ))!.toFilePath()
+      : '${File(runtime).parent.path}/info-runtime-worker.exe';
+  if (!await File(worker).exists()) {
+    throw const CredentialUseFailure('process_start_failed');
+  }
+  final args = interpreted
+      ? ['--packages=${(await Isolate.packageConfig)!.toFilePath()}', worker]
+      : <String>[];
+  // In the local SDK, killing a VM launched through dart.exe also terminated
+  // its children. Use the VM directly for the development worker, matching the
+  // standalone worker executable used in packaged builds.
+  final path = interpreted ? '${File(runtime).parent.path}/dartvm.exe' : worker;
+  if (!await File(path).exists()) {
+    throw const CredentialUseFailure('process_start_failed');
+  }
+  final state = File('${environment['TEMP']}/worker-state.json');
+  final nonce = base64Url.encode(
+    List.generate(24, (_) => Random.secure().nextInt(256)),
+  );
+  final jobName = 'Local\\AgentInfoRuntime-$nonce';
+  final process = await Process.start(
+    path,
+    args,
+    workingDirectory: cwd,
+    environment: environment,
+    includeParentEnvironment: false,
+    runInShell: false,
+  );
+  var stopped = false;
+  final ended = process.exitCode.then((code) {
+    stopped = true;
+    return code;
+  });
+  process.stdin.writeln(
+    jsonEncode({
+      'executable': executable,
+      'argv': argv,
+      'cwd': cwd,
+      'statePath': state.path,
+      'jobName': jobName,
+    }),
+  );
+  await process.stdin.flush();
+  while (!stopped) {
+    try {
+      final facts =
+          jsonDecode(await state.readAsString()) as Map<String, dynamic>;
+      if (facts['state'] == 'started' &&
+          facts['jobName'] == jobName &&
+          facts['pid'] is int) {
+        return _RuntimeWorkerProcess(
+          process,
+          facts['pid'] as int,
+          state,
+          jobName,
+        );
+      }
+    } on FileSystemException {
+      // The worker has not atomically published its state yet.
+    } on FormatException {
+      // A not-yet-complete state is not evidence that the target started.
+    }
+    await Future<void>.delayed(const Duration(milliseconds: 20));
+  }
+  await ended;
+  await process.stdin.close();
+  await Future.wait([
+    process.stdout.drain<void>(),
+    process.stderr.drain<void>(),
+  ]);
+  throw const CredentialUseFailure('process_start_failed');
+}
+
+class _RuntimeWorkerProcess implements Process {
+  _RuntimeWorkerProcess(this.worker, this.pid, this.state, this.jobName) {
+    try {
+      _job = CredentialProcessJob.observe(jobName, pid);
+    } on Object {
+      // The worker still owns its original job handle and monitors its tree.
+      // A later worker failure without this handle must remain unknown.
+    }
+  }
+  final Process worker;
+  final File state;
+  final String jobName;
+  CredentialProcessJob? _job;
+  bool treeEnded = false;
+  @override
+  final int pid;
+  @override
+  Stream<List<int>> get stdout => worker.stdout;
+  @override
+  Stream<List<int>> get stderr => worker.stderr;
+  @override
+  IOSink get stdin => worker.stdin;
+  @override
+  Future<int> get exitCode => _ended;
+  late final Future<int> _ended = _wait();
+  Future<int> _wait() async {
+    await worker.exitCode;
+    try {
+      final job = _job;
+      if (job != null) {
+        await job.waitUntilEmpty();
+        treeEnded = true;
+      }
+    } finally {
+      _job?.close();
+      _job = null;
+    }
+    final facts =
+        jsonDecode(await state.readAsString()) as Map<String, dynamic>;
+    if (facts['state'] != 'exited' ||
+        facts['pid'] != pid ||
+        facts['jobName'] != jobName ||
+        facts['exitCode'] is! int) {
+      throw const CredentialUseFailure('execution_unknown');
+    }
+    treeEnded =
+        true; // The worker wrote exited only after its job became empty.
+    return facts['exitCode'] as int;
+  }
+
+  @override
+  bool kill([ProcessSignal signal = ProcessSignal.sigterm]) => false;
+}
 
 extension _CredentialRuntimeClient on AgentClient {
   Future<Map<String, dynamic>> _executeCredentialCommand(
@@ -78,6 +205,10 @@ extension _CredentialRuntimeClient on AgentClient {
           }
           return status;
         case 'execution-output':
+          if (input.containsKey('cursor') && input['cursor'] is! int ||
+              input.containsKey('limit') && input['limit'] is! int) {
+            throw const CredentialUseFailure('invalid_type');
+          }
           // Authorization is checked even for a local memory buffer.
           final status = await _call('/credential-use/execution/status', {
             'sessionSecret': _session,
@@ -115,6 +246,7 @@ extension _CredentialRuntimeClient on AgentClient {
   Future<CredentialExecutionMaterial> _consumeCredentialMaterial(
     String id,
   ) async {
+    var mayBeConsumed = false;
     try {
       final request = await _http.post(
         '127.0.0.1',
@@ -124,10 +256,18 @@ extension _CredentialRuntimeClient on AgentClient {
       request.headers.contentType = ContentType.json;
       request.followRedirects = false;
       request.write(jsonEncode({'sessionSecret': _session, 'requestId': id}));
-      final response = await request.close();
-      final decoded =
-          jsonDecode(await utf8.decoder.bind(response).join())
-              as Map<String, dynamic>;
+      mayBeConsumed = true;
+      final response = await request.close().timeout(
+        const Duration(seconds: 5),
+      );
+      final bytes = <int>[];
+      await for (final chunk in response.timeout(const Duration(seconds: 5))) {
+        if (bytes.length + chunk.length > 2097152) {
+          throw const FormatException();
+        }
+        bytes.addAll(chunk);
+      }
+      final decoded = jsonDecode(utf8.decode(bytes)) as Map<String, dynamic>;
       if (decoded['status'] != 'ok') {
         throw CredentialUseFailure(
           decoded['errorCode'] as String? ?? 'service_unavailable',
@@ -139,7 +279,13 @@ extension _CredentialRuntimeClient on AgentClient {
     } on CredentialUseFailure {
       rethrow;
     } on Object {
-      throw const CredentialUseFailure('material_claim_failed');
+      // Once sent, losing the response cannot prove that the audit transaction
+      // rolled back. The caller must query the original request, never launch a
+      // replacement or advertise this attempt as safely unconsumed.
+      throw CredentialUseFailure(
+        mayBeConsumed ? 'material_claim_failed' : 'service_unavailable',
+        attemptConsumed: mayBeConsumed,
+      );
     }
   }
 
@@ -198,6 +344,9 @@ class _CredentialRuntimeExecutor {
   }
 
   Future<Map<String, dynamic>> start(String id) async {
+    if (!Platform.isWindows && client._usesDefaultCredentialStarter) {
+      throw const CredentialUseFailure('unsupported_tool_version');
+    }
     prune();
     if (outputs.length + reservations >= 16) {
       throw const CredentialUseFailure('execution_capacity');
@@ -265,21 +414,35 @@ class _CredentialRuntimeExecutor {
     DateTime? started;
     String? created;
     Future<void>? stdoutDone, stderrDone;
+    File? journal;
     var preparing = true;
-    Future<void> report(String state, {String? code, int? exit}) =>
-        client._reportCredentialExecution(
-          CredentialExecutionReport(
-            executionId: m.executionId,
-            executionCapability: m.executionCapability,
-            state: state,
-            pid: process?.pid,
-            processCreatedAt: created,
-            exitCode: exit,
-            errorCode: code,
-            startedAt: started,
-            finishedAt: state == 'running' ? null : DateTime.now().toUtc(),
-          ),
-        );
+    Future<void> report(String state, {String? code, int? exit}) async {
+      await journal?.writeAsString(
+        jsonEncode({
+          'executionId': m.executionId,
+          'state': state,
+          'pid': process?.pid,
+          'processCreatedAt': created,
+          if (process is _RuntimeWorkerProcess) 'jobName': process.jobName,
+          'cleanupState': 'not_needed',
+        }),
+        flush: true,
+      );
+      await client._reportCredentialExecution(
+        CredentialExecutionReport(
+          executionId: m.executionId,
+          executionCapability: m.executionCapability,
+          state: state,
+          pid: process?.pid,
+          processCreatedAt: created,
+          exitCode: exit,
+          errorCode: code,
+          startedAt: started,
+          finishedAt: state == 'running' ? null : DateTime.now().toUtc(),
+        ),
+      );
+    }
+
     try {
       final plan = m.approvedPlan;
       final binding = plan.env['GH_TOKEN'];
@@ -292,6 +455,15 @@ class _CredentialRuntimeExecutor {
         throw const CredentialUseFailure('material_prepare_failed');
       }
       folder = await Directory.systemTemp.createTemp('info-runtime-');
+      journal = File('${folder.path}/journal.json');
+      await journal.writeAsString(
+        jsonEncode({
+          'executionId': m.executionId,
+          'state': 'preparing',
+          'cleanupState': 'not_needed',
+        }),
+        flush: true,
+      );
       final config = await Directory('${folder.path}/config').create();
       final temp = await Directory('${folder.path}/temp').create();
       final programData = await Directory(
@@ -378,7 +550,11 @@ class _CredentialRuntimeExecutor {
       if (process != null) {
         // A reporting/identity failure cannot release a live process's slot or
         // dispose its isolated configuration while it still uses it.
-        await process.exitCode;
+        try {
+          await process.exitCode;
+        } on Object {
+          // The supervisor can die without a trustworthy target exit result.
+        }
         try {
           await Future.wait([?stdoutDone, ?stderrDone]);
         } on Object {
@@ -407,7 +583,8 @@ class _CredentialRuntimeExecutor {
       output.active = false;
       output.finishedAt = DateTime.now();
       output.complete = true;
-      if (folder != null) {
+      if (folder != null &&
+          (process is! _RuntimeWorkerProcess || process.treeEnded)) {
         try {
           await folder.delete(recursive: true);
         } on Object {

@@ -23,6 +23,7 @@ Future<void> main(List<String> args) async {
   for (final entry in {
     'codex_hook': 'info-codex-hook',
     'codex_info': 'info-codex',
+    'runtime_worker': 'info-runtime-worker',
   }.entries) {
     final result = await Process.run(Platform.resolvedExecutable, [
       'compile',

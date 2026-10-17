@@ -21,9 +21,17 @@ void main() {
       await File(
         '${repo.path}/integrations/codex/skills/agent-info-access/SKILL.md',
       ).copy('${template.path}/SKILL.md');
-      for (final name in ['info-codex', 'info-codex-hook']) {
+      for (final name in [
+        'info-codex',
+        'info-codex-hook',
+        'info-runtime-worker',
+      ]) {
         if (delivered == null) {
-          final entry = name.endsWith('hook') ? 'codex_hook' : 'codex_info';
+          final entry = name == 'info-runtime-worker'
+              ? 'runtime_worker'
+              : name.endsWith('hook')
+              ? 'codex_hook'
+              : 'codex_info';
           final build = await Process.run(Platform.resolvedExecutable, [
             'compile',
             'exe',
@@ -55,6 +63,12 @@ void main() {
       );
       final prepared = await prepare();
       expect(prepared.exitCode, 0, reason: '${prepared.stderr}');
+      expect(
+        await File('$output/info-runtime-worker.exe').exists(),
+        isTrue,
+        reason:
+            'A prepared executable must retain the worker required for approved launches.',
+      );
       final configFile = File('$output/hooks.json');
       final configBefore = await configFile.readAsString();
       final config = jsonDecode(configBefore) as Map<String, dynamic>;

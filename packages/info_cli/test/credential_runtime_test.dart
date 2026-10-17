@@ -6,8 +6,385 @@ import 'package:info_cli/agent_client.dart';
 import 'package:info_core/info_core.dart';
 import 'package:info_core/agent_server.dart';
 import 'package:test/test.dart';
+import 'support/runtime_harness.dart';
 
 void main() {
+  test(
+    'changing executable bytes while preserving size and modification time consumes the attempt without spawning',
+    () async {
+      final folder = await Directory.systemTemp.createTemp(
+        'runtime-image-change-',
+      );
+      final image = await File(
+        Platform.resolvedExecutable,
+      ).copy('${folder.path}/controlled.exe');
+      var spawned = false;
+      final h = await RuntimeHarness.create(
+        executablePath: image.path,
+        starter: (exe, argv, cwd, env) async {
+          spawned = true;
+          throw StateError('Changed executable must never be started');
+        },
+      );
+      addTearDown(() async {
+        await h.close();
+        await folder.delete(recursive: true);
+      });
+      final request = await h.approve();
+      final stat = await image.stat();
+      final bytes = await image.readAsBytes();
+      bytes[0] ^= 1;
+      await image.writeAsBytes(bytes, flush: true);
+      await image.setLastModified(stat.modified);
+      expect((await image.stat()).size, stat.size);
+      expect((await image.stat()).modified, stat.modified);
+      final accepted = await h.client.execute({
+        'command': 'run-use',
+        'requestId': request,
+      });
+      expect(accepted['status'], 'accepted');
+      await h.client.drainCredentialExecutions();
+      final status = await h.client.execute({
+        'command': 'execution-status',
+        'executionId': accepted['executionId'],
+      });
+      expect(status['executionState'], 'prepare_failed');
+      expect(status['errorCode'], 'executable_changed');
+      expect(status['processStarted'], isFalse);
+      expect(spawned, isFalse);
+      expect(
+        (await h.client.execute({
+          'command': 'run-use',
+          'requestId': request,
+        }))['errorCode'],
+        'attempt_consumed',
+      );
+    },
+  );
+  test(
+    'a lost private consume response is never reported as an unconsumed retryable attempt',
+    () async {
+      final h = await RuntimeHarness.create();
+      final request = await h.approve();
+      final cut = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+      final handling = cut.listen((incoming) async {
+        final body =
+            jsonDecode(await utf8.decoder.bind(incoming).join())
+                as Map<String, dynamic>;
+        try {
+          await h.service.agent.consumeCredentialUse(
+            body['sessionSecret'] as String,
+            body['requestId'] as String,
+          );
+          (await incoming.response.detachSocket()).destroy();
+        } on CredentialUseFailure catch (error) {
+          incoming.response.write(jsonEncode(error.toJson()));
+          await incoming.response.close();
+        }
+      });
+      final client = AgentClient(
+        cut.port,
+        sessionSecret: h.client.sessionSecret,
+      );
+      addTearDown(() async {
+        client.close();
+        await cut.close(force: true);
+        await handling.cancel();
+        await h.close();
+      });
+      final result = await client.execute({
+        'command': 'run-use',
+        'requestId': request,
+      });
+      expect(result['attemptConsumed'], isTrue);
+      expect(result['retryable'], isFalse);
+      expect(
+        h.service.owner.credentialUseRequests.single.attemptConsumed,
+        isTrue,
+      );
+      expect(h.service.owner.credentialExecutions, hasLength(1));
+      expect(
+        (await h.client.execute({
+          'command': 'status',
+          'requestId': request,
+        }))['executionId'],
+        isNotNull,
+      );
+    },
+  );
+  test(
+    'sixteen active executions reject the next attempt before consuming its permission',
+    () async {
+      final gate = Completer<void>();
+      Future<void> previous = gate.future;
+      final h = await RuntimeHarness.create(
+        starter: (exe, argv, cwd, env) async {
+          final turn = previous;
+          final next = Completer<void>();
+          previous = next.future;
+          await turn;
+          final process = await Process.start(
+            exe,
+            [File('test/support/credential_child.dart').absolute.path, ...argv],
+            workingDirectory: cwd,
+            environment: env,
+            includeParentEnvironment: false,
+          );
+          unawaited(process.exitCode.whenComplete(next.complete));
+          return process;
+        },
+      );
+      addTearDown(() async {
+        if (!gate.isCompleted) gate.complete();
+        await h.close();
+      });
+      for (var i = 0; i < 16; i++) {
+        final request = await h.approve();
+        expect(
+          (await h.client.execute({
+            'command': 'run-use',
+            'requestId': request,
+          }))['status'],
+          'accepted',
+        );
+      }
+      final pending = await h.approve();
+      final rejected = await h.client.execute({
+        'command': 'run-use',
+        'requestId': pending,
+      });
+      expect(rejected['errorCode'], 'execution_capacity');
+      expect(rejected['attemptConsumed'], isFalse);
+      expect(
+        h.service.owner.credentialUseRequests
+            .singleWhere((r) => r.id == pending)
+            .attemptConsumed,
+        isFalse,
+      );
+      gate.complete();
+      await h.client.drainCredentialExecutions();
+      expect(
+        (await h.client.execute({
+          'command': 'run-use',
+          'requestId': pending,
+        }))['status'],
+        'accepted',
+      );
+      await h.client.drainCredentialExecutions();
+      expect(h.service.owner.credentialExecutions.length, 17);
+    },
+  );
+  test(
+    'real output is limited to the first 4 MiB and is unavailable from another CLI process context',
+    () async {
+      final folder = await Directory.systemTemp.createTemp(
+        'runtime-output-test-',
+      );
+      await File('${folder.path}/api').writeAsString('''
+import 'dart:io';
+Future<void> main() async {
+  stdout.add(List<int>.filled(4194304 + 8192, 120));
+  await stdout.flush();
+  stderr.writeln('synthetic-tail');
+}
+''');
+      final h = await RuntimeHarness.create();
+      addTearDown(() async {
+        await h.close();
+        await folder.delete(recursive: true);
+      });
+      final request = await h.approve(cwd: folder.path);
+      final accepted = await h.client.execute({
+        'command': 'run-use',
+        'requestId': request,
+      });
+      await h.client.drainCredentialExecutions();
+      var cursor = 0, bytes = 0;
+      while (true) {
+        final output = await h.client.execute({
+          'command': 'execution-output',
+          'executionId': accepted['executionId'],
+          'cursor': cursor,
+          'limit': 16,
+        });
+        expect(output['status'], 'ok');
+        expect(output['outputComplete'], isTrue);
+        expect(output['outputTruncated'], isTrue);
+        final chunks = output['chunks'] as List;
+        expect(chunks.length, lessThanOrEqualTo(16));
+        for (final dynamic chunk in chunks) {
+          expect(chunk['seq'], cursor++);
+          expect(chunk['stream'], anyOf('stdout', 'stderr'));
+          final raw = base64Decode(chunk['dataBase64'] as String);
+          expect(raw.length, inInclusiveRange(1, 4096));
+          bytes += raw.length;
+        }
+        expect(output['nextCursor'], cursor);
+        if (output['hasMore'] != true) break;
+      }
+      expect(bytes, 4194304);
+      final other = AgentClient(
+        h.server.port,
+        sessionSecret: h.client.sessionSecret,
+      );
+      addTearDown(other.close);
+      expect(
+        (await other.execute({
+          'command': 'execution-status',
+          'executionId': accepted['executionId'],
+        }))['executionState'],
+        'exited',
+      );
+      expect(
+        (await other.execute({
+          'command': 'execution-output',
+          'executionId': accepted['executionId'],
+        }))['errorCode'],
+        'output_unavailable',
+      );
+      expect(
+        (await h.client.execute({
+          'command': 'execution-output',
+          'executionId': accepted['executionId'],
+          'cursor': cursor + 1,
+        }))['errorCode'],
+        'cursor_out_of_range',
+      );
+      expect(
+        jsonEncode(h.service.owner.credentialExecutions.single.toStorageJson()),
+        isNot(contains('synthetic-tail')),
+      );
+    },
+    skip: !Platform.isWindows,
+  );
+  test(
+    'worker crash preserves monitoring until the remaining tree ends and records unknown',
+    () async {
+      final folder = await Directory.systemTemp.createTemp(
+        'runtime-worker-crash-',
+      );
+      final release = File('${folder.path}/release');
+      await File('${folder.path}/api').writeAsString(
+        await File('test/support/credential_crash_child.dart').readAsString(),
+      );
+      final h = await RuntimeHarness.create();
+      addTearDown(() async {
+        await release.writeAsString('release');
+        await h.close();
+        await folder.delete(recursive: true);
+      });
+      final request = await h.approve(cwd: folder.path);
+      final accepted = await h.client.execute({
+        'command': 'run-use',
+        'requestId': request,
+      });
+      final deadline = DateTime.now().add(const Duration(seconds: 10));
+      Future<void> waitFor(bool Function() ready) async {
+        while (!ready()) {
+          if (DateTime.now().isAfter(deadline)) {
+            fail('Controlled worker did not reach the expected state');
+          }
+          await Future<void>.delayed(const Duration(milliseconds: 20));
+        }
+      }
+
+      await waitFor(
+        () =>
+            File('${folder.path}/target-ready').existsSync() &&
+            h.service.owner.credentialExecutions.single.state == 'running',
+      );
+      await File('${folder.path}/kill-worker').writeAsString('kill');
+      await waitFor(() => File('${folder.path}/worker-killed').existsSync());
+      expect(
+        await h.client
+            .drainCredentialExecutions()
+            .then((_) => true)
+            .timeout(const Duration(milliseconds: 150), onTimeout: () => false),
+        isFalse,
+      );
+      await release.writeAsString('release');
+      await h.client.drainCredentialExecutions();
+      final status = await h.client.execute({
+        'command': 'execution-status',
+        'executionId': accepted['executionId'],
+      });
+      expect(status['executionState'], 'unknown');
+      expect(status['processStarted'], isTrue);
+      expect(status['exitCode'], isNull);
+      expect(
+        (await h.client.execute({
+          'command': 'run-use',
+          'requestId': request,
+        }))['errorCode'],
+        'attempt_consumed',
+      );
+    },
+    skip: !Platform.isWindows,
+  );
+  test(
+    'production starter monitors a detached descendant after the approved parent exits',
+    () async {
+      final folder = await Directory.systemTemp.createTemp(
+        'runtime-tree-test-',
+      );
+      final release = File('${folder.path}/release');
+      final ready = File('${folder.path}/descendant-ready');
+      await File('${folder.path}/api').writeAsString('''
+import 'dart:io';
+Future<void> main() async {
+  await Process.start(Platform.resolvedExecutable, ['descendant.dart'], mode: ProcessStartMode.detached);
+  exit(7);
+}
+''');
+      await File('${folder.path}/descendant.dart').writeAsString('''
+import 'dart:io';
+Future<void> main() async {
+  await File('descendant-ready').writeAsString('ready');
+  final end = DateTime.now().add(const Duration(seconds: 15));
+  while (!await File('release').exists()) {
+    if (DateTime.now().isAfter(end)) exit(70);
+    await Future<void>.delayed(const Duration(milliseconds: 20));
+  }
+}
+''');
+      final h = await RuntimeHarness.create();
+      addTearDown(() async {
+        await release.writeAsString('release');
+        await h.close();
+        await folder.delete(recursive: true);
+      });
+      final request = await h.approve(cwd: folder.path);
+      final accepted = await h.client.execute({
+        'command': 'run-use',
+        'requestId': request,
+      });
+      expect(accepted['status'], 'accepted');
+      final deadline = DateTime.now().add(const Duration(seconds: 10));
+      while (!await ready.exists()) {
+        if (DateTime.now().isAfter(deadline)) {
+          fail('Controlled descendant did not become ready');
+        }
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+      }
+      expect(
+        await h.client
+            .drainCredentialExecutions()
+            .then((_) => true)
+            .timeout(const Duration(milliseconds: 150), onTimeout: () => false),
+        isFalse,
+        reason: 'Parent exit is not the end of its process tree.',
+      );
+      await release.writeAsString('release');
+      await h.client.drainCredentialExecutions();
+      final result = await h.client.execute({
+        'command': 'execution-status',
+        'executionId': accepted['executionId'],
+      });
+      expect(result['executionState'], 'exited');
+      expect(result['exitCode'], 7);
+    },
+    skip: !Platform.isWindows,
+  );
   test(
     'a transient running audit failure does not stop monitoring a live process',
     () async {
@@ -224,6 +601,17 @@ void main() {
         'limit': 16,
       });
       expect(output['outputComplete'], isTrue);
+      for (final invalid in [
+        <String, Object?>{'cursor': null},
+        <String, Object?>{'limit': null},
+      ]) {
+        final rejected = await client.execute({
+          'command': 'execution-output',
+          'executionId': executionId,
+          ...invalid,
+        });
+        expect(rejected['errorCode'], 'invalid_type');
+      }
       final chunks = output['chunks'] as List;
       final text = utf8.decode([
         for (final dynamic c in chunks)

@@ -4,6 +4,7 @@ import 'package:info_core/info_core.dart';
 import 'ui.dart';
 import 'prototype_ui.dart';
 import 'prototype_dialog.dart';
+import 'credential_execution_receipt.dart';
 
 String credentialUseStateLabel(String state) => switch (state) {
   'pending' => '待处理',
@@ -17,7 +18,7 @@ String credentialUseStateLabel(String state) => switch (state) {
 class CredentialUseApprovalDraft {
   CredentialUseApprovalDraft(Iterable<FieldRef> fields)
     : fields = fields.toSet();
-  bool allowCredential = true, fieldsExpanded = false;
+  bool allowCredential = true, fieldsExpanded = false, planExpanded = false;
   int minutes = 15;
   final Set<FieldRef> fields;
   String? tip;
@@ -48,6 +49,20 @@ class _CredentialUseApprovalPanelState
   CredentialUseRequest get r => widget.request;
   CredentialUseApprovalDraft get draft => widget.draft;
   bool get pending => widget.owner.credentialUseState(r) == 'pending';
+  bool get allowCredential =>
+      pending ? draft.allowCredential && eligible : r.credentialApproved;
+  int get selectedFieldCount =>
+      pending ? draft.fields.length : r.approvedFields.length;
+  CredentialExecution? get execution {
+    try {
+      return widget.owner.credentialExecutions
+          .where((e) => e.id == r.executionId)
+          .firstOrNull;
+    } on Object {
+      return null;
+    }
+  }
+
   @override
   void dispose() {
     _document.dispose();
@@ -77,7 +92,10 @@ class _CredentialUseApprovalPanelState
   }
 
   String get command => [
-    r.plan.path,
+    r.plan.path
+        .split(RegExp(r'[/\\]'))
+        .last
+        .replaceFirst(RegExp(r'\.exe$', caseSensitive: false), ''),
     ...r.plan.argv.map(
       (a) => a.kind == LaunchValueKind.literal
           ? a.value
@@ -89,6 +107,8 @@ class _CredentialUseApprovalPanelState
   Future<void> _dialog(String kind) async {
     final approve = kind == 'approve';
     final detail = kind == 'request';
+    Widget fact(String label, String value) =>
+        _fact(label, value, brief: detail);
     await showDialog<void>(
       context: context,
       barrierColor: const Color(0x4f241b27),
@@ -99,10 +119,11 @@ class _CredentialUseApprovalPanelState
             try {
               await widget.owner.decideCredentialUse(
                 r.id,
-                approveCredential: approve && draft.allowCredential,
+                approveCredential: approve && allowCredential,
                 fields: approve ? draft.fields.toList() : [],
                 lifetime: Duration(minutes: draft.minutes),
               );
+              if (mounted) setState(() => _error = null);
               if (dialogContext.mounted) Navigator.pop(dialogContext);
               widget.onChanged();
             } on Object {
@@ -133,7 +154,7 @@ class _CredentialUseApprovalPanelState
                   detail
                       ? 'Agent 提交的申请；用途与目标是自述内容。原文不随申请提交。'
                       : approve
-                      ? (draft.allowCredential
+                      ? (allowCredential
                             ? '允许本次会话启动一次任务，使用「$credentialName」版本 ${r.version}。'
                             : '本次仅批准所选连接字段，不提供凭据使用许可。')
                       : '本次申请不会获得凭据使用许可，也不会提供同时申请的连接字段。',
@@ -141,23 +162,32 @@ class _CredentialUseApprovalPanelState
                 ),
                 if (detail || approve) ...[
                   const SizedBox(height: 14),
-                  _fact('使用凭据', '$credentialName · 版本 ${r.version}'),
-                  _fact(
+                  if (detail) fact('使用凭据', '$credentialName · 版本 ${r.version}'),
+                  fact(
                     '凭据许可',
-                    draft.allowCredential
-                        ? '${draft.minutes} 分钟内允许启动一次'
+                    allowCredential
+                        ? pending
+                              ? '${draft.minutes} 分钟内允许启动一次'
+                              : '截止 ${_time(r.credentialExpiresAt)}'
                         : '不批准',
                   ),
                   if (r.fields.isNotEmpty)
-                    _fact(
+                    fact(
                       '字段许可',
-                      '${draft.fields.length} 个字段 · ${draft.minutes} 分钟（独立许可）',
+                      pending
+                          ? '$selectedFieldCount 个字段 · ${draft.minutes} 分钟（独立许可）'
+                          : '$selectedFieldCount 个字段 · 截止 ${_time(r.fieldExpiresAt)}（独立许可）',
                     ),
-                  _fact('注入位置', 'GH_TOKEN ← 字符串秘密值'),
+                  fact('注入位置', 'GH_TOKEN ← 字符串秘密值'),
                   _code(command),
-                  _fact('工作目录', r.plan.cwd),
-                  _fact('凭据标识 / 版本', '${r.credentialId} / ${r.version}'),
-                  _fact('计划 hash', r.plan.planHash),
+                  fact('程序位置', r.plan.path),
+                  fact(
+                    '参数（按项）',
+                    jsonEncode(r.plan.argv.map((a) => a.toJson()).toList()),
+                  ),
+                  fact('工作目录', r.plan.cwd),
+                  fact('凭据标识 / 版本', '${r.credentialId} / ${r.version}'),
+                  fact('计划 hash', r.plan.planHash),
                   const SizedBox(height: 12),
                   Text(
                     '由信息授权 CLI 启动。批准不会立即运行；程序、参数和注入位置按本次申请固定。',
@@ -177,12 +207,33 @@ class _CredentialUseApprovalPanelState
                     const SizedBox(height: 12),
                     _code(
                       const JsonEncoder.withIndent('  ').convert({
-                        'credentialId': r.credentialId,
-                        'version': r.version,
-                        'launch': r.plan.toJson(),
+                        'command': 'request-use',
+                        'purpose': r.purpose,
+                        'credentials': [
+                          {
+                            'alias': r.alias,
+                            'credentialId': r.credentialId,
+                            'version': r.version,
+                          },
+                        ],
+                        'launch': Map<String, Object?>.from(r.plan.toJson())
+                          ..remove('executableIdentity'),
                         'readFields': r.fields.map((f) => f.toJson()).toList(),
-                        'run': {'command': 'run-use', 'requestId': r.id},
                       }),
+                    ),
+                    fact('待审批截止', _time(r.requestExpiresAt)),
+                    fact('程序校验', r.plan.executable.sha256),
+                    const SizedBox(height: 12),
+                    Text(
+                      '批准后的启动调用',
+                      style: prototypeText(
+                        context,
+                        13,
+                        weight: FontWeight.w500,
+                      ),
+                    ),
+                    _code(
+                      jsonEncode({'command': 'run-use', 'requestId': r.id}),
                     ),
                   ],
                 ],
@@ -236,26 +287,30 @@ class _CredentialUseApprovalPanelState
       style: prototypeText(context, 13, family: 'Consolas', height: 1.9),
     ),
   );
-  Widget _fact(String label, String value) => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 10),
+  Widget _fact(String label, String value, {bool brief = false}) => Container(
+    padding: EdgeInsets.symmetric(vertical: brief ? 13 : 15),
+    decoration: BoxDecoration(
+      border: Border(bottom: BorderSide(color: UiPalette.of(context).line)),
+    ),
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(
-          width: 110,
+          width: brief ? 100 : 122,
           child: Text(
             label,
             style: prototypeText(
               context,
-              12,
+              brief ? 14 : 13,
               color: UiPalette.of(context).muted,
             ),
           ),
         ),
+        SizedBox(width: brief ? 12 : 18),
         Expanded(
           child: SelectableText(
             value,
-            style: prototypeText(context, 12, family: 'Consolas'),
+            style: prototypeText(context, 13, family: 'Consolas'),
           ),
         ),
       ],
@@ -291,12 +346,11 @@ class _CredentialUseApprovalPanelState
                 ),
               ),
               const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  title,
-                  style: prototypeText(context, 16, weight: FontWeight.w700),
-                ),
+              Text(
+                title,
+                style: prototypeText(context, 16, weight: FontWeight.w700),
               ),
+              const SizedBox(width: 10),
               SizedBox.square(
                 dimension: 26,
                 child: TextButton(
@@ -311,9 +365,25 @@ class _CredentialUseApprovalPanelState
                   ),
                   onPressed: () =>
                       setState(() => draft.tip = draft.tip == tip ? null : tip),
-                  child: const Text('?'),
+                  child: Text(
+                    '?',
+                    style: prototypeText(
+                      context,
+                      14,
+                      family: 'Georgia',
+                      color: c.accent,
+                    ),
+                  ),
                 ),
               ),
+              if (tip == 'injection') ...[
+                const Spacer(),
+                Text(
+                  '秘密值 → 环境变量',
+                  textAlign: TextAlign.right,
+                  style: prototypeText(context, 12, color: c.muted),
+                ),
+              ],
             ],
           ),
           AnimatedSize(
@@ -333,14 +403,28 @@ class _CredentialUseApprovalPanelState
                       border: Border.all(color: c.line),
                       borderRadius: BorderRadius.circular(4),
                     ),
-                    child: Text(
-                      text,
-                      style: prototypeText(
-                        context,
-                        13,
-                        height: 1.9,
-                        color: c.muted,
-                      ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text(
+                          text.substring(0, text.indexOf('。') + 1),
+                          style: prototypeText(
+                            context,
+                            13,
+                            height: 1.9,
+                            weight: FontWeight.w500,
+                          ),
+                        ),
+                        Text(
+                          text.substring(text.indexOf('。') + 1),
+                          style: prototypeText(
+                            context,
+                            13,
+                            height: 1.9,
+                            color: c.muted,
+                          ),
+                        ),
+                      ],
                     ),
                   )
                 : const SizedBox.shrink(),
@@ -357,7 +441,7 @@ class _CredentialUseApprovalPanelState
     final credential = widget.owner.credentials
         .where((c) => c.id == r.credentialId)
         .firstOrNull;
-    final allow = pending ? draft.allowCredential : r.credentialApproved;
+    final allow = allowCredential;
     return Scrollbar(
       controller: _document,
       child: SingleChildScrollView(
@@ -396,7 +480,10 @@ class _CredentialUseApprovalPanelState
                 ),
                 const Spacer(),
                 TextButton(
-                  style: prototypeButton(context),
+                  style: prototypeButton(
+                    context,
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                  ),
                   onPressed: () => _dialog('request'),
                   child: const Text('查看申请明细 ↗'),
                 ),
@@ -465,7 +552,9 @@ class _CredentialUseApprovalPanelState
               '申请只引用名称、标识与版本。凭据原文由本机服务保管，不放进申请。关联服务器信息不等于获得密钥使用权。',
               Container(
                 margin: EdgeInsets.only(top: short ? 10 : 12),
-                padding: EdgeInsets.all(short ? 12 : 16),
+                padding: short
+                    ? const EdgeInsets.symmetric(horizontal: 12, vertical: 10)
+                    : const EdgeInsets.all(13),
                 decoration: BoxDecoration(
                   color: c.rail,
                   border: Border.all(color: c.line),
@@ -513,9 +602,20 @@ class _CredentialUseApprovalPanelState
                       ),
                     ),
                     const SizedBox(width: 8),
-                    Text(
-                      eligible ? '可用' : '已失效',
-                      style: prototypeText(context, 11, color: c.muted),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: c.paper,
+                        border: Border.all(color: c.line),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        eligible ? '可用' : '已失效',
+                        style: prototypeText(context, 11, color: c.muted),
+                      ),
                     ),
                   ],
                 ),
@@ -535,7 +635,7 @@ class _CredentialUseApprovalPanelState
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            '环境变量',
+                            '环境变量名',
                             style: prototypeText(context, 12, color: c.muted),
                           ),
                           const SizedBox(height: 8),
@@ -568,7 +668,7 @@ class _CredentialUseApprovalPanelState
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            '字符串秘密值',
+                            '真实 Token（不展示原文）',
                             style: prototypeText(
                               context,
                               14,
@@ -612,30 +712,46 @@ class _CredentialUseApprovalPanelState
                     ],
                   ),
                   const SizedBox(height: 12),
-                  Text(
-                    '程序位置与固定计划',
-                    style: prototypeText(context, 13, color: c.muted),
-                  ),
-                  SelectableText(
-                    r.plan.path,
-                    style: prototypeText(
-                      context,
-                      13,
-                      family: 'Consolas',
-                      color: c.muted,
+                  TextButton(
+                    style: prototypeButton(context, size: 13),
+                    onPressed: () => setState(
+                      () => draft.planExpanded = !draft.planExpanded,
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          draft.planExpanded
+                              ? Icons.arrow_drop_down
+                              : Icons.arrow_right,
+                          size: 13,
+                        ),
+                        const SizedBox(width: 1),
+                        const Text('程序位置与固定计划'),
+                      ],
                     ),
                   ),
-                  ...r.plan.env.entries.map(
-                    (e) => Text(
-                      '${e.key} = ${e.value.kind == LaunchValueKind.secret ? '{secret:${e.value.value}}' : e.value.value}',
+                  if (draft.planExpanded) ...[
+                    const SizedBox(height: 8),
+                    SelectableText(
+                      r.plan.path,
                       style: prototypeText(
                         context,
-                        12,
+                        13,
                         family: 'Consolas',
                         color: c.muted,
                       ),
                     ),
-                  ),
+                    for (final e in r.plan.env.entries)
+                      Text(
+                        '${e.key} = ${e.value.kind == LaunchValueKind.secret ? '{secret:${e.value.value}}' : e.value.value}',
+                        style: prototypeText(
+                          context,
+                          12,
+                          family: 'Consolas',
+                          color: c.muted,
+                        ),
+                      ),
+                  ],
                 ],
               ),
             ),
@@ -688,7 +804,7 @@ class _CredentialUseApprovalPanelState
             value: pending
                 ? draft.fields.contains(field)
                 : r.approvedFields.contains(field),
-            onChanged: pending && f != null
+            onChanged: pending && (f != null || draft.fields.contains(field))
                 ? (v) => setState(() {
                     if (v == true) {
                       draft.fields.add(field);
@@ -716,7 +832,7 @@ class _CredentialUseApprovalPanelState
 
   Widget _decisionBody() {
     final c = UiPalette.of(context);
-    final allow = pending ? draft.allowCredential : r.credentialApproved;
+    final allow = allowCredential;
     final grant = widget.owner.credentialGrantState(r);
     return Container(
       decoration: BoxDecoration(
@@ -731,8 +847,16 @@ class _CredentialUseApprovalPanelState
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text('本次决定', style: prototypeText(context, 11, color: c.muted)),
-              const SizedBox(height: 8),
+              Text(
+                '本次决定',
+                style: prototypeText(
+                  context,
+                  11,
+                  color: c.muted,
+                  height: 21 / 11,
+                ),
+              ),
+              const SizedBox(height: 14),
               Text(
                 '允许这次启动',
                 style: prototypeText(
@@ -804,27 +928,39 @@ class _CredentialUseApprovalPanelState
               const SizedBox(height: 20),
               Text('允许启动的期限', style: prototypeText(context, 12)),
               const SizedBox(height: 9),
-              DesktopSelect<int>(
-                value: draft.minutes,
-                isExpanded: true,
-                items: [
-                  for (final n in [15, 30])
-                    DropdownMenuItem(value: n, child: Text('$n 分钟')),
-                ],
-                onChanged: pending
-                    ? (v) => setState(() => draft.minutes = v ?? 15)
-                    : null,
-              ),
-              const SizedBox(height: 12),
-              Text(
-                '程序会接触原文。\n运行时注入不构成强隔离。',
-                style: prototypeText(context, 12, height: 1.8, color: c.muted),
+              SizedBox(
+                height: MediaQuery.textScalerOf(context).scale(13) * 1.5 + 21.5,
+                child: DesktopSelect<int>(
+                  value: draft.minutes,
+                  isExpanded: true,
+                  items: [
+                    for (final n in [15, 30])
+                      DropdownMenuItem(value: n, child: Text('$n 分钟')),
+                  ],
+                  onChanged: pending
+                      ? (v) => setState(() => draft.minutes = v ?? 15)
+                      : null,
+                ),
               ),
               const SizedBox(height: 18),
+              Text(
+                '程序会接触原文。\n运行时注入不构成强隔离。',
+                style: prototypeText(
+                  context,
+                  13,
+                  height: 1.85,
+                  color: c.strong,
+                ),
+              ),
+              const SizedBox(height: 20),
               if (pending) ...[
                 TextButton(
                   key: const ValueKey('credential-use-approve'),
-                  style: prototypePrimary(context),
+                  style: prototypePrimary(context).copyWith(
+                    padding: const WidgetStatePropertyAll(
+                      EdgeInsets.symmetric(horizontal: 10, vertical: 13),
+                    ),
+                  ),
                   onPressed:
                       _busy ||
                           !widget.owner.serviceAvailable ||
@@ -832,7 +968,7 @@ class _CredentialUseApprovalPanelState
                               draft.fields.isEmpty
                       ? null
                       : () => _dialog('approve'),
-                  child: const Text('批准这次使用  →'),
+                  child: const Text('批准本次选择 →'),
                 ),
                 TextButton(
                   style: prototypeButton(
@@ -878,6 +1014,33 @@ class _CredentialUseApprovalPanelState
                     },
                     child: const Text('撤销使用授权'),
                   ),
+              ],
+              if (r.executionId != null) ...[
+                const SizedBox(height: 12),
+                Text('执行结果', style: prototypeText(context, 11, color: c.muted)),
+                const SizedBox(height: 5),
+                Text(
+                  credentialExecutionLabel(execution),
+                  style: prototypeText(
+                    context,
+                    13,
+                    color: c.strong,
+                    height: 1.9,
+                  ),
+                ),
+                Text(
+                  credentialCleanupLabel(execution?.cleanupState),
+                  style: prototypeText(context, 11, color: c.muted),
+                ),
+                TextButton(
+                  style: prototypeButton(
+                    context,
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                  ),
+                  onPressed: () =>
+                      showCredentialExecutionReceipt(context, widget.owner, r),
+                  child: const Text('查看执行记录 →'),
+                ),
               ],
               const SizedBox(height: 16),
               Text(

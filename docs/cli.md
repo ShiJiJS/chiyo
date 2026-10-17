@@ -1,8 +1,7 @@
 # 通用 CLI 申请与等待
 
-> 待实现扩展：凭据使用采用“提交启动计划 → 桌面批准 → 同一 CLI 会话调用启动”的方向，
-> 见[运行时注入设计](design/credential-runtime-injection.md)。拟议 `request-use` / `run-use`
-> 不是当前可用命令；本页下列接口仍描述实际已实现行为。不要将原型占位符直接交给 shell 执行。
+> 当前开发分支已实现 Windows 字符串凭据的一次启动流程，见下方“凭据使用”。
+> 文件接收、Codex 生命周期整合和完整凭据备份仍分别由 #29–#31 继续；不要将原型占位符直接交给 shell。
 
 CLI 使用标准输入逐行 JSON，标准输出每行一个结果。保持同一个 CLI 进程，授权会话凭据和已领取的访问凭据留在进程内；不要把凭据写入命令参数、日志或聊天。启动入口是 `dart run packages/info_cli/bin/info.dart`，默认连接本机应用端口 47125，可用 `--port` 指定开发端口。
 
@@ -70,3 +69,25 @@ CLI 使用标准输入逐行 JSON，标准输出每行一个结果。保持同�
 提交仅返回 `pending` 和 `proposalId`，不读取当前值、不直接覆盖资料。每次提案最多 200 个操作，单值最多 64000 字符，提案 JSON 最多 240000 UTF-8 字节。相同字段只能出现一个操作；最终信息必须保留至少一个字段。提案状态仅创建它的私密会话可查询，且不返回变更内容、原值或差异。Agent 无预览、确认、拒绝或历史读取入口；需要原值时先申请正常读取授权。
 
 用户在“录入提案”中查看修改前后信息和公开描述，明确确认或拒绝。状态为 `confirmed`、`rejected` 或 `conflicted`；版本冲突不会覆盖当前资料。冲突后根据当前目录版本和用户要求重新准备提案，避免自动重提。用户确认修正后，仍有效的原字段授权可读取最新值。确认操作可安全重试，不会重复增加版本或历史。
+
+## 凭据使用（Windows 开发分支）
+
+当前支持字符串凭据接收配置 `gh_token`，版本探测只接受已验证的 GitHub CLI 2.102.0。其他平台的默认执行器在占用前拒绝；SSH/AWS 文件交付尚待 #29。正式二进制必须将 `info-runtime-worker.exe` 与 `info.exe` 放在同一目录，Codex bundle 准备器会一起复制。原有已安装 CLI 不会自动获得新增命令。
+
+先查询 `{"command":"credential-catalog"}`，并在私密授权会话中提交完整计划。下面的 ID、程序和工作目录必须换成当前目录结果及本机实际绝对路径，Token 原文不写入输入：
+
+```json
+{"command":"request-use","purpose":"查看技能仓库信息","credentials":[{"alias":"github_token","credentialId":"CREDENTIAL_ID","version":1}],"launch":{"receiver":"gh_token","executable":"C:\\Program Files\\GitHub CLI\\gh.exe","argv":["repo","view","northstar/agent-skills"],"cwd":"C:\\Work\\northstar","env":{"GH_TOKEN":{"secret":"github_token"}}}}
+```
+
+保存返回的 `requestId`，用原有 `status` / `wait` 等待用户在桌面决定；可附带 `readFields`，字段与凭据的批准范围、期限和失效独立。只有 `decision.credentialUse.approved:true` 且许可仍有效时才发送：
+
+```json
+{"command":"run-use","requestId":"REQUEST_ID"}
+{"command":"execution-status","executionId":"EXECUTION_ID"}
+{"command":"execution-output","executionId":"EXECUTION_ID","cursor":0,"limit":16}
+```
+
+`run-use` 只引用获批计划，不接受修改后的命令。返回 `accepted` 表示尝试已占用、正在准备，不能当作已创建进程或执行成功；随后根据 `execution-status` 的 `processStarted`、`executionState`、`exitCode` 和独立 `cleanupState` 判断。准备/启动失败也消耗一次尝试；响应丢失先查询原请求取得执行编号，不能自动重跑或重提。程序位置、参数、工作目录、凭据版本在提交后固定；普通文本中的占位符不会替换。
+
+输出仅保留在启动该任务的 CLI 内存，按块返回 base64、流标签和全局接收序号，最多首4MiB，超限后继续排空。其他 CLI 或进程关闭后输出不可恢复；外部输出可能含秘密，勿写入聊天、审计或历史。stdin EOF 等待已启动任务结束，但不结束共享授权会话。重启只保留非秘密事实，无法确认的执行显示 `unknown`，不恢复启动能力。Token 不创建凭据文件，清理为 `not_needed`。完整约束、错误码和边界见[协议 v1](design/runtime-protocol-v1.md)。

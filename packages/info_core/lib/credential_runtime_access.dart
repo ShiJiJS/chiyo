@@ -320,8 +320,7 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
           a == '--hostname' ||
           a.startsWith('--hostname=') ||
           a == '--web' ||
-          a == '-w' ||
-          a.startsWith('!'),
+          a == '-w',
     )) {
       throw const CredentialUseFailure(
         'invalid_plan',
@@ -330,9 +329,34 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
     }
     if (argv.first == 'api') {
       String? endpoint;
+      bool changesAuthentication(String header) => RegExp(
+        r'^\s*(authorization|host|proxy-authorization|cookie)\s*:',
+        caseSensitive: false,
+      ).hasMatch(header);
       for (var i = 1; i < argv.length; i++) {
         final value = argv[i];
-        if (value == '--method' || value == '-X') {
+        final shortHeader = RegExp(r'^-[ip]*H(.*)$').firstMatch(value);
+        if (value.startsWith('--header=') || shortHeader != null) {
+          var header = value.startsWith('--header=')
+              ? value.substring(9)
+              : shortHeader!.group(1)!;
+          if (header.startsWith('=')) header = header.substring(1);
+          if (header.isEmpty) {
+            if (++i >= argv.length) {
+              throw const CredentialUseFailure(
+                'invalid_plan',
+                fieldPath: 'launch.argv',
+              );
+            }
+            header = argv[i];
+          }
+          if (changesAuthentication(header)) {
+            throw const CredentialUseFailure(
+              'invalid_plan',
+              fieldPath: 'launch.argv',
+            );
+          }
+        } else if (value == '--method' || value == '-X') {
           if (i + 1 >= argv.length ||
               !{'GET', 'POST', 'PUT', 'PATCH', 'DELETE'}.contains(argv[++i])) {
             throw const CredentialUseFailure(
@@ -373,10 +397,7 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
           }
           final argument = argv[++i];
           if ({'--header', '-H'}.contains(value) &&
-              RegExp(
-                r'^\s*(authorization|host|proxy-authorization)\s*:',
-                caseSensitive: false,
-              ).hasMatch(argument)) {
+              changesAuthentication(argument)) {
             throw const CredentialUseFailure(
               'invalid_plan',
               fieldPath: 'launch.argv',
@@ -404,8 +425,8 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
       'protocolVersion': 1,
       'status': _service._useState(r),
       'requestId': id,
-      'createdAt': r.createdAt.toUtc().toIso8601String(),
-      'requestExpiresAt': r.requestExpiresAt.toUtc().toIso8601String(),
+      'createdAt': _useTimestamp(r.createdAt),
+      'requestExpiresAt': _useTimestamp(r.requestExpiresAt),
       'planHash': r.plan.planHash,
       if (r.state != 'pending')
         'decision': {
@@ -414,7 +435,7 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
             if (r.credentialApproved) ...{
               'credentialId': r.credentialId,
               'version': r.version,
-              'expiresAt': r.credentialExpiresAt!.toUtc().toIso8601String(),
+              'expiresAt': _useTimestamp(r.credentialExpiresAt),
               'maxAttempts': 1,
               'attemptsConsumed': r.attemptConsumed ? 1 : 0,
             },
@@ -423,7 +444,7 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
             'approved': r.approvedFields.isNotEmpty,
             if (r.approvedFields.isNotEmpty) ...{
               'fields': r.approvedFields.map((f) => f.toJson()).toList(),
-              'expiresAt': r.fieldExpiresAt!.toUtc().toIso8601String(),
+              'expiresAt': _useTimestamp(r.fieldExpiresAt),
             },
           },
         },
@@ -483,37 +504,47 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
     _service._executionCapabilities[execution.id] = capability;
     try {
       validate();
-    } on CredentialUseFailure catch (e) {
-      await _service._saveUse(
-        execution: CredentialExecution(
-          id: execution.id,
-          requestId: id,
-          state: 'prepare_failed',
-          errorCode: 'material_claim_failed',
-          finishedAt: _service._clock().toUtc(),
-        ),
+      final material = _service._currentCredentialMaterial(c);
+      if (material.bytes.isEmpty) {
+        throw const CredentialUseFailure('material_prepare_failed');
+      }
+      return CredentialExecutionMaterial(
+        execution.id,
+        capability,
+        r.plan,
+        CredentialMaterialValue(c.id, c.version, c.form, material.bytes),
+        r.alias,
       );
+    } on Object catch (e) {
+      _service._executionCapabilities.remove(execution.id);
+      final code = e is CredentialUseFailure
+          ? e.code
+          : 'material_prepare_failed';
+      try {
+        await _service._saveUse(
+          execution: CredentialExecution(
+            id: execution.id,
+            requestId: id,
+            state: 'prepare_failed',
+            errorCode: code == 'material_prepare_failed'
+                ? code
+                : 'material_claim_failed',
+            finishedAt: _service._clock().toUtc(),
+          ),
+        );
+      } on Object {
+        throw CredentialUseFailure(
+          'audit_unavailable',
+          attemptConsumed: true,
+          executionId: execution.id,
+        );
+      }
       throw CredentialUseFailure(
-        e.code,
+        code,
         attemptConsumed: true,
         executionId: execution.id,
       );
     }
-    final material = _service._currentCredentialMaterial(c);
-    if (material.bytes.isEmpty) {
-      throw CredentialUseFailure(
-        'material_prepare_failed',
-        attemptConsumed: true,
-        executionId: execution.id,
-      );
-    }
-    return CredentialExecutionMaterial(
-      execution.id,
-      capability,
-      r.plan,
-      CredentialMaterialValue(c.id, c.version, c.form, material.bytes),
-      r.alias,
-    );
   });
 }
 
@@ -572,10 +603,10 @@ extension CredentialRuntimeOwnerAccess on OwnerAccess {
       'credentialApproved': approveCredential,
       'approvedFields': fields.map((f) => f.toJson()).toList(),
       'credentialExpiresAt': approveCredential
-          ? now.add(lifetime).toIso8601String()
+          ? _useTimestamp(now.add(lifetime))
           : null,
       'fieldExpiresAt': fields.isNotEmpty
-          ? now.add(fieldLifetime ?? lifetime).toIso8601String()
+          ? _useTimestamp(now.add(fieldLifetime ?? lifetime))
           : null,
     });
     final session = _service._credentialUseSessions[id]!;

@@ -74,7 +74,7 @@ try {
     New-Item -ItemType Directory -Path $cli | Out-Null
     Push-Location 'packages/info_cli'
     try {
-        foreach ($entry in @(@('info', 'info'), @('codex_info', 'info-codex'), @('codex_hook', 'info-codex-hook'), @('prepare_codex', 'info-prepare-codex'))) {
+        foreach ($entry in @(@('info', 'info'), @('runtime_worker', 'info-runtime-worker'), @('codex_info', 'info-codex'), @('codex_hook', 'info-codex-hook'), @('prepare_codex', 'info-prepare-codex'))) {
             Invoke-Checked $dart @('compile', 'exe', '--target-os', 'windows', '--target-arch', 'x64', "bin/$($entry[0]).dart", '-o', (Join-Path $cli "$($entry[1]).exe"))
         }
     } finally { Pop-Location }

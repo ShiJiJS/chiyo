@@ -1,0 +1,94 @@
+import 'dart:io';
+import 'package:crypto/crypto.dart';
+import 'package:info_cli/agent_client.dart';
+import 'package:info_core/info_core.dart';
+import 'package:info_core/agent_server.dart';
+
+class RuntimeHarness {
+  RuntimeHarness._(
+    this.service,
+    this.server,
+    this.client,
+    this.credential,
+    this.executablePath,
+  );
+  final InformationService service;
+  final AgentServer server;
+  final AgentClient client;
+  final ManagedCredential credential;
+  final String executablePath;
+  static Future<RuntimeHarness> create({
+    CredentialProcessStarter? starter,
+    String? executablePath,
+  }) async {
+    final exe = File(executablePath ?? Platform.resolvedExecutable);
+    final stat = await exe.stat();
+    final digest = 'sha256:${sha256.convert(await exe.readAsBytes())}';
+    final service = InformationService(
+      repository: MemoryInformationRepository(),
+      credentialExecutableInspector: (path, receiver) async =>
+          ExecutableIdentity(
+            path,
+            stat.size,
+            stat.modified.microsecondsSinceEpoch,
+            digest,
+          ),
+    );
+    final server = await AgentServer.start(service.agent, port: 0);
+    final client = AgentClient(server.port, credentialProcessStarter: starter);
+    var c = await service.owner.createStringCredential(
+      name: 'Synthetic',
+      publicPurpose: '',
+      secret: 'synthetic-token',
+    );
+    c = await service.owner.updateCredentialMetadata(
+      c.id,
+      c.revision,
+      name: c.name,
+      publicPurpose: '',
+      privateNote: '',
+      suggestedBinding: 'GH_TOKEN',
+      discoverable: true,
+    );
+    await client.execute({
+      'command': 'session',
+      'chatLabel': 'Controlled runtime',
+    });
+    return RuntimeHarness._(service, server, client, c, exe.path);
+  }
+
+  Future<String> approve({
+    String? cwd,
+    List<String> argv = const ['api', 'user'],
+  }) async {
+    final r = await client.execute({
+      'command': 'request-use',
+      'purpose': 'Controlled runtime test',
+      'credentials': [
+        {'alias': 'token', 'credentialId': credential.id, 'version': 1},
+      ],
+      'launch': {
+        'receiver': 'gh_token',
+        'executable': executablePath,
+        'argv': argv,
+        'cwd': cwd ?? Directory.current.path,
+        'env': {
+          'GH_TOKEN': {'secret': 'token'},
+        },
+      },
+    });
+    if (r['status'] != 'pending') {
+      throw StateError('Controlled plan was rejected');
+    }
+    final id = r['requestId'] as String;
+    await service.owner.decideCredentialUse(id, approveCredential: true);
+    return id;
+  }
+
+  Future<void> close() async {
+    await client.drainCredentialExecutions();
+    client.close();
+    await server.close();
+    await service.close();
+  }
+}

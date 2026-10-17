@@ -6,7 +6,7 @@
 
 通用 CLI stdin 每行一个 UTF-8 JSON 对象，stdout 每条输入恰好一个 JSON 对象加换行。所有新响应有 `protocolVersion:1`。一次输入最多 262144 UTF-8 字节（含换行），超限整行拒绝；既有命令更小的限制保持不变。未知属性、错类型、重复 JSON key、非整数数值和非有限数值均拒绝；解析层不能先丢弃重复 key 再验证。UTC 时间采用 RFC3339 毫秒和 `Z`；标识是不可推导授权的 opaque string，1–128 ASCII 字符。
 
-服务负责批准、原子占用许可和持久化非秘密执行/清理元数据；**CLI 才是执行器**。`run-use` 经 AgentClient 内部带会话证明的私有通道领取执行材料，在当前 CLI 进程中直接 `Process.start`，不经 shell。通用 JSON 响应、目录和桌面历史都不含外部秘密、临时授权证明、受管材料内容或临时绝对路径。私有 HTTP 不能误用为普通 CLI command 的透传响应。
+服务负责批准、原子占用许可和持久化非秘密执行/清理元数据；**CLI 才是执行器**。`run-use` 经 AgentClient 内部带会话证明的私有通道领取执行材料，由 CLI 的本机执行任务直接使用进程 API 启动，不经 shell。Windows 实现使用同包内部 worker，先加入独立 Job 再创建获批程序，使 CLI 退出后仍可等待进程树并排空输出；worker 不得到本软件会话证明或执行报告 capability。通用 JSON 响应、目录和桌面历史都不含外部秘密、临时授权证明、受管材料内容或临时绝对路径。私有 HTTP 不能误用为普通 CLI command 的透传响应。
 
 CLI 不把 JSON stdin 接给子进程；首版关闭子进程 stdin。不提供 PTY、交互输入、shell 管道、浏览器密码填充、远程执行器或多凭据组合。`run-use` 不等待程序退出：原子占用后立即返回 `executionId`，本地执行任务异步准备和启动；后续逐行输入仍能查询和完成其他工作。
 
@@ -130,6 +130,8 @@ CLI stdin EOF：停止接收新命令，保持执行监护和清理直到已启�
 | `cleanup_busy,cleanup_failed,cleanup_identity_mismatch` | conflict | 只重试清理，保持执行结果与消耗不变 |
 
 `retryable:true`只用于已确认未占用且短暂可恢复的服务/审计不可用，或cleanup_busy的清理重试；任何调用若未收到响应，先查原请求/执行。requestUse status需包含已有executionId（同会话），解决run-use响应丢失后的定位。服务/CLI日志只记录错误码、对象ID和状态；不记录私密HTTP原body、输入env值或输出。
+
+D6实现澄清：私有领取尚未建立连接时可以明确返回`service_unavailable,attemptConsumed:false`；请求已发出但响应断开、损坏或超时，不能据此证明事务未占用，CLI返回`material_claim_failed,retryable:false,attemptConsumed:true`作保守处理，再以原请求status中的执行编号及服务事实核对。不得把这个本地通信失败转换成可安全重跑的未占用许可。
 
 ## 直接验收 seam
 

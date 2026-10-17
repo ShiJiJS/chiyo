@@ -1,5 +1,12 @@
 part of 'info_core.dart';
 
+String? _useTimestamp(DateTime? value) => value == null
+    ? null
+    : DateTime.fromMillisecondsSinceEpoch(
+        value.millisecondsSinceEpoch,
+        isUtc: true,
+      ).toIso8601String();
+
 class CredentialUseFailure implements Exception {
   const CredentialUseFailure(
     this.code, {
@@ -75,7 +82,9 @@ String _useText(
   if (value is! String) {
     throw CredentialUseFailure('invalid_type', fieldPath: path);
   }
-  if (value.contains('\u0000') || value.length > max || !empty && value.isEmpty) {
+  if (value.contains('\u0000') ||
+      value.length > max ||
+      !empty && value.isEmpty) {
     throw CredentialUseFailure('invalid_plan', fieldPath: path);
   }
   return value;
@@ -175,8 +184,11 @@ class CredentialUseInput {
     if (launch is! Map<String, dynamic>) {
       throw const CredentialUseFailure('invalid_type', fieldPath: 'launch');
     }
-    final rawFields = j['readFields'] ?? [];
-    if (rawFields is! List || rawFields.length > 200) {
+    final rawFields = j.containsKey('readFields') ? j['readFields'] : const [];
+    if (rawFields is! List) {
+      throw const CredentialUseFailure('invalid_type', fieldPath: 'readFields');
+    }
+    if (rawFields.length > 200) {
       throw const CredentialUseFailure(
         'limit_exceeded',
         fieldPath: 'readFields',
@@ -246,6 +258,7 @@ Future<ExecutableIdentity> inspectCredentialExecutable(
   String path,
   String receiver,
 ) async {
+  Directory? probe;
   try {
     final file = File(path);
     final canonical = await file.resolveSymbolicLinks();
@@ -260,10 +273,31 @@ Future<ExecutableIdentity> inspectCredentialExecutable(
     if (receiver != 'gh_token' || !{'gh', 'gh.exe'}.contains(name)) {
       throw const CredentialUseFailure('unsupported_tool_version');
     }
+    probe = await Directory.systemTemp.createTemp('info-tool-probe-');
+    final environment = <String, String>{
+      'HOME': probe.path,
+      'USERPROFILE': probe.path,
+      'APPDATA': probe.path,
+      'LOCALAPPDATA': probe.path,
+      'XDG_CONFIG_HOME': probe.path,
+      'XDG_STATE_HOME': probe.path,
+      'GH_CONFIG_DIR': probe.path,
+      if (Platform.isWindows)
+        'SystemRoot': Platform.environment['SystemRoot'] ?? '',
+      if (Platform.isWindows) 'TEMP': probe.path,
+      if (Platform.isWindows) 'TMP': probe.path,
+      if (!Platform.isWindows) 'PATH': '/usr/bin:/bin',
+      if (!Platform.isWindows) 'LANG': 'C.UTF-8',
+      if (!Platform.isWindows) 'TMPDIR': probe.path,
+    };
     final result = await Process.run(
       canonical,
       ['--version'],
-      environment: const {},
+      workingDirectory: probe.path,
+      // An empty environment block is rejected by CreateProcess on this
+      // Windows runtime (error 87). Retain only the system loader location,
+      // never the invoking process's authentication/configuration variables.
+      environment: environment,
       includeParentEnvironment: false,
       runInShell: false,
     ).timeout(const Duration(seconds: 5));
@@ -286,6 +320,24 @@ Future<ExecutableIdentity> inspectCredentialExecutable(
       'invalid_plan',
       fieldPath: 'launch.executable',
     );
+  } finally {
+    if (probe != null) {
+      try {
+        final actual = await probe.resolveSymbolicLinks();
+        final parent = await Directory.systemTemp.resolveSymbolicLinks();
+        final comparable = Platform.isWindows ? actual.toLowerCase() : actual;
+        final expected = Platform.isWindows
+            ? probe.path.toLowerCase()
+            : probe.path;
+        final prefix =
+            '${Platform.isWindows ? parent.toLowerCase() : parent}${Platform.pathSeparator}';
+        if (comparable == expected && comparable.startsWith(prefix)) {
+          await probe.delete(recursive: true);
+        }
+      } on FileSystemException {
+        // A failed private cache cleanup does not reveal submitted values.
+      }
+    }
   }
 }
 
@@ -439,14 +491,14 @@ class CredentialUseRequest {
     'version': version,
     'useGeneration': useGeneration,
     'plan': plan.toJson(),
-    'createdAt': createdAt.toUtc().toIso8601String(),
-    'requestExpiresAt': requestExpiresAt.toUtc().toIso8601String(),
+    'createdAt': _useTimestamp(createdAt),
+    'requestExpiresAt': _useTimestamp(requestExpiresAt),
     'fields': fields.map((f) => f.toJson()).toList(),
     'state': state,
     'credentialApproved': credentialApproved,
     'approvedFields': approvedFields.map((f) => f.toJson()).toList(),
-    'credentialExpiresAt': credentialExpiresAt?.toUtc().toIso8601String(),
-    'fieldExpiresAt': fieldExpiresAt?.toUtc().toIso8601String(),
+    'credentialExpiresAt': _useTimestamp(credentialExpiresAt),
+    'fieldExpiresAt': _useTimestamp(fieldExpiresAt),
     'executionId': executionId,
     'attemptConsumed': attemptConsumed,
     'invalidatedCode': invalidatedCode,
@@ -518,8 +570,8 @@ class CredentialExecution {
     'processStarted': processStarted,
     'exitCode': exitCode,
     'errorCode': errorCode,
-    'startedAt': startedAt?.toUtc().toIso8601String(),
-    'finishedAt': finishedAt?.toUtc().toIso8601String(),
+    'startedAt': _useTimestamp(startedAt),
+    'finishedAt': _useTimestamp(finishedAt),
     'cleanupState': cleanupState,
     'outputAvailable': false,
     'outputTruncated': false,
@@ -573,8 +625,8 @@ class CredentialExecutionReport {
     'processCreatedAt': processCreatedAt,
     'exitCode': exitCode,
     'errorCode': errorCode,
-    'startedAt': startedAt?.toUtc().toIso8601String(),
-    'finishedAt': finishedAt?.toUtc().toIso8601String(),
+    'startedAt': _useTimestamp(startedAt),
+    'finishedAt': _useTimestamp(finishedAt),
   };
   factory CredentialExecutionReport.fromPrivateJson(Map<String, dynamic> j) {
     _useShape(j, {

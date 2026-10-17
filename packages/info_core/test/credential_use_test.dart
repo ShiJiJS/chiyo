@@ -34,9 +34,12 @@ class FailingRuntimeRepository extends MemoryInformationRepository {
 
 Future<(InformationService, String, CredentialUseRequest)> tokenRequest({
   MemoryInformationRepository? repository,
+  List<String> argv = const ['api', 'user', '--method', 'GET'],
+  DateTime Function()? clock,
 }) async {
   final service = InformationService(
     repository: repository ?? MemoryInformationRepository(),
+    clock: clock,
     credentialExecutableInspector: (path, receiver) async =>
         ExecutableIdentity(path, 10, 100, 'sha256:fixture'),
   );
@@ -66,7 +69,7 @@ Future<(InformationService, String, CredentialUseRequest)> tokenRequest({
       'launch': {
         'receiver': 'gh_token',
         'executable': Platform.resolvedExecutable,
-        'argv': ['api', 'user', '--method', 'GET'],
+        'argv': argv,
         'cwd': Directory.current.path,
         'env': {
           'GH_TOKEN': {'secret': 'token'},
@@ -78,6 +81,217 @@ Future<(InformationService, String, CredentialUseRequest)> tokenRequest({
 }
 
 void main() {
+  test(
+    'pending denied revoked expired and cross-session requests never consume a launch attempt',
+    () async {
+      for (final scenario in [
+        'pending',
+        'denied',
+        'revoked',
+        'expired',
+        'cross-session',
+      ]) {
+        var now = DateTime.utc(2026, 10, 17);
+        final (service, session, request) = await tokenRequest(
+          clock: () => now,
+        );
+        try {
+          if (scenario != 'pending') {
+            await service.owner.decideCredentialUse(
+              request.id,
+              approveCredential: scenario != 'denied',
+            );
+          }
+          if (scenario == 'revoked') {
+            await service.owner.revokeCredentialUse(request.id);
+          }
+          if (scenario == 'expired') now = now.add(const Duration(minutes: 15));
+          final caller = scenario == 'cross-session'
+              ? service.agent.openSession('Another private session')
+              : session;
+          final expected = switch (scenario) {
+            'pending' => 'request_pending',
+            'denied' => 'request_denied',
+            'revoked' => 'grant_revoked',
+            'expired' => 'grant_expired',
+            _ => 'session_mismatch',
+          };
+          await expectLater(
+            service.agent.consumeCredentialUse(caller, request.id),
+            throwsA(
+              isA<CredentialUseFailure>()
+                  .having((e) => e.code, 'code', expected)
+                  .having((e) => e.attemptConsumed, 'attemptConsumed', false),
+            ),
+          );
+          expect(service.owner.credentialExecutions, isEmpty);
+          expect(
+            service.owner.credentialUseRequests.single.attemptConsumed,
+            isFalse,
+          );
+        } finally {
+          await service.close();
+        }
+      }
+    },
+  );
+  test(
+    'runtime status timestamps use UTC milliseconds even when the clock has microseconds',
+    () async {
+      final (service, session, request) = await tokenRequest(
+        clock: () => DateTime.utc(2026, 10, 17, 0, 0, 0, 123, 456),
+      );
+      addTearDown(service.close);
+      final pending = service.agent.credentialUseStatus(session, request.id);
+      expect(pending['createdAt'], '2026-10-17T00:00:00.123Z');
+      expect(pending['requestExpiresAt'], '2026-10-17T00:30:00.123Z');
+      await service.owner.decideCredentialUse(
+        request.id,
+        approveCredential: true,
+      );
+      final decision =
+          service.agent.credentialUseStatus(session, request.id)['decision']
+              as Map;
+      expect(
+        (decision['credentialUse'] as Map)['expiresAt'],
+        '2026-10-17T00:15:00.123Z',
+      );
+    },
+  );
+  test(
+    'an explicitly null field-read scope is rejected rather than treated as an omitted scope',
+    () async {
+      final (service, session, request) = await tokenRequest();
+      addTearDown(service.close);
+      final launch = Map<String, Object?>.from(request.plan.toJson())
+        ..remove('executableIdentity');
+      await expectLater(
+        Future.sync(
+          () => service.agent.requestCredentialUse(
+            session,
+            CredentialUseInput.fromJson({
+              'command': 'request-use',
+              'purpose': 'Check strict field scope',
+              'credentials': [
+                {
+                  'alias': request.alias,
+                  'credentialId': request.credentialId,
+                  'version': request.version,
+                },
+              ],
+              'launch': launch,
+              'readFields': null,
+            }),
+          ),
+        ),
+        throwsA(
+          isA<CredentialUseFailure>().having(
+            (e) => e.code,
+            'code',
+            'invalid_type',
+          ),
+        ),
+      );
+    },
+  );
+  test(
+    'audit failure after consumption never advertises an unused attempt',
+    () async {
+      final repo = FailingRuntimeRepository();
+      final (service, session, request) = await tokenRequest(repository: repo);
+      addTearDown(service.close);
+      await service.owner.decideCredentialUse(
+        request.id,
+        approveCredential: true,
+      );
+      repo.afterConsumeCommit = () {
+        service.agent.endSession(session);
+        repo.fail = true;
+      };
+      await expectLater(
+        service.agent.consumeCredentialUse(session, request.id),
+        throwsA(
+          isA<CredentialUseFailure>()
+              .having((e) => e.code, 'code', 'audit_unavailable')
+              .having((e) => e.attemptConsumed, 'attemptConsumed', true)
+              .having((e) => e.executionId, 'executionId', isNotNull),
+        ),
+      );
+      expect(
+        service.owner.credentialUseRequests.single.attemptConsumed,
+        isTrue,
+      );
+      expect(service.owner.credentialExecutions, hasLength(1));
+    },
+  );
+  test(
+    'gh API auth and host headers are rejected in split, attached and grouped flag forms',
+    () async {
+      final (service, session, request) = await tokenRequest();
+      addTearDown(service.close);
+      for (final flags in [
+        ['--header=Authorization: synthetic-other'],
+        ['-HAuthorization: synthetic-other'],
+        ['-H=Cookie: synthetic-other'],
+        ['-iHHost: other.invalid'],
+        ['-pHAuthorization: synthetic-other'],
+        ['-piH', 'Cookie: synthetic-other'],
+        ['-iH', 'Proxy-Authorization: synthetic-other'],
+        ['--header', 'Cookie: synthetic-other'],
+      ]) {
+        final input = CredentialUseInput.fromJson({
+          'command': 'request-use',
+          'purpose': 'Verify one authentication source',
+          'credentials': [
+            {
+              'alias': request.alias,
+              'credentialId': request.credentialId,
+              'version': request.version,
+            },
+          ],
+          'launch': {
+            'receiver': 'gh_token',
+            'executable': Platform.resolvedExecutable,
+            'argv': ['api', 'user', ...flags],
+            'cwd': Directory.current.path,
+            'env': {
+              'GH_TOKEN': {'secret': request.alias},
+            },
+          },
+        });
+        await expectLater(
+          service.agent.requestCredentialUse(session, input),
+          throwsA(
+            isA<CredentialUseFailure>().having(
+              (e) => e.code,
+              'code',
+              'invalid_plan',
+            ),
+          ),
+        );
+      }
+    },
+  );
+  test(
+    'approved gh write arguments beginning with an exclamation mark stay literal',
+    () async {
+      final (service, _, request) = await tokenRequest(
+        argv: [
+          'issue',
+          'create',
+          '--repo',
+          'northstar/agent-skills',
+          '--title',
+          '! Release notes',
+          '--body',
+          'Reviewed body',
+        ],
+      );
+      addTearDown(service.close);
+      expect(request.plan.argv[5].value, '! Release notes');
+      expect(service.owner.credentialUseState(request), 'pending');
+    },
+  );
   test(
     'identical execution reports can be retried after a lost response without changing facts',
     () async {

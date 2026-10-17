@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:isolate';
+import 'dart:math';
 import 'package:crypto/crypto.dart';
 import 'package:info_core/info_core.dart';
 part 'credential_runtime_client.dart';
@@ -12,9 +14,11 @@ class AgentClient {
     this.sourceAgent = '通用 CLI',
     CredentialProcessStarter? credentialProcessStarter,
   }) : _session = sessionSecret,
+       _usesDefaultCredentialStarter = credentialProcessStarter == null,
        _credentialProcessStarter =
            credentialProcessStarter ?? _startCredentialProcess;
   final CredentialProcessStarter _credentialProcessStarter;
+  final bool _usesDefaultCredentialStarter;
   late final _credentialExecutions = _CredentialRuntimeExecutor(this);
   Future<void> drainCredentialExecutions() => _credentialExecutions.drain();
   final int port;
