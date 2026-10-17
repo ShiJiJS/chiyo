@@ -1868,7 +1868,7 @@ class _CurrentResultsState extends State<_CurrentResults> {
                 if (item == null) {
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 18),
-                    child: _paragraph('当前信息已不存在（$id）。请前往回收站检查。'),
+                    child: _paragraph('当前信息已不存在（$id）\n可到回收站检查。'),
                   );
                 }
                 return Padding(
