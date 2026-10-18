@@ -64,6 +64,7 @@ class EncryptedInformationRepository
     implements
         InformationRepository,
         CredentialRepository,
+        CredentialFieldMigrationRepository,
         CredentialRuntimeRepository,
         SshHostTrustRepository {
   SshHostTrustSnapshot? _sshHostTrust;
@@ -100,6 +101,10 @@ class EncryptedInformationRepository
   final _deletes = <String, DeleteProposal>{};
   final _credentials = <ManagedCredential>[];
   final _credentialMaterials = <CredentialMaterial>[];
+  @override
+  Future<void> commitCredentialFieldMigration(
+    CredentialFieldMigration change,
+  ) => _migrateCredentialField(change);
   final _credentialUseRequests = <CredentialUseRequest>[];
   final _credentialExecutions = <CredentialExecution>[];
   @override

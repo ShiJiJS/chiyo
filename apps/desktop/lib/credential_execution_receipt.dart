@@ -177,7 +177,11 @@ class _ExecutionReceiptState extends State<_ExecutionReceipt> {
                 fact('开始时间', time(record.startedAt)),
                 fact('结束时间', time(record.finishedAt)),
                 if (record.errorCode != null) fact('结果代码', record.errorCode!),
-                if (record.state == 'unknown')
+                if (record.restoredAt != null)
+                  const QuietNotice(
+                    '这是从备份恢复的历史事实。本机没有恢复运行材料、输出或使用许可；原设备的任务和材料需在原设备核查。',
+                  ),
+                if (record.state == 'unknown' && record.restoredAt == null)
                   const QuietNotice(
                     '无法确认本次任务的最终结果。请先核查原任务，不要重新启动同一操作。',
                     warning: true,

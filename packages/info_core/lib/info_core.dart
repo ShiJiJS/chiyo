@@ -37,6 +37,7 @@ part 'backup_access.dart';
 part 'workspace_access.dart';
 part 'library_access.dart';
 part 'credential_access.dart';
+part 'credential_field_migration.dart';
 part 'credential_runtime_models.dart';
 part 'credential_runtime_access.dart';
 part 'credential_file_receivers.dart';

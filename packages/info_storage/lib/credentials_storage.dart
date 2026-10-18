@@ -1,6 +1,42 @@
 part of 'info_storage.dart';
 
 extension _CredentialSnapshotValidation on EncryptedInformationRepository {
+  Future<void> _migrateCredentialField(CredentialFieldMigration change) async {
+    if (_closed) throw const StorageFailure('library_closed');
+    final before = change.previous.item,
+        c = change.credential,
+        m = change.material;
+    if (_items[before.id]?.version != before.version ||
+        change.item.id != before.id ||
+        change.item.version != before.version + 1 ||
+        _credentials.any((v) => v.id == c.id))
+      throw const StorageFailure('credential_migration_conflict');
+    _validateVault([..._credentials, c], [..._credentialMaterials, m]);
+    try {
+      await _db.transaction(() async {
+        await _writeItem(change.item);
+        await _db.customStatement(
+          'INSERT INTO managed_credentials(id,payload) VALUES(?,?)',
+          [c.id, jsonEncode(c.toJson())],
+        );
+        await _db.customStatement(
+          'INSERT INTO credential_materials(credential_id,version,payload) VALUES(?,?,?)',
+          [m.credentialId, m.version, jsonEncode(m.toStorageJson())],
+        );
+        await _writeRevision(change.previous);
+        await _writeRecycle([change.recycled], [change.fact]);
+      });
+      _items[before.id] = change.item;
+      _credentials.add(c);
+      _credentialMaterials.add(m);
+      _revisions.add(change.previous);
+      _recycle[change.recycled.id] = change.recycled;
+      _recycleFacts.add(change.fact);
+    } on Object {
+      throw const StorageFailure('credential_migration_failed');
+    }
+  }
+
   void _validateVault(
     List<ManagedCredential> credentials,
     List<CredentialMaterial> materials,

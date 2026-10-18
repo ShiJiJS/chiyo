@@ -20,6 +20,9 @@ class BackupContents {
   int get requestHistoryCount => _tables['request_history']!.length;
   int get credentialCount => _tables['managed_credentials']!.length;
   int get credentialVersionCount => _tables['credential_materials']!.length;
+  int get credentialUseHistoryCount => _tables['credential_use_requests']!.length;
+  int get credentialExecutionCount => _tables['credential_executions']!.length;
+  int get sshTrustCount => _tables['ssh_host_trust']!.length;
 }
 
 /// Owner-only manual backup capability. It is never part of the agent server.

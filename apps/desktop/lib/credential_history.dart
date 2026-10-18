@@ -330,7 +330,15 @@ class _CredentialHistoryDocumentState extends State<CredentialHistoryDocument> {
                         padding: const EdgeInsets.symmetric(vertical: 20),
                         child: t('本次启动尝试已消耗，程序未启动。修正原因后，需要重新申请一次使用许可。', 13),
                       ),
-                    if (record?.state == 'unknown')
+                    if (r.restoredAt != null)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 20),
+                        child: t(
+                          '从备份恢复的历史事实，不表示本机仍在运行。许可、运行材料和输出没有恢复；原设备的任务和材料需在原设备核查。',
+                          13,
+                        ),
+                      ),
+                    if (record?.state == 'unknown' && r.restoredAt == null)
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 20),
                         child: t('结果尚无法确认。先核查原执行与残留文件，避免重复运行。', 13),
@@ -589,6 +597,8 @@ class _CredentialHistoryDocumentState extends State<CredentialHistoryDocument> {
                       '清理',
                       record == null
                           ? '尚未生成材料'
+                          : record.restoredAt != null
+                          ? '本机不恢复运行材料'
                           : credentialCleanupLabel(record.cleanupState),
                       divider: true,
                     ),
