@@ -40,7 +40,23 @@ Future<void> main() async {
     final file = state!;
     final temporary = File('${file.path}.next');
     await temporary.writeAsString(jsonEncode(facts), flush: true);
-    await temporary.rename(file.path);
+    // Dart's Windows read handles can briefly deny replacement. Polling the
+    // ready receipt must not lose the next receipt after a target was started.
+    // Retry only this same atomic publication; never repeat Process.start.
+    final waiting = Stopwatch()..start();
+    while (true) {
+      try {
+        await temporary.rename(file.path);
+        return;
+      } on FileSystemException catch (e) {
+        if (!Platform.isWindows ||
+            !{5, 32, 33}.contains(e.osError?.errorCode) ||
+            waiting.elapsed >= const Duration(seconds: 2)) {
+          rethrow;
+        }
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+      }
+    }
   }
 
   try {
@@ -65,6 +81,12 @@ Future<void> main() async {
     }
     // Crucially, no target exists before this process has joined its job.
     job = CredentialProcessJob.createForCurrentWorker(name);
+    await write({'state': 'ready', 'workerPid': pid, 'jobName': name});
+    // The supervisor first persists this worker's verified job membership.
+    // EOF or supervisor failure before that acknowledgement cannot launch.
+    if (!await input.moveNext() || input.current != 'start') {
+      throw const FormatException();
+    }
     target = await Process.start(
       plan['executable'] as String,
       (plan['argv'] as List).cast<String>(),

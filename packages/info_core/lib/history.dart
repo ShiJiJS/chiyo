@@ -266,7 +266,10 @@ class AuditRetentionPreview {
     this.cutoff, [
     this.requests = 0,
     this.organizations = 0,
+    this.credentialRequests = 0,
+    this.credentialExecutions = 0,
   ]);
   final int days, grants, accesses, requests, organizations;
+  final int credentialRequests, credentialExecutions;
   final DateTime cutoff;
 }

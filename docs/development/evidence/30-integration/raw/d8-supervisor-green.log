@@ -1,0 +1,16 @@
+00:00 +0: loading test/credential_supervisor_recovery_test.dart
+00:00 +0: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:00 +0 -1: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends [E]
+  Expected: match '^Local\\AgentInfoRuntime-[A-Za-z0-9_-]{32}$'
+    Actual: 'Local\\AgentInfoRuntime-3l6oO2MRbMp58zxa7JvVTFKpfo9t1jG4IAWQ4LJ5zjk='
+  
+  package:matcher                                     expect
+  test\credential_supervisor_recovery_test.dart 29:5  main.<fn>
+  
+00:00 +0 -1: Some tests failed.
+
+Failing tests:
+  test/credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+
+Consider enabling the flag chain-stack-traces to receive more detailed exceptions.
+For example, 'dart test --chain-stack-traces'.

@@ -9,6 +9,7 @@ import 'recycle.dart';
 import 'revisions.dart';
 import 'ui.dart';
 import 'credential_dialogs.dart';
+import 'credential_migration.dart';
 
 class InformationLibrary extends StatefulWidget {
   const InformationLibrary({
@@ -1270,17 +1271,33 @@ class _InformationLibraryState extends State<InformationLibrary> {
                             return;
                           }
                           if (!context.mounted) return;
-                          await showDialog<void>(
-                            context: context,
-                            barrierColor: const Color(0x4f241b27),
-                            builder: (_) => PrototypeDialog(
-                              title: '转换旧秘密字段',
-                              onClose: () => Navigator.pop(context),
-                              body: const Text(
-                                '托管凭据管理服务当前不可用。尚未转换任何字段，原信息及已有授权保持当前状态。',
+                          final credential =
+                              await showDialog<ManagedCredential>(
+                                context: context,
+                                barrierDismissible: false,
+                                barrierColor: const Color(0x4f241b27),
+                                builder: (_) => CredentialMigrationDialog(
+                                  owner: owner,
+                                  item: item,
+                                ),
+                              );
+                          _refresh();
+                          if (mounted && credential != null) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: const Text('已建立托管凭据并关闭旧读取路径。旧授权不会恢复。'),
+                                action: widget.onOpenCredential == null
+                                    ? null
+                                    : SnackBarAction(
+                                        label: '查看凭据',
+                                        onPressed: () =>
+                                            widget.onOpenCredential!(
+                                              credential.id,
+                                            ),
+                                      ),
                               ),
-                            ),
-                          );
+                            );
+                          }
                         },
                         child: const Text('转换旧秘密字段'),
                       ),

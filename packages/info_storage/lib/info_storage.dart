@@ -9,6 +9,7 @@ import 'backup_publish.dart';
 export 'platform_keys.dart';
 part 'backups.dart';
 part 'backup_history.dart';
+part 'backup_credentials.dart';
 part 'credentials_storage.dart';
 part 'credential_runtime_storage.dart';
 
@@ -63,6 +64,7 @@ class EncryptedInformationRepository
     implements
         InformationRepository,
         CredentialRepository,
+        CredentialFieldMigrationRepository,
         CredentialRuntimeRepository,
         SshHostTrustRepository {
   SshHostTrustSnapshot? _sshHostTrust;
@@ -99,6 +101,10 @@ class EncryptedInformationRepository
   final _deletes = <String, DeleteProposal>{};
   final _credentials = <ManagedCredential>[];
   final _credentialMaterials = <CredentialMaterial>[];
+  @override
+  Future<void> commitCredentialFieldMigration(
+    CredentialFieldMigration change,
+  ) => _migrateCredentialField(change);
   final _credentialUseRequests = <CredentialUseRequest>[];
   final _credentialExecutions = <CredentialExecution>[];
   @override

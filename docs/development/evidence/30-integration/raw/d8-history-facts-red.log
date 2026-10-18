@@ -1,0 +1,32 @@
+00:00 +0: loading test/credential_history_facts_test.dart
+00:00 +0 -1: loading test/credential_history_facts_test.dart [E]
+  Failed to load "test/credential_history_facts_test.dart":
+  test/credential_history_facts_test.dart:10:20: Error: The getter 'credentialName' isn't defined for the type 'CredentialUseRequest'.
+   - 'CredentialUseRequest' is from 'package:info_core/info_core.dart' ('lib/info_core.dart').
+  Try correcting the name to the name of an existing getter, or defining a getter or field named 'credentialName'.
+      expect(request.credentialName,'Synthetic');
+                     ^^^^^^^^^^^^^^
+  test/credential_history_facts_test.dart:14:17: Error: The getter 'decidedAt' isn't defined for the type 'CredentialUseRequest'.
+   - 'CredentialUseRequest' is from 'package:info_core/info_core.dart' ('lib/info_core.dart').
+  Try correcting the name to the name of an existing getter, or defining a getter or field named 'decidedAt'.
+      expect(fact.decidedAt,DateTime.utc(2026,10,18,8,2));
+                  ^^^^^^^^^
+  test/credential_history_facts_test.dart:19:17: Error: The getter 'credentialName' isn't defined for the type 'CredentialUseRequest'.
+   - 'CredentialUseRequest' is from 'package:info_core/info_core.dart' ('lib/info_core.dart').
+  Try correcting the name to the name of an existing getter, or defining a getter or field named 'credentialName'.
+      expect(fact.credentialName,'Synthetic');expect(fact.revokedAt,DateTime.utc(2026,10,18,8,5));
+                  ^^^^^^^^^^^^^^
+  test/credential_history_facts_test.dart:19:57: Error: The getter 'revokedAt' isn't defined for the type 'CredentialUseRequest'.
+   - 'CredentialUseRequest' is from 'package:info_core/info_core.dart' ('lib/info_core.dart').
+  Try correcting the name to the name of an existing getter, or defining a getter or field named 'revokedAt'.
+      expect(fact.credentialName,'Synthetic');expect(fact.revokedAt,DateTime.utc(2026,10,18,8,5));
+                                                          ^^^^^^^^^
+  test/credential_history_facts_test.dart:21:17: Error: The getter 'attemptedAt' isn't defined for the type 'CredentialUseRequest'.
+   - 'CredentialUseRequest' is from 'package:info_core/info_core.dart' ('lib/info_core.dart').
+  Try correcting the name to the name of an existing getter, or defining a getter or field named 'attemptedAt'.
+      expect(fact.attemptedAt,isNull);
+                  ^^^^^^^^^^^
+00:00 +0 -1: Some tests failed.
+
+Failing tests:
+  test/credential_history_facts_test.dart: loading test/credential_history_facts_test.dart

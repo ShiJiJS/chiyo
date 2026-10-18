@@ -384,6 +384,7 @@ class CredentialLaunchPlan {
   factory CredentialLaunchPlan.parse(
     Map<String, dynamic> j, {
     bool allowInternal = false,
+    bool allowPortablePaths = false,
   }) {
     _useShape(j, {'receiver', 'executable', 'argv', 'cwd', 'env'});
     final receiver = _useText(
@@ -406,7 +407,9 @@ class CredentialLaunchPlan {
       empty: false,
     );
     final cwd = _useText(j['cwd'], 'launch.cwd', max: 4096, empty: false);
-    bool absolute(String p) => Platform.isWindows
+    bool absolute(String p) => allowPortablePaths
+        ? p.startsWith('/') || RegExp(r'^[A-Za-z]:[/\\]').hasMatch(p)
+        : Platform.isWindows
         ? RegExp(r'^[A-Za-z]:[/\\]').hasMatch(p)
         : p.startsWith('/');
     if (!absolute(path) || !absolute(cwd)) {
@@ -501,7 +504,13 @@ class CredentialLaunchPlan {
       ..remove('executableIdentity')
       ..remove('sshTrustSnapshotId')
       ..remove('internalMaterialHashes');
-    final plan = CredentialLaunchPlan.parse(shape, allowInternal: true);
+    // Archived plans describe another device's past facts. Request parsing
+    // still requires this OS's absolute paths and runtime revalidates tools.
+    final plan = CredentialLaunchPlan.parse(
+      shape,
+      allowInternal: true,
+      allowPortablePaths: true,
+    );
     final resolved = plan.resolved(
       ExecutableIdentity.fromJson(
         j['executableIdentity'] as Map<String, dynamic>,
@@ -556,6 +565,11 @@ class CredentialUseRequest {
     this.executionId,
     this.attemptConsumed = false,
     this.invalidatedCode,
+    this.credentialName,
+    this.decidedAt,
+    this.revokedAt,
+    this.attemptedAt,
+    this.restoredAt,
   }) : fields = List.unmodifiable(fields),
        approvedFields = List.unmodifiable(approvedFields);
   final String id, chatLabel, purpose, alias, credentialId, state;
@@ -567,6 +581,9 @@ class CredentialUseRequest {
   final bool credentialApproved, attemptConsumed;
   final DateTime? credentialExpiresAt, fieldExpiresAt;
   final String? executionId, invalidatedCode;
+  final String? credentialName;
+  final DateTime? decidedAt, revokedAt, attemptedAt;
+  final DateTime? restoredAt;
   Map<String, Object?> toJson() => {
     'id': id,
     'chatLabel': chatLabel,
@@ -588,6 +605,11 @@ class CredentialUseRequest {
     'executionId': executionId,
     'attemptConsumed': attemptConsumed,
     'invalidatedCode': invalidatedCode,
+    'credentialName': credentialName,
+    'decidedAt': _useTimestamp(decidedAt),
+    'revokedAt': _useTimestamp(revokedAt),
+    'attemptedAt': _useTimestamp(attemptedAt),
+    if (restoredAt != null) 'restoredAt': _useTimestamp(restoredAt),
   };
   factory CredentialUseRequest.fromJson(Map<String, dynamic> j) =>
       CredentialUseRequest(
@@ -627,6 +649,19 @@ class CredentialUseRequest {
         executionId: j['executionId'] as String?,
         attemptConsumed: j['attemptConsumed'] as bool,
         invalidatedCode: j['invalidatedCode'] as String?,
+        credentialName: j['credentialName'] as String?,
+        decidedAt: j['decidedAt'] == null
+            ? null
+            : DateTime.parse(j['decidedAt'] as String),
+        revokedAt: j['revokedAt'] == null
+            ? null
+            : DateTime.parse(j['revokedAt'] as String),
+        attemptedAt: j['attemptedAt'] == null
+            ? null
+            : DateTime.parse(j['attemptedAt'] as String),
+        restoredAt: j['restoredAt'] == null
+            ? null
+            : DateTime.parse(j['restoredAt'] as String),
       );
   CredentialUseRequest changed(Map<String, Object?> values) =>
       CredentialUseRequest.fromJson({...toJson(), ...values});
@@ -658,6 +693,11 @@ class CredentialExecution {
     this.processCreatedAt,
     this.materialLease,
     this.jobName,
+    this.supervisorPid,
+    this.supervisorCreatedAt,
+    this.workerPid,
+    this.workerCreatedAt,
+    this.restoredAt,
   });
   final String id, requestId, state, cleanupState;
   final bool processStarted;
@@ -665,7 +705,12 @@ class CredentialExecution {
   final String? errorCode, processCreatedAt;
   final CredentialMaterialLease? materialLease;
   final String? jobName;
+  final int? supervisorPid;
+  final String? supervisorCreatedAt;
+  final int? workerPid;
+  final String? workerCreatedAt;
   final DateTime? startedAt, finishedAt;
+  final DateTime? restoredAt;
   Map<String, Object?> toJson() => {
     'protocolVersion': 1,
     'status': 'ok',
@@ -681,6 +726,7 @@ class CredentialExecution {
     'cleanupState': cleanupState,
     'outputAvailable': false,
     'outputTruncated': false,
+    if (restoredAt != null) 'restoredAt': _useTimestamp(restoredAt),
   };
   Map<String, Object?> toStorageJson() => {
     ...toJson(),
@@ -688,6 +734,10 @@ class CredentialExecution {
     'processCreatedAt': processCreatedAt,
     if (materialLease != null) 'materialLease': materialLease!.toPrivateJson(),
     if (jobName != null) 'jobName': jobName,
+    if (supervisorPid != null) 'supervisorPid': supervisorPid,
+    if (supervisorCreatedAt != null) 'supervisorCreatedAt': supervisorCreatedAt,
+    if (workerPid != null) 'workerPid': workerPid,
+    if (workerCreatedAt != null) 'workerCreatedAt': workerCreatedAt,
   };
   factory CredentialExecution.fromJson(Map<String, dynamic> j) =>
       CredentialExecution(
@@ -712,6 +762,13 @@ class CredentialExecution {
                 j['materialLease'] as Map<String, dynamic>,
               ),
         jobName: j['jobName'] as String?,
+        supervisorPid: j['supervisorPid'] as int?,
+        supervisorCreatedAt: j['supervisorCreatedAt'] as String?,
+        workerPid: j['workerPid'] as int?,
+        workerCreatedAt: j['workerCreatedAt'] as String?,
+        restoredAt: j['restoredAt'] == null
+            ? null
+            : DateTime.parse(j['restoredAt'] as String),
       );
   CredentialExecution changed(Map<String, Object?> values) =>
       CredentialExecution.fromJson({...toStorageJson(), ...values});
@@ -819,6 +876,7 @@ class CredentialExecutionMaterial {
     this.alias, [
     this.materialLease,
     Map<String, List<int>> internalMaterials = const {},
+    this.jobName,
   ]) : internalMaterials = Map.unmodifiable(
          internalMaterials.map(
            (key, value) => MapEntry(key, List<int>.unmodifiable(value)),
@@ -829,6 +887,7 @@ class CredentialExecutionMaterial {
   final CredentialMaterialValue credentialMaterial;
   final CredentialMaterialLease? materialLease;
   final Map<String, List<int>> internalMaterials;
+  final String? jobName;
   Map<String, Object?> toPrivateJson() => {
     'protocolVersion': 1,
     'status': 'ok',
@@ -837,6 +896,7 @@ class CredentialExecutionMaterial {
     'approvedPlan': approvedPlan.toJson(),
     'credentialMaterial': credentialMaterial.toPrivateJson(),
     'alias': alias,
+    if (jobName != null) 'jobName': jobName,
     if (materialLease != null) 'materialLease': materialLease!.toPrivateJson(),
     if (internalMaterials.isNotEmpty)
       'internalMaterials': internalMaterials.map(
@@ -864,6 +924,7 @@ class CredentialExecutionMaterial {
                   MapEntry(key as String, base64Decode(value as String)),
             ) ??
             const {},
+        j['jobName'] as String?,
       );
   @override
   String toString() => 'CredentialExecutionMaterial($executionId)';

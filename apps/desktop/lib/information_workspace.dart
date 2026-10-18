@@ -14,6 +14,7 @@ class InformationWorkspace extends StatefulWidget {
     this.initialCredentialId,
     this.focusRevision = 0,
     this.onOpenInformation,
+    this.onOpenUsageHistory,
     this.files = const NativeCredentialFilePicker(),
   });
   final OwnerAccess owner;
@@ -22,6 +23,7 @@ class InformationWorkspace extends StatefulWidget {
   final String? initialCredentialId;
   final int focusRevision;
   final ValueChanged<String>? onOpenInformation;
+  final ValueChanged<String>? onOpenUsageHistory;
   final CredentialFilePicker files;
   @override
   State<InformationWorkspace> createState() => _InformationWorkspaceState();
@@ -43,6 +45,11 @@ class _InformationWorkspaceState extends State<InformationWorkspace> {
   void didUpdateWidget(InformationWorkspace old) {
     super.didUpdateWidget(old);
     if (old.focusRevision != widget.focusRevision &&
+        widget.initialCredentialId != null) {
+      _credentialId = widget.initialCredentialId;
+      _credentialNavigation++;
+      _credentials = true;
+    } else if (old.focusRevision != widget.focusRevision &&
         widget.focusItemId != null) {
       _itemId = widget.focusItemId;
       _itemNavigation++;
@@ -86,6 +93,12 @@ class _InformationWorkspaceState extends State<InformationWorkspace> {
         files: widget.files,
         onInformationMode: () => setState(() => _credentials = false),
         onOpenInformation: _openInformation,
+        onOpenUsageHistory: widget.onOpenUsageHistory,
+        hasUsageRecords: (id) => widget.owner.credentialUseRequests.any(
+          (r) =>
+              r.credentialId == id &&
+              widget.owner.credentialUseState(r) != 'pending',
+        ),
       ),
     ],
   );

@@ -8,7 +8,7 @@ import '../../info_core/test/ssh_credential_use_test.dart' show knownHostBytes;
 
 void main() {
   test(
-    'schema15 upgrades without losing existing information, and format4 refuses to silently omit confirmed SSH trust',
+    'schema15 upgrades without losing existing information, and format5 restores confirmed SSH trust',
     () async {
       final folder = await Directory.systemTemp.createTemp(
         'ssh-trust-upgrade-',
@@ -46,19 +46,21 @@ void main() {
       );
       await repository.backups.enable();
       await repository.backups.saveRecoveryKeyTo('${folder.path}/recovery.txt');
-      await expectLater(
-        repository.backups.exportTo('${folder.path}/omitted.aimbackup'),
-        throwsA(
-          isA<StorageFailure>().having(
-            (e) => e.code,
-            'code',
-            'credentials_backup_not_supported',
-          ),
-        ),
-      );
-      expect(await File('${folder.path}/omitted.aimbackup').exists(), isFalse);
+      final recovery = (await repository.backups.recoveryKey())!;
+      await repository.backups.exportTo('${folder.path}/complete.aimbackup');
       await service.close();
       await repository.close();
+      final restored = await EncryptedInformationRepository.open(
+        '${folder.path}/restored',
+        TestKeyStore(),
+      );
+      await restored.backups.restoreFrom(
+        '${folder.path}/complete.aimbackup',
+        recovery,
+      );
+      expect(restored.sshHostTrust!.bytes, knownHostBytes());
+      expect(restored.sshHostTrust!.name, 'confirmed after upgrade');
+      await restored.close();
       repository = await EncryptedInformationRepository.open(folder.path, keys);
       service = InformationService(repository: repository);
       expect(service.owner.sshKnownHosts!.name, 'confirmed after upgrade');

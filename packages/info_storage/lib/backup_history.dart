@@ -428,6 +428,7 @@ extension _CompleteBackups on InformationBackups {
         table.key: table.value.toList(),
     };
     final cutoff = now.subtract(const Duration(days: 30));
+    _retainBackupCredentials(tables, cutoff);
     final purges = {
       for (final row in tables['revision_purge_facts']!)
         jsonEncode([row['item_id'], row['version']]),
@@ -473,6 +474,7 @@ extension _CompleteBackups on InformationBackups {
       }
     }
     final auditCutoff = now.subtract(Duration(days: days));
+    _retainBackupCredentialHistory(tables, auditCutoff, restored ? now : null);
     tables['grant_history']!.removeWhere(
       (row) => DateTime.fromMillisecondsSinceEpoch(
         row['approved_at'] as int,
@@ -609,7 +611,37 @@ extension _CompleteBackups on InformationBackups {
       for (final row in tables['settings']!)
         row['name'] as String: row['value'] as int,
     };
+    final credentials = tables['managed_credentials']!
+        .map((r) => ManagedCredential.fromJson(_backupJson(r)))
+        .toList();
+    final materials = tables['credential_materials']!
+        .map((r) => CredentialMaterial.fromStorageJson(_backupJson(r)))
+        .toList();
+    final trust = tables['ssh_host_trust']!.isEmpty
+        ? null
+        : SshHostTrustSnapshot.fromStorageJson(
+            _backupJson(tables['ssh_host_trust']!.single),
+          );
+    final useRequests = tables['credential_use_requests']!
+        .map((r) => CredentialUseRequest.fromJson(_backupJson(r)))
+        .toList();
+    final executions = tables['credential_executions']!
+        .map((r) => CredentialExecution.fromJson(_backupJson(r)))
+        .toList();
     return () {
+      _repository._credentialUseRequests
+        ..clear()
+        ..addAll(useRequests);
+      _repository._credentialExecutions
+        ..clear()
+        ..addAll(executions);
+      _repository._credentials
+        ..clear()
+        ..addAll(credentials);
+      _repository._credentialMaterials
+        ..clear()
+        ..addAll(materials);
+      _repository._sshHostTrust = trust;
       _repository._items
         ..clear()
         ..addEntries(items.map((v) => MapEntry(v.id, v)));

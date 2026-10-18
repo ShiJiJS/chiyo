@@ -22,8 +22,10 @@ def docker(*args):
     return p.stdout.strip()
 
 def main():
-    parser=argparse.ArgumentParser();mode=parser.add_mutually_exclusive_group();mode.add_argument('--native',action='store_true');mode.add_argument('--suite',action='store_true');mode.add_argument('--checks',action='store_true');parser.add_argument('--repeat',type=int,default=1);args=parser.parse_args()
+    parser=argparse.ArgumentParser();mode=parser.add_mutually_exclusive_group();mode.add_argument('--native',action='store_true');mode.add_argument('--suite',action='store_true');mode.add_argument('--checks',action='store_true');mode.add_argument('--package-output',type=Path);parser.add_argument('--repeat',type=int,default=1);parser.add_argument('--cli-executable',type=Path);parser.add_argument('--native-test',choices=['file_runtime_native_test.dart','hosted_runtime_native_test.dart'],default='file_runtime_native_test.dart');args=parser.parse_args()
     assert 1<=args.repeat<=3
+    assert not args.package_output or args.repeat==1
+    cli=(args.cli_executable or REPO/'.scratch/d7-aot/info.exe').resolve()
     runs=REPO/'.scratch/ssh-native-runs'
     runs.mkdir(parents=True,exist_ok=True)
     root=Path(tempfile.mkdtemp(prefix='synthetic-',dir=runs)).resolve()
@@ -42,27 +44,33 @@ def main():
         binding=docker('port',container,'2222/tcp')
         assert binding.startswith('127.0.0.1:')
         env=os.environ.copy()
-        material_temp=root/('materials' if args.suite or args.checks else '材料 空格');material_temp.mkdir()
+        material_temp=root/('materials' if args.suite or args.checks or args.package_output else '材料 空格');material_temp.mkdir()
         env.update({'D7_SSH_FIXTURE':str(output),'D7_SSH_PORT':binding.split(':')[-1],
           'TEMP':str(material_temp),'TMP':str(material_temp),
           'D7_SSH_EXE':str(Path(os.environ['SystemRoot'])/'System32/OpenSSH/ssh.exe')})
         dart=Path.home()/'.local/share/flutter/bin/cache/dart-sdk/bin/dart.exe'
         if args.native:
             flutter=Path.home()/'.local/share/flutter/bin/flutter.bat'
-            command=[str(flutter),'test','--no-pub','integration_test/file_runtime_native_test.dart','-d','windows',
-              '--dart-define=CLI_EXECUTABLE='+str(REPO/'.scratch/d7-aot/info.exe'),
+            command=[str(flutter),'test','--no-pub','integration_test/'+args.native_test,'-d','windows',
+              '--dart-define=CLI_EXECUTABLE='+str(cli),
               '--dart-define=SSH_EXECUTABLE='+env['D7_SSH_EXE'],'--dart-define=SSH_FIXTURE='+str(output),'--dart-define=SSH_FIXTURE_PORT='+env['D7_SSH_PORT']]
+            if args.native_test=='hosted_runtime_native_test.dart':
+                adapter=cli.parent/'info-codex.exe';worker=cli.parent/'info-runtime-worker.exe'
+                assert adapter.is_file() and worker.is_file()
+                command+=['--dart-define=CODEX_EXECUTABLE='+str(adapter),'--dart-define=WORKER_EXECUTABLE='+str(worker)]
             cwd=REPO/'apps/desktop'
         elif args.checks:
             command=['pwsh.exe','-NoProfile','-File',str(REPO/'scripts/check.ps1'),'-FlutterBin',str(Path.home()/'.local/share/flutter/bin'),'-Offline'];cwd=REPO
+        elif args.package_output:
+            command=['pwsh.exe','-NoProfile','-File',str(REPO/'scripts/package-windows.ps1'),'-FlutterBin',str(Path.home()/'.local/share/flutter/bin'),'-OutputDirectory',str(args.package_output.resolve()),'-Offline'];cwd=REPO
         else:
             command=[str(dart),'test',*([] if args.suite else ['test/ssh_receiver_native_test.dart'])];cwd=REPO/'packages/info_cli'
-        if args.suite or args.checks:
-            env['D6_COMPILED_CLI']=str(REPO/'.scratch/d7-aot/info.exe')
+        if args.suite or args.checks or args.package_output:
+            env['D6_COMPILED_CLI']=str(cli)
             assert Path(env['D6_COMPILED_CLI']).is_file()
             assert Path(env['D7_AWS_EXE']).is_file()
         for _ in range(args.repeat):
-            p=subprocess.run(command,cwd=cwd,env=env,timeout=240 if args.native else 180 if args.checks else 100)
+            p=subprocess.run(command,cwd=cwd,env=env,timeout=1200 if args.package_output else 240 if args.native else 180 if args.checks else 100)
             if p.returncode:break
     finally:
         try:

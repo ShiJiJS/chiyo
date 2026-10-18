@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:info_core/info_core.dart';
 import 'ui.dart';
@@ -6,6 +7,7 @@ import 'prototype_ui.dart';
 import 'settings_controls.dart';
 import 'settings.dart';
 import 'backups.dart';
+import 'credential_history.dart';
 
 class AuthorizationHistory extends StatefulWidget {
   const AuthorizationHistory({
@@ -15,6 +17,8 @@ class AuthorizationHistory extends StatefulWidget {
     this.initialRecordId,
     this.focusRevision = 0,
     this.refresh,
+    this.onOpenCredential,
+    this.visible = true,
   });
   final OwnerAccess owner;
   final VoidCallback? onOpenRecordSettings;
@@ -26,6 +30,8 @@ class AuthorizationHistory extends StatefulWidget {
   /// retains the current search, page and selection.
   final int focusRevision;
   final Listenable? refresh;
+  final ValueChanged<String>? onOpenCredential;
+  final bool visible;
   @override
   State<AuthorizationHistory> createState() => _AuthorizationHistoryState();
 }
@@ -41,6 +47,10 @@ class _HistoryEntry {
     this.request,
     this.organization,
     this.orphan,
+    this.use,
+    this.credentialActive = false,
+    this.fieldActive,
+    this.organizationActive = false,
   });
   final String id, title, chat;
   final DateTime at;
@@ -49,7 +59,14 @@ class _HistoryEntry {
   final RequestHistory? request;
   final OrganizationTask? organization;
   final AccessRecord? orphan;
-  bool get active => grant?.active ?? false;
+  final CredentialUseRequest? use;
+  final bool credentialActive;
+  final bool? fieldActive;
+  final bool organizationActive;
+  bool get active =>
+      organizationActive ||
+      credentialActive ||
+      (fieldActive ?? grant?.active ?? false);
   List<RecordedField> get fields =>
       grant?.fields ?? request?.fields ?? const [];
 }
@@ -63,11 +80,17 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
   bool _busy = false;
   bool _focusPending = true;
   bool _focusMissing = false;
+  Timer? _credentialRefresh;
   @override
   void initState() {
     super.initState();
     _history = widget.owner.history();
     widget.refresh?.addListener(_refresh);
+    _credentialRefresh = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (mounted && widget.visible && TickerMode.valuesOf(context).enabled) {
+        setState(() {});
+      }
+    });
   }
 
   @override
@@ -93,6 +116,7 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
   @override
   void dispose() {
     widget.refresh?.removeListener(_refresh);
+    _credentialRefresh?.cancel();
     _search.dispose();
     for (final c in _scrolls.values) {
       c.dispose();
@@ -130,8 +154,33 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
   List<_HistoryEntry> _entries(AuditHistory history) {
     final requests = {for (final r in history.requests) r.id: r};
     final grants = {for (final g in history.grants) g.id: g};
+    final uses = widget.owner.credentialUseRequests
+        .where((r) => widget.owner.credentialUseState(r) != 'pending')
+        .toList();
+    final useIds = uses.map((r) => r.id).toSet();
     final list = <_HistoryEntry>[
-      for (final grant in history.grants)
+      for (final r in uses)
+        _HistoryEntry(
+          id: r.id,
+          title: r.chatLabel,
+          chat: r.chatLabel,
+          at: r.decidedAt ?? r.createdAt,
+          until: r.credentialExpiresAt,
+          use: r,
+          credentialActive:
+              widget.owner.credentialGrantState(r) == 'available' ||
+              widget.owner.credentialExecutions.any(
+                (e) =>
+                    e.requestId == r.id &&
+                    {'preparing', 'running'}.contains(e.state),
+              ),
+          fieldActive: widget.owner.credentialFieldGrantState(r) == 'available',
+          grant: history.grants.where((g) => g.requestId == r.id).firstOrNull,
+          request: requests[r.id],
+        ),
+      for (final grant in history.grants.where(
+        (g) => !useIds.contains(g.requestId),
+      ))
         _HistoryEntry(
           id: grant.id,
           title: requests[grant.requestId]?.purpose ?? '未记录用途',
@@ -142,7 +191,7 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
           request: requests[grant.requestId],
         ),
       for (final r in history.requests.where(
-        (r) => !grants.containsKey(r.grantId),
+        (r) => !grants.containsKey(r.grantId) && !useIds.contains(r.id),
       ))
         _HistoryEntry(
           id: r.id,
@@ -160,6 +209,9 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
           at: task.approvedAt ?? task.createdAt,
           until: task.expiresAt,
           organization: task,
+          organizationActive:
+              widget.owner.organizationState(task) ==
+              OrganizationTaskState.active,
         ),
       for (final r in history.accesses.where(
         (r) => !grants.containsKey(r.grantId),
@@ -180,6 +232,13 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
   }
 
   String _state(_HistoryEntry e) {
+    if (e.use != null) {
+      return e.use!.executionId == null &&
+              !e.credentialActive &&
+              e.fieldActive == true
+          ? '字段有效'
+          : credentialHistoryState(widget.owner, e.use!);
+    }
     if (e.grant case final g?) {
       if (g.restoredAt != null) return '历史事实';
       return switch (g.events.last.kind) {
@@ -496,7 +555,11 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
                               children: [
                                 Expanded(
                                   child: _text(
-                                    '${e.chat} · ${e.organization != null ? '整理资料' : '${_reads(e, history)} 次访问'}',
+                                    '${e.chat} · ${e.use != null
+                                        ? '凭据使用'
+                                        : e.organization != null
+                                        ? '整理资料'
+                                        : '${_reads(e, history)} 次访问'}',
                                     12,
                                     color: c.muted,
                                   ),
@@ -941,6 +1004,19 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
   }
 
   Widget _document(_HistoryEntry e, AuditHistory history) {
+    if (e.use != null) {
+      return CredentialHistoryDocument(
+        key: ValueKey('history-use-${e.id}'),
+        owner: widget.owner,
+        request: e.use!,
+        fieldGrant: e.grant,
+        accesses: history.accesses
+            .where((a) => e.grant != null && a.grantId == e.grant!.id)
+            .toList(),
+        onChanged: _reload,
+        onOpenCredential: widget.onOpenCredential,
+      );
+    }
     final c = UiPalette.of(context);
     final scroll = _scrolls.putIfAbsent(
       '${e.id}-$_tab',
@@ -1194,13 +1270,18 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
       final filtered = all
           .where(
             (e) =>
-                (_filter == 0 ||
-                    (_filter == 1 ? _state(e) == '有效' : _state(e) != '有效')) &&
+                (_filter == 0 || (_filter == 1 ? e.active : !e.active)) &&
                 (needle.isEmpty ||
                     [
                       e.id,
                       e.title,
                       e.chat,
+                      if (e.use != null) ...[
+                        e.use!.credentialName ?? '',
+                        e.use!.credentialId,
+                        '凭据使用',
+                        e.use!.plan.receiver,
+                      ],
                       ...e.fields.map((f) => '${f.itemName} ${f.fieldName}'),
                     ].any((s) => s.toLowerCase().contains(needle))),
           )

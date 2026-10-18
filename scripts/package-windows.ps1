@@ -78,8 +78,13 @@ try {
             Invoke-Checked $dart @('compile', 'exe', '--target-os', 'windows', '--target-arch', 'x64', "bin/$($entry[0]).dart", '-o', (Join-Path $cli "$($entry[1]).exe"))
         }
     } finally { Pop-Location }
+    # One-shot adapters use the resident execution host in the desktop app.
+    # Its worker is a shipped asset next to the app, independent of SDK/PATH.
+    Copy-Item -LiteralPath (Join-Path $cli 'info-runtime-worker.exe') -Destination (Join-Path $app 'info-runtime-worker.exe')
     New-Item -ItemType Directory -Path (Join-Path $cli 'template') | Out-Null
     Copy-Item -LiteralPath 'integrations/codex/skills/agent-info-access/SKILL.md' -Destination (Join-Path $cli 'template/SKILL.md')
+    New-Item -ItemType Directory -Path (Join-Path $cli 'template/references') | Out-Null
+    Copy-Item -LiteralPath 'integrations/codex/skills/agent-info-access/references/credential-use.md' -Destination (Join-Path $cli 'template/references/credential-use.md')
 
     # This console probe uses only synthetic data in a newly created temp
     # directory and current-user DPAPI. It never opens the application database.

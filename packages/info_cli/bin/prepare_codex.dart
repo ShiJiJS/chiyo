@@ -26,6 +26,9 @@ Future<void> main(List<String> args) async {
       return;
     }
     final skill = await File('${source.path}/template/SKILL.md').readAsString();
+    final credentialUseReference = await File(
+      '${source.path}/template/references/credential-use.md',
+    ).readAsString();
     const binaries = [
       'info-codex.exe',
       'info-codex-hook.exe',
@@ -43,7 +46,12 @@ Future<void> main(List<String> args) async {
         await File('${source.path}/$name').copy('${staging.path}/$name');
       }
       // Render using the final directory, not the temporary staging directory.
-      await writeCodexConfiguration(staging, skill, finalDirectory: output);
+      await writeCodexConfiguration(
+        staging,
+        skill,
+        finalDirectory: output,
+        credentialUseReference: credentialUseReference,
+      );
       if (await FileSystemEntity.type(output.path, followLinks: false) !=
           FileSystemEntityType.notFound) {
         throw const FileSystemException();

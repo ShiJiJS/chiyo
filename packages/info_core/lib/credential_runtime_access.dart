@@ -116,6 +116,53 @@ extension _CredentialRuntimeService on InformationService {
 }
 
 extension CredentialRuntimeAgentAccess on AgentAccess {
+  Future<void> registerCredentialWorker(
+    String id,
+    String capability,
+    int workerPid,
+    String workerCreatedAt,
+  ) => _service.owner._serialize(() async {
+    final record = _service._runtimeRepository.credentialExecutions
+        .where((e) => e.id == id)
+        .firstOrNull;
+    if (_service._executionCapabilities[id] != capability || record == null) {
+      throw const CredentialUseFailure('session_mismatch');
+    }
+    if (record.state != 'preparing' ||
+        record.jobName == null ||
+        record.supervisorPid == null ||
+        record.supervisorCreatedAt == null ||
+        record.workerPid != null &&
+            (record.workerPid != workerPid ||
+                record.workerCreatedAt != workerCreatedAt)) {
+      throw const CredentialUseFailure('invalid_plan');
+    }
+    void validate() {
+      if (CredentialProcessIdentity.isActive(
+                record.supervisorPid!,
+                record.supervisorCreatedAt!,
+              ) !=
+              true ||
+          CredentialProcessIdentity.isActive(workerPid, workerCreatedAt) !=
+              true) {
+        throw const CredentialUseFailure('invalid_plan');
+      }
+      try {
+        CredentialProcessJob.observe(record.jobName!, workerPid).close();
+      } on Object {
+        throw const CredentialUseFailure('invalid_plan');
+      }
+    }
+
+    validate();
+    await _service._saveUse(
+      execution: record.changed({
+        'workerPid': workerPid,
+        'workerCreatedAt': workerCreatedAt,
+      }),
+      validate: validate,
+    );
+  });
   CredentialExecution credentialExecutionStatus(String session, String id) {
     final e = _service._runtimeRepository.credentialExecutions
         .where((e) => e.id == id)
@@ -186,6 +233,9 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
       throw const CredentialUseFailure('invalid_plan');
     }
     if (next == 'running') {
+      if (old.supervisorPid != null && old.workerPid == null) {
+        throw const CredentialUseFailure('invalid_plan');
+      }
       if (report.jobName != null &&
           !RegExp(
             r'^Local\\AgentInfoRuntime-[A-Za-z0-9_-]{32}$',
@@ -222,6 +272,10 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
       materialLease: old.materialLease,
       cleanupState: old.cleanupState,
       jobName: report.jobName ?? old.jobName,
+      supervisorPid: old.supervisorPid,
+      supervisorCreatedAt: old.supervisorCreatedAt,
+      workerPid: old.workerPid,
+      workerCreatedAt: old.workerCreatedAt,
     );
     await _service._saveUse(execution: changed);
     return changed;
@@ -283,6 +337,7 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
       purpose: input.purpose,
       alias: input.alias,
       credentialId: c.id,
+      credentialName: c.name,
       version: c.version,
       useGeneration: c.useGeneration,
       plan: launch.resolved(identity, cwd),
@@ -472,6 +527,7 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
         'decision': {
           'credentialUse': {
             'approved': r.credentialApproved,
+            'state': _service._useGrantState(r),
             if (r.credentialApproved) ...{
               'credentialId': r.credentialId,
               'version': r.version,
@@ -494,8 +550,10 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
 
   Future<CredentialExecutionMaterial> consumeCredentialUse(
     String session,
-    String id,
-  ) => _service.owner._serialize(() async {
+    String id, {
+    int? supervisorPid,
+    String? supervisorCreatedAt,
+  }) => _service.owner._serialize(() async {
     final r = _service._sessionUseRequest(session, id);
     if (r.attemptConsumed) {
       throw CredentialUseFailure(
@@ -517,13 +575,30 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
       throw const CredentialUseFailure('grant_expired');
     }
     final c = _service._useEligible(r);
+    if (supervisorPid != null || supervisorCreatedAt != null) {
+      if (supervisorPid == null ||
+          supervisorCreatedAt == null ||
+          CredentialProcessIdentity.isActive(
+                supervisorPid,
+                supervisorCreatedAt,
+              ) !=
+              true) {
+        throw const CredentialUseFailure('invalid_plan');
+      }
+    }
     final execution = CredentialExecution(
       id: _service._secret(),
       requestId: id,
+      supervisorPid: supervisorPid,
+      supervisorCreatedAt: supervisorCreatedAt,
+      jobName: supervisorPid == null
+          ? null
+          : 'Local\\AgentInfoRuntime-${_service._secret().substring(0, 32)}',
     );
     final changed = r.changed({
       'attemptConsumed': true,
       'executionId': execution.id,
+      'attemptedAt': _useTimestamp(_service._clock().toUtc()),
     });
     void validate() {
       if (!_service._sessionActive(session)) {
@@ -568,6 +643,7 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
         r.plan.receiver == 'ssh_identity'
             ? {'ssh_known_hosts': _service._sshHostTrust!.bytes}
             : const {},
+        execution.jobName,
       );
     } on Object catch (e) {
       _service._executionCapabilities.remove(execution.id);
@@ -595,6 +671,9 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
             finishedAt: _service._clock().toUtc(),
             materialLease: lease,
             cleanupState: cleanup,
+            jobName: execution.jobName,
+            supervisorPid: execution.supervisorPid,
+            supervisorCreatedAt: execution.supervisorCreatedAt,
           ),
         );
       } on Object {
@@ -622,6 +701,23 @@ extension CredentialRuntimeOwnerAccess on OwnerAccess {
       _service._useState(request);
   String credentialGrantState(CredentialUseRequest request) =>
       _service._useGrantState(request);
+
+  /// Current permission, independently from the immutable recorded decision.
+  /// This reads the live authorization model without writing/pruning history.
+  String credentialFieldGrantState(CredentialUseRequest request) {
+    if (request.approvedFields.isEmpty) return 'not_approved';
+    if (request.fieldExpiresAt == null ||
+        !_service._clock().isBefore(request.fieldExpiresAt!)) {
+      return 'expired';
+    }
+    final active = _service._requests[request.id];
+    return request.approvedFields.any(
+          (field) => _service._canRead(active, field),
+        )
+        ? 'available'
+        : 'revoked';
+  }
+
   void checkCredentialUseEligibility(CredentialUseRequest request) {
     _service._useEligible(request);
   }
@@ -632,7 +728,10 @@ extension CredentialRuntimeOwnerAccess on OwnerAccess {
       throw const CredentialUseFailure('request_terminal');
     }
     await _service._saveUse(
-      request: r.changed({'invalidatedCode': 'grant_revoked'}),
+      request: r.changed({
+        'invalidatedCode': 'grant_revoked',
+        'revokedAt': _useTimestamp(_service._clock().toUtc()),
+      }),
     );
   });
   Future<void> decideCredentialUse(
@@ -669,6 +768,7 @@ extension CredentialRuntimeOwnerAccess on OwnerAccess {
         : 'partially_approved';
     final changed = r.changed({
       'state': state,
+      'decidedAt': _useTimestamp(now),
       'credentialApproved': approveCredential,
       'approvedFields': fields.map((f) => f.toJson()).toList(),
       'credentialExpiresAt': approveCredential

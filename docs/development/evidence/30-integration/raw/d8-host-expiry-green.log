@@ -1,0 +1,8 @@
+00:00 +0: loading test/hosted_credential_execution_test.dart
+00:00 +0: resident output expiry preserves active work and durable facts but does not retain completed output after thirty minutes
+00:00 +1: the resident limit is global across sessions, preserves running tasks, and evicts only finished output
+00:02 +2: an unavailable resident host never falls back to local execution or consumes the approved attempt
+00:02 +3: closing a host during worker availability inspection rejects the launch before consuming its attempt
+00:02 +4: separate actual Codex adapter processes start and query one hosted task without losing output or repeating approval
+00:07 +5: a hosted task survives its calling client closing and another call retrieves the same authorized output
+00:07 +6: All tests passed!

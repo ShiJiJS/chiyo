@@ -72,6 +72,8 @@ argv 项只能是字符串或恰含 `file` 的对象；env 值只能是字符串
 
 若 `credentialUse.approved:true`，还包含 `credentialId,version,expiresAt,maxAttempts:1,attemptsConsumed:0`。两项均未批准只允许 `denied`，不能返回部分批准。组合字段期限默认跟随15/30分钟启动窗口，两个精确到期时间分别显示；独立字段申请仍默认8小时。`claim` 对组合申请只领取实际批准的 fieldRead，响应沿用既有 fields/expiresAt；不批准字段返回 `scope_not_approved`。`read` 不改变使用额度；准备/启动失败不撤销字段许可。
 
+`decision.credentialUse.state` 表示当前使用许可：`not_approved|available|consumed|revoked|expired|version_invalidated`。`approved`保留当时决定，撤销/到期后不会改写成“过去未批准”；新启动还须当前state为available并由Core再次核对。`partially_approved`不能单独说明哪一项获准。
+
 `{"command":"run-use","requestId":"use-024"}` 恰含这两个字段，不接受新 launch/version/env。私密会话的内部请求先事务核对请求已批准、会话活跃、未到期/撤销、当前凭据版本可用和计划完整，再将一次尝试从 available 改 consumed，创建 execution。原子占用和执行记录任一审计写入失败均回滚，返回 `audit_unavailable`，不交付秘密。成功响应：
 
 ```json
@@ -83,6 +85,8 @@ argv 项只能是字符串或恰含 `file` 的对象；env 值只能是字符串
 ### 内部私有领取边界（不属于通用 JSON CLI）
 
 AgentClient 经本机 loopback `POST /credential-use/consume` 发送 `sessionSecret,requestId`，服务原子占用并返回 `executionId,executionCapability,approvedPlan,credentialMaterial`。材料仅含恰好一个已批版本，字符串原文或 base64 文件字节；HTTP 原始响应不得返回给 execute() 调用者、stdout、debug logger 或异常消息。服务监听沿用现有本机服务，仍需私密证明，不凭来源IP授权；库密钥不交给CLI。
+
+默认Windows执行器还发送`supervisorPid,supervisorCreatedAt`成对私有字段；Core核对实际存活身份，在占用事务中生成并保存随机私有Job名，私有材料DTO携带该Job名。worker加入Job后等待，宿主持执行capability向`/credential-use/worker/register`提交`executionId,executionCapability,workerPid,workerCreatedAt`；Core核对原宿主仍存活、worker实际身份及Job成员关系并保存后才放行启动。确认前断开不启动。登记仅进私有存储，公开状态和备份不带PID/创建身份/Job名；参见ADR0009。
 
 CLI 在受管目录建立执行日志（只有executionId、文件身份、进程身份、清理状态；无原文/证明），使用 `POST /credential-use/execution/report` 持 `executionCapability` 报告准备/启动/退出/清理状态。capability 只能更新这个执行的允许状态，不能再次领取或启动其他执行；结束会话/撤销后可继续上报已启动执行的退出与清理，不因此恢复普通访问。服务核对状态单调、子进程身份与受管文件身份，不接受任意路径删除指令。内部 `/credential-use/execution/status` 使用会话证明查询所属执行；桌面 owner API 可读全部非秘密记录。接口各自输入输出应有专门 DTO；不能把 credentials/material 混入通用 Map 后靠 remove() 黑名单过滤。
 
@@ -96,6 +100,8 @@ CLI 在受管目录建立执行日志（只有executionId、文件身份、进�
 
 所有时间和 exitCode 在未知/未发生时为 null。`executionState`: `preparing|running|exited|prepare_failed|start_failed|unknown`；exited 用 exitCode区分成功/失败。`cleanupState`: `not_needed|pending|complete|failed|needs_check`。`processStarted` 只有执行器收到 OS 创建成功事实才为true。请求状态、使用许可、执行和清理四个维度分开；文件清理失败不能把非零退出改为成功，Token 使用是 not_needed，不能画成“SSH文件已清理”。
 
+备份格式5恢复的Owner历史可附可选UTC时间`restoredAt`，只说明这份事实何时恢复；没有原私密会话/能力，Agent不能据编号领取或重新启动。原preparing/running事实恢复为unknown，不补造退出码或结束时间；本机不恢复原设备运行材料、进程身份或输出。普通当前运行响应不因此新增必填字段，申请输入schema保持不变。
+
 `{"command":"execution-output","executionId":"exec-024","cursor":0,"limit":16}`：cursor为下一个 chunk序号（0起），limit1–16，默认16。仅查询当前 CLI 内存缓冲，不把输出传回服务或写库；其他CLI进程即使获准查询历史也返回 `output_unavailable`。响应：
 
 ```json
@@ -107,6 +113,8 @@ CLI 在受管目录建立执行日志（只有executionId、文件身份、进�
 `{"command":"cleanup-use","executionId":"exec-024"}` 只重试已登记材料清理，绝不执行命令。服务与执行器核对同会话/执行身份，返回 `status:ok,executionId,cleanupState`；仍有活动身份或路径不匹配时 `cleanup_busy|cleanup_identity_mismatch`，保留登记并给owner操作指引。没有文件时返回 not_needed。文件owner-only权限（Windows仅当前用户及必要系统主体；Unix0600目录0700），拒绝 symlink/reparse point；相同别名复用同一副本。退出后等待受管进程树确定结束再清理，不把父进程退出等于后代都结束。不能确定后代身份时 needs_check，保留失败事实，禁止盲删用户文件。
 
 CLI stdin EOF：停止接收新命令，保持执行监护和清理直到已启动受管进程树结束；**不结束共享授权会话**，普通CLI退出不等于Codex聊天结束。只有既有可信生命周期适配器明确结束会话才撤销其许可，不把stdout管道关闭等于完成。CLI崩溃/被强杀/服务重启：受信桌面owner/后台在下次启动核查已登记执行和材料，依据服务内登记、路径/文件身份及进程创建时间等事实决定清理；本地无秘密journal不是权限证明，不能据此恢复启动许可。能核实进程树仍活跃则保留，无法核实标 unknown/needs_check；不重放、不将未知标成功。服务重启使未消费能力失效。CLI内存输出丢失返回 output_unavailable，桌面仅显示执行事实。撤销/到期不自动杀进程；用户若需终止已运行进程需用系统工具，本版无“撤销即杀进程”。
+
+上述EOF规则针对持续通用JSON-lines CLI。逐次Codex适配器只转发本机`/credential-use/hosted`的运行/状态/输出/清理命令，持续执行器由应用托管，因此单个适配器退出不会丢失该执行的内存输出。全局最多16项、各自原有4MiB上限；运行中不驱逐，已结束项可腾出容量且30分钟后淘汰。宿主缺失不回退为另一条执行路径；运行响应不确定先查原requestId。应用宿主退出会丢失内存输出，外部worker仍保持已启动程序的进程组与管道排空；重开后保留执行事实并核查清理，不恢复输出或启动许可。
 
 ## 错误码与重试
 

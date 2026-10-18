@@ -166,12 +166,14 @@ class _InformationAppState extends State<InformationApp>
   int _libraryRevision = 0;
   final _visited = <int>{0};
   String? _focusedInformationId;
+  String? _focusedCredentialId;
   int _informationFocusRevision = 0;
   String? _focusedHistoryId;
   int _historyFocusRevision = 0;
   void _openInformation(String id) {
     setState(() {
       _focusedInformationId = id;
+      _focusedCredentialId = null;
       _informationFocusRevision++;
       _visited.add(1);
     });
@@ -185,6 +187,29 @@ class _InformationAppState extends State<InformationApp>
       _visited.add(3);
     });
     _tabs.index = 3;
+  }
+
+  void _openCredential(String id) {
+    setState(() {
+      _focusedCredentialId = id;
+      _focusedInformationId = null;
+      _informationFocusRevision++;
+      _visited.add(1);
+    });
+    _tabs.index = 1;
+  }
+
+  void _openCredentialHistory(String id) {
+    final requests =
+        widget.service.owner.credentialUseRequests
+            .where(
+              (r) =>
+                  r.credentialId == id &&
+                  widget.service.owner.credentialUseState(r) != 'pending',
+            )
+            .toList()
+          ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    if (requests.isNotEmpty) _openOrganizationGrant(requests.first.id);
   }
 
   final _approvalsKey = GlobalKey<ApprovalsState>();
@@ -296,8 +321,10 @@ class _InformationAppState extends State<InformationApp>
                       owner: widget.service.owner,
                       refresh: _tabs,
                       focusItemId: _focusedInformationId,
+                      initialCredentialId: _focusedCredentialId,
                       focusRevision: _informationFocusRevision,
                       onOpenInformation: _openInformation,
+                      onOpenUsageHistory: _openCredentialHistory,
                       files: widget.credentialFiles,
                     ),
                     ImportProposalsPage(
@@ -307,10 +334,12 @@ class _InformationAppState extends State<InformationApp>
                       onOpenOrganizationGrant: _openOrganizationGrant,
                     ),
                     AuthorizationHistory(
+                      visible: _tabs.index == 3,
                       key: ValueKey(_libraryRevision),
                       owner: widget.service.owner,
                       onOpenRecordSettings: _openRecordSettings,
                       initialRecordId: _focusedHistoryId,
+                      onOpenCredential: _openCredential,
                       focusRevision: _historyFocusRevision,
                       refresh: _tabs,
                     ),

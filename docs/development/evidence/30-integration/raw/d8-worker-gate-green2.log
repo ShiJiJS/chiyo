@@ -1,0 +1,4 @@
+00:00 +0: loading test/worker_start_gate_test.dart
+00:00 +0: worker waits for durable registration and does not start when the supervisor disconnects
+00:00 +1: worker waits for durable registration and starts after acknowledgement
+00:02 +2: All tests passed!

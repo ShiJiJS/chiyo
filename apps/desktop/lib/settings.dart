@@ -155,7 +155,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
               ),
               SettingsNotice(
-                '将清理 ${preview.grants} 条授权、${preview.accesses} 条访问记录、${preview.requests} 条请求记录、${preview.organizations} 条已结束整理记录',
+                '将清理 ${preview.grants} 条授权、${preview.accesses} 条访问记录、${preview.requests} 条请求记录、${preview.organizations} 条已结束整理记录${preview.credentialRequests == 0 && preview.credentialExecutions == 0 ? '' : '、${preview.credentialRequests} 条凭据使用申请及 ${preview.credentialExecutions} 条执行记录'}',
                 '清理后无法从本机找回，信息库内容不受影响。',
                 warning: true,
                 icon: PrototypeIconGlyph.clock,

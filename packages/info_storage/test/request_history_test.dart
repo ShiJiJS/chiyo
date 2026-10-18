@@ -105,7 +105,7 @@ void main() {
         '${folder.path}/backup.aim',
         key,
       );
-      expect(snapshot.formatVersion, 4);
+      expect(snapshot.formatVersion, 5);
       await target.owner.restoreLibrary(
         () => recipient.backups.restore(snapshot),
       );

@@ -9,6 +9,31 @@ class CredentialProcessIdentity {
   CredentialProcessIdentity._(this.value, this._handle);
   final String value;
   int? _handle;
+
+  /// false is a confirmed ended or different process; null is inconclusive.
+  static bool? isActive(int processId, String createdAt) {
+    if (!Platform.isWindows || processId < 1) return null;
+    final handle = _openProcess(0x1000 | 0x100000, 0, processId);
+    final error = _lastError();
+    if (handle == 0) return error == 87 ? false : null;
+    final times = calloc<Uint64>(4);
+    try {
+      if (_getProcessTimes(handle, times, times + 1, times + 2, times + 3) ==
+          0) {
+        return null;
+      }
+      if ('windows:${times.value}' != createdAt) return false;
+      return switch (_waitProcess(handle, 0)) {
+        0 => false,
+        258 => true,
+        _ => null,
+      };
+    } finally {
+      calloc.free(times);
+      _closeHandle(handle);
+    }
+  }
+
   static CredentialProcessIdentity? capture(int processId) {
     if (Platform.isWindows) {
       final handle = _openProcess(0x1000, 0, processId);
@@ -92,6 +117,13 @@ final _closeHandle =
     ) ??
     _unavailableClose;
 int _unavailableClose(int _) => 0;
+final _waitProcess =
+    _kernel?.lookupFunction<
+      Uint32 Function(IntPtr, Uint32),
+      int Function(int, int)
+    >('WaitForSingleObject') ??
+    _unavailableWait;
+int _unavailableWait(int _, int _) => 0xffffffff;
 
 /// A worker joins this job before creating the approved program. Windows then
 /// associates its descendants with the same job, including detached children.
@@ -105,7 +137,9 @@ class CredentialProcessJob {
   /// null means inspection was inconclusive; never infer termination from it.
   static bool? isActive(String name) {
     if (!Platform.isWindows ||
-        !RegExp(r'^Local\\AgentInfoRuntime-[A-Za-z0-9_-]{32}$').hasMatch(name)) {
+        !RegExp(
+          r'^Local\\AgentInfoRuntime-[A-Za-z0-9_-]{32}$',
+        ).hasMatch(name)) {
       return null;
     }
     final native = name.toNativeUtf16();

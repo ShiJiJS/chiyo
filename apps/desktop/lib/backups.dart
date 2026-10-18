@@ -58,7 +58,7 @@ class NativeBackupFilePicker extends BackupFilePicker {
 String _backupFailure(Object error) => switch (error) {
   StorageFailure(code: 'output_exists') => '所选文件已存在，请选择新的文件名，原文件未覆盖。',
   StorageFailure(code: 'recipient_not_empty') =>
-    '当前信息库已有资料、提案或历史记录，不能覆盖或合并恢复。请在独立空库操作。',
+    '当前信息库已有信息、凭据、回收对象、提案或历史记录，不能覆盖或合并恢复。请在独立空库操作。',
   StorageFailure(code: 'invalid_recovery_key') => '恢复密钥文件格式不正确，请选择独立另存的完整密钥。',
   StorageFailure(code: 'invalid_backup') => '恢复密钥不匹配、文件损坏或备份内容无效。当前信息库未改变。',
   StorageFailure(code: 'unsupported_backup') => '此备份格式或版本不受支持，当前信息库未改变。',
@@ -210,7 +210,7 @@ class _BackupLibraryState extends State<BackupLibrary> {
           '恢复到空的信息库',
           _empty
               ? '当前信息库为空，可以选择备份和恢复密钥，核对预览后恢复。'
-              : '当前信息库中有 ${widget.owner.information.length} 条信息，暂时不能恢复。\n资料、提案或历史记录使目标库非空，不能覆盖或合并恢复。',
+              : '当前信息库非空，暂时不能恢复。\n信息、独立凭据、回收对象、提案或历史记录均不能覆盖或合并恢复。',
           control: settingsAction(context, '查看恢复步骤', _busy ? null : _open),
           bottomPadding: 23,
         ),
@@ -468,7 +468,11 @@ class _BackupFlowDialogState extends State<BackupFlowDialog> {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _paragraph('使用独立恢复密钥加密备份。信息、设置和保留期内旧版本入备份；临时授权、待处理请求和运行材料不入备份。'),
+        _paragraph(
+          '使用独立恢复密钥加密备份。包含信息、设置、托管凭据及保留期内秘密版本和回收对象、关联、SSH 主机信任与历史事实；临时授权、待处理请求、运行材料和输出不入备份。',
+        ),
+        const SizedBox(height: 10),
+        _paragraph('备份中含秘密原文，请与恢复密钥分开保管。删除或转换当前内容，不会擦除已经导出的离线备份。'),
         if (_saved)
           Padding(
             // The saved-key result is a 14px status block, not a section h3.
@@ -563,7 +567,13 @@ class _BackupFlowDialogState extends State<BackupFlowDialog> {
           ),
           const SizedBox(height: 12),
           _paragraph(
-            '备份格式 ${p.formatVersion}；历史按原时间与保留期限恢复，只表示过去事实。不会恢复活动会话、待审批、授权凭证、整理任务或整理结果。',
+            p.formatVersion < 5
+                ? '旧格式不含托管凭据及其使用历史。'
+                : '凭据对象 ${p.credentialCount} 项（含回收对象或删除后的非秘密记录），秘密版本 ${p.credentialVersionCount} 份，SSH 主机信任 ${p.sshTrustCount} 份，凭据使用历史 ${p.credentialUseHistoryCount} 条，启动事实 ${p.credentialExecutionCount} 条。',
+          ),
+          const SizedBox(height: 12),
+          _paragraph(
+            '备份格式 ${p.formatVersion}；保留对象状态，到期按当前时间判断。历史只表示过去事实，不会恢复有效使用许可、活动会话、待审批、授权凭证、运行文件、输出、整理任务或整理结果。',
           ),
           const SizedBox(height: 15),
           settingsAction(

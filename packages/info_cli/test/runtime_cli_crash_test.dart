@@ -134,6 +134,17 @@ Future<void> main() async {
         reason:
             'Worker must discard output after its CLI pipe closes and continue draining the approved process.',
       );
+      await h.service.owner.reconcileCredentialMaterialCleanup();
+      final recovered = h.service.owner.credentialExecutions.single;
+      expect(recovered.state, 'unknown');
+      expect(recovered.processStarted, isTrue);
+      expect(recovered.exitCode, isNull);
+      expect(recovered.jobName, isNotNull);
+      expect(CredentialProcessJob.isActive(recovered.jobName!), isTrue);
+      expect(
+        h.service.owner.credentialUseRequests.single.attemptConsumed,
+        isTrue,
+      );
       await release.writeAsString('release');
     },
     skip: !Platform.isWindows || compiled == null,

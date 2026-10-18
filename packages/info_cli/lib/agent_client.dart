@@ -13,10 +13,22 @@ class AgentClient {
     String? sessionSecret,
     this.sourceAgent = '通用 CLI',
     CredentialProcessStarter? credentialProcessStarter,
+    this.hostedCredentialExecutions = false,
+    String? runtimeWorkerExecutable,
   }) : _session = sessionSecret,
+       _runtimeWorkerExecutable = runtimeWorkerExecutable,
        _usesDefaultCredentialStarter = credentialProcessStarter == null,
        _credentialProcessStarter =
-           credentialProcessStarter ?? _startCredentialProcess;
+           credentialProcessStarter ??
+           ((exe, argv, cwd, env) => _startCredentialProcess(
+             exe,
+             argv,
+             cwd,
+             env,
+             workerExecutable: runtimeWorkerExecutable,
+           ));
+  final bool hostedCredentialExecutions;
+  final String? _runtimeWorkerExecutable;
   final CredentialProcessStarter _credentialProcessStarter;
   final bool _usesDefaultCredentialStarter;
   late final _credentialExecutions = _CredentialRuntimeExecutor(this);

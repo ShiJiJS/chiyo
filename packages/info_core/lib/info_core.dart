@@ -37,10 +37,12 @@ part 'backup_access.dart';
 part 'workspace_access.dart';
 part 'library_access.dart';
 part 'credential_access.dart';
+part 'credential_field_migration.dart';
 part 'credential_runtime_models.dart';
 part 'credential_runtime_access.dart';
 part 'credential_file_receivers.dart';
 part 'credential_material_access.dart';
+part 'credential_history_access.dart';
 part 'ssh_host_trust.dart';
 part 'proposal_access.dart';
 

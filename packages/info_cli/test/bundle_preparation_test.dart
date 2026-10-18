@@ -21,6 +21,13 @@ void main() {
       await File(
         '${repo.path}/integrations/codex/skills/agent-info-access/SKILL.md',
       ).copy('${template.path}/SKILL.md');
+      await Directory('${template.path}/references').create();
+      final credentialReference = File(
+        '${repo.path}/integrations/codex/skills/agent-info-access/references/credential-use.md',
+      );
+      await credentialReference.copy(
+        '${template.path}/references/credential-use.md',
+      );
       for (final name in [
         'info-codex',
         'info-codex-hook',
@@ -97,6 +104,12 @@ void main() {
         '$output/skills/agent-info-access/SKILL.md',
       ).readAsString();
       expect(skill, contains('$output/info-codex.exe'));
+      expect(
+        await File(
+          '$output/skills/agent-info-access/references/credential-use.md',
+        ).readAsString(),
+        await credentialReference.readAsString(),
+      );
       final refused = await prepare();
       expect(refused.exitCode, 64);
       expect(await configFile.readAsString(), configBefore);

@@ -1,0 +1,19 @@
+00:00 +0: loading test/hosted_credential_execution_test.dart
+00:00 +0: test/hosted_credential_execution_test.dart: an unavailable resident host never falls back to local execution or consumes the approved attempt
+00:00 +1: test/credential_runtime_test.dart: an OS start failure consumes the attempt without claiming process creation or retrying
+00:00 +2: test/credential_runtime_test.dart: an OS start failure consumes the attempt without claiming process creation or retrying
+00:00 +3: test/file_credential_runtime_test.dart: a locked credential file reports cleanup failure independently from exit7, then retries cleanup without replay
+00:00 +4: test/file_credential_runtime_test.dart: a locked credential file reports cleanup failure independently from exit7, then retries cleanup without replay
+00:00 +5: test/file_credential_runtime_test.dart: a locked credential file reports cleanup failure independently from exit7, then retries cleanup without replay
+00:00 +6: test/file_credential_runtime_test.dart: a locked credential file reports cleanup failure independently from exit7, then retries cleanup without replay
+00:01 +7: test/file_json_lines_test.dart: a real CLI accepts the owner-registered Unicode material path even when its TEMP differs from the desktop
+00:02 +8: test/file_json_lines_test.dart: a real CLI accepts the owner-registered Unicode material path even when its TEMP differs from the desktop
+00:03 +9: test/hosted_credential_execution_test.dart: separate actual Codex adapter processes start and query one hosted task without losing output or repeating approval
+00:05 +10: test/credential_runtime_test.dart: sixteen active executions reject the next attempt before consuming its permission
+00:05 +11: test/credential_runtime_test.dart: sixteen active executions reject the next attempt before consuming its permission
+00:05 +12: test/credential_runtime_test.dart: real output is limited to the first 4 MiB and is unavailable from another CLI process context
+00:06 +13: test/credential_runtime_test.dart: worker crash preserves monitoring until the remaining tree ends and records unknown
+00:07 +14: test/credential_runtime_test.dart: production starter monitors a detached descendant after the approved parent exits
+00:08 +15: test/credential_runtime_test.dart: a transient running audit failure does not stop monitoring a live process
+00:09 +16: test/credential_runtime_test.dart: private Token material launches a real controlled process and exposes only bounded execution events
+00:09 +17: All tests passed!

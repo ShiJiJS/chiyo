@@ -335,7 +335,7 @@ void main() {
       await File(path).copy(malformed);
       final malformedDb = sqlite3.open(malformed);
       malformedDb.execute('PRAGMA key = "x\'$hex\'"');
-      payload['version'] = 1;
+      payload['version'] = 5;
       (payload['tables']['information_fields'] as List).single['kind'] =
           'unknown';
       malformedDb.execute('UPDATE backup_snapshot SET payload=?', [

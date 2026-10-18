@@ -1,0 +1,27 @@
+00:00 +0: loading test/credential_field_state_test.dart
+00:00 +0 -1: loading test/credential_field_state_test.dart [E]
+  Failed to load "test/credential_field_state_test.dart":
+  test/credential_field_state_test.dart:18:26: Error: The method 'credentialFieldGrantState' isn't defined for the type 'OwnerAccess'.
+   - 'OwnerAccess' is from 'package:info_core/info_core.dart' ('lib/info_core.dart').
+  Try correcting the name to the name of an existing method, or defining a method named 'credentialFieldGrantState'.
+      expect(service.owner.credentialFieldGrantState(r),'available');
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  test/credential_field_state_test.dart:20:26: Error: The method 'credentialFieldGrantState' isn't defined for the type 'OwnerAccess'.
+   - 'OwnerAccess' is from 'package:info_core/info_core.dart' ('lib/info_core.dart').
+  Try correcting the name to the name of an existing method, or defining a method named 'credentialFieldGrantState'.
+      expect(service.owner.credentialFieldGrantState(r),'available');
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  test/credential_field_state_test.dart:23:26: Error: The method 'credentialFieldGrantState' isn't defined for the type 'OwnerAccess'.
+   - 'OwnerAccess' is from 'package:info_core/info_core.dart' ('lib/info_core.dart').
+  Try correcting the name to the name of an existing method, or defining a method named 'credentialFieldGrantState'.
+      expect(service.owner.credentialFieldGrantState(r),'revoked');
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  test/credential_field_state_test.dart:25:26: Error: The method 'credentialFieldGrantState' isn't defined for the type 'OwnerAccess'.
+   - 'OwnerAccess' is from 'package:info_core/info_core.dart' ('lib/info_core.dart').
+  Try correcting the name to the name of an existing method, or defining a method named 'credentialFieldGrantState'.
+      expect(service.owner.credentialFieldGrantState(expiring),'expired');
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^
+00:00 +0 -1: Some tests failed.
+
+Failing tests:
+  test/credential_field_state_test.dart: loading test/credential_field_state_test.dart

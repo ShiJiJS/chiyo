@@ -227,6 +227,7 @@ extension OwnerAuditAccess on OwnerAccess {
     }
     final current = await history();
     final cutoff = _service._clock().subtract(Duration(days: days));
+    final credentialIds = _service._credentialHistoryPruneIds(cutoff);
     final preview = AuditRetentionPreview(
       days,
       current.grants.where((g) => g.approvedAt.isBefore(cutoff)).length,
@@ -240,6 +241,13 @@ extension OwnerAuditAccess on OwnerAccess {
                 (t.approvedAt ?? t.createdAt).isBefore(cutoff),
           )
           .length,
+      credentialIds.length,
+      _service._repository is CredentialRuntimeRepository
+          ? (_service._repository as CredentialRuntimeRepository)
+                .credentialExecutions
+                .where((e) => credentialIds.contains(e.requestId))
+                .length
+          : 0,
     );
     _service._retentionPreview = preview;
     return preview;
@@ -261,6 +269,9 @@ extension OwnerAuditAccess on OwnerAccess {
     _service._retentionPreview = null;
     await _service._repository.writeSetting('auditRetentionDays', days);
     await history();
+    await _service._pruneCredentialUseHistory(
+      _service._clock().subtract(Duration(days: days)),
+    );
   });
 
   Future<void> revokeFromHistory(String grantId) async {

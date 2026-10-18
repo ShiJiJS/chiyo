@@ -1,0 +1,13 @@
+Analyzing info_core, info_cli...
+
+   info - packages\info_cli\lib\credential_runtime_client.dart:706:19 - Statements in an if should be enclosed in a block. Try wrapping the statement in a block. - curly_braces_in_flow_control_structures
+   info - packages\info_cli\lib\credential_runtime_client.dart:716:21 - Statements in an if should be enclosed in a block. Try wrapping the statement in a block. - curly_braces_in_flow_control_structures
+   info - packages\info_cli\test\worker_start_gate_test.dart:41:11 - Statements in an if should be enclosed in a block. Try wrapping the statement in a block. - curly_braces_in_flow_control_structures
+   info - packages\info_core\lib\agent_server.dart:233:11 - Statements in an if should be enclosed in a block. Try wrapping the statement in a block. - curly_braces_in_flow_control_structures
+   info - packages\info_core\lib\credential_runtime_access.dart:129:7 - Statements in an if should be enclosed in a block. Try wrapping the statement in a block. - curly_braces_in_flow_control_structures
+   info - packages\info_core\lib\credential_runtime_access.dart:137:7 - Statements in an if should be enclosed in a block. Try wrapping the statement in a block. - curly_braces_in_flow_control_structures
+   info - packages\info_core\lib\credential_runtime_access.dart:146:9 - Statements in an if should be enclosed in a block. Try wrapping the statement in a block. - curly_braces_in_flow_control_structures
+   info - packages\info_core\lib\credential_runtime_access.dart:234:9 - Statements in an if should be enclosed in a block. Try wrapping the statement in a block. - curly_braces_in_flow_control_structures
+   info - packages\info_core\test\credential_supervisor_recovery_test.dart:40:11 - Statements in an if should be enclosed in a block. Try wrapping the statement in a block. - curly_braces_in_flow_control_structures
+
+9 issues found.

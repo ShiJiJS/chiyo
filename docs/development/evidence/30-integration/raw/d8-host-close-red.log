@@ -1,0 +1,17 @@
+00:00 +0: loading test/hosted_credential_execution_test.dart
+00:00 +0 -1: loading test/hosted_credential_execution_test.dart [E]
+  Failed to load "test/hosted_credential_execution_test.dart":
+  test/hosted_credential_execution_test.dart:19:28: Error: The getter 'credentialUseRequests' isn't defined for the type 'OwnerAccess'.
+   - 'OwnerAccess' is from 'package:info_core/info_core.dart' ('../info_core/lib/info_core.dart').
+  Try correcting the name to the name of an existing getter, or defining a getter or field named 'credentialUseRequests'.
+      expect(h.service.owner.credentialUseRequests.single.attemptConsumed,isFalse);expect(h.service.owner.credentialExecutions,isEmpty);
+                             ^^^^^^^^^^^^^^^^^^^^^
+  test/hosted_credential_execution_test.dart:19:105: Error: The getter 'credentialExecutions' isn't defined for the type 'OwnerAccess'.
+   - 'OwnerAccess' is from 'package:info_core/info_core.dart' ('../info_core/lib/info_core.dart').
+  Try correcting the name to the name of an existing getter, or defining a getter or field named 'credentialExecutions'.
+      expect(h.service.owner.credentialUseRequests.single.attemptConsumed,isFalse);expect(h.service.owner.credentialExecutions,isEmpty);
+                                                                                                          ^^^^^^^^^^^^^^^^^^^^
+00:00 +0 -1: Some tests failed.
+
+Failing tests:
+  test/hosted_credential_execution_test.dart: loading test/hosted_credential_execution_test.dart

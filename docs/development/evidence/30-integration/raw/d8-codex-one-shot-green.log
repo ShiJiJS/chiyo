@@ -1,0 +1,4 @@
+00:00 +0: loading test/hosted_credential_execution_test.dart
+00:00 +0: separate actual Codex adapter processes start and query one hosted task without losing output or repeating approval
+00:04 +1: a hosted task survives its calling client closing and another call retrieves the same authorized output
+00:04 +2: All tests passed!

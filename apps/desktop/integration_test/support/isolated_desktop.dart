@@ -21,10 +21,12 @@ class IsolatedDesktopFixture {
   static Future<IsolatedDesktopFixture> start({
     DesktopPlatform? platform,
     Future<void> Function(InformationService)? prepareLibrary,
+    String? credentialWorkerExecutable,
   }) async {
     final root = await Directory.systemTemp.createTemp('aim-native-approval-');
     final bootstrap = DesktopBootstrap(
       port: 0,
+      credentialWorkerExecutable: credentialWorkerExecutable,
       platform: platform ?? _AcceptancePlatform(),
       openLibrary: () async {
         final repository = await EncryptedInformationRepository.open(

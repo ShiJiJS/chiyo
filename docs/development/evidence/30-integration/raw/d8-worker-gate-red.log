@@ -1,0 +1,21 @@
+00:00 +0: loading test/worker_start_gate_test.dart
+00:00 +0: worker joins its process group but cannot start the approved program before the supervisor acknowledges durable registration
+00:00 +0 -1: worker joins its process group but cannot start the approved program before the supervisor acknowledges durable registration [E]
+  Expected: 'ready'
+    Actual: 'started'
+     Which: is different.
+            Expected: ready
+              Actual: started
+                      ^
+             Differ at offset 0
+  
+  package:matcher                        expect
+  test\worker_start_gate_test.dart 23:5  main.<fn>
+  
+00:00 +0 -1: Some tests failed.
+
+Failing tests:
+  test/worker_start_gate_test.dart: worker joins its process group but cannot start the approved program before the supervisor acknowledges durable registration
+
+Consider enabling the flag chain-stack-traces to receive more detailed exceptions.
+For example, 'dart test --chain-stack-traces'.

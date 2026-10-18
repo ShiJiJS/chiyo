@@ -92,7 +92,7 @@ void main() {
           '${folder.path}/format-four.aim',
           key,
         );
-        expect(snapshot.formatVersion, 4);
+        expect(snapshot.formatVersion, 5);
         expect(snapshot.requestHistoryCount, 1);
         final credential = await service.owner.createStringCredential(
           name: 'Synthetic token',
@@ -136,15 +136,13 @@ void main() {
       await store.backups.saveRecoveryKeyTo(
         '${folder.path}/synthetic-recovery.key',
       );
-      await expectLater(
-        store.backups.exportTo('${folder.path}/incomplete.backup'),
-        throwsA(
-          isA<StorageFailure>().having(
-            (e) => e.code,
-            'code',
-            'credentials_backup_not_supported',
-          ),
-        ),
+      await store.backups.exportTo('${folder.path}/complete.backup');
+      expect(
+        (await store.backups.inspect(
+          '${folder.path}/complete.backup',
+          (await store.backups.recoveryKey())!,
+        )).credentialCount,
+        2,
       );
       await service.owner.rotateStringCredential(
         string.id,

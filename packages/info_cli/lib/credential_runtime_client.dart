@@ -11,18 +11,24 @@ Future<Process> _startCredentialProcess(
   String executable,
   List<String> argv,
   String cwd,
-  Map<String, String> environment,
-) async {
+  Map<String, String> environment, {
+  String? workerExecutable,
+  String? plannedJobName,
+  Future<void> Function(int workerPid)? registerWorker,
+}) async {
   if (!Platform.isWindows) {
     throw const CredentialUseFailure('unsupported_tool_version');
   }
   final runtime = Platform.resolvedExecutable;
-  final interpreted = runtime.toLowerCase().endsWith('dart.exe');
-  final worker = interpreted
-      ? (await Isolate.resolvePackageUri(
-          Uri.parse('package:info_cli/runtime_worker.dart'),
-        ))!.toFilePath()
-      : '${File(runtime).parent.path}/info-runtime-worker.exe';
+  final interpreted =
+      workerExecutable == null && runtime.toLowerCase().endsWith('dart.exe');
+  final worker =
+      workerExecutable ??
+      (interpreted
+          ? (await Isolate.resolvePackageUri(
+              Uri.parse('package:info_cli/runtime_worker.dart'),
+            ))!.toFilePath()
+          : '${File(runtime).parent.path}/info-runtime-worker.exe');
   if (!await File(worker).exists()) {
     throw const CredentialUseFailure('process_start_failed');
   }
@@ -40,7 +46,7 @@ Future<Process> _startCredentialProcess(
   final nonce = base64Url.encode(
     List.generate(24, (_) => Random.secure().nextInt(256)),
   );
-  final jobName = 'Local\\AgentInfoRuntime-$nonce';
+  final jobName = plannedJobName ?? 'Local\\AgentInfoRuntime-$nonce';
   final process = await Process.start(
     path,
     args,
@@ -64,19 +70,57 @@ Future<Process> _startCredentialProcess(
     }),
   );
   await process.stdin.flush();
+  var released = false;
+  CredentialProcessJob? launchJob;
   while (!stopped) {
     try {
       final facts =
           jsonDecode(await state.readAsString()) as Map<String, dynamic>;
-      if (facts['state'] == 'started' &&
+      if (!released &&
+          facts['state'] == 'ready' &&
+          facts['jobName'] == jobName &&
+          facts['workerPid'] == process.pid) {
+        try {
+          launchJob = CredentialProcessJob.observe(jobName, process.pid);
+          await registerWorker?.call(process.pid);
+          // Once any acknowledgement write is attempted, a lost response is
+          // not proof the worker did not start the target.
+          released = true;
+          process.stdin.writeln('start');
+          await process.stdin.flush();
+        } on Object {
+          await process.stdin.close();
+          if (released && launchJob != null) {
+            throw _UncertainCredentialLaunch(process, launchJob);
+          }
+          await ended;
+          await Future.wait([
+            process.stdout.drain<void>(),
+            process.stderr.drain<void>(),
+          ]);
+          launchJob?.close();
+          rethrow;
+        }
+      }
+      if (released &&
+          facts['state'] == 'started' &&
           facts['jobName'] == jobName &&
           facts['pid'] is int) {
-        return _RuntimeWorkerProcess(
-          process,
-          facts['pid'] as int,
-          state,
-          jobName,
-        );
+        try {
+          final wrapped = _RuntimeWorkerProcess(
+            process,
+            facts['pid'] as int,
+            state,
+            jobName,
+          );
+          launchJob?.close();
+          return wrapped;
+        } on Object {
+          if (launchJob != null) {
+            throw _UncertainCredentialLaunch(process, launchJob);
+          }
+          rethrow;
+        }
       }
     } on FileSystemException {
       // The worker has not atomically published its state yet.
@@ -87,11 +131,60 @@ Future<Process> _startCredentialProcess(
   }
   await ended;
   await process.stdin.close();
+  if (released && launchJob != null) {
+    var confirmedNotStarted = false;
+    try {
+      confirmedNotStarted =
+          (jsonDecode(await state.readAsString()) as Map)['state'] ==
+              'start_failed' &&
+          CredentialProcessJob.isActive(jobName) == false;
+    } on Object {
+      /* Missing final state is inconclusive. */
+    }
+    if (!confirmedNotStarted) {
+      throw _UncertainCredentialLaunch(process, launchJob);
+    }
+  }
+  launchJob?.close();
   await Future.wait([
     process.stdout.drain<void>(),
     process.stderr.drain<void>(),
   ]);
   throw const CredentialUseFailure('process_start_failed');
+}
+
+/// Owns the original job before the target PID was acknowledged. Keep draining
+/// and holding the capacity/configuration even though no target identity can be
+/// claimed. A dead worker does not imply its descendants ended.
+class _UncertainCredentialLaunch implements Exception {
+  _UncertainCredentialLaunch(this.worker, this.job);
+  final Process worker;
+  final CredentialProcessJob job;
+  bool treeEnded = false;
+  Future<void> monitor(_ExecutionOutput output) async {
+    final out = worker.stdout
+        .listen((data) => output.add('stdout', data))
+        .asFuture<void>();
+    final err = worker.stderr
+        .listen((data) => output.add('stderr', data))
+        .asFuture<void>();
+    try {
+      await worker.exitCode;
+      await Future.wait([out, err]);
+    } on Object {
+      /* Still wait for a conclusive group-end fact. */
+    }
+    while (true) {
+      try {
+        if (job.activeProcesses == 0) break;
+      } on Object {
+        /* Inconclusive inspection retains the slot and material. */
+      }
+      await Future<void>.delayed(const Duration(milliseconds: 40));
+    }
+    treeEnded = true;
+    job.close();
+  }
 }
 
 class _RuntimeWorkerProcess implements Process {
@@ -190,6 +283,23 @@ extension _CredentialRuntimeClient on AgentClient {
           identity.codeUnits.any((c) => c < 33 || c > 126)) {
         throw const CredentialUseFailure('invalid_reference');
       }
+      if (hostedCredentialExecutions) {
+        final result = await _call('/credential-use/hosted', {
+          'sessionSecret': _session,
+          ...input,
+        });
+        if (command == 'run-use' &&
+            result['status'] == 'service_unavailable' &&
+            !result.containsKey('attemptConsumed')) {
+          // A lost response is not proof that the resident executor did not
+          // reserve the original attempt. Never fall back to another launch.
+          throw const CredentialUseFailure(
+            'material_claim_failed',
+            attemptConsumed: true,
+          );
+        }
+        return result;
+      }
       switch (command) {
         case 'run-use':
           return await _credentialExecutions.start(identity);
@@ -248,7 +358,26 @@ extension _CredentialRuntimeClient on AgentClient {
       );
       request.headers.contentType = ContentType.json;
       request.followRedirects = false;
-      request.write(jsonEncode({'sessionSecret': _session, 'requestId': id}));
+      final supervisor = _usesDefaultCredentialStarter
+          ? CredentialProcessIdentity.capture(pid)
+          : null;
+      if (_usesDefaultCredentialStarter && supervisor == null) {
+        throw const CredentialUseFailure('service_unavailable');
+      }
+      try {
+        request.write(
+          jsonEncode({
+            'sessionSecret': _session,
+            'requestId': id,
+            if (supervisor != null) ...{
+              'supervisorPid': pid,
+              'supervisorCreatedAt': supervisor.value,
+            },
+          }),
+        );
+      } finally {
+        supervisor?.close();
+      }
       mayBeConsumed = true;
       final response = await request.close().timeout(
         const Duration(seconds: 5),
@@ -411,6 +540,7 @@ class _CredentialRuntimeExecutor {
     var materialLease = m.materialLease;
     var registeredFiles = false;
     var preparing = true;
+    _UncertainCredentialLaunch? uncertainLaunch;
     Future<void> report(String state, {String? code, int? exit}) async {
       await journal?.writeAsString(
         jsonEncode({
@@ -433,8 +563,12 @@ class _CredentialRuntimeExecutor {
           exitCode: exit,
           errorCode: code,
           startedAt: started,
-          finishedAt: state == 'running' ? null : DateTime.now().toUtc(),
-          jobName: process is _RuntimeWorkerProcess ? process.jobName : null,
+          finishedAt: {'running', 'unknown'}.contains(state)
+              ? null
+              : DateTime.now().toUtc(),
+          jobName:
+              m.jobName ??
+              (process is _RuntimeWorkerProcess ? process.jobName : null),
         ),
       );
     }
@@ -628,12 +762,44 @@ class _CredentialRuntimeExecutor {
       };
       final argv = plan.argv.map(resolveArgument).toList();
       preparing = false;
-      process = await client._credentialProcessStarter(
-        plan.path,
-        argv,
-        plan.cwd,
-        env,
-      );
+      process = client._usesDefaultCredentialStarter
+          ? await _startCredentialProcess(
+              plan.path,
+              argv,
+              plan.cwd,
+              env,
+              workerExecutable: client._runtimeWorkerExecutable,
+              plannedJobName: m.jobName,
+              registerWorker: (workerPid) async {
+                final identity = CredentialProcessIdentity.capture(workerPid);
+                if (identity == null) {
+                  throw const CredentialUseFailure('process_start_failed');
+                }
+                try {
+                  final result = await client
+                      ._call('/credential-use/worker/register', {
+                        'executionId': m.executionId,
+                        'executionCapability': m.executionCapability,
+                        'workerPid': workerPid,
+                        'workerCreatedAt': identity.value,
+                      });
+                  if (result['status'] != 'ok') {
+                    throw const CredentialUseFailure(
+                      'audit_unavailable',
+                      attemptConsumed: true,
+                    );
+                  }
+                } finally {
+                  identity.close();
+                }
+              },
+            )
+          : await client._credentialProcessStarter(
+              plan.path,
+              argv,
+              plan.cwd,
+              env,
+            );
       // Drain immediately after OS creation, including when identity capture or
       // audit reporting fails. Neither failure ends the child's lifetime.
       stdoutDone = process.stdout
@@ -660,6 +826,15 @@ class _CredentialRuntimeExecutor {
       output.complete = true;
       await report('exited', exit: result);
     } on Object catch (e) {
+      if (e is _UncertainCredentialLaunch) {
+        uncertainLaunch = e;
+        try {
+          await report('unknown', code: 'execution_unknown');
+        } on Object {
+          /* Preserve monitoring despite an unavailable receipt. */
+        }
+        await e.monitor(output);
+      }
       if (process != null) {
         // A reporting/identity failure cannot release a live process's slot or
         // dispose its isolated configuration while it still uses it.
@@ -681,12 +856,16 @@ class _CredentialRuntimeExecutor {
           : 'process_start_failed';
       try {
         await report(
-          process != null
+          process != null ||
+                  uncertainLaunch != null ||
+                  code == 'execution_unknown'
               ? 'unknown'
               : preparing
               ? 'prepare_failed'
               : 'start_failed',
-          code: process != null ? 'execution_unknown' : code,
+          code: process != null || uncertainLaunch != null
+              ? 'execution_unknown'
+              : code,
         );
       } on Object {
         /* No retry can start another process. */
@@ -714,6 +893,7 @@ class _CredentialRuntimeExecutor {
         }
       }
       if (folder != null &&
+          (uncertainLaunch == null || uncertainLaunch.treeEnded) &&
           (process is! _RuntimeWorkerProcess || process.treeEnded)) {
         try {
           await folder.delete(recursive: true);
