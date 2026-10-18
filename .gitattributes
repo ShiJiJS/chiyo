@@ -1,2 +1,3 @@
 # Synthetic QA logs are immutable byte evidence, including failed runs.
 docs/development/evidence/29-files/raw/** -text -diff
+docs/development/evidence/30-integration/raw/** -text -diff
