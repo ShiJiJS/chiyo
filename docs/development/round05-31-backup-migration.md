@@ -41,3 +41,9 @@ f4a2f41固定生产代码完整349项零跳过（CLI54/Core130/Storage61/Desktop
 55份原始日志、40张r2截图、固定代码/AOT/具体源文件哈希归档见evidence/31-backup-migration/verification.json；同时保留所有失败及3条info修正记录。主会话按代码标准与原规格自检：Owner/Agent边界、事务后缓存发布、一次消费/私密关联、原型共享表面与历史恢复语义一致。没有独立Agent评审，也没有真实资料迁移。
 
 准备0.4.0+7 Windows未签名预览，更新schema/备份/使用方式和已知限制说明；打包验收新增应用旁/CLI旁同一worker及随包Skill参考检查，使用受控localhost SSH/AWS fixture启用全部检查。发布包和SDK-free解压验证将独立追加，不预先计为通过。D8一次完成超时、真实系统通知、干净机器及用户Codex信任仍独立开放，Mac/双向恢复延期，服务器同步暂停。
+
+## 0.4.0+7主集成交付
+
+Windows实现及证据已合入3ca7465并完成实际预览打包：主集成349项零跳过/严格分析/Release编译通过，中文空格路径解压后11项SDK-free CLI/hook、SQLCipher4.19.0与DPAPI诊断通过，111个文件与worker/Skill材料核验通过。ZIP路径、SHA-256和原始构建日志见[Windows交付记录](round05-windows-delivery.md)。没有启动/迁移用户实际应用或安装Codex配置。
+
+本票Windows条目已完成；#17真实跨平台双向恢复与Mac延期仍保留，本票保持OPEN，不以Windows代替平台总门槛。整体#21仍有#30偶发完成超时及真实Codex、#23系统通知、#18干净机器/用户联合验收。服务器同步暂停，无子Agent，测试窗口与容器均退出。
