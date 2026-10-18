@@ -22,7 +22,7 @@ def docker(*args):
     return p.stdout.strip()
 
 def main():
-    parser=argparse.ArgumentParser();mode=parser.add_mutually_exclusive_group();mode.add_argument('--native',action='store_true');mode.add_argument('--suite',action='store_true');mode.add_argument('--checks',action='store_true');parser.add_argument('--repeat',type=int,default=1);parser.add_argument('--cli-executable',type=Path);args=parser.parse_args()
+    parser=argparse.ArgumentParser();mode=parser.add_mutually_exclusive_group();mode.add_argument('--native',action='store_true');mode.add_argument('--suite',action='store_true');mode.add_argument('--checks',action='store_true');parser.add_argument('--repeat',type=int,default=1);parser.add_argument('--cli-executable',type=Path);parser.add_argument('--native-test',choices=['file_runtime_native_test.dart','hosted_runtime_native_test.dart'],default='file_runtime_native_test.dart');args=parser.parse_args()
     assert 1<=args.repeat<=3
     cli=(args.cli_executable or REPO/'.scratch/d7-aot/info.exe').resolve()
     runs=REPO/'.scratch/ssh-native-runs'
@@ -50,9 +50,13 @@ def main():
         dart=Path.home()/'.local/share/flutter/bin/cache/dart-sdk/bin/dart.exe'
         if args.native:
             flutter=Path.home()/'.local/share/flutter/bin/flutter.bat'
-            command=[str(flutter),'test','--no-pub','integration_test/file_runtime_native_test.dart','-d','windows',
+            command=[str(flutter),'test','--no-pub','integration_test/'+args.native_test,'-d','windows',
               '--dart-define=CLI_EXECUTABLE='+str(cli),
               '--dart-define=SSH_EXECUTABLE='+env['D7_SSH_EXE'],'--dart-define=SSH_FIXTURE='+str(output),'--dart-define=SSH_FIXTURE_PORT='+env['D7_SSH_PORT']]
+            if args.native_test=='hosted_runtime_native_test.dart':
+                adapter=cli.parent/'info-codex.exe';worker=cli.parent/'info-runtime-worker.exe'
+                assert adapter.is_file() and worker.is_file()
+                command+=['--dart-define=CODEX_EXECUTABLE='+str(adapter),'--dart-define=WORKER_EXECUTABLE='+str(worker)]
             cwd=REPO/'apps/desktop'
         elif args.checks:
             command=['pwsh.exe','-NoProfile','-File',str(REPO/'scripts/check.ps1'),'-FlutterBin',str(Path.home()/'.local/share/flutter/bin'),'-Offline'];cwd=REPO

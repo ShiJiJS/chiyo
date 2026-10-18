@@ -11,6 +11,101 @@ import 'codex_process_test.dart' show invoke;
 
 void main() {
   test(
+    'resident output expiry preserves active work and durable facts but does not retain completed output after thirty minutes',
+    () async {
+      var now = DateTime.utc(2026, 10, 18);
+      final h = await RuntimeHarness.create();
+      final root = await Directory.systemTemp.createTemp('hosted-expiry-');
+      final gate = File('${root.path}/release');
+      late CredentialExecutionHost host;
+      final server = await AgentServer.start(
+        h.service.agent,
+        port: 0,
+        credentialExecutionHandler: (session, input) =>
+            host.execute(session, input),
+      );
+      host = CredentialExecutionHost(
+        port: server.port,
+        clock: () => now,
+        processStarter: (exe, argv, cwd, env) => Process.start(
+          exe,
+          [
+            File('test/support/hosted_waiting_child.dart').absolute.path,
+            gate.path,
+            ...argv,
+          ],
+          workingDirectory: cwd,
+          environment: env,
+          includeParentEnvironment: false,
+          runInShell: false,
+        ),
+      );
+      final client = AgentClient(
+        server.port,
+        sessionSecret: h.client.sessionSecret,
+        hostedCredentialExecutions: true,
+      );
+      addTearDown(() async {
+        await gate.writeAsString('release');
+        await host.drain();
+        host.close();
+        client.close();
+        await server.close();
+        await h.close();
+        final actual = await root.resolveSymbolicLinks(),
+            temp = await Directory.systemTemp.resolveSymbolicLinks();
+        if (actual.toLowerCase() != root.absolute.path.toLowerCase() ||
+            !actual.toLowerCase().startsWith(
+              '${temp.toLowerCase()}${Platform.pathSeparator}',
+            )) {
+          throw StateError('Unexpected expiry fixture');
+        }
+        await root.delete(recursive: true);
+      });
+      final request = await h.approve();
+      final run = await client.execute({
+        'command': 'run-use',
+        'requestId': request,
+      });
+      expect(run['status'], 'accepted');
+      final id = run['executionId'];
+      now = now.add(const Duration(minutes: 40));
+      expect(
+        (await client.execute({
+          'command': 'execution-status',
+          'executionId': id,
+        }))['outputAvailable'],
+        isTrue,
+      );
+      await gate.writeAsString('release');
+      await host.drain();
+      now = now.add(const Duration(minutes: 31));
+      final status = await client.execute({
+        'command': 'execution-status',
+        'executionId': id,
+      });
+      expect(status['executionState'], 'exited');
+      expect(status['exitCode'], 0);
+      expect(status['outputAvailable'], isFalse);
+      expect(
+        (await client.execute({
+          'command': 'execution-output',
+          'executionId': id,
+        }))['errorCode'],
+        'output_unavailable',
+      );
+      expect(
+        (await client.execute({
+          'command': 'run-use',
+          'requestId': request,
+        }))['errorCode'],
+        'attempt_consumed',
+      );
+      expect(h.service.owner.credentialExecutions, hasLength(1));
+    },
+    skip: !Platform.isWindows,
+  );
+  test(
     'the resident limit is global across sessions, preserves running tasks, and evicts only finished output',
     () async {
       final h = await RuntimeHarness.create();

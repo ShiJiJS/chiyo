@@ -10,12 +10,15 @@ class CredentialExecutionHost {
     required this.port,
     this.workerExecutable,
     CredentialProcessStarter? processStarter,
-  }) : _processStarter = processStarter {
+    DateTime Function()? clock,
+  }) : _processStarter = processStarter,
+       _clock = clock ?? DateTime.now {
     _timer = Timer.periodic(const Duration(minutes: 1), (_) => _prune());
   }
   final int port;
   final String? workerExecutable;
   final CredentialProcessStarter? _processStarter;
+  final DateTime Function() _clock;
   final _entries = <String, _HostedExecution>{};
   Timer? _timer;
   int _reservations = 0;
@@ -32,7 +35,7 @@ class CredentialExecutionHost {
   }
 
   void _prune() {
-    final cutoff = DateTime.now().subtract(const Duration(minutes: 30));
+    final cutoff = _clock().subtract(const Duration(minutes: 30));
     for (final e in _entries.entries.toList()) {
       if (e.value.finishedAt case final finished?) {
         if (finished.isBefore(cutoff)) _remove(e.key);
@@ -119,7 +122,7 @@ class CredentialExecutionHost {
             if (_closed) {
               client.close();
             } else {
-              entry.finishedAt = DateTime.now();
+              entry.finishedAt = _clock();
             }
           }),
         );
