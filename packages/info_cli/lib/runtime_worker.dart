@@ -40,7 +40,23 @@ Future<void> main() async {
     final file = state!;
     final temporary = File('${file.path}.next');
     await temporary.writeAsString(jsonEncode(facts), flush: true);
-    await temporary.rename(file.path);
+    // Dart's Windows read handles can briefly deny replacement. Polling the
+    // ready receipt must not lose the next receipt after a target was started.
+    // Retry only this same atomic publication; never repeat Process.start.
+    final waiting = Stopwatch()..start();
+    while (true) {
+      try {
+        await temporary.rename(file.path);
+        return;
+      } on FileSystemException catch (e) {
+        if (!Platform.isWindows ||
+            !{5, 32, 33}.contains(e.osError?.errorCode) ||
+            waiting.elapsed >= const Duration(seconds: 2)) {
+          rethrow;
+        }
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+      }
+    }
   }
 
   try {

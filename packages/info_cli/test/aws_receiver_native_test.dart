@@ -180,11 +180,23 @@ void main() {
           'command': 'execution-status',
           'executionId': result['executionId'],
         });
-        expect(
-          status['executionState'],
-          'exited',
-          reason: '${status['errorCode']}',
-        );
+        if (status['executionState'] != 'exited') {
+          final diagnostic = await harness.client.execute({
+            'command': 'execution-output',
+            'executionId': result['executionId'],
+            'cursor': 0,
+            'limit': 16,
+          });
+          final errors = utf8.decode([
+            for (final dynamic c in (diagnostic['chunks'] as List? ?? []))
+              if (c['stream'] == 'stderr')
+                ...base64Decode(c['dataBase64'] as String),
+          ], allowMalformed: true);
+          fail(
+            'Synthetic local AWS receiver: ${jsonEncode(status)}; worker stderr: $errors',
+          );
+        }
+        expect(status['executionState'], 'exited', reason: jsonEncode(status));
         expect(status['exitCode'], expectedExit);
         expect(status['cleanupState'], 'complete');
         final response = await harness.client.execute({
