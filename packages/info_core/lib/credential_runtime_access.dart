@@ -28,12 +28,22 @@ extension _CredentialRuntimeService on InformationService {
     return _useRequest(id);
   }
 
-  ManagedCredential _useEligible(CredentialUseRequest r) =>
-      _guardUseEligibility(
-        r.credentialId,
-        r.version,
-        generation: r.useGeneration,
-      );
+  ManagedCredential _useEligible(CredentialUseRequest r) {
+    final credential = _guardUseEligibility(
+      r.credentialId,
+      r.version,
+      generation: r.useGeneration,
+    );
+    if (r.plan.receiver == 'ssh_identity' &&
+        (r.plan.sshTrustSnapshotId == null ||
+            r.plan.sshTrustSnapshotId != _sshHostTrust?.id ||
+            r.plan.internalMaterialHashes['ssh_known_hosts'] !=
+                _sshHostTrust?.sha256)) {
+      throw const CredentialUseFailure('receiver_not_ready');
+    }
+    return credential;
+  }
+
   ManagedCredential _guardUseEligibility(
     String id,
     int version, {
@@ -239,6 +249,8 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
     final CredentialLaunchPlan launch;
     if (input.launch.receiver == 'aws_shared_credentials') {
       launch = _service._validateAwsReceiver(input, c);
+    } else if (input.launch.receiver == 'ssh_identity') {
+      launch = _service._validateSshReceiver(input, c);
     } else {
       _validateTokenReceiver(input, c);
       launch = input.launch;
@@ -552,6 +564,9 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
         CredentialMaterialValue(c.id, c.version, c.form, material.bytes),
         r.alias,
         lease,
+        r.plan.receiver == 'ssh_identity'
+            ? {'ssh_known_hosts': _service._sshHostTrust!.bytes}
+            : const {},
       );
     } on Object catch (e) {
       _service._executionCapabilities.remove(execution.id);

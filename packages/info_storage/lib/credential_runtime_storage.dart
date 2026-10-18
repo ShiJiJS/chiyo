@@ -1,6 +1,36 @@
 part of 'info_storage.dart';
 
 extension _CredentialRuntimeStorage on EncryptedInformationRepository {
+  Future<void> _loadSshTrust() async {
+    final rows = await _db
+        .customSelect('SELECT payload FROM ssh_host_trust WHERE id=1')
+        .get();
+    _sshHostTrust = rows.isEmpty
+        ? null
+        : SshHostTrustSnapshot.fromStorageJson(
+            jsonDecode(rows.single.read<String>('payload'))
+                as Map<String, dynamic>,
+          );
+  }
+
+  Future<void> _saveSshTrust(SshHostTrustSnapshot? snapshot) async {
+    if (_closed) throw const StorageFailure('library_closed');
+    try {
+      await _db.transaction(() async {
+        await _db.customStatement('DELETE FROM ssh_host_trust');
+        if (snapshot != null) {
+          await _db.customStatement(
+            'INSERT INTO ssh_host_trust(id,payload) VALUES(1,?)',
+            [jsonEncode(snapshot.toStorageJson())],
+          );
+        }
+      });
+      _sshHostTrust = snapshot;
+    } on Object {
+      throw const StorageFailure('ssh_trust_save_failed');
+    }
+  }
+
   Future<void> _loadRuntime() async {
     _credentialUseRequests.clear();
     _credentialExecutions.clear();

@@ -14,7 +14,7 @@
 
 ## 尚未完成
 
-SSH参数交付/已确认主机快照及对应原型页面、审计失败/身份替换/异常重启核查、SQLCipher重开、完整协议负例和全套主集成回归均待后续。当前未知状态保守保留材料并标needs_check，不冒充自动恢复清理完成。未合并到主集成，#29保持OPEN，不能将此版本作为正式文件运行或凭据备份交付。
+SSH对应原型页面、启动时残留核查入口、完整协议负例及schema16升级、备份兼容和全套主集成回归仍待完成。下文记录已验证的异常、重启、真实文件接收流程；未登记进程组的未知执行继续保守保留材料并标needs_check。未合并到主集成，#29保持OPEN，不能将此版本作为正式文件运行或凭据备份交付。
 
 ## 真实工具与跨进程增量
 
@@ -33,3 +33,11 @@ SSH参数交付/已确认主机快照及对应原型页面、审计失败/身份
 实际SQLCipher重开验证：执行私有登记身份保留，未确认的文件执行立即标unknown/needs_check；原会话不能使用，秘密不在公开响应或库文件明文中。未登记到进程组的未知执行保持保守，不盲删。另以真实独立Windows进程组验证：活跃时清理busy且材料保留，组结束后可安全清理，执行结果仍unknown、不能重放。进程组名称仅由私有执行报告登记，核对实际成员及进程身份，登记后不能换组；观察失败不视为进程组已结束。
 
 文件权限与清理集中在受管材料模块；实现核查依据：[CreateFileW](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilew)、[GetSecurityInfo](https://learn.microsoft.com/en-us/windows/win32/api/aclapi/nf-aclapi-getsecurityinfo)、[SetFileInformationByHandle](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-setfileinformationbyhandle)。真实DACL检查与子进程行为作为验证，不以“调用过权限函数”代替结果。
+
+## SSH 主机信任与真实文件接收
+
+所有者明确导入并确认known_hosts，形成不可变ID和SHA256；相同内容重新确认也会产生新ID，旧的未启动SSH申请失效。配置保存在SQLCipher schema16，重开保留、清除可持久化。输入在排队前复制，后续修改调用方字节不会改变已确认内容。既有用户known_hosts、ssh_config及ssh-agent不被读取作为认证回退。
+
+申请只含类型化私钥引用、明确user@host/端口、非交互参数和字面远程参数。有效计划附加严格主机检查、唯一identity、禁用agent/密码/键盘交互、私有空config/global hosts，并绑定主机快照哈希；参数及这些附加配置均需在审批展示。远程参数逐个按POSIX引用后形成固定命令，不把分号解释成额外远程命令；不启动本机shell。known_hosts仅在私有领取通道交付；CLI核对批准哈希再准备材料。四个空文件真实身份全部登记后才写私钥。私有响应上限4MiB覆盖两个各1MiB材料的base64与计划，公开请求仍限262144字节。
+
+实际Windows OpenSSH 9.5p2通过产品申请、worker、受限文件与Windows进程组执行：匹配的临时密钥及已确认主机成功exit0；错误密钥、未知主机、主机公钥改变均exit255，每次cleanup complete且不能重放；远程分号字面参数保持原文。仅临时localhost Docker SSH服务，所有密钥均本轮生成，结束后核对标签并移除容器。可复现入口 `scripts/qa/ssh-fixture/run.py`，首次真实工具红记录 `.d7-ssh-native-red.log`，绿记录 `.d7-ssh-native-green.log`；受控接收端另检查四个材料内容和无环境认证回退。

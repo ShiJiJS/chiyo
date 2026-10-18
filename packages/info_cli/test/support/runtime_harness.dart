@@ -70,8 +70,14 @@ class RuntimeHarness {
 
   Future<String> approve({
     String? cwd,
-    List<String> argv = const ['api', 'user'],
+    List<Object?> argv = const ['api', 'user'],
+    String? receiver,
   }) async {
+    final selectedReceiver =
+        receiver ??
+        (credential.form == CredentialForm.file
+            ? 'aws_shared_credentials'
+            : 'gh_token');
     final r = await client.execute({
       'command': 'request-use',
       'purpose': 'Controlled runtime test',
@@ -79,16 +85,14 @@ class RuntimeHarness {
         {'alias': 'token', 'credentialId': credential.id, 'version': 1},
       ],
       'launch': {
-        'receiver': credential.form == CredentialForm.file
-            ? 'aws_shared_credentials'
-            : 'gh_token',
+        'receiver': selectedReceiver,
         'executable': executablePath,
         'argv': argv,
         'cwd': cwd ?? Directory.current.path,
         'env': {
-          if (credential.form == CredentialForm.file)
+          if (selectedReceiver == 'aws_shared_credentials')
             'AWS_SHARED_CREDENTIALS_FILE': {'file': 'token'}
-          else
+          else if (selectedReceiver == 'gh_token')
             'GH_TOKEN': {'secret': 'token'},
         },
       },

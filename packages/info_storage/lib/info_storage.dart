@@ -63,7 +63,14 @@ class EncryptedInformationRepository
     implements
         InformationRepository,
         CredentialRepository,
-        CredentialRuntimeRepository {
+        CredentialRuntimeRepository,
+        SshHostTrustRepository {
+  SshHostTrustSnapshot? _sshHostTrust;
+  @override
+  SshHostTrustSnapshot? get sshHostTrust => _sshHostTrust;
+  @override
+  Future<void> saveSshHostTrust(SshHostTrustSnapshot? snapshot) =>
+      _saveSshTrust(snapshot);
   EncryptedInformationRepository._(
     this._db,
     this._lock,
@@ -241,6 +248,7 @@ class EncryptedInformationRepository
   }
 
   Future<void> _load() async {
+    await _loadSshTrust();
     await _loadRuntime();
     _credentials.clear();
     _credentialMaterials.clear();
@@ -1129,12 +1137,13 @@ class EncryptedInformationRepository
 class _InformationDatabase extends GeneratedDatabase {
   _InformationDatabase(super.executor);
   @override
-  int get schemaVersion => 15;
+  int get schemaVersion => 16;
   @override
   Iterable<TableInfo<Table, Object?>> get allTables => const [];
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (_) async {
+      await _createSshHostTrust();
       await _createCredentialRuntime();
       await _createCredentials();
       await _createRevisionPurges();
@@ -1158,10 +1167,11 @@ class _InformationDatabase extends GeneratedDatabase {
       await _backupSchema();
     },
     onUpgrade: (_, from, to) async {
-      if (from < 1 || to != 15) {
+      if (from < 1 || to != 16) {
         throw const StorageFailure('unsupported_schema');
       }
       await transaction(() async {
+        if (from < 16) await _createSshHostTrust();
         if (from < 15) await _createCredentialRuntime();
         if (from < 14) await _createCredentials();
         if (from < 2) {
@@ -1222,6 +1232,12 @@ class _InformationDatabase extends GeneratedDatabase {
     );
     await customStatement(
       'CREATE TABLE IF NOT EXISTS credential_materials(credential_id TEXT NOT NULL,version INTEGER NOT NULL,payload TEXT NOT NULL,PRIMARY KEY(credential_id,version))',
+    );
+  }
+
+  Future<void> _createSshHostTrust() async {
+    await customStatement(
+      'CREATE TABLE IF NOT EXISTS ssh_host_trust(id INTEGER PRIMARY KEY CHECK(id=1),payload TEXT NOT NULL)',
     );
   }
 

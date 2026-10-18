@@ -280,6 +280,7 @@ Future<ExecutableIdentity> inspectCredentialExecutable(
     final names = switch (receiver) {
       'gh_token' => {'gh', 'gh.exe'},
       'aws_shared_credentials' => {'aws', 'aws.exe'},
+      'ssh_identity' => {'ssh', 'ssh.exe'},
       _ => <String>{},
     };
     if (!names.contains(name)) {
@@ -294,6 +295,9 @@ Future<ExecutableIdentity> inspectCredentialExecutable(
       'XDG_CONFIG_HOME': probe.path,
       'XDG_STATE_HOME': probe.path,
       'GH_CONFIG_DIR': probe.path,
+      if (Platform.isWindows) 'ProgramData': probe.path,
+      if (Platform.isWindows)
+        'WINDIR': Platform.environment['SystemRoot'] ?? '',
       if (Platform.isWindows)
         'SystemRoot': Platform.environment['SystemRoot'] ?? '',
       if (Platform.isWindows) 'TEMP': probe.path,
@@ -304,7 +308,7 @@ Future<ExecutableIdentity> inspectCredentialExecutable(
     };
     final result = await Process.run(
       canonical,
-      ['--version'],
+      [receiver == 'ssh_identity' ? '-V' : '--version'],
       workingDirectory: probe.path,
       // An empty environment block is rejected by CreateProcess on this
       // Windows runtime (error 87). Retain only the system loader location,
@@ -313,11 +317,16 @@ Future<ExecutableIdentity> inspectCredentialExecutable(
       includeParentEnvironment: false,
       runInShell: false,
     ).timeout(const Duration(seconds: 5));
-    final version = receiver == 'gh_token'
-        ? r'^gh version 2\.102\.0(?:\s|$)'
-        : r'^aws-cli/2\.38\.1(?:\s|$)';
+    final version = switch (receiver) {
+      'gh_token' => r'^gh version 2\.102\.0(?:\s|$)',
+      'aws_shared_credentials' => r'^aws-cli/2\.38\.1(?:\s|$)',
+      _ => r'^OpenSSH_for_Windows_9\.5p2(?:,|\s|$)',
+    };
     if (result.exitCode != 0 ||
-        !RegExp(version).hasMatch(result.stdout as String)) {
+        !RegExp(version).hasMatch(
+          (receiver == 'ssh_identity' ? result.stderr : result.stdout)
+              as String,
+        )) {
       throw const CredentialUseFailure('unsupported_tool_version');
     }
     return ExecutableIdentity(
@@ -362,11 +371,15 @@ class CredentialLaunchPlan {
     this.cwd,
     this.env, {
     this.identity,
-  });
+    this.sshTrustSnapshotId,
+    Map<String, String> internalMaterialHashes = const {},
+  }) : internalMaterialHashes = Map.unmodifiable(internalMaterialHashes);
   final String receiver, path, cwd;
   final List<LaunchValue> argv;
   final Map<String, LaunchValue> env;
   final ExecutableIdentity? identity;
+  final String? sshTrustSnapshotId;
+  final Map<String, String> internalMaterialHashes;
   ExecutableIdentity get executable => identity!;
   factory CredentialLaunchPlan.parse(
     Map<String, dynamic> j, {
@@ -441,6 +454,8 @@ class CredentialLaunchPlan {
         cwd,
         env,
         identity: identity,
+        sshTrustSnapshotId: sshTrustSnapshotId,
+        internalMaterialHashes: internalMaterialHashes,
       );
   CredentialLaunchPlan withDelivery({
     List<LaunchValue>? argv,
@@ -452,7 +467,24 @@ class CredentialLaunchPlan {
     cwd,
     Map.unmodifiable(env ?? this.env),
     identity: identity,
+    sshTrustSnapshotId: sshTrustSnapshotId,
+    internalMaterialHashes: internalMaterialHashes,
   );
+  CredentialLaunchPlan withSshTrust(SshHostTrustSnapshot trust) =>
+      CredentialLaunchPlan._(
+        receiver,
+        path,
+        argv,
+        cwd,
+        env,
+        identity: identity,
+        sshTrustSnapshotId: trust.id,
+        internalMaterialHashes: {
+          'ssh_known_hosts': trust.sha256,
+          'ssh_config': 'sha256:${_runtimeSha256(const [])}',
+          'ssh_global_known_hosts': 'sha256:${_runtimeSha256(const [])}',
+        },
+      );
   Map<String, Object?> toJson() => {
     'receiver': receiver,
     'executable': path,
@@ -460,15 +492,33 @@ class CredentialLaunchPlan {
     'cwd': cwd,
     'env': {for (final e in env.entries) e.key: e.value.toJson()},
     if (identity != null) 'executableIdentity': identity!.toJson(),
+    if (sshTrustSnapshotId != null) 'sshTrustSnapshotId': sshTrustSnapshotId,
+    if (internalMaterialHashes.isNotEmpty)
+      'internalMaterialHashes': internalMaterialHashes,
   };
   factory CredentialLaunchPlan.fromStorageJson(Map<String, dynamic> j) {
-    final shape = Map<String, dynamic>.from(j)..remove('executableIdentity');
+    final shape = Map<String, dynamic>.from(j)
+      ..remove('executableIdentity')
+      ..remove('sshTrustSnapshotId')
+      ..remove('internalMaterialHashes');
     final plan = CredentialLaunchPlan.parse(shape, allowInternal: true);
-    return plan.resolved(
+    final resolved = plan.resolved(
       ExecutableIdentity.fromJson(
         j['executableIdentity'] as Map<String, dynamic>,
       ),
       plan.cwd,
+    );
+    return CredentialLaunchPlan._(
+      resolved.receiver,
+      resolved.path,
+      resolved.argv,
+      resolved.cwd,
+      resolved.env,
+      identity: resolved.identity,
+      sshTrustSnapshotId: j['sshTrustSnapshotId'] as String?,
+      internalMaterialHashes:
+          (j['internalMaterialHashes'] as Map?)?.cast<String, String>() ??
+          const {},
     );
   }
   String get planHash {
@@ -572,6 +622,7 @@ class CredentialUseRequest {
       );
   CredentialUseRequest changed(Map<String, Object?> values) =>
       CredentialUseRequest.fromJson({...toJson(), ...values});
+  Map<String, Object?> toStorageJson() => toJson();
 }
 
 class CredentialExecution {
@@ -749,11 +800,17 @@ class CredentialExecutionMaterial {
     this.credentialMaterial,
     this.alias, [
     this.materialLease,
-  ]);
+    Map<String, List<int>> internalMaterials = const {},
+  ]) : internalMaterials = Map.unmodifiable(
+         internalMaterials.map(
+           (key, value) => MapEntry(key, List<int>.unmodifiable(value)),
+         ),
+       );
   final String executionId, executionCapability, alias;
   final CredentialLaunchPlan approvedPlan;
   final CredentialMaterialValue credentialMaterial;
   final CredentialMaterialLease? materialLease;
+  final Map<String, List<int>> internalMaterials;
   Map<String, Object?> toPrivateJson() => {
     'protocolVersion': 1,
     'status': 'ok',
@@ -763,6 +820,10 @@ class CredentialExecutionMaterial {
     'credentialMaterial': credentialMaterial.toPrivateJson(),
     'alias': alias,
     if (materialLease != null) 'materialLease': materialLease!.toPrivateJson(),
+    if (internalMaterials.isNotEmpty)
+      'internalMaterials': internalMaterials.map(
+        (key, value) => MapEntry(key, base64Encode(value)),
+      ),
   };
   factory CredentialExecutionMaterial.fromPrivateJson(Map<String, dynamic> j) =>
       CredentialExecutionMaterial(
@@ -780,6 +841,11 @@ class CredentialExecutionMaterial {
             : CredentialMaterialLease.fromPrivateJson(
                 j['materialLease'] as Map<String, dynamic>,
               ),
+        (j['internalMaterials'] as Map?)?.map(
+              (key, value) =>
+                  MapEntry(key as String, base64Decode(value as String)),
+            ) ??
+            const {},
       );
   @override
   String toString() => 'CredentialExecutionMaterial($executionId)';

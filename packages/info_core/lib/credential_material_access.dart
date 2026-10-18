@@ -13,16 +13,27 @@ extension CredentialMaterialAgentAccess on AgentAccess {
         .where((e) => e.id == executionId)
         .firstOrNull;
     final registered = old?.materialLease;
+    final receiver = old == null
+        ? null
+        : _service._useRequest(old.requestId).plan.receiver;
+    final names = switch (receiver) {
+      'aws_shared_credentials' => {'credential.bin', 'aws-config'},
+      'ssh_identity' => {
+        'credential.bin',
+        'ssh-config',
+        'known-hosts',
+        'global-known-hosts',
+      },
+      _ => <String>{},
+    };
     if (old == null ||
         old.state != 'preparing' ||
         registered == null ||
         registered.path != lease.path ||
         registered.identity != lease.identity ||
-        lease.files.keys.toSet().difference({
-          'credential.bin',
-          'aws-config',
-        }).isNotEmpty ||
-        lease.files.length != 2) {
+        names.isEmpty ||
+        lease.files.keys.toSet().difference(names).isNotEmpty ||
+        lease.files.length != names.length) {
       throw const CredentialUseFailure('invalid_reference');
     }
     if (registered.files.isNotEmpty &&

@@ -255,7 +255,7 @@ extension _CredentialRuntimeClient on AgentClient {
       );
       final bytes = <int>[];
       await for (final chunk in response.timeout(const Duration(seconds: 5))) {
-        if (bytes.length + chunk.length > 2097152) {
+        if (bytes.length + chunk.length > 4194304) {
           throw const FormatException();
         }
         bytes.addAll(chunk);
@@ -442,6 +442,8 @@ class _CredentialRuntimeExecutor {
     try {
       final plan = m.approvedPlan;
       final tokenReceiver = plan.receiver == 'gh_token';
+      final awsReceiver = plan.receiver == 'aws_shared_credentials';
+      final sshReceiver = plan.receiver == 'ssh_identity';
       final binding =
           plan.env[tokenReceiver ? 'GH_TOKEN' : 'AWS_SHARED_CREDENTIALS_FILE'];
       if (tokenReceiver &&
@@ -453,22 +455,49 @@ class _CredentialRuntimeExecutor {
         throw const CredentialUseFailure('material_prepare_failed');
       }
       if (!tokenReceiver) {
-        if (plan.receiver != 'aws_shared_credentials' ||
+        if ((!awsReceiver && !sshReceiver) ||
             m.credentialMaterial.form != CredentialForm.file ||
-            binding?.kind != LaunchValueKind.file ||
-            binding?.value != m.alias ||
             materialLease == null ||
-            materialLease.files.isNotEmpty ||
-            plan.env['AWS_CONFIG_FILE']?.kind !=
-                LaunchValueKind.internalMaterial ||
-            plan.env['AWS_CONFIG_FILE']?.value != 'aws_config') {
+            materialLease.files.isNotEmpty) {
           throw const CredentialUseFailure('material_prepare_failed');
         }
-        validateAwsSharedCredentialFile(m.credentialMaterial.bytes);
-        materialLease = ManagedCredentialFiles.reserve(materialLease, [
-          'credential.bin',
-          'aws-config',
-        ]);
+        if (awsReceiver &&
+            (binding?.kind != LaunchValueKind.file ||
+                binding?.value != m.alias ||
+                plan.env['AWS_CONFIG_FILE']?.kind !=
+                    LaunchValueKind.internalMaterial ||
+                plan.env['AWS_CONFIG_FILE']?.value != 'aws_config')) {
+          throw const CredentialUseFailure('material_prepare_failed');
+        }
+        if (awsReceiver) {
+          validateAwsSharedCredentialFile(m.credentialMaterial.bytes);
+        }
+        if (sshReceiver) {
+          final hosts = m.internalMaterials['ssh_known_hosts'];
+          if (plan.env.isNotEmpty ||
+              m.credentialMaterial.bytes.isEmpty ||
+              hosts == null ||
+              plan.sshTrustSnapshotId == null ||
+              plan.internalMaterialHashes['ssh_known_hosts'] !=
+                  'sha256:${sha256.convert(hosts)}' ||
+              plan.internalMaterialHashes['ssh_config'] !=
+                  'sha256:${sha256.convert(const <int>[])}' ||
+              plan.internalMaterialHashes['ssh_global_known_hosts'] !=
+                  'sha256:${sha256.convert(const <int>[])}') {
+            throw const CredentialUseFailure('material_prepare_failed');
+          }
+        }
+        materialLease = ManagedCredentialFiles.reserve(
+          materialLease,
+          awsReceiver
+              ? ['credential.bin', 'aws-config']
+              : [
+                  'credential.bin',
+                  'ssh-config',
+                  'known-hosts',
+                  'global-known-hosts',
+                ],
+        );
         final registration = await client
             ._call('/credential-use/materials/register', {
               'executionId': m.executionId,
@@ -487,7 +516,22 @@ class _CredentialRuntimeExecutor {
           'credential.bin',
           m.credentialMaterial.bytes,
         );
-        ManagedCredentialFiles.write(materialLease, 'aws-config', const []);
+        if (awsReceiver) {
+          ManagedCredentialFiles.write(materialLease, 'aws-config', const []);
+        }
+        if (sshReceiver) {
+          ManagedCredentialFiles.write(materialLease, 'ssh-config', const []);
+          ManagedCredentialFiles.write(
+            materialLease,
+            'known-hosts',
+            m.internalMaterials['ssh_known_hosts']!,
+          );
+          ManagedCredentialFiles.write(
+            materialLease,
+            'global-known-hosts',
+            const [],
+          );
+        }
       }
       folder = await Directory.systemTemp.createTemp('info-runtime-');
       journal = File('${folder.path}/journal.json');
@@ -515,7 +559,7 @@ class _CredentialRuntimeExecutor {
           'GH_HOST': 'github.com',
           'GH_PROMPT_DISABLED': '1',
           'GH_TOKEN': m.credentialMaterial.stringValue,
-        } else ...{
+        } else if (awsReceiver) ...{
           'AWS_SHARED_CREDENTIALS_FILE':
               '${materialLease!.path}${Platform.pathSeparator}credential.bin',
           'AWS_CONFIG_FILE':
@@ -559,10 +603,34 @@ class _CredentialRuntimeExecutor {
       if (!await Directory(plan.cwd).exists()) {
         throw const CredentialUseFailure('material_prepare_failed');
       }
+      String materialPath(String name) =>
+          '${materialLease!.path}${Platform.pathSeparator}$name';
+      String hostsOption(String option, String file) =>
+          '$option="${materialPath(file).replaceAll('\\', '/')}"';
+      String resolveArgument(LaunchValue value) => switch (value.kind) {
+        LaunchValueKind.literal => value.value,
+        LaunchValueKind.file when sshReceiver && value.value == m.alias =>
+          materialPath('credential.bin'),
+        LaunchValueKind.internalMaterial when sshReceiver =>
+          switch (value.value) {
+            'ssh_config' => materialPath('ssh-config'),
+            'ssh_user_hosts_option' => hostsOption(
+              'UserKnownHostsFile',
+              'known-hosts',
+            ),
+            'ssh_global_hosts_option' => hostsOption(
+              'GlobalKnownHostsFile',
+              'global-known-hosts',
+            ),
+            _ => throw const CredentialUseFailure('material_prepare_failed'),
+          },
+        _ => throw const CredentialUseFailure('material_prepare_failed'),
+      };
+      final argv = plan.argv.map(resolveArgument).toList();
       preparing = false;
       process = await client._credentialProcessStarter(
         plan.path,
-        plan.argv.map((v) => v.value).toList(),
+        argv,
         plan.cwd,
         env,
       );

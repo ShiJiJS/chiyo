@@ -44,6 +44,129 @@ void validateAwsSharedCredentialFile(List<int> bytes) {
 }
 
 extension _FileCredentialReceivers on InformationService {
+  CredentialLaunchPlan _validateSshReceiver(
+    CredentialUseInput input,
+    ManagedCredential credential,
+  ) {
+    if (credential.form != CredentialForm.file) {
+      throw const CredentialUseFailure('invalid_reference');
+    }
+    final trust = _sshHostTrust;
+    if (trust == null) throw const CredentialUseFailure('receiver_not_ready');
+    final plan = input.launch;
+    if (plan.env.isNotEmpty) throw const CredentialUseFailure('invalid_env');
+    var tty = false, batch = false, identity = false, port = false;
+    var destination = -1;
+    for (var i = 0; i < plan.argv.length; i++) {
+      final value = plan.argv[i];
+      if (value.kind != LaunchValueKind.literal) {
+        throw const CredentialUseFailure('invalid_reference');
+      }
+      if (value.value == '-T' && !tty) {
+        tty = true;
+        continue;
+      }
+      if (value.value == '-o' || value.value.startsWith('-o')) {
+        final LaunchValue option;
+        if (value.value == '-o') {
+          if (++i >= plan.argv.length) {
+            throw const CredentialUseFailure('invalid_plan');
+          }
+          option = plan.argv[i];
+        } else {
+          option = LaunchValue(
+            LaunchValueKind.literal,
+            value.value.substring(2),
+          );
+        }
+        if (option.kind != LaunchValueKind.literal ||
+            option.value.toLowerCase() != 'batchmode=yes' ||
+            batch) {
+          throw const CredentialUseFailure('invalid_plan');
+        }
+        batch = true;
+        continue;
+      }
+      if (value.value == '-i' && !identity) {
+        if (++i >= plan.argv.length ||
+            plan.argv[i].kind != LaunchValueKind.file ||
+            plan.argv[i].value != input.alias) {
+          throw const CredentialUseFailure('invalid_reference');
+        }
+        identity = true;
+        continue;
+      }
+      if (value.value == '-p' && !port) {
+        if (++i >= plan.argv.length ||
+            plan.argv[i].kind != LaunchValueKind.literal) {
+          throw const CredentialUseFailure('invalid_plan');
+        }
+        final number = int.tryParse(plan.argv[i].value);
+        if (number == null || number < 1 || number > 65535) {
+          throw const CredentialUseFailure('invalid_plan');
+        }
+        port = true;
+        continue;
+      }
+      if (value.value.startsWith('-') ||
+          !RegExp(
+            r'^[A-Za-z0-9_.-]+@(?:[A-Za-z0-9_.-]+|\[[0-9a-fA-F:]+\])$',
+          ).hasMatch(value.value)) {
+        throw const CredentialUseFailure('invalid_plan');
+      }
+      destination = i;
+      break;
+    }
+    if (!tty ||
+        !batch ||
+        !identity ||
+        destination < 0 ||
+        destination + 1 >= plan.argv.length) {
+      throw const CredentialUseFailure('invalid_plan');
+    }
+    final remote = plan.argv.skip(destination + 1).toList();
+    if (remote.any((v) => v.kind != LaunchValueKind.literal || v.value.isEmpty)) {
+      throw const CredentialUseFailure('invalid_reference');
+    }
+    String quote(String value) =>
+        RegExp(r'^[A-Za-z0-9_./:@%+=,-]+$').hasMatch(value)
+        ? value
+        : "'${value.replaceAll("'", "'\"'\"'")}'";
+    return plan
+        .withDelivery(
+          argv: [
+            const LaunchValue(LaunchValueKind.literal, '-F'),
+            const LaunchValue(LaunchValueKind.internalMaterial, 'ssh_config'),
+            for (final option in [
+              'IdentitiesOnly=yes',
+              'IdentityAgent=none',
+              'PasswordAuthentication=no',
+              'KbdInteractiveAuthentication=no',
+              'StrictHostKeyChecking=yes',
+            ]) ...[
+              const LaunchValue(LaunchValueKind.literal, '-o'),
+              LaunchValue(LaunchValueKind.literal, option),
+            ],
+            const LaunchValue(LaunchValueKind.literal, '-o'),
+            const LaunchValue(
+              LaunchValueKind.internalMaterial,
+              'ssh_user_hosts_option',
+            ),
+            const LaunchValue(LaunchValueKind.literal, '-o'),
+            const LaunchValue(
+              LaunchValueKind.internalMaterial,
+              'ssh_global_hosts_option',
+            ),
+            ...plan.argv.take(destination + 1),
+            LaunchValue(
+              LaunchValueKind.literal,
+              remote.map((v) => quote(v.value)).join(' '),
+            ),
+          ],
+        )
+        .withSshTrust(trust);
+  }
+
   CredentialLaunchPlan _validateAwsReceiver(
     CredentialUseInput input,
     ManagedCredential credential,

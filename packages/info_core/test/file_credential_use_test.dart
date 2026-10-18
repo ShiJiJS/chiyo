@@ -168,5 +168,6 @@ void main() {
         ),
       );
     },
+    skip: !Platform.isWindows,
   );
 }
