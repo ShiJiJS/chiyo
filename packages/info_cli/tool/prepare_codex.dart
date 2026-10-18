@@ -41,7 +41,14 @@ Future<void> main(List<String> args) async {
   final source = await File(
     '${repository.path}/integrations/codex/skills/agent-info-access/SKILL.md',
   ).readAsString();
-  await writeCodexConfiguration(output, source);
+  final credentialUseReference = await File(
+    '${repository.path}/integrations/codex/skills/agent-info-access/references/credential-use.md',
+  ).readAsString();
+  await writeCodexConfiguration(
+    output,
+    source,
+    credentialUseReference: credentialUseReference,
+  );
   stdout.writeln('Prepared bundle: ${output.path}');
   stdout.writeln(
     'No hooks installed or trusted. Follow integrations/codex/README.md.',

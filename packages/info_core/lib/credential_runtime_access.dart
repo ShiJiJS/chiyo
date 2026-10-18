@@ -527,6 +527,7 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
         'decision': {
           'credentialUse': {
             'approved': r.credentialApproved,
+            'state': _service._useGrantState(r),
             if (r.credentialApproved) ...{
               'credentialId': r.credentialId,
               'version': r.version,

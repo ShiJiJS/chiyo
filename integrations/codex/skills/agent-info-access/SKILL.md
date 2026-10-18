@@ -1,6 +1,6 @@
 ---
 name: agent-info-access
-description: Request user-approved personal information through Agent Info, submit user-designated source information for review, or request and perform user-authorized classification changes; reuse this chat's approved fields and handle pending or denied access.
+description: Request user-approved information or Windows credential use through Agent Info, submit designated source information for review, and perform approved classification changes; reuse this chat's association and respect pending or denied access.
 ---
 
 Use the Agent Info association supplied by this chat's latest SessionStart hook.
@@ -13,6 +13,11 @@ integration. Only after that request, run the bundled `info-codex-hook --connect
 to obtain a fresh context reference for the current CODEX_THREAD_ID. This is a
 new unapproved session, not a way to find an old grant. Do not retry it silently.
 Public chat IDs are not credentials.
+
+For Token, SSH private-key or AWS credential-file use, read
+[Credential use](references/credential-use.md) before requesting or running it.
+That workflow starts one approved program through the app's resident CLI host;
+ordinary information access below reads approved field values.
 
 1. Call `info-codex` with one JSON object on stdin, including `association` and
    `command`. No command-line arguments. The executable is in the reviewed

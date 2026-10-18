@@ -36,6 +36,11 @@ void main() {
       expect(fact.credentialName, 'Synthetic');
       expect(fact.revokedAt, DateTime.utc(2026, 10, 18, 8, 5));
       expect(service.owner.credentialGrantState(fact), 'revoked');
+      final status = service.agent.credentialUseStatus(session, request.id);
+      expect(
+        ((status['decision'] as Map)['credentialUse'] as Map)['state'],
+        'revoked',
+      );
       expect(fact.attemptedAt, isNull);
       await expectLater(
         service.agent.consumeCredentialUse(session, request.id),
