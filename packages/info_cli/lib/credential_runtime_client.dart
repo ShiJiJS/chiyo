@@ -71,6 +71,7 @@ Future<Process> _startCredentialProcess(
   );
   await process.stdin.flush();
   var released = false;
+  CredentialProcessJob? launchJob;
   while (!stopped) {
     try {
       final facts =
@@ -80,29 +81,46 @@ Future<Process> _startCredentialProcess(
           facts['jobName'] == jobName &&
           facts['workerPid'] == process.pid) {
         try {
+          launchJob = CredentialProcessJob.observe(jobName, process.pid);
           await registerWorker?.call(process.pid);
+          // Once any acknowledgement write is attempted, a lost response is
+          // not proof the worker did not start the target.
+          released = true;
           process.stdin.writeln('start');
           await process.stdin.flush();
-          released = true;
         } on Object {
           await process.stdin.close();
+          if (released && launchJob != null) {
+            throw _UncertainCredentialLaunch(process, launchJob);
+          }
           await ended;
           await Future.wait([
             process.stdout.drain<void>(),
             process.stderr.drain<void>(),
           ]);
+          launchJob?.close();
           rethrow;
         }
       }
-      if (facts['state'] == 'started' &&
+      if (released &&
+          facts['state'] == 'started' &&
           facts['jobName'] == jobName &&
           facts['pid'] is int) {
-        return _RuntimeWorkerProcess(
-          process,
-          facts['pid'] as int,
-          state,
-          jobName,
-        );
+        try {
+          final wrapped = _RuntimeWorkerProcess(
+            process,
+            facts['pid'] as int,
+            state,
+            jobName,
+          );
+          launchJob?.close();
+          return wrapped;
+        } on Object {
+          if (launchJob != null) {
+            throw _UncertainCredentialLaunch(process, launchJob);
+          }
+          rethrow;
+        }
       }
     } on FileSystemException {
       // The worker has not atomically published its state yet.
@@ -113,11 +131,60 @@ Future<Process> _startCredentialProcess(
   }
   await ended;
   await process.stdin.close();
+  if (released && launchJob != null) {
+    var confirmedNotStarted = false;
+    try {
+      confirmedNotStarted =
+          (jsonDecode(await state.readAsString()) as Map)['state'] ==
+              'start_failed' &&
+          CredentialProcessJob.isActive(jobName) == false;
+    } on Object {
+      /* Missing final state is inconclusive. */
+    }
+    if (!confirmedNotStarted) {
+      throw _UncertainCredentialLaunch(process, launchJob);
+    }
+  }
+  launchJob?.close();
   await Future.wait([
     process.stdout.drain<void>(),
     process.stderr.drain<void>(),
   ]);
   throw const CredentialUseFailure('process_start_failed');
+}
+
+/// Owns the original job before the target PID was acknowledged. Keep draining
+/// and holding the capacity/configuration even though no target identity can be
+/// claimed. A dead worker does not imply its descendants ended.
+class _UncertainCredentialLaunch implements Exception {
+  _UncertainCredentialLaunch(this.worker, this.job);
+  final Process worker;
+  final CredentialProcessJob job;
+  bool treeEnded = false;
+  Future<void> monitor(_ExecutionOutput output) async {
+    final out = worker.stdout
+        .listen((data) => output.add('stdout', data))
+        .asFuture<void>();
+    final err = worker.stderr
+        .listen((data) => output.add('stderr', data))
+        .asFuture<void>();
+    try {
+      await worker.exitCode;
+      await Future.wait([out, err]);
+    } on Object {
+      /* Still wait for a conclusive group-end fact. */
+    }
+    while (true) {
+      try {
+        if (job.activeProcesses == 0) break;
+      } on Object {
+        /* Inconclusive inspection retains the slot and material. */
+      }
+      await Future<void>.delayed(const Duration(milliseconds: 40));
+    }
+    treeEnded = true;
+    job.close();
+  }
 }
 
 class _RuntimeWorkerProcess implements Process {
@@ -473,6 +540,7 @@ class _CredentialRuntimeExecutor {
     var materialLease = m.materialLease;
     var registeredFiles = false;
     var preparing = true;
+    _UncertainCredentialLaunch? uncertainLaunch;
     Future<void> report(String state, {String? code, int? exit}) async {
       await journal?.writeAsString(
         jsonEncode({
@@ -495,7 +563,9 @@ class _CredentialRuntimeExecutor {
           exitCode: exit,
           errorCode: code,
           startedAt: started,
-          finishedAt: state == 'running' ? null : DateTime.now().toUtc(),
+          finishedAt: {'running', 'unknown'}.contains(state)
+              ? null
+              : DateTime.now().toUtc(),
           jobName:
               m.jobName ??
               (process is _RuntimeWorkerProcess ? process.jobName : null),
@@ -756,6 +826,15 @@ class _CredentialRuntimeExecutor {
       output.complete = true;
       await report('exited', exit: result);
     } on Object catch (e) {
+      if (e is _UncertainCredentialLaunch) {
+        uncertainLaunch = e;
+        try {
+          await report('unknown', code: 'execution_unknown');
+        } on Object {
+          /* Preserve monitoring despite an unavailable receipt. */
+        }
+        await e.monitor(output);
+      }
       if (process != null) {
         // A reporting/identity failure cannot release a live process's slot or
         // dispose its isolated configuration while it still uses it.
@@ -777,12 +856,16 @@ class _CredentialRuntimeExecutor {
           : 'process_start_failed';
       try {
         await report(
-          process != null
+          process != null ||
+                  uncertainLaunch != null ||
+                  code == 'execution_unknown'
               ? 'unknown'
               : preparing
               ? 'prepare_failed'
               : 'start_failed',
-          code: process != null ? 'execution_unknown' : code,
+          code: process != null || uncertainLaunch != null
+              ? 'execution_unknown'
+              : code,
         );
       } on Object {
         /* No retry can start another process. */
@@ -810,6 +893,7 @@ class _CredentialRuntimeExecutor {
         }
       }
       if (folder != null &&
+          (uncertainLaunch == null || uncertainLaunch.treeEnded) &&
           (process is! _RuntimeWorkerProcess || process.treeEnded)) {
         try {
           await folder.delete(recursive: true);
