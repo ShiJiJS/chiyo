@@ -258,5 +258,23 @@
     "compare-r3/purple-1440-aws-pending/page.png": "aaa03606723309ba61f340eae18ae8a1d669a3408bf537c57d8067ff31aa9274",
     "compare-r3/purple-1440-ssh-pending/page-compare.png": "d04df47b798eb8fc87c0543653c684982500b98d48cc5e5cf41bf881ffbb1f20",
     "compare-r3/purple-1440-ssh-pending/page.png": "69b43dc8f24203811e13383fcc1748308aace7ff3ca96dbbe7569b24b2f3f27c"
+  },
+  "parentVerification": {
+    "productionMergeCommit": "613493afe27b096ca3fc72141364473086d9d567",
+    "qaDriverOnlyPatch": "adds --checks orchestration; production source unchanged",
+    "headlessPassed": 325,
+    "skipped": 0,
+    "nativeRepetitions": 1,
+    "sshCases": 4,
+    "raw": {
+      "raw/d7-root-check.log": {
+        "sha256": "a44e0e37b5f4537ff9a9593336df353b7b5c32ed6bd1d63302bc78a3819a7ad6",
+        "bytes": 84985
+      },
+      "raw/d7-root-native.log": {
+        "sha256": "c0e0e57a8207a4f0b23cd3d6853f8cfdcb8145146e6ab29444f181f5ce0e2a8e",
+        "bytes": 916
+      }
+    }
   }
 }

@@ -22,7 +22,7 @@ def docker(*args):
     return p.stdout.strip()
 
 def main():
-    parser=argparse.ArgumentParser();mode=parser.add_mutually_exclusive_group();mode.add_argument('--native',action='store_true');mode.add_argument('--suite',action='store_true');parser.add_argument('--repeat',type=int,default=1);args=parser.parse_args()
+    parser=argparse.ArgumentParser();mode=parser.add_mutually_exclusive_group();mode.add_argument('--native',action='store_true');mode.add_argument('--suite',action='store_true');mode.add_argument('--checks',action='store_true');parser.add_argument('--repeat',type=int,default=1);args=parser.parse_args()
     assert 1<=args.repeat<=3
     runs=REPO/'.scratch/ssh-native-runs'
     runs.mkdir(parents=True,exist_ok=True)
@@ -42,7 +42,7 @@ def main():
         binding=docker('port',container,'2222/tcp')
         assert binding.startswith('127.0.0.1:')
         env=os.environ.copy()
-        material_temp=root/('materials' if args.suite else '材料 空格');material_temp.mkdir()
+        material_temp=root/('materials' if args.suite or args.checks else '材料 空格');material_temp.mkdir()
         env.update({'D7_SSH_FIXTURE':str(output),'D7_SSH_PORT':binding.split(':')[-1],
           'TEMP':str(material_temp),'TMP':str(material_temp),
           'D7_SSH_EXE':str(Path(os.environ['SystemRoot'])/'System32/OpenSSH/ssh.exe')})
@@ -53,14 +53,16 @@ def main():
               '--dart-define=CLI_EXECUTABLE='+str(REPO/'.scratch/d7-aot/info.exe'),
               '--dart-define=SSH_EXECUTABLE='+env['D7_SSH_EXE'],'--dart-define=SSH_FIXTURE='+str(output),'--dart-define=SSH_FIXTURE_PORT='+env['D7_SSH_PORT']]
             cwd=REPO/'apps/desktop'
+        elif args.checks:
+            command=['pwsh.exe','-NoProfile','-File',str(REPO/'scripts/check.ps1'),'-FlutterBin',str(Path.home()/'.local/share/flutter/bin'),'-Offline'];cwd=REPO
         else:
             command=[str(dart),'test',*([] if args.suite else ['test/ssh_receiver_native_test.dart'])];cwd=REPO/'packages/info_cli'
-            if args.suite:
-                env['D6_COMPILED_CLI']=str(REPO/'.scratch/d7-aot/info.exe')
-                assert Path(env['D6_COMPILED_CLI']).is_file()
-                assert Path(env['D7_AWS_EXE']).is_file()
+        if args.suite or args.checks:
+            env['D6_COMPILED_CLI']=str(REPO/'.scratch/d7-aot/info.exe')
+            assert Path(env['D6_COMPILED_CLI']).is_file()
+            assert Path(env['D7_AWS_EXE']).is_file()
         for _ in range(args.repeat):
-            p=subprocess.run(command,cwd=cwd,env=env,timeout=240 if args.native else 100)
+            p=subprocess.run(command,cwd=cwd,env=env,timeout=240 if args.native else 180 if args.checks else 100)
             if p.returncode:break
     finally:
         try:
