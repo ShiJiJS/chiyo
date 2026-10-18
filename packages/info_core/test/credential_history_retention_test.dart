@@ -4,6 +4,52 @@ import 'credential_use_test.dart' show tokenRequest;
 
 void main() {
   test(
+    'one ended operation cannot prune an earlier active operation of the same grant',
+    () async {
+      var now = DateTime.utc(2026, 10, 1);
+      final repository = MemoryInformationRepository();
+      final (service, session, request) = await tokenRequest(
+        repository: repository,
+        clock: () => now,
+      );
+      addTearDown(service.close);
+      await service.owner.decideCredentialUse(
+        request.id,
+        approveCredential: true,
+      );
+      final first = await service.agent.consumeCredentialUse(
+        session,
+        request.id,
+      );
+      // A reusable grant owns several independent execution facts. The newer
+      // terminal record must not hide an older preparing/running process group.
+      await repository
+          .commitCredentialRuntime(repository.credentialUseRequests, [
+            ...repository.credentialExecutions,
+            CredentialExecution(
+              id: 'later-terminal-operation',
+              requestId: request.id,
+              state: 'start_failed',
+              errorCode: 'process_start_failed',
+              finishedAt: now,
+            ),
+          ]);
+      now = DateTime.utc(2026, 12, 1);
+      final preview = await service.owner.previewAuditRetention(30);
+      expect(preview.credentialRequests, 0);
+      expect(preview.credentialExecutions, 0);
+      await service.owner.pruneCredentialUseHistory();
+      expect(service.owner.credentialUseRequests, hasLength(1));
+      expect(service.owner.credentialExecutions, hasLength(2));
+      expect(
+        service.owner.credentialExecutions.any(
+          (e) => e.id == first.executionId,
+        ),
+        isTrue,
+      );
+    },
+  );
+  test(
     'retention previews and removes only ended credential facts while keeping an execution whose end cannot be established',
     () async {
       var now = DateTime.utc(2026, 10, 1);

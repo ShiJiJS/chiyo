@@ -143,6 +143,13 @@ class LaunchValue {
       kind == LaunchValueKind.literal ? value : {kind.name: value};
 }
 
+int _useProtocol(Map<String, dynamic> json) {
+  if (!json.containsKey('protocolVersion')) return 1;
+  final raw = json['protocolVersion'];
+  if (raw is int && (raw == 1 || raw == 2)) return raw;
+  throw const CredentialUseFailure('unsupported_protocol');
+}
+
 class CredentialUseInput {
   CredentialUseInput._(
     this.purpose,
@@ -151,16 +158,19 @@ class CredentialUseInput {
     this.version,
     this.launch,
     this.readFields,
+    this.protocolVersion,
   );
   final String purpose, alias, credentialId;
   final int version;
+  final int protocolVersion;
   final CredentialLaunchPlan launch;
   final List<FieldRef> readFields;
   factory CredentialUseInput.fromJson(Map<String, dynamic> j) {
+    final protocolVersion = _useProtocol(j);
     _useShape(
       j,
       {'command', 'purpose', 'credentials', 'launch'},
-      {'readFields'},
+      {'readFields', 'protocolVersion'},
     );
     if (j['command'] != 'request-use') {
       throw const CredentialUseFailure('invalid_plan');
@@ -230,6 +240,7 @@ class CredentialUseInput {
       version,
       CredentialLaunchPlan.parse(launch),
       List.unmodifiable(fields),
+      protocolVersion,
     );
   }
 }
@@ -545,6 +556,7 @@ class CredentialLaunchPlan {
 
 class CredentialUseRequest {
   CredentialUseRequest({
+    this.protocolVersion = 1,
     required this.id,
     required this.chatLabel,
     required this.purpose,
@@ -574,6 +586,7 @@ class CredentialUseRequest {
        approvedFields = List.unmodifiable(approvedFields);
   final String id, chatLabel, purpose, alias, credentialId, state;
   final int version, useGeneration;
+  final int protocolVersion;
   final CredentialLaunchPlan plan;
   final CredentialLaunchPlan? requestedPlan;
   final DateTime createdAt, requestExpiresAt;
@@ -585,6 +598,7 @@ class CredentialUseRequest {
   final DateTime? decidedAt, revokedAt, attemptedAt;
   final DateTime? restoredAt;
   Map<String, Object?> toJson() => {
+    if (protocolVersion != 1) 'protocolVersion': protocolVersion,
     'id': id,
     'chatLabel': chatLabel,
     'purpose': purpose,
@@ -613,6 +627,7 @@ class CredentialUseRequest {
   };
   factory CredentialUseRequest.fromJson(Map<String, dynamic> j) =>
       CredentialUseRequest(
+        protocolVersion: _useProtocol(j),
         id: j['id'] as String,
         chatLabel: j['chatLabel'] as String,
         purpose: j['purpose'] as String,
@@ -667,6 +682,7 @@ class CredentialUseRequest {
       CredentialUseRequest.fromJson({...toJson(), ...values});
   Map<String, Object?> toStorageJson() => toJson();
   Map<String, Object?> toRequestInputJson() => {
+    if (protocolVersion != 1) 'protocolVersion': protocolVersion,
     'command': 'request-use',
     'purpose': purpose,
     'credentials': [

@@ -21,3 +21,9 @@ index.html是唯一完整交互入口。baseline-index.html保存已确认基线
 `node check-flows.cjs`检查包含扩展后的15项基线状态，`node check-attachments.cjs`检查14项附件设计边界。两者不能替代后续SQLCipher/真实CLI/Flutter验收。文件交付历史状态使用预置的交付事实，不伪装实际启动了CLI或上传网站。
 
 服务和字段合同见[接口合同](../../attachment-interface-contract.md)，消费者及逐页责任见[客户端规划](../../windows-attachment-client-plan.md)。本轮沿用四主题、三栏、现有字体/控件；自检而无独立子Agent评审。#33再补授权复用原型，#37/#38接真实文件IO和生产界面。
+
+## #33 复用目标原型（实施中）
+
+`reuse.js`、`reuse-history.html`和`reuse-assembly.cjs`在同一入口扩展新批准及多操作历史：`?state=reuse-approval`、`reuse-result`、`reuse-history`、`reuse-running`、`reuse-failed`、`reuse-unknown`、`reuse-revoked`。`node check-reuse.cjs`检查6项复用设计状态；旧15项基线用显式legacy夹具保留v1历史合同，当前新复用目标另行检查。
+
+字段与凭据的期限分别显示，逐次操作命令是不可执行的虚构状态数据；没有调用真实CLI/SSH。服务目标见[v2合同](../../runtime-protocol-v2.md)，生产复用能力仍需#33继续实现与验证。

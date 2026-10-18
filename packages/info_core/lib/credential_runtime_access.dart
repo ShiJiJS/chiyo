@@ -332,6 +332,7 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
     );
     final now = _service._clock().toUtc();
     final request = CredentialUseRequest(
+      protocolVersion: input.protocolVersion,
       id: _service._secret(),
       chatLabel: _service._sessions[session]!,
       purpose: input.purpose,
@@ -555,6 +556,9 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
     String? supervisorCreatedAt,
   }) => _service.owner._serialize(() async {
     final r = _service._sessionUseRequest(session, id);
+    if (r.protocolVersion != 1) {
+      throw const CredentialUseFailure('operation_required');
+    }
     if (r.attemptConsumed) {
       throw CredentialUseFailure(
         'attempt_consumed',

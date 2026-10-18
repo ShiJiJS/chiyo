@@ -36,6 +36,7 @@ Future<(InformationService, String, CredentialUseRequest)> tokenRequest({
   MemoryInformationRepository? repository,
   List<String> argv = const ['api', 'user', '--method', 'GET'],
   DateTime Function()? clock,
+  int protocolVersion = 1,
 }) async {
   final service = InformationService(
     repository: repository ?? MemoryInformationRepository(),
@@ -61,6 +62,7 @@ Future<(InformationService, String, CredentialUseRequest)> tokenRequest({
   final request = await service.agent.requestCredentialUse(
     session,
     CredentialUseInput.fromJson({
+      if (protocolVersion != 1) 'protocolVersion': protocolVersion,
       'command': 'request-use',
       'purpose': 'Synthetic task',
       'credentials': [

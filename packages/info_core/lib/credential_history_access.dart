@@ -4,12 +4,18 @@ extension _CredentialHistoryService on InformationService {
   Set<String> _credentialHistoryPruneIds(DateTime cutoff) {
     if (_repository is! CredentialRuntimeRepository) return {};
     final repo = _repository as CredentialRuntimeRepository;
-    final executions = {
-      for (final e in repo.credentialExecutions) e.requestId: e,
-    };
+    final executions = <String, List<CredentialExecution>>{};
+    for (final execution in repo.credentialExecutions) {
+      executions.putIfAbsent(execution.requestId, () => []).add(execution);
+    }
     return {
       for (final r in repo.credentialUseRequests)
-        if (_credentialHistoryCanPrune(r, executions[r.id], cutoff)) r.id,
+        if (executions.containsKey(r.id)
+            ? executions[r.id]!.every(
+                (e) => _credentialHistoryCanPrune(r, e, cutoff),
+              )
+            : _credentialHistoryCanPrune(r, null, cutoff))
+          r.id,
     };
   }
 
