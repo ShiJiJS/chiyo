@@ -11,9 +11,9 @@ dependencies:
     path: ../../packages/info_core
   info_storage:
     path: ../../packages/info_storage
-dev_dependencies:
   info_cli:
     path: ../../packages/info_cli
+dev_dependencies:
   flutter_test:
     sdk: flutter
   integration_test:

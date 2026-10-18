@@ -1,4 +1,6 @@
 import 'package:flutter/foundation.dart';
+import 'dart:io';
+import 'package:info_cli/credential_execution_host.dart';
 import 'package:info_core/agent_server.dart';
 import 'package:info_core/info_core.dart';
 import 'package:info_storage/info_storage.dart';
@@ -23,14 +25,17 @@ class DesktopBootstrap extends ChangeNotifier {
     required this.openLibrary,
     required this.platform,
     this.port = 47125,
+    this.credentialWorkerExecutable,
   });
   final Future<DesktopLibrary> Function() openLibrary;
   final DesktopPlatform platform;
   final int port;
+  final String? credentialWorkerExecutable;
   DesktopStartupState state = DesktopStartupState.idle;
   DesktopLibrary? library;
   DesktopRuntime? runtime;
   AgentServer? _server;
+  CredentialExecutionHost? _credentialExecutions;
   int? boundPort;
   bool cleanupPending = false;
 
@@ -44,12 +49,36 @@ class DesktopBootstrap extends ChangeNotifier {
     try {
       await _release();
       library = await openLibrary();
-      _server = await AgentServer.start(library!.service.agent, port: port);
+      _server = await AgentServer.start(
+        library!.service.agent,
+        port: port,
+        credentialExecutionHandler: (session, input) {
+          final host = _credentialExecutions;
+          return host == null
+              ? Future.value(
+                  Map<String, dynamic>.from(
+                    const CredentialUseFailure('service_unavailable').toJson(),
+                  ),
+                )
+              : host.execute(session, input);
+        },
+      );
       boundPort = _server!.port;
+      final server = _server!;
+      final host = CredentialExecutionHost(
+        port: boundPort!,
+        workerExecutable:
+            credentialWorkerExecutable ??
+            '${File(Platform.resolvedExecutable).parent.path}/info-runtime-worker.exe',
+      );
+      _credentialExecutions = host;
       runtime = DesktopRuntime(
         service: library!.service,
         platform: platform,
-        closeServer: _server!.close,
+        closeServer: () async {
+          host.close();
+          await server.close();
+        },
         closeRepository: library!.close,
       );
       await runtime!.start();
@@ -78,6 +107,7 @@ class DesktopBootstrap extends ChangeNotifier {
       await active.stop();
       active.dispose();
     } else if (library case final opened?) {
+      _credentialExecutions?.close();
       await Future.wait([
         opened.service.close(),
         if (_server case final server?) server.close(),
@@ -86,6 +116,7 @@ class DesktopBootstrap extends ChangeNotifier {
     }
     runtime = null;
     _server = null;
+    _credentialExecutions = null;
     library = null;
     cleanupPending = false;
   }
