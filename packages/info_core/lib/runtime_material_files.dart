@@ -41,6 +41,9 @@ class ManagedCredentialFiles {
   static CredentialMaterialLease create() {
     if (!Platform.isWindows) throw const RuntimeMaterialFailure('unsupported');
     final parent = Directory.systemTemp.resolveSymbolicLinksSync();
+    if (!RegExp(r'^[A-Za-z]:[/\\]').hasMatch(parent)) {
+      throw const RuntimeMaterialFailure('prepare_failed');
+    }
     final nonce = base64Url.encode(
       List.generate(24, (_) => Random.secure().nextInt(256)),
     );
@@ -59,12 +62,17 @@ class ManagedCredentialFiles {
   }
 
   static int _parent(CredentialMaterialLease lease, {bool deleting = false}) {
-    final root = Directory.systemTemp.resolveSymbolicLinksSync().toLowerCase();
     final parent = Directory(lease.path).parent.path.toLowerCase();
+    // The desktop, not the invoking CLI's TEMP environment, chose this path.
+    // Its immutable registry entry and OS identity/DACL are the authority.
+    final canonicalParent = Directory(
+      lease.path,
+    ).parent.resolveSymbolicLinksSync().toLowerCase();
     final name = Directory(
       lease.path,
     ).uri.pathSegments.where((s) => s.isNotEmpty).last;
-    if (parent != root ||
+    if (!RegExp(r'^[A-Za-z]:[/\\]').hasMatch(lease.path) ||
+        parent != canonicalParent ||
         !RegExp(r'^info-managed-[A-Za-z0-9_-]{32}$').hasMatch(name)) {
       throw const RuntimeMaterialFailure('identity_mismatch');
     }
@@ -226,6 +234,8 @@ final class _SecurityAttributes extends Struct {
 class _WindowsMaterialFiles {
   final kernel = DynamicLibrary.open('kernel32.dll'),
       security = DynamicLibrary.open('advapi32.dll');
+  late final _lastError = kernel
+      .lookupFunction<Uint32 Function(), int Function()>('GetLastError');
   late final close = kernel
       .lookupFunction<Int32 Function(IntPtr), int Function(int)>('CloseHandle');
   late final free = kernel
@@ -376,7 +386,8 @@ class _WindowsMaterialFiles {
       }
       final data = calloc<Uint8>(length.value);
       try {
-        if (_tokenInfo(token.value, 1, data.cast(), length.value, length) == 0) {
+        if (_tokenInfo(token.value, 1, data.cast(), length.value, length) ==
+            0) {
           throw const RuntimeMaterialFailure('permissions');
         }
         return _sid(data.cast<Pointer<Void>>().value);
@@ -460,7 +471,14 @@ class _WindowsMaterialFiles {
         0x00200000 | (directory ? 0x02000000 : 0),
         0,
       );
-      if (handle == -1) throw const RuntimeMaterialFailure('identity_mismatch');
+      // Capture before allocating collections or making another native call.
+      final error = _lastError();
+      if (handle == -1) {
+        if (deleting && {32, 33}.contains(error)) {
+          throw const RuntimeMaterialFailure('cleanup_failed');
+        }
+        throw const RuntimeMaterialFailure('identity_mismatch');
+      }
       return handle;
     } finally {
       calloc.free(native);

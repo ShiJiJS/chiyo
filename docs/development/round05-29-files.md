@@ -14,6 +14,14 @@
 
 ## 尚未完成
 
-真实AWS产品执行链、SSH参数交付/已确认主机快照及对应原型页面、清理失败/异常/重启核查、SQLCipher重开、完整协议负例和全套主集成回归均待后续。当前未知状态保守保留材料并标needs_check，不冒充自动恢复清理完成。未合并到主集成，#29保持OPEN，不能将此版本作为正式文件运行或凭据备份交付。
+SSH参数交付/已确认主机快照及对应原型页面、审计失败/身份替换/异常重启核查、SQLCipher重开、完整协议负例和全套主集成回归均待后续。当前未知状态保守保留材料并标needs_check，不冒充自动恢复清理完成。未合并到主集成，#29保持OPEN，不能将此版本作为正式文件运行或凭据备份交付。
+
+## 真实工具与跨进程增量
+
+真实AWS CLI 2.38.1通过公开AgentClient、受管worker和文件准备运行：身份查询、SSM非秘密参数写入及读回均退出0；本地服务端独立验证完整SigV4签名。相同虚构access key但错误secret得到403/exit254，四次执行的文件清理均complete，没有继承当前账号配置。工具SHA与前次预检相同；本轮是产品执行链，原预检未被拿来冒充完成。原始 `.d7-aws-real.log`，9秒通过。
+
+真实文件被独立进程占用时，任务保留exit7，清理单独failed；释放后cleanup-use只重试清理，退出码不变、启动不能重放。红测试还暴露Windows错误码必须在分配Dart集合/后续原生调用前立即读取，已修正并回归。
+
+实际独立服务和JSON-lines CLI进程使用不同TEMP时，先前把CLI自己的TEMP误当成服务登记目录的权威，导致准备失败。现按服务私密登记的固定路径、真实目录/文件身份及protected DACL核对，同时拒绝非本地路径和非规范父路径；不根据调用方TEMP改写或扩大目录。中文/空格材料目录及工作位置的真实JSON-lines与子进程通过，所有材料清理完毕。独立PowerShell ACL核验器明确以UTF-8读取JSON，避免中文路径被测试工具误解码。
 
 文件权限与清理集中在受管材料模块；实现核查依据：[CreateFileW](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilew)、[GetSecurityInfo](https://learn.microsoft.com/en-us/windows/win32/api/aclapi/nf-aclapi-getsecurityinfo)、[SetFileInformationByHandle](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-setfileinformationbyhandle)。真实DACL检查与子进程行为作为验证，不以“调用过权限函数”代替结果。

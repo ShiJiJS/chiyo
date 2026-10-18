@@ -14,6 +14,7 @@ Future<void> main(List<String> args) async {
       '-NonInteractive',
       '-Command',
       r'''
+[Console]::InputEncoding=[Text.UTF8Encoding]::new($false)
 $paths=[Console]::In.ReadToEnd() | ConvertFrom-Json
 $sid=[Security.Principal.WindowsIdentity]::GetCurrent().User.Value
 $valid=$true

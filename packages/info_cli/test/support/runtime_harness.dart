@@ -21,19 +21,21 @@ class RuntimeHarness {
     CredentialProcessStarter? starter,
     String? executablePath,
     List<int>? fileBytes,
+    bool inspectTool = false,
   }) async {
     final exe = File(executablePath ?? Platform.resolvedExecutable);
     final stat = await exe.stat();
     final digest = 'sha256:${sha256.convert(await exe.readAsBytes())}';
     final service = InformationService(
       repository: MemoryInformationRepository(),
-      credentialExecutableInspector: (path, receiver) async =>
-          ExecutableIdentity(
-            path,
-            stat.size,
-            stat.modified.microsecondsSinceEpoch,
-            digest,
-          ),
+      credentialExecutableInspector: inspectTool
+          ? inspectCredentialExecutable
+          : (path, receiver) async => ExecutableIdentity(
+              path,
+              stat.size,
+              stat.modified.microsecondsSinceEpoch,
+              digest,
+            ),
     );
     final server = await AgentServer.start(service.agent, port: 0);
     final client = AgentClient(server.port, credentialProcessStarter: starter);
@@ -100,6 +102,15 @@ class RuntimeHarness {
 
   Future<void> close() async {
     await client.drainCredentialExecutions();
+    for (final execution in service.owner.credentialExecutions.where(
+      (e) => e.materialLease != null && e.cleanupState != 'complete',
+    )) {
+      try {
+        await service.owner.cleanupCredentialExecution(execution.id);
+      } on CredentialUseFailure {
+        /* Preserve any active or unknown test resource. */
+      }
+    }
     client.close();
     await server.close();
     await service.close();

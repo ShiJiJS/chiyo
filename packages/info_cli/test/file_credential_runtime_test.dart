@@ -1,9 +1,126 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:async';
 import 'package:test/test.dart';
 import 'support/runtime_harness.dart';
 
 void main() {
+  test(
+    'a locked credential file reports cleanup failure independently from exit7, then retries cleanup without replay',
+    () async {
+      final fixture = await Directory.systemTemp.createTemp(
+        'runtime-lock-fixture-',
+      );
+      final releaseFile = File('${fixture.path}/release');
+      Process? locker;
+      StreamIterator<String>? lines;
+      Future<void>? errors;
+      late String materialPath;
+      final h = await RuntimeHarness.create(
+        fileBytes: utf8.encode(
+          '[default]\naws_access_key_id=TEST_ACCESS_ONLY\naws_secret_access_key=SYNTHETIC_NOT_A_REAL_SECRET\n',
+        ),
+        starter: (exe, argv, cwd, env) async {
+          materialPath = env['AWS_SHARED_CREDENTIALS_FILE']!;
+          final system = env['SystemRoot']!;
+          locker = await Process.start(
+            '$system/System32/WindowsPowerShell/v1.0/powershell.exe',
+            const [
+              '-NoLogo',
+              '-NoProfile',
+              '-NonInteractive',
+              '-Command',
+              r'''$inputData=[Console]::In.ReadToEnd()|ConvertFrom-Json;$f=[IO.File]::Open($inputData.path,[IO.FileMode]::Open,[IO.FileAccess]::Read,[IO.FileShare]::None);[Console]::Out.WriteLine('locked');[Console]::Out.Flush();$deadline=[DateTime]::UtcNow.AddSeconds(15);while(-not [IO.File]::Exists($inputData.release)){if([DateTime]::UtcNow -gt $deadline){break};Start-Sleep -Milliseconds 20};$f.Dispose()''',
+            ],
+            environment: {'SystemRoot': system, 'WINDIR': system},
+            includeParentEnvironment: false,
+            runInShell: false,
+          );
+          lines = StreamIterator(
+            locker!.stdout
+                .transform(utf8.decoder)
+                .transform(const LineSplitter()),
+          );
+          errors = locker!.stderr.drain<void>();
+          locker!.stdin.write(
+            jsonEncode({'path': materialPath, 'release': releaseFile.path}),
+          );
+          await locker!.stdin.close();
+          expect(
+            await lines!.moveNext().timeout(const Duration(seconds: 5)),
+            isTrue,
+          );
+          expect(lines!.current, 'locked');
+          return Process.start(
+            exe,
+            [File('test/support/credential_exit_child.dart').absolute.path],
+            workingDirectory: cwd,
+            environment: env,
+            includeParentEnvironment: false,
+            runInShell: false,
+          );
+        },
+      );
+      Future<void> release() async {
+        if (locker == null) return;
+        try {
+          await releaseFile.writeAsString('release');
+          await lines!.cancel();
+          await locker!.exitCode.timeout(const Duration(seconds: 5));
+        } on TimeoutException {
+          locker!.kill();
+          await locker!.exitCode;
+          rethrow;
+        } finally {
+          await lines!.cancel();
+          await errors;
+          locker = null;
+        }
+      }
+
+      addTearDown(() async {
+        await release();
+        await h.close();
+        if (await releaseFile.exists()) await releaseFile.delete();
+        await fixture.delete();
+      });
+      final request = await h.approve(
+        argv: ['sts', 'get-caller-identity', '--region', 'us-east-1'],
+      );
+      final run = await h.client.execute({
+        'command': 'run-use',
+        'requestId': request,
+      });
+      await h.client.drainCredentialExecutions();
+      Future<Map<String, dynamic>> status() => h.client.execute({
+        'command': 'execution-status',
+        'executionId': run['executionId'],
+      });
+      final failed = await status();
+      expect(failed['executionState'], 'exited');
+      expect(failed['exitCode'], 7);
+      expect(failed['cleanupState'], 'failed');
+      expect(await File(materialPath).exists(), isTrue);
+      await release();
+      expect(
+        (await h.client.execute({
+          'command': 'cleanup-use',
+          'executionId': run['executionId'],
+        }))['cleanupState'],
+        'complete',
+      );
+      expect((await status())['exitCode'], 7);
+      expect(await File(materialPath).exists(), isFalse);
+      expect(
+        (await h.client.execute({
+          'command': 'run-use',
+          'requestId': request,
+        }))['errorCode'],
+        'attempt_consumed',
+      );
+    },
+    skip: !Platform.isWindows,
+  );
   test(
     'approved AWS file use privately prepares exact material, runs a real receiver and cleans files after exit',
     () async {
