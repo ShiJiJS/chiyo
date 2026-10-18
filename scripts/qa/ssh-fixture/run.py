@@ -10,6 +10,7 @@ import subprocess
 import tempfile
 import time
 import argparse
+import sys
 
 BASE=Path(__file__).resolve().parent
 REPO=BASE.parents[2]
@@ -22,9 +23,10 @@ def docker(*args):
     return p.stdout.strip()
 
 def main():
-    parser=argparse.ArgumentParser();mode=parser.add_mutually_exclusive_group();mode.add_argument('--native',action='store_true');mode.add_argument('--suite',action='store_true');mode.add_argument('--checks',action='store_true');mode.add_argument('--package-output',type=Path);parser.add_argument('--repeat',type=int,default=1);parser.add_argument('--cli-executable',type=Path);parser.add_argument('--native-test',choices=['file_runtime_native_test.dart','hosted_runtime_native_test.dart'],default='file_runtime_native_test.dart');args=parser.parse_args()
+    parser=argparse.ArgumentParser();mode=parser.add_mutually_exclusive_group();mode.add_argument('--native',action='store_true');mode.add_argument('--suite',action='store_true');mode.add_argument('--checks',action='store_true');mode.add_argument('--package-output',type=Path);mode.add_argument('--crash-probe',type=Path);parser.add_argument('--repeat',type=int,default=1);parser.add_argument('--cli-executable',type=Path);parser.add_argument('--native-test',choices=['file_runtime_native_test.dart','hosted_runtime_native_test.dart'],default='file_runtime_native_test.dart');args=parser.parse_args()
     assert 1<=args.repeat<=3
     assert not args.package_output or args.repeat==1
+    assert not args.crash_probe or args.repeat==1
     cli=(args.cli_executable or REPO/'.scratch/d7-aot/info.exe').resolve()
     runs=REPO/'.scratch/ssh-native-runs'
     runs.mkdir(parents=True,exist_ok=True)
@@ -66,6 +68,9 @@ def main():
             command=['pwsh.exe','-NoProfile','-File',str(REPO/'scripts/check.ps1'),'-FlutterBin',str(Path.home()/'.local/share/flutter/bin'),'-Offline'];cwd=REPO
         elif args.package_output:
             command=['pwsh.exe','-NoProfile','-File',str(REPO/'scripts/package-windows.ps1'),'-FlutterBin',str(Path.home()/'.local/share/flutter/bin'),'-OutputDirectory',str(args.package_output.resolve()),'-Offline'];cwd=REPO
+        elif args.crash_probe:
+            command=[sys.executable,str(BASE.parent/'windows-hosted-crash.py'),
+              '--app',str(args.crash_probe.resolve()),'--worker',str(cli.parent/'info-runtime-worker.exe')];cwd=REPO
         else:
             command=[str(dart),'test',*([] if args.suite else ['test/ssh_receiver_native_test.dart'])];cwd=REPO/'packages/info_cli'
         if args.suite or args.checks or args.package_output:
