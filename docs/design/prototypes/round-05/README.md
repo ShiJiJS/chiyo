@@ -11,3 +11,13 @@
 index.html是唯一完整交互入口。baseline-index.html保存已确认基线，旧碎片HTML作为来源归档；新增在lifecycle.js/css和lifecycle-surfaces.html。运行 `node assemble-lifecycle.cjs` 从基线重新组合，重复运行结果一致，不依赖Git历史或原video_viewer。`node check-flows.cjs`运行15项设计状态检查。
 
 直接查看：`?state=editor`、`scope`、`proposal-edit`、`credential-rotate`、`credential-discovery`、`backup-enable`、`restore-preview`、`execution-start_failed`、`execution-token`、`no-results`、`large-data`；完整清单见覆盖表。异常验收通过URL，不显示在产品流程。纯HTML不读取所选文件内容、不生成可用恢复密钥；文件选择和另存是交互设计，真实IO/加密由后续票实现。
+
+## #36 普通文件字段扩展
+
+`attachments.js/css`、`attachment-surfaces.html`及`attachments-assembly.cjs`扩展既有视觉和流程；组装器从原基线重新组合，不手改生成入口。`?state=attachment-library`进入虚构“求职资料”混合样本；`theme=purple|green|blue|mono`选择主题。
+
+附件状态：`attachment-editor`、`attachment-file-field`、`attachment-empty-file`、`attachment-failure`、`attachment-long-name`、`attachment-only-file`、`attachment-too-large`、`attachment-converted`、`attachment-template`、`attachment-public`、`attachment-approval`、`attachment-history`、`attachment-trash`、`attachment-revision`、`attachment-restore`、`attachment-proposal`。均用同一个入口，不另造文件库导航。常规编辑中可切换文件类型并用浏览器选择文件；原型只取文件元数据，不读取或持久化原字节。
+
+`node check-flows.cjs`检查包含扩展后的15项基线状态，`node check-attachments.cjs`检查14项附件设计边界。两者不能替代后续SQLCipher/真实CLI/Flutter验收。文件交付历史状态使用预置的交付事实，不伪装实际启动了CLI或上传网站。
+
+服务和字段合同见[接口合同](../../attachment-interface-contract.md)，消费者及逐页责任见[客户端规划](../../windows-attachment-client-plan.md)。本轮沿用四主题、三栏、现有字体/控件；自检而无独立子Agent评审。#33再补授权复用原型，#37/#38接真实文件IO和生产界面。
