@@ -5,6 +5,8 @@ import 'dart:io';
 import 'package:crypto/crypto.dart';
 import 'runtime_process_identity.dart';
 export 'runtime_process_identity.dart';
+import 'runtime_material_files.dart';
+export 'runtime_material_files.dart';
 import 'package:unorm_dart/unorm_dart.dart' as unorm;
 import 'credentials.dart';
 export 'credentials.dart';
@@ -37,6 +39,8 @@ part 'library_access.dart';
 part 'credential_access.dart';
 part 'credential_runtime_models.dart';
 part 'credential_runtime_access.dart';
+part 'credential_file_receivers.dart';
+part 'credential_material_access.dart';
 part 'proposal_access.dart';
 
 class AccessFailure implements Exception {

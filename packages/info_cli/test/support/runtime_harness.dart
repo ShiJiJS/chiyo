@@ -20,6 +20,7 @@ class RuntimeHarness {
   static Future<RuntimeHarness> create({
     CredentialProcessStarter? starter,
     String? executablePath,
+    List<int>? fileBytes,
   }) async {
     final exe = File(executablePath ?? Platform.resolvedExecutable);
     final stat = await exe.stat();
@@ -36,11 +37,18 @@ class RuntimeHarness {
     );
     final server = await AgentServer.start(service.agent, port: 0);
     final client = AgentClient(server.port, credentialProcessStarter: starter);
-    var c = await service.owner.createStringCredential(
-      name: 'Synthetic',
-      publicPurpose: '',
-      secret: 'synthetic-token',
-    );
+    var c = fileBytes == null
+        ? await service.owner.createStringCredential(
+            name: 'Synthetic',
+            publicPurpose: '',
+            secret: 'synthetic-token',
+          )
+        : await service.owner.createFileCredential(
+            name: 'Synthetic file',
+            publicPurpose: '',
+            fileName: 'credentials.ini',
+            bytes: fileBytes,
+          );
     c = await service.owner.updateCredentialMetadata(
       c.id,
       c.revision,
@@ -68,12 +76,17 @@ class RuntimeHarness {
         {'alias': 'token', 'credentialId': credential.id, 'version': 1},
       ],
       'launch': {
-        'receiver': 'gh_token',
+        'receiver': credential.form == CredentialForm.file
+            ? 'aws_shared_credentials'
+            : 'gh_token',
         'executable': executablePath,
         'argv': argv,
         'cwd': cwd ?? Directory.current.path,
         'env': {
-          'GH_TOKEN': {'secret': 'token'},
+          if (credential.form == CredentialForm.file)
+            'AWS_SHARED_CREDENTIALS_FILE': {'file': 'token'}
+          else
+            'GH_TOKEN': {'secret': 'token'},
         },
       },
     });

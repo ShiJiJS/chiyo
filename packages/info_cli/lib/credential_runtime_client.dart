@@ -221,17 +221,10 @@ extension _CredentialRuntimeClient on AgentClient {
             input['limit'] ?? 16,
           );
         case 'cleanup-use':
-          final status = await _call('/credential-use/execution/status', {
+          return await _call('/credential-use/cleanup', {
             'sessionSecret': _session,
             'executionId': identity,
           });
-          if (status['status'] != 'ok') return status;
-          return {
-            'protocolVersion': 1,
-            'status': 'ok',
-            'executionId': identity,
-            'cleanupState': status['cleanupState'],
-          };
       }
       throw const CredentialUseFailure('invalid_plan');
     } on CredentialUseFailure catch (e) {
@@ -415,6 +408,8 @@ class _CredentialRuntimeExecutor {
     String? created;
     Future<void>? stdoutDone, stderrDone;
     File? journal;
+    var materialLease = m.materialLease;
+    var registeredFiles = false;
     var preparing = true;
     Future<void> report(String state, {String? code, int? exit}) async {
       await journal?.writeAsString(
@@ -439,20 +434,60 @@ class _CredentialRuntimeExecutor {
           errorCode: code,
           startedAt: started,
           finishedAt: state == 'running' ? null : DateTime.now().toUtc(),
+          jobName: process is _RuntimeWorkerProcess ? process.jobName : null,
         ),
       );
     }
 
     try {
       final plan = m.approvedPlan;
-      final binding = plan.env['GH_TOKEN'];
-      if (plan.receiver != 'gh_token' ||
-          m.credentialMaterial.form != CredentialForm.string ||
-          binding?.kind != LaunchValueKind.secret ||
-          binding?.value != m.alias ||
-          m.credentialMaterial.bytes.isEmpty ||
-          m.credentialMaterial.stringValue.isEmpty) {
+      final tokenReceiver = plan.receiver == 'gh_token';
+      final binding =
+          plan.env[tokenReceiver ? 'GH_TOKEN' : 'AWS_SHARED_CREDENTIALS_FILE'];
+      if (tokenReceiver &&
+          (m.credentialMaterial.form != CredentialForm.string ||
+              binding?.kind != LaunchValueKind.secret ||
+              binding?.value != m.alias ||
+              m.credentialMaterial.bytes.isEmpty ||
+              m.credentialMaterial.stringValue.isEmpty)) {
         throw const CredentialUseFailure('material_prepare_failed');
+      }
+      if (!tokenReceiver) {
+        if (plan.receiver != 'aws_shared_credentials' ||
+            m.credentialMaterial.form != CredentialForm.file ||
+            binding?.kind != LaunchValueKind.file ||
+            binding?.value != m.alias ||
+            materialLease == null ||
+            materialLease.files.isNotEmpty ||
+            plan.env['AWS_CONFIG_FILE']?.kind !=
+                LaunchValueKind.internalMaterial ||
+            plan.env['AWS_CONFIG_FILE']?.value != 'aws_config') {
+          throw const CredentialUseFailure('material_prepare_failed');
+        }
+        validateAwsSharedCredentialFile(m.credentialMaterial.bytes);
+        materialLease = ManagedCredentialFiles.reserve(materialLease, [
+          'credential.bin',
+          'aws-config',
+        ]);
+        final registration = await client
+            ._call('/credential-use/materials/register', {
+              'executionId': m.executionId,
+              'executionCapability': m.executionCapability,
+              'lease': materialLease.toPrivateJson(),
+            });
+        if (registration['status'] != 'ok') {
+          throw const CredentialUseFailure(
+            'audit_unavailable',
+            attemptConsumed: true,
+          );
+        }
+        registeredFiles = true;
+        ManagedCredentialFiles.write(
+          materialLease,
+          'credential.bin',
+          m.credentialMaterial.bytes,
+        );
+        ManagedCredentialFiles.write(materialLease, 'aws-config', const []);
       }
       folder = await Directory.systemTemp.createTemp('info-runtime-');
       journal = File('${folder.path}/journal.json');
@@ -475,10 +510,20 @@ class _CredentialRuntimeExecutor {
         'APPDATA': config.path,
         'LOCALAPPDATA': config.path,
         'XDG_CONFIG_HOME': config.path,
-        'GH_CONFIG_DIR': config.path,
-        'GH_HOST': 'github.com',
-        'GH_PROMPT_DISABLED': '1',
-        'GH_TOKEN': m.credentialMaterial.stringValue,
+        if (tokenReceiver) ...{
+          'GH_CONFIG_DIR': config.path,
+          'GH_HOST': 'github.com',
+          'GH_PROMPT_DISABLED': '1',
+          'GH_TOKEN': m.credentialMaterial.stringValue,
+        } else ...{
+          'AWS_SHARED_CREDENTIALS_FILE':
+              '${materialLease!.path}${Platform.pathSeparator}credential.bin',
+          'AWS_CONFIG_FILE':
+              '${materialLease.path}${Platform.pathSeparator}aws-config',
+          'AWS_EC2_METADATA_DISABLED': 'true',
+          'AWS_PAGER': '',
+          'AWS_CLI_AUTO_PROMPT': 'off',
+        },
       };
       if (Platform.isWindows) {
         final system = Platform.environment['SystemRoot'];
@@ -583,6 +628,23 @@ class _CredentialRuntimeExecutor {
       output.active = false;
       output.finishedAt = DateTime.now();
       output.complete = true;
+      if (materialLease != null) {
+        if (!registeredFiles && process == null) {
+          try {
+            ManagedCredentialFiles.cleanup(materialLease);
+          } on Object {
+            /* Only this invocation's verified empty files may be removed. */
+          }
+        }
+        try {
+          await client._call('/credential-use/cleanup', {
+            'sessionSecret': client._session,
+            'executionId': m.executionId,
+          });
+        } on Object {
+          /* Persisted pending facts remain for recovery. */
+        }
+      }
       if (folder != null &&
           (process is! _RuntimeWorkerProcess || process.treeEnded)) {
         try {

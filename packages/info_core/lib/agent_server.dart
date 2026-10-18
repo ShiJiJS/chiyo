@@ -128,6 +128,34 @@ class AgentServer {
     Map<String, dynamic> body,
   ) async {
     switch (path) {
+      case '/credential-use/materials/register':
+        if (body.keys.any(
+          (k) => !{'executionId', 'executionCapability', 'lease'}.contains(k),
+        )) {
+          throw const CredentialUseFailure('unknown_field');
+        }
+        await _agent.registerCredentialMaterials(
+          _text(body, 'executionId'),
+          _text(body, 'executionCapability'),
+          CredentialMaterialLease.fromPrivateJson(
+            body['lease'] as Map<String, dynamic>,
+          ),
+        );
+        return {'protocolVersion': 1, 'status': 'ok'};
+      case '/credential-use/cleanup':
+        if (body.keys.any((k) => !{'sessionSecret', 'executionId'}.contains(k))) {
+          throw const CredentialUseFailure('unknown_field');
+        }
+        final execution = await _agent.cleanupCredentialExecution(
+          _text(body, 'sessionSecret'),
+          _text(body, 'executionId'),
+        );
+        return {
+          'protocolVersion': 1,
+          'status': 'ok',
+          'executionId': execution.id,
+          'cleanupState': execution.cleanupState,
+        };
       case '/credential-use/request':
         final session = _text(body, 'sessionSecret');
         final command = Map<String, dynamic>.from(body)
@@ -150,7 +178,9 @@ class AgentServer {
           CredentialExecutionReport.fromPrivateJson(body),
         )).toJson();
       case '/credential-use/execution/status':
-        if (body.keys.any((k) => !{'sessionSecret', 'executionId'}.contains(k))) {
+        if (body.keys.any(
+          (k) => !{'sessionSecret', 'executionId'}.contains(k),
+        )) {
           throw const CredentialUseFailure('unknown_field');
         }
         return _agent

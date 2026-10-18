@@ -134,6 +134,7 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
         old.processCreatedAt == report.processCreatedAt &&
         old.startedAt == report.startedAt &&
         old.finishedAt == report.finishedAt &&
+        old.jobName == report.jobName &&
         old.exitCode == report.exitCode &&
         old.errorCode == report.errorCode) {
       return old;
@@ -171,6 +172,12 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
       throw const CredentialUseFailure('invalid_plan');
     }
     if (next == 'running') {
+      if (report.jobName != null &&
+          !RegExp(
+            r'^Local\\AgentInfoRuntime-[A-Za-z0-9_-]{32}$',
+          ).hasMatch(report.jobName!)) {
+        throw const CredentialUseFailure('invalid_plan');
+      }
       final identity = CredentialProcessIdentity.capture(report.pid!);
       try {
         if (identity == null || identity.value != report.processCreatedAt) {
@@ -191,6 +198,9 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
       finishedAt: report.finishedAt,
       exitCode: report.exitCode,
       errorCode: report.errorCode,
+      materialLease: old.materialLease,
+      cleanupState: old.cleanupState,
+      jobName: report.jobName ?? old.jobName,
     );
     await _service._saveUse(execution: changed);
     return changed;
@@ -215,7 +225,13 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
         fieldPath: 'readFields',
       );
     }
-    _validateTokenReceiver(input, c);
+    final CredentialLaunchPlan launch;
+    if (input.launch.receiver == 'aws_shared_credentials') {
+      launch = _service._validateAwsReceiver(input, c);
+    } else {
+      _validateTokenReceiver(input, c);
+      launch = input.launch;
+    }
     final identity = await _service.credentialExecutableInspector(
       input.launch.path,
       input.launch.receiver,
@@ -246,7 +262,7 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
       credentialId: c.id,
       version: c.version,
       useGeneration: c.useGeneration,
-      plan: input.launch.resolved(identity, cwd),
+      plan: launch.resolved(identity, cwd),
       createdAt: now,
       requestExpiresAt: now.add(_service._requestLifetime),
       fields: input.readFields,
@@ -502,11 +518,21 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
     );
     final capability = _service._secret();
     _service._executionCapabilities[execution.id] = capability;
+    CredentialMaterialLease? lease;
     try {
       validate();
       final material = _service._currentCredentialMaterial(c);
       if (material.bytes.isEmpty) {
         throw const CredentialUseFailure('material_prepare_failed');
+      }
+      if (c.form == CredentialForm.file) {
+        lease = ManagedCredentialFiles.create();
+        await _service._saveUse(
+          execution: execution.changed({
+            'materialLease': lease.toPrivateJson(),
+            'cleanupState': 'pending',
+          }),
+        );
       }
       return CredentialExecutionMaterial(
         execution.id,
@@ -514,12 +540,22 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
         r.plan,
         CredentialMaterialValue(c.id, c.version, c.form, material.bytes),
         r.alias,
+        lease,
       );
     } on Object catch (e) {
       _service._executionCapabilities.remove(execution.id);
       final code = e is CredentialUseFailure
           ? e.code
           : 'material_prepare_failed';
+      var cleanup = 'not_needed';
+      if (lease != null) {
+        try {
+          ManagedCredentialFiles.cleanup(lease);
+          cleanup = 'complete';
+        } on Object {
+          cleanup = 'needs_check';
+        }
+      }
       try {
         await _service._saveUse(
           execution: CredentialExecution(
@@ -530,6 +566,8 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
                 ? code
                 : 'material_claim_failed',
             finishedAt: _service._clock().toUtc(),
+            materialLease: lease,
+            cleanupState: cleanup,
           ),
         );
       } on Object {
