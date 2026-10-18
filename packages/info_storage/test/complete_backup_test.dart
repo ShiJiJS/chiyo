@@ -155,7 +155,7 @@ void main() {
       final key = await enableTestBackups(source.backups);
       final path = '${root.path}/times.aimbackup';
       await service.owner.exportLibrary(() => source.backups.exportTo(path));
-      expect(_payload(path, key)['version'], 4);
+      expect(_payload(path, key)['version'], 5);
       final target = await EncryptedInformationRepository.open(
         '${root.path}/target',
         _Keys(),
@@ -483,6 +483,15 @@ void main() {
         await source.backups.exportTo(path);
         await _rewrite(path, '${root.path}/v1.aimbackup', key, (p) {
           p['version'] = legacyVersion;
+          for (final table in [
+            'managed_credentials',
+            'credential_materials',
+            'ssh_host_trust',
+            'credential_use_requests',
+            'credential_executions',
+          ]) {
+            (p['tables'] as Map).remove(table);
+          }
           (p['tables'] as Map).remove('request_history');
           for (final row in p['tables']['information_items'] as List) {
             (row as Map).remove('created_at');
@@ -905,7 +914,7 @@ void main() {
       final path = '${root.path}/complete.aimbackup';
       await source.backups.exportTo(path);
       final payload = _payload(path, key);
-      expect(payload['version'], 4);
+      expect(payload['version'], 5);
       final tables = payload['tables'] as Map<String, dynamic>;
       expect(tables.keys.toSet(), {
         'information_directories',
@@ -922,6 +931,11 @@ void main() {
         'grant_history',
         'access_records',
         'request_history',
+        'managed_credentials',
+        'credential_materials',
+        'ssh_host_trust',
+        'credential_use_requests',
+        'credential_executions',
       });
       final encoded = jsonEncode(payload);
       for (final excluded in [

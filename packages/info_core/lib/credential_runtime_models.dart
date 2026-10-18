@@ -384,6 +384,7 @@ class CredentialLaunchPlan {
   factory CredentialLaunchPlan.parse(
     Map<String, dynamic> j, {
     bool allowInternal = false,
+    bool allowPortablePaths = false,
   }) {
     _useShape(j, {'receiver', 'executable', 'argv', 'cwd', 'env'});
     final receiver = _useText(
@@ -406,7 +407,9 @@ class CredentialLaunchPlan {
       empty: false,
     );
     final cwd = _useText(j['cwd'], 'launch.cwd', max: 4096, empty: false);
-    bool absolute(String p) => Platform.isWindows
+    bool absolute(String p) => allowPortablePaths
+        ? p.startsWith('/') || RegExp(r'^[A-Za-z]:[/\\]').hasMatch(p)
+        : Platform.isWindows
         ? RegExp(r'^[A-Za-z]:[/\\]').hasMatch(p)
         : p.startsWith('/');
     if (!absolute(path) || !absolute(cwd)) {
@@ -501,7 +504,13 @@ class CredentialLaunchPlan {
       ..remove('executableIdentity')
       ..remove('sshTrustSnapshotId')
       ..remove('internalMaterialHashes');
-    final plan = CredentialLaunchPlan.parse(shape, allowInternal: true);
+    // Archived plans describe another device's past facts. Request parsing
+    // still requires this OS's absolute paths and runtime revalidates tools.
+    final plan = CredentialLaunchPlan.parse(
+      shape,
+      allowInternal: true,
+      allowPortablePaths: true,
+    );
     final resolved = plan.resolved(
       ExecutableIdentity.fromJson(
         j['executableIdentity'] as Map<String, dynamic>,
@@ -560,6 +569,7 @@ class CredentialUseRequest {
     this.decidedAt,
     this.revokedAt,
     this.attemptedAt,
+    this.restoredAt,
   }) : fields = List.unmodifiable(fields),
        approvedFields = List.unmodifiable(approvedFields);
   final String id, chatLabel, purpose, alias, credentialId, state;
@@ -573,6 +583,7 @@ class CredentialUseRequest {
   final String? executionId, invalidatedCode;
   final String? credentialName;
   final DateTime? decidedAt, revokedAt, attemptedAt;
+  final DateTime? restoredAt;
   Map<String, Object?> toJson() => {
     'id': id,
     'chatLabel': chatLabel,
@@ -598,6 +609,7 @@ class CredentialUseRequest {
     'decidedAt': _useTimestamp(decidedAt),
     'revokedAt': _useTimestamp(revokedAt),
     'attemptedAt': _useTimestamp(attemptedAt),
+    if (restoredAt != null) 'restoredAt': _useTimestamp(restoredAt),
   };
   factory CredentialUseRequest.fromJson(Map<String, dynamic> j) =>
       CredentialUseRequest(
@@ -647,6 +659,9 @@ class CredentialUseRequest {
         attemptedAt: j['attemptedAt'] == null
             ? null
             : DateTime.parse(j['attemptedAt'] as String),
+        restoredAt: j['restoredAt'] == null
+            ? null
+            : DateTime.parse(j['restoredAt'] as String),
       );
   CredentialUseRequest changed(Map<String, Object?> values) =>
       CredentialUseRequest.fromJson({...toJson(), ...values});
@@ -682,6 +697,7 @@ class CredentialExecution {
     this.supervisorCreatedAt,
     this.workerPid,
     this.workerCreatedAt,
+    this.restoredAt,
   });
   final String id, requestId, state, cleanupState;
   final bool processStarted;
@@ -694,6 +710,7 @@ class CredentialExecution {
   final int? workerPid;
   final String? workerCreatedAt;
   final DateTime? startedAt, finishedAt;
+  final DateTime? restoredAt;
   Map<String, Object?> toJson() => {
     'protocolVersion': 1,
     'status': 'ok',
@@ -709,6 +726,7 @@ class CredentialExecution {
     'cleanupState': cleanupState,
     'outputAvailable': false,
     'outputTruncated': false,
+    if (restoredAt != null) 'restoredAt': _useTimestamp(restoredAt),
   };
   Map<String, Object?> toStorageJson() => {
     ...toJson(),
@@ -748,6 +766,9 @@ class CredentialExecution {
         supervisorCreatedAt: j['supervisorCreatedAt'] as String?,
         workerPid: j['workerPid'] as int?,
         workerCreatedAt: j['workerCreatedAt'] as String?,
+        restoredAt: j['restoredAt'] == null
+            ? null
+            : DateTime.parse(j['restoredAt'] as String),
       );
   CredentialExecution changed(Map<String, Object?> values) =>
       CredentialExecution.fromJson({...toStorageJson(), ...values});

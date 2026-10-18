@@ -18,6 +18,8 @@ class BackupContents {
   int get grantHistoryCount => _tables['grant_history']!.length;
   int get accessRecordCount => _tables['access_records']!.length;
   int get requestHistoryCount => _tables['request_history']!.length;
+  int get credentialCount => _tables['managed_credentials']!.length;
+  int get credentialVersionCount => _tables['credential_materials']!.length;
 }
 
 /// Owner-only manual backup capability. It is never part of the agent server.
@@ -66,9 +68,20 @@ class InformationBackups {
     ..._v2Columns,
     'information_items': [..._itemColumns, 'created_at', 'modified_at'],
   });
-  static final _allColumns = Map<String, List<String>>.unmodifiable({
+  static final _v4Columns = Map<String, List<String>>.unmodifiable({
     ..._v3Columns,
     'request_history': ['id', 'created_at', 'payload'],
+  });
+  static const _credentialColumns = <String, List<String>>{
+    'managed_credentials': ['id', 'payload'],
+    'credential_materials': ['credential_id', 'version', 'payload'],
+    'ssh_host_trust': ['id', 'payload'],
+    'credential_use_requests': ['id', 'payload'],
+    'credential_executions': ['id', 'request_id', 'payload'],
+  };
+  static final _allColumns = Map<String, List<String>>.unmodifiable({
+    ..._v4Columns,
+    ..._credentialColumns,
   });
 
   void _checkOpen() {
@@ -220,7 +233,7 @@ class InformationBackups {
   Future<BackupContents> _snapshot() async {
     _checkOpen();
     return _repository._db.transaction(() async {
-      final tables = <String, Object?>{};
+      final tables = <String, List<Map<String, Object?>>>{};
       final now = _repository._clock().toUtc();
       for (final table in _allColumns.entries) {
         final rows = await _repository._db
@@ -230,10 +243,13 @@ class InformationBackups {
             .get();
         tables[table.key] = rows.map((row) => row.data).toList();
       }
+      // Persist only archive facts. Never serialize private runtime DTOs into
+      // a portable backup, even when an execution is currently active.
+      _archiveCredentialRuntime(tables);
       return _retain(
         _validate({
           'format': _format,
-          'version': 4,
+          'version': 5,
           'createdAt': now.toIso8601String(),
           'tables': tables,
         }),
@@ -269,12 +285,6 @@ class InformationBackups {
   /// overwrite. A failed/interrupted export leaves existing backups untouched.
   Future<void> exportTo(String path, {String? stagingParent}) async {
     _checkOpen();
-    // D9 supplies format 5. Never export an apparently complete backup that
-    // silently omits a nonempty credential vault during staged development.
-    if (_repository.managedCredentials.isNotEmpty ||
-        _repository.sshHostTrust != null) {
-      throw const StorageFailure('credentials_backup_not_supported');
-    }
     sqlite.Database? db;
     Directory? staging;
     try {
@@ -287,7 +297,7 @@ class InformationBackups {
       final snapshot = await _snapshot();
       final payload = jsonEncode({
         'format': _format,
-        'version': 4,
+        'version': 5,
         'createdAt': snapshot.createdAt.toIso8601String(),
         'tables': snapshot._tables,
       });
@@ -480,7 +490,7 @@ class InformationBackups {
     if (decoded is! Map<String, dynamic>) invalid();
     if (decoded['format'] != _format ||
         decoded['version'] is! int ||
-        ![1, 2, 3, 4].contains(decoded['version'])) {
+        ![1, 2, 3, 4, 5].contains(decoded['version'])) {
       throw const StorageFailure('unsupported_backup');
     }
     if (decoded.length != 4 ||
@@ -494,6 +504,7 @@ class InformationBackups {
       1 => _columns,
       2 => _v2Columns,
       3 => _v3Columns,
+      4 => _v4Columns,
       _ => _allColumns,
     };
     final data = decoded['tables'] as Map<String, dynamic>;
@@ -529,6 +540,9 @@ class InformationBackups {
       tables.putIfAbsent(table, () => const []);
     }
     tables.putIfAbsent('request_history', () => const []);
+    for (final table in _credentialColumns.keys) {
+      tables.putIfAbsent(table, () => const []);
+    }
     if ((decoded['version'] as int) < 3) {
       tables['information_items'] = [
         for (final row in tables['information_items']!)
@@ -664,6 +678,7 @@ class InformationBackups {
       }
     }
     _validateBackupHistory(tables);
+    _validateBackupCredentials(tables);
     return BackupContents._(
       Map.unmodifiable(tables),
       createdAt,

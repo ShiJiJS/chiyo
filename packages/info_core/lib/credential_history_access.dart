@@ -41,6 +41,7 @@ extension _CredentialHistoryService on InformationService {
     // A legacy unknown record without a registered process group cannot prove
     // its descendants ended. Preserve its identity and any recovery evidence.
     if (e.state == 'unknown' &&
+        e.restoredAt == null &&
         (e.jobName == null ||
             CredentialProcessJob.isActive(e.jobName!) != false)) {
       return false;

@@ -9,6 +9,7 @@ import 'backup_publish.dart';
 export 'platform_keys.dart';
 part 'backups.dart';
 part 'backup_history.dart';
+part 'backup_credentials.dart';
 part 'credentials_storage.dart';
 part 'credential_runtime_storage.dart';
 
