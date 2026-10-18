@@ -5,6 +5,7 @@ import 'package:info_core/info_core.dart';
 import 'prototype_dialog.dart';
 import 'prototype_ui.dart';
 import 'ui.dart';
+import 'credential_delivery.dart';
 
 String credentialExecutionLabel(CredentialExecution? execution) =>
     switch (execution?.state) {
@@ -48,6 +49,35 @@ class _ExecutionReceipt extends StatefulWidget {
 
 class _ExecutionReceiptState extends State<_ExecutionReceipt> {
   Timer? _refresh;
+  bool _cleaning = false;
+  String? _cleanupError;
+  Future<void> _cleanup() async {
+    final record = execution;
+    if (record == null || _cleaning) return;
+    setState(() {
+      _cleaning = true;
+      _cleanupError = null;
+    });
+    try {
+      await widget.owner.cleanupCredentialExecution(record.id);
+    } on CredentialUseFailure catch (e) {
+      if (mounted) {
+        setState(
+          () => _cleanupError = switch (e.code) {
+            'cleanup_busy' => '仍有活动进程，或暂时无法确认进程组已结束。材料已保留，请稍后核查。',
+            'cleanup_identity_mismatch' => '材料身份或目录内容已变化，未删除可疑文件。请先人工核查。',
+            'cleanup_failed' => '文件仍被占用或无法删除。材料已保留，可解除占用后只重试清理。',
+            _ => '未能保存或完成清理，请检查本机服务后核查。',
+          },
+        );
+      }
+    } on Object {
+      if (mounted) setState(() => _cleanupError = '未能完成清理，请检查本机服务后核查。');
+    } finally {
+      if (mounted) setState(() => _cleaning = false);
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -135,6 +165,15 @@ class _ExecutionReceiptState extends State<_ExecutionReceipt> {
                 ),
                 fact('退出码', record.exitCode?.toString() ?? '尚无记录'),
                 fact('文件清理', credentialCleanupLabel(record.cleanupState)),
+                if (record.materialLease != null)
+                  fact(
+                    '受管材料',
+                    r.plan.receiver == 'ssh_identity'
+                        ? '私钥副本 · SSH 空配置 · 确认主机快照 · 空全局主机记录'
+                        : 'AWS 凭据副本 · AWS 空配置',
+                  ),
+                if (_cleanupError != null)
+                  QuietNotice(_cleanupError!, warning: true),
                 fact('开始时间', time(record.startedAt)),
                 fact('结束时间', time(record.finishedAt)),
                 if (record.errorCode != null) fact('结果代码', record.errorCode!),
@@ -145,7 +184,11 @@ class _ExecutionReceiptState extends State<_ExecutionReceipt> {
                   ),
                 const SizedBox(height: 10),
                 fact('凭据 / 版本', '${r.credentialId} / ${r.version}'),
-                fact('注入位置', 'GH_TOKEN ← {secret:${r.alias}}'),
+                fact('注入位置', credentialInjectionFact(r)),
+                fact(
+                  r.plan.receiver == 'ssh_identity' ? '主机快照与隔离' : '接收配置',
+                  credentialIsolationFacts(r),
+                ),
                 fact('程序位置', r.plan.path),
                 fact(
                   '参数（按项）',
@@ -168,6 +211,14 @@ class _ExecutionReceiptState extends State<_ExecutionReceipt> {
               ],
             ),
       actions: [
+        if (record?.materialLease != null &&
+            record!.cleanupState != 'complete' &&
+            !{'preparing', 'running'}.contains(record.state))
+          TextButton(
+            style: prototypeSecondary(context),
+            onPressed: _cleaning ? null : _cleanup,
+            child: Text(_cleaning ? '正在核查…' : '核查并重试清理'),
+          ),
         TextButton(
           style: prototypePrimary(context),
           onPressed: () => Navigator.pop(context),

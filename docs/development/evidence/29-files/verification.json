@@ -1,0 +1,262 @@
+{
+  "productionSource": "2dab8387a2c8f84edd1306e150751dda90ca4e07",
+  "verificationSource": "453a7139adf45e60321ba145513e2642e6786535",
+  "visualSource": "83579edcb7ed03dbb39b1cafd5856cb1095f5a9b",
+  "headless": {
+    "passed": 325,
+    "skipped": 0,
+    "packages": {
+      "core": {
+        "passed": 125,
+        "log": "raw/d7-final2-core.log"
+      },
+      "cli": {
+        "passed": 43,
+        "log": "raw/d7-final2-cli.log"
+      },
+      "storage": {
+        "passed": 56,
+        "log": "raw/d7-final3-storage.log"
+      },
+      "desktop": {
+        "passed": 101,
+        "log": "raw/d7-final2-desktop.log"
+      }
+    },
+    "storageFixtureNote": "Bounded complete-counter observation fixed a truncate/read race; the original failed full run is preserved."
+  },
+  "native": {
+    "platform": "Windows",
+    "repetitions": 3,
+    "sshCasesPerRepetition": 4,
+    "exitCodes": [
+      0,
+      255,
+      255,
+      255
+    ],
+    "compiledCli": true,
+    "realOpenSsh": true,
+    "sqlCipherDpapiReopen": true,
+    "realAccountCredentials": false
+  },
+  "visual": {
+    "screenshots": 60,
+    "comparisonPairs": 4,
+    "themes": [
+      "purple",
+      "green",
+      "blue",
+      "mono"
+    ],
+    "viewports": [
+      [
+        1440,
+        900
+      ],
+      [
+        1280,
+        800
+      ]
+    ],
+    "textScale200": true,
+    "independentReview": false,
+    "review": "Main-agent self-check only; user prohibits subagents. Original Round05 file/file-env layout compared, synthetic content differs."
+  },
+  "artifacts": {
+    "info-runtime-worker.exe": "47e8c067e51671134e9aeced17ad3f0c304534a3063cbcdb76f369977d7e6d7b",
+    "info.exe": "b868b36fb871e795e13f83608207ac2d0f88c09c87b9db166c9c89d5ec710b5d"
+  },
+  "computerUse": false,
+  "scope": {
+    "serverSync": "paused by user",
+    "macOS": "deferred",
+    "codexRealInstallTrust": "not verified",
+    "cleanWindowsRelease": "not verified",
+    "credentialBackupFormat5": "pending issue31"
+  },
+  "raw": {
+    "raw/d7-final2-core.log": {
+      "sha256": "83768ccbe14d9ea1bb99d3fc69dc6774457f2ce88f380d6b5a0d3b6357b87d22",
+      "bytes": 19862
+    },
+    "raw/d7-final2-cli.log": {
+      "sha256": "2c8ef723bef028811939fd453677ca7dbffd733831e73d1277ee15098367333f",
+      "bytes": 6521
+    },
+    "raw/d7-final3-storage.log": {
+      "sha256": "4e48b7359919e32ae436b159501e73f1f51b0645daa2295e0a11f11ffb162def",
+      "bytes": 37855
+    },
+    "raw/d7-final2-desktop.log": {
+      "sha256": "438ade8c8fe4abb63de30ebd37078db6d709b2e00e77a5fb2e60d2133be4e22a",
+      "bytes": 22553
+    },
+    "raw/d7-final2-native.log": {
+      "sha256": "fdf6df94ac53397e603afff857f6cb1a847fede334e120fb087b24b7364d923b",
+      "bytes": 2445
+    },
+    "raw/d7-final2-cli-compile.log": {
+      "sha256": "066770ecc6b4147392eff6598089e470219abb42daf4fd4e411f18ff36f41f4a",
+      "bytes": 94
+    },
+    "raw/d7-final2-worker-compile.log": {
+      "sha256": "3398cfcacdea4ca9fe5f7a153920e6c966d930ef199fed696056698be143f49a",
+      "bytes": 109
+    },
+    "raw/d7-final2-storage.log": {
+      "sha256": "78bea63900a0a8b423d6e4762f661f0eace440327854f3c60f6f4d1387f82eba",
+      "bytes": 38668
+    },
+    "raw/d7-frozen-storage.log": {
+      "sha256": "15505d08ef01dcdc680ed0cccc7e187803cfc13687893c8f5bebcfb6fe0a5389",
+      "bytes": 37855
+    },
+    "raw/d7-file-cli-crash.log": {
+      "sha256": "38e91aa596656c7be575035787bf16ef487e5059e7ed07d681cf187d483ac651",
+      "bytes": 265
+    },
+    "raw/d7-file-policy-review.log": {
+      "sha256": "7ae0eef88df6ff0a6e91ec4d2b2b8a2c42f61ace56d5c5d9257ca30b772d6208",
+      "bytes": 352
+    },
+    "raw/d7-repeated-file-red.log": {
+      "sha256": "4c67ab7756de6dba7eb946ddbfbf852d4661c6dbc3d7b1e060f05838c834db09",
+      "bytes": 858
+    },
+    "raw/d7-repeated-file-green.log": {
+      "sha256": "983ca945710dab2ead97c93b9aa7534acd8a177095ef59a0eb64dac9e1cefb36",
+      "bytes": 202
+    },
+    "raw/d7-host-backup-gate-red.log": {
+      "sha256": "2681ba7db7dba292d089165d19d5cd6c285fcfd1fd65eda45d984b8636db58cc",
+      "bytes": 1057
+    },
+    "raw/d7-host-backup-gate-green.log": {
+      "sha256": "63f316b49771b804ac0000daabec71bf1fd3b25aade27a588fe181b756cd457c",
+      "bytes": 380
+    },
+    "raw/d7-closed-host-red.log": {
+      "sha256": "19a37d23ca7c88e47321aa54c908af2cf9e62bd509e1aeb5541f950fa328ec23",
+      "bytes": 1068
+    },
+    "raw/d7-closed-host-green.log": {
+      "sha256": "c28c047245ff9d64477597a42461aadb6d9fd32a3c9eff1ac95983d7aea1b5f4",
+      "bytes": 435
+    },
+    "raw/d7-file-capture-r3.log": {
+      "sha256": "d6d85260b75665fc38f2fa0759bf0d7e281b8b78d6ae73687b444b1d76223cd7",
+      "bytes": 587
+    },
+    "raw/d7-file-compare-r3.log": {
+      "sha256": "6d81c04bc9dce4644afa3a80cd955c87cfb238e6d7587ddbda59253d266175ed",
+      "bytes": 1591
+    },
+    "raw/d7-ssh-ui-native-r1.log": {
+      "sha256": "dda890015f2a480015c8cba90aaccee8f4880288bb9efc5fb7d29574e5c96993",
+      "bytes": 3456
+    },
+    "raw/d7-ssh-ui-native-r2.log": {
+      "sha256": "fa2c19d6a2c2a1dc409cc9f8ef98188320056dec4e137bef6d39521115c243c5",
+      "bytes": 935
+    },
+    "raw/d7-cli-full-all-enabled.log": {
+      "sha256": "ba7ad29d564717090d155ea195f115720a5020a5fbea7f7fb410cc43b6e98822",
+      "bytes": 8781
+    },
+    "raw/d7-cli-full-all-enabled-r2.log": {
+      "sha256": "07dc87d416ae819b667da600c157a23fdeab4cb8be2a149e6b4c4350345029be",
+      "bytes": 6150
+    },
+    "raw/d7-windows-build.log": {
+      "sha256": "c7ddc313aec31e64b708a9540807af14f15609c2b9654bf409119e6ff7304623",
+      "bytes": 237
+    },
+    "raw/d7-aws-real.log": {
+      "sha256": "b92b444ccfe0c996a42690314087cf18738bad006a948d17eb3dabb61168e680",
+      "bytes": 208
+    },
+    "raw/d7-material-failures.log": {
+      "sha256": "f68726745880ad1a9aed720f66e5a47ab2c44c465243a226f8a1220cf5b77cfa",
+      "bytes": 309
+    },
+    "raw/d7-registration-audit-red.log": {
+      "sha256": "4bd8273057b71d9399393337314dc63b0d39b7a784efbcdfcb28cf11f0b1c860",
+      "bytes": 981
+    },
+    "raw/d7-job-recovery-green.log": {
+      "sha256": "386297d2f4c428e994816a3375d33d9707763f1de8f64878a005a3ca835d6c4e",
+      "bytes": 2911
+    }
+  },
+  "images": {
+    "r3/blue-1280-aws-pending.png": "3bd78af602441a5ffc7c4066cfe82ebb3a48a604eec85763aa9c6524c695be72",
+    "r3/blue-1280-host-settings.png": "fc65d9e56fcd0c7c2acfbb88c5582c2105f62416a087d0d38e7dbf9752a20212",
+    "r3/blue-1280-ssh-pending.png": "d1319d6efbc254b031d31e817f631eab86006f812c28ba88845166007e66366e",
+    "r3/blue-1440-aws-pending.png": "374f901699d75019190b0f8fc9c990295a4d7c0dae16f7cb5578bd5f8d4f27c8",
+    "r3/blue-1440-host-settings.png": "66df4e3e4b5039ae0dca2eef604611d6cf72fbe51383bc443bc82f51afe06ae9",
+    "r3/blue-1440-ssh-pending.png": "f4f5f5ca2aed26bff57b7051209bf32e83d6e041576bf960f8a1c7b3a3e05f08",
+    "r3/green-1280-aws-pending.png": "5819a790a13789e4db6fc3ed89fdc9ce63417057a18d8a566fc00323b133e6d7",
+    "r3/green-1280-host-settings.png": "d9323b7b272f3cda439974b9c80979d4b8ae3bb8f87caf34bbcc2109f33b1085",
+    "r3/green-1280-ssh-pending.png": "3a5599c41069be1ab567250d48863210326bfdeddc993b6eaa6989ed0703a850",
+    "r3/green-1440-aws-pending.png": "5ee04b39be23d85751bf86a231be7c75b0bd9a4cf37ee299f40bcbda0aa37121",
+    "r3/green-1440-host-settings.png": "ff682868edfc884aa6e3c1e6b805953ff410d9619f5176a4f3f19570ff90c7a7",
+    "r3/green-1440-ssh-pending.png": "876980b19f66638028aad69dc50ee1a59a85aa68528ef1c06e25174cff05b950",
+    "r3/mono-1280-aws-200-launch.png": "8637d523d8391b4268dd23e638229ab1cbad77e59a3f0ff00944386b2fccab8f",
+    "r3/mono-1280-aws-200-top.png": "148dc1d6c2100ccd8fdfe6288e7533ab7de39926fdd7d7a2754d2e7252818e63",
+    "r3/mono-1280-aws-pending.png": "494e90c32a90db4d2fb23e07dd4d067b8680080545c9638d90e1701724043b18",
+    "r3/mono-1280-host-settings-200.png": "23b2790875651810aec8ee6d3004f05417d0bbed35fec5ffbcb7d85706ce4d31",
+    "r3/mono-1280-host-settings.png": "7f9ab44d3b90ae86df68bdf51582659b793fb30198072850f9b9da3c97330fd1",
+    "r3/mono-1280-ssh-200-launch.png": "1c1c90a2fea1804360e346ca51f68414881b01231705f6ddaaca830f40b0acd0",
+    "r3/mono-1280-ssh-200-top.png": "86f6bfb06b5bb8c5478012ad43943855f98cef3826d88c2efbc5de346fe474ce",
+    "r3/mono-1280-ssh-pending.png": "acb02936e686ab9bcd9418291635b3d243f36c9b51963f129bf5b526c56dab8e",
+    "r3/mono-1440-aws-200-launch.png": "b1e433ce1561a7b671c38276f83a167aa7742e986e9330f2a2a8c74e7b687c0f",
+    "r3/mono-1440-aws-200-top.png": "18f4adb79d6ef70c7f9b3cc83476274dc11df4b3763af11e451a7da4b8cc0998",
+    "r3/mono-1440-aws-pending.png": "828f66b55f49211726efa1aca08aa4fb3f2853e3e6e766bddebcd89abd512b78",
+    "r3/mono-1440-host-settings-200.png": "7c1d4aa6b32b72a99efbb3b422937c349bcc51002ae1e05477383764aae3f3dd",
+    "r3/mono-1440-host-settings.png": "37891f007e9d47ff0438abee4ae3d1e3b26432ed24f31406d740511d63ee3597",
+    "r3/mono-1440-ssh-200-launch.png": "670d59eb2cdb4b3c686fa981120f88f5fc1213ddf2cceb6aa2158eadf93e96ab",
+    "r3/mono-1440-ssh-200-top.png": "200143076737892f3099679acabc4d6df7ba3f5e72e66188931d2c8390249e85",
+    "r3/mono-1440-ssh-pending.png": "b728b16fb9ea9e76015ac0278d6c2e4edf4b2b7745178fe407ad789a1ca7ab5b",
+    "r3/purple-1280-aws-200-launch.png": "2aedd0a0e9987584008ab210bc77c73729299fa2ea00c7c42d3a17be975e72d2",
+    "r3/purple-1280-aws-200-top.png": "1b560f624be6a2213befe23a7d01dd650f9817728b3f2e09239599435e3898ff",
+    "r3/purple-1280-aws-confirm.png": "5dd50b4ee651614efb2bd201914db54e482b10191baabe66c330e4d01049c078",
+    "r3/purple-1280-aws-pending.png": "73f0dfd5b91d972306113eeb1f74a8bcbfa0d7f0e24864d107bb6c908a0bf1d7",
+    "r3/purple-1280-aws-plan.png": "3504c3a4bbb65d57f3e5d4e56d78173a4999ccad6f81be3d71341754b3faed88",
+    "r3/purple-1280-aws-request.png": "d44c39bfa8a0c081d02ac1eb7422db4f213ae7775b738018693ae819b24c48a8",
+    "r3/purple-1280-aws-tip.png": "629796f69000af41df69fa78088f822ff6d164c7791c67843341c8e7c6504a31",
+    "r3/purple-1280-host-confirm.png": "1b98f934bec9ae117464fcd83c5fff634f89d0ede0035ea88ad28fd6652b31cf",
+    "r3/purple-1280-host-settings.png": "123251689f2c64437759ac2c72fd6e2dd217705cc820338520e2293e4e186eb4",
+    "r3/purple-1280-ssh-200-launch.png": "06660361d61f3700744707089850c4fc9f4d6cd2a4c753b500c4e7c394e3369d",
+    "r3/purple-1280-ssh-200-top.png": "4c06c1f775cdacdd9f98c8698a6f7f89eecd18897487ffe2bdef951121a27791",
+    "r3/purple-1280-ssh-confirm.png": "5145b202b009b6c3477c37cb9df640ce0967bd0f94b9de08f264394c50b7cfb4",
+    "r3/purple-1280-ssh-pending.png": "5ebb1698b7bc2cfc1595caea5e30df0f20e26309d158c5aea58d3a1ab1232cb0",
+    "r3/purple-1280-ssh-plan.png": "1e39f2cff8d28baae183177089a839e069b48c4fff5d03b468509385b27e0b71",
+    "r3/purple-1280-ssh-request.png": "99243b3cb5d1b54ac6563ebdf6f9d01fc303644ef2033c0fa78716a269bca51b",
+    "r3/purple-1280-ssh-tip.png": "77b3833658bb745dfe15ca94f178ac3864a68bb537dce10dfb3d89ecf8b39b07",
+    "r3/purple-1440-aws-200-launch.png": "93026dd0c34e97861e0f49396d33ba5fa184c31c25a7a0512c83576cc90550ac",
+    "r3/purple-1440-aws-200-top.png": "c61245d141cb27798744ba0497c2017ef3357376c848c7c6d90fc98b857de03a",
+    "r3/purple-1440-aws-confirm.png": "06f0f8b6337b0550584263072721cee0e626d113f2f904c206d808ec45c17f74",
+    "r3/purple-1440-aws-pending.png": "a44b94589433535b66d400b18c1c83152ca9ece5ef6103fa0405365f8c603092",
+    "r3/purple-1440-aws-plan.png": "9585d81738dcf25ce3237dd5350b3e06dc77af91bd30c4c18d73fd083689ada3",
+    "r3/purple-1440-aws-request.png": "cf07000d0426144d12ce984aeacb9bb6ad18661599f184b45fd17249bb26d1ac",
+    "r3/purple-1440-aws-tip.png": "87e8ddcb45fd681c829d0da732a3e57cd31fdfbe4e95b1009f3d5794d7133781",
+    "r3/purple-1440-host-confirm.png": "6909d0ac3a95737428bf232e708a835ba56459540ce4a377cf209c710b5ba17d",
+    "r3/purple-1440-host-settings.png": "23843711f863544bd2ff1d52e148e859ee639f6710044212a05b8bd71b896eba",
+    "r3/purple-1440-ssh-200-launch.png": "0ac3117b822349cfe8f518da8d4126cd162df9462d27d251ff6e468ec28c6e9a",
+    "r3/purple-1440-ssh-200-top.png": "72a5043722f74b661bf2e59c6721259dc26dff3f638a3cd9f957b0242138429e",
+    "r3/purple-1440-ssh-confirm.png": "44a1c10fa9244d2fda9a3bee3c55de792a9cc50733b9b87d1db66b41c15d097c",
+    "r3/purple-1440-ssh-pending.png": "2d7334a2f07ea5238df6fc7291ad3040c8d0e9511a2449578571e534890373f2",
+    "r3/purple-1440-ssh-plan.png": "57c70a7e42adc1d9c70ae24637953e20937176f066e65e90fd100bdbd20bed95",
+    "r3/purple-1440-ssh-request.png": "7682d057364841a44227caada1d538fbb74922ef18ca698977d03e1b1b0eb8e2",
+    "r3/purple-1440-ssh-tip.png": "ee389fef6cdc87483ed9ae1dcaa905ddd90fde6a8498c459ec2d723fee7d506d",
+    "compare-r3/purple-1280-aws-pending/page-compare.png": "938229e372ac45554b2a2454601a7cc0d0a20f6139bcdb118b678fe452a8e745",
+    "compare-r3/purple-1280-aws-pending/page.png": "d1bb79f657263ae505f03445cf9e3c2934af033226c13a460a4ec87d0242c8a6",
+    "compare-r3/purple-1280-ssh-pending/page-compare.png": "29bacf93519fbcbd571a9f2bb64e0e56410e99e313521bf9180d584d7e527755",
+    "compare-r3/purple-1280-ssh-pending/page.png": "fe1cc4376fb190235f6df6d468b3ee3a56708c8291bdcca341a20363354fb591",
+    "compare-r3/purple-1440-aws-pending/page-compare.png": "c6b4c003368dda3a9e160b435c1a3aba759f405a36045e42c49427012644ac81",
+    "compare-r3/purple-1440-aws-pending/page.png": "aaa03606723309ba61f340eae18ae8a1d669a3408bf537c57d8067ff31aa9274",
+    "compare-r3/purple-1440-ssh-pending/page-compare.png": "d04df47b798eb8fc87c0543653c684982500b98d48cc5e5cf41bf881ffbb1f20",
+    "compare-r3/purple-1440-ssh-pending/page.png": "69b43dc8f24203811e13383fcc1748308aace7ff3ca96dbbe7569b24b2f3f27c"
+  }
+}

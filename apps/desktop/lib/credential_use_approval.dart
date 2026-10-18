@@ -5,6 +5,7 @@ import 'ui.dart';
 import 'prototype_ui.dart';
 import 'prototype_dialog.dart';
 import 'credential_execution_receipt.dart';
+import 'credential_delivery.dart';
 
 String credentialUseStateLabel(String state) => switch (state) {
   'pending' => '待处理',
@@ -80,27 +81,20 @@ class _CredentialUseApprovalPanelState
 
   bool get eligible {
     try {
-      widget.owner.checkCredentialEligibility(
-        r.credentialId,
-        r.version,
-        useGeneration: r.useGeneration,
-      );
+      widget.owner.checkCredentialUseEligibility(r);
       return true;
     } on Object {
       return false;
     }
   }
 
-  String get command => [
-    r.plan.path
+  String get command => _command(r.plan);
+  String _command(CredentialLaunchPlan plan) => [
+    plan.path
         .split(RegExp(r'[/\\]'))
         .last
         .replaceFirst(RegExp(r'\.exe$', caseSensitive: false), ''),
-    ...r.plan.argv.map(
-      (a) => a.kind == LaunchValueKind.literal
-          ? a.value
-          : '{${a.kind.name}:${a.value}}',
-    ),
+    ...plan.argv.map(launchValueLabel),
   ].map((s) => s.contains(' ') ? '"$s"' : s).join(' ');
   String _time(DateTime? d) => d == null ? '未批准' : d.toLocal().toString();
 
@@ -178,7 +172,11 @@ class _CredentialUseApprovalPanelState
                           ? '$selectedFieldCount 个字段 · ${draft.minutes} 分钟（独立许可）'
                           : '$selectedFieldCount 个字段 · 截止 ${_time(r.fieldExpiresAt)}（独立许可）',
                     ),
-                  fact('注入位置', 'GH_TOKEN ← 字符串秘密值'),
+                  fact('注入位置', credentialInjectionFact(r)),
+                  fact(
+                    r.plan.receiver == 'ssh_identity' ? '主机快照与隔离' : '接收配置',
+                    credentialIsolationFacts(r),
+                  ),
                   _code(command),
                   fact('程序位置', r.plan.path),
                   fact(
@@ -206,20 +204,9 @@ class _CredentialUseApprovalPanelState
                   if (detail) ...[
                     const SizedBox(height: 12),
                     _code(
-                      const JsonEncoder.withIndent('  ').convert({
-                        'command': 'request-use',
-                        'purpose': r.purpose,
-                        'credentials': [
-                          {
-                            'alias': r.alias,
-                            'credentialId': r.credentialId,
-                            'version': r.version,
-                          },
-                        ],
-                        'launch': Map<String, Object?>.from(r.plan.toJson())
-                          ..remove('executableIdentity'),
-                        'readFields': r.fields.map((f) => f.toJson()).toList(),
-                      }),
+                      const JsonEncoder.withIndent(
+                        '  ',
+                      ).convert(r.toRequestInputJson()),
                     ),
                     fact('待审批截止', _time(r.requestExpiresAt)),
                     fact('程序校验', r.plan.executable.sha256),
@@ -379,7 +366,11 @@ class _CredentialUseApprovalPanelState
               if (tip == 'injection') ...[
                 const Spacer(),
                 Text(
-                  '秘密值 → 环境变量',
+                  r.plan.receiver == 'gh_token'
+                      ? '秘密值 → 环境变量'
+                      : r.plan.receiver == 'ssh_identity'
+                      ? '临时文件路径 → 命令参数'
+                      : '临时文件路径 → 环境变量',
                   textAlign: TextAlign.right,
                   style: prototypeText(context, 12, color: c.muted),
                 ),
@@ -590,7 +581,7 @@ class _CredentialUseApprovalPanelState
                           ),
                           const SizedBox(height: 6),
                           Text(
-                            '字符串 · ${credential?.publicPurpose ?? ''} · 版本 ${r.version}',
+                            '${credential?.form == CredentialForm.file ? '文件' : '字符串'} · ${credential?.publicPurpose ?? ''} · 版本 ${r.version}',
                             style: prototypeText(
                               context,
                               12,
@@ -625,64 +616,123 @@ class _CredentialUseApprovalPanelState
               '02',
               '注入到哪里',
               'injection',
-              '环境变量装的是秘密值。CLI 创建目标进程时设置变量，程序自己读取；不修改全局环境变量，也不生成凭据文件。',
+              credentialInjectionTip(r),
               Padding(
                 padding: EdgeInsets.only(top: short ? 12 : 16, bottom: 3),
-                child: Row(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '环境变量名',
-                            style: prototypeText(context, 12, color: c.muted),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                r.plan.receiver == 'ssh_identity'
+                                    ? '参数位置'
+                                    : '环境变量名',
+                                style: prototypeText(
+                                  context,
+                                  12,
+                                  color: c.muted,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                r.plan.receiver == 'ssh_identity'
+                                    ? 'ssh 的 -i 参数'
+                                    : credentialInjectionTarget(r),
+                                style: prototypeText(
+                                  context,
+                                  14,
+                                  family: 'Consolas',
+                                ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'GH_TOKEN',
-                            style: prototypeText(
-                              context,
-                              14,
-                              family: 'Consolas',
+                        ),
+                        SizedBox(
+                          width: MediaQuery.sizeOf(context).width <= 1300
+                              ? 9
+                              : 15,
+                        ),
+                        SizedBox(
+                          width: 24,
+                          child: Text(
+                            '←',
+                            style: prototypeText(context, 14, color: c.accent),
+                          ),
+                        ),
+                        SizedBox(
+                          width: MediaQuery.sizeOf(context).width <= 1300
+                              ? 9
+                              : 15,
+                        ),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '程序收到',
+                                style: prototypeText(
+                                  context,
+                                  12,
+                                  color: c.muted,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                credentialInjectionValue(r),
+                                style: prototypeText(
+                                  context,
+                                  14,
+                                  weight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (r.plan.receiver != 'gh_token')
+                      Padding(
+                        padding: const EdgeInsets.only(top: 12),
+                        child: Wrap(
+                          spacing: 12,
+                          runSpacing: 6,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          children: [
+                            Text(
+                              '文件引用',
+                              style: prototypeText(context, 12, color: c.muted),
                             ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(
-                      width: MediaQuery.sizeOf(context).width <= 1300 ? 9 : 15,
-                    ),
-                    SizedBox(
-                      width: 24,
-                      child: Text(
-                        '←',
-                        style: prototypeText(context, 14, color: c.accent),
-                      ),
-                    ),
-                    SizedBox(
-                      width: MediaQuery.sizeOf(context).width <= 1300 ? 9 : 15,
-                    ),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '程序收到',
-                            style: prototypeText(context, 12, color: c.muted),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            '真实 Token（不展示原文）',
-                            style: prototypeText(
-                              context,
-                              14,
-                              weight: FontWeight.w500,
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 3,
+                              ),
+                              decoration: BoxDecoration(
+                                color: c.selected,
+                                borderRadius: BorderRadius.circular(3),
+                              ),
+                              child: Text(
+                                '{{file:${r.alias}}}',
+                                style: prototypeText(
+                                  context,
+                                  12,
+                                  family: 'Consolas',
+                                  color: c.strong,
+                                ),
+                              ),
                             ),
-                          ),
-                        ],
+                            Text(
+                              '运行前由 CLI 替换',
+                              style: prototypeText(context, 12, color: c.muted),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
                   ],
                 ),
               ),
@@ -695,7 +745,17 @@ class _CredentialUseApprovalPanelState
               Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  _code(command),
+                  _code(_command(r.requestedPlan ?? r.plan)),
+                  const SizedBox(height: 8),
+                  Text(
+                    credentialIsolationFacts(r),
+                    style: prototypeText(
+                      context,
+                      11,
+                      color: c.muted,
+                      height: 1.8,
+                    ),
+                  ),
                   const SizedBox(height: 12),
                   Wrap(
                     spacing: 24,
@@ -737,6 +797,7 @@ class _CredentialUseApprovalPanelState
                   ),
                   if (draft.planExpanded) ...[
                     const SizedBox(height: 8),
+                    _code(command),
                     SelectableText(
                       r.plan.path,
                       style: prototypeText(
@@ -748,7 +809,7 @@ class _CredentialUseApprovalPanelState
                     ),
                     for (final e in r.plan.env.entries)
                       Text(
-                        '${e.key} = ${e.value.kind == LaunchValueKind.secret ? '{secret:${e.value.value}}' : e.value.value}',
+                        '${e.key} = ${launchValueLabel(e.value)}',
                         style: prototypeText(
                           context,
                           12,
@@ -756,6 +817,16 @@ class _CredentialUseApprovalPanelState
                           color: c.muted,
                         ),
                       ),
+                    const SizedBox(height: 8),
+                    SelectableText(
+                      credentialIsolationFacts(r),
+                      style: prototypeText(
+                        context,
+                        12,
+                        color: c.muted,
+                        height: 1.8,
+                      ),
+                    ),
                   ],
                 ],
               ),
@@ -1052,6 +1123,18 @@ class _CredentialUseApprovalPanelState
                 '到期或撤销只阻止新启动，不能收回已读内容，也不会终止进程。',
                 style: prototypeText(context, 11, height: 1.9, color: c.muted),
               ),
+              if (r.plan.receiver != 'gh_token') ...[
+                const SizedBox(height: 12),
+                Text(
+                  '进程组结束后核对身份并尝试清理临时文件。',
+                  style: prototypeText(
+                    context,
+                    11,
+                    height: 1.9,
+                    color: c.muted,
+                  ),
+                ),
+              ],
             ],
           ),
         ),

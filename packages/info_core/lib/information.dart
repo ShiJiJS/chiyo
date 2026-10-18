@@ -9,7 +9,12 @@ import 'recycle.dart';
 import 'revisions.dart';
 import 'credentials.dart';
 import 'info_core.dart'
-    show CredentialRuntimeRepository, CredentialUseRequest, CredentialExecution;
+    show
+        CredentialRuntimeRepository,
+        CredentialUseRequest,
+        CredentialExecution,
+        SshHostTrustRepository,
+        SshHostTrustSnapshot;
 
 enum FieldKind { structured, textNote }
 
@@ -145,7 +150,16 @@ class MemoryInformationRepository
     implements
         InformationRepository,
         CredentialRepository,
-        CredentialRuntimeRepository {
+        CredentialRuntimeRepository,
+        SshHostTrustRepository {
+  SshHostTrustSnapshot? _sshHostTrust;
+  @override
+  SshHostTrustSnapshot? get sshHostTrust => _sshHostTrust;
+  @override
+  Future<void> saveSshHostTrust(SshHostTrustSnapshot? snapshot) async {
+    _sshHostTrust = snapshot;
+  }
+
   final _credentialUseRequests = <CredentialUseRequest>[];
   final _credentialExecutions = <CredentialExecution>[];
   @override

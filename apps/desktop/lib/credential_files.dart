@@ -13,12 +13,13 @@ abstract interface class CredentialFilePicker {
 }
 
 class NativeCredentialFilePicker implements CredentialFilePicker {
-  const NativeCredentialFilePicker();
+  const NativeCredentialFilePicker({this.knownHosts = false});
+  final bool knownHosts;
   @override
   Future<SelectedCredentialFile?> choose() async {
     final path = await const MethodChannel(
       'agent_info_manage/backup_files',
-    ).invokeMethod<String>('credentialInput');
+    ).invokeMethod<String>(knownHosts ? 'knownHostsInput' : 'credentialInput');
     if (path == null) return null;
     return readCredentialFile(path);
   }

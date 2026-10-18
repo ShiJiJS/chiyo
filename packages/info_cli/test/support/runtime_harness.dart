@@ -20,27 +20,38 @@ class RuntimeHarness {
   static Future<RuntimeHarness> create({
     CredentialProcessStarter? starter,
     String? executablePath,
+    List<int>? fileBytes,
+    bool inspectTool = false,
+    InformationRepository? repository,
   }) async {
     final exe = File(executablePath ?? Platform.resolvedExecutable);
     final stat = await exe.stat();
     final digest = 'sha256:${sha256.convert(await exe.readAsBytes())}';
     final service = InformationService(
-      repository: MemoryInformationRepository(),
-      credentialExecutableInspector: (path, receiver) async =>
-          ExecutableIdentity(
-            path,
-            stat.size,
-            stat.modified.microsecondsSinceEpoch,
-            digest,
-          ),
+      repository: repository ?? MemoryInformationRepository(),
+      credentialExecutableInspector: inspectTool
+          ? inspectCredentialExecutable
+          : (path, receiver) async => ExecutableIdentity(
+              path,
+              stat.size,
+              stat.modified.microsecondsSinceEpoch,
+              digest,
+            ),
     );
     final server = await AgentServer.start(service.agent, port: 0);
     final client = AgentClient(server.port, credentialProcessStarter: starter);
-    var c = await service.owner.createStringCredential(
-      name: 'Synthetic',
-      publicPurpose: '',
-      secret: 'synthetic-token',
-    );
+    var c = fileBytes == null
+        ? await service.owner.createStringCredential(
+            name: 'Synthetic',
+            publicPurpose: '',
+            secret: 'synthetic-token',
+          )
+        : await service.owner.createFileCredential(
+            name: 'Synthetic file',
+            publicPurpose: '',
+            fileName: 'credentials.ini',
+            bytes: fileBytes,
+          );
     c = await service.owner.updateCredentialMetadata(
       c.id,
       c.revision,
@@ -59,8 +70,14 @@ class RuntimeHarness {
 
   Future<String> approve({
     String? cwd,
-    List<String> argv = const ['api', 'user'],
+    List<Object?> argv = const ['api', 'user'],
+    String? receiver,
   }) async {
+    final selectedReceiver =
+        receiver ??
+        (credential.form == CredentialForm.file
+            ? 'aws_shared_credentials'
+            : 'gh_token');
     final r = await client.execute({
       'command': 'request-use',
       'purpose': 'Controlled runtime test',
@@ -68,12 +85,15 @@ class RuntimeHarness {
         {'alias': 'token', 'credentialId': credential.id, 'version': 1},
       ],
       'launch': {
-        'receiver': 'gh_token',
+        'receiver': selectedReceiver,
         'executable': executablePath,
         'argv': argv,
         'cwd': cwd ?? Directory.current.path,
         'env': {
-          'GH_TOKEN': {'secret': 'token'},
+          if (selectedReceiver == 'aws_shared_credentials')
+            'AWS_SHARED_CREDENTIALS_FILE': {'file': 'token'}
+          else if (selectedReceiver == 'gh_token')
+            'GH_TOKEN': {'secret': 'token'},
         },
       },
     });
@@ -87,6 +107,15 @@ class RuntimeHarness {
 
   Future<void> close() async {
     await client.drainCredentialExecutions();
+    for (final execution in service.owner.credentialExecutions.where(
+      (e) => e.materialLease != null && e.cleanupState != 'complete',
+    )) {
+      try {
+        await service.owner.cleanupCredentialExecution(execution.id);
+      } on CredentialUseFailure {
+        /* Preserve any active or unknown test resource. */
+      }
+    }
     client.close();
     await server.close();
     await service.close();

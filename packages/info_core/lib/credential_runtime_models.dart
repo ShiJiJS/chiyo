@@ -116,6 +116,7 @@ class LaunchValue {
     Object? raw,
     String path, {
     required bool environment,
+    bool allowInternal = false,
   }) {
     if (raw is String) {
       return LaunchValue(LaunchValueKind.literal, _useText(raw, path));
@@ -124,6 +125,12 @@ class LaunchValue {
       throw CredentialUseFailure('invalid_type', fieldPath: path);
     }
     final kind = raw.keys.single;
+    if (allowInternal && kind == 'internalMaterial') {
+      return LaunchValue(
+        LaunchValueKind.internalMaterial,
+        _useAlias(raw.values.single, path),
+      );
+    }
     if (kind != 'file' && (kind != 'secret' || !environment)) {
       throw CredentialUseFailure('invalid_reference', fieldPath: path);
     }
@@ -270,7 +277,13 @@ Future<ExecutableIdentity> inspectCredentialExecutable(
       );
     }
     final name = canonical.split(RegExp(r'[/\\]')).last.toLowerCase();
-    if (receiver != 'gh_token' || !{'gh', 'gh.exe'}.contains(name)) {
+    final names = switch (receiver) {
+      'gh_token' => {'gh', 'gh.exe'},
+      'aws_shared_credentials' => {'aws', 'aws.exe'},
+      'ssh_identity' => {'ssh', 'ssh.exe'},
+      _ => <String>{},
+    };
+    if (!names.contains(name)) {
       throw const CredentialUseFailure('unsupported_tool_version');
     }
     probe = await Directory.systemTemp.createTemp('info-tool-probe-');
@@ -282,6 +295,9 @@ Future<ExecutableIdentity> inspectCredentialExecutable(
       'XDG_CONFIG_HOME': probe.path,
       'XDG_STATE_HOME': probe.path,
       'GH_CONFIG_DIR': probe.path,
+      if (Platform.isWindows) 'ProgramData': probe.path,
+      if (Platform.isWindows)
+        'WINDIR': Platform.environment['SystemRoot'] ?? '',
       if (Platform.isWindows)
         'SystemRoot': Platform.environment['SystemRoot'] ?? '',
       if (Platform.isWindows) 'TEMP': probe.path,
@@ -292,7 +308,7 @@ Future<ExecutableIdentity> inspectCredentialExecutable(
     };
     final result = await Process.run(
       canonical,
-      ['--version'],
+      [receiver == 'ssh_identity' ? '-V' : '--version'],
       workingDirectory: probe.path,
       // An empty environment block is rejected by CreateProcess on this
       // Windows runtime (error 87). Retain only the system loader location,
@@ -301,10 +317,16 @@ Future<ExecutableIdentity> inspectCredentialExecutable(
       includeParentEnvironment: false,
       runInShell: false,
     ).timeout(const Duration(seconds: 5));
+    final version = switch (receiver) {
+      'gh_token' => r'^gh version 2\.102\.0(?:\s|$)',
+      'aws_shared_credentials' => r'^aws-cli/2\.38\.1(?:\s|$)',
+      _ => r'^OpenSSH_for_Windows_9\.5p2(?:,|\s|$)',
+    };
     if (result.exitCode != 0 ||
-        !RegExp(
-          r'^gh version 2\.102\.0(?:\s|$)',
-        ).hasMatch(result.stdout as String)) {
+        !RegExp(version).hasMatch(
+          (receiver == 'ssh_identity' ? result.stderr : result.stdout)
+              as String,
+        )) {
       throw const CredentialUseFailure('unsupported_tool_version');
     }
     return ExecutableIdentity(
@@ -349,13 +371,20 @@ class CredentialLaunchPlan {
     this.cwd,
     this.env, {
     this.identity,
-  });
+    this.sshTrustSnapshotId,
+    Map<String, String> internalMaterialHashes = const {},
+  }) : internalMaterialHashes = Map.unmodifiable(internalMaterialHashes);
   final String receiver, path, cwd;
   final List<LaunchValue> argv;
   final Map<String, LaunchValue> env;
   final ExecutableIdentity? identity;
+  final String? sshTrustSnapshotId;
+  final Map<String, String> internalMaterialHashes;
   ExecutableIdentity get executable => identity!;
-  factory CredentialLaunchPlan.parse(Map<String, dynamic> j) {
+  factory CredentialLaunchPlan.parse(
+    Map<String, dynamic> j, {
+    bool allowInternal = false,
+  }) {
     _useShape(j, {'receiver', 'executable', 'argv', 'cwd', 'env'});
     final receiver = _useText(
       j['receiver'],
@@ -398,7 +427,12 @@ class CredentialLaunchPlan {
       path,
       List.unmodifiable([
         for (var i = 0; i < a.length; i++)
-          LaunchValue.parse(a[i], 'launch.argv[$i]', environment: false),
+          LaunchValue.parse(
+            a[i],
+            'launch.argv[$i]',
+            environment: false,
+            allowInternal: allowInternal,
+          ),
       ]),
       cwd,
       Map.unmodifiable({
@@ -407,6 +441,7 @@ class CredentialLaunchPlan {
             entry.value,
             'launch.env.${entry.key}',
             environment: true,
+            allowInternal: allowInternal,
           ),
       }),
     );
@@ -419,6 +454,36 @@ class CredentialLaunchPlan {
         cwd,
         env,
         identity: identity,
+        sshTrustSnapshotId: sshTrustSnapshotId,
+        internalMaterialHashes: internalMaterialHashes,
+      );
+  CredentialLaunchPlan withDelivery({
+    List<LaunchValue>? argv,
+    Map<String, LaunchValue>? env,
+  }) => CredentialLaunchPlan._(
+    receiver,
+    path,
+    List.unmodifiable(argv ?? this.argv),
+    cwd,
+    Map.unmodifiable(env ?? this.env),
+    identity: identity,
+    sshTrustSnapshotId: sshTrustSnapshotId,
+    internalMaterialHashes: internalMaterialHashes,
+  );
+  CredentialLaunchPlan withSshTrust(SshHostTrustSnapshot trust) =>
+      CredentialLaunchPlan._(
+        receiver,
+        path,
+        argv,
+        cwd,
+        env,
+        identity: identity,
+        sshTrustSnapshotId: trust.id,
+        internalMaterialHashes: {
+          'ssh_known_hosts': trust.sha256,
+          'ssh_config': 'sha256:${_runtimeSha256(const [])}',
+          'ssh_global_known_hosts': 'sha256:${_runtimeSha256(const [])}',
+        },
       );
   Map<String, Object?> toJson() => {
     'receiver': receiver,
@@ -427,15 +492,33 @@ class CredentialLaunchPlan {
     'cwd': cwd,
     'env': {for (final e in env.entries) e.key: e.value.toJson()},
     if (identity != null) 'executableIdentity': identity!.toJson(),
+    if (sshTrustSnapshotId != null) 'sshTrustSnapshotId': sshTrustSnapshotId,
+    if (internalMaterialHashes.isNotEmpty)
+      'internalMaterialHashes': internalMaterialHashes,
   };
   factory CredentialLaunchPlan.fromStorageJson(Map<String, dynamic> j) {
-    final shape = Map<String, dynamic>.from(j)..remove('executableIdentity');
-    final plan = CredentialLaunchPlan.parse(shape);
-    return plan.resolved(
+    final shape = Map<String, dynamic>.from(j)
+      ..remove('executableIdentity')
+      ..remove('sshTrustSnapshotId')
+      ..remove('internalMaterialHashes');
+    final plan = CredentialLaunchPlan.parse(shape, allowInternal: true);
+    final resolved = plan.resolved(
       ExecutableIdentity.fromJson(
         j['executableIdentity'] as Map<String, dynamic>,
       ),
       plan.cwd,
+    );
+    return CredentialLaunchPlan._(
+      resolved.receiver,
+      resolved.path,
+      resolved.argv,
+      resolved.cwd,
+      resolved.env,
+      identity: resolved.identity,
+      sshTrustSnapshotId: j['sshTrustSnapshotId'] as String?,
+      internalMaterialHashes:
+          (j['internalMaterialHashes'] as Map?)?.cast<String, String>() ??
+          const {},
     );
   }
   String get planHash {
@@ -461,6 +544,7 @@ class CredentialUseRequest {
     required this.version,
     required this.useGeneration,
     required this.plan,
+    this.requestedPlan,
     required this.createdAt,
     required this.requestExpiresAt,
     required Iterable<FieldRef> fields,
@@ -477,6 +561,7 @@ class CredentialUseRequest {
   final String id, chatLabel, purpose, alias, credentialId, state;
   final int version, useGeneration;
   final CredentialLaunchPlan plan;
+  final CredentialLaunchPlan? requestedPlan;
   final DateTime createdAt, requestExpiresAt;
   final List<FieldRef> fields, approvedFields;
   final bool credentialApproved, attemptConsumed;
@@ -491,6 +576,7 @@ class CredentialUseRequest {
     'version': version,
     'useGeneration': useGeneration,
     'plan': plan.toJson(),
+    if (requestedPlan != null) 'requestedPlan': requestedPlan!.toJson(),
     'createdAt': _useTimestamp(createdAt),
     'requestExpiresAt': _useTimestamp(requestExpiresAt),
     'fields': fields.map((f) => f.toJson()).toList(),
@@ -515,6 +601,11 @@ class CredentialUseRequest {
         plan: CredentialLaunchPlan.fromStorageJson(
           j['plan'] as Map<String, dynamic>,
         ),
+        requestedPlan: j['requestedPlan'] == null
+            ? null
+            : CredentialLaunchPlan.fromStorageJson(
+                j['requestedPlan'] as Map<String, dynamic>,
+              ),
         createdAt: DateTime.parse(j['createdAt'] as String),
         requestExpiresAt: DateTime.parse(j['requestExpiresAt'] as String),
         fields: (j['fields'] as List).map(
@@ -539,6 +630,17 @@ class CredentialUseRequest {
       );
   CredentialUseRequest changed(Map<String, Object?> values) =>
       CredentialUseRequest.fromJson({...toJson(), ...values});
+  Map<String, Object?> toStorageJson() => toJson();
+  Map<String, Object?> toRequestInputJson() => {
+    'command': 'request-use',
+    'purpose': purpose,
+    'credentials': [
+      {'alias': alias, 'credentialId': credentialId, 'version': version},
+    ],
+    'launch': Map<String, Object?>.from((requestedPlan ?? plan).toJson())
+      ..remove('executableIdentity'),
+    'readFields': fields.map((f) => f.toJson()).toList(),
+  };
 }
 
 class CredentialExecution {
@@ -554,11 +656,15 @@ class CredentialExecution {
     this.cleanupState = 'not_needed',
     this.pid,
     this.processCreatedAt,
+    this.materialLease,
+    this.jobName,
   });
   final String id, requestId, state, cleanupState;
   final bool processStarted;
   final int? exitCode, pid;
   final String? errorCode, processCreatedAt;
+  final CredentialMaterialLease? materialLease;
+  final String? jobName;
   final DateTime? startedAt, finishedAt;
   Map<String, Object?> toJson() => {
     'protocolVersion': 1,
@@ -580,6 +686,8 @@ class CredentialExecution {
     ...toJson(),
     'pid': pid,
     'processCreatedAt': processCreatedAt,
+    if (materialLease != null) 'materialLease': materialLease!.toPrivateJson(),
+    if (jobName != null) 'jobName': jobName,
   };
   factory CredentialExecution.fromJson(Map<String, dynamic> j) =>
       CredentialExecution(
@@ -598,7 +706,15 @@ class CredentialExecution {
         cleanupState: j['cleanupState'] as String,
         pid: j['pid'] as int?,
         processCreatedAt: j['processCreatedAt'] as String?,
+        materialLease: j['materialLease'] == null
+            ? null
+            : CredentialMaterialLease.fromPrivateJson(
+                j['materialLease'] as Map<String, dynamic>,
+              ),
+        jobName: j['jobName'] as String?,
       );
+  CredentialExecution changed(Map<String, Object?> values) =>
+      CredentialExecution.fromJson({...toStorageJson(), ...values});
 }
 
 class CredentialExecutionReport {
@@ -612,10 +728,12 @@ class CredentialExecutionReport {
     this.errorCode,
     this.startedAt,
     this.finishedAt,
+    this.jobName,
   });
   final String executionId, executionCapability, state;
   final int? pid, exitCode;
   final String? processCreatedAt, errorCode;
+  final String? jobName;
   final DateTime? startedAt, finishedAt;
   Map<String, Object?> toPrivateJson() => {
     'executionId': executionId,
@@ -627,19 +745,24 @@ class CredentialExecutionReport {
     'errorCode': errorCode,
     'startedAt': _useTimestamp(startedAt),
     'finishedAt': _useTimestamp(finishedAt),
+    if (jobName != null) 'jobName': jobName,
   };
   factory CredentialExecutionReport.fromPrivateJson(Map<String, dynamic> j) {
-    _useShape(j, {
-      'executionId',
-      'executionCapability',
-      'executionState',
-      'pid',
-      'processCreatedAt',
-      'exitCode',
-      'errorCode',
-      'startedAt',
-      'finishedAt',
-    });
+    _useShape(
+      j,
+      {
+        'executionId',
+        'executionCapability',
+        'executionState',
+        'pid',
+        'processCreatedAt',
+        'exitCode',
+        'errorCode',
+        'startedAt',
+        'finishedAt',
+      },
+      {'jobName'},
+    );
     if (j['pid'] != null && j['pid'] is! int ||
         j['exitCode'] != null && j['exitCode'] is! int) {
       throw const CredentialUseFailure('invalid_type');
@@ -660,6 +783,7 @@ class CredentialExecutionReport {
       processCreatedAt: j['processCreatedAt'] as String?,
       exitCode: j['exitCode'] as int?,
       errorCode: j['errorCode'] as String?,
+      jobName: j['jobName'] as String?,
       startedAt: j['startedAt'] == null
           ? null
           : DateTime.parse(j['startedAt'] as String),
@@ -692,11 +816,19 @@ class CredentialExecutionMaterial {
     this.executionCapability,
     this.approvedPlan,
     this.credentialMaterial,
-    this.alias,
-  );
+    this.alias, [
+    this.materialLease,
+    Map<String, List<int>> internalMaterials = const {},
+  ]) : internalMaterials = Map.unmodifiable(
+         internalMaterials.map(
+           (key, value) => MapEntry(key, List<int>.unmodifiable(value)),
+         ),
+       );
   final String executionId, executionCapability, alias;
   final CredentialLaunchPlan approvedPlan;
   final CredentialMaterialValue credentialMaterial;
+  final CredentialMaterialLease? materialLease;
+  final Map<String, List<int>> internalMaterials;
   Map<String, Object?> toPrivateJson() => {
     'protocolVersion': 1,
     'status': 'ok',
@@ -705,6 +837,11 @@ class CredentialExecutionMaterial {
     'approvedPlan': approvedPlan.toJson(),
     'credentialMaterial': credentialMaterial.toPrivateJson(),
     'alias': alias,
+    if (materialLease != null) 'materialLease': materialLease!.toPrivateJson(),
+    if (internalMaterials.isNotEmpty)
+      'internalMaterials': internalMaterials.map(
+        (key, value) => MapEntry(key, base64Encode(value)),
+      ),
   };
   factory CredentialExecutionMaterial.fromPrivateJson(Map<String, dynamic> j) =>
       CredentialExecutionMaterial(
@@ -717,6 +854,16 @@ class CredentialExecutionMaterial {
           j['credentialMaterial'] as Map<String, dynamic>,
         ),
         j['alias'] as String,
+        j['materialLease'] == null
+            ? null
+            : CredentialMaterialLease.fromPrivateJson(
+                j['materialLease'] as Map<String, dynamic>,
+              ),
+        (j['internalMaterials'] as Map?)?.map(
+              (key, value) =>
+                  MapEntry(key as String, base64Decode(value as String)),
+            ) ??
+            const {},
       );
   @override
   String toString() => 'CredentialExecutionMaterial($executionId)';

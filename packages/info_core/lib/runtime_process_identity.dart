@@ -101,6 +101,28 @@ class CredentialProcessJob {
   CredentialProcessJob._(this.name, this._handle);
   final String name;
   int? _handle;
+
+  /// null means inspection was inconclusive; never infer termination from it.
+  static bool? isActive(String name) {
+    if (!Platform.isWindows ||
+        !RegExp(r'^Local\\AgentInfoRuntime-[A-Za-z0-9_-]{32}$').hasMatch(name)) {
+      return null;
+    }
+    final native = name.toNativeUtf16();
+    var handle = 0;
+    try {
+      handle = _openJob(4, 0, native);
+      final error = _lastError();
+      if (handle == 0) return error == 2 ? false : null;
+      return CredentialProcessJob._(name, handle).activeProcesses != 0;
+    } on Object {
+      return null;
+    } finally {
+      if (handle != 0) _closeHandle(handle);
+      calloc.free(native);
+    }
+  }
+
   static CredentialProcessJob observe(String name, int processId) {
     final nativeName = name.toNativeUtf16();
     int jobHandle = 0, processHandle = 0;

@@ -7,6 +7,9 @@ import 'templates.dart';
 import 'ui.dart';
 import 'prototype_ui.dart';
 import 'settings_controls.dart';
+import 'credential_files.dart';
+import 'ssh_host_settings.dart';
+import 'credential_material_checks.dart';
 
 enum SettingsSection {
   appearance,
@@ -15,6 +18,7 @@ enum SettingsSection {
   templates,
   backups,
   application,
+  sshHosts,
 }
 
 class SettingsPage extends StatefulWidget {
@@ -31,11 +35,13 @@ class SettingsPage extends StatefulWidget {
     this.initialSection = SettingsSection.appearance,
     this.navigationRevision = 0,
     this.onOpenApprovals,
+    this.sshHostFiles = const NativeCredentialFilePicker(knownHosts: true),
   });
   final OwnerAccess owner;
   final DesktopRuntime? runtime;
   final InformationBackups? backups;
   final BackupFilePicker files;
+  final CredentialFilePicker sshHostFiles;
   final VoidCallback? onRestored, onOpenApprovals;
   final ValueChanged<DesktopColorTheme>? onThemeChanged;
   final bool themeBusy;
@@ -54,7 +60,15 @@ class _SettingsPageState extends State<SettingsPage> {
   bool _testFailed = false;
   late int _timeout = widget.owner.requestLifetime.inMinutes;
   late int _retention = widget.owner.auditRetentionDays;
-  static const _labels = ['外观', '通知', '请求与记录', '录入模板', '备份与恢复', '应用运行'];
+  static const _labels = [
+    '外观',
+    '通知',
+    '请求与记录',
+    '录入模板',
+    '备份与恢复',
+    '应用运行',
+    'SSH 主机信任',
+  ];
   static const _descriptions = [
     '主题与界面颜色',
     '访问申请提醒',
@@ -62,6 +76,7 @@ class _SettingsPageState extends State<SettingsPage> {
     '常用信息的字段结构',
     '加密导出与恢复密钥',
     '后台运行与本机服务',
+    '确认 SSH 服务器身份',
   ];
   static const _intro = [
     '选择习惯的颜色，让每个工作区保持一致。',
@@ -70,6 +85,7 @@ class _SettingsPageState extends State<SettingsPage> {
     '保存常用字段结构，减少重复录入。',
     '使用独立恢复密钥，保存与恢复你的信息库。',
     '查看本机服务与窗口关闭后的运行方式。',
+    '明确确认主机记录，让每次 SSH 使用都连接到预期的服务器。',
   ];
   static const _icons = [
     PrototypeIconGlyph.layers,
@@ -78,6 +94,7 @@ class _SettingsPageState extends State<SettingsPage> {
     PrototypeIconGlyph.file,
     PrototypeIconGlyph.shield,
     PrototypeIconGlyph.tune,
+    PrototypeIconGlyph.shield,
   ];
   @override
   void didUpdateWidget(covariant SettingsPage oldWidget) {
@@ -591,6 +608,10 @@ class _SettingsPageState extends State<SettingsPage> {
     ],
   );
   Widget _application() => _inset([
+    CredentialMaterialChecks(
+      owner: widget.owner,
+      reconcile: widget.runtime?.reconcileRuntimeMaterialCleanup,
+    ),
     SettingsRow(
       widget.owner.serviceAvailable ? '本机服务运行中' : '本机服务暂不可用',
       '应用为 Agent 提供访问请求入口；信息的实际读取需要你的授权。',
@@ -804,6 +825,10 @@ class _SettingsPageState extends State<SettingsPage> {
                                 embedded: true,
                               ),
                       SettingsSection.application => _application(),
+                      SettingsSection.sshHosts => SshHostSettings(
+                        owner: widget.owner,
+                        files: widget.sshHostFiles,
+                      ),
                     },
                     if (_error != null || widget.themeError != null)
                       SettingsNotice(

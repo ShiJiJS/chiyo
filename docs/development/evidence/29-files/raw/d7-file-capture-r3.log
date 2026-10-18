@@ -1,0 +1,13 @@
+Flutter assets will be downloaded from https://storage.flutter-io.cn. Make sure you trust this source!
+00:00 +0: loading C:/Project/network_config/info-manage-worktrees/29-files/apps/desktop/tool/capture_file_delivery.dart
+00:00 +0: (setUpAll)
+00:00 +0: file delivery purple 1440
+00:02 +1: file delivery purple 1280
+00:04 +2: file delivery green 1440
+00:04 +3: file delivery green 1280
+00:05 +4: file delivery blue 1440
+00:05 +5: file delivery blue 1280
+00:05 +6: file delivery mono 1440
+00:06 +7: file delivery mono 1280
+00:07 +8: (tearDownAll)
+00:07 +8: All tests passed!
