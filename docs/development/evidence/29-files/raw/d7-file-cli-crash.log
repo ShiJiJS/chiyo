@@ -1,0 +1,3 @@
+Running build hooks...Running build hooks...00:00 +0: loading test/file_cli_crash_recovery_test.dart
+00:00 +0: compiled CLI death preserves an active file task, and encrypted reopen cleans only after its registered process group ends
+00:02 +1: All tests passed!

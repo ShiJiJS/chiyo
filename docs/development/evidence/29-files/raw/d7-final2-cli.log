@@ -1,0 +1,46 @@
+00:00 +0: loading test\adjusted_scope_cli_test.dart
+00:00 +0: test\adjusted_scope_cli_test.dart: real CLI learns and reads the owner-adjusted range and fixed expiry
+00:00 +1: test\adjusted_scope_cli_test.dart: real CLI learns and reads the owner-adjusted range and fixed expiry
+00:01 +2: test\adjusted_scope_cli_test.dart: real CLI learns and reads the owner-adjusted range and fixed expiry
+00:01 +3: test\adjusted_scope_cli_test.dart: real CLI learns and reads the owner-adjusted range and fixed expiry
+00:01 +4: test\adjusted_scope_cli_test.dart: real CLI learns and reads the owner-adjusted range and fixed expiry
+00:01 +5: test\adjusted_scope_cli_test.dart: real CLI learns and reads the owner-adjusted range and fixed expiry
+00:01 +6: test\adjusted_scope_cli_test.dart: real CLI learns and reads the owner-adjusted range and fixed expiry
+00:01 +7: test\adjusted_scope_cli_test.dart: real CLI learns and reads the owner-adjusted range and fixed expiry
+00:02 +8: test\adjusted_scope_cli_test.dart: real CLI learns and reads the owner-adjusted range and fixed expiry
+00:04 +9: test\adjusted_scope_cli_test.dart: real CLI learns and reads the owner-adjusted range and fixed expiry
+00:04 +10: test\aws_receiver_native_test.dart: real AWS CLI uses only approved static file credentials for signed reads and writes, and rejects the wrong secret
+00:04 +11: test\aws_receiver_native_test.dart: real AWS CLI uses only approved static file credentials for signed reads and writes, and rejects the wrong secret
+00:05 +12: test\aws_receiver_native_test.dart: real AWS CLI uses only approved static file credentials for signed reads and writes, and rejects the wrong secret
+00:05 +13: test\aws_receiver_native_test.dart: real AWS CLI uses only approved static file credentials for signed reads and writes, and rejects the wrong secret
+00:05 +14: test\aws_receiver_native_test.dart: real AWS CLI uses only approved static file credentials for signed reads and writes, and rejects the wrong secret
+00:05 +15: test\aws_receiver_native_test.dart: real AWS CLI uses only approved static file credentials for signed reads and writes, and rejects the wrong secret
+00:05 +16: test\aws_receiver_native_test.dart: real AWS CLI uses only approved static file credentials for signed reads and writes, and rejects the wrong secret
+00:06 +17: test\aws_receiver_native_test.dart: real AWS CLI uses only approved static file credentials for signed reads and writes, and rejects the wrong secret
+00:06 +18: test\aws_receiver_native_test.dart: real AWS CLI uses only approved static file credentials for signed reads and writes, and rejects the wrong secret
+00:06 +19: test\aws_receiver_native_test.dart: real AWS CLI uses only approved static file credentials for signed reads and writes, and rejects the wrong secret
+00:07 +20: test\aws_receiver_native_test.dart: real AWS CLI uses only approved static file credentials for signed reads and writes, and rejects the wrong secret
+00:07 +21: test\aws_receiver_native_test.dart: real AWS CLI uses only approved static file credentials for signed reads and writes, and rejects the wrong secret
+00:08 +22: test\aws_receiver_native_test.dart: real AWS CLI uses only approved static file credentials for signed reads and writes, and rejects the wrong secret
+00:10 +23: test\aws_receiver_native_test.dart: real AWS CLI uses only approved static file credentials for signed reads and writes, and rejects the wrong secret
+00:11 +24: test\aws_receiver_native_test.dart: real AWS CLI uses only approved static file credentials for signed reads and writes, and rejects the wrong secret
+00:14 +25: test\aws_receiver_native_test.dart: real AWS CLI uses only approved static file credentials for signed reads and writes, and rejects the wrong secret
+00:15 +26: test\aws_receiver_native_test.dart: real AWS CLI uses only approved static file credentials for signed reads and writes, and rejects the wrong secret
+00:17 +27: test\aws_receiver_native_test.dart: real AWS CLI uses only approved static file credentials for signed reads and writes, and rejects the wrong secret
+00:18 +28: test\aws_receiver_native_test.dart: real AWS CLI uses only approved static file credentials for signed reads and writes, and rejects the wrong secret
+00:18 +29: test\aws_receiver_native_test.dart: real AWS CLI uses only approved static file credentials for signed reads and writes, and rejects the wrong secret
+00:19 +30: test\aws_receiver_native_test.dart: real AWS CLI uses only approved static file credentials for signed reads and writes, and rejects the wrong secret
+00:20 +31: test\aws_receiver_native_test.dart: real AWS CLI uses only approved static file credentials for signed reads and writes, and rejects the wrong secret
+00:22 +32: test\aws_receiver_native_test.dart: real AWS CLI uses only approved static file credentials for signed reads and writes, and rejects the wrong secret
+00:23 +33: test\aws_receiver_native_test.dart: real AWS CLI uses only approved static file credentials for signed reads and writes, and rejects the wrong secret
+00:24 +34: test\aws_receiver_native_test.dart: real AWS CLI uses only approved static file credentials for signed reads and writes, and rejects the wrong secret
+00:24 +35: test\aws_receiver_native_test.dart: real AWS CLI uses only approved static file credentials for signed reads and writes, and rejects the wrong secret
+00:24 +36: test\aws_receiver_native_test.dart: real AWS CLI uses only approved static file credentials for signed reads and writes, and rejects the wrong secret
+00:25 +37: test\codex_process_test.dart: root SessionEnd ends every startup generation and its delegated child without reading a transcript
+00:37 +38: test\codex_process_test.dart: a parent proof delegates only the same grant and deadline to its intended child
+00:47 +39: test\codex_process_test.dart: explicit reconnect creates a fresh association without recovering grants
+00:49 +40: test\codex_process_test.dart: known chat and request IDs cannot recover a capability, even by restarting the hook
+01:00 +41: test\codex_process_test.dart: malformed associations and hook input fail without leaking input or reading transcripts
+01:03 +42: test\codex_process_test.dart: hook association supports distinct CLI processes without reapproval
+01:13 +43: All tests passed!
+{"imageId": "sha256:4c33580cdd4166ddf8faeb4f6bba9fb7e208720978f0a92751681b3f22d9406c", "testExitCode": 0, "fixture": "synthetic localhost only", "containerRemovedAfterRun": true}
