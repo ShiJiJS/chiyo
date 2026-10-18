@@ -16,7 +16,7 @@ Future<void> main(List<String> args) async {
       bytes.addAll(chunk);
     }
     final input = decodeProtocolObject(utf8.decode(bytes));
-    final commandInput = Map<String,dynamic>.of(input)..remove('association');
+    final commandInput = Map<String, dynamic>.of(input)..remove('association');
     final association = await CodexAssociation.load(
       input['association'] as String,
       Platform.environment['CODEX_THREAD_ID'] ?? '',
@@ -25,6 +25,7 @@ Future<void> main(List<String> args) async {
       association.port,
       sessionSecret: association.secret,
       sourceAgent: 'Codex',
+      hostedCredentialExecutions: true,
     );
     if (input['command'] == 'delegate') {
       final child = input['childChatId'];
@@ -50,7 +51,9 @@ Future<void> main(List<String> args) async {
         'command': 'claim',
         'requestId': input['requestId'],
       });
-      result = claim['status'] == 'ok' ? await client.execute(commandInput) : claim;
+      result = claim['status'] == 'ok'
+          ? await client.execute(commandInput)
+          : claim;
     } else if (input['command'] == 'session') {
       result = {'status': 'invalid_request'};
     } else {

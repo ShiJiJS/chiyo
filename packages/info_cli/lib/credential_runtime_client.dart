@@ -11,18 +11,22 @@ Future<Process> _startCredentialProcess(
   String executable,
   List<String> argv,
   String cwd,
-  Map<String, String> environment,
-) async {
+  Map<String, String> environment, {
+  String? workerExecutable,
+}) async {
   if (!Platform.isWindows) {
     throw const CredentialUseFailure('unsupported_tool_version');
   }
   final runtime = Platform.resolvedExecutable;
-  final interpreted = runtime.toLowerCase().endsWith('dart.exe');
-  final worker = interpreted
-      ? (await Isolate.resolvePackageUri(
-          Uri.parse('package:info_cli/runtime_worker.dart'),
-        ))!.toFilePath()
-      : '${File(runtime).parent.path}/info-runtime-worker.exe';
+  final interpreted =
+      workerExecutable == null && runtime.toLowerCase().endsWith('dart.exe');
+  final worker =
+      workerExecutable ??
+      (interpreted
+          ? (await Isolate.resolvePackageUri(
+              Uri.parse('package:info_cli/runtime_worker.dart'),
+            ))!.toFilePath()
+          : '${File(runtime).parent.path}/info-runtime-worker.exe');
   if (!await File(worker).exists()) {
     throw const CredentialUseFailure('process_start_failed');
   }
@@ -189,6 +193,23 @@ extension _CredentialRuntimeClient on AgentClient {
           identity.length > 128 ||
           identity.codeUnits.any((c) => c < 33 || c > 126)) {
         throw const CredentialUseFailure('invalid_reference');
+      }
+      if (hostedCredentialExecutions) {
+        final result = await _call('/credential-use/hosted', {
+          'sessionSecret': _session,
+          ...input,
+        });
+        if (command == 'run-use' &&
+            result['status'] == 'service_unavailable' &&
+            !result.containsKey('attemptConsumed')) {
+          // A lost response is not proof that the resident executor did not
+          // reserve the original attempt. Never fall back to another launch.
+          throw const CredentialUseFailure(
+            'material_claim_failed',
+            attemptConsumed: true,
+          );
+        }
+        return result;
       }
       switch (command) {
         case 'run-use':

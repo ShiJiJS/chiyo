@@ -1,0 +1,240 @@
+import 'dart:convert';
+import 'dart:io';
+import 'package:info_cli/agent_client.dart';
+import 'package:info_cli/credential_execution_host.dart';
+import 'package:info_cli/codex_association.dart';
+import 'package:info_core/agent_server.dart';
+import 'package:info_core/info_core.dart';
+import 'package:test/test.dart';
+import 'support/runtime_harness.dart';
+import 'codex_process_test.dart' show invoke;
+
+void main() {
+  test(
+    'an unavailable resident host never falls back to local execution or consumes the approved attempt',
+    () async {
+      final h = await RuntimeHarness.create();
+      addTearDown(h.close);
+      final request = await h.approve();
+      final client = AgentClient(
+        h.server.port,
+        sessionSecret: h.client.sessionSecret,
+        hostedCredentialExecutions: true,
+      );
+      addTearDown(client.close);
+      final result = await client.execute({
+        'command': 'run-use',
+        'requestId': request,
+      });
+      expect(result['errorCode'], 'service_unavailable');
+      expect(result['attemptConsumed'], isFalse);
+      expect(
+        h.service.owner.credentialUseRequests.single.attemptConsumed,
+        isFalse,
+      );
+      expect(h.service.owner.credentialExecutions, isEmpty);
+    },
+  );
+  test(
+    'closing a host during worker availability inspection rejects the launch before consuming its attempt',
+    () async {
+      final h = await RuntimeHarness.create();
+      addTearDown(h.close);
+      final request = await h.approve();
+      final host = CredentialExecutionHost(
+        port: h.server.port,
+        workerExecutable: File('pubspec.yaml').absolute.path,
+      );
+      addTearDown(() async {
+        await host.drain();
+        host.close();
+      });
+      final pending = host.execute(h.client.sessionSecret!, {
+        'command': 'run-use',
+        'requestId': request,
+      });
+      host.close();
+      final result = await pending;
+      expect(result['errorCode'], 'service_unavailable');
+      expect(result['attemptConsumed'], isFalse);
+      expect(
+        h.service.owner.credentialUseRequests.single.attemptConsumed,
+        isFalse,
+      );
+      expect(h.service.owner.credentialExecutions, isEmpty);
+    },
+    skip: !Platform.isWindows,
+  );
+  test(
+    'separate actual Codex adapter processes start and query one hosted task without losing output or repeating approval',
+    () async {
+      final h = await RuntimeHarness.create();
+      addTearDown(h.close);
+      final request = await h.approve(argv: ['api', 'user', '--method', 'GET']);
+      await h.server.close();
+      late CredentialExecutionHost host;
+      final server = await AgentServer.start(
+        h.service.agent,
+        port: 0,
+        credentialExecutionHandler: (session, input) =>
+            host.execute(session, input),
+      );
+      host = CredentialExecutionHost(
+        port: server.port,
+        processStarter: (exe, argv, cwd, env) => Process.start(
+          exe,
+          [
+            File('test/support/hosted_credential_child.dart').absolute.path,
+            ...argv,
+          ],
+          workingDirectory: cwd,
+          environment: env,
+          includeParentEnvironment: false,
+          runInShell: false,
+        ),
+      );
+      addTearDown(() async {
+        await host.drain();
+        host.close();
+        await server.close();
+      });
+      final root = await Directory.systemTemp.createTemp(
+        'hosted-codex-association-',
+      );
+      addTearDown(() async {
+        final actual = await root.resolveSymbolicLinks(),
+            parent = await Directory.systemTemp.resolveSymbolicLinks();
+        if (actual.toLowerCase() != root.absolute.path.toLowerCase() ||
+            !actual.toLowerCase().startsWith(
+              '${parent.toLowerCase()}${Platform.pathSeparator}',
+            )) {
+          throw StateError('Refusing unexpected test association cleanup');
+        }
+        await root.delete(recursive: true);
+      });
+      final reference = await CodexAssociation(
+        'hosted-test-chat',
+        server.port,
+        h.client.sessionSecret!,
+      ).save(root);
+      Future<Map<String, dynamic>> call(Map<String, dynamic> input) => invoke(
+        'bin/codex_info.dart',
+        {'association': reference, ...input},
+        chat: 'hosted-test-chat',
+      );
+      final accepted = await call({'command': 'run-use', 'requestId': request});
+      expect(accepted['status'], 'accepted');
+      await host.drain();
+      final status = await call({
+        'command': 'execution-status',
+        'executionId': accepted['executionId'],
+      });
+      expect(status['executionState'], 'exited');
+      expect(status['exitCode'], 0);
+      expect(status['outputAvailable'], isTrue);
+      final output = await call({
+        'command': 'execution-output',
+        'executionId': accepted['executionId'],
+      });
+      expect(output['chunks'], isNotEmpty);
+      expect(
+        (await call({'command': 'run-use', 'requestId': request}))['errorCode'],
+        'attempt_consumed',
+      );
+    },
+    skip: !Platform.isWindows,
+  );
+  test(
+    'a hosted task survives its calling client closing and another call retrieves the same authorized output',
+    () async {
+      final h = await RuntimeHarness.create();
+      addTearDown(h.close);
+      final request = await h.approve(argv: ['api', 'user', '--method', 'GET']);
+      await h.server.close();
+      late CredentialExecutionHost host;
+      final server = await AgentServer.start(
+        h.service.agent,
+        port: 0,
+        credentialExecutionHandler: (session, input) =>
+            host.execute(session, input),
+      );
+      host = CredentialExecutionHost(
+        port: server.port,
+        processStarter: (exe, argv, cwd, env) => Process.start(
+          exe,
+          [
+            File('test/support/hosted_credential_child.dart').absolute.path,
+            ...argv,
+          ],
+          workingDirectory: cwd,
+          environment: env,
+          includeParentEnvironment: false,
+          runInShell: false,
+        ),
+      );
+      addTearDown(() async {
+        await host.drain();
+        host.close();
+        await server.close();
+      });
+      final first = AgentClient(
+        server.port,
+        sessionSecret: h.client.sessionSecret,
+        hostedCredentialExecutions: true,
+      );
+      final accepted = await first.execute({
+        'command': 'run-use',
+        'requestId': request,
+      });
+      expect(accepted['status'], 'accepted');
+      first.close();
+      final second = AgentClient(
+        server.port,
+        sessionSecret: h.client.sessionSecret,
+        hostedCredentialExecutions: true,
+      );
+      addTearDown(second.close);
+      await host.drain();
+      final status = await second.execute({
+        'command': 'execution-status',
+        'executionId': accepted['executionId'],
+      });
+      expect(status['executionState'], 'exited');
+      expect(status['exitCode'], 0);
+      expect(status['outputAvailable'], isTrue);
+      final output = await second.execute({
+        'command': 'execution-output',
+        'executionId': accepted['executionId'],
+      });
+      final bytes = (output['chunks'] as List)
+          .where((c) => c['stream'] == 'stdout')
+          .expand<int>((c) => base64Decode(c['dataBase64'] as String))
+          .toList();
+      expect(jsonDecode(utf8.decode(bytes)), {
+        'tokenMatches': true,
+        'literalArguments': true,
+      });
+      expect(
+        (await second.execute({
+          'command': 'run-use',
+          'requestId': request,
+        }))['errorCode'],
+        'attempt_consumed',
+      );
+      final stranger = AgentClient(
+        server.port,
+        hostedCredentialExecutions: true,
+      );
+      addTearDown(stranger.close);
+      await stranger.execute({'command': 'session', 'chatLabel': 'Unrelated'});
+      expect(
+        (await stranger.execute({
+          'command': 'execution-output',
+          'executionId': accepted['executionId'],
+        }))['errorCode'],
+        'session_mismatch',
+      );
+    },
+    skip: !Platform.isWindows,
+  );
+}

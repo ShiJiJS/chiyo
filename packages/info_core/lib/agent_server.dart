@@ -19,19 +19,28 @@ Map<String, Object?> _credentialFailure(String code, {String? fieldPath}) => {
 };
 
 /// Agent-only transport. OwnerAccess is intentionally not a dependency.
+typedef CredentialExecutionHandler =
+    Future<Map<String, dynamic>> Function(
+      String session,
+      Map<String, dynamic> input,
+    );
+
 class AgentServer {
-  AgentServer._(this._server, this._agent) {
+  AgentServer._(this._server, this._agent, this._credentialExecutionHandler) {
     _server.listen(_handle);
   }
   final HttpServer _server;
   final AgentAccess _agent;
+  final CredentialExecutionHandler? _credentialExecutionHandler;
   int get port => _server.port;
   static Future<AgentServer> start(
     AgentAccess agent, {
     int port = 47125,
+    CredentialExecutionHandler? credentialExecutionHandler,
   }) async => AgentServer._(
     await HttpServer.bind(InternetAddress.loopbackIPv4, port, shared: false),
     agent,
+    credentialExecutionHandler,
   );
   Future<void> close() async {
     await _server.close(force: true);
@@ -128,6 +137,22 @@ class AgentServer {
     Map<String, dynamic> body,
   ) async {
     switch (path) {
+      case '/credential-use/hosted':
+        final handler = _credentialExecutionHandler;
+        if (handler == null) {
+          throw const CredentialUseFailure('service_unavailable');
+        }
+        final session = _text(body, 'sessionSecret');
+        final input = Map<String, dynamic>.of(body)..remove('sessionSecret');
+        if (!{
+          'run-use',
+          'execution-status',
+          'execution-output',
+          'cleanup-use',
+        }.contains(input['command'])) {
+          throw const CredentialUseFailure('invalid_plan');
+        }
+        return handler(session, input);
       case '/credential-use/materials/register':
         if (body.keys.any(
           (k) => !{'executionId', 'executionCapability', 'lease'}.contains(k),
@@ -143,7 +168,9 @@ class AgentServer {
         );
         return {'protocolVersion': 1, 'status': 'ok'};
       case '/credential-use/cleanup':
-        if (body.keys.any((k) => !{'sessionSecret', 'executionId'}.contains(k))) {
+        if (body.keys.any(
+          (k) => !{'sessionSecret', 'executionId'}.contains(k),
+        )) {
           throw const CredentialUseFailure('unknown_field');
         }
         final execution = await _agent.cleanupCredentialExecution(
