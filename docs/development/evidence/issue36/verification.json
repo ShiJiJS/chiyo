@@ -77,28 +77,28 @@
       "sha256": "5b80b85d19020de82d0b8dbd0e4d8eb8a6e7b4c86a78742129e1f716c636ad3d"
     },
     "check-attachments.cjs-round-1.log": {
-      "bytes": 1193,
-      "sha256": "665f834389db597a660da24b3d8df0bba69ef89189d55fc4b15b3398bad6bdef"
+      "bytes": 1178,
+      "sha256": "b3197d3808724974e2851e21fdfba266515df928e4a47b694b836699fb5667ef"
     },
     "check-attachments.cjs-round-2.log": {
-      "bytes": 1193,
-      "sha256": "665f834389db597a660da24b3d8df0bba69ef89189d55fc4b15b3398bad6bdef"
+      "bytes": 1178,
+      "sha256": "b3197d3808724974e2851e21fdfba266515df928e4a47b694b836699fb5667ef"
     },
     "check-attachments.cjs-round-3.log": {
-      "bytes": 1193,
-      "sha256": "665f834389db597a660da24b3d8df0bba69ef89189d55fc4b15b3398bad6bdef"
+      "bytes": 1178,
+      "sha256": "b3197d3808724974e2851e21fdfba266515df928e4a47b694b836699fb5667ef"
     },
     "check-flows.cjs-round-1.log": {
-      "bytes": 1003,
-      "sha256": "1e289592ccd334962fd283339a4cc1bcb1387011183258650170600c125ae97d"
+      "bytes": 987,
+      "sha256": "a13842c381ebbe5f1bfaef249a614aab4965b8b4e7639e24ea8a9b63fc7b986d"
     },
     "check-flows.cjs-round-2.log": {
-      "bytes": 1003,
-      "sha256": "1e289592ccd334962fd283339a4cc1bcb1387011183258650170600c125ae97d"
+      "bytes": 987,
+      "sha256": "a13842c381ebbe5f1bfaef249a614aab4965b8b4e7639e24ea8a9b63fc7b986d"
     },
     "check-flows.cjs-round-3.log": {
-      "bytes": 1003,
-      "sha256": "1e289592ccd334962fd283339a4cc1bcb1387011183258650170600c125ae97d"
+      "bytes": 987,
+      "sha256": "a13842c381ebbe5f1bfaef249a614aab4965b8b4e7639e24ea8a9b63fc7b986d"
     },
     "file-field.png": {
       "bytes": 117741,
@@ -186,33 +186,35 @@
     }
   },
   "sources": {
-    "docs/design/prototypes/round-05/assemble-lifecycle.cjs": "dbd41a9a84330d76220eb20ec426fcb3f71665c1539a132f5429b15f45c50dfd",
+    "docs/design/prototypes/round-05/assemble-lifecycle.cjs": "e705e04d03a34174ae496dbb3198ff86d0118db3bb5a7ac9a6e0e1df747ba341",
     "docs/design/prototypes/round-05/association.html": "e608b961360200206dba70e3c0f7f6627174ad12095465a436e6adf1cb66e4e6",
     "docs/design/prototypes/round-05/attachment-surfaces.html": "3d788abd5d2ff207cc21cf29fda6fac444c68c3cc102f191fac49c720f6b5a2c",
-    "docs/design/prototypes/round-05/attachments-assembly.cjs": "06c5c6434271ff589d73810a164cfcd1fa15881d7931eaa56e966b9bad1948f6",
+    "docs/design/prototypes/round-05/attachments-assembly.cjs": "942d5e200de7b14e700b4510be9a744f31eaa98638c87b1d08f62fe81dbb9ef8",
     "docs/design/prototypes/round-05/attachments.css": "31f13d5c21493630672583a5de2c319d06e77177365e6ef675961155d4995db0",
     "docs/design/prototypes/round-05/attachments.js": "87ac005af2be15f98ea7bacc78b2bafa9b650e8ca7a3f7e0d1b1111064c7e136",
-    "docs/design/prototypes/round-05/baseline-index.html": "3ef6385d9fb04ac5d072a130c7531a50fff6168d57b5e2608c03d75d59774674",
+    "docs/design/prototypes/round-05/baseline-index.html": "70d2f358f60a1dd003a8db46db21894e038bd7af2f6144c53a5a73bce6ebfe67",
     "docs/design/prototypes/round-05/check-attachments.cjs": "b9cddc902843b14eb87e05c271b7443fe5f891669e7f6a87d6be428d58c5727a",
-    "docs/design/prototypes/round-05/check-flows.cjs": "97983c52cb216aab5a903a056a6aa4832f168c190911ccddbe34e9e28bd9fbbd",
-    "docs/design/prototypes/round-05/credential-dialogs.html": "7424165308b400121ce53e62dda8179af6a272a107f6a33d322371cf45d6c66d",
-    "docs/design/prototypes/round-05/credential-library.html": "637a685fe3a02f859b3db38b1d54de06ebcfd74ff85d03f53d198d9127085b5f",
-    "docs/design/prototypes/round-05/credentials.css": "1b1a07a8ed5df3188dbf4a58671c42347713b8f4e284c4cd8f31b341ebfceee3",
-    "docs/design/prototypes/round-05/credentials.js": "321e78e22be13f88f1a851d7d01daf96246c18cd1f2ea3956c15becee29af1a8",
-    "docs/design/prototypes/round-05/index.html": "0daa85dc34fb98366dbfc05ac7aefcc4c90eebfdd4672398fb83e3d57deafc80",
-    "docs/design/prototypes/round-05/lifecycle-surfaces.html": "4ec78586cb857d6175f8b32f168d86e5e9a548052223f38ec0a1623ff3460ab1",
-    "docs/design/prototypes/round-05/lifecycle.css": "f5a306803c4367ae5c733fb942211a6f69138623670e35bf50f1564e5e1618dd",
-    "docs/design/prototypes/round-05/lifecycle.js": "ed0315316a539d7c8b4c76b1b4a2f94e5ae6d44e0ae54100928026720562abe5",
+    "docs/design/prototypes/round-05/check-flows.cjs": "d1a12bc0947da19e1c8c87512f07c9905d2e48ddc762ae2e5b0d85b3e09c358c",
+    "docs/design/prototypes/round-05/credential-dialogs.html": "24f80cc78dcfba1ab04962020f5bc4b30173a1e7fdcc32a9c971c269b7672013",
+    "docs/design/prototypes/round-05/credential-library.html": "4a9da0fe6620133ed273b1131eec9b594d3a8f8f90c0935820628a88c19152de",
+    "docs/design/prototypes/round-05/credentials.css": "899684d23ed3a944435d53b401af00b9d5d01bbdb9e44932dd5a206ad7b54700",
+    "docs/design/prototypes/round-05/credentials.js": "63f8202bc12c545fa6c2711d83be604111374a5fac9c454dab9a5ec72b8e05a8",
+    "docs/design/prototypes/round-05/index.html": "c7439e79583abcd50f3e441ecbedc426555d8e2ce72f5449169c8437ad113a40",
+    "docs/design/prototypes/round-05/lifecycle-surfaces.html": "84a14285608f2ddd8d3508bda9bfa79d7572565b8ae34f05c831c2e9733e7058",
+    "docs/design/prototypes/round-05/lifecycle.css": "8f377589f2089c9c5801ffd2954d05db0fcb4c9d127fe383bb0e52cb0c7edda7",
+    "docs/design/prototypes/round-05/lifecycle.js": "feec903ebd1d7e57bf8bbfa203c4e9fb63866c4a328cf11c1c37d8e23c72d448",
     "docs/design/prototypes/round-05/notes.html": "1cc3ec911db36901c15fa14a6e504c007aa0258e9950c4d17c3d6d36a3acd37a",
     "docs/design/prototypes/round-05/prototype.css": "944c91c7f9588dad94a0662e4a9dac892eca3dce75d67af517839be9d33370d7",
     "docs/design/prototypes/round-05/prototype.js": "5dd766626ae092936152fdbcdefc3ed4d0174f5dd310466fbcb29ba32f280292",
     "docs/design/prototypes/round-05/request-dialog.html": "4e3efdcb5967a8dda736b8463ca170da4781dc08291dc2f49a104b482bfb6f3e",
     "docs/design/prototypes/round-05/runtime.css": "3705b36e2ee4b7f826e6d6a438dd524e62042efda81aeef3acba92cb97c73d6c",
     "docs/design/prototypes/round-05/runtime.js": "f9715e1fcb6d56b0f835a36a105ee2347d7a9d27b40731a488c3419279ef885e",
-    "docs/design/prototypes/round-05/sections.css": "e97a2bc64f7ff62d3e2aa0f92be2108e3bc3b9c619cc499d07504783626880ad",
+    "docs/design/prototypes/round-05/sections.css": "a4e2d5961bd86e7bd3dee4948c99558e86002f99c04f51854d258f033f0b90e4",
     "docs/design/prototypes/round-05/sections.js": "b226bd0685d137fcabd09b644698f761817763d58fbf4d295656fd4c0053995f",
     "docs/design/prototypes/round-05/use-approval.html": "436d3328143e568f169760d1b30407a1ca0d0b0069d6feb15e373a8e63a20e7d",
-    "docs/design/prototypes/round-05/use-history.html": "4888f1c41e96cb3615734c88bea05e82bd9e6426a2764c4e684819828d517edc",
+    "docs/design/prototypes/round-05/use-history.html": "af9c39608ef3343bb94497127bb795964e6b542c1e9183d404035b0d37444ea3",
     "docs/design/attachment-interface-contract.md": "35308f6388587695b0ba16ff093a0fded078bd7889d91547c8946d59d617bd70"
-  }
+  },
+  "sourceCommit": "85f3363",
+  "textHashNormalization": "UTF-8 text uses LF for SHA-256 and bytes; PNG/JPEG use original bytes"
 }
