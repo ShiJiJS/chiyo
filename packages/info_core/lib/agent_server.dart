@@ -193,17 +193,52 @@ class AgentServer {
         );
         return _agent.credentialUseStatus(session, request.id);
       case '/credential-use/consume':
-        if (body.keys.any((k) => !{'sessionSecret', 'requestId'}.contains(k))) {
+        if (body.keys.any(
+          (k) => !{
+            'sessionSecret',
+            'requestId',
+            'supervisorPid',
+            'supervisorCreatedAt',
+          }.contains(k),
+        )) {
           throw const CredentialUseFailure('unknown_field');
+        }
+        if (body.containsKey('supervisorPid') !=
+                body.containsKey('supervisorCreatedAt') ||
+            body.containsKey('supervisorPid') &&
+                (body['supervisorPid'] is! int ||
+                    body['supervisorCreatedAt'] is! String)) {
+          throw const CredentialUseFailure('invalid_plan');
         }
         return (await _agent.consumeCredentialUse(
           _text(body, 'sessionSecret'),
           _text(body, 'requestId'),
+          supervisorPid: body['supervisorPid'] as int?,
+          supervisorCreatedAt: body['supervisorCreatedAt'] as String?,
         )).toPrivateJson();
       case '/credential-use/execution/report':
         return (await _agent.reportCredentialExecution(
           CredentialExecutionReport.fromPrivateJson(body),
         )).toJson();
+      case '/credential-use/worker/register':
+        if (body.keys.any(
+              (k) => !{
+                'executionId',
+                'executionCapability',
+                'workerPid',
+                'workerCreatedAt',
+              }.contains(k),
+            ) ||
+            body['workerPid'] is! int) {
+          throw const CredentialUseFailure('invalid_plan');
+        }
+        await _agent.registerCredentialWorker(
+          _text(body, 'executionId'),
+          _text(body, 'executionCapability'),
+          body['workerPid'] as int,
+          _text(body, 'workerCreatedAt'),
+        );
+        return {'protocolVersion': 1, 'status': 'ok'};
       case '/credential-use/execution/status':
         if (body.keys.any(
           (k) => !{'sessionSecret', 'executionId'}.contains(k),

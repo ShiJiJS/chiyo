@@ -13,6 +13,8 @@ Future<Process> _startCredentialProcess(
   String cwd,
   Map<String, String> environment, {
   String? workerExecutable,
+  String? plannedJobName,
+  Future<void> Function(int workerPid)? registerWorker,
 }) async {
   if (!Platform.isWindows) {
     throw const CredentialUseFailure('unsupported_tool_version');
@@ -44,7 +46,7 @@ Future<Process> _startCredentialProcess(
   final nonce = base64Url.encode(
     List.generate(24, (_) => Random.secure().nextInt(256)),
   );
-  final jobName = 'Local\\AgentInfoRuntime-$nonce';
+  final jobName = plannedJobName ?? 'Local\\AgentInfoRuntime-$nonce';
   final process = await Process.start(
     path,
     args,
@@ -68,10 +70,30 @@ Future<Process> _startCredentialProcess(
     }),
   );
   await process.stdin.flush();
+  var released = false;
   while (!stopped) {
     try {
       final facts =
           jsonDecode(await state.readAsString()) as Map<String, dynamic>;
+      if (!released &&
+          facts['state'] == 'ready' &&
+          facts['jobName'] == jobName &&
+          facts['workerPid'] == process.pid) {
+        try {
+          await registerWorker?.call(process.pid);
+          process.stdin.writeln('start');
+          await process.stdin.flush();
+          released = true;
+        } on Object {
+          await process.stdin.close();
+          await ended;
+          await Future.wait([
+            process.stdout.drain<void>(),
+            process.stderr.drain<void>(),
+          ]);
+          rethrow;
+        }
+      }
       if (facts['state'] == 'started' &&
           facts['jobName'] == jobName &&
           facts['pid'] is int) {
@@ -269,7 +291,26 @@ extension _CredentialRuntimeClient on AgentClient {
       );
       request.headers.contentType = ContentType.json;
       request.followRedirects = false;
-      request.write(jsonEncode({'sessionSecret': _session, 'requestId': id}));
+      final supervisor = _usesDefaultCredentialStarter
+          ? CredentialProcessIdentity.capture(pid)
+          : null;
+      if (_usesDefaultCredentialStarter && supervisor == null) {
+        throw const CredentialUseFailure('service_unavailable');
+      }
+      try {
+        request.write(
+          jsonEncode({
+            'sessionSecret': _session,
+            'requestId': id,
+            if (supervisor != null) ...{
+              'supervisorPid': pid,
+              'supervisorCreatedAt': supervisor.value,
+            },
+          }),
+        );
+      } finally {
+        supervisor?.close();
+      }
       mayBeConsumed = true;
       final response = await request.close().timeout(
         const Duration(seconds: 5),
@@ -455,7 +496,9 @@ class _CredentialRuntimeExecutor {
           errorCode: code,
           startedAt: started,
           finishedAt: state == 'running' ? null : DateTime.now().toUtc(),
-          jobName: process is _RuntimeWorkerProcess ? process.jobName : null,
+          jobName:
+              m.jobName ??
+              (process is _RuntimeWorkerProcess ? process.jobName : null),
         ),
       );
     }
@@ -649,12 +692,44 @@ class _CredentialRuntimeExecutor {
       };
       final argv = plan.argv.map(resolveArgument).toList();
       preparing = false;
-      process = await client._credentialProcessStarter(
-        plan.path,
-        argv,
-        plan.cwd,
-        env,
-      );
+      process = client._usesDefaultCredentialStarter
+          ? await _startCredentialProcess(
+              plan.path,
+              argv,
+              plan.cwd,
+              env,
+              workerExecutable: client._runtimeWorkerExecutable,
+              plannedJobName: m.jobName,
+              registerWorker: (workerPid) async {
+                final identity = CredentialProcessIdentity.capture(workerPid);
+                if (identity == null) {
+                  throw const CredentialUseFailure('process_start_failed');
+                }
+                try {
+                  final result = await client
+                      ._call('/credential-use/worker/register', {
+                        'executionId': m.executionId,
+                        'executionCapability': m.executionCapability,
+                        'workerPid': workerPid,
+                        'workerCreatedAt': identity.value,
+                      });
+                  if (result['status'] != 'ok') {
+                    throw const CredentialUseFailure(
+                      'audit_unavailable',
+                      attemptConsumed: true,
+                    );
+                  }
+                } finally {
+                  identity.close();
+                }
+              },
+            )
+          : await client._credentialProcessStarter(
+              plan.path,
+              argv,
+              plan.cwd,
+              env,
+            );
       // Drain immediately after OS creation, including when identity capture or
       // audit reporting fails. Neither failure ends the child's lifetime.
       stdoutDone = process.stdout

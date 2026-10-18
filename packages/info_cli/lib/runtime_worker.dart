@@ -65,6 +65,12 @@ Future<void> main() async {
     }
     // Crucially, no target exists before this process has joined its job.
     job = CredentialProcessJob.createForCurrentWorker(name);
+    await write({'state': 'ready', 'workerPid': pid, 'jobName': name});
+    // The supervisor first persists this worker's verified job membership.
+    // EOF or supervisor failure before that acknowledgement cannot launch.
+    if (!await input.moveNext() || input.current != 'start') {
+      throw const FormatException();
+    }
     target = await Process.start(
       plan['executable'] as String,
       (plan['argv'] as List).cast<String>(),

@@ -114,6 +114,26 @@ extension CredentialMaterialOwnerAccess on OwnerAccess {
     ),
   );
   Future<int> reconcileCredentialMaterialCleanup() => _serialize(() async {
+    // An empty job before launch is not proof of completion while its original
+    // supervisor can still start the worker. Preserve that launch/report path.
+    for (final record
+        in _service._runtimeRepository.credentialExecutions.toList()) {
+      if ({'preparing', 'running'}.contains(record.state) &&
+          record.supervisorPid != null &&
+          record.supervisorCreatedAt != null &&
+          CredentialProcessIdentity.isActive(
+                record.supervisorPid!,
+                record.supervisorCreatedAt!,
+              ) ==
+              false) {
+        await _service._saveUse(
+          execution: record.changed({
+            'executionState': 'unknown',
+            'errorCode': 'execution_unknown',
+          }),
+        );
+      }
+    }
     for (final record in credentialMaterialChecks) {
       try {
         await _service._cleanupMaterialExecution(record);

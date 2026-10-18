@@ -16,6 +16,7 @@ class AgentClient {
     this.hostedCredentialExecutions = false,
     String? runtimeWorkerExecutable,
   }) : _session = sessionSecret,
+       _runtimeWorkerExecutable = runtimeWorkerExecutable,
        _usesDefaultCredentialStarter = credentialProcessStarter == null,
        _credentialProcessStarter =
            credentialProcessStarter ??
@@ -27,6 +28,7 @@ class AgentClient {
              workerExecutable: runtimeWorkerExecutable,
            ));
   final bool hostedCredentialExecutions;
+  final String? _runtimeWorkerExecutable;
   final CredentialProcessStarter _credentialProcessStarter;
   final bool _usesDefaultCredentialStarter;
   late final _credentialExecutions = _CredentialRuntimeExecutor(this);

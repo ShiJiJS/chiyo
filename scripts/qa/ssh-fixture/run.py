@@ -22,8 +22,9 @@ def docker(*args):
     return p.stdout.strip()
 
 def main():
-    parser=argparse.ArgumentParser();mode=parser.add_mutually_exclusive_group();mode.add_argument('--native',action='store_true');mode.add_argument('--suite',action='store_true');mode.add_argument('--checks',action='store_true');parser.add_argument('--repeat',type=int,default=1);args=parser.parse_args()
+    parser=argparse.ArgumentParser();mode=parser.add_mutually_exclusive_group();mode.add_argument('--native',action='store_true');mode.add_argument('--suite',action='store_true');mode.add_argument('--checks',action='store_true');parser.add_argument('--repeat',type=int,default=1);parser.add_argument('--cli-executable',type=Path);args=parser.parse_args()
     assert 1<=args.repeat<=3
+    cli=(args.cli_executable or REPO/'.scratch/d7-aot/info.exe').resolve()
     runs=REPO/'.scratch/ssh-native-runs'
     runs.mkdir(parents=True,exist_ok=True)
     root=Path(tempfile.mkdtemp(prefix='synthetic-',dir=runs)).resolve()
@@ -50,7 +51,7 @@ def main():
         if args.native:
             flutter=Path.home()/'.local/share/flutter/bin/flutter.bat'
             command=[str(flutter),'test','--no-pub','integration_test/file_runtime_native_test.dart','-d','windows',
-              '--dart-define=CLI_EXECUTABLE='+str(REPO/'.scratch/d7-aot/info.exe'),
+              '--dart-define=CLI_EXECUTABLE='+str(cli),
               '--dart-define=SSH_EXECUTABLE='+env['D7_SSH_EXE'],'--dart-define=SSH_FIXTURE='+str(output),'--dart-define=SSH_FIXTURE_PORT='+env['D7_SSH_PORT']]
             cwd=REPO/'apps/desktop'
         elif args.checks:
@@ -58,7 +59,7 @@ def main():
         else:
             command=[str(dart),'test',*([] if args.suite else ['test/ssh_receiver_native_test.dart'])];cwd=REPO/'packages/info_cli'
         if args.suite or args.checks:
-            env['D6_COMPILED_CLI']=str(REPO/'.scratch/d7-aot/info.exe')
+            env['D6_COMPILED_CLI']=str(cli)
             assert Path(env['D6_COMPILED_CLI']).is_file()
             assert Path(env['D7_AWS_EXE']).is_file()
         for _ in range(args.repeat):

@@ -658,6 +658,10 @@ class CredentialExecution {
     this.processCreatedAt,
     this.materialLease,
     this.jobName,
+    this.supervisorPid,
+    this.supervisorCreatedAt,
+    this.workerPid,
+    this.workerCreatedAt,
   });
   final String id, requestId, state, cleanupState;
   final bool processStarted;
@@ -665,6 +669,10 @@ class CredentialExecution {
   final String? errorCode, processCreatedAt;
   final CredentialMaterialLease? materialLease;
   final String? jobName;
+  final int? supervisorPid;
+  final String? supervisorCreatedAt;
+  final int? workerPid;
+  final String? workerCreatedAt;
   final DateTime? startedAt, finishedAt;
   Map<String, Object?> toJson() => {
     'protocolVersion': 1,
@@ -688,6 +696,10 @@ class CredentialExecution {
     'processCreatedAt': processCreatedAt,
     if (materialLease != null) 'materialLease': materialLease!.toPrivateJson(),
     if (jobName != null) 'jobName': jobName,
+    if (supervisorPid != null) 'supervisorPid': supervisorPid,
+    if (supervisorCreatedAt != null) 'supervisorCreatedAt': supervisorCreatedAt,
+    if (workerPid != null) 'workerPid': workerPid,
+    if (workerCreatedAt != null) 'workerCreatedAt': workerCreatedAt,
   };
   factory CredentialExecution.fromJson(Map<String, dynamic> j) =>
       CredentialExecution(
@@ -712,6 +724,10 @@ class CredentialExecution {
                 j['materialLease'] as Map<String, dynamic>,
               ),
         jobName: j['jobName'] as String?,
+        supervisorPid: j['supervisorPid'] as int?,
+        supervisorCreatedAt: j['supervisorCreatedAt'] as String?,
+        workerPid: j['workerPid'] as int?,
+        workerCreatedAt: j['workerCreatedAt'] as String?,
       );
   CredentialExecution changed(Map<String, Object?> values) =>
       CredentialExecution.fromJson({...toStorageJson(), ...values});
@@ -819,6 +835,7 @@ class CredentialExecutionMaterial {
     this.alias, [
     this.materialLease,
     Map<String, List<int>> internalMaterials = const {},
+    this.jobName,
   ]) : internalMaterials = Map.unmodifiable(
          internalMaterials.map(
            (key, value) => MapEntry(key, List<int>.unmodifiable(value)),
@@ -829,6 +846,7 @@ class CredentialExecutionMaterial {
   final CredentialMaterialValue credentialMaterial;
   final CredentialMaterialLease? materialLease;
   final Map<String, List<int>> internalMaterials;
+  final String? jobName;
   Map<String, Object?> toPrivateJson() => {
     'protocolVersion': 1,
     'status': 'ok',
@@ -837,6 +855,7 @@ class CredentialExecutionMaterial {
     'approvedPlan': approvedPlan.toJson(),
     'credentialMaterial': credentialMaterial.toPrivateJson(),
     'alias': alias,
+    if (jobName != null) 'jobName': jobName,
     if (materialLease != null) 'materialLease': materialLease!.toPrivateJson(),
     if (internalMaterials.isNotEmpty)
       'internalMaterials': internalMaterials.map(
@@ -864,6 +883,7 @@ class CredentialExecutionMaterial {
                   MapEntry(key as String, base64Decode(value as String)),
             ) ??
             const {},
+        j['jobName'] as String?,
       );
   @override
   String toString() => 'CredentialExecutionMaterial($executionId)';
