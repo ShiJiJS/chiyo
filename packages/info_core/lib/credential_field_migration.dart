@@ -52,11 +52,13 @@ extension CredentialFieldMigrationOwner on OwnerAccess {
     int expectedVersion,
   ) {
     if (!serviceAvailable ||
-        _service._repository is! CredentialFieldMigrationRepository)
+        _service._repository is! CredentialFieldMigrationRepository) {
       throw const AccessFailure('service_unavailable');
+    }
     final item = information.where((i) => i.id == ref.itemId).firstOrNull;
-    if (item == null || item.version != expectedVersion)
+    if (item == null || item.version != expectedVersion) {
       throw const AccessFailure('proposal_conflict');
+    }
     final field = item.fields.where((f) => f.id == ref.fieldId).firstOrNull;
     if (field == null) throw const AccessFailure('invalid_information');
     return CredentialMigrationPreview(
@@ -87,8 +89,9 @@ extension CredentialFieldMigrationOwner on OwnerAccess {
     final preview = previewCredentialMigration(ref, expectedVersion);
     final before = preview.item, field = preview.field;
     final bytes = utf8.encode(field.value);
-    if (bytes.isEmpty || bytes.length > 65536 || field.value.contains('\u0000'))
+    if (bytes.isEmpty || bytes.length > 65536 || field.value.contains('\u0000')) {
       throw const AccessFailure('invalid_credential_content');
+    }
     final now = _service._clock().toUtc();
     final name = preview.credentialName;
     _validateCredentialMetadata(name, field.description, '', 'SERVICE_TOKEN');

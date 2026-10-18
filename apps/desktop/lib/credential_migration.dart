@@ -84,7 +84,10 @@ class _CredentialMigrationDialogState extends State<CredentialMigrationDialog> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: 120,
+            width: (MediaQuery.textScalerOf(context).scale(13) * 6).clamp(
+              120.0,
+              240.0,
+            ),
             child: Text(
               label,
               style: prototypeText(context, 13, color: p.muted),
@@ -148,7 +151,10 @@ class _CredentialMigrationDialogState extends State<CredentialMigrationDialog> {
                     '会受到影响',
                     '${preview.activeGrantCount} 项读取授权、${preview.revisionCount} 个历史版本、${preview.recycleCopyCount} 份回收副本',
                   ),
-                  fact('转换后', '${preview.credentialName} · 独立字符串凭据，默认不允许发现，并关联原信息'),
+                  fact(
+                    '转换后',
+                    '${preview.credentialName} · 独立字符串凭据，默认不允许发现，并关联原信息',
+                  ),
                 ],
               ),
             ],

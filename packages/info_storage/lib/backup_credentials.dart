@@ -329,7 +329,6 @@ void _validateBackupCredentialHistory(
         }.contains(j['executionState']) ||
         !{
           'not_needed',
-          'prepared',
           'pending',
           'complete',
           'failed',

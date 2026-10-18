@@ -197,6 +197,19 @@ void main() {
         (await source.backups.inspect(portable, recovery)).formatVersion,
         5,
       );
+      final privateRegistration = '${root.path}/private-registration.aimbackup';
+      await _changeBackup(path, privateRegistration, recovery, (payload) {
+        final row = payload['tables']['credential_executions'][0];
+        final j = jsonDecode(row['payload'] as String);
+        j['pid'] = 99999;
+        row['payload'] = jsonEncode(j);
+      });
+      await expectLater(
+        source.backups.inspect(privateRegistration, recovery),
+        throwsA(
+          isA<StorageFailure>().having((e) => e.code, 'code', 'invalid_backup'),
+        ),
+      );
     },
   );
   test(
@@ -206,7 +219,7 @@ void main() {
         'synthetic-credential-backup-',
       );
       addTearDown(() => root.delete(recursive: true));
-      final now = DateTime.utc(2026, 10, 18);
+      var now = DateTime.utc(2026, 10, 18);
       final sourceKeys = _Keys(), targetKeys = _Keys();
       final source = await EncryptedInformationRepository.open(
         '${root.path}/source',
@@ -326,6 +339,90 @@ void main() {
         [1, 2],
       );
       expect(await target.backups.recoveryKey(), isNull);
+      for (final version in [3, 4]) {
+        final legacyPath = '${root.path}/format-$version.aimbackup';
+        await _changeBackup(path, legacyPath, recovery, (payload) {
+          payload['version'] = version;
+          final tables = payload['tables'] as Map;
+          for (final table in [
+            'managed_credentials',
+            'credential_materials',
+            'ssh_host_trust',
+            'credential_use_requests',
+            'credential_executions',
+          ]) {
+            tables.remove(table);
+          }
+          if (version == 3) tables.remove('request_history');
+        });
+        final legacy = await EncryptedInformationRepository.open(
+          '${root.path}/legacy-$version',
+          _Keys(),
+          clock: () => now,
+        );
+        try {
+          final preview = await legacy.backups.restoreFrom(
+            legacyPath,
+            recovery,
+          );
+          expect(preview.formatVersion, version);
+          expect(preview.credentialCount, 0);
+          expect(legacy.items.single.id, item.id);
+          expect(legacy.managedCredentials, isEmpty);
+        } finally {
+          await legacy.close();
+        }
+      }
+      final deleted = await service.owner.createFileCredential(
+        name: 'Deleted synthetic',
+        publicPurpose: '',
+        fileName: 'deleted.key',
+        bytes: [11, 22, 33],
+      );
+      await service.owner.deleteCredential(deleted.id, deleted.revision);
+      final recyclePath = '${root.path}/with-recycled.aimbackup';
+      await service.owner.exportLibrary(
+        () => source.backups.exportTo(recyclePath),
+      );
+      now = now.add(const Duration(days: 31));
+      final aged = await EncryptedInformationRepository.open(
+        '${root.path}/aged',
+        _Keys(),
+        clock: () => now,
+      );
+      final agedService = InformationService(
+        repository: aged,
+        clock: () => now,
+      );
+      try {
+        final preview = await aged.backups.restoreFrom(recyclePath, recovery);
+        expect(preview.credentialCount, 3);
+        expect(preview.credentialVersionCount, 2);
+        expect(
+          aged.credentialMaterials
+              .where((m) => m.credentialId == token.id)
+              .map((m) => m.version),
+          [2],
+        );
+        expect(
+          aged.credentialMaterials.any((m) => m.credentialId == deleted.id),
+          isFalse,
+        );
+        expect(agedService.owner.recycledCredentials, isEmpty);
+        await expectLater(
+          agedService.owner.restoreCredential(deleted.id),
+          throwsA(
+            isA<AccessFailure>().having(
+              (e) => e.status,
+              'status',
+              'credential_material_purged',
+            ),
+          ),
+        );
+      } finally {
+        await agedService.close();
+        await aged.close();
+      }
     },
   );
 }
