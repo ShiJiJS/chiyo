@@ -1,0 +1,157 @@
+{
+  "packageSource": "291801046f7d1e6e4217a4bc001ea714689855c5",
+  "productionFixSource": "f3e34728515983103657f42f3e7a98bf90a688f4",
+  "nativeAotSource": "a76629d08db949c7bec08228d81884417322738e",
+  "release": "0.4.0+8-dev.291801046f7d",
+  "archiveRelativePath": "build/windows-preview-round05-2918010/agent-info-manage-0.4.0+8-dev.291801046f7d-windows-x64.zip",
+  "archiveBytes": 52802814,
+  "archiveSha256": "09d0515326dd4d6e5355ad2301d73c231287d43401024862380662aad687edb5",
+  "payloadFiles": 111,
+  "headlessCounts": {
+    "cli": 56,
+    "core": 130,
+    "storage": 61,
+    "desktop": 104
+  },
+  "headlessTotal": 351,
+  "skipped": 0,
+  "extractedSdkFreePasses": 11,
+  "nativeFullPasses": 3,
+  "nativeConfiguredShortRunsPerPass": 60,
+  "packagedNativePasses": 1,
+  "packagedNativeDefaultShortRuns": 10,
+  "guiProcessDeathVerificationPasses": 2,
+  "guiProcessDeathFactsPerPass": 7,
+  "configurationEvidence": "HOSTED_SHORT_RUNS=60 in invocation; native source consumes the define. Raw native log records test completion, not individual count lines.",
+  "knownLimitations": [
+    "Legacy one-off timeout has no stage evidence; cannot uniquely attribute it to reproduced receipt lock.",
+    "Actual OS notification click still unverified; both bounded attempts this session failed. Temporary C++ trace draft was not retained and its phase delivery was not verified.",
+    "External UIA observation caused a SemanticsHandle end-check failure; preserved and excluded from the three passes.",
+    "One old-binary stress pass succeeded, then repetition was interrupted to avoid mixed worker protocols; not three passes.",
+    "Actual Codex model installation/trust and clean Windows machine remain manual gates; no model subagents or user config changes.",
+    "Server sync paused; Mac and cross-platform restore deferred."
+  ],
+  "review": "Main session self-review of implementation and spec; no independent agent review.",
+  "files": [
+    {
+      "path": "raw/timeout-baseline-native.log",
+      "bytes": 2742,
+      "sha256": "3501d4d9bb1da25d6501e058ee1a11cd5f74229d5a9c23604da186b8679339ed"
+    },
+    {
+      "path": "raw/timeout-fast-worker.log",
+      "bytes": 25,
+      "sha256": "f6929e17216ea0e51628274f3dcd0bd199eb89a9d89ee40038b32bfee1751a73"
+    },
+    {
+      "path": "raw/timeout-fixed-native-three.log",
+      "bytes": 3093,
+      "sha256": "876bbd4061c7de0fa26c2ab2bfadd07d13b9ee2a51cdfae8472da95f407355af"
+    },
+    {
+      "path": "raw/timeout-fixed-native-unobserved-three.log",
+      "bytes": 2742,
+      "sha256": "9fe173648fad9c66d9cc00c389236f2c712dbe6e6da319ee4446ac4c00deb99d"
+    },
+    {
+      "path": "raw/timeout-full-checks.log",
+      "bytes": 907,
+      "sha256": "97dd4e3bf92941fc71c84298c1e80c561d46409b548f6006e9be88cbe1c844ef"
+    },
+    {
+      "path": "raw/timeout-full-checks2.log",
+      "bytes": 100557,
+      "sha256": "414d2a221ac1146f5d79a1d7cc68efae0caf31f3c830e75504042ab857ca75b7"
+    },
+    {
+      "path": "raw/timeout-gui-crash-build.log",
+      "bytes": 237,
+      "sha256": "f16d5d9751a27bc87b459f28101089c0a80f41b715fa55d6b630d56c48c22f63"
+    },
+    {
+      "path": "raw/timeout-gui-crash.log",
+      "bytes": 409,
+      "sha256": "1ee9a65ca7505f3e9b02ff52d711d5e37d2908fefc36a037e5e1f675b189b153"
+    },
+    {
+      "path": "raw/timeout-notification-attempt.log",
+      "bytes": 2746,
+      "sha256": "480386091d73a1e5fa74376f4041017055514247d509916169cdaa790d9c6866"
+    },
+    {
+      "path": "raw/timeout-notification-trace-attempt.log",
+      "bytes": 2746,
+      "sha256": "1f91af27a458ffd80d325a98f1e4154d1d45624afe0f93c9484fa40be2ef0d90"
+    },
+    {
+      "path": "raw/timeout-package-2918010.log",
+      "bytes": 104312,
+      "sha256": "84f66dbd3b06f781b7eeba08a68d9cdfecae069c6d816a583a0e829c9ac6d6de"
+    },
+    {
+      "path": "raw/timeout-package-gui-crash.log",
+      "bytes": 409,
+      "sha256": "1ee9a65ca7505f3e9b02ff52d711d5e37d2908fefc36a037e5e1f675b189b153"
+    },
+    {
+      "path": "raw/timeout-package-native.log",
+      "bytes": 1034,
+      "sha256": "c0eb02e6273db3e01e8b25604df0f81067bc52f5db4abad80cd407297773b5c8"
+    },
+    {
+      "path": "raw/timeout-protocol-green.log",
+      "bytes": 918,
+      "sha256": "0c67ed4f6b26642b90184208e85f2f2e3e9821eae85f15dd93cbab2b702c0bd7"
+    },
+    {
+      "path": "raw/timeout-protocol-red.log",
+      "bytes": 1277,
+      "sha256": "96389061f2a645c25b24c5193b88b6678b2538cff6ef88c7cf201b5b9b697fe3"
+    },
+    {
+      "path": "raw/timeout-protocol-red2.log",
+      "bytes": 859,
+      "sha256": "e106c074ab74303e41750696628985bbcb556da95993bdf1a3b62f172b0e32d0"
+    },
+    {
+      "path": "raw/timeout-protocol-red3.log",
+      "bytes": 716,
+      "sha256": "891cbaa0fea8f5a7b45303b2b5000aa1b1d4b1161f12b3d6a3b5ee6243a08000"
+    },
+    {
+      "path": "raw/timeout-receipt-green.log",
+      "bytes": 2130,
+      "sha256": "e8f79e4053977a20f1aa6ad20baf762f61c7847adf5f0a14d92686cfc313b804"
+    },
+    {
+      "path": "raw/timeout-receipt-red.log",
+      "bytes": 773,
+      "sha256": "a4134a8656f333271c47177d8b55685478b269438b315adde8e8be92cf652ef9"
+    },
+    {
+      "path": "raw/timeout-stress-native.log",
+      "bytes": 1378,
+      "sha256": "6cf5b7de86b44af4aac1e4f47436f5cd38db282e77c131c3abf37b6b5fa74754"
+    },
+    {
+      "path": "raw/legacy-native-timeout.log",
+      "bytes": 4004,
+      "sha256": "bb686dd287ce6a25bac39252ea6edc02b5757258ec01bdb272757aa049da8bba"
+    },
+    {
+      "path": "raw/package-manifest-2918010.json",
+      "bytes": 20366,
+      "sha256": "fdc4db875da58edeca7811f44474f51e7e9c9abaa3950b0bca4e2da503915eb0"
+    },
+    {
+      "path": "raw/gui-crash-probe-binaries.json",
+      "bytes": 3340,
+      "sha256": "7e93050ae423509af6edba7e2f235eeeed6924ee6b398bc80f955b114df46e4f"
+    },
+    {
+      "path": "raw/supplemental-fast-worker-probe.dart.txt",
+      "bytes": 2336,
+      "sha256": "b914a8938e06c9f6b24bc30013a0dfa8fa414d97fae729feda78d2006db253ac"
+    }
+  ]
+}
