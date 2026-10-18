@@ -184,7 +184,19 @@ Future<void> main(List<String> args) async {
       final record = service.owner.credentialExecutions.single;
       expect(record.jobName, isNotNull);
       materialPath = record.materialLease!.path;
-      final before = int.parse(await heartbeat.readAsString());
+      // The independent receiver truncates before publishing each heartbeat.
+      // An empty in-progress write is not a stopped process or valid baseline.
+      Future<int> committedHeartbeat() async {
+        final deadline = DateTime.now().add(const Duration(seconds: 2));
+        while (DateTime.now().isBefore(deadline)) {
+          final value = int.tryParse(await heartbeat.readAsString());
+          if (value != null) return value;
+          await Future<void>.delayed(const Duration(milliseconds: 2));
+        }
+        fail('Synthetic heartbeat never published a complete counter');
+      }
+
+      final before = await committedHeartbeat();
       expect(cli.kill(), isTrue);
       await cli.exitCode;
       await service.close();
