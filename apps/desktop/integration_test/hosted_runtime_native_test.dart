@@ -140,7 +140,12 @@ void main() {
         return id;
       }
 
-      for (var repetition = 0; repetition < 10; repetition++) {
+      const shortRuns = int.fromEnvironment(
+        'HOSTED_SHORT_RUNS',
+        defaultValue: 10,
+      );
+      expect(shortRuns, inInclusiveRange(10, 60));
+      for (var repetition = 0; repetition < shortRuns; repetition++) {
         final repeated = await approve('重复核对合成服务器 $repetition', [
           '/usr/bin/printf',
           '%s',

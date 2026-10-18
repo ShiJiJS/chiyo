@@ -58,6 +58,9 @@ def main():
                 adapter=cli.parent/'info-codex.exe';worker=cli.parent/'info-runtime-worker.exe'
                 assert adapter.is_file() and worker.is_file()
                 command+=['--dart-define=CODEX_EXECUTABLE='+str(adapter),'--dart-define=WORKER_EXECUTABLE='+str(worker)]
+                if env.get('HOSTED_SHORT_RUNS'):
+                    assert 10<=int(env['HOSTED_SHORT_RUNS'])<=60
+                    command+=['--dart-define=HOSTED_SHORT_RUNS='+env['HOSTED_SHORT_RUNS']]
             cwd=REPO/'apps/desktop'
         elif args.checks:
             command=['pwsh.exe','-NoProfile','-File',str(REPO/'scripts/check.ps1'),'-FlutterBin',str(Path.home()/'.local/share/flutter/bin'),'-Offline'];cwd=REPO

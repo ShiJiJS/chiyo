@@ -75,12 +75,20 @@ Future<Process> _startCredentialProcess(
   while (!stopped) {
     try {
       final facts =
-          jsonDecode(await state.readAsString()) as Map<String, dynamic>;
+          jsonDecode(
+                await File(
+                  '${state.path}${released ? '.started' : ''}',
+                ).readAsString(),
+              )
+              as Map<String, dynamic>;
       if (!released &&
           facts['state'] == 'ready' &&
           facts['jobName'] == jobName &&
           facts['workerPid'] == process.pid) {
         try {
+          if (facts['receiptVersion'] != 2) {
+            throw const CredentialUseFailure('process_start_failed');
+          }
           launchJob = CredentialProcessJob.observe(jobName, process.pid);
           await registerWorker?.call(process.pid);
           // Once any acknowledgement write is attempted, a lost response is
@@ -135,7 +143,8 @@ Future<Process> _startCredentialProcess(
     var confirmedNotStarted = false;
     try {
       confirmedNotStarted =
-          (jsonDecode(await state.readAsString()) as Map)['state'] ==
+          (jsonDecode(await File('${state.path}.finished').readAsString())
+                  as Map)['state'] ==
               'start_failed' &&
           CredentialProcessJob.isActive(jobName) == false;
     } on Object {
@@ -225,7 +234,8 @@ class _RuntimeWorkerProcess implements Process {
       _job = null;
     }
     final facts =
-        jsonDecode(await state.readAsString()) as Map<String, dynamic>;
+        jsonDecode(await File('${state.path}.finished').readAsString())
+            as Map<String, dynamic>;
     if (facts['state'] != 'exited' ||
         facts['pid'] != pid ||
         facts['jobName'] != jobName ||

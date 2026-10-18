@@ -15,7 +15,12 @@ Future<void> main() async {
     plan['jobName'] as String,
   );
   await File(plan['statePath'] as String).writeAsString(
-    jsonEncode({'state': 'ready', 'workerPid': pid, 'jobName': job.name}),
+    jsonEncode({
+      'state': 'ready',
+      'receiptVersion': 2,
+      'workerPid': pid,
+      'jobName': job.name,
+    }),
     flush: true,
   );
   if (!await input.moveNext() || input.current != 'start') exit(70);

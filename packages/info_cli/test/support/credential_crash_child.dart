@@ -4,7 +4,7 @@ import 'dart:io';
 Future<void> main() async {
   // Only terminate the worker that just created this synthetic test process.
   if (Platform.environment['GH_TOKEN'] != 'synthetic-token') exit(71);
-  final path = '${Platform.environment['TEMP']}/worker-state.json';
+  final path = '${Platform.environment['TEMP']}/worker-state.json.started';
   final deadline = DateTime.now().add(const Duration(seconds: 15));
   Future<void> waitFor(String name) async {
     while (!await File(name).exists()) {
