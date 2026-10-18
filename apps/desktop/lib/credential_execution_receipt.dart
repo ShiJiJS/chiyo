@@ -200,7 +200,7 @@ class _ExecutionReceiptState extends State<_ExecutionReceipt> {
                 fact('申请编号', r.id),
                 const SizedBox(height: 12),
                 Text(
-                  '这里只保留执行事实。完整输出不写入历史或备份；启动任务的 CLI 关闭后，内存输出不再保留。',
+                  '这里只保留执行事实。完整输出不写入历史或备份；执行宿主退出、缓存淘汰或任务结束超过 30 分钟后，内存输出不再保留。',
                   style: prototypeText(
                     context,
                     12,

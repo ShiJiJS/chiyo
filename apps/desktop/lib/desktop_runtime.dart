@@ -171,6 +171,11 @@ class DesktopRuntime extends ChangeNotifier {
       credentialCleanupFailed = true;
     }
     await reconcileRuntimeMaterialCleanup();
+    try {
+      await service.owner.pruneCredentialUseHistory();
+    } catch (_) {
+      credentialCleanupFailed = true;
+    }
     notifyListeners();
   });
   Future<void> reconcileRuntimeMaterialCleanup() async {

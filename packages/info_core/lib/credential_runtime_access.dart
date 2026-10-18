@@ -337,6 +337,7 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
       purpose: input.purpose,
       alias: input.alias,
       credentialId: c.id,
+      credentialName: c.name,
       version: c.version,
       useGeneration: c.useGeneration,
       plan: launch.resolved(identity, cwd),
@@ -596,6 +597,7 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
     final changed = r.changed({
       'attemptConsumed': true,
       'executionId': execution.id,
+      'attemptedAt': _useTimestamp(_service._clock().toUtc()),
     });
     void validate() {
       if (!_service._sessionActive(session)) {
@@ -708,7 +710,10 @@ extension CredentialRuntimeOwnerAccess on OwnerAccess {
       throw const CredentialUseFailure('request_terminal');
     }
     await _service._saveUse(
-      request: r.changed({'invalidatedCode': 'grant_revoked'}),
+      request: r.changed({
+        'invalidatedCode': 'grant_revoked',
+        'revokedAt': _useTimestamp(_service._clock().toUtc()),
+      }),
     );
   });
   Future<void> decideCredentialUse(
@@ -745,6 +750,7 @@ extension CredentialRuntimeOwnerAccess on OwnerAccess {
         : 'partially_approved';
     final changed = r.changed({
       'state': state,
+      'decidedAt': _useTimestamp(now),
       'credentialApproved': approveCredential,
       'approvedFields': fields.map((f) => f.toJson()).toList(),
       'credentialExpiresAt': approveCredential

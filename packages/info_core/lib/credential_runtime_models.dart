@@ -556,6 +556,10 @@ class CredentialUseRequest {
     this.executionId,
     this.attemptConsumed = false,
     this.invalidatedCode,
+    this.credentialName,
+    this.decidedAt,
+    this.revokedAt,
+    this.attemptedAt,
   }) : fields = List.unmodifiable(fields),
        approvedFields = List.unmodifiable(approvedFields);
   final String id, chatLabel, purpose, alias, credentialId, state;
@@ -567,6 +571,8 @@ class CredentialUseRequest {
   final bool credentialApproved, attemptConsumed;
   final DateTime? credentialExpiresAt, fieldExpiresAt;
   final String? executionId, invalidatedCode;
+  final String? credentialName;
+  final DateTime? decidedAt, revokedAt, attemptedAt;
   Map<String, Object?> toJson() => {
     'id': id,
     'chatLabel': chatLabel,
@@ -588,6 +594,10 @@ class CredentialUseRequest {
     'executionId': executionId,
     'attemptConsumed': attemptConsumed,
     'invalidatedCode': invalidatedCode,
+    'credentialName': credentialName,
+    'decidedAt': _useTimestamp(decidedAt),
+    'revokedAt': _useTimestamp(revokedAt),
+    'attemptedAt': _useTimestamp(attemptedAt),
   };
   factory CredentialUseRequest.fromJson(Map<String, dynamic> j) =>
       CredentialUseRequest(
@@ -627,6 +637,16 @@ class CredentialUseRequest {
         executionId: j['executionId'] as String?,
         attemptConsumed: j['attemptConsumed'] as bool,
         invalidatedCode: j['invalidatedCode'] as String?,
+        credentialName: j['credentialName'] as String?,
+        decidedAt: j['decidedAt'] == null
+            ? null
+            : DateTime.parse(j['decidedAt'] as String),
+        revokedAt: j['revokedAt'] == null
+            ? null
+            : DateTime.parse(j['revokedAt'] as String),
+        attemptedAt: j['attemptedAt'] == null
+            ? null
+            : DateTime.parse(j['attemptedAt'] as String),
       );
   CredentialUseRequest changed(Map<String, Object?> values) =>
       CredentialUseRequest.fromJson({...toJson(), ...values});

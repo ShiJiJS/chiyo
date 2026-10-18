@@ -14,7 +14,7 @@ String credentialInjectionTip(
   CredentialUseRequest r,
 ) => switch (r.plan.receiver) {
   'ssh_identity' =>
-    'CLI 将私钥写入受限临时文件，-i 接收完整路径。主机记录来自本次批准的确认快照，使用独立空配置；拒绝未知或变化的主机，不读取原有 SSH 配置或 agent。进程组结束后核对身份并尝试清理，清理失败可单独重试。',
+    'CLI 将私钥写入受限临时文件，-i 接收完整路径。首版连接 Linux / Unix 主机，执行一次非交互命令。主机记录来自本次批准的确认快照，使用独立空配置；拒绝未知或变化的主机，不读取原有 SSH 配置或 agent。进程组结束后核对身份并尝试清理，清理失败可单独重试。',
   'aws_shared_credentials' =>
     '环境变量装的是文件路径。CLI 创建受限凭据副本和独立空配置，程序从 AWS_SHARED_CREDENTIALS_FILE 读取静态 default 凭据；不使用当前账号配置或实例 metadata。进程组结束后核对身份并尝试清理，清理失败可单独重试。',
   _ => '环境变量装的是秘密值。CLI 创建目标进程时设置变量，程序自己读取；不修改全局环境变量，也不生成凭据文件。',
