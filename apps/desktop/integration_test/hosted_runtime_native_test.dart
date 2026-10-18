@@ -140,6 +140,43 @@ void main() {
         return id;
       }
 
+      for (var repetition = 0; repetition < 10; repetition++) {
+        final repeated = await approve('重复核对合成服务器 $repetition', [
+          '/usr/bin/printf',
+          '%s',
+          'hosted-native-repeat',
+        ]);
+        final accepted = await command({
+          'command': 'run-use',
+          'requestId': repeated,
+        });
+        expect(accepted['status'], 'accepted');
+        final id = accepted['executionId'] as String;
+        final deadline = DateTime.now().add(const Duration(seconds: 20));
+        while (true) {
+          final status = await command({
+            'command': 'execution-status',
+            'executionId': id,
+          });
+          if (status['executionState'] == 'exited' &&
+              status['cleanupState'] == 'complete') {
+            expect(status['exitCode'], 0);
+            break;
+          }
+          if (status['executionState'] == 'unknown' ||
+              !DateTime.now().isBefore(deadline)) {
+            final output = await command({
+              'command': 'execution-output',
+              'executionId': id,
+              'cursor': 0,
+            });
+            fail(
+              'Repeated synthetic SSH $repetition: ${jsonEncode(status)}; ${jsonEncode(output)}',
+            );
+          }
+          await Future<void>.delayed(const Duration(milliseconds: 30));
+        }
+      }
       final first = await approve('核对测试服务器输出', [
         '/usr/bin/printf',
         '%s',
@@ -162,11 +199,16 @@ void main() {
             status['cleanupState'] == 'complete') {
           break;
         }
-        expect(
-          DateTime.now().isBefore(deadline),
-          isTrue,
-          reason: 'Hosted SSH did not finish',
-        );
+        if (!DateTime.now().isBefore(deadline)) {
+          final output = await command({
+            'command': 'execution-output',
+            'executionId': executionId,
+            'cursor': 0,
+          });
+          fail(
+            'Hosted synthetic SSH did not finish: ${jsonEncode(status)}; ${jsonEncode(output)}',
+          );
+        }
         await Future<void>.delayed(const Duration(milliseconds: 30));
       } while (true);
       expect(status['exitCode'], 0);
