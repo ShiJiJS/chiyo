@@ -40,8 +40,9 @@ Future<void> main() async {
     );
     service = InformationService(repository: repository);
     if (service.owner.information.single.fields.single.value !=
-        'FICTIONAL-RELEASE-MARKER-13869')
+        'FICTIONAL-RELEASE-MARKER-13869') {
       throw StateError('Reopen failed');
+    }
     var denied = false;
     try {
       await service.agent.read(token, ref);
@@ -54,8 +55,9 @@ Future<void> main() async {
     await repository.close();
     for (final file in directory.listSync().whereType<File>()) {
       if (String.fromCharCodes(file.readAsBytesSync())
-          .contains('FICTIONAL-RELEASE-MARKER-13869'))
+          .contains('FICTIONAL-RELEASE-MARKER-13869')) {
         throw StateError('Plaintext marker found');
+      }
     }
     // Build a prior-schema encrypted fixture using this same protected key.
     final migrationDirectory = await Directory('${directory.path}/migration')
@@ -92,8 +94,9 @@ Future<void> main() async {
       migrationDirectory.path,
       migrationKeys,
     );
-    if (repository.items.single.version != 1)
+    if (repository.items.single.version != 1) {
       throw StateError('Migration failed');
+    }
     stdout.writeln(
       'PASS: SQLCipher $version; current-user DPAPI, encrypted reopen, token invalidation, plaintext scan, schema migration',
     );

@@ -102,21 +102,25 @@ void main() {
           .transform(const LineSplitter())
           .listen((line) {
             final started = RegExp(r'backup_ready:(\d+)$').firstMatch(line);
-            if (started != null && !ready.isCompleted)
+            if (started != null && !ready.isCompleted) {
               ready.complete(int.parse(started.group(1)!));
-            if (line.contains('backup_failed:') && !ready.isCompleted)
+            }
+            if (line.contains('backup_failed:') && !ready.isCompleted) {
               ready.completeError(
                 StateError(line.substring(line.indexOf('backup_failed:'))),
               );
-            if (line == 'backup_restored' || line == 'backup_failed')
+            }
+            if (line == 'backup_restored' || line == 'backup_failed') {
               finished = true;
+            }
           });
       final errors = child.stderr.transform(utf8.decoder).join();
       child.exitCode.then((code) async {
-        if (!ready.isCompleted)
+        if (!ready.isCompleted) {
           ready.completeError(
             StateError('Backup fixture startup failed ($code).'),
           );
+        }
       });
       child.stdin.writeln(
         jsonEncode({'directory': targetPath, 'backup': backup, 'key': key}),

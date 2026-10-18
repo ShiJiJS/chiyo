@@ -19,8 +19,9 @@ void publishNewBackup(String source, String destination) {
     try {
       // WRITE_THROUGH, with neither REPLACE_EXISTING nor COPY_ALLOWED. A
       // cross-volume move or an existing destination must fail safely.
-      if (move(from, to, 8) == 0)
+      if (move(from, to, 8) == 0) {
         throw const FileSystemException('Backup publication failed');
+      }
     } finally {
       calloc.free(from);
       calloc.free(to);
@@ -35,8 +36,9 @@ void publishNewBackup(String source, String destination) {
     final to = destination.toNativeUtf8();
     try {
       // RENAME_EXCL from Darwin sys/stdio.h. Never fall back to replacing rename.
-      if (rename(from, to, 4) != 0)
+      if (rename(from, to, 4) != 0) {
         throw const FileSystemException('Backup publication failed');
+      }
     } finally {
       calloc.free(from);
       calloc.free(to);

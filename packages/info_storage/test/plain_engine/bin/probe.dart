@@ -24,10 +24,11 @@ Future<void> main() async {
     } on StorageFailure catch (error) {
       rejected = error.code == 'cipher_unavailable';
     }
-    if (!rejected || await File('${folder.path}/library.db').exists())
+    if (!rejected || await File('${folder.path}/library.db').exists()) {
       throw StateError(
         'Plain SQLite was not rejected before creating a database',
       );
+    }
     stdout.writeln('PASS: plain SQLite rejected without creating database');
   } finally {
     await folder.delete(recursive: true);

@@ -32,10 +32,11 @@ void main() {
             const FieldInput('Host', '', 'synthetic.invalid'),
           ]);
           await initial.backups.enable();
-          if (legacy == 13)
+          if (legacy == 13) {
             await initial.backups.saveRecoveryKeyTo(
               '${folder.path}/before-key.txt',
             );
+          }
           await service.close();
           await initial.close();
         }
@@ -82,8 +83,9 @@ void main() {
         expect((await service.owner.history()).requests.single.id, request.id);
         await store.backups.enable();
         expect(await store.backups.recoveryKeySaved(), legacy == 13);
-        if (legacy != 13)
+        if (legacy != 13) {
           await store.backups.saveRecoveryKeyTo('${folder.path}/after-key.txt');
+        }
         final key = (await store.backups.recoveryKey())!;
         await service.owner.exportLibrary(
           () => store.backups.exportTo('${folder.path}/format-four.aim'),

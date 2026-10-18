@@ -54,7 +54,12 @@ extension _CredentialMaterialService on InformationService {
     if (record.materialLease == null || record.cleanupState == 'complete') {
       return record;
     }
-    if (!{'exited', 'prepare_failed', 'start_failed'}.contains(record.state)) {
+    final unknownTreeEnded =
+        record.state == 'unknown' &&
+        record.jobName != null &&
+        CredentialProcessJob.isActive(record.jobName!) == false;
+    if (!{'exited', 'prepare_failed', 'start_failed'}.contains(record.state) &&
+        !unknownTreeEnded) {
       await _saveUse(
         execution: record.changed({'cleanupState': 'needs_check'}),
       );

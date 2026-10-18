@@ -24,4 +24,12 @@ SSH参数交付/已确认主机快照及对应原型页面、审计失败/身份
 
 实际独立服务和JSON-lines CLI进程使用不同TEMP时，先前把CLI自己的TEMP误当成服务登记目录的权威，导致准备失败。现按服务私密登记的固定路径、真实目录/文件身份及protected DACL核对，同时拒绝非本地路径和非规范父路径；不根据调用方TEMP改写或扩大目录。中文/空格材料目录及工作位置的真实JSON-lines与子进程通过，所有材料清理完毕。独立PowerShell ACL核验器明确以UTF-8读取JSON，避免中文路径被测试工具误解码。
 
+## 失败与恢复增量
+
+受控事务失败验证：材料登记提交时文件仍为空；失败后不写秘密、不启动程序，尝试保留已消耗，准备失败及audit_unavailable回执明确，空目录清理完成。补正了原执行报告未接受该错误码而遗留preparing的问题。
+
+身份替换验证：把原材料保存在测试目录之外、在登记路径放入不同文件并独立设置同样受限ACL，清理仍因真实文件身份不同而拒绝。替代文件和原材料都保留，exit7与needs_check不互相覆盖；只在测试结束恢复原身份后清理该合成fixture。
+
+实际SQLCipher重开验证：执行私有登记身份保留，未确认的文件执行立即标unknown/needs_check；原会话不能使用，秘密不在公开响应或库文件明文中。未登记到进程组的未知执行保持保守，不盲删。另以真实独立Windows进程组验证：活跃时清理busy且材料保留，组结束后可安全清理，执行结果仍unknown、不能重放。进程组名称仅由私有执行报告登记，核对实际成员及进程身份，登记后不能换组；观察失败不视为进程组已结束。
+
 文件权限与清理集中在受管材料模块；实现核查依据：[CreateFileW](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilew)、[GetSecurityInfo](https://learn.microsoft.com/en-us/windows/win32/api/aclapi/nf-aclapi-getsecurityinfo)、[SetFileInformationByHandle](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-setfileinformationbyhandle)。真实DACL检查与子进程行为作为验证，不以“调用过权限函数”代替结果。

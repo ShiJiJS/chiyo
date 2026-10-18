@@ -22,12 +22,13 @@ class RuntimeHarness {
     String? executablePath,
     List<int>? fileBytes,
     bool inspectTool = false,
+    InformationRepository? repository,
   }) async {
     final exe = File(executablePath ?? Platform.resolvedExecutable);
     final stat = await exe.stat();
     final digest = 'sha256:${sha256.convert(await exe.readAsBytes())}';
     final service = InformationService(
-      repository: MemoryInformationRepository(),
+      repository: repository ?? MemoryInformationRepository(),
       credentialExecutableInspector: inspectTool
           ? inspectCredentialExecutable
           : (path, receiver) async => ExecutableIdentity(

@@ -127,6 +127,9 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
         .firstOrNull;
     if (old == null) throw const CredentialUseFailure('session_mismatch');
     final next = report.state;
+    if (old.jobName != null && old.jobName != report.jobName) {
+      throw const CredentialUseFailure('invalid_plan');
+    }
     // An HTTP response can be lost after commit. Replaying the exact metadata
     // is harmless; changing any existing fact is still rejected below.
     if (old.state == next &&
@@ -168,6 +171,7 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
           'executable_changed',
           'process_start_failed',
           'execution_unknown',
+          'audit_unavailable',
         }.contains(report.errorCode)) {
       throw const CredentialUseFailure('invalid_plan');
     }
@@ -177,6 +181,13 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
             r'^Local\\AgentInfoRuntime-[A-Za-z0-9_-]{32}$',
           ).hasMatch(report.jobName!)) {
         throw const CredentialUseFailure('invalid_plan');
+      }
+      if (report.jobName != null) {
+        try {
+          CredentialProcessJob.observe(report.jobName!, report.pid!).close();
+        } on Object {
+          throw const CredentialUseFailure('invalid_plan');
+        }
       }
       final identity = CredentialProcessIdentity.capture(report.pid!);
       try {
