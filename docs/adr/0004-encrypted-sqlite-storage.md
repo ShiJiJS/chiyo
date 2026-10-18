@@ -1,5 +1,7 @@
 # SQLite + Drift + SQLCipher，系统保管本机密钥并分离备份密钥
 
+> 2026-10-18补充：[ADR0011](0011-ordinary-attachments-in-encrypted-database.md)决定普通附件原字节也存入现有SQLCipher，目标待实现；不另建外部加密附件库。下文保留当时技术选择，当前Windows实际DPAPI/SQLCipher验证见交付记录，不代表Mac已验收。
+
 2026-10-16 确认：第一版使用 SQLite 关系型存储，通过 Drift 和 Dart sqlite3 绑定访问 SQLCipher 加密数据库。信息项、字段、授权和历史的关联及事务需求适合关系型存储；整库加密统一保护正文、索引和历史，避免第一版自行维护字段加密、搜索及多密钥体系。相比本机数据库服务器，此方案无需额外安装数据库服务；SQLite3MultipleCiphers 保留为比较过的替代方案，不与 SQLCipher 混称或自动切换。
 
 字段级授权仍由本地核心服务逐请求执行，不依赖每字段一把密钥。数据库密钥使用密码学安全随机源生成，由操作系统保护并供应用自动获取；不写入公开配置或 CLI。优先验证 flutter_secure_storage 平台适配，具体版本、Windows 存储实现和 macOS 签名及钥匙串配置尚未锁定；不改变 ADR 0002 的免应用密码和同用户进程隔离边界。

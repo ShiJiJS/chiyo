@@ -1,5 +1,7 @@
 # round05 流程覆盖与开发映射
 
+> 当前目标更新（2026-10-18）：已确认授权期内复用、普通附件入SQLCipher及本机焦点填充，生产实现尚未开始。当前行为与后续界面要求见[设计修订](windows-credential-and-file-update.md)，排期见[Windows计划](../planning/windows-next-iteration.md)。下文/现有HTML保留Round05 v1视觉及流程基线，一次启动状态不代表新目标；新增状态由#33/#34/#35先补原型再开发，保持四主题及三栏。
+
 2026-10-17，Issue #22（D0）。沿用已确认的顶部导航、收件箱、三栏、文档卡片和四主题。HTML设计修改内存中的虚构资料，刷新重置；不能证明Flutter、CLI、加密库或Windows安装已经通过。入口为[原型](prototypes/round-05/index.html)，以下状态加在 `?state=` 后。
 
 | 复核项 | 原型入口/状态与验收 | 已有实现依据 | 生产票 |

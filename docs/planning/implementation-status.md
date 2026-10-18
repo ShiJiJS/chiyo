@@ -1,5 +1,7 @@
 # Implementation status
 
+> 当前执行入口（2026-10-18）：[Windows后续计划](windows-next-iteration.md)已统一三项新增调整和六张主工单。当前程序0.4.0+8仍是v1一次启动，新增功能未实现；#28/#29/#31的Windows基线已交付，通知、真实Codex、干净环境仍待验收。下文旧阶段状态/自动继续同步安排仅作历史，不作为当前指令；无子Agent、服务器同步暂停，Mac及双向恢复延期。
+
 2026-10-16：用户要求更新方案与GitHub tickets；[新计划](design-audit-2026-10-16/README.md)跟踪round05界面与凭据注入。任务按依赖推进，D0先补齐原型及协议。仅完成规划发布，未新增生产实现或实机验收；下方旧实现进度保留为基线事实。
 
 Integration branch: `integration/local-information-access`.

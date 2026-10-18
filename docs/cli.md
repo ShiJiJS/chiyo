@@ -1,7 +1,7 @@
 # 通用 CLI 申请与等待
 
-> 当前开发分支已实现 Windows 字符串凭据的一次启动流程，见下方“凭据使用”。
-> 文件接收、Codex 生命周期整合和完整凭据备份仍分别由 #29–#31 继续；不要将原型占位符直接交给 shell。
+> 2026-10-18：当前Windows开发预览已实现字符串、SSH/AWS文件凭据和完整凭据备份；凭据协议v1仍是一次批准、一次启动。真实Codex联合验收与通知/干净环境门槛仍开放。
+> 用户确认的[授权有效期内复用、普通附件和焦点填充](design/windows-credential-and-file-update.md)尚未实现，不能按目标设计调用当前CLI。新协议由#33/#30冻结；不要将原型占位符直接交给shell。历史验证和当前Windows排期见[计划](planning/windows-next-iteration.md)。
 
 CLI 使用标准输入逐行 JSON，标准输出每行一个结果。保持同一个 CLI 进程，授权会话凭据和已领取的访问凭据留在进程内；不要把凭据写入命令参数、日志或聊天。启动入口是 `dart run packages/info_cli/bin/info.dart`，默认连接本机应用端口 47125，可用 `--port` 指定开发端口。
 

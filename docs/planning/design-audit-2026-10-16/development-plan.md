@@ -1,5 +1,7 @@
 # 后续开发计划与实施任务
 
+> 当前执行入口（2026-10-18）：[Windows后续计划](../windows-next-iteration.md)已统一三项新增调整和六张主工单。当前程序0.4.0+8仍是v1一次启动，新增功能未实现；#28/#29/#31的Windows基线已交付，通知、真实Codex、干净环境仍待验收。下文旧阶段状态/自动继续同步安排仅作历史，不作为当前指令；无子Agent、服务器同步暂停，Mac及双向恢复延期。
+
 状态更新：2026-10-17。规划和GitHub任务已发布；用户后续已授权自主实施，D0（#22）已完成并合入，D1（#23）实施中，其余仍按依赖推进。D编号是稳定设计编号，实际Issue见下方发布映射。以下勾选项保留为验收清单，实际完成证据以对应Issue及[执行记录](../windows-and-sync-execution.md)为准。依据：[设计复核](design-review.md)、[旧票调整表](tracker-adjustments.md)、[运行时注入设计](../../design/credential-runtime-injection.md)。
 
 ## 发布映射

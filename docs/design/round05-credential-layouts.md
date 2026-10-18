@@ -1,5 +1,7 @@
 # Round05 凭据与使用流程的布局变体
 
+> 当前目标更新（2026-10-18）：已确认授权期内复用、普通附件入SQLCipher及本机焦点填充，生产实现尚未开始。当前行为与后续界面要求见[设计修订](windows-credential-and-file-update.md)，排期见[Windows计划](../planning/windows-next-iteration.md)。下文/现有HTML保留Round05 v1视觉及流程基线，一次启动状态不代表新目标；新增状态由#33/#34/#35先补原型再开发，保持四主题及三栏。
+
 2026-10-17。只读测量已确认HTML的最终CSS，供#27–#31继续忠实还原。不是新设计、Flutter证据或业务验收；共同约束仍见[还原规则](prototype-fidelity.md)、[页面变体](round05-page-layouts.md)，唯一视觉来源是[原型](prototypes/round-05/index.html)。
 
 ## 凭据库

@@ -1,5 +1,7 @@
 # 软件设计复核与开发计划
 
+> 当前执行入口（2026-10-18）：[Windows后续计划](../windows-next-iteration.md)已统一三项新增调整和六张主工单。当前程序0.4.0+8仍是v1一次启动，新增功能未实现；#28/#29/#31的Windows基线已交付，通知、真实Codex、干净环境仍待验收。下文旧阶段状态/自动继续同步安排仅作历史，不作为当前指令；无子Agent、服务器同步暂停，Mac及双向恢复延期。
+
 审计日期：2026-10-16；发布及后续核验：2026-10-17（北京时间）。round05视觉方向已获认可，方案和GitHub任务已发布。后续用户已明确授权自主实施；D0已完成，D1实施中。完整执行范围和最新进度见[Windows与同步执行记录](../windows-and-sync-execution.md)。
 
 总入口：[升级父任务 #21](https://github.com/ShiJiJS/agent-info-manage/issues/21)。10张子任务有原生父子关系和阻塞依赖；[#22](https://github.com/ShiJiJS/agent-info-manage/issues/22)已按设计证据完成，当前前沿为[#23](https://github.com/ShiJiJS/agent-info-manage/issues/23)。

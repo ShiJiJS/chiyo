@@ -1,5 +1,7 @@
 # 凭据使用与 CLI 运行时注入设计
 
+> 当前目标更新（2026-10-18）：已确认授权期内复用、普通附件入SQLCipher及本机焦点填充，生产实现尚未开始。当前行为与后续界面要求见[设计修订](windows-credential-and-file-update.md)，排期见[Windows计划](../planning/windows-next-iteration.md)。下文/现有HTML保留Round05 v1视觉及流程基线，一次启动状态不代表新目标；新增状态由#33/#34/#35先补原型再开发，保持四主题及三栏。
+
 状态：用户已确认交互方向；接口、数据结构和执行规则为待实现设计。2026-10-16。
 
 全产品复核见[审计与计划](../planning/design-audit-2026-10-16/README.md)；一次一个凭据、非交互SSH、组合审批与版本保留已收口为[首版实施契约](runtime-implementation-contract.md)。后者补充并优先于本文件早期未决描述。
