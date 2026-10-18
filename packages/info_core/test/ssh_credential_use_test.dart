@@ -21,6 +21,38 @@ List<int> knownHostBytes() {
 
 void main() {
   test(
+    'a closed service cannot replace or clear its confirmed SSH host settings',
+    () async {
+      final service = InformationService(
+        repository: MemoryInformationRepository(),
+      );
+      final original = await service.owner.configureSshKnownHosts(
+        'original',
+        knownHostBytes(),
+      );
+      await service.close();
+      for (final action in <Future<Object?> Function()>[
+        () => service.owner.configureSshKnownHosts(
+          'replacement',
+          knownHostBytes(),
+        ),
+        () => service.owner.clearSshKnownHosts(),
+      ]) {
+        await expectLater(
+          action(),
+          throwsA(
+            isA<CredentialUseFailure>().having(
+              (e) => e.code,
+              'code',
+              'service_unavailable',
+            ),
+          ),
+        );
+      }
+      expect(service.owner.sshKnownHosts!.id, original.id);
+    },
+  );
+  test(
     'confirming SSH hosts copies the submitted bytes before asynchronous storage and returns an immutable snapshot',
     () async {
       final service = InformationService(

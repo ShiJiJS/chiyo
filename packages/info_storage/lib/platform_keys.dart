@@ -39,9 +39,8 @@ class WindowsDatabaseKeyStore implements DatabaseKeyStore {
   static const _header = <int>[73, 65, 75, 1]; // IAK, format version 1
 
   Uint8List _crypt(List<int> input, {required bool protect}) {
-    if (!Platform.isWindows) {
+    if (!Platform.isWindows)
       throw const StorageFailure('key_provider_unavailable');
-    }
     final crypt = DynamicLibrary.open('Crypt32.dll');
     final kernel = DynamicLibrary.open('Kernel32.dll');
     final call = crypt.lookupFunction<_ProtectNative, _Protect>(
@@ -126,9 +125,8 @@ class MacOsDatabaseKeyStore implements DatabaseKeyStore {
     try {
       final result = await invoke('read', null);
       if (result == null) return null;
-      if (result is! Uint8List || result.length != 32) {
+      if (result is! Uint8List || result.length != 32)
         throw const StorageFailure('key_unavailable');
-      }
       return result;
     } catch (_) {
       throw const StorageFailure('key_unavailable');

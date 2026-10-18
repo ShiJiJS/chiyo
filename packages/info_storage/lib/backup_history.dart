@@ -226,9 +226,8 @@ void _validateBackupHistory(Map<String, List<Map<String, Object?>>> tables) {
       final mapping = j['restoredFieldIds'];
       if (j['kind'] != RecycleFactKind.restored.name ||
           mapping is! Map<String, dynamic> ||
-          mapping.length > 200) {
+          mapping.length > 200)
         _backupInvalid();
-      }
       for (final link in mapping.entries) {
         final target = link.value;
         if (!fields.contains(link.key) ||
@@ -236,9 +235,8 @@ void _validateBackupHistory(Map<String, List<Map<String, Object?>>> tables) {
             target.isEmpty ||
             target.length > 200 ||
             target == link.key ||
-            !restoredTargets.add(target)) {
+            !restoredTargets.add(target))
           _backupInvalid();
-        }
         count(1);
         fieldOwner(target, item);
       }

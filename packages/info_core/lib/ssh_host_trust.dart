@@ -48,7 +48,7 @@ extension SshTrustOwnerAccess on OwnerAccess {
   ) {
     final copy = List<int>.of(bytes);
     return _serialize(() async {
-      if (_service._repository is! SshHostTrustRepository) {
+      if (!serviceAvailable || _service._repository is! SshHostTrustRepository) {
         throw const CredentialUseFailure('service_unavailable');
       }
       validateSshKnownHosts(name, copy);
@@ -66,7 +66,7 @@ extension SshTrustOwnerAccess on OwnerAccess {
   }
 
   Future<void> clearSshKnownHosts() => _serialize(() async {
-    if (_service._repository is! SshHostTrustRepository) {
+    if (!serviceAvailable || _service._repository is! SshHostTrustRepository) {
       throw const CredentialUseFailure('service_unavailable');
     }
     await (_service._repository as SshHostTrustRepository).saveSshHostTrust(
