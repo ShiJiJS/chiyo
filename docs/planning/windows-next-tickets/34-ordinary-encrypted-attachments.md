@@ -1,3 +1,28 @@
+# 普通附件完整支持：文件字段、Windows客户端、加密入库与授权交付
+
+## 当前规划修订 · 2026-10-18
+
+用户指出文件入库必须同时改客户端信息类型和全流程。#34现调整为完整功能父票，不再作为仅存储/CLI的执行票；设计和实现均未开始。三张执行子票分别跟踪，不能把后台支持等同于Windows功能完成。
+
+| 子票 | 交付 | 前置 |
+| --- | --- | --- |
+| [#36 文件字段与客户端原型/合同](https://github.com/ShiJiJS/agent-info-manage/issues/36) | 新建/编辑的“文件”类型、所有受影响页面、兼容及服务合同 | 已交付Round05基线 |
+| [#37 核心/存储/交付/备份](https://github.com/ShiJiJS/agent-info-manage/issues/37) | 带类型载荷、SQLCipher原字节、普通授权交付、新备份和真实CLI | #36 |
+| [#38 Windows客户端实现](https://github.com/ShiJiJS/agent-info-manage/issues/38) | Flutter文件控件、混合信息项、模板、审批/历史/回收及备份界面和真实GUI闭环 | #36/#37 |
+
+[客户端补充规划](https://github.com/ShiJiJS/agent-info-manage/blob/codex/round05-windows-sync/docs/design/windows-attachment-client-plan.md)补齐逐页改动、失败状态、旧字段兼容和真实样本。[原目标设计](https://github.com/ShiJiJS/agent-info-manage/blob/codex/round05-windows-sync/docs/design/windows-credential-and-file-update.md)的存储、容量、保留、授权和备份要求全部继续有效，分别落到以上子票；父任务仍为#21。
+
+## 父票完成条件
+
+- [ ] #36原型与字段合同完成，已有字段不默认转换；一个文件字段对应一份文件，可与文本混合，也可独立成项，仍保持信息库三栏/四主题。
+- [ ] #37服务与CLI/迁移/完整备份完成，旧文本、模板及普通提案不丢文件；未获批不能读取，批准范围和版本交付正确。
+- [ ] #38接入真实服务并完成Windows客户端逐页对照与原生闭环；新建/编辑提供“文件”类型，不以模拟按钮、路径字符串或仅后端绿跑代替完成。
+- [ ] 虚构简历可从GUI选择保存、重开、独立勾选批准、CLI领取、另存/替换、历史/回收及空库备份恢复，原字节一致，授权不复活；功能自身验收不推给#18。
+
+#30在本父票整体通过后完成实际Agent联调；#18保留最终整包/干净Windows验收。#34不再加ready-for-agent，执行队列使用#36/#37/#38，历史勾选和证据不删除。
+
+<details><summary>此前整体范围与验收要求（继续有效，已分配到三个子票）</summary>
+
 # 普通文件作为信息附件存入SQLCipher，并完成授权交付和完整备份
 
 ## 状态与依据
@@ -22,3 +47,5 @@
 - [ ] 实际Windows系统文件对话框、CLI读取及文档/上传工具的同机文件可用性用虚构资料留证，不把文件路径返回当作远程浏览器可用。
 
 #31原有凭据备份Windows里程碑保持已完成，本票承担普通附件新增备份工作；#12/#17保留原平台门槛。可独立于#35开发，最终与#30/#18联合验收。
+
+</details>

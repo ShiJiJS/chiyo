@@ -1,6 +1,6 @@
 # round05 已确认视觉基线
 
-> 当前目标更新（2026-10-18）：已确认授权期内复用、普通附件入SQLCipher及本机焦点填充，生产实现尚未开始。当前行为与后续界面要求见[设计修订](../../windows-credential-and-file-update.md)，排期见[Windows计划](../../../planning/windows-next-iteration.md)。下文/现有HTML保留Round05 v1视觉及流程基线，一次启动状态不代表新目标；新增状态由#33/#34/#35先补原型再开发，保持四主题及三栏。
+> 当前目标更新（2026-10-18）：已确认授权期内复用、普通附件入SQLCipher及本机焦点填充，生产实现尚未开始。当前行为与后续界面要求见[设计修订](../../windows-credential-and-file-update.md)，排期见[Windows计划](../../../planning/windows-next-iteration.md)。下文/现有HTML保留Round05 v1视觉及流程基线，一次启动状态不代表新目标；新增状态由#33/#35及#34下的#36先补原型；附件核心由#37、Windows客户端由#38交付，保持四主题及三栏。
 
 来自2026-10-16的HTML设计探索；2026-10-17 D0补齐流程。保留原型而非生产软件，虚构数据不接后台，刷新重置。见[流程覆盖](../../round05-flow-coverage.md)与[D0证据](../../../development/round05-22-design.md)。
 
