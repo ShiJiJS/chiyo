@@ -1,0 +1,3 @@
+00:00 +0: loading test/credential_history_facts_test.dart
+00:00 +0: credential history preserves the requested name and actual decision and revocation times after metadata changes
+00:00 +1: All tests passed!

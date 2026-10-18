@@ -1,0 +1,40 @@
+00:00 +0: loading test/hosted_credential_execution_test.dart
+00:00 +0 -1: loading test/hosted_credential_execution_test.dart [E]
+  Failed to load "test/hosted_credential_execution_test.dart":
+  test/hosted_credential_execution_test.dart:4:8: Error: Error when reading 'lib/credential_execution_host.dart': 系统找不到指定的文件。
+  import 'package:info_cli/credential_execution_host.dart';
+         ^
+  test/hosted_credential_execution_test.dart:14:10: Error: 'CredentialExecutionHost' isn't a type.
+      late CredentialExecutionHost host;
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  test/hosted_credential_execution_test.dart:15:65: Error: No named parameter with the name 'credentialExecutionHandler'.
+      final server=await AgentServer.start(h.service.agent,port:0,credentialExecutionHandler:(session,input)=>host.execute(session,input));
+                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ../info_core/lib/agent_server.dart:29:30: Context: Found this candidate, but the arguments don't match.
+    static Future<AgentServer> start(
+                               ^^^^^
+  test/hosted_credential_execution_test.dart:16:10: Error: Method not found: 'CredentialExecutionHost'.
+      host=CredentialExecutionHost(port:server.port,processStarter:(exe,argv,cwd,env)=>Process.start(exe,[File('test/support/hosted_credential_child.dart').absolute.path,...argv],workingDirectory:cwd,environment:env,includeParentEnvironment:false,runInShell:false));
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  test/hosted_credential_execution_test.dart:18:78: Error: No named parameter with the name 'hostedCredentialExecutions'.
+      final first=AgentClient(server.port,sessionSecret:h.client.sessionSecret,hostedCredentialExecutions:true);
+                                                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  lib/agent_client.dart:11:3: Context: Found this candidate, but the arguments don't match.
+    AgentClient(
+    ^^^^^^^^^^^
+  test/hosted_credential_execution_test.dart:20:79: Error: No named parameter with the name 'hostedCredentialExecutions'.
+      final second=AgentClient(server.port,sessionSecret:h.client.sessionSecret,hostedCredentialExecutions:true);addTearDown(second.close);
+                                                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  lib/agent_client.dart:11:3: Context: Found this candidate, but the arguments don't match.
+    AgentClient(
+    ^^^^^^^^^^^
+  test/hosted_credential_execution_test.dart:28:44: Error: No named parameter with the name 'hostedCredentialExecutions'.
+      final stranger=AgentClient(server.port,hostedCredentialExecutions:true);addTearDown(stranger.close);await stranger.execute({'command':'session','chatLabel':'Unrelated'});
+                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  lib/agent_client.dart:11:3: Context: Found this candidate, but the arguments don't match.
+    AgentClient(
+    ^^^^^^^^^^^
+00:00 +0 -1: Some tests failed.
+
+Failing tests:
+  test/hosted_credential_execution_test.dart: loading test/hosted_credential_execution_test.dart
