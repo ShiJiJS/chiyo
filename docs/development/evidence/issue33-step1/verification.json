@@ -15,7 +15,7 @@
     "actualBeforeFix": 1,
     "source": "Dart test output before grouping fix; original implementation at c3b8161"
   },
-  "textHashNormalization": "LF UTF-8; binary originals",
+  "textHashNormalization": "LF UTF-8; red-test transcript copy additionally strips trailing spaces; binary originals",
   "sources": {
     "docs/design/prototypes/round-05/assemble-lifecycle.cjs": "571beee71255dff482e439f69c4baf483ba59aa25a6c5c22e053cc079c123855",
     "docs/design/prototypes/round-05/attachments.css": "2307098d1a44a4aea176952c0d500908ce1911f292951f60e5196d698532e005",
@@ -96,8 +96,8 @@
       "bytes": 124836
     },
     "v2-model-red.txt": {
-      "sha256": "a18009ef16f081a77e3f512533eed30f4eeb8a79a699b762ada537cf6166ccf1",
-      "bytes": 2122
+      "bytes": 2098,
+      "sha256": "70b7ec1f781b737f209adc55cba098a519b6edae66678a7d4a3a1337df7df66a"
     }
   }
 }

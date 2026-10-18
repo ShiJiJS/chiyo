@@ -7,7 +7,7 @@
   test\credential_use_test.dart 64:24                     tokenRequest
   ===== asynchronous gap ===========================
   test\credential_reuse_test.dart 7:35                    main.<fn>
-  
+
 00:00 +0 -1: unknown protocol version is explicitly refused
 00:00 +0 -2: unknown protocol version is explicitly refused [E]
   Expected: throws <Instance of 'CredentialUseFailure'> with `code`: 'unsupported_protocol'
@@ -18,15 +18,15 @@
                   test\credential_use_test.dart 64:24                     tokenRequest
                   ===== asynchronous gap ===========================
                   test\credential_reuse_test.dart 17:5                    main.<fn>
-                  
+
             which has `code` with value 'unknown_field' which is different.
                   Expected: unsupported_ ...
                     Actual: unknown_fiel ...
                               ^
                    Differ at offset 2
-  
+
   test\credential_reuse_test.dart 17:5  main.<fn>
-  
+
 00:00 +0 -2: Some tests failed.
 
 Failing tests:
