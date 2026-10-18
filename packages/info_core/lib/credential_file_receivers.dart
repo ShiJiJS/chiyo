@@ -87,7 +87,7 @@ extension _FileCredentialReceivers on InformationService {
         batch = true;
         continue;
       }
-      if (value.value == '-i' && !identity) {
+      if (value.value == '-i') {
         if (++i >= plan.argv.length ||
             plan.argv[i].kind != LaunchValueKind.file ||
             plan.argv[i].value != input.alias) {
@@ -125,7 +125,9 @@ extension _FileCredentialReceivers on InformationService {
       throw const CredentialUseFailure('invalid_plan');
     }
     final remote = plan.argv.skip(destination + 1).toList();
-    if (remote.any((v) => v.kind != LaunchValueKind.literal || v.value.isEmpty)) {
+    if (remote.any(
+      (v) => v.kind != LaunchValueKind.literal || v.value.isEmpty,
+    )) {
       throw const CredentialUseFailure('invalid_reference');
     }
     String quote(String value) =>

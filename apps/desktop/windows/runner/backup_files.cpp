@@ -15,7 +15,8 @@ BackupFileDialogs::BackupFileDialogs(flutter::BinaryMessenger* messenger,
       [owner](const flutter::MethodCall<flutter::EncodableValue>& call,
               std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
         const bool credential = call.method_name() == "credentialInput";
-        const bool input = call.method_name() == "backupInput" || call.method_name() == "recoveryKeyInput" || credential;
+        const bool known_hosts = call.method_name() == "knownHostsInput";
+        const bool input = call.method_name() == "backupInput" || call.method_name() == "recoveryKeyInput" || credential || known_hosts;
         const bool recovery = call.method_name() == "recoveryKeyOutput" || call.method_name() == "recoveryKeyInput";
         if (!input && !recovery && call.method_name() != "backupOutput") {
           result->NotImplemented();
@@ -32,12 +33,12 @@ BackupFileDialogs::BackupFileDialogs(flutter::BinaryMessenger* messenger,
         dialog.hwndOwner = owner;
         dialog.lpstrFile = path.data();
         dialog.nMaxFile = static_cast<DWORD>(path.size());
-        dialog.lpstrFilter = credential ? L"Credential file\0*.*\0\0" : recovery ? L"Recovery key (*.txt)\0*.txt\0All files\0*.*\0\0"
+        dialog.lpstrFilter = known_hosts ? L"SSH known_hosts file\0*.*\0\0" : credential ? L"Credential file\0*.*\0\0" : recovery ? L"Recovery key (*.txt)\0*.txt\0All files\0*.*\0\0"
                                      : L"Encrypted backup (*.aimbackup)\0*.aimbackup\0All files\0*.*\0\0";
-        dialog.lpstrTitle = credential ? L"Choose credential file (1 byte to 1 MiB)" : input ? (recovery ? L"Choose recovery key file" : L"Choose encrypted backup")
+        dialog.lpstrTitle = known_hosts ? L"Choose trusted SSH known_hosts file (confirm before enabling)" : credential ? L"Choose credential file (1 byte to 1 MiB)" : input ? (recovery ? L"Choose recovery key file" : L"Choose encrypted backup")
                                  : (recovery ? L"Save recovery key separately"
                                              : L"Export encrypted backup to a new file");
-        dialog.lpstrDefExt = credential ? nullptr : recovery ? L"txt" : L"aimbackup";
+        dialog.lpstrDefExt = credential || known_hosts ? nullptr : recovery ? L"txt" : L"aimbackup";
         dialog.Flags = OFN_EXPLORER | OFN_PATHMUSTEXIST | OFN_NOCHANGEDIR |
                        OFN_DONTADDTORECENT | (input ? OFN_FILEMUSTEXIST : OFN_OVERWRITEPROMPT);
         const BOOL chosen = input ? GetOpenFileNameW(&dialog) : GetSaveFileNameW(&dialog);

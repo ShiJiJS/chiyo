@@ -71,9 +71,11 @@ extension _CredentialMaterialService on InformationService {
         CredentialProcessJob.isActive(record.jobName!) == false;
     if (!{'exited', 'prepare_failed', 'start_failed'}.contains(record.state) &&
         !unknownTreeEnded) {
-      await _saveUse(
-        execution: record.changed({'cleanupState': 'needs_check'}),
-      );
+      if (record.cleanupState != 'needs_check') {
+        await _saveUse(
+          execution: record.changed({'cleanupState': 'needs_check'}),
+        );
+      }
       throw const CredentialUseFailure('cleanup_busy', attemptConsumed: true);
     }
     String? code;
@@ -103,6 +105,30 @@ extension _CredentialMaterialService on InformationService {
 }
 
 extension CredentialMaterialOwnerAccess on OwnerAccess {
+  List<CredentialExecution> get credentialMaterialChecks => List.unmodifiable(
+    _service._runtimeRepository.credentialExecutions.where(
+      (e) =>
+          e.materialLease != null &&
+          e.cleanupState != 'complete' &&
+          !{'preparing', 'running'}.contains(e.state),
+    ),
+  );
+  Future<int> reconcileCredentialMaterialCleanup() => _serialize(() async {
+    for (final record in credentialMaterialChecks) {
+      try {
+        await _service._cleanupMaterialExecution(record);
+      } on CredentialUseFailure catch (e) {
+        if (!{
+          'cleanup_busy',
+          'cleanup_identity_mismatch',
+          'cleanup_failed',
+        }.contains(e.code)) {
+          rethrow;
+        }
+      }
+    }
+    return credentialMaterialChecks.length;
+  });
   Future<CredentialExecution> cleanupCredentialExecution(String executionId) =>
       _serialize(() async {
         final record = _service._runtimeRepository.credentialExecutions

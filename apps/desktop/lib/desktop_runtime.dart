@@ -124,6 +124,8 @@ class DesktopRuntime extends ChangeNotifier {
   bool recycleCleanupFailed = false;
   bool revisionCleanupFailed = false;
   bool credentialCleanupFailed = false;
+  bool runtimeMaterialCleanupFailed = false;
+  int runtimeMaterialChecks = 0;
   Future<void>? _quit;
   Future<void>? _stop;
   bool _stopped = false;
@@ -168,8 +170,19 @@ class DesktopRuntime extends ChangeNotifier {
     } catch (_) {
       credentialCleanupFailed = true;
     }
+    await reconcileRuntimeMaterialCleanup();
     notifyListeners();
   });
+  Future<void> reconcileRuntimeMaterialCleanup() async {
+    try {
+      runtimeMaterialChecks = await service.owner
+          .reconcileCredentialMaterialCleanup();
+      runtimeMaterialCleanupFailed = false;
+    } catch (_) {
+      runtimeMaterialCleanupFailed = true;
+    }
+    notifyListeners();
+  }
 
   Future<void> _notify(String requestId) async {
     await _ready.future;

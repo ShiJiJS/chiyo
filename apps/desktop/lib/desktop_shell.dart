@@ -356,6 +356,17 @@ class _DesktopShellState extends State<DesktopShell> {
                 warning: true,
               ),
             ),
+          if (runtime?.runtimeMaterialCleanupFailed == true ||
+              (runtime?.runtimeMaterialChecks ?? 0) > 0)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: QuietNotice(
+                runtime?.runtimeMaterialCleanupFailed == true
+                    ? '临时凭据材料核查暂时失败。可在设置 → 应用运行中查看并重试清理。'
+                    : '有 ${runtime!.runtimeMaterialChecks} 项临时凭据材料待核查。可在设置 → 应用运行中查看，清理不会重新启动命令。',
+                warning: true,
+              ),
+            ),
           Expanded(
             key: const ValueKey('desktop-workspace'),
             child: WorkspaceEntrance(child: widget.child),

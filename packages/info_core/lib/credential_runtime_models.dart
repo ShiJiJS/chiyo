@@ -544,6 +544,7 @@ class CredentialUseRequest {
     required this.version,
     required this.useGeneration,
     required this.plan,
+    this.requestedPlan,
     required this.createdAt,
     required this.requestExpiresAt,
     required Iterable<FieldRef> fields,
@@ -560,6 +561,7 @@ class CredentialUseRequest {
   final String id, chatLabel, purpose, alias, credentialId, state;
   final int version, useGeneration;
   final CredentialLaunchPlan plan;
+  final CredentialLaunchPlan? requestedPlan;
   final DateTime createdAt, requestExpiresAt;
   final List<FieldRef> fields, approvedFields;
   final bool credentialApproved, attemptConsumed;
@@ -574,6 +576,7 @@ class CredentialUseRequest {
     'version': version,
     'useGeneration': useGeneration,
     'plan': plan.toJson(),
+    if (requestedPlan != null) 'requestedPlan': requestedPlan!.toJson(),
     'createdAt': _useTimestamp(createdAt),
     'requestExpiresAt': _useTimestamp(requestExpiresAt),
     'fields': fields.map((f) => f.toJson()).toList(),
@@ -598,6 +601,11 @@ class CredentialUseRequest {
         plan: CredentialLaunchPlan.fromStorageJson(
           j['plan'] as Map<String, dynamic>,
         ),
+        requestedPlan: j['requestedPlan'] == null
+            ? null
+            : CredentialLaunchPlan.fromStorageJson(
+                j['requestedPlan'] as Map<String, dynamic>,
+              ),
         createdAt: DateTime.parse(j['createdAt'] as String),
         requestExpiresAt: DateTime.parse(j['requestExpiresAt'] as String),
         fields: (j['fields'] as List).map(
@@ -623,6 +631,16 @@ class CredentialUseRequest {
   CredentialUseRequest changed(Map<String, Object?> values) =>
       CredentialUseRequest.fromJson({...toJson(), ...values});
   Map<String, Object?> toStorageJson() => toJson();
+  Map<String, Object?> toRequestInputJson() => {
+    'command': 'request-use',
+    'purpose': purpose,
+    'credentials': [
+      {'alias': alias, 'credentialId': credentialId, 'version': version},
+    ],
+    'launch': Map<String, Object?>.from((requestedPlan ?? plan).toJson())
+      ..remove('executableIdentity'),
+    'readFields': fields.map((f) => f.toJson()).toList(),
+  };
 }
 
 class CredentialExecution {

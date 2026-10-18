@@ -271,7 +271,8 @@ class InformationBackups {
     _checkOpen();
     // D9 supplies format 5. Never export an apparently complete backup that
     // silently omits a nonempty credential vault during staged development.
-    if (_repository.managedCredentials.isNotEmpty) {
+    if (_repository.managedCredentials.isNotEmpty ||
+        _repository.sshHostTrust != null) {
       throw const StorageFailure('credentials_backup_not_supported');
     }
     sqlite.Database? db;

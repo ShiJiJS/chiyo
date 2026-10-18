@@ -104,6 +104,15 @@ void main() {
         knownHostBytes(),
       );
       final request = await service.agent.requestCredentialUse(session, input);
+      final saved = CredentialUseRequest.fromJson(request.toStorageJson());
+      final submission = CredentialUseInput.fromJson(
+        saved.toRequestInputJson(),
+      );
+      expect(
+        submission.launch.argv.map((v) => v.toJson()).toList(),
+        input.launch.argv.map((v) => v.toJson()).toList(),
+      );
+      expect(submission.launch.sshTrustSnapshotId, isNull);
       expect(request.plan.sshTrustSnapshotId, trust.id);
       expect(
         request.plan.internalMaterialHashes['ssh_known_hosts'],

@@ -28,6 +28,19 @@ Future<void> main(List<String> input) async {
           !Platform.environment.containsKey('SSH_AUTH_SOCK') &&
           !Platform.environment.containsKey('SSH_ASKPASS') &&
           !Platform.environment.containsKey('INFO_SESSION_SECRET'),
+      'sameFileReference':
+          [
+                for (var i = 0; i < args.length - 1; i++)
+                  if (args[i] == '-i') args[i + 1],
+              ].length ==
+              2 &&
+          {
+                for (var i = 0; i < args.length - 1; i++)
+                  if (args[i] == '-i') args[i + 1],
+              }.length ==
+              1,
+      'literalPlaceholder':
+          args.last == "/usr/bin/printf %s '{{SSH_KEY_FILE}}'",
     }),
   );
   await stdout.flush();

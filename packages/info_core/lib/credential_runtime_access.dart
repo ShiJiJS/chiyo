@@ -286,6 +286,7 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
       version: c.version,
       useGeneration: c.useGeneration,
       plan: launch.resolved(identity, cwd),
+      requestedPlan: input.launch.resolved(identity, cwd),
       createdAt: now,
       requestExpiresAt: now.add(_service._requestLifetime),
       fields: input.readFields,
@@ -621,6 +622,10 @@ extension CredentialRuntimeOwnerAccess on OwnerAccess {
       _service._useState(request);
   String credentialGrantState(CredentialUseRequest request) =>
       _service._useGrantState(request);
+  void checkCredentialUseEligibility(CredentialUseRequest request) {
+    _service._useEligible(request);
+  }
+
   Future<void> revokeCredentialUse(String id) => _serialize(() async {
     final r = _service._useRequest(id);
     if (!r.credentialApproved || r.attemptConsumed) {

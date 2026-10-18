@@ -50,10 +50,14 @@ void main() {
           'BatchMode=yes',
           '-i',
           {'file': 'token'},
+          '-i',
+          {'file': 'token'},
           '-p',
           '2222',
           'developer@test.beichen.example',
-          '/usr/bin/true',
+          '/usr/bin/printf',
+          '%s',
+          '{{SSH_KEY_FILE}}',
         ],
       );
       final run = await h.client.execute({
@@ -90,6 +94,8 @@ void main() {
         'oneIdentity': true,
         'batch': true,
         'noAmbientAuth': true,
+        'sameFileReference': true,
+        'literalPlaceholder': true,
       });
       for (final path in paths) {
         expect(await File(path).exists(), isFalse);
