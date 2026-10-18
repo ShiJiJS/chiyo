@@ -334,6 +334,7 @@ class _InformationAppState extends State<InformationApp>
                       onOpenOrganizationGrant: _openOrganizationGrant,
                     ),
                     AuthorizationHistory(
+                      visible: _tabs.index == 3,
                       key: ValueKey(_libraryRevision),
                       owner: widget.service.owner,
                       onOpenRecordSettings: _openRecordSettings,

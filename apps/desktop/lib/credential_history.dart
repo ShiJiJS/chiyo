@@ -68,7 +68,7 @@ class _CredentialHistoryDocumentState extends State<CredentialHistoryDocument> {
     });
     try {
       await action();
-      widget.onChanged();
+      if (mounted) widget.onChanged();
     } on CredentialUseFailure catch (e) {
       if (mounted) {
         setState(
@@ -136,11 +136,45 @@ class _CredentialHistoryDocumentState extends State<CredentialHistoryDocument> {
   );
   String time(DateTime? value) =>
       value == null ? '未记录' : value.toLocal().toString().split('.').first;
+  Widget _actions(CredentialExecution? record, bool available, bool cleanup) =>
+      Wrap(
+        alignment: WrapAlignment.end,
+        spacing: 12,
+        runSpacing: 10,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [
+          if (available)
+            settingsAction(context, '撤销使用授权', _busy ? null : () => _revoke()),
+          if (widget.owner.credentialFieldGrantState(r) == 'available')
+            settingsAction(
+              context,
+              '撤销字段授权',
+              _busy ? null : () => _revoke(fields: true),
+            ),
+          if (cleanup)
+            settingsAction(
+              context,
+              '重试文件清理',
+              _busy
+                  ? null
+                  : () => _run(() async {
+                      await widget.owner.cleanupCredentialExecution(record!.id);
+                    }),
+            ),
+          if (widget.onOpenCredential != null)
+            TextButton(
+              onPressed: () => widget.onOpenCredential!(r.credentialId),
+              style: prototypeButton(context),
+              child: const Text('查看凭据 →'),
+            ),
+        ],
+      );
   Widget fact(
     String label,
     String value, {
     bool code = false,
     bool divider = false,
+    bool injectionTip = false,
   }) => Container(
     padding: const EdgeInsets.symmetric(vertical: 10),
     decoration: divider
@@ -155,12 +189,44 @@ class _CredentialHistoryDocumentState extends State<CredentialHistoryDocument> {
       children: [
         SizedBox(
           width: 90,
-          child: t(label, 13, color: UiPalette.of(context).muted),
+          child: injectionTip
+              ? Wrap(
+                  spacing: 6,
+                  runSpacing: 4,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    t(label, 13, color: UiPalette.of(context).muted),
+                    SizedBox.square(
+                      dimension:
+                          26 * MediaQuery.textScalerOf(context).scale(14) / 14,
+                      child: TextButton(
+                        key: const ValueKey('history-injection-tip'),
+                        onPressed: () => setState(() => _tip = !_tip),
+                        style: prototypeButton(
+                          context,
+                          radius: 13,
+                          side: BorderSide(color: UiPalette.of(context).line),
+                          background: _tip
+                              ? UiPalette.of(context).selected
+                              : null,
+                        ),
+                        child: t(
+                          '?',
+                          14,
+                          color: UiPalette.of(context).accent,
+                          family: 'Georgia',
+                        ),
+                      ),
+                    ),
+                  ],
+                )
+              : t(label, 13, color: UiPalette.of(context).muted),
         ),
         const SizedBox(width: 15),
         Expanded(
           child: SelectableText(
             value,
+            textAlign: divider ? TextAlign.end : TextAlign.start,
             style: prototypeText(
               context,
               code ? 12 : 13,
@@ -173,12 +239,14 @@ class _CredentialHistoryDocumentState extends State<CredentialHistoryDocument> {
   );
   @override
   Widget build(BuildContext context) {
+    final avatarSize = MediaQuery.textScalerOf(context).scale(16) * 1.75;
     final c = UiPalette.of(context),
         record = widget.owner.credentialExecutions
             .where((e) => e.id == r.executionId)
             .firstOrNull;
     final permit = widget.owner.credentialGrantState(r),
         available = permit == 'available';
+    final fieldState = widget.owner.credentialFieldGrantState(r);
     final plan = r.requestedPlan ?? r.plan;
     final command = [
       plan.path,
@@ -256,11 +324,22 @@ class _CredentialHistoryDocumentState extends State<CredentialHistoryDocument> {
                         weight: FontWeight.w500,
                       ),
                     ),
+                    if (record?.state == 'prepare_failed' ||
+                        record?.state == 'start_failed')
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 20),
+                        child: t('本次启动尝试已消耗，程序未启动。修正原因后，需要重新申请一次使用许可。', 13),
+                      ),
+                    if (record?.state == 'unknown')
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 20),
+                        child: t('结果尚无法确认。先核查原执行与残留文件，避免重复运行。', 13),
+                      ),
                     Row(
                       children: [
                         Container(
-                          width: 28,
-                          height: 28,
+                          width: avatarSize,
+                          height: avatarSize,
                           alignment: Alignment.center,
                           decoration: BoxDecoration(
                             color: c.selected,
@@ -285,7 +364,7 @@ class _CredentialHistoryDocumentState extends State<CredentialHistoryDocument> {
                     ),
                     Container(
                       margin: const EdgeInsets.only(top: 28),
-                      padding: const EdgeInsets.symmetric(vertical: 20),
+                      padding: const EdgeInsets.only(top: 20, bottom: 18),
                       decoration: BoxDecoration(
                         border: Border(
                           top: BorderSide(color: c.line),
@@ -316,11 +395,32 @@ class _CredentialHistoryDocumentState extends State<CredentialHistoryDocument> {
                                     children: [
                                       t(summaries[i].$1, 12, color: c.muted),
                                       const SizedBox(height: 8),
-                                      t(
-                                        summaries[i].$2,
-                                        16,
-                                        weight: FontWeight.w500,
-                                      ),
+                                      if (i == 2)
+                                        Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.baseline,
+                                          textBaseline: TextBaseline.alphabetic,
+                                          children: [
+                                            Text(
+                                              '${r.attemptConsumed ? 1 : 0}',
+                                              style: prototypeText(
+                                                context,
+                                                28,
+                                                family: 'Georgia',
+                                                height: 1.2,
+                                                color: c.strong,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 5),
+                                            t('/ 1 次', 15),
+                                          ],
+                                        )
+                                      else
+                                        t(
+                                          summaries[i].$2,
+                                          16,
+                                          weight: FontWeight.w500,
+                                        ),
                                     ],
                                   ),
                                 ),
@@ -337,32 +437,47 @@ class _CredentialHistoryDocumentState extends State<CredentialHistoryDocument> {
                           : r.plan.receiver == 'ssh_identity'
                           ? '临时文件路径 → 命令参数'
                           : '临时文件路径 → 环境变量',
+                      injectionTip: true,
                     ),
                     fact(
                       r.plan.receiver == 'ssh_identity' ? '文件引用' : '环境变量',
-                      credentialInjectionTarget(r),
+                      r.plan.receiver == 'ssh_identity'
+                          ? '{{file:${r.alias}}}'
+                          : credentialInjectionTarget(r),
                       code: true,
                     ),
-                    TextButton(
-                      key: const ValueKey('history-injection-tip'),
-                      onPressed: () => setState(() => _tip = !_tip),
-                      style: prototypeButton(
-                        context,
-                        padding: const EdgeInsets.symmetric(vertical: 6),
-                      ),
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: t(
-                          '注入方式说明 ${_tip ? '−' : '＋'}',
-                          12,
-                          color: c.accent,
-                        ),
-                      ),
+                    fact('申报目标', credentialCommandTarget(r)),
+                    AnimatedSize(
+                      duration: MediaQuery.disableAnimationsOf(context)
+                          ? Duration.zero
+                          : const Duration(milliseconds: 150),
+                      alignment: Alignment.topCenter,
+                      child: _tip
+                          ? SettingsNotice(
+                              '由 CLI 设置接收位置',
+                              credentialInjectionTip(r),
+                            )
+                          : const SizedBox(),
                     ),
-                    if (_tip)
-                      SettingsNotice('由 CLI 设置接收位置', credentialInjectionTip(r)),
-                    const SizedBox(height: 14),
-                    t('由 CLI 启动的命令', 12, color: c.muted),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(child: t('由 CLI 启动的命令', 12, color: c.muted)),
+                        const SizedBox(width: 12),
+                        TextButton(
+                          onPressed: () => setState(() => _details = !_details),
+                          style: prototypeButton(
+                            context,
+                            padding: EdgeInsets.zero,
+                          ),
+                          child: t(
+                            '程序位置与固定计划 ${_details ? '−' : '＋'}',
+                            12,
+                            color: c.accent,
+                          ),
+                        ),
+                      ],
+                    ),
                     const SizedBox(height: 10),
                     Container(
                       padding: const EdgeInsets.all(15),
@@ -381,22 +496,8 @@ class _CredentialHistoryDocumentState extends State<CredentialHistoryDocument> {
                         ),
                       ),
                     ),
-                    TextButton(
-                      onPressed: () => setState(() => _details = !_details),
-                      style: prototypeButton(
-                        context,
-                        padding: const EdgeInsets.symmetric(vertical: 10),
-                      ),
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: t(
-                          '程序位置与固定计划 ${_details ? '−' : '＋'}',
-                          12,
-                          color: c.accent,
-                        ),
-                      ),
-                    ),
                     if (_details) ...[
+                      fact('申报用途', r.purpose),
                       fact('工作目录', r.plan.cwd, code: true),
                       fact(
                         '固定参数',
@@ -413,13 +514,31 @@ class _CredentialHistoryDocumentState extends State<CredentialHistoryDocument> {
                       fact('计划 hash', r.plan.planHash, code: true),
                       fact('接收配置', credentialIsolationFacts(r)),
                     ],
-                    fact(
-                      r.decidedAt == null ? '申请时间' : '审批时间',
-                      time(r.decidedAt ?? r.createdAt),
+                    Container(
+                      margin: const EdgeInsets.only(top: 12),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      decoration: BoxDecoration(
+                        border: Border(top: BorderSide(color: c.line)),
+                      ),
+                      child: Wrap(
+                        spacing: 28,
+                        runSpacing: 8,
+                        children: [
+                          t(
+                            '${r.decidedAt == null
+                                ? '申请时间'
+                                : r.credentialApproved
+                                ? '授权时间'
+                                : '审批时间'}  ${time(r.decidedAt ?? r.createdAt)}',
+                            13,
+                          ),
+                          if (r.credentialExpiresAt != null)
+                            t('允许启动至  ${time(r.credentialExpiresAt)}', 13),
+                          if (r.revokedAt != null)
+                            t('撤销使用于  ${time(r.revokedAt)}', 13),
+                        ],
+                      ),
                     ),
-                    if (r.credentialExpiresAt != null)
-                      fact('允许启动至', time(r.credentialExpiresAt)),
-                    if (r.revokedAt != null) fact('撤销使用于', time(r.revokedAt)),
                     if (fields.isNotEmpty) ...[
                       const SizedBox(height: 8),
                       t('同时批准读取的连接字段', 13, weight: FontWeight.w600),
@@ -433,7 +552,11 @@ class _CredentialHistoryDocumentState extends State<CredentialHistoryDocument> {
                       ),
                       const SizedBox(height: 10),
                       t(
-                        '字段授权：${widget.fieldGrant!.active ? '有效' : '已结束'} · ${widget.accesses.length} 次实际读取',
+                        '字段授权：${fieldState == 'available'
+                            ? '有效'
+                            : fieldState == 'expired'
+                            ? '已到期'
+                            : '已结束'} · ${widget.accesses.length} 次实际读取',
                         12,
                         color: c.muted,
                       ),
@@ -485,18 +608,6 @@ class _CredentialHistoryDocumentState extends State<CredentialHistoryDocument> {
                           child: t('查看执行记录 →', 13, color: c.accent),
                         ),
                       ),
-                    if (record?.state == 'unknown')
-                      const SettingsNotice(
-                        '结果尚无法确认',
-                        '先核查原执行与残留文件，避免重复运行。',
-                        error: true,
-                      ),
-                    if (record?.state == 'prepare_failed' ||
-                        record?.state == 'start_failed')
-                      const SettingsNotice(
-                        '启动尝试已消耗',
-                        '程序未能确认启动。修正原因后，需要重新申请一次使用许可。',
-                      ),
                     if (available)
                       const SettingsNotice(
                         '等待 CLI 启动任务',
@@ -531,42 +642,34 @@ class _CredentialHistoryDocumentState extends State<CredentialHistoryDocument> {
               color: c.rail,
               border: Border(top: BorderSide(color: c.line)),
             ),
-            child: Wrap(
-              spacing: 12,
-              runSpacing: 10,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: [
-                if (available)
-                  settingsAction(
-                    context,
-                    '撤销使用授权',
-                    _busy ? null : () => _revoke(),
-                  ),
-                if (widget.fieldGrant?.active == true)
-                  settingsAction(
-                    context,
-                    '撤销字段授权',
-                    _busy ? null : () => _revoke(fields: true),
-                  ),
-                if (cleanup)
-                  settingsAction(
-                    context,
-                    '重试文件清理',
-                    _busy
-                        ? null
-                        : () => _run(() async {
-                            await widget.owner.cleanupCredentialExecution(
-                              record.id,
-                            );
-                          }),
-                  ),
-                if (widget.onOpenCredential != null)
-                  TextButton(
-                    onPressed: () => widget.onOpenCredential!(r.credentialId),
-                    style: prototypeButton(context),
-                    child: const Text('查看凭据 →'),
-                  ),
-              ],
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final message = t(
+                  available
+                      ? '授权到期或被撤销后，CLI 将拒绝新的使用。'
+                      : '记录保留使用对象、注入方式、运行与清理结果。',
+                  12,
+                  color: c.muted,
+                );
+                final actions = _actions(record, available, cleanup);
+                return constraints.maxWidth < 850 ||
+                        MediaQuery.textScalerOf(context).scale(12) > 18
+                    ? Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          message,
+                          const SizedBox(height: 12),
+                          actions,
+                        ],
+                      )
+                    : Row(
+                        children: [
+                          Expanded(child: message),
+                          const SizedBox(width: 16),
+                          actions,
+                        ],
+                      );
+              },
             ),
           ),
         ],

@@ -701,6 +701,23 @@ extension CredentialRuntimeOwnerAccess on OwnerAccess {
       _service._useState(request);
   String credentialGrantState(CredentialUseRequest request) =>
       _service._useGrantState(request);
+
+  /// Current permission, independently from the immutable recorded decision.
+  /// This reads the live authorization model without writing/pruning history.
+  String credentialFieldGrantState(CredentialUseRequest request) {
+    if (request.approvedFields.isEmpty) return 'not_approved';
+    if (request.fieldExpiresAt == null ||
+        !_service._clock().isBefore(request.fieldExpiresAt!)) {
+      return 'expired';
+    }
+    final active = _service._requests[request.id];
+    return request.approvedFields.any(
+          (field) => _service._canRead(active, field),
+        )
+        ? 'available'
+        : 'revoked';
+  }
+
   void checkCredentialUseEligibility(CredentialUseRequest request) {
     _service._useEligible(request);
   }

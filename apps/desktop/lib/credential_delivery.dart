@@ -8,6 +8,23 @@ String credentialInjectionTarget(CredentialUseRequest r) =>
     };
 String credentialInjectionValue(CredentialUseRequest r) =>
     r.plan.receiver == 'gh_token' ? '真实 Token（不展示原文）' : 'CLI 生成的临时文件路径';
+String credentialCommandTarget(CredentialUseRequest r) {
+  final args = (r.requestedPlan ?? r.plan).argv
+      .where((a) => a.kind == LaunchValueKind.literal)
+      .map((a) => a.value)
+      .toList();
+  if (r.plan.receiver == 'ssh_identity') {
+    final target = args
+        .where((a) => RegExp(r'^[^\s@]+@[^\s@]+$').hasMatch(a))
+        .firstOrNull;
+    final p = args.indexOf('-p');
+    return target == null
+        ? '见下方固定命令'
+        : '$target${p >= 0 && p + 1 < args.length ? ' · ${args[p + 1]}' : ''}';
+  }
+  return '${r.plan.receiver == 'gh_token' ? 'GitHub' : 'AWS'} · ${args.take(r.plan.receiver == 'gh_token' ? 3 : 2).join(' ')}';
+}
+
 String credentialInjectionFact(CredentialUseRequest r) =>
     '${credentialInjectionTarget(r)} ← ${r.plan.receiver == 'gh_token' ? '{secret:${r.alias}}' : '受限临时文件'}';
 String credentialInjectionTip(

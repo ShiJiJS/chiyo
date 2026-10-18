@@ -234,7 +234,10 @@ void main() {
       await tester.pumpAndSettle();
       final status = service.agent.credentialUseStatus(session, request.id);
       expect(status['status'], 'partially_approved');
-      expect((status['decision'] as Map)['credentialUse'], {'approved': false});
+      expect((status['decision'] as Map)['credentialUse'], {
+        'approved': false,
+        'state': 'not_approved',
+      });
       final grant = service.agent.claim(session, request.id);
       expect(
         await tester.runAsync(
@@ -269,7 +272,10 @@ void main() {
       expect(find.textContaining('未能保存决定'), findsNothing);
       final status = service.agent.credentialUseStatus(session, request.id);
       expect(status['status'], 'partially_approved');
-      expect((status['decision'] as Map)['credentialUse'], {'approved': false});
+      expect((status['decision'] as Map)['credentialUse'], {
+        'approved': false,
+        'state': 'not_approved',
+      });
       final grant = service.agent.claim(session, request.id);
       final value = await tester.runAsync(
         () => service.agent.read(grant.token, request.fields.single),
