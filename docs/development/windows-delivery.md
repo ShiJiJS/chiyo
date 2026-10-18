@@ -4,32 +4,46 @@
 CLI、SDK-free Codex 接入材料生成器、合成资料控制台检查、依赖许可和来源清单。
 它用于配合验收；Issue #18 的干净环境、真实桌面和 Codex 检查仍开放。
 
-## 当前 Agent 发起整理与界面改进包
+## 当前 Round05 Windows 预览
 
-**0.3.1+6**。准确源码、构建时间及逐文件校验值见本包 `manifest.json`，
+**0.4.0+7**。准确源码、构建时间及逐文件校验值见本包 `manifest.json`，
 ZIP 校验值见随附的同名 `.sha256` 文件。具体本地交付路径及大小记录在
-[实施进度](https://github.com/ShiJiJS/agent-info-manage/blob/integration/local-information-access/docs/planning/implementation-status.md)，不在随包说明中写入自身归档的哈希。
+[实施进度](https://github.com/ShiJiJS/agent-info-manage/issues/21)，不在随包说明中写入自身归档的哈希。
 已展开 EXE 位于 `AgentInfoManage/app/info_desktop.exe`，须保留其全部相邻文件。
 
-录入提案默认阅读卡片、逐项独立编辑；列表明确自述提交者、聊天、用途和摘要，已确认
-可只读查看当前资料。分类建议随整批确认保存。列表动作位于右侧，来源、用途、标题摘要、
-时间及状态分层展示；资料详情和回收站沿用同一套简洁控件。
+沿用已确认Round05顶部导航、紫/绿/蓝/黑白四主题、审批收件箱与卡片、信息库目录树/
+列表/详情、录入提案、授权历史和设置。支持搜索分页、历史定位与放大文字。
+
+字符串与文件凭据独立管理，可关联服务器等普通信息。申请显示凭据版本、注入位置和固定
+启动计划；批准后由随包CLI worker启动一次，不能直接执行带占位符的原命令。支持gh Token、
+非交互Linux/Unix SSH身份文件和AWS静态凭据文件。获批程序及同一系统用户仍可能接触原文，
+不是强进程沙箱，也不提供浏览器填充或服务器同步。
+
+跨次CLI调用由应用宿主保留有界内存输出；应用退出或缓存淘汰后不能恢复输出。重启只恢复
+过去事实和必要清理登记，不恢复有效许可。未知结果先核查原任务，不能自动重放。普通字段
+许可与凭据使用许可独立。旧秘密字段可明确选择转换，默认不允许发现；原读取路径关闭，
+保留历史/回收副本及已导出的离线备份不会同时擦除，恢复旧内容不复活旧授权。
 
 整理从 Codex 等外部聊天发起：Agent 经 CLI 提交整理请求，用户在现有“访问审批”选择
 资料范围并批准一次，之后 Agent 可自动应用分类及标签。无需在应用创建任务或再次确认
 整理方案。只提供所选标题、说明、目录和标签元数据，不含字段值；批准最长30分钟，
 完成、撤销、到期或会话结束即失效。旧版待确认方案保持原确认要求，不升级其写入能力。
-协议详见[整理流程说明](https://github.com/ShiJiJS/agent-info-manage/blob/integration/local-information-access/docs/development/organization-tasks.md)。
+协议详见[整理流程说明](https://github.com/ShiJiJS/agent-info-manage/blob/codex/round05-windows-sync/docs/development/organization-tasks.md)。
 
-本版保持schema12，与0.3.0兼容；0.2.2的schema11需增量升级。打开新版前，请在旧版
-导出备份并单独保存恢复密钥，再完全
+本版数据库schema16、完整备份格式5，继续读取备份格式1–4。新备份包含托管凭据及保留
+秘密版本、回收对象、关联、已确认SSH主机数据和历史；排除私密授权证明、待审批能力、
+运行材料和输出。只向空库恢复，独立凭据非空也不能覆盖。使用独立恢复密钥和新本机密钥，
+到期按恢复时的时间判断，历史许可不重新生效。旧程序会拒绝新备份。
+
+打开新版前，请在旧版导出备份并单独保存恢复密钥，再完全
 退出旧版托盘进程。不要直接用旧程序重新打开已升级的数据库；需要回退时使用独立备份
 和新资料库，按支持的恢复流程操作。自动检查只使用合成资料，未直接迁移用户当前库。
 
-完整194项无窗口测试、四包分析、Windows编译、11项独立CLI/hook及SQLCipher/DPAPI诊断
-通过，桌面55项连续三轮通过。实际Flutter离屏画面已查看；原生手感及新版实际整理流程
-打包时尚待用户打开验证。后续实际CLI录入、整理及获批字段读取已通过；完整原生验收仍开放，详见
-[验收记录](https://github.com/ShiJiJS/agent-info-manage/blob/integration/local-information-access/docs/development/windows-acceptance.md)。
+固定实现检查点349项零跳过与严格分析通过；原生备份迁移及CLI宿主/OpenSSH流程各连续三轮
+通过，实际0.3.1旧代码创建的加密库/备份升级与恢复通过。包的准确构建检查以manifest及验收
+记录为准。曾有一次原生短任务完成状态超时，后续加强诊断/压力复验未重现，#30仍保留待定位
+项。真实Codex安装/信任、系统通知点击和干净机器联合验收仍开放；先用虚构资料验收，
+不据此宣称正式发行完成，详见随包 `ACCEPTANCE.md`。
 
 ## 使用预览包
 
@@ -41,8 +55,8 @@ ZIP 校验值见随附的同名 `.sha256` 文件。具体本地交付路径及�
    [Microsoft 官方运行库页面](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist)
    安装。当前编译及无窗口检查环境为 Windows 11 Home x64（10.0.26300）；
    Windows 10、ARM64、32 位、无开发工具干净机器尚未实测，不承诺支持。
-3. 用户准备好后启动 `app/info_desktop.exe`。关闭窗口保留托盘和本机服务；
-   使用“设置 → 通知与应用 → 完全退出”停止服务。先使用虚构信息。
+3. 用户准备好后启动 `app/info_desktop.exe`。托盘可用时关闭窗口转入后台，托盘不可用时
+   保持窗口可达；使用“设置 → 应用运行 → 完全退出”停止服务。先使用虚构信息。
 4. CLI 可用完整路径调用 `cli/info.exe`（通用 JSON-lines），无需安装 Dart、
    Flutter 或 Java；不自动修改 PATH。Codex 使用下面的独立接入步骤。
 

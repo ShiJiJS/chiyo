@@ -339,6 +339,41 @@ void main() {
         [1, 2],
       );
       expect(await target.backups.recoveryKey(), isNull);
+      final occupied = await EncryptedInformationRepository.open(
+        '${root.path}/credential-only',
+        _Keys(),
+      );
+      final occupiedService = InformationService(repository: occupied);
+      try {
+        final kept = await occupiedService.owner.createStringCredential(
+          name: 'Keep synthetic credential',
+          publicPurpose: '',
+          secret: 'synthetic-preserved',
+        );
+        expect(occupied.items, isEmpty);
+        expect(await occupied.backups.recipientEmpty(), isFalse);
+        await expectLater(
+          occupiedService.owner.restoreLibrary(
+            () => occupied.backups.restoreFrom(path, recovery),
+          ),
+          throwsA(
+            isA<StorageFailure>().having(
+              (e) => e.code,
+              'code',
+              'recipient_not_empty',
+            ),
+          ),
+        );
+        expect(occupiedService.owner.credentials.single.id, kept.id);
+        expect(
+          occupied.credentialMaterials.single.bytes,
+          'synthetic-preserved'.codeUnits,
+        );
+        expect(occupied.items, isEmpty);
+      } finally {
+        await occupiedService.close();
+        await occupied.close();
+      }
       for (final version in [3, 4]) {
         final legacyPath = '${root.path}/format-$version.aimbackup';
         await _changeBackup(path, legacyPath, recovery, (payload) {

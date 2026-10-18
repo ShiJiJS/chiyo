@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "C:\Project\network_config\info-manage-worktrees\31-backup-migration\scripts\qa\check-legacy-backup-reader.py", line 165, in <module>
+    main()
+  File "C:\Project\network_config\info-manage-worktrees\31-backup-migration\scripts\qa\check-legacy-backup-reader.py", line 159, in main
+    raise RuntimeError(f'{name} failed: {result.stdout[-2000:]} {result.stderr[-2000:]}')
+RuntimeError: old-producer failed:  Running build hooks...Running build hooks...probe.dart:11:1: Error: Directives must appear before any declarations.
+Try moving the directive before any declarations.
+import 'dart:convert';
+^^^^^^
+

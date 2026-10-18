@@ -38,6 +38,16 @@ try {
     if (@(Get-ChildItem -LiteralPath $payload -Recurse -File).Count -ne @($manifest.files).Count + 1) {
         throw 'Unlisted payload files.'
     }
+    $appWorker = Join-Path $payload 'app/info-runtime-worker.exe'
+    $cliWorker = Join-Path $payload 'cli/info-runtime-worker.exe'
+    if (-not (Test-Path -LiteralPath $appWorker -PathType Leaf) -or
+        -not (Test-Path -LiteralPath $cliWorker -PathType Leaf) -or
+        (Get-FileHash -LiteralPath $appWorker -Algorithm SHA256).Hash -ne (Get-FileHash -LiteralPath $cliWorker -Algorithm SHA256).Hash) {
+        throw 'The resident host must ship the same worker beside the desktop and CLI.'
+    }
+    if (-not (Test-Path -LiteralPath (Join-Path $payload 'cli/template/references/credential-use.md') -PathType Leaf)) {
+        throw 'The extracted SDK-free bundle is missing the credential-use Skill reference.'
+    }
     # Restrict only this process and its children. Do not change the user's PATH.
     $env:PATH = "$env:SystemRoot\System32;$env:SystemRoot;$env:SystemRoot\System32\WindowsPowerShell\v1.0"
     $storage = Join-Path $payload 'diagnostics/bin/info-storage-check.exe'

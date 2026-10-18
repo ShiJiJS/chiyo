@@ -1,0 +1,19 @@
+Running build hooks...Running build hooks...00:00 +0: loading test/credential_field_migration_test.dart
+00:00 +0: long Unicode field names convert to valid bounded credential names
+00:00 +0 -1: long Unicode field names convert to valid bounded credential names [E]
+  AccessFailure(invalid_credential_metadata)
+  package:info_core/credential_access.dart 358:7          CredentialOwnerAccess._validateCredentialMetadata
+  package:info_core/credential_field_migration.dart 83:5  CredentialFieldMigrationOwner.migrateFieldToCredential.<fn>
+  package:info_core/info_core.dart 635:20                 OwnerAccess._serialize.<fn>
+  ===== asynchronous gap ===========================
+  test\credential_field_migration_test.dart 15:15         main.<fn>
+  
+00:00 +0 -1: a durable conversion failure rolls back the credential and item and leaves the old grant usable
+00:00 +1 -1: explicit field conversion preserves item and other fields, closes old grants and restores old content only with a new field identity
+00:00 +2 -1: Some tests failed.
+
+Failing tests:
+  test/credential_field_migration_test.dart: long Unicode field names convert to valid bounded credential names
+
+Consider enabling the flag chain-stack-traces to receive more detailed exceptions.
+For example, 'dart test --chain-stack-traces'.

@@ -100,6 +100,8 @@ CLI 在受管目录建立执行日志（只有executionId、文件身份、进�
 
 所有时间和 exitCode 在未知/未发生时为 null。`executionState`: `preparing|running|exited|prepare_failed|start_failed|unknown`；exited 用 exitCode区分成功/失败。`cleanupState`: `not_needed|pending|complete|failed|needs_check`。`processStarted` 只有执行器收到 OS 创建成功事实才为true。请求状态、使用许可、执行和清理四个维度分开；文件清理失败不能把非零退出改为成功，Token 使用是 not_needed，不能画成“SSH文件已清理”。
 
+备份格式5恢复的Owner历史可附可选UTC时间`restoredAt`，只说明这份事实何时恢复；没有原私密会话/能力，Agent不能据编号领取或重新启动。原preparing/running事实恢复为unknown，不补造退出码或结束时间；本机不恢复原设备运行材料、进程身份或输出。普通当前运行响应不因此新增必填字段，申请输入schema保持不变。
+
 `{"command":"execution-output","executionId":"exec-024","cursor":0,"limit":16}`：cursor为下一个 chunk序号（0起），limit1–16，默认16。仅查询当前 CLI 内存缓冲，不把输出传回服务或写库；其他CLI进程即使获准查询历史也返回 `output_unavailable`。响应：
 
 ```json
