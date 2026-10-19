@@ -556,6 +556,7 @@ void main() {
       await repo.close();
       var db = inspect();
       for (final t in [
+        'information_deliveries',
         'information_file_fields',
         'information_attachment_versions',
         'information_draft_commits',
@@ -575,6 +576,7 @@ void main() {
       await service.close();
       await repo.close();
       db = inspect();
+      db.execute('DROP TABLE information_deliveries');
       db.execute('UPDATE library_format SET version=19');
       db.execute('PRAGMA user_version=10');
       db.close();

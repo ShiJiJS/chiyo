@@ -31,6 +31,7 @@ final class AttachmentBackupContainer {
     required DateTime createdAt,
     required Map<String, List<Map<String, Object?>>> tables,
     required List<AttachmentBackupSource> attachments,
+    int formatVersion = 8,
     String? stagingParent,
   }) async {
     InformationBackups._decodeKey(recoveryKey);
@@ -46,7 +47,7 @@ final class AttachmentBackupContainer {
         throw const StorageFailure('backup_too_large');
       final payload = jsonEncode({
         'format': InformationBackups._format,
-        'version': 8,
+        'version': formatVersion,
         'createdAt': createdAt.toIso8601String(),
         'tables': tables,
         'attachments': [for (final s in sources) s.version.toPrivateJson()],
@@ -247,6 +248,7 @@ final class AttachmentBackupReader {
   final _AttachmentBackupManifest _manifest;
   bool _closed = false;
   DateTime get createdAt => _manifest.createdAt;
+  int get formatVersion => _manifest.formatVersion;
   Map<String, List<Map<String, Object?>>> get tables => _manifest.tables;
   List<InformationAttachmentVersion> get versions => _manifest.versions;
 
@@ -339,10 +341,16 @@ final class AttachmentBackupReader {
 }
 
 final class _AttachmentBackupManifest {
-  _AttachmentBackupManifest(this.tables, this.versions, this.createdAt);
+  _AttachmentBackupManifest(
+    this.tables,
+    this.versions,
+    this.createdAt,
+    this.formatVersion,
+  );
   final Map<String, List<Map<String, Object?>>> tables;
   final List<InformationAttachmentVersion> versions;
   final DateTime createdAt;
+  final int formatVersion;
   static _AttachmentBackupManifest parse(String payload) {
     final json = decodeProtocolObject(
       payload,
@@ -350,7 +358,7 @@ final class _AttachmentBackupManifest {
     );
     if (json['format'] != InformationBackups._format ||
         json['version'] is! int ||
-        json['version'] != 8) {
+        !{8, 9}.contains(json['version'])) {
       throw const StorageFailure('unsupported_backup');
     }
     if (json.length != 5 ||
@@ -394,6 +402,7 @@ final class _AttachmentBackupManifest {
       Map.unmodifiable(tables),
       List.unmodifiable(versions),
       createdAt,
+      json['version'] as int,
     );
   }
 }

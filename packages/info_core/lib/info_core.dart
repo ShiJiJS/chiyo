@@ -287,6 +287,7 @@ class InformationService {
   final _pendingInformationDeliveries = <String, InformationFileDelivery>{};
   bool _informationDeliveryCleanupScheduled = false;
   bool _informationDeliveryCleanupRequested = false;
+  bool _informationDeliveryShutdownComplete = false;
   Future<void> _informationDeliveryCleanup = Future.value();
   final _inFlightInformationDeliveries = <String>{};
   String _secret() =>

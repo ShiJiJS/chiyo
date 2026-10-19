@@ -86,6 +86,12 @@ class _Repository extends MemoryInformationRepository {
   }
 }
 
+class _NoFileGetterRepository extends MemoryInformationRepository {
+  @override
+  List<InformationFileDelivery> get informationFileDeliveries =>
+      throw StateError('file registry unavailable');
+}
+
 Matcher fails(String code) =>
     throwsA(isA<InformationFileFailure>().having((e) => e.code, 'code', code));
 InformationFileFetchInput fetch(
@@ -192,6 +198,23 @@ void main() {
         jsonEncode(const InformationFileFailure('not_authorized').toJson()),
         isNot(contains('private resume')),
       );
+    },
+  );
+  test(
+    'disabled delivery never reads its optional registry during revoke or repeated shutdown',
+    () async {
+      final other = InformationService(repository: _NoFileGetterRepository());
+      final info = await other.owner.createInformation('文本', '', [
+        const FieldInput('字段', '', '内容'),
+      ]);
+      final s = other.agent.openSession('普通聊天');
+      final id = other.agent.request(s, '读取', [
+        FieldRef(info.id, info.fields.single.id),
+      ]).id;
+      other.owner.approve(id, [FieldRef(info.id, info.fields.single.id)]);
+      other.owner.revoke(id);
+      await other.close();
+      await other.close();
     },
   );
   test(

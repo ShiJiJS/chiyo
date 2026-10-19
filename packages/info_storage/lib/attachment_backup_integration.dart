@@ -13,13 +13,13 @@ extension _AttachmentBackupIntegration on InformationBackups {
     'version': contents.formatVersion,
     'createdAt': contents.createdAt.toIso8601String(),
     'tables': contents._tables,
-    if (contents.formatVersion == 8)
+    if (contents.formatVersion >= 8)
       'attachments': [for (final v in contents.attachments) v.toPrivateJson()],
   };
   BackupContents _contentsFromReader(AttachmentBackupReader reader) =>
       InformationBackups._validate({
         'format': InformationBackups._format,
-        'version': 8,
+        'version': reader.formatVersion,
         'createdAt': reader.createdAt.toIso8601String(),
         'tables': reader.tables,
         'attachments': [for (final v in reader.versions) v.toPrivateJson()],
@@ -39,7 +39,7 @@ extension _AttachmentBackupIntegration on InformationBackups {
         BackupContents._(
           raw._tables,
           raw.createdAt,
-          8,
+          raw.formatVersion,
           attachments: raw.attachments,
           origin: _AttachmentBackupOrigin(path, key, _fingerprint(raw)),
         ),

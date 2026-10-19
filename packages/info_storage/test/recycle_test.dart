@@ -75,6 +75,7 @@ void main() {
       fixture.execute('DROP TABLE organization_tasks');
       fixture.execute('PRAGMA user_version = 8');
       fixture.execute('DROP TABLE library_format');
+      fixture.execute('DROP TABLE information_deliveries');
       fixture.execute('DROP TABLE information_file_fields');
       fixture.execute('DROP TABLE information_attachment_versions');
       fixture.execute('DROP TABLE information_draft_commits');

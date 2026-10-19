@@ -70,6 +70,7 @@ Map<String, dynamic> _backupJson(Map<String, Object?> row) {
 void _validateBackupHistory(
   Map<String, List<Map<String, Object?>>> tables, {
   Set<InformationAttachmentRef>? availableAttachments,
+  Iterable<InformationFileDelivery> deliveries = const [],
 }) {
   final directories = tables['information_directories']!
       .map((r) => r['id'])
@@ -90,6 +91,10 @@ void _validateBackupHistory(
 
   for (final field in tables['information_fields']!) {
     fieldOwner(field['id'] as String, field['item_id'] as String);
+  }
+  for (final delivery in deliveries) {
+    fieldOwner(delivery.field.fieldId, delivery.field.itemId);
+    count(1);
   }
   // These are recorded wall-clock facts, which may cross the export timestamp
   // when the OS clock moves back. Validate representation, not chronology.
@@ -494,6 +499,23 @@ extension _CompleteBackups on InformationBackups {
       }
     }
     final auditCutoff = now.subtract(Duration(days: days));
+    if (tables.containsKey('information_deliveries')) {
+      final retained = <Map<String, Object?>>[];
+      for (final row in tables['information_deliveries']!) {
+        final record = _deliveryArchive(row);
+        if ((record.finishedAt ?? record.createdAt).isBefore(auditCutoff) &&
+            !now.isBefore(record.expiresAt))
+          continue;
+        final fact = restored
+            ? record.changed({'restoredAt': now.toIso8601String()})
+            : record;
+        retained.add({
+          'id': fact.id,
+          'payload': jsonEncode(fact.toArchiveJson()),
+        });
+      }
+      tables['information_deliveries'] = retained;
+    }
     _retainBackupCredentialHistory(tables, auditCutoff, restored ? now : null);
     tables['grant_history']!.removeWhere(
       (row) => DateTime.fromMillisecondsSinceEpoch(
@@ -702,7 +724,14 @@ extension _CompleteBackups on InformationBackups {
     final fills = tables['credential_focused_fills']!
         .map((r) => FocusedFillOperation.fromStorageJson(_backupJson(r)))
         .toList();
+    final deliveries = _validateBackupFileDeliveries(
+      tables,
+      contents.attachments,
+    );
     return () {
+      _repository._fileDeliveries
+        ..clear()
+        ..addEntries(deliveries.map((r) => MapEntry(r.id, r)));
       _repository._focusedFillOperations
         ..clear()
         ..addAll(fills);

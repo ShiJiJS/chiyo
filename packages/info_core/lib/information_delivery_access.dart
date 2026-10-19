@@ -83,7 +83,9 @@ extension InformationFileAgentAccess on AgentAccess {
     final held = _service._informationDeliveries
         .where((r) => r.holdsCopy)
         .toList();
-    if (held.length >= informationDeliveryLimit ||
+    if (_service._informationDeliveries.length >=
+            informationDeliveryHistoryLimit ||
+        held.length >= informationDeliveryLimit ||
         held.fold<int>(0, (n, r) => n + r.byteLength) + version.byteLength >
             informationDeliveryByteLimit) {
       throw const InformationFileFailure('delivery_capacity');
@@ -432,12 +434,32 @@ extension _InformationFileDeliveryService on InformationService {
         );
       }
     }
+    final cutoff = _clock().subtract(Duration(days: owner.auditRetentionDays));
+    final activeBindings = {
+      for (final entry in _sessionBindings.entries)
+        if (_sessionActive(entry.key)) entry.value,
+    };
+    final prune = {
+      for (final r in _informationDeliveries)
+        if (!r.holdsCopy &&
+            (!r.runtime ||
+                InformationFileDelivery.terminals.contains(r.state)) &&
+            (!r.runtime || !activeBindings.contains(r.sessionBinding)) &&
+            (r.finishedAt ?? r.createdAt).isBefore(cutoff) &&
+            !_clock().isBefore(r.expiresAt))
+          r.id,
+    };
+    if (prune.isNotEmpty) {
+      await (_repository as InformationFileDeliveryRepository)
+          .pruneInformationFileDeliveryHistory(prune);
+    }
     return _informationDeliveries
         .where((r) => r.state == 'cleanup_pending')
         .length;
   }
 
   void _scheduleInformationDeliveryCleanup() {
+    if (informationDeliveryFiles == null) return;
     if (!_informationDeliveries.any((r) => r.runtime && r.holdsCopy)) {
       return;
     }
@@ -469,7 +491,12 @@ extension InformationFileDeliveryOwnerAccess on OwnerAccess {
     return _service._reconcileInformationDeliveries();
   });
   Future<void> _closeInformationFileDeliveries() {
+    // A disabled optional feature must not touch a closed repository during
+    // existing callers' repeated shutdown. No copy can be created without it.
+    if (_service.informationDeliveryFiles == null) return Future.value();
+    if (_service._informationDeliveryShutdownComplete) return Future.value();
     if (!_service._informationDeliveries.any((r) => r.runtime && r.holdsCopy)) {
+      _service._informationDeliveryShutdownComplete = true;
       return Future.value();
     }
     return _serialize(() async {
@@ -479,6 +506,7 @@ extension InformationFileDeliveryOwnerAccess on OwnerAccess {
       if (_service._auditFailed) {
         throw const InformationFileFailure('audit_failed');
       }
+      _service._informationDeliveryShutdownComplete = true;
     });
   }
 }

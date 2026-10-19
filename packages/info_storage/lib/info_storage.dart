@@ -20,8 +20,9 @@ part 'information_files_storage.dart';
 part 'attachment_backup.dart';
 part 'information_attachments_storage.dart';
 part 'attachment_backup_integration.dart';
+part 'information_delivery_storage.dart';
 
-const _libraryFormat = 20;
+const _libraryFormat = 21;
 
 class StorageFailure implements Exception {
   const StorageFailure(this.code);
@@ -96,7 +97,21 @@ class EncryptedInformationRepository
         CredentialFieldMigrationRepository,
         FocusedFillRuntimeRepository,
         InformationAttachmentRepository,
+        InformationFileDeliveryRepository,
         SshHostTrustRepository {
+  @override
+  List<InformationFileDelivery> get informationFileDeliveries {
+    if (_closed) throw const StorageFailure('library_closed');
+    return List.unmodifiable(_fileDeliveries.values);
+  }
+
+  @override
+  Future<void> saveInformationFileDelivery(InformationFileDelivery record) =>
+      _saveFileDelivery(record);
+  @override
+  Future<void> pruneInformationFileDeliveryHistory(Set<String> ids) =>
+      _pruneFileDeliveries(ids);
+  final _fileDeliveries = <String, InformationFileDelivery>{};
   @override
   Future<InformationFileStage> informationStage(
     String draftId,
@@ -623,6 +638,7 @@ class EncryptedInformationRepository
       _items[decoded.id] = decoded;
     }
     await _checkStoredFileReferences();
+    await _loadFileDeliveries();
     await _db.transaction(
       () => _reconcileAttachmentRetention(_clock().toUtc()),
     );
@@ -1072,6 +1088,7 @@ class EncryptedInformationRepository
     _updates.clear();
     _revisions.clear();
     _revisionPurges.clear();
+    _fileDeliveries.clear();
     try {
       await _db.close();
     } finally {
@@ -1346,6 +1363,7 @@ class _InformationDatabase extends GeneratedDatabase {
         'CREATE TABLE information_fields(id TEXT PRIMARY KEY,item_id TEXT NOT NULL REFERENCES information_items(id),name TEXT NOT NULL,description TEXT NOT NULL,value TEXT NOT NULL,version INTEGER NOT NULL DEFAULT 1,kind TEXT NOT NULL DEFAULT \'structured\')',
       );
       await _createInformationAttachments();
+      await _createInformationDeliveries();
       await _organizationSchema();
       await _backupSchema();
     },
@@ -1365,6 +1383,12 @@ class _InformationDatabase extends GeneratedDatabase {
         sourceVersion = marker.read<int>('version');
       }
       await transaction(() async {
+        if (sourceVersion < 21 &&
+            (await customSelect(
+              "SELECT name FROM sqlite_master WHERE name='information_deliveries'",
+            ).get()).isNotEmpty) {
+          throw const StorageFailure('unsupported_schema');
+        }
         if (sourceVersion < 20 &&
             (await customSelect(
               "SELECT name FROM sqlite_master WHERE name IN ('information_attachment_versions','information_file_fields','information_draft_commits')",
@@ -1427,6 +1451,7 @@ class _InformationDatabase extends GeneratedDatabase {
         if (sourceVersion < 18) await _createFocusedFillRuntime();
         if (sourceVersion < 19) await _createInformationFileStages();
         if (sourceVersion < 20) await _createInformationAttachments();
+        if (sourceVersion < 21) await _createInformationDeliveries();
         await _createLibraryFormat();
       });
     },
@@ -1471,6 +1496,11 @@ class _InformationDatabase extends GeneratedDatabase {
       'CREATE TABLE information_draft_commits(draft_id TEXT NOT NULL,operation_id TEXT NOT NULL,payload TEXT NOT NULL,PRIMARY KEY(draft_id,operation_id))',
     );
   }
+
+  Future<void> _createInformationDeliveries() => customStatement(
+    'CREATE TABLE information_deliveries(id TEXT PRIMARY KEY,session_binding TEXT,operation_id TEXT NOT NULL,'
+    'payload TEXT NOT NULL CHECK(length(CAST(payload AS BLOB))<=262144),UNIQUE(session_binding,operation_id))',
+  );
 
   Future<void> _migrateCredentialRuntime17() async {
     final names = (await customSelect(

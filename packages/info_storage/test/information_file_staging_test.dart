@@ -79,10 +79,10 @@ void main() {
         );
         expect(metadata.sameAs(saved), isTrue);
         expect(saved.sha256, sha256.convert(original).toString());
-        expect(db.select('PRAGMA user_version').single.values.single, 20);
+        expect(db.select('PRAGMA user_version').single.values.single, 21);
         expect(
           db.select('SELECT version FROM library_format').single.values.single,
-          20,
+          21,
         );
       } finally {
         db.close();
@@ -270,6 +270,7 @@ void main() {
       );
       await repository.close();
       var db = inspect();
+      db.execute('DROP TABLE information_deliveries');
       db.execute('DROP TABLE information_file_fields');
       db.execute('DROP TABLE information_attachment_versions');
       db.execute('DROP TABLE information_draft_commits');
@@ -286,6 +287,7 @@ void main() {
       expect(repository.items.single.fields.single.value, '字节不变');
       await repository.close();
       db = inspect();
+      db.execute('DROP TABLE information_deliveries');
       db.execute('DROP TABLE information_file_fields');
       db.execute('DROP TABLE information_attachment_versions');
       db.execute('DROP TABLE information_draft_commits');

@@ -7,9 +7,7 @@ extension _EncryptedInformationAttachments on EncryptedInformationRepository {
   ) async {
     if (_closed) throw const StorageFailure('library_closed');
     return _db.transaction(() async {
-      final version = (await _attachmentVersions(
-        ref.attachmentId,
-      )).where((v) => v.reference == ref).firstOrNull;
+      final version = await _attachmentVersion(ref);
       if (version == null || !version.available)
         throw const AccessFailure('attachment_missing');
       Stream<Uint8List> chunks() async* {
@@ -154,19 +152,41 @@ extension _EncryptedInformationAttachments on EncryptedInformationRepository {
 
   Future<List<InformationAttachmentVersion>> _attachmentVersions(
     String id,
-  ) async => List.unmodifiable(
-    (await _allAttachmentVersions()).where(
-      (v) => v.reference.attachmentId == id,
-    ),
-  );
+  ) async {
+    if (_closed) throw const StorageFailure('library_closed');
+    final rows = await _db
+        .customSelect(
+          'SELECT attachment_id,version,metadata,byte_length,typeof(body) AS body_type,length(body) AS body_size FROM information_attachment_versions WHERE attachment_id=? ORDER BY version LIMIT 10001',
+          variables: [Variable(id)],
+        )
+        .get();
+    if (rows.length > AttachmentBackupContainer.maxVersions)
+      throw const AccessFailure('attachment_capacity_exceeded');
+    return List.unmodifiable(rows.map((r) => _attachmentFromRow(r.data)));
+  }
+
+  Future<InformationAttachmentVersion?> _attachmentVersion(
+    InformationAttachmentRef ref,
+  ) async {
+    if (_closed) throw const StorageFailure('library_closed');
+    final rows = await _db
+        .customSelect(
+          'SELECT attachment_id,version,metadata,byte_length,typeof(body) AS body_type,length(body) AS body_size FROM information_attachment_versions WHERE attachment_id=? AND version=?',
+          variables: [
+            Variable(ref.attachmentId),
+            Variable(ref.attachmentVersion),
+          ],
+        )
+        .get();
+    return rows.isEmpty ? null : _attachmentFromRow(rows.single.data);
+  }
 
   Future<Uint8List> _readAttachmentChunk(
     InformationAttachmentRef ref,
     int offset,
     int length,
   ) async {
-    final versions = await _attachmentVersions(ref.attachmentId);
-    final v = versions.where((v) => v.reference == ref).firstOrNull;
+    final v = await _attachmentVersion(ref);
     if (v == null || !v.available)
       throw const AccessFailure('attachment_missing');
     if (offset < 0 ||

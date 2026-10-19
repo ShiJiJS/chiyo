@@ -37,6 +37,7 @@ class BackupContents {
   int get attachmentBytes => attachments
       .where((v) => v.available)
       .fold(0, (sum, v) => sum + v.byteLength);
+  int get fileDeliveryCount => _tables['information_deliveries']?.length ?? 0;
 }
 
 /// Owner-only manual backup capability. It is never part of the agent server.
@@ -112,6 +113,11 @@ class InformationBackups {
       'attachment_version',
     ],
   });
+  static final _v9Columns = Map<String, List<String>>.unmodifiable({
+    ..._v8Columns,
+    'information_deliveries': ['id', 'payload'],
+  });
+
   // Portable formats 1–7 keep their table keys independent of the schema17+
   // physical names. Legacy readers must not find a writable old runtime table.
   static const _physicalTables = {
@@ -271,6 +277,9 @@ class InformationBackups {
       final tables = <String, List<Map<String, Object?>>>{};
       final now = _repository._clock().toUtc();
       final versions = await _repository._allAttachmentVersions();
+      final deliveryRows = await _repository._db
+          .customSelect('SELECT id FROM information_deliveries LIMIT 1')
+          .get();
       final fileTemplates = _repository.templates.any(
         (t) => t.fields.any((f) => f.kind == FieldKind.file),
       );
@@ -287,7 +296,18 @@ class InformationBackups {
               (f) => f['kind'] == 'file',
             ),
           );
-      for (final table in (v8 ? _v8Columns : _allColumns).entries) {
+      final formatVersion = deliveryRows.isNotEmpty
+          ? 9
+          : v8
+          ? 8
+          : 7;
+      for (final table
+          in (formatVersion == 9
+                  ? _v9Columns
+                  : v8
+                  ? _v8Columns
+                  : _allColumns)
+              .entries) {
         final rows = await _repository._db
             .customSelect(
               'SELECT ${table.value.join(',')} FROM ${_physicalTables[table.key] ?? table.key} ORDER BY rowid',
@@ -298,13 +318,27 @@ class InformationBackups {
       // Persist only archive facts. Never serialize private runtime DTOs into
       // a portable backup, even when an execution is currently active.
       _archiveCredentialRuntime(tables, now);
+      if (tables.containsKey('information_deliveries')) {
+        tables['information_deliveries'] = [
+          for (final row in tables['information_deliveries']!)
+            {
+              'id': row['id'],
+              'payload': jsonEncode(
+                InformationFileDelivery.fromPrivateJson(
+                  decodeProtocolObject(row['payload'] as String),
+                ).toArchiveJson(),
+              ),
+            },
+        ];
+      }
       return _retain(
         _validate({
           'format': _format,
-          'version': v8 ? 8 : 7,
+          'version': formatVersion,
           'createdAt': now.toIso8601String(),
           'tables': tables,
-          if (v8) 'attachments': [for (final v in versions) v.toPrivateJson()],
+          if (formatVersion >= 8)
+            'attachments': [for (final v in versions) v.toPrivateJson()],
         }),
         now,
       );
@@ -355,7 +389,7 @@ class InformationBackups {
       }
       final snapshot = await _repository._db.transaction(() async {
         final snapshot = await _snapshot();
-        if (snapshot.formatVersion != 8) return snapshot;
+        if (snapshot.formatVersion < 8) return snapshot;
         // Metadata and every range of original bytes share one source snapshot.
         await AttachmentBackupContainer.write(
           path: path,
@@ -363,6 +397,7 @@ class InformationBackups {
           createdAt: snapshot.createdAt,
           tables: snapshot._tables,
           stagingParent: stagingParent,
+          formatVersion: snapshot.formatVersion,
           attachments: [
             for (final v in snapshot.attachments)
               AttachmentBackupSource(
@@ -520,7 +555,7 @@ class InformationBackups {
   /// OS-protected database key is retained; the source device key is unnecessary.
   Future<BackupContents> restore(BackupContents contents) async {
     _checkOpen();
-    if (contents.formatVersion == 8) return _restoreAttachmentBackup(contents);
+    if (contents.formatVersion >= 8) return _restoreAttachmentBackup(contents);
     return _installBackup(contents);
   }
 
@@ -582,15 +617,33 @@ class InformationBackups {
         await _repository._db.customStatement('DELETE FROM organization_tasks');
         // Directory parents may appear after a moved child in source row order.
         await _repository._db.customStatement('PRAGMA defer_foreign_keys = ON');
-        if (contents.formatVersion == 8) {
+        if (contents.formatVersion >= 8) {
           if (reader == null) throw const StorageFailure('invalid_backup');
           await _installAttachmentBodies(contents, reader);
         }
         for (final table
-            in (contents.formatVersion == 8 ? _v8Columns : _allColumns)
+            in (contents.formatVersion == 9
+                    ? _v9Columns
+                    : contents.formatVersion == 8
+                    ? _v8Columns
+                    : _allColumns)
                 .entries) {
           final placeholders = List.filled(table.value.length, '?').join(',');
           for (final row in contents._tables[table.key]!) {
+            if (table.key == 'information_deliveries') {
+              final record = InformationFileDelivery.fromArchiveJson(
+                decodeProtocolObject(row['payload'] as String),
+              );
+              await _repository._db.customStatement(
+                'INSERT INTO information_deliveries(id,session_binding,operation_id,payload) VALUES(?,NULL,?,?)',
+                [
+                  record.id,
+                  record.operationId,
+                  jsonEncode(record.toPrivateJson()),
+                ],
+              );
+              continue;
+            }
             await _repository._db.customStatement(
               'INSERT INTO ${_physicalTables[table.key] ?? table.key}(${table.value.join(',')}) VALUES($placeholders)',
               table.value.map((column) => row[column]).toList(),
@@ -611,10 +664,10 @@ class InformationBackups {
     if (decoded is! Map<String, dynamic>) invalid();
     if (decoded['format'] != _format ||
         decoded['version'] is! int ||
-        ![1, 2, 3, 4, 5, 6, 7, 8].contains(decoded['version'])) {
+        ![1, 2, 3, 4, 5, 6, 7, 8, 9].contains(decoded['version'])) {
       throw const StorageFailure('unsupported_backup');
     }
-    final v8 = decoded['version'] == 8;
+    final v8 = (decoded['version'] as int) >= 8;
     if (decoded.length != (v8 ? 5 : 4) ||
         decoded['tables'] is! Map<String, dynamic> ||
         decoded['createdAt'] is! String ||
@@ -629,6 +682,7 @@ class InformationBackups {
       4 => _v4Columns,
       5 || 6 => _v6Columns,
       8 => _v8Columns,
+      9 => _v9Columns,
       _ => _allColumns,
     };
     final data = decoded['tables'] as Map<String, dynamic>;
@@ -835,7 +889,12 @@ class InformationBackups {
         invalid();
       }
     }
-    _validateBackupHistory(tables, availableAttachments: v8 ? available : null);
+    final deliveries = _validateBackupFileDeliveries(tables, attachments);
+    _validateBackupHistory(
+      tables,
+      availableAttachments: v8 ? available : null,
+      deliveries: deliveries,
+    );
     _validateBackupCredentials(
       tables,
       formatVersion: decoded['version'] as int,

@@ -237,6 +237,105 @@ Map<String, dynamic> _payload(String path, String recovery) {
 
 void main() {
   test(
+    'format9 preserves command, fill and credential archives alongside ordinary originals without file delivery authority',
+    () async {
+      final f = await _Fixture.create();
+      addTearDown(f.close);
+      final r = await f.request();
+      await f.fill(r.id, 'first');
+      final command = await f.command();
+      await f.fill(r.id, 'second');
+      final source = File('${f.root.path}/ordinary.pdf');
+      await source.writeAsBytes([0, 255, 7]);
+      final draft = await f.service.owner.beginInformationFileDraft();
+      final stage = await f.service.owner.stageInformationFile(
+        draft,
+        source.path,
+      );
+      final item = await f.service.owner.commitInformationDraft(
+        draft,
+        'file',
+        InformationDraftInput(
+          name: '普通附件',
+          description: '',
+          fields: [InformationDraftField.stagedFile('简历', '', stage.id)],
+        ),
+      );
+      await f.service.owner.releaseInformationFileDraft(draft);
+      final version = (await f.repo.informationAttachmentVersions(
+        item.fields.single.attachment!.attachmentId,
+      )).single;
+      final preparing = InformationFileDelivery.preparing(
+        id: 'archived-file',
+        sessionBinding: 'past-session',
+        operationId: 'past-op',
+        requestId: 'past-request',
+        grantId: 'past-grant',
+        field: RecordedField(
+          item.id,
+          item.fields.single.id,
+          item.name,
+          item.fields.single.name,
+        ),
+        fieldVersion: 1,
+        version: version,
+        createdAt: f.now,
+        expiresAt: f.now.add(const Duration(hours: 8)),
+      );
+      final fact = InformationFileDelivery.fromArchiveJson({
+        ...preparing.toArchiveJson(),
+        'state': 'ready',
+      });
+      await f.repo.saveInformationFileDelivery(fact);
+      final materials = f.repo.credentialMaterials
+          .map((m) => m.toStorageJson())
+          .toList();
+      final (path, key) = await f.backup('complete-format9');
+      final target = await EncryptedInformationRepository.open(
+        '${f.root.path}/recipient',
+        TestKeyStore(),
+        clock: () => f.now,
+      );
+      addTearDown(target.close);
+      final restored = await target.backups.restoreFrom(path, key);
+      expect(restored.formatVersion, 9);
+      expect(restored.fileDeliveryCount, 1);
+      expect(restored.focusedFillCount, 2);
+      expect(restored.credentialExecutionCount, 1);
+      expect(
+        target.credentialMaterials.map((m) => m.toStorageJson()).toList(),
+        materials,
+      );
+      expect(target.credentialExecutions.single.id, command.id);
+      expect(
+        target.credentialUseRequests.every(
+          (u) => u.invalidatedCode == 'grant_revoked',
+        ),
+        isTrue,
+      );
+      expect(target.focusedFillOperations.map((o) => o.state), [
+        FocusedFillState.sent,
+        FocusedFillState.sent,
+      ]);
+      expect(target.informationFileDeliveries.single.runtime, isFalse);
+      expect(target.informationFileDeliveries.single.lease, isNull);
+      expect(
+        await target.readInformationAttachmentChunk(
+          item.fields.single.attachment!,
+          0,
+          3,
+        ),
+        [0, 255, 7],
+      );
+      final fresh = f.newService(target);
+      addTearDown(fresh.close);
+      expect(
+        () => fresh.agent.validateSession(f.session),
+        throwsA(isA<AccessFailure>()),
+      );
+    },
+  );
+  test(
     'clock rollback preserves actual fill and audit facts through backup/reopen',
     () async {
       final f = await _Fixture.create();

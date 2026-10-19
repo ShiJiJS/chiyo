@@ -32,6 +32,7 @@ void main() {
       legacy.execute('DROP TABLE ssh_host_trust');
       legacy.execute('DROP TABLE credential_focused_fills');
       legacy.execute('DROP TABLE library_format');
+      legacy.execute('DROP TABLE information_deliveries');
       legacy.execute('DROP TABLE information_file_fields');
       legacy.execute('DROP TABLE information_attachment_versions');
       legacy.execute('DROP TABLE information_draft_commits');

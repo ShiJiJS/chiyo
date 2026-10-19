@@ -2,6 +2,7 @@ part of 'info_core.dart';
 
 const informationDeliveryLimit = 32;
 const informationDeliveryByteLimit = 100 * 1024 * 1024;
+const informationDeliveryHistoryLimit = 10000;
 
 final class InformationFileFailure implements Exception {
   const InformationFileFailure(
@@ -297,6 +298,23 @@ final class InformationFileDelivery {
     }
     if (j['finishedAt'] != null) _deliveryDate(j['finishedAt']);
     if (j['restoredAt'] != null) _deliveryDate(j['restoredAt']);
+    final active = {'preparing', 'ready'}.contains(j['state']);
+    if (active &&
+            (j['finishedAt'] != null ||
+                j['targetState'] != null ||
+                j['reason'] != null ||
+                j['cleanupError'] != null) ||
+        j['state'] == 'cleanup_pending' &&
+            (j['targetState'] == null ||
+                j['finishedAt'] == null ||
+                j['reason'] == null) ||
+        terminals.contains(j['state']) &&
+            (j['targetState'] != null ||
+                j['finishedAt'] == null ||
+                j['reason'] == null ||
+                j['cleanupError'] != null)) {
+      throw const InformationFileFailure('invalid_request');
+    }
     InformationDeliveryLease? lease;
     if (j['lease'] != null) {
       if (j['lease'] is! Map<String, dynamic>) {
@@ -368,6 +386,58 @@ final class InformationFileDelivery {
     'finishedAt': finishedAt?.toIso8601String(),
     'restoredAt': restoredAt?.toIso8601String(),
   };
+
+  /// Portable facts use an explicit allowlist, never the private runtime DTO.
+  Map<String, Object?> toArchiveJson() => {
+    'id': id,
+    'operationId': operationId,
+    'requestId': requestId,
+    'grantId': grantId,
+    'field': field.toJson(),
+    'fieldVersion': fieldVersion,
+    'attachment': attachment.toJson(),
+    'fileName': fileName,
+    'mediaType': mediaType,
+    'byteLength': byteLength,
+    'sha256': sha256,
+    'createdAt': createdAt.toIso8601String(),
+    'expiresAt': expiresAt.toIso8601String(),
+    'state': state,
+    'targetState': targetState,
+    'reason': reason,
+    'cleanupError': cleanupError,
+    'restoredAt': restoredAt?.toIso8601String(),
+    'finishedAt': finishedAt?.toIso8601String(),
+  };
+  factory InformationFileDelivery.fromArchiveJson(Map<String, dynamic> json) {
+    _deliveryShape(json, {
+      'id',
+      'operationId',
+      'requestId',
+      'grantId',
+      'field',
+      'fieldVersion',
+      'attachment',
+      'fileName',
+      'mediaType',
+      'byteLength',
+      'sha256',
+      'createdAt',
+      'expiresAt',
+      'state',
+      'targetState',
+      'reason',
+      'cleanupError',
+      'restoredAt',
+      'finishedAt',
+    });
+    return InformationFileDelivery.fromPrivateJson({
+      ...json,
+      'sessionBinding': null,
+      'runtime': false,
+      'lease': null,
+    });
+  }
   @override
   String toString() => 'InformationFileDelivery($state)';
 }

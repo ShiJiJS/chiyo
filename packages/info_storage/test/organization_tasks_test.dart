@@ -111,6 +111,7 @@ void main() {
       db.execute('DROP TABLE organization_tasks');
       db.execute('PRAGMA user_version = 11');
       db.execute('DROP TABLE library_format');
+      db.execute('DROP TABLE information_deliveries');
       db.execute('DROP TABLE information_file_fields');
       db.execute('DROP TABLE information_attachment_versions');
       db.execute('DROP TABLE information_draft_commits');
