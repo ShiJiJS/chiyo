@@ -1,0 +1,7 @@
+from pathlib import Path
+root=Path.cwd()
+p=root/'apps/desktop/lib/information_editor.dart';s=p.read_text(encoding='utf-8')
+start=s.index('/// A UI draft,');end=s.index('typedef SaveInformationDraft')
+s=s[:start]+s[end:]
+s=s.replace("import 'ui_palette.dart';", "import 'ui_palette.dart';\nimport 'information_editor_draft.dart';\nexport 'information_editor_draft.dart';\nimport 'information_files.dart';\nimport 'information_file_summary.dart';")
+p.write_text(s,encoding='utf-8',newline='\n')

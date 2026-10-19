@@ -1,0 +1,7 @@
+Formatted lib/information_editor.dart
+Formatted lib/information_editor_draft.dart
+Formatted lib/information_files.dart
+Formatted lib/library.dart
+Formatted lib/templates.dart
+Formatted test/information_file_editor_test.dart
+Formatted 8 files (6 changed) in 0.09 seconds.

@@ -1,0 +1,4 @@
+Formatted lib/information_editor.dart
+Formatted test/information_file_editor_test.dart
+Formatted tool/render_information_files_test.dart
+Formatted 9 files (3 changed) in 0.09 seconds.
