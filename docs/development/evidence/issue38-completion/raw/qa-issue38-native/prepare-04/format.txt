@@ -1,0 +1,2 @@
+Formatted integration_test/ordinary_files_native_test.dart
+Formatted 2 files (1 changed) in 0.01 seconds.

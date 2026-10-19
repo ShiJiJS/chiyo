@@ -1,0 +1,88 @@
+{
+  "mode": "matrix",
+  "sourceRevision": "108403a41430e931a9a7eff5bf350466d727f205",
+  "workingFileSha256": "c30f9774468e479b63e71bd7480efe5f96bf7536efcd2f92d67270a64ddb25a2",
+  "phases": [
+    {
+      "phase": "pub",
+      "exitCode": 0
+    },
+    {
+      "phase": "editor",
+      "exitCode": 0
+    },
+    {
+      "phase": "consumers-1280",
+      "exitCode": 0
+    },
+    {
+      "phase": "approval-purple-1280",
+      "exitCode": 0
+    },
+    {
+      "phase": "backup-purple-1280",
+      "exitCode": 0
+    },
+    {
+      "phase": "approval-green-1280",
+      "exitCode": 0
+    },
+    {
+      "phase": "backup-green-1280",
+      "exitCode": 0
+    },
+    {
+      "phase": "approval-blue-1280",
+      "exitCode": 0
+    },
+    {
+      "phase": "backup-blue-1280",
+      "exitCode": 0
+    },
+    {
+      "phase": "approval-mono-1280",
+      "exitCode": 0
+    },
+    {
+      "phase": "backup-mono-1280",
+      "exitCode": 0
+    },
+    {
+      "phase": "consumers-1440",
+      "exitCode": 0
+    },
+    {
+      "phase": "approval-purple-1440",
+      "exitCode": 0
+    },
+    {
+      "phase": "backup-purple-1440",
+      "exitCode": 0
+    },
+    {
+      "phase": "approval-green-1440",
+      "exitCode": 0
+    },
+    {
+      "phase": "backup-green-1440",
+      "exitCode": 0
+    },
+    {
+      "phase": "approval-blue-1440",
+      "exitCode": 0
+    },
+    {
+      "phase": "backup-blue-1440",
+      "exitCode": 0
+    },
+    {
+      "phase": "approval-mono-1440",
+      "exitCode": 0
+    },
+    {
+      "phase": "backup-mono-1440",
+      "exitCode": 0
+    }
+  ],
+  "unexpectedLocks": []
+}

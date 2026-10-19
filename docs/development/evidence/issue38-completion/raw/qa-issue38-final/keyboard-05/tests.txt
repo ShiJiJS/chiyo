@@ -1,0 +1,483 @@
+Flutter assets will be downloaded from https://storage.flutter-io.cn. Make sure you trust this source!
+00:00 +0: loading C:/Project/network_config/info-manage/apps/desktop/test/information_file_editor_test.dart
+00:00 +0: (setUpAll)
+00:00 +0: file controls are reachable by keyboard and Escape cleans the draft at 100.0%
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown while running async test code:
+Expected: true
+  Actual: <false>
+FocusManager#d5d84
+ │ primaryFocus: FocusNode#34472([PRIMARY FOCUS])
+ │ primaryFocusCreator: Focus ← _ActionsScope ← Actions ←
+ │   _ParentInkResponseProvider ← _InkResponseStateWidget ← InkWell
+ │   ← DefaultSelectionStyle ← IconTheme ← IconTheme ←
+ │   InheritedCupertinoTheme ← CupertinoTheme ← _InheritedTheme ←
+ │   Theme ← AnimatedTheme ← DefaultTextStyle ←
+ │   AnimatedDefaultTextStyle ← _InkFeatures-[GlobalKey#fdcb2 ink
+ │   renderer] ← NotificationListener<LayoutChangedNotification> ←
+ │   CustomPaint ← _ShapeBorderPaint ← ⋯
+ │
+ └─rootScope: FocusScopeNode#e0fea(Root Focus Scope [IN FOCUS PATH])
+   │ IN FOCUS PATH
+   │ focusedChildren: FocusScopeNode#30331(View Scope [IN FOCUS PATH])
+   │
+   └─Child 1: _FocusTraversalGroupNode#8463a(FocusTraversalGroup [IN FOCUS PATH])
+     │ context: Focus
+     │ NOT FOCUSABLE
+     │ IN FOCUS PATH
+     │
+     └─Child 1: FocusScopeNode#30331(View Scope [IN FOCUS PATH])
+       │ context: _FocusScopeWithExternalFocusNode
+       │ IN FOCUS PATH
+       │ focusedChildren: FocusScopeNode#89c9e(Navigator Scope [IN FOCUS
+       │   PATH])
+       │
+       └─Child 1: FocusNode#d6765(Shortcuts: <Default WidgetsApp Shortcuts> [IN FOCUS PATH])
+         │ context: Focus
+         │ NOT FOCUSABLE
+         │ IN FOCUS PATH
+         │
+         └─Child 1: FocusNode#7df11(Shortcuts: <Default Text Editing Shortcuts> [IN FOCUS PATH])
+           │ context: Focus
+           │ NOT FOCUSABLE
+           │ IN FOCUS PATH
+           │
+           └─Child 1: _FocusTraversalGroupNode#e8432(FocusTraversalGroup [IN FOCUS PATH])
+             │ context: Focus
+             │ NOT FOCUSABLE
+             │ IN FOCUS PATH
+             │
+             └─Child 1: FocusNode#74280(Shortcuts: <Shortcut Registrar> [IN FOCUS PATH])
+               │ context: Focus
+               │ NOT FOCUSABLE
+               │ IN FOCUS PATH
+               │
+               └─Child 1: FocusNode#d696d([IN FOCUS PATH])
+                 │ context: Focus
+                 │ NOT FOCUSABLE
+                 │ IN FOCUS PATH
+                 │
+                 └─Child 1: FocusScopeNode#89c9e(Navigator Scope [IN FOCUS PATH])
+                   │ context: FocusScope
+                   │ IN FOCUS PATH
+                   │ focusedChildren: FocusScopeNode#3a9bc(_ModalScopeState<dynamic>
+                   │   Focus Scope [IN FOCUS PATH]),
+                   │   FocusScopeNode#f96b9(_ModalScopeState<dynamic> Focus Scope),
+                   │   FocusScopeNode#8ed82(_ModalScopeState<dynamic> Focus Scope)
+                   │
+                   └─Child 1: _FocusTraversalGroupNode#989c1(FocusTraversalGroup [IN FOCUS PATH])
+                     │ context: Focus
+                     │ NOT FOCUSABLE
+                     │ IN FOCUS PATH
+                     │
+                     └─Child 1: FocusNode#e1ff6(Navigator [IN FOCUS PATH])
+                       │ context: Focus
+                       │ IN FOCUS PATH
+                       │
+                       ├─Child 1: FocusScopeNode#8ed82(_ModalScopeState<dynamic> Focus Scope)
+                       │ │ context: _FocusScopeWithExternalFocusNode
+                       │ │
+                       │ ├─Child 1: FocusNode#e56f6
+                       │ │   context: Focus
+                       │ │
+                       │ ├─Child 2: FocusNode#3aaf0
+                       │ │   context: Focus
+                       │ │
+                       │ ├─Child 3: FocusNode#26489
+                       │ │   context: Focus
+                       │ │
+                       │ ├─Child 4: FocusNode#f5e3e
+                       │ │   context: Focus
+                       │ │   NOT FOCUSABLE
+                       │ │
+                       │ ├─Child 5: FocusNode#7d3bf
+                       │ │   context: Focus
+                       │ │   NOT FOCUSABLE
+                       │ │
+                       │ ├─Child 6: FocusNode#81d43
+                       │ │   context: Focus
+                       │ │   NOT FOCUSABLE
+                       │ │
+                       │ ├─Child 7: FocusNode#2dfc1
+                       │ │   context: Focus
+                       │ │
+                       │ ├─Child 8: FocusNode#831b3
+                       │ │   context: Focus
+                       │ │
+                       │ ├─Child 9: FocusNode#cfd49
+                       │ │   context: Focus
+                       │ │
+                       │ └─Child 10: FocusNode#b3e34
+                       │     context: Focus
+                       │
+                       ├─Child 2: FocusScopeNode#3a9bc(_ModalScopeState<dynamic> Focus Scope [IN
+FOCUS PATH])
+                       │ │ context: _FocusScopeWithExternalFocusNode
+                       │ │ IN FOCUS PATH
+                       │ │ focusedChildren: FocusNode#34472([PRIMARY FOCUS])
+                       │ │
+                       │ ├─Child 1: FocusNode#5b725
+                       │ │   context: Focus
+                       │ │   NOT FOCUSABLE
+                       │ │
+                       │ ├─Child 2: FocusNode#a4e57
+                       │ │   context: Focus
+                       │ │   NOT FOCUSABLE
+                       │ │
+                       │ ├─Child 3: FocusNode#3c7ac
+                       │ │ │ context: Focus
+                       │ │ │ NOT FOCUSABLE
+                       │ │ │
+                       │ │ └─Child 1: FocusNode#3b434(DropdownButton<String>)
+                       │ │   │ context: Focus
+                       │ │   │ NOT FOCUSABLE
+                       │ │   │
+                       │ │   └─Child 1: FocusNode#65d28
+                       │ │       context: Focus
+                       │ │       NOT FOCUSABLE
+                       │ │
+                       │ ├─Child 4: FocusNode#4ab05
+                       │ │   context: Focus
+                       │ │   NOT FOCUSABLE
+                       │ │
+                       │ ├─Child 5: FocusNode#f6ee7
+                       │ │   context: Focus
+                       │ │   NOT FOCUSABLE
+                       │ │
+                       │ ├─Child 6: FocusNode#82b20
+                       │ │   context: Focus
+                       │ │   NOT FOCUSABLE
+                       │ │
+                       │ ├─Child 7: FocusNode#ea7b7
+                       │ │ │ context: Focus
+                       │ │ │ NOT FOCUSABLE
+                       │ │ │
+                       │ │ └─Child 1: FocusNode#8531c(DropdownButton<FieldKind>)
+                       │ │   │ context: Focus
+                       │ │   │ NOT FOCUSABLE
+                       │ │   │
+                       │ │   ├─Child 1: FocusNode#9157f
+                       │ │   │   context: Focus
+                       │ │   │   DESCENDANTS UNFOCUSABLE
+                       │ │   │   NOT FOCUSABLE
+                       │ │   │
+                       │ │   ├─Child 2: FocusNode#69877
+                       │ │   │   context: Focus
+                       │ │   │   DESCENDANTS UNFOCUSABLE
+                       │ │   │   NOT FOCUSABLE
+                       │ │   │
+                       │ │   └─Child 3: FocusNode#7117b
+                       │ │       context: Focus
+                       │ │       NOT FOCUSABLE
+                       │ │
+                       │ ├─Child 8: FocusNode#bc14f
+                       │ │   context: Focus
+                       │ │   NOT FOCUSABLE
+                       │ │
+                       │ ├─Child 9: FocusNode#316b3
+                       │ │   context: Focus
+                       │ │   NOT FOCUSABLE
+                       │ │
+                       │ ├─Child 10: FocusNode#8ab2d
+                       │ │   context: Focus
+                       │ │   NOT FOCUSABLE
+                       │ │
+                       │ ├─Child 11: FocusNode#34472([PRIMARY FOCUS])
+                       │ │   context: Focus
+                       │ │   PRIMARY FOCUS
+                       │ │
+                       │ ├─Child 12: FocusNode#c9232
+                       │ │   context: Focus
+                       │ │   NOT FOCUSABLE
+                       │ │
+                       │ ├─Child 13: FocusNode#33455
+                       │ │   context: Focus
+                       │ │   NOT FOCUSABLE
+                       │ │
+                       │ └─Child 14: FocusNode#d48ae
+                       │     context: Focus
+                       │     NOT FOCUSABLE
+                       │
+                       └─Child 3: FocusScopeNode#f96b9(_ModalScopeState<dynamic> Focus Scope)
+                         │ context: _FocusScopeWithExternalFocusNode
+                         │
+                         ├─Child 1: FocusNode#a1d9f
+                         │   context: Focus
+                         │
+                         ├─Child 2: FocusNode#f1784
+                         │   context: Focus
+                         │
+                         └─Child 3: FocusNode#46c01
+                             context: Focus
+
+When the exception was thrown, this was the stack:
+#0      fail (package:matcher/src/expect/expect.dart:187:31)
+#1      _expect (package:matcher/src/expect/expect.dart:182:3)
+#2      expect (package:matcher/src/expect/expect.dart:65:3)
+#3      expect (package:flutter_test/src/widget_tester.dart:473:18)
+#4      main.<anonymous closure>.<anonymous closure>.focusWithTab (file:///C:/Project/network_config/info-manage/apps/desktop/test/information_file_editor_test.dart:158:13)
+<asynchronous suspension>
+#5      main.<anonymous closure>.<anonymous closure> (file:///C:/Project/network_config/info-manage/apps/desktop/test/information_file_editor_test.dart:214:11)
+<asynchronous suspension>
+<asynchronous suspension>
+#7      main.<anonymous closure> (file:///C:/Project/network_config/info-manage/apps/desktop/test/information_file_editor_test.dart:123:9)
+<asynchronous suspension>
+#8      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#9      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 2 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:01 +0 -1: file controls are reachable by keyboard and Escape cleans the draft at 100.0% [E]
+  Test failed. See exception logs above.
+  The test description was: file controls are reachable by keyboard and Escape cleans the draft at 100.0%
+  
+00:01 +0 -1: file controls are reachable by keyboard and Escape cleans the draft at 200.0%
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown while running async test code:
+Expected: true
+  Actual: <false>
+FocusManager#501d8
+ │ primaryFocus: FocusNode#b5a05([PRIMARY FOCUS])
+ │ primaryFocusCreator: Focus ← _ActionsScope ← Actions ←
+ │   _ParentInkResponseProvider ← _InkResponseStateWidget ← InkWell
+ │   ← DefaultSelectionStyle ← IconTheme ← IconTheme ←
+ │   InheritedCupertinoTheme ← CupertinoTheme ← _InheritedTheme ←
+ │   Theme ← AnimatedTheme ← DefaultTextStyle ←
+ │   AnimatedDefaultTextStyle ← _InkFeatures-[GlobalKey#1c65d ink
+ │   renderer] ← NotificationListener<LayoutChangedNotification> ←
+ │   CustomPaint ← _ShapeBorderPaint ← ⋯
+ │
+ └─rootScope: FocusScopeNode#b8fc6(Root Focus Scope [IN FOCUS PATH])
+   │ IN FOCUS PATH
+   │ focusedChildren: FocusScopeNode#30331(View Scope [IN FOCUS PATH])
+   │
+   └─Child 1: _FocusTraversalGroupNode#8463a(FocusTraversalGroup [IN FOCUS PATH])
+     │ context: Focus
+     │ NOT FOCUSABLE
+     │ IN FOCUS PATH
+     │
+     └─Child 1: FocusScopeNode#30331(View Scope [IN FOCUS PATH])
+       │ context: _FocusScopeWithExternalFocusNode
+       │ IN FOCUS PATH
+       │ focusedChildren: FocusScopeNode#0740b(Navigator Scope [IN FOCUS
+       │   PATH])
+       │
+       └─Child 1: FocusNode#8c502(Shortcuts: <Default WidgetsApp Shortcuts> [IN FOCUS PATH])
+         │ context: Focus
+         │ NOT FOCUSABLE
+         │ IN FOCUS PATH
+         │
+         └─Child 1: FocusNode#c9f29(Shortcuts: <Default Text Editing Shortcuts> [IN FOCUS PATH])
+           │ context: Focus
+           │ NOT FOCUSABLE
+           │ IN FOCUS PATH
+           │
+           └─Child 1: _FocusTraversalGroupNode#0a356(FocusTraversalGroup [IN FOCUS PATH])
+             │ context: Focus
+             │ NOT FOCUSABLE
+             │ IN FOCUS PATH
+             │
+             └─Child 1: FocusNode#d8ffa(Shortcuts: <Shortcut Registrar> [IN FOCUS PATH])
+               │ context: Focus
+               │ NOT FOCUSABLE
+               │ IN FOCUS PATH
+               │
+               └─Child 1: FocusNode#c4c19([IN FOCUS PATH])
+                 │ context: Focus
+                 │ NOT FOCUSABLE
+                 │ IN FOCUS PATH
+                 │
+                 └─Child 1: FocusScopeNode#0740b(Navigator Scope [IN FOCUS PATH])
+                   │ context: FocusScope
+                   │ IN FOCUS PATH
+                   │ focusedChildren: FocusScopeNode#fa09e(_ModalScopeState<dynamic>
+                   │   Focus Scope [IN FOCUS PATH]),
+                   │   FocusScopeNode#227d0(_ModalScopeState<dynamic> Focus Scope),
+                   │   FocusScopeNode#0d6a7(_ModalScopeState<dynamic> Focus Scope)
+                   │
+                   └─Child 1: _FocusTraversalGroupNode#9f6fd(FocusTraversalGroup [IN FOCUS PATH])
+                     │ context: Focus
+                     │ NOT FOCUSABLE
+                     │ IN FOCUS PATH
+                     │
+                     └─Child 1: FocusNode#3904b(Navigator [IN FOCUS PATH])
+                       │ context: Focus
+                       │ IN FOCUS PATH
+                       │
+                       ├─Child 1: FocusScopeNode#0d6a7(_ModalScopeState<dynamic> Focus Scope)
+                       │ │ context: _FocusScopeWithExternalFocusNode
+                       │ │
+                       │ ├─Child 1: FocusNode#0c216
+                       │ │   context: Focus
+                       │ │
+                       │ ├─Child 2: FocusNode#f290c
+                       │ │   context: Focus
+                       │ │
+                       │ ├─Child 3: FocusNode#76c51
+                       │ │   context: Focus
+                       │ │
+                       │ ├─Child 4: FocusNode#b0c0f
+                       │ │   context: Focus
+                       │ │   NOT FOCUSABLE
+                       │ │
+                       │ ├─Child 5: FocusNode#caebe
+                       │ │   context: Focus
+                       │ │   NOT FOCUSABLE
+                       │ │
+                       │ ├─Child 6: FocusNode#8edef
+                       │ │   context: Focus
+                       │ │   NOT FOCUSABLE
+                       │ │
+                       │ ├─Child 7: FocusNode#d40be
+                       │ │   context: Focus
+                       │ │
+                       │ ├─Child 8: FocusNode#2409e
+                       │ │   context: Focus
+                       │ │
+                       │ ├─Child 9: FocusNode#0348d
+                       │ │   context: Focus
+                       │ │
+                       │ └─Child 10: FocusNode#9360e
+                       │     context: Focus
+                       │
+                       ├─Child 2: FocusScopeNode#fa09e(_ModalScopeState<dynamic> Focus Scope [IN
+FOCUS PATH])
+                       │ │ context: _FocusScopeWithExternalFocusNode
+                       │ │ IN FOCUS PATH
+                       │ │ focusedChildren: FocusNode#b5a05([PRIMARY FOCUS])
+                       │ │
+                       │ ├─Child 1: FocusNode#ac764
+                       │ │   context: Focus
+                       │ │   NOT FOCUSABLE
+                       │ │
+                       │ ├─Child 2: FocusNode#c9ca5
+                       │ │   context: Focus
+                       │ │   NOT FOCUSABLE
+                       │ │
+                       │ ├─Child 3: FocusNode#7967d
+                       │ │ │ context: Focus
+                       │ │ │ NOT FOCUSABLE
+                       │ │ │
+                       │ │ └─Child 1: FocusNode#7249d(DropdownButton<String>)
+                       │ │   │ context: Focus
+                       │ │   │ NOT FOCUSABLE
+                       │ │   │
+                       │ │   └─Child 1: FocusNode#28955
+                       │ │       context: Focus
+                       │ │       NOT FOCUSABLE
+                       │ │
+                       │ ├─Child 4: FocusNode#e4c9d
+                       │ │   context: Focus
+                       │ │   NOT FOCUSABLE
+                       │ │
+                       │ ├─Child 5: FocusNode#2d4cb
+                       │ │   context: Focus
+                       │ │   NOT FOCUSABLE
+                       │ │
+                       │ ├─Child 6: FocusNode#75b4a
+                       │ │   context: Focus
+                       │ │   NOT FOCUSABLE
+                       │ │
+                       │ ├─Child 7: FocusNode#1ba16
+                       │ │ │ context: Focus
+                       │ │ │ NOT FOCUSABLE
+                       │ │ │
+                       │ │ └─Child 1: FocusNode#f87b2(DropdownButton<FieldKind>)
+                       │ │   │ context: Focus
+                       │ │   │ NOT FOCUSABLE
+                       │ │   │
+                       │ │   ├─Child 1: FocusNode#ae335
+                       │ │   │   context: Focus
+                       │ │   │   DESCENDANTS UNFOCUSABLE
+                       │ │   │   NOT FOCUSABLE
+                       │ │   │
+                       │ │   ├─Child 2: FocusNode#8a3a0
+                       │ │   │   context: Focus
+                       │ │   │   DESCENDANTS UNFOCUSABLE
+                       │ │   │   NOT FOCUSABLE
+                       │ │   │
+                       │ │   └─Child 3: FocusNode#7040a
+                       │ │       context: Focus
+                       │ │       NOT FOCUSABLE
+                       │ │
+                       │ ├─Child 8: FocusNode#e1513
+                       │ │   context: Focus
+                       │ │   NOT FOCUSABLE
+                       │ │
+                       │ ├─Child 9: FocusNode#dbec8
+                       │ │   context: Focus
+                       │ │   NOT FOCUSABLE
+                       │ │
+                       │ ├─Child 10: FocusNode#1918a
+                       │ │   context: Focus
+                       │ │   NOT FOCUSABLE
+                       │ │
+                       │ ├─Child 11: FocusNode#b5a05([PRIMARY FOCUS])
+                       │ │   context: Focus
+                       │ │   PRIMARY FOCUS
+                       │ │
+                       │ ├─Child 12: FocusNode#1d91b
+                       │ │   context: Focus
+                       │ │   NOT FOCUSABLE
+                       │ │
+                       │ ├─Child 13: FocusNode#497f0
+                       │ │   context: Focus
+                       │ │   NOT FOCUSABLE
+                       │ │
+                       │ └─Child 14: FocusNode#f22fa
+                       │     context: Focus
+                       │     NOT FOCUSABLE
+                       │
+                       └─Child 3: FocusScopeNode#227d0(_ModalScopeState<dynamic> Focus Scope)
+                         │ context: _FocusScopeWithExternalFocusNode
+                         │
+                         ├─Child 1: FocusNode#32de2
+                         │   context: Focus
+                         │
+                         ├─Child 2: FocusNode#6ef5f
+                         │   context: Focus
+                         │
+                         └─Child 3: FocusNode#bb733
+                             context: Focus
+
+When the exception was thrown, this was the stack:
+#0      fail (package:matcher/src/expect/expect.dart:187:31)
+#1      _expect (package:matcher/src/expect/expect.dart:182:3)
+#2      expect (package:matcher/src/expect/expect.dart:65:3)
+#3      expect (package:flutter_test/src/widget_tester.dart:473:18)
+#4      main.<anonymous closure>.<anonymous closure>.focusWithTab (file:///C:/Project/network_config/info-manage/apps/desktop/test/information_file_editor_test.dart:158:13)
+<asynchronous suspension>
+#5      main.<anonymous closure>.<anonymous closure> (file:///C:/Project/network_config/info-manage/apps/desktop/test/information_file_editor_test.dart:214:11)
+<asynchronous suspension>
+<asynchronous suspension>
+#7      main.<anonymous closure> (file:///C:/Project/network_config/info-manage/apps/desktop/test/information_file_editor_test.dart:123:9)
+<asynchronous suspension>
+#8      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#9      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 2 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:01 +0 -2: file controls are reachable by keyboard and Escape cleans the draft at 200.0% [E]
+  Test failed. See exception logs above.
+  The test description was: file controls are reachable by keyboard and Escape cleans the draft at 200.0%
+  
+00:01 +0 -2: real owner save retries unchanged input, preserves bytes and text-only edits
+00:01 +1 -2: cancel waits for in-flight picker and releases its eventual stage; cleanup can retry
+00:01 +2 -2: cancelled picker and failed replacement retain the original selection and other inputs
+00:01 +3 -2: same-purpose file replacement retains identity, kind conversion changes it
+00:01 +4 -2: a known committed save only retries cleanup and never submits a second version
+00:02 +5 -2: file editor shows missing file error, saves real file and keeps the three-column library
+00:02 +6 -2: (tearDownAll)
+00:02 +6 -2: Some tests failed.
+
+Failing tests:
+  C:/Project/network_config/info-manage/apps/desktop/test/information_file_editor_test.dart: file controls are reachable by keyboard and Escape cleans the draft at 100.0%
+  C:/Project/network_config/info-manage/apps/desktop/test/information_file_editor_test.dart: file controls are reachable by keyboard and Escape cleans the draft at 200.0%

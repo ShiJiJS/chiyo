@@ -1,6 +1,6 @@
 # Windows 凭据复用、普通附件与本机焦点填充
 
-2026-10-18用户确认三项目标设计；2026-10-19状态更新：#33凭据复用和#35本机焦点填充的Windows范围已完成。#37普通附件核心/存储/Windows受管交付/独立CLI及完整备份已完成，[七项验收和冻结容量](../development/issue37-completion.md)通过；#38客户端和生产文件能力bootstrap仍待。当前交付0.4.0+8（源码2918010）仍是公开协议v1/schema16/备份5；新分支为Windows默认v2/schema21，含交付事实的库备份9、仅附件/文件模板8、纯文本库7，不能把源码能力当作用户已更新。实施顺序见[Windows计划](../planning/windows-next-iteration.md)。
+2026-10-18用户确认三项目标设计；2026-10-19状态更新：#33凭据复用和#35本机焦点填充的Windows范围已完成。#37普通附件核心/存储/Windows受管交付/独立CLI及完整备份已完成，[七项验收和冻结容量](../development/issue37-completion.md)通过；#38客户端和生产文件能力bootstrap已完成Windows范围，并通过真实GUI/独立CLI、恢复后新授权及内置浏览器本机文件消费，见[最终验收](../development/issue38-completion.md)。当前交付0.4.0+8（源码2918010）仍是公开协议v1/schema16/备份5；新分支为Windows默认v2/schema21，含交付事实的库备份9、仅附件/文件模板8、纯文本库7，不能把源码能力当作用户已更新。实施顺序见[Windows计划](../planning/windows-next-iteration.md)。
 
 ## 1. 已确认方向与范围
 
