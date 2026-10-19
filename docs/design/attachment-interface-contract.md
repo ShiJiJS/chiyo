@@ -57,6 +57,8 @@ Owner另存按固定版本完整读取，校验长度和SHA-256，源事务成�
 
 错误投影至少包含`not_authorized, grant_expired, session_ended, field_removed, not_a_file, unsupported_capability, unsupported_file_write, file_delivery_required, operation_conflict, stage_unavailable, version_conflict, attachment_too_large, attachment_capacity_exceeded, attachment_missing, attachment_integrity_failed, delivery_io_failed, audit_failed`；客户端保留当前位置和可重试草稿，不把错误当空文件或成功。权限失败不泄露未获批文件的名称/大小。
 
+2026-10-19最新实施检查点：[加密交付登记/归档](../development/issue37-delivery-storage.md)已接schema21/备份9；实际SQLCipher与Windows占用重开、归档白名单和末段回滚已验证。HTTP/独立CLI及生产bootstrap仍待，能力继续关闭；旧检查点如下。
+
 2026-10-19实施检查点：[交付核心及Windows文件驱动](../development/issue37-delivery-core.md)已按上述顺序接入，Memory/合成适配器覆盖公开核心Interface，另有真实Windows保护/并发读取/占用清理检查。SQLCipher交付登记/备份归档、实际HTTP/CLI和生产bootstrap尚未连接，不宣告能力。受管副本暂定32份/100MiB，preparing及cleanup_pending均计入占位；本轮份数上限已测，最终组合字节/峰值内存仍待实测冻结。
 
 ## 4. 存储、恢复及消费者清单

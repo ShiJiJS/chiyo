@@ -4,6 +4,8 @@
 
 ## 当前执行检查点
 
+最新#37检查点为e53475d：[加密交付登记/备份归档](../development/issue37-delivery-storage.md)。schema21，存在交付事实输出备份9、仅附件/文件模板8、纯文本7，兼容旧库1–20/备份1–8。新增13项，完整631通过/19跳过、四包严格分析及原锁通过。实际SQLCipher/Windows占用重开、错误归档与末段回滚已测；实际进程中断、HTTP/独立CLI、生产bootstrap、最终容量/RSS及#38仍待，能力不宣告，七项整体验收未勾选。以下旧检查点保留当时范围。
+
 最新#37检查点为f2422cd：[文件交付核心及Windows受管副本](../development/issue37-delivery-core.md)，接续[正式保存/完整备份](../development/issue37-formal-files.md)和[Owner另存/保留清理](../development/issue37-owner-file-lifecycle.md)。新增19项公开核心/模型和3项真实Windows文件驱动测试，完整618通过/19跳过、四包严格分析及原锁通过；修复清理中第二项撤销被漏掉的实测竞态。当前schema20/含文件备份8、纯文本7，交付SQLCipher登记/归档、HTTP/独立CLI和生产bootstrap尚未连接，能力不宣告；最终容量/RSS及#38仍待，#37七项整体验收全部未勾选。下面旧提交保留为各阶段记录；其“尚未接正式保存/库恢复/另存/保留清理”不是当前进度。
 
 #36原型与接口合同已完成；#33 Windows功能已完成，见[最终验收](../development/issue33-completion.md)。协议v2在Windows生产bootstrap启用，新CLI默认2；423项零跳过、四包严格分析、真实Windows UI/独立编译适配器/SSH闭环、实际接收器及Release通过，旧许可不升级。当前用户包仍为0.4.0+8/v1，不把源码验收冒充已更新。#35完成后接续#37→#38→#30；#23/#18仍独立保留。
