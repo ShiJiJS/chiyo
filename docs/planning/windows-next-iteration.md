@@ -6,7 +6,9 @@
 
 #36原型与接口合同已完成；#33 Windows功能已完成，见[最终验收](../development/issue33-completion.md)。协议v2在Windows生产bootstrap启用，新CLI默认2；423项零跳过、四包严格分析、真实Windows UI/独立编译适配器/SSH闭环、实际接收器及Release通过，旧许可不升级。当前用户包仍为0.4.0+8/v1，不把源码验收冒充已更新。接续#35→#37→#38→#30；#23/#18仍独立保留。
 
-#35当前推进：338445a接通EXE内摘要绑定、正式驱动/Windows入口；3e98ec6修正构建/提取的依赖锁还原并生成QA整包，见[辅助程序与整包检查点](../development/issue35-focused-fill-bundle.md)。最终头部507通过/CLI6跳过、四包分析/Release、解压SDK-free11、6项构建绑定及5项分发拒绝通过。真实runner/SQLCipher/CLI的锁屏拒绝已过；正向GUI/内置浏览器及生命周期仍待解锁，#35不关闭。schema18/备份7不变，用户包未替换。#37从当前版本接续兼容1–7。
+#35当前推进：用户已解锁；正常WidgetsBinding下，真实runner/SQLCipher/DPAPI/独立CLI/broker的Win32和当前内置浏览器完整流程均退出0，包括复用、人工确认、撤销及加密库重开。正常浏览器AX/显式value为`<redacted>`，明文截图对照确有暴露；DOM焦点不等于系统前台。默认testWidgets的辅助功能AV及句柄结尾失败保留，#35仍OPEN，继续定位和完整故障矩阵，见[用户流程检查点](../development/issue35-native-user-flow.md)。此前[3e98ec6 QA整包](../development/issue35-focused-fill-bundle.md)未重建，用户包未替换，schema18/备份7不变。
+
+#37已在等待桌面期间交付类型基础d1bda60：文件引用、编辑/回收/修订保留及旧入口封闭边界；新增12项通过，完整508通过/19跳过及四包分析通过，见[字段检查点](../development/issue37-typed-file-fields.md)。BLOB、草稿提交、迁移、交付/清理、容量和完整附件备份仍待实现，不提前启用文件能力或关闭#37；#38客户端仍待。后续兼容旧备份1–7。
 
 #30接入材料接续：3c343cf补齐随包Skill的焦点填充分支、安全目标发现和未知结果处理；两项新独立适配器进程测试已过，选定检查16通过/1原生坏帧项跳过，见[检查点](../development/issue30-focused-fill-skill.md)。使用受控临时关联、Memory与假输入驱动，不计真实Codex/Windows输入验收。此前QA ZIP未重建，用户配置未改；#30仍待附件材料及三功能联合验收。
 

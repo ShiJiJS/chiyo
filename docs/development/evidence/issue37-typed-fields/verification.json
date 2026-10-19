@@ -1,0 +1,237 @@
+{
+  "source": "d1bda60a4786a387b1ab39e522add45364a32979",
+  "scope": "Typed file-field foundation only; no attachment BLOB, transport or client feature enabled",
+  "newTests": 12,
+  "fullCheck": {
+    "exitCode": 0,
+    "passed": 508,
+    "skipped": 19,
+    "packages": {
+      "cli": {
+        "passed": 87,
+        "skipped": 13
+      },
+      "core": {
+        "passed": 200
+      },
+      "storage": {
+        "passed": 85,
+        "skipped": 6
+      },
+      "desktop": {
+        "passed": 136
+      }
+    }
+  },
+  "schema": 18,
+  "backupFormat": 7,
+  "sources": [
+    {
+      "path": "apps/desktop/lib/history.dart",
+      "source": "d1bda60a4786a387b1ab39e522add45364a32979",
+      "sha256": "b3c06ff7d393aa4f4bf5a1c069b225e7c6b60edb736e0917ecd848ae30743f45",
+      "representation": "git blob"
+    },
+    {
+      "path": "packages/info_core/lib/agent_server.dart",
+      "source": "d1bda60a4786a387b1ab39e522add45364a32979",
+      "sha256": "8d8d03489d30d818aaeab2eec5ab6e94ff97bed740d6c730dd1853ecdadceafd",
+      "representation": "git blob"
+    },
+    {
+      "path": "packages/info_core/lib/credential_field_migration.dart",
+      "source": "d1bda60a4786a387b1ab39e522add45364a32979",
+      "sha256": "e16a4e9e9fc421848cc969262b64e3a492cab7508880f05b385ac6d37dde68f6",
+      "representation": "git blob"
+    },
+    {
+      "path": "packages/info_core/lib/history.dart",
+      "source": "d1bda60a4786a387b1ab39e522add45364a32979",
+      "sha256": "ae07b6ee68779ab5405e13bb3d5af08f9b849fe231b935fccb5dedbba2b31284",
+      "representation": "git blob"
+    },
+    {
+      "path": "packages/info_core/lib/history_access.dart",
+      "source": "d1bda60a4786a387b1ab39e522add45364a32979",
+      "sha256": "659c134433eae3b3f6676882202f66d5801d337029e5b4c1ea53df34555bfa77",
+      "representation": "git blob"
+    },
+    {
+      "path": "packages/info_core/lib/import_proposals.dart",
+      "source": "d1bda60a4786a387b1ab39e522add45364a32979",
+      "sha256": "584e114f111e18e25f040b86742a42f493617e111d1d39f0c23352fe753a2db8",
+      "representation": "git blob"
+    },
+    {
+      "path": "packages/info_core/lib/info_core.dart",
+      "source": "d1bda60a4786a387b1ab39e522add45364a32979",
+      "sha256": "519cb487c2d65f57abddff3de53da3dc84a240bfa5a1428c9bca75fee436d5f3",
+      "representation": "git blob"
+    },
+    {
+      "path": "packages/info_core/lib/information.dart",
+      "source": "d1bda60a4786a387b1ab39e522add45364a32979",
+      "sha256": "228cbdfa221bf58f2aacc841e39dcd7f7859329e69a62bc8eee6ac657af0ab26",
+      "representation": "git blob"
+    },
+    {
+      "path": "packages/info_core/lib/library_access.dart",
+      "source": "d1bda60a4786a387b1ab39e522add45364a32979",
+      "sha256": "2b3b1b1990ac3efab0815cfbbb2ced628107b42b76d4f08147cc1ac079c785e0",
+      "representation": "git blob"
+    },
+    {
+      "path": "packages/info_core/lib/organization_access.dart",
+      "source": "d1bda60a4786a387b1ab39e522add45364a32979",
+      "sha256": "f226b45cc3eca5a43c20945a8775fee27718f8f637fc09858045268110171ee8",
+      "representation": "git blob"
+    },
+    {
+      "path": "packages/info_core/lib/recycle_access.dart",
+      "source": "d1bda60a4786a387b1ab39e522add45364a32979",
+      "sha256": "01bbb108cd31c9e77f5d4a0e2f5f09fc5c0d86c9fdbf77ff187e9fab5a2e7f06",
+      "representation": "git blob"
+    },
+    {
+      "path": "packages/info_core/lib/revision_access.dart",
+      "source": "d1bda60a4786a387b1ab39e522add45364a32979",
+      "sha256": "cbd3fabc3a0a8bcc85e3707c8bc9b2503689495c016c0d646e42b10ea102fe3e",
+      "representation": "git blob"
+    },
+    {
+      "path": "packages/info_core/lib/revisions.dart",
+      "source": "d1bda60a4786a387b1ab39e522add45364a32979",
+      "sha256": "756f8b3800b4d0a649dfeb6256ee928280720ea2267049da82b5c62318ed8385",
+      "representation": "git blob"
+    },
+    {
+      "path": "packages/info_core/lib/update_access.dart",
+      "source": "d1bda60a4786a387b1ab39e522add45364a32979",
+      "sha256": "83be31ff0957495e72f2856ce0d3ce31130a983a9f7504d3c84d645f870e41eb",
+      "representation": "git blob"
+    },
+    {
+      "path": "packages/info_core/lib/update_proposals.dart",
+      "source": "d1bda60a4786a387b1ab39e522add45364a32979",
+      "sha256": "13bc11f82244cf59ad9a0500a153536c86fb7581b7d62ce92b3ea55a04827fd0",
+      "representation": "git blob"
+    },
+    {
+      "path": "packages/info_core/test/attachment_fields_test.dart",
+      "source": "d1bda60a4786a387b1ab39e522add45364a32979",
+      "sha256": "4e6f67b5a08e19a57b1728456a794c496f079f7ffd5404b3db7cea858a534be6",
+      "representation": "git blob"
+    },
+    {
+      "path": "packages/info_storage/lib/backup_history.dart",
+      "source": "d1bda60a4786a387b1ab39e522add45364a32979",
+      "sha256": "97c183117655ced26fd322c5f86fc14550bebb8462b1fde109ff0198938c7256",
+      "representation": "git blob"
+    },
+    {
+      "path": "packages/info_storage/lib/backups.dart",
+      "source": "d1bda60a4786a387b1ab39e522add45364a32979",
+      "sha256": "e94340d88aa542242bb0dbe9e0c6235fc5d13f161ac765b795d210b7d848ae0e",
+      "representation": "git blob"
+    },
+    {
+      "path": "packages/info_storage/lib/info_storage.dart",
+      "source": "d1bda60a4786a387b1ab39e522add45364a32979",
+      "sha256": "dbbd1cb95c0eb825294a6569585fc95086c028e8d05bd1484f12822d9da20adc",
+      "representation": "git blob"
+    },
+    {
+      "path": "packages/info_storage/test/attachment_legacy_boundary_test.dart",
+      "source": "d1bda60a4786a387b1ab39e522add45364a32979",
+      "sha256": "fca9aa34c6234b18e20c8e4eaf6f53d85a8f5561535e8d488ef8d5fc121e1b81",
+      "representation": "git blob"
+    }
+  ],
+  "locks": [
+    {
+      "path": "packages/info_cli/pubspec.lock",
+      "sha256": "ba6ef5d779db0b2baeed9d5e0d1681786a9c35bf383a09513c485bd1892c44f6",
+      "representation": "LF normalized"
+    },
+    {
+      "path": "packages/info_core/pubspec.lock",
+      "sha256": "f4b92b116d6017052bc0814be49221cab9e7e907c1fdbf44b32cf0050d449682",
+      "representation": "LF normalized"
+    },
+    {
+      "path": "packages/info_storage/pubspec.lock",
+      "sha256": "0d82edc897dfa54297eb99638977a22061587b3c8dc5e799cd451570134d877d",
+      "representation": "LF normalized"
+    },
+    {
+      "path": "apps/desktop/pubspec.lock",
+      "sha256": "9929f3b3febefc0de06e9a841ac4b5505896eda43a503b0f128467d93b311553",
+      "representation": "LF normalized"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "fields-01-analyze.txt",
+      "sha256": "d9ebd39d330d44ff327dbf6cf5ce8566791da694504d82a7b989e78e27969232",
+      "bytes": 40,
+      "original": "build/qa-issue37/fields-01-analyze.txt",
+      "representation": "raw bytes"
+    },
+    {
+      "path": "fields-01-pub.txt",
+      "sha256": "a24779315fffab73870dfc7b15b56246a95b601b3432e434b43cd223bf752a6a",
+      "bytes": 258,
+      "original": "build/qa-issue37/fields-01-pub.txt",
+      "representation": "raw bytes"
+    },
+    {
+      "path": "fields-01-result.json",
+      "sha256": "954704dcbeb45e9c10e63baaa78bd87d2ab834887306530778fc41a3206489b1",
+      "bytes": 330,
+      "original": "build/qa-issue37/fields-01-result.json",
+      "representation": "raw bytes"
+    },
+    {
+      "path": "fields-01-tests.txt",
+      "sha256": "f7866cef1de8b6e82b3c5ddf13427078dbd9929424a136b831d57133d2e55a32",
+      "bytes": 1001,
+      "original": "build/qa-issue37/fields-01-tests.txt",
+      "representation": "raw bytes"
+    },
+    {
+      "path": "fields-full.txt",
+      "sha256": "1581e562575b7d087dae71b3a3991be5c503b7dd3fceb89ad84c475d10f5b092",
+      "bytes": 142151,
+      "original": "build/qa-issue37/fields-full.txt",
+      "representation": "raw bytes"
+    },
+    {
+      "path": "fields-storage-01-analyze.txt",
+      "sha256": "a489b1249880b489826d25a25a28b316c5059ae3c5e62feecfc2b7949aba9041",
+      "bytes": 43,
+      "original": "build/qa-issue37/fields-storage-01-analyze.txt",
+      "representation": "raw bytes"
+    },
+    {
+      "path": "fields-storage-01-pub.txt",
+      "sha256": "a24779315fffab73870dfc7b15b56246a95b601b3432e434b43cd223bf752a6a",
+      "bytes": 258,
+      "original": "build/qa-issue37/fields-storage-01-pub.txt",
+      "representation": "raw bytes"
+    },
+    {
+      "path": "fields-storage-01-result.json",
+      "sha256": "03232a41e13e7cca92661fae2bbedd341ac9c8c09d4f643cae1b843ac3c76c61",
+      "bytes": 342,
+      "original": "build/qa-issue37/fields-storage-01-result.json",
+      "representation": "raw bytes"
+    },
+    {
+      "path": "fields-storage-01-tests.txt",
+      "sha256": "d83fb86b5966c58aa01bb1689693fd82dde902c9af1cb036f0846e764da408db",
+      "bytes": 1902,
+      "original": "build/qa-issue37/fields-storage-01-tests.txt",
+      "representation": "raw bytes"
+    }
+  ]
+}

@@ -4,3 +4,6 @@ docs/development/evidence/30-integration/raw/** -text -diff
 docs/development/evidence/31-backup-migration/raw/** -text -diff
 docs/development/evidence/windows-round05-delivery/raw/** -text -diff
 docs/development/evidence/windows-timeout-fix/raw/** -text -diff
+docs/development/evidence/issue35-native-user-flow/raw/** -text -diff
+docs/development/evidence/issue35-native-user-flow/control-native-ui.py.txt -text -diff
+docs/development/evidence/issue37-typed-fields/fields-* -text -diff
