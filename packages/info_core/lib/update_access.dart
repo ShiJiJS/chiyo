@@ -137,13 +137,9 @@ extension OwnerUpdates on OwnerAccess {
           for (final field in after.fields)
             if (review.fieldDescriptions.containsKey(field.id) &&
                 review.fieldDescriptions[field.id] != field.description)
-              InformationField(
-                field.id,
-                field.name,
-                review.fieldDescriptions[field.id]!,
-                field.value,
-                field.version + 1,
-                kind: field.kind,
+              field.withMetadata(
+                description: review.fieldDescriptions[field.id]!,
+                version: field.version + 1,
               )
             else
               field,

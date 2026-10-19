@@ -259,14 +259,7 @@ extension OwnerRecycle on OwnerAccess {
       [
         if (previous != null) ...previous.fields,
         for (final f in snapshot.fields)
-          InformationField(
-            restoredIds[f.id]!,
-            f.name,
-            f.description,
-            f.value,
-            f.version + 1,
-            kind: f.kind,
-          ),
+          f.withMetadata(id: restoredIds[f.id]!, version: f.version + 1),
       ],
       directoryId: source.directoryId,
       tagIds: source.tagIds,

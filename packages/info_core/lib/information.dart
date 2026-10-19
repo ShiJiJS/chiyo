@@ -10,6 +10,7 @@ import 'revisions.dart';
 import 'credentials.dart';
 import 'info_core.dart'
     show
+        AccessFailure,
         CredentialRuntimeRepository,
         CredentialUseRequest,
         CredentialExecution,
@@ -18,20 +19,124 @@ import 'info_core.dart'
         SshHostTrustRepository,
         SshHostTrustSnapshot;
 
-enum FieldKind { structured, textNote }
+enum FieldKind { structured, textNote, file }
+
+/// A stable reference to immutable bytes, never a path or an access capability.
+final class InformationAttachmentRef {
+  InformationAttachmentRef(this.attachmentId, this.attachmentVersion) {
+    if (attachmentId.isEmpty ||
+        attachmentId.length > 200 ||
+        attachmentId.codeUnits.any((c) => c < 33 || c > 126) ||
+        attachmentVersion < 1) {
+      throw const FormatException('Invalid attachment reference');
+    }
+  }
+  final String attachmentId;
+  final int attachmentVersion;
+  Map<String, Object> toJson() => {
+    'attachmentId': attachmentId,
+    'attachmentVersion': attachmentVersion,
+  };
+  factory InformationAttachmentRef.fromJson(Map<String, dynamic> json) {
+    if (json.length != 2 ||
+        json['attachmentId'] is! String ||
+        json['attachmentVersion'] is! int) {
+      throw const FormatException('Invalid attachment reference');
+    }
+    return InformationAttachmentRef(
+      json['attachmentId'] as String,
+      json['attachmentVersion'] as int,
+    );
+  }
+  @override
+  bool operator ==(Object other) =>
+      other is InformationAttachmentRef &&
+      attachmentId == other.attachmentId &&
+      attachmentVersion == other.attachmentVersion;
+  @override
+  int get hashCode => Object.hash(attachmentId, attachmentVersion);
+}
+
+sealed class InformationContent {
+  const InformationContent();
+}
+
+final class InformationText extends InformationContent {
+  const InformationText(this.value);
+  final String value;
+}
+
+final class InformationFile extends InformationContent {
+  const InformationFile(this.reference);
+  final InformationAttachmentRef reference;
+}
 
 /// Public metadata is kept distinct from controlled field values.
 class FieldInput {
   const FieldInput(
     this.name,
     this.description,
-    this.value, {
+    String value, {
     this.kind = FieldKind.structured,
-  });
+  }) : _value = value,
+       _file = null,
+       assert(kind != FieldKind.file);
+  const FieldInput.file(
+    this.name,
+    this.description,
+    InformationAttachmentRef file,
+  ) : kind = FieldKind.file,
+      _file = file,
+      _value = null;
   final String name;
   final String description;
-  final String value;
+  final String? _value;
+  final InformationAttachmentRef? _file;
   final FieldKind kind;
+  InformationContent get content => kind == FieldKind.file
+      ? InformationFile(
+          _file ?? (throw const FormatException('Invalid file payload')),
+        )
+      : InformationText(_value!);
+  String get value {
+    if (kind == FieldKind.file) {
+      throw const AccessFailure('file_delivery_required');
+    }
+    return _value!;
+  }
+
+  /// Agent proposals can write text or remove a file, not supply file bytes or IDs.
+  Map<String, Object?> toJson() {
+    if (kind == FieldKind.file) {
+      throw const AccessFailure('unsupported_file_write');
+    }
+    return {
+      'name': name,
+      'description': description,
+      'value': value,
+      'kind': kind.name,
+    };
+  }
+
+  factory FieldInput.fromJson(Map<String, dynamic> json) {
+    final kind = FieldKind.values.byName(
+      json['kind'] as String? ?? 'structured',
+    );
+    if (kind == FieldKind.file) {
+      throw const AccessFailure('unsupported_file_write');
+    }
+    if (json.keys.any(
+      (k) => !{'name', 'description', 'value', 'kind'}.contains(k),
+    )) {
+      throw const FormatException('Invalid text payload');
+    }
+    return FieldInput(
+      json['name'] as String,
+      json['description'] as String? ?? '',
+      json['value'] as String,
+      kind: kind,
+    );
+  }
 }
 
 class InformationField {
@@ -39,17 +144,132 @@ class InformationField {
     this.id,
     this.name,
     this.description,
-    this.value,
+    String value,
     this.version, {
     this.kind = FieldKind.structured,
-  });
-  final String id, name, description, value;
+  }) : _value = value,
+       _file = null,
+       assert(kind != FieldKind.file);
+  const InformationField.file(
+    this.id,
+    this.name,
+    this.description,
+    InformationAttachmentRef file,
+    this.version,
+  ) : _file = file,
+      _value = null,
+      kind = FieldKind.file;
+  final String id, name, description;
+  final String? _value;
+  final InformationAttachmentRef? _file;
   final int version;
   final FieldKind kind;
+  InformationContent get content => kind == FieldKind.file
+      ? InformationFile(
+          _file ?? (throw const FormatException('Invalid file payload')),
+        )
+      : InformationText(_value!);
+  InformationAttachmentRef? get attachment =>
+      kind == FieldKind.file ? (content as InformationFile).reference : null;
+  String get value {
+    if (kind == FieldKind.file) {
+      throw const AccessFailure('file_delivery_required');
+    }
+    return _value!;
+  }
+
+  /// Copies identity/metadata while retaining the same discriminated payload.
+  InformationField withMetadata({
+    String? id,
+    String? name,
+    String? description,
+    int? version,
+  }) => switch (content) {
+    InformationText(:final value) => InformationField(
+      id ?? this.id,
+      name ?? this.name,
+      description ?? this.description,
+      value,
+      version ?? this.version,
+      kind: kind,
+    ),
+    InformationFile(:final reference) => InformationField.file(
+      id ?? this.id,
+      name ?? this.name,
+      description ?? this.description,
+      reference,
+      version ?? this.version,
+    ),
+  };
+
+  bool hasSameContent(InformationField other) =>
+      kind == other.kind &&
+      (kind == FieldKind.file
+          ? attachment == other.attachment
+          : value == other.value);
+
+  Map<String, Object?> toJson() => {
+    'id': id,
+    'name': name,
+    'description': description,
+    'version': version,
+    'kind': kind.name,
+    if (kind == FieldKind.file)
+      'content': attachment!.toJson()
+    else
+      'value': value,
+  };
+  factory InformationField.fromJson(Map<String, dynamic> json) {
+    final kind = FieldKind.values.byName(json['kind'] as String);
+    final file = kind == FieldKind.file;
+    final allowed = {
+      'id',
+      'name',
+      'description',
+      'version',
+      'kind',
+      file ? 'content' : 'value',
+    };
+    if (json.keys.any((key) => !allowed.contains(key)) ||
+        json['version'] is! int ||
+        (json['version'] as int) < 1) {
+      throw const FormatException('Invalid field payload');
+    }
+    if (file) {
+      return InformationField.file(
+        json['id'] as String,
+        json['name'] as String,
+        json['description'] as String,
+        InformationAttachmentRef.fromJson(
+          json['content'] as Map<String, dynamic>,
+        ),
+        json['version'] as int,
+      );
+    }
+    return InformationField(
+      json['id'] as String,
+      json['name'] as String,
+      json['description'] as String,
+      json['value'] as String,
+      json['version'] as int,
+      kind: kind,
+    );
+  }
 
   /// Corrects the current value without changing the field's meaning or identity.
-  InformationField correctValue(String value) =>
-      InformationField(id, name, description, value, version + 1, kind: kind);
+  InformationField correctValue(String value) {
+    if (kind == FieldKind.file) {
+      throw const AccessFailure('unsupported_file_write');
+    }
+    return InformationField(
+      id,
+      name,
+      description,
+      value,
+      version + 1,
+      kind: kind,
+    );
+  }
 }
 
 class InformationItem {

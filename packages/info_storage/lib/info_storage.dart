@@ -657,6 +657,11 @@ class EncryptedInformationRepository
   @override
   Future<void> saveTemplate(InformationTemplate template) async {
     if (_closed) throw const StorageFailure('library_closed');
+    // The schema18/format7 writer must not admit an unbackable new field kind.
+    // Attachment persistence is connected by the following #37 migration.
+    if (template.fields.any((f) => f.kind == FieldKind.file)) {
+      throw const StorageFailure('unsupported_attachment_storage');
+    }
     try {
       await _db.customStatement(
         'INSERT INTO field_templates(id,name,description,version,fields_json) VALUES(?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET name=excluded.name,description=excluded.description,version=excluded.version,fields_json=excluded.fields_json',
@@ -770,6 +775,9 @@ class EncryptedInformationRepository
   }
 
   Future<void> _writeItem(InformationItem item) async {
+    if (item.fields.any((f) => f.kind == FieldKind.file)) {
+      throw const StorageFailure('unsupported_attachment_storage');
+    }
     await _db.customStatement(
       'INSERT INTO information_items(id,name,description,version,directory_id,created_at,modified_at) VALUES(?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET name=excluded.name,description=excluded.description,version=excluded.version,directory_id=excluded.directory_id,created_at=excluded.created_at,modified_at=excluded.modified_at',
       [

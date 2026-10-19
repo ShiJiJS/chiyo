@@ -656,7 +656,7 @@ class InformationBackups {
       if (!items.contains(id(row, 'item_id'))) invalid();
       text(row, 'description', 2000);
       text(row, 'value', 1000000);
-      if (!FieldKind.values.any((kind) => kind.name == row['kind'])) invalid();
+      if (!{'structured', 'textNote'}.contains(row['kind'])) invalid();
     }
     final associations = <String>{};
     final tagCounts = <String, int>{};
@@ -683,7 +683,7 @@ class InformationBackups {
         }
         text(field, 'name', 200, required: true);
         text(field, 'description', 2000);
-        if (!FieldKind.values.any((kind) => kind.name == field['kind'])) {
+        if (!{'structured', 'textNote'}.contains(field['kind'])) {
           invalid();
         }
       }

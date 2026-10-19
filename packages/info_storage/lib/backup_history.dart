@@ -140,7 +140,7 @@ void _validateBackupHistory(Map<String, List<Map<String, Object?>>> tables) {
       _backupText(field, 'description', 2000);
       _backupText(field, 'value', 1000000);
       _backupVersion(field);
-      if (!FieldKind.values.any((v) => v.name == field['kind'])) {
+      if (!{'structured', 'textNote'}.contains(field['kind'])) {
         _backupInvalid();
       }
     }

@@ -123,13 +123,9 @@ extension OwnerLibrary on OwnerAccess {
         for (final field in updated.fields)
           if (fieldDescriptions.containsKey(field.id) &&
               fieldDescriptions[field.id] != field.description)
-            InformationField(
-              field.id,
-              field.name,
-              fieldDescriptions[field.id]!,
-              field.value,
-              field.version + 1,
-              kind: field.kind,
+            field.withMetadata(
+              description: fieldDescriptions[field.id]!,
+              version: field.version + 1,
             )
           else
             field,

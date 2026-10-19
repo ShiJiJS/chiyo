@@ -923,6 +923,7 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
                 AccessOutcome.allowed => '访问允许',
                 AccessOutcome.unauthorized => '读取被拒绝',
                 AccessOutcome.auditUnavailable => '记录保存异常，未提供内容',
+                AccessOutcome.fileDeliveryRequired => '文件需单独领取，未提供内容',
               },
             ),
           if (e.grant case final g?)

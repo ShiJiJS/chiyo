@@ -66,12 +66,10 @@ extension OwnerRevisions on OwnerAccess {
       current.version + 1,
       [
         for (final f in old.fields)
-          InformationField(
-            resolved[f.id]!,
-            f.name,
-            f.description,
-            f.value,
-            max(
+          f.withMetadata(
+            id: resolved[f.id]!,
+            version:
+                max(
                   f.version,
                   current.fields
                           .where((c) => c.id == resolved[f.id])
@@ -80,7 +78,6 @@ extension OwnerRevisions on OwnerAccess {
                       0,
                 ) +
                 1,
-            kind: f.kind,
           ),
       ],
       directoryId: old.directoryId,

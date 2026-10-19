@@ -128,7 +128,11 @@ extension _AuditService on InformationService {
     var record = AccessRecord(
       id: _secret(),
       at: _clock(),
-      outcome: allowed ? AccessOutcome.allowed : AccessOutcome.unauthorized,
+      outcome: !allowed
+          ? AccessOutcome.unauthorized
+          : known?.kind == FieldKind.file
+          ? AccessOutcome.fileDeliveryRequired
+          : AccessOutcome.allowed,
       sessionId: request?.history?.sessionId,
       grantId: request?.history?.id,
       itemId: normalized ? target.itemId : null,
@@ -175,6 +179,9 @@ extension _AuditService on InformationService {
       throw const AccessFailure('audit_unavailable');
     }
     if (!deliver) throw const AccessFailure('unauthorized');
+    if (_field(target)!.kind == FieldKind.file) {
+      throw const AccessFailure('file_delivery_required');
+    }
     // No await separates the final permission check and completing the value.
     // This is the read's delivery point in the core's owning isolate.
     return _field(target)!.value;

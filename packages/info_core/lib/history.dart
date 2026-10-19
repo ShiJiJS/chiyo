@@ -87,7 +87,12 @@ class RequestHistory {
 
 enum GrantEventKind { approved, revoked, expired, ended, applicationClosed }
 
-enum AccessOutcome { allowed, unauthorized, auditUnavailable }
+enum AccessOutcome {
+  allowed,
+  unauthorized,
+  auditUnavailable,
+  fileDeliveryRequired,
+}
 
 class RecordedField {
   const RecordedField(this.itemId, this.fieldId, this.itemName, this.fieldName);

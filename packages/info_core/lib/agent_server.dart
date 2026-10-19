@@ -503,6 +503,15 @@ class AgentServer {
           offset: offset,
           limit: limit,
         );
+        // File delivery/capability negotiation is not enabled yet. Legacy
+        // clients must fail explicitly rather than dropping unknown fields.
+        if (page.items.any(
+          (item) => (item['fields'] as List).any(
+            (field) => (field as Map)['kind'] == FieldKind.file.name,
+          ),
+        )) {
+          throw const AccessFailure('unsupported_capability');
+        }
         return {
           'status': 'ok',
           'items': page.items,
@@ -528,6 +537,7 @@ class AgentServer {
         _agent.endSessionWithCapability(_text(body, 'endCapability'));
         return {'status': 'ended'};
       case '/request':
+        _agent.validateSession(_text(body, 'sessionSecret'));
         final raw = body['fields'];
         if (raw is! List || raw.length > 200) {
           throw const AccessFailure('invalid_request');
@@ -538,6 +548,15 @@ class AgentServer {
           }
           return FieldRef(_text(f, 'itemId'), _text(f, 'fieldId'));
         }).toList();
+        final fileFields = {
+          for (final item in _agent.catalog())
+            for (final field in item['fields'] as List)
+              if ((field as Map)['kind'] == FieldKind.file.name)
+                FieldRef(item['id'] as String, field['id'] as String),
+        };
+        if (fields.any(fileFields.contains)) {
+          throw const AccessFailure('unsupported_capability');
+        }
         final receipt = _agent.request(
           _text(body, 'sessionSecret'),
           _text(body, 'purpose'),

@@ -639,6 +639,9 @@ class OwnerAccess {
       throw const AccessFailure('template_changed');
     }
     final template = matches.single;
+    if (template.fields.any((f) => f.kind == FieldKind.file)) {
+      throw const AccessFailure('attachment_missing');
+    }
     if (values.length != template.fields.length ||
         template.fields.any((f) => !values.containsKey(f.id))) {
       throw const AccessFailure('invalid_information');
@@ -693,6 +696,9 @@ class OwnerAccess {
     Iterable<String> tagIds = const [],
   }) async {
     if (_service._closed) throw const AccessFailure('service_unavailable');
+    if (fields.any((f) => f.kind == FieldKind.file)) {
+      throw const AccessFailure('unsupported_file_write');
+    }
     _checkParent(directoryId);
     final selectedTags = tagIds.toSet();
     if (selectedTags.length > 100 ||

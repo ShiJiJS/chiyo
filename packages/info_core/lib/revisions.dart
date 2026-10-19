@@ -31,8 +31,7 @@ class RevisionPreview {
       a.id == b.id &&
       a.name == b.name &&
       a.description == b.description &&
-      a.value == b.value &&
-      a.kind == b.kind;
+      a.hasSameContent(b);
 }
 
 class RevisionFieldChange {
