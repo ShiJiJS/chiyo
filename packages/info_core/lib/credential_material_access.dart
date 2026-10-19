@@ -9,6 +9,7 @@ extension CredentialMaterialAgentAccess on AgentAccess {
     if (_service._executionCapabilities[executionId] != capability) {
       throw const CredentialUseFailure('session_mismatch');
     }
+    _service._requireSettledExecutionReceipt(executionId);
     final old = _service._runtimeRepository.credentialExecutions
         .where((e) => e.id == executionId)
         .firstOrNull;
@@ -63,6 +64,7 @@ extension _CredentialMaterialService on InformationService {
   Future<CredentialExecution> _cleanupMaterialExecution(
     CredentialExecution record,
   ) async {
+    _requireSettledExecutionReceipt(record.id);
     if (record.materialLease == null || record.cleanupState == 'complete') {
       return record;
     }
@@ -113,6 +115,7 @@ extension CredentialMaterialOwnerAccess on OwnerAccess {
   List<CredentialExecution> get credentialMaterialChecks => List.unmodifiable(
     _service._runtimeRepository.credentialExecutions.where(
       (e) =>
+          !_service._pendingExecutionReceipts.containsKey(e.id) &&
           e.materialLease != null &&
           e.cleanupState != 'complete' &&
           !{'preparing', 'running'}.contains(e.state),
@@ -123,6 +126,7 @@ extension CredentialMaterialOwnerAccess on OwnerAccess {
     // supervisor can still start the worker. Preserve that launch/report path.
     for (final record
         in _service._runtimeRepository.credentialExecutions.toList()) {
+      if (_service._pendingExecutionReceipts.containsKey(record.id)) continue;
       if ({'preparing', 'running'}.contains(record.state) &&
           record.supervisorPid != null &&
           record.supervisorCreatedAt != null &&

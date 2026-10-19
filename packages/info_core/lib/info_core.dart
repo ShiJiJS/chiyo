@@ -54,6 +54,7 @@ part 'credential_runtime_models.dart';
 part 'focused_fill_models.dart';
 part 'focused_fill_access.dart';
 part 'credential_runtime_access.dart';
+part 'credential_execution_audit.dart';
 part 'credential_file_receivers.dart';
 part 'credential_material_access.dart';
 part 'credential_history_access.dart';
@@ -205,6 +206,8 @@ class InformationService {
 
   final _credentialUseSessions = <String, String>{};
   final _executionCapabilities = <String, String>{};
+  final _pendingExecutionReceipts = <String, Map<String, Object?>>{};
+  Future<void> _runtimeWrites = Future.value();
   InformationField? _field(FieldRef ref) {
     for (final item in _repository.items) {
       if (item.id == ref.itemId) {

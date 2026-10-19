@@ -2,7 +2,7 @@
 
 ## 当前新增功能与整包门槛 · 2026-10-20
 
-0.4.0+9的交付说明采用协议v2/schema21及文件备份7/8/9；实际是否已生成包、源码和校验值以具体交付记录及manifest为准，不将版本号当作通过证据。已交付的用户旧包仍为0.4.0+8，自动检查不操作它或真实资料库。
+0.4.0+10的交付说明采用协议v2/schema21及文件备份7/8/9；实际是否已生成包、源码和校验值以具体交付记录及manifest为准，不将版本号当作通过证据。0.4.0+9存在结束回执写入失败后无法补记的问题，见[修复记录](issue30-terminal-audit-recovery.md)。已交付的用户旧包仍为0.4.0+8，自动检查不操作它或真实资料库。
 
 凭据有效期复用#33、本机焦点填充#35及普通附件#34/#38已完成各自Windows功能验收；新增随包文件流程和三方式受控联合检查已接#30。范围与限制分别见[功能计划](https://github.com/ShiJiJS/agent-info-manage/blob/codex/round05-windows-sync/docs/planning/windows-next-iteration.md)及[文件接入检查点](https://github.com/ShiJiJS/agent-info-manage/blob/codex/round05-windows-sync/docs/development/issue30-information-files-skill.md)。
 

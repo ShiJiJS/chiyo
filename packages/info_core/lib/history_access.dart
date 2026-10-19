@@ -189,7 +189,8 @@ extension _AuditService on InformationService {
 }
 
 extension OwnerAuditAccess on OwnerAccess {
-  bool get auditStorageUnavailable => _service._auditFailed;
+  bool get auditStorageUnavailable =>
+      _service._auditFailed || _service._pendingExecutionReceipts.isNotEmpty;
   Future<void> retryAuditStorage() async {
     if (_service._backupBusy) throw const AccessFailure('service_unavailable');
     await _retryAuditStorage();
