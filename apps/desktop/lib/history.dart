@@ -158,6 +158,13 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
         .where((r) => widget.owner.credentialUseState(r) != 'pending')
         .toList();
     final useIds = uses.map((r) => r.id).toSet();
+    final mergedUseIds = uses
+        .where((r) => r.protocolVersion == 1)
+        .map((r) => r.id)
+        .toSet();
+    final reusable = {
+      for (final r in uses.where((r) => r.protocolVersion == 2)) r.id: r,
+    };
     final list = <_HistoryEntry>[
       for (final r in uses)
         _HistoryEntry(
@@ -169,21 +176,28 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
           use: r,
           credentialActive:
               widget.owner.credentialGrantState(r) == 'available' ||
-              widget.owner.credentialExecutions.any(
-                (e) =>
-                    e.requestId == r.id &&
-                    {'preparing', 'running'}.contains(e.state),
-              ),
-          fieldActive: widget.owner.credentialFieldGrantState(r) == 'available',
-          grant: history.grants.where((g) => g.requestId == r.id).firstOrNull,
+              r.protocolVersion == 1 &&
+                  widget.owner.credentialExecutions.any(
+                    (e) =>
+                        e.requestId == r.id &&
+                        {'preparing', 'running'}.contains(e.state),
+                  ),
+          fieldActive:
+              r.protocolVersion == 1 &&
+              widget.owner.credentialFieldGrantState(r) == 'available',
+          grant: r.protocolVersion == 1
+              ? history.grants.where((g) => g.requestId == r.id).firstOrNull
+              : null,
           request: requests[r.id],
         ),
       for (final grant in history.grants.where(
-        (g) => !useIds.contains(g.requestId),
+        (g) => !mergedUseIds.contains(g.requestId),
       ))
         _HistoryEntry(
           id: grant.id,
-          title: requests[grant.requestId]?.purpose ?? '未记录用途',
+          title: reusable.containsKey(grant.requestId)
+              ? '${reusable[grant.requestId]!.chatLabel} · 连接字段'
+              : requests[grant.requestId]?.purpose ?? '未记录用途',
           chat: grant.chatLabel,
           at: grant.approvedAt,
           until: grant.expiresAt,

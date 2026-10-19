@@ -3,11 +3,27 @@ import 'package:flutter/material.dart';
 import 'package:info_core/info_core.dart';
 import 'credential_delivery.dart';
 import 'credential_execution_receipt.dart';
+import 'credential_operations.dart';
 import 'prototype_ui.dart';
 import 'settings_controls.dart';
 import 'ui.dart';
 
 String credentialHistoryState(OwnerAccess owner, CredentialUseRequest r) {
+  if (r.protocolVersion == 2) {
+    if (r.restoredAt != null) return '历史事实';
+    return switch (owner.credentialGrantState(r)) {
+      'available' => '有效',
+      'expired' => '已到期',
+      'revoked' => '已撤销',
+      'version_invalidated' => '使用条件已变化',
+      _ =>
+        owner.credentialUseState(r) == 'denied'
+            ? '已拒绝'
+            : r.credentialApproved
+            ? '已结束'
+            : '未批准凭据',
+    };
+  }
   final execution = owner.credentialExecutions
       .where((e) => e.id == r.executionId)
       .firstOrNull;
@@ -53,7 +69,11 @@ class _CredentialHistoryDocumentState extends State<CredentialHistoryDocument> {
   final _scroll = ScrollController();
   bool _busy = false, _tip = false, _details = false;
   String? _error;
-  CredentialUseRequest get r => widget.request;
+  CredentialUseRequest get r =>
+      widget.owner.credentialUseRequests
+          .where((r) => r.id == widget.request.id)
+          .firstOrNull ??
+      widget.request;
   @override
   void dispose() {
     _scroll.dispose();
@@ -145,7 +165,9 @@ class _CredentialHistoryDocumentState extends State<CredentialHistoryDocument> {
         children: [
           if (available)
             settingsAction(context, '撤销使用授权', _busy ? null : () => _revoke()),
-          if (widget.owner.credentialFieldGrantState(r) == 'available')
+          if (r.protocolVersion == 1 &&
+              widget.fieldGrant != null &&
+              widget.owner.credentialFieldGrantState(r) == 'available')
             settingsAction(
               context,
               '撤销字段授权',
@@ -258,10 +280,24 @@ class _CredentialHistoryDocumentState extends State<CredentialHistoryDocument> {
         record.materialLease != null &&
         record.cleanupState != 'complete' &&
         !{'preparing', 'running'}.contains(record.state);
+    final reusable = r.protocolVersion == 2;
+    final operationCount = widget.owner.credentialExecutions
+        .where((e) => e.requestId == r.id)
+        .length;
     final summaries = [
       ('使用凭据', r.credentialName ?? '名称未记录'),
-      (r.credentialApproved ? '批准版本' : '申请版本', '版本 ${r.version}'),
-      ('启动尝试', '${r.attemptConsumed ? 1 : 0} / 1 次'),
+      (
+        r.credentialApproved
+            ? reusable
+                  ? '固定版本'
+                  : '批准版本'
+            : '申请版本',
+        '版本 ${r.version}',
+      ),
+      (
+        reusable ? '使用操作' : '启动尝试',
+        reusable ? '$operationCount 次' : '${r.attemptConsumed ? 1 : 0} / 1 次',
+      ),
     ];
     return Container(
       key: ValueKey('history-document-${r.id}'),
@@ -302,7 +338,10 @@ class _CredentialHistoryDocumentState extends State<CredentialHistoryDocument> {
                                 12,
                                 color: available ? c.statusLive : c.muted,
                               ),
-                              t('凭据使用 · 运行时注入', 12),
+                              t(
+                                reusable ? '凭据使用 · 有效期内复用' : '凭据使用 · 运行时注入',
+                                12,
+                              ),
                             ],
                           ),
                         ),
@@ -324,8 +363,9 @@ class _CredentialHistoryDocumentState extends State<CredentialHistoryDocument> {
                         weight: FontWeight.w500,
                       ),
                     ),
-                    if (record?.state == 'prepare_failed' ||
-                        record?.state == 'start_failed')
+                    if (!reusable &&
+                        (record?.state == 'prepare_failed' ||
+                            record?.state == 'start_failed'))
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 20),
                         child: t('本次启动尝试已消耗，程序未启动。修正原因后，需要重新申请一次使用许可。', 13),
@@ -338,7 +378,9 @@ class _CredentialHistoryDocumentState extends State<CredentialHistoryDocument> {
                           13,
                         ),
                       ),
-                    if (record?.state == 'unknown' && r.restoredAt == null)
+                    if (!reusable &&
+                        record?.state == 'unknown' &&
+                        r.restoredAt == null)
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 20),
                         child: t('结果尚无法确认。先核查原执行与残留文件，避免重复运行。', 13),
@@ -410,7 +452,11 @@ class _CredentialHistoryDocumentState extends State<CredentialHistoryDocument> {
                                           textBaseline: TextBaseline.alphabetic,
                                           children: [
                                             Text(
-                                              '${r.attemptConsumed ? 1 : 0}',
+                                              '${reusable
+                                                  ? operationCount
+                                                  : r.attemptConsumed
+                                                  ? 1
+                                                  : 0}',
                                               style: prototypeText(
                                                 context,
                                                 28,
@@ -420,7 +466,7 @@ class _CredentialHistoryDocumentState extends State<CredentialHistoryDocument> {
                                               ),
                                             ),
                                             const SizedBox(width: 5),
-                                            t('/ 1 次', 15),
+                                            t(reusable ? '次' : '/ 1 次', 15),
                                           ],
                                         )
                                       else
@@ -437,210 +483,223 @@ class _CredentialHistoryDocumentState extends State<CredentialHistoryDocument> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 18),
-                    fact(
-                      '注入方式',
-                      r.plan.receiver == 'gh_token'
-                          ? '秘密值 → 环境变量'
-                          : r.plan.receiver == 'ssh_identity'
-                          ? '临时文件路径 → 命令参数'
-                          : '临时文件路径 → 环境变量',
-                      injectionTip: true,
-                    ),
-                    fact(
-                      r.plan.receiver == 'ssh_identity' ? '文件引用' : '环境变量',
-                      r.plan.receiver == 'ssh_identity'
-                          ? '{{file:${r.alias}}}'
-                          : credentialInjectionTarget(r),
-                      code: true,
-                    ),
-                    fact('申报目标', credentialCommandTarget(r)),
-                    AnimatedSize(
-                      duration: MediaQuery.disableAnimationsOf(context)
-                          ? Duration.zero
-                          : const Duration(milliseconds: 150),
-                      alignment: Alignment.topCenter,
-                      child: _tip
-                          ? SettingsNotice(
-                              '由 CLI 设置接收位置',
-                              credentialInjectionTip(r),
-                            )
-                          : const SizedBox(),
-                    ),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(child: t('由 CLI 启动的命令', 12, color: c.muted)),
-                        const SizedBox(width: 12),
-                        TextButton(
-                          onPressed: () => setState(() => _details = !_details),
-                          style: prototypeButton(
-                            context,
-                            padding: EdgeInsets.zero,
-                          ),
-                          child: t(
-                            '程序位置与固定计划 ${_details ? '−' : '＋'}',
-                            12,
-                            color: c.accent,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                    Container(
-                      padding: const EdgeInsets.all(15),
-                      decoration: BoxDecoration(
-                        color: c.rail,
-                        border: Border.all(color: c.line),
-                        borderRadius: BorderRadius.circular(4),
+                    if (reusable) ...[
+                      CredentialUseOperations(
+                        key: ValueKey('operations-${r.id}'),
+                        owner: widget.owner,
+                        request: r,
                       ),
-                      child: SelectableText(
-                        command,
-                        style: prototypeText(
-                          context,
-                          13,
-                          family: 'Consolas',
-                          height: 1.8,
-                        ),
-                      ),
-                    ),
-                    if (_details) ...[
-                      fact('申报用途', r.purpose),
-                      fact('工作目录', r.plan.cwd, code: true),
+                      if (_error != null)
+                        SettingsNotice('操作未完成', _error!, error: true),
+                    ] else ...[
+                      const SizedBox(height: 18),
                       fact(
-                        '固定参数',
-                        jsonEncode(r.plan.argv.map((a) => a.toJson()).toList()),
-                        code: true,
+                        '注入方式',
+                        r.plan.receiver == 'gh_token'
+                            ? '秘密值 → 环境变量'
+                            : r.plan.receiver == 'ssh_identity'
+                            ? '临时文件路径 → 命令参数'
+                            : '临时文件路径 → 环境变量',
+                        injectionTip: true,
                       ),
                       fact(
-                        '固定环境',
-                        jsonEncode(
-                          r.plan.env.map((k, v) => MapEntry(k, v.toJson())),
-                        ),
+                        r.plan.receiver == 'ssh_identity' ? '文件引用' : '环境变量',
+                        r.plan.receiver == 'ssh_identity'
+                            ? '{{file:${r.alias}}}'
+                            : credentialInjectionTarget(r),
                         code: true,
                       ),
-                      fact('计划 hash', r.plan.planHash, code: true),
-                      fact('接收配置', credentialIsolationFacts(r)),
-                    ],
-                    Container(
-                      margin: const EdgeInsets.only(top: 12),
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      decoration: BoxDecoration(
-                        border: Border(top: BorderSide(color: c.line)),
+                      fact('申报目标', credentialCommandTarget(r)),
+                      AnimatedSize(
+                        duration: MediaQuery.disableAnimationsOf(context)
+                            ? Duration.zero
+                            : const Duration(milliseconds: 150),
+                        alignment: Alignment.topCenter,
+                        child: _tip
+                            ? SettingsNotice(
+                                '由 CLI 设置接收位置',
+                                credentialInjectionTip(r),
+                              )
+                            : const SizedBox(),
                       ),
-                      child: Wrap(
-                        spacing: 28,
-                        runSpacing: 8,
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          t(
-                            '${r.decidedAt == null
-                                ? '申请时间'
-                                : r.credentialApproved
-                                ? '授权时间'
-                                : '审批时间'}  ${time(r.decidedAt ?? r.createdAt)}',
-                            13,
+                          Expanded(child: t('由 CLI 启动的命令', 12, color: c.muted)),
+                          const SizedBox(width: 12),
+                          TextButton(
+                            onPressed: () =>
+                                setState(() => _details = !_details),
+                            style: prototypeButton(
+                              context,
+                              padding: EdgeInsets.zero,
+                            ),
+                            child: t(
+                              '程序位置与固定计划 ${_details ? '−' : '＋'}',
+                              12,
+                              color: c.accent,
+                            ),
                           ),
-                          if (r.credentialExpiresAt != null)
-                            t('允许启动至  ${time(r.credentialExpiresAt)}', 13),
-                          if (r.revokedAt != null)
-                            t('撤销使用于  ${time(r.revokedAt)}', 13),
                         ],
                       ),
-                    ),
-                    if (fields.isNotEmpty) ...[
-                      const SizedBox(height: 8),
-                      t('同时批准读取的连接字段', 13, weight: FontWeight.w600),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 10),
+                      Container(
+                        padding: const EdgeInsets.all(15),
+                        decoration: BoxDecoration(
+                          color: c.rail,
+                          border: Border.all(color: c.line),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: SelectableText(
+                          command,
+                          style: prototypeText(
+                            context,
+                            13,
+                            family: 'Consolas',
+                            height: 1.8,
+                          ),
+                        ),
+                      ),
+                      if (_details) ...[
+                        fact('申报用途', r.purpose),
+                        fact('工作目录', r.plan.cwd, code: true),
+                        fact(
+                          '固定参数',
+                          jsonEncode(
+                            r.plan.argv.map((a) => a.toJson()).toList(),
+                          ),
+                          code: true,
+                        ),
+                        fact(
+                          '固定环境',
+                          jsonEncode(
+                            r.plan.env.map((k, v) => MapEntry(k, v.toJson())),
+                          ),
+                          code: true,
+                        ),
+                        fact('计划 hash', r.plan.planHash, code: true),
+                        fact('接收配置', credentialIsolationFacts(r)),
+                      ],
+                      Container(
+                        margin: const EdgeInsets.only(top: 12),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        decoration: BoxDecoration(
+                          border: Border(top: BorderSide(color: c.line)),
+                        ),
+                        child: Wrap(
+                          spacing: 28,
+                          runSpacing: 8,
+                          children: [
+                            t(
+                              '${r.decidedAt == null
+                                  ? '申请时间'
+                                  : r.credentialApproved
+                                  ? '授权时间'
+                                  : '审批时间'}  ${time(r.decidedAt ?? r.createdAt)}',
+                              13,
+                            ),
+                            if (r.credentialExpiresAt != null)
+                              t('允许启动至  ${time(r.credentialExpiresAt)}', 13),
+                            if (r.revokedAt != null)
+                              t('撤销使用于  ${time(r.revokedAt)}', 13),
+                          ],
+                        ),
+                      ),
+                      if (fields.isNotEmpty) ...[
+                        const SizedBox(height: 8),
+                        t('同时批准读取的连接字段', 13, weight: FontWeight.w600),
+                        const SizedBox(height: 8),
+                        t(
+                          fields
+                              .map((f) => '${f.itemName}：${f.fieldName}')
+                              .join('；'),
+                          13,
+                          color: c.muted,
+                        ),
+                        const SizedBox(height: 10),
+                        t(
+                          '字段授权：${fieldState == 'available'
+                              ? '有效'
+                              : fieldState == 'expired'
+                              ? '已到期'
+                              : '已结束'} · ${widget.accesses.length} 次实际读取',
+                          12,
+                          color: c.muted,
+                        ),
+                      ],
+                      const SizedBox(height: 14),
+                      fact('申请', switch (widget.owner.credentialUseState(r)) {
+                        'approved' => '已批准',
+                        'partially_approved' => '部分批准',
+                        'denied' => '已拒绝',
+                        'expired' => '已到期',
+                        _ => '已结束',
+                      }, divider: true),
+                      fact(
+                        '使用许可',
+                        available
+                            ? '有效 · 尚未消耗'
+                            : r.attemptConsumed
+                            ? '已消耗 · 不可重新启动'
+                            : credentialHistoryState(widget.owner, r),
+                        divider: true,
+                      ),
+                      fact(
+                        '执行',
+                        record == null
+                            ? '尚未启动'
+                            : credentialExecutionLabel(record),
+                        divider: true,
+                      ),
+                      fact(
+                        '清理',
+                        record == null
+                            ? '尚未生成材料'
+                            : record.restoredAt != null
+                            ? '本机不恢复运行材料'
+                            : credentialCleanupLabel(record.cleanupState),
+                        divider: true,
+                      ),
+                      if (record != null)
+                        TextButton(
+                          onPressed: () => showCredentialExecutionReceipt(
+                            context,
+                            widget.owner,
+                            r,
+                          ),
+                          style: prototypeButton(
+                            context,
+                            padding: const EdgeInsets.symmetric(vertical: 10),
+                          ),
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: t('查看执行记录 →', 13, color: c.accent),
+                          ),
+                        ),
+                      if (available)
+                        const SettingsNotice(
+                          '等待 CLI 启动任务',
+                          '仅生成了使用许可，尚未向进程注入凭据或生成临时文件。',
+                        ),
+                      if (_error != null)
+                        SettingsNotice('操作未完成', _error!, error: true),
+                      if (widget.accesses.isNotEmpty) ...[
+                        const SizedBox(height: 18),
+                        t('字段实际访问', 14, weight: FontWeight.w600),
+                        for (final access in widget.accesses)
+                          fact(
+                            time(access.at),
+                            '${access.itemName ?? '信息名称未记录'}：${access.fieldName ?? '字段名称未记录'} · ${access.outcome == AccessOutcome.allowed ? '访问允许' : '读取被拒绝'}',
+                            divider: true,
+                          ),
+                      ],
+                      const SizedBox(height: 17),
                       t(
-                        fields
-                            .map((f) => '${f.itemName}：${f.fieldName}')
-                            .join('；'),
+                        '准备失败或启动失败也消耗一次尝试。撤销不会终止已运行进程；结果未知时不自动重试。文件清理不能收回已复制的内容。',
                         13,
                         color: c.muted,
                       ),
-                      const SizedBox(height: 10),
-                      t(
-                        '字段授权：${fieldState == 'available'
-                            ? '有效'
-                            : fieldState == 'expired'
-                            ? '已到期'
-                            : '已结束'} · ${widget.accesses.length} 次实际读取',
-                        12,
-                        color: c.muted,
-                      ),
                     ],
-                    const SizedBox(height: 14),
-                    fact('申请', switch (widget.owner.credentialUseState(r)) {
-                      'approved' => '已批准',
-                      'partially_approved' => '部分批准',
-                      'denied' => '已拒绝',
-                      'expired' => '已到期',
-                      _ => '已结束',
-                    }, divider: true),
-                    fact(
-                      '使用许可',
-                      available
-                          ? '有效 · 尚未消耗'
-                          : r.attemptConsumed
-                          ? '已消耗 · 不可重新启动'
-                          : credentialHistoryState(widget.owner, r),
-                      divider: true,
-                    ),
-                    fact(
-                      '执行',
-                      record == null
-                          ? '尚未启动'
-                          : credentialExecutionLabel(record),
-                      divider: true,
-                    ),
-                    fact(
-                      '清理',
-                      record == null
-                          ? '尚未生成材料'
-                          : record.restoredAt != null
-                          ? '本机不恢复运行材料'
-                          : credentialCleanupLabel(record.cleanupState),
-                      divider: true,
-                    ),
-                    if (record != null)
-                      TextButton(
-                        onPressed: () => showCredentialExecutionReceipt(
-                          context,
-                          widget.owner,
-                          r,
-                        ),
-                        style: prototypeButton(
-                          context,
-                          padding: const EdgeInsets.symmetric(vertical: 10),
-                        ),
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: t('查看执行记录 →', 13, color: c.accent),
-                        ),
-                      ),
-                    if (available)
-                      const SettingsNotice(
-                        '等待 CLI 启动任务',
-                        '仅生成了使用许可，尚未向进程注入凭据或生成临时文件。',
-                      ),
-                    if (_error != null)
-                      SettingsNotice('操作未完成', _error!, error: true),
-                    if (widget.accesses.isNotEmpty) ...[
-                      const SizedBox(height: 18),
-                      t('字段实际访问', 14, weight: FontWeight.w600),
-                      for (final access in widget.accesses)
-                        fact(
-                          time(access.at),
-                          '${access.itemName ?? '信息名称未记录'}：${access.fieldName ?? '字段名称未记录'} · ${access.outcome == AccessOutcome.allowed ? '访问允许' : '读取被拒绝'}',
-                          divider: true,
-                        ),
-                    ],
-                    const SizedBox(height: 17),
-                    t(
-                      '准备失败或启动失败也消耗一次尝试。撤销不会终止已运行进程；结果未知时不自动重试。文件清理不能收回已复制的内容。',
-                      13,
-                      color: c.muted,
-                    ),
                   ],
                 ),
               ),
@@ -655,13 +714,19 @@ class _CredentialHistoryDocumentState extends State<CredentialHistoryDocument> {
             child: LayoutBuilder(
               builder: (context, constraints) {
                 final message = t(
-                  available
+                  reusable
+                      ? '撤销阻止新使用；已经运行的进程继续，材料按各自进程组清理。'
+                      : available
                       ? '授权到期或被撤销后，CLI 将拒绝新的使用。'
                       : '记录保留使用对象、注入方式、运行与清理结果。',
                   12,
                   color: c.muted,
                 );
-                final actions = _actions(record, available, cleanup);
+                final actions = _actions(
+                  record,
+                  available,
+                  !reusable && cleanup,
+                );
                 return constraints.maxWidth < 850 ||
                         MediaQuery.textScalerOf(context).scale(12) > 18
                     ? Column(

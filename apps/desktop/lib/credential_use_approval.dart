@@ -5,6 +5,7 @@ import 'ui.dart';
 import 'prototype_ui.dart';
 import 'prototype_dialog.dart';
 import 'credential_execution_receipt.dart';
+import 'credential_operations.dart';
 import 'credential_delivery.dart';
 
 String credentialUseStateLabel(String state) => switch (state) {
@@ -21,6 +22,7 @@ class CredentialUseApprovalDraft {
     : fields = fields.toSet();
   bool allowCredential = true, fieldsExpanded = false, planExpanded = false;
   int minutes = 15;
+  int fieldMinutes = 480;
   final Set<FieldRef> fields;
   String? tip;
 }
@@ -47,7 +49,15 @@ class _CredentialUseApprovalPanelState
   final _document = ScrollController(), _decision = ScrollController();
   bool _busy = false;
   String? _error;
-  CredentialUseRequest get r => widget.request;
+  CredentialUseRequest get r =>
+      widget.owner.credentialUseRequests
+          .where((r) => r.id == widget.request.id)
+          .firstOrNull ??
+      widget.request;
+  bool get reusable => r.protocolVersion == 2;
+  List<CredentialExecution> get operations => widget.owner.credentialExecutions
+      .where((e) => e.requestId == r.id)
+      .toList();
   CredentialUseApprovalDraft get draft => widget.draft;
   bool get pending => widget.owner.credentialUseState(r) == 'pending';
   bool get allowCredential =>
@@ -98,6 +108,22 @@ class _CredentialUseApprovalPanelState
   ].map((s) => s.contains(' ') ? '"$s"' : s).join(' ');
   String _time(DateTime? d) => d == null ? '未批准' : d.toLocal().toString();
 
+  Future<void> _revoke() async {
+    if (_busy) return;
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
+    try {
+      await widget.owner.revokeCredentialUse(r.id);
+      if (mounted) widget.onChanged();
+    } on Object {
+      if (mounted) setState(() => _error = '未能保存撤销决定，请检查本机服务后重试。');
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
   Future<void> _dialog(String kind) async {
     final approve = kind == 'approve';
     final detail = kind == 'request';
@@ -116,6 +142,9 @@ class _CredentialUseApprovalPanelState
                 approveCredential: approve && allowCredential,
                 fields: approve ? draft.fields.toList() : [],
                 lifetime: Duration(minutes: draft.minutes),
+                fieldLifetime: reusable
+                    ? Duration(minutes: draft.fieldMinutes)
+                    : null,
               );
               if (mounted) setState(() => _error = null);
               if (dialogContext.mounted) Navigator.pop(dialogContext);
@@ -149,7 +178,9 @@ class _CredentialUseApprovalPanelState
                       ? 'Agent 提交的申请；用途与目标是自述内容。原文不随申请提交。'
                       : approve
                       ? (allowCredential
-                            ? '允许本次会话启动一次任务，使用「$credentialName」版本 ${r.version}。'
+                            ? reusable
+                                  ? '允许本次会话在有效期内重复使用「$credentialName」版本 ${r.version}，使用方式固定。'
+                                  : '允许本次会话启动一次任务，使用「$credentialName」版本 ${r.version}。'
                             : '本次仅批准所选连接字段，不提供凭据使用许可。')
                       : '本次申请不会获得凭据使用许可，也不会提供同时申请的连接字段。',
                   style: prototypeText(context, 14, height: 1.85),
@@ -161,7 +192,9 @@ class _CredentialUseApprovalPanelState
                     '凭据许可',
                     allowCredential
                         ? pending
-                              ? '${draft.minutes} 分钟内允许启动一次'
+                              ? reusable
+                                    ? '${draft.minutes} 分钟内可重复使用，不续期'
+                                    : '${draft.minutes} 分钟内允许启动一次'
                               : '截止 ${_time(r.credentialExpiresAt)}'
                         : '不批准',
                   ),
@@ -169,7 +202,7 @@ class _CredentialUseApprovalPanelState
                     fact(
                       '字段许可',
                       pending
-                          ? '$selectedFieldCount 个字段 · ${draft.minutes} 分钟（独立许可）'
+                          ? '$selectedFieldCount 个字段 · ${reusable && draft.fieldMinutes == 480 ? '8 小时' : '${reusable ? draft.fieldMinutes : draft.minutes} 分钟'}（独立许可）'
                           : '$selectedFieldCount 个字段 · 截止 ${_time(r.fieldExpiresAt)}（独立许可）',
                     ),
                   fact('注入位置', credentialInjectionFact(r)),
@@ -188,7 +221,9 @@ class _CredentialUseApprovalPanelState
                   fact('计划 hash', r.plan.planHash),
                   const SizedBox(height: 12),
                   Text(
-                    '由信息授权 CLI 启动。批准不会立即运行；程序、参数和注入位置按本次申请固定。',
+                    reusable
+                        ? '首条命令用于理解用途，批准不会立即运行。同一批准范围内的新命令不重新审批；每次操作冻结自己的完整计划和操作 ID。增加未批准的凭据或使用方式需要新申请。'
+                        : '由信息授权 CLI 启动。批准不会立即运行；程序、参数和注入位置按本次申请固定。',
                     style: prototypeText(
                       context,
                       12,
@@ -220,7 +255,15 @@ class _CredentialUseApprovalPanelState
                       ),
                     ),
                     _code(
-                      jsonEncode({'command': 'run-use', 'requestId': r.id}),
+                      jsonEncode({
+                        'command': 'run-use',
+                        'requestId': r.id,
+                        if (reusable) ...{
+                          'protocolVersion': 2,
+                          'operationId': '由 Agent 为本次操作生成唯一 ID',
+                          'launch': r.toRequestInputJson()['launch'],
+                        },
+                      }),
                     ),
                   ],
                 ],
@@ -739,9 +782,11 @@ class _CredentialUseApprovalPanelState
             ),
             _section(
               '03',
-              '由 CLI 启动什么命令',
+              reusable ? '首条 CLI 命令参考' : '由 CLI 启动什么命令',
               'launch',
-              'Agent 让信息授权 CLI 执行这份申请。批准不会自动运行。CLI 校验当前会话和使用授权后，准备凭据并启动下面的程序；程序、参数、工作目录或注入位置改变都需要重新申请。',
+              reusable
+                  ? '批准不会自动运行。Agent 为每次操作提供唯一操作 ID 和完整命令，由信息授权 CLI 校验后注入并启动。同一批准范围内的新命令不重新审批；每次操作冻结自己的计划。增加未批准的凭据或使用方式需要新申请。'
+                  : 'Agent 让信息授权 CLI 执行这份申请。批准不会自动运行。CLI 校验当前会话和使用授权后，准备凭据并启动下面的程序；程序、参数、工作目录或注入位置改变都需要重新申请。',
               Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -934,7 +979,7 @@ class _CredentialUseApprovalPanelState
               ),
               const SizedBox(height: 14),
               Text(
-                '允许这次启动',
+                reusable ? '批准期限内使用' : '允许这次启动',
                 style: prototypeText(
                   context,
                   23,
@@ -990,7 +1035,9 @@ class _CredentialUseApprovalPanelState
                     ),
                     const SizedBox(height: 5),
                     Text(
-                      '仅一次，绑定当前会话。\n按本页的凭据与启动内容执行。',
+                      reusable
+                          ? '期限内可重复使用，绑定当前会话。\n固定凭据版本和使用方式；逐次命令独立记录。'
+                          : '仅一次，绑定当前会话。\n按本页的凭据与启动内容执行。',
                       style: prototypeText(
                         context,
                         12,
@@ -1002,22 +1049,58 @@ class _CredentialUseApprovalPanelState
                 ),
               ),
               const SizedBox(height: 20),
-              Text('允许启动的期限', style: prototypeText(context, 12)),
-              const SizedBox(height: 9),
-              SizedBox(
-                height: MediaQuery.textScalerOf(context).scale(13) * 1.5 + 21.5,
-                child: DesktopSelect<int>(
-                  value: draft.minutes,
-                  isExpanded: true,
-                  items: [
-                    for (final n in [15, 30])
-                      DropdownMenuItem(value: n, child: Text('$n 分钟')),
-                  ],
-                  onChanged: pending
-                      ? (v) => setState(() => draft.minutes = v ?? 15)
-                      : null,
-                ),
+              Text(
+                reusable ? '使用授权期限' : '允许启动的期限',
+                style: prototypeText(context, 12),
               ),
+              const SizedBox(height: 9),
+              if (pending || !reusable)
+                SizedBox(
+                  height:
+                      MediaQuery.textScalerOf(context).scale(13) * 1.5 + 21.5,
+                  child: DesktopSelect<int>(
+                    value: draft.minutes,
+                    isExpanded: true,
+                    items: [
+                      for (final n in [15, 30])
+                        DropdownMenuItem(value: n, child: Text('$n 分钟')),
+                    ],
+                    onChanged: pending
+                        ? (v) => setState(() => draft.minutes = v ?? 15)
+                        : null,
+                  ),
+                ),
+              if (!pending && reusable)
+                Text(
+                  _time(r.credentialExpiresAt),
+                  style: prototypeText(context, 12),
+                ),
+              if (reusable && r.fields.isNotEmpty) ...[
+                const SizedBox(height: 18),
+                Text('连接字段读取期限（独立）', style: prototypeText(context, 12)),
+                const SizedBox(height: 9),
+                if (pending)
+                  DesktopSelect<int>(
+                    key: const ValueKey('credential-field-lifetime'),
+                    value: draft.fieldMinutes,
+                    isExpanded: true,
+                    items: [
+                      for (final n in [15, 30, 60, 480])
+                        DropdownMenuItem(
+                          value: n,
+                          child: Text(n == 480 ? '8 小时' : '$n 分钟'),
+                        ),
+                    ],
+                    onChanged: draft.fields.isEmpty
+                        ? null
+                        : (v) => setState(() => draft.fieldMinutes = v ?? 480),
+                  )
+                else
+                  Text(
+                    _time(r.fieldExpiresAt),
+                    style: prototypeText(context, 12),
+                  ),
+              ],
               const SizedBox(height: 18),
               Text(
                 '程序会接触原文。\n运行时注入不构成强隔离。',
@@ -1044,7 +1127,7 @@ class _CredentialUseApprovalPanelState
                               draft.fields.isEmpty
                       ? null
                       : () => _dialog('approve'),
-                  child: const Text('批准本次选择 →'),
+                  child: Text(reusable ? '批准期限内使用 →' : '批准本次选择 →'),
                 ),
                 TextButton(
                   style: prototypeButton(
@@ -1058,7 +1141,8 @@ class _CredentialUseApprovalPanelState
                 Text(
                   switch (grant) {
                     'consumed' => '已占用一次启动尝试',
-                    'available' => '已批准，等待 Agent 调用',
+                    'available' =>
+                      reusable ? '使用授权有效 · 可重复使用' : '已批准，等待 Agent 调用',
                     'expired' => '使用许可已到期',
                     'version_invalidated' => '凭据已变化，旧许可失效',
                     _ => r.credentialApproved ? '使用许可已结束' : '未批准凭据使用',
@@ -1084,14 +1168,28 @@ class _CredentialUseApprovalPanelState
                 if (grant == 'available')
                   TextButton(
                     style: prototypeButton(context),
-                    onPressed: () async {
-                      await widget.owner.revokeCredentialUse(r.id);
-                      widget.onChanged();
-                    },
+                    onPressed: _busy ? null : _revoke,
                     child: const Text('撤销使用授权'),
                   ),
               ],
-              if (r.executionId != null) ...[
+              if (reusable && operations.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                Text(
+                  '逐次使用记录',
+                  style: prototypeText(context, 11, color: c.muted),
+                ),
+                Text(
+                  '${operations.length} 次操作 · ${operations.where((e) => {'preparing', 'running'}.contains(e.state)).length} 个进行中',
+                  style: prototypeText(context, 13, height: 1.9),
+                ),
+                TextButton(
+                  style: prototypeButton(context),
+                  onPressed: () =>
+                      showCredentialUseOperations(context, widget.owner, r),
+                  child: const Text('查看全部操作 →'),
+                ),
+              ],
+              if (!reusable && r.executionId != null) ...[
                 const SizedBox(height: 12),
                 Text('执行结果', style: prototypeText(context, 11, color: c.muted)),
                 const SizedBox(height: 5),

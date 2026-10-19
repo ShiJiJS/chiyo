@@ -32,17 +32,27 @@ String credentialCleanupLabel(String? state) => switch (state) {
 Future<void> showCredentialExecutionReceipt(
   BuildContext context,
   OwnerAccess owner,
-  CredentialUseRequest request,
-) => showDialog<void>(
+  CredentialUseRequest request, {
+  String? executionId,
+}) => showDialog<void>(
   context: context,
   barrierColor: const Color(0x4f241b27),
-  builder: (_) => _ExecutionReceipt(owner: owner, request: request),
+  builder: (_) => _ExecutionReceipt(
+    owner: owner,
+    request: request,
+    executionId: executionId,
+  ),
 );
 
 class _ExecutionReceipt extends StatefulWidget {
-  const _ExecutionReceipt({required this.owner, required this.request});
+  const _ExecutionReceipt({
+    required this.owner,
+    required this.request,
+    this.executionId,
+  });
   final OwnerAccess owner;
   final CredentialUseRequest request;
+  final String? executionId;
   @override
   State<_ExecutionReceipt> createState() => _ExecutionReceiptState();
 }
@@ -95,7 +105,11 @@ class _ExecutionReceiptState extends State<_ExecutionReceipt> {
   CredentialExecution? get execution {
     try {
       return widget.owner.credentialExecutions
-          .where((e) => e.id == widget.request.executionId)
+          .where(
+            (e) =>
+                e.id == (widget.executionId ?? widget.request.executionId) &&
+                e.requestId == widget.request.id,
+          )
           .firstOrNull;
     } on Object {
       return null;
@@ -137,6 +151,7 @@ class _ExecutionReceiptState extends State<_ExecutionReceipt> {
   Widget build(BuildContext context) {
     final record = execution;
     final r = widget.request;
+    final plan = record?.operationPlan ?? r.plan;
     return PrototypeDialog(
       width: 650,
       title: '执行记录',
@@ -154,7 +169,12 @@ class _ExecutionReceiptState extends State<_ExecutionReceipt> {
                   style: prototypeText(context, 16, weight: FontWeight.w600),
                 ),
                 const SizedBox(height: 10),
-                fact('启动尝试', '已占用 1 / 1，不会自动重试'),
+                if (record.protocolVersion == 2) ...[
+                  fact('操作 ID', record.operationId ?? '未记录'),
+                  fact('登记时间', time(record.createdAt)),
+                  fact('重试规则', '同一操作不会重复启动；本次结果不消耗整个授权。'),
+                ] else
+                  fact('启动尝试', '已占用 1 / 1，不会自动重试'),
                 fact(
                   '进程创建',
                   record.processStarted
@@ -168,7 +188,7 @@ class _ExecutionReceiptState extends State<_ExecutionReceipt> {
                 if (record.materialLease != null)
                   fact(
                     '受管材料',
-                    r.plan.receiver == 'ssh_identity'
+                    plan.receiver == 'ssh_identity'
                         ? '私钥副本 · SSH 空配置 · 确认主机快照 · 空全局主机记录'
                         : 'AWS 凭据副本 · AWS 空配置',
                   ),
@@ -190,16 +210,16 @@ class _ExecutionReceiptState extends State<_ExecutionReceipt> {
                 fact('凭据 / 版本', '${r.credentialId} / ${r.version}'),
                 fact('注入位置', credentialInjectionFact(r)),
                 fact(
-                  r.plan.receiver == 'ssh_identity' ? '主机快照与隔离' : '接收配置',
-                  credentialIsolationFacts(r),
+                  plan.receiver == 'ssh_identity' ? '主机快照与隔离' : '接收配置',
+                  credentialIsolationFacts(r, plan: plan),
                 ),
-                fact('程序位置', r.plan.path),
+                fact('程序位置', plan.path),
                 fact(
                   '参数（按项）',
-                  jsonEncode(r.plan.argv.map((a) => a.toJson()).toList()),
+                  jsonEncode(plan.argv.map((a) => a.toJson()).toList()),
                 ),
-                fact('工作目录', r.plan.cwd),
-                fact('计划 hash', r.plan.planHash),
+                fact('工作目录', plan.cwd),
+                fact('计划 hash', plan.planHash),
                 fact('执行编号', record.id),
                 fact('申请编号', r.id),
                 const SizedBox(height: 12),
@@ -226,7 +246,7 @@ class _ExecutionReceiptState extends State<_ExecutionReceipt> {
         TextButton(
           style: prototypePrimary(context),
           onPressed: () => Navigator.pop(context),
-          child: const Text('返回审批'),
+          child: Text(r.protocolVersion == 2 ? '返回' : '返回审批'),
         ),
       ],
     );

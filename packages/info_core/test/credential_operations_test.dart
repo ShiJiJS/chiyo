@@ -398,6 +398,18 @@ void main() {
         first.material!.approvedPlan.planHash,
       );
       expect(s.owner.credentialExecutions, hasLength(2));
+      final admittedAt = first.execution.createdAt;
+      expect(admittedAt, isNotNull);
+      final retried = await s.agent.beginCredentialUseOperation(
+        session,
+        operation(r, 'one'),
+      );
+      expect(retried.newlyClaimed, isFalse);
+      expect(retried.execution.createdAt, admittedAt);
+      expect(
+        CredentialExecution.fromJson(first.execution.toArchiveJson()).createdAt,
+        admittedAt,
+      );
       expect(s.owner.credentialUseRequests.single.attemptConsumed, isFalse);
       expect(s.owner.credentialUseRequests.single.credentialExpiresAt, expires);
       expect(

@@ -49,10 +49,11 @@ String launchValueLabel(LaunchValue value) => switch (value.kind) {
   },
 };
 String credentialIsolationFacts(
-  CredentialUseRequest r,
-) => switch (r.plan.receiver) {
+  CredentialUseRequest r, {
+  CredentialLaunchPlan? plan,
+}) => switch ((plan ?? r.plan).receiver) {
   'ssh_identity' =>
-    '严格校验主机 · 仅所选私钥 · 禁用 agent、密码和交互回退\n主机快照 ${r.plan.sshTrustSnapshotId}\n${r.plan.internalMaterialHashes['ssh_known_hosts']}',
+    '严格校验主机 · 仅所选私钥 · 禁用 agent、密码和交互回退\n主机快照 ${(plan ?? r.plan).sshTrustSnapshotId}\n${(plan ?? r.plan).internalMaterialHashes['ssh_known_hosts']}',
   'aws_shared_credentials' =>
     '静态 default 凭据 · 独立空 AWS_CONFIG_FILE · 禁用 metadata、pager 和自动提示',
   _ => '仅本次子进程环境 · 独立 GitHub 配置 · 禁止交互登录',

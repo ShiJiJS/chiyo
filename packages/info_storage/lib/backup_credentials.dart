@@ -329,7 +329,7 @@ void _validateBackupCredentialHistory(
         'outputAvailable',
         'outputTruncated',
       },
-      {'restoredAt'},
+      {'restoredAt', if (v2) 'createdAt'},
     );
     final id = _backupId(j, 'executionId'), request = _backupId(j, 'requestId');
     if (row['id'] != id ||
@@ -369,7 +369,12 @@ void _validateBackupCredentialHistory(
       _backupInvalid();
     if (j['errorCode'] != null)
       _backupText(j, 'errorCode', 100, required: true);
-    for (final key in ['startedAt', 'finishedAt', 'restoredAt']) {
+    for (final key in [
+      'startedAt',
+      'finishedAt',
+      'restoredAt',
+      if (v2) 'createdAt',
+    ]) {
       if (j[key] != null) _backupDate(j[key]);
     }
     final e = CredentialExecution.fromJson(j);
@@ -438,7 +443,11 @@ void _retainBackupCredentialHistory(
       ?r.decidedAt,
       ?r.revokedAt,
       ?r.attemptedAt,
-      for (final e in operations) ...[?e.startedAt, ?e.finishedAt],
+      for (final e in operations) ...[
+        ?e.createdAt,
+        ?e.startedAt,
+        ?e.finishedAt,
+      ],
     ].every((t) => t.isBefore(cutoff));
   });
   final ids = tables['credential_use_requests']!.map((r) => r['id']).toSet();

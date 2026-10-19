@@ -8,9 +8,13 @@ import 'package:info_desktop/prototype_dialog.dart';
 
 Future<(InformationService, String, CredentialUseRequest)> fixture({
   MemoryInformationRepository? repository,
+  int protocolVersion = 1,
+  DateTime Function()? clock,
+  String? executable,
 }) async {
   final service = InformationService(
     repository: repository ?? MemoryInformationRepository(),
+    clock: clock,
     credentialExecutableInspector: (path, receiver) async =>
         ExecutableIdentity(path, 1, 1, 'sha256:synthetic'),
   );
@@ -36,13 +40,14 @@ Future<(InformationService, String, CredentialUseRequest)> fixture({
     session,
     CredentialUseInput.fromJson({
       'command': 'request-use',
+      'protocolVersion': protocolVersion,
       'purpose': '发布更新后的北辰文档站，需要使用 GitHub Token 完成本次发布。',
       'credentials': [
         {'alias': 'deploy_token', 'credentialId': c.id, 'version': 1},
       ],
       'launch': {
         'receiver': 'gh_token',
-        'executable': Platform.resolvedExecutable,
+        'executable': executable ?? Platform.resolvedExecutable,
         'argv': ['repo', 'view', 'northstar/docs'],
         'cwd': Directory.current.path,
         'env': {

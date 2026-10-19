@@ -773,6 +773,7 @@ class CredentialExecution {
     this.supervisorCreatedAt,
     this.workerPid,
     this.workerCreatedAt,
+    this.createdAt,
     this.restoredAt,
   });
   final String id, requestId, state, cleanupState;
@@ -789,10 +790,13 @@ class CredentialExecution {
   final int? workerPid;
   final String? workerCreatedAt;
   final DateTime? startedAt, finishedAt;
+  final DateTime? createdAt;
   final DateTime? restoredAt;
   Map<String, Object?> toJson() => {
     'protocolVersion': protocolVersion,
     if (protocolVersion == 2) 'operationId': operationId,
+    if (protocolVersion == 2 && createdAt != null)
+      'createdAt': _useTimestamp(createdAt),
     'status': 'ok',
     'executionId': id,
     'requestId': requestId,
@@ -838,6 +842,9 @@ class CredentialExecution {
             : CredentialLaunchPlan.fromStorageJson(
                 j['operationPlan'] as Map<String, dynamic>,
               ),
+        createdAt: j['createdAt'] == null
+            ? null
+            : DateTime.parse(j['createdAt'] as String),
         id: j['executionId'] as String,
         requestId: j['requestId'] as String,
         state: j['executionState'] as String,

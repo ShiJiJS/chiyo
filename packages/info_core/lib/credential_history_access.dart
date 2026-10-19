@@ -37,6 +37,7 @@ extension _CredentialHistoryService on InformationService {
       ?r.decidedAt,
       ?r.revokedAt,
       ?r.attemptedAt,
+      ?e?.createdAt,
       ?e?.startedAt,
       ?e?.finishedAt,
     ];

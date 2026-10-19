@@ -211,6 +211,10 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
       credential,
     );
     validate();
+    final operationTime = DateTime.fromMillisecondsSinceEpoch(
+      _service._clock().millisecondsSinceEpoch,
+      isUtc: true,
+    );
     final execution = CredentialExecution(
       id: _service._secret(),
       requestId: r.id,
@@ -218,6 +222,7 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
       operationId: input.operationId,
       operationFingerprint: input.fingerprint,
       operationPlan: plan,
+      createdAt: operationTime,
       supervisorPid: supervisorPid,
       supervisorCreatedAt: supervisorCreatedAt,
       jobName: supervisorPid == null
@@ -227,7 +232,7 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
     await _service._saveUse(
       request: r.changed({
         'executionId': execution.id,
-        'attemptedAt': _useTimestamp(_service._clock().toUtc()),
+        'attemptedAt': _useTimestamp(operationTime),
       }),
       execution: execution,
       validate: validate,
