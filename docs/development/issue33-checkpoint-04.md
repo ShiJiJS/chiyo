@@ -27,3 +27,12 @@ library_format独立标记在交给Drift前检查；未知未来版本或丢失�
 复跑旧兼容：运行 `python docs/development/evidence/issue33-step4/prepare-legacy.py`，将输出reader路径设到ISSUE33_LEGACY_PROBE；将本轮编译CLI设到D6_COMPILED_CLI，再运行 `python docs/development/evidence/issue33-step4/check-package.py --package info_storage --label replay-step4 --analyze`。不配置两个环境会跳过相应实机探针，不能计零跳过。
 
 下一步补v2多文件任务与加密数据库联合重启/清理证据，再接Flutter的一授权多操作、独立期限、历史和正式v2默认启用。真实gh/SSH/AWS新协议接收配置与全软件流程尚待，#33保持OPEN。#37合同同步为兼容1–6和独立格式标记，不改变执行顺序或提前开发附件。无子Agent，本轮未用Computer Use；Mac和服务器同步继续延期。
+
+
+## 检查点4补充：已完成迁移与旧结构分开处理
+
+基础实现及原始74项证据固定在2d607c9。后续补充让library_format已经等于目标时只修复版本头，不重新执行已完成的旧DDL；用当前17结构保留标记并把头部改为10、16，验证全部操作/原字节保留且许可仍失效。真实旧结构没有该标记，仍按旧版本完整升级。
+
+首次补充全跑暴露4个历史模拟fixture用当前库删列降版本，却仍留着schema17标记；已让这些旧结构fixture移除当年不存在的标记/运行时表，原先的版本、值、历史与回收断言保持。没有为这些不一致状态削弱生产格式检查。
+
+最终存储76项零跳过及严格分析通过，原核心157项证据继续有效；[补充源文件哈希、完整日志及实际准备信息](evidence/issue33-step4/verification-header-repair.json)。prepare-legacy.py已实际运行，并用它新生成的固定旧源码读者跑最终回归。AOT探针缺原生资源的原始失败也补入证据，不作通过。本补充仍不代表v2数据库/原生多文件联合恢复、Flutter或整票完成。

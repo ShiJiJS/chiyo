@@ -460,6 +460,51 @@ void main() {
     );
   }
 
+  for (final olderHeader in [10, 16]) {
+    test(
+      'known completed format repairs header $olderHeader without replaying old migrations',
+      () async {
+        final f = await _Fixture.create();
+        addTearDown(f.close);
+        final claim = await f.add('record');
+        await f.service.close();
+        await f.repo.close();
+        final hex = f.keys.key!
+            .map((b) => b.toRadixString(16).padLeft(2, '0'))
+            .join();
+        final db = sqlite.sqlite3.open('${f.root.path}/source/library.db');
+        try {
+          db.execute('PRAGMA key = "x\'$hex\'"');
+          db.execute('PRAGMA user_version=$olderHeader');
+        } finally {
+          db.close();
+        }
+        f.repo = await EncryptedInformationRepository.open(
+          '${f.root.path}/source',
+          f.keys,
+        );
+        f.service = InformationService(repository: f.repo);
+        expect(f.repo.credentialExecutions.single.id, claim.execution.id);
+        expect(
+          f.repo.credentialExecutions.single.operationPlan!.planHash,
+          claim.execution.operationPlan!.planHash,
+        );
+        expect(f.repo.credentialExecutions.single.state, 'unknown');
+        expect(f.repo.credentialUseRequests.single.protocolVersion, 2);
+        expect(
+          f.service.owner.credentialGrantState(
+            f.repo.credentialUseRequests.single,
+          ),
+          'revoked',
+        );
+        expect(
+          utf8.decode(f.repo.credentialMaterials.single.bytes),
+          'SYNTHETIC_STORAGE_ONLY_638291',
+        );
+      },
+    );
+  }
+
   test(
     'real format5 reader refuses format6 before restoring any records',
     () async {

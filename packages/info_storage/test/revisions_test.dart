@@ -33,6 +33,9 @@ void main() {
       fixture.execute('DROP TABLE revision_purge_facts');
       fixture.execute('DROP TABLE organization_tasks');
       fixture.execute('PRAGMA user_version = 9');
+      fixture.execute('DROP TABLE library_format');
+      fixture.execute('DROP TABLE credential_operations');
+      fixture.execute('DROP TABLE credential_runtime_requests');
       fixture.execute('ALTER TABLE information_items DROP COLUMN created_at');
       fixture.execute('ALTER TABLE information_items DROP COLUMN modified_at');
       fixture.close();

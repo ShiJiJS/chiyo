@@ -110,6 +110,9 @@ void main() {
       db.execute('PRAGMA key = "x\'$hex\'"');
       db.execute('DROP TABLE organization_tasks');
       db.execute('PRAGMA user_version = 11');
+      db.execute('DROP TABLE library_format');
+      db.execute('DROP TABLE credential_operations');
+      db.execute('DROP TABLE credential_runtime_requests');
       db.close();
       store = await EncryptedInformationRepository.open(folder.path, keys);
       expect(store.items.single.id, item.id);

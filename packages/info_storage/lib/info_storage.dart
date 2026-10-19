@@ -1201,6 +1201,15 @@ class _InformationDatabase extends GeneratedDatabase {
       if (from < 1 || from > to || to != _libraryFormat) {
         throw const StorageFailure('unsupported_schema');
       }
+      final hasMarker = await customSelect(
+        "SELECT name FROM sqlite_master WHERE type='table' AND name='library_format'",
+      ).get();
+      if (hasMarker.isNotEmpty) {
+        final marker = await customSelect(
+          'SELECT version FROM library_format WHERE singleton=1',
+        ).getSingle();
+        if (marker.read<int>('version') == _libraryFormat) return;
+      }
       await transaction(() async {
         if (from < 16) await _createSshHostTrust();
         if (from < 15) {
