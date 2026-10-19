@@ -1,0 +1,18 @@
+from pathlib import Path
+import subprocess,sys,json,shutil
+sys.stdout.reconfigure(encoding='utf-8')
+root=Path.cwd();out=root/'build/qa-issue23-notification'/sys.argv[1];out.mkdir(parents=True,exist_ok=False)
+build=root/'apps/desktop/build/windows/x64'
+cmake=next(l.split('=',1)[1] for l in (build/'CMakeCache.txt').read_text().splitlines() if l.startswith('CMAKE_COMMAND:INTERNAL='))
+for name in ['notification_queue.h','notification_queue_test.cpp']:
+    shutil.copyfile(root/'apps/desktop/windows/runner'/name,out/(name+'.txt'))
+with (out/'build.txt').open('wb') as log:
+    compiled=subprocess.run([cmake,'--build',str(build),'--config','Debug','--target','notification_queue_test'],stdout=log,stderr=subprocess.STDOUT)
+assert compiled.returncode==0,(out/'build.txt').read_text(errors='replace')[-10000:]
+with (out/'queue.txt').open('wb') as log:
+    run=subprocess.run([str(build/'runner/Debug/notification_queue_test.exe')],stdout=log,stderr=subprocess.STDOUT)
+facts=dict(buildExitCode=compiled.returncode,queueExitCode=run.returncode,expectedFailure='red' in sys.argv[2:])
+(out/'result.json').write_text(json.dumps(facts,indent=2)+'\n',encoding='utf-8')
+print(json.dumps(facts),flush=True)
+print((out/'queue.txt').read_text(errors='replace'),flush=True)
+assert (run.returncode!=0) if facts['expectedFailure'] else (run.returncode==0)
