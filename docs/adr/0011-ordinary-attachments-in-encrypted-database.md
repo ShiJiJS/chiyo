@@ -6,4 +6,4 @@
 
 初版不引入外部加密附件库或服务器同步。附件版本/回收、受管交付副本和包含原字节的完整加密备份须一起实现；导入不删除源文件，撤销不承诺收回已读取内容。扩展旧规格排除附件存储的范围，不自动承诺OCR或通用解析，详见[当前设计](../design/windows-credential-and-file-update.md)。
 
-2026-10-19实施状态：已接[文件类型及所有者加密暂存](../development/issue37-encrypted-file-staging.md)，schema19/备份7；正式附件保存/交付/备份和Windows文件客户端仍待，#37/#38/#34保持OPEN。暂存不进入正式信息或便携备份，不宣告Agent文件能力；上述存储决策不变。
+2026-10-19实施状态：已接[正式附件草稿事务和完整库备份](../development/issue37-formal-files.md)，以及[Owner另存和30天保留清理](../development/issue37-owner-file-lifecycle.md)。schema20/含文件备份8、纯文本库7，仍兼容旧库/备份1–7；正文按需读取、不进普通快照。Agent交付、最终容量/RSS及Windows文件客户端仍待，#37/#38/#34保持OPEN，未宣告Agent文件能力。暂存不进入便携备份，上述存储决策不变。
