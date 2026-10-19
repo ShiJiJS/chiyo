@@ -8,6 +8,8 @@
 
 #35当前推进：338445a接通EXE内摘要绑定、正式驱动/Windows入口；3e98ec6修正构建/提取的依赖锁还原并生成QA整包，见[辅助程序与整包检查点](../development/issue35-focused-fill-bundle.md)。最终头部507通过/CLI6跳过、四包分析/Release、解压SDK-free11、6项构建绑定及5项分发拒绝通过。真实runner/SQLCipher/CLI的锁屏拒绝已过；正向GUI/内置浏览器及生命周期仍待解锁，#35不关闭。schema18/备份7不变，用户包未替换。#37从当前版本接续兼容1–7。
 
+#30接入材料接续：3c343cf补齐随包Skill的焦点填充分支、安全目标发现和未知结果处理；两项新独立适配器进程测试已过，选定检查16通过/1原生坏帧项跳过，见[检查点](../development/issue30-focused-fill-skill.md)。使用受控临时关联、Memory与假输入驱动，不计真实Codex/Windows输入验收。此前QA ZIP未重建，用户配置未改；#30仍待附件材料及三功能联合验收。
+
 ## 已交付基线
 
 当前Windows开发预览0.4.0+8，程序源码2918010，证据916fd2a；公开协议v1、schema16、备份格式5。Round05信息库、提案、历史/设置、凭据管理、字符串及文件注入、完整凭据备份已落地。351项自动检查、Release、SDK-free解压11项及各固定来源原生证据见[交付记录](../development/round05-windows-timeout-delivery.md)。这些结果不覆盖下面新增需求。

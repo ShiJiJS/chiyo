@@ -4,6 +4,8 @@
 
 > #35检查点（2026-10-19）：338445a已接可信辅助程序与Windows入口，3e98ec6完成QA整包/依赖还原，见[当前检查点](../development/issue35-focused-fill-bundle.md)。最终507通过/CLI6跳过、四包分析/Release、提取后11项和构建/分发检查通过；真实加密宿主+CLI仅新增锁屏拒绝证明，正向桌面和内置浏览器仍待解锁。源码按驱动条件启用，schema18/备份7不变，#35保持OPEN；用户旧包未更新。
 
+> #30材料检查点（2026-10-19）：3c343cf补齐随包Skill的焦点发现/申请/后台填充/原ID查询及人工检查边界；两项新独立适配器进程检查已过，选定16通过/1原生坏帧项跳过，严格分析/Skill校验通过。见[范围与原始证据](../development/issue30-focused-fill-skill.md)。Memory/假输入不替代原生正向或真实Codex验收；旧QA ZIP未重建，用户配置未改，#30继续OPEN。
+
 2026-10-16：用户要求更新方案与GitHub tickets；[新计划](design-audit-2026-10-16/README.md)跟踪round05界面与凭据注入。任务按依赖推进，D0先补齐原型及协议。仅完成规划发布，未新增生产实现或实机验收；下方旧实现进度保留为基线事实。
 
 Integration branch: `integration/local-information-access`.
