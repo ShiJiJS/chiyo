@@ -49,6 +49,217 @@ void main() {
     return db;
   }
 
+  test(
+    'file libraries reject a1001st template before committing unbackable rows',
+    () async {
+      await service.owner.createTemplate('File template', '', [
+        const TemplateFieldInput('Document', '', kind: FieldKind.file),
+      ]);
+      final db = inspect();
+      try {
+        db.execute('BEGIN');
+        for (var i = 1; i < 1000; i++) {
+          db.execute(
+            'INSERT INTO field_templates(id,name,description,version,fields_json) VALUES(?,?,?,?,?)',
+            [
+              'template-$i',
+              'Template$i',
+              '',
+              1,
+              jsonEncode([
+                {
+                  'id': 'definition-$i',
+                  'name': 'Document',
+                  'description': '',
+                  'kind': 'file',
+                },
+              ]),
+            ],
+          );
+        }
+        db.execute('COMMIT');
+        await expectLater(
+          service.owner.createTemplate('Over limit', '', [
+            const TemplateFieldInput('Document', '', kind: FieldKind.file),
+          ]),
+          throwsA(isA<StorageFailure>()),
+        );
+        expect(
+          db.select('SELECT count(*) AS n FROM field_templates').single['n'],
+          1000,
+        );
+        expect(repo.templates, hasLength(1));
+        final key = await enableTestBackups(repo.backups);
+        final path = '${root.path}/template-limit.aimbackup';
+        await repo.backups.exportTo(path);
+        expect((await repo.backups.inspect(path, key)).templateCount, 1000);
+      } finally {
+        db.close();
+      }
+    },
+  );
+
+  test(
+    'file libraries reject history beyond the shared500000 nested fact ceiling',
+    () async {
+      await service.owner.createTemplate('File template', '', [
+        const TemplateFieldInput('Document', '', kind: FieldKind.file),
+      ]);
+      GrantHistory history(String id, List<RecordedField> fields) =>
+          GrantHistory(
+            id: id,
+            requestId: 'request-$id',
+            sessionId: 'historical',
+            chatLabel: 'Historical',
+            approvedAt: now,
+            expiresAt: now.add(const Duration(hours: 8)),
+            fields: fields,
+            events: [GrantEvent(GrantEventKind.approved, now)],
+          );
+      final fields = [
+        for (var i = 0; i < 200; i++) RecordedField('i', 'f$i', 'I', 'F'),
+      ];
+      final db = inspect();
+      try {
+        db.execute('BEGIN');
+        for (var i = 0; i < 2500; i++) {
+          final record = history('grant-$i', fields);
+          db.execute(
+            'INSERT INTO grant_history(id,approved_at,payload) VALUES(?,?,?)',
+            [
+              record.id,
+              now.millisecondsSinceEpoch,
+              jsonEncode(record.toJson()),
+            ],
+          );
+        }
+        db.execute('COMMIT');
+        final key = await enableTestBackups(repo.backups);
+        final path = '${root.path}/nested-limit.aimbackup';
+        await repo.backups.exportTo(path);
+        expect((await repo.backups.inspect(path, key)).grantHistoryCount, 2500);
+        final recipient = await EncryptedInformationRepository.open(
+          '${root.path}/nested-recipient',
+          _Keys(),
+          clock: () => now,
+        );
+        addTearDown(recipient.close);
+        await recipient.backups.restoreFrom(path, key);
+        expect(recipient.grantHistory, hasLength(2500));
+        expect(
+          recipient.grantHistory.fold<int>(0, (n, g) => n + g.fields.length),
+          500000,
+        );
+        expect(recipient.grantHistory.every((g) => !g.active), isTrue);
+        await expectLater(
+          repo.saveGrantHistory(history('over-limit', [fields.first])),
+          throwsA(isA<StorageFailure>()),
+        );
+        expect(
+          db.select('SELECT count(*) AS n FROM grant_history').single['n'],
+          2500,
+        );
+        expect(repo.grantHistory, isEmpty);
+      } finally {
+        db.close();
+      }
+    },
+    timeout: const Timeout(Duration(minutes: 2)),
+  );
+
+  test(
+    'file libraries reserve future purge fact slots and never publish an oversized legacy retention result',
+    () async {
+      await service.owner.createTemplate('File template', '', [
+        const TemplateFieldInput('Document', '', kind: FieldKind.file),
+      ]);
+      final item = await service.owner.createInformation('Current', '', [
+        const FieldInput('Value', '', 'Synthetic'),
+      ]);
+      final db = inspect();
+      try {
+        db.execute('BEGIN');
+        for (var i = 0; i < 199999; i++) {
+          final fact = RecycleFact(
+            'old-$i',
+            'historical',
+            const [],
+            1,
+            RecycleFactKind.purged,
+            now,
+          );
+          db.execute('INSERT INTO recycle_facts(payload) VALUES(?)', [
+            jsonEncode(fact.toJson()),
+          ]);
+        }
+        db.execute('COMMIT');
+        // The immediate deletion would fit200000 facts, but its later purge
+        // needs one additional fact. Reject before changing the current item.
+        await expectLater(
+          service.owner.deleteInformation(item.id, item.version),
+          throwsA(isA<StorageFailure>()),
+        );
+        expect(repo.items.single.id, item.id);
+        expect(repo.recycleEntries, isEmpty);
+        expect(
+          db.select('SELECT count(*) AS n FROM recycle_facts').single['n'],
+          199999,
+        );
+
+        // Represent an old library created before those reservations existed.
+        final entry = RecycleEntry(
+          id: 'legacy-entry',
+          itemId: item.id,
+          wholeItem: true,
+          deletedAt: now,
+          expiresAt: now.add(const Duration(days: 30)),
+          version: 2,
+          snapshot: item,
+        );
+        final fact = RecycleFact(
+          entry.id,
+          item.id,
+          item.fields.map((f) => f.id),
+          2,
+          RecycleFactKind.deleted,
+          now,
+        );
+        db.execute('BEGIN');
+        db.execute('INSERT INTO recycle_entries(id,payload) VALUES(?,?)', [
+          entry.id,
+          jsonEncode(entry.toJson()),
+        ]);
+        db.execute('INSERT INTO recycle_facts(payload) VALUES(?)', [
+          jsonEncode(fact.toJson()),
+        ]);
+        db.execute('DELETE FROM information_fields WHERE item_id=?', [item.id]);
+        db.execute('DELETE FROM information_items WHERE id=?', [item.id]);
+        db.execute('COMMIT');
+        now = now.add(const Duration(days: 31));
+        await enableTestBackups(repo.backups);
+        final output = '${root.path}/must-not-publish.aimbackup';
+        await expectLater(
+          repo.backups.exportTo(output),
+          throwsA(
+            isA<StorageFailure>().having(
+              (e) => e.code,
+              'code',
+              'backup_capacity_exceeded',
+            ),
+          ),
+        );
+        expect(await File(output).exists(), isFalse);
+        expect(
+          db.select('SELECT count(*) AS n FROM recycle_facts').single['n'],
+          200000,
+        );
+      } finally {
+        db.close();
+      }
+    },
+    timeout: const Timeout(Duration(minutes: 2)),
+  );
+
   Future<InformationFileStage> stage(
     InformationFileDraft draft,
     List<int> bytes,

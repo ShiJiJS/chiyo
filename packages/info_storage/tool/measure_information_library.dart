@@ -18,10 +18,12 @@ class _Keys implements DatabaseKeyStore {
 /// Actual repository/retention/copy/backup/restore pipeline, synthetic data only.
 /// Run as a separate JIT process or `dart build cli` bundle, never on a user vault.
 Future<void> main(List<String> args) async {
-  if (args.length != 1 || !{'small', 'near-limit'}.contains(args.single)) {
-    throw ArgumentError('Choose small or near-limit');
+  if (args.length != 1 ||
+      !{'small', 'near-limit', 'history-limit'}.contains(args.single)) {
+    throw ArgumentError('Choose small, near-limit or history-limit');
   }
   final near = args.single == 'near-limit';
+  final dense = args.single == 'history-limit';
   final root = await Directory.systemTemp.createTemp(
     'information-library-measure-',
   );
@@ -173,6 +175,63 @@ Future<void> main(List<String> args) async {
           source.recycleEntries.isNotEmpty,
       'Missing retained or recycled fixture',
     );
+    if (dense) {
+      final db = database('${root.path}/source/library.db', 61);
+      try {
+        db.execute('BEGIN');
+        final fields = [
+          for (var i = 0; i < 200; i++)
+            RecordedField('dense-item', 'dense-field-$i', 'I', 'F'),
+        ];
+        for (var i = 0; i < 2499; i++) {
+          final record = GrantHistory(
+            id: 'dense-grant-$i',
+            requestId: 'dense-request-$i',
+            sessionId: 'dense-history',
+            chatLabel: 'Synthetic history',
+            approvedAt: now.subtract(const Duration(days: 1)),
+            expiresAt: now.subtract(const Duration(hours: 16)),
+            fields: fields,
+            events: [
+              GrantEvent(
+                GrantEventKind.approved,
+                now.subtract(const Duration(days: 1)),
+              ),
+            ],
+            restoredAt: now,
+          );
+          db.execute(
+            'INSERT INTO grant_history(id,approved_at,payload) VALUES(?,?,?)',
+            [
+              record.id,
+              record.approvedAt.millisecondsSinceEpoch,
+              jsonEncode(record.toJson()),
+            ],
+          );
+        }
+        db.execute('COMMIT');
+      } finally {
+        db.close();
+      }
+      await service.close();
+      service = null;
+      await source.close();
+      source = null;
+      source = await EncryptedInformationRepository.open(
+        '${root.path}/source',
+        sourceKeys,
+        clock: () => now,
+      );
+      service = InformationService(
+        repository: source,
+        clock: () => now,
+        informationDeliveryFiles: WindowsInformationDeliveryFiles(),
+      );
+      await require(
+        source.grantHistory.length == 2499,
+        'Dense history was not loaded',
+      );
+    }
     sample('originals-retention-recycle');
     final session = service.agent.openSession('Synthetic capacity profile');
     final fields = [
@@ -240,7 +299,29 @@ Future<void> main(List<String> args) async {
     await source.backups.saveRecoveryKeyTo('${root.path}/recovery.txt');
     final before = '${root.path}/before.aimbackup';
     await source.backups.exportTo(before);
-    if (near) {
+    if (dense) {
+      var remaining =
+          AttachmentBackupContainer.maxPayloadBytes -
+          await payloadSize(before, key) -
+          65536;
+      await require(remaining > 0, 'Dense metadata already exceeds budget');
+      final fields = <FieldInput>[];
+      while (remaining > 0) {
+        final size = remaining > 1000000 ? 1000000 : remaining;
+        fields.add(
+          FieldInput(
+            'Dense text${fields.length}',
+            '',
+            size < 10
+                ? 'x' * size
+                : '${'${fields.length}'.padLeft(10, '0')}${'x' * (size - 10)}',
+          ),
+        );
+        remaining -= size;
+      }
+      await service.owner.createInformation('Synthetic dense text', '', fields);
+      await source.writeSetting('auditRetentionDays', 90);
+    } else if (near) {
       final originalSize = await payloadSize(before, key);
       final padding =
           AttachmentBackupContainer.maxPayloadBytes - originalSize - 65536;
@@ -354,6 +435,7 @@ Future<void> main(List<String> args) async {
       'inspectAndRestoreMs': restoreMs,
       'allVersionsExact': true,
       'restoredFactsOnly': true,
+      'historicalGrants': dense ? 2499 : 0,
       'measurements': measurements,
       'maxRss': ProcessInfo.maxRss,
       'totalMs': watch.elapsedMilliseconds,
@@ -395,6 +477,13 @@ Future<void> main(List<String> args) async {
       removed = true;
     }
   }
+  sample('closed-and-cleaned');
+  result = {
+    ...result,
+    'maxRss': ProcessInfo.maxRss,
+    'postCloseRss': ProcessInfo.currentRss,
+    'totalMs': watch.elapsedMilliseconds,
+  };
   stdout.writeln(
     jsonEncode({'result': result, 'temporaryOutputRemoved': removed}),
   );

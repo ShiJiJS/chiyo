@@ -1,6 +1,74 @@
 part of 'info_storage.dart';
 
 const _metadataBudgetTimestamp = '9999-12-31T23:59:59.999999Z';
+const _backupRowCeiling = 500000;
+const _backupNestedFactCeiling = 500000;
+
+int _maximumBackupRows(String table) => switch (table) {
+  'information_fields' ||
+  'information_item_tags' ||
+  'information_file_fields' => 200000,
+  'field_templates' || 'settings' => 1000,
+  'access_records' || 'recycle_facts' || 'revision_purge_facts' => 200000,
+  _ => 10000,
+};
+
+bool _backupRowsWithinLimits(Map<String, List<Map<String, Object?>>> tables) {
+  var total = 0;
+  for (final table in tables.entries) {
+    if (table.value.length > _maximumBackupRows(table.key)) return false;
+    total += table.value.length;
+  }
+  return total <= _backupRowCeiling;
+}
+
+/// Count structure, not cross-record validity: an ordered audit pair may still
+/// be between its writes. Full domain checks remain mandatory for export.
+void _checkBackupAdmissionCounts(
+  Map<String, List<Map<String, Object?>>> tables,
+) {
+  Never full() => throw const AccessFailure('attachment_capacity_exceeded');
+  if (!_backupRowsWithinLimits(tables)) full();
+  var total = 0, nested = tables['information_deliveries']?.length ?? 0;
+  for (final table in tables.entries) {
+    if (table.value.length > _maximumBackupRows(table.key)) full();
+    total += table.value.length;
+  }
+  var availableRecycle = 0;
+  void snapshot(Map<String, dynamic> item) {
+    nested +=
+        1 + (item['fields'] as List).length + (item['tagIds'] as List).length;
+  }
+
+  for (final row in tables['information_revisions']!) {
+    snapshot(_backupJson(row));
+  }
+  for (final row in tables['recycle_entries']!) {
+    final entry = _backupJson(row);
+    if (entry['state'] == 'available') {
+      availableRecycle++;
+      snapshot(Map<String, dynamic>.from(entry['snapshot'] as Map));
+    }
+  }
+  for (final row in tables['recycle_facts']!) {
+    final fact = _backupJson(row);
+    nested += (fact['fieldIds'] as List).length;
+    nested += (fact['restoredFieldIds'] as Map?)?.length ?? 0;
+  }
+  for (final row in tables['grant_history']!) {
+    nested += (_backupJson(row)['fields'] as List).length;
+  }
+  // Expiring revisions replace one row with one purge fact. Recycling keeps
+  // its entry and adds a fact. Reserve these slots before automatic retention.
+  if (tables['revision_purge_facts']!.length +
+              tables['information_revisions']!.length >
+          _maximumBackupRows('revision_purge_facts') ||
+      tables['recycle_facts']!.length + availableRecycle >
+          _maximumBackupRows('recycle_facts') ||
+      total + availableRecycle > _backupRowCeiling ||
+      nested > _backupNestedFactCeiling)
+    full();
+}
 
 String _longestBudgetValue(Iterable<String> values) =>
     values.reduce((a, b) => a.length >= b.length ? a : b);
@@ -15,10 +83,14 @@ void _reserveRuntimeBackupOutcomes(
     String table,
     Map<String, Object?> Function(Map<String, dynamic>) project,
   ) {
-    tables[table] = [
-      for (final row in tables[table]!)
-        {...row, 'payload': jsonEncode(project(_backupJson(row)))},
-    ];
+    Map<String, Object?> rowWithReservation(Map<String, Object?> row) {
+      final original = _backupJson(row), reserved = project(original);
+      return identical(original, reserved)
+          ? row
+          : {...row, 'payload': jsonEncode(reserved)};
+    }
+
+    tables[table] = [for (final row in tables[table]!) rowWithReservation(row)];
   }
 
   reserve('credential_use_requests', (json) {
@@ -31,7 +103,7 @@ void _reserveRuntimeBackupOutcomes(
       ...json,
       // First/last operation identities and invalidation dates can still be
       // recorded under this grant. Opaque IDs have at most200 code units.
-      if (!request.isFocusedFill) 'executionId': 'X' * 200,
+      if (!request.isFocusedFill) 'executionId': '\u0001' * 200,
       'attemptConsumed': false,
       'attemptedAt': _metadataBudgetTimestamp,
       'revokedAt': _metadataBudgetTimestamp,
@@ -96,12 +168,39 @@ void _reserveRuntimeBackupOutcomes(
       'attentionAcknowledgedAt': _metadataBudgetTimestamp,
     };
   });
-  reserve(
-    'managed_credentials',
-    (json) => {
+  reserve('managed_credentials', (json) {
+    if (json['deletedAt'] == null || json['purgedAt'] != null) return json;
+    return {...json, 'purgedAt': _metadataBudgetTimestamp};
+  });
+  reserve('grant_history', (json) {
+    final events = json['events'] as List;
+    if (json['restoredAt'] != null ||
+        events.isEmpty ||
+        (events.last as Map)['kind'] != GrantEventKind.approved.name)
+      return json;
+    return {
       ...json,
-      if (json['deletedAt'] != null && json['purgedAt'] == null)
-        'purgedAt': _metadataBudgetTimestamp,
-    },
-  );
+      'events': [
+        ...events,
+        {
+          'kind': _longestBudgetValue(GrantEventKind.values.map((e) => e.name)),
+          'at': _metadataBudgetTimestamp,
+        },
+      ],
+    };
+  });
+  reserve('request_history', (json) {
+    if (json['restoredAt'] != null ||
+        json['state'] != AccessRequestState.approved.name)
+      return json;
+    return {
+      ...json,
+      'state': _longestBudgetValue(
+        AccessRequestState.values.map((s) => s.name),
+      ),
+      'recordedAt': _metadataBudgetTimestamp,
+      'sessionEnded': false,
+      'applicationClosed': false,
+    };
+  });
 }

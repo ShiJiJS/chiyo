@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:crypto/crypto.dart' as crypto;
 import 'package:info_core/info_core.dart';
 import 'package:info_core/agent_server.dart';
 import 'package:info_storage/info_storage.dart';
@@ -129,6 +130,53 @@ void main() {
     ]).id;
     service.owner.approve(request, [FieldRef(item.id, item.fields.single.id)]);
     await service.owner.retryAuditStorage();
+  }
+
+  Future<void> checkOldReaders(
+    String path,
+    String recovery,
+    int version,
+  ) async {
+    final configured = Platform.environment['ISSUE37_OLD_STORAGE_PROBES'];
+    if (configured == null) return;
+    final probes = (jsonDecode(configured) as List).cast<String>();
+    final before = crypto.sha256
+        .convert(await File(path).readAsBytes())
+        .toString();
+    final keyFile = File('${root.path}/old-reader-recovery.txt');
+    await keyFile.writeAsString(recovery);
+    for (var i = 0; i < probes.length; i++) {
+      final probe = probes[i], interpreted = probes[i].endsWith('.dart');
+      final reply = await Process.run(
+        interpreted ? Platform.resolvedExecutable : probe,
+        [
+          if (interpreted) ...['run', probe],
+          'inspect-backup',
+          '${root.path}/old-v$version-$i',
+          path,
+          keyFile.path,
+        ],
+        workingDirectory: File(probe).parent.path,
+      );
+      expect(
+        reply.exitCode,
+        0,
+        reason: 'Pinned old-reader process must finish normally',
+      );
+      final json =
+          jsonDecode((reply.stdout as String).trim().split('\n').last) as Map;
+      expect(json['status'], 'rejected');
+      expect(json['errorCode'], isIn(['unsupported_backup', 'invalid_backup']));
+      expect(reply.stderr, isNot(contains(recovery)));
+      expect(
+        crypto.sha256.convert(await File(path).readAsBytes()).toString(),
+        before,
+      );
+      // Only non-secret evidence markers reach the test log.
+      print(
+        'pinned-old-reader-$i rejected valid format$version; source unchanged',
+      );
+    }
   }
 
   setUp(() async {
@@ -423,6 +471,13 @@ void main() {
     'format9 archives facts and original bytes without leases or associations and restores no execution capability',
     () async {
       await approve();
+      if (Platform.environment.containsKey('ISSUE37_OLD_STORAGE_PROBES')) {
+        final key = await enableTestBackups(repo.backups);
+        final path = '${root.path}/before-delivery8.aimbackup';
+        await repo.backups.exportTo(path);
+        expect((await repo.backups.inspect(path, key)).formatVersion, 8);
+        await checkOldReaders(path, key, 8);
+      }
       final delivered = result(
         await service.agent.fetchInformationFile(session, input('one')),
       );
@@ -430,6 +485,7 @@ void main() {
       final key = await enableTestBackups(repo.backups),
           path = '${root.path}/archive.aimbackup';
       await service.owner.exportLibrary(() => repo.backups.exportTo(path));
+      await checkOldReaders(path, key, 9);
       final reader = await AttachmentBackupContainer.openValidated(path, key);
       try {
         expect(reader.formatVersion, 9);
@@ -917,6 +973,13 @@ void main() {
         );
         expect(released['state'], 'released');
         expect(await File(first['path'] as String).exists(), isFalse);
+        service.owner.revoke(request);
+        await service.owner.retryAuditStorage();
+        expect(
+          repo.grantHistory.single.events.last.kind,
+          GrantEventKind.revoked,
+        );
+        expect(repo.requestHistory.single.state, AccessRequestState.revoked);
         final after = '${root.path}/after.aimbackup';
         await repo.backups.exportTo(after);
         final checked = await repo.backups.inspect(after, recovery);

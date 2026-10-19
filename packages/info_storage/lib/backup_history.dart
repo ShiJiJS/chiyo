@@ -80,7 +80,7 @@ void _validateBackupHistory(
   var nestedCount = 0;
   void count(int n) {
     nestedCount += n;
-    if (nestedCount > 500000) _backupInvalid();
+    if (nestedCount > _backupNestedFactCeiling) _backupInvalid();
   }
 
   void fieldOwner(String field, String item) {

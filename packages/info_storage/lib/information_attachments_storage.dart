@@ -296,6 +296,9 @@ extension _EncryptedInformationAttachments on EncryptedInformationRepository {
     final document = await backups._rawSnapshotDocument(
       reserveLifecycleOutcomes: true,
     );
+    _checkBackupAdmissionCounts(
+      document['tables'] as Map<String, List<Map<String, Object?>>>,
+    );
     if (utf8.encode(jsonEncode(document)).length >
         AttachmentBackupContainer.maxPayloadBytes) {
       throw const AccessFailure('attachment_capacity_exceeded');

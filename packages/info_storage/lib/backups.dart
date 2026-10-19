@@ -274,10 +274,16 @@ class InformationBackups {
   Future<BackupContents> _snapshot() async {
     return _repository._db.transaction(() async {
       final document = await _rawSnapshotDocument();
-      return _retain(
+      final retained = _retain(
         _validate(document),
         DateTime.parse(document['createdAt'] as String),
       );
+      // Old libraries may predate admission reservations. Never publish an
+      // archive that retention has expanded beyond its own row limits.
+      if (!_backupRowsWithinLimits(retained._tables)) {
+        throw const StorageFailure('backup_capacity_exceeded');
+      }
+      return retained;
     });
   }
 
@@ -722,17 +728,10 @@ class InformationBackups {
     var totalRows = 0;
     for (final table in columns.entries) {
       final rows = data[table.key];
-      final maximum = switch (table.key) {
-        'information_fields' ||
-        'information_item_tags' ||
-        'information_file_fields' => 200000,
-        'field_templates' || 'settings' => 1000,
-        'access_records' || 'recycle_facts' || 'revision_purge_facts' => 200000,
-        _ => 10000,
-      };
+      final maximum = _maximumBackupRows(table.key);
       if (rows is! List || rows.length > maximum) invalid();
       totalRows += rows.length;
-      if (totalRows > 500000) invalid();
+      if (totalRows > _backupRowCeiling) invalid();
       tables[table.key] = rows
           .map((value) {
             if (value is! Map<String, dynamic> ||
