@@ -27,3 +27,5 @@ docs/development/evidence/issue38-owner-file-editor/raw/** -text -diff
 docs/development/evidence/issue38-approval-history/raw/** -text -diff
 
 docs/development/evidence/issue38-file-consumers/raw/** -text -diff
+
+docs/development/evidence/issue38-file-backup-capacity/raw/** -text -diff

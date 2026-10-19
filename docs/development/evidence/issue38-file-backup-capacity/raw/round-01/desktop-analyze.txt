@@ -1,0 +1,9 @@
+Flutter assets will be downloaded from https://storage.flutter-io.cn. Make sure you trust this source!
+Analyzing desktop...                                            
+
+   info - Statements in an if should be enclosed in a block. Try wrapping the statement in a block - lib\backups.dart:322:7 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block. Try wrapping the statement in a block - lib\backups.dart:342:7 - curly_braces_in_flow_control_structures
+  error - Missing concrete implementation of 'BackupFilePicker.recoveryKeyOutput'. Try implementing the missing method, or make the class abstract - test\information_file_backup_test.dart:28:7 - non_abstract_class_inherits_abstract_member
+   info - Statements in an if should be enclosed in a block. Try wrapping the statement in a block - test\information_file_backup_test.dart:274:13 - curly_braces_in_flow_control_structures
+
+4 issues found. (ran in 4.5s)
