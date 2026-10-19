@@ -1,0 +1,15 @@
+{
+  "pythonSyntax": true,
+  "helpExit": 0,
+  "originalLocksRawHashes": true,
+  "gitLockFiltersClean": true,
+  "payloadFiles": 113,
+  "appControl": {
+    "controlVersion": 1,
+    "status": "not_running"
+  },
+  "port47125Free": true,
+  "nativeTestProcesses": 0,
+  "cuReset": true,
+  "earlierVerificationAttempt": "Raw worktree/HEAD byte equality assertion failed because of Git line-ending filters; all four raw hashes match the preceding frozen evidence. No lock changed."
+}
