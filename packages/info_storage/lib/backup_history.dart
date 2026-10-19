@@ -550,8 +550,52 @@ extension _CompleteBackups on InformationBackups {
       }),
       contents.createdAt,
       contents.formatVersion,
-      attachments: contents.attachments,
+      attachments: _retainedBackupAttachments(
+        tables,
+        contents.attachments,
+        now,
+      ),
       origin: contents._origin,
+    );
+  }
+
+  List<InformationAttachmentVersion> _retainedBackupAttachments(
+    Map<String, List<Map<String, Object?>>> tables,
+    List<InformationAttachmentVersion> versions,
+    DateTime now,
+  ) {
+    if (versions.isEmpty) return versions;
+    final current = {
+      for (final row
+          in tables['information_file_fields'] ?? <Map<String, Object?>>[])
+        InformationAttachmentRef(
+          row['attachment_id'] as String,
+          row['attachment_version'] as int,
+        ),
+    };
+    final retained = <InformationAttachmentRef>{};
+    void keep(InformationItem item) {
+      retained.addAll(
+        item.fields
+            .map((f) => f.attachment)
+            .whereType<InformationAttachmentRef>(),
+      );
+    }
+
+    for (final row in tables['information_revisions']!) {
+      keep(informationFromJson(_backupJson(row)));
+    }
+    for (final row in tables['recycle_entries']!) {
+      final item = RecycleEntry.fromJson(_backupJson(row)).snapshot;
+      if (item != null) {
+        keep(item);
+      }
+    }
+    return retainInformationAttachments(
+      versions: versions,
+      current: current,
+      retained: retained,
+      now: now,
     );
   }
 

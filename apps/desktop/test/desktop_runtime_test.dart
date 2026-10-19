@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:info_core/agent_server.dart';
 import 'package:info_core/info_core.dart';
@@ -8,20 +9,146 @@ import 'package:info_desktop/desktop_runtime.dart';
 import 'support/desktop_platform_fixture.dart';
 
 void main() {
-  test('startup maintenance removes retired credential material without reviving it after clock rollback', () async {
-    var now = DateTime.utc(2026, 10, 1);
-    final service = InformationService(repository: MemoryInformationRepository(), clock: () => now);
-    var c = await service.owner.createStringCredential(name: 'Synthetic', publicPurpose: '', secret: 'fictional-old');
-    c = await service.owner.rotateStringCredential(c.id, c.revision, 'fictional-current');
-    now = now.add(const Duration(days: 31));
-    final runtime = DesktopRuntime(service: service, platform: NativeDesktopFixture(), closeServer: () async {}, closeRepository: () async {});
-    await runtime.start();
-    now = now.subtract(const Duration(days: 2));
-    await expectLater(service.owner.restoreCredentialVersion(c.id,c.revision,1), throwsA(isA<AccessFailure>()
-      .having((e)=>e.status,'status','credential_material_purged')));
-    expect(service.owner.credential(c.id).version,2);
-    await runtime.quit();
-  });
+  test(
+    'startup removes expired attachment originals while preserving the current file',
+    () async {
+      var now = DateTime.utc(2026, 10, 1);
+      final root = await Directory.systemTemp.createTemp('runtime-attachment-');
+      final repo = MemoryInformationRepository();
+      final service = InformationService(repository: repo, clock: () => now);
+      addTearDown(() async {
+        await service.close();
+        await root.delete(recursive: true);
+      });
+      Future<InformationItem> save(
+        List<int> bytes, [
+        InformationItem? previous,
+      ]) async {
+        final source = File('${root.path}/fictional.txt');
+        await source.writeAsBytes(bytes);
+        final draft = await service.owner.beginInformationFileDraft();
+        final stage = await service.owner.stageInformationFile(
+          draft,
+          source.path,
+        );
+        final item = await service.owner.commitInformationDraft(
+          draft,
+          'save',
+          InformationDraftInput(
+            name: '附件',
+            description: '',
+            itemId: previous?.id,
+            baseVersion: previous?.version,
+            fields: [
+              InformationDraftField.stagedFile(
+                '文件',
+                '',
+                stage.id,
+                fieldId: previous?.fields.single.id,
+              ),
+            ],
+          ),
+        );
+        await service.owner.releaseInformationFileDraft(draft);
+        return item;
+      }
+
+      final old = await save([1, 2]);
+      final current = await save([3], old);
+      now = now.add(const Duration(days: 30));
+      final runtime = DesktopRuntime(
+        service: service,
+        platform: NativeDesktopFixture(),
+        closeServer: () async {},
+        closeRepository: () async {},
+      );
+      await runtime.start();
+      expect(runtime.attachmentCleanupFailed, isFalse);
+      await expectLater(
+        repo.readInformationAttachmentChunk(
+          old.fields.single.attachment!,
+          0,
+          2,
+        ),
+        throwsA(
+          isA<AccessFailure>().having(
+            (e) => e.status,
+            'status',
+            'attachment_missing',
+          ),
+        ),
+      );
+      expect(
+        await repo.readInformationAttachmentChunk(
+          current.fields.single.attachment!,
+          0,
+          1,
+        ),
+        [3],
+      );
+      await runtime.quit();
+    },
+  );
+  test(
+    'failed startup attachment cleanup remains visible without blocking desktop startup',
+    () async {
+      final service = InformationService(
+        repository: _FailingAttachmentRepository(),
+      );
+      final native = NativeDesktopFixture();
+      final runtime = DesktopRuntime(
+        service: service,
+        platform: native,
+        closeServer: () async {},
+        closeRepository: () async {},
+      );
+      await runtime.start();
+      expect(runtime.attachmentCleanupFailed, isTrue);
+      expect(runtime.quitting, isFalse);
+      await runtime.quit();
+    },
+  );
+  test(
+    'startup maintenance removes retired credential material without reviving it after clock rollback',
+    () async {
+      var now = DateTime.utc(2026, 10, 1);
+      final service = InformationService(
+        repository: MemoryInformationRepository(),
+        clock: () => now,
+      );
+      var c = await service.owner.createStringCredential(
+        name: 'Synthetic',
+        publicPurpose: '',
+        secret: 'fictional-old',
+      );
+      c = await service.owner.rotateStringCredential(
+        c.id,
+        c.revision,
+        'fictional-current',
+      );
+      now = now.add(const Duration(days: 31));
+      final runtime = DesktopRuntime(
+        service: service,
+        platform: NativeDesktopFixture(),
+        closeServer: () async {},
+        closeRepository: () async {},
+      );
+      await runtime.start();
+      now = now.subtract(const Duration(days: 2));
+      await expectLater(
+        service.owner.restoreCredentialVersion(c.id, c.revision, 1),
+        throwsA(
+          isA<AccessFailure>().having(
+            (e) => e.status,
+            'status',
+            'credential_material_purged',
+          ),
+        ),
+      );
+      expect(service.owner.credential(c.id).version, 2);
+      await runtime.quit();
+    },
+  );
   test(
     'background startup durably purges expired revisions while preserving current content',
     () async {
@@ -275,5 +402,12 @@ class FailingHistoryRepository extends MemoryInformationRepository {
   Future<void> saveGrantHistory(GrantHistory history) async {
     if (failing) throw StateError('storage unavailable');
     return super.saveGrantHistory(history);
+  }
+}
+
+class _FailingAttachmentRepository extends MemoryInformationRepository {
+  @override
+  Future<void> reconcileInformationAttachments(DateTime now) async {
+    throw StateError('synthetic attachment cleanup unavailable');
   }
 }

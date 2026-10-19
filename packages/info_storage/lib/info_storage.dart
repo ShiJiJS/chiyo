@@ -113,6 +113,23 @@ class EncryptedInformationRepository
     int length,
   ) => _readAttachmentChunk(ref, offset, length);
   @override
+  Future<T> withInformationAttachment<T>(
+    InformationAttachmentRef ref,
+    Future<T> Function(InformationAttachmentVersion, Stream<Uint8List>) action,
+  ) => _withAttachment(ref, action);
+  @override
+  Future<void> reconcileInformationAttachments(DateTime now) async {
+    if (_closed) throw const StorageFailure('library_closed');
+    try {
+      await _db.transaction(() => _reconcileAttachmentRetention(now.toUtc()));
+    } on AccessFailure {
+      rethrow;
+    } on Object {
+      throw const StorageFailure('attachment_cleanup_failed');
+    }
+  }
+
+  @override
   Future<InformationDraftReceipt?> informationDraftReceipt(
     String draftId,
     String operationId,
@@ -606,6 +623,9 @@ class EncryptedInformationRepository
       _items[decoded.id] = decoded;
     }
     await _checkStoredFileReferences();
+    await _db.transaction(
+      () => _reconcileAttachmentRetention(_clock().toUtc()),
+    );
   }
 
   @override
@@ -1104,6 +1124,7 @@ class EncryptedInformationRepository
             [revision.item.id, revision.item.version],
           );
         }
+        await _reconcileAttachmentRetention(purgedAt.toUtc());
       });
       for (final revision in expired) {
         _revisionPurges.add(

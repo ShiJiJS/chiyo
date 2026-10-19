@@ -1,6 +1,51 @@
 part of 'information.dart';
 
 extension _MemoryInformationAttachments on MemoryInformationRepository {
+  Future<T> _withInformationFile<T>(
+    InformationAttachmentRef ref,
+    Future<T> Function(InformationAttachmentVersion, Stream<Uint8List>) action,
+  ) async {
+    final value = _informationFiles[ref];
+    if (value == null || !value.$1.available || value.$2 == null) {
+      throw const AccessFailure('attachment_missing');
+    }
+    Stream<Uint8List> chunks() async* {
+      final bytes = value.$2!;
+      for (var offset = 0; offset < bytes.length; offset += 1024 * 1024) {
+        final end = offset + 1024 * 1024 < bytes.length
+            ? offset + 1024 * 1024
+            : bytes.length;
+        yield Uint8List.fromList(bytes.sublist(offset, end));
+      }
+    }
+
+    return action(value.$1, chunks());
+  }
+
+  void _reconcileInformationFiles(DateTime now) {
+    if (_informationFiles.isEmpty) return;
+    Set<InformationAttachmentRef> refs(Iterable<InformationItem> items) => {
+      for (final item in items)
+        for (final f in item.fields)
+          if (f.attachment != null) f.attachment!,
+    };
+    final planned = retainInformationAttachments(
+      versions: _informationFiles.values.map((v) => v.$1),
+      current: refs(_items.values),
+      retained: refs([
+        ..._revisions.map((r) => r.item),
+        ..._recycle.values.map((e) => e.snapshot).whereType<InformationItem>(),
+      ]),
+      now: now,
+    );
+    for (final v in planned) {
+      _informationFiles[v.reference] = (
+        v,
+        v.available ? _informationFiles[v.reference]!.$2 : null,
+      );
+    }
+  }
+
   Uint8List _readInformationFile(
     InformationAttachmentRef ref,
     int offset,
@@ -87,6 +132,7 @@ extension _MemoryInformationAttachments on MemoryInformationRepository {
     _recycleFacts.addAll(change.facts);
     _informationCommits[key] = receipt;
     _fileStages.consume(change.draftId, stageIds);
+    _reconcileInformationFiles(item.modifiedAt!.toUtc());
     return receipt;
   }
 }

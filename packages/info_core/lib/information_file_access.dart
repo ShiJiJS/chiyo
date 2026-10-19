@@ -61,6 +61,7 @@ extension OwnerInformationFileIntake on OwnerAccess {
     String mediaType = 'application/octet-stream',
   }) => _serialize(() async {
     _checkInformationFileDraft(draft);
+    await _purgeInformationAttachments();
     final file = File(sourcePath);
     final name = file.uri.pathSegments.lastOrNull ?? '';
     // Validate display metadata before reading or reserving any encrypted row.

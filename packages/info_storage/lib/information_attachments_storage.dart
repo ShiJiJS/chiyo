@@ -1,6 +1,110 @@
 part of 'info_storage.dart';
 
 extension _EncryptedInformationAttachments on EncryptedInformationRepository {
+  Future<T> _withAttachment<T>(
+    InformationAttachmentRef ref,
+    Future<T> Function(InformationAttachmentVersion, Stream<Uint8List>) action,
+  ) async {
+    if (_closed) throw const StorageFailure('library_closed');
+    return _db.transaction(() async {
+      final version = (await _attachmentVersions(
+        ref.attachmentId,
+      )).where((v) => v.reference == ref).firstOrNull;
+      if (version == null || !version.available)
+        throw const AccessFailure('attachment_missing');
+      Stream<Uint8List> chunks() async* {
+        for (
+          var offset = 0;
+          offset < version.byteLength;
+          offset += AttachmentBackupContainer.chunkBytes
+        ) {
+          yield await _readAttachmentChunk(
+            ref,
+            offset,
+            min(
+              AttachmentBackupContainer.chunkBytes,
+              version.byteLength - offset,
+            ),
+          );
+        }
+      }
+
+      return action(version, chunks());
+    });
+  }
+
+  Future<void> _reconcileAttachmentRetention(DateTime now) async {
+    final versions = await _allAttachmentVersions();
+    if (versions.isEmpty) return;
+    final current = {
+      for (final row
+          in await _db
+              .customSelect(
+                'SELECT attachment_id,attachment_version FROM information_file_fields',
+              )
+              .get())
+        InformationAttachmentRef(
+          row.read<String>('attachment_id'),
+          row.read<int>('attachment_version'),
+        ),
+    };
+    final retained = <InformationAttachmentRef>{};
+    void keep(InformationItem item) {
+      retained.addAll(
+        item.fields
+            .map((f) => f.attachment)
+            .whereType<InformationAttachmentRef>(),
+      );
+    }
+
+    for (final r
+        in await _db
+            .customSelect('SELECT payload FROM information_revisions')
+            .get()) {
+      keep(
+        informationFromJson(
+          jsonDecode(r.read<String>('payload')) as Map<String, dynamic>,
+        ),
+      );
+    }
+    for (final r
+        in await _db
+            .customSelect('SELECT payload FROM recycle_entries')
+            .get()) {
+      final item = RecycleEntry.fromJson(
+        jsonDecode(r.read<String>('payload')) as Map<String, dynamic>,
+      ).snapshot;
+      if (item != null) keep(item);
+    }
+    final known = versions
+        .where((v) => v.available)
+        .map((v) => v.reference)
+        .toSet();
+    if (!known.containsAll(current) || !known.containsAll(retained))
+      throw const AccessFailure('attachment_missing');
+    final plan = retainInformationAttachments(
+      versions: versions,
+      current: current,
+      retained: retained,
+      now: now,
+    );
+    for (var i = 0; i < versions.length; i++) {
+      final before = versions[i], after = plan[i];
+      if (before.retiredAt == after.retiredAt &&
+          before.purgedAt == after.purgedAt)
+        continue;
+      await _db.customStatement(
+        'UPDATE information_attachment_versions SET metadata=?,body=CASE WHEN ?=1 THEN NULL ELSE body END WHERE attachment_id=? AND version=?',
+        [
+          jsonEncode(after.toPrivateJson()),
+          after.available ? 0 : 1,
+          after.reference.attachmentId,
+          after.reference.attachmentVersion,
+        ],
+      );
+    }
+  }
+
   Future<InformationFileStage> _informationStage(
     String draftId,
     String stageId,
@@ -144,6 +248,7 @@ extension _EncryptedInformationAttachments on EncryptedInformationRepository {
   }
 
   Future<void> _checkAttachmentBackupBudget() async {
+    await _reconcileAttachmentRetention(_clock().toUtc());
     final exists = await _db
         .customSelect(
           'SELECT 1 AS n FROM information_attachment_versions LIMIT 1',

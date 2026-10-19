@@ -408,6 +408,14 @@ class MemoryInformationRepository
     int length,
   ) async => _readInformationFile(ref, offset, length);
   @override
+  Future<T> withInformationAttachment<T>(
+    InformationAttachmentRef ref,
+    Future<T> Function(InformationAttachmentVersion, Stream<Uint8List>) action,
+  ) => _withInformationFile(ref, action);
+  @override
+  Future<void> reconcileInformationAttachments(DateTime now) async =>
+      _reconcileInformationFiles(now);
+  @override
   Future<InformationDraftReceipt?> informationDraftReceipt(
     String draftId,
     String operationId,
@@ -630,6 +638,13 @@ class MemoryInformationRepository
     }
     _recycleFacts.addAll(facts);
     if (proposal != null) _deletes[proposal.id] = proposal;
+    _reconcileInformationFiles(
+      (facts.lastOrNull?.at ??
+              item?.modifiedAt ??
+              previous?.replacedAt ??
+              DateTime.now())
+          .toUtc(),
+    );
   }
 
   final _directories = <String, InformationDirectory>{};
@@ -665,6 +680,7 @@ class MemoryInformationRepository
       );
     }
     _revisions.removeWhere((r) => !r.replacedAt.isAfter(cutoff));
+    _reconcileInformationFiles(purgedAt.toUtc());
   }
 
   @override
@@ -685,6 +701,9 @@ class MemoryInformationRepository
   ) async {
     _items[item.id] = item;
     _revisions.add(previous);
+    _reconcileInformationFiles(
+      (item.modifiedAt ?? previous.replacedAt).toUtc(),
+    );
   }
 
   @override
@@ -702,6 +721,9 @@ class MemoryInformationRepository
       _recycle[entry.id] = entry;
     }
     _recycleFacts.addAll(facts);
+    _reconcileInformationFiles(
+      (item.modifiedAt ?? previous.replacedAt).toUtc(),
+    );
   }
 
   @override
@@ -749,6 +771,7 @@ class MemoryInformationRepository
   @override
   Future<void> save(InformationItem item) async {
     _items[item.id] = item;
+    _reconcileInformationFiles((item.modifiedAt ?? DateTime.now()).toUtc());
   }
 
   @override

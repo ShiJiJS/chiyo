@@ -123,6 +123,7 @@ class DesktopRuntime extends ChangeNotifier {
   Future<void> _maintenance = Future.value();
   bool recycleCleanupFailed = false;
   bool revisionCleanupFailed = false;
+  bool attachmentCleanupFailed = false;
   bool credentialCleanupFailed = false;
   bool runtimeMaterialCleanupFailed = false;
   int runtimeMaterialChecks = 0;
@@ -169,6 +170,12 @@ class DesktopRuntime extends ChangeNotifier {
       credentialCleanupFailed = false;
     } catch (_) {
       credentialCleanupFailed = true;
+    }
+    try {
+      await service.owner.purgeInformationAttachments();
+      attachmentCleanupFailed = false;
+    } catch (_) {
+      attachmentCleanupFailed = true;
     }
     await reconcileRuntimeMaterialCleanup();
     try {

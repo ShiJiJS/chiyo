@@ -135,6 +135,18 @@ abstract interface class InformationAttachmentRepository
     int offset,
     int length,
   );
+
+  /// The callback's complete read shares one fixed original. No body is
+  /// attached to ordinary information snapshots or returned before approval.
+  Future<T> withInformationAttachment<T>(
+    InformationAttachmentRef ref,
+    Future<T> Function(
+      InformationAttachmentVersion version,
+      Stream<Uint8List> chunks,
+    )
+    action,
+  );
+  Future<void> reconcileInformationAttachments(DateTime now);
   Future<InformationDraftReceipt?> informationDraftReceipt(
     String draftId,
     String operationId,

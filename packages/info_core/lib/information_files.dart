@@ -64,6 +64,19 @@ final class InformationAttachmentVersion {
   final DateTime createdAt;
   final DateTime? retiredAt, purgedAt;
   bool get available => purgedAt == null;
+  InformationAttachmentVersion withRetention({
+    required DateTime? retiredAt,
+    required DateTime? purgedAt,
+  }) => InformationAttachmentVersion(
+    reference: reference,
+    originalName: originalName,
+    mediaType: mediaType,
+    byteLength: byteLength,
+    sha256: sha256,
+    createdAt: createdAt,
+    retiredAt: retiredAt,
+    purgedAt: purgedAt,
+  );
   static bool _validDate(DateTime date) =>
       date.isUtc && date.year >= 1970 && date.year <= 9999;
 
@@ -119,6 +132,33 @@ final class InformationAttachmentVersion {
     );
   }
 }
+
+/// One retention policy for the live repository and portable backups. Current
+/// content is pinned regardless of age; retained snapshots can delay deletion.
+/// Callers validate unknown references before applying this policy.
+List<InformationAttachmentVersion> retainInformationAttachments({
+  required Iterable<InformationAttachmentVersion> versions,
+  required Set<InformationAttachmentRef> current,
+  required Set<InformationAttachmentRef> retained,
+  required DateTime now,
+}) => List.unmodifiable(
+  versions.map((v) {
+    if (!v.available) return v;
+    if (current.contains(v.reference)) {
+      return v.retiredAt == null
+          ? v
+          : v.withRetention(retiredAt: null, purgedAt: null);
+    }
+    final retired = v.retiredAt ?? now.toUtc();
+    final purge =
+        !retained.contains(v.reference) &&
+        !now.isBefore(retired.add(const Duration(days: 30)));
+    return v.withRetention(
+      retiredAt: retired,
+      purgedAt: purge ? now.toUtc() : null,
+    );
+  }),
+);
 
 /// Private owner metadata. This is neither a field value nor an Agent grant.
 final class InformationFileStage {
