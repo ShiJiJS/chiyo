@@ -37,6 +37,8 @@ Owner另存按固定版本完整读取，校验长度和SHA-256，源事务成�
 
 ## 3. 申请、读取与交付
 
+2026-10-19客户端衔接：Owner的`approve`新增可选`reviewedVersions`映射，所选稳定字段引用必须恰好覆盖并仍与画面版本一致，否则`scope_changed`且请求保持待处理。此参数是所有者同意的并发保护，不是Agent新协议；未改变授权后按当前字段版本领取的语义。#38已接文件摘要加载后批准及固定版本交付历史，详见[检查点](../development/issue38-approval-history.md)，生产bootstrap仍待。
+
 发现与申请沿用`catalog`、`request(fields)`、`status/wait`、`claim`，不增加第二种普通文件授权弹窗。附件和文本混合申请可部分批准，普通读取默认8小时；私密会话证明沿用AgentClient内部关联，不作为JSON字段或stdout返回。凭据默认15分钟的使用许可不适用于普通附件。
 
 协商v2并具备`information-attachments.v1`后提供以下命令。opaque标识/JSON大小/重复key/未知属性/UTC等沿用运行协议约束；请求只含非秘密引用，真实会话能力由CLI带入私有通道。

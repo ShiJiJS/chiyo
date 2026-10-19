@@ -1,0 +1,6 @@
+Formatted lib/approvals.dart
+Formatted lib/history.dart
+Formatted lib/information_delivery_history.dart
+Formatted test/information_file_approval_history_test.dart
+Formatted test/support/information_attachment_fixture.dart
+Formatted 6 files (5 changed) in 0.10 seconds.

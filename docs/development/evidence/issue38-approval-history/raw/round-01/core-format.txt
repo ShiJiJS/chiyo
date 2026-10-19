@@ -1,0 +1,3 @@
+Formatted lib/info_core.dart
+Formatted test/owner_test.dart
+Formatted 2 files (2 changed) in 0.02 seconds.
