@@ -1,6 +1,6 @@
 ---
 name: agent-info-access
-description: Request user-approved information or Windows credential use through Agent Info, submit designated source information for review, and perform approved classification changes; reuse this chat's association and respect pending or denied access.
+description: Request user-approved information, Windows credential command use or local password filling through Agent Info; submit designated source information for review and perform approved classification changes using this chat's private association.
 ---
 
 Use the Agent Info association supplied by this chat's latest SessionStart hook.
@@ -14,11 +14,11 @@ to obtain a fresh context reference for the current CODEX_THREAD_ID. This is a
 new unapproved session, not a way to find an old grant. Do not retry it silently.
 Public chat IDs are not credentials.
 
-For Token, SSH private-key or AWS credential-file use, read
+For Token, SSH private-key, AWS credential-file use or local password filling, read
 [Credential use](references/credential-use.md) before requesting or running it.
-That workflow requests fixed-term credential use, then launches separately
-identified operations through the app's resident CLI host. Each operation supplies
-its full command; ordinary information access below reads approved field values.
+Choose its command or focused-input branch. Both request fixed-term use and
+identify each operation separately; focused filling supplies no command or secret
+value. Ordinary information access below reads approved field values.
 
 1. Call `info-codex` with one JSON object on stdin, including `association` and
    `command`. No command-line arguments. The executable is in the reviewed

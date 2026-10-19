@@ -4,7 +4,9 @@
 手工生成 token。它仍须真实桌面两聊天验收；当前实现不等于已安装或已验收。
 来源：[OpenAI Hooks 文档](https://learn.chatgpt.com/docs/hooks)，2026-10-16 核对。
 
-Windows开发分支的凭据调用已接协议v2：先申请固定期限，再以逐次operationId和完整launch调用持续宿主，同一批准范围内的不同命令不重复审批。CLI省略协议版本时默认2，旧服务明确拒绝；旧v1事实保持单次语义。调用流程及类型化注入见[随包凭据使用说明](skills/agent-info-access/references/credential-use.md)。当前已交付0.4.0+8仍是旧v1，须使用同一新版整包的应用、CLI、worker和模板，不能只更新Skill。普通附件和焦点填充仍待各自功能票，真实Codex安装/信任验收继续由#30跟踪。
+Windows开发分支的凭据调用已接协议v2：先申请固定期限，再以逐次operationId和完整launch调用持续宿主，同一批准范围内的不同命令不重复审批。CLI省略协议版本时默认2，旧服务明确拒绝；旧v1事实保持单次语义。调用流程及类型化注入见[随包凭据使用说明](skills/agent-info-access/references/credential-use.md)。当前已交付0.4.0+8仍是旧v1，须使用同一新版整包的应用、CLI、worker和模板，不能只更新Skill。
+
+#35的新源码与QA包已接构建绑定的焦点输入宿主，先以实际capabilities判断可用性；不把QA包冒充已替换用户包。Skill现包括[先授权、再点击和后台填充](skills/agent-info-access/references/credential-use.md#focused-password-input)，并区分安全目标发现、操作查询、未知结果和所有者人工确认。正向完整GUI及内置浏览器仍待解锁验收，普通附件仍待#37/#38；#30继续跟踪三功能联合及真实Codex安装/信任，不把受控关联文件测试当成真实Codex事件。
 
 ## 凭据边界
 

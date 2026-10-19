@@ -1,10 +1,12 @@
 # Windows credential use
 
 Use the same private association and stdin-only `info-codex` transport as the
-main Skill. The CLI launches each operation and injects its credential into that
-child process. Your own shell does not receive the secret or a secret-file path.
+main Skill. Choose command injection below for a CLI tool, or
+[Focused password input](#focused-password-input) for a visible local password
+box. The app's resident host handles the secret; your own shell does not receive
+the secret or a secret-file path. Approval alone performs neither operation.
 
-## Request once, operate within the fixed deadline
+## Command injection: request once, operate within the fixed deadline
 
 1. Query `capabilities`. New `request-use`, `run-use` and `operation-status`
    default to protocol2 and require `credential-use-reuse.v1`. An unsupported
@@ -116,5 +118,79 @@ external files or deliberate disclosure. The approved program receives the raw
 credential; runtime injection is not a sandbox. Use task results, not deliberate
 credential-printing commands, and report only the needed nonsecret facts.
 
-Ordinary attachments and local focused password filling are not enabled by this
-receiver protocol; do not invent commands for those separately planned features.
+## Focused password input
+
+This development branch has a separate local input protocol. A capability means
+the installed host offers that operation, not that every browser is supported.
+The previously delivered0.4.0+8 package does not offer it; the newer QA bundle
+still needs complete desktop/browser acceptance. Ordinary attachment delivery is
+not implemented yet. Use only the capabilities actually returned by the host.
+
+1. Query `capabilities`. Require protocol2, `credential-use-reuse.v1` and
+   `credential-focused-fill.v1`. For safe target discovery also require
+   `credential-focused-target.v1`. If discovery is unavailable, stop this
+   workflow and report it; keep secrets in the app rather than requesting raw
+   password text or inventing a receiver/placeholder.
+2. Select one current **string** credential from `credential-catalog`. Click the
+   intended visible password box, then call `focus-target` through a background
+   execution tool that preserves the foreground. Require `targetState:ready`
+   and keep its returned `application` object (absolute executable and SHA-256).
+   This observation neither reserves focus nor verifies the website. A DOM-only
+   focus in a hidden, remote or headless browser is insufficient.
+3. Send one `request-use` with that credential's actual ID/version and `fill` as
+   below. Copy `application` from discovery; use `targetHint` only to explain the
+   intended site. Do not combine `fill` with `launch` or `readFields`. Keep its
+   returned `requestId`, query `status`/bounded `wait`, and wait for
+   `decision.credentialUse.approved` and current `state:available`. The grant
+   fixes this credential version, application and15/30minute deadline.
+4. After approval, prepare an empty password box and click it again. Leave it
+   masked and keep the intended application foreground. Call `fill-use` in the
+   background with a new logical `operationId`; supply no secret, command,
+   window handle or file path. If the execution tool opens a terminal or cannot
+   carry private stdin separately, report that transport limitation.
+5. Query `fill-status` with the original requestId/operationId until a terminal
+   `fillState`, using bounded polling. `checking` is in progress; `sent` means
+   Windows accepted input events, not proof of full receipt or login. Never read
+   back, reveal or screenshot a visible password to verify it. Filling does not
+   clear the box or submit the form. Continue the user's authorized website task
+   only after the result is understood.
+
+As with command examples, include the private `association` only in stdin. Replace
+the application object with discovery's actual object and credential IDs/version
+with the catalog result; the values below are illustrative, not an allowlist.
+
+```json
+{"protocolVersion":2,"command":"focus-target"}
+{"protocolVersion":2,"command":"request-use","purpose":"Sign in to the project portal","credentials":[{"alias":"portal_password","credentialId":"CREDENTIAL_ID","version":1}],"fill":{"application":{"executable":"C:/Apps/WorkBrowser/WorkBrowser.exe","sha256":"8b31313131313131313131313131313131313131313131313131313131313131"},"targetHint":"https://portal.beichen.example/login"}}
+{"protocolVersion":2,"command":"fill-use","requestId":"REQUEST_ID","operationId":"portal-fill-01"}
+{"protocolVersion":2,"command":"fill-status","requestId":"REQUEST_ID","operationId":"portal-fill-01"}
+```
+
+For a lost response or `fill_unknown`, query the **same** `fill-status`. Repeating
+the same fill-use ID returns the original fact, even after revocation; it sends no
+new input. A new ID means a new attempt, not a polling method. `not_found` alone
+does not prove a timed-out request cannot still arrive: stop and inspect rather
+than automatically replacing or resending an uncertain operation.
+
+`refused` records zero sent events; explain its reason (for example,
+desktop_locked/unsupported_target/application_changed) before a deliberate new
+attempt after the cause is resolved. `busy` does not queue input for a future
+focus. `partial`, `unknown`, `audit_unavailable` or `fill_needs_attention` require
+stopping and owner inspection. The owner checks/clears the target and explicitly
+acknowledges it in the app before a deliberate new operation. The agent has no
+acknowledgment command; another approved request or ID cannot bypass the hold.
+The original outcome and deadline are preserved.
+
+Separate successful logical fills may reuse the same grant before expiry, after
+preparing and clicking the intended empty box each time. Revocation, rotation,
+disable/delete, expiry, session end or restart block new uses; they never justify
+automatic reapproval. File credentials and command grants cannot be used as fill
+grants. Filling returns metadata only: no executionId/exitCode, command output or
+cleanup-use path. The host checks the actual local password target, uses native
+input without the ordinary clipboard, and refuses an unverifiable target.
+
+The application identity is not a verified website origin. Password masking or
+redaction by another browser tool is that tool's behavior, not an Agent Info
+guarantee; explicit value extraction or a revealed-password screenshot can expose
+secrets. This workflow limits accidental disclosure during normal use, not
+deliberate readback or arbitrary third-party capture.
