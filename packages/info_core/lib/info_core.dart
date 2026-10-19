@@ -207,7 +207,7 @@ class InformationService {
   final _credentialUseSessions = <String, String>{};
   final _executionCapabilities = <String, String>{};
   final _pendingExecutionReceipts = <String, Map<String, Object?>>{};
-  Future<void> _runtimeWrites = Future.value();
+  late Future<void> _runtimeWrites = Future.value();
   InformationField? _field(FieldRef ref) {
     for (final item in _repository.items) {
       if (item.id == ref.itemId) {
