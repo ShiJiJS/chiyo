@@ -1,0 +1,7 @@
+Flutter assets will be downloaded from https://storage.flutter-io.cn. Make sure you trust this source!
+00:00 +0: loading C:/Project/network_config/info-manage/apps/desktop/integration_test/focused_fill_native_test.dart
+Building Windows application...                                    12.9s
+√ Built build\windows\x64\runner\Debug\info_desktop.exe
+00:00 +0: trusted bundle and encrypted bootstrap refuse a locked desktop without input
+00:00 +1: (tearDownAll)
+00:00 +1: All tests passed!

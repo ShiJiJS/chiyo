@@ -1,10 +1,10 @@
 # Windows焦点填充输入端
 
-2026-10-19，#35的原生检查点。业务边界以[填充合同](local-focused-fill-contract.md)为准；生产bootstrap尚未配置driver、未打包辅助进程，功能开关关闭。当前已验证一个真实Win32密码控件，不宣告内置浏览器兼容或整个功能完成。
+2026-10-19，#35的原生检查点。业务边界以[填充合同](local-focused-fill-contract.md)为准；[338445a/3e98ec6](../development/issue35-focused-fill-bundle.md)已配置构建绑定driver并生成QA整包，Windows源码按束校验成功条件启用；用户旧包未变。当前已验证一个真实Win32密码控件，不宣告内置浏览器兼容或整个功能完成。
 
 Agent经私密会话调用`focus-target`，只得到应用规范路径、当前文件SHA-256和当时是否就绪；无PID、窗口/控件身份、网页标题、字段值、DOM或截图。需要协议2及`credential-focused-target.v1`、既有填充/复用能力。查询不固定之后的焦点、不审批、不输入；批准后仍由Agent点击空密码框。
 
-所有者配置的`WindowsFocusedFillDriver`只启动固定程序`info-focus-broker.exe --broker-v1`，申请不能更换辅助进程或环境。启动前后核对文件；子进程再次核对自身SHA并持有文件句柄。初始环境仅SystemRoot/WINDIR，没有授权证明或托管凭据。秘密不经CLI参数、环境、文件、普通JSON响应或日志。
+桌面EXE编入同一配置broker的SHA-256，由本地MethodChannel给出同目录固定路径/摘要；启动前校验，失败先于资料库打开。构建sidecar和分发JSON不作为运行时信任源。配置后的`WindowsFocusedFillDriver`只启动固定程序`info-focus-broker.exe --broker-v1`，申请不能更换辅助进程或环境。启动前后核对文件；子进程再次核对自身SHA并持有文件句柄。初始环境仅SystemRoot/WINDIR，没有授权证明或托管凭据。秘密不经CLI参数、环境、文件、普通JSON响应或日志。
 
 内部stdin传长度帧，stdout只回严格元数据JSON；意外stderr、额外字段、坏JSON和尾随内容使通道失效。Dart默认分别限制写入和回执等待为4秒；取消先终止子进程，关闭共享同一排空Future。原生进程另有30秒上限和真实父进程退出观察，隔离UIA阻塞，不在审批队列里等待控件。
 
@@ -27,6 +27,6 @@ Agent经私密会话调用`focus-target`，只得到应用规范路径、当前�
 
 未解决的partial/unknown（含审计失败保留的checking）阻止同会话换操作ID或换另一项已批申请重填；活动操作优先返回busy。同ID仍查原事实，所有者确认不续期、不改成未输入；不使其他方式的命令操作失效。
 
-[原生检查点](../development/issue35-focused-fill-native.md)记录真实CLI/Win32、互斥、未知恢复、无粘贴/剪贴板不变及正常工具文字扫描。只有测试接收器读取自己的假密码作独立比对，生产broker不读回控件。仍须Flutter申请/审批/历史和人工确认入口、受信任程序清单及bootstrap/完整包，以及真实内置浏览器、显式value和明文截图验证。当前实机批准由所有者API决定，不冒充真实Flutter审批。原生目标和故障桩均EXCLUDE_FROM_ALL，测试程序不进用户包。
+[原生检查点](../development/issue35-focused-fill-native.md)记录真实CLI/Win32、互斥、未知恢复、无粘贴/剪贴板不变及正常工具文字扫描。只有测试接收器读取自己的假密码作独立比对，生产broker不读回控件。Flutter申请/审批/历史/人工确认与构建绑定bootstrap已有后续检查点；正向完整GUI/SQLCipher/CLI及真实内置浏览器、显式value和明文截图仍待解锁。本轮真实接线仅新增锁屏拒绝/空输入证明，不冒充正向Flutter审批通过。生产broker默认安装，测试/诊断和故障桩仍EXCLUDE_FROM_ALL，不进用户包。
 
 依据：[UIA2超时](https://learn.microsoft.com/en-us/windows/win32/api/uiautomationclient/nf-uiautomationclient-iuiautomation2-put_transactiontimeout)、[SendInput边界](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-sendinput)、[进程快照](https://learn.microsoft.com/en-us/windows/win32/api/tlhelp32/nf-tlhelp32-createtoolhelp32snapshot)、[PID复用](https://devblogs.microsoft.com/oldnewthing/20150403-00/?p=44313)。

@@ -1,6 +1,6 @@
 # 通用 CLI 申请与等待
 
-> 2026-10-19：开发分支的新CLI默认凭据协议v2，需要服务明确支持credential-use-reuse.v1；#33的Windows功能验收通过，生产入口已启用v2。当前已交付0.4.0+8预览仍为v1，须整包更新应用、CLI和worker后才能使用新版流程。普通附件与本机焦点填充分别待#37/#38和#35实现。真实Codex、通知和干净环境门槛继续保留。
+> 2026-10-19：开发分支的新CLI默认凭据协议v2，需要服务明确支持credential-use-reuse.v1；#33的Windows功能验收通过，生产入口已启用v2。当前已交付0.4.0+8预览仍为v1，须整包更新应用、CLI和worker后才能使用新版流程。普通附件仍待#37/#38；本机焦点填充已接Windows构建绑定入口与QA整包，正向GUI/内置浏览器仍待#35验收。真实Codex、通知和干净环境门槛继续保留。
 
 CLI 使用标准输入逐行 JSON，标准输出每行一个结果。保持同一个 CLI 进程，授权会话凭据和已领取的访问凭据留在进程内；不要把凭据写入命令参数、日志或聊天。启动入口是 `dart run packages/info_cli/bin/info.dart`，默认连接本机应用端口 47125，可用 `--port` 指定开发端口。
 
@@ -101,7 +101,7 @@ Typed env/argv对象才产生注入：GH_TOKEN接收`{"secret":"alias"}`；SSH�
 
 ## 开发中的本机焦点填充（#35）
 
-核心/CLI与真实Windows输入端已接通，当前生产bootstrap、Flutter页面及0.4.0+8包尚未启用。必须同时协商协议2、`credential-use-reuse.v1`和`credential-focused-fill.v1`，未提供时停止，不退回返回密码原文。需要私密会话，不能只凭请求ID使用。
+核心/CLI、Flutter及Windows构建绑定入口已接通，见[整包检查点](development/issue35-focused-fill-bundle.md)。源码/QA包按束校验条件启用；用户原0.4.0+8包未启用，正向GUI及内置浏览器仍待验收。必须同时协商协议2、`credential-use-reuse.v1`和`credential-focused-fill.v1`，未提供时停止，不退回返回密码原文。需要私密会话，不能只凭请求ID使用。
 
 若另有`credential-focused-target.v1`，`{"protocolVersion":2,"command":"focus-target"}`可观察本机当前密码目标，仅返回ready/refused和就绪应用路径/SHA；不提供值、窗口句柄或PID，不预留焦点、不审批、不输入。批准后必须重新点击空密码框。详见[原生合同与当前验证范围](design/windows-focused-fill-native.md)。
 

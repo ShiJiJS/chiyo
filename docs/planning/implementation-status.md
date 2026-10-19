@@ -2,7 +2,7 @@
 
 > 当前执行入口（2026-10-19）：[Windows后续计划](windows-next-iteration.md)继续跟踪三项新增调整。#36原型与#33凭据复用已完成，见[#33最终验收](../development/issue33-completion.md)；Windows源码已启用v2，接续#35→#37→#38→#30。当前已交付0.4.0+8包仍为v1，不表示用户已经更新。#23通知、#18新整包/干净环境及真实Codex联合门槛保持开放。下文旧阶段状态/自动继续同步安排仅作历史；无子Agent、服务器同步暂停，Mac及双向恢复延期。
 
-> #35检查点（2026-10-19）：8b36ead已接入Flutter审批/历史/分页/人工确认，见[客户端检查点](../development/issue35-focused-fill-ui.md)。本轮315项零跳过（核心190/桌面125）、客户端16项连续三轮、两包分析/Release、49项原型检查及21张四主题渲染通过；[原生4092d96证据](../development/issue35-focused-fill-native.md)单列。正式bootstrap/打包、完整Windows GUI/SQLCipher/CLI及内置浏览器仍待；生产关闭、schema18/备份7不变，#35保持OPEN，用户包未更新。
+> #35检查点（2026-10-19）：338445a已接可信辅助程序与Windows入口，3e98ec6完成QA整包/依赖还原，见[当前检查点](../development/issue35-focused-fill-bundle.md)。最终507通过/CLI6跳过、四包分析/Release、提取后11项和构建/分发检查通过；真实加密宿主+CLI仅新增锁屏拒绝证明，正向桌面和内置浏览器仍待解锁。源码按驱动条件启用，schema18/备份7不变，#35保持OPEN；用户旧包未更新。
 
 2026-10-16：用户要求更新方案与GitHub tickets；[新计划](design-audit-2026-10-16/README.md)跟踪round05界面与凭据注入。任务按依赖推进，D0先补齐原型及协议。仅完成规划发布，未新增生产实现或实机验收；下方旧实现进度保留为基线事实。
 

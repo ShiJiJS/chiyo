@@ -1,0 +1,3 @@
+{"phase":"ready","helper":{"executable":"C:\\Project\\network_config\\info-manage\\apps\\desktop\\build\\windows\\x64\\runner\\Debug\\info-focus-broker.exe","sha256":"3a52234a281cf8fcac7f0148906991094147d8219617673981e934d72498d40b"},"cli":"C:/Project/network_config/info-manage/build/qa-issue35/bundle-cli/info.exe","receiver":"C:/Project/network_config/info-manage/apps/desktop/build/windows/x64/focused_input/Release/info-focus-fixture.exe","encryptedLibrary":true}
+{"phase":"action","id":1,"action":"discover","ok":true,"protocolVersion":2,"status":"ok","targetState":"refused","errorCode":"desktop_locked"}
+{"phase":"action","id":2,"action":"close","ok":true,"closing":true}

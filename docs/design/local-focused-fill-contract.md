@@ -1,6 +1,6 @@
 # 本机焦点填充合同（#35）
 
-2026-10-19，沿用Round05，基线为#33提交3d31604。本文区分目标合同和已实现检查点：HTML、类型化核心、CLI和SQLCipher后已接通真实Windows输入端及安全目标发现，用独立CLI/Win32假密码控件验证。Flutter页已有[客户端检查点](../development/issue35-focused-fill-ui.md)，正式bootstrap/打包、完整Windows GUI/SQLCipher/CLI及内置浏览器兼容仍待；生产客户端继续关闭填充能力。
+2026-10-19，沿用Round05，基线为#33提交3d31604。本文区分目标合同和已实现检查点：HTML、类型化核心、CLI和SQLCipher后已接通真实Windows输入端及安全目标发现，用独立CLI/Win32假密码控件验证。Flutter页已有[客户端检查点](../development/issue35-focused-fill-ui.md)，[Windows可信辅助程序及QA整包](../development/issue35-focused-fill-bundle.md)已接通；源码在完整束校验成功后配置驱动并启用。完整正向Windows GUI/SQLCipher/CLI、内置浏览器兼容仍待解锁；用户旧包尚未更新。
 
 ## 用户任务与设计
 
@@ -25,7 +25,7 @@ Agent在批准后点击密码框一次、后台调用一次；这是新增使用
 
 公开v1命令合同不变。v2 `request-use`扩展为互斥的两种使用规格：原`launch`与新`fill`；缺少fill仍按命令规格解析。两种同时提供、未知方式或旧客户端尝试填充均明确拒绝，不用虚构LaunchPlan兼容。
 
-请求形状（已通过核心及独立编译CLI的受控宿主测试；当前生产客户端尚不支持）：
+请求形状（已通过核心及独立编译CLI的受控宿主测试；Windows新源码/QA包已接入；正向GUI和内置浏览器仍待验收，用户旧包尚未启用）：
 
 ```json
 {
@@ -78,12 +78,12 @@ SendInput不是向某个HWND原子定向输入；最终复核和Windows接受按
 
 ## 当前检查点与后续验证
 
-已交付[核心/CLI](../development/issue35-focused-fill-core.md)、[加密存储/备份](../development/issue35-focused-fill-storage.md)，现接续[原生输入/发现](../development/issue35-focused-fill-native.md)。使用独立操作类型及同一私密会话/版本/代际/期限，Memory和SQLCipher均实现原子审计，真实驱动逐批复核输入。`focus-target`已实现，需独立`credential-focused-target.v1`能力；生产driver/bootstrap未配置，enableFocusedFill默认false，不提前宣告生产可用。Flutter审批/历史/人工确认已有服务和渲染验证，完整Windows原生界面与内置浏览器仍须接续，不能把Win32接收器通过推广到所有工具。
+已交付[核心/CLI](../development/issue35-focused-fill-core.md)、[加密存储/备份](../development/issue35-focused-fill-storage.md)，现接续[原生输入/发现](../development/issue35-focused-fill-native.md)。使用独立操作类型及同一私密会话/版本/代际/期限，Memory和SQLCipher均实现原子审计，真实驱动逐批复核输入。`focus-target`已实现，需独立`credential-focused-target.v1`能力；Windows入口已配置构建绑定的driver并显式启用；AgentServer通用默认值仍false，实际能力还要求宿主及仓储支持。不把源码配置当作全部目标已验收。Flutter审批/历史/人工确认已有服务和渲染验证，完整Windows原生界面与内置浏览器仍须接续，不能把Win32接收器通过推广到所有工具。
 
-原生`focused_input`已实现[受管输入端](windows-focused-fill-native.md)：私有二进制通道、应用文件/进程及提供者链核验、桌面互斥、超时/父进程退出隔离、Unicode批次和结果。目标仍EXCLUDE_FROM_ALL，不打包到生产应用；只有明确测试接收器读自己的假密码比对，生产broker不读控件值或剪贴板。未解决的输入阻止同会话换已批申请重填，活动操作优先busy。
+原生`focused_input`已实现[受管输入端](windows-focused-fill-native.md)：私有二进制通道、应用文件/进程及提供者链核验、桌面互斥、超时/父进程退出隔离、Unicode批次和结果。生产broker默认构建/安装并以EXE内摘要校验，测试/诊断目标仍EXCLUDE_FROM_ALL；只有明确测试接收器读自己的假密码比对，生产broker不读控件值或剪贴板。未解决的输入阻止同会话换已批申请重填，活动操作优先busy。
 
 2026-10-19实际发现：浏览器工具的DOM焦点与Windows前台可以不同，首次前台为LockApp，识别未通过。只检查桌面名Default不足以拒绝锁屏，因此增加本机会话WTS解锁检查。之后只读捕获见到普通Chrome控件，同样未识别为密码框；这不证明内置浏览器已兼容。现有24项原生检查为状态谓词/JSON检查，不是24种真实控件兼容。
 
-继续完成正式bootstrap/打包及Windows GUI/SQLCipher/独立CLI闭环，将现有核心/CLI/存储/输入端串成完整用户流程；验证当前可见内置浏览器、显式value/明文截图，以及全链路生命周期和审计。Win32实机及各层自动验证不能替代所有目标逐个验收，未实测不列支持。此前假密码工具脱敏/明文截图反例仍有效；测试完关闭自建标签页/服务/控制会话，不动真实资料库或用户Codex配置。
+继续完成正向Windows GUI/SQLCipher/独立CLI闭环，将现有核心/CLI/存储/输入端串成完整用户流程；验证当前可见内置浏览器、显式value/明文截图，以及全链路生命周期和审计。Win32实机及各层自动验证不能替代所有目标逐个验收，未实测不列支持。此前假密码工具脱敏/明文截图反例仍有效；测试完关闭自建标签页/服务/控制会话，不动真实资料库或用户Codex配置。
 
 依据：[WTS会话状态](https://learn.microsoft.com/en-us/windows/win32/api/wtsapi32/ns-wtsapi32-wtsinfoex_level1_w)、[查询本机会话](https://learn.microsoft.com/en-us/windows/win32/api/wtsapi32/nf-wtsapi32-wtsquerysessioninformationw)、[SendInput限制](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-sendinput)。
