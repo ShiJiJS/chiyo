@@ -1,6 +1,6 @@
 # round05 已确认视觉基线
 
-> 当前目标更新（2026-10-19）：#33 Windows凭据复用及#36附件原型已完成；#35补焦点填充原型及只读原生识别，正式填充未接通。当前行为与后续界面要求见[设计修订](../../windows-credential-and-file-update.md)，排期见[Windows计划](../../../planning/windows-next-iteration.md)。旧一次启动状态用于保留v1历史，新复用/附件/填充有独立状态；附件核心由#37、Windows客户端由#38交付，保持四主题及三栏。
+> 当前目标更新（2026-10-19）：#33 Windows凭据复用、#36附件原型及[#35焦点填充Windows范围](../../../development/issue35-completion.md)已完成。HTML仍是虚构交互，不能替代真实平台证据或最终新包。当前行为与后续界面要求见[设计修订](../../windows-credential-and-file-update.md)，排期见[Windows计划](../../../planning/windows-next-iteration.md)。旧一次启动状态用于保留v1历史，新复用/附件/填充有独立状态；附件核心由#37、Windows客户端由#38交付，保持四主题及三栏。
 
 来自2026-10-16的HTML设计探索；2026-10-17 D0补齐流程。保留原型而非生产软件，虚构数据不接后台，刷新重置。见[流程覆盖](../../round05-flow-coverage.md)与[D0证据](../../../development/round05-22-design.md)。
 

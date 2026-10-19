@@ -1,0 +1,29 @@
+from pathlib import Path
+import json,sys,time
+folder=Path(sys.argv[1]); action=sys.argv[2]
+state=json.loads((folder/'state.json').read_text(encoding='utf-8'))
+previous=json.loads((folder/'command.json').read_text(encoding='utf-8')) if (folder/'command.json').exists() else None
+if previous and (state.get('id')!=previous['id'] or state.get('phase')!='action'):
+    raise RuntimeError('Previous action is not terminal; inspect existing state')
+identifier=(previous['id']+1) if previous else 1
+temporary=folder/'command.new.json'
+temporary.write_text(json.dumps({'id':identifier,'action':action}),encoding='utf-8')
+replace_until=time.monotonic()+2
+while True:
+    try:
+        temporary.replace(folder/'command.json')
+        break
+    except PermissionError:
+        if time.monotonic()>=replace_until:raise
+        time.sleep(.02)
+until=time.monotonic()+22
+while time.monotonic()<until:
+    try:
+        result=json.loads((folder/'state.json').read_text(encoding='utf-8'))
+        if (result.get('id')==identifier and result.get('phase')=='action') or result.get('phase')=='closed':
+            print(json.dumps(result,ensure_ascii=False))
+            if result.get('ok') is False:raise SystemExit(1)
+            break
+    except (json.JSONDecodeError,PermissionError):pass
+    time.sleep(.1)
+else:raise RuntimeError('Observation timed out; inspect same action before retrying')

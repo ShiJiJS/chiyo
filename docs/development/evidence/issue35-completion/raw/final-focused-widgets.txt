@@ -1,0 +1,22 @@
+Flutter assets will be downloaded from https://storage.flutter-io.cn. Make sure you trust this source!
+00:00 +0: loading C:/Project/network_config/info-manage/apps/desktop/test/focused_fill_widget_test.dart
+00:00 +0: C:/Project/network_config/info-manage/apps/desktop/test/focused_fill_widget_test.dart: real inbox approves focused fill without a command plan or sending input
+00:00 +1: C:/Project/network_config/info-manage/apps/desktop/test/focused_fill_widget_test.dart: real inbox approves focused fill without a command plan or sending input
+00:00 +2: C:/Project/network_config/info-manage/apps/desktop/test/focused_fill_widget_test.dart: real inbox approves focused fill without a command plan or sending input
+00:00 +3: C:/Project/network_config/info-manage/apps/desktop/test/focused_fill_widget_test.dart: real inbox approves focused fill without a command plan or sending input
+00:01 +4: C:/Project/network_config/info-manage/apps/desktop/test/focused_fill_widget_test.dart: failed approval preserves draft, modal and no authority; retry persists once
+00:01 +5: C:/Project/network_config/info-manage/apps/desktop/test/focused_fill_widget_test.dart: refusal does not create fill authority or input
+00:01 +6: C:/Project/network_config/info-manage/apps/desktop/test/focused_fill_widget_test.dart: unknown recovery is owner-confirmed, audited and does not resend or extend
+00:01 +7: C:/Project/network_config/info-manage/apps/desktop/test/focused_fill_widget_test.dart: active checking cannot be manually cleared
+00:01 +8: C:/Project/network_config/info-manage/apps/desktop/test/focused_fill_widget_test.dart: string credential can be saved with an empty optional binding
+00:01 +9: C:/Project/network_config/info-manage/apps/desktop/test/focused_fill_widget_test.dart: terminal audit failure has an honest recovery entry, not an endless checking label
+00:01 +10: C:/Project/network_config/info-manage/apps/desktop/test/focused_fill_widget_test.dart: twenty operations stay bounded and page selection does not mix records
+00:01 +11: C:/Project/network_config/info-manage/apps/desktop/test/focused_fill_widget_test.dart: long focused-fill surfaces purple 1440.0 at 200 percent
+00:02 +12: C:/Project/network_config/info-manage/apps/desktop/test/focused_fill_widget_test.dart: long focused-fill surfaces purple 1280.0 at 200 percent
+00:02 +13: C:/Project/network_config/info-manage/apps/desktop/test/focused_fill_widget_test.dart: long focused-fill surfaces green 1440.0 at 200 percent
+00:02 +14: C:/Project/network_config/info-manage/apps/desktop/test/focused_fill_widget_test.dart: long focused-fill surfaces green 1280.0 at 200 percent
+00:02 +15: C:/Project/network_config/info-manage/apps/desktop/test/focused_fill_widget_test.dart: long focused-fill surfaces blue 1440.0 at 200 percent
+00:02 +16: C:/Project/network_config/info-manage/apps/desktop/test/focused_fill_widget_test.dart: long focused-fill surfaces blue 1280.0 at 200 percent
+00:02 +17: C:/Project/network_config/info-manage/apps/desktop/test/focused_fill_widget_test.dart: long focused-fill surfaces mono 1440.0 at 200 percent
+00:02 +18: C:/Project/network_config/info-manage/apps/desktop/test/focused_fill_widget_test.dart: long focused-fill surfaces mono 1280.0 at 200 percent
+00:02 +19: All tests passed!

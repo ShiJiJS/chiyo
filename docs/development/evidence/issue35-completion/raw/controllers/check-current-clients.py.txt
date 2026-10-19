@@ -1,0 +1,29 @@
+from pathlib import Path
+import hashlib,json,os,subprocess
+root=Path.cwd();out=root/'build/qa-issue35/current-clients';out.mkdir(exist_ok=True)
+dart=r'C:/Users/Todoki/.local/share/flutter/bin/dart.bat'
+locks={root/p:(root/p).read_bytes() for p in ['packages/info_cli/pubspec.lock','packages/info_core/pubspec.lock','packages/info_storage/pubspec.lock','apps/desktop/pubspec.lock']}
+env=os.environ.copy();env['PUB_HOSTED_URL']='https://pub.flutter-io.cn'
+env['D35_COMPILED_CLI']=str(out/'info.exe');env['INFO_TEST_BUNDLE']=str(out)
+env['ISSUE35_NATIVE_BROKER']=str(root/'apps/desktop/build/windows/x64/focused_input/Release/info-focus-broker.exe')
+env['ISSUE35_NATIVE_FAULTS']=str(root/'apps/desktop/build/windows/x64/focused_input/Release')
+phases=[]
+try:
+    for path,data in locks.items():path.write_bytes(data.replace(b'https://pub.dev',b'https://pub.flutter-io.cn'))
+    commands=[('pub',[dart,'pub','get','--enforce-lockfile','--offline']),('analyze',[dart,'analyze','--fatal-infos']),('compile-info',[dart,'compile','exe','bin/info.dart','-o',str(out/'info.exe')]),('compile-adapter',[dart,'compile','exe','bin/codex_info.dart','-o',str(out/'info-codex.exe')]),('tests',[dart,'test','test/focused_fill_client_test.dart','test/focused_fill_target_test.dart','test/windows_focused_fill_test.dart','test/codex_focused_fill_test.dart','--reporter','expanded'])]
+    for name,command in commands:
+        result=subprocess.run(command,cwd=root/'packages/info_cli',env=env,capture_output=True,text=True,encoding='utf-8')
+        (out/(name+'.txt')).write_text(result.stdout+result.stderr,encoding='utf-8',newline='\n')
+        phases.append({'phase':name,'exitCode':result.returncode})
+        print(name+': '+str(result.returncode),flush=True)
+        if result.returncode:raise RuntimeError(name+' failed; inspect original log')
+finally:
+    drift=[]
+    normalize=lambda data:data.replace(b'https://pub.flutter-io.cn',b'https://pub.dev').replace(b'\r\n',b'\n')
+    for path,data in locks.items():
+        if path.exists() and normalize(path.read_bytes())==normalize(data):path.write_bytes(data)
+        else:drift.append(str(path.relative_to(root)))
+    value={'source':subprocess.check_output(['git','rev-parse','HEAD'],cwd=root,text=True).strip(),'phases':phases,'unexpectedLocks':drift,'binaries':[{'path':p.name,'sha256':hashlib.sha256(p.read_bytes()).hexdigest()} for p in out.glob('*.exe')]}
+    (out/'result.json').write_text(json.dumps(value,indent=2)+'\n',encoding='utf-8',newline='\n')
+    if drift:raise RuntimeError('Unexpected lock changes preserved')
+print('\n'.join((out/'tests.txt').read_text(encoding='utf-8').splitlines()[-9:]))
