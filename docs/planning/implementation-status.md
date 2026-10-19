@@ -1,5 +1,7 @@
 # Implementation status
 
+> 2026-10-20通知接续：[新实现实际Shell探针](../development/windows-notification-current-probe.md)显示回调已确认，实际点击/定位未通过（60秒0通过/1失败），Computer Use无通知目标，未输入且已reset；不自动重复投递。正常包内流程仍待旧版释放47125，真实Codex/干净Windows仍待用户安排，三票继续OPEN。
+
 > 2026-10-20后续：[实际包异常启动四项](../development/windows-packaged-startup-errors.md)通过，覆盖密钥缺失/损坏/不匹配和数据库损坏的错误窗口、原文件字节保护及正常退出；未改产品或重打包。正常GUI/升级仍需用户先退出占用47125的旧版，已发出请求，未假定完成。独立测试窗口和资料库、Computer Use已清理，其他真人/干净环境门槛保留。
 
 > 当前执行入口（2026-10-20）：Windows功能票#33/#34/#35/#36/#37/#38已完成，剩余执行票#30/#23/#18。#30的结束回执恢复和联合生命周期已修复验证，干净527b4cc的[0.4.0+10整包](../development/windows-preview-0.4.0-10.md)完整685通过/19既有跳过、严格分析、Release、实际解包CLI16/0与加密联合7/0通过，113项载荷与归档已复核。[恢复记录](../development/issue30-terminal-audit-recovery.md)保留首轮红测和桌面初始化停顿；0.4.0+9不含修复。最终GUI/升级、通知点击、真实Codex及干净Windows门槛保留。用户旧0.4.0+8未替换，无子Agent，服务器同步与Mac延期。下面保留各阶段当时的范围。
