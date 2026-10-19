@@ -1,0 +1,17 @@
+Flutter assets will be downloaded from https://storage.flutter-io.cn. Make sure you trust this source!
+00:00 +0: loading C:/Project/network_config/info-manage/apps/desktop/test/hosted_execution_bootstrap_test.dart
+00:00 +0: Windows desktop advertises reuse and accepts default v2 CLI requests through its production bootstrap
+00:00 +0 -1: Windows desktop advertises reuse and accepts default v2 CLI requests through its production bootstrap [E]
+  Expected: contains <2>
+    Actual: [1]
+     Which: does not contain <2>
+
+  package:matcher                                     expect
+  package:flutter_test/src/widget_tester.dart 473:18  expect
+  test\hosted_execution_bootstrap_test.dart 32:7      main.<fn>
+
+00:00 +0 -1: desktop bootstrap exposes authorized hosted execution facts and removes the endpoint on shutdown
+00:00 +1 -1: Some tests failed.
+
+Failing tests:
+  C:/Project/network_config/info-manage/apps/desktop/test/hosted_execution_bootstrap_test.dart: Windows desktop advertises reuse and accepts default v2 CLI requests through its production bootstrap

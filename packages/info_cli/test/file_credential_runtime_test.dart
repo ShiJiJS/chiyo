@@ -88,6 +88,7 @@ void main() {
         argv: ['sts', 'get-caller-identity', '--region', 'us-east-1'],
       );
       final run = await h.client.execute({
+        'protocolVersion': 1,
         'command': 'run-use',
         'requestId': request,
       });
@@ -99,7 +100,23 @@ void main() {
       final failed = await status();
       expect(failed['executionState'], 'exited');
       expect(failed['exitCode'], 7);
-      expect(failed['cleanupState'], 'failed');
+      // Windows may reject deletion or refuse identity inspection while the
+      // exclusive handle is held. Both must retain material, with an exact
+      // matching typed error; neither changes the recorded process exit.
+      expect(failed['cleanupState'], anyOf('failed', 'needs_check'));
+      final blocked = await h.client.execute({
+        'command': 'cleanup-use',
+        'executionId': run['executionId'],
+      });
+      final stillBlocked = await status();
+      expect(
+        blocked['errorCode'],
+        stillBlocked['cleanupState'] == 'failed'
+            ? 'cleanup_failed'
+            : 'cleanup_identity_mismatch',
+      );
+      expect(stillBlocked['cleanupState'], anyOf('failed', 'needs_check'));
+      expect(stillBlocked['exitCode'], 7);
       expect(await File(materialPath).exists(), isTrue);
       await release();
       expect(
@@ -113,6 +130,7 @@ void main() {
       expect(await File(materialPath).exists(), isFalse);
       expect(
         (await h.client.execute({
+          'protocolVersion': 1,
           'command': 'run-use',
           'requestId': request,
         }))['errorCode'],
@@ -159,6 +177,7 @@ void main() {
         ],
       );
       final accepted = await h.client.execute({
+        'protocolVersion': 1,
         'command': 'run-use',
         'requestId': request,
       });
@@ -196,6 +215,7 @@ void main() {
       expect(jsonEncode(status), isNot(contains(materialPath)));
       expect(
         (await h.client.execute({
+          'protocolVersion': 1,
           'command': 'run-use',
           'requestId': request,
         }))['errorCode'],

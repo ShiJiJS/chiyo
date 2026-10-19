@@ -88,6 +88,7 @@ void main() {
       expect(item.fields.first.value, 'native.example.invalid');
       Future<String> approve(String purpose, List<String> remote) async {
         final requested = await command({
+          'protocolVersion': 1,
           'command': 'request-use',
           'purpose': purpose,
           'credentials': [
@@ -152,6 +153,7 @@ void main() {
           'hosted-native-repeat',
         ]);
         final accepted = await command({
+          'protocolVersion': 1,
           'command': 'run-use',
           'requestId': repeated,
         });
@@ -188,6 +190,7 @@ void main() {
         'hosted-native-ok',
       ]);
       final accepted = await command({
+        'protocolVersion': 1,
         'command': 'run-use',
         'requestId': first,
       });
@@ -235,6 +238,7 @@ void main() {
       );
       expect(
         (await command({
+          'protocolVersion': 1,
           'command': 'run-use',
           'requestId': first,
         }))['errorCode'],
@@ -248,6 +252,7 @@ void main() {
 
       final second = await approve('等待测试服务器任务结束', ['/bin/sleep', '6']);
       final running = await command({
+        'protocolVersion': 1,
         'command': 'run-use',
         'requestId': second,
       });

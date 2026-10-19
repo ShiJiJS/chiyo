@@ -253,8 +253,20 @@ class _RuntimeWorkerProcess implements Process {
 
 extension _CredentialRuntimeClient on AgentClient {
   Future<Map<String, dynamic>> _executeCredentialCommand(
-    Map<String, dynamic> input,
+    Map<String, dynamic> submitted,
   ) async {
+    // New requests and operations use reusable authorization. Explicit v1 is
+    // retained only for historical clients/records, never an automatic fallback.
+    // Execution queries without a version infer it from the stored record.
+    final input =
+        !submitted.containsKey('protocolVersion') &&
+            {
+              'request-use',
+              'run-use',
+              'operation-status',
+            }.contains(submitted['command'])
+        ? <String, dynamic>{...submitted, 'protocolVersion': 2}
+        : submitted;
     try {
       if (utf8.encode(jsonEncode(input)).length > 262143) {
         throw const CredentialUseFailure('limit_exceeded');

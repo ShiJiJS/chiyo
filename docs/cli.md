@@ -1,7 +1,6 @@
 # 通用 CLI 申请与等待
 
-> 2026-10-18：当前Windows开发预览已实现字符串、SSH/AWS文件凭据和完整凭据备份；凭据协议v1仍是一次批准、一次启动。真实Codex联合验收与通知/干净环境门槛仍开放。
-> 用户确认的[授权有效期内复用、普通附件和焦点填充](design/windows-credential-and-file-update.md)尚未实现，不能按目标设计调用当前CLI。新协议由#33/#30冻结；不要将原型占位符直接交给shell。历史验证和当前Windows排期见[计划](planning/windows-next-iteration.md)。
+> 2026-10-19：开发分支的新CLI默认凭据协议v2，需要服务明确支持credential-use-reuse.v1；#33的Windows功能验收通过，生产入口已启用v2。当前已交付0.4.0+8预览仍为v1，须整包更新应用、CLI和worker后才能使用新版流程。普通附件与本机焦点填充分别待#37/#38和#35实现。真实Codex、通知和干净环境门槛继续保留。
 
 CLI 使用标准输入逐行 JSON，标准输出每行一个结果。保持同一个 CLI 进程，授权会话凭据和已领取的访问凭据留在进程内；不要把凭据写入命令参数、日志或聊天。启动入口是 `dart run packages/info_cli/bin/info.dart`，默认连接本机应用端口 47125，可用 `--port` 指定开发端口。
 
@@ -70,24 +69,32 @@ CLI 使用标准输入逐行 JSON，标准输出每行一个结果。保持同�
 
 用户在“录入提案”中查看修改前后信息和公开描述，明确确认或拒绝。状态为 `confirmed`、`rejected` 或 `conflicted`；版本冲突不会覆盖当前资料。冲突后根据当前目录版本和用户要求重新准备提案，避免自动重提。用户确认修正后，仍有效的原字段授权可读取最新值。确认操作可安全重试，不会重复增加版本或历史。
 
-## 凭据使用（Windows 开发分支）
+## 凭据使用（Windows开发分支，协议v2）
 
-当前支持字符串凭据接收配置 `gh_token`，版本探测只接受已验证的 GitHub CLI 2.102.0。其他平台的默认执行器在占用前拒绝；SSH/AWS 文件交付尚待 #29。正式二进制必须将 `info-runtime-worker.exe` 与 `info.exe` 放在同一目录，Codex bundle 准备器会一起复制。原有已安装 CLI 不会自动获得新增命令。
+先查询`capabilities`；新版CLI的request-use/run-use/operation-status省略协议版本时按2处理，必须共同支持`credential-use-reuse.v1`。旧服务返回unsupported_capability，不能静默降级或重提单次申请。其他查询可按执行事实返回原版本。旧v1记录与明确的v1调用保留一次尝试，不能升级旧许可；这不是用户的单次/多次模式开关。
 
-先查询 `{"command":"credential-catalog"}`，并在私密授权会话中提交完整计划。下面的 ID、程序和工作目录必须换成当前目录结果及本机实际绝对路径，Token 原文不写入输入：
+字符串接收配置gh_token、文件接收配置ssh_identity/aws_shared_credentials沿用已验证工具版本及严格接收器规则。程序、CLI、worker整包匹配；CLI只在自己创建的子进程中注入值或文件路径，不修改Agent当前shell、全局环境或返回秘密材料。
+
+查询credential-catalog选择相关凭据及固定版本，然后在现有私密会话提交一次申请。以下ID与绝对路径需替换为当前实际结果，普通字段可用readFields同时申请：
 
 ```json
-{"command":"request-use","purpose":"查看技能仓库信息","credentials":[{"alias":"github_token","credentialId":"CREDENTIAL_ID","version":1}],"launch":{"receiver":"gh_token","executable":"C:\\Program Files\\GitHub CLI\\gh.exe","argv":["repo","view","northstar/agent-skills"],"cwd":"C:\\Work\\northstar","env":{"GH_TOKEN":{"secret":"github_token"}}}}
+{"protocolVersion":2,"command":"request-use","purpose":"查看技能仓库信息","credentials":[{"alias":"github_token","credentialId":"CREDENTIAL_ID","version":1}],"launch":{"receiver":"gh_token","executable":"C:/Program Files/GitHub CLI/gh.exe","argv":["repo","view","northstar/agent-skills"],"cwd":"C:/Work/northstar","env":{"GH_TOKEN":{"secret":"github_token"}}}}
 ```
 
-保存返回的 `requestId`，用原有 `status` / `wait` 等待用户在桌面决定；可附带 `readFields`，字段与凭据的批准范围、期限和失效独立。只有 `decision.credentialUse.approved:true` 且许可仍有效时才发送：
+首条launch供用户理解用途。通过原requestId查询status/wait，用户批准不会自动执行。credentialUse.approved及当前state为available时，使用授权固定15/30分钟，期间每个操作独立提交完整launch和唯一operationId，不逐命令再审批；普通字段独立默认8小时，可由用户缩短。复用不续期，新增未批凭据或使用方式需要新申请。
 
 ```json
-{"command":"run-use","requestId":"REQUEST_ID"}
+{"protocolVersion":2,"command":"run-use","requestId":"REQUEST_ID","operationId":"repo-check-01","launch":{"receiver":"gh_token","executable":"C:/Program Files/GitHub CLI/gh.exe","argv":["repo","view","northstar/agent-skills"],"cwd":"C:/Work/northstar","env":{"GH_TOKEN":{"secret":"github_token"}}}}
 {"command":"execution-status","executionId":"EXECUTION_ID"}
 {"command":"execution-output","executionId":"EXECUTION_ID","cursor":0,"limit":16}
 ```
 
-`run-use` 只引用获批计划，不接受修改后的命令。返回 `accepted` 表示尝试已占用、正在准备，不能当作已创建进程或执行成功；随后根据 `execution-status` 的 `processStarted`、`executionState`、`exitCode` 和独立 `cleanupState` 判断。准备/启动失败也消耗一次尝试；响应丢失先查询原请求取得执行编号，不能自动重跑或重提。程序位置、参数、工作目录、凭据版本在提交后固定；普通文本中的占位符不会替换。
+同一私密会话的同operationId和完整内容重试只返回原事实；换内容为operation_conflict，不会再次交付材料。响应丢失时复制原run-use对象，仅把command改为operation-status，按原ID/原内容查询。unknown不代表未运行，不自动改ID重做。明确失败只属于本次操作，不消费整个授权；修正并核查原因后，可在仍有效的批准范围内明确提交新ID和新命令。
 
-输出仅保留在启动该任务的 CLI 内存，按块返回 base64、流标签和全局接收序号，最多首4MiB，超限后继续排空。其他 CLI 或进程关闭后输出不可恢复；外部输出可能含秘密，勿写入聊天、审计或历史。stdin EOF 等待已启动任务结束，但不结束共享授权会话。重启只保留非秘密事实，无法确认的执行显示 `unknown`，不恢复启动能力。Token 不创建凭据文件，清理为 `not_needed`。完整约束、错误码和边界见[协议 v1](design/runtime-protocol-v1.md)。
+accepted只表示登记操作；根据processStarted、executionState、实际exitCode和独立cleanupState判断运行结果。每次执行冻结自己的程序身份/参数/目录/注入计划，材料及Job独立。撤销、到期、轮换、停用、删除、会话结束及重启拒绝新操作，已运行任务继续；某任务退出只清理自己的材料。cleanup-use按原executionId重试清理，不能当作重新运行。重启保留未知结果但不恢复许可。
+
+Typed env/argv对象才产生注入：GH_TOKEN接收`{"secret":"alias"}`；SSH的-i后独立参数`{"file":"alias"}`接收临时路径；AWS_SHARED_CREDENTIALS_FILE接收`{"file":"alias"}`路径。普通文本{{SSH_KEY_FILE}}不替换。通用cookie文件、普通附件领取和浏览器密码填充不由这些接收器自动支持。
+
+输出在执行宿主内存有界保留、base64按流/序号分页；已知凭据直接回显在保留前遮挡，但不保证编码、截图或外部文件安全。输出不可用不代表执行失败。通用CLI需保持进程接续；Codex由持续宿主跨单命令进程保管，结束/缓存淘汰后不恢复输出。CLI的stdin EOF不结束共享会话。
+
+完整协议、兼容和边界见[协议v2](design/runtime-protocol-v2.md)，Agent流程见[随包凭据使用说明](../integrations/codex/skills/agent-info-access/references/credential-use.md)。

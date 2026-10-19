@@ -52,6 +52,7 @@ class DesktopBootstrap extends ChangeNotifier {
       _server = await AgentServer.start(
         library!.service.agent,
         port: port,
+        enableReusableCredentialUse: Platform.isWindows,
         credentialExecutionHandler: (session, input) {
           final host = _credentialExecutions;
           return host == null

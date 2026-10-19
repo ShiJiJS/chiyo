@@ -80,6 +80,7 @@ void main() {
       final item = service.owner.information.single;
       final field = FieldRef(item.id, item.fields.first.id);
       final request = await command({
+        'protocolVersion': 1,
         'command': 'request-use',
         'purpose': '只用本次非空合成 Token 请求 GitHub /user，预期401，不读取用户已有账号。',
         'credentials': [
@@ -114,7 +115,11 @@ void main() {
       );
       final id = request['requestId'] as String;
       expect(
-        (await command({'command': 'run-use', 'requestId': id}))['errorCode'],
+        (await command({
+          'protocolVersion': 1,
+          'command': 'run-use',
+          'requestId': id,
+        }))['errorCode'],
         'request_pending',
       );
       await tester.pumpAndSettle();
@@ -139,11 +144,19 @@ void main() {
         }))['value'],
         'native.example.invalid',
       );
-      final accepted = await command({'command': 'run-use', 'requestId': id});
+      final accepted = await command({
+        'protocolVersion': 1,
+        'command': 'run-use',
+        'requestId': id,
+      });
       expect(accepted['status'], 'accepted');
       final executionId = accepted['executionId'] as String;
       expect(
-        (await command({'command': 'run-use', 'requestId': id}))['errorCode'],
+        (await command({
+          'protocolVersion': 1,
+          'command': 'run-use',
+          'requestId': id,
+        }))['errorCode'],
         'attempt_consumed',
       );
       final deadline = DateTime.now().add(const Duration(seconds: 30));

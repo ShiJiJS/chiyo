@@ -392,25 +392,27 @@ void main() {
   );
 
   test(
-    'disabled v2 capability refuses new semantics before creating a request',
+    'default and explicit v2 refuse an old service without silently creating a v1 request',
     () async {
       final h = await RuntimeHarness.create();
       addTearDown(h.close);
       final capabilities = await h.client.execute({'command': 'capabilities'});
       expect(capabilities['protocolVersions'], [1]);
       expect(capabilities['capabilities'], isEmpty);
-      final result = await h.client.execute({
-        'protocolVersion': 2,
-        'command': 'request-use',
-        'purpose': 'Capability check',
-        'credentials': [
-          {'alias': 'token', 'credentialId': h.credential.id, 'version': 1},
-        ],
-        'launch': run(h, 'unused', 'unused')['launch'],
-      });
-      expect(result['errorCode'], 'unsupported_capability');
-      expect(result['protocolVersion'], 2);
-      expect(h.service.owner.credentialUseRequests, isEmpty);
+      for (final version in [null, 2]) {
+        final result = await h.client.execute({
+          'protocolVersion': ?version,
+          'command': 'request-use',
+          'purpose': 'Capability check',
+          'credentials': [
+            {'alias': 'token', 'credentialId': h.credential.id, 'version': 1},
+          ],
+          'launch': run(h, 'unused', 'unused')['launch'],
+        });
+        expect(result['errorCode'], 'unsupported_capability');
+        expect(result['protocolVersion'], 2);
+        expect(h.service.owner.credentialUseRequests, isEmpty);
+      }
     },
   );
 

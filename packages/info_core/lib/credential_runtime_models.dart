@@ -738,7 +738,7 @@ class CredentialUseRequest {
       CredentialUseRequest.fromJson({...toJson(), ...values});
   Map<String, Object?> toStorageJson() => toJson();
   Map<String, Object?> toRequestInputJson() => {
-    if (protocolVersion != 1) 'protocolVersion': protocolVersion,
+    'protocolVersion': protocolVersion,
     'command': 'request-use',
     'purpose': purpose,
     'credentials': [

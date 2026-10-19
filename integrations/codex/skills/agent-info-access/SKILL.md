@@ -16,8 +16,9 @@ Public chat IDs are not credentials.
 
 For Token, SSH private-key or AWS credential-file use, read
 [Credential use](references/credential-use.md) before requesting or running it.
-That workflow starts one approved program through the app's resident CLI host;
-ordinary information access below reads approved field values.
+That workflow requests fixed-term credential use, then launches separately
+identified operations through the app's resident CLI host. Each operation supplies
+its full command; ordinary information access below reads approved field values.
 
 1. Call `info-codex` with one JSON object on stdin, including `association` and
    `command`. No command-line arguments. The executable is in the reviewed

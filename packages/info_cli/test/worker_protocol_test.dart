@@ -60,6 +60,7 @@ Future<void> main() async {
       });
       final request = await h.approve(cwd: root.path);
       final accepted = await client.execute({
+        'protocolVersion': 1,
         'command': 'run-use',
         'requestId': request,
       });
@@ -76,6 +77,7 @@ Future<void> main() async {
       expect(status['processStarted'], isFalse);
       expect(
         (await client.execute({
+          'protocolVersion': 1,
           'command': 'run-use',
           'requestId': request,
         }))['errorCode'],

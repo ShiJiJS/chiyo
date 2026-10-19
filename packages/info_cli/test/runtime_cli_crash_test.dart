@@ -80,6 +80,7 @@ Future<void> main() async {
 
       await command({'command': 'session', 'chatLabel': 'Compiled CLI crash'});
       final r = await command({
+        'protocolVersion': 1,
         'command': 'request-use',
         'purpose': 'Controlled crash recovery',
         'credentials': [
@@ -102,6 +103,7 @@ Future<void> main() async {
       );
       expect(
         (await command({
+          'protocolVersion': 1,
           'command': 'run-use',
           'requestId': r['requestId'],
         }))['status'],

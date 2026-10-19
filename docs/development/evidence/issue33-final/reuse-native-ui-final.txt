@@ -1,0 +1,8 @@
+Flutter assets will be downloaded from https://storage.flutter-io.cn. Make sure you trust this source!
+00:00 +0: loading C:/Project/network_config/info-manage/apps/desktop/integration_test/reusable_runtime_native_test.dart
+Building Windows application...                                    16.2s
+√ Built build\windows\x64\runner\Debug\info_desktop.exe
+00:00 +0: native v2 approval runs two independent SSH operations across compiled adapters and preserves independent field access after revocation
+00:07 +1: (tearDownAll)
+00:07 +1: All tests passed!
+{"imageId": "sha256:4c33580cdd4166ddf8faeb4f6bba9fb7e208720978f0a92751681b3f22d9406c", "testExitCode": 0, "fixture": "synthetic localhost only", "containerRemovedAfterRun": true}

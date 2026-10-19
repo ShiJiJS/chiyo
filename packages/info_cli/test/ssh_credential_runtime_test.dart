@@ -61,6 +61,7 @@ void main() {
         ],
       );
       final run = await h.client.execute({
+        'protocolVersion': 1,
         'command': 'run-use',
         'requestId': request,
       });
@@ -102,6 +103,7 @@ void main() {
       }
       expect(
         (await h.client.execute({
+          'protocolVersion': 1,
           'command': 'run-use',
           'requestId': request,
         }))['errorCode'],

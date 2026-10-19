@@ -74,6 +74,7 @@ Future<void> main() async {
       );
       Future<String> request() async {
         final result = await command({
+          'protocolVersion': 1,
           'command': 'request-use',
           'purpose': 'Real CLI controlled launch',
           'credentials': [
@@ -98,6 +99,7 @@ Future<void> main() async {
       final used = await request();
       final unused = await request();
       final modified = await command({
+        'protocolVersion': 1,
         'command': 'run-use',
         'requestId': used,
         'launch': {},
@@ -109,7 +111,11 @@ Future<void> main() async {
             .attemptConsumed,
         isFalse,
       );
-      final accepted = await command({'command': 'run-use', 'requestId': used});
+      final accepted = await command({
+        'protocolVersion': 1,
+        'command': 'run-use',
+        'requestId': used,
+      });
       expect(accepted['status'], 'accepted');
       final deadline = DateTime.now().add(const Duration(seconds: 10));
       while (!await ready.exists()) {
@@ -118,7 +124,11 @@ Future<void> main() async {
         }
         await Future<void>.delayed(const Duration(milliseconds: 20));
       }
-      final replay = await command({'command': 'run-use', 'requestId': used});
+      final replay = await command({
+        'protocolVersion': 1,
+        'command': 'run-use',
+        'requestId': used,
+      });
       expect(replay['errorCode'], 'attempt_consumed');
       expect(replay['executionId'], accepted['executionId']);
       final output = await command({
@@ -205,7 +215,9 @@ Future<void> main() async {
       expect((await response())['errorCode'], 'invalid_json');
       cli.stdin.writeln('{"command":"credential-catalog"}');
       expect((await response())['status'], 'ok');
-      cli.stdin.writeln('{"command":"run-use","requestId":"unknown"}');
+      cli.stdin.writeln(
+        '{"protocolVersion":1,"command":"run-use","requestId":"unknown"}',
+      );
       expect((await response())['errorCode'], 'session_mismatch');
     },
   );

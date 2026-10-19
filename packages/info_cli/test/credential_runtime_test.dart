@@ -34,6 +34,7 @@ void main() {
       });
       final request = await h.approve();
       final accepted = await h.client.execute({
+        'protocolVersion': 1,
         'command': 'run-use',
         'requestId': request,
       });
@@ -50,6 +51,7 @@ void main() {
       expect(status['exitCode'], isNull);
       expect(
         (await h.client.execute({
+          'protocolVersion': 1,
           'command': 'run-use',
           'requestId': request,
         }))['errorCode'],
@@ -119,6 +121,7 @@ void main() {
         try {
           expect(
             (await client.execute({
+              'protocolVersion': 1,
               'command': 'run-use',
               'requestId': request,
             }))['status'],
@@ -168,6 +171,7 @@ void main() {
       expect((await image.stat()).size, stat.size);
       expect((await image.stat()).modified, stat.modified);
       final accepted = await h.client.execute({
+        'protocolVersion': 1,
         'command': 'run-use',
         'requestId': request,
       });
@@ -183,6 +187,7 @@ void main() {
       expect(spawned, isFalse);
       expect(
         (await h.client.execute({
+          'protocolVersion': 1,
           'command': 'run-use',
           'requestId': request,
         }))['errorCode'],
@@ -222,6 +227,7 @@ void main() {
         await h.close();
       });
       final result = await client.execute({
+        'protocolVersion': 1,
         'command': 'run-use',
         'requestId': request,
       });
@@ -271,6 +277,7 @@ void main() {
         final request = await h.approve();
         expect(
           (await h.client.execute({
+            'protocolVersion': 1,
             'command': 'run-use',
             'requestId': request,
           }))['status'],
@@ -279,6 +286,7 @@ void main() {
       }
       final pending = await h.approve();
       final rejected = await h.client.execute({
+        'protocolVersion': 1,
         'command': 'run-use',
         'requestId': pending,
       });
@@ -294,6 +302,7 @@ void main() {
       await h.client.drainCredentialExecutions();
       expect(
         (await h.client.execute({
+          'protocolVersion': 1,
           'command': 'run-use',
           'requestId': pending,
         }))['status'],
@@ -324,6 +333,7 @@ Future<void> main() async {
       });
       final request = await h.approve(cwd: folder.path);
       final accepted = await h.client.execute({
+        'protocolVersion': 1,
         'command': 'run-use',
         'requestId': request,
       });
@@ -404,6 +414,7 @@ Future<void> main() async {
       });
       final request = await h.approve(cwd: folder.path);
       final accepted = await h.client.execute({
+        'protocolVersion': 1,
         'command': 'run-use',
         'requestId': request,
       });
@@ -442,6 +453,7 @@ Future<void> main() async {
       expect(status['exitCode'], isNull);
       expect(
         (await h.client.execute({
+          'protocolVersion': 1,
           'command': 'run-use',
           'requestId': request,
         }))['errorCode'],
@@ -484,6 +496,7 @@ Future<void> main() async {
       });
       final request = await h.approve(cwd: folder.path);
       final accepted = await h.client.execute({
+        'protocolVersion': 1,
         'command': 'run-use',
         'requestId': request,
       });
@@ -572,6 +585,7 @@ Future<void> main() async {
       );
       await client.execute({'command': 'session', 'chatLabel': 'Audit outage'});
       final request = await client.execute({
+        'protocolVersion': 1,
         'command': 'request-use',
         'purpose': 'Monitor despite audit outage',
         'credentials': [
@@ -593,6 +607,7 @@ Future<void> main() async {
         approveCredential: true,
       );
       final accepted = await client.execute({
+        'protocolVersion': 1,
         'command': 'run-use',
         'requestId': request['requestId'],
       });
@@ -682,6 +697,7 @@ Future<void> main() async {
         {'status': 'ok'},
       );
       final request = await client.execute({
+        'protocolVersion': 1,
         'command': 'request-use',
         'purpose': 'Verify isolated process',
         'credentials': [
@@ -701,6 +717,7 @@ Future<void> main() async {
       final id = request['requestId'] as String;
       await service.owner.decideCredentialUse(id, approveCredential: true);
       final accepted = await client.execute({
+        'protocolVersion': 1,
         'command': 'run-use',
         'requestId': id,
       });
@@ -709,6 +726,7 @@ Future<void> main() async {
       expect(jsonEncode(accepted), isNot(contains('synthetic-token')));
       expect(
         (await client.execute({
+          'protocolVersion': 1,
           'command': 'run-use',
           'requestId': id,
         }))['errorCode'],

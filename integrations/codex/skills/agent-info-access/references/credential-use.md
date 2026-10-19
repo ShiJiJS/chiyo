@@ -1,105 +1,120 @@
 # Windows credential use
 
 Use the same private association and stdin-only `info-codex` transport as the
-main Skill. This branch permits one approved program launch, not secret reading.
-The desktop app must remain available to accept and observe the launch. Its
-resident CLI host owns the worker; separate adapter calls share authorized
-status and bounded memory output. Never run the placeholder command directly
-in the agent's own shell or set global environment variables.
+main Skill. The CLI launches each operation and injects its credential into that
+child process. Your own shell does not receive the secret or a secret-file path.
 
-## Request, wait, run and observe
+## Request once, operate within the fixed deadline
 
-1. Call `credential-catalog` (`limit`1–100, optional returned `cursor`). It exposes
-   only discoverable metadata, forms, current versions and suggested bindings.
-   Select the credential relevant to this task, not every discovered credential.
-2. Submit one `request-use` with `purpose`, one `credentials` entry containing
-   `alias`, `credentialId`, `version`, and `launch` containing `receiver`, an
-   absolute `executable`, exact `argv`, existing absolute `cwd`, and typed `env`.
-   Optional `readFields` contains ordinary `itemId`/`fieldId` pairs. These grants
-   are independent: credential approval does not imply field access, or vice versa.
-   Keep the returned public `requestId` and fixed plan hash.
-3. Use `status` or bounded `wait` with that same `requestId`; `timeoutMs` is
-   0–300000. Continue unrelated work while pending. Timeout or adapter exit does
-   not justify another request. Inspect `decision.credentialUse.approved` and
-   its current `state`, not just the overall approved/partially_approved label.
-   Only `available` permits a new launch. Ordinary fields, if approved, use the
-   main Skill's `claim`/`read` workflow on this request ID.
-4. Call `run-use` with only `requestId` plus the private association. The service
-   rechecks current session, expiry, credential version and fixed executable/plan.
-   Do not send replacement arguments, environment values or working directory.
-   `accepted` means an attempt was reserved; it does not mean the program started
-   or succeeded. Keep `executionId`. Preparation/start failure also consumes
-   the single attempt; a different plan needs a newly reviewed request.
-5. Query `execution-status` with `executionId`. Distinguish `preparing`, `running`,
-   `exited`, `prepare_failed`, `start_failed` and `unknown`. Check actual `exitCode`
-   only when recorded. Stop polling when a terminal fact is available; while
-   running use a bounded check interval rather than a tight loop.
-6. When `outputAvailable` is true and task output is needed, call
-   `execution-output` with that `executionId`, `cursor`0 and `limit`1–16. Decode
-   each chunk's `dataBase64` as bytes for its `stream`; continue with `nextCursor`
-   while `hasMore`. `outputComplete` and `outputTruncated` are independent facts.
-   Output is at most the first4MiB per task, only in the host's memory, globally
-   up to16 tasks; finished caches may be evicted, expire after30minutes, and
-   disappear when the host exits. Unavailable output is not proof of failure and
-   must not trigger another launch.
+1. Query `capabilities`. New `request-use`, `run-use` and `operation-status`
+   default to protocol2 and require `credential-use-reuse.v1`. An unsupported
+   service requires a matching whole app/CLI/worker bundle; never silently
+   downgrade or create a replacement single-use request.
+2. Query `credential-catalog` for public metadata, form, current version and
+   suggested binding. Select the one credential relevant to the task. Submit
+   one `request-use` with `purpose`, `credentials` (`alias`, `credentialId`,
+   `version`) and the first complete `launch` (`receiver`, absolute `executable`,
+   exact `argv`, existing absolute `cwd`, typed `env`). This first command helps
+   the owner understand the task; it is not the only command allowed forever.
+   Optional `readFields` contains ordinary item/field IDs, independently approved.
+3. Keep the returned `requestId`. Use `status` or bounded `wait` on that same
+   request (`timeoutMs`0–300000) and continue unrelated work while pending.
+   Approval does not start anything. Inspect `decision.credentialUse.approved`,
+   current `state` and fixed `expiresAt`; only `available` admits a new operation.
+   Credential use defaults to15minutes (owner may choose30); ordinary fields
+   independently default to8hours and use the main Skill's claim/read workflow.
+4. For each logical command, choose a new unique `operationId` and send
+   `run-use` with the same `requestId` and that command's complete `launch`.
+   The alias, credential version and receiver remain in the approved scope.
+   Legal new commands within that scope need no new approval and never extend
+   the deadline. CLI validates the real receiver and freezes each operation's
+   executable identity, parameters, directory and effective injection plan.
+5. Keep `executionId`. `accepted` means the operation was registered, not that
+   the process started or succeeded. Query `execution-status` and distinguish
+   preparing/running/exited/prepare_failed/start_failed/unknown; use an exit code
+   only when actually recorded. Stop polling at a terminal fact and use bounded
+   intervals while running. A failed operation does not consume the whole grant.
+6. If output is needed and `outputAvailable` is true, use `execution-output`
+   with executionId, cursor0 and limit1–16. Decode `dataBase64` for its `stream`
+   and advance `nextCursor` while `hasMore`. OutputComplete/outputTruncated are
+   separate facts. At most4MiB is retained per task, up to16 resident tasks;
+   completed caches may be evicted, expire after30minutes, or disappear on host
+   exit. Missing output is not a reason to launch the command again.
 
-## Typed delivery
-
-Only these receivers are supported in this Windows version:
-
-- `gh_token`: a string Token in `GH_TOKEN`. Use
-  `"env":{"GH_TOKEN":{"secret":"github_token"}}`; the credential entry's alias
-  is `github_token`. The actual value is set only on the approved child process.
-  This is not a way to run arbitrary executables with arbitrary secret variables.
-- `ssh_identity`: an unencrypted SSH private-key file, noninteractive OpenSSH to
-  a Linux/Unix host. Put `"-i",{"file":"ssh_key"}` as separate argv entries and
-  `"env":{}`; the credential alias is `ssh_key`. The CLI creates a protected copy
-  and supplies its full path. The owner must first confirm a known-host snapshot
-  in settings. Fixed strict-host, single-identity and empty configuration controls
-  are added to the approved effective plan. Unknown/changed hosts, password/PTY
-  interaction and Windows remote shells are outside this receiver.
-- `aws_shared_credentials`: a static shared-credentials file with one `default`
-  profile. Use `"env":{"AWS_SHARED_CREDENTIALS_FILE":{"file":"aws_file"}}`,
-  alias `aws_file`, and explicit region arguments. The CLI supplies protected
-  credentials and an independent empty AWS config. Existing user profiles, SSO,
-  credential processes, instance metadata and interactive prompts are excluded.
-
-`{"file":"alias"}` and `{"secret":"alias"}` are structured values. A literal
-string such as `{{SSH_KEY_FILE}}` or `{{file:ssh_key}}` remains literal; neither
-the OS nor the agent shell expands it. Strings are not injected into argv.
-File paths and private material are prepared by the CLI, never requested as
-ordinary readable fields. Generic cookie files or other receivers are not
-supported merely because they can be stored as a credential.
-
-Example `launch` for a file credential (the normal association/credential entry
-and user-specific IDs belong in the enclosing request):
+Examples omit the private `association`; pass the current reference separately
+in each stdin JSON object as required by the main Skill. Replace public IDs and
+absolute paths using the actual catalog and local program installation.
 
 ```json
-{"receiver":"ssh_identity","executable":"C:/Windows/System32/OpenSSH/ssh.exe","argv":["-T","-o","BatchMode=yes","-i",{"file":"ssh_key"},"-p","2222","developer@test.beichen.example","/usr/bin/true"],"cwd":"C:/work/project","env":{}}
+{"protocolVersion":2,"command":"request-use","purpose":"Check the skill repository","credentials":[{"alias":"github_token","credentialId":"CREDENTIAL_ID","version":1}],"launch":{"receiver":"gh_token","executable":"C:/Program Files/GitHub CLI/gh.exe","argv":["repo","view","northstar/agent-skills"],"cwd":"C:/work/northstar","env":{"GH_TOKEN":{"secret":"github_token"}}}}
 ```
 
-## Uncertain and ended operations
+After approval, the first operation still needs its own ID and full launch:
 
-If the launch response is lost or reports `material_claim_failed`, query
-`status` for the original request, obtain its existing `executionId`, then
-query that execution. Never switch to direct shell execution or automatically
-reapply/relaunch an uncertain operation. `unknown` requires checking the
-original task and residual resources, not interpreting an absent exit code.
+```json
+{"protocolVersion":2,"command":"run-use","requestId":"REQUEST_ID","operationId":"repo-inspection-01","launch":{"receiver":"gh_token","executable":"C:/Program Files/GitHub CLI/gh.exe","argv":["repo","view","northstar/agent-skills"],"cwd":"C:/work/northstar","env":{"GH_TOKEN":{"secret":"github_token"}}}}
+```
 
-For file cleanup failures use `cleanup-use` with the original `executionId`;
-this retries cleanup only. `cleanup_busy` preserves files while a process group
-is active or its end is inconclusive. Identity mismatch requires owner review.
-Never delete a path inferred from an execution ID or scan for secret files.
+For a second different command use another operationId and supply its full launch
+under the same request. Preserve each submitted object until its result is known.
 
-Stop on denial, unavailable scope, expiry, revocation, version/use-condition
-changes or ended association. Report the specific result; a new need or changed
-plan needs a new user-reviewed request. A typed unavailable host/capacity result
-with `attemptConsumed:false` leaves the original attempt unspent; resume only
-that approved request while still eligible, never create replacement requests
-silently. Revocation/session end blocks later launches, not an already running
-program. An existing program can outlive the app; reopening records uncertain
-results and checks registered process groups before cleaning files.
+## Retry identity and uncertain results
 
-This is runtime delivery, not a sandbox that hides secrets from the approved
-program or other same-user processes. Programs can disclose secrets in output;
-avoid commands that intentionally print credentials and report only task facts.
+The de-duplication key is this private session plus operationId. Repeating the
+same requestId/operationId/launch returns the original facts with duplicate:true;
+it never returns new material or launches again. Changing content under the same
+ID gives operation_conflict, including when trying another request in this session.
+
+After a lost response, copy the exact original run-use object and change only
+command to operation-status. This queries the original operation even if no
+executionId was received. A found operation is not permission to replay it.
+Unknown results and material_claim_failed require checking that original task;
+never automatically change the ID or use a direct shell to replay it. If an
+explicit failure confirms the operation was not successful, fix and assess the
+cause before deliberately submitting a new logical operation with a new ID.
+
+A typed unavailable/capacity result with operationClaimed:false allows retrying
+that same unclaimed operation while eligible. Denial, expiry, revocation,
+credential rotation/disable/delete, session end and app restart block new uses.
+Report that reason; never silently recreate the request. Scope expansion needs
+new owner approval. Old protocol1 records retain one attempt: only when
+continuing such a returned record, legacy run-use explicitly sends protocolVersion1
+and requestId. Do not reinterpret an old record as a reusable grant.
+
+## Typed injection
+
+- gh_token: string credential through `"env":{"GH_TOKEN":{"secret":"github_token"}}`.
+  Only the CLI-created child's environment receives it; global and parent shell
+  environments are unchanged. This supports the validated GitHub CLI receiver,
+  not arbitrary programs or arbitrary secret variable names.
+- ssh_identity: unencrypted private key, noninteractive OpenSSH to Linux/Unix.
+  Put `"-i",{"file":"ssh_key"}` as separate argv entries, with `"env":{}`.
+  CLI creates a protected copy, passes its full path, and adds strict-host,
+  single-identity and empty-config controls. The owner first confirms a host
+  snapshot in settings. Unknown/changed hosts and password/PTY interaction fail.
+- aws_shared_credentials: one static default profile through
+  `"env":{"AWS_SHARED_CREDENTIALS_FILE":{"file":"aws_file"}}`, with explicit
+  region arguments. CLI provides a protected credentials copy and independent
+  empty AWS config; existing profiles, SSO, credential processes, instance
+  metadata and interactive prompts are not inherited.
+
+The credential entry alias must match its typed reference. Literal text such as
+`{{SSH_KEY_FILE}}` or `{{file:ssh_key}}` stays literal; neither the shell nor this
+CLI substitutes strings. Secrets are not placed in argv. Each file operation
+owns independent temporary material; one finishing never cleans another's files.
+
+For cleanup failure, call cleanup-use with that operation's executionId. This
+retries cleanup only. Cleanup_busy retains files while a group may be active;
+identity mismatch needs owner review. Let the registered cleanup mechanism handle
+paths. Revocation blocks new operations, but does not terminate running programs
+or recall injected data. After restart, uncertain facts stay unknown and cleanup
+checks the original registered process groups before deleting anything.
+
+Known direct credential byte echoes are masked before output is retained, with
+bounded stream matching. This does not cover arbitrary encodings, screenshots,
+external files or deliberate disclosure. The approved program receives the raw
+credential; runtime injection is not a sandbox. Use task results, not deliberate
+credential-printing commands, and report only the needed nonsecret facts.
+
+Ordinary attachments and local focused password filling are not enabled by this
+receiver protocol; do not invent commands for those separately planned features.

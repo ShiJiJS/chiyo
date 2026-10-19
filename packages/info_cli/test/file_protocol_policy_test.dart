@@ -47,6 +47,7 @@ void main() {
         ),
       ]) {
         final response = await h.client.execute({
+          'protocolVersion': 1,
           'command': 'request-use',
           'purpose': 'Synthetic policy check',
           'credentials': [

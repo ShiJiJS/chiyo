@@ -100,6 +100,7 @@ void main() {
         argv: ['sts', 'get-caller-identity', '--region', 'us-east-1'],
       );
       final run = await h.client.execute({
+        'protocolVersion': 1,
         'command': 'run-use',
         'requestId': request,
       });
@@ -126,6 +127,7 @@ void main() {
       expect(await File(path!).readAsString(), 'foreign-file-must-survive');
       expect(
         (await h.client.execute({
+          'protocolVersion': 1,
           'command': 'run-use',
           'requestId': request,
         }))['errorCode'],
@@ -154,6 +156,7 @@ void main() {
         argv: ['sts', 'get-caller-identity', '--region', 'us-east-1'],
       );
       final run = await h.client.execute({
+        'protocolVersion': 1,
         'command': 'run-use',
         'requestId': request,
       });
@@ -178,6 +181,7 @@ void main() {
       );
       expect(
         (await h.client.execute({
+          'protocolVersion': 1,
           'command': 'run-use',
           'requestId': request,
         }))['errorCode'],

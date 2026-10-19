@@ -86,7 +86,7 @@ class RuntimeHarness {
             : 'gh_token');
     final r = await client.execute({
       'command': 'request-use',
-      if (protocolVersion != 1) 'protocolVersion': protocolVersion,
+      'protocolVersion': protocolVersion,
       'purpose': 'Controlled runtime test',
       'credentials': [
         {'alias': 'token', 'credentialId': credential.id, 'version': 1},
@@ -126,5 +126,37 @@ class RuntimeHarness {
     client.close();
     await server.close();
     await service.close();
+  }
+
+  /// A target exit is earlier than the end of its whole Windows Job. Poll the
+  /// original operation and cleanup endpoint; never start a replacement task.
+  Future<Map<String, dynamic>> waitForMaterialCleanup(
+    String executionId,
+  ) async {
+    final deadline = DateTime.now().add(const Duration(seconds: 10));
+    while (true) {
+      final status = await client.execute({
+        'command': 'execution-status',
+        'executionId': executionId,
+      });
+      if (status['executionState'] != 'exited') {
+        throw StateError('Receiver has no established exit: $status');
+      }
+      if ({'complete', 'not_needed'}.contains(status['cleanupState'])) {
+        return status;
+      }
+      if (!DateTime.now().isBefore(deadline)) {
+        throw StateError('Receiver material did not settle: $status');
+      }
+      final result = await client.execute({
+        'command': 'cleanup-use',
+        'executionId': executionId,
+      });
+      if (result['errorCode'] != null &&
+          !{'cleanup_busy', 'cleanup_failed'}.contains(result['errorCode'])) {
+        throw StateError('Unexpected material identity failure: $result');
+      }
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+    }
   }
 }

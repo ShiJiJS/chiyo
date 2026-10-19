@@ -67,6 +67,7 @@ Future<void> main()async{
         argv: ['sts', 'get-caller-identity', '--region', 'us-east-1'],
       );
       final run = await client.execute({
+        'protocolVersion': 1,
         'command': 'run-use',
         'requestId': request,
       });

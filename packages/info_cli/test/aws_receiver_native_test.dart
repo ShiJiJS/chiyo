@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:crypto/crypto.dart';
+import 'package:info_core/info_core.dart';
 import 'package:test/test.dart';
 import 'support/runtime_harness.dart';
 
@@ -88,78 +89,89 @@ bool authenticates(HttpRequest request, List<int> body) {
 
 void main() {
   final executable = Platform.environment['D7_AWS_EXE'];
-  test(
-    'real AWS CLI uses only approved static file credentials for signed reads and writes, and rejects the wrong secret',
-    () async {
-      final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
-      var valid = 0, invalid = 0;
-      final parameters = <String, String>{};
-      final handling = server.listen((request) async {
-        final body = await request.fold<List<int>>([], (b, c) => b..addAll(c));
-        final authenticated = authenticates(request, body);
-        request.response.headers.contentType = ContentType(
-          'application',
-          'x-amz-json-1.1',
-          charset: 'utf-8',
-        );
-        if (!authenticated) {
-          invalid++;
-          request.response.statusCode = 403;
-          request.response.write(
-            jsonEncode({
-              '__type': 'UnrecognizedClientException',
-              'message': 'Synthetic signature rejected',
-            }),
+  for (final protocol in [1, 2]) {
+    test(
+      'v$protocol real AWS CLI uses only approved static file credentials for signed reads and writes, and rejects the wrong secret',
+      () async {
+        final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+        var valid = 0, invalid = 0;
+        final parameters = <String, String>{};
+        final handling = server.listen((request) async {
+          final body = await request.fold<List<int>>(
+            [],
+            (b, c) => b..addAll(c),
           );
-        } else {
-          valid++;
-          final action = request.headers.value('x-amz-target')?.split('.').last;
-          if (action == 'PutParameter') {
-            final input = jsonDecode(utf8.decode(body)) as Map<String, dynamic>;
-            parameters[input['Name'] as String] = input['Value'] as String;
-            request.response.write(
-              jsonEncode({'Version': 1, 'Tier': 'Standard'}),
-            );
-          } else if (action == 'GetParameter') {
-            final input = jsonDecode(utf8.decode(body)) as Map<String, dynamic>;
+          final authenticated = authenticates(request, body);
+          request.response.headers.contentType = ContentType(
+            'application',
+            'x-amz-json-1.1',
+            charset: 'utf-8',
+          );
+          if (!authenticated) {
+            invalid++;
+            request.response.statusCode = 403;
             request.response.write(
               jsonEncode({
-                'Parameter': {
-                  'Name': input['Name'],
-                  'Type': 'String',
-                  'Value': parameters[input['Name']],
-                  'Version': 1,
-                },
+                '__type': 'UnrecognizedClientException',
+                'message': 'Synthetic signature rejected',
               }),
             );
           } else {
-            request.response.headers.contentType = ContentType('text', 'xml');
-            request.response.write(
-              '<GetCallerIdentityResponse xmlns="https://sts.amazonaws.com/doc/2011-06-15/"><GetCallerIdentityResult><Arn>arn:aws:iam::000000000000:user/fixture</Arn><UserId>LOCALFIXTURE</UserId><Account>000000000000</Account></GetCallerIdentityResult><ResponseMetadata><RequestId>synthetic-request</RequestId></ResponseMetadata></GetCallerIdentityResponse>',
-            );
+            valid++;
+            final action = request.headers
+                .value('x-amz-target')
+                ?.split('.')
+                .last;
+            if (action == 'PutParameter') {
+              final input =
+                  jsonDecode(utf8.decode(body)) as Map<String, dynamic>;
+              parameters[input['Name'] as String] = input['Value'] as String;
+              request.response.write(
+                jsonEncode({'Version': 1, 'Tier': 'Standard'}),
+              );
+            } else if (action == 'GetParameter') {
+              final input =
+                  jsonDecode(utf8.decode(body)) as Map<String, dynamic>;
+              request.response.write(
+                jsonEncode({
+                  'Parameter': {
+                    'Name': input['Name'],
+                    'Type': 'String',
+                    'Value': parameters[input['Name']],
+                    'Version': 1,
+                  },
+                }),
+              );
+            } else {
+              request.response.headers.contentType = ContentType('text', 'xml');
+              request.response.write(
+                '<GetCallerIdentityResponse xmlns="https://sts.amazonaws.com/doc/2011-06-15/"><GetCallerIdentityResult><Arn>arn:aws:iam::000000000000:user/fixture</Arn><UserId>LOCALFIXTURE</UserId><Account>000000000000</Account></GetCallerIdentityResult><ResponseMetadata><RequestId>synthetic-request</RequestId></ResponseMetadata></GetCallerIdentityResponse>',
+              );
+            }
           }
-        }
-        await request.response.close();
-      });
-      addTearDown(() async {
-        await server.close(force: true);
-        await handling.cancel();
-      });
-      final h = await RuntimeHarness.create(
-        executablePath: executable!,
-        inspectTool: true,
-        fileBytes: utf8.encode(
-          '[default]\naws_access_key_id=$access\naws_secret_access_key=$secret\n',
-        ),
-      );
-      addTearDown(h.close);
-      Future<Map<String, dynamic>> run(
-        RuntimeHarness harness,
-        List<String> argv,
-        int expectedExit,
-      ) async {
-        final request = await harness.approve(
-          argv: [
+          await request.response.close();
+        });
+        addTearDown(() async {
+          await server.close(force: true);
+          await handling.cancel();
+        });
+        final h = await RuntimeHarness.create(
+          executablePath: executable!,
+          inspectTool: true,
+          enableReusableCredentialUse: protocol == 2,
+          fileBytes: utf8.encode(
+            '[default]\naws_access_key_id=$access\naws_secret_access_key=$secret\n',
+          ),
+        );
+        addTearDown(h.close);
+        final reusableRequests = <RuntimeHarness, String>{};
+        var operationNumber = 0;
+        Future<Map<String, dynamic>> run(
+          RuntimeHarness harness,
+          List<String> argv,
+          int expectedExit,
+        ) async {
+          final fullArgv = <Object?>[
             ...argv,
             '--region',
             'us-east-1',
@@ -168,95 +180,149 @@ void main() {
             '--output',
             'json',
             '--no-cli-pager',
-          ],
-        );
-        final result = await harness.client.execute({
-          'command': 'run-use',
-          'requestId': request,
-        });
-        expect(result['status'], 'accepted');
-        await harness.client.drainCredentialExecutions();
-        final status = await harness.client.execute({
-          'command': 'execution-status',
-          'executionId': result['executionId'],
-        });
-        if (status['executionState'] != 'exited') {
-          final diagnostic = await harness.client.execute({
+          ];
+          final request = protocol == 2 && reusableRequests.containsKey(harness)
+              ? reusableRequests[harness]!
+              : await harness.approve(
+                  argv: fullArgv,
+                  protocolVersion: protocol,
+                );
+          if (protocol == 2) reusableRequests[harness] = request;
+          final approved = harness.service.owner.credentialUseRequests
+              .singleWhere((r) => r.id == request);
+          final deadline = approved.credentialExpiresAt;
+          final call = <String, dynamic>{
+            'protocolVersion': protocol,
+            'command': 'run-use',
+            'requestId': request,
+            if (protocol == 2) ...{
+              'operationId': 'aws-${++operationNumber}',
+              'launch': {
+                ...Map<String, dynamic>.from(
+                  approved.toRequestInputJson()['launch'] as Map,
+                ),
+                'argv': fullArgv,
+              },
+            },
+          };
+          final result = await harness.client.execute(call);
+          expect(result['status'], 'accepted', reason: jsonEncode(result));
+          await harness.client.drainCredentialExecutions();
+          if (protocol == 2) {
+            final duplicate = await harness.client.execute(call);
+            expect(duplicate['duplicate'], isTrue);
+            expect(duplicate['executionId'], result['executionId']);
+            expect(
+              harness.service.owner.credentialUseRequests
+                  .singleWhere((r) => r.id == request)
+                  .credentialExpiresAt,
+              deadline,
+            );
+            expect(
+              harness.service.owner.credentialGrantState(
+                harness.service.owner.credentialUseRequests.singleWhere(
+                  (r) => r.id == request,
+                ),
+              ),
+              'available',
+            );
+          }
+          final status = await harness.client.execute({
+            'command': 'execution-status',
+            'executionId': result['executionId'],
+          });
+          if (status['executionState'] != 'exited') {
+            final diagnostic = await harness.client.execute({
+              'command': 'execution-output',
+              'executionId': result['executionId'],
+              'cursor': 0,
+              'limit': 16,
+            });
+            final errors = utf8.decode([
+              for (final dynamic c in (diagnostic['chunks'] as List? ?? []))
+                if (c['stream'] == 'stderr')
+                  ...base64Decode(c['dataBase64'] as String),
+            ], allowMalformed: true);
+            fail(
+              'Synthetic local AWS receiver: ${jsonEncode(status)}; worker stderr: $errors',
+            );
+          }
+          expect(
+            status['executionState'],
+            'exited',
+            reason: jsonEncode(status),
+          );
+          expect(status['exitCode'], expectedExit);
+          final cleaned = await harness.waitForMaterialCleanup(
+            result['executionId'] as String,
+          );
+          expect(cleaned['exitCode'], expectedExit);
+          expect(cleaned['cleanupState'], 'complete');
+          final response = await harness.client.execute({
             'command': 'execution-output',
             'executionId': result['executionId'],
-            'cursor': 0,
-            'limit': 16,
           });
-          final errors = utf8.decode([
-            for (final dynamic c in (diagnostic['chunks'] as List? ?? []))
-              if (c['stream'] == 'stderr')
-                ...base64Decode(c['dataBase64'] as String),
-          ], allowMalformed: true);
-          fail(
-            'Synthetic local AWS receiver: ${jsonEncode(status)}; worker stderr: $errors',
-          );
+          final bytes = (response['chunks'] as List)
+              .where((c) => c['stream'] == 'stdout')
+              .expand<int>((c) => base64Decode(c['dataBase64'] as String))
+              .toList();
+          return expectedExit == 0
+              ? jsonDecode(utf8.decode(bytes)) as Map<String, dynamic>
+              : {};
         }
-        expect(status['executionState'], 'exited', reason: jsonEncode(status));
-        expect(status['exitCode'], expectedExit);
-        expect(status['cleanupState'], 'complete');
-        final response = await harness.client.execute({
-          'command': 'execution-output',
-          'executionId': result['executionId'],
-        });
-        final bytes = (response['chunks'] as List)
-            .where((c) => c['stream'] == 'stdout')
-            .expand<int>((c) => base64Decode(c['dataBase64'] as String))
-            .toList();
-        return expectedExit == 0
-            ? jsonDecode(utf8.decode(bytes)) as Map<String, dynamic>
-            : {};
-      }
 
-      expect(
-        (await run(h, ['sts', 'get-caller-identity'], 0))['UserId'],
-        'LOCALFIXTURE',
-      );
-      expect(
-        (await run(h, [
+        expect(
+          (await run(h, ['sts', 'get-caller-identity'], 0))['UserId'],
+          'LOCALFIXTURE',
+        );
+        expect(
+          (await run(h, [
+            'ssm',
+            'put-parameter',
+            '--name',
+            '/fixture/example',
+            '--value',
+            'public-fixture-value',
+            '--type',
+            'String',
+          ], 0))['Version'],
+          1,
+        );
+        expect(
+          ((await run(h, [
+                'ssm',
+                'get-parameter',
+                '--name',
+                '/fixture/example',
+              ], 0))['Parameter']
+              as Map)['Value'],
+          'public-fixture-value',
+        );
+        final wrong = await RuntimeHarness.create(
+          executablePath: executable,
+          inspectTool: true,
+          enableReusableCredentialUse: protocol == 2,
+          fileBytes: utf8.encode(
+            '[default]\naws_access_key_id=$access\naws_secret_access_key=WRONG_SYNTHETIC_SECRET\n',
+          ),
+        );
+        addTearDown(wrong.close);
+        await run(wrong, [
           'ssm',
-          'put-parameter',
+          'get-parameter',
           '--name',
           '/fixture/example',
-          '--value',
-          'public-fixture-value',
-          '--type',
-          'String',
-        ], 0))['Version'],
-        1,
-      );
-      expect(
-        ((await run(h, [
-              'ssm',
-              'get-parameter',
-              '--name',
-              '/fixture/example',
-            ], 0))['Parameter']
-            as Map)['Value'],
-        'public-fixture-value',
-      );
-      final wrong = await RuntimeHarness.create(
-        executablePath: executable,
-        inspectTool: true,
-        fileBytes: utf8.encode(
-          '[default]\naws_access_key_id=$access\naws_secret_access_key=WRONG_SYNTHETIC_SECRET\n',
-        ),
-      );
-      addTearDown(wrong.close);
-      await run(wrong, [
-        'ssm',
-        'get-parameter',
-        '--name',
-        '/fixture/example',
-      ], 254);
-      expect(valid, 3);
-      expect(invalid, 1);
-    },
-    skip: !Platform.isWindows || executable == null,
-    timeout: const Timeout(Duration(minutes: 2)),
-  );
+        ], 254);
+        if (protocol == 2) {
+          expect(h.service.owner.credentialUseRequests, hasLength(1));
+          expect(h.service.owner.credentialExecutions, hasLength(3));
+          expect(wrong.service.owner.credentialUseRequests, hasLength(1));
+        }
+        expect(valid, 3);
+        expect(invalid, 1);
+      },
+      skip: !Platform.isWindows || executable == null,
+      timeout: const Timeout(Duration(minutes: 2)),
+    );
+  }
 }

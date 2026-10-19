@@ -4,6 +4,8 @@
 手工生成 token。它仍须真实桌面两聊天验收；当前实现不等于已安装或已验收。
 来源：[OpenAI Hooks 文档](https://learn.chatgpt.com/docs/hooks)，2026-10-16 核对。
 
+Windows开发分支的凭据调用已接协议v2：先申请固定期限，再以逐次operationId和完整launch调用持续宿主，同一批准范围内的不同命令不重复审批。CLI省略协议版本时默认2，旧服务明确拒绝；旧v1事实保持单次语义。调用流程及类型化注入见[随包凭据使用说明](skills/agent-info-access/references/credential-use.md)。当前已交付0.4.0+8仍是旧v1，须使用同一新版整包的应用、CLI、worker和模板，不能只更新Skill。普通附件和焦点填充仍待各自功能票，真实Codex安装/信任验收继续由#30跟踪。
+
 ## 凭据边界
 
 - 随机 256-bit 文件名指向不可变的会话凭据文件；文件在用户私有状态目录，

@@ -70,6 +70,7 @@ void main() {
 
       await command({'command': 'session', 'chatLabel': 'Isolated file CLI'});
       final request = await command({
+        'protocolVersion': 1,
         'command': 'request-use',
         'purpose': 'Verify a scoped file path',
         'credentials': [
@@ -107,6 +108,7 @@ void main() {
       );
       expect(jsonDecode(ownerLines.current), {'status': 'ok'});
       final run = await command({
+        'protocolVersion': 1,
         'command': 'run-use',
         'requestId': request['requestId'],
       });

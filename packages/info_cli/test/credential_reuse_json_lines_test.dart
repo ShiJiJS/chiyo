@@ -8,7 +8,76 @@ import 'credential_reuse_runtime_test.dart' show removeFixture;
 
 void main() {
   test(
-    'independent JSON-lines CLI negotiates v2, runs distinct operations and never repeats a claimed operation',
+    'the shipped v1 CLI refuses a v2 request and never upgrades its ordinary v1 request',
+    () async {
+      final executable = Platform.environment['D6_LEGACY_CLI'];
+      final h = await RuntimeHarness.create(enableReusableCredentialUse: true);
+      final process = await Process.start(executable!, [
+        '--port',
+        '${h.server.port}',
+      ]);
+      final lines = StreamIterator(
+        process.stdout.transform(utf8.decoder).transform(const LineSplitter()),
+      );
+      final errors = process.stderr.drain<void>();
+      addTearDown(() async {
+        await process.stdin.close();
+        await process.exitCode.timeout(const Duration(seconds: 10));
+        await lines.cancel();
+        await errors;
+        await h.close();
+      });
+      Future<Map<String, dynamic>> command(Map<String, Object?> input) async {
+        process.stdin.writeln(jsonEncode(input));
+        expect(
+          await lines.moveNext().timeout(const Duration(seconds: 10)),
+          isTrue,
+        );
+        return jsonDecode(lines.current) as Map<String, dynamic>;
+      }
+
+      expect(
+        (await command({
+          'command': 'session',
+          'chatLabel': 'Actual shipped v1 compatibility',
+        }))['status'],
+        'ok',
+      );
+      final input = <String, Object?>{
+        'protocolVersion': 2,
+        'command': 'request-use',
+        'purpose': 'Must not be downgraded',
+        'credentials': [
+          {'alias': 'token', 'credentialId': h.credential.id, 'version': 1},
+        ],
+        'launch': {
+          'receiver': 'gh_token',
+          'executable': h.executablePath,
+          'argv': ['api', 'user'],
+          'cwd': Directory.current.path,
+          'env': {
+            'GH_TOKEN': {'secret': 'token'},
+          },
+        },
+      };
+      final refused = await command(input);
+      expect(refused['status'], 'invalid_request');
+      expect(
+        refused['errorCode'],
+        anyOf('unknown_field', 'unsupported_protocol'),
+      );
+      expect(h.service.owner.credentialUseRequests, isEmpty);
+      expect(h.service.owner.credentialExecutions, isEmpty);
+      final legacy = await command(
+        Map<String, Object?>.from(input)..remove('protocolVersion'),
+      );
+      expect(legacy['status'], 'pending');
+      expect(h.service.owner.credentialUseRequests.single.protocolVersion, 1);
+    },
+    skip: Platform.environment['D6_LEGACY_CLI'] == null,
+  );
+  test(
+    'independent JSON-lines CLI defaults to v2, runs distinct operations and never repeats a claimed operation',
     () async {
       final root = await Directory.systemTemp.createTemp('reuse-json-lines-');
       final h = await RuntimeHarness.create(enableReusableCredentialUse: true);
@@ -66,7 +135,6 @@ void main() {
         },
       };
       final request = await command({
-        'protocolVersion': 2,
         'command': 'request-use',
         'purpose': 'Independent reusable CLI flow',
         'credentials': [
@@ -91,7 +159,6 @@ void main() {
         isFalse,
       );
       Map<String, Object?> run(String operation, List<String> argv) => {
-        'protocolVersion': 2,
         'command': 'run-use',
         'requestId': id,
         'operationId': operation,

@@ -87,6 +87,7 @@ void main() {
         final item = service.owner.information.single;
         final field = FieldRef(item.id, item.fields.first.id);
         final request = await command({
+          'protocolVersion': 1,
           'command': 'request-use',
           'purpose': '${scenario.$1}：只连接本轮localhost测试服务，执行固定非交互命令。',
           'credentials': [
@@ -115,6 +116,7 @@ void main() {
         final requestId = request['requestId'] as String;
         expect(
           (await command({
+            'protocolVersion': 1,
             'command': 'run-use',
             'requestId': requestId,
           }))['errorCode'],
@@ -159,6 +161,7 @@ void main() {
           'native.example.invalid',
         );
         final accepted = await command({
+          'protocolVersion': 1,
           'command': 'run-use',
           'requestId': requestId,
         });
@@ -206,6 +209,7 @@ void main() {
         expect(jsonEncode(status).contains('info-managed-'), isFalse);
         expect(
           (await command({
+            'protocolVersion': 1,
             'command': 'run-use',
             'requestId': requestId,
           }))['errorCode'],

@@ -143,6 +143,7 @@ Future<void> main(List<String> args) async {
         'chatLabel': 'Synthetic file crash',
       });
       final request = await command({
+        'protocolVersion': 1,
         'command': 'request-use',
         'purpose': 'Verify durable file recovery',
         'credentials': [
@@ -164,6 +165,7 @@ Future<void> main(List<String> args) async {
         approveCredential: true,
       );
       final started = await command({
+        'protocolVersion': 1,
         'command': 'run-use',
         'requestId': request['requestId'],
       });

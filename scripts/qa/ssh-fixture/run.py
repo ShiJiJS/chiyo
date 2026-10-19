@@ -23,7 +23,10 @@ def docker(*args):
     return p.stdout.strip()
 
 def main():
-    parser=argparse.ArgumentParser();mode=parser.add_mutually_exclusive_group();mode.add_argument('--native',action='store_true');mode.add_argument('--suite',action='store_true');mode.add_argument('--checks',action='store_true');mode.add_argument('--package-output',type=Path);mode.add_argument('--crash-probe',type=Path);parser.add_argument('--repeat',type=int,default=1);parser.add_argument('--cli-executable',type=Path);parser.add_argument('--native-test',choices=['file_runtime_native_test.dart','hosted_runtime_native_test.dart'],default='file_runtime_native_test.dart');args=parser.parse_args()
+    parser=argparse.ArgumentParser();mode=parser.add_mutually_exclusive_group();mode.add_argument('--native',action='store_true');mode.add_argument('--suite',action='store_true');mode.add_argument('--checks',action='store_true');mode.add_argument('--package-output',type=Path);mode.add_argument('--crash-probe',type=Path);parser.add_argument('--locked-suite-runner',type=Path);parser.add_argument('--test-label',default='real-receiver-suite');parser.add_argument('--repeat',type=int,default=1);parser.add_argument('--cli-executable',type=Path);parser.add_argument('--native-test',choices=['file_runtime_native_test.dart','hosted_runtime_native_test.dart','reusable_runtime_native_test.dart'],default='file_runtime_native_test.dart');args=parser.parse_args()
+    # Optional locked package runner avoids implicit pub resolution during a
+    # targeted protocol regression, while retaining this fixture's ownership.
+    assert not args.locked_suite_runner or args.suite
     assert 1<=args.repeat<=3
     assert not args.package_output or args.repeat==1
     assert not args.crash_probe or args.repeat==1
@@ -56,10 +59,12 @@ def main():
             command=[str(flutter),'test','--no-pub','integration_test/'+args.native_test,'-d','windows',
               '--dart-define=CLI_EXECUTABLE='+str(cli),
               '--dart-define=SSH_EXECUTABLE='+env['D7_SSH_EXE'],'--dart-define=SSH_FIXTURE='+str(output),'--dart-define=SSH_FIXTURE_PORT='+env['D7_SSH_PORT']]
-            if args.native_test=='hosted_runtime_native_test.dart':
+            if args.native_test in {'hosted_runtime_native_test.dart','reusable_runtime_native_test.dart'}:
                 adapter=cli.parent/'info-codex.exe';worker=cli.parent/'info-runtime-worker.exe'
                 assert adapter.is_file() and worker.is_file()
                 command+=['--dart-define=CODEX_EXECUTABLE='+str(adapter),'--dart-define=WORKER_EXECUTABLE='+str(worker)]
+                if args.native_test=='reusable_runtime_native_test.dart':
+                    command+=['--dart-define=EVIDENCE_DIRECTORY='+str(REPO/'build/qa-issue33/native-reuse')]
                 if env.get('HOSTED_SHORT_RUNS'):
                     assert 10<=int(env['HOSTED_SHORT_RUNS'])<=60
                     command+=['--dart-define=HOSTED_SHORT_RUNS='+env['HOSTED_SHORT_RUNS']]
@@ -77,6 +82,10 @@ def main():
             env['D6_COMPILED_CLI']=str(cli)
             assert Path(env['D6_COMPILED_CLI']).is_file()
             assert Path(env['D7_AWS_EXE']).is_file()
+        if args.locked_suite_runner:
+            assert args.locked_suite_runner.is_file()
+            command=[sys.executable,str(args.locked_suite_runner.resolve()),'--package','info_cli','--label',args.test_label,'--analyze']
+            cwd=REPO
         for _ in range(args.repeat):
             p=subprocess.run(command,cwd=cwd,env=env,timeout=1200 if args.package_output else 240 if args.native else 180 if args.checks else 100)
             if p.returncode:break

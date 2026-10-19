@@ -64,6 +64,7 @@ void main() {
       });
       final request = await h.approve();
       final run = await client.execute({
+        'protocolVersion': 1,
         'command': 'run-use',
         'requestId': request,
       });
@@ -96,6 +97,7 @@ void main() {
       );
       expect(
         (await client.execute({
+          'protocolVersion': 1,
           'command': 'run-use',
           'requestId': request,
         }))['errorCode'],
@@ -165,6 +167,7 @@ void main() {
       for (var i = 0; i < 17; i++) {
         final client = i.isEven ? a : b;
         final result = await client.execute({
+          'protocolVersion': 1,
           'command': 'request-use',
           'purpose': 'Capacity test $i',
           'credentials': [
@@ -188,7 +191,11 @@ void main() {
       }
       final results = await Future.wait([
         for (var i = 0; i < 17; i++)
-          clients[i].execute({'command': 'run-use', 'requestId': requests[i]}),
+          clients[i].execute({
+            'protocolVersion': 1,
+            'command': 'run-use',
+            'requestId': requests[i],
+          }),
       ]);
       expect(results.where((r) => r['status'] == 'accepted'), hasLength(16));
       final denied = results.indexWhere(
@@ -203,6 +210,7 @@ void main() {
       await release.writeAsString('release');
       await host.drain();
       final resumed = await clients[denied].execute({
+        'protocolVersion': 1,
         'command': 'run-use',
         'requestId': requests[denied],
       });
@@ -238,6 +246,7 @@ void main() {
       );
       addTearDown(client.close);
       final result = await client.execute({
+        'protocolVersion': 1,
         'command': 'run-use',
         'requestId': request,
       });
@@ -265,6 +274,7 @@ void main() {
         host.close();
       });
       final pending = host.execute(h.client.sessionSecret!, {
+        'protocolVersion': 1,
         'command': 'run-use',
         'requestId': request,
       });
@@ -337,7 +347,11 @@ void main() {
         {'association': reference, ...input},
         chat: 'hosted-test-chat',
       );
-      final accepted = await call({'command': 'run-use', 'requestId': request});
+      final accepted = await call({
+        'protocolVersion': 1,
+        'command': 'run-use',
+        'requestId': request,
+      });
       expect(accepted['status'], 'accepted');
       await host.drain();
       final status = await call({
@@ -353,7 +367,11 @@ void main() {
       });
       expect(output['chunks'], isNotEmpty);
       expect(
-        (await call({'command': 'run-use', 'requestId': request}))['errorCode'],
+        (await call({
+          'protocolVersion': 1,
+          'command': 'run-use',
+          'requestId': request,
+        }))['errorCode'],
         'attempt_consumed',
       );
     },
@@ -398,6 +416,7 @@ void main() {
         hostedCredentialExecutions: true,
       );
       final accepted = await first.execute({
+        'protocolVersion': 1,
         'command': 'run-use',
         'requestId': request,
       });
@@ -431,6 +450,7 @@ void main() {
       });
       expect(
         (await second.execute({
+          'protocolVersion': 1,
           'command': 'run-use',
           'requestId': request,
         }))['errorCode'],
