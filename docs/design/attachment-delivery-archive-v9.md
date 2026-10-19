@@ -10,4 +10,4 @@ ID唯一，生命周期状态和时间组合须合法，归档引用的附件版
 
 元数据完整验证及BLOB整文件校验通过后，所有信息/附件/历史/交付归档在同一接收事务提交；任一末段插入失败全部回滚。用户恢复确认重新验证原预览来源，使用同一已认证句柄。容量/JSON/重复键/时间戳/块结构等所有格式8约束继续适用。
 
-实际SQLCipher、Windows占用重开、恶意归档、末段回滚及混合凭据历史证据见[实施记录](../development/issue37-delivery-storage.md)。本合同未宣告Agent文件能力，HTTP/CLI、最终预算余量及#38客户端仍待。
+实际SQLCipher、Windows占用重开、恶意归档、末段回滚及混合凭据历史证据见[实施记录](../development/issue37-delivery-storage.md)。后续HTTP/独立CLI、真实进程中断、预算余量、完整AOT组合及实际旧读取器拒绝8/9均通过，[#37完成验收](../development/issue37-completion.md)冻结容量。生产能力仍等待#38客户端/bootstrap接入，不把归档恢复解释为重新交付文件。

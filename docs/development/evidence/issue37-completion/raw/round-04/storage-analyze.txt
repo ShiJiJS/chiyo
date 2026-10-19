@@ -1,0 +1,6 @@
+Analyzing info_storage...
+
+  error - tool\measure_information_library.dart:153:65 - 1 positional argument expected by 'informationAttachmentVersions', but 0 found. Try adding the missing argument. - not_enough_positional_arguments
+  error - tool\measure_information_library.dart:280:70 - 1 positional argument expected by 'informationAttachmentVersions', but 0 found. Try adding the missing argument. - not_enough_positional_arguments
+
+2 issues found.

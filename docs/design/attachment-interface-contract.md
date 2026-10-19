@@ -1,6 +1,6 @@
 # 普通附件字段与服务接口合同 · #36
 
-2026-10-18。冻结后续#37/#38的目标合同，尚未成为可用接口。字段与授权含义来自[客户端规划](windows-attachment-client-plan.md)和ADR0011；公共CLI使用现有逐行JSON和私密会话关联。#33实现共同协议v2协商，#37增加`information-attachments.v1`能力，#30更新随包CLI/Skill。协议v1与旧证明不静默升级。
+2026-10-18。冻结#37/#38的目标合同。2026-10-19：[#37公开核心/存储/HTTP/独立CLI已完成](../development/issue37-completion.md)，#38 Windows客户端及生产能力启用仍待；下方历史检查点保留当时范围。字段与授权含义来自[客户端规划](windows-attachment-client-plan.md)和ADR0011；公共CLI使用现有逐行JSON和私密会话关联。#33实现共同协议v2协商，#37增加`information-attachments.v1`能力，#30更新随包CLI/Skill。协议v1与旧证明不静默升级。
 
 ## 1. 字段载荷与兼容
 
@@ -62,7 +62,9 @@ CLI文件命令默认v2，显式v1拒绝；先核对服务的协议和informatio
 
 错误投影至少包含`not_authorized, grant_expired, session_ended, field_removed, not_a_file, unsupported_capability, unsupported_file_write, file_delivery_required, operation_conflict, stage_unavailable, version_conflict, attachment_too_large, attachment_capacity_exceeded, attachment_missing, attachment_integrity_failed, delivery_io_failed, audit_failed`；客户端保留当前位置和可重试草稿，不把错误当空文件或成功。权限失败不泄露未获批文件的名称/大小。
 
-2026-10-19最新传输检查点：[HTTP/独立CLI与实际中断](../development/issue37-delivery-cli.md)已通过，30秒超时按原操作查询、不自动重放。最终容量/RSS及全写入口预算、正式bootstrap及#38仍待，不宣告能力。此前存储检查点如下。
+2026-10-19完成状态：[#37逐项验收](../development/issue37-completion.md)已冻结容量：原文单份10MiB、保留/暂存100MiB，副本32份/100MiB，元数据64MiB、容器256MiB及与备份一致的行/嵌套事实数量限制。事务预算预留已放行操作结束和保留清理空间。独立CLI、真实worker中断、旧源迁移及旧读取器拒绝8/9通过。正式bootstrap随#38真实客户端接入，当前继续门控。
+
+2026-10-19历史传输检查点：[HTTP/独立CLI与实际中断](../development/issue37-delivery-cli.md)已通过，30秒超时按原操作查询、不自动重放。最终容量/RSS及全写入口预算、正式bootstrap及#38仍待，不宣告能力。此前存储检查点如下。
 
 2026-10-19最新实施检查点：[加密交付登记/归档](../development/issue37-delivery-storage.md)已接schema21/备份9；实际SQLCipher与Windows占用重开、归档白名单和末段回滚已验证。HTTP/独立CLI及生产bootstrap仍待，能力继续关闭；旧检查点如下。
 
