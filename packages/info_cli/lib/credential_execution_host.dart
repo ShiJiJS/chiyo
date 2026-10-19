@@ -61,7 +61,9 @@ class CredentialExecutionHost {
   ) async {
     if (_closed) {
       return Map.from(
-        const CredentialUseFailure('service_unavailable').toJson(),
+        const CredentialUseFailure(
+          'service_unavailable',
+        ).toJson(protocolVersion: input['protocolVersion'] == 2 ? 2 : 1),
       );
     }
     _prune();
@@ -72,7 +74,11 @@ class CredentialExecutionHost {
       'execution-output',
       'cleanup-use',
     }.contains(command)) {
-      return Map.from(const CredentialUseFailure('invalid_plan').toJson());
+      return Map.from(
+        const CredentialUseFailure(
+          'invalid_plan',
+        ).toJson(protocolVersion: input['protocolVersion'] == 2 ? 2 : 1),
+      );
     }
     if (command != 'run-use') {
       final entry = _entries[input['executionId']];
@@ -86,26 +92,48 @@ class CredentialExecutionHost {
         client.close();
       }
     }
+    if (input['protocolVersion'] == 2) {
+      // Query before reserving a capacity slot: an old operation is readable
+      // even when all slots are occupied, and never needs a second worker.
+      final query = _client(session);
+      try {
+        final existing = await query.execute({
+          ...input,
+          'command': 'operation-status',
+        });
+        if (existing['status'] != 'not_found') return existing;
+      } finally {
+        query.close();
+      }
+    }
     if (_processStarter == null) {
       if (!Platform.isWindows) {
         return Map.from(
-          const CredentialUseFailure('unsupported_tool_version').toJson(),
+          const CredentialUseFailure(
+            'unsupported_tool_version',
+          ).toJson(protocolVersion: input['protocolVersion'] == 2 ? 2 : 1),
         );
       }
       if (workerExecutable == null || !await File(workerExecutable!).exists()) {
         return Map.from(
-          const CredentialUseFailure('service_unavailable').toJson(),
+          const CredentialUseFailure(
+            'service_unavailable',
+          ).toJson(protocolVersion: input['protocolVersion'] == 2 ? 2 : 1),
         );
       }
     }
     if (_closed) {
       return Map.from(
-        const CredentialUseFailure('service_unavailable').toJson(),
+        const CredentialUseFailure(
+          'service_unavailable',
+        ).toJson(protocolVersion: input['protocolVersion'] == 2 ? 2 : 1),
       );
     }
     if (!_makeRoom()) {
       return Map.from(
-        const CredentialUseFailure('execution_capacity').toJson(),
+        const CredentialUseFailure(
+          'execution_capacity',
+        ).toJson(protocolVersion: input['protocolVersion'] == 2 ? 2 : 1),
       );
     }
     _reservations++;

@@ -23,6 +23,7 @@ class RuntimeHarness {
     List<int>? fileBytes,
     bool inspectTool = false,
     InformationRepository? repository,
+    bool enableReusableCredentialUse = false,
   }) async {
     final exe = File(executablePath ?? Platform.resolvedExecutable);
     final stat = await exe.stat();
@@ -38,7 +39,11 @@ class RuntimeHarness {
               digest,
             ),
     );
-    final server = await AgentServer.start(service.agent, port: 0);
+    final server = await AgentServer.start(
+      service.agent,
+      port: 0,
+      enableReusableCredentialUse: enableReusableCredentialUse,
+    );
     final client = AgentClient(server.port, credentialProcessStarter: starter);
     var c = fileBytes == null
         ? await service.owner.createStringCredential(
@@ -72,6 +77,7 @@ class RuntimeHarness {
     String? cwd,
     List<Object?> argv = const ['api', 'user'],
     String? receiver,
+    int protocolVersion = 1,
   }) async {
     final selectedReceiver =
         receiver ??
@@ -80,6 +86,7 @@ class RuntimeHarness {
             : 'gh_token');
     final r = await client.execute({
       'command': 'request-use',
+      if (protocolVersion != 1) 'protocolVersion': protocolVersion,
       'purpose': 'Controlled runtime test',
       'credentials': [
         {'alias': 'token', 'credentialId': credential.id, 'version': 1},

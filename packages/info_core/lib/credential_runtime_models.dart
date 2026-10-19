@@ -17,8 +17,8 @@ class CredentialUseFailure implements Exception {
   final String code;
   final String? fieldPath, executionId;
   final bool attemptConsumed;
-  Map<String, Object?> toJson() => {
-    'protocolVersion': 1,
+  Map<String, Object?> toJson({int protocolVersion = 1}) => {
+    'protocolVersion': protocolVersion,
     'status': switch (code) {
       'session_required' ||
       'session_mismatch' ||
@@ -53,7 +53,10 @@ class CredentialUseFailure implements Exception {
           'execution_capacity',
           'cleanup_busy',
         }.contains(code),
-    'attemptConsumed': attemptConsumed,
+    if (protocolVersion == 1)
+      'attemptConsumed': attemptConsumed
+    else
+      'operationClaimed': attemptConsumed,
     if (fieldPath != null) 'fieldPath': fieldPath,
     if (executionId != null) 'executionId': executionId,
   };
@@ -168,6 +171,13 @@ class CredentialOperationInput {
   CredentialOperationInput._(this.requestId, this.operationId, this.launch);
   final String requestId, operationId;
   final CredentialLaunchPlan launch;
+  Map<String, Object?> toJson() => {
+    'protocolVersion': 2,
+    'command': 'run-use',
+    'requestId': requestId,
+    'operationId': operationId,
+    'launch': launch.toJson(),
+  };
   factory CredentialOperationInput.fromJson(Map<String, dynamic> json) {
     if (_useProtocol(json) != 2) {
       throw const CredentialUseFailure('unsupported_protocol');

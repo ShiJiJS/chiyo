@@ -138,12 +138,10 @@ extension _CredentialRuntimeService on InformationService {
 }
 
 extension CredentialRuntimeAgentAccess on AgentAccess {
-  Future<CredentialOperationClaim> beginCredentialUseOperation(
+  CredentialOperationClaim? credentialUseOperationStatus(
     String session,
-    CredentialOperationInput input, {
-    int? supervisorPid,
-    String? supervisorCreatedAt,
-  }) => _service.owner._serialize(() async {
+    CredentialOperationInput input,
+  ) {
     final r = _service._sessionUseRequest(session, input.requestId);
     if (r.protocolVersion != 2) {
       throw const CredentialUseFailure('unsupported_protocol');
@@ -156,16 +154,31 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
               _service._credentialUseSessions[e.requestId] == session,
         )
         .firstOrNull;
+    if (existing == null) return null;
+    if (existing.operationFingerprint != input.fingerprint) {
+      throw const CredentialUseFailure('operation_conflict');
+    }
+    return CredentialOperationClaim(
+      existing,
+      grantState: _service._useGrantState(r),
+    );
+  }
+
+  Future<CredentialOperationClaim> beginCredentialUseOperation(
+    String session,
+    CredentialOperationInput input, {
+    int? supervisorPid,
+    String? supervisorCreatedAt,
+  }) => _service.owner._serialize(() async {
+    final r = _service._sessionUseRequest(session, input.requestId);
+    if (r.protocolVersion != 2) {
+      throw const CredentialUseFailure('unsupported_protocol');
+    }
+    final existing = credentialUseOperationStatus(session, input);
     if (existing != null) {
-      if (existing.operationFingerprint != input.fingerprint) {
-        throw const CredentialUseFailure('operation_conflict');
-      }
       // Replays are metadata queries, including after expiry/revocation.
       // They must never reissue material or start a second process.
-      return CredentialOperationClaim(
-        existing,
-        grantState: _service._useGrantState(r),
-      );
+      return existing;
     }
     void validate() => _service._requireReusableUseGrant(r, session);
 
@@ -643,7 +656,7 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
   Map<String, Object?> credentialUseStatus(String session, String id) {
     final r = _service._sessionUseRequest(session, id, allowEnded: true);
     return {
-      'protocolVersion': 1,
+      'protocolVersion': r.protocolVersion,
       'status': _service._useState(r),
       'requestId': id,
       'createdAt': _useTimestamp(r.createdAt),
@@ -658,8 +671,17 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
               'credentialId': r.credentialId,
               'version': r.version,
               'expiresAt': _useTimestamp(r.credentialExpiresAt),
-              'maxAttempts': 1,
-              'attemptsConsumed': r.attemptConsumed ? 1 : 0,
+              if (r.protocolVersion == 1) ...{
+                'maxAttempts': 1,
+                'attemptsConsumed': r.attemptConsumed ? 1 : 0,
+              } else ...{
+                'reusable': true,
+                'operationCount': _service
+                    ._runtimeRepository
+                    .credentialExecutions
+                    .where((e) => e.requestId == r.id)
+                    .length,
+              },
             },
           },
           'fieldRead': {

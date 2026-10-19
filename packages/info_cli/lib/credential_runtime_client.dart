@@ -260,17 +260,34 @@ extension _CredentialRuntimeClient on AgentClient {
         throw const CredentialUseFailure('limit_exceeded');
       }
       final command = input['command'];
+      final version = input['protocolVersion'] ?? 1;
+      if (input.containsKey('protocolVersion') &&
+          (input['protocolVersion'] is! int || !{1, 2}.contains(version))) {
+        throw const CredentialUseFailure('unsupported_protocol');
+      }
       final allowed = switch (command) {
         'request-use' => {
+          'protocolVersion',
           'command',
           'purpose',
           'credentials',
           'launch',
           'readFields',
         },
-        'run-use' => {'command', 'requestId'},
-        'execution-output' => {'command', 'executionId', 'cursor', 'limit'},
-        _ => {'command', 'executionId'},
+        'run-use' || 'operation-status' => {
+          'protocolVersion',
+          'command',
+          'requestId',
+          if (version == 2) ...{'operationId', 'launch'},
+        },
+        'execution-output' => {
+          'protocolVersion',
+          'command',
+          'executionId',
+          'cursor',
+          'limit',
+        },
+        _ => {'protocolVersion', 'command', 'executionId'},
       };
       if (input.keys.any((k) => !allowed.contains(k))) {
         throw const CredentialUseFailure('unknown_field');
@@ -278,12 +295,24 @@ extension _CredentialRuntimeClient on AgentClient {
       if (_session == null) {
         throw const CredentialUseFailure('session_required');
       }
+      if (version == 2) await _requireReusableCredentialCapability();
       if (command == 'request-use') {
         CredentialUseInput.fromJson(input);
         return await _call('/credential-use/request', {
           'sessionSecret': _session,
           ...input,
         });
+      }
+      CredentialOperationInput? operation;
+      if (command == 'operation-status' ||
+          command == 'run-use' && version == 2) {
+        operation = CredentialOperationInput.fromJson({
+          ...input,
+          'command': 'run-use',
+        });
+      }
+      if (command == 'operation-status') {
+        return await _lookupCredentialOperation(operation!);
       }
       final identity =
           input[command == 'run-use' ? 'requestId' : 'executionId'];
@@ -300,7 +329,9 @@ extension _CredentialRuntimeClient on AgentClient {
         });
         if (command == 'run-use' &&
             result['status'] == 'service_unavailable' &&
-            !result.containsKey('attemptConsumed')) {
+            !result.containsKey(
+              version == 2 ? 'operationClaimed' : 'attemptConsumed',
+            )) {
           // A lost response is not proof that the resident executor did not
           // reserve the original attempt. Never fall back to another launch.
           throw const CredentialUseFailure(
@@ -312,7 +343,10 @@ extension _CredentialRuntimeClient on AgentClient {
       }
       switch (command) {
         case 'run-use':
-          return await _credentialExecutions.start(identity);
+          return await _credentialExecutions.start(
+            identity,
+            operation: operation,
+          );
         case 'execution-status':
           final status = await _call('/credential-use/execution/status', {
             'sessionSecret': _session,
@@ -335,11 +369,14 @@ extension _CredentialRuntimeClient on AgentClient {
             'executionId': identity,
           });
           if (status['status'] != 'ok') return status;
-          return _credentialExecutions.output(
-            identity,
-            input['cursor'] ?? 0,
-            input['limit'] ?? 16,
-          );
+          return {
+            ..._credentialExecutions.output(
+              identity,
+              input['cursor'] ?? 0,
+              input['limit'] ?? 16,
+            ),
+            'protocolVersion': status['protocolVersion'] ?? 1,
+          };
         case 'cleanup-use':
           return await _call('/credential-use/cleanup', {
             'sessionSecret': _session,
@@ -348,10 +385,121 @@ extension _CredentialRuntimeClient on AgentClient {
       }
       throw const CredentialUseFailure('invalid_plan');
     } on CredentialUseFailure catch (e) {
-      return Map<String, dynamic>.from(e.toJson());
+      return Map<String, dynamic>.from(
+        e.toJson(protocolVersion: input['protocolVersion'] == 2 ? 2 : 1),
+      );
     } on Object {
       return Map<String, dynamic>.from(
-        const CredentialUseFailure('invalid_type').toJson(),
+        const CredentialUseFailure(
+          'invalid_type',
+        ).toJson(protocolVersion: input['protocolVersion'] == 2 ? 2 : 1),
+      );
+    }
+  }
+
+  Future<void> _requireReusableCredentialCapability() async {
+    final result = await _call('/capabilities', {});
+    if (result['status'] == 'service_unavailable') {
+      throw const CredentialUseFailure('service_unavailable');
+    }
+    if (result['status'] != 'ok' ||
+        result['protocolVersions'] is! List ||
+        !(result['protocolVersions'] as List).contains(2) ||
+        result['capabilities'] is! List ||
+        !(result['capabilities'] as List).contains('credential-use-reuse.v1')) {
+      throw const CredentialUseFailure('unsupported_capability');
+    }
+  }
+
+  Future<Map<String, dynamic>> _lookupCredentialOperation(
+    CredentialOperationInput input,
+  ) async {
+    final result = await _call('/credential-use/operation/status', {
+      'sessionSecret': _session,
+      ...input.toJson(),
+    });
+    return result.containsKey('protocolVersion')
+        ? result
+        : Map<String, dynamic>.from(
+            const CredentialUseFailure(
+              'service_unavailable',
+            ).toJson(protocolVersion: 2),
+          );
+  }
+
+  Future<CredentialOperationClaim> _claimCredentialOperation(
+    CredentialOperationInput input,
+  ) async {
+    var mayBeClaimed = false, explicitFailure = false;
+    try {
+      final request = await _http.post(
+        '127.0.0.1',
+        port,
+        '/credential-use/operation',
+      );
+      request.headers.contentType = ContentType.json;
+      request.followRedirects = false;
+      final supervisor = _usesDefaultCredentialStarter
+          ? CredentialProcessIdentity.capture(pid)
+          : null;
+      if (_usesDefaultCredentialStarter && supervisor == null) {
+        throw const CredentialUseFailure('service_unavailable');
+      }
+      try {
+        request.write(
+          jsonEncode({
+            'sessionSecret': _session,
+            ...input.toJson(),
+            if (supervisor != null) ...{
+              'supervisorPid': pid,
+              'supervisorCreatedAt': supervisor.value,
+            },
+          }),
+        );
+      } finally {
+        supervisor?.close();
+      }
+      mayBeClaimed = true;
+      final response = await request.close().timeout(
+        const Duration(seconds: 5),
+      );
+      final bytes = <int>[];
+      await for (final chunk in response.timeout(const Duration(seconds: 5))) {
+        if (bytes.length + chunk.length > 4194304) {
+          throw const FormatException();
+        }
+        bytes.addAll(chunk);
+      }
+      final decoded = decodeProtocolObject(
+        utf8.decode(bytes),
+        maxBytes: 4194304,
+      );
+      if (decoded['protocolVersion'] == 2 &&
+          decoded['errorCode'] is String &&
+          decoded['status'] is String) {
+        explicitFailure = true;
+        throw CredentialUseFailure(
+          decoded['errorCode'] as String,
+          attemptConsumed: decoded['operationClaimed'] == true,
+          executionId: decoded['executionId'] as String?,
+        );
+      }
+      final claim = CredentialOperationClaim.fromPrivateJson(decoded);
+      if (claim.execution.requestId != input.requestId ||
+          claim.execution.operationId != input.operationId ||
+          claim.execution.operationFingerprint != input.fingerprint) {
+        throw const FormatException();
+      }
+      return claim;
+    } on Object catch (e) {
+      if (e is CredentialUseFailure && (explicitFailure || !mayBeClaimed)) {
+        rethrow;
+      }
+      // No retry/fallback after a missing or malformed private claim. A later
+      // query can recover the operation facts, never a second material bundle.
+      throw CredentialUseFailure(
+        mayBeClaimed ? 'material_claim_failed' : 'service_unavailable',
+        attemptConsumed: mayBeClaimed,
       );
     }
   }
@@ -438,11 +586,46 @@ extension _CredentialRuntimeClient on AgentClient {
 }
 
 class _ExecutionOutput {
+  _ExecutionOutput({List<List<int>> secretPatterns = const []})
+    : _secretPatterns = secretPatterns;
+  List<List<int>> _secretPatterns;
+  final _filters = <String, CredentialOutputFilter>{};
+  int _rawBytes = 0;
   final chunks = <Map<String, Object?>>[];
   int bytes = 0;
   bool truncated = false, complete = false, active = true;
   DateTime? finishedAt;
   void add(String stream, List<int> data) {
+    final remaining = 4194304 - _rawBytes;
+    if (data.length > remaining) truncated = true;
+    final length = data.length.clamp(0, remaining);
+    _rawBytes += length;
+    if (length == 0) return;
+    final accepted = length == data.length ? data : data.sublist(0, length);
+    _append(
+      stream,
+      _secretPatterns.isEmpty
+          ? accepted
+          : _filters
+                .putIfAbsent(
+                  stream,
+                  () => CredentialOutputFilter(_secretPatterns),
+                )
+                .add(accepted),
+    );
+  }
+
+  void finish() {
+    if (complete) return;
+    for (final entry in _filters.entries) {
+      _append(entry.key, entry.value.finish());
+    }
+    _filters.clear();
+    _secretPatterns = const [];
+    complete = true;
+  }
+
+  void _append(String stream, List<int> data) {
     final remaining = 4194304 - bytes;
     if (data.length > remaining) truncated = true;
     final length = data.length.clamp(0, remaining);
@@ -456,6 +639,41 @@ class _ExecutionOutput {
     }
     bytes += length;
   }
+}
+
+List<List<int>> _credentialOutputPatterns(
+  CredentialExecutionMaterial material,
+) {
+  final bytes = material.credentialMaterial.bytes;
+  final patterns = <List<int>>[List<int>.of(bytes)];
+  if (material.credentialMaterial.form == CredentialForm.file) {
+    try {
+      final text = utf8.decode(bytes),
+          lines = const LineSplitter().convert(text);
+      if (material.approvedPlan.receiver == 'aws_shared_credentials') {
+        for (final line in lines) {
+          final match = RegExp(
+            r'^\s*(aws_access_key_id|aws_secret_access_key|aws_session_token)\s*=\s*(.*?)\s*$',
+          ).firstMatch(line);
+          if (match != null && match[2]!.isNotEmpty) {
+            patterns.add(utf8.encode(match[2]!));
+          }
+        }
+      } else if (text.startsWith('-----BEGIN ') && lines.length <= 128) {
+        for (final line in lines) {
+          if (line.isNotEmpty && !line.startsWith('-----')) {
+            patterns.add(utf8.encode(line));
+          }
+        }
+      }
+    } on FormatException {
+      // Arbitrary binary material has only an exact whole-byte pattern.
+    }
+  }
+  final seen = <String>{};
+  return patterns
+      .where((p) => p.isNotEmpty && seen.add(base64Encode(p)))
+      .toList();
 }
 
 class _CredentialRuntimeExecutor {
@@ -475,9 +693,16 @@ class _CredentialRuntimeExecutor {
     }
   }
 
-  Future<Map<String, dynamic>> start(String id) async {
+  Future<Map<String, dynamic>> start(
+    String id, {
+    CredentialOperationInput? operation,
+  }) async {
     if (!Platform.isWindows && client._usesDefaultCredentialStarter) {
       throw const CredentialUseFailure('unsupported_tool_version');
+    }
+    if (operation != null) {
+      final existing = await client._lookupCredentialOperation(operation);
+      if (existing['status'] != 'not_found') return existing;
     }
     prune();
     if (outputs.length + reservations >= 16) {
@@ -486,11 +711,23 @@ class _CredentialRuntimeExecutor {
     reservations++;
     late CredentialExecutionMaterial material;
     try {
-      material = await client._consumeCredentialMaterial(id);
+      if (operation == null) {
+        material = await client._consumeCredentialMaterial(id);
+      } else {
+        final claim = await client._claimCredentialOperation(operation);
+        if (!claim.newlyClaimed) {
+          return Map<String, dynamic>.from(claim.toPublicJson());
+        }
+        material = claim.material!;
+      }
     } finally {
       reservations--;
     }
-    final output = _ExecutionOutput();
+    final output = _ExecutionOutput(
+      secretPatterns: operation == null
+          ? const []
+          : _credentialOutputPatterns(material),
+    );
     outputs[material.executionId] = output;
     late Future<void> work;
     work = Future<void>(
@@ -498,11 +735,18 @@ class _CredentialRuntimeExecutor {
     ).whenComplete(() => running.remove(work));
     running.add(work);
     return {
-      'protocolVersion': 1,
+      'protocolVersion': operation == null ? 1 : 2,
       'status': 'accepted',
       'requestId': id,
       'executionId': material.executionId,
-      'attemptConsumed': true,
+      if (operation == null)
+        'attemptConsumed': true
+      else ...{
+        'operationId': operation.operationId,
+        'operationClaimed': true,
+        'duplicate': false,
+        'grantState': 'available',
+      },
       'processStarted': false,
       'executionState': 'preparing',
     };
@@ -833,7 +1077,7 @@ class _CredentialRuntimeExecutor {
       }
       final result = await process.exitCode;
       await Future.wait([stdoutDone, stderrDone]);
-      output.complete = true;
+      output.finish();
       await report('exited', exit: result);
     } on Object catch (e) {
       if (e is _UncertainCredentialLaunch) {
@@ -884,7 +1128,7 @@ class _CredentialRuntimeExecutor {
       processIdentity?.close();
       output.active = false;
       output.finishedAt = DateTime.now();
-      output.complete = true;
+      output.finish();
       if (materialLease != null) {
         if (!registeredFiles && process == null) {
           try {

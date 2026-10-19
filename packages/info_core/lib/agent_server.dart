@@ -26,21 +26,31 @@ typedef CredentialExecutionHandler =
     );
 
 class AgentServer {
-  AgentServer._(this._server, this._agent, this._credentialExecutionHandler) {
+  AgentServer._(
+    this._server,
+    this._agent,
+    this._credentialExecutionHandler,
+    this.enableReusableCredentialUse,
+  ) {
     _server.listen(_handle);
   }
   final HttpServer _server;
   final AgentAccess _agent;
   final CredentialExecutionHandler? _credentialExecutionHandler;
+
+  /// Enable only after the caller's storage and executor support v2 semantics.
+  final bool enableReusableCredentialUse;
   int get port => _server.port;
   static Future<AgentServer> start(
     AgentAccess agent, {
     int port = 47125,
     CredentialExecutionHandler? credentialExecutionHandler,
+    bool enableReusableCredentialUse = false,
   }) async => AgentServer._(
     await HttpServer.bind(InternetAddress.loopbackIPv4, port, shared: false),
     agent,
     credentialExecutionHandler,
+    enableReusableCredentialUse,
   );
   Future<void> close() async {
     await _server.close(force: true);
@@ -49,6 +59,7 @@ class AgentServer {
   Future<void> _handle(HttpRequest request) async {
     Map<String, Object?> result;
     final runtime = request.uri.path.startsWith('/credential-use/');
+    var protocolVersion = 1;
     try {
       if (request.method != 'POST' ||
           request.headers.value('origin') != null ||
@@ -87,6 +98,7 @@ class AgentServer {
       if (body is! Map<String, dynamic>) {
         throw const AccessFailure('invalid_request');
       }
+      if (body['protocolVersion'] == 2) protocolVersion = 2;
       result = await _dispatch(request.uri.path, body);
     } on CredentialUseFailure catch (error) {
       result = error.toJson();
@@ -116,6 +128,12 @@ class AgentServer {
         'retryable': false,
       };
     }
+    if (runtime && protocolVersion == 2) {
+      result = {...result, 'protocolVersion': 2};
+      if (result.containsKey('attemptConsumed')) {
+        result['operationClaimed'] = result.remove('attemptConsumed');
+      }
+    }
     request.response.headers.contentType = ContentType.json;
     request.response.headers.set('Cache-Control', 'no-store');
     request.response.headers.set('X-Content-Type-Options', 'nosniff');
@@ -137,6 +155,50 @@ class AgentServer {
     Map<String, dynamic> body,
   ) async {
     switch (path) {
+      case '/capabilities':
+        if (body.isNotEmpty) throw const CredentialUseFailure('unknown_field');
+        return {
+          'protocolVersion': 1,
+          'status': 'ok',
+          'protocolVersions': [1, if (enableReusableCredentialUse) 2],
+          'capabilities': [
+            if (enableReusableCredentialUse) 'credential-use-reuse.v1',
+          ],
+        };
+      case '/credential-use/operation':
+      case '/credential-use/operation/status':
+        if (!enableReusableCredentialUse) {
+          throw const CredentialUseFailure('unsupported_capability');
+        }
+        final input = Map<String, dynamic>.from(body)
+          ..remove('sessionSecret')
+          ..remove('supervisorPid')
+          ..remove('supervisorCreatedAt');
+        final operation = CredentialOperationInput.fromJson(input);
+        final session = _text(body, 'sessionSecret');
+        if (path.endsWith('/status')) {
+          if (body.containsKey('supervisorPid') ||
+              body.containsKey('supervisorCreatedAt')) {
+            throw const CredentialUseFailure('unknown_field');
+          }
+          return _agent
+                  .credentialUseOperationStatus(session, operation)
+                  ?.toPublicJson() ??
+              {'protocolVersion': 2, 'status': 'not_found'};
+        }
+        if (body.containsKey('supervisorPid') !=
+                body.containsKey('supervisorCreatedAt') ||
+            body.containsKey('supervisorPid') &&
+                (body['supervisorPid'] is! int ||
+                    body['supervisorCreatedAt'] is! String)) {
+          throw const CredentialUseFailure('invalid_plan');
+        }
+        return (await _agent.beginCredentialUseOperation(
+          session,
+          operation,
+          supervisorPid: body['supervisorPid'] as int?,
+          supervisorCreatedAt: body['supervisorCreatedAt'] as String?,
+        )).toPrivateJson();
       case '/credential-use/hosted':
         final handler = _credentialExecutionHandler;
         if (handler == null) {
@@ -144,6 +206,9 @@ class AgentServer {
         }
         final session = _text(body, 'sessionSecret');
         final input = Map<String, dynamic>.of(body)..remove('sessionSecret');
+        if (input['protocolVersion'] == 2 && !enableReusableCredentialUse) {
+          throw const CredentialUseFailure('unsupported_capability');
+        }
         if (!{
           'run-use',
           'execution-status',
@@ -152,7 +217,17 @@ class AgentServer {
         }.contains(input['command'])) {
           throw const CredentialUseFailure('invalid_plan');
         }
-        return handler(session, input);
+        try {
+          return await handler(session, input);
+        } on Object {
+          // The handler can fail after the operation was committed or started.
+          // Never turn that uncertainty into an unclaimed/retryable launch.
+          final launching = input['command'] == 'run-use';
+          throw CredentialUseFailure(
+            launching ? 'execution_unknown' : 'service_unavailable',
+            attemptConsumed: launching,
+          );
+        }
       case '/credential-use/materials/register':
         if (body.keys.any(
           (k) => !{'executionId', 'executionCapability', 'lease'}.contains(k),
@@ -178,7 +253,7 @@ class AgentServer {
           _text(body, 'executionId'),
         );
         return {
-          'protocolVersion': 1,
+          'protocolVersion': execution.protocolVersion,
           'status': 'ok',
           'executionId': execution.id,
           'cleanupState': execution.cleanupState,
@@ -187,6 +262,9 @@ class AgentServer {
         final session = _text(body, 'sessionSecret');
         final command = Map<String, dynamic>.from(body)
           ..remove('sessionSecret');
+        if (command['protocolVersion'] == 2 && !enableReusableCredentialUse) {
+          throw const CredentialUseFailure('unsupported_capability');
+        }
         final request = await _agent.requestCredentialUse(
           session,
           CredentialUseInput.fromJson(command),

@@ -1,9 +1,12 @@
 import 'dart:convert';
 
-/// Strict RFC JSON object decoding for protocol v1. Duplicate members are
+/// Strict RFC JSON object decoding. Duplicate members are
 /// rejected before any caller can treat the last value as authoritative.
-Map<String, dynamic> decodeProtocolObject(String source) {
-  if (utf8.encode(source).length > 262144) throw const FormatException();
+Map<String, dynamic> decodeProtocolObject(
+  String source, {
+  int maxBytes = 262144,
+}) {
+  if (utf8.encode(source).length > maxBytes) throw const FormatException();
   final value = jsonDecode(source);
   if (value is! Map<String, dynamic>) throw const FormatException();
   _Members(source).value(0);

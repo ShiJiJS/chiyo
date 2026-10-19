@@ -1,0 +1,45 @@
+00:00 +0: loading test/credential_reuse_runtime_test.dart
+00:00 +0: full resident capacity still returns duplicate facts without another start
+00:02 +1: each file operation writes exact bytes into its own path and cleans only its lease
+00:03 +2: disabled v2 capability refuses new semantics before creating a request
+00:03 +3: one CLI grant runs two distinct plans and duplicate commands only query facts
+00:03 +4: failed CLI operation does not consume approval and is not replayed
+00:04 +5: truncated private claim is uncertain, and same operation retry cannot reissue material
+00:04 +6: wrong-operation private claim is uncertain, and same operation retry cannot reissue material
+00:04 +6 -1: wrong-operation private claim is uncertain, and same operation retry cannot reissue material [E]
+  Expected: 'material_claim_failed'
+    Actual: <null>
+     Which: not an <Instance of 'String'>
+
+  package:matcher                                expect
+  test\credential_reuse_runtime_test.dart 385:9  main.<fn>
+
+00:04 +6 -1: wrong-request private claim is uncertain, and same operation retry cannot reissue material
+00:04 +6 -2: wrong-request private claim is uncertain, and same operation retry cannot reissue material [E]
+  Expected: 'material_claim_failed'
+    Actual: <null>
+     Which: not an <Instance of 'String'>
+
+  package:matcher                                expect
+  test\credential_reuse_runtime_test.dart 385:9  main.<fn>
+
+00:04 +6 -2: duplicate-key private claim is uncertain, and same operation retry cannot reissue material
+00:04 +7 -2: a lost hosted acknowledgement remains uncertain and does not replay a command
+00:04 +7 -3: a lost hosted acknowledgement remains uncertain and does not replay a command [E]
+  Expected: true
+    Actual: <null>
+
+  package:matcher                                expect
+  test\credential_reuse_runtime_test.dart 449:7  main.<fn>
+
+00:04 +7 -3: protocol errors never upgrade old grants or create malformed operations
+00:04 +8 -3: hosted concurrent clients use one operation, including after revocation
+00:05 +9 -3: Some tests failed.
+
+Failing tests:
+  test/credential_reuse_runtime_test.dart: a lost hosted acknowledgement remains uncertain and does not replay a command
+  test/credential_reuse_runtime_test.dart: wrong-operation private claim is uncertain, and same operation retry cannot reissue material
+  test/credential_reuse_runtime_test.dart: wrong-request private claim is uncertain, and same operation retry cannot reissue material
+
+Consider enabling the flag chain-stack-traces to receive more detailed exceptions.
+For example, 'dart test --chain-stack-traces'.

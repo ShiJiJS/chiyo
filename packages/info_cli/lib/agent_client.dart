@@ -5,6 +5,8 @@ import 'dart:isolate';
 import 'dart:math';
 import 'package:crypto/crypto.dart';
 import 'package:info_core/info_core.dart';
+import 'package:info_core/protocol_json.dart';
+import 'credential_output_filter.dart';
 part 'credential_runtime_client.dart';
 
 class AgentClient {
@@ -72,6 +74,7 @@ class AgentClient {
     if ({
       'request-use',
       'run-use',
+      'operation-status',
       'execution-status',
       'execution-output',
       'cleanup-use',
@@ -95,6 +98,13 @@ class AgentClient {
           : {'status': 'invalid_request'};
     }
     switch (command) {
+      case 'capabilities':
+        if (input.keys.any((k) => k != 'command')) {
+          return Map<String, dynamic>.from(
+            const CredentialUseFailure('unknown_field').toJson(),
+          );
+        }
+        return _call('/capabilities', {});
       case 'credential-catalog':
         if (input.keys.any(
           (k) => !{'command', 'cursor', 'limit'}.contains(k),
