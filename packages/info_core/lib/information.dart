@@ -13,6 +13,8 @@ import 'info_core.dart'
         CredentialRuntimeRepository,
         CredentialUseRequest,
         CredentialExecution,
+        FocusedFillRuntimeRepository,
+        FocusedFillOperation,
         SshHostTrustRepository,
         SshHostTrustSnapshot;
 
@@ -151,6 +153,7 @@ class MemoryInformationRepository
         InformationRepository,
         CredentialRepository,
         CredentialRuntimeRepository,
+        FocusedFillRuntimeRepository,
         SshHostTrustRepository {
   SshHostTrustSnapshot? _sshHostTrust;
   @override
@@ -162,6 +165,31 @@ class MemoryInformationRepository
 
   final _credentialUseRequests = <CredentialUseRequest>[];
   final _credentialExecutions = <CredentialExecution>[];
+  final _focusedFillOperations = <FocusedFillOperation>[];
+  @override
+  List<FocusedFillOperation> get focusedFillOperations =>
+      List.unmodifiable(_focusedFillOperations);
+  @override
+  Future<void> commitFocusedFillRuntime(
+    List<CredentialUseRequest> requests,
+    List<FocusedFillOperation> operations, {
+    void Function()? validate,
+    List<CredentialExecution>? executions,
+  }) async {
+    validate?.call();
+    _credentialUseRequests
+      ..clear()
+      ..addAll(requests);
+    _focusedFillOperations
+      ..clear()
+      ..addAll(operations);
+    if (executions != null) {
+      _credentialExecutions
+        ..clear()
+        ..addAll(executions);
+    }
+  }
+
   @override
   List<CredentialUseRequest> get credentialUseRequests =>
       List.unmodifiable(_credentialUseRequests);

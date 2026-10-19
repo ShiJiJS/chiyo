@@ -10,13 +10,42 @@ extension _CredentialHistoryService on InformationService {
     }
     return {
       for (final r in repo.credentialUseRequests)
-        if (executions.containsKey(r.id)
+        if (r.isFocusedFill
+            ? _focusedHistoryCanPrune(r, cutoff)
+            : executions.containsKey(r.id)
             ? executions[r.id]!.every(
                 (e) => _credentialHistoryCanPrune(r, e, cutoff),
               )
             : _credentialHistoryCanPrune(r, null, cutoff))
           r.id,
     };
+  }
+
+  bool _focusedHistoryCanPrune(CredentialUseRequest request, DateTime cutoff) {
+    if (!_credentialHistoryCanPrune(request, null, cutoff) ||
+        _repository is! FocusedFillRuntimeRepository) {
+      return false;
+    }
+    return (_repository as FocusedFillRuntimeRepository).focusedFillOperations
+        .where((o) => o.requestId == request.id)
+        .every((o) {
+          if (o.state == FocusedFillState.checking ||
+              _failedFillAudits.contains(o.id) ||
+              {
+                    FocusedFillState.partial,
+                    FocusedFillState.unknown,
+                  }.contains(o.state) &&
+                  o.attentionAcknowledgedAt == null) {
+            return false;
+          }
+          return [
+            o.createdAt,
+            ?o.checkedAt,
+            ?o.finishedAt,
+            ?o.restoredAt,
+            ?o.attentionAcknowledgedAt,
+          ].every((t) => t.isBefore(cutoff));
+        });
   }
 
   bool _credentialHistoryCanPrune(
@@ -71,12 +100,23 @@ extension _CredentialHistoryService on InformationService {
         if (ids.contains(e.requestId)) e.id,
     };
     try {
-      await repo.commitCredentialRuntime(
-        repo.credentialUseRequests.where((r) => !ids.contains(r.id)).toList(),
-        repo.credentialExecutions
-            .where((e) => !executionIds.contains(e.id))
-            .toList(),
-      );
+      final requests = repo.credentialUseRequests
+          .where((r) => !ids.contains(r.id))
+          .toList();
+      final executions = repo.credentialExecutions
+          .where((e) => !executionIds.contains(e.id))
+          .toList();
+      if (repo is FocusedFillRuntimeRepository) {
+        await repo.commitFocusedFillRuntime(
+          requests,
+          repo.focusedFillOperations
+              .where((o) => !ids.contains(o.requestId))
+              .toList(),
+          executions: executions,
+        );
+      } else {
+        await repo.commitCredentialRuntime(requests, executions);
+      }
     } on Object {
       throw const CredentialUseFailure('audit_unavailable');
     }

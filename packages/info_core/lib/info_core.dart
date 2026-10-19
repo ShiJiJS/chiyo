@@ -39,6 +39,8 @@ part 'library_access.dart';
 part 'credential_access.dart';
 part 'credential_field_migration.dart';
 part 'credential_runtime_models.dart';
+part 'focused_fill_models.dart';
+part 'focused_fill_access.dart';
 part 'credential_runtime_access.dart';
 part 'credential_file_receivers.dart';
 part 'credential_material_access.dart';
@@ -134,14 +136,20 @@ class InformationService {
     required InformationRepository repository,
     DateTime Function()? clock,
     CredentialExecutableInspector? credentialExecutableInspector,
+    this.focusedFillDriver,
+    FocusedFillApplicationInspector? focusedFillApplicationInspector,
   }) : _repository = repository,
+       focusedFillApplicationInspector =
+           focusedFillApplicationInspector ?? inspectFocusedFillApplication,
        credentialExecutableInspector =
            credentialExecutableInspector ?? inspectCredentialExecutable,
        _clock = clock ?? DateTime.now {
     _recoverAudit();
   }
   InformationService.fictional({DateTime Function()? clock})
-    : credentialExecutableInspector = inspectCredentialExecutable,
+    : focusedFillDriver = null,
+      focusedFillApplicationInspector = inspectFocusedFillApplication,
+      credentialExecutableInspector = inspectCredentialExecutable,
       _clock = clock ?? DateTime.now,
       _repository = MemoryInformationRepository([
         InformationItem(
@@ -169,6 +177,18 @@ class InformationService {
       ]);
   final InformationRepository _repository;
   final CredentialExecutableInspector credentialExecutableInspector;
+  final FocusedFillDriver? focusedFillDriver;
+  final FocusedFillApplicationInspector focusedFillApplicationInspector;
+  final _focusedFillTasks = <String, Future<void>>{};
+  final _failedFillAudits = <String>{};
+  PreparedFocusedFill? _preparedFocusedFill;
+  String? _activeFocusedFill;
+  Future<void> drainFocusedFills() async {
+    while (_focusedFillTasks.isNotEmpty) {
+      await Future.wait(_focusedFillTasks.values.toList());
+    }
+  }
+
   final _credentialUseSessions = <String, String>{};
   final _executionCapabilities = <String, String>{};
   InformationField? _field(FieldRef ref) {
@@ -209,7 +229,12 @@ class InformationService {
     if (_backupBarrier case final barrier?) {
       return barrier.future.then((_) => close());
     }
-    if (_closed) return owner.retryAuditStorage();
+    if (_closed) {
+      return Future.wait<void>([
+        owner.retryAuditStorage(),
+        drainFocusedFills(),
+      ]).then((_) {});
+    }
     _closed = true;
     for (final request in _requests.values) {
       _expire(request);
@@ -230,7 +255,13 @@ class InformationService {
     _requests.clear();
     _grants.clear();
     _submitted.close();
-    return owner.retryAuditStorage();
+    return Future.wait<void>([
+      owner.retryAuditStorage(),
+      Future<void>.sync(
+        () => _preparedFocusedFill?.close(),
+      ).catchError((Object _) {}),
+      drainFocusedFills(),
+    ]).then((_) {});
   }
 
   final _random = Random.secure();

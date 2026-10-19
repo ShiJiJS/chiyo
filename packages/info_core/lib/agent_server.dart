@@ -31,6 +31,7 @@ class AgentServer {
     this._agent,
     this._credentialExecutionHandler,
     this.enableReusableCredentialUse,
+    this.enableFocusedFill,
   ) {
     _server.listen(_handle);
   }
@@ -40,17 +41,26 @@ class AgentServer {
 
   /// Enable only after the caller's storage and executor support v2 semantics.
   final bool enableReusableCredentialUse;
+
+  /// Kept off until the repository, native host, and owner UI support fills.
+  final bool enableFocusedFill;
+  bool get _focusedFillEnabled =>
+      enableReusableCredentialUse &&
+      enableFocusedFill &&
+      _agent.focusedFillAvailable;
   int get port => _server.port;
   static Future<AgentServer> start(
     AgentAccess agent, {
     int port = 47125,
     CredentialExecutionHandler? credentialExecutionHandler,
     bool enableReusableCredentialUse = false,
+    bool enableFocusedFill = false,
   }) async => AgentServer._(
     await HttpServer.bind(InternetAddress.loopbackIPv4, port, shared: false),
     agent,
     credentialExecutionHandler,
     enableReusableCredentialUse,
+    enableFocusedFill,
   );
   Future<void> close() async {
     await _server.close(force: true);
@@ -163,8 +173,24 @@ class AgentServer {
           'protocolVersions': [1, if (enableReusableCredentialUse) 2],
           'capabilities': [
             if (enableReusableCredentialUse) 'credential-use-reuse.v1',
+            if (_focusedFillEnabled) 'credential-focused-fill.v1',
           ],
         };
+      case '/credential-use/fill':
+      case '/credential-use/fill/status':
+        if (!_focusedFillEnabled) {
+          throw const CredentialUseFailure('unsupported_capability');
+        }
+        final session = _text(body, 'sessionSecret');
+        final command = Map<String, dynamic>.of(body)..remove('sessionSecret');
+        if (command['command'] !=
+            (path.endsWith('/status') ? 'fill-status' : 'fill-use')) {
+          throw const CredentialUseFailure('invalid_plan');
+        }
+        final input = FocusedFillOperationInput.fromJson(command);
+        return path.endsWith('/status')
+            ? _agent.focusedFillStatus(session, input)
+            : await _agent.startFocusedFill(session, input);
       case '/credential-use/operation':
       case '/credential-use/operation/status':
         if (!enableReusableCredentialUse) {
@@ -264,6 +290,16 @@ class AgentServer {
           ..remove('sessionSecret');
         if (command['protocolVersion'] == 2 && !enableReusableCredentialUse) {
           throw const CredentialUseFailure('unsupported_capability');
+        }
+        if (command.containsKey('fill')) {
+          if (!_focusedFillEnabled) {
+            throw const CredentialUseFailure('unsupported_capability');
+          }
+          final request = await _agent.requestFocusedFill(
+            session,
+            FocusedFillInput.fromJson(command),
+          );
+          return _agent.credentialUseStatus(session, request.id);
         }
         final request = await _agent.requestCredentialUse(
           session,

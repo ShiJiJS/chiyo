@@ -33,8 +33,13 @@ extension _CredentialRuntimeService on InformationService {
       r.credentialId,
       r.version,
       generation: r.useGeneration,
+      requireMaterial: !r.isFocusedFill,
     );
-    if (r.plan.receiver == 'ssh_identity' &&
+    if (r.isFocusedFill && credential.form != CredentialForm.string) {
+      throw const CredentialUseFailure('invalid_reference');
+    }
+    if (!r.isFocusedFill &&
+        r.plan.receiver == 'ssh_identity' &&
         (r.plan.sshTrustSnapshotId == null ||
             r.plan.sshTrustSnapshotId != _sshHostTrust?.id ||
             r.plan.internalMaterialHashes['ssh_known_hosts'] !=
@@ -48,9 +53,15 @@ extension _CredentialRuntimeService on InformationService {
     String id,
     int version, {
     int? generation,
+    bool requireMaterial = true,
   }) {
     try {
-      return _eligibleCredential(id, version, useGeneration: generation);
+      return _eligibleCredential(
+        id,
+        version,
+        useGeneration: generation,
+        requireMaterial: requireMaterial,
+      );
     } on AccessFailure catch (e) {
       throw CredentialUseFailure(
         e.status == 'credential_material_purged'
@@ -143,6 +154,8 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
     CredentialOperationInput input,
   ) {
     final r = _service._sessionUseRequest(session, input.requestId);
+    if (r.isFocusedFill) throw const CredentialUseFailure('scope_not_approved');
+    _service._rejectFocusedOperationCollision(session, input.operationId);
     if (r.protocolVersion != 2) {
       throw const CredentialUseFailure('unsupported_protocol');
     }
@@ -666,7 +679,8 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
       'requestId': id,
       'createdAt': _useTimestamp(r.createdAt),
       'requestExpiresAt': _useTimestamp(r.requestExpiresAt),
-      'planHash': r.plan.planHash,
+      'planHash': r.usePlanHash,
+      if (r.isFocusedFill) 'useKind': 'focused_fill',
       if (r.state != 'pending')
         'decision': {
           'credentialUse': {
@@ -681,11 +695,15 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
                 'attemptsConsumed': r.attemptConsumed ? 1 : 0,
               } else ...{
                 'reusable': true,
-                'operationCount': _service
-                    ._runtimeRepository
-                    .credentialExecutions
-                    .where((e) => e.requestId == r.id)
-                    .length,
+                'operationCount': r.isFocusedFill
+                    ? (_service._runtimeRepository
+                              as FocusedFillRuntimeRepository)
+                          .focusedFillOperations
+                          .where((e) => e.requestId == r.id)
+                          .length
+                    : _service._runtimeRepository.credentialExecutions
+                          .where((e) => e.requestId == r.id)
+                          .length,
               },
             },
           },

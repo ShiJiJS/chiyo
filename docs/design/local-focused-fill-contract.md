@@ -1,6 +1,6 @@
 # 本机焦点填充合同（#35）
 
-2026-10-19，沿用Round05，基线为#33提交3d31604。本文区分目标合同和已实现检查点：HTML状态及原生只读焦点识别已开始；正式CLI、授权服务、输入、存储迁移和Flutter填充页尚未实现。现有生产能力不得提前宣告支持填充。
+2026-10-19，沿用Round05，基线为#33提交3d31604。本文区分目标合同和已实现检查点：HTML/只读原生识别已交付；类型化核心、Memory审计及CLI请求/查询已接通受控驱动。SQLCipher迁移/备份、真正原生输入和Flutter页仍待；生产客户端继续关闭填充能力。
 
 ## 用户任务与设计
 
@@ -25,11 +25,11 @@ Agent在批准后点击密码框一次、后台调用一次；这是新增使用
 
 公开v1命令合同不变。v2 `request-use`扩展为互斥的两种使用规格：原`launch`与新`fill`；缺少fill仍按命令规格解析。两种同时提供、未知方式或旧客户端尝试填充均明确拒绝，不用虚构LaunchPlan兼容。
 
-目标请求形状（待正式CLI接通，不能当作当前可用命令）：
+请求形状（已通过核心及独立编译CLI的受控宿主测试；当前生产客户端尚不支持）：
 
 ```json
 {
-  "version": 2,
+  "protocolVersion": 2,
   "command": "request-use",
   "purpose": "登录工作台继续填写项目发布资料",
   "credentials": [{"alias": "portal_password", "credentialId": "portal-password", "version": 1}],
@@ -77,6 +77,8 @@ SendInput不是向某个HWND原子定向输入；最终复核和Windows接受按
 存储须用带类型的使用规格/操作归档扩展schema17/备份6，不能伪装成command或丢弃原有命令记录；预计升级schema18/备份7，具体迁移随实现验证。独立library_format及物理表规则延续#33。旧库/备份仍可读，旧读取器拒绝新格式。恢复不复活授权、私密会话、PID/句柄或输入能力，进行中/已放行未确认转unknown，已终结输入事实保留。
 
 ## 当前检查点与后续验证
+
+第二个检查点见[核心与CLI实现](../development/issue35-focused-fill-core.md)：请求使用sealed specification区分命令/填充，填充操作有独立结果。沿用同一私密会话、凭据版本/代际及固定期限检查；审计、逐批许可、未知恢复、关闭/恢复隔离已接入。Memory实现了原子审计，SQLCipher尚未实现`FocusedFillRuntimeRepository`，生产driver未配置、AgentServer的enableFocusedFill默认false，因此不宣告填充能力。`focus-target`发现、SQL/备份、建议绑定可空的格式兼容及GUI/真实输入仍须接续，不能用模拟驱动证明Win32输入通过。
 
 原生`focused_input`目录当前只含私有只读快照、检查程序和测试；目标EXCLUDE_FROM_ALL，不链接/打包到正式应用，无SendInput或秘密通道。控制值、窗口标题和剪贴板均未读取。正式宿主须补应用字节核验、进程归属/完整性、串行、租约、秘密输入及授权审计后才能满足上文。
 

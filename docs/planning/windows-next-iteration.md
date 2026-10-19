@@ -6,7 +6,7 @@
 
 #36原型与接口合同已完成；#33 Windows功能已完成，见[最终验收](../development/issue33-completion.md)。协议v2在Windows生产bootstrap启用，新CLI默认2；423项零跳过、四包严格分析、真实Windows UI/独立编译适配器/SSH闭环、实际接收器及Release通过，旧许可不升级。当前用户包仍为0.4.0+8/v1，不把源码验收冒充已更新。接续#35→#37→#38→#30；#23/#18仍独立保留。
 
-#35当前推进：已补申请/审批/逐次填充历史原型和[填充合同](../design/local-focused-fill-contract.md)，原生只读识别模块与Debug/Release状态检查已开始。正式CLI/宿主输入、类型化持久化及Flutter页面仍待，继续执行#35；原型不等于新用户包已更新。
+#35当前推进：原型/合同及只读识别已交付，核心授权、Memory审计和CLI已接通受控驱动，见[核心检查点](../development/issue35-focused-fill-core.md)。SQLCipher/备份、真实原生输入、发现及Flutter仍待，生产填充开关保持关闭；继续#35，不把模拟驱动或QA CLI编译当用户新包。
 
 ## 已交付基线
 

@@ -78,6 +78,8 @@ class AgentClient {
       'execution-status',
       'execution-output',
       'cleanup-use',
+      'fill-use',
+      'fill-status',
     }.contains(command)) {
       return _executeCredentialCommand(input);
     }

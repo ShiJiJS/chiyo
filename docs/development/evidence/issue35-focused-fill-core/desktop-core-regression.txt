@@ -1,0 +1,112 @@
+Flutter assets will be downloaded from https://storage.flutter-io.cn. Make sure you trust this source!
+00:00 +0: loading C:/Project/network_config/info-manage/apps/desktop/test/adjusted_approval_widget_test.dart
+00:00 +0: C:/Project/network_config/info-manage/apps/desktop/test/adjusted_approval_widget_test.dart: owner can remove a requested field that is no longer available
+00:01 +1: C:/Project/network_config/info-manage/apps/desktop/test/adjusted_approval_widget_test.dart: owner can remove a requested field that is no longer available
+00:02 +2: C:/Project/network_config/info-manage/apps/desktop/test/adjusted_approval_widget_test.dart: owner can remove a requested field that is no longer available
+00:02 +3: C:/Project/network_config/info-manage/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:02 +4: C:/Project/network_config/info-manage/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:02 +5: C:/Project/network_config/info-manage/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:02 +6: C:/Project/network_config/info-manage/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:03 +7: C:/Project/network_config/info-manage/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:03 +8: C:/Project/network_config/info-manage/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:03 +9: C:/Project/network_config/info-manage/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:03 +10: C:/Project/network_config/info-manage/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:03 +11: C:/Project/network_config/info-manage/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:03 +12: C:/Project/network_config/info-manage/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:03 +13: C:/Project/network_config/info-manage/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:03 +14: C:/Project/network_config/info-manage/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:04 +15: C:/Project/network_config/info-manage/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:04 +16: C:/Project/network_config/info-manage/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:04 +17: C:/Project/network_config/info-manage/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:04 +18: C:/Project/network_config/info-manage/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:04 +19: C:/Project/network_config/info-manage/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:05 +20: C:/Project/network_config/info-manage/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:05 +21: C:/Project/network_config/info-manage/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:05 +22: C:/Project/network_config/info-manage/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:05 +23: C:/Project/network_config/info-manage/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:05 +24: C:/Project/network_config/info-manage/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:06 +25: C:/Project/network_config/info-manage/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:06 +26: C:/Project/network_config/info-manage/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:06 +27: C:/Project/network_config/info-manage/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:06 +28: C:/Project/network_config/info-manage/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:07 +29: C:/Project/network_config/info-manage/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:07 +30: C:/Project/network_config/info-manage/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:07 +31: C:/Project/network_config/info-manage/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:07 +32: C:/Project/network_config/info-manage/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:08 +33: C:/Project/network_config/info-manage/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:08 +34: C:/Project/network_config/info-manage/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:09 +35: C:/Project/network_config/info-manage/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:09 +36: C:/Project/network_config/info-manage/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:09 +37: C:/Project/network_config/info-manage/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:09 +38: C:/Project/network_config/info-manage/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:10 +39: C:/Project/network_config/info-manage/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:10 +40: C:/Project/network_config/info-manage/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:10 +41: C:/Project/network_config/info-manage/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:10 +42: C:/Project/network_config/info-manage/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:10 +43: C:/Project/network_config/info-manage/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:11 +44: C:/Project/network_config/info-manage/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:11 +45: C:/Project/network_config/info-manage/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:11 +46: C:/Project/network_config/info-manage/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:12 +47: C:/Project/network_config/info-manage/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:12 +48: C:/Project/network_config/info-manage/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:12 +49: C:/Project/network_config/info-manage/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:12 +50: C:/Project/network_config/info-manage/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:13 +51: C:/Project/network_config/info-manage/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:13 +52: C:/Project/network_config/info-manage/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:13 +53: C:/Project/network_config/info-manage/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:13 +54: C:/Project/network_config/info-manage/apps/desktop/test/cross_page_navigation_test.dart: main shares current-ID navigation with proposal results and credential links while ordinary library jumps preserve state
+00:13 +55: C:/Project/network_config/info-manage/apps/desktop/test/cross_page_navigation_test.dart: main shares current-ID navigation with proposal results and credential links while ordinary library jumps preserve state
+00:14 +56: C:/Project/network_config/info-manage/apps/desktop/test/cross_page_navigation_test.dart: main shares current-ID navigation with proposal results and credential links while ordinary library jumps preserve state
+00:14 +57: C:/Project/network_config/info-manage/apps/desktop/test/cross_page_navigation_test.dart: main shares current-ID navigation with proposal results and credential links while ordinary library jumps preserve state
+00:14 +58: C:/Project/network_config/info-manage/apps/desktop/test/cross_page_navigation_test.dart: main shares current-ID navigation with proposal results and credential links while ordinary library jumps preserve state
+00:14 +59: C:/Project/network_config/info-manage/apps/desktop/test/cross_page_navigation_test.dart: main shares current-ID navigation with proposal results and credential links while ordinary library jumps preserve state
+00:15 +60: C:/Project/network_config/info-manage/apps/desktop/test/cross_page_navigation_test.dart: main shares current-ID navigation with proposal results and credential links while ordinary library jumps preserve state
+00:15 +61: C:/Project/network_config/info-manage/apps/desktop/test/cross_page_navigation_test.dart: main shares current-ID navigation with proposal results and credential links while ordinary library jumps preserve state
+00:15 +62: C:/Project/network_config/info-manage/apps/desktop/test/cross_page_navigation_test.dart: main shares current-ID navigation with proposal results and credential links while ordinary library jumps preserve state
+00:15 +63: C:/Project/network_config/info-manage/apps/desktop/test/cross_page_navigation_test.dart: main shares current-ID navigation with proposal results and credential links while ordinary library jumps preserve state
+00:15 +64: C:/Project/network_config/info-manage/apps/desktop/test/cross_page_navigation_test.dart: main shares current-ID navigation with proposal results and credential links while ordinary library jumps preserve state
+00:15 +65: C:/Project/network_config/info-manage/apps/desktop/test/cross_page_navigation_test.dart: main shares current-ID navigation with proposal results and credential links while ordinary library jumps preserve state
+00:15 +66: C:/Project/network_config/info-manage/apps/desktop/test/cross_page_navigation_test.dart: main shares current-ID navigation with proposal results and credential links while ordinary library jumps preserve state
+00:15 +67: C:/Project/network_config/info-manage/apps/desktop/test/cross_page_navigation_test.dart: main shares current-ID navigation with proposal results and credential links while ordinary library jumps preserve state
+00:15 +68: C:/Project/network_config/info-manage/apps/desktop/test/cross_page_navigation_test.dart: main shares current-ID navigation with proposal results and credential links while ordinary library jumps preserve state
+00:16 +69: C:/Project/network_config/info-manage/apps/desktop/test/cross_page_navigation_test.dart: main shares current-ID navigation with proposal results and credential links while ordinary library jumps preserve state
+00:16 +70: C:/Project/network_config/info-manage/apps/desktop/test/cross_page_navigation_test.dart: main shares current-ID navigation with proposal results and credential links while ordinary library jumps preserve state
+00:16 +71: C:/Project/network_config/info-manage/apps/desktop/test/cross_page_navigation_test.dart: main shares current-ID navigation with proposal results and credential links while ordinary library jumps preserve state
+00:16 +72: C:/Project/network_config/info-manage/apps/desktop/test/cross_page_navigation_test.dart: main shares current-ID navigation with proposal results and credential links while ordinary library jumps preserve state
+00:16 +73: C:/Project/network_config/info-manage/apps/desktop/test/cross_page_navigation_test.dart: main shares current-ID navigation with proposal results and credential links while ordinary library jumps preserve state
+00:16 +74: C:/Project/network_config/info-manage/apps/desktop/test/cross_page_navigation_test.dart: main shares current-ID navigation with proposal results and credential links while ordinary library jumps preserve state
+00:16 +75: C:/Project/network_config/info-manage/apps/desktop/test/cross_page_navigation_test.dart: main shares current-ID navigation with proposal results and credential links while ordinary library jumps preserve state
+00:16 +76: C:/Project/network_config/info-manage/apps/desktop/test/cross_page_navigation_test.dart: main shares current-ID navigation with proposal results and credential links while ordinary library jumps preserve state
+00:17 +77: C:/Project/network_config/info-manage/apps/desktop/test/cross_page_navigation_test.dart: main shares current-ID navigation with proposal results and credential links while ordinary library jumps preserve state
+00:17 +78: C:/Project/network_config/info-manage/apps/desktop/test/cross_page_navigation_test.dart: main shares current-ID navigation with proposal results and credential links while ordinary library jumps preserve state
+00:17 +79: C:/Project/network_config/info-manage/apps/desktop/test/cross_page_navigation_test.dart: main shares current-ID navigation with proposal results and credential links while ordinary library jumps preserve state
+00:18 +80: C:/Project/network_config/info-manage/apps/desktop/test/cross_page_navigation_test.dart: main shares current-ID navigation with proposal results and credential links while ordinary library jumps preserve state
+00:18 +81: C:/Project/network_config/info-manage/apps/desktop/test/cross_page_navigation_test.dart: main shares current-ID navigation with proposal results and credential links while ordinary library jumps preserve state
+00:18 +82: C:/Project/network_config/info-manage/apps/desktop/test/cross_page_navigation_test.dart: main shares current-ID navigation with proposal results and credential links while ordinary library jumps preserve state
+00:18 +83: C:/Project/network_config/info-manage/apps/desktop/test/cross_page_navigation_test.dart: main shares current-ID navigation with proposal results and credential links while ordinary library jumps preserve state
+00:18 +84: C:/Project/network_config/info-manage/apps/desktop/test/cross_page_navigation_test.dart: main shares current-ID navigation with proposal results and credential links while ordinary library jumps preserve state
+00:18 +85: C:/Project/network_config/info-manage/apps/desktop/test/cross_page_navigation_test.dart: main shares current-ID navigation with proposal results and credential links while ordinary library jumps preserve state
+00:18 +86: C:/Project/network_config/info-manage/apps/desktop/test/cross_page_navigation_test.dart: main shares current-ID navigation with proposal results and credential links while ordinary library jumps preserve state
+00:19 +87: C:/Project/network_config/info-manage/apps/desktop/test/cross_page_navigation_test.dart: main shares current-ID navigation with proposal results and credential links while ordinary library jumps preserve state
+00:19 +88: C:/Project/network_config/info-manage/apps/desktop/test/desktop_navigation_test.dart: navigation switches one selection immediately and pages share an origin
+00:19 +89: C:/Project/network_config/info-manage/apps/desktop/test/desktop_navigation_test.dart: navigation switches one selection immediately and pages share an origin
+00:19 +90: C:/Project/network_config/info-manage/apps/desktop/test/desktop_navigation_test.dart: navigation switches one selection immediately and pages share an origin
+00:19 +91: C:/Project/network_config/info-manage/apps/desktop/test/desktop_navigation_test.dart: navigation switches one selection immediately and pages share an origin
+00:19 +92: C:/Project/network_config/info-manage/apps/desktop/test/templates_test.dart: owner creates a template and only saves information after reviewing its form
+00:19 +93: C:/Project/network_config/info-manage/apps/desktop/test/templates_test.dart: owner creates a template and only saves information after reviewing its form
+00:19 +94: C:/Project/network_config/info-manage/apps/desktop/test/templates_test.dart: owner creates a template and only saves information after reviewing its form
+00:20 +95: C:/Project/network_config/info-manage/apps/desktop/test/templates_test.dart: owner creates a template and only saves information after reviewing its form
+00:20 +96: C:/Project/network_config/info-manage/apps/desktop/test/inbox_workspace_test.dart: theme changes reach existing pages, reopen, and recover from failed writes
+00:20 +97: C:/Project/network_config/info-manage/apps/desktop/test/cross_page_navigation_test.dart: main opens the actual organization task and preserves history search page and selection on ordinary returns
+00:20 +98: C:/Project/network_config/info-manage/apps/desktop/test/cross_page_navigation_test.dart: main opens the actual organization task and preserves history search page and selection on ordinary returns
+00:20 +99: C:/Project/network_config/info-manage/apps/desktop/test/cross_page_navigation_test.dart: main opens the actual organization task and preserves history search page and selection on ordinary returns
+00:20 +100: C:/Project/network_config/info-manage/apps/desktop/test/cross_page_navigation_test.dart: main opens the actual organization task and preserves history search page and selection on ordinary returns
+00:20 +101: C:/Project/network_config/info-manage/apps/desktop/test/cross_page_navigation_test.dart: main opens the actual organization task and preserves history search page and selection on ordinary returns
+00:20 +102: C:/Project/network_config/info-manage/apps/desktop/test/cross_page_navigation_test.dart: main opens the actual organization task and preserves history search page and selection on ordinary returns
+00:20 +103: C:/Project/network_config/info-manage/apps/desktop/test/cross_page_navigation_test.dart: main opens the actual organization task and preserves history search page and selection on ordinary returns
+00:21 +104: C:/Project/network_config/info-manage/apps/desktop/test/cross_page_navigation_test.dart: main opens the actual organization task and preserves history search page and selection on ordinary returns
+00:21 +105: C:/Project/network_config/info-manage/apps/desktop/test/cross_page_navigation_test.dart: main opens the actual organization task and preserves history search page and selection on ordinary returns
+00:21 +106: C:/Project/network_config/info-manage/apps/desktop/test/cross_page_navigation_test.dart: main opens the actual organization task and preserves history search page and selection on ordinary returns
+00:22 +107: C:/Project/network_config/info-manage/apps/desktop/test/cross_page_navigation_test.dart: main opens the actual organization task and preserves history search page and selection on ordinary returns
+00:22 +108: C:/Project/network_config/info-manage/apps/desktop/test/cross_page_navigation_test.dart: main opens the actual organization task and preserves history search page and selection on ordinary returns
+00:22 +109: All tests passed!

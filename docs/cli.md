@@ -98,3 +98,18 @@ Typed env/argv对象才产生注入：GH_TOKEN接收`{"secret":"alias"}`；SSH�
 输出在执行宿主内存有界保留、base64按流/序号分页；已知凭据直接回显在保留前遮挡，但不保证编码、截图或外部文件安全。输出不可用不代表执行失败。通用CLI需保持进程接续；Codex由持续宿主跨单命令进程保管，结束/缓存淘汰后不恢复输出。CLI的stdin EOF不结束共享会话。
 
 完整协议、兼容和边界见[协议v2](design/runtime-protocol-v2.md)，Agent流程见[随包凭据使用说明](../integrations/codex/skills/agent-info-access/references/credential-use.md)。
+
+## 开发中的本机焦点填充（#35）
+
+核心/CLI已支持受控宿主测试，当前生产Windows客户端及0.4.0+8包尚未启用。必须同时协商协议2、`credential-use-reuse.v1`和`credential-focused-fill.v1`，未提供对应能力时停止，不退回返回密码原文。需要私密会话，不能只凭请求ID使用。
+
+`request-use`提交一个字符串凭据引用和`fill`（应用绝对路径/字节摘要、仅供判断的网址），不同时提供`launch`，也不附带普通字段授权。请求格式见[填充合同](design/local-focused-fill-contract.md)。批准固定凭据版本、应用、方式及15/30分钟期限；批准不输入。Agent准备空密码框、重新点击目标，再后台调用：
+
+```json
+{"protocolVersion":2,"command":"fill-use","requestId":"REQUEST_ID","operationId":"password-fill-01"}
+{"protocolVersion":2,"command":"fill-status","requestId":"REQUEST_ID","operationId":"password-fill-01"}
+```
+
+省略版本也按2处理。`fill-use`只登记/请求该次操作，宿主保管秘密；CLI没有输入值、窗口句柄、秘密文件路径或命令模板参数。`fill-status`仅查询；相同操作ID返回原记录，不再发送。响应丢失用原requestId/operationId查询，不改ID自动重试。
+
+结果区分checking、sent、refused、partial、unknown；sent仅表示Windows接受输入，不等于完整接收或登录成功。填充不返回命令退出码/文件清理或秘密。partial/unknown保留原事实并停止新操作，用户检查目标并通过所有者恢复入口确认后才可明确重做；确认不续期、不清空输入框，也不会重放旧操作。保持密码遮挡，不读取或显示明文；不自动提交登录。

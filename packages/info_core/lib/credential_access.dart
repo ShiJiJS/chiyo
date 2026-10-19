@@ -453,6 +453,7 @@ extension _CredentialService on InformationService {
     String id,
     int version, {
     int? useGeneration,
+    bool requireMaterial = true,
   }) {
     final c = owner.credential(id);
     switch (c.availability(_clock())) {
@@ -469,7 +470,7 @@ extension _CredentialService on InformationService {
         useGeneration != null && c.useGeneration != useGeneration) {
       throw const AccessFailure('credential_version_changed');
     }
-    _currentCredentialMaterial(c);
+    if (requireMaterial) _currentCredentialMaterial(c);
     return c;
   }
 

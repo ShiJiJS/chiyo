@@ -244,9 +244,15 @@ extension OwnerAuditAccess on OwnerAccess {
       credentialIds.length,
       _service._repository is CredentialRuntimeRepository
           ? (_service._repository as CredentialRuntimeRepository)
-                .credentialExecutions
-                .where((e) => credentialIds.contains(e.requestId))
-                .length
+                    .credentialExecutions
+                    .where((e) => credentialIds.contains(e.requestId))
+                    .length +
+                (_service._repository is FocusedFillRuntimeRepository
+                    ? (_service._repository as FocusedFillRuntimeRepository)
+                          .focusedFillOperations
+                          .where((o) => credentialIds.contains(o.requestId))
+                          .length
+                    : 0)
           : 0,
     );
     _service._retentionPreview = preview;

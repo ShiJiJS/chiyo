@@ -35,6 +35,8 @@ class CredentialUseFailure implements Exception {
       'executable_changed' ||
       'plan_changed' ||
       'operation_conflict' ||
+      'fill_needs_attention' ||
+      'fill_unknown' ||
       'execution_unknown' ||
       'cleanup_busy' ||
       'cleanup_failed' ||
@@ -42,6 +44,7 @@ class CredentialUseFailure implements Exception {
       'audit_unavailable' ||
       'service_unavailable' ||
       'execution_capacity' => 'service_unavailable',
+      'busy' => 'service_unavailable',
       _ => 'invalid_request',
     },
     'errorCode': code,
@@ -52,6 +55,7 @@ class CredentialUseFailure implements Exception {
           'service_unavailable',
           'execution_capacity',
           'cleanup_busy',
+          'busy',
         }.contains(code),
     if (protocolVersion == 1)
       'attemptConsumed': attemptConsumed
@@ -620,7 +624,8 @@ class CredentialUseRequest {
     required this.credentialId,
     required this.version,
     required this.useGeneration,
-    required this.plan,
+    CredentialLaunchPlan? plan,
+    FocusedFillPlan? fill,
     this.requestedPlan,
     required this.createdAt,
     required this.requestExpiresAt,
@@ -638,12 +643,32 @@ class CredentialUseRequest {
     this.revokedAt,
     this.attemptedAt,
     this.restoredAt,
-  }) : fields = List.unmodifiable(fields),
+  }) : specification = _credentialSpecification(
+         protocolVersion,
+         plan,
+         fill,
+         requestedPlan,
+         fields,
+       ),
+       fields = List.unmodifiable(fields),
        approvedFields = List.unmodifiable(approvedFields);
   final String id, chatLabel, purpose, alias, credentialId, state;
   final int version, useGeneration;
   final int protocolVersion;
-  final CredentialLaunchPlan plan;
+  final CredentialUseSpecification specification;
+  bool get isFocusedFill => specification is CredentialFocusedFillSpecification;
+  FocusedFillPlan? get focusedFill => switch (specification) {
+    CredentialFocusedFillSpecification(:final plan) => plan,
+    _ => null,
+  };
+
+  /// Compatibility accessor for existing command consumers. A fill has no
+  /// launch plan; dispatch on specification instead of inventing one.
+  CredentialLaunchPlan get plan => switch (specification) {
+    CredentialCommandSpecification(:final plan) => plan,
+    _ => throw const CredentialUseFailure('scope_not_approved'),
+  };
+  String get usePlanHash => focusedFill?.planHash ?? plan.planHash;
   final CredentialLaunchPlan? requestedPlan;
   final DateTime createdAt, requestExpiresAt;
   final List<FieldRef> fields, approvedFields;
@@ -662,7 +687,11 @@ class CredentialUseRequest {
     'credentialId': credentialId,
     'version': version,
     'useGeneration': useGeneration,
-    'plan': plan.toJson(),
+    if (isFocusedFill) ...{
+      'useKind': 'focused_fill',
+      'fill': focusedFill!.toJson(),
+    } else
+      'plan': plan.toJson(),
     if (requestedPlan != null) 'requestedPlan': requestedPlan!.toJson(),
     'createdAt': _useTimestamp(createdAt),
     'requestExpiresAt': _useTimestamp(requestExpiresAt),
@@ -691,9 +720,14 @@ class CredentialUseRequest {
         credentialId: j['credentialId'] as String,
         version: j['version'] as int,
         useGeneration: j['useGeneration'] as int,
-        plan: CredentialLaunchPlan.fromStorageJson(
-          j['plan'] as Map<String, dynamic>,
-        ),
+        plan: _storedFocusedFill(j)
+            ? null
+            : CredentialLaunchPlan.fromStorageJson(
+                j['plan'] as Map<String, dynamic>,
+              ),
+        fill: _storedFocusedFill(j)
+            ? FocusedFillPlan.fromJson(j['fill'] as Map<String, dynamic>)
+            : null,
         requestedPlan: j['requestedPlan'] == null
             ? null
             : CredentialLaunchPlan.fromStorageJson(
@@ -744,8 +778,11 @@ class CredentialUseRequest {
     'credentials': [
       {'alias': alias, 'credentialId': credentialId, 'version': version},
     ],
-    'launch': Map<String, Object?>.from((requestedPlan ?? plan).toJson())
-      ..remove('executableIdentity'),
+    if (isFocusedFill)
+      'fill': focusedFill!.toJson()
+    else
+      'launch': Map<String, Object?>.from((requestedPlan ?? plan).toJson())
+        ..remove('executableIdentity'),
     'readFields': fields.map((f) => f.toJson()).toList(),
   };
 }

@@ -264,6 +264,8 @@ extension _CredentialRuntimeClient on AgentClient {
               'request-use',
               'run-use',
               'operation-status',
+              'fill-use',
+              'fill-status',
             }.contains(submitted['command'])
         ? <String, dynamic>{...submitted, 'protocolVersion': 2}
         : submitted;
@@ -285,6 +287,13 @@ extension _CredentialRuntimeClient on AgentClient {
           'credentials',
           'launch',
           'readFields',
+          'fill',
+        },
+        'fill-use' || 'fill-status' => {
+          'protocolVersion',
+          'command',
+          'requestId',
+          'operationId',
         },
         'run-use' || 'operation-status' => {
           'protocolVersion',
@@ -307,13 +316,48 @@ extension _CredentialRuntimeClient on AgentClient {
       if (_session == null) {
         throw const CredentialUseFailure('session_required');
       }
-      if (version == 2) await _requireReusableCredentialCapability();
+      final filling =
+          command == 'fill-use' ||
+          command == 'fill-status' ||
+          input.containsKey('fill');
+      if (filling && version != 2) {
+        throw const CredentialUseFailure('unsupported_protocol');
+      }
+      if (version == 2) {
+        await _requireReusableCredentialCapability(focusedFill: filling);
+      }
       if (command == 'request-use') {
-        CredentialUseInput.fromJson(input);
+        if (filling) {
+          FocusedFillInput.fromJson(input);
+        } else {
+          CredentialUseInput.fromJson(input);
+        }
         return await _call('/credential-use/request', {
           'sessionSecret': _session,
           ...input,
         });
+      }
+      if (command == 'fill-use' || command == 'fill-status') {
+        FocusedFillOperationInput.fromJson(input);
+        final result = await _call(
+          command == 'fill-use'
+              ? '/credential-use/fill'
+              : '/credential-use/fill/status',
+          {'sessionSecret': _session, ...input},
+        );
+        if (command == 'fill-use' &&
+            result['status'] == 'service_unavailable' &&
+            !result.containsKey('operationClaimed')) {
+          return {
+            ...const CredentialUseFailure(
+              'fill_unknown',
+              attemptConsumed: true,
+            ).toJson(protocolVersion: 2),
+            'requestId': input['requestId'],
+            'operationId': input['operationId'],
+          };
+        }
+        return result;
       }
       CredentialOperationInput? operation;
       if (command == 'operation-status' ||
@@ -409,7 +453,9 @@ extension _CredentialRuntimeClient on AgentClient {
     }
   }
 
-  Future<void> _requireReusableCredentialCapability() async {
+  Future<void> _requireReusableCredentialCapability({
+    bool focusedFill = false,
+  }) async {
     final result = await _call('/capabilities', {});
     if (result['status'] == 'service_unavailable') {
       throw const CredentialUseFailure('service_unavailable');
@@ -418,7 +464,11 @@ extension _CredentialRuntimeClient on AgentClient {
         result['protocolVersions'] is! List ||
         !(result['protocolVersions'] as List).contains(2) ||
         result['capabilities'] is! List ||
-        !(result['capabilities'] as List).contains('credential-use-reuse.v1')) {
+        !(result['capabilities'] as List).contains('credential-use-reuse.v1') ||
+        focusedFill &&
+            !(result['capabilities'] as List).contains(
+              'credential-focused-fill.v1',
+            )) {
       throw const CredentialUseFailure('unsupported_capability');
     }
   }
