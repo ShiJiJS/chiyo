@@ -1,0 +1,15 @@
+Formatted lib\information.dart
+Formatted lib\information_draft_access.dart
+Formatted lib\information_draft_models.dart
+Formatted lib\information_files.dart
+Formatted lib\memory_information_files.dart
+Formatted lib\ssh_host_trust.dart
+Formatted lib\workspace_access.dart
+Formatted test\adjusted_approval_test.dart
+Formatted test\approval_test.dart
+Formatted test\catalog_test.dart
+Formatted test\expiry_test.dart
+Formatted test\focused_fill_lifecycle_test.dart
+Formatted test\information_test.dart
+Formatted test\session_end_transport_test.dart
+Formatted 87 files (14 changed) in 0.24 seconds.
