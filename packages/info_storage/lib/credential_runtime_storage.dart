@@ -34,6 +34,7 @@ extension _CredentialRuntimeStorage on EncryptedInformationRepository {
   Future<void> _loadRuntime() async {
     _credentialUseRequests.clear();
     _credentialExecutions.clear();
+    _focusedFillOperations.clear();
     for (final row
         in await _db
             .customSelect(
@@ -73,7 +74,12 @@ extension _CredentialRuntimeStorage on EncryptedInformationRepository {
       }
       _credentialExecutions.add(e);
     }
-    _validateRuntimeSnapshot(_credentialUseRequests, _credentialExecutions);
+    await _loadFocusedFills();
+    _validateRuntimeSnapshot(
+      _credentialUseRequests,
+      _credentialExecutions,
+      _focusedFillOperations,
+    );
     // Loading only persists terminal facts; it never reconstructs capabilities.
     if (_credentialUseRequests.isNotEmpty) {
       await _commitRuntime(
@@ -88,13 +94,16 @@ extension _CredentialRuntimeStorage on EncryptedInformationRepository {
     List<CredentialExecution> executions, {
     GrantHistory? fieldGrant,
     RequestHistory? fieldRequest,
+    List<FocusedFillOperation>? fills,
     void Function()? validate,
   }) async {
     if (_closed) throw const StorageFailure('library_closed');
-    _validateRuntimeSnapshot(requests, executions);
+    final fillSnapshot = fills ?? List.of(_focusedFillOperations);
+    _validateRuntimeSnapshot(requests, executions, fillSnapshot);
     try {
       await _db.transaction(() async {
         validate?.call();
+        await _db.customStatement('DELETE FROM credential_focused_fills');
         await _db.customStatement('DELETE FROM credential_operations');
         await _db.customStatement('DELETE FROM credential_runtime_requests');
         for (final r in requests) {
@@ -107,6 +116,12 @@ extension _CredentialRuntimeStorage on EncryptedInformationRepository {
           await _db.customStatement(
             'INSERT INTO credential_operations(id,request_id,payload) VALUES(?,?,?)',
             [e.id, e.requestId, jsonEncode(e.toStorageJson())],
+          );
+        }
+        for (final fill in fillSnapshot) {
+          await _db.customStatement(
+            'INSERT INTO credential_focused_fills(id,request_id,payload) VALUES(?,?,?)',
+            [fill.id, fill.requestId, jsonEncode(fill.toStorageJson())],
           );
         }
         if (fieldGrant != null) {
@@ -137,6 +152,9 @@ extension _CredentialRuntimeStorage on EncryptedInformationRepository {
       _credentialExecutions
         ..clear()
         ..addAll(executions);
+      _focusedFillOperations
+        ..clear()
+        ..addAll(fillSnapshot);
       if (fieldGrant != null) _history[fieldGrant.id] = fieldGrant;
       if (fieldRequest != null) _requestHistory[fieldRequest.id] = fieldRequest;
     } on CredentialUseFailure {
@@ -149,8 +167,9 @@ extension _CredentialRuntimeStorage on EncryptedInformationRepository {
 
 void _validateRuntimeSnapshot(
   List<CredentialUseRequest> requests,
-  List<CredentialExecution> executions,
-) {
+  List<CredentialExecution> executions, [
+  List<FocusedFillOperation> fills = const [],
+]) {
   Never invalid() => throw const StorageFailure('invalid_runtime_snapshot');
   final byId = {for (final r in requests) r.id: r};
   if (byId.length != requests.length ||
@@ -161,6 +180,7 @@ void _validateRuntimeSnapshot(
   for (final e in executions) {
     final r = byId[e.requestId];
     if (r == null ||
+        r.isFocusedFill ||
         e.protocolVersion != r.protocolVersion ||
         !{1, 2}.contains(e.protocolVersion))
       invalid();
@@ -190,8 +210,10 @@ void _validateRuntimeSnapshot(
     }
     executionById[e.id] = e;
   }
+  _validateFocusedFillSnapshot(requests, executions, fills);
   for (final r in requests) {
     if (!{1, 2}.contains(r.protocolVersion)) invalid();
+    if (r.isFocusedFill) continue;
     if (r.protocolVersion == 2 &&
         (r.attemptConsumed ||
             (r.executionId == null

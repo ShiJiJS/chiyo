@@ -1,0 +1,859 @@
+Running build hooks...Running build hooks...00:00 +0: loading test\backup_interruption_test.dart
+00:00 +0: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:00 +1: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:00 +2: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:00 +2: test\complete_backup_test.dart: clock rollback never makes legitimate grant history unexportable or restores live authority
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:283:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///C:/Project/network_config/info-manage/packages/info_storage/test/complete_backup_test.dart:98:24)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:00 +3: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:00 +3: test\credential_backup_test.dart: restored credential history contains no pending authority or private process registration
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:283:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///C:/Project/network_config/info-manage/packages/info_storage/test/credential_backup_test.dart:134:22)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:00 +3 -1: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:00 +3 -1: test\credentials_storage_test.dart: schema 12 migrates directly to credential storage with request facts and backup four [E]
+  StorageFailure(unsupported_schema)
+  package:info_storage/info_storage.dart 280:9  EncryptedInformationRepository.open
+  ===== asynchronous gap ===========================
+  test\credentials_storage_test.dart 73:21      main.<fn>
+  
+00:00 +4 -1: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:00 +5 -1: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:00 +6 -1: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:00 +6 -1: test\complete_backup_test.dart: clock rollback never makes legitimate grant history unexportable or restores live authority
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:283:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///C:/Project/network_config/info-manage/packages/info_storage/test/complete_backup_test.dart:98:24)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:00 +6 -2: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:00 +7 -2: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:00 +7 -2: test\credential_backup_test.dart: restored credential history contains no pending authority or private process registration [E]
+  Expected: <6>
+    Actual: <7>
+  
+  package:matcher                         expect
+  test\credential_backup_test.dart 196:7  main.<fn>
+  
+00:01 +7 -3: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:01 +8 -3: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:01 +8 -4: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:01 +8 -4: test\credentials_storage_test.dart: schema 13 migrates directly to credential storage with request facts and backup four [E]
+  StorageFailure(unsupported_schema)
+  package:info_storage/info_storage.dart 280:9  EncryptedInformationRepository.open
+  ===== asynchronous gap ===========================
+  test\credentials_storage_test.dart 73:21      main.<fn>
+  
+00:01 +9 -4: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:01 +9 -4: test\information_time_test.dart: schema ten upgrades unknown timestamps to null without inventing creation facts [E]
+  StorageFailure(unsupported_schema)
+  package:info_storage/info_storage.dart 280:9  EncryptedInformationRepository.open
+  ===== asynchronous gap ===========================
+  test\information_time_test.dart 35:15         main.<fn>
+  
+00:01 +10 -4: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:01 +11 -4: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:01 +12 -4: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:01 +13 -4: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:01 +14 -4: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:01 +15 -4: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:01 +16 -4: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:01 +17 -4: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:01 +17 -4: test\complete_backup_test.dart: format 3 preserves original information times through complete restore and rejects malformed dates atomically
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:283:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///C:/Project/network_config/info-manage/packages/info_storage/test/complete_backup_test.dart:159:22)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:01 +17 -4: test\credential_backup_test.dart: current format restores credential bytes, versions, states and links under a fresh local key
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:283:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///C:/Project/network_config/info-manage/packages/info_storage/test/credential_backup_test.dart:303:22)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:01 +18 -4: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:01 +19 -4: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:01 +19 -4: test\credential_backup_test.dart: current format restores credential bytes, versions, states and links under a fresh local key
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:283:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///C:/Project/network_config/info-manage/packages/info_storage/test/credential_backup_test.dart:342:24)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:01 +20 -4: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:01 +21 -4: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:02 +21 -4: test\credential_backup_test.dart: current format restores credential bytes, versions, states and links under a fresh local key
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:283:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///C:/Project/network_config/info-manage/packages/info_storage/test/credential_backup_test.dart:393:24)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:02 +21 -4: test\organization_tasks_test.dart: organization proposals reopen, preserve content, and are excluded from recovery
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:283:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///C:/Project/network_config/info-manage/packages/info_storage/test/organization_tasks_test.dart:68:25)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:02 +22 -4: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:02 +23 -4: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:02 +24 -4: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:02 +25 -4: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:02 +25 -4: test\complete_backup_test.dart: complete backup preserves grouped recycle fields from replace
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:283:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///C:/Project/network_config/info-manage/packages/info_storage/test/complete_backup_test.dart:248:24)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:02 +25 -5: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:02 +25 -5: test\credential_backup_test.dart: current format restores credential bytes, versions, states and links under a fresh local key [E]
+  StorageFailure(invalid_backup)
+  package:info_storage/backups.dart 511:24  InformationBackups._validate.invalid
+  package:info_storage/backups.dart 536:7   InformationBackups._validate
+  package:info_storage/backups.dart 431:9   InformationBackups.inspect
+  ===== asynchronous gap ===========================
+  package:info_storage/backups.dart 443:15  InformationBackups.restoreFrom
+  ===== asynchronous gap ===========================
+  test\credential_backup_test.dart 399:27   main.<fn>
+  
+00:02 +26 -5: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:02 +27 -5: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:02 +27 -6: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:02 +27 -7: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:02 +27 -7: test\revisions_test.dart: schema nine upgrade preserves encrypted revisions and restored current versions survive reopen [E]
+  StorageFailure(unsupported_schema)
+  package:info_storage/info_storage.dart 280:9  EncryptedInformationRepository.open
+  ===== asynchronous gap ===========================
+  test\revisions_test.dart 42:15                main.<fn>
+  
+00:02 +27 -7: test\ssh_host_trust_storage_test.dart: schema15 upgrades without losing existing information, and format5 restores confirmed SSH trust [E]
+  StorageFailure(unsupported_schema)
+  package:info_storage/info_storage.dart 280:9  EncryptedInformationRepository.open
+  ===== asynchronous gap ===========================
+  test\ssh_host_trust_storage_test.dart 42:20   main.<fn>
+  
+00:02 +28 -7: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:02 +29 -7: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:02 +30 -7: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:02 +31 -7: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:02 +32 -7: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:02 +32 -8: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:02 +32 -8: test\organization_tasks_test.dart: schema eleven upgrades additively without changing saved information [E]
+  StorageFailure(unsupported_schema)
+  package:info_storage/info_storage.dart 280:9  EncryptedInformationRepository.open
+  ===== asynchronous gap ===========================
+  test\organization_tasks_test.dart 117:15      main.<fn>
+  
+00:02 +32 -8: test\request_history_test.dart: format four restores request facts without any pending session
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:283:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///C:/Project/network_config/info-manage/packages/info_storage/test/request_history_test.dart:95:25)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:02 +33 -8: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:02 +34 -8: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:02 +35 -8: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:02 +35 -8: test\complete_backup_test.dart: complete backup preserves grouped recycle fields from rollback
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:283:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///C:/Project/network_config/info-manage/packages/info_storage/test/complete_backup_test.dart:248:24)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:02 +35 -9: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:03 +35 -9: test\recycle_test.dart: development schema eight migrates and terminal import payloads are scrubbed without losing receipt or pending work [E]
+  StorageFailure(unsupported_schema)
+  package:info_storage/info_storage.dart 280:9  EncryptedInformationRepository.open
+  ===== asynchronous gap ===========================
+  test\recycle_test.dart 112:21                 main.<fn>
+  
+00:03 +36 -9: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:03 +37 -9: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:03 +38 -9: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:03 +38 -9: test\focused_fill_storage_test.dart: format7 encrypted backup includes both result types, excludes pending and restores facts only
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:283:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///C:/Project/network_config/info-manage/packages/info_storage/test/focused_fill_storage_test.dart:447:22)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:03 +39 -9: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:03 +40 -9: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:03 +41 -9: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:03 +42 -9: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:03 +43 -9: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:03 +44 -9: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:03 +45 -9: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:03 +45 -9: test\credential_reuse_file_recovery_test.dart: v2 file operations retain independent leases through revoke, CLI death and encrypted reopen
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:283:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///C:/Project/network_config/info-manage/packages/info_storage/test/credential_reuse_file_recovery_test.dart:374:22)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:03 +46 -9: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:03 +47 -9: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:03 +48 -9: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:03 +49 -9: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:03 +49 -9: test\complete_backup_test.dart: complete backup roundtrips grouped removed fields and zero-field whole-item metadata
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:283:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///C:/Project/network_config/info-manage/packages/info_storage/test/complete_backup_test.dart:333:22)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:03 +50 -9: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:03 +50 -9: test\focused_fill_storage_test.dart: format7 refuses extra/private data and mismatched fill associations without changing recipient
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:283:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///C:/Project/network_config/info-manage/packages/info_storage/test/focused_fill_storage_test.dart:503:22)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:03 +51 -9: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:03 +52 -9: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:04 +53 -9: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:04 +54 -9: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:04 +54 -9: test\complete_backup_test.dart: each audit retention setting keeps its exact boundary and expires it on later restore
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:283:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///C:/Project/network_config/info-manage/packages/info_storage/test/complete_backup_test.dart:444:24)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:04 +55 -9: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:04 +55 -9: test\complete_backup_test.dart: each audit retention setting keeps its exact boundary and expires it on later restore
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:283:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///C:/Project/network_config/info-manage/packages/info_storage/test/complete_backup_test.dart:444:24)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:283:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///C:/Project/network_config/info-manage/packages/info_storage/test/complete_backup_test.dart:444:24)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:283:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///C:/Project/network_config/info-manage/packages/info_storage/test/complete_backup_test.dart:444:24)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:05 +56 -9: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:05 +56 -9: test\complete_backup_test.dart: legacy format 1 restores unknown dates without inventing history or credentials
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:283:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///C:/Project/network_config/info-manage/packages/info_storage/test/complete_backup_test.dart:518:24)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:05 +56 -10: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:05 +56 -10: test\complete_backup_test.dart: legacy format 1 restores unknown dates without inventing history or credentials [E]
+  StorageFailure(invalid_backup)
+  package:info_storage/backups.dart 511:24  InformationBackups._validate.invalid
+  package:info_storage/backups.dart 536:7   InformationBackups._validate
+  package:info_storage/backups.dart 431:9   InformationBackups.inspect
+  ===== asynchronous gap ===========================
+  package:info_storage/backups.dart 443:15  InformationBackups.restoreFrom
+  ===== asynchronous gap ===========================
+  test\complete_backup_test.dart 522:25     main.<fn>
+  
+  PathAccessException: Deletion failed, path = 'C:\Users\Todoki\AppData\Local\Temp\backup-v1-2209b7da' (OS Error: 另一个程序正在使用此文件，进程无法访问。, errno = 32)
+  package:test_api  Invoker._waitForOutstandingCallbacks.<fn>
+  
+00:05 +56 -10: test\complete_backup_test.dart: legacy format 2 restores unknown dates without inventing history or credentials
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:283:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///C:/Project/network_config/info-manage/packages/info_storage/test/complete_backup_test.dart:469:24)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:283:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///C:/Project/network_config/info-manage/packages/info_storage/test/complete_backup_test.dart:518:24)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:05 +56 -11: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:05 +56 -11: test\complete_backup_test.dart: legacy format 2 restores unknown dates without inventing history or credentials [E]
+  StorageFailure(invalid_backup)
+  package:info_storage/backups.dart 511:24  InformationBackups._validate.invalid
+  package:info_storage/backups.dart 536:7   InformationBackups._validate
+  package:info_storage/backups.dart 431:9   InformationBackups.inspect
+  ===== asynchronous gap ===========================
+  package:info_storage/backups.dart 443:15  InformationBackups.restoreFrom
+  ===== asynchronous gap ===========================
+  test\complete_backup_test.dart 522:25     main.<fn>
+  
+  PathAccessException: Deletion failed, path = 'C:\Users\Todoki\AppData\Local\Temp\backup-v1-cd9b9bf9' (OS Error: 另一个程序正在使用此文件，进程无法访问。, errno = 32)
+  package:test_api  Invoker._waitForOutstandingCallbacks.<fn>
+  
+00:05 +56 -11: test\complete_backup_test.dart: authenticated hostile history payloads fail before changing recipient preferences
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:283:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///C:/Project/network_config/info-manage/packages/info_storage/test/complete_backup_test.dart:554:22)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:283:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///C:/Project/network_config/info-manage/packages/info_storage/test/complete_backup_test.dart:578:22)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:06 +56 -11: test\credential_reuse_storage_test.dart: real schema16 library upgrades without granting v2 and old reader cannot load the new runtime tables
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:283:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///C:/Project/network_config/info-manage/packages/info_storage/test/credential_reuse_storage_test.dart:348:22)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:06 +57 -11: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:06 +57 -11: test\complete_backup_test.dart: retention applies at export and delayed restore without renewing content lifetimes
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:283:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///C:/Project/network_config/info-manage/packages/info_storage/test/complete_backup_test.dart:708:22)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:283:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///C:/Project/network_config/info-manage/packages/info_storage/test/complete_backup_test.dart:804:25)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:06 +58 -11: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:06 +58 -11: test\complete_backup_test.dart: complete backup preserves retained versions, recycle and past audit without live capabilities
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:283:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///C:/Project/network_config/info-manage/packages/info_storage/test/complete_backup_test.dart:837:22)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:06 +58 -12: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:06 +58 -12: test\complete_backup_test.dart: complete backup preserves retained versions, recycle and past audit without live capabilities [E]
+  Expected: Set:[
+              'information_directories',
+              'information_tags',
+              'field_templates',
+              'information_items',
+              'information_fields',
+              'information_item_tags',
+              'settings',
+              'information_revisions',
+              'recycle_entries',
+              'recycle_facts',
+              'revision_purge_facts',
+              'grant_history',
+              'access_records',
+              'request_history',
+              'managed_credentials',
+              'credential_materials',
+              'ssh_host_trust',
+              'credential_use_requests',
+              'credential_executions'
+            ]
+    Actual: Set:[
+              'information_directories',
+              'information_tags',
+              'field_templates',
+              'information_items',
+              'information_fields',
+              'information_item_tags',
+              'settings',
+              'information_revisions',
+              'recycle_entries',
+              'recycle_facts',
+              'revision_purge_facts',
+              'grant_history',
+              'access_records',
+              'request_history',
+              'managed_credentials',
+              'credential_materials',
+              'ssh_host_trust',
+              'credential_use_requests',
+              'credential_executions',
+              'credential_focused_fills'
+            ]
+     Which: larger than expected
+  
+  package:matcher                       expect
+  test\complete_backup_test.dart 919:7  main.<fn>
+  
+00:06 +58 -12: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:06 +58 -12: test\complete_backup_test.dart: complete backup preserves retained versions, recycle and past audit without live capabilities [E]
+  PathAccessException: Deletion failed, path = 'C:\Users\Todoki\AppData\Local\Temp\complete-backup-cc7a714f' (OS Error: 另一个程序正在使用此文件，进程无法访问。, errno = 32)
+  package:test_api  Invoker._waitForOutstandingCallbacks.<fn>
+  
+00:07 +58 -12: test\focused_fill_storage_test.dart: actual schema17 reader upgrades to18 and format6 restores; old reader refuses new database/backup unchanged
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:283:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///C:/Project/network_config/info-manage/packages/info_storage/test/focused_fill_storage_test.dart:627:24)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:08 +58 -12: test\credential_reuse_storage_test.dart: real schema16 library upgrades without granting v2 and old reader cannot load the new runtime tables
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:283:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///C:/Project/network_config/info-manage/packages/info_storage/test/credential_reuse_storage_test.dart:374:24)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:08 +59 -12: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:09 +60 -12: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:09 +61 -12: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:09 +62 -12: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:09 +63 -12: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:09 +64 -12: test\backup_interruption_test.dart: interrupted recipient process rolls back restore without losing original settings
+00:10 +64 -12: test\focused_fill_storage_test.dart: actual schema17 reader upgrades to18 and format6 restores; old reader refuses new database/backup unchanged
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:283:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///C:/Project/network_config/info-manage/packages/info_storage/test/focused_fill_storage_test.dart:642:22)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:11 +65 -12: test\focused_fill_storage_test.dart: actual schema17 reader upgrades to18 and format6 restores; old reader refuses new database/backup unchanged
+00:12 +66 -12: test\focused_fill_storage_test.dart: actual schema17 reader upgrades to18 and format6 restores; old reader refuses new database/backup unchanged
+00:13 +67 -12: test\credential_reuse_storage_test.dart: schema17 table migration rolls back completely when a target name conflicts
+00:14 +68 -12: test\credential_reuse_storage_test.dart: schema17 reopen keeps all frozen operations but no usable session or worker capability
+00:14 +69 -12: test\credential_reuse_storage_test.dart: backup6 restores per-operation plans and terminal states independently (activeFirst=true)
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:283:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///C:/Project/network_config/info-manage/packages/info_storage/test/credential_reuse_storage_test.dart:762:24)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:15 +70 -12: test\credential_reuse_storage_test.dart: backup6 restores per-operation plans and terminal states independently (activeFirst=false)
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:283:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///C:/Project/network_config/info-manage/packages/info_storage/test/credential_reuse_storage_test.dart:762:24)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:15 +71 -12: test\credential_reuse_storage_test.dart: backup retention checks every operation rather than only the latest pointer
+00:15 +72 -12: test\credential_reuse_storage_test.dart: format6 rejects malformed operation identity, plan, legacy downgrade and request links
+00:15 +73 -12: Some tests failed.
+
+Failing tests:
+  test\complete_backup_test.dart: complete backup preserves retained versions, recycle and past audit without live capabilities
+  test\complete_backup_test.dart: legacy format 1 restores unknown dates without inventing history or credentials
+  test\complete_backup_test.dart: legacy format 2 restores unknown dates without inventing history or credentials
+  test\credential_backup_test.dart: current format restores credential bytes, versions, states and links under a fresh local key
+  ... and 8 more
+
+Consider enabling the flag chain-stack-traces to receive more detailed exceptions.
+For example, 'dart test --chain-stack-traces'.
+2026-10-19 11:56:09.103: ERROR CORE sqlcipher_page_cipher: hmac check failed for pgno=1
+2026-10-19 11:56:09.103: ERROR CORE sqlite3Codec: error decrypting page 1 data: 1
+2026-10-19 11:56:09.103: ERROR CORE sqlcipher_codec_ctx_set_error: 1 lock=0

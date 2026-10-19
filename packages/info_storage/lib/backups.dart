@@ -23,6 +23,7 @@ class BackupContents {
   int get credentialUseHistoryCount =>
       _tables['credential_use_requests']!.length;
   int get credentialExecutionCount => _tables['credential_executions']!.length;
+  int get focusedFillCount => _tables['credential_focused_fills']!.length;
   int get sshTrustCount => _tables['ssh_host_trust']!.length;
 }
 
@@ -83,11 +84,15 @@ class InformationBackups {
     'credential_use_requests': ['id', 'payload'],
     'credential_executions': ['id', 'request_id', 'payload'],
   };
-  static final _allColumns = Map<String, List<String>>.unmodifiable({
+  static final _v6Columns = Map<String, List<String>>.unmodifiable({
     ..._v4Columns,
     ..._credentialColumns,
   });
-  // Portable formats 1–6 keep their table keys independent of the schema17
+  static final _allColumns = Map<String, List<String>>.unmodifiable({
+    ..._v6Columns,
+    'credential_focused_fills': ['id', 'request_id', 'payload'],
+  });
+  // Portable formats 1–7 keep their table keys independent of the schema17+
   // physical names. Legacy readers must not find a writable old runtime table.
   static const _physicalTables = {
     'credential_use_requests': 'credential_runtime_requests',
@@ -255,11 +260,11 @@ class InformationBackups {
       }
       // Persist only archive facts. Never serialize private runtime DTOs into
       // a portable backup, even when an execution is currently active.
-      _archiveCredentialRuntime(tables);
+      _archiveCredentialRuntime(tables, now);
       return _retain(
         _validate({
           'format': _format,
-          'version': 6,
+          'version': 7,
           'createdAt': now.toIso8601String(),
           'tables': tables,
         }),
@@ -311,7 +316,7 @@ class InformationBackups {
       final snapshot = await _snapshot();
       final payload = jsonEncode({
         'format': _format,
-        'version': 6,
+        'version': 7,
         'createdAt': snapshot.createdAt.toIso8601String(),
         'tables': snapshot._tables,
       });
@@ -507,7 +512,7 @@ class InformationBackups {
     if (decoded is! Map<String, dynamic>) invalid();
     if (decoded['format'] != _format ||
         decoded['version'] is! int ||
-        ![1, 2, 3, 4, 5, 6].contains(decoded['version'])) {
+        ![1, 2, 3, 4, 5, 6, 7].contains(decoded['version'])) {
       throw const StorageFailure('unsupported_backup');
     }
     if (decoded.length != 4 ||
@@ -522,6 +527,7 @@ class InformationBackups {
       2 => _v2Columns,
       3 => _v3Columns,
       4 => _v4Columns,
+      5 || 6 => _v6Columns,
       _ => _allColumns,
     };
     final data = decoded['tables'] as Map<String, dynamic>;
@@ -560,6 +566,7 @@ class InformationBackups {
     for (final table in _credentialColumns.keys) {
       tables.putIfAbsent(table, () => const []);
     }
+    tables.putIfAbsent('credential_focused_fills', () => const []);
     if ((decoded['version'] as int) < 3) {
       tables['information_items'] = [
         for (final row in tables['information_items']!)

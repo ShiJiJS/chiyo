@@ -56,6 +56,7 @@ void main() {
           );
         } else {
           fixture.execute('DROP TABLE library_format');
+          fixture.execute('DROP TABLE credential_focused_fills');
           fixture.execute('DROP TABLE credential_operations');
           fixture.execute('DROP TABLE credential_runtime_requests');
           fixture.execute('DROP TABLE ssh_host_trust');
@@ -96,7 +97,7 @@ void main() {
           '${folder.path}/format-four.aim',
           key,
         );
-        expect(snapshot.formatVersion, 6);
+        expect(snapshot.formatVersion, 7);
         expect(snapshot.requestHistoryCount, 1);
         final credential = await service.owner.createStringCredential(
           name: 'Synthetic token',

@@ -34,9 +34,14 @@ void _validateBackupCredentials(
     _backupText(j, 'name', 60, required: true);
     _backupText(j, 'publicPurpose', 2000);
     _backupText(j, 'privateNote', 4000);
-    if (!RegExp(
-          r'^[A-Za-z_][A-Za-z0-9_]{0,63}$',
-        ).hasMatch(_backupText(j, 'suggestedBinding', 64, required: true)) ||
+    final binding = _backupText(
+      j,
+      'suggestedBinding',
+      64,
+      required: formatVersion < 7,
+    );
+    if ((binding.isNotEmpty &&
+            !RegExp(r'^[A-Za-z_][A-Za-z0-9_]{0,63}$').hasMatch(binding)) ||
         [
           'name',
           'publicPurpose',
@@ -160,7 +165,10 @@ void _retainBackupCredentials(
   });
 }
 
-void _archiveCredentialRuntime(Map<String, List<Map<String, Object?>>> tables) {
+void _archiveCredentialRuntime(
+  Map<String, List<Map<String, Object?>>> tables,
+  DateTime now,
+) {
   final requests = tables['credential_use_requests']!
       .map((r) => CredentialUseRequest.fromJson(_backupJson(r)))
       .where((r) => r.state != 'pending')
@@ -177,6 +185,19 @@ void _archiveCredentialRuntime(Map<String, List<Map<String, Object?>>> tables) {
           'request_id': row['request_id'],
           'payload': jsonEncode(
             CredentialExecution.fromJson(_backupJson(row)).toArchiveJson(),
+          ),
+        },
+  ];
+  tables['credential_focused_fills'] = [
+    for (final row in tables['credential_focused_fills']!)
+      if (ids.contains(row['request_id']))
+        {
+          ...row,
+          'payload': jsonEncode(
+            _archiveFocusedFill(
+              FocusedFillOperation.fromStorageJson(_backupJson(row)),
+              now,
+            ).toStorageJson(),
           ),
         },
   ];
@@ -197,8 +218,10 @@ void _validateBackupCredentialHistory(
 }) {
   final requests = <String, CredentialUseRequest>{};
   for (final row in tables['credential_use_requests']!) {
+    final raw = _backupJson(row);
+    final fill = formatVersion >= 7 && raw['useKind'] == 'focused_fill';
     final j = _backupObject(
-      _backupJson(row),
+      raw,
       {
         'id',
         'chatLabel',
@@ -207,7 +230,7 @@ void _validateBackupCredentialHistory(
         'credentialId',
         'version',
         'useGeneration',
-        'plan',
+        if (fill) ...{'useKind', 'fill'} else 'plan',
         'createdAt',
         'requestExpiresAt',
         'fields',
@@ -338,6 +361,7 @@ void _validateBackupCredentialHistory(
         !requests.containsKey(request) ||
         requests[request]!.protocolVersion != (v2 ? 2 : 1) ||
         !requests[request]!.credentialApproved ||
+        requests[request]!.isFocusedFill ||
         !v2 &&
             (!legacyRequests.add(request) ||
                 requests[request]!.executionId != id))
@@ -406,9 +430,30 @@ void _validateBackupCredentialHistory(
   ))
     _backupInvalid();
   try {
+    final fills = <FocusedFillOperation>[];
+    for (final row in tables['credential_focused_fills']!) {
+      final raw = _backupJson(row);
+      final fill = FocusedFillOperation.fromStorageJson(raw);
+      for (final key in [
+        'createdAt',
+        'checkedAt',
+        'finishedAt',
+        'restoredAt',
+        'attentionAcknowledgedAt',
+      ]) {
+        if (raw[key] != null) _backupDate(raw[key]);
+      }
+      if (row['id'] != fill.id ||
+          row['request_id'] != fill.requestId ||
+          jsonEncode(_orderedBackupJson(fill.toStorageJson())) !=
+              jsonEncode(_orderedBackupJson(raw)))
+        _backupInvalid();
+      fills.add(fill);
+    }
     _validateRuntimeSnapshot(
       requests.values.toList(),
       executions.values.toList(),
+      fills,
     );
   } on Object {
     _backupInvalid();
@@ -421,6 +466,12 @@ void _retainBackupCredentialHistory(
   DateTime? restoredAt,
 ) {
   final executions = <String, List<CredentialExecution>>{};
+  final fills = <String, List<FocusedFillOperation>>{};
+  for (final row in tables['credential_focused_fills']!) {
+    fills
+        .putIfAbsent(row['request_id'] as String, () => [])
+        .add(FocusedFillOperation.fromStorageJson(_backupJson(row)));
+  }
   for (final row in tables['credential_executions']!) {
     executions
         .putIfAbsent(row['request_id'] as String, () => [])
@@ -429,6 +480,17 @@ void _retainBackupCredentialHistory(
   tables['credential_use_requests']!.removeWhere((row) {
     final r = CredentialUseRequest.fromJson(_backupJson(row)),
         operations = executions[row['id']] ?? const <CredentialExecution>[];
+    final inputOperations = fills[r.id] ?? const <FocusedFillOperation>[];
+    if (inputOperations.any(
+      (f) =>
+          f.state == FocusedFillState.checking ||
+          {
+                FocusedFillState.partial,
+                FocusedFillState.unknown,
+              }.contains(f.state) &&
+              f.attentionAcknowledgedAt == null,
+    ))
+      return false;
     // Portable history cannot prove an old source Job is no longer active.
     // Preserve uncertainty and uncompleted cleanup across all operations.
     if (operations.any(
@@ -443,6 +505,14 @@ void _retainBackupCredentialHistory(
       ?r.decidedAt,
       ?r.revokedAt,
       ?r.attemptedAt,
+      ?r.restoredAt,
+      for (final f in inputOperations) ...[
+        f.createdAt,
+        ?f.checkedAt,
+        ?f.finishedAt,
+        ?f.restoredAt,
+        ?f.attentionAcknowledgedAt,
+      ],
       for (final e in operations) ...[
         ?e.createdAt,
         ?e.startedAt,
@@ -454,7 +524,23 @@ void _retainBackupCredentialHistory(
   tables['credential_executions']!.removeWhere(
     (r) => !ids.contains(r['request_id']),
   );
+  tables['credential_focused_fills']!.removeWhere(
+    (r) => !ids.contains(r['request_id']),
+  );
   if (restoredAt == null) return;
+  tables['credential_focused_fills'] = [
+    for (final row in tables['credential_focused_fills']!)
+      {
+        ...row,
+        'payload': jsonEncode(
+          _archiveFocusedFill(
+            FocusedFillOperation.fromStorageJson(_backupJson(row)),
+            restoredAt,
+            restored: true,
+          ).toStorageJson(),
+        ),
+      },
+  ];
   tables['credential_use_requests'] = [
     for (final row in tables['credential_use_requests']!)
       {

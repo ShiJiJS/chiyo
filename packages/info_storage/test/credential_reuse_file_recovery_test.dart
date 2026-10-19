@@ -377,7 +377,7 @@ Future<void> main(List<String> args) async {
       );
       addTearDown(target.close);
       final preview = await target.backups.restoreFrom(backup, key);
-      expect(preview.formatVersion, 6);
+      expect(preview.formatVersion, 7);
       expect(preview.credentialExecutionCount, 2);
       for (final e in target.credentialExecutions) {
         expect(e.createdAt, before[e.id]!.createdAt);

@@ -195,7 +195,7 @@ void main() {
       });
       expect(
         (await source.backups.inspect(portable, recovery)).formatVersion,
-        6,
+        7,
       );
       final privateRegistration = '${root.path}/private-registration.aimbackup';
       await _changeBackup(path, privateRegistration, recovery, (payload) {
@@ -255,7 +255,7 @@ void main() {
       final path = '${root.path}/complete.aimbackup';
       await service.owner.exportLibrary(() => source.backups.exportTo(path));
       final preview = await source.backups.inspect(path, recovery);
-      expect(preview.formatVersion, 6);
+      expect(preview.formatVersion, 7);
       expect(preview.credentialCount, 2);
       expect(preview.credentialVersionCount, 3);
       for (final mutation in [
@@ -385,6 +385,7 @@ void main() {
             'ssh_host_trust',
             'credential_use_requests',
             'credential_executions',
+            'credential_focused_fills',
           ]) {
             tables.remove(table);
           }

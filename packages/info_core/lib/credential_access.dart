@@ -354,7 +354,8 @@ extension CredentialOwnerAccess on OwnerAccess {
         purpose.length > 2000 ||
         note.length > 4000 ||
         [name, purpose, note].any((s) => s.contains('\u0000')) ||
-        !RegExp(r'^[A-Za-z_][A-Za-z0-9_]{0,63}$').hasMatch(binding)) {
+        binding.isNotEmpty &&
+            !RegExp(r'^[A-Za-z_][A-Za-z0-9_]{0,63}$').hasMatch(binding)) {
       throw const AccessFailure('invalid_credential_metadata');
     }
   }

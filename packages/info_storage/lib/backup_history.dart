@@ -628,7 +628,13 @@ extension _CompleteBackups on InformationBackups {
     final executions = tables['credential_executions']!
         .map((r) => CredentialExecution.fromJson(_backupJson(r)))
         .toList();
+    final fills = tables['credential_focused_fills']!
+        .map((r) => FocusedFillOperation.fromStorageJson(_backupJson(r)))
+        .toList();
     return () {
+      _repository._focusedFillOperations
+        ..clear()
+        ..addAll(fills);
       _repository._credentialUseRequests
         ..clear()
         ..addAll(useRequests);

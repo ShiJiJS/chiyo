@@ -197,6 +197,28 @@ Matcher code(String expected) => throwsA(
 
 void main() {
   test(
+    'fill request limits match the portable credential history contract',
+    () async {
+      final f = await fixture(request: false);
+      final largest = f.input()..['purpose'] = 'a' * 2000;
+      expect(FocusedFillInput.fromJson(largest).purpose.length, 2000);
+      expect(
+        () => FocusedFillInput.fromJson({...largest, 'purpose': 'a' * 2001}),
+        throwsA(isA<CredentialUseFailure>()),
+      );
+      final credential = Map<String, dynamic>.from(
+        (f.input()['credentials'] as List).single as Map,
+      )..['version'] = 2147483648;
+      expect(
+        () => FocusedFillInput.fromJson({
+          ...f.input(),
+          'credentials': [credential],
+        }),
+        throwsA(isA<CredentialUseFailure>()),
+      );
+    },
+  );
+  test(
     'the published focused-fill request example parses with the actual protocol field names',
     () async {
       final text = (await File(

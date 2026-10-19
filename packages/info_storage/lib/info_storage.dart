@@ -12,8 +12,9 @@ part 'backup_history.dart';
 part 'backup_credentials.dart';
 part 'credentials_storage.dart';
 part 'credential_runtime_storage.dart';
+part 'focused_fill_storage.dart';
 
-const _libraryFormat = 17;
+const _libraryFormat = 18;
 
 class StorageFailure implements Exception {
   const StorageFailure(this.code);
@@ -67,7 +68,7 @@ class EncryptedInformationRepository
         InformationRepository,
         CredentialRepository,
         CredentialFieldMigrationRepository,
-        CredentialRuntimeRepository,
+        FocusedFillRuntimeRepository,
         SshHostTrustRepository {
   SshHostTrustSnapshot? _sshHostTrust;
   @override
@@ -109,6 +110,22 @@ class EncryptedInformationRepository
   ) => _migrateCredentialField(change);
   final _credentialUseRequests = <CredentialUseRequest>[];
   final _credentialExecutions = <CredentialExecution>[];
+  final _focusedFillOperations = <FocusedFillOperation>[];
+  @override
+  List<FocusedFillOperation> get focusedFillOperations =>
+      List.unmodifiable(_focusedFillOperations);
+  @override
+  Future<void> commitFocusedFillRuntime(
+    List<CredentialUseRequest> requests,
+    List<FocusedFillOperation> operations, {
+    void Function()? validate,
+    List<CredentialExecution>? executions,
+  }) => _commitRuntime(
+    requests,
+    executions ?? List.of(_credentialExecutions),
+    fills: operations,
+    validate: validate,
+  );
   @override
   List<CredentialUseRequest> get credentialUseRequests =>
       List.unmodifiable(_credentialUseRequests);
@@ -234,6 +251,11 @@ class EncryptedInformationRepository
       native.execute('PRAGMA temp_store = MEMORY');
       // Reading the schema checks the key before any migrations or updates.
       native.select('SELECT count(*) FROM sqlite_master');
+      final headerVersion =
+          native.select('PRAGMA user_version').single.values.single as int;
+      if (headerVersion > _libraryFormat) {
+        throw const StorageFailure('unsupported_schema');
+      }
       if (native
           .select(
             "SELECT name FROM sqlite_master WHERE type='table' AND name='library_format'",
@@ -246,12 +268,13 @@ class EncryptedInformationRepository
             marker.single['singleton'] != 1 ||
             marker.single['version'] is! int ||
             (marker.single['version'] as int) < 17 ||
-            (marker.single['version'] as int) > _libraryFormat) {
+            (marker.single['version'] as int) > _libraryFormat ||
+            headerVersion > (marker.single['version'] as int)) {
           throw const StorageFailure('unsupported_schema');
         }
       } else if (native
           .select(
-            "SELECT name FROM sqlite_master WHERE type='table' AND name IN ('credential_runtime_requests','credential_operations')",
+            "SELECT name FROM sqlite_master WHERE type='table' AND name IN ('credential_runtime_requests','credential_operations','credential_focused_fills')",
           )
           .isNotEmpty) {
         throw const StorageFailure('unsupported_schema');
@@ -1201,6 +1224,7 @@ class _InformationDatabase extends GeneratedDatabase {
       if (from < 1 || from > to || to != _libraryFormat) {
         throw const StorageFailure('unsupported_schema');
       }
+      var sourceVersion = from;
       final hasMarker = await customSelect(
         "SELECT name FROM sqlite_master WHERE type='table' AND name='library_format'",
       ).get();
@@ -1209,16 +1233,23 @@ class _InformationDatabase extends GeneratedDatabase {
           'SELECT version FROM library_format WHERE singleton=1',
         ).getSingle();
         if (marker.read<int>('version') == _libraryFormat) return;
+        sourceVersion = marker.read<int>('version');
       }
       await transaction(() async {
-        if (from < 16) await _createSshHostTrust();
-        if (from < 15) {
+        if (sourceVersion < 18 &&
+            (await customSelect(
+              "SELECT name FROM sqlite_master WHERE name='credential_focused_fills'",
+            ).get()).isNotEmpty) {
+          throw const StorageFailure('unsupported_schema');
+        }
+        if (sourceVersion < 16) await _createSshHostTrust();
+        if (sourceVersion < 15) {
           await _createCredentialRuntime();
-        } else if (from < 17) {
+        } else if (sourceVersion < 17) {
           await _migrateCredentialRuntime17();
         }
-        if (from < 14) await _createCredentials();
-        if (from < 2) {
+        if (sourceVersion < 14) await _createCredentials();
+        if (sourceVersion < 2) {
           await customStatement(
             'CREATE TABLE settings(name TEXT PRIMARY KEY,value INTEGER NOT NULL)',
           );
@@ -1229,22 +1260,22 @@ class _InformationDatabase extends GeneratedDatabase {
             'ALTER TABLE information_fields ADD COLUMN version INTEGER NOT NULL DEFAULT 1',
           );
         }
-        if (from < 3) await _organizationSchema();
-        if (from < 4) {
+        if (sourceVersion < 3) await _organizationSchema();
+        if (sourceVersion < 4) {
           await _createTemplates();
           await customStatement(
             'ALTER TABLE information_fields ADD COLUMN kind TEXT NOT NULL DEFAULT \'structured\'',
           );
         }
-        if (from < 5) await _backupSchema();
-        if (from < 6) await _createProposals();
-        if (from < 7) await _createAudit();
-        if (from < 8) await _createUpdates();
-        if (from < 9) await _createRecycle();
-        if (from < 10) await _createRevisionPurges();
-        if (from < 12) await _createOrganizationTasks();
-        if (from < 13) await _createRequestHistory();
-        if (from < 11) {
+        if (sourceVersion < 5) await _backupSchema();
+        if (sourceVersion < 6) await _createProposals();
+        if (sourceVersion < 7) await _createAudit();
+        if (sourceVersion < 8) await _createUpdates();
+        if (sourceVersion < 9) await _createRecycle();
+        if (sourceVersion < 10) await _createRevisionPurges();
+        if (sourceVersion < 12) await _createOrganizationTasks();
+        if (sourceVersion < 13) await _createRequestHistory();
+        if (sourceVersion < 11) {
           await customStatement(
             'ALTER TABLE information_items ADD COLUMN created_at TEXT',
           );
@@ -1252,6 +1283,7 @@ class _InformationDatabase extends GeneratedDatabase {
             'ALTER TABLE information_items ADD COLUMN modified_at TEXT',
           );
         }
+        if (sourceVersion < 18) await _createFocusedFillRuntime();
         await _createLibraryFormat();
       });
     },
@@ -1324,7 +1356,12 @@ class _InformationDatabase extends GeneratedDatabase {
     await customStatement(
       'CREATE TABLE IF NOT EXISTS credential_operations(id TEXT PRIMARY KEY,request_id TEXT NOT NULL REFERENCES credential_runtime_requests(id),payload TEXT NOT NULL)',
     );
+    await _createFocusedFillRuntime();
   }
+
+  Future<void> _createFocusedFillRuntime() => customStatement(
+    'CREATE TABLE IF NOT EXISTS credential_focused_fills(id TEXT PRIMARY KEY,request_id TEXT NOT NULL REFERENCES credential_runtime_requests(id),payload TEXT NOT NULL)',
+  );
 
   Future<void> _createRequestHistory() async {
     await customStatement(

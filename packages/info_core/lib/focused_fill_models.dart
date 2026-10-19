@@ -144,11 +144,11 @@ class FocusedFillInput {
     final credential = credentials.single as Map<String, dynamic>;
     _useShape(credential, {'alias', 'credentialId', 'version'});
     final version = credential['version'];
-    if (version is! int || version < 1) {
+    if (version is! int || version < 1 || version > 2147483647) {
       throw const CredentialUseFailure('invalid_reference');
     }
     return FocusedFillInput._(
-      _useText(json['purpose'], 'purpose', max: 4000, empty: false),
+      _useText(json['purpose'], 'purpose', max: 2000, empty: false),
       _useAlias(credential['alias'], 'credentials[0].alias'),
       _useId(credential['credentialId'], 'credentials[0].credentialId'),
       version,

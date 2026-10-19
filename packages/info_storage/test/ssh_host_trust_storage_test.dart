@@ -30,6 +30,7 @@ void main() {
         'PRAGMA key = "x\'${keys.key!.map((v) => v.toRadixString(16).padLeft(2, '0')).join()}\'"',
       );
       legacy.execute('DROP TABLE ssh_host_trust');
+      legacy.execute('DROP TABLE credential_focused_fills');
       legacy.execute('DROP TABLE library_format');
       legacy.execute(
         'ALTER TABLE credential_runtime_requests RENAME TO credential_use_requests',
