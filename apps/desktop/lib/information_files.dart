@@ -142,7 +142,7 @@ String informationFileSize(int bytes) => bytes < 1024
 String informationFileError(Object error) => switch (error) {
   AccessFailure(status: 'attachment_too_large') => '单个文件最多10 MiB，请选择较小的文件。',
   AccessFailure(status: 'attachment_capacity_exceeded') =>
-    '附件容量或记录数量已达上限。请清理不再需要的内容后重试。',
+    '附件容量或记录数量已达上限。请到设置的“备份与恢复”查看用量；保留内容清理前仍占容量。',
   AccessFailure(status: 'file_read_failed') => '无法读取文件，请检查文件是否存在以及访问权限。',
   AccessFailure(status: 'file_changed') => '读取期间文件已变化，请重新选择。',
   AccessFailure(status: 'version_conflict' || 'information_conflict') =>

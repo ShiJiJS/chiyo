@@ -114,6 +114,23 @@ class EncryptedInformationRepository
       _pruneFileDeliveries(ids);
   final _fileDeliveries = <String, InformationFileDelivery>{};
   @override
+  Future<InformationAttachmentUsage> informationAttachmentUsage() async {
+    if (_closed) throw const StorageFailure('library_closed');
+    return _db.transaction(() async {
+      final versions = await _allAttachmentVersions();
+      final stages = await _fileStagingUsage();
+      final available = versions.where((v) => v.available).toList();
+      return InformationAttachmentUsage(
+        versionRecords: versions.length,
+        availableVersions: available.length,
+        storedBytes: available.fold(0, (sum, v) => sum + v.byteLength),
+        stagedFiles: stages.files,
+        stagedBytes: stages.bytes,
+      );
+    });
+  }
+
+  @override
   Future<InformationFileStage> informationStage(
     String draftId,
     String stageId,

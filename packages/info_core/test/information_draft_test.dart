@@ -56,6 +56,55 @@ void main() {
   }
 
   test(
+    'owner usage accounts for retained originals and uncommitted stages in the same byte budget',
+    () async {
+      final first = await create();
+      final draft = await service.owner.beginInformationFileDraft();
+      final replacement = await stage(draft, [9, 8]);
+      var usage = await service.owner.informationAttachmentUsage();
+      expect(usage.versionRecords, 1);
+      expect(usage.availableVersions, 1);
+      expect(usage.stagedFiles, 1);
+      expect(usage.storedBytes, 3);
+      expect(usage.originalAndStagedBytes, 5);
+      final saved = await service.owner.commitInformationDraft(
+        draft,
+        'replace-for-usage',
+        input([
+          InformationDraftField.stagedFile(
+            '简历',
+            '',
+            replacement.id,
+            fieldId: first.fields.last.id,
+          ),
+        ], first),
+      );
+      usage = await service.owner.informationAttachmentUsage();
+      expect(usage.availableVersions, 2);
+      expect(usage.versionRecords, 2);
+      expect(usage.stagedFiles, 0);
+      expect(usage.storedBytes, 5);
+      final cancelled = await service.owner.beginInformationFileDraft();
+      await stage(cancelled, [1, 2, 3, 4]);
+      expect(
+        (await service.owner.informationAttachmentUsage())
+            .originalAndStagedBytes,
+        9,
+      );
+      await service.owner.releaseInformationFileDraft(cancelled);
+      await service.owner.releaseInformationFileDraft(draft);
+      await service.owner.deleteInformation(saved.id, saved.version);
+      usage = await service.owner.informationAttachmentUsage();
+      expect(
+        usage.storedBytes,
+        5,
+        reason: 'recycle and revision originals remain retained after deletion',
+      );
+      expect(usage.stagedBytes, 0);
+    },
+  );
+
+  test(
     'mixed save consumes stages once, retries after form close and rejects operation reuse',
     () async {
       final d = await service.owner.beginInformationFileDraft();

@@ -55,12 +55,13 @@ class AttachmentUiFixture {
   static Future<AttachmentUiFixture> create({
     DateTime Function()? clock,
     CredentialExecutableInspector? executableInspector,
+    MemoryInformationRepository? repository,
   }) async {
     final root = await Directory.systemTemp.createTemp('attachment-ui-');
-    final repository = MemoryInformationRepository();
+    final store = repository ?? MemoryInformationRepository();
     final driver = MemoryInformationDeliveries();
     final service = InformationService(
-      repository: repository,
+      repository: store,
       informationDeliveryFiles: driver,
       clock: clock,
       credentialExecutableInspector: executableInspector,
@@ -92,7 +93,7 @@ class AttachmentUiFixture {
       ),
     );
     await service.owner.releaseInformationFileDraft(form);
-    return AttachmentUiFixture._(root, repository, driver, service, item);
+    return AttachmentUiFixture._(root, store, driver, service, item);
   }
 
   Future<void> replace(List<int> bytes) async {

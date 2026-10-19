@@ -34,10 +34,26 @@ class BackupContents {
   int get focusedFillCount => _tables['credential_focused_fills']!.length;
   int get sshTrustCount => _tables['ssh_host_trust']!.length;
   int get attachmentCount => attachments.where((v) => v.available).length;
+  int get currentAttachmentCount =>
+      _tables['information_file_fields']?.length ?? 0;
   int get attachmentBytes => attachments
       .where((v) => v.available)
       .fold(0, (sum, v) => sum + v.byteLength);
   int get fileDeliveryCount => _tables['information_deliveries']?.length ?? 0;
+}
+
+/// Private counts from the exact snapshot that was successfully published.
+/// Contains neither recovery material nor a reusable snapshot/source handle.
+final class BackupExportSummary {
+  BackupExportSummary._(BackupContents snapshot)
+    : currentAttachmentCount = snapshot.currentAttachmentCount,
+      attachmentCount = snapshot.attachmentCount,
+      attachmentBytes = snapshot.attachmentBytes,
+      fileDeliveryCount = snapshot.fileDeliveryCount;
+  final int currentAttachmentCount,
+      attachmentCount,
+      attachmentBytes,
+      fileDeliveryCount;
 }
 
 /// Owner-only manual backup capability. It is never part of the agent server.
@@ -409,10 +425,14 @@ class InformationBackups {
 
   /// An existing output is always refused, even when the file dialog confirmed
   /// overwrite. A failed/interrupted export leaves existing backups untouched.
-  Future<void> exportTo(String path, {String? stagingParent}) async {
+  Future<BackupExportSummary> exportTo(
+    String path, {
+    String? stagingParent,
+  }) async {
     _checkOpen();
     sqlite.Database? db;
     Directory? staging;
+    late BackupExportSummary summary;
     try {
       _requireCipher();
       final key = await recoveryKey();
@@ -422,6 +442,7 @@ class InformationBackups {
       }
       final snapshot = await _repository._db.transaction(() async {
         final snapshot = await _snapshot();
+        summary = BackupExportSummary._(snapshot);
         if (snapshot.formatVersion < 8) return snapshot;
         // Metadata and every range of original bytes share one source snapshot.
         await AttachmentBackupContainer.write(
@@ -447,7 +468,7 @@ class InformationBackups {
         );
         return null;
       });
-      if (snapshot == null) return;
+      if (snapshot == null) return summary;
       final payload = jsonEncode(_document(snapshot));
       if (utf8.encode(payload).length > maxPayloadBytes) {
         throw const StorageFailure('backup_too_large');
@@ -481,6 +502,7 @@ class InformationBackups {
         }
         throw const StorageFailure('backup_publish_failed');
       }
+      return summary;
     } catch (error) {
       db?.close();
       if (error is StorageFailure) rethrow;

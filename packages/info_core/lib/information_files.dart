@@ -248,6 +248,24 @@ final class InformationFileStagingUsage {
   final int files, bytes;
 }
 
+/// Owner-only accounting. Counts versions, including retained originals;
+/// does not load any body or expose attachment names or source paths.
+final class InformationAttachmentUsage {
+  const InformationAttachmentUsage({
+    required this.versionRecords,
+    required this.availableVersions,
+    required this.storedBytes,
+    required this.stagedFiles,
+    required this.stagedBytes,
+  });
+  final int versionRecords,
+      availableVersions,
+      storedBytes,
+      stagedFiles,
+      stagedBytes;
+  int get originalAndStagedBytes => storedBytes + stagedBytes;
+}
+
 /// Owner-only encrypted intake seam. No stage data is in items/catalog/read.
 /// Committed attachments and their backup/delivery use a separate next step.
 abstract interface class InformationFileStagingRepository {

@@ -1,6 +1,11 @@
 part of 'info_core.dart';
 
 extension OwnerInformationAttachments on OwnerAccess {
+  Future<InformationAttachmentUsage> informationAttachmentUsage() =>
+      _serialize(() async {
+        if (!serviceAvailable) throw const AccessFailure('service_unavailable');
+        return _attachments.informationAttachmentUsage();
+      });
   Future<void> purgeInformationAttachments() =>
       _serialize(_purgeInformationAttachments);
   Future<void> _purgeInformationAttachments() async {

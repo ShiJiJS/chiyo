@@ -126,6 +126,7 @@ final class InformationDraftChange {
 
 abstract interface class InformationAttachmentRepository
     implements InformationFileStagingRepository {
+  Future<InformationAttachmentUsage> informationAttachmentUsage();
   Future<InformationFileStage> informationStage(String draftId, String stageId);
   Future<List<InformationAttachmentVersion>> informationAttachmentVersions(
     String attachmentId,

@@ -6,6 +6,8 @@ import 'package:info_core/info_core.dart';
 import 'ui.dart';
 import 'prototype_ui.dart';
 import 'settings_controls.dart';
+import 'information_attachment_capacity.dart';
+import 'information_files.dart';
 
 /// The OS file-dialog boundary. Widget tests supply paths, never open dialogs.
 abstract class BackupFilePicker {
@@ -62,6 +64,11 @@ String _backupFailure(Object error) => switch (error) {
   StorageFailure(code: 'invalid_recovery_key') => '恢复密钥文件格式不正确，请选择独立另存的完整密钥。',
   StorageFailure(code: 'invalid_backup') => '恢复密钥不匹配、文件损坏或备份内容无效。当前信息库未改变。',
   StorageFailure(code: 'unsupported_backup') => '此备份格式或版本不受支持，当前信息库未改变。',
+  StorageFailure(code: 'backup_changed') => '备份在检查后发生变化，请重新选择并检查。当前信息库未改变。',
+  StorageFailure(code: 'attachment_missing' || 'attachment_integrity_failed') =>
+    '附件原文缺失或校验失败，操作未完成。请检查原库或其他完整备份后重试。',
+  StorageFailure(code: 'backup_too_large') =>
+    '备份超过当前容量或记录上限，导出未完成。请检查附件与保留记录用量。',
   StorageFailure(code: 'recovery_key_not_saved') => '请先独立保存恢复密钥文件，保存成功后才能导出。',
   _ => '操作未完成，请检查文件位置、恢复密钥及存储状态后重试。',
 };
@@ -86,6 +93,7 @@ class BackupLibrary extends StatefulWidget {
 
 class _BackupLibraryState extends State<BackupLibrary> {
   bool _busy = true, _empty = false;
+  int _capacityRevision = 0;
   String? _error;
   @override
   void initState() {
@@ -99,6 +107,7 @@ class _BackupLibraryState extends State<BackupLibrary> {
       if (mounted) {
         setState(() {
           _empty = empty;
+          _capacityRevision++;
           _error = null;
         });
       }
@@ -222,6 +231,10 @@ class _BackupLibraryState extends State<BackupLibrary> {
         ),
         if (_error != null) SettingsNotice('备份服务不可用', _error!, error: true),
         if (_busy) const LinearProgressIndicator(),
+        InformationAttachmentCapacity(
+          key: ValueKey(_capacityRevision),
+          owner: widget.owner,
+        ),
       ],
     );
     return widget.embedded
@@ -251,6 +264,7 @@ class _BackupFlowDialogState extends State<BackupFlowDialog> {
   bool _busy = true, _saved = false, _empty = false, _completed = false;
   String? _localKey, _backupPath, _keyPath, _error, _result;
   BackupContents? _preview;
+  BackupExportSummary? _exportSummary;
   @override
   void initState() {
     super.initState();
@@ -309,9 +323,16 @@ class _BackupFlowDialogState extends State<BackupFlowDialog> {
   Future<void> _export() => _run(() async {
     final path = await widget.files.backupOutput();
     if (path == null) return;
+    if (mounted) {
+      setState(() {
+        _exportSummary = null;
+        _result = null;
+      });
+    }
     final staging = await widget.files.prepareStaging(path);
+    late BackupExportSummary summary;
     try {
-      await widget.owner.exportLibrary(
+      summary = await widget.owner.exportLibrary(
         () => widget.backups.exportTo(path, stagingParent: staging?.directory),
       );
     } finally {
@@ -323,7 +344,12 @@ class _BackupFlowDialogState extends State<BackupFlowDialog> {
         }
       }
     }
-    if (mounted) setState(() => _result = '加密备份已导出。');
+    if (mounted) {
+      setState(() {
+        _result = '加密备份已导出。';
+        _exportSummary = summary;
+      });
+    }
   });
   Future<void> _select(bool recovery) => _run(() async {
     final path = await (recovery
@@ -531,6 +557,10 @@ class _BackupFlowDialogState extends State<BackupFlowDialog> {
               ),
             ),
           ),
+        if (_exportSummary case final summary?)
+          _paragraph(
+            '普通附件：当前文件字段 ${summary.currentAttachmentCount} 个，可恢复原文版本 ${summary.attachmentCount} 份（含保留版本）· ${informationFileSize(summary.attachmentBytes)}。文件交付事实 ${summary.fileDeliveryCount} 条，不含活副本。',
+          ),
         _heading('恢复到空的信息库'),
         _paragraph(_empty ? '当前目标库为空，可以检查备份。' : '目标库非空，不能覆盖或合并恢复。'),
         const SizedBox(height: 25),
@@ -570,6 +600,12 @@ class _BackupFlowDialogState extends State<BackupFlowDialog> {
             p.formatVersion < 5
                 ? '旧格式不含托管凭据及其使用历史。'
                 : '凭据对象 ${p.credentialCount} 项（含回收对象或删除后的非秘密记录），秘密版本 ${p.credentialVersionCount} 份，SSH 主机信任 ${p.sshTrustCount} 份，凭据使用历史 ${p.credentialUseHistoryCount} 条，启动事实 ${p.credentialExecutionCount} 条。',
+          ),
+          const SizedBox(height: 12),
+          _paragraph(
+            p.formatVersion < 8
+                ? '旧格式不含普通附件原文。'
+                : '普通附件：当前文件字段 ${p.currentAttachmentCount} 个，可恢复原文版本 ${p.attachmentCount} 份（含保留版本）· ${informationFileSize(p.attachmentBytes)}。文件交付事实 ${p.fileDeliveryCount} 条；恢复后需重新申请读取，不重建活副本。',
           ),
           const SizedBox(height: 12),
           _paragraph(

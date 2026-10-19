@@ -130,6 +130,40 @@ void main() {
       });
     },
   );
+
+  test(
+    'encrypted owner usage includes retained versions and stages until real retention cleanup',
+    () async {
+      final first = await save([0, 255, 7]);
+      final second = await save([1, 2, 3, 4], first);
+      final draft = await service.owner.beginInformationFileDraft();
+      await service.owner.stageInformationFile(
+        draft,
+        '${root.path}/fictional.pdf',
+      );
+      var usage = await service.owner.informationAttachmentUsage();
+      expect(usage.availableVersions, 2);
+      expect(usage.versionRecords, 2);
+      expect(usage.storedBytes, 7);
+      expect(usage.stagedFiles, 1);
+      expect(usage.originalAndStagedBytes, 11);
+      await service.owner.releaseInformationFileDraft(draft);
+      await service.owner.deleteInformation(second.id, second.version);
+      expect((await service.owner.informationAttachmentUsage()).storedBytes, 7);
+      now = now.add(const Duration(days: 31));
+      await service.owner.purgeInformationAttachments();
+      usage = await service.owner.informationAttachmentUsage();
+      expect(usage.availableVersions, 0);
+      expect(usage.versionRecords, 2);
+      expect(usage.originalAndStagedBytes, 0);
+      expect(await File('${root.path}/fictional.pdf').readAsBytes(), [
+        1,
+        2,
+        3,
+        4,
+      ]);
+    },
+  );
   test(
     'expired original cleanup failure rolls back revision pruning and can retry',
     () async {

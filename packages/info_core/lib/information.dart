@@ -421,6 +421,21 @@ class MemoryInformationRepository
         .map((v) => v.$1),
   );
   @override
+  Future<InformationAttachmentUsage> informationAttachmentUsage() async {
+    final stages = await _fileStages.informationFileStagingUsage();
+    final available = _informationFiles.values
+        .where((v) => v.$1.available)
+        .toList();
+    return InformationAttachmentUsage(
+      versionRecords: _informationFiles.length,
+      availableVersions: available.length,
+      storedBytes: available.fold(0, (sum, v) => sum + v.$1.byteLength),
+      stagedFiles: stages.files,
+      stagedBytes: stages.bytes,
+    );
+  }
+
+  @override
   Future<Uint8List> readInformationAttachmentChunk(
     InformationAttachmentRef ref,
     int offset,
