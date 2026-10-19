@@ -45,3 +45,5 @@ docs/development/evidence/issue30-terminal-audit-recovery/raw/** -text -diff
 docs/development/evidence/issue18-packaged-startup/raw/** -text -diff
 
 docs/development/evidence/issue23-current-notification/raw/** -text -diff
+
+docs/development/evidence/issue39-app-control/raw/** -text -diff
