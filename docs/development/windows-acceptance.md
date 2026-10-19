@@ -2,6 +2,11 @@
 
 ## 当前新增功能与整包门槛 · 2026-10-20
 
+0.4.0+11当前已完成[正常退出及部分混合批准/五主页面](windows-agent-graceful-exit.md)，
+并直接验证[真实旧源schema16→21及格式5系统对话框恢复](windows-packaged-upgrade-format5.md)。
+这些是独立合成库的实际包检查，旧v1事实不升级为复用许可，原库/备份保持；不能从中
+推断格式1–4/当前附件8/9逐项实际包验收、真实Codex/通知或干净Windows已通过。
+
 用户已确认退出旧版，并要求[#39](https://github.com/ShiJiJS/agent-info-manage/issues/39)补齐Agent正常退出入口。
 新版验收切换先用同包 `cli/info.exe app status` / `app quit`，或核对路径后明确指定PID，确认`exited`。
 保存失败保留窗口修复，超时先查原实例，不降级强杀。旧版不支持时才需要用户原托盘入口。
