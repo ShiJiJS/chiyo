@@ -19,10 +19,16 @@ import 'support/isolated_desktop.dart';
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
   const lockedOnly = bool.fromEnvironment('FILL_LOCKED_ONLY');
+  // Preserve the default accessibility regression. A separate baseline can
+  // omit the test-created handle; platform-requested semantics still applies.
+  const testSemantics = bool.fromEnvironment(
+    'FILL_TEST_SEMANTICS',
+    defaultValue: true,
+  );
   testWidgets(
     lockedOnly
         ? 'trusted bundle and encrypted bootstrap refuse a locked desktop without input'
-        : 'trusted bundled helper, SQLCipher, real approval UI and independent CLI native input',
+        : 'trusted bundled helper, SQLCipher, real approval UI and independent CLI native input (test semantics: $testSemantics)',
     (tester) async {
       const cliPath = String.fromEnvironment('FILL_CLI'),
           receiverPath = String.fromEnvironment('FILL_RECEIVER'),
@@ -136,6 +142,13 @@ void main() {
         }
 
         Future<void> click(String key) async {
+          await record({
+            'phase': 'action_started',
+            'step': 'before_click',
+            'key': key,
+            'flutterSemanticsEnabled':
+                SemanticsBinding.instance.semanticsEnabled,
+          });
           final target = find.byKey(ValueKey(key));
           final until = DateTime.now().add(const Duration(seconds: 10));
           while (target.evaluate().isEmpty && DateTime.now().isBefore(until)) {
@@ -204,6 +217,8 @@ void main() {
           'cli': cliPath,
           'receiver': receiverPath,
           'encryptedLibrary': true,
+          'testSemanticsRequested': testSemantics,
+          'flutterSemanticsEnabled': SemanticsBinding.instance.semanticsEnabled,
         });
         var seen = -1;
         final limit = DateTime.now().add(const Duration(minutes: 4));
@@ -223,6 +238,13 @@ void main() {
             continue;
           }
           seen = next['id'] as int;
+          await record({
+            'phase': 'action_started',
+            'id': seen,
+            'action': next['action'],
+            'flutterSemanticsEnabled':
+                SemanticsBinding.instance.semanticsEnabled,
+          });
           try {
             Map<String, Object?> result;
             switch (next['action']) {
@@ -270,6 +292,14 @@ void main() {
                 };
               case 'approve':
                 await click('focused-fill-approve');
+                await record({
+                  'phase': 'action_started',
+                  'id': seen,
+                  'action': 'approve',
+                  'step': 'confirmation_open',
+                  'flutterSemanticsEnabled':
+                      SemanticsBinding.instance.semanticsEnabled,
+                });
                 await capture('confirmation');
                 await click('fill-confirm-decision');
                 expect(
@@ -356,6 +386,8 @@ void main() {
               'id': seen,
               'action': next['action'],
               'ok': true,
+              'flutterSemanticsEnabled':
+                  SemanticsBinding.instance.semanticsEnabled,
               ...result,
             });
           } on Object {
@@ -433,5 +465,6 @@ void main() {
       }
     },
     timeout: const Timeout(Duration(minutes: 6)),
+    semanticsEnabled: testSemantics,
   );
 }
