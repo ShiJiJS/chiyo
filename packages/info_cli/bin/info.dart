@@ -2,10 +2,17 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:info_cli/agent_client.dart';
+import 'package:info_cli/desktop_control.dart';
 import 'package:info_core/protocol_json.dart';
 
 /// JSON-lines commands never carry or print session/grant credentials.
 Future<void> main(List<String> args) async {
+  if (args.isNotEmpty && args.first == 'app') {
+    final result = await desktopControlCommand(args);
+    stdout.writeln(jsonEncode(result.output));
+    exitCode = result.exitCode;
+    return;
+  }
   var port = 47125;
   if (args.isNotEmpty) {
     if (args.length != 2 ||

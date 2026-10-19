@@ -14,6 +14,14 @@ to obtain a fresh context reference for the current CODEX_THREAD_ID. This is a
 new unapproved session, not a way to find an old grant. Do not retry it silently.
 Public chat IDs are not credentials.
 
+For user-requested app shutdown or an authorized test-version switch, use the
+reviewed Windows delivery's `cli/info.exe app status`, then `app quit`.
+Default discovery targets that delivery only; another installation requires its
+verified PID with `--pid`. `exited` confirms process exit; `shutdown_failed`
+keeps unsaved records open for repair, and `timeout` is unknown. Query before
+retrying; never force-kill. Quitting ends all chats' current grants. This native
+lifetime entry does not read information or approve anything.
+
 For Token, SSH private-key, AWS credential-file use or local password filling, read
 [Credential use](references/credential-use.md) before requesting or running it.
 Choose its command or focused-input branch. Both request fixed-term use and

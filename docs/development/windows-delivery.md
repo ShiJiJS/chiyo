@@ -6,7 +6,7 @@ CLI、SDK-free Codex 接入材料生成器、合成资料控制台检查、依�
 
 ## 当前 Round05 Windows 预览
 
-本文随 **0.4.0+10** 构建；是否已生成和验收以具体交付记录为准。准确源码、构建时间及逐文件校验值见本包 `manifest.json`，
+本文随 **0.4.0+11** 构建；是否已生成和验收以具体交付记录为准。准确源码、构建时间及逐文件校验值见本包 `manifest.json`，
 ZIP 校验值见随附的同名 `.sha256` 文件。具体本地交付路径及大小记录在
 [实施进度](https://github.com/ShiJiJS/agent-info-manage/issues/21)，不在随包说明中写入自身归档的哈希。
 已展开 EXE 位于 `AgentInfoManage/app/info_desktop.exe`，须保留其全部相邻文件。
@@ -58,6 +58,11 @@ ZIP 校验值见随附的同名 `.sha256` 文件。具体本地交付路径及�
    保持窗口可达；使用“设置 → 应用运行 → 完全退出”停止服务。先使用虚构信息。
 4. CLI 可用完整路径调用 `cli/info.exe`（通用 JSON-lines），无需安装 Dart、
    Flutter 或 Java；不自动修改 PATH。Codex 使用下面的独立接入步骤。
+
+Agent 可用同包 `cli/info.exe app status` 查询、`cli/info.exe app quit` 正常退出。
+默认只定位同目录桌面程序，另一目录须核对后加 `--pid <进程号>`。CLI确认进程实际结束才返回
+`exited`；保存失败返回 `shutdown_failed` 并保留窗口及库可重试，超时不强杀。旧版不支持此入口时
+仍需原托盘菜单。完整状态/退出码见[CLI说明](https://github.com/ShiJiJS/agent-info-manage/blob/codex/round05-windows-sync/docs/cli.md)。
 
 示例（路径仅为示例，使用实际解压路径）：
 

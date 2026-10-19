@@ -35,11 +35,16 @@ class FlutterWindow : public Win32Window {
   void OpenApprovals(const std::string& request_id = "");
   bool ShowNotification(const NotificationMessage& message);
   void SendDesktopEvent(const char* event);
+  void RequestQuit();
   flutter::EncodableValue DesktopAvailability();
   std::unique_ptr<flutter::MethodChannel<flutter::EncodableValue>> desktop_channel_;
   std::unique_ptr<flutter::MethodChannel<flutter::EncodableValue>> window_channel_;
   bool custom_frame_ = false;
   bool desktop_ready_ = false;
+  UINT control_message_ = 0;
+  // Local-control v1: 1 running, 2 quitting, 3 save/close failed, 4 starting,
+  // 5 handler unavailable. No pointer or caller data crosses this protocol.
+  LRESULT control_state_ = 4;
   bool tray_available_ = false;
   bool notifications_enabled_ = true;
   UINT tray_id_ = 0;

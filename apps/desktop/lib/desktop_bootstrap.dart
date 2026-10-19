@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'dart:io';
 import 'package:info_cli/credential_execution_host.dart';
@@ -40,6 +41,7 @@ class DesktopBootstrap extends ChangeNotifier {
   int? boundPort;
   bool cleanupPending = false;
   bool applicationFilesInvalid = false;
+  Completer<void>? _startupSettled;
 
   Future<void> start() async {
     if (state == DesktopStartupState.starting ||
@@ -47,9 +49,13 @@ class DesktopBootstrap extends ChangeNotifier {
       return;
     }
     state = DesktopStartupState.starting;
+    final settled = _startupSettled = Completer<void>();
     applicationFilesInvalid = false;
     notifyListeners();
     try {
+      // Install the lifetime entry before opening data. A failed key/open must
+      // still be closable, and a quit during startup waits for owned work.
+      await platform.initialize(_handleStartupEvent);
       await _release();
       library = await openLibrary();
       // Reconcile registered copies before publishing the Windows endpoint.
@@ -107,13 +113,46 @@ class DesktopBootstrap extends ChangeNotifier {
         cleanupPending = true;
       }
       state = DesktopStartupState.failed;
+      // Runtime.start may have replaced the handler before startup failed.
+      // Route failed-startup quit through the retained bootstrap resources.
+      try {
+        await platform.initialize(_handleStartupEvent);
+      } on Object {
+        /* Preserve the startup failure and any retryable audit facts. */
+      }
       try {
         await platform.showWindow();
       } on Object {
         // Native startup may also have failed; still render the error screen.
       }
+    } finally {
+      settled.complete();
     }
     notifyListeners();
+  }
+
+  Future<void> _handleStartupEvent(DesktopEvent event) async {
+    await _startupSettled?.future;
+    if (state == DesktopStartupState.ready) {
+      await runtime!.handleEvent(event);
+    } else if (event == DesktopEvent.quit ||
+        event == DesktopEvent.closeWindow) {
+      try {
+        await _release();
+        await platform.terminate();
+      } on Object {
+        cleanupPending = true;
+        notifyListeners();
+        try {
+          await platform.showWindow();
+        } on Object {
+          /* Keep the original shutdown failure. */
+        }
+        if (event == DesktopEvent.quit) rethrow;
+      }
+    } else if (event == DesktopEvent.openApprovals) {
+      await platform.showWindow();
+    }
   }
 
   Future<void> _release() async {

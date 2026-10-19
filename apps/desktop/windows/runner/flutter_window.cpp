@@ -1,5 +1,7 @@
 #include "flutter_window.h"
 
+#include <flutter/method_result_functions.h>
+
 #include <optional>
 #include <windowsx.h>
 #include <flutter/standard_method_codec.h>
@@ -93,6 +95,20 @@ void FlutterWindow::SendDesktopEvent(const char* event) {
   if (desktop_ready_ && desktop_channel_) {
     desktop_channel_->InvokeMethod(event, nullptr);
   }
+}
+
+void FlutterWindow::RequestQuit() {
+  if (!desktop_ready_ || !desktop_channel_ || control_state_ == 2) return;
+  control_state_ = 2;
+  desktop_channel_->InvokeMethod("quit", nullptr,
+      std::make_unique<flutter::MethodResultFunctions<flutter::EncodableValue>>(
+          [](const flutter::EncodableValue*) {
+            // Success means the normal terminate message was queued. Only the
+            // caller's process handle can confirm that the process really ends.
+          },
+          [this](const std::string&, const std::string&,
+                 const flutter::EncodableValue*) { control_state_ = 3; },
+          [this]() { control_state_ = 5; }));
 }
 
 void FlutterWindow::OpenApprovals(const std::string& request_id) {
@@ -198,6 +214,7 @@ bool FlutterWindow::OnCreate() {
     }
   });
   taskbar_created_ = RegisterWindowMessageW(L"TaskbarCreated");
+  control_message_ = RegisterWindowMessageW(L"AgentInfoManage.LocalControl.v1");
   desktop_channel_ = std::make_unique<flutter::MethodChannel<flutter::EncodableValue>>(
       flutter_controller_->engine()->messenger(), "agent_info_manage/desktop",
       &flutter::StandardMethodCodec::GetInstance());
@@ -236,6 +253,7 @@ bool FlutterWindow::OnCreate() {
     } else if (method == "initialize") {
       if (!desktop_ready_) AddTrayIcon();
       desktop_ready_ = true;
+      if (control_state_ == 4) control_state_ = 1;
       result->Success(DesktopAvailability());
     } else if (method == "availability") {
       result->Success(DesktopAvailability());
@@ -299,6 +317,11 @@ LRESULT
 FlutterWindow::MessageHandler(HWND hwnd, UINT const message,
                               WPARAM const wparam,
                               LPARAM const lparam) noexcept {
+  if (control_message_ != 0 && message == control_message_) {
+    if (wparam != GetCurrentProcessId() || (lparam != 0 && lparam != 1)) return 0;
+    if (lparam == 1) RequestQuit();
+    return control_state_;
+  }
   if (custom_frame_ && message == WM_NCCALCSIZE && wparam) {
     auto* params = reinterpret_cast<NCCALCSIZE_PARAMS*>(lparam);
     const LONG original_top = params->rgrc[0].top;
@@ -389,7 +412,7 @@ FlutterWindow::MessageHandler(HWND hwnd, UINT const message,
       DestroyMenu(menu);
       PostMessage(hwnd, WM_NULL, 0, 0);
       if (selected == kOpenApprovals) OpenApprovals();
-      if (selected == kQuit) SendDesktopEvent("quit");
+      if (selected == kQuit) RequestQuit();
     }
     return 0;
   }

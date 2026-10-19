@@ -1,5 +1,34 @@
 # 通用 CLI 申请与等待
 
+## Windows 应用状态与正常退出（0.4.0+11起）
+
+独立子命令 `info.exe app status` / `info.exe app quit` 不读取标准输入，不需要信息授权。
+默认只定位同一交付目录的 `app/info_desktop.exe`；要退出另一目录的实例，先核对进程路径，
+再显式加 `--pid <进程号>`。多实例返回 `ambiguous_target`，不会批量退出。
+源代码运行时须指定PID，因为Dart SDK旁边没有同包桌面程序。
+
+```powershell
+& 'C:\Tools\AgentInfoManage\cli\info.exe' app status
+& 'C:\Tools\AgentInfoManage\cli\info.exe' app quit --timeout-ms 15000
+```
+
+正常退出停用所有会话许可、保存结束记录、关闭服务与库，再结束进程。输出为单行JSON，
+含 `controlVersion:1`、`status`，定位成功时含 `processId`，不含资料或凭据。
+只有核对绑定的进程确已以0退出才返回 `exited`。同包没有实例为 `not_running`，重复调用可用；
+`running` / `starting` / `exiting` 是只读状态。以上退出码0。
+`shutdown_failed` 表示保存/关闭失败（退出码1），保留窗口和库供修复后再调用退出；
+`timeout` 表示期限内未确认结束（退出码75），不能当成功或强杀理由，先查询原实例。
+可用 `--timeout-ms 100–60000` 调整等待。
+`target_mismatch` / `target_unavailable` / `ambiguous_target` / `control_unavailable` 为75；
+`unexpected_exit` 为1；旧版不支持或非Windows为69；参数错误为64。
+显式PID不存在或不可确认不会伪装成成功；旧版 `unsupported_version` 需按原有托盘入口退出。
+
+入口使用同一本机桌面的Windows消息、程序身份及进程句柄；消息只含目标PID和状态/退出操作。
+不向公开HTTP添加主人接口，不靠请求编号退出应用，也不是同一Windows用户进程之间的安全沙箱。
+运行中的已启动命令仍遵守原有生命周期规则；退出不会擅自杀死它们，材料可能待下次启动核查回收。
+
+## 信息申请
+
 > 2026-10-19：开发分支的新CLI默认凭据协议v2，需要服务明确支持credential-use-reuse.v1；#33的Windows功能验收通过，生产入口已启用v2。当前已交付0.4.0+8预览仍为v1，须整包更新应用、CLI和worker后才能使用新版流程。普通附件仍待#37/#38；本机焦点填充已接Windows构建绑定入口与QA整包，正向GUI/内置浏览器仍待#35验收。真实Codex、通知和干净环境门槛继续保留。
 
 CLI 使用标准输入逐行 JSON，标准输出每行一个结果。保持同一个 CLI 进程，授权会话凭据和已领取的访问凭据留在进程内；不要把凭据写入命令参数、日志或聊天。启动入口是 `dart run packages/info_cli/bin/info.dart`，默认连接本机应用端口 47125，可用 `--port` 指定开发端口。
