@@ -15,6 +15,7 @@ import 'package:info_storage/info_storage.dart';
 import 'package:info_desktop/bundled_focused_fill.dart';
 import 'package:info_desktop/main.dart';
 import 'support/isolated_desktop.dart';
+import 'support/browser_fill_receiver.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -86,6 +87,7 @@ Future<void> runFocusedFillNative(
   final owner = fixture.service.owner;
   final boundary = GlobalKey();
   Process? receiver, cli;
+  BrowserFillReceiver? browser;
   StreamIterator<String>? receiverLines, cliLines;
   final drains = <Future<String>>[];
   var closed = false, failed = false, approvals = 0;
@@ -141,7 +143,10 @@ Future<void> runFocusedFillNative(
     }
 
     verify((await response(receiverLines))['event'], 'window_ready');
-    Future<Map<String, dynamic>> receive(int code, [String? value]) async {
+    Future<Map<String, dynamic>> receiveNative(
+      int code, [
+      String? value,
+    ]) async {
       final units = value?.codeUnits ?? const <int>[];
       final body = Uint8List(1 + units.length * 2)..[0] = code;
       final view = ByteData.sublistView(body);
@@ -154,6 +159,17 @@ Future<void> runFocusedFillNative(
       await receiver.stdin.flush();
       body.fillRange(0, body.length, 0);
       return response(receiverLines!);
+    }
+
+    Future<Map<String, dynamic>> receive(int code, [String? value]) async {
+      if (browser == null) return receiveNative(code, value);
+      final native = code <= 2
+          ? await receiveNative(code, value)
+          : const <String, dynamic>{};
+      return {
+        ...await browser!.command(code),
+        if (code == 2) 'clipboardUnchanged': native['clipboardUnchanged'],
+      };
     }
 
     Future<Map<String, dynamic>> call(Map<String, Object?> value) async {
@@ -193,6 +209,9 @@ Future<void> runFocusedFillNative(
       image.dispose();
     }
 
+    if (const bool.fromEnvironment('FILL_BROWSER_PROBE')) {
+      browser = await BrowserFillReceiver.start(secret);
+    }
     await receive(1, secret);
     await call({'command': 'session', 'chatLabel': 'Windows本机填充闭环'});
     final capabilities = await call({'command': 'capabilities'});
@@ -240,6 +259,7 @@ Future<void> runFocusedFillNative(
       'encryptedLibrary': true,
       'testSemanticsRequested': testSemanticsRequested,
       'harness': harness,
+      if (browser != null) 'browserTarget': browser.url,
       'flutterSemanticsEnabled': SemanticsBinding.instance.semanticsEnabled,
       'controlDeadline': limit.toUtc().toIso8601String(),
     });
@@ -271,10 +291,14 @@ Future<void> runFocusedFillNative(
             final value = await call({'command': 'focus-target'});
             if (value['targetState'] == 'ready') {
               final candidate = FocusedFillTarget.fromJson(value).application!;
-              verify(
-                candidate.executable.toLowerCase(),
-                (await File(receiverPath).resolveSymbolicLinks()).toLowerCase(),
-              );
+              if (browser == null) {
+                verify(
+                  candidate.executable.toLowerCase(),
+                  (await File(
+                    receiverPath,
+                  ).resolveSymbolicLinks()).toLowerCase(),
+                );
+              }
               application = candidate;
             }
             result = value;
@@ -443,6 +467,7 @@ Future<void> runFocusedFillNative(
     assertionsPassed = true;
   } finally {
     await mount(const SizedBox());
+    await browser?.close();
     for (final process in [cli, receiver]) {
       if (process == null) continue;
       try {
