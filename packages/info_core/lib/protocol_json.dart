@@ -6,7 +6,19 @@ Map<String, dynamic> decodeProtocolObject(
   String source, {
   int maxBytes = 262144,
 }) {
-  if (utf8.encode(source).length > maxBytes) throw const FormatException();
+  // Do not allocate a second full UTF-8 copy of a large backup JSON string.
+  // Unpaired UTF-16 surrogates use the encoder's replacement width (3 bytes).
+  var bytes = 0;
+  for (final rune in source.runes) {
+    bytes += rune <= 0x7f
+        ? 1
+        : rune <= 0x7ff
+        ? 2
+        : rune <= 0xffff
+        ? 3
+        : 4;
+    if (bytes > maxBytes) throw const FormatException();
+  }
   final value = jsonDecode(source);
   if (value is! Map<String, dynamic>) throw const FormatException();
   _Members(source).value(0);
@@ -23,7 +35,7 @@ class _Members {
     }
   }
 
-  String string() {
+  String string({bool decode = true}) {
     final start = at++;
     while (at < source.length) {
       if (source[at] == '\\') {
@@ -31,7 +43,9 @@ class _Members {
         continue;
       }
       if (source[at++] == '"') {
-        return jsonDecode(source.substring(start, at)) as String;
+        // jsonDecode already validated/decoded values. This pass only needs
+        // decoded member names to detect escaped duplicate keys.
+        return decode ? jsonDecode(source.substring(start, at)) as String : '';
       }
     }
     throw const FormatException();
@@ -41,7 +55,7 @@ class _Members {
     if (depth > 64) throw const FormatException();
     whitespace();
     if (source[at] == '"') {
-      string();
+      string(decode: false);
       return;
     }
     if (source[at] == '{') {
