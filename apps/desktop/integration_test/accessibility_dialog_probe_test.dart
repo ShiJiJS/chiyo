@@ -4,10 +4,16 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
+import 'support/native_semantics_lifetime.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  const forceFramework = bool.fromEnvironment(
+    'ACCESSIBILITY_FORCE_FRAMEWORK',
+    defaultValue: true,
+  );
   testWidgets('native accessibility simple modal diagnostic', (tester) async {
+    final lifetime = NativeSemanticsLifetime(tester);
     const observe = bool.fromEnvironment('ACCESSIBILITY_LATE_OBSERVER');
     const evidence = String.fromEnvironment('ACCESSIBILITY_EVIDENCE');
     final label = ValueNotifier('Open');
@@ -98,5 +104,6 @@ void main() {
     expect(tester.takeException(), isNull);
     await tester.pumpWidget(const SizedBox());
     label.dispose();
-  });
+    debugPrint(jsonEncode(lifetime.finishAfterUnmount()));
+  }, semanticsEnabled: forceFramework);
 }

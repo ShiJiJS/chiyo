@@ -12,32 +12,47 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:info_core/info_core.dart';
+import 'package:info_core/agent_server.dart';
 import 'package:info_storage/info_storage.dart';
 import 'package:info_desktop/bundled_focused_fill.dart';
 import 'package:info_desktop/main.dart';
 import 'support/isolated_desktop.dart';
 import 'support/browser_fill_receiver.dart';
+import 'support/native_semantics_lifetime.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
   const lockedOnly = bool.fromEnvironment('FILL_LOCKED_ONLY');
-  // Preserve the default accessibility regression. A separate baseline can
-  // omit the test-created handle; platform-requested semantics still applies.
-  const testSemantics = bool.fromEnvironment(
-    'FILL_TEST_SEMANTICS',
-    defaultValue: true,
-  );
+  // Match production: the OS requests native semantics. Forcing framework
+  // semantics first can send only an incremental tree to a newly attached
+  // Windows bridge. The separate simple-modal diagnostic preserves that SDK
+  // reproducer; the explicit true option remains available here as well.
+  const testSemantics = bool.fromEnvironment('FILL_TEST_SEMANTICS');
   testWidgets(
     lockedOnly
         ? 'trusted bundle and encrypted bootstrap refuse a locked desktop without input'
         : 'trusted bundled helper, SQLCipher, real approval UI and independent CLI native input (test semantics: $testSemantics)',
-    (tester) => runFocusedFillNative(
-      tester,
-      mount: tester.pumpWidget,
-      verifyFrameworkErrors: () => expect(tester.takeException(), isNull),
-      lockedOnly: lockedOnly,
-      testSemanticsRequested: testSemantics,
-    ),
+    (tester) async {
+      final lifetime = NativeSemanticsLifetime(tester);
+      try {
+        await runFocusedFillNative(
+          tester,
+          mount: tester.pumpWidget,
+          verifyFrameworkErrors: () => expect(tester.takeException(), isNull),
+          lockedOnly: lockedOnly,
+          testSemanticsRequested: testSemantics,
+        );
+      } finally {
+        await tester.pumpWidget(const SizedBox());
+        final cleanup = lifetime.finishAfterUnmount();
+        const evidence = String.fromEnvironment('FILL_EVIDENCE');
+        if (evidence.isNotEmpty) {
+          await File(
+            '$evidence/semantics-cleanup.json',
+          ).writeAsString(jsonEncode(cleanup), flush: true);
+        }
+      }
+    },
     timeout: const Timeout(Duration(minutes: 6)),
     semanticsEnabled: testSemantics,
   );
@@ -99,7 +114,7 @@ Future<void> runFocusedFillNative(
       revoked = false,
       revocationBlocked = false,
       historyViewed = false;
-  String? requestId, lastOperation;
+  String? requestId, lastOperation, firstSentOperation, activeRestartRequestId;
   FocusedFillApplication? application;
   DateTime? deadline;
   var sequence = 0;
@@ -275,13 +290,9 @@ Future<void> runFocusedFillNative(
         /* Await complete task-owned control file. */
       }
       if (next == null || next['id'] is! int || next['id'] == seen) {
-        if (harness == 'testWidgets') {
-          await tester.pump(const Duration(milliseconds: 80));
-        } else {
-          // A minimized native window need not produce another frame. Polling
-          // control must remain live while the app legitimately yields focus.
-          await Future<void>.delayed(const Duration(milliseconds: 80));
-        }
+        // All callers here are live native bindings. A minimized window need
+        // not produce another frame; control must remain able to restore it.
+        await Future<void>.delayed(const Duration(milliseconds: 80));
         continue;
       }
       seen = next['id'] as int;
@@ -333,10 +344,19 @@ Future<void> runFocusedFillNative(
               'fill': FocusedFillPlan(application!, '合成本机密码框，非网站登录').toJson(),
             });
             requestId = value['requestId'] as String;
+            final premature = await call({
+              'command': 'fill-use',
+              'requestId': requestId,
+              'operationId': 'before-approval',
+            });
+            verify(premature['errorCode'], 'request_pending');
+            verify(owner.focusedFillOperations, isEmpty);
+            verify((await receive(2))['empty'], isTrue);
             await tester.pump(const Duration(seconds: 1));
             await capture('approval');
             result = {
               'requestId': requestId,
+              'beforeApproval': premature,
               'pending':
                   owner.credentialUseState(
                     owner.credentialUseRequests.single,
@@ -389,6 +409,7 @@ Future<void> runFocusedFillNative(
             verify(receiverFacts['noPaste'], isTrue);
             verify(receiverFacts['clipboardUnchanged'], isTrue);
             if (status['fillState'] == 'sent') {
+              firstSentOperation ??= lastOperation;
               verify(receiverFacts['matches'], isTrue);
               if (next['action'] == 'duplicate') {
                 duplicateVerified = true;
@@ -436,7 +457,44 @@ Future<void> runFocusedFillNative(
               'revoked',
             );
             revoked = true;
-            result = {'revokedByFlutter': true};
+            final beforeCount = owner.focusedFillOperations.length;
+            final old = await call({
+              'command': 'fill-use',
+              'requestId': requestId,
+              'operationId': firstSentOperation,
+            });
+            verify(old['duplicate'], isTrue);
+            verify(old['fillState'], 'sent');
+            verify(owner.focusedFillOperations.length, beforeCount);
+            result = {'revokedByFlutter': true, 'oldOperationAfterRevoke': old};
+          case 'active-before-restart':
+            final newRequest = await call({
+              'command': 'request-use',
+              'purpose': '核对服务重启使仍有效的许可失效，不发送输入',
+              'credentials': [
+                {
+                  'alias': 'password',
+                  'credentialId': credential.id,
+                  'version': credential.version,
+                },
+              ],
+              'fill': FocusedFillPlan(application!, '合成重启检查').toJson(),
+            });
+            activeRestartRequestId = newRequest['requestId'] as String;
+            await tester.pump(const Duration(seconds: 1));
+            await tester.pumpAndSettle();
+            await click('focused-fill-approve');
+            await click('fill-confirm-decision');
+            final activeRequest = owner.credentialUseRequests.firstWhere(
+              (r) => r.id == activeRestartRequestId,
+            );
+            verify(owner.credentialGrantState(activeRequest), 'available');
+            approvals++;
+            result = {
+              'additionalGrantApprovedByFlutter': true,
+              'activeBeforeRestart': true,
+              'inputOperations': owner.focusedFillOperations.length,
+            };
           case 'close':
             closed = true;
             result = {'closing': true};
@@ -468,7 +526,16 @@ Future<void> runFocusedFillNative(
       reason: 'Interactive test must finish explicitly within its bound',
     );
     verify(failed, isFalse);
-    verify(approvals, 1);
+    verify(approvals, 2);
+    verify(activeRestartRequestId, isNotNull);
+    verify(
+      owner.credentialGrantState(
+        owner.credentialUseRequests.firstWhere(
+          (r) => r.id == activeRestartRequestId,
+        ),
+      ),
+      'available',
+    );
     verify(duplicateVerified, isTrue);
     verify(attentionBlocked, isTrue);
     verify(attentionAcknowledged, isTrue);
@@ -485,8 +552,8 @@ Future<void> runFocusedFillNative(
   } finally {
     await mount(const SizedBox());
     await browser?.close();
-    for (final process in [cli, receiver]) {
-      if (process == null) continue;
+    Future<void> closeChild(Process? process) async {
+      if (process == null) return;
       try {
         await process.stdin.close();
         await process.exitCode.timeout(const Duration(seconds: 3));
@@ -495,34 +562,87 @@ Future<void> runFocusedFillNative(
         await process.exitCode;
       }
     }
-    await cliLines?.cancel();
-    await receiverLines?.cancel();
-    for (final drain in drains) {
-      verify(await drain, isEmpty);
-    }
-    await fixture.bootstrap.runtime!.stop();
-    final reopened = await EncryptedInformationRepository.open(
-      fixture.root.path,
-      WindowsDatabaseKeyStore('${fixture.root.path}/database-key.dpapi'),
-    );
-    final afterRestart = InformationService(
-      repository: reopened,
-      focusedFillDriver: driver,
-    );
+
     final facts = <String, Object?>{};
     try {
-      final requests = afterRestart.owner.credentialUseRequests;
-      facts.addAll({
-        'operations': afterRestart.owner.focusedFillOperations.length,
-        'requests': requests.length,
-        'grantNotRevived': requests.every(
-          (r) => afterRestart.owner.credentialGrantState(r) != 'available',
-        ),
-      });
-      verify(facts['grantNotRevived'], isTrue);
+      await closeChild(receiver);
+      await fixture.bootstrap.runtime!.stop();
+      final reopened = await EncryptedInformationRepository.open(
+        fixture.root.path,
+        WindowsDatabaseKeyStore('${fixture.root.path}/database-key.dpapi'),
+      );
+      final afterRestart = InformationService(
+        repository: reopened,
+        focusedFillDriver: driver,
+      );
+      AgentServer? restartedServer;
+      try {
+        final requests = afterRestart.owner.credentialUseRequests;
+        facts.addAll({
+          'operations': afterRestart.owner.focusedFillOperations.length,
+          'requests': requests.length,
+          'grantNotRevived': requests.every(
+            (r) => afterRestart.owner.credentialGrantState(r) != 'available',
+          ),
+        });
+        verify(facts['grantNotRevived'], isTrue);
+        if (assertionsPassed && cli != null && cliLines != null) {
+          final oldLines = cliLines;
+          restartedServer = await AgentServer.start(
+            afterRestart.agent,
+            port: fixture.port,
+            enableReusableCredentialUse: true,
+            enableFocusedFill: true,
+          );
+          Future<Map<String, dynamic>> oldCliCall(String command) async {
+            cli!.stdin.writeln(
+              jsonEncode({
+                'command': command,
+                'requestId': command == 'fill-status'
+                    ? requestId
+                    : activeRestartRequestId,
+                'operationId': command == 'fill-status'
+                    ? firstSentOperation
+                    : 'after-restart-live-grant',
+              }),
+            );
+            await cli.stdin.flush();
+            if (!await oldLines.moveNext().timeout(
+              const Duration(seconds: 12),
+            )) {
+              throw StateError(
+                'Old independent CLI ended before restart check',
+              );
+            }
+            scan(oldLines.current);
+            return jsonDecode(oldLines.current) as Map<String, dynamic>;
+          }
+
+          final status = await oldCliCall('fill-status');
+          final use = await oldCliCall('fill-use');
+          verify(status['status'], 'unauthorized');
+          verify(use['status'], 'unauthorized');
+          verify(
+            afterRestart.owner.focusedFillOperations.length,
+            facts['operations'],
+          );
+          facts.addAll({
+            'oldCliStatusAfterRestart': status,
+            'oldCliUseAfterRestart': use,
+          });
+        }
+      } finally {
+        await restartedServer?.close();
+        await afterRestart.close();
+        await reopened.close();
+      }
     } finally {
-      await afterRestart.close();
-      await reopened.close();
+      await closeChild(cli);
+      await cliLines?.cancel();
+      await receiverLines?.cancel();
+      for (final drain in drains) {
+        verify(await drain, isEmpty);
+      }
       await fixture.close();
     }
     await record({
