@@ -1,0 +1,145 @@
+part of 'info_core.dart';
+
+/// Complete owner form content. A file is either an unchanged version reference
+/// or a stage owned by this form, never a source/delivery path or Base64 string.
+final class InformationDraftField {
+  const InformationDraftField.text(
+    this.name,
+    this.description,
+    this.text, {
+    this.fieldId,
+    this.kind = FieldKind.structured,
+    this.replaceIdentity = false,
+  }) : stageId = null,
+       attachment = null;
+  const InformationDraftField.stagedFile(
+    this.name,
+    this.description,
+    this.stageId, {
+    this.fieldId,
+    this.replaceIdentity = false,
+  }) : kind = FieldKind.file,
+       text = null,
+       attachment = null;
+  const InformationDraftField.retainedFile(
+    this.name,
+    this.description,
+    this.attachment, {
+    required this.fieldId,
+    this.replaceIdentity = false,
+  }) : kind = FieldKind.file,
+       text = null,
+       stageId = null;
+  final String name, description;
+  final String? fieldId, text, stageId;
+  final InformationAttachmentRef? attachment;
+  final FieldKind kind;
+  final bool replaceIdentity;
+  Map<String, Object?> toPrivateJson() => {
+    'fieldId': fieldId,
+    'name': name,
+    'description': description,
+    'kind': kind.name,
+    'replaceIdentity': replaceIdentity,
+    if (kind != FieldKind.file) 'text': text,
+    if (stageId != null) 'stageId': stageId,
+    if (attachment != null) 'attachment': attachment!.toJson(),
+  };
+}
+
+final class InformationDraftInput {
+  InformationDraftInput({
+    required this.name,
+    required this.description,
+    required Iterable<InformationDraftField> fields,
+    this.itemId,
+    this.baseVersion,
+    this.directoryId,
+    Iterable<String> tagIds = const [],
+  }) : fields = List.unmodifiable(fields),
+       tagIds = List.unmodifiable(tagIds);
+  final String name, description;
+  final String? itemId, directoryId;
+  final int? baseVersion;
+  final List<InformationDraftField> fields;
+  final List<String> tagIds;
+  Map<String, Object?> toPrivateJson() => {
+    'itemId': itemId,
+    'baseVersion': baseVersion,
+    'name': name,
+    'description': description,
+    'directoryId': directoryId,
+    'tagIds': (tagIds.toSet().toList()..sort()),
+    'fields': [for (final f in fields) f.toPrivateJson()],
+  };
+}
+
+final class InformationAttachmentPromotion {
+  const InformationAttachmentPromotion(this.stageId, this.version);
+  final String stageId;
+  final InformationAttachmentVersion version;
+}
+
+final class InformationDraftReceipt {
+  const InformationDraftReceipt(this.inputHash, this.item);
+  final String inputHash;
+  final InformationItem item;
+  Map<String, Object?> toPrivateJson() => {
+    'inputHash': inputHash,
+    'item': informationToJson(item),
+  };
+  factory InformationDraftReceipt.fromPrivateJson(Map<String, dynamic> json) {
+    if (json.length != 2 ||
+        json['inputHash'] is! String ||
+        !RegExp(r'^[0-9a-f]{64}$').hasMatch(json['inputHash'] as String) ||
+        json['item'] is! Map<String, dynamic>) {
+      throw const FormatException('Invalid owner draft receipt');
+    }
+    return InformationDraftReceipt(
+      json['inputHash'] as String,
+      informationFromJson(json['item'] as Map<String, dynamic>),
+    );
+  }
+}
+
+/// The trusted repository must atomically promote stages, save the whole item,
+/// revision/recycle facts and the idempotency receipt. Failure retains stages.
+final class InformationDraftChange {
+  InformationDraftChange({
+    required this.draftId,
+    required this.operationId,
+    required this.receipt,
+    required this.promotions,
+    this.previous,
+    required this.entries,
+    required this.facts,
+    required this.validate,
+  });
+  final String draftId, operationId;
+  final InformationDraftReceipt receipt;
+  final List<InformationAttachmentPromotion> promotions;
+  final InformationRevision? previous;
+  final List<RecycleEntry> entries;
+  final List<RecycleFact> facts;
+  final void Function() validate;
+}
+
+abstract interface class InformationAttachmentRepository
+    implements InformationFileStagingRepository {
+  Future<InformationFileStage> informationStage(String draftId, String stageId);
+  Future<List<InformationAttachmentVersion>> informationAttachmentVersions(
+    String attachmentId,
+  );
+  Future<Uint8List> readInformationAttachmentChunk(
+    InformationAttachmentRef ref,
+    int offset,
+    int length,
+  );
+  Future<InformationDraftReceipt?> informationDraftReceipt(
+    String draftId,
+    String operationId,
+  );
+  Future<InformationDraftReceipt> commitInformationDraft(
+    InformationDraftChange change,
+  );
+}

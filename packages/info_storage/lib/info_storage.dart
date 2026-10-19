@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:convert';
 import 'dart:math';
+import 'dart:typed_data';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:info_core/info_core.dart';
@@ -17,8 +18,10 @@ part 'credential_runtime_storage.dart';
 part 'focused_fill_storage.dart';
 part 'information_files_storage.dart';
 part 'attachment_backup.dart';
+part 'information_attachments_storage.dart';
+part 'attachment_backup_integration.dart';
 
-const _libraryFormat = 19;
+const _libraryFormat = 20;
 
 class StorageFailure implements Exception {
   const StorageFailure(this.code);
@@ -37,22 +40,41 @@ abstract interface class DatabaseKeyStore {
 InformationItem _informationFromRows(
   Map<String, Object?> row,
   Iterable<Map<String, Object?>> fields,
-  Iterable<Map<String, Object?>> links,
-) => InformationItem(
+  Iterable<Map<String, Object?>> links, [
+  Iterable<Map<String, Object?>> fileFields = const [],
+]) => InformationItem(
   row['id'] as String,
   row['name'] as String,
   row['description'] as String,
   row['version'] as int,
   [
     for (final field in fields.where((f) => f['item_id'] == row['id']))
-      InformationField(
-        field['id'] as String,
-        field['name'] as String,
-        field['description'] as String,
-        field['value'] as String,
-        field['version'] as int,
-        kind: FieldKind.values.byName(field['kind'] as String),
-      ),
+      if (field['kind'] == 'file')
+        InformationField.file(
+          field['id'] as String,
+          field['name'] as String,
+          field['description'] as String,
+          InformationAttachmentRef(
+            fileFields.singleWhere(
+                  (r) => r['field_id'] == field['id'],
+                )['attachment_id']
+                as String,
+            fileFields.singleWhere(
+                  (r) => r['field_id'] == field['id'],
+                )['attachment_version']
+                as int,
+          ),
+          field['version'] as int,
+        )
+      else
+        InformationField(
+          field['id'] as String,
+          field['name'] as String,
+          field['description'] as String,
+          field['value'] as String,
+          field['version'] as int,
+          kind: FieldKind.values.byName(field['kind'] as String),
+        ),
   ],
   directoryId: row['directory_id'] as String?,
   createdAt: row['created_at'] == null
@@ -73,8 +95,32 @@ class EncryptedInformationRepository
         CredentialRepository,
         CredentialFieldMigrationRepository,
         FocusedFillRuntimeRepository,
-        InformationFileStagingRepository,
+        InformationAttachmentRepository,
         SshHostTrustRepository {
+  @override
+  Future<InformationFileStage> informationStage(
+    String draftId,
+    String stageId,
+  ) => _informationStage(draftId, stageId);
+  @override
+  Future<List<InformationAttachmentVersion>> informationAttachmentVersions(
+    String id,
+  ) => _attachmentVersions(id);
+  @override
+  Future<Uint8List> readInformationAttachmentChunk(
+    InformationAttachmentRef ref,
+    int offset,
+    int length,
+  ) => _readAttachmentChunk(ref, offset, length);
+  @override
+  Future<InformationDraftReceipt?> informationDraftReceipt(
+    String draftId,
+    String operationId,
+  ) => _draftReceipt(draftId, operationId);
+  @override
+  Future<InformationDraftReceipt> commitInformationDraft(
+    InformationDraftChange change,
+  ) => _commitAttachmentDraft(change);
   @override
   Future<InformationFileStage> stageInformationBytes({
     required String draftId,
@@ -332,6 +378,7 @@ class EncryptedInformationRepository
     // A stage belongs to an in-process owner form, never a resumed grant or
     // formal item. A new process has no valid form handle for orphan bytes.
     await _db.customStatement('DELETE FROM information_file_stages');
+    await _db.customStatement('DELETE FROM information_draft_commits');
     await _loadSshTrust();
     await _loadRuntime();
     _credentials.clear();
@@ -545,10 +592,20 @@ class EncryptedInformationRepository
         .get();
     final fieldRows = fields.map((row) => row.data).toList();
     final tagRows = itemTags.map((row) => row.data).toList();
+    final fileRows =
+        (await _db.customSelect('SELECT * FROM information_file_fields').get())
+            .map((r) => r.data)
+            .toList();
     for (final item in items) {
-      final decoded = _informationFromRows(item.data, fieldRows, tagRows);
+      final decoded = _informationFromRows(
+        item.data,
+        fieldRows,
+        tagRows,
+        fileRows,
+      );
       _items[decoded.id] = decoded;
     }
+    await _checkStoredFileReferences();
   }
 
   @override
@@ -688,33 +745,31 @@ class EncryptedInformationRepository
   @override
   Future<void> saveTemplate(InformationTemplate template) async {
     if (_closed) throw const StorageFailure('library_closed');
-    // Until committed BLOBs and backup8 are connected, staged bytes cannot be
-    // promoted through a legacy writer into an unbackable formal field.
-    if (template.fields.any((f) => f.kind == FieldKind.file)) {
-      throw const StorageFailure('unsupported_attachment_storage');
-    }
     try {
-      await _db.customStatement(
-        'INSERT INTO field_templates(id,name,description,version,fields_json) VALUES(?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET name=excluded.name,description=excluded.description,version=excluded.version,fields_json=excluded.fields_json',
-        [
-          template.id,
-          template.name,
-          template.description,
-          template.version,
-          jsonEncode(
-            template.fields
-                .map(
-                  (f) => {
-                    'id': f.id,
-                    'name': f.name,
-                    'description': f.description,
-                    'kind': f.kind.name,
-                  },
-                )
-                .toList(),
-          ),
-        ],
-      );
+      await _db.transaction(() async {
+        await _db.customStatement(
+          'INSERT INTO field_templates(id,name,description,version,fields_json) VALUES(?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET name=excluded.name,description=excluded.description,version=excluded.version,fields_json=excluded.fields_json',
+          [
+            template.id,
+            template.name,
+            template.description,
+            template.version,
+            jsonEncode(
+              template.fields
+                  .map(
+                    (f) => {
+                      'id': f.id,
+                      'name': f.name,
+                      'description': f.description,
+                      'kind': f.kind.name,
+                    },
+                  )
+                  .toList(),
+            ),
+          ],
+        );
+        await _checkAttachmentBackupBudget();
+      });
       _templates[template.id] = template;
     } catch (_) {
       throw const StorageFailure('save_failed');
@@ -798,6 +853,7 @@ class EncryptedInformationRepository
     try {
       await _db.transaction(() async {
         await _writeItem(item);
+        await _checkAttachmentBackupBudget();
       });
       _items[item.id] = item;
     } catch (_) {
@@ -806,9 +862,7 @@ class EncryptedInformationRepository
   }
 
   Future<void> _writeItem(InformationItem item) async {
-    if (item.fields.any((f) => f.kind == FieldKind.file)) {
-      throw const StorageFailure('unsupported_attachment_storage');
-    }
+    await _checkItemAttachments(item);
     await _db.customStatement(
       'INSERT INTO information_items(id,name,description,version,directory_id,created_at,modified_at) VALUES(?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET name=excluded.name,description=excluded.description,version=excluded.version,directory_id=excluded.directory_id,created_at=excluded.created_at,modified_at=excluded.modified_at',
       [
@@ -843,11 +897,17 @@ class EncryptedInformationRepository
           item.id,
           field.name,
           field.description,
-          field.value,
+          field.kind == FieldKind.file ? '' : field.value,
           field.version,
           field.kind.name,
         ],
       );
+      if (field.attachment case final ref?) {
+        await _db.customStatement(
+          'INSERT INTO information_file_fields(field_id,attachment_id,attachment_version) VALUES(?,?,?)',
+          [field.id, ref.attachmentId, ref.attachmentVersion],
+        );
+      }
     }
   }
 
@@ -899,6 +959,7 @@ class EncryptedInformationRepository
           await _writeRevision(r);
         }
         await _writeOrganizationTask(task);
+        await _checkAttachmentBackupBudget();
         validate?.call();
       });
       for (final d in newDirectories) {
@@ -959,6 +1020,7 @@ class EncryptedInformationRepository
           await _writeItem(item);
         }
         await _writeProposal(proposal);
+        await _checkAttachmentBackupBudget();
       });
       for (final directory in newDirectories) {
         _directories[directory.id] = directory;
@@ -1058,17 +1120,19 @@ class EncryptedInformationRepository
     'INSERT INTO update_proposals(id,payload) VALUES(?,?) ON CONFLICT(id) DO UPDATE SET payload=excluded.payload',
     [proposal.id, jsonEncode(proposal.toJson())],
   );
-  Future<void> _writeRevision(
-    InformationRevision revision,
-  ) => _db.customStatement(
-    'INSERT INTO information_revisions(item_id,version,replaced_at,payload) VALUES(?,?,?,?)',
-    [
-      revision.item.id,
-      revision.item.version,
-      revision.replacedAt.toUtc().toIso8601String(),
-      jsonEncode(informationToJson(revision.item)),
-    ],
-  );
+  Future<void> _writeRevision(InformationRevision revision) async {
+    await _checkItemAttachments(revision.item);
+    await _db.customStatement(
+      'INSERT INTO information_revisions(item_id,version,replaced_at,payload) VALUES(?,?,?,?)',
+      [
+        revision.item.id,
+        revision.item.version,
+        revision.replacedAt.toUtc().toIso8601String(),
+        jsonEncode(informationToJson(revision.item)),
+      ],
+    );
+  }
+
   @override
   Future<void> saveUpdateProposal(UpdateProposal proposal) async {
     if (_closed) throw const StorageFailure('library_closed');
@@ -1090,6 +1154,7 @@ class EncryptedInformationRepository
       await _db.transaction(() async {
         await _writeItem(item);
         await _writeRevision(previous);
+        await _checkAttachmentBackupBudget();
       });
       _items[item.id] = item;
       _revisions.add(previous);
@@ -1113,6 +1178,7 @@ class EncryptedInformationRepository
         await _writeRevision(previous);
         await _writeUpdate(proposal);
         await _writeRecycle(recycled, facts);
+        await _checkAttachmentBackupBudget();
       });
       _items[item.id] = item;
       _revisions.add(previous);
@@ -1208,6 +1274,7 @@ class EncryptedInformationRepository
         if (previous != null) await _writeRevision(previous);
         await _writeRecycle(entries, facts);
         if (proposal != null) await _writeDelete(proposal);
+        await _checkAttachmentBackupBudget();
       });
       if (item == null) {
         _items.remove(itemId);
@@ -1257,6 +1324,7 @@ class _InformationDatabase extends GeneratedDatabase {
       await customStatement(
         'CREATE TABLE information_fields(id TEXT PRIMARY KEY,item_id TEXT NOT NULL REFERENCES information_items(id),name TEXT NOT NULL,description TEXT NOT NULL,value TEXT NOT NULL,version INTEGER NOT NULL DEFAULT 1,kind TEXT NOT NULL DEFAULT \'structured\')',
       );
+      await _createInformationAttachments();
       await _organizationSchema();
       await _backupSchema();
     },
@@ -1276,6 +1344,12 @@ class _InformationDatabase extends GeneratedDatabase {
         sourceVersion = marker.read<int>('version');
       }
       await transaction(() async {
+        if (sourceVersion < 20 &&
+            (await customSelect(
+              "SELECT name FROM sqlite_master WHERE name IN ('information_attachment_versions','information_file_fields','information_draft_commits')",
+            ).get()).isNotEmpty) {
+          throw const StorageFailure('unsupported_schema');
+        }
         if (sourceVersion < 19 &&
             (await customSelect(
               "SELECT name FROM sqlite_master WHERE name='information_file_stages'",
@@ -1331,6 +1405,7 @@ class _InformationDatabase extends GeneratedDatabase {
         }
         if (sourceVersion < 18) await _createFocusedFillRuntime();
         if (sourceVersion < 19) await _createInformationFileStages();
+        if (sourceVersion < 20) await _createInformationAttachments();
         await _createLibraryFormat();
       });
     },
@@ -1363,6 +1438,18 @@ class _InformationDatabase extends GeneratedDatabase {
     'CHECK(byte_length>=0),metadata TEXT NOT NULL,body BLOB NOT NULL '
     'CHECK(length(body)=byte_length))',
   );
+
+  Future<void> _createInformationAttachments() async {
+    await customStatement(
+      'CREATE TABLE information_attachment_versions(attachment_id TEXT NOT NULL,version INTEGER NOT NULL,metadata TEXT NOT NULL,byte_length INTEGER NOT NULL CHECK(byte_length>=0),body BLOB CHECK(body IS NULL OR length(body)=byte_length),PRIMARY KEY(attachment_id,version))',
+    );
+    await customStatement(
+      'CREATE TABLE information_file_fields(field_id TEXT PRIMARY KEY REFERENCES information_fields(id) ON DELETE CASCADE,attachment_id TEXT NOT NULL,attachment_version INTEGER NOT NULL,FOREIGN KEY(attachment_id,attachment_version) REFERENCES information_attachment_versions(attachment_id,version))',
+    );
+    await customStatement(
+      'CREATE TABLE information_draft_commits(draft_id TEXT NOT NULL,operation_id TEXT NOT NULL,payload TEXT NOT NULL,PRIMARY KEY(draft_id,operation_id))',
+    );
+  }
 
   Future<void> _migrateCredentialRuntime17() async {
     final names = (await customSelect(

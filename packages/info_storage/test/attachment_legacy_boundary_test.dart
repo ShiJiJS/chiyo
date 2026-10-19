@@ -16,7 +16,7 @@ class _Keys implements DatabaseKeyStore {
 
 void main() {
   test(
-    'the legacy writer does not promote a staged file before complete attachment backup is connected',
+    'a missing file reference rejects atomically while a file template uses backup8',
     () async {
       final root = await Directory.systemTemp.createTemp(
         'attachment-legacy-db-',
@@ -49,33 +49,23 @@ void main() {
         ),
         throwsA(isA<StorageFailure>()),
       );
-      await expectLater(
-        repository.saveTemplate(
-          InformationTemplate('file-template', '文件模板', '', 1, [
-            const TemplateFieldDefinition(
-              'resume-def',
-              '简历',
-              '',
-              FieldKind.file,
-            ),
-          ]),
-        ),
-        throwsA(
-          isA<StorageFailure>().having(
-            (e) => e.code,
-            'code',
-            'unsupported_attachment_storage',
-          ),
-        ),
+      await repository.saveTemplate(
+        InformationTemplate('file-template', '文件模板', '', 1, [
+          const TemplateFieldDefinition('resume-def', '简历', '', FieldKind.file),
+        ]),
       );
       expect(repository.items.single.name, '求职资料');
       expect(repository.items.single.version, 1);
-      expect(repository.templates, isEmpty);
+      expect(repository.templates.single.fields.single.kind, FieldKind.file);
+      final key = await enableTestBackups(repository.backups);
+      final path = '${root.path}/file-template.aimbackup';
+      await repository.backups.exportTo(path);
+      expect((await repository.backups.inspect(path, key)).formatVersion, 8);
       await repository.close();
       repository = await EncryptedInformationRepository.open(root.path, keys);
       expect(repository.items.single.fields.single.value, '原内容');
       expect(repository.items.single.version, 1);
-      expect(repository.templates, isEmpty);
+      expect(repository.templates.single.fields.single.kind, FieldKind.file);
     },
   );
 

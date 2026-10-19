@@ -235,6 +235,7 @@ final class MemoryInformationFileStages
     required String originalName,
     required String mediaType,
     required Uint8List bytes,
+    int retainedBytes = 0,
   }) async {
     final stage = InformationFileStage.forBytes(
       id: stageId,
@@ -252,7 +253,7 @@ final class MemoryInformationFileStages
     }
     final used = _stages.values.fold<int>(0, (n, s) => n + s.$1.byteLength);
     if (_stages.length >= informationFileStageLimit ||
-        used + bytes.length > informationFileStagingByteLimit) {
+        retainedBytes + used + bytes.length > informationFileStagingByteLimit) {
       throw const AccessFailure('attachment_capacity_exceeded');
     }
     _stages[stageId] = (stage, Uint8List.fromList(bytes));
@@ -274,5 +275,27 @@ final class MemoryInformationFileStages
   @override
   Future<void> releaseInformationDraft(String draftId) async {
     _stages.removeWhere((_, s) => s.$1.draftId == draftId);
+  }
+
+  InformationFileStage stageMetadata(String draftId, String stageId) {
+    final value = _stages[stageId];
+    if (value == null || value.$1.draftId != draftId) {
+      throw const AccessFailure('stage_unavailable');
+    }
+    return value.$1;
+  }
+
+  (InformationFileStage, Uint8List) stageBody(String draftId, String stageId) {
+    final value = _stages[stageId];
+    if (value == null || value.$1.draftId != draftId) {
+      throw const AccessFailure('stage_unavailable');
+    }
+    return (value.$1, Uint8List.fromList(value.$2));
+  }
+
+  void consume(String draftId, Iterable<String> ids) {
+    for (final id in ids) {
+      if (_stages[id]?.$1.draftId == draftId) _stages.remove(id);
+    }
   }
 }

@@ -13,7 +13,7 @@ final class AttachmentBackupSource {
 
 /// Backup format8 in SQLCipher4. Domain row/reference validation and the
 /// recipient's atomic installation belong to InformationBackups, not this codec.
-/// Not yet connected to the user export path until formal files are implemented.
+/// InformationBackups connects this codec to formal rows and atomic restores.
 final class AttachmentBackupContainer {
   static const _snapshotSchema =
       'CREATE TABLE backup_snapshot(singleton INTEGER PRIMARY KEY CHECK(singleton=1),payload TEXT NOT NULL)';

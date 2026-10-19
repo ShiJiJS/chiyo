@@ -67,7 +67,10 @@ Map<String, dynamic> _backupJson(Map<String, Object?> row) {
   return decoded;
 }
 
-void _validateBackupHistory(Map<String, List<Map<String, Object?>>> tables) {
+void _validateBackupHistory(
+  Map<String, List<Map<String, Object?>>> tables, {
+  Set<InformationAttachmentRef>? availableAttachments,
+}) {
   final directories = tables['information_directories']!
       .map((r) => r['id'])
       .toSet();
@@ -125,11 +128,15 @@ void _validateBackupHistory(Map<String, List<Map<String, Object?>>> tables) {
     count(fields.length + itemTags.length);
     final seen = <String>{};
     for (final rawField in fields) {
+      final file =
+          rawField is Map &&
+          rawField['kind'] == 'file' &&
+          availableAttachments != null;
       final field = _backupObject(rawField, {
         'id',
         'name',
         'description',
-        'value',
+        if (file) 'content' else 'value',
         'version',
         'kind',
       });
@@ -138,9 +145,20 @@ void _validateBackupHistory(Map<String, List<Map<String, Object?>>> tables) {
       fieldOwner(fieldId, itemId);
       _backupText(field, 'name', 200, required: true);
       _backupText(field, 'description', 2000);
-      _backupText(field, 'value', 1000000);
+      if (file) {
+        final content = _backupObject(field['content'], {
+          'attachmentId',
+          'attachmentVersion',
+        });
+        if (!availableAttachments.contains(
+          InformationAttachmentRef.fromJson(content),
+        ))
+          _backupInvalid();
+      } else {
+        _backupText(field, 'value', 1000000);
+      }
       _backupVersion(field);
-      if (!{'structured', 'textNote'}.contains(field['kind'])) {
+      if (!file && !{'structured', 'textNote'}.contains(field['kind'])) {
         _backupInvalid();
       }
     }
@@ -226,8 +244,9 @@ void _validateBackupHistory(Map<String, List<Map<String, Object?>>> tables) {
       final mapping = j['restoredFieldIds'];
       if (j['kind'] != RecycleFactKind.restored.name ||
           mapping is! Map<String, dynamic> ||
-          mapping.length > 200)
+          mapping.length > 200) {
         _backupInvalid();
+      }
       for (final link in mapping.entries) {
         final target = link.value;
         if (!fields.contains(link.key) ||
@@ -235,8 +254,9 @@ void _validateBackupHistory(Map<String, List<Map<String, Object?>>> tables) {
             target.isEmpty ||
             target.length > 200 ||
             target == link.key ||
-            !restoredTargets.add(target))
+            !restoredTargets.add(target)) {
           _backupInvalid();
+        }
         count(1);
         fieldOwner(target, item);
       }
@@ -530,6 +550,8 @@ extension _CompleteBackups on InformationBackups {
       }),
       contents.createdAt,
       contents.formatVersion,
+      attachments: contents.attachments,
+      origin: contents._origin,
     );
   }
 
@@ -539,7 +561,12 @@ extension _CompleteBackups on InformationBackups {
     final links = tables['information_item_tags']!;
     final items = [
       for (final row in tables['information_items']!)
-        _informationFromRows(row, fields, links),
+        _informationFromRows(
+          row,
+          fields,
+          links,
+          tables['information_file_fields'] ?? const [],
+        ),
     ];
     final directories = [
       for (final r in tables['information_directories']!)

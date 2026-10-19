@@ -79,10 +79,10 @@ void main() {
         );
         expect(metadata.sameAs(saved), isTrue);
         expect(saved.sha256, sha256.convert(original).toString());
-        expect(db.select('PRAGMA user_version').single.values.single, 19);
+        expect(db.select('PRAGMA user_version').single.values.single, 20);
         expect(
           db.select('SELECT version FROM library_format').single.values.single,
-          19,
+          20,
         );
       } finally {
         db.close();
@@ -270,6 +270,9 @@ void main() {
       );
       await repository.close();
       var db = inspect();
+      db.execute('DROP TABLE information_file_fields');
+      db.execute('DROP TABLE information_attachment_versions');
+      db.execute('DROP TABLE information_draft_commits');
       db.execute('DROP TABLE information_file_stages');
       db.execute('UPDATE library_format SET version=18');
       db.execute('PRAGMA user_version=10');
@@ -283,6 +286,9 @@ void main() {
       expect(repository.items.single.fields.single.value, '字节不变');
       await repository.close();
       db = inspect();
+      db.execute('DROP TABLE information_file_fields');
+      db.execute('DROP TABLE information_attachment_versions');
+      db.execute('DROP TABLE information_draft_commits');
       db.execute('DROP TABLE information_file_stages');
       db.execute('CREATE TABLE information_file_stages(unrelated TEXT)');
       db.execute('UPDATE library_format SET version=18');

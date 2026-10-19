@@ -478,19 +478,22 @@ void main() {
       );
     },
   );
-  test('legacy complete-backup reader refuses the format8 container', () async {
-    await write([source('resume', data)]);
-    final repository = await EncryptedInformationRepository.open(
-      '${root.path}/legacy-reader',
-      _Keys(),
-    );
-    try {
-      await expectLater(
-        repository.backups.inspect(path, key),
-        fails('unsupported_backup'),
+  test(
+    'complete reader refuses codec-only snapshot without domain rows',
+    () async {
+      await write([source('resume', data)]);
+      final repository = await EncryptedInformationRepository.open(
+        '${root.path}/legacy-reader',
+        _Keys(),
       );
-    } finally {
-      await repository.close();
-    }
-  });
+      try {
+        await expectLater(
+          repository.backups.inspect(path, key),
+          fails('invalid_backup'),
+        );
+      } finally {
+        await repository.close();
+      }
+    },
+  );
 }

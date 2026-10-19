@@ -9,6 +9,8 @@ import 'recycle.dart';
 import 'revisions.dart';
 import 'credentials.dart';
 import 'dart:typed_data';
+import 'dart:convert';
+import 'package:crypto/crypto.dart' as crypto;
 import 'information_files.dart';
 import 'info_core.dart'
     show
@@ -18,8 +20,12 @@ import 'info_core.dart'
         CredentialExecution,
         FocusedFillRuntimeRepository,
         FocusedFillOperation,
+        InformationAttachmentRepository,
+        InformationDraftChange,
+        InformationDraftReceipt,
         SshHostTrustRepository,
         SshHostTrustSnapshot;
+part 'memory_information_files.dart';
 
 enum FieldKind { structured, textNote, file }
 
@@ -376,9 +382,40 @@ class MemoryInformationRepository
         CredentialRepository,
         CredentialRuntimeRepository,
         FocusedFillRuntimeRepository,
-        InformationFileStagingRepository,
+        InformationAttachmentRepository,
         SshHostTrustRepository {
   final _fileStages = MemoryInformationFileStages();
+  final _informationFiles =
+      <InformationAttachmentRef, (InformationAttachmentVersion, Uint8List?)>{};
+  final _informationCommits = <String, InformationDraftReceipt>{};
+  @override
+  Future<InformationFileStage> informationStage(
+    String draftId,
+    String stageId,
+  ) async => _fileStages.stageMetadata(draftId, stageId);
+  @override
+  Future<List<InformationAttachmentVersion>> informationAttachmentVersions(
+    String id,
+  ) async => List.unmodifiable(
+    _informationFiles.values
+        .where((v) => v.$1.reference.attachmentId == id)
+        .map((v) => v.$1),
+  );
+  @override
+  Future<Uint8List> readInformationAttachmentChunk(
+    InformationAttachmentRef ref,
+    int offset,
+    int length,
+  ) async => _readInformationFile(ref, offset, length);
+  @override
+  Future<InformationDraftReceipt?> informationDraftReceipt(
+    String draftId,
+    String operationId,
+  ) async => _informationCommits[jsonEncode([draftId, operationId])];
+  @override
+  Future<InformationDraftReceipt> commitInformationDraft(
+    InformationDraftChange change,
+  ) async => _commitInformationDraft(change);
   @override
   Future<InformationFileStage> stageInformationBytes({
     required String draftId,
@@ -392,6 +429,10 @@ class MemoryInformationRepository
     originalName: originalName,
     mediaType: mediaType,
     bytes: bytes,
+    retainedBytes: _informationFiles.values.fold<int>(
+      0,
+      (sum, v) => sum + (v.$2?.length ?? 0),
+    ),
   );
   @override
   Future<InformationFileStagingUsage> informationFileStagingUsage() =>

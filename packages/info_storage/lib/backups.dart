@@ -3,8 +3,16 @@ part of 'info_storage.dart';
 /// A fully authenticated and validated snapshot, held in memory.
 /// It carries no usable grant, pending request or source database key.
 class BackupContents {
-  BackupContents._(this._tables, this.createdAt, this.formatVersion);
+  BackupContents._(
+    this._tables,
+    this.createdAt,
+    this.formatVersion, {
+    this.attachments = const [],
+    _AttachmentBackupOrigin? origin,
+  }) : _origin = origin;
   final Map<String, List<Map<String, Object?>>> _tables;
+  final List<InformationAttachmentVersion> attachments;
+  final _AttachmentBackupOrigin? _origin;
   final DateTime createdAt;
   final int formatVersion;
   int get informationCount => _tables['information_items']!.length;
@@ -25,6 +33,10 @@ class BackupContents {
   int get credentialExecutionCount => _tables['credential_executions']!.length;
   int get focusedFillCount => _tables['credential_focused_fills']!.length;
   int get sshTrustCount => _tables['ssh_host_trust']!.length;
+  int get attachmentCount => attachments.where((v) => v.available).length;
+  int get attachmentBytes => attachments
+      .where((v) => v.available)
+      .fold(0, (sum, v) => sum + v.byteLength);
 }
 
 /// Owner-only manual backup capability. It is never part of the agent server.
@@ -91,6 +103,14 @@ class InformationBackups {
   static final _allColumns = Map<String, List<String>>.unmodifiable({
     ..._v6Columns,
     'credential_focused_fills': ['id', 'request_id', 'payload'],
+  });
+  static final _v8Columns = Map<String, List<String>>.unmodifiable({
+    ..._allColumns,
+    'information_file_fields': [
+      'field_id',
+      'attachment_id',
+      'attachment_version',
+    ],
   });
   // Portable formats 1–7 keep their table keys independent of the schema17+
   // physical names. Legacy readers must not find a writable old runtime table.
@@ -250,7 +270,24 @@ class InformationBackups {
     return _repository._db.transaction(() async {
       final tables = <String, List<Map<String, Object?>>>{};
       final now = _repository._clock().toUtc();
-      for (final table in _allColumns.entries) {
+      final versions = await _repository._allAttachmentVersions();
+      final fileTemplates = _repository.templates.any(
+        (t) => t.fields.any((f) => f.kind == FieldKind.file),
+      );
+      // Read templates in this transaction: a template may just have been saved
+      // while its owner cache is deliberately still unpublished.
+      final templates = await _repository._db
+          .customSelect('SELECT fields_json FROM field_templates')
+          .get();
+      final v8 =
+          versions.isNotEmpty ||
+          fileTemplates ||
+          templates.any(
+            (r) => (jsonDecode(r.read<String>('fields_json')) as List).any(
+              (f) => f['kind'] == 'file',
+            ),
+          );
+      for (final table in (v8 ? _v8Columns : _allColumns).entries) {
         final rows = await _repository._db
             .customSelect(
               'SELECT ${table.value.join(',')} FROM ${_physicalTables[table.key] ?? table.key} ORDER BY rowid',
@@ -264,9 +301,10 @@ class InformationBackups {
       return _retain(
         _validate({
           'format': _format,
-          'version': 7,
+          'version': v8 ? 8 : 7,
           'createdAt': now.toIso8601String(),
           'tables': tables,
+          if (v8) 'attachments': [for (final v in versions) v.toPrivateJson()],
         }),
         now,
       );
@@ -289,6 +327,8 @@ class InformationBackups {
                 'settings',
                 'backup_configuration',
                 'library_format',
+                'information_file_stages',
+                'information_draft_commits',
               }.contains(name),
             )) {
       final quoted = table.replaceAll('"', '""');
@@ -313,13 +353,34 @@ class InformationBackups {
       if (!await recoveryKeySaved()) {
         throw const StorageFailure('recovery_key_not_saved');
       }
-      final snapshot = await _snapshot();
-      final payload = jsonEncode({
-        'format': _format,
-        'version': 7,
-        'createdAt': snapshot.createdAt.toIso8601String(),
-        'tables': snapshot._tables,
+      final snapshot = await _repository._db.transaction(() async {
+        final snapshot = await _snapshot();
+        if (snapshot.formatVersion != 8) return snapshot;
+        // Metadata and every range of original bytes share one source snapshot.
+        await AttachmentBackupContainer.write(
+          path: path,
+          recoveryKey: key,
+          createdAt: snapshot.createdAt,
+          tables: snapshot._tables,
+          stagingParent: stagingParent,
+          attachments: [
+            for (final v in snapshot.attachments)
+              AttachmentBackupSource(
+                v,
+                read: v.available
+                    ? (offset, length) => _repository._readAttachmentChunk(
+                        v.reference,
+                        offset,
+                        length,
+                      )
+                    : null,
+              ),
+          ],
+        );
+        return null;
       });
+      if (snapshot == null) return;
+      final payload = jsonEncode(_document(snapshot));
       if (utf8.encode(payload).length > maxPayloadBytes) {
         throw const StorageFailure('backup_too_large');
       }
@@ -392,7 +453,9 @@ class InformationBackups {
         throw const StorageFailure('invalid_backup');
       }
       final length = await File(path).length();
-      if (length < 4096 || length > maxFileBytes || length % 4096 != 0) {
+      if (length < 4096 ||
+          length > AttachmentBackupContainer.maxFileBytes ||
+          length % 4096 != 0) {
         throw const StorageFailure('invalid_backup');
       }
       db = sqlite.sqlite3.open(path, mode: sqlite.OpenMode.readOnly);
@@ -405,6 +468,17 @@ class InformationBackups {
       final objects = db.select(
         "SELECT type,name FROM sqlite_master WHERE name NOT LIKE 'sqlite_%'",
       );
+      if (objects.length == 2 &&
+          objects.every((r) => r['type'] == 'table') &&
+          objects.map((r) => r['name']).toSet().containsAll({
+            'backup_snapshot',
+            'attachment_chunks',
+          })) {
+        db.close();
+        db = null;
+        return await _inspectAttachmentBackup(path, recoveryKey);
+      }
+      if (length > maxFileBytes) throw const StorageFailure('invalid_backup');
       if (objects.length != 1 ||
           objects.single['type'] != 'table' ||
           objects.single['name'] != 'backup_snapshot') {
@@ -446,6 +520,15 @@ class InformationBackups {
   /// OS-protected database key is retained; the source device key is unnecessary.
   Future<BackupContents> restore(BackupContents contents) async {
     _checkOpen();
+    if (contents.formatVersion == 8) return _restoreAttachmentBackup(contents);
+    return _installBackup(contents);
+  }
+
+  Future<BackupContents> _installBackup(
+    BackupContents contents, {
+    AttachmentBackupReader? reader,
+  }) async {
+    _checkOpen();
     if (_repository.managedCredentials.isNotEmpty) {
       throw const StorageFailure('recipient_not_empty');
     }
@@ -476,6 +559,7 @@ class InformationBackups {
                     'backup_configuration',
                     'library_format',
                     'information_file_stages',
+                    'information_draft_commits',
                   }.contains(name),
                 )) {
           final quoted = table.replaceAll('"', '""');
@@ -491,11 +575,20 @@ class InformationBackups {
         await _repository._db.customStatement(
           'DELETE FROM information_file_stages',
         );
+        await _repository._db.customStatement(
+          'DELETE FROM information_draft_commits',
+        );
         await _repository._db.customStatement('DELETE FROM settings');
         await _repository._db.customStatement('DELETE FROM organization_tasks');
         // Directory parents may appear after a moved child in source row order.
         await _repository._db.customStatement('PRAGMA defer_foreign_keys = ON');
-        for (final table in _allColumns.entries) {
+        if (contents.formatVersion == 8) {
+          if (reader == null) throw const StorageFailure('invalid_backup');
+          await _installAttachmentBodies(contents, reader);
+        }
+        for (final table
+            in (contents.formatVersion == 8 ? _v8Columns : _allColumns)
+                .entries) {
           final placeholders = List.filled(table.value.length, '?').join(',');
           for (final row in contents._tables[table.key]!) {
             await _repository._db.customStatement(
@@ -518,10 +611,11 @@ class InformationBackups {
     if (decoded is! Map<String, dynamic>) invalid();
     if (decoded['format'] != _format ||
         decoded['version'] is! int ||
-        ![1, 2, 3, 4, 5, 6, 7].contains(decoded['version'])) {
+        ![1, 2, 3, 4, 5, 6, 7, 8].contains(decoded['version'])) {
       throw const StorageFailure('unsupported_backup');
     }
-    if (decoded.length != 4 ||
+    final v8 = decoded['version'] == 8;
+    if (decoded.length != (v8 ? 5 : 4) ||
         decoded['tables'] is! Map<String, dynamic> ||
         decoded['createdAt'] is! String ||
         (decoded['createdAt'] as String).length > 64) {
@@ -534,6 +628,7 @@ class InformationBackups {
       3 => _v3Columns,
       4 => _v4Columns,
       5 || 6 => _v6Columns,
+      8 => _v8Columns,
       _ => _allColumns,
     };
     final data = decoded['tables'] as Map<String, dynamic>;
@@ -546,7 +641,9 @@ class InformationBackups {
     for (final table in columns.entries) {
       final rows = data[table.key];
       final maximum = switch (table.key) {
-        'information_fields' || 'information_item_tags' => 200000,
+        'information_fields' ||
+        'information_item_tags' ||
+        'information_file_fields' => 200000,
         'field_templates' || 'settings' => 1000,
         'access_records' || 'recycle_facts' || 'revision_purge_facts' => 200000,
         _ => 10000,
@@ -573,6 +670,31 @@ class InformationBackups {
       tables.putIfAbsent(table, () => const []);
     }
     tables.putIfAbsent('credential_focused_fills', () => const []);
+    final attachments = v8
+        ? _AttachmentBackupManifest.parse(jsonEncode(decoded)).versions
+        : <InformationAttachmentVersion>[];
+    final available = attachments
+        .where((v) => v.available)
+        .map((v) => v.reference)
+        .toSet();
+    final fileFields = <String>{};
+    if (v8) {
+      final fields = {
+        for (final f in tables['information_fields']!) f['id']: f,
+      };
+      for (final row in tables['information_file_fields']!) {
+        final fieldId = row['field_id'];
+        if (fieldId is! String ||
+            !fileFields.add(fieldId) ||
+            fields[fieldId]?['kind'] != 'file')
+          invalid();
+        final ref = InformationAttachmentRef.fromJson({
+          'attachmentId': row['attachment_id'],
+          'attachmentVersion': row['attachment_version'],
+        });
+        if (!available.contains(ref)) invalid();
+      }
+    }
     if ((decoded['version'] as int) < 3) {
       tables['information_items'] = [
         for (final row in tables['information_items']!)
@@ -662,7 +784,10 @@ class InformationBackups {
       if (!items.contains(id(row, 'item_id'))) invalid();
       text(row, 'description', 2000);
       text(row, 'value', 1000000);
-      if (!{'structured', 'textNote'}.contains(row['kind'])) invalid();
+      if (row['kind'] == 'file' && v8) {
+        if (row['value'] != '' || !fileFields.contains(row['id'])) invalid();
+      } else if (!{'structured', 'textNote'}.contains(row['kind']))
+        invalid();
     }
     final associations = <String>{};
     final tagCounts = <String, int>{};
@@ -689,7 +814,10 @@ class InformationBackups {
         }
         text(field, 'name', 200, required: true);
         text(field, 'description', 2000);
-        if (!{'structured', 'textNote'}.contains(field['kind'])) {
+        if (!(v8
+                ? {'structured', 'textNote', 'file'}
+                : {'structured', 'textNote'})
+            .contains(field['kind'])) {
           invalid();
         }
       }
@@ -707,7 +835,7 @@ class InformationBackups {
         invalid();
       }
     }
-    _validateBackupHistory(tables);
+    _validateBackupHistory(tables, availableAttachments: v8 ? available : null);
     _validateBackupCredentials(
       tables,
       formatVersion: decoded['version'] as int,
@@ -716,6 +844,7 @@ class InformationBackups {
       Map.unmodifiable(tables),
       createdAt,
       decoded['version'] as int,
+      attachments: List.unmodifiable(attachments),
     );
   }
 }

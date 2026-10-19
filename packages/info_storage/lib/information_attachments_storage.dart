@@ -1,0 +1,296 @@
+part of 'info_storage.dart';
+
+extension _EncryptedInformationAttachments on EncryptedInformationRepository {
+  Future<InformationFileStage> _informationStage(
+    String draftId,
+    String stageId,
+  ) async {
+    if (_closed) throw const StorageFailure('library_closed');
+    final rows = await _db
+        .customSelect(
+          'SELECT metadata FROM information_file_stages WHERE id=? AND draft_id=?',
+          variables: [Variable(stageId), Variable(draftId)],
+        )
+        .get();
+    if (rows.length != 1) throw const AccessFailure('stage_unavailable');
+    final stage = InformationFileStage.fromPrivateJson(
+      jsonDecode(rows.single.read<String>('metadata')) as Map<String, dynamic>,
+    );
+    if (stage.id != stageId || stage.draftId != draftId)
+      throw const AccessFailure('attachment_integrity_failed');
+    return stage;
+  }
+
+  InformationAttachmentVersion _attachmentFromRow(Map<String, Object?> row) {
+    final v = InformationAttachmentVersion.fromPrivateJson(
+      jsonDecode(row['metadata'] as String) as Map<String, dynamic>,
+    );
+    if (v.reference.attachmentId != row['attachment_id'] ||
+        v.reference.attachmentVersion != row['version'] ||
+        v.byteLength != row['byte_length'] ||
+        (v.available
+            ? row['body_type'] != 'blob' || row['body_size'] != v.byteLength
+            : row['body_type'] != 'null')) {
+      throw const AccessFailure('attachment_integrity_failed');
+    }
+    return v;
+  }
+
+  Future<List<InformationAttachmentVersion>> _allAttachmentVersions() async {
+    if (_closed) throw const StorageFailure('library_closed');
+    final rows = await _db
+        .customSelect(
+          'SELECT attachment_id,version,metadata,byte_length,typeof(body) AS body_type,length(body) AS body_size FROM information_attachment_versions ORDER BY attachment_id,version',
+        )
+        .get();
+    if (rows.length > AttachmentBackupContainer.maxVersions)
+      throw const AccessFailure('attachment_capacity_exceeded');
+    return List.unmodifiable(rows.map((r) => _attachmentFromRow(r.data)));
+  }
+
+  Future<List<InformationAttachmentVersion>> _attachmentVersions(
+    String id,
+  ) async => List.unmodifiable(
+    (await _allAttachmentVersions()).where(
+      (v) => v.reference.attachmentId == id,
+    ),
+  );
+
+  Future<Uint8List> _readAttachmentChunk(
+    InformationAttachmentRef ref,
+    int offset,
+    int length,
+  ) async {
+    final versions = await _attachmentVersions(ref.attachmentId);
+    final v = versions.where((v) => v.reference == ref).firstOrNull;
+    if (v == null || !v.available)
+      throw const AccessFailure('attachment_missing');
+    if (offset < 0 ||
+        length < 0 ||
+        length > AttachmentBackupContainer.chunkBytes ||
+        offset + length > v.byteLength) {
+      throw const AccessFailure('invalid_information');
+    }
+    // SQLite can return NULL for substr(empty_blob, 1, 0). A validated empty
+    // range still belongs to an existing original.
+    if (length == 0) return Uint8List(0);
+    final row = await _db
+        .customSelect(
+          'SELECT substr(body,?,?) AS bytes FROM information_attachment_versions WHERE attachment_id=? AND version=?',
+          variables: [
+            Variable(offset + 1),
+            Variable(length),
+            Variable(ref.attachmentId),
+            Variable(ref.attachmentVersion),
+          ],
+        )
+        .getSingle();
+    final bytes = row.read<Uint8List>('bytes');
+    if (bytes.length != length)
+      throw const AccessFailure('attachment_integrity_failed');
+    return Uint8List.fromList(bytes);
+  }
+
+  Future<InformationDraftReceipt?> _draftReceipt(
+    String draftId,
+    String operationId,
+  ) async {
+    if (_closed) throw const StorageFailure('library_closed');
+    final rows = await _db
+        .customSelect(
+          'SELECT payload FROM information_draft_commits WHERE draft_id=? AND operation_id=?',
+          variables: [Variable(draftId), Variable(operationId)],
+        )
+        .get();
+    return rows.isEmpty
+        ? null
+        : InformationDraftReceipt.fromPrivateJson(
+            jsonDecode(rows.single.read<String>('payload'))
+                as Map<String, dynamic>,
+          );
+  }
+
+  Future<void> _checkItemAttachments(InformationItem item) async {
+    final refs = item.fields
+        .map((f) => f.attachment)
+        .whereType<InformationAttachmentRef>()
+        .toSet();
+    if (refs.isEmpty) return;
+    final available = (await _allAttachmentVersions())
+        .where((v) => v.available)
+        .map((v) => v.reference)
+        .toSet();
+    if (!available.containsAll(refs))
+      throw const AccessFailure('attachment_missing');
+  }
+
+  Future<void> _checkStoredFileReferences() async {
+    final available = (await _allAttachmentVersions())
+        .where((v) => v.available)
+        .map((v) => v.reference)
+        .toSet();
+    final items = [
+      ..._items.values,
+      ..._revisions.map((r) => r.item),
+      ..._recycle.values.map((e) => e.snapshot).whereType<InformationItem>(),
+    ];
+    for (final item in items) {
+      if (item.fields.any(
+        (f) => f.attachment != null && !available.contains(f.attachment),
+      )) {
+        throw const AccessFailure('attachment_missing');
+      }
+    }
+  }
+
+  Future<void> _checkAttachmentBackupBudget() async {
+    final exists = await _db
+        .customSelect(
+          'SELECT 1 AS n FROM information_attachment_versions LIMIT 1',
+        )
+        .get();
+    final templates = await _db
+        .customSelect('SELECT fields_json FROM field_templates')
+        .get();
+    if (exists.isEmpty &&
+        !templates.any(
+          (r) => (jsonDecode(r.read<String>('fields_json')) as List).any(
+            (f) => f['kind'] == 'file',
+          ),
+        ))
+      return;
+    final snapshot = await backups._snapshot();
+    if (utf8.encode(jsonEncode(backups._document(snapshot))).length >
+        AttachmentBackupContainer.maxPayloadBytes) {
+      throw const AccessFailure('attachment_capacity_exceeded');
+    }
+  }
+
+  Future<InformationDraftReceipt> _commitAttachmentDraft(
+    InformationDraftChange change,
+  ) async {
+    if (_closed) throw const StorageFailure('library_closed');
+    try {
+      var committed = false;
+      final receipt = await _db.transaction(() async {
+        final old = await _draftReceipt(change.draftId, change.operationId);
+        if (old != null) {
+          if (old.inputHash != change.receipt.inputHash)
+            throw const AccessFailure('operation_conflict');
+          return old;
+        }
+        final item = change.receipt.item;
+        final rows = await _db
+            .customSelect(
+              'SELECT version FROM information_items WHERE id=?',
+              variables: [Variable(item.id)],
+            )
+            .get();
+        if (change.previous == null
+            ? rows.isNotEmpty || item.version != 1
+            : rows.length != 1 ||
+                  rows.single.read<int>('version') !=
+                      change.previous!.item.version ||
+                  item.version != change.previous!.item.version + 1) {
+          throw const AccessFailure('version_conflict');
+        }
+        final stages = <String>{};
+        for (final p in change.promotions) {
+          if (!stages.add(p.stageId))
+            throw const AccessFailure('stage_unavailable');
+          final stage = await _informationStage(change.draftId, p.stageId),
+              v = p.version;
+          final versions = await _attachmentVersions(v.reference.attachmentId);
+          final latest = versions.fold<int>(
+            0,
+            (n, v) => max(n, v.reference.attachmentVersion),
+          );
+          if (v.reference.attachmentVersion != latest + 1 ||
+              stage.originalName != v.originalName ||
+              stage.mediaType != v.mediaType ||
+              stage.byteLength != v.byteLength ||
+              stage.sha256 != v.sha256 ||
+              !v.available ||
+              v.retiredAt != null) {
+            throw const AccessFailure('attachment_integrity_failed');
+          }
+          final hash = _AttachmentBackupHash();
+          for (
+            var offset = 0;
+            offset < v.byteLength;
+            offset += AttachmentBackupContainer.chunkBytes
+          ) {
+            final n = min(
+              AttachmentBackupContainer.chunkBytes,
+              v.byteLength - offset,
+            );
+            final row = await _db
+                .customSelect(
+                  'SELECT substr(body,?,?) AS bytes FROM information_file_stages WHERE id=? AND draft_id=?',
+                  variables: [
+                    Variable(offset + 1),
+                    Variable(n),
+                    Variable(stage.id),
+                    Variable(change.draftId),
+                  ],
+                )
+                .getSingle();
+            final bytes = row.read<Uint8List>('bytes');
+            if (bytes.length != n)
+              throw const AccessFailure('attachment_integrity_failed');
+            hash.add(bytes);
+          }
+          if (hash.finish() != v.sha256)
+            throw const AccessFailure('attachment_integrity_failed');
+          await _db.customStatement(
+            'INSERT INTO information_attachment_versions(attachment_id,version,metadata,byte_length,body) SELECT ?,?,?,byte_length,body FROM information_file_stages WHERE id=? AND draft_id=?',
+            [
+              v.reference.attachmentId,
+              v.reference.attachmentVersion,
+              jsonEncode(v.toPrivateJson()),
+              stage.id,
+              change.draftId,
+            ],
+          );
+        }
+        await _writeItem(item);
+        if (change.previous != null) await _writeRevision(change.previous!);
+        await _writeRecycle(change.entries, change.facts);
+        for (final id in stages) {
+          await _db.customStatement(
+            'DELETE FROM information_file_stages WHERE id=? AND draft_id=?',
+            [id, change.draftId],
+          );
+        }
+        await _db.customStatement(
+          'INSERT INTO information_draft_commits(draft_id,operation_id,payload) VALUES(?,?,?)',
+          [
+            change.draftId,
+            change.operationId,
+            jsonEncode(change.receipt.toPrivateJson()),
+          ],
+        );
+        await _checkAttachmentBackupBudget();
+        change.validate();
+        committed = true;
+        return change.receipt;
+      });
+      final item = receipt.item;
+      if (committed) {
+        _items[item.id] = item;
+        if (change.previous != null) _revisions.add(change.previous!);
+        for (final entry in change.entries) {
+          _recycle[entry.id] = entry;
+        }
+        _recycleFacts.addAll(change.facts);
+      }
+      return receipt;
+    } on AccessFailure {
+      rethrow;
+    } on StorageFailure {
+      rethrow;
+    } on Object {
+      throw const StorageFailure('attachment_save_failed');
+    }
+  }
+}

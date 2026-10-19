@@ -65,8 +65,16 @@ extension _EncryptedInformationFileIntake on EncryptedInformationRepository {
           return previous;
         }
         final usage = await _fileStagingUsage();
+        final retained =
+            (await _db
+                    .customSelect(
+                      'SELECT coalesce(sum(byte_length),0) AS bytes FROM information_attachment_versions WHERE body IS NOT NULL',
+                    )
+                    .getSingle())
+                .read<int>('bytes');
         if (usage.files >= informationFileStageLimit ||
-            usage.bytes + ownedBytes.length > informationFileStagingByteLimit) {
+            retained + usage.bytes + ownedBytes.length >
+                informationFileStagingByteLimit) {
           throw const AccessFailure('attachment_capacity_exceeded');
         }
         await _db.customStatement(
