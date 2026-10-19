@@ -71,6 +71,12 @@ void main() {
       StreamIterator<String>? receiverLines, cliLines;
       final drains = <Future<String>>[];
       var closed = false, failed = false, approvals = 0;
+      var duplicateVerified = false,
+          attentionBlocked = false,
+          attentionAcknowledged = false,
+          revoked = false,
+          revocationBlocked = false,
+          historyViewed = false;
       String? requestId, lastOperation;
       FocusedFillApplication? application;
       DateTime? deadline;
@@ -211,6 +217,7 @@ void main() {
           ),
         );
         await tester.pumpAndSettle();
+        final limit = DateTime.now().add(const Duration(minutes: 4));
         await record({
           'phase': 'ready',
           'helper': driver.helper.toJson(),
@@ -219,9 +226,9 @@ void main() {
           'encryptedLibrary': true,
           'testSemanticsRequested': testSemantics,
           'flutterSemanticsEnabled': SemanticsBinding.instance.semanticsEnabled,
+          'controlDeadline': limit.toUtc().toIso8601String(),
         });
         var seen = -1;
-        final limit = DateTime.now().add(const Duration(minutes: 4));
         while (!closed && DateTime.now().isBefore(limit)) {
           Map<String, dynamic>? next;
           try {
@@ -320,7 +327,7 @@ void main() {
                 if (next['action'] == 'fill') {
                   lastOperation = 'native-ui-${++sequence}';
                 }
-                await call({
+                final use = await call({
                   'command': 'fill-use',
                   'requestId': requestId,
                   'operationId': lastOperation,
@@ -328,13 +335,26 @@ void main() {
                 await fixture.service.drainFocusedFills().timeout(
                   const Duration(seconds: 15),
                 );
+                final status = await call({
+                  'command': 'fill-status',
+                  'requestId': requestId,
+                  'operationId': lastOperation,
+                });
+                final receiverFacts = await receive(2);
+                expect(receiverFacts['noPaste'], isTrue);
+                expect(receiverFacts['clipboardUnchanged'], isTrue);
+                if (status['fillState'] == 'sent') {
+                  expect(receiverFacts['matches'], isTrue);
+                  if (next['action'] == 'duplicate') {
+                    duplicateVerified = true;
+                  }
+                }
+                attentionBlocked |= use['errorCode'] == 'fill_needs_attention';
+                revocationBlocked |= use['errorCode'] == 'grant_revoked';
                 result = {
-                  'status': await call({
-                    'command': 'fill-status',
-                    'requestId': requestId,
-                    'operationId': lastOperation,
-                  }),
-                  'receiver': await receive(2),
+                  'use': use,
+                  'status': status,
+                  'receiver': receiverFacts,
                   'approvals': approvals,
                   'deadlineUnchanged':
                       owner.credentialUseRequests.single.credentialExpiresAt ==
@@ -348,6 +368,7 @@ void main() {
                 await tester.tap(find.byKey(const ValueKey('nav-3')));
                 await tester.pumpAndSettle();
                 await capture('history-${owner.focusedFillOperations.length}');
+                historyViewed = true;
                 result = {
                   'history': true,
                   'operations': owner.focusedFillOperations.length,
@@ -356,14 +377,11 @@ void main() {
                 await click('fill-acknowledge-attention');
                 await capture('attention-confirmation');
                 await click('fill-confirm-attention');
-                result = {
-                  'ownerConfirmedByFlutter':
-                      owner
-                          .focusedFillOperations
-                          .last
-                          .attentionAcknowledgedAt !=
-                      null,
-                };
+                attentionAcknowledged =
+                    owner.focusedFillOperations.last.attentionAcknowledgedAt !=
+                    null;
+                expect(attentionAcknowledged, isTrue);
+                result = {'ownerConfirmedByFlutter': attentionAcknowledged};
               case 'revoke':
                 await click('fill-revoke');
                 await tester.tap(find.text('确认撤销'));
@@ -374,6 +392,7 @@ void main() {
                   ),
                   'revoked',
                 );
+                revoked = true;
                 result = {'revokedByFlutter': true};
               case 'close':
                 closed = true;
@@ -408,6 +427,12 @@ void main() {
         );
         expect(failed, isFalse);
         expect(approvals, 1);
+        expect(duplicateVerified, isTrue);
+        expect(attentionBlocked, isTrue);
+        expect(attentionAcknowledged, isTrue);
+        expect(revoked, isTrue);
+        expect(revocationBlocked, isTrue);
+        expect(historyViewed, isTrue);
         expect(
           owner.focusedFillOperations
               .where((op) => op.state == FocusedFillState.sent)
