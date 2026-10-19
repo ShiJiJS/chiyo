@@ -4,6 +4,8 @@
 
 ## 当前执行检查点
 
+#38第五段45f15b0已接[Windows正式文件驱动、能力与启动/周期维护](../development/issue38-windows-file-bootstrap.md)。桌面完整158/0、严格分析/原四锁通过；定向22、新增2项三轮通过，不是完整四包新结果。Windows源码具备实际驱动时已宣告文件能力，用户包未替换；真实Windows窗口/系统选择器及完整原生闭环仍待，#38/#34继续OPEN。以下前段“门控/未接bootstrap”保留当时范围。
+
 #38第四段4815d6e已接[附件容量及备份恢复界面](../development/issue38-file-backup-capacity.md)。新增4项，完整661通过/19原生opt-in跳过、四包分析/原四锁通过；32张四主题实际Flutter图，真实SQLCipher控件导出/空库恢复验证2份7字节原文，草稿/会话/活副本不恢复。客户端文件页面均已接Owner接口；正式Windows驱动/bootstrap、维护刷新、系统选择器和真实Windows窗口闭环仍待，#38/#34仍OPEN，生产文件能力门控，用户包未替换。
 
 #38第三段3749140已接[提案、回收与修订的文件分支](../development/issue38-file-consumers.md)，并补凭据申请附带普通文件的摘要/最终版本核对。定向32、新4项三轮通过；core261+desktop154=415、两包分析和原四锁通过。21张四主题/200%实际Flutter图自检。容量/备份恢复预览、生产bootstrap及真实加密GUI闭环继续，#38/#34仍OPEN，用户包未替换。

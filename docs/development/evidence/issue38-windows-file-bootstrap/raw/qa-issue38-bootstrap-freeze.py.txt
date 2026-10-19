@@ -1,0 +1,24 @@
+from pathlib import Path
+import hashlib,json,shutil,subprocess,sys
+sys.stdout.reconfigure(encoding='utf-8')
+root=Path.cwd();qa=root/'build/qa-issue38-bootstrap';source=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip();assert source.startswith('45f15b0')
+for phase in ['round-06','round-07']:
+ r=json.loads((qa/phase/'result.json').read_text());assert not r['unexpectedLocks'] and all(p['exitCode']==0 for p in r['phases'])
+dest=root/'docs/development/evidence/issue38-windows-file-bootstrap';(dest/'raw').mkdir(parents=True,exist_ok=False);raw=[]
+for phase in [*(f'round-{n:02}' for n in range(1,8))]:
+ for p in sorted((qa/phase).glob('*')):
+  if p.is_file() and p.suffix in {'.txt','.json'}:
+   t=dest/'raw'/phase/p.name;t.parent.mkdir(exist_ok=True);shutil.copyfile(p,t);b=t.read_bytes();raw.append({'path':t.relative_to(dest).as_posix(),'bytes':len(b),'sha256':hashlib.sha256(b).hexdigest()})
+for name in ['qa-issue38-bootstrap-check.py','qa-issue38-bootstrap-freeze.py']:
+ t=dest/'raw'/(name+'.txt');shutil.copyfile(root/'build'/name,t);b=t.read_bytes();raw.append({'path':t.relative_to(dest).as_posix(),'bytes':len(b),'sha256':hashlib.sha256(b).hexdigest()})
+paths=set(subprocess.check_output(['git','diff','--name-only','c0c6734',source],text=True).splitlines());assert len(paths)==7
+paths.update(p+'/pubspec.lock' for p in ['packages/info_core','packages/info_storage','packages/info_cli','apps/desktop']);sources=[]
+for p in sorted(paths):
+ b=subprocess.check_output(['git','show',source+':'+p]);sources.append({'path':p,'bytes':len(b),'sha256':hashlib.sha256(b).hexdigest()})
+record={'sourceRevision':source,'scope':'partial #38 Windows production bootstrap, maintenance and settings; native whole GUI/pickers still pending',
+ 'final':{'desktopPassed':158,'desktopSkipped':0,'strictDesktopAnalyze':True,'locksUnchanged':True,'fullFourPackageRun':False},
+ 'focused':{'passed':22,'newTests':2,'consecutiveNewTestRuns':3,'additionalRuns':['raw/round-06/repeat-01.txt','raw/round-06/repeat-02.txt']},
+ 'windowsSourceCapabilityConnected':True,'userDistributionUpdated':False,'nativeAcceptanceComplete':False,'raw':raw,'sourceGitBytes':sources}
+(dest/'verification.json').write_text(json.dumps(record,ensure_ascii=False,indent=2)+'\n',encoding='utf-8',newline='\n')
+p=root/'.gitattributes';p.write_text(p.read_text(encoding='utf-8')+'\ndocs/development/evidence/issue38-windows-file-bootstrap/raw/** -text -diff\n',encoding='utf-8',newline='\n')
+print(json.dumps({'raw':len(raw),'sourceAndLocks':len(sources),'revision':source}))

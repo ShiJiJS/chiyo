@@ -12,6 +12,8 @@
 
 ## 入口与目标路径
 
+2026-10-19第五段45f15b0接通[Windows正式bootstrap与后台维护](../development/issue38-windows-file-bootstrap.md)，源码有实际文件驱动时宣告文件能力。桌面158/0通过；系统对话框、真实Windows窗口完整流程及最终整体验收仍待，用户包未替换。
+
 2026-10-19第四段4815d6e已接[容量/备份恢复预览](../development/issue38-file-backup-capacity.md)：实际一致快照的附件数量和大小、只读池用量、失败后旧值标记及空库原字节恢复已有测试。客户端各文件页面已接Owner接口，正式Windows驱动/bootstrap、原生选择器与最终Windows GUI闭环仍待。
 
 2026-10-19第三段3749140已接[回收/修订、提案与联合凭据审批中的文件字段](../development/issue38-file-consumers.md)：恢复明确版本与字段身份，文字提案保留原文件，所有者私有预览统一按类型分支。容量/备份恢复预览、正式bootstrap和最终真实GUI验收尚待，前段“回收/提案仍待”仅保留当时范围。
