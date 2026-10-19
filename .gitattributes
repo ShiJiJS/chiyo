@@ -17,3 +17,5 @@ docs/development/evidence/issue37-delivery-core/raw/** -text -diff
 docs/development/evidence/issue37-delivery-storage/raw/** -text -diff
 
 docs/development/evidence/issue37-delivery-cli/raw/** -text -diff
+
+docs/development/evidence/issue37-metadata-budget/raw/** -text -diff
