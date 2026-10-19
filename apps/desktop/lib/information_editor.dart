@@ -77,18 +77,49 @@ class _InformationEditorState extends State<InformationEditor> {
     change();
     _dirty = true;
   });
+
+  void _restoreFocus(FocusNode? previous) {
+    if (!mounted || previous == null) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted &&
+          ModalRoute.of(context)?.isCurrent == true &&
+          previous.context?.mounted == true &&
+          previous.canRequestFocus) {
+        previous.requestFocus();
+      }
+    });
+  }
+
+  Future<bool> _confirm({
+    required String title,
+    required String message,
+    required String action,
+  }) async {
+    final previousFocus = FocusManager.instance.primaryFocus;
+    // Do not leave a focused editor control becoming disabled underneath a
+    // newly mounted confirmation. Cancelling returns focus to that control.
+    FocusScope.of(context).unfocus();
+    setState(() => _leaving = true);
+    final confirmed = await prototypeConfirm(
+      context,
+      title: title,
+      message: message,
+      action: action,
+    );
+    if (!mounted) return false;
+    setState(() => _leaving = false);
+    if (!confirmed) _restoreFocus(previousFocus);
+    return confirmed;
+  }
+
   Future<void> _close() async {
     if (_saving || _leaving || _fileWorking) return;
     if (_dirty && !_committed) {
-      setState(() => _leaving = true);
-      final discard = await prototypeConfirm(
-        context,
+      final discard = await _confirm(
         title: '放弃未保存的更改？',
         message: '更改尚未保存。取消会继续保留当前输入，放弃后返回信息库。',
         action: '放弃更改',
       );
-      if (!mounted) return;
-      setState(() => _leaving = false);
       if (!discard) return;
     }
     if (!mounted) return;
@@ -137,16 +168,12 @@ class _InformationEditorState extends State<InformationEditor> {
     final destructive = d.destructiveChanges;
     // Also prevent a second click while the identity confirmation is open.
     if (destructive > 0) {
-      setState(() => _leaving = true);
-      final confirmed = await prototypeConfirm(
-        context,
+      final confirmed = await _confirm(
         title: '确认字段身份变化',
         message:
             '$destructive 个字段将删除或被新含义替换。旧字段进入回收站，新增或恢复的字段需要重新授权；现有授权不会自动扩大。',
         action: '确认保存',
       );
-      if (!mounted) return;
-      setState(() => _leaving = false);
       if (!confirmed) return;
     }
     if (!mounted) return;
@@ -307,7 +334,16 @@ class _InformationEditorState extends State<InformationEditor> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => Actions(
+    actions: {
+      // A non-dismissible modal barrier also disables Flutter's default Escape
+      // action. Use the same guarded close/confirmation/cleanup as the buttons.
+      DismissIntent: CallbackAction<DismissIntent>(onInvoke: (_) => _close()),
+    },
+    child: _dialog(context),
+  );
+
+  Widget _dialog(BuildContext context) {
     final p = UiPalette.of(context);
     return PopScope(
       canPop: widget.fileSession == null && !_dirty && !_busy,
@@ -740,11 +776,14 @@ class _InformationEditorState extends State<InformationEditor> {
         if (mounted) _changed(() => d.fields.remove(field));
       }, field: field);
 
-  Future<void> _chooseFile(EditableInformationField field) =>
-      _fileAction(() async {
-        final changed = await widget.fileSession!.choose(field);
-        if (changed && mounted) _changed(() {});
-      }, field: field);
+  Future<void> _chooseFile(EditableInformationField field) async {
+    final previousFocus = FocusManager.instance.primaryFocus;
+    await _fileAction(() async {
+      final changed = await widget.fileSession!.choose(field);
+      if (changed && mounted) _changed(() {});
+    }, field: field);
+    _restoreFocus(previousFocus);
+  }
 
   Widget _fileControl(EditableInformationField field, int index) {
     final p = UiPalette.of(context), stage = field.stage;

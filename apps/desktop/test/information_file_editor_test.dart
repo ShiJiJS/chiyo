@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'
+    show FontLoader, LogicalKeyboardKey, rootBundle;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:info_core/info_core.dart';
 import 'package:info_desktop/information_files.dart';
@@ -11,8 +13,13 @@ import 'package:info_desktop/ui.dart';
 class _Files implements InformationFilePicker {
   String? source, target;
   Future<String?>? pending;
+  int chooseCount = 0;
   @override
-  Future<String?> choose() async => pending ?? source;
+  Future<String?> choose() async {
+    chooseCount++;
+    return pending ?? source;
+  }
+
   @override
   Future<String?> saveAs(String name) async => target;
 }
@@ -57,6 +64,26 @@ class _Repository extends MemoryInformationRepository {
 }
 
 void main() {
+  setUpAll(() async {
+    final bundled = await rootBundle.load(
+      'assets/fonts/NotoSansSC-Regular.otf',
+    );
+    for (final family in ['ProductSans', 'AppSans']) {
+      await (FontLoader(family)..addFont(Future.value(bundled))).load();
+    }
+    for (final font in {
+      'SimSun': 'simsun.ttc',
+      'Georgia': 'georgia.ttf',
+      'Consolas': 'consola.ttf',
+    }.entries) {
+      final data = Platform.isWindows
+          ? ByteData.sublistView(
+              await File('C:/Windows/Fonts/${font.value}').readAsBytes(),
+            )
+          : bundled;
+      await (FontLoader(font.key)..addFont(Future.value(data))).load();
+    }
+  });
   late Directory root;
   late _Repository repository;
   late InformationService service;
@@ -88,6 +115,141 @@ void main() {
       EditableInformationField(name: '简历', kind: FieldKind.file),
     ],
   );
+
+  for (final scale in [1.0, 2.0]) {
+    testWidgets(
+      'file controls are reachable by keyboard and Escape cleans the draft at ${scale * 100}%',
+      (tester) async {
+        await tester.runAsync(() async {
+          tester.view.physicalSize = const Size(1280, 800);
+          tester.view.devicePixelRatio = 1;
+          tester.platformDispatcher.textScaleFactorTestValue = scale;
+          addTearDown(tester.view.resetPhysicalSize);
+          addTearDown(tester.view.resetDevicePixelRatio);
+          addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+          await tester.pumpWidget(
+            MaterialApp(
+              theme: informationTheme(
+                scale == 1 ? DesktopColorTheme.purple : DesktopColorTheme.mono,
+              ),
+              home: Scaffold(
+                body: InformationLibrary(owner: service.owner, files: files),
+              ),
+            ),
+          );
+          bool focusedWithin(Finder finder) {
+            final target = finder.evaluate().single;
+            final focused = FocusManager.instance.primaryFocus?.context;
+            if (identical(target, focused)) return true;
+            var found = false;
+            focused?.visitAncestorElements((element) {
+              found = identical(element, target);
+              return !found;
+            });
+            return found;
+          }
+
+          Future<void> focusWithTab(Finder control) async {
+            for (var i = 0; i < 20 && !focusedWithin(control); i++) {
+              await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+              await tester.pumpAndSettle();
+              await Future<void>.delayed(Duration.zero);
+            }
+            expect(
+              focusedWithin(control),
+              isTrue,
+              reason: FocusManager.instance.toStringDeep(),
+            );
+            expect(control.hitTestable(), findsOneWidget);
+          }
+
+          await tester.tap(find.byKey(const ValueKey('new-information')));
+          await tester.pumpAndSettle();
+          await tester.enterText(
+            find.byKey(const ValueKey('item-name')),
+            '键盘录入',
+          );
+          await tester.ensureVisible(
+            find.byKey(const ValueKey('field-name-0')),
+          );
+          await tester.enterText(
+            find.byKey(const ValueKey('field-name-0')),
+            '简历',
+          );
+          await focusWithTab(find.byKey(const ValueKey('field-kind-0')));
+          await tester.sendKeyEvent(LogicalKeyboardKey.space);
+          await tester.pumpAndSettle();
+          await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+          await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+          await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+          await tester.pumpAndSettle();
+          expect(find.byKey(const ValueKey('field-value-0')), findsNothing);
+          final choose = find.byKey(const ValueKey('choose-file-0'));
+          Future<void> pickerIdle() => Future.doWhile(() async {
+            await Future<void>.delayed(Duration.zero);
+            await tester.pump();
+            return tester.widget<TextButton>(choose).onPressed == null;
+          }).timeout(const Duration(seconds: 10));
+          await focusWithTab(choose);
+          final originalPath = files.source;
+          final cancelledPick = Completer<String?>();
+          files.pending = cancelledPick.future;
+          files.source = null;
+          await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+          await tester.pumpAndSettle();
+          expect(tester.widget<TextButton>(choose).onPressed, isNull);
+          await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+          await tester.pumpAndSettle();
+          expect(find.text('放弃未保存的更改？'), findsNothing);
+          expect(find.byType(InformationEditor), findsOneWidget);
+          cancelledPick.complete(null);
+          files.pending = null;
+          await pickerIdle();
+          await tester.pumpAndSettle();
+          expect(files.chooseCount, 1);
+          expect(find.text('键盘录入'), findsOneWidget);
+          expect((await repository.informationFileStagingUsage()).files, 0);
+          expect(focusedWithin(choose), isTrue);
+          files.source = originalPath;
+          await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+          await repository.staged.future.timeout(const Duration(seconds: 10));
+          await pickerIdle();
+          await tester.pumpAndSettle();
+          expect(files.chooseCount, 2);
+          expect((await repository.informationFileStagingUsage()).files, 1);
+          await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+          await tester.pumpAndSettle();
+          final discard = find.widgetWithText(TextButton, '放弃更改');
+          expect(discard, findsOneWidget);
+          await focusWithTab(find.widgetWithText(TextButton, '取消').last);
+          await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+          await tester.pumpAndSettle();
+          await tester.pump();
+          expect(find.text('放弃未保存的更改？'), findsNothing);
+          expect((await repository.informationFileStagingUsage()).files, 1);
+          expect(focusedWithin(choose), isTrue);
+          await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+          await tester.pumpAndSettle();
+          expect(discard, findsOneWidget);
+          await focusWithTab(discard);
+          await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+          final deadline = DateTime.now().add(const Duration(seconds: 10));
+          while (find.byType(InformationEditor).evaluate().isNotEmpty &&
+              DateTime.now().isBefore(deadline)) {
+            await tester.pump(const Duration(milliseconds: 50));
+            await Future<void>.delayed(Duration.zero);
+          }
+          await tester.pumpAndSettle();
+          expect(find.byType(InformationEditor), findsNothing);
+          expect(repository.items, isEmpty);
+          expect((await repository.informationFileStagingUsage()).files, 0);
+          expect(tester.takeException(), isNull);
+          await tester.pumpWidget(const SizedBox.shrink());
+          await service.close();
+        });
+      },
+    );
+  }
 
   test(
     'real owner save retries unchanged input, preserves bytes and text-only edits',

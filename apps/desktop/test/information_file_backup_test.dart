@@ -43,9 +43,10 @@ void main({
   Widget Function(Widget app)? wrapApp,
   Future<void> Function(WidgetTester tester, String state)? capture,
   DesktopColorTheme theme = DesktopColorTheme.purple,
+  Size viewport = const Size(1280, 800),
 }) {
   Future<void> mount(WidgetTester tester, Widget body) async {
-    tester.view.physicalSize = const Size(1280, 800);
+    tester.view.physicalSize = viewport;
     tester.view.devicePixelRatio = 1;
     final app = MaterialApp(
       debugShowCheckedModeBanner: false,
