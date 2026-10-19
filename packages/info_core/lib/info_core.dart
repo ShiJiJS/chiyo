@@ -845,6 +845,7 @@ class OwnerAccess {
     String requestId,
     List<FieldRef> fields, {
     Duration lifetime = const Duration(hours: 8),
+    Map<FieldRef, int>? reviewedVersions,
   }) {
     if (_service._backupBusy) throw const AccessFailure('service_unavailable');
     final request = _service._requests[requestId];
@@ -859,6 +860,15 @@ class OwnerAccess {
         fields.length > 200 ||
         fields.any((f) => _service._field(f) == null)) {
       throw const AccessFailure('invalid_scope');
+    }
+    if (reviewedVersions != null &&
+        (reviewedVersions.length != fields.toSet().length ||
+            fields.any(
+              (ref) => reviewedVersions[ref] != _service._field(ref)!.version,
+            ))) {
+      // Check the displayed field revision immediately before creating a grant.
+      // Later reads still follow the approved stable field's current content.
+      throw const AccessFailure('scope_changed');
     }
     if (lifetime < const Duration(minutes: 1) ||
         lifetime > const Duration(days: 7)) {

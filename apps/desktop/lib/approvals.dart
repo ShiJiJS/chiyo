@@ -9,6 +9,7 @@ import 'ui.dart';
 import 'inbox_queue.dart';
 import 'prototype_ui.dart';
 import 'prototype_dialog.dart';
+import 'information_file_summary.dart';
 import 'package:flutter/services.dart';
 
 class SearchInboxIntent extends Intent {
@@ -67,6 +68,32 @@ class ApprovalsState extends State<Approvals> {
   }
 
   final _busy = <String>{};
+  final _loadedFiles = <String, Set<InformationAttachmentRef>>{};
+  InformationField? _currentField(FieldRef ref) => widget
+      .service
+      .owner
+      .information
+      .where((item) => item.id == ref.itemId)
+      .firstOrNull
+      ?.fields
+      .where((field) => field.id == ref.fieldId)
+      .firstOrNull;
+  Map<FieldRef, int> _reviewedVersions(Iterable<FieldRef> refs) => {
+    for (final ref in refs)
+      if (_currentField(ref) case final field?) ref: field.version,
+  };
+  bool _filesReady(Iterable<FieldRef> refs) => refs.every((ref) {
+    final field = _currentField(ref);
+    return field?.kind != FieldKind.file ||
+        (_loadedFiles[_focused]?.contains(field!.attachment) ?? false);
+  });
+  String _scopeName(FieldRef ref) {
+    final field = _currentField(ref);
+    return field == null
+        ? ref.fieldId
+        : '${field.name}${field.kind == FieldKind.file ? '（文件 · 领取原文件）' : ''}';
+  }
+
   final _search = TextEditingController();
   final _searchFocus = FocusNode();
   InboxFilter _filter = InboxFilter.all;
@@ -91,7 +118,7 @@ class ApprovalsState extends State<Approvals> {
   final _organizationSelection = <String, Set<String>>{};
   final _grantMinutes = <String, int>{};
   final _organizationMinutes = <String, int>{};
-  final _credentialDrafts=<String,CredentialUseApprovalDraft>{};
+  final _credentialDrafts = <String, CredentialUseApprovalDraft>{};
   @override
   void initState() {
     super.initState();
@@ -132,6 +159,8 @@ class ApprovalsState extends State<Approvals> {
           () => _errors[id] = switch (error) {
             AccessFailure(status: 'invalid_scope') =>
               '所选字段已不可用，或超过200个。请重新检查最终选择。',
+            AccessFailure(status: 'scope_changed') =>
+              '字段或文件版本已变化。选择已保留，请重新核对后再批准。',
             AccessFailure(status: 'invalid_duration') => '授权有效期须为1至10080分钟。',
             AccessFailure(status: 'audit_unavailable') =>
               '决定已记录，但记录保存异常，信息读取暂停。请到授权历史重试保存记录。',
@@ -391,8 +420,19 @@ class ApprovalsState extends State<Approvals> {
                   ),
                   child: Material(
                     color: Colors.transparent,
-                    child: current.credentialUse!=null
-                        ? CredentialUseApprovalPanel(key:ValueKey(current.id),owner:owner,request:current.credentialUse!,draft:_credentialDrafts.putIfAbsent(current.id,()=>CredentialUseApprovalDraft(current.credentialUse!.fields)),onChanged:()=>setState((){}))
+                    child: current.credentialUse != null
+                        ? CredentialUseApprovalPanel(
+                            key: ValueKey(current.id),
+                            owner: owner,
+                            request: current.credentialUse!,
+                            draft: _credentialDrafts.putIfAbsent(
+                              current.id,
+                              () => CredentialUseApprovalDraft(
+                                current.credentialUse!.fields,
+                              ),
+                            ),
+                            onChanged: () => setState(() {}),
+                          )
                         : current.organization != null
                         ? OrganizationApprovalPanel(
                             key: ValueKey(current.id),
@@ -616,7 +656,8 @@ class ApprovalsState extends State<Approvals> {
 
   String _entryState(InboxEntry entry) => entry.access != null
       ? _state(entry.access!.state)
-      : entry.credentialUse!=null?credentialUseStateLabel(entry.credentialUseState!)
+      : entry.credentialUse != null
+      ? credentialUseStateLabel(entry.credentialUseState!)
       : organizationStateLabel(entry.organizationState!);
 
   Widget _requestView(OwnerRequestSnapshot request) {
@@ -807,6 +848,17 @@ class ApprovalsState extends State<Approvals> {
           Text(request.purpose, style: prototypeText(context, 14, height: 1.9)),
           SizedBox(height: largeType ? 4 : 6),
           const PrototypeSelfDescription(),
+          if (pending &&
+              groups.values
+                  .expand((refs) => refs)
+                  .any((ref) => _currentField(ref)?.kind == FieldKind.file))
+            Padding(
+              padding: const EdgeInsets.only(top: 12),
+              child: Text(
+                '批准文件字段后，Agent 可领取并读取原文件，不只是查看文件名称。',
+                style: prototypeText(context, 12, color: c.muted, height: 1.85),
+              ),
+            ),
           if (pending)
             Padding(
               padding: EdgeInsets.only(top: largeType ? 6 : 18),
@@ -1262,6 +1314,7 @@ class ApprovalsState extends State<Approvals> {
     final Iterable<FieldRef> refs = pending
         ? selected
         : (request.approvedFields ?? <FieldRef>[]);
+    final reviewedVersions = _reviewedVersions(refs);
     final omissions = request.fields.where((f) => !refs.contains(f)).length;
     final extra = refs.where((f) => !request.fields.contains(f)).length;
     return Container(
@@ -1403,13 +1456,18 @@ class ApprovalsState extends State<Approvals> {
               FilledButton(
                 key: const ValueKey('approve-selection'),
                 onPressed:
-                    busy || selected.isEmpty || minutes < 1 || minutes > 10080
+                    busy ||
+                        selected.isEmpty ||
+                        minutes < 1 ||
+                        minutes > 10080 ||
+                        !_filesReady(selected)
                     ? null
                     : () => _manage(
                         () => widget.service.owner.approve(
                           request.id,
                           selected.toList(),
                           lifetime: Duration(minutes: minutes),
+                          reviewedVersions: reviewedVersions,
                         ),
                       ),
                 style: prototypeButton(
@@ -1570,19 +1628,7 @@ class ApprovalsState extends State<Approvals> {
           ),
           const SizedBox(height: 5),
           Text(
-            group.value
-                .map(
-                  (ref) =>
-                      widget.service.owner.information
-                          .where((i) => i.id == ref.itemId)
-                          .firstOrNull
-                          ?.fields
-                          .where((f) => f.id == ref.fieldId)
-                          .firstOrNull
-                          ?.name ??
-                      ref.fieldId,
-                )
-                .join('、'),
+            group.value.map(_scopeName).join('、'),
             style: prototypeText(context, 12, color: c.muted, height: 1.8),
           ),
         ],
@@ -1600,6 +1646,7 @@ class ApprovalsState extends State<Approvals> {
         _busy.contains(request.id) || !widget.service.owner.serviceAvailable;
     final minutes = _grantMinutes[request.id] ?? 480;
     final valid = minutes >= 1 && minutes <= 10080;
+    final reviewedVersions = _reviewedVersions(selected);
     final scopeChange =
         '原申请 ${request.fields.length} · 未选 ${request.fields.where((field) => !selected.contains(field)).length} · 补选 ${selected.where((field) => !request.fields.contains(field)).length}';
     final lifetime = SizedBox(
@@ -1636,13 +1683,15 @@ class ApprovalsState extends State<Approvals> {
         ),
         FilledButton.icon(
           key: const ValueKey('approve-selection'),
-          onPressed: busy || selected.isEmpty || !valid
+          onPressed:
+              busy || selected.isEmpty || !valid || !_filesReady(selected)
               ? null
               : () => _manage(
                   () => widget.service.owner.approve(
                     request.id,
                     selected.toList(),
                     lifetime: Duration(minutes: minutes),
+                    reviewedVersions: reviewedVersions,
                   ),
                 ),
           icon: Icon(Icons.check, size: 17),
@@ -1880,9 +1929,7 @@ class ApprovalsState extends State<Approvals> {
           for (final ref in group.value)
             Padding(
               padding: const EdgeInsets.only(bottom: 9),
-              child: Text(
-                '· ${widget.service.owner.information.where((i) => i.id == ref.itemId).firstOrNull?.fields.where((f) => f.id == ref.fieldId).firstOrNull?.name ?? ref.fieldId}',
-              ),
+              child: Text('· ${_scopeName(ref)}'),
             ),
         ],
       ],
@@ -1900,6 +1947,7 @@ class ApprovalsState extends State<Approvals> {
         .where((i) => i.id == ref.itemId)
         .firstOrNull;
     final field = item?.fields.where((f) => f.id == ref.fieldId).firstOrNull;
+    final focusedRequest = _focused;
     final chosen = selected.contains(ref);
     final large = MediaQuery.textScalerOf(context).scale(14) > 20;
     final ValueChanged<bool?>? change =
@@ -1911,60 +1959,84 @@ class ApprovalsState extends State<Approvals> {
             value == true ? selected.add(ref) : selected.remove(ref);
             _actionError = null;
           });
-    final value = Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          !available.contains(ref) ? '字段已不可用，可取消选择' : field?.value ?? '不可用',
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          style: prototypeText(
-            context,
-            12,
-            family: 'Consolas',
-            color: chosen ? c.ink : c.muted,
-            height: 1.6,
-          ),
-        ),
-        if (field != null &&
-            (field.value.length > 200 || field.value.contains('\n')))
-          TextButton(
-            style: prototypeButton(context),
-            onPressed: () => showDialog<void>(
-              context: context,
-              barrierColor: const Color(0x4f241b27),
-              builder: (context) => PrototypeDialog(
-                title: '查看完整字段值',
-                flow: true,
-                onClose: () => Navigator.pop(context),
-                body: SizedBox(
-                  height: 420,
-                  child: SingleChildScrollView(
-                    child: SelectableText(
-                      field.value,
-                      style: prototypeText(
-                        context,
-                        13,
-                        family: 'Consolas',
-                        height: 1.7,
+    final value = field?.kind == FieldKind.file && available.contains(ref)
+        ? Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: InformationFileSummary(
+              key: ValueKey('approval-file-$focusedRequest-${ref.fieldId}'),
+              owner: widget.service.owner,
+              reference: field!.attachment!,
+              compact: true,
+              onLoaded: (version) {
+                if (version.available &&
+                    mounted &&
+                    focusedRequest != null &&
+                    _focused == focusedRequest &&
+                    _loadedFiles
+                        .putIfAbsent(focusedRequest, () => {})
+                        .add(version.reference)) {
+                  setState(() {});
+                }
+              },
+            ),
+          )
+        : Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                !available.contains(ref)
+                    ? '字段已不可用，可取消选择'
+                    : field?.value ?? '不可用',
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: prototypeText(
+                  context,
+                  12,
+                  family: 'Consolas',
+                  color: chosen ? c.ink : c.muted,
+                  height: 1.6,
+                ),
+              ),
+              if (field != null &&
+                  field.kind != FieldKind.file &&
+                  (field.value.length > 200 || field.value.contains('\n')))
+                TextButton(
+                  style: prototypeButton(context),
+                  onPressed: () => showDialog<void>(
+                    context: context,
+                    barrierColor: const Color(0x4f241b27),
+                    builder: (context) => PrototypeDialog(
+                      title: '查看完整字段值',
+                      flow: true,
+                      onClose: () => Navigator.pop(context),
+                      body: SizedBox(
+                        height: 420,
+                        child: SingleChildScrollView(
+                          child: SelectableText(
+                            field.value,
+                            style: prototypeText(
+                              context,
+                              13,
+                              family: 'Consolas',
+                              height: 1.7,
+                            ),
+                          ),
+                        ),
                       ),
+                      actions: [
+                        TextButton(
+                          style: prototypeSecondary(context),
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text('返回审批'),
+                        ),
+                      ],
                     ),
                   ),
+                  child: const Text('查看完整值'),
                 ),
-                actions: [
-                  TextButton(
-                    style: prototypeSecondary(context),
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text('返回审批'),
-                  ),
-                ],
-              ),
-            ),
-            child: const Text('查看完整值'),
-          ),
-      ],
-    );
+            ],
+          );
     return Material(
       color: Colors.transparent,
       child: InkWell(

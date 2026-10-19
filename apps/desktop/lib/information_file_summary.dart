@@ -11,10 +11,14 @@ class InformationFileSummary extends StatefulWidget {
     required this.owner,
     required this.reference,
     this.actions,
+    this.compact = false,
+    this.onLoaded,
   });
   final OwnerAccess owner;
   final InformationAttachmentRef reference;
   final Widget Function(InformationAttachmentVersion version)? actions;
+  final bool compact;
+  final ValueChanged<InformationAttachmentVersion>? onLoaded;
   @override
   State<InformationFileSummary> createState() => _InformationFileSummaryState();
 }
@@ -26,10 +30,12 @@ class _InformationFileSummaryState extends State<InformationFileSummary> {
     final versions = await widget.owner.informationAttachmentVersions(
       reference.attachmentId,
     );
-    return versions.firstWhere(
+    final version = versions.firstWhere(
       (version) => version.reference == reference,
       orElse: () => throw const AccessFailure('attachment_missing'),
     );
+    if (mounted) widget.onLoaded?.call(version);
+    return version;
   }
 
   @override
@@ -60,6 +66,12 @@ class _InformationFileSummaryState extends State<InformationFileSummary> {
                 child: const Text('重试'),
               ),
           ],
+        );
+      }
+      if (widget.compact) {
+        return Text(
+          '${version.originalName} · ${informationFileSize(version.byteLength)} · 版本 ${version.reference.attachmentVersion}${version.available ? '' : ' · 原文件已清理'}',
+          style: prototypeText(context, 12, family: 'Consolas', height: 1.6),
         );
       }
       return Column(

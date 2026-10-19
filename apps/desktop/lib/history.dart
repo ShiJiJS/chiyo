@@ -8,6 +8,7 @@ import 'settings_controls.dart';
 import 'settings.dart';
 import 'backups.dart';
 import 'credential_history.dart';
+import 'information_delivery_history.dart';
 
 class AuthorizationHistory extends StatefulWidget {
   const AuthorizationHistory({
@@ -51,6 +52,8 @@ class _HistoryEntry {
     this.credentialActive = false,
     this.fieldActive,
     this.organizationActive = false,
+    this.fileDelivery,
+    this.deliveries = const [],
   });
   final String id, title, chat;
   final DateTime at;
@@ -60,6 +63,8 @@ class _HistoryEntry {
   final OrganizationTask? organization;
   final AccessRecord? orphan;
   final CredentialUseRequest? use;
+  final InformationFileDelivery? fileDelivery;
+  final List<InformationFileDelivery> deliveries;
   final bool credentialActive;
   final bool? fieldActive;
   final bool organizationActive;
@@ -68,7 +73,9 @@ class _HistoryEntry {
       credentialActive ||
       (fieldActive ?? grant?.active ?? false);
   List<RecordedField> get fields =>
-      grant?.fields ?? request?.fields ?? const [];
+      grant?.fields ??
+      request?.fields ??
+      (fileDelivery == null ? const [] : [fileDelivery!.field]);
 }
 
 class _AuthorizationHistoryState extends State<AuthorizationHistory> {
@@ -154,6 +161,10 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
   List<_HistoryEntry> _entries(AuditHistory history) {
     final requests = {for (final r in history.requests) r.id: r};
     final grants = {for (final g in history.grants) g.id: g};
+    final deliveries = <String, List<InformationFileDelivery>>{};
+    for (final record in widget.owner.informationFileDeliveries) {
+      deliveries.putIfAbsent(record.grantId, () => []).add(record);
+    }
     final uses = widget.owner.credentialUseRequests
         .where((r) => widget.owner.credentialUseState(r) != 'pending')
         .toList();
@@ -189,6 +200,13 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
               ? history.grants.where((g) => g.requestId == r.id).firstOrNull
               : null,
           request: requests[r.id],
+          deliveries: r.protocolVersion == 1
+              ? deliveries[history.grants
+                        .where((g) => g.requestId == r.id)
+                        .firstOrNull
+                        ?.id] ??
+                    const []
+              : const [],
         ),
       for (final grant in history.grants.where(
         (g) => !mergedUseIds.contains(g.requestId),
@@ -202,6 +220,7 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
           at: grant.approvedAt,
           until: grant.expiresAt,
           grant: grant,
+          deliveries: deliveries[grant.id] ?? const [],
           request: requests[grant.requestId],
         ),
       for (final r in history.requests.where(
@@ -237,6 +256,19 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
           at: r.at,
           orphan: r,
         ),
+      for (final group in deliveries.entries.where(
+        (entry) => !grants.containsKey(entry.key),
+      ))
+        for (final record in group.value)
+          _HistoryEntry(
+            id: 'file-delivery:${record.id}',
+            title: '未关联保留中授权的文件交付',
+            chat: '未记录会话名称',
+            at: record.createdAt,
+            until: record.expiresAt,
+            fileDelivery: record,
+            deliveries: [record],
+          ),
     ];
     list.sort((a, b) {
       final time = b.at.compareTo(a.at);
@@ -246,6 +278,9 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
   }
 
   String _state(_HistoryEntry e) {
+    if (e.fileDelivery != null) {
+      return e.fileDelivery!.restoredAt == null ? '交付记录' : '历史事实';
+    }
     if (e.use != null) {
       return e.use!.executionId == null &&
               !e.credentialActive &&
@@ -316,6 +351,25 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
       : history.accesses
             .where((a) => a.grantId == e.grant?.id && e.grant != null)
             .length;
+  List<InformationFileDelivery> _deliveries(_HistoryEntry e) => e.deliveries;
+  String _activityLabel(_HistoryEntry e, AuditHistory history) =>
+      _deliveries(e).isEmpty
+      ? '${_reads(e, history)} 次访问'
+      : '${_reads(e, history)} 次读取 · ${_deliveries(e).length} 条文件交付';
+  Set<FieldRef> _fileRefs(_HistoryEntry e) {
+    final refs = {
+      for (final field in e.fields) FieldRef(field.itemId, field.fieldId),
+    };
+    return {
+      for (final item in widget.owner.information)
+        for (final field in item.fields)
+          if (field.kind == FieldKind.file &&
+              refs.contains(FieldRef(item.id, field.id)))
+            FieldRef(item.id, field.id),
+      for (final delivery in _deliveries(e)) delivery.fieldRef,
+    };
+  }
+
   Future<void> _settings() async {
     if (widget.onOpenRecordSettings != null) {
       widget.onOpenRecordSettings!();
@@ -573,7 +627,7 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
                                         ? '凭据使用'
                                         : e.organization != null
                                         ? '整理资料'
-                                        : '${_reads(e, history)} 次访问'}',
+                                        : _activityLabel(e, history)}',
                                     12,
                                     color: c.muted,
                                   ),
@@ -680,7 +734,11 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _text(
-            e.grant != null || e.organization != null ? '批准范围' : '申请范围',
+            e.fileDelivery != null
+                ? '交付字段'
+                : e.grant != null || e.organization != null
+                ? '批准范围'
+                : '申请范围',
             12,
             color: c.muted,
           ),
@@ -708,6 +766,8 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
           _text(
             e.grant != null || e.organization?.approvedAt != null
                 ? '授权时间'
+                : e.fileDelivery != null
+                ? '记录时间'
                 : '申请时间',
             12,
             color: c.muted,
@@ -762,12 +822,15 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
 
   Widget _scope(_HistoryEntry e) {
     final c = UiPalette.of(context), groups = <String, List<RecordedField>>{};
+    final fileRefs = _fileRefs(e);
     for (final f in e.fields) {
       groups.putIfAbsent(f.itemId, () => []).add(f);
     }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        if (e.fileDelivery != null)
+          const SettingsNotice('原授权记录未保留', '只保留这次交付事实，无法据此还原完整批准范围或重新领取文件。'),
         for (final fields in groups.values)
           Container(
             padding: const EdgeInsets.symmetric(vertical: 20.5),
@@ -799,7 +862,12 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
                       _text(fields.first.itemName, 15, weight: FontWeight.w700),
                       const SizedBox(height: 7),
                       _text(
-                        fields.map((f) => f.fieldName).join('、'),
+                        fields
+                            .map(
+                              (f) =>
+                                  '${f.fieldName}${fileRefs.contains(FieldRef(f.itemId, f.fieldId)) ? '（文件）' : ''}',
+                            )
+                            .join('、'),
                         13,
                         color: c.muted,
                       ),
@@ -816,7 +884,17 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
                     borderRadius: BorderRadius.circular(3),
                   ),
                   child: _text(
-                    e.grant == null ? '未授予读取' : '可读取',
+                    e.fileDelivery != null
+                        ? '仅有交付事实'
+                        : e.grant == null
+                        ? '未授予读取'
+                        : fields.any(
+                            (f) => fileRefs.contains(
+                              FieldRef(f.itemId, f.fieldId),
+                            ),
+                          )
+                        ? '可读取 · 含文件'
+                        : '可读取',
                     11,
                     color: c.muted,
                   ),
@@ -893,6 +971,7 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
   }
 
   Widget _accesses(_HistoryEntry e, AuditHistory history) {
+    final deliveries = _deliveries(e);
     final records =
         e.orphan != null
               ? [e.orphan!]
@@ -905,6 +984,16 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          if (deliveries.isNotEmpty ||
+              e.grant != null && _fileRefs(e).isNotEmpty)
+            InformationDeliveryHistory(
+              key: ValueKey('file-deliveries-${e.id}'),
+              records: deliveries,
+              onRetryCleanup: () async {
+                await widget.owner.reconcileInformationFileDeliveries();
+                if (mounted) setState(() {});
+              },
+            ),
           for (final r in records)
             _event(
               '读取信息字段',
@@ -941,7 +1030,7 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
                     : '后续读取不再获准。',
                 event.at,
               ),
-          if (records.isEmpty && e.grant == null)
+          if (records.isEmpty && deliveries.isEmpty && e.grant == null)
             _text(
               '没有已记录的实际读取。批准范围不表示已经访问。',
               13,
@@ -1075,6 +1164,8 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
                         _text(
                           e.organization != null
                               ? '整理资料'
+                              : e.fileDelivery != null
+                              ? '文件交付'
                               : e.grant != null
                               ? '读取信息'
                               : '访问请求',
@@ -1128,7 +1219,8 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
                       ],
                     ),
                     if (e.grant?.restoredAt != null ||
-                        e.request?.restoredAt != null)
+                        e.request?.restoredAt != null ||
+                        e.fileDelivery?.restoredAt != null)
                       const SettingsNotice(
                         '从备份恢复的历史记录',
                         '只保留曾经授权的事实，这条记录不赋予当前访问权限。',
@@ -1171,13 +1263,17 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
                                 ),
                                 child: _text(
                                   i == 0
-                                      ? (e.grant != null ||
-                                                e.organization != null
+                                      ? (e.fileDelivery != null
+                                            ? '交付字段'
+                                            : e.grant != null ||
+                                                  e.organization != null
                                             ? '批准范围'
                                             : '申请范围')
                                       : i == 1
                                       ? e.organization == null
-                                            ? '实际访问 ${_reads(e, history)}'
+                                            ? (_fileRefs(e).isEmpty
+                                                  ? '实际访问 ${_reads(e, history)}'
+                                                  : '访问与交付 ${_reads(e, history) + _deliveries(e).length}')
                                             : '实际访问 未记录'
                                       : '整理结果',
                                   14,
@@ -1275,7 +1371,11 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
           needle = _search.text.trim().toLowerCase();
       if (_focusPending) {
         _focusPending = false;
-        final index = all.indexWhere((e) => e.id == widget.initialRecordId);
+        final index = all.indexWhere(
+          (e) =>
+              e.id == widget.initialRecordId ||
+              e.fileDelivery?.id == widget.initialRecordId,
+        );
         _focusMissing = widget.initialRecordId != null && index < 0;
         if (index >= 0) {
           _page = index ~/ 8;
@@ -1298,6 +1398,10 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
                         e.use!.isFocusedFill ? '本机焦点填充' : e.use!.plan.receiver,
                       ],
                       ...e.fields.map((f) => '${f.itemName} ${f.fieldName}'),
+                      for (final record in e.deliveries) ...[
+                        record.id,
+                        record.operationId,
+                      ],
                     ].any((s) => s.toLowerCase().contains(needle))),
           )
           .toList();
