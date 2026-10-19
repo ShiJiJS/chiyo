@@ -10,10 +10,12 @@ import 'package:info_core/info_core.dart';
 import 'package:info_desktop/main.dart';
 import 'support/native_semantics_lifetime.dart';
 import 'support/ordinary_file_native_fixture.dart';
+import 'support/ordinary_file_browser_receiver.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
   const syntheticPicker = bool.fromEnvironment('NATIVE_FILES_SYNTHETIC_PICKER');
+  const browserConsumer = bool.fromEnvironment('NATIVE_FILES_BROWSER_CONSUMER');
   testWidgets(
     'Windows files, AOT CLI and backup recovery (synthetic picker: $syntheticPicker)',
     (tester) async {
@@ -39,10 +41,12 @@ void main() {
         Directory('${root.path}/target'),
       );
       NativeOrdinaryFileCli? cli;
+      NativeResumeUploadReceiver? receiver;
       final semantics = NativeSemanticsLifetime(tester);
       final boundary = GlobalKey();
       final checks = <String, Object?>{
         'syntheticPicker': syntheticPicker,
+        'browserConsumer': browserConsumer,
         'completed': false,
       };
       String? activeStage, activePath;
@@ -59,6 +63,7 @@ void main() {
               const methods = {
                 'choose-original': 'informationFileInput',
                 'choose-replacement': 'informationFileInput',
+                'choose-readable-resume': 'informationFileInput',
                 'save-original-as': 'informationFileOutput',
                 'export-backup': 'backupOutput',
                 'restore-backup-file': 'backupInput',
@@ -69,12 +74,17 @@ void main() {
               return activePath;
             });
       }
-      Future<void> phase(String stage, {String? path}) async {
+      Future<void> phase(
+        String stage, {
+        String? path,
+        String? browserUrl,
+      }) async {
         activeStage = stage;
         activePath = path;
         final record = jsonEncode({
           'stage': stage,
           'path': path,
+          'browserUrl': browserUrl,
           'fixtureRoot': root.path,
           'at': DateTime.now().toUtc().toIso8601String(),
         });
@@ -554,6 +564,115 @@ void main() {
         await capture('native-empty-library-restored');
         checks['nativeBackupDialogAndFreshDpapiRestoreExactVersionsWithoutAuthority'] =
             true;
+        if (browserConsumer) {
+          // After restore, a fresh GUI approval must authorize actual document
+          // consumption. The prior 3/4-byte binary fixtures test byte integrity;
+          // this additional UTF-8 resume is intentionally readable by tools.
+          final resumeBytes = utf8.encode(
+            '虚构简历\n姓名：林予安（虚构）\n求职方向：Windows 客户端开发\n'
+            '项目经历：制作本机资料整理工具。\n'
+            'WINDOWS-ATTACHMENT-CONSUMER-20261019\n',
+          );
+          final resume = File('${root.path}/fictional-resume.txt');
+          await resume.writeAsBytes(resumeBytes);
+          await tap(find.text('×'));
+          await tap(find.byKey(const ValueKey('nav-1')));
+          await tap(find.text('求职资料').first);
+          await tap(find.text('更换文件'));
+          final before = target.owner.information.single;
+          final fieldIndex = before.fields.indexWhere(
+            (f) => f.kind == FieldKind.file,
+          );
+          await selectFile(
+            'choose-readable-resume',
+            resume.path,
+            find.byKey(ValueKey('choose-file-$fieldIndex')),
+            find.text('fictional-resume.txt'),
+          );
+          await tap(find.byKey(const ValueKey('save-information')));
+          await waitFor(
+            () =>
+                target.owner.information.single.version == before.version + 1 &&
+                find
+                    .byKey(const ValueKey('save-information'))
+                    .evaluate()
+                    .isEmpty,
+          );
+          final document = target.owner.information.single;
+          final documentField = document.fields.singleWhere(
+            (f) => f.kind == FieldKind.file,
+          );
+          cli = await NativeOrdinaryFileCli.start(
+            cliExecutable,
+            target.port,
+            root.path,
+          );
+          expect(
+            (await cli.command({
+              'command': 'session',
+              'chatLabel': '上传虚构简历',
+            }))['status'],
+            'ok',
+          );
+          final requested = await cli.command({
+            'protocolVersion': 2,
+            'command': 'request',
+            'purpose': '读取虚构简历原文件，交给本机浏览器上传控件',
+            'fields': [FieldRef(document.id, documentField.id).toJson()],
+          });
+          final newRequestId = requested['requestId'] as String;
+          await tap(find.byKey(const ValueKey('nav-0')));
+          final documentView = find.byKey(
+            PageStorageKey('detail-$newRequestId'),
+          );
+          await shown(documentView);
+          await tester.scrollUntilVisible(
+            find.byKey(
+              ValueKey('approval-file-$newRequestId-${documentField.id}'),
+            ),
+            240,
+            scrollable: find
+                .descendant(of: documentView, matching: find.byType(Scrollable))
+                .first,
+          );
+          await tap(find.byKey(const ValueKey('approve-selection')));
+          await waitFor(
+            () => target.owner.requests.single.grantExpiresAt != null,
+          );
+          final copy = await fetch(newRequestId, document, 'readable-resume');
+          expect(await File(copy['path'] as String).readAsBytes(), resumeBytes);
+          receiver = await NativeResumeUploadReceiver.start(
+            resumeBytes,
+            File(copy['path'] as String).uri.pathSegments.last,
+          );
+          await phase(
+            'browser-upload',
+            path: copy['path'] as String,
+            browserUrl: receiver.url,
+          );
+          await waitFor(
+            () => receiver!.completed,
+            timeout: const Duration(minutes: 6),
+          );
+          final received = await receiver.received;
+          await File(
+            '${output.path}/browser-received.json',
+          ).writeAsString(jsonEncode(received), flush: true);
+          expect(received['bytesMatched'], isTrue);
+          expect(received['fileNameMatched'], isTrue);
+          expect(received['byteLength'], resumeBytes.length);
+          // Let the external consumer close its file input before releasing the
+          // managed copy. A marker is QA control, never an application bypass.
+          await phase('browser-upload-received');
+          await waitFor(
+            () => File('${output.path}/browser-closed').existsSync(),
+            timeout: const Duration(minutes: 2),
+          );
+          await release(copy);
+          checks['freshApprovalAfterRestoreAndBrowserConsumedOriginalBytes'] =
+              received;
+          await phase('browser-consumer-complete');
+        }
         expect(await original.readAsBytes(), [0, 255, 7]);
         expect(await replacement.readAsBytes(), [1, 2, 3, 4]);
         checks['sourceFilesUnchanged'] = true;
@@ -563,6 +682,7 @@ void main() {
         await phase('failed');
         rethrow;
       } finally {
+        await receiver?.close();
         if (syntheticPicker) {
           TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
               .setMockMethodCallHandler(pickerChannel, null);
