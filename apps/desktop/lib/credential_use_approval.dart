@@ -9,6 +9,7 @@ import 'credential_operations.dart';
 import 'credential_delivery.dart';
 import 'credential_use_draft.dart';
 import 'focused_fill_ui.dart';
+import 'information_file_summary.dart';
 export 'credential_use_draft.dart';
 
 String credentialUseStateLabel(String state) => switch (state) {
@@ -120,6 +121,19 @@ class _CredentialUseApprovalPanelState
   Future<void> _dialog(String kind) async {
     final approve = kind == 'approve';
     final detail = kind == 'request';
+    final selected = approve ? draft.fields.toList() : <FieldRef>[];
+    final reviewed = <FieldRef, InformationField>{
+      for (final ref in selected)
+        for (final item in widget.owner.information.where(
+          (i) => i.id == ref.itemId,
+        ))
+          for (final field in item.fields.where((f) => f.id == ref.fieldId))
+            ref: field,
+    };
+    final fileFields = reviewed.values
+        .where((f) => f.kind == FieldKind.file)
+        .toList();
+    final loaded = <InformationAttachmentRef>{};
     Widget fact(String label, String value) =>
         _fact(label, value, brief: detail);
     await showDialog<void>(
@@ -133,7 +147,11 @@ class _CredentialUseApprovalPanelState
               await widget.owner.decideCredentialUse(
                 r.id,
                 approveCredential: approve && allowCredential,
-                fields: approve ? draft.fields.toList() : [],
+                fields: selected,
+                reviewedVersions: {
+                  for (final entry in reviewed.entries)
+                    entry.key: entry.value.version,
+                },
                 lifetime: Duration(minutes: draft.minutes),
                 fieldLifetime: reusable
                     ? Duration(minutes: draft.fieldMinutes)
@@ -142,9 +160,15 @@ class _CredentialUseApprovalPanelState
               if (mounted) setState(() => _error = null);
               if (dialogContext.mounted) Navigator.pop(dialogContext);
               widget.onChanged();
-            } on Object {
+            } on Object catch (error) {
               if (mounted) {
-                setState(() => _error = '未能保存决定，请检查凭据、请求状态或存储后重试。输入已保留。');
+                setState(
+                  () => _error =
+                      error is CredentialUseFailure &&
+                          error.code == 'scope_changed'
+                      ? '连接字段或文件版本已变化。请返回核对后重新批准，当前决定未保存。'
+                      : '未能保存决定，请检查凭据、请求状态或存储后重试。输入已保留。',
+                );
               }
               if (dialogContext.mounted) update(() => _busy = false);
               return;
@@ -197,6 +221,31 @@ class _CredentialUseApprovalPanelState
                       pending
                           ? '$selectedFieldCount 个字段 · ${reusable && draft.fieldMinutes == 480 ? '8 小时' : '${reusable ? draft.fieldMinutes : draft.minutes} 分钟'}（独立许可）'
                           : '$selectedFieldCount 个字段 · 截止 ${_time(r.fieldExpiresAt)}（独立许可）',
+                    ),
+                  for (final field in fileFields) ...[
+                    const SizedBox(height: 12),
+                    Text(
+                      '${field.name} · 领取原文件',
+                      style: prototypeText(
+                        context,
+                        13,
+                        weight: FontWeight.w600,
+                      ),
+                    ),
+                    InformationFileSummary(
+                      owner: widget.owner,
+                      reference: field.attachment!,
+                      onLoaded: (version) {
+                        if (version.available && dialogContext.mounted) {
+                          update(() => loaded.add(version.reference));
+                        }
+                      },
+                    ),
+                  ],
+                  if (fileFields.isNotEmpty)
+                    Text(
+                      '文件字段允许 Agent 领取并读取原文件，使用独立的普通信息期限；不是凭据注入。',
+                      style: prototypeText(context, 12, height: 1.9),
                     ),
                   fact('注入位置', credentialInjectionFact(r)),
                   fact(
@@ -275,7 +324,9 @@ class _CredentialUseApprovalPanelState
                 ),
               TextButton(
                 style: prototypePrimary(context),
-                onPressed: _busy
+                onPressed:
+                    _busy ||
+                        fileFields.any((f) => !loaded.contains(f.attachment))
                     ? null
                     : detail
                     ? () => Navigator.pop(dialogContext)
@@ -934,10 +985,16 @@ class _CredentialUseApprovalPanelState
           ),
           const SizedBox(width: 10),
           Flexible(
-            child: SelectableText(
-              f?.value ?? '',
-              style: prototypeText(context, 12, family: 'Consolas'),
-            ),
+            child: f?.kind == FieldKind.file
+                ? InformationFileSummary(
+                    owner: widget.owner,
+                    reference: f!.attachment!,
+                    compact: true,
+                  )
+                : SelectableText(
+                    f?.value ?? '',
+                    style: prototypeText(context, 12, family: 'Consolas'),
+                  ),
           ),
         ],
       ),

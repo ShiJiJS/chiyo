@@ -54,6 +54,7 @@ class AttachmentUiFixture {
   OwnerAccess get owner => service.owner;
   static Future<AttachmentUiFixture> create({
     DateTime Function()? clock,
+    CredentialExecutableInspector? executableInspector,
   }) async {
     final root = await Directory.systemTemp.createTemp('attachment-ui-');
     final repository = MemoryInformationRepository();
@@ -62,6 +63,7 @@ class AttachmentUiFixture {
       repository: repository,
       informationDeliveryFiles: driver,
       clock: clock,
+      credentialExecutableInspector: executableInspector,
     );
     final source = File('${root.path}/fictional-resume.pdf');
     await source.writeAsBytes([0, 255, 7]);

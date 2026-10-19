@@ -7,6 +7,13 @@ import 'prototype_dialog.dart';
 import 'prototype_ui.dart';
 import 'proposal_queue.dart';
 import 'ui_palette.dart';
+import 'information_field_preview.dart';
+
+String _fieldKind(FieldKind kind) => switch (kind) {
+  FieldKind.structured => '结构化字段',
+  FieldKind.textNote => '受控说明',
+  FieldKind.file => '文件',
+};
 
 class ImportProposalsPage extends StatefulWidget {
   const ImportProposalsPage({
@@ -1059,15 +1066,7 @@ class _ImportProposalsPageState extends State<ImportProposalsPage> {
                 SizedBox(width: 150, child: t(field.name, 13)),
                 const SizedBox(width: 20),
                 Expanded(
-                  child: SelectableText(
-                    field.value,
-                    style: prototypeText(
-                      context,
-                      13,
-                      family: 'Consolas',
-                      height: 1.6,
-                    ),
-                  ),
+                  child: InformationFieldContent(owner: owner, field: field),
                 ),
               ],
             ),
@@ -1263,17 +1262,21 @@ class _ImportProposalsPageState extends State<ImportProposalsPage> {
             .where((candidate) => candidate.original?.id == field.id)
             .firstOrNull;
         if (edited == null) {
-          rows.add(('${field.name} · 移除', field.value, '移除字段'));
+          rows.add((
+            '${field.name} · 移除',
+            informationFieldValueLabel(field),
+            '移除字段',
+          ));
         } else if (edited.replacesIdentity ||
-            edited.value != field.value ||
+            (field.kind != FieldKind.file && edited.value != field.value) ||
             edited.name != field.name ||
             edited.kind != field.kind) {
           rows.add((
             edited.replacesIdentity
-                ? '${field.name} → ${edited.name} · 替换含义${field.kind == edited.kind ? '' : '（${field.kind == FieldKind.textNote ? '受控说明' : '结构化字段'} → ${edited.kind == FieldKind.textNote ? '受控说明' : '结构化字段'}）'}'
+                ? '${field.name} → ${edited.name} · 替换含义${field.kind == edited.kind ? '' : '（${_fieldKind(field.kind)} → ${_fieldKind(edited.kind)}）'}'
                 : edited.name,
-            field.value,
-            edited.value,
+            informationFieldValueLabel(field),
+            edited.kind == FieldKind.file ? '保留原文件与版本' : edited.value,
           ));
         }
         if (edited != null && edited.description != field.description) {
@@ -1318,7 +1321,7 @@ class _ImportProposalsPageState extends State<ImportProposalsPage> {
             .firstOrNull;
         rows.add((
           field?.name ?? change.field?.name ?? '字段 ${change.fieldId}',
-          field?.value ?? '当前字段已不存在',
+          field == null ? '当前字段已不存在' : informationFieldValueLabel(field),
           change.value ?? change.field?.value ?? '移除字段',
         ));
       }
@@ -1387,6 +1390,24 @@ class _ImportProposalsPageState extends State<ImportProposalsPage> {
             padding: const EdgeInsets.symmetric(vertical: 20),
             child: t('没有字段内容变化。确认仅应用上方元数据调整。', 13, color: p.muted),
           ),
+        if (draft != null)
+          for (final field in draft.fields.where(
+            (field) =>
+                field.kind == FieldKind.file &&
+                field.original != null &&
+                !field.replacesIdentity,
+          ))
+            Padding(
+              padding: const EdgeInsets.only(top: 18),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  t('${field.name} · 保留原文件与版本', 13, weight: FontWeight.w600),
+                  const SizedBox(height: 6),
+                  InformationFieldContent(owner: owner, field: field.original!),
+                ],
+              ),
+            ),
         if (draft != null &&
             draft.fields.any(
               (field) => field.original == null || field.replacesIdentity,
@@ -1901,16 +1922,9 @@ class _CurrentResultsState extends State<_CurrentResults> {
                                 ),
                               ),
                               const SizedBox(height: 7),
-                              SelectableText(
-                                field.value,
-                                style: prototypeText(
-                                  context,
-                                  13,
-                                  family: field.kind == FieldKind.textNote
-                                      ? null
-                                      : 'Consolas',
-                                  height: 1.8,
-                                ),
+                              InformationFieldContent(
+                                owner: widget.owner,
+                                field: field,
                               ),
                             ],
                           ),

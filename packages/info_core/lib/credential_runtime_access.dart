@@ -920,6 +920,7 @@ extension CredentialRuntimeOwnerAccess on OwnerAccess {
     List<FieldRef> fields = const [],
     Duration lifetime = const Duration(minutes: 15),
     Duration? fieldLifetime,
+    Map<FieldRef, int>? reviewedVersions,
   }) => _serialize(() async {
     final r = _service._useRequest(id);
     if (_service._useState(r) != 'pending') {
@@ -942,6 +943,13 @@ extension CredentialRuntimeOwnerAccess on OwnerAccess {
           (f) => !r.fields.contains(f) || _service._field(f) == null,
         )) {
       throw const CredentialUseFailure('invalid_reference');
+    }
+    if (reviewedVersions != null &&
+        (reviewedVersions.length != fields.toSet().length ||
+            fields.any(
+              (f) => reviewedVersions[f] != _service._field(f)!.version,
+            ))) {
+      throw const CredentialUseFailure('scope_changed');
     }
     if (approveCredential) _service._useEligible(r);
     final now = _service._clock().toUtc();

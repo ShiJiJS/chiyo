@@ -4,6 +4,7 @@ import 'package:info_core/info_core.dart';
 import 'prototype_dialog.dart';
 import 'prototype_ui.dart';
 import 'organization.dart';
+import 'information_field_preview.dart';
 
 Future<void> confirmInformationDeletion(
   BuildContext context,
@@ -92,11 +93,7 @@ class _DeleteInformationState extends State<_DeleteInformation> {
             for (final field in widget.item.fields.where(
               (f) => widget.fieldId == null || f.id == widget.fieldId,
             ))
-              InformationValue(
-                name: field.name,
-                description: field.description,
-                value: field.value,
-              ),
+              InformationFieldPreview(owner: widget.owner, field: field),
             if (_error != null) QuietNotice(_error!, warning: true),
           ],
         ),
@@ -196,7 +193,9 @@ class _RecyclePageState extends State<RecyclePage> {
         width: 700,
         height:
             entry.snapshot!.fields.length <= 2 &&
-                entry.snapshot!.fields.every((f) => f.value.length < 200)
+                entry.snapshot!.fields.every(
+                  (f) => f.kind == FieldKind.file || f.value.length < 200,
+                )
             ? 360
             : 500,
         child: ListView(
@@ -207,11 +206,7 @@ class _RecyclePageState extends State<RecyclePage> {
             ),
             const QuietNotice('回收站内容仅供你查看；恢复不会重新启用旧授权。'),
             for (final field in entry.snapshot!.fields)
-              InformationValue(
-                name: field.name,
-                description: field.description,
-                value: field.value,
-              ),
+              InformationFieldPreview(owner: widget.owner, field: field),
           ],
         ),
       ),
@@ -263,6 +258,8 @@ class _RecyclePageState extends State<RecyclePage> {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
+                if (entry.snapshot!.fields.any((f) => f.kind == FieldKind.file))
+                  const Text('包含文件及其保留版本'),
               ],
             ),
             trailing: Wrap(
@@ -373,6 +370,18 @@ class _RecyclePageState extends State<RecyclePage> {
                         color: UiPalette.of(context).muted,
                       ),
                     ),
+                    if (entry.snapshot!.fields.any(
+                      (f) => f.kind == FieldKind.file,
+                    ))
+                      Text(
+                        '包含文件及其保留版本',
+                        style: prototypeText(
+                          context,
+                          13,
+                          height: 1.8,
+                          color: UiPalette.of(context).muted,
+                        ),
+                      ),
                     const SizedBox(height: 6),
                     Text(
                       '${entry.wholeItem ? '整条信息' : '选定字段'} · ${entry.snapshot!.fields.length} 个字段 · 保留至 ${uiTime(entry.expiresAt)}',

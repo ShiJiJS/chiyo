@@ -5,6 +5,7 @@ import 'organization.dart';
 import 'recycle.dart';
 import 'prototype_dialog.dart';
 import 'prototype_ui.dart';
+import 'information_field_preview.dart';
 
 class RevisionHistoryPage extends StatefulWidget {
   const RevisionHistoryPage({
@@ -105,8 +106,19 @@ class _RevisionHistoryPageState extends State<RevisionHistoryPage> {
               title: Text(
                 '版本 ${revision.item.version} · ${revision.item.name}',
               ),
-              subtitle: Text(
-                '替换时间：${revision.replacedAt.toLocal()}\n保留至：${revision.replacedAt.add(const Duration(days: 30)).toLocal()}',
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '替换时间：${revision.replacedAt.toLocal()}\n保留至：${revision.replacedAt.add(const Duration(days: 30)).toLocal()}',
+                  ),
+                  for (final field in revision.item.fields.where(
+                    (f) => f.kind == FieldKind.file,
+                  ))
+                    Text(
+                      '${field.name} · 文件版本 ${field.attachment!.attachmentVersion}',
+                    ),
+                ],
               ),
               trailing: TextButton(
                 onPressed: () => _preview(revision),
@@ -192,6 +204,18 @@ class _RevisionHistoryPageState extends State<RevisionHistoryPage> {
                         revision.item.description,
                         style: prototypeText(context, 13),
                       ),
+                      for (final field in revision.item.fields.where(
+                        (f) => f.kind == FieldKind.file,
+                      ))
+                        Text(
+                          '${field.name} · 文件版本 ${field.attachment!.attachmentVersion}',
+                          style: prototypeText(
+                            context,
+                            13,
+                            height: 1.8,
+                            color: UiPalette.of(context).muted,
+                          ),
+                        ),
                       const SizedBox(height: 6),
                       Text(
                         '替换时间：${uiTime(revision.replacedAt)}',
@@ -221,6 +245,8 @@ String _message(String status) => switch (status) {
   'recycle_restore_required' => '目标信息或字段已删除，请先在回收站明确恢复，再返回历史查看差异；已清理内容不能恢复。',
   'revision_conflict' => '当前信息已变化，请重新打开差异后确认。',
   'revision_unavailable' => '该修改版本已经过期或不可用，请刷新历史。',
+  'attachment_missing' => '该版本的原文件已不可用，请刷新历史；未恢复不完整内容。',
+  'attachment_integrity_failed' => '原文件校验失败，未恢复。请检查备份或存储后重试。',
   _ => '恢复失败，当前资料未更新，请检查存储状态后重试。',
 };
 
@@ -275,6 +301,8 @@ class _RestoreRevisionState extends State<_RestoreRevision> {
     String before,
     String after, {
     bool code = false,
+    Widget? beforeContent,
+    Widget? afterContent,
   }) => Padding(
     padding: const EdgeInsets.only(top: 18),
     child: Container(
@@ -325,17 +353,18 @@ class _RestoreRevisionState extends State<_RestoreRevision> {
                             ),
                           ),
                           const SizedBox(height: 8),
-                          SelectableText(
-                            cell.$2,
-                            style: prototypeText(
-                              context,
-                              13,
-                              family: code && cell.$2 != '（不存在）'
-                                  ? 'Consolas'
-                                  : null,
-                              height: 1.6,
-                            ),
-                          ),
+                          (cell.$1 == '当前' ? beforeContent : afterContent) ??
+                              SelectableText(
+                                cell.$2,
+                                style: prototypeText(
+                                  context,
+                                  13,
+                                  family: code && cell.$2 != '（不存在）'
+                                      ? 'Consolas'
+                                      : null,
+                                  height: 1.6,
+                                ),
+                              ),
                         ],
                       ),
                     ),
@@ -349,7 +378,7 @@ class _RestoreRevisionState extends State<_RestoreRevision> {
   );
 
   String _field(InformationField? field) =>
-      field == null ? '（不存在）' : field.value;
+      field == null ? '（不存在）' : informationFieldValueLabel(field);
 
   @override
   Widget build(BuildContext context) {
@@ -394,6 +423,18 @@ class _RestoreRevisionState extends State<_RestoreRevision> {
                   change.after?.name ?? change.before!.name,
                   _field(change.before),
                   _field(change.after),
+                  beforeContent: change.before?.kind == FieldKind.file
+                      ? InformationFieldContent(
+                          owner: widget.owner,
+                          field: change.before!,
+                        )
+                      : null,
+                  afterContent: change.after?.kind == FieldKind.file
+                      ? InformationFieldContent(
+                          owner: widget.owner,
+                          field: change.after!,
+                        )
+                      : null,
                   code:
                       (change.after ?? change.before!).kind ==
                       FieldKind.structured,

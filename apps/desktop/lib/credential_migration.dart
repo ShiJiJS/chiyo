@@ -134,7 +134,9 @@ class _CredentialMigrationDialogState extends State<CredentialMigrationDialog> {
                 ),
               ),
               items: [
-                for (final f in widget.item.fields)
+                for (final f in widget.item.fields.where(
+                  (f) => f.kind != FieldKind.file,
+                ))
                   DropdownMenuItem(
                     value: f.id,
                     child: Text(f.name, overflow: TextOverflow.ellipsis),
@@ -142,6 +144,8 @@ class _CredentialMigrationDialogState extends State<CredentialMigrationDialog> {
               ],
               onChanged: _busy ? null : _select,
             ),
+            if (widget.item.fields.any((f) => f.kind == FieldKind.file))
+              paragraph('普通文件不能转换为字符串凭据。密钥文件请在凭据管理中单独导入。'),
             if (_preview case final preview?) ...[
               const SizedBox(height: 18),
               Column(
