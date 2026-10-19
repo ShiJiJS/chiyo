@@ -1,0 +1,77 @@
+Running build hooks...Running build hooks...00:00 +0: loading test/attachment_backup_container_test.dart
+00:00 +0: test/information_file_staging_test.dart: SQLCipher owns exact BLOB bytes and metadata without loading them into items
+00:00 +1: test/information_file_staging_test.dart: SQLCipher owns exact BLOB bytes and metadata without loading them into items
+00:00 +2: test/attachment_backup_container_test.dart: real encrypted multichunk/empty/purged bytes round trip with a bounded source
+00:00 +2: test/attachment_legacy_boundary_test.dart: authenticated format7 file-kind strings are rejected before inspection or restore, not downgraded
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:311:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///C:/Project/network_config/info-manage/packages/info_storage/test/attachment_legacy_boundary_test.dart:92:22)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:00 +3: test/attachment_legacy_boundary_test.dart: authenticated format7 file-kind strings are rejected before inspection or restore, not downgraded
+00:00 +4: test/attachment_legacy_boundary_test.dart: authenticated format7 file-kind strings are rejected before inspection or restore, not downgraded
+00:00 +5: test/attachment_legacy_boundary_test.dart: authenticated format7 file-kind strings are rejected before inspection or restore, not downgraded
+00:00 +6: test/attachment_legacy_boundary_test.dart: authenticated format7 file-kind strings are rejected before inspection or restore, not downgraded
+00:00 +7: test/attachment_legacy_boundary_test.dart: authenticated format7 file-kind strings are rejected before inspection or restore, not downgraded
+00:00 +8: test/attachment_legacy_boundary_test.dart: authenticated format7 file-kind strings are rejected before inspection or restore, not downgraded
+00:00 +9: test/attachment_legacy_boundary_test.dart: authenticated format7 file-kind strings are rejected before inspection or restore, not downgraded
+00:00 +10: test/attachment_legacy_boundary_test.dart: authenticated format7 file-kind strings are rejected before inspection or restore, not downgraded
+00:00 +11: test/attachment_backup_container_test.dart: existing destination and publication races never overwrite an owner file
+00:00 +12: test/information_file_staging_test.dart: failed draft cancellation cannot partially remove its staged files
+00:00 +13: test/attachment_backup_container_test.dart: wrong key, corrupted page and both truncated forms fail before returning a reader
+2026-10-19 17:09:27.744: ERROR CORE sqlcipher_page_cipher: hmac check failed for pgno=1
+2026-10-19 17:09:27.745: ERROR CORE sqlite3Codec: error decrypting page 1 data: 1
+2026-10-19 17:09:27.745: ERROR CORE sqlcipher_codec_ctx_set_error: 1 lock=0
+00:00 +14: test/information_file_staging_test.dart: transactional byte budget serializes simultaneous final-size reservations
+00:00 +15: test/information_file_staging_test.dart: transactional byte budget serializes simultaneous final-size reservations
+00:00 +16: test/information_file_staging_test.dart: transactional byte budget serializes simultaneous final-size reservations
+00:01 +17: test/information_file_staging_test.dart: transactional byte budget serializes simultaneous final-size reservations
+00:01 +18: test/information_file_staging_test.dart: transactional byte budget serializes simultaneous final-size reservations
+00:01 +19: test/information_file_staging_test.dart: transactional byte budget serializes simultaneous final-size reservations
+00:01 +20: test/information_file_staging_test.dart: transactional byte budget serializes simultaneous final-size reservations
+00:01 +21: test/information_file_staging_test.dart: transactional byte budget serializes simultaneous final-size reservations
+00:01 +22: test/information_file_staging_test.dart: transactional byte budget serializes simultaneous final-size reservations
+00:01 +23: test/information_file_staging_test.dart: transactional byte budget serializes simultaneous final-size reservations
+00:01 +24: test/information_file_staging_test.dart: transactional byte budget serializes simultaneous final-size reservations
+00:02 +25: test/information_file_staging_test.dart: transactional byte budget serializes simultaneous final-size reservations
+00:02 +26: test/information_file_staging_test.dart: transactional byte budget serializes simultaneous final-size reservations
+00:02 +27: test/attachment_backup_container_test.dart: authenticated but malformed noncanonical schema is rejected as a whole
+00:02 +28: test/information_file_staging_test.dart: reopening a library clears orphan stages without deleting formal text
+00:02 +29: test/attachment_backup_container_test.dart: authenticated but malformed WAL journal mode is rejected as a whole
+00:02 +30: test/information_file_staging_test.dart: schema18 structural fixture upgrades using format marker and conflicting table rolls back
+00:02 +31: test/attachment_backup_container_test.dart: validated reader holds its transaction and close invalidates a partial stream
+00:02 +31: test/information_file_staging_test.dart: backup excludes stages and successful restore clears drafts atomically; wrong key preserves them
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:311:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///C:/Project/network_config/info-manage/packages/info_storage/test/information_file_staging_test.dart:334:22)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:02 +32: test/information_file_staging_test.dart: backup excludes stages and successful restore clears drafts atomically; wrong key preserves them
+00:02 +33: test/attachment_backup_container_test.dart: legacy complete-backup reader refuses the format8 container
+00:02 +34: All tests passed!
