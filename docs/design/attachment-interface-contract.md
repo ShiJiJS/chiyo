@@ -44,6 +44,7 @@ Owner另存按固定版本完整读取，校验长度和SHA-256，源事务成�
 ```json
 {"protocolVersion":2,"command":"file-fetch","requestId":"request-id","itemId":"career","fieldId":"resume","operationId":"delivery-op-1"}
 {"protocolVersion":2,"command":"file-status","deliveryId":"delivery-id"}
+{"protocolVersion":2,"command":"file-status","operationId":"delivery-op-1"}
 {"protocolVersion":2,"command":"file-release","deliveryId":"delivery-id"}
 ```
 
@@ -53,9 +54,15 @@ Owner另存按固定版本完整读取，校验长度和SHA-256，源事务成�
 
 `file-status`只返回所属会话的非内容事实：版本、状态、截止及可公开错误；不返回path、正文或摘要哈希。状态为`preparing|ready|released|expired|cleanup_pending|failed|unknown`。`file-release`幂等停止该副本使用并请求清理，重复释放返回当前事实；不伪造文件占用情况下的删除成功。目录/read接口不返回二进制、Base64或交付路径：对文件调用普通`read`返回`file_delivery_required`，提示使用file-fetch。
 
+领取响应丢失时可能尚无deliveryId，因此file-status另接受原operationId，二者必须且只能提供一个；file-release仍使用deliveryId。按operationId查询不排在原文件IO之后，不创建操作/副本，只报告已登记事实。查询到ready也不构成新读取许可，领取路径仍须通过原授权与完整核验；失效清理尚未保存时可能暂报之前的状态及原截止时间。没有所属会话记录时返回delivery_not_found，其他会话不能据此判断记录是否存在。not_found也不证明排队中的原请求将来不会登记，不能自动换ID或重放领取。
+
+CLI文件命令默认v2，显式v1拒绝；先核对服务的协议和information-attachments.v1能力。HTTP为/information-file/fetch、status、release，严格JSON及16KiB请求上限；Agent提交的命令不能带任意目标路径、租约或私密会话证明。私密会话由受信客户端内部带入传输。文件调用等待上限30秒；领取/释放的连接中断、截断响应或超时统一报告delivery_unknown、operationClaimed=true及原非秘密查询ID，禁止自动重试。查询运输失败仅报告service_unavailable。正式bootstrap仍须在原生文件驱动、存储及#38主人界面连接后显式启用能力；旧客户端目录/申请不静默忽略文件。
+
 副本使用应用生成的唯一安全子目录和安全basename；不把原文件名作为路径片段或接受Agent指定任意写入目标。主人另存与Agent受管交付分开。撤销、到期、会话结束和重启阻止新领取，并按登记记录回收副本；打开句柄导致清理失败时记录cleanup_pending并安全重试。此机制不回收已被复制/上传的数据，不提供同用户强沙箱。交付历史和备份均不含path或执行能力。
 
 错误投影至少包含`not_authorized, grant_expired, session_ended, field_removed, not_a_file, unsupported_capability, unsupported_file_write, file_delivery_required, operation_conflict, stage_unavailable, version_conflict, attachment_too_large, attachment_capacity_exceeded, attachment_missing, attachment_integrity_failed, delivery_io_failed, audit_failed`；客户端保留当前位置和可重试草稿，不把错误当空文件或成功。权限失败不泄露未获批文件的名称/大小。
+
+2026-10-19最新传输检查点：[HTTP/独立CLI与实际中断](../development/issue37-delivery-cli.md)已通过，30秒超时按原操作查询、不自动重放。最终容量/RSS及全写入口预算、正式bootstrap及#38仍待，不宣告能力。此前存储检查点如下。
 
 2026-10-19最新实施检查点：[加密交付登记/归档](../development/issue37-delivery-storage.md)已接schema21/备份9；实际SQLCipher与Windows占用重开、归档白名单和末段回滚已验证。HTTP/独立CLI及生产bootstrap仍待，能力继续关闭；旧检查点如下。
 
