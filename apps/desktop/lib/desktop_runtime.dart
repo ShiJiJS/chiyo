@@ -124,6 +124,7 @@ class DesktopRuntime extends ChangeNotifier {
   bool recycleCleanupFailed = false;
   bool revisionCleanupFailed = false;
   bool attachmentCleanupFailed = false;
+  bool informationDeliveryCleanupFailed = false;
   bool credentialCleanupFailed = false;
   bool runtimeMaterialCleanupFailed = false;
   int runtimeMaterialChecks = 0;
@@ -171,12 +172,7 @@ class DesktopRuntime extends ChangeNotifier {
     } catch (_) {
       credentialCleanupFailed = true;
     }
-    try {
-      await service.owner.purgeInformationAttachments();
-      attachmentCleanupFailed = false;
-    } catch (_) {
-      attachmentCleanupFailed = true;
-    }
+    await _checkInformationFiles();
     await reconcileRuntimeMaterialCleanup();
     try {
       await service.owner.pruneCredentialUseHistory();
@@ -185,6 +181,33 @@ class DesktopRuntime extends ChangeNotifier {
     }
     notifyListeners();
   });
+  Future<void> reconcileInformationFiles() =>
+      _maintenance = _maintenance.then((_) async {
+        if (quitting) return;
+        await _checkInformationFiles();
+      });
+
+  Future<void> _checkInformationFiles() async {
+    try {
+      if (service.owner.informationFileDeliveries.any(
+        (record) => record.holdsCopy,
+      )) {
+        await service.owner.reconcileInformationFileDeliveries();
+      }
+      informationDeliveryCleanupFailed = service.owner.informationFileDeliveries
+          .any((record) => record.runtime && record.state == 'cleanup_pending');
+    } catch (_) {
+      informationDeliveryCleanupFailed = true;
+    }
+    try {
+      await service.owner.purgeInformationAttachments();
+      attachmentCleanupFailed = false;
+    } catch (_) {
+      attachmentCleanupFailed = true;
+    }
+    notifyListeners();
+  }
+
   Future<void> reconcileRuntimeMaterialCleanup() async {
     try {
       runtimeMaterialChecks = await service.owner

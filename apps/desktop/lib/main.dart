@@ -64,6 +64,9 @@ Future<DesktopLibrary> _openLibrary() async {
     service: InformationService(
       repository: repository,
       focusedFillDriver: fill,
+      informationDeliveryFiles: Platform.isWindows
+          ? WindowsInformationDeliveryFiles()
+          : null,
     ),
     close: repository.close,
     backups: repository.backups,

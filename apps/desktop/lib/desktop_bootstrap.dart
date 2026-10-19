@@ -52,11 +52,19 @@ class DesktopBootstrap extends ChangeNotifier {
     try {
       await _release();
       library = await openLibrary();
+      // Reconcile registered copies before publishing the Windows endpoint.
+      // Occupied/uncertain copies stay registered and consume their quota.
+      if (library!.service.owner.informationFileDeliveries.any(
+        (record) => record.holdsCopy,
+      )) {
+        await library!.service.owner.reconcileInformationFileDeliveries();
+      }
       _server = await AgentServer.start(
         library!.service.agent,
         port: port,
         enableReusableCredentialUse: Platform.isWindows,
         enableFocusedFill: Platform.isWindows,
+        enableInformationFiles: Platform.isWindows,
         credentialExecutionHandler: (session, input) {
           final host = _credentialExecutions;
           return host == null

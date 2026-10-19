@@ -58,6 +58,8 @@ class _SettingsPageState extends State<SettingsPage> {
   String? _message, _error;
   bool? _notificationDraft;
   bool _testFailed = false;
+  bool _checkingInformationFiles = false;
+  String? _informationFileError;
   late int _timeout = widget.owner.requestLifetime.inMinutes;
   late int _retention = widget.owner.auditRetentionDays;
   static const _labels = [
@@ -607,11 +609,66 @@ class _SettingsPageState extends State<SettingsPage> {
       ),
     ],
   );
+  int get _pendingInformationCopies => !widget.owner.serviceAvailable
+      ? 0
+      : widget.owner.informationFileDeliveries
+            .where(
+              (record) => record.runtime && record.state == 'cleanup_pending',
+            )
+            .length;
+  Future<void> _checkInformationFiles() async {
+    setState(() {
+      _checkingInformationFiles = true;
+      _informationFileError = null;
+    });
+    try {
+      final runtime = widget.runtime;
+      if (runtime != null) {
+        await runtime.reconcileInformationFiles();
+      } else {
+        await widget.owner.reconcileInformationFileDeliveries();
+        await widget.owner.purgeInformationAttachments();
+      }
+      if (mounted && _pendingInformationCopies > 0) {
+        setState(() => _informationFileError = '仍有副本待回收。占用或身份核查失败时保留登记，请稍后重试。');
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() => _informationFileError = '核查未完成，保留已登记副本。请检查本机存储后重试。');
+      }
+    } finally {
+      if (mounted) setState(() => _checkingInformationFiles = false);
+    }
+  }
+
   Widget _application() => _inset([
     CredentialMaterialChecks(
       owner: widget.owner,
       reconcile: widget.runtime?.reconcileRuntimeMaterialCleanup,
     ),
+    SettingsRow(
+      '普通附件维护',
+      _pendingInformationCopies > 0
+          ? '有 $_pendingInformationCopies 份副本待回收。占用或身份核查失败时保留登记；不会重跑领取操作。'
+          : '核查已登记副本及过期原文。撤销或到期后回收副本；回收与修订中的原文按30天保留期清理。',
+      control: settingsAction(
+        context,
+        _checkingInformationFiles ? '正在核查…' : '核查附件',
+        _checkingInformationFiles ||
+                !widget.owner.serviceAvailable ||
+                widget.runtime?.quitting == true
+            ? null
+            : _checkInformationFiles,
+      ),
+    ),
+    if (_informationFileError != null ||
+        widget.runtime?.attachmentCleanupFailed == true ||
+        widget.runtime?.informationDeliveryCleanupFailed == true)
+      SettingsNotice(
+        '附件维护未完成',
+        _informationFileError ?? '过期原文或已登记副本尚未完成清理，内容仍保留，请重试。',
+        error: true,
+      ),
     SettingsRow(
       widget.owner.serviceAvailable ? '本机服务运行中' : '本机服务暂不可用',
       '应用为 Agent 提供访问请求入口；信息的实际读取需要你的授权。',

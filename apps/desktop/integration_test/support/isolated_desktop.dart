@@ -23,6 +23,7 @@ class IsolatedDesktopFixture {
     Future<void> Function(InformationService)? prepareLibrary,
     String? credentialWorkerExecutable,
     FocusedFillDriver? focusedFillDriver,
+    InformationDeliveryFiles? informationDeliveryFiles,
   }) async {
     final root = await Directory.systemTemp.createTemp('aim-native-approval-');
     final bootstrap = DesktopBootstrap(
@@ -37,6 +38,7 @@ class IsolatedDesktopFixture {
         final service = InformationService(
           repository: repository,
           focusedFillDriver: focusedFillDriver,
+          informationDeliveryFiles: informationDeliveryFiles,
         );
         try {
           await service.owner.createInformation(
