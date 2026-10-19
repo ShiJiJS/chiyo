@@ -6,7 +6,7 @@
 
 #36原型与接口合同已完成；#33 Windows功能已完成，见[最终验收](../development/issue33-completion.md)。协议v2在Windows生产bootstrap启用，新CLI默认2；423项零跳过、四包严格分析、真实Windows UI/独立编译适配器/SSH闭环、实际接收器及Release通过，旧许可不升级。当前用户包仍为0.4.0+8/v1，不把源码验收冒充已更新。接续#35→#37→#38→#30；#23/#18仍独立保留。
 
-#35当前推进：SQLCipher/schema18/备份7之后，接通真实Windows输入端和安全发现，见[原生检查点](../development/issue35-focused-fill-native.md)。423项执行零跳过（CLI为相关子集），47项原生检查Debug/Release各通过，独立CLI/Win32窗口验证输入/互斥/复用/未知恢复和剪贴板/正常工具文字。Flutter、正式bootstrap/打包及内置浏览器仍待，生产开关关闭。#37仍从schema18/备份7接续兼容1–7，不把QA程序当用户新包。
+#35当前推进：8b36ead已接入Flutter申请、审批、历史、分页和人工确认，见[客户端检查点](../development/issue35-focused-fill-ui.md)。本轮核心190/桌面125零跳过、16项客户端连续三轮、两包分析/Release、49项原型检查及21张四主题Flutter渲染通过；真实原生输入/发现仍以[4092d96检查点](../development/issue35-focused-fill-native.md)为准。正式bootstrap/可信辅助程序打包、完整Windows GUI/SQLCipher/CLI及内置浏览器仍待，生产开关关闭。schema18/备份7未变，#37从此接续兼容1–7，用户包未更新。
 
 ## 已交付基线
 
