@@ -275,7 +275,13 @@ Future<void> runFocusedFillNative(
         /* Await complete task-owned control file. */
       }
       if (next == null || next['id'] is! int || next['id'] == seen) {
-        await tester.pump(const Duration(milliseconds: 80));
+        if (harness == 'testWidgets') {
+          await tester.pump(const Duration(milliseconds: 80));
+        } else {
+          // A minimized native window need not produce another frame. Polling
+          // control must remain live while the app legitimately yields focus.
+          await Future<void>.delayed(const Duration(milliseconds: 80));
+        }
         continue;
       }
       seen = next['id'] as int;
