@@ -266,6 +266,7 @@ extension _CredentialRuntimeClient on AgentClient {
               'operation-status',
               'fill-use',
               'fill-status',
+              'focus-target',
             }.contains(submitted['command'])
         ? <String, dynamic>{...submitted, 'protocolVersion': 2}
         : submitted;
@@ -280,6 +281,7 @@ extension _CredentialRuntimeClient on AgentClient {
         throw const CredentialUseFailure('unsupported_protocol');
       }
       final allowed = switch (command) {
+        'focus-target' => {'protocolVersion', 'command'},
         'request-use' => {
           'protocolVersion',
           'command',
@@ -319,12 +321,28 @@ extension _CredentialRuntimeClient on AgentClient {
       final filling =
           command == 'fill-use' ||
           command == 'fill-status' ||
+          command == 'focus-target' ||
           input.containsKey('fill');
       if (filling && version != 2) {
         throw const CredentialUseFailure('unsupported_protocol');
       }
       if (version == 2) {
-        await _requireReusableCredentialCapability(focusedFill: filling);
+        await _requireReusableCredentialCapability(
+          focusedFill: filling,
+          focusedTarget: command == 'focus-target',
+        );
+      }
+      if (command == 'focus-target') {
+        FocusedFillTargetQuery.fromJson(input);
+        final result = await _call('/credential-use/focus-target', {
+          'sessionSecret': _session,
+          ...input,
+        });
+        return result['status'] == 'ok'
+            ? Map<String, dynamic>.from(
+                FocusedFillTarget.fromJson(result).toJson(),
+              )
+            : result;
       }
       if (command == 'request-use') {
         if (filling) {
@@ -455,6 +473,7 @@ extension _CredentialRuntimeClient on AgentClient {
 
   Future<void> _requireReusableCredentialCapability({
     bool focusedFill = false,
+    bool focusedTarget = false,
   }) async {
     final result = await _call('/capabilities', {});
     if (result['status'] == 'service_unavailable') {
@@ -468,6 +487,10 @@ extension _CredentialRuntimeClient on AgentClient {
         focusedFill &&
             !(result['capabilities'] as List).contains(
               'credential-focused-fill.v1',
+            ) ||
+        focusedTarget &&
+            !(result['capabilities'] as List).contains(
+              'credential-focused-target.v1',
             )) {
       throw const CredentialUseFailure('unsupported_capability');
     }

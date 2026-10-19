@@ -130,8 +130,14 @@ FocusSnapshot CaptureFocus() {
     if ((GetAsyncKeyState(key) & 0x8000) != 0) result.modifiers_released = false;
   }
   ComPtr<IUIAutomation> automation;
-  if (FAILED(CoCreateInstance(__uuidof(CUIAutomation), nullptr, CLSCTX_INPROC_SERVER,
+  if (FAILED(CoCreateInstance(__uuidof(CUIAutomation8), nullptr, CLSCTX_INPROC_SERVER,
       IID_PPV_ARGS(&automation)))) { result.error = "automation_unavailable"; return result; }
+  ComPtr<IUIAutomation2> bounded;
+  if (FAILED(automation.As(&bounded)) || FAILED(bounded->put_AutoSetFocus(FALSE)) ||
+      FAILED(bounded->put_ConnectionTimeout(500)) ||
+      FAILED(bounded->put_TransactionTimeout(500))) {
+    result.error = "automation_unavailable"; return result;
+  }
   ComPtr<IUIAutomationElement> element;
   if (FAILED(automation->GetFocusedElement(&element)) || element == nullptr) {
     result.error = "control_unavailable"; return result;

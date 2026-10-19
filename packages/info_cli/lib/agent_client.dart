@@ -80,6 +80,7 @@ class AgentClient {
       'cleanup-use',
       'fill-use',
       'fill-status',
+      'focus-target',
     }.contains(command)) {
       return _executeCredentialCommand(input);
     }

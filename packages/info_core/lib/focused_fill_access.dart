@@ -222,6 +222,30 @@ extension _FocusedFillService on InformationService {
 }
 
 extension FocusedFillAgentAccess on AgentAccess {
+  bool get focusedFillDiscoveryAvailable =>
+      focusedFillAvailable &&
+      _service.focusedFillDriver is FocusedFillDiscoveryDriver;
+  Future<FocusedFillTarget> discoverFocusedFillTarget(String session) async {
+    if (!focusedFillDiscoveryAvailable) {
+      throw const CredentialUseFailure('unsupported_capability');
+    }
+    void check() {
+      if (_service._closed || !_service._sessionActive(session)) {
+        throw const CredentialUseFailure('session_required');
+      }
+      _service._fillRepository();
+    }
+
+    check();
+    final target =
+        await (_service.focusedFillDriver as FocusedFillDiscoveryDriver)
+            .inspectTarget();
+    check();
+    return FocusedFillTarget.fromJson(
+      Map<String, dynamic>.from(target.toJson()),
+    );
+  }
+
   bool get focusedFillAvailable =>
       _service.focusedFillDriver != null &&
       _service._repository is FocusedFillRuntimeRepository &&
@@ -341,9 +365,12 @@ extension FocusedFillAgentAccess on AgentAccess {
         throw const CredentialUseFailure('unsupported_capability');
       }
       final request = _service._requireFillGrant(session, input.requestId);
+      if (_service._activeFocusedFill != null) {
+        throw const CredentialUseFailure('busy');
+      }
       if (_service._fillRepository().focusedFillOperations.any(
         (o) =>
-            o.requestId == request.id &&
+            _service._credentialUseSessions[o.requestId] == session &&
             ({
               FocusedFillState.checking,
               FocusedFillState.partial,
@@ -352,9 +379,6 @@ extension FocusedFillAgentAccess on AgentAccess {
             o.attentionAcknowledgedAt == null,
       )) {
         throw const CredentialUseFailure('fill_needs_attention');
-      }
-      if (_service._activeFocusedFill != null) {
-        throw const CredentialUseFailure('busy');
       }
       final now = _service._clock().toUtc();
       final operation = FocusedFillOperation(

@@ -2,7 +2,7 @@
 
 > 当前执行入口（2026-10-19）：[Windows后续计划](windows-next-iteration.md)继续跟踪三项新增调整。#36原型与#33凭据复用已完成，见[#33最终验收](../development/issue33-completion.md)；Windows源码已启用v2，接续#35→#37→#38→#30。当前已交付0.4.0+8包仍为v1，不表示用户已经更新。#23通知、#18新整包/干净环境及真实Codex联合门槛保持开放。下文旧阶段状态/自动继续同步安排仅作历史；无子Agent、服务器同步暂停，Mac及双向恢复延期。
 
-> #35检查点（2026-10-19）：[原型/只读识别](../development/issue35-focused-fill-checkpoint.md)、[核心/CLI](../development/issue35-focused-fill-core.md)后已完成SQLCipher类型化操作与重开、schema18/备份7及旧格式兼容，见[存储检查点](../development/issue35-focused-fill-storage.md)。411项测试零跳过（CLI为相关子集），四包分析/Release通过；实际原生输入、安全发现及Flutter仍待，生产开关关闭，#35保持OPEN，当前用户包未更新。
+> #35检查点（2026-10-19）：接续SQLCipher/schema18/备份7，已接真实Windows输入和安全发现，见[原生检查点](../development/issue35-focused-fill-native.md)。423项执行零跳过（CLI相关子集）、四包分析/Release、47项原生检查Debug/Release和独立CLI/Win32输入验证通过；Flutter、正式bootstrap/打包及内置浏览器仍待，生产开关关闭，#35保持OPEN，用户包未更新。
 
 2026-10-16：用户要求更新方案与GitHub tickets；[新计划](design-audit-2026-10-16/README.md)跟踪round05界面与凭据注入。任务按依赖推进，D0先补齐原型及协议。仅完成规划发布，未新增生产实现或实机验收；下方旧实现进度保留为基线事实。
 

@@ -386,6 +386,70 @@ abstract interface class FocusedFillDriver {
   Future<PreparedFocusedFill> prepare(FocusedFillApplication application);
 }
 
+abstract interface class FocusedFillDiscoveryDriver
+    implements FocusedFillDriver {
+  Future<FocusedFillTarget> inspectTarget();
+}
+
+class FocusedFillTargetQuery {
+  const FocusedFillTargetQuery._();
+  factory FocusedFillTargetQuery.fromJson(Map<String, dynamic> json) {
+    if (_useProtocol(json) != 2) {
+      throw const CredentialUseFailure('unsupported_protocol');
+    }
+    _useShape(json, {'protocolVersion', 'command'});
+    if (json['command'] != 'focus-target') {
+      throw const CredentialUseFailure('invalid_plan');
+    }
+    return const FocusedFillTargetQuery._();
+  }
+}
+
+/// Readiness is a point-in-time observation, never an input reservation, grant
+/// or a website-origin assertion. Native/control/process identities stay local.
+class FocusedFillTarget {
+  const FocusedFillTarget.ready(FocusedFillApplication this.application)
+    : errorCode = null;
+  const FocusedFillTarget.refused(this.errorCode) : application = null;
+  final FocusedFillApplication? application;
+  final String? errorCode;
+  Map<String, Object?> toJson() => {
+    'protocolVersion': 2,
+    'status': 'ok',
+    'targetState': application == null ? 'refused' : 'ready',
+    if (application != null) 'application': application!.toJson(),
+    if (application == null)
+      'errorCode': focusedFillErrorCodes.contains(errorCode)
+          ? errorCode
+          : 'unsupported_target',
+  };
+  factory FocusedFillTarget.fromJson(Map<String, dynamic> json) {
+    _useShape(
+      json,
+      {'protocolVersion', 'status', 'targetState'},
+      {'application', 'errorCode'},
+    );
+    if (_useProtocol(json) != 2 || json['status'] != 'ok') {
+      throw const CredentialUseFailure('invalid_type');
+    }
+    if (json['targetState'] == 'ready' &&
+        json['application'] is Map<String, dynamic> &&
+        !json.containsKey('errorCode')) {
+      return FocusedFillTarget.ready(
+        FocusedFillApplication.fromJson(
+          json['application'] as Map<String, dynamic>,
+        ),
+      );
+    }
+    if (json['targetState'] == 'refused' &&
+        !json.containsKey('application') &&
+        focusedFillErrorCodes.contains(json['errorCode'])) {
+      return FocusedFillTarget.refused(json['errorCode'] as String);
+    }
+    throw const CredentialUseFailure('invalid_type');
+  }
+}
+
 abstract interface class PreparedFocusedFill {
   FocusedFillApplication get application;
   Future<FocusedFillBatchResult> sendBatch(List<int> utf16CodeUnits);

@@ -197,6 +197,32 @@ Matcher code(String expected) => throwsA(
 
 void main() {
   test(
+    'an unresolved input cannot be retried through another already approved request in the same session',
+    () async {
+      final f = await fixture();
+      f.driver.onBatch = (_, _) async => const FocusedFillBatchResult(
+        FocusedFillState.unknown,
+        'fill_unknown',
+      );
+      await f.run();
+      final original = f.repo.focusedFillOperations.single;
+      await f.requestAndApprove();
+      await expectLater(
+        f.run('other-approved-request'),
+        code('fill_needs_attention'),
+      );
+      expect(f.driver.prepares, 1);
+      await f.service.owner.acknowledgeFocusedFillAttention(original.id);
+      f.driver.onBatch = (_, _) async =>
+          const FocusedFillBatchResult(FocusedFillState.sent);
+      expect((await f.run('explicit-after-owner-review'))['fillState'], 'sent');
+      expect(
+        f.repo.focusedFillOperations.first.state,
+        FocusedFillState.unknown,
+      );
+    },
+  );
+  test(
     'fill request limits match the portable credential history contract',
     () async {
       final f = await fixture(request: false);

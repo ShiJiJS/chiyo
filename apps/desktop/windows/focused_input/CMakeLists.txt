@@ -1,5 +1,5 @@
-# The inspection seam is not a filling capability. Diagnostics are explicitly
-# built while #35's application/CLI authorization is still being implemented.
+# Read-only capture is shared by diagnostics and the private input broker.
+# Targets remain explicit until desktop/browser integration is verified.
 add_library(focused_input_snapshot STATIC EXCLUDE_FROM_ALL "focus_snapshot.cpp")
 apply_standard_settings(focused_input_snapshot)
 target_compile_definitions(focused_input_snapshot PRIVATE NOMINMAX)
@@ -17,3 +17,47 @@ add_executable(focus_snapshot_test EXCLUDE_FROM_ALL "focus_snapshot_test.cpp")
 apply_standard_settings(focus_snapshot_test)
 target_compile_options(focus_snapshot_test PRIVATE /utf-8)
 target_link_libraries(focus_snapshot_test PRIVATE focused_input_snapshot)
+
+add_library(focused_input_guard STATIC EXCLUDE_FROM_ALL "fill_guard.cpp")
+apply_standard_settings(focused_input_guard)
+target_compile_definitions(focused_input_guard PRIVATE NOMINMAX)
+target_compile_options(focused_input_guard PRIVATE /utf-8)
+target_link_libraries(focused_input_guard PUBLIC focused_input_snapshot bcrypt advapi32)
+
+# Explicitly built until the real CLI/desktop end-to-end gate is complete.
+add_executable(focus_broker WIN32 EXCLUDE_FROM_ALL "broker_main.cpp")
+apply_standard_settings(focus_broker)
+target_compile_definitions(focus_broker PRIVATE NOMINMAX)
+target_compile_options(focus_broker PRIVATE /utf-8)
+target_link_libraries(focus_broker PRIVATE focused_input_guard)
+set_target_properties(focus_broker PROPERTIES OUTPUT_NAME "info-focus-broker")
+
+add_executable(fill_guard_test EXCLUDE_FROM_ALL "fill_guard_test.cpp")
+apply_standard_settings(fill_guard_test)
+target_compile_definitions(fill_guard_test PRIVATE NOMINMAX)
+target_compile_options(fill_guard_test PRIVATE /utf-8)
+target_link_libraries(fill_guard_test PRIVATE focused_input_guard)
+
+add_executable(focus_fixture WIN32 EXCLUDE_FROM_ALL "fixture_main.cpp")
+apply_standard_settings(focus_fixture)
+target_compile_definitions(focus_fixture PRIVATE NOMINMAX)
+target_compile_options(focus_fixture PRIVATE /utf-8)
+target_link_libraries(focus_fixture PRIVATE user32)
+set_target_properties(focus_fixture PROPERTIES OUTPUT_NAME "info-focus-fixture")
+
+foreach(mode IN ITEMS stall drop refusal malformed)
+  if(mode STREQUAL "stall")
+    set(fault_mode 0)
+  elseif(mode STREQUAL "drop")
+    set(fault_mode 1)
+  elseif(mode STREQUAL "refusal")
+    set(fault_mode 2)
+  else()
+    set(fault_mode 3)
+  endif()
+  add_executable(focus_${mode}_stub WIN32 EXCLUDE_FROM_ALL "broker_fault_stub.cpp")
+  apply_standard_settings(focus_${mode}_stub)
+  target_compile_definitions(focus_${mode}_stub PRIVATE NOMINMAX FILL_FAULT_MODE=${fault_mode})
+  target_compile_options(focus_${mode}_stub PRIVATE /utf-8)
+  target_link_libraries(focus_${mode}_stub PRIVATE focused_input_snapshot)
+endforeach()

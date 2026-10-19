@@ -101,7 +101,9 @@ Typed env/argv对象才产生注入：GH_TOKEN接收`{"secret":"alias"}`；SSH�
 
 ## 开发中的本机焦点填充（#35）
 
-核心/CLI已支持受控宿主测试，当前生产Windows客户端及0.4.0+8包尚未启用。必须同时协商协议2、`credential-use-reuse.v1`和`credential-focused-fill.v1`，未提供对应能力时停止，不退回返回密码原文。需要私密会话，不能只凭请求ID使用。
+核心/CLI与真实Windows输入端已接通，当前生产bootstrap、Flutter页面及0.4.0+8包尚未启用。必须同时协商协议2、`credential-use-reuse.v1`和`credential-focused-fill.v1`，未提供时停止，不退回返回密码原文。需要私密会话，不能只凭请求ID使用。
+
+若另有`credential-focused-target.v1`，`{"protocolVersion":2,"command":"focus-target"}`可观察本机当前密码目标，仅返回ready/refused和就绪应用路径/SHA；不提供值、窗口句柄或PID，不预留焦点、不审批、不输入。批准后必须重新点击空密码框。详见[原生合同与当前验证范围](design/windows-focused-fill-native.md)。
 
 `request-use`提交一个字符串凭据引用和`fill`（应用绝对路径/字节摘要、仅供判断的网址），不同时提供`launch`，也不附带普通字段授权。请求格式见[填充合同](design/local-focused-fill-contract.md)。批准固定凭据版本、应用、方式及15/30分钟期限；批准不输入。Agent准备空密码框、重新点击目标，再后台调用：
 
@@ -112,4 +114,4 @@ Typed env/argv对象才产生注入：GH_TOKEN接收`{"secret":"alias"}`；SSH�
 
 省略版本也按2处理。`fill-use`只登记/请求该次操作，宿主保管秘密；CLI没有输入值、窗口句柄、秘密文件路径或命令模板参数。`fill-status`仅查询；相同操作ID返回原记录，不再发送。响应丢失用原requestId/operationId查询，不改ID自动重试。
 
-结果区分checking、sent、refused、partial、unknown；sent仅表示Windows接受输入，不等于完整接收或登录成功。填充不返回命令退出码/文件清理或秘密。partial/unknown保留原事实并停止新操作，用户检查目标并通过所有者恢复入口确认后才可明确重做；确认不续期、不清空输入框，也不会重放旧操作。保持密码遮挡，不读取或显示明文；不自动提交登录。
+结果区分checking、sent、refused、partial、unknown；sent仅表示Windows接受输入，不等于完整接收或登录成功。填充不返回命令退出码/文件清理或秘密。partial/unknown保留原事实并停止同会话的新操作，不能换另一已批申请绕过；用户检查目标并通过所有者恢复入口确认后才可明确重做，不续期、不清空、不重放旧操作。仍在执行时返回busy且不排队。保持密码遮挡，不读取或显示明文，不自动提交登录。

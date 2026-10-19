@@ -174,8 +174,19 @@ class AgentServer {
           'capabilities': [
             if (enableReusableCredentialUse) 'credential-use-reuse.v1',
             if (_focusedFillEnabled) 'credential-focused-fill.v1',
+            if (_focusedFillEnabled && _agent.focusedFillDiscoveryAvailable)
+              'credential-focused-target.v1',
           ],
         };
+      case '/credential-use/focus-target':
+        if (!_focusedFillEnabled || !_agent.focusedFillDiscoveryAvailable) {
+          throw const CredentialUseFailure('unsupported_capability');
+        }
+        final command = Map<String, dynamic>.of(body)..remove('sessionSecret');
+        FocusedFillTargetQuery.fromJson(command);
+        return (await _agent.discoverFocusedFillTarget(
+          _text(body, 'sessionSecret'),
+        )).toJson();
       case '/credential-use/fill':
       case '/credential-use/fill/status':
         if (!_focusedFillEnabled) {

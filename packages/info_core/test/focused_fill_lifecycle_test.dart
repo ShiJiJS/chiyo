@@ -11,6 +11,9 @@ void main() {
     () async {
       final f = await fixture();
       f.driver.preparation = Completer<void>();
+      addTearDown(() {
+        if (!f.driver.preparation!.isCompleted) f.driver.preparation!.complete();
+      });
       final second = await f.service.agent.requestFocusedFill(
         f.session,
         FocusedFillInput.fromJson(f.input()),
