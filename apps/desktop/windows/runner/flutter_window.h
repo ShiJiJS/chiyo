@@ -31,6 +31,7 @@ class FlutterWindow : public Win32Window {
  private:
   bool AddTrayIcon();
   void RemoveTrayIcon();
+  void RemoveNotificationIcon();
   void OpenApprovals(const std::string& request_id = "");
   bool ShowNotification(const NotificationMessage& message);
   void SendDesktopEvent(const char* event);
@@ -42,6 +43,16 @@ class FlutterWindow : public Win32Window {
   bool tray_available_ = false;
   bool notifications_enabled_ = true;
   UINT tray_id_ = 0;
+  UINT notification_icon_id_ = 0;
+#ifndef NDEBUG
+  int notification_send_attempts_ = 0;
+  bool notification_last_accepted_ = false;
+  int notification_shown_ = 0;
+  int notification_hidden_ = 0;
+  int notification_timed_out_ = 0;
+  int notification_clicked_ = 0;
+  int notification_id_mismatch_ = 0;
+#endif
   NotificationQueue notifications_{[this](const NotificationMessage& message) {
     return ShowNotification(message);
   }};
