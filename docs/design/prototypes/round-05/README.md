@@ -32,4 +32,4 @@ index.html是唯一完整交互入口。baseline-index.html保存已确认基线
 
 `focused-fill.js/css`、`focused-fill-{approval,history,dialog}.html`和`focused-fill-assembly.cjs`沿用同一收件箱、决定栏和历史。`?state=fill-approval`、`fill-confirm`、`fill-result`、`fill-history`、`fill-sent`、`fill-refused`、`fill-partial`、`fill-unknown`、`fill-checking`、`fill-revoked`、`fill-rejected`、`fill-save-failed`、`fill-incompatible`、`fill-tip`、`fill-long-target`直达相应状态；主题参数不变。
 
-`node check-focused-fill.cjs`检查11项填充设计状态，连同原15/14/6项检查共46项。密码框填充不要求建议环境变量名，不展示命令/退出码/文件清理；批准后等待Agent点击目标，原型不发送任何真实输入。流程、类型和生产接口目标见[填充合同](../../local-focused-fill-contract.md)，原生只读识别不等于正式填充已实现。
+`node check-focused-fill.cjs`检查14项填充设计状态，连同原15/14/6项检查共49项。部分/未知结果增加“我已检查并处理输入框”的人工确认，失败保留暂停和原结果；确认不输入、不续期。逐次记录每页最多8项，原操作选择独立。密码框填充不要求建议环境变量名，不展示命令/退出码/文件清理；批准后等待Agent点击目标，原型不发送任何真实输入。流程、类型和生产接口目标见[填充合同](../../local-focused-fill-contract.md)；Flutter渲染与原生输入检查点分别取证，均不替代完整用户流程验收。

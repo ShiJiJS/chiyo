@@ -520,11 +520,21 @@ void main() {
         FocusedFillState.checking,
       );
       expect(f.repo.focusedFillOperations.single.inputReleased, isTrue);
+      expect(
+        f.service.owner.focusedFillOperationState(result['fillId']! as String),
+        FocusedFillState.unknown,
+      );
       await expectLater(
         f.service.agent.startFocusedFill(f.session, f.operation('new')),
         code('fill_needs_attention'),
       );
       f.repo.failPhase = null;
+      expect(
+        f.service.owner.canAcknowledgeFocusedFillAttention(
+          result['fillId']! as String,
+        ),
+        isTrue,
+      );
       await f.service.owner.acknowledgeFocusedFillAttention(
         result['fillId']! as String,
       );
@@ -535,6 +545,12 @@ void main() {
       expect(
         f.repo.focusedFillOperations.single.attentionAcknowledgedAt,
         isNotNull,
+      );
+      expect(
+        f.service.owner.canAcknowledgeFocusedFillAttention(
+          result['fillId']! as String,
+        ),
+        isFalse,
       );
     },
   );

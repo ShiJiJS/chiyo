@@ -412,6 +412,33 @@ extension FocusedFillAgentAccess on AgentAccess {
 }
 
 extension FocusedFillOwnerAccess on OwnerAccess {
+  /// The known input outcome may be uncertain even when its terminal audit
+  /// could not be saved. Keep this fact independent of recovery availability.
+  FocusedFillState focusedFillOperationState(String id) {
+    final record = focusedFillOperations.where((o) => o.id == id).firstOrNull;
+    if (record == null) throw const CredentialUseFailure('session_mismatch');
+    return record.state == FocusedFillState.checking &&
+            _service._failedFillAudits.contains(id)
+        ? FocusedFillState.unknown
+        : record.state;
+  }
+
+  /// Owner-only recovery affordance. A live input operation cannot be cleared.
+  /// A failed terminal audit is also recoverable after its native task stops.
+  bool canAcknowledgeFocusedFillAttention(String id) {
+    if (_service._closed || _service._backupBusy) return false;
+    final record = focusedFillOperations.where((o) => o.id == id).firstOrNull;
+    return record != null &&
+        record.attentionAcknowledgedAt == null &&
+        _service._activeFocusedFill != id &&
+        ({
+              FocusedFillState.partial,
+              FocusedFillState.unknown,
+            }.contains(record.state) ||
+            record.state == FocusedFillState.checking &&
+                _service._failedFillAudits.contains(id));
+  }
+
   List<FocusedFillOperation> get focusedFillOperations =>
       _service._repository is FocusedFillRuntimeRepository
       ? (_service._repository as FocusedFillRuntimeRepository)

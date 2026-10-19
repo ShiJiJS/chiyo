@@ -1294,7 +1294,7 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
                         e.use!.credentialName ?? '',
                         e.use!.credentialId,
                         '凭据使用',
-                        e.use!.plan.receiver,
+                        e.use!.isFocusedFill ? '本机焦点填充' : e.use!.plan.receiver,
                       ],
                       ...e.fields.map((f) => '${f.itemName} ${f.fieldName}'),
                     ].any((s) => s.toLowerCase().contains(needle))),

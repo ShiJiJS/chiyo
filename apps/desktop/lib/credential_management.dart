@@ -342,7 +342,7 @@ class _CredentialManagementState extends State<CredentialManagement> {
                 maxLength: 4000,
                 lines: 3,
               ),
-              credentialInput(context, '建议绑定名称', _binding, maxLength: 64),
+              credentialInput(context, '建议绑定名称（可选）', _binding, maxLength: 64),
             ],
           ],
           if (action == 'disable') paragraph('停用保留资料，使待启动许可失效。正在运行的程序不会停止。'),

@@ -94,7 +94,9 @@ Widget credentialFlowError(BuildContext context, String text) => Semantics(
       style: prototypeText(
         context,
         13,
-        color: const Color(0xff8b3c37),
+        color: UiPalette.of(context).isMono
+            ? UiPalette.of(context).noticeWarningInk
+            : const Color(0xff8b3c37),
         height: 1.8,
       ),
     ),
@@ -183,7 +185,7 @@ class _CredentialEditorState extends State<CredentialEditor> {
       final c = _form == CredentialForm.string
           ? await widget.owner.createStringCredential(
               name: _name.text,
-              publicPurpose: 'API Token',
+              publicPurpose: '字符串凭据',
               secret: _secret.text,
               suggestedBinding: _binding.text,
             )
@@ -212,7 +214,8 @@ class _CredentialEditorState extends State<CredentialEditor> {
         (_form == CredentialForm.string
             ? _secret.text.isNotEmpty
             : _file != null) &&
-        RegExp(r'^[A-Za-z_][A-Za-z0-9_]{0,63}$').hasMatch(_binding.text);
+        (_binding.text.isEmpty ||
+          RegExp(r'^[A-Za-z_][A-Za-z0-9_]{0,63}$').hasMatch(_binding.text));
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {
@@ -350,18 +353,18 @@ class _CredentialEditorState extends State<CredentialEditor> {
               context,
               _form == CredentialForm.file
                   ? '保存文件内容的独立副本。更改原文件不会自动更新凭据，也不会自动删除原文件。'
-                  : '使用时注入进程环境变量，不通过聊天或普通读取接口交出原文。',
+                  : '可用于运行时注入或本机密码框填充，不通过聊天或普通读取接口交出原文。',
             ),
             credentialInput(
               context,
-              _form == CredentialForm.file ? '文件引用别名' : '建议环境变量名',
+              _form == CredentialForm.file ? '文件引用别名（可选）' : '建议环境变量名（可选）',
               _binding,
               key: const ValueKey('credential-binding'),
               maxLength: 64,
             ),
             credentialHelp(
               context,
-              '别名可用字母、数字和下划线；环境变量建议用大写字母。这里只保存建议；每次申请另行声明参数位置或目标程序认识的环境变量名。',
+              '留空不影响密码框填充。填写时可用字母、数字和下划线；这里只保存建议，命令申请另行声明注入位置。',
             ),
             if (_error != null) credentialFlowError(context, _error!),
           ],

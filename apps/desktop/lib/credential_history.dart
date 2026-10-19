@@ -7,6 +7,7 @@ import 'credential_operations.dart';
 import 'prototype_ui.dart';
 import 'settings_controls.dart';
 import 'ui.dart';
+import 'focused_fill_ui.dart';
 
 String credentialHistoryState(OwnerAccess owner, CredentialUseRequest r) {
   if (r.protocolVersion == 2) {
@@ -261,6 +262,16 @@ class _CredentialHistoryDocumentState extends State<CredentialHistoryDocument> {
   );
   @override
   Widget build(BuildContext context) {
+    if (r.isFocusedFill) {
+      return FocusedFillHistoryDocument(
+        key: ValueKey('focused-history-${r.id}'),
+        owner: widget.owner,
+        request: r,
+        stateLabel: credentialHistoryState(widget.owner, r),
+        onChanged: widget.onChanged,
+        onOpenCredential: widget.onOpenCredential,
+      );
+    }
     final avatarSize = MediaQuery.textScalerOf(context).scale(16) * 1.75;
     final c = UiPalette.of(context),
         record = widget.owner.credentialExecutions

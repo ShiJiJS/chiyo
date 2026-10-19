@@ -7,6 +7,9 @@ import 'prototype_dialog.dart';
 import 'credential_execution_receipt.dart';
 import 'credential_operations.dart';
 import 'credential_delivery.dart';
+import 'credential_use_draft.dart';
+import 'focused_fill_ui.dart';
+export 'credential_use_draft.dart';
 
 String credentialUseStateLabel(String state) => switch (state) {
   'pending' => '待处理',
@@ -16,16 +19,6 @@ String credentialUseStateLabel(String state) => switch (state) {
   'expired' => '已到期',
   _ => '已结束',
 };
-
-class CredentialUseApprovalDraft {
-  CredentialUseApprovalDraft(Iterable<FieldRef> fields)
-    : fields = fields.toSet();
-  bool allowCredential = true, fieldsExpanded = false, planExpanded = false;
-  int minutes = 15;
-  int fieldMinutes = 480;
-  final Set<FieldRef> fields;
-  String? tip;
-}
 
 class CredentialUseApprovalPanel extends StatefulWidget {
   const CredentialUseApprovalPanel({
@@ -1241,25 +1234,36 @@ class _CredentialUseApprovalPanelState
   }
 
   @override
-  Widget build(BuildContext context) => LayoutBuilder(
-    builder: (context, bounds) {
-      final wide =
-          bounds.maxWidth >= 780 &&
-          MediaQuery.textScalerOf(context).scale(14) <= 20;
-      return wide
-          ? Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Expanded(child: _documentBody()),
-                SizedBox(width: 244, child: _decisionBody()),
-              ],
-            )
-          : Column(
-              children: [
-                Expanded(child: _documentBody()),
-                SizedBox(height: bounds.maxHeight * .4, child: _decisionBody()),
-              ],
-            );
-    },
-  );
+  Widget build(BuildContext context) => r.isFocusedFill
+      ? FocusedFillApprovalPanel(
+          key: ValueKey('focused-fill-${r.id}'),
+          owner: widget.owner,
+          request: r,
+          draft: draft,
+          onChanged: widget.onChanged,
+        )
+      : LayoutBuilder(
+          builder: (context, bounds) {
+            final wide =
+                bounds.maxWidth >= 780 &&
+                MediaQuery.textScalerOf(context).scale(14) <= 20;
+            return wide
+                ? Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Expanded(child: _documentBody()),
+                      SizedBox(width: 244, child: _decisionBody()),
+                    ],
+                  )
+                : Column(
+                    children: [
+                      Expanded(child: _documentBody()),
+                      SizedBox(
+                        height: bounds.maxHeight * .4,
+                        child: _decisionBody(),
+                      ),
+                    ],
+                  );
+          },
+        );
 }

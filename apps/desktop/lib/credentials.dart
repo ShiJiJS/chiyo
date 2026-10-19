@@ -925,7 +925,7 @@ class _CredentialLibraryState extends State<CredentialLibrary> {
                         ),
                         _fact(
                           c.form == CredentialForm.file ? '文件引用别名' : '建议环境变量名',
-                          t(c.suggestedBinding, 13, family: 'Consolas'),
+                          t(c.suggestedBinding.isEmpty ? '未设置' : c.suggestedBinding, 13, family: 'Consolas'),
                         ),
                         _fact('最近使用', t('尚未使用', 13)),
                         const SizedBox(height: 22),
