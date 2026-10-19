@@ -8,3 +8,4 @@ docs/development/evidence/issue35-native-user-flow/raw/** -text -diff
 docs/development/evidence/issue35-native-user-flow/control-native-ui.py.txt -text -diff
 docs/development/evidence/issue37-typed-fields/fields-* -text -diff
 docs/development/evidence/issue35-completion/raw/** -text -diff
+docs/development/evidence/issue37-encrypted-staging/raw/** -text -diff
