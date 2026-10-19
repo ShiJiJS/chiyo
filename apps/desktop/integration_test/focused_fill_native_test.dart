@@ -50,13 +50,14 @@ Future<void> runFocusedFillNative(
   required bool lockedOnly,
   bool? testSemanticsRequested,
   String harness = 'testWidgets',
+  void Function(Object?, Object?, {String? reason}) verify = expect,
 }) async {
   const cliPath = String.fromEnvironment('FILL_CLI'),
       receiverPath = String.fromEnvironment('FILL_RECEIVER'),
       evidence = String.fromEnvironment('FILL_EVIDENCE');
-  expect(cliPath, isNotEmpty);
-  expect(receiverPath, isNotEmpty);
-  expect(evidence, isNotEmpty);
+  verify(cliPath, isNotEmpty);
+  verify(receiverPath, isNotEmpty);
+  verify(evidence, isNotEmpty);
   final folder = Directory(evidence);
   await folder.create(recursive: true);
   final random = Random.secure();
@@ -139,7 +140,7 @@ Future<void> runFocusedFillNative(
       return jsonDecode(lines.current) as Map<String, dynamic>;
     }
 
-    expect((await response(receiverLines))['event'], 'window_ready');
+    verify((await response(receiverLines))['event'], 'window_ready');
     Future<Map<String, dynamic>> receive(int code, [String? value]) async {
       final units = value?.codeUnits ?? const <int>[];
       final body = Uint8List(1 + units.length * 2)..[0] = code;
@@ -195,20 +196,20 @@ Future<void> runFocusedFillNative(
     await receive(1, secret);
     await call({'command': 'session', 'chatLabel': 'Windows本机填充闭环'});
     final capabilities = await call({'command': 'capabilities'});
-    expect(
+    verify(
       capabilities['capabilities'],
       contains('credential-focused-target.v1'),
     );
     if (lockedOnly) {
       final result = await call({'command': 'focus-target'});
-      expect(result['targetState'], 'refused');
-      expect(result['errorCode'], 'desktop_locked');
+      verify(result['targetState'], 'refused');
+      verify(result['errorCode'], 'desktop_locked');
       final input = await receive(2);
-      expect(input['empty'], isTrue);
-      expect(input['noPaste'], isTrue);
-      expect(input['clipboardUnchanged'], isTrue);
-      expect(owner.focusedFillOperations, isEmpty);
-      expect(owner.credentialUseRequests, isEmpty);
+      verify(input['empty'], isTrue);
+      verify(input['noPaste'], isTrue);
+      verify(input['clipboardUnchanged'], isTrue);
+      verify(owner.focusedFillOperations, isEmpty);
+      verify(owner.credentialUseRequests, isEmpty);
       closed = true;
       await record({
         'phase': 'locked_refusal',
@@ -270,7 +271,7 @@ Future<void> runFocusedFillNative(
             final value = await call({'command': 'focus-target'});
             if (value['targetState'] == 'ready') {
               final candidate = FocusedFillTarget.fromJson(value).application!;
-              expect(
+              verify(
                 candidate.executable.toLowerCase(),
                 (await File(receiverPath).resolveSymbolicLinks()).toLowerCase(),
               );
@@ -313,11 +314,11 @@ Future<void> runFocusedFillNative(
             });
             await capture('confirmation');
             await click('fill-confirm-decision');
-            expect(
+            verify(
               owner.credentialUseRequests.single.credentialApproved,
               isTrue,
             );
-            expect(owner.focusedFillOperations, isEmpty);
+            verify(owner.focusedFillOperations, isEmpty);
             approvals++;
             deadline = owner.credentialUseRequests.single.credentialExpiresAt;
             result = {
@@ -344,10 +345,10 @@ Future<void> runFocusedFillNative(
               'operationId': lastOperation,
             });
             final receiverFacts = await receive(2);
-            expect(receiverFacts['noPaste'], isTrue);
-            expect(receiverFacts['clipboardUnchanged'], isTrue);
+            verify(receiverFacts['noPaste'], isTrue);
+            verify(receiverFacts['clipboardUnchanged'], isTrue);
             if (status['fillState'] == 'sent') {
-              expect(receiverFacts['matches'], isTrue);
+              verify(receiverFacts['matches'], isTrue);
               if (next['action'] == 'duplicate') {
                 duplicateVerified = true;
               }
@@ -383,13 +384,13 @@ Future<void> runFocusedFillNative(
             attentionAcknowledged =
                 owner.focusedFillOperations.last.attentionAcknowledgedAt !=
                 null;
-            expect(attentionAcknowledged, isTrue);
+            verify(attentionAcknowledged, isTrue);
             result = {'ownerConfirmedByFlutter': attentionAcknowledged};
           case 'revoke':
             await click('fill-revoke');
             await tester.tap(find.text('确认撤销'));
             await tester.pumpAndSettle();
-            expect(
+            verify(
               owner.credentialGrantState(owner.credentialUseRequests.single),
               'revoked',
             );
@@ -420,20 +421,20 @@ Future<void> runFocusedFillNative(
         });
       }
     }
-    expect(
+    verify(
       closed,
       isTrue,
       reason: 'Interactive test must finish explicitly within its bound',
     );
-    expect(failed, isFalse);
-    expect(approvals, 1);
-    expect(duplicateVerified, isTrue);
-    expect(attentionBlocked, isTrue);
-    expect(attentionAcknowledged, isTrue);
-    expect(revoked, isTrue);
-    expect(revocationBlocked, isTrue);
-    expect(historyViewed, isTrue);
-    expect(
+    verify(failed, isFalse);
+    verify(approvals, 1);
+    verify(duplicateVerified, isTrue);
+    verify(attentionBlocked, isTrue);
+    verify(attentionAcknowledged, isTrue);
+    verify(revoked, isTrue);
+    verify(revocationBlocked, isTrue);
+    verify(historyViewed, isTrue);
+    verify(
       owner.focusedFillOperations
           .where((op) => op.state == FocusedFillState.sent)
           .length,
@@ -455,7 +456,7 @@ Future<void> runFocusedFillNative(
     await cliLines?.cancel();
     await receiverLines?.cancel();
     for (final drain in drains) {
-      expect(await drain, isEmpty);
+      verify(await drain, isEmpty);
     }
     await fixture.bootstrap.runtime!.stop();
     final reopened = await EncryptedInformationRepository.open(
@@ -476,7 +477,7 @@ Future<void> runFocusedFillNative(
           (r) => afterRestart.owner.credentialGrantState(r) != 'available',
         ),
       });
-      expect(facts['grantNotRevived'], isTrue);
+      verify(facts['grantNotRevived'], isTrue);
     } finally {
       await afterRestart.close();
       await reopened.close();

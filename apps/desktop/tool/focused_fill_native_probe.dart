@@ -20,7 +20,13 @@ Future<void> main() async {
     return true;
   };
   final controller = LiveWidgetController(binding);
-  void verifyFrameworkErrors() => expect(frameworkErrors, 0);
+  void verify(Object? actual, Object? expected, {String? reason}) {
+    if (!wrapMatcher(expected).matches(actual, <Object?, Object?>{})) {
+      throw StateError('Native assertion failed');
+    }
+  }
+
+  void verifyFrameworkErrors() => verify(frameworkErrors, 0);
   try {
     await runFocusedFillNative(
       controller,
@@ -31,14 +37,16 @@ Future<void> main() async {
       verifyFrameworkErrors: verifyFrameworkErrors,
       lockedOnly: false,
       harness: 'production WidgetsBinding + LiveWidgetController',
+      verify: verify,
     ).timeout(const Duration(minutes: 6));
     verifyFrameworkErrors();
     stdout.writeln('NATIVE_FOCUSED_FILL_ASSERTIONS=PASS');
     await stdout.flush();
     exit(0);
-  } on Object {
+  } on Object catch (error, stack) {
     // No raw framework errors or process payloads are emitted by this probe.
-    stderr.writeln('NATIVE_FOCUSED_FILL_ASSERTIONS=FAIL');
+    stderr.writeln('NATIVE_FOCUSED_FILL_ASSERTIONS=FAIL ${error.runtimeType}');
+    stderr.writeln(stack.toString().split('\n').take(8).join('\n'));
     await stderr.flush();
     exit(1);
   }
