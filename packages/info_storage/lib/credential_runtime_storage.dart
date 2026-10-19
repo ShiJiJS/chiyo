@@ -37,7 +37,7 @@ extension _CredentialRuntimeStorage on EncryptedInformationRepository {
     for (final row
         in await _db
             .customSelect(
-              'SELECT payload FROM credential_use_requests ORDER BY rowid',
+              'SELECT payload FROM credential_runtime_requests ORDER BY rowid',
             )
             .get()) {
       var r = CredentialUseRequest.fromJson(
@@ -55,7 +55,7 @@ extension _CredentialRuntimeStorage on EncryptedInformationRepository {
     for (final row
         in await _db
             .customSelect(
-              'SELECT payload FROM credential_executions ORDER BY rowid',
+              'SELECT payload FROM credential_operations ORDER BY rowid',
             )
             .get()) {
       var e = CredentialExecution.fromJson(
@@ -73,6 +73,7 @@ extension _CredentialRuntimeStorage on EncryptedInformationRepository {
       }
       _credentialExecutions.add(e);
     }
+    _validateRuntimeSnapshot(_credentialUseRequests, _credentialExecutions);
     // Loading only persists terminal facts; it never reconstructs capabilities.
     if (_credentialUseRequests.isNotEmpty) {
       await _commitRuntime(
@@ -90,25 +91,21 @@ extension _CredentialRuntimeStorage on EncryptedInformationRepository {
     void Function()? validate,
   }) async {
     if (_closed) throw const StorageFailure('library_closed');
-    if (requests.map((r) => r.id).toSet().length != requests.length ||
-        executions.map((e) => e.id).toSet().length != executions.length ||
-        executions.any((e) => !requests.any((r) => r.id == e.requestId))) {
-      throw const StorageFailure('invalid_runtime_snapshot');
-    }
+    _validateRuntimeSnapshot(requests, executions);
     try {
       await _db.transaction(() async {
         validate?.call();
-        await _db.customStatement('DELETE FROM credential_executions');
-        await _db.customStatement('DELETE FROM credential_use_requests');
+        await _db.customStatement('DELETE FROM credential_operations');
+        await _db.customStatement('DELETE FROM credential_runtime_requests');
         for (final r in requests) {
           await _db.customStatement(
-            'INSERT INTO credential_use_requests(id,payload) VALUES(?,?)',
+            'INSERT INTO credential_runtime_requests(id,payload) VALUES(?,?)',
             [r.id, jsonEncode(r.toJson())],
           );
         }
         for (final e in executions) {
           await _db.customStatement(
-            'INSERT INTO credential_executions(id,request_id,payload) VALUES(?,?,?)',
+            'INSERT INTO credential_operations(id,request_id,payload) VALUES(?,?,?)',
             [e.id, e.requestId, jsonEncode(e.toStorageJson())],
           );
         }
@@ -147,5 +144,60 @@ extension _CredentialRuntimeStorage on EncryptedInformationRepository {
     } on Object {
       throw const StorageFailure('audit_save_failed');
     }
+  }
+}
+
+void _validateRuntimeSnapshot(
+  List<CredentialUseRequest> requests,
+  List<CredentialExecution> executions,
+) {
+  Never invalid() => throw const StorageFailure('invalid_runtime_snapshot');
+  final byId = {for (final r in requests) r.id: r};
+  if (byId.length != requests.length ||
+      executions.map((e) => e.id).toSet().length != executions.length)
+    invalid();
+  final operations = <String, Set<String>>{},
+      executionById = <String, CredentialExecution>{};
+  for (final e in executions) {
+    final r = byId[e.requestId];
+    if (r == null ||
+        e.protocolVersion != r.protocolVersion ||
+        !{1, 2}.contains(e.protocolVersion))
+      invalid();
+    if (e.protocolVersion == 2) {
+      if (!r.credentialApproved ||
+          e.operationId == null ||
+          e.operationId!.length > 128 ||
+          !RegExp(r'^[!-~]+$').hasMatch(e.operationId!) ||
+          !operations.putIfAbsent(r.id, () => {}).add(e.operationId!) ||
+          e.operationFingerprint == null ||
+          !RegExp(r'^sha256:[0-9a-f]{64}$').hasMatch(e.operationFingerprint!) ||
+          e.operationPlan?.identity == null ||
+          e.operationPlan!.executable.byteLength < 1 ||
+          e.operationPlan!.executable.modifiedMicros < 0 ||
+          !RegExp(
+            r'^sha256:[0-9a-f]{64}$',
+          ).hasMatch(e.operationPlan!.executable.sha256) ||
+          e.operationPlan!.receiver != r.plan.receiver)
+        invalid();
+      final values = [...e.operationPlan!.argv, ...e.operationPlan!.env.values];
+      if (values.any(
+        (v) =>
+            {LaunchValueKind.secret, LaunchValueKind.file}.contains(v.kind) &&
+            v.value != r.alias,
+      ))
+        invalid();
+    }
+    executionById[e.id] = e;
+  }
+  for (final r in requests) {
+    if (!{1, 2}.contains(r.protocolVersion)) invalid();
+    if (r.protocolVersion == 2 &&
+        (r.attemptConsumed ||
+            (r.executionId == null
+                ? r.attemptedAt != null || operations.containsKey(r.id)
+                : executionById[r.executionId]?.requestId != r.id ||
+                      r.attemptedAt == null)))
+      invalid();
   }
 }

@@ -195,7 +195,7 @@ void main() {
       });
       expect(
         (await source.backups.inspect(portable, recovery)).formatVersion,
-        5,
+        6,
       );
       final privateRegistration = '${root.path}/private-registration.aimbackup';
       await _changeBackup(path, privateRegistration, recovery, (payload) {
@@ -213,7 +213,7 @@ void main() {
     },
   );
   test(
-    'format five restores credential bytes, versions, states and links under a fresh local key',
+    'current format restores credential bytes, versions, states and links under a fresh local key',
     () async {
       final root = await Directory.systemTemp.createTemp(
         'synthetic-credential-backup-',
@@ -255,7 +255,7 @@ void main() {
       final path = '${root.path}/complete.aimbackup';
       await service.owner.exportLibrary(() => source.backups.exportTo(path));
       final preview = await source.backups.inspect(path, recovery);
-      expect(preview.formatVersion, 5);
+      expect(preview.formatVersion, 6);
       expect(preview.credentialCount, 2);
       expect(preview.credentialVersionCount, 3);
       for (final mutation in [

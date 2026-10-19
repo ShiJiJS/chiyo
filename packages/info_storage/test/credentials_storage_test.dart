@@ -55,6 +55,10 @@ void main() {
             "INSERT INTO information_fields VALUES('legacy-host','legacy','Host','','synthetic.invalid')",
           );
         } else {
+          fixture.execute('DROP TABLE library_format');
+          fixture.execute('DROP TABLE credential_operations');
+          fixture.execute('DROP TABLE credential_runtime_requests');
+          fixture.execute('DROP TABLE ssh_host_trust');
           fixture.execute('DROP TABLE credential_materials');
           fixture.execute('DROP TABLE managed_credentials');
           if (legacy == 12) {
@@ -92,7 +96,7 @@ void main() {
           '${folder.path}/format-four.aim',
           key,
         );
-        expect(snapshot.formatVersion, 5);
+        expect(snapshot.formatVersion, 6);
         expect(snapshot.requestHistoryCount, 1);
         final credential = await service.owner.createStringCredential(
           name: 'Synthetic token',

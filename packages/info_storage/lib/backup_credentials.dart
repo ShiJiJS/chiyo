@@ -1,10 +1,11 @@
 part of 'info_storage.dart';
 
-// Explicit format-five shapes: neither a future private field nor arbitrary
+// Explicit portable shapes: neither a future private field nor arbitrary
 // runtime registration can silently enter a portable backup.
 void _validateBackupCredentials(
-  Map<String, List<Map<String, Object?>>> tables,
-) {
+  Map<String, List<Map<String, Object?>>> tables, {
+  required int formatVersion,
+}) {
   final credentials = <String, ManagedCredential>{};
   for (final row in tables['managed_credentials']!) {
     final j = _backupObject(_backupJson(row), {
@@ -145,7 +146,7 @@ void _validateBackupCredentials(
     if (base64Encode(trust.bytes) != bytes) _backupInvalid();
     validateSshKnownHosts(trust.name, trust.bytes);
   }
-  _validateBackupCredentialHistory(tables);
+  _validateBackupCredentialHistory(tables, formatVersion: formatVersion);
 }
 
 void _retainBackupCredentials(
@@ -175,7 +176,7 @@ void _archiveCredentialRuntime(Map<String, List<Map<String, Object?>>> tables) {
           'id': row['id'],
           'request_id': row['request_id'],
           'payload': jsonEncode(
-            CredentialExecution.fromJson(_backupJson(row)).toJson(),
+            CredentialExecution.fromJson(_backupJson(row)).toArchiveJson(),
           ),
         },
   ];
@@ -191,8 +192,9 @@ Object? _orderedBackupJson(Object? value) => value is Map
     : value;
 
 void _validateBackupCredentialHistory(
-  Map<String, List<Map<String, Object?>>> tables,
-) {
+  Map<String, List<Map<String, Object?>>> tables, {
+  required int formatVersion,
+}) {
   final requests = <String, CredentialUseRequest>{};
   for (final row in tables['credential_use_requests']!) {
     final j = _backupObject(
@@ -222,7 +224,11 @@ void _validateBackupCredentialHistory(
         'revokedAt',
         'attemptedAt',
       },
-      {'requestedPlan', 'restoredAt'},
+      {
+        'requestedPlan',
+        'restoredAt',
+        if (formatVersion >= 6) 'protocolVersion',
+      },
     );
     final id = _backupId(j, 'id');
     if (row['id'] != id || requests.containsKey(id)) _backupInvalid();
@@ -275,7 +281,14 @@ void _validateBackupCredentialHistory(
     final r = CredentialUseRequest.fromJson(j);
     if (r.approvedFields.any((f) => !r.fields.contains(f)) ||
         r.attemptConsumed && !r.credentialApproved ||
-        r.attemptConsumed != (r.executionId != null))
+        (r.protocolVersion == 1
+            ? r.attemptConsumed != (r.executionId != null)
+            : r.attemptConsumed ||
+                  r.executionId != null && !r.credentialApproved) ||
+        r.executionId != null && r.attemptedAt == null ||
+        r.credentialApproved &&
+            (r.decidedAt == null || r.credentialExpiresAt == null) ||
+        r.approvedFields.isNotEmpty && r.fieldExpiresAt == null)
       _backupInvalid();
     // Also rejects unknown nested plan/identity/reference keys; no filesystem
     // inspection or executable revalidation occurs while previewing history.
@@ -284,17 +297,29 @@ void _validateBackupCredentialHistory(
       _backupInvalid();
     requests[id] = r;
   }
-  final executionIds = <String>{}, usedRequests = <String>{};
+  final executions = <String, CredentialExecution>{},
+      legacyRequests = <String>{},
+      executionRequests = <String>{},
+      operationIds = <String, Set<String>>{};
   for (final row in tables['credential_executions']!) {
+    final raw = _backupJson(row);
+    final v2 = formatVersion >= 6 && raw['protocolVersion'] == 2;
     final j = _backupObject(
-      _backupJson(row),
+      raw,
       {
         'protocolVersion',
         'status',
         'executionId',
         'requestId',
         'executionState',
-        'attemptConsumed',
+        if (!v2)
+          'attemptConsumed'
+        else ...{
+          'operationClaimed',
+          'operationId',
+          'operationFingerprint',
+          'operationPlan',
+        },
         'processStarted',
         'exitCode',
         'errorCode',
@@ -309,13 +334,17 @@ void _validateBackupCredentialHistory(
     final id = _backupId(j, 'executionId'), request = _backupId(j, 'requestId');
     if (row['id'] != id ||
         row['request_id'] != request ||
-        !executionIds.add(id) ||
-        !usedRequests.add(request) ||
-        requests[request]?.executionId != id)
+        executions.containsKey(id) ||
+        !requests.containsKey(request) ||
+        requests[request]!.protocolVersion != (v2 ? 2 : 1) ||
+        !requests[request]!.credentialApproved ||
+        !v2 &&
+            (!legacyRequests.add(request) ||
+                requests[request]!.executionId != id))
       _backupInvalid();
-    if (j['protocolVersion'] != 1 ||
+    if (j['protocolVersion'] != (v2 ? 2 : 1) ||
         j['status'] != 'ok' ||
-        j['attemptConsumed'] != true ||
+        j[v2 ? 'operationClaimed' : 'attemptConsumed'] != true ||
         j['processStarted'] is! bool ||
         j['outputAvailable'] != false ||
         j['outputTruncated'] != false ||
@@ -347,11 +376,38 @@ void _validateBackupCredentialHistory(
     if (e.state == 'exited' && (e.exitCode == null || e.finishedAt == null) ||
         e.state == 'unknown' && e.exitCode != null)
       _backupInvalid();
+    if (v2) {
+      final operationId = _backupText(j, 'operationId', 128, required: true);
+      if (!RegExp(r'^[!-~]+$').hasMatch(operationId) ||
+          !operationIds.putIfAbsent(request, () => {}).add(operationId) ||
+          e.operationFingerprint == null ||
+          !RegExp(r'^sha256:[0-9a-f]{64}$').hasMatch(e.operationFingerprint!) ||
+          e.operationPlan == null ||
+          e.operationPlan!.receiver != requests[request]!.plan.receiver) {
+        _backupInvalid();
+      }
+    }
+    if (jsonEncode(_orderedBackupJson(e.toArchiveJson())) !=
+        jsonEncode(_orderedBackupJson(j))) {
+      _backupInvalid();
+    }
+    executions[id] = e;
+    executionRequests.add(request);
   }
   if (requests.values.any(
-    (r) => r.executionId != null && !executionIds.contains(r.executionId),
+    (r) =>
+        r.executionId != null && executions[r.executionId]?.requestId != r.id ||
+        r.executionId == null && executionRequests.contains(r.id),
   ))
     _backupInvalid();
+  try {
+    _validateRuntimeSnapshot(
+      requests.values.toList(),
+      executions.values.toList(),
+    );
+  } on Object {
+    _backupInvalid();
+  }
 }
 
 void _retainBackupCredentialHistory(
@@ -359,20 +415,30 @@ void _retainBackupCredentialHistory(
   DateTime cutoff,
   DateTime? restoredAt,
 ) {
-  final executions = {
-    for (final row in tables['credential_executions']!)
-      row['request_id']: CredentialExecution.fromJson(_backupJson(row)),
-  };
+  final executions = <String, List<CredentialExecution>>{};
+  for (final row in tables['credential_executions']!) {
+    executions
+        .putIfAbsent(row['request_id'] as String, () => [])
+        .add(CredentialExecution.fromJson(_backupJson(row)));
+  }
   tables['credential_use_requests']!.removeWhere((row) {
     final r = CredentialUseRequest.fromJson(_backupJson(row)),
-        e = executions[row['id']];
+        operations = executions[row['id']] ?? const <CredentialExecution>[];
+    // Portable history cannot prove an old source Job is no longer active.
+    // Preserve uncertainty and uncompleted cleanup across all operations.
+    if (operations.any(
+      (e) =>
+          {'preparing', 'running'}.contains(e.state) ||
+          e.state == 'unknown' && e.restoredAt == null ||
+          !{'not_needed', 'complete'}.contains(e.cleanupState),
+    ))
+      return false;
     return [
       r.createdAt,
       ?r.decidedAt,
       ?r.revokedAt,
       ?r.attemptedAt,
-      ?e?.startedAt,
-      ?e?.finishedAt,
+      for (final e in operations) ...[?e.startedAt, ?e.finishedAt],
     ].every((t) => t.isBefore(cutoff));
   });
   final ids = tables['credential_use_requests']!.map((r) => r['id']).toSet();
@@ -397,20 +463,25 @@ void _retainBackupCredentialHistory(
       {
         ...row,
         'payload': jsonEncode(
-          CredentialExecution.fromJson(_backupJson(row)).changed({
-            if ({
-              'preparing',
-              'running',
-            }.contains(executions[row['request_id']]!.state)) ...{
-              'executionState': 'unknown',
-              'exitCode': null,
-              'finishedAt': null,
-              'errorCode': 'execution_unknown',
-            },
-            'cleanupState': 'not_needed',
-            'restoredAt': restoredAt.toIso8601String(),
-          }).toJson(),
+          _restoreCredentialExecutionArchive(
+            CredentialExecution.fromJson(_backupJson(row)),
+            restoredAt,
+          ),
         ),
       },
   ];
 }
+
+Map<String, Object?> _restoreCredentialExecutionArchive(
+  CredentialExecution e,
+  DateTime restoredAt,
+) => e.changed({
+  if ({'preparing', 'running'}.contains(e.state)) ...{
+    'executionState': 'unknown',
+    'exitCode': null,
+    'finishedAt': null,
+    'errorCode': 'execution_unknown',
+  },
+  'cleanupState': 'not_needed',
+  'restoredAt': restoredAt.toIso8601String(),
+}).toArchiveJson();

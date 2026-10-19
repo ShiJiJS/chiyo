@@ -155,7 +155,7 @@ void main() {
       final key = await enableTestBackups(source.backups);
       final path = '${root.path}/times.aimbackup';
       await service.owner.exportLibrary(() => source.backups.exportTo(path));
-      expect(_payload(path, key)['version'], 5);
+      expect(_payload(path, key)['version'], 6);
       final target = await EncryptedInformationRepository.open(
         '${root.path}/target',
         _Keys(),
@@ -914,7 +914,7 @@ void main() {
       final path = '${root.path}/complete.aimbackup';
       await source.backups.exportTo(path);
       final payload = _payload(path, key);
-      expect(payload['version'], 5);
+      expect(payload['version'], 6);
       final tables = payload['tables'] as Map<String, dynamic>;
       expect(tables.keys.toSet(), {
         'information_directories',

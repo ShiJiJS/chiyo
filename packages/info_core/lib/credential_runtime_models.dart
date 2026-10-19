@@ -811,11 +811,14 @@ class CredentialExecution {
     'outputTruncated': false,
     if (restoredAt != null) 'restoredAt': _useTimestamp(restoredAt),
   };
-  Map<String, Object?> toStorageJson() => {
+  Map<String, Object?> toArchiveJson() => {
     ...toJson(),
     if (operationFingerprint != null)
       'operationFingerprint': operationFingerprint,
     if (operationPlan != null) 'operationPlan': operationPlan!.toJson(),
+  };
+  Map<String, Object?> toStorageJson() => {
+    ...toArchiveJson(),
     'pid': pid,
     'processCreatedAt': processCreatedAt,
     if (materialLease != null) 'materialLease': materialLease!.toPrivateJson(),

@@ -13,6 +13,8 @@ part 'backup_credentials.dart';
 part 'credentials_storage.dart';
 part 'credential_runtime_storage.dart';
 
+const _libraryFormat = 17;
+
 class StorageFailure implements Exception {
   const StorageFailure(this.code);
   final String code;
@@ -232,6 +234,28 @@ class EncryptedInformationRepository
       native.execute('PRAGMA temp_store = MEMORY');
       // Reading the schema checks the key before any migrations or updates.
       native.select('SELECT count(*) FROM sqlite_master');
+      if (native
+          .select(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name='library_format'",
+          )
+          .isNotEmpty) {
+        final marker = native.select(
+          'SELECT singleton,version FROM library_format',
+        );
+        if (marker.length != 1 ||
+            marker.single['singleton'] != 1 ||
+            marker.single['version'] is! int ||
+            (marker.single['version'] as int) < 17 ||
+            (marker.single['version'] as int) > _libraryFormat) {
+          throw const StorageFailure('unsupported_schema');
+        }
+      } else if (native
+          .select(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name IN ('credential_runtime_requests','credential_operations')",
+          )
+          .isNotEmpty) {
+        throw const StorageFailure('unsupported_schema');
+      }
       native.execute('PRAGMA foreign_keys = ON');
       db = _InformationDatabase(NativeDatabase.opened(native));
       native = null; // Drift owns the handle now.
@@ -1143,12 +1167,13 @@ class EncryptedInformationRepository
 class _InformationDatabase extends GeneratedDatabase {
   _InformationDatabase(super.executor);
   @override
-  int get schemaVersion => 16;
+  int get schemaVersion => _libraryFormat;
   @override
   Iterable<TableInfo<Table, Object?>> get allTables => const [];
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (_) async {
+      await _createLibraryFormat();
       await _createSshHostTrust();
       await _createCredentialRuntime();
       await _createCredentials();
@@ -1173,12 +1198,16 @@ class _InformationDatabase extends GeneratedDatabase {
       await _backupSchema();
     },
     onUpgrade: (_, from, to) async {
-      if (from < 1 || to != 16) {
+      if (from < 1 || from > to || to != _libraryFormat) {
         throw const StorageFailure('unsupported_schema');
       }
       await transaction(() async {
         if (from < 16) await _createSshHostTrust();
-        if (from < 15) await _createCredentialRuntime();
+        if (from < 15) {
+          await _createCredentialRuntime();
+        } else if (from < 17) {
+          await _migrateCredentialRuntime17();
+        }
         if (from < 14) await _createCredentials();
         if (from < 2) {
           await customStatement(
@@ -1214,6 +1243,7 @@ class _InformationDatabase extends GeneratedDatabase {
             'ALTER TABLE information_items ADD COLUMN modified_at TEXT',
           );
         }
+        await _createLibraryFormat();
       });
     },
     beforeOpen: (details) async {
@@ -1228,6 +1258,37 @@ class _InformationDatabase extends GeneratedDatabase {
       await _createAudit();
     },
   );
+
+  Future<void> _createLibraryFormat() async {
+    await customStatement(
+      'CREATE TABLE IF NOT EXISTS library_format(singleton INTEGER PRIMARY KEY CHECK(singleton=1),version INTEGER NOT NULL)',
+    );
+    await customStatement(
+      'INSERT INTO library_format(singleton,version) VALUES(1,?) ON CONFLICT(singleton) DO UPDATE SET version=excluded.version WHERE version<excluded.version',
+      [_libraryFormat],
+    );
+  }
+
+  Future<void> _migrateCredentialRuntime17() async {
+    final names = (await customSelect(
+      "SELECT name FROM sqlite_master WHERE type='table'",
+    ).get()).map((r) => r.read<String>('name')).toSet();
+    const old = {'credential_use_requests', 'credential_executions'},
+        current = {'credential_runtime_requests', 'credential_operations'};
+    if (names.containsAll(old) && names.intersection(current).isEmpty) {
+      await customStatement(
+        'ALTER TABLE credential_use_requests RENAME TO credential_runtime_requests',
+      );
+      await customStatement(
+        'ALTER TABLE credential_executions RENAME TO credential_operations',
+      );
+    } else if (!names.containsAll(current) ||
+        names.intersection(old).isNotEmpty) {
+      throw const StorageFailure('unsupported_schema');
+    }
+    // An old Drift reader may reset user_version before its missing-table
+    // failure. The independent native format marker remains authoritative.
+  }
 
   Future<void> _createRevisionPurges() => customStatement(
     'CREATE TABLE revision_purge_facts(item_id TEXT NOT NULL,version INTEGER NOT NULL,purged_at TEXT NOT NULL,PRIMARY KEY(item_id,version))',
@@ -1249,10 +1310,10 @@ class _InformationDatabase extends GeneratedDatabase {
 
   Future<void> _createCredentialRuntime() async {
     await customStatement(
-      'CREATE TABLE IF NOT EXISTS credential_use_requests(id TEXT PRIMARY KEY,payload TEXT NOT NULL)',
+      'CREATE TABLE IF NOT EXISTS credential_runtime_requests(id TEXT PRIMARY KEY,payload TEXT NOT NULL)',
     );
     await customStatement(
-      'CREATE TABLE IF NOT EXISTS credential_executions(id TEXT PRIMARY KEY,request_id TEXT NOT NULL REFERENCES credential_use_requests(id),payload TEXT NOT NULL)',
+      'CREATE TABLE IF NOT EXISTS credential_operations(id TEXT PRIMARY KEY,request_id TEXT NOT NULL REFERENCES credential_runtime_requests(id),payload TEXT NOT NULL)',
     );
   }
 

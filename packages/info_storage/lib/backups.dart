@@ -20,7 +20,8 @@ class BackupContents {
   int get requestHistoryCount => _tables['request_history']!.length;
   int get credentialCount => _tables['managed_credentials']!.length;
   int get credentialVersionCount => _tables['credential_materials']!.length;
-  int get credentialUseHistoryCount => _tables['credential_use_requests']!.length;
+  int get credentialUseHistoryCount =>
+      _tables['credential_use_requests']!.length;
   int get credentialExecutionCount => _tables['credential_executions']!.length;
   int get sshTrustCount => _tables['ssh_host_trust']!.length;
 }
@@ -86,6 +87,12 @@ class InformationBackups {
     ..._v4Columns,
     ..._credentialColumns,
   });
+  // Portable formats 1–6 keep their table keys independent of the schema17
+  // physical names. Legacy readers must not find a writable old runtime table.
+  static const _physicalTables = {
+    'credential_use_requests': 'credential_runtime_requests',
+    'credential_executions': 'credential_operations',
+  };
 
   void _checkOpen() {
     if (_repository._closed) throw const StorageFailure('library_closed');
@@ -241,7 +248,7 @@ class InformationBackups {
       for (final table in _allColumns.entries) {
         final rows = await _repository._db
             .customSelect(
-              'SELECT ${table.value.join(',')} FROM ${table.key} ORDER BY rowid',
+              'SELECT ${table.value.join(',')} FROM ${_physicalTables[table.key] ?? table.key} ORDER BY rowid',
             )
             .get();
         tables[table.key] = rows.map((row) => row.data).toList();
@@ -252,7 +259,7 @@ class InformationBackups {
       return _retain(
         _validate({
           'format': _format,
-          'version': 5,
+          'version': 6,
           'createdAt': now.toIso8601String(),
           'tables': tables,
         }),
@@ -273,7 +280,11 @@ class InformationBackups {
         in tables
             .map((r) => r.read<String>('name'))
             .where(
-              (name) => name != 'settings' && name != 'backup_configuration',
+              (name) => !{
+                'settings',
+                'backup_configuration',
+                'library_format',
+              }.contains(name),
             )) {
       final quoted = table.replaceAll('"', '""');
       final count = await _repository._db
@@ -300,7 +311,7 @@ class InformationBackups {
       final snapshot = await _snapshot();
       final payload = jsonEncode({
         'format': _format,
-        'version': 5,
+        'version': 6,
         'createdAt': snapshot.createdAt.toIso8601String(),
         'tables': snapshot._tables,
       });
@@ -455,8 +466,11 @@ class InformationBackups {
             in existingTables
                 .map((r) => r.read<String>('name'))
                 .where(
-                  (name) =>
-                      name != 'settings' && name != 'backup_configuration',
+                  (name) => !{
+                    'settings',
+                    'backup_configuration',
+                    'library_format',
+                  }.contains(name),
                 )) {
           final quoted = table.replaceAll('"', '""');
           final rows = await _repository._db
@@ -474,7 +488,7 @@ class InformationBackups {
           final placeholders = List.filled(table.value.length, '?').join(',');
           for (final row in contents._tables[table.key]!) {
             await _repository._db.customStatement(
-              'INSERT INTO ${table.key}(${table.value.join(',')}) VALUES($placeholders)',
+              'INSERT INTO ${_physicalTables[table.key] ?? table.key}(${table.value.join(',')}) VALUES($placeholders)',
               table.value.map((column) => row[column]).toList(),
             );
           }
@@ -493,7 +507,7 @@ class InformationBackups {
     if (decoded is! Map<String, dynamic>) invalid();
     if (decoded['format'] != _format ||
         decoded['version'] is! int ||
-        ![1, 2, 3, 4, 5].contains(decoded['version'])) {
+        ![1, 2, 3, 4, 5, 6].contains(decoded['version'])) {
       throw const StorageFailure('unsupported_backup');
     }
     if (decoded.length != 4 ||
@@ -681,7 +695,10 @@ class InformationBackups {
       }
     }
     _validateBackupHistory(tables);
-    _validateBackupCredentials(tables);
+    _validateBackupCredentials(
+      tables,
+      formatVersion: decoded['version'] as int,
+    );
     return BackupContents._(
       Map.unmodifiable(tables),
       createdAt,
