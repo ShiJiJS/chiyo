@@ -66,6 +66,9 @@ try {
     if (-not (Test-Path -LiteralPath (Join-Path $payload 'cli/template/references/credential-use.md') -PathType Leaf)) {
         throw 'The extracted SDK-free bundle is missing the credential-use Skill reference.'
     }
+    if (-not (Test-Path -LiteralPath (Join-Path $payload 'cli/template/references/information-files.md') -PathType Leaf)) {
+        throw 'The extracted SDK-free bundle is missing the information-files Skill reference.'
+    }
     # Restrict only this process and its children. Do not change the user's PATH.
     $env:PATH = "$env:SystemRoot\System32;$env:SystemRoot;$env:SystemRoot\System32\WindowsPowerShell\v1.0"
     $storage = Join-Path $payload 'diagnostics/bin/info-storage-check.exe'

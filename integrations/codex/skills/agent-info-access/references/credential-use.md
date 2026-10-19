@@ -124,7 +124,9 @@ This development branch has a separate local input protocol. A capability means
 the installed host offers that operation, not that every browser is supported.
 The previously delivered0.4.0+8 package does not offer it. Windows source now has
 verified local-input workflows; use only capabilities actually returned by the
-installed host. Ordinary attachment delivery is not implemented yet.
+installed host. For approved ordinary attachments, use
+[Ordinary information files](information-files.md); they are readable documents,
+not credentials for filling or process injection.
 
 1. Query `capabilities`. Require protocol2, `credential-use-reuse.v1` and
    `credential-focused-fill.v1`. For safe target discovery also require

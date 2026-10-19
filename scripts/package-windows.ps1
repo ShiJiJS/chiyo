@@ -96,6 +96,7 @@ try {
     Copy-Item -LiteralPath 'integrations/codex/skills/agent-info-access/SKILL.md' -Destination (Join-Path $cli 'template/SKILL.md')
     New-Item -ItemType Directory -Path (Join-Path $cli 'template/references') | Out-Null
     Copy-Item -LiteralPath 'integrations/codex/skills/agent-info-access/references/credential-use.md' -Destination (Join-Path $cli 'template/references/credential-use.md')
+    Copy-Item -LiteralPath 'integrations/codex/skills/agent-info-access/references/information-files.md' -Destination (Join-Path $cli 'template/references/information-files.md')
 
     # This console probe uses only synthetic data in a newly created temp
     # directory and current-user DPAPI. It never opens the application database.

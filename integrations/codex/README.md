@@ -6,7 +6,7 @@
 
 Windows开发分支的凭据调用已接协议v2：先申请固定期限，再以逐次operationId和完整launch调用持续宿主，同一批准范围内的不同命令不重复审批。CLI省略协议版本时默认2，旧服务明确拒绝；旧v1事实保持单次语义。调用流程及类型化注入见[随包凭据使用说明](skills/agent-info-access/references/credential-use.md)。当前已交付0.4.0+8仍是旧v1，须使用同一新版整包的应用、CLI、worker和模板，不能只更新Skill。
 
-#35的新源码与QA包已接构建绑定的焦点输入宿主，先以实际capabilities判断可用性；不把QA包冒充已替换用户包。Skill现包括[先授权、再点击和后台填充](skills/agent-info-access/references/credential-use.md#focused-password-input)，并区分安全目标发现、操作查询、未知结果和所有者人工确认。正向完整GUI及内置浏览器仍待解锁验收，普通附件仍待#37/#38；#30继续跟踪三功能联合及真实Codex安装/信任，不把受控关联文件测试当成真实Codex事件。
+#35的Windows焦点输入及#34普通附件已完成各自验收，先以实际capabilities判断安装版本的能力。Skill包括[先授权、再点击和后台填充](skills/agent-info-access/references/credential-use.md#focused-password-input)和[普通文件申请、领取与释放](skills/agent-info-access/references/information-files.md)。文件副本可交给同机文档工具或浏览器上传工具；凭据文件仍由命令宿主注入，不作为普通附件领取。各自实测范围见[#35完成记录](../../docs/development/issue35-completion.md)和[#38完成记录](../../docs/development/issue38-completion.md)。#30继续跟踪三功能联合及真实Codex安装/信任，不把受控关联文件测试当成真实Codex事件；用户旧0.4.0+8包仍未替换。
 
 ## 凭据边界
 
@@ -94,7 +94,7 @@ dart run tool/prepare_codex.dart ../../build/codex-preview
 
 只用虚构资料，避免把关联引用、文件内容和 token 放入报告或截图。
 
-1. 新资料库为空，用户先在“我的信息”创建一条虚构服务器信息，包含“地址”和
+1. 新资料库为空，用户先在“信息库”创建一条虚构服务器信息，包含“地址”和
    “用户名”两个字段。聊天 A 用 catalog 获取实际生成的信息项及字段 ID，再请求
    这两个字段。用户确认桌面展示聊天关联、用途及字段，仅批准“地址”。记录公开
    请求 ID、字段及到期时间；不要假设固定的 demo-server/host ID 存在。

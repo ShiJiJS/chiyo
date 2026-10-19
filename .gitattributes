@@ -33,3 +33,5 @@ docs/development/evidence/issue38-file-backup-capacity/raw/** -text -diff
 docs/development/evidence/issue38-windows-file-bootstrap/raw/** -text -diff
 
 docs/development/evidence/issue38-completion/raw/** -text -diff
+
+docs/development/evidence/issue30-files-skill/raw/** -text -diff
