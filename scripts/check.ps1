@@ -26,23 +26,25 @@ function Invoke-Checked {
 
 function Invoke-LockedGet {
     param([string]$Executable)
-    $lockPath = Join-Path (Get-Location) 'pubspec.lock'
-    $originalLock = [IO.File]::ReadAllBytes($lockPath)
-    try {
-        # The configured mirror needs its own cache URL. Change only that URL
-        # for resolution, enforce every pinned version/hash, then restore bytes.
-        if ($env:PUB_HOSTED_URL -eq 'https://pub.flutter-io.cn') {
-            $temporaryLock = [Text.Encoding]::UTF8.GetString($originalLock).Replace('https://pub.dev', 'https://pub.flutter-io.cn')
-            [IO.File]::WriteAllText($lockPath, $temporaryLock, (New-Object Text.UTF8Encoding($false)))
-        }
-        $arguments = @('pub', 'get', '--enforce-lockfile')
-        if ($Offline) { $arguments += '--offline' }
-        Invoke-Checked $Executable $arguments
-    } finally {
-        [IO.File]::WriteAllBytes($lockPath, $originalLock)
-    }
+    $arguments = @('pub', 'get', '--enforce-lockfile')
+    if ($Offline) { $arguments += '--offline' }
+    Invoke-Checked $Executable $arguments
 }
 
+$lockSnapshots = @{}
+foreach ($relative in @('packages/info_cli', 'packages/info_core', 'packages/info_storage', 'apps/desktop')) {
+    $lockPath = Join-Path $projectRoot "$relative/pubspec.lock"
+    $lockSnapshots[$lockPath] = [IO.File]::ReadAllBytes($lockPath)
+}
+try {
+    # Keep mirror URLs stable for the entire pipeline: tests can run Dart child
+    # processes which also resolve packages. Never change versions or hashes.
+    if ($env:PUB_HOSTED_URL -eq 'https://pub.flutter-io.cn') {
+        foreach ($lockPath in $lockSnapshots.Keys) {
+            $temporaryLock = [Text.Encoding]::UTF8.GetString($lockSnapshots[$lockPath]).Replace('https://pub.dev', 'https://pub.flutter-io.cn')
+            [IO.File]::WriteAllText($lockPath, $temporaryLock, (New-Object Text.UTF8Encoding($false)))
+        }
+    }
 foreach ($package in Get-ChildItem (Join-Path $projectRoot 'packages') -Directory | Sort-Object Name) {
     if (-not (Test-Path (Join-Path $package.FullName 'pubspec.yaml'))) { continue }
     Push-Location $package.FullName
@@ -67,5 +69,27 @@ try {
         Invoke-Checked $flutterCommand @('build', 'macos', '--release', '--no-pub')
     }
 } finally { Pop-Location }
+
+} finally {
+    $unexpectedLocks = @()
+    foreach ($lockPath in $lockSnapshots.Keys) {
+        $original = [Text.Encoding]::UTF8.GetString($lockSnapshots[$lockPath]).Replace('https://pub.flutter-io.cn', 'https://pub.dev').Replace("`r`n", "`n")
+        if (-not (Test-Path -LiteralPath $lockPath)) {
+            $unexpectedLocks += $lockPath
+            continue
+        }
+        $current = [IO.File]::ReadAllText($lockPath).Replace('https://pub.flutter-io.cn', 'https://pub.dev').Replace("`r`n", "`n")
+        if ($current -cne $original) {
+            # Preserve unexpected edits for inspection rather than hiding an
+            # upgrade or overwriting another editor's concurrent changes.
+            $unexpectedLocks += $lockPath
+        } else {
+            [IO.File]::WriteAllBytes($lockPath, $lockSnapshots[$lockPath])
+        }
+    }
+    if ($unexpectedLocks.Count -gt 0) {
+        throw "Dependency locks changed beyond mirror URLs; preserved for inspection: $($unexpectedLocks -join ', ')"
+    }
+}
 
 Write-Host 'Headless checks passed. No desktop application was launched.'
