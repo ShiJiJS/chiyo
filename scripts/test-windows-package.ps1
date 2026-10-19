@@ -77,10 +77,29 @@ try {
     $env:INFO_TEST_DELIVERY = $payload
     $env:INFO_TEST_BUNDLE = $bundle
     Push-Location (Join-Path (Split-Path -Parent $PSScriptRoot) 'packages/info_cli')
+    $cliLock = Join-Path (Get-Location) 'pubspec.lock'
+    $originalCliLock = [IO.File]::ReadAllBytes($cliLock)
     try {
+        if ($env:PUB_HOSTED_URL -eq 'https://pub.flutter-io.cn') {
+            $temporaryCliLock = [Text.Encoding]::UTF8.GetString($originalCliLock).Replace('https://pub.dev', 'https://pub.flutter-io.cn')
+            [IO.File]::WriteAllText($cliLock, $temporaryCliLock, (New-Object Text.UTF8Encoding($false)))
+        }
+        # The preceding headless build populated this exact cache. Prevent
+        # 'dart test' from silently re-resolving dev dependencies under a mirror.
+        & $dart pub get --enforce-lockfile --offline
+        if ($LASTEXITCODE -ne 0) { throw 'Pinned SDK-free test dependencies are unavailable.' }
         & $dart test test/bundle_preparation_test.dart test/cli_test.dart test/codex_process_test.dart
         if ($LASTEXITCODE -ne 0) { throw 'Extracted CLI and rendered hooks failed.' }
-    } finally { Pop-Location }
+    } finally {
+        try {
+            $expectedLock = [Text.Encoding]::UTF8.GetString($originalCliLock).Replace('https://pub.flutter-io.cn', 'https://pub.dev').Replace("`r`n", "`n")
+            $actualLock = [IO.File]::ReadAllText($cliLock).Replace('https://pub.flutter-io.cn', 'https://pub.dev').Replace("`r`n", "`n")
+            if ($actualLock -cne $expectedLock) {
+                throw 'SDK-free tests changed dependency versions/hashes; preserving the lock for inspection.'
+            }
+            [IO.File]::WriteAllBytes($cliLock, $originalCliLock)
+        } finally { Pop-Location }
+    }
     Write-Host 'PASS: extracted checksums, SDK-free CLI/hooks, synthetic SQLCipher/DPAPI. Desktop and user configuration untouched.'
 } finally {
     $env:INFO_TEST_DELIVERY = $priorDelivery
