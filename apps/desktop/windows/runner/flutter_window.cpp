@@ -4,6 +4,8 @@
 #include <windowsx.h>
 #include <flutter/standard_method_codec.h>
 #include "resource.h"
+#include "utils.h"
+#include "focused_fill_identity.h"
 
 #include "flutter/generated_plugin_registrant.h"
 
@@ -17,6 +19,24 @@ constexpr UINT kTrayMessage = WM_APP + 1;
 constexpr UINT kTerminateMessage = WM_APP + 2;
 constexpr UINT kOpenApprovals = 1;
 constexpr UINT kQuit = 2;
+
+std::optional<flutter::EncodableValue> FocusedFillHelperIdentity() {
+  wchar_t path[32768]{};
+  const DWORD length = GetModuleFileNameW(nullptr, path, 32768);
+  if (length == 0 || length >= 32768) return std::nullopt;
+  std::wstring executable(path, length);
+  const auto separator = executable.find_last_of(L"\\/");
+  if (separator == std::wstring::npos) return std::nullopt;
+  executable.resize(separator + 1);
+  executable += L"info-focus-broker.exe";
+  const auto utf8 = Utf8FromUtf16(executable.c_str());
+  if (utf8.empty()) return std::nullopt;
+  return flutter::EncodableValue(flutter::EncodableMap{
+      {flutter::EncodableValue("executable"), flutter::EncodableValue(utf8)},
+      {flutter::EncodableValue("sha256"),
+       flutter::EncodableValue(kFocusedFillHelperSha256)},
+  });
+}
 }
 
 bool FlutterWindow::AddTrayIcon() {
@@ -144,7 +164,16 @@ bool FlutterWindow::OnCreate() {
       &flutter::StandardMethodCodec::GetInstance());
   desktop_channel_->SetMethodCallHandler([this](const auto& call, auto result) {
     const auto& method = call.method_name();
-    if (method == "initialize") {
+    if (method == "focusedFillHelper") {
+      if (call.arguments() &&
+          !std::holds_alternative<std::monostate>(*call.arguments())) {
+        result->Error("invalid_arguments", "No arguments are accepted.");
+      } else if (const auto identity = FocusedFillHelperIdentity()) {
+        result->Success(*identity);
+      } else {
+        result->Error("bundle_unavailable", "Application identity unavailable.");
+      }
+    } else if (method == "initialize") {
       if (!desktop_ready_) AddTrayIcon();
       desktop_ready_ = true;
       result->Success(DesktopAvailability());

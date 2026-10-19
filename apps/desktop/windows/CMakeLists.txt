@@ -53,6 +53,18 @@ add_subdirectory(${FLUTTER_MANAGED_DIR})
 add_subdirectory("runner")
 add_subdirectory("focused_input")
 
+# Bind this configuration's broker bytes into the desktop EXE. An always-run
+# target checks the linked file, but only changes the header when its hash changes.
+set(FOCUSED_IDENTITY_DIR "${CMAKE_BINARY_DIR}/focused-input-identity/$<CONFIG>")
+add_custom_target(focused_fill_identity
+  COMMAND "${CMAKE_COMMAND}"
+    "-DBROKER=$<TARGET_FILE:focus_broker>"
+    "-DOUTPUT_DIR=${FOCUSED_IDENTITY_DIR}"
+    -P "${CMAKE_CURRENT_SOURCE_DIR}/focused_input/write_identity.cmake"
+  DEPENDS focus_broker "${CMAKE_CURRENT_SOURCE_DIR}/focused_input/write_identity.cmake"
+  VERBATIM)
+add_dependencies(${BINARY_NAME} focused_fill_identity)
+target_include_directories(${BINARY_NAME} PRIVATE "${FOCUSED_IDENTITY_DIR}")
 
 # Generated plugin build rules, which manage building the plugins and adding
 # them to the application.
@@ -74,6 +86,8 @@ set(INSTALL_BUNDLE_DATA_DIR "${CMAKE_INSTALL_PREFIX}/data")
 set(INSTALL_BUNDLE_LIB_DIR "${CMAKE_INSTALL_PREFIX}")
 
 install(TARGETS ${BINARY_NAME} RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX}"
+  COMPONENT Runtime)
+install(TARGETS focus_broker RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX}"
   COMPONENT Runtime)
 
 install(FILES "${FLUTTER_ICU_DATA_FILE}" DESTINATION "${INSTALL_BUNDLE_DATA_DIR}"

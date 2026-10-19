@@ -5,6 +5,7 @@ import 'package:info_core/agent_server.dart';
 import 'package:info_core/info_core.dart';
 import 'package:info_storage/info_storage.dart';
 import 'desktop_runtime.dart';
+import 'bundled_focused_fill.dart';
 
 /// The opened library remains owned here until authorization facts are saved.
 class DesktopLibrary {
@@ -38,6 +39,7 @@ class DesktopBootstrap extends ChangeNotifier {
   CredentialExecutionHost? _credentialExecutions;
   int? boundPort;
   bool cleanupPending = false;
+  bool applicationFilesInvalid = false;
 
   Future<void> start() async {
     if (state == DesktopStartupState.starting ||
@@ -45,6 +47,7 @@ class DesktopBootstrap extends ChangeNotifier {
       return;
     }
     state = DesktopStartupState.starting;
+    applicationFilesInvalid = false;
     notifyListeners();
     try {
       await _release();
@@ -53,6 +56,7 @@ class DesktopBootstrap extends ChangeNotifier {
         library!.service.agent,
         port: port,
         enableReusableCredentialUse: Platform.isWindows,
+        enableFocusedFill: Platform.isWindows,
         credentialExecutionHandler: (session, input) {
           final host = _credentialExecutions;
           return host == null
@@ -85,7 +89,8 @@ class DesktopBootstrap extends ChangeNotifier {
       await runtime!.start();
       await library!.service.owner.retryAuditStorage();
       state = DesktopStartupState.ready;
-    } on Object {
+    } on Object catch (error) {
+      applicationFilesInvalid = error is FocusedFillBundleFailure;
       try {
         await _release();
       } on Object {

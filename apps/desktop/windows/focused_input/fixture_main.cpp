@@ -37,6 +37,7 @@ LRESULT CALLBACK Window(HWND h, UINT message, WPARAM w, LPARAM l) {
       const bool matches = received == expected;
       SecureZeroMemory(received.data(), received.size() * sizeof(wchar_t));
       Write(std::string("{\"event\":\"verified\",\"matches\":") + (matches ? "true" : "false") +
+          ",\"empty\":" + (size == 0 ? "true" : "false") +
           ",\"noPaste\":" + (pastes == 0 ? "true" : "false") +
           ",\"clipboardUnchanged\":" + (clipboard == GetClipboardSequenceNumber() ? "true" : "false") +
           ",\"focusChanged\":" + (focus_changed ? "true" : "false") + "}");

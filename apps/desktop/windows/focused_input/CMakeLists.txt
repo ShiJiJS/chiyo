@@ -1,5 +1,5 @@
 # Read-only capture is shared by diagnostics and the private input broker.
-# Targets remain explicit until desktop/browser integration is verified.
+# Diagnostics, synthetic receivers and fault stubs remain explicit test targets.
 add_library(focused_input_snapshot STATIC EXCLUDE_FROM_ALL "focus_snapshot.cpp")
 apply_standard_settings(focused_input_snapshot)
 target_compile_definitions(focused_input_snapshot PRIVATE NOMINMAX)
@@ -24,8 +24,8 @@ target_compile_definitions(focused_input_guard PRIVATE NOMINMAX)
 target_compile_options(focused_input_guard PRIVATE /utf-8)
 target_link_libraries(focused_input_guard PUBLIC focused_input_snapshot bcrypt advapi32)
 
-# Explicitly built until the real CLI/desktop end-to-end gate is complete.
-add_executable(focus_broker WIN32 EXCLUDE_FROM_ALL "broker_main.cpp")
+# Only the production broker is part of the desktop distribution.
+add_executable(focus_broker WIN32 "broker_main.cpp")
 apply_standard_settings(focus_broker)
 target_compile_definitions(focus_broker PRIVATE NOMINMAX)
 target_compile_options(focus_broker PRIVATE /utf-8)

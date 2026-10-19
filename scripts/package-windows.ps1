@@ -67,8 +67,19 @@ try {
     New-Item -ItemType Directory -Path $payload | Out-Null
     $app = Join-Path $payload 'app'
     Copy-Item -LiteralPath (Join-Path $projectRoot 'apps/desktop/build/windows/x64/runner/Release') -Destination $app -Recurse
-    foreach ($required in @('info_desktop.exe', 'flutter_windows.dll', 'sqlcipher.dll', 'data/app.so', 'data/icudtl.dat')) {
+    foreach ($required in @('info_desktop.exe', 'info-focus-broker.exe', 'flutter_windows.dll', 'sqlcipher.dll', 'data/app.so', 'data/icudtl.dat')) {
         if (-not (Test-Path -LiteralPath (Join-Path $app $required))) { throw "Missing desktop payload: $required" }
+    }
+    $focusDigestPath = Join-Path $projectRoot 'apps/desktop/build/windows/x64/focused-input-identity/Release/focused_fill_identity.sha256'
+    $focusDigest = ([IO.File]::ReadAllText($focusDigestPath)).Trim()
+    $actualFocusDigest = (Get-FileHash -LiteralPath (Join-Path $app 'info-focus-broker.exe') -Algorithm SHA256).Hash.ToLowerInvariant()
+    if ($focusDigest -notmatch '^[0-9a-f]{64}$' -or $focusDigest -ne $actualFocusDigest) {
+        throw 'The packaged focused input helper differs from the runner build identity.'
+    }
+    foreach ($binary in Get-ChildItem -LiteralPath $app -Filter '*.exe' -Recurse) {
+        if ($binary.Name -notin @('info_desktop.exe', 'info-focus-broker.exe', 'info-runtime-worker.exe')) {
+            throw "Unexpected executable in desktop payload: $($binary.Name)"
+        }
     }
     $cli = Join-Path $payload 'cli'
     New-Item -ItemType Directory -Path $cli | Out-Null
@@ -160,7 +171,7 @@ try {
     Assert-CleanSources
     if ((git rev-parse HEAD).Trim() -ne $commit) { throw 'Sources changed during packaging.' }
     Write-Json (Join-Path $payload 'manifest.json') ([ordered]@{
-        format = 1; product = 'Agent Info Manage'; release = $identity
+        format = 2; product = 'Agent Info Manage'; release = $identity
         sourceCommit = $commit; sourceDirty = $false; architecture = 'windows-x64'
         builtAtUtc = [DateTime]::UtcNow.ToString('o')
         signing = 'unsigned development preview'
@@ -169,6 +180,10 @@ try {
         flutter = $flutterVersion; dart = $dartVersion; visualStudio = $visualStudio
         windowsSdk = $windowsSdk; msvcToolset = $msvcToolset
         sqlcipherSha256 = $actualCipher
+        focusedFill = [ordered]@{
+            helperProtocol = 1; helper = 'app/info-focus-broker.exe'; sha256 = $actualFocusDigest
+            trustSource = 'SHA-256 compiled into the native desktop runner; this manifest is provenance only'
+        }
         verification = 'Full headless check.ps1 and Windows release compilation; no desktop/Codex/clean-machine acceptance implied'
         files = $files
     })

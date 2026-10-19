@@ -22,6 +22,7 @@ class IsolatedDesktopFixture {
     DesktopPlatform? platform,
     Future<void> Function(InformationService)? prepareLibrary,
     String? credentialWorkerExecutable,
+    FocusedFillDriver? focusedFillDriver,
   }) async {
     final root = await Directory.systemTemp.createTemp('aim-native-approval-');
     final bootstrap = DesktopBootstrap(
@@ -33,7 +34,10 @@ class IsolatedDesktopFixture {
           root.path,
           WindowsDatabaseKeyStore('${root.path}/database-key.dpapi'),
         );
-        final service = InformationService(repository: repository);
+        final service = InformationService(
+          repository: repository,
+          focusedFillDriver: focusedFillDriver,
+        );
         try {
           await service.owner.createInformation(
             'Native fictional server',

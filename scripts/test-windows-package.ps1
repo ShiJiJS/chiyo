@@ -27,6 +27,24 @@ try {
     $payload = Join-Path $testRoot 'AgentInfoManage'
     $manifest = Get-Content -LiteralPath (Join-Path $payload 'manifest.json') -Raw | ConvertFrom-Json
     if ($manifest.architecture -ne 'windows-x64' -or $manifest.sourceDirty) { throw 'Invalid preview identity.' }
+    if ($manifest.format -notin @(1, 2)) { throw 'Unsupported preview manifest.' }
+    if ($manifest.format -eq 2) {
+        $focus = $manifest.focusedFill
+        if ($focus.helperProtocol -ne 1 -or $focus.helper -ne 'app/info-focus-broker.exe' -or
+            $focus.sha256 -notmatch '^[0-9a-f]{64}$') {
+            throw 'Invalid focused input helper provenance.'
+        }
+        $focusPath = Join-Path $payload 'app/info-focus-broker.exe'
+        if (-not (Test-Path -LiteralPath $focusPath -PathType Leaf) -or
+            (Get-FileHash -LiteralPath $focusPath -Algorithm SHA256).Hash.ToLowerInvariant() -ne $focus.sha256) {
+            throw 'Focused input helper checksum mismatch.'
+        }
+        foreach ($binary in Get-ChildItem -LiteralPath (Join-Path $payload 'app') -Filter '*.exe' -Recurse) {
+            if ($binary.Name -notin @('info_desktop.exe', 'info-focus-broker.exe', 'info-runtime-worker.exe')) {
+                throw 'Test or unknown executable in desktop payload.'
+            }
+        }
+    }
     foreach ($entry in $manifest.files) {
         $path = [IO.Path]::GetFullPath((Join-Path $payload $entry.path))
         if (-not $path.StartsWith("$payload\", [StringComparison]::OrdinalIgnoreCase)) { throw 'Unsafe manifest path.' }

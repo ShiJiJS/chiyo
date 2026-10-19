@@ -24,15 +24,31 @@ function Invoke-Checked {
     }
 }
 
-$getArguments = @('pub', 'get')
-if ($Offline) { $getArguments += '--offline' }
+function Invoke-LockedGet {
+    param([string]$Executable)
+    $lockPath = Join-Path (Get-Location) 'pubspec.lock'
+    $originalLock = [IO.File]::ReadAllBytes($lockPath)
+    try {
+        # The configured mirror needs its own cache URL. Change only that URL
+        # for resolution, enforce every pinned version/hash, then restore bytes.
+        if ($env:PUB_HOSTED_URL -eq 'https://pub.flutter-io.cn') {
+            $temporaryLock = [Text.Encoding]::UTF8.GetString($originalLock).Replace('https://pub.dev', 'https://pub.flutter-io.cn')
+            [IO.File]::WriteAllText($lockPath, $temporaryLock, (New-Object Text.UTF8Encoding($false)))
+        }
+        $arguments = @('pub', 'get', '--enforce-lockfile')
+        if ($Offline) { $arguments += '--offline' }
+        Invoke-Checked $Executable $arguments
+    } finally {
+        [IO.File]::WriteAllBytes($lockPath, $originalLock)
+    }
+}
 
 foreach ($package in Get-ChildItem (Join-Path $projectRoot 'packages') -Directory | Sort-Object Name) {
     if (-not (Test-Path (Join-Path $package.FullName 'pubspec.yaml'))) { continue }
     Push-Location $package.FullName
     try {
         Write-Host "Checking $($package.Name)"
-        Invoke-Checked $dartCommand $getArguments
+        Invoke-LockedGet $dartCommand
         Invoke-Checked $dartCommand @('analyze', '--fatal-infos')
         Invoke-Checked $dartCommand @('test')
     } finally { Pop-Location }
@@ -40,15 +56,15 @@ foreach ($package in Get-ChildItem (Join-Path $projectRoot 'packages') -Director
 
 Push-Location (Join-Path $projectRoot 'apps/desktop')
 try {
-    Invoke-Checked $flutterCommand $getArguments
-    Invoke-Checked $flutterCommand @('analyze', '--fatal-infos')
+    Invoke-LockedGet $flutterCommand
+    Invoke-Checked $flutterCommand @('analyze', '--fatal-infos', '--no-pub')
     # The explicit test/ path excludes native integration_test/ runners.
-    Invoke-Checked $flutterCommand @('test', 'test/')
+    Invoke-Checked $flutterCommand @('test', '--no-pub', 'test/')
     if ($WindowsRelease) {
-        Invoke-Checked $flutterCommand @('build', 'windows', '--release')
+        Invoke-Checked $flutterCommand @('build', 'windows', '--release', '--no-pub')
     }
     if ($MacosRelease) {
-        Invoke-Checked $flutterCommand @('build', 'macos', '--release')
+        Invoke-Checked $flutterCommand @('build', 'macos', '--release', '--no-pub')
     }
 } finally { Pop-Location }
 

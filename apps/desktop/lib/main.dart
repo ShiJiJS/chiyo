@@ -18,6 +18,7 @@ import 'desktop_shell.dart';
 import 'ui.dart';
 import 'window_frame.dart';
 import 'prototype_dialog.dart';
+import 'bundled_focused_fill.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -57,9 +58,13 @@ Future<DesktopLibrary> _openLibrary() async {
   } else {
     throw const StorageFailure('platform_unsupported');
   }
+  final fill = Platform.isWindows ? await loadBundledFocusedFill() : null;
   final repository = await EncryptedInformationRepository.open(directory, keys);
   return DesktopLibrary(
-    service: InformationService(repository: repository),
+    service: InformationService(
+      repository: repository,
+      focusedFillDriver: fill,
+    ),
     close: repository.close,
     backups: repository.backups,
   );
@@ -111,8 +116,10 @@ class _DesktopLauncherState extends State<DesktopLauncher> {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Text(
-                              '信息库或本机服务无法启动。请检查系统密钥是否可用、应用是否已运行。原有资料不会被重建或覆盖；请保留信息库与密钥文件。',
+                            Text(
+                              startup.applicationFilesInvalid
+                                  ? '应用文件不完整或版本不匹配。请将桌面程序与辅助程序整包替换后重试。尚未打开信息库，原有资料不会被重建或覆盖。'
+                                  : '信息库或本机服务无法启动。请检查系统密钥是否可用、应用是否已运行。原有资料不会被重建或覆盖；请保留信息库与密钥文件。',
                             ),
                             if (startup.cleanupPending)
                               const Text(
