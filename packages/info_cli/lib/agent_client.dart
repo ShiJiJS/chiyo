@@ -8,6 +8,7 @@ import 'package:info_core/info_core.dart';
 import 'package:info_core/protocol_json.dart';
 import 'credential_output_filter.dart';
 part 'credential_runtime_client.dart';
+part 'information_file_client.dart';
 
 class AgentClient {
   AgentClient(
@@ -71,6 +72,9 @@ class AgentClient {
 
   Future<Map<String, dynamic>> execute(Map<String, dynamic> input) async {
     final command = input['command'];
+    if ({'file-fetch', 'file-status', 'file-release'}.contains(command)) {
+      return _executeInformationFileCommand(input);
+    }
     if ({
       'request-use',
       'run-use',
@@ -229,6 +233,7 @@ class AgentClient {
         });
       case 'catalog':
         return _call('/catalog', {
+          'protocolVersion': input['protocolVersion'] ?? 2,
           for (final key in [
             'query',
             'directoryId',
@@ -256,6 +261,7 @@ class AgentClient {
       case 'request':
         if (_session == null) return {'status': 'unauthorized'};
         return _call('/request', {
+          'protocolVersion': input['protocolVersion'] ?? 2,
           'sessionSecret': _session,
           'purpose': input['purpose'],
           'fields': input['fields'],
@@ -313,8 +319,9 @@ class AgentClient {
 
   Future<Map<String, dynamic>> _call(
     String path,
-    Map<String, dynamic> data,
-  ) async {
+    Map<String, dynamic> data, {
+    Duration timeout = const Duration(seconds: 5),
+  }) async {
     try {
       return await (() async {
         final request = await _http.post('127.0.0.1', port, path);
@@ -324,7 +331,7 @@ class AgentClient {
         final response = await request.close();
         final text = await utf8.decoder.bind(response).join();
         return jsonDecode(text) as Map<String, dynamic>;
-      })().timeout(const Duration(seconds: 5));
+      })().timeout(timeout);
     } on Object {
       return {'status': 'service_unavailable'};
     }

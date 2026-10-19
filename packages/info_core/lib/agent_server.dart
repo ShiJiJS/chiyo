@@ -32,6 +32,7 @@ class AgentServer {
     this._credentialExecutionHandler,
     this.enableReusableCredentialUse,
     this.enableFocusedFill,
+    this.enableInformationFiles,
   ) {
     _server.listen(_handle);
   }
@@ -44,6 +45,13 @@ class AgentServer {
 
   /// Kept off until the repository, native host, and owner UI support fills.
   final bool enableFocusedFill;
+
+  /// Off until storage, file driver and owner UI are connected by the host.
+  final bool enableInformationFiles;
+  bool get _informationFilesEnabled =>
+      enableReusableCredentialUse &&
+      enableInformationFiles &&
+      _agent.informationFileDeliveryAvailable;
   bool get _focusedFillEnabled =>
       enableReusableCredentialUse &&
       enableFocusedFill &&
@@ -55,12 +63,14 @@ class AgentServer {
     CredentialExecutionHandler? credentialExecutionHandler,
     bool enableReusableCredentialUse = false,
     bool enableFocusedFill = false,
+    bool enableInformationFiles = false,
   }) async => AgentServer._(
     await HttpServer.bind(InternetAddress.loopbackIPv4, port, shared: false),
     agent,
     credentialExecutionHandler,
     enableReusableCredentialUse,
     enableFocusedFill,
+    enableInformationFiles,
   );
   Future<void> close() async {
     await _server.close(force: true);
@@ -69,6 +79,7 @@ class AgentServer {
   Future<void> _handle(HttpRequest request) async {
     Map<String, Object?> result;
     final runtime = request.uri.path.startsWith('/credential-use/');
+    final informationFile = request.uri.path.startsWith('/information-file/');
     var protocolVersion = 1;
     try {
       if (request.method != 'POST' ||
@@ -102,7 +113,12 @@ class AgentServer {
         }
         bytes.addAll(chunk);
       }
-      final body = request.uri.path == '/credentials/catalog' || runtime
+      final body =
+          request.uri.path == '/credentials/catalog' ||
+              runtime ||
+              informationFile ||
+              request.uri.path == '/catalog' ||
+              request.uri.path == '/request'
           ? decodeProtocolObject(utf8.decode(bytes))
           : jsonDecode(utf8.decode(bytes));
       if (body is! Map<String, dynamic>) {
@@ -110,12 +126,16 @@ class AgentServer {
       }
       if (body['protocolVersion'] == 2) protocolVersion = 2;
       result = await _dispatch(request.uri.path, body);
+    } on InformationFileFailure catch (error) {
+      result = error.toJson();
     } on CredentialUseFailure catch (error) {
       result = error.toJson();
     } on _CredentialRequestFailure catch (error) {
       result = _credentialFailure(error.code, fieldPath: error.fieldPath);
     } on FormatException {
-      result = request.uri.path == '/credentials/catalog' || runtime
+      result = informationFile
+          ? const InformationFileFailure('invalid_json').toJson()
+          : request.uri.path == '/credentials/catalog' || runtime
           ? _credentialFailure('invalid_json')
           : {'status': 'invalid_request'};
     } on AccessFailure catch (error) {
@@ -123,6 +143,15 @@ class AgentServer {
     } on Object {
       // Never echo submitted text, authorization material, or internal errors.
       result = {'status': 'invalid_request'};
+    }
+    if (informationFile && result['protocolVersion'] == null) {
+      result = InformationFileFailure(
+        result['status'] == 'unauthorized'
+            ? 'not_authorized'
+            : result['status'] == 'service_unavailable'
+            ? 'service_unavailable'
+            : 'invalid_request',
+      ).toJson();
     }
     if ((request.uri.path == '/credentials/catalog' || runtime) &&
         result['protocolVersion'] == null) {
@@ -176,8 +205,37 @@ class AgentServer {
             if (_focusedFillEnabled) 'credential-focused-fill.v1',
             if (_focusedFillEnabled && _agent.focusedFillDiscoveryAvailable)
               'credential-focused-target.v1',
+            if (_informationFilesEnabled) 'information-attachments.v1',
           ],
         };
+      case '/information-file/fetch':
+      case '/information-file/status':
+      case '/information-file/release':
+        if (!_informationFilesEnabled) {
+          throw const InformationFileFailure('unsupported_capability');
+        }
+        final command = Map<String, dynamic>.of(body)..remove('sessionSecret');
+        final expected = 'file-${path.split('/').last}';
+        if (command['command'] != expected) {
+          throw const InformationFileFailure('invalid_request');
+        }
+        final session = _text(body, 'sessionSecret');
+        if (path.endsWith('/fetch')) {
+          return _agent.fetchInformationFile(
+            session,
+            InformationFileFetchInput.fromJson(command),
+          );
+        }
+        final input = InformationFileDeliveryInput.fromJson(command);
+        if (input.operationId != null) {
+          return _agent.informationFileOperationStatus(
+            session,
+            input.operationId!,
+          );
+        }
+        return path.endsWith('/status')
+            ? _agent.informationFileStatus(session, input.deliveryId!)
+            : _agent.releaseInformationFile(session, input.deliveryId!);
       case '/credential-use/focus-target':
         if (!_focusedFillEnabled || !_agent.focusedFillDiscoveryAvailable) {
           throw const CredentialUseFailure('unsupported_capability');
@@ -503,13 +561,15 @@ class AgentServer {
           offset: offset,
           limit: limit,
         );
-        // File delivery/capability negotiation is not enabled yet. Legacy
-        // clients must fail explicitly rather than dropping unknown fields.
-        if (page.items.any(
-          (item) => (item['fields'] as List).any(
-            (field) => (field as Map)['kind'] == FieldKind.file.name,
-          ),
-        )) {
+        // Legacy clients fail explicitly rather than dropping file fields.
+        if ((!_informationFilesEnabled ||
+                body['protocolVersion'] is! int ||
+                body['protocolVersion'] != 2) &&
+            page.items.any(
+              (item) => (item['fields'] as List).any(
+                (field) => (field as Map)['kind'] == FieldKind.file.name,
+              ),
+            )) {
           throw const AccessFailure('unsupported_capability');
         }
         return {
@@ -554,7 +614,10 @@ class AgentServer {
               if ((field as Map)['kind'] == FieldKind.file.name)
                 FieldRef(item['id'] as String, field['id'] as String),
         };
-        if (fields.any(fileFields.contains)) {
+        if ((!_informationFilesEnabled ||
+                body['protocolVersion'] is! int ||
+                body['protocolVersion'] != 2) &&
+            fields.any(fileFields.contains)) {
           throw const AccessFailure('unsupported_capability');
         }
         final receipt = _agent.request(

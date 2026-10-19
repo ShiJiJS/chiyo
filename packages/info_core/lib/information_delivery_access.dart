@@ -207,6 +207,38 @@ extension InformationFileAgentAccess on AgentAccess {
     await _service._reconcileInformationDeliveries();
     return _fileReply(_service._ownInformationDelivery(session, deliveryId));
   });
+
+  /// Observe the original operation without waiting behind its file IO or
+  /// creating any copy. The state is a recorded fact, never a new read grant.
+  Map<String, Object?> informationFileOperationStatus(
+    String session,
+    String operationId,
+  ) {
+    _service._fileSession(session);
+    _deliveryId(operationId);
+    if (!informationFileDeliveryAvailable) {
+      throw const InformationFileFailure('unsupported_capability');
+    }
+    final binding = _service._sessionBindings[session]!;
+    final record = _service._informationDeliveries
+        .where(
+          (r) =>
+              r.runtime &&
+              r.sessionBinding == binding &&
+              r.operationId == operationId,
+        )
+        .firstOrNull;
+    if (record == null) {
+      throw const InformationFileFailure('delivery_not_found');
+    }
+    // Invalidations are serialized with the ongoing write. Do not claim a
+    // physical cleanup has completed while the driver is still writing.
+    if (_service._informationDeliveryInvalid(record) != null) {
+      _service._scheduleInformationDeliveryCleanup();
+    }
+    return _fileReply(record);
+  }
+
   Future<Map<String, Object?>> releaseInformationFile(
     String session,
     String deliveryId,

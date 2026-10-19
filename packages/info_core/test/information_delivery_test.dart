@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 import 'package:info_core/info_core.dart';
+import 'package:info_core/agent_server.dart';
 import 'package:test/test.dart';
 
 class _Files implements InformationDeliveryFiles {
@@ -174,6 +175,152 @@ void main() {
     await service.owner.retryAuditStorage();
   }
 
+  test(
+    'operation query observes a pending copy without waiting for IO or creating another operation',
+    () async {
+      await approve();
+      final writing = Completer<void>(), resume = Completer<void>();
+      files.beforeWrite = () async {
+        writing.complete();
+        await resume.future;
+      };
+      final work = service.agent.fetchInformationFile(
+        session,
+        fetch(request, item, 'original'),
+      );
+      try {
+        await writing.future;
+        final facts = delivery(
+          service.agent.informationFileOperationStatus(session, 'original'),
+        );
+        expect(facts['state'], 'preparing');
+        expect(facts, isNot(contains('path')));
+        final other = service.agent.openSession('另一个会话');
+        expect(
+          () => service.agent.informationFileOperationStatus(other, 'original'),
+          fails('delivery_not_found'),
+        );
+        expect(files.reserved, 1);
+        expect(files.written, 0);
+      } finally {
+        resume.complete();
+      }
+      final ready = delivery(await work);
+      expect(
+        delivery(
+          service.agent.informationFileOperationStatus(session, 'original'),
+        )['deliveryId'],
+        ready['deliveryId'],
+      );
+      expect(files.written, 1);
+    },
+  );
+  test(
+    'HTTP file capability is explicit and strict private routes preserve mixed partial approval',
+    () async {
+      final server = await AgentServer.start(
+        service.agent,
+        port: 0,
+        enableReusableCredentialUse: true,
+        enableInformationFiles: true,
+      );
+      final http = HttpClient();
+      addTearDown(() async {
+        http.close(force: true);
+        await server.close();
+      });
+      Future<Map<String, dynamic>> call(String path, Object body) async {
+        final req = await http.post('127.0.0.1', server.port, path);
+        req.headers.contentType = ContentType.json;
+        req.write(body is String ? body : jsonEncode(body));
+        final response = await req.close();
+        return jsonDecode(await utf8.decoder.bind(response).join())
+            as Map<String, dynamic>;
+      }
+
+      expect(
+        (await call('/capabilities', {}))['capabilities'],
+        contains('information-attachments.v1'),
+      );
+      expect((await call('/catalog', {}))['status'], 'unsupported_capability');
+      final catalog = await call('/catalog', {'protocolVersion': 2});
+      expect(catalog['status'], 'ok');
+      expect(jsonEncode(catalog), isNot(contains('private resume')));
+      expect(jsonEncode(catalog), isNot(contains('sha256')));
+      final input = fetch(request, item, 'http').toJson();
+      expect(
+        (await call('/information-file/fetch', {
+          ...input,
+          'sessionSecret': session,
+        }))['errorCode'],
+        'not_authorized',
+      );
+      await approve();
+      final fetched = await call('/information-file/fetch', {
+        ...input,
+        'sessionSecret': session,
+      });
+      expect(fetched['status'], 'ok');
+      final facts = await call('/information-file/status', {
+        'protocolVersion': 2,
+        'command': 'file-status',
+        'operationId': 'http',
+        'sessionSecret': session,
+      });
+      expect((facts['delivery'] as Map)['state'], 'ready');
+      expect(jsonEncode(facts), isNot(contains('path')));
+      final other = service.agent.openSession('其他聊天');
+      expect(
+        (await call('/information-file/status', {
+          'protocolVersion': 2,
+          'command': 'file-status',
+          'operationId': 'http',
+          'sessionSecret': other,
+        }))['status'],
+        'not_found',
+      );
+      expect(
+        (await call('/information-file/fetch', {
+          ...input,
+          'sessionSecret': session,
+          'path': root.path,
+        }))['errorCode'],
+        'invalid_request',
+      );
+      final repeated = jsonEncode({...input, 'sessionSecret': session})
+          .replaceFirst(
+            '"operationId":"http"',
+            '"operationId":"http","operationId":"other"',
+          );
+      expect(
+        (await call('/information-file/fetch', repeated))['errorCode'],
+        'invalid_json',
+      );
+      expect(files.written, 1);
+      expect(
+        (await call('/information-file/fetch', {
+          ...fetch(request, item, 'outside', field: 2).toJson(),
+          'sessionSecret': session,
+        }))['errorCode'],
+        'not_authorized',
+      );
+      final disabled = await AgentServer.start(
+        service.agent,
+        port: 0,
+        enableReusableCredentialUse: true,
+      );
+      addTearDown(disabled.close);
+      final req = await http.post('127.0.0.1', disabled.port, '/capabilities');
+      req.headers.contentType = ContentType.json;
+      req.write('{}');
+      final caps =
+          jsonDecode(await utf8.decoder.bind(await req.close()).join()) as Map;
+      expect(
+        caps['capabilities'],
+        isNot(contains('information-attachments.v1')),
+      );
+    },
+  );
   test(
     'unapproved and out-of-scope fetch reject without private metadata or filesystem effects',
     () async {

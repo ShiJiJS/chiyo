@@ -1,11 +1,14 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:info_core/info_core.dart';
+import 'package:info_core/agent_server.dart';
 import 'package:info_storage/info_storage.dart';
 import 'package:sqlite3/sqlite3.dart' as sqlite;
 import 'package:test/test.dart';
 import 'backup_setup.dart';
+import 'support/ordinary_file_cli.dart';
 
 class _Keys implements DatabaseKeyStore {
   List<int>? key;
@@ -649,6 +652,178 @@ void main() {
       await service.owner.reconcileInformationFileDeliveries();
       expect(repo.informationFileDeliveries, isEmpty);
     },
+  );
+  test(
+    'independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy',
+    () async {
+      final server = await AgentServer.start(
+        service.agent,
+        port: 0,
+        enableReusableCredentialUse: true,
+        enableInformationFiles: true,
+      );
+      final cli = await OrdinaryFileCli.start(server.port);
+      final other = await OrdinaryFileCli.start(server.port);
+      final writing = Completer<void>(), resume = Completer<void>();
+      addTearDown(() async {
+        if (!resume.isCompleted) resume.complete();
+        await cli.close();
+        await other.close();
+        await server.close();
+      });
+      final text = await service.owner.createInformation('合成文本', '', [
+        const FieldInput('姓名', '', '合成姓名'),
+        const FieldInput('不批准', '', '不应该返回的内容'),
+      ]);
+      expect(
+        (await cli.command({
+          'command': 'session',
+          'chatLabel': '独立文件CLI',
+        }))['status'],
+        'ok',
+      );
+      expect(
+        (await other.command({
+          'command': 'session',
+          'chatLabel': '其他会话',
+        }))['status'],
+        'ok',
+      );
+      final catalog = await cli.command({'command': 'catalog'});
+      expect(catalog['status'], 'ok');
+      expect(jsonEncode(catalog), isNot(contains('fictional.pdf')));
+      expect(jsonEncode(catalog), isNot(contains('合成姓名')));
+      final pending = await cli.command({
+        'command': 'request',
+        'purpose': '合成文件及文字',
+        'fields': [
+          {'itemId': item.id, 'fieldId': item.fields.single.id},
+          for (final f in text.fields) {'itemId': text.id, 'fieldId': f.id},
+        ],
+      });
+      expect(pending['status'], 'pending');
+      final id = pending['requestId'] as String;
+      final fetch = <String, dynamic>{
+        'command': 'file-fetch',
+        'requestId': id,
+        'itemId': item.id,
+        'fieldId': item.fields.single.id,
+        'operationId': 'timeout-original',
+      };
+      expect((await cli.command(fetch))['errorCode'], 'not_authorized');
+      expect(repo.informationFileDeliveries, isEmpty);
+      service.owner.approve(id, [
+        FieldRef(item.id, item.fields.single.id),
+        FieldRef(text.id, text.fields.first.id),
+      ]);
+      await service.owner.retryAuditStorage();
+      expect(
+        (await cli.command({'command': 'claim', 'requestId': id}))['status'],
+        'ok',
+      );
+      expect(
+        (await cli.command({
+          'command': 'read',
+          'requestId': id,
+          'itemId': text.id,
+          'fieldId': text.fields.first.id,
+        }))['value'],
+        '合成姓名',
+      );
+      expect(
+        (await cli.command({
+          'command': 'read',
+          'requestId': id,
+          'itemId': text.id,
+          'fieldId': text.fields.last.id,
+        }))['status'],
+        'unauthorized',
+      );
+      expect(
+        (await cli.command({
+          'command': 'read',
+          'requestId': id,
+          'itemId': item.id,
+          'fieldId': item.fields.single.id,
+        }))['status'],
+        'file_delivery_required',
+      );
+      files.beforeWrite = (_) async {
+        writing.complete();
+        await resume.future;
+      };
+      final outstanding = cli.command(fetch);
+      await writing.future.timeout(const Duration(seconds: 10));
+      expect(repo.informationFileDeliveries.single.state, 'preparing');
+      expect(repo.informationFileDeliveries.single.lease, isNotNull);
+      expect(files.writes, 0);
+      final unknown = await outstanding;
+      expect(unknown['errorCode'], 'delivery_unknown');
+      expect(unknown['operationId'], 'timeout-original');
+      expect(unknown['operationClaimed'], isTrue);
+      final facts = await cli.command({
+        'command': 'file-status',
+        'operationId': 'timeout-original',
+      });
+      expect((facts['delivery'] as Map)['state'], 'preparing');
+      expect(jsonEncode(facts), isNot(contains('path')));
+      expect(jsonEncode(facts), isNot(contains('fictional.pdf')));
+      expect(jsonEncode(facts), isNot(contains('sha256')));
+      expect(
+        (await other.command({
+          'command': 'file-status',
+          'operationId': 'timeout-original',
+        }))['status'],
+        'not_found',
+      );
+      expect(files.writes, 0);
+      resume.complete();
+      final watch = Stopwatch()..start();
+      while (repo.informationFileDeliveries.single.state != 'ready' &&
+          watch.elapsedMilliseconds < 5000) {
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+      }
+      expect(repo.informationFileDeliveries.single.state, 'ready');
+      files.beforeWrite = null;
+      // Explicit duplicate fetch after observing ready returns the original,
+      // fully verified receipt; it does not replay the write.
+      final ready = await cli.command(fetch);
+      final d = ready['delivery'] as Map;
+      expect(ready['status'], 'ok');
+      expect(await File(d['path'] as String).readAsBytes(), data);
+      expect(files.writes, 1);
+      expect(repo.informationFileDeliveries, hasLength(1));
+      expect((await cli.command(fetch))['delivery'], d);
+      expect(files.writes, 1);
+      final released = await cli.command({
+        'command': 'file-release',
+        'deliveryId': d['deliveryId'],
+      });
+      expect((released['delivery'] as Map)['state'], 'released');
+      expect(await File(d['path'] as String).exists(), isFalse);
+      expect(
+        ((await cli.command(fetch))['delivery'] as Map)['state'],
+        'released',
+      );
+      expect(files.writes, 1);
+      final second = await cli.command({...fetch, 'operationId': 'second'});
+      expect(second['status'], 'ok');
+      expect(files.writes, 2);
+      final secondPath = (second['delivery'] as Map)['path'] as String;
+      service.owner.revoke(id);
+      await service.agent.drainInformationFileDeliveries();
+      expect(await File(secondPath).exists(), isFalse);
+      expect(
+        (await cli.command({
+          ...fetch,
+          'operationId': 'after-revoke',
+        }))['errorCode'],
+        'not_authorized',
+      );
+      expect(files.writes, 2);
+      expect(service.owner.requests.where((r) => r.id == id), hasLength(1));
+    },
+    timeout: const Timeout(Duration(seconds: 100)),
   );
   test(
     'schema20 upgrade preserves file originals and refuses a conflicting new registry table atomically',

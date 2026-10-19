@@ -19,6 +19,7 @@ final class InformationFileFailure implements Exception {
       'not_authorized' || 'session_ended' => 'unauthorized',
       'grant_expired' => 'expired',
       'operation_conflict' || 'field_removed' => 'conflict',
+      'delivery_not_found' => 'not_found',
       'audit_failed' ||
       'service_unavailable' ||
       'delivery_capacity' => 'service_unavailable',
@@ -107,10 +108,21 @@ final class InformationFileFetchInput {
 }
 
 final class InformationFileDeliveryInput {
-  const InformationFileDeliveryInput._(this.command, this.deliveryId);
-  final String command, deliveryId;
+  const InformationFileDeliveryInput._(
+    this.command,
+    this.deliveryId,
+    this.operationId,
+  );
+  final String command;
+  final String? deliveryId, operationId;
   factory InformationFileDeliveryInput.fromJson(Map<String, dynamic> json) {
-    _deliveryShape(json, {'protocolVersion', 'command', 'deliveryId'});
+    final byOperation =
+        json['command'] == 'file-status' && json.containsKey('operationId');
+    _deliveryShape(json, {
+      'protocolVersion',
+      'command',
+      byOperation ? 'operationId' : 'deliveryId',
+    });
     if (json['protocolVersion'] != 2 || json['protocolVersion'] is! int) {
       throw const InformationFileFailure('unsupported_protocol');
     }
@@ -119,7 +131,8 @@ final class InformationFileDeliveryInput {
     }
     return InformationFileDeliveryInput._(
       json['command'] as String,
-      _deliveryId(json['deliveryId']),
+      byOperation ? null : _deliveryId(json['deliveryId']),
+      byOperation ? _deliveryId(json['operationId']) : null,
     );
   }
 }
