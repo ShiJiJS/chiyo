@@ -1,5 +1,17 @@
 # Windows 用户配合验收记录（Issue #18）
 
+## 当前新增功能与整包门槛 · 2026-10-20
+
+0.4.0+9的交付说明采用协议v2/schema21及文件备份7/8/9；实际是否已生成包、源码和校验值以具体交付记录及manifest为准，不将版本号当作通过证据。已交付的用户旧包仍为0.4.0+8，自动检查不操作它或真实资料库。
+
+凭据有效期复用#33、本机焦点填充#35及普通附件#34/#38已完成各自Windows功能验收；新增随包文件流程和三方式受控联合检查已接#30。范围与限制分别见[功能计划](https://github.com/ShiJiJS/agent-info-manage/blob/codex/round05-windows-sync/docs/planning/windows-next-iteration.md)及[文件接入检查点](https://github.com/ShiJiJS/agent-info-manage/blob/codex/round05-windows-sync/docs/development/issue30-information-files-skill.md)。
+
+仍需在最终同版本包内确认命令复用、焦点填充、普通文件生命周期/完整备份恢复和旧库升级。真实Codex安装/信任、隔离/共享、结束/恢复与干净Windows用户或独立机器继续待用户安排；无SDK子进程PATH不是新系统安装。只用虚构材料，记录实际使用的包和版本。
+
+#23第五次真实探针收到系统显示回调和两次超时、无点击，明确失败；由此发现的通知回调串位已做行为红绿修复，但新入口的实际显示/点击仍未验成。后续按操作员就绪单次投递，再核对普通、凭据、附件申请对应ID跨页定位。详见[通知诊断](https://github.com/ShiJiJS/agent-info-manage/blob/codex/round05-windows-sync/docs/development/windows-notification-identity.md)。不改系统设置或自动重复投递来凑通过。
+
+下面所有2026-10-18及更早记录和用户表格保留其当时版本范围；其中旧schema16/单次凭据/351项数字不表示当前新版功能或最终用户验收状态。#18/#23/#30保持OPEN，Mac及服务器同步延期，无子Agent。
+
 ## 2026-10-18 补充排查
 
 f3e3472完成351项零跳过及严格分析，红测修复Windows读句柄导致回执覆盖失败，内部worker版本握手防止混用挂起。实际第三次通知探针Shell接受，但工具没有可操作通知、60秒无点击回调，明确失败；用户确认当时不在电脑前，人工点击另行安排，不重复投递。详情见[排查记录](windows-timeout-investigation.md)。以下历史证据不改写为新版全部验收通过。

@@ -91,7 +91,7 @@ try {
         # 'dart test' from silently re-resolving dev dependencies under a mirror.
         & $dart pub get --enforce-lockfile --offline
         if ($LASTEXITCODE -ne 0) { throw 'Pinned SDK-free test dependencies are unavailable.' }
-        & $dart test test/bundle_preparation_test.dart test/cli_test.dart test/codex_process_test.dart
+        & $dart test test/bundle_preparation_test.dart test/cli_test.dart test/codex_process_test.dart test/codex_focused_fill_test.dart test/codex_information_files_test.dart
         if ($LASTEXITCODE -ne 0) { throw 'Extracted CLI and rendered hooks failed.' }
     } finally {
         try {
