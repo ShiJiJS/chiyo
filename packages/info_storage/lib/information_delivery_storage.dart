@@ -9,18 +9,16 @@ Map<String, Object?> _deliveryBudgetArchive(
       !record.runtime ||
       InformationFileDelivery.terminals.contains(record.state))
     return archive;
-  String longest(Set<String> values) =>
-      values.reduce((a, b) => a.length >= b.length ? a : b);
   // Immutable fields stay unchanged. Every remaining lifecycle value has a
   // finite enum or bounded UTC date. This intentionally non-domain document
   // upper-bounds its JSON byte contribution, including the outer row escaping.
   return {
     ...archive,
-    'state': longest(InformationFileDelivery.states),
-    'targetState': longest(InformationFileDelivery.terminals),
-    'reason': longest(InformationFileDelivery.reasons),
-    'cleanupError': longest(InformationFileDelivery.cleanupErrors),
-    'finishedAt': '9999-12-31T23:59:59.999999Z',
+    'state': _longestBudgetValue(InformationFileDelivery.states),
+    'targetState': _longestBudgetValue(InformationFileDelivery.terminals),
+    'reason': _longestBudgetValue(InformationFileDelivery.reasons),
+    'cleanupError': _longestBudgetValue(InformationFileDelivery.cleanupErrors),
+    'finishedAt': _metadataBudgetTimestamp,
   };
 }
 

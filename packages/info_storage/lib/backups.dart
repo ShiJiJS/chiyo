@@ -333,6 +333,7 @@ class InformationBackups {
       // Persist only archive facts. Never serialize private runtime DTOs into
       // a portable backup, even when an execution is currently active.
       _archiveCredentialRuntime(tables, now);
+      if (reserveLifecycleOutcomes) _reserveRuntimeBackupOutcomes(tables);
       if (tables.containsKey('information_deliveries')) {
         tables['information_deliveries'] = [
           for (final row in tables['information_deliveries']!)
@@ -353,7 +354,7 @@ class InformationBackups {
         'format': _format,
         'version': formatVersion,
         'createdAt': reserveLifecycleOutcomes
-            ? '9999-12-31T23:59:59.999999Z'
+            ? _metadataBudgetTimestamp
             : now.toIso8601String(),
         'tables': tables,
         if (formatVersion >= 8)
@@ -362,8 +363,8 @@ class InformationBackups {
               {
                 ...v.toPrivateJson(),
                 if (reserveLifecycleOutcomes && v.available) ...{
-                  'retiredAt': '9999-12-31T23:59:59.999999Z',
-                  'purgedAt': '9999-12-31T23:59:59.999999Z',
+                  'retiredAt': _metadataBudgetTimestamp,
+                  'purgedAt': _metadataBudgetTimestamp,
                 },
               },
           ],

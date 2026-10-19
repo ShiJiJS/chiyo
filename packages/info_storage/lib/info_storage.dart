@@ -13,6 +13,7 @@ export 'platform_keys.dart';
 part 'backups.dart';
 part 'backup_history.dart';
 part 'backup_credentials.dart';
+part 'backup_metadata_budget.dart';
 part 'credentials_storage.dart';
 part 'credential_runtime_storage.dart';
 part 'focused_fill_storage.dart';

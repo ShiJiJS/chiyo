@@ -116,7 +116,7 @@ class _Fixture {
     return repo.focusedFillOperations.last;
   }
 
-  Future<CredentialExecution> command() async {
+  Future<CredentialOperationClaim> claimCommand() async {
     final r = await service.agent.requestCredentialUse(
       session,
       CredentialUseInput.fromJson({
@@ -148,6 +148,11 @@ class _Fixture {
         'launch': r.toRequestInputJson()['launch'],
       }),
     );
+    return claim;
+  }
+
+  Future<CredentialExecution> command() async {
+    final claim = await claimCommand();
     await service.agent.reportCredentialExecution(
       CredentialExecutionReport(
         executionId: claim.execution.id,
@@ -236,6 +241,118 @@ Map<String, dynamic> _payload(String path, String recovery) {
 }
 
 void main() {
+  test(
+    'metadata admission reserves command and released fill outcomes at the actual64MiB boundary',
+    () async {
+      final f = await _Fixture.create();
+      addTearDown(f.close);
+      final request = await f.request();
+      await f.intent(request, released: true);
+      final command = await f.claimCommand();
+      await f.service.owner.createTemplate('文件定义', '', [
+        const TemplateFieldInput('文件', '', kind: FieldKind.file),
+      ]);
+      await f.repo.writeSetting('auditRetentionDays', 90);
+      final large = await f.service.owner.createInformation('合法容量样本', '', [
+        for (var i = 0; i < 67; i++) FieldInput('字段$i', '', 'x' * 1000000),
+        const FieldInput('填充', '', ''),
+      ]);
+      final (path, key) = await f.backup('boundary');
+      final backup = _backupDb(path, key);
+      late int count;
+      try {
+        count =
+            backup
+                    .select(
+                      'SELECT length(CAST(payload AS BLOB)) AS n FROM backup_snapshot',
+                    )
+                    .single['n']
+                as int;
+      } finally {
+        backup.close();
+      }
+      final db = sqlite.sqlite3.open('${f.root.path}/source/library.db');
+      final hex = f.keys.key!
+          .map((b) => b.toRadixString(16).padLeft(2, '0'))
+          .join();
+      db.execute('PRAGMA key = "x\'$hex\'"');
+      try {
+        var low = AttachmentBackupContainer.maxPayloadBytes - count - 8192;
+        var high = AttachmentBackupContainer.maxPayloadBytes - count;
+        expect(low, greaterThan(0));
+        expect(high, lessThan(1000000));
+        void setPadding(int n) => db.execute(
+          'UPDATE information_fields SET value=? WHERE id=?',
+          ['p' * n, large.fields.last.id],
+        );
+        setPadding(low);
+        await f.repo.writeSetting('auditRetentionDays', 90);
+        // Discover the largest admitted valid fixture through the real writer,
+        // without knowing or copying the reservation implementation.
+        while (low < high) {
+          final middle = (low + high + 1) ~/ 2;
+          setPadding(middle);
+          try {
+            await f.repo.writeSetting('auditRetentionDays', 90);
+            low = middle;
+          } on StorageFailure {
+            high = middle - 1;
+          }
+        }
+        setPadding(low);
+        await f.repo.writeSetting('auditRetentionDays', 90);
+        await f.service.agent.reportCredentialExecution(
+          CredentialExecutionReport(
+            executionId: command.execution.id,
+            executionCapability: command.material!.executionCapability,
+            state: 'start_failed',
+            errorCode: 'material_prepare_failed',
+            finishedAt: f.now,
+          ),
+        );
+        expect(f.repo.credentialExecutions.single.state, 'start_failed');
+        final current = f.repo.focusedFillOperations.single;
+        final finished = current.changed({
+          'fillState': 'partial',
+          'finishedAt': f.now.toIso8601String(),
+          'errorCode': 'credential_version_changed',
+        });
+        await f.repo.commitFocusedFillRuntime(f.repo.credentialUseRequests, [
+          finished,
+        ]);
+        expect(
+          f.repo.focusedFillOperations.single.state,
+          FocusedFillState.partial,
+        );
+        expect(f.repo.focusedFillOperations.single.inputReleased, isTrue);
+        final acknowledged = finished.changed({
+          'attentionAcknowledgedAt': f.now.toIso8601String(),
+        });
+        await f.repo.commitFocusedFillRuntime(f.repo.credentialUseRequests, [
+          acknowledged,
+        ]);
+        expect(
+          f.repo.focusedFillOperations.single.attentionAcknowledgedAt,
+          f.now,
+        );
+        await f.service.owner.revokeCredentialUse(request.id);
+        await f.service.owner.revokeCredentialUse(command.execution.requestId);
+        expect(
+          f.repo.credentialUseRequests.every(
+            (r) => r.invalidatedCode == 'grant_revoked',
+          ),
+          isTrue,
+        );
+      } finally {
+        db.execute('UPDATE information_fields SET value=? WHERE item_id=?', [
+          '',
+          large.id,
+        ]);
+        db.close();
+      }
+    },
+    timeout: const Timeout(Duration(minutes: 4)),
+  );
   test(
     'format9 preserves command, fill and credential archives alongside ordinary originals without file delivery authority',
     () async {
