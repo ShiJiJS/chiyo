@@ -80,15 +80,16 @@ class _InformationEditorState extends State<InformationEditor> {
   Future<void> _close() async {
     if (_saving || _leaving || _fileWorking) return;
     if (_dirty && !_committed) {
-      _leaving = true;
+      setState(() => _leaving = true);
       final discard = await prototypeConfirm(
         context,
         title: '放弃未保存的更改？',
         message: '更改尚未保存。取消会继续保留当前输入，放弃后返回信息库。',
         action: '放弃更改',
       );
-      _leaving = false;
-      if (!discard || !mounted) return;
+      if (!mounted) return;
+      setState(() => _leaving = false);
+      if (!discard) return;
     }
     if (!mounted) return;
     setState(() => _leaving = true);
@@ -129,21 +130,25 @@ class _InformationEditorState extends State<InformationEditor> {
       });
       return;
     }
-    final destructive = d.destructiveChanges;
-    // Also prevent a second click while the identity confirmation is open.
-    _leaving = true;
-    if (destructive > 0 &&
-        !await prototypeConfirm(
-          context,
-          title: '确认字段身份变化',
-          message:
-              '$destructive 个字段将删除或被新含义替换。旧字段进入回收站，新增或恢复的字段需要重新授权；现有授权不会自动扩大。',
-          action: '确认保存',
-        )) {
-      _leaving = false;
+    if (d.fields.any(_fileErrors.containsKey)) {
+      setState(() => _error = '请重新选择文件，或明确选择继续使用原文件。');
       return;
     }
-    _leaving = false;
+    final destructive = d.destructiveChanges;
+    // Also prevent a second click while the identity confirmation is open.
+    if (destructive > 0) {
+      setState(() => _leaving = true);
+      final confirmed = await prototypeConfirm(
+        context,
+        title: '确认字段身份变化',
+        message:
+            '$destructive 个字段将删除或被新含义替换。旧字段进入回收站，新增或恢复的字段需要重新授权；现有授权不会自动扩大。',
+        action: '确认保存',
+      );
+      if (!mounted) return;
+      setState(() => _leaving = false);
+      if (!confirmed) return;
+    }
     if (!mounted) return;
     setState(() {
       _saving = true;

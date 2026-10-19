@@ -270,7 +270,7 @@ void main() {
         await tester.pumpAndSettle();
         expect(repository.items, isEmpty);
         expect(find.text('fictional-resume.pdf'), findsWidgets);
-        expect(find.textContaining('原信息和其他输入已保留'), findsOneWidget);
+        expect(find.textContaining('当前输入已保留'), findsOneWidget);
         repository.failCommit = false;
         repository.failRelease = true;
         await tester.tap(find.byKey(const ValueKey('save-information')));
@@ -337,6 +337,53 @@ void main() {
           find.textContaining('5 B · application/pdf · 版本 1'),
           findsOneWidget,
         );
+        final saved = repository.items.single;
+        await tester.tap(
+          find.byKey(const ValueKey('edit-information-description')),
+        );
+        await tester.pumpAndSettle();
+        await tester.ensureVisible(find.byKey(const ValueKey('field-name-0')));
+        await tester.enterText(
+          find.byKey(const ValueKey('field-name-0')),
+          '不同含义',
+        );
+        await tester.tap(find.byKey(const ValueKey('save-information')));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('取消').last);
+        await tester.pumpAndSettle();
+        expect(
+          tester
+              .widget<TextFormField>(find.byKey(const ValueKey('field-name-0')))
+              .enabled,
+          isTrue,
+        );
+        await tester.enterText(
+          find.byKey(const ValueKey('field-name-0')),
+          '简历',
+        );
+        files.source = '${root.path}/missing.pdf';
+        await tester.ensureVisible(find.byKey(const ValueKey('choose-file-0')));
+        await tester.tap(find.byKey(const ValueKey('choose-file-0')));
+        await Future.doWhile(() async {
+          await Future<void>.delayed(Duration.zero);
+          await tester.pump();
+          return find.textContaining('无法读取文件').evaluate().isEmpty;
+        }).timeout(const Duration(seconds: 10));
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const ValueKey('save-information')));
+        await tester.pumpAndSettle();
+        expect(find.byType(InformationEditor), findsOneWidget);
+        expect(repository.items.single.version, saved.version);
+        await tester.ensureVisible(find.text('继续使用原文件'));
+        await tester.tap(find.text('继续使用原文件'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const ValueKey('save-information')));
+        await tester.pumpAndSettle();
+        expect(
+          repository.items.single.fields.single.attachment,
+          saved.fields.single.attachment,
+        );
+        expect(find.byType(InformationEditor), findsNothing);
         expect(tester.takeException(), isNull);
         await tester.pumpWidget(const SizedBox.shrink());
         final closing = service.close();

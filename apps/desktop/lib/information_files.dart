@@ -151,5 +151,5 @@ String informationFileError(Object error) => switch (error) {
   AccessFailure(status: 'output_exists') => '目标文件已存在，请选择新的文件名。',
   AccessFailure(status: 'attachment_missing') => '该文件版本已不可用。',
   AccessFailure(status: 'attachment_integrity_failed') => '文件完整性校验失败，操作未完成。',
-  _ => '操作未完成。原信息和其他输入已保留，请重试。',
+  _ => '操作结果未确认。当前输入已保留，请重试。',
 };

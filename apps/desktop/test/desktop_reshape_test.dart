@@ -7,11 +7,36 @@ import 'package:info_desktop/ui.dart';
 
 class _FailingWrites extends MemoryInformationRepository {
   bool fail = false;
+  int draftCommits = 0;
   @override
-  Future<void> commitRecycleChange({required String itemId,InformationItem? item,InformationRevision? previous,required List<RecycleEntry> entries,required List<RecycleFact> facts,DeleteProposal? proposal}) async {
-    if(fail) throw StateError('synthetic write failure');
-    await super.commitRecycleChange(itemId:itemId,item:item,previous:previous,entries:entries,facts:facts,proposal:proposal);
+  Future<InformationDraftReceipt> commitInformationDraft(
+    InformationDraftChange change,
+  ) async {
+    draftCommits++;
+    if (fail) throw StateError('synthetic draft transaction failure');
+    return super.commitInformationDraft(change);
   }
+
+  @override
+  Future<void> commitRecycleChange({
+    required String itemId,
+    InformationItem? item,
+    InformationRevision? previous,
+    required List<RecycleEntry> entries,
+    required List<RecycleFact> facts,
+    DeleteProposal? proposal,
+  }) async {
+    if (fail) throw StateError('synthetic write failure');
+    await super.commitRecycleChange(
+      itemId: itemId,
+      item: item,
+      previous: previous,
+      entries: entries,
+      facts: facts,
+      proposal: proposal,
+    );
+  }
+
   @override
   Future<void> save(InformationItem item) async {
     if (fail) throw StateError('synthetic write failure');
@@ -49,7 +74,9 @@ void main() {
           home: InformationLibrary(owner: service.owner),
         ),
       );
-      await tester.tap(find.byKey(const ValueKey('edit-information-description')));
+      await tester.tap(
+        find.byKey(const ValueKey('edit-information-description')),
+      );
       await tester.pumpAndSettle();
       await tester.enterText(
         find.byKey(const ValueKey('field-value-0')),
@@ -59,6 +86,7 @@ void main() {
       await tester.tap(find.byKey(const ValueKey('save-information')));
       await tester.pumpAndSettle();
       expect(find.textContaining('输入已保留'), findsOneWidget);
+      expect(repository.draftCommits, 1);
       expect(find.text('reviewed.invalid'), findsOneWidget);
       expect(
         service.owner.information.single.fields.single.value,
@@ -71,6 +99,7 @@ void main() {
       expect(saved.fields.single.value, 'reviewed.invalid');
       expect(saved.fields.single.id, item.fields.single.id);
       expect(saved.version, 2);
+      expect(repository.draftCommits, 2);
       await tester.pumpWidget(
         MaterialApp(
           theme: informationTheme(),
@@ -120,6 +149,7 @@ void main() {
       await tester.tap(find.byKey(const ValueKey('save-information')));
       await tester.pumpAndSettle();
       expect(service.owner.information, isEmpty);
+      expect(repo.draftCommits, 1);
       expect(find.textContaining('输入已保留'), findsOneWidget);
       expect(find.textContaining('请填写'), findsNothing);
       expect(find.text('new.invalid'), findsOneWidget);
@@ -131,6 +161,7 @@ void main() {
         'new.invalid',
       );
       expect(service.owner.information.single.name, 'New server');
+      expect(repo.draftCommits, 2);
       await tester.pumpWidget(const SizedBox());
       await service.close();
     },
