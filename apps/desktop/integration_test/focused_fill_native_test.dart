@@ -483,6 +483,8 @@ Future<void> runFocusedFillNative(
             activeRestartRequestId = newRequest['requestId'] as String;
             await tester.pump(const Duration(seconds: 1));
             await tester.pumpAndSettle();
+            await click('nav-0');
+            await click('request-$activeRestartRequestId');
             await click('focused-fill-approve');
             await click('fill-confirm-decision');
             final activeRequest = owner.credentialUseRequests.firstWhere(
