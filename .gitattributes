@@ -12,3 +12,4 @@ docs/development/evidence/issue37-encrypted-staging/raw/** -text -diff
 docs/development/evidence/issue37-backup-container/raw/** -text -diff
 docs/development/evidence/issue37-formal-files/raw/** -text -diff
 docs/development/evidence/issue37-owner-file-lifecycle/raw/** -text -diff
+docs/development/evidence/issue37-delivery-core/raw/** -text -diff

@@ -57,6 +57,8 @@ Owner另存按固定版本完整读取，校验长度和SHA-256，源事务成�
 
 错误投影至少包含`not_authorized, grant_expired, session_ended, field_removed, not_a_file, unsupported_capability, unsupported_file_write, file_delivery_required, operation_conflict, stage_unavailable, version_conflict, attachment_too_large, attachment_capacity_exceeded, attachment_missing, attachment_integrity_failed, delivery_io_failed, audit_failed`；客户端保留当前位置和可重试草稿，不把错误当空文件或成功。权限失败不泄露未获批文件的名称/大小。
 
+2026-10-19实施检查点：[交付核心及Windows文件驱动](../development/issue37-delivery-core.md)已按上述顺序接入，Memory/合成适配器覆盖公开核心Interface，另有真实Windows保护/并发读取/占用清理检查。SQLCipher交付登记/备份归档、实际HTTP/CLI和生产bootstrap尚未连接，不宣告能力。受管副本暂定32份/100MiB，preparing及cleanup_pending均计入占位；本轮份数上限已测，最终组合字节/峰值内存仍待实测冻结。
+
 ## 4. 存储、恢复及消费者清单
 
 2026-10-19实施状态：schema20已接Owner完整草稿保存、不可变附件版本/字段关系和修订/回收/幂等回执的同一事务。含正式附件或文件模板时，完整备份入口使用[格式8](attachment-backup-v8.md)，验证当前/修订/回收引用后原子安装；纯文本库继续输出7，兼容旧1–7。恢复确认会重新验证选中文件与预览一致，并通过同一已验证句柄读取；更换来源时拒绝，不恢复另一份内容。[Owner另存及版本清理](../development/issue37-owner-file-lifecycle.md)已接通，Agent文件交付及#38客户端尚待，不宣告文件能力或关闭#37。下段1–6是本合同冻结时的旧基线，不能据此丢弃格式7。

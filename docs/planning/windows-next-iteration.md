@@ -4,7 +4,7 @@
 
 ## 当前执行检查点
 
-最新#37检查点为dbb94ac：[Owner另存和保留清理](../development/issue37-owner-file-lifecycle.md)，接续dc6c179的[正式草稿保存及完整库备份](../development/issue37-formal-files.md)。schema20/含文件备份8、纯文本7；另存完整验证及不覆盖发布、当前/历史/回收引用固定、30天清理及回拨不复活、延后恢复和入库前额度回收已验证。新增19项，完整596通过/19跳过、四包严格分析和原锁通过，实际100MiB额度及回收通过。Agent领取/受管副本/独立CLI、最终容量/RSS和#38仍待，#37七项整体验收全部保持未勾选。下面旧提交保留为各阶段记录；其“尚未接正式保存/库恢复/另存/保留清理”不是当前进度。
+最新#37检查点为f2422cd：[文件交付核心及Windows受管副本](../development/issue37-delivery-core.md)，接续[正式保存/完整备份](../development/issue37-formal-files.md)和[Owner另存/保留清理](../development/issue37-owner-file-lifecycle.md)。新增19项公开核心/模型和3项真实Windows文件驱动测试，完整618通过/19跳过、四包严格分析及原锁通过；修复清理中第二项撤销被漏掉的实测竞态。当前schema20/含文件备份8、纯文本7，交付SQLCipher登记/归档、HTTP/独立CLI和生产bootstrap尚未连接，能力不宣告；最终容量/RSS及#38仍待，#37七项整体验收全部未勾选。下面旧提交保留为各阶段记录；其“尚未接正式保存/库恢复/另存/保留清理”不是当前进度。
 
 #36原型与接口合同已完成；#33 Windows功能已完成，见[最终验收](../development/issue33-completion.md)。协议v2在Windows生产bootstrap启用，新CLI默认2；423项零跳过、四包严格分析、真实Windows UI/独立编译适配器/SSH闭环、实际接收器及Release通过，旧许可不升级。当前用户包仍为0.4.0+8/v1，不把源码验收冒充已更新。#35完成后接续#37→#38→#30；#23/#18仍独立保留。
 
