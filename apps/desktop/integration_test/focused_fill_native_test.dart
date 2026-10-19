@@ -8,6 +8,7 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:info_core/info_core.dart';
@@ -287,6 +288,16 @@ Future<void> runFocusedFillNative(
       try {
         Map<String, Object?> result;
         switch (next['action']) {
+          case 'yield-window':
+            await const MethodChannel(
+              'agent_info_manage/window',
+            ).invokeMethod<void>('minimize');
+            result = {'ownTestWindowMinimized': true};
+          case 'show-window':
+            await const MethodChannel(
+              'agent_info_manage/desktop',
+            ).invokeMethod<void>('show');
+            result = {'ownTestWindowShown': true};
           case 'discover':
             final value = await call({'command': 'focus-target'});
             if (value['targetState'] == 'ready') {
