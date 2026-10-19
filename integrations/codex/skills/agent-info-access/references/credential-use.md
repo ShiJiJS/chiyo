@@ -122,9 +122,9 @@ credential-printing commands, and report only the needed nonsecret facts.
 
 This development branch has a separate local input protocol. A capability means
 the installed host offers that operation, not that every browser is supported.
-The previously delivered0.4.0+8 package does not offer it; the newer QA bundle
-still needs complete desktop/browser acceptance. Ordinary attachment delivery is
-not implemented yet. Use only the capabilities actually returned by the host.
+The previously delivered0.4.0+8 package does not offer it. Windows source now has
+verified local-input workflows; use only capabilities actually returned by the
+installed host. Ordinary attachment delivery is not implemented yet.
 
 1. Query `capabilities`. Require protocol2, `credential-use-reuse.v1` and
    `credential-focused-fill.v1`. For safe target discovery also require
@@ -144,7 +144,11 @@ not implemented yet. Use only the capabilities actually returned by the host.
    `decision.credentialUse.approved` and current `state:available`. The grant
    fixes this credential version, application and15/30minute deadline.
 4. After approval, prepare an empty password box and click it again. Leave it
-   masked and keep the intended application foreground. Call `fill-use` in the
+   masked and keep the intended application in the Windows foreground. A
+   browser tool's DOM focus or visible panel alone may leave the approval app
+   foreground. If the tool cannot activate the target window, ask the owner to
+   return to it. Require `focus-target:ready` for the approved application before
+   proceeding. Call `fill-use` in the
    background with a new logical `operationId`; supply no secret, command,
    window handle or file path. If the execution tool opens a terminal or cannot
    carry private stdin separately, report that transport limitation.

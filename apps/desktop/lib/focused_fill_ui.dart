@@ -647,7 +647,7 @@ class _FocusedFillApprovalPanelState extends State<FocusedFillApprovalPanel> {
             _section(
               '02',
               '填充到哪里',
-              '每次核验前台窗口、进程创建身份和密码控件。锁屏、目标变化或无法识别时拒绝。相同应用中的其他页面仍须谨慎确认。',
+              '每次核验前台窗口、进程创建身份和密码控件。锁屏、目标变化或无法识别时拒绝。相同应用中的其他页面仍须谨慎确认。仅在网页内聚焦不够；若工具不能切换系统前台，请先切回目标应用，再调用 CLI。',
               FocusedFillTargetFacts(plan: r.focusedFill!),
             ),
             _section(
