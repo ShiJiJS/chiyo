@@ -8,6 +8,8 @@ import 'runtime_process_identity.dart';
 export 'runtime_process_identity.dart';
 import 'runtime_material_files.dart';
 import 'new_file_publish.dart' as file_publication;
+import 'information_delivery_driver.dart';
+export 'information_delivery_driver.dart';
 export 'runtime_material_files.dart';
 import 'package:unorm_dart/unorm_dart.dart' as unorm;
 import 'credentials.dart';
@@ -44,6 +46,8 @@ part 'information_file_access.dart';
 part 'information_draft_models.dart';
 part 'information_draft_access.dart';
 part 'information_attachment_access.dart';
+part 'information_delivery_models.dart';
+part 'information_delivery_access.dart';
 part 'credential_access.dart';
 part 'credential_field_migration.dart';
 part 'credential_runtime_models.dart';
@@ -145,6 +149,7 @@ class InformationService {
     DateTime Function()? clock,
     CredentialExecutableInspector? credentialExecutableInspector,
     this.focusedFillDriver,
+    this.informationDeliveryFiles,
     FocusedFillApplicationInspector? focusedFillApplicationInspector,
   }) : _repository = repository,
        focusedFillApplicationInspector =
@@ -156,6 +161,7 @@ class InformationService {
   }
   InformationService.fictional({DateTime Function()? clock})
     : focusedFillDriver = null,
+      informationDeliveryFiles = null,
       focusedFillApplicationInspector = inspectFocusedFillApplication,
       credentialExecutableInspector = inspectCredentialExecutable,
       _clock = clock ?? DateTime.now,
@@ -241,6 +247,7 @@ class InformationService {
       return Future.wait<void>([
         owner.retryAuditStorage(),
         owner._releaseAllInformationFileDrafts(),
+        owner._closeInformationFileDeliveries(),
         drainFocusedFills(),
       ]).then((_) {});
     }
@@ -267,6 +274,7 @@ class InformationService {
     return Future.wait<void>([
       owner.retryAuditStorage(),
       owner._releaseAllInformationFileDrafts(),
+      owner._closeInformationFileDeliveries(),
       Future<void>.sync(
         () => _preparedFocusedFill?.close(),
       ).catchError((Object _) {}),
@@ -275,6 +283,12 @@ class InformationService {
   }
 
   final _random = Random.secure();
+  final InformationDeliveryFiles? informationDeliveryFiles;
+  final _pendingInformationDeliveries = <String, InformationFileDelivery>{};
+  bool _informationDeliveryCleanupScheduled = false;
+  bool _informationDeliveryCleanupRequested = false;
+  Future<void> _informationDeliveryCleanup = Future.value();
+  final _inFlightInformationDeliveries = <String>{};
   String _secret() =>
       base64Url.encode(List.generate(32, (_) => _random.nextInt(256)));
 
@@ -317,6 +331,7 @@ class InformationService {
         _recordRequest(request, sessionEnded: true);
       }
     }
+    _scheduleInformationDeliveryCleanup();
   }
 
   void _expire(_Request request) {
@@ -330,6 +345,7 @@ class InformationService {
       request.state = AccessRequestState.expired;
       _finishHistory(request, GrantEventKind.expired);
       _recordRequest(request);
+      _scheduleInformationDeliveryCleanup();
     }
   }
 
@@ -814,6 +830,7 @@ class OwnerAccess {
     request!.state = AccessRequestState.revoked;
     _service._finishHistory(request, GrantEventKind.revoked);
     _service._recordRequest(request);
+    _service._scheduleInformationDeliveryCleanup();
   }
 
   void deny(String requestId) {

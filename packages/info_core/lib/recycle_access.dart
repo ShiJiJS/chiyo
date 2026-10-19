@@ -171,6 +171,7 @@ extension OwnerRecycle on OwnerAccess {
         }
       }
     }
+    _service._scheduleInformationDeliveryCleanup();
   }
 
   Future<RecycleEntry> deleteInformation(

@@ -94,12 +94,13 @@ class ManagedCredentialFiles {
 
   static String _path(CredentialMaterialLease lease, String name) {
     if (!{
-      'credential.bin',
-      'aws-config',
-      'ssh-config',
-      'known-hosts',
-      'global-known-hosts',
-    }.contains(name)) {
+          'credential.bin',
+          'aws-config',
+          'ssh-config',
+          'known-hosts',
+          'global-known-hosts',
+        }.contains(name) &&
+        !RegExp(r'^attachment\.[a-z0-9]{1,12}$').hasMatch(name)) {
       throw const RuntimeMaterialFailure('identity_mismatch');
     }
     return '${lease.path}${Platform.pathSeparator}$name';
@@ -136,11 +137,17 @@ class ManagedCredentialFiles {
     }
   }
 
-  static void verify(CredentialMaterialLease lease) {
+  static void verify(
+    CredentialMaterialLease lease, {
+    bool allowConcurrentReaders = false,
+  }) {
     final parent = _parent(lease);
     try {
       for (final entry in lease.files.entries) {
-        final handle = _windows.open(_path(lease, entry.key));
+        final handle = _windows.open(
+          _path(lease, entry.key),
+          shared: allowConcurrentReaders,
+        );
         try {
           if (_windows.identity(handle) != entry.value) {
             throw const RuntimeMaterialFailure('identity_mismatch');
@@ -459,13 +466,18 @@ class _WindowsMaterialFiles {
     bool directory = false,
     bool writing = false,
     bool deleting = false,
+    bool shared = false,
   }) {
     final native = path.toNativeUtf16();
     try {
       final handle = _open(
         native,
         0x20080 | (writing ? 0x40000000 : 0) | (deleting ? 0x10000 : 0),
-        directory ? 3 : 0,
+        directory
+            ? 3
+            : shared
+            ? 7
+            : 0,
         nullptr,
         3,
         0x00200000 | (directory ? 0x02000000 : 0),

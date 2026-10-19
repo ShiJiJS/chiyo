@@ -23,6 +23,8 @@ import 'info_core.dart'
         InformationAttachmentRepository,
         InformationDraftChange,
         InformationDraftReceipt,
+        InformationFileDeliveryRepository,
+        InformationFileDelivery,
         SshHostTrustRepository,
         SshHostTrustSnapshot;
 part 'memory_information_files.dart';
@@ -383,8 +385,25 @@ class MemoryInformationRepository
         CredentialRuntimeRepository,
         FocusedFillRuntimeRepository,
         InformationAttachmentRepository,
+        InformationFileDeliveryRepository,
         SshHostTrustRepository {
   final _fileStages = MemoryInformationFileStages();
+  final _informationFileDeliveries = <String, InformationFileDelivery>{};
+  @override
+  List<InformationFileDelivery> get informationFileDeliveries =>
+      List.unmodifiable(_informationFileDeliveries.values);
+  @override
+  Future<void> saveInformationFileDelivery(
+    InformationFileDelivery value,
+  ) async {
+    _informationFileDeliveries[value.id] = value;
+  }
+
+  @override
+  Future<void> pruneInformationFileDeliveryHistory(Set<String> ids) async {
+    _informationFileDeliveries.removeWhere((id, _) => ids.contains(id));
+  }
+
   final _informationFiles =
       <InformationAttachmentRef, (InformationAttachmentVersion, Uint8List?)>{};
   final _informationCommits = <String, InformationDraftReceipt>{};
