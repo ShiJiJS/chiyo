@@ -4,6 +4,8 @@
 
 0.4.0+10的交付说明采用协议v2/schema21及文件备份7/8/9；实际是否已生成包、源码和校验值以具体交付记录及manifest为准，不将版本号当作通过证据。0.4.0+9存在结束回执写入失败后无法补记的问题，见[修复记录](issue30-terminal-audit-recovery.md)。已交付的用户旧包仍为0.4.0+8，自动检查不操作它或真实资料库。
 
+2026-10-20：[0.4.0+10](windows-preview-0.4.0-10.md)已由干净527b4cc生成，完整685通过/19既有跳过、四包严格分析、Release、实际ZIP解包16项CLI与7项加密联合通过，113项载荷/归档复核；尚未启动新包GUI或升级真实库。#30联合生命周期/记录条目据对应契约检查更新，真实通知、真实Codex、最终GUI/升级及干净Windows仍待，不关闭#18/#23/#30。
+
 凭据有效期复用#33、本机焦点填充#35及普通附件#34/#38已完成各自Windows功能验收；新增随包文件流程和三方式受控联合检查已接#30。范围与限制分别见[功能计划](https://github.com/ShiJiJS/agent-info-manage/blob/codex/round05-windows-sync/docs/planning/windows-next-iteration.md)及[文件接入检查点](https://github.com/ShiJiJS/agent-info-manage/blob/codex/round05-windows-sync/docs/development/issue30-information-files-skill.md)。
 
 仍需在最终同版本包内确认命令复用、焦点填充、普通文件生命周期/完整备份恢复和旧库升级。真实Codex安装/信任、隔离/共享、结束/恢复与干净Windows用户或独立机器继续待用户安排；无SDK子进程PATH不是新系统安装。只用虚构材料，记录实际使用的包和版本。
