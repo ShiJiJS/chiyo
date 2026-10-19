@@ -111,6 +111,7 @@ void main() {
       db.execute('DROP TABLE organization_tasks');
       db.execute('PRAGMA user_version = 11');
       db.execute('DROP TABLE library_format');
+      db.execute('DROP TABLE information_file_stages');
       db.execute('DROP TABLE credential_focused_fills');
       db.execute('DROP TABLE credential_operations');
       db.execute('DROP TABLE credential_runtime_requests');

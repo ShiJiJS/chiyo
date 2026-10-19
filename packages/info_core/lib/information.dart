@@ -8,6 +8,8 @@ import 'update_proposals.dart';
 import 'recycle.dart';
 import 'revisions.dart';
 import 'credentials.dart';
+import 'dart:typed_data';
+import 'information_files.dart';
 import 'info_core.dart'
     show
         AccessFailure,
@@ -374,7 +376,33 @@ class MemoryInformationRepository
         CredentialRepository,
         CredentialRuntimeRepository,
         FocusedFillRuntimeRepository,
+        InformationFileStagingRepository,
         SshHostTrustRepository {
+  final _fileStages = MemoryInformationFileStages();
+  @override
+  Future<InformationFileStage> stageInformationBytes({
+    required String draftId,
+    required String stageId,
+    required String originalName,
+    required String mediaType,
+    required Uint8List bytes,
+  }) => _fileStages.stageInformationBytes(
+    draftId: draftId,
+    stageId: stageId,
+    originalName: originalName,
+    mediaType: mediaType,
+    bytes: bytes,
+  );
+  @override
+  Future<InformationFileStagingUsage> informationFileStagingUsage() =>
+      _fileStages.informationFileStagingUsage();
+  @override
+  Future<void> releaseInformationStage(String draftId, String stageId) =>
+      _fileStages.releaseInformationStage(draftId, stageId);
+  @override
+  Future<void> releaseInformationDraft(String draftId) =>
+      _fileStages.releaseInformationDraft(draftId);
+
   SshHostTrustSnapshot? _sshHostTrust;
   @override
   SshHostTrustSnapshot? get sshHostTrust => _sshHostTrust;

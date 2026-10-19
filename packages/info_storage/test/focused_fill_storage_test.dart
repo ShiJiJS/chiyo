@@ -695,7 +695,7 @@ void main() {
   }
 
   test(
-    'actual schema17 reader upgrades to18 and format6 restores; old reader refuses new database/backup unchanged',
+    'actual schema17 reader upgrades to19 and format6 restores; old reader refuses new database/backup unchanged',
     () async {
       final f = await _Fixture.create();
       addTearDown(f.close);

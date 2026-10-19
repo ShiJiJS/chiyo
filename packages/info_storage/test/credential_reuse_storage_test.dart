@@ -418,13 +418,13 @@ void main() {
         var db = open();
         try {
           if (future == 'marker') {
-            db.execute('UPDATE library_format SET version=19');
+            db.execute('UPDATE library_format SET version=999');
             db.execute('PRAGMA user_version=16');
           } else if (future == 'missing-marker') {
             db.execute('DROP TABLE library_format');
             db.execute('PRAGMA user_version=16');
           } else {
-            db.execute('PRAGMA user_version=19');
+            db.execute('PRAGMA user_version=999');
           }
         } finally {
           db.close();
@@ -443,7 +443,7 @@ void main() {
         try {
           expect(
             db.select('PRAGMA user_version').single.values.single,
-            future == 'header' ? 19 : 16,
+            future == 'header' ? 999 : 16,
           );
           expect(
             db
@@ -615,7 +615,7 @@ void main() {
   );
 
   test(
-    'schema18 reopen keeps all frozen operations but no usable session or worker capability',
+    'schema19 reopen keeps all frozen operations but no usable session or worker capability',
     () async {
       final f = await _Fixture.create();
       addTearDown(f.close);
@@ -636,7 +636,7 @@ void main() {
             .map((b) => b.toRadixString(16).padLeft(2, '0'))
             .join();
         db.execute('PRAGMA key = "x\'$hex\'"');
-        expect(db.select('PRAGMA user_version').single.values.single, 18);
+        expect(db.select('PRAGMA user_version').single.values.single, 19);
       } finally {
         db.close();
       }

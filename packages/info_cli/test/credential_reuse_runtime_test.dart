@@ -221,6 +221,24 @@ void main() {
         });
         expect(result['status'], 'accepted');
         await h.client.drainCredentialExecutions();
+        // Target exit/pipe drain may precede the end of the worker's Windows
+        // Job. Query and clean the original operation, never rerun the command.
+        final beforeCleanup = await h.client.execute({
+          'command': 'execution-status',
+          'executionId': result['executionId'],
+        });
+        print(
+          jsonEncode({
+            'phase': 'native_file_cleanup_before_wait',
+            'operationId': region,
+            'executionState': beforeCleanup['executionState'],
+            'cleanupState': beforeCleanup['cleanupState'],
+          }),
+        );
+        final cleaned = await h.waitForMaterialCleanup(
+          result['executionId'] as String,
+        );
+        expect(cleaned['cleanupState'], 'complete');
         final output = await h.client.execute({
           'protocolVersion': 2,
           'command': 'execution-output',

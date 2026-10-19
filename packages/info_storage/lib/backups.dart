@@ -475,6 +475,7 @@ class InformationBackups {
                     'settings',
                     'backup_configuration',
                     'library_format',
+                    'information_file_stages',
                   }.contains(name),
                 )) {
           final quoted = table.replaceAll('"', '""');
@@ -485,6 +486,11 @@ class InformationBackups {
             throw const StorageFailure('recipient_not_empty');
           }
         }
+        // Uncommitted owner forms are ephemeral, excluded from backup and
+        // invalidated by a successful restore. A failed restore keeps them.
+        await _repository._db.customStatement(
+          'DELETE FROM information_file_stages',
+        );
         await _repository._db.customStatement('DELETE FROM settings');
         await _repository._db.customStatement('DELETE FROM organization_tasks');
         // Directory parents may appear after a moved child in source row order.

@@ -100,6 +100,19 @@ Future<void> main()async{
       );
       await release.writeAsString('release');
       await client.drainCredentialExecutions();
+      final afterDrain = h.service.owner.credentialExecutions.single;
+      print(
+        jsonEncode({
+          'phase': 'early_worker_cleanup_after_drain',
+          'executionState': afterDrain.state,
+          'cleanupState': afterDrain.cleanupState,
+          'jobActive': CredentialProcessJob.isActive(afterDrain.jobName!),
+        }),
+      );
+      await h.waitForMaterialCleanup(
+        afterDrain.id,
+        expectedExecutionState: 'unknown',
+      );
       final cleaned = h.service.owner.credentialExecutions.single;
       expect(cleaned.state, 'unknown');
       expect(cleaned.exitCode, isNull);

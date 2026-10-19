@@ -13,8 +13,9 @@ part 'backup_credentials.dart';
 part 'credentials_storage.dart';
 part 'credential_runtime_storage.dart';
 part 'focused_fill_storage.dart';
+part 'information_files_storage.dart';
 
-const _libraryFormat = 18;
+const _libraryFormat = 19;
 
 class StorageFailure implements Exception {
   const StorageFailure(this.code);
@@ -69,7 +70,31 @@ class EncryptedInformationRepository
         CredentialRepository,
         CredentialFieldMigrationRepository,
         FocusedFillRuntimeRepository,
+        InformationFileStagingRepository,
         SshHostTrustRepository {
+  @override
+  Future<InformationFileStage> stageInformationBytes({
+    required String draftId,
+    required String stageId,
+    required String originalName,
+    required String mediaType,
+    required Uint8List bytes,
+  }) => _stageInformationFileBytes(
+    draftId: draftId,
+    stageId: stageId,
+    originalName: originalName,
+    mediaType: mediaType,
+    bytes: bytes,
+  );
+  @override
+  Future<InformationFileStagingUsage> informationFileStagingUsage() =>
+      _fileStagingUsage();
+  @override
+  Future<void> releaseInformationStage(String draftId, String stageId) =>
+      _releaseInformationFileStage(draftId, stageId);
+  @override
+  Future<void> releaseInformationDraft(String draftId) =>
+      _releaseInformationFileStage(draftId, null);
   SshHostTrustSnapshot? _sshHostTrust;
   @override
   SshHostTrustSnapshot? get sshHostTrust => _sshHostTrust;
@@ -301,6 +326,9 @@ class EncryptedInformationRepository
   }
 
   Future<void> _load() async {
+    // A stage belongs to an in-process owner form, never a resumed grant or
+    // formal item. A new process has no valid form handle for orphan bytes.
+    await _db.customStatement('DELETE FROM information_file_stages');
     await _loadSshTrust();
     await _loadRuntime();
     _credentials.clear();
@@ -657,8 +685,8 @@ class EncryptedInformationRepository
   @override
   Future<void> saveTemplate(InformationTemplate template) async {
     if (_closed) throw const StorageFailure('library_closed');
-    // The schema18/format7 writer must not admit an unbackable new field kind.
-    // Attachment persistence is connected by the following #37 migration.
+    // Until committed BLOBs and backup8 are connected, staged bytes cannot be
+    // promoted through a legacy writer into an unbackable formal field.
     if (template.fields.any((f) => f.kind == FieldKind.file)) {
       throw const StorageFailure('unsupported_attachment_storage');
     }
@@ -1205,6 +1233,7 @@ class _InformationDatabase extends GeneratedDatabase {
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (_) async {
       await _createLibraryFormat();
+      await _createInformationFileStages();
       await _createSshHostTrust();
       await _createCredentialRuntime();
       await _createCredentials();
@@ -1244,6 +1273,12 @@ class _InformationDatabase extends GeneratedDatabase {
         sourceVersion = marker.read<int>('version');
       }
       await transaction(() async {
+        if (sourceVersion < 19 &&
+            (await customSelect(
+              "SELECT name FROM sqlite_master WHERE name='information_file_stages'",
+            ).get()).isNotEmpty) {
+          throw const StorageFailure('unsupported_schema');
+        }
         if (sourceVersion < 18 &&
             (await customSelect(
               "SELECT name FROM sqlite_master WHERE name='credential_focused_fills'",
@@ -1292,6 +1327,7 @@ class _InformationDatabase extends GeneratedDatabase {
           );
         }
         if (sourceVersion < 18) await _createFocusedFillRuntime();
+        if (sourceVersion < 19) await _createInformationFileStages();
         await _createLibraryFormat();
       });
     },
@@ -1317,6 +1353,13 @@ class _InformationDatabase extends GeneratedDatabase {
       [_libraryFormat],
     );
   }
+
+  Future<void> _createInformationFileStages() => customStatement(
+    'CREATE TABLE information_file_stages('
+    'id TEXT PRIMARY KEY,draft_id TEXT NOT NULL,byte_length INTEGER NOT NULL '
+    'CHECK(byte_length>=0),metadata TEXT NOT NULL,body BLOB NOT NULL '
+    'CHECK(length(body)=byte_length))',
+  );
 
   Future<void> _migrateCredentialRuntime17() async {
     final names = (await customSelect(

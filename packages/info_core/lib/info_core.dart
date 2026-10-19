@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 import 'runtime_process_identity.dart';
 export 'runtime_process_identity.dart';
@@ -13,6 +14,8 @@ export 'credentials.dart';
 import 'organization_tasks.dart';
 export 'organization_tasks.dart';
 import 'information.dart';
+import 'information_files.dart';
+export 'information_files.dart';
 import 'templates.dart';
 import 'history.dart';
 export 'history.dart';
@@ -36,6 +39,7 @@ part 'revision_access.dart';
 part 'backup_access.dart';
 part 'workspace_access.dart';
 part 'library_access.dart';
+part 'information_file_access.dart';
 part 'credential_access.dart';
 part 'credential_field_migration.dart';
 part 'credential_runtime_models.dart';
@@ -232,6 +236,7 @@ class InformationService {
     if (_closed) {
       return Future.wait<void>([
         owner.retryAuditStorage(),
+        owner._releaseAllInformationFileDrafts(),
         drainFocusedFills(),
       ]).then((_) {});
     }
@@ -257,6 +262,7 @@ class InformationService {
     _submitted.close();
     return Future.wait<void>([
       owner.retryAuditStorage(),
+      owner._releaseAllInformationFileDrafts(),
       Future<void>.sync(
         () => _preparedFocusedFill?.close(),
       ).catchError((Object _) {}),
@@ -505,6 +511,7 @@ class ClaimedGrant {
 class OwnerAccess {
   OwnerAccess._(this._service);
   final InformationService _service;
+  final _informationFileDrafts = <String, InformationFileDraft>{};
   Stream<String> get requestSubmitted => _service._submitted.stream;
   Duration get requestLifetime => _service._requestLifetime;
   Future<void> setRequestLifetime(Duration duration) {

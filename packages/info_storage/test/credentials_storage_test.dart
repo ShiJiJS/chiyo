@@ -56,6 +56,7 @@ void main() {
           );
         } else {
           fixture.execute('DROP TABLE library_format');
+          fixture.execute('DROP TABLE information_file_stages');
           fixture.execute('DROP TABLE credential_focused_fills');
           fixture.execute('DROP TABLE credential_operations');
           fixture.execute('DROP TABLE credential_runtime_requests');

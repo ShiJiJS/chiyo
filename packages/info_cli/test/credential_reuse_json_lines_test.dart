@@ -198,10 +198,15 @@ void main() {
         expect(text, contains('[REDACTED]'));
         expect(text, isNot(contains('synthetic-token')));
       }
-      expect(h.service.owner.credentialExecutions.map((e) => e.exitCode), [
-        0,
-        7,
-      ]);
+      // Concurrent workers can finish in either order. Verify each operation's
+      // own result rather than the repository's last-updated iteration order.
+      expect(
+        {
+          for (final e in h.service.owner.credentialExecutions)
+            e.operationId: e.exitCode,
+        },
+        {'json-a': 0, 'json-b': 7},
+      );
       expect(
         h.service.owner.credentialExecutions.every((e) => e.workerPid != null),
         isTrue,

@@ -131,16 +131,17 @@ class RuntimeHarness {
   /// A target exit is earlier than the end of its whole Windows Job. Poll the
   /// original operation and cleanup endpoint; never start a replacement task.
   Future<Map<String, dynamic>> waitForMaterialCleanup(
-    String executionId,
-  ) async {
+    String executionId, {
+    String expectedExecutionState = 'exited',
+  }) async {
     final deadline = DateTime.now().add(const Duration(seconds: 10));
     while (true) {
       final status = await client.execute({
         'command': 'execution-status',
         'executionId': executionId,
       });
-      if (status['executionState'] != 'exited') {
-        throw StateError('Receiver has no established exit: $status');
+      if (status['executionState'] != expectedExecutionState) {
+        throw StateError('Receiver changed its established result: $status');
       }
       if ({'complete', 'not_needed'}.contains(status['cleanupState'])) {
         return status;

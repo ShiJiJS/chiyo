@@ -16,7 +16,7 @@ class _Keys implements DatabaseKeyStore {
 
 void main() {
   test(
-    'the schema18 writer does not persist a file as a text value before attachment storage is connected',
+    'the legacy writer does not promote a staged file before complete attachment backup is connected',
     () async {
       final root = await Directory.systemTemp.createTemp(
         'attachment-legacy-db-',
