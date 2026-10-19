@@ -3,7 +3,7 @@ const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/st
 function workspace(search=''){
  search+=(search?'&':'?')+'legacy=1';
  let factory;const init=[];const c={console,URLSearchParams,location:{search},document:{activeElement:{focus(){}},addEventListener:(name,fn)=>init.push(fn)},Alpine:{data:(name,f)=>factory=f},setTimeout:()=>0,clearTimeout(){}};c.window=c;
- vm.createContext(c);for(const file of ['sections.js','credentials.js','runtime.js','prototype.js','lifecycle.js','attachments.js','reuse.js'])vm.runInContext(fs.readFileSync(path.join(__dirname,file),'utf8'),c,{filename:file});init.forEach(f=>f());const a=factory();a.$watch=()=>{};a.$nextTick=f=>f();a.$refs={};a.init();return a;
+ vm.createContext(c);for(const file of ['sections.js','credentials.js','runtime.js','prototype.js','lifecycle.js','attachments.js','reuse.js','focused-fill.js'])vm.runInContext(fs.readFileSync(path.join(__dirname,file),'utf8'),c,{filename:file});init.forEach(f=>f());const a=factory();a.$watch=()=>{};a.$nextTick=f=>f();a.$refs={};a.init();return a;
 }
 let checks=0;async function check(name,fn){await fn();checks++;console.log('PASS '+name)}
 (async()=>{

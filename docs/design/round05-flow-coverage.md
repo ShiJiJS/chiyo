@@ -25,6 +25,8 @@
 
 ## 数据与身份映射
 
+2026-10-19新增F15“本机焦点填充”：`fill-approval/confirm/result/history/sent/refused/partial/unknown/checking/revoked/rejected/save-failed/incompatible/tip/long-target`。沿用同一收件箱、右侧决定栏和历史，输入目标说明替代命令区，无退出码/清理字段；期限内多次使用、重复ID和不确定结果不重放见[填充合同](local-focused-fill-contract.md)。HTML及只读识别不是正式填充，#35继续实施。
+
 “公开说明”映射现有InformationItem.description/ImportItemDraft.description，进入公开目录；本轮不新增私有备注字段。原型publicDescription是旧视图兼容字段，保存映射为description，不能误把内部说明公开。唯一组织结构是稳定目录ID和标签；path是显示，原型旧category仅用于派生图标/显示，不新增并列分类实体。生产选择directoryId/tagIds。
 
 普通值修正及仍存在字段的版本恢复保留身份；曾删除/替换后恢复的语义字段取得新身份，旧许可不复活。回收恢复保留信息身份但不恢复授权。凭据恢复建立新版本并停用。提案终态只留事实和目标身份；目标不存在不能读取旧副本。

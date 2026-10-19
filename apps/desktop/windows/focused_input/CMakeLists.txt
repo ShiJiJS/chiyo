@@ -1,0 +1,19 @@
+# The inspection seam is not a filling capability. Diagnostics are explicitly
+# built while #35's application/CLI authorization is still being implemented.
+add_library(focused_input_snapshot STATIC EXCLUDE_FROM_ALL "focus_snapshot.cpp")
+apply_standard_settings(focused_input_snapshot)
+target_compile_definitions(focused_input_snapshot PRIVATE NOMINMAX)
+target_compile_options(focused_input_snapshot PRIVATE /utf-8)
+target_link_libraries(focused_input_snapshot PUBLIC user32 ole32 oleaut32 wtsapi32)
+target_include_directories(focused_input_snapshot PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
+
+add_executable(focus_inspector WIN32 EXCLUDE_FROM_ALL "inspect_main.cpp")
+apply_standard_settings(focus_inspector)
+target_compile_options(focus_inspector PRIVATE /utf-8)
+target_link_libraries(focus_inspector PRIVATE focused_input_snapshot)
+set_target_properties(focus_inspector PROPERTIES OUTPUT_NAME "info-focus-inspector")
+
+add_executable(focus_snapshot_test EXCLUDE_FROM_ALL "focus_snapshot_test.cpp")
+apply_standard_settings(focus_snapshot_test)
+target_compile_options(focus_snapshot_test PRIVATE /utf-8)
+target_link_libraries(focus_snapshot_test PRIVATE focused_input_snapshot)

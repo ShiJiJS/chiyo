@@ -1,6 +1,6 @@
 # round05 已确认视觉基线
 
-> 当前目标更新（2026-10-18）：已确认授权期内复用、普通附件入SQLCipher及本机焦点填充，生产实现尚未开始。当前行为与后续界面要求见[设计修订](../../windows-credential-and-file-update.md)，排期见[Windows计划](../../../planning/windows-next-iteration.md)。下文/现有HTML保留Round05 v1视觉及流程基线，一次启动状态不代表新目标；新增状态由#33/#35及#34下的#36先补原型；附件核心由#37、Windows客户端由#38交付，保持四主题及三栏。
+> 当前目标更新（2026-10-19）：#33 Windows凭据复用及#36附件原型已完成；#35补焦点填充原型及只读原生识别，正式填充未接通。当前行为与后续界面要求见[设计修订](../../windows-credential-and-file-update.md)，排期见[Windows计划](../../../planning/windows-next-iteration.md)。旧一次启动状态用于保留v1历史，新复用/附件/填充有独立状态；附件核心由#37、Windows客户端由#38交付，保持四主题及三栏。
 
 来自2026-10-16的HTML设计探索；2026-10-17 D0补齐流程。保留原型而非生产软件，虚构数据不接后台，刷新重置。见[流程覆盖](../../round05-flow-coverage.md)与[D0证据](../../../development/round05-22-design.md)。
 
@@ -22,8 +22,14 @@ index.html是唯一完整交互入口。baseline-index.html保存已确认基线
 
 服务和字段合同见[接口合同](../../attachment-interface-contract.md)，消费者及逐页责任见[客户端规划](../../windows-attachment-client-plan.md)。本轮沿用四主题、三栏、现有字体/控件；自检而无独立子Agent评审。#33再补授权复用原型，#37/#38接真实文件IO和生产界面。
 
-## #33 复用目标原型（实施中）
+## #33 复用原型（Windows生产实现已完成）
 
 `reuse.js`、`reuse-history.html`和`reuse-assembly.cjs`在同一入口扩展新批准及多操作历史：`?state=reuse-approval`、`reuse-result`、`reuse-history`、`reuse-running`、`reuse-failed`、`reuse-unknown`、`reuse-revoked`。`node check-reuse.cjs`检查6项复用设计状态；旧15项基线用显式legacy夹具保留v1历史合同，当前新复用目标另行检查。
 
-字段与凭据的期限分别显示，逐次操作命令是不可执行的虚构状态数据；没有调用真实CLI/SSH。服务目标见[v2合同](../../runtime-protocol-v2.md)，生产复用能力仍需#33继续实现与验证。
+字段与凭据的期限分别显示，逐次操作命令是不可执行的虚构状态数据；HTML没有调用真实CLI/SSH。生产复用能力见[#33完成记录](../../../development/issue33-completion.md)与[v2合同](../../runtime-protocol-v2.md)，不以HTML状态证明生产通过。
+
+## #35 本机焦点填充原型
+
+`focused-fill.js/css`、`focused-fill-{approval,history,dialog}.html`和`focused-fill-assembly.cjs`沿用同一收件箱、决定栏和历史。`?state=fill-approval`、`fill-confirm`、`fill-result`、`fill-history`、`fill-sent`、`fill-refused`、`fill-partial`、`fill-unknown`、`fill-checking`、`fill-revoked`、`fill-rejected`、`fill-save-failed`、`fill-incompatible`、`fill-tip`、`fill-long-target`直达相应状态；主题参数不变。
+
+`node check-focused-fill.cjs`检查11项填充设计状态，连同原15/14/6项检查共46项。密码框填充不要求建议环境变量名，不展示命令/退出码/文件清理；批准后等待Agent点击目标，原型不发送任何真实输入。流程、类型和生产接口目标见[填充合同](../../local-focused-fill-contract.md)，原生只读识别不等于正式填充已实现。

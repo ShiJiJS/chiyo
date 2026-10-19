@@ -2,6 +2,8 @@
 
 > 当前执行入口（2026-10-19）：[Windows后续计划](windows-next-iteration.md)继续跟踪三项新增调整。#36原型与#33凭据复用已完成，见[#33最终验收](../development/issue33-completion.md)；Windows源码已启用v2，接续#35→#37→#38→#30。当前已交付0.4.0+8包仍为v1，不表示用户已经更新。#23通知、#18新整包/干净环境及真实Codex联合门槛保持开放。下文旧阶段状态/自动继续同步安排仅作历史；无子Agent、服务器同步暂停，Mac及双向恢复延期。
 
+> #35检查点（2026-10-19）：已补Round05焦点填充原型/合同和只读原生识别，46项设计状态、24项原生状态/JSON检查及浏览器验证见[检查点](../development/issue35-focused-fill-checkpoint.md)。正式填充/CLI/Flutter/迁移仍待，#35保持OPEN；当前用户包未更新。
+
 2026-10-16：用户要求更新方案与GitHub tickets；[新计划](design-audit-2026-10-16/README.md)跟踪round05界面与凭据注入。任务按依赖推进，D0先补齐原型及协议。仅完成规划发布，未新增生产实现或实机验收；下方旧实现进度保留为基线事实。
 
 Integration branch: `integration/local-information-access`.

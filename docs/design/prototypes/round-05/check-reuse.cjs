@@ -1,7 +1,7 @@
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict'),path=require('node:path');
 function workspace(state='reuse-approval'){
  let factory;const listeners=[];const c={console,URLSearchParams,location:{search:'?state='+state},document:{activeElement:{focus(){}},addEventListener:(_,f)=>listeners.push(f)},Alpine:{data:(_,f)=>factory=f},setTimeout:()=>0,clearTimeout(){}};c.window=c;vm.createContext(c);
- for(const file of ['sections.js','credentials.js','runtime.js','prototype.js','lifecycle.js','attachments.js','reuse.js'])vm.runInContext(fs.readFileSync(path.join(__dirname,file),'utf8'),c,{filename:file});
+ for(const file of ['sections.js','credentials.js','runtime.js','prototype.js','lifecycle.js','attachments.js','reuse.js','focused-fill.js'])vm.runInContext(fs.readFileSync(path.join(__dirname,file),'utf8'),c,{filename:file});
  listeners.forEach(f=>f());const a=factory();a.$watch=()=>{};a.$nextTick=f=>f();a.$refs={};a.init();return a;
 }
 let count=0;function check(name,fn){fn();console.log('PASS '+name);count++}
