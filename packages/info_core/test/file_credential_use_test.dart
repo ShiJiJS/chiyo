@@ -8,9 +8,10 @@ const syntheticAwsFile =
 
 Future<(InformationService, String, ManagedCredential)> fileSession({
   String content = syntheticAwsFile,
+  MemoryInformationRepository? repository,
 }) async {
   final service = InformationService(
-    repository: MemoryInformationRepository(),
+    repository: repository ?? MemoryInformationRepository(),
     credentialExecutableInspector: (path, receiver) async =>
         ExecutableIdentity(path, 1, 1, 'sha256:controlled'),
   );
@@ -38,10 +39,12 @@ Future<(InformationService, String, ManagedCredential)> fileSession({
 
 CredentialUseInput awsInput(
   ManagedCredential c, {
+  int protocolVersion = 1,
   List<Object?>? argv,
   Map<String, Object?>? env,
   String? cwd,
 }) => CredentialUseInput.fromJson({
+  if (protocolVersion != 1) 'protocolVersion': protocolVersion,
   'command': 'request-use',
   'purpose': 'Run an approved local AWS operation',
   'credentials': [

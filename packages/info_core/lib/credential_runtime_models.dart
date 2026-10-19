@@ -34,6 +34,7 @@ class CredentialUseFailure implements Exception {
       'credential_version_changed' ||
       'executable_changed' ||
       'plan_changed' ||
+      'operation_conflict' ||
       'execution_unknown' ||
       'cleanup_busy' ||
       'cleanup_failed' ||
@@ -148,6 +149,51 @@ int _useProtocol(Map<String, dynamic> json) {
   final raw = json['protocolVersion'];
   if (raw is int && (raw == 1 || raw == 2)) return raw;
   throw const CredentialUseFailure('unsupported_protocol');
+}
+
+String _useFingerprint(Object? value) {
+  Object? ordered(Object? v) => v is Map
+      ? {
+          for (final key in (v.keys.cast<String>().toList()..sort()))
+            key: ordered(v[key]),
+        }
+      : v is List
+      ? v.map(ordered).toList()
+      : v;
+  return 'sha256:${sha256.convert(utf8.encode(jsonEncode(ordered(value))))}';
+}
+
+/// Non-secret caller plan. No grant or execution material is carried here.
+class CredentialOperationInput {
+  CredentialOperationInput._(this.requestId, this.operationId, this.launch);
+  final String requestId, operationId;
+  final CredentialLaunchPlan launch;
+  factory CredentialOperationInput.fromJson(Map<String, dynamic> json) {
+    if (_useProtocol(json) != 2) {
+      throw const CredentialUseFailure('unsupported_protocol');
+    }
+    _useShape(json, {
+      'protocolVersion',
+      'command',
+      'requestId',
+      'operationId',
+      'launch',
+    });
+    if (json['command'] != 'run-use') {
+      throw const CredentialUseFailure('invalid_plan');
+    }
+    final launch = json['launch'];
+    if (launch is! Map<String, dynamic>) {
+      throw const CredentialUseFailure('invalid_type', fieldPath: 'launch');
+    }
+    return CredentialOperationInput._(
+      _useId(json['requestId'], 'requestId'),
+      _useId(json['operationId'], 'operationId'),
+      CredentialLaunchPlan.parse(launch),
+    );
+  }
+  String get fingerprint =>
+      _useFingerprint({'requestId': requestId, 'launch': launch.toJson()});
 }
 
 class CredentialUseInput {
@@ -698,6 +744,10 @@ class CredentialExecution {
   CredentialExecution({
     required this.id,
     required this.requestId,
+    this.protocolVersion = 1,
+    this.operationId,
+    this.operationFingerprint,
+    this.operationPlan,
     this.state = 'preparing',
     this.processStarted = false,
     this.exitCode,
@@ -716,6 +766,9 @@ class CredentialExecution {
     this.restoredAt,
   });
   final String id, requestId, state, cleanupState;
+  final int protocolVersion;
+  final String? operationId, operationFingerprint;
+  final CredentialLaunchPlan? operationPlan;
   final bool processStarted;
   final int? exitCode, pid;
   final String? errorCode, processCreatedAt;
@@ -728,12 +781,16 @@ class CredentialExecution {
   final DateTime? startedAt, finishedAt;
   final DateTime? restoredAt;
   Map<String, Object?> toJson() => {
-    'protocolVersion': 1,
+    'protocolVersion': protocolVersion,
+    if (protocolVersion == 2) 'operationId': operationId,
     'status': 'ok',
     'executionId': id,
     'requestId': requestId,
     'executionState': state,
-    'attemptConsumed': true,
+    if (protocolVersion == 1)
+      'attemptConsumed': true
+    else
+      'operationClaimed': true,
     'processStarted': processStarted,
     'exitCode': exitCode,
     'errorCode': errorCode,
@@ -746,6 +803,9 @@ class CredentialExecution {
   };
   Map<String, Object?> toStorageJson() => {
     ...toJson(),
+    if (operationFingerprint != null)
+      'operationFingerprint': operationFingerprint,
+    if (operationPlan != null) 'operationPlan': operationPlan!.toJson(),
     'pid': pid,
     'processCreatedAt': processCreatedAt,
     if (materialLease != null) 'materialLease': materialLease!.toPrivateJson(),
@@ -757,6 +817,14 @@ class CredentialExecution {
   };
   factory CredentialExecution.fromJson(Map<String, dynamic> j) =>
       CredentialExecution(
+        protocolVersion: _useProtocol(j),
+        operationId: j['operationId'] as String?,
+        operationFingerprint: j['operationFingerprint'] as String?,
+        operationPlan: j['operationPlan'] == null
+            ? null
+            : CredentialLaunchPlan.fromStorageJson(
+                j['operationPlan'] as Map<String, dynamic>,
+              ),
         id: j['executionId'] as String,
         requestId: j['requestId'] as String,
         state: j['executionState'] as String,
@@ -788,6 +856,85 @@ class CredentialExecution {
       );
   CredentialExecution changed(Map<String, Object?> values) =>
       CredentialExecution.fromJson({...toStorageJson(), ...values});
+}
+
+/// Only the first private claim contains material. Never encode this as a
+/// generic response: use toPublicJson for agent-facing metadata.
+class CredentialOperationClaim {
+  CredentialOperationClaim(
+    this.execution, {
+    this.material,
+    required this.grantState,
+  });
+  final CredentialExecution execution;
+  final CredentialExecutionMaterial? material;
+  final String grantState;
+  bool get newlyClaimed => material != null;
+  Map<String, Object?> toPublicJson() => {
+    ...execution.toJson(),
+    'grantState': grantState,
+    'duplicate': !newlyClaimed,
+  };
+  Map<String, Object?> toPrivateJson() => {
+    'protocolVersion': 2,
+    'execution': execution.toStorageJson(),
+    'grantState': grantState,
+    'newlyClaimed': newlyClaimed,
+    if (material != null) 'material': material!.toPrivateJson(),
+  };
+  factory CredentialOperationClaim.fromPrivateJson(Map<String, dynamic> json) {
+    _useShape(
+      json,
+      {'protocolVersion', 'execution', 'grantState', 'newlyClaimed'},
+      {'material'},
+    );
+    if (_useProtocol(json) != 2 ||
+        json['newlyClaimed'] is! bool ||
+        json['execution'] is! Map<String, dynamic> ||
+        json['grantState'] is! String ||
+        json.containsKey('material') &&
+            json['material'] is! Map<String, dynamic> ||
+        (json['newlyClaimed'] == true) != json.containsKey('material')) {
+      throw const CredentialUseFailure('invalid_type');
+    }
+    final execution = CredentialExecution.fromJson(
+      json['execution'] as Map<String, dynamic>,
+    );
+    final material = json.containsKey('material')
+        ? CredentialExecutionMaterial.fromPrivateJson(
+            json['material'] as Map<String, dynamic>,
+          )
+        : null;
+    if (execution.protocolVersion != 2 ||
+        execution.operationId == null ||
+        execution.operationId!.isEmpty ||
+        execution.operationFingerprint == null ||
+        !RegExp(
+          r'^sha256:[0-9a-f]{64}$',
+        ).hasMatch(execution.operationFingerprint!) ||
+        execution.operationPlan == null ||
+        !{
+          'available',
+          'revoked',
+          'expired',
+          'not_approved',
+          'version_invalidated',
+        }.contains(json['grantState']) ||
+        material != null &&
+            (material.executionId != execution.id ||
+                material.approvedPlan.planHash !=
+                    execution.operationPlan!.planHash ||
+                execution.state != 'preparing' ||
+                execution.processStarted ||
+                json['grantState'] != 'available')) {
+      throw const CredentialUseFailure('invalid_reference');
+    }
+    return CredentialOperationClaim(
+      execution,
+      material: material,
+      grantState: json['grantState'] as String,
+    );
+  }
 }
 
 class CredentialExecutionReport {

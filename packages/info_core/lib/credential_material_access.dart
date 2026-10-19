@@ -15,7 +15,8 @@ extension CredentialMaterialAgentAccess on AgentAccess {
     final registered = old?.materialLease;
     final receiver = old == null
         ? null
-        : _service._useRequest(old.requestId).plan.receiver;
+        : (old.operationPlan ?? _service._useRequest(old.requestId).plan)
+              .receiver;
     final names = switch (receiver) {
       'aws_shared_credentials' => {'credential.bin', 'aws-config'},
       'ssh_identity' => {
