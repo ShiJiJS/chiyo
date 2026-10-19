@@ -826,6 +826,114 @@ void main() {
     timeout: const Timeout(Duration(seconds: 100)),
   );
   test(
+    'near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up',
+    () async {
+      await approve();
+      final first = result(
+        await service.agent.fetchInformationFile(session, input('admitted')),
+      );
+      final large = await service.owner.createInformation('合成容量样本', '', [
+        for (var i = 0; i < 67; i++) FieldInput('字段$i', '', 'x' * 1000000),
+        const FieldInput('填充', '', ''),
+      ]);
+      final recovery = await enableTestBackups(repo.backups);
+      final before = '${root.path}/before.aimbackup';
+      await repo.backups.exportTo(before);
+      final db = sqlite.sqlite3.open(before);
+      final hex = base64Url
+          .decode(recovery.substring('aim-recovery-v1:'.length))
+          .map((b) => b.toRadixString(16).padLeft(2, '0'))
+          .join();
+      late int currentBytes;
+      try {
+        db.execute('PRAGMA key = "x\'$hex\'"');
+        currentBytes =
+            db
+                    .select(
+                      'SELECT length(CAST(payload AS BLOB)) AS n FROM backup_snapshot',
+                    )
+                    .single['n']
+                as int;
+      } finally {
+        db.close();
+      }
+      final padding =
+          AttachmentBackupContainer.maxPayloadBytes - currentBytes - 300;
+      expect(padding, inInclusiveRange(1, 1000000));
+      final source = inspect();
+      try {
+        // Storage fixture adjustment of one already-valid text field. All
+        // tested mutations below use public Interfaces and actual production
+        // limits; there is no reduced test-only budget.
+        source.execute('UPDATE information_fields SET value=? WHERE id=?', [
+          'p' * padding,
+          large.fields.last.id,
+        ]);
+        await expectLater(
+          service.owner.createDirectory('目' * 200),
+          throwsA(isA<StorageFailure>()),
+        );
+        expect(repo.directories, isEmpty);
+        await expectLater(
+          service.owner.createTag('签' * 200),
+          throwsA(isA<StorageFailure>()),
+        );
+        expect(repo.tags, isEmpty);
+        await expectLater(
+          service.owner.createStringCredential(
+            name: '容量拒绝',
+            publicPurpose: '',
+            secret: 's' * 1024,
+          ),
+          throwsA(isA<StorageFailure>()),
+        );
+        expect(repo.managedCredentials, isEmpty);
+        await expectLater(
+          repo.saveAccessRecord(
+            AccessRecord(
+              id: 'R' * 200,
+              at: now,
+              outcome: AccessOutcome.unauthorized,
+            ),
+          ),
+          throwsA(isA<StorageFailure>()),
+        );
+        expect(repo.accessRecords, isEmpty);
+        await expectLater(
+          service.agent.fetchInformationFile(session, input('rejected')),
+          throwsA(
+            isA<InformationFileFailure>()
+                .having((e) => e.code, 'code', 'delivery_capacity')
+                .having((e) => e.operationClaimed, 'operationClaimed', false),
+          ),
+        );
+        expect(repo.informationFileDeliveries, hasLength(1));
+        expect(files.writes, 1);
+        final released = result(
+          await service.agent.releaseInformationFile(
+            session,
+            first['deliveryId'] as String,
+          ),
+        );
+        expect(released['state'], 'released');
+        expect(await File(first['path'] as String).exists(), isFalse);
+        final after = '${root.path}/after.aimbackup';
+        await repo.backups.exportTo(after);
+        final checked = await repo.backups.inspect(after, recovery);
+        expect(checked.formatVersion, 9);
+        expect(checked.fileDeliveryCount, 1);
+        expect(checked.attachmentBytes, data.length);
+      } finally {
+        source.execute(
+          'UPDATE information_fields SET value=? WHERE item_id=?',
+          ['', large.id],
+        );
+        source.close();
+      }
+    },
+    timeout: const Timeout(Duration(minutes: 4)),
+  );
+  test(
     'schema20 upgrade preserves file originals and refuses a conflicting new registry table atomically',
     () async {
       await service.close();

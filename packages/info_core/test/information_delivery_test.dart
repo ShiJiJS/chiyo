@@ -76,12 +76,16 @@ class _Files implements InformationDeliveryFiles {
 
 class _Repository extends MemoryInformationRepository {
   bool fails = false;
+  bool capacityRejected = false;
   Future<void> Function(InformationFileDelivery)? beforeSave;
   @override
   Future<void> saveInformationFileDelivery(
     InformationFileDelivery value,
   ) async {
     await beforeSave?.call(value);
+    if (capacityRejected) {
+      throw const AccessFailure('attachment_capacity_exceeded');
+    }
     if (fails) throw StateError('synthetic delivery audit failure');
     await super.saveInformationFileDelivery(value);
   }
@@ -319,6 +323,36 @@ void main() {
         caps['capabilities'],
         isNot(contains('information-attachments.v1')),
       );
+    },
+  );
+  test(
+    'capacity admission rejects before claiming operation or poisoning ordered audit retries',
+    () async {
+      await approve();
+      repo.capacityRejected = true;
+      try {
+        await service.agent.fetchInformationFile(
+          session,
+          fetch(request, item, 'capacity'),
+        );
+        fail('Capacity rejection expected');
+      } on InformationFileFailure catch (error) {
+        expect(error.code, 'delivery_capacity');
+        expect(error.operationClaimed, isFalse);
+      }
+      expect(repo.informationFileDeliveries, isEmpty);
+      expect(files.reserved, 0);
+      repo.capacityRejected = false;
+      expect(
+        delivery(
+          await service.agent.fetchInformationFile(
+            session,
+            fetch(request, item, 'capacity'),
+          ),
+        )['state'],
+        'ready',
+      );
+      expect(files.written, 1);
     },
   );
   test(

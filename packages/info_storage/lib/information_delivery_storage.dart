@@ -1,5 +1,29 @@
 part of 'info_storage.dart';
 
+Map<String, Object?> _deliveryBudgetArchive(
+  InformationFileDelivery record,
+  bool reserve,
+) {
+  final archive = record.toArchiveJson();
+  if (!reserve ||
+      !record.runtime ||
+      InformationFileDelivery.terminals.contains(record.state))
+    return archive;
+  String longest(Set<String> values) =>
+      values.reduce((a, b) => a.length >= b.length ? a : b);
+  // Immutable fields stay unchanged. Every remaining lifecycle value has a
+  // finite enum or bounded UTC date. This intentionally non-domain document
+  // upper-bounds its JSON byte contribution, including the outer row escaping.
+  return {
+    ...archive,
+    'state': longest(InformationFileDelivery.states),
+    'targetState': longest(InformationFileDelivery.terminals),
+    'reason': longest(InformationFileDelivery.reasons),
+    'cleanupError': longest(InformationFileDelivery.cleanupErrors),
+    'finishedAt': '9999-12-31T23:59:59.999999Z',
+  };
+}
+
 InformationFileDelivery _deliveryArchive(Map<String, Object?> row) {
   final payload = row['payload'];
   if (payload is! String) throw const StorageFailure('invalid_backup');
@@ -149,6 +173,8 @@ extension _EncryptedFileDeliveries on EncryptedInformationRepository {
         await _checkAttachmentBackupBudget();
       });
       _fileDeliveries[record.id] = record;
+    } on AccessFailure {
+      rethrow;
     } on StorageFailure {
       rethrow;
     } on Object {

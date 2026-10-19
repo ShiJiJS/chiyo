@@ -266,7 +266,7 @@ class EncryptedInformationRepository
     if (_closed) throw const StorageFailure('library_closed');
     _validateVault(credentials, materials);
     try {
-      await _db.transaction(() async {
+      await _writeMetadata(() async {
         await _db.customStatement('DELETE FROM credential_materials');
         await _db.customStatement('DELETE FROM managed_credentials');
         for (final c in credentials) {
@@ -654,13 +654,15 @@ class EncryptedInformationRepository
   Future<void> saveRequestHistory(RequestHistory history) async {
     if (_closed) throw const StorageFailure('library_closed');
     try {
-      await _db.customStatement(
-        'INSERT INTO request_history(id,created_at,payload) VALUES(?,?,?) ON CONFLICT(id) DO UPDATE SET payload=excluded.payload',
-        [
-          history.id,
-          history.createdAt.toUtc().millisecondsSinceEpoch,
-          jsonEncode(history.toJson()),
-        ],
+      await _writeMetadata(
+        () => _db.customStatement(
+          'INSERT INTO request_history(id,created_at,payload) VALUES(?,?,?) ON CONFLICT(id) DO UPDATE SET payload=excluded.payload',
+          [
+            history.id,
+            history.createdAt.toUtc().millisecondsSinceEpoch,
+            jsonEncode(history.toJson()),
+          ],
+        ),
       );
       _requestHistory[history.id] = history;
     } on Object {
@@ -684,13 +686,15 @@ class EncryptedInformationRepository
   Future<void> saveGrantHistory(GrantHistory history) async {
     if (_closed) throw const StorageFailure('library_closed');
     try {
-      await _db.customStatement(
-        'INSERT INTO grant_history(id,approved_at,payload) VALUES(?,?,?) ON CONFLICT(id) DO UPDATE SET payload=excluded.payload',
-        [
-          history.id,
-          history.approvedAt.toUtc().millisecondsSinceEpoch,
-          jsonEncode(history.toJson()),
-        ],
+      await _writeMetadata(
+        () => _db.customStatement(
+          'INSERT INTO grant_history(id,approved_at,payload) VALUES(?,?,?) ON CONFLICT(id) DO UPDATE SET payload=excluded.payload',
+          [
+            history.id,
+            history.approvedAt.toUtc().millisecondsSinceEpoch,
+            jsonEncode(history.toJson()),
+          ],
+        ),
       );
       _history[history.id] = history;
     } on Object {
@@ -702,13 +706,15 @@ class EncryptedInformationRepository
   Future<void> saveAccessRecord(AccessRecord record) async {
     if (_closed) throw const StorageFailure('library_closed');
     try {
-      await _db.customStatement(
-        'INSERT INTO access_records(id,recorded_at,payload) VALUES(?,?,?) ON CONFLICT(id) DO UPDATE SET payload=excluded.payload',
-        [
-          record.id,
-          record.at.toUtc().millisecondsSinceEpoch,
-          jsonEncode(record.toJson()),
-        ],
+      await _writeMetadata(
+        () => _db.customStatement(
+          'INSERT INTO access_records(id,recorded_at,payload) VALUES(?,?,?) ON CONFLICT(id) DO UPDATE SET payload=excluded.payload',
+          [
+            record.id,
+            record.at.toUtc().millisecondsSinceEpoch,
+            jsonEncode(record.toJson()),
+          ],
+        ),
       );
       _accesses[record.id] = record;
     } on Object {
@@ -845,7 +851,7 @@ class EncryptedInformationRepository
   Future<void> saveDirectory(InformationDirectory directory) async {
     if (_closed) throw const StorageFailure('library_closed');
     try {
-      await _writeDirectory(directory);
+      await _writeMetadata(() => _writeDirectory(directory));
       _directories[directory.id] = directory;
     } catch (_) {
       throw const StorageFailure('save_failed');
@@ -856,7 +862,7 @@ class EncryptedInformationRepository
   Future<void> saveTag(InformationTag tag) async {
     if (_closed) throw const StorageFailure('library_closed');
     try {
-      await _writeTag(tag);
+      await _writeMetadata(() => _writeTag(tag));
       _tags[tag.id] = tag;
     } catch (_) {
       throw const StorageFailure('save_failed');
@@ -873,9 +879,11 @@ class EncryptedInformationRepository
   Future<void> writeSetting(String key, int value) async {
     if (_closed) throw const StorageFailure('library_closed');
     try {
-      await _db.customStatement(
-        'INSERT INTO settings(name,value) VALUES(?,?) ON CONFLICT(name) DO UPDATE SET value=excluded.value',
-        [key, value],
+      await _writeMetadata(
+        () => _db.customStatement(
+          'INSERT INTO settings(name,value) VALUES(?,?) ON CONFLICT(name) DO UPDATE SET value=excluded.value',
+          [key, value],
+        ),
       );
       _settings[key] = value;
     } catch (_) {
@@ -963,7 +971,7 @@ class EncryptedInformationRepository
   Future<void> saveOrganizationTask(OrganizationTask task) async {
     if (_closed) throw const StorageFailure('library_closed');
     try {
-      await _writeOrganizationTask(task);
+      await _writeMetadata(() => _writeOrganizationTask(task));
       _organizationTasks[task.id] = task;
     } catch (_) {
       throw const StorageFailure('save_failed');
@@ -1029,7 +1037,7 @@ class EncryptedInformationRepository
   Future<void> saveImportProposal(ImportProposal proposal) async {
     if (_closed) throw const StorageFailure('library_closed');
     try {
-      await _writeProposal(proposal);
+      await _writeMetadata(() => _writeProposal(proposal));
       _proposals[proposal.id] = proposal;
     } catch (_) {
       throw const StorageFailure('save_failed');
@@ -1126,7 +1134,7 @@ class EncryptedInformationRepository
         .toList();
     if (expired.isEmpty) return;
     try {
-      await _db.transaction(() async {
+      await _writeMetadata(() async {
         for (final revision in expired) {
           await _db.customStatement(
             'INSERT INTO revision_purge_facts(item_id,version,purged_at) VALUES(?,?,?) ON CONFLICT(item_id,version) DO NOTHING',
@@ -1175,7 +1183,7 @@ class EncryptedInformationRepository
   Future<void> saveUpdateProposal(UpdateProposal proposal) async {
     if (_closed) throw const StorageFailure('library_closed');
     try {
-      await _writeUpdate(proposal);
+      await _writeMetadata(() => _writeUpdate(proposal));
       _updates[proposal.id] = proposal;
     } catch (_) {
       throw const StorageFailure('save_failed');
@@ -1256,7 +1264,7 @@ class EncryptedInformationRepository
   Future<void> saveDeleteProposal(DeleteProposal proposal) async {
     if (_closed) throw const StorageFailure('library_closed');
     try {
-      await _writeDelete(proposal);
+      await _writeMetadata(() => _writeDelete(proposal));
       _deletes[proposal.id] = proposal;
     } catch (_) {
       throw const StorageFailure('save_failed');

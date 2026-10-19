@@ -1,6 +1,15 @@
 part of 'info_storage.dart';
 
 extension _EncryptedInformationAttachments on EncryptedInformationRepository {
+  Future<T> _writeMetadata<T>(
+    Future<T> Function() write, {
+    void Function()? validate,
+  }) => _db.transaction(() async {
+    final result = await write();
+    await _checkAttachmentBackupBudget();
+    validate?.call();
+    return result;
+  });
   Future<T> _withAttachment<T>(
     InformationAttachmentRef ref,
     Future<T> Function(InformationAttachmentVersion, Stream<Uint8List>) action,
@@ -284,8 +293,10 @@ extension _EncryptedInformationAttachments on EncryptedInformationRepository {
           ),
         ))
       return;
-    final snapshot = await backups._snapshot();
-    if (utf8.encode(jsonEncode(backups._document(snapshot))).length >
+    final document = await backups._rawSnapshotDocument(
+      reserveLifecycleOutcomes: true,
+    );
+    if (utf8.encode(jsonEncode(document)).length >
         AttachmentBackupContainer.maxPayloadBytes) {
       throw const AccessFailure('attachment_capacity_exceeded');
     }

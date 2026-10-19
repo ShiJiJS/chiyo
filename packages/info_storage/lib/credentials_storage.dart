@@ -13,7 +13,7 @@ extension _CredentialSnapshotValidation on EncryptedInformationRepository {
       throw const StorageFailure('credential_migration_conflict');
     _validateVault([..._credentials, c], [..._credentialMaterials, m]);
     try {
-      await _db.transaction(() async {
+      await _writeMetadata(() async {
         await _writeItem(change.item);
         await _db.customStatement(
           'INSERT INTO managed_credentials(id,payload) VALUES(?,?)',

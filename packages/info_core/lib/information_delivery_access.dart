@@ -108,7 +108,7 @@ extension InformationFileAgentAccess on AgentAccess {
     _service._inFlightInformationDeliveries.add(record.id);
     InformationDeliveryLease? reserved;
     try {
-      await _service._saveInformationDelivery(record);
+      await _service._saveInformationDelivery(record, claim: true);
       _service._fileRequest(session, input.requestId, input.field);
       final extension =
           RegExp(
@@ -166,6 +166,11 @@ extension InformationFileAgentAccess on AgentAccess {
       _service._fileRequest(session, input.requestId, input.field);
       return _fileReply(record, ready: true);
     } on Object catch (error) {
+      if (error is InformationFileFailure &&
+          error.code == 'delivery_capacity' &&
+          !error.operationClaimed) {
+        rethrow;
+      }
       final code = _service._deliveryError(error);
       // Even a failed registry write can leave a known empty reservation.
       // It is kept in the pending audit queue and never exposed to the Agent.
@@ -341,9 +346,39 @@ extension _InformationFileDeliveryService on InformationService {
       'attachment_integrity_failed',
     _ => 'delivery_io_failed',
   };
-  Future<void> _saveInformationDelivery(InformationFileDelivery record) async {
+  Future<void> _saveInformationDelivery(
+    InformationFileDelivery record, {
+    bool claim = false,
+  }) async {
     if (_repository is! InformationFileDeliveryRepository) {
       throw const InformationFileFailure('unsupported_capability');
+    }
+    if (claim) {
+      await _auditWrites;
+      if (_auditFailed) {
+        throw const InformationFileFailure('audit_failed');
+      }
+      try {
+        await (_repository as InformationFileDeliveryRepository)
+            .saveInformationFileDelivery(record);
+        return;
+      } on AccessFailure catch (error) {
+        // This repository failure guarantees its transaction did not commit.
+        // Capacity rejection is admission, not a pending audit fact.
+        if (error.status == 'attachment_capacity_exceeded') {
+          throw const InformationFileFailure('delivery_capacity');
+        }
+      } on Object {
+        // Uncertain registration is retained in the ordered repair queue below.
+      }
+      await _saveInformationDelivery(record);
+      // Even if an ordered repair succeeded, don't turn a failed registration
+      // response into a fresh filesystem action. The caller classifies it.
+      throw InformationFileFailure(
+        'audit_failed',
+        deliveryId: record.id,
+        operationClaimed: true,
+      );
     }
     _pendingInformationDeliveries[record.id] = record;
     _enqueueAudit(() async {

@@ -272,6 +272,21 @@ class InformationBackups {
   }
 
   Future<BackupContents> _snapshot() async {
+    return _repository._db.transaction(() async {
+      final document = await _rawSnapshotDocument();
+      return _retain(
+        _validate(document),
+        DateTime.parse(document['createdAt'] as String),
+      );
+    });
+  }
+
+  // Budget checks also run between ordered audit writes, where a newly saved
+  // request/grant pair may not yet both exist. Count the exact portable shape
+  // without requiring that intermediate state to be a restorable library.
+  Future<Map<String, Object?>> _rawSnapshotDocument({
+    bool reserveLifecycleOutcomes = false,
+  }) async {
     _checkOpen();
     return _repository._db.transaction(() async {
       final tables = <String, List<Map<String, Object?>>>{};
@@ -324,24 +339,35 @@ class InformationBackups {
             {
               'id': row['id'],
               'payload': jsonEncode(
-                InformationFileDelivery.fromPrivateJson(
-                  decodeProtocolObject(row['payload'] as String),
-                ).toArchiveJson(),
+                _deliveryBudgetArchive(
+                  InformationFileDelivery.fromPrivateJson(
+                    decodeProtocolObject(row['payload'] as String),
+                  ),
+                  reserveLifecycleOutcomes,
+                ),
               ),
             },
         ];
       }
-      return _retain(
-        _validate({
-          'format': _format,
-          'version': formatVersion,
-          'createdAt': now.toIso8601String(),
-          'tables': tables,
-          if (formatVersion >= 8)
-            'attachments': [for (final v in versions) v.toPrivateJson()],
-        }),
-        now,
-      );
+      return {
+        'format': _format,
+        'version': formatVersion,
+        'createdAt': reserveLifecycleOutcomes
+            ? '9999-12-31T23:59:59.999999Z'
+            : now.toIso8601String(),
+        'tables': tables,
+        if (formatVersion >= 8)
+          'attachments': [
+            for (final v in versions)
+              {
+                ...v.toPrivateJson(),
+                if (reserveLifecycleOutcomes && v.available) ...{
+                  'retiredAt': '9999-12-31T23:59:59.999999Z',
+                  'purgedAt': '9999-12-31T23:59:59.999999Z',
+                },
+              },
+          ],
+      };
     });
   }
 
@@ -650,6 +676,7 @@ class InformationBackups {
             );
           }
         }
+        await _repository._checkAttachmentBackupBudget();
       });
       install();
       return contents;

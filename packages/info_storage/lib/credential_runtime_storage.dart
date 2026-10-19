@@ -16,7 +16,7 @@ extension _CredentialRuntimeStorage on EncryptedInformationRepository {
   Future<void> _saveSshTrust(SshHostTrustSnapshot? snapshot) async {
     if (_closed) throw const StorageFailure('library_closed');
     try {
-      await _db.transaction(() async {
+      await _writeMetadata(() async {
         await _db.customStatement('DELETE FROM ssh_host_trust');
         if (snapshot != null) {
           await _db.customStatement(
@@ -101,7 +101,7 @@ extension _CredentialRuntimeStorage on EncryptedInformationRepository {
     final fillSnapshot = fills ?? List.of(_focusedFillOperations);
     _validateRuntimeSnapshot(requests, executions, fillSnapshot);
     try {
-      await _db.transaction(() async {
+      await _writeMetadata(() async {
         validate?.call();
         await _db.customStatement('DELETE FROM credential_focused_fills');
         await _db.customStatement('DELETE FROM credential_operations');
@@ -145,7 +145,7 @@ extension _CredentialRuntimeStorage on EncryptedInformationRepository {
           );
         }
         validate?.call();
-      });
+      }, validate: validate);
       _credentialUseRequests
         ..clear()
         ..addAll(requests);
