@@ -199,9 +199,11 @@ class _TemplateLibraryState extends State<TemplateLibrary> {
                                   Tooltip(
                                     message: f.description,
                                     child: Text(
-                                      f.kind == FieldKind.textNote
-                                          ? '多行文本'
-                                          : '文本',
+                                      switch (f.kind) {
+                                        FieldKind.textNote => '多行文本',
+                                        FieldKind.structured => '文本',
+                                        FieldKind.file => '文件 · 待选择',
+                                      },
                                       style: prototypeText(
                                         context,
                                         12,
@@ -279,25 +281,11 @@ class _TemplateLibraryState extends State<TemplateLibrary> {
           .toList(),
       description: template.description,
     );
-    await showDialog<bool>(
-      context: context,
-      barrierDismissible: false,
-      barrierColor: const Color(0x4f241b27),
-      builder: (_) => InformationEditor(
-        draft: draft,
-        title: '使用模板：${template.name}',
-        directories: widget.owner.directories,
-        tags: widget.owner.tags,
-        onSave: (d) async {
-          await widget.owner.createInformation(
-            d.name,
-            d.description,
-            d.fields.map((f) => f.input).toList(),
-            directoryId: d.directoryId,
-            tagIds: d.tagIds,
-          );
-        },
-      ),
+    await showOwnerInformationEditor(
+      context,
+      owner: widget.owner,
+      draft: draft,
+      title: '使用模板：${template.name}',
     );
     if (mounted) setState(() {});
   }
@@ -605,6 +593,7 @@ class _TemplateEditorState extends State<_TemplateEditor> {
                       value: FieldKind.textNote,
                       child: Text('多行文本'),
                     ),
+                    PopupMenuItem(value: FieldKind.file, child: Text('文件')),
                   ],
                   child: Container(
                     padding: const EdgeInsets.symmetric(
@@ -616,7 +605,11 @@ class _TemplateEditorState extends State<_TemplateEditor> {
                       borderRadius: BorderRadius.circular(3),
                     ),
                     child: Text(
-                      _fields[i].kind == FieldKind.textNote ? '多行文本' : '文本',
+                      switch (_fields[i].kind) {
+                        FieldKind.textNote => '多行文本',
+                        FieldKind.structured => '文本',
+                        FieldKind.file => '文件',
+                      },
                       style: prototypeText(
                         context,
                         11,

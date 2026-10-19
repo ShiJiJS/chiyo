@@ -3,99 +3,43 @@ import 'package:info_core/info_core.dart';
 import 'prototype_dialog.dart';
 import 'prototype_ui.dart';
 import 'ui_palette.dart';
-
-/// A UI draft, with no owner/proposal side effects. A changed name/kind is a
-/// semantic replacement; public description and ordinary value edits retain ID.
-class EditableInformationField {
-  EditableInformationField({
-    this.original,
-    String? name,
-    String? description,
-    String? value,
-    FieldKind? kind,
-    this.replaceIdentity = false,
-  }) : name = name ?? original?.name ?? '',
-       description = description ?? original?.description ?? '',
-       value = value ?? original?.value ?? '',
-       kind = kind ?? original?.kind ?? FieldKind.structured;
-  final InformationField? original;
-  final bool replaceIdentity;
-  String name, description, value;
-  FieldKind kind;
-  bool get replacesIdentity =>
-      original != null &&
-      (replaceIdentity ||
-          name.trim() != original!.name ||
-          kind != original!.kind);
-  FieldInput get input => FieldInput(name, description, value, kind: kind);
-}
-
-class InformationEditorDraft {
-  InformationEditorDraft({
-    this.original,
-    String? name,
-    String? description,
-    String? directoryId,
-    Iterable<String>? tagIds,
-    this.suggestedDirectory = '',
-    Iterable<String> suggestedTags = const [],
-    List<EditableInformationField>? fields,
-  }) : name = name ?? original?.name ?? '',
-       description = description ?? original?.description ?? '',
-       directoryId = directoryId ?? original?.directoryId,
-       tagIds = {...?tagIds ?? original?.tagIds},
-       suggestedTags = {...suggestedTags},
-       fields =
-           fields ??
-           (original?.fields
-                   .map((f) => EditableInformationField(original: f))
-                   .toList() ??
-               [EditableInformationField()]);
-  final InformationItem? original;
-  String name, description;
-  String? directoryId;
-  final Set<String> tagIds;
-  String suggestedDirectory;
-  final Set<String> suggestedTags;
-  final List<EditableInformationField> fields;
-  List<FieldChange> get changes => [
-    for (final old in original?.fields ?? <InformationField>[])
-      if (!fields.any((f) => f.original?.id == old.id))
-        FieldChange.remove(old.id),
-    for (final field in fields)
-      if (field.original == null)
-        FieldChange.add(field.input)
-      else if (field.replacesIdentity)
-        FieldChange.replace(field.original!.id, field.input)
-      else if (field.value != field.original!.value)
-        FieldChange.correct(field.original!.id, field.value),
-  ];
-  Map<String, String> get fieldDescriptions => {
-    for (final f in fields)
-      if (f.original != null &&
-          !f.replacesIdentity &&
-          f.description != f.original!.description)
-        f.original!.id: f.description,
-  };
-  void applyTemplate(InformationTemplate template) {
-    name = name.isEmpty ? template.name : name;
-    description = template.description;
-    fields
-      ..clear()
-      ..addAll(
-        template.fields.map(
-          (f) => EditableInformationField(
-            name: f.name,
-            description: f.description,
-            kind: f.kind,
-          ),
-        ),
-      );
-  }
-}
+import 'information_editor_draft.dart';
+export 'information_editor_draft.dart';
+import 'information_files.dart';
+import 'information_file_summary.dart';
 
 typedef SaveInformationDraft =
     Future<void> Function(InformationEditorDraft draft);
+
+Future<InformationItem?> showOwnerInformationEditor(
+  BuildContext context, {
+  required OwnerAccess owner,
+  required InformationEditorDraft draft,
+  InformationFilePicker files = const NativeInformationFilePicker(),
+  String? title,
+}) async {
+  final session = OwnerInformationEditorSession(owner, files);
+  InformationItem? saved;
+  try {
+    await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      barrierColor: const Color(0x4f241b27),
+      builder: (_) => InformationEditor(
+        draft: draft,
+        title: title,
+        directories: owner.directories,
+        tags: owner.tags,
+        templates: owner.templates,
+        fileSession: session,
+        onSave: (d) async => saved = await session.save(d),
+      ),
+    );
+  } finally {
+    await session.close();
+  }
+  return saved;
+}
 
 class InformationEditor extends StatefulWidget {
   const InformationEditor({
@@ -107,6 +51,7 @@ class InformationEditor extends StatefulWidget {
     this.templates = const [],
     this.title,
     this.saveLabel = '保存信息',
+    this.fileSession,
   });
   final InformationEditorDraft draft;
   final SaveInformationDraft onSave;
@@ -115,12 +60,16 @@ class InformationEditor extends StatefulWidget {
   final List<InformationTemplate> templates;
   final String? title;
   final String saveLabel;
+  final OwnerInformationEditorSession? fileSession;
   @override
   State<InformationEditor> createState() => _InformationEditorState();
 }
 
 class _InformationEditorState extends State<InformationEditor> {
   bool _dirty = false, _saving = false, _leaving = false;
+  bool _fileWorking = false, _committed = false;
+  bool get _busy => _saving || _leaving || _fileWorking || _committed;
+  final _fileErrors = <EditableInformationField, String>{};
   String? _error;
   int _templateRevision = 0;
   InformationEditorDraft get d => widget.draft;
@@ -129,8 +78,8 @@ class _InformationEditorState extends State<InformationEditor> {
     _dirty = true;
   });
   Future<void> _close() async {
-    if (_saving || _leaving) return;
-    if (_dirty) {
+    if (_saving || _leaving || _fileWorking) return;
+    if (_dirty && !_committed) {
       _leaving = true;
       final discard = await prototypeConfirm(
         context,
@@ -141,23 +90,48 @@ class _InformationEditorState extends State<InformationEditor> {
       _leaving = false;
       if (!discard || !mounted) return;
     }
-    if (mounted) Navigator.pop(context);
+    if (!mounted) return;
+    setState(() => _leaving = true);
+    try {
+      await widget.fileSession?.close();
+      if (mounted) Navigator.pop(context, _committed);
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _leaving = false;
+          _error = '暂存清理未完成，请再次取消以重试。原信息不会被删除。';
+        });
+      }
+    }
   }
 
   Future<void> _save() async {
-    if (d.name.trim().isEmpty ||
-        (d.original == null && d.fields.isEmpty) ||
-        d.fields.any((f) => f.name.trim().isEmpty)) {
-      setState(() => _error = '请填写信息名称和每个字段的名称。');
+    if (_saving || _leaving || _fileWorking) return;
+    if (_committed) {
+      await _close();
       return;
     }
-    final destructive = d.changes
-        .where(
-          (c) =>
-              c.kind == FieldChangeKind.remove ||
-              c.kind == FieldChangeKind.replace,
-        )
-        .length;
+    if (d.name.trim().isEmpty ||
+        d.fields.isEmpty ||
+        d.fields.any((f) => f.name.trim().isEmpty)) {
+      setState(() => _error = '请填写信息名称，并至少保留一个有名称的字段。');
+      return;
+    }
+    final missing = d.fields.where(
+      (f) => f.kind == FieldKind.file && !f.hasFile,
+    );
+    if (missing.isNotEmpty) {
+      setState(() {
+        for (final field in missing) {
+          _fileErrors[field] = '请为这个字段选择一份文件。';
+        }
+        _error = '仍有文件字段未选择文件。';
+      });
+      return;
+    }
+    final destructive = d.destructiveChanges;
+    // Also prevent a second click while the identity confirmation is open.
+    _leaving = true;
     if (destructive > 0 &&
         !await prototypeConfirm(
           context,
@@ -166,8 +140,10 @@ class _InformationEditorState extends State<InformationEditor> {
               '$destructive 个字段将删除或被新含义替换。旧字段进入回收站，新增或恢复的字段需要重新授权；现有授权不会自动扩大。',
           action: '确认保存',
         )) {
+      _leaving = false;
       return;
     }
+    _leaving = false;
     if (!mounted) return;
     setState(() {
       _saving = true;
@@ -175,14 +151,24 @@ class _InformationEditorState extends State<InformationEditor> {
     });
     try {
       await widget.onSave(d);
+      _committed = true;
+      try {
+        await widget.fileSession?.close();
+      } catch (_) {
+        if (mounted) {
+          setState(() {
+            _saving = false;
+            _error = '信息已保存，剩余暂存清理未完成。请重试清理并关闭。';
+          });
+        }
+        return;
+      }
       if (mounted) Navigator.pop(context, true);
     } on AccessFailure catch (e) {
       if (mounted) {
         setState(() {
           _saving = false;
-          _error = e.status == 'information_conflict'
-              ? '当前信息已变化。输入已保留，请取消后重新打开并核对版本。'
-              : '保存失败，信息库未改变。输入已保留，请重试。';
+          _error = informationFileError(e);
         });
       }
     } catch (_) {
@@ -202,6 +188,7 @@ class _InformationEditorState extends State<InformationEditor> {
     Key? key,
     int lines = 1,
     int max = 200,
+    bool readOnly = false,
   }) => Padding(
     padding: EdgeInsets.only(top: 10, bottom: lines == 1 ? 10 : 4.5),
     child: Column(
@@ -217,7 +204,7 @@ class _InformationEditorState extends State<InformationEditor> {
           child: TextFormField(
             key: key,
             initialValue: value,
-            enabled: !_saving,
+            enabled: !_busy && !readOnly,
             maxLength: max,
             minLines: lines,
             maxLines: lines == 1 ? 1 : 6,
@@ -254,6 +241,7 @@ class _InformationEditorState extends State<InformationEditor> {
     List<DropdownMenuItem<T>> items,
     ValueChanged<T?> change, {
     Key? key,
+    bool showChevron = false,
   }) => Padding(
     padding: const EdgeInsets.symmetric(vertical: 10),
     child: Column(
@@ -272,7 +260,12 @@ class _InformationEditorState extends State<InformationEditor> {
             items: items,
             isExpanded: true,
             style: prototypeText(context, 13),
-            icon: const SizedBox.shrink(),
+            icon: showChevron
+                ? const RotatedBox(
+                    quarterTurns: 1,
+                    child: PrototypeIcon(PrototypeIconGlyph.chev, size: 12),
+                  )
+                : const SizedBox.shrink(),
             decoration: InputDecoration(
               isDense: true,
               contentPadding: const EdgeInsets.symmetric(
@@ -290,7 +283,7 @@ class _InformationEditorState extends State<InformationEditor> {
                 borderSide: BorderSide(color: UiPalette.of(context).line),
               ),
             ),
-            onChanged: _saving ? null : (v) => _changed(() => change(v)),
+            onChanged: _busy ? null : (v) => _changed(() => change(v)),
           ),
         ),
       ],
@@ -312,14 +305,14 @@ class _InformationEditorState extends State<InformationEditor> {
   Widget build(BuildContext context) {
     final p = UiPalette.of(context);
     return PopScope(
-      canPop: !_dirty && !_saving,
+      canPop: widget.fileSession == null && !_dirty && !_busy,
       onPopInvokedWithResult: (didPop, _) {
         if (!didPop) _close();
       },
       child: PrototypeDialog(
         flow: true,
         title: widget.title ?? (d.original == null ? '新建信息' : '编辑信息'),
-        onClose: _saving ? null : _close,
+        onClose: _saving || _leaving || _fileWorking ? null : _close,
         body: Column(
           key: ValueKey(_templateRevision),
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -339,10 +332,9 @@ class _InformationEditorState extends State<InformationEditor> {
                 ],
                 (id) {
                   if (id != null) {
-                    d.applyTemplate(
+                    _applyTemplate(
                       widget.templates.firstWhere((t) => t.id == id),
                     );
-                    _templateRevision++;
                   }
                 },
                 key: const ValueKey('new-template'),
@@ -430,7 +422,7 @@ class _InformationEditorState extends State<InformationEditor> {
                   const SizedBox(height: 7),
                   TextButton(
                     key: const ValueKey('item-tags'),
-                    onPressed: _saving ? null : _chooseTags,
+                    onPressed: _busy ? null : _chooseTags,
                     style: prototypeButton(
                       context,
                       size: 13,
@@ -497,28 +489,23 @@ class _InformationEditorState extends State<InformationEditor> {
               children: [
                 TextButton(
                   key: const ValueKey('add-field'),
-                  style: prototypeSecondary(context),
-                  onPressed: _saving
+                  style: prototypeButton(
+                    context,
+                    size: 13,
+                    foreground: p.ink,
+                    background: p.paper,
+                    side: BorderSide(color: p.line),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                  ),
+                  onPressed: _busy
                       ? null
                       : () => _changed(
                           () => d.fields.add(EditableInformationField()),
                         ),
-                  child: const Text('添加字段'),
-                ),
-                TextButton(
-                  key: const ValueKey('add-text-note'),
-                  style: prototypeSecondary(context),
-                  onPressed: _saving
-                      ? null
-                      : () => _changed(
-                          () => d.fields.add(
-                            EditableInformationField(
-                              kind: FieldKind.textNote,
-                              name: '文本说明',
-                            ),
-                          ),
-                        ),
-                  child: const Text('添加受控文本说明'),
+                  child: const Text('＋ 添加字段'),
                 ),
               ],
             ),
@@ -546,7 +533,9 @@ class _InformationEditorState extends State<InformationEditor> {
                       for (final f in d.fields)
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 8),
-                          child: Text('${f.name}\n${f.description}'),
+                          child: Text(
+                            '${f.name}${f.kind == FieldKind.file ? ' · 文件' : ''}\n${f.description}',
+                          ),
                         ),
                     ],
                   ),
@@ -568,14 +557,16 @@ class _InformationEditorState extends State<InformationEditor> {
         actions: [
           TextButton(
             style: prototypeSecondary(context),
-            onPressed: _saving ? null : _close,
+            onPressed: _saving || _leaving || _fileWorking ? null : _close,
             child: const Text('取消'),
           ),
           TextButton(
             style: prototypePrimary(context),
             key: const ValueKey('save-information'),
-            onPressed: _saving ? null : _save,
-            child: _saving
+            onPressed: _saving || _leaving || _fileWorking ? null : _save,
+            child: _committed
+                ? const Text('重试清理并关闭')
+                : _saving
                 ? const Text('正在保存…')
                 : widget.saveLabel.startsWith('保存') &&
                       widget.saveLabel.length > 2
@@ -693,6 +684,175 @@ class _InformationEditorState extends State<InformationEditor> {
     }
   }
 
+  Future<void> _fileAction(
+    Future<void> Function() action, {
+    EditableInformationField? field,
+  }) async {
+    if (_busy) return;
+    setState(() {
+      _fileWorking = true;
+      _error = null;
+      if (field != null) _fileErrors.remove(field);
+    });
+    try {
+      await action();
+    } catch (error) {
+      if (mounted) {
+        setState(() {
+          if (field != null) {
+            _fileErrors[field] = informationFileError(error);
+          } else {
+            _error = informationFileError(error);
+          }
+        });
+      }
+    } finally {
+      if (mounted) setState(() => _fileWorking = false);
+    }
+  }
+
+  Future<void> _applyTemplate(InformationTemplate template) =>
+      _fileAction(() async {
+        await widget.fileSession?.reset();
+        if (mounted) {
+          _changed(() {
+            d.applyTemplate(template);
+            _fileErrors.clear();
+            _templateRevision++;
+          });
+        }
+      });
+
+  Future<void> _changeKind(EditableInformationField field, FieldKind kind) =>
+      _fileAction(() async {
+        if (field.stage != null) await widget.fileSession?.release(field);
+        if (mounted) _changed(() => field.kind = kind);
+      }, field: field);
+
+  Future<void> _removeField(EditableInformationField field) =>
+      _fileAction(() async {
+        if (field.stage != null) await widget.fileSession?.release(field);
+        if (mounted) _changed(() => d.fields.remove(field));
+      }, field: field);
+
+  Future<void> _chooseFile(EditableInformationField field) =>
+      _fileAction(() async {
+        final changed = await widget.fileSession!.choose(field);
+        if (changed && mounted) _changed(() {});
+      }, field: field);
+
+  Widget _fileControl(EditableInformationField field, int index) {
+    final p = UiPalette.of(context), stage = field.stage;
+    return AnimatedSize(
+      duration: MediaQuery.disableAnimationsOf(context)
+          ? Duration.zero
+          : const Duration(milliseconds: 140),
+      alignment: Alignment.topLeft,
+      child: Container(
+        key: ValueKey('file-control-$index'),
+        margin: const EdgeInsets.symmetric(vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: p.rail,
+          border: Border.all(color: p.line),
+          borderRadius: BorderRadius.circular(5),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (stage != null) ...[
+              Text(
+                stage.originalName,
+                style: prototypeText(context, 14, weight: FontWeight.w600),
+              ),
+              Text(
+                '${informationFileSize(stage.byteLength)} · ${stage.mediaType} · 待保存',
+                style: prototypeText(context, 13, color: p.muted, height: 1.8),
+              ),
+            ] else if (field.retainedFile != null && widget.fileSession != null)
+              InformationFileSummary(
+                owner: widget.fileSession!.owner,
+                reference: field.retainedFile!,
+              )
+            else ...[
+              Text(
+                field.retainedFile == null ? '选择原文件' : '保留原文件与版本',
+                style: prototypeText(context, 14, weight: FontWeight.w600),
+              ),
+              Text(
+                '每个文件字段保存一份文件',
+                style: prototypeText(context, 13, color: p.muted),
+              ),
+            ],
+            if (widget.fileSession != null) ...[
+              const SizedBox(height: 8),
+              Text('选择或更换文件', style: prototypeText(context, 13)),
+              Container(
+                margin: const EdgeInsets.only(top: 4, bottom: 8),
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: p.paper,
+                  border: Border.all(color: p.line),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Row(
+                  children: [
+                    TextButton(
+                      key: ValueKey('choose-file-$index'),
+                      style: prototypeButton(
+                        context,
+                        size: 13,
+                        foreground: p.ink,
+                        background: p.paper,
+                        side: BorderSide(color: p.line),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                      ),
+                      onPressed: _busy ? null : () => _chooseFile(field),
+                      child: const Text('选择文件'),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        _fileWorking
+                            ? '正在处理文件…'
+                            : stage?.originalName ?? '未选择新的文件',
+                        style: prototypeText(context, 13),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+            if (_fileErrors[field] case final error?) ...[
+              Text(error, style: prototypeText(context, 13, color: p.danger)),
+              if (field.hasFile)
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton(
+                    style: prototypeButton(context, size: 12),
+                    onPressed: _busy
+                        ? null
+                        : () => setState(() => _fileErrors.remove(field)),
+                    child: const Text('继续使用原文件'),
+                  ),
+                ),
+            ],
+            Text(
+              widget.fileSession == null
+                  ? '保留已有文件。添加或更换原文件请到信息库操作。'
+                  : '原文件保留在原位置。SSH 私钥、Token 请保存为凭据。',
+              style: prototypeText(context, 13, height: 1.85, color: p.muted),
+            ),
+            const SizedBox(height: 13),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _field(int index) {
     final f = d.fields[index], p = UiPalette.of(context);
     return Container(
@@ -713,22 +873,53 @@ class _InformationEditorState extends State<InformationEditor> {
                   f.name,
                   (v) => f.name = v,
                   key: ValueKey('field-name-$index'),
+                  readOnly:
+                      f.kind == FieldKind.file && widget.fileSession == null,
                 ),
               ),
               const SizedBox(width: 15),
               Expanded(
                 flex: 2,
-                child: _input(
-                  f.kind == FieldKind.textNote ? '受控文本说明' : '字段内容',
-                  f.value,
-                  (v) => f.value = v,
-                  key: ValueKey('field-value-$index'),
-                  lines: f.kind == FieldKind.textNote ? 3 : 1,
-                  max: 64000,
+                child: _select<FieldKind>(
+                  '字段类型',
+                  f.kind,
+                  [
+                    const DropdownMenuItem(
+                      value: FieldKind.structured,
+                      child: Text('结构化字段'),
+                    ),
+                    const DropdownMenuItem(
+                      value: FieldKind.textNote,
+                      child: Text('受控说明'),
+                    ),
+                    DropdownMenuItem(
+                      value: FieldKind.file,
+                      enabled:
+                          widget.fileSession != null ||
+                          f.kind == FieldKind.file,
+                      child: const Text('文件'),
+                    ),
+                  ],
+                  (kind) {
+                    if (kind != null) _changeKind(f, kind);
+                  },
+                  key: ValueKey('field-kind-$index'),
+                  showChevron: true,
                 ),
               ),
             ],
           ),
+          if (f.kind == FieldKind.file)
+            _fileControl(f, index)
+          else
+            _input(
+              f.kind == FieldKind.textNote ? '受控文本说明' : '字段内容',
+              f.value,
+              (v) => f.value = v,
+              key: ValueKey('field-value-$index'),
+              lines: f.kind == FieldKind.textNote ? 3 : 1,
+              max: 1000000,
+            ),
           _input(
             '字段公开说明',
             f.description,
@@ -748,9 +939,7 @@ class _InformationEditorState extends State<InformationEditor> {
                 ),
                 foreground: p.accent,
               ),
-              onPressed: _saving
-                  ? null
-                  : () => _changed(() => d.fields.removeAt(index)),
+              onPressed: _busy ? null : () => _removeField(f),
               child: const Text('移除字段'),
             ),
           ),

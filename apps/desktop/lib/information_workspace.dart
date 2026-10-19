@@ -3,6 +3,7 @@ import 'package:info_core/info_core.dart';
 import 'library.dart';
 import 'credentials.dart';
 import 'credential_files.dart';
+import 'information_files.dart';
 
 /// Information and credentials share a navigation destination, never a value store.
 class InformationWorkspace extends StatefulWidget {
@@ -16,6 +17,7 @@ class InformationWorkspace extends StatefulWidget {
     this.onOpenInformation,
     this.onOpenUsageHistory,
     this.files = const NativeCredentialFilePicker(),
+    this.informationFiles = const NativeInformationFilePicker(),
   });
   final OwnerAccess owner;
   final Listenable? refresh;
@@ -25,6 +27,7 @@ class InformationWorkspace extends StatefulWidget {
   final ValueChanged<String>? onOpenInformation;
   final ValueChanged<String>? onOpenUsageHistory;
   final CredentialFilePicker files;
+  final InformationFilePicker informationFiles;
   @override
   State<InformationWorkspace> createState() => _InformationWorkspaceState();
 }
@@ -76,6 +79,7 @@ class _InformationWorkspaceState extends State<InformationWorkspace> {
       InformationLibrary(
         key: ValueKey('information-$_itemNavigation'),
         owner: widget.owner,
+        files: widget.informationFiles,
         refresh: widget.refresh,
         initialItemId: _itemId,
         onOpenCredentials: () => setState(() => _credentials = true),

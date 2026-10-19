@@ -10,6 +10,8 @@ import 'revisions.dart';
 import 'ui.dart';
 import 'credential_dialogs.dart';
 import 'credential_migration.dart';
+import 'information_files.dart';
+import 'information_file_summary.dart';
 
 class InformationLibrary extends StatefulWidget {
   const InformationLibrary({
@@ -21,6 +23,7 @@ class InformationLibrary extends StatefulWidget {
     this.onMigrateSecretFields,
     this.onOpenCredentials,
     this.onOpenCredential,
+    this.files = const NativeInformationFilePicker(),
   });
   final OwnerAccess owner;
   final Listenable? refresh;
@@ -28,6 +31,7 @@ class InformationLibrary extends StatefulWidget {
   final Future<void> Function(InformationItem item)? onMigrateSecretFields;
   final VoidCallback? onOpenCredentials;
   final ValueChanged<String>? onOpenCredential;
+  final InformationFilePicker files;
   @override
   State<InformationLibrary> createState() => _InformationLibraryState();
 }
@@ -43,6 +47,7 @@ class _InformationLibraryState extends State<InformationLibrary> {
   bool _focusMissing = false;
   int _offset = 0;
   String? _queryError;
+  InformationAttachmentRef? _exportingFile;
   static const _limit = 50;
   OwnerAccess get owner => widget.owner;
   UiPalette get p => UiPalette.of(context);
@@ -105,40 +110,23 @@ class _InformationLibraryState extends State<InformationLibrary> {
 
   Future<void> _edit([InformationItem? item]) async {
     InformationItem? saved;
-    await showDialog<bool>(
-      context: context,
-      barrierDismissible: false,
-      barrierColor: const Color(0x4f241b27),
-      builder: (_) => InformationEditor(
+    try {
+      saved = await showOwnerInformationEditor(
+        context,
+        owner: owner,
+        files: widget.files,
         draft: InformationEditorDraft(
           original: item,
           directoryId: item?.directoryId ?? _directoryId,
         ),
-        directories: owner.directories,
-        tags: owner.tags,
-        templates: owner.templates,
-        onSave: (d) async {
-          saved = item == null
-              ? await owner.createInformation(
-                  d.name,
-                  d.description,
-                  d.fields.map((f) => f.input).toList(),
-                  directoryId: d.directoryId,
-                  tagIds: d.tagIds,
-                )
-              : await owner.editInformation(
-                  item.id,
-                  item.version,
-                  name: d.name,
-                  description: d.description,
-                  directoryId: d.directoryId,
-                  tagIds: d.tagIds,
-                  changes: d.changes,
-                  fieldDescriptions: d.fieldDescriptions,
-                );
-        },
-      ),
-    );
+      );
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('编辑器未能完成清理，请重新打开后重试。')));
+      }
+    }
     if (mounted) {
       setState(() {
         if (saved != null) {
@@ -146,9 +134,9 @@ class _InformationLibraryState extends State<InformationLibrary> {
           _directoryId = null;
           _tagIds.clear();
           _search.clear();
-          _selectedId = saved!.id;
+          _selectedId = saved.id;
           _offset = owner
-              .queryInformation(focusItemId: saved!.id, limit: _limit)
+              .queryInformation(focusItemId: saved.id, limit: _limit)
               .offset;
         }
       });
@@ -158,6 +146,29 @@ class _InformationLibraryState extends State<InformationLibrary> {
   Future<void> _delete(InformationItem item) async {
     await confirmInformationDeletion(context, owner, item);
     _refresh();
+  }
+
+  Future<void> _exportFile(InformationAttachmentVersion version) async {
+    if (_exportingFile != null) return;
+    setState(() => _exportingFile = version.reference);
+    try {
+      final path = await widget.files.saveAs(version.originalName);
+      if (path == null) return;
+      await owner.exportInformationFile(version.reference, path);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('文件已另存，副本由你自行保管，不随授权到期删除。')),
+        );
+      }
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(informationFileError(error))));
+      }
+    } finally {
+      if (mounted) setState(() => _exportingFile = null);
+    }
   }
 
   Future<void> _history(InformationItem item) async {
@@ -791,7 +802,7 @@ class _InformationLibraryState extends State<InformationLibrary> {
                                         ),
                                         const SizedBox(width: 12),
                                         t(
-                                          '${item.fields.length} 个字段',
+                                          '${item.fields.length} 个字段${item.fields.any((f) => f.kind == FieldKind.file) ? ' · 含文件' : ''}',
                                           11,
                                           color: p.muted,
                                         ),
@@ -868,7 +879,9 @@ class _InformationLibraryState extends State<InformationLibrary> {
   }
 
   PrototypeIconGlyph _glyph(InformationItem item) =>
-      item.fields.any((f) => f.value.startsWith('http'))
+      item.fields.any(
+        (f) => f.kind != FieldKind.file && f.value.startsWith('http'),
+      )
       ? PrototypeIconGlyph.link
       : PrototypeIconGlyph.file;
   Widget _itemIcon(
@@ -1069,15 +1082,39 @@ class _InformationLibraryState extends State<InformationLibrary> {
                                 Expanded(
                                   child: Padding(
                                     padding: const EdgeInsets.only(top: 1),
-                                    child: SelectableText(
-                                      field.value,
-                                      style: prototypeText(
-                                        context,
-                                        13,
-                                        family: 'Consolas',
-                                        height: 1.6,
-                                      ),
-                                    ),
+                                    child: field.kind == FieldKind.file
+                                        ? InformationFileSummary(
+                                            owner: owner,
+                                            reference: field.attachment!,
+                                            actions: (version) => Wrap(
+                                              spacing: 12,
+                                              runSpacing: 4,
+                                              children: [
+                                                b('更换文件', () => _edit(item)),
+                                                b(
+                                                  '另存',
+                                                  version.available &&
+                                                          _exportingFile == null
+                                                      ? () =>
+                                                            _exportFile(version)
+                                                      : null,
+                                                  key: ValueKey(
+                                                    'export-file-${field.id}',
+                                                  ),
+                                                ),
+                                                b('公开预览', () => _catalog(item)),
+                                              ],
+                                            ),
+                                          )
+                                        : SelectableText(
+                                            field.value,
+                                            style: prototypeText(
+                                              context,
+                                              13,
+                                              family: 'Consolas',
+                                              height: 1.6,
+                                            ),
+                                          ),
                                   ),
                                 ),
                               ],
@@ -1356,6 +1393,7 @@ class _InformationLibraryState extends State<InformationLibrary> {
                 children: [
                   t(field.name, 13, weight: FontWeight.w500),
                   t(field.description, 12),
+                  if (field.kind == FieldKind.file) t('文件', 12, color: p.muted),
                 ],
               ),
             ),
