@@ -1,0 +1,549 @@
+{
+  "complete": true,
+  "productSource": "cccc37e4a1125f88c7714a26b1873fdb2ffb7a9c",
+  "cliSha256": "1341e5278d0b073eccf5444a16c38f4195f22a02b60c3b125e93b21cdc5afea6",
+  "phases": [
+    {
+      "phase": "01-created-hidden",
+      "checks": [
+        {
+          "command": "credential-catalog",
+          "status": "ok",
+          "privateFixtureContentAbsent": true
+        },
+        {
+          "catalogCount": 0,
+          "expectedVersion": 1,
+          "expectedAvailability": "available"
+        },
+        {
+          "command": "catalog",
+          "status": "ok",
+          "privateFixtureContentAbsent": true
+        },
+        {
+          "command": "read",
+          "status": "unauthorized",
+          "privateFixtureContentAbsent": true
+        },
+        {
+          "command": "request-use",
+          "status": "invalid_request",
+          "privateFixtureContentAbsent": true
+        },
+        {
+          "eligibilityError": "invalid_reference",
+          "operationClaimed": false
+        }
+      ]
+    },
+    {
+      "phase": "02-linked-hidden",
+      "checks": [
+        {
+          "command": "credential-catalog",
+          "status": "ok",
+          "privateFixtureContentAbsent": true
+        },
+        {
+          "catalogCount": 0,
+          "expectedVersion": 1,
+          "expectedAvailability": "available"
+        },
+        {
+          "command": "catalog",
+          "status": "ok",
+          "privateFixtureContentAbsent": true
+        },
+        {
+          "command": "read",
+          "status": "unauthorized",
+          "privateFixtureContentAbsent": true
+        },
+        {
+          "command": "request-use",
+          "status": "invalid_request",
+          "privateFixtureContentAbsent": true
+        },
+        {
+          "eligibilityError": "invalid_reference",
+          "operationClaimed": false
+        }
+      ]
+    },
+    {
+      "phase": "03-public",
+      "checks": [
+        {
+          "command": "credential-catalog",
+          "status": "ok",
+          "privateFixtureContentAbsent": true
+        },
+        {
+          "catalogCount": 1,
+          "expectedVersion": 1,
+          "expectedAvailability": "available"
+        },
+        {
+          "command": "catalog",
+          "status": "ok",
+          "privateFixtureContentAbsent": true
+        },
+        {
+          "command": "read",
+          "status": "unauthorized",
+          "privateFixtureContentAbsent": true
+        }
+      ]
+    },
+    {
+      "phase": "04-rotated",
+      "checks": [
+        {
+          "command": "credential-catalog",
+          "status": "ok",
+          "privateFixtureContentAbsent": true
+        },
+        {
+          "catalogCount": 1,
+          "expectedVersion": 2,
+          "expectedAvailability": "available"
+        },
+        {
+          "command": "catalog",
+          "status": "ok",
+          "privateFixtureContentAbsent": true
+        },
+        {
+          "command": "read",
+          "status": "unauthorized",
+          "privateFixtureContentAbsent": true
+        },
+        {
+          "command": "request-use",
+          "status": "conflict",
+          "privateFixtureContentAbsent": true
+        },
+        {
+          "eligibilityError": "credential_version_changed",
+          "operationClaimed": false
+        }
+      ]
+    },
+    {
+      "phase": "05-disabled",
+      "checks": [
+        {
+          "command": "credential-catalog",
+          "status": "ok",
+          "privateFixtureContentAbsent": true
+        },
+        {
+          "catalogCount": 1,
+          "expectedVersion": 2,
+          "expectedAvailability": "disabled"
+        },
+        {
+          "command": "catalog",
+          "status": "ok",
+          "privateFixtureContentAbsent": true
+        },
+        {
+          "command": "read",
+          "status": "unauthorized",
+          "privateFixtureContentAbsent": true
+        },
+        {
+          "command": "request-use",
+          "status": "revoked",
+          "privateFixtureContentAbsent": true
+        },
+        {
+          "eligibilityError": "credential_disabled",
+          "operationClaimed": false
+        }
+      ]
+    },
+    {
+      "phase": "06-enabled",
+      "checks": [
+        {
+          "command": "credential-catalog",
+          "status": "ok",
+          "privateFixtureContentAbsent": true
+        },
+        {
+          "catalogCount": 1,
+          "expectedVersion": 2,
+          "expectedAvailability": "available"
+        },
+        {
+          "command": "catalog",
+          "status": "ok",
+          "privateFixtureContentAbsent": true
+        },
+        {
+          "command": "read",
+          "status": "unauthorized",
+          "privateFixtureContentAbsent": true
+        },
+        {
+          "command": "request-use",
+          "status": "conflict",
+          "privateFixtureContentAbsent": true
+        },
+        {
+          "eligibilityError": "credential_version_changed",
+          "operationClaimed": false
+        }
+      ]
+    },
+    {
+      "phase": "07-version-restored",
+      "checks": [
+        {
+          "command": "credential-catalog",
+          "status": "ok",
+          "privateFixtureContentAbsent": true
+        },
+        {
+          "catalogCount": 1,
+          "expectedVersion": 3,
+          "expectedAvailability": "disabled"
+        },
+        {
+          "command": "catalog",
+          "status": "ok",
+          "privateFixtureContentAbsent": true
+        },
+        {
+          "command": "read",
+          "status": "unauthorized",
+          "privateFixtureContentAbsent": true
+        },
+        {
+          "command": "request-use",
+          "status": "revoked",
+          "privateFixtureContentAbsent": true
+        },
+        {
+          "eligibilityError": "credential_disabled",
+          "operationClaimed": false
+        }
+      ]
+    },
+    {
+      "phase": "08-version-enabled",
+      "checks": [
+        {
+          "command": "credential-catalog",
+          "status": "ok",
+          "privateFixtureContentAbsent": true
+        },
+        {
+          "catalogCount": 1,
+          "expectedVersion": 3,
+          "expectedAvailability": "available"
+        },
+        {
+          "command": "catalog",
+          "status": "ok",
+          "privateFixtureContentAbsent": true
+        },
+        {
+          "command": "read",
+          "status": "unauthorized",
+          "privateFixtureContentAbsent": true
+        },
+        {
+          "command": "request-use",
+          "status": "conflict",
+          "privateFixtureContentAbsent": true
+        },
+        {
+          "eligibilityError": "credential_version_changed",
+          "operationClaimed": false
+        }
+      ]
+    },
+    {
+      "phase": "09-deleted",
+      "checks": [
+        {
+          "command": "credential-catalog",
+          "status": "ok",
+          "privateFixtureContentAbsent": true
+        },
+        {
+          "catalogCount": 0,
+          "expectedVersion": 3,
+          "expectedAvailability": "deleted"
+        },
+        {
+          "command": "catalog",
+          "status": "ok",
+          "privateFixtureContentAbsent": true
+        },
+        {
+          "command": "read",
+          "status": "unauthorized",
+          "privateFixtureContentAbsent": true
+        },
+        {
+          "command": "request-use",
+          "status": "revoked",
+          "privateFixtureContentAbsent": true
+        },
+        {
+          "eligibilityError": "credential_deleted",
+          "operationClaimed": false
+        }
+      ]
+    },
+    {
+      "phase": "10-recycle-restored",
+      "checks": [
+        {
+          "command": "credential-catalog",
+          "status": "ok",
+          "privateFixtureContentAbsent": true
+        },
+        {
+          "catalogCount": 1,
+          "expectedVersion": 4,
+          "expectedAvailability": "disabled"
+        },
+        {
+          "command": "catalog",
+          "status": "ok",
+          "privateFixtureContentAbsent": true
+        },
+        {
+          "command": "read",
+          "status": "unauthorized",
+          "privateFixtureContentAbsent": true
+        },
+        {
+          "command": "request-use",
+          "status": "revoked",
+          "privateFixtureContentAbsent": true
+        },
+        {
+          "eligibilityError": "credential_disabled",
+          "operationClaimed": false
+        }
+      ]
+    },
+    {
+      "phase": "11-recycle-enabled",
+      "checks": [
+        {
+          "command": "credential-catalog",
+          "status": "ok",
+          "privateFixtureContentAbsent": true
+        },
+        {
+          "catalogCount": 1,
+          "expectedVersion": 4,
+          "expectedAvailability": "available"
+        },
+        {
+          "command": "catalog",
+          "status": "ok",
+          "privateFixtureContentAbsent": true
+        },
+        {
+          "command": "read",
+          "status": "unauthorized",
+          "privateFixtureContentAbsent": true
+        },
+        {
+          "command": "request-use",
+          "status": "conflict",
+          "privateFixtureContentAbsent": true
+        },
+        {
+          "eligibilityError": "credential_version_changed",
+          "operationClaimed": false
+        }
+      ]
+    },
+    {
+      "phase": "12-expired",
+      "checks": [
+        {
+          "command": "credential-catalog",
+          "status": "ok",
+          "privateFixtureContentAbsent": true
+        },
+        {
+          "catalogCount": 1,
+          "expectedVersion": 4,
+          "expectedAvailability": "expired"
+        },
+        {
+          "command": "catalog",
+          "status": "ok",
+          "privateFixtureContentAbsent": true
+        },
+        {
+          "command": "read",
+          "status": "unauthorized",
+          "privateFixtureContentAbsent": true
+        },
+        {
+          "command": "request-use",
+          "status": "expired",
+          "privateFixtureContentAbsent": true
+        },
+        {
+          "eligibilityError": "credential_expired",
+          "operationClaimed": false
+        }
+      ]
+    },
+    {
+      "phase": "13-hidden",
+      "checks": [
+        {
+          "command": "credential-catalog",
+          "status": "ok",
+          "privateFixtureContentAbsent": true
+        },
+        {
+          "catalogCount": 0,
+          "expectedVersion": 4,
+          "expectedAvailability": "available"
+        },
+        {
+          "command": "catalog",
+          "status": "ok",
+          "privateFixtureContentAbsent": true
+        },
+        {
+          "command": "read",
+          "status": "unauthorized",
+          "privateFixtureContentAbsent": true
+        },
+        {
+          "command": "request-use",
+          "status": "invalid_request",
+          "privateFixtureContentAbsent": true
+        },
+        {
+          "eligibilityError": "invalid_reference",
+          "operationClaimed": false
+        }
+      ]
+    },
+    {
+      "phase": "14-reopened",
+      "checks": [
+        {
+          "command": "credential-catalog",
+          "status": "ok",
+          "privateFixtureContentAbsent": true
+        },
+        {
+          "catalogCount": 0,
+          "expectedVersion": 4,
+          "expectedAvailability": "available"
+        },
+        {
+          "command": "catalog",
+          "status": "ok",
+          "privateFixtureContentAbsent": true
+        },
+        {
+          "command": "read",
+          "status": "unauthorized",
+          "privateFixtureContentAbsent": true
+        },
+        {
+          "command": "request-use",
+          "status": "invalid_request",
+          "privateFixtureContentAbsent": true
+        },
+        {
+          "eligibilityError": "invalid_reference",
+          "operationClaimed": false
+        }
+      ]
+    },
+    {
+      "phase": "complete",
+      "checks": []
+    }
+  ],
+  "appBaseCommit": "8f917f659a2f8d170883d0a0fac10ce240f272ad",
+  "worktreeStatus": [
+    "?? apps/desktop/integration_test/macos_credential_management_native_test.dart",
+    "?? scripts/qa/macos-credential-management-ui.py"
+  ],
+  "qaSources": [
+    {
+      "path": "apps/desktop/integration_test/macos_credential_management_native_test.dart",
+      "sha256": "a839f57c4e367f7cd64f910bbb45e9c386efc7fb9e0dc19e9bdc259116997f74"
+    },
+    {
+      "path": "scripts/qa/macos-credential-management-ui.py",
+      "sha256": "60c5257db0ca994c3589488a70e0f6ffc95a17ca5c66989539e86f76a7b5fe3f"
+    },
+    {
+      "path": "apps/desktop/lib/credentials.dart",
+      "sha256": "72384ae9e9a9a1533de555f9c910e761bbe24eb0fff7aa17e9c458dc85c5ccae"
+    },
+    {
+      "path": "apps/desktop/lib/credential_management.dart",
+      "sha256": "269cff2c25e8fb12152b7627c55c6898631e1925fa739f292e54bd1a01fceb3b"
+    },
+    {
+      "path": "apps/desktop/lib/credential_dialogs.dart",
+      "sha256": "e55dc7471dadd698c608c48837bbfd56da5484c1cb83be8d3fd8693440db21d0"
+    },
+    {
+      "path": "apps/desktop/lib/information_workspace.dart",
+      "sha256": "eb2c65a38db88be3557847f131d7fe8efca68616ffbef313d35fa5ca210737e6"
+    },
+    {
+      "path": "apps/desktop/lib/library.dart",
+      "sha256": "f0759829163187a34dd6b0f75be756e7e0a768586ff3448661f30a3f2edff1b4"
+    },
+    {
+      "path": "apps/desktop/lib/main.dart",
+      "sha256": "484271607ad9cabdcd7fd69374b9c71a37dee4d2a51fe4cd82d40811aa420e39"
+    },
+    {
+      "path": "apps/desktop/integration_test/support/native_semantics_lifetime.dart",
+      "sha256": "a274da35d57e9bca3322b7e5b70a2bc610990e8e8dc3fba0821bbb1e9219036f"
+    }
+  ],
+  "nativeResult": {
+    "complete": true,
+    "phases": 15,
+    "captures": [
+      "01-created-hidden.png",
+      "02-linked-hidden.png",
+      "02-metadata-before-save.png",
+      "03-public.png",
+      "04-rotated.png",
+      "05-disabled.png",
+      "06-enabled.png",
+      "07-version-restored.png",
+      "08-version-enabled.png",
+      "09-deleted.png",
+      "10-recycle-restored.png",
+      "11-recycle-enabled.png",
+      "12-expired.png",
+      "13-hidden.png",
+      "14-reopened.png"
+    ],
+    "finalCredentialVersion": 4,
+    "scope": "Native tester drives string credential creation, metadata, discovery, links, rotation, disable/enable, version restore, recycle restore and expiry; real SQLCipher plus independent CLI catalog/negative eligibility; fixture ordinary information, ephemeral key; registered test text-input channel, no actual credential use grants/worker execution, physical input/IME, file credential picker or Keychain."
+  },
+  "flutterExitCode": 0,
+  "cliExits": [
+    0,
+    0
+  ]
+}

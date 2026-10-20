@@ -1,0 +1,32 @@
+{
+  "sourceHashesMatch": true,
+  "strictAnalysisPassed": true,
+  "widgetTestsPassed": 5,
+  "defaultDebugSignatureExitCode": 0,
+  "signatureStderr": "",
+  "successfulRootsRemoved": [
+    5,
+    6
+  ],
+  "commandStatusAssertions": 55,
+  "catalogSnapshots": 14,
+  "ineligibleUseRequests": 13,
+  "actualUseGrants": 0,
+  "actualCredentialExecutions": 0,
+  "registeredTestTextInput": true,
+  "physicalInputVerified": false,
+  "viewedCaptures": {
+    "run-5": [
+      "03-public",
+      "04-rotated",
+      "07-version-restored",
+      "10-recycle-restored",
+      "12-expired",
+      "14-reopened"
+    ],
+    "run-6": [
+      "02-metadata-before-save",
+      "14-reopened"
+    ]
+  }
+}
