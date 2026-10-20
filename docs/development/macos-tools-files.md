@@ -39,8 +39,9 @@ python3 scripts/qa/macos-attachment-preserve-ui.py build/macos-adaptation/file-c
 
 Mac 仍锁屏。初始信息/临时数据库密钥/批准为隔离夹具；UI 由原生 tester 驱动，
 不代表真实键盘、系统选择/另存面板、Keychain 或浏览器网站验收。
-实际工具目录许可、书签重开/升级、外部 GH/AWS、文件替换/版本/撤销到期联合流程、
-容量及最终安装包闭环继续按原票执行。
+文件替换/版本恢复/撤销及真实一分钟到期已由
+[后续原生生命周期流程](macos-file-lifecycle.md)补证。
+实际工具目录许可、书签重开/升级、外部 GH/AWS、容量及最终安装包闭环继续按原票执行。
 
 ## 较早工具工作流基线
 
