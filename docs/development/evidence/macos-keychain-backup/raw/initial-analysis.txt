@@ -1,0 +1,6 @@
+Analyzing desktop...                                            
+
+   info • The import of 'dart:typed_data' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/foundation.dart'. Try removing the import directive • integration_test/support/macos_keychain_backup.dart:6:8 • unnecessary_import
+warning • This function has a nullable return type of 'FutureOr<Object?>', but ends without returning a value. Try adding a return statement, or if no value is ever returned, try changing the return type to 'void' • integration_test/support/macos_keychain_backup.dart:287:49 • body_might_complete_normally_nullable
+
+2 issues found. (ran in 1.0s)

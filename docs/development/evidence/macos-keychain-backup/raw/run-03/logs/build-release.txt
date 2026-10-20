@@ -1,0 +1,78 @@
+Building macOS application...                                   
+error: the following command failed with exit code 0 but produced no further output
+SwiftCompile normal arm64 (in target 'Runner' from project 'Runner')
+/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue45-keychain-backup-3/source/apps/desktop/macos/Runner/MainFlutterWindow.swift:118:86: warning: 'allowedFileTypes' was deprecated in macOS 12.0: Use -allowedContentTypes instead [#DeprecatedDeclaration]
+116 |         panel.canChooseFiles = true
+117 |         panel.allowsMultipleSelection = false
+118 |         if call.method == "backupInput" || call.method == "recoveryKeyInput" { panel.allowedFileTypes = [call.method == "recoveryKeyInput" ? "txt" : "aimbackup"] }
+    |                                                                                      `- warning: 'allowedFileTypes' was deprecated in macOS 12.0: Use -allowedContentTypes instead [#DeprecatedDeclaration]
+119 |         panel.beginSheetModal(for: window) { response in
+120 |           result(response == .OK ? panel.url?.path : nil)
+
+/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue45-keychain-backup-3/source/apps/desktop/macos/Runner/MainFlutterWindow.swift:136:15: warning: 'allowedFileTypes' was deprecated in macOS 12.0: Use -allowedContentTypes instead [#DeprecatedDeclaration]
+134 |         let recovery = call.method == "recoveryKeyOutput"
+135 |         let panel = NSSavePanel()
+136 |         panel.allowedFileTypes = [recovery ? "txt" : "aimbackup"]
+    |               `- warning: 'allowedFileTypes' was deprecated in macOS 12.0: Use -allowedContentTypes instead [#DeprecatedDeclaration]
+137 |         panel.nameFieldStringValue = recovery ? "agent-info-recovery-key.txt" : "information-backup.aimbackup"
+138 |         panel.canCreateDirectories = true
+
+/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue45-keychain-backup-3/source/apps/desktop/macos/Runner/MainFlutterWindow.swift:312:25: warning: 'alert' was deprecated in macOS 11.0 [#DeprecatedDeclaration]
+310 |       willPresent notification: UNNotification,
+311 |       withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+312 |     completionHandler([.alert])
+    |                         `- warning: 'alert' was deprecated in macOS 11.0 [#DeprecatedDeclaration]
+313 |   }
+314 | 
+
+/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue45-keychain-backup-3/source/apps/desktop/macos/Runner/MainFlutterWindow.swift:331:9: warning: 'SecKeychainGetUserInteractionAllowed' was deprecated in macOS 10.10: SecKeychain is deprecated [#DeprecatedDeclaration]
+329 | private func mutateOwnedKeychainFixture(_ method: String) throws {
+330 |   var previous: DarwinBoolean = true
+331 |   guard SecKeychainGetUserInteractionAllowed(&previous) == errSecSuccess,
+    |         `- warning: 'SecKeychainGetUserInteractionAllowed' was deprecated in macOS 10.10: SecKeychain is deprecated [#DeprecatedDeclaration]
+332 |         SecKeychainSetUserInteractionAllowed(false) == errSecSuccess else {
+333 |     throw DatabaseKeyFailure(code: "qa_interaction_failed", status: nil)
+
+/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue45-keychain-backup-3/source/apps/desktop/macos/Runner/MainFlutterWindow.swift:332:9: warning: 'SecKeychainSetUserInteractionAllowed' was deprecated in macOS 10.10: SecKeychain is deprecated [#DeprecatedDeclaration]
+330 |   var previous: DarwinBoolean = true
+331 |   guard SecKeychainGetUserInteractionAllowed(&previous) == errSecSuccess,
+332 |         SecKeychainSetUserInteractionAllowed(false) == errSecSuccess else {
+    |         `- warning: 'SecKeychainSetUserInteractionAllowed' was deprecated in macOS 10.10: SecKeychain is deprecated [#DeprecatedDeclaration]
+333 |     throw DatabaseKeyFailure(code: "qa_interaction_failed", status: nil)
+334 |   }
+
+/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue45-keychain-backup-3/source/apps/desktop/macos/Runner/MainFlutterWindow.swift:335:11: warning: 'SecKeychainSetUserInteractionAllowed' was deprecated in macOS 10.10: SecKeychain is deprecated [#DeprecatedDeclaration]
+333 |     throw DatabaseKeyFailure(code: "qa_interaction_failed", status: nil)
+334 |   }
+335 |   defer { SecKeychainSetUserInteractionAllowed(previous.boolValue) }
+    |           `- warning: 'SecKeychainSetUserInteractionAllowed' was deprecated in macOS 10.10: SecKeychain is deprecated [#DeprecatedDeclaration]
+336 |   let query: [String: Any] = [
+337 |     kSecClass as String: kSecClassGenericPassword,
+
+/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue45-keychain-backup-3/source/apps/desktop/macos/Runner/DatabaseKeyStore.swift:40:22: warning: 'SecKeychainGetUserInteractionAllowed' was deprecated in macOS 10.10: SecKeychain is deprecated [#DeprecatedDeclaration]
+38 |     defer { Self.interactionLock.unlock() }
+39 |     var previous: DarwinBoolean = true
+40 |     let readStatus = SecKeychainGetUserInteractionAllowed(&previous)
+   |                      `- warning: 'SecKeychainGetUserInteractionAllowed' was deprecated in macOS 10.10: SecKeychain is deprecated [#DeprecatedDeclaration]
+41 |     guard readStatus == errSecSuccess else {
+42 |       throw DatabaseKeyFailure(code: "key_unavailable", status: readStatus)
+
+/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue45-keychain-backup-3/source/apps/desktop/macos/Runner/DatabaseKeyStore.swift:44:21: warning: 'SecKeychainSetUserInteractionAllowed' was deprecated in macOS 10.10: SecKeychain is deprecated [#DeprecatedDeclaration]
+42 |       throw DatabaseKeyFailure(code: "key_unavailable", status: readStatus)
+43 |     }
+44 |     let setStatus = SecKeychainSetUserInteractionAllowed(false)
+   |                     `- warning: 'SecKeychainSetUserInteractionAllowed' was deprecated in macOS 10.10: SecKeychain is deprecated [#DeprecatedDeclaration]
+45 |     guard setStatus == errSecSuccess else {
+46 |       throw DatabaseKeyFailure(code: "key_unavailable", status: setStatus)
+
+/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue45-keychain-backup-3/source/apps/desktop/macos/Runner/DatabaseKeyStore.swift:48:13: warning: 'SecKeychainSetUserInteractionAllowed' was deprecated in macOS 10.10: SecKeychain is deprecated [#DeprecatedDeclaration]
+46 |       throw DatabaseKeyFailure(code: "key_unavailable", status: setStatus)
+47 |     }
+48 |     defer { SecKeychainSetUserInteractionAllowed(previous.boolValue) }
+   |             `- warning: 'SecKeychainSetUserInteractionAllowed' was deprecated in macOS 10.10: SecKeychain is deprecated [#DeprecatedDeclaration]
+49 |     return try action()
+50 |   }
+
+[#DeprecatedDeclaration]: <https://docs.swift.org/compiler/documentation/diagnostics/deprecated-declaration>
+warning: Run script build phase 'Run Script' will be run during every build because it does not specify any outputs. To address this issue, either add output dependencies to the script phase, or configure it to run in every build by unchecking "Based on dependency analysis" in the script phase. (in target 'Flutter Assemble' from project 'Runner')
+✓ Built build/macos/Build/Products/Release/info_desktop.app (49.2MB)

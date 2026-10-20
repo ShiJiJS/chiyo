@@ -8,7 +8,7 @@
 - [#43 故障恢复](macos-lifecycle-recovery.md)：已按原有 6 条条件完成收口；既有 8 项 SQLCipher/AOT 联合场景、5 项 Darwin worker 检查，加上两种签名 Flutter/系统 SSH 故障重开及本次 41 项定向检查。无法确认旧进程时保留材料，实际结束后回收，不重放命令。
 - [#42 Keychain](macos-keychain-validation.md)：实际 Release Flutter + Keychain + SQLCipher 的 20 次进程验证通过，补齐创建/重开、缺失/坏值/错误密钥/损坏库保留与重试；发现并修复退出后界面读已关闭资料库，桌面 178 通过/2 跳过。新 ad-hoc 签名升级仍被拒绝，原签名重开正常。
 - [#44 工具与附件](macos-tools-files.md)：外部 GH/AWS 实测 EPERM 后，已新增主人选择工具目录与系统书签持久化入口；原生存储/界面回归及新包 SSH/附件工作流通过，真实目录许可、外部 GH/AWS、当前系统面板仍待验收。
-- [#45 备份恢复](macos-backup-recovery.md)：签名 Flutter 的 7/8/9 格式恢复、签名 Release 应用与独立 AOT 的 80 MiB 中断回滚/同目标重试，以及固定旧源 5/6 兼容已通过；真实面板、Keychain、最终交付包联合验收与 Windows 双向迁移仍待。
+- [#45 备份恢复](macos-backup-recovery.md)：签名 Flutter 的 7/8/9 格式恢复、签名 Release 应用与独立 AOT 的 80 MiB 中断回滚/同目标重试，以及固定旧源 5/6 兼容已通过；另已完成真实 Keychain 源密钥丢失后，独立新目标的格式 9 恢复/重开与 2 MiB 附件及历史关系核对；真实面板、最终交付包联合验收与 Windows 双向迁移仍待。
 - [#46 应用生命周期](macos-lifecycle-recovery.md)：实际签名 Flutter 的重复启动拒绝、正常退出/重开、SIGKILL 重开、缺失密钥、47125 占用、初始化期间退出和 SQLCipher 审计失败重试已通过；9 个正常退出、1 个故障注入，实际菜单/睡眠唤醒仍待。执行中 worker 联合场景已在 #43 补齐。
 - [#48 移除范围与历史](evidence/macos-removed-scope-ui/verification.json)：真实 Mac Flutter/SQLCipher 与独立 AOT CLI 的 9 阶段流程连续三轮通过，每轮 19 次读取断言；四主题、200% 滚动及有效/已结束筛选与权限一致。随后修正访问次数断行，补充完整应用导航内 19 条记录/三页/24 字段长申请的搜索、滚动及清除复验，见[新增证据](evidence/macos-history-layout/verification.json)。实际系统面板、键盘、其他资料管理及大规模数据压力仍待。
 - [#48 资料管理闭环](evidence/macos-library-ui/verification.json)：新增实际 Mac Flutter/SQLCipher + 独立 AOT CLI 的模板、编辑、删除恢复、版本恢复及库重开验证；最终九阶段/18 次读取断言通过，模板修改与既有信息隔离、取消确认及关闭弹窗后详情刷新均独立核对。提案/整理/凭据等其余流程、真实输入和系统面板仍待。
