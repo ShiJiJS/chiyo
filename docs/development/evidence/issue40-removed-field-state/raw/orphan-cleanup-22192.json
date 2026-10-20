@@ -1,0 +1,13 @@
+{
+  "processId": 22192,
+  "executable": "C:\\Users\\Todoki\\AppData\\Local\\Temp\\aim-lifecycle-adapters-7d83da08\\lifecycle-host.exe",
+  "startedAt": "2026-10-20T10:02:22.2665130+08:00",
+  "executableSha256": "2f134c88e6b1c209a50b1fc8cc0f91001d57a8c35ccb5e32ae96ad78f3de3b74",
+  "action": "Explicit cleanup of this orphaned failed QA host; not normal-exit evidence or product quit fallback",
+  "childPaths": [
+    {
+      "ProcessId": 39196,
+      "ExecutablePath": "C:\\Windows\\system32\\conhost.exe"
+    }
+  ]
+}

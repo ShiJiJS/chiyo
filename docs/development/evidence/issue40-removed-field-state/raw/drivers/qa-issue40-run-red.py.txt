@@ -1,0 +1,29 @@
+from pathlib import Path
+import json,os,subprocess
+root=Path.cwd();out=root/'build/qa-issue40/red';out.mkdir(parents=True,exist_ok=False)
+locks={root/p/'pubspec.lock':(root/p/'pubspec.lock').read_bytes() for p in ['packages/info_core','packages/info_storage','packages/info_cli','apps/desktop']}
+norm=lambda b:b.replace(b'https://pub.flutter-io.cn',b'https://pub.dev').replace(b'\r\n',b'\n')
+env=os.environ.copy();env.update(PUB_HOSTED_URL='https://pub.flutter-io.cn',FLUTTER_STORAGE_BASE_URL='https://storage.flutter-io.cn')
+flutter=r'C:/Users/Todoki/.local/share/flutter/bin/flutter.bat';dart=r'C:/Users/Todoki/.local/share/flutter/bin/dart.bat'
+def run(name,exe,args):
+ with (out/(name+'.txt')).open('wb') as log:return subprocess.run([exe,*args],cwd=root/'apps/desktop',env=env,stdout=log,stderr=subprocess.STDOUT).returncode
+try:
+ for p,b in locks.items():p.write_bytes(b.replace(b'https://pub.dev',b'https://pub.flutter-io.cn'))
+ assert run('format',dart,['format','test/removed_field_state_test.dart'])==0
+ assert run('pub',flutter,['pub','get','--offline','--enforce-lockfile'])==0
+ code=run('widget-red',flutter,['test','--no-pub','--reporter','json','test/removed_field_state_test.dart'])
+ events=[]
+ for line in (out/'widget-red.txt').read_text(encoding='utf-8',errors='replace').splitlines():
+  try:events.append(json.loads(line))
+  except ValueError:pass
+ done=[e for e in events if e.get('type')=='testDone' and not e.get('hidden',False)]
+ result={'exitCode':code,'failedTests':sum(e.get('result')=='error' or e.get('result')=='failure' for e in done),'testDone':done,'productFilesChanged':False}
+ (out/'result.json').write_text(json.dumps(result,indent=2)+'\n',encoding='utf-8')
+ print(json.dumps({'exitCode':code,'testDone':done},indent=2))
+ assert code!=0 and len(done)==4 and all(e.get('result') in ['error','failure'] for e in done)
+finally:
+ bad=[]
+ for p,b in locks.items():
+  if norm(p.read_bytes())!=norm(b):bad.append(str(p))
+  else:p.write_bytes(b)
+ assert not bad,bad
