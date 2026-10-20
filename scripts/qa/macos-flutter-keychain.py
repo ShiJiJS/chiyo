@@ -6,6 +6,7 @@ changed. Production store/adapter/startup/storage/lifetime sources stay exact.
 Never read/delete production Keychain items; never export keys/private fixture
 associations/databases. No physical keyboard/menu/locked-Keychain claim.
 """
+import argparse
 import hashlib
 import json
 import os
@@ -28,9 +29,13 @@ def digest(path):
 
 
 def main():
-    if sys.platform != 'darwin' or len(sys.argv) != 2:
-        raise SystemExit('Usage on macOS: macos-flutter-keychain.py NEW_OUTPUT_DIRECTORY')
-    output = Path(sys.argv[1]).resolve()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('output', type=Path)
+    parser.add_argument('--backups', action='store_true', help='Real Keychain source export, source-key loss, fresh target restore/reopen')
+    args = parser.parse_args()
+    if sys.platform != 'darwin':
+        parser.error('Requires macOS')
+    output = args.output.resolve()
     output.relative_to(ROOT / 'build/macos-adaptation')
     output.mkdir(parents=True, exist_ok=False)
     logs = output / 'logs'
@@ -44,6 +49,7 @@ def main():
         ['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip(),
         'service': service, 'bundleIdentifier': identity, 'commands': [], 'cases': [],
         'scope': 'isolated Release Flutter copy; real Keychain and SQLCipher; injected failure conditions/events'}
+    result['scenario'] = 'backups' if args.backups else 'keychain-failures'
     roots, processes = set(), []
     binary = None
 
@@ -127,7 +133,8 @@ def main():
     try:
         names = subprocess.check_output(['git', 'ls-files', '-z', 'apps/desktop', 'packages',
                                          'scripts', 'integrations', 'third_party'], cwd=ROOT).decode().split('\0')
-        names = sorted(set(filter(None, names)) | {ENTRY, INJECTION, 'scripts/qa/macos-flutter-keychain.py'})
+        names = sorted(set(filter(None, names)) | {ENTRY, INJECTION, 'scripts/qa/macos-flutter-keychain.py',
+            'apps/desktop/integration_test/support/macos_keychain_backup.dart'})
         hashes = {}
         for name in names:
             origin = ROOT / name
@@ -180,29 +187,44 @@ def main():
         run('signature', ['codesign', '--verify', '--deep', '--strict', str(app)], timeout=30)
         run('signature-details', ['codesign', '-d', '--verbose=4', '--entitlements', ':-', str(app)], timeout=30)
         result['binarySha256'] = digest(binary)
-        for scenario in ['reopen', 'missing', 'malformed', 'wrong', 'corrupt']:
-            root = launch('create', scenario + '-create')
-            launch(scenario, scenario + '-check', root)
-            launch('cleanup', scenario + '-cleanup', root)
-        upgraded = output / 'Changed-Version.app'
-        shutil.copytree(app, upgraded, symlinks=True)
-        info = upgraded / 'Contents/Info.plist'
-        data = plistlib.loads(info.read_bytes())
-        data['CFBundleVersion'] = str(int(data['CFBundleVersion']) + 1)
-        info.write_bytes(plistlib.dumps(data))
-        run('sign-changed-version', ['codesign', '--force', '--sign', '-', '--entitlements',
-            str(source / 'apps/desktop/macos/Runner/Release.entitlements'), str(upgraded)], timeout=30)
-        run('signature-changed-version', ['codesign', '--verify', '--deep', '--strict', str(upgraded)], timeout=30)
-        run('signature-details-changed-version', ['codesign', '-d', '--verbose=4', str(upgraded)], timeout=30)
-        changed_binary = upgraded / 'Contents/MacOS/info_desktop'
-        result['changedVersionBinarySha256'] = digest(changed_binary)
-        if result['changedVersionBinarySha256'] == result['binarySha256']:
-            raise RuntimeError('Changed version did not change code signature')
-        root = launch('create', 'upgrade-create')
-        launch('upgrade', 'upgrade-changed-signature', root, changed_binary)
-        result['upgradeAccess'] = result['cases'][-1]['upgradeAccess']
-        launch('reopen', 'upgrade-original-reopen', root)
-        launch('cleanup', 'upgrade-cleanup', root)
+        if args.backups:
+            root = launch('backup-export', 'backup-export')
+            backup = root / '中文 完整备份.aimbackup'
+            source_db = root / 'library/library.db'
+            result['exportedBackupSha256'] = digest(backup)
+            result['closedSourceDatabaseSha256'] = digest(source_db)
+            launch('cleanup', 'delete-source-key', root)
+            launch('missing', 'source-unavailable-before-restore', root)
+            launch('backup-restore', 'new-target-restore', root)
+            launch('backup-reopen', 'target-process-reopen', root)
+            if (digest(backup) != result['exportedBackupSha256'] or
+                    digest(source_db) != result['closedSourceDatabaseSha256']):
+                raise RuntimeError('Original backup or closed source database changed')
+            result['sourceDatabaseAndBackupBytesPreserved'] = True
+        else:
+            for scenario in ['reopen', 'missing', 'malformed', 'wrong', 'corrupt']:
+                root = launch('create', scenario + '-create')
+                launch(scenario, scenario + '-check', root)
+                launch('cleanup', scenario + '-cleanup', root)
+            upgraded = output / 'Changed-Version.app'
+            shutil.copytree(app, upgraded, symlinks=True)
+            info = upgraded / 'Contents/Info.plist'
+            data = plistlib.loads(info.read_bytes())
+            data['CFBundleVersion'] = str(int(data['CFBundleVersion']) + 1)
+            info.write_bytes(plistlib.dumps(data))
+            run('sign-changed-version', ['codesign', '--force', '--sign', '-', '--entitlements',
+                str(source / 'apps/desktop/macos/Runner/Release.entitlements'), str(upgraded)], timeout=30)
+            run('signature-changed-version', ['codesign', '--verify', '--deep', '--strict', str(upgraded)], timeout=30)
+            run('signature-details-changed-version', ['codesign', '-d', '--verbose=4', str(upgraded)], timeout=30)
+            changed_binary = upgraded / 'Contents/MacOS/info_desktop'
+            result['changedVersionBinarySha256'] = digest(changed_binary)
+            if result['changedVersionBinarySha256'] == result['binarySha256']:
+                raise RuntimeError('Changed version did not change code signature')
+            root = launch('create', 'upgrade-create')
+            launch('upgrade', 'upgrade-changed-signature', root, changed_binary)
+            result['upgradeAccess'] = result['cases'][-1]['upgradeAccess']
+            launch('reopen', 'upgrade-original-reopen', root)
+            launch('cleanup', 'upgrade-cleanup', root)
         result['complete'] = True
     except Exception as error:
         result['failure'] = str(error)
