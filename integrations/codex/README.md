@@ -98,10 +98,11 @@ dart run tool/prepare_codex.dart ../../build/codex-preview
 python scripts/prepare-codex-acceptance.py --delivery <AgentInfoManage目录> --bundle <已生成bundle> --workspace <不存在的新项目目录>
 ```
 
-工具先核对随包manifest、AOT/Skill/引用及Windows hook目标，再仅在新目录准备
-`.codex/hooks.json`、`.agents/skills/agent-info-access`、README.txt及八项未运行的验收清单。
+工具按随包 manifest 区分 Windows x64 与 Mac ARM64，核对同源 AOT/Skill/引用、
+两种 shell 的准确 hook 命令、事件/匹配器/超时，再仅在新目录准备
+`.codex/hooks.json`、`.agents/skills/agent-info-access`、README.txt及 13 项未运行的验收清单。
 已存在的目录直接拒绝，不合并既有配置。这个Python工具用于开发者准备材料，不是
-Windows预览包或用户实际接入的额外运行依赖；已生成项目由用户直接在客户端打开。
+预览包或用户实际接入的额外运行依赖；已生成项目由用户直接在客户端打开。
 项目仍引用原bundle的固定绝对路径，不能先删除/移动该bundle。
 
 这只是待用户开启的独立项目布局，不注册Codex项目、不授予信任、不运行hook，也不

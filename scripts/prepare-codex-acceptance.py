@@ -23,6 +23,14 @@ def prepare(delivery, bundle, workspace):
         raise ValueError('Workspace exists; choose a new directory.')
     workspace.parent.resolve(strict=True)
     manifest = json.loads((delivery / 'manifest.json').read_text(encoding='utf-8-sig'))
+    architecture = manifest.get('architecture')
+    targets = {
+        'windows-x64': ('.exe', 'Windows', 'app/info_desktop.exe'),
+        'macos-arm64': ('', 'macOS ARM64', 'app/info_desktop.app'),
+    }
+    if architecture not in targets:
+        raise ValueError('Unsupported delivery architecture.')
+    suffix, platform_name, app_relative = targets[architecture]
     entries = {entry['path'].replace('\\', '/'): entry for entry in manifest['files']}
 
     def shipped(relative):
@@ -32,7 +40,8 @@ def prepare(delivery, bundle, workspace):
             raise ValueError('Delivery no longer matches its manifest.')
         return path
 
-    binaries = ['info-codex.exe', 'info-codex-hook.exe', 'info-runtime-worker.exe']
+    binaries = [name + suffix for name in
+                ['info-codex', 'info-codex-hook', 'info-runtime-worker']]
     for name in binaries:
         if digest(bundle / name) != digest(shipped('cli/' + name)):
             raise ValueError('Bundle binary differs from the delivered version.')
@@ -42,23 +51,37 @@ def prepare(delivery, bundle, workspace):
         if digest(skill / 'references' / name) != digest(shipped('cli/template/references/' + name)):
             raise ValueError('Bundle reference differs from the delivered version.')
     original_skill = shipped('cli/template/SKILL.md').read_text(encoding='utf-8')
-    expected_skill = f'{original_skill}\nBundle executable: `{bundle.as_posix()}/info-codex.exe`.\n'
+    expected_skill = f'{original_skill}\nBundle executable: `{bundle.as_posix()}/info-codex{suffix}`.\n'
     if (skill / 'SKILL.md').read_text(encoding='utf-8') != expected_skill:
         raise ValueError('Unexpected Skill contents or executable path.')
     hooks_path = bundle / 'hooks.json'
-    hooks = json.loads(hooks_path.read_text(encoding='utf-8'))['hooks']
+    configuration = json.loads(hooks_path.read_text(encoding='utf-8'))
+    if set(configuration) != {'description', 'hooks'}:
+        raise ValueError('Unexpected hook configuration fields.')
+    hooks = configuration['hooks']
     if set(hooks) != {'SessionStart', 'SubagentStart', 'SessionEnd'}:
         raise ValueError('Unexpected hook events.')
     for event, timeout in [('SessionStart', 15), ('SubagentStart', 5), ('SessionEnd', 3)]:
         groups = hooks[event]
         if len(groups) != 1 or len(groups[0]['hooks']) != 1:
             raise ValueError('Unexpected hook count.')
+        expected_group_keys = {'hooks', 'matcher'} if event == 'SessionStart' else {'hooks'}
+        if set(groups[0]) != expected_group_keys:
+            raise ValueError('Unexpected hook matcher settings.')
+        if event == 'SessionStart' and groups[0]['matcher'] != '^(startup|resume|clear|compact|fork)$':
+            raise ValueError('Unexpected SessionStart matcher.')
         hook = groups[0]['hooks'][0]
+        if set(hook) != {'type', 'command', 'commandWindows', 'timeout', 'additionalContextLimit'}:
+            raise ValueError('Unexpected hook handler fields.')
+        hook_path = f'{bundle.as_posix()}/info-codex-hook{suffix}'
+        quoted_posix = "'" + hook_path.replace("'", "'\"'\"'") + "'"
+        if hook['command'] != quoted_posix:
+            raise ValueError('Unexpected POSIX hook target.')
         encoded = hook['commandWindows'].split()
-        if encoded[:4] != ['powershell.exe', '-NoProfile', '-NonInteractive', '-EncodedCommand']:
+        if len(encoded) != 5 or encoded[:4] != ['powershell.exe', '-NoProfile', '-NonInteractive', '-EncodedCommand']:
             raise ValueError('Unexpected Windows command wrapper.')
         command = base64.b64decode(encoded[4], validate=True).decode('utf-16-le')
-        if command != f"& '{bundle.as_posix()}/info-codex-hook.exe'" or len(encoded) != 5:
+        if command != "& '" + hook_path.replace("'", "''") + "'":
             raise ValueError('Unexpected Windows hook target.')
         if hook['timeout'] != timeout or hook['type'] != 'command' or hook['additionalContextLimit'] != 0:
             raise ValueError('Unexpected hook execution settings.')
@@ -74,6 +97,7 @@ def prepare(delivery, bundle, workspace):
             raise ValueError('Prepared project copy differs from the reviewed source.')
     cases = [
         ('client-trust', '正式客户端识别项目Skill和准确hook定义，用户审查并信任'),
+        ('private-stdin', '真实执行工具经独立stdin传递私密关联，父shell/argv/普通日志不含能力引用'),
         ('partial-approval', '聊天A申请两个字段，只批一个；已批读取成功，未批拒绝'),
         ('multiple-cli-calls', '同一聊天多个CLI进程复用已批范围，不重复审批、不续期'),
         ('chat-isolation', '独立聊天B只拿A的公开ID时不能获得A的权限'),
@@ -81,15 +105,19 @@ def prepare(delivery, bundle, workspace):
         ('session-end', '真实根聊天结束使其所有启动代际和已委托许可失效'),
         ('application-restart', '应用退出/重启后旧关联失效，须新连接和新申请'),
         ('same-root-sharing', '主子共享真人场景由用户另行安排，本脚本不启动子Agent'),
+        ('context-lifecycle', '真实compact/resume保留有效上下文但不续期，fork/clear不继承旧授权；缺失引用明确重新连接'),
+        ('non-root-events', '真实Stop/Interrupt/子结束不结束根会话，记录实际事件与顺序'),
+        ('credential-reuse', '同一次凭据批准后多次操作及原操作重查，不重复审批或重放'),
+        ('ordinary-file-delivery', '普通附件部分批准、领取、同机实际消费与释放，旧关联被拒绝'),
     ]
     (workspace / 'acceptance-cases.json').write_text(
         json.dumps([dict(id=key, expected=expected, state='not_run') for key, expected in cases], ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
-    readme = f'''Codex / Windows 同版本实机验收项目
+    readme = f'''Codex / {platform_name} 同版本实机验收项目
 
 软件来源：{manifest['sourceCommit']}，版本：{manifest['release']}
 独立项目：{workspace.as_posix()}
 被引用的SDK-free材料：{bundle.as_posix()}
-桌面程序：{(delivery / 'app/info_desktop.exe').as_posix()}
+桌面程序：{(delivery / app_relative).as_posix()}
 
 这只是尚未在Codex打开、注册或信任的项目材料，不是实机验收通过记录。
 没有修改当前项目、用户级hook、个人Skill或信任配置；没有启动聊天或子Agent。
@@ -109,6 +137,7 @@ def prepare(delivery, bundle, workspace):
 聊天B必须由用户另开，只提供A的公开请求ID/聊天ID，不把A的私密关联交给B。
 真实结束/恢复也由用户操作；主子共享按用户允许的真人场景另行安排。
 普通字段、凭据命令、普通附件和焦点填充保持独立流程；能力以实际capabilities为准。
+Mac 当前没有焦点填充，不把 Windows 专用说明当作 Mac 可用能力。
 记录客户端版本、实际信任入口、公开请求ID和截止时间；所有测试只用虚构资料。
 
 参考官方文档：
@@ -118,6 +147,7 @@ https://learn.chatgpt.com/docs/build-skills
     (workspace / 'README.txt').write_text(readme, encoding='utf-8')
     proof = dict(
         release=manifest['release'], productSource=manifest['sourceCommit'],
+        architecture=architecture,
         bundle=str(bundle), workspace=str(workspace), projectLayoutPrepared=True,
         existingProjectsModified=False, registeredByThisScript=False,
         clientActivationVerified=False, trusted=False, realClientAcceptance=False,
