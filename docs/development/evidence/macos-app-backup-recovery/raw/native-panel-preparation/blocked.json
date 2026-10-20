@@ -1,0 +1,13 @@
+{
+  "complete": false,
+  "reason": "CUA getApp reports Mac locked; automatic unlock failed",
+  "actualPanelOperations": 0,
+  "ordinaryAppFixtureReachedReady": true,
+  "ownedProcess": 89779,
+  "exitCode": -15,
+  "stoppedForLockedUi": true,
+  "ownedSyntheticRootsRemoved": [
+    "/Users/jiangxinyi/Library/Containers/com.example.infoDesktop/Data/tmp/aim-mac-backup-panel-uVUpHE"
+  ],
+  "uiAcceptance": false
+}
