@@ -1,0 +1,4 @@
+Flutter assets will be downloaded from https://storage.flutter-io.cn. Make sure you trust this source!
+00:00 +0: loading C:/Project/network_config/info-manage/apps/desktop/tool/render_information_approval_history_test.dart
+00:00 +0: inspect actual file approval and delivery history layout
+00:01 +1: All tests passed!

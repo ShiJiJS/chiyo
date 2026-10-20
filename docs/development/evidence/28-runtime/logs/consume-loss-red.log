@@ -1,0 +1,16 @@
+00:00 +0: loading test/credential_runtime_test.dart
+00:00 +0: a lost private consume response is never reported as an unconsumed retryable attempt
+00:00 +0 -1: a lost private consume response is never reported as an unconsumed retryable attempt [E]
+  Expected: true
+    Actual: <false>
+  
+  package:matcher                         expect
+  test\credential_runtime_test.dart 29:5  main.<fn>
+  
+00:00 +0 -1: Some tests failed.
+
+Failing tests:
+  test/credential_runtime_test.dart: a lost private consume response is never reported as an unconsumed retryable attempt
+
+Consider enabling the flag chain-stack-traces to receive more detailed exceptions.
+For example, 'dart test --chain-stack-traces'.

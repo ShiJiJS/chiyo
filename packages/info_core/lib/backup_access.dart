@@ -19,6 +19,15 @@ extension OwnerLibraryBackup on OwnerAccess {
     _service._backupBarrier = barrier;
     _service._backupBusy = restore;
     try {
+      // Stop the native endpoint before replacing its authorization library.
+      // Do not await the whole task here: it may be waiting for this owner lock.
+      if (restore) {
+        try {
+          await _service._preparedFocusedFill?.close();
+        } on Object {
+          throw const AccessFailure('service_unavailable');
+        }
+      }
       // Restore latches content delivery before replacing a library. An export
       // drains existing reads normally and leaves end/revoke/expiry effective;
       // its read-only SQL transaction captures a consistent durable snapshot.
@@ -32,6 +41,11 @@ extension OwnerLibraryBackup on OwnerAccess {
         _service._endedSessions.clear();
         _service._requests.clear();
         _service._grants.clear();
+        _service._credentialUseSessions.clear();
+        _service._executionCapabilities.clear();
+        _service._pendingExecutionReceipts.clear();
+        _service._failedFillAudits.clear();
+        _service._pendingInformationDeliveries.clear();
         _service._retentionPreview = null;
         _service._libraryGeneration++;
       }

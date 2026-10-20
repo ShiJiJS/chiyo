@@ -32,23 +32,12 @@ class FieldChange {
     'operation': kind.name,
     if (fieldId != null) 'fieldId': fieldId,
     if (value != null) 'value': value,
-    if (field != null)
-      'field': {
-        'name': field!.name,
-        'description': field!.description,
-        'value': field!.value,
-        'kind': field!.kind.name,
-      },
+    if (field != null) 'field': field!.toJson(),
   };
   factory FieldChange.fromJson(Map<String, dynamic> json) {
     FieldInput input() {
       final f = json['field'] as Map<String, dynamic>;
-      return FieldInput(
-        f['name'] as String,
-        f['description'] as String? ?? '',
-        f['value'] as String,
-        kind: FieldKind.values.byName(f['kind'] as String? ?? 'structured'),
-      );
+      return FieldInput.fromJson(f);
     }
 
     return switch (FieldChangeKind.values.byName(json['operation'] as String)) {
@@ -166,6 +155,21 @@ class UpdatePreview {
   final InformationItem before, after;
 }
 
+/// Owner-only, unsaved review input. Target and base version cannot be changed.
+class UpdateReview {
+  UpdateReview(
+    this.input, {
+    this.directoryId,
+    Iterable<String> tagIds = const [],
+    Map<String, String> fieldDescriptions = const {},
+  }) : tagIds = List.unmodifiable(tagIds),
+       fieldDescriptions = Map.unmodifiable(fieldDescriptions);
+  final UpdateInput input;
+  final String? directoryId;
+  final List<String> tagIds;
+  final Map<String, String> fieldDescriptions;
+}
+
 /// A past content version, only available to the owner. Persisted encrypted.
 class InformationRevision {
   const InformationRevision(this.item, this.replacedAt);
@@ -182,17 +186,7 @@ Map<String, Object?> informationToJson(InformationItem item) => {
   'tagIds': item.tagIds,
   'createdAt': item.createdAt?.toUtc().toIso8601String(),
   'modifiedAt': item.modifiedAt?.toUtc().toIso8601String(),
-  'fields': [
-    for (final f in item.fields)
-      {
-        'id': f.id,
-        'name': f.name,
-        'description': f.description,
-        'value': f.value,
-        'version': f.version,
-        'kind': f.kind.name,
-      },
-  ],
+  'fields': [for (final f in item.fields) f.toJson()],
 };
 InformationItem informationFromJson(Map<String, dynamic> json) =>
     InformationItem(
@@ -202,14 +196,7 @@ InformationItem informationFromJson(Map<String, dynamic> json) =>
       json['version'] as int,
       (json['fields'] as List)
           .map(
-            (dynamic f) => InformationField(
-              f['id'] as String,
-              f['name'] as String,
-              f['description'] as String,
-              f['value'] as String,
-              f['version'] as int,
-              kind: FieldKind.values.byName(f['kind'] as String),
-            ),
+            (dynamic f) => InformationField.fromJson(f as Map<String, dynamic>),
           )
           .toList(),
       directoryId: json['directoryId'] as String?,

@@ -1,0 +1,22 @@
+# This runs after the selected configuration's broker is linked. The runner
+# compiles this digest; no adjacent JSON/config/environment variable is trusted.
+if(NOT DEFINED BROKER OR NOT EXISTS "${BROKER}" OR NOT DEFINED OUTPUT_DIR)
+  message(FATAL_ERROR "Focused input broker identity inputs are missing")
+endif()
+file(SHA256 "${BROKER}" broker_sha256)
+string(LENGTH "${broker_sha256}" digest_length)
+if(NOT digest_length EQUAL 64 OR NOT broker_sha256 MATCHES "^[0-9a-f]+$")
+  message(FATAL_ERROR "Invalid focused input broker digest")
+endif()
+file(MAKE_DIRECTORY "${OUTPUT_DIR}")
+set(contents "#pragma once\ninline constexpr char kFocusedFillHelperSha256[] = \"${broker_sha256}\";\n")
+set(header "${OUTPUT_DIR}/focused_fill_identity.h")
+set(old_contents "")
+if(EXISTS "${header}")
+  file(READ "${header}" old_contents)
+endif()
+if(NOT old_contents STREQUAL contents)
+  file(WRITE "${header}" "${contents}")
+endif()
+# Build/provenance metadata only; the application never reads this sidecar.
+file(WRITE "${OUTPUT_DIR}/focused_fill_identity.sha256" "${broker_sha256}\n")

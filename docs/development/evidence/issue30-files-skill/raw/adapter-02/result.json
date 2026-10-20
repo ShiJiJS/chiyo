@@ -1,0 +1,21 @@
+{
+  "phases": [
+    {
+      "phase": "pub",
+      "exitCode": 0
+    },
+    {
+      "phase": "format",
+      "exitCode": 0
+    },
+    {
+      "phase": "analyze",
+      "exitCode": 0
+    },
+    {
+      "phase": "skill-validate",
+      "exitCode": 1
+    }
+  ],
+  "unexpectedLocks": []
+}

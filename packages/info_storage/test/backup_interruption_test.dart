@@ -1,3 +1,4 @@
+import 'backup_setup.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -51,7 +52,7 @@ void main() {
         field,
       );
       await owner.setRequestLifetime(const Duration(minutes: 45));
-      final key = await source.backups.enable();
+      final key = await enableTestBackups(source.backups);
       final backup = '${root.path}/many.aimbackup';
       await source.backups.exportTo(backup);
       await service.close();

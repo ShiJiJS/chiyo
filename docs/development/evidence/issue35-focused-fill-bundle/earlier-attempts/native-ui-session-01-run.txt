@@ -1,0 +1,32 @@
+Flutter assets will be downloaded from https://storage.flutter-io.cn. Make sure you trust this source!
+00:00 +0: loading C:/Project/network_config/info-manage/apps/desktop/integration_test/focused_fill_native_test.dart
+Building Windows application...                                    16.7s
+√ Built build\windows\x64\runner\Debug\info_desktop.exe
+00:00 +0: trusted bundled helper, SQLCipher, real approval UI and independent CLI native input
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following StateError was thrown running a test:
+Bad state: No element
+
+When the exception was thrown, this was the stack:
+#0      _Array.single (dart:core-patch/array.dart:62:22)
+#1      main.<anonymous closure> (file:///C:/Project/network_config/info-manage/apps/desktop/integration_test/focused_fill_native_test.dart:392:58)
+<asynchronous suspension>
+#2      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#3      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+The test description was:
+  trusted bundled helper, SQLCipher, real approval UI and independent CLI native input
+════════════════════════════════════════════════════════════════════════════════════════════════════
+01:00 +0 -1: trusted bundled helper, SQLCipher, real approval UI and independent CLI native input [E]
+  Test failed. See exception logs above.
+  The test description was: trusted bundled helper, SQLCipher, real approval UI and independent CLI native input
+  
+01:00 +0 -1: (tearDownAll)
+01:00 +0 -1: Some tests failed.
+
+Failing tests:
+  C:/Project/network_config/info-manage/apps/desktop/integration_test/focused_fill_native_test.dart: trusted bundled helper, SQLCipher, real approval UI and independent CLI native input

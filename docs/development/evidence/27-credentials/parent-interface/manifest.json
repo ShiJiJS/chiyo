@@ -1,0 +1,23 @@
+{
+  "date": "2026-10-17",
+  "sourceCommit": "a5035f638d2449651beaead8b8aee1535aa274a3",
+  "implementationCommit": "fba0393585313b68875e74c82cf228f18d3e3aef",
+  "scope": "D5 public interface milestone; issue27 remains OPEN for D3 navigation and joint native",
+  "fullSuite": {
+    "cli": 20,
+    "core": 103,
+    "storage": 50,
+    "desktop": 76,
+    "total": 249,
+    "exitCode": 0
+  },
+  "analyze": "all four modules passed",
+  "nativeRerun": false,
+  "files": [
+    {
+      "name": "full-check.log",
+      "bytes": 67270,
+      "sha256": "759e3f90985cb5bd96065e5dbae33c743e6bfe73821fcc7342ee433388123e72"
+    }
+  ]
+}

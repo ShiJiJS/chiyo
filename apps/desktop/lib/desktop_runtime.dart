@@ -18,15 +18,16 @@ class DesktopAvailability {
   );
 }
 
-/// Owner-process-only native boundary. Notification arguments are deliberately
-/// absent: no submitted text or authorization material can cross this boundary.
+/// Owner-process-only native boundary. Only an opaque request ID crosses this
+/// boundary for routing; no submitted text or authorization material is sent.
 abstract interface class DesktopPlatform {
   Future<DesktopAvailability> initialize(
     Future<void> Function(DesktopEvent) onEvent,
   );
   Future<bool> hideWindow();
   Future<void> showWindow();
-  Future<bool> notifyNewRequest();
+  String? get openedRequestId;
+  Future<bool> notifyNewRequest(String requestId);
   Future<bool> notifyTest();
   Future<DesktopAvailability> readAvailability();
   Future<DesktopAvailability> requestNotificationPermission();
@@ -34,6 +35,8 @@ abstract interface class DesktopPlatform {
 }
 
 class NativeDesktopPlatform implements DesktopPlatform {
+  @override
+  String? openedRequestId;
   static const _channel = MethodChannel('agent_info_manage/desktop');
   DesktopAvailability _decode(Object? raw) {
     if (raw is! Map) return DesktopAvailability.unavailable;
@@ -53,6 +56,11 @@ class NativeDesktopPlatform implements DesktopPlatform {
     Future<void> Function(DesktopEvent) onEvent,
   ) async {
     _channel.setMethodCallHandler((call) async {
+      if (call.method == 'open') {
+        openedRequestId = call.arguments is String
+            ? call.arguments as String
+            : null;
+      }
       final event = switch (call.method) {
         'close' => DesktopEvent.closeWindow,
         'open' => DesktopEvent.openApprovals,
@@ -71,11 +79,17 @@ class NativeDesktopPlatform implements DesktopPlatform {
   @override
   Future<void> showWindow() => _channel.invokeMethod<void>('show');
   @override
-  Future<bool> notifyNewRequest() async =>
-      await _channel.invokeMethod<bool>('notify') ?? false;
+  Future<bool> notifyNewRequest(String requestId) async =>
+      await _channel
+          .invokeMethod<bool>('notify', requestId)
+          .timeout(const Duration(seconds: 45), onTimeout: () => false) ??
+      false;
   @override
   Future<bool> notifyTest() async =>
-      await _channel.invokeMethod<bool>('testNotify') ?? false;
+      await _channel
+          .invokeMethod<bool>('testNotify')
+          .timeout(const Duration(seconds: 45), onTimeout: () => false) ??
+      false;
   @override
   Future<DesktopAvailability> requestNotificationPermission() async =>
       _decode(await _channel.invokeMethod<Object?>('enableNotifications'));
@@ -101,6 +115,7 @@ class DesktopRuntime extends ChangeNotifier {
   final Future<void> Function() closeRepository;
   DesktopAvailability availability = DesktopAvailability.unavailable;
   int openApprovalsRevision = 0;
+  String? openRequestId;
   bool quitting = false;
   bool shutdownFailed = false;
   StreamSubscription<String>? _requests;
@@ -108,6 +123,11 @@ class DesktopRuntime extends ChangeNotifier {
   Future<void> _maintenance = Future.value();
   bool recycleCleanupFailed = false;
   bool revisionCleanupFailed = false;
+  bool attachmentCleanupFailed = false;
+  bool informationDeliveryCleanupFailed = false;
+  bool credentialCleanupFailed = false;
+  bool runtimeMaterialCleanupFailed = false;
+  int runtimeMaterialChecks = 0;
   Future<void>? _quit;
   Future<void>? _stop;
   bool _stopped = false;
@@ -116,8 +136,8 @@ class DesktopRuntime extends ChangeNotifier {
   Future<void> start() async {
     // Subscribe before any asynchronous maintenance: a request arriving during
     // cleanup must still be delivered once native initialization is ready.
-    _requests = service.owner.requestSubmitted.listen((_) {
-      unawaited(_notify());
+    _requests = service.owner.requestSubmitted.listen((id) {
+      unawaited(_notify(id));
     });
     await _maintain();
     _maintenanceTimer = Timer.periodic(const Duration(minutes: 1), (_) {
@@ -146,17 +166,68 @@ class DesktopRuntime extends ChangeNotifier {
     } catch (_) {
       revisionCleanupFailed = true;
     }
+    try {
+      await service.owner.purgeExpiredCredentialMaterial();
+      credentialCleanupFailed = false;
+    } catch (_) {
+      credentialCleanupFailed = true;
+    }
+    await _checkInformationFiles();
+    await reconcileRuntimeMaterialCleanup();
+    try {
+      await service.owner.pruneCredentialUseHistory();
+    } catch (_) {
+      credentialCleanupFailed = true;
+    }
     notifyListeners();
   });
+  Future<void> reconcileInformationFiles() =>
+      _maintenance = _maintenance.then((_) async {
+        if (quitting) return;
+        await _checkInformationFiles();
+      });
 
-  Future<void> _notify() async {
+  Future<void> _checkInformationFiles() async {
+    try {
+      if (service.owner.informationFileDeliveries.any(
+        (record) => record.holdsCopy,
+      )) {
+        await service.owner.reconcileInformationFileDeliveries();
+      }
+      informationDeliveryCleanupFailed = service.owner.informationFileDeliveries
+          .any((record) => record.runtime && record.state == 'cleanup_pending');
+    } catch (_) {
+      informationDeliveryCleanupFailed = true;
+    }
+    try {
+      await service.owner.purgeInformationAttachments();
+      attachmentCleanupFailed = false;
+    } catch (_) {
+      attachmentCleanupFailed = true;
+    }
+    notifyListeners();
+  }
+
+  Future<void> reconcileRuntimeMaterialCleanup() async {
+    try {
+      runtimeMaterialChecks = await service.owner
+          .reconcileCredentialMaterialCleanup();
+      runtimeMaterialCleanupFailed = false;
+    } catch (_) {
+      runtimeMaterialCleanupFailed = true;
+    }
+    notifyListeners();
+  }
+
+  Future<void> _notify(String requestId) async {
     await _ready.future;
     if (quitting ||
+        !service.owner.notificationsEnabled ||
         availability.notifications != NotificationAvailability.enabled) {
       return;
     }
     try {
-      if (await platform.notifyNewRequest()) return;
+      if (await platform.notifyNewRequest(requestId)) return;
     } on Object {
       /* Unavailable notification delivery must not lose a request. */
     }
@@ -205,6 +276,9 @@ class DesktopRuntime extends ChangeNotifier {
     }
     if (event == DesktopEvent.quit) {
       await quit();
+      // Native local control needs an explicit refusal, not an acknowledged
+      // event whose audit writes are still unsaved. UI callers use quit().
+      if (shutdownFailed) throw StateError('shutdown_failed');
       return;
     }
     if (quitting) return;
@@ -222,6 +296,7 @@ class DesktopRuntime extends ChangeNotifier {
         notifyListeners();
       case DesktopEvent.openApprovals:
         await platform.showWindow();
+        openRequestId = platform.openedRequestId;
         openApprovalsRevision++;
         notifyListeners();
       case DesktopEvent.availabilityChanged:
@@ -265,6 +340,7 @@ class DesktopRuntime extends ChangeNotifier {
   }
 
   Future<void> _shutdown() async {
+    shutdownFailed = false;
     try {
       await stop();
       await platform.terminate();

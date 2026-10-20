@@ -1,0 +1,412 @@
+{
+  "productSource": "995283f1d5ef806a629f6cb917cca3bb7e88944f",
+  "productPayloadUnchanged": true,
+  "payloadFiles": 113,
+  "rotateCloseRoundsPassed": 15,
+  "rotateCloseFailureReproduced": false,
+  "originalCloseRootCauseEstablished": false,
+  "notification": {
+    "windowKeptVisible": true,
+    "actualDispatches": 1,
+    "passed": 0,
+    "failed": 1,
+    "clicked": 0,
+    "shown": 1,
+    "timedOut": 1,
+    "requestLocated": false,
+    "userStateAtReady": 5,
+    "userStateAfterDispatch": 2,
+    "syntheticFixtureRemoved": true,
+    "semantics": {
+      "handlesBefore": 0,
+      "handlesAfterBody": 1,
+      "newPlatformHandleReleasedAfterUnmount": true
+    },
+    "computerUseKernelReset": true,
+    "fabricatedCallbacks": false,
+    "operator": "agent",
+    "screenshotsPersisted": false
+  },
+  "codex": {
+    "bundlePrepared": true,
+    "bundleFileCount": 7,
+    "copiesAndHookTargetsVerified": true,
+    "installed": false,
+    "trusted": false,
+    "realClientAcceptance": false
+  },
+  "onlyQaAndDocumentationChanged": true,
+  "subagentsUsed": false,
+  "rawCount": 52,
+  "sourceCount": 6,
+  "raw": [
+    {
+      "source": "build/resume-windows-20261020/rotate-close-probe/progress.json",
+      "path": "raw/rotate-close/progress.json",
+      "bytes": 776,
+      "sha256": "a6ec91729b7273b6ac5e9370bfc95b03dc17791b445db17938c4e154038a34a2"
+    },
+    {
+      "source": "build/resume-windows-20261020/rotate-close-probe/result.json",
+      "path": "raw/rotate-close/result.json",
+      "bytes": 970,
+      "sha256": "b9902a864195d29b47b2f1ac18f722c8e67296c45c0f360b59c9dd422d44bfc6"
+    },
+    {
+      "source": "build/resume-windows-20261020/rotate-close-probe/run-01/host-42588.jsonl",
+      "path": "raw/rotate-close/run-01/host-42588.jsonl",
+      "bytes": 290,
+      "sha256": "1c8026deca30ee1ca419005eb0c3b3c395254df9a4a1f498d9724580315eedc6"
+    },
+    {
+      "source": "build/resume-windows-20261020/rotate-close-probe/run-01/test.jsonl",
+      "path": "raw/rotate-close/run-01/test.jsonl",
+      "bytes": 1983,
+      "sha256": "6030bd5a96e8f927996650479b50210e851590fce5c32dbd511c6d98f4ccc3d8"
+    },
+    {
+      "source": "build/resume-windows-20261020/rotate-close-probe/run-02/host-68640.jsonl",
+      "path": "raw/rotate-close/run-02/host-68640.jsonl",
+      "bytes": 290,
+      "sha256": "009b737c58ea1aa669cf3b74df219c0cdc3261548bb41065d9c356709a371545"
+    },
+    {
+      "source": "build/resume-windows-20261020/rotate-close-probe/run-02/test.jsonl",
+      "path": "raw/rotate-close/run-02/test.jsonl",
+      "bytes": 1983,
+      "sha256": "22db40fad0b8a34f97b1231455ca6a1a0a13d6471193382e2e7b82d68305814c"
+    },
+    {
+      "source": "build/resume-windows-20261020/rotate-close-probe/run-03/host-56132.jsonl",
+      "path": "raw/rotate-close/run-03/host-56132.jsonl",
+      "bytes": 290,
+      "sha256": "8aab6ee344ff90fc0ee0347e03b73b3c29c3dbd7e7477817cca93943ab7e17a8"
+    },
+    {
+      "source": "build/resume-windows-20261020/rotate-close-probe/run-03/test.jsonl",
+      "path": "raw/rotate-close/run-03/test.jsonl",
+      "bytes": 1983,
+      "sha256": "b9b4d57d704fd598c5509b81b36ea4de2c87fafd0cb7cf9019af18f4ebe88d07"
+    },
+    {
+      "source": "build/resume-windows-20261020/rotate-close-probe/run-04/host-71492.jsonl",
+      "path": "raw/rotate-close/run-04/host-71492.jsonl",
+      "bytes": 290,
+      "sha256": "a68c419e1e8736d0da735ec54b82e40a5fce849633d63dc8d4cc559ed4f137ac"
+    },
+    {
+      "source": "build/resume-windows-20261020/rotate-close-probe/run-04/test.jsonl",
+      "path": "raw/rotate-close/run-04/test.jsonl",
+      "bytes": 1983,
+      "sha256": "e787b376af4d04867ad52981d1bc86e00274d8044ef68ee597812bd3e58756ca"
+    },
+    {
+      "source": "build/resume-windows-20261020/rotate-close-probe/run-05/host-37352.jsonl",
+      "path": "raw/rotate-close/run-05/host-37352.jsonl",
+      "bytes": 290,
+      "sha256": "55558794e4791f4a0b2b47f41d3c28732ac245391b8a558ac15358967226793d"
+    },
+    {
+      "source": "build/resume-windows-20261020/rotate-close-probe/run-05/test.jsonl",
+      "path": "raw/rotate-close/run-05/test.jsonl",
+      "bytes": 1983,
+      "sha256": "505d76b4833913254e4824ed4f231a31efe73fa78ad3123bac396d758c641fd9"
+    },
+    {
+      "source": "build/resume-windows-20261020/rotate-close-probe/run-06/host-79020.jsonl",
+      "path": "raw/rotate-close/run-06/host-79020.jsonl",
+      "bytes": 290,
+      "sha256": "add35aa9f2dfa0fd2f7886b0090e8b76a7ee22d924420695a607a5e821ecbb7e"
+    },
+    {
+      "source": "build/resume-windows-20261020/rotate-close-probe/run-06/test.jsonl",
+      "path": "raw/rotate-close/run-06/test.jsonl",
+      "bytes": 1983,
+      "sha256": "cbc2831ac51ca2e7fb4a06e7996037936042de94b35efc8f34a83a690ad81ad3"
+    },
+    {
+      "source": "build/resume-windows-20261020/rotate-close-probe/run-07/host-62384.jsonl",
+      "path": "raw/rotate-close/run-07/host-62384.jsonl",
+      "bytes": 290,
+      "sha256": "63d55aab156db1fd7507b1ce9205e03f7ea930f97c2e9441059a395dd95a32a2"
+    },
+    {
+      "source": "build/resume-windows-20261020/rotate-close-probe/run-07/test.jsonl",
+      "path": "raw/rotate-close/run-07/test.jsonl",
+      "bytes": 1983,
+      "sha256": "64e3eb16387ae20440bb059e56be0f7482d4acb4fb03e3810755266437d30034"
+    },
+    {
+      "source": "build/resume-windows-20261020/rotate-close-probe/run-08/host-15132.jsonl",
+      "path": "raw/rotate-close/run-08/host-15132.jsonl",
+      "bytes": 290,
+      "sha256": "8ac853dd2bb6c6ef8e55077f63d34c7f5c1f1e252006e95562e103f3c18d8af1"
+    },
+    {
+      "source": "build/resume-windows-20261020/rotate-close-probe/run-08/test.jsonl",
+      "path": "raw/rotate-close/run-08/test.jsonl",
+      "bytes": 1983,
+      "sha256": "82fb75ae702cb14d1c6794f41f02eeecbbb579642886a69096d14f64ccd11fc7"
+    },
+    {
+      "source": "build/resume-windows-20261020/rotate-close-probe/run-09/host-63696.jsonl",
+      "path": "raw/rotate-close/run-09/host-63696.jsonl",
+      "bytes": 290,
+      "sha256": "e11315b5067435d1613614afa84be6e678c11136dac74b9ec33ecf29f90afd81"
+    },
+    {
+      "source": "build/resume-windows-20261020/rotate-close-probe/run-09/test.jsonl",
+      "path": "raw/rotate-close/run-09/test.jsonl",
+      "bytes": 1983,
+      "sha256": "0386e4d8d690dd9a95a2bffc9ac9f559ad417268e1d76b7ac0c2cf1f2ee18d78"
+    },
+    {
+      "source": "build/resume-windows-20261020/rotate-close-probe/run-10/host-25972.jsonl",
+      "path": "raw/rotate-close/run-10/host-25972.jsonl",
+      "bytes": 290,
+      "sha256": "5e475d6850db9f68243129ca56abb6575e081e4961517d0b892a90e02d19f15a"
+    },
+    {
+      "source": "build/resume-windows-20261020/rotate-close-probe/run-10/test.jsonl",
+      "path": "raw/rotate-close/run-10/test.jsonl",
+      "bytes": 1983,
+      "sha256": "a93afd8aa567b32368e505a507f6889ffe4b6ddf5182258a57f8072069c6d189"
+    },
+    {
+      "source": "build/resume-windows-20261020/rotate-close-probe/run-11/host-66028.jsonl",
+      "path": "raw/rotate-close/run-11/host-66028.jsonl",
+      "bytes": 290,
+      "sha256": "09e3e3cb52a2f8db89133df513379f72fe0d102de2f796c2c8ede809e749c622"
+    },
+    {
+      "source": "build/resume-windows-20261020/rotate-close-probe/run-11/test.jsonl",
+      "path": "raw/rotate-close/run-11/test.jsonl",
+      "bytes": 1983,
+      "sha256": "adbb884d761233f3d7211baa7e2172c50ad830d9e1ec4192c32085e266e758c9"
+    },
+    {
+      "source": "build/resume-windows-20261020/rotate-close-probe/run-12/host-39692.jsonl",
+      "path": "raw/rotate-close/run-12/host-39692.jsonl",
+      "bytes": 290,
+      "sha256": "23243e3fdf309f205c81abd7074111f7a944193a8d78c0b5272aa70ee56bf2d3"
+    },
+    {
+      "source": "build/resume-windows-20261020/rotate-close-probe/run-12/test.jsonl",
+      "path": "raw/rotate-close/run-12/test.jsonl",
+      "bytes": 1983,
+      "sha256": "8026a37e35fdea4181ee8ff3a06c0f270dd43480a25afa44a95257b79fb3b345"
+    },
+    {
+      "source": "build/resume-windows-20261020/rotate-close-probe/run-13/host-14324.jsonl",
+      "path": "raw/rotate-close/run-13/host-14324.jsonl",
+      "bytes": 290,
+      "sha256": "226822e5f0b97d2425fe74ff7d5d6f5269fc1a20ea85c4e96b5a753c340be65f"
+    },
+    {
+      "source": "build/resume-windows-20261020/rotate-close-probe/run-13/test.jsonl",
+      "path": "raw/rotate-close/run-13/test.jsonl",
+      "bytes": 1983,
+      "sha256": "fccb2166c6235b18722df20a71ab3aec0a8f3e6fd12bf0b3d6ba593fd92ba18f"
+    },
+    {
+      "source": "build/resume-windows-20261020/rotate-close-probe/run-14/host-46720.jsonl",
+      "path": "raw/rotate-close/run-14/host-46720.jsonl",
+      "bytes": 290,
+      "sha256": "a889e9a850a916c7d370e9c2b679181c6736e28121d64de5ea7acc583f3c902c"
+    },
+    {
+      "source": "build/resume-windows-20261020/rotate-close-probe/run-14/test.jsonl",
+      "path": "raw/rotate-close/run-14/test.jsonl",
+      "bytes": 1983,
+      "sha256": "e4387afc2f66a76a486a67a45d915d4f3e5db5ca7dee0b8b7c18f42502ecc755"
+    },
+    {
+      "source": "build/resume-windows-20261020/rotate-close-probe/run-15/host-47712.jsonl",
+      "path": "raw/rotate-close/run-15/host-47712.jsonl",
+      "bytes": 290,
+      "sha256": "c96dfff78f6c5cfefcb1dd0c13b5fe97eb56130d4d0e9a61942236c11c88f9ed"
+    },
+    {
+      "source": "build/resume-windows-20261020/rotate-close-probe/run-15/test.jsonl",
+      "path": "raw/rotate-close/run-15/test.jsonl",
+      "bytes": 1983,
+      "sha256": "ebfb5651358dfc3fba3ed737d31562e55621dd9b74d091bb4a0232872bce8348"
+    },
+    {
+      "source": "build/qa-issue23-notification/native-visible-03/analyze.txt",
+      "path": "raw/notification-visible/analyze.txt",
+      "bytes": 199,
+      "sha256": "1136782bf15f56e8d8ee9ecea8d57283061eb05cdb024ad1ba5a39178b8ee13f"
+    },
+    {
+      "source": "build/qa-issue23-notification/native-visible-03/dispatch",
+      "path": "raw/notification-visible/dispatch",
+      "bytes": 32,
+      "sha256": "5a9da239dad8f4c7ffed980876b7416eacfe94ab76ccf5e274c8a61ce528a9bd"
+    },
+    {
+      "source": "build/qa-issue23-notification/native-visible-03/flutter_window.cpp.txt",
+      "path": "raw/notification-visible/flutter_window.cpp.txt",
+      "bytes": 17905,
+      "sha256": "1b6a241dd7c391f60e84a9957ef5f5802c3c5e1d9f76782b8edee4ed18d31669"
+    },
+    {
+      "source": "build/qa-issue23-notification/native-visible-03/flutter_window.h.txt",
+      "path": "raw/notification-visible/flutter_window.h.txt",
+      "bytes": 2534,
+      "sha256": "5869ca5dfebc9a2ed68f366961be33bf1172c23e377ae30bccf5570daa43c7a8"
+    },
+    {
+      "source": "build/qa-issue23-notification/native-visible-03/format.txt",
+      "path": "raw/notification-visible/format.txt",
+      "bytes": 46,
+      "sha256": "1685974b88bd671112e17334bdc2abb8ef350e01ae026547459ec7a8307375ec"
+    },
+    {
+      "source": "build/qa-issue23-notification/native-visible-03/manual_notification_test.dart.txt",
+      "path": "raw/notification-visible/manual_notification_test.dart.txt",
+      "bytes": 9631,
+      "sha256": "c92ff907bb7d2e12ff404e561f3854be8d398b520fc948c7ea5d7d7a0b117eaf"
+    },
+    {
+      "source": "build/qa-issue23-notification/native-visible-03/native.txt",
+      "path": "raw/notification-visible/native.txt",
+      "bytes": 4626,
+      "sha256": "95a52612c759b834e46c5454c9f5f2aab0ede5b1789094ebf188f2eb0b62e92e"
+    },
+    {
+      "source": "build/qa-issue23-notification/native-visible-03/native_semantics_lifetime.dart.txt",
+      "path": "raw/notification-visible/native_semantics_lifetime.dart.txt",
+      "bytes": 1540,
+      "sha256": "a274da35d57e9bca3322b7e5b70a2bc610990e8e8dc3fba0821bbb1e9219036f"
+    },
+    {
+      "source": "build/qa-issue23-notification/native-visible-03/notification_queue.h.txt",
+      "path": "raw/notification-visible/notification_queue.h.txt",
+      "bytes": 2536,
+      "sha256": "7eaf8dea38fef55ae3320c5fbdf981851310c4db0d7475e36f8d6fce23229a27"
+    },
+    {
+      "source": "build/qa-issue23-notification/native-visible-03/notification_queue_test.cpp.txt",
+      "path": "raw/notification-visible/notification_queue_test.cpp.txt",
+      "bytes": 5030,
+      "sha256": "166c7dce579ef7f90b57ef4ad2a9d4695c71e55a7f8e7b98bdcf2c1ca27f3d99"
+    },
+    {
+      "source": "build/qa-issue23-notification/native-visible-03/phase.json",
+      "path": "raw/notification-visible/phase.json",
+      "bytes": 151,
+      "sha256": "c1a0071614f24c4cc8bd83375fbfa55d1527486f52d8d0317bf345abf5e51965"
+    },
+    {
+      "source": "build/qa-issue23-notification/native-visible-03/phases.jsonl",
+      "path": "raw/notification-visible/phases.jsonl",
+      "bytes": 1778,
+      "sha256": "7c448556e73ff55a0003709f21104708261a008935c9b6db4e78e591d708cc45"
+    },
+    {
+      "source": "build/qa-issue23-notification/native-visible-03/pub.txt",
+      "path": "raw/notification-visible/pub.txt",
+      "bytes": 368,
+      "sha256": "748e8df20571fc202b90cb6d56c154b0fb7eff6ba0e04c8c1102f7b22a8e7005"
+    },
+    {
+      "source": "build/qa-issue23-notification/native-visible-03/runner-result.json",
+      "path": "raw/notification-visible/runner-result.json",
+      "bytes": 1346,
+      "sha256": "7f593bd557541357009f08ef91f123fdb8edddc0e6a1a9ffcd5467a52e137815"
+    },
+    {
+      "source": "build/resume-windows-20261020/codex-prepare.txt",
+      "path": "raw/preparation/codex-prepare.txt",
+      "bytes": 153,
+      "sha256": "f507289d73ad181f979bcf4f23f46f4f0ee8aecd4ef8500086b859f94ce6d88d"
+    },
+    {
+      "source": "build/resume-windows-20261020/codex-bundle-proof.json",
+      "path": "raw/preparation/codex-bundle-proof.json",
+      "bytes": 1563,
+      "sha256": "c996f968c6c50c8dbd18ad0c43b39108f485fda7b55d0f59896f26d613b07be4"
+    },
+    {
+      "source": "build/resume-windows-20261020/rotate-close-probe.py",
+      "path": "raw/preparation/rotate-close-probe.py.txt",
+      "bytes": 1866,
+      "sha256": "a0353983d56eb4aaa320d61d1f6fee96cc82bb93014b5975b13e888ecef519f5"
+    },
+    {
+      "source": "build/resume-windows-20261020/visible-notification-run.py",
+      "path": "raw/preparation/visible-notification-run.py.txt",
+      "bytes": 3155,
+      "sha256": "4fc15d3ede12f1bb5bddec84c9d37cf7d41303c2a5ef155ffd6b4b6526898833"
+    },
+    {
+      "source": "build/resume-windows-20261020/freeze-resume.py",
+      "path": "raw/preparation/freeze-resume.py.txt",
+      "bytes": 4945,
+      "sha256": "5833b3cf9dd6d01ee6d0b7cea925c66cdf654b7ff6f95f6aaeaad1384dcfcbbc"
+    },
+    {
+      "source": "build/codex-preview-0.4.0-12-995283f/hooks.json",
+      "path": "raw/preparation/review-hooks.json",
+      "bytes": 2181,
+      "sha256": "61b3ba810cef63a79a3955f696b64266fbae8774646c3f83787c9ccdb9319ec4"
+    }
+  ],
+  "sources": [
+    {
+      "path": "apps/desktop/integration_test/manual_notification_test.dart",
+      "bytes": 9631,
+      "sha256": "c92ff907bb7d2e12ff404e561f3854be8d398b520fc948c7ea5d7d7a0b117eaf",
+      "gitNormalizedSha256": "7f5750eb2553182157a5f5b0fb9ee1b3c963bdc2d29369f6290b47f89838fa94"
+    },
+    {
+      "path": "packages/info_cli/test/support/mixed_lifecycle_host.dart",
+      "bytes": 2027,
+      "sha256": "179b960fa71896200917f1dbd37b7fe055443bab50fe01b0f395059095ae6b05",
+      "gitNormalizedSha256": "179b960fa71896200917f1dbd37b7fe055443bab50fe01b0f395059095ae6b05"
+    },
+    {
+      "path": "packages/info_storage/test/support/mixed_lifecycle.dart",
+      "bytes": 20038,
+      "sha256": "ee7f1b68a9b6d11ba6179d8748f45e76399e717dc58cce0599b3c17a86872b8d",
+      "gitNormalizedSha256": "ee7f1b68a9b6d11ba6179d8748f45e76399e717dc58cce0599b3c17a86872b8d"
+    },
+    {
+      "path": "packages/info_storage/test/mixed_lifecycle_windows_test.dart",
+      "bytes": 14074,
+      "sha256": "b52ab481c04488f98abd4b195763958393bbf9827791bbb0a9cb06aaa0e933b0",
+      "gitNormalizedSha256": "b52ab481c04488f98abd4b195763958393bbf9827791bbb0a9cb06aaa0e933b0"
+    },
+    {
+      "path": "packages/info_cli/lib/credential_execution_host.dart",
+      "bytes": 5747,
+      "sha256": "300a4c648ccb98fa096f11811763159be8b9d4148931772b6be96d88048aa7b3",
+      "gitNormalizedSha256": "84e11374b4fc7ae7ba223ae4e54643fa0c6783567f6e6f400beeb6f1ad5b43d0"
+    },
+    {
+      "path": "scripts/test-windows-notification-manual.ps1",
+      "bytes": 1037,
+      "sha256": "8ffa10d41022cdc36a6196c45e71c39b9077301fc534edc71ec6065cc6152aed",
+      "gitNormalizedSha256": "5d23a50829c16e341bd85fbc3bddf4c2615ba7b019296c913ed6eb7783edb4c6"
+    }
+  ],
+  "locks": [
+    {
+      "path": "packages/info_core/pubspec.lock",
+      "sha256": "f8220e6477f28a1bb4b1914847377b675dbd5cbf50ca609bd23ded65e2fd5328"
+    },
+    {
+      "path": "packages/info_storage/pubspec.lock",
+      "sha256": "d5def0ba580249b39ce5f42292705851b16230903276c6a17ec9e2af4df30e39"
+    },
+    {
+      "path": "packages/info_cli/pubspec.lock",
+      "sha256": "b8695e9c135a0441eb384507acb347d334a190451f63be7874e22c058f56b3c2"
+    },
+    {
+      "path": "apps/desktop/pubspec.lock",
+      "sha256": "4c5e88461035c36d85d8fa9fb50f69e1450aa1662f677e5723417471f669c70b"
+    }
+  ]
+}

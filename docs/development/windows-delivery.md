@@ -4,32 +4,49 @@
 CLI、SDK-free Codex 接入材料生成器、合成资料控制台检查、依赖许可和来源清单。
 它用于配合验收；Issue #18 的干净环境、真实桌面和 Codex 检查仍开放。
 
-## 当前 Agent 发起整理与界面改进包
+## 当前 Round05 Windows 预览
 
-**0.3.1+6**。准确源码、构建时间及逐文件校验值见本包 `manifest.json`，
+本文适用于当前 **0.4.0+12** 预览；是否已生成和验收以具体交付记录为准。准确源码、构建时间及逐文件校验值见本包 `manifest.json`，
 ZIP 校验值见随附的同名 `.sha256` 文件。具体本地交付路径及大小记录在
-[实施进度](https://github.com/ShiJiJS/agent-info-manage/blob/integration/local-information-access/docs/planning/implementation-status.md)，不在随包说明中写入自身归档的哈希。
+[实施进度](https://github.com/ShiJiJS/agent-info-manage/issues/21)，不在随包说明中写入自身归档的哈希。
 已展开 EXE 位于 `AgentInfoManage/app/info_desktop.exe`，须保留其全部相邻文件。
+本版采用授权协议v2；应用、CLI、worker、焦点辅助程序和Skill必须来自同一整包，不能只覆盖单个EXE或模板。此前已交付的0.4.0+8仍是旧v1，不会因新源码通过检查就自动更新。
 
-录入提案默认阅读卡片、逐项独立编辑；列表明确自述提交者、聊天、用途和摘要，已确认
-可只读查看当前资料。分类建议随整批确认保存。列表动作位于右侧，来源、用途、标题摘要、
-时间及状态分层展示；资料详情和回收站沿用同一套简洁控件。
+沿用已确认Round05顶部导航、紫/绿/蓝/黑白四主题、审批收件箱与卡片、信息库目录树/
+列表/详情、录入提案、授权历史和设置。支持搜索分页、历史定位与放大文字。
+
+已修正删除字段后的Owner显示：旧审批保留已记录名称，历史批准范围明确标记原字段移除、
+部分范围、授权结束或恢复归档；同名字段恢复使用新身份，不使旧许可重新可读。历史事实
+与当前可用范围分别判断，不读取旧字段正文，不改变原批准范围或截止时间。
+
+字符串与文件凭据独立管理，可关联服务器等普通信息。申请显示使用的凭据版本、注入位置和首个启动计划；一次批准后可在固定有效期内用不同operationId启动多条命令，不重复审批也不续期。程序核对每次完整计划，再由随包worker启动并注入环境变量、配置或文件路径；不能直接执行带占位符的原命令。支持gh Token、非交互Linux/Unix SSH身份文件和AWS静态凭据文件，默认15分钟、可选30分钟。旧v1证明不升级为复用许可。
+
+本机焦点填充使用独立批准方式：先发现当前可用应用、申请字符串凭据，批准后重新点击空的遮挡密码框，再后台调用CLI填充。结果表示发送情况，不代表登录成功。当前仅验证有限Win32控件和当前前台内置浏览器的合成页面；工具不能激活应用时需要先切回。不是通用浏览器插件或远程浏览器桥接，也不保证其他工具、明文截图或目标程序不会读到秘密。实际步骤见随包Skill的`references/credential-use.md`。
+
+信息库支持文字与普通文件混合、独立批准文件字段。普通附件原字节加密存入数据库，单文件10MiB、保留原文与暂存合计100MiB。Agent经`file-fetch`取得受管副本实际路径，供同机文档/浏览器工具读取或上传，用完`file-release`；普通文件原文可读，与凭据文件的进程材料分开清理。同操作重试固定原版本，新操作领取当前版本；撤销或结束停止新交付，不能收回已经读出或保存的内容。远程工具不能访问本机路径时不提供上传桥接，Agent提案暂不提交文件字节。详见随包Skill的`references/information-files.md`。
+
+跨次CLI调用由应用宿主保留有界内存输出；应用退出或缓存淘汰后不能恢复输出。重启只恢复
+过去事实和必要清理登记，不恢复有效许可。未知结果先核查原任务，不能自动重放。命令结束记录暂时无法写入时显示结果未知；审计存储恢复并重试后补记已收到的结束事实，再核查清理，不重新执行命令。若应用先退出或崩溃而回执丢失，仍保持未知，不推断退出码。普通字段
+许可与凭据使用许可独立。旧秘密字段可明确选择转换，默认不允许发现；原读取路径关闭，
+保留历史/回收副本及已导出的离线备份不会同时擦除，恢复旧内容不复活旧授权。
 
 整理从 Codex 等外部聊天发起：Agent 经 CLI 提交整理请求，用户在现有“访问审批”选择
 资料范围并批准一次，之后 Agent 可自动应用分类及标签。无需在应用创建任务或再次确认
 整理方案。只提供所选标题、说明、目录和标签元数据，不含字段值；批准最长30分钟，
 完成、撤销、到期或会话结束即失效。旧版待确认方案保持原确认要求，不升级其写入能力。
-协议详见[整理流程说明](https://github.com/ShiJiJS/agent-info-manage/blob/integration/local-information-access/docs/development/organization-tasks.md)。
+协议详见[整理流程说明](https://github.com/ShiJiJS/agent-info-manage/blob/codex/round05-windows-sync/docs/development/organization-tasks.md)。
 
-本版保持schema12，与0.3.0兼容；0.2.2的schema11需增量升级。打开新版前，请在旧版
-导出备份并单独保存恢复密钥，再完全
+本版数据库schema21，兼容迁移旧schema1–20。按内容输出完整备份：有文件交付事实为格式9，有普通附件/文件模板为8，其余为7；读取格式1–9。备份包含普通文件原字节、托管凭据及保留版本、回收对象、关联、已确认SSH主机数据和历史；排除私密授权证明、可用审批能力、暂存、受管副本、运行材料及输出。恢复的交付记录只表示过去事实，不恢复有效路径、次数或许可。只向空库恢复，独立凭据非空也不能覆盖。使用独立恢复密钥和新本机密钥，到期按恢复时的时间判断，历史许可不重新生效。旧程序会拒绝新备份。
+
+打开新版前，请在旧版导出备份并单独保存恢复密钥，再完全
 退出旧版托盘进程。不要直接用旧程序重新打开已升级的数据库；需要回退时使用独立备份
 和新资料库，按支持的恢复流程操作。自动检查只使用合成资料，未直接迁移用户当前库。
 
-完整194项无窗口测试、四包分析、Windows编译、11项独立CLI/hook及SQLCipher/DPAPI诊断
-通过，桌面55项连续三轮通过。实际Flutter离屏画面已查看；原生手感及新版实际整理流程
-打包时尚待用户打开验证。后续实际CLI录入、整理及获批字段读取已通过；完整原生验收仍开放，详见
-[验收记录](https://github.com/ShiJiJS/agent-info-manage/blob/integration/local-information-access/docs/development/windows-acceptance.md)。
+凭据复用、本机焦点填充和普通文件已分别完成其Windows功能验收；实际范围见[#33](https://github.com/ShiJiJS/agent-info-manage/issues/33)、[#35](https://github.com/ShiJiJS/agent-info-manage/issues/35)、[#34](https://github.com/ShiJiJS/agent-info-manage/issues/34)。原生选择器、虚构简历同机浏览器消费及加密空库恢复已有独立证据；它们不替代当前整包验收。包的准确构建检查以manifest及交付记录为准，不沿用旧版通过计数。
+
+已修复阶段回执覆盖失败及通知旧回调串到后续请求的队列错误。后者有C++红绿、桌面回归和编译证据，新通知入口的真实系统显示与点击仍待复验；不能拿修复前的显示回调当作新版点击通过。旧单次CLI超时缺阶段日志，仍不能唯一归因。通知及接入状态继续由[#23](https://github.com/ShiJiJS/agent-info-manage/issues/23)和[#30](https://github.com/ShiJiJS/agent-info-manage/issues/30)跟踪。
+真实Codex安装/信任、系统通知点击和干净机器联合验收仍开放；先用虚构资料验收，
+不据此宣称正式发行完成，详见随包 `ACCEPTANCE.md`。
 
 ## 使用预览包
 
@@ -41,10 +58,15 @@ ZIP 校验值见随附的同名 `.sha256` 文件。具体本地交付路径及�
    [Microsoft 官方运行库页面](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist)
    安装。当前编译及无窗口检查环境为 Windows 11 Home x64（10.0.26300）；
    Windows 10、ARM64、32 位、无开发工具干净机器尚未实测，不承诺支持。
-3. 用户准备好后启动 `app/info_desktop.exe`。关闭窗口保留托盘和本机服务；
-   使用“设置 → 通知与应用 → 完全退出”停止服务。先使用虚构信息。
+3. 用户准备好后启动 `app/info_desktop.exe`。托盘可用时关闭窗口转入后台，托盘不可用时
+   保持窗口可达；使用“设置 → 应用运行 → 完全退出”停止服务。先使用虚构信息。
 4. CLI 可用完整路径调用 `cli/info.exe`（通用 JSON-lines），无需安装 Dart、
    Flutter 或 Java；不自动修改 PATH。Codex 使用下面的独立接入步骤。
+
+Agent 可用同包 `cli/info.exe app status` 查询、`cli/info.exe app quit` 正常退出。
+默认只定位同目录桌面程序，另一目录须核对后加 `--pid <进程号>`。CLI确认进程实际结束才返回
+`exited`；保存失败返回 `shutdown_failed` 并保留窗口及库可重试，超时不强杀。旧版不支持此入口时
+仍需原托盘菜单。完整状态/退出码见[CLI说明](https://github.com/ShiJiJS/agent-info-manage/blob/codex/round05-windows-sync/docs/cli.md)。
 
 示例（路径仅为示例，使用实际解压路径）：
 
@@ -54,7 +76,7 @@ Get-FileHash -Algorithm SHA256 -LiteralPath '.\agent-info-manage-<版本>-window
 ```
 
 生成器将编译好的 Codex CLI/hook 复制到指定的**新目录**，生成指向该最终目录的
-`hooks.json` 和 `skills/agent-info-access/SKILL.md`。已有目标目录或文件会被拒绝；
+`hooks.json` 和 `skills/agent-info-access/SKILL.md`，并携带凭据使用、普通文件两份引用说明。已有目标目录或文件会被拒绝；
 不合并、不覆盖项目/用户配置，也不安装或信任 hook。支持含空格和中文的路径。
 生成后保持此目录位置稳定；更换位置时选新目录重新生成并审查配置。
 

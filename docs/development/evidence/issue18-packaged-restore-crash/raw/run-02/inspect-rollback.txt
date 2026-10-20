@@ -1,0 +1,1 @@
+Running build hooks...Running build hooks...{"status":"inspected","action":"inspect-rollback","journalMode":"delete","integrity":"ok","information":0,"attachmentVersions":0,"attachmentBytes":0,"fileFields":0,"stagedFiles":0,"modelInformation":0,"requestLifetimeMinutes":17,"requests":0,"activeGrants":0,"fileDeliveries":0,"originalsMatch":true}

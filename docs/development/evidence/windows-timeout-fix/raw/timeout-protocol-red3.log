@@ -1,0 +1,16 @@
+00:00 +0: loading test/worker_protocol_test.dart
+00:00 +0: an incompatible worker is rejected before launch acknowledgement without hanging or replay
+00:01 +0 -1: an incompatible worker is rejected before launch acknowledgement without hanging or replay [E]
+  Expected: false
+    Actual: <true>
+  
+  package:matcher                      expect
+  test\worker_protocol_test.dart 70:7  main.<fn>
+  
+00:01 +0 -1: Some tests failed.
+
+Failing tests:
+  test/worker_protocol_test.dart: an incompatible worker is rejected before launch acknowledgement without hanging or replay
+
+Consider enabling the flag chain-stack-traces to receive more detailed exceptions.
+For example, 'dart test --chain-stack-traces'.

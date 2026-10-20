@@ -124,13 +124,19 @@ class RecycleFact {
     Iterable<String> fieldIds,
     this.version,
     this.kind,
-    this.at,
-  ) : fieldIds = List.unmodifiable(fieldIds);
+    this.at, {
+    Map<String, String> restoredFieldIds = const {},
+  }) : fieldIds = List.unmodifiable(fieldIds),
+       restoredFieldIds = Map.unmodifiable(restoredFieldIds);
   final String entryId, itemId;
   final List<String> fieldIds;
   final int version;
   final RecycleFactKind kind;
   final DateTime at;
+
+  /// Explicit provenance written only by an owner recycle restore transaction.
+  /// This is never an authorization alias and old backups need no inferred map.
+  final Map<String, String> restoredFieldIds;
   Map<String, Object?> toJson() => {
     'entryId': entryId,
     'itemId': itemId,
@@ -138,6 +144,7 @@ class RecycleFact {
     'version': version,
     'kind': kind.name,
     'at': at.toUtc().toIso8601String(),
+    if (restoredFieldIds.isNotEmpty) 'restoredFieldIds': restoredFieldIds,
   };
   factory RecycleFact.fromJson(Map<String, dynamic> j) => RecycleFact(
     j['entryId'] as String,
@@ -146,5 +153,7 @@ class RecycleFact {
     j['version'] as int,
     RecycleFactKind.values.byName(j['kind'] as String),
     DateTime.parse(j['at'] as String),
+    restoredFieldIds:
+        (j['restoredFieldIds'] as Map?)?.cast<String, String>() ?? const {},
   );
 }

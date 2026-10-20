@@ -1,0 +1,191 @@
+00:00 +0: loading test\access_test.dart
+00:00 +0: test\access_test.dart: public catalog describes fictional fields without disclosing values
+00:00 +1: test\adjusted_approval_test.dart: owner substitutes and adds fields across information items
+00:00 +2: test\approval_test.dart: owner approves one fixed field and only that field can be read
+00:00 +3: test\approval_test.dart: owner approves one fixed field and only that field can be read
+00:00 +4: test\approval_test.dart: owner approves one fixed field and only that field can be read
+00:00 +5: test\backup_coordinator_test.dart: export retains normal in-flight delivery and respects none while its snapshot is pending
+00:00 +6: test\backup_coordinator_test.dart: export retains normal in-flight delivery and respects none while its snapshot is pending
+00:00 +7: test\catalog_test.dart: catalog searches only saved public metadata and pages matching items
+00:00 +8: test\catalog_test.dart: catalog searches only saved public metadata and pages matching items
+00:00 +9: test\catalog_test.dart: catalog searches only saved public metadata and pages matching items
+00:00 +10: test\catalog_test.dart: catalog searches only saved public metadata and pages matching items
+00:00 +11: test\catalog_test.dart: catalog searches only saved public metadata and pages matching items
+00:00 +12: test\catalog_test.dart: catalog searches only saved public metadata and pages matching items
+00:00 +13: test\catalog_test.dart: catalog searches only saved public metadata and pages matching items
+00:00 +14: test\catalog_test.dart: catalog searches only saved public metadata and pages matching items
+00:00 +15: test\catalog_test.dart: directory selection stays fixed when another item is moved into it
+00:00 +16: test\credentials_test.dart: strict protocol rejects nested duplicate keys and nonfinite numbers before shape validation
+00:00 +17: test\credentials_test.dart: credential transport distinguishes malformed, unknown, typed and reference errors without echoing input
+00:00 +18: test\credentials_test.dart: credential transport distinguishes malformed, unknown, typed and reference errors without echoing input
+00:00 +19: test\credentials_test.dart: credential transport distinguishes malformed, unknown, typed and reference errors without echoing input
+00:00 +20: test\credential_history_retention_test.dart: one ended operation cannot prune an earlier active operation of the same grant
+00:00 +21: test\credentials_test.dart: failed owner mutations leave the old fixed version and associations intact
+00:00 +22: test\credential_operations_test.dart: expired prevents new operations without reissuing old material
+00:00 +23: test\credential_operations_test.dart: expired prevents new operations without reissuing old material
+00:00 +24: test\credential_operations_test.dart: expired prevents new operations without reissuing old material
+00:00 +25: test\credential_operations_test.dart: expired prevents new operations without reissuing old material
+00:00 +26: test\credential_operations_test.dart: expired prevents new operations without reissuing old material
+00:00 +27: test\credential_operations_test.dart: expired prevents new operations without reissuing old material
+00:00 +28: test\credential_reuse_test.dart: v2 authorization records its protocol instead of silently becoming a v1 permit
+00:00 +29: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:00 +30: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:00 +31: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:00 +32: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:00 +33: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:00 +34: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:00 +35: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:00 +36: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:00 +37: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:00 +38: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:00 +39: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:00 +40: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:00 +41: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:00 +42: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +43: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +44: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +45: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +46: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +47: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +48: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +49: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +50: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +51: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +52: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +53: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +54: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +55: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +56: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +57: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +58: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +59: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +60: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +61: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +62: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +63: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +64: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +65: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +66: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +67: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +68: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +69: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +70: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +71: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +72: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +73: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +74: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +75: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +76: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +77: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +78: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +79: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +80: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +81: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +82: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +83: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +84: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +85: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +86: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +87: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +88: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +89: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +90: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +91: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +92: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +93: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +94: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +95: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +96: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +97: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +98: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +99: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +100: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +101: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +102: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +103: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +104: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +105: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +106: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +107: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +108: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +109: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +110: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +111: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +112: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +113: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +114: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +115: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +116: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +117: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +118: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +119: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +120: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +121: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +122: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +123: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +124: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +125: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +126: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +127: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +128: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +129: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +130: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +131: test\credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:01 +132: test\file_job_recovery_test.dart: unknown receipt retains files while the registered Windows job lives, then cleans without rewriting the reported outcome
+00:01 +133: test\file_job_recovery_test.dart: unknown receipt retains files while the registered Windows job lives, then cleans without rewriting the reported outcome
+00:01 +134: test\file_job_recovery_test.dart: unknown receipt retains files while the registered Windows job lives, then cleans without rewriting the reported outcome
+00:01 +135: test\file_job_recovery_test.dart: unknown receipt retains files while the registered Windows job lives, then cleans without rewriting the reported outcome
+00:01 +136: test\file_job_recovery_test.dart: unknown receipt retains files while the registered Windows job lives, then cleans without rewriting the reported outcome
+00:01 +137: test\file_job_recovery_test.dart: unknown receipt retains files while the registered Windows job lives, then cleans without rewriting the reported outcome
+00:01 +138: test\file_job_recovery_test.dart: unknown receipt retains files while the registered Windows job lives, then cleans without rewriting the reported outcome
+00:01 +139: test\file_job_recovery_test.dart: unknown receipt retains files while the registered Windows job lives, then cleans without rewriting the reported outcome
+00:01 +140: test\file_job_recovery_test.dart: unknown receipt retains files while the registered Windows job lives, then cleans without rewriting the reported outcome
+00:01 +141: test\file_job_recovery_test.dart: unknown receipt retains files while the registered Windows job lives, then cleans without rewriting the reported outcome
+00:01 +142: test\file_job_recovery_test.dart: unknown receipt retains files while the registered Windows job lives, then cleans without rewriting the reported outcome
+00:01 +143: test\file_job_recovery_test.dart: unknown receipt retains files while the registered Windows job lives, then cleans without rewriting the reported outcome
+00:01 +144: test\file_job_recovery_test.dart: unknown receipt retains files while the registered Windows job lives, then cleans without rewriting the reported outcome
+00:01 +145: test\file_job_recovery_test.dart: unknown receipt retains files while the registered Windows job lives, then cleans without rewriting the reported outcome
+00:01 +146: test\file_job_recovery_test.dart: unknown receipt retains files while the registered Windows job lives, then cleans without rewriting the reported outcome
+00:01 +147: test\file_job_recovery_test.dart: unknown receipt retains files while the registered Windows job lives, then cleans without rewriting the reported outcome
+00:01 +148: test\file_job_recovery_test.dart: unknown receipt retains files while the registered Windows job lives, then cleans without rewriting the reported outcome
+00:01 +149: test\file_job_recovery_test.dart: unknown receipt retains files while the registered Windows job lives, then cleans without rewriting the reported outcome
+00:02 +150: test\file_job_recovery_test.dart: unknown receipt retains files while the registered Windows job lives, then cleans without rewriting the reported outcome
+00:02 +151: test\file_job_recovery_test.dart: unknown receipt retains files while the registered Windows job lives, then cleans without rewriting the reported outcome
+00:02 +152: test\file_job_recovery_test.dart: unknown receipt retains files while the registered Windows job lives, then cleans without rewriting the reported outcome
+00:02 +153: test\file_job_recovery_test.dart: unknown receipt retains files while the registered Windows job lives, then cleans without rewriting the reported outcome
+00:02 +154: test\file_job_recovery_test.dart: unknown receipt retains files while the registered Windows job lives, then cleans without rewriting the reported outcome
+00:02 +155: test\file_job_recovery_test.dart: unknown receipt retains files while the registered Windows job lives, then cleans without rewriting the reported outcome
+00:02 +156: test\file_job_recovery_test.dart: unknown receipt retains files while the registered Windows job lives, then cleans without rewriting the reported outcome
+00:02 +157: test\file_job_recovery_test.dart: unknown receipt retains files while the registered Windows job lives, then cleans without rewriting the reported outcome
+00:02 +158: test\file_job_recovery_test.dart: unknown receipt retains files while the registered Windows job lives, then cleans without rewriting the reported outcome
+00:02 +159: test\file_job_recovery_test.dart: unknown receipt retains files while the registered Windows job lives, then cleans without rewriting the reported outcome
+00:02 +160: test\file_job_recovery_test.dart: unknown receipt retains files while the registered Windows job lives, then cleans without rewriting the reported outcome
+00:02 +161: test\file_job_recovery_test.dart: unknown receipt retains files while the registered Windows job lives, then cleans without rewriting the reported outcome
+00:02 +162: test\file_job_recovery_test.dart: unknown receipt retains files while the registered Windows job lives, then cleans without rewriting the reported outcome
+00:02 +163: test\file_job_recovery_test.dart: unknown receipt retains files while the registered Windows job lives, then cleans without rewriting the reported outcome
+00:02 +164: test\file_job_recovery_test.dart: unknown receipt retains files while the registered Windows job lives, then cleans without rewriting the reported outcome
+00:02 +165: test\file_job_recovery_test.dart: unknown receipt retains files while the registered Windows job lives, then cleans without rewriting the reported outcome
+00:02 +166: test\file_job_recovery_test.dart: unknown receipt retains files while the registered Windows job lives, then cleans without rewriting the reported outcome
+00:02 +167: test\file_job_recovery_test.dart: unknown receipt retains files while the registered Windows job lives, then cleans without rewriting the reported outcome
+00:02 +168: test\file_job_recovery_test.dart: unknown receipt retains files while the registered Windows job lives, then cleans without rewriting the reported outcome
+00:02 +169: test\file_job_recovery_test.dart: unknown receipt retains files while the registered Windows job lives, then cleans without rewriting the reported outcome
+00:02 +170: test\file_job_recovery_test.dart: unknown receipt retains files while the registered Windows job lives, then cleans without rewriting the reported outcome
+00:02 +171: test\file_job_recovery_test.dart: unknown receipt retains files while the registered Windows job lives, then cleans without rewriting the reported outcome
+00:02 +172: test\file_job_recovery_test.dart: unknown receipt retains files while the registered Windows job lives, then cleans without rewriting the reported outcome
+00:02 +173: test\file_job_recovery_test.dart: unknown receipt retains files while the registered Windows job lives, then cleans without rewriting the reported outcome
+00:02 +174: test\file_job_recovery_test.dart: unknown receipt retains files while the registered Windows job lives, then cleans without rewriting the reported outcome
+00:02 +175: test\file_job_recovery_test.dart: unknown receipt retains files while the registered Windows job lives, then cleans without rewriting the reported outcome
+00:02 +176: test\file_job_recovery_test.dart: unknown receipt retains files while the registered Windows job lives, then cleans without rewriting the reported outcome
+00:02 +177: test\file_job_recovery_test.dart: unknown receipt retains files while the registered Windows job lives, then cleans without rewriting the reported outcome
+00:02 +178: test\file_job_recovery_test.dart: unknown receipt retains files while the registered Windows job lives, then cleans without rewriting the reported outcome
+00:02 +179: test\file_job_recovery_test.dart: unknown receipt retains files while the registered Windows job lives, then cleans without rewriting the reported outcome
+00:02 +180: test\file_job_recovery_test.dart: unknown receipt retains files while the registered Windows job lives, then cleans without rewriting the reported outcome
+00:02 +181: test\file_job_recovery_test.dart: unknown receipt retains files while the registered Windows job lives, then cleans without rewriting the reported outcome
+00:02 +182: test\file_job_recovery_test.dart: unknown receipt retains files while the registered Windows job lives, then cleans without rewriting the reported outcome
+00:02 +183: test\file_job_recovery_test.dart: unknown receipt retains files while the registered Windows job lives, then cleans without rewriting the reported outcome
+00:02 +184: test\file_job_recovery_test.dart: unknown receipt retains files while the registered Windows job lives, then cleans without rewriting the reported outcome
+00:02 +185: test\file_job_recovery_test.dart: unknown receipt retains files while the registered Windows job lives, then cleans without rewriting the reported outcome
+00:02 +186: test\file_job_recovery_test.dart: unknown receipt retains files while the registered Windows job lives, then cleans without rewriting the reported outcome
+00:02 +187: test\file_job_recovery_test.dart: unknown receipt retains files while the registered Windows job lives, then cleans without rewriting the reported outcome
+00:03 +188: test\file_job_recovery_test.dart: exited receipt retains files while the registered Windows job lives, then cleans without rewriting the reported outcome
+00:03 +189: All tests passed!

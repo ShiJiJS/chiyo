@@ -40,6 +40,12 @@ void main() {
       final secret = (await call('/session', {
         'chatLabel': 'chat',
       }))['sessionSecret'];
+      for (final route in ['/app/quit', '/owner/quit']) {
+        expect(
+          (await call(route, {'sessionSecret': secret}))['status'],
+          'unauthorized',
+        );
+      }
       final id =
           (await call('/request', {
                 'sessionSecret': secret,

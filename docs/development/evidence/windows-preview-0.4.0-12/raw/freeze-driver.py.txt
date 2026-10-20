@@ -1,0 +1,49 @@
+from pathlib import Path
+import hashlib,json,re,shutil,subprocess,sys
+
+sys.stdout.reconfigure(encoding='utf-8')
+root=Path.cwd(); out=root/'docs/development/evidence/windows-preview-0.4.0-12'
+out.mkdir(parents=True,exist_ok=False)
+package=root/'build/windows-preview-0.4.0-12-995283f';payload=package/'AgentInfoManage'
+sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
+manifest=json.loads((payload/'manifest.json').read_text(encoding='utf-8-sig'))
+assert manifest['sourceCommit']=='995283f1d5ef806a629f6cb917cca3bb7e88944f' and manifest['sourceDirty'] is False
+assert not subprocess.check_output(['git','status','--porcelain']).strip()
+assert len(manifest['files'])==113
+for entry in manifest['files']:
+ p=payload/entry['path'];assert p.resolve().is_relative_to(payload.resolve())
+ assert p.stat().st_size==entry['bytes'] and sha(p)==entry['sha256'],str(p)
+assert {p.relative_to(payload).as_posix() for p in payload.rglob('*') if p.is_file()}=={e['path'].replace('\\','/') for e in manifest['files']}|{'manifest.json'}
+archive=next(package.glob('*.zip'))
+assert sha(archive)==Path(str(archive)+'.sha256').read_text(encoding='utf-8-sig').split()[0]
+log=root/'build/qa-issue40/package-0.4.0-12-final.txt';body=log.read_text(encoding='utf-8-sig')
+counts=[(int(a),int(b or 0)) for a,b in re.findall(r'\+(\d+)(?: ~(\d+))?: All tests passed!',body)]
+assert counts==[(94,13),(275,1),(161,6),(166,0),(16,0),(7,0)],counts
+assert 'Verified development package:' in body
+old=json.loads((root/'build/windows-preview-0.4.0-12-2fe6189/AgentInfoManage/manifest.json').read_text(encoding='utf-8-sig'))
+desktop={e['path']:e['sha256'] for e in manifest['files'] if e['path'].startswith('app/')}
+old_desktop={e['path']:e['sha256'] for e in old['files'] if e['path'].startswith('app/')}
+assert desktop==old_desktop
+raw=[]
+def copy(p,name):
+ target=out/'raw'/name;target.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(p,target)
+ raw.append(dict(source=p.relative_to(root).as_posix(),path='raw/'+name,bytes=target.stat().st_size,sha256=sha(target)))
+copy(log,'package-0.4.0-12-final.txt');copy(payload/'manifest.json','manifest.json')
+for p in sorted((root/'build/qa-issue40/final-package-phases').glob('*.jsonl')):copy(p,'phases/'+p.name)
+copy(root/'build/freeze-issue40-final-package.py','freeze-driver.py.txt')
+expected=['f8220e6477f28a1bb4b1914847377b675dbd5cbf50ca609bd23ded65e2fd5328','d5def0ba580249b39ce5f42292705851b16230903276c6a17ec9e2af4df30e39','b8695e9c135a0441eb384507acb347d334a190451f63be7874e22c058f56b3c2','4c5e88461035c36d85d8fa9fb50f69e1450aa1662f677e5723417471f669c70b']
+locks=[]
+for name,digest in zip(['packages/info_core','packages/info_storage','packages/info_cli','apps/desktop'],expected):
+ p=root/name/'pubspec.lock';assert sha(p)==digest
+ locks.append(dict(path=p.relative_to(root).as_posix(),sha256=digest))
+v=dict(release=manifest['release'],sourceCommit=manifest['sourceCommit'],packageCommandExitCode=0,
+       completePipelinePassed=True,fullPassed=696,fullOptInSkipped=20,extractedCliPassed=16,
+       extractedEncryptedMixedPassed=7,overlappingChecksNotAdded=True,payloadFiles=113,
+       archivePath=archive.relative_to(root).as_posix(),archiveBytes=archive.stat().st_size,
+       archiveSha256=sha(archive),manifestSha256=sha(payload/'manifest.json'),
+       desktopFiles=len(desktop),desktopPayloadByteIdenticalToActual2fe6189NativePreview=True,
+       actualNativePreviewEvidence='../issue40-removed-field-state/verification.json',
+       first2fe6189CloseTimeoutRootCauseEstablished=False,newGuiOrCodexAcceptanceNotPerformed=True,
+       userRequestedPauseAfterCheckpoint=True,rawCount=len(raw),raw=raw,locks=locks)
+(out/'verification.json').write_text(json.dumps(v,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+print(json.dumps({k:v[k] for k in ['release','sourceCommit','fullPassed','fullOptInSkipped','extractedCliPassed','extractedEncryptedMixedPassed','payloadFiles','archiveBytes','archiveSha256','desktopFiles','rawCount']},ensure_ascii=False,indent=2))

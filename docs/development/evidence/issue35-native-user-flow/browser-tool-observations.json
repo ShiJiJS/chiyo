@@ -1,0 +1,14 @@
+{
+  "representation": "Manual transcription of actual in-app browser tool observations; not a raw tool export or screenshot artifact",
+  "browser": "ChatGPT in-app browser",
+  "testUrl": "http://127.0.0.1:62321/target.html",
+  "afterOperation": "native-ui-1",
+  "normalAxPasswordValue": "<redacted>",
+  "explicitValueRead": "<redacted>",
+  "explicitReadExpression": "getByLabel('密码框', {exact:true}).evaluate(el => el.value)",
+  "normalScreenshot": "Masked dots; the full expected synthetic value matched inside the local receiver",
+  "plaintextScreenshot": "Clicking 显示明文 exposed synthetic characters in the screenshot; then 恢复遮挡 was clicked",
+  "pixels": "Displayed in this task's actual tool results; no local PNG was saved and no pixel hash is claimed",
+  "notClaimed": "No exact scan of the browser tool's whole transport payload, model request body, or arbitrary tool implementations",
+  "cleanup": "Owned tab closed and cua_repl reset after the native probe exited 0"
+}

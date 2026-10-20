@@ -1,0 +1,27 @@
+[
+  {
+    "passed": true,
+    "case": "bad-digest",
+    "expectedRefusal": "Focused input helper checksum mismatch."
+  },
+  {
+    "passed": true,
+    "case": "bad-path",
+    "expectedRefusal": "Invalid focused input helper provenance."
+  },
+  {
+    "passed": true,
+    "case": "test-executable",
+    "expectedRefusal": "Test or unknown executable in desktop payload."
+  },
+  {
+    "passed": true,
+    "case": "future-format",
+    "expectedRefusal": "Unsupported preview manifest."
+  },
+  {
+    "passed": true,
+    "case": "legacy-format",
+    "expectedRefusal": "Unlisted payload files."
+  }
+]

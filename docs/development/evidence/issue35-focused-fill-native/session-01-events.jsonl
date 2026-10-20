@@ -1,0 +1,4 @@
+{"phase":"awaiting_focus","application":{"executable":"C:\\Project\\network_config\\info-manage\\apps\\desktop\\build\\windows\\x64\\focused_input\\Release\\info-focus-fixture.exe","sha256":"1b7ad0da291df9c2f6f31e824e123d10d39daddcac618a5c3173fafce7508f1e"},"secretNotPrintedByHarness":true}
+{"id":1,"action":"probe","result":{"protocolVersion":2,"status":"ok","targetState":"refused","errorCode":"unsupported_target"}}
+{"id":2,"action":"probe","result":{"protocolVersion":2,"status":"ok","targetState":"refused","errorCode":"unsupported_target"}}
+{"id":3,"action":"close","result":{"closing":true}}

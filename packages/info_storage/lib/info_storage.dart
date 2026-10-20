@@ -1,14 +1,29 @@
 import 'dart:io';
 import 'dart:convert';
 import 'dart:math';
+import 'dart:typed_data';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:info_core/info_core.dart';
 import 'package:sqlite3/sqlite3.dart' as sqlite;
+import 'package:crypto/crypto.dart' as crypto;
+import 'package:info_core/protocol_json.dart';
 import 'backup_publish.dart';
 export 'platform_keys.dart';
 part 'backups.dart';
 part 'backup_history.dart';
+part 'backup_credentials.dart';
+part 'backup_metadata_budget.dart';
+part 'credentials_storage.dart';
+part 'credential_runtime_storage.dart';
+part 'focused_fill_storage.dart';
+part 'information_files_storage.dart';
+part 'attachment_backup.dart';
+part 'information_attachments_storage.dart';
+part 'attachment_backup_integration.dart';
+part 'information_delivery_storage.dart';
+
+const _libraryFormat = 21;
 
 class StorageFailure implements Exception {
   const StorageFailure(this.code);
@@ -27,22 +42,41 @@ abstract interface class DatabaseKeyStore {
 InformationItem _informationFromRows(
   Map<String, Object?> row,
   Iterable<Map<String, Object?>> fields,
-  Iterable<Map<String, Object?>> links,
-) => InformationItem(
+  Iterable<Map<String, Object?>> links, [
+  Iterable<Map<String, Object?>> fileFields = const [],
+]) => InformationItem(
   row['id'] as String,
   row['name'] as String,
   row['description'] as String,
   row['version'] as int,
   [
     for (final field in fields.where((f) => f['item_id'] == row['id']))
-      InformationField(
-        field['id'] as String,
-        field['name'] as String,
-        field['description'] as String,
-        field['value'] as String,
-        field['version'] as int,
-        kind: FieldKind.values.byName(field['kind'] as String),
-      ),
+      if (field['kind'] == 'file')
+        InformationField.file(
+          field['id'] as String,
+          field['name'] as String,
+          field['description'] as String,
+          InformationAttachmentRef(
+            fileFields.singleWhere(
+                  (r) => r['field_id'] == field['id'],
+                )['attachment_id']
+                as String,
+            fileFields.singleWhere(
+                  (r) => r['field_id'] == field['id'],
+                )['attachment_version']
+                as int,
+          ),
+          field['version'] as int,
+        )
+      else
+        InformationField(
+          field['id'] as String,
+          field['name'] as String,
+          field['description'] as String,
+          field['value'] as String,
+          field['version'] as int,
+          kind: FieldKind.values.byName(field['kind'] as String),
+        ),
   ],
   directoryId: row['directory_id'] as String?,
   createdAt: row['created_at'] == null
@@ -57,7 +91,115 @@ InformationItem _informationFromRows(
 );
 
 /// A desktop-only capability. The CLI depends on info_core, never this package.
-class EncryptedInformationRepository implements InformationRepository {
+class EncryptedInformationRepository
+    implements
+        InformationRepository,
+        CredentialRepository,
+        CredentialFieldMigrationRepository,
+        FocusedFillRuntimeRepository,
+        InformationAttachmentRepository,
+        InformationFileDeliveryRepository,
+        SshHostTrustRepository {
+  @override
+  List<InformationFileDelivery> get informationFileDeliveries {
+    if (_closed) throw const StorageFailure('library_closed');
+    return List.unmodifiable(_fileDeliveries.values);
+  }
+
+  @override
+  Future<void> saveInformationFileDelivery(InformationFileDelivery record) =>
+      _saveFileDelivery(record);
+  @override
+  Future<void> pruneInformationFileDeliveryHistory(Set<String> ids) =>
+      _pruneFileDeliveries(ids);
+  final _fileDeliveries = <String, InformationFileDelivery>{};
+  @override
+  Future<InformationAttachmentUsage> informationAttachmentUsage() async {
+    if (_closed) throw const StorageFailure('library_closed');
+    return _db.transaction(() async {
+      final versions = await _allAttachmentVersions();
+      final stages = await _fileStagingUsage();
+      final available = versions.where((v) => v.available).toList();
+      return InformationAttachmentUsage(
+        versionRecords: versions.length,
+        availableVersions: available.length,
+        storedBytes: available.fold(0, (sum, v) => sum + v.byteLength),
+        stagedFiles: stages.files,
+        stagedBytes: stages.bytes,
+      );
+    });
+  }
+
+  @override
+  Future<InformationFileStage> informationStage(
+    String draftId,
+    String stageId,
+  ) => _informationStage(draftId, stageId);
+  @override
+  Future<List<InformationAttachmentVersion>> informationAttachmentVersions(
+    String id,
+  ) => _attachmentVersions(id);
+  @override
+  Future<Uint8List> readInformationAttachmentChunk(
+    InformationAttachmentRef ref,
+    int offset,
+    int length,
+  ) => _readAttachmentChunk(ref, offset, length);
+  @override
+  Future<T> withInformationAttachment<T>(
+    InformationAttachmentRef ref,
+    Future<T> Function(InformationAttachmentVersion, Stream<Uint8List>) action,
+  ) => _withAttachment(ref, action);
+  @override
+  Future<void> reconcileInformationAttachments(DateTime now) async {
+    if (_closed) throw const StorageFailure('library_closed');
+    try {
+      await _db.transaction(() => _reconcileAttachmentRetention(now.toUtc()));
+    } on AccessFailure {
+      rethrow;
+    } on Object {
+      throw const StorageFailure('attachment_cleanup_failed');
+    }
+  }
+
+  @override
+  Future<InformationDraftReceipt?> informationDraftReceipt(
+    String draftId,
+    String operationId,
+  ) => _draftReceipt(draftId, operationId);
+  @override
+  Future<InformationDraftReceipt> commitInformationDraft(
+    InformationDraftChange change,
+  ) => _commitAttachmentDraft(change);
+  @override
+  Future<InformationFileStage> stageInformationBytes({
+    required String draftId,
+    required String stageId,
+    required String originalName,
+    required String mediaType,
+    required Uint8List bytes,
+  }) => _stageInformationFileBytes(
+    draftId: draftId,
+    stageId: stageId,
+    originalName: originalName,
+    mediaType: mediaType,
+    bytes: bytes,
+  );
+  @override
+  Future<InformationFileStagingUsage> informationFileStagingUsage() =>
+      _fileStagingUsage();
+  @override
+  Future<void> releaseInformationStage(String draftId, String stageId) =>
+      _releaseInformationFileStage(draftId, stageId);
+  @override
+  Future<void> releaseInformationDraft(String draftId) =>
+      _releaseInformationFileStage(draftId, null);
+  SshHostTrustSnapshot? _sshHostTrust;
+  @override
+  SshHostTrustSnapshot? get sshHostTrust => _sshHostTrust;
+  @override
+  Future<void> saveSshHostTrust(SshHostTrustSnapshot? snapshot) =>
+      _saveSshTrust(snapshot);
   EncryptedInformationRepository._(
     this._db,
     this._lock,
@@ -74,6 +216,7 @@ class EncryptedInformationRepository implements InformationRepository {
   final _tags = <String, InformationTag>{};
   final _templates = <String, InformationTemplate>{};
   final _history = <String, GrantHistory>{};
+  final _requestHistory = <String, RequestHistory>{};
   final _accesses = <String, AccessRecord>{};
   final _organizationTasks = <String, OrganizationTask>{};
   final _proposals = <String, ImportProposal>{};
@@ -83,6 +226,91 @@ class EncryptedInformationRepository implements InformationRepository {
   final _recycle = <String, RecycleEntry>{};
   final _recycleFacts = <RecycleFact>[];
   final _deletes = <String, DeleteProposal>{};
+  final _credentials = <ManagedCredential>[];
+  final _credentialMaterials = <CredentialMaterial>[];
+  @override
+  Future<void> commitCredentialFieldMigration(
+    CredentialFieldMigration change,
+  ) => _migrateCredentialField(change);
+  final _credentialUseRequests = <CredentialUseRequest>[];
+  final _credentialExecutions = <CredentialExecution>[];
+  final _focusedFillOperations = <FocusedFillOperation>[];
+  @override
+  List<FocusedFillOperation> get focusedFillOperations =>
+      List.unmodifiable(_focusedFillOperations);
+  @override
+  Future<void> commitFocusedFillRuntime(
+    List<CredentialUseRequest> requests,
+    List<FocusedFillOperation> operations, {
+    void Function()? validate,
+    List<CredentialExecution>? executions,
+  }) => _commitRuntime(
+    requests,
+    executions ?? List.of(_credentialExecutions),
+    fills: operations,
+    validate: validate,
+  );
+  @override
+  List<CredentialUseRequest> get credentialUseRequests =>
+      List.unmodifiable(_credentialUseRequests);
+  @override
+  List<CredentialExecution> get credentialExecutions =>
+      List.unmodifiable(_credentialExecutions);
+  @override
+  Future<void> commitCredentialRuntime(
+    List<CredentialUseRequest> requests,
+    List<CredentialExecution> executions, {
+    GrantHistory? fieldGrant,
+    RequestHistory? fieldRequest,
+    void Function()? validate,
+  }) => _commitRuntime(
+    requests,
+    executions,
+    fieldGrant: fieldGrant,
+    fieldRequest: fieldRequest,
+    validate: validate,
+  );
+  @override
+  List<ManagedCredential> get managedCredentials =>
+      List.unmodifiable(_credentials);
+  @override
+  List<CredentialMaterial> get credentialMaterials =>
+      List.unmodifiable(_credentialMaterials);
+  @override
+  Future<void> commitCredentials(
+    List<ManagedCredential> credentials,
+    List<CredentialMaterial> materials,
+  ) async {
+    if (_closed) throw const StorageFailure('library_closed');
+    _validateVault(credentials, materials);
+    try {
+      await _writeMetadata(() async {
+        await _db.customStatement('DELETE FROM credential_materials');
+        await _db.customStatement('DELETE FROM managed_credentials');
+        for (final c in credentials) {
+          await _db.customStatement(
+            'INSERT INTO managed_credentials(id,payload) VALUES(?,?)',
+            [c.id, jsonEncode(c.toJson())],
+          );
+        }
+        for (final m in materials) {
+          await _db.customStatement(
+            'INSERT INTO credential_materials(credential_id,version,payload) VALUES(?,?,?)',
+            [m.credentialId, m.version, jsonEncode(m.toStorageJson())],
+          );
+        }
+      });
+      _credentials
+        ..clear()
+        ..addAll(credentials);
+      _credentialMaterials
+        ..clear()
+        ..addAll(materials);
+    } catch (_) {
+      throw const StorageFailure('credential_save_failed');
+    }
+  }
+
   bool _closed = false;
   static final _openDirectories = <String>{};
   late final String _directory;
@@ -96,8 +324,9 @@ class EncryptedInformationRepository implements InformationRepository {
     final folder = Directory(directory);
     await folder.create(recursive: true);
     final canonical = await folder.resolveSymbolicLinks();
-    if (!_openDirectories.add(canonical))
+    if (!_openDirectories.add(canonical)) {
       throw const StorageFailure('library_in_use');
+    }
     RandomAccessFile? lock;
     sqlite.Database? native;
     _InformationDatabase? db;
@@ -122,18 +351,21 @@ class EncryptedInformationRepository implements InformationRepository {
           throw const StorageFailure('key_unavailable');
         }
       }
-      if (key.length != 32 || key.any((v) => v < 0 || v > 255))
+      if (key.length != 32 || key.any((v) => v < 0 || v > 255)) {
         throw const StorageFailure('invalid_key');
+      }
       // Probe before creating or opening the user's file: plaintext fallback is forbidden.
       final probe = sqlite.sqlite3.openInMemory();
       String version;
       try {
         final rows = probe.select('PRAGMA cipher_version');
-        if (rows.isEmpty || !(rows.first.values.first is String))
+        if (rows.isEmpty || !(rows.first.values.first is String)) {
           throw const StorageFailure('cipher_unavailable');
+        }
         version = rows.first.values.first as String;
-        if (!version.startsWith('4.'))
+        if (!version.startsWith('4.')) {
           throw const StorageFailure('cipher_unavailable');
+        }
       } finally {
         probe.close();
       }
@@ -143,6 +375,34 @@ class EncryptedInformationRepository implements InformationRepository {
       native.execute('PRAGMA temp_store = MEMORY');
       // Reading the schema checks the key before any migrations or updates.
       native.select('SELECT count(*) FROM sqlite_master');
+      final headerVersion =
+          native.select('PRAGMA user_version').single.values.single as int;
+      if (headerVersion > _libraryFormat) {
+        throw const StorageFailure('unsupported_schema');
+      }
+      if (native
+          .select(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name='library_format'",
+          )
+          .isNotEmpty) {
+        final marker = native.select(
+          'SELECT singleton,version FROM library_format',
+        );
+        if (marker.length != 1 ||
+            marker.single['singleton'] != 1 ||
+            marker.single['version'] is! int ||
+            (marker.single['version'] as int) < 17 ||
+            (marker.single['version'] as int) > _libraryFormat ||
+            headerVersion > (marker.single['version'] as int)) {
+          throw const StorageFailure('unsupported_schema');
+        }
+      } else if (native
+          .select(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name IN ('credential_runtime_requests','credential_operations','credential_focused_fills')",
+          )
+          .isNotEmpty) {
+        throw const StorageFailure('unsupported_schema');
+      }
       native.execute('PRAGMA foreign_keys = ON');
       db = _InformationDatabase(NativeDatabase.opened(native));
       native = null; // Drift owns the handle now.
@@ -165,6 +425,45 @@ class EncryptedInformationRepository implements InformationRepository {
   }
 
   Future<void> _load() async {
+    // A stage belongs to an in-process owner form, never a resumed grant or
+    // formal item. A new process has no valid form handle for orphan bytes.
+    await _db.customStatement('DELETE FROM information_file_stages');
+    await _db.customStatement('DELETE FROM information_draft_commits');
+    await _loadSshTrust();
+    await _loadRuntime();
+    _credentials.clear();
+    _credentialMaterials.clear();
+    for (final row
+        in await _db
+            .customSelect(
+              'SELECT payload FROM managed_credentials ORDER BY rowid',
+            )
+            .get()) {
+      _credentials.add(
+        ManagedCredential.fromJson(
+          jsonDecode(row.read<String>('payload')) as Map<String, dynamic>,
+        ),
+      );
+    }
+    for (final row
+        in await _db
+            .customSelect(
+              'SELECT payload FROM credential_materials ORDER BY rowid',
+            )
+            .get()) {
+      _credentialMaterials.add(
+        CredentialMaterial.fromStorageJson(
+          jsonDecode(row.read<String>('payload')) as Map<String, dynamic>,
+        ),
+      );
+    }
+    final cutoff = _clock().subtract(const Duration(days: 30));
+    final retained = _credentialMaterials
+        .where((m) => m.retiredAt == null || m.retiredAt!.isAfter(cutoff))
+        .toList();
+    if (retained.length != _credentialMaterials.length) {
+      await commitCredentials(_credentials.toList(), retained);
+    }
     for (final row
         in await _db
             .customSelect(
@@ -216,6 +515,15 @@ class EncryptedInformationRepository implements InformationRepository {
         jsonDecode(row.read<String>('payload')) as Map<String, dynamic>,
       );
       _deletes[proposal.id] = proposal;
+    }
+    for (final row
+        in await _db
+            .customSelect('SELECT payload FROM request_history ORDER BY rowid')
+            .get()) {
+      final fact = RequestHistory.fromJson(
+        jsonDecode(row.read<String>('payload')) as Map<String, dynamic>,
+      );
+      _requestHistory[fact.id] = fact;
     }
     for (final row
         in await _db
@@ -334,9 +642,49 @@ class EncryptedInformationRepository implements InformationRepository {
         .get();
     final fieldRows = fields.map((row) => row.data).toList();
     final tagRows = itemTags.map((row) => row.data).toList();
+    final fileRows =
+        (await _db.customSelect('SELECT * FROM information_file_fields').get())
+            .map((r) => r.data)
+            .toList();
     for (final item in items) {
-      final decoded = _informationFromRows(item.data, fieldRows, tagRows);
+      final decoded = _informationFromRows(
+        item.data,
+        fieldRows,
+        tagRows,
+        fileRows,
+      );
       _items[decoded.id] = decoded;
+    }
+    await _checkStoredFileReferences();
+    await _loadFileDeliveries();
+    await _db.transaction(
+      () => _reconcileAttachmentRetention(_clock().toUtc()),
+    );
+  }
+
+  @override
+  List<RequestHistory> get requestHistory {
+    if (_closed) throw const StorageFailure('library_closed');
+    return List.unmodifiable(_requestHistory.values);
+  }
+
+  @override
+  Future<void> saveRequestHistory(RequestHistory history) async {
+    if (_closed) throw const StorageFailure('library_closed');
+    try {
+      await _writeMetadata(
+        () => _db.customStatement(
+          'INSERT INTO request_history(id,created_at,payload) VALUES(?,?,?) ON CONFLICT(id) DO UPDATE SET payload=excluded.payload',
+          [
+            history.id,
+            history.createdAt.toUtc().millisecondsSinceEpoch,
+            jsonEncode(history.toJson()),
+          ],
+        ),
+      );
+      _requestHistory[history.id] = history;
+    } on Object {
+      throw const StorageFailure('audit_save_failed');
     }
   }
 
@@ -356,13 +704,15 @@ class EncryptedInformationRepository implements InformationRepository {
   Future<void> saveGrantHistory(GrantHistory history) async {
     if (_closed) throw const StorageFailure('library_closed');
     try {
-      await _db.customStatement(
-        'INSERT INTO grant_history(id,approved_at,payload) VALUES(?,?,?) ON CONFLICT(id) DO UPDATE SET payload=excluded.payload',
-        [
-          history.id,
-          history.approvedAt.toUtc().millisecondsSinceEpoch,
-          jsonEncode(history.toJson()),
-        ],
+      await _writeMetadata(
+        () => _db.customStatement(
+          'INSERT INTO grant_history(id,approved_at,payload) VALUES(?,?,?) ON CONFLICT(id) DO UPDATE SET payload=excluded.payload',
+          [
+            history.id,
+            history.approvedAt.toUtc().millisecondsSinceEpoch,
+            jsonEncode(history.toJson()),
+          ],
+        ),
       );
       _history[history.id] = history;
     } on Object {
@@ -374,15 +724,36 @@ class EncryptedInformationRepository implements InformationRepository {
   Future<void> saveAccessRecord(AccessRecord record) async {
     if (_closed) throw const StorageFailure('library_closed');
     try {
-      await _db.customStatement(
-        'INSERT INTO access_records(id,recorded_at,payload) VALUES(?,?,?) ON CONFLICT(id) DO UPDATE SET payload=excluded.payload',
-        [
-          record.id,
-          record.at.toUtc().millisecondsSinceEpoch,
-          jsonEncode(record.toJson()),
-        ],
+      await _writeMetadata(
+        () => _db.customStatement(
+          'INSERT INTO access_records(id,recorded_at,payload) VALUES(?,?,?) ON CONFLICT(id) DO UPDATE SET payload=excluded.payload',
+          [
+            record.id,
+            record.at.toUtc().millisecondsSinceEpoch,
+            jsonEncode(record.toJson()),
+          ],
+        ),
       );
       _accesses[record.id] = record;
+    } on Object {
+      throw const StorageFailure('audit_save_failed');
+    }
+  }
+
+  @override
+  Future<void> pruneOrganizationHistory(Set<String> ids) async {
+    if (_closed) throw const StorageFailure('library_closed');
+    if (ids.isEmpty) return;
+    try {
+      await _db.transaction(() async {
+        for (final id in ids) {
+          await _db.customStatement(
+            'DELETE FROM organization_tasks WHERE id=?',
+            [id],
+          );
+        }
+      });
+      _organizationTasks.removeWhere((id, _) => ids.contains(id));
     } on Object {
       throw const StorageFailure('audit_save_failed');
     }
@@ -394,6 +765,10 @@ class EncryptedInformationRepository implements InformationRepository {
     try {
       await _db.transaction(() async {
         await _db.customStatement(
+          'DELETE FROM request_history WHERE created_at < ?',
+          [cutoff.toUtc().millisecondsSinceEpoch],
+        );
+        await _db.customStatement(
           'DELETE FROM grant_history WHERE approved_at < ?',
           [cutoff.toUtc().millisecondsSinceEpoch],
         );
@@ -403,6 +778,7 @@ class EncryptedInformationRepository implements InformationRepository {
         );
       });
       _history.removeWhere((_, h) => h.approvedAt.isBefore(cutoff));
+      _requestHistory.removeWhere((_, r) => r.createdAt.isBefore(cutoff));
       _accesses.removeWhere((_, a) => a.at.isBefore(cutoff));
     } on Object {
       throw const StorageFailure('audit_save_failed');
@@ -416,30 +792,44 @@ class EncryptedInformationRepository implements InformationRepository {
   }
 
   @override
+  Future<void> deleteTemplate(String id) async {
+    if (_closed) throw const StorageFailure('library_closed');
+    try {
+      await _db.customStatement('DELETE FROM field_templates WHERE id=?', [id]);
+      _templates.remove(id);
+    } catch (_) {
+      throw const StorageFailure('save_failed');
+    }
+  }
+
+  @override
   Future<void> saveTemplate(InformationTemplate template) async {
     if (_closed) throw const StorageFailure('library_closed');
     try {
-      await _db.customStatement(
-        'INSERT INTO field_templates(id,name,description,version,fields_json) VALUES(?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET name=excluded.name,description=excluded.description,version=excluded.version,fields_json=excluded.fields_json',
-        [
-          template.id,
-          template.name,
-          template.description,
-          template.version,
-          jsonEncode(
-            template.fields
-                .map(
-                  (f) => {
-                    'id': f.id,
-                    'name': f.name,
-                    'description': f.description,
-                    'kind': f.kind.name,
-                  },
-                )
-                .toList(),
-          ),
-        ],
-      );
+      await _db.transaction(() async {
+        await _db.customStatement(
+          'INSERT INTO field_templates(id,name,description,version,fields_json) VALUES(?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET name=excluded.name,description=excluded.description,version=excluded.version,fields_json=excluded.fields_json',
+          [
+            template.id,
+            template.name,
+            template.description,
+            template.version,
+            jsonEncode(
+              template.fields
+                  .map(
+                    (f) => {
+                      'id': f.id,
+                      'name': f.name,
+                      'description': f.description,
+                      'kind': f.kind.name,
+                    },
+                  )
+                  .toList(),
+            ),
+          ],
+        );
+        await _checkAttachmentBackupBudget();
+      });
       _templates[template.id] = template;
     } catch (_) {
       throw const StorageFailure('save_failed');
@@ -479,7 +869,7 @@ class EncryptedInformationRepository implements InformationRepository {
   Future<void> saveDirectory(InformationDirectory directory) async {
     if (_closed) throw const StorageFailure('library_closed');
     try {
-      await _writeDirectory(directory);
+      await _writeMetadata(() => _writeDirectory(directory));
       _directories[directory.id] = directory;
     } catch (_) {
       throw const StorageFailure('save_failed');
@@ -490,7 +880,7 @@ class EncryptedInformationRepository implements InformationRepository {
   Future<void> saveTag(InformationTag tag) async {
     if (_closed) throw const StorageFailure('library_closed');
     try {
-      await _writeTag(tag);
+      await _writeMetadata(() => _writeTag(tag));
       _tags[tag.id] = tag;
     } catch (_) {
       throw const StorageFailure('save_failed');
@@ -507,9 +897,11 @@ class EncryptedInformationRepository implements InformationRepository {
   Future<void> writeSetting(String key, int value) async {
     if (_closed) throw const StorageFailure('library_closed');
     try {
-      await _db.customStatement(
-        'INSERT INTO settings(name,value) VALUES(?,?) ON CONFLICT(name) DO UPDATE SET value=excluded.value',
-        [key, value],
+      await _writeMetadata(
+        () => _db.customStatement(
+          'INSERT INTO settings(name,value) VALUES(?,?) ON CONFLICT(name) DO UPDATE SET value=excluded.value',
+          [key, value],
+        ),
       );
       _settings[key] = value;
     } catch (_) {
@@ -523,6 +915,7 @@ class EncryptedInformationRepository implements InformationRepository {
     try {
       await _db.transaction(() async {
         await _writeItem(item);
+        await _checkAttachmentBackupBudget();
       });
       _items[item.id] = item;
     } catch (_) {
@@ -531,6 +924,7 @@ class EncryptedInformationRepository implements InformationRepository {
   }
 
   Future<void> _writeItem(InformationItem item) async {
+    await _checkItemAttachments(item);
     await _db.customStatement(
       'INSERT INTO information_items(id,name,description,version,directory_id,created_at,modified_at) VALUES(?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET name=excluded.name,description=excluded.description,version=excluded.version,directory_id=excluded.directory_id,created_at=excluded.created_at,modified_at=excluded.modified_at',
       [
@@ -565,11 +959,17 @@ class EncryptedInformationRepository implements InformationRepository {
           item.id,
           field.name,
           field.description,
-          field.value,
+          field.kind == FieldKind.file ? '' : field.value,
           field.version,
           field.kind.name,
         ],
       );
+      if (field.attachment case final ref?) {
+        await _db.customStatement(
+          'INSERT INTO information_file_fields(field_id,attachment_id,attachment_version) VALUES(?,?,?)',
+          [field.id, ref.attachmentId, ref.attachmentVersion],
+        );
+      }
     }
   }
 
@@ -589,7 +989,7 @@ class EncryptedInformationRepository implements InformationRepository {
   Future<void> saveOrganizationTask(OrganizationTask task) async {
     if (_closed) throw const StorageFailure('library_closed');
     try {
-      await _writeOrganizationTask(task);
+      await _writeMetadata(() => _writeOrganizationTask(task));
       _organizationTasks[task.id] = task;
     } catch (_) {
       throw const StorageFailure('save_failed');
@@ -621,6 +1021,7 @@ class EncryptedInformationRepository implements InformationRepository {
           await _writeRevision(r);
         }
         await _writeOrganizationTask(task);
+        await _checkAttachmentBackupBudget();
         validate?.call();
       });
       for (final d in newDirectories) {
@@ -654,7 +1055,7 @@ class EncryptedInformationRepository implements InformationRepository {
   Future<void> saveImportProposal(ImportProposal proposal) async {
     if (_closed) throw const StorageFailure('library_closed');
     try {
-      await _writeProposal(proposal);
+      await _writeMetadata(() => _writeProposal(proposal));
       _proposals[proposal.id] = proposal;
     } catch (_) {
       throw const StorageFailure('save_failed');
@@ -681,6 +1082,7 @@ class EncryptedInformationRepository implements InformationRepository {
           await _writeItem(item);
         }
         await _writeProposal(proposal);
+        await _checkAttachmentBackupBudget();
       });
       for (final directory in newDirectories) {
         _directories[directory.id] = directory;
@@ -705,12 +1107,14 @@ class EncryptedInformationRepository implements InformationRepository {
     _tags.clear();
     _templates.clear();
     _history.clear();
+    _requestHistory.clear();
     _accesses.clear();
     _organizationTasks.clear();
     _proposals.clear();
     _updates.clear();
     _revisions.clear();
     _revisionPurges.clear();
+    _fileDeliveries.clear();
     try {
       await _db.close();
     } finally {
@@ -748,7 +1152,7 @@ class EncryptedInformationRepository implements InformationRepository {
         .toList();
     if (expired.isEmpty) return;
     try {
-      await _db.transaction(() async {
+      await _writeMetadata(() async {
         for (final revision in expired) {
           await _db.customStatement(
             'INSERT INTO revision_purge_facts(item_id,version,purged_at) VALUES(?,?,?) ON CONFLICT(item_id,version) DO NOTHING',
@@ -763,6 +1167,7 @@ class EncryptedInformationRepository implements InformationRepository {
             [revision.item.id, revision.item.version],
           );
         }
+        await _reconcileAttachmentRetention(purgedAt.toUtc());
       });
       for (final revision in expired) {
         _revisionPurges.add(
@@ -779,22 +1184,24 @@ class EncryptedInformationRepository implements InformationRepository {
     'INSERT INTO update_proposals(id,payload) VALUES(?,?) ON CONFLICT(id) DO UPDATE SET payload=excluded.payload',
     [proposal.id, jsonEncode(proposal.toJson())],
   );
-  Future<void> _writeRevision(
-    InformationRevision revision,
-  ) => _db.customStatement(
-    'INSERT INTO information_revisions(item_id,version,replaced_at,payload) VALUES(?,?,?,?)',
-    [
-      revision.item.id,
-      revision.item.version,
-      revision.replacedAt.toUtc().toIso8601String(),
-      jsonEncode(informationToJson(revision.item)),
-    ],
-  );
+  Future<void> _writeRevision(InformationRevision revision) async {
+    await _checkItemAttachments(revision.item);
+    await _db.customStatement(
+      'INSERT INTO information_revisions(item_id,version,replaced_at,payload) VALUES(?,?,?,?)',
+      [
+        revision.item.id,
+        revision.item.version,
+        revision.replacedAt.toUtc().toIso8601String(),
+        jsonEncode(informationToJson(revision.item)),
+      ],
+    );
+  }
+
   @override
   Future<void> saveUpdateProposal(UpdateProposal proposal) async {
     if (_closed) throw const StorageFailure('library_closed');
     try {
-      await _writeUpdate(proposal);
+      await _writeMetadata(() => _writeUpdate(proposal));
       _updates[proposal.id] = proposal;
     } catch (_) {
       throw const StorageFailure('save_failed');
@@ -811,6 +1218,7 @@ class EncryptedInformationRepository implements InformationRepository {
       await _db.transaction(() async {
         await _writeItem(item);
         await _writeRevision(previous);
+        await _checkAttachmentBackupBudget();
       });
       _items[item.id] = item;
       _revisions.add(previous);
@@ -834,6 +1242,7 @@ class EncryptedInformationRepository implements InformationRepository {
         await _writeRevision(previous);
         await _writeUpdate(proposal);
         await _writeRecycle(recycled, facts);
+        await _checkAttachmentBackupBudget();
       });
       _items[item.id] = item;
       _revisions.add(previous);
@@ -873,7 +1282,7 @@ class EncryptedInformationRepository implements InformationRepository {
   Future<void> saveDeleteProposal(DeleteProposal proposal) async {
     if (_closed) throw const StorageFailure('library_closed');
     try {
-      await _writeDelete(proposal);
+      await _writeMetadata(() => _writeDelete(proposal));
       _deletes[proposal.id] = proposal;
     } catch (_) {
       throw const StorageFailure('save_failed');
@@ -929,6 +1338,7 @@ class EncryptedInformationRepository implements InformationRepository {
         if (previous != null) await _writeRevision(previous);
         await _writeRecycle(entries, facts);
         if (proposal != null) await _writeDelete(proposal);
+        await _checkAttachmentBackupBudget();
       });
       if (item == null) {
         _items.remove(itemId);
@@ -950,15 +1360,21 @@ class EncryptedInformationRepository implements InformationRepository {
 class _InformationDatabase extends GeneratedDatabase {
   _InformationDatabase(super.executor);
   @override
-  int get schemaVersion => 12;
+  int get schemaVersion => _libraryFormat;
   @override
   Iterable<TableInfo<Table, Object?>> get allTables => const [];
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (_) async {
+      await _createLibraryFormat();
+      await _createInformationFileStages();
+      await _createSshHostTrust();
+      await _createCredentialRuntime();
+      await _createCredentials();
       await _createRevisionPurges();
       await _createRecycle();
       await _createAudit();
+      await _createRequestHistory();
       await _createUpdates();
       await _createProposals();
       await _createOrganizationTasks();
@@ -972,14 +1388,59 @@ class _InformationDatabase extends GeneratedDatabase {
       await customStatement(
         'CREATE TABLE information_fields(id TEXT PRIMARY KEY,item_id TEXT NOT NULL REFERENCES information_items(id),name TEXT NOT NULL,description TEXT NOT NULL,value TEXT NOT NULL,version INTEGER NOT NULL DEFAULT 1,kind TEXT NOT NULL DEFAULT \'structured\')',
       );
+      await _createInformationAttachments();
+      await _createInformationDeliveries();
       await _organizationSchema();
       await _backupSchema();
     },
     onUpgrade: (_, from, to) async {
-      if (from < 1 || to != 12)
+      if (from < 1 || from > to || to != _libraryFormat) {
         throw const StorageFailure('unsupported_schema');
+      }
+      var sourceVersion = from;
+      final hasMarker = await customSelect(
+        "SELECT name FROM sqlite_master WHERE type='table' AND name='library_format'",
+      ).get();
+      if (hasMarker.isNotEmpty) {
+        final marker = await customSelect(
+          'SELECT version FROM library_format WHERE singleton=1',
+        ).getSingle();
+        if (marker.read<int>('version') == _libraryFormat) return;
+        sourceVersion = marker.read<int>('version');
+      }
       await transaction(() async {
-        if (from < 2) {
+        if (sourceVersion < 21 &&
+            (await customSelect(
+              "SELECT name FROM sqlite_master WHERE name='information_deliveries'",
+            ).get()).isNotEmpty) {
+          throw const StorageFailure('unsupported_schema');
+        }
+        if (sourceVersion < 20 &&
+            (await customSelect(
+              "SELECT name FROM sqlite_master WHERE name IN ('information_attachment_versions','information_file_fields','information_draft_commits')",
+            ).get()).isNotEmpty) {
+          throw const StorageFailure('unsupported_schema');
+        }
+        if (sourceVersion < 19 &&
+            (await customSelect(
+              "SELECT name FROM sqlite_master WHERE name='information_file_stages'",
+            ).get()).isNotEmpty) {
+          throw const StorageFailure('unsupported_schema');
+        }
+        if (sourceVersion < 18 &&
+            (await customSelect(
+              "SELECT name FROM sqlite_master WHERE name='credential_focused_fills'",
+            ).get()).isNotEmpty) {
+          throw const StorageFailure('unsupported_schema');
+        }
+        if (sourceVersion < 16) await _createSshHostTrust();
+        if (sourceVersion < 15) {
+          await _createCredentialRuntime();
+        } else if (sourceVersion < 17) {
+          await _migrateCredentialRuntime17();
+        }
+        if (sourceVersion < 14) await _createCredentials();
+        if (sourceVersion < 2) {
           await customStatement(
             'CREATE TABLE settings(name TEXT PRIMARY KEY,value INTEGER NOT NULL)',
           );
@@ -990,21 +1451,22 @@ class _InformationDatabase extends GeneratedDatabase {
             'ALTER TABLE information_fields ADD COLUMN version INTEGER NOT NULL DEFAULT 1',
           );
         }
-        if (from < 3) await _organizationSchema();
-        if (from < 4) {
+        if (sourceVersion < 3) await _organizationSchema();
+        if (sourceVersion < 4) {
           await _createTemplates();
           await customStatement(
             'ALTER TABLE information_fields ADD COLUMN kind TEXT NOT NULL DEFAULT \'structured\'',
           );
         }
-        if (from < 5) await _backupSchema();
-        if (from < 6) await _createProposals();
-        if (from < 7) await _createAudit();
-        if (from < 8) await _createUpdates();
-        if (from < 9) await _createRecycle();
-        if (from < 10) await _createRevisionPurges();
-        if (from < 12) await _createOrganizationTasks();
-        if (from < 11) {
+        if (sourceVersion < 5) await _backupSchema();
+        if (sourceVersion < 6) await _createProposals();
+        if (sourceVersion < 7) await _createAudit();
+        if (sourceVersion < 8) await _createUpdates();
+        if (sourceVersion < 9) await _createRecycle();
+        if (sourceVersion < 10) await _createRevisionPurges();
+        if (sourceVersion < 12) await _createOrganizationTasks();
+        if (sourceVersion < 13) await _createRequestHistory();
+        if (sourceVersion < 11) {
           await customStatement(
             'ALTER TABLE information_items ADD COLUMN created_at TEXT',
           );
@@ -1012,11 +1474,17 @@ class _InformationDatabase extends GeneratedDatabase {
             'ALTER TABLE information_items ADD COLUMN modified_at TEXT',
           );
         }
+        if (sourceVersion < 18) await _createFocusedFillRuntime();
+        if (sourceVersion < 19) await _createInformationFileStages();
+        if (sourceVersion < 20) await _createInformationAttachments();
+        if (sourceVersion < 21) await _createInformationDeliveries();
+        await _createLibraryFormat();
       });
     },
     beforeOpen: (details) async {
-      if (details.versionNow > schemaVersion)
+      if (details.versionNow > schemaVersion) {
         throw const StorageFailure('unsupported_schema');
+      }
       // Some pre-merge development schema 6 databases reserved version 5 but
       // did not create its backup table. Backfill only this additive structure.
       await _backupSchema();
@@ -1026,9 +1494,101 @@ class _InformationDatabase extends GeneratedDatabase {
     },
   );
 
+  Future<void> _createLibraryFormat() async {
+    await customStatement(
+      'CREATE TABLE IF NOT EXISTS library_format(singleton INTEGER PRIMARY KEY CHECK(singleton=1),version INTEGER NOT NULL)',
+    );
+    await customStatement(
+      'INSERT INTO library_format(singleton,version) VALUES(1,?) ON CONFLICT(singleton) DO UPDATE SET version=excluded.version WHERE version<excluded.version',
+      [_libraryFormat],
+    );
+  }
+
+  Future<void> _createInformationFileStages() => customStatement(
+    'CREATE TABLE information_file_stages('
+    'id TEXT PRIMARY KEY,draft_id TEXT NOT NULL,byte_length INTEGER NOT NULL '
+    'CHECK(byte_length>=0),metadata TEXT NOT NULL,body BLOB NOT NULL '
+    'CHECK(length(body)=byte_length))',
+  );
+
+  Future<void> _createInformationAttachments() async {
+    await customStatement(
+      'CREATE TABLE information_attachment_versions(attachment_id TEXT NOT NULL,version INTEGER NOT NULL,metadata TEXT NOT NULL,byte_length INTEGER NOT NULL CHECK(byte_length>=0),body BLOB CHECK(body IS NULL OR length(body)=byte_length),PRIMARY KEY(attachment_id,version))',
+    );
+    await customStatement(
+      'CREATE TABLE information_file_fields(field_id TEXT PRIMARY KEY REFERENCES information_fields(id) ON DELETE CASCADE,attachment_id TEXT NOT NULL,attachment_version INTEGER NOT NULL,FOREIGN KEY(attachment_id,attachment_version) REFERENCES information_attachment_versions(attachment_id,version))',
+    );
+    await customStatement(
+      'CREATE TABLE information_draft_commits(draft_id TEXT NOT NULL,operation_id TEXT NOT NULL,payload TEXT NOT NULL,PRIMARY KEY(draft_id,operation_id))',
+    );
+  }
+
+  Future<void> _createInformationDeliveries() => customStatement(
+    'CREATE TABLE information_deliveries(id TEXT PRIMARY KEY,session_binding TEXT,operation_id TEXT NOT NULL,'
+    'payload TEXT NOT NULL CHECK(length(CAST(payload AS BLOB))<=262144),UNIQUE(session_binding,operation_id))',
+  );
+
+  Future<void> _migrateCredentialRuntime17() async {
+    final names = (await customSelect(
+      "SELECT name FROM sqlite_master WHERE type='table'",
+    ).get()).map((r) => r.read<String>('name')).toSet();
+    const old = {'credential_use_requests', 'credential_executions'},
+        current = {'credential_runtime_requests', 'credential_operations'};
+    if (names.containsAll(old) && names.intersection(current).isEmpty) {
+      await customStatement(
+        'ALTER TABLE credential_use_requests RENAME TO credential_runtime_requests',
+      );
+      await customStatement(
+        'ALTER TABLE credential_executions RENAME TO credential_operations',
+      );
+    } else if (!names.containsAll(current) ||
+        names.intersection(old).isNotEmpty) {
+      throw const StorageFailure('unsupported_schema');
+    }
+    // An old Drift reader may reset user_version before its missing-table
+    // failure. The independent native format marker remains authoritative.
+  }
+
   Future<void> _createRevisionPurges() => customStatement(
     'CREATE TABLE revision_purge_facts(item_id TEXT NOT NULL,version INTEGER NOT NULL,purged_at TEXT NOT NULL,PRIMARY KEY(item_id,version))',
   );
+  Future<void> _createCredentials() async {
+    await customStatement(
+      'CREATE TABLE IF NOT EXISTS managed_credentials(id TEXT PRIMARY KEY,payload TEXT NOT NULL)',
+    );
+    await customStatement(
+      'CREATE TABLE IF NOT EXISTS credential_materials(credential_id TEXT NOT NULL,version INTEGER NOT NULL,payload TEXT NOT NULL,PRIMARY KEY(credential_id,version))',
+    );
+  }
+
+  Future<void> _createSshHostTrust() async {
+    await customStatement(
+      'CREATE TABLE IF NOT EXISTS ssh_host_trust(id INTEGER PRIMARY KEY CHECK(id=1),payload TEXT NOT NULL)',
+    );
+  }
+
+  Future<void> _createCredentialRuntime() async {
+    await customStatement(
+      'CREATE TABLE IF NOT EXISTS credential_runtime_requests(id TEXT PRIMARY KEY,payload TEXT NOT NULL)',
+    );
+    await customStatement(
+      'CREATE TABLE IF NOT EXISTS credential_operations(id TEXT PRIMARY KEY,request_id TEXT NOT NULL REFERENCES credential_runtime_requests(id),payload TEXT NOT NULL)',
+    );
+    await _createFocusedFillRuntime();
+  }
+
+  Future<void> _createFocusedFillRuntime() => customStatement(
+    'CREATE TABLE IF NOT EXISTS credential_focused_fills(id TEXT PRIMARY KEY,request_id TEXT NOT NULL REFERENCES credential_runtime_requests(id),payload TEXT NOT NULL)',
+  );
+
+  Future<void> _createRequestHistory() async {
+    await customStatement(
+      'CREATE TABLE IF NOT EXISTS request_history(id TEXT PRIMARY KEY,created_at INTEGER NOT NULL,payload TEXT NOT NULL)',
+    );
+    await customStatement(
+      'CREATE INDEX IF NOT EXISTS request_history_retention ON request_history(created_at)',
+    );
+  }
 
   Future<void> _createRecycle() async {
     await customStatement(
@@ -1075,9 +1635,20 @@ class _InformationDatabase extends GeneratedDatabase {
     'CREATE TABLE field_templates(id TEXT PRIMARY KEY,name TEXT NOT NULL,description TEXT NOT NULL,version INTEGER NOT NULL,fields_json TEXT NOT NULL)',
   );
 
-  Future<void> _backupSchema() => customStatement(
-    'CREATE TABLE IF NOT EXISTS backup_configuration(singleton INTEGER PRIMARY KEY CHECK(singleton=1),recovery_key TEXT NOT NULL)',
-  );
+  Future<void> _backupSchema() async {
+    await customStatement(
+      'CREATE TABLE IF NOT EXISTS backup_configuration(singleton INTEGER PRIMARY KEY CHECK(singleton=1),recovery_key TEXT NOT NULL,recovery_saved INTEGER NOT NULL DEFAULT 0)',
+    );
+    final columns = await customSelect(
+      'PRAGMA table_info(backup_configuration)',
+    ).get();
+    if (!columns.any((row) => row.read<String>('name') == 'recovery_saved')) {
+      await customStatement(
+        'ALTER TABLE backup_configuration ADD COLUMN recovery_saved INTEGER NOT NULL DEFAULT 0',
+      );
+    }
+  }
+
   Future<void> _createAudit() async {
     await customStatement(
       'CREATE TABLE IF NOT EXISTS grant_history(id TEXT PRIMARY KEY,approved_at INTEGER NOT NULL,payload TEXT NOT NULL)',

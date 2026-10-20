@@ -1,0 +1,46 @@
+{
+  "bundle": "C:\\Project\\network_config\\info-manage\\build\\codex-preview-0.4.0-12-995283f",
+  "source": "995283f1d5ef806a629f6cb917cca3bb7e88944f",
+  "binaryAndReferenceCopiesMatch": true,
+  "allWindowsHooksTargetFinalDirectory": true,
+  "configurationInstalled": false,
+  "trustGranted": false,
+  "realCodexEventsTested": false,
+  "files": [
+    {
+      "path": "hooks.json",
+      "sha256": "61b3ba810cef63a79a3955f696b64266fbae8774646c3f83787c9ccdb9319ec4",
+      "bytes": 2181
+    },
+    {
+      "path": "info-codex-hook.exe",
+      "sha256": "7578309491909b311883035e3e3b8c22fa493a454f6db38c3c3dea2fc6b83e59",
+      "bytes": 7035392
+    },
+    {
+      "path": "info-codex.exe",
+      "sha256": "92e2115c90561923c40f7ac686e5ad0dc5da9b0de52d6b4213dd67000c91ba8f",
+      "bytes": 7101440
+    },
+    {
+      "path": "info-runtime-worker.exe",
+      "sha256": "59cf09020539be93dff3f7ff2fdfe0adee4a622a60855aab9f4e56567cdb05ec",
+      "bytes": 6437376
+    },
+    {
+      "path": "skills/agent-info-access/references/credential-use.md",
+      "sha256": "8610c5d45571846d30a646bfb58ed27f48c52252f1d36efb138e66f1c55abbac",
+      "bytes": 13695
+    },
+    {
+      "path": "skills/agent-info-access/references/information-files.md",
+      "sha256": "9dc64a5e38d8f88f28a73a8ce8de9656e21138ee0d5b0c9b226cfc7982777209",
+      "bytes": 5748
+    },
+    {
+      "path": "skills/agent-info-access/SKILL.md",
+      "sha256": "5b9649c7d6a91d77a54451d34e9718b811bf1c6812df38acdcbb02950cd3b684",
+      "bytes": 11497
+    }
+  ]
+}

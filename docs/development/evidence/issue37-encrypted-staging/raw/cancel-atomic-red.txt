@@ -1,0 +1,16 @@
+Running build hooks...Running build hooks...00:00 +0: loading test/information_file_staging_test.dart
+00:00 +0: failed draft cancellation cannot partially remove its staged files
+00:00 +0 -1: failed draft cancellation cannot partially remove its staged files [E]
+  Expected: <2>
+    Actual: <1>
+  
+  package:matcher                                expect
+  test\information_file_staging_test.dart 182:5  main.<fn>
+  
+00:00 +0 -1: Some tests failed.
+
+Failing tests:
+  test/information_file_staging_test.dart: failed draft cancellation cannot partially remove its staged files
+
+Consider enabling the flag chain-stack-traces to receive more detailed exceptions.
+For example, 'dart test --chain-stack-traces'.

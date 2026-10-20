@@ -1,6 +1,8 @@
 import 'package:info_desktop/desktop_runtime.dart';
 
 class NativeDesktopFixture implements DesktopPlatform {
+  @override
+  String? openedRequestId;
   Future<void> Function(DesktopEvent)? events;
   bool hidden = false;
   bool terminated = false;
@@ -33,8 +35,8 @@ class NativeDesktopFixture implements DesktopPlatform {
   }
 
   @override
-  Future<bool> notifyNewRequest() async {
-    // This native boundary accepts no user-supplied notification payload.
+  Future<bool> notifyNewRequest(String requestId) async {
+    // The payload is an opaque routing ID, with no submitted content.
     notices.add('new_request');
     return deliveryAvailable;
   }

@@ -1,0 +1,198 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:info_core/info_core.dart';
+import 'package:info_desktop/approvals.dart';
+import 'package:info_desktop/history.dart';
+import 'package:info_desktop/ui.dart';
+
+void main() {
+  void viewport(WidgetTester tester) {
+    tester.view.physicalSize = const Size(1440, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+  }
+
+  Future<InformationItem> item(InformationService service) =>
+      service.owner.createInformation('Synthetic server', '', const [
+        FieldInput('Address', '', 'private-original-address'),
+        FieldInput('Account', '', 'private-account-value'),
+      ]);
+
+  Future<void> showHistory(
+    WidgetTester tester,
+    InformationService service,
+    String id,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: informationTheme(),
+        home: Scaffold(
+          body: AuthorizationHistory(owner: service.owner, initialRecordId: id),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets(
+    'handled approval keeps recorded names after a same-name field is restored with a new identity',
+    (tester) async {
+      viewport(tester);
+      final service = InformationService(
+        repository: MemoryInformationRepository(),
+      );
+      final original = await item(service);
+      final old = FieldRef(original.id, original.fields.first.id);
+      final session = service.agent.openSession('Synthetic chat');
+      final request = service.agent.request(session, 'Original request', [old]);
+      service.owner.approve(request.id, [old]);
+      final grant = service.agent.claim(session, request.id);
+      final recycled = await service.owner.deleteInformation(
+        original.id,
+        original.version,
+      );
+      final restored = await service.owner.restoreRecycled(recycled.id);
+      expect(restored.fields.first.id, isNot(old.fieldId));
+      await expectLater(
+        service.agent.read(grant.token, old),
+        throwsA(isA<AccessFailure>()),
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: informationTheme(),
+          home: Scaffold(
+            body: Approvals(
+              service: service,
+              port: 0,
+              focusRequestId: request.id,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Address'), findsWidgets);
+      expect(find.text('原字段已移除，旧授权不可读取'), findsOneWidget);
+      expect(find.textContaining('private-original-address'), findsNothing);
+      final visible = tester
+          .widgetList<Text>(find.byType(Text))
+          .map((t) => t.data ?? '')
+          .join('\n');
+      expect(visible, isNot(contains(old.fieldId)));
+      expect(visible, isNot(contains(old.itemId)));
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox());
+      await service.close();
+    },
+  );
+
+  testWidgets(
+    'history does not call a restored new identity readable under the old grant',
+    (tester) async {
+      viewport(tester);
+      final service = InformationService(
+        repository: MemoryInformationRepository(),
+      );
+      final original = await item(service);
+      final old = FieldRef(original.id, original.fields.first.id);
+      final session = service.agent.openSession('Synthetic chat');
+      final request = service.agent.request(session, 'Original history', [old]);
+      service.owner.approve(request.id, [old]);
+      final record = (await service.owner.history()).grants.single;
+      final recycled = await service.owner.deleteInformation(
+        original.id,
+        original.version,
+      );
+      await service.owner.restoreRecycled(recycled.id);
+      await showHistory(tester, service, record.id);
+      expect(find.text('原字段已移除'), findsOneWidget);
+      expect(find.text('范围已失效'), findsWidgets);
+      expect(find.textContaining('可读取'), findsNothing);
+      expect(find.textContaining('Address'), findsWidgets);
+      expect(find.textContaining('private-original-address'), findsNothing);
+      await tester.pumpWidget(const SizedBox());
+      await service.close();
+    },
+  );
+
+  testWidgets(
+    'history distinguishes a partially removed scope while the remaining field stays authorized',
+    (tester) async {
+      viewport(tester);
+      final service = InformationService(
+        repository: MemoryInformationRepository(),
+      );
+      final original = await item(service);
+      final fields = original.fields
+          .map((f) => FieldRef(original.id, f.id))
+          .toList();
+      final session = service.agent.openSession('Synthetic chat');
+      final request = service.agent.request(session, 'Partial scope', fields);
+      service.owner.approve(request.id, fields);
+      final grant = service.agent.claim(session, request.id);
+      final record = (await service.owner.history()).grants.single;
+      await service.owner.deleteInformation(
+        original.id,
+        original.version,
+        fieldId: fields.first.fieldId,
+      );
+      expect(
+        await service.agent.read(grant.token, fields.last),
+        'private-account-value',
+      );
+      await expectLater(
+        service.agent.read(grant.token, fields.first),
+        throwsA(isA<AccessFailure>()),
+      );
+      await showHistory(tester, service, record.id);
+      expect(find.text('部分字段已移除'), findsOneWidget);
+      expect(find.textContaining('可读取'), findsNothing);
+      expect(find.textContaining('Account'), findsWidgets);
+      await tester.pumpWidget(const SizedBox());
+      await service.close();
+    },
+  );
+
+  testWidgets(
+    'ended and archived historical approvals never claim current readable scope',
+    (tester) async {
+      viewport(tester);
+      for (final mode in ['revoked', 'expired', 'archived']) {
+        var now = DateTime.utc(2026, 10, 20);
+        final repository = MemoryInformationRepository();
+        final service = InformationService(
+          repository: repository,
+          clock: () => now,
+        );
+        final original = await item(service);
+        final ref = FieldRef(original.id, original.fields.first.id);
+        final session = service.agent.openSession('Synthetic $mode');
+        final request = service.agent.request(session, 'Scope $mode', [ref]);
+        service.owner.approve(request.id, [
+          ref,
+        ], lifetime: const Duration(minutes: 1));
+        final record = (await service.owner.history()).grants.single;
+        if (mode == 'revoked') {
+          service.owner.revoke(request.id);
+        } else if (mode == 'expired') {
+          now = now.add(const Duration(minutes: 2));
+          service
+              .owner
+              .requests; // Use the same clock-driven expiry as live requests.
+        } else {
+          await repository.saveGrantHistory(record.asRestored(now));
+        }
+        await showHistory(tester, service, record.id);
+        expect(
+          find.text(mode == 'archived' ? '历史归档 · 未授权' : '授权已结束'),
+          findsOneWidget,
+          reason: mode,
+        );
+        expect(find.textContaining('可读取'), findsNothing, reason: mode);
+        expect(find.textContaining('private-original-address'), findsNothing);
+        await tester.pumpWidget(const SizedBox());
+        await service.close();
+      }
+    },
+  );
+}

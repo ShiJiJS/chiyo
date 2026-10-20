@@ -1,9 +1,24 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
+import 'dart:io';
+import 'dart:typed_data';
+import 'package:crypto/crypto.dart';
+import 'runtime_process_identity.dart';
+export 'runtime_process_identity.dart';
+import 'runtime_material_files.dart';
+import 'new_file_publish.dart' as file_publication;
+import 'information_delivery_driver.dart';
+export 'information_delivery_driver.dart';
+export 'runtime_material_files.dart';
+import 'package:unorm_dart/unorm_dart.dart' as unorm;
+import 'credentials.dart';
+export 'credentials.dart';
 import 'organization_tasks.dart';
 export 'organization_tasks.dart';
 import 'information.dart';
+import 'information_files.dart';
+export 'information_files.dart';
 import 'templates.dart';
 import 'history.dart';
 export 'history.dart';
@@ -25,6 +40,26 @@ part 'update_access.dart';
 part 'recycle_access.dart';
 part 'revision_access.dart';
 part 'backup_access.dart';
+part 'workspace_access.dart';
+part 'library_access.dart';
+part 'information_file_access.dart';
+part 'information_draft_models.dart';
+part 'information_draft_access.dart';
+part 'information_attachment_access.dart';
+part 'information_delivery_models.dart';
+part 'information_delivery_access.dart';
+part 'credential_access.dart';
+part 'credential_field_migration.dart';
+part 'credential_runtime_models.dart';
+part 'focused_fill_models.dart';
+part 'focused_fill_access.dart';
+part 'credential_runtime_access.dart';
+part 'credential_execution_audit.dart';
+part 'credential_file_receivers.dart';
+part 'credential_material_access.dart';
+part 'credential_history_access.dart';
+part 'ssh_host_trust.dart';
+part 'proposal_access.dart';
 
 class AccessFailure implements Exception {
   const AccessFailure(this.status);
@@ -50,15 +85,6 @@ class RequestReceipt {
   final String id;
 }
 
-enum AccessRequestState {
-  pending,
-  approved,
-  denied,
-  expired,
-  cancelled,
-  revoked,
-}
-
 /// An owner-facing view of a request, without session secrets or grant tokens.
 class OwnerRequestSnapshot {
   OwnerRequestSnapshot({
@@ -72,8 +98,11 @@ class OwnerRequestSnapshot {
     required Iterable<FieldRef> fields,
     required Iterable<FieldRef>? approvedFields,
     required this.grantExpiresAt,
+    this.grantLifetime,
     this.sessionEnded = false,
+    Iterable<RecordedField> recordedFields = const [],
   }) : fields = List.unmodifiable(fields),
+       recordedFields = List.unmodifiable(recordedFields),
        approvedFields = approvedFields == null
            ? null
            : List.unmodifiable(approvedFields);
@@ -88,7 +117,11 @@ class OwnerRequestSnapshot {
   final List<FieldRef> fields;
   final List<FieldRef>? approvedFields;
   final DateTime? grantExpiresAt;
+  final Duration? grantLifetime;
   final bool sessionEnded;
+
+  /// Owner display names captured at request/approval, never old field values.
+  final List<RecordedField> recordedFields;
 }
 
 class _Request {
@@ -110,6 +143,7 @@ class _Request {
   ClaimedGrant? grant;
   DateTime? approvedAt;
   GrantHistory? history;
+  List<RecordedField> recordedFields = const [];
   final invalidatedFields = <FieldRef>{};
 }
 
@@ -119,12 +153,24 @@ class InformationService {
   InformationService({
     required InformationRepository repository,
     DateTime Function()? clock,
+    CredentialExecutableInspector? credentialExecutableInspector,
+    this.focusedFillDriver,
+    this.informationDeliveryFiles,
+    FocusedFillApplicationInspector? focusedFillApplicationInspector,
   }) : _repository = repository,
+       focusedFillApplicationInspector =
+           focusedFillApplicationInspector ?? inspectFocusedFillApplication,
+       credentialExecutableInspector =
+           credentialExecutableInspector ?? inspectCredentialExecutable,
        _clock = clock ?? DateTime.now {
     _recoverAudit();
   }
   InformationService.fictional({DateTime Function()? clock})
-    : _clock = clock ?? DateTime.now,
+    : focusedFillDriver = null,
+      informationDeliveryFiles = null,
+      focusedFillApplicationInspector = inspectFocusedFillApplication,
+      credentialExecutableInspector = inspectCredentialExecutable,
+      _clock = clock ?? DateTime.now,
       _repository = MemoryInformationRepository([
         InformationItem(
           'demo-server',
@@ -150,6 +196,23 @@ class InformationService {
         ),
       ]);
   final InformationRepository _repository;
+  final CredentialExecutableInspector credentialExecutableInspector;
+  final FocusedFillDriver? focusedFillDriver;
+  final FocusedFillApplicationInspector focusedFillApplicationInspector;
+  final _focusedFillTasks = <String, Future<void>>{};
+  final _failedFillAudits = <String>{};
+  PreparedFocusedFill? _preparedFocusedFill;
+  String? _activeFocusedFill;
+  Future<void> drainFocusedFills() async {
+    while (_focusedFillTasks.isNotEmpty) {
+      await Future.wait(_focusedFillTasks.values.toList());
+    }
+  }
+
+  final _credentialUseSessions = <String, String>{};
+  final _executionCapabilities = <String, String>{};
+  final _pendingExecutionReceipts = <String, Map<String, Object?>>{};
+  late Future<void> _runtimeWrites = Future.value();
   InformationField? _field(FieldRef ref) {
     for (final item in _repository.items) {
       if (item.id == ref.itemId) {
@@ -188,11 +251,26 @@ class InformationService {
     if (_backupBarrier case final barrier?) {
       return barrier.future.then((_) => close());
     }
-    if (_closed) return owner.retryAuditStorage();
+    if (_closed) {
+      return Future.wait<void>([
+        owner.retryAuditStorage(),
+        owner._releaseAllInformationFileDrafts(),
+        owner._closeInformationFileDeliveries(),
+        drainFocusedFills(),
+      ]).then((_) {});
+    }
     _closed = true;
     for (final request in _requests.values) {
       _expire(request);
+      if (request.state != AccessRequestState.pending &&
+          request.state != AccessRequestState.approved) {
+        continue;
+      }
       _finishHistory(request, GrantEventKind.applicationClosed);
+      if (request.state == AccessRequestState.pending) {
+        request.state = AccessRequestState.cancelled;
+      }
+      _recordRequest(request, applicationClosed: true);
     }
     _sessions.clear();
     _endCapabilities.clear();
@@ -201,10 +279,25 @@ class InformationService {
     _requests.clear();
     _grants.clear();
     _submitted.close();
-    return owner.retryAuditStorage();
+    return Future.wait<void>([
+      owner.retryAuditStorage(),
+      owner._releaseAllInformationFileDrafts(),
+      owner._closeInformationFileDeliveries(),
+      Future<void>.sync(
+        () => _preparedFocusedFill?.close(),
+      ).catchError((Object _) {}),
+      drainFocusedFills(),
+    ]).then((_) {});
   }
 
   final _random = Random.secure();
+  final InformationDeliveryFiles? informationDeliveryFiles;
+  final _pendingInformationDeliveries = <String, InformationFileDelivery>{};
+  bool _informationDeliveryCleanupScheduled = false;
+  bool _informationDeliveryCleanupRequested = false;
+  bool _informationDeliveryShutdownComplete = false;
+  Future<void> _informationDeliveryCleanup = Future.value();
+  final _inFlightInformationDeliveries = <String>{};
   String _secret() =>
       base64Url.encode(List.generate(32, (_) => _random.nextInt(256)));
 
@@ -240,11 +333,14 @@ class InformationService {
       _expire(request);
       if (request.state == AccessRequestState.pending) {
         request.state = AccessRequestState.cancelled;
+        _recordRequest(request, sessionEnded: true);
       } else if (request.state == AccessRequestState.approved) {
         request.state = AccessRequestState.revoked;
         _finishHistory(request, GrantEventKind.ended);
+        _recordRequest(request, sessionEnded: true);
       }
     }
+    _scheduleInformationDeliveryCleanup();
   }
 
   void _expire(_Request request) {
@@ -252,10 +348,13 @@ class InformationService {
     if (request.state == AccessRequestState.pending &&
         !_clock().isBefore(request.expiresAt)) {
       request.state = AccessRequestState.expired;
+      _recordRequest(request);
     } else if (request.state == AccessRequestState.approved &&
         !_clock().isBefore(request.grant!.expiresAt)) {
       request.state = AccessRequestState.expired;
       _finishHistory(request, GrantEventKind.expired);
+      _recordRequest(request);
+      _scheduleInformationDeliveryCleanup();
     }
   }
 
@@ -267,6 +366,7 @@ class InformationService {
       throw const AccessFailure('invalid_request');
     }
     request.state = state;
+    _recordRequest(request);
   }
 }
 
@@ -320,14 +420,22 @@ class AgentAccess {
     }
     final id = _service._secret();
     final now = _service._clock();
-    _service._requests[id] = _Request(
-      id,
-      session,
-      purpose,
-      Set.unmodifiable(fields),
-      now,
-      now.add(_service._requestLifetime),
-    );
+    _service._requests[id] =
+        _Request(
+            id,
+            session,
+            purpose,
+            Set.unmodifiable(fields),
+            now,
+            now.add(_service._requestLifetime),
+          )
+          ..recordedFields = fields.toSet().map((ref) {
+            final item = _service._repository.items.firstWhere(
+              (i) => i.id == ref.itemId,
+            );
+            final field = item.fields.firstWhere((f) => f.id == ref.fieldId);
+            return RecordedField(item.id, field.id, item.name, field.name);
+          }).toList();
     _service._submitted.add(id);
     return RequestReceipt(id);
   }
@@ -345,6 +453,9 @@ class AgentAccess {
   }
 
   Map<String, Object?> status(String session, String id) {
+    if (_service._credentialUseSessions.containsKey(id)) {
+      return credentialUseStatus(session, id);
+    }
     final request = _request(session, id);
     return {
       'status': request.state.name,
@@ -362,6 +473,10 @@ class AgentAccess {
   }
 
   ClaimedGrant claim(String session, String id) {
+    if (_service._credentialUseSessions.containsKey(id) &&
+        _service._sessionUseRequest(session, id).approvedFields.isEmpty) {
+      throw const CredentialUseFailure('scope_not_approved');
+    }
     final request = _request(session, id);
     if (request.grant == null) throw AccessFailure(request.state.name);
     if (request.state != AccessRequestState.approved) {
@@ -425,6 +540,7 @@ class ClaimedGrant {
 class OwnerAccess {
   OwnerAccess._(this._service);
   final InformationService _service;
+  final _informationFileDrafts = <String, InformationFileDraft>{};
   Stream<String> get requestSubmitted => _service._submitted.stream;
   Duration get requestLifetime => _service._requestLifetime;
   Future<void> setRequestLifetime(Duration duration) {
@@ -442,6 +558,15 @@ class OwnerAccess {
 
   List<InformationItem> get information => _service._repository.items;
   List<InformationTemplate> get templates => _service._repository.templates;
+  Future<void> deleteTemplate(String id, int expectedVersion) =>
+      _serialize(() async {
+        if (!serviceAvailable) throw const AccessFailure('service_unavailable');
+        final current = templates.where((t) => t.id == id).firstOrNull;
+        if (current == null || current.version != expectedVersion) {
+          throw const AccessFailure('template_changed');
+        }
+        await _service._repository.deleteTemplate(id);
+      });
 
   Future<InformationTemplate> createTemplate(
     String name,
@@ -541,13 +666,18 @@ class OwnerAccess {
     int templateVersion,
     String name,
     String description,
-    Map<String, String> values,
-  ) => _serialize(() async {
+    Map<String, String> values, {
+    String? directoryId,
+    Iterable<String> tagIds = const [],
+  }) => _serialize(() async {
     final matches = templates.where((t) => t.id == templateId);
     if (matches.isEmpty || matches.single.version != templateVersion) {
       throw const AccessFailure('template_changed');
     }
     final template = matches.single;
+    if (template.fields.any((f) => f.kind == FieldKind.file)) {
+      throw const AccessFailure('attachment_missing');
+    }
     if (values.length != template.fields.length ||
         template.fields.any((f) => !values.containsKey(f.id))) {
       throw const AccessFailure('invalid_information');
@@ -561,6 +691,8 @@ class OwnerAccess {
                 FieldInput(f.name, f.description, values[f.id]!, kind: f.kind),
           )
           .toList(),
+      directoryId: directoryId,
+      tagIds: tagIds,
     );
   });
   Future<void> _writes = Future.value();
@@ -579,15 +711,36 @@ class OwnerAccess {
   Future<InformationItem> createInformation(
     String name,
     String description,
-    List<FieldInput> fields,
-  ) => _serialize(() => _createInformation(name, description, fields));
+    List<FieldInput> fields, {
+    String? directoryId,
+    Iterable<String> tagIds = const [],
+  }) => _serialize(
+    () => _createInformation(
+      name,
+      description,
+      fields,
+      directoryId: directoryId,
+      tagIds: tagIds,
+    ),
+  );
 
   Future<InformationItem> _createInformation(
     String name,
     String description,
-    List<FieldInput> fields,
-  ) async {
+    List<FieldInput> fields, {
+    String? directoryId,
+    Iterable<String> tagIds = const [],
+  }) async {
     if (_service._closed) throw const AccessFailure('service_unavailable');
+    if (fields.any((f) => f.kind == FieldKind.file)) {
+      throw const AccessFailure('unsupported_file_write');
+    }
+    _checkParent(directoryId);
+    final selectedTags = tagIds.toSet();
+    if (selectedTags.length > 100 ||
+        selectedTags.any((id) => !tags.any((t) => t.id == id))) {
+      throw const AccessFailure('invalid_information');
+    }
     if (name.trim().isEmpty ||
         name.length > 200 ||
         description.length > 2000 ||
@@ -622,6 +775,8 @@ class OwnerAccess {
           .toList(),
       createdAt: now,
       modifiedAt: now,
+      directoryId: directoryId,
+      tagIds: selectedTags,
     );
     await _service._repository.save(item);
     return item;
@@ -671,7 +826,16 @@ class OwnerAccess {
       fields: r.fields,
       approvedFields: r.grant?.fields,
       grantExpiresAt: r.grant?.expiresAt,
+      grantLifetime: r.approvedAt == null
+          ? null
+          : r.grant?.expiresAt.difference(r.approvedAt!),
       sessionEnded: _service._endedSessions.contains(r.session),
+      recordedFields: {
+        for (final field in r.recordedFields)
+          FieldRef(field.itemId, field.fieldId): field,
+        for (final field in r.history?.fields ?? const <RecordedField>[])
+          FieldRef(field.itemId, field.fieldId): field,
+      }.values,
     );
   }).toList();
   void revoke(String requestId) {
@@ -680,6 +844,8 @@ class OwnerAccess {
     if (request?.grant == null) throw const AccessFailure('invalid_request');
     request!.state = AccessRequestState.revoked;
     _service._finishHistory(request, GrantEventKind.revoked);
+    _service._recordRequest(request);
+    _service._scheduleInformationDeliveryCleanup();
   }
 
   void deny(String requestId) {
@@ -693,6 +859,7 @@ class OwnerAccess {
     String requestId,
     List<FieldRef> fields, {
     Duration lifetime = const Duration(hours: 8),
+    Map<FieldRef, int>? reviewedVersions,
   }) {
     if (_service._backupBusy) throw const AccessFailure('service_unavailable');
     final request = _service._requests[requestId];
@@ -708,6 +875,15 @@ class OwnerAccess {
         fields.any((f) => _service._field(f) == null)) {
       throw const AccessFailure('invalid_scope');
     }
+    if (reviewedVersions != null &&
+        (reviewedVersions.length != fields.toSet().length ||
+            fields.any(
+              (ref) => reviewedVersions[ref] != _service._field(ref)!.version,
+            ))) {
+      // Check the displayed field revision immediately before creating a grant.
+      // Later reads still follow the approved stable field's current content.
+      throw const AccessFailure('scope_changed');
+    }
     if (lifetime < const Duration(minutes: 1) ||
         lifetime > const Duration(days: 7)) {
       throw const AccessFailure('invalid_duration');
@@ -722,5 +898,6 @@ class OwnerAccess {
     _service._grants[request.grant!.token] = request;
     request.state = AccessRequestState.approved;
     _service._approveHistory(request);
+    _service._recordRequest(request);
   }
 }

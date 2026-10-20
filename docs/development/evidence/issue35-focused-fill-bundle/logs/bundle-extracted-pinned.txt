@@ -1,0 +1,24 @@
+PASS: SQLCipher 4.19.0 community; current-user DPAPI, encrypted reopen, token invalidation, plaintext scan, schema migration
+Prepared bundle: C:\Users\Todoki\AppData\Local\Temp\Agent Info 验证 896f9e352aa443c6b8c2e4484f137d63\最终 Codex bundle
+Review hooks.json and Skill before installing or trusting.
+Resolving dependencies...
+Downloading packages...
+  shelf 1.4.2 (1.4.3 available)
+  shelf_static 1.1.3 (1.2.0 available)
+Got dependencies!
+2 packages have newer versions incompatible with dependency constraints.
+Try `dart pub outdated` for more information.
+00:00 +0: loading test/bundle_preparation_test.dart
+00:00 +0: test/bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:00 +1: test/cli_test.dart: real CLI process claims only approved fields without printing credentials
+00:02 +2: test/codex_process_test.dart: a stalled end call stops within its deadline and retains capabilities for a later retry
+00:02 +3: test/codex_process_test.dart: root SessionEnd ends every startup generation and its delegated child without reading a transcript
+00:04 +4: test/codex_process_test.dart: a parent proof delegates only the same grant and deadline to its intended child
+00:05 +5: test/codex_process_test.dart: the generated Windows SessionEnd command terminates a live session within its 3 second hook timeout
+00:06 +6: test/codex_process_test.dart: rendered Windows hook command forwards documented JSON stdin
+00:06 +7: test/codex_process_test.dart: explicit reconnect creates a fresh association without recovering grants
+00:07 +8: test/codex_process_test.dart: known chat and request IDs cannot recover a capability, even by restarting the hook
+00:08 +9: test/codex_process_test.dart: malformed associations and hook input fail without leaking input or reading transcripts
+00:08 +10: test/codex_process_test.dart: hook association supports distinct CLI processes without reapproval
+00:09 +11: All tests passed!
+PASS: extracted checksums, SDK-free CLI/hooks, synthetic SQLCipher/DPAPI. Desktop and user configuration untouched.

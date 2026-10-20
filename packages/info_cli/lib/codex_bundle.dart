@@ -7,6 +7,8 @@ Future<void> writeCodexConfiguration(
   Directory output,
   String skillSource, {
   Directory? finalDirectory,
+  String? credentialUseReference,
+  String? informationFilesReference,
 }) async {
   final bundle = finalDirectory ?? output;
   final suffix = Platform.isWindows ? '.exe' : '';
@@ -56,4 +58,16 @@ Future<void> writeCodexConfiguration(
   await File('${skill.path}/SKILL.md').writeAsString(
     '$skillSource\nBundle executable: `${bundle.path}/info-codex$suffix`.\n',
   );
+  if (credentialUseReference != null) {
+    await Directory('${skill.path}/references').create();
+    await File(
+      '${skill.path}/references/credential-use.md',
+    ).writeAsString(credentialUseReference);
+  }
+  if (informationFilesReference != null) {
+    await Directory('${skill.path}/references').create(recursive: true);
+    await File(
+      '${skill.path}/references/information-files.md',
+    ).writeAsString(informationFilesReference);
+  }
 }

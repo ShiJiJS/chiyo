@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:info_core/info_core.dart';
@@ -7,6 +8,61 @@ import 'package:info_desktop/main.dart';
 import 'support/desktop_platform_fixture.dart';
 
 void main() {
+  test(
+    'quit works when library opening failed before runtime initialization',
+    () async {
+      final native = NativeDesktopFixture();
+      final bootstrap = DesktopBootstrap(
+        platform: native,
+        openLibrary: () async => throw StateError('key_unavailable'),
+      );
+      await bootstrap.start();
+      expect(bootstrap.state, DesktopStartupState.failed);
+      expect(bootstrap.runtime, isNull);
+      await native.events!(DesktopEvent.quit);
+      expect(native.terminated, isTrue);
+    },
+  );
+
+  test(
+    'quit during opening waits for startup and closes owned resources once',
+    () async {
+      final native = NativeDesktopFixture();
+      final opening = Completer<DesktopLibrary>();
+      final entered = Completer<void>();
+      final service = InformationService(
+        repository: MemoryInformationRepository(),
+      );
+      var closed = 0;
+      final bootstrap = DesktopBootstrap(
+        port: 0,
+        platform: native,
+        openLibrary: () {
+          entered.complete();
+          return opening.future;
+        },
+      );
+      final start = bootstrap.start();
+      await entered.future;
+      final quit = native.events!(DesktopEvent.quit);
+      await Future<void>.delayed(Duration.zero);
+      expect(native.terminated, isFalse);
+      opening.complete(
+        DesktopLibrary(
+          service: service,
+          close: () async {
+            closed++;
+          },
+        ),
+      );
+      await start;
+      await quit;
+      expect(native.terminated, isTrue);
+      expect(closed, 1);
+      bootstrap.runtime!.dispose();
+    },
+  );
+
   for (final event in [DesktopEvent.closeWindow, DesktopEvent.quit]) {
     test('cleaned startup failure still handles native $event', () async {
       final repository = TransientAuditRepository();
@@ -195,7 +251,10 @@ void main() {
       expect(repository.grantHistory, isEmpty);
       expect(native.hidden, isFalse);
       await native.events!(DesktopEvent.closeWindow);
-      await native.events!(DesktopEvent.quit);
+      await expectLater(
+        native.events!(DesktopEvent.quit),
+        throwsA(isA<AccessFailure>()),
+      );
       expect(native.terminated, isFalse);
       expect(libraryClosed, isFalse);
       final failedPort = bootstrap.boundPort!;

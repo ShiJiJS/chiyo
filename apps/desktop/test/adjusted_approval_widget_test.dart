@@ -1,3 +1,4 @@
+import 'support/approval_interactions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:info_core/info_core.dart';
@@ -30,13 +31,17 @@ void main() async {
       await tester.ensureVisible(unavailable);
       await tester.pumpAndSettle();
       await tester.tap(unavailable);
-      await tester.tap(find.text('补选或改选字段'));
+      await tester.tap(find.text('调整提供范围 / 补选其他信息'));
       await tester.pumpAndSettle();
       await tester.ensureVisible(
-        find.byKey(ValueKey('field-${remaining.fieldId}')),
+        find.byKey(ValueKey('scope-field-${remaining.fieldId}')),
       );
       await tester.pumpAndSettle();
-      await tester.tap(find.byKey(ValueKey('field-${remaining.fieldId}')));
+      await tester.tap(
+        find.byKey(ValueKey('scope-field-${remaining.fieldId}')),
+      );
+      await tester.tap(find.byKey(const ValueKey('scope-apply')));
+      await tester.pumpAndSettle();
       await tester.ensureVisible(find.text('批准所选字段'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('批准所选字段'));
@@ -72,26 +77,31 @@ void main() async {
     ]);
     await tester.pumpWidget(InformationApp(service: core, port: 47125));
 
-    expect(find.text('Agent 申请范围'), findsOneWidget);
+    expect(find.text('申请范围'), findsOneWidget);
     await tester.ensureVisible(
       find.byKey(ValueKey('field-${requested.fieldId}')),
     );
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(ValueKey('field-${requested.fieldId}')));
-    await tester.tap(find.text('补选或改选字段'));
+    await tester.tap(find.text('调整提供范围 / 补选其他信息'));
     await tester.pumpAndSettle();
     await tester.ensureVisible(
-      find.byKey(ValueKey('field-${replacement.fieldId}')),
+      find.byKey(ValueKey('scope-field-${replacement.fieldId}')),
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(ValueKey('field-${replacement.fieldId}')));
+    await tester.tap(
+      find.byKey(ValueKey('scope-field-${replacement.fieldId}')),
+    );
+    await tester.tap(find.byKey(const ValueKey('scope-apply')));
+    await tester.pumpAndSettle();
     await tester.ensureVisible(
       find.byKey(ValueKey('grant-lifetime-${request.id}')),
     );
     await tester.pumpAndSettle();
-    await tester.enterText(
+    await selectGrantMinutes(
+      tester,
       find.byKey(ValueKey('grant-lifetime-${request.id}')),
-      '30',
+      30,
     );
     await tester.ensureVisible(find.text('批准所选字段'));
     await tester.pumpAndSettle();
@@ -106,8 +116,9 @@ void main() async {
       () => core.agent.read(grant.token, requested),
       throwsA(isA<AccessFailure>()),
     );
-    expect(find.text('已批准字段：Server B · Private notes B'), findsOneWidget);
-    expect(find.text('Agent 申请范围'), findsOneWidget);
+    expect(find.text('Server B'), findsWidgets);
+    expect(find.text('Private notes B'), findsWidgets);
+    expect(find.text('申请范围'), findsOneWidget);
     await tester.pumpWidget(const SizedBox());
     core.close();
   });

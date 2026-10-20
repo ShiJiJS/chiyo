@@ -1,0 +1,17 @@
+Running build hooks...Running build hooks...00:00 +0: loading test/credential_backup_test.dart
+00:00 +0: format five restores credential bytes, versions, states and links under a fresh local key
+00:00 +0 -1: format five restores credential bytes, versions, states and links under a fresh local key [E]
+  StorageFailure(credentials_backup_not_supported)
+  package:info_storage/backups.dart 276:7     InformationBackups.exportTo
+  test\credential_backup_test.dart 33:60      main.<fn>.<fn>
+  package:info_core/backup_access.dart 27:34  OwnerLibraryBackup._withLibrarySnapshot.<fn>
+  ===== asynchronous gap ===========================
+  test\credential_backup_test.dart 33:5       main.<fn>
+  
+00:00 +0 -1: Some tests failed.
+
+Failing tests:
+  test/credential_backup_test.dart: format five restores credential bytes, versions, states and links under a fresh local key
+
+Consider enabling the flag chain-stack-traces to receive more detailed exceptions.
+For example, 'dart test --chain-stack-traces'.

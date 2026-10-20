@@ -1,0 +1,17 @@
+[
+  {
+    "file": "purple-1440-revision-confirm.png",
+    "sha256": "10FAFDC190FCD390CEBCE1AD4D60AEAB6F278FF0DDC44AD55AF349559963B8B0",
+    "supersedes": "../review-round2/purple-1440-revision-confirm.png"
+  },
+  {
+    "file": "purple-1440-revision-failure.png",
+    "sha256": "77480F61BCEFFB39BB463A8D3E8807747A1B082B1A826C9469E5D7D60D110C2F",
+    "supersedes": "../review-round2/purple-1440-revision-failure.png"
+  },
+  {
+    "file": "purple-1440-query-failure.png",
+    "sha256": "E19E5435E29051BF4C20A4DC358FF2516F0FDB50AB720D02E4C0281B25E8B630",
+    "supersedes": null
+  }
+]

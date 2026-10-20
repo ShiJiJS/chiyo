@@ -1,0 +1,16 @@
+00:00 +0: loading test/credential_use_test.dart
+00:00 +0: pending denied revoked expired and cross-session requests never consume a launch attempt
+00:00 +1: runtime status timestamps use UTC milliseconds even when the clock has microseconds
+00:00 +2: an explicitly null field-read scope is rejected rather than treated as an omitted scope
+00:00 +3: audit failure after consumption never advertises an unused attempt
+00:00 +4: gh API auth and host headers are rejected in split, attached and grouped flag forms
+00:00 +5: approved gh write arguments beginning with an exclamation mark stay literal
+00:00 +6: identical execution reports can be retried after a lost response without changing facts
+00:00 +7: credential request is discoverable through the bounded owner inbox
+00:00 +8: execution report cannot invent the OS process creation identity
+00:00 +9: session ending after committed consumption records the failed preparation and never returns material
+00:00 +10: combined decision audit failure publishes neither independent permission nor half a decision
+00:00 +11: audit failure rolls back a start attempt before private material is delivered
+00:00 +12: credential invalidation is latched while field approval remains independent
+00:00 +13: approved fixed Token plan is consumed once and keeps its field permission
+00:00 +14: All tests passed!

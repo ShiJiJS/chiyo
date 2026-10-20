@@ -26,7 +26,18 @@ Future<void> main(List<String> args) async {
       return;
     }
     final skill = await File('${source.path}/template/SKILL.md').readAsString();
-    for (final name in ['info-codex.exe', 'info-codex-hook.exe']) {
+    final credentialUseReference = await File(
+      '${source.path}/template/references/credential-use.md',
+    ).readAsString();
+    final informationFilesReference = await File(
+      '${source.path}/template/references/information-files.md',
+    ).readAsString();
+    const binaries = [
+      'info-codex.exe',
+      'info-codex-hook.exe',
+      'info-runtime-worker.exe',
+    ];
+    for (final name in binaries) {
       if (!await File('${source.path}/$name').exists()) {
         throw const FileSystemException();
       }
@@ -34,11 +45,17 @@ Future<void> main(List<String> args) async {
     await output.parent.create(recursive: true);
     final staging = await output.parent.createTemp('.agent-info-prepare-');
     try {
-      for (final name in ['info-codex.exe', 'info-codex-hook.exe']) {
+      for (final name in binaries) {
         await File('${source.path}/$name').copy('${staging.path}/$name');
       }
       // Render using the final directory, not the temporary staging directory.
-      await writeCodexConfiguration(staging, skill, finalDirectory: output);
+      await writeCodexConfiguration(
+        staging,
+        skill,
+        finalDirectory: output,
+        credentialUseReference: credentialUseReference,
+        informationFilesReference: informationFilesReference,
+      );
       if (await FileSystemEntity.type(output.path, followLinks: false) !=
           FileSystemEntityType.notFound) {
         throw const FileSystemException();

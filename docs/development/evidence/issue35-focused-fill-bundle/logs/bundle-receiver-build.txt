@@ -1,0 +1,4 @@
+适用于 .NET Framework MSBuild 版本 17.14.60+43b635718
+
+  fixture_main.cpp
+  focus_fixture.vcxproj -> C:\Project\network_config\info-manage\apps\desktop\build\windows\x64\focused_input\Release\info-focus-fixture.exe

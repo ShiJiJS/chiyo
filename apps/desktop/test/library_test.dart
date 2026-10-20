@@ -11,7 +11,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(home: InformationLibrary(owner: service.owner)),
     );
-    await tester.tap(find.text('新建信息'));
+    await tester.tap(find.byKey(const ValueKey('new-information')));
     await tester.pumpAndSettle();
     await tester.enterText(find.byKey(const ValueKey('item-name')), '虚构服务器');
     await tester.enterText(find.byKey(const ValueKey('field-name-0')), '地址');
@@ -19,7 +19,7 @@ void main() {
       find.byKey(const ValueKey('field-value-0')),
       'fictional.invalid',
     );
-    await tester.tap(find.text('保存信息'));
+    await tester.tap(find.byKey(const ValueKey('save-information')));
     await tester.pumpAndSettle();
     expect(
       service.owner.information.single.fields.single.value,

@@ -1,0 +1,17 @@
+00:00 +0: loading test/credential_history_facts_test.dart
+00:00 +0: credential history preserves the requested name and actual decision and revocation times after metadata changes
+00:00 +0 -1: credential history preserves the requested name and actual decision and revocation times after metadata changes [E]
+  Expected: 'revoked'
+    Actual: <null>
+     Which: not an <Instance of 'String'>
+  
+  package:matcher                               expect
+  test\credential_history_facts_test.dart 40:7  main.<fn>
+  
+00:00 +0 -1: Some tests failed.
+
+Failing tests:
+  test/credential_history_facts_test.dart: credential history preserves the requested name and actual decision and revocation times after metadata changes
+
+Consider enabling the flag chain-stack-traces to receive more detailed exceptions.
+For example, 'dart test --chain-stack-traces'.

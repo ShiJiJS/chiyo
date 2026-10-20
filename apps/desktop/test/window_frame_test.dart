@@ -1,11 +1,79 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:info_desktop/window_frame.dart';
 
 void main() {
   const channel = MethodChannel('agent_info_manage/window');
+  testWidgets('caption controls remain accessible above the workspace route', (
+    tester,
+  ) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.windows;
+    addTearDown(() => debugDefaultTargetPlatformOverride = null);
+    final semantics = tester.ensureSemantics();
+    final commands = <String>[];
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(channel, (
+      call,
+    ) async {
+      commands.add(call.method);
+      return call.method == 'enableCustomFrame' ? false : null;
+    });
+    addTearDown(
+      () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        channel,
+        null,
+      ),
+    );
+    try {
+      await tester.pumpWidget(
+        MaterialApp(
+          builder: (_, child) => DesktopWindowFrame(child: child!),
+          home: const Scaffold(body: Text('Workspace')),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        tester.semantics.simulatedAccessibilityTraversal(),
+        containsAll([
+          isSemantics(tooltip: '最小化', isButton: true, hasTapAction: true),
+          isSemantics(tooltip: '最大化', isButton: true, hasTapAction: true),
+          isSemantics(tooltip: '关闭窗口', isButton: true, hasTapAction: true),
+          isSemantics(label: 'Workspace'),
+        ]),
+      );
+      expect(tester.getTopLeft(find.byType(Scaffold)).dy, 34);
+      expect(
+        tester.getTopLeft(find.byKey(const ValueKey('window-close'))).dy,
+        0,
+      );
+      tester.semantics.performAction(
+        find.semantics.byPredicate(
+          (node) => node.getSemanticsData().tooltip == '最小化',
+        ),
+        SemanticsAction.focus,
+      );
+      await tester.pumpAndSettle();
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pumpAndSettle();
+      expect(commands, ['enableCustomFrame', 'minimize']);
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pumpAndSettle();
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pumpAndSettle();
+      expect(commands.last, 'toggleMaximize');
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pumpAndSettle();
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pumpAndSettle();
+      expect(commands.last, 'close');
+      await tester.pumpWidget(const SizedBox());
+    } finally {
+      semantics.dispose();
+      debugDefaultTargetPlatformOverride = null;
+    }
+  });
   testWidgets(
     'custom caption routes controls to native host and supports dragging',
     (tester) async {

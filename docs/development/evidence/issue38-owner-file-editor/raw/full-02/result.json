@@ -1,0 +1,18 @@
+{
+  "sourceRevision": "cb2d5f1dffa8e5eb5f00b20961d21614439f3813",
+  "phases": [
+    {
+      "phase": "checks",
+      "exitCode": 0
+    },
+    {
+      "phase": "repeat-01",
+      "exitCode": 0
+    },
+    {
+      "phase": "repeat-02",
+      "exitCode": 0
+    }
+  ],
+  "unexpectedLocks": []
+}

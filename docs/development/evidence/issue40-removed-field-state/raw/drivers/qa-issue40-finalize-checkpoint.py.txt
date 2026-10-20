@@ -1,0 +1,54 @@
+from pathlib import Path
+import hashlib, json, os, shutil, subprocess, sys
+
+sys.stdout.reconfigure(encoding='utf-8')
+root = Path.cwd()
+out = root/'build/qa-issue40'
+sha = lambda p: hashlib.sha256(p.read_bytes()).hexdigest()
+locks = {root/p/'pubspec.lock': (root/p/'pubspec.lock').read_bytes() for p in
+         ['packages/info_core', 'packages/info_storage', 'packages/info_cli', 'apps/desktop']}
+expected = ['f8220e6477f28a1bb4b1914847377b675dbd5cbf50ca609bd23ded65e2fd5328',
+            'd5def0ba580249b39ce5f42292705851b16230903276c6a17ec9e2af4df30e39',
+            'b8695e9c135a0441eb384507acb347d334a190451f63be7874e22c058f56b3c2',
+            '4c5e88461035c36d85d8fa9fb50f69e1450aa1662f677e5723417471f669c70b']
+assert [hashlib.sha256(b).hexdigest() for b in locks.values()] == expected
+norm = lambda b: b.replace(b'https://pub.flutter-io.cn', b'https://pub.dev').replace(b'\r\n', b'\n')
+env = os.environ.copy()
+env.update(PUB_HOSTED_URL='https://pub.flutter-io.cn', FLUTTER_STORAGE_BASE_URL='https://storage.flutter-io.cn')
+dart='C:/Users/Todoki/.local/share/flutter/bin/cache/dart-sdk/bin/dart.exe'
+if not (out/'qa-helper-analyze.txt').exists():
+    try:
+        for p,b in locks.items(): p.write_bytes(b.replace(b'https://pub.dev', b'https://pub.flutter-io.cn'))
+        with (out/'qa-helper-analyze.txt').open('wb') as log:
+            code = subprocess.run([dart,'analyze','--fatal-infos'], cwd=root/'packages/info_cli', env=env,
+                                  stdout=log, stderr=subprocess.STDOUT).returncode
+        assert code == 0
+    finally:
+        for p,b in locks.items():
+            assert norm(p.read_bytes()) == norm(b), str(p)
+            p.write_bytes(b)
+        assert [sha(p) for p in locks] == expected
+else:
+    assert 'No issues found!' in (out/'qa-helper-analyze.txt').read_text(encoding='utf-8')
+payload=root/'build/windows-preview-0.4.0-12-2fe6189/AgentInfoManage'
+manifest=json.loads((payload/'manifest.json').read_text(encoding='utf-8-sig'))
+for entry in manifest['files']:
+    p=payload/entry['path']
+    assert p.resolve().is_relative_to(payload.resolve())
+    assert p.stat().st_size == entry['bytes'] and sha(p) == entry['sha256'], str(p)
+actual={str(p.relative_to(payload)).replace('\\','/') for p in payload.rglob('*') if p.is_file()}
+assert actual == {e['path'].replace('\\','/') for e in manifest['files']} | {'manifest.json'}
+archive=next(payload.parent.glob('*.zip'))
+assert sha(archive) == Path(str(archive)+'.sha256').read_text(encoding='utf-8-sig').split()[0]
+proof=dict(productSource=manifest['sourceCommit'], release=manifest['release'], payloadFiles=len(manifest['files']),
+           archiveBytes=archive.stat().st_size, archiveSha256=sha(archive), manifestSha256=sha(payload/'manifest.json'),
+           appSoSha256=sha(payload/'app/data/app.so'), appExeSha256=sha(payload/'app/info_desktop.exe'),
+           initialPackageCommandPassed=False, independentExtractedVerificationPassed=True,
+           firstCloseTimeoutRootCauseEstablished=False, corePassed=275,storagePassed=161,cliPassed=94,desktopPassed=166,
+           passed=696,skipped=20,extractedPassed=23,extractedOverlapNotAdded=True,
+           noRemainingOwnedProductOrLifecycleHost=True)
+(out/'artifact-checkpoint.json').write_text(json.dumps(proof,indent=2)+'\n',encoding='utf-8')
+state=json.loads((out/'native-preview/running.json').read_text(encoding='utf-8-sig'))
+preview=Path(state['root'])
+shutil.copyfile(preview/'expected.json',out/'native-preview/fixture-proof.json')
+print(json.dumps(proof,ensure_ascii=False,indent=2))

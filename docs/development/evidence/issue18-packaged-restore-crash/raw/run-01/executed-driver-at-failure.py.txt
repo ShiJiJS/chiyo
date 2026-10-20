@@ -1,0 +1,265 @@
+"""Intentionally interrupt this test's own packaged Windows restore process.
+
+Only a new aim-packaged-restore-crash-* synthetic root is used. An 80MiB format8
+fixture is created through the normal Owner API. No production binary is changed.
+The operator selects its backup/key through native dialogs, checks preview and
+writes preview-observed.json. A watcher is then armed; the operator clicks the
+actual Confirm restore button. Only after a new rollback journal and >=4MiB
+database growth are observed does it terminate the exact Popen child handle.
+This is an intentional crash test, never a fallback for a failed normal quit.
+
+The helper checks rollback/integrity/settings with SQLCipher before SDK open.
+The same target is restarted and restored normally through the real UI. Write
+restored-observed.json only after actual success is visible. No raw keys or file
+bodies may be read or attached. Receipts record actual operator observations.
+Normal exits use only `app quit --pid` for this script's own child. Failures keep
+their synthetic root. The test never exits another installation or edits a real
+library, user configuration, notification setting or OS policy.
+"""
+from pathlib import Path
+import argparse
+import hashlib
+import json
+import os
+import queue
+import shutil
+import socket
+import subprocess
+import sys
+import tempfile
+import threading
+import time
+
+sys.stdout.reconfigure(encoding="utf-8")
+parser = argparse.ArgumentParser(description=__doc__)
+for name in ["delivery", "dart", "evidence"]:
+    parser.add_argument("--" + name, type=Path, required=True)
+args = parser.parse_args()
+if sys.platform != "win32":
+    parser.error("This actual-package acceptance requires Windows")
+root = Path(__file__).resolve().parent.parent
+out = args.evidence.resolve()
+out.mkdir(parents=True, exist_ok=False)
+payload = args.delivery.resolve(strict=True)
+manifest = json.loads((payload / "manifest.json").read_text(encoding="utf-8-sig"))
+for entry in manifest["files"]:
+    file = (payload / entry["path"]).resolve(strict=True)
+    assert file.is_relative_to(payload)
+    assert file.stat().st_size == entry["bytes"] and hashlib.sha256(file.read_bytes()).hexdigest() == entry["sha256"]
+app, cli = payload / "app/info_desktop.exe", payload / "cli/info.exe"
+dart = str(args.dart.resolve(strict=True))
+temp = Path(tempfile.mkdtemp(prefix="aim-packaged-restore-crash-")).resolve()
+assert temp.parent == Path(tempfile.gettempdir()).resolve()
+environment = os.environ.copy()
+environment.update(PUB_HOSTED_URL="https://pub.flutter-io.cn", FLUTTER_STORAGE_BASE_URL="https://storage.flutter-io.cn")
+locks = {root / name / "pubspec.lock": (root / name / "pubspec.lock").read_bytes()
+         for name in ["packages/info_core", "packages/info_cli", "packages/info_storage", "apps/desktop"]}
+normalize = lambda b: b.replace(b"https://pub.flutter-io.cn", b"https://pub.dev").replace(b"\r\n", b"\n")
+facts = {"productSource": manifest["sourceCommit"], "complete": False, "checks": []}
+streams = []
+process = agent = watcher = None
+watch_stop = threading.Event()
+
+
+def check(name, condition, **data):
+    facts["checks"].append(dict(check=name, passed=bool(condition), **data))
+    assert condition, name
+
+
+def phase(stage, **data):
+    value = dict(phase=stage, **data)
+    text = json.dumps(value)
+    (out / "phase.json").write_text(text + "\n", encoding="utf-8")
+    with (out / "phases.jsonl").open("a", encoding="utf-8") as log:
+        log.write(text + "\n")
+    print(text, flush=True)
+
+
+def run(name, arguments):
+    with (out / (name + ".txt")).open("wb") as log:
+        result = subprocess.run([dart, *arguments], cwd=root / "packages/info_storage", env=environment,
+                                stdout=log, stderr=subprocess.STDOUT, timeout=180)
+    check(name, result.returncode == 0)
+    text = (out / (name + ".txt")).read_text(encoding="utf-8", errors="replace")
+    start = text.find('{"status":')
+    return json.loads(text[start:].strip()) if start >= 0 else None
+
+
+def helper(action):
+    return run(action, ["run", "test/support/packaged_restore_crash_fixture.dart", action, str(temp)])
+
+
+class Agent:
+    def __init__(self):
+        log = (out / "agent-stderr.txt").open("wb")
+        streams.append(log)
+        self.child = subprocess.Popen([str(cli)], cwd=cli.parent, stdin=subprocess.PIPE,
+                                      stdout=subprocess.PIPE, stderr=log, text=True, encoding="utf-8",
+                                      creationflags=subprocess.CREATE_NO_WINDOW)
+        self.lines = queue.Queue()
+
+        def read():
+            for line in self.child.stdout:
+                self.lines.put(line)
+        threading.Thread(target=read, daemon=True).start()
+
+    def call(self, command, **data):
+        self.child.stdin.write(json.dumps(dict(command=command, **data)) + "\n")
+        self.child.stdin.flush()
+        return json.loads(self.lines.get(timeout=45))
+
+    def close(self):
+        self.child.stdin.close()
+        assert self.child.wait(timeout=10) == 0
+
+
+def start(label):
+    global process
+    assert process is None or process.poll() is not None
+    with socket.socket() as available:
+        available.bind(("127.0.0.1", 47125))
+    child_env = environment.copy()
+    child_env["LOCALAPPDATA"] = str(temp / "target")
+    log = (out / f"app-{label}.txt").open("wb")
+    streams.append(log)
+    process = subprocess.Popen([str(app)], cwd=app.parent, env=child_env,
+                               stdin=subprocess.DEVNULL, stdout=log, stderr=subprocess.STDOUT)
+    end = time.monotonic() + 30
+    while time.monotonic() < end:
+        if agent.call("capabilities")["status"] == "ok":
+            break
+        assert process.poll() is None
+        time.sleep(.2)
+    else:
+        raise RuntimeError("Packaged service did not become ready")
+    ports = subprocess.run(["powershell", "-NoProfile", "-Command",
+                            "Get-NetTCPConnection -LocalPort 47125 -State Listen -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -Unique"],
+                           capture_output=True, text=True, timeout=15)
+    check("http-port-owned-by-child", ports.stdout.strip() == str(process.pid), processId=process.pid)
+
+
+def stop():
+    result = subprocess.run([str(cli), "app", "quit", "--pid", str(process.pid)], capture_output=True,
+                            text=True, encoding="utf-8", timeout=65, creationflags=subprocess.CREATE_NO_WINDOW)
+    value = json.loads(result.stdout)
+    check("own-child-normal-exit", result.returncode == 0 and value["status"] == "exited"
+          and process.wait(timeout=5) == 0, processId=process.pid)
+
+
+def observe(name):
+    deadline = time.monotonic() + 600
+    receipt = out / name
+    while not receipt.is_file():
+        assert time.monotonic() < deadline and process.poll() is None, "Bounded actual operator observation missing"
+        time.sleep(.2)
+    check(name, json.loads(receipt.read_text(encoding="utf-8"))["observed"])
+
+
+try:
+    for file, before in locks.items():
+        file.write_bytes(before.replace(b"https://pub.dev", b"https://pub.flutter-io.cn"))
+    run("fixture-format", ["format", "test/support/packaged_restore_crash_fixture.dart"])
+    run("pub", ["pub", "get", "--offline", "--enforce-lockfile"])
+    run("analyze", ["analyze", "--fatal-infos"])
+    prepared = helper("prepare")
+    check("80MiB-synthetic-format8", prepared["format"] == 8 and prepared["files"] == 10 and prepared["bytes"] == 80 * 1024 * 1024)
+    backup, recovery = temp / "synthetic.aimbackup", temp / "synthetic.recovery.txt"
+    database = (temp / "target/AgentInfoManage/library.db").resolve(strict=True)
+    key_file = database.parent / "database-key.dpapi"
+    journal = Path(str(database) + "-journal")
+    check("database-within-own-root", database.is_relative_to(temp) and not any(p.is_symlink() or p.is_junction() for p in temp.rglob("*")))
+    preserved = {file: hashlib.sha256(file.read_bytes()).hexdigest() for file in [backup, recovery, key_file]}
+    agent = Agent()
+    start("before-crash")
+    check("initial-session", agent.call("session", chatLabel="Synthetic restore crash")["status"] == "ok")
+    check("empty-before-restore", not agent.call("catalog")["items"])
+    phase("select-backup-and-observe-preview", pid=process.pid, backup=str(backup), recovery=str(recovery),
+          files=10, bytes=80 * 1024 * 1024, receipt=str(out / "preview-observed.json"))
+    observe("preview-observed.json")
+    check("journal-absent-before-confirm", not journal.exists())
+    baseline = database.stat().st_size
+    victim = process  # The Popen handle, never a PID discovered from another app.
+    crash = {"interrupted": False, "victimPid": victim.pid, "baselineDatabaseBytes": baseline}
+
+    def interrupt_own_restore():
+        deadline = time.monotonic() + 120
+        while not watch_stop.is_set() and time.monotonic() < deadline and victim.poll() is None:
+            try:
+                size, journal_size = database.stat().st_size, journal.stat().st_size
+                if size >= baseline + 4 * 1024 * 1024 and journal_size >= 512:
+                    with journal.open("rb") as header:
+                        header_nonzero = any(header.read(8))
+                    if not header_nonzero:
+                        continue
+                    crash.update(databaseBytesAtInterruption=size, rollbackJournalBytes=journal_size,
+                                 journalHeaderNonzero=True, interrupted=True)
+                    # Intentional crash injection into this exact owned child.
+                    # Never used by normal app control or as a quit fallback.
+                    victim.kill()
+                    crash["exitCode"] = victim.wait(timeout=10)
+                    crash["journalPresentAfterExit"] = journal.exists()
+                    break
+            except FileNotFoundError:
+                pass
+            time.sleep(.001)
+        (out / "interruption.json").write_text(json.dumps(crash, indent=2) + "\n", encoding="utf-8")
+
+    watcher = threading.Thread(target=interrupt_own_restore, daemon=True)
+    watcher.start()
+    phase("watcher-armed-click-confirm-restore", pid=victim.pid)
+    watcher.join(timeout=135)
+    check("watcher-finished", not watcher.is_alive())
+    facts["interruption"] = crash
+    check("interrupted-during-uncommitted-file-write", crash["interrupted"] and crash.get("journalPresentAfterExit")
+          and crash.get("exitCode") != 0)
+    rolled_back = helper("inspect-rollback")
+    facts["rollback"] = rolled_back
+    check("actual-SQLCipher-rollback", rolled_back["integrity"] == "ok" and rolled_back["journalMode"] == "delete"
+          and all(rolled_back[key] == 0 for key in ["information", "attachmentVersions", "attachmentBytes", "fileFields", "stagedFiles", "modelInformation", "requests", "activeGrants", "fileDeliveries"])
+          and rolled_back["requestLifetimeMinutes"] == 17)
+    check("source-and-local-key-unchanged-after-crash", all(hashlib.sha256(file.read_bytes()).hexdigest() == digest for file, digest in preserved.items()))
+    start("retry")
+    check("prior-session-not-revived-after-crash", agent.call("session-check")["status"] == "unauthorized")
+    check("fresh-retry-session", agent.call("session", chatLabel="Synthetic restore retry")["status"] == "ok")
+    check("retry-library-still-empty", not agent.call("catalog")["items"])
+    phase("retry-restore-through-native-dialogs", pid=process.pid, backup=str(backup), recovery=str(recovery),
+          receipt=str(out / "restored-observed.json"))
+    observe("restored-observed.json")
+    check("retry-session-invalidated-by-restore", agent.call("session-check")["status"] == "unauthorized")
+    stop()
+    restored = helper("inspect-restored")
+    facts["restored"] = restored
+    check("retry-restores-all-80MiB-originals", restored["integrity"] == "ok" and restored["originalsMatch"]
+          and restored["information"] == restored["modelInformation"] == restored["attachmentVersions"] == restored["fileFields"] == 10
+          and restored["attachmentBytes"] == 80 * 1024 * 1024 and restored["requestLifetimeMinutes"] == 23
+          and all(restored[key] == 0 for key in ["stagedFiles", "requests", "activeGrants", "fileDeliveries"]))
+    check("source-and-local-key-unchanged-after-retry", all(hashlib.sha256(file.read_bytes()).hexdigest() == digest for file, digest in preserved.items()))
+    facts["complete"] = True
+    phase("complete")
+finally:
+    watch_stop.set()
+    if watcher is not None:
+        watcher.join(timeout=15)
+    if process is not None and process.poll() is None:
+        stop()
+    if agent is not None:
+        agent.close()
+    for stream in streams:
+        stream.close()
+    bad = []
+    for file, before in locks.items():
+        if normalize(file.read_bytes()) != normalize(before):
+            bad.append(str(file))
+        else:
+            file.write_bytes(before)
+    facts["unexpectedLocks"] = bad
+    if facts["complete"]:
+        assert temp.parent == Path(tempfile.gettempdir()).resolve() and temp.name.startswith("aim-packaged-restore-crash-")
+        assert not temp.is_symlink() and not temp.is_junction()
+        assert not any(file.is_symlink() or file.is_junction() for file in temp.rglob("*"))
+        shutil.rmtree(temp)
+        facts["temporaryRemoved"] = not temp.exists()
+    else:
+        facts["preservedTemporary"] = str(temp)
+    (out / "result.json").write_text(json.dumps(facts, indent=2) + "\n", encoding="utf-8")
+    assert not bad, bad

@@ -1,0 +1,151 @@
+{
+  "complete": true,
+  "checks": [
+    {
+      "name": "format",
+      "exitCode": 0
+    },
+    {
+      "name": "pub",
+      "exitCode": 0
+    },
+    {
+      "name": "analyze",
+      "exitCode": 0
+    },
+    {
+      "name": "inspect-1",
+      "exitCode": 0
+    },
+    {
+      "name": "inspect-2",
+      "exitCode": 0
+    },
+    {
+      "name": "inspect-3",
+      "exitCode": 0
+    },
+    {
+      "name": "inspect-4",
+      "exitCode": 0
+    },
+    {
+      "name": "inspect-8",
+      "exitCode": 0
+    }
+  ],
+  "inspections": [
+    {
+      "format": 1,
+      "inspection": {
+        "status": "inspected",
+        "sameIdentity": true,
+        "sameFieldIdentity": true,
+        "version": 2,
+        "originalsMatch": true,
+        "datesUnknown": true,
+        "datesExactlyPreserved": false,
+        "revisions": 0,
+        "templates": 0,
+        "fileTemplateTyped": false,
+        "credentials": 0,
+        "requests": 0,
+        "activeGrants": 0,
+        "fileDeliveries": 0,
+        "requestLifetimeMinutes": 23
+      },
+      "inspectionDidNotModifyBackupOrKey": true
+    },
+    {
+      "format": 2,
+      "inspection": {
+        "status": "inspected",
+        "sameIdentity": true,
+        "sameFieldIdentity": true,
+        "version": 2,
+        "originalsMatch": true,
+        "datesUnknown": true,
+        "datesExactlyPreserved": false,
+        "revisions": 1,
+        "templates": 0,
+        "fileTemplateTyped": false,
+        "credentials": 0,
+        "requests": 0,
+        "activeGrants": 0,
+        "fileDeliveries": 0,
+        "requestLifetimeMinutes": 23
+      },
+      "inspectionDidNotModifyBackupOrKey": true
+    },
+    {
+      "format": 3,
+      "inspection": {
+        "status": "inspected",
+        "sameIdentity": true,
+        "sameFieldIdentity": true,
+        "version": 2,
+        "originalsMatch": true,
+        "datesUnknown": false,
+        "datesExactlyPreserved": true,
+        "revisions": 1,
+        "templates": 0,
+        "fileTemplateTyped": false,
+        "credentials": 0,
+        "requests": 0,
+        "activeGrants": 0,
+        "fileDeliveries": 0,
+        "requestLifetimeMinutes": 23
+      },
+      "inspectionDidNotModifyBackupOrKey": true
+    },
+    {
+      "format": 4,
+      "inspection": {
+        "status": "inspected",
+        "sameIdentity": true,
+        "sameFieldIdentity": true,
+        "version": 2,
+        "originalsMatch": true,
+        "datesUnknown": false,
+        "datesExactlyPreserved": true,
+        "revisions": 1,
+        "templates": 0,
+        "fileTemplateTyped": false,
+        "credentials": 0,
+        "requests": 0,
+        "activeGrants": 0,
+        "fileDeliveries": 0,
+        "requestLifetimeMinutes": 23
+      },
+      "inspectionDidNotModifyBackupOrKey": true
+    },
+    {
+      "format": 8,
+      "inspection": {
+        "status": "inspected",
+        "sameIdentity": true,
+        "sameFieldIdentity": true,
+        "version": 2,
+        "originalsMatch": true,
+        "datesUnknown": false,
+        "datesExactlyPreserved": true,
+        "revisions": 1,
+        "templates": 1,
+        "fileTemplateTyped": true,
+        "credentials": 0,
+        "requests": 0,
+        "activeGrants": 0,
+        "fileDeliveries": 0,
+        "requestLifetimeMinutes": 23
+      },
+      "inspectionDidNotModifyBackupOrKey": true
+    }
+  ],
+  "pythonSyntax": true,
+  "helpExit": 0,
+  "nativeProcesses": 0,
+  "port47125Free": true,
+  "cuReset": true,
+  "preservedSyntheticRootsRemoved": true,
+  "unexpectedLocks": []
+}

@@ -1,0 +1,18 @@
+Analyzing info_cli...
+
+   info - lib\windows_focused_fill.dart:19:7 - Statements in an if should be enclosed in a block. Try wrapping the statement in a block. - curly_braces_in_flow_control_structures
+   info - lib\windows_focused_fill.dart:52:9 - Statements in a for should be enclosed in a block. Try wrapping the statement in a block. - curly_braces_in_flow_control_structures
+   info - lib\windows_focused_fill.dart:63:9 - Statements in a for should be enclosed in a block. Try wrapping the statement in a block. - curly_braces_in_flow_control_structures
+   info - lib\windows_focused_fill.dart:74:9 - Statements in an if should be enclosed in a block. Try wrapping the statement in a block. - curly_braces_in_flow_control_structures
+   info - lib\windows_focused_fill.dart:76:9 - Statements in an if should be enclosed in a block. Try wrapping the statement in a block. - curly_braces_in_flow_control_structures
+   info - lib\windows_focused_fill.dart:91:9 - Statements in an if should be enclosed in a block. Try wrapping the statement in a block. - curly_braces_in_flow_control_structures
+   info - lib\windows_focused_fill.dart:133:7 - Statements in an if should be enclosed in a block. Try wrapping the statement in a block. - curly_braces_in_flow_control_structures
+   info - lib\windows_focused_fill.dart:165:40 - Unnecessary use of multiple underscores. Try using '_'. - unnecessary_underscores
+   info - lib\windows_focused_fill.dart:178:7 - Statements in an if should be enclosed in a block. Try wrapping the statement in a block. - curly_braces_in_flow_control_structures
+   info - lib\windows_focused_fill.dart:188:13 - Statements in an if should be enclosed in a block. Try wrapping the statement in a block. - curly_braces_in_flow_control_structures
+   info - lib\windows_focused_fill.dart:204:7 - Statements in an if should be enclosed in a block. Try wrapping the statement in a block. - curly_braces_in_flow_control_structures
+   info - lib\windows_focused_fill.dart:208:70 - Unnecessary use of multiple underscores. Try using '_'. - unnecessary_underscores
+   info - lib\windows_focused_fill.dart:265:7 - Statements in a for should be enclosed in a block. Try wrapping the statement in a block. - curly_braces_in_flow_control_structures
+   info - lib\windows_focused_fill.dart:271:7 - Statements in an if should be enclosed in a block. Try wrapping the statement in a block. - curly_braces_in_flow_control_structures
+
+14 issues found.

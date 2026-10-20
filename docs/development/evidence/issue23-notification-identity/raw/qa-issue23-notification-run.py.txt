@@ -1,0 +1,37 @@
+from pathlib import Path
+import os,sys,json,hashlib,subprocess
+sys.stdout.reconfigure(encoding='utf-8')
+root=Path.cwd();out=root/'build/qa-issue23-notification'/sys.argv[1];out.mkdir(parents=True,exist_ok=False)
+dart='C:/Users/Todoki/.local/share/flutter/bin/dart.bat';flutter='C:/Users/Todoki/.local/share/flutter/bin/flutter.bat'
+env=os.environ.copy();env.update(PUB_HOSTED_URL='https://pub.flutter-io.cn',FLUTTER_STORAGE_BASE_URL='https://storage.flutter-io.cn')
+locks={root/p/'pubspec.lock':(root/p/'pubspec.lock').read_bytes() for p in ['packages/info_core','packages/info_storage','packages/info_cli','apps/desktop']};phases=[]
+norm=lambda b:b.replace(b'https://pub.flutter-io.cn',b'https://pub.dev').replace(b'\r\n',b'\n')
+sources=[]
+def run(name,cmd,cwd):
+    with (out/(name+'.txt')).open('wb') as log:r=subprocess.run(cmd,cwd=cwd,env=env,stdout=log,stderr=subprocess.STDOUT,timeout=600)
+    phases.append(dict(phase=name,exitCode=r.returncode));print(json.dumps(phases[-1]),flush=True)
+    if r.returncode:
+        print((out/(name+'.txt')).read_text(encoding='utf-8',errors='replace')[-14000:],flush=True)
+        raise RuntimeError(name)
+try:
+    for p,b in locks.items():p.write_bytes(b.replace(b'https://pub.dev',b'https://pub.flutter-io.cn'))
+    desktop=root/'apps/desktop'
+    run('pub',[flutter,'pub','get','--enforce-lockfile','--offline'],desktop)
+    run('format',[dart,'format','integration_test/manual_notification_test.dart'],desktop)
+    run('analyze',[flutter,'analyze','--fatal-infos','--no-pub'],desktop)
+    for p in ['apps/desktop/integration_test/manual_notification_test.dart','apps/desktop/integration_test/support/native_semantics_lifetime.dart','apps/desktop/windows/runner/flutter_window.cpp','apps/desktop/windows/runner/flutter_window.h','apps/desktop/windows/runner/notification_queue.h','apps/desktop/windows/runner/notification_queue_test.cpp']:
+        b=(root/p).read_bytes();(out/(Path(p).name+'.txt')).write_bytes(b);sources.append(dict(path=p,sha256=hashlib.sha256(b).hexdigest()))
+    if 'headless' in sys.argv[2:]:
+        run('desktop-tests',[flutter,'test','--no-pub','test/','-r','expanded'],desktop)
+        run('windows-debug',[flutter,'build','windows','--debug','--no-pub'],desktop)
+        run('windows-release',[flutter,'build','windows','--release','--no-pub'],desktop)
+    elif 'lint-only' not in sys.argv[2:]:
+        print('Starting one real notification probe; phase ready-to-dispatch waits for the explicit dispatch marker.',flush=True)
+        run('native',[flutter,'test','integration_test/manual_notification_test.dart','-d','windows','--no-pub','--dart-define=D1_MANUAL_NOTIFICATION=true','--dart-define=D1_NOTIFICATION_QA_DIRECTORY='+str(out)],desktop)
+finally:
+    unexpected=[]
+    for p,b in locks.items():
+        if norm(p.read_bytes())!=norm(b):unexpected.append(str(p))
+        else:p.write_bytes(b)
+    (out/'runner-result.json').write_text(json.dumps(dict(phases=phases,sources=sources,unexpectedLocks=unexpected),indent=2)+'\n',encoding='utf-8')
+    assert not unexpected,unexpected

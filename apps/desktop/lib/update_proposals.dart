@@ -1,6 +1,7 @@
 import 'ui.dart';
 import 'package:flutter/material.dart';
 import 'package:info_core/info_core.dart';
+import 'information_field_preview.dart';
 
 class UpdateProposalsList extends StatelessWidget {
   const UpdateProposalsList({
@@ -128,11 +129,7 @@ class _ReviewUpdateState extends State<_ReviewUpdate> {
       const SizedBox(height: 6),
       SelectableText(item.description),
       for (final f in item.fields)
-        InformationValue(
-          name: f.name,
-          description: f.description,
-          value: f.value,
-        ),
+        InformationFieldPreview(owner: widget.owner, field: f),
     ],
   );
   @override

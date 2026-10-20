@@ -94,7 +94,7 @@ extension OwnerUpdates on OwnerAccess {
     return found.single;
   }
 
-  UpdatePreview previewUpdate(String id) {
+  UpdatePreview previewUpdate(String id, {UpdateReview? review}) {
     final proposal = _update(id);
     if (proposal.state != UpdateProposalState.pending) {
       throw const AccessFailure('proposal_changed');
@@ -103,10 +103,52 @@ extension OwnerUpdates on OwnerAccess {
     if (found.isEmpty || found.single.version != proposal.input.baseVersion) {
       throw const AccessFailure('proposal_conflict');
     }
+    if (review == null) {
+      return UpdatePreview(
+        proposal,
+        found.single,
+        _applyUpdate(found.single, proposal.input),
+      );
+    }
+    if (review.input.itemId != proposal.input.itemId ||
+        review.input.baseVersion != proposal.input.baseVersion ||
+        review.tagIds.length > 100 ||
+        review.tagIds.any((id) => !tags.any((tag) => tag.id == id)) ||
+        review.fieldDescriptions.length > 200 ||
+        review.fieldDescriptions.values.any((value) => value.length > 2000)) {
+      throw const AccessFailure('invalid_proposal');
+    }
+    _checkParent(review.directoryId);
+    final after = _applyUpdate(found.single, review.input);
+    if (review.fieldDescriptions.keys.any(
+      (id) => !after.fields.any((field) => field.id == id),
+    )) {
+      throw const AccessFailure('invalid_proposal');
+    }
     return UpdatePreview(
       proposal,
       found.single,
-      _applyUpdate(found.single, proposal.input),
+      InformationItem(
+        after.id,
+        after.name,
+        after.description,
+        after.version,
+        [
+          for (final field in after.fields)
+            if (review.fieldDescriptions.containsKey(field.id) &&
+                review.fieldDescriptions[field.id] != field.description)
+              field.withMetadata(
+                description: review.fieldDescriptions[field.id]!,
+                version: field.version + 1,
+              )
+            else
+              field,
+        ],
+        directoryId: review.directoryId,
+        tagIds: review.tagIds,
+        createdAt: after.createdAt,
+        modifiedAt: after.modifiedAt,
+      ),
     );
   }
 
@@ -157,45 +199,48 @@ extension OwnerUpdates on OwnerAccess {
     );
   }
 
-  Future<UpdateReceipt> confirmUpdate(String id, int proposalVersion) =>
-      _serialize(() async {
-        final proposal = _update(id);
-        if (proposal.state == UpdateProposalState.confirmed) {
-          return proposal.result!;
-        }
-        if (proposal.state != UpdateProposalState.pending ||
-            proposal.version != proposalVersion) {
-          throw const AccessFailure('proposal_changed');
-        }
-        UpdatePreview preview;
-        try {
-          preview = previewUpdate(id);
-        } on AccessFailure catch (error) {
-          if (error.status == 'proposal_conflict') {
-            await _service._repository.saveUpdateProposal(
-              proposal.finish(UpdateProposalState.conflicted),
-            );
-          }
-          rethrow;
-        }
-        final item = preview.after;
-        final receipt = UpdateReceipt(item.id, item.version);
-        final removed = preview.before.fields.any(
-          (f) => !item.fields.any((n) => n.id == f.id),
+  Future<UpdateReceipt> confirmUpdate(
+    String id,
+    int proposalVersion, {
+    UpdateReview? review,
+  }) => _serialize(() async {
+    final proposal = _update(id);
+    if (proposal.state == UpdateProposalState.confirmed) {
+      return proposal.result!;
+    }
+    if (proposal.state != UpdateProposalState.pending ||
+        proposal.version != proposalVersion) {
+      throw const AccessFailure('proposal_changed');
+    }
+    UpdatePreview preview;
+    try {
+      preview = previewUpdate(id, review: review);
+    } on AccessFailure catch (error) {
+      if (error.status == 'proposal_conflict') {
+        await _service._repository.saveUpdateProposal(
+          proposal.finish(UpdateProposalState.conflicted),
         );
-        final recycled = removed ? _recycle(preview.before, item) : null;
-        await _service._repository.confirmUpdateProposal(
-          proposal.finish(UpdateProposalState.confirmed, result: receipt),
-          item,
-          InformationRevision(preview.before, _service._clock()),
-          recycled: recycled == null ? const [] : [recycled],
-          facts: recycled == null
-              ? const []
-              : [_fact(recycled, RecycleFactKind.deleted, item.version)],
-        );
-        _invalidateRemoved(preview.before, item);
-        return receipt;
-      });
+      }
+      rethrow;
+    }
+    final item = preview.after;
+    final receipt = UpdateReceipt(item.id, item.version);
+    final removed = preview.before.fields.any(
+      (f) => !item.fields.any((n) => n.id == f.id),
+    );
+    final recycled = removed ? _recycle(preview.before, item) : null;
+    await _service._repository.confirmUpdateProposal(
+      proposal.finish(UpdateProposalState.confirmed, result: receipt),
+      item,
+      InformationRevision(preview.before, _service._clock()),
+      recycled: recycled == null ? const [] : [recycled],
+      facts: recycled == null
+          ? const []
+          : [_fact(recycled, RecycleFactKind.deleted, item.version)],
+    );
+    _invalidateRemoved(preview.before, item);
+    return receipt;
+  });
   Future<void> rejectUpdate(String id, int proposalVersion) =>
       _serialize(() async {
         final proposal = _update(id);

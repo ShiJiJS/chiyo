@@ -1,0 +1,12 @@
+Running build hooks...Running build hooks...00:00 +0: loading test/credential_backup_test.dart
+00:00 +0 -1: loading test/credential_backup_test.dart [E]
+  Failed to load "test/credential_backup_test.dart":
+  test/credential_backup_test.dart:55:22: Error: The getter 'restoredAt' isn't defined for the type 'CredentialExecution'.
+   - 'CredentialExecution' is from 'package:info_core/info_core.dart' ('../info_core/lib/info_core.dart').
+  Try correcting the name to the name of an existing getter, or defining a getter or field named 'restoredAt'.
+      expect(execution.restoredAt, now);
+                       ^^^^^^^^^^
+00:00 +0 -1: Some tests failed.
+
+Failing tests:
+  test/credential_backup_test.dart: loading test/credential_backup_test.dart

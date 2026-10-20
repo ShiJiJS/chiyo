@@ -1,0 +1,32 @@
+[
+  {
+    "file": "page-approve.png",
+    "state": null,
+    "size": "1280x800",
+    "zoom": 1,
+    "group": "approve",
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  },
+  {
+    "file": "page-cancel.png",
+    "state": null,
+    "size": "1280x800",
+    "zoom": 1,
+    "group": "cancel",
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  },
+  {
+    "file": "page-tip.png",
+    "state": null,
+    "size": "1280x800",
+    "zoom": 1,
+    "group": "tip",
+    "animationWaitMs": 21,
+    "issues": [],
+    "lint": []
+  }
+]

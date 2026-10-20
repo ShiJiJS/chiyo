@@ -1,0 +1,25 @@
+{
+  "root": "C:\\Users\\Todoki\\AppData\\Local\\Temp\\aim-packaged-recycle-ui-ojm8uqxk",
+  "files": [
+    {
+      "path": "profile/AgentInfoManage/library.db",
+      "bytes": 270336,
+      "sha256": "85f066f0421a5976a001a13763d14b1e565b53c04c36e35dd166db8084908e7c"
+    },
+    {
+      "path": "profile/AgentInfoManage/database-key.dpapi",
+      "bytes": 266,
+      "sha256": "08d6027833a4b6c6537be24d187f7bf010f5afb358685df3f2b1be8623ecbccd"
+    },
+    {
+      "path": "expected.json",
+      "bytes": 284,
+      "sha256": "2790ad53d260dd5dcd06fe98ec15f7764f9cd0e176fac8d04ae0f612583625ae"
+    },
+    {
+      "path": "synthetic-resume.txt",
+      "bytes": 76,
+      "sha256": "2e27f34aa140b02adcfbb695c520d491cc5cfcb20018e2a1a2af7367dc042dc0"
+    }
+  ]
+}

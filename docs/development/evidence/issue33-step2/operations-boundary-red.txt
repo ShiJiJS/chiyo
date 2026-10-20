@@ -1,0 +1,120 @@
+00:00 +0: loading test/credential_operations_test.dart
+00:00 +0: expired prevents new operations without reissuing old material
+00:00 +1: rotated prevents new operations without reissuing old material
+00:00 +2: disabled prevents new operations without reissuing old material
+00:00 +3: deleted prevents new operations without reissuing old material
+00:00 +4: ended prevents new operations without reissuing old material
+00:00 +5: worker admission rechecks expired after material claim
+00:00 +5 -1: worker admission rechecks expired after material claim [E]
+  Expected: throws <Instance of 'CredentialUseFailure'> with `code`: 'grant_expired'
+    Actual: <Instance of 'Future<void>'>
+     Which: threw CredentialUseFailure:<CredentialUseFailure(invalid_plan)>
+            stack package:info_core/credential_runtime_access.dart 270:9  CredentialRuntimeAgentAccess.registerCredentialWorker.<fn>.validate
+                  package:info_core/credential_runtime_access.dart 274:5  CredentialRuntimeAgentAccess.registerCredentialWorker.<fn>
+                  package:info_core/info_core.dart 635:20                 OwnerAccess._serialize.<fn>
+                  ===== asynchronous gap ===========================
+                  test\credential_operations_test.dart 130:7              main.<fn>
+
+            which has `code` with value 'invalid_plan' which is different.
+                  Expected: grant_expi ...
+                    Actual: invalid_pl ...
+                            ^
+                   Differ at offset 0
+
+  test\credential_operations_test.dart 130:7  main.<fn>
+
+00:00 +5 -1: worker admission rechecks revoked after material claim
+00:00 +5 -2: worker admission rechecks revoked after material claim [E]
+  Expected: throws <Instance of 'CredentialUseFailure'> with `code`: 'grant_revoked'
+    Actual: <Instance of 'Future<void>'>
+     Which: threw CredentialUseFailure:<CredentialUseFailure(invalid_plan)>
+            stack package:info_core/credential_runtime_access.dart 270:9  CredentialRuntimeAgentAccess.registerCredentialWorker.<fn>.validate
+                  package:info_core/credential_runtime_access.dart 274:5  CredentialRuntimeAgentAccess.registerCredentialWorker.<fn>
+                  package:info_core/info_core.dart 635:20                 OwnerAccess._serialize.<fn>
+                  ===== asynchronous gap ===========================
+                  test\credential_operations_test.dart 130:7              main.<fn>
+
+            which has `code` with value 'invalid_plan' which is different.
+                  Expected: grant_revo ...
+                    Actual: invalid_pl ...
+                            ^
+                   Differ at offset 0
+
+  test\credential_operations_test.dart 130:7  main.<fn>
+
+00:00 +5 -2: worker admission rechecks ended after material claim
+00:00 +5 -3: worker admission rechecks ended after material claim [E]
+  Expected: throws <Instance of 'CredentialUseFailure'> with `code`: 'grant_revoked'
+    Actual: <Instance of 'Future<void>'>
+     Which: threw CredentialUseFailure:<CredentialUseFailure(invalid_plan)>
+            stack package:info_core/credential_runtime_access.dart 270:9  CredentialRuntimeAgentAccess.registerCredentialWorker.<fn>.validate
+                  package:info_core/credential_runtime_access.dart 274:5  CredentialRuntimeAgentAccess.registerCredentialWorker.<fn>
+                  package:info_core/info_core.dart 635:20                 OwnerAccess._serialize.<fn>
+                  ===== asynchronous gap ===========================
+                  test\credential_operations_test.dart 130:7              main.<fn>
+
+            which has `code` with value 'invalid_plan' which is different.
+                  Expected: grant_revo ...
+                    Actual: invalid_pl ...
+                            ^
+                   Differ at offset 0
+
+  test\credential_operations_test.dart 130:7  main.<fn>
+
+00:00 +5 -3: worker admission rechecks rotated after material claim
+00:00 +5 -4: worker admission rechecks rotated after material claim [E]
+  Expected: throws <Instance of 'CredentialUseFailure'> with `code`: 'credential_version_changed'
+    Actual: <Instance of 'Future<void>'>
+     Which: threw CredentialUseFailure:<CredentialUseFailure(invalid_plan)>
+            stack package:info_core/credential_runtime_access.dart 270:9  CredentialRuntimeAgentAccess.registerCredentialWorker.<fn>.validate
+                  package:info_core/credential_runtime_access.dart 274:5  CredentialRuntimeAgentAccess.registerCredentialWorker.<fn>
+                  package:info_core/info_core.dart 635:20                 OwnerAccess._serialize.<fn>
+                  ===== asynchronous gap ===========================
+                  test\credential_operations_test.dart 130:7              main.<fn>
+
+            which has `code` with value 'invalid_plan' which is different.
+                  Expected: credential ...
+                    Actual: invalid_pl ...
+                            ^
+                   Differ at offset 0
+
+  test\credential_operations_test.dart 130:7  main.<fn>
+
+00:00 +5 -4: combined v2 decision defaults ordinary fields to eight hours independently
+00:00 +5 -5: combined v2 decision defaults ordinary fields to eight hours independently [E]
+  Expected: DateTime:<2026-10-19 08:00:00.000Z>
+    Actual: DateTime:<2026-10-19 00:15:00.000Z>
+
+  package:matcher                             expect
+  test\credential_operations_test.dart 179:7  main.<fn>
+
+00:00 +5 -5: v2 fields-only approval supports ordinary read durations, never credential use
+00:00 +5 -6: v2 fields-only approval supports ordinary read durations, never credential use [E]
+  CredentialUseFailure(invalid_plan)
+  package:info_core/credential_runtime_access.dart 880:7  CredentialRuntimeOwnerAccess.decideCredentialUse.<fn>
+  package:info_core/info_core.dart 635:20                 OwnerAccess._serialize.<fn>
+  ===== asynchronous gap ===========================
+  test\credential_operations_test.dart 211:9              main.<fn>
+
+00:00 +5 -6: private claim roundtrip cannot change a frozen plan or attach material to an old execution
+00:00 +6 -6: each file operation owns its material lease and revocation does not erase earlier operations
+00:00 +7 -6: session ending during file preparation returns no material and keeps operation identity
+00:00 +8 -6: one approval admits two immutable plans and keeps original deadline
+00:00 +9 -6: simultaneous retries issue material exactly once
+00:00 +10 -6: same operation with another command or grant conflicts
+00:00 +11 -6: map key order does not create a second operation
+00:00 +12 -6: a failed attempt retains its facts, and a fresh operation needs no approval
+00:00 +13 -6: audit failure gives no material and does not reserve a phantom operation
+00:00 +14 -6: another session, unapproved receiver and revoked grant cannot obtain new material
+00:00 +15 -6: v1 grant cannot be upgraded by choosing the v2 operation endpoint
+00:00 +16 -6: Some tests failed.
+
+Failing tests:
+  test/credential_operations_test.dart: combined v2 decision defaults ordinary fields to eight hours independently
+  test/credential_operations_test.dart: v2 fields-only approval supports ordinary read durations, never credential use
+  test/credential_operations_test.dart: worker admission rechecks ended after material claim
+  test/credential_operations_test.dart: worker admission rechecks expired after material claim
+  ... and 2 more
+
+Consider enabling the flag chain-stack-traces to receive more detailed exceptions.
+For example, 'dart test --chain-stack-traces'.

@@ -67,19 +67,36 @@ try {
     New-Item -ItemType Directory -Path $payload | Out-Null
     $app = Join-Path $payload 'app'
     Copy-Item -LiteralPath (Join-Path $projectRoot 'apps/desktop/build/windows/x64/runner/Release') -Destination $app -Recurse
-    foreach ($required in @('info_desktop.exe', 'flutter_windows.dll', 'sqlcipher.dll', 'data/app.so', 'data/icudtl.dat')) {
+    foreach ($required in @('info_desktop.exe', 'info-focus-broker.exe', 'flutter_windows.dll', 'sqlcipher.dll', 'data/app.so', 'data/icudtl.dat')) {
         if (-not (Test-Path -LiteralPath (Join-Path $app $required))) { throw "Missing desktop payload: $required" }
+    }
+    $focusDigestPath = Join-Path $projectRoot 'apps/desktop/build/windows/x64/focused-input-identity/Release/focused_fill_identity.sha256'
+    $focusDigest = ([IO.File]::ReadAllText($focusDigestPath)).Trim()
+    $actualFocusDigest = (Get-FileHash -LiteralPath (Join-Path $app 'info-focus-broker.exe') -Algorithm SHA256).Hash.ToLowerInvariant()
+    if ($focusDigest -notmatch '^[0-9a-f]{64}$' -or $focusDigest -ne $actualFocusDigest) {
+        throw 'The packaged focused input helper differs from the runner build identity.'
+    }
+    foreach ($binary in Get-ChildItem -LiteralPath $app -Filter '*.exe' -Recurse) {
+        if ($binary.Name -notin @('info_desktop.exe', 'info-focus-broker.exe', 'info-runtime-worker.exe')) {
+            throw "Unexpected executable in desktop payload: $($binary.Name)"
+        }
     }
     $cli = Join-Path $payload 'cli'
     New-Item -ItemType Directory -Path $cli | Out-Null
     Push-Location 'packages/info_cli'
     try {
-        foreach ($entry in @(@('info', 'info'), @('codex_info', 'info-codex'), @('codex_hook', 'info-codex-hook'), @('prepare_codex', 'info-prepare-codex'))) {
+        foreach ($entry in @(@('info', 'info'), @('runtime_worker', 'info-runtime-worker'), @('codex_info', 'info-codex'), @('codex_hook', 'info-codex-hook'), @('prepare_codex', 'info-prepare-codex'))) {
             Invoke-Checked $dart @('compile', 'exe', '--target-os', 'windows', '--target-arch', 'x64', "bin/$($entry[0]).dart", '-o', (Join-Path $cli "$($entry[1]).exe"))
         }
     } finally { Pop-Location }
+    # One-shot adapters use the resident execution host in the desktop app.
+    # Its worker is a shipped asset next to the app, independent of SDK/PATH.
+    Copy-Item -LiteralPath (Join-Path $cli 'info-runtime-worker.exe') -Destination (Join-Path $app 'info-runtime-worker.exe')
     New-Item -ItemType Directory -Path (Join-Path $cli 'template') | Out-Null
     Copy-Item -LiteralPath 'integrations/codex/skills/agent-info-access/SKILL.md' -Destination (Join-Path $cli 'template/SKILL.md')
+    New-Item -ItemType Directory -Path (Join-Path $cli 'template/references') | Out-Null
+    Copy-Item -LiteralPath 'integrations/codex/skills/agent-info-access/references/credential-use.md' -Destination (Join-Path $cli 'template/references/credential-use.md')
+    Copy-Item -LiteralPath 'integrations/codex/skills/agent-info-access/references/information-files.md' -Destination (Join-Path $cli 'template/references/information-files.md')
 
     # This console probe uses only synthetic data in a newly created temp
     # directory and current-user DPAPI. It never opens the application database.
@@ -155,7 +172,7 @@ try {
     Assert-CleanSources
     if ((git rev-parse HEAD).Trim() -ne $commit) { throw 'Sources changed during packaging.' }
     Write-Json (Join-Path $payload 'manifest.json') ([ordered]@{
-        format = 1; product = 'Agent Info Manage'; release = $identity
+        format = 2; product = 'Agent Info Manage'; release = $identity
         sourceCommit = $commit; sourceDirty = $false; architecture = 'windows-x64'
         builtAtUtc = [DateTime]::UtcNow.ToString('o')
         signing = 'unsigned development preview'
@@ -164,6 +181,10 @@ try {
         flutter = $flutterVersion; dart = $dartVersion; visualStudio = $visualStudio
         windowsSdk = $windowsSdk; msvcToolset = $msvcToolset
         sqlcipherSha256 = $actualCipher
+        focusedFill = [ordered]@{
+            helperProtocol = 1; helper = 'app/info-focus-broker.exe'; sha256 = $actualFocusDigest
+            trustSource = 'SHA-256 compiled into the native desktop runner; this manifest is provenance only'
+        }
         verification = 'Full headless check.ps1 and Windows release compilation; no desktop/Codex/clean-machine acceptance implied'
         files = $files
     })
@@ -172,5 +193,9 @@ try {
     $digest = (Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash.ToLowerInvariant()
     [IO.File]::WriteAllText("$archive.sha256", "$digest  $([IO.Path]::GetFileName($archive))`n", $utf8)
     & (Join-Path $PSScriptRoot 'test-windows-package.ps1') -ArchivePath $archive -DartExecutable $dart
+    Assert-CleanSources
+    if ((git rev-parse HEAD).Trim() -ne $commit) {
+        throw 'Sources changed during extracted verification; the archive is not a verified delivery.'
+    }
     Write-Host "Verified development package: $archive"
 } finally { Pop-Location }

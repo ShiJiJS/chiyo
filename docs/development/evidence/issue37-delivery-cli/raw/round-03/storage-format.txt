@@ -1,0 +1,3 @@
+Formatted test\fixtures\file_delivery_crash_child.dart
+Formatted test\information_delivery_crash_test.dart
+Formatted 4 files (2 changed) in 0.01 seconds.

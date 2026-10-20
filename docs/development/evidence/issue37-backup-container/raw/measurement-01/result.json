@@ -1,0 +1,25 @@
+{
+  "phases": [
+    {
+      "phase": "format",
+      "exitCode": 0
+    },
+    {
+      "phase": "pub",
+      "exitCode": 0
+    },
+    {
+      "phase": "analyze",
+      "exitCode": 0
+    },
+    {
+      "phase": "text-0",
+      "exitCode": 0
+    },
+    {
+      "phase": "text-48",
+      "exitCode": 0
+    }
+  ],
+  "unexpectedLocks": []
+}
