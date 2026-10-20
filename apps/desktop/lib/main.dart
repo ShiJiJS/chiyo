@@ -124,6 +124,8 @@ class _DesktopLauncherState extends State<DesktopLauncher> {
                             Text(
                               startup.applicationFilesInvalid
                                   ? '应用文件不完整或版本不匹配。请将桌面程序与辅助程序整包替换后重试。尚未打开信息库，原有资料不会被重建或覆盖。'
+                                  : startup.systemKeyUnavailable
+                                  ? '无法访问系统钥匙串中的信息库密钥。请确认钥匙串已解锁；如果刚更新应用，请先用原版本导出备份，再处理新版本的钥匙串访问。原有资料不会被重建或覆盖。'
                                   : '信息库或本机服务无法启动。请检查系统密钥是否可用、应用是否已运行。原有资料不会被重建或覆盖；请保留信息库与密钥文件。',
                             ),
                             if (startup.cleanupPending)
