@@ -1,0 +1,378 @@
+{
+  "sourceCommit": "1fea9d0a6a2657ed0235c848b73618bc986de85f",
+  "finalRun": "raw/run-02/result.json",
+  "originalFiles": [
+    {
+      "path": "raw/issue46-analyze-1.txt",
+      "bytes": 295,
+      "sha256": "8b43137e485020cc542113b44f5b5b86ccb8e534450f07f0ba5776c3c499e687"
+    },
+    {
+      "path": "raw/issue46-analyze-2.txt",
+      "bytes": 96,
+      "sha256": "9926af1a2df097cf051856363ce29bb8d8d9ef109c428b90918592bdcdd4580f"
+    },
+    {
+      "path": "raw/issue46-analyze-3.txt",
+      "bytes": 96,
+      "sha256": "685fc40c722ef1185a6610cbf69e384c87059d21df64afcb4907910d76ff960b"
+    },
+    {
+      "path": "raw/issue46-production-restore.txt",
+      "bytes": 136,
+      "sha256": "9a09c6b2cc301ac4ffdfb5de6173602ccbe61e7df72a21e6b4627016733879ed"
+    },
+    {
+      "path": "raw/issue46-production-signature.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/run-01/crash-reopen.json",
+      "bytes": 232,
+      "sha256": "870d5a04c29c795e2457a117d1d3793da106339a6f5ef766d584604b54e45c85"
+    },
+    {
+      "path": "raw/run-01/duplicate.json",
+      "bytes": 252,
+      "sha256": "f0d85d6145b0dee61ac0d30b047894dbf669a4cf04957dae8319ea1acf0f3a97"
+    },
+    {
+      "path": "raw/run-01/holder-normal-quit.json",
+      "bytes": 212,
+      "sha256": "742b1a0590d820ac10d24159e475e45097444d522a510bae300b841707ffacc6"
+    },
+    {
+      "path": "raw/run-01/key-failure.json",
+      "bytes": 252,
+      "sha256": "05eb485b42f0d327dc0f2dabf11f293c3b1f676abf04b3eadecf192b7717da31"
+    },
+    {
+      "path": "raw/run-01/logs/build.txt",
+      "bytes": 136,
+      "sha256": "5bd5cc86ca2cfcca6b84ac06c372fd15aaf7ace19e3bf55a468791a5aa8fd216"
+    },
+    {
+      "path": "raw/run-01/logs/crash-holder.txt",
+      "bytes": 271,
+      "sha256": "9f667a12c81dde1fd52f99612f4d984b89cb9770c20eeb7f7aa8a9d7b487109d"
+    },
+    {
+      "path": "raw/run-01/logs/crash-reopen.txt",
+      "bytes": 246,
+      "sha256": "7decf8bade01b09d7b30a73be9a86e12ada79a7eed5d4514679eda5aa048612d"
+    },
+    {
+      "path": "raw/run-01/logs/duplicate.txt",
+      "bytes": 246,
+      "sha256": "34e91881cffabee36e97a8138f0a9029ea5bd12ce3b09c0100a3c0adf47ad820"
+    },
+    {
+      "path": "raw/run-01/logs/holder.txt",
+      "bytes": 271,
+      "sha256": "337b750a030c69691a36833d782ca1b06e9ac8dd839fb2b9a72c17bb5e267502"
+    },
+    {
+      "path": "raw/run-01/logs/key-failure.txt",
+      "bytes": 246,
+      "sha256": "bbe86e968eb9f8b761c95578110bfb722c98aa4976f16bc8d1f60efd3b8b8c90"
+    },
+    {
+      "path": "raw/run-01/logs/normal-reopen.txt",
+      "bytes": 246,
+      "sha256": "34e91881cffabee36e97a8138f0a9029ea5bd12ce3b09c0100a3c0adf47ad820"
+    },
+    {
+      "path": "raw/run-01/logs/port-busy.txt",
+      "bytes": 246,
+      "sha256": "0b3bf85925e0b0656a662bca67d91d14d540be539965dc457ae96d409b67dd7e"
+    },
+    {
+      "path": "raw/run-01/logs/quit-opening.txt",
+      "bytes": 246,
+      "sha256": "7a31b98e5a9e5b9ed8a4a7cacb77d484ca5d40771164442da611ed744add992e"
+    },
+    {
+      "path": "raw/run-01/logs/signature.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/run-01/normal-reopen.json",
+      "bytes": 233,
+      "sha256": "29ac3a3001e3c0b7451b4285a8a509fa7092a3b9aa1a80a972d064e3fa50111a"
+    },
+    {
+      "path": "raw/run-01/port-busy.json",
+      "bytes": 233,
+      "sha256": "d46ec127da04d57cda7cc6bad253ed6c49676d6dfe4f7a82b4981093e6e14fff"
+    },
+    {
+      "path": "raw/run-01/quit-opening.json",
+      "bytes": 161,
+      "sha256": "8d0a2ca833165a1a639928b31d2962d457523502017a3fe3967d437a117f1b84"
+    },
+    {
+      "path": "raw/run-01/result.json",
+      "bytes": 3107,
+      "sha256": "1ee7ee1a6bf98d0cdcac9cc44a16202c4dc6154f5ff150ab01bdbd60bbca9fe4"
+    },
+    {
+      "path": "raw/run-01/retained-aim-mac-lifecycle-Gz3pY7-port-busy-result.json",
+      "bytes": 162,
+      "sha256": "cd02759419584f8f91cd424058c1f3ba185d4ca9cf852360c1a7345ca2e30ba0"
+    },
+    {
+      "path": "raw/run-01/retained-aim-mac-lifecycle-VB6g1R-key-failure-result.json",
+      "bytes": 179,
+      "sha256": "d2461a933acc402ea1e146d3731e8a8b11913e2854b3b20e6f0db28bb46d959f"
+    },
+    {
+      "path": "raw/run-01/retained-aim-mac-lifecycle-Wpo8zl-duplicate-result.json",
+      "bytes": 181,
+      "sha256": "95aa24a7edf3dd5ad19aad534757393bcdc894042c2adc652baf7b463097e9b2"
+    },
+    {
+      "path": "raw/run-01/retained-aim-mac-lifecycle-Wpo8zl-hold-result.json",
+      "bytes": 136,
+      "sha256": "26b3ee35696cad4d23d457d16b7f2d283040aa13cac9af836fea0146b5987990"
+    },
+    {
+      "path": "raw/run-01/retained-aim-mac-lifecycle-Wpo8zl-recover-result.json",
+      "bytes": 162,
+      "sha256": "14994bcb5707a85e02c38f9d6657e14b619354e659156a833a95544a28598590"
+    },
+    {
+      "path": "raw/run-01/retained-aim-mac-lifecycle-nP56Ez-quit-opening-result.json",
+      "bytes": 103,
+      "sha256": "2c3fa6484be31d24910d1e9b527415e4f949e76174a5def3fb259764dfcef3e5"
+    },
+    {
+      "path": "raw/run-01/retained-aim-mac-lifecycle-oLc5Cg-hold-result.json",
+      "bytes": 84,
+      "sha256": "c3e0ea635f6619dc32e61c2d32888a10b9a00d4d7421286a99dca09db08da3e3"
+    },
+    {
+      "path": "raw/run-01/retained-aim-mac-lifecycle-oLc5Cg-recover-result.json",
+      "bytes": 162,
+      "sha256": "3943e7e27cec7e3e688afb6effb5b167d22e7b3750b7d54af058e9750f1a1117"
+    },
+    {
+      "path": "raw/run-01/runner.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/run-02/audit-failure.json",
+      "bytes": 241,
+      "sha256": "a6098ab2d125ec0c331dd9a1c54e7f254e1fa8b97ea6b93eb75c551f0e0ce1cb"
+    },
+    {
+      "path": "raw/run-02/audit-reopen.json",
+      "bytes": 277,
+      "sha256": "6b38dc42adb683a577e0d0b746b440a972b5559bb64e6c08c644fcc7e6451b3c"
+    },
+    {
+      "path": "raw/run-02/crash-reopen.json",
+      "bytes": 277,
+      "sha256": "7b78625024f91ce6e8e00186e07c6c78d1c8d63aededfe030c40614611aed146"
+    },
+    {
+      "path": "raw/run-02/duplicate.json",
+      "bytes": 252,
+      "sha256": "f0d85d6145b0dee61ac0d30b047894dbf669a4cf04957dae8319ea1acf0f3a97"
+    },
+    {
+      "path": "raw/run-02/holder-normal-quit.json",
+      "bytes": 212,
+      "sha256": "f9a35535f46b3f72c71aae39b2b98a7ecaaaf87b7a798c3457607f8ebaecd8ce"
+    },
+    {
+      "path": "raw/run-02/key-failure.json",
+      "bytes": 252,
+      "sha256": "05eb485b42f0d327dc0f2dabf11f293c3b1f676abf04b3eadecf192b7717da31"
+    },
+    {
+      "path": "raw/run-02/logs/audit-failure.txt",
+      "bytes": 246,
+      "sha256": "08be84c967275ab6b0e6f5a9c25236d76d6e78c7129228ab5c6fea177ad0893d"
+    },
+    {
+      "path": "raw/run-02/logs/audit-reopen.txt",
+      "bytes": 246,
+      "sha256": "08be84c967275ab6b0e6f5a9c25236d76d6e78c7129228ab5c6fea177ad0893d"
+    },
+    {
+      "path": "raw/run-02/logs/build.txt",
+      "bytes": 136,
+      "sha256": "5bd5cc86ca2cfcca6b84ac06c372fd15aaf7ace19e3bf55a468791a5aa8fd216"
+    },
+    {
+      "path": "raw/run-02/logs/crash-holder.txt",
+      "bytes": 271,
+      "sha256": "b2fc3b8cee157581436d7ee7fc6ec0f796d0a1eabf973b4b7196b110cdd6633c"
+    },
+    {
+      "path": "raw/run-02/logs/crash-reopen.txt",
+      "bytes": 246,
+      "sha256": "61b1aab1ba2e3d73b1766287dce9fae19d430c9824a2df1a2c8244ecbdfaba40"
+    },
+    {
+      "path": "raw/run-02/logs/duplicate.txt",
+      "bytes": 246,
+      "sha256": "3e4c126cb9d34b6e6e1884148995c972684841959952fadcfb9a63e21601a913"
+    },
+    {
+      "path": "raw/run-02/logs/holder.txt",
+      "bytes": 271,
+      "sha256": "274ef5bf1e56dbfb999c1e4cae95137c02d8137e55473b52dcc92ac88261ae53"
+    },
+    {
+      "path": "raw/run-02/logs/key-failure.txt",
+      "bytes": 246,
+      "sha256": "7876c7a421a1624a71028a56e7326c9902db39c6e0e730e18c8dc995fe988168"
+    },
+    {
+      "path": "raw/run-02/logs/normal-reopen.txt",
+      "bytes": 246,
+      "sha256": "3e4c126cb9d34b6e6e1884148995c972684841959952fadcfb9a63e21601a913"
+    },
+    {
+      "path": "raw/run-02/logs/port-busy.txt",
+      "bytes": 246,
+      "sha256": "946e1d77d7eb71ef6f36e6011c07cbc39ae7025d6fd1d8e2cb9c9ea02804b5af"
+    },
+    {
+      "path": "raw/run-02/logs/quit-opening.txt",
+      "bytes": 246,
+      "sha256": "2eb600fa0f9497f9b9b74df830580e7b498aacdc22394b02286fffe87fe9e92f"
+    },
+    {
+      "path": "raw/run-02/logs/signature.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/run-02/normal-reopen.json",
+      "bytes": 278,
+      "sha256": "303337a9534cd57d3424204ab82fa12ed32ee280a9a1e280f70b017458d57382"
+    },
+    {
+      "path": "raw/run-02/port-busy.json",
+      "bytes": 233,
+      "sha256": "d46ec127da04d57cda7cc6bad253ed6c49676d6dfe4f7a82b4981093e6e14fff"
+    },
+    {
+      "path": "raw/run-02/quit-opening.json",
+      "bytes": 161,
+      "sha256": "8d0a2ca833165a1a639928b31d2962d457523502017a3fe3967d437a117f1b84"
+    },
+    {
+      "path": "raw/run-02/result.json",
+      "bytes": 4151,
+      "sha256": "38a2ef88e51eab4ae26d96c805bceaa119913844fbbab40bd080e8d9c6bfc13f"
+    },
+    {
+      "path": "raw/run-02/retained-aim-mac-lifecycle-O1EvjC-key-failure-result.json",
+      "bytes": 179,
+      "sha256": "d2461a933acc402ea1e146d3731e8a8b11913e2854b3b20e6f0db28bb46d959f"
+    },
+    {
+      "path": "raw/run-02/retained-aim-mac-lifecycle-TfiXXJ-duplicate-result.json",
+      "bytes": 181,
+      "sha256": "95aa24a7edf3dd5ad19aad534757393bcdc894042c2adc652baf7b463097e9b2"
+    },
+    {
+      "path": "raw/run-02/retained-aim-mac-lifecycle-TfiXXJ-hold-result.json",
+      "bytes": 136,
+      "sha256": "28c2b6d384458ad476e83b393b380decd4ef870ea82263a962b79e71736bd16c"
+    },
+    {
+      "path": "raw/run-02/retained-aim-mac-lifecycle-TfiXXJ-recover-result.json",
+      "bytes": 203,
+      "sha256": "cc7e5c373fefaa354b8aa369e325bf2e35327576a27d32baafe18c8b66ecea29"
+    },
+    {
+      "path": "raw/run-02/retained-aim-mac-lifecycle-U2p16M-quit-opening-result.json",
+      "bytes": 103,
+      "sha256": "2c3fa6484be31d24910d1e9b527415e4f949e76174a5def3fb259764dfcef3e5"
+    },
+    {
+      "path": "raw/run-02/retained-aim-mac-lifecycle-ho5bsx-port-busy-result.json",
+      "bytes": 162,
+      "sha256": "cd02759419584f8f91cd424058c1f3ba185d4ca9cf852360c1a7345ca2e30ba0"
+    },
+    {
+      "path": "raw/run-02/retained-aim-mac-lifecycle-rgmS1n-hold-result.json",
+      "bytes": 84,
+      "sha256": "87cd39f0b10a91d96242ddc4198d4e6a776fc8920bd54dd93dd6c30a56a513cd"
+    },
+    {
+      "path": "raw/run-02/retained-aim-mac-lifecycle-rgmS1n-recover-result.json",
+      "bytes": 203,
+      "sha256": "fc7307fad1e7016835d134b6dbd1cbe1e7c8702e7bb8e05facaf15e60970bac0"
+    },
+    {
+      "path": "raw/run-02/retained-aim-mac-lifecycle-zKHKZu-audit-failure-result.json",
+      "bytes": 174,
+      "sha256": "2b317a9f2db3ba4f833901d4f8a77e48a97d0fdf4f933630bdf81c029cca8a45"
+    },
+    {
+      "path": "raw/run-02/retained-aim-mac-lifecycle-zKHKZu-recover-result.json",
+      "bytes": 203,
+      "sha256": "e0f601e382a27a365f1c7abefa8a68ba4293834f6f1331e4432dcaeda3291e7c"
+    },
+    {
+      "path": "raw/run-02/runner.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/run-02/sources/apps-desktop-integration_test-macos_lifecycle_probe.dart.txt",
+      "bytes": 11698,
+      "sha256": "b1e64b142d01c4f246ef0d23de391956ce16d67e3c3caf6cb8cf64641f9edd60"
+    },
+    {
+      "path": "raw/run-02/sources/apps-desktop-lib-desktop_bootstrap.dart.txt",
+      "bytes": 6198,
+      "sha256": "025a8a0f1d26aed7b77c64b3b9cfa2cdfe60c4133fc2c00b574860e3d1fb5026"
+    },
+    {
+      "path": "raw/run-02/sources/apps-desktop-lib-desktop_runtime.dart.txt",
+      "bytes": 11499,
+      "sha256": "1cd0ba9971d3d0b321f22eec78c3186919328b7fffc346785b1f0ad340d4751c"
+    },
+    {
+      "path": "raw/run-02/sources/apps-desktop-macos-Runner-AppDelegate.swift.txt",
+      "bytes": 905,
+      "sha256": "6be0305e6a175f9486a4859597f7e1d2a4d1855fd5d630603466e7466214878e"
+    },
+    {
+      "path": "raw/run-02/sources/apps-desktop-macos-Runner-MainFlutterWindow.swift.txt",
+      "bytes": 15487,
+      "sha256": "ba3715cdc39f5fa3f489382cd710801a91717c92ef9388594d6a00cdba3fbcdb"
+    },
+    {
+      "path": "raw/run-02/sources/apps-desktop-macos-Runner.xcodeproj-project.pbxproj.txt",
+      "bytes": 29409,
+      "sha256": "4f3c4b943ea56a8c6c6f07a96c54f7d10934a48938c5f98ba7af3553f3f26d33"
+    },
+    {
+      "path": "raw/run-02/sources/apps-desktop-pubspec.lock.txt",
+      "bytes": 11393,
+      "sha256": "9929f3b3febefc0de06e9a841ac4b5505896eda43a503b0f128467d93b311553"
+    },
+    {
+      "path": "raw/run-02/sources/packages-info_storage-pubspec.lock.txt",
+      "bytes": 13848,
+      "sha256": "131f601be25b6a7759cf961d15fda9c4e176a759eb20d499a83e2bff8d9d1274"
+    },
+    {
+      "path": "raw/run-02/sources/scripts-qa-macos-lifecycle.py.txt",
+      "bytes": 10962,
+      "sha256": "41f5decc92a3de00cda12f77e0083759653709940b39f9e124596000d055f5ee"
+    }
+  ],
+  "privateQaDirectoriesRemoved": 11,
+  "scope": "9 native normal exits, 1 explicit crash; synthetic keys/events; actual SQLCipher and signed Flutter processes; no physical UI/wake/Codex acceptance"
+}

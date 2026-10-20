@@ -1,0 +1,12 @@
+{
+  "label": "audit-reopen",
+  "exit": 0,
+  "mode": "recover",
+  "startup": "ready",
+  "port": 50383,
+  "oldAuthorityRefused": true,
+  "storedInformationPreserved": true,
+  "endedGrantAndAllowedReadPreserved": true,
+  "nativeTerminationRequested": true,
+  "libraryCloses": 1
+}

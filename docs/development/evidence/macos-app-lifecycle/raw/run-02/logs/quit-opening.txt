@@ -1,0 +1,2 @@
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+MAC_LIFECYCLE_ROOT=/Users/jiangxinyi/Library/Containers/com.example.infoDesktop/Data/tmp/aim-mac-lifecycle-U2p16M

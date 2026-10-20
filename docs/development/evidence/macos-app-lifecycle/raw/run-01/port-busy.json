@@ -1,0 +1,12 @@
+{
+  "label": "port-busy",
+  "exit": 0,
+  "mode": "port-busy",
+  "startup": "failed",
+  "cleanupPending": false,
+  "keyReads": 1,
+  "keyCreates": 0,
+  "libraryCloses": 1,
+  "storageFailure": "",
+  "nativeTerminationRequested": true
+}

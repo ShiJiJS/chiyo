@@ -1,0 +1,10 @@
+{
+  "label": "audit-failure",
+  "exit": 0,
+  "mode": "audit-failure",
+  "auditFailurePreventedTermination": true,
+  "libraryRetainedForRetry": true,
+  "oldAuthorityRefused": true,
+  "nativeTerminationRequested": true,
+  "libraryCloses": 1
+}
