@@ -1,0 +1,916 @@
+{
+  "sourceCommit": "9ea452646d0040212df8798f20036f19d0ca09c3",
+  "appBaseCommit": "0c9ed4b8b350e31c13b9e723c1d6bc1fe5071845",
+  "cliProductSource": "cccc37e4a1125f88c7714a26b1873fdb2ffb7a9c",
+  "finalRun": 5,
+  "issue48Complete": false,
+  "productionChanged": true,
+  "fixes": [
+    "Bound tag scrolling height to 35% of library viewport so long tag collections remain reachable.",
+    "Allow heading and count to wrap and keep normal-size full-width alignment.",
+    "Let all-information label and pagination total use constrained available width."
+  ],
+  "nativeResult": {
+    "items": 125,
+    "directories": 3,
+    "tags": 52,
+    "phases": 6,
+    "commandStatusAssertions": 38,
+    "captures": 33,
+    "themes": 4,
+    "textScales": [
+      1,
+      2
+    ],
+    "matrixViewport": [
+      1280,
+      800
+    ],
+    "flowViewport": [
+      1440,
+      1000
+    ]
+  },
+  "strictAnalysisPassed": true,
+  "widgetTestsPassed": 6,
+  "defaultDebugRestoredAndStrictSignaturePassed": true,
+  "physicalUiAcceptance": false,
+  "keychainAcceptance": false,
+  "windowsNativeRegression": false,
+  "finalReleasePackageRebuilt": false,
+  "runs": [
+    {
+      "run": 1,
+      "complete": false,
+      "phases": 1,
+      "commandStatusAssertions": 1,
+      "flutterExitCode": null,
+      "cliExits": [
+        0
+      ],
+      "failure": {
+        "type": "AssertionError",
+        "message": "('claim', 'ok')"
+      },
+      "retainedOwnedRoot": true
+    },
+    {
+      "run": 2,
+      "complete": true,
+      "phases": 6,
+      "commandStatusAssertions": 38,
+      "flutterExitCode": 0,
+      "cliExits": [
+        0,
+        0
+      ],
+      "failure": null,
+      "retainedOwnedRoot": false
+    },
+    {
+      "run": 3,
+      "complete": false,
+      "phases": 5,
+      "commandStatusAssertions": 38,
+      "flutterExitCode": null,
+      "cliExits": [
+        0,
+        0
+      ],
+      "failure": {
+        "type": "RuntimeError",
+        "message": "Flutter exited before expected evidence"
+      },
+      "retainedOwnedRoot": true
+    },
+    {
+      "run": 4,
+      "complete": true,
+      "phases": 6,
+      "commandStatusAssertions": 38,
+      "flutterExitCode": 0,
+      "cliExits": [
+        0,
+        0
+      ],
+      "failure": null,
+      "retainedOwnedRoot": false
+    },
+    {
+      "run": 5,
+      "complete": true,
+      "phases": 6,
+      "commandStatusAssertions": 38,
+      "flutterExitCode": 0,
+      "cliExits": [
+        0,
+        0
+      ],
+      "failure": null,
+      "retainedOwnedRoot": false
+    }
+  ],
+  "failureAnalysis": [
+    "Run 1 driver expected approved for claim instead of the protocol ok; corrected harness expectation.",
+    "Run 2 workflow passed before pressure checks. Separate widget pressure found 1023px vertical tag overflow at normal scale, then 47px pagination overflow at 200%.",
+    "Run 3 native flow completed through repository reopen but 125-item heading overflowed at 200%; widget diagnosis also exposed the all-information count row. The first expanded fixture used an empty-field item and was rejected; corrected to a valid synthetic field.",
+    "Run 4 passed all themes/scales; visual inspection found normal-scale heading/count had lost full-width spacing.",
+    "Run 5 retains full-width heading layout and captures the initial sidebar as well as final tag and second-page states for each theme/scale."
+  ],
+  "limits": [
+    "UI actions and text are tester-driven with registered TestTextInput; current Mac locked. No real IME, physical scrolling, keyboard or system-panel claim.",
+    "Ephemeral keys, owner approval and 125 information items plus 50 pressure tags are fixtures. Initial three directories and two tags and their edits are UI-created.",
+    "Same-process repository/service reopen, not application restart; no Keychain or natural grant expiry.",
+    "125 items/52 tags is a bounded scenario, not a general performance guarantee.",
+    "UI does not implement directory/tag deletion; no deletion flow or new deletion feature is claimed.",
+    "Earlier AOT CLI cccc37e is used with current app tests; final same-source release and Windows UI regression still pending.",
+    "All native runs reported foreground open returned 1; PNGs are Flutter render captures, not physical screenshots."
+  ],
+  "viewedCaptures": {
+    "run-2": [
+      "06-combined-filters",
+      "09-reopened"
+    ],
+    "run-4": [
+      "10-tags-purple-200",
+      "11-pagination-purple-200",
+      "10-tags-mono-200",
+      "11-pagination-blue-200",
+      "07-moved-renamed",
+      "11-pagination-green-100"
+    ],
+    "run-5": [
+      "10-initial-purple-100",
+      "10-initial-purple-200",
+      "10-initial-mono-200",
+      "10-tags-blue-200"
+    ]
+  },
+  "raw": [
+    {
+      "path": "raw/final-regression-source.dart",
+      "bytes": 2284,
+      "sha256": "4cca34cd05705ec30c83b16b6322fc34b0b2596228e3146f1b061748220e2cd2"
+    },
+    {
+      "path": "raw/run-1/cli-0-stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/run-1/flutter.txt",
+      "bytes": 495,
+      "sha256": "00bc1fafefaded3cd1bfd615eebee73fe41ef1d9456392cca970d6c74158a754"
+    },
+    {
+      "path": "raw/run-1/native-01-created.png",
+      "bytes": 268733,
+      "sha256": "321f1c7eb7349253a0332b1fe1a50a34fc8f455dd1c9c8178a4346d322845a35"
+    },
+    {
+      "path": "raw/run-1/native-02-cycle-rejected.png",
+      "bytes": 378993,
+      "sha256": "5e20f602e36201e469d63471996fe29e67a786a37004075bda53d127d10bdb51"
+    },
+    {
+      "path": "raw/run-1/result.json",
+      "bytes": 1948,
+      "sha256": "33b74551d9793defdec6b5096c610744823741d8aead00d2e7dddc6e8f071042"
+    },
+    {
+      "path": "raw/run-1/sources/information_editor.dart",
+      "bytes": 35266,
+      "sha256": "59d36a64441022117e9bfe43645b75531f71fc698da1372d3807d2fc51416989"
+    },
+    {
+      "path": "raw/run-1/sources/library.dart",
+      "bytes": 55279,
+      "sha256": "f0759829163187a34dd6b0f75be756e7e0a768586ff3448661f30a3f2edff1b4"
+    },
+    {
+      "path": "raw/run-1/sources/macos-library-filters-ui.py",
+      "bytes": 8882,
+      "sha256": "04bcccca46bc01377844a578a3455142376ed0dd37ba58bb9d7174f4465802b1"
+    },
+    {
+      "path": "raw/run-1/sources/macos_library_filters_native_test.dart",
+      "bytes": 14299,
+      "sha256": "923c977d4bf9929526bbf3544845b4793c665dccf3559cfd8797dc8fa9d9fab2"
+    },
+    {
+      "path": "raw/run-1/sources/main.dart",
+      "bytes": 13679,
+      "sha256": "484271607ad9cabdcd7fd69374b9c71a37dee4d2a51fe4cd82d40811aa420e39"
+    },
+    {
+      "path": "raw/run-1/sources/native_semantics_lifetime.dart",
+      "bytes": 1540,
+      "sha256": "a274da35d57e9bca3322b7e5b70a2bc610990e8e8dc3fba0821bbb1e9219036f"
+    },
+    {
+      "path": "raw/run-1/sources/organization.dart",
+      "bytes": 16785,
+      "sha256": "8e2d97624cac010295650f0179551a62f43131a81e086e95fef24c1cc377d319"
+    },
+    {
+      "path": "raw/run-2/cli-0-stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/run-2/cli-1-stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/run-2/flutter.txt",
+      "bytes": 547,
+      "sha256": "acffef6f5865c1a1bf4306d22bb8165574a3bf4ad4add412409c8959fb0af40c"
+    },
+    {
+      "path": "raw/run-2/native-01-created.png",
+      "bytes": 268733,
+      "sha256": "321f1c7eb7349253a0332b1fe1a50a34fc8f455dd1c9c8178a4346d322845a35"
+    },
+    {
+      "path": "raw/run-2/native-02-cycle-rejected.png",
+      "bytes": 378993,
+      "sha256": "5e20f602e36201e469d63471996fe29e67a786a37004075bda53d127d10bdb51"
+    },
+    {
+      "path": "raw/run-2/native-03-last-page.png",
+      "bytes": 318480,
+      "sha256": "e966898408c912f2e0e04470ee6b37000d5af7748a77b81172cad50bcdb3cf68"
+    },
+    {
+      "path": "raw/run-2/native-04-public-field-search.png",
+      "bytes": 249581,
+      "sha256": "29baf07ed3030342c86d51790111a1d20709aad9d9dce945256e5432c95b3180"
+    },
+    {
+      "path": "raw/run-2/native-05-invalid-query.png",
+      "bytes": 155606,
+      "sha256": "c4d2027ee619086d169b4dd58a123841d5d8cc9297353aad68a609964260ec6a"
+    },
+    {
+      "path": "raw/run-2/native-06-combined-filters.png",
+      "bytes": 327023,
+      "sha256": "7a1f3472d358d851379d64d4024ef676763f7c5fee2605a57d51e5debe8a6c4a"
+    },
+    {
+      "path": "raw/run-2/native-07-moved-renamed.png",
+      "bytes": 433878,
+      "sha256": "36efb2f73a84f495b0fb5cf6e9ab23eb1ed8a179c1a17cc501444c6f99fde904"
+    },
+    {
+      "path": "raw/run-2/native-08-moved-filter.png",
+      "bytes": 336918,
+      "sha256": "046f4ebf45968b282e0934eea090c64639c88f6f65d9894357bf2b7b356aa6ab"
+    },
+    {
+      "path": "raw/run-2/native-09-reopened.png",
+      "bytes": 336918,
+      "sha256": "046f4ebf45968b282e0934eea090c64639c88f6f65d9894357bf2b7b356aa6ab"
+    },
+    {
+      "path": "raw/run-2/native-result.json",
+      "bytes": 443,
+      "sha256": "86e0476794539a85af3ac98e35f244c75beb93cb9e327519dd1d16e66d01d313"
+    },
+    {
+      "path": "raw/run-2/result.json",
+      "bytes": 5510,
+      "sha256": "59a8da36e17a8532a5cbd132e717fdb40873ef5b923b7e20b53efd2983a1a0d7"
+    },
+    {
+      "path": "raw/run-2/sources/information_editor.dart",
+      "bytes": 35266,
+      "sha256": "59d36a64441022117e9bfe43645b75531f71fc698da1372d3807d2fc51416989"
+    },
+    {
+      "path": "raw/run-2/sources/library.dart",
+      "bytes": 55279,
+      "sha256": "f0759829163187a34dd6b0f75be756e7e0a768586ff3448661f30a3f2edff1b4"
+    },
+    {
+      "path": "raw/run-2/sources/macos-library-filters-ui.py",
+      "bytes": 8876,
+      "sha256": "569bef4b7484d64b21c05b36c51af03d467596b524f7a0263169a7be95e07e1a"
+    },
+    {
+      "path": "raw/run-2/sources/macos_library_filters_native_test.dart",
+      "bytes": 14299,
+      "sha256": "923c977d4bf9929526bbf3544845b4793c665dccf3559cfd8797dc8fa9d9fab2"
+    },
+    {
+      "path": "raw/run-2/sources/main.dart",
+      "bytes": 13679,
+      "sha256": "484271607ad9cabdcd7fd69374b9c71a37dee4d2a51fe4cd82d40811aa420e39"
+    },
+    {
+      "path": "raw/run-2/sources/native_semantics_lifetime.dart",
+      "bytes": 1540,
+      "sha256": "a274da35d57e9bca3322b7e5b70a2bc610990e8e8dc3fba0821bbb1e9219036f"
+    },
+    {
+      "path": "raw/run-2/sources/organization.dart",
+      "bytes": 16785,
+      "sha256": "8e2d97624cac010295650f0179551a62f43131a81e086e95fef24c1cc377d319"
+    },
+    {
+      "path": "raw/run-2/tag-pressure-after-pagination-fix.txt",
+      "bytes": 211,
+      "sha256": "58356b7d8ac837dd16bcc42d15107fe159e4417f4984372cc041227ec8926505"
+    },
+    {
+      "path": "raw/run-2/tag-pressure-after.txt",
+      "bytes": 2065,
+      "sha256": "23346d4e81d9a1a4d01c4d61a4bf6b5858cf13c9b7ba7236d73d5ce698ddffff"
+    },
+    {
+      "path": "raw/run-2/tag-pressure-before.txt",
+      "bytes": 2068,
+      "sha256": "de0299f4582200c652d1bc03ab617114b86b2fae3f9308572a5e1e4fd47d6411"
+    },
+    {
+      "path": "raw/run-2/tag-pressure-diagnostic.txt",
+      "bytes": 2626710,
+      "sha256": "4e608f25d6d2374a5b515782566089ebf650a40b488300f96560f5aaf91194e3"
+    },
+    {
+      "path": "raw/run-3/analyze.txt",
+      "bytes": 96,
+      "sha256": "c6ba915e68bb6d4f706f45f51c48e544dad87af4f7fa2174f2c9eac5f3299477"
+    },
+    {
+      "path": "raw/run-3/cli-0-stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/run-3/cli-1-stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/run-3/flutter.txt",
+      "bytes": 2649,
+      "sha256": "ebe2b6d02d71c7be271c4727ce97e938fbf55d064273d40dd4f1561f83f61b0c"
+    },
+    {
+      "path": "raw/run-3/native-01-created.png",
+      "bytes": 268733,
+      "sha256": "321f1c7eb7349253a0332b1fe1a50a34fc8f455dd1c9c8178a4346d322845a35"
+    },
+    {
+      "path": "raw/run-3/native-02-cycle-rejected.png",
+      "bytes": 378993,
+      "sha256": "5e20f602e36201e469d63471996fe29e67a786a37004075bda53d127d10bdb51"
+    },
+    {
+      "path": "raw/run-3/native-03-last-page.png",
+      "bytes": 318223,
+      "sha256": "ef00ff667316fc5dcc3c4944cff769234104e9248803b9d54aa8cf98eed6eae7"
+    },
+    {
+      "path": "raw/run-3/native-04-public-field-search.png",
+      "bytes": 249393,
+      "sha256": "fac353d05194202db455511377fb7fe31d375559a37b561ca6556addc72569e4"
+    },
+    {
+      "path": "raw/run-3/native-05-invalid-query.png",
+      "bytes": 155606,
+      "sha256": "c4d2027ee619086d169b4dd58a123841d5d8cc9297353aad68a609964260ec6a"
+    },
+    {
+      "path": "raw/run-3/native-06-combined-filters.png",
+      "bytes": 326818,
+      "sha256": "d2e75f8648cbc3173f1db0b38dde7bfeed6dcd10c31ee28baf58773bba594940"
+    },
+    {
+      "path": "raw/run-3/native-07-moved-renamed.png",
+      "bytes": 433814,
+      "sha256": "94d4f133e3c7df14756f4b021ff997456a0d5c661f0ec79ae2f8d5051d745c90"
+    },
+    {
+      "path": "raw/run-3/native-08-moved-filter.png",
+      "bytes": 336741,
+      "sha256": "f7d9672ab9e8030d2f4a49d8263e08075a8d5084472d3f3528ed8dad3d520f00"
+    },
+    {
+      "path": "raw/run-3/native-09-reopened.png",
+      "bytes": 336741,
+      "sha256": "f7d9672ab9e8030d2f4a49d8263e08075a8d5084472d3f3528ed8dad3d520f00"
+    },
+    {
+      "path": "raw/run-3/native-10-tags-purple-100.png",
+      "bytes": 161541,
+      "sha256": "4000d7e6f5717e204b28d7d05ddf4e9cfe3e782a82fa652f31c82b0b6af04414"
+    },
+    {
+      "path": "raw/run-3/native-11-pagination-purple-100.png",
+      "bytes": 295485,
+      "sha256": "541bb97062cb5107f7d4654e6db792476d12efb0dc097a7f8716db2d09c4e9d1"
+    },
+    {
+      "path": "raw/run-3/result.json",
+      "bytes": 5195,
+      "sha256": "72837fc6cba16e60f969cfd7e327039149aedd8716af13e68a248220b24e6fec"
+    },
+    {
+      "path": "raw/run-3/sources/information_editor.dart",
+      "bytes": 35266,
+      "sha256": "59d36a64441022117e9bfe43645b75531f71fc698da1372d3807d2fc51416989"
+    },
+    {
+      "path": "raw/run-3/sources/library.dart",
+      "bytes": 55737,
+      "sha256": "b5054216e55846e4f0a70b8059f58d93992e193711c7a6a4eb6666efda9361a1"
+    },
+    {
+      "path": "raw/run-3/sources/macos-library-filters-ui.py",
+      "bytes": 8876,
+      "sha256": "569bef4b7484d64b21c05b36c51af03d467596b524f7a0263169a7be95e07e1a"
+    },
+    {
+      "path": "raw/run-3/sources/macos_library_filters_native_test.dart",
+      "bytes": 15667,
+      "sha256": "6ec58f4fd9a3695f62a79861f58f49cdb0a6bb67c1812a63636063ce82244ebc"
+    },
+    {
+      "path": "raw/run-3/sources/main.dart",
+      "bytes": 13679,
+      "sha256": "484271607ad9cabdcd7fd69374b9c71a37dee4d2a51fe4cd82d40811aa420e39"
+    },
+    {
+      "path": "raw/run-3/sources/native_semantics_lifetime.dart",
+      "bytes": 1540,
+      "sha256": "a274da35d57e9bca3322b7e5b70a2bc610990e8e8dc3fba0821bbb1e9219036f"
+    },
+    {
+      "path": "raw/run-3/sources/organization.dart",
+      "bytes": 16785,
+      "sha256": "8e2d97624cac010295650f0179551a62f43131a81e086e95fef24c1cc377d319"
+    },
+    {
+      "path": "raw/run-3/tag-pressure-header-before.txt",
+      "bytes": 2145,
+      "sha256": "0f752166ba0d7d0e913603df2869baa37f39e6353545861eaa8a2e142a04b228"
+    },
+    {
+      "path": "raw/run-3/tag-pressure-header-reproduced.txt",
+      "bytes": 7013,
+      "sha256": "bd544d8577b2a7f39a10a9a5d33d01d5be2fbbf9223483aefe91f0aecbe6fc28"
+    },
+    {
+      "path": "raw/run-3/widget-final.txt",
+      "bytes": 1134,
+      "sha256": "7006f50655350753a0551ee4dfc99b18eef66bc50a0689c917829c6ae1a3b20a"
+    },
+    {
+      "path": "raw/run-4/analyze.txt",
+      "bytes": 96,
+      "sha256": "c6ba915e68bb6d4f706f45f51c48e544dad87af4f7fa2174f2c9eac5f3299477"
+    },
+    {
+      "path": "raw/run-4/cli-0-stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/run-4/cli-1-stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/run-4/default-build.txt",
+      "bytes": 125,
+      "sha256": "bb928504a91fe0ce4dc0bb921b142b31033cbbf74e92214ba34521fe3f2f22be"
+    },
+    {
+      "path": "raw/run-4/default-signature.txt",
+      "bytes": 2171,
+      "sha256": "93fdc434f7f2324cec4805b9ed5764a3d8e07962a7a2b3c0b52b16e212d23793"
+    },
+    {
+      "path": "raw/run-4/flutter.txt",
+      "bytes": 547,
+      "sha256": "fc7296de3be342055a0c932f1fff48ffed408a607d35631e46604c18174c0cc0"
+    },
+    {
+      "path": "raw/run-4/native-01-created.png",
+      "bytes": 268333,
+      "sha256": "64c250ff422ce427d6f3b3f2a4e36dfabd6a0789e4a97432ad56116c5805a03a"
+    },
+    {
+      "path": "raw/run-4/native-02-cycle-rejected.png",
+      "bytes": 378449,
+      "sha256": "448d13416c6b827710a305d98f436964071a2b708b38933fabe5336e53e902d9"
+    },
+    {
+      "path": "raw/run-4/native-03-last-page.png",
+      "bytes": 318047,
+      "sha256": "fe4fb7c1527db6a6c1290c73c045113981a8443203adb945c984636f8dc433a3"
+    },
+    {
+      "path": "raw/run-4/native-04-public-field-search.png",
+      "bytes": 249242,
+      "sha256": "a17842dd0c12c5b7c73c0e9d3b26df032483a69261aec7830819c59bd20f28e6"
+    },
+    {
+      "path": "raw/run-4/native-05-invalid-query.png",
+      "bytes": 155470,
+      "sha256": "261969e220263e52aeae2e9e8c26d378fa83656bd3662cb4d8b687559af25922"
+    },
+    {
+      "path": "raw/run-4/native-06-combined-filters.png",
+      "bytes": 326680,
+      "sha256": "a54095ad9a2412525ce732a8b662a90d641450cb8c0aa7a0557077dc04e9394a"
+    },
+    {
+      "path": "raw/run-4/native-07-moved-renamed.png",
+      "bytes": 433668,
+      "sha256": "2a01ae39d5bf57feb7b9162a5eea85cf6dcc628273d2b8118df2c1e2ba107cdb"
+    },
+    {
+      "path": "raw/run-4/native-08-moved-filter.png",
+      "bytes": 336576,
+      "sha256": "6049aa78a1cf1bbe133d29132ef64e2d7915df5db58feb46b6d2171cdb201c76"
+    },
+    {
+      "path": "raw/run-4/native-09-reopened.png",
+      "bytes": 336576,
+      "sha256": "6049aa78a1cf1bbe133d29132ef64e2d7915df5db58feb46b6d2171cdb201c76"
+    },
+    {
+      "path": "raw/run-4/native-10-tags-blue-100.png",
+      "bytes": 160705,
+      "sha256": "1a8ecac4cabf4d2da2c5b7873892e124d2386e177221eeaed68bf998f9bb0a2d"
+    },
+    {
+      "path": "raw/run-4/native-10-tags-blue-200.png",
+      "bytes": 239457,
+      "sha256": "07bf887baeba823d638fd6823f78f02772fc359825402b6ccaee8bc1e0b75891"
+    },
+    {
+      "path": "raw/run-4/native-10-tags-green-100.png",
+      "bytes": 161295,
+      "sha256": "0b0de35d60e6a8ac60e00cf8da9ac4afe259e7cad4399d0a3960f54b4048e09b"
+    },
+    {
+      "path": "raw/run-4/native-10-tags-green-200.png",
+      "bytes": 239210,
+      "sha256": "ea53a2d8157f77058d28c0837e790175a72ecf611bc91ff08ed0aa7b141197b6"
+    },
+    {
+      "path": "raw/run-4/native-10-tags-mono-100.png",
+      "bytes": 154584,
+      "sha256": "a8f912d531801f0dc5594a9f0dcb8606f484edcb9f9dca31e168df5662f41a74"
+    },
+    {
+      "path": "raw/run-4/native-10-tags-mono-200.png",
+      "bytes": 227135,
+      "sha256": "5e1d889ad7724a39342220a1a848bc8b0ffd5aaa53501fef0de923bc0dead34b"
+    },
+    {
+      "path": "raw/run-4/native-10-tags-purple-100.png",
+      "bytes": 161339,
+      "sha256": "cb48157e64564841585afd5a2772cd7f353de62fb199e6a4da125b259de50828"
+    },
+    {
+      "path": "raw/run-4/native-10-tags-purple-200.png",
+      "bytes": 238068,
+      "sha256": "a14eff7d2b866bbc870e9c859053e9813c898adc5fdab1b0e61dd525d8c28449"
+    },
+    {
+      "path": "raw/run-4/native-11-pagination-blue-100.png",
+      "bytes": 295547,
+      "sha256": "70c297fe52e9293e5974e71fe34aa0f5c81cff049f150a0f78471fbf1cada013"
+    },
+    {
+      "path": "raw/run-4/native-11-pagination-blue-200.png",
+      "bytes": 337264,
+      "sha256": "9a748f192e1156d9586d41ad0da047af45322dbcb51c94ffbff42b3a2574d762"
+    },
+    {
+      "path": "raw/run-4/native-11-pagination-green-100.png",
+      "bytes": 297034,
+      "sha256": "a44626df488015b224f1a782fc9b6c56ac10a01f89586001d014e38fe3bdd338"
+    },
+    {
+      "path": "raw/run-4/native-11-pagination-green-200.png",
+      "bytes": 337490,
+      "sha256": "a63c2041f60f026adfbb0abd83afe2ead162538b87b0f9d9b65cb36c636c6183"
+    },
+    {
+      "path": "raw/run-4/native-11-pagination-mono-100.png",
+      "bytes": 281104,
+      "sha256": "5f72aba5d7250dd30d1e188d4852791815fa50432e64123dbe8e1a5978b30fe6"
+    },
+    {
+      "path": "raw/run-4/native-11-pagination-mono-200.png",
+      "bytes": 319345,
+      "sha256": "80ef7631c866fa00a6f2ab04cff1124bbd9712720b108fdb6b3c88c6e35a32fc"
+    },
+    {
+      "path": "raw/run-4/native-11-pagination-purple-100.png",
+      "bytes": 295308,
+      "sha256": "dc28a647e020264841044ccb1bbabc47702668dd94d73b35dfb756413991a790"
+    },
+    {
+      "path": "raw/run-4/native-11-pagination-purple-200.png",
+      "bytes": 335556,
+      "sha256": "9453c57a05541fc6d08c4ca6ccaec4e4a7b80a131edf0685b796469a2939ecd2"
+    },
+    {
+      "path": "raw/run-4/native-result.json",
+      "bytes": 872,
+      "sha256": "7da77862b824517ebcc31fbf610e9d87b12b411bb5c3ea3612cb8d1a7f698286"
+    },
+    {
+      "path": "raw/run-4/result.json",
+      "bytes": 6153,
+      "sha256": "cda377951d269200621dba270c6611ffefad9b676d4dbcb31f3e0f673463bac7"
+    },
+    {
+      "path": "raw/run-4/sources/information_editor.dart",
+      "bytes": 35266,
+      "sha256": "59d36a64441022117e9bfe43645b75531f71fc698da1372d3807d2fc51416989"
+    },
+    {
+      "path": "raw/run-4/sources/library.dart",
+      "bytes": 55809,
+      "sha256": "54cba9700748effaac4859286617b8256ebf287784ca573c1c8e4d6011ff8474"
+    },
+    {
+      "path": "raw/run-4/sources/macos-library-filters-ui.py",
+      "bytes": 8876,
+      "sha256": "569bef4b7484d64b21c05b36c51af03d467596b524f7a0263169a7be95e07e1a"
+    },
+    {
+      "path": "raw/run-4/sources/macos_library_filters_native_test.dart",
+      "bytes": 15667,
+      "sha256": "6ec58f4fd9a3695f62a79861f58f49cdb0a6bb67c1812a63636063ce82244ebc"
+    },
+    {
+      "path": "raw/run-4/sources/main.dart",
+      "bytes": 13679,
+      "sha256": "484271607ad9cabdcd7fd69374b9c71a37dee4d2a51fe4cd82d40811aa420e39"
+    },
+    {
+      "path": "raw/run-4/sources/native_semantics_lifetime.dart",
+      "bytes": 1540,
+      "sha256": "a274da35d57e9bca3322b7e5b70a2bc610990e8e8dc3fba0821bbb1e9219036f"
+    },
+    {
+      "path": "raw/run-4/sources/organization.dart",
+      "bytes": 16785,
+      "sha256": "8e2d97624cac010295650f0179551a62f43131a81e086e95fef24c1cc377d319"
+    },
+    {
+      "path": "raw/run-5/analyze.txt",
+      "bytes": 96,
+      "sha256": "c6ba915e68bb6d4f706f45f51c48e544dad87af4f7fa2174f2c9eac5f3299477"
+    },
+    {
+      "path": "raw/run-5/cli-0-stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/run-5/cli-1-stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/run-5/default-build.txt",
+      "bytes": 125,
+      "sha256": "bb928504a91fe0ce4dc0bb921b142b31033cbbf74e92214ba34521fe3f2f22be"
+    },
+    {
+      "path": "raw/run-5/default-signature.txt",
+      "bytes": 2171,
+      "sha256": "93fdc434f7f2324cec4805b9ed5764a3d8e07962a7a2b3c0b52b16e212d23793"
+    },
+    {
+      "path": "raw/run-5/flutter.txt",
+      "bytes": 547,
+      "sha256": "065d1b76ed4e874d36e5a71649883fd1f0888181f2d869f15c48978560fb4d7d"
+    },
+    {
+      "path": "raw/run-5/native-01-created.png",
+      "bytes": 268733,
+      "sha256": "321f1c7eb7349253a0332b1fe1a50a34fc8f455dd1c9c8178a4346d322845a35"
+    },
+    {
+      "path": "raw/run-5/native-02-cycle-rejected.png",
+      "bytes": 378993,
+      "sha256": "5e20f602e36201e469d63471996fe29e67a786a37004075bda53d127d10bdb51"
+    },
+    {
+      "path": "raw/run-5/native-03-last-page.png",
+      "bytes": 318141,
+      "sha256": "9da9beb37ba88f49957212b3c8eb74d0ee272d67f93fc426b8b0388ed96631f5"
+    },
+    {
+      "path": "raw/run-5/native-04-public-field-search.png",
+      "bytes": 249332,
+      "sha256": "d42519a0312f7b582fe8c5f391db34f42a9960860ca49e34bbf8e0ae30f35cf7"
+    },
+    {
+      "path": "raw/run-5/native-05-invalid-query.png",
+      "bytes": 155606,
+      "sha256": "c4d2027ee619086d169b4dd58a123841d5d8cc9297353aad68a609964260ec6a"
+    },
+    {
+      "path": "raw/run-5/native-06-combined-filters.png",
+      "bytes": 326745,
+      "sha256": "854e40d260233a0e0f801049465c7bfa3cf2d0b81c8a38848060f5b701dda2ef"
+    },
+    {
+      "path": "raw/run-5/native-07-moved-renamed.png",
+      "bytes": 433816,
+      "sha256": "374862ee0717f62b3bfc8ce97d99f90b3f32f605fd5ba63ac089d8b11cdc9afd"
+    },
+    {
+      "path": "raw/run-5/native-08-moved-filter.png",
+      "bytes": 336658,
+      "sha256": "239cb3edb85fc9e75091cabf5caf397349b9597b0b686adeb473482fe21e832f"
+    },
+    {
+      "path": "raw/run-5/native-09-reopened.png",
+      "bytes": 336658,
+      "sha256": "239cb3edb85fc9e75091cabf5caf397349b9597b0b686adeb473482fe21e832f"
+    },
+    {
+      "path": "raw/run-5/native-10-initial-blue-100.png",
+      "bytes": 298544,
+      "sha256": "f020815341e9b044cead63c1f3b300c87ab5c119199c3b4770fc2473ebc29520"
+    },
+    {
+      "path": "raw/run-5/native-10-initial-blue-200.png",
+      "bytes": 349423,
+      "sha256": "2cf4ffa31c00eadce526aea0680bc3002de2e67d8252da4644701d0f96580573"
+    },
+    {
+      "path": "raw/run-5/native-10-initial-green-100.png",
+      "bytes": 299788,
+      "sha256": "64a7ff0927aa4479db7eea98ac5925cdeba407dd9ffc9224e402c4f4161879a0"
+    },
+    {
+      "path": "raw/run-5/native-10-initial-green-200.png",
+      "bytes": 350508,
+      "sha256": "9f01c0b073da8bf3bb8b1b0c94615368c0358bbf31405e75ec0f76673ada4936"
+    },
+    {
+      "path": "raw/run-5/native-10-initial-mono-100.png",
+      "bytes": 284057,
+      "sha256": "34722c6f7cce460dc07359b377159feab85a005b64146d2c4936cfce98d3fae3"
+    },
+    {
+      "path": "raw/run-5/native-10-initial-mono-200.png",
+      "bytes": 330098,
+      "sha256": "a5a41810dc75dbadb5fbb0f2dda3a43ba931575963353e898ba451acd8f64ba9"
+    },
+    {
+      "path": "raw/run-5/native-10-initial-purple-100.png",
+      "bytes": 298716,
+      "sha256": "da4659a4267bf03ef35868aa858ff46628b43b70275d8333dda8a3e5fee34dbe"
+    },
+    {
+      "path": "raw/run-5/native-10-initial-purple-200.png",
+      "bytes": 347803,
+      "sha256": "e118ed50a1b0fefb2e002a13a4ca4e4e681e4b6abfa4185c8aa7e9a560f1815a"
+    },
+    {
+      "path": "raw/run-5/native-10-tags-blue-100.png",
+      "bytes": 160894,
+      "sha256": "4587b1bde29466b4719558fe2020aa6bc68e261077435c0cff3f3439210c6814"
+    },
+    {
+      "path": "raw/run-5/native-10-tags-blue-200.png",
+      "bytes": 239457,
+      "sha256": "07bf887baeba823d638fd6823f78f02772fc359825402b6ccaee8bc1e0b75891"
+    },
+    {
+      "path": "raw/run-5/native-10-tags-green-100.png",
+      "bytes": 161462,
+      "sha256": "6b6c17d3e5c0f52288427c4421bafab4a1d8bb163d2a0f57aaa5849a941833eb"
+    },
+    {
+      "path": "raw/run-5/native-10-tags-green-200.png",
+      "bytes": 239210,
+      "sha256": "ea53a2d8157f77058d28c0837e790175a72ecf611bc91ff08ed0aa7b141197b6"
+    },
+    {
+      "path": "raw/run-5/native-10-tags-mono-100.png",
+      "bytes": 154671,
+      "sha256": "56753d2b37709f50726505b5905704693e2b65e17e69b45bd892cfad86633ffc"
+    },
+    {
+      "path": "raw/run-5/native-10-tags-mono-200.png",
+      "bytes": 227135,
+      "sha256": "5e1d889ad7724a39342220a1a848bc8b0ffd5aaa53501fef0de923bc0dead34b"
+    },
+    {
+      "path": "raw/run-5/native-10-tags-purple-100.png",
+      "bytes": 161541,
+      "sha256": "4000d7e6f5717e204b28d7d05ddf4e9cfe3e782a82fa652f31c82b0b6af04414"
+    },
+    {
+      "path": "raw/run-5/native-10-tags-purple-200.png",
+      "bytes": 238068,
+      "sha256": "a14eff7d2b866bbc870e9c859053e9813c898adc5fdab1b0e61dd525d8c28449"
+    },
+    {
+      "path": "raw/run-5/native-11-pagination-blue-100.png",
+      "bytes": 295632,
+      "sha256": "a73978932ef06a6641c574fe09b93a84aecdbe0f65475972cbed89b02e58a339"
+    },
+    {
+      "path": "raw/run-5/native-11-pagination-blue-200.png",
+      "bytes": 336952,
+      "sha256": "b40cc44b561b4b1a3f59a6e98297eced7acf296a24c0b1674da9952eda989f99"
+    },
+    {
+      "path": "raw/run-5/native-11-pagination-green-100.png",
+      "bytes": 297059,
+      "sha256": "c8d6a421cd28930e3a27545b149d3ac131dff6052e5841da6e5b305e19743e22"
+    },
+    {
+      "path": "raw/run-5/native-11-pagination-green-200.png",
+      "bytes": 337197,
+      "sha256": "98fa3503aece9652b7320250ee37bed69bd9a390f554a5000816cc0dd339d356"
+    },
+    {
+      "path": "raw/run-5/native-11-pagination-mono-100.png",
+      "bytes": 281086,
+      "sha256": "62db7f4376c7ab7a872a1abec486863e343a76c7d35b074af12db820877f4c7b"
+    },
+    {
+      "path": "raw/run-5/native-11-pagination-mono-200.png",
+      "bytes": 319096,
+      "sha256": "47d95c0da851237968f771545a26da6cc7b9b38f90d7a6e96b377a849fd8ef8c"
+    },
+    {
+      "path": "raw/run-5/native-11-pagination-purple-100.png",
+      "bytes": 295398,
+      "sha256": "42a027a6850a97e0b71db2e38a59324e9b65103483d7b6d2b7b76ec62beb5725"
+    },
+    {
+      "path": "raw/run-5/native-11-pagination-purple-200.png",
+      "bytes": 335246,
+      "sha256": "a4402bf03213cc125aa7cc24ba7728ba376a40764719547b38e7830359e3f8e0"
+    },
+    {
+      "path": "raw/run-5/native-result.json",
+      "bytes": 1086,
+      "sha256": "cb27c7f59d95b081f78c538642545b2c29ef617a82af126e9156172589cd2d81"
+    },
+    {
+      "path": "raw/run-5/result.json",
+      "bytes": 6423,
+      "sha256": "73f9e39bf21ee576863ef0d3414e998ff3d91c61669ce207de2a0584396bf0e3"
+    },
+    {
+      "path": "raw/run-5/sources/information_editor.dart",
+      "bytes": 35266,
+      "sha256": "59d36a64441022117e9bfe43645b75531f71fc698da1372d3807d2fc51416989"
+    },
+    {
+      "path": "raw/run-5/sources/library.dart",
+      "bytes": 55925,
+      "sha256": "90f222b10538a3aa3f1c703dd3ff091154972813635147fb0cf354ac0c32e4ed"
+    },
+    {
+      "path": "raw/run-5/sources/macos-library-filters-ui.py",
+      "bytes": 8876,
+      "sha256": "569bef4b7484d64b21c05b36c51af03d467596b524f7a0263169a7be95e07e1a"
+    },
+    {
+      "path": "raw/run-5/sources/macos_library_filters_native_test.dart",
+      "bytes": 15745,
+      "sha256": "af599437bad52d0e53552074957e3445176d61dacd99bc15f250da920f6782bf"
+    },
+    {
+      "path": "raw/run-5/sources/main.dart",
+      "bytes": 13679,
+      "sha256": "484271607ad9cabdcd7fd69374b9c71a37dee4d2a51fe4cd82d40811aa420e39"
+    },
+    {
+      "path": "raw/run-5/sources/native_semantics_lifetime.dart",
+      "bytes": 1540,
+      "sha256": "a274da35d57e9bca3322b7e5b70a2bc610990e8e8dc3fba0821bbb1e9219036f"
+    },
+    {
+      "path": "raw/run-5/sources/organization.dart",
+      "bytes": 16785,
+      "sha256": "8e2d97624cac010295650f0179551a62f43131a81e086e95fef24c1cc377d319"
+    },
+    {
+      "path": "raw/run-5/widget.txt",
+      "bytes": 1074,
+      "sha256": "e6f529e9191327d30ea0f9a913fcf5eaf4d9fd47bc9de8bdc8441b035c01caa8"
+    }
+  ]
+}

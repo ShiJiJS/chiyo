@@ -1,0 +1,230 @@
+{
+  "complete": false,
+  "productSource": "cccc37e4a1125f88c7714a26b1873fdb2ffb7a9c",
+  "cliSha256": "1341e5278d0b073eccf5444a16c38f4195f22a02b60c3b125e93b21cdc5afea6",
+  "phases": [
+    {
+      "phase": "request",
+      "checks": [
+        {
+          "command": "request",
+          "status": "pending"
+        }
+      ]
+    },
+    {
+      "phase": "approved",
+      "checks": [
+        {
+          "command": "claim",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "read",
+          "status": "ok"
+        }
+      ]
+    },
+    {
+      "phase": "filtered",
+      "checks": [
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "read",
+          "status": "ok"
+        }
+      ]
+    },
+    {
+      "phase": "moved",
+      "checks": [
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "read",
+          "status": "ok"
+        }
+      ]
+    },
+    {
+      "phase": "repository-reopened",
+      "checks": [
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "read",
+          "status": "unauthorized"
+        }
+      ]
+    }
+  ],
+  "appBaseCommit": "0c9ed4b8b350e31c13b9e723c1d6bc1fe5071845",
+  "worktreeStatus": [
+    " M apps/desktop/lib/library.dart",
+    "?? apps/desktop/integration_test/macos_library_filters_native_test.dart",
+    "?? apps/desktop/test/library_labels_overflow_test.dart",
+    "?? scripts/qa/macos-library-filters-ui.py"
+  ],
+  "qaSources": [
+    {
+      "path": "apps/desktop/integration_test/macos_library_filters_native_test.dart",
+      "sha256": "6ec58f4fd9a3695f62a79861f58f49cdb0a6bb67c1812a63636063ce82244ebc"
+    },
+    {
+      "path": "scripts/qa/macos-library-filters-ui.py",
+      "sha256": "569bef4b7484d64b21c05b36c51af03d467596b524f7a0263169a7be95e07e1a"
+    },
+    {
+      "path": "apps/desktop/lib/library.dart",
+      "sha256": "b5054216e55846e4f0a70b8059f58d93992e193711c7a6a4eb6666efda9361a1"
+    },
+    {
+      "path": "apps/desktop/lib/organization.dart",
+      "sha256": "8e2d97624cac010295650f0179551a62f43131a81e086e95fef24c1cc377d319"
+    },
+    {
+      "path": "apps/desktop/lib/information_editor.dart",
+      "sha256": "59d36a64441022117e9bfe43645b75531f71fc698da1372d3807d2fc51416989"
+    },
+    {
+      "path": "apps/desktop/lib/main.dart",
+      "sha256": "484271607ad9cabdcd7fd69374b9c71a37dee4d2a51fe4cd82d40811aa420e39"
+    },
+    {
+      "path": "apps/desktop/integration_test/support/native_semantics_lifetime.dart",
+      "sha256": "a274da35d57e9bca3322b7e5b70a2bc610990e8e8dc3fba0821bbb1e9219036f"
+    }
+  ],
+  "failure": {
+    "type": "RuntimeError",
+    "message": "Flutter exited before expected evidence"
+  },
+  "cliExits": [
+    0,
+    0
+  ],
+  "retainedOwnedRoot": "/Users/jiangxinyi/Library/Containers/com.example.infoDesktop/Data/tmp/aim-mac-library-filters-ui-6w5dDA"
+}

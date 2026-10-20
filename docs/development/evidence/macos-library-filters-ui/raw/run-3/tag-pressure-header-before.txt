@@ -1,0 +1,31 @@
+00:00 +0: loading /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/library_labels_overflow_test.dart
+00:00 +0: many tags stay reachable at normal and large text sizes
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following AccessFailure was thrown running a test:
+AccessFailure(invalid_information)
+
+When the exception was thrown, this was the stack:
+#0      OwnerAccess._createInformation (package:info_core/info_core.dart:757:7)
+#1      OwnerAccess.createInformation.<anonymous closure> (package:info_core/info_core.dart:719:11)
+#2      OwnerAccess._serialize.<anonymous closure> (package:info_core/info_core.dart:706:20)
+<asynchronous suspension>
+#8      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/library_labels_overflow_test.dart:25:7)
+<asynchronous suspension>
+#9      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#10     TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 6 frames from dart:async and package:stack_trace)
+
+The test description was:
+  many tags stay reachable at normal and large text sizes
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:00 +0 -1: many tags stay reachable at normal and large text sizes [E]
+  Test failed. See exception logs above.
+  The test description was: many tags stay reachable at normal and large text sizes
+  
+00:00 +0 -1: Some tests failed.
+
+Failing tests:
+  /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/library_labels_overflow_test.dart: many tags stay reachable at normal and large text sizes
