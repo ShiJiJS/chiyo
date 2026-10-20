@@ -55,3 +55,5 @@ docs/development/evidence/issue18-packaged-joint/raw/** -text -diff
 docs/development/evidence/issue18-packaged-file-ui/raw/** -text -diff
 
 docs/development/evidence/issue18-packaged-compat/raw/** -text -diff
+
+docs/development/evidence/issue18-packaged-restore-crash/raw/** -text -diff
