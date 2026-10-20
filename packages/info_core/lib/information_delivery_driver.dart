@@ -65,10 +65,9 @@ abstract interface class InformationDeliveryFiles {
   Future<void> cleanup(InformationDeliveryLease lease);
 }
 
-/// Reuses the Windows protected-from-birth objects, identity/DACL checks and
-/// handle-based nonrecursive cleanup already used by credential materials.
-final class WindowsInformationDeliveryFiles
-    implements InformationDeliveryFiles {
+/// Reuses the current platform's protected objects, real identity/permission
+/// checks and nonrecursive cleanup already used by credential materials.
+class NativeInformationDeliveryFiles implements InformationDeliveryFiles {
   CredentialMaterialLease _native(InformationDeliveryLease lease) =>
       CredentialMaterialLease(lease.path, lease.directoryIdentity, {
         lease.name: lease.fileIdentity,
@@ -145,6 +144,11 @@ final class WindowsInformationDeliveryFiles
   Future<void> cleanup(InformationDeliveryLease lease) async =>
       ManagedCredentialFiles.cleanup(_native(lease));
 }
+
+/// Retained for existing Windows callers. The implementation now dispatches
+/// through ManagedCredentialFiles without changing Windows file semantics.
+final class WindowsInformationDeliveryFiles
+    extends NativeInformationDeliveryFiles {}
 
 final class _DeliveryDigest implements Sink<Digest> {
   Digest? value;

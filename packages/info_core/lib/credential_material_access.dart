@@ -69,10 +69,20 @@ extension _CredentialMaterialService on InformationService {
     final unknownTreeEnded =
         record.state == 'unknown' &&
         record.jobName != null &&
-        CredentialProcessJob.isActive(record.jobName!) == false;
+        CredentialProcessJob.isActive(
+              record.jobName!,
+              workerPid: record.workerPid,
+              workerCreatedAt: record.workerCreatedAt,
+            ) ==
+            false;
     final registeredTreeMayBeActive =
         record.jobName != null &&
-        CredentialProcessJob.isActive(record.jobName!) != false;
+        CredentialProcessJob.isActive(
+              record.jobName!,
+              workerPid: record.workerPid,
+              workerCreatedAt: record.workerCreatedAt,
+            ) !=
+            false;
     if (registeredTreeMayBeActive ||
         (!{'exited', 'prepare_failed', 'start_failed'}.contains(record.state) &&
             !unknownTreeEnded)) {

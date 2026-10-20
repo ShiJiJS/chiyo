@@ -240,7 +240,7 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
       supervisorCreatedAt: supervisorCreatedAt,
       jobName: supervisorPid == null
           ? null
-          : 'Local\\AgentInfoRuntime-${_service._secret().substring(0, 32)}',
+          : CredentialProcessJob.nameFor(_service._secret().substring(0, 32)),
     );
     await _service._saveUse(
       request: r.changed({
@@ -393,14 +393,16 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
         throw const CredentialUseFailure('invalid_plan');
       }
       if (report.jobName != null &&
-          !RegExp(
-            r'^Local\\AgentInfoRuntime-[A-Za-z0-9_-]{32}$',
-          ).hasMatch(report.jobName!)) {
+          !CredentialProcessJob.validName(report.jobName!)) {
         throw const CredentialUseFailure('invalid_plan');
       }
       if (report.jobName != null) {
         try {
-          CredentialProcessJob.observe(report.jobName!, report.pid!).close();
+          CredentialProcessJob.observe(
+            report.jobName!,
+            report.pid!,
+            workerPid: old.workerPid,
+          ).close();
         } on Object {
           throw const CredentialUseFailure('invalid_plan');
         }
@@ -767,7 +769,7 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
       supervisorCreatedAt: supervisorCreatedAt,
       jobName: supervisorPid == null
           ? null
-          : 'Local\\AgentInfoRuntime-${_service._secret().substring(0, 32)}',
+          : CredentialProcessJob.nameFor(_service._secret().substring(0, 32)),
     );
     final changed = r.changed({
       'attemptConsumed': true,

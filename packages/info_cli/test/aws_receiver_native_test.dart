@@ -321,7 +321,7 @@ void main() {
         expect(valid, 3);
         expect(invalid, 1);
       },
-      skip: !Platform.isWindows || executable == null,
+      skip: (!Platform.isWindows && !Platform.isMacOS) || executable == null,
       timeout: const Timeout(Duration(minutes: 2)),
     );
   }

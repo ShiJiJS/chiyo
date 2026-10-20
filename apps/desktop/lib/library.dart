@@ -154,7 +154,25 @@ class _InformationLibraryState extends State<InformationLibrary> {
     try {
       final path = await widget.files.saveAs(version.originalName);
       if (path == null) return;
-      await owner.exportInformationFile(version.reference, path);
+      final provider = widget.files is InformationExportStagingProvider
+          ? widget.files as InformationExportStagingProvider
+          : null;
+      final staging = await provider?.prepareExport(path);
+      try {
+        await owner.exportInformationFile(
+          version.reference,
+          path,
+          stagingParent: staging?.directory,
+        );
+      } finally {
+        if (staging != null && provider != null) {
+          try {
+            await provider.releaseExport(staging);
+          } on Object {
+            // Native only removes its own empty replacement directory.
+          }
+        }
+      }
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('文件已另存，副本由你自行保管，不随授权到期删除。')),

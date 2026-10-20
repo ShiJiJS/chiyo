@@ -62,9 +62,9 @@ class DesktopBootstrap extends ChangeNotifier {
       _server = await AgentServer.start(
         library!.service.agent,
         port: port,
-        enableReusableCredentialUse: Platform.isWindows,
+        enableReusableCredentialUse: Platform.isWindows || Platform.isMacOS,
         enableFocusedFill: Platform.isWindows,
-        enableInformationFiles: Platform.isWindows,
+        enableInformationFiles: Platform.isWindows || Platform.isMacOS,
         credentialExecutionHandler: (session, input) {
           final host = _credentialExecutions;
           return host == null
@@ -82,7 +82,7 @@ class DesktopBootstrap extends ChangeNotifier {
         port: boundPort!,
         workerExecutable:
             credentialWorkerExecutable ??
-            '${File(Platform.resolvedExecutable).parent.path}/info-runtime-worker.exe',
+            '${File(Platform.resolvedExecutable).parent.path}/info-runtime-worker${Platform.isWindows ? '.exe' : ''}',
       );
       _credentialExecutions = host;
       runtime = DesktopRuntime(

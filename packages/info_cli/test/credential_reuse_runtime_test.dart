@@ -87,7 +87,7 @@ Future<void> main() async {
   );
 
   test(
-    'native Windows workers run three operations with separate Jobs and one unchanged grant',
+    'native platform workers run three operations with separate groups and one unchanged grant',
     () async {
       final root = await Directory.systemTemp.createTemp('reuse-native 中文 ');
       final h = await RuntimeHarness.create(enableReusableCredentialUse: true);
@@ -168,7 +168,7 @@ void main() {
         expect(text.trim(), 'injected\n[REDACTED]');
       }
     },
-    skip: !Platform.isWindows,
+    skip: !Platform.isWindows && !Platform.isMacOS,
     timeout: const Timeout(Duration(seconds: 40)),
   );
 
@@ -271,7 +271,7 @@ void main() {
         isTrue,
       );
     },
-    skip: !Platform.isWindows,
+    skip: !Platform.isWindows && !Platform.isMacOS,
     timeout: const Timeout(Duration(seconds: 40)),
   );
 

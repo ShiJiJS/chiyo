@@ -10,6 +10,8 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
   private var notificationsEnabled = false
   private var backupOutputs: [String: URL] = [:]
   private var backupStaging: [String: URL] = [:]
+  private var informationOutputs: [String: URL] = [:]
+  private var informationStaging: [String: URL] = [:]
 
   override func awakeFromNib() {
     let flutterViewController = FlutterViewController()
@@ -61,7 +63,31 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
       guard let window = self else {
         result(FlutterError(code: "file_dialog_failed", message: "Window unavailable", details: nil)); return
       }
-      if call.method == "prepareBackupStaging" {
+      if call.method == "prepareInformationStaging" {
+        guard let path = call.arguments as? String, let destination = window.informationOutputs.removeValue(forKey: path) else {
+          result(FlutterError(code: "file_export_failed", message: "No selected file destination", details: nil)); return
+        }
+        do {
+          let directory = try FileManager.default.url(for: .itemReplacementDirectory, in: .userDomainMask, appropriateFor: destination, create: true)
+          let token = UUID().uuidString
+          window.informationStaging[token] = directory
+          result(["directory": directory.path, "token": token])
+        } catch {
+          result(FlutterError(code: "file_export_failed", message: "File staging unavailable", details: nil))
+        }
+      } else if call.method == "releaseInformationStaging" {
+        guard let token = call.arguments as? String, let directory = window.informationStaging.removeValue(forKey: token) else {
+          result(FlutterError(code: "file_export_failed", message: "Unknown file staging", details: nil)); return
+        }
+        do {
+          if try FileManager.default.contentsOfDirectory(atPath: directory.path).isEmpty {
+            try FileManager.default.removeItem(at: directory)
+          }
+          result(nil)
+        } catch {
+          result(FlutterError(code: "file_export_failed", message: "File staging cleanup incomplete", details: nil))
+        }
+      } else if call.method == "prepareBackupStaging" {
         guard let path = call.arguments as? String, let destination = window.backupOutputs.removeValue(forKey: path) else {
           result(FlutterError(code: "backup_staging_failed", message: "No selected backup destination", details: nil)); return
         }
@@ -87,13 +113,24 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
         } catch {
           result(FlutterError(code: "backup_staging_failed", message: "Backup staging cleanup incomplete", details: nil))
         }
-      } else if call.method == "backupInput" || call.method == "recoveryKeyInput" || call.method == "credentialInput" {
+      } else if call.method == "backupInput" || call.method == "recoveryKeyInput" || call.method == "credentialInput" || call.method == "knownHostsInput" || call.method == "informationFileInput" {
         let panel = NSOpenPanel()
         panel.canChooseDirectories = false
         panel.canChooseFiles = true
         panel.allowsMultipleSelection = false
-        if call.method != "credentialInput" { panel.allowedFileTypes = [call.method == "recoveryKeyInput" ? "txt" : "aimbackup"] }
+        if call.method == "backupInput" || call.method == "recoveryKeyInput" { panel.allowedFileTypes = [call.method == "recoveryKeyInput" ? "txt" : "aimbackup"] }
         panel.beginSheetModal(for: window) { response in
+          result(response == .OK ? panel.url?.path : nil)
+        }
+      } else if call.method == "informationFileOutput" {
+        guard let name = call.arguments as? String, !name.isEmpty, name.utf8.count <= 4096 else {
+          result(FlutterError(code: "file_dialog_failed", message: "Invalid file name", details: nil)); return
+        }
+        let panel = NSSavePanel()
+        panel.nameFieldStringValue = name.replacingOccurrences(of: "/", with: "_").replacingOccurrences(of: ":", with: "_")
+        panel.canCreateDirectories = true
+        panel.beginSheetModal(for: window) { response in
+          if response == .OK, let url = panel.url { window.informationOutputs[url.path] = url }
           result(response == .OK ? panel.url?.path : nil)
         }
       } else if call.method == "backupOutput" || call.method == "recoveryKeyOutput" {

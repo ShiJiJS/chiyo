@@ -8,7 +8,7 @@ import 'support/information_attachment_fixture.dart';
 
 void main() {
   test(
-    'Windows bootstrap announces actual file support after startup reconciliation, and runtime retries held copies without fetching again',
+    'native bootstrap announces actual file support after startup reconciliation, and runtime retries held copies without fetching again',
     () async {
       var now = DateTime.utc(2026, 10, 19);
       final f = await AttachmentUiFixture.create(clock: () => now);
@@ -72,6 +72,6 @@ void main() {
         await f.close();
       }
     },
-    skip: !Platform.isWindows,
+    skip: !Platform.isWindows && !Platform.isMacOS,
   );
 }

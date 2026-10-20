@@ -2,6 +2,8 @@ import 'dart:ffi';
 import 'dart:io';
 import 'package:ffi/ffi.dart';
 
+part 'runtime_process_identity_macos.dart';
+
 /// Holds a Windows process handle so PID reuse cannot change this identity while
 /// the executor drains pipes and reports the final result. No capability or
 /// credential is stored here.
@@ -12,6 +14,9 @@ class CredentialProcessIdentity {
 
   /// false is a confirmed ended or different process; null is inconclusive.
   static bool? isActive(int processId, String createdAt) {
+    if (Platform.isMacOS) {
+      return _MacOsProcessIdentity.isActive(processId, createdAt);
+    }
     if (!Platform.isWindows || processId < 1) return null;
     final handle = _openProcess(0x1000 | 0x100000, 0, processId);
     final error = _lastError();
@@ -35,6 +40,12 @@ class CredentialProcessIdentity {
   }
 
   static CredentialProcessIdentity? capture(int processId) {
+    if (Platform.isMacOS) {
+      final info = _MacOsProcessIdentity.read(processId);
+      return info == null
+          ? null
+          : CredentialProcessIdentity._(info.identity, null);
+    }
     if (Platform.isWindows) {
       final handle = _openProcess(0x1000, 0, processId);
       if (handle == 0) return null;
@@ -130,12 +141,39 @@ int _unavailableWait(int _, int _) => 0xffffffff;
 /// No breakaway or kill-on-close flags are enabled: revocation/CLI death must
 /// not silently terminate an already started command.
 class CredentialProcessJob {
-  CredentialProcessJob._(this.name, this._handle);
+  CredentialProcessJob._(this.name, this._handle) : _macos = null;
+  CredentialProcessJob._darwin(this.name, this._macos) : _handle = null;
   final String name;
   int? _handle;
+  _MacOsProcessGroup? _macos;
+
+  static String nameFor(String nonce) => Platform.isMacOS
+      ? 'macos:AgentInfoRuntime-$nonce'
+      : 'Local\\AgentInfoRuntime-$nonce';
+  static bool validName(String name) => RegExp(
+    Platform.isMacOS
+        ? r'^macos:AgentInfoRuntime-[A-Za-z0-9_-]{32}$'
+        : r'^Local\\AgentInfoRuntime-[A-Za-z0-9_-]{32}$',
+  ).hasMatch(name);
 
   /// null means inspection was inconclusive; never infer termination from it.
-  static bool? isActive(String name) {
+  static bool? isActive(
+    String name, {
+    int? workerPid,
+    String? workerCreatedAt,
+  }) {
+    if (Platform.isMacOS) {
+      if (!validName(name)) return null;
+      // An unregistered worker never received the start acknowledgement.
+      if (workerPid == null) return false;
+      if (workerCreatedAt == null) return null;
+      try {
+        return _MacOsProcessGroup(workerPid, workerCreatedAt).activeProcesses !=
+            0;
+      } on Object {
+        return null;
+      }
+    }
     if (!Platform.isWindows ||
         !RegExp(
           r'^Local\\AgentInfoRuntime-[A-Za-z0-9_-]{32}$',
@@ -157,7 +195,27 @@ class CredentialProcessJob {
     }
   }
 
-  static CredentialProcessJob observe(String name, int processId) {
+  static CredentialProcessJob observe(
+    String name,
+    int processId, {
+    int? workerPid,
+  }) {
+    if (Platform.isMacOS) {
+      if (!validName(name)) throw StateError('job_identity_mismatch');
+      final leader = workerPid ?? processId;
+      final worker = _MacOsProcessIdentity.read(leader);
+      final member = _MacOsProcessIdentity.read(processId);
+      if (worker == null ||
+          member == null ||
+          worker.group != leader ||
+          member.group != leader) {
+        throw StateError('job_identity_mismatch');
+      }
+      return CredentialProcessJob._darwin(
+        name,
+        _MacOsProcessGroup(leader, worker.identity),
+      );
+    }
     final nativeName = name.toNativeUtf16();
     int jobHandle = 0, processHandle = 0;
     final membership = calloc<Int32>();
@@ -182,6 +240,10 @@ class CredentialProcessJob {
   }
 
   static CredentialProcessJob createForCurrentWorker(String name) {
+    if (Platform.isMacOS) {
+      if (!validName(name)) throw StateError('job_identity_mismatch');
+      return CredentialProcessJob._darwin(name, _MacOsProcessGroup.create());
+    }
     if (!Platform.isWindows) throw UnsupportedError('Windows job required');
     final nativeName = name.toNativeUtf16();
     try {
@@ -198,6 +260,11 @@ class CredentialProcessJob {
   }
 
   int get activeProcesses {
+    if (Platform.isMacOS) {
+      final group = _macos;
+      if (group == null) throw StateError('job_closed');
+      return group.activeProcesses;
+    }
     final handle = _handle;
     if (handle == null) throw StateError('job_closed');
     final accounting = calloc<Uint8>(48);
@@ -225,6 +292,7 @@ class CredentialProcessJob {
   }
 
   void close() {
+    _macos = null;
     final handle = _handle;
     _handle = null;
     if (handle != null) _closeHandle(handle);

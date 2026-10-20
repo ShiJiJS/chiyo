@@ -4,6 +4,8 @@ import 'dart:io';
 import 'dart:math';
 import 'package:ffi/ffi.dart';
 
+part 'runtime_material_files_macos.dart';
+
 /// Private registry data. Never include this object in a public protocol DTO.
 class CredentialMaterialLease {
   CredentialMaterialLease(this.path, this.identity, Map<String, String> files)
@@ -38,7 +40,9 @@ class RuntimeMaterialFailure implements Exception {
 /// deletes by an opened handle. Cleanup never recursively traverses a path.
 class ManagedCredentialFiles {
   static final _windows = _WindowsMaterialFiles();
+  static final _macos = _MacOsMaterialFiles();
   static CredentialMaterialLease create() {
+    if (Platform.isMacOS) return _macos.create();
     if (!Platform.isWindows) throw const RuntimeMaterialFailure('unsupported');
     final parent = Directory.systemTemp.resolveSymbolicLinksSync();
     if (!RegExp(r'^[A-Za-z]:[/\\]').hasMatch(parent)) {
@@ -110,6 +114,7 @@ class ManagedCredentialFiles {
     CredentialMaterialLease lease,
     List<String> names,
   ) {
+    if (Platform.isMacOS) return _macos.reserve(lease, names);
     final parent = _parent(lease);
     final files = Map<String, String>.from(lease.files);
     try {
@@ -141,6 +146,10 @@ class ManagedCredentialFiles {
     CredentialMaterialLease lease, {
     bool allowConcurrentReaders = false,
   }) {
+    if (Platform.isMacOS) {
+      _macos.verify(lease);
+      return;
+    }
     final parent = _parent(lease);
     try {
       for (final entry in lease.files.entries) {
@@ -166,6 +175,10 @@ class ManagedCredentialFiles {
     String name,
     List<int> bytes,
   ) {
+    if (Platform.isMacOS) {
+      _macos.write(lease, name, bytes);
+      return;
+    }
     if (!lease.files.containsKey(name)) {
       throw const RuntimeMaterialFailure('identity_mismatch');
     }
@@ -207,6 +220,10 @@ class ManagedCredentialFiles {
   }
 
   static void cleanup(CredentialMaterialLease lease) {
+    if (Platform.isMacOS) {
+      _macos.cleanup(lease);
+      return;
+    }
     if (FileSystemEntity.typeSync(lease.path, followLinks: false) ==
         FileSystemEntityType.notFound) {
       return;

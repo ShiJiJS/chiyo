@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:info_core/info_core.dart';
 import 'information_editor_draft.dart';
@@ -9,7 +10,20 @@ abstract interface class InformationFilePicker {
   Future<String?> saveAs(String originalName);
 }
 
-class NativeInformationFilePicker implements InformationFilePicker {
+class InformationExportStaging {
+  const InformationExportStaging(this.directory, this.token);
+  final String directory, token;
+}
+
+/// A Save panel grants its selected file, not arbitrary sibling paths. The
+/// native provider owns a same-volume replacement directory for publication.
+abstract interface class InformationExportStagingProvider {
+  Future<InformationExportStaging?> prepareExport(String output);
+  Future<void> releaseExport(InformationExportStaging staging);
+}
+
+class NativeInformationFilePicker
+    implements InformationFilePicker, InformationExportStagingProvider {
   const NativeInformationFilePicker();
   static const _channel = MethodChannel('agent_info_manage/backup_files');
   @override
@@ -18,6 +32,22 @@ class NativeInformationFilePicker implements InformationFilePicker {
   @override
   Future<String?> saveAs(String originalName) =>
       _channel.invokeMethod<String>('informationFileOutput', originalName);
+  @override
+  Future<InformationExportStaging?> prepareExport(String output) async {
+    if (!Platform.isMacOS) return null;
+    final value = await _channel.invokeMapMethod<String, String>(
+      'prepareInformationStaging',
+      output,
+    );
+    if (value?['directory'] == null || value?['token'] == null) {
+      throw const AccessFailure('file_export_failed');
+    }
+    return InformationExportStaging(value!['directory']!, value['token']!);
+  }
+
+  @override
+  Future<void> releaseExport(InformationExportStaging staging) =>
+      _channel.invokeMethod<void>('releaseInformationStaging', staging.token);
 }
 
 /// Owns one real form lifetime. All operations finish before cancellation; a

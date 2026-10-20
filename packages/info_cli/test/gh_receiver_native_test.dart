@@ -96,7 +96,7 @@ void main() {
         );
         expect(jsonEncode(facts), isNot(contains('synthetic-token')));
       },
-      skip: !Platform.isWindows || executable == null,
+      skip: (!Platform.isWindows && !Platform.isMacOS) || executable == null,
       timeout: const Timeout(Duration(seconds: 90)),
     );
   }

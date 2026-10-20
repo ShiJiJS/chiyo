@@ -189,10 +189,13 @@ void main() {
       await save([], first);
       final oldPath = '${root.path}/old.pdf',
           emptyPath = '${root.path}/empty.pdf';
+      final replacement = await Directory('${root.path}/replacement').create();
       await service.owner.exportInformationFile(
         first.fields.single.attachment!,
         oldPath,
+        stagingParent: replacement.path,
       );
+      expect(await replacement.list().toList(), isEmpty);
       await service.owner.exportInformationFile(
         repo.items.single.fields.single.attachment!,
         emptyPath,
@@ -209,7 +212,7 @@ void main() {
       expect(await File(oldPath).readAsBytes(), [0, 255, 1]);
       expect(noPartials(), isTrue);
     },
-    skip: !Platform.isWindows,
+    skip: !Platform.isWindows && !Platform.isMacOS,
   );
   for (final fault in ['short', 'digest', 'io', 'source-close']) {
     test(
@@ -240,7 +243,7 @@ void main() {
           [0, 255, 1],
         );
       },
-      skip: !Platform.isWindows,
+      skip: !Platform.isWindows && !Platform.isMacOS,
     );
   }
   test(
@@ -261,7 +264,7 @@ void main() {
       expect(await File(path).readAsString(), 'other owner file');
       expect(noPartials(), isTrue);
     },
-    skip: !Platform.isWindows,
+    skip: !Platform.isWindows && !Platform.isMacOS,
   );
   test(
     'Save As shutdown before publication leaves no output or partial',
@@ -283,6 +286,6 @@ void main() {
       expect(await File(path).exists(), isFalse);
       expect(noPartials(), isTrue);
     },
-    skip: !Platform.isWindows,
+    skip: !Platform.isWindows && !Platform.isMacOS,
   );
 }

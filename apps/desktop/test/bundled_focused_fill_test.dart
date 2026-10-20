@@ -77,6 +77,7 @@ void main() {
       expect(driver.helper.sha256, _digest);
       expect(calls, ['focusedFillHelper']);
     },
+    skip: !Platform.isWindows,
   );
   for (final bad in [
     null,
@@ -136,6 +137,7 @@ void main() {
         ),
       );
     },
+    skip: !Platform.isWindows,
   );
   test(
     'bundle failure starts no library/server and a repaired retry clears the failure',
@@ -174,7 +176,7 @@ void main() {
   );
   for (final enabled in [false, true]) {
     test(
-      'bootstrap advertises and routes focused target only with a configured driver: $enabled',
+      'bootstrap advertises focused target only on Windows with a configured driver: $enabled',
       () async {
         final driver = _Discovery();
         final service = InformationService(
@@ -198,15 +200,19 @@ void main() {
         final capabilities =
             (await client.execute({'command': 'capabilities'}))['capabilities']
                 as List;
-        expect(capabilities.contains('credential-focused-fill.v1'), enabled);
-        expect(capabilities.contains('credential-focused-target.v1'), enabled);
+        final supported = Platform.isWindows && enabled;
+        expect(capabilities.contains('credential-focused-fill.v1'), supported);
+        expect(
+          capabilities.contains('credential-focused-target.v1'),
+          supported,
+        );
         await client.execute({
           'command': 'session',
           'chatLabel': 'Synthetic bundle capability',
         });
         final result = await client.execute({'command': 'focus-target'});
-        expect(driver.inspections, enabled ? 1 : 0);
-        if (enabled) {
+        expect(driver.inspections, supported ? 1 : 0);
+        if (supported) {
           expect(result['targetState'], 'refused');
         } else {
           expect(result['errorCode'], 'unsupported_capability');

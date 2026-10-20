@@ -27,4 +27,8 @@
 
 Windows 也可以运行 `./scripts/check.ps1 -FlutterBin <Flutter安装目录>/bin`，统一检查各 Dart 包和桌面 widget 测试。添加 `-WindowsRelease` 会编译发行包，仍不会启动窗口；依赖已缓存时可添加 `-Offline`。
 
+macOS 可以运行 `./scripts/dev-macos.sh setup` 准备本目录下的固定版本 SDK 和依赖，再用 `./scripts/dev-macos.sh check` 检查、`build` 编译或 `run` 启动。详见 [Mac 本机开发环境](docs/development/macos-local-setup.md)。
+
+本机凭据执行与普通附件移植的当前证据、平台差异及待验收项见 [Mac 适配记录](docs/development/macos-runtime-adaptation.md)。
+
 CLI 不直接打开资料库，也不提供批准申请的管理接口。开发与测试使用虚构资料；真实资料迁移需要先完成加密、系统密钥保管和备份恢复验收。
