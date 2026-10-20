@@ -1,0 +1,21 @@
+usage: test-windows-packaged-recycle-delete.py [-h] --delivery DELIVERY --dart
+                                               DART --evidence EVIDENCE
+                                               --prior-proof PRIOR_PROOF
+
+Finish one human-confirmed UI deletion of a preserved synthetic version3 file.
+Requires the frozen previous run's library hash proof; no new fixture is made.
+The operator approves a fresh CLI request, observes the exact version3 delete
+modal, and only after human action-time confirmation clicks Confirm delete.
+The private CLI peer checks old scope denial and automatic copy cleanup. The
+operator then restores via the real recycle UI, approves the new field, and
+observes recycle/history before writing final-observed.json. Receipts describe
+actual observations, not image recognition. This driver never clicks any UI.
+Normal exits address only this Popen child, with no force-kill fallback. Full
+success removes only the validated owned temporary root; failures preserve it.
+
+options:
+  -h, --help            show this help message and exit
+  --delivery DELIVERY
+  --dart DART
+  --evidence EVIDENCE
+  --prior-proof PRIOR_PROOF

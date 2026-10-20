@@ -1,5 +1,7 @@
 #include "flutter_window.h"
 
+#include <flutter/method_result_functions.h>
+
 #include <optional>
 #include <windowsx.h>
 #include <flutter/standard_method_codec.h>
@@ -40,7 +42,7 @@ std::optional<flutter::EncodableValue> FocusedFillHelperIdentity() {
 }
 
 bool FlutterWindow::AddTrayIcon() {
-  tray_id_ = (tray_id_ + 1) & 0xffff;
+  tray_id_ = (tray_id_ + 1) & 0x0fff;
   if (tray_id_ == 0) ++tray_id_;
   NOTIFYICONDATAW data{};
   data.cbSize = sizeof(data);
@@ -69,6 +71,18 @@ void FlutterWindow::RemoveTrayIcon() {
   tray_available_ = false;
 }
 
+void FlutterWindow::RemoveNotificationIcon() {
+  const UINT id = notification_icon_id_;
+  // Retire before the Shell call: deletion can itself produce a late callback.
+  notification_icon_id_ = 0;
+  if (id == 0) return;
+  NOTIFYICONDATAW data{};
+  data.cbSize = sizeof(data);
+  data.hWnd = GetHandle();
+  data.uID = id;
+  Shell_NotifyIconW(NIM_DELETE, &data);
+}
+
 flutter::EncodableValue FlutterWindow::DesktopAvailability() {
   using flutter::EncodableValue;
   return EncodableValue(flutter::EncodableMap{
@@ -83,6 +97,20 @@ void FlutterWindow::SendDesktopEvent(const char* event) {
   }
 }
 
+void FlutterWindow::RequestQuit() {
+  if (!desktop_ready_ || !desktop_channel_ || control_state_ == 2) return;
+  control_state_ = 2;
+  desktop_channel_->InvokeMethod("quit", nullptr,
+      std::make_unique<flutter::MethodResultFunctions<flutter::EncodableValue>>(
+          [](const flutter::EncodableValue*) {
+            // Success means the normal terminate message was queued. Only the
+            // caller's process handle can confirm that the process really ends.
+          },
+          [this](const std::string&, const std::string&,
+                 const flutter::EncodableValue*) { control_state_ = 3; },
+          [this]() { control_state_ = 5; }));
+}
+
 void FlutterWindow::OpenApprovals(const std::string& request_id) {
   ShowWindow(GetHandle(), SW_RESTORE);
   SetForegroundWindow(GetHandle());
@@ -93,15 +121,42 @@ void FlutterWindow::OpenApprovals(const std::string& request_id) {
 }
 
 bool FlutterWindow::ShowNotification(const NotificationMessage& message) {
+#ifndef NDEBUG
+  ++notification_send_attempts_;
+  notification_last_accepted_ = false;
+#endif
+  if (!tray_available_ || !notifications_enabled_ ||
+      notification_icon_id_ != 0 || message.native_id < 0x1000 ||
+      message.native_id > 0xffff) return false;
   NOTIFYICONDATAW data{};
   data.cbSize = sizeof(data);
   data.hWnd = GetHandle();
-  data.uID = tray_id_;
+  data.uID = message.native_id;
+  // Keep the persistent tray entry unchanged. This hidden, one-notification
+  // entry gives every callback an immutable ID, including duplicate timeouts.
+  data.uFlags = NIF_MESSAGE | NIF_ICON | NIF_TIP | NIF_STATE;
+  data.uCallbackMessage = kTrayMessage;
+  data.hIcon = LoadIcon(GetModuleHandle(nullptr), MAKEINTRESOURCE(IDI_APP_ICON));
+  data.dwStateMask = NIS_HIDDEN;
+  data.dwState = NIS_HIDDEN;
+  wcscpy_s(data.szTip, L"信息访问授权");
+  if (!Shell_NotifyIconW(NIM_ADD, &data)) return false;
+  notification_icon_id_ = message.native_id;
+  data.uVersion = NOTIFYICON_VERSION_4;
+  if (!Shell_NotifyIconW(NIM_SETVERSION, &data)) {
+    RemoveNotificationIcon();
+    return false;
+  }
   data.uFlags = NIF_INFO;
   data.dwInfoFlags = NIIF_INFO | NIIF_RESPECT_QUIET_TIME;
   wcscpy_s(data.szInfoTitle, L"信息访问授权");
   wcscpy_s(data.szInfo, message.test ? L"这是一条测试通知。访问申请提醒已连接到系统。" : L"有新的访问请求。打开应用查看并审批。");
-  return tray_available_ && notifications_enabled_ && Shell_NotifyIconW(NIM_MODIFY, &data) != FALSE;
+  const bool accepted = Shell_NotifyIconW(NIM_MODIFY, &data) != FALSE;
+  if (!accepted) RemoveNotificationIcon();
+#ifndef NDEBUG
+  notification_last_accepted_ = accepted;
+#endif
+  return accepted;
 }
 
 bool FlutterWindow::OnCreate() {
@@ -159,6 +214,7 @@ bool FlutterWindow::OnCreate() {
     }
   });
   taskbar_created_ = RegisterWindowMessageW(L"TaskbarCreated");
+  control_message_ = RegisterWindowMessageW(L"AgentInfoManage.LocalControl.v1");
   desktop_channel_ = std::make_unique<flutter::MethodChannel<flutter::EncodableValue>>(
       flutter_controller_->engine()->messenger(), "agent_info_manage/desktop",
       &flutter::StandardMethodCodec::GetInstance());
@@ -173,9 +229,31 @@ bool FlutterWindow::OnCreate() {
       } else {
         result->Error("bundle_unavailable", "Application identity unavailable.");
       }
+#ifndef NDEBUG
+    } else if (method == "notificationDebugState") {
+      // Read-only diagnostics for the opt-in live test. There is no event
+      // injection or permission change, and no release-channel API.
+      using flutter::EncodableValue;
+      QUERY_USER_NOTIFICATION_STATE state{};
+      const HRESULT query = SHQueryUserNotificationState(&state);
+      result->Success(EncodableValue(flutter::EncodableMap{
+          {EncodableValue("queryHresult"), EncodableValue(static_cast<int>(query))},
+          {EncodableValue("userState"), EncodableValue(static_cast<int>(state))},
+          {EncodableValue("trayId"), EncodableValue(static_cast<int>(tray_id_))},
+          {EncodableValue("activeNotificationId"), EncodableValue(static_cast<int>(notification_icon_id_))},
+          {EncodableValue("sendAttempts"), EncodableValue(notification_send_attempts_)},
+          {EncodableValue("lastAccepted"), EncodableValue(notification_last_accepted_)},
+          {EncodableValue("shown"), EncodableValue(notification_shown_)},
+          {EncodableValue("hidden"), EncodableValue(notification_hidden_)},
+          {EncodableValue("timedOut"), EncodableValue(notification_timed_out_)},
+          {EncodableValue("clicked"), EncodableValue(notification_clicked_)},
+          {EncodableValue("idMismatch"), EncodableValue(notification_id_mismatch_)},
+      }));
+#endif
     } else if (method == "initialize") {
       if (!desktop_ready_) AddTrayIcon();
       desktop_ready_ = true;
+      if (control_state_ == 4) control_state_ = 1;
       result->Success(DesktopAvailability());
     } else if (method == "availability") {
       result->Success(DesktopAvailability());
@@ -221,6 +299,7 @@ bool FlutterWindow::OnCreate() {
 }
 
 void FlutterWindow::OnDestroy() {
+  RemoveNotificationIcon();
   notifications_.Reset();
   backup_files_.reset();
   RemoveTrayIcon();
@@ -238,6 +317,11 @@ LRESULT
 FlutterWindow::MessageHandler(HWND hwnd, UINT const message,
                               WPARAM const wparam,
                               LPARAM const lparam) noexcept {
+  if (control_message_ != 0 && message == control_message_) {
+    if (wparam != GetCurrentProcessId() || (lparam != 0 && lparam != 1)) return 0;
+    if (lparam == 1) RequestQuit();
+    return control_state_;
+  }
   if (custom_frame_ && message == WM_NCCALCSIZE && wparam) {
     auto* params = reinterpret_cast<NCCALCSIZE_PARAMS*>(lparam);
     const LONG original_top = params->rgrc[0].top;
@@ -263,6 +347,7 @@ FlutterWindow::MessageHandler(HWND hwnd, UINT const message,
   if (taskbar_created_ != 0 && message == taskbar_created_ && desktop_ready_) {
     // Explorer restarts lose the old icon. Restore a visible entry or window.
     tray_available_ = false;
+    RemoveNotificationIcon();
     notifications_.Reset();
     if (!AddTrayIcon()) {
       ShowWindow(hwnd, SW_RESTORE);
@@ -279,14 +364,38 @@ FlutterWindow::MessageHandler(HWND hwnd, UINT const message,
     return 0;
   }
   if (message == kTrayMessage) {
-    if (HIWORD(lparam) != tray_id_) return 0;
     const UINT event = LOWORD(lparam);
+    const UINT callback_id = HIWORD(lparam);
+    const bool balloon = event == NIN_BALLOONSHOW || event == NIN_BALLOONHIDE ||
+        event == NIN_BALLOONTIMEOUT || event == NIN_BALLOONUSERCLICK;
+    if ((balloon && (callback_id == 0 || callback_id != notification_icon_id_)) ||
+        (!balloon && callback_id != tray_id_)) {
+#ifndef NDEBUG
+      if (event == NIN_BALLOONSHOW || event == NIN_BALLOONHIDE ||
+          event == NIN_BALLOONTIMEOUT || event == NIN_BALLOONUSERCLICK) {
+        ++notification_id_mismatch_;
+      }
+#endif
+      return 0;
+    }
     if (event == NIN_BALLOONSHOW) {
-      notifications_.OnBalloonEvent(BalloonEvent::shown);
+#ifndef NDEBUG
+      ++notification_shown_;
+#endif
+      notifications_.OnBalloonEvent(BalloonEvent::shown, callback_id);
     } else if (event == NIN_BALLOONHIDE || event == NIN_BALLOONTIMEOUT) {
-      notifications_.OnBalloonEvent(event == NIN_BALLOONHIDE ? BalloonEvent::hidden : BalloonEvent::timedOut);
+#ifndef NDEBUG
+      if (event == NIN_BALLOONHIDE) ++notification_hidden_;
+      else ++notification_timed_out_;
+#endif
+      RemoveNotificationIcon();
+      notifications_.OnBalloonEvent(event == NIN_BALLOONHIDE ? BalloonEvent::hidden : BalloonEvent::timedOut, callback_id);
     } else if (event == NIN_BALLOONUSERCLICK) {
-      const auto clicked = notifications_.OnBalloonEvent(BalloonEvent::clicked);
+#ifndef NDEBUG
+      ++notification_clicked_;
+#endif
+      RemoveNotificationIcon();
+      const auto clicked = notifications_.OnBalloonEvent(BalloonEvent::clicked, callback_id);
       if (clicked) OpenApprovals(clicked->request_id);
     } else if (event == NIN_SELECT || event == NIN_KEYSELECT) {
       OpenApprovals();
@@ -303,7 +412,7 @@ FlutterWindow::MessageHandler(HWND hwnd, UINT const message,
       DestroyMenu(menu);
       PostMessage(hwnd, WM_NULL, 0, 0);
       if (selected == kOpenApprovals) OpenApprovals();
-      if (selected == kQuit) SendDesktopEvent("quit");
+      if (selected == kQuit) RequestQuit();
     }
     return 0;
   }

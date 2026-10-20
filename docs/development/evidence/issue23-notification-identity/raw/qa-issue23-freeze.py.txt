@@ -1,0 +1,26 @@
+from pathlib import Path
+import hashlib,json,subprocess,shutil
+root=Path.cwd();qa=root/'build/qa-issue23-notification';dest=root/'docs/development/evidence/issue23-notification-identity';dest.mkdir(parents=True,exist_ok=False)
+raw=dest/'raw';raw.mkdir()
+for name in ['readiness.cs','readiness-01.json']:
+    shutil.copyfile(qa/name,raw/name)
+for name in ['native-01','queue-red-01','queue-green-01','headless-01']:
+    target=raw/name;target.mkdir()
+    for p in (qa/name).iterdir():
+        if p.is_file() and p.suffix in ['.txt','.json','.jsonl']:
+            shutil.copyfile(p,target/p.name)
+for name in ['qa-issue23-notification-run.py','qa-issue23-queue.py','qa-issue23-freeze.py']:
+    shutil.copyfile(root/'build'/name,raw/(name+'.txt'))
+sha=lambda b:hashlib.sha256(b).hexdigest()
+source=subprocess.check_output(['git','rev-parse','HEAD'],cwd=root,text=True).strip();assert source.startswith('b8169e2')
+sources=[]
+for p in subprocess.check_output(['git','diff','--name-only','3faf9b8',source],cwd=root,text=True).splitlines()+[p+'/pubspec.lock' for p in ['packages/info_cli','packages/info_core','packages/info_storage','apps/desktop']]:
+    b=subprocess.check_output(['git','show',f'{source}:{p}'],cwd=root);assert b.replace(b'\r\n',b'\n')==(root/p).read_bytes().replace(b'\r\n',b'\n');sources.append(dict(path=p,gitSha256=sha(b)))
+artifacts=[dict(path=p.relative_to(dest).as_posix(),byteLength=p.stat().st_size,sha256=sha(p.read_bytes())) for p in sorted(raw.rglob('*')) if p.is_file()]
+for run in ['native-01','headless-01']:
+    result=json.loads((qa/run/'runner-result.json').read_text())
+    for item in result['sources']:
+        assert sha((raw/run/(Path(item['path']).name+'.txt')).read_bytes())==item['sha256']
+m=dict(fixedSourceCommit=source,nativeFailureScope='working diagnostic sources before the identity fix; genuine click not verified',acceptanceComplete=False,desktopTestsPassed=160,desktopTestsSkipped=0,queueRedExitCode=1,queueGreenExitCode=0,sources=sources,artifacts=artifacts)
+(dest/'verification.json').write_text(json.dumps(m,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+print(json.dumps(dict(artifacts=len(artifacts),sources=len(sources)),indent=2))

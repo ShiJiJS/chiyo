@@ -17,6 +17,14 @@ void main() {
     'ATTACHMENT_CONSUMERS_RENDER_DIRECTORY',
   );
   if (directory.isEmpty) return;
+  const width = int.fromEnvironment(
+    'ATTACHMENT_RENDER_WIDTH',
+    defaultValue: 1280,
+  );
+  const height = int.fromEnvironment(
+    'ATTACHMENT_RENDER_HEIGHT',
+    defaultValue: 800,
+  );
   testWidgets(
     'inspect file revision, recycle and proposal consumers in the existing shell',
     (tester) async {
@@ -40,7 +48,7 @@ void main() {
           )..addFont(Future.value(ByteData.sublistView(bytes)))).load();
         }
         await Directory(directory).create(recursive: true);
-        tester.view.physicalSize = const Size(1280, 800);
+        tester.view.physicalSize = Size(width.toDouble(), height.toDouble());
         tester.view.devicePixelRatio = 1;
         debugDisableShadows = false;
         try {

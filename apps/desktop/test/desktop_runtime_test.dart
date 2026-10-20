@@ -250,7 +250,10 @@ void main() {
         },
       );
       await runtime.start();
-      await runtime.quit();
+      await expectLater(
+        native.events!(DesktopEvent.quit),
+        throwsA(isA<StateError>()),
+      );
       expect(libraryClosed, isFalse);
       expect(native.terminated, isFalse);
       expect(runtime.shutdownFailed, isTrue);
@@ -259,9 +262,10 @@ void main() {
         throwsA(isA<AccessFailure>()),
       );
       repository.failing = false;
-      await runtime.quit();
+      await native.events!(DesktopEvent.quit);
       expect(libraryClosed, isTrue);
       expect(native.terminated, isTrue);
+      expect(runtime.shutdownFailed, isFalse);
       expect(
         repository.grantHistory.single.events.last.kind,
         GrantEventKind.applicationClosed,

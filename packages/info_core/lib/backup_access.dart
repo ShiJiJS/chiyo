@@ -43,6 +43,7 @@ extension OwnerLibraryBackup on OwnerAccess {
         _service._grants.clear();
         _service._credentialUseSessions.clear();
         _service._executionCapabilities.clear();
+        _service._pendingExecutionReceipts.clear();
         _service._failedFillAudits.clear();
         _service._pendingInformationDeliveries.clear();
         _service._retentionPreview = null;

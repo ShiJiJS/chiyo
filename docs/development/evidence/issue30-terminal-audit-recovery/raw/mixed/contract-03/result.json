@@ -1,0 +1,47 @@
+{
+  "phases": [
+    {
+      "phase": "info_cli-pub",
+      "exitCode": 0
+    },
+    {
+      "phase": "info_cli-format",
+      "exitCode": 0
+    },
+    {
+      "phase": "info_storage-pub",
+      "exitCode": 0
+    },
+    {
+      "phase": "info_storage-format",
+      "exitCode": 0
+    },
+    {
+      "phase": "info_cli-analyze",
+      "exitCode": 0
+    },
+    {
+      "phase": "info_storage-analyze",
+      "exitCode": 0
+    },
+    {
+      "phase": "source",
+      "exitCode": 0
+    }
+  ],
+  "sources": [
+    {
+      "path": "packages/info_cli/test/support/mixed_lifecycle_host.dart",
+      "sha256": "624c010b511fceaf2b277981c8aeb280697a9626ba63c28e7a594e38e62db488"
+    },
+    {
+      "path": "packages/info_storage/test/support/mixed_lifecycle.dart",
+      "sha256": "ee7f1b68a9b6d11ba6179d8748f45e76399e717dc58cce0599b3c17a86872b8d"
+    },
+    {
+      "path": "packages/info_storage/test/mixed_lifecycle_windows_test.dart",
+      "sha256": "b52ab481c04488f98abd4b195763958393bbf9827791bbb0a9cb06aaa0e933b0"
+    }
+  ],
+  "unexpectedLocks": []
+}

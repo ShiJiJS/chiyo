@@ -276,6 +276,9 @@ class DesktopRuntime extends ChangeNotifier {
     }
     if (event == DesktopEvent.quit) {
       await quit();
+      // Native local control needs an explicit refusal, not an acknowledged
+      // event whose audit writes are still unsaved. UI callers use quit().
+      if (shutdownFailed) throw StateError('shutdown_failed');
       return;
     }
     if (quitting) return;
@@ -337,6 +340,7 @@ class DesktopRuntime extends ChangeNotifier {
   }
 
   Future<void> _shutdown() async {
+    shutdownFailed = false;
     try {
       await stop();
       await platform.terminate();

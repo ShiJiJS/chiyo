@@ -1,0 +1,56 @@
+from pathlib import Path
+import json, os, socket, subprocess, tempfile, time
+
+root = Path.cwd()
+out = root / 'build/qa-issue40/native-preview'
+out.mkdir(parents=True, exist_ok=False)
+locks = {root/p/'pubspec.lock': (root/p/'pubspec.lock').read_bytes() for p in
+         ['packages/info_core', 'packages/info_storage', 'packages/info_cli', 'apps/desktop']}
+norm = lambda b: b.replace(b'https://pub.flutter-io.cn', b'https://pub.dev').replace(b'\r\n', b'\n')
+env = os.environ.copy()
+env.update(PUB_HOSTED_URL='https://pub.flutter-io.cn', FLUTTER_STORAGE_BASE_URL='https://storage.flutter-io.cn')
+dart = 'C:/Users/Todoki/.local/share/flutter/bin/cache/dart-sdk/bin/dart.exe'
+temp = Path(tempfile.mkdtemp(prefix='aim-removed-field-preview-'))
+steps = []
+def run(name, args):
+    with (out/(name+'.txt')).open('wb') as log:
+        code = subprocess.run([dart, *args], cwd=root/'packages/info_storage', env=env,
+                              stdout=log, stderr=subprocess.STDOUT).returncode
+    steps.append(dict(name=name, exitCode=code))
+    print(json.dumps(steps[-1]), flush=True)
+    assert code == 0, name
+try:
+    for p,b in locks.items(): p.write_bytes(b.replace(b'https://pub.dev', b'https://pub.flutter-io.cn'))
+    run('format', ['format', 'test/support/removed_field_preview_fixture.dart'])
+    run('pub', ['pub', 'get', '--offline', '--enforce-lockfile'])
+    run('analyze', ['analyze', '--fatal-infos'])
+    run('prepare', ['run', 'test/support/removed_field_preview_fixture.dart', str(temp)])
+finally:
+    bad = []
+    for p,b in locks.items():
+        if norm(p.read_bytes()) != norm(b): bad.append(str(p))
+        else: p.write_bytes(b)
+    (out/'checks.json').write_text(json.dumps(dict(steps=steps, unexpectedLocks=bad), indent=2)+'\n', encoding='utf-8')
+    assert not bad, bad
+with socket.socket() as check: check.bind(('127.0.0.1', 47125))
+env['LOCALAPPDATA'] = str(temp/'profile')
+app = root/'build/windows-preview-0.4.0-12-2fe6189/AgentInfoManage/app/info_desktop.exe'
+with (out/'app.txt').open('wb') as log:
+    process = subprocess.Popen([str(app)], cwd=app.parent, env=env, stdin=subprocess.DEVNULL,
+                               stdout=log, stderr=subprocess.STDOUT)
+    state = dict(root=str(temp), processId=process.pid, executable=str(app), fixtureOnly=True)
+    (out/'running.json').write_text(json.dumps(state, indent=2)+'\n', encoding='utf-8')
+    print(json.dumps(dict(processId=process.pid, fixturePrepared=True)), flush=True)
+    while not (out/'observed.json').exists():
+        if process.poll() is not None: raise RuntimeError('App ended before observation')
+        time.sleep(0.5)
+    cli = app.parent.parent/'cli/info.exe'
+    result = subprocess.run([str(cli), 'app', 'quit', '--pid', str(process.pid)],
+                            capture_output=True, timeout=30)
+    (out/'quit.txt').write_bytes(result.stdout+result.stderr)
+    assert result.returncode == 0
+    code = process.wait(timeout=15)
+    assert code == 0
+    (out/'result.json').write_text(json.dumps(dict(complete=True, exitCode=code, processId=process.pid,
+                                                 setupWasSdkOnly=True), indent=2)+'\n', encoding='utf-8')
+    print(json.dumps(dict(complete=True, exitCode=code)), flush=True)

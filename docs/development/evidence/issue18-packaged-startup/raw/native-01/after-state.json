@@ -1,0 +1,12 @@
+{
+  "oldProgram": {
+    "Id": 68048,
+    "Path": "C:\\Project\\network_config\\info-manage\\build\\windows-preview-round05-2918010\\AgentInfoManage\\app\\info_desktop.exe"
+  },
+  "listener": {
+    "LocalAddress": "127.0.0.1",
+    "LocalPort": 47125,
+    "OwningProcess": 68048
+  },
+  "remainingPreviewProcesses": 0
+}

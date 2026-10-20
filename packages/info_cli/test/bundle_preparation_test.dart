@@ -28,6 +28,12 @@ void main() {
       await credentialReference.copy(
         '${template.path}/references/credential-use.md',
       );
+      final fileReference = File(
+        '${repo.path}/integrations/codex/skills/agent-info-access/references/information-files.md',
+      );
+      await fileReference.copy(
+        '${template.path}/references/information-files.md',
+      );
       for (final name in [
         'info-codex',
         'info-codex-hook',
@@ -111,6 +117,12 @@ void main() {
         await credentialReference.readAsString(),
       );
       final refused = await prepare();
+      expect(
+        await File(
+          '$output/skills/agent-info-access/references/information-files.md',
+        ).readAsString(),
+        await fileReference.readAsString(),
+      );
       expect(refused.exitCode, 64);
       expect(await configFile.readAsString(), configBefore);
       // The copied executable still accepts JSON after the source directory is

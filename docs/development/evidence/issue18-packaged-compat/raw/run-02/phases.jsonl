@@ -1,0 +1,2 @@
+{"phase": "restore-format-via-native-dialogs", "format": 8, "pid": 47076, "backup": "C:\\Users\\Todoki\\AppData\\Local\\Temp\\aim-packaged-compat-yvonqy13\\selected.aimbackup", "recovery": "C:\\Users\\Todoki\\AppData\\Local\\Temp\\aim-packaged-compat-yvonqy13\\selected.recovery.txt", "expected": {"status": "prepared", "format": 8, "information": 1, "revisions": 1, "attachments": 2, "attachmentBytes": 100, "templates": 1, "credentials": 0}, "receipt": "C:\\Project\\network_config\\info-manage\\build\\qa-issue18-compat\\run-02\\observed-format-8.json"}
+{"phase": "complete"}

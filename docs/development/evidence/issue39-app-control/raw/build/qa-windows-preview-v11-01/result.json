@@ -1,0 +1,12 @@
+{
+  "source": "887f1c2e29da8799cfec48032ac4967d1576fb77",
+  "exitCode": 0,
+  "unexpectedLocks": [],
+  "archives": [
+    {
+      "path": "build/windows-preview-0.4.0-11-887f1c2/agent-info-manage-0.4.0+11-dev.887f1c2e29da-windows-x64.zip",
+      "byteLength": 53312233,
+      "sha256": "65bb32f0080da7769eb79e51b751297702bdde47e137b0a934abb206949bd0f7"
+    }
+  ]
+}

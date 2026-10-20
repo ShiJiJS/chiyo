@@ -1,0 +1,160 @@
+{
+  "productSource": "887f1c2e29da8799cfec48032ac4967d1576fb77",
+  "complete": true,
+  "checks": [
+    {
+      "check": "format",
+      "passed": true
+    },
+    {
+      "check": "pub",
+      "passed": true
+    },
+    {
+      "check": "analyze",
+      "passed": true
+    },
+    {
+      "check": "inspect",
+      "passed": true
+    },
+    {
+      "check": "same-version3-target",
+      "passed": true
+    },
+    {
+      "check": "port-owned-by-child",
+      "passed": true,
+      "processId": 74132
+    },
+    {
+      "check": "fresh-session",
+      "passed": true
+    },
+    {
+      "check": "confirmed-synthetic-target-only",
+      "passed": true
+    },
+    {
+      "check": "before-delete-request-pending",
+      "passed": true
+    },
+    {
+      "check": "before-delete-ui-approved",
+      "passed": true
+    },
+    {
+      "check": "before-delete-claimed",
+      "passed": true
+    },
+    {
+      "check": "before-delete-ready",
+      "passed": true
+    },
+    {
+      "check": "before-delete-original-bytes",
+      "passed": true
+    },
+    {
+      "check": "after-delete-denied",
+      "passed": true,
+      "status": "conflict",
+      "errorCode": "field_removed"
+    },
+    {
+      "check": "deletion-cleans-existing-copy",
+      "passed": true
+    },
+    {
+      "check": "actual-delete-observed-and-human-confirmed",
+      "passed": true
+    },
+    {
+      "check": "ui-restore-creates-new-field",
+      "passed": true
+    },
+    {
+      "check": "old-field-after-restore-denied",
+      "passed": true,
+      "status": "conflict",
+      "errorCode": "field_removed"
+    },
+    {
+      "check": "new-field-with-old-grant-denied",
+      "passed": true,
+      "status": "unauthorized",
+      "errorCode": "not_authorized"
+    },
+    {
+      "check": "old-grant-deadline-not-extended",
+      "passed": true
+    },
+    {
+      "check": "after-restore-request-pending",
+      "passed": true
+    },
+    {
+      "check": "after-restore-ui-approved",
+      "passed": true
+    },
+    {
+      "check": "after-restore-claimed",
+      "passed": true
+    },
+    {
+      "check": "after-restore-ready",
+      "passed": true
+    },
+    {
+      "check": "after-restore-original-bytes",
+      "passed": true
+    },
+    {
+      "check": "new-copy-released",
+      "passed": true
+    },
+    {
+      "check": "final-ui-observed",
+      "passed": true
+    },
+    {
+      "check": "actual-normal-exit",
+      "passed": true,
+      "processId": 74132
+    },
+    {
+      "check": "inspect-completed",
+      "passed": true
+    },
+    {
+      "check": "durable-ui-delete-restore-and-scope-invalidation",
+      "passed": true
+    }
+  ],
+  "priorProof": {
+    "path": "C:\\Project\\network_config\\info-manage\\docs\\development\\evidence\\issue18-packaged-recycle-ui\\raw\\preserved-library-hashes.json",
+    "sha256": "13edb1d0bdc6b953591b911ef4237a55722a96d89fffd8afc06e4b1de1bfb1f4"
+  },
+  "inspection": {
+    "status": "inspected",
+    "information": 1,
+    "itemIdentityPreserved": true,
+    "fieldIdentityChanged": true,
+    "attachmentIdentityPreserved": true,
+    "originalMatches": true,
+    "itemVersion": 5,
+    "availableRecycle": 0,
+    "restoredRecycle": 2,
+    "deletionFacts": 2,
+    "restoreFacts": 2,
+    "deliveries": 3,
+    "noHeldCopies": true,
+    "activeGrants": 0,
+    "fieldIdentityChangedFromV3": true,
+    "expiredRemovedDeliveries": 1,
+    "releasedDeliveries": 2,
+    "restoredFieldMappingMatches": true
+  },
+  "unexpectedLocks": [],
+  "temporaryRemoved": true
+}

@@ -2,6 +2,7 @@
 #define RUNNER_NOTIFICATION_QUEUE_H_
 
 #include <deque>
+#include <cstdint>
 #include <functional>
 #include <optional>
 #include <string>
@@ -10,12 +11,13 @@
 struct NotificationMessage {
   std::string request_id;
   bool test = false;
+  std::uint32_t native_id = 0;
 };
 
 enum class BalloonEvent { shown, hidden, timedOut, clicked };
 
-// Public native delivery adapter. The Shell sees only one outstanding balloon,
-// so an old click can never acquire the ID of a later queued request/test.
+// Native callbacks carry an icon ID, not the request ID. Every send therefore
+// uses a fresh ID and the native sender must register that ID with the Shell.
 class NotificationQueue {
  public:
   using Sender = std::function<bool(const NotificationMessage&)>;
@@ -28,8 +30,10 @@ class NotificationQueue {
     Pump();
   }
 
-  std::optional<NotificationMessage> OnBalloonEvent(BalloonEvent event) {
-    if (event == BalloonEvent::shown || !active_) return std::nullopt;
+  std::optional<NotificationMessage> OnBalloonEvent(
+      BalloonEvent event, std::uint32_t native_id) {
+    if (!active_ || active_->native_id != native_id ||
+        event == BalloonEvent::shown) return std::nullopt;
     auto ended = std::move(active_);
     active_.reset();
     Pump();
@@ -51,6 +55,11 @@ class NotificationQueue {
     while (!active_ && !pending_.empty()) {
       auto entry = std::move(pending_.front());
       pending_.pop_front();
+      // VERSION_4 callbacks expose only 16 bits. Never wrap/reuse even after
+      // Reset: a delayed callback could otherwise acquire a new request.
+      // IDs below 0x1000 are reserved for the persistent generic tray icon.
+      if (next_native_id_ > 0xffff) { entry.reply(false); continue; }
+      entry.message.native_id = next_native_id_++;
       active_ = entry.message;
       const bool accepted = sender_(entry.message);
       if (!accepted) active_.reset();
@@ -62,6 +71,7 @@ class NotificationQueue {
   std::deque<Pending> pending_;
   std::optional<NotificationMessage> active_;
   bool pumping_ = false;
+  std::uint32_t next_native_id_ = 0x1000;
 };
 
 #endif  // RUNNER_NOTIFICATION_QUEUE_H_

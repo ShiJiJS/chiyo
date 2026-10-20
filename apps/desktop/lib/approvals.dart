@@ -90,9 +90,34 @@ class ApprovalsState extends State<Approvals> {
   String _scopeName(FieldRef ref) {
     final field = _currentField(ref);
     return field == null
-        ? ref.fieldId
+        ? _fieldLabel(ref)
         : '${field.name}${field.kind == FieldKind.file ? '（文件 · 领取原文件）' : ''}';
   }
+
+  RecordedField? _recordedField(FieldRef ref) => _lastPage?.entries
+      .where((entry) => entry.id == _focused)
+      .firstOrNull
+      ?.access
+      ?.recordedFields
+      .where(
+        (field) => field.itemId == ref.itemId && field.fieldId == ref.fieldId,
+      )
+      .firstOrNull;
+
+  String _itemLabel(String id) =>
+      widget.service.owner.information
+          .where((item) => item.id == id)
+          .firstOrNull
+          ?.name ??
+      _lastPage?.entries
+          .where((entry) => entry.id == _focused)
+          .firstOrNull
+          ?.access
+          ?.recordedFields
+          .where((field) => field.itemId == id)
+          .firstOrNull
+          ?.itemName ??
+      '信息名称未记录';
 
   final _search = TextEditingController();
   final _searchFocus = FocusNode();
@@ -931,7 +956,7 @@ class ApprovalsState extends State<Approvals> {
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
-                                  item?.name ?? '原信息已不可用',
+                                  _itemLabel(group.key),
                                   style: prototypeText(
                                     context,
                                     19,
@@ -1614,11 +1639,7 @@ class ApprovalsState extends State<Approvals> {
         for (final group in groups.entries) ...[
           if (group.key != groups.keys.first) const SizedBox(height: 15),
           Text(
-            widget.service.owner.information
-                    .where((i) => i.id == group.key)
-                    .firstOrNull
-                    ?.name ??
-                '原信息已不可用',
+            _itemLabel(group.key),
             style: prototypeText(
               context,
               13,
@@ -1918,11 +1939,7 @@ class ApprovalsState extends State<Approvals> {
           Padding(
             padding: const EdgeInsets.only(top: 8, bottom: 8),
             child: Text(
-              widget.service.owner.information
-                      .where((i) => i.id == group.key)
-                      .firstOrNull
-                      ?.name ??
-                  group.key,
+              _itemLabel(group.key),
               style: Theme.of(context).textTheme.titleSmall,
             ),
           ),
@@ -1986,7 +2003,9 @@ class ApprovalsState extends State<Approvals> {
             children: [
               Text(
                 !available.contains(ref)
-                    ? '字段已不可用，可取消选择'
+                    ? pending
+                          ? '字段已不可用，可取消选择'
+                          : '原字段已移除，旧授权不可读取'
                     : field?.value ?? '不可用',
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
@@ -2101,7 +2120,7 @@ class ApprovalsState extends State<Approvals> {
         if (field.id == ref.fieldId) return '${item.name} · ${field.name}';
       }
     }
-    return '${ref.itemId} / ${ref.fieldId}';
+    return _recordedField(ref)?.fieldName ?? '字段名称未记录';
   }
 
   String _durationLabel(int minutes) {

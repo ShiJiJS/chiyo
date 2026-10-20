@@ -1,0 +1,1 @@
+Running build hooks...Running build hooks...{"status":"inspected","grants":1,"allClosed":true,"successfulReads":4,"items":2}

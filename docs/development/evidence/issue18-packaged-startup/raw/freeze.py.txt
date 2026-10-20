@@ -1,0 +1,25 @@
+from pathlib import Path
+import json,hashlib,subprocess,shutil
+root=Path.cwd();qaCommit=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip();assert qaCommit=='8b9019a96d06ee9a4b03baf9ac91310cf6aeef4d'
+source='527b4ccf63e53c8aaae5c492d9fb34b239ff0d29';base=root/'build/qa-issue18-startup';result=json.loads((base/'native-01/result.json').read_text())
+assert result['complete'] and len(result['cases'])==4 and not result['unexpectedLocks'] and result['fixtureRemoved']
+assert all(c['exitCode']==0 and c['protectedFilesUnchanged'] for c in result['cases'])
+assert result['sourceCommit']==source
+payload=root/'build/windows-preview-0.4.0-10-527b4cc/AgentInfoManage';manifest=json.loads((payload/'manifest.json').read_text(encoding='utf-8-sig'));assert manifest['sourceCommit']==source
+sha=lambda b:hashlib.sha256(b).hexdigest()
+for item in manifest['files']:
+ p=payload/item['path'];assert p.stat().st_size==item['bytes'] and sha(p.read_bytes())==item['sha256']
+assert sha((payload/'app/info_desktop.exe').read_bytes())==result['executableSha256']
+dest=root/'docs/development/evidence/issue18-packaged-startup';dest.mkdir(parents=True,exist_ok=False);raw=dest/'raw';raw.mkdir()
+for name in ['lint-01','native-01']:
+ shutil.copytree(base/name,raw/name)
+shutil.copyfile(payload/'manifest.json',raw/'package-manifest.json')
+shutil.copyfile(root/'build/freeze-packaged-startup.py',raw/'freeze.py.txt')
+shutil.copyfile(root/'build/qa-startup-lint.py',raw/'lint-run.py.txt')
+sources=[]
+for revision,path in [(qaCommit,'scripts/test-windows-startup-errors.py'),(qaCommit,'packages/info_storage/test/support/packaged_startup_fixture.dart')]+[(source,p) for p in ['apps/desktop/lib/main.dart','apps/desktop/lib/desktop_bootstrap.dart','packages/info_storage/lib/platform_keys.dart','packages/info_storage/lib/info_storage.dart']]+[(qaCommit,p+'/pubspec.lock') for p in ['packages/info_cli','packages/info_core','packages/info_storage','apps/desktop']]:
+ b=subprocess.check_output(['git','show',revision+':'+path]);sources.append(dict(commit=revision,path=path,sha256=sha(b)))
+artifacts=[dict(path=p.relative_to(dest).as_posix(),byteLength=p.stat().st_size,sha256=sha(p.read_bytes())) for p in sorted(raw.rglob('*')) if p.is_file()]
+facts=dict(packageSource=source,qaSource=qaCommit,release=result['release'],desktopSha256=result['executableSha256'],manifestFilesVerified=113,actualPackagedFailureCases=4,normalGuiAccepted=False,sourceRuntimeChanged=False,fixtureRemoved=True,observations='Computer Use screenshots inspected in conversation; written observation receipts are manual records, not automated image assertions. No screenshot payload files saved.',sources=sources,artifacts=artifacts)
+(dest/'verification.json').write_text(json.dumps(facts,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+print(json.dumps(dict(artifacts=len(artifacts),sources=len(sources),cases=4,packageSource=source,qaSource=qaCommit),indent=2))

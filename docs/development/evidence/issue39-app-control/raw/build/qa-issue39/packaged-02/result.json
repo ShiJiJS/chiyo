@@ -1,0 +1,192 @@
+{
+  "sourceCommit": "887f1c2e29da8799cfec48032ac4967d1576fb77",
+  "release": "0.4.0+11-dev.887f1c2e29da",
+  "checks": [
+    {
+      "check": "control-status",
+      "exitCode": 0,
+      "result": {
+        "controlVersion": 1,
+        "status": "not_running"
+      }
+    },
+    {
+      "check": "no-peer-before-start",
+      "passed": true
+    },
+    {
+      "check": "control-status",
+      "exitCode": 75,
+      "result": {
+        "controlVersion": 1,
+        "status": "target_mismatch",
+        "processId": 69340
+      }
+    },
+    {
+      "check": "control-status",
+      "exitCode": 0,
+      "result": {
+        "controlVersion": 1,
+        "status": "starting",
+        "processId": 69340
+      }
+    },
+    {
+      "check": "control-status",
+      "exitCode": 0,
+      "result": {
+        "controlVersion": 1,
+        "status": "running",
+        "processId": 69340
+      }
+    },
+    {
+      "check": "release-service-ready",
+      "passed": true
+    },
+    {
+      "check": "session-opened",
+      "passed": true
+    },
+    {
+      "check": "pending-request",
+      "passed": true
+    },
+    {
+      "check": "owner-approved",
+      "passed": true
+    },
+    {
+      "check": "partial-scope",
+      "passed": true
+    },
+    {
+      "check": "approved-read-0",
+      "passed": true
+    },
+    {
+      "check": "approved-read-1",
+      "passed": true
+    },
+    {
+      "check": "approved-read-2",
+      "passed": true
+    },
+    {
+      "check": "unapproved-denied",
+      "passed": true
+    },
+    {
+      "check": "same-expiry",
+      "passed": true
+    },
+    {
+      "check": "file-claim",
+      "passed": true
+    },
+    {
+      "check": "file-ready",
+      "passed": true
+    },
+    {
+      "check": "copy-bytes",
+      "passed": true
+    },
+    {
+      "check": "file-released",
+      "passed": true
+    },
+    {
+      "check": "observed-tabs-hide",
+      "passed": true
+    },
+    {
+      "check": "control-status",
+      "exitCode": 0,
+      "result": {
+        "controlVersion": 1,
+        "status": "running",
+        "processId": 69340
+      }
+    },
+    {
+      "check": "hidden-still-running",
+      "passed": true
+    },
+    {
+      "check": "hidden-read",
+      "passed": true
+    },
+    {
+      "check": "synthetic-sql-lock",
+      "passed": true
+    },
+    {
+      "check": "control-quit",
+      "exitCode": 1,
+      "result": {
+        "controlVersion": 1,
+        "status": "shutdown_failed",
+        "processId": 69340
+      }
+    },
+    {
+      "check": "failed-save-refuses-exit",
+      "passed": true
+    },
+    {
+      "check": "control-status",
+      "exitCode": 1,
+      "result": {
+        "controlVersion": 1,
+        "status": "shutdown_failed",
+        "processId": 69340
+      }
+    },
+    {
+      "check": "failure-remains-queryable",
+      "passed": true
+    },
+    {
+      "check": "write-lock-released",
+      "passed": true
+    },
+    {
+      "check": "control-quit",
+      "exitCode": 0,
+      "result": {
+        "controlVersion": 1,
+        "status": "exited",
+        "processId": 69340
+      }
+    },
+    {
+      "check": "retry-actually-exits",
+      "passed": true
+    },
+    {
+      "check": "control-quit",
+      "exitCode": 0,
+      "result": {
+        "controlVersion": 1,
+        "status": "not_running"
+      }
+    },
+    {
+      "check": "repeat-idempotent",
+      "passed": true
+    },
+    {
+      "check": "service-closed",
+      "passed": true
+    },
+    {
+      "check": "library-inspect-process",
+      "passed": true
+    }
+  ],
+  "complete": false,
+  "unexpectedLocks": [],
+  "temporaryRemoved": true
+}

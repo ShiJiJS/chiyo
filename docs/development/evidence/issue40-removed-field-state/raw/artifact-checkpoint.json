@@ -1,0 +1,22 @@
+{
+  "productSource": "2fe61896dac06bed5f13c507d07da73a7a95d468",
+  "release": "0.4.0+12-dev.2fe61896dac0",
+  "payloadFiles": 113,
+  "archiveBytes": 53311634,
+  "archiveSha256": "88fb5953eb3b50057b0f0ad3aa8098f517ed7539f6b8cfa19481505f2937804f",
+  "manifestSha256": "8b52fef8f833953b9cb2165efa3fb1ff3d3b7a723d71625e5ce3bec51cc7e471",
+  "appSoSha256": "390b6cd3e04eb82bcd2cc708d7f0cd9effc285fc5726863b32de11bd75949b31",
+  "appExeSha256": "22223ef9742acd2635f569f93625873b8264b566bd50f811b189ffe67f91512d",
+  "initialPackageCommandPassed": false,
+  "independentExtractedVerificationPassed": true,
+  "firstCloseTimeoutRootCauseEstablished": false,
+  "corePassed": 275,
+  "storagePassed": 161,
+  "cliPassed": 94,
+  "desktopPassed": 166,
+  "passed": 696,
+  "skipped": 20,
+  "extractedPassed": 23,
+  "extractedOverlapNotAdded": true,
+  "noRemainingOwnedProductOrLifecycleHost": true
+}

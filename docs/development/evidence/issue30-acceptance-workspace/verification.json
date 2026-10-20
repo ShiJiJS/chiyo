@@ -1,0 +1,94 @@
+{
+  "productSource": "995283f1d5ef806a629f6cb917cca3bb7e88944f",
+  "workspace": "C:\\Project\\network_config\\info-manage-codex-acceptance-0.4.0-12-995283f",
+  "bundle": "C:\\Project\\network_config\\info-manage\\build\\codex-preview-0.4.0-12-995283f",
+  "preparationChecks": {
+    "preparedFiles": 7,
+    "manifestedFilesVerified": 6,
+    "allEightClientCasesStillNotRun": true,
+    "existingDirectoryRefused": true,
+    "refusedTargetAllBytesUnchanged": true,
+    "hookDefinitionsUnchanged": true,
+    "scriptSyntaxVerified": true
+  },
+  "existingProjectOrGlobalConfigurationModified": false,
+  "clientActivatedByScript": false,
+  "trustGrantedByScript": false,
+  "hooksRunByScript": false,
+  "chatsOrSubagentsCreated": false,
+  "clientCasesCompleted": 0,
+  "rawCount": 11,
+  "raw": [
+    {
+      "source": "C:\\Project\\network_config\\info-manage-codex-acceptance-0.4.0-12-995283f\\.agents\\skills\\agent-info-access\\references\\credential-use.md",
+      "path": "raw/project/.agents/skills/agent-info-access/references/credential-use.md.txt",
+      "bytes": 13695,
+      "sha256": "8610c5d45571846d30a646bfb58ed27f48c52252f1d36efb138e66f1c55abbac"
+    },
+    {
+      "source": "C:\\Project\\network_config\\info-manage-codex-acceptance-0.4.0-12-995283f\\.agents\\skills\\agent-info-access\\references\\information-files.md",
+      "path": "raw/project/.agents/skills/agent-info-access/references/information-files.md.txt",
+      "bytes": 5748,
+      "sha256": "9dc64a5e38d8f88f28a73a8ce8de9656e21138ee0d5b0c9b226cfc7982777209"
+    },
+    {
+      "source": "C:\\Project\\network_config\\info-manage-codex-acceptance-0.4.0-12-995283f\\.agents\\skills\\agent-info-access\\SKILL.md",
+      "path": "raw/project/.agents/skills/agent-info-access/SKILL.md.txt",
+      "bytes": 11497,
+      "sha256": "5b9649c7d6a91d77a54451d34e9718b811bf1c6812df38acdcbb02950cd3b684"
+    },
+    {
+      "source": "C:\\Project\\network_config\\info-manage-codex-acceptance-0.4.0-12-995283f\\.codex\\hooks.json",
+      "path": "raw/project/.codex/hooks.json.txt",
+      "bytes": 2181,
+      "sha256": "61b3ba810cef63a79a3955f696b64266fbae8774646c3f83787c9ccdb9319ec4"
+    },
+    {
+      "source": "C:\\Project\\network_config\\info-manage-codex-acceptance-0.4.0-12-995283f\\acceptance-cases.json",
+      "path": "raw/project/acceptance-cases.json.txt",
+      "bytes": 1231,
+      "sha256": "c5802866cc1b2a9418e7d1c16fe9caf734c80a7a629b0192f582015621631e1d"
+    },
+    {
+      "source": "C:\\Project\\network_config\\info-manage-codex-acceptance-0.4.0-12-995283f\\preparation.json",
+      "path": "raw/project/preparation.json.txt",
+      "bytes": 1596,
+      "sha256": "3d857db4ee3345999624366a190ef8b07691f3d14dae28c45d676e506f158822"
+    },
+    {
+      "source": "C:\\Project\\network_config\\info-manage-codex-acceptance-0.4.0-12-995283f\\README.txt",
+      "path": "raw/project/README.txt.txt",
+      "bytes": 2239,
+      "sha256": "2fd72b12e4e13d43dbd59486a017dde2659bd4bf497cf94d2f9738173c42d459"
+    },
+    {
+      "source": "C:\\Project\\network_config\\info-manage\\build\\resume-windows-20261020\\codex-workspace-preparation.txt",
+      "path": "raw/checks/codex-workspace-preparation.txt",
+      "bytes": 138,
+      "sha256": "66f7ce1147221a8233a43e885cb45d410445e2a53c3cf2ff40ec72572802111b"
+    },
+    {
+      "source": "C:\\Project\\network_config\\info-manage\\build\\resume-windows-20261020\\codex-workspace-overwrite-refusal.txt",
+      "path": "raw/checks/codex-workspace-overwrite-refusal.txt",
+      "bytes": 500,
+      "sha256": "4f7c269fd84c57d161dd48c916fb191329b3d6966d11ae69ddf5b1cbb94b864a"
+    },
+    {
+      "source": "C:\\Project\\network_config\\info-manage\\build\\resume-windows-20261020\\codex-workspace-verification.json",
+      "path": "raw/checks/codex-workspace-verification.json",
+      "bytes": 254,
+      "sha256": "e610fa1931a5f393f74f60b1670ca0611ce4cb045b5fcb22d39a682126f9a4c2"
+    },
+    {
+      "source": "C:\\Project\\network_config\\info-manage\\scripts\\prepare-codex-acceptance.py",
+      "path": "raw/executed-preparation-script.py.txt",
+      "bytes": 8125,
+      "sha256": "0a377945cf3b04977de94dd8f5699e30be1357cfe3cdaca907d1851e213071e9"
+    }
+  ],
+  "script": {
+    "path": "scripts/prepare-codex-acceptance.py",
+    "sha256": "0a377945cf3b04977de94dd8f5699e30be1357cfe3cdaca907d1851e213071e9",
+    "normalizedSha256": "0a377945cf3b04977de94dd8f5699e30be1357cfe3cdaca907d1851e213071e9"
+  }
+}

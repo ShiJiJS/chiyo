@@ -1,0 +1,5 @@
+{
+  "buildExitCode": 0,
+  "queueExitCode": 1,
+  "expectedFailure": true
+}

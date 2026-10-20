@@ -1,10 +1,10 @@
 # 普通附件字段与服务接口合同 · #36
 
-2026-10-18。冻结#37/#38的目标合同。2026-10-19：[#37公开核心/存储/HTTP/独立CLI已完成](../development/issue37-completion.md)，#38 Windows客户端及生产能力启用仍待；下方历史检查点保留当时范围。字段与授权含义来自[客户端规划](windows-attachment-client-plan.md)和ADR0011；公共CLI使用现有逐行JSON和私密会话关联。#33实现共同协议v2协商，#37增加`information-attachments.v1`能力，#30更新随包CLI/Skill。协议v1与旧证明不静默升级。
+2026-10-18。冻结#37/#38的目标合同。2026-10-19：[#37公开核心/存储/HTTP/独立CLI已完成](../development/issue37-completion.md)，#38 Windows客户端、生产能力启用及真实GUI/CLI/本机浏览器闭环已完成，见[客户端完成记录](../development/issue38-completion.md)；下方历史检查点保留当时范围。字段与授权含义来自[客户端规划](windows-attachment-client-plan.md)和ADR0011；公共CLI使用现有逐行JSON和私密会话关联。#33实现共同协议v2协商，#37增加`information-attachments.v1`能力，#30更新随包CLI/Skill。协议v1与旧证明不静默升级。
 
 ## 1. 字段载荷与兼容
 
-2026-10-19当前接入状态：#38源码45f15b0已完成各文件页面并将Windows正式驱动、启动与周期维护接到bootstrap；Windows在存储/驱动实际支持时宣告文件能力，Mac仍关闭。桌面158/0及定向测试通过，真实Windows窗口/系统对话框和完整原生闭环尚待；不是用户整包已更新。此前“生产能力未接/门控”的检查点保留当时范围，详见[启动与维护](../development/issue38-windows-file-bootstrap.md)。
+2026-10-19当前接入状态：#38生产源码108403a和集成验收5b1e064已通过Windows真实系统选择器、加密GUI、独立CLI、备份空库恢复及新授权后的内置浏览器本机文件消费。Windows仅在实际存储/驱动支持时宣告文件能力，Mac仍关闭。用户旧0.4.0+8包未替换，最终整包由#18跟踪；较早“能力门控/原生验收尚待”的记录保留历史范围。
 
 业务模型使用判别联合：`structured/textNote`对应文本内容，`file`对应附件版本引用。不能以路径、Base64或空String伪装文件。现有文本构造入口可保持源码兼容，但文件只能经专门文件构造入口建立；所有消费者按kind显式分支，文件调用旧文本value接口必须明确报错，不能返回空串。具体内部类布局可调整，不改变以下可持久化含义。
 
@@ -57,6 +57,8 @@ Owner另存按固定版本完整读取，校验长度和SHA-256，源事务成�
 
 `file-fetch`检查当前会话、有效授权、固定字段成员、信息项/字段存续及文件类型；获取提交时当前版本并持久化交付操作后生成受管副本。响应为`{protocolVersion:2,status:"ok",delivery:{deliveryId,itemId,fieldId,fieldVersion,attachmentVersion,fileName,mediaType,byteLength,path,state:"ready",expiresAt}}`，其中path只在此获批交付中返回。本机路径允许Agent交给同机文档或浏览器上传工具；不把本机路径当远程浏览器文件。
 
+`delivery.fileName`是获准附件的原始文件名元数据；`path`末段使用应用生成的安全basename，两者不保证同名。工具必须使用返回的真实path，不按fileName重拼路径。本机浏览器实测中的副本名是attachment.txt，内容与原始虚构简历一致；不为保留原始文件名绕过受管目录/路径检查。
+
 同一会话内operationId唯一；相同输入重复调用只返回原操作，在有效授权下保留同一文件版本/副本，不因当前内容变化再产生一份；不同输入返回`operation_conflict`。释放、撤销、到期或重启后不重新创建副本，不通过重复ID恢复读取。新领取使用新operationId，按当前字段版本处理。准备中失败或未知先查询原操作，不自动重放；先保存审计失败则不交付。
 
 `file-status`只返回所属会话的非内容事实：版本、状态、截止及可公开错误；不返回path、正文或摘要哈希。状态为`preparing|ready|released|expired|cleanup_pending|failed|unknown`。`file-release`幂等停止该副本使用并请求清理，重复释放返回当前事实；不伪造文件占用情况下的删除成功。目录/read接口不返回二进制、Base64或交付路径：对文件调用普通`read`返回`file_delivery_required`，提示使用file-fetch。
@@ -69,7 +71,7 @@ CLI文件命令默认v2，显式v1拒绝；先核对服务的协议和informatio
 
 错误投影至少包含`not_authorized, grant_expired, session_ended, field_removed, not_a_file, unsupported_capability, unsupported_file_write, file_delivery_required, operation_conflict, stage_unavailable, version_conflict, attachment_too_large, attachment_capacity_exceeded, attachment_missing, attachment_integrity_failed, delivery_io_failed, audit_failed`；客户端保留当前位置和可重试草稿，不把错误当空文件或成功。权限失败不泄露未获批文件的名称/大小。
 
-2026-10-19完成状态：[#37逐项验收](../development/issue37-completion.md)已冻结容量：原文单份10MiB、保留/暂存100MiB，副本32份/100MiB，元数据64MiB、容器256MiB及与备份一致的行/嵌套事实数量限制。事务预算预留已放行操作结束和保留清理空间。独立CLI、真实worker中断、旧源迁移及旧读取器拒绝8/9通过。正式bootstrap随#38真实客户端接入，当前继续门控。
+2026-10-19完成状态：[#37逐项验收](../development/issue37-completion.md)已冻结容量：原文单份10MiB、保留/暂存100MiB，副本32份/100MiB，元数据64MiB、容器256MiB及与备份一致的行/嵌套事实数量限制。事务预算预留已放行操作结束和保留清理空间。独立CLI、真实worker中断、旧源迁移及旧读取器拒绝8/9通过。Windows正式bootstrap已随#38客户端接入并通过原生验收；实际存储/驱动支持时宣告文件能力。Mac仍关闭，用户分发包未替换。
 
 2026-10-19历史传输检查点：[HTTP/独立CLI与实际中断](../development/issue37-delivery-cli.md)已通过，30秒超时按原操作查询、不自动重放。最终容量/RSS及全写入口预算、正式bootstrap及#38仍待，不宣告能力。此前存储检查点如下。
 

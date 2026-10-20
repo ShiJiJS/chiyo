@@ -55,6 +55,7 @@ part 'credential_runtime_models.dart';
 part 'focused_fill_models.dart';
 part 'focused_fill_access.dart';
 part 'credential_runtime_access.dart';
+part 'credential_execution_audit.dart';
 part 'credential_file_receivers.dart';
 part 'credential_material_access.dart';
 part 'credential_history_access.dart';
@@ -100,7 +101,9 @@ class OwnerRequestSnapshot {
     required this.grantExpiresAt,
     this.grantLifetime,
     this.sessionEnded = false,
+    Iterable<RecordedField> recordedFields = const [],
   }) : fields = List.unmodifiable(fields),
+       recordedFields = List.unmodifiable(recordedFields),
        approvedFields = approvedFields == null
            ? null
            : List.unmodifiable(approvedFields);
@@ -117,6 +120,9 @@ class OwnerRequestSnapshot {
   final DateTime? grantExpiresAt;
   final Duration? grantLifetime;
   final bool sessionEnded;
+
+  /// Owner display names captured at request/approval, never old field values.
+  final List<RecordedField> recordedFields;
 }
 
 class _Request {
@@ -206,6 +212,8 @@ class InformationService {
 
   final _credentialUseSessions = <String, String>{};
   final _executionCapabilities = <String, String>{};
+  final _pendingExecutionReceipts = <String, Map<String, Object?>>{};
+  late Future<void> _runtimeWrites = Future.value();
   InformationField? _field(FieldRef ref) {
     for (final item in _repository.items) {
       if (item.id == ref.itemId) {
@@ -823,6 +831,12 @@ class OwnerAccess {
           ? null
           : r.grant?.expiresAt.difference(r.approvedAt!),
       sessionEnded: _service._endedSessions.contains(r.session),
+      recordedFields: {
+        for (final field in r.recordedFields)
+          FieldRef(field.itemId, field.fieldId): field,
+        for (final field in r.history?.fields ?? const <RecordedField>[])
+          FieldRef(field.itemId, field.fieldId): field,
+      }.values,
     );
   }).toList();
   void revoke(String requestId) {

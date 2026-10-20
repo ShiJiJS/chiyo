@@ -1,0 +1,5 @@
+适用于 .NET Framework MSBuild 版本 17.14.60+43b635718
+
+  Building Custom Rule C:/Project/network_config/info-manage/apps/desktop/windows/runner/CMakeLists.txt
+  desktop_control_fixture.cpp
+  desktop_control_fixture.vcxproj -> C:\Project\network_config\info-manage\apps\desktop\build\windows\x64\runner\control-fixture\Release\info_desktop.exe
