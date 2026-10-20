@@ -189,6 +189,15 @@ extension _AuditService on InformationService {
 }
 
 extension OwnerAuditAccess on OwnerAccess {
+  /// Owner-only current scope projection, using the actual read decision.
+  /// A historical grant ID or restored field name cannot create authorization.
+  bool canReadGrantedField(GrantHistory grant, FieldRef field) {
+    if (grant.restoredAt != null || auditStorageUnavailable) return false;
+    final request = _service._requests[grant.requestId];
+    return request?.history?.id == grant.id &&
+        _service._canRead(request, field);
+  }
+
   bool get auditStorageUnavailable =>
       _service._auditFailed || _service._pendingExecutionReceipts.isNotEmpty;
   Future<void> retryAuditStorage() async {
