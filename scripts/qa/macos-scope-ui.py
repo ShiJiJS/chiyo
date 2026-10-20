@@ -43,6 +43,8 @@ def main():
     state['qaSources'] = []
     for name in ['apps/desktop/integration_test/macos_removed_scope_native_test.dart',
                  'scripts/qa/macos-scope-ui.py',
+                 'apps/desktop/lib/history.dart',
+                 'apps/desktop/lib/main.dart',
                  'apps/desktop/integration_test/support/native_semantics_lifetime.dart']:
         source = ROOT / name
         shutil.copyfile(source, sources / source.name)
