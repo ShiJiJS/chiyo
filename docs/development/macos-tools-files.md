@@ -43,3 +43,50 @@ GH/AWS 接收端。AWS 的依赖文件还需同目录范围验证，不能只授
 
 Computer Use 只读查询确认当前 Mac 锁屏，无法进行原生选择；其他自动化仍可
 运行。这是实际面板验收的暂时条件，不是停止实现和其他票据的理由。
+
+## 工具目录访问入口与故障回归（同日）
+
+源码 `3c0e2886a2c44c65ade0a48f279c803a14cd2ccb`。在现有“设置 → 应用运行”
+加入 Mac 工具目录入口，使用实际 NSOpenPanel 选择目录，原生层创建 app-scoped
+security-scoped bookmark，持有访问范围并在启动时恢复。只能选择文件夹，
+没有允许 Dart 或 Agent 传入路径自行授予访问的接口；书签内容不经过 MethodChannel、
+HTTP 接口或便携备份。新增 bookmark entitlement，App Sandbox 保持启用。
+
+选择 GH/AWS 时应包含实际程序及其依赖的安装目录；快捷方式指向目录范围外的
+程序不能据此推定可用。这里恢复的是系统目录访问，凭据使用仍须独立审批和
+实际程序身份/版本核查。持久书签请求只读访问，但现有 user-selected.read-write
+entitlement 保留；不将本次面板选择宣称为强制只读隔离。
+
+书签文件位于应用容器的 Application Support/AgentInfoManage/tool-access/
+directories.json，与资料库分离。原生层限制记录数和输入容量，原子写入，
+临时文件创建即为 0600。保存失败保留原记录与已有访问，损坏文件不被空列表覆盖；
+失效、拒绝和目录移除显示为需要重新选择。移除保存项不删除用户文件，也不承诺
+收回已运行工具持有的访问。更新包后是否仍能恢复访问仍需真实系统验收。
+
+本轮结果：
+
+| 验证 | 结果与边界 |
+| --- | --- |
+| Swift 原生存储 | 9 项通过；真实磁盘，受控 OS scope adapter，不能替代实际沙盒许可 |
+| 设置入口及通道 | 8 项新增测试通过，覆盖取消、写入失败、重选、移除、并发禁用、销毁、窄窗及放大文字 |
+| 完整 desktop 回归 | 严格分析通过；173 项通过、2 项跳过，包含上述 8 项 |
+| Release | 构建通过，deep/strict codesign 通过；保留已有 Keychain API 弃用警告 |
+| 新签名 Debug 联合工作流 | 1 项通过；真实 SQLCipher、worker、SSH 0/1、审批/历史、附件领取/释放和独立撤销；密钥与文件面板路径为测试夹具 |
+
+第一次原生回归发现 URL 属性缓存导致已删除目录仍显示可用。修复为清除缓存后
+重新核查，随后完整 9 项通过；该失败不是 GH/AWS 授权成功的证据。
+原始日志、源版本与摘要见
+[本轮验收清单](evidence/macos-tools-files/tool-access-verification.json)。
+
+复验命令（Swift 输出目录必须新建）：
+
+```bash
+xcrun swiftc -parse-as-library \
+  apps/desktop/macos/Runner/ToolAccessStore.swift \
+  scripts/qa/macos-tool-access-store-test.swift -o build/macos-tool-access-test
+build/macos-tool-access-test build/macos-adaptation/tool-access-new-run
+```
+
+锁屏状态再次得到 Computer Use 确认。当前实现已可继续做其他独立测试；
+真实外部工具目录选择、取消和焦点、书签跨重开/更新恢复、GH/AWS 及 worker
+继承访问仍未通过。之前 EPERM 失败记录保持有效，#44 不关闭。

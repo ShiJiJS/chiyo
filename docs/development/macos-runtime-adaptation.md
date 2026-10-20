@@ -7,7 +7,7 @@
 - [#41 主分支整合](macos-main-integration.md)：已固定新基线并构建，当前 Mac 分支的 Windows 实机回归仍待。
 - [#43 故障恢复](macos-lifecycle-recovery.md)：SQLCipher/独立 AOT 宿主与 worker 联合场景 8 项通过；还需签名 Flutter 应用本体异常退出重开。
 - [#42 Keychain](macos-keychain-validation.md)：真实系统存储验证发现并修复 legacy ACL 提示阻塞；不同 ad-hoc 签名间的升级访问仍被拒绝，保留原库与密钥。
-- [#44 工具与附件](macos-tools-files.md)：新基线签名沙盒 SSH/附件自动工作流通过，GH/AWS 外部路径、当前系统面板及其他交付条件继续验收。
+- [#44 工具与附件](macos-tools-files.md)：外部 GH/AWS 实测 EPERM 后，已新增主人选择工具目录与系统书签持久化入口；原生存储/界面回归及新包 SSH/附件工作流通过，真实目录许可、外部 GH/AWS、当前系统面板仍待验收。
 
 上述票据仍 OPEN；具体未完成条件以 GitHub 票据及各记录为准。现有证据不等于 Mac 总票 #19 已可交付。
 
