@@ -92,6 +92,10 @@ Future<void> main() async {
     'backup-export',
     'backup-restore',
     'backup-reopen',
+    'access-success',
+    'access-denied',
+    'access-quit',
+    'access-close',
   };
   final owner = Platform.environment['INFO_MAC_KEYCHAIN_OWNER'];
   if (!Platform.isMacOS ||
@@ -170,6 +174,7 @@ Future<void> main() async {
       await db.writeAsBytes(damaged, flush: true);
     }
     final guarded = await db.exists() ? await db.readAsBytes() : null;
+    final ownerAccess = mode!.startsWith('access-');
     final raw = sql.sqlite3.openInMemory();
     try {
       final version = raw
@@ -186,7 +191,31 @@ Future<void> main() async {
     bootstrap = DesktopBootstrap(
       platform: platform,
       port: 0,
+      openLibraryWithKeyAccess: ownerAccess
+          ? () async {
+              final recovered = MacOsDatabaseKeyStore((method, arguments) {
+                _check(method == 'read', 'Recovery tried to replace a key');
+                return _channel.invokeMethod<Object?>(
+                  'readWithInteraction',
+                  arguments,
+                );
+              });
+              final repo = await EncryptedInformationRepository.open(
+                libraryPath,
+                recovered,
+              );
+              opened = repo;
+              return DesktopLibrary(
+                service: InformationService(repository: repo),
+                close: () async {
+                  await repo.close();
+                  closes++;
+                },
+              );
+            }
+          : null,
       openLibrary: () async {
+        if (ownerAccess) throw const StorageFailure('key_unavailable');
         try {
           final repo = await EncryptedInformationRepository.open(
             libraryPath,
@@ -196,7 +225,7 @@ Future<void> main() async {
           return DesktopLibrary(
             service: InformationService(
               repository: repo,
-              informationDeliveryFiles: mode!.startsWith('backup-')
+              informationDeliveryFiles: mode.startsWith('backup-')
                   ? NativeInformationDeliveryFiles()
                   : null,
             ),
@@ -214,7 +243,77 @@ Future<void> main() async {
     final starting = bootstrap.start();
     runApp(DesktopLauncher(bootstrap: bootstrap));
     await starting;
-    if (mode!.startsWith('backup-')) {
+    if (ownerAccess) {
+      _check(bootstrap.canRequestKeyAccess, 'Owner recovery not offered');
+      await WidgetsBinding.instance.endOfFrame;
+      VoidCallback? action;
+      void visit(Element element) {
+        if (element.widget case TextButton(:final child, :final onPressed)) {
+          if (child is Text && child.data == '请求钥匙串访问') action = onPressed;
+        }
+        element.visitChildren(visit);
+      }
+
+      visit(WidgetsBinding.instance.rootElement!);
+      _check(action != null, 'Owner recovery button missing');
+      action!();
+      await WidgetsBinding.instance.endOfFrame;
+      if (mode == 'access-quit' || mode == 'access-close') {
+        _check(
+          bootstrap.keyAccessPending,
+          'Simulated authorization did not wait',
+        );
+        // A separate native channel must still answer while keyQueue waits.
+        await platform.readAvailability().timeout(const Duration(seconds: 3));
+        _check(
+          bootstrap.boundPort == null &&
+              bootstrap.library == null &&
+              listEquals(await db.readAsBytes(), guarded),
+          'Waiting authorization published or changed data',
+        );
+        facts.addAll({
+          'systemDecisionIsFixture': true,
+          'ownerButtonInvoked': true,
+          'nativeMainQueueResponsive': true,
+          'databaseBytesPreserved': true,
+          'noEndpointPublished': true,
+          'keyAccessPendingAtQuit': true,
+        });
+        if (mode == 'access-close') {
+          await platform.event(DesktopEvent.closeWindow);
+        } else {
+          await bootstrap.quitKeyAccess();
+        }
+        return;
+      }
+      final deadline = DateTime.now().add(const Duration(seconds: 10));
+      while (bootstrap.state == DesktopStartupState.starting &&
+          DateTime.now().isBefore(deadline)) {
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+      }
+      facts.addAll({
+        'systemDecisionIsFixture': true,
+        'ownerButtonInvoked': true,
+      });
+      if (mode == 'access-denied') {
+        _check(
+          bootstrap.state == DesktopStartupState.failed &&
+              bootstrap.canRequestKeyAccess &&
+              bootstrap.library == null &&
+              bootstrap.boundPort == null &&
+              listEquals(await db.readAsBytes(), guarded),
+          'Denied recovery altered database or lost retry',
+        );
+        facts.addAll({
+          'deniedRecoveryRetryable': true,
+          'databaseBytesPreserved': true,
+          'noEndpointPublished': true,
+        });
+        await platform.event(DesktopEvent.quit);
+        return;
+      }
+    }
+    if (mode.startsWith('backup-')) {
       _check(
         bootstrap.state == DesktopStartupState.ready,
         'Backup library failed to start',

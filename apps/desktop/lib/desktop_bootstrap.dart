@@ -28,8 +28,12 @@ class DesktopBootstrap extends ChangeNotifier {
     required this.platform,
     this.port = 47125,
     this.credentialWorkerExecutable,
+    this.openLibraryWithKeyAccess,
   });
   final Future<DesktopLibrary> Function() openLibrary;
+
+  /// Owner-only recovery. Ordinary startup never invokes an interactive read.
+  final Future<DesktopLibrary> Function()? openLibraryWithKeyAccess;
   final DesktopPlatform platform;
   final int port;
   final String? credentialWorkerExecutable;
@@ -42,14 +46,44 @@ class DesktopBootstrap extends ChangeNotifier {
   bool cleanupPending = false;
   bool applicationFilesInvalid = false;
   bool systemKeyUnavailable = false;
+  bool keyAccessPending = false;
+  bool keyAccessExitFailed = false;
+  bool _keyAccessQuitRequested = false;
   Completer<void>? _startupSettled;
 
-  Future<void> start() async {
+  bool get canRequestKeyAccess =>
+      Platform.isMacOS &&
+      state == DesktopStartupState.failed &&
+      systemKeyUnavailable &&
+      !cleanupPending &&
+      library == null &&
+      runtime == null &&
+      openLibraryWithKeyAccess != null;
+
+  Future<void> requestKeyAccess() async {
+    if (canRequestKeyAccess) await _start(interactive: true);
+  }
+
+  Future<void> quitKeyAccess() async {
+    if (!keyAccessPending) return;
+    try {
+      await _handleStartupEvent(DesktopEvent.quit);
+    } on Object {
+      // The native failure is already visible and can be retried.
+    }
+  }
+
+  Future<void> start() => _start();
+
+  Future<void> _start({bool interactive = false}) async {
     if (state == DesktopStartupState.starting ||
         state == DesktopStartupState.ready) {
       return;
     }
     state = DesktopStartupState.starting;
+    keyAccessPending = interactive;
+    keyAccessExitFailed = false;
+    _keyAccessQuitRequested = false;
     final settled = _startupSettled = Completer<void>();
     applicationFilesInvalid = false;
     systemKeyUnavailable = false;
@@ -59,7 +93,18 @@ class DesktopBootstrap extends ChangeNotifier {
       // still be closable, and a quit during startup waits for owned work.
       await platform.initialize(_handleStartupEvent);
       await _release();
-      library = await openLibrary();
+      if (_keyAccessQuitRequested) {
+        state = DesktopStartupState.failed;
+        return;
+      }
+      library = await (interactive ? openLibraryWithKeyAccess! : openLibrary)();
+      if (_keyAccessQuitRequested) {
+        // A late authorization result must not publish an endpoint after quit.
+        await _release();
+        state = DesktopStartupState.failed;
+        return;
+      }
+      keyAccessPending = false;
       // Reconcile registered copies before publishing the Windows endpoint.
       // Occupied/uncertain copies stay registered and consume their quota.
       if (library!.service.owner.informationFileDeliveries.any(
@@ -130,18 +175,36 @@ class DesktopBootstrap extends ChangeNotifier {
       } on Object {
         /* Preserve the startup failure and any retryable audit facts. */
       }
-      try {
-        await platform.showWindow();
-      } on Object {
-        // Native startup may also have failed; still render the error screen.
+      if (!_keyAccessQuitRequested) {
+        try {
+          await platform.showWindow();
+        } on Object {
+          // Native startup may also have failed; still render the error screen.
+        }
       }
     } finally {
+      keyAccessPending = false;
       settled.complete();
+      notifyListeners();
     }
-    notifyListeners();
   }
 
   Future<void> _handleStartupEvent(DesktopEvent event) async {
+    if (keyAccessPending &&
+        (event == DesktopEvent.quit || event == DesktopEvent.closeWindow)) {
+      // Interactive recovery is offered only after all previous resources have
+      // closed. Do not wait for a system authorization dialog to return.
+      _keyAccessQuitRequested = true;
+      try {
+        await platform.terminate();
+        keyAccessExitFailed = false;
+      } on Object {
+        keyAccessExitFailed = true;
+        notifyListeners();
+        rethrow;
+      }
+      return;
+    }
     await _startupSettled?.future;
     if (state == DesktopStartupState.ready) {
       await runtime!.handleEvent(event);

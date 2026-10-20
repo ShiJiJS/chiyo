@@ -31,8 +31,11 @@ def digest(path):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('output', type=Path)
+    parser.add_argument('--owner-access', action='store_true', help='Owner recovery UI with explicitly simulated system decisions; no authorization prompt')
     parser.add_argument('--backups', action='store_true', help='Real Keychain source export, source-key loss, fresh target restore/reopen')
     args = parser.parse_args()
+    if args.owner_access and args.backups:
+        parser.error('Choose one scenario')
     if sys.platform != 'darwin':
         parser.error('Requires macOS')
     output = args.output.resolve()
@@ -49,7 +52,7 @@ def main():
         ['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip(),
         'service': service, 'bundleIdentifier': identity, 'commands': [], 'cases': [],
         'scope': 'isolated Release Flutter copy; real Keychain and SQLCipher; injected failure conditions/events'}
-    result['scenario'] = 'backups' if args.backups else 'keychain-failures'
+    result['scenario'] = 'owner-access-fixtures' if args.owner_access else 'backups' if args.backups else 'keychain-failures'
     roots, processes = set(), []
     binary = None
 
@@ -151,14 +154,31 @@ def main():
         window = source / 'apps/desktop/macos/Runner/MainFlutterWindow.swift'
         text = window.read_text()
         original = 'let databaseKeys = NativeDatabaseKeyStore()'
-        if text.count(original) != 1 or text.split('let backupFiles =', 1)[0].count('if call.method == "read" {') != 1:
+        if text.count(original) != 1 or text.split('let backupFiles =', 1)[0].count('if call.method == "read" || call.method == "readWithInteraction" {') != 1:
             raise RuntimeError('Native injection anchor changed; review source')
         text = text.replace('import Cocoa\n', 'import Cocoa\nimport Security\n', 1)
         text = text.replace(original, 'let databaseKeys = NativeDatabaseKeyStore(service: "' + service + '")')
-        text = text.replace('if call.method == "read" {', '''if ["qaDelete", "qaMalformed", "qaWrong"].contains(call.method) {
+        text = text.replace('if call.method == "read" || call.method == "readWithInteraction" {', '''if ["qaDelete", "qaMalformed", "qaWrong"].contains(call.method) {
           try mutateOwnedKeychainFixture(call.method)
-          result(nil)
-        } else if call.method == "read" {''', 1)
+          reply(nil)
+        } else if call.method == "readWithInteraction",
+                  let mode = ProcessInfo.processInfo.environment["INFO_MAC_KEYCHAIN_MODE"],
+                  mode.hasPrefix("access-") {
+          // Simulated system decisions only. Never enable Security UI in QA.
+          if mode == "access-success" {
+            guard let key = try databaseKeys.read() else {
+              throw DatabaseKeyFailure(code: "key_unavailable", status: nil)
+            }
+            reply(FlutterStandardTypedData(bytes: key))
+          } else {
+            if mode == "access-quit" || mode == "access-close" {
+              print("MAC_KEYCHAIN_SIMULATED_WAIT_STARTED")
+              fflush(stdout)
+              Thread.sleep(forTimeInterval: 30)
+            }
+            throw DatabaseKeyFailure(code: "key_unavailable", status: nil)
+          }
+        } else if call.method == "read" || call.method == "readWithInteraction" {''', 1)
         text += '\n' + (ROOT / INJECTION).read_text().replace('@SERVICE@', service)
         window.write_text(text)
         config = source / 'apps/desktop/macos/Runner/Configs/AppInfo.xcconfig'
@@ -187,7 +207,17 @@ def main():
         run('signature', ['codesign', '--verify', '--deep', '--strict', str(app)], timeout=30)
         run('signature-details', ['codesign', '-d', '--verbose=4', '--entitlements', ':-', str(app)], timeout=30)
         result['binarySha256'] = digest(binary)
-        if args.backups:
+        if args.owner_access:
+            root = launch('create', 'owner-access-create')
+            for mode in ['access-denied', 'access-quit', 'access-close', 'access-success']:
+                launch(mode, mode, root)
+                case = result['cases'][-1]
+                if mode in ['access-quit', 'access-close']:
+                    if case['seconds'] >= 15 or 'MAC_KEYCHAIN_SIMULATED_WAIT_STARTED' not in (logs / (mode + '.txt')).read_text():
+                        raise RuntimeError('Native exit did not interrupt the simulated 30-second key wait')
+                    case['nativeExitBeforeSimulatedKeyWaitReturned'] = True
+            launch('reopen', 'owner-access-normal-reopen', root)
+        elif args.backups:
             root = launch('backup-export', 'backup-export')
             backup = root / '中文 完整备份.aimbackup'
             source_db = root / 'library/library.db'

@@ -31,13 +31,16 @@ Future<void> main() async {
     DesktopLauncher(
       bootstrap: DesktopBootstrap(
         openLibrary: _openLibrary,
+        openLibraryWithKeyAccess: Platform.isMacOS
+            ? () => _openLibrary(requestKeyAccess: true)
+            : null,
         platform: NativeDesktopPlatform(),
       ),
     ),
   );
 }
 
-Future<DesktopLibrary> _openLibrary() async {
+Future<DesktopLibrary> _openLibrary({bool requestKeyAccess = false}) async {
   final String directory;
   final DatabaseKeyStore keys;
   if (Platform.isWindows) {
@@ -54,7 +57,12 @@ Future<DesktopLibrary> _openLibrary() async {
     }
     directory = '$base/Library/Application Support/AgentInfoManage';
     const channel = MethodChannel('agent_info_manage/database_key');
-    keys = MacOsDatabaseKeyStore(channel.invokeMethod<Object?>);
+    keys = MacOsDatabaseKeyStore((method, arguments) {
+      return channel.invokeMethod<Object?>(
+        requestKeyAccess && method == 'read' ? 'readWithInteraction' : method,
+        arguments,
+      );
+    });
   } else {
     throw const StorageFailure('platform_unsupported');
   }
@@ -141,7 +149,24 @@ class _DesktopLauncherState extends State<DesktopLauncher> {
         debugShowCheckedModeBanner: false,
         home: Scaffold(
           body: Center(
-            child: startup.state != DesktopStartupState.failed
+            child: startup.keyAccessPending
+                ? Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const CircularProgressIndicator(),
+                      const SizedBox(height: 16),
+                      const Text('请在系统提示中确认钥匙串访问。取消后可重新尝试。'),
+                      if (startup.keyAccessExitFailed)
+                        const Text('应用未能退出，请重试退出。'),
+                      TextButton(
+                        onPressed: startup.quitKeyAccess,
+                        child: Text(
+                          startup.keyAccessExitFailed ? '重试退出' : '退出应用',
+                        ),
+                      ),
+                    ],
+                  )
+                : startup.state != DesktopStartupState.failed
                 ? const CircularProgressIndicator()
                 : Padding(
                     padding: const EdgeInsets.all(28),
@@ -164,6 +189,15 @@ class _DesktopLauncherState extends State<DesktopLauncher> {
                                 '访问服务已停止，但记录尚未保存或信息库尚未关闭。请保留此窗口，修复存储后重试；记录保存成功后才会重新启动。',
                               ),
                             const SizedBox(height: 16),
+                            if (startup.canRequestKeyAccess) ...[
+                              const Text(
+                                '可点击下方按钮，请系统重新请求访问现有密钥。是否允许由你在系统提示中决定；拒绝或密钥缺失不会替换原密钥。',
+                              ),
+                              TextButton(
+                                onPressed: startup.requestKeyAccess,
+                                child: const Text('请求钥匙串访问'),
+                              ),
+                            ],
                             TextButton(
                               style: prototypePrimary(context),
                               onPressed: startup.start,
