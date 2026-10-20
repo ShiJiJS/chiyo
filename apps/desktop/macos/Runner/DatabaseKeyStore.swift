@@ -30,7 +30,7 @@ final class NativeDatabaseKeyStore {
     ]
   }
 
-  private func withoutInteraction<T>(_ action: () throws -> T) throws -> T {
+  private func withInteraction<T>(_ allowed: Bool, _ action: () throws -> T) throws -> T {
     // This profile uses the legacy keychain. SecItem's authentication-UI flag
     // does not suppress legacy ACL prompts, which can block the Flutter thread.
     // Limit the process-wide legacy switch to the serialized native operation.
@@ -41,7 +41,7 @@ final class NativeDatabaseKeyStore {
     guard readStatus == errSecSuccess else {
       throw DatabaseKeyFailure(code: "key_unavailable", status: readStatus)
     }
-    let setStatus = SecKeychainSetUserInteractionAllowed(false)
+    let setStatus = SecKeychainSetUserInteractionAllowed(allowed)
     guard setStatus == errSecSuccess else {
       throw DatabaseKeyFailure(code: "key_unavailable", status: setStatus)
     }
@@ -49,14 +49,15 @@ final class NativeDatabaseKeyStore {
     return try action()
   }
 
-  func read() throws -> Data? {
-    try withoutInteraction {
+  func read(allowInteraction: Bool = false) throws -> Data? {
+    try withInteraction(allowInteraction) {
       var request = query
       request[kSecReturnData as String] = true
       request[kSecMatchLimit as String] = kSecMatchLimitOne
       var output: CFTypeRef?
       let status = SecItemCopyMatching(request as CFDictionary, &output)
-      if status == errSecItemNotFound { return nil }
+      // Owner recovery must never create a replacement for a missing key.
+      if status == errSecItemNotFound && !allowInteraction { return nil }
       guard status == errSecSuccess, let data = output as? Data, data.count == 32 else {
         throw DatabaseKeyFailure(code: "key_unavailable", status: status)
       }
@@ -68,7 +69,7 @@ final class NativeDatabaseKeyStore {
     guard data.count == 32 else {
       throw DatabaseKeyFailure(code: "invalid_key", status: nil)
     }
-    try withoutInteraction {
+    try withInteraction(false) {
       var request = query
       request[kSecValueData as String] = data
       // Add refuses duplicates. Never replace a key after a read/open failure.

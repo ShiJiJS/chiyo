@@ -27,27 +27,35 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
     // Local, owner-process-only bridge; never exposed by the Agent HTTP server.
     let keyChannel = FlutterMethodChannel(name: "agent_info_manage/database_key", binaryMessenger: flutterViewController.engine.binaryMessenger)
     let databaseKeys = NativeDatabaseKeyStore()
+    let keyQueue = DispatchQueue(label: "agent_info_manage.database_key")
     keyChannel.setMethodCallHandler { call, result in
-      do {
-        if call.method == "read" {
-          if let data = try databaseKeys.read() {
-            result(FlutterStandardTypedData(bytes: data))
-          } else {
-            result(nil)
-          }
-        } else if call.method == "create" {
-          guard let data = call.arguments as? FlutterStandardTypedData else {
-            throw DatabaseKeyFailure(code: "invalid_key", status: nil)
-          }
-          try databaseKeys.create(data.data)
-          result(nil)
-        } else {
-          result(FlutterMethodNotImplemented)
+      // A legacy ACL/unlock dialog can wait indefinitely. Keep every key
+      // operation (including lock contention) off the Cocoa/Flutter thread.
+      keyQueue.async {
+        let reply: FlutterResult = { value in
+          DispatchQueue.main.async { result(value) }
         }
-      } catch let failure as DatabaseKeyFailure {
-        result(FlutterError(code: failure.code, message: "System key unavailable", details: nil))
-      } catch {
-        result(FlutterError(code: "key_unavailable", message: "System key unavailable", details: nil))
+        do {
+          if call.method == "read" || call.method == "readWithInteraction" {
+            if let data = try databaseKeys.read(allowInteraction: call.method == "readWithInteraction") {
+              reply(FlutterStandardTypedData(bytes: data))
+            } else {
+              reply(nil)
+            }
+          } else if call.method == "create" {
+            guard let data = call.arguments as? FlutterStandardTypedData else {
+              throw DatabaseKeyFailure(code: "invalid_key", status: nil)
+            }
+            try databaseKeys.create(data.data)
+            reply(nil)
+          } else {
+            reply(FlutterMethodNotImplemented)
+          }
+        } catch let failure as DatabaseKeyFailure {
+          reply(FlutterError(code: failure.code, message: "System key unavailable", details: nil))
+        } catch {
+          reply(FlutterError(code: "key_unavailable", message: "System key unavailable", details: nil))
+        }
       }
     }
 
