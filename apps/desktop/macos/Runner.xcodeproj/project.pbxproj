@@ -315,7 +315,9 @@
 			files = ();
 			inputPaths = ();
 			name = "Bundle credential worker";
-			outputPaths = ();
+			outputPaths = (
+				"$(TARGET_BUILD_DIR)/$(EXECUTABLE_FOLDER_PATH)/info-runtime-worker",
+			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/bash;
 			shellScript = "\"$SRCROOT/../../../scripts/bundle-macos-worker.sh\"\n";
