@@ -34,6 +34,30 @@
     "Windows native regression of shared bootstrap/launcher"
   ],
   "files": {
+    "raw/cleanup-race/analyze-final.txt": {
+      "bytes": 96,
+      "sha256": "c6ba915e68bb6d4f706f45f51c48e544dad87af4f7fa2174f2c9eac5f3299477"
+    },
+    "raw/cleanup-race/cleanup-race-before-fix.json": {
+      "bytes": 252,
+      "sha256": "5ce310c89daa5c821334f8984a0ddeef0bbd0b2cf68fe847ac61785744b85208"
+    },
+    "raw/cleanup-race/cleanup-race-before-fix.txt": {
+      "bytes": 901,
+      "sha256": "030678738b967a404b78864e0302a0e4a00d975214c1b81f682b944ac47c0f31"
+    },
+    "raw/cleanup-race/default-release-final.txt": {
+      "bytes": 136,
+      "sha256": "9a09c6b2cc301ac4ffdfb5de6173602ccbe61e7df72a21e6b4627016733879ed"
+    },
+    "raw/cleanup-race/default-signature-final.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "raw/cleanup-race/desktop-full-final.txt": {
+      "bytes": 38993,
+      "sha256": "da7a441b79c66d9a865186771f7be062553d7067db5b95ea75155b5ebeacbcf5"
+    },
     "raw/development/analyze-1.txt": {
       "bytes": 96,
       "sha256": "ed407199b2b0553cd0da4eef9898bffc4410c87aeb2772f1ec34d4f5c6fe405b"
@@ -53,6 +77,114 @@
     "raw/development/tests-1.txt": {
       "bytes": 3616,
       "sha256": "c1961934b75318fc814d121cc305a277d87ae031de49c97ad0f9fe8bb5f50146"
+    },
+    "raw/final-owner-access/access-close.json": {
+      "bytes": 450,
+      "sha256": "f9c51d4237190179487b08482ad1dcda7004f0977b0d99aae90a9aca18896aaa"
+    },
+    "raw/final-owner-access/access-denied.json": {
+      "bytes": 416,
+      "sha256": "5f151835200047130a66e2f6d46743bf2e374da41d801be716a31380fab68b3b"
+    },
+    "raw/final-owner-access/access-quit.json": {
+      "bytes": 448,
+      "sha256": "7c51f2c5015cc634c820674a355b7d9b90b137498ef66e17f319d13680f63cf9"
+    },
+    "raw/final-owner-access/access-success.json": {
+      "bytes": 493,
+      "sha256": "7e075b50cf52982b798d25e356e7034bd91fa127ba84a437c650ac63692d44c2"
+    },
+    "raw/final-owner-access/final-owned-key-cleanup.json": {
+      "bytes": 258,
+      "sha256": "a72d62c48a9451f65cbc37f0dce252cdf75c939ec7dcd1f04648d6839766129b"
+    },
+    "raw/final-owner-access/injected-source/apps/desktop/macos/Runner/Configs/AppInfo.xcconfig": {
+      "bytes": 635,
+      "sha256": "350d47f70d931ceb19febf1fb72c0a652ca9e79cfeb3221a26aaf0edfedfc781"
+    },
+    "raw/final-owner-access/injected-source/apps/desktop/macos/Runner/MainFlutterWindow.swift": {
+      "bytes": 18619,
+      "sha256": "ec43cb781704bfc1d6ebd5e0df49b70aa0d7d4fc9efcad752431a2fce3be4892"
+    },
+    "raw/final-owner-access/logs/access-close.txt": {
+      "bytes": 305,
+      "sha256": "48c050e449a59250ee1f316433ba01cdb648fe1cbaccf775d78a2ee05b022963"
+    },
+    "raw/final-owner-access/logs/access-denied.txt": {
+      "bytes": 269,
+      "sha256": "9dab397bcda68a46f6d3b9d1a5aa771d33045654d7ca38112d1947e6f6988e58"
+    },
+    "raw/final-owner-access/logs/access-quit.txt": {
+      "bytes": 305,
+      "sha256": "48c050e449a59250ee1f316433ba01cdb648fe1cbaccf775d78a2ee05b022963"
+    },
+    "raw/final-owner-access/logs/access-success.txt": {
+      "bytes": 269,
+      "sha256": "9dab397bcda68a46f6d3b9d1a5aa771d33045654d7ca38112d1947e6f6988e58"
+    },
+    "raw/final-owner-access/logs/analyze.txt": {
+      "bytes": 96,
+      "sha256": "9b68a5577cb96858b6ed8b00e4c2093b51553130eb419e747018c6f9945a8a96"
+    },
+    "raw/final-owner-access/logs/build-release.txt": {
+      "bytes": 7271,
+      "sha256": "769b45946679ed8aa2271da7399052ed30b2dd25ffe486f04c843fe7c6faaf66"
+    },
+    "raw/final-owner-access/logs/final-owned-key-cleanup.txt": {
+      "bytes": 269,
+      "sha256": "9dab397bcda68a46f6d3b9d1a5aa771d33045654d7ca38112d1947e6f6988e58"
+    },
+    "raw/final-owner-access/logs/owner-access-create.txt": {
+      "bytes": 269,
+      "sha256": "9dab397bcda68a46f6d3b9d1a5aa771d33045654d7ca38112d1947e6f6988e58"
+    },
+    "raw/final-owner-access/logs/owner-access-normal-reopen.txt": {
+      "bytes": 269,
+      "sha256": "9dab397bcda68a46f6d3b9d1a5aa771d33045654d7ca38112d1947e6f6988e58"
+    },
+    "raw/final-owner-access/logs/pub-desktop.txt": {
+      "bytes": 318,
+      "sha256": "ca68f707c22164511fc2b3f9af97ed7bd46538b1d334d9c806a6a59a556a6e05"
+    },
+    "raw/final-owner-access/logs/pub-info_cli.txt": {
+      "bytes": 258,
+      "sha256": "a24779315fffab73870dfc7b15b56246a95b601b3432e434b43cd223bf752a6a"
+    },
+    "raw/final-owner-access/logs/pub-info_core.txt": {
+      "bytes": 258,
+      "sha256": "a24779315fffab73870dfc7b15b56246a95b601b3432e434b43cd223bf752a6a"
+    },
+    "raw/final-owner-access/logs/pub-info_storage.txt": {
+      "bytes": 258,
+      "sha256": "a24779315fffab73870dfc7b15b56246a95b601b3432e434b43cd223bf752a6a"
+    },
+    "raw/final-owner-access/logs/signature-details.txt": {
+      "bytes": 1615,
+      "sha256": "ca4000b68cf17865d8b0b5a289626d7f5beac8ad9073d8cf671159c436ad8fef"
+    },
+    "raw/final-owner-access/logs/signature.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "raw/final-owner-access/owner-access-create.json": {
+      "bytes": 351,
+      "sha256": "aced29a09c129812df27bf71e23e539abd5efafab4ea8cdd8857fdfb54c664da"
+    },
+    "raw/final-owner-access/owner-access-normal-reopen.json": {
+      "bytes": 432,
+      "sha256": "c3f15b65b65b7019be8eb292f00f21fef400eb92caa1dc21c3aefe620bacc74a"
+    },
+    "raw/final-owner-access/result.json": {
+      "bytes": 79972,
+      "sha256": "5d7d266b5b555fa703bbe27682ccb760e7e1ebf32097ae8c16cd06ae3a459d4f"
+    },
+    "raw/final-source/apps/desktop/lib/desktop_bootstrap.dart": {
+      "bytes": 8326,
+      "sha256": "b92af076d8cd5cabb4be49f7e1f0a605a56306b9f342b08baf41b7b1d06a980c"
+    },
+    "raw/final-source/apps/desktop/test/macos_key_access_test.dart": {
+      "bytes": 10785,
+      "sha256": "16923904d91dfc3b09b2e399e06be1b6aae948384b0e2143d9fcdb16606e6972"
     },
     "raw/host.json": {
       "bytes": 389,
@@ -402,5 +534,23 @@
       "bytes": 15668,
       "sha256": "b9222cc004c9e5fa2f431af9b784a770aa140ebc048e492e3f8c709d96e877b8"
     }
+  },
+  "cleanupRaceFinalValidation": {
+    "source": "36a4bef7fe46f05666f4b6408dce7289c921e1a3",
+    "originalFailureSource": "b98e487",
+    "originalRegressionExit": 1,
+    "failure": "second termination called before late library cleanup; expected count 1, actual 2",
+    "desktopPassed": 187,
+    "desktopSkipped": 2,
+    "strictAnalysis": "passed",
+    "defaultReleaseBuildAndStrictSignature": "passed",
+    "defaultReleaseSha256": "11d923ab31405b5f0fbdc1f41c656617c29c43a2ca4a8e75d0535326b1581aae",
+    "ownerAccessProcesses": 7,
+    "ownerAccessPreparationSteps": 8,
+    "allFinalRunInputHashesMatchSourceCommit": true,
+    "systemDecisions": "fixtures; not actual authorization",
+    "quitSeconds": 0.216,
+    "closeSeconds": 0.217,
+    "ordinary20ProcessRegressionSource": "b98e487; preserved previous run, not rerun after three-guard cleanup fix"
   }
 }

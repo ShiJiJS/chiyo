@@ -4,8 +4,8 @@
 
 ## 2026-10-21 当前执行记录
 
-最新 #42 源码 `b98e487` 已补主人主动请求 Keychain 访问与等待时退出保护：桌面 186/2，
-7 个模拟系统决定的签名 Release 进程与 20 个真实 Keychain 普通故障回归进程通过。
+最新 #42 源码 `36a4bef` 已补主人主动请求 Keychain 访问、等待时退出保护和迟到开库的清理竞态：
+最终桌面 187/2、7 个模拟系统决定的签名 Release 进程通过；20 个真实 Keychain 普通故障回归进程对应先前 `b98e487`。
 真实系统授权和升级仍待，`541a671` 整包尚不包含此入口，详见 [Keychain 记录](macos-keychain-validation.md)。
 
 - [#41 主分支整合](macos-main-integration.md)：已固定新基线并构建，当前 Mac 分支的 Windows 实机回归仍待。
