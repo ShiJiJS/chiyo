@@ -1,0 +1,1 @@
+apps/desktop/build/macos/Build/Products/Debug/info_desktop.app/Contents/MacOS/info_desktop: Mach-O 64-bit executable arm64
