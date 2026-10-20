@@ -1,6 +1,5 @@
 import Cocoa
 import FlutterMacOS
-import Security
 import UserNotifications
 
 class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDelegate {
@@ -24,38 +23,29 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
 
     // Local, owner-process-only bridge; never exposed by the Agent HTTP server.
     let keyChannel = FlutterMethodChannel(name: "agent_info_manage/database_key", binaryMessenger: flutterViewController.engine.binaryMessenger)
+    let databaseKeys = NativeDatabaseKeyStore()
     keyChannel.setMethodCallHandler { call, result in
-      let query: [String: Any] = [
-        kSecClass as String: kSecClassGenericPassword,
-        kSecAttrService as String: "org.shijijs.agent-info-manage.database",
-        kSecAttrAccount as String: "local-database-v1",
-        kSecUseDataProtectionKeychain as String: false,
-        kSecUseAuthenticationUI as String: kSecUseAuthenticationUIFail
-      ]
-      if call.method == "read" {
-        var readQuery = query
-        readQuery[kSecReturnData as String] = true
-        readQuery[kSecMatchLimit as String] = kSecMatchLimitOne
-        var output: CFTypeRef?
-        let status = SecItemCopyMatching(readQuery as CFDictionary, &output)
-        if status == errSecItemNotFound { result(nil); return }
-        guard status == errSecSuccess, let data = output as? Data, data.count == 32 else {
-          result(FlutterError(code: "key_unavailable", message: "System key unavailable", details: nil)); return
+      do {
+        if call.method == "read" {
+          if let data = try databaseKeys.read() {
+            result(FlutterStandardTypedData(bytes: data))
+          } else {
+            result(nil)
+          }
+        } else if call.method == "create" {
+          guard let data = call.arguments as? FlutterStandardTypedData else {
+            throw DatabaseKeyFailure(code: "invalid_key", status: nil)
+          }
+          try databaseKeys.create(data.data)
+          result(nil)
+        } else {
+          result(FlutterMethodNotImplemented)
         }
-        result(FlutterStandardTypedData(bytes: data))
-      } else if call.method == "create" {
-        guard let data = call.arguments as? FlutterStandardTypedData, data.data.count == 32 else {
-          result(FlutterError(code: "invalid_key", message: "Invalid key", details: nil)); return
-        }
-        var writeQuery = query
-        writeQuery[kSecValueData as String] = data.data
-        // SecItemAdd refuses duplicates; key failure never replaces an existing key.
-        let status = SecItemAdd(writeQuery as CFDictionary, nil)
-        guard status == errSecSuccess else {
-          result(FlutterError(code: "key_creation_failed", message: "System key creation failed", details: nil)); return
-        }
-        result(nil)
-      } else { result(FlutterMethodNotImplemented) }
+      } catch let failure as DatabaseKeyFailure {
+        result(FlutterError(code: failure.code, message: "System key unavailable", details: nil))
+      } catch {
+        result(FlutterError(code: "key_unavailable", message: "System key unavailable", details: nil))
+      }
     }
 
     let backupFiles = FlutterMethodChannel(name: "agent_info_manage/backup_files", binaryMessenger: flutterViewController.engine.binaryMessenger)

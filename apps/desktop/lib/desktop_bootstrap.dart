@@ -41,6 +41,7 @@ class DesktopBootstrap extends ChangeNotifier {
   int? boundPort;
   bool cleanupPending = false;
   bool applicationFilesInvalid = false;
+  bool systemKeyUnavailable = false;
   Completer<void>? _startupSettled;
 
   Future<void> start() async {
@@ -51,6 +52,7 @@ class DesktopBootstrap extends ChangeNotifier {
     state = DesktopStartupState.starting;
     final settled = _startupSettled = Completer<void>();
     applicationFilesInvalid = false;
+    systemKeyUnavailable = false;
     notifyListeners();
     try {
       // Install the lifetime entry before opening data. A failed key/open must
@@ -105,6 +107,14 @@ class DesktopBootstrap extends ChangeNotifier {
       state = DesktopStartupState.ready;
     } on Object catch (error) {
       applicationFilesInvalid = error is FocusedFillBundleFailure;
+      systemKeyUnavailable =
+          Platform.isMacOS &&
+          error is StorageFailure &&
+          {
+            'key_unavailable',
+            'key_creation_failed',
+            'invalid_key',
+          }.contains(error.code);
       try {
         await _release();
       } on Object {

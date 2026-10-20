@@ -2,12 +2,41 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:info_core/info_core.dart';
+import 'package:info_storage/info_storage.dart';
 import 'package:info_desktop/desktop_bootstrap.dart';
 import 'package:info_desktop/desktop_runtime.dart';
 import 'package:info_desktop/main.dart';
 import 'support/desktop_platform_fixture.dart';
 
 void main() {
+  testWidgets(
+    'Mac key failure remains actionable and retry/quit never starts an endpoint',
+    (tester) async {
+      final native = NativeDesktopFixture();
+      var opens = 0;
+      final bootstrap = DesktopBootstrap(
+        platform: native,
+        openLibrary: () async {
+          opens++;
+          throw const StorageFailure('key_unavailable');
+        },
+      );
+      await tester.runAsync(bootstrap.start);
+      await tester.pumpWidget(DesktopLauncher(bootstrap: bootstrap));
+      expect(find.textContaining('系统钥匙串'), findsOneWidget);
+      expect(find.textContaining('原版本导出备份'), findsOneWidget);
+      await tester.tap(find.text('重试启动'));
+      await tester.pumpAndSettle();
+      expect(opens, 2);
+      expect(bootstrap.state, DesktopStartupState.failed);
+      expect(bootstrap.boundPort, isNull);
+      expect(bootstrap.library, isNull);
+      await native.events!(DesktopEvent.quit);
+      expect(native.terminated, isTrue);
+    },
+    skip: !Platform.isMacOS,
+  );
+
   test(
     'quit works when library opening failed before runtime initialization',
     () async {
