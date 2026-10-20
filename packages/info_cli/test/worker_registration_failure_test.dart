@@ -79,6 +79,6 @@ void main() {
         'attempt_consumed',
       );
     },
-    skip: !Platform.isWindows,
+    skip: !Platform.isWindows && !Platform.isMacOS,
   );
 }

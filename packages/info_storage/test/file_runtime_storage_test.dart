@@ -146,6 +146,6 @@ void main() {
         );
       }
     },
-    skip: !Platform.isWindows,
+    skip: !Platform.isWindows && !Platform.isMacOS,
   );
 }

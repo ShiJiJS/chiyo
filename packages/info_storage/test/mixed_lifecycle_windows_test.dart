@@ -4,13 +4,14 @@ import 'package:info_core/info_core.dart';
 import 'package:test/test.dart';
 import 'support/mixed_lifecycle.dart';
 
-void main() {
+void main({bool runOnMacOS = false}) {
+  final supported = Platform.isWindows || (runOnMacOS && Platform.isMacOS);
   late LifecycleAdapters adapters;
   setUpAll(() async {
-    if (Platform.isWindows) adapters = await LifecycleAdapters.build();
+    if (supported) adapters = await LifecycleAdapters.build();
   });
   tearDownAll(() async {
-    if (Platform.isWindows) await adapters.close();
+    if (supported) await adapters.close();
   });
 
   Future<MixedLifecycle> fixture() async {
@@ -160,76 +161,97 @@ void main() {
           true,
         );
       },
-      skip: !Platform.isWindows,
+      skip: !supported,
       timeout: const Timeout(Duration(minutes: 2)),
     );
   }
 
-  test(
-    'encrypted restart with an actual dead resident host preserves the active Job, facts and authority loss',
-    () async {
-      final f = await fixture();
-      await f.useThree();
-      await f.until(
-        () async =>
-            f.service.owner.credentialExecutions.single.state == 'running',
-        'Worker start was not durably recorded',
-      );
-      final oldPath = f.documentCopy!['path'] as String;
-      await f.restart();
-      expect(await File(oldPath).exists(), false);
-      expect(await f.material!.exists(), true);
-      final interrupted = f.service.owner.credentialExecutions.single;
-      expect(interrupted.state, 'unknown');
-      expect(interrupted.exitCode, isNull);
-      expect(interrupted.finishedAt, isNull);
-      expect(interrupted.cleanupState, 'needs_check');
-      expect(
-        f.service.owner.focusedFillOperations.single.state,
-        FocusedFillState.sent,
-      );
-      expect(
-        f.service.owner.credentialUseRequests.every(
-          (r) => f.service.owner.credentialGrantState(r) == 'revoked',
-        ),
-        true,
-      );
-      expect(
-        (await f.call(f.fetch('restart-file')))['errorCode'],
-        'not_authorized',
-      );
-      expect(
-        (await f.call(f.fill('restart-fill')))['errorCode'],
-        'session_required',
-      );
-      expect(
-        (await f.call(f.run('restart-command')))['errorCode'],
-        'session_required',
-      );
-      final retained = await f.hook({
-        'hook_event_name': 'SessionStart',
-        'source': 'resume',
-        'session_id': f.chat,
-      });
-      expect(
-        retained['hookSpecificOutput']['additionalContext'],
-        contains('Retain'),
-      );
-      expect(
-        (await f.call(f.fetch('resume-file')))['errorCode'],
-        'not_authorized',
-      );
-      await f.releaseReceiver();
-      final settled = f.service.owner.credentialExecutions.single;
-      expect(settled.state, 'unknown');
-      expect(settled.exitCode, isNull);
-      expect(settled.finishedAt, isNull);
-      expect(settled.cleanupState, 'complete');
-      expect(await File('${f.root.path}/receiver-count').readAsString(), '1');
-    },
-    skip: !Platform.isWindows,
-    timeout: const Timeout(Duration(minutes: 2)),
-  );
+  for (final crashWorker in [false, if (runOnMacOS) true]) {
+    test(
+      'encrypted restart after ${crashWorker ? 'worker and host death' : 'host death'} preserves the active process group, facts and authority loss',
+      () async {
+        final f = await fixture();
+        await f.useThree();
+        await f.until(
+          () async =>
+              f.service.owner.credentialExecutions.single.state == 'running',
+          'Worker start was not durably recorded',
+        );
+        final oldPath = f.documentCopy!['path'] as String;
+        if (crashWorker) {
+          final execution = f.service.owner.credentialExecutions.single;
+          final workerPid = execution.workerPid!;
+          final workerCreatedAt = execution.workerCreatedAt!;
+          expect(
+            CredentialProcessIdentity.isActive(workerPid, workerCreatedAt),
+            isTrue,
+          );
+          expect(Process.killPid(workerPid, ProcessSignal.sigkill), isTrue);
+          await f.until(
+            () async =>
+                CredentialProcessIdentity.isActive(
+                  workerPid,
+                  workerCreatedAt,
+                ) ==
+                false,
+            'Test-owned worker did not terminate',
+          );
+        }
+        await f.restart();
+        expect(await File(oldPath).exists(), false);
+        expect(await f.material!.exists(), true);
+        final interrupted = f.service.owner.credentialExecutions.single;
+        expect(interrupted.state, 'unknown');
+        expect(interrupted.exitCode, isNull);
+        expect(interrupted.finishedAt, isNull);
+        expect(interrupted.cleanupState, 'needs_check');
+        expect(
+          f.service.owner.focusedFillOperations.single.state,
+          FocusedFillState.sent,
+        );
+        expect(
+          f.service.owner.credentialUseRequests.every(
+            (r) => f.service.owner.credentialGrantState(r) == 'revoked',
+          ),
+          true,
+        );
+        expect(
+          (await f.call(f.fetch('restart-file')))['errorCode'],
+          'not_authorized',
+        );
+        expect(
+          (await f.call(f.fill('restart-fill')))['errorCode'],
+          'session_required',
+        );
+        expect(
+          (await f.call(f.run('restart-command')))['errorCode'],
+          'session_required',
+        );
+        final retained = await f.hook({
+          'hook_event_name': 'SessionStart',
+          'source': 'resume',
+          'session_id': f.chat,
+        });
+        expect(
+          retained['hookSpecificOutput']['additionalContext'],
+          contains('Retain'),
+        );
+        expect(
+          (await f.call(f.fetch('resume-file')))['errorCode'],
+          'not_authorized',
+        );
+        await f.releaseReceiver();
+        final settled = f.service.owner.credentialExecutions.single;
+        expect(settled.state, 'unknown');
+        expect(settled.exitCode, isNull);
+        expect(settled.finishedAt, isNull);
+        expect(settled.cleanupState, 'complete');
+        expect(await File('${f.root.path}/receiver-count').readAsString(), '1');
+      },
+      skip: !supported,
+      timeout: const Timeout(Duration(minutes: 2)),
+    );
+  }
 
   test(
     'a real encrypted writer lock prevents unaudited document, fill or command delivery and end still latches',
@@ -285,7 +307,7 @@ void main() {
       );
       expect(f.files.leases, isEmpty);
     },
-    skip: !Platform.isWindows,
+    skip: !supported,
     timeout: const Timeout(Duration(minutes: 2)),
   );
 
@@ -366,7 +388,7 @@ void main() {
         }
       }
     },
-    skip: !Platform.isWindows,
+    skip: !supported,
     timeout: const Timeout(Duration(minutes: 2)),
   );
 }

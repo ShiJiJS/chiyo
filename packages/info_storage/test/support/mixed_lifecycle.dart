@@ -35,6 +35,7 @@ class LifecycleAdapters {
   LifecycleAdapters._(this.root, this.bundle, this.host);
   final Directory root;
   final String bundle, host;
+  static String get suffix => Platform.isWindows ? '.exe' : '';
   static Future<LifecycleAdapters> build() async {
     final root = await Directory.systemTemp.createTemp(
       'aim-lifecycle-adapters-',
@@ -57,7 +58,7 @@ class LifecycleAdapters {
           'exe',
           entry.value,
           '-o',
-          '${root.path}/${entry.key}.exe',
+          '${root.path}/${entry.key}$suffix',
         ], workingDirectory: cli);
         if (built.exitCode != 0) {
           throw StateError(
@@ -70,14 +71,14 @@ class LifecycleAdapters {
         'info-codex-hook',
         'info-runtime-worker',
       ]) {
-        if (!await File('$output/$name.exe').exists()) {
+        if (!await File('$output/$name$suffix').exists()) {
           throw StateError('Incomplete lifecycle input bundle');
         }
       }
       return LifecycleAdapters._(
         root,
         output,
-        '${root.path}/lifecycle-host.exe',
+        '${root.path}/lifecycle-host$suffix',
       );
     } on Object {
       await removeLifecycleDirectory(root, 'aim-lifecycle-adapters-');
@@ -139,7 +140,7 @@ class _Host {
 }
 
 class LifecycleFiles implements InformationDeliveryFiles {
-  final native = WindowsInformationDeliveryFiles();
+  final native = NativeInformationDeliveryFiles();
   final leases = <InformationDeliveryLease>[];
   @override
   Future<InformationDeliveryLease> reserve(String name) async {
@@ -200,13 +201,31 @@ class _Prepared implements PreparedFocusedFill {
   }
 }
 
-/// Actual encrypted repository/DPAPI, AOT hook/adapter/host/worker and Windows
-/// files/Jobs; focused input and tool classification are controlled fixtures.
+/// Mac lifecycle tests isolate storage/worker behavior from Keychain acceptance.
+/// Keys stay in this process and survive only fixture-controlled repository reopen.
+class _LifecycleMemoryKeys implements DatabaseKeyStore {
+  List<int>? _value;
+  @override
+  Future<List<int>?> read() async =>
+      _value == null ? null : List<int>.of(_value!);
+  @override
+  Future<void> create(List<int> key) async {
+    if (_value != null) throw StateError('Test key already exists');
+    _value = List<int>.of(key);
+  }
+
+  void clear() => _value?.fillRange(0, _value!.length, 0);
+}
+
+/// Actual SQLCipher, AOT hook/adapter/host/worker and native files/process groups.
+/// Windows uses DPAPI; Mac uses an ephemeral test key, not a Keychain claim.
+/// Focused input and tool classification are controlled fixtures on both hosts;
+/// this does not enable focused fill in the production Mac desktop.
 class MixedLifecycle {
   MixedLifecycle(this.adapters);
   final LifecycleAdapters adapters;
   late Directory root;
-  late WindowsDatabaseKeyStore keys;
+  late DatabaseKeyStore keys;
   late EncryptedInformationRepository repository;
   late InformationService service;
   late AgentServer server;
@@ -226,7 +245,9 @@ class MixedLifecycle {
   final chat = 'synthetic-lifecycle';
   Future<void> start() async {
     root = await Directory.systemTemp.createTemp('aim-mixed-lifecycle-');
-    keys = WindowsDatabaseKeyStore('${root.path}/database-key.dpapi');
+    keys = Platform.isMacOS
+        ? _LifecycleMemoryKeys()
+        : WindowsDatabaseKeyStore('${root.path}/database-key.dpapi');
     final target = File(Platform.resolvedExecutable);
     final stat = await target.stat();
     executable = ExecutableIdentity(
@@ -302,7 +323,8 @@ class MixedLifecycle {
       await host.call({
         'action': 'initialize',
         'port': server.port,
-        'worker': '${adapters.bundle}/info-runtime-worker.exe',
+        'worker':
+            '${adapters.bundle}/info-runtime-worker${LifecycleAdapters.suffix}',
       }),
       {'status': 'ready'},
     );
@@ -330,7 +352,7 @@ class MixedLifecycle {
     List<String> args = const [],
   }) async {
     final process = await Process.start(
-      '${adapters.bundle}/$executable.exe',
+      '${adapters.bundle}/$executable${LifecycleAdapters.suffix}',
       args,
       environment: {'CODEX_THREAD_ID': chat},
     );
@@ -602,6 +624,7 @@ Future<void> main() async {
     await server.close();
     await service.close();
     await repository.close();
+    if (keys case final _LifecycleMemoryKeys memory) memory.clear();
     for (final lease in files.leases) {
       expect(await File(lease.filePath).exists(), false);
     }
