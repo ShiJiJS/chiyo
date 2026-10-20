@@ -42,8 +42,11 @@ def target_identity(pid):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("output", type=Path, help="New directory under project build/")
-    parser.add_argument("--workers", action="store_true",
+    scenario = parser.add_mutually_exclusive_group()
+    scenario.add_argument("--workers", action="store_true",
                         help="Actual SSH command/worker + Flutter crash/recovery scenarios")
+    scenario.add_argument("--backups", action="store_true",
+                         help="Signed Flutter 80MiB backup restore SIGKILL/rollback/retry")
     args = parser.parse_args()
     if sys.platform != "darwin":
         parser.error("Requires macOS")
@@ -194,6 +197,54 @@ def main():
             receiver.terminate()
             receiver.wait(timeout=10)
 
+    def backup_scenarios():
+        nonlocal ssh_environment
+        for version in [8, 9]:
+            label = f"backup{version}"
+            ssh_environment = {"INFO_MAC_BACKUP_FORMAT": str(version)}
+            prepared, directory = launch("backup-prepare", label + "-prepare")
+            exited(prepared, directory, "backup-prepare", label + "-prepare")
+            backup = directory / "中文 完整备份.aimbackup"
+            digest = hashlib.sha256(backup.read_bytes()).hexdigest()
+            victim, _ = launch("backup-interrupt", label + "-interrupt", directory)
+            ready = report(directory, "backup-interrupt", victim)
+            if ready.get("phase") != "ready" or ready.get("pid") != victim.pid:
+                raise RuntimeError("Restore process did not identify itself")
+            database = directory / "library/library.db"
+            journal = database.with_name("library.db-journal")
+            if journal.exists():
+                raise RuntimeError("Unexpected journal before restore")
+            (directory / "begin-backup-restore").touch()
+            def uncommitted_write():
+                try:
+                    with journal.open("rb") as handle:
+                        header = handle.read(8)
+                    growth = database.stat().st_size - ready["baselineBytes"]
+                    return growth if any(header) and growth >= 4 * 1024 * 1024 else None
+                except FileNotFoundError:
+                    return None
+            # Poll at 1ms to observe an actual uncommitted database write.
+            deadline = time.monotonic() + 45
+            growth = None
+            while time.monotonic() < deadline and victim.poll() is None:
+                growth = uncommitted_write()
+                if growth:
+                    victim.send_signal(signal.SIGKILL)
+                    break
+                time.sleep(0.001)
+            if not growth or victim.wait(timeout=10) != -signal.SIGKILL or not journal.exists():
+                raise RuntimeError("Did not interrupt real restore writes with retained journal")
+            cases.append({"label": label + "-interrupt", "exit": -signal.SIGKILL,
+                          "faultInjection": True, "growthBytes": growth,
+                          "journalRetained": True, "backupSha256": digest, **ready})
+            recovered, _ = launch("backup-recover", label + "-reopen", directory)
+            result = exited(recovered, directory, "backup-recover", label + "-reopen")
+            if result.get("phase") != "complete" or result.get("libraryCloses") != 1:
+                raise RuntimeError("Restore retry did not close normally")
+            if hashlib.sha256(backup.read_bytes()).hexdigest() != digest:
+                raise RuntimeError("Backup changed during crash/retry")
+            cases[-1]["backupUnchanged"] = True
+
     def ordinary_scenarios():
         # Independent processes contend for the same SQLCipher library.
         first, folder = launch("hold", "holder")
@@ -239,6 +290,7 @@ def main():
             "scripts/qa/macos-lifecycle.py",
             "apps/desktop/integration_test/macos_lifecycle_probe.dart",
             "apps/desktop/integration_test/support/macos_worker_recovery.dart",
+            "apps/desktop/integration_test/support/macos_backup_recovery.dart",
             "scripts/qa/macos-ssh-fixture.py",
             "apps/desktop/lib/desktop_bootstrap.dart",
             "apps/desktop/lib/desktop_runtime.dart",
@@ -271,6 +323,8 @@ def main():
                            stdout=log, stderr=subprocess.STDOUT, check=True)
         if args.workers:
             worker_scenarios()
+        elif args.backups:
+            backup_scenarios()
         else:
             ordinary_scenarios()
         for name, digest in facts["sourceHashes"].items():
