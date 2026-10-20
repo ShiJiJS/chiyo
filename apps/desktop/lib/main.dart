@@ -97,11 +97,42 @@ class _DesktopLauncherState extends State<DesktopLauncher> {
     builder: (context, _) {
       final startup = widget.bootstrap;
       if (startup.state == DesktopStartupState.ready) {
-        return InformationApp(
-          service: startup.library!.service,
-          port: startup.boundPort!,
-          runtime: startup.runtime,
-          backups: startup.library!.backups,
+        final runtime = startup.runtime!;
+        return ListenableBuilder(
+          listenable: runtime,
+          builder: (context, _) {
+            // A ready notification can still have a frame queued when quit
+            // closes the repository. Never mount/rebuild data views then.
+            if (runtime.quitting || runtime.stopped) {
+              return MaterialApp(
+                theme: informationTheme(),
+                debugShowCheckedModeBanner: false,
+                builder: (_, child) => DesktopWindowFrame(child: child!),
+                home: Scaffold(
+                  body: Center(
+                    child: runtime.shutdownFailed
+                        ? Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Text('信息库已关闭，但应用未能退出。请重试退出。'),
+                              TextButton(
+                                onPressed: runtime.quit,
+                                child: const Text('重试退出'),
+                              ),
+                            ],
+                          )
+                        : const Text('正在保存并退出…'),
+                  ),
+                ),
+              );
+            }
+            return InformationApp(
+              service: startup.library!.service,
+              port: startup.boundPort!,
+              runtime: runtime,
+              backups: startup.library!.backups,
+            );
+          },
         );
       }
       return MaterialApp(

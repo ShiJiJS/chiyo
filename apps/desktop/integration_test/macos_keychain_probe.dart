@@ -73,6 +73,11 @@ void _check(bool condition, String message) {
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  var flutterErrors = 0;
+  FlutterError.onError = (details) {
+    flutterErrors++;
+    FlutterError.presentError(details);
+  };
   final mode = Platform.environment['INFO_MAC_KEYCHAIN_MODE'];
   const modes = {
     'create',
@@ -118,7 +123,14 @@ Future<void> main() async {
   var closes = 0;
   var failureCode = '';
   platform.beforeTerminate = () async {
+    // Exercise a pending frame after data closes but before Cocoa terminates.
+    if (mode != 'cleanup') await WidgetsBinding.instance.endOfFrame;
+    _check(
+      flutterErrors == 0,
+      'Flutter reported an exception during this scenario',
+    );
     facts.addAll({
+      'flutterErrors': flutterErrors,
       'nativeTerminationRequested': true,
       'libraryCloses': closes,
       'keyReads': keys.reads,
