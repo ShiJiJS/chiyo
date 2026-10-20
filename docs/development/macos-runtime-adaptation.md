@@ -2,6 +2,15 @@
 
 开发分支：`codex/macos-adaptation`。2026-10-21 已保存原有适配并整合固定主分支 `b37f96a089d6d4a0a9f872bd667be0c6b037f975`，合并源码及四包/Release 验证见 [主分支整合记录](macos-main-integration.md)。下文 2026-10-20 的实机证据仍仅代表原 `0855120` 基线上的适配，不自动扩展到新包。环境准备记录见 [macOS 本机环境](macos-local-setup.md)。
 
+## 2026-10-21 当前执行记录
+
+- [#41 主分支整合](macos-main-integration.md)：已固定新基线并构建，当前 Mac 分支的 Windows 实机回归仍待。
+- [#43 故障恢复](macos-lifecycle-recovery.md)：SQLCipher/独立 AOT 宿主与 worker 联合场景 8 项通过；还需签名 Flutter 应用本体异常退出重开。
+- [#42 Keychain](macos-keychain-validation.md)：真实系统存储验证发现并修复 legacy ACL 提示阻塞；不同 ad-hoc 签名间的升级访问仍被拒绝，保留原库与密钥。
+- [#44 工具与附件](macos-tools-files.md)：新基线签名沙盒 SSH/附件自动工作流通过，GH/AWS 外部路径、当前系统面板及其他交付条件继续验收。
+
+上述票据仍 OPEN；具体未完成条件以 GitHub 票据及各记录为准。现有证据不等于 Mac 总票 #19 已可交付。
+
 ## 当前实现
 
 - Mac 使用 Darwin FFI 核对 PID/启动时间、POSIX 会话与进程组。worker 先等持久登记确认，目标暂停装载后再核对实际身份；kqueue 保留短进程及信号退出结果，避免与 Dart 的 SIGCHLD 回收竞争。
