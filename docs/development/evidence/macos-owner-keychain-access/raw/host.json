@@ -1,0 +1,7 @@
+{
+  "system": "ProductName:\t\tmacOS\nProductVersion:\t\t27.0.1\nBuildVersion:\t\t26A434\n",
+  "xcode": "Xcode 27.1\nBuild version 27A9275\n",
+  "signingIdentities": "     0 valid identities found\n",
+  "defaultReleaseSha256": "b81dacc4207d2f085ccd71f9bbf7f46170d27909e1fb26fe9457343d4b6c81cc",
+  "desktopAccess": "Computer Use reported locked; no system authorization prompt exercised"
+}

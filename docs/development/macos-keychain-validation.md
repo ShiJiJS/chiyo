@@ -1,5 +1,52 @@
 # Mac Keychain 访问与签名升级检查（#42）
 
+## 主人主动请求系统授权（2026-10-21，#42 继续 OPEN）
+
+源码 `b98e487e1fdba935cc1feb3dfeb29159fcec5f7f`。新增“请求钥匙串访问”入口：
+只在 Mac 启动因密钥失败、原资源已释放时显示，普通启动和“重试启动”仍不请求交互。
+主人点击后通过独立 method channel 方法读取原 service/account；由系统决定是否允许，
+程序不更改 ACL、不输入密码、不改应用身份。交互读取缺失密钥直接失败，不能走创建替代密钥的路径。
+一次允许所返回的原密钥直接用于本次开库，不要求第二次交互读取；是否允许后续启动访问取决于实际系统决定，尚未验证。
+
+所有原生密钥操作现在在串行后台队列运行，包括等候进程内交互锁，返回结果切回主线程。
+这符合 [Apple 对 SecItemCopyMatching 阻塞行为的说明](https://developer.apple.com/documentation/security/secitemcopymatching(_:_:))。
+等待系统时显示独立退出入口；关窗/退出无需等密钥操作返回。若退出失败可以重试；
+退出请求之后到达的成功结果关闭刚打开的库，不启动 Agent endpoint，失败结果不重新显示窗口。
+正常启动的退出等待和审计保留语义保持原有规则。恢复入口没有开放给 Agent HTTP/CLI。
+
+[固定证据与原始资料](evidence/macos-owner-keychain-access/verification.json)：
+
+- 完整桌面 **186 通过、2 跳过**；其中新增 8 项覆盖明确触发、重复点击/普通重试、拒绝重试、
+  关窗/退出不等待、迟到成功/失败、系统退出失败重试和不符合条件的拒绝。定向 20 项与全量重叠，不累加。
+- 两个独立签名 Release Flutter 源码副本保留生产 store、bootstrap、launcher、SQLCipher，
+  只对 QA 身份和明确列出的原生故障/系统决定注入做改动。输入文件摘要逐个与源码提交匹配。
+- 恢复入口轮次：8 个准备步骤、7 个真实应用进程返回 0。允许/拒绝/等待都是 **模拟系统决定**，
+  不调用真正的交互授权查询。允许场景从该 QA 应用已有权限的真实 Keychain 项读取原密钥，
+  实际重开 SQLCipher 核对原信息身份/内容/历史，旧授权拒绝。
+- 两个等待场景在原生后台队列真实睡眠 30 秒；另一原生通道仍可响应。
+  程序经正常 Cocoa 退出，含启动/断言的整进程耗时分别 0.357 秒和 0.290 秒，
+  未用强杀代替退出。入口由实际 Flutter TextButton 回调触发，关窗为注入的生命周期事件；
+  这不是物理鼠标、系统弹窗或红色关窗按钮验收。
+- 普通行为轮次：11 个准备步骤、20 个真实应用进程返回 0，覆盖创建/重开、缺失、坏长度、
+  错误密钥、损坏库和重试保留。不同 ad-hoc 签名默认读取仍为 `upgradeAccess: denied`，
+  原签名可重新打开；不能据此宣称交互授权或升级通过。
+- 两轮 Flutter 异常均为 0；已启动端口退出后关闭。各自 QA Keychain 项最终删除并确认不存在，
+  专属合成根清理。普通产品入口另行 Release 构建及 deep/strict 签名核验通过。
+
+Mac 仍锁屏，系统签名身份数仍为 0。本轮没有调用真实系统授权弹窗、解锁钥匙串、创建证书、
+修改信任或操作生产资料。真实允许/拒绝/取消及其后重开、锁定钥匙串、两版应用/schema 升级、
+最终安装与 Windows 共享界面回归仍待。现有 `541a671` ZIP 不包含本入口，后续由 #50 刷新，
+不能把源码 Release 编译当成整包安装升级通过。
+
+复跑（输出目录必须不存在）：
+
+```sh
+python3 scripts/qa/macos-flutter-keychain.py build/macos-adaptation/NEW_OWNER_ACCESS --owner-access
+python3 scripts/qa/macos-flutter-keychain.py build/macos-adaptation/NEW_DEFAULT_KEYCHAIN
+```
+
+## 早期原生探针与非交互失败修复
+
 2026-10-21，修复源码 `86e35f3`，#42 保持 OPEN。
 
 ## 保留现有资料身份

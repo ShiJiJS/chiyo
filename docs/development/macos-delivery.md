@@ -10,6 +10,12 @@ bundle ID 保持 `com.example.infoDesktop`，不另建资料身份。
 macOS 14 和其他设备尚未实机验收。App、worker 和 CLI 主程序均为 ARM64，
 依赖库至少包含 ARM64；不提供 Intel 兼容承诺。
 
+## 当前源码与已有整包的差异
+
+`b98e487` 增加主人主动请求 Keychain 访问及等待时退出保护，已完成源码 Release 构建、
+签名核验、桌面回归及隔离原生验证，见 [#42 记录](macos-keychain-validation.md)。
+下方 `541a671` ZIP 尚不包含此入口；刷新整包和实际安装/升级仍归 #50，旧包证据不扩展到新源码。
+
 ## 退出修复与后续整包
 
 #42 的真实 Keychain 联合验收随后发现并修复了退出后界面访问已关闭资料库的问题
