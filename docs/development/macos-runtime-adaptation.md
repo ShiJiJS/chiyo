@@ -15,10 +15,63 @@
 - [#48 提案闭环](evidence/macos-proposals-ui/verification.json)：实际 Mac 原生审核完成批量提案调整、分类校验失败保留草稿与原子重试、拒绝、删除、冲突拒绝与新版本再次确认；最终 11 阶段/22 次独立 CLI 状态和 3 次公开目录检查，重开后五条处理记录及当前内容保持。整理、附件与提案联合场景、真实输入等继续待做。
 - [#48 整理闭环](evidence/macos-organization-ui/verification.json)：六个整理任务覆盖缩小范围、自动应用、整批冲突、撤销、拒绝、无改动结束及库重开；最终 12 阶段/49 次独立 CLI 状态断言通过。保留首轮过早查找 UI 的失败；睡眠/到期、真实输入及其余资料流程仍待。
 - [#48 附件保留闭环](evidence/macos-attachment-preserve-ui/verification.json)：原生文本编辑、修改提案确认、文本删除/恢复及库重开保持附件身份、版本与原文；最终十阶段/44 次 CLI 状态核对、六次真实交付/释放通过。初始文件准备与审批为夹具，实际系统面板仍待。
+- [#48 字符串凭据管理](evidence/macos-credential-management-ui/verification.json)：原生创建/元数据/关联/轮换/停用/版本与回收恢复/过期/隐藏及库重开，最终十五阶段、55 次 CLI 状态核对通过。明确使用测试文本通道；真实输入法清空到期时间、文件凭据面板与实际使用授权仍需联合验收。
 - [#49 Codex 接入准备](evidence/macos-codex-preparation/verification.json)：已修复验收项目生成器只接受 Windows `.exe` 的问题，实际同源 ARM64 包生成独立项目并通过摘要/签名/拒绝覆盖核对；13 项真实聊天验收仍未运行，尚未安装或信任 hook。
 - [#50 ARM64 交付](macos-delivery.md)：`cccc37e` 同源 App/CLI/worker 整包已生成，133 项解包载荷、签名、合成存储诊断与实际 AOT 的 6 项检查通过；修复增量构建漏签名并去除 Release 调试访问权限。实际安装、Keychain 升级及最终 GUI/Codex 联合验收仍待。
 
 #43 已完成其范围，其余上述票据仍 OPEN；具体未完成条件以 GitHub 票据及各记录为准。现有证据不等于 Mac 总票 #19 已可交付。
+
+### #48 字符串凭据管理、可见性与版本恢复的原生验收
+
+QA 源码 `33a8631` 新增 `macos_credential_management_native_test.dart` 与
+`scripts/qa/macos-credential-management-ui.py`，产品基线 `8f917f6` 不变。
+[固定证据](evidence/macos-credential-management-ui/verification.json)保存六轮原始日志、源码及截图，
+父进程使用已核对摘要的 `cccc37e` ARM64 AOT CLI。
+
+实际 Mac Flutter/SQLCipher 中，由 tester 新建字符串凭据，输入框 obscured，保存后详情不显示秘密。
+默认不可发现；UI 将其关联到夹具普通信息后仍不可发现，关联不产生内容读取许可。
+修改名称、公开用途、私有备注及可见性，先输入无效日期，保存被拒绝且原元数据保持；
+纠正并保存后，独立 CLI 凭据目录只含约定的六个公开字段，不含秘密、私有备注或普通字段值。
+
+UI 轮换到版本 2，旧版本 1 加密材料保留；停用/启用与 CLI availability 一致。
+版本恢复以版本 1 原文建立停用版本 3，重新启用后才能作为当前可用版本。
+删除先取消（不写入）再确认，目录消失、普通信息及关联保留；凭据回收站恢复建立停用版本 4，
+材料与版本 1 一致，重新启用；设置过去日期显示过期并拒绝申请，清除日期并关闭可见性后重新隐藏。
+关闭服务/真实加密库并在同一进程重开，名称/用途/私有备注/关联/四个版本及当前启用隐藏状态保持，
+普通信息身份、版本 1 和字段值全过程不变。
+
+每个检查点独立 CLI 核对凭据目录与普通目录，并验证凭据编号不能当作普通内容许可。
+13 次有意不符合条件的 request-use 精确返回 invalid_reference、credential_version_changed、
+credential_disabled、credential_deleted 或 credential_expired，operationClaimed=false。
+服务中的使用请求及执行始终为零；这没有证明实际批准、旧 grant 撤销、秘密注入或 worker 运行。
+正常执行仍依 #44 的实际运行场景验收，不能把请求拒绝当成命令执行通过。
+
+输入边界与失败记录：run-1 在无效日期重试后仍读到旧名称；run-2 增加最多五秒等待保存窗口关闭，仍失败。
+run-3 核对编辑器/当前 revision 都为 2，诊断和截图证明空字符串注入后到期框仍保留 not-a-date。
+run-4 聚焦后模拟 Meta+A/Backspace 仍未清空。Flutter 本地集成 binding 默认不注册测试文本通道，
+其 TestTextInput 文档说明与真实 IME 混用可能导致状态不同步；这是诊断依据，不是已经确认真实用户输入缺陷。
+run-5 显式注册 TestTextInput 后完整通过，输入框内容逐次断言；退出前注销，产品代码不变。
+随后严格分析报单个 if 缺少大括号，run-6 仅补括号并验证最终源码完整流程。
+
+run-5/6 各 complete=true、十五阶段、55 次命令状态断言、14 次凭据目录核对及 15 张原生图，
+Flutter 和两份 CLI 正常退出 0；两轮成功专属根已清理。前四轮失败根仅本机保留，
+没有伪造其未捕获的 Flutter 退出码，也不累加重叠通过结果。
+最终严格分析、凭据界面/维护五项回归通过，普通 main.dart Debug 恢复及 deep/strict 验签通过。
+主 agent 目测公开/轮换/两种恢复/过期/重开页面及最后元数据编辑图；1440×1000 紫棠主题无阻断性布局问题。
+主人界面按设计显示私有备注（全部为合成内容）；CLI 回包不含这些值。
+
+复跑（输出目录必须不存在）：
+
+```sh
+python3 scripts/qa/macos-credential-management-ui.py build/macos-adaptation/credential-management-new-run \
+  --delivery 'build/macos-adaptation/issue50-package-4/verify/中文 空格 路径/AgentInfoManage'
+```
+
+Computer Use 本轮仍报告锁屏；全部运行都有 foreground open returned 1。
+文本输入通过注册的测试通道，不覆盖真实键盘、中文 IME 或物理焦点。
+**待实机补验：正常应用内使用真实键盘/IME 清空无效或已有到期时间、再次保存，以及焦点/快捷键。**
+此外文件凭据的原生选择/替换、有效使用许可与轮换/停用联合场景、自然到期/睡眠、Keychain、
+规模压力及最终同源包仍未因本轮完成。#48 六条复合验收保持未勾选。
 
 ### #48 普通编辑、修改提案与文本恢复保留附件的原生验收
 

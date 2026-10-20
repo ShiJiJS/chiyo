@@ -1,0 +1,7 @@
+00:00 +0: loading /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credentials_test.dart
+00:00 +0: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credentials_test.dart: 1280 failure keeps complete save action reachable without shrinking the form
+00:00 +1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_maintenance_test.dart: runtime tick preserves failed expired credential material and clears its real notice after retry
+00:00 +2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credentials_test.dart: 200 percent credential actions have a visible horizontal scrollbar and remain operable
+00:00 +3: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credentials_test.dart: workspace preserves routine filters and explicit current-ID navigation clears incompatible filters
+00:01 +4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credentials_test.dart: owner adds a hidden string then enables discovery explicitly
+00:01 +5: All tests passed!
