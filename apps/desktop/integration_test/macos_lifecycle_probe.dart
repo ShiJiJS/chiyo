@@ -11,6 +11,7 @@ import 'package:info_desktop/desktop_bootstrap.dart';
 import 'package:info_desktop/desktop_runtime.dart';
 import 'package:info_desktop/main.dart';
 import 'package:sqlite3/sqlite3.dart' as sql;
+import 'support/macos_worker_recovery.dart';
 
 class _Keys implements DatabaseKeyStore {
   _Keys({this.missing = false});
@@ -82,6 +83,8 @@ Future<void> main() async {
     'port-busy',
     'quit-opening',
     'audit-failure',
+    'worker-hold',
+    'worker-recover',
   };
   if (!Platform.isMacOS || !modes.contains(mode)) exit(64);
   final supplied = Platform.environment['INFO_MAC_LIFECYCLE_ROOT'];
@@ -139,7 +142,12 @@ Future<void> main() async {
           );
           opened = repository;
           return DesktopLibrary(
-            service: InformationService(repository: repository),
+            service: InformationService(
+              repository: repository,
+              informationDeliveryFiles: mode!.startsWith('worker-')
+                  ? NativeInformationDeliveryFiles()
+                  : null,
+            ),
             close: () async {
               await repository.close();
               closes++;
@@ -216,6 +224,10 @@ Future<void> main() async {
       return;
     }
     _check(bootstrap.state == DesktopStartupState.ready, 'Startup not ready');
+    if (mode!.startsWith('worker-')) {
+      await runMacWorkerRecovery(bootstrap, canonical, mode, report);
+      return;
+    }
     final service = bootstrap.library!.service;
     final stateFile = File('$canonical/synthetic-association.json');
     if (mode == 'recover') {
@@ -335,6 +347,7 @@ Future<void> main() async {
         'mode': mode,
         'failed': true,
         'errorType': e.runtimeType.toString(),
+        if (e is StateError) 'checkFailure': e.message.toString(),
         'storageFailure': failureCode,
       }),
     );

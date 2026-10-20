@@ -7,6 +7,8 @@ explicit crash case (or marked failed-run cleanup), never a successful quit.
 No injected event is counted as a physical button, menu, shortcut or wake event.
 """
 import argparse
+import base64
+import ctypes
 import hashlib
 import json
 import os
@@ -22,9 +24,26 @@ import uuid
 ROOT = Path(__file__).resolve().parents[2]
 
 
+def target_identity(pid):
+    lib = ctypes.CDLL("/usr/lib/libproc.dylib", use_errno=True)
+    lib.proc_pidinfo.argtypes = [ctypes.c_int, ctypes.c_int, ctypes.c_uint64,
+                                 ctypes.c_void_p, ctypes.c_int]
+    buffer = ctypes.create_string_buffer(136)
+    if lib.proc_pidinfo(pid, 3, 0, buffer, len(buffer)) != len(buffer):
+        return None
+    data = buffer.raw
+    integer = lambda offset, size: int.from_bytes(data[offset:offset + size], sys.byteorder)
+    if integer(12, 4) != pid:
+        raise RuntimeError("Kernel identity PID mismatch")
+    return {"identity": f"macos:{integer(120, 8)}:{integer(128, 8)}",
+            "group": integer(100, 4), "active": integer(4, 4) != 5}
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("output", type=Path, help="New directory under project build/")
+    parser.add_argument("--workers", action="store_true",
+                        help="Actual SSH command/worker + Flutter crash/recovery scenarios")
     args = parser.parse_args()
     if sys.platform != "darwin":
         parser.error("Requires macOS")
@@ -35,6 +54,8 @@ def main():
     logs.mkdir()
     owner = uuid.uuid4().hex
     processes, roots, cases = [], set(), []
+    receivers = []
+    ssh_environment = {}
     facts = {"complete": False, "cases": cases, "scope":
              "signed Flutter QA entry; real native termination/SQLCipher/processes; synthetic keys/events"}
 
@@ -52,6 +73,7 @@ def main():
     def launch(mode, label, directory=None):
         environment = os.environ.copy()
         environment.update(INFO_MAC_LIFECYCLE_MODE=mode, INFO_MAC_LIFECYCLE_OWNER=owner)
+        environment.update(ssh_environment)
         if directory is not None:
             environment["INFO_MAC_LIFECYCLE_ROOT"] = str(directory)
         else:
@@ -117,41 +139,63 @@ def main():
             raise RuntimeError("Normal termination failed to close library/endpoint")
         cases[-1]["portClosedAfterExit"] = True
 
-    try:
-        source_names = [
-            "scripts/qa/macos-lifecycle.py",
-            "apps/desktop/integration_test/macos_lifecycle_probe.dart",
-            "apps/desktop/lib/desktop_bootstrap.dart",
-            "apps/desktop/lib/desktop_runtime.dart",
-            "apps/desktop/macos/Runner/AppDelegate.swift",
-            "apps/desktop/macos/Runner/MainFlutterWindow.swift",
-            "apps/desktop/macos/Runner.xcodeproj/project.pbxproj",
-            "apps/desktop/pubspec.lock",
-            "packages/info_storage/pubspec.lock",
-        ]
-        snapshot = output / "sources"
-        snapshot.mkdir()
-        facts["sourceHashes"] = {}
-        for name in source_names:
-            content = (ROOT / name).read_bytes()
-            facts["sourceHashes"][name] = hashlib.sha256(content).hexdigest()
-            (snapshot / (name.replace("/", "-") + ".txt")).write_bytes(content)
-        with (logs / "build.txt").open("wb") as log:
-            subprocess.run([str(ROOT / "scripts/dev-macos.sh"), "build",
-                            "-t", "integration_test/macos_lifecycle_probe.dart"],
-                           cwd=ROOT, stdout=log, stderr=subprocess.STDOUT,
-                           timeout=600, check=True)
-        source_app = ROOT / "apps/desktop/build/macos/Build/Products/Release/info_desktop.app"
-        app = output / "qa/info_desktop.app"
-        shutil.copytree(source_app, app, symlinks=True)
-        binary = app / "Contents/MacOS/info_desktop"
-        facts["executableSha256"] = hashlib.sha256(binary.read_bytes()).hexdigest()
-        facts["gitHead"] = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
-        with (logs / "signature.txt").open("wb") as log:
-            subprocess.run(["/usr/bin/codesign", "--verify", "--deep", "--strict", str(app)],
-                           stdout=log, stderr=subprocess.STDOUT, check=True)
-        # Independent processes contend for the same SQLCipher library. The
-        # second process must fail before reading its synthetic key store.
+    def worker_scenarios():
+        nonlocal ssh_environment
+        for crash_worker in [False, True]:
+            label = "worker-and-app-crash" if crash_worker else "app-crash"
+            ssh_root = output / (label + "-ssh")
+            with (logs / (label + "-ssh.txt")).open("wb") as log:
+                receiver = subprocess.Popen(
+                    [str(ROOT / ".tools/qa-python/bin/python"),
+                     str(ROOT / "scripts/qa/macos-ssh-fixture.py"), str(ssh_root),
+                     "--lifecycle-gate"], stdout=log, stderr=subprocess.STDOUT)
+            receivers.append((receiver, ssh_root))
+            wait_until(lambda: (ssh_root / "fixture.json").exists(), receiver)
+            fixture = json.loads((ssh_root / "fixture.json").read_text())
+            ssh_environment = {
+                "INFO_MAC_SSH_PORT": str(fixture["port"]),
+                "INFO_MAC_SSH_KEY": base64.b64encode((ssh_root / "client").read_bytes()).decode(),
+                "INFO_MAC_SSH_HOST": " ".join((ssh_root / "host.pub").read_text().split()[:2]),
+                "INFO_MAC_CRASH_WORKER": str(crash_worker).lower(),
+            }
+            process, directory = launch("worker-hold", label + "-holder")
+            ready = report(directory, "worker-hold", process)
+            if ready.get("phase") != "ready" or not ready.get("supervisorIsFlutter"):
+                raise RuntimeError("Flutter-hosted worker never reached ready")
+            wait_until(lambda: (ssh_root / "command-count").exists(), receiver)
+            if (ssh_root / "command-count").read_text() != "1":
+                raise RuntimeError("Remote command did not start exactly once")
+            process.send_signal(signal.SIGKILL)
+            if process.wait(timeout=10) != -signal.SIGKILL:
+                raise RuntimeError("Explicit application crash failed")
+            target = target_identity(ready["targetPid"])
+            if (not target or not target["active"] or
+                    target["identity"] != ready["targetCreatedAt"] or
+                    target["group"] != ready["workerPid"]):
+                raise RuntimeError("Actual SSH target did not survive the application")
+            cases.append({"label": label, "exit": -signal.SIGKILL,
+                          "faultInjection": True, "targetObservedAfterCrash": target, **ready})
+            recovered, _ = launch("worker-recover", label + "-reopen", directory)
+            checkpoint = report(directory, "worker-recover", recovered)
+            if checkpoint.get("phase") != "active-material-retained":
+                raise RuntimeError("Restart failed to preserve live material")
+            if target_identity(ready["targetPid"]) != target:
+                raise RuntimeError("Target identity changed before controlled release")
+            (output / (label + "-active-checkpoint.json")).write_text(
+                json.dumps(checkpoint, indent=2) + "\n")
+            (ssh_root / "release").touch()
+            result = exited(recovered, directory, "worker-recover", label + "-reopen")
+            if result.get("phase") != "complete" or result.get("libraryCloses") != 1:
+                raise RuntimeError("Native recovery did not complete")
+            count = (ssh_root / "command-count").read_text()
+            if count != "1":
+                raise RuntimeError("Command replayed during restart")
+            cases[-1]["remoteCommandCount"] = int(count)
+            receiver.terminate()
+            receiver.wait(timeout=10)
+
+    def ordinary_scenarios():
+        # Independent processes contend for the same SQLCipher library.
         first, folder = launch("hold", "holder")
         first_ready = report(folder, "hold", first)
         if first_ready.get("startup") != "ready":
@@ -189,6 +233,46 @@ def main():
                     raise RuntimeError("Audit failure was not retained and retried")
                 recovered, _ = launch("recover", "audit-reopen", directory)
                 exited(recovered, directory, "recover", "audit-reopen")
+
+    try:
+        source_names = [
+            "scripts/qa/macos-lifecycle.py",
+            "apps/desktop/integration_test/macos_lifecycle_probe.dart",
+            "apps/desktop/integration_test/support/macos_worker_recovery.dart",
+            "scripts/qa/macos-ssh-fixture.py",
+            "apps/desktop/lib/desktop_bootstrap.dart",
+            "apps/desktop/lib/desktop_runtime.dart",
+            "apps/desktop/macos/Runner/AppDelegate.swift",
+            "apps/desktop/macos/Runner/MainFlutterWindow.swift",
+            "apps/desktop/macos/Runner.xcodeproj/project.pbxproj",
+            "apps/desktop/pubspec.lock",
+            "packages/info_storage/pubspec.lock",
+        ]
+        snapshot = output / "sources"
+        snapshot.mkdir()
+        facts["sourceHashes"] = {}
+        for name in source_names:
+            content = (ROOT / name).read_bytes()
+            facts["sourceHashes"][name] = hashlib.sha256(content).hexdigest()
+            (snapshot / (name.replace("/", "-") + ".txt")).write_bytes(content)
+        with (logs / "build.txt").open("wb") as log:
+            subprocess.run([str(ROOT / "scripts/dev-macos.sh"), "build",
+                            "-t", "integration_test/macos_lifecycle_probe.dart"],
+                           cwd=ROOT, stdout=log, stderr=subprocess.STDOUT,
+                           timeout=600, check=True)
+        source_app = ROOT / "apps/desktop/build/macos/Build/Products/Release/info_desktop.app"
+        app = output / "qa/info_desktop.app"
+        shutil.copytree(source_app, app, symlinks=True)
+        binary = app / "Contents/MacOS/info_desktop"
+        facts["executableSha256"] = hashlib.sha256(binary.read_bytes()).hexdigest()
+        facts["gitHead"] = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
+        with (logs / "signature.txt").open("wb") as log:
+            subprocess.run(["/usr/bin/codesign", "--verify", "--deep", "--strict", str(app)],
+                           stdout=log, stderr=subprocess.STDOUT, check=True)
+        if args.workers:
+            worker_scenarios()
+        else:
+            ordinary_scenarios()
         for name, digest in facts["sourceHashes"].items():
             if hashlib.sha256((ROOT / name).read_bytes()).hexdigest() != digest:
                 raise RuntimeError("Source changed during native acceptance")
@@ -198,6 +282,12 @@ def main():
         raise
     finally:
         cleanup = []
+        for receiver, ssh_root in receivers:
+            if ssh_root.exists():
+                (ssh_root / "release").touch()
+            if receiver.poll() is None:
+                receiver.terminate()
+                receiver.wait(timeout=10)
         for process in processes:
             if process.poll() is None:
                 # This is bounded failed-test cleanup, never counted as quit.
@@ -214,7 +304,10 @@ def main():
             for report_file in directory.glob("*-result.json"):
                 dest = output / ("retained-" + directory.name + "-" + report_file.name)
                 shutil.copyfile(report_file, dest)
-            shutil.rmtree(directory)
+            if facts["complete"]:
+                shutil.rmtree(directory)
+            else:
+                facts.setdefault("retainedFailedQaRoots", []).append(str(directory))
         (output / "result.json").write_text(json.dumps(facts, indent=2) + "\n")
 
 
