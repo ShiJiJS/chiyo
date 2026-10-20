@@ -1,0 +1,39 @@
+00:00 +0: loading /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/integration_test/macos_removed_scope_native_test.dart
+Building macOS application...                                   
+✓ Built build/macos/Build/Products/Debug/info_desktop.app
+Failed to foreground app; open returned 1
+00:00 +0: Mac encrypted removed-scope UI agrees with independent CLI
+MAC_SCOPE_ROOT=/Users/jiangxinyi/Library/Containers/com.example.infoDesktop/Data/tmp/aim-mac-scope-ui-UONycT
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: an object with length of <1>
+  Actual: Set:[0.9997234344482422, 36.999725341796875]
+   Which: has length of <2>
+An ordinary access count must remain one readable phrase
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure>.show (file:///Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/integration_test/macos_removed_scope_native_test.dart:143:11)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/integration_test/macos_removed_scope_native_test.dart:300:9)
+<asynchronous suspension>
+#6      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#7      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/integration_test/macos_removed_scope_native_test.dart line 143
+The test description was:
+  Mac encrypted removed-scope UI agrees with independent CLI
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:10 +0 -1: Mac encrypted removed-scope UI agrees with independent CLI [E]
+  Test failed. See exception logs above.
+  The test description was: Mac encrypted removed-scope UI agrees with independent CLI
+  
+00:10 +0 -1: (tearDownAll)
+00:10 +0 -1: Some tests failed.
+
+Failing tests:
+  /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/integration_test/macos_removed_scope_native_test.dart: Mac encrypted removed-scope UI agrees with independent CLI
