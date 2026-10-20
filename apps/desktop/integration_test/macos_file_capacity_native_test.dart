@@ -300,6 +300,62 @@ void main() {
         copies: 0,
         copyBytes: 0,
       );
+      // Independent count bounds still apply to empty stages and empty forms.
+      final emptyDraft = await service.owner.beginInformationFileDraft();
+      final emptyStages = <InformationFileStage>[];
+      for (var i = 0; i < informationFileStageLimit; i++) {
+        emptyStages.add(
+          await service.owner.stageInformationFile(emptyDraft, empty.path),
+        );
+      }
+      expect(informationFileStageLimit, 200);
+      await expectLater(
+        service.owner.stageInformationFile(emptyDraft, empty.path),
+        fails('attachment_capacity_exceeded'),
+      );
+      await usage(
+        'two-hundred-empty-stages',
+        stored: budget,
+        staged: 0,
+        stages: 200,
+        copies: 0,
+        copyBytes: 0,
+      );
+      await service.owner.releaseInformationStage(
+        emptyDraft,
+        emptyStages.first,
+      );
+      await service.owner.stageInformationFile(emptyDraft, empty.path);
+      await usage(
+        'stage-count-release-retry',
+        stored: budget,
+        staged: 0,
+        stages: 200,
+        copies: 0,
+        copyBytes: 0,
+      );
+      await service.owner.releaseInformationFileDraft(emptyDraft);
+      final forms = <InformationFileDraft>[];
+      for (var i = 0; i < 32; i++) {
+        forms.add(await service.owner.beginInformationFileDraft());
+      }
+      await expectLater(
+        service.owner.beginInformationFileDraft(),
+        fails('attachment_capacity_exceeded'),
+      );
+      await service.owner.releaseInformationFileDraft(forms.removeLast());
+      forms.add(await service.owner.beginInformationFileDraft());
+      for (final form in forms) {
+        await service.owner.releaseInformationFileDraft(form);
+      }
+      await usage(
+        'draft-count-release-retry-clean',
+        stored: budget,
+        staged: 0,
+        stages: 0,
+        copies: 0,
+        copyBytes: 0,
+      );
       final largeRef = FieldRef(restored.id, restored.fields.first.id);
       final emptyRef = FieldRef(zeroItem.id, zeroItem.fields.single.id);
       final requests = await exchange('request', {
@@ -410,6 +466,15 @@ void main() {
       );
       expect(await source.readAsBytes(), bytes);
       expect(await oversized.length(), limit + 1);
+      final oversizeReader = await oversized.open();
+      try {
+        expect(await oversizeReader.read(limit), bytes);
+        expect(await oversizeReader.readByte(), 42);
+        expect(await oversizeReader.readByte(), -1);
+      } finally {
+        await oversizeReader.close();
+      }
+      expect(repository.cipherVersion, startsWith('4.19.0'));
       expect(await empty.length(), 0);
       expect(await small.readAsBytes(), [7]);
       await File('${root.path}/result.json').writeAsString(
@@ -419,6 +484,9 @@ void main() {
           'captures': captures,
           'sourceFilesUnchanged': true,
           'deliveryHistoryCount': 44,
+          'cipherVersion': repository.cipherVersion,
+          'stageLimit': informationFileStageLimit,
+          'draftLimit': 32,
           'scope':
               'Real sandbox Debug Flutter/SQLCipher/native files; public owner fixture APIs and production capacity component; ephemeral key, same-process library reopen, no system panels/physical input/Keychain/30-day clock simulation.',
         }),
