@@ -56,10 +56,7 @@ void main() {
         supervisorCreatedAt: identity.value,
       );
       final record = service.owner.credentialExecutions.single;
-      expect(
-        record.jobName,
-        matches(r'^Local\\AgentInfoRuntime-[A-Za-z0-9_-]{32}$'),
-      );
+      expect(CredentialProcessJob.validName(record.jobName!), isTrue);
       expect(jsonEncode(record.toJson()), isNot(contains('supervisor')));
       expect(jsonEncode(record.toJson()), isNot(contains(record.jobName!)));
       await service.owner.reconcileCredentialMaterialCleanup();
@@ -85,6 +82,6 @@ void main() {
         ),
       );
     },
-    skip: !Platform.isWindows,
+    skip: !Platform.isWindows && !Platform.isMacOS,
   );
 }

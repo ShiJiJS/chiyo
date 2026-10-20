@@ -4,20 +4,43 @@ import 'package:info_core/info_core.dart';
 import 'package:test/test.dart';
 
 void main() {
-  for (final mode in ['before-gate', 'after-gate', 'worker-crash']) {
+  late Directory compiled;
+  late String executable;
+  setUpAll(() async {
+    if (!Platform.isMacOS) return;
+    compiled = await Directory.systemTemp.createTemp('mac-worker-aot-');
+    executable = '${compiled.path}/info-runtime-worker';
+    final result = await Process.run(Platform.resolvedExecutable, [
+      'compile',
+      'exe',
+      'bin/runtime_worker.dart',
+      '-o',
+      executable,
+    ]);
+    expect(result.exitCode, 0, reason: '${result.stdout}\n${result.stderr}');
+  });
+  tearDownAll(() async {
+    if (Platform.isMacOS) await compiled.delete(recursive: true);
+  });
+
+  for (final mode in [
+    'before-gate',
+    'after-gate',
+    'worker-crash',
+    'short-zero',
+    'short-signal',
+  ]) {
     final admitted = mode != 'before-gate', crashed = mode == 'worker-crash';
-    test('Darwin worker lifetime: $mode', () async {
+    final short = mode.startsWith('short-');
+    test('Darwin AOT worker lifetime: $mode', () async {
       final created = await Directory.systemTemp.createTemp('mac-worker-gate-');
       final root = Directory(await created.resolveSymbolicLinks());
       final state = File('${root.path}/worker-state.json');
       final marker = File('${root.path}/ran');
       final group = CredentialProcessJob.nameFor('0' * 32);
       final worker = await Process.start(
-        Platform.resolvedExecutable,
-        [
-          '--packages=${File('.dart_tool/package_config.json').absolute.path}',
-          File('lib/runtime_worker.dart').absolute.path,
-        ],
+        executable,
+        [],
         workingDirectory: root.path,
         environment: {
           'TMPDIR': root.path,
@@ -37,7 +60,12 @@ void main() {
             'executable': '/bin/sh',
             'argv': [
               '-c',
-              '/usr/bin/touch ran; /bin/sleep ${crashed ? 2 : 0.6} & exit 7',
+              switch (mode) {
+                'short-zero' => '/usr/bin/touch ran; exit 0',
+                'short-signal' => r'/usr/bin/touch ran; kill -TERM $$',
+                _ =>
+                  '/usr/bin/touch ran; /bin/sleep ${crashed ? 2 : 0.6} & exit 7',
+              },
             ],
           }),
         );
@@ -64,6 +92,8 @@ void main() {
         await worker.stdin.close();
         if (admitted) {
           await receipt(marker);
+        }
+        if (admitted && !short) {
           expect(
             CredentialProcessJob.isActive(
               group,
@@ -110,7 +140,11 @@ void main() {
             jsonDecode(
               await File('${state.path}.finished').readAsString(),
             )['exitCode'],
-            7,
+            switch (mode) {
+              'short-zero' => 0,
+              'short-signal' => -15,
+              _ => 7,
+            },
           );
         }
         final deadline = DateTime.now().add(const Duration(seconds: 5));

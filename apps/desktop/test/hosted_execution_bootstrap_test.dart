@@ -7,7 +7,7 @@ import 'support/desktop_platform_fixture.dart';
 
 void main() {
   test(
-    'Windows desktop advertises reuse and accepts default v2 CLI requests through its production bootstrap',
+    'desktop advertises reuse and accepts default v2 CLI requests through its production bootstrap',
     () async {
       final service = InformationService(
         repository: MemoryInformationRepository(),
@@ -81,7 +81,7 @@ void main() {
         isFalse,
       );
     },
-    skip: !Platform.isWindows,
+    skip: !Platform.isWindows && !Platform.isMacOS,
   );
   test(
     'desktop bootstrap exposes authorized hosted execution facts and removes the endpoint on shutdown',
