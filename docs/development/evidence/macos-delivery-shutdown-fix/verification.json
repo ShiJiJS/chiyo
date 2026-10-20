@@ -1,0 +1,171 @@
+{
+  "source": "541a6714473eb85810c984bc32797c5fb548b09d",
+  "date": "2026-10-21",
+  "archive": "build/macos-adaptation/issue50-package-6/agent-info-manage-0.4.0+12-mac-dev.541a6714473e-macos-arm64.zip",
+  "archiveBytes": 45487290,
+  "archiveSha256": "ae7a4f00d3b79cf300800f05d55916254d8e39119631798a776595603add4640",
+  "scope": "source checks and extracted ARM64 development package verification; not physical GUI, production Keychain upgrade or clean-user install",
+  "includesShutdownFix": "05326a78b3d25ee21e2099e7ae125014d22b726a",
+  "testSuites": {
+    "core": {
+      "passed": 285,
+      "skipped": 6
+    },
+    "cli": {
+      "passed": 72,
+      "skipped": 40
+    },
+    "storage": {
+      "passed": 159,
+      "skipped": 18
+    },
+    "desktop": {
+      "passed": 178,
+      "skipped": 2
+    }
+  },
+  "sourceTotal": {
+    "passed": 694,
+    "skipped": 66
+  },
+  "phases": 21,
+  "payloadFilesAndLinks": 133,
+  "machOFiles": 12,
+  "extractedTests": 6,
+  "extractedTestsOverlapSourceSuite": true,
+  "nativeUIJointRerun": false,
+  "previousNativeEvidenceScope": "c1a58b7 library/attachment joint scenarios remain historical; 05326a7 real Keychain QA source-copy findings recorded separately",
+  "remaining": [
+    "stable installed app startup and final UI workflow",
+    "stable signing and Keychain upgrade",
+    "clean user/independent Mac",
+    "real notification/pickers/Codex",
+    "Windows native regression of shared launcher"
+  ],
+  "files": {
+    "raw/agent-info-manage-0.4.0+12-mac-dev.541a6714473e-macos-arm64.zip.sha256": {
+      "bytes": 130,
+      "sha256": "5d77deca7b65f71477ed092831fe7889f67083cd71713223cf665353eb631c16"
+    },
+    "raw/logs/app-signature.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "raw/logs/archive.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "raw/logs/compile-info-codex-hook.txt": {
+      "bytes": 135,
+      "sha256": "3aadc37ddd8711f20394cc719470536221d53d7f38b187945f9c8e76480c8b50"
+    },
+    "raw/logs/compile-info-codex.txt": {
+      "bytes": 130,
+      "sha256": "87e1a555eff01f0587d122e17eec6d1d086cb839fc9bd6e8db5125736c7ce4a5"
+    },
+    "raw/logs/compile-info-prepare-codex.txt": {
+      "bytes": 138,
+      "sha256": "6c7667f75cf183e501f28aa35357894fa263418e72da5c90e4b9adb39936af60"
+    },
+    "raw/logs/compile-info-runtime-worker.txt": {
+      "bytes": 139,
+      "sha256": "2e82ef4f20a317abf9eb1561f2c3cc9540638f1bdd4c810eb9724f40d509844b"
+    },
+    "raw/logs/compile-info.txt": {
+      "bytes": 124,
+      "sha256": "6a9e5cb9a5cdb9fd854a79241171d6380578bbe5b4f7c896351e1be987b71dbe"
+    },
+    "raw/logs/diagnostic-build.txt": {
+      "bytes": 299,
+      "sha256": "a967cb4cf10afde4bac0005d227d70fc1f8fcd73abef0ade0d16db4dbac14c22"
+    },
+    "raw/logs/extract.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "raw/logs/extracted-app-signature.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "raw/logs/extracted-cli-and-worker.txt": {
+      "bytes": 842,
+      "sha256": "7aca7085e00077c247eb493880ab1f386fb56abe15d52c2cd2781df8c92408ed"
+    },
+    "raw/logs/extracted-storage.txt": {
+      "bytes": 187,
+      "sha256": "bfe59e3f5c8148af626c8aa8416aa5c874f251127cecd3c3ec86f26dddfb1657"
+    },
+    "raw/logs/release-build.txt": {
+      "bytes": 136,
+      "sha256": "9a09c6b2cc301ac4ffdfb5de6173602ccbe61e7df72a21e6b4627016733879ed"
+    },
+    "raw/logs/sign-diagnostic-libsqlcipher.dylib.txt": {
+      "bytes": 169,
+      "sha256": "bf72e7d028c84050c6623c59ace831b172c5cb2e2a4b29353c63b319acf1504d"
+    },
+    "raw/logs/sign-diagnostic-macos-storage-check.txt": {
+      "bytes": 170,
+      "sha256": "b8346b2a4bb71831ba90cfc7cefb1e3d5dd63531bf29ac02fc3bb2fc7c328a8c"
+    },
+    "raw/logs/sign-info-codex-hook.txt": {
+      "bytes": 154,
+      "sha256": "ee02490542aa9936dd2069d8f1b5ee3811c0d7ad4d5f5d116e3cc5089314d04d"
+    },
+    "raw/logs/sign-info-codex.txt": {
+      "bytes": 149,
+      "sha256": "f79b95b6eb57c40f24f56097ceee1fc177fce8819c50a767fce7705616f6de86"
+    },
+    "raw/logs/sign-info-prepare-codex.txt": {
+      "bytes": 157,
+      "sha256": "ac374954fbad994a04d566e2c884043f6e99e267a80aea683b1b3a5cc54b2d52"
+    },
+    "raw/logs/sign-info-runtime-worker.txt": {
+      "bytes": 158,
+      "sha256": "55423d2f49f49a248a8bb1ffb1e750dc0b50864b6ac72ffd97f529f89a0afc9c"
+    },
+    "raw/logs/sign-info.txt": {
+      "bytes": 143,
+      "sha256": "fd454121ce96e4eb314c20ffee136320c74b96283175ee78c3b241f260baa4a9"
+    },
+    "raw/logs/source-checks.txt": {
+      "bytes": 194927,
+      "sha256": "03c7be4f77ed8af97edf36e1d0111b93ebb84d7aa9f9a56b0c8a86be794694d7"
+    },
+    "raw/manifest.json": {
+      "bytes": 28834,
+      "sha256": "6a2774d53d8cec3eccb06b80d1db2e48c846aa7f1246a22d14944dee71913d5b"
+    },
+    "raw/remote-main.txt": {
+      "bytes": 57,
+      "sha256": "8d61b5cc5777ff94205c878e9ffe69ff14075b41e2abec5533b41cf82171d181"
+    },
+    "raw/sources/apps/desktop/lib/desktop_runtime.dart": {
+      "bytes": 11683,
+      "sha256": "6f449fa67826afabe3caa85239360a6d86fdf7694cca3eefcb98065ca1d12da5"
+    },
+    "raw/sources/apps/desktop/lib/main.dart": {
+      "bytes": 15020,
+      "sha256": "c2affdf2feeef064d8b8101b84d7aef6dcef6a2fbdaac56f4065269e20dc07d2"
+    },
+    "raw/sources/apps/desktop/test/desktop_shutdown_frame_test.dart": {
+      "bytes": 4763,
+      "sha256": "820331e7d7563087f26ddfa54897708469f780d2f628b3b734febbea6cf6bdfc"
+    },
+    "raw/sources/scripts/dev-macos.sh": {
+      "bytes": 5311,
+      "sha256": "ec47e88925d21399b7fb3905754f85e357e50eb374017978efc9f11f67738d4b"
+    },
+    "raw/sources/scripts/package-macos.py": {
+      "bytes": 16660,
+      "sha256": "285ea56718f548ce0941048950f7611756c9d4e51bc39a8c13b14b5cfb8b2210"
+    },
+    "raw/verification.json": {
+      "bytes": 1865,
+      "sha256": "056fd2f5d7fd4f0efc165080bbd242f96f4345877fa3845d75d719da3a6cc6c8"
+    },
+    "raw/windows-native-diff.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  }
+}
