@@ -8,6 +8,7 @@
 - [#43 故障恢复](macos-lifecycle-recovery.md)：SQLCipher/独立 AOT 宿主与 worker 联合场景 8 项通过；还需签名 Flutter 应用本体异常退出重开。
 - [#42 Keychain](macos-keychain-validation.md)：真实系统存储验证发现并修复 legacy ACL 提示阻塞；不同 ad-hoc 签名间的升级访问仍被拒绝，保留原库与密钥。
 - [#44 工具与附件](macos-tools-files.md)：外部 GH/AWS 实测 EPERM 后，已新增主人选择工具目录与系统书签持久化入口；原生存储/界面回归及新包 SSH/附件工作流通过，真实目录许可、外部 GH/AWS、当前系统面板仍待验收。
+- [#45 备份恢复](macos-backup-recovery.md)：签名 Flutter 的 7/8/9 格式恢复、独立 AOT 的 80 MiB 中断回滚，以及固定旧源 5/6 兼容已通过；真实面板、Keychain、应用本体中断与 Windows 双向迁移仍待。
 
 上述票据仍 OPEN；具体未完成条件以 GitHub 票据及各记录为准。现有证据不等于 Mac 总票 #19 已可交付。
 
