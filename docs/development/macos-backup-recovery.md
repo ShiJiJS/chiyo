@@ -5,6 +5,35 @@
 没有修改生产备份格式或 Windows 源码。源码及产物摘要见
 [证据清单](evidence/macos-backup-recovery/verification.json)。
 
+## 补充：签名 Release 应用恢复中断
+
+源码 `398f3a3`，格式 8、9 的两项实际应用中断/恢复均通过。
+使用同一签名沙盒 Flutter 验收入口、生产 DesktopBootstrap、Owner
+恢复边界及 SQLCipher；分别建立合成源与目标，源关闭并清除源测试密钥，
+目标使用另一把固定合成密钥。原应用库和 Keychain 未参与。
+
+每份备份包含 10 个 8 MiB 附件、文字版本、回收项、托管凭据、设置、
+访问历史和待审批；格式 9 另含真实文件交付事实。父驱动在目标进程报告
+预检完成后放行，观察非零 rollback journal 头与数据库增长才向自己启动的
+Flutter 进程发送 SIGKILL。格式 8/9 分别观察到增长 4,509,696 /
+4,411,392 字节；退出均为 -9，journal 保留。
+
+新签名应用在 DesktopBootstrap 打开 Repository **之前**，直接用 SQLCipher
+核对 schema 21、`integrity_check=ok` 和四张信息/附件/暂存表零行。
+正常启动后进一步核对目标仍是空库、原 17 分钟设置和历史均无部分恢复。
+在同一目标重试后，80 MiB 附件逐块一致，版本/回收/凭据/历史及 23 分钟
+设置恢复；旧授权拒绝，格式 9 交付无 lease/会话绑定，旧会话查询也被拒绝。
+备份 SHA-256 在全过程保持不变，目标始终用原合成密钥打开，不调用创建替代密钥。
+
+6 次实际应用运行中，4 次通过 Cocoa 正常退出且各关闭数据库一次，2 次
+是明确的崩溃注入；没有失败兜底强制结束。两个自有合成临时目录已清除。
+12 份源码摘要与提交逐字节一致，严格 Flutter 分析通过，QA 包严格签名通过；
+执行后恢复正常产品入口并复核签名。记录与原始输出见
+[应用恢复证据](evidence/macos-app-backup-recovery/verification.json)。
+
+本项补齐此前独立 AOT 测试未覆盖的应用本体中断；未操作物理界面、
+NSOpenPanel/NSSavePanel、真实 Keychain 或 Windows，不能据此关闭整张 #45。
+
 ## 签名 Flutter 沙盒中的备份界面
 
 `macos_backup_native_test.dart` 的格式 7、8、9 共 **3 项通过**。
@@ -46,7 +75,8 @@ codesign 已通过，载荷清单单独记录。
 `libsqlcipher.dylib` 的 AOT bundle 后通过；保留最初失败日志和最终载荷摘要。
 这次失败证明加密能力缺失时拒绝继续，不是一次成功回滚，也不是产品备份
 缺陷被修改后的验证。上述中断发生在独立 AOT 接收进程，
-**签名 Flutter 应用本体/最终包的恢复中断仍未验收**。
+当时未覆盖签名 Flutter 应用本体；现已由上方独立补充验收覆盖，
+最终交付包与真实系统交互仍归 #50。
 
 ## 格式与来源矩阵
 
@@ -82,9 +112,14 @@ Mac storage 与 desktop 严格分析均通过。
 # 在仓库根目录下；输出目录必须是全新的
 python3 scripts/qa/macos-backup-compatibility.py \
   build/macos-adaptation/new-backup-compatibility-run
+# 签名 Release Flutter 本体中断、原始回滚和同目标重试
+python3 scripts/qa/macos-lifecycle.py \
+  build/macos-adaptation/new-app-backup-run --backups
+# QA 运行后恢复正常产品入口
+./scripts/dev-macos.sh build
 ```
 
-仍需真实系统面板与同卷暂存、真实 Keychain 目标、签名应用恢复写入中断，
+仍需真实系统面板与同卷暂存、真实 Keychain 目标、最终交付包的联合验收，
 以及 Windows 实机导出→Mac 和反向恢复。旧源在 Mac 运行不等于跨平台往返，
 本轮未将 #17 或 #45 的这些条件标记完成。跨平台程序路径/工具绑定也仍需
 按目标设备重新验收；本软件没有因此获得自动同步能力。

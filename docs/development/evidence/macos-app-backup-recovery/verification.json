@@ -1,0 +1,187 @@
+{
+  "sourceCommit": "398f3a358d1813f611e51014355c323211cbfbfb",
+  "finalRun": "raw/result.json",
+  "scope": "Signed Release sandbox Flutter app, production bootstrap/owner restore and SQLCipher; synthetic keys/libraries; not Keychain, physical UI, system file panels or Windows migration",
+  "result": "2 formats passed; 6 real app processes, 2 deliberate SIGKILL, 4 native exits; no failed-run forced cleanup",
+  "originalFiles": [
+    {
+      "path": "raw/backup8-prepare.json",
+      "bytes": 269,
+      "sha256": "85dd48a33350d8e1b20aa26e2985ceedf9cd81ac15b609d10376651e5d522ede"
+    },
+    {
+      "path": "raw/backup8-reopen.json",
+      "bytes": 421,
+      "sha256": "63e79a01da2b41d00d0d43e9dda20a1eec832a7bc3b2923ce6f0e119518f1ab8"
+    },
+    {
+      "path": "raw/backup9-prepare.json",
+      "bytes": 269,
+      "sha256": "a06da603aa21e09b7a7d82fe6e69c85d819b546e2228fef3f1c5571ba5c9a029"
+    },
+    {
+      "path": "raw/backup9-reopen.json",
+      "bytes": 421,
+      "sha256": "fcb16bf010449ab7d9e0dce0ba7075a87125ae353d6745305165dd6ca9dd5e23"
+    },
+    {
+      "path": "raw/logs/backup8-interrupt.txt",
+      "bytes": 246,
+      "sha256": "7f03a256ffeca2eeae402e0f5f26970b6f4efe416cde87947582f5d9d2062bbe"
+    },
+    {
+      "path": "raw/logs/backup8-prepare.txt",
+      "bytes": 246,
+      "sha256": "7f03a256ffeca2eeae402e0f5f26970b6f4efe416cde87947582f5d9d2062bbe"
+    },
+    {
+      "path": "raw/logs/backup8-reopen.txt",
+      "bytes": 246,
+      "sha256": "7f03a256ffeca2eeae402e0f5f26970b6f4efe416cde87947582f5d9d2062bbe"
+    },
+    {
+      "path": "raw/logs/backup9-interrupt.txt",
+      "bytes": 246,
+      "sha256": "fcc3ecfceadca50118e59b6e987dd05d65d6412a2e196eb73fc6a43441a4a994"
+    },
+    {
+      "path": "raw/logs/backup9-prepare.txt",
+      "bytes": 246,
+      "sha256": "fcc3ecfceadca50118e59b6e987dd05d65d6412a2e196eb73fc6a43441a4a994"
+    },
+    {
+      "path": "raw/logs/backup9-reopen.txt",
+      "bytes": 246,
+      "sha256": "fcc3ecfceadca50118e59b6e987dd05d65d6412a2e196eb73fc6a43441a4a994"
+    },
+    {
+      "path": "raw/logs/build.txt",
+      "bytes": 136,
+      "sha256": "9a09c6b2cc301ac4ffdfb5de6173602ccbe61e7df72a21e6b4627016733879ed"
+    },
+    {
+      "path": "raw/logs/production-build.txt",
+      "bytes": 136,
+      "sha256": "9a09c6b2cc301ac4ffdfb5de6173602ccbe61e7df72a21e6b4627016733879ed"
+    },
+    {
+      "path": "raw/logs/production-signature.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/logs/signature.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/result.json",
+      "bytes": 4203,
+      "sha256": "cb98a7f0f60fa0d955610481b7ed48791d4a370624f5bc994529a3978b985848"
+    },
+    {
+      "path": "raw/retained-aim-mac-lifecycle-tzrdAt-backup-interrupt-result.json",
+      "bytes": 89,
+      "sha256": "dc49516bfe5fead3303a5748539bb67d2d2b014ad5492de9d7f1e046d5e91312"
+    },
+    {
+      "path": "raw/retained-aim-mac-lifecycle-tzrdAt-backup-prepare-result.json",
+      "bytes": 192,
+      "sha256": "3cc83021601988092760685c0bb84092a5ae2bbb9c877387b04af6c49d1c687b"
+    },
+    {
+      "path": "raw/retained-aim-mac-lifecycle-tzrdAt-backup-recover-result.json",
+      "bytes": 325,
+      "sha256": "d236289b75ddb79b001c2d6a87b5b4fd155424eb2be543cbc20f166cfe1620a7"
+    },
+    {
+      "path": "raw/retained-aim-mac-lifecycle-uh4VzP-backup-interrupt-result.json",
+      "bytes": 89,
+      "sha256": "2cb8a353abe44066605b6d8cfdd23926c84dd4ba5a220cbec575c819a9741b4f"
+    },
+    {
+      "path": "raw/retained-aim-mac-lifecycle-uh4VzP-backup-prepare-result.json",
+      "bytes": 192,
+      "sha256": "5ef65dbca52d19d71bbd035be1033b0f33c80f901bdaec7d957e6e7c28200e59"
+    },
+    {
+      "path": "raw/retained-aim-mac-lifecycle-uh4VzP-backup-recover-result.json",
+      "bytes": 325,
+      "sha256": "3f8444aeaa29863277ba1bc1762913b0ee1941aca6aae958547e5630111281c5"
+    },
+    {
+      "path": "raw/source-verification.json",
+      "bytes": 294,
+      "sha256": "6caaedaebbb864d03e3d01c93addbd46179861a29c774418869518206481cf91"
+    },
+    {
+      "path": "raw/sources/apps-desktop-integration_test-macos_lifecycle_probe.dart.txt",
+      "bytes": 12579,
+      "sha256": "34d1e143f99728a02e93d191f637957444eb8c4dc9e5de4ecfe1c26bf54dbb72"
+    },
+    {
+      "path": "raw/sources/apps-desktop-integration_test-support-macos_backup_recovery.dart.txt",
+      "bytes": 10864,
+      "sha256": "0a932663db41ad3af5b20941c82e1952c2b86bc1700750912b71efadd7cf64ea"
+    },
+    {
+      "path": "raw/sources/apps-desktop-integration_test-support-macos_worker_recovery.dart.txt",
+      "bytes": 9841,
+      "sha256": "0265ed079f0363d4ed45066280eafc59e43393e6155924aba2f7cf966055ac9c"
+    },
+    {
+      "path": "raw/sources/apps-desktop-lib-desktop_bootstrap.dart.txt",
+      "bytes": 6198,
+      "sha256": "025a8a0f1d26aed7b77c64b3b9cfa2cdfe60c4133fc2c00b574860e3d1fb5026"
+    },
+    {
+      "path": "raw/sources/apps-desktop-lib-desktop_runtime.dart.txt",
+      "bytes": 11499,
+      "sha256": "1cd0ba9971d3d0b321f22eec78c3186919328b7fffc346785b1f0ad340d4751c"
+    },
+    {
+      "path": "raw/sources/apps-desktop-macos-Runner-AppDelegate.swift.txt",
+      "bytes": 905,
+      "sha256": "6be0305e6a175f9486a4859597f7e1d2a4d1855fd5d630603466e7466214878e"
+    },
+    {
+      "path": "raw/sources/apps-desktop-macos-Runner-MainFlutterWindow.swift.txt",
+      "bytes": 15487,
+      "sha256": "ba3715cdc39f5fa3f489382cd710801a91717c92ef9388594d6a00cdba3fbcdb"
+    },
+    {
+      "path": "raw/sources/apps-desktop-macos-Runner.xcodeproj-project.pbxproj.txt",
+      "bytes": 29409,
+      "sha256": "4f3c4b943ea56a8c6c6f07a96c54f7d10934a48938c5f98ba7af3553f3f26d33"
+    },
+    {
+      "path": "raw/sources/apps-desktop-pubspec.lock.txt",
+      "bytes": 11393,
+      "sha256": "9929f3b3febefc0de06e9a841ac4b5505896eda43a503b0f128467d93b311553"
+    },
+    {
+      "path": "raw/sources/packages-info_storage-pubspec.lock.txt",
+      "bytes": 13848,
+      "sha256": "131f601be25b6a7759cf961d15fda9c4e176a759eb20d499a83e2bff8d9d1274"
+    },
+    {
+      "path": "raw/sources/scripts-qa-macos-lifecycle.py.txt",
+      "bytes": 19200,
+      "sha256": "a38b2c0d75cd33aa8d94b593ee92e2e35bfe0ebf6f3a5aaffc53274523ad6442"
+    },
+    {
+      "path": "raw/sources/scripts-qa-macos-ssh-fixture.py.txt",
+      "bytes": 4234,
+      "sha256": "57643a226c33301920ebbb7a96642d7bfc10e3a39a4306376641e6bdf1669216"
+    }
+  ],
+  "additionalToolChecks": {
+    "flutterAnalyze": "exit 0, no issues, --no-pub --fatal-infos --fatal-warnings",
+    "pythonCompile": "exit 0",
+    "diffCheck": "exit 0"
+  },
+  "excludedArtifacts": [
+    "QA app binary (kept under build/)",
+    "synthetic databases, recovery keys, private associations (owned roots removed)"
+  ]
+}

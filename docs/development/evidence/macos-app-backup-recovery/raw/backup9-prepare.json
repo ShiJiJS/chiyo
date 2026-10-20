@@ -1,0 +1,12 @@
+{
+  "label": "backup9-prepare",
+  "exit": 0,
+  "mode": "backup-prepare",
+  "format": 9,
+  "phase": "prepared",
+  "sourceClosedAndKeyCleared": true,
+  "distinctTargetKey": true,
+  "attachmentBytes": 83886080,
+  "nativeTerminationRequested": true,
+  "libraryCloses": 1
+}

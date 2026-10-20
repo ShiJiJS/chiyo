@@ -1,0 +1,9 @@
+{
+  "sourceCommit": "398f3a358d1813f611e51014355c323211cbfbfb",
+  "capturedGitHeadBeforeSourceCommit": "6eb16d52f10a8486a399ac951e09cb2caaa07107",
+  "matchingSourceFiles": 12,
+  "ownedSyntheticRootsRemoved": 2,
+  "applicationProcesses": 6,
+  "intentionalSigkill": 2,
+  "nativeNormalExits": 4
+}
