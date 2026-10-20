@@ -1,3 +1,4 @@
+import 'backup_setup.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'package:info_core/info_core.dart';
@@ -80,7 +81,7 @@ void main() {
       service.owner.approve(request.id, [ref]);
       final token = service.agent.claim(session, request.id).token;
       await service.agent.read(token, ref);
-      final key = await source.backups.enable();
+      final key = await enableTestBackups(source.backups);
       await service.owner.exportLibrary(
         () => source.backups.exportTo('${root.path}/before.aimbackup'),
       );
@@ -151,10 +152,10 @@ void main() {
         FieldRef(item.id, item.fields.single.id),
         'after',
       );
-      final key = await source.backups.enable();
+      final key = await enableTestBackups(source.backups);
       final path = '${root.path}/times.aimbackup';
       await service.owner.exportLibrary(() => source.backups.exportTo(path));
-      expect(_payload(path, key)['version'], 3);
+      expect(_payload(path, key)['version'], 7);
       final target = await EncryptedInformationRepository.open(
         '${root.path}/target',
         _Keys(),
@@ -234,7 +235,7 @@ void main() {
         }
         final entry = service.owner.recycleEntries.single;
         expect(entry.snapshot!.fields, hasLength(2));
-        final key = await source.backups.enable();
+        final key = await enableTestBackups(source.backups);
         final path = '${root.path}/saved.aimbackup';
         await service.owner.exportLibrary(() => source.backups.exportTo(path));
         await service.owner.restoreRecycled(entry.id);
@@ -256,7 +257,16 @@ void main() {
         );
         final recovered = await restored.owner.restoreRecycled(entry.id);
         for (final field in fields) {
-          final saved = recovered.fields.singleWhere((f) => f.id == field.id);
+          final provenance = restored.owner.recycleFacts
+              .firstWhere(
+                (f) =>
+                    f.entryId == entry.id && f.kind == RecycleFactKind.restored,
+              )
+              .restoredFieldIds;
+          final saved = recovered.fields.singleWhere(
+            (f) => f.id == provenance[field.id],
+          );
+          expect(saved.id, isNot(field.id));
           expect(saved.value, field.value);
           expect(saved.kind, field.kind);
           expect(saved.version, greaterThan(field.version));
@@ -316,7 +326,7 @@ void main() {
       );
       final whole = await service.owner.deleteInformation(metadata.id, 2);
       expect(whole.snapshot!.fields, isEmpty);
-      final key = await source.backups.enable();
+      final key = await enableTestBackups(source.backups);
       final path = '${root.path}/grouped.aimbackup';
       await service.owner.exportLibrary(() => source.backups.exportTo(path));
 
@@ -331,9 +341,11 @@ void main() {
         () => target.backups.restoreFrom(path, key),
       );
       final recovered = await restored.owner.restoreRecycled(grouped.id);
+      expect(recovered.fields, hasLength(3));
+      expect(recovered.fields.any((f) => f.id == refs.last.fieldId), isTrue);
       expect(
-        recovered.fields.map((f) => f.id).toSet(),
-        refs.map((f) => f.fieldId).toSet(),
+        recovered.fields.any((f) => refs.take(2).any((r) => r.fieldId == f.id)),
+        isFalse,
       );
       expect(recovered.fields.map((f) => f.value).toSet(), {
         'host.invalid',
@@ -357,16 +369,26 @@ void main() {
         );
       }
       final freshSession = restored.agent.openSession('new read');
+      final mapping = restored.owner.recycleFacts
+          .firstWhere(
+            (f) =>
+                f.entryId == grouped.id && f.kind == RecycleFactKind.restored,
+          )
+          .restoredFieldIds;
+      final freshRefs = refs
+          .take(2)
+          .map((f) => FieldRef(item.id, mapping[f.fieldId]!))
+          .toList();
       final fresh = restored.agent.request(
         freshSession,
         'recovered fields',
-        refs.take(2).toList(),
+        freshRefs,
       );
-      restored.owner.approve(fresh.id, refs.take(2).toList());
+      restored.owner.approve(fresh.id, freshRefs);
       expect(
         await restored.agent.read(
           restored.agent.claim(freshSession, fresh.id).token,
-          refs.first,
+          freshRefs.first,
         ),
         'host.invalid',
       );
@@ -416,7 +438,7 @@ void main() {
             outcome: AccessOutcome.unauthorized,
           ),
         );
-        final key = await source.backups.enable();
+        final key = await enableTestBackups(source.backups);
         final path = '${root.path}/audit-$days.aimbackup';
         await source.backups.exportTo(path);
         final target = await EncryptedInformationRepository.open(
@@ -456,11 +478,22 @@ void main() {
           FieldRef(item.id, item.fields.single.id),
           'current value',
         );
-        final key = await source.backups.enable();
+        final key = await enableTestBackups(source.backups);
         final path = '${root.path}/v3.aimbackup';
         await source.backups.exportTo(path);
         await _rewrite(path, '${root.path}/v1.aimbackup', key, (p) {
           p['version'] = legacyVersion;
+          for (final table in [
+            'managed_credentials',
+            'credential_materials',
+            'ssh_host_trust',
+            'credential_use_requests',
+            'credential_executions',
+            'credential_focused_fills',
+          ]) {
+            (p['tables'] as Map).remove(table);
+          }
+          (p['tables'] as Map).remove('request_history');
           for (final row in p['tables']['information_items'] as List) {
             (row as Map).remove('created_at');
             row.remove('modified_at');
@@ -540,7 +573,7 @@ void main() {
         service.agent.claim(session, request.id).token,
         ref,
       );
-      final key = await source.backups.enable();
+      final key = await enableTestBackups(source.backups);
       final path = '${root.path}/good.aimbackup';
       await source.backups.exportTo(path);
       final target = await EncryptedInformationRepository.open(
@@ -754,7 +787,7 @@ void main() {
           outcome: AccessOutcome.unauthorized,
         ),
       );
-      final key = await source.backups.enable();
+      final key = await enableTestBackups(source.backups);
       final path = '${root.path}/retention.aimbackup';
       await source.backups.exportTo(path);
       final before = File(path).readAsBytesSync();
@@ -848,11 +881,13 @@ void main() {
         3,
         fieldId: item.fields.last.id,
       );
-      await service.owner.restoreRecycled(firstNoteDeletion.id);
+      final firstRestored = await service.owner.restoreRecycled(
+        firstNoteDeletion.id,
+      );
       final noteDeletion = await service.owner.deleteInformation(
         item.id,
         5,
-        fieldId: item.fields.last.id,
+        fieldId: firstRestored.fields.last.id,
       );
       final revokedSession = service.agent.openSession('Revoked source chat');
       final revoked = service.agent.request(revokedSession, 'read', [ref]);
@@ -876,11 +911,11 @@ void main() {
       ]);
       service.agent.request(session, 'pending request', [ref]);
       await service.owner.retryAuditStorage();
-      final key = await source.backups.enable();
+      final key = await enableTestBackups(source.backups);
       final path = '${root.path}/complete.aimbackup';
       await source.backups.exportTo(path);
       final payload = _payload(path, key);
-      expect(payload['version'], 3);
+      expect(payload['version'], 7);
       final tables = payload['tables'] as Map<String, dynamic>;
       expect(tables.keys.toSet(), {
         'information_directories',
@@ -896,6 +931,13 @@ void main() {
         'revision_purge_facts',
         'grant_history',
         'access_records',
+        'request_history',
+        'managed_credentials',
+        'credential_materials',
+        'ssh_host_trust',
+        'credential_use_requests',
+        'credential_executions',
+        'credential_focused_fills',
       });
       final encoded = jsonEncode(payload);
       for (final excluded in [
@@ -970,7 +1012,8 @@ void main() {
       );
       final withNote = await restored.owner.restoreRecycled(noteDeletion.id);
       expect(withNote.version, 7);
-      expect(withNote.fields.last.id, item.fields.last.id);
+      expect(withNote.fields.last.id, isNot(item.fields.last.id));
+      expect(withNote.fields.last.id, isNot(firstRestored.fields.last.id));
       expect(withNote.fields.last.version, 3);
       expect(withNote.fields.last.kind, FieldKind.textNote);
       await restored.close();

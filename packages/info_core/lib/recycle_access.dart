@@ -171,6 +171,7 @@ extension OwnerRecycle on OwnerAccess {
         }
       }
     }
+    _service._scheduleInformationDeliveryCleanup();
   }
 
   Future<RecycleEntry> deleteInformation(
@@ -248,6 +249,9 @@ extension OwnerRecycle on OwnerAccess {
           (v, f) => max(v, f.version),
         );
     final source = previous ?? snapshot;
+    final restoredIds = {
+      for (final f in snapshot.fields) f.id: _service._secret(),
+    };
     final restored = InformationItem(
       source.id,
       source.name,
@@ -256,14 +260,7 @@ extension OwnerRecycle on OwnerAccess {
       [
         if (previous != null) ...previous.fields,
         for (final f in snapshot.fields)
-          InformationField(
-            f.id,
-            f.name,
-            f.description,
-            f.value,
-            f.version + 1,
-            kind: f.kind,
-          ),
+          f.withMetadata(id: restoredIds[f.id]!, version: f.version + 1),
       ],
       directoryId: source.directoryId,
       tagIds: source.tagIds,
@@ -280,7 +277,17 @@ extension OwnerRecycle on OwnerAccess {
           ? null
           : InformationRevision(previous, _service._clock()),
       entries: [entry.finish(RecycleState.restored)],
-      facts: [_fact(entry, RecycleFactKind.restored, restored.version)],
+      facts: [
+        RecycleFact(
+          entry.id,
+          entry.itemId,
+          snapshot.fields.map((f) => f.id),
+          restored.version,
+          RecycleFactKind.restored,
+          _service._clock(),
+          restoredFieldIds: restoredIds,
+        ),
+      ],
     );
     return restored;
   });

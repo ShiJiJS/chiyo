@@ -1,0 +1,37 @@
+import 'dart:convert';
+import 'dart:io';
+import 'package:info_core/info_core.dart';
+Future<void> main(List<String> args) async {
+  var missing=0, failed=0;
+  Future<void> run(int i) async {
+    final root=await Directory.systemTemp.createTemp('worker-fast-probe-');
+    final state=File('${root.path}/worker-state.json');
+    final worker=await Process.start(args.single,[],workingDirectory:root.path,environment:{'TEMP':root.path,'TMP':root.path});
+    final out=worker.stdout.drain<void>(),err=worker.stderr.drain<void>();
+    try {
+      worker.stdin.writeln(jsonEncode({'executable':'${Platform.environment['SystemRoot']}/System32/cmd.exe','argv':['/d','/c','exit','0'],'cwd':root.path,'statePath':state.path,'jobName':'Local\\AgentInfoRuntime-${i.toString().padLeft(32,'0')}'}));
+      await worker.stdin.flush();
+      Future<Map> wait(String wanted) async {
+        final deadline=DateTime.now().add(Duration(seconds:10));
+        while(DateTime.now().isBefore(deadline)) {
+          try { final j=jsonDecode(await state.readAsString()) as Map; if(j['state']==wanted)return j; } on FileSystemException {} on FormatException {}
+          await Future<void>.delayed(Duration(milliseconds:1));
+        }
+        throw StateError('deadline ${await state.readAsString()}');
+      }
+      await wait('ready');worker.stdin.writeln('start');await worker.stdin.flush();
+      final facts=await wait('started');
+      final identity=CredentialProcessIdentity.capture(facts['pid'] as int);
+      if(identity==null || facts['processCreatedAt']==null) {missing++; print('MISSING $i $facts');}
+      identity?.close();
+      await worker.stdin.close();
+      final exit=await worker.exitCode.timeout(Duration(seconds:10));
+      if(exit!=0) {failed++; print('FAILED $i ${await state.readAsString()}');}
+    } finally {await worker.stdin.close();await worker.exitCode;await Future.wait([out,err]);
+      final temp=await Directory.systemTemp.resolveSymbolicLinks(),actual=await root.resolveSymbolicLinks();
+      if(actual.toLowerCase()==root.absolute.path.toLowerCase() && actual.toLowerCase().startsWith('${temp.toLowerCase()}${Platform.pathSeparator}'))await root.delete(recursive:true);
+    }
+  }
+  for(var batch=0;batch<75;batch++)await Future.wait([for(var j=0;j<4;j++)run(batch*4+j)]);
+  print('missing=$missing failed=$failed /300');
+}

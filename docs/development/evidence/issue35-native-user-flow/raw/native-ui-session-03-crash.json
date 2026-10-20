@@ -1,0 +1,12 @@
+{
+  "dump": "info_desktop.exe.68096.dmp",
+  "dumpSha256": "3f45b7607e412f94530279887b9406a4929ba8f3744c65d1432cc37f4122db9d",
+  "thread": 60344,
+  "exceptionCode": "0xc0000005",
+  "module": "flutter_windows.dll",
+  "offset": "0x3c1ea",
+  "symbolResolved": true,
+  "symbol": "flutter::AccessibilityBridge::CreateRemoveReparentedNodesUpdate",
+  "displacement": 186,
+  "symbolError": null
+}

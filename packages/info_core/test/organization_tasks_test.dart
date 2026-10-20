@@ -30,6 +30,72 @@ class _DelayedOrganizationRepository extends MemoryInformationRepository {
 
 void main() {
   test(
+    'organization lifetime follows the chosen deadline and rejects invalid decisions atomically',
+    () async {
+      var now = DateTime.utc(2026, 10, 17);
+      final service = InformationService.fictional(clock: () => now);
+      addTearDown(service.close);
+      final session = service.agent.openSession('Organizer');
+      final task = await service.agent.requestOrganization(session, '分类整理', [
+        'demo-server',
+      ]);
+      for (final invalid in [
+        Duration.zero,
+        const Duration(seconds: -1),
+        const Duration(minutes: 31),
+      ]) {
+        await expectLater(
+          service.owner.approveOrganization(task.id, [
+            'demo-server',
+          ], lifetime: invalid),
+          throwsA(
+            isA<AccessFailure>().having(
+              (e) => e.status,
+              'status',
+              'invalid_duration',
+            ),
+          ),
+        );
+        expect(
+          service.agent.organizationStatus(session, task.id)['status'],
+          'pending',
+        );
+      }
+      await service.owner.approveOrganization(task.id, [
+        'demo-server',
+      ], lifetime: const Duration(minutes: 15));
+      expect(
+        service.owner.organizationTasks.single.expiresAt,
+        now.add(const Duration(minutes: 15)),
+      );
+      expect(
+        (await service.agent.organizationMetadata(session, task.id))['items'],
+        hasLength(1),
+      );
+      final other = await service.agent.requestOrganization(session, '默认期限', [
+        'demo-server',
+      ]);
+      await service.owner.approveOrganization(other.id, ['demo-server']);
+      expect(
+        service.owner.organizationTasks.last.expiresAt,
+        now.add(const Duration(minutes: 30)),
+      );
+      now = now.add(const Duration(minutes: 15));
+      expect(
+        service.agent.organizationStatus(session, task.id)['status'],
+        'expired',
+      );
+      await expectLater(
+        service.agent.organizationMetadata(session, task.id),
+        throwsA(isA<AccessFailure>()),
+      );
+      expect(
+        service.agent.organizationStatus(session, other.id)['status'],
+        'active',
+      );
+    },
+  );
+  test(
     'suggested organization is reused and committed once with the reviewed import',
     () async {
       final service = InformationService(

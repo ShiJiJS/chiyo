@@ -87,12 +87,12 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
         } catch {
           result(FlutterError(code: "backup_staging_failed", message: "Backup staging cleanup incomplete", details: nil))
         }
-      } else if call.method == "backupInput" {
+      } else if call.method == "backupInput" || call.method == "recoveryKeyInput" || call.method == "credentialInput" {
         let panel = NSOpenPanel()
         panel.canChooseDirectories = false
         panel.canChooseFiles = true
         panel.allowsMultipleSelection = false
-        panel.allowedFileTypes = ["aimbackup"]
+        if call.method != "credentialInput" { panel.allowedFileTypes = [call.method == "recoveryKeyInput" ? "txt" : "aimbackup"] }
         panel.beginSheetModal(for: window) { response in
           result(response == .OK ? panel.url?.path : nil)
         }
@@ -155,6 +155,9 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
         let content = UNMutableNotificationContent()
         content.title = "信息访问授权"
         content.body = call.method == "testNotify" ? "这是一条测试通知。访问申请提醒已连接到系统。" : "有新的访问请求。打开应用查看并审批。"
+        if call.method == "notify", let requestId = call.arguments as? String {
+          content.userInfo = ["requestId": requestId]
+        }
         let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
         UNUserNotificationCenter.current().add(request) { error in
           DispatchQueue.main.async { result(error == nil) }
@@ -221,6 +224,10 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
   func userNotificationCenter(_ center: UNUserNotificationCenter,
       didReceive response: UNNotificationResponse,
       withCompletionHandler completionHandler: @escaping () -> Void) {
-    DispatchQueue.main.async { self.openApprovals(); completionHandler() }
+    DispatchQueue.main.async {
+      self.showApprovalsWindow()
+      self.desktopChannel?.invokeMethod("open", arguments: response.notification.request.content.userInfo["requestId"] as? String)
+      completionHandler()
+    }
   }
 }

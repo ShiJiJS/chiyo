@@ -1,0 +1,20 @@
+from pathlib import Path
+import json,os,subprocess
+root=Path.cwd();out=root/'build/qa-issue40/visual';out.mkdir(parents=True,exist_ok=False)
+locks={root/p/'pubspec.lock':(root/p/'pubspec.lock').read_bytes() for p in ['packages/info_core','packages/info_storage','packages/info_cli','apps/desktop']};norm=lambda b:b.replace(b'https://pub.flutter-io.cn',b'https://pub.dev').replace(b'\r\n',b'\n')
+env=os.environ.copy();env.update(PUB_HOSTED_URL='https://pub.flutter-io.cn',FLUTTER_STORAGE_BASE_URL='https://storage.flutter-io.cn')
+steps=[]
+def run(name,exe,args):
+ with (out/(name+'.txt')).open('wb') as log:code=subprocess.run([exe,*args],cwd=root/'apps/desktop',env=env,stdout=log,stderr=subprocess.STDOUT).returncode
+ steps.append({'name':name,'exitCode':code});print(steps[-1],flush=True);assert code==0,name
+try:
+ for p,b in locks.items():p.write_bytes(b.replace(b'https://pub.dev',b'https://pub.flutter-io.cn'))
+ run('format',r'C:/Users/Todoki/.local/share/flutter/bin/dart.bat',['format','tool/render_removed_field_state_test.dart'])
+ run('pub',r'C:/Users/Todoki/.local/share/flutter/bin/flutter.bat',['pub','get','--offline','--enforce-lockfile'])
+ run('render',r'C:/Users/Todoki/.local/share/flutter/bin/flutter.bat',['test','--no-pub','--reporter','json','--dart-define=REMOVED_FIELD_RENDER_DIRECTORY='+str(out/'images'),'tool/render_removed_field_state_test.dart'])
+finally:
+ bad=[]
+ for p,b in locks.items():
+  if norm(p.read_bytes())!=norm(b):bad.append(str(p))
+  else:p.write_bytes(b)
+ (out/'result.json').write_text(json.dumps({'steps':steps,'unexpectedLocks':bad},indent=2)+'\n',encoding='utf-8');assert not bad,bad

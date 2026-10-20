@@ -1,3 +1,4 @@
+import 'backup_setup.dart';
 import 'dart:io';
 import 'dart:convert';
 import 'package:info_core/info_core.dart';
@@ -32,7 +33,7 @@ void main() {
         [const FieldInput('Value', '', 'FICTIONAL-DPAPI-BACKUP-41232')],
       );
       final originalKey = await originalKeys.read();
-      final recovery = await source.backups.enable();
+      final recovery = await enableTestBackups(source.backups);
       final backup = '${root.path}/independent.aimbackup';
       await source.backups.exportTo(backup);
       await source.close();
@@ -120,7 +121,7 @@ void main() {
         ]),
       ]);
       ownerService.agent.request(session, 'still pending', [ref]);
-      final recovery = await source.backups.enable();
+      final recovery = await enableTestBackups(source.backups);
       expect(
         base64Url.decode(recovery.substring('aim-recovery-v1:'.length)),
         isNot(sourceKeys.key),
@@ -207,7 +208,7 @@ void main() {
         '',
         [const FieldInput('Value', '', 'fictional source')],
       );
-      final recovery = await source.backups.enable();
+      final recovery = await enableTestBackups(source.backups);
       final backup = '${root.path}/source.aimbackup';
       await source.backups.exportTo(backup);
       final before = File(backup).readAsBytesSync();
@@ -265,7 +266,7 @@ void main() {
         _Keys(),
       );
       addTearDown(store.close);
-      final recovery = await store.backups.enable();
+      final recovery = await enableTestBackups(store.backups);
       final path = '${root.path}/separate-recovery-key.txt';
       await store.backups.saveRecoveryKeyTo(path);
       expect(await File(path).readAsString(), '$recovery\n');
@@ -293,7 +294,7 @@ void main() {
         '',
         [const FieldInput('Value', '', 'fictional')],
       );
-      final recovery = await source.backups.enable();
+      final recovery = await enableTestBackups(source.backups);
       final path = '${root.path}/good.aimbackup';
       await source.backups.exportTo(path);
       await source.close();
@@ -334,7 +335,7 @@ void main() {
       await File(path).copy(malformed);
       final malformedDb = sqlite3.open(malformed);
       malformedDb.execute('PRAGMA key = "x\'$hex\'"');
-      payload['version'] = 1;
+      payload['version'] = 5;
       (payload['tables']['information_fields'] as List).single['kind'] =
           'unknown';
       malformedDb.execute('UPDATE backup_snapshot SET payload=?', [
@@ -384,7 +385,7 @@ void main() {
       '${root.path}/source',
       _Keys(),
     );
-    final key = await source.backups.enable();
+    final key = await enableTestBackups(source.backups);
     final backup = '${root.path}/empty.aimbackup';
     await source.backups.exportTo(backup);
     await source.close();

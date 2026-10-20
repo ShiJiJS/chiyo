@@ -1,0 +1,172 @@
+{
+  "productSource": "887f1c2e29da8799cfec48032ac4967d1576fb77",
+  "payloadFiles": 113,
+  "specificDeleteRestoreChecksComplete": true,
+  "allUIStatesCorrect": false,
+  "newDefectIssue": 40,
+  "nativeAppProcesses": 1,
+  "normalExits": 1,
+  "uiDeletions": 1,
+  "uiRestores": 1,
+  "rawCount": 16,
+  "sourceCount": 11,
+  "raw": [
+    {
+      "source": "build/qa-issue18-recycle-delete/run-01/analyze.txt",
+      "path": "raw/analyze.txt",
+      "bytes": 43,
+      "sha256": "a489b1249880b489826d25a25a28b316c5059ae3c5e62feecfc2b7949aba9041"
+    },
+    {
+      "source": "build/qa-issue18-recycle-delete/run-01/app.txt",
+      "path": "raw/app.txt",
+      "bytes": 8589,
+      "sha256": "80238483bf4421e97fe99c310064672fd0f16806aa2408e3e9c079f6fcbec902"
+    },
+    {
+      "source": "build/qa-issue18-recycle-delete/run-01/cli-stderr.txt",
+      "path": "raw/cli-stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "build/qa-issue18-recycle-delete/run-01/delete-observed.json",
+      "path": "raw/delete-observed.json",
+      "bytes": 339,
+      "sha256": "a8b5bf06accfdd559cbb6e8348decc25b41ad08f1295f5b29ce48bfd252739d4"
+    },
+    {
+      "source": "build/qa-issue18-recycle-delete/run-01/executed-driver.py.txt",
+      "path": "raw/executed-driver.py.txt",
+      "bytes": 13646,
+      "sha256": "5a93bf1c4fc9e28fef065f4c275cd8b39ecdf9d85724752dc9c6997e9e597f32"
+    },
+    {
+      "source": "build/qa-issue18-recycle-delete/run-01/executed-fixture.dart.txt",
+      "path": "raw/executed-fixture.dart.txt",
+      "bytes": 6145,
+      "sha256": "4db50b3c05bf226b9357e8f41162d009dfe2a89f727131e4666934360528f1ef"
+    },
+    {
+      "source": "build/qa-issue18-recycle-delete/run-01/final-observed.json",
+      "path": "raw/final-observed.json",
+      "bytes": 431,
+      "sha256": "e2ccac530e0248c3c8adcd3bc6565b053e6cd3a43ccf5234259e2d0b8414d1ab"
+    },
+    {
+      "source": "build/qa-issue18-recycle-delete/run-01/format.txt",
+      "path": "raw/format.txt",
+      "bytes": 102,
+      "sha256": "c368e3543e8d034d0ddd4be429da8efb00289f27fa7d8b176e50fcb84b911fd6"
+    },
+    {
+      "source": "build/qa-issue18-recycle-delete/run-01/help.txt",
+      "path": "raw/help.txt",
+      "bytes": 1176,
+      "sha256": "62682507063d19ae75a27f858b0198b88decfa965cc66a73a463b06d8b94b119"
+    },
+    {
+      "source": "build/qa-issue18-recycle-delete/run-01/inspect-completed.txt",
+      "path": "raw/inspect-completed.txt",
+      "bytes": 463,
+      "sha256": "dbeda9cfb4196b5cdaf669ab9b392ae50930c728ae06f7658cc47fbc441fef79"
+    },
+    {
+      "source": "build/qa-issue18-recycle-delete/run-01/inspect.txt",
+      "path": "raw/inspect.txt",
+      "bytes": 342,
+      "sha256": "8a4bbe5d2bc8a01e832854c8206dab7e4c5507a1f139b7ecffda0e0c41a2c24d"
+    },
+    {
+      "source": "build/qa-issue18-recycle-delete/run-01/phase.json",
+      "path": "raw/phase.json",
+      "bytes": 23,
+      "sha256": "4efd11ab61b6049b532dfbcdaa9095923c2bd52cc470510642612dab672ddb88"
+    },
+    {
+      "source": "build/qa-issue18-recycle-delete/run-01/phases.jsonl",
+      "path": "raw/phases.jsonl",
+      "bytes": 797,
+      "sha256": "24c817cd25e1216ddb3c7fa627cbc3c935e35f88bbaa3129e6b32c138746cecb"
+    },
+    {
+      "source": "build/qa-issue18-recycle-delete/run-01/post-checks.json",
+      "path": "raw/post-checks.json",
+      "bytes": 244,
+      "sha256": "7409aa884c6ee326a70870b8064ba23c2cbf11209bad571aabe947a2ae3962c6"
+    },
+    {
+      "source": "build/qa-issue18-recycle-delete/run-01/pub.txt",
+      "path": "raw/pub.txt",
+      "bytes": 258,
+      "sha256": "a24779315fffab73870dfc7b15b56246a95b601b3432e434b43cd223bf752a6a"
+    },
+    {
+      "source": "build/qa-issue18-recycle-delete/run-01/result.json",
+      "path": "raw/result.json",
+      "bytes": 3634,
+      "sha256": "43245a26a42c7a751336f42fc47633f9709486b2a8d42886461a1ef6094eef50"
+    }
+  ],
+  "sources": [
+    {
+      "path": "scripts/test-windows-packaged-recycle-delete.py",
+      "bytes": 13646,
+      "sha256": "5a93bf1c4fc9e28fef065f4c275cd8b39ecdf9d85724752dc9c6997e9e597f32"
+    },
+    {
+      "path": "packages/info_storage/test/support/packaged_recycle_ui_fixture.dart",
+      "bytes": 6145,
+      "sha256": "4db50b3c05bf226b9357e8f41162d009dfe2a89f727131e4666934360528f1ef"
+    },
+    {
+      "path": "apps/desktop/lib/recycle.dart",
+      "bytes": 18743,
+      "sha256": "e3a41cc0faaa12869b12b70f72a46803d0da900ce3f19a6eebc27c750563a348"
+    },
+    {
+      "path": "apps/desktop/lib/approvals.dart",
+      "bytes": 82147,
+      "sha256": "a13757a7b063fb7308cef42669a50289c70616964cfd68bccd3c86f4174a8366"
+    },
+    {
+      "path": "apps/desktop/lib/history.dart",
+      "bytes": 56107,
+      "sha256": "6b9eb96a5a832d6819d30960d498211e2c5544bdf863957423772da324003004"
+    },
+    {
+      "path": "packages/info_core/lib/recycle_access.dart",
+      "bytes": 10968,
+      "sha256": "f40ea6e28643a921451cef639205f1b391a1e7d9cd821ad98909e1b6df77d1d9"
+    },
+    {
+      "path": "packages/info_core/lib/information_delivery_access.dart",
+      "bytes": 20759,
+      "sha256": "c9353fab6d6af0da832ca9a9435896847b868b5bc33fc2558e7dc6a2d7589e3f"
+    },
+    {
+      "path": "packages/info_core/pubspec.lock",
+      "bytes": 12286,
+      "sha256": "f8220e6477f28a1bb4b1914847377b675dbd5cbf50ca609bd23ded65e2fd5328"
+    },
+    {
+      "path": "packages/info_storage/pubspec.lock",
+      "bytes": 14332,
+      "sha256": "d5def0ba580249b39ce5f42292705851b16230903276c6a17ec9e2af4df30e39"
+    },
+    {
+      "path": "packages/info_cli/pubspec.lock",
+      "bytes": 12433,
+      "sha256": "b8695e9c135a0441eb384507acb347d334a190451f63be7874e22c058f56b3c2"
+    },
+    {
+      "path": "apps/desktop/pubspec.lock",
+      "bytes": 11802,
+      "sha256": "4c5e88461035c36d85d8fa9fb50f69e1450aa1662f677e5723417471f669c70b"
+    }
+  ],
+  "manifest": {
+    "path": "build/windows-preview-0.4.0-11-887f1c2/AgentInfoManage/manifest.json",
+    "sha256": "07fb3432acc19ce300fb335eb931d906140d7297f5e20a26e3be1a7a4fc424b2"
+  }
+}

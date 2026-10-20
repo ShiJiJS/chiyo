@@ -1,10 +1,41 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:isolate';
+import 'dart:math';
+import 'package:crypto/crypto.dart';
+import 'package:info_core/info_core.dart';
+import 'package:info_core/protocol_json.dart';
+import 'credential_output_filter.dart';
+part 'credential_runtime_client.dart';
+part 'information_file_client.dart';
 
 class AgentClient {
-  AgentClient(this.port, {String? sessionSecret, this.sourceAgent = '通用 CLI'})
-    : _session = sessionSecret;
+  AgentClient(
+    this.port, {
+    String? sessionSecret,
+    this.sourceAgent = '通用 CLI',
+    CredentialProcessStarter? credentialProcessStarter,
+    this.hostedCredentialExecutions = false,
+    String? runtimeWorkerExecutable,
+  }) : _session = sessionSecret,
+       _runtimeWorkerExecutable = runtimeWorkerExecutable,
+       _usesDefaultCredentialStarter = credentialProcessStarter == null,
+       _credentialProcessStarter =
+           credentialProcessStarter ??
+           ((exe, argv, cwd, env) => _startCredentialProcess(
+             exe,
+             argv,
+             cwd,
+             env,
+             workerExecutable: runtimeWorkerExecutable,
+           ));
+  final bool hostedCredentialExecutions;
+  final String? _runtimeWorkerExecutable;
+  final CredentialProcessStarter _credentialProcessStarter;
+  final bool _usesDefaultCredentialStarter;
+  late final _credentialExecutions = _CredentialRuntimeExecutor(this);
+  Future<void> drainCredentialExecutions() => _credentialExecutions.drain();
   final int port;
   final String sourceAgent;
   final _http = HttpClient()..connectionTimeout = const Duration(seconds: 3);
@@ -41,15 +72,73 @@ class AgentClient {
 
   Future<Map<String, dynamic>> execute(Map<String, dynamic> input) async {
     final command = input['command'];
+    if ({'file-fetch', 'file-status', 'file-release'}.contains(command)) {
+      return _executeInformationFileCommand(input);
+    }
+    if ({
+      'request-use',
+      'run-use',
+      'operation-status',
+      'execution-status',
+      'execution-output',
+      'cleanup-use',
+      'fill-use',
+      'fill-status',
+      'focus-target',
+    }.contains(command)) {
+      return _executeCredentialCommand(input);
+    }
     if (utf8.encode(jsonEncode(input)).length >
-        (command == 'import-submit' ||
+        (command == 'credential-catalog' ||
+                command == 'import-submit' ||
                 command == 'update-submit' ||
                 command == 'organize-submit'
             ? 262144
             : 16384)) {
-      return {'status': 'invalid_request'};
+      return command == 'credential-catalog'
+          ? {
+              'protocolVersion': 1,
+              'status': 'invalid_request',
+              'errorCode': 'limit_exceeded',
+              'retryable': false,
+            }
+          : {'status': 'invalid_request'};
     }
     switch (command) {
+      case 'capabilities':
+        if (input.keys.any((k) => k != 'command')) {
+          return Map<String, dynamic>.from(
+            const CredentialUseFailure('unknown_field').toJson(),
+          );
+        }
+        return _call('/capabilities', {});
+      case 'credential-catalog':
+        if (input.keys.any(
+          (k) => !{'command', 'cursor', 'limit'}.contains(k),
+        )) {
+          return {
+            'protocolVersion': 1,
+            'status': 'invalid_request',
+            'errorCode': 'unknown_field',
+            'retryable': false,
+          };
+        }
+        if (input['cursor'] != null && input['cursor'] is! String ||
+            input.containsKey('limit') &&
+                (input['limit'] is! int ||
+                    (input['limit'] as int) < 1 ||
+                    (input['limit'] as int) > 100)) {
+          return {
+            'protocolVersion': 1,
+            'status': 'invalid_request',
+            'errorCode': 'invalid_type',
+            'retryable': false,
+          };
+        }
+        return _call('/credentials/catalog', {
+          'cursor': input['cursor'],
+          'limit': input['limit'] ?? 50,
+        });
       case 'organize-request':
         if (_session == null) return {'status': 'unauthorized'};
         return _call('/organization/request', {
@@ -144,6 +233,7 @@ class AgentClient {
         });
       case 'catalog':
         return _call('/catalog', {
+          'protocolVersion': input['protocolVersion'] ?? 2,
           for (final key in [
             'query',
             'directoryId',
@@ -171,6 +261,7 @@ class AgentClient {
       case 'request':
         if (_session == null) return {'status': 'unauthorized'};
         return _call('/request', {
+          'protocolVersion': input['protocolVersion'] ?? 2,
           'sessionSecret': _session,
           'purpose': input['purpose'],
           'fields': input['fields'],
@@ -228,8 +319,9 @@ class AgentClient {
 
   Future<Map<String, dynamic>> _call(
     String path,
-    Map<String, dynamic> data,
-  ) async {
+    Map<String, dynamic> data, {
+    Duration timeout = const Duration(seconds: 5),
+  }) async {
     try {
       return await (() async {
         final request = await _http.post('127.0.0.1', port, path);
@@ -239,7 +331,7 @@ class AgentClient {
         final response = await request.close();
         final text = await utf8.decoder.bind(response).join();
         return jsonDecode(text) as Map<String, dynamic>;
-      })().timeout(const Duration(seconds: 5));
+      })().timeout(timeout);
     } on Object {
       return {'status': 'service_unavailable'};
     }

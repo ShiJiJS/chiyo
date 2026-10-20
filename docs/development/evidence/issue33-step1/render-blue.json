@@ -1,0 +1,128 @@
+[
+  {
+    "file": "reuse-approval-1440x900.png",
+    "state": "reuse-approval",
+    "size": "1440x900",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  },
+  {
+    "file": "reuse-approval-1280x800.png",
+    "state": "reuse-approval",
+    "size": "1280x800",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  },
+  {
+    "file": "reuse-result-1440x900.png",
+    "state": "reuse-result",
+    "size": "1440x900",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  },
+  {
+    "file": "reuse-result-1280x800.png",
+    "state": "reuse-result",
+    "size": "1280x800",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  },
+  {
+    "file": "reuse-history-1440x900.png",
+    "state": "reuse-history",
+    "size": "1440x900",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  },
+  {
+    "file": "reuse-running-1440x900.png",
+    "state": "reuse-running",
+    "size": "1440x900",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  },
+  {
+    "file": "reuse-failed-1440x900.png",
+    "state": "reuse-failed",
+    "size": "1440x900",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  },
+  {
+    "file": "reuse-unknown-1440x900.png",
+    "state": "reuse-unknown",
+    "size": "1440x900",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  },
+  {
+    "file": "reuse-revoked-1440x900.png",
+    "state": "reuse-revoked",
+    "size": "1440x900",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  },
+  {
+    "file": "reuse-history-1280x800.png",
+    "state": "reuse-history",
+    "size": "1280x800",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  },
+  {
+    "file": "reuse-running-1280x800.png",
+    "state": "reuse-running",
+    "size": "1280x800",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  },
+  {
+    "file": "reuse-failed-1280x800.png",
+    "state": "reuse-failed",
+    "size": "1280x800",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  },
+  {
+    "file": "reuse-unknown-1280x800.png",
+    "state": "reuse-unknown",
+    "size": "1280x800",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  },
+  {
+    "file": "reuse-revoked-1280x800.png",
+    "state": "reuse-revoked",
+    "size": "1280x800",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  }
+]

@@ -1,0 +1,7 @@
+{"pid":36736,"phase":"started"}
+{"pid":36736,"phase":"close-drain-started"}
+{"pid":36736,"phase":"close-drain-complete"}
+{"pid":36736,"phase":"host-close-complete"}
+{"pid":36736,"phase":"close-reply-flushed"}
+{"pid":36736,"phase":"finally-entered"}
+{"pid":36736,"phase":"finally-complete"}

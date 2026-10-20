@@ -1,0 +1,279 @@
+{
+  "phases": [
+    {
+      "phase": "pub",
+      "exitCode": 0
+    },
+    {
+      "phase": "analyze",
+      "exitCode": 0
+    },
+    {
+      "phase": "build",
+      "exitCode": 0
+    },
+    {
+      "phase": "jit-small",
+      "exitCode": 0
+    },
+    {
+      "phase": "aot-small",
+      "exitCode": 0
+    },
+    {
+      "phase": "jit-near-limit",
+      "exitCode": 0
+    },
+    {
+      "phase": "aot-near-limit",
+      "exitCode": 0
+    }
+  ],
+  "runs": [
+    {
+      "result": {
+        "scenario": "small",
+        "execution": "JIT",
+        "dart": "3.13.5 (stable) (Tue Sep 29 01:00:52 2026 -0700) on \"windows_x64\"",
+        "baselineRss": 316088320,
+        "metadataBytes": 24508,
+        "originalBytes": 104857600,
+        "managedCopyBytes": 104857600,
+        "backupFileBytes": 107413504,
+        "exportAndVerifyMs": 11168,
+        "inspectAndRestoreMs": 13593,
+        "allVersionsExact": true,
+        "restoredFactsOnly": true,
+        "measurements": [
+          {
+            "phase": "originals-retention-recycle",
+            "elapsedMs": 8147,
+            "rss": 342818816,
+            "maxRss": 393031680
+          },
+          {
+            "phase": "ten100MiB-native-copies",
+            "elapsedMs": 13536,
+            "rss": 354353152,
+            "maxRss": 393031680
+          },
+          {
+            "phase": "metadata-admitted",
+            "elapsedMs": 24194,
+            "rss": 352964608,
+            "maxRss": 393031680
+          },
+          {
+            "phase": "full-export-verified",
+            "elapsedMs": 35363,
+            "rss": 310784000,
+            "maxRss": 393031680
+          },
+          {
+            "phase": "atomic-restore",
+            "elapsedMs": 49046,
+            "rss": 329498624,
+            "maxRss": 393031680
+          },
+          {
+            "phase": "all-versions-checked-copies-released",
+            "elapsedMs": 52452,
+            "rss": 334032896,
+            "maxRss": 393031680
+          }
+        ],
+        "maxRss": 393031680,
+        "totalMs": 52452
+      },
+      "temporaryOutputRemoved": true,
+      "run": "jit-small"
+    },
+    {
+      "result": {
+        "scenario": "small",
+        "execution": "AOT bundle",
+        "dart": "3.13.5 (stable) (Tue Sep 29 01:00:52 2026 -0700) on \"windows_x64\"",
+        "baselineRss": 16302080,
+        "metadataBytes": 24508,
+        "originalBytes": 104857600,
+        "managedCopyBytes": 104857600,
+        "backupFileBytes": 107413504,
+        "exportAndVerifyMs": 10033,
+        "inspectAndRestoreMs": 12849,
+        "allVersionsExact": true,
+        "restoredFactsOnly": true,
+        "measurements": [
+          {
+            "phase": "originals-retention-recycle",
+            "elapsedMs": 7319,
+            "rss": 50110464,
+            "maxRss": 87568384
+          },
+          {
+            "phase": "ten100MiB-native-copies",
+            "elapsedMs": 12359,
+            "rss": 60850176,
+            "maxRss": 87568384
+          },
+          {
+            "phase": "metadata-admitted",
+            "elapsedMs": 22535,
+            "rss": 48566272,
+            "maxRss": 87568384
+          },
+          {
+            "phase": "full-export-verified",
+            "elapsedMs": 32570,
+            "rss": 48590848,
+            "maxRss": 87568384
+          },
+          {
+            "phase": "atomic-restore",
+            "elapsedMs": 45508,
+            "rss": 74457088,
+            "maxRss": 109273088
+          },
+          {
+            "phase": "all-versions-checked-copies-released",
+            "elapsedMs": 48873,
+            "rss": 78790656,
+            "maxRss": 109273088
+          }
+        ],
+        "maxRss": 109273088,
+        "totalMs": 48873
+      },
+      "temporaryOutputRemoved": true,
+      "run": "aot-small"
+    },
+    {
+      "result": {
+        "scenario": "near-limit",
+        "execution": "JIT",
+        "dart": "3.13.5 (stable) (Tue Sep 29 01:00:52 2026 -0700) on \"windows_x64\"",
+        "baselineRss": 312373248,
+        "metadataBytes": 67043368,
+        "originalBytes": 104857600,
+        "managedCopyBytes": 104857600,
+        "backupFileBytes": 175833088,
+        "exportAndVerifyMs": 15466,
+        "inspectAndRestoreMs": 17548,
+        "allVersionsExact": true,
+        "restoredFactsOnly": true,
+        "measurements": [
+          {
+            "phase": "originals-retention-recycle",
+            "elapsedMs": 8104,
+            "rss": 371691520,
+            "maxRss": 392671232
+          },
+          {
+            "phase": "ten100MiB-native-copies",
+            "elapsedMs": 13382,
+            "rss": 365301760,
+            "maxRss": 392671232
+          },
+          {
+            "phase": "metadata-admitted",
+            "elapsedMs": 27886,
+            "rss": 678322176,
+            "maxRss": 894939136
+          },
+          {
+            "phase": "full-export-verified",
+            "elapsedMs": 43534,
+            "rss": 817692672,
+            "maxRss": 897650688
+          },
+          {
+            "phase": "atomic-restore",
+            "elapsedMs": 61172,
+            "rss": 788754432,
+            "maxRss": 954318848
+          },
+          {
+            "phase": "all-versions-checked-copies-released",
+            "elapsedMs": 71646,
+            "rss": 790466560,
+            "maxRss": 954318848
+          }
+        ],
+        "maxRss": 954318848,
+        "totalMs": 71647
+      },
+      "temporaryOutputRemoved": true,
+      "run": "jit-near-limit"
+    },
+    {
+      "result": {
+        "scenario": "near-limit",
+        "execution": "AOT bundle",
+        "dart": "3.13.5 (stable) (Tue Sep 29 01:00:52 2026 -0700) on \"windows_x64\"",
+        "baselineRss": 16310272,
+        "metadataBytes": 67043368,
+        "originalBytes": 104857600,
+        "managedCopyBytes": 104857600,
+        "backupFileBytes": 175833088,
+        "exportAndVerifyMs": 13105,
+        "inspectAndRestoreMs": 18699,
+        "allVersionsExact": true,
+        "restoredFactsOnly": true,
+        "measurements": [
+          {
+            "phase": "originals-retention-recycle",
+            "elapsedMs": 7131,
+            "rss": 50073600,
+            "maxRss": 87855104
+          },
+          {
+            "phase": "ten100MiB-native-copies",
+            "elapsedMs": 11852,
+            "rss": 60833792,
+            "maxRss": 87855104
+          },
+          {
+            "phase": "metadata-admitted",
+            "elapsedMs": 26261,
+            "rss": 386293760,
+            "maxRss": 513982464
+          },
+          {
+            "phase": "full-export-verified",
+            "elapsedMs": 39548,
+            "rss": 189554688,
+            "maxRss": 524623872
+          },
+          {
+            "phase": "atomic-restore",
+            "elapsedMs": 58335,
+            "rss": 551473152,
+            "maxRss": 551473152
+          },
+          {
+            "phase": "all-versions-checked-copies-released",
+            "elapsedMs": 69996,
+            "rss": 484409344,
+            "maxRss": 635666432
+          }
+        ],
+        "maxRss": 635666432,
+        "totalMs": 69997
+      },
+      "temporaryOutputRemoved": true,
+      "run": "aot-near-limit"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "bin/measure_information_library.exe",
+      "bytes": 7921664,
+      "sha256": "0dc141a6505bf4dabb8144a97752abbd8ebe93836ab38d4c41e68efcf0386cc6"
+    },
+    {
+      "path": "lib/sqlcipher.dll",
+      "bytes": 4688896,
+      "sha256": "9c7d9d08cb64c868e1829af86b4419bf25b8b985116ae1a1e82d647652d5931e"
+    }
+  ],
+  "unexpectedLocks": []
+}

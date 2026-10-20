@@ -1,0 +1,3 @@
+00:00 +0: loading test/ssh_credential_runtime_test.dart
+00:00 +0: approved SSH receives exactly one key path and immutable host snapshot with private empty configurations
+00:00 +1: All tests passed!

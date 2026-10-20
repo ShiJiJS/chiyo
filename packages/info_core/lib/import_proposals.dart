@@ -38,15 +38,7 @@ class ImportItemInput {
     'suggestedDirectory': suggestedDirectory,
     'suggestedTags': suggestedTags,
     'suggestedTemplate': suggestedTemplate,
-    'fields': [
-      for (final f in fields)
-        {
-          'name': f.name,
-          'description': f.description,
-          'value': f.value,
-          'kind': f.kind.name,
-        },
-    ],
+    'fields': [for (final f in fields) f.toJson()],
   };
 
   factory ImportItemInput.fromJson(Map<String, dynamic> json) =>
@@ -54,12 +46,7 @@ class ImportItemInput {
         json['name'] as String,
         json['description'] as String? ?? '',
         (json['fields'] as List).map(
-          (dynamic f) => FieldInput(
-            f['name'] as String,
-            f['description'] as String? ?? '',
-            f['value'] as String,
-            kind: FieldKind.values.byName(f['kind'] as String? ?? 'structured'),
-          ),
+          (dynamic f) => FieldInput.fromJson(f as Map<String, dynamic>),
         ),
         directoryId: json['directoryId'] as String?,
         tagIds: (json['tagIds'] as List? ?? []).cast<String>(),

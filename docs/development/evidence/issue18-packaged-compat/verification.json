@@ -1,0 +1,412 @@
+{
+  "productSource": "887f1c2e29da8799cfec48032ac4967d1576fb77",
+  "payloadFiles": 113,
+  "formatSources": {
+    "1-4": "current snapshot compatibility projections, not genuine legacy writers",
+    "8": "current Owner file draft/export interfaces"
+  },
+  "completedFormatsFromRun01": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "completedFormatsFromRun02": [
+    8
+  ],
+  "run01TopLevelComplete": false,
+  "supplementaryStrongInspections": 5,
+  "nativeAppProcesses": 6,
+  "nativeOpenDialogs": 12,
+  "rawCount": 56,
+  "sourceCount": 9,
+  "raw": [
+    {
+      "source": "build/qa-issue18-compat/run-01/agent-1-stderr.txt",
+      "path": "raw/run-01/agent-1-stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "build/qa-issue18-compat/run-01/agent-2-stderr.txt",
+      "path": "raw/run-01/agent-2-stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "build/qa-issue18-compat/run-01/agent-3-stderr.txt",
+      "path": "raw/run-01/agent-3-stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "build/qa-issue18-compat/run-01/agent-4-stderr.txt",
+      "path": "raw/run-01/agent-4-stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "build/qa-issue18-compat/run-01/agent-8-stderr.txt",
+      "path": "raw/run-01/agent-8-stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "build/qa-issue18-compat/run-01/analyze.txt",
+      "path": "raw/run-01/analyze.txt",
+      "bytes": 43,
+      "sha256": "a489b1249880b489826d25a25a28b316c5059ae3c5e62feecfc2b7949aba9041"
+    },
+    {
+      "source": "build/qa-issue18-compat/run-01/app-1.txt",
+      "path": "raw/run-01/app-1.txt",
+      "bytes": 134,
+      "sha256": "d057cc3292153d1658c1b2e6b222c1dac3fac376a84fde6d39cc55843fe25bdc"
+    },
+    {
+      "source": "build/qa-issue18-compat/run-01/app-2.txt",
+      "path": "raw/run-01/app-2.txt",
+      "bytes": 134,
+      "sha256": "d057cc3292153d1658c1b2e6b222c1dac3fac376a84fde6d39cc55843fe25bdc"
+    },
+    {
+      "source": "build/qa-issue18-compat/run-01/app-3.txt",
+      "path": "raw/run-01/app-3.txt",
+      "bytes": 134,
+      "sha256": "d057cc3292153d1658c1b2e6b222c1dac3fac376a84fde6d39cc55843fe25bdc"
+    },
+    {
+      "source": "build/qa-issue18-compat/run-01/app-4.txt",
+      "path": "raw/run-01/app-4.txt",
+      "bytes": 134,
+      "sha256": "d057cc3292153d1658c1b2e6b222c1dac3fac376a84fde6d39cc55843fe25bdc"
+    },
+    {
+      "source": "build/qa-issue18-compat/run-01/app-8.txt",
+      "path": "raw/run-01/app-8.txt",
+      "bytes": 134,
+      "sha256": "d057cc3292153d1658c1b2e6b222c1dac3fac376a84fde6d39cc55843fe25bdc"
+    },
+    {
+      "source": "build/qa-issue18-compat/run-01/executed-fixture-at-failure.dart.txt",
+      "path": "raw/run-01/executed-fixture-at-failure.dart.txt",
+      "bytes": 9839,
+      "sha256": "7962a18809a5753081f73982b7d7fcc045751ba93ef41aaa0d43085523b7f32a"
+    },
+    {
+      "source": "build/qa-issue18-compat/run-01/fixture-format.txt",
+      "path": "raw/run-01/fixture-format.txt",
+      "bytes": 98,
+      "sha256": "b54c318661bb394aac95ad6deba82fdd70f418fe30c7243b2e161be1220ddff5"
+    },
+    {
+      "source": "build/qa-issue18-compat/run-01/inspect-1.txt",
+      "path": "raw/run-01/inspect-1.txt",
+      "bytes": 262,
+      "sha256": "2acce411e75b8a6c0cdcbbfef6405942e55039e99f186e568e040f8691f3c783"
+    },
+    {
+      "source": "build/qa-issue18-compat/run-01/inspect-2.txt",
+      "path": "raw/run-01/inspect-2.txt",
+      "bytes": 262,
+      "sha256": "0ced309fd3b4d7bc1773f2a6f27da945cd5051fa225468f3057787c87660b8a7"
+    },
+    {
+      "source": "build/qa-issue18-compat/run-01/inspect-3.txt",
+      "path": "raw/run-01/inspect-3.txt",
+      "bytes": 263,
+      "sha256": "ccae5505be44338d694b8356f40d6b4a83071ba7d98ef3a29e2a7ce26965145f"
+    },
+    {
+      "source": "build/qa-issue18-compat/run-01/inspect-4.txt",
+      "path": "raw/run-01/inspect-4.txt",
+      "bytes": 263,
+      "sha256": "ccae5505be44338d694b8356f40d6b4a83071ba7d98ef3a29e2a7ce26965145f"
+    },
+    {
+      "source": "build/qa-issue18-compat/run-01/inspect-8.txt",
+      "path": "raw/run-01/inspect-8.txt",
+      "bytes": 340,
+      "sha256": "a0b45a4e35bef7570f172f14926ffdc4f7000cf63ec8032925655f5361859e45"
+    },
+    {
+      "source": "build/qa-issue18-compat/run-01/observed-format-1.json",
+      "path": "raw/run-01/observed-format-1.json",
+      "bytes": 189,
+      "sha256": "9b900c0497cf54de1ff29d7f16da3d9efeab751e6572bd9d1d6981bd4087d7fd"
+    },
+    {
+      "source": "build/qa-issue18-compat/run-01/observed-format-2.json",
+      "path": "raw/run-01/observed-format-2.json",
+      "bytes": 189,
+      "sha256": "a02f8e1fa886fa2ca7f1cc53656fb59c967a1d16e4331aa7c551bcf87e2abb96"
+    },
+    {
+      "source": "build/qa-issue18-compat/run-01/observed-format-3.json",
+      "path": "raw/run-01/observed-format-3.json",
+      "bytes": 189,
+      "sha256": "636eaffd6e54792abe13e5db1a8f8521afad02f78cc482729192f138d3df123f"
+    },
+    {
+      "source": "build/qa-issue18-compat/run-01/observed-format-4.json",
+      "path": "raw/run-01/observed-format-4.json",
+      "bytes": 189,
+      "sha256": "fa728019331b7ccfb362210bec666d81118a0ec4de623b75c68aad22455f193d"
+    },
+    {
+      "source": "build/qa-issue18-compat/run-01/observed-format-8.json",
+      "path": "raw/run-01/observed-format-8.json",
+      "bytes": 276,
+      "sha256": "01e02cffaeef7c8339427b8d29b6893369a3037cc3f71885a5e5b011475a4f80"
+    },
+    {
+      "source": "build/qa-issue18-compat/run-01/phase.json",
+      "path": "raw/run-01/phase.json",
+      "bytes": 557,
+      "sha256": "d7f59bc34db1abcdad948f56854d18d86d85e468391c6d2bed7967ad25a14b30"
+    },
+    {
+      "source": "build/qa-issue18-compat/run-01/phases.jsonl",
+      "path": "raw/run-01/phases.jsonl",
+      "bytes": 2780,
+      "sha256": "4c7ac8ad77c09cd77611434b19c6caefbf5eba1b8b8053b7d42ce1cf25a79684"
+    },
+    {
+      "source": "build/qa-issue18-compat/run-01/prepare-1.txt",
+      "path": "raw/run-01/prepare-1.txt",
+      "bytes": 173,
+      "sha256": "14c3398cbfade8140b33c6f7042171619d357d68e947447893f1148c3ad8bdf5"
+    },
+    {
+      "source": "build/qa-issue18-compat/run-01/prepare-2.txt",
+      "path": "raw/run-01/prepare-2.txt",
+      "bytes": 173,
+      "sha256": "b618ab5fb1a591a1374cb6a0acedd084e7480be392f83da8b5ac8d62bd36b0c4"
+    },
+    {
+      "source": "build/qa-issue18-compat/run-01/prepare-3.txt",
+      "path": "raw/run-01/prepare-3.txt",
+      "bytes": 173,
+      "sha256": "bf1181df90f4147535e283e9405e1ea5ae2f732219373973633b42ea98e4f410"
+    },
+    {
+      "source": "build/qa-issue18-compat/run-01/prepare-4.txt",
+      "path": "raw/run-01/prepare-4.txt",
+      "bytes": 173,
+      "sha256": "4880a576a7f2c696a30e0275691df44041befd3e94e7432b45163029c2afefb4"
+    },
+    {
+      "source": "build/qa-issue18-compat/run-01/prepare-8.txt",
+      "path": "raw/run-01/prepare-8.txt",
+      "bytes": 175,
+      "sha256": "ce689693f861eeb3f042f79be5562c195a983129e62544e7302e5fa0edcadc06"
+    },
+    {
+      "source": "build/qa-issue18-compat/run-01/pub.txt",
+      "path": "raw/run-01/pub.txt",
+      "bytes": 258,
+      "sha256": "a24779315fffab73870dfc7b15b56246a95b601b3432e434b43cd223bf752a6a"
+    },
+    {
+      "source": "build/qa-issue18-compat/run-01/result.json",
+      "path": "raw/run-01/result.json",
+      "bytes": 8935,
+      "sha256": "974e1838333e8172812c3751a470b3186aa94b9562268c0c72ca37dd044ef492"
+    },
+    {
+      "source": "build/qa-issue18-compat/run-02/agent-8-stderr.txt",
+      "path": "raw/run-02/agent-8-stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "build/qa-issue18-compat/run-02/analyze.txt",
+      "path": "raw/run-02/analyze.txt",
+      "bytes": 43,
+      "sha256": "a489b1249880b489826d25a25a28b316c5059ae3c5e62feecfc2b7949aba9041"
+    },
+    {
+      "source": "build/qa-issue18-compat/run-02/app-8.txt",
+      "path": "raw/run-02/app-8.txt",
+      "bytes": 134,
+      "sha256": "d057cc3292153d1658c1b2e6b222c1dac3fac376a84fde6d39cc55843fe25bdc"
+    },
+    {
+      "source": "build/qa-issue18-compat/run-02/executed-fixture-before-stronger-inspection.dart.txt",
+      "path": "raw/run-02/executed-fixture-before-stronger-inspection.dart.txt",
+      "bytes": 9864,
+      "sha256": "c9210f84915df1e78f4f79e2a04abdff6764fd0ce7ebf8e5b55bdb8a29baf241"
+    },
+    {
+      "source": "build/qa-issue18-compat/run-02/fixture-format.txt",
+      "path": "raw/run-02/fixture-format.txt",
+      "bytes": 98,
+      "sha256": "b54c318661bb394aac95ad6deba82fdd70f418fe30c7243b2e161be1220ddff5"
+    },
+    {
+      "source": "build/qa-issue18-compat/run-02/inspect-8.txt",
+      "path": "raw/run-02/inspect-8.txt",
+      "bytes": 263,
+      "sha256": "57e05a57ab8c271722d6638c30421512b4181a120a2e90e2fec95b87e4b4908f"
+    },
+    {
+      "source": "build/qa-issue18-compat/run-02/observed-format-8.json",
+      "path": "raw/run-02/observed-format-8.json",
+      "bytes": 276,
+      "sha256": "01e02cffaeef7c8339427b8d29b6893369a3037cc3f71885a5e5b011475a4f80"
+    },
+    {
+      "source": "build/qa-issue18-compat/run-02/phase.json",
+      "path": "raw/run-02/phase.json",
+      "bytes": 23,
+      "sha256": "4efd11ab61b6049b532dfbcdaa9095923c2bd52cc470510642612dab672ddb88"
+    },
+    {
+      "source": "build/qa-issue18-compat/run-02/phases.jsonl",
+      "path": "raw/run-02/phases.jsonl",
+      "bytes": 581,
+      "sha256": "75cab3ac909a2de023a09db0c2ab2afe38d192b6c66818f242f21705b2dbcf86"
+    },
+    {
+      "source": "build/qa-issue18-compat/run-02/prepare-8.txt",
+      "path": "raw/run-02/prepare-8.txt",
+      "bytes": 175,
+      "sha256": "ce689693f861eeb3f042f79be5562c195a983129e62544e7302e5fa0edcadc06"
+    },
+    {
+      "source": "build/qa-issue18-compat/run-02/pub.txt",
+      "path": "raw/run-02/pub.txt",
+      "bytes": 258,
+      "sha256": "a24779315fffab73870dfc7b15b56246a95b601b3432e434b43cd223bf752a6a"
+    },
+    {
+      "source": "build/qa-issue18-compat/run-02/result.json",
+      "path": "raw/run-02/result.json",
+      "bytes": 2217,
+      "sha256": "6f09f39420d589d4ac676042c3bb7afe09bcbe86868a571a42e586d4951d03b4"
+    },
+    {
+      "source": "build/qa-issue18-compat/strong-inspection/analyze.txt",
+      "path": "raw/strong-inspection/analyze.txt",
+      "bytes": 43,
+      "sha256": "a489b1249880b489826d25a25a28b316c5059ae3c5e62feecfc2b7949aba9041"
+    },
+    {
+      "source": "build/qa-issue18-compat/strong-inspection/format.txt",
+      "path": "raw/strong-inspection/format.txt",
+      "bytes": 98,
+      "sha256": "b54c318661bb394aac95ad6deba82fdd70f418fe30c7243b2e161be1220ddff5"
+    },
+    {
+      "source": "build/qa-issue18-compat/strong-inspection/help.txt",
+      "path": "raw/strong-inspection/help.txt",
+      "bytes": 1348,
+      "sha256": "87d6928faf4c041b02f6a4043ddc23530e1b76c94c419ceb5ad11fab6e4096d1"
+    },
+    {
+      "source": "build/qa-issue18-compat/strong-inspection/inspect-1.txt",
+      "path": "raw/strong-inspection/inspect-1.txt",
+      "bytes": 343,
+      "sha256": "fdbbaee1645e5498e34a39b72083626200b545d4499989f88c919f0d286e53bc"
+    },
+    {
+      "source": "build/qa-issue18-compat/strong-inspection/inspect-2.txt",
+      "path": "raw/strong-inspection/inspect-2.txt",
+      "bytes": 343,
+      "sha256": "9d2e3c7d68af4067f314ffe9df0239e2bf349290fc5e1200915d7027d9ea7004"
+    },
+    {
+      "source": "build/qa-issue18-compat/strong-inspection/inspect-3.txt",
+      "path": "raw/strong-inspection/inspect-3.txt",
+      "bytes": 343,
+      "sha256": "bcdefe91c311a6d71504375d23d169c36061945955c43965c8a71c3016420c8d"
+    },
+    {
+      "source": "build/qa-issue18-compat/strong-inspection/inspect-4.txt",
+      "path": "raw/strong-inspection/inspect-4.txt",
+      "bytes": 343,
+      "sha256": "bcdefe91c311a6d71504375d23d169c36061945955c43965c8a71c3016420c8d"
+    },
+    {
+      "source": "build/qa-issue18-compat/strong-inspection/inspect-8.txt",
+      "path": "raw/strong-inspection/inspect-8.txt",
+      "bytes": 342,
+      "sha256": "e2239ce3c5295620b2984834bd1c005ee5dfdb16510c901db419082d0f25678e"
+    },
+    {
+      "source": "build/qa-issue18-compat/strong-inspection/pub.txt",
+      "path": "raw/strong-inspection/pub.txt",
+      "bytes": 258,
+      "sha256": "a24779315fffab73870dfc7b15b56246a95b601b3432e434b43cd223bf752a6a"
+    },
+    {
+      "source": "build/qa-issue18-compat/strong-inspection/result.json",
+      "path": "raw/strong-inspection/result.json",
+      "bytes": 3644,
+      "sha256": "811e519f234f8736025dfd3cc7df8a44579135351228fec19de595cc8f3bb496"
+    },
+    {
+      "source": "build/qa-issue18-compat/executed-driver.py.txt",
+      "path": "raw/executed-driver.py.txt",
+      "bytes": 10021,
+      "sha256": "b0f817fa6ddc9e977d7739862d29eaf6f62806eef2a9fe7bbdafe11e4ecfe316"
+    },
+    {
+      "source": "packages/info_storage/test/support/packaged_compat_fixture.dart",
+      "path": "raw/strong-inspection-fixture.dart.txt",
+      "bytes": 10352,
+      "sha256": "829bea55352c1a35ee7449a68058c01a01ee537530af78e3ca2bc27f0f83fcdd"
+    }
+  ],
+  "sources": [
+    {
+      "path": "scripts/test-windows-packaged-compat.py",
+      "bytes": 10244,
+      "sha256": "b390835020e1f548a5804f661f7b6c87d3e5202fe6798275893a37e604499432"
+    },
+    {
+      "path": "packages/info_storage/test/support/packaged_compat_fixture.dart",
+      "bytes": 10352,
+      "sha256": "829bea55352c1a35ee7449a68058c01a01ee537530af78e3ca2bc27f0f83fcdd"
+    },
+    {
+      "path": "packages/info_storage/lib/backups.dart",
+      "bytes": 36449,
+      "sha256": "41c7321da5e383db75fa9e1d42a107182a21d029c351453bd063ad4d9f595b95"
+    },
+    {
+      "path": "packages/info_storage/lib/attachment_backup.dart",
+      "bytes": 16989,
+      "sha256": "7d3d65b631b19976e69d8f2ff5f37d434fab1d3b237b77ee24bf49bbfb743ea9"
+    },
+    {
+      "path": "packages/info_core/lib/information.dart",
+      "bytes": 26078,
+      "sha256": "7b364b826a29cfb4545a610c513360c5fd17735a2ec7dddc18011cc0dc4ab17c"
+    },
+    {
+      "path": "packages/info_cli/pubspec.lock",
+      "bytes": 12433,
+      "sha256": "b8695e9c135a0441eb384507acb347d334a190451f63be7874e22c058f56b3c2"
+    },
+    {
+      "path": "packages/info_core/pubspec.lock",
+      "bytes": 12286,
+      "sha256": "f8220e6477f28a1bb4b1914847377b675dbd5cbf50ca609bd23ded65e2fd5328"
+    },
+    {
+      "path": "packages/info_storage/pubspec.lock",
+      "bytes": 14332,
+      "sha256": "d5def0ba580249b39ce5f42292705851b16230903276c6a17ec9e2af4df30e39"
+    },
+    {
+      "path": "apps/desktop/pubspec.lock",
+      "bytes": 11802,
+      "sha256": "4c5e88461035c36d85d8fa9fb50f69e1450aa1662f677e5723417471f669c70b"
+    }
+  ],
+  "manifest": {
+    "path": "build/windows-preview-0.4.0-11-887f1c2/AgentInfoManage/manifest.json",
+    "sha256": "07fb3432acc19ce300fb335eb931d906140d7297f5e20a26e3be1a7a4fc424b2"
+  }
+}

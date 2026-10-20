@@ -1,6 +1,6 @@
 ---
 name: agent-info-access
-description: Request user-approved personal information through Agent Info, submit user-designated source information for review, or request and perform user-authorized classification changes; reuse this chat's approved fields and handle pending or denied access.
+description: Request approved information or ordinary file delivery, Windows credential command use or local password filling through Agent Info; submit designated source information for review and perform approved classification changes using this chat's private association.
 ---
 
 Use the Agent Info association supplied by this chat's latest SessionStart hook.
@@ -13,6 +13,23 @@ integration. Only after that request, run the bundled `info-codex-hook --connect
 to obtain a fresh context reference for the current CODEX_THREAD_ID. This is a
 new unapproved session, not a way to find an old grant. Do not retry it silently.
 Public chat IDs are not credentials.
+
+For user-requested app shutdown or an authorized test-version switch, use the
+reviewed Windows delivery's `cli/info.exe app status`, then `app quit`.
+Default discovery targets that delivery only; another installation requires its
+verified PID with `--pid`. `exited` confirms process exit; `shutdown_failed`
+keeps unsaved records open for repair, and `timeout` is unknown. Query before
+retrying; never force-kill. Quitting ends all chats' current grants. This native
+lifetime entry does not read information or approve anything.
+
+For Token, SSH private-key, AWS credential-file use or local password filling, read
+[Credential use](references/credential-use.md) before requesting or running it.
+Choose its command or focused-input branch. Both request fixed-term use and
+identify each operation separately; focused filling supplies no command or secret
+value. For a `kind:file` information field, read
+[Ordinary information files](references/information-files.md) before fetching or
+passing its copy to a document/browser tool. Ordinary text access below reads
+approved structured/text-note values; file access uses its separate fetch path.
 
 1. Call `info-codex` with one JSON object on stdin, including `association` and
    `command`. No command-line arguments. The executable is in the reviewed
@@ -29,8 +46,9 @@ Public chat IDs are not credentials.
    300000). A wait timeout leaves the original request pending. Never resubmit
    merely because a command exited, timed out, or the app was unavailable.
 4. When approved, `claim` returns final fields and expiry, without a token.
-   Respect the user's actual selection. Use `read` with `requestId`, `itemId`,
-   and `fieldId`. Each new process privately claims the existing grant before
+   Respect the user's actual selection. For text fields use `read` with
+   `requestId`, `itemId`, and `fieldId`; for a file use the linked file workflow.
+   Each new text-read process privately claims the existing grant before
    reading, so neither approval nor expiry is renewed by repeated use.
 5. Stop on `denied`, `expired`, `cancelled`, `revoked`, or `unauthorized`.
    Explain the result and ask only if a new need justifies a new request. Do not
@@ -105,7 +123,7 @@ For user-requested organization, use this chat's existing private association:
    never silently recreate an expired/conflicting request. If still `active` after
    a storage failure, retry the same plan only within its original deadline.
 
-Access lasts at most30minutes after approval and ends on completion, revocation,
+Organization access lasts at most30minutes after approval and ends on completion, revocation,
 expiry, session end or restart. This does not grant values, content edits, approval
 powers or a larger normal content grant. Legacy `proposed` results still require
 owner review; do not treat a legacy metadata grant as automatic-write permission.

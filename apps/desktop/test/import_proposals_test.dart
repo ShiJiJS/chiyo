@@ -46,33 +46,36 @@ void main() {
       );
       await tester.tap(find.text('录入提案'));
       await tester.pumpAndSettle();
-      expect(find.text('Codex 提交了 2 条信息'), findsOneWidget);
-      expect(find.text('用途：录入指定的服务信息'), findsOneWidget);
-      await tester.tap(find.text('查看提案'));
-      await tester.pumpAndSettle();
-      expect(find.byType(TextField), findsNothing);
+      expect(find.text('Codex'), findsOneWidget);
+      expect(find.text('录入指定的服务信息'), findsOneWidget);
+      expect(find.byKey(const ValueKey('proposal-document')), findsOneWidget);
       await tester.tap(find.byKey(const ValueKey('edit-import-0')));
       await tester.pumpAndSettle();
       await tester.enterText(
-        find.byKey(const ValueKey('proposal-name-0')),
+        find.byKey(const ValueKey('item-name')),
         'Reviewed item',
       );
       await tester.enterText(
-        find.byKey(const ValueKey('proposal-value-0-0')),
+        find.byKey(const ValueKey('field-value-0')),
         'reviewed.invalid',
       );
-      await tester.tap(find.byKey(const ValueKey('proposal-directory-0')));
+      await tester.tap(find.byKey(const ValueKey('item-directory')));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Reviewed folder').last);
       await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const ValueKey('proposal-tag-0-0')));
+      await tester.tap(find.byKey(const ValueKey('item-tags')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Reviewed tag').last);
+      await tester.tap(find.text('使用所选标签'));
       await tester.pumpAndSettle();
       expect(service.owner.information, isEmpty);
-      await tester.tap(find.text('保存更改'));
+      await tester.tap(find.byKey(const ValueKey('save-information')));
       await tester.pumpAndSettle();
-      expect(find.byType(TextField), findsNothing);
+      expect(find.byKey(const ValueKey('item-name')), findsNothing);
       expect(find.text('reviewed.invalid'), findsOneWidget);
       await tester.tap(find.text('确认全部入库'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('confirm-proposal-decision')));
       await tester.pumpAndSettle();
       expect(service.agent.importStatus(session, id)['status'], 'confirmed');
       expect(service.owner.information.first.directoryId, directory.id);
@@ -81,12 +84,12 @@ void main() {
         service.owner.information.first.fields.single.value,
         'reviewed.invalid',
       );
-      await tester.tap(find.text('查看详情'));
+      await tester.tap(find.text('按信息身份查看当前内容 →'));
       await tester.pumpAndSettle();
-      expect(find.byType(TextField), findsNothing);
+      expect(find.byKey(const ValueKey('item-name')), findsNothing);
       expect(find.text('编辑'), findsNothing);
       expect(find.text('reviewed.invalid'), findsOneWidget);
-      await tester.tap(find.text('关闭'));
+      await tester.tap(find.text('×').last);
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const ValueKey('nav-1')));
       await tester.pumpAndSettle();

@@ -4,6 +4,10 @@
 手工生成 token。它仍须真实桌面两聊天验收；当前实现不等于已安装或已验收。
 来源：[OpenAI Hooks 文档](https://learn.chatgpt.com/docs/hooks)，2026-10-16 核对。
 
+Windows开发分支的凭据调用已接协议v2：先申请固定期限，再以逐次operationId和完整launch调用持续宿主，同一批准范围内的不同命令不重复审批。CLI省略协议版本时默认2，旧服务明确拒绝；旧v1事实保持单次语义。调用流程及类型化注入见[随包凭据使用说明](skills/agent-info-access/references/credential-use.md)。当前已交付0.4.0+8仍是旧v1，须使用同一新版整包的应用、CLI、worker和模板，不能只更新Skill。
+
+#35的Windows焦点输入及#34普通附件已完成各自验收，先以实际capabilities判断安装版本的能力。Skill包括[先授权、再点击和后台填充](skills/agent-info-access/references/credential-use.md#focused-password-input)和[普通文件申请、领取与释放](skills/agent-info-access/references/information-files.md)。文件副本可交给同机文档工具或浏览器上传工具；凭据文件仍由命令宿主注入，不作为普通附件领取。各自实测范围见[#35完成记录](../../docs/development/issue35-completion.md)和[#38完成记录](../../docs/development/issue38-completion.md)。#30继续跟踪三功能联合及真实Codex安装/信任，不把受控关联文件测试当成真实Codex事件；用户旧0.4.0+8包仍未替换。
+
 ## 凭据边界
 
 - 随机 256-bit 文件名指向不可变的会话凭据文件；文件在用户私有状态目录，
@@ -57,7 +61,7 @@ SessionEnd；Stop、Interrupt、SubagentStop、CLI 结束及切换聊天均不�
 ## 生成可审查安装材料
 
 Windows 开发预览 ZIP 还提供无需 SDK 的 `cli/info-prepare-codex.exe`。它把编译的
-CLI/hook 复制到用户选定的新稳定目录，生成最终路径的 hook 和 Skill，拒绝覆盖
+CLI/hook 及 `info-runtime-worker.exe` 复制到用户选定的新稳定目录，生成最终路径的 hook 和 Skill，拒绝覆盖
 已有目录；安装/信任仍需单独配合。详见 [Windows 交付说明](../../docs/development/windows-delivery.md)。
 
 从 `packages/info_cli` 执行（先 `dart pub get`）：
@@ -86,11 +90,30 @@ dart run tool/prepare_codex.dart ../../build/codex-preview
 
 目前不会自动执行上述安装步骤。用户只需要配合真实 UI 验证，不要求透露 token。
 
+### 准备独立验收项目（开发者工具）
+
+已审查的同版本bundle还可生成一个全新的、尚未在客户端注册/信任的测试项目：
+
+```text
+python scripts/prepare-codex-acceptance.py --delivery <AgentInfoManage目录> --bundle <已生成bundle> --workspace <不存在的新项目目录>
+```
+
+工具先核对随包manifest、AOT/Skill/引用及Windows hook目标，再仅在新目录准备
+`.codex/hooks.json`、`.agents/skills/agent-info-access`、README.txt及八项未运行的验收清单。
+已存在的目录直接拒绝，不合并既有配置。这个Python工具用于开发者准备材料，不是
+Windows预览包或用户实际接入的额外运行依赖；已生成项目由用户直接在客户端打开。
+项目仍引用原bundle的固定绝对路径，不能先删除/移动该bundle。
+
+这只是待用户开启的独立项目布局，不注册Codex项目、不授予信任、不运行hook，也不
+创建聊天或子Agent。先在原开发会话安排独立虚构资料库的应用，再由用户正式审查/信任
+并启动测试聊天；不要在没有服务时抢先启动。实际客户端事件/会话隔离与结束恢复仍须
+单独验收，生成器和文件哈希核对不能代替它们。
+
 ## 用户配合的两聊天验收
 
 只用虚构资料，避免把关联引用、文件内容和 token 放入报告或截图。
 
-1. 新资料库为空，用户先在“我的信息”创建一条虚构服务器信息，包含“地址”和
+1. 新资料库为空，用户先在“信息库”创建一条虚构服务器信息，包含“地址”和
    “用户名”两个字段。聊天 A 用 catalog 获取实际生成的信息项及字段 ID，再请求
    这两个字段。用户确认桌面展示聊天关联、用途及字段，仅批准“地址”。记录公开
    请求 ID、字段及到期时间；不要假设固定的 demo-server/host ID 存在。

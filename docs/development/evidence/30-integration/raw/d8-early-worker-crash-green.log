@@ -1,0 +1,3 @@
+00:00 +0: loading test/early_worker_crash_test.dart
+00:00 +0: worker death after launch acknowledgement but before target identity keeps the attempt unknown and preserves live material
+00:02 +1: All tests passed!

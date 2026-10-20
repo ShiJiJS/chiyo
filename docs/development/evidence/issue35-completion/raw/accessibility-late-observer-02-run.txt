@@ -1,0 +1,13 @@
+Flutter assets will be downloaded from https://storage.flutter-io.cn. Make sure you trust this source!
+00:00 +0: loading C:/Project/network_config/info-manage/apps/desktop/integration_test/accessibility_dialog_probe_test.dart
+Building Windows application...                                    12.2s
+√ Built build\windows\x64\runner\Debug\info_desktop.exe
+00:00 +0: native accessibility simple modal diagnostic
+{"phase":"mounted","frameworkSemantics":false,"nativeSemantics":false,"handles":0,"rootId":null}
+{"phase":"observer_connected","frameworkSemantics":true,"nativeSemantics":true,"handles":1,"rootId":null}
+{"phase":"incremental_update","frameworkSemantics":true,"nativeSemantics":true,"handles":1,"rootId":0}
+{"phase":"modal_open","frameworkSemantics":true,"nativeSemantics":true,"handles":1,"rootId":0}
+{"phase":"modal_closed","frameworkSemantics":true,"nativeSemantics":true,"handles":1,"rootId":0}
+{"handlesBefore":0,"handlesAfterBody":1,"newPlatformHandleReleasedAfterUnmount":true}
+00:44 +1: (tearDownAll)
+00:44 +1: All tests passed!

@@ -1,0 +1,5 @@
+Analyzing info_core...
+
+  error - test\credential_execution_audit_test.dart:22:10 - A negation operand must have a static type of 'bool'. Try changing the operand to the '!' operator. - non_bool_negation_expression
+
+1 issue found.

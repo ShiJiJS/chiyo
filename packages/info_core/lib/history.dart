@@ -1,7 +1,98 @@
+import 'organization_tasks.dart';
+
 /// Past facts only. None of these identifiers are authorization capabilities.
+enum AccessRequestState {
+  pending,
+  approved,
+  denied,
+  expired,
+  cancelled,
+  revoked,
+}
+
+/// Durable, non-secret request outcome. Pending requests are never stored.
+class RequestHistory {
+  RequestHistory({
+    required this.id,
+    required this.sessionId,
+    required this.chatLabel,
+    required this.purpose,
+    required this.createdAt,
+    required this.requestExpiresAt,
+    required this.recordedAt,
+    required this.state,
+    required Iterable<RecordedField> fields,
+    this.grantId,
+    this.sessionEnded = false,
+    this.applicationClosed = false,
+    this.restoredAt,
+  }) : fields = List.unmodifiable(fields);
+  final String id, sessionId, chatLabel, purpose;
+  final DateTime createdAt, requestExpiresAt, recordedAt;
+  final AccessRequestState state;
+  final List<RecordedField> fields;
+  final String? grantId;
+  final bool sessionEnded, applicationClosed;
+  final DateTime? restoredAt;
+  RequestHistory asRestored(DateTime at) => RequestHistory(
+    id: id,
+    sessionId: sessionId,
+    chatLabel: chatLabel,
+    purpose: purpose,
+    createdAt: createdAt,
+    requestExpiresAt: requestExpiresAt,
+    recordedAt: recordedAt,
+    state: state,
+    fields: fields,
+    grantId: grantId,
+    sessionEnded: sessionEnded,
+    applicationClosed: applicationClosed,
+    restoredAt: at,
+  );
+  Map<String, Object?> toJson() => {
+    'id': id,
+    'sessionId': sessionId,
+    'chatLabel': chatLabel,
+    'purpose': purpose,
+    'createdAt': createdAt.toUtc().toIso8601String(),
+    'requestExpiresAt': requestExpiresAt.toUtc().toIso8601String(),
+    'recordedAt': recordedAt.toUtc().toIso8601String(),
+    'state': state.name,
+    'fields': fields.map((f) => f.toJson()).toList(),
+    'grantId': grantId,
+    'sessionEnded': sessionEnded,
+    'applicationClosed': applicationClosed,
+    if (restoredAt != null) 'restoredAt': restoredAt!.toUtc().toIso8601String(),
+  };
+  factory RequestHistory.fromJson(Map<String, dynamic> j) => RequestHistory(
+    id: j['id'] as String,
+    sessionId: j['sessionId'] as String,
+    chatLabel: j['chatLabel'] as String,
+    purpose: j['purpose'] as String,
+    createdAt: DateTime.parse(j['createdAt'] as String),
+    requestExpiresAt: DateTime.parse(j['requestExpiresAt'] as String),
+    recordedAt: DateTime.parse(j['recordedAt'] as String),
+    state: AccessRequestState.values.byName(j['state'] as String),
+    fields: (j['fields'] as List).map(
+      (f) => RecordedField.fromJson(f as Map<String, dynamic>),
+    ),
+    grantId: j['grantId'] as String?,
+    sessionEnded: j['sessionEnded'] == true,
+    applicationClosed: j['applicationClosed'] == true,
+    restoredAt: j['restoredAt'] == null
+        ? null
+        : DateTime.parse(j['restoredAt'] as String),
+  );
+}
+
 enum GrantEventKind { approved, revoked, expired, ended, applicationClosed }
 
-enum AccessOutcome { allowed, unauthorized, auditUnavailable }
+enum AccessOutcome {
+  allowed,
+  unauthorized,
+  auditUnavailable,
+  fileDeliveryRequired,
+}
 
 class RecordedField {
   const RecordedField(this.itemId, this.fieldId, this.itemName, this.fieldName);
@@ -117,11 +208,14 @@ class AccessRecord {
     this.grantId,
     this.itemId,
     this.fieldId,
+    this.itemName,
+    this.fieldName,
   });
   final String id;
   final DateTime at;
   final AccessOutcome outcome;
   final String? sessionId, grantId, itemId, fieldId;
+  final String? itemName, fieldName;
   Map<String, Object?> toJson() => {
     'id': id,
     'at': at.toUtc().toIso8601String(),
@@ -131,6 +225,8 @@ class AccessRecord {
     'grantId': grantId,
     'itemId': itemId,
     'fieldId': fieldId,
+    if (itemName != null) 'itemName': itemName,
+    if (fieldName != null) 'fieldName': fieldName,
   };
   factory AccessRecord.fromJson(Map<String, dynamic> json) => AccessRecord(
     id: json['id'] as String,
@@ -140,18 +236,30 @@ class AccessRecord {
     grantId: json['grantId'] as String?,
     itemId: json['itemId'] as String?,
     fieldId: json['fieldId'] as String?,
+    itemName: json['itemName'] as String?,
+    fieldName: json['fieldName'] as String?,
   );
 }
 
 class AuditHistory {
-  AuditHistory(Iterable<GrantHistory> grants, Iterable<AccessRecord> accesses)
-    : grants = List.unmodifiable(grants),
-      accesses = List.unmodifiable(accesses);
+  AuditHistory(
+    Iterable<GrantHistory> grants,
+    Iterable<AccessRecord> accesses, [
+    Iterable<RequestHistory> requests = const [],
+    Iterable<OrganizationTask> organizations = const [],
+  ]) : grants = List.unmodifiable(grants),
+       accesses = List.unmodifiable(accesses),
+       requests = List.unmodifiable(requests),
+       organizations = List.unmodifiable(organizations);
   final List<GrantHistory> grants;
   final List<AccessRecord> accesses;
+  final List<RequestHistory> requests;
+  final List<OrganizationTask> organizations;
   Map<String, Object?> toJson() => {
     'grants': grants.map((g) => g.toJson()).toList(),
     'accesses': accesses.map((a) => a.toJson()).toList(),
+    'requests': requests.map((r) => r.toJson()).toList(),
+    'organizations': organizations.map((t) => t.toJson()).toList(),
   };
 }
 
@@ -160,8 +268,13 @@ class AuditRetentionPreview {
     this.days,
     this.grants,
     this.accesses,
-    this.cutoff,
-  );
-  final int days, grants, accesses;
+    this.cutoff, [
+    this.requests = 0,
+    this.organizations = 0,
+    this.credentialRequests = 0,
+    this.credentialExecutions = 0,
+  ]);
+  final int days, grants, accesses, requests, organizations;
+  final int credentialRequests, credentialExecutions;
   final DateTime cutoff;
 }

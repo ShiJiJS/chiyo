@@ -1,0 +1,6 @@
+Flutter assets will be downloaded from https://storage.flutter-io.cn. Make sure you trust this source!
+00:00 +0: loading C:/Project/network_config/info-manage/apps/desktop/test/native_semantics_lifetime_test.dart
+00:00 +0: native platform handle is released only after unmount
+00:00 +1: an extra application handle still fails native lifetime validation
+00:00 +2: a native request present before the case is left owned by the platform
+00:00 +3: All tests passed!

@@ -1,0 +1,32 @@
+from pathlib import Path
+import subprocess,re,sys
+root=Path.cwd();assert (root/'apps/desktop/pubspec.yaml').is_file()
+norm=lambda b:b.replace(b'https://pub.flutter-io.cn',b'https://pub.dev').replace(b'\r\n',b'\n')
+for package in ['packages/info_cli','packages/info_core','packages/info_storage','apps/desktop']:
+    path=package+'/pubspec.lock'
+    original=subprocess.check_output(['git','show','HEAD:'+path],cwd=root)
+    current=(root/path).read_bytes()
+    if norm(original)!=norm(current) and '--restore-observed-upgrades' in sys.argv:
+        # The isolated direct `dart test` invocations resolved a different
+        # mirror URL and upgraded these two transitive packages. Preserve their
+        # exact bytes, reject any other edit, then rerun against source locks.
+        old=norm(original).decode();changed=norm(current).decode()
+        allowed={'shelf':('1.4.3','e75e9cf311d7fd712048038cc17c25199c38536c20330d53e7db058b543d5a48'),
+                 'shelf_static':('1.2.0','480504af9e5323899c5be26a4f6c2fc4437d50954d39842f0290f4ae733d57b4')}
+        for package,(version,digest) in allowed.items():
+            pattern=r'(?ms)^  '+package+r':\n.*?(?=^  [a-zA-Z_]|\Z)'
+            before=re.search(pattern,old).group();after=re.search(pattern,changed).group()
+            if before==after:continue
+            assert 'version: "'+version+'"' in after and digest in after,(path,package)
+            repaired=re.sub(r'(?m)^      sha256: .+$',re.search(r'(?m)^      sha256: .+$',before).group(),after)
+            repaired=re.sub(r'(?m)^    version: .+$',re.search(r'(?m)^    version: .+$',before).group(),repaired)
+            assert repaired==before,(path,package,'other package edit')
+            changed=changed.replace(after,before)
+        assert changed==old,('other lock change',path)
+        archive=root/'build/qa-issue37-staging/dependency-drift';archive.mkdir(exist_ok=True)
+        (archive/(package.replace('/','-')+'-'+path.replace('/','-'))).write_bytes(current)
+        current=original
+    assert norm(original)==norm(current),('unexpected dependency change',path)
+    expected=subprocess.check_output(['git','cat-file','--filters','HEAD:'+path],cwd=root)
+    (root/path).write_bytes(expected)
+print('All four dependency locks match source; only mirror URLs/line endings normalized.')

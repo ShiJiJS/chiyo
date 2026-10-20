@@ -1,0 +1,7 @@
+Formatted lib\information.dart
+Formatted lib\information_draft_models.dart
+Formatted lib\information_files.dart
+Formatted lib\memory_information_files.dart
+Formatted lib\information_attachment_access.dart
+Formatted lib\new_file_publish.dart
+Formatted 8 files (6 changed) in 0.03 seconds.

@@ -1,0 +1,212 @@
+{
+  "issue": 33,
+  "status": "Windows functional acceptance complete",
+  "baseSourceCommit": "5fd0e67f58edb5734efcdb136430d0a609550f4a",
+  "textHashes": "UTF-8 LF canonical",
+  "sourceFiles": {
+    "apps/desktop/integration_test/credential_runtime_native_test.dart": "2903c87dff2bff75a8aa6ecffff05c68fd934f02562dfd49c9cd0810e7b5fa3f",
+    "apps/desktop/integration_test/file_runtime_native_test.dart": "f8f84b453cfb1bfca3d2cf3a73ebea7c1c6acb42a781563949dccf45dd7176d3",
+    "apps/desktop/integration_test/hosted_runtime_native_test.dart": "af9f900e068621fb7303ceda9ac23a17605999bb98e69ac01ea00b49a26d5202",
+    "apps/desktop/integration_test/reusable_runtime_native_test.dart": "25771919671264d566de7fe18923b61a03bda1f99921a11a18c3877adb326ae5",
+    "apps/desktop/lib/desktop_bootstrap.dart": "72afd1af35fd49758c0409b2f43018504dfd12d7761579248872ac3b44d636e2",
+    "apps/desktop/test/hosted_execution_bootstrap_test.dart": "4b19da7c631e081e23e4f9cf5f114237270faad5244ee9d16ddc445264f37264",
+    "docs/adr/0010-reusable-credential-use-grants.md": "cf6c63523d92b832eb725dde10597d588ca8d0a591498a72080a54b0e2de855b",
+    "docs/cli.md": "c709f183c9624c18554ea7adc7f97162e4b9c16b9a90c355770ef46b1a67e737",
+    "docs/design/runtime-protocol-v2.md": "3ff8f81b61ac1cffc48e327589dca11719ac3c6c7ba501ae6c4909f0fc470732",
+    "docs/design/windows-credential-and-file-update.md": "e980d3a03a62108873932bde21fec6261688a4a24ef776b989f0aebe6751ae44",
+    "docs/development/issue33-completion.md": "59f0da85175307da1759df9a5561f368c27cfa6571492116535f58bd947d12b2",
+    "docs/planning/implementation-status.md": "136a066fbe899bf55c29aea7c2fb80b312cb4b2a3700015096f443c91b3995a8",
+    "docs/planning/windows-next-iteration.md": "80c65cef24710cfe5fc7080efc90d3ccd2341559a7217ed601be455eaeac6ac0",
+    "integrations/codex/README.md": "0141188e9d0661eed5b49f5f34a55a4ff9e8e955e3860af4536158f813ebb16a",
+    "integrations/codex/skills/agent-info-access/SKILL.md": "c37c3a4a567b7f31e0a418cbeb566586de5266cfa5911c60876e03c2289fb2d1",
+    "integrations/codex/skills/agent-info-access/references/credential-use.md": "c83926f13c06e3ea351c1241f8c1bc5af8534296150509d193a2eabbcd959215",
+    "packages/info_cli/lib/credential_runtime_client.dart": "83cf99451b93c786d0618ca7fd23dd4ed4eeda059b58d70b2a96d792a71a0991",
+    "packages/info_cli/test/aws_receiver_native_test.dart": "e1fe55befaa49d8acec0698c851da3398fb92eccb080ac7a646983cf03b30d82",
+    "packages/info_cli/test/credential_reuse_json_lines_test.dart": "ff6078a01fd131bf8dbb0e7a5195a88f9ba161af12b0e3ac2e58b043f72e5753",
+    "packages/info_cli/test/credential_reuse_runtime_test.dart": "9468cd4f255a3f3c3c1f0ed070acf2b18ea38ec8a3538ed8782d9d5c7874316c",
+    "packages/info_cli/test/credential_runtime_test.dart": "7c71fd3bed9de6420d6ea25e5e24901ee1c5988fc5d3d8f9daa761b746850df7",
+    "packages/info_cli/test/early_worker_crash_test.dart": "22a3f94b86bbf123744d45200b34442dafdc19a346bdb5393f9a585736336f12",
+    "packages/info_cli/test/file_credential_runtime_test.dart": "d39f7f7e7a6502033451f4cccb17faab7deb3139ef95f47e84c6c7dd0edaafee",
+    "packages/info_cli/test/file_json_lines_test.dart": "558cc1ac003e2d07efabea2bd59c23bf7dbef6b2703d01624e8f5df0e6039165",
+    "packages/info_cli/test/file_material_failure_test.dart": "89cc8534a61a4fe7eea0492673de7f417f627f8d124cd45eebeeef200ba83634",
+    "packages/info_cli/test/file_protocol_policy_test.dart": "83bcd6a62223946a8532bb734dc8efa14f58907b6ade4c28039d0df6f3f0a03c",
+    "packages/info_cli/test/gh_receiver_native_test.dart": "810969be6676ca13454ab44bc66ee43e34afddc7fc62558af30bf911bc7cd552",
+    "packages/info_cli/test/hosted_credential_execution_test.dart": "0a3c2338e10e002357f05bda36795ace0dbfa674677325170095c8380bb0906c",
+    "packages/info_cli/test/runtime_cli_crash_test.dart": "c2438343475eb564f20a4f02360ccbc600965493d6c9bf89f8dcc83c8f167f12",
+    "packages/info_cli/test/runtime_json_lines_test.dart": "8f905158ddcde1ac0d6a397bbfc0fe812b4f2c9fc0b100071c042b42c4016eaf",
+    "packages/info_cli/test/ssh_credential_runtime_test.dart": "eb8d8796c6559ecafc4a410ef2acc7df375e5accfd455b17740c931eb48bc681",
+    "packages/info_cli/test/ssh_receiver_native_test.dart": "f721bafa01fe382bd3c4d03fed290a90295c4a9cceb22c3e9ef85c5f755673f8",
+    "packages/info_cli/test/support/runtime_harness.dart": "5bf2fa7b1b4d65bb73bad99eaa3537715f914d87016c33e80b8fa18de2227f07",
+    "packages/info_cli/test/worker_protocol_test.dart": "6a4b9abef1a2a6d2d1af3ea204866041ae156d3f822819b4a19d9e1aa35b8302",
+    "packages/info_cli/test/worker_registration_failure_test.dart": "f09e8f1906a78e2ec1cb28d3b160ff1f8abfa98a7b74723153620ed2d15ee323",
+    "packages/info_core/lib/credential_runtime_models.dart": "38e835c4396923f8badd2c052145a6e899d42d87de50d9e8f3e13b448c78afa3",
+    "packages/info_storage/test/file_cli_crash_recovery_test.dart": "cc18bc15a54656d3ad4a95413d74ab7925b7d416d38cf0f9746168eb47a78623",
+    "scripts/qa/ssh-fixture/run.py": "4146f78c827a560904aa7b7ecc98b22310ada92041104bb379ac3607b9a6d116"
+  },
+  "evidenceFiles": {
+    "cleanup.json": "232dd1d9d7bbd6793130dadce5b1877d511c609d0382af09761b394f1fad6a05",
+    "legacy-package-manifest.json": "42d605ace9cfa63afe3c849bba757e1921bcfc5c5bd6ea09c951a02a0a25a744",
+    "reuse-activation-cli-final-analyze.txt": "b51c9c80f2b144a3a264061cede7a8071b74e307d76dd376dcc35e80722ff39c",
+    "reuse-activation-cli-final-environment.json": "92981df17080cc70fd08d7fbb2f189c13c84847716dc75a21d0666c5c266204d",
+    "reuse-activation-cli-final.txt": "809098e2ee4b944377ac1efd4c86dd04ef7d3d36ebf660fadad197ed0920bfbc",
+    "reuse-activation-core-analyze.txt": "d9ebd39d330d44ff327dbf6cf5ce8566791da694504d82a7b989e78e27969232",
+    "reuse-activation-core-environment.json": "896aa61eed57339135fc507258f3365ac8c7db8144f1579f421ec1418e70f954",
+    "reuse-activation-core.txt": "b1d5d25b0ad90bf21a8c70368435db50bf2a1962e4d3d92c531ae979952a0862",
+    "reuse-activation-fixture-final.txt": "ac5157f2e09e2715aad1b8ea1fca5d68af362971b29af46b52f68e38ff8483f9",
+    "reuse-activation-real-settle.txt": "f643959843fd00ccc3056bc2e2a078e7ba9c9183b666446bfdcff0b47a07d941",
+    "reuse-activation-real-suite.txt": "846925a30b8ce2db3e64645c038bc17dafd8ff9131f5a150476ce0f57f594009",
+    "reuse-activation-storage-analyze.txt": "a489b1249880b489826d25a25a28b316c5059ae3c5e62feecfc2b7949aba9041",
+    "reuse-activation-storage-environment.json": "82729dba0499bec23197f2c3eadf2436ada264d09b0e33787583ec3373ad5112",
+    "reuse-activation-storage.txt": "0cacad2c0e765aa5aa5c8ee63e4151ba1dd762c42abe5f1e702be3549a35ff05",
+    "reuse-bootstrap-enabled.txt": "3eb9bb5ef484a74bc8a73bab8b5791c38711e0b6e895452c6bec5ee6f9d4fcf2",
+    "reuse-bootstrap-red.txt": "cc056dd479b54cee5c9d4c850eafb89302a31ee53619e5336401c87dfe811cde",
+    "reuse-default-v2-client.txt": "ed49a4828456e90025e87387c3a38a6128138d62121a42978ac9ce56f1d58a9e",
+    "reuse-default-v2-red.txt": "e1d27aede778181d5ba4f2726c7eadd79ebe88caabb033e873d9bf3a997b01da",
+    "reuse-desktop-enabled-analyze.txt": "e4d8860e6fabc5ed7683b27a120fdf8547d623fdfccfa89f3c6079f3f4051219",
+    "reuse-desktop-enabled-final.txt": "3d91ba0ac1d501fcdba5ddfc2edf4a81064f7b5e7897c4cc956f2c71223e3d32",
+    "reuse-enabled-windows-release.txt": "07efcfd73f1ed9f723fe7159c69fced1059b1856b2b02a8cfffa48228ff89b17",
+    "reuse-native-ui-final.txt": "2a27f839d454e37a81b159932f1d1073c0d2197cf598c1aa0bc06504f593ad9f",
+    "reuse-real-aws-gh-typed.txt": "703e99803d474d35b11a3ed054d9e5d4bb8f17a990ed631c2416b438c6ad6a47",
+    "reuse-real-aws-gh.txt": "53a34403fcd7abeaeefd226550a72a9c2a217c9adbf83c304b41ee07b14c724d",
+    "reuse-real-aws-v2.txt": "56aba8b73e0d2280230779100262b73612a8b3dadd04bcd254534c3c4bc8ab01",
+    "reuse-sdk-free-prepare.json": "b9f0a01fad82fe90f96dfa3141e3e0ece4f215fbd024a8a35dd62eef194bdc6d",
+    "reuse-sdk-free-prepare.txt": "4db497d6dc2c85adf21e9d821d4c5ffa47b76003ec8e8fe38e974e1cae9140ee"
+  },
+  "nativeArtifacts": {
+    "native/approval.png": "c4c3eeeac85cd2d0f2c8ffe91d698df210959bd2e46e26adf3cb727ae09c4541",
+    "native/facts.json": "4717eb4d1fef4d9efa4f7acf400b3d71d7cff7372cb17ea41c8178274a159359",
+    "native/first-operation-receipt.png": "30c2e59729369b90db6f6739bd0f64d18909d31e06cf384d171747f83fa48535",
+    "native/history.png": "5444fd1286eff37d1e0e2a394150c18f3febeb81aa4465c578caaff6b52b0d5d",
+    "native/revoked-fields-remain.png": "824f84169e2ec1f60e556b535a2a649a4edabe92a939a017041f69c1de54b4c9",
+    "native/selected-operation.png": "23119af642e88f7123a0a7dc90d2792bca241fc401b3f8915090fb663842fcb2"
+  },
+  "cliBinaries": {
+    "info-codex-hook.exe": "4948175d788ff1a93178aae012469fed773bddfc33e2eb0a78fb97b6e81216ab",
+    "info-codex.exe": "6da7e4b7cb9ea2691e0514497c2e042af68c72bbcbf43265b77f5e9232c068d6",
+    "info-prepare-codex.exe": "0ec2f969eaf66d03cd8e1f17c2754c8e773449aca5b46c0edc95461567f17850",
+    "info-runtime-worker.exe": "59cf09020539be93dff3f7ff2fdfe0adee4a622a60855aab9f4e56567cdb05ec",
+    "info.exe": "3c8545e1127fba41275670ca68987aa9cd4b4694e01b39cea71b569d09bded01"
+  },
+  "legacyCli": {
+    "sourceCommit": "291801046f7d1e6e4217a4bc001ea714689855c5",
+    "path": "cli/info.exe",
+    "bytes": 7309824,
+    "sha256": "95df8c453aa7f46924b09038d8c1a0e4ce560de07421db23af5a2cc367344497"
+  },
+  "releaseFiles": {
+    "data/app.so": {
+      "bytes": 8487816,
+      "sha256": "339e01f318411f749cdf683ef784b9fb1671c398162233d963f9f9d5951fa5d4"
+    },
+    "data/flutter_assets/AssetManifest.bin": {
+      "bytes": 225,
+      "sha256": "83aff8338613c8e4e6f664b6c31894d2481320ea29bdc93aa475e79639792289"
+    },
+    "data/flutter_assets/assets/fonts/NotoSansSC-Medium.otf": {
+      "bytes": 8345436,
+      "sha256": "7633f5a016d4dd95e685a69633d818aabc4644c4b08e26bd35b1b30c45ed5dda"
+    },
+    "data/flutter_assets/assets/fonts/NotoSansSC-Regular.otf": {
+      "bytes": 8331336,
+      "sha256": "faa6c9df652116dde789d351359f3d7e5d2285a2b2a1f04a2d7244df706d5ea9"
+    },
+    "data/flutter_assets/assets/fonts/OFL.txt": {
+      "bytes": 4301,
+      "sha256": "6a73f9541c2de74158c0e7cf6b0a58ef774f5a780bf191f2d7ec9cc53efe2bf2"
+    },
+    "data/flutter_assets/FontManifest.json": {
+      "bytes": 330,
+      "sha256": "f1561684efd3517f8f4ebce880aa36f5c949a53d75a0bb66431626f8959fa25a"
+    },
+    "data/flutter_assets/fonts/MaterialIcons-Regular.otf": {
+      "bytes": 2844,
+      "sha256": "ee7ef0a3eafae699d8b35e2e808ffe4b53f2464c9c89f90ae4236bd1e950c42e"
+    },
+    "data/flutter_assets/NativeAssetsManifest.json": {
+      "bytes": 133,
+      "sha256": "102f582ac604e77edd2f51b9b6f01c5f02c4066e44d76e42ac6a0f24ec764d90"
+    },
+    "data/flutter_assets/NOTICES.Z": {
+      "bytes": 99898,
+      "sha256": "7726f58af9d2b754cc5f79be65ff68f77231c879e42a422ddbc9aab05e725701"
+    },
+    "data/flutter_assets/shaders/ink_sparkle.frag": {
+      "bytes": 21856,
+      "sha256": "1fe8436a743884cb65078fe8c7b38e18f5365f2a2961270916f426fd13c604af"
+    },
+    "data/flutter_assets/shaders/stretch_effect.frag": {
+      "bytes": 17616,
+      "sha256": "bc7599dbbbaab310efe41520574138d21fb18a88c8fe4495ed79315309336f6f"
+    },
+    "data/icudtl.dat": {
+      "bytes": 864880,
+      "sha256": "325a86063d26334c2eabe1743cea073b612540fbf3d8fc2ef0b5708e3763a8c7"
+    },
+    "flutter_windows.dll": {
+      "bytes": 21274112,
+      "sha256": "7b03815958c49d72385be497fbd0eb1bb2ae27d24989d6c9aee83eafbd93e9d3"
+    },
+    "info_desktop.exe": {
+      "bytes": 130560,
+      "sha256": "805ecc5301dda81926bfda5a19762acfda896c10444bc95b09de9f44722692de"
+    },
+    "native_assets.json": {
+      "bytes": 221,
+      "sha256": "383ef60caa2de6482cb6d1fac9e683980041c3643fdf93e8368de504301afbaf"
+    },
+    "sqlcipher.dll": {
+      "bytes": 4688896,
+      "sha256": "9c7d9d08cb64c868e1829af86b4419bf25b8b985116ae1a1e82d647652d5931e"
+    }
+  },
+  "verification": {
+    "tests": {
+      "core": 157,
+      "cli": 80,
+      "storage": 77,
+      "desktop": 109
+    },
+    "total": 423,
+    "skipped": 0,
+    "strictAnalysis": [
+      "core",
+      "cli",
+      "storage",
+      "desktop"
+    ],
+    "nativeWindowsUi": 1,
+    "nativeUiScreenshots": 5,
+    "windowsProductionV2": true,
+    "defaultCliV2": true,
+    "oldClientV2Refused": true,
+    "oldGrantSemanticsPreserved": true,
+    "realReceiverCases": [
+      "OpenSSH valid/wrong key and host variants, v1/v2; v2 two commands under one grant",
+      "AWS signed identity/write/read and wrong secret, v1/v2; v2 one grant",
+      "gh synthetic invalid Token HTTP401, v1/v2; no real account success claimed"
+    ],
+    "sdkFreeBundlePreparation": true,
+    "hooksInstalled": false,
+    "releaseBuild": "passed",
+    "newPreviewZipPublished": false,
+    "independentAgentReview": false,
+    "computerUse": false,
+    "deferred": [
+      "35 focused fill",
+      "37 attachments",
+      "38 Windows attachment UI",
+      "30 combined real Codex acceptance",
+      "23 notification click",
+      "18 final package and clean Windows",
+      "Mac",
+      "server sync"
+    ]
+  },
+  "previousEvidence": [
+    "../issue33-step5/verification.json",
+    "../issue33-step4/verification-header-repair.json",
+    "../issue33-step4/verification.json",
+    "../issue33-step3/verification.json",
+    "../issue33-step2/verification.json"
+  ]
+}

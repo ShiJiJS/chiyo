@@ -1,0 +1,28 @@
+00:00 +0: loading C:/Project/network_config/info-manage/apps/desktop/test/proposal_workspace_test.dart
+00:00 +0: C:/Project/network_config/info-manage/apps/desktop/test/proposal_workspace_test.dart: a stopped query reports failure without claiming an empty successful result
+00:01 +1: C:/Project/network_config/info-manage/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:03 +2: C:/Project/network_config/info-manage/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:03 +3: C:/Project/network_config/info-manage/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:03 +4: C:/Project/network_config/info-manage/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:04 +5: C:/Project/network_config/info-manage/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:04 +6: C:/Project/network_config/info-manage/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:04 +7: C:/Project/network_config/info-manage/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:04 +8: C:/Project/network_config/info-manage/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:05 +9: C:/Project/network_config/info-manage/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:05 +10: C:/Project/network_config/info-manage/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:05 +11: C:/Project/network_config/info-manage/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:06 +12: C:/Project/network_config/info-manage/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:06 +13: C:/Project/network_config/info-manage/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:06 +14: C:/Project/network_config/info-manage/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:06 +15: C:/Project/network_config/info-manage/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:06 +16: C:/Project/network_config/info-manage/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:06 +17: C:/Project/network_config/info-manage/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:06 +18: C:/Project/network_config/info-manage/apps/desktop/test/organization_tasks_test.dart: organization shares the inbox with content requests without changing content approval
+00:07 +19: C:/Project/network_config/info-manage/apps/desktop/test/organization_tasks_test.dart: organization shares the inbox with content requests without changing content approval
+00:07 +20: C:/Project/network_config/info-manage/apps/desktop/test/proposal_workspace_test.dart: batch storage failure keeps the reviewed item and retries atomically
+00:07 +21: C:/Project/network_config/info-manage/apps/desktop/test/proposal_workspace_test.dart: a version race during confirmation keeps the conflict receipt visible
+00:07 +22: C:/Project/network_config/info-manage/apps/desktop/test/proposal_workspace_test.dart: a completed organization with no changes is a read-only result
+00:08 +23: C:/Project/network_config/info-manage/apps/desktop/test/proposal_workspace_test.dart: deletion review shows the live target then only a receipt
+00:08 +24: C:/Project/network_config/info-manage/apps/desktop/test/proposal_workspace_test.dart: reviewing a modification preserves explicit replacement identity
+00:08 +25: C:/Project/network_config/info-manage/apps/desktop/test/proposal_workspace_test.dart: one item review stays a draft until the whole batch is confirmed
+00:09 +26: All tests passed!

@@ -1,0 +1,25 @@
+00:00 +0: loading test/focused_fill_client_test.dart
+00:00 +0: test/focused_fill_client_test.dart: public CLI request, owner approval, fill, query and reuse traverse real loopback HTTP without secret output
+00:00 +0 ~1: test/focused_fill_client_test.dart: public CLI request, owner approval, fill, query and reuse traverse real loopback HTTP without secret output
+00:00 +1 ~1: test/credential_reuse_runtime_test.dart: v2 output masks credential bytes across chunks while preserving binary data and stream identity
+00:00 +2 ~1: test/credential_reuse_runtime_test.dart: v2 output masks credential bytes across chunks while preserving binary data and stream identity
+00:00 +3 ~1: test/credential_reuse_runtime_test.dart: v2 output masks credential bytes across chunks while preserving binary data and stream identity
+00:00 +4 ~1: test/credential_reuse_runtime_test.dart: v2 output masks credential bytes across chunks while preserving binary data and stream identity
+00:00 +5 ~1: test/credential_reuse_runtime_test.dart: v2 output masks credential bytes across chunks while preserving binary data and stream identity
+00:00 +6 ~1: test/credential_reuse_runtime_test.dart: v2 output masks credential bytes across chunks while preserving binary data and stream identity
+00:00 +7 ~1: test/credential_reuse_json_lines_test.dart: independent JSON-lines CLI defaults to v2, runs distinct operations and never repeats a claimed operation
+00:02 +8 ~1: test/credential_reuse_runtime_test.dart: native Windows workers run three operations with separate Jobs and one unchanged grant
+00:04 +9 ~1: test/credential_reuse_runtime_test.dart: native file workers inject two independent paths and clear their registered material
+00:05 +10 ~1: test/credential_reuse_runtime_test.dart: full resident capacity still returns duplicate facts without another start
+00:08 +11 ~1: test/credential_reuse_runtime_test.dart: each file operation writes exact bytes into its own path and cleans only its lease
+00:09 +12 ~1: test/credential_reuse_runtime_test.dart: default and explicit v2 refuse an old service without silently creating a v1 request
+00:09 +13 ~1: test/credential_reuse_runtime_test.dart: one CLI grant runs two distinct plans and duplicate commands only query facts
+00:09 +14 ~1: test/credential_reuse_runtime_test.dart: failed CLI operation does not consume approval and is not replayed
+00:10 +15 ~1: test/credential_reuse_runtime_test.dart: truncated private claim is uncertain, and same operation retry cannot reissue material
+00:10 +16 ~1: test/credential_reuse_runtime_test.dart: wrong-operation private claim is uncertain, and same operation retry cannot reissue material
+00:10 +17 ~1: test/credential_reuse_runtime_test.dart: wrong-request private claim is uncertain, and same operation retry cannot reissue material
+00:10 +18 ~1: test/credential_reuse_runtime_test.dart: duplicate-key private claim is uncertain, and same operation retry cannot reissue material
+00:10 +19 ~1: test/credential_reuse_runtime_test.dart: a lost hosted acknowledgement remains uncertain and does not replay a command
+00:10 +20 ~1: test/credential_reuse_runtime_test.dart: protocol errors never upgrade old grants or create malformed operations
+00:10 +21 ~1: test/credential_reuse_runtime_test.dart: hosted concurrent clients use one operation, including after revocation
+00:11 +22 ~1: All tests passed!

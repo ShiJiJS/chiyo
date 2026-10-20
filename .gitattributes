@@ -1,0 +1,71 @@
+# Synthetic QA logs are immutable byte evidence, including failed runs.
+docs/development/evidence/29-files/raw/** -text -diff
+docs/development/evidence/30-integration/raw/** -text -diff
+docs/development/evidence/31-backup-migration/raw/** -text -diff
+docs/development/evidence/windows-round05-delivery/raw/** -text -diff
+docs/development/evidence/windows-timeout-fix/raw/** -text -diff
+docs/development/evidence/issue35-native-user-flow/raw/** -text -diff
+docs/development/evidence/issue35-native-user-flow/control-native-ui.py.txt -text -diff
+docs/development/evidence/issue37-typed-fields/fields-* -text -diff
+docs/development/evidence/issue35-completion/raw/** -text -diff
+docs/development/evidence/issue37-encrypted-staging/raw/** -text -diff
+docs/development/evidence/issue37-backup-container/raw/** -text -diff
+docs/development/evidence/issue37-formal-files/raw/** -text -diff
+docs/development/evidence/issue37-owner-file-lifecycle/raw/** -text -diff
+docs/development/evidence/issue37-delivery-core/raw/** -text -diff
+
+docs/development/evidence/issue37-delivery-storage/raw/** -text -diff
+
+docs/development/evidence/issue37-delivery-cli/raw/** -text -diff
+
+docs/development/evidence/issue37-metadata-budget/raw/** -text -diff
+
+docs/development/evidence/issue37-completion/raw/** -text -diff
+
+docs/development/evidence/issue38-owner-file-editor/raw/** -text -diff
+
+docs/development/evidence/issue38-approval-history/raw/** -text -diff
+
+docs/development/evidence/issue38-file-consumers/raw/** -text -diff
+
+docs/development/evidence/issue38-file-backup-capacity/raw/** -text -diff
+
+docs/development/evidence/issue38-windows-file-bootstrap/raw/** -text -diff
+
+docs/development/evidence/issue38-completion/raw/** -text -diff
+
+docs/development/evidence/issue30-files-skill/raw/** -text -diff
+
+docs/development/evidence/issue23-notification-identity/raw/** -text -diff
+
+docs/development/evidence/windows-preview-0.4.0-9/raw/** -text -diff
+
+docs/development/evidence/issue30-terminal-audit-recovery/raw/** -text -diff
+
+docs/development/evidence/issue18-packaged-startup/raw/** -text -diff
+
+docs/development/evidence/issue23-current-notification/raw/** -text -diff
+
+docs/development/evidence/issue39-app-control/raw/** -text -diff
+
+docs/development/evidence/issue18-packaged-upgrade/raw/** -text -diff
+
+docs/development/evidence/issue18-packaged-joint/raw/** -text -diff
+
+docs/development/evidence/issue18-packaged-file-ui/raw/** -text -diff
+
+docs/development/evidence/issue18-packaged-compat/raw/** -text -diff
+
+docs/development/evidence/issue18-packaged-restore-crash/raw/** -text -diff
+
+docs/development/evidence/issue18-packaged-recycle-ui/raw/** -text -diff
+
+docs/development/evidence/issue18-packaged-recycle-delete/raw/** -text -diff
+
+docs/development/evidence/issue40-removed-field-state/raw/** -text -diff
+
+docs/development/evidence/windows-preview-0.4.0-12/raw/** -text -diff
+
+docs/development/evidence/windows-resume-20261020/raw/** -text -diff
+
+docs/development/evidence/issue30-acceptance-workspace/raw/** -text -diff

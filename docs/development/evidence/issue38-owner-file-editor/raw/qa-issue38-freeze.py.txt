@@ -1,0 +1,45 @@
+from pathlib import Path
+import hashlib,json,shutil,subprocess
+root=Path.cwd();qa=root/'build/qa-issue38'
+source=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()
+assert source=='cb2d5f1dffa8e5eb5f00b20961d21614439f3813'
+full=json.loads((qa/'full-02/result.json').read_text())
+assert full['sourceRevision']==source and not full['unexpectedLocks']
+assert len(full['phases'])==3 and all(p['exitCode']==0 for p in full['phases'])
+dest=root/'docs/development/evidence/issue38-owner-file-editor';(dest/'raw').mkdir(parents=True,exist_ok=False)
+raw=[]
+def copy(p,relative):
+    target=dest/relative;target.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(p,target)
+    b=target.read_bytes();raw.append({'path':target.relative_to(dest).as_posix(),'bytes':len(b),'sha256':hashlib.sha256(b).hexdigest()})
+for phase in [*(f'round-{i:02}' for i in range(1,9)),'full-01','full-02']:
+    for p in sorted((qa/phase).iterdir()):
+        if p.is_file() and p.suffix in {'.txt','.json'}:copy(p,Path('raw')/phase/p.name)
+for name in ['qa-issue38-check.py','qa-issue38-full.py','qa-issue38-editing.py','qa-issue38-freeze.py']:
+    copy(root/'build'/name,Path('raw')/(name+'.txt'))
+selected=['purple-1280-library.png','purple-1280-file-editor.png','purple-1280-file-editor-text-200.png','green-1440-library.png','blue-1280-empty-file.png','mono-1440-missing-file.png']
+for name in selected:copy(qa/'round-08/screens'/name,Path('screens')/name)
+copy(qa/'compare-01/stitch.png',Path('screens/prototype-and-flutter-initial.png'))
+paths=set(subprocess.check_output(['git','diff','--name-only','08ada3a',source],text=True).splitlines())
+paths.update(p+'/pubspec.lock' for p in ['packages/info_core','packages/info_storage','packages/info_cli','apps/desktop'])
+sources=[]
+for p in sorted(paths):
+    b=subprocess.check_output(['git','show',source+':'+p]);sources.append({'path':p,'bytes':len(b),'sha256':hashlib.sha256(b).hexdigest()})
+captures=[]
+for p in sorted((qa/'round-08/screens').glob('*.png')):
+    b=p.read_bytes();captures.append({'name':p.name,'bytes':len(b),'sha256':hashlib.sha256(b).hexdigest(),'committed':p.name in selected})
+assert len(captures)==33
+release=[]
+for p in ['info_desktop.exe','data/app.so','flutter_windows.dll','sqlcipher.dll']:
+    b=(root/'apps/desktop/build/windows/x64/runner/Release'/p).read_bytes();release.append({'path':p,'bytes':len(b),'sha256':hashlib.sha256(b).hexdigest()})
+record={'sourceRevision':source,'initialRevision':'1b923b6','scope':'partial #38 owner file editor/templates/library; no native dialog/production bootstrap/full ticket acceptance',
+ 'final':{'passed':649,'skipped':19,'packages':{'info_cli':{'passed':89,'skipped':13},'info_core':{'passed':260,'skipped':0},'info_storage':{'passed':153,'skipped':6},'desktop':{'passed':147,'skipped':0}},'strictAnalyzes':4,'locksUnchanged':True,'fullRun':'raw/full-02/checks.txt'},
+ 'focused':{'round08Passed':26,'newTests':6,'additionalConsecutiveRuns':[{'passed':6,'run':'raw/full-02/repeat-01.txt'},{'passed':6,'run':'raw/full-02/repeat-02.txt'}]},
+ 'render':{'screens':33,'themes':['purple','green','blue','mono'],'sizes':['1440x900','1280x800'],'text200Percent':True,'productionFonts':True,'nativeDialogValidated':False,'fullFidelityAccepted':False,'unindependentlyReviewed':True,'captures':captures},
+ 'release':release,'raw':raw,'sourceGitBytes':sources}
+(dest/'verification.json').write_text(json.dumps(record,ensure_ascii=False,indent=2)+'\n',encoding='utf-8',newline='\n')
+p=root/'.gitattributes';p.write_text(p.read_text(encoding='utf-8')+'\ndocs/development/evidence/issue38-owner-file-editor/raw/** -text -diff\n',encoding='utf-8',newline='\n')
+p=root/'docs/development/issue38-owner-file-editor.md';s=p.read_text(encoding='utf-8').replace('源码`1b923b6`','初始源码`1b923b6`、修正`cb2d5f1`',1)
+s=s.replace('正式最终结果和原始证据由下方固定验证索引记录。','全量回归另发现两项旧故障适配器只拦截旧保存入口；改为对实际新草稿事务注入失败，并断言确实进入失败/重试边界，没有放松回滚要求。另补失败替换必须明确继续使用原文件，以及取消身份确认后恢复编辑状态。通用异常不假称旧库一定未变化，输入保持并按原操作明确重试。\n\n最终完整`scripts/check.ps1 -Offline`通过：CLI89/13、core260/0、storage153/6、desktop147/0，共649通过/19原生opt-in跳过；四包严格分析/原四锁通过。定向26项通过，新增6项异步相关检查在修正后再连续两轮6/0通过。Windows Release再次构建通过；33张实际Flutter状态图及6张代表图入库。[固定证据与source/lock、Release摘要](evidence/issue38-owner-file-editor/verification.json)保留所有失败/成功轮、脚本和范围限制。')
+p.write_text(s,encoding='utf-8',newline='\n')
+p=root/'docs/planning/windows-next-iteration.md';s=p.read_text(encoding='utf-8').replace('#38第一段1b923b6已连接','#38第一段1b923b6/cb2d5f1已连接',1).replace('系统picker适配代码、真实草稿事务/取消/失败重试与另存已接；','完整649通过/19跳过、四包分析/原锁及Release通过；33张Flutter状态图与原型并排检查。系统picker适配代码、真实草稿事务/取消/失败重试与另存已接；',1);p.write_text(s,encoding='utf-8',newline='\n')
+print(json.dumps({'rawAndScreens':len(raw),'sourceFiles':len(sources),'captures':len(captures)}))

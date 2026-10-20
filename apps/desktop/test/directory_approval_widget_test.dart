@@ -38,12 +38,16 @@ void main() {
       MaterialApp(home: Approvals(service: service, port: 47125)),
     );
     await tester.tap(find.byKey(ValueKey('field-${requested.fieldId}')));
-    await tester.tap(find.text('补选或改选字段'));
+    await tester.tap(find.text('调整提供范围 / 补选其他信息'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('按目录批量选择'));
     await tester.pumpAndSettle();
     await tester.tap(
       find.byKey(ValueKey('directory-${request.id}-${directory.id}')),
     );
     await tester.pump();
+    await tester.tap(find.byKey(const ValueKey('scope-apply')));
+    await tester.pumpAndSettle();
     final approve = find.text('批准所选字段');
     await tester.ensureVisible(approve);
     await tester.tap(approve);

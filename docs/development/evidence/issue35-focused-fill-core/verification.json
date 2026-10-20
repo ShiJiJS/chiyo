@@ -1,0 +1,247 @@
+{
+  "format": 1,
+  "baseline": "381f3f2528e1f295b37c0633935d4757861ba717",
+  "status": "core-memory-and-cli checkpoint; not native fill delivery",
+  "tests": {
+    "core": 188,
+    "cliRelevantSubset": 24,
+    "existingStorage": 77,
+    "existingDesktop": 109,
+    "total": 398,
+    "skipped": 0,
+    "newFocusedCoreTests": 31,
+    "newFocusedCliTests": 7
+  },
+  "strictAnalyses": [
+    "info_core",
+    "info_cli",
+    "info_storage",
+    "desktop"
+  ],
+  "compiled": [
+    "independent Windows AOT info.exe",
+    "AOT runtime worker",
+    "Windows desktop Release"
+  ],
+  "productionEnabled": false,
+  "actualFillDriver": "simulated test driver only",
+  "schemaVersion": 17,
+  "backupFormat": 6,
+  "notImplemented": [
+    "SQLCipher focused fill audit and new backup format",
+    "actual Windows input driver/host and native compatibility",
+    "focus-target discovery",
+    "Flutter fill/recovery UI",
+    "native no-clipboard and external context verification",
+    "new delivery ZIP"
+  ],
+  "dependencyPolicy": "enforced existing locks; URL-only mirror temporary; final locks match Git",
+  "cleanup": "test-owned loopback services and independent CLI processes disposed; no Computer Use or server-sync work",
+  "aotBinaries": [
+    {
+      "name": "info.exe",
+      "bytes": 7395840,
+      "sha256": "195c1fb7dafde98efa4ae528039aa78b70d3b4ce9539563040c2f48e58a3fc6c"
+    },
+    {
+      "name": "info-runtime-worker.exe",
+      "bytes": 6437376,
+      "sha256": "59cf09020539be93dff3f7ff2fdfe0adee4a622a60855aab9f4e56567cdb05ec"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "aot-binaries.json",
+      "bytes": 302,
+      "sha256": "0748e2cda08fcb63cc90fb34bb07898f3f46b713abd49ef27aba8ebe06c1a4ca"
+    },
+    {
+      "path": "aot-info-runtime-worker.exe.build.txt",
+      "bytes": 100,
+      "sha256": "86287674e2645cad39a0e6489173afa80b4b37e032a953db50dafe671e205101"
+    },
+    {
+      "path": "aot-info.exe.build.txt",
+      "bytes": 85,
+      "sha256": "a8758090cd05cec4d58c6c2b3b42cd1292ff5f8934ec0a3d1527715edf3ed3df"
+    },
+    {
+      "path": "aot-pub.txt",
+      "bytes": 265,
+      "sha256": "89355575f81c8d5ef69241ee0807d5cc23f8d8eddaac1763189ecc54f1fba757"
+    },
+    {
+      "path": "cli-analyze.txt",
+      "bytes": 41,
+      "sha256": "6e44cc46795204be42a0f9574ea1bb6ea6f30510cacf1fc32c1bdcbcf11556c1"
+    },
+    {
+      "path": "cli-environment.json",
+      "bytes": 274,
+      "sha256": "93c063f21985ae3a683e3639d9412a932cb19a95cfab2961700fd25f8f3012b7"
+    },
+    {
+      "path": "cli-pub.txt",
+      "bytes": 265,
+      "sha256": "89355575f81c8d5ef69241ee0807d5cc23f8d8eddaac1763189ecc54f1fba757"
+    },
+    {
+      "path": "cli.txt",
+      "bytes": 3446,
+      "sha256": "9bc7d3e082600693cdf1045890f019317f6ff49d76652b7f5f315a1902d4e7df"
+    },
+    {
+      "path": "core-analyze.txt",
+      "bytes": 42,
+      "sha256": "28e050beb69b2d391c6c6b401c3f1700ebc3ea89c0b1439ca0c02bcb02fc9fcf"
+    },
+    {
+      "path": "core-desktop-release.txt",
+      "bytes": 239,
+      "sha256": "96d0313e05979c427ebbd7c537764c143842135f81bad6b73052d81ef36be4a8"
+    },
+    {
+      "path": "core-environment.json",
+      "bytes": 149,
+      "sha256": "141a8470b76269ea052a4bfd1b935e0a699a1cbffb855ed134b4eca9f4e4b3fb"
+    },
+    {
+      "path": "core-pub.txt",
+      "bytes": 265,
+      "sha256": "89355575f81c8d5ef69241ee0807d5cc23f8d8eddaac1763189ecc54f1fba757"
+    },
+    {
+      "path": "core.txt",
+      "bytes": 30126,
+      "sha256": "b99cf71fa793710ec01cab80cf628fc940253fbdac0db461c6990922c4b7fa91"
+    },
+    {
+      "path": "desktop-core-analyze.txt",
+      "bytes": 202,
+      "sha256": "d3ec3ed34a0c462028790d1e138cd4ba18e3080de474c96ecd12f1864d733e36"
+    },
+    {
+      "path": "desktop-core-regression.txt",
+      "bytes": 22375,
+      "sha256": "066e6b5eb4c61721587d4d2b94ba39157ded9364dab3c25dfe9dfa7ad56d0934"
+    },
+    {
+      "path": "earlier-cli-entry-correction.txt",
+      "bytes": 3396,
+      "sha256": "853808282d0669e2030a2f31d94bf6d74d32b2e0f90d52b4965b9b077fc21136"
+    },
+    {
+      "path": "earlier-storage-2-skipped.txt",
+      "bytes": 57368,
+      "sha256": "0f1339be98bd0256bd27b75dd1a08bfabc95bdea9fc701a3920f3b59b9a6d276"
+    },
+    {
+      "path": "storage-analyze.txt",
+      "bytes": 45,
+      "sha256": "cd576e4111f8aefaf1ed90db51a3b9271878708a31ce944f08180fe9b85584ec"
+    },
+    {
+      "path": "storage-environment.json",
+      "bytes": 149,
+      "sha256": "8ffd408b0e61726c27cb7a4479cd9f516621ff38ec0ef9a8dbd0d23feeab8faa"
+    },
+    {
+      "path": "storage-pub.txt",
+      "bytes": 265,
+      "sha256": "89355575f81c8d5ef69241ee0807d5cc23f8d8eddaac1763189ecc54f1fba757"
+    },
+    {
+      "path": "storage.txt",
+      "bytes": 58800,
+      "sha256": "c41ba24ddea2ed05c5334753afd43e0bec33ac464e64e428063f99d7e3ef5797"
+    }
+  ],
+  "sourceObjects": [
+    {
+      "path": "docs/cli.md",
+      "gitBlobSha1": "3e2ab15f39b51ed210e765bc366b4c618abfd078"
+    },
+    {
+      "path": "docs/design/local-focused-fill-contract.md",
+      "gitBlobSha1": "00b912e7693eba682b980aecbb84790dc16563b9"
+    },
+    {
+      "path": "docs/development/issue35-focused-fill-core.md",
+      "gitBlobSha1": "1abb4c25432250cb17bafe8499b8846227c81f3a"
+    },
+    {
+      "path": "docs/planning/implementation-status.md",
+      "gitBlobSha1": "fe8b3bd77ef58c441fce58c7b6eee5f9cbffb940"
+    },
+    {
+      "path": "docs/planning/windows-next-iteration.md",
+      "gitBlobSha1": "0c8987274183856ca69b51d7b7d49389c7172c75"
+    },
+    {
+      "path": "packages/info_cli/lib/agent_client.dart",
+      "gitBlobSha1": "4c7b30d94de2a205774744a3c202b431a07f503d"
+    },
+    {
+      "path": "packages/info_cli/lib/credential_runtime_client.dart",
+      "gitBlobSha1": "ddf6bd949158ecd5bde51e9cfaffa7e44c6512be"
+    },
+    {
+      "path": "packages/info_cli/test/focused_fill_client_test.dart",
+      "gitBlobSha1": "a041175d6a4bad3435d962e3ddfdd9d4e814d147"
+    },
+    {
+      "path": "packages/info_core/lib/agent_server.dart",
+      "gitBlobSha1": "63a5aa203b04bbb6c99721abdbad7cd5f5c626df"
+    },
+    {
+      "path": "packages/info_core/lib/backup_access.dart",
+      "gitBlobSha1": "498815ff8b118e819f1890e3b03b0ef78557c1d3"
+    },
+    {
+      "path": "packages/info_core/lib/credential_access.dart",
+      "gitBlobSha1": "68d4af72aa098d0fe219cc14a01903f6c0d378f4"
+    },
+    {
+      "path": "packages/info_core/lib/credential_history_access.dart",
+      "gitBlobSha1": "0778213f4613edb50bd9ba2a0011b65365c0c1d7"
+    },
+    {
+      "path": "packages/info_core/lib/credential_runtime_access.dart",
+      "gitBlobSha1": "6aca501c6b8ce8c5f47c33fba94cd7187672faa8"
+    },
+    {
+      "path": "packages/info_core/lib/credential_runtime_models.dart",
+      "gitBlobSha1": "062e60cd95ce0eb9a45a886a5009ef109c1f5b29"
+    },
+    {
+      "path": "packages/info_core/lib/focused_fill_access.dart",
+      "gitBlobSha1": "ea27aa26ad9f4095345b990deea4677740a5cb51"
+    },
+    {
+      "path": "packages/info_core/lib/focused_fill_models.dart",
+      "gitBlobSha1": "a35a8bf0d10d15aad3a0381ba9c01fc7780c205a"
+    },
+    {
+      "path": "packages/info_core/lib/history_access.dart",
+      "gitBlobSha1": "64bc818de8246c7528ea05c892a14f0a7c6db0b5"
+    },
+    {
+      "path": "packages/info_core/lib/info_core.dart",
+      "gitBlobSha1": "31f73ffd42a7a61af14f437c2d8ff86531478748"
+    },
+    {
+      "path": "packages/info_core/lib/information.dart",
+      "gitBlobSha1": "b95ee95147cec5bb8c99d57ac5e58252874cadb9"
+    },
+    {
+      "path": "packages/info_core/test/focused_fill_lifecycle_test.dart",
+      "gitBlobSha1": "2734ff74df1a3e70743c377a4b5a839038092e10"
+    },
+    {
+      "path": "packages/info_core/test/focused_fill_test.dart",
+      "gitBlobSha1": "363c105a7a79fa268e64927a9600016b1d4c2da7"
+    }
+  ],
+  "aotProductionSourcesOlderThanBinary": true,
+  "ownedQaProcessesRemaining": 0
+}

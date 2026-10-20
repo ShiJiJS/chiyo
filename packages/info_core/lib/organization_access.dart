@@ -168,13 +168,9 @@ extension OwnerOrganization on OwnerAccess {
       [
         for (final field in old.fields)
           if (fieldDescriptions.containsKey(field.id))
-            InformationField(
-              field.id,
-              field.name,
-              fieldDescriptions[field.id]!,
-              field.value,
-              field.version + 1,
-              kind: field.kind,
+            field.withMetadata(
+              description: fieldDescriptions[field.id]!,
+              version: field.version + 1,
             )
           else
             field,

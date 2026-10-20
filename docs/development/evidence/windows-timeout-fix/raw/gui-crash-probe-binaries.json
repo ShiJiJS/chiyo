@@ -1,0 +1,97 @@
+{
+  "target": "tool/windows_hosted_crash_probe.dart",
+  "source": "291801046f7d1e6e4217a4bc001ea714689855c5",
+  "define": "WINDOWS_HOSTED_CRASH_QA=true",
+  "files": [
+    {
+      "sha256": "b60f6940fdabeca7ea9688448852c705e76dbe6513902651dfb1e92bc1db9fd2",
+      "path": "flutter_windows.dll",
+      "bytes": 46621696
+    },
+    {
+      "sha256": "d7ee42ff0b58189df8675bb7c8ae3b36d1d0857b3de48792002ee49554d3f74c",
+      "path": "info_desktop.exe",
+      "bytes": 1101824
+    },
+    {
+      "sha256": "b912716f0771d053627494b6881470086ccfd8b4f8ab495c77c9b3cb6ae7ec49",
+      "path": "info_desktop.pdb",
+      "bytes": 15003648
+    },
+    {
+      "sha256": "2973dfcf8de49e0ea171353b1b3dbe6362b3c0dcda35c7044a8f4463ac795313",
+      "path": "notification_queue_test.exe",
+      "bytes": 151040
+    },
+    {
+      "sha256": "ac24422b8649623399e907c4cd84e09a8e92a1379271a6464f821e1dcb4ac6b7",
+      "path": "notification_queue_test.pdb",
+      "bytes": 1822720
+    },
+    {
+      "sha256": "9c7d9d08cb64c868e1829af86b4419bf25b8b985116ae1a1e82d647652d5931e",
+      "path": "sqlcipher.dll",
+      "bytes": 4688896
+    },
+    {
+      "sha256": "325a86063d26334c2eabe1743cea073b612540fbf3d8fc2ef0b5708e3763a8c7",
+      "path": "data/icudtl.dat",
+      "bytes": 864880
+    },
+    {
+      "sha256": "83aff8338613c8e4e6f664b6c31894d2481320ea29bdc93aa475e79639792289",
+      "path": "data/flutter_assets/AssetManifest.bin",
+      "bytes": 225
+    },
+    {
+      "sha256": "f1561684efd3517f8f4ebce880aa36f5c949a53d75a0bb66431626f8959fa25a",
+      "path": "data/flutter_assets/FontManifest.json",
+      "bytes": 330
+    },
+    {
+      "sha256": "7cc752c0c5e62939e7e3929bb3a6eb28a873fb52675fa3fff2fa60590f93424a",
+      "path": "data/flutter_assets/kernel_blob.bin",
+      "bytes": 50505680
+    },
+    {
+      "sha256": "102f582ac604e77edd2f51b9b6f01c5f02c4066e44d76e42ac6a0f24ec764d90",
+      "path": "data/flutter_assets/NativeAssetsManifest.json",
+      "bytes": 133
+    },
+    {
+      "sha256": "7726f58af9d2b754cc5f79be65ff68f77231c879e42a422ddbc9aab05e725701",
+      "path": "data/flutter_assets/NOTICES.Z",
+      "bytes": 99898
+    },
+    {
+      "sha256": "7633f5a016d4dd95e685a69633d818aabc4644c4b08e26bd35b1b30c45ed5dda",
+      "path": "data/flutter_assets/assets/fonts/NotoSansSC-Medium.otf",
+      "bytes": 8345436
+    },
+    {
+      "sha256": "faa6c9df652116dde789d351359f3d7e5d2285a2b2a1f04a2d7244df706d5ea9",
+      "path": "data/flutter_assets/assets/fonts/NotoSansSC-Regular.otf",
+      "bytes": 8331336
+    },
+    {
+      "sha256": "6a73f9541c2de74158c0e7cf6b0a58ef774f5a780bf191f2d7ec9cc53efe2bf2",
+      "path": "data/flutter_assets/assets/fonts/OFL.txt",
+      "bytes": 4301
+    },
+    {
+      "sha256": "d9865b671a09d683d13a863089d8825e0f61a37696ce5d7d448bc8023aa62453",
+      "path": "data/flutter_assets/fonts/MaterialIcons-Regular.otf",
+      "bytes": 1645184
+    },
+    {
+      "sha256": "1fe8436a743884cb65078fe8c7b38e18f5365f2a2961270916f426fd13c604af",
+      "path": "data/flutter_assets/shaders/ink_sparkle.frag",
+      "bytes": 21856
+    },
+    {
+      "sha256": "bc7599dbbbaab310efe41520574138d21fb18a88c8fe4495ed79315309336f6f",
+      "path": "data/flutter_assets/shaders/stretch_effect.frag",
+      "bytes": 17616
+    }
+  ]
+}

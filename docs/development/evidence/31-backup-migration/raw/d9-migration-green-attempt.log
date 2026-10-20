@@ -1,0 +1,13 @@
+Running build hooks...Running build hooks...00:00 +0: loading test/credential_field_migration_test.dart
+00:00 +0 -1: loading test/credential_field_migration_test.dart [E]
+  Failed to load "test/credential_field_migration_test.dart":
+  ../info_core/lib/credential_field_migration.dart:103:21: Error: The argument type 'Iterable<InformationField>' can't be assigned to the parameter type 'List<InformationField>'.
+   - 'Iterable' is from 'dart:core'.
+   - 'InformationField' is from 'package:info_core/information.dart' ('../info_core/lib/information.dart').
+   - 'List' is from 'dart:core'.
+        before.fields.where((f) => f.id != ref.fieldId),
+                      ^
+00:00 +0 -1: Some tests failed.
+
+Failing tests:
+  test/credential_field_migration_test.dart: loading test/credential_field_migration_test.dart

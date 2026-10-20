@@ -1,0 +1,17 @@
+from pathlib import Path
+root=Path.cwd()/'packages/info_storage/test'
+for p in root.glob('*.dart'):
+    value=p.read_text(encoding='utf-8');lines=value.splitlines(keepends=True);result=[]
+    for line in lines:
+        if ".execute('DROP TABLE information_file_fields');" in line:
+            indent=line[:len(line)-len(line.lstrip())];receiver=line.strip().split('.execute')[0]
+            result.append(f"{indent}{receiver}.execute('DROP TABLE information_deliveries');\n")
+        result.append(line)
+    updated=''.join(result)
+    if p.name in ['credential_reuse_storage_test.dart','information_file_staging_test.dart']:
+        updated=updated.replace('single.values.single, 20)','single.values.single, 21)').replace('          20,','          21,').replace('schema20 reopen','schema21 reopen')
+    if p.name=='information_attachments_storage_test.dart':
+        updated=updated.replace("for (final t in [\n        'information_file_fields',","for (final t in [\n        'information_deliveries',\n        'information_file_fields',")
+        # Keep the older-table collision test specifically about schema20 tables.
+        updated=updated.replace("db = inspect();\n      db.execute('UPDATE library_format SET version=19');","db = inspect();\n      db.execute('DROP TABLE information_deliveries');\n      db.execute('UPDATE library_format SET version=19');")
+    if updated!=value:p.write_text(updated,encoding='utf-8',newline='\n')

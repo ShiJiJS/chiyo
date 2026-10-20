@@ -1,0 +1,4 @@
+适用于 .NET Framework MSBuild 版本 17.14.60+43b635718
+
+  notification_queue_test.cpp
+  notification_queue_test.vcxproj -> C:\Project\network_config\info-manage\apps\desktop\build\windows\x64\runner\Debug\notification_queue_test.exe

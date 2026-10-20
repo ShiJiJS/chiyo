@@ -11,7 +11,7 @@ void main() {
     await tester.pumpWidget(InformationApp(service: core, port: 47125));
     await tester.tap(find.text('请求设置'));
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const ValueKey('request-lifetime')));
+    await tester.tap(find.byKey(const ValueKey('timeout-30')));
     await tester.pumpAndSettle();
     await tester.tap(find.text('5 分钟').last);
     await tester.pumpAndSettle();
@@ -22,6 +22,10 @@ void main() {
   testWidgets('owner sees remaining time and rejects a pending request', (
     tester,
   ) async {
+    tester.view.physicalSize = const Size(1280, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
     final core = InformationService.fictional(
       clock: () => DateTime.utc(2026, 10, 16),
     );
@@ -30,13 +34,23 @@ void main() {
       const FieldRef('demo-server', 'host'),
     ]);
     await tester.pumpWidget(InformationApp(service: core, port: 47125));
-    expect(find.text('待审批剩余：30 分 0 秒'), findsOneWidget);
-    await tester.ensureVisible(find.text('拒绝申请'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('拒绝申请'));
+    final document = find.byKey(PageStorageKey('detail-${request.id}'));
+    await tester.scrollUntilVisible(
+      find.text('Need host'),
+      100,
+      scrollable: find
+          .descendant(of: document, matching: find.byType(Scrollable))
+          .first,
+    );
+    expect(find.text('Need host'), findsOneWidget);
+    expect(find.text('还剩 30 分钟'), findsOneWidget);
+    await tester.ensureVisible(find.text('拒绝请求'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('拒绝请求'));
     await tester.pump();
     expect(core.agent.status(session, request.id)['status'], 'denied');
-    expect(find.text('已拒绝'), findsOneWidget);
+    expect(find.text('已拒绝'), findsWidgets);
     expect(find.text('批准所选字段'), findsNothing);
     await tester.pumpWidget(const SizedBox());
     core.close();

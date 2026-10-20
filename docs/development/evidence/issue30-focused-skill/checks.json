@@ -1,0 +1,23 @@
+{
+  "results": [
+    {
+      "name": "pub",
+      "exitCode": 0
+    },
+    {
+      "name": "analyze",
+      "exitCode": 0
+    },
+    {
+      "name": "tests",
+      "exitCode": 0
+    }
+  ],
+  "tests": [
+    "test/codex_focused_fill_test.dart",
+    "test/focused_fill_client_test.dart",
+    "test/focused_fill_target_test.dart",
+    "test/bundle_preparation_test.dart"
+  ],
+  "unexpectedLocks": []
+}

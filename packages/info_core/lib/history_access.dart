@@ -1,6 +1,29 @@
 part of 'info_core.dart';
 
 extension _AuditService on InformationService {
+  void _recordRequest(
+    _Request request, {
+    bool sessionEnded = false,
+    bool applicationClosed = false,
+  }) {
+    if (request.state == AccessRequestState.pending) return;
+    final history = RequestHistory(
+      id: request.id,
+      sessionId: _sessionBindings[request.session]!,
+      chatLabel: _sessions[request.session]!,
+      purpose: request.purpose,
+      createdAt: request.createdAt,
+      requestExpiresAt: request.expiresAt,
+      recordedAt: _clock(),
+      state: request.state,
+      fields: request.recordedFields,
+      grantId: request.history?.id,
+      sessionEnded: sessionEnded || _endedSessions.contains(request.session),
+      applicationClosed: applicationClosed,
+    );
+    _enqueueAudit(() => _repository.saveRequestHistory(history));
+  }
+
   void _recoverAudit() {
     for (final history in _repository.grantHistory.where((g) => g.active)) {
       final expired = !_clock().isBefore(history.expiresAt);
@@ -13,11 +36,26 @@ extension _AuditService on InformationService {
     _pruneAudit();
   }
 
-  void _pruneAudit() => _enqueueAudit(
-    () => _repository.pruneAudit(
-      _clock().subtract(Duration(days: owner.auditRetentionDays)),
-    ),
-  );
+  bool _endedOrganization(OrganizationTask task) =>
+      switch (owner.organizationState(task)) {
+        OrganizationTaskState.pending ||
+        OrganizationTaskState.active ||
+        OrganizationTaskState.proposed => false,
+        _ => true,
+      };
+
+  void _pruneAudit() => _enqueueAudit(() async {
+    final cutoff = _clock().subtract(Duration(days: owner.auditRetentionDays));
+    await _repository.pruneAudit(cutoff);
+    // Proposed results still await an owner decision. Live tasks keep their
+    // capability; only ended facts are subject to audit-history cleanup.
+    await _repository.pruneOrganizationHistory({
+      for (final task in _repository.organizationTasks)
+        if (_endedOrganization(task) &&
+            (task.approvedAt ?? task.createdAt).isBefore(cutoff))
+          task.id,
+    });
+  });
 
   void _approveHistory(_Request request) {
     final grant = request.grant!;
@@ -81,14 +119,26 @@ extension _AuditService on InformationService {
         ) ??
         false;
     final normalized = known != null || previouslyApproved;
+    final recorded = request?.history?.fields
+        .where((f) => f.itemId == target.itemId && f.fieldId == target.fieldId)
+        .firstOrNull;
+    final namedItem = normalized
+        ? _repository.items.where((i) => i.id == target.itemId).firstOrNull
+        : null;
     var record = AccessRecord(
       id: _secret(),
       at: _clock(),
-      outcome: allowed ? AccessOutcome.allowed : AccessOutcome.unauthorized,
+      outcome: !allowed
+          ? AccessOutcome.unauthorized
+          : known?.kind == FieldKind.file
+          ? AccessOutcome.fileDeliveryRequired
+          : AccessOutcome.allowed,
       sessionId: request?.history?.sessionId,
       grantId: request?.history?.id,
       itemId: normalized ? target.itemId : null,
       fieldId: normalized ? target.fieldId : null,
+      itemName: recorded?.itemName ?? namedItem?.name,
+      fieldName: recorded?.fieldName ?? known?.name,
     );
     _enqueueAudit(() => _repository.saveAccessRecord(record));
     _pruneAudit();
@@ -105,6 +155,8 @@ extension _AuditService on InformationService {
         grantId: record.grantId,
         itemId: record.itemId,
         fieldId: record.fieldId,
+        itemName: record.itemName,
+        fieldName: record.fieldName,
       );
       _enqueueAudit(() => _repository.saveAccessRecord(record));
       await _auditWrites;
@@ -120,11 +172,16 @@ extension _AuditService on InformationService {
         grantId: record.grantId,
         itemId: record.itemId,
         fieldId: record.fieldId,
+        itemName: record.itemName,
+        fieldName: record.fieldName,
       );
       _enqueueAudit(() => _repository.saveAccessRecord(record));
       throw const AccessFailure('audit_unavailable');
     }
     if (!deliver) throw const AccessFailure('unauthorized');
+    if (_field(target)!.kind == FieldKind.file) {
+      throw const AccessFailure('file_delivery_required');
+    }
     // No await separates the final permission check and completing the value.
     // This is the read's delivery point in the core's owning isolate.
     return _field(target)!.value;
@@ -132,7 +189,17 @@ extension _AuditService on InformationService {
 }
 
 extension OwnerAuditAccess on OwnerAccess {
-  bool get auditStorageUnavailable => _service._auditFailed;
+  /// Owner-only current scope projection, using the actual read decision.
+  /// A historical grant ID or restored field name cannot create authorization.
+  bool canReadGrantedField(GrantHistory grant, FieldRef field) {
+    if (grant.restoredAt != null || auditStorageUnavailable) return false;
+    final request = _service._requests[grant.requestId];
+    return request?.history?.id == grant.id &&
+        _service._canRead(request, field);
+  }
+
+  bool get auditStorageUnavailable =>
+      _service._auditFailed || _service._pendingExecutionReceipts.isNotEmpty;
   Future<void> retryAuditStorage() async {
     if (_service._backupBusy) throw const AccessFailure('service_unavailable');
     await _retryAuditStorage();
@@ -160,6 +227,14 @@ extension OwnerAuditAccess on OwnerAccess {
     return AuditHistory(
       _service._repository.grantHistory,
       _service._repository.accessRecords,
+      _service._repository.requestHistory,
+      _service._repository.organizationTasks.where(
+        (t) =>
+            organizationState(t) != OrganizationTaskState.pending &&
+            !(t.approvedAt ?? t.createdAt).isBefore(
+              _service._clock().subtract(Duration(days: auditRetentionDays)),
+            ),
+      ),
     );
   }
 
@@ -169,11 +244,33 @@ extension OwnerAuditAccess on OwnerAccess {
     }
     final current = await history();
     final cutoff = _service._clock().subtract(Duration(days: days));
+    final credentialIds = _service._credentialHistoryPruneIds(cutoff);
     final preview = AuditRetentionPreview(
       days,
       current.grants.where((g) => g.approvedAt.isBefore(cutoff)).length,
       current.accesses.where((a) => a.at.isBefore(cutoff)).length,
       cutoff,
+      current.requests.where((r) => r.createdAt.isBefore(cutoff)).length,
+      current.organizations
+          .where(
+            (t) =>
+                _service._endedOrganization(t) &&
+                (t.approvedAt ?? t.createdAt).isBefore(cutoff),
+          )
+          .length,
+      credentialIds.length,
+      _service._repository is CredentialRuntimeRepository
+          ? (_service._repository as CredentialRuntimeRepository)
+                    .credentialExecutions
+                    .where((e) => credentialIds.contains(e.requestId))
+                    .length +
+                (_service._repository is FocusedFillRuntimeRepository
+                    ? (_service._repository as FocusedFillRuntimeRepository)
+                          .focusedFillOperations
+                          .where((o) => credentialIds.contains(o.requestId))
+                          .length
+                    : 0)
+          : 0,
     );
     _service._retentionPreview = preview;
     return preview;
@@ -195,6 +292,9 @@ extension OwnerAuditAccess on OwnerAccess {
     _service._retentionPreview = null;
     await _service._repository.writeSetting('auditRetentionDays', days);
     await history();
+    await _service._pruneCredentialUseHistory(
+      _service._clock().subtract(Duration(days: days)),
+    );
   });
 
   Future<void> revokeFromHistory(String grantId) async {

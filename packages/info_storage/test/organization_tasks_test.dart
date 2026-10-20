@@ -1,3 +1,4 @@
+import 'backup_setup.dart';
 import 'dart:io';
 import 'package:info_core/info_core.dart';
 import 'package:info_storage/info_storage.dart';
@@ -62,7 +63,7 @@ void main() {
       );
       expect(service.owner.directories.single.name, 'Services');
       expect(service.owner.tags.single.name, 'Notes');
-      final recovery = await store.backups.enable();
+      final recovery = await enableTestBackups(store.backups);
       await store.backups.exportTo('${folder.path}/snapshot.aimbackup');
       final recipient = await EncryptedInformationRepository.open(
         '${folder.path}/recipient',
@@ -109,6 +110,15 @@ void main() {
       db.execute('PRAGMA key = "x\'$hex\'"');
       db.execute('DROP TABLE organization_tasks');
       db.execute('PRAGMA user_version = 11');
+      db.execute('DROP TABLE library_format');
+      db.execute('DROP TABLE information_deliveries');
+      db.execute('DROP TABLE information_file_fields');
+      db.execute('DROP TABLE information_attachment_versions');
+      db.execute('DROP TABLE information_draft_commits');
+      db.execute('DROP TABLE information_file_stages');
+      db.execute('DROP TABLE credential_focused_fills');
+      db.execute('DROP TABLE credential_operations');
+      db.execute('DROP TABLE credential_runtime_requests');
       db.close();
       store = await EncryptedInformationRepository.open(folder.path, keys);
       expect(store.items.single.id, item.id);

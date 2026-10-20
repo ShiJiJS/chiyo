@@ -1,0 +1,7 @@
+Analyzing info_core...
+
+   info - lib\credential_field_migration.dart:45:7 - Statements in an if should be enclosed in a block. Try wrapping the statement in a block. - curly_braces_in_flow_control_structures
+   info - lib\credential_field_migration.dart:48:7 - Statements in an if should be enclosed in a block. Try wrapping the statement in a block. - curly_braces_in_flow_control_structures
+   info - lib\credential_field_migration.dart:80:7 - Statements in an if should be enclosed in a block. Try wrapping the statement in a block. - curly_braces_in_flow_control_structures
+
+3 issues found.

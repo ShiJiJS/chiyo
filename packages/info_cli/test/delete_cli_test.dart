@@ -84,7 +84,10 @@ void main() {
         }))['status'],
         'confirmed',
       );
-      await service.owner.restoreRecycled(entry.id);
+      final restored = await service.owner.restoreRecycled(entry.id);
+      final restoredHost = restored.fields
+          .firstWhere((f) => f.id != 'username')
+          .id;
       final denied = await command({
         'command': 'read',
         'requestId': requested['requestId'],
@@ -96,11 +99,11 @@ void main() {
         'command': 'request',
         'purpose': 'restored',
         'fields': [
-          {'itemId': 'demo-server', 'fieldId': 'host'},
+          {'itemId': 'demo-server', 'fieldId': restoredHost},
         ],
       });
       service.owner.approve(fresh['requestId'] as String, [
-        const FieldRef('demo-server', 'host'),
+        FieldRef('demo-server', restoredHost),
       ]);
       await command({'command': 'claim', 'requestId': fresh['requestId']});
       expect(
@@ -108,7 +111,7 @@ void main() {
           'command': 'read',
           'requestId': fresh['requestId'],
           'itemId': 'demo-server',
-          'fieldId': 'host',
+          'fieldId': restoredHost,
         }))['value'],
         'demo.example.invalid',
       );

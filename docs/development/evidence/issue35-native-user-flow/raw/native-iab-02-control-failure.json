@@ -1,0 +1,7 @@
+{
+  "reason": "QA control loop awaited a frame while its own window was minimized",
+  "commandDeliveredButNotStarted": 2,
+  "lastCompletedAction": 1,
+  "manualStopPid": 72476,
+  "recordedAt": "2026-10-19T07:15:58.7221977Z"
+}

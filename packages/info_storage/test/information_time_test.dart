@@ -28,6 +28,15 @@ void main() {
       fixture.execute('ALTER TABLE information_items DROP COLUMN modified_at');
       fixture.execute('DROP TABLE organization_tasks');
       fixture.execute('PRAGMA user_version = 10');
+      fixture.execute('DROP TABLE library_format');
+      fixture.execute('DROP TABLE information_deliveries');
+      fixture.execute('DROP TABLE information_file_fields');
+      fixture.execute('DROP TABLE information_attachment_versions');
+      fixture.execute('DROP TABLE information_draft_commits');
+      fixture.execute('DROP TABLE information_file_stages');
+      fixture.execute('DROP TABLE credential_focused_fills');
+      fixture.execute('DROP TABLE credential_operations');
+      fixture.execute('DROP TABLE credential_runtime_requests');
       fixture.close();
       store = await EncryptedInformationRepository.open(folder.path, keys);
       expect(store.items.single.createdAt, isNull);

@@ -1,8 +1,35 @@
 # 通用 CLI 申请与等待
 
-> 待实现扩展：凭据使用采用“提交启动计划 → 桌面批准 → 同一 CLI 会话调用启动”的方向，
-> 见[运行时注入设计](design/credential-runtime-injection.md)。拟议 `request-use` / `run-use`
-> 不是当前可用命令；本页下列接口仍描述实际已实现行为。不要将原型占位符直接交给 shell 执行。
+## Windows 应用状态与正常退出（0.4.0+11起）
+
+独立子命令 `info.exe app status` / `info.exe app quit` 不读取标准输入，不需要信息授权。
+默认只定位同一交付目录的 `app/info_desktop.exe`；要退出另一目录的实例，先核对进程路径，
+再显式加 `--pid <进程号>`。多实例返回 `ambiguous_target`，不会批量退出。
+源代码运行时须指定PID，因为Dart SDK旁边没有同包桌面程序。
+
+```powershell
+& 'C:\Tools\AgentInfoManage\cli\info.exe' app status
+& 'C:\Tools\AgentInfoManage\cli\info.exe' app quit --timeout-ms 15000
+```
+
+正常退出停用所有会话许可、保存结束记录、关闭服务与库，再结束进程。输出为单行JSON，
+含 `controlVersion:1`、`status`，定位成功时含 `processId`，不含资料或凭据。
+只有核对绑定的进程确已以0退出才返回 `exited`。同包没有实例为 `not_running`，重复调用可用；
+`running` / `starting` / `exiting` 是只读状态。以上退出码0。
+`shutdown_failed` 表示保存/关闭失败（退出码1），保留窗口和库供修复后再调用退出；
+`timeout` 表示期限内未确认结束（退出码75），不能当成功或强杀理由，先查询原实例。
+可用 `--timeout-ms 100–60000` 调整等待。
+`target_mismatch` / `target_unavailable` / `ambiguous_target` / `control_unavailable` 为75；
+`unexpected_exit` 为1；旧版不支持或非Windows为69；参数错误为64。
+显式PID不存在或不可确认不会伪装成成功；旧版 `unsupported_version` 需按原有托盘入口退出。
+
+入口使用同一本机桌面的Windows消息、程序身份及进程句柄；消息只含目标PID和状态/退出操作。
+不向公开HTTP添加主人接口，不靠请求编号退出应用，也不是同一Windows用户进程之间的安全沙箱。
+运行中的已启动命令仍遵守原有生命周期规则；退出不会擅自杀死它们，材料可能待下次启动核查回收。
+
+## 信息申请
+
+> 2026-10-19：开发分支的新CLI默认凭据协议v2，需要服务明确支持credential-use-reuse.v1；#33的Windows功能验收通过，生产入口已启用v2。当前已交付0.4.0+8预览仍为v1，须整包更新应用、CLI和worker后才能使用新版流程。普通附件仍待#37/#38；本机焦点填充已接Windows构建绑定入口与QA整包，正向GUI/内置浏览器仍待#35验收。真实Codex、通知和干净环境门槛继续保留。
 
 CLI 使用标准输入逐行 JSON，标准输出每行一个结果。保持同一个 CLI 进程，授权会话凭据和已领取的访问凭据留在进程内；不要把凭据写入命令参数、日志或聊天。启动入口是 `dart run packages/info_cli/bin/info.dart`，默认连接本机应用端口 47125，可用 `--port` 指定开发端口。
 
@@ -70,3 +97,50 @@ CLI 使用标准输入逐行 JSON，标准输出每行一个结果。保持同�
 提交仅返回 `pending` 和 `proposalId`，不读取当前值、不直接覆盖资料。每次提案最多 200 个操作，单值最多 64000 字符，提案 JSON 最多 240000 UTF-8 字节。相同字段只能出现一个操作；最终信息必须保留至少一个字段。提案状态仅创建它的私密会话可查询，且不返回变更内容、原值或差异。Agent 无预览、确认、拒绝或历史读取入口；需要原值时先申请正常读取授权。
 
 用户在“录入提案”中查看修改前后信息和公开描述，明确确认或拒绝。状态为 `confirmed`、`rejected` 或 `conflicted`；版本冲突不会覆盖当前资料。冲突后根据当前目录版本和用户要求重新准备提案，避免自动重提。用户确认修正后，仍有效的原字段授权可读取最新值。确认操作可安全重试，不会重复增加版本或历史。
+
+## 凭据使用（Windows开发分支，协议v2）
+
+先查询`capabilities`；新版CLI的request-use/run-use/operation-status省略协议版本时按2处理，必须共同支持`credential-use-reuse.v1`。旧服务返回unsupported_capability，不能静默降级或重提单次申请。其他查询可按执行事实返回原版本。旧v1记录与明确的v1调用保留一次尝试，不能升级旧许可；这不是用户的单次/多次模式开关。
+
+字符串接收配置gh_token、文件接收配置ssh_identity/aws_shared_credentials沿用已验证工具版本及严格接收器规则。程序、CLI、worker整包匹配；CLI只在自己创建的子进程中注入值或文件路径，不修改Agent当前shell、全局环境或返回秘密材料。
+
+查询credential-catalog选择相关凭据及固定版本，然后在现有私密会话提交一次申请。以下ID与绝对路径需替换为当前实际结果，普通字段可用readFields同时申请：
+
+```json
+{"protocolVersion":2,"command":"request-use","purpose":"查看技能仓库信息","credentials":[{"alias":"github_token","credentialId":"CREDENTIAL_ID","version":1}],"launch":{"receiver":"gh_token","executable":"C:/Program Files/GitHub CLI/gh.exe","argv":["repo","view","northstar/agent-skills"],"cwd":"C:/Work/northstar","env":{"GH_TOKEN":{"secret":"github_token"}}}}
+```
+
+首条launch供用户理解用途。通过原requestId查询status/wait，用户批准不会自动执行。credentialUse.approved及当前state为available时，使用授权固定15/30分钟，期间每个操作独立提交完整launch和唯一operationId，不逐命令再审批；普通字段独立默认8小时，可由用户缩短。复用不续期，新增未批凭据或使用方式需要新申请。
+
+```json
+{"protocolVersion":2,"command":"run-use","requestId":"REQUEST_ID","operationId":"repo-check-01","launch":{"receiver":"gh_token","executable":"C:/Program Files/GitHub CLI/gh.exe","argv":["repo","view","northstar/agent-skills"],"cwd":"C:/Work/northstar","env":{"GH_TOKEN":{"secret":"github_token"}}}}
+{"command":"execution-status","executionId":"EXECUTION_ID"}
+{"command":"execution-output","executionId":"EXECUTION_ID","cursor":0,"limit":16}
+```
+
+同一私密会话的同operationId和完整内容重试只返回原事实；换内容为operation_conflict，不会再次交付材料。响应丢失时复制原run-use对象，仅把command改为operation-status，按原ID/原内容查询。unknown不代表未运行，不自动改ID重做。明确失败只属于本次操作，不消费整个授权；修正并核查原因后，可在仍有效的批准范围内明确提交新ID和新命令。
+
+accepted只表示登记操作；根据processStarted、executionState、实际exitCode和独立cleanupState判断运行结果。每次执行冻结自己的程序身份/参数/目录/注入计划，材料及Job独立。撤销、到期、轮换、停用、删除、会话结束及重启拒绝新操作，已运行任务继续；某任务退出只清理自己的材料。cleanup-use按原executionId重试清理，不能当作重新运行。重启保留未知结果但不恢复许可。
+
+Typed env/argv对象才产生注入：GH_TOKEN接收`{"secret":"alias"}`；SSH的-i后独立参数`{"file":"alias"}`接收临时路径；AWS_SHARED_CREDENTIALS_FILE接收`{"file":"alias"}`路径。普通文本{{SSH_KEY_FILE}}不替换。通用cookie文件、普通附件领取和浏览器密码填充不由这些接收器自动支持。
+
+输出在执行宿主内存有界保留、base64按流/序号分页；已知凭据直接回显在保留前遮挡，但不保证编码、截图或外部文件安全。输出不可用不代表执行失败。通用CLI需保持进程接续；Codex由持续宿主跨单命令进程保管，结束/缓存淘汰后不恢复输出。CLI的stdin EOF不结束共享会话。
+
+完整协议、兼容和边界见[协议v2](design/runtime-protocol-v2.md)，Agent流程见[随包凭据使用说明](../integrations/codex/skills/agent-info-access/references/credential-use.md)。
+
+## 开发中的本机焦点填充（#35）
+
+核心/CLI、Flutter及Windows构建绑定入口已接通，见[整包检查点](development/issue35-focused-fill-bundle.md)。源码/QA包按束校验条件启用；用户原0.4.0+8包未启用，正向GUI及内置浏览器仍待验收。必须同时协商协议2、`credential-use-reuse.v1`和`credential-focused-fill.v1`，未提供时停止，不退回返回密码原文。需要私密会话，不能只凭请求ID使用。
+
+若另有`credential-focused-target.v1`，`{"protocolVersion":2,"command":"focus-target"}`可观察本机当前密码目标，仅返回ready/refused和就绪应用路径/SHA；不提供值、窗口句柄或PID，不预留焦点、不审批、不输入。批准后必须重新点击空密码框。详见[原生合同与当前验证范围](design/windows-focused-fill-native.md)。
+
+`request-use`提交一个字符串凭据引用和`fill`（应用绝对路径/字节摘要、仅供判断的网址），不同时提供`launch`，也不附带普通字段授权。请求格式见[填充合同](design/local-focused-fill-contract.md)。批准固定凭据版本、应用、方式及15/30分钟期限；批准不输入。Agent准备空密码框、重新点击目标，再后台调用：
+
+```json
+{"protocolVersion":2,"command":"fill-use","requestId":"REQUEST_ID","operationId":"password-fill-01"}
+{"protocolVersion":2,"command":"fill-status","requestId":"REQUEST_ID","operationId":"password-fill-01"}
+```
+
+省略版本也按2处理。`fill-use`只登记/请求该次操作，宿主保管秘密；CLI没有输入值、窗口句柄、秘密文件路径或命令模板参数。`fill-status`仅查询；相同操作ID返回原记录，不再发送。响应丢失用原requestId/operationId查询，不改ID自动重试。
+
+结果区分checking、sent、refused、partial、unknown；sent仅表示Windows接受输入，不等于完整接收或登录成功。填充不返回命令退出码/文件清理或秘密。partial/unknown保留原事实并停止同会话的新操作，不能换另一已批申请绕过；用户检查目标并通过所有者恢复入口确认后才可明确重做，不续期、不清空、不重放旧操作。仍在执行时返回busy且不排队。保持密码遮挡，不读取或显示明文，不自动提交登录。

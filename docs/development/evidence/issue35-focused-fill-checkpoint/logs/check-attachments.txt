@@ -1,0 +1,15 @@
+PASS mixed item is in existing library and public projection contains no private file metadata
+PASS cancelled picker keeps staged choice and failed size does not overwrite old file
+PASS file selection is draft only and cancelling editing leaves library unchanged
+PASS text-only edit preserves unchanged attachment reference and identity
+PASS failure preserves whole draft, library, and identities; retry commits once
+PASS empty file cannot be saved; only-file item can be saved after actual metadata selection
+PASS type or meaning conversion receives new field identity; replacement keeps identity
+PASS template contains no previous selected file and requires fresh choice
+PASS partial approval excludes note, does not auto-deliver, uses ordinary deadline
+PASS same-meaning replacement delivers current version, existing delivery retains old version
+PASS revoke stops new delivery, does not invent successful cleanup
+PASS deleted or replaced-identity file cannot use old member grant
+PASS unsupported field kind fails instead of destructive downgrade
+PASS two overlapping saves commit exactly once
+14 attachment design checks passed. Production interfaces/bytes remain #37/#38.

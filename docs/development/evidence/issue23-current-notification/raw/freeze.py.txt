@@ -1,0 +1,29 @@
+from pathlib import Path
+import json,hashlib,subprocess,shutil
+root=Path.cwd();revision=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip();assert revision=='37da21eb85e4001577beba886ab7f8ffe93368ba'
+qa=root/'build/qa-issue23-notification/native-current-02';result=json.loads((qa/'runner-result.json').read_text())
+assert result['phases'][-1]==dict(phase='native',exitCode=1) and not result['unexpectedLocks']
+events=[json.loads(l) for l in (qa/'phases.jsonl').read_text().splitlines()]
+ready=next(e for e in events if e['stage']=='ready-to-dispatch');accepted=next(e for e in events if e['stage']=='shell-accepted');ended=next(e for e in events if e['stage']=='click-window-ended');closed=events[-1]
+assert ready['native']['userState']==5 and ready['native']['queryHresult']==0
+assert accepted['native']['activeNotificationId']==4096
+assert ended['native']==dict(activeNotificationId=0,clicked=0,hidden=0,idMismatch=1,lastAccepted=True,queryHresult=0,sendAttempts=1,shown=1,timedOut=1,trayId=1,userState=5)
+assert ended['openedRequestId'] is None and closed['stage']=='closed'
+assert closed['semantics']['handlesBefore']==closed['semantics']['handlesAfterBody']==0
+assert not Path(ready['fixtureRoot']).exists()
+state=json.loads((qa/'after-state.json').read_text(encoding='utf-8-sig'));assert state['remainingDebugProcesses']==0
+dest=root/'docs/development/evidence/issue23-current-notification';dest.mkdir(parents=True,exist_ok=False);raw=dest/'raw';raw.mkdir()
+for p in qa.iterdir():
+ if p.is_file():shutil.copyfile(p,raw/p.name)
+for p,name in [(root/'build/qa-issue23-notification-run.py','probe-run.py.txt'),(root/'build/freeze-current-notification.py','freeze.py.txt')]:shutil.copyfile(p,raw/name)
+sha=lambda b:hashlib.sha256(b).hexdigest()
+sources=[]
+for item in result['sources']:
+ p=item['path'];b=subprocess.check_output(['git','show',revision+':'+p]);assert (root/p).read_bytes().replace(b'\r\n',b'\n')==b.replace(b'\r\n',b'\n');assert sha((raw/(Path(p).name+'.txt')).read_bytes())==item['sha256'];sources.append(dict(commit=revision,path=p,sha256=sha(b)))
+for p in [p+'/pubspec.lock' for p in ['packages/info_cli','packages/info_core','packages/info_storage','apps/desktop']]:
+ b=subprocess.check_output(['git','show',revision+':'+p]);assert b.replace(b'\r\n',b'\n')==(root/p).read_bytes().replace(b'\r\n',b'\n');sources.append(dict(commit=revision,path=p,sha256=sha(b)))
+artifacts=[dict(path=p.relative_to(dest).as_posix(),byteLength=p.stat().st_size,sha256=sha(p.read_bytes())) for p in sorted(raw.rglob('*')) if p.is_file()]
+runner=root/'apps/desktop/build/windows/x64/runner/Debug/info_desktop.exe'
+facts=dict(sourceCommit=revision,mode='isolated Debug integration entry, not shipped Release GUI',checks=dict(strictAnalyzePassed=True,nativePassed=0,nativeFailed=1,skipped=0,timeoutSeconds=60),native=ended['native'],openedRequestId=None,semantics=closed['semantics'],fixtureRemoved=True,debugRunner=dict(path=runner.relative_to(root).as_posix(),sha256=sha(runner.read_bytes())),sources=sources,artifacts=artifacts,realClickAccepted=False)
+(dest/'verification.json').write_text(json.dumps(facts,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+print(json.dumps(dict(artifacts=len(artifacts),sources=len(sources),native=ended['native'],checks=facts['checks']),indent=2))

@@ -80,8 +80,10 @@ class _DesktopWindowFrameState extends State<DesktopWindowFrame> {
         padding: EdgeInsets.zero,
         minimumSize: Size.zero,
         shape: const RoundedRectangleBorder(),
-        foregroundColor: UiColors.ink,
-        overlayColor: command == 'close' ? Colors.red : UiColors.muted,
+        foregroundColor: UiPalette.of(context).ink,
+        overlayColor: command == 'close'
+            ? Colors.red
+            : UiPalette.of(context).muted,
       ),
       child: Tooltip(message: label, child: Icon(icon, size: 15)),
     ),
@@ -92,9 +94,14 @@ class _DesktopWindowFrameState extends State<DesktopWindowFrame> {
     if (!_enabled) return widget.child;
     return Overlay.wrap(
       child: Column(
+        // A route blocks semantics painted before it. Paint the workspace
+        // first so its Navigator cannot hide the caption or its Tooltip anchor,
+        // while keeping the caption visually above the workspace.
+        verticalDirection: VerticalDirection.up,
         children: [
+          Expanded(child: widget.child),
           Material(
-            color: UiColors.rail,
+            color: UiPalette.of(context).rail,
             child: SizedBox(
               height: 34,
               child: Row(
@@ -119,7 +126,6 @@ class _DesktopWindowFrameState extends State<DesktopWindowFrame> {
               ),
             ),
           ),
-          Expanded(child: widget.child),
         ],
       ),
     );

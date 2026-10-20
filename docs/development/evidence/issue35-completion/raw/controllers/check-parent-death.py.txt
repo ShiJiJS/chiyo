@@ -1,0 +1,69 @@
+from pathlib import Path
+import ctypes,json,os,queue,secrets,struct,subprocess,threading,time
+root=Path.cwd();folder=root/'build/qa-issue35/parent-death-01';folder.mkdir(exist_ok=False)
+receiver_path=root/'apps/desktop/build/windows/x64/focused_input/Release/info-focus-fixture.exe'
+broker_path=root/'apps/desktop/build/windows/x64/focused_input/Release/info-focus-broker.exe'
+worker_path=root/'build/qa-issue35/current-clients/parent-death-worker.exe'
+secret='  '+secrets.token_urlsafe(30)+'测试🧭  '
+receiver=worker=None;handle=None;events=[]
+kernel=ctypes.WinDLL('kernel32',use_last_error=True)
+kernel.OpenProcess.argtypes=[ctypes.c_uint32,ctypes.c_int,ctypes.c_uint32];kernel.OpenProcess.restype=ctypes.c_void_p
+kernel.WaitForSingleObject.argtypes=[ctypes.c_void_p,ctypes.c_uint32];kernel.WaitForSingleObject.restype=ctypes.c_uint32
+kernel.CloseHandle.argtypes=[ctypes.c_void_p]
+def scan(data):
+    text=data.decode('utf-8') if isinstance(data,bytes) else data
+    assert secret not in text and json.dumps(secret)[1:-1] not in text
+def record(value):
+    raw=json.dumps(value,ensure_ascii=False);scan(raw)
+    events.append(value);(folder/'events.json').write_text(json.dumps(events,indent=2,ensure_ascii=False),encoding='utf-8',newline='\n')
+def lines(process):
+    values=queue.Queue()
+    def read():
+        for line in process.stdout:values.put(line)
+        values.put(None)
+    threading.Thread(target=read,daemon=True).start();return values
+def response(values):
+    raw=values.get(timeout=12);assert raw is not None;scan(raw);return json.loads(raw)
+def receiver_call(code,value=''):
+    data=bytes([code])+value.encode('utf-16-le')
+    receiver.stdin.write(struct.pack('<I',len(data))+data);receiver.stdin.flush()
+    return response(receiver_lines)
+try:
+    receiver=subprocess.Popen([str(receiver_path)],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+    receiver_lines=lines(receiver);assert response(receiver_lines)['event']=='window_ready'
+    receiver_call(1,secret[:16])
+    record({'phase':'ready','receiverPid':receiver.pid,'noSecretInControl':True})
+    (folder/'ready.json').write_text('{"ready":true}',encoding='utf-8')
+    until=time.monotonic()+90
+    while not (folder/'continue').exists() and time.monotonic()<until:time.sleep(.05)
+    assert (folder/'continue').exists(),'No explicit target focus confirmation'
+    worker=subprocess.Popen([str(worker_path),str(broker_path),str(receiver_path)],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+    worker_lines=lines(worker)
+    worker.stdin.write((json.dumps({'synthetic':secret},ensure_ascii=False)+'\n').encode('utf-8'));worker.stdin.flush()
+    result=response(worker_lines);assert result=={'phase':'one_batch','state':'sent'},result
+    before=receiver_call(2)
+    assert before['matches'] and before['noPaste'] and before['clipboardUnchanged'],before
+    command=f"@(Get-CimInstance Win32_Process -Filter \"ParentProcessId={worker.pid} AND Name='info-focus-broker.exe'\").ProcessId | ConvertTo-Json -Compress"
+    native=json.loads(subprocess.check_output(['pwsh','-NoProfile','-NonInteractive','-Command',command],text=True,encoding='utf-8'))
+    if isinstance(native,list):assert len(native)==1;native=native[0]
+    assert isinstance(native,int)
+    handle=kernel.OpenProcess(0x100000,False,native);assert handle
+    assert kernel.WaitForSingleObject(handle,0)==258,'Broker already ended'
+    record({'phase':'prepared_and_first_batch','workerPid':worker.pid,'brokerPid':native,'receiver':before})
+    worker.kill();worker.wait(timeout=5)
+    started=time.monotonic();assert kernel.WaitForSingleObject(handle,4000)==0,'Broker survived its parent'
+    after=receiver_call(2)
+    assert after['matches'] and after['noPaste'] and after['clipboardUnchanged'],after
+    record({'phase':'parent_terminated','brokerExited':True,'waitAfterKillMs':round((time.monotonic()-started)*1000),'noFurtherInput':after['matches'],'receiver':after})
+    record({'phase':'passed'})
+finally:
+    if handle:kernel.CloseHandle(handle)
+    for process in [worker,receiver]:
+        if process is None:continue
+        if process.poll() is None:
+            process.stdin.close()
+            try:process.wait(timeout=4)
+            except subprocess.TimeoutExpired:process.kill();process.wait(timeout=4)
+        scan(process.stderr.read())
+    record({'phase':'closed','workerExited':worker is None or worker.poll() is not None,'receiverExited':receiver is None or receiver.poll() is not None})
+print(json.dumps(events,ensure_ascii=False))

@@ -1,0 +1,14 @@
+[
+  {
+    "file": "page-history-first.png",
+    "state": null,
+    "size": "1280x800",
+    "zoom": 1,
+    "group": "history-first",
+    "animationWaitMs": 0,
+    "issues": [
+      "第 3 步「click .focused-fill-history .reuse-operation:first-of-type」：中心点被 article.document-card.credential-card-entrance.focused-fill-history:nth-of-type(1) > footer.document-actions 挡住，动作仍照常执行"
+    ],
+    "lint": []
+  }
+]

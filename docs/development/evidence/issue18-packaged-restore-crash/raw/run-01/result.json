@@ -1,0 +1,118 @@
+{
+  "productSource": "887f1c2e29da8799cfec48032ac4967d1576fb77",
+  "complete": false,
+  "checks": [
+    {
+      "check": "fixture-format",
+      "passed": true
+    },
+    {
+      "check": "pub",
+      "passed": true
+    },
+    {
+      "check": "analyze",
+      "passed": true
+    },
+    {
+      "check": "prepare",
+      "passed": true
+    },
+    {
+      "check": "80MiB-synthetic-format8",
+      "passed": true
+    },
+    {
+      "check": "database-within-own-root",
+      "passed": true
+    },
+    {
+      "check": "http-port-owned-by-child",
+      "passed": true,
+      "processId": 82472
+    },
+    {
+      "check": "initial-session",
+      "passed": true
+    },
+    {
+      "check": "empty-before-restore",
+      "passed": true
+    },
+    {
+      "check": "preview-observed.json",
+      "passed": true
+    },
+    {
+      "check": "journal-absent-before-confirm",
+      "passed": true
+    },
+    {
+      "check": "watcher-finished",
+      "passed": true
+    },
+    {
+      "check": "interrupted-during-uncommitted-file-write",
+      "passed": true
+    },
+    {
+      "check": "inspect-rollback",
+      "passed": true
+    },
+    {
+      "check": "actual-SQLCipher-rollback",
+      "passed": true
+    },
+    {
+      "check": "source-and-local-key-unchanged-after-crash",
+      "passed": true
+    },
+    {
+      "check": "http-port-owned-by-child",
+      "passed": true,
+      "processId": 8900
+    },
+    {
+      "check": "prior-session-not-revived-after-crash",
+      "passed": true
+    },
+    {
+      "check": "fresh-retry-session",
+      "passed": false
+    },
+    {
+      "check": "own-child-normal-exit",
+      "passed": true,
+      "processId": 8900
+    }
+  ],
+  "interruption": {
+    "interrupted": true,
+    "victimPid": 82472,
+    "baselineDatabaseBytes": 270336,
+    "databaseBytesAtInterruption": 4734976,
+    "rollbackJournalBytes": 42496,
+    "journalHeaderNonzero": true,
+    "exitCode": 1,
+    "journalPresentAfterExit": true
+  },
+  "rollback": {
+    "status": "inspected",
+    "action": "inspect-rollback",
+    "journalMode": "delete",
+    "integrity": "ok",
+    "information": 0,
+    "attachmentVersions": 0,
+    "attachmentBytes": 0,
+    "fileFields": 0,
+    "stagedFiles": 0,
+    "modelInformation": 0,
+    "requestLifetimeMinutes": 17,
+    "requests": 0,
+    "activeGrants": 0,
+    "fileDeliveries": 0,
+    "originalsMatch": true
+  },
+  "unexpectedLocks": [],
+  "preservedTemporary": "C:\\Users\\Todoki\\AppData\\Local\\Temp\\aim-packaged-restore-crash-hdjcms5k"
+}

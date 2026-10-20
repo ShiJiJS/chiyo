@@ -1,0 +1,18 @@
+Flutter assets will be downloaded from https://storage.flutter-io.cn. Make sure you trust this source!
+Analyzing desktop...                                            
+
+   info - Statements in an if should be enclosed in a block. Try wrapping the statement in a block - lib\information_editor.dart:100:9 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block. Try wrapping the statement in a block - lib\information_editor.dart:158:11 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block. Try wrapping the statement in a block - lib\information_editor.dart:698:9 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block. Try wrapping the statement in a block - lib\information_editor.dart:714:11 - curly_braces_in_flow_control_structures
+warning - The '!' will have no effect because the receiver can't be null. Try removing the '!' operator - lib\information_editor_draft.dart:17:41 - unnecessary_non_null_assertion
+warning - The '!' will have no effect because the receiver can't be null. Try removing the '!' operator - lib\information_editor_draft.dart:19:26 - unnecessary_non_null_assertion
+   info - Unnecessary use of multiple underscores. Try using '_' - lib\information_files.dart:41:70 - unnecessary_underscores
+   info - Statements in an if should be enclosed in a block. Try wrapping the statement in a block - lib\library.dart:125:9 - curly_braces_in_flow_control_structures
+warning - The '!' will have no effect because the receiver can't be null. Try removing the '!' operator - lib\library.dart:136:30 - unnecessary_non_null_assertion
+warning - The '!' will have no effect because the receiver can't be null. Try removing the '!' operator - lib\library.dart:138:51 - unnecessary_non_null_assertion
+   info - Statements in an if should be enclosed in a block. Try wrapping the statement in a block - lib\library.dart:158:9 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block. Try wrapping the statement in a block - lib\library.dart:163:9 - curly_braces_in_flow_control_structures
+   info - The import of 'package:info_desktop/information_editor.dart' is unnecessary because all of the used elements are also provided by the import of 'package:info_desktop/library.dart'. Try removing the import directive - test\information_file_editor_test.dart:7:8 - unnecessary_import
+
+13 issues found. (ran in 3.9s)

@@ -1,0 +1,4 @@
+00:00 +0: loading test/credential_runtime_test.dart
+00:00 +0: a transient running audit failure does not stop monitoring a live process
+00:00 +1: private Token material launches a real controlled process and exposes only bounded execution events
+00:00 +2: All tests passed!

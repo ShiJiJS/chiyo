@@ -1,0 +1,3 @@
+Running build hooks...Running build hooks...00:00 +0: loading test/credential_field_migration_test.dart
+00:00 +0: explicit field conversion preserves item and other fields, closes old grants and restores old content only with a new field identity
+00:00 +1: All tests passed!

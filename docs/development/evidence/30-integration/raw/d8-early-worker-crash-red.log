@@ -1,0 +1,21 @@
+00:00 +0: loading test/early_worker_crash_test.dart
+00:00 +0: worker death after launch acknowledgement but before target identity keeps the attempt unknown and preserves live material
+00:02 +0 -1: worker death after launch acknowledgement but before target identity keeps the attempt unknown and preserves live material [E]
+  Expected: 'unknown'
+    Actual: 'start_failed'
+     Which: is different.
+            Expected: unknown
+              Actual: start_fail ...
+                      ^
+             Differ at offset 0
+  
+  package:matcher                         expect
+  test\early_worker_crash_test.dart 39:5  main.<fn>
+  
+00:02 +0 -1: Some tests failed.
+
+Failing tests:
+  test/early_worker_crash_test.dart: worker death after launch acknowledgement but before target identity keeps the attempt unknown and preserves live material
+
+Consider enabling the flag chain-stack-traces to receive more detailed exceptions.
+For example, 'dart test --chain-stack-traces'.

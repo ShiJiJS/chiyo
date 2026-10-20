@@ -1,0 +1,679 @@
+{
+  "base": "5ddb537",
+  "parent_evidence": "314b485",
+  "production_change": "apps/desktop/lib/window_frame.dart: workspace paint order only",
+  "flutter": "3.47.7",
+  "framework": "abaf9c523780a608bd46686fd5e53740a07077f8",
+  "engine": "deb287481e3ce9468f3434937ced4240a70539ca",
+  "native_runs": {
+    "before": {
+      "source_directory": "C:\\Project\\network_config\\info-manage-worktrees\\26-history-settings\\.scratch\\ax-probe\\synthetic-bnxud36r",
+      "raw_log_sha256": "37ee3eb02d3f043570ed172858fdc7c918bebf2eda4bea73dd6246c5353310fc",
+      "raw_log_bytes": 2291,
+      "semantics_batches": 20,
+      "orphan_batches": [
+        16,
+        17
+      ],
+      "ax_tree_errors": 5,
+      "binding_created": {
+        "utc": "2026-10-17T00:06:41.538961Z",
+        "ms": 0,
+        "type": "binding-created",
+        "phase": "startup",
+        "semanticsEnabled": true
+      },
+      "timeline": [
+        {
+          "utc": "2026-10-17T00:06:42.306576Z",
+          "ms": 766,
+          "type": "semantics-batch",
+          "phase": "startup",
+          "batch": 1
+        },
+        {
+          "utc": "2026-10-17T00:06:42.352168Z",
+          "ms": 811,
+          "type": "semantics-batch",
+          "phase": "startup",
+          "batch": 2
+        },
+        {
+          "utc": "2026-10-17T00:06:42.380148Z",
+          "ms": 839,
+          "type": "semantics-batch",
+          "phase": "startup",
+          "batch": 3
+        },
+        {
+          "utc": "2026-10-17T00:06:42.780822Z",
+          "ms": 1241,
+          "type": "semantics-batch",
+          "phase": "startup",
+          "batch": 4
+        },
+        {
+          "utc": "2026-10-17T00:07:10.757605Z",
+          "ms": 29216,
+          "type": "control",
+          "phase": "create-and-auto-approve",
+          "action": "request"
+        },
+        {
+          "utc": "2026-10-17T00:07:11.140597Z",
+          "ms": 29600,
+          "type": "semantics-batch",
+          "phase": "create-and-auto-approve",
+          "batch": 5
+        },
+        {
+          "utc": "2026-10-17T00:07:32.168807Z",
+          "ms": 50628,
+          "type": "control",
+          "phase": "hover-request-id",
+          "action": "phase"
+        },
+        {
+          "utc": "2026-10-17T00:07:41.954587Z",
+          "ms": 60414,
+          "type": "semantics-batch",
+          "phase": "hover-request-id",
+          "batch": 6
+        },
+        {
+          "utc": "2026-10-17T00:07:42.106092Z",
+          "ms": 60565,
+          "type": "semantics-batch",
+          "phase": "hover-request-id",
+          "batch": 7
+        },
+        {
+          "utc": "2026-10-17T00:08:12.582709Z",
+          "ms": 91042,
+          "type": "control",
+          "phase": "hover-request-id-wheel",
+          "action": "phase"
+        },
+        {
+          "utc": "2026-10-17T00:08:31.957430Z",
+          "ms": 110416,
+          "type": "control",
+          "phase": "switch-to-settings",
+          "action": "phase"
+        },
+        {
+          "utc": "2026-10-17T00:08:32.557521Z",
+          "ms": 111017,
+          "type": "semantics-batch",
+          "phase": "switch-to-settings",
+          "batch": 8
+        },
+        {
+          "utc": "2026-10-17T00:08:32.632980Z",
+          "ms": 111092,
+          "type": "semantics-batch",
+          "phase": "switch-to-settings",
+          "batch": 9
+        },
+        {
+          "utc": "2026-10-17T00:08:32.773749Z",
+          "ms": 111233,
+          "type": "semantics-batch",
+          "phase": "switch-to-settings",
+          "batch": 10
+        },
+        {
+          "utc": "2026-10-17T00:08:41.849514Z",
+          "ms": 120309,
+          "type": "semantics-batch",
+          "phase": "switch-to-settings",
+          "batch": 11
+        },
+        {
+          "utc": "2026-10-17T00:08:42.072456Z",
+          "ms": 120531,
+          "type": "semantics-batch",
+          "phase": "switch-to-settings",
+          "batch": 12
+        },
+        {
+          "utc": "2026-10-17T00:08:49.659361Z",
+          "ms": 128119,
+          "type": "control",
+          "phase": "return-approvals-before-hide",
+          "action": "phase"
+        },
+        {
+          "utc": "2026-10-17T00:09:09.961432Z",
+          "ms": 148421,
+          "type": "semantics-batch",
+          "phase": "return-approvals-before-hide",
+          "batch": 13
+        },
+        {
+          "utc": "2026-10-17T00:09:10.029399Z",
+          "ms": 148488,
+          "type": "semantics-batch",
+          "phase": "return-approvals-before-hide",
+          "batch": 14
+        },
+        {
+          "utc": "2026-10-17T00:09:10.226615Z",
+          "ms": 148687,
+          "type": "semantics-batch",
+          "phase": "return-approvals-before-hide",
+          "batch": 15
+        },
+        {
+          "utc": "2026-10-17T00:09:11.358889Z",
+          "ms": 149818,
+          "type": "control",
+          "phase": "native-hide",
+          "action": "phase"
+        },
+        {
+          "utc": "2026-10-17T00:09:17.757018Z",
+          "ms": 156217,
+          "type": "control",
+          "phase": "native-show",
+          "action": "show"
+        },
+        {
+          "utc": "2026-10-17T00:09:18.281081Z",
+          "ms": 156740,
+          "type": "semantics-batch",
+          "phase": "native-show",
+          "batch": 16,
+          "updates": [
+            {
+              "id": 1,
+              "label": "",
+              "tooltip": "",
+              "hint": "",
+              "children": [
+                2
+              ],
+              "hitChildren": [
+                2
+              ],
+              "traversalParent": -1,
+              "role": "none",
+              "valueLength": 0,
+              "rect": [
+                0.0,
+                0.0,
+                1266.2857142857142,
+                706.2857142857143
+              ]
+            },
+            {
+              "id": 86,
+              "label": "",
+              "tooltip": "",
+              "hint": "",
+              "children": [],
+              "hitChildren": [],
+              "traversalParent": -1,
+              "role": "none",
+              "valueLength": 0,
+              "rect": [
+                0.0,
+                0.0,
+                1266.2857142857142,
+                706.2857142857143
+              ]
+            }
+          ],
+          "orphans": [
+            {
+              "id": 86,
+              "label": "",
+              "tooltip": "",
+              "hint": "",
+              "children": [],
+              "hitChildren": [],
+              "traversalParent": -1,
+              "role": "none",
+              "valueLength": 0,
+              "rect": [
+                0.0,
+                0.0,
+                1266.2857142857142,
+                706.2857142857143
+              ]
+            }
+          ]
+        },
+        {
+          "utc": "2026-10-17T00:09:18.291613Z",
+          "ms": 156751,
+          "type": "semantics-batch",
+          "phase": "native-show",
+          "batch": 17,
+          "updates": [
+            {
+              "id": 86,
+              "label": "",
+              "tooltip": "",
+              "hint": "",
+              "children": [
+                87
+              ],
+              "hitChildren": [
+                87
+              ],
+              "traversalParent": -1,
+              "role": "none",
+              "valueLength": 0,
+              "rect": [
+                0.0,
+                0.0,
+                1266.2857142857142,
+                706.2857142857143
+              ]
+            },
+            {
+              "id": 87,
+              "label": "关闭窗口",
+              "tooltip": "",
+              "hint": "",
+              "children": [],
+              "hitChildren": [],
+              "traversalParent": -1,
+              "role": "none",
+              "valueLength": 0,
+              "rect": [
+                0.0,
+                0.0,
+                52.0,
+                20.0
+              ]
+            }
+          ],
+          "orphans": [
+            {
+              "id": 86,
+              "label": "",
+              "tooltip": "",
+              "hint": "",
+              "children": [
+                87
+              ],
+              "hitChildren": [
+                87
+              ],
+              "traversalParent": -1,
+              "role": "none",
+              "valueLength": 0,
+              "rect": [
+                0.0,
+                0.0,
+                1266.2857142857142,
+                706.2857142857143
+              ]
+            },
+            {
+              "id": 87,
+              "label": "关闭窗口",
+              "tooltip": "",
+              "hint": "",
+              "children": [],
+              "hitChildren": [],
+              "traversalParent": -1,
+              "role": "none",
+              "valueLength": 0,
+              "rect": [
+                0.0,
+                0.0,
+                52.0,
+                20.0
+              ]
+            }
+          ]
+        },
+        {
+          "utc": "2026-10-17T00:09:41.863880Z",
+          "ms": 180323,
+          "type": "semantics-batch",
+          "phase": "native-show",
+          "batch": 18
+        },
+        {
+          "utc": "2026-10-17T00:09:42.133501Z",
+          "ms": 180593,
+          "type": "semantics-batch",
+          "phase": "native-show",
+          "batch": 19
+        },
+        {
+          "utc": "2026-10-17T00:09:49.557957Z",
+          "ms": 188017,
+          "type": "control",
+          "phase": "finish-first-probe",
+          "action": "quit"
+        },
+        {
+          "utc": "2026-10-17T00:09:49.700501Z",
+          "ms": 188159,
+          "type": "semantics-batch",
+          "phase": "finish-first-probe",
+          "batch": 20
+        }
+      ]
+    },
+    "after": {
+      "source_directory": "C:\\Project\\network_config\\info-manage-worktrees\\26-history-settings\\.scratch\\ax-probe\\synthetic-lqn43lfz",
+      "raw_log_sha256": "99e8c157a9c4386d99afe4ff259f61160264c65e7dd99fb1125ee70e12a9248c",
+      "raw_log_bytes": 1573,
+      "semantics_batches": 23,
+      "orphan_batches": [],
+      "ax_tree_errors": 0,
+      "binding_created": {
+        "utc": "2026-10-17T00:16:28.030179Z",
+        "ms": 0,
+        "type": "binding-created",
+        "phase": "startup",
+        "semanticsEnabled": true
+      },
+      "timeline": [
+        {
+          "utc": "2026-10-17T00:16:29.020215Z",
+          "ms": 988,
+          "type": "semantics-batch",
+          "phase": "startup",
+          "batch": 1
+        },
+        {
+          "utc": "2026-10-17T00:16:29.070059Z",
+          "ms": 1038,
+          "type": "semantics-batch",
+          "phase": "startup",
+          "batch": 2
+        },
+        {
+          "utc": "2026-10-17T00:16:29.239919Z",
+          "ms": 1208,
+          "type": "semantics-batch",
+          "phase": "startup",
+          "batch": 3
+        },
+        {
+          "utc": "2026-10-17T00:16:29.266401Z",
+          "ms": 1234,
+          "type": "semantics-batch",
+          "phase": "startup",
+          "batch": 4
+        },
+        {
+          "utc": "2026-10-17T00:16:38.680345Z",
+          "ms": 10648,
+          "type": "control",
+          "phase": "seeded-request",
+          "action": "request"
+        },
+        {
+          "utc": "2026-10-17T00:16:39.738030Z",
+          "ms": 11706,
+          "type": "semantics-batch",
+          "phase": "seeded-request",
+          "batch": 5
+        },
+        {
+          "utc": "2026-10-17T00:16:45.886646Z",
+          "ms": 17855,
+          "type": "semantics-batch",
+          "phase": "seeded-request",
+          "batch": 6
+        },
+        {
+          "utc": "2026-10-17T00:16:45.976636Z",
+          "ms": 17945,
+          "type": "semantics-batch",
+          "phase": "seeded-request",
+          "batch": 7
+        },
+        {
+          "utc": "2026-10-17T00:16:46.178005Z",
+          "ms": 18146,
+          "type": "semantics-batch",
+          "phase": "seeded-request",
+          "batch": 8
+        },
+        {
+          "utc": "2026-10-17T00:16:49.880203Z",
+          "ms": 21848,
+          "type": "control",
+          "phase": "before-hide",
+          "action": "phase"
+        },
+        {
+          "utc": "2026-10-17T00:16:53.089754Z",
+          "ms": 25057,
+          "type": "semantics-batch",
+          "phase": "before-hide",
+          "batch": 9
+        },
+        {
+          "utc": "2026-10-17T00:16:53.145249Z",
+          "ms": 25113,
+          "type": "semantics-batch",
+          "phase": "before-hide",
+          "batch": 10
+        },
+        {
+          "utc": "2026-10-17T00:16:53.343368Z",
+          "ms": 25311,
+          "type": "semantics-batch",
+          "phase": "before-hide",
+          "batch": 11
+        },
+        {
+          "utc": "2026-10-17T00:16:59.780816Z",
+          "ms": 31749,
+          "type": "control",
+          "phase": "native-show",
+          "action": "show"
+        },
+        {
+          "utc": "2026-10-17T00:17:00.303783Z",
+          "ms": 32271,
+          "type": "semantics-batch",
+          "phase": "native-show",
+          "batch": 12
+        },
+        {
+          "utc": "2026-10-17T00:17:00.312689Z",
+          "ms": 32280,
+          "type": "semantics-batch",
+          "phase": "native-show",
+          "batch": 13
+        },
+        {
+          "utc": "2026-10-17T00:17:09.783381Z",
+          "ms": 41751,
+          "type": "control",
+          "phase": "second-cycle",
+          "action": "phase"
+        },
+        {
+          "utc": "2026-10-17T00:17:14.893256Z",
+          "ms": 46861,
+          "type": "semantics-batch",
+          "phase": "second-cycle",
+          "batch": 14
+        },
+        {
+          "utc": "2026-10-17T00:17:17.580914Z",
+          "ms": 49549,
+          "type": "control",
+          "phase": "second-show",
+          "action": "show"
+        },
+        {
+          "utc": "2026-10-17T00:17:18.068560Z",
+          "ms": 50037,
+          "type": "semantics-batch",
+          "phase": "second-show",
+          "batch": 15
+        },
+        {
+          "utc": "2026-10-17T00:17:18.081627Z",
+          "ms": 50049,
+          "type": "semantics-batch",
+          "phase": "second-show",
+          "batch": 16
+        },
+        {
+          "utc": "2026-10-17T00:17:27.026324Z",
+          "ms": 58994,
+          "type": "semantics-batch",
+          "phase": "second-show",
+          "batch": 17
+        },
+        {
+          "utc": "2026-10-17T00:17:27.078966Z",
+          "ms": 59046,
+          "type": "semantics-batch",
+          "phase": "second-show",
+          "batch": 18
+        },
+        {
+          "utc": "2026-10-17T00:17:27.154337Z",
+          "ms": 59122,
+          "type": "semantics-batch",
+          "phase": "second-show",
+          "batch": 19
+        },
+        {
+          "utc": "2026-10-17T00:17:27.230464Z",
+          "ms": 59198,
+          "type": "semantics-batch",
+          "phase": "second-show",
+          "batch": 20
+        },
+        {
+          "utc": "2026-10-17T00:17:28.427888Z",
+          "ms": 60395,
+          "type": "semantics-batch",
+          "phase": "second-show",
+          "batch": 21
+        },
+        {
+          "utc": "2026-10-17T00:17:28.663237Z",
+          "ms": 60631,
+          "type": "semantics-batch",
+          "phase": "second-show",
+          "batch": 22
+        },
+        {
+          "utc": "2026-10-17T00:17:35.680903Z",
+          "ms": 67648,
+          "type": "control",
+          "phase": "complete",
+          "action": "quit"
+        },
+        {
+          "utc": "2026-10-17T00:17:35.788308Z",
+          "ms": 67756,
+          "type": "semantics-batch",
+          "phase": "complete",
+          "batch": 23
+        }
+      ]
+    }
+  },
+  "files": {
+    "before-semantics.jsonl": {
+      "sha256": "682642be564925c6a4cee80d7a5273447c3909a9855098310e1cbaea9ea904bf",
+      "bytes": 42825
+    },
+    "before-native-diagnostic.log": {
+      "sha256": "e28cb55a93a2791be2cec9c470bf664b637f577302989fd96b1dff62b3df365d",
+      "bytes": 2237,
+      "omitted": "Only the VM debug endpoint line"
+    },
+    "after-semantics.jsonl": {
+      "sha256": "64352c1ee83fb521b8f8e55c3def9a75864bbd2c1f30f6c4c886b95c37ba5ba4",
+      "bytes": 47983
+    },
+    "after-native-diagnostic.log": {
+      "sha256": "f97f3a7cf544777e7d60ff9c89362e946a7e64884bb7f0ba28d4372d42f81023",
+      "bytes": 1522,
+      "omitted": "Only the VM debug endpoint line"
+    },
+    "ax_probe_app.dart.txt": {
+      "sha256": "d12e06f55283d9c760adeb3f372adb6d3387902d4dc8faad462cfb796164dba5",
+      "bytes": 10461
+    },
+    "start_ax_probe.py": {
+      "sha256": "5226b8f6b246a10870f792ebed313dfb2b8614e8f178e5158fdd5df7215a79dd",
+      "bytes": 777
+    },
+    "ax_control.py": {
+      "sha256": "4ff3702a58135ea5b12186bb9f62b1e2ac8164a56cb56c3a8350b46584b8ebb6",
+      "bytes": 433
+    },
+    "after-initial-tree.txt": {
+      "sha256": "5a2b74a6494538f968e60ded8e5119e4bc822a5a427f46988f38bd61cb1bb46e",
+      "bytes": 2546
+    },
+    "after-restored-tree.txt": {
+      "sha256": "1c126207db5964030c68d8ee0978acd9eb93ab70f2c961dc15750833d05a2ccc",
+      "bytes": 2664
+    },
+    "after-settings-after-show-tree.txt": {
+      "sha256": "6c812548de9c9efcabf6ffdb0556848eeb6be2d374afd83353acafcde750d69d",
+      "bytes": 1685
+    },
+    "after-restored-tooltip.png": {
+      "sha256": "37377559f9444cbaf395b97f897cf6ddee9c83a8a6dbf6391ea779a011971808",
+      "bytes": 80317
+    },
+    "caption-red.log": {
+      "sha256": "68f9e8d2d27a558652b24e439b8ea3d769c6504a243000b922997c9f20e77e27",
+      "bytes": 2675
+    },
+    "caption-green.log": {
+      "sha256": "6e3504040364e2c166396d9e578a9c14660ea53b74a9e3517b5830706c5d9df2",
+      "bytes": 458
+    },
+    "caption-analyze.log": {
+      "sha256": "c9ad93adc2af67f69b7eb488ccd53e656abb080b357a3fb163c7bfb04357d6e2",
+      "bytes": 98
+    },
+    "helper-initial-build-failure.log": {
+      "sha256": "ab40ae922f149f44f03ca90748f35d196b5be99b871c0f7701e33af0fe70d9e8",
+      "bytes": 1503
+    },
+    "before-build.log": {
+      "sha256": "2bd94ef9addcd4cb7c3b5ade7c6ce1a49b131f79d7b27b0d0f3703216498f324",
+      "bytes": 133
+    },
+    "after-build.log": {
+      "sha256": "ed908c5f7a8d4bfe0a3fafa50bb8c111e6033a63f0e41fab7d924f01824e6843",
+      "bytes": 133
+    },
+    "merged-missing-dependency.log": {
+      "sha256": "a0d2d31bc72e8b02f6dcece234196f2bf329509f60115d4bb168862de9743a90",
+      "bytes": 2199
+    },
+    "merged-offline-pub.log": {
+      "sha256": "6cca87fa330d05e08cc607e0cc666d08810e1e116bb434d2e65fe950b6e105ab",
+      "bytes": 272
+    },
+    "merged-caption-green.log": {
+      "sha256": "8f67e79459ec6f5f2c257b9a4c009ca59942197270cc128c8157c0965049accb",
+      "bytes": 458
+    },
+    "merged-caption-analyze.log": {
+      "sha256": "128449f8a393f620158e7a3ac7b004c562e7bd4581066bec3da8a9b3ac59d529",
+      "bytes": 98
+    }
+  },
+  "product_sha256": {
+    "apps/desktop/lib/window_frame.dart": "3d92058298a9998297bc5f1298318b627e34d8aab3b2652c44952ca2d5028a7b",
+    "apps/desktop/test/window_frame_test.dart": "fa691a833c9c6797b414c9b8296f9b9b94b486314ae68665ba06f48053ea112f"
+  },
+  "flutter_windows_dll_sha256": "b60f6940fdabeca7ea9688448852c705e76dbe6513902651dfb1e92bc1db9fd2",
+  "final_parent_integration": "1d986becb4170b9b723cfa01af54a7c9c7a8410d"
+}

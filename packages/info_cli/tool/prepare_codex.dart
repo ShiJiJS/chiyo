@@ -23,6 +23,7 @@ Future<void> main(List<String> args) async {
   for (final entry in {
     'codex_hook': 'info-codex-hook',
     'codex_info': 'info-codex',
+    'runtime_worker': 'info-runtime-worker',
   }.entries) {
     final result = await Process.run(Platform.resolvedExecutable, [
       'compile',
@@ -40,7 +41,18 @@ Future<void> main(List<String> args) async {
   final source = await File(
     '${repository.path}/integrations/codex/skills/agent-info-access/SKILL.md',
   ).readAsString();
-  await writeCodexConfiguration(output, source);
+  final credentialUseReference = await File(
+    '${repository.path}/integrations/codex/skills/agent-info-access/references/credential-use.md',
+  ).readAsString();
+  final informationFilesReference = await File(
+    '${repository.path}/integrations/codex/skills/agent-info-access/references/information-files.md',
+  ).readAsString();
+  await writeCodexConfiguration(
+    output,
+    source,
+    credentialUseReference: credentialUseReference,
+    informationFilesReference: informationFilesReference,
+  );
   stdout.writeln('Prepared bundle: ${output.path}');
   stdout.writeln(
     'No hooks installed or trusted. Follow integrations/codex/README.md.',

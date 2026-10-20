@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'ui_palette.dart';
 import 'package:flutter/services.dart';
 
 // Labels stay outside the editable border, including after a value is entered.
@@ -6,6 +7,7 @@ class DesktopTextField extends StatelessWidget {
   const DesktopTextField({
     super.key,
     this.controller,
+    this.focusNode,
     this.decoration = const InputDecoration(),
     this.maxLength,
     this.minLines,
@@ -18,6 +20,7 @@ class DesktopTextField extends StatelessWidget {
     this.autocorrect = true,
   });
   final TextEditingController? controller;
+  final FocusNode? focusNode;
   final InputDecoration decoration;
   final int? maxLength, minLines, maxLines;
   final bool? enabled;
@@ -31,6 +34,7 @@ class DesktopTextField extends StatelessWidget {
     label: decoration.labelText,
     child: TextField(
       controller: controller,
+      focusNode: focusNode,
       decoration: _inside(decoration),
       maxLength: maxLength,
       minLines: minLines,
@@ -91,7 +95,7 @@ InputDecoration _inside(InputDecoration source) => source.copyWith(
   // copyWith cannot clear a nullable label. An empty label leaves the visible
   // and semantic label in the persistent field frame instead.
   labelText: '',
-  floatingLabelBehavior: FloatingLabelBehavior.never,
+  floatingLabelBehavior: FloatingLabelBehavior.always,
   alignLabelWithHint: false,
 );
 
@@ -210,7 +214,7 @@ class _DesktopSelectState<T> extends State<DesktopSelect<T>> {
                     widget.onChanged!(item.value);
                   },
             leadingIcon: item.value == _selected
-                ? const Icon(Icons.check, size: 14)
+                ? Icon(Icons.check, size: 14)
                 : const SizedBox(width: 14),
             child: item.child,
           ),
@@ -227,7 +231,7 @@ class _DesktopSelectState<T> extends State<DesktopSelect<T>> {
               ? () => controller.isOpen ? controller.close() : controller.open()
               : null,
           style: OutlinedButton.styleFrom(
-            backgroundColor: Colors.white,
+            backgroundColor: UiPalette.of(context).paper,
             alignment: Alignment.centerLeft,
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
           ),
@@ -238,7 +242,7 @@ class _DesktopSelectState<T> extends State<DesktopSelect<T>> {
             children: [
               if (widget.isExpanded) Expanded(child: label) else label,
               const SizedBox(width: 18),
-              const Icon(Icons.expand_more, size: 16),
+              Icon(Icons.expand_more, size: 16),
             ],
           ),
         ),

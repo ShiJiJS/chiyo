@@ -1,0 +1,1 @@
+Running build hooks...Running build hooks...{"status":"inspected","schemaBeforeOpen":21,"informationMatches":true,"credentialMatches":true,"requests":2,"onlyV1Facts":true,"attemptsConsumed":1,"unusedInvalidation":"grant_revoked","executionFacts":1,"independentKey":false}
