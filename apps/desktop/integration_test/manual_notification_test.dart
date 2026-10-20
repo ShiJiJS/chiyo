@@ -25,6 +25,12 @@ void main() {
       const evidencePath = String.fromEnvironment(
         'D1_NOTIFICATION_QA_DIRECTORY',
       );
+      // A visible test window lets a desktop operator inspect a real Shell
+      // balloon inside the captured desktop area. This is not a background
+      // visibility check and must be recorded separately from the default probe.
+      const keepWindowVisible = bool.fromEnvironment(
+        'D1_NOTIFICATION_KEEP_WINDOW_VISIBLE',
+      );
       const diagnostics = MethodChannel('agent_info_manage/desktop');
       Future<Map<Object?, Object?>> snapshot() async =>
           await diagnostics.invokeMapMethod<Object?, Object?>(
@@ -123,12 +129,15 @@ void main() {
 
         // Hide only this isolated runner. A successful real click must restore it
         // through the native callback, switch tabs, clear search and select ID.
-        expect(await platform.hideWindow(), isTrue);
+        if (!keepWindowVisible) {
+          expect(await platform.hideWindow(), isTrue);
+        }
         final before = await snapshot();
         await phase('ready-to-dispatch', {
           'native': before,
           'requestId': target.id,
           'fixtureRoot': fixture.root.path,
+          'windowKeptVisible': keepWindowVisible,
         });
         expect(before['queryHresult'], 0);
         expect(

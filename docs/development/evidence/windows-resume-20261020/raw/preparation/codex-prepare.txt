@@ -1,0 +1,2 @@
+Prepared bundle: C:/Project/network_config/info-manage/build/codex-preview-0.4.0-12-995283f
+Review hooks.json and Skill before installing or trusting.
