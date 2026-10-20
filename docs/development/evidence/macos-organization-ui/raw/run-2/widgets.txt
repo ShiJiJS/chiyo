@@ -1,0 +1,7 @@
+00:00 +0: loading /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/organization_tasks_test.dart
+00:00 +0: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/organization_tasks_test.dart: Agent requests in approval inbox; one approval enables automatic classification and read-only result
+00:01 +1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/organization_widget_test.dart: owner creates hierarchy and tags then organizes an item
+00:01 +2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/organization_tasks_test.dart: owner can narrow metadata scope and reject a later Agent request
+00:01 +3: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/organization_widget_test.dart: public description drafts stay private until owner saves
+00:01 +4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/organization_widget_test.dart: public description drafts stay private until owner saves
+00:01 +5: All tests passed!
