@@ -4,6 +4,13 @@
 
 ### 恢复后的定向检查（晚于下方暂停检查点）
 
+#30当前可打开的独立验收项目为
+`C:/Project/network_config/info-manage-codex-acceptance-0.4.0-12-995283f`，含项目hook、
+Skill、README.txt和八项未运行的客户端清单。已验证同版本材料、路径与拒绝覆盖保护，
+没有注册/信任客户端项目或运行任何hook，也没有改当前项目或用户配置。
+[准备证据](evidence/issue30-acceptance-workspace/verification.json)只证明项目材料可审查，
+不证明真实客户端接入。用户先在原开发会话安排独立虚构库，再正式打开项目并信任。
+
 用户已恢复工作并允许Computer Use。产品仍为995283f/0.4.0+12，113项载荷重新核对未变，
 本轮只有QA入口与记录变化，不重打包，也不累加原696/20：
 

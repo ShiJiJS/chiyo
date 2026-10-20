@@ -4,6 +4,16 @@
 
 ## 当前执行检查点
 
+#30进一步准备了全新的独立Codex验收项目：
+`C:/Project/network_config/info-manage-codex-acceptance-0.4.0-12-995283f`。
+它使用原同版本bundle的准确hook定义和Skill，只配置新目录的自动发现布局，
+没有修改当前项目或全局配置、注册客户端项目、运行hook或创建聊天/子Agent。
+7个准备文件、原样副本和拒绝覆盖已有目录已核对；八项客户端检查全部保持未运行。
+开发工具见[接入说明](../../integrations/codex/README.md)，
+证据见[项目准备清单](../development/evidence/issue30-acceptance-workspace/verification.json)。
+下一步仍需用户配合正式信任/测试聊天，或提供干净Windows用户/独立机器。
+通知点击没有新的结果，不重复发通知或重跑原通过组。以下恢复检查和原暂停段保留来源。
+
 **已恢复 · 2026-10-20。**用户允许Computer Use，实际包仍995283f/0.4.0+12、113载荷未变。
 #18原rotate后QA宿主退出超时又做15轮真实加密库的有界复现，全部正常退出且阶段完整，
 仍不能唯一归因；保留原失败，不擅改退出规则。#23新的可见窗口模式真实单次探针60秒

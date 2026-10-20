@@ -90,6 +90,25 @@ dart run tool/prepare_codex.dart ../../build/codex-preview
 
 目前不会自动执行上述安装步骤。用户只需要配合真实 UI 验证，不要求透露 token。
 
+### 准备独立验收项目（开发者工具）
+
+已审查的同版本bundle还可生成一个全新的、尚未在客户端注册/信任的测试项目：
+
+```text
+python scripts/prepare-codex-acceptance.py --delivery <AgentInfoManage目录> --bundle <已生成bundle> --workspace <不存在的新项目目录>
+```
+
+工具先核对随包manifest、AOT/Skill/引用及Windows hook目标，再仅在新目录准备
+`.codex/hooks.json`、`.agents/skills/agent-info-access`、README.txt及八项未运行的验收清单。
+已存在的目录直接拒绝，不合并既有配置。这个Python工具用于开发者准备材料，不是
+Windows预览包或用户实际接入的额外运行依赖；已生成项目由用户直接在客户端打开。
+项目仍引用原bundle的固定绝对路径，不能先删除/移动该bundle。
+
+这只是待用户开启的独立项目布局，不注册Codex项目、不授予信任、不运行hook，也不
+创建聊天或子Agent。先在原开发会话安排独立虚构资料库的应用，再由用户正式审查/信任
+并启动测试聊天；不要在没有服务时抢先启动。实际客户端事件/会话隔离与结束恢复仍须
+单独验收，生成器和文件哈希核对不能代替它们。
+
 ## 用户配合的两聊天验收
 
 只用虚构资料，避免把关联引用、文件内容和 token 放入报告或截图。
