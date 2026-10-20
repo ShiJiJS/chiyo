@@ -1,0 +1,43 @@
+00:00 +0: loading test/credential_execution_audit_test.dart
+00:00 +0: test/credential_execution_audit_test.dart: unauthenticated or invalid terminal reports cannot create recovery work
+00:00 +1: test/credential_operations_test.dart: expired prevents new operations without reissuing old material
+00:00 +2: test/credential_history_retention_test.dart: one ended operation cannot prune an earlier active operation of the same grant
+00:00 +3: test/credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:00 +4: test/credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:00 +5: test/credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:00 +6: test/credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:00 +7: test/credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:00 +8: test/credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:00 +9: test/credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:00 +10: test/credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:00 +11: test/credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:00 +12: test/credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:00 +13: test/credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:00 +14: test/credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:00 +15: test/credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:00 +16: test/credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:00 +17: test/credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:00 +18: test/credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:00 +19: test/credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:00 +20: test/credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:00 +21: test/credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:00 +22: test/credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:00 +23: test/credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:00 +24: test/credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:00 +25: test/credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:00 +26: test/credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:00 +27: test/credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:00 +28: test/credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:00 +29: test/credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:00 +30: test/credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:00 +31: test/credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:00 +32: test/credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:00 +33: test/credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:00 +34: test/credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:00 +35: test/credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:00 +36: test/credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:00 +37: test/credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:00 +38: test/credential_supervisor_recovery_test.dart: a launch interrupted before its worker registers can be reconciled only after its original supervisor ends
+00:00 +39: test/macos_material_files_test.dart: Darwin managed material files extended access rules are refused even when mode remains 0600
+00:00 +40: test/macos_material_files_test.dart: Darwin managed material files unlink removes the managed name while an existing reader keeps its bytes
+00:00 +41: All tests passed!

@@ -1,0 +1,12 @@
+{
+  "mode": "worker-recover",
+  "phase": "active-material-retained",
+  "targetGroupObservation": null,
+  "ordinaryCopyRemoved": true,
+  "credentialMaterialsRetained": true,
+  "executionState": "unknown",
+  "oldRunStatus": "unauthorized",
+  "oldRunError": "session_required",
+  "oldFetchStatus": "unauthorized",
+  "oldFetchError": "not_authorized"
+}

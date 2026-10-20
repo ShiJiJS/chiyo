@@ -1,0 +1,17 @@
+{
+  "cleanup": [
+    {
+      "workerPid": 86144,
+      "targetPid": 86145,
+      "bothAbsent": true,
+      "nonsecretWorkerScratchRemovedByQa": true
+    },
+    {
+      "workerPid": 86129,
+      "targetPid": 86130,
+      "bothAbsent": true,
+      "nonsecretWorkerScratchRemovedByQa": true
+    }
+  ],
+  "scope": "nonsecret worker scratch cleanup by QA; credential materials were already removed by product reconciliation"
+}
