@@ -10,11 +10,45 @@ bundle ID 保持 `com.example.infoDesktop`，不另建资料身份。
 macOS 14 和其他设备尚未实机验收。App、worker 和 CLI 主程序均为 ARM64，
 依赖库至少包含 ARM64；不提供 Intel 兼容承诺。
 
-## 后续源码修复
+## 退出修复与后续整包
 
 #42 的真实 Keychain 联合验收随后发现并修复了退出后界面访问已关闭资料库的问题
 （`05326a7`，见 [联合验收记录](macos-keychain-validation.md)）。
-下方 `c1a58b7` 整包的既有结果不包含此修复；正式交付前须刷新整包并重复必要联合验证。
+下方 `c1a58b7` 整包的既有结果不包含此修复；现已刷新为 `541a671` 整包，验证范围见下一节。
+
+## 2026-10-21 纳入退出修复的整包（#50 继续 OPEN）
+
+固定源码 `541a6714473eb85810c984bc32797c5fb548b09d`，版本
+`0.4.0+12-mac-dev.541a6714473e`，已包含 `05326a7` 的 launcher 退出保护。
+ZIP 保存在项目：
+`build/macos-adaptation/issue50-package-6/agent-info-manage-0.4.0+12-mac-dev.541a6714473e-macos-arm64.zip`。
+45,487,290 字节，SHA256：
+`ae7a4f00d3b79cf300800f05d55916254d8e39119631798a776595603add4640`。
+旧包保留，未替换已安装应用或发布 GitHub Release。
+
+干净源码执行 `python3 scripts/package-macos.py build/macos-adaptation/issue50-package-6 --check`：
+四包严格分析通过；Core 285/6、CLI 72/40、Storage 159/18、Desktop 178/2
+（通过/跳过），合计 **694 通过、66 跳过**。21 个打包阶段均返回 0。
+133 项文件/符号链接、12 个 Mach-O；主程序 ARM64，最低声明 14.0，
+实际验收宿主仅 macOS 27.0.1。App 仍为原 bundle identity，包含随包 worker、
+CLI/hook/材料生成器、Skill/引用、SQLCipher、许可证、依赖锁和载荷清单。
+
+解包到中文空格路径后，字节/权限/链接与清单一致，deep/strict 签名通过；
+沙盒/书签/用户选择文件/网络 entitlement 保留，worker 继承沙盒，Release 无调试权限。
+仅 `/usr/bin:/bin` PATH 下实际存储诊断确认 SQLCipher 4.19.0 community、
+资料重开、独立目标恢复与旧授权拒绝。六项随包 CLI/hook/worker 测试通过，
+与源码用例重叠，不累加到 694。CLI SHA256：
+`ecf7736d915a653d33a922253e670f63ead19d0776598e28965e89d57aff18fb`。
+
+本轮没有重跑资料筛选/附件 UI 场景；下方 `c1a58b7` 的原生联合结果保持历史范围。
+退出修复的普通 Release Flutter + 真实 Keychain 隔离副本验证单列在
+[#42 记录](macos-keychain-validation.md)，不能冒充此 ZIP 的已安装 GUI 流程。
+远端 main 仍为 `b37f96a`，Windows 原生目录无改动，共享 launcher 的 Windows 实机回归仍待。
+
+[原始构建/测试/解包日志、清单及摘要](evidence/macos-delivery-shutdown-fix/verification.json)
+保存源码版本与范围；不含数据库、测试密钥或 ZIP 二进制。
+#50 第一条整包组成/身份/版本/架构证据已刷新，其余五条继续未完成：
+稳定位置实际应用、签名升级、干净用户、系统面板/通知/Codex 和最终日常工作闭环。
 
 ## 包含内容
 
