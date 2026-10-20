@@ -1,0 +1,15 @@
+{
+  "testOnlyResidueRemoved": true,
+  "exactSyntheticCredentialMatched": true,
+  "processChecks": [
+    {
+      "pid": 85572,
+      "kernelResult": "ESRCH"
+    },
+    {
+      "pid": 85573,
+      "kernelResult": "ESRCH"
+    }
+  ],
+  "scope": "explicit cleanup after receiver stopped; not product cleanup acceptance"
+}

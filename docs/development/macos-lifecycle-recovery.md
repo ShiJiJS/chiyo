@@ -1,5 +1,66 @@
 # Mac 原生执行与应用生命周期恢复（#43 / #46）
 
+## 2026-10-21 #43 收口：签名 Flutter 与运行中 SSH / worker
+
+QA 源码 `17faee8`，新增场景使用实际 Release/沙盒 Flutter 宿主、随包 ARM64
+worker、系统 `/usr/bin/ssh` 及仅监听 loopback 的合成 SSH 服务。
+审批和密钥是合成输入，不接触生产库、Keychain 或真实 Codex。
+没有修改产品执行、审计、进程身份或材料回收逻辑。
+
+最终 `issue43-app-worker-2` 两个联合场景通过：
+
+1. 命令处于远端受控等待时，仅 SIGKILL 测试 Flutter 应用。
+2. 先按已登记 PID/内核创建身份 SIGKILL 测试 worker，再 SIGKILL Flutter。
+
+两种情况下，驱动侧的 `proc_pidinfo` 均确认原 SSH 目标的内核创建身份、
+进程组和存活状态保持；恢复进程启动前后各观察一次，随后才放行远端。
+实际重开后的沙盒应用查询旧进程组返回 `null`（无法确认），不是确定已退出。
+应用因此保留凭据材料和 `needs_check`，独立回收旧普通附件副本。
+旧私密会话再请求命令/文件分别被 `session_required` / `not_authorized` 拒绝。
+远端放行后应用核对进程组确已结束，凭据材料才被回收。
+执行仍为 `unknown`、无退出码或结束时刻；无法确认的旧结果未被编造为成功。
+每种场景只有 1 条执行记录，SSH 接收端命令计数均为 1。
+两个恢复应用均由 Cocoa 正常退出 0，两个旧应用为明确故障注入 -9；
+没有超时强杀清理。
+
+首轮 `issue43-app-worker-1` 的测试错误地要求新沙盒必须读到进程组存活，
+而不是接受保守的“无法确认”；因此失败。保留该轮源码、日志和结果。
+修正 QA 为独立驱动验证目标实际存活、应用验证“不确定时不删”后再运行，
+未放宽产品身份检查或沙盒。首轮两个确属本次测试的残留目录，分别通过
+原 worker 回执/内核 ESRCH 和生成的合成私钥字节核对后由 QA 清理，
+不冒称产品清理通过。最终轮凭据材料由产品回收，两个不含凭据的 worker
+暂存目录由 QA 在确切 worker/目标均已不存在后回收；这是不同清理范围。
+
+最终 QA 二进制 SHA-256：
+`cc9eeabde1f025ff394ad340efcc422ede02682cf16db1b879b0083ac38d00fa`。
+11 个构建前源码/锁快照、构建后源文件和 `17faee8` 提交的字节摘要一致。
+Flutter 严格分析、Python 语法检查通过；收口定向运行
+`credential_execution_audit`、`credential_operations`、
+`credential_history_retention`、`credential_supervisor_recovery`、
+`macos_material_files` 共 **41 项通过、0 跳过**，不与旧全量计数累加。
+开发目录已恢复默认产品入口且严格签名通过，#50 原 ZIP 不变。
+60 份原始资料与收口映射见 [证据索引](evidence/macos-app-worker-recovery/verification.json)。
+
+按 #43 原有 6 条验收条件核对：
+
+| 条件 | 证据 |
+| --- | --- |
+| 终态落盘失败时保持 unknown，恢复补记首份事实 | 既有实际 SQLCipher/AOT 的 terminal-audit-recovery；本次 Core 审计回归 |
+| 重复/降级/迟到登记、并发及备份/退出排空 | 本次 41 项定向检查；此前完整 Core 回归 |
+| AOT 双门、短命令/信号、后代与内核身份 | 既有 Darwin AOT worker 5 项；本次实际随包 worker / SSH 身份观察 |
+| 撤销/到期/轮换/根结束、应用/worker 终止重开 | 既有 8 项 SQLCipher 联合场景；本次两种签名 Flutter 故障恢复 |
+| 附件和凭据独立回收，不误删活跃/不确定材料 | 本次两种真实应用联合场景；本次 Darwin 材料链接/未知子项/身份检查 |
+| Mac 原生入口、失败与恢复日志、启动计数和边界 | 已提交 QA 入口及原始资料；两种 SSH 接收端计数均为 1 |
+
+#43 的执行回执与 worker 生命周期范围已完成。它不代替 #46 的实际菜单、
+快捷键和睡眠唤醒，不代替 #42/#47/#49/#50 的 Keychain、通知、真实 Codex
+或安装升级，也不代表 #19 整体可用。#41 的共享修改 Windows 实机回归仍单独保留。
+
+```bash
+python3 scripts/qa/macos-lifecycle.py build/macos-adaptation/new-worker-recovery --workers
+./scripts/dev-macos.sh build
+```
+
 ## 2026-10-21 签名 Flutter 应用本体（#46）
 
 QA 源码 `1fea9d0`，产品逻辑与 `cccc37e` 交付包保持一致；
@@ -57,9 +118,9 @@ python3 scripts/qa/macos-lifecycle.py build/macos-adaptation/new-lifecycle
 ./scripts/dev-macos.sh build
 ```
 
-**#46/#43 保持 OPEN。** 仍需实际关窗/菜单栏/Dock/⌘Q、可见错误窗口、
-菜单栏不可用回退、实际睡眠唤醒，以及正在执行的凭据 worker/附件材料与
-签名 Flutter 宿主异常重开的联合场景。合成退出事件不能替代这些 UI 操作，
+**#46 保持 OPEN。** 仍需实际关窗/菜单栏/Dock/⌘Q、可见错误窗口、
+菜单栏不可用回退和实际睡眠唤醒。正在执行的凭据 worker/附件材料与
+签名 Flutter 宿主异常重开的联合场景已在上方 #43 收口补齐。合成退出事件不能替代这些 UI 操作，
 锁屏下运行测试也不等于睡眠/唤醒验收。通知、真实 Codex 和 Keychain 升级
 分别继续由 #47/#49/#42 验收。
 
@@ -113,9 +174,9 @@ Desktop 164/2（通过/跳过），合计 **676 通过、66 跳过**。这次全
 本轮没有产品运行时代码修改，Release 对应 #41 已构建的同一产品源码。
 Windows 分支没有更新；当前共享测试适配仍缺新 Windows 主机执行证据。
 
-#43 暂保持 OPEN：独立执行宿主的实际终止/恢复已验证，但还需与 #46 合并验证
-正在执行的 worker 与签名 Flutter 应用本体异常退出、重新启动的联合路径。
-上方 #46 已补普通读取授权场景的应用本体故障重开。这里的受控 hook 事件也
+#43 在本阶段曾因签名 Flutter 的联合路径保持 OPEN；该缺口已由上方
+`17faee8` 两种实际应用场景补齐。#46 已补普通读取授权场景的应用本体故障重开。
+这里的受控 hook 事件仍
 不能替代 #49 的真实 Codex 生命周期。Keychain、系统通知及最终安装包分别由
 #42、#47、#50 继续处理。
 

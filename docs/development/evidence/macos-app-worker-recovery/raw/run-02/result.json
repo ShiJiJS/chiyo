@@ -1,0 +1,98 @@
+{
+  "complete": true,
+  "cases": [
+    {
+      "label": "app-crash",
+      "exit": -9,
+      "faultInjection": true,
+      "targetObservedAfterCrash": {
+        "identity": "macos:1792518391:898711",
+        "group": 86129,
+        "active": true
+      },
+      "mode": "worker-hold",
+      "phase": "ready",
+      "port": 50682,
+      "workerCrashInjected": false,
+      "supervisorIsFlutter": true,
+      "workerPid": 86129,
+      "workerCreatedAt": "macos:1792518391:848247",
+      "targetPid": 86130,
+      "targetCreatedAt": "macos:1792518391:898711",
+      "executionState": "running",
+      "materialsPresent": true
+    },
+    {
+      "label": "app-crash-reopen",
+      "exit": 0,
+      "mode": "worker-recover",
+      "phase": "complete",
+      "ordinaryCopyRemoved": true,
+      "activeMaterialsWereRetained": true,
+      "materialsRemovedAfterGroupExit": true,
+      "executionState": "unknown",
+      "exitCode": null,
+      "finishedAt": null,
+      "executionCount": 1,
+      "oldAuthorityRefused": true,
+      "nativeTerminationRequested": true,
+      "libraryCloses": 1,
+      "remoteCommandCount": 1
+    },
+    {
+      "label": "worker-and-app-crash",
+      "exit": -9,
+      "faultInjection": true,
+      "targetObservedAfterCrash": {
+        "identity": "macos:1792518392:788501",
+        "group": 86144,
+        "active": true
+      },
+      "mode": "worker-hold",
+      "phase": "ready",
+      "port": 50691,
+      "workerCrashInjected": true,
+      "supervisorIsFlutter": true,
+      "workerPid": 86144,
+      "workerCreatedAt": "macos:1792518392:737353",
+      "targetPid": 86145,
+      "targetCreatedAt": "macos:1792518392:788501",
+      "executionState": "running",
+      "materialsPresent": true
+    },
+    {
+      "label": "worker-and-app-crash-reopen",
+      "exit": 0,
+      "mode": "worker-recover",
+      "phase": "complete",
+      "ordinaryCopyRemoved": true,
+      "activeMaterialsWereRetained": true,
+      "materialsRemovedAfterGroupExit": true,
+      "executionState": "unknown",
+      "exitCode": null,
+      "finishedAt": null,
+      "executionCount": 1,
+      "oldAuthorityRefused": true,
+      "nativeTerminationRequested": true,
+      "libraryCloses": 1,
+      "remoteCommandCount": 1
+    }
+  ],
+  "scope": "signed Flutter QA entry; real native termination/SQLCipher/processes; synthetic keys/events",
+  "sourceHashes": {
+    "scripts/qa/macos-lifecycle.py": "98d29a435bf156a550dce3be798815f15a74a479b9d3bdeea4e08e6dcf9ef285",
+    "apps/desktop/integration_test/macos_lifecycle_probe.dart": "51f078da81071b7b244a5c572147d573cabe06fca41021b2eb9dd6f7ae851a49",
+    "apps/desktop/integration_test/support/macos_worker_recovery.dart": "0265ed079f0363d4ed45066280eafc59e43393e6155924aba2f7cf966055ac9c",
+    "scripts/qa/macos-ssh-fixture.py": "57643a226c33301920ebbb7a96642d7bfc10e3a39a4306376641e6bdf1669216",
+    "apps/desktop/lib/desktop_bootstrap.dart": "025a8a0f1d26aed7b77c64b3b9cfa2cdfe60c4133fc2c00b574860e3d1fb5026",
+    "apps/desktop/lib/desktop_runtime.dart": "1cd0ba9971d3d0b321f22eec78c3186919328b7fffc346785b1f0ad340d4751c",
+    "apps/desktop/macos/Runner/AppDelegate.swift": "6be0305e6a175f9486a4859597f7e1d2a4d1855fd5d630603466e7466214878e",
+    "apps/desktop/macos/Runner/MainFlutterWindow.swift": "ba3715cdc39f5fa3f489382cd710801a91717c92ef9388594d6a00cdba3fbcdb",
+    "apps/desktop/macos/Runner.xcodeproj/project.pbxproj": "4f3c4b943ea56a8c6c6f07a96c54f7d10934a48938c5f98ba7af3553f3f26d33",
+    "apps/desktop/pubspec.lock": "9929f3b3febefc0de06e9a841ac4b5505896eda43a503b0f128467d93b311553",
+    "packages/info_storage/pubspec.lock": "131f601be25b6a7759cf961d15fda9c4e176a759eb20d499a83e2bff8d9d1274"
+  },
+  "executableSha256": "cc9eeabde1f025ff394ad340efcc422ede02682cf16db1b879b0083ac38d00fa",
+  "gitHead": "d97a8c54c93f32b7326a6f4c48b1bcd7079a581e",
+  "processCleanup": []
+}

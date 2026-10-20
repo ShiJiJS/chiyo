@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/Users/jiangxinyi/Documents/Project/agent-info/scripts/qa/macos-lifecycle.py", line 289, in <module>
+    main()
+  File "/Users/jiangxinyi/Documents/Project/agent-info/scripts/qa/macos-lifecycle.py", line 250, in main
+    worker_scenarios()
+  File "/Users/jiangxinyi/Documents/Project/agent-info/scripts/qa/macos-lifecycle.py", line 160, in worker_scenarios
+    raise RuntimeError("Restart failed to preserve live material")
+RuntimeError: Restart failed to preserve live material
