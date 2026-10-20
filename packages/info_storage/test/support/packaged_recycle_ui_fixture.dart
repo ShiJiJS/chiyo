@@ -5,7 +5,8 @@ import 'package:info_core/info_core.dart';
 import 'package:info_storage/info_storage.dart';
 
 Future<void> main(List<String> args) async {
-  if (args.length != 2 || !{'prepare', 'inspect'}.contains(args.first)) {
+  if (args.length != 2 ||
+      !{'prepare', 'inspect', 'inspect-completed'}.contains(args.first)) {
     throw StateError('Explicit synthetic recycle action required');
   }
   final root = Directory(args[1]);
@@ -122,6 +123,34 @@ Future<void> main(List<String> args) async {
             (d) => !d.holdsCopy,
           ),
           'activeGrants': repo.grantHistory.where((g) => g.active).length,
+          if (args.first == 'inspect-completed') ...{
+            'fieldIdentityChangedFromV3':
+                item.fields.single.id !=
+                (jsonDecode(
+                      await File(
+                        '${root.path}/tail-expected.json',
+                      ).readAsString(),
+                    )
+                    as Map<String, dynamic>)['fieldId'],
+            'expiredRemovedDeliveries': repo.informationFileDeliveries
+                .where(
+                  (d) => d.state == 'expired' && d.reason == 'field_removed',
+                )
+                .length,
+            'releasedDeliveries': repo.informationFileDeliveries
+                .where((d) => d.state == 'released' && d.reason == 'released')
+                .length,
+            'restoredFieldMappingMatches': repo.recycleFacts
+                .where(
+                  (f) =>
+                      f.kind == RecycleFactKind.restored &&
+                      f.version == item.version,
+                )
+                .single
+                .restoredFieldIds
+                .values
+                .contains(item.fields.single.id),
+          },
         }),
       );
     }

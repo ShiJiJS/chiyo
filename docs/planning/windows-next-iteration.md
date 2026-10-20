@@ -4,6 +4,12 @@
 
 ## 当前执行检查点
 
+用户已确认并完成[原版本3虚构条目的实际UI删除/恢复](../development/windows-packaged-recycle-delete.md)，
+旧范围拒绝/副本自动回收、新字段新审批、退出重开原文/事实一致，专属库已清理。
+同时发现[#40](https://github.com/ShiJiJS/agent-info-manage/issues/40)：旧审批显示内部ID、
+历史范围误标可读取。先修复并测试这个已复现的Owner显示缺陷，再接续#30/#23/#18实际
+环境门槛；UI删除确认已完成，不再等待用户重复确认。无子Agent，外观沿用Round05。
+
 #18原包的[恢复中断与正常重试](../development/windows-packaged-restore-crash.md)已分轮通过：
 80 MiB实际写入中断后SQLCipher恢复原空库/17分钟设置，同目标UI重试恢复全部原文/身份，
 设置恢复源23分钟；原QA复用CLI会话失败保留，新CLI补测正常通过。
