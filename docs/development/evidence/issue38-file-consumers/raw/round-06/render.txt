@@ -1,0 +1,4 @@
+Flutter assets will be downloaded from https://storage.flutter-io.cn. Make sure you trust this source!
+00:00 +0: loading C:/Project/network_config/info-manage/apps/desktop/tool/render_information_file_consumers_test.dart
+00:00 +0: inspect file revision, recycle and proposal consumers in the existing shell
+00:03 +1: All tests passed!

@@ -1,0 +1,3 @@
+00:00 +0: loading test/hosted_credential_execution_test.dart
+00:00 +0: a hosted task survives its calling client closing and another call retrieves the same authorized output
+00:00 +1: All tests passed!

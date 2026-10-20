@@ -1,0 +1,1 @@
+{"workspace": "C:\\Project\\network_config\\info-manage-codex-acceptance-0.4.0-12-995283f", "prepared": true, "clientAcceptance": false}

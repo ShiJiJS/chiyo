@@ -1,0 +1,8 @@
+Flutter assets will be downloaded from https://storage.flutter-io.cn. Make sure you trust this source!
+00:00 +0: loading C:/Project/network_config/info-manage-worktrees/28-runtime/apps/desktop/test/credential_use_widget_test.dart
+00:00 +0: handled credential request exposes its actual nonzero execution receipt without material or output
+00:00 +1: owner can omit a deleted requested field and still approve the credential
+00:01 +2: successful decision retry clears the previous save failure notice
+00:01 +3: disabled credential still permits an independent field-only decision
+00:01 +4: owner can approve fields independently from credential use through the real inbox
+00:01 +5: All tests passed!

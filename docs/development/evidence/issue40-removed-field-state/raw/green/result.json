@@ -1,0 +1,34 @@
+{
+  "complete": false,
+  "steps": [
+    {
+      "name": "core-format",
+      "exitCode": 0
+    },
+    {
+      "name": "desktop-format",
+      "exitCode": 0
+    },
+    {
+      "name": "core-pub",
+      "exitCode": 0
+    },
+    {
+      "name": "core-analyze",
+      "exitCode": 0
+    },
+    {
+      "name": "core-targeted",
+      "exitCode": 0
+    },
+    {
+      "name": "desktop-pub",
+      "exitCode": 0
+    },
+    {
+      "name": "desktop-analyze",
+      "exitCode": 1
+    }
+  ],
+  "unexpectedLocks": []
+}

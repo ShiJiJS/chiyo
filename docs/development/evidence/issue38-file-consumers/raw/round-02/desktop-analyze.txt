@@ -1,0 +1,7 @@
+Flutter assets will be downloaded from https://storage.flutter-io.cn. Make sure you trust this source!
+Analyzing desktop...                                            
+
+  error - The getter 'status' isn't defined for the type 'CredentialUseFailure'. Try importing the library that defines 'status', correcting the name to the name of an existing getter, or defining a getter or field named 'status' - lib\credential_use_approval.dart:168:33 - undefined_getter
+  error - Undefined name 'owner'. Try correcting the name to one that is defined, or defining the name - lib\proposal_workspace.dart:1926:40 - undefined_identifier
+
+2 issues found. (ran in 3.7s)

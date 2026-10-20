@@ -1,0 +1,3 @@
+Formatted lib/desktop_runtime.dart
+Formatted test/information_file_bootstrap_test.dart
+Formatted 7 files (2 changed) in 0.03 seconds.

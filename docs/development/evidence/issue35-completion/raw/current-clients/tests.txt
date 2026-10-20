@@ -1,0 +1,22 @@
+00:00 +0: loading test/focused_fill_client_test.dart
+00:00 +0: test/focused_fill_client_test.dart: independent JSON-lines CLI can request, reuse, and query fills while all secret handling stays in its resident host
+00:00 +1: test/focused_fill_client_test.dart: independent JSON-lines CLI can request, reuse, and query fills while all secret handling stays in its resident host
+00:00 +2: test/focused_fill_client_test.dart: independent JSON-lines CLI can request, reuse, and query fills while all secret handling stays in its resident host
+00:00 +3: test/focused_fill_client_test.dart: independent JSON-lines CLI can request, reuse, and query fills while all secret handling stays in its resident host
+00:00 +4: test/focused_fill_client_test.dart: independent JSON-lines CLI can request, reuse, and query fills while all secret handling stays in its resident host
+00:00 +5: test/focused_fill_client_test.dart: independent JSON-lines CLI can request, reuse, and query fills while all secret handling stays in its resident host
+00:00 +6: test/focused_fill_client_test.dart: independent JSON-lines CLI can request, reuse, and query fills while all secret handling stays in its resident host
+00:00 +7: test/windows_focused_fill_test.dart: actual hung helper times out before reading material and close drains
+00:00 +8: test/windows_focused_fill_test.dart: actual hung helper times out before reading material and close drains
+00:00 +9: test/windows_focused_fill_test.dart: actual hung helper times out before reading material and close drains
+00:00 +10: test/windows_focused_fill_test.dart: actual hung helper times out before reading material and close drains
+00:00 +11: test/windows_focused_fill_test.dart: actual hung helper times out before reading material and close drains
+00:00 +12: test/windows_focused_fill_test.dart: actual hung helper times out before reading material and close drains
+00:00 +13: test/windows_focused_fill_test.dart: actual hung helper times out before reading material and close drains
+00:00 +14: test/windows_focused_fill_test.dart: actual hung helper times out before reading material and close drains
+00:00 +15: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:00 +16: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:00 +17: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:00 +18: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:00 +19: test/codex_focused_fill_test.dart: separate adapter processes discover, request once, reuse, query duplicates and obey revocation without returning secrets
+00:01 +20: All tests passed!

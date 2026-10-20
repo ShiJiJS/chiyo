@@ -1,0 +1,20 @@
+[
+  {
+    "file": "page.png",
+    "state": null,
+    "size": "1440x900",
+    "zoom": 1,
+    "animationWaitMs": 52,
+    "issues": [],
+    "lint": [
+      {
+        "rule": "longMeasure",
+        "label": "正文行太长",
+        "count": 1,
+        "examples": [
+          "div.command-preview「ssh -T -o BatchMode=yes 」（每行约 119 个字符）"
+        ]
+      }
+    ]
+  }
+]

@@ -1,0 +1,20 @@
+from pathlib import Path
+import json,os,subprocess,sys
+sys.stdout.reconfigure(encoding='utf-8')
+root=Path.cwd();out=root/'build/qa-issue40/rotate-diagnostics';out.mkdir(parents=True,exist_ok=False)
+locks={root/p/'pubspec.lock':(root/p/'pubspec.lock').read_bytes() for p in ['packages/info_core','packages/info_storage','packages/info_cli','apps/desktop']};norm=lambda b:b.replace(b'https://pub.flutter-io.cn',b'https://pub.dev').replace(b'\r\n',b'\n')
+env=os.environ.copy();env.update(PUB_HOSTED_URL='https://pub.flutter-io.cn',FLUTTER_STORAGE_BASE_URL='https://storage.flutter-io.cn',INFO_TEST_BUNDLE=str(root/'build/windows-preview-0.4.0-12-2fe6189/AgentInfoManage/cli'),INFO_TEST_HOST_PHASE_DIRECTORY=str(out))
+dart=r'C:/Users/Todoki/.local/share/flutter/bin/cache/dart-sdk/bin/dart.exe'
+try:
+ for p,b in locks.items():p.write_bytes(b.replace(b'https://pub.dev',b'https://pub.flutter-io.cn'))
+ with (out/'format.txt').open('wb') as log:assert subprocess.run([dart,'format','test/support/mixed_lifecycle_host.dart'],cwd=root/'packages/info_cli',env=env,stdout=log,stderr=subprocess.STDOUT).returncode==0
+ for n in range(1,6):
+  with (out/f'run-{n}.jsonl').open('wb') as log:code=subprocess.run([dart,'test','--reporter','json','--chain-stack-traces','--plain-name','encrypted mixed lifecycle: rotate keeps permissions, facts and native cleanup distinct','test/mixed_lifecycle_windows_test.dart'],cwd=root/'packages/info_storage',env=env,stdout=log,stderr=subprocess.STDOUT).returncode
+  print(json.dumps({'iteration':n,'exitCode':code}),flush=True)
+  if code!=0:break
+finally:
+ bad=[]
+ for p,b in locks.items():
+  if norm(p.read_bytes())!=norm(b):bad.append(str(p))
+  else:p.write_bytes(b)
+ assert not bad,bad

@@ -1,0 +1,15 @@
+[
+  {
+    "fields": {
+      "ModuleName": "flutter_windows.dll",
+      "FaultingOffset": "000000000003c1ea",
+      "AppPath": "C:\\Project\\network_config\\info-manage\\apps\\desktop\\build\\windows\\x64\\runner\\Debug\\info_desktop.exe",
+      "ModulePath": "C:\\Project\\network_config\\info-manage\\apps\\desktop\\build\\windows\\x64\\runner\\Debug\\flutter_windows.dll",
+      "ExceptionCode": "c0000005",
+      "AppName": "info_desktop.exe",
+      "ProcessId": "0x13084"
+    },
+    "eventId": 1000,
+    "at": "2026-10-19T14:58:35.9679981Z"
+  }
+]

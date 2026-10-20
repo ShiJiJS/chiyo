@@ -1,0 +1,13 @@
+{
+  "phases": [
+    {
+      "phase": "core-format",
+      "exitCode": 0
+    },
+    {
+      "phase": "storage-format",
+      "exitCode": 65
+    }
+  ],
+  "unexpectedLocks": []
+}

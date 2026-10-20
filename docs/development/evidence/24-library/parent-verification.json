@@ -1,0 +1,38 @@
+{
+  "sourceCommit": "df63de6c11a95e918e46f8d30a787b0e6e8b0c97",
+  "recordedUtc": "2026-10-16T22:33:21.7134501Z",
+  "headless": {
+    "command": "scripts/check.ps1 -FlutterBin C:/Users/Todoki/.local/share/flutter/bin -Offline",
+    "exitCode": 0,
+    "cli": 18,
+    "core": 93,
+    "storage": 42,
+    "desktop": 64,
+    "total": 217,
+    "analyzers": "passed"
+  },
+  "windowsNative": {
+    "command": "scripts/test-windows-library.ps1 -FlutterBin C:/Users/Todoki/.local/share/flutter/bin",
+    "exitCode": 0,
+    "tests": 1,
+    "marker": "D2_NATIVE_VERIFIED",
+    "logicalViewport": "1267x707",
+    "dpr": 2
+  },
+  "logs": [
+    {
+      "name": "24-parent-full-check.log",
+      "sha256": "dfae631efa0905130dc19b532766ace5807933b1acee94e7085615ff88616240"
+    },
+    {
+      "name": "24-parent-windows-native.log",
+      "sha256": "73fee668a1e8cf53d447c961ca39495da4011a1758311dc3293014314ae78501"
+    }
+  ],
+  "notVerified": [
+    "macOS actual acceptance",
+    "real Windows notification click",
+    "later credential/runtime/complete credential backup",
+    "server synchronization"
+  ]
+}

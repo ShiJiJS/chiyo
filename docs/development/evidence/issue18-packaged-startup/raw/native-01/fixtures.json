@@ -1,0 +1,66 @@
+{
+  "cases": [
+    {
+      "case": "missing-key",
+      "localAppData": "C:\\Users\\Todoki\\AppData\\Local\\Temp\\aim-packaged-startup-hl09b8lu/missing-key",
+      "protectedFiles": {
+        "AgentInfoManage/library.db": {
+          "exists": true,
+          "bytes": 270336,
+          "sha256": "01a28164c3a16881347451f3a3482030a31fe5364069423d22f526ae81689d0c"
+        },
+        "AgentInfoManage/database-key.dpapi": {
+          "exists": false
+        }
+      }
+    },
+    {
+      "case": "damaged-key",
+      "localAppData": "C:\\Users\\Todoki\\AppData\\Local\\Temp\\aim-packaged-startup-hl09b8lu/damaged-key",
+      "protectedFiles": {
+        "AgentInfoManage/library.db": {
+          "exists": true,
+          "bytes": 270336,
+          "sha256": "af657e2bb5edd6b5a3513f897e749c46b3eb31444f9d8d8b7c6a5a53b2c632c8"
+        },
+        "AgentInfoManage/database-key.dpapi": {
+          "exists": true,
+          "bytes": 26,
+          "sha256": "ba237e14f9595e250814426bc963f1140614f1a0ed7a5fa8f600566bd15dc889"
+        }
+      }
+    },
+    {
+      "case": "wrong-key",
+      "localAppData": "C:\\Users\\Todoki\\AppData\\Local\\Temp\\aim-packaged-startup-hl09b8lu/wrong-key",
+      "protectedFiles": {
+        "AgentInfoManage/library.db": {
+          "exists": true,
+          "bytes": 270336,
+          "sha256": "18778b511df861cb7c38925c53e8f677c21d79f477cb2c31c0e80c52bc6a91a8"
+        },
+        "AgentInfoManage/database-key.dpapi": {
+          "exists": true,
+          "bytes": 266,
+          "sha256": "e80d657e3201c0e70f6d04fb8a1ed85a185346ab854695b08b7c4981a340196e"
+        }
+      }
+    },
+    {
+      "case": "corrupt-database",
+      "localAppData": "C:\\Users\\Todoki\\AppData\\Local\\Temp\\aim-packaged-startup-hl09b8lu/corrupt-database",
+      "protectedFiles": {
+        "AgentInfoManage/library.db": {
+          "exists": true,
+          "bytes": 4096,
+          "sha256": "9ce2519c0561bb0b06617143d723160ce3a095ce9fa2bada3403d84d32045e47"
+        },
+        "AgentInfoManage/database-key.dpapi": {
+          "exists": true,
+          "bytes": 266,
+          "sha256": "f9ee19e13ddd9e4fa93a74ad105986515f9d7dfa5453f5c432c73c8bc20d8782"
+        }
+      }
+    }
+  ]
+}

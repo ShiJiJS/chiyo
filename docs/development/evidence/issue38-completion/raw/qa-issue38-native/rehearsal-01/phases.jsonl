@@ -1,0 +1,13 @@
+{"stage":"starting","path":null,"fixtureRoot":"C:\\Users\\Todoki\\AppData\\Local\\Temp\\aim-native-ordinary-files-3c7c3b1d","at":"2026-10-19T15:15:25.804549Z"}
+{"stage":"cancel-initial-picker","path":null,"fixtureRoot":"C:\\Users\\Todoki\\AppData\\Local\\Temp\\aim-native-ordinary-files-3c7c3b1d","at":"2026-10-19T15:15:30.998871Z"}
+{"stage":"choose-original","path":"C:\\Users\\Todoki\\AppData\\Local\\Temp\\aim-native-ordinary-files-3c7c3b1d/synthetic-简历-v1.pdf","fixtureRoot":"C:\\Users\\Todoki\\AppData\\Local\\Temp\\aim-native-ordinary-files-3c7c3b1d","at":"2026-10-19T15:15:31.225916Z"}
+{"stage":"choose-original-returned","path":null,"fixtureRoot":"C:\\Users\\Todoki\\AppData\\Local\\Temp\\aim-native-ordinary-files-3c7c3b1d","at":"2026-10-19T15:15:31.467482Z"}
+{"stage":"saving-original","path":null,"fixtureRoot":"C:\\Users\\Todoki\\AppData\\Local\\Temp\\aim-native-ordinary-files-3c7c3b1d","at":"2026-10-19T15:15:31.480614Z"}
+{"stage":"original-saved","path":null,"fixtureRoot":"C:\\Users\\Todoki\\AppData\\Local\\Temp\\aim-native-ordinary-files-3c7c3b1d","at":"2026-10-19T15:15:31.969065Z"}
+{"stage":"reopening-source","path":null,"fixtureRoot":"C:\\Users\\Todoki\\AppData\\Local\\Temp\\aim-native-ordinary-files-3c7c3b1d","at":"2026-10-19T15:15:32.133929Z"}
+{"stage":"partial-approval","path":null,"fixtureRoot":"C:\\Users\\Todoki\\AppData\\Local\\Temp\\aim-native-ordinary-files-3c7c3b1d","at":"2026-10-19T15:15:32.603458Z"}
+{"stage":"save-original-as","path":"C:\\Users\\Todoki\\AppData\\Local\\Temp\\aim-native-ordinary-files-3c7c3b1d/owner-copy.pdf","fixtureRoot":"C:\\Users\\Todoki\\AppData\\Local\\Temp\\aim-native-ordinary-files-3c7c3b1d","at":"2026-10-19T15:15:35.337901Z"}
+{"stage":"save-original-as-returned","path":null,"fixtureRoot":"C:\\Users\\Todoki\\AppData\\Local\\Temp\\aim-native-ordinary-files-3c7c3b1d","at":"2026-10-19T15:15:35.550888Z"}
+{"stage":"choose-replacement","path":"C:\\Users\\Todoki\\AppData\\Local\\Temp\\aim-native-ordinary-files-3c7c3b1d/synthetic-简历-v2.pdf","fixtureRoot":"C:\\Users\\Todoki\\AppData\\Local\\Temp\\aim-native-ordinary-files-3c7c3b1d","at":"2026-10-19T15:15:36.352285Z"}
+{"stage":"choose-replacement-returned","path":null,"fixtureRoot":"C:\\Users\\Todoki\\AppData\\Local\\Temp\\aim-native-ordinary-files-3c7c3b1d","at":"2026-10-19T15:15:36.608363Z"}
+{"stage":"failed","path":null,"fixtureRoot":"C:\\Users\\Todoki\\AppData\\Local\\Temp\\aim-native-ordinary-files-3c7c3b1d","at":"2026-10-19T15:15:59.651798Z"}

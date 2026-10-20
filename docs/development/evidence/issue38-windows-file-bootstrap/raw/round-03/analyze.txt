@@ -1,0 +1,6 @@
+Flutter assets will be downloaded from https://storage.flutter-io.cn. Make sure you trust this source!
+Analyzing desktop...                                            
+
+warning - The declaration 'waitForCheck' isn't referenced. Try removing the declaration of 'waitForCheck' - test\information_file_runtime_test.dart:10:16 - unused_element
+
+1 issue found. (ran in 2.8s)

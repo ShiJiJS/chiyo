@@ -1,0 +1,7 @@
+Formatted lib\info_core.dart
+Formatted lib\information.dart
+Formatted lib\runtime_material_files.dart
+Formatted lib\information_delivery_access.dart
+Formatted lib\information_delivery_driver.dart
+Formatted lib\information_delivery_models.dart
+Formatted 8 files (6 changed) in 0.04 seconds.

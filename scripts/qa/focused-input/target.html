@@ -1,0 +1,10 @@
+<!doctype html>
+<html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>本机焦点识别检查</title>
+<style>body{font:16px/1.8 system-ui;background:#f3f2f5;color:#28232d;margin:0;padding:48px}main{max-width:640px;margin:auto;padding:32px;background:white;border:1px solid #dcd6df;border-radius:10px}h1{font-size:24px}label{display:block;margin-top:24px}input,button{font:inherit;padding:10px 14px;border:1px solid #c9bfce;border-radius:5px}input{display:block;box-sizing:border-box;width:100%;margin-top:6px}input:focus{outline:3px solid #e5d7eb;border-color:#78517f}button{margin-top:24px;background:#f3eef5;color:#49364e}p{color:#605866}</style>
+<main><h1>本机焦点识别检查</h1><p>仅在本机运行的空控件。此页不读取、提交或保存输入内容。</p>
+<label>普通文本框<input id="plain" type="text" autocomplete="off"></label>
+<label>密码框<input id="password" type="password" autocomplete="new-password"></label>
+<label>已停用密码框<input id="disabled-password" type="password" disabled></label>
+<button id="visibility" type="button" onclick="const field=document.getElementById('password');field.type=field.type==='password'?'text':'password';this.textContent=field.type==='password'?'显示明文':'恢复遮挡'">显示明文</button>
+</main></html>

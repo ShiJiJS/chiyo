@@ -1,0 +1,669 @@
+{
+  "productSource": "887f1c2e29da8799cfec48032ac4967d1576fb77",
+  "rawCount": 89,
+  "raw": [
+    {
+      "source": "build/qa-issue39/targeted-01/cli-format.txt",
+      "path": "raw/build/qa-issue39/targeted-01/cli-format.txt",
+      "bytes": 88,
+      "sha256": "6cd9444f0c1f0207f2af17bda825d565464eb1e7ac5f2cac405ea59a448f3198"
+    },
+    {
+      "source": "build/qa-issue39/targeted-01/core-format.txt",
+      "path": "raw/build/qa-issue39/targeted-01/core-format.txt",
+      "bytes": 89,
+      "sha256": "b5908f4ebc273b5e746528adea4fa7a4c05e921858816dbc552ef6b2753e16ba"
+    },
+    {
+      "source": "build/qa-issue39/targeted-01/desktop-format.txt",
+      "path": "raw/build/qa-issue39/targeted-01/desktop-format.txt",
+      "bytes": 127,
+      "sha256": "f1ab9658cac917842de12a1270698d548312bff28152603b44788684d571fd19"
+    },
+    {
+      "source": "build/qa-issue39/targeted-01/info_core-analyze.txt",
+      "path": "raw/build/qa-issue39/targeted-01/info_core-analyze.txt",
+      "bytes": 199,
+      "sha256": "e9e9c2aa05af3daa19dd189cc7d7c61ea7ff5988ce34db2a986bcd3630d44c48"
+    },
+    {
+      "source": "build/qa-issue39/targeted-01/info_core-pub.txt",
+      "path": "raw/build/qa-issue39/targeted-01/info_core-pub.txt",
+      "bytes": 258,
+      "sha256": "a24779315fffab73870dfc7b15b56246a95b601b3432e434b43cd223bf752a6a"
+    },
+    {
+      "source": "build/qa-issue39/targeted-01/result.json",
+      "path": "raw/build/qa-issue39/targeted-01/result.json",
+      "bytes": 396,
+      "sha256": "bf009c2022b0d8403101b82ab8d4e452da2a5876751184eefd8f9c087217b28b"
+    },
+    {
+      "source": "build/qa-issue39/targeted-02/cli-format.txt",
+      "path": "raw/build/qa-issue39/targeted-02/cli-format.txt",
+      "bytes": 47,
+      "sha256": "de230ee3a258be1211e3b168c04dbd546303a71d1a2ad203a76e547836a3589e"
+    },
+    {
+      "source": "build/qa-issue39/targeted-02/core-format.txt",
+      "path": "raw/build/qa-issue39/targeted-02/core-format.txt",
+      "bytes": 46,
+      "sha256": "1685974b88bd671112e17334bdc2abb8ef350e01ae026547459ec7a8307375ec"
+    },
+    {
+      "source": "build/qa-issue39/targeted-02/desktop-format.txt",
+      "path": "raw/build/qa-issue39/targeted-02/desktop-format.txt",
+      "bytes": 47,
+      "sha256": "3f48ca976b74ae5cd933c7ba982c43f885d1008df606ac0136d9a6f1cc4f9c68"
+    },
+    {
+      "source": "build/qa-issue39/targeted-02/info_core-analyze.txt",
+      "path": "raw/build/qa-issue39/targeted-02/info_core-analyze.txt",
+      "bytes": 411,
+      "sha256": "bd7e7ad4569f8034cab5cf6ac318e3498a41c9c9667219c5ef34b50d767d4ade"
+    },
+    {
+      "source": "build/qa-issue39/targeted-02/info_core-pub.txt",
+      "path": "raw/build/qa-issue39/targeted-02/info_core-pub.txt",
+      "bytes": 258,
+      "sha256": "a24779315fffab73870dfc7b15b56246a95b601b3432e434b43cd223bf752a6a"
+    },
+    {
+      "source": "build/qa-issue39/targeted-02/result.json",
+      "path": "raw/build/qa-issue39/targeted-02/result.json",
+      "bytes": 396,
+      "sha256": "2e6109d921e7b6eb38511c9a525e1d2493de34cf85d1da5a9c6a645e07ee11d2"
+    },
+    {
+      "source": "build/qa-issue39/targeted-03/cli-format.txt",
+      "path": "raw/build/qa-issue39/targeted-03/cli-format.txt",
+      "bytes": 47,
+      "sha256": "de230ee3a258be1211e3b168c04dbd546303a71d1a2ad203a76e547836a3589e"
+    },
+    {
+      "source": "build/qa-issue39/targeted-03/cli-targeted.txt",
+      "path": "raw/build/qa-issue39/targeted-03/cli-targeted.txt",
+      "bytes": 225,
+      "sha256": "e4d235ac910418f1c1f0cc771c223a1fd7946ecc4011493fd114d1fce49b60fc"
+    },
+    {
+      "source": "build/qa-issue39/targeted-03/core-format.txt",
+      "path": "raw/build/qa-issue39/targeted-03/core-format.txt",
+      "bytes": 46,
+      "sha256": "1685974b88bd671112e17334bdc2abb8ef350e01ae026547459ec7a8307375ec"
+    },
+    {
+      "source": "build/qa-issue39/targeted-03/desktop-analyze.txt",
+      "path": "raw/build/qa-issue39/targeted-03/desktop-analyze.txt",
+      "bytes": 199,
+      "sha256": "47a62d9dec10bcd19c3d75825c2d69573f8b7b7512c374217618fe3edf086a57"
+    },
+    {
+      "source": "build/qa-issue39/targeted-03/desktop-format.txt",
+      "path": "raw/build/qa-issue39/targeted-03/desktop-format.txt",
+      "bytes": 47,
+      "sha256": "3f48ca976b74ae5cd933c7ba982c43f885d1008df606ac0136d9a6f1cc4f9c68"
+    },
+    {
+      "source": "build/qa-issue39/targeted-03/desktop-pub.txt",
+      "path": "raw/build/qa-issue39/targeted-03/desktop-pub.txt",
+      "bytes": 368,
+      "sha256": "748e8df20571fc202b90cb6d56c154b0fb7eff6ba0e04c8c1102f7b22a8e7005"
+    },
+    {
+      "source": "build/qa-issue39/targeted-03/desktop-targeted.txt",
+      "path": "raw/build/qa-issue39/targeted-03/desktop-targeted.txt",
+      "bytes": 3524,
+      "sha256": "bbdd42db3ac330a6e713913972dd907c8511d2d85d31090b49c51cd24c4a6970"
+    },
+    {
+      "source": "build/qa-issue39/targeted-03/info_cli-analyze.txt",
+      "path": "raw/build/qa-issue39/targeted-03/info_cli-analyze.txt",
+      "bytes": 39,
+      "sha256": "b51c9c80f2b144a3a264061cede7a8071b74e307d76dd376dcc35e80722ff39c"
+    },
+    {
+      "source": "build/qa-issue39/targeted-03/info_cli-pub.txt",
+      "path": "raw/build/qa-issue39/targeted-03/info_cli-pub.txt",
+      "bytes": 258,
+      "sha256": "a24779315fffab73870dfc7b15b56246a95b601b3432e434b43cd223bf752a6a"
+    },
+    {
+      "source": "build/qa-issue39/targeted-03/info_core-analyze.txt",
+      "path": "raw/build/qa-issue39/targeted-03/info_core-analyze.txt",
+      "bytes": 40,
+      "sha256": "d9ebd39d330d44ff327dbf6cf5ce8566791da694504d82a7b989e78e27969232"
+    },
+    {
+      "source": "build/qa-issue39/targeted-03/info_core-pub.txt",
+      "path": "raw/build/qa-issue39/targeted-03/info_core-pub.txt",
+      "bytes": 258,
+      "sha256": "a24779315fffab73870dfc7b15b56246a95b601b3432e434b43cd223bf752a6a"
+    },
+    {
+      "source": "build/qa-issue39/targeted-03/result.json",
+      "path": "raw/build/qa-issue39/targeted-03/result.json",
+      "bytes": 814,
+      "sha256": "7f181268e6e20ccf8d11b2f6d622997938c621486607d9b308a04cd4de2d4fe9"
+    },
+    {
+      "source": "build/qa-issue39/targeted-04/cli-format.txt",
+      "path": "raw/build/qa-issue39/targeted-04/cli-format.txt",
+      "bytes": 47,
+      "sha256": "de230ee3a258be1211e3b168c04dbd546303a71d1a2ad203a76e547836a3589e"
+    },
+    {
+      "source": "build/qa-issue39/targeted-04/cli-targeted.txt",
+      "path": "raw/build/qa-issue39/targeted-04/cli-targeted.txt",
+      "bytes": 225,
+      "sha256": "e4d235ac910418f1c1f0cc771c223a1fd7946ecc4011493fd114d1fce49b60fc"
+    },
+    {
+      "source": "build/qa-issue39/targeted-04/core-format.txt",
+      "path": "raw/build/qa-issue39/targeted-04/core-format.txt",
+      "bytes": 96,
+      "sha256": "8c1605ffe436a3928272db98790f2b79ba51bfec3791309fe99be4c3eda158d0"
+    },
+    {
+      "source": "build/qa-issue39/targeted-04/desktop-analyze.txt",
+      "path": "raw/build/qa-issue39/targeted-04/desktop-analyze.txt",
+      "bytes": 199,
+      "sha256": "185d3292c3aa5a55efe5cc5283b37123ab236aa6336081ccc754191724263bba"
+    },
+    {
+      "source": "build/qa-issue39/targeted-04/desktop-format.txt",
+      "path": "raw/build/qa-issue39/targeted-04/desktop-format.txt",
+      "bytes": 47,
+      "sha256": "3f48ca976b74ae5cd933c7ba982c43f885d1008df606ac0136d9a6f1cc4f9c68"
+    },
+    {
+      "source": "build/qa-issue39/targeted-04/desktop-pub.txt",
+      "path": "raw/build/qa-issue39/targeted-04/desktop-pub.txt",
+      "bytes": 368,
+      "sha256": "748e8df20571fc202b90cb6d56c154b0fb7eff6ba0e04c8c1102f7b22a8e7005"
+    },
+    {
+      "source": "build/qa-issue39/targeted-04/desktop-targeted.txt",
+      "path": "raw/build/qa-issue39/targeted-04/desktop-targeted.txt",
+      "bytes": 2990,
+      "sha256": "e85fc61c1fbbc4883178864396a390d386a68940bdd3f4b71f777267b527132b"
+    },
+    {
+      "source": "build/qa-issue39/targeted-04/info_cli-analyze.txt",
+      "path": "raw/build/qa-issue39/targeted-04/info_cli-analyze.txt",
+      "bytes": 39,
+      "sha256": "b51c9c80f2b144a3a264061cede7a8071b74e307d76dd376dcc35e80722ff39c"
+    },
+    {
+      "source": "build/qa-issue39/targeted-04/info_cli-pub.txt",
+      "path": "raw/build/qa-issue39/targeted-04/info_cli-pub.txt",
+      "bytes": 258,
+      "sha256": "a24779315fffab73870dfc7b15b56246a95b601b3432e434b43cd223bf752a6a"
+    },
+    {
+      "source": "build/qa-issue39/targeted-04/info_core-analyze.txt",
+      "path": "raw/build/qa-issue39/targeted-04/info_core-analyze.txt",
+      "bytes": 40,
+      "sha256": "d9ebd39d330d44ff327dbf6cf5ce8566791da694504d82a7b989e78e27969232"
+    },
+    {
+      "source": "build/qa-issue39/targeted-04/info_core-pub.txt",
+      "path": "raw/build/qa-issue39/targeted-04/info_core-pub.txt",
+      "bytes": 258,
+      "sha256": "a24779315fffab73870dfc7b15b56246a95b601b3432e434b43cd223bf752a6a"
+    },
+    {
+      "source": "build/qa-issue39/targeted-04/result.json",
+      "path": "raw/build/qa-issue39/targeted-04/result.json",
+      "bytes": 814,
+      "sha256": "1a757ff59f368ed2514424a8fa3b2b78e82a973c86cebf850d993b9b2d404f8d"
+    },
+    {
+      "source": "build/qa-issue39/native-01/build-native-peer.txt",
+      "path": "raw/build/qa-issue39/native-01/build-native-peer.txt",
+      "bytes": 353,
+      "sha256": "7648870e573f2b8ba985020dd08a26e5c466bb4439d278a2935ee6d7c92e739d"
+    },
+    {
+      "source": "build/qa-issue39/native-01/core-pub.txt",
+      "path": "raw/build/qa-issue39/native-01/core-pub.txt",
+      "bytes": 258,
+      "sha256": "a24779315fffab73870dfc7b15b56246a95b601b3432e434b43cd223bf752a6a"
+    },
+    {
+      "source": "build/qa-issue39/native-01/native-control.txt",
+      "path": "raw/build/qa-issue39/native-01/native-control.txt",
+      "bytes": 174,
+      "sha256": "cdc76a77a22627ecf08a312d48af8510b54f1f8d741997ad67369b4b4fbe600d"
+    },
+    {
+      "source": "build/qa-issue39/native-01/result.json",
+      "path": "raw/build/qa-issue39/native-01/result.json",
+      "bytes": 258,
+      "sha256": "110ef2d19ac6c3dd95121292683dd750043d54d8252e7602643de6c94993e0c8"
+    },
+    {
+      "source": "build/qa-issue39/packaged-01/agent-errors.txt",
+      "path": "raw/build/qa-issue39/packaged-01/agent-errors.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "build/qa-issue39/packaged-01/fixture-prepare.txt",
+      "path": "raw/build/qa-issue39/packaged-01/fixture-prepare.txt",
+      "bytes": 66,
+      "sha256": "a87eff33ed19b34ba3df1b9562a19c1adf199546cb58dc0b8494e05207dadcab"
+    },
+    {
+      "source": "build/qa-issue39/packaged-01/normal-1792449709016346400-app.txt",
+      "path": "raw/build/qa-issue39/packaged-01/normal-1792449709016346400-app.txt",
+      "bytes": 8447,
+      "sha256": "59728ae4279cd9ed92ea7e3ea6df673f58cc19f1fb4061ca1f9569e37f9b0efd"
+    },
+    {
+      "source": "build/qa-issue39/packaged-01/phase.json",
+      "path": "raw/build/qa-issue39/packaged-01/phase.json",
+      "bytes": 112,
+      "sha256": "aee95efe8ad390bcb03d2414146c340650537b9829de208c7d237b633a3aa039"
+    },
+    {
+      "source": "build/qa-issue39/packaged-01/result.json",
+      "path": "raw/build/qa-issue39/packaged-01/result.json",
+      "bytes": 2271,
+      "sha256": "f1ec38d0c6c862220b3d78b665424e0697c69ae85b9830c2fad4c5fdba871a3a"
+    },
+    {
+      "source": "build/qa-issue39/packaged-02/agent-errors.txt",
+      "path": "raw/build/qa-issue39/packaged-02/agent-errors.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "build/qa-issue39/packaged-02/blocker.txt",
+      "path": "raw/build/qa-issue39/packaged-02/blocker.txt",
+      "bytes": 44,
+      "sha256": "dd35d399349c10aa3a96d7b290940c947560d0a57270cc0c46cfa73c85128ef6"
+    },
+    {
+      "source": "build/qa-issue39/packaged-02/fixture-prepare.txt",
+      "path": "raw/build/qa-issue39/packaged-02/fixture-prepare.txt",
+      "bytes": 66,
+      "sha256": "a87eff33ed19b34ba3df1b9562a19c1adf199546cb58dc0b8494e05207dadcab"
+    },
+    {
+      "source": "build/qa-issue39/packaged-02/hidden.json",
+      "path": "raw/build/qa-issue39/packaged-02/hidden.json",
+      "bytes": 226,
+      "sha256": "1813253dd214bc353de7e00e1868f775c202aa2a56668accabefcb45bd236220"
+    },
+    {
+      "source": "build/qa-issue39/packaged-02/inspect.txt",
+      "path": "raw/build/qa-issue39/packaged-02/inspect.txt",
+      "bytes": 125,
+      "sha256": "aff3216404e11ea887e05fd7d023ce94d403fc4aafdc1152c59cd5a772f93fe6"
+    },
+    {
+      "source": "build/qa-issue39/packaged-02/inspection-recheck.json",
+      "path": "raw/build/qa-issue39/packaged-02/inspection-recheck.json",
+      "bytes": 298,
+      "sha256": "8a26dcd30ef1eac2e45cc1a08b9c1bd9202114a8e9a9db59c87a4d83ef8fa768"
+    },
+    {
+      "source": "build/qa-issue39/packaged-02/normal-1792449810127872300-app.txt",
+      "path": "raw/build/qa-issue39/packaged-02/normal-1792449810127872300-app.txt",
+      "bytes": 9897,
+      "sha256": "c1e020417d265b1dcfdb9e759f56b0a409adfbf46998bbd4d199e7833ad59774"
+    },
+    {
+      "source": "build/qa-issue39/packaged-02/phase.json",
+      "path": "raw/build/qa-issue39/packaged-02/phase.json",
+      "bytes": 56,
+      "sha256": "d11a545cc1f4357e3588d5a8222f7d167202d99b886b6c79e7e1c59bcafca97c"
+    },
+    {
+      "source": "build/qa-issue39/packaged-02/result.json",
+      "path": "raw/build/qa-issue39/packaged-02/result.json",
+      "bytes": 3764,
+      "sha256": "d284e37b9fef537ea5cd089c33b04fb2d1287ca5e589b9cd256a17a52149aa46"
+    },
+    {
+      "source": "build/qa-issue39/packaged-tail-03/agent-errors.txt",
+      "path": "raw/build/qa-issue39/packaged-tail-03/agent-errors.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "build/qa-issue39/packaged-tail-03/fixture-prepare.txt",
+      "path": "raw/build/qa-issue39/packaged-tail-03/fixture-prepare.txt",
+      "bytes": 66,
+      "sha256": "a87eff33ed19b34ba3df1b9562a19c1adf199546cb58dc0b8494e05207dadcab"
+    },
+    {
+      "source": "build/qa-issue39/packaged-tail-03/missing-key-1792449967708842200-app.txt",
+      "path": "raw/build/qa-issue39/packaged-tail-03/missing-key-1792449967708842200-app.txt",
+      "bytes": 134,
+      "sha256": "d057cc3292153d1658c1b2e6b222c1dac3fac376a84fde6d39cc55843fe25bdc"
+    },
+    {
+      "source": "build/qa-issue39/packaged-tail-03/normal-1792449964296525200-app.txt",
+      "path": "raw/build/qa-issue39/packaged-tail-03/normal-1792449964296525200-app.txt",
+      "bytes": 134,
+      "sha256": "d057cc3292153d1658c1b2e6b222c1dac3fac376a84fde6d39cc55843fe25bdc"
+    },
+    {
+      "source": "build/qa-issue39/packaged-tail-03/normal-1792449966005742000-app.txt",
+      "path": "raw/build/qa-issue39/packaged-tail-03/normal-1792449966005742000-app.txt",
+      "bytes": 134,
+      "sha256": "d057cc3292153d1658c1b2e6b222c1dac3fac376a84fde6d39cc55843fe25bdc"
+    },
+    {
+      "source": "build/qa-issue39/packaged-tail-03/phase.json",
+      "path": "raw/build/qa-issue39/packaged-tail-03/phase.json",
+      "bytes": 57,
+      "sha256": "62af3b7260dbeafe0cd979a197cd276a399a4e25a771f36a76ea7384c93992dc"
+    },
+    {
+      "source": "build/qa-issue39/packaged-tail-03/result.json",
+      "path": "raw/build/qa-issue39/packaged-tail-03/result.json",
+      "bytes": 3094,
+      "sha256": "1533c09a953160ac4cd8389611be199a4f19a4caa30172a8be09e8d72b48957f"
+    },
+    {
+      "source": "build/qa-issue39/packaged-tail-03/startup-error-observed.json",
+      "path": "raw/build/qa-issue39/packaged-tail-03/startup-error-observed.json",
+      "bytes": 106,
+      "sha256": "c08414850319c219ea3bdbd9edd8de69bf301f7508802e69cc32ece3c1a0881a"
+    },
+    {
+      "source": "build/qa-issue39/packaged-tail-04/agent-errors.txt",
+      "path": "raw/build/qa-issue39/packaged-tail-04/agent-errors.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "build/qa-issue39/packaged-tail-04/fixture-prepare.txt",
+      "path": "raw/build/qa-issue39/packaged-tail-04/fixture-prepare.txt",
+      "bytes": 66,
+      "sha256": "a87eff33ed19b34ba3df1b9562a19c1adf199546cb58dc0b8494e05207dadcab"
+    },
+    {
+      "source": "build/qa-issue39/packaged-tail-04/missing-key-1792450011582210200-app.txt",
+      "path": "raw/build/qa-issue39/packaged-tail-04/missing-key-1792450011582210200-app.txt",
+      "bytes": 134,
+      "sha256": "d057cc3292153d1658c1b2e6b222c1dac3fac376a84fde6d39cc55843fe25bdc"
+    },
+    {
+      "source": "build/qa-issue39/packaged-tail-04/normal-1792450008138579700-app.txt",
+      "path": "raw/build/qa-issue39/packaged-tail-04/normal-1792450008138579700-app.txt",
+      "bytes": 134,
+      "sha256": "d057cc3292153d1658c1b2e6b222c1dac3fac376a84fde6d39cc55843fe25bdc"
+    },
+    {
+      "source": "build/qa-issue39/packaged-tail-04/normal-1792450009894425600-app.txt",
+      "path": "raw/build/qa-issue39/packaged-tail-04/normal-1792450009894425600-app.txt",
+      "bytes": 134,
+      "sha256": "d057cc3292153d1658c1b2e6b222c1dac3fac376a84fde6d39cc55843fe25bdc"
+    },
+    {
+      "source": "build/qa-issue39/packaged-tail-04/phase.json",
+      "path": "raw/build/qa-issue39/packaged-tail-04/phase.json",
+      "bytes": 44,
+      "sha256": "e180ad6c7921e4239a0d1f5b072c6d4f0beee0e7b21ae171c2e30758e21510fa"
+    },
+    {
+      "source": "build/qa-issue39/packaged-tail-04/result.json",
+      "path": "raw/build/qa-issue39/packaged-tail-04/result.json",
+      "bytes": 3329,
+      "sha256": "445fc5cfea7ccc1f5dc551dab40eafd4982c9912f51cc0c81d3427e58665ea13"
+    },
+    {
+      "source": "build/qa-issue39/packaged-tail-04/startup-error-observed.json",
+      "path": "raw/build/qa-issue39/packaged-tail-04/startup-error-observed.json",
+      "bytes": 104,
+      "sha256": "8134eef334aae6970909f475d556ad28cd0780c8f7c66ee72cf1eb595288d866"
+    },
+    {
+      "source": "build/qa-issue39/qa-lint-01/core-analyze.txt",
+      "path": "raw/build/qa-issue39/qa-lint-01/core-analyze.txt",
+      "bytes": 40,
+      "sha256": "d9ebd39d330d44ff327dbf6cf5ce8566791da694504d82a7b989e78e27969232"
+    },
+    {
+      "source": "build/qa-issue39/qa-lint-01/core-pub.txt",
+      "path": "raw/build/qa-issue39/qa-lint-01/core-pub.txt",
+      "bytes": 258,
+      "sha256": "a24779315fffab73870dfc7b15b56246a95b601b3432e434b43cd223bf752a6a"
+    },
+    {
+      "source": "build/qa-issue39/qa-lint-01/fixture-format.txt",
+      "path": "raw/build/qa-issue39/qa-lint-01/fixture-format.txt",
+      "bytes": 99,
+      "sha256": "116d063aa8e1d02771e2a79d3a8cc98f5ad12d344af5864b78032fe4254d77d6"
+    },
+    {
+      "source": "build/qa-issue39/qa-lint-01/json-lines.txt",
+      "path": "raw/build/qa-issue39/qa-lint-01/json-lines.txt",
+      "bytes": 30,
+      "sha256": "923607c4acb9e8cc6f8c6910d482f45f004da857c48d4ae396f4584c2e0039e1"
+    },
+    {
+      "source": "build/qa-issue39/qa-lint-01/result.json",
+      "path": "raw/build/qa-issue39/qa-lint-01/result.json",
+      "bytes": 675,
+      "sha256": "700042a81f294e034c37422fa819638aa72c7ade514327510f66703fb37d8ad5"
+    },
+    {
+      "source": "build/qa-issue39/qa-lint-01/storage-analyze.txt",
+      "path": "raw/build/qa-issue39/qa-lint-01/storage-analyze.txt",
+      "bytes": 43,
+      "sha256": "a489b1249880b489826d25a25a28b316c5059ae3c5e62feecfc2b7949aba9041"
+    },
+    {
+      "source": "build/qa-issue39/qa-lint-01/storage-pub.txt",
+      "path": "raw/build/qa-issue39/qa-lint-01/storage-pub.txt",
+      "bytes": 258,
+      "sha256": "a24779315fffab73870dfc7b15b56246a95b601b3432e434b43cd223bf752a6a"
+    },
+    {
+      "source": "build/qa-issue39/qa-lint-01/transport-format.txt",
+      "path": "raw/build/qa-issue39/qa-lint-01/transport-format.txt",
+      "bytes": 46,
+      "sha256": "fe6375e754b87ee13a38bf0e318093f679ff3bf68fb195ef047475f2ccab3828"
+    },
+    {
+      "source": "build/qa-issue39/qa-lint-01/transport.txt",
+      "path": "raw/build/qa-issue39/qa-lint-01/transport.txt",
+      "bytes": 156,
+      "sha256": "cc192ec2b6d3d2fa8dd31a874536b91d82c42ab6bc8c5b359cbf60f199b81ad1"
+    },
+    {
+      "source": "build/qa-windows-preview-v11-01/package.txt",
+      "path": "raw/build/qa-windows-preview-v11-01/package.txt",
+      "bytes": 200981,
+      "sha256": "fda4f1fbf0ee790b24b3e1c8ec082684ff8839ba05aa09b7732a8afff570602d"
+    },
+    {
+      "source": "build/qa-windows-preview-v11-01/result.json",
+      "path": "raw/build/qa-windows-preview-v11-01/result.json",
+      "bytes": 375,
+      "sha256": "67d8fe2c45cf4f58427c0fad951c1b5b6f06df7ea15dad9f6623592927958579"
+    },
+    {
+      "source": "build/qa-issue39-targeted.py",
+      "path": "raw/build/qa-issue39-targeted.py",
+      "bytes": 2489,
+      "sha256": "f056e258c2a98e5ce04cdcb309e05cd836a51cddb031eefc3f963349392fe291"
+    },
+    {
+      "source": "build/qa-issue39-native.py",
+      "path": "raw/build/qa-issue39-native.py",
+      "bytes": 2007,
+      "sha256": "ab5958db1f7eae5e240c65b282a443705f4c920651d57f5e7759920896f65aeb"
+    },
+    {
+      "source": "build/qa-issue39-packaged.py",
+      "path": "raw/build/qa-issue39-packaged.py",
+      "bytes": 13213,
+      "sha256": "5c9a8696a48a9b9e2d90ed0e291a7d24400ce0d5da0c742f0d5e3923a91d3675"
+    },
+    {
+      "source": "build/qa-issue39-qa-lint.py",
+      "path": "raw/build/qa-issue39-qa-lint.py",
+      "bytes": 2610,
+      "sha256": "d50555f06eeb922e7f2454246523ec8b01498f26fa5752709f448bcd7eee8279"
+    },
+    {
+      "source": "build/qa-issue39-fix-harness.py",
+      "path": "raw/build/qa-issue39-fix-harness.py",
+      "bytes": 2494,
+      "sha256": "8764c0bcdad3ecf41ec0472b72bda2b07ba07b1783166f519773312ffd7ad69b"
+    },
+    {
+      "source": "build/qa-windows-preview-v11.py",
+      "path": "raw/build/qa-windows-preview-v11.py",
+      "bytes": 2106,
+      "sha256": "ec6bdec329b72849c4af7be48e8e6653b632bade0ced7a2d74f52359c20c97ff"
+    },
+    {
+      "source": "build/qa-issue39/packaged_control_fixture.dart",
+      "path": "raw/build/qa-issue39/packaged_control_fixture.dart",
+      "bytes": 4785,
+      "sha256": "7b40777fa74ba4fedddf47c98245a9ddfd9e22eef850a046711b9de2f2f2acf7"
+    },
+    {
+      "source": "build/windows-preview-0.4.0-11-887f1c2/AgentInfoManage/manifest.json",
+      "path": "raw/build/windows-preview-0.4.0-11-887f1c2/AgentInfoManage/manifest.json",
+      "bytes": 21003,
+      "sha256": "07fb3432acc19ce300fb335eb931d906140d7297f5e20a26e3be1a7a4fc424b2"
+    }
+  ],
+  "sources": [
+    {
+      "path": "apps/desktop/lib/desktop_bootstrap.dart",
+      "bytes": 5997,
+      "sha256": "0afddbcda791144d654d5c1f9c0f8991f6ba40d51965013da3ead4126cdea040"
+    },
+    {
+      "path": "apps/desktop/lib/desktop_runtime.dart",
+      "bytes": 11859,
+      "sha256": "4172ef3ea4614df32f9cb10b4c98648f01d1fe39f3c95478276ec50bc2a0ff1f"
+    },
+    {
+      "path": "apps/desktop/windows/runner/flutter_window.cpp",
+      "bytes": 17905,
+      "sha256": "1b6a241dd7c391f60e84a9957ef5f5802c3c5e1d9f76782b8edee4ed18d31669"
+    },
+    {
+      "path": "apps/desktop/windows/runner/flutter_window.h",
+      "bytes": 2534,
+      "sha256": "5869ca5dfebc9a2ed68f366961be33bf1172c23e377ae30bccf5570daa43c7a8"
+    },
+    {
+      "path": "apps/desktop/windows/runner/desktop_control_fixture.cpp",
+      "bytes": 1960,
+      "sha256": "f66a9795347a0d27c63aae2424658038f3771573c48626182d0417b42a7626da"
+    },
+    {
+      "path": "apps/desktop/windows/runner/CMakeLists.txt",
+      "bytes": 2633,
+      "sha256": "63edadd797cb801a1d792ed8da9242b8e3e75a6c3f7b9385ff0ee236687be786"
+    },
+    {
+      "path": "apps/desktop/pubspec.yaml",
+      "bytes": 971,
+      "sha256": "00378cdb9fd693be1ddf49d25dca1b7266f3a0b0d873160b01b28af92abfe7f2"
+    },
+    {
+      "path": "packages/info_core/lib/windows_desktop_control.dart",
+      "bytes": 8629,
+      "sha256": "38cabb303e70e9471c66656277fdffdb298b22f5713fb296c075cc73b961a289"
+    },
+    {
+      "path": "packages/info_cli/lib/desktop_control.dart",
+      "bytes": 1826,
+      "sha256": "54aabcd9f34e1c311cf90a513d8524d3b580868531ec8c9013e4017be564ef04"
+    },
+    {
+      "path": "packages/info_cli/bin/info.dart",
+      "bytes": 3158,
+      "sha256": "d41b3effa27a82b04c91aae97b4c1a1f674e4d2c4f9f99fff0ee7f8ef9c7dd89"
+    },
+    {
+      "path": "packages/info_core/test/windows_desktop_control_test.dart",
+      "bytes": 3362,
+      "sha256": "e6d0cb8f58498429a18895564d736efe017d6ad5112b2d5379f60178c1a4e4d8"
+    },
+    {
+      "path": "packages/info_core/test/transport_test.dart",
+      "bytes": 2875,
+      "sha256": "1596cb4a882a1673594b44cea78d7121335e5873f3a109b0e06328951e53a750"
+    },
+    {
+      "path": "packages/info_cli/test/desktop_control_test.dart",
+      "bytes": 1207,
+      "sha256": "a8be3b35f8d53761bc5453b3b5424da0004cc99d808eac76eb92534347c4e72d"
+    },
+    {
+      "path": "packages/info_storage/test/support/packaged_control_fixture.dart",
+      "bytes": 5470,
+      "sha256": "1878a6148a2b45ba4c1527e4b53a724a3b71058cba79dd78afea1cc13abf0a9e"
+    },
+    {
+      "path": "scripts/test-windows-app-control.py",
+      "bytes": 13728,
+      "sha256": "26095f59f6ecdb4d26df5e59dce07e32e4de81ca2c71f4286071199d9ca897cc"
+    },
+    {
+      "path": "packages/info_core/pubspec.lock",
+      "bytes": 12286,
+      "sha256": "f8220e6477f28a1bb4b1914847377b675dbd5cbf50ca609bd23ded65e2fd5328"
+    },
+    {
+      "path": "packages/info_cli/pubspec.lock",
+      "bytes": 12433,
+      "sha256": "b8695e9c135a0441eb384507acb347d334a190451f63be7874e22c058f56b3c2"
+    },
+    {
+      "path": "packages/info_storage/pubspec.lock",
+      "bytes": 14332,
+      "sha256": "d5def0ba580249b39ce5f42292705851b16230903276c6a17ec9e2af4df30e39"
+    },
+    {
+      "path": "apps/desktop/pubspec.lock",
+      "bytes": 11802,
+      "sha256": "4c5e88461035c36d85d8fa9fb50f69e1450aa1662f677e5723417471f669c70b"
+    }
+  ],
+  "archive": {
+    "path": "build/windows-preview-0.4.0-11-887f1c2/agent-info-manage-0.4.0+11-dev.887f1c2e29da-windows-x64.zip",
+    "bytes": 53312233,
+    "sha256": "65bb32f0080da7769eb79e51b751297702bdde47e137b0a934abb206949bd0f7"
+  },
+  "checks": {
+    "fullPassed": 689,
+    "optInSkipped": 20,
+    "extractedCliPassed": 16,
+    "encryptedLifecyclePassed": 7,
+    "nativeTransportPassed": 1,
+    "transportHttpPassed": 1,
+    "groupsOverlap": true
+  },
+  "actualWindows": {
+    "mixedGrantAndFile": "packaged-02 (interrupted by QA JSON parsing after real exit)",
+    "persistedExitFacts": "packaged-02/inspection-recheck.json",
+    "restartAndMissingKey": "packaged-tail-04 (complete=true)",
+    "operatorReceiptsAreNotAutomaticImageAssertions": true,
+    "allSyntheticProfilesRemoved": true,
+    "allTestProcessesExited": true,
+    "port47125Released": true,
+    "computerUseReset": true
+  },
+  "failuresRetained": [
+    "targeted-01 lint",
+    "targeted-02 lint",
+    "targeted-03 changed error-event assertion",
+    "packaged-01 wrong QA deliveryId lookup",
+    "packaged-02 build-hook stdout JSON prefix",
+    "packaged-tail-03 Windows default text decoding"
+  ]
+}

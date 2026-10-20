@@ -1,0 +1,308 @@
+[
+  {
+    "file": "attachment-library-1440x900.png",
+    "state": "attachment-library",
+    "size": "1440x900",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  },
+  {
+    "file": "attachment-editor-1440x900.png",
+    "state": "attachment-editor",
+    "size": "1440x900",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  },
+  {
+    "file": "attachment-file-field-1440x900.png",
+    "state": "attachment-file-field",
+    "size": "1440x900",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  },
+  {
+    "file": "attachment-empty-file-1440x900.png",
+    "state": "attachment-empty-file",
+    "size": "1440x900",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  },
+  {
+    "file": "attachment-failure-1440x900.png",
+    "state": "attachment-failure",
+    "size": "1440x900",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  },
+  {
+    "file": "attachment-long-name-1440x900.png",
+    "state": "attachment-long-name",
+    "size": "1440x900",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  },
+  {
+    "file": "attachment-only-file-1440x900.png",
+    "state": "attachment-only-file",
+    "size": "1440x900",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  },
+  {
+    "file": "attachment-too-large-1440x900.png",
+    "state": "attachment-too-large",
+    "size": "1440x900",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  },
+  {
+    "file": "attachment-converted-1440x900.png",
+    "state": "attachment-converted",
+    "size": "1440x900",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  },
+  {
+    "file": "attachment-template-1440x900.png",
+    "state": "attachment-template",
+    "size": "1440x900",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  },
+  {
+    "file": "attachment-public-1440x900.png",
+    "state": "attachment-public",
+    "size": "1440x900",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  },
+  {
+    "file": "attachment-approval-1440x900.png",
+    "state": "attachment-approval",
+    "size": "1440x900",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  },
+  {
+    "file": "attachment-history-1440x900.png",
+    "state": "attachment-history",
+    "size": "1440x900",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  },
+  {
+    "file": "attachment-trash-1440x900.png",
+    "state": "attachment-trash",
+    "size": "1440x900",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  },
+  {
+    "file": "attachment-revision-1440x900.png",
+    "state": "attachment-revision",
+    "size": "1440x900",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  },
+  {
+    "file": "attachment-restore-1440x900.png",
+    "state": "attachment-restore",
+    "size": "1440x900",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  },
+  {
+    "file": "attachment-proposal-1440x900.png",
+    "state": "attachment-proposal",
+    "size": "1440x900",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  },
+  {
+    "file": "attachment-library-1280x800.png",
+    "state": "attachment-library",
+    "size": "1280x800",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  },
+  {
+    "file": "attachment-editor-1280x800.png",
+    "state": "attachment-editor",
+    "size": "1280x800",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  },
+  {
+    "file": "attachment-file-field-1280x800.png",
+    "state": "attachment-file-field",
+    "size": "1280x800",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  },
+  {
+    "file": "attachment-empty-file-1280x800.png",
+    "state": "attachment-empty-file",
+    "size": "1280x800",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  },
+  {
+    "file": "attachment-failure-1280x800.png",
+    "state": "attachment-failure",
+    "size": "1280x800",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  },
+  {
+    "file": "attachment-long-name-1280x800.png",
+    "state": "attachment-long-name",
+    "size": "1280x800",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  },
+  {
+    "file": "attachment-only-file-1280x800.png",
+    "state": "attachment-only-file",
+    "size": "1280x800",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  },
+  {
+    "file": "attachment-too-large-1280x800.png",
+    "state": "attachment-too-large",
+    "size": "1280x800",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  },
+  {
+    "file": "attachment-converted-1280x800.png",
+    "state": "attachment-converted",
+    "size": "1280x800",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  },
+  {
+    "file": "attachment-template-1280x800.png",
+    "state": "attachment-template",
+    "size": "1280x800",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  },
+  {
+    "file": "attachment-public-1280x800.png",
+    "state": "attachment-public",
+    "size": "1280x800",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  },
+  {
+    "file": "attachment-approval-1280x800.png",
+    "state": "attachment-approval",
+    "size": "1280x800",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  },
+  {
+    "file": "attachment-history-1280x800.png",
+    "state": "attachment-history",
+    "size": "1280x800",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  },
+  {
+    "file": "attachment-trash-1280x800.png",
+    "state": "attachment-trash",
+    "size": "1280x800",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  },
+  {
+    "file": "attachment-revision-1280x800.png",
+    "state": "attachment-revision",
+    "size": "1280x800",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  },
+  {
+    "file": "attachment-restore-1280x800.png",
+    "state": "attachment-restore",
+    "size": "1280x800",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  },
+  {
+    "file": "attachment-proposal-1280x800.png",
+    "state": "attachment-proposal",
+    "size": "1280x800",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  }
+]

@@ -1,0 +1,41 @@
+name: info_desktop
+description: Local information authorization and managed credentials desktop.
+publish_to: none
+version: 0.4.0+12
+environment:
+  sdk: '>=3.9.0 <4.0.0'
+dependencies:
+  flutter:
+    sdk: flutter
+  info_core:
+    path: ../../packages/info_core
+  info_storage:
+    path: ../../packages/info_storage
+  info_cli:
+    path: ../../packages/info_cli
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  sqlite3: 3.7.1
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/fonts/OFL.txt
+  fonts:
+    - family: ProductSans
+      fonts:
+        - asset: assets/fonts/NotoSansSC-Regular.otf
+          weight: 400
+    - family: AppSans
+      fonts:
+        - asset: assets/fonts/NotoSansSC-Regular.otf
+          weight: 400
+        - asset: assets/fonts/NotoSansSC-Medium.otf
+          weight: 500
+hooks:
+  user_defines:
+    sqlite3:
+      source: sqlcipher

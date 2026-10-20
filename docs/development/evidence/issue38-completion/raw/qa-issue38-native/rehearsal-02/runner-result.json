@@ -1,0 +1,26 @@
+{
+  "syntheticPicker": true,
+  "productionRevision": "085512060b5cf5fe7f1e45abea52f17d253141bb",
+  "cliSha256": "7c00e1dc37fa991d1f90df183dd6cca354f92700dff7ef3f4fb0454c3f103c23",
+  "testSources": [
+    {
+      "path": "apps/desktop/integration_test/ordinary_files_native_test.dart",
+      "bytes": 22844,
+      "sha256": "8ef945650754eea575944261d071bd354f7d82171a227311022d6575dabd29b1",
+      "bytesKind": "working file as executed"
+    },
+    {
+      "path": "apps/desktop/integration_test/support/ordinary_file_native_fixture.dart",
+      "bytes": 3398,
+      "sha256": "bd7f0de30ca50cd248d6af6c99d3348ac1995d524a090484c8b31e76edd0bde1",
+      "bytesKind": "working file as executed"
+    }
+  ],
+  "phases": [
+    {
+      "phase": "native",
+      "exitCode": 0
+    }
+  ],
+  "unexpectedLocks": []
+}

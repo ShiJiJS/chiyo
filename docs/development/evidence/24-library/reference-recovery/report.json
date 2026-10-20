@@ -1,0 +1,20 @@
+[
+  {
+    "file": "trash.png",
+    "state": "trash",
+    "size": "1440x900",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  },
+  {
+    "file": "revision.png",
+    "state": "revision",
+    "size": "1440x900",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  }
+]

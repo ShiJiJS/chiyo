@@ -1,0 +1,35 @@
+[
+  {
+    "kind": "generated-identity",
+    "digest": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
+    "unchangedHeader": false
+  },
+  {
+    "kind": "generated-identity",
+    "digest": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
+    "unchangedHeader": true
+  },
+  {
+    "kind": "generated-identity",
+    "digest": "a52d159f262b2c6ddb724a61840befc36eb30c88877a4030b65cbe86298449c9",
+    "unchangedHeader": false
+  },
+  {
+    "kind": "missing-helper-fails-build",
+    "exitCode": 1
+  },
+  {
+    "kind": "built-identity",
+    "configuration": "Release",
+    "helperSha256": "bc20991cbf7a68f56ac687afa9e2597c0fd4c3c36d5122e1fc5fb625cc8e918f",
+    "compiledIntoRunner": true,
+    "onlyProductionHelperShipped": true
+  },
+  {
+    "kind": "built-identity",
+    "configuration": "Debug",
+    "helperSha256": "3a52234a281cf8fcac7f0148906991094147d8219617673981e934d72498d40b",
+    "compiledIntoRunner": true,
+    "onlyProductionHelperShipped": true
+  }
+]

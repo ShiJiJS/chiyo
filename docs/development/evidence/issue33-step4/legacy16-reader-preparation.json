@@ -1,0 +1,10 @@
+{
+  "sourceCommit": "291801046f7d1e6e4217a4bc001ea714689855c5",
+  "archiveSha256": "7d775372e4fc710fcda55918c205a393724d9d8c794de911137575c79c491c0e",
+  "helperSha256": "159d9791b4c94f1302b41105ca272766fceb37f63c610c26a97f09159a8cc2d3",
+  "lockSha256": "0d82edc897dfa54297eb99638977a22061587b3c8dc5e799cd451570134d877d",
+  "reader": "C:\\Project\\network_config\\info-manage\\build\\qa-issue33\\legacy16-source-tz2lw61y\\packages\\info_storage\\legacy_probe.dart",
+  "schema": 16,
+  "backupFormat": 5,
+  "execution": "dart run legacy_probe.dart with original SQLCipher native-asset hooks"
+}

@@ -1,0 +1,31 @@
+from pathlib import Path
+import hashlib,json,shutil,subprocess,sys
+sys.stdout.reconfigure(encoding='utf-8')
+root=Path.cwd();qa=root/'build/qa-issue38-consumers'
+source=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip();assert source.startswith('3749140')
+result=json.loads((qa/'round-06/result.json').read_text());assert not result['unexpectedLocks'] and all(p['exitCode']==0 for p in result['phases'])
+dest=root/'docs/development/evidence/issue38-file-consumers';(dest/'raw').mkdir(parents=True,exist_ok=False);raw=[]
+def copy(p,rel):
+ target=dest/rel;target.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(p,target)
+ b=target.read_bytes();raw.append({'path':target.relative_to(dest).as_posix(),'bytes':len(b),'sha256':hashlib.sha256(b).hexdigest()})
+for n in range(1,7):
+ for p in sorted((qa/f'round-{n:02}').glob('*')):
+  if p.is_file() and p.suffix in {'.txt','.json'}:copy(p,Path('raw')/f'round-{n:02}'/p.name)
+for n in ['qa-issue38-consumers-check.py','qa-issue38-consumers-freeze.py']:copy(root/'build'/n,Path('raw')/(n+'.txt'))
+selected=['purple-revision-list.png','purple-revision-compare.png','purple-revision-compare-text-200.png','mono-recycle-list.png','blue-recycle-preview.png','purple-proposal-retained-file.png']
+for n in selected:copy(qa/'round-06/screens'/n,Path('screens')/n)
+paths=set(subprocess.check_output(['git','diff','--name-only','91df978',source],text=True).splitlines());assert len(paths)==11
+paths.update(p+'/pubspec.lock' for p in ['packages/info_core','packages/info_storage','packages/info_cli','apps/desktop']);sources=[]
+for p in sorted(paths):
+ b=subprocess.check_output(['git','show',source+':'+p]);sources.append({'path':p,'bytes':len(b),'sha256':hashlib.sha256(b).hexdigest()})
+captures=[]
+for p in sorted((qa/'round-06/screens').glob('*.png')):
+ b=p.read_bytes();captures.append({'name':p.name,'bytes':len(b),'sha256':hashlib.sha256(b).hexdigest(),'committed':p.name in selected})
+assert len(captures)==21
+record={'sourceRevision':source,'scope':'partial #38 private file consumers and combined credential/file consent; no native picker or SQLCipher GUI acceptance',
+ 'final':{'passed':415,'packages':{'info_core':261,'desktop':154},'strictAnalyzes':2,'locksUnchanged':True,'fullFourPackageRun':False},
+ 'focused':{'passed':32,'newTests':4,'consecutiveFourTestRuns':3,'additionalRuns':['raw/round-05/repeat-01.txt','raw/round-05/repeat-02.txt']},
+ 'render':{'screens':21,'themes':['purple','green','blue','mono'],'size':'1280x800','text200Percent':True,'productionFonts':True,'independentlyReviewed':False,'fullFidelityAccepted':False,'captures':captures},'raw':raw,'sourceGitBytes':sources}
+(dest/'verification.json').write_text(json.dumps(record,ensure_ascii=False,indent=2)+'\n',encoding='utf-8',newline='\n')
+p=root/'.gitattributes';p.write_text(p.read_text(encoding='utf-8')+'\ndocs/development/evidence/issue38-file-consumers/raw/** -text -diff\n',encoding='utf-8',newline='\n')
+print(json.dumps({'frozen':len(raw),'sourceAndLocks':len(sources),'revision':source}))

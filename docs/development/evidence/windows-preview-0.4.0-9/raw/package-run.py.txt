@@ -1,0 +1,30 @@
+from pathlib import Path
+import os,sys,json,subprocess,hashlib
+sys.stdout.reconfigure(encoding='utf-8')
+root=Path.cwd();qa=root/('build/qa-windows-preview-50e2c09-'+sys.argv[1]);qa.mkdir(parents=True,exist_ok=False)
+output=root/'build/windows-preview-0.4.0-9-50e2c09'
+assert not output.exists()
+assert subprocess.check_output(['git','rev-parse','HEAD'],cwd=root,text=True).strip().startswith('50e2c09')
+assert not subprocess.check_output(['git','status','--porcelain'],cwd=root).strip()
+env=os.environ.copy();env.update(PUB_HOSTED_URL='https://pub.flutter-io.cn',FLUTTER_STORAGE_BASE_URL='https://storage.flutter-io.cn')
+for name in ['INFO_TEST_DELIVERY','INFO_TEST_BUNDLE']:
+    env.pop(name,None)
+locks={root/p/'pubspec.lock':(root/p/'pubspec.lock').read_bytes() for p in ['packages/info_core','packages/info_storage','packages/info_cli','apps/desktop']}
+norm=lambda b:b.replace(b'https://pub.flutter-io.cn',b'https://pub.dev').replace(b'\r\n',b'\n')
+code=None
+try:
+    with (qa/'package.txt').open('wb') as log:
+        result=subprocess.run(['C:/Users/Todoki/.cache/codex-runtimes/codex-primary-runtime/dependencies/native/powershell/pwsh.exe','-NoProfile','-NonInteractive','-File',str(root/'scripts/package-windows.ps1'),'-FlutterBin','C:/Users/Todoki/.local/share/flutter/bin','-OutputDirectory',str(output),'-Offline'],cwd=root,env=env,stdout=log,stderr=subprocess.STDOUT)
+    code=result.returncode
+    print(json.dumps(dict(phase='package',exitCode=code)),flush=True)
+    if code:
+        print((qa/'package.txt').read_text(encoding='utf-8',errors='replace')[-16000:],flush=True)
+finally:
+    unexpected=[]
+    for p,b in locks.items():
+        if norm(p.read_bytes())!=norm(b):unexpected.append(str(p))
+        else:p.write_bytes(b)
+    files=[dict(path=p.relative_to(root).as_posix(),byteLength=p.stat().st_size,sha256=hashlib.sha256(p.read_bytes()).hexdigest()) for p in output.glob('*.zip')] if output.exists() else []
+    (qa/'result.json').write_text(json.dumps(dict(exitCode=code,unexpectedLocks=unexpected,archives=files),indent=2)+'\n',encoding='utf-8')
+    assert not unexpected,unexpected
+if code:raise SystemExit(code)

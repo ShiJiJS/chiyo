@@ -1,0 +1,74 @@
+[
+  {
+    "path": "apps/desktop/windows/focused_input/CMakeLists.txt",
+    "gitBlobSha1": "80bc1e182721c499753eb23426934f349bffd989"
+  },
+  {
+    "path": "apps/desktop/windows/focused_input/broker_fault_stub.cpp",
+    "gitBlobSha1": "64108af16587fb66717fc5f1f4f1d3082e036df8"
+  },
+  {
+    "path": "apps/desktop/windows/focused_input/broker_main.cpp",
+    "gitBlobSha1": "7bac2b336af58d0571f3f6af75a92156a3bb01ee"
+  },
+  {
+    "path": "apps/desktop/windows/focused_input/fill_guard.cpp",
+    "gitBlobSha1": "4ff3f23e87502227f9efae9cc769d7e8d1b82a1d"
+  },
+  {
+    "path": "apps/desktop/windows/focused_input/fill_guard.h",
+    "gitBlobSha1": "6ad791b5082be40f4cb1da6be1b6f13a9d4d652d"
+  },
+  {
+    "path": "apps/desktop/windows/focused_input/fill_guard_test.cpp",
+    "gitBlobSha1": "3f37b2091a5f1300153aa4bfd3db011687f96d74"
+  },
+  {
+    "path": "apps/desktop/windows/focused_input/fixture_main.cpp",
+    "gitBlobSha1": "155ffb307abde38f1193da3ee7388bcdd1c155f1"
+  },
+  {
+    "path": "apps/desktop/windows/focused_input/focus_snapshot.cpp",
+    "gitBlobSha1": "35ee7a55290d217b74e7c41a250ed27c2b06c0f3"
+  },
+  {
+    "path": "packages/info_cli/lib/agent_client.dart",
+    "gitBlobSha1": "a04cb217d496d32ae8191c267f8bfef13a7b294d"
+  },
+  {
+    "path": "packages/info_cli/lib/credential_runtime_client.dart",
+    "gitBlobSha1": "faefebde38c0eeae89c19883d894caad40fb5b37"
+  },
+  {
+    "path": "packages/info_cli/lib/windows_focused_fill.dart",
+    "gitBlobSha1": "6831cc9242b29a63830516b731375ccf5ddcdc75"
+  },
+  {
+    "path": "packages/info_cli/test/focused_fill_target_test.dart",
+    "gitBlobSha1": "c2e44713a2244d0a13d8205bdae518a7b8cdf0b1"
+  },
+  {
+    "path": "packages/info_cli/test/support/focused_native_probe.dart",
+    "gitBlobSha1": "496971a579600bc112d00d5a10aed1af67014478"
+  },
+  {
+    "path": "packages/info_cli/test/windows_focused_fill_test.dart",
+    "gitBlobSha1": "8823746c3d570324932a61a7ca9d6e32758ecb7a"
+  },
+  {
+    "path": "packages/info_core/lib/agent_server.dart",
+    "gitBlobSha1": "eba793338c1122ddb0ec2c8bc58ccba3054d6b32"
+  },
+  {
+    "path": "packages/info_core/lib/focused_fill_access.dart",
+    "gitBlobSha1": "ba5143bdbb3cd9bbe8640faaacbcfc60b08704a2"
+  },
+  {
+    "path": "packages/info_core/lib/focused_fill_models.dart",
+    "gitBlobSha1": "b56efaba161fd5de894d55c3bd805d775218c8f0"
+  },
+  {
+    "path": "packages/info_core/test/focused_fill_test.dart",
+    "gitBlobSha1": "898b7146be08e04f96cd7f6de5b5b980465bd0ec"
+  }
+]

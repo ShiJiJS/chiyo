@@ -1,0 +1,25 @@
+{
+  "phases": [
+    {
+      "phase": "core-format",
+      "exitCode": 0
+    },
+    {
+      "phase": "storage-format",
+      "exitCode": 0
+    },
+    {
+      "phase": "storage-pub",
+      "exitCode": 0
+    },
+    {
+      "phase": "storage-analyze",
+      "exitCode": 0
+    },
+    {
+      "phase": "storage-tests",
+      "exitCode": 1
+    }
+  ],
+  "unexpectedLocks": []
+}

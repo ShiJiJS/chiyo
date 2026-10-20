@@ -1,0 +1,103 @@
+{
+  "baseCommit": "c3b8161",
+  "scope": "issue33 checkpoint; not a completed reusable runtime",
+  "prototypeRenderCount": 56,
+  "coreTests": 135,
+  "coreAnalysis": "pass",
+  "originalDependencyLockUnchanged": true,
+  "designChecks": {
+    "v1HistoricalFixtureWithLegacyFlag": 15,
+    "attachments": 14,
+    "reusableTarget": 6
+  },
+  "retentionRedObservation": {
+    "expectedPrunableRequests": 0,
+    "actualBeforeFix": 1,
+    "source": "Dart test output before grouping fix; original implementation at c3b8161"
+  },
+  "textHashNormalization": "LF UTF-8; red-test transcript copy additionally strips trailing spaces; binary originals",
+  "sources": {
+    "docs/design/prototypes/round-05/assemble-lifecycle.cjs": "571beee71255dff482e439f69c4baf483ba59aa25a6c5c22e053cc079c123855",
+    "docs/design/prototypes/round-05/attachments.css": "2307098d1a44a4aea176952c0d500908ce1911f292951f60e5196d698532e005",
+    "docs/design/prototypes/round-05/check-attachments.cjs": "59eb966615cc8fc11133f7c0fdb6dfe47eaec25e3c94e79008da2a301dac904c",
+    "docs/design/prototypes/round-05/check-flows.cjs": "0f035adff9bb9cdd5016917fce10babd689da8b6a64fc3fc22110ec30be63e7e",
+    "docs/design/prototypes/round-05/index.html": "60b848f97c0f4062716207db0bd9bb1ad0dacfcb923f83064a0c07a7cdbc8c32",
+    "packages/info_core/lib/credential_history_access.dart": "6cffb48749c2f8e7cdbe8948e41b77e233db562f2518285d0998a87a4f777b6c",
+    "packages/info_core/lib/credential_runtime_access.dart": "57a1af0522e1842ffb6c5eff65f5a85510568c702cb9b9519c8538bc283e0f8e",
+    "packages/info_core/lib/credential_runtime_models.dart": "7b19c8830f821e48e6d58c84cdf3761f073eeddadf2c8dfd1b2a1a94d6afc76c",
+    "packages/info_core/test/credential_history_retention_test.dart": "d25293f0fb5cf5424ee0e3004bb8c6ab3a9959a0cbe3df1ce70ca53a8ca418fd",
+    "packages/info_core/test/credential_use_test.dart": "b5306f6ada921f726479021ed101476a3afb39aff8045c18692c8a5c26a10c19",
+    "docs/design/prototypes/round-05/check-reuse.cjs": "cbb9a78cc29733b309958c1fc73c94ae1443c61575f0a258d92bd093abe5e909",
+    "docs/design/prototypes/round-05/reuse-assembly.cjs": "da3c4f0118915879c25bdcd9e945176aeb9734cab4cf92eca7d0d116dfbd48dd",
+    "docs/design/prototypes/round-05/reuse-history.html": "89319a3d989fe82b6a40d2755dde5423c4f95aaca08c4f1eb8b9866e486fd964",
+    "docs/design/prototypes/round-05/reuse.js": "07e927e7663a8e4e47e18b3420cff4734ecda3d41ad7811e3913a1dca520777b",
+    "docs/design/runtime-protocol-v2.md": "86c55392bb53fb4e8efce92f93be73cc1a8ce12fbdf93b392a25c26d8e62e30c",
+    "packages/info_core/test/credential_reuse_test.dart": "929a0ed08b0a9607b64b5132b6b4a58554f324fa340cf1713a2a8e8696a64b49"
+  },
+  "artifacts": {
+    "check-attachments.cjs.txt": {
+      "sha256": "b3197d3808724974e2851e21fdfba266515df928e4a47b694b836699fb5667ef",
+      "bytes": 1178
+    },
+    "check-flows.cjs.txt": {
+      "sha256": "a13842c381ebbe5f1bfaef249a614aab4965b8b4e7639e24ea8a9b63fc7b986d",
+      "bytes": 987
+    },
+    "check-reuse.cjs.txt": {
+      "sha256": "4a1b29059d276a18507939bb6acb240bc2866f5a6e72b236fb9f14da184a42f1",
+      "bytes": 544
+    },
+    "core-locked-analyze.txt": {
+      "sha256": "d9ebd39d330d44ff327dbf6cf5ce8566791da694504d82a7b989e78e27969232",
+      "bytes": 40
+    },
+    "core-locked-full.txt": {
+      "sha256": "72d94768830aba8e6993c3ee3fc38500ce61e56200c253f7b7f04ac45ff7b509",
+      "bytes": 21241
+    },
+    "core-step1-green.txt": {
+      "sha256": "35125a89163c9923d8247fccbb8ad9eeeab49a307dba181efdfb79a52e747b5f",
+      "bytes": 744
+    },
+    "render-blue.json": {
+      "sha256": "b9d5868387f557afed30d0b2c3bcdf4f4e03e7d2ccbceed59967c758ffedc23c",
+      "bytes": 2504
+    },
+    "render-green.json": {
+      "sha256": "b9d5868387f557afed30d0b2c3bcdf4f4e03e7d2ccbceed59967c758ffedc23c",
+      "bytes": 2504
+    },
+    "render-mono.json": {
+      "sha256": "b9d5868387f557afed30d0b2c3bcdf4f4e03e7d2ccbceed59967c758ffedc23c",
+      "bytes": 2504
+    },
+    "render-purple.json": {
+      "sha256": "b9d5868387f557afed30d0b2c3bcdf4f4e03e7d2ccbceed59967c758ffedc23c",
+      "bytes": 2504
+    },
+    "reuse-approval.png": {
+      "sha256": "616fea76982057f90927ce759650e14e26fd38df7435576b6c1651beb6177775",
+      "bytes": 171297
+    },
+    "reuse-history.png": {
+      "sha256": "71cd5830f0fb6be0bd656ea85ad6b618b5bbea963fb23217a9a153461fc70b38",
+      "bytes": 124557
+    },
+    "reuse-result.png": {
+      "sha256": "038f0b4b08d02a005fcd17241f28751013911bf6a303af6b5844c7dc91206e56",
+      "bytes": 213455
+    },
+    "reuse-revoked.png": {
+      "sha256": "fc51cf7b8a757dfcd17d90d2f20db3a0615c1cca14b80deac44cf558811683a7",
+      "bytes": 122538
+    },
+    "reuse-unknown.png": {
+      "sha256": "5f5a59184cf320a6d8e2a501dab2294f6bfe0200df042577eeb122b052980933",
+      "bytes": 124836
+    },
+    "v2-model-red.txt": {
+      "bytes": 2098,
+      "sha256": "70b7ec1f781b737f209adc55cba098a519b6edae66678a7d4a3a1337df7df66a"
+    }
+  }
+}

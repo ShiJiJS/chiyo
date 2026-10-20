@@ -1,0 +1,7 @@
+00:45 +78: test\codex_process_test.dart: malformed associations and hook input fail without leaking input or reading transcripts
+00:47 +79: test\codex_process_test.dart: hook association supports distinct CLI processes without reapproval
+00:55 +80: All tests passed!
+Analyzing info_cli...
+No issues found!
+
+{"imageId": "sha256:4c33580cdd4166ddf8faeb4f6bba9fb7e208720978f0a92751681b3f22d9406c", "testExitCode": 0, "fixture": "synthetic localhost only", "containerRemovedAfterRun": true}

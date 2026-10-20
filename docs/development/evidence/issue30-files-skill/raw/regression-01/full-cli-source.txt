@@ -1,0 +1,113 @@
+00:00 +0: loading test\adjusted_scope_cli_test.dart
+00:00 +0: test\adjusted_scope_cli_test.dart: real CLI learns and reads the owner-adjusted range and fixed expiry
+00:00 +0 ~1: test\adjusted_scope_cli_test.dart: real CLI learns and reads the owner-adjusted range and fixed expiry
+00:00 +0 ~2: test\adjusted_scope_cli_test.dart: real CLI learns and reads the owner-adjusted range and fixed expiry
+00:00 +1 ~2: test\adjusted_scope_cli_test.dart: real CLI learns and reads the owner-adjusted range and fixed expiry
+00:00 +1 ~3: test\adjusted_scope_cli_test.dart: real CLI learns and reads the owner-adjusted range and fixed expiry
+00:00 +2 ~3: test\adjusted_scope_cli_test.dart: real CLI learns and reads the owner-adjusted range and fixed expiry
+00:00 +3 ~3: test\adjusted_scope_cli_test.dart: real CLI learns and reads the owner-adjusted range and fixed expiry
+00:00 +4 ~3: test\adjusted_scope_cli_test.dart: real CLI learns and reads the owner-adjusted range and fixed expiry
+00:01 +5 ~3: test\adjusted_scope_cli_test.dart: real CLI learns and reads the owner-adjusted range and fixed expiry
+00:01 +6 ~3: test\adjusted_scope_cli_test.dart: real CLI learns and reads the owner-adjusted range and fixed expiry
+00:01 +7 ~3: test\adjusted_scope_cli_test.dart: real CLI learns and reads the owner-adjusted range and fixed expiry
+00:01 +8 ~3: test\adjusted_scope_cli_test.dart: real CLI learns and reads the owner-adjusted range and fixed expiry
+00:02 +9 ~3: test\adjusted_scope_cli_test.dart: real CLI learns and reads the owner-adjusted range and fixed expiry
+00:03 +10 ~3: test\bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:03 +11 ~3: test\bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:03 +12 ~3: test\bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:03 +13 ~3: test\bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:04 +14 ~3: test\bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:04 +15 ~3: test\bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:04 +16 ~3: test\bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:04 +17 ~3: test\bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:04 +18 ~3: test\bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:04 +19 ~3: test\bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:04 +20 ~3: test\bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:04 +21 ~3: test\bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:04 +22 ~3: test\bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:04 +22 ~4: test\bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:04 +22 ~5: test\bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:04 +22 ~6: test\bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:05 +23 ~6: test\bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:05 +24 ~6: test\bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:05 +25 ~6: test\bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:06 +26 ~6: test\bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:06 +27 ~6: test\bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:06 +28 ~6: test\bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:06 +29 ~6: test\bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:06 +30 ~6: test\bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:06 +31 ~6: test\bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:06 +32 ~6: test\bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:06 +32 ~7: test\bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:08 +33 ~7: test\bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:08 +34 ~7: test\bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:08 +35 ~7: test\bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:08 +36 ~7: test\bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:08 +37 ~7: test\bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:08 +38 ~7: test\bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:08 +39 ~7: test\bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:09 +39 ~8: test\bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:09 +39 ~9: test\bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:09 +40 ~9: test\bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:09 +41 ~9: test\bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:09 +41 ~9: test\early_worker_crash_test.dart: worker death after launch acknowledgement but before target identity keeps the attempt unknown and preserves live material
+{"phase":"early_worker_cleanup_after_drain","executionState":"unknown","cleanupState":"complete","jobActive":false}
+00:09 +42 ~9: test\bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:09 +42 ~10: test\bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:09 +42 ~11: test\bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:09 +42 ~12: test\bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:09 +42 ~13: test\bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:09 +43 ~13: test\bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:10 +44 ~13: test\bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:11 +45 ~13: test\bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:12 +46 ~13: test\bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:12 +47 ~13: test\bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:12 +48 ~13: test\bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:13 +49 ~13: test\bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:13 +50 ~13: test\bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:13 +51 ~13: test\bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:13 +52 ~13: test\bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:13 +53 ~13: test\bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:14 +54 ~13: test\bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:14 +55 ~13: test\bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:16 +56 ~13: test\bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:16 +57 ~13: test\bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:16 +58 ~13: test\bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:16 +59 ~13: test\bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:16 +60 ~13: test\bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:17 +60 ~13: test\credential_reuse_runtime_test.dart: native file workers inject two independent paths and clear their registered material
+{"phase":"native_file_cleanup_before_wait","operationId":"us-east-1","executionState":"exited","cleanupState":"complete"}
+00:17 +61 ~13: test\bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:18 +62 ~13: test\bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:18 +63 ~13: test\bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:19 +63 ~13: test\credential_reuse_runtime_test.dart: native file workers inject two independent paths and clear their registered material
+{"phase":"native_file_cleanup_before_wait","operationId":"us-west-2","executionState":"exited","cleanupState":"complete"}
+00:19 +64 ~13: test\bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:21 +65 ~13: test\bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:22 +66 ~13: test\bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:22 +67 ~13: test\codex_information_files_test.dart: independent adapters deliver only approved files, pin retries, share only delegated authority and release after revocation
+00:24 +68 ~13: test\codex_information_files_test.dart: independent adapters deliver only approved files, pin retries, share only delegated authority and release after revocation
+00:24 +69 ~13: test\codex_information_files_test.dart: independent adapters deliver only approved files, pin retries, share only delegated authority and release after revocation
+00:24 +70 ~13: test\codex_information_files_test.dart: independent adapters deliver only approved files, pin retries, share only delegated authority and release after revocation
+00:24 +71 ~13: test\codex_information_files_test.dart: independent adapters deliver only approved files, pin retries, share only delegated authority and release after revocation
+00:24 +72 ~13: test\codex_information_files_test.dart: independent adapters deliver only approved files, pin retries, share only delegated authority and release after revocation
+00:25 +73 ~13: test\codex_information_files_test.dart: independent adapters deliver only approved files, pin retries, share only delegated authority and release after revocation
+00:25 +74 ~13: test\codex_information_files_test.dart: independent adapters deliver only approved files, pin retries, share only delegated authority and release after revocation
+00:25 +75 ~13: test\codex_information_files_test.dart: independent adapters deliver only approved files, pin retries, share only delegated authority and release after revocation
+00:25 +76 ~13: test\codex_information_files_test.dart: independent adapters deliver only approved files, pin retries, share only delegated authority and release after revocation
+00:25 +77 ~13: test\codex_information_files_test.dart: independent adapters deliver only approved files, pin retries, share only delegated authority and release after revocation
+00:26 +78 ~13: test\codex_information_files_test.dart: independent adapters deliver only approved files, pin retries, share only delegated authority and release after revocation
+00:26 +79 ~13: test\codex_information_files_test.dart: independent adapters deliver only approved files, pin retries, share only delegated authority and release after revocation
+00:26 +80 ~13: test\codex_information_files_test.dart: independent adapters deliver only approved files, pin retries, share only delegated authority and release after revocation
+00:26 +81 ~13: test\codex_information_files_test.dart: independent adapters deliver only approved files, pin retries, share only delegated authority and release after revocation
+00:26 +82 ~13: test\codex_information_files_test.dart: independent adapters deliver only approved files, pin retries, share only delegated authority and release after revocation
+00:27 +83 ~13: test\codex_information_files_test.dart: independent adapters deliver only approved files, pin retries, share only delegated authority and release after revocation
+00:37 +84 ~13: test\codex_information_files_test.dart: independent adapters deliver only approved files, pin retries, share only delegated authority and release after revocation
+00:41 +85 ~13: test\codex_information_files_test.dart: independent adapters deliver only approved files, pin retries, share only delegated authority and release after revocation
+00:42 +86 ~13: test\codex_process_test.dart: a parent proof delegates only the same grant and deadline to its intended child
+00:52 +87 ~13: test\codex_information_files_test.dart: one association separates document copies, focused fills and active credential-file materials through root end
+00:55 +88 ~13: test\codex_information_files_test.dart: one association separates document copies, focused fills and active credential-file materials through root end
+01:00 +89 ~13: test\codex_process_test.dart: known chat and request IDs cannot recover a capability, even by restarting the hook
+01:06 +90 ~13: test\codex_process_test.dart: malformed associations and hook input fail without leaking input or reading transcripts
+01:09 +91 ~13: test\codex_process_test.dart: hook association supports distinct CLI processes without reapproval
+01:20 +92 ~13: All tests passed!

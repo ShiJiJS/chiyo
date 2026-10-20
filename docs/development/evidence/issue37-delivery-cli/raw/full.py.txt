@@ -1,0 +1,11 @@
+from pathlib import Path
+import subprocess,os,json,sys,shutil
+sys.stdout.reconfigure(encoding='utf-8')
+root=Path.cwd();out=root/'build/qa-issue37-delivery-cli'/sys.argv[1];out.mkdir(parents=True,exist_ok=False)
+env=os.environ.copy();env['PUB_HOSTED_URL']='https://pub.flutter-io.cn';env['FLUTTER_STORAGE_BASE_URL']='https://storage.flutter-io.cn'
+with (out/'checks.txt').open('wb') as log:
+    result=subprocess.run([shutil.which('pwsh') or shutil.which('powershell'),'-NoProfile','-File','scripts/check.ps1','-Offline','-FlutterBin','C:/Users/Todoki/.local/share/flutter/bin'],cwd=root,env=env,stdout=log,stderr=subprocess.STDOUT)
+(out/'result.json').write_text(json.dumps({'exitCode':result.returncode})+'\n',encoding='utf-8')
+print(json.dumps({'exitCode':result.returncode}),flush=True)
+if result.returncode:print((out/'checks.txt').read_text(encoding='utf-8',errors='replace')[-7000:])
+sys.exit(result.returncode)

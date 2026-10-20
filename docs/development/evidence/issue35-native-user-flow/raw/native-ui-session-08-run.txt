@@ -1,0 +1,31 @@
+Flutter assets will be downloaded from https://storage.flutter-io.cn. Make sure you trust this source!
+00:00 +0: loading C:/Project/network_config/info-manage/apps/desktop/integration_test/focused_fill_native_test.dart
+Building Windows application...                                    13.6s
+√ Built build\windows\x64\runner\Debug\info_desktop.exe
+00:00 +0: trusted bundled helper, SQLCipher, real approval UI and independent CLI native input (test semantics: false)
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown running a test:
+A SemanticsHandle was active at the end of the test.
+All SemanticsHandle instances must be disposed by calling dispose() on the SemanticsHandle.
+
+When the exception was thrown, this was the stack:
+#0      WidgetTester._verifySemanticsHandlesWereDisposed (package:flutter_test/src/widget_tester.dart:1074:7)
+#1      WidgetTester._endOfTestVerifications (package:flutter_test/src/widget_tester.dart:1063:5)
+#2      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1969:22)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+The test description was:
+  trusted bundled helper, SQLCipher, real approval UI and independent CLI native input (test
+  semantics: false)
+════════════════════════════════════════════════════════════════════════════════════════════════════
+01:34 +0 -1: trusted bundled helper, SQLCipher, real approval UI and independent CLI native input (test semantics: false) [E]
+  Test failed. See exception logs above.
+  The test description was: trusted bundled helper, SQLCipher, real approval UI and independent CLI native input (test semantics: false)
+  
+01:34 +0 -1: (tearDownAll)
+01:34 +0 -1: Some tests failed.
+
+Failing tests:
+  C:/Project/network_config/info-manage/apps/desktop/integration_test/focused_fill_native_test.dart: trusted bundled helper, SQLCipher, real approval UI and independent CLI native input (test semantics: false)

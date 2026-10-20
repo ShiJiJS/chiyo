@@ -1,0 +1,16 @@
+PASS ordinary read default 8h and selected duration drives history
+PASS failed save preserves draft and repository
+PASS delete/restore keeps stable item identity
+PASS selected revision restored, unchanged field identity preserved
+PASS fields-only approval grants no credential use
+PASS combined approval creates two distinct grants and deadlines
+PASS rotation invalidates unused grant and restore creates disabled version
+PASS organization completion is consistent across request/result/history
+PASS full proposal edit and terminal result links actual object
+PASS backup preview requires files and empty destination
+PASS failed execution consumes attempt without claiming process started
+PASS Token has no file cleanup; unknown is never success
+PASS large collection has bounded 50-row pages
+PASS empty library getter does not retain ghost detail
+PASS payload agrees with receiver contract and uses typed argv reference
+15 design-state checks passed. No production behavior is asserted.

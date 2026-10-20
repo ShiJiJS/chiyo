@@ -1,0 +1,98 @@
+import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
+import 'package:flutter/material.dart';
+import 'package:info_core/info_core.dart';
+import 'package:info_desktop/desktop_bootstrap.dart';
+import 'package:info_desktop/desktop_runtime.dart';
+import 'package:info_desktop/main.dart' as app;
+import 'package:info_storage/info_storage.dart';
+
+// Explicitly compiled QA entrypoint only. The production main never imports it.
+// Auto-approval is synthetic fixture preparation, not a production capability.
+Future<void> main(List<String> arguments) async {
+  if (!const bool.fromEnvironment('D4_NATIVE_LIFECYCLE') || arguments.length != 1) {
+    exit(64);
+  }
+  WidgetsFlutterBinding.ensureInitialized();
+  final configFile = File(arguments.single);
+  final configuration = jsonDecode(await configFile.readAsString()) as Map;
+  final root = Directory(configuration['root'] as String);
+  if (!root.absolute.path.toLowerCase().contains('native-lifecycle-probe') ||
+      !root.uri.pathSegments.where((p) => p.isNotEmpty).last.startsWith('synthetic-') ||
+      await root.resolveSymbolicLinks() != root.absolute.path) {
+    throw StateError('Isolated fixture directory required.');
+  }
+  final platform = NativeDesktopPlatform();
+  final bootstrap = DesktopBootstrap(
+    port: configuration['port'] as int,
+    platform: platform,
+    openLibrary: () async {
+      final repository = await EncryptedInformationRepository.open(
+        '${root.path}/library',
+        WindowsDatabaseKeyStore('${root.path}/library/database-key.dpapi'),
+      );
+      final service = InformationService(repository: repository);
+      if (service.owner.information.isEmpty) {
+        await service.owner.createInformation(
+          '生命周期验收虚构信息',
+          'Only synthetic content in a dedicated native QA profile.',
+          const [FieldInput('Address', '', 'lifecycle.example.invalid')],
+        );
+      }
+      await service.owner.setNotificationsEnabled(false);
+      return DesktopLibrary(
+        service: service,
+        backups: repository.backups,
+        close: repository.close,
+      );
+    },
+  );
+  await bootstrap.start();
+  final status = <String, Object?>{
+    'pid': pid,
+    'state': bootstrap.state.name,
+    'port': bootstrap.boundPort,
+    'tray': bootstrap.runtime?.availability.tray,
+    'syntheticAutoApproval': true,
+    'controlAck': null,
+  };
+  final statusFile = File('${root.path}/status.json');
+  Future<void> saveStatus() => statusFile.writeAsString(jsonEncode(status), flush: true);
+  await saveStatus();
+  if (bootstrap.state != DesktopStartupState.ready) exit(65);
+  runApp(app.InformationApp(
+    service: bootstrap.library!.service,
+    port: bootstrap.boundPort!,
+    runtime: bootstrap.runtime!,
+    backups: bootstrap.library!.backups,
+  ));
+  var polling = false;
+  Timer.periodic(const Duration(milliseconds: 100), (timer) async {
+    if (polling) return;
+    polling = true;
+    try {
+      final owner = bootstrap.library!.service.owner;
+      if (!owner.serviceAvailable) {
+        timer.cancel();
+        return;
+      }
+      for (final request in owner.requests) {
+        if (request.state == AccessRequestState.pending) {
+          owner.approve(request.id, request.fields);
+        }
+      }
+      final commandFile = File('${root.path}/control.json');
+      if (await commandFile.exists()) {
+        final command = jsonDecode(await commandFile.readAsString()) as Map;
+        if (command['action'] == 'show' && command['nonce'] != status['controlAck']) {
+          await platform.showWindow();
+          status['controlAck'] = command['nonce'];
+          await saveStatus();
+        }
+      }
+    } finally {
+      polling = false;
+    }
+  });
+}

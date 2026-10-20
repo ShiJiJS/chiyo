@@ -1,0 +1,24 @@
+Flutter assets will be downloaded from https://storage.flutter-io.cn. Make sure you trust this source!
+00:00 +0: loading C:/Project/network_config/info-manage-worktrees/31-backup-migration/apps/desktop/integration_test/backup_migration_native_test.dart
+Building Windows application...                                    13.3s
+√ Built build\windows\x64\runner\Debug\info_desktop.exe
+00:00 +0: schema13 DPAPI upgrade, explicit native field conversion and encrypted credential recovery work after removing the source key
+D9_NATIVE_VERIFIED schema13 encrypted DPAPI upgrade preserves identities; UI field conversion and complete credential backup; source key removed; UI restore with fresh DPAPI key; no old authority. Synthetic only; injected file picker, no OS dialog or notification acceptance.
+00:07 +1: (tearDownAll)
+00:07 +1: All tests passed!
+Flutter assets will be downloaded from https://storage.flutter-io.cn. Make sure you trust this source!
+00:00 +0: loading C:/Project/network_config/info-manage-worktrees/31-backup-migration/apps/desktop/integration_test/backup_migration_native_test.dart
+Building Windows application...                                    13.4s
+√ Built build\windows\x64\runner\Debug\info_desktop.exe
+00:00 +0: schema13 DPAPI upgrade, explicit native field conversion and encrypted credential recovery work after removing the source key
+D9_NATIVE_VERIFIED schema13 encrypted DPAPI upgrade preserves identities; UI field conversion and complete credential backup; source key removed; UI restore with fresh DPAPI key; no old authority. Synthetic only; injected file picker, no OS dialog or notification acceptance.
+00:07 +1: (tearDownAll)
+00:07 +1: All tests passed!
+Flutter assets will be downloaded from https://storage.flutter-io.cn. Make sure you trust this source!
+00:00 +0: loading C:/Project/network_config/info-manage-worktrees/31-backup-migration/apps/desktop/integration_test/backup_migration_native_test.dart
+Building Windows application...                                    13.0s
+√ Built build\windows\x64\runner\Debug\info_desktop.exe
+00:00 +0: schema13 DPAPI upgrade, explicit native field conversion and encrypted credential recovery work after removing the source key
+D9_NATIVE_VERIFIED schema13 encrypted DPAPI upgrade preserves identities; UI field conversion and complete credential backup; source key removed; UI restore with fresh DPAPI key; no old authority. Synthetic only; injected file picker, no OS dialog or notification acceptance.
+00:07 +1: (tearDownAll)
+00:07 +1: All tests passed!

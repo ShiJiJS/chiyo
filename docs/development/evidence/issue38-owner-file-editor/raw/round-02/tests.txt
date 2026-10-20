@@ -1,0 +1,72 @@
+Flutter assets will be downloaded from https://storage.flutter-io.cn. Make sure you trust this source!
+00:00 +0: loading C:/Project/network_config/info-manage/apps/desktop/test/information_file_editor_test.dart
+00:00 +0: C:/Project/network_config/info-manage/apps/desktop/test/information_file_editor_test.dart: real owner save retries unchanged input, preserves bytes and text-only edits
+00:00 +1: C:/Project/network_config/info-manage/apps/desktop/test/library_test.dart: owner manually saves named information fields
+00:00 +2: C:/Project/network_config/info-manage/apps/desktop/test/library_test.dart: owner manually saves named information fields
+00:00 +3: C:/Project/network_config/info-manage/apps/desktop/test/library_test.dart: owner manually saves named information fields
+00:00 +4: C:/Project/network_config/info-manage/apps/desktop/test/library_test.dart: owner manually saves named information fields
+00:01 +5: C:/Project/network_config/info-manage/apps/desktop/test/library_test.dart: owner manually saves named information fields
+00:01 +6: C:/Project/network_config/info-manage/apps/desktop/test/library_test.dart: owner manually saves named information fields
+00:01 +7: C:/Project/network_config/info-manage/apps/desktop/test/information_file_editor_test.dart: file editor shows missing file error, saves real file and keeps the three-column library
+00:01 +8: C:/Project/network_config/info-manage/apps/desktop/test/information_file_editor_test.dart: file editor shows missing file error, saves real file and keeps the three-column library
+00:02 +9: C:/Project/network_config/info-manage/apps/desktop/test/information_file_editor_test.dart: file editor shows missing file error, saves real file and keeps the three-column library
+00:02 +10: C:/Project/network_config/info-manage/apps/desktop/test/information_file_editor_test.dart: file editor shows missing file error, saves real file and keeps the three-column library
+00:02 +11: C:/Project/network_config/info-manage/apps/desktop/test/information_file_editor_test.dart: file editor shows missing file error, saves real file and keeps the three-column library
+00:03 +12: C:/Project/network_config/info-manage/apps/desktop/test/information_file_editor_test.dart: file editor shows missing file error, saves real file and keeps the three-column library
+00:03 +13: C:/Project/network_config/info-manage/apps/desktop/test/information_file_editor_test.dart: file editor shows missing file error, saves real file and keeps the three-column library
+00:03 +14: C:/Project/network_config/info-manage/apps/desktop/test/information_file_editor_test.dart: file editor shows missing file error, saves real file and keeps the three-column library
+00:03 +15: C:/Project/network_config/info-manage/apps/desktop/test/information_file_editor_test.dart: file editor shows missing file error, saves real file and keeps the three-column library
+00:04 +16: C:/Project/network_config/info-manage/apps/desktop/test/information_file_editor_test.dart: file editor shows missing file error, saves real file and keeps the three-column library
+00:04 +17: C:/Project/network_config/info-manage/apps/desktop/test/information_file_editor_test.dart: file editor shows missing file error, saves real file and keeps the three-column library
+00:04 +18: C:/Project/network_config/info-manage/apps/desktop/test/information_file_editor_test.dart: file editor shows missing file error, saves real file and keeps the three-column library
+00:04 +19: C:/Project/network_config/info-manage/apps/desktop/test/information_file_editor_test.dart: file editor shows missing file error, saves real file and keeps the three-column library
+00:04 +20: C:/Project/network_config/info-manage/apps/desktop/test/information_file_editor_test.dart: file editor shows missing file error, saves real file and keeps the three-column library
+00:05 +21: C:/Project/network_config/info-manage/apps/desktop/test/information_file_editor_test.dart: file editor shows missing file error, saves real file and keeps the three-column library
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TimeoutException was thrown while running async test code:
+TimeoutException after 0:00:10.000000: Future not completed
+
+When the exception was thrown, this was the stack:
+<asynchronous suspension>
+<asynchronous suspension>
+#2      main.<anonymous closure> (file:///C:/Project/network_config/info-manage/apps/desktop/test/information_file_editor_test.dart:263:7)
+<asynchronous suspension>
+#3      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#4      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: exactly one matching candidate
+  Actual: _TextWidgetFinder:<Found 0 widgets with text "fictional-resume.pdf": []>
+   Which: means none were found but one was expected
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (file:///C:/Project/network_config/info-manage/apps/desktop/test/information_file_editor_test.dart:267:7)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///C:/Project/network_config/info-manage/apps/desktop/test/information_file_editor_test.dart line 267
+The test description was:
+  file editor shows missing file error, saves real file and keeps the three-column library
+════════════════════════════════════════════════════════════════════════════════════════════════════
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following message was thrown:
+Multiple exceptions (2) were detected during the running of the current test, and at least one was
+unexpected.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:12 +21 -1: C:/Project/network_config/info-manage/apps/desktop/test/information_file_editor_test.dart: file editor shows missing file error, saves real file and keeps the three-column library [E]
+  Test failed. See exception logs above.
+  The test description was: file editor shows missing file error, saves real file and keeps the three-column library
+  

@@ -6,3 +6,7 @@ build/
 .flutter-plugins-dependencies
 *.log
 .DS_Store
+*.iml
+.idea/
+.vscode/
+/.worktrees/

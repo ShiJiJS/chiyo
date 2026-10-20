@@ -1,0 +1,15 @@
+Running build hooks...Running build hooks...00:00 +0: loading test/focused_fill_storage_test.dart
+00:00 +0: metadata admission reserves a released fill outcome at the actual64MiB boundary
+00:13 +0 -1: metadata admission reserves a released fill outcome at the actual64MiB boundary [E]
+  StorageFailure(audit_save_failed)
+  package:info_storage/credential_runtime_storage.dart 163:7  _CredentialRuntimeStorage._commitRuntime
+  ===== asynchronous gap ===========================
+  test\focused_fill_storage_test.dart 304:9                   main.<fn>
+  
+00:13 +0 -1: Some tests failed.
+
+Failing tests:
+  test/focused_fill_storage_test.dart: metadata admission reserves a released fill outcome at the actual64MiB boundary
+
+Consider enabling the flag chain-stack-traces to receive more detailed exceptions.
+For example, 'dart test --chain-stack-traces'.
