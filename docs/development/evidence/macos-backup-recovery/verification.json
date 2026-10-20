@@ -1,0 +1,125 @@
+{
+  "source": "7687368b9639de34bfc27930b17fc8c4f41af23b",
+  "productBase": "d353ced",
+  "issue": 45,
+  "scope": "Mac local backup validation; no real OS key store, native file dialogs, packaged app interruption, or Windows migration acceptance",
+  "strictAnalysis": {
+    "storage": "passed",
+    "desktop": "passed"
+  },
+  "nativeUI": {
+    "passed": 3,
+    "formats": [
+      7,
+      8,
+      9
+    ],
+    "keyStore": "synthetic in-memory",
+    "filePanels": "path fixtures",
+    "actual": "signed Debug Flutter sandbox, SQLCipher, backup UI",
+    "deepStrictCodesign": "passed"
+  },
+  "aotInterruption": {
+    "passed": 2,
+    "formats": [
+      8,
+      9
+    ],
+    "bytesPerBackup": 83886080,
+    "databaseGrowthBeforeSigkill": 4194304,
+    "nonzeroJournalHeader": true,
+    "schema": 21,
+    "directSQLCipherIntegrity": "ok",
+    "sameTargetRetry": "passed",
+    "sourceKeyCleared": true,
+    "targetKeyPreserved": true
+  },
+  "backupMatrix": {
+    "passed": 70,
+    "skipped": 1,
+    "skip": "Windows-only DPAPI recovery"
+  },
+  "pinnedLegacyMatrix": {
+    "passed": 55,
+    "skipped": 0,
+    "overlapsBackupMatrix": true,
+    "unexpectedSourceOrLockChanges": []
+  },
+  "remaining": [
+    "actual NSOpenPanel/NSSavePanel and same-volume native staging",
+    "actual target Keychain",
+    "signed Flutter application restore interruption",
+    "Windows export to Mac and Mac export to Windows",
+    "cross-platform executable rebinding acceptance"
+  ],
+  "files": {
+    "raw/storage-analyze.txt": {
+      "bytes": 43,
+      "sha256": "a489b1249880b489826d25a25a28b316c5059ae3c5e62feecfc2b7949aba9041"
+    },
+    "raw/desktop-analyze.txt": {
+      "bytes": 96,
+      "sha256": "9b3c13fa6ee02d25a11f791ff29af977fb8185ce1a21473b6d88bf1caceb497f"
+    },
+    "raw/aot-initial-failure.txt": {
+      "bytes": 4271,
+      "sha256": "ed204c852446048e825ea60881e4bea177940fb83270276cde1f86866e773610"
+    },
+    "raw/aot-cipher-diagnosis.txt": {
+      "bytes": 2369,
+      "sha256": "b0704e8cc5aa3dfa9ba9c0568022fe3f57e6564d7a7f50b5ddc700456d6fc1fd"
+    },
+    "raw/aot-interruption-final.txt": {
+      "bytes": 1101,
+      "sha256": "cd39286029e572a905616093d4c15247f3285d93f938a09ec6625bea70d3b978"
+    },
+    "raw/native-backup-ui.txt": {
+      "bytes": 1187,
+      "sha256": "0749d0c0372db966cf38132a77b774446ae785037e0cf40d2242b76c75e96987"
+    },
+    "raw/backup-matrix.txt": {
+      "bytes": 63599,
+      "sha256": "d2e38895457da9c1b8b7e3b298e4d7f6aa0684f56c562d554f865c1163a5ff09"
+    },
+    "raw/legacy-matrix.txt": {
+      "bytes": 46060,
+      "sha256": "407af8237fe992911bf61d7523ca7ad59602de2834e29da53f4bbd8b8032f4d5"
+    },
+    "raw/legacy-runner.txt": {
+      "bytes": 109,
+      "sha256": "42b79248c2c5729d3c8bb50cc0d5d24cacb40141cc8d105cf6efd37e38c13272"
+    },
+    "raw/legacy-source-verification.json": {
+      "bytes": 18270,
+      "sha256": "3f6c86067e1d2bfb96fa075b10bcea842dcb985fbbc01833982533b7297c4724"
+    },
+    "raw/debug-app-payload.json": {
+      "bytes": 7070,
+      "sha256": "fdbd0df1dc22ec36e9d328f80a44a0e90546f3c89bba483190fb56c672938873"
+    },
+    "raw/legacy-archive-16.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "raw/legacy-archive-17.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "raw/legacy-bundle-16.txt": {
+      "bytes": 289,
+      "sha256": "34ff6fa9fd4c56676d6a074a753094a5813834e2caf66b907bdfb89b063b23f7"
+    },
+    "raw/legacy-bundle-17.txt": {
+      "bytes": 289,
+      "sha256": "20ff242f45714674962487755414e855fe9c83c793bdddb97ae55e857a317cc0"
+    },
+    "raw/legacy-dependencies-16.txt": {
+      "bytes": 68,
+      "sha256": "d4cb7a3c68b4133b4f6e58c67ff5bfd13725d8021e930388cdc98da8a575919d"
+    },
+    "raw/legacy-dependencies-17.txt": {
+      "bytes": 68,
+      "sha256": "d4cb7a3c68b4133b4f6e58c67ff5bfd13725d8021e930388cdc98da8a575919d"
+    }
+  }
+}
