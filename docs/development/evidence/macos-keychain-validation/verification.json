@@ -1,0 +1,57 @@
+{
+  "source": "86e35f3e4c01c49500aa0bec202c17e1f554e76f",
+  "files": {
+    "raw/run-01.json": {
+      "bytes": 5773,
+      "sha256": "21228265640ee83f2f62f7b0c59640f78c6e7ae463c78530bbbfc29ffcf5e97e"
+    },
+    "raw/run-02.json": {
+      "bytes": 2301,
+      "sha256": "f096011e96c6c82e80dc67dab6cdd3ddc18e0ae65b54f09037ba31c8a71ec9c8"
+    },
+    "raw/run-03.json": {
+      "bytes": 8907,
+      "sha256": "dcc3d7933ad4fcf5aaad9f8a0cafd073adbcd73dccd698ae3c486e1890f9c556"
+    },
+    "raw/run-04.json": {
+      "bytes": 12181,
+      "sha256": "b9aa68608050ca1968894258f936acc6149b9e9cd081a32b654e5f0606851548"
+    },
+    "raw/desktop-analyze.txt": {
+      "bytes": 96,
+      "sha256": "685fc40c722ef1185a6610cbf69e384c87059d21df64afcb4907910d76ff960b"
+    },
+    "raw/desktop-test.txt": {
+      "bytes": 3377,
+      "sha256": "69d1cdeb7579f6aaa61272d85ccbcab99236f8f82a0dd30d9a938bbccd1ae71f"
+    },
+    "raw/flutter-build.txt": {
+      "bytes": 8710,
+      "sha256": "c6ec02398ed19b4a7885c3af869d8bf821bd801cdb9eb521395474c2880eefe8"
+    },
+    "raw/app-signature.txt": {
+      "bytes": 583,
+      "sha256": "db8eb78e8799f42aa4be4d90e684798fa3f28f8bbfaf0c9107ad346525bbce93"
+    },
+    "raw/signing-identities.txt": {
+      "bytes": 30,
+      "sha256": "0ad30eb1563c325d77f4dc564c5d96851d5a39205307f5cdd7d762b59688f87a"
+    }
+  },
+  "sources": {
+    "apps/desktop/lib/desktop_bootstrap.dart": "025a8a0f1d26aed7b77c64b3b9cfa2cdfe60c4133fc2c00b574860e3d1fb5026",
+    "apps/desktop/lib/main.dart": "484271607ad9cabdcd7fd69374b9c71a37dee4d2a51fe4cd82d40811aa420e39",
+    "apps/desktop/macos/Runner.xcodeproj/project.pbxproj": "9947af92454b7476fcae9b70011405a2c3e64a24baec5e3765e32cbfc7d5e4cb",
+    "apps/desktop/macos/Runner/DatabaseKeyStore.swift": "9cd24d39fefb242d48371008f9e3519048583116b4f9520815a97f02c905f32c",
+    "apps/desktop/macos/Runner/MainFlutterWindow.swift": "15186bda16ad0d51b2205b7508c1c16de4752f6b38e294307ea342c3da24a4ee",
+    "apps/desktop/test/desktop_bootstrap_test.dart": "615cd0632b530d3cc62a030ab70a7c5b8218ec071081abea73b7b021b557ff0f",
+    "scripts/qa/macos-keychain-probe.swift": "0f5494f518336e9d1c9b620d36f05a0e25362d3911ecf75a24da176c16ee1e0b",
+    "scripts/qa/macos-keychain.py": "2b8d744604660596213ae2fe5baa7f6ca660f9b3ab668c9b02eafa46d95fcd51"
+  },
+  "run01Termination": {
+    "step": "B-read-after-upgrade",
+    "timeoutSeconds": 90,
+    "runnerExitCode": 1,
+    "testItemCleanup": "original A deleted item and verified absence; recorded in run-01.json"
+  }
+}

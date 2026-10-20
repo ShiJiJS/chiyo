@@ -1,0 +1,12 @@
+{
+  "service": "org.shijijs.agent-info-manage.qa.666fadcb-b5e6-418d-bffe-bf1711b84dfb",
+  "scope": "native signed sandbox probe, not Flutter UI",
+  "steps": [
+    {
+      "name": "compile-A",
+      "exit": 1,
+      "stdout": "",
+      "stderr": "/Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/macos/Runner/DatabaseKeyStore.swift:40:22: warning: 'SecKeychainGetUserInteractionAllowed' was deprecated in macOS 10.10: SecKeychain is deprecated [#DeprecatedDeclaration]\n38 |     defer { Self.interactionLock.unlock() }\n39 |     var previous: DarwinBoolean = true\n40 |     let readStatus = SecKeychainGetUserInteractionAllowed(&previous)\n   |                      `- warning: 'SecKeychainGetUserInteractionAllowed' was deprecated in macOS 10.10: SecKeychain is deprecated [#DeprecatedDeclaration]\n41 |     guard readStatus == errSecSuccess else {\n42 |       throw DatabaseKeyFailure(code: \"key_unavailable\", status: readStatus)\n\n/Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/macos/Runner/DatabaseKeyStore.swift:44:21: warning: 'SecKeychainSetUserInteractionAllowed' was deprecated in macOS 10.10: SecKeychain is deprecated [#DeprecatedDeclaration]\n42 |       throw DatabaseKeyFailure(code: \"key_unavailable\", status: readStatus)\n43 |     }\n44 |     let setStatus = SecKeychainSetUserInteractionAllowed(false)\n   |                     `- warning: 'SecKeychainSetUserInteractionAllowed' was deprecated in macOS 10.10: SecKeychain is deprecated [#DeprecatedDeclaration]\n45 |     guard setStatus == errSecSuccess else {\n46 |       throw DatabaseKeyFailure(code: \"key_unavailable\", status: setStatus)\n\n/Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/macos/Runner/DatabaseKeyStore.swift:48:50: error: cannot convert value of type 'DarwinBoolean' to expected argument type 'Bool'\n46 |       throw DatabaseKeyFailure(code: \"key_unavailable\", status: setStatus)\n47 |     }\n48 |     defer { SecKeychainSetUserInteractionAllowed(previous) }\n   |                                                  `- error: cannot convert value of type 'DarwinBoolean' to expected argument type 'Bool'\n49 |     return try action()\n50 |   }\n\n[#DeprecatedDeclaration]: <https://docs.swift.org/compiler/documentation/diagnostics/deprecated-declaration>\n"
+    }
+  ]
+}
