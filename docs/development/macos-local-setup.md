@@ -172,7 +172,10 @@ SDK 与所有顶层包的锁定依赖安装成功，四个模块静态分析全�
 生成本地二进制不等于安装接入。环境准备不修改用户 `.codex`、不安装或信任 hook，
 也不迁移真实信息库。实际接入流程见 [Codex 接入开发预览](../../integrations/codex/README.md)。
 
-## Mac 后续工作
+## 环境准备阶段的后续工作（历史）
+
+以下为准备阶段记录；当前实现和未完成门槛以 [主分支整合记录](macos-main-integration.md)、
+[Mac 适配记录](macos-runtime-adaptation.md) 及 GitHub #41–#50 为准。
 
 macOS 工程已有钥匙串、菜单栏、通知、文件面板及退出流程的原生桥接。
 这些代码仍需完整 Xcode 编译和本机 UI 验证，尤其是应用身份、sandbox、系统通知权限、

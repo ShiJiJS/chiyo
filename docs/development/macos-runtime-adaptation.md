@@ -1,6 +1,6 @@
 # Mac 凭据执行与普通附件适配
 
-开发分支：`codex/macos-adaptation`。固定 Windows 来源为 `085512060b5cf5fe7f1e45abea52f17d253141bb`，不自动跟进 `codex/round05-windows-sync` 上并行的功能开发。环境准备记录见 [macOS 本机环境](macos-local-setup.md)；其中关于“尚未适配”的结论是开始本轮前的历史状态。
+开发分支：`codex/macos-adaptation`。2026-10-21 已保存原有适配并整合固定主分支 `b37f96a089d6d4a0a9f872bd667be0c6b037f975`，合并源码及四包/Release 验证见 [主分支整合记录](macos-main-integration.md)。下文 2026-10-20 的实机证据仍仅代表原 `0855120` 基线上的适配，不自动扩展到新包。环境准备记录见 [macOS 本机环境](macos-local-setup.md)。
 
 ## 当前实现
 

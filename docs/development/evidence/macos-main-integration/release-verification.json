@@ -1,0 +1,27 @@
+{
+  "sign": {
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "runner": {
+    "exit": 0,
+    "stdout": "/Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/build/macos/Build/Products/Release/info_desktop.app/Contents/MacOS/info_desktop: Mach-O universal binary with 2 architectures: [x86_64:Mach-O 64-bit executable x86_64] [arm64:Mach-O 64-bit executable arm64]\n/Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/build/macos/Build/Products/Release/info_desktop.app/Contents/MacOS/info_desktop (for architecture x86_64):\tMach-O 64-bit executable x86_64\n/Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/build/macos/Build/Products/Release/info_desktop.app/Contents/MacOS/info_desktop (for architecture arm64):\tMach-O 64-bit executable arm64",
+    "stderr": ""
+  },
+  "worker": {
+    "exit": 0,
+    "stdout": "/Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/build/macos/Build/Products/Release/info_desktop.app/Contents/MacOS/info-runtime-worker: Mach-O 64-bit executable arm64",
+    "stderr": ""
+  },
+  "sqlcipher": {
+    "exit": 0,
+    "stdout": "/Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/build/macos/Build/Products/Release/info_desktop.app/Contents/Frameworks/sqlcipher.framework\n/Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/build/macos/Build/Products/Release/info_desktop.app/Contents/Frameworks/sqlcipher.framework/Versions/A/sqlcipher\n/Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/build/macos/Build/Products/Release/info_desktop.app/Contents/Frameworks/sqlcipher.framework/sqlcipher",
+    "stderr": ""
+  },
+  "sha256": {
+    "Contents/MacOS/info_desktop": "a4dc5065086380c127f145ea783fb5643de3f1f49ef7d86b012b87ed503be739",
+    "Contents/MacOS/info-runtime-worker": "dc5fc0cf92c3c65c0fade17f52232ded3c8b51866f1212de4265ca75beb02187",
+    "Contents/Info.plist": "db174c4873391c8dec0ba48812cf37fd27b350e1fbb1294288ef273ecef13c54"
+  }
+}
