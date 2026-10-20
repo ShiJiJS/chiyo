@@ -1,0 +1,6 @@
+00:00 +0: loading /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/templates_test.dart
+00:00 +0: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/library_test.dart: owner manually saves named information fields
+00:00 +1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/templates_test.dart: owner creates a template and only saves information after reviewing its form
+00:01 +2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/templates_test.dart: owner creates a template and only saves information after reviewing its form
+00:01 +3: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/templates_test.dart: owner creates a template and only saves information after reviewing its form
+00:01 +4: All tests passed!
