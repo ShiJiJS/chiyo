@@ -1,0 +1,2 @@
+Prepared bundle: /Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/稳定 中文 'quote $literal; bundle
+Review hooks.json and Skill before installing or trusting.

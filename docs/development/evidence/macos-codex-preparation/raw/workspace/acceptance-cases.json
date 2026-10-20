@@ -1,0 +1,67 @@
+[
+  {
+    "id": "client-trust",
+    "expected": "正式客户端识别项目Skill和准确hook定义，用户审查并信任",
+    "state": "not_run"
+  },
+  {
+    "id": "private-stdin",
+    "expected": "真实执行工具经独立stdin传递私密关联，父shell/argv/普通日志不含能力引用",
+    "state": "not_run"
+  },
+  {
+    "id": "partial-approval",
+    "expected": "聊天A申请两个字段，只批一个；已批读取成功，未批拒绝",
+    "state": "not_run"
+  },
+  {
+    "id": "multiple-cli-calls",
+    "expected": "同一聊天多个CLI进程复用已批范围，不重复审批、不续期",
+    "state": "not_run"
+  },
+  {
+    "id": "chat-isolation",
+    "expected": "独立聊天B只拿A的公开ID时不能获得A的权限",
+    "state": "not_run"
+  },
+  {
+    "id": "revoke-and-resume",
+    "expected": "手动撤销后恢复聊天不能复活权限",
+    "state": "not_run"
+  },
+  {
+    "id": "session-end",
+    "expected": "真实根聊天结束使其所有启动代际和已委托许可失效",
+    "state": "not_run"
+  },
+  {
+    "id": "application-restart",
+    "expected": "应用退出/重启后旧关联失效，须新连接和新申请",
+    "state": "not_run"
+  },
+  {
+    "id": "same-root-sharing",
+    "expected": "主子共享真人场景由用户另行安排，本脚本不启动子Agent",
+    "state": "not_run"
+  },
+  {
+    "id": "context-lifecycle",
+    "expected": "真实compact/resume保留有效上下文但不续期，fork/clear不继承旧授权；缺失引用明确重新连接",
+    "state": "not_run"
+  },
+  {
+    "id": "non-root-events",
+    "expected": "真实Stop/Interrupt/子结束不结束根会话，记录实际事件与顺序",
+    "state": "not_run"
+  },
+  {
+    "id": "credential-reuse",
+    "expected": "同一次凭据批准后多次操作及原操作重查，不重复审批或重放",
+    "state": "not_run"
+  },
+  {
+    "id": "ordinary-file-delivery",
+    "expected": "普通附件部分批准、领取、同机实际消费与释放，旧关联被拒绝",
+    "state": "not_run"
+  }
+]

@@ -1,0 +1,10 @@
+test_changed_payload_and_unknown_platform_refused (test_prepare_codex_acceptance.PreparationTests) ... ok
+test_existing_workspace_is_byte_preserved (test_prepare_codex_acceptance.PreparationTests) ... ok
+test_hook_mutations_refused_before_writes (test_prepare_codex_acceptance.PreparationTests) ... ok
+test_mac_layout_and_cases_are_unexecuted (test_prepare_codex_acceptance.PreparationTests) ... ok
+test_windows_layout_and_literal_path_preserved (test_prepare_codex_acceptance.PreparationTests) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.032s
+
+OK

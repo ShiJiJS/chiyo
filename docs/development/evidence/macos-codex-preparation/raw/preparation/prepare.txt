@@ -1,0 +1,1 @@
+{"workspace": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/独立 Mac Codex 验收项目", "prepared": true, "clientAcceptance": false}

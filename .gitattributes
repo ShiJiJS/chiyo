@@ -79,3 +79,4 @@ docs/development/evidence/macos-delivery/raw/** -text -diff
 docs/development/evidence/macos-app-lifecycle/raw/** -text -diff
 docs/development/evidence/macos-app-worker-recovery/raw/** -text -diff
 docs/development/evidence/macos-app-backup-recovery/raw/** -text -diff
+docs/development/evidence/macos-codex-preparation/raw/** -text -diff

@@ -1,0 +1,20 @@
+{
+  "complete": true,
+  "scope": "Real standalone app-server command API; no thread, model, trusted hook or real association",
+  "client": "codex-cli 0.158.0",
+  "initialization": {
+    "userAgent": "Codex Desktop/0.158.0 (Mac OS 27.0.1; arm64) dumb (agent_info_mac_qa; 1.0)",
+    "codexHome": "/Users/jiangxinyi/.codex",
+    "platformFamily": "unix",
+    "platformOs": "macos"
+  },
+  "independentStdin": true,
+  "separateArgvVerified": true,
+  "stdinSha256": "82e4e47bb4672befb42ea3db18a4ec75049e3d89bfb84947bba2e14e25d970db",
+  "stdinBytes": 105,
+  "recipientExitCode": 0,
+  "modelToolAcceptance": false,
+  "hooksInstalled": false,
+  "threadsCreated": 0,
+  "serverExitCode": 0
+}

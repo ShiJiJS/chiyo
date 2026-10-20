@@ -10,9 +10,42 @@
 - [#44 工具与附件](macos-tools-files.md)：外部 GH/AWS 实测 EPERM 后，已新增主人选择工具目录与系统书签持久化入口；原生存储/界面回归及新包 SSH/附件工作流通过，真实目录许可、外部 GH/AWS、当前系统面板仍待验收。
 - [#45 备份恢复](macos-backup-recovery.md)：签名 Flutter 的 7/8/9 格式恢复、签名 Release 应用与独立 AOT 的 80 MiB 中断回滚/同目标重试，以及固定旧源 5/6 兼容已通过；真实面板、Keychain、最终交付包联合验收与 Windows 双向迁移仍待。
 - [#46 应用生命周期](macos-lifecycle-recovery.md)：实际签名 Flutter 的重复启动拒绝、正常退出/重开、SIGKILL 重开、缺失密钥、47125 占用、初始化期间退出和 SQLCipher 审计失败重试已通过；9 个正常退出、1 个故障注入，实际菜单/睡眠唤醒仍待。执行中 worker 联合场景已在 #43 补齐。
+- [#49 Codex 接入准备](evidence/macos-codex-preparation/verification.json)：已修复验收项目生成器只接受 Windows `.exe` 的问题，实际同源 ARM64 包生成独立项目并通过摘要/签名/拒绝覆盖核对；13 项真实聊天验收仍未运行，尚未安装或信任 hook。
 - [#50 ARM64 交付](macos-delivery.md)：`cccc37e` 同源 App/CLI/worker 整包已生成，133 项解包载荷、签名、合成存储诊断与实际 AOT 的 6 项检查通过；修复增量构建漏签名并去除 Release 调试访问权限。实际安装、Keychain 升级及最终 GUI/Codex 联合验收仍待。
 
 #43 已完成其范围，其余上述票据仍 OPEN；具体未完成条件以 GitHub 票据及各记录为准。现有证据不等于 Mac 总票 #19 已可交付。
+
+### #49 可审查工作区与真实独立 stdin 接口
+
+源码 `2d4378b`。实际输入为已核对的 `cccc37e` Mac ARM64 交付包，
+用随包 SDK-free `info-prepare-codex` 在中文、空格、单引号及 shell 特殊字符
+目录生成 CLI/hook/worker/Skill/引用。旧项目生成器确实因寻找
+`info-codex.exe` 失败，未留下目标；修复后识别 manifest 平台，
+核对两种 shell 的准确命令、事件、匹配器与超时，不复制多余执行设置。
+实际三个程序均为 ARM64 且签名校验通过。重复生成被拒绝，
+原项目所有文件摘要保持不变。另有 5 项配置测试通过，包含 6 类 hook
+改写拒绝；Windows 仅验证合成布局兼容，不算 Windows 实机回归。
+
+可审查项目位于当前仓库
+`build/macos-adaptation/issue49-codex-preparation-1/独立 Mac Codex 验收项目`。
+保留其同级固定路径 bundle，不移动或单独删除；项目没有注册到客户端，
+没有写入现有用户配置、创建聊天或授予 hook 信任。第一条准备条件已具备，
+其余真实客户端条件仍待。验收清单扩充为 13 项，全为 `not_run`，
+包括独立 stdin、compact/fork/clear、非根结束、凭据复用和普通附件实际消费。
+
+本机 `codex-cli 0.158.0` 生成的 schema 明确支持 `command/exec` 与
+`command/exec/write`。通过实际独立 app-server、只读禁网命令沙盒发送
+105 字节随机合成输入，接收摘要一致；目标与 app-server 的 argv 及本次
+响应/标准错误不包含该输入，双方退出码 0。没有调用模型、创建 thread、
+安装或信任 hook，**不能替代模型工具通道或真实会话事件**。
+首次使用 `/usr/bin/python3` 包装器时，虽收到正确摘要，但只读沙盒拒绝
+其 Xcode 缓存写入，因 stderr 非空而失败；改用已解析的 Python 实体路径
+后通过，未放宽沙盒，失败与成功记录均保留。
+
+[官方 hook 文档](https://learn.chatgpt.com/docs/hooks)于 2026-10-21 核对：
+项目配置可被发现，但非托管 hook 需用户审查并信任准确的当前定义；
+准备材料不等于已信任。本会话已向用户请求仅限该合成测试项目的明确授权，
+尚未收到答复，未使用信任绕过参数。
 
 ## 当前实现
 
