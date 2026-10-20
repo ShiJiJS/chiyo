@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:info_core/info_core.dart';
 import 'package:info_storage/info_storage.dart';
@@ -10,6 +11,7 @@ import 'settings_controls.dart';
 import 'credential_files.dart';
 import 'ssh_host_settings.dart';
 import 'credential_material_checks.dart';
+import 'tool_directory_settings.dart';
 
 enum SettingsSection {
   appearance,
@@ -642,6 +644,7 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Widget _application() => _inset([
+    if (Platform.isMacOS) const ToolDirectorySettings(),
     CredentialMaterialChecks(
       owner: widget.owner,
       reconcile: widget.runtime?.reconcileRuntimeMaterialCleanup,

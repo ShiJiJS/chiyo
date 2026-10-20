@@ -11,6 +11,8 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
   private var backupStaging: [String: URL] = [:]
   private var informationOutputs: [String: URL] = [:]
   private var informationStaging: [String: URL] = [:]
+  private var toolAccess: ToolAccessStore?
+  private var choosingToolDirectory = false
 
   override func awakeFromNib() {
     let flutterViewController = FlutterViewController()
@@ -20,6 +22,7 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
     self.title = "信息授权"
 
     RegisterGeneratedPlugins(registry: flutterViewController)
+    configureToolAccess(flutterViewController)
 
     // Local, owner-process-only bridge; never exposed by the Agent HTTP server.
     let keyChannel = FlutterMethodChannel(name: "agent_info_manage/database_key", binaryMessenger: flutterViewController.engine.binaryMessenger)
@@ -222,6 +225,63 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
     if !desktopReady { return true }
     desktopChannel?.invokeMethod("close", arguments: nil)
     return false
+  }
+
+  private func configureToolAccess(_ controller: FlutterViewController) {
+    if let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first {
+      toolAccess = ToolAccessStore(file: base.appendingPathComponent("AgentInfoManage/tool-access/directories.json"))
+    }
+    let channel = FlutterMethodChannel(name: "agent_info_manage/tool_directories",
+                                       binaryMessenger: controller.engine.binaryMessenger)
+    channel.setMethodCallHandler { [weak self] call, result in
+      guard let window = self, let store = window.toolAccess else {
+        result(FlutterError(code: "tool_access_storage_failed", message: "Tool directory settings unavailable", details: nil))
+        return
+      }
+      if call.method == "read" {
+        result(store.snapshot())
+      } else if call.method == "forget", let id = call.arguments as? String {
+        do {
+          try store.forget(id)
+          result(store.snapshot())
+        } catch {
+          result(FlutterError(code: "tool_access_storage_failed", message: "Directory was not removed", details: nil))
+        }
+      } else if call.method == "choose" {
+        guard !window.choosingToolDirectory else {
+          result(FlutterError(code: "tool_access_busy", message: "Directory chooser already open", details: nil))
+          return
+        }
+        guard call.arguments == nil || call.arguments is String else {
+          result(FlutterError(code: "tool_access_unknown", message: "Invalid directory reference", details: nil))
+          return
+        }
+        let panel = NSOpenPanel()
+        panel.title = "选择外部工具目录"
+        panel.message = "选择 GH 或 AWS 的安装目录，包含程序及其依赖文件。"
+        panel.prompt = "允许访问"
+        panel.canChooseDirectories = true
+        panel.canChooseFiles = false
+        panel.canCreateDirectories = false
+        panel.allowsMultipleSelection = false
+        window.choosingToolDirectory = true
+        panel.beginSheetModal(for: window) { response in
+          window.choosingToolDirectory = false
+          window.showApprovalsWindow()
+          guard response == .OK, let url = panel.url else { result(nil); return }
+          do {
+            try store.rememberSelection(url, replacing: call.arguments as? String)
+            result(store.snapshot())
+          } catch let error as ToolAccessFailure {
+            result(FlutterError(code: error.code, message: "Directory access was not saved", details: nil))
+          } catch {
+            result(FlutterError(code: "tool_access_unavailable", message: "Directory access unavailable", details: nil))
+          }
+        }
+      } else {
+        result(FlutterMethodNotImplemented)
+      }
+    }
   }
 
   private func showApprovalsWindow() {
