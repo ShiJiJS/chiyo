@@ -191,6 +191,9 @@ class DesktopBootstrap extends ChangeNotifier {
 
   Future<void> _handleStartupEvent(DesktopEvent event) async {
     if (keyAccessPending &&
+        library == null &&
+        runtime == null &&
+        !cleanupPending &&
         (event == DesktopEvent.quit || event == DesktopEvent.closeWindow)) {
       // Interactive recovery is offered only after all previous resources have
       // closed. Do not wait for a system authorization dialog to return.
