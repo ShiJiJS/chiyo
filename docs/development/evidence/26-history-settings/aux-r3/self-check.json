@@ -1,0 +1,130 @@
+{
+  "1440": {
+    "reference": {
+      "retentionTitle": [
+        508,
+        439,
+        693,
+        450
+      ],
+      "retentionBody": [
+        509,
+        468,
+        792,
+        481
+      ],
+      "remove": [
+        966,
+        398,
+        977,
+        410
+      ],
+      "settings-notificationsLines": [
+        498,
+        583
+      ],
+      "settings-backupsLines": [
+        607,
+        630,
+        715
+      ]
+    },
+    "actual": {
+      "retentionTitle": [
+        508,
+        439,
+        901,
+        450
+      ],
+      "retentionBody": [
+        509,
+        468,
+        792,
+        481
+      ],
+      "remove": [
+        966,
+        398,
+        977,
+        410
+      ],
+      "settings-notificationsLines": [
+        596,
+        681
+      ],
+      "settings-backupsLines": [
+        607,
+        630,
+        715
+      ]
+    },
+    "notificationExpectedWithRealExtra98px": [
+      596,
+      681
+    ]
+  },
+  "1280": {
+    "reference": {
+      "retentionTitle": [
+        428,
+        389,
+        613,
+        400
+      ],
+      "retentionBody": [
+        429,
+        418,
+        712,
+        431
+      ],
+      "remove": [
+        886,
+        348,
+        897,
+        360
+      ],
+      "settings-notificationsLines": [
+        498,
+        583
+      ],
+      "settings-backupsLines": [
+        607,
+        630,
+        715
+      ]
+    },
+    "actual": {
+      "retentionTitle": [
+        428,
+        389,
+        821,
+        400
+      ],
+      "retentionBody": [
+        429,
+        418,
+        712,
+        431
+      ],
+      "remove": [
+        886,
+        348,
+        897,
+        360
+      ],
+      "settings-notificationsLines": [
+        596,
+        681
+      ],
+      "settings-backupsLines": [
+        607,
+        630,
+        715
+      ]
+    },
+    "notificationExpectedWithRealExtra98px": [
+      596,
+      681
+    ]
+  }
+}

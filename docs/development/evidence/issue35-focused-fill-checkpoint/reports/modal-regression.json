@@ -1,0 +1,42 @@
+[
+  {
+    "file": "fill-confirm-dialog-visible-1440x900.png",
+    "state": "fill-confirm",
+    "size": "1440x900",
+    "zoom": 1,
+    "group": "dialog-visible",
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  },
+  {
+    "file": "fill-save-failed-dialog-visible-1440x900.png",
+    "state": "fill-save-failed",
+    "size": "1440x900",
+    "zoom": 1,
+    "group": "dialog-visible",
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  },
+  {
+    "file": "fill-confirm-dialog-visible-1280x800.png",
+    "state": "fill-confirm",
+    "size": "1280x800",
+    "zoom": 1,
+    "group": "dialog-visible",
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  },
+  {
+    "file": "fill-save-failed-dialog-visible-1280x800.png",
+    "state": "fill-save-failed",
+    "size": "1280x800",
+    "zoom": 1,
+    "group": "dialog-visible",
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  }
+]

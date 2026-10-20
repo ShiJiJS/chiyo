@@ -1,0 +1,13 @@
+Flutter assets will be downloaded from https://storage.flutter-io.cn. Make sure you trust this source!
+00:00 +0: loading C:/Project/network_config/info-manage/apps/desktop/test/information_file_editor_test.dart
+00:00 +0: (setUpAll)
+00:00 +0: file controls are reachable by keyboard and Escape cleans the draft at 100.0%
+00:11 +1: file controls are reachable by keyboard and Escape cleans the draft at 200.0%
+00:21 +2: real owner save retries unchanged input, preserves bytes and text-only edits
+00:21 +3: cancel waits for in-flight picker and releases its eventual stage; cleanup can retry
+00:21 +4: cancelled picker and failed replacement retain the original selection and other inputs
+00:21 +5: same-purpose file replacement retains identity, kind conversion changes it
+00:21 +6: a known committed save only retries cleanup and never submits a second version
+00:21 +7: file editor shows missing file error, saves real file and keeps the three-column library
+00:22 +8: (tearDownAll)
+00:22 +8: All tests passed!

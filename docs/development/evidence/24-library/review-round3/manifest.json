@@ -1,0 +1,177 @@
+{
+  "capturedFrom": "uncommitted #24 source after editor/taxonomy/breadcrumb/recovery refinements",
+  "baseCommit": "da165406dbb0a50a48e25f8f909d5929f9947ef2",
+  "fixedUtc": "2026-10-16T22:16:08.5542928Z",
+  "files": [
+    {
+      "name": "blue-1440-editor.png",
+      "sha256": "034d051b66482e09864297835721ff48d8bf445d945d011489b21594e2e1c899",
+      "sourceLastWriteUtc": "2026-10-16T22:15:47.8767718Z"
+    },
+    {
+      "name": "blue-1440-empty.png",
+      "sha256": "64556e510e0390930385b5108f87458f6e4e74a627523a915bc573c23ac52ee2",
+      "sourceLastWriteUtc": "2026-10-16T22:15:48.5324292Z"
+    },
+    {
+      "name": "blue-1440-taxonomy.png",
+      "sha256": "41efe0dfa9348c8c6a6cc6df16620d68f0bbd368ef829c4f229dc97977a71443",
+      "sourceLastWriteUtc": "2026-10-16T22:15:48.2029929Z"
+    },
+    {
+      "name": "blue-1440.png",
+      "sha256": "0a42164d7f3d67867843b7321dfc7cd7d1a667a5e3d100f1c0a9454b16c778c5",
+      "sourceLastWriteUtc": "2026-10-16T22:15:47.5935666Z"
+    },
+    {
+      "name": "green-1440-editor.png",
+      "sha256": "c39997152658711fd2b39aefe7f1493a4885884cbbcf774aebadde7a810e919e",
+      "sourceLastWriteUtc": "2026-10-16T22:15:46.5724038Z"
+    },
+    {
+      "name": "green-1440-empty.png",
+      "sha256": "16e1ff3fd24f85cf70d4e186d8da38ffc11924bca401aa9face90a6526bc989c",
+      "sourceLastWriteUtc": "2026-10-16T22:15:47.2507880Z"
+    },
+    {
+      "name": "green-1440-taxonomy.png",
+      "sha256": "80acef9397798dc60767c07666df039b0f4b34d85ecb681d7f6032897aa9aaf5",
+      "sourceLastWriteUtc": "2026-10-16T22:15:46.9435604Z"
+    },
+    {
+      "name": "green-1440.png",
+      "sha256": "065d16fd9940f0ed011208603f664ef68203381baecf32346a04ca71ac0659b5",
+      "sourceLastWriteUtc": "2026-10-16T22:15:46.2829948Z"
+    },
+    {
+      "name": "mono-1440-editor.png",
+      "sha256": "d8f9ba6f13b941537f80bc0734009e782f50c6925ac8524b4b2419c9684870fa",
+      "sourceLastWriteUtc": "2026-10-16T22:15:45.1131440Z"
+    },
+    {
+      "name": "mono-1440-empty.png",
+      "sha256": "b8cbe017930733bcb89983f190bb4bc530d8614d44d0e4b756fa4e19b33775b7",
+      "sourceLastWriteUtc": "2026-10-16T22:15:45.9628103Z"
+    },
+    {
+      "name": "mono-1440-taxonomy.png",
+      "sha256": "4b7ab5b50d92679cfa357ce07bb7491c4c7582581ef8e35e1b3e7603eba1b404",
+      "sourceLastWriteUtc": "2026-10-16T22:15:45.5619097Z"
+    },
+    {
+      "name": "mono-1440.png",
+      "sha256": "f7a9522192e87b75b34690cba5d39367c7fa2e813c131167f639cbd9657dc241",
+      "sourceLastWriteUtc": "2026-10-16T22:15:44.7897070Z"
+    },
+    {
+      "name": "purple-1280-editor.png",
+      "sha256": "61077980a0fe1c41edea0b040e3ea0d92c6c2bca1accec6ef6129dd79dc80f78",
+      "sourceLastWriteUtc": "2026-10-16T22:15:43.5318361Z"
+    },
+    {
+      "name": "purple-1280-empty.png",
+      "sha256": "3a350bcc89c9c85ee6b355ea837c6acddb1e9817d14e75c8a91908bd7a110b28",
+      "sourceLastWriteUtc": "2026-10-16T22:15:44.4383290Z"
+    },
+    {
+      "name": "purple-1280-taxonomy.png",
+      "sha256": "145775882e5c589e18115e5a9c2f53caf03600676d9c05a7c9d14c29a5ab1e63",
+      "sourceLastWriteUtc": "2026-10-16T22:15:43.9617879Z"
+    },
+    {
+      "name": "purple-1280.png",
+      "sha256": "e1a55f507506b2c656eda8f45341aa740a68d356e226dc1a3717c305fc8444d6",
+      "sourceLastWriteUtc": "2026-10-16T22:15:43.2227111Z"
+    },
+    {
+      "name": "purple-1440-editor.png",
+      "sha256": "9a43ee1bd9bf62e37a95b7fd8c2ea64a6b97833ad036c21914a20cc3d0a415f0",
+      "sourceLastWriteUtc": "2026-10-16T22:15:37.9091445Z"
+    },
+    {
+      "name": "purple-1440-empty.png",
+      "sha256": "b382c53f93d03111f8b53e8b3058e60397923d0d77faa4b6a36691e4db6403db",
+      "sourceLastWriteUtc": "2026-10-16T22:15:39.5584019Z"
+    },
+    {
+      "name": "purple-1440-failure.png",
+      "sha256": "41a0fdd6e38fc8521ebbb449117682796b385d09fc535701523e346c729d7fbc",
+      "sourceLastWriteUtc": "2026-10-16T22:15:38.2298953Z"
+    },
+    {
+      "name": "purple-1440-history-empty.png",
+      "sha256": "a436f85e3d99136ac2fb795cab375f0d60a4ba4d0ed947ede9166181bab64152",
+      "sourceLastWriteUtc": "2026-10-16T22:15:40.4608430Z"
+    },
+    {
+      "name": "purple-1440-history.png",
+      "sha256": "eed61e3e4600998c8b91ddb12ca82788f5b037bc4a2fffd9aba6091cda3d038d",
+      "sourceLastWriteUtc": "2026-10-16T22:15:40.8632099Z"
+    },
+    {
+      "name": "purple-1440-query-failure.png",
+      "sha256": "25c1c0dfdbc32c718f5e8145864114fbbbb8d56b1f625e0bb26c43984da00342",
+      "sourceLastWriteUtc": "2026-10-16T22:15:39.7399497Z"
+    },
+    {
+      "name": "purple-1440-recycle-confirm.png",
+      "sha256": "003f08ece48f99025b261a57a250b5248a9782b212e29d8ebb84a15660882284",
+      "sourceLastWriteUtc": "2026-10-16T22:15:42.1505996Z"
+    },
+    {
+      "name": "purple-1440-recycle-failure.png",
+      "sha256": "d1f61709b1c3df82206a8081c47351588cc0ad38badc2d17b7d227348c2e3082",
+      "sourceLastWriteUtc": "2026-10-16T22:15:42.3089423Z"
+    },
+    {
+      "name": "purple-1440-revision-confirm.png",
+      "sha256": "2a64669a70603abe097ae0d3032354180b89e85bee6f64218dd647f695757c7d",
+      "sourceLastWriteUtc": "2026-10-16T22:15:41.2045996Z"
+    },
+    {
+      "name": "purple-1440-revision-failure.png",
+      "sha256": "2c08fe3fc18b13cb318cb60e0e8babc92074bedee5ef59e57e880052d30227b4",
+      "sourceLastWriteUtc": "2026-10-16T22:15:41.4448352Z"
+    },
+    {
+      "name": "purple-1440-taxonomy.png",
+      "sha256": "8450fc672f3fa3fc5e3a0528b2ee16e54585e6081e2e41b301ad9982b26797bf",
+      "sourceLastWriteUtc": "2026-10-16T22:15:38.9509240Z"
+    },
+    {
+      "name": "purple-1440-trash-empty.png",
+      "sha256": "5af9b96392e45e42a8ba70f728e58fe8a43e9073cf8c5e049c9f5402df3599b2",
+      "sourceLastWriteUtc": "2026-10-16T22:15:42.5736307Z"
+    },
+    {
+      "name": "purple-1440-trash.png",
+      "sha256": "ada1d720b467e7dd73dcc5eef62de983f5c95388ba7e4f2f8921ef2cf33fdb26",
+      "sourceLastWriteUtc": "2026-10-16T22:15:41.9377269Z"
+    },
+    {
+      "name": "purple-1440.png",
+      "sha256": "06159a1fabcb1bd9071e9f2f9c3df1e183df4e784f4bff40704412bfb3e3a627",
+      "sourceLastWriteUtc": "2026-10-16T22:15:37.3790927Z"
+    },
+    {
+      "name": "purple-200-last.png",
+      "sha256": "23212fd9fd91403b90dc2f09ba421b7b2ba2df5d6901355fba4c4e69c7639791",
+      "sourceLastWriteUtc": "2026-10-16T22:15:49.7651823Z"
+    },
+    {
+      "name": "purple-200.png",
+      "sha256": "016decf8b9228b0f3d59aa2e7f7dcdf925e5f6e5ccf63c1fbdd7dfda5e21c3fd",
+      "sourceLastWriteUtc": "2026-10-16T22:15:49.5880190Z"
+    },
+    {
+      "name": "purple-long-last.png",
+      "sha256": "e648c5be6734f9adafd629b120ed693581e913ac501cd99054b883b2c4ee6cc5",
+      "sourceLastWriteUtc": "2026-10-16T22:15:49.2202425Z"
+    },
+    {
+      "name": "purple-long.png",
+      "sha256": "1fc4e6432750b376e71e7ca839e10abbbfd85bc4f6e966bdb46afd54daeaf27b",
+      "sourceLastWriteUtc": "2026-10-16T22:15:49.0821737Z"
+    }
+  ]
+}

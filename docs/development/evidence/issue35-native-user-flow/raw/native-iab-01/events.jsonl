@@ -1,0 +1,12 @@
+{"phase":"ready","helper":{"executable":"C:\\Project\\network_config\\info-manage\\apps\\desktop\\build\\windows\\x64\\runner\\Debug\\info-focus-broker.exe","sha256":"3a52234a281cf8fcac7f0148906991094147d8219617673981e934d72498d40b"},"cli":"C:/Project/network_config/info-manage/build/qa-issue35/bundle-cli/info.exe","receiver":"C:/Project/network_config/info-manage/apps/desktop/build/windows/x64/focused_input/Release/info-focus-fixture.exe","encryptedLibrary":true,"testSemanticsRequested":null,"harness":"production WidgetsBinding + LiveWidgetController","browserTarget":"http://127.0.0.1:54775/target.html","flutterSemanticsEnabled":false,"controlDeadline":"2026-10-19T07:14:59.332645Z"}
+{"phase":"action_started","id":1,"action":"discover","flutterSemanticsEnabled":false}
+{"phase":"action","id":1,"action":"discover","ok":true,"flutterSemanticsEnabled":true,"protocolVersion":2,"status":"ok","targetState":"refused","errorCode":"unsupported_target"}
+{"phase":"action_started","id":2,"action":"request","flutterSemanticsEnabled":true}
+{"phase":"action","id":2,"action":"request","ok":false,"rawErrorNotRecorded":true}
+{"phase":"action_started","id":3,"action":"discover","flutterSemanticsEnabled":true}
+{"phase":"action","id":3,"action":"discover","ok":true,"flutterSemanticsEnabled":true,"protocolVersion":2,"status":"ok","targetState":"refused","errorCode":"unsupported_target"}
+{"phase":"action_started","id":4,"action":"discover","flutterSemanticsEnabled":true}
+{"phase":"action","id":4,"action":"discover","ok":true,"flutterSemanticsEnabled":true,"protocolVersion":2,"status":"ok","targetState":"refused","errorCode":"unsupported_target"}
+{"phase":"action_started","id":5,"action":"close","flutterSemanticsEnabled":true}
+{"phase":"action","id":5,"action":"close","ok":true,"flutterSemanticsEnabled":true,"closing":true}
+{"phase":"closed","closed":true,"assertionsPassed":false,"failed":true,"reopenedEncryptedFacts":{"operations":0,"requests":0,"grantNotRevived":true}}

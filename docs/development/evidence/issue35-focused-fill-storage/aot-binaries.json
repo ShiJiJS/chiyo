@@ -1,0 +1,12 @@
+[
+  {
+    "name": "info.exe",
+    "bytes": 7395840,
+    "sha256": "159fe781c0fa100335921da9b7c6c9d0179b3a21e24d7bd88c0962cce0bba70f"
+  },
+  {
+    "name": "info-runtime-worker.exe",
+    "bytes": 6437376,
+    "sha256": "59cf09020539be93dff3f7ff2fdfe0adee4a622a60855aab9f4e56567cdb05ec"
+  }
+]

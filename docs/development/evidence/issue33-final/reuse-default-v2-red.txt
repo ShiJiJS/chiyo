@@ -1,0 +1,40 @@
+00:00 +0: loading test/credential_reuse_json_lines_test.dart
+00:00 +0: test/credential_reuse_json_lines_test.dart: independent JSON-lines CLI defaults to v2, runs distinct operations and never repeats a claimed operation
+00:00 +1: test/credential_reuse_json_lines_test.dart: independent JSON-lines CLI defaults to v2, runs distinct operations and never repeats a claimed operation
+00:00 +1 -1: test/credential_reuse_runtime_test.dart: native Windows workers run three operations with separate Jobs and one unchanged grant
+00:00 +1 -1: test/credential_reuse_json_lines_test.dart: independent JSON-lines CLI defaults to v2, runs distinct operations and never repeats a claimed operation [E]
+  Expected: true
+    Actual: <null>
+
+  package:matcher                                  expect
+  test\credential_reuse_json_lines_test.dart 82:7  main.<fn>
+
+00:03 +2 -1: test/credential_reuse_runtime_test.dart: native file workers inject two independent paths and clear their registered material
+00:04 +3 -1: test/credential_reuse_runtime_test.dart: full resident capacity still returns duplicate facts without another start
+00:06 +4 -1: test/credential_reuse_runtime_test.dart: each file operation writes exact bytes into its own path and cleans only its lease
+00:07 +5 -1: test/credential_reuse_runtime_test.dart: default and explicit v2 refuse an old service without silently creating a v1 request
+00:07 +5 -2: test/credential_reuse_runtime_test.dart: default and explicit v2 refuse an old service without silently creating a v1 request [E]
+  Expected: 'unsupported_capability'
+    Actual: <null>
+     Which: not an <Instance of 'String'>
+
+  package:matcher                                expect
+  test\credential_reuse_runtime_test.dart 412:7  main.<fn>
+
+00:07 +5 -2: test/credential_reuse_runtime_test.dart: one CLI grant runs two distinct plans and duplicate commands only query facts
+00:08 +6 -2: test/credential_reuse_runtime_test.dart: failed CLI operation does not consume approval and is not replayed
+00:08 +7 -2: test/credential_reuse_runtime_test.dart: truncated private claim is uncertain, and same operation retry cannot reissue material
+00:08 +8 -2: test/credential_reuse_runtime_test.dart: wrong-operation private claim is uncertain, and same operation retry cannot reissue material
+00:08 +9 -2: test/credential_reuse_runtime_test.dart: wrong-request private claim is uncertain, and same operation retry cannot reissue material
+00:09 +10 -2: test/credential_reuse_runtime_test.dart: duplicate-key private claim is uncertain, and same operation retry cannot reissue material
+00:09 +11 -2: test/credential_reuse_runtime_test.dart: a lost hosted acknowledgement remains uncertain and does not replay a command
+00:09 +12 -2: test/credential_reuse_runtime_test.dart: protocol errors never upgrade old grants or create malformed operations
+00:09 +13 -2: test/credential_reuse_runtime_test.dart: hosted concurrent clients use one operation, including after revocation
+00:09 +14 -2: Some tests failed.
+
+Failing tests:
+  test/credential_reuse_json_lines_test.dart: independent JSON-lines CLI defaults to v2, runs distinct operations and never repeats a claimed operation
+  test/credential_reuse_runtime_test.dart: default and explicit v2 refuse an old service without silently creating a v1 request
+
+Consider enabling the flag chain-stack-traces to receive more detailed exceptions.
+For example, 'dart test --chain-stack-traces'.

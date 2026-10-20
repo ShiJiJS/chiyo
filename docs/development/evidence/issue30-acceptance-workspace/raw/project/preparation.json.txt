@@ -1,0 +1,45 @@
+{
+  "release": "0.4.0+12-dev.995283f1d5ef",
+  "productSource": "995283f1d5ef806a629f6cb917cca3bb7e88944f",
+  "bundle": "C:\\Project\\network_config\\info-manage\\build\\codex-preview-0.4.0-12-995283f",
+  "workspace": "C:\\Project\\network_config\\info-manage-codex-acceptance-0.4.0-12-995283f",
+  "projectLayoutPrepared": true,
+  "existingProjectsModified": false,
+  "registeredByThisScript": false,
+  "clientActivationVerified": false,
+  "trusted": false,
+  "realClientAcceptance": false,
+  "casesRun": 0,
+  "files": [
+    {
+      "path": ".agents/skills/agent-info-access/references/credential-use.md",
+      "bytes": 13695,
+      "sha256": "8610c5d45571846d30a646bfb58ed27f48c52252f1d36efb138e66f1c55abbac"
+    },
+    {
+      "path": ".agents/skills/agent-info-access/references/information-files.md",
+      "bytes": 5748,
+      "sha256": "9dc64a5e38d8f88f28a73a8ce8de9656e21138ee0d5b0c9b226cfc7982777209"
+    },
+    {
+      "path": ".agents/skills/agent-info-access/SKILL.md",
+      "bytes": 11497,
+      "sha256": "5b9649c7d6a91d77a54451d34e9718b811bf1c6812df38acdcbb02950cd3b684"
+    },
+    {
+      "path": ".codex/hooks.json",
+      "bytes": 2181,
+      "sha256": "61b3ba810cef63a79a3955f696b64266fbae8774646c3f83787c9ccdb9319ec4"
+    },
+    {
+      "path": "acceptance-cases.json",
+      "bytes": 1231,
+      "sha256": "c5802866cc1b2a9418e7d1c16fe9caf734c80a7a629b0192f582015621631e1d"
+    },
+    {
+      "path": "README.txt",
+      "bytes": 2239,
+      "sha256": "2fd72b12e4e13d43dbd59486a017dde2659bd4bf497cf94d2f9738173c42d459"
+    }
+  ]
+}

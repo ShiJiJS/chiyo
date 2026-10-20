@@ -1,0 +1,40 @@
+from pathlib import Path
+import subprocess,json,sys,os,hashlib
+sys.stdout.reconfigure(encoding='utf-8')
+root=Path.cwd();out=root/'build/qa-issue37-capacity-outcomes'/sys.argv[1];out.mkdir(parents=True,exist_ok=False)
+dart='C:/Users/Todoki/.local/share/flutter/bin/dart.bat'
+env=os.environ.copy();env['PUB_HOSTED_URL']='https://pub.flutter-io.cn';env['FLUTTER_STORAGE_BASE_URL']='https://storage.flutter-io.cn'
+old=[(root/'build/qa-issue33/legacy16-source-tz2lw61y','291801046f7d1e6e4217a4bc001ea714689855c5','legacy_probe.dart'),(root/'build/qa-issue35/schema17-source-kzrti573','299a8b1f9615de218c1fba42d9f383dad377890f','schema17_probe.dart')]
+norm=lambda b:b.replace(b'https://pub.flutter-io.cn',b'https://pub.dev').replace(b'\r\n',b'\n')
+production=[];probes=[]
+for folder,revision,helper in old:
+    paths=subprocess.check_output(['git','ls-tree','-r','--name-only',revision,'--','packages/info_core/lib','packages/info_storage/lib','packages/info_core/pubspec.yaml','packages/info_storage/pubspec.yaml','packages/info_core/pubspec.lock','packages/info_storage/pubspec.lock'],cwd=root,text=True).splitlines()
+    for relative in paths:
+        expected=subprocess.check_output(['git','show',revision+':'+relative],cwd=root);actual=(folder/relative).read_bytes()
+        assert norm(actual)==norm(expected),(revision,relative)
+        production.append({'revision':revision,'path':relative,'gitSha256':hashlib.sha256(expected).hexdigest(),'actualSha256':hashlib.sha256(actual).hexdigest()})
+    probe=folder/'packages/info_storage'/helper;assert probe.is_file();probes.append(str(probe))
+    production.append({'revision':revision,'helper':helper,'sha256':hashlib.sha256(probe.read_bytes()).hexdigest()})
+env['ISSUE33_LEGACY_PROBE']=probes[0];env['ISSUE35_SCHEMA17_PROBE']=probes[1];env['ISSUE37_OLD_STORAGE_PROBES']=json.dumps(probes)
+current=[root/p/'pubspec.lock' for p in ['packages/info_core','packages/info_storage','packages/info_cli','apps/desktop']]
+legacy=[folder/p/'pubspec.lock' for folder,_,_ in old for p in ['packages/info_core','packages/info_storage']]
+locks={p:p.read_bytes() for p in current+legacy};phases=[]
+def run(package,name,args):
+    with (out/(name+'.txt')).open('wb') as log:r=subprocess.run([dart,*args],cwd=package,env=env,stdout=log,stderr=subprocess.STDOUT)
+    phases.append({'phase':name,'exitCode':r.returncode});print(json.dumps(phases[-1]),flush=True)
+    if r.returncode:
+        print((out/(name+'.txt')).read_text(encoding='utf-8',errors='replace')[-10000:],flush=True);raise RuntimeError(name)
+try:
+    for p,b in locks.items():p.write_bytes(b.replace(b'https://pub.dev',b'https://pub.flutter-io.cn'))
+    for i,(folder,_,_) in enumerate(old):run(folder/'packages/info_storage',f'old{i}-pub',['pub','get','--enforce-lockfile','--offline'])
+    package=root/'packages/info_storage';run(package,'pub',['pub','get','--enforce-lockfile','--offline'])
+    run(package,'format',['format','test/information_delivery_storage_test.dart','test/information_attachments_storage_test.dart'])
+    run(package,'analyze',['analyze','--fatal-infos'])
+    run(package,'legacy-and-storage',['test','test/information_delivery_storage_test.dart','test/information_attachments_storage_test.dart','test/credential_reuse_storage_test.dart','test/focused_fill_storage_test.dart','--reporter','expanded'])
+finally:
+    unexpected=[]
+    for p,b in locks.items():
+        if norm(p.read_bytes())!=norm(b):unexpected.append(str(p))
+        else:p.write_bytes(b)
+    (out/'result.json').write_text(json.dumps({'phases':phases,'pinnedSourceChecks':production,'unexpectedLocks':unexpected},ensure_ascii=False,indent=2)+'\n',encoding='utf-8',newline='\n')
+    assert not unexpected,unexpected

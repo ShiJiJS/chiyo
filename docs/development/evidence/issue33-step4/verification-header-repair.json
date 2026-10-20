@@ -1,0 +1,51 @@
+{
+  "issue": 33,
+  "checkpoint": "4-supplement",
+  "baseSourceCommit": "2d607c93717ce209642565c2f9eb2b0d4809f24c",
+  "textHashes": "UTF-8 LF canonical",
+  "sourceFiles": {
+    "packages/info_storage/lib/info_storage.dart": "675b085162a84fab9f44fe64cb12953caf6a4ea6969aae358d468f0bf926781c",
+    "packages/info_storage/test/credential_reuse_storage_test.dart": "a8159190c67e7fa06fbe485d7ce8b21dfa0ada0d6f570b90bf1e8bc48603065d",
+    "packages/info_storage/test/information_time_test.dart": "12f108f1d9e676291712dd0f31aa1ddbb3f7a0401d5567ff638255fcc6bbb55e",
+    "packages/info_storage/test/organization_tasks_test.dart": "3ef9b7dab59fd818044bde42521f21c5815cd80dd89e7a9f99ef85e4f8ea81fd",
+    "packages/info_storage/test/recycle_test.dart": "2960dbf9899cfdd43891731731b437041d96edd3d082e01afb8a8f9c4cc41319",
+    "packages/info_storage/test/revisions_test.dart": "c8ed16c631294d34d52580e504a00a6cbeb8c3e038840b250820f6279e200daa",
+    "docs/design/runtime-protocol-v2.md": "96c0288831193b70ddfe25f7fc4aa974c0b773f4840dac6e4401adc0fc35b146"
+  },
+  "evidenceFiles": {
+    "reuse-storage-header-repair-final.txt": "19f827118e4eb8628689adb5da3d66be224fdb6e816d5263a6e85663bb7bc667",
+    "reuse-storage-completed-format-final.txt": "af82b89db2a2d4c48115eaee57f2e70e166523ef816a64c9633c7013775f3ef3",
+    "reuse-storage-completed-format-final-analyze.txt": "a489b1249880b489826d25a25a28b316c5059ae3c5e62feecfc2b7949aba9041",
+    "reuse-storage-completed-format-final-environment.json": "82729dba0499bec23197f2c3eadf2436ada264d09b0e33787583ec3373ad5112",
+    "legacy16-reader-preparation.json": "8c9514eea90a7d094b33ce6bc775b6a91f7915795ae935fc461273fa8b0333e8",
+    "legacy16-preparation.txt": "a24779315fffab73870dfc7b15b56246a95b601b3432e434b43cd223bf752a6a",
+    "reuse-storage-compat.txt": "1435ddf859226a3cad3685c7cd2d7c957c8bcbed38894336f3d35a095a7925d7"
+  },
+  "verification": {
+    "storageTestsPassed": 76,
+    "storageTestsSkipped": 0,
+    "strictAnalysis": "passed",
+    "completedFormatHeaderCases": [
+      10,
+      16
+    ],
+    "realLegacyStructureFixtures": [
+      1,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      15,
+      16
+    ],
+    "legacyPreparationScript": "executed successfully; its prepared reader was used in final full test",
+    "legacySourceCommit": "291801046f7d1e6e4217a4bc001ea714689855c5",
+    "failedIntermediateRun": "4 synthetic legacy fixtures incorrectly retained current marker; fixed them to remove schema17 marker/runtime tables, preserving their original data and upgrade assertions",
+    "coreTests": 157,
+    "coreEvidence": "same unchanged core as base checkpoint4",
+    "productionV2Enabled": false,
+    "flutterV2": false
+  }
+}

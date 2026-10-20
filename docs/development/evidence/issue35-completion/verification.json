@@ -1,0 +1,570 @@
+{
+  "source": "fd86496e78d8972fc19129ed25b1d8454ad17dba",
+  "status": "Windows focused-fill component verified; distribution/Codex/notification and ordinary files remain separate tickets",
+  "nativeWorkflowSource": "9ad18af4e7e77a02f2314aa8ca0ff3f6e721a0d4",
+  "nativeWorkflow": {
+    "testRunnerExitCode": 0,
+    "approvedRequests": 2,
+    "reusedFirstGrantSuccessfulOperations": 3,
+    "unknownOperations": 1,
+    "secondGrantStillAvailableBeforeRestart": true,
+    "oldCliQueryAndUseAfterRestart": "unauthorized/session_required",
+    "scope": "Same living independent CLI against reopened SQLCipher/DPAPI service on same port"
+  },
+  "semantics": {
+    "diagnosticFailure": "Minimal dialog with framework-first/native-later semantics reproduces AV 0xc0000005 at flutter_windows.dll+0x3c1ea",
+    "control": "OS-requested semantics produces a complete tree and native modal test passes",
+    "sdkNotPatched": true,
+    "productionAccessibilityNotDisabled": true,
+    "teardown": "Only newly OS-requested handle released after unmount; extra app handle is rejected by 3 regression tests",
+    "mechanism": "Source-based inference confirmed by the on/off attachment-order experiment; engine was not rebuilt or instrumented"
+  },
+  "checks": [
+    {
+      "item": 1,
+      "verified": true,
+      "requirement": "Round05 prototype, separate fill result and history/tips",
+      "evidence": [
+        "../issue35-focused-fill-checkpoint/verification.json",
+        "../issue35-focused-fill-ui/verification.json",
+        "raw/final-check-focused-fill.cjs.txt",
+        "raw/final-focused-widgets.txt"
+      ]
+    },
+    {
+      "item": 2,
+      "verified": true,
+      "requirement": "Private session, fixed grants, audit before input, duplicate/version/expiry/revoke/restart",
+      "evidence": [
+        "../issue35-focused-fill-core/verification.json",
+        "../issue35-focused-fill-storage/verification.json",
+        "raw/native-ui-session-10/events.jsonl",
+        "raw/native-ui-session-10/state.json",
+        "raw/current-clients/tests.txt"
+      ]
+    },
+    {
+      "item": 3,
+      "verified": true,
+      "requirement": "Native foreground/process/target guards, serialization and explanatory refusal",
+      "evidence": [
+        "../issue35-focused-fill-native/verification.json",
+        "../issue35-native-user-flow/verification.json",
+        "raw/final-native-guards-result.json",
+        "raw/current-clients/tests.txt"
+      ]
+    },
+    {
+      "item": 4,
+      "verified": true,
+      "requirement": "Private keyboard input; no ordinary clipboard or secret in public receipts",
+      "evidence": [
+        "../issue35-focused-fill-native/verification.json",
+        "../issue35-native-user-flow/verification.json",
+        "raw/native-ui-session-10/events.jsonl",
+        "raw/parent-death-01/events.json"
+      ]
+    },
+    {
+      "item": 5,
+      "verified": true,
+      "requirement": "Independent CLI real Unicode input, exact match, no paste, no replay or readback by production",
+      "evidence": [
+        "raw/native-ui-session-10/events.jsonl",
+        "raw/current-clients/native-binary-equivalence.json",
+        "raw/native-ui-session-10/state.json"
+      ]
+    },
+    {
+      "item": 6,
+      "verified": true,
+      "requirement": "Per-target support and explicit unsupported states",
+      "evidence": [
+        "../issue35-native-user-flow/verification.json",
+        "../issue35-native-user-flow/browser-tool-observations.json"
+      ],
+      "scope": "Synthetic Win32 password receiver and current visible native-foreground Codex IAB password page only; owner returns to target when DOM tool cannot activate the OS window"
+    },
+    {
+      "item": 7,
+      "verified": true,
+      "requirement": "Normal tool snapshot/value/masked image and explicit plaintext-image counterexample",
+      "evidence": [
+        "../issue35-native-user-flow/browser-tool-observations.json",
+        "../issue35-focused-fill-native/verification.json"
+      ],
+      "scope": "Actual observations, transcription and chat screenshots; no saved browser pixel artifact or entire tool/model transport payload claim"
+    },
+    {
+      "item": 8,
+      "verified": true,
+      "requirement": "Isolated lifecycle, cleanup and Skill instructions",
+      "evidence": [
+        "raw/native-ui-session-10/state.json",
+        "raw/native-ui-session-10/semantics-cleanup.json",
+        "raw/parent-death-01/events.json",
+        "raw/current-clients/tests.txt"
+      ],
+      "scope": "No real credentials, user vault, Codex install/config, subagents or server sync; all owned test windows/processes and control sessions closed"
+    }
+  ],
+  "testGroups": {
+    "newHandleRegressions": 3,
+    "selectedWidgetsIncludingThose3": 19,
+    "freshCompiledClientAndNativeFaultCases": 20,
+    "prototypeStates": 49,
+    "guardChecksPerConfiguration": 23,
+    "snapshotChecksPerConfiguration": 24,
+    "nativeConfigurations": [
+      "Debug",
+      "Release"
+    ],
+    "notACombinedHeadlessTotal": true
+  },
+  "nativeParentDeath": {
+    "source": "b0f2e4535760b6edb9324a613d5a5ebaf11250e7",
+    "realReleaseBroker": true,
+    "oneAcceptedBatchThenParentTerminated": true,
+    "noLaterInput": true,
+    "scope": "Direct real driver/native-helper lifecycle with private synthetic bytes; separate from GUI/auth database test; does not isolate watch-thread vs pipe-EOF exit path"
+  },
+  "sources": [
+    {
+      "path": "apps/desktop/integration_test/focused_fill_native_test.dart",
+      "source": "fd86496e78d8972fc19129ed25b1d8454ad17dba",
+      "sha256": "daa4b8a6784622fe6ea282b3a2489c82560eddd7b662c1f94706b663f2b2443f",
+      "representation": "git blob"
+    },
+    {
+      "path": "apps/desktop/integration_test/accessibility_dialog_probe_test.dart",
+      "source": "fd86496e78d8972fc19129ed25b1d8454ad17dba",
+      "sha256": "2532a1ca765808392dd1c14ffebfb9635f65f98c72254d6eb295b6cde2cadf90",
+      "representation": "git blob"
+    },
+    {
+      "path": "apps/desktop/integration_test/focused_fill_accessibility_test.dart",
+      "source": "fd86496e78d8972fc19129ed25b1d8454ad17dba",
+      "sha256": "ac8a55531b6b3c5e044d44a0b4627f7a1be46c79325884fd0218b90f48bab5e1",
+      "representation": "git blob"
+    },
+    {
+      "path": "apps/desktop/integration_test/support/native_semantics_lifetime.dart",
+      "source": "fd86496e78d8972fc19129ed25b1d8454ad17dba",
+      "sha256": "a274da35d57e9bca3322b7e5b70a2bc610990e8e8dc3fba0821bbb1e9219036f",
+      "representation": "git blob"
+    },
+    {
+      "path": "apps/desktop/test/native_semantics_lifetime_test.dart",
+      "source": "fd86496e78d8972fc19129ed25b1d8454ad17dba",
+      "sha256": "5f968c4711b55eece7ea8d92926fbde15e92ec9eef206c6f74432abb56889438",
+      "representation": "git blob"
+    },
+    {
+      "path": "packages/info_cli/test/support/focused_parent_death_worker.dart",
+      "source": "fd86496e78d8972fc19129ed25b1d8454ad17dba",
+      "sha256": "0a2d7be0c5a958d31847964e69c23f24ed7768197408fa1120ba8f25f3fc6146",
+      "representation": "git blob"
+    },
+    {
+      "path": "apps/desktop/lib/focused_fill_ui.dart",
+      "source": "fd86496e78d8972fc19129ed25b1d8454ad17dba",
+      "sha256": "85389420065a1451642565132f5a3966c05ebb44983042229cbeb8656e1b0e3c",
+      "representation": "git blob"
+    },
+    {
+      "path": "docs/design/prototypes/round-05/focused-fill-approval.html",
+      "source": "fd86496e78d8972fc19129ed25b1d8454ad17dba",
+      "sha256": "539a7a7fda9dcff249e127f3067721c74e7f6c35cd44e56363b106ca48e41205",
+      "representation": "git blob"
+    },
+    {
+      "path": "docs/design/prototypes/round-05/index.html",
+      "source": "fd86496e78d8972fc19129ed25b1d8454ad17dba",
+      "sha256": "cef1c18904b8bb62001a89abc752169c5944b72ef3df5dfb5ad8e4414455df8f",
+      "representation": "git blob"
+    },
+    {
+      "path": "integrations/codex/skills/agent-info-access/references/credential-use.md",
+      "source": "fd86496e78d8972fc19129ed25b1d8454ad17dba",
+      "sha256": "f214c26b5f95602b783fe8629b5baed2df844d178f59850c4e6a49dee00317cc",
+      "representation": "git blob"
+    }
+  ],
+  "sdkSources": [
+    {
+      "path": "engine/src/flutter/shell/platform/windows/flutter_windows_engine.cc",
+      "sha256": "fdb452182886aad7b113163a52529a66fe0fa6b6a3156ac92e1c2d3f94499e47",
+      "representation": "local SDK source bytes consulted; not an instrumented engine build"
+    },
+    {
+      "path": "engine/src/flutter/shell/platform/windows/flutter_windows_view.cc",
+      "sha256": "412e9e98c5f63238fe049f36d16aab5af82d5f925827c0616ac8696f809a10af",
+      "representation": "local SDK source bytes consulted; not an instrumented engine build"
+    },
+    {
+      "path": "engine/src/flutter/shell/platform/common/accessibility_bridge.cc",
+      "sha256": "01a7362f53551ffb3d90ee05f6af258d6da82416da4f2cc6812c0b97408941d7",
+      "representation": "local SDK source bytes consulted; not an instrumented engine build"
+    },
+    {
+      "path": "packages/flutter/lib/src/semantics/binding.dart",
+      "sha256": "e96aa7f24d879d6c270335e18c19cfb205065e0b00bed793d6a1ab918c92c16c",
+      "representation": "local SDK source bytes consulted; not an instrumented engine build"
+    },
+    {
+      "path": "packages/flutter_test/lib/src/widget_tester.dart",
+      "sha256": "152153a9419faa8294b9b97a5230a9f1c883b3b76d9d574094c6f45493d449d2",
+      "representation": "local SDK source bytes consulted; not an instrumented engine build"
+    }
+  ],
+  "latestDebugIdentity": {
+    "scope": "native-ui-session-10 assets built from 9ad18af before later hidden-tip text clarification; no new distribution bundle",
+    "files": [
+      {
+        "path": "info_desktop.exe",
+        "sha256": "6633f1a01724680fcc1413c231fcc5180d15a37ea55ef34daeaa2ac2de932ae5"
+      },
+      {
+        "path": "info-focus-broker.exe",
+        "sha256": "3a52234a281cf8fcac7f0148906991094147d8219617673981e934d72498d40b"
+      },
+      {
+        "path": "flutter_windows.dll",
+        "sha256": "b60f6940fdabeca7ea9688448852c705e76dbe6513902651dfb1e92bc1db9fd2"
+      },
+      {
+        "path": "data/flutter_assets/kernel_blob.bin",
+        "sha256": "84eccb307fe19a744642a37517309ec64e91cf6707e0738239c264047f85b8f7"
+      }
+    ]
+  },
+  "artifacts": [
+    {
+      "path": "raw/accessibility-focused-memory-01.txt",
+      "sha256": "482a6c965282c3483799b388a44de928a78033ea8d3f492623ac3a687b10b1a1",
+      "bytes": 876,
+      "representation": "raw bytes",
+      "original": "build/qa-issue35/accessibility-focused-memory-01.txt"
+    },
+    {
+      "path": "raw/accessibility-late-observer-01-run.txt",
+      "sha256": "636d04861ca85aebecd797ae4271588e89c0e0b3c946873c0d78fb74abb8a7c1",
+      "bytes": 2639,
+      "representation": "raw bytes",
+      "original": "build/qa-issue35/accessibility-late-observer-01-run.txt"
+    },
+    {
+      "path": "raw/accessibility-late-observer-01-crash.json",
+      "sha256": "1b3696930250ac8621269c351413d50cbcb49396bd6a1a019c5b5f94aacc4ed8",
+      "bytes": 399,
+      "representation": "raw bytes",
+      "original": "build/qa-issue35/accessibility-late-observer-01-crash.json"
+    },
+    {
+      "path": "raw/accessibility-late-observer-02-run.txt",
+      "sha256": "02e7d2d633841cd78af5affe443857c89bc91c68b4f0658e9606076cc1e88202",
+      "bytes": 1061,
+      "representation": "raw bytes",
+      "original": "build/qa-issue35/accessibility-late-observer-02-run.txt"
+    },
+    {
+      "path": "raw/native-semantics-lifetime-tests.txt",
+      "sha256": "5fcf94d08cdb8a406d27c26fd7f2f3242c639d9d1f0af00e406c8c5017f42f33",
+      "bytes": 469,
+      "representation": "raw bytes",
+      "original": "build/qa-issue35/native-semantics-lifetime-tests.txt"
+    },
+    {
+      "path": "raw/native-ui-session-09-run.txt",
+      "sha256": "a052d492e24385ff7ee53e40e854ed74384ec2a6ec5e12eac116ae60fdb3f569",
+      "bytes": 2741,
+      "representation": "raw bytes",
+      "original": "build/qa-issue35/native-ui-session-09-run.txt"
+    },
+    {
+      "path": "raw/native-ui-session-09-result.json",
+      "sha256": "406c06b0be545b251963f27abad5b0653afcb64dceda2410730c922fe71e43df",
+      "bytes": 72,
+      "representation": "raw bytes",
+      "original": "build/qa-issue35/native-ui-session-09-result.json"
+    },
+    {
+      "path": "raw/native-ui-session-10-run.txt",
+      "sha256": "5f2170b95ca0f2ee302516e10dd5bbe82e64252ed78f5ace369a3e0bb34c6f7a",
+      "bytes": 528,
+      "representation": "raw bytes",
+      "original": "build/qa-issue35/native-ui-session-10-run.txt"
+    },
+    {
+      "path": "raw/native-ui-session-10-result.json",
+      "sha256": "9cbb3731ad021277802c669a12d05da4d24bdd45134244f849c968fa55722bfc",
+      "bytes": 72,
+      "representation": "raw bytes",
+      "original": "build/qa-issue35/native-ui-session-10-result.json"
+    },
+    {
+      "path": "raw/final-Debug-fill_guard_test.txt",
+      "sha256": "b27242c1b0971e2db17196c503d80c347e836c9b121a6ac19c88c05304b6f622",
+      "bytes": 39,
+      "representation": "raw bytes",
+      "original": "build/qa-issue35/final-Debug-fill_guard_test.txt"
+    },
+    {
+      "path": "raw/final-Debug-focus_snapshot_test.txt",
+      "sha256": "c807322479b3303c064b883c9d108df711bb61ab7b0d54f022fd9142c8ad1964",
+      "bytes": 56,
+      "representation": "raw bytes",
+      "original": "build/qa-issue35/final-Debug-focus_snapshot_test.txt"
+    },
+    {
+      "path": "raw/final-Release-fill_guard_test.txt",
+      "sha256": "b27242c1b0971e2db17196c503d80c347e836c9b121a6ac19c88c05304b6f622",
+      "bytes": 39,
+      "representation": "raw bytes",
+      "original": "build/qa-issue35/final-Release-fill_guard_test.txt"
+    },
+    {
+      "path": "raw/final-Release-focus_snapshot_test.txt",
+      "sha256": "c807322479b3303c064b883c9d108df711bb61ab7b0d54f022fd9142c8ad1964",
+      "bytes": 56,
+      "representation": "raw bytes",
+      "original": "build/qa-issue35/final-Release-focus_snapshot_test.txt"
+    },
+    {
+      "path": "raw/final-native-guards-result.json",
+      "sha256": "4c699bb7a33defdd0c7a0afe256a4137036bcb2c1a22b439b9680aac817cf37a",
+      "bytes": 397,
+      "representation": "raw bytes",
+      "original": "build/qa-issue35/final-native-guards-result.json"
+    },
+    {
+      "path": "raw/final-focused-widgets.txt",
+      "sha256": "46111a84dfec1a37c198da983096366d9ef11794a30358d6f9359f0ef3605f4a",
+      "bytes": 3299,
+      "representation": "raw bytes",
+      "original": "build/qa-issue35/final-focused-widgets.txt"
+    },
+    {
+      "path": "raw/final-check-flows.cjs.txt",
+      "sha256": "1e289592ccd334962fd283339a4cc1bcb1387011183258650170600c125ae97d",
+      "bytes": 1003,
+      "representation": "raw bytes",
+      "original": "build/qa-issue35/final-check-flows.cjs.txt"
+    },
+    {
+      "path": "raw/final-check-attachments.cjs.txt",
+      "sha256": "665f834389db597a660da24b3d8df0bba69ef89189d55fc4b15b3398bad6bdef",
+      "bytes": 1193,
+      "representation": "raw bytes",
+      "original": "build/qa-issue35/final-check-attachments.cjs.txt"
+    },
+    {
+      "path": "raw/final-check-reuse.cjs.txt",
+      "sha256": "fb63ddee6e4614ba3cda28cab16407f0958dc9368db4281e115b476bdaf99b41",
+      "bytes": 551,
+      "representation": "raw bytes",
+      "original": "build/qa-issue35/final-check-reuse.cjs.txt"
+    },
+    {
+      "path": "raw/final-check-focused-fill.cjs.txt",
+      "sha256": "0fcd4347575b51fa3dd344202b7dc9bde69612e9c77ed0e93eda9ac3dfe27fd4",
+      "bytes": 1138,
+      "representation": "raw bytes",
+      "original": "build/qa-issue35/final-check-focused-fill.cjs.txt"
+    },
+    {
+      "path": "raw/parent-death-compile.txt",
+      "sha256": "fcacc308a9393ab747bb45c5b44c2246d3256ba52dd0dba0bb05ef5c5dc345c1",
+      "bytes": 107,
+      "representation": "raw bytes",
+      "original": "build/qa-issue35/parent-death-compile.txt"
+    },
+    {
+      "path": "raw/parent-death-analyze.txt",
+      "sha256": "6e44cc46795204be42a0f9574ea1bb6ea6f30510cacf1fc32c1bdcbcf11556c1",
+      "bytes": 41,
+      "representation": "raw bytes",
+      "original": "build/qa-issue35/parent-death-analyze.txt"
+    },
+    {
+      "path": "raw/parent-death-01-run.txt",
+      "sha256": "c6df5da3f5ec0eaa355b8c57f6387a082e9c45c1ece037a43f15f956cbac7490",
+      "bytes": 610,
+      "representation": "raw bytes",
+      "original": "build/qa-issue35/parent-death-01-run.txt"
+    },
+    {
+      "path": "raw/accessibility-late-observer-01/events.jsonl",
+      "sha256": "8a58bbad34f4f2d70f3e774ad92b5bcbe2f676f300838a0cdfbcd1954deccf03",
+      "bytes": 394,
+      "representation": "raw bytes",
+      "original": "build/qa-issue35/accessibility-late-observer-01/events.jsonl"
+    },
+    {
+      "path": "raw/accessibility-late-observer-02/events.jsonl",
+      "sha256": "5600ac6843f3f5c58f059530f39832f5710d0bbca71bfd6963e290fe0656a7ee",
+      "bytes": 498,
+      "representation": "raw bytes",
+      "original": "build/qa-issue35/accessibility-late-observer-02/events.jsonl"
+    },
+    {
+      "path": "raw/native-ui-session-09/events.jsonl",
+      "sha256": "4d357aabcac22dc1b6aecaaf61818ce09bd7c5e04093ed0cd26e706870e40618",
+      "bytes": 13996,
+      "representation": "raw bytes",
+      "original": "build/qa-issue35/native-ui-session-09/events.jsonl"
+    },
+    {
+      "path": "raw/native-ui-session-09/state.json",
+      "sha256": "c08c8ff8734e58d8a9b9273773aa0d471dc1df739ec0cfe0082f8d3f103c8557",
+      "bytes": 149,
+      "representation": "raw bytes",
+      "original": "build/qa-issue35/native-ui-session-09/state.json"
+    },
+    {
+      "path": "raw/native-ui-session-09/semantics-cleanup.json",
+      "sha256": "5b941105898fdaec6e167780471f7705d5db8d0d072fb9b68263ad3e61fd04aa",
+      "bytes": 85,
+      "representation": "raw bytes",
+      "original": "build/qa-issue35/native-ui-session-09/semantics-cleanup.json"
+    },
+    {
+      "path": "raw/native-ui-session-10/events.jsonl",
+      "sha256": "9a74966ccc4e4d17af1b9b40a0fa24e8008c8324f50f1ddf1a5fa431f4862a26",
+      "bytes": 14722,
+      "representation": "raw bytes",
+      "original": "build/qa-issue35/native-ui-session-10/events.jsonl"
+    },
+    {
+      "path": "raw/native-ui-session-10/state.json",
+      "sha256": "1bc2836eb9166cbb23065b8fc7dd5d53b46983f6ed43296b43e1fdd73c398d0f",
+      "bytes": 440,
+      "representation": "raw bytes",
+      "original": "build/qa-issue35/native-ui-session-10/state.json"
+    },
+    {
+      "path": "raw/native-ui-session-10/semantics-cleanup.json",
+      "sha256": "5b941105898fdaec6e167780471f7705d5db8d0d072fb9b68263ad3e61fd04aa",
+      "bytes": 85,
+      "representation": "raw bytes",
+      "original": "build/qa-issue35/native-ui-session-10/semantics-cleanup.json"
+    },
+    {
+      "path": "native-ui-session-10/approval.png",
+      "sha256": "38be1088e6290712fa84ba97d1e371b0ce9442ff78e35401ac6f8edb03dabf47",
+      "bytes": 114665,
+      "representation": "raw bytes",
+      "original": "build/qa-issue35/native-ui-session-10/approval.png"
+    },
+    {
+      "path": "native-ui-session-10/confirmation.png",
+      "sha256": "004538c51a0b48d701dcf5a3111ab2ae62f5716bd80e3581360b059f7234b0e5",
+      "bytes": 161619,
+      "representation": "raw bytes",
+      "original": "build/qa-issue35/native-ui-session-10/confirmation.png"
+    },
+    {
+      "path": "native-ui-session-10/attention-confirmation.png",
+      "sha256": "9d727ad983865325ffb8d14f42b5584eae47a3745bfb6a2285c24d6090a74675",
+      "bytes": 129998,
+      "representation": "raw bytes",
+      "original": "build/qa-issue35/native-ui-session-10/attention-confirmation.png"
+    },
+    {
+      "path": "native-ui-session-10/history-4.png",
+      "sha256": "1558f91e8b226919c5188bdd65fa52e63d0498badfe3653f29b1f1509115c244",
+      "bytes": 88743,
+      "representation": "raw bytes",
+      "original": "build/qa-issue35/native-ui-session-10/history-4.png"
+    },
+    {
+      "path": "raw/parent-death-01/events.json",
+      "sha256": "ad480d8dd7f2afd532a392f9551655d1096293ee590672e9bb7db20084cd8470",
+      "bytes": 788,
+      "representation": "raw bytes",
+      "original": "build/qa-issue35/parent-death-01/events.json"
+    },
+    {
+      "path": "raw/current-clients/pub.txt",
+      "sha256": "a24779315fffab73870dfc7b15b56246a95b601b3432e434b43cd223bf752a6a",
+      "bytes": 258,
+      "representation": "raw bytes",
+      "original": "build/qa-issue35/current-clients/pub.txt"
+    },
+    {
+      "path": "raw/current-clients/analyze.txt",
+      "sha256": "b51c9c80f2b144a3a264061cede7a8071b74e307d76dd376dcc35e80722ff39c",
+      "bytes": 39,
+      "representation": "raw bytes",
+      "original": "build/qa-issue35/current-clients/analyze.txt"
+    },
+    {
+      "path": "raw/current-clients/compile-info.txt",
+      "sha256": "de2d310fd1a0bc735ed2c7144e041da16855e885ae4bfdb31df140cac22f1d65",
+      "bytes": 91,
+      "representation": "raw bytes",
+      "original": "build/qa-issue35/current-clients/compile-info.txt"
+    },
+    {
+      "path": "raw/current-clients/compile-adapter.txt",
+      "sha256": "887da628c80bf367db925266a7f049d79a276151d85457e147a81ebd2516589c",
+      "bytes": 97,
+      "representation": "raw bytes",
+      "original": "build/qa-issue35/current-clients/compile-adapter.txt"
+    },
+    {
+      "path": "raw/current-clients/tests.txt",
+      "sha256": "8340158cb6528acc0caf0552457ee8aeca3cfa40ce618e4ef83e8c7a8f6671e6",
+      "bytes": 2736,
+      "representation": "raw bytes",
+      "original": "build/qa-issue35/current-clients/tests.txt"
+    },
+    {
+      "path": "raw/current-clients/result.json",
+      "sha256": "fe93a37dda5a6dbb017a0bca117aa9c0eb92a6c9975f6586fb0ac91d75dff007",
+      "bytes": 674,
+      "representation": "raw bytes",
+      "original": "build/qa-issue35/current-clients/result.json"
+    },
+    {
+      "path": "raw/current-clients/native-binary-equivalence.json",
+      "sha256": "c40683c435ae478e0ea70d49679208375ea36c4f02081eeb009b80fcf34b6e7e",
+      "bytes": 208,
+      "representation": "raw bytes",
+      "original": "build/qa-issue35/current-clients/native-binary-equivalence.json"
+    },
+    {
+      "path": "raw/controllers/check-parent-death.py.txt",
+      "sha256": "539844b700206d8d4ef296197ed3a70baa5bfbcd377d999b6e5d3853f2404e9b",
+      "bytes": 4548,
+      "representation": "raw bytes",
+      "original": "build/qa-issue35/check-parent-death.py"
+    },
+    {
+      "path": "raw/controllers/check-current-clients.py.txt",
+      "sha256": "43d621440c11e46f362a2f37e0c0784b777a7b32437d1f513f98cf66d365f345",
+      "bytes": 2650,
+      "representation": "raw bytes",
+      "original": "build/qa-issue35/check-current-clients.py"
+    },
+    {
+      "path": "raw/controllers/control-native-ui.py.txt",
+      "sha256": "29c10b87410eeec6228ee9d1f1a7d72bbdbb0beeddd58471ee31b5eb7ce44a68",
+      "bytes": 1408,
+      "representation": "raw bytes",
+      "original": "build/qa-issue35/control-native-ui.py"
+    }
+  ],
+  "notCompletedByThisTicket": [
+    "#37/#38 ordinary attachment feature",
+    "#30 installed/trusted Codex and three-feature combined acceptance",
+    "#23 actual notification click",
+    "#18 final distribution and clean Windows environment"
+  ],
+  "previousFailuresPreserved": [
+    "framework-first native AV",
+    "testWidgets native OS-owned handle invariant",
+    "session09 second approval omitted explicit navigation; session10 uses actual nav/request controls",
+    "wrong working directory initially analyzed unrelated archived sources; corrected package analysis passed and no input test ran in that attempt"
+  ]
+}

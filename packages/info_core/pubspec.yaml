@@ -1,0 +1,13 @@
+name: info_core
+description: Local information authorization use cases and agent transport.
+version: 0.1.0
+publish_to: none
+environment:
+  sdk: '>=3.9.0 <4.0.0'
+dev_dependencies:
+  test: ^1.26.3
+  lints: ^6.0.0
+dependencies:
+  crypto: ^3.0.6
+  ffi: ^2.1.4
+  unorm_dart: ^0.3.2

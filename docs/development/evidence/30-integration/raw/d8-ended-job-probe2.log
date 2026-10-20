@@ -1,0 +1,5 @@
+Unhandled exception:
+type 'Null' is not a subtype of type 'String'
+#0      _StreamIterator.current (dart:async/stream_impl.dart:1038:17)
+#1      main (file:///C:/Project/network_config/info-manage-worktrees/30-integration/.scratch/probe-ended-job.dart:7:54)
+<asynchronous suspension>

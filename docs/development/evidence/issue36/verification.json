@@ -1,0 +1,220 @@
+{
+  "baseCommit": "a932cdf",
+  "ticket": 36,
+  "productionBehaviorVerified": false,
+  "renderMatrix": {
+    "purple": {
+      "viewports": [
+        "1440x900",
+        "1280x800"
+      ],
+      "states": 17,
+      "renders": 34,
+      "issues": 0,
+      "lint": 0
+    },
+    "green": {
+      "viewports": [
+        "1440x900",
+        "1280x800"
+      ],
+      "states": 17,
+      "renders": 34,
+      "issues": 0,
+      "lint": 0
+    },
+    "blue": {
+      "viewports": [
+        "1440x900",
+        "1280x800"
+      ],
+      "states": 17,
+      "renders": 34,
+      "issues": 0,
+      "lint": 0
+    },
+    "mono": {
+      "viewports": [
+        "1440x900",
+        "1280x800"
+      ],
+      "states": 17,
+      "renders": 34,
+      "issues": 0,
+      "lint": 0
+    }
+  },
+  "stateChecks": {
+    "baseline": 15,
+    "attachments": 14,
+    "rounds": 3
+  },
+  "uiObservations": [
+    "Browser text edit saved while file name/reference/version remained",
+    "Owner deselected note and approved name plus file; actual history showed same scope",
+    "Fixed delayed request watcher selection and synthetic timestamp inconsistency; final renderer rechecked states"
+  ],
+  "limitations": [
+    "HTML metadata only; no real file bytes/encryption/production CLI/Flutter",
+    "No independent subagent review by user request",
+    "ffmpeg unavailable; only motion frames generated, no video"
+  ],
+  "artifacts": {
+    "approval.png": {
+      "bytes": 157846,
+      "sha256": "be186b5e8447dff0f46d344c7bfe35071435df7ca5020d6f0b4c228c245ebdc1"
+    },
+    "attachment-file-field-@2x.png": {
+      "bytes": 298230,
+      "sha256": "6cd4968de2ec0331c2a38e97eb61c68ac77b6f2346c4362d3d940654cb587394"
+    },
+    "attachment-long-name-@2x.png": {
+      "bytes": 314829,
+      "sha256": "e4dd9eb429f473cb554e872c1d6ab24393c10d6429c705d60802e500f97bc9cc"
+    },
+    "attachment-too-large-@2x.png": {
+      "bytes": 306646,
+      "sha256": "5b80b85d19020de82d0b8dbd0e4d8eb8a6e7b4c86a78742129e1f716c636ad3d"
+    },
+    "check-attachments.cjs-round-1.log": {
+      "bytes": 1178,
+      "sha256": "b3197d3808724974e2851e21fdfba266515df928e4a47b694b836699fb5667ef"
+    },
+    "check-attachments.cjs-round-2.log": {
+      "bytes": 1178,
+      "sha256": "b3197d3808724974e2851e21fdfba266515df928e4a47b694b836699fb5667ef"
+    },
+    "check-attachments.cjs-round-3.log": {
+      "bytes": 1178,
+      "sha256": "b3197d3808724974e2851e21fdfba266515df928e4a47b694b836699fb5667ef"
+    },
+    "check-flows.cjs-round-1.log": {
+      "bytes": 987,
+      "sha256": "a13842c381ebbe5f1bfaef249a614aab4965b8b4e7639e24ea8a9b63fc7b986d"
+    },
+    "check-flows.cjs-round-2.log": {
+      "bytes": 987,
+      "sha256": "a13842c381ebbe5f1bfaef249a614aab4965b8b4e7639e24ea8a9b63fc7b986d"
+    },
+    "check-flows.cjs-round-3.log": {
+      "bytes": 987,
+      "sha256": "a13842c381ebbe5f1bfaef249a614aab4965b8b4e7639e24ea8a9b63fc7b986d"
+    },
+    "file-field.png": {
+      "bytes": 117741,
+      "sha256": "bef7b6f922ba2de655702bad609bca53521bc15e3a936eb4cdc253c95b3896f0"
+    },
+    "history.png": {
+      "bytes": 147530,
+      "sha256": "ae7c09cd92ceed2c56582f76b82920d18cd9ebf2a421185c941113d4b18aad59"
+    },
+    "library.png": {
+      "bytes": 129213,
+      "sha256": "1fe63f2bb01054f99e37908496fa9217b49bdad93fab2b1cc75768565d8ce0ff"
+    },
+    "motion-entry-end.jpg": {
+      "bytes": 61638,
+      "sha256": "b74a62f8c332d774fe54b5a130f59834a76525b3ec6d7bc13a84cd7979824c0e"
+    },
+    "motion-entry-mid.jpg": {
+      "bytes": 86114,
+      "sha256": "e4fa8f5ea8ee0abe24bafa21c0bb773f66ce0fb4353e24e71a6bd46fcc52261a"
+    },
+    "motion-entry-start.jpg": {
+      "bytes": 101189,
+      "sha256": "0a41a5e5bd60c398f7811c9a2d10b21eb9b2fc37123123c890e856fab39d02a1"
+    },
+    "motion-kind-end.jpg": {
+      "bytes": 61312,
+      "sha256": "49981ac79d1eea3a30fe647139019a5ce43c59d9d41301a04ba1704351b72458"
+    },
+    "motion-kind-mid.jpg": {
+      "bytes": 57778,
+      "sha256": "c6a377ff2c56444b4ea7dfbbd69b9bd8f75592958cccbfcc70f93e125e61cd86"
+    },
+    "motion-kind-start.jpg": {
+      "bytes": 55578,
+      "sha256": "988b45e865cb9507da89a18c2e94b4a459566d10990e5305fbc3607f0935669c"
+    },
+    "motion-report.json": {
+      "bytes": 4584,
+      "sha256": "5a16f44f3a8cecf6caa3c07f037e08214ddbeacd6fcd36174b3cbeca791c3e07"
+    },
+    "proposal.png": {
+      "bytes": 152953,
+      "sha256": "500bc4e0413e127ffa83072ea39d700bbe51dc75ef7e81357a2bed74f657727f"
+    },
+    "public.png": {
+      "bytes": 151745,
+      "sha256": "26c1d88a12d1509b344769de85884f4410496f4c3411fd31e763f07fa5af9042"
+    },
+    "render-blue.json": {
+      "bytes": 6484,
+      "sha256": "0504bee49bd9c9bde7befc696271e7954e8ad777784f735269c2f15272d9eac4"
+    },
+    "render-green.json": {
+      "bytes": 6484,
+      "sha256": "0504bee49bd9c9bde7befc696271e7954e8ad777784f735269c2f15272d9eac4"
+    },
+    "render-mono.json": {
+      "bytes": 6484,
+      "sha256": "0504bee49bd9c9bde7befc696271e7954e8ad777784f735269c2f15272d9eac4"
+    },
+    "render-purple.json": {
+      "bytes": 6484,
+      "sha256": "0504bee49bd9c9bde7befc696271e7954e8ad777784f735269c2f15272d9eac4"
+    },
+    "restore.png": {
+      "bytes": 140064,
+      "sha256": "f3cd35ca19f303b9ac8032f338b0b4da075b45722be0ecf81adf2cb0b76ce74c"
+    },
+    "revision.png": {
+      "bytes": 176464,
+      "sha256": "9dd14e3322a22d367cd175672c32a653a668e1b134e5a9ac7ca04391812b1200"
+    },
+    "template.png": {
+      "bytes": 148449,
+      "sha256": "e1c0c2d4f873651c446d0b77b2d606c082583e4c523c3317bcfd7785da9fb0df"
+    },
+    "too-large.png": {
+      "bytes": 122002,
+      "sha256": "c4def1201fb8e48c1e5ca517ab060660adeeaeb653d135165570216b9b8ecf9f"
+    },
+    "trash.png": {
+      "bytes": 161289,
+      "sha256": "9030ced3cd9db1d24f11dda529e734c92fe1e893b995d319b5a72d17823a84ad"
+    }
+  },
+  "sources": {
+    "docs/design/prototypes/round-05/assemble-lifecycle.cjs": "e705e04d03a34174ae496dbb3198ff86d0118db3bb5a7ac9a6e0e1df747ba341",
+    "docs/design/prototypes/round-05/association.html": "e608b961360200206dba70e3c0f7f6627174ad12095465a436e6adf1cb66e4e6",
+    "docs/design/prototypes/round-05/attachment-surfaces.html": "3d788abd5d2ff207cc21cf29fda6fac444c68c3cc102f191fac49c720f6b5a2c",
+    "docs/design/prototypes/round-05/attachments-assembly.cjs": "942d5e200de7b14e700b4510be9a744f31eaa98638c87b1d08f62fe81dbb9ef8",
+    "docs/design/prototypes/round-05/attachments.css": "31f13d5c21493630672583a5de2c319d06e77177365e6ef675961155d4995db0",
+    "docs/design/prototypes/round-05/attachments.js": "87ac005af2be15f98ea7bacc78b2bafa9b650e8ca7a3f7e0d1b1111064c7e136",
+    "docs/design/prototypes/round-05/baseline-index.html": "70d2f358f60a1dd003a8db46db21894e038bd7af2f6144c53a5a73bce6ebfe67",
+    "docs/design/prototypes/round-05/check-attachments.cjs": "b9cddc902843b14eb87e05c271b7443fe5f891669e7f6a87d6be428d58c5727a",
+    "docs/design/prototypes/round-05/check-flows.cjs": "d1a12bc0947da19e1c8c87512f07c9905d2e48ddc762ae2e5b0d85b3e09c358c",
+    "docs/design/prototypes/round-05/credential-dialogs.html": "24f80cc78dcfba1ab04962020f5bc4b30173a1e7fdcc32a9c971c269b7672013",
+    "docs/design/prototypes/round-05/credential-library.html": "4a9da0fe6620133ed273b1131eec9b594d3a8f8f90c0935820628a88c19152de",
+    "docs/design/prototypes/round-05/credentials.css": "899684d23ed3a944435d53b401af00b9d5d01bbdb9e44932dd5a206ad7b54700",
+    "docs/design/prototypes/round-05/credentials.js": "63f8202bc12c545fa6c2711d83be604111374a5fac9c454dab9a5ec72b8e05a8",
+    "docs/design/prototypes/round-05/index.html": "c7439e79583abcd50f3e441ecbedc426555d8e2ce72f5449169c8437ad113a40",
+    "docs/design/prototypes/round-05/lifecycle-surfaces.html": "84a14285608f2ddd8d3508bda9bfa79d7572565b8ae34f05c831c2e9733e7058",
+    "docs/design/prototypes/round-05/lifecycle.css": "8f377589f2089c9c5801ffd2954d05db0fcb4c9d127fe383bb0e52cb0c7edda7",
+    "docs/design/prototypes/round-05/lifecycle.js": "feec903ebd1d7e57bf8bbfa203c4e9fb63866c4a328cf11c1c37d8e23c72d448",
+    "docs/design/prototypes/round-05/notes.html": "1cc3ec911db36901c15fa14a6e504c007aa0258e9950c4d17c3d6d36a3acd37a",
+    "docs/design/prototypes/round-05/prototype.css": "944c91c7f9588dad94a0662e4a9dac892eca3dce75d67af517839be9d33370d7",
+    "docs/design/prototypes/round-05/prototype.js": "5dd766626ae092936152fdbcdefc3ed4d0174f5dd310466fbcb29ba32f280292",
+    "docs/design/prototypes/round-05/request-dialog.html": "4e3efdcb5967a8dda736b8463ca170da4781dc08291dc2f49a104b482bfb6f3e",
+    "docs/design/prototypes/round-05/runtime.css": "3705b36e2ee4b7f826e6d6a438dd524e62042efda81aeef3acba92cb97c73d6c",
+    "docs/design/prototypes/round-05/runtime.js": "f9715e1fcb6d56b0f835a36a105ee2347d7a9d27b40731a488c3419279ef885e",
+    "docs/design/prototypes/round-05/sections.css": "a4e2d5961bd86e7bd3dee4948c99558e86002f99c04f51854d258f033f0b90e4",
+    "docs/design/prototypes/round-05/sections.js": "b226bd0685d137fcabd09b644698f761817763d58fbf4d295656fd4c0053995f",
+    "docs/design/prototypes/round-05/use-approval.html": "436d3328143e568f169760d1b30407a1ca0d0b0069d6feb15e373a8e63a20e7d",
+    "docs/design/prototypes/round-05/use-history.html": "af9c39608ef3343bb94497127bb795964e6b542c1e9183d404035b0d37444ea3",
+    "docs/design/attachment-interface-contract.md": "35308f6388587695b0ba16ff093a0fded078bd7889d91547c8946d59d617bd70"
+  },
+  "sourceCommit": "85f3363",
+  "textHashNormalization": "UTF-8 text uses LF for SHA-256 and bytes; PNG/JPEG use original bytes"
+}

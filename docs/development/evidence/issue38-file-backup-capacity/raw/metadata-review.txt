@@ -1,0 +1,1 @@
+Before staging, the focused core test count was corrected from 8 to 7 by reading raw/round-02/info_core-tests.txt. The original freezing script is retained. Full four-package counts (661 passed/19 skipped) are unchanged.

@@ -1,0 +1,7 @@
+Flutter assets will be downloaded from https://storage.flutter-io.cn. Make sure you trust this source!
+00:00 +0: loading C:/Project/network_config/info-manage/apps/desktop/integration_test/accessibility_dialog_probe_test.dart
+Building Windows application...                                    12.3s
+√ Built build\windows\x64\runner\Debug\info_desktop.exe
+00:00 +0: native accessibility simple modal diagnostic
+00:01 +1: (tearDownAll)
+00:01 +1: All tests passed!

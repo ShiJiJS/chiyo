@@ -1,0 +1,19 @@
+00:00 +0: loading test/codex_focused_fill_test.dart
+00:00 +0: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:00 +1: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:00 +2: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:00 +3: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:00 +4: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:00 +5: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:00 +6: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:00 +6 ~1: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:00 +7 ~1: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:00 +8 ~1: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:00 +9 ~1: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:00 +10 ~1: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:00 +11 ~1: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:00 +12 ~1: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:00 +13 ~1: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:00 +14 ~1: test/bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:01 +15 ~1: test/bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:05 +16 ~1: All tests passed!

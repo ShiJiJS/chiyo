@@ -1,0 +1,8 @@
+{
+  "sourceCommit": "291801046f7d1e6e4217a4bc001ea714689855c5",
+  "archiveSha256": "7d775372e4fc710fcda55918c205a393724d9d8c794de911137575c79c491c0e",
+  "helperSha256": "159d9791b4c94f1302b41105ca272766fceb37f63c610c26a97f09159a8cc2d3",
+  "readerExecution": "dart run legacy_probe.dart against the unmodified archived release libraries with SQLCipher native assets",
+  "schema": 16,
+  "backupFormat": 5
+}

@@ -1,0 +1,16 @@
+Flutter assets will be downloaded from https://storage.flutter-io.cn. Make sure you trust this source!
+00:00 +0: loading C:/Project/network_config/info-manage/apps/desktop/test/information_file_approval_history_test.dart
+00:00 +0: C:/Project/network_config/info-manage/apps/desktop/test/information_file_approval_history_test.dart: mixed file approval rejects a changed review and delivery history keeps each version and cleanup outcome
+00:00 +1: C:/Project/network_config/info-manage/apps/desktop/test/information_file_approval_history_test.dart: mixed file approval rejects a changed review and delivery history keeps each version and cleanup outcome
+00:01 +2: C:/Project/network_config/info-manage/apps/desktop/test/information_file_approval_history_test.dart: mixed file approval rejects a changed review and delivery history keeps each version and cleanup outcome
+00:01 +3: C:/Project/network_config/info-manage/apps/desktop/test/information_file_approval_history_test.dart: mixed file approval rejects a changed review and delivery history keeps each version and cleanup outcome
+00:01 +4: C:/Project/network_config/info-manage/apps/desktop/test/information_file_approval_history_test.dart: mixed file approval rejects a changed review and delivery history keeps each version and cleanup outcome
+00:01 +5: C:/Project/network_config/info-manage/apps/desktop/test/inbox_workspace_test.dart: slash preserves the custom lifetime editor focus and text key
+00:01 +6: C:/Project/network_config/info-manage/apps/desktop/test/settings_round05_test.dart: settings theme updates root and request settings navigate to records
+00:01 +7: C:/Project/network_config/info-manage/apps/desktop/test/settings_round05_test.dart: settings theme updates root and request settings navigate to records
+00:01 +8: C:/Project/network_config/info-manage/apps/desktop/test/settings_round05_test.dart: settings theme updates root and request settings navigate to records
+00:01 +9: C:/Project/network_config/info-manage/apps/desktop/test/settings_round05_test.dart: settings theme updates root and request settings navigate to records
+00:02 +10: C:/Project/network_config/info-manage/apps/desktop/test/inbox_workspace_test.dart: notification opens its request on another page and clears stale search
+00:02 +11: C:/Project/network_config/info-manage/apps/desktop/test/inbox_workspace_test.dart: large inbox pages and searches while preserving per-request decisions
+00:03 +12: C:/Project/network_config/info-manage/apps/desktop/test/inbox_workspace_test.dart: theme changes reach existing pages, reopen, and recover from failed writes
+00:03 +13: All tests passed!

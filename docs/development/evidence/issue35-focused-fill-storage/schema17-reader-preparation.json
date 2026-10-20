@@ -1,0 +1,16 @@
+{
+  "sourceCommit": "299a8b1f9615de218c1fba42d9f383dad377890f",
+  "archiveSha256": "c27950c1d03b2d8c6fe407c79587671620fe9adf7794f6a33cad0a8bf5fcbb53",
+  "helperSha256": "3ee26c94bc29e4a38d008a01d50b655e64a3bd34d267408c4feb317e8628645b",
+  "originalLockSha256": "176b8933b9ca4b5dc0e3267cd6a33fc31feb2fbb158862a5bdb4a1b0b13609ba",
+  "reader": "C:\\Project\\network_config\\info-manage\\build\\qa-issue35\\schema17-source-kzrti573\\packages\\info_storage\\schema17_probe.dart",
+  "schema": 17,
+  "backupFormat": 6,
+  "execution": "dart run pinned archived source with SQLCipher native hooks",
+  "selfCheck": {
+    "status": "created",
+    "schema": 17,
+    "backupVersion": 6
+  },
+  "compileExeWithoutAssets": "failed library_unavailable; not accepted as compatibility evidence"
+}

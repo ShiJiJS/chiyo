@@ -1,0 +1,5 @@
+PASS bad-digest
+PASS bad-path
+PASS test-executable
+PASS future-format
+PASS legacy-format

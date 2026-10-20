@@ -1,0 +1,21 @@
+Flutter assets will be downloaded from https://storage.flutter-io.cn. Make sure you trust this source!
+00:00 +0: loading C:/Project/network_config/info-manage-worktrees/31-backup-migration/apps/desktop/test/credential_migration_widget_test.dart
+lib/credential_migration.dart:169:45: Error: No named parameter with the name 'primary'.
+            style: prototypeButton(context, primary: true, size: 13),
+                                            ^^^^^^^
+lib/prototype_ui.dart:69:13: Context: Found this candidate, but the arguments don't match.
+ButtonStyle prototypeButton(
+            ^^^^^^^^^^^^^^^
+00:00 +0 -1: loading C:/Project/network_config/info-manage-worktrees/31-backup-migration/apps/desktop/test/credential_migration_widget_test.dart [E]
+  Failed to load "C:/Project/network_config/info-manage-worktrees/31-backup-migration/apps/desktop/test/credential_migration_widget_test.dart":
+  Compilation failed for testPath=C:/Project/network_config/info-manage-worktrees/31-backup-migration/apps/desktop/test/credential_migration_widget_test.dart: lib/credential_migration.dart:169:45: Error: No named parameter with the name 'primary'.
+              style: prototypeButton(context, primary: true, size: 13),
+                                              ^^^^^^^
+  lib/prototype_ui.dart:69:13: Context: Found this candidate, but the arguments don't match.
+  ButtonStyle prototypeButton(
+              ^^^^^^^^^^^^^^^
+  .
+00:00 +0 -1: Some tests failed.
+
+Failing tests:
+  C:/Project/network_config/info-manage-worktrees/31-backup-migration/apps/desktop/test/credential_migration_widget_test.dart: loading C:/Project/network_config/info-manage-worktrees/31-backup-migration/apps/desktop/test/credential_migration_widget_test.dart

@@ -1,0 +1,101 @@
+"""Test actual Windows package file import, replacement and released history.
+
+Use only disposable synthetic profiles; port 47125 must be free. The helper seeds
+an empty encrypted profile with notifications disabled and two fictional files.
+An operator imports v1 through the real GUI and system Open dialog, approves the
+CLI file request, then replaces that same field with v2 through another native
+Open dialog. The private CLI peer checks exact bytes, stable field identity and
+deadline, old-operation idempotency, and releases both copies. Inspect both
+released versions in the history page before writing the printed observation
+receipt with {"observed": true}. Operator receipts are not image recognition.
+The CLI exits only the process this script created, by PID; no force-kill fallback.
+Successful runs remove their own synthetic directory after normal exit. Failed
+runs preserve that directory for diagnosis and still attempt normal shutdown.
+"""
+from pathlib import Path
+import argparse,os,sys,json,subprocess,tempfile,time,socket,hashlib,shutil,queue,threading
+sys.stdout.reconfigure(encoding='utf-8')
+parser=argparse.ArgumentParser(description='Operator-assisted synthetic Windows packaged file import/replacement acceptance.')
+for name in ['delivery','dart','evidence']:parser.add_argument('--'+name,type=Path,required=True)
+a=parser.parse_args()
+if sys.platform!='win32':parser.error('This acceptance requires Windows')
+r=Path(__file__).resolve().parent.parent;out=a.evidence.resolve();out.mkdir(parents=True,exist_ok=False)
+payload=a.delivery.resolve(strict=True);app=payload/'app/info_desktop.exe';cli=payload/'cli/info.exe';dart=str(a.dart.resolve(strict=True))
+manifest=json.loads((payload/'manifest.json').read_text(encoding='utf-8-sig'))
+for e in manifest['files']:
+    f=(payload/e['path']).resolve(strict=True);assert f.is_relative_to(payload.resolve()) and hashlib.sha256(f.read_bytes()).hexdigest()==e['sha256'] and f.stat().st_size==e['bytes']
+temp=Path(tempfile.mkdtemp(prefix='aim-packaged-file-ui-')).resolve();env=os.environ.copy();env.update(PUB_HOSTED_URL='https://pub.flutter-io.cn',FLUTTER_STORAGE_BASE_URL='https://storage.flutter-io.cn')
+locks={r/p/'pubspec.lock':(r/p/'pubspec.lock').read_bytes() for p in ['packages/info_core','packages/info_cli','packages/info_storage','apps/desktop']};norm=lambda b:b.replace(b'https://pub.flutter-io.cn',b'https://pub.dev').replace(b'\r\n',b'\n')
+facts={'productSource':manifest['sourceCommit'],'complete':False,'checks':[]};streams=[];process=None;agent=None
+class Agent:
+    def __init__(self):
+        log=(out/'agent-errors.txt').open('wb');streams.append(log)
+        self.p=subprocess.Popen([str(cli)],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=log,text=True,encoding='utf-8',creationflags=subprocess.CREATE_NO_WINDOW);self.q=queue.Queue()
+        def read():
+            for line in self.p.stdout:self.q.put(line)
+        threading.Thread(target=read,daemon=True).start()
+    def call(self,command,**data):
+        self.p.stdin.write(json.dumps(dict(command=command,**data))+'\n');self.p.stdin.flush();return json.loads(self.q.get(timeout=45))
+    def close(self):self.p.stdin.close();assert self.p.wait(timeout=10)==0
+def check(name,condition,**data):facts['checks'].append(dict(check=name,passed=bool(condition),**data));assert condition,name
+def phase(stage,**data):
+    value=dict(phase=stage,**data);(out/'phase.json').write_text(json.dumps(value,ensure_ascii=False,indent=2),encoding='utf-8');print(json.dumps(value,ensure_ascii=False),flush=True)
+def run(name,args):
+    with (out/(name+'.txt')).open('wb') as log:p=subprocess.run([dart,*args],cwd=r/'packages/info_storage',env=env,stdout=log,stderr=subprocess.STDOUT,timeout=120)
+    check(name,p.returncode==0)
+    text=(out/(name+'.txt')).read_text(encoding='utf-8',errors='replace');start=text.find('{"status":');return json.loads(text[start:].strip()) if start>=0 else None
+def wait_item(version):
+    end=time.monotonic()+600
+    while time.monotonic()<end:
+        page=agent.call('catalog');items=page.get('items',[])
+        if items and items[0]['version']>=version:return items[0]
+        time.sleep(.5)
+    raise RuntimeError('No UI save observed')
+def stop():
+    p=subprocess.run([str(cli),'app','quit','--pid',str(process.pid)],capture_output=True,text=True,encoding='utf-8',timeout=65,creationflags=subprocess.CREATE_NO_WINDOW);value=json.loads(p.stdout);check('graceful-exit',p.returncode==0 and value['status']=='exited' and process.wait(timeout=5)==0)
+def fetch(request,item,field,op,version):
+    value=agent.call('file-fetch',requestId=request,itemId=item,fieldId=field,operationId=op);delivery=value.get('delivery',{});check('ready-'+op,value['status']=='ok' and delivery['state']=='ready');path=Path(delivery['path']);check('bytes-'+op,path.read_bytes()==(temp/f'synthetic-resume-v{version}.txt').read_bytes());return delivery
+try:
+    for p,b in locks.items():p.write_bytes(b.replace(b'https://pub.dev',b'https://pub.flutter-io.cn'))
+    run('format',['format','test/support/packaged_file_ui_fixture.dart']);run('pub',['pub','get','--offline','--enforce-lockfile']);run('analyze',['analyze','--fatal-infos']);prepared=run('prepare',['run','test/support/packaged_file_ui_fixture.dart','prepare',str(temp)]);check('prepared',prepared['status']=='prepared')
+    with socket.socket() as s:s.bind(('127.0.0.1',47125))
+    log=(out/'app.txt').open('wb');streams.append(log);child=env.copy();child['LOCALAPPDATA']=str(temp/'profile');process=subprocess.Popen([str(app)],cwd=app.parent,env=child,stdin=subprocess.DEVNULL,stdout=log,stderr=subprocess.STDOUT)
+    agent=Agent();end=time.monotonic()+30
+    while time.monotonic()<end:
+        if agent.call('capabilities')['status']=='ok':break
+        assert process.poll() is None;time.sleep(.2)
+    check('session',agent.call('session',chatLabel='最终包文件UI虚构验收')['status']=='ok')
+    phase('import-file-in-empty-ui',pid=process.pid,input=str(temp/'synthetic-resume-v1.txt'),name='整包界面虚构简历')
+    item=wait_item(1);check('one-file-field',len(item['fields'])==1 and item['fields'][0]['kind']=='file');item_id=item['id'];field=item['fields'][0]['id']
+    request=agent.call('request',purpose='最终包文件界面验收：读取虚构简历，替换后继续同一授权，不是真实个人资料。',fields=[dict(itemId=item_id,fieldId=field)]);check('request-pending',request['status']=='pending');request_id=request['requestId'];phase('approve-imported-file',pid=process.pid,requestId=request_id)
+    end=time.monotonic()+300
+    while time.monotonic()<end:
+        status=agent.call('status',requestId=request_id)
+        if status['status']!='pending':check('approved',status['status']=='approved');break
+        time.sleep(.4)
+    claim=agent.call('claim',requestId=request_id);check('claimed',claim['status']=='ok');deadline=claim['expiresAt']
+    first=fetch(request_id,item_id,field,'file-ui-v1',1)
+    phase('replace-file-in-ui',pid=process.pid,input=str(temp/'synthetic-resume-v2.txt'),itemId=item_id)
+    updated=wait_item(2);check('field-identity-preserved',updated['id']==item_id and updated['fields'][0]['id']==field)
+    second=fetch(request_id,item_id,field,'file-ui-v2',2);duplicate=fetch(request_id,item_id,field,'file-ui-v1',1);check('old-operation-keeps-original',duplicate['deliveryId']==first['deliveryId']);check('new-operation-new-copy',second['deliveryId']!=first['deliveryId']);check('deadline-unchanged',agent.call('claim',requestId=request_id)['expiresAt']==deadline)
+    for delivery in [first,second]:
+        result=agent.call('file-release',deliveryId=delivery['deliveryId']);check('released',result['status']=='ok' and result['delivery']['state']=='released' and not Path(delivery['path']).exists())
+    phase('observe-import-replacement-history',pid=process.pid,receipt=str(out/'history-observed.json'))
+    end=time.monotonic()+300
+    while not (out/'history-observed.json').is_file():assert time.monotonic()<end;time.sleep(.2)
+    check('history-observed',json.loads((out/'history-observed.json').read_text(encoding='utf-8'))['observed']);stop()
+    inspection=run('inspect',['run','test/support/packaged_file_ui_fixture.dart','inspect',str(temp)]);facts['inspection']=inspection
+    check('persisted-file-and-released-facts',inspection['information']==1 and inspection['version']==2 and inspection['fileField'] and inspection['currentMatches'] and inspection['deliveries']==2 and inspection['noHeldCopies']);facts['complete']=True;phase('complete')
+finally:
+    if process is not None and process.poll() is None:stop()
+    if agent is not None:agent.close()
+    for stream in streams:stream.close()
+    bad=[]
+    for p,b in locks.items():
+        if norm(p.read_bytes())!=norm(b):bad.append(str(p))
+        else:p.write_bytes(b)
+    facts['unexpectedLocks']=bad
+    if facts['complete'] and (process is None or process.poll() is not None):
+        assert temp.parent==Path(tempfile.gettempdir()).resolve() and temp.name.startswith('aim-packaged-file-ui-') and not any(p.is_symlink() or p.is_junction() for p in temp.rglob('*'));shutil.rmtree(temp);facts['temporaryRemoved']=not temp.exists()
+    else:facts['preservedTemporary']=str(temp)
+    (out/'result.json').write_text(json.dumps(facts,indent=2)+'\n',encoding='utf-8');assert not bad

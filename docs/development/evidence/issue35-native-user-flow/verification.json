@@ -1,0 +1,485 @@
+{
+  "latestBrowserSource": "1bbcd8f0e3df9d5665464e94122fa5a95c883fa0",
+  "nativeWin32Source": "5ab8995a31e1b9390c8a06f232f0977405281409",
+  "scope": "Isolated Debug real runner/SQLCipher/DPAPI/independent compiled CLI/native input workflows. QA entry is not production main or a distributed bundle.",
+  "nativeWin32": {
+    "result": "pass",
+    "exitCode": 0,
+    "approvals": 1,
+    "sentOperations": 3,
+    "unknownOperations": 1,
+    "duplicateNoReplay": true,
+    "attentionBlocked": true,
+    "ownerAcknowledgedInFlutter": true,
+    "revocationBlocked": true,
+    "reopenGrantNotRevived": true
+  },
+  "currentIab": {
+    "result": "pass",
+    "exitCode": 0,
+    "approvals": 1,
+    "sentOperations": 3,
+    "unknownOperations": 1,
+    "changedTargetReason": "unsupported_target",
+    "normalSnapshotValue": "<redacted>",
+    "explicitValueRead": "<redacted>",
+    "normalScreenshot": "masked",
+    "plaintextScreenshot": "exposed synthetic content intentionally; then remasked",
+    "browserToolObservations": "transcribed separately from this chat; pixels were displayed in tool results, not saved as local PNGs",
+    "foregroundCondition": "Both owned QA windows yielded native foreground before browser input. DOM focus alone was refused.",
+    "hostExecutableSha256": "2f61eaeb01dcee7fd18d572fbb338c88b686c0d891427487fdd182afdd64b4f6"
+  },
+  "unresolved": [
+    "Default testWidgets native accessibility AV (CreateRemoveReparentedNodesUpdate); root trigger not uniquely established",
+    "testWidgets external platform semantics handle end invariant; native standalone pass does not erase failed tests",
+    "Full lifecycle/failure-matrix and final release bundle gates remain tracked on issue35/18"
+  ],
+  "sources": [
+    {
+      "path": "apps/desktop/integration_test/focused_fill_native_test.dart",
+      "source": "1bbcd8f0e3df9d5665464e94122fa5a95c883fa0",
+      "sha256": "17b1e70a587f8078dcec4d5cc3c1f463897138d72f99022e521d7031505f70ed",
+      "representation": "git blob"
+    },
+    {
+      "path": "apps/desktop/integration_test/support/browser_fill_receiver.dart",
+      "source": "1bbcd8f0e3df9d5665464e94122fa5a95c883fa0",
+      "sha256": "b2c8eea894a00a94117309e448ef11c7e9175eda933b10aad870ebb1c2950e9e",
+      "representation": "git blob"
+    },
+    {
+      "path": "apps/desktop/integration_test/support/isolated_desktop.dart",
+      "source": "1bbcd8f0e3df9d5665464e94122fa5a95c883fa0",
+      "sha256": "8d5f268dfc755532ea879745ad10b3510caf8ea199a982acbe360948f02c7dd3",
+      "representation": "git blob"
+    },
+    {
+      "path": "apps/desktop/tool/focused_fill_native_probe.dart",
+      "source": "1bbcd8f0e3df9d5665464e94122fa5a95c883fa0",
+      "sha256": "1c597d5eb435a67aa6f01db36d7353141bd2c9aa0613b1fd226d703efbe532f8",
+      "representation": "git blob"
+    },
+    {
+      "path": "apps/desktop/integration_test/accessibility_dialog_probe_test.dart",
+      "source": "1bbcd8f0e3df9d5665464e94122fa5a95c883fa0",
+      "sha256": "3dfef19bf85c0c87e222903cebb28e8f4b761eaf688e09e15216b8168371bd87",
+      "representation": "git blob"
+    }
+  ],
+  "runtimeIdentity": {
+    "scope": "latest browser03 Debug assets only; earlier overwritten kernels were not hashed and are not claimed identical",
+    "files": [
+      {
+        "path": "info_desktop.exe",
+        "sha256": "6633f1a01724680fcc1413c231fcc5180d15a37ea55ef34daeaa2ac2de932ae5",
+        "bytes": 1117696
+      },
+      {
+        "path": "info-focus-broker.exe",
+        "sha256": "3a52234a281cf8fcac7f0148906991094147d8219617673981e934d72498d40b",
+        "bytes": 747008
+      },
+      {
+        "path": "flutter_windows.dll",
+        "sha256": "b60f6940fdabeca7ea9688448852c705e76dbe6513902651dfb1e92bc1db9fd2",
+        "bytes": 46621696
+      },
+      {
+        "path": "data/flutter_assets/kernel_blob.bin",
+        "sha256": "b55ea24e6e2f211026225c84ee26387e1b17dcb994df559ea26f4d86dd99da44",
+        "bytes": 54847728
+      }
+    ]
+  },
+  "locks": [
+    {
+      "path": "packages/info_cli/pubspec.lock",
+      "sha256": "ba6ef5d779db0b2baeed9d5e0d1681786a9c35bf383a09513c485bd1892c44f6",
+      "representation": "LF normalized"
+    },
+    {
+      "path": "packages/info_core/pubspec.lock",
+      "sha256": "f4b92b116d6017052bc0814be49221cab9e7e907c1fdbf44b32cf0050d449682",
+      "representation": "LF normalized"
+    },
+    {
+      "path": "packages/info_storage/pubspec.lock",
+      "sha256": "0d82edc897dfa54297eb99638977a22061587b3c8dc5e799cd451570134d877d",
+      "representation": "LF normalized"
+    },
+    {
+      "path": "apps/desktop/pubspec.lock",
+      "sha256": "9929f3b3febefc0de06e9a841ac4b5505896eda43a503b0f128467d93b311553",
+      "representation": "LF normalized"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "raw/native-ui-session-03-crash.json",
+      "sha256": "1d99357a39b4578a9392bbb09fe5ce1938ea90d2dfc8d4a19901717189994ea5",
+      "bytes": 400,
+      "original": "build/qa-issue35/native-ui-session-03-crash.json",
+      "representation": "raw bytes"
+    },
+    {
+      "path": "raw/native-ui-session-03-run.txt",
+      "sha256": "7a3eef2bb7eb6fc364faa2e374510d2223c2094c55458f044fc013fe6af4bb1f",
+      "bytes": 2331,
+      "original": "build/qa-issue35/native-ui-session-03-run.txt",
+      "representation": "raw bytes"
+    },
+    {
+      "path": "raw/native-ui-session-04-run.txt",
+      "sha256": "e3ace85d96f1dea0f6868690d8611f4478932bd43bade84222a1743095b621f2",
+      "bytes": 2447,
+      "original": "build/qa-issue35/native-ui-session-04-run.txt",
+      "representation": "raw bytes"
+    },
+    {
+      "path": "raw/native-ui-session-05-run.txt",
+      "sha256": "94b71dea96ebba455b4e8d8608c35f9ccf52441ec8fd73358c225e8d7c03e0fb",
+      "bytes": 2333,
+      "original": "build/qa-issue35/native-ui-session-05-run.txt",
+      "representation": "raw bytes"
+    },
+    {
+      "path": "raw/native-ui-session-06-run.txt",
+      "sha256": "7b6bc961abfc20f5c2f4e684de8b0a8a49dfb6706d2c3d83717c8db560934778",
+      "bytes": 2565,
+      "original": "build/qa-issue35/native-ui-session-06-run.txt",
+      "representation": "raw bytes"
+    },
+    {
+      "path": "raw/native-ui-session-07-run.txt",
+      "sha256": "00f2d1084cf88b179698116e9493a71362fe3a312dcd41216a993180a7ac72c3",
+      "bytes": 2628,
+      "original": "build/qa-issue35/native-ui-session-07-run.txt",
+      "representation": "raw bytes"
+    },
+    {
+      "path": "raw/native-ui-session-08-run.txt",
+      "sha256": "3b3c6efe98594ca51179c15a9e10bfd9834cb3ed2020dbba93b1671931eb2b04",
+      "bytes": 2393,
+      "original": "build/qa-issue35/native-ui-session-08-run.txt",
+      "representation": "raw bytes"
+    },
+    {
+      "path": "raw/accessibility-modal-minimal.txt",
+      "sha256": "7b9c4abb3d2d22d5ed09985460aeb2da48f39dbad5913dd7573f0edbcc779c60",
+      "bytes": 471,
+      "original": "build/qa-issue35/accessibility-modal-minimal.txt",
+      "representation": "raw bytes"
+    },
+    {
+      "path": "raw/native-production-binding-01-stderr.txt",
+      "sha256": "ee97cdc92a37f7602ecdf02958d5ee6b347d3c1fe89384a50bd09fe01a59370f",
+      "bytes": 170,
+      "original": "build/qa-issue35/native-production-binding-01-stderr.txt",
+      "representation": "raw bytes"
+    },
+    {
+      "path": "raw/native-production-binding-02-stderr.txt",
+      "sha256": "08de554edb09deceda2f2a4df4f193214ffc650f7af13aedcaa6ce462269e2e8",
+      "bytes": 872,
+      "original": "build/qa-issue35/native-production-binding-02-stderr.txt",
+      "representation": "raw bytes"
+    },
+    {
+      "path": "raw/native-production-binding-03-build.txt",
+      "sha256": "4356085455bc5233af6626b929031cbbda7a4e2b5c1f47ca0dba41ff331f6569",
+      "bytes": 237,
+      "original": "build/qa-issue35/native-production-binding-03-build.txt",
+      "representation": "raw bytes"
+    },
+    {
+      "path": "raw/native-production-binding-03-stderr.txt",
+      "sha256": "d057cc3292153d1658c1b2e6b222c1dac3fac376a84fde6d39cc55843fe25bdc",
+      "bytes": 134,
+      "original": "build/qa-issue35/native-production-binding-03-stderr.txt",
+      "representation": "raw bytes"
+    },
+    {
+      "path": "raw/native-production-binding-03-result.json",
+      "sha256": "717d486dc3e6bf0b90474a5b063b15f0158b46430f0f9cd6e185dfd0acf21bde",
+      "bytes": 72,
+      "original": "build/qa-issue35/native-production-binding-03-result.json",
+      "representation": "raw bytes"
+    },
+    {
+      "path": "raw/native-iab-01-build.txt",
+      "sha256": "d97f1cfa2e73bf5f7406f429d087796c85797b806d59be644a2a3c2aa8085dac",
+      "bytes": 237,
+      "original": "build/qa-issue35/native-iab-01-build.txt",
+      "representation": "raw bytes"
+    },
+    {
+      "path": "raw/native-iab-01-stderr.txt",
+      "sha256": "67cabbd6529c09c7e75d70bdd2f1b4b11dcd52c6525f0cf499bf87b5fbff0c41",
+      "bytes": 721,
+      "original": "build/qa-issue35/native-iab-01-stderr.txt",
+      "representation": "raw bytes"
+    },
+    {
+      "path": "raw/native-iab-01-result.json",
+      "sha256": "a0b5e9cfc5f6dbe6e651b25c10aff5b9ba8fab01ed8660030e8f8621ea2ad078",
+      "bytes": 72,
+      "original": "build/qa-issue35/native-iab-01-result.json",
+      "representation": "raw bytes"
+    },
+    {
+      "path": "raw/native-iab-02-build.txt",
+      "sha256": "d97f1cfa2e73bf5f7406f429d087796c85797b806d59be644a2a3c2aa8085dac",
+      "bytes": 237,
+      "original": "build/qa-issue35/native-iab-02-build.txt",
+      "representation": "raw bytes"
+    },
+    {
+      "path": "raw/native-iab-02-stderr.txt",
+      "sha256": "d057cc3292153d1658c1b2e6b222c1dac3fac376a84fde6d39cc55843fe25bdc",
+      "bytes": 134,
+      "original": "build/qa-issue35/native-iab-02-stderr.txt",
+      "representation": "raw bytes"
+    },
+    {
+      "path": "raw/native-iab-02-result.json",
+      "sha256": "50ee1cc9273f260b8395b7bdfa6b5e01c0d472f83d0d532647c58c30bd0a18b5",
+      "bytes": 73,
+      "original": "build/qa-issue35/native-iab-02-result.json",
+      "representation": "raw bytes"
+    },
+    {
+      "path": "raw/native-iab-02-control-failure.json",
+      "sha256": "ca57c3987102489363d9b3dfaaee3956d41077b5390ad6b07733f9c87649d0a1",
+      "bytes": 232,
+      "original": "build/qa-issue35/native-iab-02-control-failure.json",
+      "representation": "raw bytes"
+    },
+    {
+      "path": "raw/native-iab-03-build.txt",
+      "sha256": "ccb2ef30c5ec09554926f6ded6d61dcdb0b8d424ba900619c403731c544ec362",
+      "bytes": 237,
+      "original": "build/qa-issue35/native-iab-03-build.txt",
+      "representation": "raw bytes"
+    },
+    {
+      "path": "raw/native-iab-03-stderr.txt",
+      "sha256": "d057cc3292153d1658c1b2e6b222c1dac3fac376a84fde6d39cc55843fe25bdc",
+      "bytes": 134,
+      "original": "build/qa-issue35/native-iab-03-stderr.txt",
+      "representation": "raw bytes"
+    },
+    {
+      "path": "raw/native-iab-03-result.json",
+      "sha256": "477ce75793886bc0f740a4b26514be42e6a48f1f5f24b55a8bfc606d9650e1b8",
+      "bytes": 72,
+      "original": "build/qa-issue35/native-iab-03-result.json",
+      "representation": "raw bytes"
+    },
+    {
+      "path": "raw/native-ui-session-03/events.jsonl",
+      "sha256": "2fbdd01a6516c025f8c6b6c86ee33a4cd22bc61e84596fb5a542d8ecc2162da5",
+      "bytes": 942,
+      "original": "build/qa-issue35/native-ui-session-03/events.jsonl",
+      "representation": "raw bytes"
+    },
+    {
+      "path": "raw/native-ui-session-03/state.json",
+      "sha256": "7fffe974119e7e8beca7f70fe6246327f5df6e778ad761a59ba945e0df603358",
+      "bytes": 128,
+      "original": "build/qa-issue35/native-ui-session-03/state.json",
+      "representation": "raw bytes"
+    },
+    {
+      "path": "raw/native-ui-session-05/events.jsonl",
+      "sha256": "67a120e9e01e2fca8f14ae7d72acda46585d6dd887101a0183345d328d01bb78",
+      "bytes": 942,
+      "original": "build/qa-issue35/native-ui-session-05/events.jsonl",
+      "representation": "raw bytes"
+    },
+    {
+      "path": "raw/native-ui-session-05/state.json",
+      "sha256": "a76faec249a5ba45c54fdeafee2ba304c935eb9d4b9a00296004be64d30713cc",
+      "bytes": 128,
+      "original": "build/qa-issue35/native-ui-session-05/state.json",
+      "representation": "raw bytes"
+    },
+    {
+      "path": "raw/native-ui-session-06/events.jsonl",
+      "sha256": "bd34f34b8b5b80517806f79d7e990d593280713ee7d80aa4fa68395168489b12",
+      "bytes": 1299,
+      "original": "build/qa-issue35/native-ui-session-06/events.jsonl",
+      "representation": "raw bytes"
+    },
+    {
+      "path": "raw/native-ui-session-06/state.json",
+      "sha256": "eb60d7e8789cf2e25a9609dd5ef63b86099ecfbb7e20ad54a7a2a3556c8d64d8",
+      "bytes": 125,
+      "original": "build/qa-issue35/native-ui-session-06/state.json",
+      "representation": "raw bytes"
+    },
+    {
+      "path": "raw/native-ui-session-07/events.jsonl",
+      "sha256": "0de59339a7500ecfb7cc7e246db4c5f4cd571d9e062ca0778183aa0a6cffc027",
+      "bytes": 6916,
+      "original": "build/qa-issue35/native-ui-session-07/events.jsonl",
+      "representation": "raw bytes"
+    },
+    {
+      "path": "raw/native-ui-session-07/state.json",
+      "sha256": "e61e1f0f713097e28e0aea586b8cb287d28bfbac8a0db22e9e1d917cd984b09d",
+      "bytes": 126,
+      "original": "build/qa-issue35/native-ui-session-07/state.json",
+      "representation": "raw bytes"
+    },
+    {
+      "path": "raw/native-ui-session-08/events.jsonl",
+      "sha256": "c51a5b64c758b25f4a9a00b31a8bce81c98df275b53a6f8e3e829eefd556b2cc",
+      "bytes": 12870,
+      "original": "build/qa-issue35/native-ui-session-08/events.jsonl",
+      "representation": "raw bytes"
+    },
+    {
+      "path": "raw/native-ui-session-08/state.json",
+      "sha256": "6e4b67b1b0add84052f0565b16bf52e66f1db62153de1d0756383e75f8dbfb22",
+      "bytes": 125,
+      "original": "build/qa-issue35/native-ui-session-08/state.json",
+      "representation": "raw bytes"
+    },
+    {
+      "path": "raw/native-production-binding-03/events.jsonl",
+      "sha256": "df7b81e7edcca7d955c86ae4dfdc51cd4e85019381fad97eceb8fee087c13b8a",
+      "bytes": 12960,
+      "original": "build/qa-issue35/native-production-binding-03/events.jsonl",
+      "representation": "raw bytes"
+    },
+    {
+      "path": "raw/native-production-binding-03/state.json",
+      "sha256": "9cab687cfb46e5dddbae74da69a65770105e11aca27ae57a47ee29a8d3f21ac9",
+      "bytes": 149,
+      "original": "build/qa-issue35/native-production-binding-03/state.json",
+      "representation": "raw bytes"
+    },
+    {
+      "path": "raw/native-iab-01/events.jsonl",
+      "sha256": "cd4f06e32d1bc80d65fd2691fd0253746235dd268e8b02f0d8ffbccbbed0e742",
+      "bytes": 1981,
+      "original": "build/qa-issue35/native-iab-01/events.jsonl",
+      "representation": "raw bytes"
+    },
+    {
+      "path": "raw/native-iab-01/state.json",
+      "sha256": "b45669f0d5bcd7e0f4c4a33a977c5828dc8005657a72693bf67085f7d56b3f74",
+      "bytes": 149,
+      "original": "build/qa-issue35/native-iab-01/state.json",
+      "representation": "raw bytes"
+    },
+    {
+      "path": "raw/native-iab-02/events.jsonl",
+      "sha256": "f448584c4f45b8d7e769b26e6f8deb8805387ed620edbe0e5ce3b3a6e15c15fe",
+      "bytes": 905,
+      "original": "build/qa-issue35/native-iab-02/events.jsonl",
+      "representation": "raw bytes"
+    },
+    {
+      "path": "raw/native-iab-02/state.json",
+      "sha256": "aa646053094fcdf58489efde3cd9f7b9911af5fd575697fe2204548b7f581ce5",
+      "bytes": 121,
+      "original": "build/qa-issue35/native-iab-02/state.json",
+      "representation": "raw bytes"
+    },
+    {
+      "path": "raw/native-iab-03/events.jsonl",
+      "sha256": "583b6f3abae4be31d50f0ae8f99f64921b494b3bba9e87fa76b0a799f55d2301",
+      "bytes": 14648,
+      "original": "build/qa-issue35/native-iab-03/events.jsonl",
+      "representation": "raw bytes"
+    },
+    {
+      "path": "raw/native-iab-03/state.json",
+      "sha256": "9cab687cfb46e5dddbae74da69a65770105e11aca27ae57a47ee29a8d3f21ac9",
+      "bytes": 149,
+      "original": "build/qa-issue35/native-iab-03/state.json",
+      "representation": "raw bytes"
+    },
+    {
+      "path": "native-production-binding-03/approval.png",
+      "sha256": "6470a08dc454444fa99a2b7ca02040ad80c8ace46d7541c58b50e1983196e8ca",
+      "bytes": 114652,
+      "original": "build/qa-issue35/native-production-binding-03/approval.png",
+      "representation": "raw bytes"
+    },
+    {
+      "path": "native-production-binding-03/confirmation.png",
+      "sha256": "a61de214c7968675cc3e728343f95e0799fb5e2789dab99e6978b723c04e004c",
+      "bytes": 161564,
+      "original": "build/qa-issue35/native-production-binding-03/confirmation.png",
+      "representation": "raw bytes"
+    },
+    {
+      "path": "native-production-binding-03/attention-confirmation.png",
+      "sha256": "732dd8f3df382e5286f114552f3f61db2a2221eecd4055d9bca376c5176863ad",
+      "bytes": 130020,
+      "original": "build/qa-issue35/native-production-binding-03/attention-confirmation.png",
+      "representation": "raw bytes"
+    },
+    {
+      "path": "native-production-binding-03/history-4.png",
+      "sha256": "4afa92b19ba624bf35ca489094bbbf5d16057f9d2ab53d676555b3210ab40d34",
+      "bytes": 89092,
+      "original": "build/qa-issue35/native-production-binding-03/history-4.png",
+      "representation": "raw bytes"
+    },
+    {
+      "path": "raw/native-production-binding-03-public-stdout.txt",
+      "sha256": "c0bb220c735a36e112b2d2b1e6f3b425ecd45ccf8c8d9a22163894dbc7d592c4",
+      "representation": "derived: removed the terminated debug VM service URL only",
+      "originalSha256": "83ca918f185868c09c7fd79d2c0c71af87c7caf363aed9b21afaaaf8357b921f"
+    },
+    {
+      "path": "native-iab-03/approval.png",
+      "sha256": "bfbc521a6bbd9485a83bc5116b5c63d19aaccf42e29187b04b532e64f82e6450",
+      "bytes": 113980,
+      "original": "build/qa-issue35/native-iab-03/approval.png",
+      "representation": "raw bytes"
+    },
+    {
+      "path": "native-iab-03/confirmation.png",
+      "sha256": "40d32e79e377a24d86a3c9d1e5abc13089af0724a2bdc6b67452befeca1d595d",
+      "bytes": 159891,
+      "original": "build/qa-issue35/native-iab-03/confirmation.png",
+      "representation": "raw bytes"
+    },
+    {
+      "path": "native-iab-03/attention-confirmation.png",
+      "sha256": "c30c3f2fff83575b2854e5b7a59de26329e03da390f8520904d5eb0e1f5e8dae",
+      "bytes": 129992,
+      "original": "build/qa-issue35/native-iab-03/attention-confirmation.png",
+      "representation": "raw bytes"
+    },
+    {
+      "path": "native-iab-03/history-4.png",
+      "sha256": "e1e55c3770742d8d5b1182cf0f7ae34374b7d5143b34945ceeeeaebdaedc9d23",
+      "bytes": 88236,
+      "original": "build/qa-issue35/native-iab-03/history-4.png",
+      "representation": "raw bytes"
+    },
+    {
+      "path": "raw/native-iab-03-public-stdout.txt",
+      "sha256": "c0bb220c735a36e112b2d2b1e6f3b425ecd45ccf8c8d9a22163894dbc7d592c4",
+      "representation": "derived: removed the terminated debug VM service URL only",
+      "originalSha256": "3f0d1df6d944c827f15e044200c3db89d7aebe62935a2982005fd581856b2b64"
+    },
+    {
+      "path": "control-native-ui.py.txt",
+      "sha256": "29c10b87410eeec6228ee9d1f1a7d72bbdbb0beeddd58471ee31b5eb7ce44a68",
+      "bytes": 1408,
+      "original": "build/qa-issue35/control-native-ui.py",
+      "representation": "raw bytes"
+    },
+    {
+      "path": "browser-tool-observations.json",
+      "sha256": "01ca5548ae67337864ed6ec4f70a4da0c58b6c59cd6acebbb57104f9a446b6a5",
+      "representation": "manual transcription; limitations stated in file"
+    }
+  ]
+}

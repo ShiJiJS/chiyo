@@ -1,0 +1,21 @@
+00:00 +0: loading test/file_material_failure_test.dart
+00:00 +0: resource audit failure writes no credential bytes, starts no program and records a consumed preparation failure
+00:00 +0 -1: resource audit failure writes no credential bytes, starts no program and records a consumed preparation failure [E]
+  Expected: 'prepare_failed'
+    Actual: 'preparing'
+     Which: is different.
+            Expected: prepare_failed
+              Actual: preparing
+                            ^
+             Differ at offset 6
+  
+  package:matcher                            expect
+  test\file_material_failure_test.dart 31:5  main.<fn>
+  
+00:00 +0 -1: Some tests failed.
+
+Failing tests:
+  test/file_material_failure_test.dart: resource audit failure writes no credential bytes, starts no program and records a consumed preparation failure
+
+Consider enabling the flag chain-stack-traces to receive more detailed exceptions.
+For example, 'dart test --chain-stack-traces'.

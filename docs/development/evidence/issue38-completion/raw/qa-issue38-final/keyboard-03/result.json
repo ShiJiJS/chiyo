@@ -1,0 +1,24 @@
+{
+  "mode": "keyboard",
+  "sourceRevision": "2108bcf9eda1ff6f28d169fc38e186a370436e09",
+  "workingFileSha256": "2fbdf24ea6938e3843b2a40ecda6dc199547955da0b3fdae0a99623fe5416c18",
+  "phases": [
+    {
+      "phase": "pub",
+      "exitCode": 0
+    },
+    {
+      "phase": "format",
+      "exitCode": 0
+    },
+    {
+      "phase": "analyze",
+      "exitCode": 0
+    },
+    {
+      "phase": "tests",
+      "exitCode": 1
+    }
+  ],
+  "unexpectedLocks": []
+}

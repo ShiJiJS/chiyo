@@ -1,0 +1,39 @@
+{
+  "exitCode": 1,
+  "failedTests": 4,
+  "testDone": [
+    {
+      "testID": 3,
+      "result": "error",
+      "skipped": false,
+      "hidden": false,
+      "type": "testDone",
+      "time": 2372
+    },
+    {
+      "testID": 4,
+      "result": "error",
+      "skipped": false,
+      "hidden": false,
+      "type": "testDone",
+      "time": 2581
+    },
+    {
+      "testID": 5,
+      "result": "error",
+      "skipped": false,
+      "hidden": false,
+      "type": "testDone",
+      "time": 2731
+    },
+    {
+      "testID": 6,
+      "result": "error",
+      "skipped": false,
+      "hidden": false,
+      "type": "testDone",
+      "time": 2870
+    }
+  ],
+  "productFilesChanged": false
+}

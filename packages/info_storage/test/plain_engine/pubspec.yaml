@@ -1,0 +1,11 @@
+name: plain_engine_probe
+publish_to: none
+environment:
+  sdk: '>=3.10.0 <4.0.0'
+dependencies:
+  info_storage:
+    path: ../..
+hooks:
+  user_defines:
+    sqlite3:
+      source: sqlite3

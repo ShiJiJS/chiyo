@@ -1,0 +1,419 @@
+import 'dart:async';
+import 'dart:io';
+import 'package:info_core/info_core.dart';
+import 'package:test/test.dart';
+import 'credential_operations_test.dart' show operation, failure;
+import 'credential_use_test.dart' show FailingRuntimeRepository;
+import 'focused_fill_test.dart' show TestFillDriver;
+
+class ReceiptRepository extends FailingRuntimeRepository {
+  String? holdExecution;
+  bool loseTerminalAcknowledgement = false;
+  final entered = Completer<void>();
+  final release = Completer<void>();
+
+  @override
+  Future<void> commitCredentialRuntime(
+    List<CredentialUseRequest> requests,
+    List<CredentialExecution> executions, {
+    GrantHistory? fieldGrant,
+    RequestHistory? fieldRequest,
+    void Function()? validate,
+  }) async {
+    if (!this.fail &&
+        executions.any((e) => e.id == holdExecution && e.state == 'exited')) {
+      if (!entered.isCompleted) entered.complete();
+      await release.future;
+    }
+    await super.commitCredentialRuntime(
+      requests,
+      executions,
+      fieldGrant: fieldGrant,
+      fieldRequest: fieldRequest,
+      validate: validate,
+    );
+    if (loseTerminalAcknowledgement &&
+        executions.any((e) => e.state == 'exited')) {
+      loseTerminalAcknowledgement = false;
+      this.fail = true;
+      throw StateError('Synthetic lost commit acknowledgement');
+    }
+  }
+}
+
+class ReceiptFixture {
+  ReceiptFixture(this.repo, this.service, this.session, this.request, this.use);
+  final ReceiptRepository repo;
+  final InformationService service;
+  final String session;
+  final CredentialUseRequest request;
+  final CredentialExecutionMaterial use;
+  CredentialExecutionReport? running;
+
+  Future<void> start() async {
+    final identity = CredentialProcessIdentity.capture(pid)!;
+    try {
+      running = CredentialExecutionReport(
+        executionId: use.executionId,
+        executionCapability: use.executionCapability,
+        state: 'running',
+        pid: pid,
+        processCreatedAt: identity.value,
+        startedAt: DateTime.utc(2026, 10, 20),
+      );
+      await service.agent.reportCredentialExecution(running!);
+    } finally {
+      identity.close();
+    }
+  }
+
+  CredentialExecutionReport report(String state, {String? capability}) =>
+      CredentialExecutionReport(
+        executionId: use.executionId,
+        executionCapability: capability ?? use.executionCapability,
+        state: state,
+        pid: running?.pid,
+        processCreatedAt: running?.processCreatedAt,
+        startedAt: running?.startedAt,
+        finishedAt: DateTime.utc(2026, 10, 20, 0, 1),
+        exitCode: state == 'exited' ? 7 : null,
+        errorCode: switch (state) {
+          'unknown' => 'execution_unknown',
+          'prepare_failed' => 'material_prepare_failed',
+          _ => null,
+        },
+      );
+
+  Future<CredentialExecutionReport> failReceipt(String state) async {
+    repo.fail = true;
+    final receipt = report(state);
+    await expectLater(
+      service.agent.reportCredentialExecution(receipt),
+      failure('audit_unavailable'),
+    );
+    await expectLater(
+      service.owner.retryAuditStorage(),
+      throwsA(isA<AccessFailure>()),
+    );
+    return receipt;
+  }
+}
+
+Future<ReceiptFixture> fixture() async {
+  final repo = ReceiptRepository();
+  final s = InformationService(
+    repository: repo,
+    focusedFillDriver: TestFillDriver(),
+    focusedFillApplicationInspector: (a) async => a,
+    credentialExecutableInspector: (path, _) async =>
+        ExecutableIdentity(path, 10, 100, 'sha256:fixture'),
+  );
+  addTearDown(() async {
+    repo.fail = false;
+    if (!repo.release.isCompleted) repo.release.complete();
+    await s.close();
+  });
+  var c = await s.owner.createStringCredential(
+    name: 'Synthetic receipt token',
+    publicPurpose: '',
+    secret: 'Not-a-real-token',
+  );
+  c = await s.owner.updateCredentialMetadata(
+    c.id,
+    c.revision,
+    name: c.name,
+    publicPurpose: '',
+    privateNote: '',
+    suggestedBinding: 'GH_TOKEN',
+    discoverable: true,
+  );
+  final session = s.agent.openSession('Synthetic receipt chat');
+  final r = await s.agent.requestCredentialUse(
+    session,
+    CredentialUseInput.fromJson({
+      'protocolVersion': 2,
+      'command': 'request-use',
+      'purpose': 'Synthetic receipt task',
+      'credentials': [
+        {'alias': 'token', 'credentialId': c.id, 'version': c.version},
+      ],
+      'launch': {
+        'receiver': 'gh_token',
+        'executable': Platform.resolvedExecutable,
+        'argv': ['api', 'user', '--method', 'GET'],
+        'cwd': Directory.current.path,
+        'env': {
+          'GH_TOKEN': {'secret': 'token'},
+        },
+      },
+    }),
+  );
+  await s.owner.decideCredentialUse(r.id, approveCredential: true);
+  final claim = await s.agent.beginCredentialUseOperation(
+    session,
+    operation(r, 'first'),
+  );
+  return ReceiptFixture(repo, s, session, r, claim.material!);
+}
+
+void main() {
+  test(
+    'unauthenticated or invalid terminal reports cannot create recovery work',
+    () async {
+      final f = await fixture();
+      await expectLater(
+        f.service.agent.reportCredentialExecution(
+          f.report('exited', capability: 'wrong-capability'),
+        ),
+        failure('session_mismatch'),
+      );
+      await expectLater(
+        f.service.agent.reportCredentialExecution(f.report('exited')),
+        failure('invalid_plan'),
+      );
+      expect(f.service.owner.auditStorageUnavailable, false);
+      expect(f.service.owner.credentialExecutions.single.state, 'preparing');
+      await f.service.owner.retryAuditStorage();
+      expect(f.repo.credentialExecutions.single.state, 'preparing');
+    },
+  );
+
+  test(
+    'pending terminal receipt is unknown everywhere and survives session end',
+    () async {
+      final f = await fixture();
+      final s = f.service;
+      await f.start();
+      final receipt = await f.failReceipt('exited');
+      expect(s.owner.auditStorageUnavailable, true);
+      expect(s.owner.credentialExecutions.single.state, 'unknown');
+      expect(s.owner.credentialExecutions.single.exitCode, isNull);
+      expect(s.owner.credentialExecutions.single.finishedAt, isNull);
+      expect(
+        s.owner.credentialExecutions.single.errorCode,
+        'audit_unavailable',
+      );
+      expect(
+        s.agent.credentialExecutionStatus(f.session, f.use.executionId).state,
+        'unknown',
+      );
+      final duplicate = await s.agent.beginCredentialUseOperation(
+        f.session,
+        operation(f.request, 'first'),
+      );
+      expect(duplicate.execution.state, 'unknown');
+      expect(duplicate.material, isNull);
+      await expectLater(
+        s.agent.reportCredentialExecution(f.report('unknown')),
+        failure('audit_unavailable'),
+      );
+      await expectLater(
+        s.agent.reportCredentialExecution(receipt),
+        failure('audit_unavailable'),
+      );
+      await expectLater(
+        s.owner.cleanupCredentialExecution(f.use.executionId),
+        failure('audit_unavailable'),
+      );
+      expect(f.repo.credentialExecutions.single.state, 'running');
+      s.agent.endSession(f.session);
+      f.repo.fail = false;
+      await s.owner.retryAuditStorage();
+      final recovered = s.agent.credentialExecutionStatus(
+        f.session,
+        f.use.executionId,
+      );
+      expect(recovered.state, 'exited');
+      expect(recovered.exitCode, 7);
+      expect(recovered.finishedAt, receipt.finishedAt);
+      expect((await s.agent.reportCredentialExecution(receipt)).exitCode, 7);
+      await expectLater(
+        s.agent.reportCredentialExecution(f.report('unknown')),
+        failure('invalid_plan'),
+      );
+      await expectLater(
+        s.agent.beginCredentialUseOperation(
+          f.session,
+          operation(f.request, 'new'),
+        ),
+        failure('session_required'),
+      );
+      expect(s.owner.auditStorageUnavailable, false);
+      expect(s.owner.credentialExecutions, hasLength(1));
+      expect(
+        s.owner.credentialGrantState(s.owner.credentialUseRequests.single),
+        'revoked',
+      );
+    },
+  );
+
+  test(
+    'terminal failure before launch blocks late worker registration',
+    () async {
+      final f = await fixture();
+      await f.failReceipt('prepare_failed');
+      await expectLater(
+        f.service.agent.registerCredentialWorker(
+          f.use.executionId,
+          f.use.executionCapability,
+          pid,
+          'synthetic-identity',
+        ),
+        failure('audit_unavailable'),
+      );
+      f.repo.fail = false;
+      await f.service.owner.retryAuditStorage();
+      expect(
+        f.service.owner.credentialExecutions.single.state,
+        'prepare_failed',
+      );
+      await expectLater(
+        f.service.agent.registerCredentialWorker(
+          f.use.executionId,
+          f.use.executionCapability,
+          pid,
+          'synthetic-identity',
+        ),
+        failure('invalid_plan'),
+      );
+    },
+  );
+
+  for (final state in ['unknown', 'start_failed']) {
+    test('$state recovery does not invent an exit result', () async {
+      final f = await fixture();
+      if (state == 'unknown') await f.start();
+      await f.failReceipt(state);
+      f.repo.fail = false;
+      await f.service.owner.retryAuditStorage();
+      final recovered = f.service.owner.credentialExecutions.single;
+      expect(recovered.state, state);
+      expect(recovered.exitCode, isNull);
+      expect(recovered.processStarted, state == 'unknown');
+      expect(f.service.owner.auditStorageUnavailable, false);
+    });
+  }
+
+  test(
+    'an applied write with a lost acknowledgement is safely reconciled',
+    () async {
+      final f = await fixture();
+      await f.start();
+      f.repo.loseTerminalAcknowledgement = true;
+      final receipt = f.report('exited');
+      await expectLater(
+        f.service.agent.reportCredentialExecution(receipt),
+        failure('audit_unavailable'),
+      );
+      await expectLater(
+        f.service.owner.retryAuditStorage(),
+        throwsA(isA<AccessFailure>()),
+      );
+      expect(f.repo.credentialExecutions.single.state, 'exited');
+      expect(f.service.owner.credentialExecutions.single.state, 'unknown');
+      f.repo.fail = false;
+      await f.service.owner.retryAuditStorage();
+      expect(f.service.owner.credentialExecutions.single.exitCode, 7);
+      expect(f.service.owner.credentialExecutions, hasLength(1));
+      expect(
+        (await f.service.agent.reportCredentialExecution(receipt)).exitCode,
+        7,
+      );
+    },
+  );
+
+  test(
+    'recovery preserves concurrent command and focused-fill request writes',
+    () async {
+      final f = await fixture();
+      final s = f.service;
+      await f.start();
+      await f.failReceipt('exited');
+      f.repo.holdExecution = f.use.executionId;
+      f.repo.fail = false;
+      final recovery = s.owner.retryAuditStorage();
+      await f.repo.entered.future;
+      final fill = s.agent.requestFocusedFill(
+        f.session,
+        FocusedFillInput.fromJson({
+          'protocolVersion': 2,
+          'command': 'request-use',
+          'purpose': 'Concurrent synthetic fill',
+          'credentials': [
+            {
+              'alias': 'password',
+              'credentialId': f.request.credentialId,
+              'version': f.request.version,
+            },
+          ],
+          'fill': {
+            'application': {
+              'executable': r'C:\Synthetic\Browser.exe',
+              'sha256': '31' * 32,
+            },
+            'targetHint': 'https://example.invalid',
+          },
+        }),
+      );
+      final command = s.agent.beginCredentialUseOperation(
+        f.session,
+        operation(f.request, 'second'),
+      );
+      // Let both asynchronous callers enter before allowing storage to finish.
+      await Future<void>.delayed(Duration.zero);
+      f.repo.release.complete();
+      final fillRequest = await fill;
+      final second = await command;
+      await recovery;
+      expect(
+        s.owner.credentialUseRequests.map((r) => r.id),
+        containsAll([f.request.id, fillRequest.id]),
+      );
+      expect(s.owner.credentialUseRequests, hasLength(2));
+      expect(
+        s.owner.credentialExecutions.map((e) => e.id),
+        containsAll([f.use.executionId, second.execution.id]),
+      );
+      expect(s.owner.credentialExecutions, hasLength(2));
+      expect(
+        s.agent
+            .credentialExecutionStatus(f.session, f.use.executionId)
+            .exitCode,
+        7,
+      );
+      expect(second.material, isNotNull);
+      expect(s.owner.auditStorageUnavailable, false);
+    },
+  );
+
+  for (final action in ['export', 'restore', 'close']) {
+    test(
+      '$action drains metadata recovery without acquiring the owner lock',
+      () async {
+        final f = await fixture();
+        await f.start();
+        await f.failReceipt('exited');
+        f.repo.fail = false;
+        Future<void> snapshot() async {
+          expect(f.repo.credentialExecutions.single.state, 'exited');
+          expect(f.repo.credentialExecutions.single.exitCode, 7);
+        }
+
+        await switch (action) {
+          'export' => f.service.owner.exportLibrary(snapshot),
+          'restore' => f.service.owner.restoreLibrary(snapshot),
+          _ => f.service.close(),
+        }.timeout(const Duration(seconds: 3));
+        expect(f.repo.credentialExecutions.single.state, 'exited');
+        expect(f.repo.credentialExecutions.single.exitCode, 7);
+        expect(f.service.owner.auditStorageUnavailable, false);
+        if (action == 'restore') {
+          await expectLater(
+            f.service.agent.reportCredentialExecution(f.report('exited')),
+            failure('session_mismatch'),
+          );
+        }
+      },
+    );
+  }
+}

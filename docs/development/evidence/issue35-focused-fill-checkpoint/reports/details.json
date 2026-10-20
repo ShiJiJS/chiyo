@@ -1,0 +1,29 @@
+[
+  {
+    "file": "fill-long-target-@2x.png",
+    "state": "fill-long-target",
+    "size": "1280x800",
+    "zoom": 2,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  },
+  {
+    "file": "fill-tip-@2x.png",
+    "state": "fill-tip",
+    "size": "1280x800",
+    "zoom": 2,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  },
+  {
+    "file": "fill-confirm-@2x.png",
+    "state": "fill-confirm",
+    "size": "1280x800",
+    "zoom": 2,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  }
+]

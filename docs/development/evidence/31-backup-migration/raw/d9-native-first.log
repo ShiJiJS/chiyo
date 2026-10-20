@@ -1,0 +1,35 @@
+Flutter assets will be downloaded from https://storage.flutter-io.cn. Make sure you trust this source!
+00:00 +0: loading C:/Project/network_config/info-manage-worktrees/31-backup-migration/apps/desktop/integration_test/backup_migration_native_test.dart
+Building Windows application...                                    24.1s
+√ Built build\windows\x64\runner\Debug\info_desktop.exe
+00:00 +0: schema13 DPAPI upgrade, explicit native field conversion and encrypted credential recovery work after removing the source key
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following StateError was thrown running a test:
+Bad state: No element
+
+When the exception was thrown, this was the stack:
+#0      Iterable.single (dart:core/iterable.dart:694:25)
+#1      WidgetController.element (package:flutter_test/src/controller.dart:888:30)
+#2      WidgetController.ensureVisible (package:flutter_test/src/controller.dart:2389:32)
+#3      main.<anonymous closure> (file:///C:/Project/network_config/info-manage-worktrees/31-backup-migration/apps/desktop/integration_test/backup_migration_native_test.dart:143:22)
+<asynchronous suspension>
+#4      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#5      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+The test description was:
+  schema13 DPAPI upgrade, explicit native field conversion and encrypted credential recovery work
+  after removing the source key
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:04 +0 -1: schema13 DPAPI upgrade, explicit native field conversion and encrypted credential recovery work after removing the source key [E]
+  Test failed. See exception logs above.
+  The test description was: schema13 DPAPI upgrade, explicit native field conversion and encrypted credential recovery work after removing the source key
+  
+00:04 +0 -1: (tearDownAll)
+00:04 +0 -1: Some tests failed.
+
+Failing tests:
+  C:/Project/network_config/info-manage-worktrees/31-backup-migration/apps/desktop/integration_test/backup_migration_native_test.dart: schema13 DPAPI upgrade, explicit native field conversion and encrypted credential recovery work after removing the source key

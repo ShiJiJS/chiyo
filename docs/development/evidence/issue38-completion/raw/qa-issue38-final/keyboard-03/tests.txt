@@ -1,0 +1,77 @@
+Flutter assets will be downloaded from https://storage.flutter-io.cn. Make sure you trust this source!
+00:00 +0: loading C:/Project/network_config/info-manage/apps/desktop/test/information_file_editor_test.dart
+00:00 +0: (setUpAll)
+00:00 +0: file controls are reachable by keyboard and Escape cleans the draft at 100.0%
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown while running async test code:
+Expected: exactly one matching candidate
+  Actual: _AncestorWidgetFinder:<Found 0 widgets with type "TextButton" that are ancestors of
+widgets with text "放弃更改": []>
+   Which: means none were found but one was expected
+
+When the exception was thrown, this was the stack:
+#0      fail (package:matcher/src/expect/expect.dart:187:31)
+#1      _expect (package:matcher/src/expect/expect.dart:182:3)
+#2      expect (package:matcher/src/expect/expect.dart:65:3)
+#3      expect (package:flutter_test/src/widget_tester.dart:473:18)
+#4      main.<anonymous closure>.<anonymous closure> (file:///C:/Project/network_config/info-manage/apps/desktop/test/information_file_editor_test.dart:208:11)
+<asynchronous suspension>
+<asynchronous suspension>
+#6      main.<anonymous closure> (file:///C:/Project/network_config/info-manage/apps/desktop/test/information_file_editor_test.dart:123:9)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 2 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:01 +0 -1: file controls are reachable by keyboard and Escape cleans the draft at 100.0% [E]
+  Test failed. See exception logs above.
+  The test description was: file controls are reachable by keyboard and Escape cleans the draft at 100.0%
+  
+00:01 +0 -1: file controls are reachable by keyboard and Escape cleans the draft at 200.0%
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown while running async test code:
+Expected: exactly one matching candidate
+  Actual: _AncestorWidgetFinder:<Found 0 widgets with type "TextButton" that are ancestors of
+widgets with text "放弃更改": []>
+   Which: means none were found but one was expected
+
+When the exception was thrown, this was the stack:
+#0      fail (package:matcher/src/expect/expect.dart:187:31)
+#1      _expect (package:matcher/src/expect/expect.dart:182:3)
+#2      expect (package:matcher/src/expect/expect.dart:65:3)
+#3      expect (package:flutter_test/src/widget_tester.dart:473:18)
+#4      main.<anonymous closure>.<anonymous closure> (file:///C:/Project/network_config/info-manage/apps/desktop/test/information_file_editor_test.dart:208:11)
+<asynchronous suspension>
+<asynchronous suspension>
+#6      main.<anonymous closure> (file:///C:/Project/network_config/info-manage/apps/desktop/test/information_file_editor_test.dart:123:9)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 2 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:01 +0 -2: file controls are reachable by keyboard and Escape cleans the draft at 200.0% [E]
+  Test failed. See exception logs above.
+  The test description was: file controls are reachable by keyboard and Escape cleans the draft at 200.0%
+  
+00:01 +0 -2: real owner save retries unchanged input, preserves bytes and text-only edits
+00:01 +1 -2: cancel waits for in-flight picker and releases its eventual stage; cleanup can retry
+00:01 +2 -2: cancelled picker and failed replacement retain the original selection and other inputs
+00:01 +3 -2: same-purpose file replacement retains identity, kind conversion changes it
+00:01 +4 -2: a known committed save only retries cleanup and never submits a second version
+00:02 +5 -2: file editor shows missing file error, saves real file and keeps the three-column library
+00:02 +6 -2: (tearDownAll)
+00:02 +6 -2: Some tests failed.
+
+Failing tests:
+  C:/Project/network_config/info-manage/apps/desktop/test/information_file_editor_test.dart: file controls are reachable by keyboard and Escape cleans the draft at 100.0%
+  C:/Project/network_config/info-manage/apps/desktop/test/information_file_editor_test.dart: file controls are reachable by keyboard and Escape cleans the draft at 200.0%

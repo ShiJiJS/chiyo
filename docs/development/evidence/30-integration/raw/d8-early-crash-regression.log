@@ -1,0 +1,16 @@
+00:00 +0: loading test/early_worker_crash_test.dart
+00:00 +0: test/early_worker_crash_test.dart: worker death after launch acknowledgement but before target identity keeps the attempt unknown and preserves live material
+00:00 +1: test/early_worker_crash_test.dart: worker death after launch acknowledgement but before target identity keeps the attempt unknown and preserves live material
+00:00 +2: test/early_worker_crash_test.dart: worker death after launch acknowledgement but before target identity keeps the attempt unknown and preserves live material
+00:00 +3: test/early_worker_crash_test.dart: worker death after launch acknowledgement but before target identity keeps the attempt unknown and preserves live material
+00:00 +4: test/early_worker_crash_test.dart: worker death after launch acknowledgement but before target identity keeps the attempt unknown and preserves live material
+00:00 +5: test/early_worker_crash_test.dart: worker death after launch acknowledgement but before target identity keeps the attempt unknown and preserves live material
+00:01 +6: test/early_worker_crash_test.dart: worker death after launch acknowledgement but before target identity keeps the attempt unknown and preserves live material
+00:01 +7: test/early_worker_crash_test.dart: worker death after launch acknowledgement but before target identity keeps the attempt unknown and preserves live material
+00:02 +8: test/credential_runtime_test.dart: sixteen active executions reject the next attempt before consuming its permission
+00:05 +9: test/credential_runtime_test.dart: real output is limited to the first 4 MiB and is unavailable from another CLI process context
+00:06 +10: test/credential_runtime_test.dart: worker crash preserves monitoring until the remaining tree ends and records unknown
+00:07 +11: test/credential_runtime_test.dart: production starter monitors a detached descendant after the approved parent exits
+00:08 +12: test/credential_runtime_test.dart: a transient running audit failure does not stop monitoring a live process
+00:09 +13: test/credential_runtime_test.dart: private Token material launches a real controlled process and exposes only bounded execution events
+00:09 +14: All tests passed!

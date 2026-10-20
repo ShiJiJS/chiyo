@@ -1,0 +1,10 @@
+00:00 +0: loading test/credential_supervisor_recovery_test.dart
+00:00 +0 -1: loading test/credential_supervisor_recovery_test.dart [E]
+  Failed to load "test/credential_supervisor_recovery_test.dart":
+  test/credential_supervisor_recovery_test.dart:27:80: Error: No named parameter with the name 'supervisorPid'.
+      final material=await service.agent.consumeCredentialUse(session,request.id,supervisorPid:supervisor.pid,supervisorCreatedAt:identity.value);
+                                                                                 ^^^^^^^^^^^^^
+00:00 +0 -1: Some tests failed.
+
+Failing tests:
+  test/credential_supervisor_recovery_test.dart: loading test/credential_supervisor_recovery_test.dart

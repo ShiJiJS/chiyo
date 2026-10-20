@@ -1,0 +1,45 @@
+{"protocolVersion":"0.1.1","runnerVersion":"1.33.0","pid":87024,"type":"start","time":0}
+{"suite":{"id":0,"platform":"vm","path":"test/owner_field_display_test.dart"},"type":"suite","time":0}
+{"test":{"id":1,"name":"loading test/owner_field_display_test.dart","suiteID":0,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":1}
+{"suite":{"id":2,"platform":"vm","path":"test/history_test.dart"},"type":"suite","time":4}
+{"test":{"id":3,"name":"loading test/history_test.dart","suiteID":2,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":4}
+{"suite":{"id":4,"platform":"vm","path":"test/recycle_test.dart"},"type":"suite","time":6}
+{"test":{"id":5,"name":"loading test/recycle_test.dart","suiteID":4,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":6}
+{"count":3,"time":6,"type":"allSuites"}
+{"testID":1,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":484}
+{"group":{"id":6,"suiteID":0,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":3,"line":null,"column":null,"url":null},"type":"group","time":486}
+{"test":{"id":7,"name":"owner snapshot retains immutable requested and supplemental names without old content","suiteID":0,"groupIDs":[6],"metadata":{"skip":false,"skipReason":null},"line":12,"column":3,"url":"file:///C:/Project/network_config/info-manage/packages/info_core/test/owner_field_display_test.dart"},"type":"testStart","time":486}
+{"testID":3,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":493}
+{"group":{"id":8,"suiteID":2,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":5,"line":null,"column":null,"url":null},"type":"group","time":493}
+{"test":{"id":9,"name":"owner confirms retention cleanup and changing names never rewrites approved facts","suiteID":2,"groupIDs":[8],"metadata":{"skip":false,"skipReason":null},"line":6,"column":3,"url":"file:///C:/Project/network_config/info-manage/packages/info_core/test/history_test.dart"},"type":"testStart","time":493}
+{"testID":7,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":514}
+{"test":{"id":10,"name":"current scope projection follows exact field identities through partial deletion and restore","suiteID":0,"groupIDs":[6],"metadata":{"skip":false,"skipReason":null},"line":46,"column":3,"url":"file:///C:/Project/network_config/info-manage/packages/info_core/test/owner_field_display_test.dart"},"type":"testStart","time":515}
+{"testID":5,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":521}
+{"group":{"id":11,"suiteID":4,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":7,"line":null,"column":null,"url":null},"type":"group","time":521}
+{"test":{"id":12,"name":"deleting a last field leaves the information metadata until explicit whole-item deletion","suiteID":4,"groupIDs":[11],"metadata":{"skip":false,"skipReason":null},"line":5,"column":3,"url":"file:///C:/Project/network_config/info-manage/packages/info_core/test/recycle_test.dart"},"type":"testStart","time":521}
+{"testID":9,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":521}
+{"testID":10,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":522}
+{"test":{"id":13,"name":"revoke during durable recording prevents both pending delivery and later reads","suiteID":2,"groupIDs":[8],"metadata":{"skip":false,"skipReason":null},"line":50,"column":3,"url":"file:///C:/Project/network_config/info-manage/packages/info_core/test/history_test.dart"},"type":"testStart","time":522}
+{"test":{"id":14,"name":"scope projection rejects ended and archived facts and observes the service clock","suiteID":0,"groupIDs":[6],"metadata":{"skip":false,"skipReason":null},"line":98,"column":3,"url":"file:///C:/Project/network_config/info-manage/packages/info_core/test/owner_field_display_test.dart"},"type":"testStart","time":522}
+{"testID":14,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":525}
+{"testID":13,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":529}
+{"test":{"id":15,"name":"audit storage failure blocks delivery until pending facts can be saved","suiteID":2,"groupIDs":[8],"metadata":{"skip":false,"skipReason":null},"line":90,"column":3,"url":"file:///C:/Project/network_config/info-manage/packages/info_core/test/history_test.dart"},"type":"testStart","time":530}
+{"testID":15,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":532}
+{"test":{"id":16,"name":"unknown targets and forged credentials never enter owner records as raw input","suiteID":2,"groupIDs":[8],"metadata":{"skip":false,"skipReason":null},"line":125,"column":3,"url":"file:///C:/Project/network_config/info-manage/packages/info_core/test/history_test.dart"},"type":"testStart","time":533}
+{"testID":16,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":535}
+{"test":{"id":17,"name":"history captures approved names, linked reads, and immediate revocation","suiteID":2,"groupIDs":[8],"metadata":{"skip":false,"skipReason":null},"line":146,"column":3,"url":"file:///C:/Project/network_config/info-manage/packages/info_core/test/history_test.dart"},"type":"testStart","time":535}
+{"testID":17,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":537}
+{"testID":12,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":541}
+{"test":{"id":18,"name":"concurrent delete and update have one version winner and duplicate restore does not apply twice","suiteID":4,"groupIDs":[11],"metadata":{"skip":false,"skipReason":null},"line":31,"column":3,"url":"file:///C:/Project/network_config/info-manage/packages/info_core/test/recycle_test.dart"},"type":"testStart","time":541}
+{"testID":18,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":549}
+{"test":{"id":19,"name":"failed persistent deletion preserves current content and existing grant","suiteID":4,"groupIDs":[11],"metadata":{"skip":false,"skipReason":null},"line":68,"column":3,"url":"file:///C:/Project/network_config/info-manage/packages/info_core/test/recycle_test.dart"},"type":"testStart","time":549}
+{"testID":19,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":555}
+{"test":{"id":20,"name":"terminal imports retain value-free receipts and retry after deletion never recreates content","suiteID":4,"groupIDs":[11],"metadata":{"skip":false,"skipReason":null},"line":91,"column":3,"url":"file:///C:/Project/network_config/info-manage/packages/info_core/test/recycle_test.dart"},"type":"testStart","time":555}
+{"testID":20,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":560}
+{"test":{"id":21,"name":"confirmed update removals enter the same thirty day recycle lifecycle and cannot revive after purge","suiteID":4,"groupIDs":[11],"metadata":{"skip":false,"skipReason":null},"line":124,"column":3,"url":"file:///C:/Project/network_config/info-manage/packages/info_core/test/recycle_test.dart"},"type":"testStart","time":560}
+{"testID":21,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":562}
+{"test":{"id":22,"name":"agent deletion is a private versioned proposal until owner confirmation","suiteID":4,"groupIDs":[11],"metadata":{"skip":false,"skipReason":null},"line":149,"column":3,"url":"file:///C:/Project/network_config/info-manage/packages/info_core/test/recycle_test.dart"},"type":"testStart","time":562}
+{"testID":22,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":566}
+{"test":{"id":23,"name":"owner field deletion and restoration require a fresh grant only for the deleted field","suiteID":4,"groupIDs":[11],"metadata":{"skip":false,"skipReason":null},"line":190,"column":3,"url":"file:///C:/Project/network_config/info-manage/packages/info_core/test/recycle_test.dart"},"type":"testStart","time":566}
+{"testID":23,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":568}
+{"success":true,"type":"done","time":570}

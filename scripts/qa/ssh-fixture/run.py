@@ -1,0 +1,102 @@
+"""Run product credential flow against a disposable localhost SSH receiver.
+
+Build the adjacent Dockerfile as agent-info-manage-ssh-fixture:20261017 in
+WSL Ubuntu-24.04 first. All keys are generated here; no personal profile is read.
+"""
+import json
+import os
+from pathlib import Path
+import subprocess
+import tempfile
+import time
+import argparse
+import sys
+
+BASE=Path(__file__).resolve().parent
+REPO=BASE.parents[2]
+IMAGE='agent-info-manage-ssh-fixture:20261017'
+LABEL='agent-info-manage-d7-ssh-native'
+
+def docker(*args):
+    p=subprocess.run(['wsl.exe','-d','Ubuntu-24.04','--','docker',*args],capture_output=True,text=True,timeout=40)
+    if p.returncode:raise RuntimeError(p.stderr)
+    return p.stdout.strip()
+
+def main():
+    parser=argparse.ArgumentParser();mode=parser.add_mutually_exclusive_group();mode.add_argument('--native',action='store_true');mode.add_argument('--suite',action='store_true');mode.add_argument('--checks',action='store_true');mode.add_argument('--package-output',type=Path);mode.add_argument('--crash-probe',type=Path);parser.add_argument('--locked-suite-runner',type=Path);parser.add_argument('--test-label',default='real-receiver-suite');parser.add_argument('--repeat',type=int,default=1);parser.add_argument('--cli-executable',type=Path);parser.add_argument('--native-test',choices=['file_runtime_native_test.dart','hosted_runtime_native_test.dart','reusable_runtime_native_test.dart'],default='file_runtime_native_test.dart');args=parser.parse_args()
+    # Optional locked package runner avoids implicit pub resolution during a
+    # targeted protocol regression, while retaining this fixture's ownership.
+    assert not args.locked_suite_runner or args.suite
+    assert 1<=args.repeat<=3
+    assert not args.package_output or args.repeat==1
+    assert not args.crash_probe or args.repeat==1
+    cli=(args.cli_executable or REPO/'.scratch/d7-aot/info.exe').resolve()
+    runs=REPO/'.scratch/ssh-native-runs'
+    runs.mkdir(parents=True,exist_ok=True)
+    root=Path(tempfile.mkdtemp(prefix='synthetic-',dir=runs)).resolve()
+    assert root.parent==runs.resolve()
+    output=root/'keys';output.mkdir()
+    linux='/mnt/'+str(output)[0].lower()+str(output)[2:].replace('\\','/')
+    container=None
+    keepalive=subprocess.Popen(['wsl.exe','-d','Ubuntu-24.04','--','sh','-c','read -r fixture_done'],stdin=subprocess.PIPE,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
+    try:
+        image=docker('image','inspect',IMAGE,'--format','{{.Id}}')
+        container=docker('run','--rm','-d','--label','task='+LABEL,'-p','127.0.0.1::2222','--mount','type=bind,source='+linux+',target=/output',image)
+        for _ in range(150):
+            if (output/'ready').exists():break
+            time.sleep(.1)
+        assert (output/'ready').exists(),'SSH fixture did not become ready'
+        binding=docker('port',container,'2222/tcp')
+        assert binding.startswith('127.0.0.1:')
+        env=os.environ.copy()
+        material_temp=root/('materials' if args.suite or args.checks or args.package_output else '材料 空格');material_temp.mkdir()
+        env.update({'D7_SSH_FIXTURE':str(output),'D7_SSH_PORT':binding.split(':')[-1],
+          'TEMP':str(material_temp),'TMP':str(material_temp),
+          'D7_SSH_EXE':str(Path(os.environ['SystemRoot'])/'System32/OpenSSH/ssh.exe')})
+        dart=Path.home()/'.local/share/flutter/bin/cache/dart-sdk/bin/dart.exe'
+        if args.native:
+            flutter=Path.home()/'.local/share/flutter/bin/flutter.bat'
+            command=[str(flutter),'test','--no-pub','integration_test/'+args.native_test,'-d','windows',
+              '--dart-define=CLI_EXECUTABLE='+str(cli),
+              '--dart-define=SSH_EXECUTABLE='+env['D7_SSH_EXE'],'--dart-define=SSH_FIXTURE='+str(output),'--dart-define=SSH_FIXTURE_PORT='+env['D7_SSH_PORT']]
+            if args.native_test in {'hosted_runtime_native_test.dart','reusable_runtime_native_test.dart'}:
+                adapter=cli.parent/'info-codex.exe';worker=cli.parent/'info-runtime-worker.exe'
+                assert adapter.is_file() and worker.is_file()
+                command+=['--dart-define=CODEX_EXECUTABLE='+str(adapter),'--dart-define=WORKER_EXECUTABLE='+str(worker)]
+                if args.native_test=='reusable_runtime_native_test.dart':
+                    command+=['--dart-define=EVIDENCE_DIRECTORY='+str(REPO/'build/qa-issue33/native-reuse')]
+                if env.get('HOSTED_SHORT_RUNS'):
+                    assert 10<=int(env['HOSTED_SHORT_RUNS'])<=60
+                    command+=['--dart-define=HOSTED_SHORT_RUNS='+env['HOSTED_SHORT_RUNS']]
+            cwd=REPO/'apps/desktop'
+        elif args.checks:
+            command=['pwsh.exe','-NoProfile','-File',str(REPO/'scripts/check.ps1'),'-FlutterBin',str(Path.home()/'.local/share/flutter/bin'),'-Offline'];cwd=REPO
+        elif args.package_output:
+            command=['pwsh.exe','-NoProfile','-File',str(REPO/'scripts/package-windows.ps1'),'-FlutterBin',str(Path.home()/'.local/share/flutter/bin'),'-OutputDirectory',str(args.package_output.resolve()),'-Offline'];cwd=REPO
+        elif args.crash_probe:
+            command=[sys.executable,str(BASE.parent/'windows-hosted-crash.py'),
+              '--app',str(args.crash_probe.resolve()),'--worker',str(cli.parent/'info-runtime-worker.exe')];cwd=REPO
+        else:
+            command=[str(dart),'test',*([] if args.suite else ['test/ssh_receiver_native_test.dart'])];cwd=REPO/'packages/info_cli'
+        if args.suite or args.checks or args.package_output:
+            env['D6_COMPILED_CLI']=str(cli)
+            assert Path(env['D6_COMPILED_CLI']).is_file()
+            assert Path(env['D7_AWS_EXE']).is_file()
+        if args.locked_suite_runner:
+            assert args.locked_suite_runner.is_file()
+            command=[sys.executable,str(args.locked_suite_runner.resolve()),'--package','info_cli','--label',args.test_label,'--analyze']
+            cwd=REPO
+        for _ in range(args.repeat):
+            p=subprocess.run(command,cwd=cwd,env=env,timeout=1200 if args.package_output else 240 if args.native else 180 if args.checks else 100)
+            if p.returncode:break
+    finally:
+        try:
+            if container:
+                assert docker('inspect',container,'--format','{{index .Config.Labels "task"}}')==LABEL
+                docker('stop','-t','1',container)
+        finally:
+            keepalive.stdin.close();keepalive.wait(timeout=10)
+    print(json.dumps({'imageId':image,'testExitCode':p.returncode,'fixture':'synthetic localhost only','containerRemovedAfterRun':True}))
+    return p.returncode
+
+if __name__=='__main__':raise SystemExit(main())

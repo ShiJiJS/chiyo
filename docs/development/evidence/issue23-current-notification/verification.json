@@ -1,0 +1,180 @@
+{
+  "sourceCommit": "37da21eb85e4001577beba886ab7f8ffe93368ba",
+  "mode": "isolated Debug integration entry, not shipped Release GUI",
+  "checks": {
+    "strictAnalyzePassed": true,
+    "nativePassed": 0,
+    "nativeFailed": 1,
+    "skipped": 0,
+    "timeoutSeconds": 60
+  },
+  "native": {
+    "activeNotificationId": 0,
+    "clicked": 0,
+    "hidden": 0,
+    "idMismatch": 1,
+    "lastAccepted": true,
+    "queryHresult": 0,
+    "sendAttempts": 1,
+    "shown": 1,
+    "timedOut": 1,
+    "trayId": 1,
+    "userState": 5
+  },
+  "openedRequestId": null,
+  "semantics": {
+    "handlesBefore": 0,
+    "handlesAfterBody": 0,
+    "newPlatformHandleReleasedAfterUnmount": false
+  },
+  "fixtureRemoved": true,
+  "debugRunner": {
+    "path": "apps/desktop/build/windows/x64/runner/Debug/info_desktop.exe",
+    "sha256": "31d4d6a9336975d511f9704e99e3b13c18c5d39c4934866b66bdd8105d916a72"
+  },
+  "sources": [
+    {
+      "commit": "37da21eb85e4001577beba886ab7f8ffe93368ba",
+      "path": "apps/desktop/integration_test/manual_notification_test.dart",
+      "sha256": "05deec3b1adccc1639b2e7e3615696d3e1f578ad853869baf2c63a05b99b915f"
+    },
+    {
+      "commit": "37da21eb85e4001577beba886ab7f8ffe93368ba",
+      "path": "apps/desktop/integration_test/support/native_semantics_lifetime.dart",
+      "sha256": "a274da35d57e9bca3322b7e5b70a2bc610990e8e8dc3fba0821bbb1e9219036f"
+    },
+    {
+      "commit": "37da21eb85e4001577beba886ab7f8ffe93368ba",
+      "path": "apps/desktop/windows/runner/flutter_window.cpp",
+      "sha256": "ec09e51dd5f9287a816ef0a0391f5a6538e879fd245598f564e3b5b8e966064f"
+    },
+    {
+      "commit": "37da21eb85e4001577beba886ab7f8ffe93368ba",
+      "path": "apps/desktop/windows/runner/flutter_window.h",
+      "sha256": "57a3902a0839f652b6de8c216ad5f121f943638236b3d0b2911c0238f82ed127"
+    },
+    {
+      "commit": "37da21eb85e4001577beba886ab7f8ffe93368ba",
+      "path": "apps/desktop/windows/runner/notification_queue.h",
+      "sha256": "c38bd902a5d0bcbb20f5c39804b6e1dd6366a90fd08b0194b746b3c501da1c43"
+    },
+    {
+      "commit": "37da21eb85e4001577beba886ab7f8ffe93368ba",
+      "path": "apps/desktop/windows/runner/notification_queue_test.cpp",
+      "sha256": "b2e3f1bec4c3c460ddb727e7732d7441458fa2a2785a618f1f6bc75d743087d0"
+    },
+    {
+      "commit": "37da21eb85e4001577beba886ab7f8ffe93368ba",
+      "path": "packages/info_cli/pubspec.lock",
+      "sha256": "ba6ef5d779db0b2baeed9d5e0d1681786a9c35bf383a09513c485bd1892c44f6"
+    },
+    {
+      "commit": "37da21eb85e4001577beba886ab7f8ffe93368ba",
+      "path": "packages/info_core/pubspec.lock",
+      "sha256": "f4b92b116d6017052bc0814be49221cab9e7e907c1fdbf44b32cf0050d449682"
+    },
+    {
+      "commit": "37da21eb85e4001577beba886ab7f8ffe93368ba",
+      "path": "packages/info_storage/pubspec.lock",
+      "sha256": "131f601be25b6a7759cf961d15fda9c4e176a759eb20d499a83e2bff8d9d1274"
+    },
+    {
+      "commit": "37da21eb85e4001577beba886ab7f8ffe93368ba",
+      "path": "apps/desktop/pubspec.lock",
+      "sha256": "9929f3b3febefc0de06e9a841ac4b5505896eda43a503b0f128467d93b311553"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "raw/after-state.json",
+      "byteLength": 347,
+      "sha256": "24a134b6de0b8fb59f8265b49f935cd28b6bd9c61b123b898454f11bc98b7a4c"
+    },
+    {
+      "path": "raw/analyze.txt",
+      "byteLength": 199,
+      "sha256": "7855c31cc31ee96531adf9a2e295156eab1c8fae682d770afbae0637daf59b67"
+    },
+    {
+      "path": "raw/dispatch",
+      "byteLength": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/flutter_window.cpp.txt",
+      "byteLength": 16839,
+      "sha256": "e577431577a3cac746c28ff01d60339e4ed24a0ac64f66e8c756ed7d8c3dd28c"
+    },
+    {
+      "path": "raw/flutter_window.h.txt",
+      "byteLength": 2292,
+      "sha256": "cf0a97cc8c3c3b7ac0ee72685f738f885729f7a15e86837331426c32a9c02b13"
+    },
+    {
+      "path": "raw/format.txt",
+      "byteLength": 46,
+      "sha256": "1685974b88bd671112e17334bdc2abb8ef350e01ae026547459ec7a8307375ec"
+    },
+    {
+      "path": "raw/freeze.py.txt",
+      "byteLength": 3306,
+      "sha256": "9057ea9cd275b0032955f1df3e87d13de2c22a27b971af92305c0fa44463c129"
+    },
+    {
+      "path": "raw/manual_notification_test.dart.txt",
+      "byteLength": 9182,
+      "sha256": "2862f3fe9abcc529236291ede7f3276967cee7857206d6805818e784178dafaa"
+    },
+    {
+      "path": "raw/native.txt",
+      "byteLength": 4605,
+      "sha256": "c8758578f682d3b84ff1c807fd7054d9d8ee6925712afa1be396b8c8b81381b4"
+    },
+    {
+      "path": "raw/native_semantics_lifetime.dart.txt",
+      "byteLength": 1540,
+      "sha256": "a274da35d57e9bca3322b7e5b70a2bc610990e8e8dc3fba0821bbb1e9219036f"
+    },
+    {
+      "path": "raw/notification_queue.h.txt",
+      "byteLength": 2536,
+      "sha256": "7eaf8dea38fef55ae3320c5fbdf981851310c4db0d7475e36f8d6fce23229a27"
+    },
+    {
+      "path": "raw/notification_queue_test.cpp.txt",
+      "byteLength": 5030,
+      "sha256": "166c7dce579ef7f90b57ef4ad2a9d4695c71e55a7f8e7b98bdcf2c1ca27f3d99"
+    },
+    {
+      "path": "raw/operator-observation.json",
+      "byteLength": 562,
+      "sha256": "d45e2e876eb0e963d4b74fcf19928b84b6e77c69bf613aaded62b4965ee8712b"
+    },
+    {
+      "path": "raw/phase.json",
+      "byteLength": 152,
+      "sha256": "5a4c8488766cf46e4b82099ac021e12afe3251eea4837e3c093c9f4fcb812caa"
+    },
+    {
+      "path": "raw/phases.jsonl",
+      "byteLength": 1757,
+      "sha256": "90b7c63f8540f5933cf8970bf72ef262c3cea418382815e84279bcd9904f2bc0"
+    },
+    {
+      "path": "raw/probe-run.py.txt",
+      "byteLength": 3061,
+      "sha256": "e5e7bbb98ca08626b335bcbe47b2e70b600e8e4b2a62df5d347e84a972c8e6f4"
+    },
+    {
+      "path": "raw/pub.txt",
+      "byteLength": 368,
+      "sha256": "748e8df20571fc202b90cb6d56c154b0fb7eff6ba0e04c8c1102f7b22a8e7005"
+    },
+    {
+      "path": "raw/runner-result.json",
+      "byteLength": 1346,
+      "sha256": "24cb4ca9b02a391cd982539ed4833a92f97f7c955a31c59c6414169b3f3b5852"
+    }
+  ],
+  "realClickAccepted": false
+}

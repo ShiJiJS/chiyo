@@ -1,0 +1,361 @@
+{
+  "sourceRevision": "dc6c179ab4e8b3511775d6d5f6a1accaca99c31d",
+  "kind": "synthetic automated Windows checks; no GUI or distribution build",
+  "final": {
+    "fullRun": "raw/full-01/checks.txt",
+    "exitCode": 0,
+    "passed": 577,
+    "skipped": 19,
+    "packages": {
+      "info_cli": {
+        "passed": 87,
+        "skipped": 13
+      },
+      "info_core": {
+        "passed": 224,
+        "skipped": 0
+      },
+      "info_storage": {
+        "passed": 127,
+        "skipped": 6
+      },
+      "desktop": {
+        "passed": 139,
+        "skipped": 0
+      }
+    },
+    "strictAnalyzes": 4,
+    "locksUnchanged": true
+  },
+  "earlierRuns": {
+    "round-01": "core curly-brace lints; stopped before storage",
+    "round-02": "deprecated indirect BytesBuilder import; stopped before tests",
+    "round-03": "3 failures: locked library.lock inspection in test, real zero-length SQLite range read, obsolete codec-only domain expectation",
+    "round-04": "core 224 and storage127/6 all passed after fixes"
+  },
+  "limits": "Agent file delivery, Owner export, retirement/purge, final capacity/memory and real client remain pending; no capability advertised",
+  "raw": [
+    {
+      "path": "raw/round-01/core-analyze.txt",
+      "bytes": 2053,
+      "sha256": "6936d8a7e9393afda972f239365b0e34ea892ab0db74b28bbce7bc616904fbdf"
+    },
+    {
+      "path": "raw/round-01/core-format.txt",
+      "bytes": 593,
+      "sha256": "98b049b314ddcca19060e976845800c5c46cc7cb956faa799b40d4507270640d"
+    },
+    {
+      "path": "raw/round-01/core-pub.txt",
+      "bytes": 258,
+      "sha256": "a24779315fffab73870dfc7b15b56246a95b601b3432e434b43cd223bf752a6a"
+    },
+    {
+      "path": "raw/round-01/result.json",
+      "bytes": 233,
+      "sha256": "f52ec1804c691357b63e2665f426e914006202bee7a0a6b50c78e00a99170cb9"
+    },
+    {
+      "path": "raw/round-02/core-analyze.txt",
+      "bytes": 40,
+      "sha256": "d9ebd39d330d44ff327dbf6cf5ce8566791da694504d82a7b989e78e27969232"
+    },
+    {
+      "path": "raw/round-02/core-braces.txt",
+      "bytes": 313,
+      "sha256": "a3bd1e9d76e3faa78c9ab02353b0616ed6abb2788a996f18194afda596580207"
+    },
+    {
+      "path": "raw/round-02/core-format.txt",
+      "bytes": 47,
+      "sha256": "725a25e3d849ec6009e6718f1be15896780cc316feea4771d60c8303f0c3e1d2"
+    },
+    {
+      "path": "raw/round-02/core-pub.txt",
+      "bytes": 258,
+      "sha256": "a24779315fffab73870dfc7b15b56246a95b601b3432e434b43cd223bf752a6a"
+    },
+    {
+      "path": "raw/round-02/result.json",
+      "bytes": 558,
+      "sha256": "7e23c1d7a8ad7e93d492961572acd9b49bb0ec833ec0bab6807f29047e25b221"
+    },
+    {
+      "path": "raw/round-02/storage-analyze.txt",
+      "bytes": 226,
+      "sha256": "cf06d92d7ade635a88b10512cd26c8b54872eaf60eae6bcd66d28306312a9a2a"
+    },
+    {
+      "path": "raw/round-02/storage-braces.txt",
+      "bytes": 683,
+      "sha256": "47dd145fae8acdf406b94204a9832594e2324f88cd7f0c14a9d4ef3f84dade87"
+    },
+    {
+      "path": "raw/round-02/storage-format.txt",
+      "bytes": 286,
+      "sha256": "a116e392c10d284e353780f74f3aad4509270aa20337600b539a6cebbb21370c"
+    },
+    {
+      "path": "raw/round-02/storage-pub.txt",
+      "bytes": 258,
+      "sha256": "a24779315fffab73870dfc7b15b56246a95b601b3432e434b43cd223bf752a6a"
+    },
+    {
+      "path": "raw/round-03/core-analyze.txt",
+      "bytes": 40,
+      "sha256": "d9ebd39d330d44ff327dbf6cf5ce8566791da694504d82a7b989e78e27969232"
+    },
+    {
+      "path": "raw/round-03/core-format.txt",
+      "bytes": 90,
+      "sha256": "0f4ad18277ef6baa07fccc2c9a567cdefffc3e57bcff17838f58cf544b63b93f"
+    },
+    {
+      "path": "raw/round-03/core-pub.txt",
+      "bytes": 258,
+      "sha256": "a24779315fffab73870dfc7b15b56246a95b601b3432e434b43cd223bf752a6a"
+    },
+    {
+      "path": "raw/round-03/core-tests.txt",
+      "bytes": 35245,
+      "sha256": "2c3afbadda8fb974bfc7e0a0774fe7fdbc751b6afd8ab8573a35fb19270849ca"
+    },
+    {
+      "path": "raw/round-03/result.json",
+      "bytes": 556,
+      "sha256": "c0dbbd648426d7bc1440c1a15ecf3cb5f2d205e52f772e3886ff464b790cb14e"
+    },
+    {
+      "path": "raw/round-03/storage-analyze.txt",
+      "bytes": 43,
+      "sha256": "a489b1249880b489826d25a25a28b316c5059ae3c5e62feecfc2b7949aba9041"
+    },
+    {
+      "path": "raw/round-03/storage-format.txt",
+      "bytes": 157,
+      "sha256": "a7ae54b07bd3e2bde098f9fa8302ce832a6b4bde936dcb49b1bdda8e7b9bfe67"
+    },
+    {
+      "path": "raw/round-03/storage-pub.txt",
+      "bytes": 258,
+      "sha256": "a24779315fffab73870dfc7b15b56246a95b601b3432e434b43cd223bf752a6a"
+    },
+    {
+      "path": "raw/round-03/storage-tests.txt",
+      "bytes": 85457,
+      "sha256": "89909dd82100ffb476526ec3b226822d3d879f84bd2f1e187aab6f2e13ec6a21"
+    },
+    {
+      "path": "raw/round-04/core-analyze.txt",
+      "bytes": 40,
+      "sha256": "d9ebd39d330d44ff327dbf6cf5ce8566791da694504d82a7b989e78e27969232"
+    },
+    {
+      "path": "raw/round-04/core-format.txt",
+      "bytes": 47,
+      "sha256": "76058124c18f8e86477b45f27761ce404f446ca3c08e1ebee878daaa42ebc9b7"
+    },
+    {
+      "path": "raw/round-04/core-pub.txt",
+      "bytes": 258,
+      "sha256": "a24779315fffab73870dfc7b15b56246a95b601b3432e434b43cd223bf752a6a"
+    },
+    {
+      "path": "raw/round-04/core-tests.txt",
+      "bytes": 35327,
+      "sha256": "7b7a7479042f1f510b1b3857dc00bb2da13722ab82385f452bc6e519a58ee8d2"
+    },
+    {
+      "path": "raw/round-04/result.json",
+      "bytes": 556,
+      "sha256": "007d17a3c4020743c602b97989b3f0de13ed7c8f2ca1330b3e29f8e0c8910f3c"
+    },
+    {
+      "path": "raw/round-04/storage-analyze.txt",
+      "bytes": 43,
+      "sha256": "a489b1249880b489826d25a25a28b316c5059ae3c5e62feecfc2b7949aba9041"
+    },
+    {
+      "path": "raw/round-04/storage-format.txt",
+      "bytes": 158,
+      "sha256": "af1eee9da0d426d4dc766bb5e596f25fcaafe4f8c440e0953667013c65bac1fd"
+    },
+    {
+      "path": "raw/round-04/storage-pub.txt",
+      "bytes": 258,
+      "sha256": "a24779315fffab73870dfc7b15b56246a95b601b3432e434b43cd223bf752a6a"
+    },
+    {
+      "path": "raw/round-04/storage-tests.txt",
+      "bytes": 82164,
+      "sha256": "10de01196cc06348df71e24fd0133443dec7d991f9d402c23a2a3149aa688328"
+    },
+    {
+      "path": "raw/full-01/checks.txt",
+      "bytes": 162407,
+      "sha256": "c24542581afd8a5400aef881856e734a153450073cab216f165df8079dc39192"
+    },
+    {
+      "path": "raw/full-01/result.json",
+      "bytes": 17,
+      "sha256": "d45db54bba0c56e2691a52869729c0a3eade7f5d50545e7832a20e3262a9d422"
+    },
+    {
+      "path": "raw/check.py.txt",
+      "bytes": 2444,
+      "sha256": "240090e6f15dfe3af633a60170f2985a23969e39509fa98d10937655f3b05898"
+    },
+    {
+      "path": "raw/full.py.txt",
+      "bytes": 912,
+      "sha256": "85fc1b503238637c4c34af6b3ff00a1b0c9267183a952da95b223fdfa3cd9f9f"
+    }
+  ],
+  "sourceGitBytes": [
+    {
+      "path": "packages/info_core/lib/info_core.dart",
+      "bytes": 28316,
+      "sha256": "aacf76f1b4c991a650e596227e921ff32e5532c1219a36aa67ef025f6faa7151"
+    },
+    {
+      "path": "packages/info_core/lib/information.dart",
+      "bytes": 23228,
+      "sha256": "9b001aa91001b34203b395c6dcc80407c837c49045b5709be0718e8e618e4d7c"
+    },
+    {
+      "path": "packages/info_core/lib/information_draft_access.dart",
+      "bytes": 7374,
+      "sha256": "3354b9574e79d0de7db6228e674e406bde07688916960c985a2cf4ef8010741d"
+    },
+    {
+      "path": "packages/info_core/lib/information_draft_models.dart",
+      "bytes": 4559,
+      "sha256": "bc14810354004d14819694274e4f4e736e20b061c8f71013f0c30445963c7f2c"
+    },
+    {
+      "path": "packages/info_core/lib/information_files.dart",
+      "bytes": 9852,
+      "sha256": "31a8a0a027c967f30b370dca7a0c486d038287b6277611a328a4c38d73841575"
+    },
+    {
+      "path": "packages/info_core/lib/memory_information_files.dart",
+      "bytes": 3295,
+      "sha256": "377898d13a854121826f6b360ce7627d5b3491077c43f0fcf7006a6c60c0a28b"
+    },
+    {
+      "path": "packages/info_core/test/information_draft_test.dart",
+      "bytes": 8152,
+      "sha256": "31e59ee8b023d0802eb485dd67572920980ede59cd78dad5e61e0493721c228e"
+    },
+    {
+      "path": "packages/info_storage/lib/attachment_backup.dart",
+      "bytes": 16353,
+      "sha256": "210b88f8ca3c774893479311879693f5aba3fcc869fd6203d383689d73d02caa"
+    },
+    {
+      "path": "packages/info_storage/lib/attachment_backup_integration.dart",
+      "bytes": 3438,
+      "sha256": "b07401e69eabcd63cbe6bcf371b50d44c8dab301ac688b4f54b78e832a1a237c"
+    },
+    {
+      "path": "packages/info_storage/lib/backup_history.dart",
+      "bytes": 22770,
+      "sha256": "eb84723706ad24db09118678fb2bc1927a16b856ebe353e1f08a5db42a394eaa"
+    },
+    {
+      "path": "packages/info_storage/lib/backups.dart",
+      "bytes": 31528,
+      "sha256": "8f0a126670d741b0b7358c69918d52cfdf38c1279b2f98305b0d08dde251694f"
+    },
+    {
+      "path": "packages/info_storage/lib/info_storage.dart",
+      "bytes": 55592,
+      "sha256": "898337ceb581a41473648e89b64f70e00235434d04ee8d1f60ff005954196279"
+    },
+    {
+      "path": "packages/info_storage/lib/information_attachments_storage.dart",
+      "bytes": 10881,
+      "sha256": "af7dedd41219a00528ce60f9906eedd287d5d86565500856b035928c9cddd7c2"
+    },
+    {
+      "path": "packages/info_storage/lib/information_files_storage.dart",
+      "bytes": 4002,
+      "sha256": "e6708302c877d2ebaa29c3ec40ee800d1c2a2a96ff0aed9d25c2d2d095aeaf71"
+    },
+    {
+      "path": "packages/info_storage/test/attachment_backup_container_test.dart",
+      "bytes": 15929,
+      "sha256": "fd78dae20d236afac0c751c1dc690cd00efbf8e5d06585ce1616edb06ea42eff"
+    },
+    {
+      "path": "packages/info_storage/test/attachment_legacy_boundary_test.dart",
+      "bytes": 5527,
+      "sha256": "63f8e9109a86bc01522c5983563d40c4a1c4a52cdf47f020d8d7689d2987e45b"
+    },
+    {
+      "path": "packages/info_storage/test/credential_reuse_storage_test.dart",
+      "bytes": 29883,
+      "sha256": "5a137903b1328b1fc731dbc9dd813874206849e045a9e927f6c803bba1b77aef"
+    },
+    {
+      "path": "packages/info_storage/test/credentials_storage_test.dart",
+      "bytes": 8303,
+      "sha256": "3e76c27f507eca483675a70f18dc35de9371721ffa8ccdc0e8b807e3f679f779"
+    },
+    {
+      "path": "packages/info_storage/test/information_attachments_storage_test.dart",
+      "bytes": 18862,
+      "sha256": "24e2a47ba0253cbba46e3ad1ad2567739a59c21b1e32882b0ebffc1921ac76f6"
+    },
+    {
+      "path": "packages/info_storage/test/information_file_staging_test.dart",
+      "bytes": 12868,
+      "sha256": "c099e3929098c51f6a21f7d02c5d39787ffd577b8bd529195e5cb03505f5ceb3"
+    },
+    {
+      "path": "packages/info_storage/test/information_time_test.dart",
+      "bytes": 4103,
+      "sha256": "141874715eaa089fb3b980b5fd2bb82dbf87576af090be06577f4247f644f95d"
+    },
+    {
+      "path": "packages/info_storage/test/organization_tasks_test.dart",
+      "bytes": 12334,
+      "sha256": "ca494b440a4d3b92592e81efc1a3a4bd66b6dbe97c0eccde63177b7bb434b11a"
+    },
+    {
+      "path": "packages/info_storage/test/recycle_test.dart",
+      "bytes": 8077,
+      "sha256": "ef167c8f417fd2514c2a1d82e7f737892d5b01169729d8d6617230286c47ea99"
+    },
+    {
+      "path": "packages/info_storage/test/revisions_test.dart",
+      "bytes": 5032,
+      "sha256": "c3dbdb08984fb6ae877175a5c43f1c95594fa309e608184e62fb8a77d81b0113"
+    },
+    {
+      "path": "packages/info_storage/test/ssh_host_trust_storage_test.dart",
+      "bytes": 4897,
+      "sha256": "20b16e13eb19dd3b8b6c136ae05af06733d0798c25eb2953934e6f9f0a31e2de"
+    },
+    {
+      "path": "packages/info_core/pubspec.lock",
+      "bytes": 11873,
+      "sha256": "f4b92b116d6017052bc0814be49221cab9e7e907c1fdbf44b32cf0050d449682"
+    },
+    {
+      "path": "packages/info_storage/pubspec.lock",
+      "bytes": 13848,
+      "sha256": "131f601be25b6a7759cf961d15fda9c4e176a759eb20d499a83e2bff8d9d1274"
+    },
+    {
+      "path": "packages/info_cli/pubspec.lock",
+      "bytes": 12013,
+      "sha256": "ba6ef5d779db0b2baeed9d5e0d1681786a9c35bf383a09513c485bd1892c44f6"
+    },
+    {
+      "path": "apps/desktop/pubspec.lock",
+      "bytes": 11393,
+      "sha256": "9929f3b3febefc0de06e9a841ac4b5505896eda43a503b0f128467d93b311553"
+    }
+  ]
+}
