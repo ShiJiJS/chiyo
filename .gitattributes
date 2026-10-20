@@ -94,3 +94,4 @@ docs/development/evidence/macos-delivery-shutdown-fix/raw/** -text -diff
 docs/development/evidence/macos-keychain-backup/raw/** -text -diff
 docs/development/evidence/macos-owner-keychain-access/raw/** -text -diff
 docs/development/evidence/macos-delivery-keychain-access/raw/** -text -diff
+docs/development/evidence/macos-locked-keychain/raw/** -text -diff

@@ -1,0 +1,114 @@
+/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue42-locked-keychain-1/DatabaseKeyStore.swift:40:22: warning: 'SecKeychainGetUserInteractionAllowed' was deprecated in macOS 10.10: SecKeychain is deprecated [#DeprecatedDeclaration]
+38 |     defer { Self.interactionLock.unlock() }
+39 |     var previous: DarwinBoolean = true
+40 |     let readStatus = SecKeychainGetUserInteractionAllowed(&previous)
+   |                      `- warning: 'SecKeychainGetUserInteractionAllowed' was deprecated in macOS 10.10: SecKeychain is deprecated [#DeprecatedDeclaration]
+41 |     guard readStatus == errSecSuccess else {
+42 |       throw DatabaseKeyFailure(code: "key_unavailable", status: readStatus)
+
+/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue42-locked-keychain-1/DatabaseKeyStore.swift:44:21: warning: 'SecKeychainSetUserInteractionAllowed' was deprecated in macOS 10.10: SecKeychain is deprecated [#DeprecatedDeclaration]
+42 |       throw DatabaseKeyFailure(code: "key_unavailable", status: readStatus)
+43 |     }
+44 |     let setStatus = SecKeychainSetUserInteractionAllowed(allowed)
+   |                     `- warning: 'SecKeychainSetUserInteractionAllowed' was deprecated in macOS 10.10: SecKeychain is deprecated [#DeprecatedDeclaration]
+45 |     guard setStatus == errSecSuccess else {
+46 |       throw DatabaseKeyFailure(code: "key_unavailable", status: setStatus)
+
+/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue42-locked-keychain-1/DatabaseKeyStore.swift:48:13: warning: 'SecKeychainSetUserInteractionAllowed' was deprecated in macOS 10.10: SecKeychain is deprecated [#DeprecatedDeclaration]
+46 |       throw DatabaseKeyFailure(code: "key_unavailable", status: setStatus)
+47 |     }
+48 |     defer { SecKeychainSetUserInteractionAllowed(previous.boolValue) }
+   |             `- warning: 'SecKeychainSetUserInteractionAllowed' was deprecated in macOS 10.10: SecKeychain is deprecated [#DeprecatedDeclaration]
+49 |     return try action()
+50 |   }
+
+[#DeprecatedDeclaration]: <https://docs.swift.org/compiler/documentation/diagnostics/deprecated-declaration>
+/Users/jiangxinyi/Documents/Project/agent-info/scripts/qa/macos-locked-keychain-probe.swift:25:17: warning: 'SecKeychainGetStatus' was deprecated in macOS 10.10: SecKeychain is deprecated [#DeprecatedDeclaration]
+ 23 |     func unlocked(_ keychain: SecKeychain) throws -> Bool {
+ 24 |       var state: SecKeychainStatus = 0
+ 25 |       try check(SecKeychainGetStatus(keychain, &state), "keychain_status")
+    |                 `- warning: 'SecKeychainGetStatus' was deprecated in macOS 10.10: SecKeychain is deprecated [#DeprecatedDeclaration]
+ 26 |       return (state & SecKeychainStatus(kSecUnlockStateStatus)) != 0
+ 27 |     }
+
+/Users/jiangxinyi/Documents/Project/agent-info/scripts/qa/macos-locked-keychain-probe.swift:29:17: warning: 'SecKeychainCopySearchList' was deprecated in macOS 10.10: SecKeychain is deprecated [#DeprecatedDeclaration]
+ 27 |     }
+ 28 |     do {
+ 29 |       try check(SecKeychainCopySearchList(&beforeList), "search_list_before")
+    |                 `- warning: 'SecKeychainCopySearchList' was deprecated in macOS 10.10: SecKeychain is deprecated [#DeprecatedDeclaration]
+ 30 |       try check(SecKeychainCopyDefault(&beforeDefault), "default_before")
+ 31 |       let directory = FileManager.default.temporaryDirectory.appendingPathComponent("aim-locked-keychain-" + UUID().uuidString)
+
+/Users/jiangxinyi/Documents/Project/agent-info/scripts/qa/macos-locked-keychain-probe.swift:30:17: warning: 'SecKeychainCopyDefault' was deprecated in macOS 10.10: SecKeychain is deprecated [#DeprecatedDeclaration]
+ 28 |     do {
+ 29 |       try check(SecKeychainCopySearchList(&beforeList), "search_list_before")
+ 30 |       try check(SecKeychainCopyDefault(&beforeDefault), "default_before")
+    |                 `- warning: 'SecKeychainCopyDefault' was deprecated in macOS 10.10: SecKeychain is deprecated [#DeprecatedDeclaration]
+ 31 |       let directory = FileManager.default.temporaryDirectory.appendingPathComponent("aim-locked-keychain-" + UUID().uuidString)
+ 32 |       try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: false, attributes: [.posixPermissions: 0o700])
+
+/Users/jiangxinyi/Documents/Project/agent-info/scripts/qa/macos-locked-keychain-probe.swift:40:9: warning: 'SecKeychainCreate' was deprecated in macOS 10.10: SecKeychain is deprecated [#DeprecatedDeclaration]
+ 38 |       let path = directory.appendingPathComponent("fixture.keychain").path
+ 39 |       let created = password.withCString {
+ 40 |         SecKeychainCreate(path, UInt32(password.utf8.count), $0, false, nil, &qaKeychain)
+    |         `- warning: 'SecKeychainCreate' was deprecated in macOS 10.10: SecKeychain is deprecated [#DeprecatedDeclaration]
+ 41 |       }
+ 42 |       try check(created, "create_private_keychain")
+
+/Users/jiangxinyi/Documents/Project/agent-info/scripts/qa/macos-locked-keychain-probe.swift:45:17: warning: 'SecKeychainCopyDefault' was deprecated in macOS 10.10: SecKeychain is deprecated [#DeprecatedDeclaration]
+ 43 |       guard let keychain = qaKeychain else { throw Failure(step: "missing_keychain", status: nil) }
+ 44 |       var currentDefault: SecKeychain?
+ 45 |       try check(SecKeychainCopyDefault(&currentDefault), "default_after_create")
+    |                 `- warning: 'SecKeychainCopyDefault' was deprecated in macOS 10.10: SecKeychain is deprecated [#DeprecatedDeclaration]
+ 46 |       try require(CFEqual(beforeDefault, currentDefault), "default_changed")
+ 47 |       facts["defaultUnchangedAfterCreate"] = true
+
+/Users/jiangxinyi/Documents/Project/agent-info/scripts/qa/macos-locked-keychain-probe.swift:59:17: warning: 'SecKeychainLock' was deprecated in macOS 10.10: SecKeychain is deprecated [#DeprecatedDeclaration]
+ 57 |       try require(try store.read() == sample, "initial_key_mismatch")
+ 58 |       facts["createdAndReadOriginalKey"] = true
+ 59 |       try check(SecKeychainLock(keychain), "lock_private_keychain")
+    |                 `- warning: 'SecKeychainLock' was deprecated in macOS 10.10: SecKeychain is deprecated [#DeprecatedDeclaration]
+ 60 |       try require(try !unlocked(keychain), "lock_not_observed")
+ 61 |       facts["actualLockedStateObserved"] = true
+
+/Users/jiangxinyi/Documents/Project/agent-info/scripts/qa/macos-locked-keychain-probe.swift:83:9: warning: 'SecKeychainUnlock' was deprecated in macOS 10.10: SecKeychain is deprecated [#DeprecatedDeclaration]
+ 81 |       }
+ 82 |       let unlockStatus = password.withCString {
+ 83 |         SecKeychainUnlock(keychain, UInt32(password.utf8.count), $0, true)
+    |         `- warning: 'SecKeychainUnlock' was deprecated in macOS 10.10: SecKeychain is deprecated [#DeprecatedDeclaration]
+ 84 |       }
+ 85 |       try check(unlockStatus, "unlock_owned_keychain")
+
+/Users/jiangxinyi/Documents/Project/agent-info/scripts/qa/macos-locked-keychain-probe.swift:90:17: warning: 'SecKeychainGetUserInteractionAllowed' was deprecated in macOS 10.10: SecKeychain is deprecated [#DeprecatedDeclaration]
+ 88 |       facts["unlockedOriginalKeyPreserved"] = true
+ 89 |       var interaction: DarwinBoolean = false
+ 90 |       try check(SecKeychainGetUserInteractionAllowed(&interaction), "interaction_after")
+    |                 `- warning: 'SecKeychainGetUserInteractionAllowed' was deprecated in macOS 10.10: SecKeychain is deprecated [#DeprecatedDeclaration]
+ 91 |       facts["interactionRestored"] = interaction.boolValue
+ 92 |     } catch let failure as Failure {
+
+/Users/jiangxinyi/Documents/Project/agent-info/scripts/qa/macos-locked-keychain-probe.swift:105:20: warning: 'SecKeychainDelete' was deprecated in macOS 10.10: SecKeychain is deprecated [#DeprecatedDeclaration]
+103 |     }
+104 |     if let keychain = qaKeychain {
+105 |       let status = SecKeychainDelete(keychain)
+    |                    `- warning: 'SecKeychainDelete' was deprecated in macOS 10.10: SecKeychain is deprecated [#DeprecatedDeclaration]
+106 |       facts["ownedKeychainDeleteStatus"] = status
+107 |       if status != errSecSuccess { failed = true }
+
+/Users/jiangxinyi/Documents/Project/agent-info/scripts/qa/macos-locked-keychain-probe.swift:111:22: warning: 'SecKeychainCopySearchList' was deprecated in macOS 10.10: SecKeychain is deprecated [#DeprecatedDeclaration]
+109 |     var afterList: CFArray?
+110 |     var afterDefault: SecKeychain?
+111 |     let listStatus = SecKeychainCopySearchList(&afterList)
+    |                      `- warning: 'SecKeychainCopySearchList' was deprecated in macOS 10.10: SecKeychain is deprecated [#DeprecatedDeclaration]
+112 |     let defaultStatus = SecKeychainCopyDefault(&afterDefault)
+113 |     let restored = listStatus == errSecSuccess && defaultStatus == errSecSuccess &&
+
+/Users/jiangxinyi/Documents/Project/agent-info/scripts/qa/macos-locked-keychain-probe.swift:112:25: warning: 'SecKeychainCopyDefault' was deprecated in macOS 10.10: SecKeychain is deprecated [#DeprecatedDeclaration]
+110 |     var afterDefault: SecKeychain?
+111 |     let listStatus = SecKeychainCopySearchList(&afterList)
+112 |     let defaultStatus = SecKeychainCopyDefault(&afterDefault)
+    |                         `- warning: 'SecKeychainCopyDefault' was deprecated in macOS 10.10: SecKeychain is deprecated [#DeprecatedDeclaration]
+113 |     let restored = listStatus == errSecSuccess && defaultStatus == errSecSuccess &&
+114 |         CFEqual(beforeList, afterList) && CFEqual(beforeDefault, afterDefault)
+
+[#DeprecatedDeclaration]: <https://docs.swift.org/compiler/documentation/diagnostics/deprecated-declaration>

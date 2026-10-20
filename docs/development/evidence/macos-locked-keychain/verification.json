@@ -1,0 +1,324 @@
+{
+  "source": "9f8c829176048a5bcc16c79e9551f78b43ee4b21",
+  "date": "2026-10-21",
+  "scope": "Real owned file-keychain lock/unlock with explicit read/add target; signed sandbox native probe plus Release Flutter/SQLCipher in-process library restart; no login keychain or system prompt acceptance",
+  "nativeFinalRun": 3,
+  "nativeFinalResult": {
+    "actualLockedStateObserved": true,
+    "complete": true,
+    "createdAndReadOriginalKey": true,
+    "defaultUnchangedAfterCreate": true,
+    "interactionRestored": true,
+    "lockedDuplicateStatus": -25293,
+    "lockedReadStatuses": [
+      -25293,
+      -25293
+    ],
+    "ownedKeychainDeleteStatus": 0,
+    "ownedRootRemoved": true,
+    "remainingOwnedNamesAfterKeychainDelete": [],
+    "searchListAndDefaultRestored": true,
+    "twoLockedReadSeconds": 0.0037959814071655273,
+    "unlockedOriginalKeyPreserved": true
+  },
+  "flutterFinalRun": 2,
+  "flutterPreparationSteps": 8,
+  "flutterProcesses": 4,
+  "flutterErrors": 0,
+  "lockedExitVerifiedByNextProcess": true,
+  "productionCodeChanged": false,
+  "existingPackageUnchanged": "01c1f14 / issue50-package-7",
+  "allFinalFlutterInputHashesMatchSourceCommit": true,
+  "cleanup": "both final private keychains deleted after normal Flutter process exit; original default and search-list hashes verified; all runner-owned roots removed",
+  "acceptanceMapping": {
+    "2": "existing default Keychain create/record/normal exit/process reopen evidence at 05326a7 and b98e487 remains scoped to those versions",
+    "3": "existing missing/malformed/wrong key/corrupt DB cases plus real locked private keychain/error UI/retry/unlock/normal quit now covered",
+    "5": "existing 01c1f14 package SQLCipher/controlled private fault evidence; no keys/databases uploaded"
+  },
+  "remaining": [
+    "stable signing/identity upgrade strategy",
+    "real owner authorization allow/deny/cancel and subsequent reopen",
+    "two signed app versions/schema migration",
+    "physical panels/keyboard and installed final workflow",
+    "Windows native regression"
+  ],
+  "files": {
+    "raw/final-source/apps/desktop/macos/Runner/DatabaseKeyStore.swift": {
+      "bytes": 3084,
+      "sha256": "d157f50972cac3da88df60846cc7a634afeaf02e787d1f486effd1fb56634ef4"
+    },
+    "raw/final-source/apps/desktop/macos/Runner/Release.entitlements": {
+      "bytes": 488,
+      "sha256": "347f9ac78f9e449e6ae74757f5c339a525b8a5059d778f498edfd68f1af090ad"
+    },
+    "raw/final-source/scripts/qa/macos-locked-keychain-fixture.swift": {
+      "bytes": 6252,
+      "sha256": "5a66d85462dbe3a1ddb9492b44dffa9db6e436b163be79ba8068038cafd06f7d"
+    },
+    "raw/final-source/scripts/qa/macos-locked-keychain-probe.swift": {
+      "bytes": 6505,
+      "sha256": "c0f1e2abd5d919c3caf05adf5d7a0bd800c92125c6bf9f6e7d510d787311f370"
+    },
+    "raw/final-source/scripts/qa/macos-locked-keychain.py": {
+      "bytes": 3844,
+      "sha256": "84743062b5a52e86e89136e85a42a34d8c9935c84220a154631f7b68fbef6619"
+    },
+    "raw/flutter-1/injected-source/apps/desktop/macos/Runner/Configs/AppInfo.xcconfig": {
+      "bytes": 635,
+      "sha256": "350d47f70d931ceb19febf1fb72c0a652ca9e79cfeb3221a26aaf0edfedfc781"
+    },
+    "raw/flutter-1/injected-source/apps/desktop/macos/Runner/DatabaseKeyStore.swift": {
+      "bytes": 3230,
+      "sha256": "268e169049ea98c22b71a15339be27c3745645724c6a9df9ac500595ccc2bf40"
+    },
+    "raw/flutter-1/injected-source/apps/desktop/macos/Runner/MainFlutterWindow.swift": {
+      "bytes": 24839,
+      "sha256": "932d5b0bdff191eb2e25077164b9f5c31cdcfffba8b7627431ef767f8ebce081"
+    },
+    "raw/flutter-1/locked-exit-private-cleanup.json": {
+      "bytes": 296,
+      "sha256": "efe8277132f1524be285a9062e2d5e4cbf0c5180955fd9695dd4b038a5976c13"
+    },
+    "raw/flutter-1/locked-exit.json": {
+      "bytes": 558,
+      "sha256": "9a13571b52bbd32c1ae8b062009850dd8b36cae479ead0776ef587d65efed294"
+    },
+    "raw/flutter-1/locked-recover-private-cleanup.json": {
+      "bytes": 299,
+      "sha256": "20add24536ee56213fbe6ca745c87668635a90b4aa5e3506cf42ad6348b6cfdf"
+    },
+    "raw/flutter-1/locked-recover.json": {
+      "bytes": 709,
+      "sha256": "70f77fa4ab8d42b1b929ccf0eb38e75b8ed3ae84f159d81e2119c083d327d007"
+    },
+    "raw/flutter-1/logs/analyze.txt": {
+      "bytes": 96,
+      "sha256": "b42d3c91b21a1ea349ffc7dc66c168acbc40fda81070ca876deb497b2d851d28"
+    },
+    "raw/flutter-1/logs/build-release.txt": {
+      "bytes": 13543,
+      "sha256": "a49608c7c1ca81dde1adf62423232c726c7281d4855c54f7a53b08e69a42a761"
+    },
+    "raw/flutter-1/logs/locked-exit-private-cleanup.txt": {
+      "bytes": 269,
+      "sha256": "c074c7b802ae58b7df90091ecb093e4cfb517b5fade292bc9319a8bba12258ee"
+    },
+    "raw/flutter-1/logs/locked-exit.txt": {
+      "bytes": 269,
+      "sha256": "c074c7b802ae58b7df90091ecb093e4cfb517b5fade292bc9319a8bba12258ee"
+    },
+    "raw/flutter-1/logs/locked-recover-private-cleanup.txt": {
+      "bytes": 269,
+      "sha256": "d9ab5b09e75b0dc5b59755a0310ff7bcd264b9cf6b1d47788341a7b506a260de"
+    },
+    "raw/flutter-1/logs/locked-recover.txt": {
+      "bytes": 269,
+      "sha256": "d9ab5b09e75b0dc5b59755a0310ff7bcd264b9cf6b1d47788341a7b506a260de"
+    },
+    "raw/flutter-1/logs/pub-desktop.txt": {
+      "bytes": 318,
+      "sha256": "ca68f707c22164511fc2b3f9af97ed7bd46538b1d334d9c806a6a59a556a6e05"
+    },
+    "raw/flutter-1/logs/pub-info_cli.txt": {
+      "bytes": 258,
+      "sha256": "a24779315fffab73870dfc7b15b56246a95b601b3432e434b43cd223bf752a6a"
+    },
+    "raw/flutter-1/logs/pub-info_core.txt": {
+      "bytes": 258,
+      "sha256": "a24779315fffab73870dfc7b15b56246a95b601b3432e434b43cd223bf752a6a"
+    },
+    "raw/flutter-1/logs/pub-info_storage.txt": {
+      "bytes": 258,
+      "sha256": "a24779315fffab73870dfc7b15b56246a95b601b3432e434b43cd223bf752a6a"
+    },
+    "raw/flutter-1/logs/signature-details.txt": {
+      "bytes": 1626,
+      "sha256": "b7f1bb726d559e37442b8a3d8ed18101ad49c76d80cf33c348ae4ff01830358b"
+    },
+    "raw/flutter-1/logs/signature.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "raw/flutter-1/result.json": {
+      "bytes": 78946,
+      "sha256": "9d54ed21f811ecb208d11cf041f145ddb4ea4dabdbbc0b2fdc6de81f808379f3"
+    },
+    "raw/flutter-1/source/apps/desktop/integration_test/macos_keychain_probe.dart": {
+      "bytes": 23805,
+      "sha256": "c4ccd341f6ce19ff60a627285babdec9c3ec798c651ce016ddf271383f6f7045"
+    },
+    "raw/flutter-1/source/scripts/qa/macos-flutter-keychain.py": {
+      "bytes": 17935,
+      "sha256": "dbd46b664824df003ae27c42f393230abff14dc99e36ae8adbf6f155b3f15b2d"
+    },
+    "raw/flutter-1/source/scripts/qa/macos-locked-keychain-fixture.swift": {
+      "bytes": 6074,
+      "sha256": "ec0517d3855c8ec2a18e3d843589f20e784ad50cc60e557c86454af4e2a903f3"
+    },
+    "raw/flutter-2/injected-source/apps/desktop/macos/Runner/Configs/AppInfo.xcconfig": {
+      "bytes": 635,
+      "sha256": "350d47f70d931ceb19febf1fb72c0a652ca9e79cfeb3221a26aaf0edfedfc781"
+    },
+    "raw/flutter-2/injected-source/apps/desktop/macos/Runner/DatabaseKeyStore.swift": {
+      "bytes": 3230,
+      "sha256": "268e169049ea98c22b71a15339be27c3745645724c6a9df9ac500595ccc2bf40"
+    },
+    "raw/flutter-2/injected-source/apps/desktop/macos/Runner/MainFlutterWindow.swift": {
+      "bytes": 25017,
+      "sha256": "8230b0cd648fc7d37be3a92cddde32437b2a1a2d10336501019ecf1fb8ff77e2"
+    },
+    "raw/flutter-2/locked-exit-private-cleanup.json": {
+      "bytes": 356,
+      "sha256": "7fd2fdd699e99d76ca0beb06bf0bb1ccdacddc54b930d04509d53a0d2b6d74eb"
+    },
+    "raw/flutter-2/locked-exit.json": {
+      "bytes": 558,
+      "sha256": "162a4f1aface28a0ac872853c975543c97d99a78b90994197452e4b44915145a"
+    },
+    "raw/flutter-2/locked-recover-private-cleanup.json": {
+      "bytes": 360,
+      "sha256": "9b1652b1069e87e7db497e9eb4c6c5e11b8ac49fb0559b248038f5f552a4c679"
+    },
+    "raw/flutter-2/locked-recover.json": {
+      "bytes": 709,
+      "sha256": "b70ea216745658eeb6855297685d77d08342816fc54a10798022c513d7b026d7"
+    },
+    "raw/flutter-2/logs/analyze.txt": {
+      "bytes": 96,
+      "sha256": "bf56e70e178ca59fc5094a5d9ded10bac964c7e6dcc1ff4b66742dabc637bb8d"
+    },
+    "raw/flutter-2/logs/build-release.txt": {
+      "bytes": 13512,
+      "sha256": "b91f2614c9c5d2a061c2eedc4d5b1ed2111d72d2530baf8ade4c7509a12d102c"
+    },
+    "raw/flutter-2/logs/locked-exit-private-cleanup.txt": {
+      "bytes": 269,
+      "sha256": "80cbf1b10c5e3bcb1da7b3ad41cfe9b17cbd6ffe0559cea593fca45607845504"
+    },
+    "raw/flutter-2/logs/locked-exit.txt": {
+      "bytes": 269,
+      "sha256": "80cbf1b10c5e3bcb1da7b3ad41cfe9b17cbd6ffe0559cea593fca45607845504"
+    },
+    "raw/flutter-2/logs/locked-recover-private-cleanup.txt": {
+      "bytes": 269,
+      "sha256": "de073327bf60b4b39a0b03ba2ea4520f4ce60b8a5295aea34af74fbd997169f2"
+    },
+    "raw/flutter-2/logs/locked-recover.txt": {
+      "bytes": 269,
+      "sha256": "de073327bf60b4b39a0b03ba2ea4520f4ce60b8a5295aea34af74fbd997169f2"
+    },
+    "raw/flutter-2/logs/pub-desktop.txt": {
+      "bytes": 318,
+      "sha256": "ca68f707c22164511fc2b3f9af97ed7bd46538b1d334d9c806a6a59a556a6e05"
+    },
+    "raw/flutter-2/logs/pub-info_cli.txt": {
+      "bytes": 258,
+      "sha256": "a24779315fffab73870dfc7b15b56246a95b601b3432e434b43cd223bf752a6a"
+    },
+    "raw/flutter-2/logs/pub-info_core.txt": {
+      "bytes": 258,
+      "sha256": "a24779315fffab73870dfc7b15b56246a95b601b3432e434b43cd223bf752a6a"
+    },
+    "raw/flutter-2/logs/pub-info_storage.txt": {
+      "bytes": 258,
+      "sha256": "a24779315fffab73870dfc7b15b56246a95b601b3432e434b43cd223bf752a6a"
+    },
+    "raw/flutter-2/logs/signature-details.txt": {
+      "bytes": 1626,
+      "sha256": "9fd9c817977baf611d1174a5c4a9193172df262562732ac251341f941cc6681f"
+    },
+    "raw/flutter-2/logs/signature.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "raw/flutter-2/result.json": {
+      "bytes": 79083,
+      "sha256": "8c6bbdc9780d8aea32966041d4f7531ce3bea9973d9fdf000ab9fd8d9c818b0b"
+    },
+    "raw/flutter-2/source/apps/desktop/integration_test/macos_keychain_probe.dart": {
+      "bytes": 23805,
+      "sha256": "c4ccd341f6ce19ff60a627285babdec9c3ec798c651ce016ddf271383f6f7045"
+    },
+    "raw/flutter-2/source/scripts/qa/macos-flutter-keychain.py": {
+      "bytes": 18214,
+      "sha256": "d497a379f369c51c48581e118840ecba5d0360bc86a3b3f46ec55ce961fdf3c0"
+    },
+    "raw/flutter-2/source/scripts/qa/macos-locked-keychain-fixture.swift": {
+      "bytes": 6252,
+      "sha256": "5a66d85462dbe3a1ddb9492b44dffa9db6e436b163be79ba8068038cafd06f7d"
+    },
+    "raw/native-1/DatabaseKeyStore.swift": {
+      "bytes": 3200,
+      "sha256": "5d720c9abbc59f2836675267feb47359ad40a3d2dd04c76c8d1e0c4b649c7dc8"
+    },
+    "raw/native-1/logs/compile.txt": {
+      "bytes": 9635,
+      "sha256": "fed5863553a3ef8243ba28bba5e5c505ad71fe365fe004c4351c24251ac0a823"
+    },
+    "raw/native-1/logs/probe.txt": {
+      "bytes": 512,
+      "sha256": "dd203bd32e1653baa47d6f83c81ab9ae104d2f9c45665ac7bb38db12b68130f1"
+    },
+    "raw/native-1/logs/sign.txt": {
+      "bytes": 145,
+      "sha256": "1fd0b751035e330143dc7d9c9e6d26b862109652ee5a7dc0f0b0ffff26c49dde"
+    },
+    "raw/native-1/logs/verify-signature.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "raw/native-1/result.json": {
+      "bytes": 1356,
+      "sha256": "32d6bbd6ab5e54b08c16fa26b3b1a74e86b13c1d19c92f2695b9f3274a916766"
+    },
+    "raw/native-2/DatabaseKeyStore.swift": {
+      "bytes": 3200,
+      "sha256": "5d720c9abbc59f2836675267feb47359ad40a3d2dd04c76c8d1e0c4b649c7dc8"
+    },
+    "raw/native-2/logs/compile.txt": {
+      "bytes": 10536,
+      "sha256": "07a92631a2a04d0b252a5b427e732bffe342c56740e353660831790ffba68b19"
+    },
+    "raw/native-2/logs/probe.txt": {
+      "bytes": 511,
+      "sha256": "21cd117655e11785893e743adac7db874f7fcd1619caefb3dbb7f8e665719885"
+    },
+    "raw/native-2/logs/sign.txt": {
+      "bytes": 145,
+      "sha256": "f79183fb024c819d868b8674bb7573c0876d6054db0e0a60f9e5b99eb18801f7"
+    },
+    "raw/native-2/logs/verify-signature.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "raw/native-2/result.json": {
+      "bytes": 1356,
+      "sha256": "470e56c50e44dee89a98f495e44062e370a8ff8fdf8f8a3f4648cbda79bb9a40"
+    },
+    "raw/native-3/DatabaseKeyStore.swift": {
+      "bytes": 3200,
+      "sha256": "5d720c9abbc59f2836675267feb47359ad40a3d2dd04c76c8d1e0c4b649c7dc8"
+    },
+    "raw/native-3/logs/compile.txt": {
+      "bytes": 10536,
+      "sha256": "6fadba11a8177d9ac1cd756b0ba57afe3ab46a0a512179a9a717b03d1fe0e383"
+    },
+    "raw/native-3/logs/probe.txt": {
+      "bytes": 512,
+      "sha256": "c9fd8125a31f2ba3d07bfe85aa89493531358c1d3f085994bbf461efe94064b7"
+    },
+    "raw/native-3/logs/sign.txt": {
+      "bytes": 145,
+      "sha256": "515cd687c15a7a2fb6c05893dd2b0e90e5c5f50c78aa093ffd9020203ef6f6ad"
+    },
+    "raw/native-3/logs/verify-signature.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "raw/native-3/result.json": {
+      "bytes": 1443,
+      "sha256": "777609c60d0a973ecec2bd71b094b861837345580778a2dbe4f0a5c67e2c692d"
+    }
+  },
+  "allFinalNativeInputHashesVerified": true
+}
