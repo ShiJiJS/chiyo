@@ -1,0 +1,2 @@
+90530 codex app-server --stdio -c analytics.enabled=false
+90531 /Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/Resources/Python.app/Contents/MacOS/Python /Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-stdin-2/recipient.py

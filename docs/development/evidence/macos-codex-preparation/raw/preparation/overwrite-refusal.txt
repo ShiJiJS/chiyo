@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File "/Users/jiangxinyi/Documents/Project/agent-info/scripts/prepare-codex-acceptance.py", line 167, in <module>
+    proof = prepare(args.delivery, args.bundle, args.workspace)
+  File "/Users/jiangxinyi/Documents/Project/agent-info/scripts/prepare-codex-acceptance.py", line 23, in prepare
+    raise ValueError('Workspace exists; choose a new directory.')
+ValueError: Workspace exists; choose a new directory.

@@ -1,0 +1,45 @@
+{
+  "description": "Agent Info development integration. Review before enabling.",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "^(startup|resume|clear|compact|fork)$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "'/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/稳定 中文 '\"'\"'quote $literal; bundle/info-codex-hook'",
+            "commandWindows": "powershell.exe -NoProfile -NonInteractive -EncodedCommand JgAgACcALwBVAHMAZQByAHMALwBqAGkAYQBuAGcAeABpAG4AeQBpAC8ARABvAGMAdQBtAGUAbgB0AHMALwBQAHIAbwBqAGUAYwB0AC8AYQBnAGUAbgB0AC0AaQBuAGYAbwAvAGIAdQBpAGwAZAAvAG0AYQBjAG8AcwAtAGEAZABhAHAAdABhAHQAaQBvAG4ALwBpAHMAcwB1AGUANAA5AC0AYwBvAGQAZQB4AC0AcAByAGUAcABhAHIAYQB0AGkAbwBuAC0AMQAvADN6mlsgAC1Oh2UgACcAJwBxAHUAbwB0AGUAIAAkAGwAaQB0AGUAcgBhAGwAOwAgAGIAdQBuAGQAbABlAC8AaQBuAGYAbwAtAGMAbwBkAGUAeAAtAGgAbwBvAGsAJwA=",
+            "timeout": 15,
+            "additionalContextLimit": 0
+          }
+        ]
+      }
+    ],
+    "SubagentStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "'/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/稳定 中文 '\"'\"'quote $literal; bundle/info-codex-hook'",
+            "commandWindows": "powershell.exe -NoProfile -NonInteractive -EncodedCommand JgAgACcALwBVAHMAZQByAHMALwBqAGkAYQBuAGcAeABpAG4AeQBpAC8ARABvAGMAdQBtAGUAbgB0AHMALwBQAHIAbwBqAGUAYwB0AC8AYQBnAGUAbgB0AC0AaQBuAGYAbwAvAGIAdQBpAGwAZAAvAG0AYQBjAG8AcwAtAGEAZABhAHAAdABhAHQAaQBvAG4ALwBpAHMAcwB1AGUANAA5AC0AYwBvAGQAZQB4AC0AcAByAGUAcABhAHIAYQB0AGkAbwBuAC0AMQAvADN6mlsgAC1Oh2UgACcAJwBxAHUAbwB0AGUAIAAkAGwAaQB0AGUAcgBhAGwAOwAgAGIAdQBuAGQAbABlAC8AaQBuAGYAbwAtAGMAbwBkAGUAeAAtAGgAbwBvAGsAJwA=",
+            "timeout": 5,
+            "additionalContextLimit": 0
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "'/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/稳定 中文 '\"'\"'quote $literal; bundle/info-codex-hook'",
+            "commandWindows": "powershell.exe -NoProfile -NonInteractive -EncodedCommand JgAgACcALwBVAHMAZQByAHMALwBqAGkAYQBuAGcAeABpAG4AeQBpAC8ARABvAGMAdQBtAGUAbgB0AHMALwBQAHIAbwBqAGUAYwB0AC8AYQBnAGUAbgB0AC0AaQBuAGYAbwAvAGIAdQBpAGwAZAAvAG0AYQBjAG8AcwAtAGEAZABhAHAAdABhAHQAaQBvAG4ALwBpAHMAcwB1AGUANAA5AC0AYwBvAGQAZQB4AC0AcAByAGUAcABhAHIAYQB0AGkAbwBuAC0AMQAvADN6mlsgAC1Oh2UgACcAJwBxAHUAbwB0AGUAIAAkAGwAaQB0AGUAcgBhAGwAOwAgAGIAdQBuAGQAbABlAC8AaQBuAGYAbwAtAGMAbwBkAGUAeAAtAGgAbwBvAGsAJwA=",
+            "timeout": 3,
+            "additionalContextLimit": 0
+          }
+        ]
+      }
+    ]
+  }
+}

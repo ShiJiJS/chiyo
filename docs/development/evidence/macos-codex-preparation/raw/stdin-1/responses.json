@@ -1,0 +1,141 @@
+[
+  {
+    "id": 1,
+    "result": {
+      "userAgent": "Codex Desktop/0.158.0 (Mac OS 27.0.1; arm64) dumb (agent_info_mac_qa; 1.0)",
+      "codexHome": "/Users/jiangxinyi/.codex",
+      "platformFamily": "unix",
+      "platformOs": "macos"
+    }
+  },
+  {
+    "method": "remoteControl/status/changed",
+    "params": {
+      "status": "disabled",
+      "serverName": "jiangxinyideAir.lan",
+      "installationId": "06656821-0fa7-49e2-86cc-e19fa3cf007f",
+      "environmentId": null
+    },
+    "emittedAtMs": 1792520832241
+  },
+  {
+    "method": "command/exec/outputDelta",
+    "params": {
+      "processId": "synthetic-stdin",
+      "stream": "stderr",
+      "deltaBase64": "cHl0aG9uMzogd2FybmluZzogY29uZnN0cigpIGZhaWxlZCB3aXRoIGNvZGUgNTogY291bGRuJ3QgZ2V0IHBhdGggb2YgREFSV0lOX1VTRVJfVEVNUF9ESVI7IHVzaW5nIC90bXAgaW5zdGVhZAo=",
+      "capReached": false
+    },
+    "emittedAtMs": 1792520832262
+  },
+  {
+    "method": "command/exec/outputDelta",
+    "params": {
+      "processId": "synthetic-stdin",
+      "stream": "stderr",
+      "deltaBase64": "cHl0aG9uMzogZXJyb3I6IGNvdWxkbid0IGNyZWF0ZSBjYWNoZSBmaWxlICcvdG1wL3hjcnVuX2RiLWVUWnFPTTdQJyAoZXJybm89T3BlcmF0aW9uIG5vdCBwZXJtaXR0ZWQpCg==",
+      "capReached": false
+    },
+    "emittedAtMs": 1792520832262
+  },
+  {
+    "method": "command/exec/outputDelta",
+    "params": {
+      "processId": "synthetic-stdin",
+      "stream": "stderr",
+      "deltaBase64": "MjAyNi0xMC0yMSAwMjoyNzoxMi40OTIgeGNvZGVidWlsZFs5MDQ4NTozNDc1MzY4XSAgRFZURmlsZVBhdGhGU0V2ZW50czogRmFpbGVkIHRvIHN0YXJ0IGZzIGV2ZW50IHN0cmVhbS4K",
+      "capReached": false
+    },
+    "emittedAtMs": 1792520832492
+  },
+  {
+    "method": "command/exec/outputDelta",
+    "params": {
+      "processId": "synthetic-stdin",
+      "stream": "stderr",
+      "deltaBase64": "MjAyNi0xMC0yMSAwMjoyNzoxMi41OTcgeGNvZGVidWlsZFs5MDQ4NTozNDc1MzY3XSBbTVRdIERWVERldmVsb3BlclBhdGhzOiBGYWlsZWQgdG8gZ2V0IGxlbmd0aCBvZiBEQVJXSU5fVVNFUl9DQUNIRV9ESVIgZnJvbSBjb25mc3RyKDMpLCBlcnJvciA9IEVycm9yIERvbWFpbj1OU1BPU0lYRXJyb3JEb21haW4gQ29kZT01ICJJbnB1dC9vdXRwdXQgZXJyb3IiLiBVc2luZyBOU0NhY2hlc0RpcmVjdG9yeSBpbnN0ZWFkLgo=",
+      "capReached": false
+    },
+    "emittedAtMs": 1792520832598
+  },
+  {
+    "method": "command/exec/outputDelta",
+    "params": {
+      "processId": "synthetic-stdin",
+      "stream": "stderr",
+      "deltaBase64": "cHl0aG9uMzogd2FybmluZzogY29uZnN0cigpIGZhaWxlZCB3aXRoIGNvZGUgNTogY291bGRuJ3QgZ2V0IHBhdGggb2YgREFSV0lOX1VTRVJfVEVNUF9ESVI7IHVzaW5nIC90bXAgaW5zdGVhZAo=",
+      "capReached": false
+    },
+    "emittedAtMs": 1792520832862
+  },
+  {
+    "method": "command/exec/outputDelta",
+    "params": {
+      "processId": "synthetic-stdin",
+      "stream": "stderr",
+      "deltaBase64": "cHl0aG9uMzogZXJyb3I6IGNvdWxkbid0IGNyZWF0ZSBjYWNoZSBmaWxlICcvdG1wL3hjcnVuX2RiLVM0aE9tYU5tJyAoZXJybm89T3BlcmF0aW9uIG5vdCBwZXJtaXR0ZWQpCg==",
+      "capReached": false
+    },
+    "emittedAtMs": 1792520832862
+  },
+  {
+    "method": "command/exec/outputDelta",
+    "params": {
+      "processId": "synthetic-stdin",
+      "stream": "stderr",
+      "deltaBase64": "MjAyNi0xMC0yMSAwMjoyNzoxMy4wNjYgeGNvZGVidWlsZFs5MDQ4OTozNDc1Mzk5XSAgRFZURmlsZVBhdGhGU0V2ZW50czogRmFpbGVkIHRvIHN0YXJ0IGZzIGV2ZW50IHN0cmVhbS4K",
+      "capReached": false
+    },
+    "emittedAtMs": 1792520833066
+  },
+  {
+    "method": "account/updated",
+    "params": {
+      "authMode": "chatgpt",
+      "planType": "prolite"
+    },
+    "emittedAtMs": 1792520833104
+  },
+  {
+    "method": "command/exec/outputDelta",
+    "params": {
+      "processId": "synthetic-stdin",
+      "stream": "stderr",
+      "deltaBase64": "MjAyNi0xMC0yMSAwMjoyNzoxMy4xODIgeGNvZGVidWlsZFs5MDQ4OTozNDc1Mzk4XSBbTVRdIERWVERldmVsb3BlclBhdGhzOiBGYWlsZWQgdG8gZ2V0IGxlbmd0aCBvZiBEQVJXSU5fVVNFUl9DQUNIRV9ESVIgZnJvbSBjb25mc3RyKDMpLCBlcnJvciA9IEVycm9yIERvbWFpbj1OU1BPU0lYRXJyb3JEb21haW4gQ29kZT01ICJJbnB1dC9vdXRwdXQgZXJyb3IiLiBVc2luZyBOU0NhY2hlc0RpcmVjdG9yeSBpbnN0ZWFkLgo=",
+      "capReached": false
+    },
+    "emittedAtMs": 1792520833182
+  },
+  {
+    "method": "command/exec/outputDelta",
+    "params": {
+      "processId": "synthetic-stdin",
+      "stream": "stdout",
+      "deltaBase64": "eyJwaGFzZSI6ICJyZWFkeSIsICJwaWQiOiA5MDQ4M30K",
+      "capReached": false
+    },
+    "emittedAtMs": 1792520833972
+  },
+  {
+    "method": "command/exec/outputDelta",
+    "params": {
+      "processId": "synthetic-stdin",
+      "stream": "stdout",
+      "deltaBase64": "eyJwaGFzZSI6ICJyZWNlaXZlZCIsICJzaGEyNTYiOiAiNzllOGYxY2FiNTUwZDdhOTk3YWU5MDIyNzMzN2E2MDIwNjkwZDFiNTIwNzUyYWU2OGFkNDI4NTBjNjU5N2MzMSIsICJieXRlcyI6IDEwNX0K",
+      "capReached": false
+    },
+    "emittedAtMs": 1792520833975
+  },
+  {
+    "id": 3,
+    "result": {}
+  },
+  {
+    "id": 2,
+    "result": {
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  }
+]

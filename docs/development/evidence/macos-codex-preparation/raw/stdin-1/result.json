@@ -1,0 +1,9 @@
+{
+  "complete": false,
+  "scope": "Real standalone app-server command API; no thread, model, trusted hook or real association",
+  "failure": {
+    "type": "AssertionError",
+    "message": ""
+  },
+  "serverExitCode": 0
+}
