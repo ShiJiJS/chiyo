@@ -21,18 +21,19 @@ void main() {
       final template = Directory('${source.path}/template');
       await template.create();
       final repo = Directory.current.parent.parent;
-      await File(
-        '${repo.path}/integrations/codex/skills/agent-info-access/SKILL.md',
-      ).copy('${template.path}/SKILL.md');
+      final sourceTemplate = delivered == null
+          ? '${repo.path}/integrations/codex/skills/agent-info-access'
+          : '$delivered/cli/template';
+      await File('$sourceTemplate/SKILL.md').copy('${template.path}/SKILL.md');
       await Directory('${template.path}/references').create();
       final credentialReference = File(
-        '${repo.path}/integrations/codex/skills/agent-info-access/references/credential-use.md',
+        '$sourceTemplate/references/credential-use.md',
       );
       await credentialReference.copy(
         '${template.path}/references/credential-use.md',
       );
       final fileReference = File(
-        '${repo.path}/integrations/codex/skills/agent-info-access/references/information-files.md',
+        '$sourceTemplate/references/information-files.md',
       );
       await fileReference.copy(
         '${template.path}/references/information-files.md',

@@ -249,6 +249,8 @@ def main():
             ["/usr/bin/codesign", "-d", "--entitlements", ":-", str(primary[1])], stderr=subprocess.DEVNULL))
         if not entitlements.get("com.apple.security.app-sandbox") or not worker_entitlements.get("com.apple.security.inherit"):
             raise RuntimeError("App sandbox or worker inheritance is missing")
+        if entitlements.get("com.apple.security.get-task-allow"):
+            raise RuntimeError("Release app must not carry the debugger entitlement")
         if info["CFBundleIdentifier"] != "com.example.infoDesktop":
             raise RuntimeError("Unexpected app identity")
         cipher = app / "Contents/Frameworks/sqlcipher.framework/Versions/A/sqlcipher"
