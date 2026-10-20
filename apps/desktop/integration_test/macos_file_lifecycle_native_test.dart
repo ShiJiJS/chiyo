@@ -334,7 +334,19 @@ void main() {
       // The independent parent waits on the actual expiry from the CLI. No fake clock.
       await exchange('expiry-approved');
       await service.owner.reconcileInformationFileDeliveries();
-      await tester.pumpAndSettle();
+      // Fixture approval happened while history was already mounted. Navigate
+      // normally to reload its snapshot before checking the actual expiry row.
+      final expiredHistory = await service.owner.history();
+      expect(expiredHistory.grants, hasLength(3));
+      final expiredGrant = expiredHistory.grants.singleWhere(
+        (g) => g.requestId == expires['requestId'],
+      );
+      expect(expiredGrant.events.last.kind, GrantEventKind.expired);
+      await tap(find.byKey(const ValueKey('nav-1')));
+      await tap(find.byKey(const ValueKey('nav-3')));
+      await tap(find.byKey(ValueKey('history-entry-${expiredGrant.id}')));
+      expect(find.text('已到期'), findsWidgets);
+      expect(find.text('未关联保留中授权的文件交付'), findsNothing);
       await capture('08-expired');
       await exchange('expired');
 
@@ -358,11 +370,18 @@ void main() {
       );
       await checkFile(5, freshFile, 1, bytes1);
       expect(repository.grantHistory.every((g) => !g.active), isTrue);
+      expect(repository.grantHistory, hasLength(3));
       expect(
         repository.informationFileDeliveries.every((d) => !d.holdsCopy),
         isTrue,
       );
       expect(repository.informationFileDeliveries, hasLength(5));
+      expect(
+        repository.informationFileDeliveries.every(
+          (d) => repository.grantHistory.any((g) => g.id == d.grantId),
+        ),
+        isTrue,
+      );
       await mount();
       await library();
       await capture('09-reopened');
@@ -373,6 +392,7 @@ void main() {
       await exchange('reopen-approved');
       await checkFile(5, freshFile, 1, bytes1);
       expect(repository.informationFileDeliveries, hasLength(6));
+      expect(repository.grantHistory, hasLength(4));
       expect(
         repository.informationFileDeliveries.every((d) => !d.holdsCopy),
         isTrue,
@@ -387,6 +407,9 @@ void main() {
           'finalItemVersion': current().version,
           'currentAttachmentVersion': file().attachment!.attachmentVersion,
           'deliveryHistoryCount': repository.informationFileDeliveries.length,
+          'grantHistoryCount': repository.grantHistory.length,
+          'deliveryGrantRelationsPreserved': true,
+          'expiredHistorySelectedAfterNormalNavigation': true,
           'scope':
               'Native tester replacement/cancel/revision/recycle/revoke, real SQLCipher/native files, actual one-minute expiry; fixture initial item/key/approvals and picker responses; same-process library reopen, not physical panels/keyboard/Keychain/sleep.',
         }),
