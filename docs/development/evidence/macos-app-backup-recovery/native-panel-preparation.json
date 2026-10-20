@@ -1,0 +1,58 @@
+{
+  "sourceCommit": "80d7d9cc910b180630fd2b3601c97c5169d0a053",
+  "acceptanceComplete": false,
+  "scope": "Preparation only; no actual panel operation due locked Mac; synthetic keys, not Keychain",
+  "startupCheck": "Ordinary app reached manual phase, deliberately stopped with SIGTERM -15; owned root removed",
+  "originalFiles": [
+    {
+      "path": "raw/native-panel-preparation/analyze.txt",
+      "bytes": 96,
+      "sha256": "8a120030a7421afda800a6fbf50b02dea547cbe98699c1f50afbea11bc65b643"
+    },
+    {
+      "path": "raw/native-panel-preparation/build.txt",
+      "bytes": 136,
+      "sha256": "7e0cbbbfaab9410de8f9c9a6e1c662f05a902993666c91a6a3035c9500dca70f"
+    },
+    {
+      "path": "raw/native-panel-preparation/signature.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/native-panel-preparation/launch.json",
+      "bytes": 195,
+      "sha256": "745a76b8f2c6f92f8c817bc0fc33070ce3f4a1e259c3e43c8bd0e0a14af47bf9"
+    },
+    {
+      "path": "raw/native-panel-preparation/manual.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/native-panel-preparation/startup-check.txt",
+      "bytes": 297,
+      "sha256": "60442b151928defe53301f1b5fd70da0f5933f970cecfb3d22f3d830d605cd4f"
+    },
+    {
+      "path": "raw/native-panel-preparation/blocked.json",
+      "bytes": 408,
+      "sha256": "9192c2f0983a8947e8c65fc7c055e24882fc74280fd7a3e5503d324d96843c5a"
+    },
+    {
+      "path": "raw/native-panel-preparation/production-build.txt",
+      "bytes": 136,
+      "sha256": "9a09c6b2cc301ac4ffdfb5de6173602ccbe61e7df72a21e6b4627016733879ed"
+    },
+    {
+      "path": "raw/native-panel-preparation/production-signature.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/native-panel-preparation/macos_backup_manual.dart.txt",
+      "bytes": 9715,
+      "sha256": "c2fa735a6c669345b694e96227dbf1513294e4f0a7fd10e0a16a58c53be4230a"
+    }
+  ]
+}

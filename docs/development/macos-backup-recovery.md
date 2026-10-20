@@ -34,6 +34,25 @@ Flutter 进程发送 SIGKILL。格式 8/9 分别观察到增长 4,509,696 /
 本项补齐此前独立 AOT 测试未覆盖的应用本体中断；未操作物理界面、
 NSOpenPanel/NSSavePanel、真实 Keychain 或 Windows，不能据此关闭整张 #45。
 
+### 已准备但尚未执行的原生面板入口
+
+`80d7d9c` 新增 `macos_backup_manual.dart`，使用普通 Flutter binding 和
+实际 NativeBackupFilePicker，没有替换文件面板路径或注入点击。
+它准备独立格式 9 合成资料，记录原生面板返回及同卷暂存释放结果；
+用户完成源导出后，通过测试根目录内 `switch-to-target` 标记关闭源库、
+清除源测试密钥并换到独立空库。界面确认恢复后核对附件/历史/旧授权拒绝
+和重新申请读取，最后等待 `finish` 标记。标记只协调验收阶段，不代替界面操作。
+
+Release 构建、严格分析、严格签名及普通应用启动准备均通过。
+CUA 获取应用时仍返回 “The Mac is locked and automatic unlock could not
+unlock it”，因此**实际面板操作数为 0，不计为面板验收通过**。
+受控启动检查到达等待面板操作阶段后，仅向自有 QA 进程发送 SIGTERM
+（退出 -15），删除该次自有合成临时目录；没有将其计为正常产品退出。
+最初后台启动没有留下应用输出，未据此声称应用启动成功；
+后续以前台驱动保留明确的准备输出与退出结果。
+正常产品构建入口已恢复，准备记录见
+[面板准备证据](evidence/macos-app-backup-recovery/native-panel-preparation.json)。
+
 ## 签名 Flutter 沙盒中的备份界面
 
 `macos_backup_native_test.dart` 的格式 7、8、9 共 **3 项通过**。
