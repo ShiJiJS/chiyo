@@ -12,10 +12,55 @@
 - [#46 应用生命周期](macos-lifecycle-recovery.md)：实际签名 Flutter 的重复启动拒绝、正常退出/重开、SIGKILL 重开、缺失密钥、47125 占用、初始化期间退出和 SQLCipher 审计失败重试已通过；9 个正常退出、1 个故障注入，实际菜单/睡眠唤醒仍待。执行中 worker 联合场景已在 #43 补齐。
 - [#48 移除范围与历史](evidence/macos-removed-scope-ui/verification.json)：真实 Mac Flutter/SQLCipher 与独立 AOT CLI 的 9 阶段流程连续三轮通过，每轮 19 次读取断言；四主题、200% 滚动及有效/已结束筛选与权限一致。随后修正访问次数断行，补充完整应用导航内 19 条记录/三页/24 字段长申请的搜索、滚动及清除复验，见[新增证据](evidence/macos-history-layout/verification.json)。实际系统面板、键盘、其他资料管理及大规模数据压力仍待。
 - [#48 资料管理闭环](evidence/macos-library-ui/verification.json)：新增实际 Mac Flutter/SQLCipher + 独立 AOT CLI 的模板、编辑、删除恢复、版本恢复及库重开验证；最终九阶段/18 次读取断言通过，模板修改与既有信息隔离、取消确认及关闭弹窗后详情刷新均独立核对。提案/整理/凭据等其余流程、真实输入和系统面板仍待。
+- [#48 提案闭环](evidence/macos-proposals-ui/verification.json)：实际 Mac 原生审核完成批量提案调整、分类校验失败保留草稿与原子重试、拒绝、删除、冲突拒绝与新版本再次确认；最终 11 阶段/22 次独立 CLI 状态和 3 次公开目录检查，重开后五条处理记录及当前内容保持。整理、附件与提案联合场景、真实输入等继续待做。
 - [#49 Codex 接入准备](evidence/macos-codex-preparation/verification.json)：已修复验收项目生成器只接受 Windows `.exe` 的问题，实际同源 ARM64 包生成独立项目并通过摘要/签名/拒绝覆盖核对；13 项真实聊天验收仍未运行，尚未安装或信任 hook。
 - [#50 ARM64 交付](macos-delivery.md)：`cccc37e` 同源 App/CLI/worker 整包已生成，133 项解包载荷、签名、合成存储诊断与实际 AOT 的 6 项检查通过；修复增量构建漏签名并去除 Release 调试访问权限。实际安装、Keychain 升级及最终 GUI/Codex 联合验收仍待。
 
 #43 已完成其范围，其余上述票据仍 OPEN；具体未完成条件以 GitHub 票据及各记录为准。现有证据不等于 Mac 总票 #19 已可交付。
+
+### #48 批量提案、修改冲突与处理记录的 Mac 原生验收
+
+QA 源码 `95e9fcb` 新增 `macos_proposals_native_test.dart` 与
+`scripts/qa/macos-proposals-ui.py`；产品仍为 `bcd66c2` 基线，Windows 测试与分支未改。
+[固定证据](evidence/macos-proposals-ui/verification.json)保留实际原生 Debug Flutter/SQLCipher、
+独立父进程 ARM64 AOT CLI 的日志、源码快照和截图。CLI 使用核对过摘要的 `cccc37e` 交付。
+
+CLI 先提交空批次并得到 invalid_request，再提交两条合成资料，第二条引用失效目录/标签。
+实际原生界面调整第一条名称和值；确认失败后显示草稿保留，公开目录仍为零条，无部分入库。
+返回审核保留修改值；修正第二条分类/标签后一次确认入库两条，多行文本类型保持。
+受控 Owner 重复确认不新增资料；公开目录只含元数据、不含字段值。
+
+模拟主人随后修改第一条值，原批次“按身份查看当前内容”及跳转信息库均显示新值。
+另一个录入提案被界面拒绝后正文不再显示；删除提案确认后第一条进入回收流程，
+再次查看当前内容明确不存在。第二条修改提案提交后主人并发改值，界面提示基于版本 1、
+当前版本 2 并禁用确认；拒绝保留主人的值。CLI 基于版本 2 重新提交后，界面确认成功到版本 3，
+字段身份保持；拿提案编号请求读取仍 unauthorized，确认修改不等于内容授权。
+
+同一原生进程关闭服务/加密库后重开：剩余信息/字段/目录身份和版本 3 值保持，
+原批次创建身份以及已确认/拒绝/删除五条处理记录保留，已结束录入草稿为空。
+实际切换“已处理”显示五条条目；打开原批次当前内容，第一条提示已不存在、第二条显示最新值。
+新 CLI 会话不能查询旧提案状态，公开目录仅剩第二条且不含正文。这里不是应用进程重启。
+
+run-1 为初始十阶段流程；run-2 增加成功修改、无隐式读取许可、重开后的已处理列表及当前内容检查。
+最终 run-2：complete=true、11 阶段、22 次命令状态断言、3 次目录断言、12 张原生渲染图，
+Flutter 和两份 CLI 正常退出 0，带 nonce 的专属合成根已移除。两轮覆盖不同，不作重复稳定性或总数累加。
+主 agent 目测关键批次、错误、冲突、已处理与当前内容截图，1440×1000/紫棠主题无阻断性布局问题；
+没有扩大成全部主题/键盘/系统面板验收。
+
+严格分析通过；原有录入/修改控件 2 项、批次存储失败保留草稿重试与确认时版本竞争 2 项通过。
+后两项通过公开 repository seam 注入，不是本次原生 SQLCipher 写锁故障证明。
+普通 `main.dart` Debug 入口恢复并 deep/strict 验签通过；原始资料逐字节核对入库摘要。
+
+复跑（输出目录必须不存在）：
+
+```sh
+python3 scripts/qa/macos-proposals-ui.py build/macos-adaptation/proposals-new-run \
+  --delivery 'build/macos-adaptation/issue50-package-4/verify/中文 空格 路径/AgentInfoManage'
+```
+
+Computer Use 仍报告锁屏；临时密钥、目录创建、并发 Owner 修改与重复确认为夹具；
+原生 tester 输入不冒充物理操作或 Keychain。未覆盖批次包含既有附件的修改/保留、整理请求与结果、
+大量数据、真实输入以及最终同源整包。#48 六条复合验收继续不勾选。
 
 ### #48 模板、编辑、回收与版本恢复的 Mac 原生验收
 
