@@ -11,10 +11,51 @@
 - [#45 备份恢复](macos-backup-recovery.md)：签名 Flutter 的 7/8/9 格式恢复、签名 Release 应用与独立 AOT 的 80 MiB 中断回滚/同目标重试，以及固定旧源 5/6 兼容已通过；真实面板、Keychain、最终交付包联合验收与 Windows 双向迁移仍待。
 - [#46 应用生命周期](macos-lifecycle-recovery.md)：实际签名 Flutter 的重复启动拒绝、正常退出/重开、SIGKILL 重开、缺失密钥、47125 占用、初始化期间退出和 SQLCipher 审计失败重试已通过；9 个正常退出、1 个故障注入，实际菜单/睡眠唤醒仍待。执行中 worker 联合场景已在 #43 补齐。
 - [#48 移除范围与历史](evidence/macos-removed-scope-ui/verification.json)：真实 Mac Flutter/SQLCipher 与独立 AOT CLI 的 9 阶段流程连续三轮通过，每轮 19 次读取断言；四主题、200% 滚动及有效/已结束筛选与权限一致。随后修正访问次数断行，补充完整应用导航内 19 条记录/三页/24 字段长申请的搜索、滚动及清除复验，见[新增证据](evidence/macos-history-layout/verification.json)。实际系统面板、键盘、其他资料管理及大规模数据压力仍待。
+- [#48 资料管理闭环](evidence/macos-library-ui/verification.json)：新增实际 Mac Flutter/SQLCipher + 独立 AOT CLI 的模板、编辑、删除恢复、版本恢复及库重开验证；最终九阶段/18 次读取断言通过，模板修改与既有信息隔离、取消确认及关闭弹窗后详情刷新均独立核对。提案/整理/凭据等其余流程、真实输入和系统面板仍待。
 - [#49 Codex 接入准备](evidence/macos-codex-preparation/verification.json)：已修复验收项目生成器只接受 Windows `.exe` 的问题，实际同源 ARM64 包生成独立项目并通过摘要/签名/拒绝覆盖核对；13 项真实聊天验收仍未运行，尚未安装或信任 hook。
 - [#50 ARM64 交付](macos-delivery.md)：`cccc37e` 同源 App/CLI/worker 整包已生成，133 项解包载荷、签名、合成存储诊断与实际 AOT 的 6 项检查通过；修复增量构建漏签名并去除 Release 调试访问权限。实际安装、Keychain 升级及最终 GUI/Codex 联合验收仍待。
 
 #43 已完成其范围，其余上述票据仍 OPEN；具体未完成条件以 GitHub 票据及各记录为准。现有证据不等于 Mac 总票 #19 已可交付。
+
+### #48 模板、编辑、回收与版本恢复的 Mac 原生验收
+
+源码 `5ca246b` 新增 Mac 独立入口 `macos_library_native_test.dart` 和
+`scripts/qa/macos-library-ui.py`，没有修改 Windows 测试或产品代码。
+[固定证据](evidence/macos-library-ui/verification.json)保留三轮原始日志、源码快照与截图。
+桌面为 `604f410` 产品基线上的原生 Debug Flutter/SQLCipher，独立父进程使用
+`cccc37e` 交付中的 ARM64 AOT CLI，先核对其清单摘要，再通过真实 HTTP/JSON-lines 交互。
+
+真实原生界面由 tester 操作完成：创建双字段模板（文本/多行文本）、模板建项、公开说明与字段值编辑、
+目录与标签选择、删除确认取消后再确认、回收站恢复、历史版本恢复，以及修改模板。
+目录/标签的创建、主人审批和临时数据库密钥为夹具；不把它们写成 UI CRUD 或 Keychain 验收。
+
+独立 CLI 的 18 次读取核对编辑后的新值、删除旧字段立即拒绝、保留字段继续可读、
+恢复字段新身份与重新审批、版本恢复到原值且旧字段身份不复活。
+取消确认不写库；模板修改到版本 2 不改变已有资料字段名称/内容或授权。
+版本恢复得到信息版本 6，目录/标签也恢复到原版本的 Services/空标签。
+关闭弹窗后直接检查并截图当前详情的两字段值，不能只凭 Owner 模型判断页面已经刷新。
+
+关闭 service/repository 后在同一原生进程重开真实加密库：信息和新字段身份、版本、模板、
+目录标签、回收恢复映射保持，两条历史授权均已失效；新 CLI 会话不能借旧请求读取。
+这是库/服务重开，不是重新启动应用进程（应用重启另见 #46）。
+
+run-1 为初始流程；run-2 增加取消/模板隔离/失效历史断言；run-3 再增加关闭弹窗后的详情断言。
+三轮各 complete=true、九阶段、18 次读取，Flutter 和两份 CLI 均退出 0；
+不是三个相同最终用例的稳定性重复，也不把重叠测试相加。最终保留 11 张原生渲染图，
+主 agent 目测核对关键页面与新增详情图，1440×1000/紫棠主题未发现阻断性显示问题。
+模板/回收/资料库既有控件回归 4 项通过，最终严格分析通过；普通 `main.dart` Debug 入口已恢复，
+deep/strict 签名通过。成功专属合成库由带 nonce 校验的驱动清理；未提交数据库、密钥或私密关联。
+
+复跑（输出目录必须是新的）：
+
+```sh
+python3 scripts/qa/macos-library-ui.py build/macos-adaptation/library-new-run \
+  --delivery 'build/macos-adaptation/issue50-package-4/verify/中文 空格 路径/AgentInfoManage'
+```
+
+Computer Use 本轮仍报告锁屏。测试控制点击/输入不等于真实键盘/中文输入法或系统面板。
+本场景只有一条信息/两字段，不代表压力、提案/整理/凭据/附件或所有主题已验；
+CLI 是较早交付版本，最终同源整包继续由 #50 收口。#48 六条整体验收保持未完成。
 
 ### #48 原生历史组件与独立 CLI 联合验证
 
