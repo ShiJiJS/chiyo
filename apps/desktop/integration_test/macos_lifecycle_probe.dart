@@ -12,6 +12,7 @@ import 'package:info_desktop/desktop_runtime.dart';
 import 'package:info_desktop/main.dart';
 import 'package:sqlite3/sqlite3.dart' as sql;
 import 'support/macos_worker_recovery.dart';
+import 'support/macos_backup_recovery.dart';
 
 class _Keys implements DatabaseKeyStore {
   _Keys({this.missing = false});
@@ -85,6 +86,9 @@ Future<void> main() async {
     'audit-failure',
     'worker-hold',
     'worker-recover',
+    'backup-prepare',
+    'backup-interrupt',
+    'backup-recover',
   };
   if (!Platform.isMacOS || !modes.contains(mode)) exit(64);
   final supplied = Platform.environment['INFO_MAC_LIFECYCLE_ROOT'];
@@ -117,6 +121,9 @@ Future<void> main() async {
   var closes = 0;
   var failureCode = '';
   try {
+    final rollback = mode == 'backup-recover'
+        ? checkMacBackupRollback(canonical)
+        : null;
     if (mode == 'key-failure') {
       final seed = await EncryptedInformationRepository.open(
         '$canonical/library',
@@ -224,7 +231,18 @@ Future<void> main() async {
       return;
     }
     _check(bootstrap.state == DesktopStartupState.ready, 'Startup not ready');
-    if (mode!.startsWith('worker-')) {
+    if (mode!.startsWith('backup-')) {
+      await runMacBackupRecovery(
+        bootstrap,
+        opened!,
+        canonical,
+        mode,
+        report,
+        rollback,
+      );
+      return;
+    }
+    if (mode.startsWith('worker-')) {
       await runMacWorkerRecovery(bootstrap, canonical, mode, report);
       return;
     }
