@@ -1,0 +1,32 @@
+[
+  {
+    "label": "native-signature",
+    "command": [
+      "codesign",
+      "--verify",
+      "--deep",
+      "--strict",
+      "--verbose=2",
+      "apps/desktop/build/macos/Build/Products/Debug/info_desktop.app"
+    ],
+    "exitCode": 0
+  },
+  {
+    "label": "native-entitlements",
+    "command": [
+      "codesign",
+      "-d",
+      "--entitlements",
+      ":-",
+      "apps/desktop/build/macos/Build/Products/Debug/info_desktop.app"
+    ],
+    "exitCode": 0
+  },
+  {
+    "label": "system",
+    "command": [
+      "sw_vers"
+    ],
+    "exitCode": 0
+  }
+]

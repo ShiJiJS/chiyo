@@ -1,0 +1,255 @@
+{
+  "curl": {
+    "path": "/usr/bin/curl",
+    "sha256": "625cd93eb0043214d5f74974d34f0b4d748977473e236a2e7f4704ecc2b95950",
+    "version": "curl 8.7.1 (x86_64-apple-darwin26.0) libcurl/8.7.1 (SecureTransport) LibreSSL/3.3.6 zlib/1.2.12 nghttp2/1.69.0"
+  },
+  "attempts": [
+    {
+      "label": "original-v1",
+      "command": [
+        "/usr/bin/curl",
+        "-q",
+        "--noproxy",
+        "*",
+        "--proxy",
+        "",
+        "--connect-timeout",
+        "3",
+        "--max-time",
+        "8",
+        "--fail",
+        "--silent",
+        "--show-error",
+        "--upload-file",
+        "/Users/jiangxinyi/Library/Containers/com.example.infoDesktop/Data/tmp/info-managed-tA5Lkl95jUDVESTr1rOGpk7vXhz3R1fq/attachment.bin",
+        "http://127.0.0.1:61267/5e78a9e4f63a424d8a248cd98c00d5e5/original-v1"
+      ],
+      "exitCode": 0,
+      "stdout": "{\"byteLength\": 1024, \"sha256\": \"ffbad8f947474cfdd5b2bb22d7e0bf5ee8ba2b7af859d0c2bb28622db6a4be47\"}",
+      "stderr": ""
+    },
+    {
+      "label": "new-v2",
+      "command": [
+        "/usr/bin/curl",
+        "-q",
+        "--noproxy",
+        "*",
+        "--proxy",
+        "",
+        "--connect-timeout",
+        "3",
+        "--max-time",
+        "8",
+        "--fail",
+        "--silent",
+        "--show-error",
+        "--upload-file",
+        "/Users/jiangxinyi/Library/Containers/com.example.infoDesktop/Data/tmp/info-managed-LgiVGYWqNYPMsEcXeDy1-zBB1A7O_ENR/attachment.bin",
+        "http://127.0.0.1:61267/5e78a9e4f63a424d8a248cd98c00d5e5/new-v2"
+      ],
+      "exitCode": 0,
+      "stdout": "{\"byteLength\": 2049, \"sha256\": \"89a8ac04b268c5ea4ef4099bf529f00c4f9390770abf89b2c1cb8a8319c91f3b\"}",
+      "stderr": ""
+    },
+    {
+      "label": "restored-v1",
+      "command": [
+        "/usr/bin/curl",
+        "-q",
+        "--noproxy",
+        "*",
+        "--proxy",
+        "",
+        "--connect-timeout",
+        "3",
+        "--max-time",
+        "8",
+        "--fail",
+        "--silent",
+        "--show-error",
+        "--upload-file",
+        "/Users/jiangxinyi/Library/Containers/com.example.infoDesktop/Data/tmp/info-managed-VWVqdhRJt8ahh2uy0GhYSsvFgMvH2FSs/attachment.bin",
+        "http://127.0.0.1:61267/5e78a9e4f63a424d8a248cd98c00d5e5/restored-v1"
+      ],
+      "exitCode": 0,
+      "stdout": "{\"byteLength\": 1024, \"sha256\": \"ffbad8f947474cfdd5b2bb22d7e0bf5ee8ba2b7af859d0c2bb28622db6a4be47\"}",
+      "stderr": ""
+    },
+    {
+      "label": "original-v1-invalidated-released",
+      "command": [
+        "/usr/bin/curl",
+        "-q",
+        "--noproxy",
+        "*",
+        "--proxy",
+        "",
+        "--connect-timeout",
+        "3",
+        "--max-time",
+        "8",
+        "--fail",
+        "--silent",
+        "--show-error",
+        "--upload-file",
+        "/Users/jiangxinyi/Library/Containers/com.example.infoDesktop/Data/tmp/info-managed-tA5Lkl95jUDVESTr1rOGpk7vXhz3R1fq/attachment.bin",
+        "http://127.0.0.1:61267/5e78a9e4f63a424d8a248cd98c00d5e5/original-v1-invalidated-released"
+      ],
+      "exitCode": 26,
+      "stdout": "",
+      "stderr": "curl: Can't open '/Users/jiangxinyi/Library/Containers/com.example.infoDesktop/Data/tmp/info-managed-tA5Lkl95jUDVESTr1rOGpk7vXhz3R1fq/attachment.bin'\ncurl: try 'curl --help' or 'curl --manual' for more information\ncurl: (26) Failed to open/read local data from file/application\n"
+    },
+    {
+      "label": "new-v2-invalidated-released",
+      "command": [
+        "/usr/bin/curl",
+        "-q",
+        "--noproxy",
+        "*",
+        "--proxy",
+        "",
+        "--connect-timeout",
+        "3",
+        "--max-time",
+        "8",
+        "--fail",
+        "--silent",
+        "--show-error",
+        "--upload-file",
+        "/Users/jiangxinyi/Library/Containers/com.example.infoDesktop/Data/tmp/info-managed-LgiVGYWqNYPMsEcXeDy1-zBB1A7O_ENR/attachment.bin",
+        "http://127.0.0.1:61267/5e78a9e4f63a424d8a248cd98c00d5e5/new-v2-invalidated-released"
+      ],
+      "exitCode": 26,
+      "stdout": "",
+      "stderr": "curl: Can't open '/Users/jiangxinyi/Library/Containers/com.example.infoDesktop/Data/tmp/info-managed-LgiVGYWqNYPMsEcXeDy1-zBB1A7O_ENR/attachment.bin'\ncurl: try 'curl --help' or 'curl --manual' for more information\ncurl: (26) Failed to open/read local data from file/application\n"
+    },
+    {
+      "label": "restored-v1-invalidated-released",
+      "command": [
+        "/usr/bin/curl",
+        "-q",
+        "--noproxy",
+        "*",
+        "--proxy",
+        "",
+        "--connect-timeout",
+        "3",
+        "--max-time",
+        "8",
+        "--fail",
+        "--silent",
+        "--show-error",
+        "--upload-file",
+        "/Users/jiangxinyi/Library/Containers/com.example.infoDesktop/Data/tmp/info-managed-VWVqdhRJt8ahh2uy0GhYSsvFgMvH2FSs/attachment.bin",
+        "http://127.0.0.1:61267/5e78a9e4f63a424d8a248cd98c00d5e5/restored-v1-invalidated-released"
+      ],
+      "exitCode": 26,
+      "stdout": "",
+      "stderr": "curl: Can't open '/Users/jiangxinyi/Library/Containers/com.example.infoDesktop/Data/tmp/info-managed-VWVqdhRJt8ahh2uy0GhYSsvFgMvH2FSs/attachment.bin'\ncurl: try 'curl --help' or 'curl --manual' for more information\ncurl: (26) Failed to open/read local data from file/application\n"
+    },
+    {
+      "label": "recycled-v1",
+      "command": [
+        "/usr/bin/curl",
+        "-q",
+        "--noproxy",
+        "*",
+        "--proxy",
+        "",
+        "--connect-timeout",
+        "3",
+        "--max-time",
+        "8",
+        "--fail",
+        "--silent",
+        "--show-error",
+        "--upload-file",
+        "/Users/jiangxinyi/Library/Containers/com.example.infoDesktop/Data/tmp/info-managed-aHu7_37_MmXkVTDWtACUqOAumnjDhV_Q/attachment.bin",
+        "http://127.0.0.1:61267/5e78a9e4f63a424d8a248cd98c00d5e5/recycled-v1"
+      ],
+      "exitCode": 0,
+      "stdout": "{\"byteLength\": 1024, \"sha256\": \"ffbad8f947474cfdd5b2bb22d7e0bf5ee8ba2b7af859d0c2bb28622db6a4be47\"}",
+      "stderr": ""
+    },
+    {
+      "label": "recycled-v1-invalidated-released",
+      "command": [
+        "/usr/bin/curl",
+        "-q",
+        "--noproxy",
+        "*",
+        "--proxy",
+        "",
+        "--connect-timeout",
+        "3",
+        "--max-time",
+        "8",
+        "--fail",
+        "--silent",
+        "--show-error",
+        "--upload-file",
+        "/Users/jiangxinyi/Library/Containers/com.example.infoDesktop/Data/tmp/info-managed-aHu7_37_MmXkVTDWtACUqOAumnjDhV_Q/attachment.bin",
+        "http://127.0.0.1:61267/5e78a9e4f63a424d8a248cd98c00d5e5/recycled-v1-invalidated-released"
+      ],
+      "exitCode": 26,
+      "stdout": "",
+      "stderr": "curl: Can't open '/Users/jiangxinyi/Library/Containers/com.example.infoDesktop/Data/tmp/info-managed-aHu7_37_MmXkVTDWtACUqOAumnjDhV_Q/attachment.bin'\ncurl: try 'curl --help' or 'curl --manual' for more information\ncurl: (26) Failed to open/read local data from file/application\n"
+    },
+    {
+      "label": "expires-v1",
+      "command": [
+        "/usr/bin/curl",
+        "-q",
+        "--noproxy",
+        "*",
+        "--proxy",
+        "",
+        "--connect-timeout",
+        "3",
+        "--max-time",
+        "8",
+        "--fail",
+        "--silent",
+        "--show-error",
+        "--upload-file",
+        "/Users/jiangxinyi/Library/Containers/com.example.infoDesktop/Data/tmp/info-managed-vGtLkKLfQvPI54yG_ZW1FscXUxWaAOzA/attachment.bin",
+        "http://127.0.0.1:61267/5e78a9e4f63a424d8a248cd98c00d5e5/expires-v1"
+      ],
+      "exitCode": 0,
+      "stdout": "{\"byteLength\": 1024, \"sha256\": \"ffbad8f947474cfdd5b2bb22d7e0bf5ee8ba2b7af859d0c2bb28622db6a4be47\"}",
+      "stderr": ""
+    }
+  ],
+  "acceptedUploads": 5,
+  "accepted": [
+    {
+      "endpoint": "/5e78a9e4f63a424d8a248cd98c00d5e5/original-v1",
+      "byteLength": 1024,
+      "sha256": "ffbad8f947474cfdd5b2bb22d7e0bf5ee8ba2b7af859d0c2bb28622db6a4be47"
+    },
+    {
+      "endpoint": "/5e78a9e4f63a424d8a248cd98c00d5e5/new-v2",
+      "byteLength": 2049,
+      "sha256": "89a8ac04b268c5ea4ef4099bf529f00c4f9390770abf89b2c1cb8a8319c91f3b"
+    },
+    {
+      "endpoint": "/5e78a9e4f63a424d8a248cd98c00d5e5/restored-v1",
+      "byteLength": 1024,
+      "sha256": "ffbad8f947474cfdd5b2bb22d7e0bf5ee8ba2b7af859d0c2bb28622db6a4be47"
+    },
+    {
+      "endpoint": "/5e78a9e4f63a424d8a248cd98c00d5e5/recycled-v1",
+      "byteLength": 1024,
+      "sha256": "ffbad8f947474cfdd5b2bb22d7e0bf5ee8ba2b7af859d0c2bb28622db6a4be47"
+    },
+    {
+      "endpoint": "/5e78a9e4f63a424d8a248cd98c00d5e5/expires-v1",
+      "byteLength": 1024,
+      "sha256": "ffbad8f947474cfdd5b2bb22d7e0bf5ee8ba2b7af859d0c2bb28622db6a4be47"
+    }
+  ],
+  "receiverClosed": true,
+  "scope": "Synthetic local HTTP upload; no external website or remote client."
+}
