@@ -22,7 +22,7 @@ class _Keys implements DatabaseKeyStore {
 }
 
 class _Files implements InformationDeliveryFiles {
-  final native = WindowsInformationDeliveryFiles();
+  final native = NativeInformationDeliveryFiles();
   int writes = 0, cleans = 0;
   InformationDeliveryLease? last;
   Future<void> Function(InformationDeliveryLease)? onReserve,
@@ -378,7 +378,7 @@ void main() {
     },
   );
   test(
-    'occupied native cleanup remains in encrypted registry through reopen and retries without writing again',
+    'native cleanup preserves platform open-reader semantics across encrypted reopen without replay',
     () async {
       await approve();
       final delivered = result(
@@ -393,8 +393,12 @@ void main() {
               delivered['deliveryId'] as String,
             ),
           )['state'],
-          'cleanup_pending',
+          Platform.isMacOS ? 'released' : 'cleanup_pending',
         );
+        if (Platform.isMacOS) {
+          expect(await File(delivered['path'] as String).exists(), isFalse);
+          expect(await reading.read(data.length), data);
+        }
         await service.close();
         await repo.close();
       } finally {
@@ -411,7 +415,10 @@ void main() {
         clock: () => now,
         informationDeliveryFiles: files,
       );
-      expect(repo.informationFileDeliveries.single.state, 'cleanup_pending');
+      expect(
+        repo.informationFileDeliveries.single.state,
+        Platform.isMacOS ? 'released' : 'cleanup_pending',
+      );
       await service.owner.reconcileInformationFileDeliveries();
       expect(repo.informationFileDeliveries.single.state, 'released');
       expect(repo.informationFileDeliveries.single.lease, isNull);

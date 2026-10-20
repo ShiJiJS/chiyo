@@ -107,7 +107,7 @@ class CredentialExecutionHost {
       }
     }
     if (_processStarter == null) {
-      if (!Platform.isWindows) {
+      if (!Platform.isWindows && !Platform.isMacOS) {
         return Map.from(
           const CredentialUseFailure(
             'unsupported_tool_version',

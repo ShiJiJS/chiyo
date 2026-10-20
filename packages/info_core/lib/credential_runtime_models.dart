@@ -377,21 +377,33 @@ Future<ExecutableIdentity> inspectCredentialExecutable(
       if (!Platform.isWindows) 'LANG': 'C.UTF-8',
       if (!Platform.isWindows) 'TMPDIR': probe.path,
     };
-    final result = await Process.run(
-      canonical,
-      [receiver == 'ssh_identity' ? '-V' : '--version'],
-      workingDirectory: probe.path,
-      // An empty environment block is rejected by CreateProcess on this
-      // Windows runtime (error 87). Retain only the system loader location,
-      // never the invoking process's authentication/configuration variables.
-      environment: environment,
-      includeParentEnvironment: false,
-      runInShell: false,
-    ).timeout(const Duration(seconds: 5));
+    final result = Platform.isMacOS
+        ? await macos_probe.probeMacOsToolVersion(
+            canonical,
+            receiver == 'ssh_identity' ? '-V' : '--version',
+            probe.path,
+            environment,
+          )
+        : await Process.run(
+            canonical,
+            [receiver == 'ssh_identity' ? '-V' : '--version'],
+            workingDirectory: probe.path,
+            // An empty environment block is rejected by CreateProcess on this
+            // Windows runtime (error 87). Retain only the system loader location,
+            // never the invoking process's authentication/configuration variables.
+            environment: environment,
+            includeParentEnvironment: false,
+            runInShell: false,
+          ).timeout(const Duration(seconds: 5));
     final version = switch (receiver) {
       'gh_token' => r'^gh version 2\.102\.0(?:\s|$)',
       'aws_shared_credentials' => r'^aws-cli/2\.38\.1(?:\s|$)',
-      _ => r'^OpenSSH_for_Windows_9\.5p2(?:,|\s|$)',
+      // Each native receiver is admitted only at the version independently
+      // exercised on that platform. The launch plan also freezes its digest.
+      _ =>
+        Platform.isMacOS
+            ? r'^OpenSSH_10\.3p1(?:,|\s|$)'
+            : r'^OpenSSH_for_Windows_9\.5p2(?:,|\s|$)',
     };
     if (result.exitCode != 0 ||
         !RegExp(version).hasMatch(

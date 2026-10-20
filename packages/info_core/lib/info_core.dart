@@ -8,6 +8,7 @@ import 'runtime_process_identity.dart';
 export 'runtime_process_identity.dart';
 import 'runtime_material_files.dart';
 import 'new_file_publish.dart' as file_publication;
+import 'macos_tool_probe.dart' as macos_probe;
 import 'information_delivery_driver.dart';
 export 'information_delivery_driver.dart';
 export 'runtime_material_files.dart';

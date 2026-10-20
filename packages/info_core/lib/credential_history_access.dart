@@ -79,7 +79,12 @@ extension _CredentialHistoryService on InformationService {
     if (e.state == 'unknown' &&
         e.restoredAt == null &&
         (e.jobName == null ||
-            CredentialProcessJob.isActive(e.jobName!) != false)) {
+            CredentialProcessJob.isActive(
+                  e.jobName!,
+                  workerPid: e.workerPid,
+                  workerCreatedAt: e.workerCreatedAt,
+                ) !=
+                false)) {
       return false;
     }
     return {

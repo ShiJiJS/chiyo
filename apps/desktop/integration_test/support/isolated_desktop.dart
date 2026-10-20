@@ -25,7 +25,10 @@ class IsolatedDesktopFixture {
     FocusedFillDriver? focusedFillDriver,
     InformationDeliveryFiles? informationDeliveryFiles,
   }) async {
-    final root = await Directory.systemTemp.createTemp('aim-native-approval-');
+    final created = await Directory.systemTemp.createTemp(
+      'aim-native-approval-',
+    );
+    final root = Directory(await created.resolveSymbolicLinks());
     final bootstrap = DesktopBootstrap(
       port: 0,
       credentialWorkerExecutable: credentialWorkerExecutable,
@@ -33,7 +36,9 @@ class IsolatedDesktopFixture {
       openLibrary: () async {
         final repository = await EncryptedInformationRepository.open(
           root.path,
-          WindowsDatabaseKeyStore('${root.path}/database-key.dpapi'),
+          Platform.isMacOS
+              ? _EphemeralMacTestKey()
+              : WindowsDatabaseKeyStore('${root.path}/database-key.dpapi'),
         );
         final service = InformationService(
           repository: repository,
@@ -99,6 +104,19 @@ class IsolatedDesktopFixture {
       throw StateError('Refusing cleanup outside the isolated fixture.');
     }
     await root.delete(recursive: true);
+  }
+}
+
+// Native Mac tests use an isolated, disposable key and never touch the owner's
+// production Keychain account. This store exists only for one test fixture.
+class _EphemeralMacTestKey implements DatabaseKeyStore {
+  List<int>? _key;
+  @override
+  Future<List<int>?> read() async => _key;
+  @override
+  Future<void> create(List<int> key) async {
+    if (_key != null) throw const StorageFailure('key_creation_failed');
+    _key = List<int>.of(key);
   }
 }
 

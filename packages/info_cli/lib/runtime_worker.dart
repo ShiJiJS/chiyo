@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:info_core/info_core.dart';
+import 'runtime_worker_macos.dart';
 
 Future<void> _forwardOutput(
   Stream<List<int>> source,
@@ -28,6 +29,7 @@ Future<void> _forwardOutput(
 /// only the already approved executable/argv/cwd and a non-secret state path.
 /// The worker's environment was built by the executor; it has no session proof.
 Future<void> main() async {
+  if (Platform.isMacOS) return runMacOsRuntimeWorker();
   final input = StreamIterator(
     stdin.transform(utf8.decoder).transform(const LineSplitter()),
   );

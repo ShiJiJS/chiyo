@@ -10,7 +10,7 @@ void main() {
   final executable = Platform.environment['D7_SSH_EXE'];
   for (final protocol in [1, 2]) {
     test(
-      'v$protocol real Windows SSH authenticates only the approved key and confirmed host, preserves literal remote arguments, and cleans each attempt',
+      'v$protocol real native SSH authenticates only the approved key and confirmed host, preserves literal remote arguments, and cleans each attempt',
       () async {
         final key = await File('$root/client').readAsBytes();
         final wrong = await File('$root/wrong-client').readAsBytes();
@@ -75,22 +75,22 @@ void main() {
             'command': 'execution-status',
             'executionId': accepted['executionId'],
           });
+          final output = await h.client.execute({
+            'command': 'execution-output',
+            'executionId': accepted['executionId'],
+          });
           expect(
             status['executionState'],
             'exited',
             reason: '${status['errorCode']}',
           );
-          expect(status['exitCode'], exit);
+          expect(status['exitCode'], exit, reason: jsonEncode(output));
           expect(
             (await h.waitForMaterialCleanup(
               accepted['executionId'] as String,
             ))['cleanupState'],
             'complete',
           );
-          final output = await h.client.execute({
-            'command': 'execution-output',
-            'executionId': accepted['executionId'],
-          });
           if (literal) {
             final stdout = (output['chunks'] as List)
                 .where((c) => c['stream'] == 'stdout')
@@ -167,7 +167,7 @@ void main() {
         await run(key, '[127.0.0.1]:$port $changed', 255);
       },
       skip:
-          !Platform.isWindows ||
+          (!Platform.isWindows && !Platform.isMacOS) ||
           root == null ||
           port == null ||
           executable == null,

@@ -16,19 +16,22 @@ Future<Process> _startCredentialProcess(
   String? plannedJobName,
   Future<void> Function(int workerPid)? registerWorker,
 }) async {
-  if (!Platform.isWindows) {
+  if (!Platform.isWindows && !Platform.isMacOS) {
     throw const CredentialUseFailure('unsupported_tool_version');
   }
   final runtime = Platform.resolvedExecutable;
   final interpreted =
-      workerExecutable == null && runtime.toLowerCase().endsWith('dart.exe');
+      workerExecutable == null &&
+      (Platform.isWindows
+          ? runtime.toLowerCase().endsWith('dart.exe')
+          : RegExp(r'/(dart|dartvm)$').hasMatch(runtime));
   final worker =
       workerExecutable ??
       (interpreted
           ? (await Isolate.resolvePackageUri(
               Uri.parse('package:info_cli/runtime_worker.dart'),
             ))!.toFilePath()
-          : '${File(runtime).parent.path}/info-runtime-worker.exe');
+          : '${File(runtime).parent.path}/info-runtime-worker${Platform.isWindows ? '.exe' : ''}');
   if (!await File(worker).exists()) {
     throw const CredentialUseFailure('process_start_failed');
   }
@@ -38,15 +41,21 @@ Future<Process> _startCredentialProcess(
   // In the local SDK, killing a VM launched through dart.exe also terminated
   // its children. Use the VM directly for the development worker, matching the
   // standalone worker executable used in packaged builds.
-  final path = interpreted ? '${File(runtime).parent.path}/dartvm.exe' : worker;
+  final path = interpreted
+      ? (Platform.isWindows
+            ? '${File(runtime).parent.path}/dartvm.exe'
+            : runtime)
+      : worker;
   if (!await File(path).exists()) {
     throw const CredentialUseFailure('process_start_failed');
   }
-  final state = File('${environment['TEMP']}/worker-state.json');
+  final state = File(
+    '${environment[Platform.isMacOS ? 'TMPDIR' : 'TEMP']}/worker-state.json',
+  );
   final nonce = base64Url.encode(
     List.generate(24, (_) => Random.secure().nextInt(256)),
   );
-  final jobName = plannedJobName ?? 'Local\\AgentInfoRuntime-$nonce';
+  final jobName = plannedJobName ?? CredentialProcessJob.nameFor(nonce);
   final process = await Process.start(
     path,
     args,
@@ -55,6 +64,9 @@ Future<Process> _startCredentialProcess(
     includeParentEnvironment: false,
     runInShell: false,
   );
+  final workerIdentity = CredentialProcessIdentity.capture(process.pid);
+  final workerCreatedAt = workerIdentity?.value;
+  workerIdentity?.close();
   var stopped = false;
   final ended = process.exitCode.then((code) {
     stopped = true;
@@ -146,7 +158,12 @@ Future<Process> _startCredentialProcess(
           (jsonDecode(await File('${state.path}.finished').readAsString())
                   as Map)['state'] ==
               'start_failed' &&
-          CredentialProcessJob.isActive(jobName) == false;
+          CredentialProcessJob.isActive(
+                jobName,
+                workerPid: process.pid,
+                workerCreatedAt: workerCreatedAt,
+              ) ==
+              false;
     } on Object {
       /* Missing final state is inconclusive. */
     }
@@ -199,7 +216,7 @@ class _UncertainCredentialLaunch implements Exception {
 class _RuntimeWorkerProcess implements Process {
   _RuntimeWorkerProcess(this.worker, this.pid, this.state, this.jobName) {
     try {
-      _job = CredentialProcessJob.observe(jobName, pid);
+      _job = CredentialProcessJob.observe(jobName, pid, workerPid: worker.pid);
     } on Object {
       // The worker still owns its original job handle and monitors its tree.
       // A later worker failure without this handle must remain unknown.
@@ -782,7 +799,9 @@ class _CredentialRuntimeExecutor {
     String id, {
     CredentialOperationInput? operation,
   }) async {
-    if (!Platform.isWindows && client._usesDefaultCredentialStarter) {
+    if (!Platform.isWindows &&
+        !Platform.isMacOS &&
+        client._usesDefaultCredentialStarter) {
       throw const CredentialUseFailure('unsupported_tool_version');
     }
     if (operation != null) {
@@ -1148,17 +1167,25 @@ class _CredentialRuntimeExecutor {
           .listen((data) => output.add('stderr', data))
           .asFuture<void>();
       processIdentity = CredentialProcessIdentity.capture(process.pid);
-      await process.stdin.close();
-      started = DateTime.now().toUtc();
-      created = processIdentity?.value;
-      if (created == null) {
-        throw const CredentialUseFailure('execution_unknown');
-      }
+      // Preserve the existing Windows control-channel timing. Only Darwin's
+      // paused-target protocol needs the channel held through Core validation.
+      if (!Platform.isMacOS) await process.stdin.close();
       try {
-        await report('running');
-      } on Object {
-        // Retry metadata only; the consumed launch is never retried.
-        await report('running');
+        started = DateTime.now().toUtc();
+        created = processIdentity?.value;
+        if (created == null) {
+          throw const CredentialUseFailure('execution_unknown');
+        }
+        try {
+          await report('running');
+        } on Object {
+          // Retry metadata only; the consumed launch is never retried.
+          await report('running');
+        }
+      } finally {
+        // Darwin keeps the actual target suspended until Core has verified
+        // its identity. EOF also releases it after an uncertain report.
+        if (Platform.isMacOS) await process.stdin.close();
       }
       final result = await process.exitCode;
       await Future.wait([stdoutDone, stderrDone]);

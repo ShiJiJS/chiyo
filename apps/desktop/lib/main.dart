@@ -66,6 +66,8 @@ Future<DesktopLibrary> _openLibrary() async {
       focusedFillDriver: fill,
       informationDeliveryFiles: Platform.isWindows
           ? WindowsInformationDeliveryFiles()
+          : Platform.isMacOS
+          ? NativeInformationDeliveryFiles()
           : null,
     ),
     close: repository.close,

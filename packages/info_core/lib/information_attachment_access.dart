@@ -22,8 +22,9 @@ extension OwnerInformationAttachments on OwnerAccess {
   /// Existing files (including publication races) are never replaced.
   Future<void> exportInformationFile(
     InformationAttachmentRef ref,
-    String path,
-  ) => _serialize(() async {
+    String path, {
+    String? stagingParent,
+  }) => _serialize(() async {
     await _purgeInformationAttachments();
     final repo = _attachments;
     final generation = _service._libraryGeneration;
@@ -36,7 +37,9 @@ extension OwnerInformationAttachments on OwnerAccess {
         throw const AccessFailure('output_exists');
       }
       await repo.withInformationAttachment(ref, (version, chunks) async {
-        staging = await output.parent.createTemp('.info-file-export-');
+        staging = await Directory(
+          stagingParent ?? output.parent.path,
+        ).createTemp('.info-file-export-');
         final temporary = File('${staging!.path}/original.partial');
         await temporary.create(exclusive: true);
         handle = await temporary.open(mode: FileMode.writeOnly);

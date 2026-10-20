@@ -6,7 +6,7 @@ import 'package:info_core/info_core.dart';
 import 'package:test/test.dart';
 
 void main() {
-  final native = WindowsInformationDeliveryFiles();
+  final native = NativeInformationDeliveryFiles();
   final data = Uint8List.fromList([
     0,
     255,
@@ -80,7 +80,7 @@ void main() {
         throwsA(isA<RuntimeMaterialFailure>()),
       );
     },
-    skip: !Platform.isWindows,
+    skip: !Platform.isWindows && !Platform.isMacOS,
   );
   test(
     'native empty original is a protected existing file with the empty digest',
@@ -92,6 +92,6 @@ void main() {
       expect(await File(lease.filePath).length(), 0);
       expect(lease.toString(), isNot(contains(lease.path)));
     },
-    skip: !Platform.isWindows,
+    skip: !Platform.isWindows && !Platform.isMacOS,
   );
 }
