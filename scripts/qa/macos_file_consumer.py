@@ -9,7 +9,9 @@ import uuid
 
 
 class LocalFileConsumer:
-    def __init__(self, output):
+    def __init__(self, output, *, maximum_bytes=1024 * 1024):
+        assert 0 <= maximum_bytes <= 10 * 1024 * 1024
+        self.maximum_bytes = maximum_bytes
         self.output = output
         self.accepted = []
         self.attempts = []
@@ -32,7 +34,7 @@ class LocalFileConsumer:
                 try:
                     size = int(self.headers.get('Content-Length', '-1'))
                     if (not self.path.startswith('/' + consumer.token + '/')
-                            or not 0 <= size <= 1024 * 1024
+                            or not 0 <= size <= consumer.maximum_bytes
                             or self.headers.get('Transfer-Encoding')):
                         self.send_error(400)
                         return
@@ -99,7 +101,8 @@ class LocalFileConsumer:
         self.thread.join(timeout=5)
         self.server.server_close()
         assert not self.thread.is_alive()
-        result = {'curl': self.identity, 'attempts': self.attempts,
+        result = {'curl': self.identity, 'maximumBytes': self.maximum_bytes,
+                  'attempts': self.attempts,
                   'acceptedUploads': len(self.accepted),
                   'accepted': [{'endpoint': endpoint, 'byteLength': len(body),
                                 'sha256': hashlib.sha256(body).hexdigest()}
