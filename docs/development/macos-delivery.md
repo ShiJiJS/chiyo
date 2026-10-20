@@ -68,6 +68,50 @@ python3 scripts/package-macos.py build/macos-adaptation/new-checked-delivery --c
 这些结果不等于干净用户安装、Keychain 升级、真实通知、可见系统面板或
 真实 Codex 接入已验收。最终同版本应用全流程仍需 #41–#49 的剩余门槛。
 
+## 2026-10-21 同源码整包更新与联合回归
+
+本轮固定干净源码 `c1a58b758dc41bbdfe8699ec67fd6c350224b294`，纳入近期历史界面、
+多标签滚动和大字号计数修复。新包版本 `0.4.0+12-mac-dev.c1a58b758dc4`，
+保留首轮包，不覆盖现有安装，也未发布 GitHub Release。
+
+本地 ZIP：
+`build/macos-adaptation/issue50-package-5/agent-info-manage-0.4.0+12-mac-dev.c1a58b758dc4-macos-arm64.zip`
+（45,483,253 字节），SHA-256：
+`5d1219c50d7bc767af8af792d2b8ce76cbb372aa0e74f7d2305e8ddbb7c69d1d`。
+
+本轮通过 `package-macos.py --check` 在上述源码重新执行四包严格分析及测试：
+Core 285/6、CLI 72/40、Storage 159/18、Desktop 174/2（通过/跳过），
+合计 **690 通过、66 跳过**，没有把旧源码结果作为本轮结果。
+21 个打包阶段均返回 0；133 项文件/链接、12 个 Mach-O，App 与五个 CLI、
+worker、Skill/引用、SQLCipher 诊断、许可证/依赖锁和清单齐备。
+产品名称、bundle 身份、最低系统及 ARM64 范围沿用上文，实际宿主仍为 macOS 27.0.1。
+
+中文空格目录解包后的字节、权限、链接及清单核对通过；App deep/strict 签名通过，
+沙盒、用户选择文件、书签和网络 entitlement 保留，worker 继承沙盒，Release 不含调试访问权限。
+受限 PATH 下运行实际 AOT 存储诊断，确认 SQLCipher 4.19.0 community、资料重开、
+独立目标恢复与旧许可拒绝；六项随包 CLI/hook 材料生成及 worker 生命周期检查通过。
+这六项与源码测试有重叠，不额外累加到 690 项。
+
+另外用新包内 `cli/info` 联合当前源码的 Mac 原生测试宿主：
+
+| 场景 | 阶段 | CLI 状态核对 | 结果 |
+| --- | ---: | ---: | --- |
+| 目录/标签、搜索分页及容量 | 6 | 38 | 125 条资料、52 标签、四主题与 100%/200%、库重开通过 |
+| 普通编辑、提案和恢复保留附件 | 10 | 44 | 六次真实交付/释放，1024 字节原文、身份与版本保持，重新授权及库重开通过 |
+
+两轮记录的 `appBaseCommit` 与 `productSource` 均为 `c1a58b7`，CLI 摘要均为
+`4e0a9920648c71bde9571410cede0624afccaed0097ca297633a4417197f71e2`。
+Flutter 和五个 CLI 实例均正常退出 0；之后已恢复普通入口 Debug 构建并通过严格签名检查。
+这是同源码的 Debug 原生测试宿主与交付 AOT CLI 联合回归，
+**不是已安装 Release 应用的最终 GUI 闭环**。临时密钥、测试文本通道、合成资料和受控审批的边界保留。
+
+本轮可证明 #50 第一项“整包组成、身份/版本/架构、清单与摘要”，其他复合条件继续待验。
+稳定位置实际启动、真实 Keychain 升级、干净用户/独立 Mac、通知/系统面板和真实 Codex
+没有因本轮通过而完成；当前仍为本机 ad-hoc、未公证包。
+远端 main 同轮核对仍为 `b37f96a`；Windows 原生代码目录未改，当前共享 UI 的 Windows 实机回归仍待。
+[101 份原始资料、摘要与范围索引](evidence/macos-delivery-refresh/verification.json) 已保存，
+包含四包日志、打包清单、联合检查与原生渲染图；不包含数据库、测试密钥或 ZIP 二进制。
+
 ## 2026-10-21 首轮打包验证记录（#50 继续 OPEN）
 
 首轮已验证的本机预览版本 `0.4.0+12-mac-dev.cccc37e4a112`，产品与打包器源码
