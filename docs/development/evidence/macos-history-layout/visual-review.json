@@ -1,0 +1,22 @@
+{
+  "mode": "independent existing UI follow-up; no score",
+  "reviewedRun": 3,
+  "reviewedImages": 12,
+  "reviewedScope": [
+    "four-theme archived at 200%, first and scrolled frames (8)",
+    "full InformationApp history at 100%/200%, first and scrolled frames (4)"
+  ],
+  "priorFinding": "resolved: 11 次访问 stays on one line without smaller typography",
+  "blockingFindings": [],
+  "fullAppFindings": [
+    "five navigation modules and four theme controls remain visible at 200%",
+    "fixed bottom action remains visible while long title scrolls",
+    "fields 1–24 visible in scrolled frame"
+  ],
+  "limits": [
+    "controlled viewport and text scale, not physical keyboard/mouse or system zoom",
+    "long record middle summary not separately captured",
+    "no same-size HTML comparison; no pixel-fidelity conclusion",
+    "no animation observation"
+  ]
+}

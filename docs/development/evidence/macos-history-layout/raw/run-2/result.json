@@ -1,0 +1,360 @@
+{
+  "complete": true,
+  "productSource": "cccc37e4a1125f88c7714a26b1873fdb2ffb7a9c",
+  "cliSha256": "1341e5278d0b073eccf5444a16c38f4195f22a02b60c3b125e93b21cdc5afea6",
+  "phases": [
+    {
+      "phase": "request",
+      "checks": []
+    },
+    {
+      "phase": "approved",
+      "checks": [
+        {
+          "field": "TtDdQXjlQbSfTp4R5kUqZUSEzU0m2RzCKzYMZJkiUag=",
+          "requestId": "aPkwJeu8xcRbADVPF48EfOH997nGEsieAOIlMet7ZGw=",
+          "status": "ok",
+          "expectedValueMatched": true
+        },
+        {
+          "field": "gY7gUSpJRQUg3sb9BYOUUvyYL209RP7NIKb50mOlS6c=",
+          "requestId": "aPkwJeu8xcRbADVPF48EfOH997nGEsieAOIlMet7ZGw=",
+          "status": "ok",
+          "expectedValueMatched": true
+        }
+      ]
+    },
+    {
+      "phase": "partial",
+      "checks": [
+        {
+          "field": "TtDdQXjlQbSfTp4R5kUqZUSEzU0m2RzCKzYMZJkiUag=",
+          "requestId": "aPkwJeu8xcRbADVPF48EfOH997nGEsieAOIlMet7ZGw=",
+          "status": "unauthorized",
+          "expectedValueMatched": false
+        },
+        {
+          "field": "gY7gUSpJRQUg3sb9BYOUUvyYL209RP7NIKb50mOlS6c=",
+          "requestId": "aPkwJeu8xcRbADVPF48EfOH997nGEsieAOIlMet7ZGw=",
+          "status": "ok",
+          "expectedValueMatched": true
+        }
+      ]
+    },
+    {
+      "phase": "restored",
+      "checks": [
+        {
+          "field": "TtDdQXjlQbSfTp4R5kUqZUSEzU0m2RzCKzYMZJkiUag=",
+          "requestId": "aPkwJeu8xcRbADVPF48EfOH997nGEsieAOIlMet7ZGw=",
+          "status": "unauthorized",
+          "expectedValueMatched": false
+        },
+        {
+          "field": "gY7gUSpJRQUg3sb9BYOUUvyYL209RP7NIKb50mOlS6c=",
+          "requestId": "aPkwJeu8xcRbADVPF48EfOH997nGEsieAOIlMet7ZGw=",
+          "status": "ok",
+          "expectedValueMatched": true
+        },
+        {
+          "field": "4360l9mKvhrM5Ot0e53mw20AaieP1Xm4uWADrdqG-7A=",
+          "requestId": "aPkwJeu8xcRbADVPF48EfOH997nGEsieAOIlMet7ZGw=",
+          "status": "unauthorized",
+          "expectedValueMatched": false
+        }
+      ]
+    },
+    {
+      "phase": "reapproved",
+      "checks": [
+        {
+          "field": "TtDdQXjlQbSfTp4R5kUqZUSEzU0m2RzCKzYMZJkiUag=",
+          "requestId": "aPkwJeu8xcRbADVPF48EfOH997nGEsieAOIlMet7ZGw=",
+          "status": "unauthorized",
+          "expectedValueMatched": false
+        },
+        {
+          "field": "gY7gUSpJRQUg3sb9BYOUUvyYL209RP7NIKb50mOlS6c=",
+          "requestId": "aPkwJeu8xcRbADVPF48EfOH997nGEsieAOIlMet7ZGw=",
+          "status": "ok",
+          "expectedValueMatched": true
+        },
+        {
+          "field": "4360l9mKvhrM5Ot0e53mw20AaieP1Xm4uWADrdqG-7A=",
+          "requestId": "Aqi62ifGcS_JM-9I6p4pIrBicZsFc-LBjYq-lLhtY0s=",
+          "status": "ok",
+          "expectedValueMatched": true
+        }
+      ]
+    },
+    {
+      "phase": "all-removed",
+      "checks": [
+        {
+          "field": "TtDdQXjlQbSfTp4R5kUqZUSEzU0m2RzCKzYMZJkiUag=",
+          "requestId": "aPkwJeu8xcRbADVPF48EfOH997nGEsieAOIlMet7ZGw=",
+          "status": "unauthorized",
+          "expectedValueMatched": false
+        },
+        {
+          "field": "gY7gUSpJRQUg3sb9BYOUUvyYL209RP7NIKb50mOlS6c=",
+          "requestId": "aPkwJeu8xcRbADVPF48EfOH997nGEsieAOIlMet7ZGw=",
+          "status": "unauthorized",
+          "expectedValueMatched": false
+        },
+        {
+          "field": "4360l9mKvhrM5Ot0e53mw20AaieP1Xm4uWADrdqG-7A=",
+          "requestId": "Aqi62ifGcS_JM-9I6p4pIrBicZsFc-LBjYq-lLhtY0s=",
+          "status": "unauthorized",
+          "expectedValueMatched": false
+        }
+      ]
+    },
+    {
+      "phase": "archived",
+      "checks": [
+        {
+          "field": "TtDdQXjlQbSfTp4R5kUqZUSEzU0m2RzCKzYMZJkiUag=",
+          "requestId": "aPkwJeu8xcRbADVPF48EfOH997nGEsieAOIlMet7ZGw=",
+          "status": "unauthorized",
+          "expectedValueMatched": false
+        },
+        {
+          "field": "gY7gUSpJRQUg3sb9BYOUUvyYL209RP7NIKb50mOlS6c=",
+          "requestId": "aPkwJeu8xcRbADVPF48EfOH997nGEsieAOIlMet7ZGw=",
+          "status": "unauthorized",
+          "expectedValueMatched": false
+        },
+        {
+          "field": "4360l9mKvhrM5Ot0e53mw20AaieP1Xm4uWADrdqG-7A=",
+          "requestId": "Aqi62ifGcS_JM-9I6p4pIrBicZsFc-LBjYq-lLhtY0s=",
+          "status": "unauthorized",
+          "expectedValueMatched": false
+        }
+      ]
+    },
+    {
+      "phase": "repository-reopened",
+      "checks": [
+        {
+          "field": "TtDdQXjlQbSfTp4R5kUqZUSEzU0m2RzCKzYMZJkiUag=",
+          "requestId": "aPkwJeu8xcRbADVPF48EfOH997nGEsieAOIlMet7ZGw=",
+          "status": "unauthorized",
+          "expectedValueMatched": false
+        },
+        {
+          "field": "gY7gUSpJRQUg3sb9BYOUUvyYL209RP7NIKb50mOlS6c=",
+          "requestId": "aPkwJeu8xcRbADVPF48EfOH997nGEsieAOIlMet7ZGw=",
+          "status": "unauthorized",
+          "expectedValueMatched": false
+        },
+        {
+          "field": "4360l9mKvhrM5Ot0e53mw20AaieP1Xm4uWADrdqG-7A=",
+          "requestId": "Aqi62ifGcS_JM-9I6p4pIrBicZsFc-LBjYq-lLhtY0s=",
+          "status": "unauthorized",
+          "expectedValueMatched": false
+        }
+      ]
+    },
+    {
+      "phase": "complete",
+      "checks": []
+    }
+  ],
+  "appBaseCommit": "fa2611d19d7c2ebb24040332b6e9344432c856b3",
+  "worktreeStatus": [
+    " M apps/desktop/integration_test/macos_removed_scope_native_test.dart",
+    " M apps/desktop/lib/history.dart",
+    " M scripts/qa/macos-scope-ui.py"
+  ],
+  "qaSources": [
+    {
+      "path": "apps/desktop/integration_test/macos_removed_scope_native_test.dart",
+      "sha256": "28400bd1f70570c794e58adb87cd9a80f217b1fc6645bc28f6d92e641a58611a"
+    },
+    {
+      "path": "scripts/qa/macos-scope-ui.py",
+      "sha256": "ecd709205f068a8fb30b382f1f1dd94a4f30e2b57f34c6878fea7560115ba15b"
+    },
+    {
+      "path": "apps/desktop/lib/history.dart",
+      "sha256": "fbc8ffbdadd1db69051f320370d1b0a26416edb0face822b6ce1ad624af8b1e3"
+    },
+    {
+      "path": "apps/desktop/lib/main.dart",
+      "sha256": "484271607ad9cabdcd7fd69374b9c71a37dee4d2a51fe4cd82d40811aa420e39"
+    },
+    {
+      "path": "apps/desktop/integration_test/support/native_semantics_lifetime.dart",
+      "sha256": "a274da35d57e9bca3322b7e5b70a2bc610990e8e8dc3fba0821bbb1e9219036f"
+    }
+  ],
+  "nativeResult": {
+    "complete": true,
+    "encryptedRepository": true,
+    "backupRestoreAndRepositoryReopen": true,
+    "controlledOwnerMutations": true,
+    "simulatedViewportAndTextScale": true,
+    "physicalUiAcceptance": false,
+    "countPhraseSingleLineAt200Percent": true,
+    "fullAppHistoryPagination": {
+      "records": 19,
+      "pages": 3,
+      "fields": 24,
+      "searchAndClear": true,
+      "globalNavigationIncluded": true
+    },
+    "captures": [
+      {
+        "file": "partial-history-purple-1440-100.png",
+        "width": 1440,
+        "height": 900,
+        "textScale": 1.0
+      },
+      {
+        "file": "partial-history-purple-1280-200.png",
+        "width": 1280,
+        "height": 800,
+        "textScale": 2.0
+      },
+      {
+        "file": "partial-history-purple-1280-200-scope-scrolled.png",
+        "width": 1280,
+        "height": 800,
+        "textScale": 2.0
+      },
+      {
+        "file": "partial-history-green-1440-100.png",
+        "width": 1440,
+        "height": 900,
+        "textScale": 1.0
+      },
+      {
+        "file": "partial-history-green-1280-200.png",
+        "width": 1280,
+        "height": 800,
+        "textScale": 2.0
+      },
+      {
+        "file": "partial-history-green-1280-200-scope-scrolled.png",
+        "width": 1280,
+        "height": 800,
+        "textScale": 2.0
+      },
+      {
+        "file": "partial-history-blue-1440-100.png",
+        "width": 1440,
+        "height": 900,
+        "textScale": 1.0
+      },
+      {
+        "file": "partial-history-blue-1280-200.png",
+        "width": 1280,
+        "height": 800,
+        "textScale": 2.0
+      },
+      {
+        "file": "partial-history-blue-1280-200-scope-scrolled.png",
+        "width": 1280,
+        "height": 800,
+        "textScale": 2.0
+      },
+      {
+        "file": "partial-history-mono-1440-100.png",
+        "width": 1440,
+        "height": 900,
+        "textScale": 1.0
+      },
+      {
+        "file": "partial-history-mono-1280-200.png",
+        "width": 1280,
+        "height": 800,
+        "textScale": 2.0
+      },
+      {
+        "file": "partial-history-mono-1280-200-scope-scrolled.png",
+        "width": 1280,
+        "height": 800,
+        "textScale": 2.0
+      },
+      {
+        "file": "all-removed-history-purple-1440-100.png",
+        "width": 1440,
+        "height": 900,
+        "textScale": 1.0
+      },
+      {
+        "file": "archived-history-purple-1280-200.png",
+        "width": 1280,
+        "height": 800,
+        "textScale": 2.0
+      },
+      {
+        "file": "archived-history-purple-1280-200-scope-scrolled.png",
+        "width": 1280,
+        "height": 800,
+        "textScale": 2.0
+      },
+      {
+        "file": "archived-history-green-1280-200.png",
+        "width": 1280,
+        "height": 800,
+        "textScale": 2.0
+      },
+      {
+        "file": "archived-history-green-1280-200-scope-scrolled.png",
+        "width": 1280,
+        "height": 800,
+        "textScale": 2.0
+      },
+      {
+        "file": "archived-history-blue-1280-200.png",
+        "width": 1280,
+        "height": 800,
+        "textScale": 2.0
+      },
+      {
+        "file": "archived-history-blue-1280-200-scope-scrolled.png",
+        "width": 1280,
+        "height": 800,
+        "textScale": 2.0
+      },
+      {
+        "file": "archived-history-mono-1280-200.png",
+        "width": 1280,
+        "height": 800,
+        "textScale": 2.0
+      },
+      {
+        "file": "archived-history-mono-1280-200-scope-scrolled.png",
+        "width": 1280,
+        "height": 800,
+        "textScale": 2.0
+      },
+      {
+        "file": "reopened-history-green-1440-100.png",
+        "width": 1440,
+        "height": 900,
+        "textScale": 1.0
+      },
+      {
+        "file": "full-app-history-search-1440-100.png",
+        "width": 1440,
+        "height": 900,
+        "textScale": 1.0
+      },
+      {
+        "file": "full-app-history-search-1280-200.png",
+        "width": 1280,
+        "height": 800,
+        "textScale": 2.0
+      }
+    ]
+  },
+  "flutterExitCode": 0,
+  "cliExits": [
+    0,
+    0,
+    0
+  ]
+}

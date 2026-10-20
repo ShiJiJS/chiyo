@@ -81,3 +81,4 @@ docs/development/evidence/macos-app-worker-recovery/raw/** -text -diff
 docs/development/evidence/macos-app-backup-recovery/raw/** -text -diff
 docs/development/evidence/macos-codex-preparation/raw/** -text -diff
 docs/development/evidence/macos-removed-scope-ui/raw/** -text -diff
+docs/development/evidence/macos-history-layout/raw/** -text -diff

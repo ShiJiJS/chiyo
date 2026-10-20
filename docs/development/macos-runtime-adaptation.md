@@ -10,7 +10,7 @@
 - [#44 工具与附件](macos-tools-files.md)：外部 GH/AWS 实测 EPERM 后，已新增主人选择工具目录与系统书签持久化入口；原生存储/界面回归及新包 SSH/附件工作流通过，真实目录许可、外部 GH/AWS、当前系统面板仍待验收。
 - [#45 备份恢复](macos-backup-recovery.md)：签名 Flutter 的 7/8/9 格式恢复、签名 Release 应用与独立 AOT 的 80 MiB 中断回滚/同目标重试，以及固定旧源 5/6 兼容已通过；真实面板、Keychain、最终交付包联合验收与 Windows 双向迁移仍待。
 - [#46 应用生命周期](macos-lifecycle-recovery.md)：实际签名 Flutter 的重复启动拒绝、正常退出/重开、SIGKILL 重开、缺失密钥、47125 占用、初始化期间退出和 SQLCipher 审计失败重试已通过；9 个正常退出、1 个故障注入，实际菜单/睡眠唤醒仍待。执行中 worker 联合场景已在 #43 补齐。
-- [#48 移除范围与历史](evidence/macos-removed-scope-ui/verification.json)：真实 Mac Flutter/SQLCipher 与独立 AOT CLI 的 9 阶段流程连续三轮通过，每轮 19 次读取断言；四主题、200% 滚动及有效/已结束筛选与权限一致。实际系统面板、键盘、完整软件界面和其他资料管理流程仍待。
+- [#48 移除范围与历史](evidence/macos-removed-scope-ui/verification.json)：真实 Mac Flutter/SQLCipher 与独立 AOT CLI 的 9 阶段流程连续三轮通过，每轮 19 次读取断言；四主题、200% 滚动及有效/已结束筛选与权限一致。随后修正访问次数断行，补充完整应用导航内 19 条记录/三页/24 字段长申请的搜索、滚动及清除复验，见[新增证据](evidence/macos-history-layout/verification.json)。实际系统面板、键盘、其他资料管理及大规模数据压力仍待。
 - [#49 Codex 接入准备](evidence/macos-codex-preparation/verification.json)：已修复验收项目生成器只接受 Windows `.exe` 的问题，实际同源 ARM64 包生成独立项目并通过摘要/签名/拒绝覆盖核对；13 项真实聊天验收仍未运行，尚未安装或信任 hook。
 - [#50 ARM64 交付](macos-delivery.md)：`cccc37e` 同源 App/CLI/worker 整包已生成，133 项解包载荷、签名、合成存储诊断与实际 AOT 的 6 项检查通过；修复增量构建漏签名并去除 Release 调试访问权限。实际安装、Keychain 升级及最终 GUI/Codex 联合验收仍待。
 
@@ -44,8 +44,8 @@ run-5 的完整 22 张入 Git，另两轮保留摘要。包含四主题部分移
 
 独立视觉评审逐张检查 22 图，没有发现阻断性重叠、永久裁切或明显状态误导；
 保留 Round05 结构、颜色及业务说明。仍有一项轻微问题：
-200% 归档记录左列的“11 次访问”末字单独换行，完整可读，
-在 #48 完整界面修整时改善。未进行同尺寸 HTML 对照，不声明原型还原完成。
+200% 归档记录左列的“11 次访问”末字单独换行，完整可读；
+该问题已由下述 `97b3f2c` 修正。未进行同尺寸 HTML 对照，不声明原型还原完成。
 评审结论和范围见 [视觉记录](evidence/macos-removed-scope-ui/visual-review.json)。
 
 保留前三轮失败：run-1 使用 stdout 导致父驱动未收到根目录；
@@ -65,6 +65,39 @@ Computer Use 本轮仍报告锁屏，普通窗口操作、中文输入、键盘�
 python3 scripts/qa/macos-scope-ui.py build/macos-adaptation/issue48-next \
   --delivery 'build/macos-adaptation/issue50-package-4/verify/中文 空格 路径/AgentInfoManage'
 ```
+
+### #48 访问次数断行与完整应用历史分页
+
+源码 `97b3f2c`。历史列表的访问/读取/文件交付数量及单位作为完整词组换行，
+保留原有字体、列宽、状态及业务文案；极端宽词组仍可在列内换行，
+不会固定宽度造成横向溢出。`WidgetSpan` 承担外层字号缩放，
+子文本不重复放大。首轮错误的双重缩放被真实原生行盒断言捕获，
+原失败记录保留；修正后四主题 200% 的“11 次访问”均只有一个文本行盒。
+
+`issue48-history-layout-3/4/5` 连续三轮通过，原九阶段权限/备份流程保持；
+每轮 19 次独立 AOT 读取断言、Flutter 和三个 CLI 均退出 0，
+成功合成目录已删除。新增完整 `InformationApp` 入口，在
+1440×900/100% 与 1280×800/200% 下实际点击全局历史导航：
+19 条记录分三页，逐页进入、最后一页下一页按钮禁用；
+搜索“分页合成08”只剩一条/一页；含 24 字段的长申请滚动可达，
+清除搜索恢复 19 条/第一页。使用真实 SQLCipher，但数据创建及审批受控，
+这些测试点击不冒充物理键盘或鼠标。
+
+每轮 26 张渲染图，run-3 原图入 Git；原 22 图依旧是历史组件，
+新增 4 图包含全局导航、长申请首屏和范围滚动。独立复核确认四主题
+访问次数换行修正，字号与相邻元数据一致；完整应用 200% 导航分两行，
+五个模块、四主题、固定底部操作均可见，字段 1–24 可滚动看到。
+没有新增阻断性视觉问题。截图没有单独取长标题与范围之间的全部中间摘要，
+也没有同尺寸 HTML 对照，不宣告所有窗口状态或像素级还原通过。
+
+历史、移除字段、凭据历史和附件审批历史四个文件共 10 项控件回归通过，
+严格分析通过；测试后恢复普通 `lib/main.dart` Debug 构建并严格验签。
+仅共享界面排版有生产改动，未改变权限、存储或 Agent 协议；
+独立 CLI 仍来自 `cccc37e` 包，本轮源码尚未重打最终 Release 包，
+Windows 实机回归仍待。Computer Use 再次确认 Mac 锁屏，
+原生面板、真实输入、其余资料管理和大规模数据压力仍留在 #48，
+六条整体验收不勾选。失败、最终三轮、源码摘要和视觉复核见
+[证据索引](evidence/macos-history-layout/verification.json)。
 
 ### #49 可审查工作区与真实独立 stdin 接口
 
