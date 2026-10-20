@@ -1,0 +1,8 @@
+00:00 +0: loading /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/integration_test/macos_attachment_preserve_native_test.dart
+Building macOS application...                                   
+✓ Built build/macos/Build/Products/Debug/info_desktop.app
+Failed to foreground app; open returned 1
+00:00 +0: Mac native text edits and proposals preserve ordinary attachments
+MAC_ATTACHMENT_PRESERVE_ROOT=/Users/jiangxinyi/Library/Containers/com.example.infoDesktop/Data/tmp/aim-mac-attachment-preserve-ui-6dpKHe
+00:12 +1: (tearDownAll)
+00:12 +1: All tests passed!

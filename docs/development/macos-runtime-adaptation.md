@@ -14,10 +14,57 @@
 - [#48 资料管理闭环](evidence/macos-library-ui/verification.json)：新增实际 Mac Flutter/SQLCipher + 独立 AOT CLI 的模板、编辑、删除恢复、版本恢复及库重开验证；最终九阶段/18 次读取断言通过，模板修改与既有信息隔离、取消确认及关闭弹窗后详情刷新均独立核对。提案/整理/凭据等其余流程、真实输入和系统面板仍待。
 - [#48 提案闭环](evidence/macos-proposals-ui/verification.json)：实际 Mac 原生审核完成批量提案调整、分类校验失败保留草稿与原子重试、拒绝、删除、冲突拒绝与新版本再次确认；最终 11 阶段/22 次独立 CLI 状态和 3 次公开目录检查，重开后五条处理记录及当前内容保持。整理、附件与提案联合场景、真实输入等继续待做。
 - [#48 整理闭环](evidence/macos-organization-ui/verification.json)：六个整理任务覆盖缩小范围、自动应用、整批冲突、撤销、拒绝、无改动结束及库重开；最终 12 阶段/49 次独立 CLI 状态断言通过。保留首轮过早查找 UI 的失败；睡眠/到期、真实输入及其余资料流程仍待。
+- [#48 附件保留闭环](evidence/macos-attachment-preserve-ui/verification.json)：原生文本编辑、修改提案确认、文本删除/恢复及库重开保持附件身份、版本与原文；最终十阶段/44 次 CLI 状态核对、六次真实交付/释放通过。初始文件准备与审批为夹具，实际系统面板仍待。
 - [#49 Codex 接入准备](evidence/macos-codex-preparation/verification.json)：已修复验收项目生成器只接受 Windows `.exe` 的问题，实际同源 ARM64 包生成独立项目并通过摘要/签名/拒绝覆盖核对；13 项真实聊天验收仍未运行，尚未安装或信任 hook。
 - [#50 ARM64 交付](macos-delivery.md)：`cccc37e` 同源 App/CLI/worker 整包已生成，133 项解包载荷、签名、合成存储诊断与实际 AOT 的 6 项检查通过；修复增量构建漏签名并去除 Release 调试访问权限。实际安装、Keychain 升级及最终 GUI/Codex 联合验收仍待。
 
 #43 已完成其范围，其余上述票据仍 OPEN；具体未完成条件以 GitHub 票据及各记录为准。现有证据不等于 Mac 总票 #19 已可交付。
+
+### #48 普通编辑、修改提案与文本恢复保留附件的原生验收
+
+QA 源码 `123868f` 新增 `macos_attachment_preserve_native_test.dart` 与
+`scripts/qa/macos-attachment-preserve-ui.py`，产品基线 `07df31a` 未改。
+[固定证据](evidence/macos-attachment-preserve-ui/verification.json)保留三轮源码、日志和原生截图；
+独立父进程使用核对摘要后的 `cccc37e` ARM64 AOT CLI，经真实 HTTP/JSON-lines 交互。
+
+夹具通过正式 Owner 暂存/提交接口创建一项“文本 + 1,024 字节二进制附件”资料，
+原文件中文/空格名称；资料、密钥和审批为隔离测试准备，不当作真实文件选择或 Keychain。
+原生 InformationApp 由 tester 打开编辑器修改文本及公开说明，再确认独立 CLI 提交的文本修改提案。
+两次保存后附件字段身份、附件身份、版本 1 和全部原字节保持，源文件未修改，暂存为零。
+提案页面显示“保留原文件与版本”及真实元数据，确认提案本身不扩大内容授权。
+
+随后通过 UI 移除文本字段，确认后信息只剩附件；独立 CLI 旧文本读取被拒绝，原文件许可仍可领取。
+通过回收站恢复文本后生成新字段身份，旧许可不能读取旧字段或新字段，重新批准新身份才可读取。
+附件全程保持原身份/版本/原文，原文件许可到期时间不变；信息最终版本为 5。
+同一原生进程关闭服务/SQLCipher 后重开，混合资料和确认提案状态保留，旧授权失效。
+新 CLI 会话持旧文件请求被拒绝，重新批准文件后能领取完全相同原文，但不能读取文本。
+
+最终 run-3：complete=true、十阶段、44 次命令状态断言、八张原生渲染图。
+六次不同文件交付逐字节匹配 1,024 字节，每次重复 operationId 取得同一交付，
+释放后路径不存在；申请前及另一会话的领取均被拒绝且未占用操作。
+Flutter 与三份 CLI 正常退出 0，成功专属合成根已清理。
+
+首轮隔离 AgentServer 未启用附件能力，按默认契约返回 unsupported_capability；
+仅修正测试入口两个能力开关，与生产 Mac bootstrap 一致。首轮父进程在失败后终止自己的测试宿主，
+不能称为自然退出；失败根仍本机保留。第二轮错误期待 Owner 编辑器出现提案编辑器的占位文案，
+实际显示 InformationFileSummary；修正测试为真实文件控件并补截图，失败源码/日志和本机根仍保留。
+两个失败轮均未伪造缺失的 Flutter 退出码，未改产品边界或重复累计通过数。
+
+最终严格分析、文件编辑/修改提案九项回归通过；恢复普通 main.dart Debug 并 deep/strict 验签通过。
+主 agent 目测文件编辑区、文本修改、提案审核、仅文件状态、文本恢复及重开页面；
+1440×1000 紫棠主题没有阻断性布局问题，图中元数据和数据库/交付断言一致。
+三轮都有 foreground open returned 1；Computer Use 同期确认锁屏，不算真实前台输入验收。
+
+复跑（必须新输出目录）：
+
+```sh
+python3 scripts/qa/macos-attachment-preserve-ui.py build/macos-adaptation/attachment-preserve-new-run \
+  --delivery 'build/macos-adaptation/issue50-package-4/verify/中文 空格 路径/AgentInfoManage'
+```
+
+这不是应用进程重启、原生文件面板、物理键盘、真实 Codex 或最终同源整包验收。
+文件自身删除/替换/版本恢复及更大混合资料范围仍依各票继续核对；凭据管理、目录标签、
+真实输入/焦点、规模压力等未因本例通过而完成。#48 六条复合条件保持未勾选。
 
 ### #48 整理请求、自动应用与结果持久化的 Mac 原生验收
 
