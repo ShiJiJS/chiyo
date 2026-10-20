@@ -15,6 +15,7 @@ import subprocess
 import threading
 import time
 import uuid
+from macos_file_consumer import LocalFileConsumer
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -23,6 +24,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('output', type=Path)
     parser.add_argument('--delivery', type=Path, required=True)
+    parser.add_argument('--consume-files', action='store_true',
+                        help='Upload synthetic managed copies using system curl to loopback HTTP')
     args = parser.parse_args()
     output = args.output.resolve(); output.relative_to(ROOT / 'build')
     output.mkdir(parents=True, exist_ok=False)
@@ -43,6 +46,7 @@ def main():
     state['qaSources'] = []
     for name in ['apps/desktop/integration_test/macos_attachment_preserve_native_test.dart',
                  'scripts/qa/macos-attachment-preserve-ui.py',
+                 'scripts/qa/macos_file_consumer.py',
                  'apps/desktop/lib/library.dart',
                  'apps/desktop/lib/information_editor_draft.dart',
                  'apps/desktop/lib/information_files.dart',
@@ -59,6 +63,7 @@ def main():
             'sha256': hashlib.sha256(source.read_bytes()).hexdigest()})
     processes = []
     directory = None
+    consumer = None
     log = output / 'flutter.txt'
     def wait_for(predicate, timeout=120):
         deadline = time.monotonic() + timeout
@@ -87,6 +92,8 @@ def main():
         try: return json.loads((directory / f'phase-{index}.json').read_text())
         except (FileNotFoundError, json.JSONDecodeError): return None
     try:
+        if args.consume_files:
+            consumer = LocalFileConsumer(output)
         with log.open('wb') as stream:
             flutter = subprocess.Popen([str(ROOT/'scripts/dev-macos.sh'), 'flutter', 'test', '--no-pub',
                 'integration_test/macos_attachment_preserve_native_test.dart', '-d', 'macos',
@@ -133,8 +140,12 @@ def main():
                 delivered_ids.add(copy['deliveryId'])
                 retry=checked(data,'ok')['delivery']
                 assert retry['deliveryId']==copy['deliveryId'] and retry['path']==str(path)
+                if consumer:
+                    checks.append(consumer.consume(path, original, op))
                 released=checked({'command':'file-release','deliveryId':copy['deliveryId']},'ok')['delivery']
                 assert released['state']=='released' and not path.exists()
+                if consumer:
+                    checks.append(consumer.verify_released(path, op))
                 checks.append({'attachmentBytesMatched':1024,'attachmentVersion':1,'repeatSameDelivery':True,'releasedPathAbsent':True})
             def new_request(fields):
                 return checked({'command':'request','purpose':'Mac mixed file preservation','fields':[{'itemId':item,'fieldId':f} for f in fields]},'pending')['requestId']
@@ -191,6 +202,12 @@ def main():
         state['failure']={'type':type(e).__name__,'message':str(e)}
         raise
     finally:
+        if consumer:
+            try:
+                state['fileConsumer'] = consumer.close()
+            except Exception as e:
+                state['complete'] = False
+                state['consumerCleanupFailure'] = {'type': type(e).__name__, 'message': str(e)}
         for p, errors in processes:
             p.stdin.close()
             try: code=p.wait(timeout=10)
