@@ -1,0 +1,13 @@
+{
+  "pythonSyntax": true,
+  "helpExit": 0,
+  "originalFourLocks": true,
+  "port47125Free": true,
+  "nativeProcesses": 0,
+  "cuReset": true,
+  "failedEmptyFixtureRemoved": true,
+  "changedSinceFileUiFunctionalAcceptance": [
+    "apps/desktop/lib/desktop_bootstrap.dart",
+    "apps/desktop/lib/desktop_runtime.dart"
+  ]
+}

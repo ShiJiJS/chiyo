@@ -66,6 +66,9 @@ try {
     if (-not (Test-Path -LiteralPath (Join-Path $payload 'cli/template/references/credential-use.md') -PathType Leaf)) {
         throw 'The extracted SDK-free bundle is missing the credential-use Skill reference.'
     }
+    if (-not (Test-Path -LiteralPath (Join-Path $payload 'cli/template/references/information-files.md') -PathType Leaf)) {
+        throw 'The extracted SDK-free bundle is missing the information-files Skill reference.'
+    }
     # Restrict only this process and its children. Do not change the user's PATH.
     $env:PATH = "$env:SystemRoot\System32;$env:SystemRoot;$env:SystemRoot\System32\WindowsPowerShell\v1.0"
     $storage = Join-Path $payload 'diagnostics/bin/info-storage-check.exe'
@@ -76,31 +79,38 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'Extracted SDK-free preparation failed.' }
     $env:INFO_TEST_DELIVERY = $payload
     $env:INFO_TEST_BUNDLE = $bundle
-    Push-Location (Join-Path (Split-Path -Parent $PSScriptRoot) 'packages/info_cli')
-    $cliLock = Join-Path (Get-Location) 'pubspec.lock'
-    $originalCliLock = [IO.File]::ReadAllBytes($cliLock)
-    try {
-        if ($env:PUB_HOSTED_URL -eq 'https://pub.flutter-io.cn') {
-            $temporaryCliLock = [Text.Encoding]::UTF8.GetString($originalCliLock).Replace('https://pub.dev', 'https://pub.flutter-io.cn')
-            [IO.File]::WriteAllText($cliLock, $temporaryCliLock, (New-Object Text.UTF8Encoding($false)))
-        }
-        # The preceding headless build populated this exact cache. Prevent
-        # 'dart test' from silently re-resolving dev dependencies under a mirror.
-        & $dart pub get --enforce-lockfile --offline
-        if ($LASTEXITCODE -ne 0) { throw 'Pinned SDK-free test dependencies are unavailable.' }
-        & $dart test test/bundle_preparation_test.dart test/cli_test.dart test/codex_process_test.dart
-        if ($LASTEXITCODE -ne 0) { throw 'Extracted CLI and rendered hooks failed.' }
-    } finally {
+    function Invoke-LockedPackageTests {
+        param([string]$Package, [string[]]$Tests)
+        Push-Location (Join-Path (Split-Path -Parent $PSScriptRoot) $Package)
+        $packageLock = Join-Path (Get-Location) 'pubspec.lock'
+        $originalPackageLock = [IO.File]::ReadAllBytes($packageLock)
         try {
-            $expectedLock = [Text.Encoding]::UTF8.GetString($originalCliLock).Replace('https://pub.flutter-io.cn', 'https://pub.dev').Replace("`r`n", "`n")
-            $actualLock = [IO.File]::ReadAllText($cliLock).Replace('https://pub.flutter-io.cn', 'https://pub.dev').Replace("`r`n", "`n")
-            if ($actualLock -cne $expectedLock) {
-                throw 'SDK-free tests changed dependency versions/hashes; preserving the lock for inspection.'
+            if ($env:PUB_HOSTED_URL -eq 'https://pub.flutter-io.cn') {
+                $temporaryPackageLock = [Text.Encoding]::UTF8.GetString($originalPackageLock).Replace('https://pub.dev', 'https://pub.flutter-io.cn')
+                [IO.File]::WriteAllText($packageLock, $temporaryPackageLock, (New-Object Text.UTF8Encoding($false)))
             }
-            [IO.File]::WriteAllBytes($cliLock, $originalCliLock)
-        } finally { Pop-Location }
+            # The preceding headless build populated this exact cache. Prevent
+            # 'dart test' from silently re-resolving dev dependencies under a mirror.
+            & $dart pub get --enforce-lockfile --offline
+            if ($LASTEXITCODE -ne 0) { throw 'Pinned SDK-free test dependencies are unavailable.' }
+            & $dart test @Tests
+            if ($LASTEXITCODE -ne 0) { throw "Extracted package checks failed: $Package" }
+        } finally {
+            try {
+                $expectedLock = [Text.Encoding]::UTF8.GetString($originalPackageLock).Replace('https://pub.flutter-io.cn', 'https://pub.dev').Replace("`r`n", "`n")
+                $actualLock = [IO.File]::ReadAllText($packageLock).Replace('https://pub.flutter-io.cn', 'https://pub.dev').Replace("`r`n", "`n")
+                if ($actualLock -cne $expectedLock) {
+                    throw 'SDK-free tests changed dependency versions/hashes; preserving the lock for inspection.'
+                }
+                [IO.File]::WriteAllBytes($packageLock, $originalPackageLock)
+            } finally { Pop-Location }
+        }
     }
-    Write-Host 'PASS: extracted checksums, SDK-free CLI/hooks, synthetic SQLCipher/DPAPI. Desktop and user configuration untouched.'
+    Invoke-LockedPackageTests -Package 'packages/info_cli' -Tests @('test/bundle_preparation_test.dart', 'test/cli_test.dart', 'test/codex_process_test.dart', 'test/codex_focused_fill_test.dart', 'test/codex_information_files_test.dart')
+    # Actual extracted CLI/worker with encrypted source-side owner/Job tests;
+    # focused input and executable classification remain controlled fixtures.
+    Invoke-LockedPackageTests -Package 'packages/info_storage' -Tests @('test/mixed_lifecycle_windows_test.dart')
+    Write-Host 'PASS: extracted checksums, SDK-free CLI/hooks, encrypted mixed lifecycle, synthetic SQLCipher/DPAPI. Desktop and user configuration untouched.'
 } finally {
     $env:INFO_TEST_DELIVERY = $priorDelivery
     $env:INFO_TEST_BUNDLE = $priorBundle

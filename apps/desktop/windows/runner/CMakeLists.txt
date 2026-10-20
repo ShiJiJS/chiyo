@@ -47,3 +47,9 @@ add_dependencies(${BINARY_NAME} flutter_assemble)
 add_executable(notification_queue_test EXCLUDE_FROM_ALL "notification_queue_test.cpp")
 apply_standard_settings(notification_queue_test)
 target_compile_options(notification_queue_test PRIVATE /utf-8)
+
+add_executable(desktop_control_fixture EXCLUDE_FROM_ALL "desktop_control_fixture.cpp")
+apply_standard_settings(desktop_control_fixture)
+set_target_properties(desktop_control_fixture PROPERTIES
+  OUTPUT_NAME "info_desktop"
+  RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/control-fixture")

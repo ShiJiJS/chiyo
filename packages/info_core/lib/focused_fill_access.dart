@@ -43,7 +43,7 @@ extension _FocusedFillService on InformationService {
     FocusedFillOperation? operation,
     void Function()? validate,
     bool finishing = false,
-  }) async {
+  }) => _serializeRuntimeWrite(() async {
     final repo = _fillRepository(finishing: finishing);
     try {
       await repo.commitFocusedFillRuntime(
@@ -64,7 +64,7 @@ extension _FocusedFillService on InformationService {
     } on Object {
       throw const CredentialUseFailure('audit_unavailable');
     }
-  }
+  });
 
   Map<String, Object?> _publicFill(
     FocusedFillOperation operation, {

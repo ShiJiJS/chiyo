@@ -77,7 +77,7 @@ extension _CredentialRuntimeService on InformationService {
     GrantHistory? fieldGrant,
     RequestHistory? fieldRequest,
     void Function()? validate,
-  }) async {
+  }) => _serializeRuntimeWrite(() async {
     final repo = _runtimeRepository;
     try {
       await repo.commitCredentialRuntime(
@@ -100,7 +100,7 @@ extension _CredentialRuntimeService on InformationService {
     } on Object {
       throw const CredentialUseFailure('audit_unavailable');
     }
-  }
+  });
 
   String _useState(CredentialUseRequest r) {
     if (r.state != 'pending') return r.state;
@@ -172,7 +172,7 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
       throw const CredentialUseFailure('operation_conflict');
     }
     return CredentialOperationClaim(
-      existing,
+      _service._executionForDisplay(existing),
       grantState: _service._useGrantState(r),
     );
   }
@@ -278,6 +278,7 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
     if (_service._executionCapabilities[id] != capability || record == null) {
       throw const CredentialUseFailure('session_mismatch');
     }
+    _service._requireSettledExecutionReceipt(id);
     if (record.state != 'preparing' ||
         record.jobName == null ||
         record.supervisorPid == null ||
@@ -325,7 +326,7 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
         .firstOrNull;
     if (e == null) throw const CredentialUseFailure('session_mismatch');
     _service._sessionUseRequest(session, e.requestId, allowEnded: true);
-    return e;
+    return _service._executionForDisplay(e);
   }
 
   Future<CredentialExecution> reportCredentialExecution(
@@ -339,6 +340,9 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
         .where((e) => e.id == report.executionId)
         .firstOrNull;
     if (old == null) throw const CredentialUseFailure('session_mismatch');
+    // A later fallback/duplicate must not replace the first validated terminal
+    // receipt while its durable write is waiting for storage recovery.
+    _service._requireSettledExecutionReceipt(old.id);
     final next = report.state;
     if (old.jobName != null && old.jobName != report.jobName) {
       throw const CredentialUseFailure('invalid_plan');
@@ -416,7 +420,7 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
         identity?.close();
       }
     }
-    final changed = old.changed({
+    final facts = <String, Object?>{
       'executionState': next,
       'processStarted': old.processStarted || next == 'running',
       'pid': report.pid ?? old.pid,
@@ -426,8 +430,16 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
       'exitCode': report.exitCode,
       'errorCode': report.errorCode,
       'jobName': report.jobName ?? old.jobName,
-    });
-    await _service._saveUse(execution: changed);
+    };
+    final changed = old.changed(facts);
+    try {
+      await _service._saveUse(execution: changed);
+    } on CredentialUseFailure catch (e) {
+      if (e.code == 'audit_unavailable' && next != 'running') {
+        _service._queueExecutionReceipt(old.id, facts);
+      }
+      rethrow;
+    }
     return changed;
   });
   Future<CredentialLaunchPlan> _resolveCredentialPlan(
@@ -877,8 +889,11 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
 extension CredentialRuntimeOwnerAccess on OwnerAccess {
   List<CredentialUseRequest> get credentialUseRequests =>
       _service._runtimeRepository.credentialUseRequests;
-  List<CredentialExecution> get credentialExecutions =>
-      _service._runtimeRepository.credentialExecutions;
+  List<CredentialExecution> get credentialExecutions => List.unmodifiable(
+    _service._runtimeRepository.credentialExecutions.map(
+      _service._executionForDisplay,
+    ),
+  );
   String credentialUseState(CredentialUseRequest request) =>
       _service._useState(request);
   String credentialGrantState(CredentialUseRequest request) =>

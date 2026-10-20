@@ -1,0 +1,8 @@
+{"stage":"starting","path":null,"fixtureRoot":"C:\\Users\\Todoki\\AppData\\Local\\Temp\\aim-native-ordinary-files-83efe45e","at":"2026-10-19T15:11:25.080018Z"}
+{"stage":"cancel-initial-picker","path":null,"fixtureRoot":"C:\\Users\\Todoki\\AppData\\Local\\Temp\\aim-native-ordinary-files-83efe45e","at":"2026-10-19T15:11:29.895625Z"}
+{"stage":"choose-original","path":"C:\\Users\\Todoki\\AppData\\Local\\Temp\\aim-native-ordinary-files-83efe45e/synthetic-简历-v1.pdf","fixtureRoot":"C:\\Users\\Todoki\\AppData\\Local\\Temp\\aim-native-ordinary-files-83efe45e","at":"2026-10-19T15:11:46.492379Z"}
+{"stage":"choose-original-returned","path":null,"fixtureRoot":"C:\\Users\\Todoki\\AppData\\Local\\Temp\\aim-native-ordinary-files-83efe45e","at":"2026-10-19T15:12:31.223690Z"}
+{"stage":"saving-original","path":null,"fixtureRoot":"C:\\Users\\Todoki\\AppData\\Local\\Temp\\aim-native-ordinary-files-83efe45e","at":"2026-10-19T15:12:31.228691Z"}
+{"stage":"original-saved","path":null,"fixtureRoot":"C:\\Users\\Todoki\\AppData\\Local\\Temp\\aim-native-ordinary-files-83efe45e","at":"2026-10-19T15:12:31.752967Z"}
+{"stage":"reopening-source","path":null,"fixtureRoot":"C:\\Users\\Todoki\\AppData\\Local\\Temp\\aim-native-ordinary-files-83efe45e","at":"2026-10-19T15:12:31.934574Z"}
+{"stage":"failed","path":null,"fixtureRoot":"C:\\Users\\Todoki\\AppData\\Local\\Temp\\aim-native-ordinary-files-83efe45e","at":"2026-10-19T15:12:52.455549Z"}

@@ -17,6 +17,19 @@ void main() {
     'ATTACHMENT_APPROVAL_RENDER_DIRECTORY',
   );
   if (directory.isEmpty) return;
+  const width = int.fromEnvironment(
+    'ATTACHMENT_RENDER_WIDTH',
+    defaultValue: 1280,
+  );
+  const height = int.fromEnvironment(
+    'ATTACHMENT_RENDER_HEIGHT',
+    defaultValue: 800,
+  );
+  const themeName = String.fromEnvironment(
+    'ATTACHMENT_RENDER_THEME',
+    defaultValue: 'purple',
+  );
+  final theme = DesktopColorTheme.values.firstWhere((v) => v.name == themeName);
   testWidgets('inspect actual file approval and delivery history layout', (
     tester,
   ) async {
@@ -39,7 +52,7 @@ void main() {
         )..addFont(Future.value(ByteData.sublistView(bytes)))).load();
       }
       await Directory(directory).create(recursive: true);
-      tester.view.physicalSize = const Size(1280, 800);
+      tester.view.physicalSize = Size(width.toDouble(), height.toDouble());
       tester.view.devicePixelRatio = 1;
       debugDisableShadows = false;
       final f = await AttachmentUiFixture.create();
@@ -50,7 +63,7 @@ void main() {
           key: boundary,
           child: MaterialApp(
             debugShowCheckedModeBanner: false,
-            theme: informationTheme(),
+            theme: informationTheme(theme),
             home: Scaffold(
               body: DesktopShell(
                 service: f.service,
@@ -58,6 +71,7 @@ void main() {
                 index: index,
                 onSelected: (_) {},
                 hasBackups: false,
+                colorTheme: theme,
                 onThemeChanged: (_) {},
                 child: body,
               ),

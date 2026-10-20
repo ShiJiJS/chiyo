@@ -31,3 +31,41 @@ docs/development/evidence/issue38-file-consumers/raw/** -text -diff
 docs/development/evidence/issue38-file-backup-capacity/raw/** -text -diff
 
 docs/development/evidence/issue38-windows-file-bootstrap/raw/** -text -diff
+
+docs/development/evidence/issue38-completion/raw/** -text -diff
+
+docs/development/evidence/issue30-files-skill/raw/** -text -diff
+
+docs/development/evidence/issue23-notification-identity/raw/** -text -diff
+
+docs/development/evidence/windows-preview-0.4.0-9/raw/** -text -diff
+
+docs/development/evidence/issue30-terminal-audit-recovery/raw/** -text -diff
+
+docs/development/evidence/issue18-packaged-startup/raw/** -text -diff
+
+docs/development/evidence/issue23-current-notification/raw/** -text -diff
+
+docs/development/evidence/issue39-app-control/raw/** -text -diff
+
+docs/development/evidence/issue18-packaged-upgrade/raw/** -text -diff
+
+docs/development/evidence/issue18-packaged-joint/raw/** -text -diff
+
+docs/development/evidence/issue18-packaged-file-ui/raw/** -text -diff
+
+docs/development/evidence/issue18-packaged-compat/raw/** -text -diff
+
+docs/development/evidence/issue18-packaged-restore-crash/raw/** -text -diff
+
+docs/development/evidence/issue18-packaged-recycle-ui/raw/** -text -diff
+
+docs/development/evidence/issue18-packaged-recycle-delete/raw/** -text -diff
+
+docs/development/evidence/issue40-removed-field-state/raw/** -text -diff
+
+docs/development/evidence/windows-preview-0.4.0-12/raw/** -text -diff
+
+docs/development/evidence/windows-resume-20261020/raw/** -text -diff
+
+docs/development/evidence/issue30-acceptance-workspace/raw/** -text -diff

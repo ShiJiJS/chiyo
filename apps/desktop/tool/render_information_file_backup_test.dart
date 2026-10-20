@@ -13,6 +13,14 @@ void main() {
     'ATTACHMENT_BACKUP_RENDER_DIRECTORY',
   );
   if (directory.isEmpty) return;
+  const width = int.fromEnvironment(
+    'ATTACHMENT_RENDER_WIDTH',
+    defaultValue: 1280,
+  );
+  const height = int.fromEnvironment(
+    'ATTACHMENT_RENDER_HEIGHT',
+    defaultValue: 800,
+  );
   const themeName = String.fromEnvironment(
     'ATTACHMENT_RENDER_THEME',
     defaultValue: 'purple',
@@ -39,6 +47,7 @@ void main() {
   });
   checks.main(
     theme: theme,
+    viewport: Size(width.toDouble(), height.toDouble()),
     wrapApp: (app) => RepaintBoundary(key: boundary, child: app),
     capture: (tester, state) async {
       final target = state == 'settings-capacity'

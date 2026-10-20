@@ -220,6 +220,12 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
           at: grant.approvedAt,
           until: grant.expiresAt,
           grant: grant,
+          fieldActive: grant.fields.any(
+            (field) => widget.owner.canReadGrantedField(
+              grant,
+              FieldRef(field.itemId, field.fieldId),
+            ),
+          ),
           deliveries: deliveries[grant.id] ?? const [],
           request: requests[grant.requestId],
         ),
@@ -290,6 +296,13 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
     }
     if (e.grant case final g?) {
       if (g.restoredAt != null) return '历史事实';
+      if (g.active && !e.active) {
+        if (!widget.owner.serviceAvailable ||
+            widget.owner.auditStorageUnavailable) {
+          return '状态不可用';
+        }
+        return g.fields.any(_fieldPresent) ? '当前不可读取' : '范围已失效';
+      }
       return switch (g.events.last.kind) {
         GrantEventKind.approved => '有效',
         GrantEventKind.revoked => '已撤销',
@@ -820,6 +833,43 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
     );
   }
 
+  bool _fieldPresent(RecordedField field) => widget.owner.information
+      .where((item) => item.id == field.itemId)
+      .any((item) => item.fields.any((current) => current.id == field.fieldId));
+
+  String _scopeStatus(
+    _HistoryEntry entry,
+    List<RecordedField> fields,
+    Set<FieldRef> fileRefs,
+  ) {
+    if (entry.fileDelivery != null) return '仅有交付事实';
+    final grant = entry.grant;
+    if (grant == null) return '未授予读取';
+    if (!widget.owner.serviceAvailable ||
+        widget.owner.auditStorageUnavailable) {
+      return '当前状态不可用';
+    }
+    if (grant.restoredAt != null) return '历史归档 · 未授权';
+    final present = fields.where(_fieldPresent).length;
+    if (present == 0) return '原字段已移除';
+    if (present < fields.length) return '部分字段已移除';
+    final readable = fields
+        .where(
+          (field) => widget.owner.canReadGrantedField(
+            grant,
+            FieldRef(field.itemId, field.fieldId),
+          ),
+        )
+        .length;
+    if (readable == 0) return '授权已结束';
+    if (readable < fields.length) return '部分字段不可读取';
+    return fields.any(
+          (field) => fileRefs.contains(FieldRef(field.itemId, field.fieldId)),
+        )
+        ? '可读取 · 含文件'
+        : '可读取';
+  }
+
   Widget _scope(_HistoryEntry e) {
     final c = UiPalette.of(context), groups = <String, List<RecordedField>>{};
     final fileRefs = _fileRefs(e);
@@ -865,7 +915,7 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
                         fields
                             .map(
                               (f) =>
-                                  '${f.fieldName}${fileRefs.contains(FieldRef(f.itemId, f.fieldId)) ? '（文件）' : ''}',
+                                  '${f.fieldName}${fileRefs.contains(FieldRef(f.itemId, f.fieldId)) ? '（文件）' : ''}${_fieldPresent(f) ? '' : '（原字段已移除）'}',
                             )
                             .join('、'),
                         13,
@@ -884,17 +934,7 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
                     borderRadius: BorderRadius.circular(3),
                   ),
                   child: _text(
-                    e.fileDelivery != null
-                        ? '仅有交付事实'
-                        : e.grant == null
-                        ? '未授予读取'
-                        : fields.any(
-                            (f) => fileRefs.contains(
-                              FieldRef(f.itemId, f.fieldId),
-                            ),
-                          )
-                        ? '可读取 · 含文件'
-                        : '可读取',
+                    _scopeStatus(e, fields, fileRefs),
                     11,
                     color: c.muted,
                   ),

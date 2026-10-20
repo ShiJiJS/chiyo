@@ -1,0 +1,10 @@
+{
+  "Debug": {
+    "diagnosticLiteralPresent": true,
+    "sha256": "8061acdf107f1dfa11b19bc6f4f2997f55410d6b27b2daeae07c60796721e6cd"
+  },
+  "Release": {
+    "diagnosticLiteralPresent": false,
+    "sha256": "314a362ca0da4317d30288689be5d4ab399e49eb7ca223082036a631c13cf57e"
+  }
+}

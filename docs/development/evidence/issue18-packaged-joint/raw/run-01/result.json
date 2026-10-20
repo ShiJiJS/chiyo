@@ -1,0 +1,545 @@
+{
+  "productSource": "887f1c2e29da8799cfec48032ac4967d1576fb77",
+  "checks": [
+    {
+      "check": "format",
+      "passed": true
+    },
+    {
+      "check": "pub",
+      "passed": true
+    },
+    {
+      "check": "analyze",
+      "passed": true
+    },
+    {
+      "check": "fixture-prepared",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "session",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "command-pending",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "owner-approved",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "command-accepted-0",
+      "passed": true
+    },
+    {
+      "check": "agent-result-clean",
+      "passed": true
+    },
+    {
+      "check": "actual-gh-401-exit-0",
+      "passed": false
+    },
+    {
+      "check": "control-quit",
+      "code": 0,
+      "result": {
+        "controlVersion": 1,
+        "status": "exited",
+        "processId": 53148
+      }
+    }
+  ],
+  "complete": false,
+  "unexpectedLocks": [],
+  "temporaryRemoved": true
+}

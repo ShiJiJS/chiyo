@@ -1,0 +1,415 @@
+{
+  "productSource": "887f1c2e29da8799cfec48032ac4967d1576fb77",
+  "complete": false,
+  "checks": [
+    {
+      "check": "fixture-format",
+      "passed": true
+    },
+    {
+      "check": "pub",
+      "passed": true
+    },
+    {
+      "check": "analyze",
+      "passed": true
+    },
+    {
+      "check": "prepare-1",
+      "passed": true
+    },
+    {
+      "check": "fixture-format-exact",
+      "passed": true,
+      "format": 1
+    },
+    {
+      "check": "new-empty-session",
+      "passed": true
+    },
+    {
+      "check": "empty-before-restore",
+      "passed": true
+    },
+    {
+      "check": "actual-UI-observed",
+      "passed": true,
+      "format": 1
+    },
+    {
+      "check": "service-still-ready",
+      "passed": true
+    },
+    {
+      "check": "pre-restore-session-invalidated",
+      "passed": true,
+      "result": {
+        "status": "unauthorized"
+      },
+      "format": 1
+    },
+    {
+      "check": "own-child-normal-exit",
+      "passed": true,
+      "processId": 10732
+    },
+    {
+      "check": "inspect-1",
+      "passed": true
+    },
+    {
+      "check": "restored-originals-and-facts",
+      "passed": true,
+      "format": 1
+    },
+    {
+      "check": "dates-have-correct-legacy-meaning",
+      "passed": true,
+      "format": 1
+    },
+    {
+      "check": "source-backup-and-key-unchanged",
+      "passed": true,
+      "format": 1
+    },
+    {
+      "check": "prepare-2",
+      "passed": true
+    },
+    {
+      "check": "fixture-format-exact",
+      "passed": true,
+      "format": 2
+    },
+    {
+      "check": "new-empty-session",
+      "passed": true
+    },
+    {
+      "check": "empty-before-restore",
+      "passed": true
+    },
+    {
+      "check": "actual-UI-observed",
+      "passed": true,
+      "format": 2
+    },
+    {
+      "check": "service-still-ready",
+      "passed": true
+    },
+    {
+      "check": "pre-restore-session-invalidated",
+      "passed": true,
+      "result": {
+        "status": "unauthorized"
+      },
+      "format": 2
+    },
+    {
+      "check": "own-child-normal-exit",
+      "passed": true,
+      "processId": 32784
+    },
+    {
+      "check": "inspect-2",
+      "passed": true
+    },
+    {
+      "check": "restored-originals-and-facts",
+      "passed": true,
+      "format": 2
+    },
+    {
+      "check": "dates-have-correct-legacy-meaning",
+      "passed": true,
+      "format": 2
+    },
+    {
+      "check": "source-backup-and-key-unchanged",
+      "passed": true,
+      "format": 2
+    },
+    {
+      "check": "prepare-3",
+      "passed": true
+    },
+    {
+      "check": "fixture-format-exact",
+      "passed": true,
+      "format": 3
+    },
+    {
+      "check": "new-empty-session",
+      "passed": true
+    },
+    {
+      "check": "empty-before-restore",
+      "passed": true
+    },
+    {
+      "check": "actual-UI-observed",
+      "passed": true,
+      "format": 3
+    },
+    {
+      "check": "service-still-ready",
+      "passed": true
+    },
+    {
+      "check": "pre-restore-session-invalidated",
+      "passed": true,
+      "result": {
+        "status": "unauthorized"
+      },
+      "format": 3
+    },
+    {
+      "check": "own-child-normal-exit",
+      "passed": true,
+      "processId": 37728
+    },
+    {
+      "check": "inspect-3",
+      "passed": true
+    },
+    {
+      "check": "restored-originals-and-facts",
+      "passed": true,
+      "format": 3
+    },
+    {
+      "check": "dates-have-correct-legacy-meaning",
+      "passed": true,
+      "format": 3
+    },
+    {
+      "check": "source-backup-and-key-unchanged",
+      "passed": true,
+      "format": 3
+    },
+    {
+      "check": "prepare-4",
+      "passed": true
+    },
+    {
+      "check": "fixture-format-exact",
+      "passed": true,
+      "format": 4
+    },
+    {
+      "check": "new-empty-session",
+      "passed": true
+    },
+    {
+      "check": "empty-before-restore",
+      "passed": true
+    },
+    {
+      "check": "actual-UI-observed",
+      "passed": true,
+      "format": 4
+    },
+    {
+      "check": "service-still-ready",
+      "passed": true
+    },
+    {
+      "check": "pre-restore-session-invalidated",
+      "passed": true,
+      "result": {
+        "status": "unauthorized"
+      },
+      "format": 4
+    },
+    {
+      "check": "own-child-normal-exit",
+      "passed": true,
+      "processId": 2340
+    },
+    {
+      "check": "inspect-4",
+      "passed": true
+    },
+    {
+      "check": "restored-originals-and-facts",
+      "passed": true,
+      "format": 4
+    },
+    {
+      "check": "dates-have-correct-legacy-meaning",
+      "passed": true,
+      "format": 4
+    },
+    {
+      "check": "source-backup-and-key-unchanged",
+      "passed": true,
+      "format": 4
+    },
+    {
+      "check": "prepare-8",
+      "passed": true
+    },
+    {
+      "check": "fixture-format-exact",
+      "passed": true,
+      "format": 8
+    },
+    {
+      "check": "new-empty-session",
+      "passed": true
+    },
+    {
+      "check": "empty-before-restore",
+      "passed": true
+    },
+    {
+      "check": "actual-UI-observed",
+      "passed": true,
+      "format": 8
+    },
+    {
+      "check": "service-still-ready",
+      "passed": true
+    },
+    {
+      "check": "pre-restore-session-invalidated",
+      "passed": true,
+      "result": {
+        "status": "unauthorized"
+      },
+      "format": 8
+    },
+    {
+      "check": "own-child-normal-exit",
+      "passed": true,
+      "processId": 8476
+    },
+    {
+      "check": "inspect-8",
+      "passed": false
+    }
+  ],
+  "formats": [
+    {
+      "format": 1,
+      "fixture": {
+        "status": "prepared",
+        "format": 1,
+        "information": 1,
+        "revisions": 0,
+        "attachments": 0,
+        "attachmentBytes": 0,
+        "templates": 0,
+        "credentials": 0
+      },
+      "inspection": {
+        "status": "inspected",
+        "sameIdentity": true,
+        "version": 2,
+        "originalsMatch": true,
+        "datesUnknown": true,
+        "revisions": 0,
+        "templates": 0,
+        "credentials": 0,
+        "requests": 0,
+        "activeGrants": 0,
+        "fileDeliveries": 0,
+        "requestLifetimeMinutes": 23
+      },
+      "complete": true
+    },
+    {
+      "format": 2,
+      "fixture": {
+        "status": "prepared",
+        "format": 2,
+        "information": 1,
+        "revisions": 1,
+        "attachments": 0,
+        "attachmentBytes": 0,
+        "templates": 0,
+        "credentials": 0
+      },
+      "inspection": {
+        "status": "inspected",
+        "sameIdentity": true,
+        "version": 2,
+        "originalsMatch": true,
+        "datesUnknown": true,
+        "revisions": 1,
+        "templates": 0,
+        "credentials": 0,
+        "requests": 0,
+        "activeGrants": 0,
+        "fileDeliveries": 0,
+        "requestLifetimeMinutes": 23
+      },
+      "complete": true
+    },
+    {
+      "format": 3,
+      "fixture": {
+        "status": "prepared",
+        "format": 3,
+        "information": 1,
+        "revisions": 1,
+        "attachments": 0,
+        "attachmentBytes": 0,
+        "templates": 0,
+        "credentials": 0
+      },
+      "inspection": {
+        "status": "inspected",
+        "sameIdentity": true,
+        "version": 2,
+        "originalsMatch": true,
+        "datesUnknown": false,
+        "revisions": 1,
+        "templates": 0,
+        "credentials": 0,
+        "requests": 0,
+        "activeGrants": 0,
+        "fileDeliveries": 0,
+        "requestLifetimeMinutes": 23
+      },
+      "complete": true
+    },
+    {
+      "format": 4,
+      "fixture": {
+        "status": "prepared",
+        "format": 4,
+        "information": 1,
+        "revisions": 1,
+        "attachments": 0,
+        "attachmentBytes": 0,
+        "templates": 0,
+        "credentials": 0
+      },
+      "inspection": {
+        "status": "inspected",
+        "sameIdentity": true,
+        "version": 2,
+        "originalsMatch": true,
+        "datesUnknown": false,
+        "revisions": 1,
+        "templates": 0,
+        "credentials": 0,
+        "requests": 0,
+        "activeGrants": 0,
+        "fileDeliveries": 0,
+        "requestLifetimeMinutes": 23
+      },
+      "complete": true
+    }
+  ],
+  "unexpectedLocks": [],
+  "preservedTemporary": [
+    "C:\\Users\\Todoki\\AppData\\Local\\Temp\\aim-packaged-compat-1zkomf0p",
+    "C:\\Users\\Todoki\\AppData\\Local\\Temp\\aim-packaged-compat-tcy5u3fa",
+    "C:\\Users\\Todoki\\AppData\\Local\\Temp\\aim-packaged-compat-b_lxsf32",
+    "C:\\Users\\Todoki\\AppData\\Local\\Temp\\aim-packaged-compat-q0yrdzu6",
+    "C:\\Users\\Todoki\\AppData\\Local\\Temp\\aim-packaged-compat-y2lio_ci"
+  ]
+}

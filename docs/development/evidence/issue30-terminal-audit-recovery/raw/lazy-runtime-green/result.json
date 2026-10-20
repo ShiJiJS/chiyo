@@ -1,0 +1,13 @@
+{
+  "phases": [
+    {
+      "phase": "pub",
+      "exitCode": 0
+    },
+    {
+      "phase": "test",
+      "exitCode": 0
+    }
+  ],
+  "unexpectedLocks": []
+}

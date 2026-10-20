@@ -29,6 +29,9 @@ Future<void> main(List<String> args) async {
     final credentialUseReference = await File(
       '${source.path}/template/references/credential-use.md',
     ).readAsString();
+    final informationFilesReference = await File(
+      '${source.path}/template/references/information-files.md',
+    ).readAsString();
     const binaries = [
       'info-codex.exe',
       'info-codex-hook.exe',
@@ -51,6 +54,7 @@ Future<void> main(List<String> args) async {
         skill,
         finalDirectory: output,
         credentialUseReference: credentialUseReference,
+        informationFilesReference: informationFilesReference,
       );
       if (await FileSystemEntity.type(output.path, followLinks: false) !=
           FileSystemEntityType.notFound) {
