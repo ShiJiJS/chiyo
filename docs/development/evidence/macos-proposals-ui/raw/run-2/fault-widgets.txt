@@ -1,0 +1,4 @@
+00:00 +0: loading /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/proposal_workspace_test.dart
+00:00 +0: batch storage failure keeps the reviewed item and retries atomically
+00:00 +1: a version race during confirmation keeps the conflict receipt visible
+00:00 +2: All tests passed!
