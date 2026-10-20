@@ -1,0 +1,15 @@
+{
+  "label": "locked-recover-private-cleanup",
+  "exit": 0,
+  "seconds": 0.229,
+  "mode": "locked-cleanup",
+  "lockedBeforeDelete": false,
+  "keychainWasPresent": true,
+  "searchListAndDefaultRestored": true,
+  "ownedKeychainDeleted": true,
+  "flutterErrors": 0,
+  "nativeTerminationRequested": true,
+  "libraryCloses": 0,
+  "keyReads": 0,
+  "keyCreates": 0
+}

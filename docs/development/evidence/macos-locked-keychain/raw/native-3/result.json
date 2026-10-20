@@ -1,0 +1,49 @@
+{
+  "complete": true,
+  "sourceCommit": "0deeaad7c7be6685104263d7960e6fe72c3a3115",
+  "sourceSha256": "d157f50972cac3da88df60846cc7a634afeaf02e787d1f486effd1fb56634ef4",
+  "probeSha256": "c0f1e2abd5d919c3caf05adf5d7a0bd800c92125c6bf9f6e7d510d787311f370",
+  "runnerSha256": "84743062b5a52e86e89136e85a42a34d8c9935c84220a154631f7b68fbef6619",
+  "targetedStoreSha256": "5d720c9abbc59f2836675267feb47359ad40a3d2dd04c76c8d1e0c4b649c7dc8",
+  "steps": [
+    {
+      "label": "compile",
+      "exit": 0,
+      "seconds": 0.549
+    },
+    {
+      "label": "sign",
+      "exit": 0,
+      "seconds": 0.024
+    },
+    {
+      "label": "verify-signature",
+      "exit": 0,
+      "seconds": 0.012
+    },
+    {
+      "label": "probe",
+      "exit": 0,
+      "seconds": 0.379
+    }
+  ],
+  "scope": "native signed sandbox, explicit private file-keychain queries; no Flutter/database or production-profile operations",
+  "probe": {
+    "actualLockedStateObserved": true,
+    "complete": true,
+    "createdAndReadOriginalKey": true,
+    "defaultUnchangedAfterCreate": true,
+    "interactionRestored": true,
+    "lockedDuplicateStatus": -25293,
+    "lockedReadStatuses": [
+      -25293,
+      -25293
+    ],
+    "ownedKeychainDeleteStatus": 0,
+    "ownedRootRemoved": true,
+    "remainingOwnedNamesAfterKeychainDelete": [],
+    "searchListAndDefaultRestored": true,
+    "twoLockedReadSeconds": 0.0037959814071655273,
+    "unlockedOriginalKeyPreserved": true
+  }
+}

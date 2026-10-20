@@ -1,0 +1,20 @@
+{
+  "actualLockedStateObserved" : true,
+  "complete" : true,
+  "createdAndReadOriginalKey" : true,
+  "defaultUnchangedAfterCreate" : true,
+  "interactionRestored" : true,
+  "lockedDuplicateStatus" : -25293,
+  "lockedReadStatuses" : [
+    -25293,
+    -25293
+  ],
+  "ownedKeychainDeleteStatus" : 0,
+  "ownedRootRemoved" : true,
+  "remainingOwnedNamesAfterKeychainDelete" : [
+
+  ],
+  "searchListAndDefaultRestored" : true,
+  "twoLockedReadSeconds" : 0.0070229768753051758,
+  "unlockedOriginalKeyPreserved" : true
+}
