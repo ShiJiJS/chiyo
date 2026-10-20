@@ -96,6 +96,9 @@ Future<void> main() async {
     'access-denied',
     'access-quit',
     'access-close',
+    'locked-recover',
+    'locked-exit',
+    'locked-cleanup',
   };
   final owner = Platform.environment['INFO_MAC_KEYCHAIN_OWNER'];
   if (!Platform.isMacOS ||
@@ -132,7 +135,9 @@ Future<void> main() async {
   var failureCode = '';
   platform.beforeTerminate = () async {
     // Exercise a pending frame after data closes but before Cocoa terminates.
-    if (mode != 'cleanup') await WidgetsBinding.instance.endOfFrame;
+    if (mode != 'cleanup' && mode != 'locked-cleanup') {
+      await WidgetsBinding.instance.endOfFrame;
+    }
     _check(
       flutterErrors == 0,
       'Flutter reported an exception during this scenario',
@@ -146,7 +151,27 @@ Future<void> main() async {
     });
     await report.writeAsString(jsonEncode(facts), flush: true);
   };
+  Future<Map<String, dynamic>> privateFixture(String method) async {
+    final result = await _channel.invokeMapMethod<String, dynamic>(method, {
+      'root': canonical,
+      'owner': owner,
+    });
+    _check(result != null, 'Private Keychain result missing');
+    return result!;
+  }
+
   try {
+    if (mode == 'locked-cleanup') {
+      final result = await privateFixture('qaPrivateCleanup');
+      _check(
+        result['ownedKeychainDeleted'] == true &&
+            result['searchListAndDefaultRestored'] == true,
+        'Owned Keychain cleanup incomplete',
+      );
+      facts.addAll(result);
+      await platform.terminate();
+      return;
+    }
     if (mode == 'cleanup') {
       await _channel.invokeMethod<void>('qaDelete');
       _check(await keys.read() == null, 'QA key still present after cleanup');
@@ -158,7 +183,13 @@ Future<void> main() async {
     final libraryPath = '$canonical/${targetBackup ? 'restored' : 'library'}';
     final db = File('$libraryPath/library.db');
     List<int>? before;
-    if (!{'create', 'backup-export', 'backup-restore'}.contains(mode)) {
+    if (!{
+      'create',
+      'backup-export',
+      'backup-restore',
+      'locked-recover',
+      'locked-exit',
+    }.contains(mode)) {
       _check(await db.exists(), 'Existing database required');
       before = await db.readAsBytes();
     }
@@ -187,6 +218,168 @@ Future<void> main() async {
       facts['sqlCipherVersion'] = version;
     } finally {
       raw.close();
+    }
+    if (mode == 'locked-recover' || mode == 'locked-exit') {
+      final prepared = await privateFixture('qaPrivatePrepare');
+      _check(
+        prepared['created'] == true &&
+            prepared['unlocked'] == true &&
+            prepared['defaultUnchanged'] == true,
+        'Private Keychain preparation failed',
+      );
+      Future<DesktopLibrary> openPrivateLibrary() async {
+        final repo = await EncryptedInformationRepository.open(
+          libraryPath,
+          keys,
+        );
+        opened = repo;
+        return DesktopLibrary(
+          service: InformationService(repository: repo),
+          close: () async {
+            await repo.close();
+            closes++;
+          },
+        );
+      }
+
+      bootstrap = DesktopBootstrap(
+        platform: platform,
+        port: 0,
+        openLibrary: openPrivateLibrary,
+      );
+      final initial = bootstrap.start();
+      runApp(DesktopLauncher(bootstrap: bootstrap));
+      await initial;
+      _check(
+        bootstrap.state == DesktopStartupState.ready,
+        'Initial private library unavailable',
+      );
+      final originalKey = List<int>.of((await keys.read())!);
+      final service = bootstrap.library!.service;
+      final item = await service.owner.createInformation(
+        'Locked Keychain fixture',
+        '',
+        [const FieldInput('Text', '', 'synthetic locked keychain value')],
+      );
+      final field = FieldRef(item.id, item.fields.single.id);
+      final session = service.agent.openSession('locked keychain fixture');
+      final request = service.agent.request(session, 'synthetic read', [field]);
+      service.owner.approve(request.id, [field]);
+      final token = service.agent.claim(session, request.id).token;
+      _check(
+        await service.agent.read(token, field) ==
+            'synthetic locked keychain value',
+        'Initial approved read failed',
+      );
+      // Deliberate in-process library restart; not a physical app restart.
+      runApp(const SizedBox());
+      await WidgetsBinding.instance.endOfFrame;
+      await bootstrap.runtime!.stop();
+      bootstrap.runtime!.dispose();
+      bootstrap.dispose();
+      final originalDb = await db.readAsBytes();
+      final locked = await privateFixture('qaPrivateLock');
+      _check(locked['locked'] == true, 'Private keychain did not really lock');
+      facts.addAll({
+        'actualPrivateKeychainLocked': true,
+        'defaultKeychainUnchanged': true,
+      });
+      bootstrap = DesktopBootstrap(
+        platform: platform,
+        port: 0,
+        openLibrary: openPrivateLibrary,
+      );
+      final restarting = bootstrap.start();
+      runApp(DesktopLauncher(bootstrap: bootstrap));
+      await restarting;
+      for (var attempt = 0; attempt < 2; attempt++) {
+        if (attempt > 0) await bootstrap.start();
+        _check(
+          bootstrap.state == DesktopStartupState.failed &&
+              bootstrap.systemKeyUnavailable &&
+              bootstrap.library == null &&
+              bootstrap.runtime == null &&
+              bootstrap.boundPort == null &&
+              keys.creates == 1 &&
+              listEquals(await db.readAsBytes(), originalDb),
+          'Locked keychain open/retry changed data or published service',
+        );
+        _check(
+          (await privateFixture('qaPrivateStatus'))['locked'] == true,
+          'Read unlocked the private keychain',
+        );
+        await WidgetsBinding.instance.endOfFrame;
+        final texts = <String>[];
+        void visit(Element element) {
+          if (element.widget case Text(:final data?)) texts.add(data);
+          element.visitChildren(visit);
+        }
+
+        visit(WidgetsBinding.instance.rootElement!);
+        _check(
+          texts.any((t) => t.contains('无法访问系统钥匙串')) && texts.contains('重试启动'),
+          'Actual locked failure screen missing',
+        );
+      }
+      facts.addAll({
+        'lockedStartupAttempts': 2,
+        'lockedFailureTextRendered': true,
+        'databaseBytesPreservedWhileLocked': true,
+        'noReplacementKeyCreated': true,
+        'noEndpointPublishedWhileLocked': true,
+      });
+      if (mode == 'locked-exit') {
+        facts['keychainStillLockedBeforeNormalQuit'] = true;
+        await platform.event(DesktopEvent.quit);
+        return;
+      }
+      _check(
+        (await privateFixture('qaPrivateUnlock'))['unlocked'] == true,
+        'Owned password did not unlock private keychain',
+      );
+      _check(
+        listEquals(await keys.read(), originalKey),
+        'Original private key changed',
+      );
+      originalKey.fillRange(0, originalKey.length, 0);
+      await bootstrap.start();
+      _check(
+        bootstrap.state == DesktopStartupState.ready && keys.creates == 1,
+        'Unlock retry did not recover original database',
+      );
+      final restored = bootstrap.library!.service;
+      _check(
+        restored.owner.information.single.id == item.id &&
+            restored.owner.information.single.fields.single.id ==
+                field.fieldId &&
+            restored.owner.information.single.fields.single.value ==
+                'synthetic locked keychain value',
+        'Stored information changed after unlock',
+      );
+      var denied = false;
+      try {
+        await restored.agent.read(token, field);
+      } on AccessFailure {
+        denied = true;
+      }
+      _check(
+        denied &&
+            opened!.grantHistory.length == 1 &&
+            !opened!.grantHistory.single.active &&
+            opened!.accessRecords.any(
+              (r) => r.outcome == AccessOutcome.allowed,
+            ),
+        'Old authority or history invalid after unlock',
+      );
+      facts.addAll({
+        'unlockedOriginalKeyPreserved': true,
+        'retryRecoveredStoredIdentityAndValue': true,
+        'oldAuthorityRefusedAfterUnlock': true,
+        'endedGrantAndReadHistoryPreserved': true,
+        'port': bootstrap.boundPort,
+      });
+      await bootstrap.runtime!.quit();
+      return;
     }
     bootstrap = DesktopBootstrap(
       platform: platform,

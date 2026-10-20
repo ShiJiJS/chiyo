@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """Release Flutter + real Keychain + SQLCipher in a dedicated source copy.
 
-Only the copy's app identity, Keychain service, and QA-only fixture methods are
-changed. Production store/adapter/startup/storage/lifetime sources stay exact.
+The copy changes app identity, Keychain service, and QA-only fixture methods.
+--locked-keychain additionally targets read/add queries at an owned file keychain;
+all other store/adapter/startup/storage/lifetime code stays exact.
 Never read/delete production Keychain items; never export keys/private fixture
-associations/databases. No physical keyboard/menu/locked-Keychain claim.
+associations/databases. No physical keyboard/menu or login-Keychain claim.
 """
 import argparse
 import hashlib
@@ -31,10 +32,11 @@ def digest(path):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('output', type=Path)
+    parser.add_argument('--locked-keychain', action='store_true', help='Real private file-keychain lock/unlock and SQLCipher recovery; never locks login keychain')
     parser.add_argument('--owner-access', action='store_true', help='Owner recovery UI with explicitly simulated system decisions; no authorization prompt')
     parser.add_argument('--backups', action='store_true', help='Real Keychain source export, source-key loss, fresh target restore/reopen')
     args = parser.parse_args()
-    if args.owner_access and args.backups:
+    if sum([args.owner_access, args.backups, args.locked_keychain]) > 1:
         parser.error('Choose one scenario')
     if sys.platform != 'darwin':
         parser.error('Requires macOS')
@@ -52,8 +54,9 @@ def main():
         ['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip(),
         'service': service, 'bundleIdentifier': identity, 'commands': [], 'cases': [],
         'scope': 'isolated Release Flutter copy; real Keychain and SQLCipher; injected failure conditions/events'}
-    result['scenario'] = 'owner-access-fixtures' if args.owner_access else 'backups' if args.backups else 'keychain-failures'
+    result['scenario'] = 'locked-private-keychain' if args.locked_keychain else 'owner-access-fixtures' if args.owner_access else 'backups' if args.backups else 'keychain-failures'
     roots, processes = set(), []
+    private_cleaned = set()
     binary = None
 
     def save():
@@ -137,7 +140,8 @@ def main():
         names = subprocess.check_output(['git', 'ls-files', '-z', 'apps/desktop', 'packages',
                                          'scripts', 'integrations', 'third_party'], cwd=ROOT).decode().split('\0')
         names = sorted(set(filter(None, names)) | {ENTRY, INJECTION, 'scripts/qa/macos-flutter-keychain.py',
-            'apps/desktop/integration_test/support/macos_keychain_backup.dart'})
+            'apps/desktop/integration_test/support/macos_keychain_backup.dart',
+            'scripts/qa/macos-locked-keychain-fixture.swift'})
         hashes = {}
         for name in names:
             origin = ROOT / name
@@ -180,6 +184,14 @@ def main():
           }
         } else if call.method == "read" || call.method == "readWithInteraction" {''', 1)
         text += '\n' + (ROOT / INJECTION).read_text().replace('@SERVICE@', service)
+        if args.locked_keychain:
+            text = text.replace('import Security\n', 'import Security\nimport CryptoKit\n', 1)
+            anchor = 'if ["qaDelete", "qaMalformed", "qaWrong"].contains(call.method) {'
+            assert text.count(anchor) == 1
+            text = text.replace(anchor, '''if call.method.hasPrefix("qaPrivate") {
+          reply(try privateKeychainFixture(call.method, call.arguments))
+        } else '''+anchor, 1)
+            text += '\n' + (ROOT / 'scripts/qa/macos-locked-keychain-fixture.swift').read_text()
         window.write_text(text)
         config = source / 'apps/desktop/macos/Runner/Configs/AppInfo.xcconfig'
         text = config.read_text()
@@ -187,9 +199,20 @@ def main():
         if text.count(original) != 1:
             raise RuntimeError('Bundle identity anchor changed')
         config.write_text(text.replace(original, 'PRODUCT_BUNDLE_IDENTIFIER = ' + identity))
-        result['copyModifications'] = {str(p.relative_to(source)): digest(p) for p in [window, config]}
+        modified = [window, config]
+        if args.locked_keychain:
+            store = source / 'apps/desktop/macos/Runner/DatabaseKeyStore.swift'
+            text = store.read_text()
+            read = '      request[kSecReturnData as String] = true'
+            add = '      request[kSecValueData as String] = data'
+            assert text.count(read) == 1 and text.count(add) == 1
+            text = text.replace(read, '      request[kSecMatchSearchList as String] = [try ownedPrivateKeychain()]\n'+read)
+            text = text.replace(add, '      request[kSecUseKeychain as String] = try ownedPrivateKeychain()\n'+add)
+            store.write_text(text)
+            modified.append(store)
+        result['copyModifications'] = {str(p.relative_to(source)): digest(p) for p in modified}
         # Assert all copied application logic remains byte-identical except the
-        # two explicit QA injection files, before any generation/build step.
+        # explicit QA injection files, before any generation/build step.
         for name, expected in hashes.items():
             if name not in result['copyModifications'] and digest(source / name) != expected:
                 raise RuntimeError('Unexpected copied source modification: ' + name)
@@ -207,7 +230,14 @@ def main():
         run('signature', ['codesign', '--verify', '--deep', '--strict', str(app)], timeout=30)
         run('signature-details', ['codesign', '-d', '--verbose=4', '--entitlements', ':-', str(app)], timeout=30)
         result['binarySha256'] = digest(binary)
-        if args.owner_access:
+        if args.locked_keychain:
+            for mode in ['locked-recover', 'locked-exit']:
+                root = launch(mode, mode)
+                launch('locked-cleanup', mode + '-private-cleanup', root)
+                if mode == 'locked-exit' and result['cases'][-1].get('lockedBeforeDelete') is not True:
+                    raise RuntimeError('Private Keychain did not remain locked across normal process exit')
+                private_cleaned.add(root)
+        elif args.owner_access:
             root = launch('create', 'owner-access-create')
             for mode in ['access-denied', 'access-quit', 'access-close', 'access-success']:
                 launch(mode, mode, root)
@@ -269,9 +299,16 @@ def main():
             # Cleanup belongs to the exact same signed program that created the
             # item. Do not delete its executable or root if cleanup is refused.
             try:
-                cleanup_root = next(iter(roots), None)
-                launch('cleanup', 'final-owned-key-cleanup', cleanup_root)
-                result['ownedKeyCleanupVerified'] = True
+                if args.locked_keychain:
+                    for index, root in enumerate(sorted(roots)):
+                        if root not in private_cleaned:
+                            launch('locked-cleanup', 'final-private-cleanup-' + str(index), root)
+                            private_cleaned.add(root)
+                    result['ownedKeyCleanupVerified'] = bool(roots) and private_cleaned == roots
+                else:
+                    cleanup_root = next(iter(roots), None)
+                    launch('cleanup', 'final-owned-key-cleanup', cleanup_root)
+                    result['ownedKeyCleanupVerified'] = True
             except Exception as error:
                 result['cleanupFailure'] = str(error)
                 result['complete'] = False
