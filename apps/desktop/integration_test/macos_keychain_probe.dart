@@ -14,6 +14,7 @@ import 'package:info_desktop/desktop_bootstrap.dart';
 import 'package:info_desktop/desktop_runtime.dart';
 import 'package:info_desktop/main.dart';
 import 'package:sqlite3/sqlite3.dart' as sql;
+import 'support/macos_keychain_backup.dart';
 
 const _channel = MethodChannel('agent_info_manage/database_key');
 
@@ -88,6 +89,9 @@ Future<void> main() async {
     'corrupt',
     'cleanup',
     'upgrade',
+    'backup-export',
+    'backup-restore',
+    'backup-reopen',
   };
   final owner = Platform.environment['INFO_MAC_KEYCHAIN_OWNER'];
   if (!Platform.isMacOS ||
@@ -146,9 +150,11 @@ Future<void> main() async {
       await platform.terminate();
       return;
     }
-    final db = File('$canonical/library/library.db');
+    final targetBackup = mode == 'backup-restore' || mode == 'backup-reopen';
+    final libraryPath = '$canonical/${targetBackup ? 'restored' : 'library'}';
+    final db = File('$libraryPath/library.db');
     List<int>? before;
-    if (mode != 'create') {
+    if (!{'create', 'backup-export', 'backup-restore'}.contains(mode)) {
       _check(await db.exists(), 'Existing database required');
       before = await db.readAsBytes();
     }
@@ -183,12 +189,17 @@ Future<void> main() async {
       openLibrary: () async {
         try {
           final repo = await EncryptedInformationRepository.open(
-            '$canonical/library',
+            libraryPath,
             keys,
           );
           opened = repo;
           return DesktopLibrary(
-            service: InformationService(repository: repo),
+            service: InformationService(
+              repository: repo,
+              informationDeliveryFiles: mode!.startsWith('backup-')
+                  ? NativeInformationDeliveryFiles()
+                  : null,
+            ),
             close: () async {
               await repo.close();
               closes++;
@@ -203,6 +214,22 @@ Future<void> main() async {
     final starting = bootstrap.start();
     runApp(DesktopLauncher(bootstrap: bootstrap));
     await starting;
+    if (mode!.startsWith('backup-')) {
+      _check(
+        bootstrap.state == DesktopStartupState.ready,
+        'Backup library failed to start',
+      );
+      _check(
+        keys.creates == (mode == 'backup-reopen' ? 0 : 1),
+        'Unexpected backup key creation',
+      );
+      facts['port'] = bootstrap.boundPort;
+      facts.addAll(
+        await runMacKeychainBackup(bootstrap, opened!, keys, canonical, mode),
+      );
+      await bootstrap.runtime!.quit();
+      return;
+    }
     final negative =
         {'missing', 'malformed', 'wrong', 'corrupt'}.contains(mode) ||
         (mode == 'upgrade' && bootstrap.state == DesktopStartupState.failed);
@@ -342,10 +369,11 @@ Future<void> main() async {
     if (mode == 'upgrade') facts['upgradeAccess'] = 'preserved';
     facts['startupAfterFinalAttempt'] = 'ready';
     await bootstrap.runtime!.quit();
-  } catch (error) {
+  } catch (error, stack) {
     facts.addAll({
       'failed': true,
       'errorType': error.runtimeType.toString(),
+      'stackTrace': stack.toString(),
       if (error is StateError) 'checkFailure': error.message.toString(),
       'storageFailure': failureCode,
     });
