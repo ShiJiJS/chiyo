@@ -18,7 +18,7 @@
 - [#48 字符串凭据管理](evidence/macos-credential-management-ui/verification.json)：原生创建/元数据/关联/轮换/停用/版本与回收恢复/过期/隐藏及库重开，最终十五阶段、55 次 CLI 状态核对通过。明确使用测试文本通道；真实输入法清空到期时间、文件凭据面板与实际使用授权仍需联合验收。
 - [#48 目录、标签与搜索](evidence/macos-library-filters-ui/verification.json)：原生目录创建/循环拒绝/移动、标签改名、125 条资料分页/组合筛选/库重开及 38 次 CLI 核对通过；修复多标签侧栏和大字号计数溢出，52 标签、四主题及 100%/200% 矩阵通过。Windows 实机与真实输入仍待。
 - [#49 Codex 接入准备](evidence/macos-codex-preparation/verification.json)：已修复验收项目生成器只接受 Windows `.exe` 的问题，实际同源 ARM64 包生成独立项目并通过摘要/签名/拒绝覆盖核对；13 项真实聊天验收仍未运行，尚未安装或信任 hook。
-- [#50 ARM64 交付](macos-delivery.md)：`cccc37e` 同源 App/CLI/worker 整包已生成，133 项解包载荷、签名、合成存储诊断与实际 AOT 的 6 项检查通过；修复增量构建漏签名并去除 Release 调试访问权限。实际安装、Keychain 升级及最终 GUI/Codex 联合验收仍待。
+- [#50 ARM64 交付](macos-delivery.md)：`c1a58b7` 同源新包重跑四包 690 通过/66 跳过，21 个打包阶段及六项随包检查通过；新 CLI 与同源码 Debug 原生宿主完成资料筛选/容量（38 次）和附件保留（44 次）状态核对。第一项整包清单与身份/架构已具备完整证据；安装、Keychain 升级与最终实际 GUI/Codex 仍待。
 
 #43 已完成其范围，其余上述票据仍 OPEN；具体未完成条件以 GitHub 票据及各记录为准。现有证据不等于 Mac 总票 #19 已可交付。
 
