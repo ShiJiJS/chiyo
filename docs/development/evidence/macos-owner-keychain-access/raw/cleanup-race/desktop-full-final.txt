@@ -1,0 +1,214 @@
+00:00 +0: loading /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_navigation_test.dart
+00:00 +0: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_runtime_test.dart: startup removes expired attachment originals while preserving the current file
+00:00 +1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_runtime_test.dart: startup removes expired attachment originals while preserving the current file
+00:00 +2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_shutdown_frame_test.dart: quit with app frame mounted=false never reads closed library
+00:00 +3: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_shutdown_frame_test.dart: quit with app frame mounted=false never reads closed library
+00:00 +4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_shutdown_frame_test.dart: quit with app frame mounted=false never reads closed library
+00:00 +5: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_shutdown_frame_test.dart: quit with app frame mounted=false never reads closed library
+00:00 +6: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_shutdown_frame_test.dart: quit with app frame mounted=false never reads closed library
+00:00 +7: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_shutdown_frame_test.dart: quit with app frame mounted=false never reads closed library
+00:00 +8: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_shutdown_frame_test.dart: quit with app frame mounted=false never reads closed library
+00:00 +9: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_shutdown_frame_test.dart: quit with app frame mounted=false never reads closed library
+00:00 +10: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_shutdown_frame_test.dart: quit with app frame mounted=false never reads closed library
+00:00 +11: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_shutdown_frame_test.dart: quit with app frame mounted=false never reads closed library
+00:00 +12: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/import_review_states_test.dart: failed import preserves the edited read-only draft and retries the complete batch once
+00:00 +13: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/import_review_states_test.dart: failed import preserves the edited read-only draft and retries the complete batch once
+00:00 +14: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/import_review_states_test.dart: failed import preserves the edited read-only draft and retries the complete batch once
+00:01 +15: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/import_review_states_test.dart: failed import preserves the edited read-only draft and retries the complete batch once
+00:01 +16: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_navigation_test.dart: navigation switches one selection immediately and pages share an origin
+00:01 +17: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_navigation_test.dart: navigation switches one selection immediately and pages share an origin
+00:02 +18: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_navigation_test.dart: navigation switches one selection immediately and pages share an origin
+00:02 +19: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_navigation_test.dart: navigation switches one selection immediately and pages share an origin
+00:02 +20: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_navigation_test.dart: navigation switches one selection immediately and pages share an origin
+00:02 +21: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_navigation_test.dart: navigation switches one selection immediately and pages share an origin
+00:02 +22: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_navigation_test.dart: navigation switches one selection immediately and pages share an origin
+00:02 +23: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_navigation_test.dart: navigation switches one selection immediately and pages share an origin
+00:03 +24: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_navigation_test.dart: navigation switches one selection immediately and pages share an origin
+00:03 +25: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_navigation_test.dart: navigation switches one selection immediately and pages share an origin
+00:03 +26: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_navigation_test.dart: navigation switches one selection immediately and pages share an origin
+00:03 +27: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/information_file_runtime_test.dart: application settings explain a held ordinary file copy and retry only registered cleanup
+00:03 +27: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/information_file_backup_test.dart: SQLCipher backup flow reports and restores exact current and retained originals without grants, stages or live copies
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure>.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/information_file_backup_test.dart:151:24)
+<asynchronous suspension>
+#6      _AsyncCompleter.complete (dart:async/future_impl.dart:96:3)
+<asynchronous suspension>
+#7      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/information_file_backup_test.dart:143:7)
+<asynchronous suspension>
+#8      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#9      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+#10     StackZoneSpecification._registerCallback.<anonymous closure> (package:stack_trace/src/stack_zone_specification.dart:114:42)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:03 +28: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/information_file_backup_test.dart: SQLCipher backup flow reports and restores exact current and retained originals without grants, stages or live copies
+00:04 +29: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/information_file_backup_test.dart: SQLCipher backup flow reports and restores exact current and retained originals without grants, stages or live copies
+00:04 +30: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/information_file_backup_test.dart: SQLCipher backup flow reports and restores exact current and retained originals without grants, stages or live copies
+00:04 +31: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/information_file_backup_test.dart: SQLCipher backup flow reports and restores exact current and retained originals without grants, stages or live copies
+00:04 +32: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/information_file_backup_test.dart: SQLCipher backup flow reports and restores exact current and retained originals without grants, stages or live copies
+00:04 +33: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/information_file_backup_test.dart: SQLCipher backup flow reports and restores exact current and retained originals without grants, stages or live copies
+00:04 +34: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/information_file_backup_test.dart: SQLCipher backup flow reports and restores exact current and retained originals without grants, stages or live copies
+00:04 +35: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/information_file_backup_test.dart: SQLCipher backup flow reports and restores exact current and retained originals without grants, stages or live copies
+00:04 +36: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/information_file_backup_test.dart: SQLCipher backup flow reports and restores exact current and retained originals without grants, stages or live copies
+00:04 +37: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/information_file_backup_test.dart: SQLCipher backup flow reports and restores exact current and retained originals without grants, stages or live copies
+00:04 +38: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/information_file_backup_test.dart: SQLCipher backup flow reports and restores exact current and retained originals without grants, stages or live copies
+00:04 +39: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/proposal_workspace_test.dart: a stopped query reports failure without claiming an empty successful result
+00:05 +40: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:05 +41: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:05 +42: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:05 +43: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:05 +44: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:05 +45: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:05 +46: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:06 +47: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:06 +48: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:06 +49: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:07 +50: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:07 +51: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:07 +52: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:07 +53: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:07 +54: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:07 +55: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:07 +56: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:07 +57: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:07 +58: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:08 +59: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:08 +60: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/organization_widget_test.dart: owner creates hierarchy and tags then organizes an item
+00:08 +61: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/organization_widget_test.dart: owner creates hierarchy and tags then organizes an item
+00:08 +62: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/organization_widget_test.dart: owner creates hierarchy and tags then organizes an item
+00:08 +63: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/organization_widget_test.dart: owner creates hierarchy and tags then organizes an item
+00:09 +64: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/organization_widget_test.dart: owner creates hierarchy and tags then organizes an item
+00:09 +65: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/organization_widget_test.dart: owner creates hierarchy and tags then organizes an item
+00:09 +66: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_history_widget_test.dart: one mixed history entry preserves independent credential and field grants and links back to its credential
+00:10 +67: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_history_widget_test.dart: one mixed history entry preserves independent credential and field grants and links back to its credential
+00:10 +68: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_history_widget_test.dart: one mixed history entry preserves independent credential and field grants and links back to its credential
+00:10 +69: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_history_widget_test.dart: one mixed history entry preserves independent credential and field grants and links back to its credential
+00:10 +70: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_history_widget_test.dart: one mixed history entry preserves independent credential and field grants and links back to its credential
+00:10 +71: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_history_widget_test.dart: one mixed history entry preserves independent credential and field grants and links back to its credential
+00:10 +72: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_history_widget_test.dart: one mixed history entry preserves independent credential and field grants and links back to its credential
+00:10 +73: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_history_widget_test.dart: one mixed history entry preserves independent credential and field grants and links back to its credential
+00:10 +74: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_history_widget_test.dart: one mixed history entry preserves independent credential and field grants and links back to its credential
+00:10 +75: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_history_widget_test.dart: one mixed history entry preserves independent credential and field grants and links back to its credential
+00:10 +76: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_history_widget_test.dart: one mixed history entry preserves independent credential and field grants and links back to its credential
+00:11 +77: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/session_end_widget_test.dart: ended chat preserves its label and explains reapproval without approval controls
+00:11 +78: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/directory_approval_widget_test.dart: owner batch selects a directory as fixed field identities
+00:11 +79: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/directory_approval_widget_test.dart: owner batch selects a directory as fixed field identities
+00:11 +80: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/revisions_test.dart: history blocks deleted fields until explicit recycle restore and rejects changed current version
+00:12 +81: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/revisions_test.dart: history blocks deleted fields until explicit recycle restore and rejects changed current version
+00:12 +82: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_maintenance_test.dart: runtime tick preserves failed expired credential material and clears its real notice after retry
+00:12 +83: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_reuse_widget_test.dart: v2 history separates field authorization and shows each frozen command, not only latest execution
+00:12 +84: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_reuse_widget_test.dart: v2 history separates field authorization and shows each frozen command, not only latest execution
+00:12 +85: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/widget_test.dart: desktop approves only selected field then revokes the grant
+00:13 +86: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/widget_test.dart: desktop approves only selected field then revokes the grant
+00:13 +87: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/focused_fill_widget_test.dart: real inbox approves focused fill without a command plan or sending input
+00:13 +88: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/focused_fill_widget_test.dart: real inbox approves focused fill without a command plan or sending input
+00:14 +89: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/focused_fill_widget_test.dart: real inbox approves focused fill without a command plan or sending input
+00:14 +90: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:14 +91: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:14 +92: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:14 +93: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:14 +94: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:14 +95: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:14 +96: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:14 +97: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:14 +98: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:15 +99: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:15 +100: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:15 +101: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:15 +102: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:15 +103: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:15 +104: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:15 +105: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:15 +106: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:15 +107: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:15 +108: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:15 +109: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:15 +110: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:16 +111: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:16 +112: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_flow_widget_test.dart: backup flow keeps real first enable and both restore file controls together
+00:16 +113: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_flow_widget_test.dart: backup flow keeps real first enable and both restore file controls together
+00:16 +114: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_flow_widget_test.dart: backup flow keeps real first enable and both restore file controls together
+00:16 +115: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_flow_widget_test.dart: backup flow keeps real first enable and both restore file controls together
+00:17 +116: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_flow_widget_test.dart: backup flow keeps real first enable and both restore file controls together
+00:17 +117: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_flow_widget_test.dart: backup flow keeps real first enable and both restore file controls together
+00:17 +118: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_flow_widget_test.dart: backup flow keeps real first enable and both restore file controls together
+00:17 +119: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_flow_widget_test.dart: backup flow keeps real first enable and both restore file controls together
+00:18 +120: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_flow_widget_test.dart: backup flow keeps real first enable and both restore file controls together
+00:18 +121: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/history_widget_test.dart: shortening retention shows real counts and deletes only after confirmation
+00:19 +122: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/history_widget_test.dart: shortening retention shows real counts and deletes only after confirmation
+00:19 +123: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/history_widget_test.dart: shortening retention shows real counts and deletes only after confirmation
+00:19 +124: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/history_widget_test.dart: shortening retention shows real counts and deletes only after confirmation
+00:19 +125: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/organization_tasks_test.dart: Agent requests in approval inbox; one approval enables automatic classification and read-only result
+00:19 +126: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/organization_tasks_test.dart: Agent requests in approval inbox; one approval enables automatic classification and read-only result
+00:19 +127: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/organization_tasks_test.dart: Agent requests in approval inbox; one approval enables automatic classification and read-only result
+00:19 +128: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/organization_tasks_test.dart: Agent requests in approval inbox; one approval enables automatic classification and read-only result
+00:19 +129: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/organization_tasks_test.dart: Agent requests in approval inbox; one approval enables automatic classification and read-only result
+00:20 +130: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/organization_tasks_test.dart: Agent requests in approval inbox; one approval enables automatic classification and read-only result
+00:20 +131: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/information_file_editor_test.dart: file editor shows missing file error, saves real file and keeps the three-column library
+00:20 +132: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/library_labels_overflow_test.dart: many tags stay reachable at normal and large text sizes
+00:21 +133: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/library_labels_overflow_test.dart: many tags stay reachable at normal and large text sizes
+00:21 +134: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/library_labels_overflow_test.dart: many tags stay reachable at normal and large text sizes
+00:21 +135: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_reshape_test.dart: failed value correction preserves the draft and retries without changing identity
+00:21 +136: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_reshape_test.dart: failed value correction preserves the draft and retries without changing identity
+00:22 +137: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/inbox_workspace_test.dart: slash focuses inbox outside editing and passes through in search input
+00:22 +138: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/inbox_workspace_test.dart: slash focuses inbox outside editing and passes through in search input
+00:22 +139: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/inbox_workspace_test.dart: slash focuses inbox outside editing and passes through in search input
+00:22 +140: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/inbox_workspace_test.dart: slash focuses inbox outside editing and passes through in search input
+00:22 +141: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/inbox_workspace_test.dart: slash focuses inbox outside editing and passes through in search input
+00:22 +142: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/information_file_approval_history_test.dart: a later delivery remains discoverable after the older grant fact is pruned
+00:22 +143: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/information_file_approval_history_test.dart: a later delivery remains discoverable after the older grant fact is pruned
+00:23 +144: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/inbox_workspace_test.dart: slash preserves the custom lifetime editor focus and text key
+00:23 +145: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_use_widget_test.dart: handled credential request exposes its actual nonzero execution receipt without material or output
+00:23 +146: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_use_widget_test.dart: handled credential request exposes its actual nonzero execution receipt without material or output
+00:23 +147: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_use_widget_test.dart: handled credential request exposes its actual nonzero execution receipt without material or output
+00:24 +148: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/information_file_approval_history_test.dart: mixed file approval rejects a changed review and delivery history keeps each version and cleanup outcome
+00:24 +149: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/library_test.dart: owner manually saves named information fields
+00:24 +150: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/library_test.dart: owner manually saves named information fields
+00:24 +151: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/library_test.dart: owner manually saves named information fields
+00:24 +152: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/inbox_workspace_test.dart: notification opens its request on another page and clears stale search
+00:24 +153: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:25 +154: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:25 +155: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:25 +156: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:25 +157: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:26 +158: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:26 +159: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:26 +160: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:26 +161: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:26 +162: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:26 +162 ~1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:26 +163 ~1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:26 +164 ~1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:26 +165 ~1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:26 +166 ~1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:26 +167 ~1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:26 +168 ~1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:26 +168 ~2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:26 +169 ~2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:26 +170 ~2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:26 +171 ~2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:26 +172 ~2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:27 +173 ~2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/library_workspace_test.dart: a rejected library query shows failure and never presents stale detail as a match
+00:27 +174 ~2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_migration_widget_test.dart: owner must explicitly choose and confirm a field, sees grant and backup effects, and gets the linked credential
+00:27 +175 ~2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_migration_widget_test.dart: owner must explicitly choose and confirm a field, sees grant and backup effects, and gets the linked credential
+00:27 +176 ~2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_migration_widget_test.dart: owner must explicitly choose and confirm a field, sees grant and backup effects, and gets the linked credential
+00:28 +177 ~2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_migration_widget_test.dart: owner must explicitly choose and confirm a field, sees grant and backup effects, and gets the linked credential
+00:28 +178 ~2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_migration_widget_test.dart: owner must explicitly choose and confirm a field, sees grant and backup effects, and gets the linked credential
+00:28 +179 ~2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_migration_widget_test.dart: owner must explicitly choose and confirm a field, sees grant and backup effects, and gets the linked credential
+00:28 +180 ~2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/cross_page_navigation_test.dart: main shares current-ID navigation with proposal results and credential links while ordinary library jumps preserve state
+00:29 +181 ~2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/cross_page_navigation_test.dart: main shares current-ID navigation with proposal results and credential links while ordinary library jumps preserve state
+00:29 +182 ~2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/cross_page_navigation_test.dart: main shares current-ID navigation with proposal results and credential links while ordinary library jumps preserve state
+00:29 +183 ~2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/cross_page_navigation_test.dart: main shares current-ID navigation with proposal results and credential links while ordinary library jumps preserve state
+00:30 +184 ~2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/cross_page_navigation_test.dart: main shares current-ID navigation with proposal results and credential links while ordinary library jumps preserve state
+00:30 +185 ~2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/cross_page_navigation_test.dart: main shares current-ID navigation with proposal results and credential links while ordinary library jumps preserve state
+00:30 +186 ~2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/cross_page_navigation_test.dart: main opens the actual organization task and preserves history search page and selection on ordinary returns
+00:32 +187 ~2: All tests passed!
