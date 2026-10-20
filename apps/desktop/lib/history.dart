@@ -369,6 +369,42 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
       _deliveries(e).isEmpty
       ? '${_reads(e, history)} 次访问'
       : '${_reads(e, history)} 次读取 · ${_deliveries(e).length} 条文件交付';
+  Widget _entryMetadata(_HistoryEntry e, AuditHistory history) {
+    final activity = e.use != null
+        ? '凭据使用'
+        : e.organization != null
+        ? '整理资料'
+        : _activityLabel(e, history);
+    final style = prototypeText(
+      context,
+      12,
+      color: UiPalette.of(context).muted,
+    );
+    return Text.rich(
+      TextSpan(
+        children: [
+          TextSpan(text: '${e.chat} · '),
+          for (final (index, label) in activity.split(' · ').indexed) ...[
+            if (index > 0) const TextSpan(text: ' · '),
+            // Move each count and its unit together to the next line.
+            // A label wider than the whole column can still wrap internally.
+            WidgetSpan(
+              alignment: PlaceholderAlignment.baseline,
+              baseline: TextBaseline.alphabetic,
+              // WidgetSpan applies its parent's text scaling to the child.
+              child: Text(
+                label,
+                style: style,
+                textScaler: TextScaler.noScaling,
+              ),
+            ),
+          ],
+        ],
+      ),
+      style: style,
+    );
+  }
+
   Set<FieldRef> _fileRefs(_HistoryEntry e) {
     final refs = {
       for (final field in e.fields) FieldRef(field.itemId, field.fieldId),
@@ -634,17 +670,7 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
                             const SizedBox(height: 8),
                             Row(
                               children: [
-                                Expanded(
-                                  child: _text(
-                                    '${e.chat} · ${e.use != null
-                                        ? '凭据使用'
-                                        : e.organization != null
-                                        ? '整理资料'
-                                        : _activityLabel(e, history)}',
-                                    12,
-                                    color: c.muted,
-                                  ),
-                                ),
+                                Expanded(child: _entryMetadata(e, history)),
                                 _text(
                                   _state(e),
                                   12,

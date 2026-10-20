@@ -10,6 +10,7 @@ import 'package:info_core/agent_server.dart';
 import 'package:info_storage/info_storage.dart';
 import 'package:info_desktop/approvals.dart';
 import 'package:info_desktop/history.dart';
+import 'package:info_desktop/main.dart' show InformationApp;
 import 'package:info_desktop/ui.dart';
 import 'support/native_semantics_lifetime.dart';
 
@@ -56,6 +57,7 @@ void main() {
         semantics.finishAfterUnmount();
         tester.view.resetPhysicalSize();
         tester.view.resetDevicePixelRatio();
+        tester.platformDispatcher.clearTextScaleFactorTestValue();
       });
       Future<Map<String, dynamic>> exchange(
         String phase, [
@@ -131,6 +133,19 @@ void main() {
           reason: 'History must not claim expired or removed scope is readable',
         );
         expect(tester.takeException(), isNull);
+        if (label == 'archived-history') {
+          final count = find.text('11 次访问');
+          expect(count, findsOneWidget);
+          final paragraph = tester.renderObject<RenderParagraph>(count);
+          final boxes = paragraph.getBoxesForSelection(
+            const TextSelection(baseOffset: 0, extentOffset: 6),
+          );
+          expect(
+            boxes.map((b) => b.top).toSet(),
+            hasLength(1),
+            reason: 'An ordinary access count must remain one readable phrase',
+          );
+        }
         Future<void> capture(String suffix) async {
           final image =
               await (boundary.currentContext!.findRenderObject()
@@ -317,6 +332,106 @@ void main() {
         ['历史归档 · 未授权'],
         [old.fieldId],
       );
+      await tester.pumpWidget(const SizedBox());
+      final many = await service.owner.createInformation(
+        '多字段分页资料',
+        '受控合成资料',
+        List.generate(
+          24,
+          (i) => FieldInput('字段${i + 1}', '公开说明', 'synthetic-private-$i'),
+        ),
+      );
+      final pageSession = service.agent.openSession('分页与长记录合成会话');
+      for (var i = 0; i < 17; i++) {
+        final refs = many.fields.map((f) => FieldRef(many.id, f.id)).toList();
+        final request = service.agent.request(
+          pageSession,
+          '分页合成${i.toString().padLeft(2, '0')}：${List.filled(8, '核对多字段申请的完整范围与历史记录').join('；')}',
+          refs,
+        );
+        service.owner.approve(request.id, refs);
+      }
+      await service.owner.setColorTheme(DesktopColorTheme.green);
+      for (final view in [
+        (const Size(1440, 900), 1.0),
+        (const Size(1280, 800), 2.0),
+      ]) {
+        tester.view.physicalSize = view.$1;
+        tester.platformDispatcher.textScaleFactorTestValue = view.$2;
+        await tester.pumpWidget(
+          RepaintBoundary(
+            key: boundary,
+            child: InformationApp(
+              key: UniqueKey(),
+              service: service,
+              port: server.port,
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const ValueKey('nav-3')));
+        await tester.pumpAndSettle();
+        expect(find.text('19 条记录'), findsOneWidget);
+        for (final page in [1, 2, 3]) {
+          expect(find.text('$page / 3'), findsOneWidget);
+          final next = tester.widget<TextButton>(
+            find.ancestor(
+              of: find.text('›'),
+              matching: find.byType(TextButton),
+            ),
+          );
+          expect(next.onPressed == null, page == 3);
+          if (page < 3) {
+            await tester.tap(find.text('›'));
+            await tester.pumpAndSettle();
+          }
+        }
+        await tester.enterText(
+          find.byKey(const ValueKey('history-search')),
+          '分页合成08',
+        );
+        await tester.pumpAndSettle();
+        expect(find.text('1 条记录'), findsOneWidget);
+        expect(find.text('1 / 1'), findsOneWidget);
+        expect(find.text('24'), findsOneWidget);
+        Future<void> captureFullApp(String suffix) async {
+          final image =
+              await (boundary.currentContext!.findRenderObject()
+                      as RenderRepaintBoundary)
+                  .toImage(pixelRatio: 1);
+          final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
+          final name =
+              'full-app-history-search-${view.$1.width.toInt()}-${(view.$2 * 100).toInt()}$suffix.png';
+          await File(
+            '${root.path}/$name',
+          ).writeAsBytes(bytes!.buffer.asUint8List());
+          image.dispose();
+          captures.add({
+            'file': name,
+            'width': view.$1.width.toInt(),
+            'height': view.$1.height.toInt(),
+            'textScale': view.$2,
+          });
+        }
+
+        expect(tester.takeException(), isNull);
+        await captureFullApp('');
+        final fields = find.textContaining('字段24');
+        await tester.ensureVisible(fields);
+        await tester.pumpAndSettle();
+        expect(fields.hitTestable(), findsOneWidget);
+        expect(tester.takeException(), isNull);
+        await captureFullApp('-scope-scrolled');
+        await tester.enterText(
+          find.byKey(const ValueKey('history-search')),
+          '',
+        );
+        await tester.pumpAndSettle();
+        expect(find.text('19 条记录'), findsOneWidget);
+        expect(find.text('1 / 3'), findsOneWidget);
+        expect(tester.takeException(), isNull);
+        await tester.pumpWidget(const SizedBox());
+      }
       await File('${root.path}/result.json').writeAsString(
         jsonEncode({
           'complete': true,
@@ -325,6 +440,14 @@ void main() {
           'controlledOwnerMutations': true,
           'simulatedViewportAndTextScale': true,
           'physicalUiAcceptance': false,
+          'countPhraseSingleLineAt200Percent': true,
+          'fullAppHistoryPagination': {
+            'records': 19,
+            'pages': 3,
+            'fields': 24,
+            'searchAndClear': true,
+            'globalNavigationIncluded': true,
+          },
           'captures': captures,
         }),
         flush: true,
