@@ -131,6 +131,9 @@ class DesktopRuntime extends ChangeNotifier {
   Future<void>? _quit;
   Future<void>? _stop;
   bool _stopped = false;
+  // Native termination may fail after the repository is already closed. The
+  // launcher must keep repository-backed widgets unmounted in that state.
+  bool get stopped => _stopped;
   final _ready = Completer<void>();
 
   Future<void> start() async {

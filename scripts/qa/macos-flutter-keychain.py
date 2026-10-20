@@ -113,7 +113,8 @@ def main():
         (output / (label + '.json')).write_text(json.dumps(case, indent=2) + '\n')
         save()
         print(label, code, flush=True)
-        if code != 0 or facts.get('failed') or not facts.get('nativeTerminationRequested'):
+        if (code != 0 or facts.get('failed') or facts.get('flutterErrors') != 0 or
+                not facts.get('nativeTerminationRequested')):
             raise RuntimeError(label + ': failed or no native termination')
         if facts.get('port'):
             with socket.socket() as connection:
@@ -199,6 +200,7 @@ def main():
             raise RuntimeError('Changed version did not change code signature')
         root = launch('create', 'upgrade-create')
         launch('upgrade', 'upgrade-changed-signature', root, changed_binary)
+        result['upgradeAccess'] = result['cases'][-1]['upgradeAccess']
         launch('reopen', 'upgrade-original-reopen', root)
         launch('cleanup', 'upgrade-cleanup', root)
         result['complete'] = True
