@@ -2,6 +2,12 @@ import 'dart:ffi';
 import 'dart:io';
 import 'package:ffi/ffi.dart';
 
+/// Publish a fully prepared directory on the same volume. The native primitive
+/// refuses an existing destination, including an empty directory created after
+/// the caller's preflight check. No partial merge or replacement is allowed.
+void publishNewDirectory(String source, String destination) =>
+    publishNewFile(source, destination);
+
 /// Same-volume no-replace publication of a closed, verified ordinary file or
 /// encrypted backup. Never fall back to an overwriting rename or copy.
 void publishNewFile(String source, String destination) {

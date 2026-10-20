@@ -1,15 +1,16 @@
 import 'dart:io';
 
 import 'package:info_cli/codex_bundle.dart';
+import 'package:info_core/new_file_publish.dart';
 
 /// SDK-free preparation from the delivered CLI folder. No user configuration
 /// or state directory is touched: all output goes into a new chosen directory.
 Future<void> main(List<String> args) async {
-  if (!Platform.isWindows ||
+  if ((!Platform.isWindows && !Platform.isMacOS) ||
       !(args.length == 1 ||
           (args.length == 3 && args.first == '--source-bundle'))) {
     stderr.writeln(
-      'Usage: info-prepare-codex.exe [--source-bundle <cli-folder>] <new-stable-bundle-directory>',
+      'Usage: info-prepare-codex [--source-bundle <cli-folder>] <new-stable-bundle-directory>',
     );
     exitCode = 64;
     return;
@@ -32,10 +33,11 @@ Future<void> main(List<String> args) async {
     final informationFilesReference = await File(
       '${source.path}/template/references/information-files.md',
     ).readAsString();
-    const binaries = [
-      'info-codex.exe',
-      'info-codex-hook.exe',
-      'info-runtime-worker.exe',
+    final suffix = Platform.isWindows ? '.exe' : '';
+    final binaries = [
+      'info-codex$suffix',
+      'info-codex-hook$suffix',
+      'info-runtime-worker$suffix',
     ];
     for (final name in binaries) {
       if (!await File('${source.path}/$name').exists()) {
@@ -60,7 +62,11 @@ Future<void> main(List<String> args) async {
           FileSystemEntityType.notFound) {
         throw const FileSystemException();
       }
-      await staging.rename(output.path);
+      if (Platform.isMacOS) {
+        publishNewDirectory(staging.path, output.path);
+      } else {
+        await staging.rename(output.path);
+      }
     } finally {
       if (await staging.exists()) await staging.delete(recursive: true);
     }
