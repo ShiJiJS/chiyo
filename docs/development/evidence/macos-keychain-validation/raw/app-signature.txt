@@ -1,0 +1,11 @@
+Executable=/Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/build/macos/Build/Products/Release/info_desktop.app/Contents/MacOS/info_desktop
+Identifier=com.example.infoDesktop
+Format=app bundle with Mach-O universal (x86_64 arm64)
+CodeDirectory v=20400 size=688 flags=0x2(adhoc) hashes=11+7 location=embedded
+Signature=adhoc
+Info.plist entries=24
+TeamIdentifier=not set
+Sealed Resources version=2 rules=13 files=7
+Total signatures=1
+Chosen signature=1
+# designated => cdhash H"3fc6af2cc17ac35f7a8527248a578941ad13f67f" or cdhash H"a535f8d2c472cc416227cc1c693521cc1e91d648"
