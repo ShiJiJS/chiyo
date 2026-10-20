@@ -9,13 +9,14 @@
 - [#42 Keychain](macos-keychain-validation.md)：真实系统存储验证发现并修复 legacy ACL 提示阻塞；不同 ad-hoc 签名间的升级访问仍被拒绝，保留原库与密钥。
 - [#44 工具与附件](macos-tools-files.md)：外部 GH/AWS 实测 EPERM 后，已新增主人选择工具目录与系统书签持久化入口；原生存储/界面回归及新包 SSH/附件工作流通过，真实目录许可、外部 GH/AWS、当前系统面板仍待验收。
 - [#45 备份恢复](macos-backup-recovery.md)：签名 Flutter 的 7/8/9 格式恢复、独立 AOT 的 80 MiB 中断回滚，以及固定旧源 5/6 兼容已通过；真实面板、Keychain、应用本体中断与 Windows 双向迁移仍待。
+- [#50 ARM64 交付](macos-delivery.md)：`cccc37e` 同源 App/CLI/worker 整包已生成，133 项解包载荷、签名、合成存储诊断与实际 AOT 的 6 项检查通过；修复增量构建漏签名并去除 Release 调试访问权限。实际安装、Keychain 升级及最终 GUI/Codex 联合验收仍待。
 
 上述票据仍 OPEN；具体未完成条件以 GitHub 票据及各记录为准。现有证据不等于 Mac 总票 #19 已可交付。
 
 ## 当前实现
 
 - Mac 使用 Darwin FFI 核对 PID/启动时间、POSIX 会话与进程组。worker 先等持久登记确认，目标暂停装载后再核对实际身份；kqueue 保留短进程及信号退出结果，避免与 Dart 的 SIGCHLD 回收竞争。
-- worker 随 Runner 构建编译、单独签名，并继承应用沙盒。worker 仅为构建宿主架构，当前设备为 ARM64；Flutter 默认 Runner 含通用壳体，不代表随包 worker 可在 Intel 上运行。Intel、完整通用二进制发行、Developer ID、公证与其他设备安装不在本轮已验证范围。
+- worker 随 Runner 构建编译、单独签名，并继承应用沙盒。当前构建入口显式将 Runner、worker 和 CLI 固定为 ARM64；最低构建目标为 macOS 14.0，仅在当前 macOS 27.0.1 实测。Intel、完整通用二进制发行、Developer ID、公证与其他设备安装不在本轮已验证范围。
 - 文件材料的目录为0700，文件为0600。核对本用户、ACL、硬链接数、设备/inode/创建身份；不跟随链接，不递归清理，不删除未知子项。Windows 原生驱动保留。
 - Mac 启用可复用凭据执行与普通附件交付；焦点填充仍只在 Windows 宣告。SSH 接收器固定到本机独立验证的 Apple `OpenSSH_10.3p1`，Windows 原版本限制保留。其他 SSH 版本拒绝，升级后须重新验收。
 - Mac版本探测为独立子进程，隔离用户认证环境，最多等待30秒且输出上限64KiB，超时/超限回收探测进程。首次解包AWS工具时曾超过旧5秒限制；6秒延迟与无限输出回归已通过。Windows仍保持原5秒路径。

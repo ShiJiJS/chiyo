@@ -1,0 +1,70 @@
+{
+  "sourceCommit": "fc0f5e5633a49c68caecbb6f59a03d9df09d4320",
+  "complete": false,
+  "phases": [
+    {
+      "name": "source-checks",
+      "exit": 0
+    },
+    {
+      "name": "release-build",
+      "exit": 0
+    },
+    {
+      "name": "compile-info",
+      "exit": 0
+    },
+    {
+      "name": "sign-info",
+      "exit": 0
+    },
+    {
+      "name": "compile-info-codex",
+      "exit": 0
+    },
+    {
+      "name": "sign-info-codex",
+      "exit": 0
+    },
+    {
+      "name": "compile-info-codex-hook",
+      "exit": 0
+    },
+    {
+      "name": "sign-info-codex-hook",
+      "exit": 0
+    },
+    {
+      "name": "compile-info-runtime-worker",
+      "exit": 0
+    },
+    {
+      "name": "sign-info-runtime-worker",
+      "exit": 0
+    },
+    {
+      "name": "compile-info-prepare-codex",
+      "exit": 0
+    },
+    {
+      "name": "sign-info-prepare-codex",
+      "exit": 0
+    },
+    {
+      "name": "diagnostic-build",
+      "exit": 0
+    },
+    {
+      "name": "sign-diagnostic-macos-storage-check",
+      "exit": 0
+    },
+    {
+      "name": "sign-diagnostic-libsqlcipher.dylib",
+      "exit": 0
+    },
+    {
+      "name": "app-signature",
+      "exit": 0
+    }
+  ]
+}

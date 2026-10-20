@@ -1,0 +1,494 @@
+{
+  "sourceCommit": "cccc37e4a1125f88c7714a26b1873fdb2ffb7a9c",
+  "sourceChecksCommit": "fc0f5e5633a49c68caecbb6f59a03d9df09d4320",
+  "finalRun": "raw/run-04",
+  "rawFiles": [
+    {
+      "path": "raw/issue50-cli-final-analyze.log",
+      "bytes": 39,
+      "sha256": "b51c9c80f2b144a3a264061cede7a8071b74e307d76dd376dcc35e80722ff39c"
+    },
+    {
+      "path": "raw/issue50-initial-check.log",
+      "bytes": 155440,
+      "sha256": "b2d4beaf004cc6dbccff9715248ca0e35c4a5bba49ec0813b69799291ad23752"
+    },
+    {
+      "path": "raw/issue50-signing-fix-build-1.log",
+      "bytes": 356222,
+      "sha256": "5ec8e0c8c3c011e8d785401bafbc3d7b5a0e895a298d178e577f5f9b6e957ad9"
+    },
+    {
+      "path": "raw/issue50-signing-fix-build-2.log",
+      "bytes": 354506,
+      "sha256": "42a07a17e223316824721e1c53c018ad0e5aa399f0a8ae77bde632f2346292c4"
+    },
+    {
+      "path": "raw/issue50-signing-fix-verify-1.log",
+      "bytes": 1589,
+      "sha256": "09b3b625bfd03178bde7805d25cf6da14d742ffebc07965989ebeaa3c5a079d5"
+    },
+    {
+      "path": "raw/issue50-signing-fix-verify-2.log",
+      "bytes": 1589,
+      "sha256": "09b3b625bfd03178bde7805d25cf6da14d742ffebc07965989ebeaa3c5a079d5"
+    },
+    {
+      "path": "raw/run-01/logs/app-signature.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/run-01/logs/compile-info-codex-hook.txt",
+      "bytes": 135,
+      "sha256": "906cdb6e58fcbe6d3f83c4eee97e0e00ba812b4e361f51169d93e5fc2b8e075e"
+    },
+    {
+      "path": "raw/run-01/logs/compile-info-codex.txt",
+      "bytes": 130,
+      "sha256": "1d28c8303553fa23ddd6e6c2db2fb329882b1b3372126da269f4a1c7da955e55"
+    },
+    {
+      "path": "raw/run-01/logs/compile-info-prepare-codex.txt",
+      "bytes": 138,
+      "sha256": "94908d0ac759052aa55e672b32b262ac12be15cb1b1262c258618b714619476e"
+    },
+    {
+      "path": "raw/run-01/logs/compile-info-runtime-worker.txt",
+      "bytes": 139,
+      "sha256": "8b4905ffe5e2e6ebb39bd4c7758a91f2a10cceaf8632128f07ec1eaf884bdd5d"
+    },
+    {
+      "path": "raw/run-01/logs/compile-info.txt",
+      "bytes": 124,
+      "sha256": "b15f83191b741de65b0c82cc56b5cf3ebce3a36cdb202ea067702231038695c0"
+    },
+    {
+      "path": "raw/run-01/logs/diagnostic-build.txt",
+      "bytes": 299,
+      "sha256": "24afd25926a518db6029d61b97776eb65b914cb9b45d1fc046124078a7d727e9"
+    },
+    {
+      "path": "raw/run-01/logs/release-build.txt",
+      "bytes": 4385,
+      "sha256": "24dff5eb5fd5f6e9c02d2acb72476d9c5be0d00abe329ccae2a79e6c8dba1677"
+    },
+    {
+      "path": "raw/run-01/logs/sign-diagnostic-libsqlcipher.dylib.txt",
+      "bytes": 169,
+      "sha256": "664b2e9217e538fc6b12ff3e9aff6a36abd805403e595f0d95c73e25e0ef7df6"
+    },
+    {
+      "path": "raw/run-01/logs/sign-diagnostic-macos-storage-check.txt",
+      "bytes": 170,
+      "sha256": "0c24d07ebd15c7889e403fac43b1a2a15c95597f7ca765c199ee0a4ae8f0c478"
+    },
+    {
+      "path": "raw/run-01/logs/sign-info-codex-hook.txt",
+      "bytes": 154,
+      "sha256": "d41d20a6c0664cb4fc99f4e3d93288d647369fd7c3050d8d84ac8cc8112064a9"
+    },
+    {
+      "path": "raw/run-01/logs/sign-info-codex.txt",
+      "bytes": 149,
+      "sha256": "594501cd0ad61f5b68d317d4ad821423a0f3257d4f7f79155b6ce5b5fcadba77"
+    },
+    {
+      "path": "raw/run-01/logs/sign-info-prepare-codex.txt",
+      "bytes": 157,
+      "sha256": "9ab0d66ea89ec745a207903eca802976bda9d00524f7b8e91517ead11547bcfe"
+    },
+    {
+      "path": "raw/run-01/logs/sign-info-runtime-worker.txt",
+      "bytes": 158,
+      "sha256": "dfce0ee2bbcbec6b091412a37607e5719765a840cd9046f54789bd674534aeed"
+    },
+    {
+      "path": "raw/run-01/logs/sign-info.txt",
+      "bytes": 143,
+      "sha256": "db40bac772cf70991b3112ec82b29aa8de7079ce0764fe3068b4e63b4e4a46c1"
+    },
+    {
+      "path": "raw/run-01/logs/source-checks.txt",
+      "bytes": 193697,
+      "sha256": "41f041e931b7cd33a6ae44ad48cab3bb5c8a1e0b6bd93d7d1309d98482196180"
+    },
+    {
+      "path": "raw/run-01/runner.log",
+      "bytes": 945,
+      "sha256": "b84f32e6dbae071a144e71059a90d7d6e828302d680e06b2e9c9549823017c3b"
+    },
+    {
+      "path": "raw/run-01/verification.json",
+      "bytes": 1177,
+      "sha256": "56112fc4ecf30a937f41a358ea5981b06062ec84127e0d890cd3dd04ec3f05ae"
+    },
+    {
+      "path": "raw/run-02/logs/app-signature.txt",
+      "bytes": 161,
+      "sha256": "eb1f35a597d886e5e7f3bea93e37b605192f4871eb864e1fdec32ae137735045"
+    },
+    {
+      "path": "raw/run-02/logs/compile-info-codex-hook.txt",
+      "bytes": 135,
+      "sha256": "38572bd920cc9382dd2dfae5912b6f7250d35b1984bbf08178ffb196e46b6ae8"
+    },
+    {
+      "path": "raw/run-02/logs/compile-info-codex.txt",
+      "bytes": 130,
+      "sha256": "44716b88d220416cd84ff039437416a878ba37cefde284a8fc58fca44dd1f4fe"
+    },
+    {
+      "path": "raw/run-02/logs/compile-info-prepare-codex.txt",
+      "bytes": 138,
+      "sha256": "392d964f35b139a67d199c6f8b3c9a8ec56b2110c4e5b6cf1652d237f7882e98"
+    },
+    {
+      "path": "raw/run-02/logs/compile-info-runtime-worker.txt",
+      "bytes": 139,
+      "sha256": "a751865f60312e5fba220740bdb921505195900b2be1f01c2931584086d16af0"
+    },
+    {
+      "path": "raw/run-02/logs/compile-info.txt",
+      "bytes": 124,
+      "sha256": "6841c29f4ef9605e689355ddb4eff6766ad2e1b07cd648e18e3f67c0cfb076e8"
+    },
+    {
+      "path": "raw/run-02/logs/diagnostic-build.txt",
+      "bytes": 299,
+      "sha256": "a00a719eea0fb35a748884c0b53156c3347ae3f2a9e2d82c7d5adc205733c4a6"
+    },
+    {
+      "path": "raw/run-02/logs/release-build.txt",
+      "bytes": 136,
+      "sha256": "9a09c6b2cc301ac4ffdfb5de6173602ccbe61e7df72a21e6b4627016733879ed"
+    },
+    {
+      "path": "raw/run-02/logs/sign-diagnostic-libsqlcipher.dylib.txt",
+      "bytes": 169,
+      "sha256": "4eeb5a4308afc2e9259dea7d2064dc79cbc0251bc436f413f1cb64e6044cfe0e"
+    },
+    {
+      "path": "raw/run-02/logs/sign-diagnostic-macos-storage-check.txt",
+      "bytes": 170,
+      "sha256": "b9319a9bfa06840e6063ef0ecb57f6d0f3b9f9c3b6da14a39f4751581976782f"
+    },
+    {
+      "path": "raw/run-02/logs/sign-info-codex-hook.txt",
+      "bytes": 154,
+      "sha256": "c8d89928eea63be028df4492e5da80d82bb11c145ddb282c519982a7175eb29d"
+    },
+    {
+      "path": "raw/run-02/logs/sign-info-codex.txt",
+      "bytes": 149,
+      "sha256": "1be00a1645db81ce95193f80055cc4d5b4c375e7217be8e8f041384998030fd7"
+    },
+    {
+      "path": "raw/run-02/logs/sign-info-prepare-codex.txt",
+      "bytes": 157,
+      "sha256": "493ea44e652a7d7fea1e103b0d50c3fe17c4f48cc8a3c2c9baaa6afac2664779"
+    },
+    {
+      "path": "raw/run-02/logs/sign-info-runtime-worker.txt",
+      "bytes": 158,
+      "sha256": "099192ea283a5818090a6d5fc86ac9dab1ab7b817a547d52a3cdbe8931b3c334"
+    },
+    {
+      "path": "raw/run-02/logs/sign-info.txt",
+      "bytes": 143,
+      "sha256": "2385994896a4f3d7a7c84c728e80a87948dd5b6c10492a90f0d13e6b5ae8512b"
+    },
+    {
+      "path": "raw/run-02/runner.log",
+      "bytes": 1016,
+      "sha256": "54012dbc8a15dec470770e139156bf7eedeb35970df7e3d05525a883629e5a3c"
+    },
+    {
+      "path": "raw/run-02/verification.json",
+      "bytes": 1117,
+      "sha256": "91ce18cefa99481c649cb9e7f6419bf647c2afd64558e729a301e7b7e121432f"
+    },
+    {
+      "path": "raw/run-03/logs/app-signature.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/run-03/logs/archive.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/run-03/logs/compile-info-codex-hook.txt",
+      "bytes": 135,
+      "sha256": "1c92235b1dac8bd2046718759b8bde2739cdff8fd621bc0bb74de50a8420c233"
+    },
+    {
+      "path": "raw/run-03/logs/compile-info-codex.txt",
+      "bytes": 130,
+      "sha256": "161c88c977fd4cb9014d14dc92c84877501a63f7262dfc58272f7a54c1fbd1c2"
+    },
+    {
+      "path": "raw/run-03/logs/compile-info-prepare-codex.txt",
+      "bytes": 138,
+      "sha256": "48bbfe6ec750466241f75e5456ad65887ca929bc5a0d6ca05ac832019af9fefd"
+    },
+    {
+      "path": "raw/run-03/logs/compile-info-runtime-worker.txt",
+      "bytes": 139,
+      "sha256": "6db0eaf13f0b1c94669858d6cdc67712e530bff29cd875d51db0005780cdf7ff"
+    },
+    {
+      "path": "raw/run-03/logs/compile-info.txt",
+      "bytes": 124,
+      "sha256": "bfef85d2ea842260bdd0d24c49ae32b567b75fe12a265e7cce1ea3f7813e8ed9"
+    },
+    {
+      "path": "raw/run-03/logs/diagnostic-build.txt",
+      "bytes": 299,
+      "sha256": "4f69f3ea71c74ae460f933388f4b7ed5785b146bfd579bc225b78b15b25fa963"
+    },
+    {
+      "path": "raw/run-03/logs/extract.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/run-03/logs/extracted-app-signature.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/run-03/logs/extracted-cli-and-worker.txt",
+      "bytes": 842,
+      "sha256": "7aca7085e00077c247eb493880ab1f386fb56abe15d52c2cd2781df8c92408ed"
+    },
+    {
+      "path": "raw/run-03/logs/extracted-storage.txt",
+      "bytes": 187,
+      "sha256": "bfe59e3f5c8148af626c8aa8416aa5c874f251127cecd3c3ec86f26dddfb1657"
+    },
+    {
+      "path": "raw/run-03/logs/release-build.txt",
+      "bytes": 136,
+      "sha256": "9a09c6b2cc301ac4ffdfb5de6173602ccbe61e7df72a21e6b4627016733879ed"
+    },
+    {
+      "path": "raw/run-03/logs/sign-diagnostic-libsqlcipher.dylib.txt",
+      "bytes": 169,
+      "sha256": "41cc39da309e03f08f1554376937102b8b82c508211172a34c6f9fdefcae9cff"
+    },
+    {
+      "path": "raw/run-03/logs/sign-diagnostic-macos-storage-check.txt",
+      "bytes": 170,
+      "sha256": "4b326431c2ca6b132db70a955da60e4f6e9291c424b7c9c5fbac465035cc6059"
+    },
+    {
+      "path": "raw/run-03/logs/sign-info-codex-hook.txt",
+      "bytes": 154,
+      "sha256": "a28a2d861da5ae24b0879cdeb732c751d236954348d1153c7c9fa647b67996ac"
+    },
+    {
+      "path": "raw/run-03/logs/sign-info-codex.txt",
+      "bytes": 149,
+      "sha256": "0c8ad95b91d2f4eb69d14f7e2d6013f7ea4c9aa3fb9a6fecbacee421cb64cfb5"
+    },
+    {
+      "path": "raw/run-03/logs/sign-info-prepare-codex.txt",
+      "bytes": 157,
+      "sha256": "6f75b577202305baf3ebb6ec0f1cacd56b8ce6cd0fe8e01c6071db1102d80324"
+    },
+    {
+      "path": "raw/run-03/logs/sign-info-runtime-worker.txt",
+      "bytes": 158,
+      "sha256": "037d6cc8852782afb3e19688728619df77b4e4139e2b21914ced70b95c8dbe9d"
+    },
+    {
+      "path": "raw/run-03/logs/sign-info.txt",
+      "bytes": 143,
+      "sha256": "7e19aaada0417aa7946dcc586ca0724d8b3c89f48f01ee885149ee2ec634abe0"
+    },
+    {
+      "path": "raw/run-03/payload-manifest.json",
+      "bytes": 28881,
+      "sha256": "07bdb973f157d4c47bfde0861be2ea9e1faa43c9d113f95d0594afd151018a47"
+    },
+    {
+      "path": "raw/run-03/runner.log",
+      "bytes": 634,
+      "sha256": "bb83bdc42fc4f8431f76fdbd5297588d4534e64faa53c50a195cc1be177cdeb6"
+    },
+    {
+      "path": "raw/run-03/verification.json",
+      "bytes": 1805,
+      "sha256": "a96a824ce55037b0817bc58bde41331d810f9b19098581fa90bfd462798028da"
+    },
+    {
+      "path": "raw/run-04/independent-verification.json",
+      "bytes": 421,
+      "sha256": "a60376b99ac090586df640e7e8748e61d961cf256b840f7b27192383abc4a58e"
+    },
+    {
+      "path": "raw/run-04/logs/app-signature.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/run-04/logs/archive.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/run-04/logs/compile-info-codex-hook.txt",
+      "bytes": 135,
+      "sha256": "57415e145c1867b111cac1891321890a151996b16a1a8455d30b481a6e122595"
+    },
+    {
+      "path": "raw/run-04/logs/compile-info-codex.txt",
+      "bytes": 130,
+      "sha256": "bdb6c532a82b9de808b5ee6fb39fc774098cbed44bf20d994d13e39910709951"
+    },
+    {
+      "path": "raw/run-04/logs/compile-info-prepare-codex.txt",
+      "bytes": 138,
+      "sha256": "ad533d0fd5130877e635c63a84bc77000b3dc6f0d439492e42145c18d272ea27"
+    },
+    {
+      "path": "raw/run-04/logs/compile-info-runtime-worker.txt",
+      "bytes": 139,
+      "sha256": "82e69fb5f3272b66cc46d59efd2ab44e404516154811e051ebc0a78602282e57"
+    },
+    {
+      "path": "raw/run-04/logs/compile-info.txt",
+      "bytes": 124,
+      "sha256": "5e831fd960a9a2e9f58fe8e51fac054a507a06c5ace68e985da94360131b2e2b"
+    },
+    {
+      "path": "raw/run-04/logs/diagnostic-build.txt",
+      "bytes": 299,
+      "sha256": "bde09ec1ea9b966975b48bc7a154cc8942d76205912a239bcedc0965e15d300d"
+    },
+    {
+      "path": "raw/run-04/logs/extract.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/run-04/logs/extracted-app-signature.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/run-04/logs/extracted-cli-and-worker.txt",
+      "bytes": 842,
+      "sha256": "7aca7085e00077c247eb493880ab1f386fb56abe15d52c2cd2781df8c92408ed"
+    },
+    {
+      "path": "raw/run-04/logs/extracted-storage.txt",
+      "bytes": 187,
+      "sha256": "bfe59e3f5c8148af626c8aa8416aa5c874f251127cecd3c3ec86f26dddfb1657"
+    },
+    {
+      "path": "raw/run-04/logs/release-build.txt",
+      "bytes": 136,
+      "sha256": "9a09c6b2cc301ac4ffdfb5de6173602ccbe61e7df72a21e6b4627016733879ed"
+    },
+    {
+      "path": "raw/run-04/logs/sign-diagnostic-libsqlcipher.dylib.txt",
+      "bytes": 169,
+      "sha256": "f1e2dc575d56ff6a8dfa22362c371efd8b34813e066e3c0fd7ccb9b6095d31ba"
+    },
+    {
+      "path": "raw/run-04/logs/sign-diagnostic-macos-storage-check.txt",
+      "bytes": 170,
+      "sha256": "8e8007a83d17cf9d8e7cfeb7514b3e0f8519723b87eaf0612404d0bc48682d75"
+    },
+    {
+      "path": "raw/run-04/logs/sign-info-codex-hook.txt",
+      "bytes": 154,
+      "sha256": "6d22595452256727bbd8491a36f4fec1fbdf2dc4e4dda8c646f28603df8df8f6"
+    },
+    {
+      "path": "raw/run-04/logs/sign-info-codex.txt",
+      "bytes": 149,
+      "sha256": "81c599c3f698073b03ccdd4cc8511b40672fa2705336227a33443b8d05f16700"
+    },
+    {
+      "path": "raw/run-04/logs/sign-info-prepare-codex.txt",
+      "bytes": 157,
+      "sha256": "1651ec90ab4bed242867f8b626a671b911c13f50f51b469ff65b20504cfdd5ef"
+    },
+    {
+      "path": "raw/run-04/logs/sign-info-runtime-worker.txt",
+      "bytes": 158,
+      "sha256": "f6314da62376031a508504bdec423347d3967be3a89d2f604a6e119f81682c7f"
+    },
+    {
+      "path": "raw/run-04/logs/sign-info.txt",
+      "bytes": 143,
+      "sha256": "9929f7aefc9b64d89619fc57cca6851e9f999a9d5083937e5b14317cb9a2aed5"
+    },
+    {
+      "path": "raw/run-04/payload-manifest.json",
+      "bytes": 28834,
+      "sha256": "2d222a4cb9609e43975e1773146e194c4e2da619617472bce7354c935628177e"
+    },
+    {
+      "path": "raw/run-04/runner.log",
+      "bytes": 634,
+      "sha256": "6aaaa220eb572efc33a0d91fdd1e4f9b948b0d4552347517870528dc56d55fe6"
+    },
+    {
+      "path": "raw/run-04/verification.json",
+      "bytes": 1805,
+      "sha256": "0824d41aef3794147cfe6eccc7d2053801ae0463cfe677e4892573b002ee7497"
+    }
+  ],
+  "sources": [
+    {
+      "path": "apps/desktop/macos/Runner.xcodeproj/project.pbxproj",
+      "sha256": "4f3c4b943ea56a8c6c6f07a96c54f7d10934a48938c5f98ba7af3553f3f26d33"
+    },
+    {
+      "path": "docs/development/macos-delivery.md",
+      "sha256": "eac221c3e1a1b59fcf39261d717c2ed358071c19f38a24a45cca43c171294511"
+    },
+    {
+      "path": "packages/info_cli/bin/prepare_codex.dart",
+      "sha256": "8c67eecdfa458fe8b48c7976f9bddb952e3931da1317b591fc6744679c6ed802"
+    },
+    {
+      "path": "packages/info_cli/test/bundle_preparation_test.dart",
+      "sha256": "85fce65565071e424449383fd2d6c10c3579b187387991542d69dc0ebca3e615"
+    },
+    {
+      "path": "packages/info_cli/test/macos_worker_lifetime_test.dart",
+      "sha256": "dbb35e151e88894cec95bcff83d0780b119b05b1df244db93e5326ee7103736d"
+    },
+    {
+      "path": "packages/info_core/lib/new_file_publish.dart",
+      "sha256": "1ed8320812f6dc45b877e81dd1be9e14d16193e9076f936f27c97c19a3261eb0"
+    },
+    {
+      "path": "packages/info_core/test/macos_directory_publication_test.dart",
+      "sha256": "ada6ade135e4d6dda76fff45bd31ed7a77d423679dc8f14171b9b77be1585420"
+    },
+    {
+      "path": "packages/info_storage/bin/macos-storage-check.dart",
+      "sha256": "b855c78170810bedf083709b761cd35230de6946dbb77a1c2024cc12484faf08"
+    },
+    {
+      "path": "scripts/bundle-macos-worker.sh",
+      "sha256": "a1fa77314a2a9db8aaf9ef17253b0357fcf04951bebf44f16dccf50680188940"
+    },
+    {
+      "path": "scripts/dev-macos.sh",
+      "sha256": "ec47e88925d21399b7fb3905754f85e357e50eb374017978efc9f11f67738d4b"
+    },
+    {
+      "path": "scripts/package-macos.py",
+      "sha256": "285ea56718f548ce0941048950f7611756c9d4e51bc39a8c13b14b5cfb8b2210"
+    }
+  ],
+  "scope": "ARM64 local ad-hoc package; synthetic extracted tests; not GUI/Keychain upgrade/real Codex/clean user acceptance"
+}
