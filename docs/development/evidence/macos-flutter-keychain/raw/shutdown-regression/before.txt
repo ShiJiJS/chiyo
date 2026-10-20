@@ -1,0 +1,85 @@
+00:00 +0: loading /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_shutdown_frame_test.dart
+00:00 +0: quit with app frame mounted=false never reads closed library
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: null
+  Actual: StateError:<Bad state: library_closed>
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_shutdown_frame_test.dart:56:9)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_shutdown_frame_test.dart line 56
+The test description was:
+  quit with app frame mounted=false never reads closed library
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:00 +0 -1: quit with app frame mounted=false never reads closed library [E]
+  Test failed. See exception logs above.
+  The test description was: quit with app frame mounted=false never reads closed library
+  
+00:00 +0 -1: quit with app frame mounted=true never reads closed library
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: no matching candidates
+  Actual: _TypeWidgetFinder:<Found 1 widget with type "InformationApp": [
+            InformationApp(state: _InformationAppState#688a0(ticker inactive)),
+          ]>
+   Which: means one was found but none were expected
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_shutdown_frame_test.dart:59:9)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_shutdown_frame_test.dart line 59
+The test description was:
+  quit with app frame mounted=true never reads closed library
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:00 +0 -2: quit with app frame mounted=true never reads closed library [E]
+  Test failed. See exception logs above.
+  The test description was: quit with app frame mounted=true never reads closed library
+  
+00:00 +0 -2: failed native termination retries without reopening closed library
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: null
+  Actual: StateError:<Bad state: library_closed>
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_shutdown_frame_test.dart:86:7)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_shutdown_frame_test.dart line 86
+The test description was:
+  failed native termination retries without reopening closed library
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:00 +0 -3: failed native termination retries without reopening closed library [E]
+  Test failed. See exception logs above.
+  The test description was: failed native termination retries without reopening closed library
+  
+00:00 +0 -3: Some tests failed.
+
+Failing tests:
+  /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_shutdown_frame_test.dart: failed native termination retries without reopening closed library
+  /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_shutdown_frame_test.dart: quit with app frame mounted=false never reads closed library
+  /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_shutdown_frame_test.dart: quit with app frame mounted=true never reads closed library

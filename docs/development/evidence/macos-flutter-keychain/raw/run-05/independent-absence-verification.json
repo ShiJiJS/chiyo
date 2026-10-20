@@ -1,0 +1,8 @@
+{
+  "scope": "read-only independent native probe of exact run5 QA service after cleanup frame timeout",
+  "service": "org.shijijs.agent-info-manage.qa.f6d11523-cb97-43d6-8910-a0e11a36015d",
+  "exit": 0,
+  "seconds": 0.043,
+  "stdout": "{\"status\":\"passed\",\"build\":\"A\",\"step\":\"missing\"}\n",
+  "stderr": ""
+}

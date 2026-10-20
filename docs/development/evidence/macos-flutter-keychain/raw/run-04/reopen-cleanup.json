@@ -1,0 +1,11 @@
+{
+  "label": "reopen-cleanup",
+  "exit": 0,
+  "seconds": 0.221,
+  "mode": "cleanup",
+  "ownedKeyDeletedAndAbsenceVerified": true,
+  "nativeTerminationRequested": true,
+  "libraryCloses": 0,
+  "keyReads": 1,
+  "keyCreates": 0
+}

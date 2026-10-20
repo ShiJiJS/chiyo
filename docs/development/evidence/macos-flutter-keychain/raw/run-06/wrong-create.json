@@ -1,0 +1,15 @@
+{
+  "label": "wrong-create",
+  "exit": 0,
+  "seconds": 0.268,
+  "mode": "create",
+  "sqlCipherVersion": "4.19.0 community",
+  "port": 57259,
+  "createdInformationAndApprovedRead": true,
+  "startupAfterFinalAttempt": "ready",
+  "flutterErrors": 0,
+  "nativeTerminationRequested": true,
+  "libraryCloses": 1,
+  "keyReads": 2,
+  "keyCreates": 1
+}

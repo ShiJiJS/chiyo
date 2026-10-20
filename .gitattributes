@@ -89,3 +89,4 @@ docs/development/evidence/macos-attachment-preserve-ui/raw/** -text -diff
 docs/development/evidence/macos-credential-management-ui/raw/** -text -diff
 docs/development/evidence/macos-library-filters-ui/raw/** -text -diff
 docs/development/evidence/macos-delivery-refresh/raw/** -text -diff
+docs/development/evidence/macos-flutter-keychain/raw/** -text -diff

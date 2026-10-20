@@ -1,0 +1,14 @@
+{
+  "label": "reopen-create",
+  "exit": 0,
+  "seconds": 1.0,
+  "mode": "create",
+  "sqlCipherVersion": "4.19.0 community",
+  "port": 56989,
+  "createdInformationAndApprovedRead": true,
+  "startupAfterFinalAttempt": "ready",
+  "nativeTerminationRequested": true,
+  "libraryCloses": 1,
+  "keyReads": 2,
+  "keyCreates": 1
+}

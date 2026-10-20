@@ -1,0 +1,19 @@
+{
+  "label": "upgrade-changed-signature",
+  "exit": 0,
+  "seconds": 0.745,
+  "mode": "upgrade",
+  "sqlCipherVersion": "4.19.0 community",
+  "upgradeAccess": "denied",
+  "startup": "failed",
+  "storageFailure": "key_unavailable",
+  "retryAttempts": 2,
+  "databaseBytesPreserved": true,
+  "noEndpointPublished": true,
+  "productionErrorTextRendered": true,
+  "noReplacementKeyCreated": true,
+  "nativeTerminationRequested": true,
+  "libraryCloses": 0,
+  "keyReads": 2,
+  "keyCreates": 0
+}

@@ -1,0 +1,18 @@
+{
+  "label": "malformed-check",
+  "exit": 0,
+  "seconds": 0.239,
+  "mode": "malformed",
+  "sqlCipherVersion": "4.19.0 community",
+  "startup": "failed",
+  "storageFailure": "key_unavailable",
+  "retryAttempts": 2,
+  "databaseBytesPreserved": true,
+  "noEndpointPublished": true,
+  "productionErrorTextRendered": true,
+  "noReplacementKeyCreated": true,
+  "nativeTerminationRequested": true,
+  "libraryCloses": 0,
+  "keyReads": 2,
+  "keyCreates": 0
+}

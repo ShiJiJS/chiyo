@@ -1,0 +1,1 @@
+/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue42-flutter-keychain-4/Changed-Version.app: replacing existing signature
