@@ -1,0 +1,24 @@
+source-checks 0
+release-build 0
+compile-info 0
+sign-info 0
+compile-info-codex 0
+sign-info-codex 0
+compile-info-codex-hook 0
+sign-info-codex-hook 0
+compile-info-runtime-worker 0
+sign-info-runtime-worker 0
+compile-info-prepare-codex 0
+sign-info-prepare-codex 0
+diagnostic-build 0
+sign-diagnostic-macos-storage-check 0
+sign-diagnostic-libsqlcipher.dylib 0
+app-signature 0
+Traceback (most recent call last):
+  File "/Users/jiangxinyi/Documents/Project/agent-info/scripts/package-macos.py", line 306, in <module>
+    main()
+  File "/Users/jiangxinyi/Documents/Project/agent-info/scripts/package-macos.py", line 264, in main
+    "sqlcipher": {"desktopSha256": digest(cipher), "desktopCipherVersion": cipher_version(cipher)},
+  File "/Users/jiangxinyi/Documents/Project/agent-info/scripts/package-macos.py", line 33, in digest
+    return hashlib.file_digest(stream, "sha256").hexdigest()
+AttributeError: module 'hashlib' has no attribute 'file_digest'

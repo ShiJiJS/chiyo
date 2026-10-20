@@ -1,0 +1,10 @@
+--prepared:/Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/build/macos/Build/Products/Release/info_desktop.app/Contents/Frameworks/sqlcipher.framework/Versions/Current/.
+--validated:/Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/build/macos/Build/Products/Release/info_desktop.app/Contents/Frameworks/sqlcipher.framework/Versions/Current/.
+--prepared:/Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/build/macos/Build/Products/Release/info_desktop.app/Contents/MacOS/info-runtime-worker
+--validated:/Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/build/macos/Build/Products/Release/info_desktop.app/Contents/MacOS/info-runtime-worker
+--prepared:/Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/build/macos/Build/Products/Release/info_desktop.app/Contents/Frameworks/App.framework/Versions/Current/.
+--prepared:/Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/build/macos/Build/Products/Release/info_desktop.app/Contents/Frameworks/FlutterMacOS.framework/Versions/Current/.
+--validated:/Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/build/macos/Build/Products/Release/info_desktop.app/Contents/Frameworks/FlutterMacOS.framework/Versions/Current/.
+--validated:/Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/build/macos/Build/Products/Release/info_desktop.app/Contents/Frameworks/App.framework/Versions/Current/.
+apps/desktop/build/macos/Build/Products/Release/info_desktop.app: valid on disk
+apps/desktop/build/macos/Build/Products/Release/info_desktop.app: satisfies its Designated Requirement
