@@ -126,6 +126,13 @@ case "$command_name" in
   build|run)
     require_sdk
     require_xcode
+    if [[ "$(uname -m)" != arm64 ]]; then
+      echo 'The current Mac application and bundled worker support ARM64 only.' >&2
+      exit 1
+    fi
+    # Scope architecture selection to this invocation, not Flutter's global
+    # preferences. The shipped worker and Dart CLI are ARM64 as well.
+    export FLUTTER_MACOS_ARM64_ONLY=true
     cd "$project_root/apps/desktop"
     if [[ "$command_name" == build ]]; then
       flutter build macos --release --no-pub "$@"

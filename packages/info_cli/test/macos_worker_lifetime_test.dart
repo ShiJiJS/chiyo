@@ -9,6 +9,12 @@ void main() {
   setUpAll(() async {
     if (!Platform.isMacOS) return;
     compiled = await Directory.systemTemp.createTemp('mac-worker-aot-');
+    final supplied = Platform.environment['INFO_TEST_MAC_WORKER'];
+    if (supplied != null) {
+      executable = File(supplied).absolute.path;
+      expect(await File(executable).exists(), isTrue);
+      return;
+    }
     executable = '${compiled.path}/info-runtime-worker';
     final result = await Process.run(Platform.resolvedExecutable, [
       'compile',
