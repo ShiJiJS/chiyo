@@ -131,12 +131,13 @@ def main():
             def fetch(op, version=1, request=None, field=None, denied=False, sender=None):
                 data={'command':'file-fetch','requestId':request or request_id,'itemId':item,
                       'fieldId':field or old_file,'operationId':op}
-                expected = 'conflict' if denied == 'field_removed' else ('unauthorized' if denied else 'ok')
+                expected = {'field_removed': 'conflict', 'grant_expired': 'expired'}.get(
+                    denied, 'unauthorized' if denied else 'ok')
                 value=checked(data,expected,sender)
                 if denied:
                     assert 'delivery' not in value
-                    if denied == 'field_removed':
-                        assert value['errorCode'] == 'field_removed' and value['operationClaimed'] is False
+                    if isinstance(denied, str):
+                        assert value['errorCode'] == denied and value['operationClaimed'] is False
                     return
                 copy=value['delivery']; path=Path(copy['path'])
                 assert copy['attachmentVersion']==version and copy['byteLength']==len(originals[version])
@@ -209,12 +210,12 @@ def main():
                 while datetime.now(timezone.utc)<=expires_at:
                     assert time.monotonic()<maximum and flutter.poll() is None
                     time.sleep(.1)
-                fetch('after-expiry',request=expiry_request,field=fresh_file,denied=True)
+                fetch('after-expiry',request=expiry_request,field=fresh_file,denied='grant_expired')
                 checks.append({'realExpiryWaitSeconds':time.monotonic()-start,'expiresAt':claim['expiresAt'],
                                'clockInjected':False})
             elif name=='expired':
                 absent(['expires-v1'])
-                fetch('expired-original-op',request=expiry_request,field=fresh_file,denied=True)
+                fetch('expired-original-op',request=expiry_request,field=fresh_file,denied='grant_expired')
             elif name=='reopened':
                 fetch('old-after-reopen',request=fresh_request,field=fresh_file,denied=True)
                 no_text(request_id,old_text)
