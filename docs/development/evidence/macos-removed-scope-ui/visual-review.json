@@ -1,0 +1,19 @@
+{
+  "mode": "independent existing UI review, no score",
+  "reviewedRun": 5,
+  "reviewedImages": 22,
+  "blockingVisualDefects": [],
+  "minorFindings": [
+    {
+      "issue": "At 1280x800, 200% archived history, the final character of 11 次访问 wraps alone in the selected left row. Still readable; no overlap.",
+      "status": "open; include in full #48 UI refinement",
+      "example": "raw/run-5/native-archived-history-purple-1280-200.png"
+    }
+  ],
+  "preserve": [
+    "Round05 paper, left list, three-column summary, tabs and fixed footer",
+    "field-level removal markers and record-level permission status",
+    "existing four-theme palette and typography"
+  ],
+  "scope": "Native rendered history component only; no physical keyboard/window acceptance, no global 72px navigation, no animation or same-size HTML comparison. 200% scope reachability shown by scroll captures; all-removed and reopened only at 100%."
+}
