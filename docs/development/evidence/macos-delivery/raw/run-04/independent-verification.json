@@ -1,0 +1,10 @@
+{
+  "sourceCommit": "cccc37e4a1125f88c7714a26b1873fdb2ffb7a9c",
+  "complete": true,
+  "independentlyCheckedEntries": 133,
+  "archiveBytes": 45484523,
+  "archiveSha256": "b1a869203f2a43d87b325a88c4bb8f6c6819e502c4dc062a8df9c74929838a6d",
+  "manifestCopiedExactly": true,
+  "debuggerEntitlementAbsent": true,
+  "scope": "Python independent traversal/hash; original packager already ran signatures and extracted programs"
+}
