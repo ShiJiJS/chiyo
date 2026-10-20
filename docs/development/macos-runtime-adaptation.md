@@ -4,6 +4,10 @@
 
 ## 2026-10-21 当前执行记录
 
+最新 #42 源码 `b98e487` 已补主人主动请求 Keychain 访问与等待时退出保护：桌面 186/2，
+7 个模拟系统决定的签名 Release 进程与 20 个真实 Keychain 普通故障回归进程通过。
+真实系统授权和升级仍待，`541a671` 整包尚不包含此入口，详见 [Keychain 记录](macos-keychain-validation.md)。
+
 - [#41 主分支整合](macos-main-integration.md)：已固定新基线并构建，当前 Mac 分支的 Windows 实机回归仍待。
 - [#43 故障恢复](macos-lifecycle-recovery.md)：已按原有 6 条条件完成收口；既有 8 项 SQLCipher/AOT 联合场景、5 项 Darwin worker 检查，加上两种签名 Flutter/系统 SSH 故障重开及本次 41 项定向检查。无法确认旧进程时保留材料，实际结束后回收，不重放命令。
 - [#42 Keychain](macos-keychain-validation.md)：实际 Release Flutter + Keychain + SQLCipher 的 20 次进程验证通过，补齐创建/重开、缺失/坏值/错误密钥/损坏库保留与重试；发现并修复退出后界面读已关闭资料库，桌面 178 通过/2 跳过。新 ad-hoc 签名升级仍被拒绝，原签名重开正常。

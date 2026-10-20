@@ -1,0 +1,18 @@
+{
+  "label": "access-quit",
+  "exit": 0,
+  "seconds": 0.357,
+  "mode": "access-quit",
+  "sqlCipherVersion": "4.19.0 community",
+  "systemDecisionIsFixture": true,
+  "ownerButtonInvoked": true,
+  "nativeMainQueueResponsive": true,
+  "databaseBytesPreserved": true,
+  "noEndpointPublished": true,
+  "keyAccessPendingAtQuit": true,
+  "flutterErrors": 0,
+  "nativeTerminationRequested": true,
+  "libraryCloses": 0,
+  "keyReads": 0,
+  "keyCreates": 0
+}

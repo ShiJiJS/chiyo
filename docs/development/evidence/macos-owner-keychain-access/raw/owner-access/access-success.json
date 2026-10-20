@@ -1,0 +1,19 @@
+{
+  "label": "access-success",
+  "exit": 0,
+  "seconds": 0.342,
+  "mode": "access-success",
+  "sqlCipherVersion": "4.19.0 community",
+  "systemDecisionIsFixture": true,
+  "ownerButtonInvoked": true,
+  "port": 59069,
+  "storedIdentityAndValuePreserved": true,
+  "oldAuthorityRefused": true,
+  "endedGrantAndAllowedReadPreserved": true,
+  "startupAfterFinalAttempt": "ready",
+  "flutterErrors": 0,
+  "nativeTerminationRequested": true,
+  "libraryCloses": 1,
+  "keyReads": 0,
+  "keyCreates": 0
+}
