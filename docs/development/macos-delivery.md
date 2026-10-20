@@ -1,6 +1,7 @@
 # Agent Info Manage：Mac ARM64 开发预览
 
-这是本机开发预览包，最终安装升级验收由 #50 跟踪。产品名称为
+这是本机开发预览包，最终安装升级验收由 #50 跟踪。当前整包的版本、源码和载荷
+以同目录 `manifest.json` 为准；下方按批次保留历史验证记录。产品名称为
 Agent Info Manage，应用文件仍固定为 `app/info_desktop.app`，
 bundle ID 保持 `com.example.infoDesktop`，不另建资料身份。
 
@@ -67,9 +68,9 @@ python3 scripts/package-macos.py build/macos-adaptation/new-checked-delivery --c
 这些结果不等于干净用户安装、Keychain 升级、真实通知、可见系统面板或
 真实 Codex 接入已验收。最终同版本应用全流程仍需 #41–#49 的剩余门槛。
 
-## 2026-10-21 打包验证记录（#50 继续 OPEN）
+## 2026-10-21 首轮打包验证记录（#50 继续 OPEN）
 
-当前本机预览版本 `0.4.0+12-mac-dev.cccc37e4a112`，产品与打包器源码
+首轮已验证的本机预览版本 `0.4.0+12-mac-dev.cccc37e4a112`，产品与打包器源码
 `cccc37e4a1125f88c7714a26b1873fdb2ffb7a9c`，位于独立 Mac 分支。
 ZIP 保留在本项目
 `build/macos-adaptation/issue50-package-4/agent-info-manage-0.4.0+12-mac-dev.cccc37e4a112-macos-arm64.zip`，
@@ -119,7 +120,7 @@ Dart 3.13.5。实际 App 为 49.2 MB，133 项文件/符号链接载荷和 12 �
 4. run-03 首次完成打包/解包检查，但人工审核清单发现 Xcode 自动注入
    `get-task-allow`。`cccc37e` 仅在 Release 禁用基础 entitlement 注入，
    打包器增加拒绝检查，并让交付测试使用解压包内的 Skill 模板。
-   run-04 整包复验通过，以 run-04 为当前产物；不交付 run-03。
+   run-04 整包复验通过，以 run-04 为该轮有效产物；不交付 run-03。
 
 88 份原始记录、各阶段源码摘要和最终载荷清单见
 [证据索引](evidence/macos-delivery/verification.json)。
