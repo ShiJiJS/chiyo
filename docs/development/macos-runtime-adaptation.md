@@ -6,7 +6,7 @@
 
 最新 #42 源码 `36a4bef` 已补主人主动请求 Keychain 访问、等待时退出保护和迟到开库的清理竞态：
 最终桌面 187/2、7 个模拟系统决定的签名 Release 进程通过；20 个真实 Keychain 普通故障回归进程对应先前 `b98e487`。
-真实系统授权和升级仍待，`541a671` 整包尚不包含此入口，详见 [Keychain 记录](macos-keychain-validation.md)。
+真实系统授权和升级仍待；入口和修复已纳入 `01c1f14` 整包，源码验证范围见 [Keychain 记录](macos-keychain-validation.md)。
 
 - [#41 主分支整合](macos-main-integration.md)：已固定新基线并构建，当前 Mac 分支的 Windows 实机回归仍待。
 - [#43 故障恢复](macos-lifecycle-recovery.md)：已按原有 6 条条件完成收口；既有 8 项 SQLCipher/AOT 联合场景、5 项 Darwin worker 检查，加上两种签名 Flutter/系统 SSH 故障重开及本次 41 项定向检查。无法确认旧进程时保留材料，实际结束后回收，不重放命令。
@@ -22,7 +22,7 @@
 - [#48 字符串凭据管理](evidence/macos-credential-management-ui/verification.json)：原生创建/元数据/关联/轮换/停用/版本与回收恢复/过期/隐藏及库重开，最终十五阶段、55 次 CLI 状态核对通过。明确使用测试文本通道；真实输入法清空到期时间、文件凭据面板与实际使用授权仍需联合验收。
 - [#48 目录、标签与搜索](evidence/macos-library-filters-ui/verification.json)：原生目录创建/循环拒绝/移动、标签改名、125 条资料分页/组合筛选/库重开及 38 次 CLI 核对通过；修复多标签侧栏和大字号计数溢出，52 标签、四主题及 100%/200% 矩阵通过。Windows 实机与真实输入仍待。
 - [#49 Codex 接入准备](evidence/macos-codex-preparation/verification.json)：已修复验收项目生成器只接受 Windows `.exe` 的问题，实际同源 ARM64 包生成独立项目并通过摘要/签名/拒绝覆盖核对；13 项真实聊天验收仍未运行，尚未安装或信任 hook。
-- [#50 ARM64 交付](macos-delivery.md)：`541a671` 新包纳入退出修复，四包 694 通过/66 跳过，21 个打包阶段及六项随包检查通过。此前 `c1a58b7` 的资料筛选/附件 Debug 原生联合结果保持历史范围；第一项整包清单与身份/架构证据已刷新，稳定安装、Keychain 升级与最终实际 GUI/Codex 仍待。
+- [#50 ARM64 交付](macos-delivery.md)：`01c1f14` 新包纳入 Keychain 恢复入口和迟到清理退出保护，四包 703 通过/66 跳过，21 个打包阶段及六项随包检查通过。此前原生资料/附件及隔离 Keychain 场景保持各自版本范围；第一项整包清单与身份/架构证据已刷新，稳定安装、真实 Keychain 授权/升级与最终实际 GUI/Codex 仍待。
 
 #43 已完成其范围，其余上述票据仍 OPEN；具体未完成条件以 GitHub 票据及各记录为准。现有证据不等于 Mac 总票 #19 已可交付。
 

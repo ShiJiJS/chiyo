@@ -10,11 +10,41 @@ bundle ID 保持 `com.example.infoDesktop`，不另建资料身份。
 macOS 14 和其他设备尚未实机验收。App、worker 和 CLI 主程序均为 ARM64，
 依赖库至少包含 ARM64；不提供 Intel 兼容承诺。
 
-## 当前源码与已有整包的差异
+## 2026-10-21 纳入 Keychain 恢复入口的整包（#50 继续 OPEN）
 
-`b98e487` 增加主人主动请求 Keychain 访问及等待时退出保护，`36a4bef` 补齐迟到开库清理与退出重试竞态，已完成源码 Release 构建、
-签名核验、桌面回归及隔离原生验证，见 [#42 记录](macos-keychain-validation.md)。
-下方 `541a671` ZIP 尚不包含此入口；刷新整包和实际安装/升级仍归 #50，旧包证据不扩展到新源码。
+固定干净源码 `01c1f141d876a9d3c49c61c7fc3d1e572c432c5a`，版本
+`0.4.0+12-mac-dev.01c1f141d876`。包含主人主动请求 Keychain 访问的 `b98e487`，
+以及等待授权时退出、迟到开库清理与退出重试竞态修复 `36a4bef`。
+现有 `541a671` 包不含这些新改动；两份旧包和当前安装均保留，未发布 GitHub Release。
+
+新 ZIP：
+`build/macos-adaptation/issue50-package-7/agent-info-manage-0.4.0+12-mac-dev.01c1f141d876-macos-arm64.zip`。
+**45,489,681 字节**，SHA256：
+`860df96c93a3db4779724cddba5731caf7402c141308a51057d8502d198ac228`。
+
+本轮从固定提交运行 `package-macos.py ... --check`，四包严格分析通过：
+Core **285/6**、CLI **72/40**、Storage **159/18**、Desktop **187/2**（通过/跳过），
+合计 **703 通过、66 跳过**；有条件跳过不算通过。21 个构建/签名/归档/解包阶段均退出 0。
+App、worker、五个 CLI、诊断程序、Skill/引用、SQLCipher、许可证、锁和清单为同一源码产物；
+133 个文件/链接、12 个 Mach-O，主程序均为 ARM64，原应用身份及 macOS 14.0 最低声明保持。
+实际验证宿主仍仅 macOS 27.0.1，不扩大到其他系统或设备。
+
+中文空格路径解包后，文件字节/权限/链接及 manifest 与原载荷一致，deep/strict 签名通过；
+App 沙盒、用户文件选择、书签和网络权限保留，worker 继承沙盒，Release 无调试 entitlement。
+在仅 `/usr/bin:/bin` PATH 下运行实际随包 AOT 诊断，确认 SQLCipher 4.19.0 community、
+资料重开、独立目标恢复及旧授权拒绝；该诊断使用合成内存密钥，不覆盖 Keychain。
+六项实际随包 CLI/hook/worker 检查通过，与源码测试重叠，不加到 703。
+解包 CLI SHA256：`cb9971c43daa0bccf06c31d48c6ac3ab62f3e57c34bc96655c47202b9e14f5b7`。
+
+[28 份原始构建/测试/清单与摘要](evidence/macos-delivery-keychain-access/verification.json)
+按 Git 入库原字节保留；不提交 ZIP、数据库或密钥。本轮没有再次运行旧资料/附件 UI 场景，
+也没有将 #42 隔离源码副本的真实 Keychain/模拟系统决定验证写成此 ZIP 的安装后 GUI 验收。
+其各自版本与范围见 [Keychain 记录](macos-keychain-validation.md)。
+
+Mac 仍锁屏。稳定位置实际 App、真实系统授权及签名/旧库升级、干净用户或独立 Mac、
+真实文件面板/通知/Codex 和最终日常闭环仍待；#50 第一项整包证据刷新，其他五项不勾选。
+远端 main 仍是 `b37f96a`，Windows 原生目录无改动，共享 bootstrap/launcher 的 Windows 实机回归仍待。
+所有本轮改动仅推送 `codex/macos-adaptation`，未替换用户安装或修改系统信任。
 
 ## 退出修复与后续整包
 
