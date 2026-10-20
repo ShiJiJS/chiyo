@@ -1,0 +1,12 @@
+{
+  "source": "7a33585bdc24adebaa1b06d635fb854fc86850a7",
+  "command": ".tools/qa-python/bin/python scripts/qa/macos-workflows.py --automatic",
+  "scope": "signed Debug Flutter sandbox, ephemeral SQLCipher key, actual worker and loopback SSH; picker paths stubbed; not real panels or Keychain",
+  "passed": 1,
+  "files": {
+    "raw/native-workflow.txt": {
+      "bytes": 5860,
+      "sha256": "7f7ea24ed84138052ddd9cf1111fe25c8a3dde55a5a4737dc1198813a474ac4a"
+    }
+  }
+}
