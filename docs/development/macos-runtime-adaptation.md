@@ -10,10 +10,61 @@
 - [#44 工具与附件](macos-tools-files.md)：外部 GH/AWS 实测 EPERM 后，已新增主人选择工具目录与系统书签持久化入口；原生存储/界面回归及新包 SSH/附件工作流通过，真实目录许可、外部 GH/AWS、当前系统面板仍待验收。
 - [#45 备份恢复](macos-backup-recovery.md)：签名 Flutter 的 7/8/9 格式恢复、签名 Release 应用与独立 AOT 的 80 MiB 中断回滚/同目标重试，以及固定旧源 5/6 兼容已通过；真实面板、Keychain、最终交付包联合验收与 Windows 双向迁移仍待。
 - [#46 应用生命周期](macos-lifecycle-recovery.md)：实际签名 Flutter 的重复启动拒绝、正常退出/重开、SIGKILL 重开、缺失密钥、47125 占用、初始化期间退出和 SQLCipher 审计失败重试已通过；9 个正常退出、1 个故障注入，实际菜单/睡眠唤醒仍待。执行中 worker 联合场景已在 #43 补齐。
+- [#48 移除范围与历史](evidence/macos-removed-scope-ui/verification.json)：真实 Mac Flutter/SQLCipher 与独立 AOT CLI 的 9 阶段流程连续三轮通过，每轮 19 次读取断言；四主题、200% 滚动及有效/已结束筛选与权限一致。实际系统面板、键盘、完整软件界面和其他资料管理流程仍待。
 - [#49 Codex 接入准备](evidence/macos-codex-preparation/verification.json)：已修复验收项目生成器只接受 Windows `.exe` 的问题，实际同源 ARM64 包生成独立项目并通过摘要/签名/拒绝覆盖核对；13 项真实聊天验收仍未运行，尚未安装或信任 hook。
 - [#50 ARM64 交付](macos-delivery.md)：`cccc37e` 同源 App/CLI/worker 整包已生成，133 项解包载荷、签名、合成存储诊断与实际 AOT 的 6 项检查通过；修复增量构建漏签名并去除 Release 调试访问权限。实际安装、Keychain 升级及最终 GUI/Codex 联合验收仍待。
 
 #43 已完成其范围，其余上述票据仍 OPEN；具体未完成条件以 GitHub 票据及各记录为准。现有证据不等于 Mac 总票 #19 已可交付。
+
+### #48 原生历史组件与独立 CLI 联合验证
+
+源码 `466a18e` 新增 `macos_removed_scope_native_test.dart` 与
+`scripts/qa/macos-scope-ui.py`。桌面测试使用当前源码和真实 SQLCipher；
+父进程使用已核对摘要的 `cccc37e` 随包 ARM64 CLI，通过真实 HTTP/JSON-lines
+会话申请与读取。主人创建、审批、删除和恢复由测试控制，使用隔离临时密钥，
+不读写用户资料库或 Keychain，不代表真实 Codex 聊天。
+
+最终 run-5/6/7 连续三轮通过。每轮九个阶段、19 次独立读取断言：
+原批准两字段可读；删除一个字段后原字段拒绝而另一字段仍可读；
+同名恢复生成新身份，旧许可仍拒绝，重新申请批准后才可读；
+整项删除后两份许可均拒绝；真实导出、恢复到独立加密库以及关闭/重新打开
+该库后，旧许可不能恢复。界面同时保留原字段名称和移除标记，
+处理后审批显示旧范围不可读取；历史有效筛选保留部分有效记录，
+排除全部移除和恢复归档的记录，已结束筛选与之相反。
+三轮 Flutter 均退出 0，每轮三个独立 CLI 均退出 0，成功测试目录已清理。
+
+每轮生成 22 张实际 macOS Flutter 渲染图，使用生产字体、真实阴影；
+run-5 的完整 22 张入 Git，另两轮保留摘要。包含四主题部分移除
+1440×900/100%、1280×800/200%，四主题归档 1280×800/200%，
+200% 的范围滚动图，以及全部移除和重开的 100% 图。滚动后字段名可命中，
+底部操作/事实说明仍可见。视口与字号是测试设定，组件挂载于 Scaffold，
+没有全局 72px 导航，因此不代替物理窗口、系统缩放或完整软件验收。
+严格分析通过；测试后重新构建普通 `lib/main.dart` Debug 入口并通过严格签名核对，
+未更改既有 Release 交付包。
+
+独立视觉评审逐张检查 22 图，没有发现阻断性重叠、永久裁切或明显状态误导；
+保留 Round05 结构、颜色及业务说明。仍有一项轻微问题：
+200% 归档记录左列的“11 次访问”末字单独换行，完整可读，
+在 #48 完整界面修整时改善。未进行同尺寸 HTML 对照，不声明原型还原完成。
+评审结论和范围见 [视觉记录](evidence/macos-removed-scope-ui/visual-review.json)。
+
+保留前三轮失败：run-1 使用 stdout 导致父驱动未收到根目录；
+run-2 把合并显示的字段名误断言为独立文本；
+run-3 业务阶段完成，但默认测试语义句柄在回调后释放，与原生句柄检查时点冲突。
+改用 debugPrint、准确字段行断言及项目既有 `semanticsEnabled: false`
+原生请求方式后，run-4 通过；补滚动/筛选后的最终三轮再通过。
+没有放宽产品权限断言或关闭框架泄漏检查。
+
+原始 78 份日志、结果、源快照和截图及全部摘要见证据索引。
+Computer Use 本轮仍报告锁屏，普通窗口操作、中文输入、键盘焦点、
+系统面板及 #48 其余资料管理流程继续保留未完成，六条整体验收不勾选。
+
+重跑命令（输出目录须不存在）：
+
+```bash
+python3 scripts/qa/macos-scope-ui.py build/macos-adaptation/issue48-next \
+  --delivery 'build/macos-adaptation/issue50-package-4/verify/中文 空格 路径/AgentInfoManage'
+```
 
 ### #49 可审查工作区与真实独立 stdin 接口
 

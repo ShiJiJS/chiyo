@@ -1,0 +1,269 @@
+{
+  "complete": false,
+  "productSource": "cccc37e4a1125f88c7714a26b1873fdb2ffb7a9c",
+  "cliSha256": "1341e5278d0b073eccf5444a16c38f4195f22a02b60c3b125e93b21cdc5afea6",
+  "phases": [
+    {
+      "phase": "request",
+      "checks": []
+    },
+    {
+      "phase": "approved",
+      "checks": [
+        {
+          "field": "xjNgl8uEnwWWhpAheIfTjG0UB2ZGDNp9oKsrJwMRHbM=",
+          "requestId": "Hf2xvMoTExMVZyJe20P0hn1W3aW3BncEYF9jwgTod38=",
+          "status": "ok",
+          "expectedValueMatched": true
+        },
+        {
+          "field": "KWKoc-hKXNwQbpie3A3V-wcpgvGMes1uXbCME30FZYE=",
+          "requestId": "Hf2xvMoTExMVZyJe20P0hn1W3aW3BncEYF9jwgTod38=",
+          "status": "ok",
+          "expectedValueMatched": true
+        }
+      ]
+    },
+    {
+      "phase": "partial",
+      "checks": [
+        {
+          "field": "xjNgl8uEnwWWhpAheIfTjG0UB2ZGDNp9oKsrJwMRHbM=",
+          "requestId": "Hf2xvMoTExMVZyJe20P0hn1W3aW3BncEYF9jwgTod38=",
+          "status": "unauthorized",
+          "expectedValueMatched": false
+        },
+        {
+          "field": "KWKoc-hKXNwQbpie3A3V-wcpgvGMes1uXbCME30FZYE=",
+          "requestId": "Hf2xvMoTExMVZyJe20P0hn1W3aW3BncEYF9jwgTod38=",
+          "status": "ok",
+          "expectedValueMatched": true
+        }
+      ]
+    },
+    {
+      "phase": "restored",
+      "checks": [
+        {
+          "field": "xjNgl8uEnwWWhpAheIfTjG0UB2ZGDNp9oKsrJwMRHbM=",
+          "requestId": "Hf2xvMoTExMVZyJe20P0hn1W3aW3BncEYF9jwgTod38=",
+          "status": "unauthorized",
+          "expectedValueMatched": false
+        },
+        {
+          "field": "KWKoc-hKXNwQbpie3A3V-wcpgvGMes1uXbCME30FZYE=",
+          "requestId": "Hf2xvMoTExMVZyJe20P0hn1W3aW3BncEYF9jwgTod38=",
+          "status": "ok",
+          "expectedValueMatched": true
+        },
+        {
+          "field": "kUvaIEHFnjRobuIHutiCo6Fa9tMCr9tmWujNn2wS8Ro=",
+          "requestId": "Hf2xvMoTExMVZyJe20P0hn1W3aW3BncEYF9jwgTod38=",
+          "status": "unauthorized",
+          "expectedValueMatched": false
+        }
+      ]
+    },
+    {
+      "phase": "reapproved",
+      "checks": [
+        {
+          "field": "xjNgl8uEnwWWhpAheIfTjG0UB2ZGDNp9oKsrJwMRHbM=",
+          "requestId": "Hf2xvMoTExMVZyJe20P0hn1W3aW3BncEYF9jwgTod38=",
+          "status": "unauthorized",
+          "expectedValueMatched": false
+        },
+        {
+          "field": "KWKoc-hKXNwQbpie3A3V-wcpgvGMes1uXbCME30FZYE=",
+          "requestId": "Hf2xvMoTExMVZyJe20P0hn1W3aW3BncEYF9jwgTod38=",
+          "status": "ok",
+          "expectedValueMatched": true
+        },
+        {
+          "field": "kUvaIEHFnjRobuIHutiCo6Fa9tMCr9tmWujNn2wS8Ro=",
+          "requestId": "0wUUwq8e9uFV8xmkOAvrQOEjFXLvw9-3ISpZ7fCVrX4=",
+          "status": "ok",
+          "expectedValueMatched": true
+        }
+      ]
+    },
+    {
+      "phase": "all-removed",
+      "checks": [
+        {
+          "field": "xjNgl8uEnwWWhpAheIfTjG0UB2ZGDNp9oKsrJwMRHbM=",
+          "requestId": "Hf2xvMoTExMVZyJe20P0hn1W3aW3BncEYF9jwgTod38=",
+          "status": "unauthorized",
+          "expectedValueMatched": false
+        },
+        {
+          "field": "KWKoc-hKXNwQbpie3A3V-wcpgvGMes1uXbCME30FZYE=",
+          "requestId": "Hf2xvMoTExMVZyJe20P0hn1W3aW3BncEYF9jwgTod38=",
+          "status": "unauthorized",
+          "expectedValueMatched": false
+        },
+        {
+          "field": "kUvaIEHFnjRobuIHutiCo6Fa9tMCr9tmWujNn2wS8Ro=",
+          "requestId": "0wUUwq8e9uFV8xmkOAvrQOEjFXLvw9-3ISpZ7fCVrX4=",
+          "status": "unauthorized",
+          "expectedValueMatched": false
+        }
+      ]
+    },
+    {
+      "phase": "archived",
+      "checks": [
+        {
+          "field": "xjNgl8uEnwWWhpAheIfTjG0UB2ZGDNp9oKsrJwMRHbM=",
+          "requestId": "Hf2xvMoTExMVZyJe20P0hn1W3aW3BncEYF9jwgTod38=",
+          "status": "unauthorized",
+          "expectedValueMatched": false
+        },
+        {
+          "field": "KWKoc-hKXNwQbpie3A3V-wcpgvGMes1uXbCME30FZYE=",
+          "requestId": "Hf2xvMoTExMVZyJe20P0hn1W3aW3BncEYF9jwgTod38=",
+          "status": "unauthorized",
+          "expectedValueMatched": false
+        },
+        {
+          "field": "kUvaIEHFnjRobuIHutiCo6Fa9tMCr9tmWujNn2wS8Ro=",
+          "requestId": "0wUUwq8e9uFV8xmkOAvrQOEjFXLvw9-3ISpZ7fCVrX4=",
+          "status": "unauthorized",
+          "expectedValueMatched": false
+        }
+      ]
+    },
+    {
+      "phase": "repository-reopened",
+      "checks": [
+        {
+          "field": "xjNgl8uEnwWWhpAheIfTjG0UB2ZGDNp9oKsrJwMRHbM=",
+          "requestId": "Hf2xvMoTExMVZyJe20P0hn1W3aW3BncEYF9jwgTod38=",
+          "status": "unauthorized",
+          "expectedValueMatched": false
+        },
+        {
+          "field": "KWKoc-hKXNwQbpie3A3V-wcpgvGMes1uXbCME30FZYE=",
+          "requestId": "Hf2xvMoTExMVZyJe20P0hn1W3aW3BncEYF9jwgTod38=",
+          "status": "unauthorized",
+          "expectedValueMatched": false
+        },
+        {
+          "field": "kUvaIEHFnjRobuIHutiCo6Fa9tMCr9tmWujNn2wS8Ro=",
+          "requestId": "0wUUwq8e9uFV8xmkOAvrQOEjFXLvw9-3ISpZ7fCVrX4=",
+          "status": "unauthorized",
+          "expectedValueMatched": false
+        }
+      ]
+    },
+    {
+      "phase": "complete",
+      "checks": []
+    }
+  ],
+  "nativeResult": {
+    "complete": true,
+    "encryptedRepository": true,
+    "backupRestoreAndRepositoryReopen": true,
+    "controlledOwnerMutations": true,
+    "simulatedViewportAndTextScale": true,
+    "physicalUiAcceptance": false,
+    "captures": [
+      {
+        "file": "partial-history-purple-1440-100.png",
+        "width": 1440,
+        "height": 900,
+        "textScale": 1.0
+      },
+      {
+        "file": "partial-history-purple-1280-200.png",
+        "width": 1280,
+        "height": 800,
+        "textScale": 2.0
+      },
+      {
+        "file": "partial-history-green-1440-100.png",
+        "width": 1440,
+        "height": 900,
+        "textScale": 1.0
+      },
+      {
+        "file": "partial-history-green-1280-200.png",
+        "width": 1280,
+        "height": 800,
+        "textScale": 2.0
+      },
+      {
+        "file": "partial-history-blue-1440-100.png",
+        "width": 1440,
+        "height": 900,
+        "textScale": 1.0
+      },
+      {
+        "file": "partial-history-blue-1280-200.png",
+        "width": 1280,
+        "height": 800,
+        "textScale": 2.0
+      },
+      {
+        "file": "partial-history-mono-1440-100.png",
+        "width": 1440,
+        "height": 900,
+        "textScale": 1.0
+      },
+      {
+        "file": "partial-history-mono-1280-200.png",
+        "width": 1280,
+        "height": 800,
+        "textScale": 2.0
+      },
+      {
+        "file": "all-removed-history-purple-1440-100.png",
+        "width": 1440,
+        "height": 900,
+        "textScale": 1.0
+      },
+      {
+        "file": "archived-history-purple-1280-200.png",
+        "width": 1280,
+        "height": 800,
+        "textScale": 2.0
+      },
+      {
+        "file": "archived-history-green-1280-200.png",
+        "width": 1280,
+        "height": 800,
+        "textScale": 2.0
+      },
+      {
+        "file": "archived-history-blue-1280-200.png",
+        "width": 1280,
+        "height": 800,
+        "textScale": 2.0
+      },
+      {
+        "file": "archived-history-mono-1280-200.png",
+        "width": 1280,
+        "height": 800,
+        "textScale": 2.0
+      },
+      {
+        "file": "reopened-history-green-1440-100.png",
+        "width": 1440,
+        "height": 900,
+        "textScale": 1.0
+      }
+    ]
+  },
+  "flutterExitCode": 1,
+  "failure": {
+    "type": "AssertionError",
+    "message": ""
+  },
+  "cliExits": [
+    0,
+    0,
+    0
+  ],
+  "retainedOwnedRoot": "/Users/jiangxinyi/Library/Containers/com.example.infoDesktop/Data/tmp/aim-mac-scope-ui-nreE5J"
+}
