@@ -1,0 +1,1398 @@
+Resolving dependencies...
+Downloading packages...
+  shelf 1.4.2 (1.4.3 available)
+  shelf_static 1.1.3 (1.2.0 available)
+Got dependencies!
+2 packages have newer versions incompatible with dependency constraints.
+Try `dart pub outdated` for more information.
+Resolving dependencies...
+Downloading packages...
+  shelf 1.4.2 (1.4.3 available)
+  shelf_static 1.1.3 (1.2.0 available)
+Got dependencies!
+2 packages have newer versions incompatible with dependency constraints.
+Try `dart pub outdated` for more information.
+Resolving dependencies...
+Downloading packages...
+  shelf 1.4.2 (1.4.3 available)
+  shelf_static 1.1.3 (1.2.0 available)
+Got dependencies!
+2 packages have newer versions incompatible with dependency constraints.
+Try `dart pub outdated` for more information.
+Resolving dependencies...
+Downloading packages...
+  material_color_utilities 0.13.0 (0.13.1 available)
+  test_api 0.7.12 (0.7.15 available)
+  vector_math 2.4.0 (2.4.3 available)
+Got dependencies!
+3 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Analyzing info_core...
+
+  error - test/macos_directory_publication_test.dart:24:9 - Undefined name 'throwsFileSystemException'. Try correcting the name to one that is defined, or defining the name. - undefined_identifier
+
+1 issue found.
+info_core checks failed; continuing with the other modules.
+Analyzing info_cli...
+No issues found!
+00:00 +0: loading test/worker_registration_failure_test.dart
+00:00 +0: test/worker_registration_failure_test.dart: a durable worker registration failure stops the waiting worker before target creation and consumes only the original attempt
+00:00 +1: test/worker_registration_failure_test.dart: a durable worker registration failure stops the waiting worker before target creation and consumes only the original attempt
+00:00 +2: test/worker_registration_failure_test.dart: a durable worker registration failure stops the waiting worker before target creation and consumes only the original attempt
+00:00 +2 ~1: test/worker_registration_failure_test.dart: a durable worker registration failure stops the waiting worker before target creation and consumes only the original attempt
+00:00 +3 ~1: test/worker_registration_failure_test.dart: a durable worker registration failure stops the waiting worker before target creation and consumes only the original attempt
+00:00 +3 ~2: test/worker_registration_failure_test.dart: a durable worker registration failure stops the waiting worker before target creation and consumes only the original attempt
+00:00 +3 ~3: test/worker_registration_failure_test.dart: a durable worker registration failure stops the waiting worker before target creation and consumes only the original attempt
+00:00 +4 ~3: test/worker_registration_failure_test.dart: a durable worker registration failure stops the waiting worker before target creation and consumes only the original attempt
+00:00 +5 ~3: test/worker_registration_failure_test.dart: a durable worker registration failure stops the waiting worker before target creation and consumes only the original attempt
+00:00 +5 ~4: test/worker_registration_failure_test.dart: a durable worker registration failure stops the waiting worker before target creation and consumes only the original attempt
+00:00 +5 ~5: test/worker_registration_failure_test.dart: a durable worker registration failure stops the waiting worker before target creation and consumes only the original attempt
+00:00 +6 ~5: test/worker_registration_failure_test.dart: a durable worker registration failure stops the waiting worker before target creation and consumes only the original attempt
+00:00 +6 ~6: test/worker_registration_failure_test.dart: a durable worker registration failure stops the waiting worker before target creation and consumes only the original attempt
+00:00 +6 ~7: test/worker_registration_failure_test.dart: a durable worker registration failure stops the waiting worker before target creation and consumes only the original attempt
+00:00 +7 ~7: test/worker_registration_failure_test.dart: a durable worker registration failure stops the waiting worker before target creation and consumes only the original attempt
+00:00 +7 ~8: test/worker_registration_failure_test.dart: a durable worker registration failure stops the waiting worker before target creation and consumes only the original attempt
+00:00 +7 ~9: test/worker_registration_failure_test.dart: a durable worker registration failure stops the waiting worker before target creation and consumes only the original attempt
+00:00 +7 ~10: test/worker_registration_failure_test.dart: a durable worker registration failure stops the waiting worker before target creation and consumes only the original attempt
+00:00 +8 ~10: test/worker_registration_failure_test.dart: a durable worker registration failure stops the waiting worker before target creation and consumes only the original attempt
+00:00 +9 ~10: test/worker_registration_failure_test.dart: a durable worker registration failure stops the waiting worker before target creation and consumes only the original attempt
+00:00 +9 ~11: test/worker_registration_failure_test.dart: a durable worker registration failure stops the waiting worker before target creation and consumes only the original attempt
+00:00 +9 ~12: test/worker_registration_failure_test.dart: a durable worker registration failure stops the waiting worker before target creation and consumes only the original attempt
+00:00 +9 ~13: test/worker_registration_failure_test.dart: a durable worker registration failure stops the waiting worker before target creation and consumes only the original attempt
+00:00 +9 ~14: test/worker_registration_failure_test.dart: a durable worker registration failure stops the waiting worker before target creation and consumes only the original attempt
+00:00 +9 ~15: test/worker_registration_failure_test.dart: a durable worker registration failure stops the waiting worker before target creation and consumes only the original attempt
+00:00 +9 ~16: test/worker_registration_failure_test.dart: a durable worker registration failure stops the waiting worker before target creation and consumes only the original attempt
+00:00 +9 ~17: test/worker_registration_failure_test.dart: a durable worker registration failure stops the waiting worker before target creation and consumes only the original attempt
+00:00 +9 ~18: test/worker_registration_failure_test.dart: a durable worker registration failure stops the waiting worker before target creation and consumes only the original attempt
+00:00 +10 ~18: test/worker_registration_failure_test.dart: a durable worker registration failure stops the waiting worker before target creation and consumes only the original attempt
+00:01 +11 ~18: test/worker_registration_failure_test.dart: a durable worker registration failure stops the waiting worker before target creation and consumes only the original attempt
+00:01 +12 ~18: test/adjusted_scope_cli_test.dart: real CLI learns and reads the owner-adjusted range and fixed expiry
+00:01 +12 ~19: test/adjusted_scope_cli_test.dart: real CLI learns and reads the owner-adjusted range and fixed expiry
+00:01 +13 ~19: test/credential_reuse_runtime_test.dart: native platform workers run three operations with separate groups and one unchanged grant
+00:02 +13 ~20: test/credential_reuse_runtime_test.dart: native platform workers run three operations with separate groups and one unchanged grant
+00:02 +13 ~21: test/credential_reuse_runtime_test.dart: native platform workers run three operations with separate groups and one unchanged grant
+00:02 +14 ~21: test/credential_reuse_runtime_test.dart: native platform workers run three operations with separate groups and one unchanged grant
+00:03 +15 ~21: test/credential_reuse_runtime_test.dart: native platform workers run three operations with separate groups and one unchanged grant
+00:03 +16 ~21: test/credential_reuse_runtime_test.dart: native platform workers run three operations with separate groups and one unchanged grant
+00:03 +16 ~22: test/credential_reuse_runtime_test.dart: native platform workers run three operations with separate groups and one unchanged grant
+00:03 +16 ~23: test/credential_reuse_runtime_test.dart: native platform workers run three operations with separate groups and one unchanged grant
+00:04 +17 ~23: test/bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:04 +18 ~23: test/bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:04 +19 ~23: test/bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:05 +20 ~23: test/bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:05 +20 ~23: test/credential_reuse_runtime_test.dart: native file workers inject two independent paths and clear their registered material
+{"phase":"native_file_cleanup_before_wait","operationId":"us-east-1","executionState":"exited","cleanupState":"complete"}
+00:05 +21 ~23: test/bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:06 +22 ~23: test/bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:06 +22 ~23: test/credential_reuse_runtime_test.dart: native file workers inject two independent paths and clear their registered material
+{"phase":"native_file_cleanup_before_wait","operationId":"us-west-2","executionState":"exited","cleanupState":"complete"}
+00:06 +23 ~23: test/bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:06 +24 ~23: test/macos_worker_lifetime_test.dart: Darwin AOT worker lifetime: worker-crash
+00:06 +24 ~24: test/macos_worker_lifetime_test.dart: Darwin AOT worker lifetime: worker-crash
+00:06 +24 ~25: test/macos_worker_lifetime_test.dart: Darwin AOT worker lifetime: worker-crash
+00:06 +24 ~26: test/macos_worker_lifetime_test.dart: Darwin AOT worker lifetime: worker-crash
+00:06 +24 ~27: test/macos_worker_lifetime_test.dart: Darwin AOT worker lifetime: worker-crash
+00:07 +25 ~27: test/macos_worker_lifetime_test.dart: Darwin AOT worker lifetime: worker-crash
+00:07 +25 ~28: test/macos_worker_lifetime_test.dart: Darwin AOT worker lifetime: worker-crash
+00:07 +25 ~29: test/macos_worker_lifetime_test.dart: Darwin AOT worker lifetime: worker-crash
+00:07 +26 ~29: test/macos_worker_lifetime_test.dart: Darwin AOT worker lifetime: worker-crash
+00:07 +26 ~30: test/macos_worker_lifetime_test.dart: Darwin AOT worker lifetime: worker-crash
+00:07 +27 ~30: test/credential_reuse_runtime_test.dart: full resident capacity still returns duplicate facts without another start
+00:07 +28 ~30: test/credential_reuse_runtime_test.dart: full resident capacity still returns duplicate facts without another start
+00:07 +29 ~30: test/credential_reuse_runtime_test.dart: full resident capacity still returns duplicate facts without another start
+00:08 +30 ~30: test/credential_catalog_cli_test.dart: real CLI discovers only opted-in metadata and rejects duplicate/unknown properties
+00:08 +30 ~31: test/credential_catalog_cli_test.dart: real CLI discovers only opted-in metadata and rejects duplicate/unknown properties
+00:08 +31 ~31: test/credential_catalog_cli_test.dart: real CLI discovers only opted-in metadata and rejects duplicate/unknown properties
+00:08 +32 ~31: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:08 +32 ~32: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:09 +33 ~32: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:09 +34 ~32: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:09 +35 ~32: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:09 +36 ~32: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:09 +37 ~32: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:09 +38 ~32: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:09 +39 ~32: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:09 +39 ~33: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:09 +40 ~33: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:09 +41 ~33: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:09 +42 ~33: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:09 +43 ~33: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:09 +44 ~33: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:09 +45 ~33: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:09 +46 ~33: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:09 +47 ~33: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:10 +48 ~33: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:10 +48 ~34: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:10 +48 ~35: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:10 +48 ~36: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:10 +49 ~36: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:10 +50 ~36: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:10 +51 ~36: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:10 +52 ~36: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:10 +53 ~36: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:11 +54 ~36: test/codex_process_test.dart: a stalled end call stops within its deadline and retains capabilities for a later retry
+00:11 +55 ~36: test/codex_process_test.dart: a stalled end call stops within its deadline and retains capabilities for a later retry
+00:11 +56 ~36: test/codex_process_test.dart: a stalled end call stops within its deadline and retains capabilities for a later retry
+00:11 +57 ~36: test/codex_process_test.dart: a stalled end call stops within its deadline and retains capabilities for a later retry
+00:11 +58 ~36: test/codex_process_test.dart: a stalled end call stops within its deadline and retains capabilities for a later retry
+00:11 +59 ~36: test/codex_process_test.dart: a stalled end call stops within its deadline and retains capabilities for a later retry
+00:11 +60 ~36: test/codex_process_test.dart: a stalled end call stops within its deadline and retains capabilities for a later retry
+00:11 +61 ~36: test/codex_process_test.dart: a stalled end call stops within its deadline and retains capabilities for a later retry
+00:11 +61 ~37: test/codex_process_test.dart: a stalled end call stops within its deadline and retains capabilities for a later retry
+00:13 +62 ~37: test/codex_process_test.dart: a stalled end call stops within its deadline and retains capabilities for a later retry
+00:13 +62 ~38: test/codex_process_test.dart: a stalled end call stops within its deadline and retains capabilities for a later retry
+00:13 +62 ~39: test/codex_process_test.dart: a stalled end call stops within its deadline and retains capabilities for a later retry
+00:13 +62 ~40: test/codex_process_test.dart: a stalled end call stops within its deadline and retains capabilities for a later retry
+00:14 +63 ~40: test/codex_process_test.dart: a stalled end call stops within its deadline and retains capabilities for a later retry
+00:14 +64 ~40: test/codex_focused_fill_test.dart: separate adapter processes discover, request once, reuse, query duplicates and obey revocation without returning secrets
+00:14 +65 ~40: test/codex_focused_fill_test.dart: separate adapter processes discover, request once, reuse, query duplicates and obey revocation without returning secrets
+00:22 +66 ~40: test/codex_process_test.dart: root SessionEnd ends every startup generation and its delegated child without reading a transcript
+00:25 +67 ~40: test/codex_process_test.dart: a parent proof delegates only the same grant and deadline to its intended child
+00:31 +68 ~40: test/codex_process_test.dart: explicit reconnect creates a fresh association without recovering grants
+00:32 +69 ~40: test/codex_process_test.dart: known chat and request IDs cannot recover a capability, even by restarting the hook
+00:38 +70 ~40: test/codex_process_test.dart: malformed associations and hook input fail without leaking input or reading transcripts
+00:40 +71 ~40: test/codex_process_test.dart: hook association supports distinct CLI processes without reapproval
+00:46 +72 ~40: All tests passed!
+info_cli checks passed.
+Analyzing info_storage...
+No issues found!
+Running build hooks...Running build hooks...00:00 +0: loading test/credential_reuse_storage_test.dart
+00:00 +0: test/credential_reuse_storage_test.dart: invalid reusable runtime snapshots are refused atomically
+00:00 +0 ~1: test/credential_reuse_storage_test.dart: invalid reusable runtime snapshots are refused atomically
+00:00 +0 ~2: test/credential_reuse_storage_test.dart: invalid reusable runtime snapshots are refused atomically
+00:00 +1 ~2: test/credential_reuse_storage_test.dart: invalid reusable runtime snapshots are refused atomically
+00:00 +2 ~2: test/credential_reuse_storage_test.dart: invalid reusable runtime snapshots are refused atomically
+00:00 +3 ~2: test/file_runtime_storage_test.dart: reopening encrypted storage preserves the material registry but no capability, and marks unconfirmed file use for inspection
+00:00 +4 ~2: test/information_delivery_storage_test.dart: real encrypted registry precedes native body writes and fixed copies persist without plaintext vault data
+00:00 +4 ~2: test/request_history_test.dart: format four restores request facts without any pending session
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/request_history_test.dart:95:25)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:00 +5 ~2: test/information_delivery_storage_test.dart: real encrypted registry precedes native body writes and fixed copies persist without plaintext vault data
+00:00 +5 ~3: test/information_delivery_storage_test.dart: real encrypted registry precedes native body writes and fixed copies persist without plaintext vault data
+00:00 +6 ~3: test/information_delivery_storage_test.dart: real encrypted registry precedes native body writes and fixed copies persist without plaintext vault data
+00:00 +7 ~3: test/credential_reuse_storage_test.dart: future header is rejected before version changes or runtime writes
+00:00 +8 ~3: test/request_history_test.dart: terminal requests survive reopen as facts without pending capability
+00:00 +9 ~3: test/request_history_test.dart: terminal requests survive reopen as facts without pending capability
+00:00 +10 ~3: test/information_delivery_storage_test.dart: registration transaction failure publishes no path, retains ordered audit facts and never replays
+00:00 +11 ~3: test/credential_reuse_storage_test.dart: future missing-marker is rejected before version changes or runtime writes
+00:00 +12 ~3: test/information_attachments_storage_test.dart: file libraries reject a1001st template before committing unbackable rows
+00:00 +13 ~3: test/information_attachments_storage_test.dart: file libraries reject a1001st template before committing unbackable rows
+00:00 +14 ~3: test/information_attachments_storage_test.dart: file libraries reject a1001st template before committing unbackable rows
+00:00 +15 ~3: test/information_attachments_storage_test.dart: file libraries reject a1001st template before committing unbackable rows
+00:00 +15 ~4: test/information_attachments_storage_test.dart: file libraries reject a1001st template before committing unbackable rows
+00:00 +15 ~5: test/information_attachments_storage_test.dart: file libraries reject a1001st template before committing unbackable rows
+00:00 +16 ~5: test/information_attachments_storage_test.dart: file libraries reject a1001st template before committing unbackable rows
+00:00 +17 ~5: test/information_attachments_storage_test.dart: file libraries reject a1001st template before committing unbackable rows
+00:00 +18 ~5: test/information_attachments_storage_test.dart: file libraries reject a1001st template before committing unbackable rows
+00:00 +18 ~5: test/credential_reuse_storage_test.dart: backup6 restores per-operation plans and terminal states independently (activeFirst=true)
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/credential_reuse_storage_test.dart:762:24)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:00 +19 ~5: test/information_attachments_storage_test.dart: file libraries reject a1001st template before committing unbackable rows
+00:00 +20 ~5: test/information_attachments_storage_test.dart: file libraries reject a1001st template before committing unbackable rows
+00:00 +20 ~5: test/credential_reuse_storage_test.dart: backup6 restores per-operation plans and terminal states independently (activeFirst=false)
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/credential_reuse_storage_test.dart:762:24)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:00 +21 ~5: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:00 +21 ~5: test/information_delivery_storage_test.dart: format9 archives facts and original bytes without leases or associations and restores no execution capability
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/information_delivery_storage_test.dart:516:22)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:00 +22 ~5: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:00 +23 ~5: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:00 +24 ~5: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:00 +24 ~5: test/information_delivery_storage_test.dart: authenticated format9 rejects private capabilities, duplicate nested keys and mismatched original/history references
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/information_delivery_storage_test.dart:570:22)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:01 +25 ~5: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:01 +26 ~5: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:01 +26 ~6: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:01 +26 ~6: test/information_delivery_storage_test.dart: late format9 archive insert failure rolls back original BLOBs and all tables before retry
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/information_delivery_storage_test.dart:646:22)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:01 +27 ~6: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:01 +28 ~6: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:01 +29 ~6: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:01 +29 ~6: test/attachment_legacy_boundary_test.dart: authenticated format7 file-kind strings are rejected before inspection or restore, not downgraded
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/attachment_legacy_boundary_test.dart:82:22)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:01 +30 ~6: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:01 +31 ~6: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:01 +32 ~6: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:01 +33 ~6: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:01 +34 ~6: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:02 +35 ~6: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:02 +36 ~6: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:02 +37 ~6: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:02 +38 ~6: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:02 +39 ~6: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:02 +40 ~6: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:02 +41 ~6: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:02 +42 ~6: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:02 +43 ~6: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:02 +44 ~6: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:02 +45 ~6: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:02 +46 ~6: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:03 +47 ~6: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:03 +48 ~6: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:03 +49 ~6: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:03 +50 ~6: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:03 +51 ~6: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:03 +52 ~6: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:03 +53 ~6: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:03 +54 ~6: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:03 +55 ~6: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:03 +56 ~6: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:03 +57 ~6: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:04 +58 ~6: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:04 +58 ~7: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:04 +59 ~7: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:04 +60 ~7: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:04 +61 ~7: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:04 +62 ~7: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:04 +63 ~7: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:06 +63 ~7: test/information_attachments_storage_test.dart: file libraries reject history beyond the shared500000 nested fact ceiling
+00:06 +63 ~7: test/macos_backup_recovery_test.dart: (setUpAll)
+MAC_RESTORE_AOT_PAYLOAD=[{"path":"bin/macos_restore_child","bytes":7225008,"sha256":"3d51744d2b795c74b8204b1b0f1d6c242d3f3c2af18ab5056ec96f72783c7631"},{"path":"lib/libsqlcipher.dylib","bytes":1792352,"sha256":"0eea040b90e45f380573abd315e79bd25a2ac17dff9818fbaa47fec1e213102f"}]
+00:06 +63 ~7: test/information_attachments_storage_test.dart: file libraries reject history beyond the shared500000 nested fact ceiling
+00:08 +64 ~7: test/information_attachments_storage_test.dart: file libraries reject history beyond the shared500000 nested fact ceiling
+00:08 +65 ~7: test/information_attachments_storage_test.dart: file libraries reject history beyond the shared500000 nested fact ceiling
+00:09 +66 ~7: test/information_attachments_storage_test.dart: file libraries reject history beyond the shared500000 nested fact ceiling
+00:10 +67 ~7: test/information_attachments_storage_test.dart: file libraries reject history beyond the shared500000 nested fact ceiling
+00:10 +68 ~7: test/information_attachments_storage_test.dart: file libraries reject history beyond the shared500000 nested fact ceiling
+00:11 +69 ~7: test/information_attachments_storage_test.dart: file libraries reject history beyond the shared500000 nested fact ceiling
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/information_attachments_storage_test.dart:141:27)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:11 +70 ~7: test/information_attachments_storage_test.dart: file libraries reject history beyond the shared500000 nested fact ceiling
+00:12 +70 ~7: test/mixed_lifecycle_macos_test.dart: terminal audit recovery preserves the observed exit without replay or a permanently running record
+{"phase":"terminal-audit-recovery","unavailable":true,"publicStateDuringFailure":"unknown","ownerStateDuringFailure":"unknown","recoveredState":"exited","recoveredExitCode":0,"cleanup":"complete","materialPresent":false}
+00:12 +71 ~7: test/information_attachments_storage_test.dart: file libraries reject history beyond the shared500000 nested fact ceiling
+00:22 +72 ~7: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:24 +73 ~7: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:24 +73 ~7: test/focused_fill_storage_test.dart: format9 preserves command, fill and credential archives alongside ordinary originals without file delivery authority
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/focused_fill_storage_test.dart:411:22)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:24 +74 ~7: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:24 +75 ~7: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:24 +75 ~7: test/focused_fill_storage_test.dart: terminal refused remains an input fact across owner review and backup
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/focused_fill_storage_test.dart:514:24)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:24 +76 ~7: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:24 +76 ~7: test/focused_fill_storage_test.dart: terminal partial remains an input fact across owner review and backup
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/focused_fill_storage_test.dart:514:24)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:24 +77 ~7: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:24 +77 ~7: test/focused_fill_storage_test.dart: terminal unknown remains an input fact across owner review and backup
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/focused_fill_storage_test.dart:514:24)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:24 +78 ~7: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:24 +79 ~7: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:24 +80 ~7: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:24 +81 ~7: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:24 +82 ~7: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:24 +82 ~7: test/focused_fill_storage_test.dart: format7 encrypted backup includes both result types, excludes pending and restores facts only
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/focused_fill_storage_test.dart:745:22)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:24 +83 ~7: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:24 +83 ~7: test/focused_fill_storage_test.dart: format7 refuses extra/private data and mismatched fill associations without changing recipient
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/focused_fill_storage_test.dart:801:22)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:24 +84 ~7: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:24 +85 ~7: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:24 +85 ~8: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:24 +86 ~8: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:24 +87 ~8: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:24 +87 ~9: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:24 +88 ~9: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:25 +89 ~9: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:25 +89 ~9: test/macos_backup_recovery_test.dart: Mac AOT format8 interruption during 80MiB restore rolls back and retries with distinct target key
+MAC_RESTORE_FORMAT_8: AOT SIGKILL after 5MiB growth and hot journal; SQLCipher integrity/rollback passed; same-target retry restored 80MiB and no live authority. Synthetic in-memory keys, not Keychain or packaged UI.
+00:25 +90 ~9: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:25 +91 ~9: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:25 +92 ~9: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:25 +92 ~9: test/credential_backup_test.dart: restored credential history contains no pending authority or private process registration
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/credential_backup_test.dart:134:22)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:25 +93 ~9: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:25 +93 ~9: test/credential_backup_test.dart: current format restores credential bytes, versions, states and links under a fresh local key
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/credential_backup_test.dart:303:22)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/credential_backup_test.dart:342:24)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/credential_backup_test.dart:394:24)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/credential_backup_test.dart:394:24)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/credential_backup_test.dart:424:20)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:25 +94 ~9: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:25 +95 ~9: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:25 +96 ~9: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:25 +97 ~9: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:25 +98 ~9: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:26 +99 ~9: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:26 +100 ~9: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:26 +101 ~9: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:26 +102 ~9: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:26 +102 ~10: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:26 +102 ~11: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:26 +102 ~12: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:26 +102 ~13: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:26 +102 ~14: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:26 +102 ~15: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:26 +102 ~16: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:26 +103 ~16: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:26 +104 ~16: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:26 +105 ~16: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:26 +105 ~16: test/information_attachments_storage_test.dart: full format8 round trip restores current and revision originals under recipient key
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/information_attachments_storage_test.dart:554:22)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:26 +106 ~16: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:26 +106 ~16: test/information_attachments_storage_test.dart: zero byte original round trip is distinct from missing content
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/information_attachments_storage_test.dart:604:22)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:26 +107 ~16: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:26 +107 ~16: test/organization_tasks_test.dart: organization proposals reopen, preserve content, and are excluded from recovery
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/organization_tasks_test.dart:68:25)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:26 +107 ~16: test/information_attachments_storage_test.dart: source replacement after preview rejects changed data and leaves recipient empty
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/information_attachments_storage_test.dart:630:22)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:26 +108 ~16: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:26 +109 ~16: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:26 +110 ~16: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:26 +110 ~16: test/information_attachments_storage_test.dart: restore write failure rolls back installed BLOBs and retains ephemeral owner draft
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/information_attachments_storage_test.dart:659:22)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:26 +111 ~16: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:26 +112 ~16: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:26 +112 ~16: test/information_attachments_storage_test.dart: authenticated domain corruption in current, revision or side refs fails before restore
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/information_attachments_storage_test.dart:713:22)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:26 +113 ~16: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:26 +114 ~16: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:26 +115 ~16: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:26 +115 ~17: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:26 +116 ~17: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:26 +117 ~17: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:26 +118 ~17: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:26 +119 ~17: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:26 +119 ~17: test/complete_backup_test.dart: clock rollback never makes legitimate grant history unexportable or restores live authority
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/complete_backup_test.dart:98:24)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/complete_backup_test.dart:98:24)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:27 +120 ~17: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:27 +121 ~17: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:27 +122 ~17: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:27 +122 ~17: test/complete_backup_test.dart: format 3 preserves original information times through complete restore and rejects malformed dates atomically
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/complete_backup_test.dart:159:22)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:27 +123 ~17: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:27 +124 ~17: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:27 +124 ~17: test/complete_backup_test.dart: complete backup preserves grouped recycle fields from replace
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/complete_backup_test.dart:248:24)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:27 +125 ~17: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:27 +125 ~17: test/complete_backup_test.dart: complete backup preserves grouped recycle fields from rollback
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/complete_backup_test.dart:248:24)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:27 +126 ~17: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:27 +126 ~17: test/complete_backup_test.dart: complete backup roundtrips grouped removed fields and zero-field whole-item metadata
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/complete_backup_test.dart:333:22)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:27 +127 ~17: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:27 +128 ~17: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:27 +129 ~17: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:27 +130 ~17: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:27 +130 ~17: test/complete_backup_test.dart: each audit retention setting keeps its exact boundary and expires it on later restore
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/complete_backup_test.dart:444:24)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:27 +131 ~17: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:27 +131 ~17: test/complete_backup_test.dart: each audit retention setting keeps its exact boundary and expires it on later restore
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/complete_backup_test.dart:444:24)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/complete_backup_test.dart:444:24)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/complete_backup_test.dart:444:24)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:27 +132 ~17: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:27 +132 ~17: test/complete_backup_test.dart: legacy format 1 restores unknown dates without inventing history or credentials
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/complete_backup_test.dart:519:24)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:27 +133 ~17: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:27 +133 ~17: test/complete_backup_test.dart: legacy format 2 restores unknown dates without inventing history or credentials
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/complete_backup_test.dart:519:24)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:27 +134 ~17: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:27 +134 ~17: test/complete_backup_test.dart: authenticated hostile history payloads fail before changing recipient preferences
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/complete_backup_test.dart:579:22)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:27 +135 ~17: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:27 +135 ~17: test/complete_backup_test.dart: retention applies at export and delayed restore without renewing content lifetimes
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/complete_backup_test.dart:805:25)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:27 +136 ~17: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:27 +136 ~17: test/complete_backup_test.dart: complete backup preserves retained versions, recycle and past audit without live capabilities
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/complete_backup_test.dart:955:23)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/complete_backup_test.dart:1002:19)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:27 +137 ~17: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:27 +138 ~17: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:27 +139 ~17: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:27 +140 ~17: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:27 +141 ~17: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:28 +142 ~17: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:28 +142 ~18: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:28 +143 ~18: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:28 +143 ~18: test/information_attachment_lifecycle_test.dart: current and retained originals export exact bytes from a fixed read transaction
+live attachment snapshot: journal=delete, independent BEGIN IMMEDIATE=SQLITE_BUSY
+00:28 +144 ~18: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:28 +145 ~18: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:28 +146 ~18: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:28 +147 ~18: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:28 +147 ~18: test/information_file_staging_test.dart: backup excludes stages and successful restore clears drafts atomically; wrong key preserves them
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/information_file_staging_test.dart:342:22)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:28 +148 ~18: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:28 +149 ~18: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:28 +150 ~18: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:28 +151 ~18: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:28 +151 ~18: test/information_attachment_lifecycle_test.dart: delayed restore prunes expired originals from the same backup without reviving them on rollback
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/information_attachment_lifecycle_test.dart:287:22)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:28 +152 ~18: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:28 +152 ~18: test/information_attachment_lifecycle_test.dart: backup of a purged original keeps unavailable metadata and no chunks
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/information_attachment_lifecycle_test.dart:340:22)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:28 +153 ~18: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:28 +154 ~18: test/information_delivery_storage_test.dart: independent CLI uses one mixed approval and resolves a real fetch timeout by original operation without a second copy
+00:32 +155 ~18: test/macos_backup_recovery_test.dart: Mac AOT format9 interruption during 80MiB restore rolls back and retries with distinct target key
+00:33 +156 ~18: test/macos_backup_recovery_test.dart: Mac AOT format9 interruption during 80MiB restore rolls back and retries with distinct target key
+MAC_RESTORE_FORMAT_9: AOT SIGKILL after 4MiB growth and hot journal; SQLCipher integrity/rollback passed; same-target retry restored 80MiB and no live authority. Synthetic in-memory keys, not Keychain or packaged UI.
+00:43 +157 ~18: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:46 +158 ~18: test/information_delivery_storage_test.dart: schema20 upgrade preserves file originals and refuses a conflicting new registry table atomically
+00:46 +159 ~18: All tests passed!
+info_storage checks passed.
+Analyzing desktop...                                            
+No issues found! (ran in 1.4s)
+00:00 +0: loading /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_navigation_test.dart
+00:00 +0: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_runtime_test.dart: startup removes expired attachment originals while preserving the current file
+00:00 +1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credentials_test.dart: 1280 failure keeps complete save action reachable without shrinking the form
+00:00 +2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credentials_test.dart: 1280 failure keeps complete save action reachable without shrinking the form
+00:00 +3: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credentials_test.dart: 1280 failure keeps complete save action reachable without shrinking the form
+00:00 +4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credentials_test.dart: 1280 failure keeps complete save action reachable without shrinking the form
+00:00 +5: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credentials_test.dart: 1280 failure keeps complete save action reachable without shrinking the form
+00:00 +6: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credentials_test.dart: 1280 failure keeps complete save action reachable without shrinking the form
+00:00 +7: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credentials_test.dart: 1280 failure keeps complete save action reachable without shrinking the form
+00:00 +8: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credentials_test.dart: 1280 failure keeps complete save action reachable without shrinking the form
+00:00 +9: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credentials_test.dart: 1280 failure keeps complete save action reachable without shrinking the form
+00:00 +10: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credentials_test.dart: 1280 failure keeps complete save action reachable without shrinking the form
+00:00 +11: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/import_review_states_test.dart: failed import preserves the edited read-only draft and retries the complete batch once
+00:01 +12: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/import_review_states_test.dart: failed import preserves the edited read-only draft and retries the complete batch once
+00:01 +13: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_navigation_test.dart: navigation switches one selection immediately and pages share an origin
+00:01 +14: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_navigation_test.dart: navigation switches one selection immediately and pages share an origin
+00:01 +15: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_navigation_test.dart: navigation switches one selection immediately and pages share an origin
+00:01 +16: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_navigation_test.dart: navigation switches one selection immediately and pages share an origin
+00:02 +17: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_navigation_test.dart: navigation switches one selection immediately and pages share an origin
+00:02 +18: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_navigation_test.dart: navigation switches one selection immediately and pages share an origin
+00:02 +19: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_navigation_test.dart: navigation switches one selection immediately and pages share an origin
+00:02 +20: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_navigation_test.dart: navigation switches one selection immediately and pages share an origin
+00:02 +21: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_navigation_test.dart: navigation switches one selection immediately and pages share an origin
+00:02 +22: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_navigation_test.dart: navigation switches one selection immediately and pages share an origin
+00:03 +23: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_navigation_test.dart: navigation switches one selection immediately and pages share an origin
+00:03 +23: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/information_file_backup_test.dart: SQLCipher backup flow reports and restores exact current and retained originals without grants, stages or live copies
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure>.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/information_file_backup_test.dart:151:24)
+<asynchronous suspension>
+#6      _AsyncCompleter.complete (dart:async/future_impl.dart:96:3)
+<asynchronous suspension>
+#7      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/information_file_backup_test.dart:143:7)
+<asynchronous suspension>
+#8      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#9      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+#10     StackZoneSpecification._registerCallback.<anonymous closure> (package:stack_trace/src/stack_zone_specification.dart:114:42)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:03 +24: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_navigation_test.dart: navigation switches one selection immediately and pages share an origin
+00:03 +25: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_navigation_test.dart: navigation switches one selection immediately and pages share an origin
+00:03 +26: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_navigation_test.dart: navigation switches one selection immediately and pages share an origin
+00:03 +27: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_navigation_test.dart: navigation switches one selection immediately and pages share an origin
+00:03 +28: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_navigation_test.dart: navigation switches one selection immediately and pages share an origin
+00:03 +29: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_navigation_test.dart: navigation switches one selection immediately and pages share an origin
+00:03 +30: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/information_file_backup_test.dart: SQLCipher backup flow reports and restores exact current and retained originals without grants, stages or live copies
+00:03 +31: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/information_file_backup_test.dart: SQLCipher backup flow reports and restores exact current and retained originals without grants, stages or live copies
+00:03 +32: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/information_file_backup_test.dart: SQLCipher backup flow reports and restores exact current and retained originals without grants, stages or live copies
+00:03 +33: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/information_file_backup_test.dart: SQLCipher backup flow reports and restores exact current and retained originals without grants, stages or live copies
+00:04 +34: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_navigation_test.dart: notification settings show permission and test-delivery outcomes without changing access
+00:04 +35: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/proposal_workspace_test.dart: a stopped query reports failure without claiming an empty successful result
+00:04 +36: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/settings_round05_test.dart: organization result opens its actual historical task across pages
+00:05 +37: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:05 +38: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:05 +39: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:05 +40: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:05 +41: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:05 +42: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:05 +43: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:06 +44: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:06 +45: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:06 +46: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:06 +47: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:06 +48: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:07 +49: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:07 +50: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:07 +51: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:07 +52: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:07 +53: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:07 +54: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:07 +55: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:08 +56: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:08 +57: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:08 +58: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/organization_widget_test.dart: owner creates hierarchy and tags then organizes an item
+00:08 +59: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/organization_widget_test.dart: owner creates hierarchy and tags then organizes an item
+00:08 +60: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/organization_widget_test.dart: owner creates hierarchy and tags then organizes an item
+00:09 +61: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/organization_widget_test.dart: owner creates hierarchy and tags then organizes an item
+00:09 +62: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_history_widget_test.dart: one mixed history entry preserves independent credential and field grants and links back to its credential
+00:09 +63: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_history_widget_test.dart: one mixed history entry preserves independent credential and field grants and links back to its credential
+00:09 +64: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_history_widget_test.dart: one mixed history entry preserves independent credential and field grants and links back to its credential
+00:09 +65: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_history_widget_test.dart: one mixed history entry preserves independent credential and field grants and links back to its credential
+00:10 +66: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_history_widget_test.dart: one mixed history entry preserves independent credential and field grants and links back to its credential
+00:10 +67: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_history_widget_test.dart: one mixed history entry preserves independent credential and field grants and links back to its credential
+00:10 +68: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_history_widget_test.dart: one mixed history entry preserves independent credential and field grants and links back to its credential
+00:10 +69: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_history_widget_test.dart: one mixed history entry preserves independent credential and field grants and links back to its credential
+00:10 +70: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_history_widget_test.dart: one mixed history entry preserves independent credential and field grants and links back to its credential
+00:10 +71: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_history_widget_test.dart: one mixed history entry preserves independent credential and field grants and links back to its credential
+00:10 +72: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_history_widget_test.dart: one mixed history entry preserves independent credential and field grants and links back to its credential
+00:10 +73: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/session_end_widget_test.dart: ended chat preserves its label and explains reapproval without approval controls
+00:11 +74: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/directory_approval_widget_test.dart: owner batch selects a directory as fixed field identities
+00:11 +75: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_reuse_widget_test.dart: v2 approval displays reusable scope and defaults independent fields to eight hours
+00:11 +76: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/revisions_test.dart: history blocks deleted fields until explicit recycle restore and rejects changed current version
+00:11 +77: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/revisions_test.dart: history blocks deleted fields until explicit recycle restore and rejects changed current version
+00:12 +78: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_maintenance_test.dart: runtime tick preserves failed expired credential material and clears its real notice after retry
+00:12 +79: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_maintenance_test.dart: runtime tick preserves failed expired credential material and clears its real notice after retry
+00:12 +80: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_reuse_widget_test.dart: v2 history separates field authorization and shows each frozen command, not only latest execution
+00:12 +81: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/widget_test.dart: desktop approves only selected field then revokes the grant
+00:12 +82: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/widget_test.dart: desktop approves only selected field then revokes the grant
+00:13 +83: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/focused_fill_widget_test.dart: real inbox approves focused fill without a command plan or sending input
+00:13 +84: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/focused_fill_widget_test.dart: real inbox approves focused fill without a command plan or sending input
+00:13 +85: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/focused_fill_widget_test.dart: real inbox approves focused fill without a command plan or sending input
+00:14 +86: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:14 +87: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:14 +88: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:14 +89: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:14 +90: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:14 +91: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:14 +92: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:14 +93: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:14 +94: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:15 +95: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:15 +96: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:15 +97: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_flow_widget_test.dart: backup flow keeps real first enable and both restore file controls together
+00:15 +98: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_flow_widget_test.dart: backup flow keeps real first enable and both restore file controls together
+00:15 +99: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_flow_widget_test.dart: backup flow keeps real first enable and both restore file controls together
+00:15 +100: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_flow_widget_test.dart: backup flow keeps real first enable and both restore file controls together
+00:15 +101: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_flow_widget_test.dart: backup flow keeps real first enable and both restore file controls together
+00:15 +102: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_flow_widget_test.dart: backup flow keeps real first enable and both restore file controls together
+00:15 +103: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_flow_widget_test.dart: backup flow keeps real first enable and both restore file controls together
+00:16 +104: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_flow_widget_test.dart: backup flow keeps real first enable and both restore file controls together
+00:16 +105: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_flow_widget_test.dart: backup flow keeps real first enable and both restore file controls together
+00:16 +106: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_flow_widget_test.dart: backup flow keeps real first enable and both restore file controls together
+00:16 +107: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/information_file_editor_test.dart: file controls are reachable by keyboard and Escape cleans the draft at 100.0%
+00:17 +108: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/history_widget_test.dart: shortening retention shows real counts and deletes only after confirmation
+00:17 +109: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/information_file_editor_test.dart: file controls are reachable by keyboard and Escape cleans the draft at 200.0%
+00:17 +110: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/organization_tasks_test.dart: Agent requests in approval inbox; one approval enables automatic classification and read-only result
+00:17 +111: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/organization_tasks_test.dart: Agent requests in approval inbox; one approval enables automatic classification and read-only result
+00:17 +112: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/organization_tasks_test.dart: Agent requests in approval inbox; one approval enables automatic classification and read-only result
+00:17 +113: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/organization_tasks_test.dart: Agent requests in approval inbox; one approval enables automatic classification and read-only result
+00:17 +114: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/organization_tasks_test.dart: Agent requests in approval inbox; one approval enables automatic classification and read-only result
+00:17 +115: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/organization_tasks_test.dart: Agent requests in approval inbox; one approval enables automatic classification and read-only result
+00:18 +116: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/organization_tasks_test.dart: Agent requests in approval inbox; one approval enables automatic classification and read-only result
+00:18 +117: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/organization_tasks_test.dart: Agent requests in approval inbox; one approval enables automatic classification and read-only result
+00:18 +118: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/information_file_editor_test.dart: file editor shows missing file error, saves real file and keeps the three-column library
+00:19 +119: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_reshape_test.dart: failed value correction preserves the draft and retries without changing identity
+00:19 +120: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_reshape_test.dart: failed value correction preserves the draft and retries without changing identity
+00:19 +121: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_reshape_test.dart: failed value correction preserves the draft and retries without changing identity
+00:19 +122: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_reshape_test.dart: failed value correction preserves the draft and retries without changing identity
+00:19 +123: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_reshape_test.dart: failed value correction preserves the draft and retries without changing identity
+00:19 +124: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_reshape_test.dart: failed value correction preserves the draft and retries without changing identity
+00:19 +125: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/removed_field_state_test.dart: ended and archived historical approvals never claim current readable scope
+00:19 +126: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/inbox_workspace_test.dart: slash focuses inbox outside editing and passes through in search input
+00:19 +127: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/inbox_workspace_test.dart: slash focuses inbox outside editing and passes through in search input
+00:20 +128: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_reshape_test.dart: large-type request picker and scope review approve only the selected chat fields
+00:20 +129: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/information_file_approval_history_test.dart: a later delivery remains discoverable after the older grant fact is pruned
+00:20 +130: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/information_file_approval_history_test.dart: a later delivery remains discoverable after the older grant fact is pruned
+00:20 +131: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_use_widget_test.dart: handled credential request exposes its actual nonzero execution receipt without material or output
+00:20 +132: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_use_widget_test.dart: handled credential request exposes its actual nonzero execution receipt without material or output
+00:20 +133: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/library_test.dart: owner manually saves named information fields
+00:21 +134: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/library_test.dart: owner manually saves named information fields
+00:21 +135: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/library_test.dart: owner manually saves named information fields
+00:21 +136: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/library_test.dart: owner manually saves named information fields
+00:21 +137: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/library_test.dart: owner manually saves named information fields
+00:21 +138: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/inbox_workspace_test.dart: notification opens its request on another page and clears stale search
+00:21 +139: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/inbox_workspace_test.dart: notification opens its request on another page and clears stale search
+00:21 +140: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_use_widget_test.dart: disabled credential still permits an independent field-only decision
+00:22 +141: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:22 +142: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:22 +143: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:22 +144: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:22 +145: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:22 +146: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:23 +147: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:23 +148: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:23 +148 ~1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:23 +149 ~1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:23 +150 ~1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:23 +151 ~1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:23 +152 ~1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:23 +153 ~1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:23 +154 ~1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:23 +155 ~1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:23 +155 ~2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:23 +156 ~2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:23 +157 ~2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:23 +158 ~2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:23 +159 ~2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:24 +160 ~2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:24 +161 ~2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_migration_widget_test.dart: owner must explicitly choose and confirm a field, sees grant and backup effects, and gets the linked credential
+00:24 +162 ~2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_migration_widget_test.dart: owner must explicitly choose and confirm a field, sees grant and backup effects, and gets the linked credential
+00:24 +163 ~2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_migration_widget_test.dart: owner must explicitly choose and confirm a field, sees grant and backup effects, and gets the linked credential
+00:24 +164 ~2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_migration_widget_test.dart: owner must explicitly choose and confirm a field, sees grant and backup effects, and gets the linked credential
+00:24 +165 ~2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_migration_widget_test.dart: owner must explicitly choose and confirm a field, sees grant and backup effects, and gets the linked credential
+00:24 +166 ~2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/cross_page_navigation_test.dart: main shares current-ID navigation with proposal results and credential links while ordinary library jumps preserve state
+00:25 +167 ~2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/cross_page_navigation_test.dart: main shares current-ID navigation with proposal results and credential links while ordinary library jumps preserve state
+00:25 +168 ~2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/cross_page_navigation_test.dart: main shares current-ID navigation with proposal results and credential links while ordinary library jumps preserve state
+00:25 +169 ~2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/cross_page_navigation_test.dart: main shares current-ID navigation with proposal results and credential links while ordinary library jumps preserve state
+00:26 +170 ~2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/cross_page_navigation_test.dart: main shares current-ID navigation with proposal results and credential links while ordinary library jumps preserve state
+00:26 +171 ~2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/cross_page_navigation_test.dart: main shares current-ID navigation with proposal results and credential links while ordinary library jumps preserve state
+00:27 +172 ~2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/cross_page_navigation_test.dart: main opens the actual organization task and preserves history search page and selection on ordinary returns
+00:28 +173 ~2: All tests passed!
+Desktop checks passed.

@@ -1,0 +1,23 @@
+release-build 0
+compile-info 0
+sign-info 0
+compile-info-codex 0
+sign-info-codex 0
+compile-info-codex-hook 0
+sign-info-codex-hook 0
+compile-info-runtime-worker 0
+sign-info-runtime-worker 0
+compile-info-prepare-codex 0
+sign-info-prepare-codex 0
+diagnostic-build 0
+sign-diagnostic-macos-storage-check 0
+sign-diagnostic-libsqlcipher.dylib 0
+app-signature 1
+Traceback (most recent call last):
+  File "/Users/jiangxinyi/Documents/Project/agent-info/scripts/package-macos.py", line 309, in <module>
+    main()
+  File "/Users/jiangxinyi/Documents/Project/agent-info/scripts/package-macos.py", line 245, in main
+    run("app-signature", ["/usr/bin/codesign", "--verify", "--deep", "--strict", str(app)])
+  File "/Users/jiangxinyi/Documents/Project/agent-info/scripts/package-macos.py", line 148, in run
+    raise RuntimeError(f"{name} failed; see {logs / (name + '.txt')}")
+RuntimeError: app-signature failed; see /Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue50-package-2/logs/app-signature.txt
