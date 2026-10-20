@@ -18,6 +18,8 @@ import paramiko
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('directory', type=Path)
+    parser.add_argument('--lifecycle-gate', action='store_true',
+                        help='Allow one synthetic wait command until the owned release file exists')
     args = parser.parse_args()
     root = args.directory.resolve()
     root.mkdir(exist_ok=False)
@@ -28,6 +30,8 @@ def main():
     host = paramiko.RSAKey.generate(2048)
     (root / 'host.pub').write_text(f'{host.get_name()} {host.get_base64()} synthetic\n')
     expected = (root / 'client.pub').read_text().split()[1]
+    counter_lock = threading.Lock()
+    command_count = 0
 
     class Server(paramiko.ServerInterface):
         def check_auth_publickey(self, username, key):
@@ -43,6 +47,7 @@ def main():
 
         def check_channel_exec_request(self, channel, command):
             def execute():
+                nonlocal command_count
                 try:
                     argv = shlex.split(command.decode('utf-8'))
                     if argv in (['/usr/bin/true'], ['/usr/bin/false']):
@@ -53,6 +58,14 @@ def main():
                     elif argv == ['/bin/sleep', '2']:
                         time.sleep(2)
                         code = 0
+                    elif args.lifecycle_gate and argv == ['/fixture/wait']:
+                        with counter_lock:
+                            command_count += 1
+                            (root / 'command-count').write_text(str(command_count))
+                        deadline = time.monotonic() + 120
+                        while not (root / 'release').exists() and time.monotonic() < deadline:
+                            time.sleep(0.05)
+                        code = 0 if (root / 'release').exists() else 124
                     else:
                         code = 126
                     channel.send_exit_status(code)
