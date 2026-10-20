@@ -1,0 +1,12 @@
+{
+  "label": "normal-reopen",
+  "exit": 0,
+  "mode": "recover",
+  "startup": "ready",
+  "port": 50377,
+  "oldAuthorityRefused": true,
+  "storedInformationPreserved": true,
+  "endedGrantAndAllowedReadPreserved": true,
+  "nativeTerminationRequested": true,
+  "libraryCloses": 1
+}

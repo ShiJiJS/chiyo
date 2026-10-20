@@ -1,0 +1,101 @@
+{
+  "complete": true,
+  "cases": [
+    {
+      "label": "duplicate",
+      "exit": 0,
+      "mode": "duplicate",
+      "startup": "failed",
+      "cleanupPending": false,
+      "keyReads": 0,
+      "keyCreates": 0,
+      "libraryCloses": 0,
+      "storageFailure": "library_unavailable",
+      "nativeTerminationRequested": true
+    },
+    {
+      "label": "holder-normal-quit",
+      "exit": 0,
+      "mode": "hold",
+      "startup": "ready",
+      "port": 50314,
+      "tray": true,
+      "syntheticGrantRead": true,
+      "nativeTerminationRequested": true,
+      "libraryCloses": 1,
+      "portClosedAfterExit": true
+    },
+    {
+      "label": "normal-reopen",
+      "exit": 0,
+      "mode": "recover",
+      "startup": "ready",
+      "port": 50317,
+      "oldAuthorityRefused": true,
+      "storedInformationPreserved": true,
+      "nativeTerminationRequested": true,
+      "libraryCloses": 1
+    },
+    {
+      "label": "explicit-app-crash",
+      "exit": -9,
+      "faultInjection": true,
+      "portClosedAfterExit": true
+    },
+    {
+      "label": "crash-reopen",
+      "exit": 0,
+      "mode": "recover",
+      "startup": "ready",
+      "port": 50320,
+      "oldAuthorityRefused": true,
+      "storedInformationPreserved": true,
+      "nativeTerminationRequested": true,
+      "libraryCloses": 1
+    },
+    {
+      "label": "key-failure",
+      "exit": 0,
+      "mode": "key-failure",
+      "startup": "failed",
+      "cleanupPending": false,
+      "keyReads": 1,
+      "keyCreates": 0,
+      "libraryCloses": 0,
+      "storageFailure": "key_unavailable",
+      "nativeTerminationRequested": true
+    },
+    {
+      "label": "port-busy",
+      "exit": 0,
+      "mode": "port-busy",
+      "startup": "failed",
+      "cleanupPending": false,
+      "keyReads": 1,
+      "keyCreates": 0,
+      "libraryCloses": 1,
+      "storageFailure": "",
+      "nativeTerminationRequested": true
+    },
+    {
+      "label": "quit-opening",
+      "exit": 0,
+      "mode": "quit-opening",
+      "quitWaitedForOpening": true,
+      "nativeTerminationRequested": true,
+      "libraryCloses": 1
+    }
+  ],
+  "scope": "signed Flutter QA entry; real native termination/SQLCipher/processes; synthetic keys/events",
+  "executableSha256": "f940874195637b5af361312812b3277816ea2a6eb6a5f2ab87cab7df95629f05",
+  "gitHead": "0fd328566e73f8b50dd901da9e947e89625668de",
+  "sourceHashes": {
+    "scripts/qa/macos-lifecycle.py": "b4c07438628512c48450ddc26b539317482bf6b34c8e38ae7c6141de09571523",
+    "apps/desktop/integration_test/macos_lifecycle_probe.dart": "6b5fd61b51404a29b26744939a8c78ea73a1da7d5612abed0c61b7512d8327a6",
+    "apps/desktop/lib/desktop_bootstrap.dart": "025a8a0f1d26aed7b77c64b3b9cfa2cdfe60c4133fc2c00b574860e3d1fb5026",
+    "apps/desktop/lib/desktop_runtime.dart": "1cd0ba9971d3d0b321f22eec78c3186919328b7fffc346785b1f0ad340d4751c",
+    "apps/desktop/macos/Runner/AppDelegate.swift": "6be0305e6a175f9486a4859597f7e1d2a4d1855fd5d630603466e7466214878e",
+    "apps/desktop/macos/Runner/MainFlutterWindow.swift": "ba3715cdc39f5fa3f489382cd710801a91717c92ef9388594d6a00cdba3fbcdb"
+  },
+  "processCleanup": []
+}

@@ -76,3 +76,4 @@ docs/development/evidence/macos-keychain-validation/raw/** -text -diff
 docs/development/evidence/macos-tools-files/raw/** -text -diff
 docs/development/evidence/macos-backup-recovery/raw/** -text -diff
 docs/development/evidence/macos-delivery/raw/** -text -diff
+docs/development/evidence/macos-app-lifecycle/raw/** -text -diff

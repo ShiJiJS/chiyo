@@ -1,0 +1,11 @@
+{
+  "label": "holder-normal-quit",
+  "exit": 0,
+  "mode": "hold",
+  "startup": "ready",
+  "port": 50374,
+  "tray": true,
+  "syntheticGrantRead": true,
+  "nativeTerminationRequested": true,
+  "libraryCloses": 1
+}
