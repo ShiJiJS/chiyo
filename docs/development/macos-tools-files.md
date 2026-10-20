@@ -1,5 +1,49 @@
 # Mac 桌面工具与附件验收（#44）
 
+## 真实同机 HTTP 文件消费（2026-10-21）
+
+QA 源码 `2cd6111` 增加 `--consume-files`：实际签名 Debug Flutter/SQLCipher
+创建受管副本，独立 `01c1f14` 整包的 AOT CLI 领取路径，再由系统 `/usr/bin/curl`
+直接将该路径的文件 PUT 到只监听 `127.0.0.1` 的临时 HTTP 接收端。
+没有把读取路径或 Python 直接读文件当作上传完成；接收端比较实际收到的全部字节，
+返回长度和 SHA-256，客户端核对成功响应后才释放副本。
+
+最终第二轮完整通过：10 个原生阶段、44 次 CLI 状态断言、6 份独立交付，
+每份收到 1,024 字节并与合成原文完全一致。覆盖初次领取、文本编辑后、修改提案确认后、
+文本移除后、文本回收恢复后及同进程资料库/服务重开并重新批准后。
+相同操作重查保持同一副本和版本；原附件始终为版本 1，信息最终版本 5。
+未批准、另一会话及重开后的旧关联领取被拒绝；文本恢复生成新身份，需要重新批准。
+
+6 次显式 `file-release` 后路径均不存在，再次使用该路径执行 curl 均退出 26，
+接收端没有新增成功上传。已接收字节不会因本地释放而撤回；这不是撤回已上传内容的保证。
+本例没有模拟远端浏览器；随包 [普通文件说明](../../integrations/codex/skills/agent-info-access/references/information-files.md)
+明确工具必须能访问同机文件系统，远端不可访问时报告传输限制，不提供隐式远程桥接。
+
+Flutter 测试宿主及三个 AOT CLI 进程均退出 0，HTTP 接收端关闭，成功合成根清理。
+严格签名和沙盒 entitlement 核对通过；测试宿主为带 JIT/调试权限的 Debug 应用，
+不是安装后的 Release 整包。八张原生渲染图保留，复核重开界面与数据库状态一致。
+第一轮也通过；第二轮仅补 runner 的接收端清理失败记录，最终源码摘要逐一匹配 `2cd6111`，
+不将两轮重叠结果累加。普通 `lib/main.dart` Debug 入口随后恢复并验签。
+
+[原始日志、接收回执、源码和截图](evidence/macos-file-consumer/verification.json)。
+只有 QA/文档变更，生产代码与现有 `01c1f14` 整包未变。
+第 5 条同机消费条件已有直接证据；#44 仍 OPEN，其他复合条件不提前勾选。
+
+复跑（输出目录须不存在）：
+
+```sh
+python3 scripts/qa/macos-attachment-preserve-ui.py build/macos-adaptation/file-consumer-next \
+  --delivery 'build/macos-adaptation/issue50-package-7/verify/中文 空格 路径/AgentInfoManage' \
+  --consume-files
+```
+
+Mac 仍锁屏。初始信息/临时数据库密钥/批准为隔离夹具；UI 由原生 tester 驱动，
+不代表真实键盘、系统选择/另存面板、Keychain 或浏览器网站验收。
+实际工具目录许可、书签重开/升级、外部 GH/AWS、文件替换/版本/撤销到期联合流程、
+容量及最终安装包闭环继续按原票执行。
+
+## 较早工具工作流基线
+
 2026-10-21，当前源码 `7a33585`（产品 Keychain 修复 `86e35f3`），#44 保持 OPEN。
 
 重新运行签名 Debug Flutter 沙盒应用自动工作流：
