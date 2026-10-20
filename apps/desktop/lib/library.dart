@@ -309,17 +309,17 @@ class _InformationLibraryState extends State<InformationLibrary> {
               ? SingleChildScrollView(
                   child: SizedBox(
                     height: bounds.maxHeight + 600,
-                    child: _directory(),
+                    child: _directory(bounds.maxHeight * .35),
                   ),
                 )
-              : _directory(),
+              : _directory(bounds.maxHeight * .35),
         ),
       ),
       SizedBox(width: 340, child: _list(page, current)),
       Expanded(child: _detail(current)),
     ],
   );
-  Widget _directory() => Container(
+  Widget _directory(double maxTagHeight) => Container(
     key: const ValueKey('library-directory'),
     decoration: BoxDecoration(
       color: p.canvas,
@@ -333,18 +333,22 @@ class _InformationLibraryState extends State<InformationLibrary> {
           padding: const EdgeInsets.symmetric(horizontal: 5),
           child: Column(
             children: [
-              Row(
-                children: [
-                  t('信息库', 21, weight: FontWeight.w600),
-                  const Spacer(),
-                  t(
-                    '${owner.information.length}',
-                    24,
-                    color: p.muted,
-                    family: 'Georgia',
-                    height: 1,
-                  ),
-                ],
+              SizedBox(
+                width: double.infinity,
+                child: Wrap(
+                  alignment: WrapAlignment.spaceBetween,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    t('信息库', 21, weight: FontWeight.w600),
+                    t(
+                      '${owner.information.length}',
+                      24,
+                      color: p.muted,
+                      family: 'Georgia',
+                      height: 1,
+                    ),
+                  ],
+                ),
               ),
               Container(
                 margin: const EdgeInsets.only(top: 20),
@@ -461,8 +465,7 @@ class _InformationLibraryState extends State<InformationLibrary> {
             children: [
               const PrototypeIcon(PrototypeIconGlyph.folder, size: 17),
               const SizedBox(width: 8),
-              const Text('全部信息'),
-              const Spacer(),
+              const Expanded(child: Text('全部信息')),
               t(
                 '${owner.information.length}',
                 13,
@@ -511,53 +514,59 @@ class _InformationLibraryState extends State<InformationLibrary> {
             ],
           ),
         ),
-        Container(
-          padding: const EdgeInsets.only(top: 18, bottom: 20),
-          decoration: BoxDecoration(
-            border: Border(top: BorderSide(color: p.line)),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(10, 0, 10, 10),
-                child: t('常用标签', 11, color: p.muted),
+        ConstrainedBox(
+          constraints: BoxConstraints(maxHeight: maxTagHeight),
+          child: SingleChildScrollView(
+            key: const ValueKey('library-tag-scroll'),
+            child: Container(
+              padding: const EdgeInsets.only(top: 18, bottom: 20),
+              decoration: BoxDecoration(
+                border: Border(top: BorderSide(color: p.line)),
               ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: Wrap(
-                  spacing: 7,
-                  runSpacing: 7,
-                  children: [
-                    for (final tag in owner.tags)
-                      TextButton(
-                        key: ValueKey('library-tag-${tag.id}'),
-                        onPressed: () => setState(() {
-                          _tagIds.contains(tag.id)
-                              ? _tagIds.remove(tag.id)
-                              : _tagIds.add(tag.id);
-                          _offset = 0;
-                          _selectedId = null;
-                        }),
-                        style: prototypeButton(
-                          context,
-                          size: 11,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 2,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(10, 0, 10, 10),
+                    child: t('常用标签', 11, color: p.muted),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    child: Wrap(
+                      spacing: 7,
+                      runSpacing: 7,
+                      children: [
+                        for (final tag in owner.tags)
+                          TextButton(
+                            key: ValueKey('library-tag-${tag.id}'),
+                            onPressed: () => setState(() {
+                              _tagIds.contains(tag.id)
+                                  ? _tagIds.remove(tag.id)
+                                  : _tagIds.add(tag.id);
+                              _offset = 0;
+                              _selectedId = null;
+                            }),
+                            style: prototypeButton(
+                              context,
+                              size: 11,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 2,
+                              ),
+                              foreground: p.muted,
+                              background: _tagIds.contains(tag.id)
+                                  ? p.selected
+                                  : p.paper,
+                              side: BorderSide(color: p.line),
+                            ),
+                            child: Text(tag.name),
                           ),
-                          foreground: p.muted,
-                          background: _tagIds.contains(tag.id)
-                              ? p.selected
-                              : p.paper,
-                          side: BorderSide(color: p.line),
-                        ),
-                        child: Text(tag.name),
-                      ),
-                  ],
-                ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
         Padding(
@@ -852,8 +861,7 @@ class _InformationLibraryState extends State<InformationLibrary> {
             ),
             child: Row(
               children: [
-                t('共 ${page.total} 条信息', 11, color: p.muted),
-                const Spacer(),
+                Expanded(child: t('共 ${page.total} 条信息', 11, color: p.muted)),
                 b(
                   '‹',
                   page.offset > 0
