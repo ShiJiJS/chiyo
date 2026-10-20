@@ -253,5 +253,55 @@ void main() {
         bootstrap.dispose();
       },
     );
+
+    test(
+      'second quit waits for late library cleanup after native exit failed',
+      () async {
+        final native = KeyAccessPlatform()..failTermination = true;
+        final authorization = Completer<DesktopLibrary>();
+        final entered = Completer<void>();
+        final closing = Completer<void>();
+        final release = Completer<void>();
+        final bootstrap = DesktopBootstrap(
+          platform: native,
+          openLibrary: () async =>
+              throw const StorageFailure('key_unavailable'),
+          openLibraryWithKeyAccess: () {
+            entered.complete();
+            return authorization.future;
+          },
+        );
+        await bootstrap.start();
+        final recovery = bootstrap.requestKeyAccess();
+        await entered.future;
+        await bootstrap.quitKeyAccess();
+        expect(native.terminateCount, 1);
+        expect(bootstrap.keyAccessExitFailed, isTrue);
+        authorization.complete(
+          DesktopLibrary(
+            service: InformationService(
+              repository: MemoryInformationRepository(),
+            ),
+            close: () {
+              closing.complete();
+              return release.future;
+            },
+          ),
+        );
+        await closing.future;
+        native.failTermination = false;
+        final quit = bootstrap.quitKeyAccess();
+        await Future<void>.delayed(Duration.zero);
+        expect(native.terminateCount, 1);
+        expect(native.terminated, isFalse);
+        release.complete();
+        await recovery;
+        await quit;
+        expect(native.terminated, isTrue);
+        expect(bootstrap.library, isNull);
+        expect(bootstrap.boundPort, isNull);
+        bootstrap.dispose();
+      },
+    );
   }, skip: !Platform.isMacOS);
 }
