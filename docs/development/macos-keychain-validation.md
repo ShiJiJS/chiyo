@@ -58,12 +58,78 @@ python3 scripts/qa/macos-keychain.py build/macos-adaptation/NEW_KEYCHAIN_RUN
 `complete: true` 表示所有观察步骤结束；`upgradeAccess: denied` 明确表示
 新签名访问旧项仍未通过，不能按 runner 返回 0 认定升级成功。
 
-## 剩余验收
+## 原生探针结束时的剩余验收（后续进展见下节）
 
-#42 仍需真实 Flutter 应用 + SQLCipher 的首次创建/重开、独立测试 Keychain
+当时 #42 仍需真实 Flutter 应用 + SQLCipher 的首次创建/重开、独立测试 Keychain
 缺失/锁定/不可访问、错误密钥/损坏库的保留与退出，以及两版应用完整升级。
 当前探针是原生签名沙盒进程，不能冒充 Flutter UI 或真实库升级。
 
 跨版本应选择并实测稳定签名、所有者显式系统授权或明确的备份迁移路径。
 本轮没有创建证书、修改系统信任、放宽 Keychain ACL 或索要用户密码。
 这个缺口同时属于 #50 最终交付；其他 Mac 独立验收继续执行。
+
+## Flutter、真实 Keychain 与 SQLCipher 联合验收（2026-10-21）
+
+源码 `05326a7`，新增普通 Release Flutter QA 入口及隔离构建 runner。
+最终第六轮 **11 个准备/构建/签名步骤、20 次实际应用进程均返回 0**，
+每个应用进程明确记录正常 Cocoa 退出且 `flutterErrors: 0`。
+[完整证据](evidence/macos-flutter-keychain/verification.json)保留失败轮次及源码摘要。
+
+### 验证边界
+
+runner 将仓库源码复制到全新的 `build/macos-adaptation` 目录，逐文件记录 SHA256。
+仅在副本中将 bundle identifier 改为 `org.shijijs.agent-info-manage.qa.flutterkeychain`，
+将 Keychain service 固定到本轮随机 QA UUID，并注入只操作该 service/account 的
+删除/31 字节坏值/错误密钥方法。生产源码没有这些故障入口或身份覆盖参数。
+`DatabaseKeyStore.swift`、Dart 平台适配、SQLCipher、启动和退出实现保持原源码字节。
+使用实际 Release 沙盒 entitlement、ARM64 应用及随包 SQLCipher 4.19.0 community。
+这份测试副本不替代 #50 正式整包，不验证生产容器迁移。
+
+每个场景新建合成资料库，密钥由生产逻辑随机生成并经真实 Keychain 保存/重读；
+没有内存假密钥。录入与批准调用主人业务接口，退出事件由探针触发；错误页实际
+构建并检查其提示与重试文案。没有声称物理输入、系统面板、菜单点击或截图验收。
+Mac 当时锁屏不等于登录 Keychain 被锁定；本轮未锁定或修改用户的登录钥匙串。
+
+### 结果
+
+- 首次创建、录入、批准读取、完全退出与独立进程重开成功；信息项/字段身份、
+  值和已结束的授权/访问历史保持，旧临时授权凭证被拒绝，重开不生成替代密钥。
+- 缺失密钥、31 字节坏值分别返回 `key_unavailable`；32 字节错误密钥、损坏库
+  分别返回 `library_unavailable`。各做两次启动尝试，数据库字节不变、密钥创建
+  次数为 0、未发布端口、未保留打开的库，错误页正常构建且可以退出。
+- 仅测试夹具还原故意损坏的原字节后，同进程第三次启动成功，原信息和历史
+  保持，旧授权仍失效。这不是软件自动修复损坏数据库的功能。
+- 同一 Release 应用副本更改 `CFBundleVersion` 后重新 ad-hoc 签名；两份应用
+  使用同 bundle identifier、service/account，但不同 CDHash。新签名在 **0.772 秒**
+  内完成两次拒绝、错误页与退出，`upgradeAccess: denied`。原签名随后仍正常重开。
+  两份的 Dart 业务代码相同，因此这证明的是签名/版本改变后的失败保留行为，
+  不代表不同资料库 schema 的完整升级迁移成功。
+- 最终仅删除专属 QA Keychain 项并重读确认不存在；六份本轮私密临时资料清理。
+  证据不包含密钥、数据库、临时授权凭证或私密关联文件。
+
+### 联合验收发现并修复的退出问题
+
+第四轮 runner 曾返回成功，但原始日志在三个场景出现 `StorageFailure(library_closed)`：
+启动/恢复成功后的界面帧尚未绘制，立即退出已关闭资料库，该帧随后读取主题设置。
+本轮不把第四轮当作完整通过。修复让 launcher 监听退出状态，退出中及库已关闭时
+卸载依赖库的界面；如果系统退出失败，保留单独“重试退出”入口。审计保存失败时
+库仍打开，沿用原有保存失败处理，不假装退出成功。
+
+新增四项回归覆盖首帧前退出、已显示界面退出、库关闭后系统退出失败与重试。
+修复前相关三项界面测试失败；修复后完整桌面 **178 通过、2 跳过**，严格分析通过。
+普通 Release 重新构建与 strict/deep 签名验证结果见证据清单。
+修改涉及共享 launcher；仍仅提交 Mac 分支，Windows 原生回归待 #41。
+
+QA runner 同时增加 Flutter 错误计数和关闭后最后一帧检查。第五轮曾在无界面
+清理进程错误等待一帧而超时，专属项已删除，随后独立原生探针只读确认不存在；
+修正清理模式后第六轮通过。前面三轮的注入定位、静态检查及 Swift 类型错误，
+以及中间测试异步等待修正日志全部保留，均不算通过。
+
+```bash
+python3 scripts/qa/macos-flutter-keychain.py build/macos-adaptation/NEW_FLUTTER_KEYCHAIN_RUN
+```
+
+`complete: true` 只表示整套观察完成；必须单独看 `upgradeAccess`。
+#42 仍 OPEN：正式身份/稳定签名策略、真正锁定钥匙串的隔离验证、完整版本/库迁移、
+实际系统授权提示和生产整包联合验收尚未完成。不能通过改生产 bundle identifier、
+service 或放宽 ACL 绕过升级问题。

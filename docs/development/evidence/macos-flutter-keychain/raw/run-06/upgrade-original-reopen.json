@@ -1,0 +1,17 @@
+{
+  "label": "upgrade-original-reopen",
+  "exit": 0,
+  "seconds": 0.365,
+  "mode": "reopen",
+  "sqlCipherVersion": "4.19.0 community",
+  "port": 57271,
+  "storedIdentityAndValuePreserved": true,
+  "oldAuthorityRefused": true,
+  "endedGrantAndAllowedReadPreserved": true,
+  "startupAfterFinalAttempt": "ready",
+  "flutterErrors": 0,
+  "nativeTerminationRequested": true,
+  "libraryCloses": 1,
+  "keyReads": 1,
+  "keyCreates": 0
+}

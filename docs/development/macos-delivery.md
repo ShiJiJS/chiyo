@@ -10,6 +10,12 @@ bundle ID 保持 `com.example.infoDesktop`，不另建资料身份。
 macOS 14 和其他设备尚未实机验收。App、worker 和 CLI 主程序均为 ARM64，
 依赖库至少包含 ARM64；不提供 Intel 兼容承诺。
 
+## 后续源码修复
+
+#42 的真实 Keychain 联合验收随后发现并修复了退出后界面访问已关闭资料库的问题
+（`05326a7`，见 [联合验收记录](macos-keychain-validation.md)）。
+下方 `c1a58b7` 整包的既有结果不包含此修复；正式交付前须刷新整包并重复必要联合验证。
+
 ## 包含内容
 
 - `app/info_desktop.app`：Release 桌面应用、SQLCipher、Flutter 运行库及随包 worker。
