@@ -20,7 +20,7 @@ Usage: ./scripts/dev-macos.sh <command> [arguments]
   setup         Fetch the pinned SDK, macOS artifacts and locked dependencies
   doctor        Show Flutter and native toolchain diagnostics
   check         Analyze and test all Dart packages and desktop widgets
-  build         Compile the macOS release (requires full Xcode)
+  build         Compile release with fixed GH/AWS tools (requires full Xcode)
   run           Open the macOS app in debug mode (requires full Xcode)
   bundle <dir>  Compile CLI/hook installation materials into a NEW directory
   flutter ...   Run the project Flutter SDK in your current working directory
@@ -136,6 +136,8 @@ case "$command_name" in
     cd "$project_root/apps/desktop"
     if [[ "$command_name" == build ]]; then
       flutter build macos --release --no-pub "$@"
+      python3 "$project_root/scripts/bundle-macos-tools.py" \
+        "$project_root/apps/desktop/build/macos/Build/Products/Release/info_desktop.app"
     else
       flutter run -d macos "$@"
     fi

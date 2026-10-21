@@ -1,4 +1,4 @@
-# Windows credential use
+# Credential use
 
 Use the same private association and stdin-only `info-codex` transport as the
 main Skill. Choose command injection below for a CLI tool, or
@@ -12,6 +12,14 @@ the secret or a secret-file path. Approval alone performs neither operation.
    default to protocol2 and require `credential-use-reuse.v1`. An unsupported
    service requires a matching whole app/CLI/worker bundle; never silently
    downgrade or create a replacement single-use request.
+   On Mac, also require `credential-tools.v1`. Select the matching receiver in
+   `credentialTools` with `available:true` and use its exact absolute
+   `executable`. The running app discovers its bundled GH/AWS paths after a
+   move; query again after moving or upgrading it. A missing or invalid entry
+   requires a complete Mac Release build. Directory selection supplies file
+   access only and does not make an external program executable in App Sandbox.
+   Tool discovery is public metadata; the owner still approves credential use,
+   and each operation independently checks executable identity and version.
 2. Query `credential-catalog` for public metadata, form, current version and
    suggested binding. Select the one credential relevant to the task. Submit
    one `request-use` with `purpose`, `credentials` (`alias`, `credentialId`,

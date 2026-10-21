@@ -1,6 +1,6 @@
 ---
 name: agent-info-access
-description: Request approved information or ordinary file delivery, Windows credential command use or local password filling through Agent Info; submit designated source information for review and perform approved classification changes using this chat's private association.
+description: Request approved information or ordinary file delivery, Windows/Mac credential command use or supported local password filling through Agent Info; submit designated source information for review and perform approved classification changes using this chat's private association.
 ---
 
 Use the Agent Info association supplied by this chat's latest SessionStart hook.
