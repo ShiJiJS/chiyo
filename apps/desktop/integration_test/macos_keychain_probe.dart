@@ -454,14 +454,14 @@ Future<void> main() async {
       final phaseFile = File('$canonical/interactive-phase.json');
       final deadline = DateTime.now().add(const Duration(minutes: 12));
       var lastPhase = '';
-      var rejectedAttempts = 0;
-      var rejectedCheckedAt = 0;
+      var failedAttempts = 0;
+      var failedCheckedAt = 0;
       while (bootstrap.state != DesktopStartupState.ready) {
         _check(
           DateTime.now().isBefore(deadline),
           'Interactive upgrade deadline',
         );
-        if (actualOwnerAccessAttempts > rejectedCheckedAt &&
+        if (actualOwnerAccessAttempts > failedCheckedAt &&
             bootstrap.state == DesktopStartupState.failed &&
             !bootstrap.keyAccessPending) {
           _check(
@@ -469,16 +469,16 @@ Future<void> main() async {
                 bootstrap.boundPort == null &&
                 keys.creates == 0 &&
                 listEquals(await db.readAsBytes(), guarded),
-            'Actual denied access changed data/key or published endpoint',
+            'Failed system access changed data/key or published endpoint',
           );
-          rejectedCheckedAt = actualOwnerAccessAttempts;
-          rejectedAttempts++;
+          failedCheckedAt = actualOwnerAccessAttempts;
+          failedAttempts++;
         }
         final current = jsonEncode({
           'state': bootstrap.state.name,
           'pending': bootstrap.keyAccessPending,
           'attempts': actualOwnerAccessAttempts,
-          'deniedAttempts': rejectedAttempts,
+          'failedAttempts': failedAttempts,
           'canRequestAccess': bootstrap.canRequestKeyAccess,
           'portPublished': bootstrap.boundPort != null,
         });
@@ -490,14 +490,16 @@ Future<void> main() async {
         await Future<void>.delayed(const Duration(milliseconds: 50));
       }
       _check(
-        actualOwnerAccessAttempts >= 2 && rejectedAttempts >= 1,
-        'Must observe a real denied attempt before real approval',
+        actualOwnerAccessAttempts >= 1,
+        'Must observe an actual owner access action before system approval',
       );
       facts.addAll({
         'systemDecisionIsFixture': false,
         'ownerButtonPhysicallyInvoked': true,
         'actualOwnerAccessAttempts': actualOwnerAccessAttempts,
-        'actualDeniedAttempts': rejectedAttempts,
+        // A failed return does not reveal which system button the owner used.
+        // The owner requested allow-only acceptance, without a denial prerequisite.
+        'actualFailedAttempts': failedAttempts,
         'failedUpgradeDatabasePreserved': true,
         'originalDatabaseRecoveredAfterSystemApproval': true,
       });
