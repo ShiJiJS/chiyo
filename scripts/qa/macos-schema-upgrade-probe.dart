@@ -31,7 +31,28 @@ Future<void> main(List<String> args) async {
     exitCode = 64;
     return;
   }
-  final root = Directory(args[1]);
+  final result = await runSchemaUpgradeFixture(
+    args[0],
+    Directory(args[1]),
+    key,
+  );
+  stdout.writeln(jsonEncode(result));
+  if (result['status'] != 'ok') exitCode = 1;
+}
+
+/// The same fixture runs inside each signed Flutter host. It never receives or
+/// returns a production key: hosts read their dedicated QA Keychain item and
+/// pass a short-lived copy entirely within their process. Returned data contains
+/// row counts/digests, not raw rows or authorization material.
+Future<Map<String, Object?>> runSchemaUpgradeFixture(
+  String mode,
+  Directory root,
+  List<int> key,
+) async {
+  if (key.length != 32 ||
+      !{'create', 'inspect', 'conflict', 'repair', 'snapshot'}.contains(mode)) {
+    throw ArgumentError('Invalid fixture input');
+  }
   final database = '${root.path}/library/library.db';
   final now = DateTime.utc(2026, 10, 21);
   sql.Database raw() {
@@ -86,21 +107,19 @@ Future<void> main(List<String> args) async {
   InformationService? service;
   Map<String, Object?>? beforeChecks;
   try {
-    if (args[0] == 'conflict' || args[0] == 'repair') {
+    if (mode == 'snapshot') return {'status': 'ok', ...snapshot()};
+    if (mode == 'conflict' || mode == 'repair') {
       final db = raw();
       try {
         db.execute(
-          args[0] == 'conflict'
+          mode == 'conflict'
               ? 'CREATE TABLE information_deliveries (qa_conflict INTEGER NOT NULL)'
               : 'DROP TABLE information_deliveries',
         );
       } finally {
         db.close();
       }
-      stdout.writeln(
-        jsonEncode({'status': 'ok', 'fixtureMutation': args[0], ...snapshot()}),
-      );
-      return;
+      return {'status': 'ok', 'fixtureMutation': mode, ...snapshot()};
     }
     repository = await EncryptedInformationRepository.open(
       '${root.path}/library',
@@ -108,7 +127,7 @@ Future<void> main(List<String> args) async {
       clock: () => now,
     );
     service = InformationService(repository: repository, clock: () => now);
-    if (args[0] == 'create') {
+    if (mode == 'create') {
       final text = await service.owner.createInformation(
         'Synthetic legacy text',
         '',
@@ -228,26 +247,21 @@ Future<void> main(List<String> args) async {
     service = null;
     await repository.close();
     repository = null;
-    stdout.writeln(
-      jsonEncode({
-        'status': 'ok',
-        'cipherVersion': cipher,
-        'oldAuthorityRefused': args[0] != 'create',
-        if (beforeChecks != null) 'beforeVerificationOperations': beforeChecks,
-        ...snapshot(),
-      }),
-    );
+    return {
+      'status': 'ok',
+      'cipherVersion': cipher,
+      'oldAuthorityRefused': mode != 'create',
+      if (beforeChecks != null) 'beforeVerificationOperations': beforeChecks,
+      ...snapshot(),
+    };
   } catch (error) {
-    stdout.writeln(
-      jsonEncode({
-        'status': 'failed',
-        'errorType': error.runtimeType.toString(),
-        if (error is AccessFailure) 'accessFailure': error.status,
-        if (error is StateError) 'checkFailure': error.message.toString(),
-        if (error is StorageFailure) 'storageFailure': error.code,
-      }),
-    );
-    exitCode = 1;
+    return {
+      'status': 'failed',
+      'errorType': error.runtimeType.toString(),
+      if (error is AccessFailure) 'accessFailure': error.status,
+      if (error is StateError) 'checkFailure': error.message.toString(),
+      if (error is StorageFailure) 'storageFailure': error.code,
+    };
   } finally {
     await service?.close();
     await repository?.close();

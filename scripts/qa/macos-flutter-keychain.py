@@ -33,7 +33,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('output', type=Path)
     parser.add_argument('--locked-keychain', action='store_true', help='Real private file-keychain lock/unlock and SQLCipher recovery; never locks login keychain')
-    parser.add_argument('--interactive-upgrade', action='store_true', help='Real system Keychain deny then owner approval; requires CUA/user; no simulated decision')
+    parser.add_argument('--interactive-upgrade', action='store_true', help='Real owner-approved Keychain recovery and two-version reopening; no denial prerequisite or simulated decision')
     parser.add_argument('--owner-access', action='store_true', help='Owner recovery UI with explicitly simulated system decisions; no authorization prompt')
     parser.add_argument('--backups', action='store_true', help='Real Keychain source export, source-key loss, fresh target restore/reopen')
     args = parser.parse_args()
