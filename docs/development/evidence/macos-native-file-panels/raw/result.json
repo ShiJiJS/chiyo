@@ -1,0 +1,27 @@
+{
+  "actualCUA": true,
+  "ordinaryReleaseBinding": true,
+  "nativeSaveAsSuccessAndCancellation": true,
+  "nativeOpenCancellation": true,
+  "nativeOpenSelectedAndOwnerSavedVersion": 2,
+  "sameLibraryNewProcessReopen": true,
+  "exports": [
+    {
+      "name": "Mac 合成附件 20261021.bin",
+      "bytes": 1024,
+      "sha256": "ffbad8f947474cfdd5b2bb22d7e0bf5ee8ba2b7af859d0c2bb28622db6a4be47"
+    },
+    {
+      "name": "重开后 合成附件.bin",
+      "bytes": 1024,
+      "sha256": "ffbad8f947474cfdd5b2bb22d7e0bf5ee8ba2b7af859d0c2bb28622db6a4be47"
+    }
+  ],
+  "independentCatalogStable": true,
+  "syntheticOnly": true,
+  "notFinalDeliveryPackage": true,
+  "keyStoreIsSyntheticFixture": true,
+  "IMEAcceptance": false,
+  "tabTraversalAcceptance": false,
+  "keyboardObservation": "Tab actions did not establish a reliable focus transition in this CUA session; left pending. Escape showed discard confirmation, cancel retained draft visually, final discard returned to library."
+}

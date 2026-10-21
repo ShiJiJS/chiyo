@@ -266,3 +266,9 @@ python3 scripts/qa/macos-flutter-keychain.py build/macos-adaptation/NEW_FLUTTER_
 #42 仍 OPEN：正式身份/稳定签名策略、真正锁定钥匙串的隔离验证、完整版本/库迁移、
 实际系统授权提示和生产整包联合验收尚未完成。不能通过改生产 bundle identifier、
 service 或放宽 ACL 绕过升级问题。
+# 解锁后一次实际系统授权尝试（2026-10-21）
+
+用户解锁后，`--interactive-upgrade` 实际构建并签名两个不同版本的 Release 应用。原版创建加密库通过；改版默认读取被拒绝，数据库字节保持、不创建替代密钥、不发布 endpoint。Computer Use 点击应用“请求钥匙串访问”后，应用进入真实系统等待。SecurityAgent 不允许工具代操作，已请用户先手动拒绝；本轮未收到实际系统决定，720.38 秒后测试失败退出 1，不能计作真实允许/拒绝验收通过。
+
+原签名应用随后正常删除本轮专属密钥并独立确认缺失，退出 0；精确核对 `.qa-owner` 后，残留合成根也已清理。未操作用户默认库或其他 Keychain 项。原始结果留在忽略的工作目录；[公开摘要](evidence/macos-unlocked-keychain-attempt/public-summary.json)去除仍可用的 QA 控制标识与私密路径，另保留原结果摘要供核对。#42 仍为原有第 2/3/5 条完成，第 1/4 条继续未完成。
+
