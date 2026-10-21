@@ -1,0 +1,1708 @@
+Resolving dependencies...
+Downloading packages...
+  shelf 1.4.2 (1.4.3 available)
+  shelf_static 1.1.3 (1.2.0 available)
+Got dependencies!
+2 packages have newer versions incompatible with dependency constraints.
+Try `dart pub outdated` for more information.
+Resolving dependencies...
+Downloading packages...
+  shelf 1.4.2 (1.4.3 available)
+  shelf_static 1.1.3 (1.2.0 available)
+Got dependencies!
+2 packages have newer versions incompatible with dependency constraints.
+Try `dart pub outdated` for more information.
+Resolving dependencies...
+Downloading packages...
+  shelf 1.4.2 (1.4.3 available)
+  shelf_static 1.1.3 (1.2.0 available)
+Got dependencies!
+2 packages have newer versions incompatible with dependency constraints.
+Try `dart pub outdated` for more information.
+Resolving dependencies...
+Downloading packages...
+  material_color_utilities 0.13.0 (0.13.1 available)
+  test_api 0.7.12 (0.7.15 available)
+  vector_math 2.4.0 (2.4.3 available)
+Got dependencies!
+3 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Analyzing info_core...
+No issues found!
+00:00 +0: loading test/access_test.dart
+00:00 +0: test/access_test.dart: public catalog describes fictional fields without disclosing values
+00:00 +1: test/information_draft_test.dart: owner usage accounts for retained originals and uncommitted stages in the same byte budget
+00:00 +2: test/import_transport_test.dart: proposal transport limits payloads and never exposes private batches or management
+00:00 +3: test/import_transport_test.dart: proposal transport limits payloads and never exposes private batches or management
+00:00 +4: test/import_transport_test.dart: proposal transport limits payloads and never exposes private batches or management
+00:00 +5: test/import_transport_test.dart: proposal transport limits payloads and never exposes private batches or management
+00:00 +6: test/import_transport_test.dart: proposal transport limits payloads and never exposes private batches or management
+00:00 +7: test/import_transport_test.dart: proposal transport limits payloads and never exposes private batches or management
+00:00 +8: test/import_transport_test.dart: proposal transport limits payloads and never exposes private batches or management
+00:00 +9: test/import_transport_test.dart: proposal transport limits payloads and never exposes private batches or management
+00:00 +10: test/import_transport_test.dart: proposal transport limits payloads and never exposes private batches or management
+00:00 +11: test/import_transport_test.dart: proposal transport limits payloads and never exposes private batches or management
+00:00 +12: test/import_transport_test.dart: proposal transport limits payloads and never exposes private batches or management
+00:00 +13: test/import_transport_test.dart: proposal transport limits payloads and never exposes private batches or management
+00:00 +14: test/import_transport_test.dart: proposal transport limits payloads and never exposes private batches or management
+00:00 +15: test/adjusted_approval_test.dart: owner substitutes and adds fields across information items
+00:00 +16: test/transport_test.dart: loopback transport supports approval flow but exposes no management routes
+00:00 +17: test/transport_test.dart: loopback transport supports approval flow but exposes no management routes
+00:00 +18: test/transport_test.dart: loopback transport supports approval flow but exposes no management routes
+00:00 +19: test/transport_test.dart: loopback transport supports approval flow but exposes no management routes
+00:00 +20: test/transport_test.dart: loopback transport supports approval flow but exposes no management routes
+00:00 +21: test/transport_test.dart: loopback transport supports approval flow but exposes no management routes
+00:00 +22: test/transport_test.dart: loopback transport supports approval flow but exposes no management routes
+00:00 +23: test/session_end_transport_test.dart: the end route authenticates an independent capability with no read or management authority
+00:00 +24: test/session_end_transport_test.dart: the end route authenticates an independent capability with no read or management authority
+00:00 +25: test/credentials_test.dart: credential transport distinguishes malformed, unknown, typed and reference errors without echoing input
+00:00 +26: test/credentials_test.dart: credential transport distinguishes malformed, unknown, typed and reference errors without echoing input
+00:00 +27: test/credentials_test.dart: credential transport distinguishes malformed, unknown, typed and reference errors without echoing input
+00:00 +28: test/ssh_credential_use_test.dart: a closed service cannot replace or clear its confirmed SSH host settings
+00:00 +29: test/ssh_credential_use_test.dart: a closed service cannot replace or clear its confirmed SSH host settings
+00:00 +30: test/credentials_test.dart: catalog pages use NFC names and include only opted-in current availability
+00:00 +31: test/credentials_test.dart: catalog pages use NFC names and include only opted-in current availability
+00:00 +32: test/ssh_credential_use_test.dart: SSH approval binds an owner-confirmed host snapshot and effective isolation arguments, and never silently follows a replacement snapshot
+00:00 +33: test/ssh_credential_use_test.dart: SSH approval binds an owner-confirmed host snapshot and effective isolation arguments, and never silently follows a replacement snapshot
+00:00 +34: test/ssh_credential_use_test.dart: SSH approval binds an owner-confirmed host snapshot and effective isolation arguments, and never silently follows a replacement snapshot
+00:00 +35: test/ssh_credential_use_test.dart: SSH approval binds an owner-confirmed host snapshot and effective isolation arguments, and never silently follows a replacement snapshot
+00:00 +36: test/restart_test.dart: shutdown and a new service cannot revive old sessions or grants
+00:00 +37: test/credential_execution_audit_test.dart: unauthenticated or invalid terminal reports cannot create recovery work
+00:00 +38: test/credential_history_retention_test.dart: one ended operation cannot prune an earlier active operation of the same grant
+00:00 +39: test/credential_history_retention_test.dart: one ended operation cannot prune an earlier active operation of the same grant
+00:01 +40: test/credential_history_retention_test.dart: one ended operation cannot prune an earlier active operation of the same grant
+00:01 +41: test/credential_history_retention_test.dart: one ended operation cannot prune an earlier active operation of the same grant
+00:01 +42: test/credential_history_retention_test.dart: one ended operation cannot prune an earlier active operation of the same grant
+00:01 +43: test/proposal_workspace_test.dart: proposal queue is bounded and separates pending conflicts and receipts
+00:01 +44: test/proposal_workspace_test.dart: proposal queue is bounded and separates pending conflicts and receipts
+00:01 +45: test/credential_reuse_test.dart: v2 authorization records its protocol instead of silently becoming a v1 permit
+00:01 +46: test/credential_reuse_test.dart: v2 authorization records its protocol instead of silently becoming a v1 permit
+00:01 +47: test/credential_reuse_test.dart: v2 authorization records its protocol instead of silently becoming a v1 permit
+00:01 +48: test/credential_reuse_test.dart: v2 authorization records its protocol instead of silently becoming a v1 permit
+00:01 +49: test/credential_reuse_test.dart: v2 authorization records its protocol instead of silently becoming a v1 permit
+00:01 +50: test/credential_reuse_test.dart: v2 authorization records its protocol instead of silently becoming a v1 permit
+00:01 +51: test/credential_reuse_test.dart: v2 authorization records its protocol instead of silently becoming a v1 permit
+00:01 +52: test/credential_reuse_test.dart: unknown protocol version is explicitly refused
+00:01 +53: test/credential_reuse_test.dart: an explicit null or non-integer protocol cannot silently select v1
+00:01 +54: test/credential_reuse_test.dart: v2 permission cannot enter the legacy one-shot consume path
+00:01 +55: test/templates_test.dart: extending and replacing template definitions leaves existing information and grants unchanged
+00:01 +56: test/session_end_test.dart: expiry during durable recording blocks cached delivery and records denial
+00:01 +57: test/session_end_test.dart: expiry during durable recording blocks cached delivery and records denial
+00:01 +58: test/information_attachment_version_test.dart: immutable version metadata round trips independently of a field version
+00:01 +59: test/macos_material_files_test.dart: Darwin managed material files owner-only files retain identity and allow only the first body write
+00:01 +60: test/macos_material_files_test.dart: Darwin managed material files owner-only files retain identity and allow only the first body write
+00:01 +61: test/macos_material_files_test.dart: Darwin managed material files owner-only files retain identity and allow only the first body write
+00:01 +62: test/macos_material_files_test.dart: Darwin managed material files owner-only files retain identity and allow only the first body write
+00:01 +63: test/macos_material_files_test.dart: Darwin managed material files owner-only files retain identity and allow only the first body write
+00:01 +64: test/macos_material_files_test.dart: Darwin managed material files owner-only files retain identity and allow only the first body write
+00:01 +65: test/macos_material_files_test.dart: Darwin managed material files owner-only files retain identity and allow only the first body write
+00:01 +66: test/macos_material_files_test.dart: Darwin managed material files owner-only files retain identity and allow only the first body write
+00:01 +67: test/macos_material_files_test.dart: Darwin managed material files owner-only files retain identity and allow only the first body write
+00:01 +68: test/macos_material_files_test.dart: Darwin managed material files symlink substitution never writes or deletes an outside file
+00:01 +69: test/macos_material_files_test.dart: Darwin managed material files hard links, changed permissions and unknown children stop cleanup
+00:01 +70: test/macos_material_files_test.dart: Darwin managed material files directory substitution retains both original and replacement
+00:01 +71: test/owner_field_display_test.dart: owner snapshot retains immutable requested and supplemental names without old content
+00:01 +72: test/owner_field_display_test.dart: owner snapshot retains immutable requested and supplemental names without old content
+00:01 +73: test/owner_field_display_test.dart: owner snapshot retains immutable requested and supplemental names without old content
+00:01 +74: test/revisions_test.dart: owner restores a past value as a new current version for an existing grant
+00:01 +75: test/revisions_test.dart: owner restores a past value as a new current version for an existing grant
+00:01 +76: test/revisions_test.dart: owner restores a past value as a new current version for an existing grant
+00:01 +77: test/credential_field_state_test.dart: a mixed request reports independent current field permission after credential revocation, field revocation and expiry without reloading history
+00:01 +78: test/credential_field_state_test.dart: a mixed request reports independent current field permission after credential revocation, field revocation and expiry without reloading history
+00:01 +79: test/credential_field_state_test.dart: a mixed request reports independent current field permission after credential revocation, field revocation and expiry without reloading history
+00:01 +80: test/credential_field_state_test.dart: a mixed request reports independent current field permission after credential revocation, field revocation and expiry without reloading history
+00:01 +81: test/credential_field_state_test.dart: a mixed request reports independent current field permission after credential revocation, field revocation and expiry without reloading history
+00:01 +82: test/credential_operations_test.dart: expired prevents new operations without reissuing old material
+00:01 +82 ~1: test/credential_operations_test.dart: expired prevents new operations without reissuing old material
+00:01 +83 ~1: test/credential_operations_test.dart: expired prevents new operations without reissuing old material
+00:01 +84 ~1: test/information_delivery_native_test.dart: native safe basenames reject traversal and changed file content fails integrity verification
+00:01 +85 ~1: test/information_delivery_native_test.dart: native safe basenames reject traversal and changed file content fails integrity verification
+00:01 +86 ~1: test/information_delivery_native_test.dart: native safe basenames reject traversal and changed file content fails integrity verification
+00:01 +87 ~1: test/information_delivery_native_test.dart: native safe basenames reject traversal and changed file content fails integrity verification
+00:01 +88 ~1: test/information_delivery_native_test.dart: native safe basenames reject traversal and changed file content fails integrity verification
+00:01 +89 ~1: test/information_delivery_native_test.dart: native safe basenames reject traversal and changed file content fails integrity verification
+00:01 +90 ~1: test/information_delivery_native_test.dart: native safe basenames reject traversal and changed file content fails integrity verification
+00:01 +91 ~1: test/information_delivery_native_test.dart: native safe basenames reject traversal and changed file content fails integrity verification
+00:01 +92 ~1: test/information_delivery_native_test.dart: native safe basenames reject traversal and changed file content fails integrity verification
+00:01 +93 ~1: test/information_delivery_native_test.dart: native safe basenames reject traversal and changed file content fails integrity verification
+00:01 +94 ~1: test/information_delivery_native_test.dart: native safe basenames reject traversal and changed file content fails integrity verification
+00:01 +95 ~1: test/information_delivery_native_test.dart: native safe basenames reject traversal and changed file content fails integrity verification
+00:01 +96 ~1: test/information_delivery_native_test.dart: native safe basenames reject traversal and changed file content fails integrity verification
+00:01 +97 ~1: test/information_delivery_native_test.dart: native safe basenames reject traversal and changed file content fails integrity verification
+00:01 +98 ~1: test/protocol_json_test.dart: large value strings decode once while obeying the exact source byte limit
+00:01 +99 ~1: test/protocol_json_test.dart: large value strings decode once while obeying the exact source byte limit
+00:01 +100 ~1: test/protocol_json_test.dart: large value strings decode once while obeying the exact source byte limit
+00:01 +101 ~1: test/credential_operations_test.dart: v2 fields-only approval supports ordinary read durations, never credential use
+00:01 +102 ~1: test/credential_operations_test.dart: v2 fields-only approval supports ordinary read durations, never credential use
+00:01 +103 ~1: test/protocol_json_test.dart: invalid syntax and nonfinite numbers are still rejected
+00:01 +104 ~1: test/credential_operations_test.dart: private claim roundtrip cannot change a frozen plan or attach material to an old execution
+00:01 +105 ~1: test/credential_operations_test.dart: each file operation owns its material lease and revocation does not erase earlier operations
+00:01 +106 ~1: test/credential_operations_test.dart: session ending during file preparation returns no material and keeps operation identity
+00:01 +107 ~1: test/expiry_test.dart: expiry observed by read cannot revive after clock rollback
+00:01 +108 ~1: test/expiry_test.dart: expiry observed by read cannot revive after clock rollback
+00:01 +109 ~1: test/expiry_test.dart: expiry observed by read cannot revive after clock rollback
+00:01 +110 ~1: test/expiry_test.dart: expiry observed by read cannot revive after clock rollback
+00:01 +111 ~1: test/expiry_test.dart: expiry observed by read cannot revive after clock rollback
+00:01 +112 ~1: test/expiry_test.dart: expiry observed by read cannot revive after clock rollback
+00:01 +113 ~1: test/expiry_test.dart: expiry observed by read cannot revive after clock rollback
+00:01 +114 ~1: test/expiry_test.dart: expiry observed by read cannot revive after clock rollback
+00:01 +115 ~1: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:01 +116 ~1: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:01 +117 ~1: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:01 +118 ~1: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:01 +119 ~1: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:01 +120 ~1: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:01 +121 ~1: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:01 +122 ~1: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:01 +123 ~1: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:01 +124 ~1: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:01 +124 ~1: test/windows_desktop_control_test.dart: native control pins one peer and preserves explicit failures and unknown exits
+  Skip: Opt in with the compiled synthetic Win32 control peer.
+00:01 +124 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +125 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +126 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +127 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +128 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +129 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +130 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +131 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +132 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +133 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +134 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +135 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +136 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +137 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +138 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +139 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +140 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +141 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +142 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +143 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +144 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +145 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +146 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +147 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +148 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +149 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +150 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +151 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +152 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +153 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +154 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +155 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +156 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +157 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +158 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +159 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +160 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +161 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +162 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +163 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +164 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +165 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +166 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +167 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +168 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +169 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +170 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +171 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +172 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +173 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +174 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +175 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +176 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +177 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +178 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +179 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +180 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +181 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +182 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +183 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +184 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +185 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +186 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +187 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +188 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +189 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +190 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +191 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +192 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +193 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +194 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +195 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +196 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +197 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +198 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +199 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +200 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +201 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +202 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +203 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +204 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +205 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +206 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +207 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +208 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +209 ~2: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +209 ~3: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +210 ~3: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +211 ~3: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +212 ~3: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +213 ~3: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +214 ~3: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +215 ~3: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +216 ~3: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +217 ~3: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +218 ~3: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +219 ~3: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +220 ~3: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +221 ~3: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +222 ~3: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +223 ~3: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +224 ~3: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +225 ~3: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +226 ~3: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +227 ~3: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +228 ~3: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:02 +229 ~3: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:03 +229 ~4: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:03 +229 ~5: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:03 +230 ~5: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:03 +231 ~5: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:03 +232 ~5: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:03 +233 ~5: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:03 +234 ~5: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:03 +235 ~5: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:03 +236 ~5: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:03 +237 ~5: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:03 +238 ~5: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:03 +239 ~5: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:03 +240 ~5: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:03 +241 ~5: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:03 +241 ~6: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:03 +242 ~6: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:03 +243 ~6: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:03 +244 ~6: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:03 +245 ~6: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:03 +246 ~6: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:03 +247 ~6: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:03 +248 ~6: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:03 +249 ~6: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:03 +250 ~6: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:03 +251 ~6: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:03 +252 ~6: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:03 +253 ~6: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:03 +254 ~6: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:03 +255 ~6: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:03 +256 ~6: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:03 +257 ~6: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:03 +258 ~6: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:03 +259 ~6: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:03 +260 ~6: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:03 +261 ~6: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:03 +262 ~6: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:03 +263 ~6: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:03 +264 ~6: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:03 +265 ~6: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:03 +266 ~6: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:03 +267 ~6: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:03 +268 ~6: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:03 +269 ~6: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:03 +270 ~6: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:03 +271 ~6: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:03 +272 ~6: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:03 +273 ~6: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:03 +274 ~6: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:03 +275 ~6: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:03 +276 ~6: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:03 +277 ~6: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:03 +278 ~6: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:03 +279 ~6: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:03 +280 ~6: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:03 +281 ~6: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:03 +282 ~6: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:03 +283 ~6: test/macos_tool_probe_test.dart: Mac version probe admits a slow first startup and freezes the actual file identity
+00:08 +284 ~6: test/macos_tool_probe_test.dart: Mac rejects an unbounded version response and reaps the probe
+00:08 +285 ~6: All tests passed!
+info_core checks passed.
+Analyzing info_cli...
+No issues found!
+00:00 +0: loading test/worker_registration_failure_test.dart
+00:00 +0: test/worker_registration_failure_test.dart: a durable worker registration failure stops the waiting worker before target creation and consumes only the original attempt
+00:00 +1: test/worker_registration_failure_test.dart: a durable worker registration failure stops the waiting worker before target creation and consumes only the original attempt
+00:00 +2: test/worker_registration_failure_test.dart: a durable worker registration failure stops the waiting worker before target creation and consumes only the original attempt
+00:00 +2 ~1: test/worker_registration_failure_test.dart: a durable worker registration failure stops the waiting worker before target creation and consumes only the original attempt
+00:00 +3 ~1: test/worker_registration_failure_test.dart: a durable worker registration failure stops the waiting worker before target creation and consumes only the original attempt
+00:00 +3 ~2: test/worker_registration_failure_test.dart: a durable worker registration failure stops the waiting worker before target creation and consumes only the original attempt
+00:00 +3 ~3: test/worker_registration_failure_test.dart: a durable worker registration failure stops the waiting worker before target creation and consumes only the original attempt
+00:00 +4 ~3: test/worker_registration_failure_test.dart: a durable worker registration failure stops the waiting worker before target creation and consumes only the original attempt
+00:00 +5 ~3: test/worker_registration_failure_test.dart: a durable worker registration failure stops the waiting worker before target creation and consumes only the original attempt
+00:00 +5 ~4: test/worker_registration_failure_test.dart: a durable worker registration failure stops the waiting worker before target creation and consumes only the original attempt
+00:00 +5 ~5: test/worker_registration_failure_test.dart: a durable worker registration failure stops the waiting worker before target creation and consumes only the original attempt
+00:00 +6 ~5: test/worker_registration_failure_test.dart: a durable worker registration failure stops the waiting worker before target creation and consumes only the original attempt
+00:00 +6 ~6: test/worker_registration_failure_test.dart: a durable worker registration failure stops the waiting worker before target creation and consumes only the original attempt
+00:00 +6 ~7: test/worker_registration_failure_test.dart: a durable worker registration failure stops the waiting worker before target creation and consumes only the original attempt
+00:00 +7 ~7: test/worker_registration_failure_test.dart: a durable worker registration failure stops the waiting worker before target creation and consumes only the original attempt
+00:00 +7 ~8: test/worker_registration_failure_test.dart: a durable worker registration failure stops the waiting worker before target creation and consumes only the original attempt
+00:00 +7 ~9: test/worker_registration_failure_test.dart: a durable worker registration failure stops the waiting worker before target creation and consumes only the original attempt
+00:00 +7 ~10: test/worker_registration_failure_test.dart: a durable worker registration failure stops the waiting worker before target creation and consumes only the original attempt
+00:01 +8 ~10: test/worker_registration_failure_test.dart: a durable worker registration failure stops the waiting worker before target creation and consumes only the original attempt
+00:01 +9 ~10: test/worker_registration_failure_test.dart: a durable worker registration failure stops the waiting worker before target creation and consumes only the original attempt
+00:01 +9 ~11: test/worker_registration_failure_test.dart: a durable worker registration failure stops the waiting worker before target creation and consumes only the original attempt
+00:01 +9 ~12: test/worker_registration_failure_test.dart: a durable worker registration failure stops the waiting worker before target creation and consumes only the original attempt
+00:01 +9 ~13: test/worker_registration_failure_test.dart: a durable worker registration failure stops the waiting worker before target creation and consumes only the original attempt
+00:01 +9 ~14: test/worker_registration_failure_test.dart: a durable worker registration failure stops the waiting worker before target creation and consumes only the original attempt
+00:01 +9 ~15: test/worker_registration_failure_test.dart: a durable worker registration failure stops the waiting worker before target creation and consumes only the original attempt
+00:01 +9 ~16: test/worker_registration_failure_test.dart: a durable worker registration failure stops the waiting worker before target creation and consumes only the original attempt
+00:01 +9 ~17: test/worker_registration_failure_test.dart: a durable worker registration failure stops the waiting worker before target creation and consumes only the original attempt
+00:01 +9 ~18: test/worker_registration_failure_test.dart: a durable worker registration failure stops the waiting worker before target creation and consumes only the original attempt
+00:02 +10 ~18: test/worker_registration_failure_test.dart: a durable worker registration failure stops the waiting worker before target creation and consumes only the original attempt
+00:03 +11 ~18: test/runtime_json_lines_test.dart: real JSON-lines CLI bounds and rejects each invalid byte line and continues the same session
+00:03 +12 ~18: test/adjusted_scope_cli_test.dart: real CLI learns and reads the owner-adjusted range and fixed expiry
+00:03 +12 ~19: test/adjusted_scope_cli_test.dart: real CLI learns and reads the owner-adjusted range and fixed expiry
+00:04 +13 ~19: test/credential_reuse_runtime_test.dart: native platform workers run three operations with separate groups and one unchanged grant
+00:05 +13 ~20: test/credential_reuse_runtime_test.dart: native platform workers run three operations with separate groups and one unchanged grant
+00:05 +13 ~21: test/credential_reuse_runtime_test.dart: native platform workers run three operations with separate groups and one unchanged grant
+00:06 +14 ~21: test/credential_reuse_runtime_test.dart: native platform workers run three operations with separate groups and one unchanged grant
+00:08 +15 ~21: test/credential_reuse_runtime_test.dart: native platform workers run three operations with separate groups and one unchanged grant
+00:09 +16 ~21: test/credential_reuse_runtime_test.dart: native platform workers run three operations with separate groups and one unchanged grant
+00:09 +16 ~22: test/credential_reuse_runtime_test.dart: native platform workers run three operations with separate groups and one unchanged grant
+00:09 +16 ~23: test/credential_reuse_runtime_test.dart: native platform workers run three operations with separate groups and one unchanged grant
+00:10 +17 ~23: test/bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:11 +18 ~23: test/bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:12 +19 ~23: test/bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:12 +20 ~23: test/bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:13 +20 ~23: test/credential_reuse_runtime_test.dart: native file workers inject two independent paths and clear their registered material
+{"phase":"native_file_cleanup_before_wait","operationId":"us-east-1","executionState":"exited","cleanupState":"complete"}
+00:14 +21 ~23: test/bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:14 +22 ~23: test/bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:14 +23 ~23: test/bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:14 +24 ~23: test/bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:14 +25 ~23: test/bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:15 +25 ~24: test/bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:15 +25 ~25: test/bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:15 +25 ~26: test/bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:15 +25 ~27: test/bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:15 +25 ~28: test/bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:15 +25 ~29: test/bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:15 +25 ~29: test/credential_reuse_runtime_test.dart: native file workers inject two independent paths and clear their registered material
+{"phase":"native_file_cleanup_before_wait","operationId":"us-west-2","executionState":"exited","cleanupState":"complete"}
+00:15 +26 ~29: test/credential_reuse_runtime_test.dart: native file workers inject two independent paths and clear their registered material
+00:15 +27 ~29: test/credential_catalog_cli_test.dart: Codex private association is adapter context, never a catalog field or output
+00:16 +28 ~29: test/credential_catalog_cli_test.dart: Codex private association is adapter context, never a catalog field or output
+00:16 +28 ~30: test/credential_catalog_cli_test.dart: Codex private association is adapter context, never a catalog field or output
+00:19 +29 ~30: test/credential_reuse_runtime_test.dart: full resident capacity still returns duplicate facts without another start
+00:20 +30 ~30: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:20 +30 ~31: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:20 +31 ~31: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:21 +32 ~31: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:22 +33 ~31: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:22 +34 ~31: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:22 +34 ~32: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:22 +35 ~32: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:22 +36 ~32: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:22 +37 ~32: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:22 +38 ~32: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:22 +39 ~32: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:22 +40 ~32: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:22 +41 ~32: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:22 +42 ~32: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:22 +43 ~32: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:22 +44 ~32: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:22 +44 ~33: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:23 +45 ~33: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:23 +46 ~33: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:23 +47 ~33: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:23 +48 ~33: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:23 +49 ~33: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:23 +50 ~33: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:23 +51 ~33: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:24 +51 ~34: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:24 +51 ~35: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:24 +51 ~36: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:24 +52 ~36: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:24 +53 ~36: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:25 +54 ~36: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:25 +55 ~36: test/codex_focused_fill_test.dart: independent adapters stop at unavailable fill capability
+00:25 +56 ~36: test/codex_process_test.dart: a stalled end call stops within its deadline and retains capabilities for a later retry
+00:26 +57 ~36: test/codex_process_test.dart: a stalled end call stops within its deadline and retains capabilities for a later retry
+00:30 +58 ~36: test/codex_process_test.dart: a stalled end call stops within its deadline and retains capabilities for a later retry
+00:30 +59 ~36: test/codex_process_test.dart: a stalled end call stops within its deadline and retains capabilities for a later retry
+00:30 +60 ~36: test/codex_process_test.dart: a stalled end call stops within its deadline and retains capabilities for a later retry
+00:30 +61 ~36: test/codex_process_test.dart: a stalled end call stops within its deadline and retains capabilities for a later retry
+00:30 +62 ~36: test/codex_process_test.dart: a stalled end call stops within its deadline and retains capabilities for a later retry
+00:30 +63 ~36: test/codex_process_test.dart: a stalled end call stops within its deadline and retains capabilities for a later retry
+00:30 +64 ~36: test/codex_process_test.dart: a stalled end call stops within its deadline and retains capabilities for a later retry
+00:30 +64 ~37: test/codex_process_test.dart: a stalled end call stops within its deadline and retains capabilities for a later retry
+00:31 +65 ~37: test/credential_runtime_test.dart: sixteen active executions reject the next attempt before consuming its permission
+00:32 +66 ~37: test/codex_focused_fill_test.dart: separate adapter processes discover, request once, reuse, query duplicates and obey revocation without returning secrets
+00:32 +66 ~38: test/codex_focused_fill_test.dart: separate adapter processes discover, request once, reuse, query duplicates and obey revocation without returning secrets
+00:32 +66 ~39: test/codex_focused_fill_test.dart: separate adapter processes discover, request once, reuse, query duplicates and obey revocation without returning secrets
+00:32 +66 ~40: test/codex_focused_fill_test.dart: separate adapter processes discover, request once, reuse, query duplicates and obey revocation without returning secrets
+00:33 +67 ~40: test/codex_focused_fill_test.dart: separate adapter processes discover, request once, reuse, query duplicates and obey revocation without returning secrets
+00:33 +68 ~40: test/codex_focused_fill_test.dart: separate adapter processes discover, request once, reuse, query duplicates and obey revocation without returning secrets
+00:50 +69 ~40: test/codex_process_test.dart: root SessionEnd ends every startup generation and its delegated child without reading a transcript
+00:53 +70 ~40: test/codex_process_test.dart: a parent proof delegates only the same grant and deadline to its intended child
+01:03 +71 ~40: test/codex_process_test.dart: explicit reconnect creates a fresh association without recovering grants
+01:05 +72 ~40: test/codex_process_test.dart: known chat and request IDs cannot recover a capability, even by restarting the hook
+01:15 +73 ~40: test/codex_process_test.dart: malformed associations and hook input fail without leaking input or reading transcripts
+01:18 +74 ~40: test/codex_process_test.dart: hook association supports distinct CLI processes without reapproval
+01:29 +75 ~40: All tests passed!
+info_cli checks passed.
+Analyzing info_storage...
+No issues found!
+Running build hooks...Running build hooks...00:00 +0: loading test/credential_reuse_storage_test.dart
+00:00 +0: test/credential_reuse_storage_test.dart: invalid reusable runtime snapshots are refused atomically
+00:00 +0 ~1: test/credential_reuse_storage_test.dart: invalid reusable runtime snapshots are refused atomically
+00:00 +0 ~2: test/credential_reuse_storage_test.dart: invalid reusable runtime snapshots are refused atomically
+00:00 +1 ~2: test/credential_reuse_storage_test.dart: invalid reusable runtime snapshots are refused atomically
+00:00 +2 ~2: test/credential_reuse_storage_test.dart: invalid reusable runtime snapshots are refused atomically
+00:00 +3 ~2: test/file_runtime_storage_test.dart: reopening encrypted storage preserves the material registry but no capability, and marks unconfirmed file use for inspection
+00:00 +4 ~2: test/information_delivery_storage_test.dart: real encrypted registry precedes native body writes and fixed copies persist without plaintext vault data
+00:00 +4 ~2: test/request_history_test.dart: format four restores request facts without any pending session
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/request_history_test.dart:95:25)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:00 +5 ~2: test/information_delivery_storage_test.dart: real encrypted registry precedes native body writes and fixed copies persist without plaintext vault data
+00:00 +5 ~3: test/information_delivery_storage_test.dart: real encrypted registry precedes native body writes and fixed copies persist without plaintext vault data
+00:00 +6 ~3: test/information_delivery_storage_test.dart: real encrypted registry precedes native body writes and fixed copies persist without plaintext vault data
+00:00 +7 ~3: test/information_delivery_storage_test.dart: real encrypted registry precedes native body writes and fixed copies persist without plaintext vault data
+00:00 +8 ~3: test/credential_reuse_storage_test.dart: future marker is rejected before version changes or runtime writes
+00:00 +9 ~3: test/request_history_test.dart: terminal requests survive reopen as facts without pending capability
+00:00 +10 ~3: test/information_delivery_storage_test.dart: registration transaction failure publishes no path, retains ordered audit facts and never replays
+00:00 +11 ~3: test/information_delivery_storage_test.dart: registration transaction failure publishes no path, retains ordered audit facts and never replays
+00:00 +12 ~3: test/information_attachments_storage_test.dart: file libraries reject a1001st template before committing unbackable rows
+00:00 +13 ~3: test/information_attachments_storage_test.dart: file libraries reject a1001st template before committing unbackable rows
+00:00 +14 ~3: test/information_attachments_storage_test.dart: file libraries reject a1001st template before committing unbackable rows
+00:00 +15 ~3: test/information_attachments_storage_test.dart: file libraries reject a1001st template before committing unbackable rows
+00:00 +15 ~4: test/information_attachments_storage_test.dart: file libraries reject a1001st template before committing unbackable rows
+00:00 +15 ~5: test/information_attachments_storage_test.dart: file libraries reject a1001st template before committing unbackable rows
+00:01 +16 ~5: test/information_attachments_storage_test.dart: file libraries reject a1001st template before committing unbackable rows
+00:01 +17 ~5: test/information_attachments_storage_test.dart: file libraries reject a1001st template before committing unbackable rows
+00:01 +18 ~5: test/information_attachments_storage_test.dart: file libraries reject a1001st template before committing unbackable rows
+00:01 +18 ~5: test/credential_reuse_storage_test.dart: backup6 restores per-operation plans and terminal states independently (activeFirst=true)
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/credential_reuse_storage_test.dart:762:24)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:01 +19 ~5: test/information_attachments_storage_test.dart: file libraries reject a1001st template before committing unbackable rows
+00:01 +20 ~5: test/information_attachments_storage_test.dart: file libraries reject a1001st template before committing unbackable rows
+00:01 +21 ~5: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:01 +21 ~5: test/credential_reuse_storage_test.dart: backup6 restores per-operation plans and terminal states independently (activeFirst=false)
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/credential_reuse_storage_test.dart:762:24)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:01 +22 ~5: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:01 +22 ~5: test/information_delivery_storage_test.dart: format9 archives facts and original bytes without leases or associations and restores no execution capability
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/information_delivery_storage_test.dart:516:22)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:01 +23 ~5: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:01 +24 ~5: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:01 +24 ~5: test/information_delivery_storage_test.dart: authenticated format9 rejects private capabilities, duplicate nested keys and mismatched original/history references
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/information_delivery_storage_test.dart:570:22)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:01 +25 ~5: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:01 +26 ~5: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:01 +26 ~6: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:01 +26 ~6: test/information_delivery_storage_test.dart: late format9 archive insert failure rolls back original BLOBs and all tables before retry
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/information_delivery_storage_test.dart:646:22)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:01 +27 ~6: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:01 +28 ~6: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:02 +29 ~6: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:02 +29 ~6: test/attachment_legacy_boundary_test.dart: authenticated format7 file-kind strings are rejected before inspection or restore, not downgraded
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/attachment_legacy_boundary_test.dart:82:22)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:02 +30 ~6: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:02 +31 ~6: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:02 +32 ~6: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:03 +33 ~6: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:03 +34 ~6: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:04 +35 ~6: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:04 +36 ~6: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:04 +37 ~6: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:04 +38 ~6: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:04 +39 ~6: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:04 +40 ~6: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:04 +41 ~6: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:04 +42 ~6: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:04 +43 ~6: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:04 +44 ~6: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:05 +45 ~6: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:05 +46 ~6: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:05 +47 ~6: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:05 +48 ~6: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:05 +49 ~6: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:05 +50 ~6: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:05 +51 ~6: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:06 +52 ~6: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:06 +53 ~6: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:06 +54 ~6: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:06 +55 ~6: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:06 +56 ~6: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:06 +57 ~6: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:07 +58 ~6: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:07 +58 ~7: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:07 +59 ~7: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:07 +60 ~7: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:07 +61 ~7: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:07 +62 ~7: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:07 +63 ~7: test/mixed_lifecycle_macos_test.dart: (setUpAll)
+00:10 +63 ~7: test/information_attachments_storage_test.dart: file libraries reject history beyond the shared500000 nested fact ceiling
+00:11 +63 ~7: test/macos_backup_recovery_test.dart: (setUpAll)
+MAC_RESTORE_AOT_PAYLOAD=[{"path":"bin/macos_restore_child","bytes":7225008,"sha256":"3c8c21fb0fd0b5f49ef0aabe7bf5e4302e44c94bcef7e39a7c5aa9728be79265"},{"path":"lib/libsqlcipher.dylib","bytes":1792352,"sha256":"0eea040b90e45f380573abd315e79bd25a2ac17dff9818fbaa47fec1e213102f"}]
+00:11 +63 ~7: test/information_attachments_storage_test.dart: file libraries reject history beyond the shared500000 nested fact ceiling
+00:13 +64 ~7: test/information_attachments_storage_test.dart: file libraries reject history beyond the shared500000 nested fact ceiling
+00:14 +65 ~7: test/information_attachments_storage_test.dart: file libraries reject history beyond the shared500000 nested fact ceiling
+00:16 +66 ~7: test/information_attachments_storage_test.dart: file libraries reject history beyond the shared500000 nested fact ceiling
+00:17 +67 ~7: test/information_attachments_storage_test.dart: file libraries reject history beyond the shared500000 nested fact ceiling
+00:18 +68 ~7: test/information_attachments_storage_test.dart: file libraries reject history beyond the shared500000 nested fact ceiling
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/information_attachments_storage_test.dart:141:27)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:19 +69 ~7: test/information_attachments_storage_test.dart: file libraries reject history beyond the shared500000 nested fact ceiling
+00:19 +70 ~7: test/information_attachments_storage_test.dart: file libraries reject history beyond the shared500000 nested fact ceiling
+00:20 +70 ~7: test/mixed_lifecycle_macos_test.dart: terminal audit recovery preserves the observed exit without replay or a permanently running record
+{"phase":"terminal-audit-recovery","unavailable":true,"publicStateDuringFailure":"unknown","ownerStateDuringFailure":"unknown","recoveredState":"exited","recoveredExitCode":0,"cleanup":"complete","materialPresent":false}
+00:20 +71 ~7: test/information_attachments_storage_test.dart: file libraries reject history beyond the shared500000 nested fact ceiling
+00:34 +72 ~7: test/information_attachments_storage_test.dart: file libraries reject history beyond the shared500000 nested fact ceiling
+00:38 +73 ~7: test/macos_backup_recovery_test.dart: Mac AOT format8 interruption during 80MiB restore rolls back and retries with distinct target key
+00:41 +74 ~7: test/macos_backup_recovery_test.dart: Mac AOT format8 interruption during 80MiB restore rolls back and retries with distinct target key
+00:41 +74 ~7: test/focused_fill_storage_test.dart: format9 preserves command, fill and credential archives alongside ordinary originals without file delivery authority
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/focused_fill_storage_test.dart:411:22)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:41 +75 ~7: test/macos_backup_recovery_test.dart: Mac AOT format8 interruption during 80MiB restore rolls back and retries with distinct target key
+00:41 +76 ~7: test/macos_backup_recovery_test.dart: Mac AOT format8 interruption during 80MiB restore rolls back and retries with distinct target key
+00:41 +76 ~7: test/focused_fill_storage_test.dart: terminal refused remains an input fact across owner review and backup
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/focused_fill_storage_test.dart:514:24)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:41 +77 ~7: test/macos_backup_recovery_test.dart: Mac AOT format8 interruption during 80MiB restore rolls back and retries with distinct target key
+00:41 +77 ~7: test/focused_fill_storage_test.dart: terminal partial remains an input fact across owner review and backup
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/focused_fill_storage_test.dart:514:24)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:41 +78 ~7: test/macos_backup_recovery_test.dart: Mac AOT format8 interruption during 80MiB restore rolls back and retries with distinct target key
+00:42 +78 ~7: test/focused_fill_storage_test.dart: terminal unknown remains an input fact across owner review and backup
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/focused_fill_storage_test.dart:514:24)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:42 +79 ~7: test/macos_backup_recovery_test.dart: Mac AOT format8 interruption during 80MiB restore rolls back and retries with distinct target key
+00:42 +80 ~7: test/macos_backup_recovery_test.dart: Mac AOT format8 interruption during 80MiB restore rolls back and retries with distinct target key
+00:42 +81 ~7: test/macos_backup_recovery_test.dart: Mac AOT format8 interruption during 80MiB restore rolls back and retries with distinct target key
+00:42 +82 ~7: test/macos_backup_recovery_test.dart: Mac AOT format8 interruption during 80MiB restore rolls back and retries with distinct target key
+00:42 +83 ~7: test/macos_backup_recovery_test.dart: Mac AOT format8 interruption during 80MiB restore rolls back and retries with distinct target key
+00:42 +83 ~7: test/focused_fill_storage_test.dart: format7 encrypted backup includes both result types, excludes pending and restores facts only
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/focused_fill_storage_test.dart:745:22)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:42 +84 ~7: test/macos_backup_recovery_test.dart: Mac AOT format8 interruption during 80MiB restore rolls back and retries with distinct target key
+00:42 +84 ~7: test/focused_fill_storage_test.dart: format7 refuses extra/private data and mismatched fill associations without changing recipient
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/focused_fill_storage_test.dart:801:22)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:42 +85 ~7: test/macos_backup_recovery_test.dart: Mac AOT format8 interruption during 80MiB restore rolls back and retries with distinct target key
+00:42 +86 ~7: test/macos_backup_recovery_test.dart: Mac AOT format8 interruption during 80MiB restore rolls back and retries with distinct target key
+00:42 +86 ~8: test/macos_backup_recovery_test.dart: Mac AOT format8 interruption during 80MiB restore rolls back and retries with distinct target key
+00:42 +87 ~8: test/macos_backup_recovery_test.dart: Mac AOT format8 interruption during 80MiB restore rolls back and retries with distinct target key
+00:43 +88 ~8: test/macos_backup_recovery_test.dart: Mac AOT format8 interruption during 80MiB restore rolls back and retries with distinct target key
+00:43 +88 ~9: test/macos_backup_recovery_test.dart: Mac AOT format8 interruption during 80MiB restore rolls back and retries with distinct target key
+MAC_RESTORE_FORMAT_8: AOT SIGKILL after 4MiB growth and hot journal; SQLCipher integrity/rollback passed; same-target retry restored 80MiB and no live authority. Synthetic in-memory keys, not Keychain or packaged UI.
+00:43 +89 ~9: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:43 +90 ~9: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:43 +91 ~9: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:43 +92 ~9: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:43 +93 ~9: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:44 +93 ~9: test/credential_backup_test.dart: restored credential history contains no pending authority or private process registration
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/credential_backup_test.dart:134:22)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:44 +94 ~9: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:44 +94 ~9: test/credential_backup_test.dart: current format restores credential bytes, versions, states and links under a fresh local key
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/credential_backup_test.dart:303:22)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/credential_backup_test.dart:342:24)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/credential_backup_test.dart:394:24)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/credential_backup_test.dart:394:24)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/credential_backup_test.dart:424:20)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:44 +95 ~9: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:44 +96 ~9: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:45 +97 ~9: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:45 +98 ~9: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:45 +99 ~9: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:45 +100 ~9: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:45 +101 ~9: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:45 +102 ~9: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:45 +103 ~9: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:45 +103 ~9: test/information_attachments_storage_test.dart: full format8 round trip restores current and revision originals under recipient key
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/information_attachments_storage_test.dart:554:22)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:45 +104 ~9: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:45 +105 ~9: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:45 +105 ~9: test/information_attachments_storage_test.dart: zero byte original round trip is distinct from missing content
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/information_attachments_storage_test.dart:604:22)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:45 +106 ~9: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:45 +106 ~9: test/information_attachments_storage_test.dart: source replacement after preview rejects changed data and leaves recipient empty
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/information_attachments_storage_test.dart:630:22)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:45 +107 ~9: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:45 +107 ~9: test/information_attachments_storage_test.dart: restore write failure rolls back installed BLOBs and retains ephemeral owner draft
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/information_attachments_storage_test.dart:659:22)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:45 +108 ~9: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:45 +108 ~9: test/information_attachments_storage_test.dart: authenticated domain corruption in current, revision or side refs fails before restore
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/information_attachments_storage_test.dart:713:22)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:45 +109 ~9: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:45 +110 ~9: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:45 +111 ~9: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:45 +112 ~9: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:45 +112 ~10: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:45 +112 ~11: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:45 +112 ~12: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:45 +112 ~13: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:45 +112 ~14: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:45 +112 ~15: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:45 +112 ~16: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:46 +112 ~16: test/organization_tasks_test.dart: organization proposals reopen, preserve content, and are excluded from recovery
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/organization_tasks_test.dart:68:25)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:46 +113 ~16: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:46 +114 ~16: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:46 +115 ~16: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:46 +116 ~16: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:46 +117 ~16: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:46 +117 ~17: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:46 +118 ~17: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:46 +119 ~17: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:46 +120 ~17: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:47 +120 ~17: test/complete_backup_test.dart: clock rollback never makes legitimate grant history unexportable or restores live authority
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/complete_backup_test.dart:98:24)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/complete_backup_test.dart:98:24)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:47 +121 ~17: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:47 +122 ~17: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:47 +122 ~17: test/complete_backup_test.dart: format 3 preserves original information times through complete restore and rejects malformed dates atomically
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/complete_backup_test.dart:159:22)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:47 +123 ~17: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:47 +124 ~17: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:47 +125 ~17: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:47 +125 ~17: test/complete_backup_test.dart: complete backup preserves grouped recycle fields from replace
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/complete_backup_test.dart:248:24)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:47 +126 ~17: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:47 +126 ~17: test/complete_backup_test.dart: complete backup preserves grouped recycle fields from rollback
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/complete_backup_test.dart:248:24)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:47 +127 ~17: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:47 +127 ~17: test/complete_backup_test.dart: complete backup roundtrips grouped removed fields and zero-field whole-item metadata
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/complete_backup_test.dart:333:22)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:47 +128 ~17: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:47 +129 ~17: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:47 +130 ~17: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:47 +130 ~17: test/complete_backup_test.dart: each audit retention setting keeps its exact boundary and expires it on later restore
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/complete_backup_test.dart:444:24)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:47 +131 ~17: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:47 +132 ~17: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:47 +132 ~17: test/complete_backup_test.dart: each audit retention setting keeps its exact boundary and expires it on later restore
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/complete_backup_test.dart:444:24)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/complete_backup_test.dart:444:24)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/complete_backup_test.dart:444:24)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:48 +133 ~17: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:48 +133 ~17: test/complete_backup_test.dart: legacy format 1 restores unknown dates without inventing history or credentials
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/complete_backup_test.dart:519:24)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:48 +134 ~17: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:48 +134 ~17: test/complete_backup_test.dart: legacy format 2 restores unknown dates without inventing history or credentials
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/complete_backup_test.dart:519:24)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:48 +135 ~17: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:48 +135 ~17: test/complete_backup_test.dart: authenticated hostile history payloads fail before changing recipient preferences
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/complete_backup_test.dart:579:22)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:48 +136 ~17: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:48 +136 ~17: test/complete_backup_test.dart: retention applies at export and delayed restore without renewing content lifetimes
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/complete_backup_test.dart:805:25)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:48 +137 ~17: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:48 +137 ~17: test/complete_backup_test.dart: complete backup preserves retained versions, recycle and past audit without live capabilities
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/complete_backup_test.dart:955:23)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/complete_backup_test.dart:1002:19)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:48 +138 ~17: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:49 +139 ~17: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:49 +140 ~17: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:49 +141 ~17: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:49 +142 ~17: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:49 +143 ~17: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:49 +143 ~18: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:50 +144 ~18: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:50 +145 ~18: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:50 +146 ~18: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:50 +147 ~18: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:50 +147 ~18: test/information_file_staging_test.dart: backup excludes stages and successful restore clears drafts atomically; wrong key preserves them
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/information_file_staging_test.dart:342:22)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:50 +147 ~18: test/information_attachment_lifecycle_test.dart: current and retained originals export exact bytes from a fixed read transaction
+live attachment snapshot: journal=delete, independent BEGIN IMMEDIATE=SQLITE_BUSY
+00:50 +148 ~18: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:50 +149 ~18: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:50 +150 ~18: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:50 +151 ~18: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:50 +152 ~18: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:50 +152 ~18: test/information_attachment_lifecycle_test.dart: delayed restore prunes expired originals from the same backup without reviving them on rollback
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/information_attachment_lifecycle_test.dart:287:22)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:51 +153 ~18: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:51 +153 ~18: test/information_attachment_lifecycle_test.dart: backup of a purged original keeps unavailable metadata and no chunks
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/test/information_attachment_lifecycle_test.dart:340:22)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:51 +154 ~18: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:51 +155 ~18: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+00:59 +156 ~18: test/information_delivery_storage_test.dart: near64MiB portable metadata rejects other writers and new deliveries while an admitted copy can still finish and back up
+01:00 +157 ~18: test/macos_backup_recovery_test.dart: Mac AOT format9 interruption during 80MiB restore rolls back and retries with distinct target key
+01:00 +158 ~18: test/macos_backup_recovery_test.dart: Mac AOT format9 interruption during 80MiB restore rolls back and retries with distinct target key
+MAC_RESTORE_FORMAT_9: AOT SIGKILL after 4MiB growth and hot journal; SQLCipher integrity/rollback passed; same-target retry restored 80MiB and no live authority. Synthetic in-memory keys, not Keychain or packaged UI.
+01:11 +159 ~18: test/macos_backup_recovery_test.dart: (tearDownAll)
+01:11 +159 ~18: All tests passed!
+info_storage checks passed.
+Analyzing desktop...                                            
+No issues found! (ran in 1.8s)
+00:00 +0: loading /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/bundled_tool_settings_test.dart
+00:00 +0: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/bundled_tool_settings_test.dart: available path copies exactly; failed entry cannot be copied; refresh recovers
+00:00 +1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/bundled_tool_settings_test.dart: available path copies exactly; failed entry cannot be copied; refresh recovers
+00:00 +2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/bundled_tool_settings_test.dart: available path copies exactly; failed entry cannot be copied; refresh recovers
+00:00 +3: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_navigation_test.dart: navigation switches one selection immediately and pages share an origin
+00:01 +4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_navigation_test.dart: navigation switches one selection immediately and pages share an origin
+00:01 +5: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_navigation_test.dart: navigation switches one selection immediately and pages share an origin
+00:01 +6: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_navigation_test.dart: navigation switches one selection immediately and pages share an origin
+00:01 +7: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_navigation_test.dart: navigation switches one selection immediately and pages share an origin
+00:01 +8: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_navigation_test.dart: navigation switches one selection immediately and pages share an origin
+00:01 +9: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_navigation_test.dart: navigation switches one selection immediately and pages share an origin
+00:01 +10: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_navigation_test.dart: navigation switches one selection immediately and pages share an origin
+00:01 +11: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_navigation_test.dart: navigation switches one selection immediately and pages share an origin
+00:01 +12: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_navigation_test.dart: navigation switches one selection immediately and pages share an origin
+00:01 +13: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_navigation_test.dart: navigation switches one selection immediately and pages share an origin
+00:01 +14: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_navigation_test.dart: navigation switches one selection immediately and pages share an origin
+00:01 +15: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_navigation_test.dart: navigation switches one selection immediately and pages share an origin
+00:03 +16: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_navigation_test.dart: navigation switches one selection immediately and pages share an origin
+00:03 +17: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_navigation_test.dart: navigation switches one selection immediately and pages share an origin
+00:03 +18: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_navigation_test.dart: navigation switches one selection immediately and pages share an origin
+00:04 +19: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_navigation_test.dart: navigation switches one selection immediately and pages share an origin
+00:04 +20: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_navigation_test.dart: navigation switches one selection immediately and pages share an origin
+00:04 +21: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_navigation_test.dart: navigation switches one selection immediately and pages share an origin
+00:05 +22: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_navigation_test.dart: navigation switches one selection immediately and pages share an origin
+00:05 +23: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_navigation_test.dart: navigation switches one selection immediately and pages share an origin
+00:06 +24: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_navigation_test.dart: navigation switches one selection immediately and pages share an origin
+00:06 +25: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_navigation_test.dart: navigation switches one selection immediately and pages share an origin
+00:06 +26: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_navigation_test.dart: navigation switches one selection immediately and pages share an origin
+00:06 +27: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_navigation_test.dart: navigation switches one selection immediately and pages share an origin
+00:06 +27: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/information_file_backup_test.dart: SQLCipher backup flow reports and restores exact current and retained originals without grants, stages or live copies
+WARNING (drift): It looks like you've created the database class _InformationDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _InformationDatabase (package:info_storage/info_storage.dart)
+#4      EncryptedInformationRepository.open (package:info_storage/info_storage.dart:407:12)
+<asynchronous suspension>
+#5      main.<anonymous closure>.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/information_file_backup_test.dart:151:24)
+<asynchronous suspension>
+#6      _AsyncCompleter.complete (dart:async/future_impl.dart:96:3)
+<asynchronous suspension>
+#7      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/information_file_backup_test.dart:143:7)
+<asynchronous suspension>
+#8      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#9      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+#10     StackZoneSpecification._registerCallback.<anonymous closure> (package:stack_trace/src/stack_zone_specification.dart:114:42)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:07 +28: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_navigation_test.dart: navigation switches one selection immediately and pages share an origin
+00:07 +29: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/information_file_runtime_test.dart: application settings explain a held ordinary file copy and retry only registered cleanup
+00:08 +30: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/information_file_runtime_test.dart: application settings explain a held ordinary file copy and retry only registered cleanup
+00:08 +31: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/information_file_runtime_test.dart: application settings explain a held ordinary file copy and retry only registered cleanup
+00:08 +32: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/information_file_runtime_test.dart: application settings explain a held ordinary file copy and retry only registered cleanup
+00:08 +33: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/information_file_runtime_test.dart: application settings explain a held ordinary file copy and retry only registered cleanup
+00:08 +34: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/information_file_runtime_test.dart: application settings explain a held ordinary file copy and retry only registered cleanup
+00:08 +35: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_navigation_test.dart: notification settings show permission and test-delivery outcomes without changing access
+00:08 +36: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_navigation_test.dart: notification settings show permission and test-delivery outcomes without changing access
+00:08 +37: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_navigation_test.dart: notification settings show permission and test-delivery outcomes without changing access
+00:08 +38: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_navigation_test.dart: notification settings show permission and test-delivery outcomes without changing access
+00:08 +39: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_navigation_test.dart: notification settings show permission and test-delivery outcomes without changing access
+00:09 +40: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/proposal_workspace_test.dart: a stopped query reports failure without claiming an empty successful result
+00:10 +41: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/settings_round05_test.dart: organization result opens its actual historical task across pages
+00:11 +42: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/settings_round05_test.dart: organization result opens its actual historical task across pages
+00:11 +43: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/settings_round05_test.dart: organization result opens its actual historical task across pages
+00:11 +44: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:11 +45: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:12 +46: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:12 +47: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:12 +48: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:13 +49: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:14 +50: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:14 +51: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:14 +52: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:15 +53: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:15 +54: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:15 +55: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:16 +56: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:16 +57: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:16 +58: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:16 +59: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:16 +60: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
+00:17 +61: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/organization_widget_test.dart: owner creates hierarchy and tags then organizes an item
+00:17 +62: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/organization_widget_test.dart: owner creates hierarchy and tags then organizes an item
+00:17 +63: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/organization_widget_test.dart: owner creates hierarchy and tags then organizes an item
+00:18 +64: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/organization_widget_test.dart: owner creates hierarchy and tags then organizes an item
+00:18 +65: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/organization_widget_test.dart: owner creates hierarchy and tags then organizes an item
+00:19 +66: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/organization_widget_test.dart: owner creates hierarchy and tags then organizes an item
+00:19 +67: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_history_widget_test.dart: one mixed history entry preserves independent credential and field grants and links back to its credential
+00:20 +68: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_history_widget_test.dart: one mixed history entry preserves independent credential and field grants and links back to its credential
+00:20 +69: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_history_widget_test.dart: one mixed history entry preserves independent credential and field grants and links back to its credential
+00:20 +70: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_history_widget_test.dart: one mixed history entry preserves independent credential and field grants and links back to its credential
+00:20 +71: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_history_widget_test.dart: one mixed history entry preserves independent credential and field grants and links back to its credential
+00:21 +72: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_history_widget_test.dart: one mixed history entry preserves independent credential and field grants and links back to its credential
+00:21 +73: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_history_widget_test.dart: one mixed history entry preserves independent credential and field grants and links back to its credential
+00:21 +74: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_history_widget_test.dart: one mixed history entry preserves independent credential and field grants and links back to its credential
+00:21 +75: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_history_widget_test.dart: one mixed history entry preserves independent credential and field grants and links back to its credential
+00:21 +76: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_history_widget_test.dart: one mixed history entry preserves independent credential and field grants and links back to its credential
+00:21 +77: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_history_widget_test.dart: one mixed history entry preserves independent credential and field grants and links back to its credential
+00:23 +78: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_history_widget_test.dart: one mixed history entry preserves independent credential and field grants and links back to its credential
+00:23 +79: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/directory_approval_widget_test.dart: owner batch selects a directory as fixed field identities
+00:24 +80: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_reuse_widget_test.dart: v2 approval displays reusable scope and defaults independent fields to eight hours
+00:24 +81: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/revisions_test.dart: history blocks deleted fields until explicit recycle restore and rejects changed current version
+00:25 +82: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/revisions_test.dart: history blocks deleted fields until explicit recycle restore and rejects changed current version
+00:26 +83: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_maintenance_test.dart: runtime tick preserves failed expired credential material and clears its real notice after retry
+00:26 +84: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/widget_test.dart: desktop approves only selected field then revokes the grant
+00:26 +85: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/widget_test.dart: desktop approves only selected field then revokes the grant
+00:26 +86: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/widget_test.dart: desktop approves only selected field then revokes the grant
+00:27 +87: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_reuse_widget_test.dart: operation pagination and selection survive reports at 200 percent text
+00:27 +88: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/focused_fill_widget_test.dart: real inbox approves focused fill without a command plan or sending input
+00:28 +89: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/focused_fill_widget_test.dart: real inbox approves focused fill without a command plan or sending input
+00:29 +90: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/focused_fill_widget_test.dart: real inbox approves focused fill without a command plan or sending input
+00:30 +91: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:30 +92: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:30 +93: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:30 +94: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:31 +95: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:31 +96: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:31 +97: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:31 +98: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:31 +99: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:31 +100: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:31 +101: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:31 +102: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:31 +103: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:31 +104: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:31 +105: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:31 +106: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:31 +107: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:32 +108: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:32 +109: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:32 +110: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:32 +111: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/background_widget_test.dart: unavailable background entry keeps window reachable; notification denial leaves pending approvals usable
+00:32 +112: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_flow_widget_test.dart: backup flow keeps real first enable and both restore file controls together
+00:32 +113: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_flow_widget_test.dart: backup flow keeps real first enable and both restore file controls together
+00:33 +114: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_flow_widget_test.dart: backup flow keeps real first enable and both restore file controls together
+00:33 +115: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_flow_widget_test.dart: backup flow keeps real first enable and both restore file controls together
+00:33 +116: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_flow_widget_test.dart: backup flow keeps real first enable and both restore file controls together
+00:33 +117: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_flow_widget_test.dart: backup flow keeps real first enable and both restore file controls together
+00:34 +118: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_flow_widget_test.dart: backup flow keeps real first enable and both restore file controls together
+00:34 +119: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_flow_widget_test.dart: backup flow keeps real first enable and both restore file controls together
+00:35 +120: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/backup_flow_widget_test.dart: backup flow keeps real first enable and both restore file controls together
+00:35 +121: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/information_file_editor_test.dart: file controls are reachable by keyboard and Escape cleans the draft at 100.0%
+00:35 +122: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/history_widget_test.dart: shortening retention shows real counts and deletes only after confirmation
+00:36 +123: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/organization_tasks_test.dart: Agent requests in approval inbox; one approval enables automatic classification and read-only result
+00:37 +124: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/organization_tasks_test.dart: Agent requests in approval inbox; one approval enables automatic classification and read-only result
+00:37 +125: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/organization_tasks_test.dart: Agent requests in approval inbox; one approval enables automatic classification and read-only result
+00:37 +126: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/organization_tasks_test.dart: Agent requests in approval inbox; one approval enables automatic classification and read-only result
+00:37 +127: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/organization_tasks_test.dart: Agent requests in approval inbox; one approval enables automatic classification and read-only result
+00:37 +128: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/organization_tasks_test.dart: Agent requests in approval inbox; one approval enables automatic classification and read-only result
+00:37 +129: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/organization_tasks_test.dart: Agent requests in approval inbox; one approval enables automatic classification and read-only result
+00:37 +130: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/organization_tasks_test.dart: Agent requests in approval inbox; one approval enables automatic classification and read-only result
+00:38 +131: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/organization_tasks_test.dart: Agent requests in approval inbox; one approval enables automatic classification and read-only result
+00:38 +132: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/library_labels_overflow_test.dart: many tags stay reachable at normal and large text sizes
+00:40 +133: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/library_labels_overflow_test.dart: many tags stay reachable at normal and large text sizes
+00:40 +134: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/library_labels_overflow_test.dart: many tags stay reachable at normal and large text sizes
+00:40 +135: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/library_labels_overflow_test.dart: many tags stay reachable at normal and large text sizes
+00:40 +136: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/library_labels_overflow_test.dart: many tags stay reachable at normal and large text sizes
+00:41 +137: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_reshape_test.dart: valid new information keeps its input on storage failure and saves once on retry
+00:41 +138: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/removed_field_state_test.dart: handled approval keeps recorded names after a same-name field is restored with a new identity
+00:42 +139: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/inbox_workspace_test.dart: slash focuses inbox outside editing and passes through in search input
+00:42 +140: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/inbox_workspace_test.dart: slash focuses inbox outside editing and passes through in search input
+00:42 +141: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/inbox_workspace_test.dart: slash focuses inbox outside editing and passes through in search input
+00:42 +142: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/information_file_approval_history_test.dart: a later delivery remains discoverable after the older grant fact is pruned
+00:42 +143: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/information_file_approval_history_test.dart: a later delivery remains discoverable after the older grant fact is pruned
+00:43 +144: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/information_file_approval_history_test.dart: a later delivery remains discoverable after the older grant fact is pruned
+00:43 +145: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/inbox_workspace_test.dart: slash preserves the custom lifetime editor focus and text key
+00:44 +146: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_use_widget_test.dart: handled credential request exposes its actual nonzero execution receipt without material or output
+00:44 +147: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_use_widget_test.dart: handled credential request exposes its actual nonzero execution receipt without material or output
+00:45 +148: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_use_widget_test.dart: handled credential request exposes its actual nonzero execution receipt without material or output
+00:45 +149: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/information_file_approval_history_test.dart: mixed file approval rejects a changed review and delivery history keeps each version and cleanup outcome
+00:45 +150: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/library_test.dart: owner manually saves named information fields
+00:45 +151: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/library_test.dart: owner manually saves named information fields
+00:46 +152: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/inbox_workspace_test.dart: notification opens its request on another page and clears stale search
+00:46 +153: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/inbox_workspace_test.dart: notification opens its request on another page and clears stale search
+00:47 +154: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:47 +155: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:48 +156: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:48 +157: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:48 +158: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:49 +159: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:49 +160: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:49 +161: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:50 +162: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:50 +163: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:50 +164: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:50 +164 ~1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:50 +165 ~1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:50 +166 ~1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:50 +167 ~1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:50 +168 ~1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:50 +169 ~1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:50 +170 ~1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:50 +170 ~2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:50 +171 ~2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:50 +172 ~2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:51 +173 ~2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/import_proposals_test.dart: owner edits a batch and sees confirmed information on the library tab
+00:51 +174 ~2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/library_workspace_test.dart: a rejected library query shows failure and never presents stale detail as a match
+00:52 +175 ~2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_migration_widget_test.dart: owner must explicitly choose and confirm a field, sees grant and backup effects, and gets the linked credential
+00:52 +176 ~2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_migration_widget_test.dart: owner must explicitly choose and confirm a field, sees grant and backup effects, and gets the linked credential
+00:52 +177 ~2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_migration_widget_test.dart: owner must explicitly choose and confirm a field, sees grant and backup effects, and gets the linked credential
+00:52 +178 ~2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_migration_widget_test.dart: owner must explicitly choose and confirm a field, sees grant and backup effects, and gets the linked credential
+00:52 +179 ~2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_migration_widget_test.dart: owner must explicitly choose and confirm a field, sees grant and backup effects, and gets the linked credential
+00:53 +180 ~2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_migration_widget_test.dart: owner must explicitly choose and confirm a field, sees grant and backup effects, and gets the linked credential
+00:53 +181 ~2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/cross_page_navigation_test.dart: main shares current-ID navigation with proposal results and credential links while ordinary library jumps preserve state
+00:54 +182 ~2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/cross_page_navigation_test.dart: main shares current-ID navigation with proposal results and credential links while ordinary library jumps preserve state
+00:55 +183 ~2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/cross_page_navigation_test.dart: main shares current-ID navigation with proposal results and credential links while ordinary library jumps preserve state
+00:55 +184 ~2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/cross_page_navigation_test.dart: main shares current-ID navigation with proposal results and credential links while ordinary library jumps preserve state
+00:56 +185 ~2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/cross_page_navigation_test.dart: main shares current-ID navigation with proposal results and credential links while ordinary library jumps preserve state
+00:57 +186 ~2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/cross_page_navigation_test.dart: main shares current-ID navigation with proposal results and credential links while ordinary library jumps preserve state
+00:57 +187 ~2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/cross_page_navigation_test.dart: main opens the actual organization task and preserves history search page and selection on ordinary returns
+00:59 +188 ~2: All tests passed!
+Desktop checks passed.

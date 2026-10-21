@@ -1,0 +1,29 @@
+The following is a diff from the previous accessibility tree for Window: "info_desktop" with ~ and + representing changed and added elements, respectively. Removed elements are summarized by ID range.
+Removed element IDs: 70-80
+~			69 container (settable)
++				70 text (settable) 批准凭据使用
++				71 button (settable) ×
++				72 text (settable) 允许本次会话在有效期内重复使用「Mac AWS 错误合成秘密」版本 1，使用方式固定。
++				73 text (settable) 凭据许可
++				74 text (settable) 15 分钟内可重复使用，不续期
++				75 text (settable) 注入位置
++				76 text (settable) AWS_SHARED_CREDENTIALS_FILE ← 受限临时文件
++				77 text (settable) 接收配置
++				78 text (settable) 静态 default 凭据 · 独立空 AWS_CONFIG_FILE · 禁用 metadata、pager 和自动提示
++				79 text (settable) aws sts get-caller-identity --region us-east-1 --endpoint-url http://127.0.0.1:61846 --output json --no-cli-pager
++				80 text (settable) 程序位置
++				81 text (settable) /Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue44-tools-production-ui-1/source/apps/desktop/build/relocated/移动 中文 空格/info_desktop.app/Contents/Resources/ThirdParty/aws-cli/aws
++				82 text (settable) 参数（按项）
++				83 text (settable) ["sts","get-caller-identity","--region","us-east-1","--endpoint-url","http://127.0.0.1:61846","--output","json","--no-cli-pager"]
++				84 text (settable) 工作目录
++				85 text (settable) /Users/jiangxinyi/Library/Containers/org.shijijs.agent-info-manage.qa.tools.924c55904a2d43dd8bb6acc1f7c49897/Data/tmp/aim-mac-tools-Fv9eh8
++				86 text (settable) 凭据标识 / 版本
++				87 text (settable) x2Mo56Nh2A474lc1hK1upQ0fBU5o1qhM4-Gfw1Ce8J8= / 1
++				88 text (settable) 计划 hash
++				89 text (settable) sha256:5a513f527cffbe991a4ae1dc7d2c768e6d7a33b3b32ebac96bb62f49f4911654
++				90 text (settable) 首条命令用于理解用途，批准不会立即运行。同一批准范围内的新命令不重新审批；每次操作冻结自己的完整计划和操作 ID。增加未批准的凭据或使用方式需要新申请。
++				91 text (settable) 程序可接触原文。撤销只会阻止新的启动，不能收回已注入的内容，也不会终止已运行进程。
++				92 button (settable) 返回核对
++				93 button (settable) 确认批准
++			94 text (settable) Dismiss
+The focused UI element is 1 container info_desktop

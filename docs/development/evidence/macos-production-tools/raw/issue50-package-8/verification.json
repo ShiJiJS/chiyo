@@ -1,0 +1,10 @@
+{
+  "sourceCommit": "1efb4bb41de298eb83d60adabf64d1cf5f6815e7",
+  "complete": false,
+  "phases": [
+    {
+      "name": "source-checks",
+      "exit": 1
+    }
+  ]
+}
