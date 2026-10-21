@@ -1,0 +1,359 @@
+{
+  "date": "2026-10-21",
+  "acceptedStartupCasesRun": "issue46-startup-ui-2",
+  "thatRunOverallPassed": false,
+  "acceptedStartupCases": [
+    "ui-key-failure",
+    "ui-port-busy",
+    "ui-quit-opening"
+  ],
+  "finalDuplicateRun": "issue46-duplicate-ui-2",
+  "finalDuplicateRunComplete": true,
+  "files": [
+    {
+      "path": "raw/issue46-duplicate-ui-1/logs/analyze.txt",
+      "bytes": 96,
+      "sha256": "c2f5bda935598dbd34b9e6b77f57d0904374e9082a5003d0482434a6d1e34ca8"
+    },
+    {
+      "path": "raw/issue46-duplicate-ui-1/logs/build-release.txt",
+      "bytes": 5054,
+      "sha256": "7ee4ec626e831c622f71641a94ba434a0199f2c382fd45bb73373d2a9d87f257"
+    },
+    {
+      "path": "raw/issue46-duplicate-ui-1/logs/pub-desktop.txt",
+      "bytes": 318,
+      "sha256": "ca68f707c22164511fc2b3f9af97ed7bd46538b1d334d9c806a6a59a556a6e05"
+    },
+    {
+      "path": "raw/issue46-duplicate-ui-1/logs/pub-info_cli.txt",
+      "bytes": 258,
+      "sha256": "a24779315fffab73870dfc7b15b56246a95b601b3432e434b43cd223bf752a6a"
+    },
+    {
+      "path": "raw/issue46-duplicate-ui-1/logs/pub-info_core.txt",
+      "bytes": 258,
+      "sha256": "a24779315fffab73870dfc7b15b56246a95b601b3432e434b43cd223bf752a6a"
+    },
+    {
+      "path": "raw/issue46-duplicate-ui-1/logs/pub-info_storage.txt",
+      "bytes": 258,
+      "sha256": "a24779315fffab73870dfc7b15b56246a95b601b3432e434b43cd223bf752a6a"
+    },
+    {
+      "path": "raw/issue46-duplicate-ui-1/logs/sign-duplicate.txt",
+      "bytes": 653,
+      "sha256": "25395080e2ab6fb25e0dd2ebefb3bfdb4122dcfd49376f1e87bafb9bf0db4205"
+    },
+    {
+      "path": "raw/issue46-duplicate-ui-1/logs/signature.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/issue46-duplicate-ui-1/result.json",
+      "bytes": 78637,
+      "sha256": "506832067233a46aaa4d22ba14e92765e6c139f5fbc8cab1bd7162b895841b37"
+    },
+    {
+      "path": "raw/issue46-duplicate-ui-1/sources/apps/desktop/integration_test/macos_lifecycle_probe.dart",
+      "bytes": 14969,
+      "sha256": "f093b5862d0b422edf6ac0d820e05d48add9b2f4c9a96b396ded4e95a4fcb923"
+    },
+    {
+      "path": "raw/issue46-duplicate-ui-1/sources/scripts/qa/macos-lifecycle-ui.py",
+      "bytes": 14664,
+      "sha256": "4633b8a9e4c71ce674ef93586f73d313e3595ba55c4b32dad046d9dffbf2bb38"
+    },
+    {
+      "path": "raw/issue46-duplicate-ui-2/01-duplicate-error.ax.txt",
+      "bytes": 742,
+      "sha256": "62e17fd780ad0597d718ef1202640ee19f99a8e0fcdd3bf2481f009b30417341"
+    },
+    {
+      "path": "raw/issue46-duplicate-ui-2/01-duplicate-error.png",
+      "bytes": 94790,
+      "sha256": "c8d7a66e395d9311ca467f5eb9a835a71a60587f0b0f2fbac3cee209b29f4c55"
+    },
+    {
+      "path": "raw/issue46-duplicate-ui-2/02-holder-survived.ax.txt",
+      "bytes": 799,
+      "sha256": "4b441d72793b4fed678231cb87098742bf0a1a996c5856a51ac5ddb4a59ad0ce"
+    },
+    {
+      "path": "raw/issue46-duplicate-ui-2/02-holder-survived.png",
+      "bytes": 176703,
+      "sha256": "23bb348f64db834a77ef03cfefa5e0007c4e2695c16fc93dc940dddb795bcb55"
+    },
+    {
+      "path": "raw/issue46-duplicate-ui-2/duplicate-error.json",
+      "bytes": 339,
+      "sha256": "47b68b15a2ba4408899112bb949eba8c400b1d269d5174857684813a0656da55"
+    },
+    {
+      "path": "raw/issue46-duplicate-ui-2/duplicate-holder-quit.json",
+      "bytes": 289,
+      "sha256": "0ac3eed869d658ee04ec71256c98990d5ccc0008b5e68408793f67af4d31a977"
+    },
+    {
+      "path": "raw/issue46-duplicate-ui-2/duplicate-holder-reopen.json",
+      "bytes": 348,
+      "sha256": "0e9343c2e5b67652bc8f517bda3a9fdb2768cad8f24cd224519539454341dad2"
+    },
+    {
+      "path": "raw/issue46-duplicate-ui-2/logs/analyze.txt",
+      "bytes": 96,
+      "sha256": "e1e9298c7ad0d147c3faed9c44aec49c9d9a09a0c6bc2331c7ee778dc70a5715"
+    },
+    {
+      "path": "raw/issue46-duplicate-ui-2/logs/build-release.txt",
+      "bytes": 5054,
+      "sha256": "443437c9bdae131ad613fa3f38b787ba9515eeeffdbfd3151fe6ca61c42cf503"
+    },
+    {
+      "path": "raw/issue46-duplicate-ui-2/logs/duplicate-error.txt",
+      "bytes": 370,
+      "sha256": "bbf02e9e4c3c4f75349b41e11bd515cfa745341a62656e198946bf5beb0ece9b"
+    },
+    {
+      "path": "raw/issue46-duplicate-ui-2/logs/duplicate-holder-reopen.txt",
+      "bytes": 298,
+      "sha256": "359facf9730585730353e8b7d379be4cafb7683529c184dc762f5c03cfbf4159"
+    },
+    {
+      "path": "raw/issue46-duplicate-ui-2/logs/duplicate-holder.txt",
+      "bytes": 1030,
+      "sha256": "0a99bf94a54c2dc4de0e640891c82c7efb43182cc1e54b14a0bf39b21a70dd5f"
+    },
+    {
+      "path": "raw/issue46-duplicate-ui-2/logs/entitlements-duplicate.txt",
+      "bytes": 759,
+      "sha256": "5061a94e1ac14c6fbcca0a2b7e02fd5f9bee9779155f4eac84298b39235a345c"
+    },
+    {
+      "path": "raw/issue46-duplicate-ui-2/logs/pub-desktop.txt",
+      "bytes": 318,
+      "sha256": "ca68f707c22164511fc2b3f9af97ed7bd46538b1d334d9c806a6a59a556a6e05"
+    },
+    {
+      "path": "raw/issue46-duplicate-ui-2/logs/pub-info_cli.txt",
+      "bytes": 258,
+      "sha256": "a24779315fffab73870dfc7b15b56246a95b601b3432e434b43cd223bf752a6a"
+    },
+    {
+      "path": "raw/issue46-duplicate-ui-2/logs/pub-info_core.txt",
+      "bytes": 258,
+      "sha256": "a24779315fffab73870dfc7b15b56246a95b601b3432e434b43cd223bf752a6a"
+    },
+    {
+      "path": "raw/issue46-duplicate-ui-2/logs/pub-info_storage.txt",
+      "bytes": 258,
+      "sha256": "a24779315fffab73870dfc7b15b56246a95b601b3432e434b43cd223bf752a6a"
+    },
+    {
+      "path": "raw/issue46-duplicate-ui-2/logs/sign-duplicate.txt",
+      "bytes": 199,
+      "sha256": "e8199080c5ead18da056d363c273af663fc2ef701dc0ffb85418b082461aa55a"
+    },
+    {
+      "path": "raw/issue46-duplicate-ui-2/logs/signature-duplicate.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/issue46-duplicate-ui-2/logs/signature.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/issue46-duplicate-ui-2/result.json",
+      "bytes": 80955,
+      "sha256": "3a49b2371ffbc7522a0362db843786d3bd2a295ac1b0f90a00f0c25080b2ed7a"
+    },
+    {
+      "path": "raw/issue46-duplicate-ui-2/sources/apps/desktop/integration_test/macos_lifecycle_probe.dart",
+      "bytes": 14969,
+      "sha256": "f093b5862d0b422edf6ac0d820e05d48add9b2f4c9a96b396ded4e95a4fcb923"
+    },
+    {
+      "path": "raw/issue46-duplicate-ui-2/sources/scripts/qa/macos-lifecycle-ui.py",
+      "bytes": 14669,
+      "sha256": "bbe5b47381ad65b88b0e75cd12a87330a6711a4c83ade4106d3e97ddce069d19"
+    },
+    {
+      "path": "raw/issue46-startup-ui-1/logs/analyze.txt",
+      "bytes": 380,
+      "sha256": "675d3b969855f21fad14e6328b5c237c908fc06764a6ce898141bb18f140c057"
+    },
+    {
+      "path": "raw/issue46-startup-ui-1/logs/pub-desktop.txt",
+      "bytes": 318,
+      "sha256": "ca68f707c22164511fc2b3f9af97ed7bd46538b1d334d9c806a6a59a556a6e05"
+    },
+    {
+      "path": "raw/issue46-startup-ui-1/logs/pub-info_cli.txt",
+      "bytes": 258,
+      "sha256": "a24779315fffab73870dfc7b15b56246a95b601b3432e434b43cd223bf752a6a"
+    },
+    {
+      "path": "raw/issue46-startup-ui-1/logs/pub-info_core.txt",
+      "bytes": 258,
+      "sha256": "a24779315fffab73870dfc7b15b56246a95b601b3432e434b43cd223bf752a6a"
+    },
+    {
+      "path": "raw/issue46-startup-ui-1/logs/pub-info_storage.txt",
+      "bytes": 258,
+      "sha256": "a24779315fffab73870dfc7b15b56246a95b601b3432e434b43cd223bf752a6a"
+    },
+    {
+      "path": "raw/issue46-startup-ui-1/result.json",
+      "bytes": 77275,
+      "sha256": "7cd7882a27a69c1c11744121443e07d854a4b0e45757e22a1d6f4c2ea73ab9ed"
+    },
+    {
+      "path": "raw/issue46-startup-ui-1/sources/apps/desktop/integration_test/macos_lifecycle_probe.dart",
+      "bytes": 14960,
+      "sha256": "081c707839bb294e499f3b90a82a5a005249ae5ec021d581aecef02fb3ef1587"
+    },
+    {
+      "path": "raw/issue46-startup-ui-1/sources/scripts/qa/macos-lifecycle-ui.py",
+      "bytes": 12793,
+      "sha256": "03685e336e4146508c04605c059e6c2f5e3dc1a4ed283585cd11ad81004bcd2f"
+    },
+    {
+      "path": "raw/issue46-startup-ui-2/01-key-failure.ax.txt",
+      "bytes": 756,
+      "sha256": "5dda1b41089a7439d133a9a9a263547dfb82fe6006bd235dc91c60aa9dcd5e08"
+    },
+    {
+      "path": "raw/issue46-startup-ui-2/01-key-failure.png",
+      "bytes": 101139,
+      "sha256": "afd6b80c22d8fb491f7428f473d10a9d1d90c022d1c46ee25e898b66fd2a4210"
+    },
+    {
+      "path": "raw/issue46-startup-ui-2/02-port-busy.ax.txt",
+      "bytes": 714,
+      "sha256": "cade96610cd463e39e8681ce2218de7f0857c2d91c2d1061b35cc8efc5c60dd6"
+    },
+    {
+      "path": "raw/issue46-startup-ui-2/02-port-busy.png",
+      "bytes": 92970,
+      "sha256": "3bf9f80dd67e9e88b0cf4c46312bfba2b5f96402ecb75ec1f709f0e3624e25fb"
+    },
+    {
+      "path": "raw/issue46-startup-ui-2/03-opening.ax.txt",
+      "bytes": 410,
+      "sha256": "ee1f6a53aff6229200c742287f15c8273ce13d11c9251dc0cd84506713ec186a"
+    },
+    {
+      "path": "raw/issue46-startup-ui-2/03-opening.png",
+      "bytes": 47450,
+      "sha256": "25ce0e5437a23e7b706b0d46aabd119825342232216b935727fa1c0cc6ae0565"
+    },
+    {
+      "path": "raw/issue46-startup-ui-2/cua-duplicate-selection-limit.json",
+      "bytes": 211,
+      "sha256": "bd09d76879c2e0d3adced1b0015f4716cb43475c11464488523e643ef006897a"
+    },
+    {
+      "path": "raw/issue46-startup-ui-2/logs/analyze.txt",
+      "bytes": 96,
+      "sha256": "9fa0da1a20f841cad4e437c7c35bf9bf3c9be73a61c061d6a741635715fd1357"
+    },
+    {
+      "path": "raw/issue46-startup-ui-2/logs/build-release.txt",
+      "bytes": 5042,
+      "sha256": "8eb7efb6de8b3a70dba24570a32a1f1097e24bd4a938931e0c1e95a03fc0072a"
+    },
+    {
+      "path": "raw/issue46-startup-ui-2/logs/duplicate-error.txt",
+      "bytes": 331,
+      "sha256": "d0ddbe424443e1cff8abf03fe7fb7b82db0e34f8d322e356057c86eff28f3050"
+    },
+    {
+      "path": "raw/issue46-startup-ui-2/logs/duplicate-holder.txt",
+      "bytes": 326,
+      "sha256": "16b483b8952fbe8933db76058bdb2e47ab61268f9e52979c339f786ebd86f74a"
+    },
+    {
+      "path": "raw/issue46-startup-ui-2/logs/pub-desktop.txt",
+      "bytes": 318,
+      "sha256": "ca68f707c22164511fc2b3f9af97ed7bd46538b1d334d9c806a6a59a556a6e05"
+    },
+    {
+      "path": "raw/issue46-startup-ui-2/logs/pub-info_cli.txt",
+      "bytes": 258,
+      "sha256": "a24779315fffab73870dfc7b15b56246a95b601b3432e434b43cd223bf752a6a"
+    },
+    {
+      "path": "raw/issue46-startup-ui-2/logs/pub-info_core.txt",
+      "bytes": 258,
+      "sha256": "a24779315fffab73870dfc7b15b56246a95b601b3432e434b43cd223bf752a6a"
+    },
+    {
+      "path": "raw/issue46-startup-ui-2/logs/pub-info_storage.txt",
+      "bytes": 258,
+      "sha256": "a24779315fffab73870dfc7b15b56246a95b601b3432e434b43cd223bf752a6a"
+    },
+    {
+      "path": "raw/issue46-startup-ui-2/logs/signature.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/issue46-startup-ui-2/logs/ui-key-failure.txt",
+      "bytes": 1044,
+      "sha256": "c606eb10f8cc70b53fe6eccd24895f447cb9fc7eeded576d42ba706d068cd5b9"
+    },
+    {
+      "path": "raw/issue46-startup-ui-2/logs/ui-port-busy.txt",
+      "bytes": 370,
+      "sha256": "9d9acb1b3a82fed39d0f533c302bfd2767bb4953cf45899a31de39482149be66"
+    },
+    {
+      "path": "raw/issue46-startup-ui-2/logs/ui-quit-opening.txt",
+      "bytes": 366,
+      "sha256": "18a753f67e1ec503e200a32cb9411ce5381cc73c716b6821d145b338a775f7c7"
+    },
+    {
+      "path": "raw/issue46-startup-ui-2/pending-quit-observation.json",
+      "bytes": 142,
+      "sha256": "528fdbee5d2cc11a0e9eb59b4dc51bdab93127be7d5d87213d2716d97ce1dd28"
+    },
+    {
+      "path": "raw/issue46-startup-ui-2/result.json",
+      "bytes": 79312,
+      "sha256": "ac924db0a2a5dfc332619564f680a4f2d77e2099bb8734d78c3428a99be3830f"
+    },
+    {
+      "path": "raw/issue46-startup-ui-2/sources/apps/desktop/integration_test/macos_lifecycle_probe.dart",
+      "bytes": 14969,
+      "sha256": "f093b5862d0b422edf6ac0d820e05d48add9b2f4c9a96b396ded4e95a4fcb923"
+    },
+    {
+      "path": "raw/issue46-startup-ui-2/sources/scripts/qa/macos-lifecycle-ui.py",
+      "bytes": 12793,
+      "sha256": "03685e336e4146508c04605c059e6c2f5e3dc1a4ed283585cd11ad81004bcd2f"
+    },
+    {
+      "path": "raw/issue46-startup-ui-2/ui-key-failure.json",
+      "bytes": 336,
+      "sha256": "400de4a9947aa1b75ef297ea00aa234016661e544c6b3af700da4b24dce824f2"
+    },
+    {
+      "path": "raw/issue46-startup-ui-2/ui-port-busy.json",
+      "bytes": 317,
+      "sha256": "5b7f3cf2b021e663026dde46a4af16fa264f0b5939521548a409e37fa938f2a3"
+    },
+    {
+      "path": "raw/issue46-startup-ui-2/ui-quit-opening.json",
+      "bytes": 238,
+      "sha256": "6b2d6fa78d0ba133a9403a33ede4772755e1a3b60bda5cdd95c6f1610dfdc065"
+    },
+    {
+      "path": "raw/scope-verification.json",
+      "bytes": 1690,
+      "sha256": "a4a53118cfda1e67d4b002789af76d0e675b96506c6e0e3e8a6d75d7f93e48cf"
+    }
+  ]
+}

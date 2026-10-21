@@ -1,0 +1,19 @@
+Window: "info_desktop", App: info_desktop.
+0 standard window info_desktop, Secondary Actions: Raise
+	1 container info_desktop
+		2 container (settable)
+			3 text (settable) 无法打开信息库
+			4 text (settable) 无法访问系统钥匙串中的信息库密钥。请确认钥匙串已解锁；如果刚更新应用，请先用原版本导出备份，再处理新版本的钥匙串访问。原有资料不会被重建或覆盖。
+			5 button (settable) 重试启动
+	6 close button
+	7 full screen button Help: this button also has an action to zoom the window, Secondary Actions: zoom the window
+	8 minimize button
+	9 text info_desktop
+10 menu bar
+	11 info_desktop
+	12 Edit
+	13 View
+	14 Window
+	15 Help
+
+The focused UI element is 1 container info_desktop
