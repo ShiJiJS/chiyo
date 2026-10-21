@@ -1,0 +1,815 @@
+{
+  "qaSourceCommit": "eba0f342604efe93dceaed82cc3af8bc9833cf59",
+  "productSource": "01c1f141d876a9d3c49c61c7fc3d1e572c432c5a",
+  "issue48Criterion": 1,
+  "successfulCases": [
+    "issue48-file-credential-ui-2",
+    "issue48-string-credential-regression-1",
+    "issue48-current-library-1",
+    "issue48-current-proposals-1",
+    "issue48-current-organization-1"
+  ],
+  "retainedFailure": "issue48-file-credential-ui-1",
+  "captures": 64,
+  "physicalInput": false,
+  "systemFilePanels": false,
+  "selectionBoundaryFixture": true,
+  "allSuccessfulSourceHashesMatchCommit": true,
+  "files": [
+    {
+      "path": "raw/issue48-current-library-1/cli-0-stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/issue48-current-library-1/cli-1-stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/issue48-current-library-1/flutter.txt",
+      "bytes": 529,
+      "sha256": "97e2ec50942856b7f359457a553b0f8cdeff0349ef27aa39811ae1c5cd770397"
+    },
+    {
+      "path": "raw/issue48-current-library-1/native-01-template.png",
+      "bytes": 201408,
+      "sha256": "e124362667e8e2f009c0a15c9b993afb9c6b4a2e9ee9a775b3f18d609c658a3a"
+    },
+    {
+      "path": "raw/issue48-current-library-1/native-02-created.png",
+      "bytes": 239032,
+      "sha256": "88377fb08393af76de4d6a8d0407499320823cdea729e6eb9cee8647b09840bb"
+    },
+    {
+      "path": "raw/issue48-current-library-1/native-03-edited-category.png",
+      "bytes": 251599,
+      "sha256": "ed0ccf56abc258903ab000e6392845f5d621d5695ebbb99604dd0fa6c08477d7"
+    },
+    {
+      "path": "raw/issue48-current-library-1/native-04-delete-confirmation.png",
+      "bytes": 426094,
+      "sha256": "801117ec077590d63bb6a3c93149b9d451178e1047048bcb214723f22efadbe9"
+    },
+    {
+      "path": "raw/issue48-current-library-1/native-05-restored-detail.png",
+      "bytes": 251332,
+      "sha256": "1d8447699ee1635b95b0435759810ec16b960e84a00a890a246f65a8a3050a93"
+    },
+    {
+      "path": "raw/issue48-current-library-1/native-05-restored.png",
+      "bytes": 404226,
+      "sha256": "e9a9b536a9f67858bc618a7983a02128c210f0e9db4c73abfae6f9e5671bdad4"
+    },
+    {
+      "path": "raw/issue48-current-library-1/native-06-revision-history.png",
+      "bytes": 415466,
+      "sha256": "d8c4c4fca54e3329150de12457315c1eae21d51bef9ea3853abb678b80abb1a4"
+    },
+    {
+      "path": "raw/issue48-current-library-1/native-07-revision-restored-detail.png",
+      "bytes": 239032,
+      "sha256": "88377fb08393af76de4d6a8d0407499320823cdea729e6eb9cee8647b09840bb"
+    },
+    {
+      "path": "raw/issue48-current-library-1/native-07-revision-restored.png",
+      "bytes": 426275,
+      "sha256": "a89d506f778567b9fafc91aef295e4da94cdd66abd740e37fa439658f92d6b49"
+    },
+    {
+      "path": "raw/issue48-current-library-1/native-08-template-edited.png",
+      "bytes": 203530,
+      "sha256": "c8da91d9e342e6109f0c49f94336b000182d7d14f7441bdb3e434d0d84172a0e"
+    },
+    {
+      "path": "raw/issue48-current-library-1/native-09-reopened.png",
+      "bytes": 239032,
+      "sha256": "88377fb08393af76de4d6a8d0407499320823cdea729e6eb9cee8647b09840bb"
+    },
+    {
+      "path": "raw/issue48-current-library-1/native-result.json",
+      "bytes": 761,
+      "sha256": "16bf8062c2d0f4e756b811e6318d8d3ccebfd530149152ed29ef74d7f269f2d1"
+    },
+    {
+      "path": "raw/issue48-current-library-1/result.json",
+      "bytes": 7598,
+      "sha256": "a3da48bcc947abeac636a4f7eb09b2b7290fbb83b740022217540165efad7413"
+    },
+    {
+      "path": "raw/issue48-current-library-1/sources/information_editor.dart",
+      "bytes": 35266,
+      "sha256": "59d36a64441022117e9bfe43645b75531f71fc698da1372d3807d2fc51416989"
+    },
+    {
+      "path": "raw/issue48-current-library-1/sources/library.dart",
+      "bytes": 55925,
+      "sha256": "90f222b10538a3aa3f1c703dd3ff091154972813635147fb0cf354ac0c32e4ed"
+    },
+    {
+      "path": "raw/issue48-current-library-1/sources/macos-library-ui.py",
+      "bytes": 9786,
+      "sha256": "92c15f93d0ef9d0be4d8ef2cb3f6b7353d2eb8ad82727d71b5cb15bfadfc9218"
+    },
+    {
+      "path": "raw/issue48-current-library-1/sources/macos_library_native_test.dart",
+      "bytes": 13709,
+      "sha256": "4386fd62734db771c1c7c5d7ee28ea95697daf2d8e2d35719d3ea1d1dc9edfed"
+    },
+    {
+      "path": "raw/issue48-current-library-1/sources/main.dart",
+      "bytes": 16729,
+      "sha256": "7a396b7917211b58906cd7bdd789d585d0cd511f1a93145246747cfaaf4cb883"
+    },
+    {
+      "path": "raw/issue48-current-library-1/sources/native_semantics_lifetime.dart",
+      "bytes": 1540,
+      "sha256": "a274da35d57e9bca3322b7e5b70a2bc610990e8e8dc3fba0821bbb1e9219036f"
+    },
+    {
+      "path": "raw/issue48-current-library-1/sources/templates.dart",
+      "bytes": 25342,
+      "sha256": "16308476d1d7d15b089a9408dc75f2f138327fffac62f62f9ea3ac58e87dcc88"
+    },
+    {
+      "path": "raw/issue48-current-organization-1/cli-0-stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/issue48-current-organization-1/cli-1-stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/issue48-current-organization-1/cli-2-stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/issue48-current-organization-1/flutter.txt",
+      "bytes": 556,
+      "sha256": "21a066e98f6f2052010580513f5d1f3a3b00f4df8759ce7e7d71bddd77c91278"
+    },
+    {
+      "path": "raw/issue48-current-organization-1/native-01-narrowed-request.png",
+      "bytes": 318828,
+      "sha256": "87384fccc002abe1df49679db7204d505d4547b6dfaf5c0ffa80e4c888163513"
+    },
+    {
+      "path": "raw/issue48-current-organization-1/native-02-approved.png",
+      "bytes": 315591,
+      "sha256": "db08f855df37fc981b69d79e2b01a2e8d87b943c226226620891c8aa5a434578"
+    },
+    {
+      "path": "raw/issue48-current-organization-1/native-03-completed-result.png",
+      "bytes": 262986,
+      "sha256": "677457478cade681ff6a9d52132ffef3d7ac923ec9f8f0b8450af297cdb5cd63"
+    },
+    {
+      "path": "raw/issue48-current-organization-1/native-04-conflicted.png",
+      "bytes": 379238,
+      "sha256": "24a10b5a727f51e47540601c732f35d8d048fed9bf6129bb63e90f2a214abc95"
+    },
+    {
+      "path": "raw/issue48-current-organization-1/native-05-revoked.png",
+      "bytes": 329489,
+      "sha256": "ad38ed2b4613a75ac8059fad278af9b24e97c252ce0fb16c51781ee0e598d83e"
+    },
+    {
+      "path": "raw/issue48-current-organization-1/native-06-rejected.png",
+      "bytes": 339213,
+      "sha256": "ef47322729e9f8e136e8af40642e196b0cf362800d0400e45f203069c0bda2df"
+    },
+    {
+      "path": "raw/issue48-current-organization-1/native-07-no-change-result.png",
+      "bytes": 250452,
+      "sha256": "2f3c462439fa5a14dded3086dc5e4807e122b9d3b78085c7620fc24b7227ea6f"
+    },
+    {
+      "path": "raw/issue48-current-organization-1/native-08-reopened-cancelled.png",
+      "bytes": 359125,
+      "sha256": "0eed139d80d9110fa58e541bcbc7d9d241bf5b8ea79986ba33255e640396d94e"
+    },
+    {
+      "path": "raw/issue48-current-organization-1/native-09-reopened-result.png",
+      "bytes": 330592,
+      "sha256": "60aff1808daa8b3f5cc599d0f54ad8fa9d108ec19590fd08e5d1ec96438766ad"
+    },
+    {
+      "path": "raw/issue48-current-organization-1/native-result.json",
+      "bytes": 846,
+      "sha256": "283bda5455a01142eb266b44c86513ab0d40f2c2cdcbcb5b0af3044d2bbde03f"
+    },
+    {
+      "path": "raw/issue48-current-organization-1/result.json",
+      "bytes": 10647,
+      "sha256": "97d998c7f7a7d1961ed491fba5510e25b0c86e35f3ebc17b60270b94c0e45942"
+    },
+    {
+      "path": "raw/issue48-current-organization-1/sources/approvals.dart",
+      "bytes": 80542,
+      "sha256": "8f3acf01186c1735e85639f06aa2d231ec37de8c9b3831c2d19153fd1cae3a80"
+    },
+    {
+      "path": "raw/issue48-current-organization-1/sources/information_editor.dart",
+      "bytes": 35266,
+      "sha256": "59d36a64441022117e9bfe43645b75531f71fc698da1372d3807d2fc51416989"
+    },
+    {
+      "path": "raw/issue48-current-organization-1/sources/library.dart",
+      "bytes": 55925,
+      "sha256": "90f222b10538a3aa3f1c703dd3ff091154972813635147fb0cf354ac0c32e4ed"
+    },
+    {
+      "path": "raw/issue48-current-organization-1/sources/macos-organization-ui.py",
+      "bytes": 13668,
+      "sha256": "6f84ba21115b453f42f7d43a84a58c0b1797eb4e916b0b35b96796c36eee643b"
+    },
+    {
+      "path": "raw/issue48-current-organization-1/sources/macos_organization_native_test.dart",
+      "bytes": 15175,
+      "sha256": "91dc0b8dfed6864ebe21e72cd95b5bc484742b8df95d05ed97d268e61efd3037"
+    },
+    {
+      "path": "raw/issue48-current-organization-1/sources/main.dart",
+      "bytes": 16729,
+      "sha256": "7a396b7917211b58906cd7bdd789d585d0cd511f1a93145246747cfaaf4cb883"
+    },
+    {
+      "path": "raw/issue48-current-organization-1/sources/native_semantics_lifetime.dart",
+      "bytes": 1540,
+      "sha256": "a274da35d57e9bca3322b7e5b70a2bc610990e8e8dc3fba0821bbb1e9219036f"
+    },
+    {
+      "path": "raw/issue48-current-organization-1/sources/organization_tasks.dart",
+      "bytes": 29548,
+      "sha256": "0b364d7026e63687e82c843e9355237e62c666e2c57859bf16b2beb14b9cd3d6"
+    },
+    {
+      "path": "raw/issue48-current-organization-1/sources/proposal_queue.dart",
+      "bytes": 15901,
+      "sha256": "dedcbd0a708e5c641660ee9ff64033de60ef5341edc842b29bc3608a21d0fab6"
+    },
+    {
+      "path": "raw/issue48-current-organization-1/sources/proposal_workspace.dart",
+      "bytes": 71167,
+      "sha256": "311f2ddd2c48873ac6d2c328415d6c632fab6ba21afbc2354ae2b9133f61dc74"
+    },
+    {
+      "path": "raw/issue48-current-organization-1/sources/update_proposals.dart",
+      "bytes": 6664,
+      "sha256": "9b50da3930de01c3e16651081eb992e521f74a98239e9603e6d8fb31e1565a79"
+    },
+    {
+      "path": "raw/issue48-current-proposals-1/cli-0-stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/issue48-current-proposals-1/cli-1-stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/issue48-current-proposals-1/flutter.txt",
+      "bytes": 543,
+      "sha256": "33b01b7e04ea2695c0fcb96ccb716a99274a48f1dee947e4d03276dbcc3863c9"
+    },
+    {
+      "path": "raw/issue48-current-proposals-1/native-01-validation-failure.png",
+      "bytes": 382251,
+      "sha256": "5c6783fa828cef74147ca61970b7d6eb4a18c35c1025b3096ad9890896db94b7"
+    },
+    {
+      "path": "raw/issue48-current-proposals-1/native-02-corrected-draft.png",
+      "bytes": 245375,
+      "sha256": "e1f30110a44024eaa977601b6acde278ab1f8ffa901bdce5539908c9756c4c9e"
+    },
+    {
+      "path": "raw/issue48-current-proposals-1/native-03-confirmed.png",
+      "bytes": 229163,
+      "sha256": "6c696de7b7c6382d7448e80f214963c9d94f3ae7af4a481be7d59c8ac886d35f"
+    },
+    {
+      "path": "raw/issue48-current-proposals-1/native-04-current-content.png",
+      "bytes": 291092,
+      "sha256": "1d684ac0f7876c565bbcefe2daea558f76d9511236cc870245469991f76ae15c"
+    },
+    {
+      "path": "raw/issue48-current-proposals-1/native-05-rejected.png",
+      "bytes": 241592,
+      "sha256": "614e5789f1be4442f7b12ccabfe584ebdae4c398cde4482478722f2fb137f742"
+    },
+    {
+      "path": "raw/issue48-current-proposals-1/native-06-deleted-current-content.png",
+      "bytes": 365170,
+      "sha256": "a8a2fb5389fc1631ff2dcf52d461e8e56ebafbc54a7bf79059736388c9802bb1"
+    },
+    {
+      "path": "raw/issue48-current-proposals-1/native-07-conflict-confirm-disabled.png",
+      "bytes": 285391,
+      "sha256": "873152f22c9a33165ea0ae7e683856c415dc1f9df618425b313e01321cde86fd"
+    },
+    {
+      "path": "raw/issue48-current-proposals-1/native-08-conflict-rejected.png",
+      "bytes": 263485,
+      "sha256": "a8739794b835b9c834b56ecb17c3b826b5109e12b06878f83d1f1f702f1e4342"
+    },
+    {
+      "path": "raw/issue48-current-proposals-1/native-09-corrected-update-confirmed.png",
+      "bytes": 277711,
+      "sha256": "2547bc05bfe935c69df0f5a164e9541e081dc8d97da332ddf457ae4699b41685"
+    },
+    {
+      "path": "raw/issue48-current-proposals-1/native-10-reopened-receipts.png",
+      "bytes": 277711,
+      "sha256": "2547bc05bfe935c69df0f5a164e9541e081dc8d97da332ddf457ae4699b41685"
+    },
+    {
+      "path": "raw/issue48-current-proposals-1/native-11-reopened-current-content.png",
+      "bytes": 393578,
+      "sha256": "505f9ce4d6a0da05fb3aac18ea7605b66a320c729092db9bffc96113112349a3"
+    },
+    {
+      "path": "raw/issue48-current-proposals-1/native-12-reopened-library.png",
+      "bytes": 233704,
+      "sha256": "7832bc811c3541d246341263ceba6598fc66ed6368cfdb63e3422b5e41795f4f"
+    },
+    {
+      "path": "raw/issue48-current-proposals-1/native-result.json",
+      "bytes": 806,
+      "sha256": "55990afbef49bd09b032ac891193573683988ebc4ebf5376f40e4d20cc363100"
+    },
+    {
+      "path": "raw/issue48-current-proposals-1/result.json",
+      "bytes": 6408,
+      "sha256": "a700cf0a6369c79b57e6764b016a938e467875f05fcf19cc4244f00e5383d2f4"
+    },
+    {
+      "path": "raw/issue48-current-proposals-1/sources/import_proposals.dart",
+      "bytes": 34,
+      "sha256": "28807b9bf2a77c3a764ea3c223ec5fbdfda9dfd575781ed6f2e04f02b85cb764"
+    },
+    {
+      "path": "raw/issue48-current-proposals-1/sources/information_editor.dart",
+      "bytes": 35266,
+      "sha256": "59d36a64441022117e9bfe43645b75531f71fc698da1372d3807d2fc51416989"
+    },
+    {
+      "path": "raw/issue48-current-proposals-1/sources/library.dart",
+      "bytes": 55925,
+      "sha256": "90f222b10538a3aa3f1c703dd3ff091154972813635147fb0cf354ac0c32e4ed"
+    },
+    {
+      "path": "raw/issue48-current-proposals-1/sources/macos-proposals-ui.py",
+      "bytes": 11811,
+      "sha256": "d20550162574c74b42a99f5f4d92a302c2220438b605cd5024769667ae3b7130"
+    },
+    {
+      "path": "raw/issue48-current-proposals-1/sources/macos_proposals_native_test.dart",
+      "bytes": 15581,
+      "sha256": "745c667349e49168a5c9e3ce21334d3e778684d96074d05c15c018ce6bc6a047"
+    },
+    {
+      "path": "raw/issue48-current-proposals-1/sources/main.dart",
+      "bytes": 16729,
+      "sha256": "7a396b7917211b58906cd7bdd789d585d0cd511f1a93145246747cfaaf4cb883"
+    },
+    {
+      "path": "raw/issue48-current-proposals-1/sources/native_semantics_lifetime.dart",
+      "bytes": 1540,
+      "sha256": "a274da35d57e9bca3322b7e5b70a2bc610990e8e8dc3fba0821bbb1e9219036f"
+    },
+    {
+      "path": "raw/issue48-current-proposals-1/sources/proposal_queue.dart",
+      "bytes": 15901,
+      "sha256": "dedcbd0a708e5c641660ee9ff64033de60ef5341edc842b29bc3608a21d0fab6"
+    },
+    {
+      "path": "raw/issue48-current-proposals-1/sources/proposal_workspace.dart",
+      "bytes": 71167,
+      "sha256": "311f2ddd2c48873ac6d2c328415d6c632fab6ba21afbc2354ae2b9133f61dc74"
+    },
+    {
+      "path": "raw/issue48-current-proposals-1/sources/update_proposals.dart",
+      "bytes": 6664,
+      "sha256": "9b50da3930de01c3e16651081eb992e521f74a98239e9603e6d8fb31e1565a79"
+    },
+    {
+      "path": "raw/issue48-file-credential-analyze-failed-1.txt",
+      "bytes": 314,
+      "sha256": "f397b32f8ef2606e7a5da8465cb64eefbfef4a3e7bf0051daf445c9dc50ef323"
+    },
+    {
+      "path": "raw/issue48-file-credential-analyze.txt",
+      "bytes": 96,
+      "sha256": "c6ba915e68bb6d4f706f45f51c48e544dad87af4f7fa2174f2c9eac5f3299477"
+    },
+    {
+      "path": "raw/issue48-file-credential-cleanup.json",
+      "bytes": 86,
+      "sha256": "3cbee804b5e6bc34c0906a900e895ef1060218f9b684186f138dadec78ac00ad"
+    },
+    {
+      "path": "raw/issue48-file-credential-ui-1/flutter.txt",
+      "bytes": 2358,
+      "sha256": "5c9d805c374597a75b5376717a93e4365e8a50df24dce224281700bc334710c3"
+    },
+    {
+      "path": "raw/issue48-file-credential-ui-1/result.json",
+      "bytes": 2316,
+      "sha256": "41a499ab461279326fc63997dc9f477f4475c05d3b4d980e095e1258d8011364"
+    },
+    {
+      "path": "raw/issue48-file-credential-ui-1/sources/credential_dialogs.dart",
+      "bytes": 21563,
+      "sha256": "e55dc7471dadd698c608c48837bbfd56da5484c1cb83be8d3fd8693440db21d0"
+    },
+    {
+      "path": "raw/issue48-file-credential-ui-1/sources/credential_files.dart",
+      "bytes": 1584,
+      "sha256": "582e09014b0d8f144fc8e39f3a0966d5790414e87180daa0797237f9985cfe51"
+    },
+    {
+      "path": "raw/issue48-file-credential-ui-1/sources/credential_management.dart",
+      "bytes": 20272,
+      "sha256": "269cff2c25e8fb12152b7627c55c6898631e1925fa739f292e54bd1a01fceb3b"
+    },
+    {
+      "path": "raw/issue48-file-credential-ui-1/sources/credentials.dart",
+      "bytes": 42653,
+      "sha256": "72384ae9e9a9a1533de555f9c910e761bbe24eb0fff7aa17e9c458dc85c5ccae"
+    },
+    {
+      "path": "raw/issue48-file-credential-ui-1/sources/information_workspace.dart",
+      "bytes": 3426,
+      "sha256": "eb2c65a38db88be3557847f131d7fe8efca68616ffbef313d35fa5ca210737e6"
+    },
+    {
+      "path": "raw/issue48-file-credential-ui-1/sources/library.dart",
+      "bytes": 55925,
+      "sha256": "90f222b10538a3aa3f1c703dd3ff091154972813635147fb0cf354ac0c32e4ed"
+    },
+    {
+      "path": "raw/issue48-file-credential-ui-1/sources/macos-credential-management-ui.py",
+      "bytes": 11581,
+      "sha256": "4947398b31ebd8acbeac5dd0c7aa03c67ccf2815347ac98bf3cfb81020d77332"
+    },
+    {
+      "path": "raw/issue48-file-credential-ui-1/sources/macos_credential_management_native_test.dart",
+      "bytes": 20919,
+      "sha256": "3eb4bdc5f541444e7cfc7a157b8fd8bb83da7d1c26d472e9a9c9cbe5b0ee8d7a"
+    },
+    {
+      "path": "raw/issue48-file-credential-ui-1/sources/main.dart",
+      "bytes": 16729,
+      "sha256": "7a396b7917211b58906cd7bdd789d585d0cd511f1a93145246747cfaaf4cb883"
+    },
+    {
+      "path": "raw/issue48-file-credential-ui-1/sources/native_semantics_lifetime.dart",
+      "bytes": 1540,
+      "sha256": "a274da35d57e9bca3322b7e5b70a2bc610990e8e8dc3fba0821bbb1e9219036f"
+    },
+    {
+      "path": "raw/issue48-file-credential-ui-2/cli-0-stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/issue48-file-credential-ui-2/cli-1-stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/issue48-file-credential-ui-2/flutter.txt",
+      "bytes": 567,
+      "sha256": "1e08803e8759c3ebb5bd60d8cfe6d9612dd6a9fa751a441833e0e4de4f747664"
+    },
+    {
+      "path": "raw/issue48-file-credential-ui-2/native-00-file-input-rejections.png",
+      "bytes": 349222,
+      "sha256": "b27d8baf24d0f7170831619565f48198c04c56e3e481a25e3e707007437f6be8"
+    },
+    {
+      "path": "raw/issue48-file-credential-ui-2/native-01-created-hidden.png",
+      "bytes": 277066,
+      "sha256": "b62edec890e70d98d46083c33af8cd396fdf24bb65ab51e9848bd25a73fddf81"
+    },
+    {
+      "path": "raw/issue48-file-credential-ui-2/native-02-linked-hidden.png",
+      "bytes": 236105,
+      "sha256": "4714f4897656e7a70d0d9e7c74cedae8690e31b6e7c2d2f8f68f15dd2da984e8"
+    },
+    {
+      "path": "raw/issue48-file-credential-ui-2/native-02-metadata-before-save.png",
+      "bytes": 373395,
+      "sha256": "eaf2dfcc4e227b0900a069b9044dca1fba317a9f63934d98d27de3757eb7494c"
+    },
+    {
+      "path": "raw/issue48-file-credential-ui-2/native-03-file-rotation-cancelled.png",
+      "bytes": 434564,
+      "sha256": "e10bc1516382b420b0e747cfb57eb80d5d79cebe9b8aaf1f44c379b7a20be99b"
+    },
+    {
+      "path": "raw/issue48-file-credential-ui-2/native-03-public.png",
+      "bytes": 282345,
+      "sha256": "079732f1185237cd45591b63beeaeb2d200fce1fac15fedb4a96a2f2a8252025"
+    },
+    {
+      "path": "raw/issue48-file-credential-ui-2/native-04-rotated.png",
+      "bytes": 280747,
+      "sha256": "2bd78dc5ae4dac3a568d06f4054e78b69bb46363506e5b4df74f84ffbbe727c8"
+    },
+    {
+      "path": "raw/issue48-file-credential-ui-2/native-05-disabled.png",
+      "bytes": 276222,
+      "sha256": "dd3d78bacb505c2cf538f50a5ba5dcaca0dc17094c5b8d37ecc7e684f3303cd7"
+    },
+    {
+      "path": "raw/issue48-file-credential-ui-2/native-06-enabled.png",
+      "bytes": 280747,
+      "sha256": "2bd78dc5ae4dac3a568d06f4054e78b69bb46363506e5b4df74f84ffbbe727c8"
+    },
+    {
+      "path": "raw/issue48-file-credential-ui-2/native-07-version-restored.png",
+      "bytes": 278126,
+      "sha256": "7153c6c6beb9cf8868b23b9391171318c849596b09d9d0256f6869c3e414ded0"
+    },
+    {
+      "path": "raw/issue48-file-credential-ui-2/native-08-version-enabled.png",
+      "bytes": 282635,
+      "sha256": "dae39c41ea627429e2bbe5b79a52155b6f857a9ef34c8fcaf18f99bd2206462a"
+    },
+    {
+      "path": "raw/issue48-file-credential-ui-2/native-09-deleted.png",
+      "bytes": 139022,
+      "sha256": "d09604a04e71eaecd627eb9bb26fcade28cd787d16fd014468c893401bb6f7e4"
+    },
+    {
+      "path": "raw/issue48-file-credential-ui-2/native-10-recycle-restored.png",
+      "bytes": 278073,
+      "sha256": "b0358a8e73e7dd1eb282e0a94aa5bb05839b72baa7a1bb3d6a24e6d6ddbf2dcd"
+    },
+    {
+      "path": "raw/issue48-file-credential-ui-2/native-11-recycle-enabled.png",
+      "bytes": 282546,
+      "sha256": "0922f415fbb67b141056f5f4f40028747433816702e9b9126cfd9343f6940882"
+    },
+    {
+      "path": "raw/issue48-file-credential-ui-2/native-12-expired.png",
+      "bytes": 278476,
+      "sha256": "9517fb9d94843ed4131b5ea7e59f91c2046138a5051c16906605b3f6c4648340"
+    },
+    {
+      "path": "raw/issue48-file-credential-ui-2/native-13-hidden.png",
+      "bytes": 282546,
+      "sha256": "0922f415fbb67b141056f5f4f40028747433816702e9b9126cfd9343f6940882"
+    },
+    {
+      "path": "raw/issue48-file-credential-ui-2/native-14-reopened.png",
+      "bytes": 282546,
+      "sha256": "0922f415fbb67b141056f5f4f40028747433816702e9b9126cfd9343f6940882"
+    },
+    {
+      "path": "raw/issue48-file-credential-ui-2/native-result.json",
+      "bytes": 913,
+      "sha256": "b72018918b30486353ffd213eb5f568527badd58afabe9c114c5f30ee75bf08d"
+    },
+    {
+      "path": "raw/issue48-file-credential-ui-2/result.json",
+      "bytes": 14818,
+      "sha256": "c775a237d69ff71a68be45b9e6e49ad7960dc8b0850ef717ee894a7c47edd7d9"
+    },
+    {
+      "path": "raw/issue48-file-credential-ui-2/sources/credential_dialogs.dart",
+      "bytes": 21563,
+      "sha256": "e55dc7471dadd698c608c48837bbfd56da5484c1cb83be8d3fd8693440db21d0"
+    },
+    {
+      "path": "raw/issue48-file-credential-ui-2/sources/credential_files.dart",
+      "bytes": 1584,
+      "sha256": "582e09014b0d8f144fc8e39f3a0966d5790414e87180daa0797237f9985cfe51"
+    },
+    {
+      "path": "raw/issue48-file-credential-ui-2/sources/credential_management.dart",
+      "bytes": 20272,
+      "sha256": "269cff2c25e8fb12152b7627c55c6898631e1925fa739f292e54bd1a01fceb3b"
+    },
+    {
+      "path": "raw/issue48-file-credential-ui-2/sources/credentials.dart",
+      "bytes": 42653,
+      "sha256": "72384ae9e9a9a1533de555f9c910e761bbe24eb0fff7aa17e9c458dc85c5ccae"
+    },
+    {
+      "path": "raw/issue48-file-credential-ui-2/sources/information_workspace.dart",
+      "bytes": 3426,
+      "sha256": "eb2c65a38db88be3557847f131d7fe8efca68616ffbef313d35fa5ca210737e6"
+    },
+    {
+      "path": "raw/issue48-file-credential-ui-2/sources/library.dart",
+      "bytes": 55925,
+      "sha256": "90f222b10538a3aa3f1c703dd3ff091154972813635147fb0cf354ac0c32e4ed"
+    },
+    {
+      "path": "raw/issue48-file-credential-ui-2/sources/macos-credential-management-ui.py",
+      "bytes": 11581,
+      "sha256": "4947398b31ebd8acbeac5dd0c7aa03c67ccf2815347ac98bf3cfb81020d77332"
+    },
+    {
+      "path": "raw/issue48-file-credential-ui-2/sources/macos_credential_management_native_test.dart",
+      "bytes": 20929,
+      "sha256": "1d2e9fc07e4232a9d50b0f98a027e74ee32f445c272c410b0d025537802188da"
+    },
+    {
+      "path": "raw/issue48-file-credential-ui-2/sources/main.dart",
+      "bytes": 16729,
+      "sha256": "7a396b7917211b58906cd7bdd789d585d0cd511f1a93145246747cfaaf4cb883"
+    },
+    {
+      "path": "raw/issue48-file-credential-ui-2/sources/native_semantics_lifetime.dart",
+      "bytes": 1540,
+      "sha256": "a274da35d57e9bca3322b7e5b70a2bc610990e8e8dc3fba0821bbb1e9219036f"
+    },
+    {
+      "path": "raw/issue48-management-codesign.txt",
+      "bytes": 2197,
+      "sha256": "44786f34b5a8e84a0fbedac0fe1aaa60e65556fdc798b647a899531ad30c91cc"
+    },
+    {
+      "path": "raw/issue48-management-debug-build.txt",
+      "bytes": 125,
+      "sha256": "bb928504a91fe0ce4dc0bb921b142b31033cbbf74e92214ba34521fe3f2f22be"
+    },
+    {
+      "path": "raw/issue48-management-final-analyze.txt",
+      "bytes": 96,
+      "sha256": "b99507df99dfac0acd7037fef784e16a58a6eb0dbc6a32bea8f274e00174e519"
+    },
+    {
+      "path": "raw/issue48-management-refresh-batch.json",
+      "bytes": 481,
+      "sha256": "29d87293829a5f8ba33e390e32b3888f42a3c886ac490751ea1b1e841c06e636"
+    },
+    {
+      "path": "raw/issue48-management-reused-directory-proof.json",
+      "bytes": 190,
+      "sha256": "1c76a572e97313a74281bbf682a626704be49aaec82614e5d98a438a160d73d2"
+    },
+    {
+      "path": "raw/issue48-management-summary.json",
+      "bytes": 882,
+      "sha256": "b53eaa3e03f7bdfa69c477b4810cbf11724bc0fc48d778f2146b744697db3bb4"
+    },
+    {
+      "path": "raw/issue48-string-credential-regression-1/cli-0-stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/issue48-string-credential-regression-1/cli-1-stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/issue48-string-credential-regression-1/flutter.txt",
+      "bytes": 567,
+      "sha256": "ad0d11eafe12b17d624832ea8428ace68dec25e486ef2a1ff5efaa3016c6e5c9"
+    },
+    {
+      "path": "raw/issue48-string-credential-regression-1/native-01-created-hidden.png",
+      "bytes": 272342,
+      "sha256": "f75742e2c2fb96615e7f4cebe536870b68f9077ed15d35471ef8edba91875890"
+    },
+    {
+      "path": "raw/issue48-string-credential-regression-1/native-02-linked-hidden.png",
+      "bytes": 236642,
+      "sha256": "2b2f97ace3703131c954c058ec9016bcb18ff1bbab066112c0d1aa34f8c01fa1"
+    },
+    {
+      "path": "raw/issue48-string-credential-regression-1/native-02-metadata-before-save.png",
+      "bytes": 372410,
+      "sha256": "f83fced9adc73075303f7350452802a05ff0f75b055e40711d716bdcb370c55e"
+    },
+    {
+      "path": "raw/issue48-string-credential-regression-1/native-03-public.png",
+      "bytes": 281765,
+      "sha256": "cd68920256140eadc499d6a200565a9cbbbbfc2247c75dac415d5849a83607c9"
+    },
+    {
+      "path": "raw/issue48-string-credential-regression-1/native-04-rotated.png",
+      "bytes": 281838,
+      "sha256": "ed6d109684d4207042334a9fcbe74c7a6921758ee2014fc67953bf07c8b90d12"
+    },
+    {
+      "path": "raw/issue48-string-credential-regression-1/native-05-disabled.png",
+      "bytes": 276810,
+      "sha256": "e9f1acdaa2c4a5837119e454f5a187dfb2c9ae619750536810989286729728ca"
+    },
+    {
+      "path": "raw/issue48-string-credential-regression-1/native-06-enabled.png",
+      "bytes": 281838,
+      "sha256": "ed6d109684d4207042334a9fcbe74c7a6921758ee2014fc67953bf07c8b90d12"
+    },
+    {
+      "path": "raw/issue48-string-credential-regression-1/native-07-version-restored.png",
+      "bytes": 276837,
+      "sha256": "f4373b7a74f94f862d524045ec6a9e718f1f87df4f298b904a35c6da96e4051d"
+    },
+    {
+      "path": "raw/issue48-string-credential-regression-1/native-08-version-enabled.png",
+      "bytes": 281854,
+      "sha256": "397cd9a2852207e760dfa90ddac617286fd33dbcb661653ea3fba67e57e7edfb"
+    },
+    {
+      "path": "raw/issue48-string-credential-regression-1/native-09-deleted.png",
+      "bytes": 139022,
+      "sha256": "d09604a04e71eaecd627eb9bb26fcade28cd787d16fd014468c893401bb6f7e4"
+    },
+    {
+      "path": "raw/issue48-string-credential-regression-1/native-10-recycle-restored.png",
+      "bytes": 276796,
+      "sha256": "7c0b994bb0ccff2f9232d88d1c2d4b09faf8c26c496c6060e18c668f50c47fd5"
+    },
+    {
+      "path": "raw/issue48-string-credential-regression-1/native-11-recycle-enabled.png",
+      "bytes": 281823,
+      "sha256": "b657cb4dc2098b45839c432a562d0b13a5b8007cdbe7ea3e1b22ebbc3e647281"
+    },
+    {
+      "path": "raw/issue48-string-credential-regression-1/native-12-expired.png",
+      "bytes": 277520,
+      "sha256": "5f37d38114ac3790ef20e48a125de5084cbc540f386f9930ec652d2156f691cf"
+    },
+    {
+      "path": "raw/issue48-string-credential-regression-1/native-13-hidden.png",
+      "bytes": 281823,
+      "sha256": "b657cb4dc2098b45839c432a562d0b13a5b8007cdbe7ea3e1b22ebbc3e647281"
+    },
+    {
+      "path": "raw/issue48-string-credential-regression-1/native-14-reopened.png",
+      "bytes": 281823,
+      "sha256": "b657cb4dc2098b45839c432a562d0b13a5b8007cdbe7ea3e1b22ebbc3e647281"
+    },
+    {
+      "path": "raw/issue48-string-credential-regression-1/native-result.json",
+      "bytes": 843,
+      "sha256": "acc7c8f5251492bd1800c7d9a72610e30258006930dd113b384146135dc01e1a"
+    },
+    {
+      "path": "raw/issue48-string-credential-regression-1/result.json",
+      "bytes": 14716,
+      "sha256": "1df0b1e29c5b351ffdee2ec1986866f3dbb9065e8f5151ac443c766079a3785b"
+    },
+    {
+      "path": "raw/issue48-string-credential-regression-1/sources/credential_dialogs.dart",
+      "bytes": 21563,
+      "sha256": "e55dc7471dadd698c608c48837bbfd56da5484c1cb83be8d3fd8693440db21d0"
+    },
+    {
+      "path": "raw/issue48-string-credential-regression-1/sources/credential_files.dart",
+      "bytes": 1584,
+      "sha256": "582e09014b0d8f144fc8e39f3a0966d5790414e87180daa0797237f9985cfe51"
+    },
+    {
+      "path": "raw/issue48-string-credential-regression-1/sources/credential_management.dart",
+      "bytes": 20272,
+      "sha256": "269cff2c25e8fb12152b7627c55c6898631e1925fa739f292e54bd1a01fceb3b"
+    },
+    {
+      "path": "raw/issue48-string-credential-regression-1/sources/credentials.dart",
+      "bytes": 42653,
+      "sha256": "72384ae9e9a9a1533de555f9c910e761bbe24eb0fff7aa17e9c458dc85c5ccae"
+    },
+    {
+      "path": "raw/issue48-string-credential-regression-1/sources/information_workspace.dart",
+      "bytes": 3426,
+      "sha256": "eb2c65a38db88be3557847f131d7fe8efca68616ffbef313d35fa5ca210737e6"
+    },
+    {
+      "path": "raw/issue48-string-credential-regression-1/sources/library.dart",
+      "bytes": 55925,
+      "sha256": "90f222b10538a3aa3f1c703dd3ff091154972813635147fb0cf354ac0c32e4ed"
+    },
+    {
+      "path": "raw/issue48-string-credential-regression-1/sources/macos-credential-management-ui.py",
+      "bytes": 11581,
+      "sha256": "4947398b31ebd8acbeac5dd0c7aa03c67ccf2815347ac98bf3cfb81020d77332"
+    },
+    {
+      "path": "raw/issue48-string-credential-regression-1/sources/macos_credential_management_native_test.dart",
+      "bytes": 20929,
+      "sha256": "1d2e9fc07e4232a9d50b0f98a027e74ee32f445c272c410b0d025537802188da"
+    },
+    {
+      "path": "raw/issue48-string-credential-regression-1/sources/main.dart",
+      "bytes": 16729,
+      "sha256": "7a396b7917211b58906cd7bdd789d585d0cd511f1a93145246747cfaaf4cb883"
+    },
+    {
+      "path": "raw/issue48-string-credential-regression-1/sources/native_semantics_lifetime.dart",
+      "bytes": 1540,
+      "sha256": "a274da35d57e9bca3322b7e5b70a2bc610990e8e8dc3fba0821bbb1e9219036f"
+    }
+  ]
+}
