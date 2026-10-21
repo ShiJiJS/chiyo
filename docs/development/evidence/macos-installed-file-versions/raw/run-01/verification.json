@@ -1,0 +1,117 @@
+{
+  "listedFileVersionCasesComplete": true,
+  "allMacTicketsComplete": false,
+  "packageSource": "4690e79357bb728da22193d8dadd6dc8a8ce2ce6",
+  "packageRelease": "0.4.0+12-mac-dev.4690e79357bb",
+  "publicCommands": 19,
+  "distinctDeliveries": 3,
+  "deliveries": [
+    {
+      "deliveryId": "PnuCSI_-90mFOwOHj0wi5jZC88sy9vJtJDnZLMLi-yM=",
+      "fieldVersion": 1,
+      "attachmentVersion": 1,
+      "byteLength": 0
+    },
+    {
+      "deliveryId": "vbX_dR-bhdkQSbWhuj7VPjA0mui0HUDS42ZFZH9fIoo=",
+      "fieldVersion": 2,
+      "attachmentVersion": 2,
+      "byteLength": 2049
+    },
+    {
+      "deliveryId": "xH5koEvpv2IqBXyayf7aMW2Qfvh0yM4wSCC393FCPWs=",
+      "fieldVersion": 3,
+      "attachmentVersion": 1,
+      "byteLength": 0
+    }
+  ],
+  "fixedExpiresAt": "2026-10-21T16:19:16.338486Z",
+  "oldOperationVersionAndIdentityPreserved": true,
+  "newOperationUsesCurrentVersion": true,
+  "GUIRestoreCreatesFieldVersion3WithAttachment1": true,
+  "releaseDoesNotRecreateOldOperation": true,
+  "GUIRevokeRefusesNewAndDuplicateFetchBeforeClaim": true,
+  "crossChatFetchAndStatusRefused": true,
+  "consumerPhases": [
+    {
+      "phase": "consume-v1",
+      "acceptedUploads": 1,
+      "attempts": 1
+    },
+    {
+      "phase": "consume-both-versions",
+      "acceptedUploads": 2,
+      "attempts": 2
+    },
+    {
+      "phase": "consume-after-restore",
+      "acceptedUploads": 3,
+      "attempts": 3
+    },
+    {
+      "phase": "consume-after-revoke",
+      "acceptedUploads": 0,
+      "attempts": 3
+    }
+  ],
+  "sourceBytesVerifiedBeforeCleanup": true,
+  "privateFixtureDirectoryRemoved": true,
+  "original777PreservedInActualGUI": true,
+  "syntheticDescriptionDraftDiscardedNotSaved": true,
+  "ordinaryQuitExitCode": 0,
+  "endpointReleased": true,
+  "reopenedAppPID": 43712,
+  "reopenedWithoutNewOwnerKeychainAction": true,
+  "reopenHistories": 14,
+  "reopenFileDeliveries": 3,
+  "reopenSyntheticItemVersion": 3,
+  "appStillOpen": true,
+  "CLIExitCode": 0,
+  "sdkRequiredByAppOrAOTCLI": false,
+  "payloadEntriesReverified": 7971,
+  "strictSignatureExitCode": 0,
+  "historicalSamePackageFilesReverified": [
+    {
+      "path": "docs/development/evidence/macos-installed-main/raw/owner-allowed-20261021/reopen-1/cli-session.txt",
+      "bytes": 15518,
+      "sha256": "ba98cc7a58a22071769736a9f72e38c18c08139e70d1340262a4b1e4e866a858"
+    },
+    {
+      "path": "docs/development/evidence/macos-installed-main/raw/owner-allowed-20261021/reopen-1/consumer-1/result.json",
+      "bytes": 213,
+      "sha256": "1222a2229476bcfc1b7f5b0cd42763c57bc2a9d13b34d159667a0e021136c445"
+    },
+    {
+      "path": "docs/development/evidence/macos-installed-main/raw/owner-allowed-20261021/reopen-1/consumer-2/result.json",
+      "bytes": 340,
+      "sha256": "7d3d1630fa4fc702ff76e8881a5bfda89dc4f7a6fee0d6f5fcaacc9a135eeb56"
+    },
+    {
+      "path": "docs/development/evidence/macos-installed-main/raw/owner-allowed-20261021/reopen-1/consumer-3/result.json",
+      "bytes": 72,
+      "sha256": "4c662188354f72c31b232955f70bfe1db8c55a77234746b0cc2dfc7fb3f55645"
+    },
+    {
+      "path": "docs/development/evidence/macos-installed-main/raw/owner-allowed-20261021/reopen-1/consumer-4/result.json",
+      "bytes": 213,
+      "sha256": "1222a2229476bcfc1b7f5b0cd42763c57bc2a9d13b34d159667a0e021136c445"
+    },
+    {
+      "path": "docs/development/evidence/macos-installed-main/raw/owner-allowed-20261021/reopen-1/consumer-5/result.json",
+      "bytes": 72,
+      "sha256": "4c662188354f72c31b232955f70bfe1db8c55a77234746b0cc2dfc7fb3f55645"
+    },
+    {
+      "path": "docs/development/evidence/macos-installed-main/raw/owner-allowed-20261021/reopen-1/13-partial-selection.jpg",
+      "bytes": 479909,
+      "sha256": "36c89b3f57800ffe2cf450a42ed41dab96c8ec4277218ca2eb31e381118dc9a4"
+    },
+    {
+      "path": "docs/development/evidence/macos-installed-main/raw/owner-allowed-20261021/reopen-1/18-expired-delivery-detail.ax.txt",
+      "bytes": 3420,
+      "sha256": "a1227890783fca306c076a67230b6c9a0ad4953e47353019262981cd222fed5f"
+    }
+  ],
+  "keyboardObservation": "super+a/native Edit Select All followed by typing appended instead of replacing; each followed by BackSpace removed one character only. Right click established a visible full single-word selection and BackSpace cleared it. Draft discarded. Cause not yet isolated; #48 remains pending.",
+  "notCovered": "No actual OS sleep/wake, clean user, package update, final notification/backup/Codex flow or new GUI-fix build."
+}

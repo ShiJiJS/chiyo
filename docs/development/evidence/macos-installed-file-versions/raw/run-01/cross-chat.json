@@ -1,0 +1,40 @@
+{
+  "commands": [
+    {
+      "command": "session",
+      "chatLabel": "普通 Mac 包附件第二聊天隔离"
+    },
+    {
+      "command": "file-fetch",
+      "requestId": "Dtnvyqzq6QxILpdvmb4ba4UMUNHu3xidl0GkyBtCRrc=",
+      "itemId": "6lCtBfSCQPjdnvlg--OBvHoi1GNOaDWhscbS_v8bMSE=",
+      "fieldId": "P0dc6Vb1uWV4n_ZtIAwmGNopxSRO1qt7fEqXy0mmoyY=",
+      "operationId": "cross-chat-attempt"
+    },
+    {
+      "command": "file-status",
+      "deliveryId": "PnuCSI_-90mFOwOHj0wi5jZC88sy9vJtJDnZLMLi-yM="
+    }
+  ],
+  "results": [
+    {
+      "status": "ok"
+    },
+    {
+      "protocolVersion": 2,
+      "status": "unauthorized",
+      "errorCode": "not_authorized",
+      "retryable": false,
+      "operationClaimed": false
+    },
+    {
+      "protocolVersion": 2,
+      "status": "unauthorized",
+      "errorCode": "not_authorized",
+      "retryable": false,
+      "operationClaimed": false
+    }
+  ],
+  "exitCode": 0,
+  "stderr": ""
+}

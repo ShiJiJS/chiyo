@@ -1,0 +1,65 @@
+{
+  "commands": [
+    {
+      "command": "session",
+      "chatLabel": "普通 Mac 包附件版本重开核对"
+    },
+    {
+      "command": "catalog"
+    }
+  ],
+  "results": [
+    {
+      "status": "ok"
+    },
+    {
+      "status": "ok",
+      "items": [
+        {
+          "id": "tv9sQSAODzcDEIyRJCGUm7bFdau11yMNhERmxXsFHEM=",
+          "version": 2,
+          "name": "MacPackageTest20MacPackageTest20261021261021",
+          "description": "",
+          "directoryId": null,
+          "tagIds": [],
+          "fields": [
+            {
+              "id": "ItUpylRSedlvkP-0QnIW5tkmr0Ml6HtqutjF79cPzsk=",
+              "name": "AllowedSyntheticField",
+              "description": "",
+              "kind": "structured"
+            },
+            {
+              "id": "4jzXsfbaOhkByLY1kiazgC7_oJOW-F7HOZc5BCKEelM=",
+              "name": "SyntheticAttachment",
+              "description": "",
+              "kind": "file"
+            }
+          ]
+        },
+        {
+          "id": "6lCtBfSCQPjdnvlg--OBvHoi1GNOaDWhscbS_v8bMSE=",
+          "version": 3,
+          "name": "MacSshAcceptanceEmptyAttachment",
+          "description": "",
+          "directoryId": null,
+          "tagIds": [],
+          "fields": [
+            {
+              "id": "P0dc6Vb1uWV4n_ZtIAwmGNopxSRO1qt7fEqXy0mmoyY=",
+              "name": "ZeroByteAttachment",
+              "description": "",
+              "kind": "file"
+            }
+          ]
+        }
+      ],
+      "total": 2,
+      "offset": 0,
+      "nextOffset": null
+    }
+  ],
+  "exitCode": 0,
+  "stderr": "",
+  "noNewKeychainOwnerAction": true
+}

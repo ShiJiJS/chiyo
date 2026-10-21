@@ -1,0 +1,30 @@
+Window: "info_desktop", App: info_desktop.
+0 standard window info_desktop, Secondary Actions: Raise
+	1 container info_desktop
+		2 container (settable)
+			3 container (settable)
+				4 button (settable) ×
+				5 text (settable) 修改历史与恢复
+				6 text (settable) 旧值只对用户可见。恢复建立一个新版本；被移除后恢复的字段使用新身份，旧授权不会重新生效。
+				7 text (settable) 修改历史保留 30 天，与回收站分别清理。
+				8 text (settable) MacSshAcceptanceEmptyAttachment · 版本 2
+				9 button (settable) 恢复为新版本
+				10 text (settable) ZeroByteAttachment · 文件版本 2
+				11 text (settable) 替换时间：2026/10/22 00:07
+				12 text (settable) MacSshAcceptanceEmptyAttachment · 版本 1
+				13 button (settable) 恢复为新版本
+				14 text (settable) ZeroByteAttachment · 文件版本 1
+				15 text (settable) 替换时间：2026/10/22 00:06
+			16 text (settable) Dismiss
+	17 close button
+	18 full screen button Help: this button also has an action to zoom the window, Secondary Actions: zoom the window
+	19 minimize button
+	20 text info_desktop
+21 menu bar
+	22 info_desktop
+	23 Edit
+	24 View
+	25 Window
+	26 Help
+
+The focused UI element is 1 container info_desktop

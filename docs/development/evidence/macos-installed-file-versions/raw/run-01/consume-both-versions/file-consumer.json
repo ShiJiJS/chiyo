@@ -1,0 +1,73 @@
+{
+  "curl": {
+    "path": "/usr/bin/curl",
+    "sha256": "625cd93eb0043214d5f74974d34f0b4d748977473e236a2e7f4704ecc2b95950",
+    "version": "curl 8.7.1 (x86_64-apple-darwin26.0) libcurl/8.7.1 (SecureTransport) LibreSSL/3.3.6 zlib/1.2.12 nghttp2/1.69.0"
+  },
+  "maximumBytes": 1048576,
+  "attempts": [
+    {
+      "label": "installed-file-original-v1",
+      "command": [
+        "/usr/bin/curl",
+        "-q",
+        "--noproxy",
+        "*",
+        "--proxy",
+        "",
+        "--connect-timeout",
+        "3",
+        "--max-time",
+        "8",
+        "--fail",
+        "--silent",
+        "--show-error",
+        "--upload-file",
+        "/Users/jiangxinyi/Library/Containers/com.example.infoDesktop/Data/tmp/info-managed-eWdmbouOQH220873wtw7EQRrQi7KkZxd/attachment.txt",
+        "http://127.0.0.1:58613/4bab2edbd8f34483b6683099f7cc4fe7/installed-file-original-v1"
+      ],
+      "exitCode": 0,
+      "stdout": "{\"byteLength\": 0, \"sha256\": \"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\"}",
+      "stderr": ""
+    },
+    {
+      "label": "installed-file-new-v2",
+      "command": [
+        "/usr/bin/curl",
+        "-q",
+        "--noproxy",
+        "*",
+        "--proxy",
+        "",
+        "--connect-timeout",
+        "3",
+        "--max-time",
+        "8",
+        "--fail",
+        "--silent",
+        "--show-error",
+        "--upload-file",
+        "/Users/jiangxinyi/Library/Containers/com.example.infoDesktop/Data/tmp/info-managed-FryeuczcuXm9NWgthS1BuqCUalKRVPVY/attachment.bin",
+        "http://127.0.0.1:58613/4bab2edbd8f34483b6683099f7cc4fe7/installed-file-new-v2"
+      ],
+      "exitCode": 0,
+      "stdout": "{\"byteLength\": 2049, \"sha256\": \"89a8ac04b268c5ea4ef4099bf529f00c4f9390770abf89b2c1cb8a8319c91f3b\"}",
+      "stderr": ""
+    }
+  ],
+  "acceptedUploads": 2,
+  "accepted": [
+    {
+      "endpoint": "/4bab2edbd8f34483b6683099f7cc4fe7/installed-file-original-v1",
+      "byteLength": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "endpoint": "/4bab2edbd8f34483b6683099f7cc4fe7/installed-file-new-v2",
+      "byteLength": 2049,
+      "sha256": "89a8ac04b268c5ea4ef4099bf529f00c4f9390770abf89b2c1cb8a8319c91f3b"
+    }
+  ],
+  "receiverClosed": true,
+  "scope": "Synthetic local HTTP upload; no external website or remote client."
+}
