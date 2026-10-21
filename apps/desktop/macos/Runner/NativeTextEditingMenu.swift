@@ -6,8 +6,9 @@ import FlutterMacOS
 final class NativeTextEditingMenu: NSObject, NSMenuItemValidation {
   private weak var window: NSWindow?
   private let methods = ["selectAll:": "selectAll", "copy:": "copy",
-                         "cut:": "cut", "paste:": "paste"]
-  private let keyMethods = ["a": "selectAll", "c": "copy", "x": "cut", "v": "paste"]
+                         "cut:": "cut", "paste:": "paste",
+                         "pasteAsPlainText:": "paste", "undo:": "undo", "redo:": "redo"]
+  private let keyMethods = ["a": "selectAll", "c": "copy", "x": "cut", "v": "paste", "z": "undo"]
   private let channel: FlutterMethodChannel
   private var keyMonitor: Any?
   private var sheetObservers: [NSObjectProtocol] = []
@@ -41,13 +42,21 @@ final class NativeTextEditingMenu: NSObject, NSMenuItemValidation {
     // The accessibility field editor may consume these before menu dispatch.
     keyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
       guard let self, self.flutterEditor != nil,
-            event.modifierFlags.contains(.command),
-            event.modifierFlags.intersection([.control, .option, .shift]).isEmpty,
-            let key = event.charactersIgnoringModifiers?.lowercased(),
-            let method = self.keyMethods[key]
+            let method = self.method(for: event)
       else { return event }
       self.channel.invokeMethod(method, arguments: nil)
       return nil
+    }
+  }
+
+  private func method(for event: NSEvent) -> String? {
+    guard let key = event.charactersIgnoringModifiers?.lowercased() else { return nil }
+    let modifiers = event.modifierFlags.intersection([.command, .control, .option, .shift])
+    switch modifiers {
+    case [.command]: return keyMethods[key]
+    case [.command, .shift]: return key == "z" ? "redo" : nil
+    case [.command, .option, .shift]: return key == "v" ? "paste" : nil
+    default: return nil
     }
   }
 

@@ -1,0 +1,6 @@
+{
+  "apps/desktop/lib/mac_text_editing.dart": true,
+  "apps/desktop/macos/Runner/NativeTextEditingMenu.swift": true,
+  "current window_frame.dart": true,
+  "current MainFlutterWindow excluding isolated QA clipboard block": true
+}

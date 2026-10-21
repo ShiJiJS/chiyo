@@ -28,14 +28,18 @@ class _MacTextEditingActionsState extends State<MacTextEditingActions> {
             SelectionChangedCause.keyboard,
           ),
           'paste' => const PasteTextIntent(SelectionChangedCause.keyboard),
+          'undo' => const UndoTextIntent(SelectionChangedCause.keyboard),
+          'redo' => const RedoTextIntent(SelectionChangedCause.keyboard),
           _ => throw MissingPluginException(),
         };
         final context = FocusManager.instance.primaryFocus?.context;
-        if (!mounted ||
-            context == null ||
-            (context.widget is! EditableText &&
-                context.findAncestorWidgetOfExactType<EditableText>() ==
-                    null)) {
+        if (!mounted || context == null) return false;
+        final editor = context.widget is EditableText
+            ? context.widget as EditableText
+            : context.findAncestorWidgetOfExactType<EditableText>();
+        if (editor == null ||
+            (editor.readOnly &&
+                (intent is UndoTextIntent || intent is RedoTextIntent))) {
           return false;
         }
         final action = Actions.maybeFind(context, intent: intent);
