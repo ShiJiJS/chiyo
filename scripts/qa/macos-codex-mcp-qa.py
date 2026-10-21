@@ -17,9 +17,10 @@ def main():
         raise SystemExit(64)
     tool = {
         'name': 'codex_info',
-        'description': 'Synthetic Mac acceptance only. Use your actual chatId and '
-        'the reviewed info-codex JSON as input. Private association comes from '
-        'your real SessionStart or explicit parent delegation. The QA driver '
+        'description': 'Read-only synthetic child acceptance only. Query claim, '
+        'status or read for the one existing owner-approved request. Cannot '
+        'request, approve, delegate, execute, reconnect or access other data. '
+        'Use your actual chatId and reviewed info-codex JSON. The QA driver '
         'binds chatId to the actual app-server MCP caller, and forwards input '
         'through anonymous stdin, with no business command-line arguments.',
         'inputSchema': {
@@ -31,6 +32,8 @@ def main():
             'required': ['chatId', 'input'],
             'additionalProperties': False,
         },
+        'annotations': {'readOnlyHint': True, 'destructiveHint': False,
+                        'openWorldHint': False},
     }
     for line in sys.stdin:
         request = json.loads(line)
@@ -50,6 +53,7 @@ def main():
         elif method == 'tools/call':
             try:
                 assert request['params']['name'] == 'codex_info'
+                assert request['params']['arguments']['input']['command'] in ['claim', 'status', 'read']
                 with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as channel:
                     channel.settimeout(60)
                     channel.connect(endpoint)

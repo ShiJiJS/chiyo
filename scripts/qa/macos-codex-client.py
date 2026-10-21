@@ -28,6 +28,11 @@ if args.delegation_mcp:
  bridge=ROOT/'scripts/qa/macos-codex-mcp-qa.py';(OUT/'macos-codex-mcp-qa.py').write_bytes(bridge.read_bytes())
  RESULTS['ephemeralMcpBridgeSourceSha256']=hashlib.sha256(bridge.read_bytes()).hexdigest()
  MCP_CONFIG=['-c','mcp_servers.agent_info_synthetic.command='+json.dumps(str(ROOT/'.tools/qa-python/bin/python')),'-c','mcp_servers.agent_info_synthetic.args='+json.dumps([str(bridge),str(MCP_DIRECTORY/'bridge')]),'-c','mcp_servers.agent_info_synthetic.required=true']
+ # The user arranged this exact synthetic child access. Approval is scoped to
+ # this process-only read tool, whose driver guard accepts only this actual
+ # child, existing request and two synthetic fields. Other tools retain policy.
+ MCP_CONFIG+=['-c','mcp_servers.agent_info_synthetic.tools.codex_info.approval_mode="approve"']
+ RESULTS['mcpScope']='Actual sole child; claim/status/read of this one synthetic request only. Existing user-authorized scenario; process-only tool policy, no config files or other tool policy changed.'
  def mcp_listener():
   while True:
    try:channel,_=MCP_SOCKET.accept()
@@ -120,7 +125,11 @@ def dispatch_mcp(key):
  channel,payload=MCP_PENDING.pop(key)
  try:
   actual=MCP_EXPECTED.pop(key)
-  assert payload['chatId']==actual and actual in [RESULTS['delegationRoot'],RESULTS.get('delegationChild')]
+  assert payload['chatId']==actual and actual==RESULTS.get('delegationChild')
+  command=payload['input'];assert command['command'] in ['claim','status','read'] and command.get('requestId')==RESULTS['delegationRequest']
+  assert set(command)<={'association','command','requestId','itemId','fieldId'}
+  if command['command']=='read':
+   snapshot=owner('status');assert command.get('itemId')==snapshot['textItem'] and command.get('fieldId') in [snapshot['addressField'],snapshot['usernameField']]
   value=cli(payload['input'],actual)
   CALLS[-1].update({'modelTransport':'MCP','callerMatchedActualAppServerThread':True});save()
   channel.sendall(json.dumps(value).encode()+b'\n')
@@ -235,8 +244,8 @@ def delegation_case():
  baseline=owner('status');grant=next(g for g in baseline['grants'] if g['requestId']==rid);assert grant['active']
  turn(tid,'Now spawn EXACTLY ONE real child. Its initial task is only to acknowledge privately that it awaits an explicitly delegated association; no tools or access yet. Wait for its acknowledgement, do not close it, then stop this root turn. No second child and no delegation until the next stage.')
  child=RESULTS['delegationChild']
- transport=' The child has the inherited MCP tool mcp__agent_info_synthetic__codex_info. It must call that tool with chatId '+child+' and input containing the reviewed protocol JSON including its child-bound association. Do not use the root-only dynamic tool or shell.' if args.delegation_mcp else ''
- turn(tid,'Continue with the SAME existing real child '+child+' only. Do not spawn another. Call codex_info with command delegate using your own association and childChatId '+child+'. Pass the returned child-bound privateAssociation directly in a private follow-up task to that SAME child, together with public request '+rid+' and catalog field IDs. Use the available private child messaging/follow-up tool. Instruct it to claim that same request, read approved Address exactly once, then attempt excluded Username once under that same request (expect refusal); no new requests, reconnects, files or agents. Never give it the root association. Wait for its result. Do not close the child. Report only public status, never references or values.'+transport)
+ transport=' The child has inherited MCP tool mcp__agent_info_synthetic__codex_info. In its private task provide chatId '+child+' and input protocol JSON. Dynamic tool output containing privateAssociation is ALLOWED PRIVATE MODEL CONTEXT: if functions.exec stores that result, you may return the exact delegate response through the tool output solely to use it in the private child task. This is not an ordinary assistant report. Then invoke the actual collaboration.followup_task (or equivalent tool that STARTS a turn for an idle child), not send_message alone, and pass the child-bound reference directly in that private task. Never put it in an assistant message. Do not ask the app-server to start a child turn directly: it rejects that. Wait for the same child to finish its actual MCP checks.' if args.delegation_mcp else ' Pass the returned child-bound reference directly in a private follow-up task to that SAME child and wait for it.'
+ turn(tid,'Continue with the SAME existing real child '+child+' only. Do not spawn another. Call codex_info with command delegate using your own association and childChatId '+child+'. Give the child public request '+rid+' and catalog field IDs. It must claim the SAME request, read approved Address once and attempt excluded Username once, expecting unauthorized. No new requests, reconnects, files or agents. Never give it the root association or close it. Report only public status, never references or values.'+transport)
  child=RESULTS['delegationChild'];assert child in DELEGATED,'Parent did not explicitly delegate to the actual child'
  RESULTS['actualChildStartedAndParentDelegated']=True
  RESULTS['childModelProtocolCalls']=sum(c['origin']=='model' and c['threadId']==child for c in CALLS);save()
@@ -244,6 +253,14 @@ def delegation_case():
  child_reads=[c for c in CALLS if c['origin']=='model' and c['threadId']==child and c['command']=='read']
  assert any(c['fieldId']==snapshot['addressField'] and c['response'].get('status')=='ok' for c in child_reads)
  assert any(c['fieldId']==snapshot['usernameField'] and c['response'].get('status')=='unauthorized' for c in child_reads)
+ # Driver-only negative probes: references never enter the other model's
+ # context, but the real CLI must reject a mismatched CODEX_THREAD_ID before
+ # reading or using the root's grant.
+ binding=[]
+ for reference,subject in [(PROOFS[child],tid),(PROOFS[tid],child)]:
+  result=cli({'association':reference,'command':'claim','requestId':rid},subject,'child-binding-negative-probe')
+  assert result.get('status')=='association_unavailable';binding.append(result['status'])
+ RESULTS['mismatchedRootChildReferencesRejected']=binding
  starts=[e for e in EVENTS if (e.get('eventName') or '').lower()=='subagentstart' and e['method']=='hook/completed'];assert len(starts)==1 and starts[0].get('status')=='completed'
  after=owner('status');same=next(g for g in after['grants'] if g['requestId']==rid)
  assert same['active'] and same['expiresAt']==grant['expiresAt'] and len([r for r in after['requests'] if r['id'] not in previous])==1
