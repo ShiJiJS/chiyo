@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:info_core/info_core.dart';
 import 'package:info_desktop/main.dart';
+import 'package:info_desktop/desktop_controls.dart';
 
 // Current application, fake data only. Archived Round05 captures are not changed.
 void main() {
@@ -179,6 +180,33 @@ void main() {
           );
           await shot('history-hover');
           await tap(find.byKey(const ValueKey('nav-4')));
+          await tap(find.byKey(const ValueKey('settings-section-templates')));
+          await tap(find.text('新建模板').last);
+          await shot('template-editor');
+          await tap(find.byType(DesktopSelect<FieldKind>).first);
+          await shot('template-field-kind');
+          await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+          await tester.pumpAndSettle();
+          await tap(find.text('取消'));
+          // At 200% the settings ListView has recycled rows above the selected
+          // Templates entry. Build that row before ensureVisible can find it.
+          final records = find.byKey(
+            const ValueKey('settings-section-records'),
+          );
+          if (records.evaluate().isEmpty) {
+            await tester.scrollUntilVisible(
+              records,
+              -200,
+              scrollable: find
+                  .ancestor(
+                    of: find.byKey(
+                      const ValueKey('settings-section-templates'),
+                    ),
+                    matching: find.byType(Scrollable),
+                  )
+                  .first,
+            );
+          }
           await tap(find.byKey(const ValueKey('settings-section-records')));
           await tap(find.byKey(const ValueKey('timeout-30')));
           await shot('dropdown');

@@ -228,6 +228,7 @@ class _CredentialHistoryDocumentState extends State<CredentialHistoryDocument> {
                         style: prototypeButton(
                           context,
                           radius: 13,
+                          iconOnly: true,
                           side: BorderSide(color: UiPalette.of(context).line),
                           background: _tip
                               ? UiPalette.of(context).selected

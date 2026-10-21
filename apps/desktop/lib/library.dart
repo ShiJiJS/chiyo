@@ -219,31 +219,44 @@ class _InformationLibraryState extends State<InformationLibrary> {
     bool border = false,
     double size = 12,
     PrototypeIconGlyph? icon,
-  }) => TextButton(
-    key: key,
-    onPressed: action,
-    style: prototypeButton(
-      context,
-      size: size,
-      foreground: p.ink,
-      padding: border
-          ? const EdgeInsets.symmetric(horizontal: 13, vertical: 8)
-          : EdgeInsets.zero,
-      side: border ? BorderSide(color: p.line) : BorderSide.none,
-      radius: 5,
-      background: border ? p.paper : null,
-    ),
-    child: Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        if (icon != null) ...[
-          PrototypeIcon(icon, size: 15),
-          const SizedBox(width: 7),
+  }) {
+    final paging = title == '‹' || title == '›';
+    return TextButton(
+      key: key,
+      onPressed: action,
+      style: prototypeButton(
+        context,
+        size: paging ? 20 : size,
+        iconOnly: paging,
+        foreground: paging ? p.muted : p.ink,
+        padding: border
+            ? const EdgeInsets.symmetric(horizontal: 13, vertical: 8)
+            : EdgeInsets.zero,
+        side: border ? BorderSide(color: p.line) : BorderSide.none,
+        radius: 5,
+        background: border ? p.paper : null,
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (icon != null) ...[
+            PrototypeIcon(icon, size: 15),
+            const SizedBox(width: 7),
+          ],
+          Flexible(
+            child: Text(
+              title,
+              textScaler: paging ? TextScaler.noScaling : null,
+              semanticsLabel: paging
+                  ? (title == '‹' ? '上一页信息' : '下一页信息')
+                  : null,
+            ),
+          ),
         ],
-        Flexible(child: Text(title)),
-      ],
-    ),
-  );
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     InformationPage page;

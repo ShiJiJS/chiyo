@@ -1026,26 +1026,26 @@ class _FocusedFillOperationsState extends State<FocusedFillOperations> {
                 ),
                 TextButton(
                   key: const ValueKey('fill-operations-previous'),
-                  style: prototypeButton(context),
+                  style: prototypeButton(context, size: 20, iconOnly: true),
                   onPressed: _page == 0
                       ? null
                       : () => setState(() {
                           _page--;
                           _selected = null;
                         }),
-                  child: const Text('‹'),
+                  child: const Text('‹', textScaler: TextScaler.noScaling),
                 ),
                 _text(context, '${_page + 1} / $pages', 12, color: c.muted),
                 TextButton(
                   key: const ValueKey('fill-operations-next'),
-                  style: prototypeButton(context),
+                  style: prototypeButton(context, size: 20, iconOnly: true),
                   onPressed: _page + 1 >= pages
                       ? null
                       : () => setState(() {
                           _page++;
                           _selected = null;
                         }),
-                  child: const Text('›'),
+                  child: const Text('›', textScaler: TextScaler.noScaling),
                 ),
               ],
             ),

@@ -2,7 +2,8 @@ param(
   [Parameter(Mandatory=$true)][string]$FlutterBin,
   [ValidateSet('core','storage','cli','desktop','all')][string]$Scope='all',
   [switch]$FullDesktop,
-  [switch]$FullCli
+  [switch]$FullCli,
+  [switch]$FullStorage
 )
 $ErrorActionPreference='Stop'
 $projectRoot=Split-Path -Parent $PSScriptRoot
@@ -25,6 +26,9 @@ try {
   }
   foreach($package in @('packages/info_core','packages/info_storage','packages/info_cli','apps/desktop')) {
     $kind=if($package -eq 'apps/desktop'){'desktop'}elseif($package.EndsWith('info_core')){'core'}elseif($package.EndsWith('info_cli')){'cli'}else{'storage'}
+    # Process-heavy CLI cases are explicit opt-in here; package-windows keeps
+    # its mandatory complete check. Ordinary UI iterations keep their scope.
+    if($kind -eq 'cli' -and $Scope -eq 'all' -and -not $FullCli){continue}
     if($Scope -ne 'all' -and $Scope -ne $kind){continue}
     Push-Location (Join-Path $projectRoot $package)
     try {
@@ -43,7 +47,8 @@ try {
         Invoke-Checked $dartExe (@('test','--concurrency','1','--reporter','expanded') + $testFiles)
       }else {
         Invoke-Checked $dartExe @('analyze','--fatal-infos')
-        Invoke-Checked $dartExe @('test','test/organization_management_test.dart','test/organization_tasks_test.dart','test/backup_test.dart','test/complete_backup_test.dart','test/recycle_test.dart','test/revisions_test.dart','--reporter','expanded')
+        $testFiles=if($FullStorage){@('test/')}else{@('test/organization_management_test.dart','test/organization_tasks_test.dart','test/backup_test.dart','test/complete_backup_test.dart','test/recycle_test.dart','test/revisions_test.dart')}
+        Invoke-Checked $dartExe (@('test','--reporter','expanded') + $testFiles)
       }
     }finally{Pop-Location}
   }

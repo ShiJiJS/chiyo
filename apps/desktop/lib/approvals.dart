@@ -1081,11 +1081,16 @@ class ApprovalsState extends State<Approvals> {
                           height: 30,
                           child: TextButton(
                             autofocus: true,
-                            style: prototypeButton(context, size: 22),
+                            style: prototypeButton(
+                              context,
+                              size: 22,
+                              iconOnly: true,
+                            ),
                             onPressed: () => Navigator.pop(context),
-                            child: Transform.translate(
-                              offset: Offset(2, 0),
-                              child: Text('×'),
+                            child: const Text(
+                              '×',
+                              textScaler: TextScaler.noScaling,
+                              semanticsLabel: '关闭',
                             ),
                           ),
                         ),
