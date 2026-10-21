@@ -1,0 +1,35 @@
+The following is a diff from the previous accessibility tree for Window: "info_desktop" with ~ and + representing changed and added elements, respectively. Removed elements are summarized by ID range.
+Removed element IDs: 70-80
+~			69 container (settable)
++				70 text (settable) 逐次使用记录
++				71 button (settable) ×
++				72 text (settable) 授权到期
++				73 text (settable) 2026-10-21 19:14:35
++				74 text (settable) 允许方式
++				75 text (settable) 秘密值 · 环境变量
++				76 button (settable) ?
++				77 text (settable) 此授权只在当前会话及固定期限内有效。逐次使用不会延长截止时间；连接字段按独立授权处理。
++				78 text (settable) 逐次使用记录
++				79 button (settable) gh-invalid
+2026-10-21 18:59:36
+已退出 · 退出码 1
++				80 text (settable) 本次 CLI 启动计划
++				81 text (settable) gh api user --method GET
++				82 text (settable) 操作 ID
++				83 text (settable) gh-invalid
++				84 text (settable) 授权批准
++				85 text (settable) 2026-10-21 18:59:35
++				86 text (settable) 程序位置
++				87 text (settable) /Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue44-tools-production-ui-1/source/apps/desktop/build/relocated/移动 中文 空格/info_desktop.app/Contents/Resources/ThirdParty/gh/bin/gh
++				88 text (settable) 工作目录
++				89 text (settable) /Users/jiangxinyi/Library/Containers/org.shijijs.agent-info-manage.qa.tools.924c55904a2d43dd8bb6acc1f7c49897/Data/tmp/aim-mac-tools-Fv9eh8
++				90 text (settable) 计划 hash
++				91 text (settable) sha256:8974f8340b0e33185e7f6cd759c90d6eb90a0d62d02b3d65a90d9cd1ca62ddf9
++				92 text (settable) 文件清理
++				93 text (settable) 无需文件清理
++				94 text (settable) 本次操作未成功
++				95 text (settable) 此结果不消耗整个授权。修正并核查原因后，可在有效范围内明确提交新的操作 ID。
++				96 button (settable) 查看本次执行记录与清理 →
++				97 button (settable) 返回
++			98 text (settable) Dismiss
+The focused UI element is 1 container info_desktop

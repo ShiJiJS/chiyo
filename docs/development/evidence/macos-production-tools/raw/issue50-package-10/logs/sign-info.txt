@@ -1,0 +1,1 @@
+/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue50-package-10/AgentInfoManage/cli/info: replacing existing signature

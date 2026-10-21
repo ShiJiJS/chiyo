@@ -1,0 +1,11 @@
+{
+  "productionSource": "4690e79357bb728da22193d8dadd6dc8a8ce2ce6",
+  "qaSource": "4690e79357bb728da22193d8dadd6dc8a8ce2ce6",
+  "toolManifestSha256": "27110b9f4c2053a98f8b852b3ffc93a83e2548724370b5e60ca34ca20b7f087c",
+  "completeToolPayloadMatchesActualUIRun": true,
+  "payloadFilesAndLinks": 7971,
+  "nativeMachO": 75,
+  "appIdentity": "com.example.infoDesktop",
+  "minimumSystemVersion": "14.0",
+  "toolDependencyFilesAndLinks": 7832
+}

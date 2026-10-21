@@ -1,0 +1,42 @@
+{
+  "format": 1,
+  "platform": "macos-arm64",
+  "tools": [
+    {
+      "id": "gh",
+      "receiver": "gh_token",
+      "version": "2.102.0",
+      "executable": "gh/bin/gh",
+      "executableSha256": "8a4258433c81106343144857750316241759d06dcf16265cf3c4864a8f2f2ad6",
+      "archive": "gh_2.102.0_macOS_arm64.zip",
+      "url": "https://github.com/cli/cli/releases/download/v2.102.0/gh_2.102.0_macOS_arm64.zip",
+      "sha256": "da922c20d1792e5b2cbf375593d7a658acf034c12c84e007e71c76ef959c337e",
+      "provenance": "Publisher GitHub release asset digest; MIT license is retained in gh/LICENSE"
+    },
+    {
+      "id": "aws-cli",
+      "receiver": "aws_shared_credentials",
+      "version": "2.38.1",
+      "executable": "aws-cli/aws",
+      "executableSha256": "3671f0984977e78874a453b85b3262989ca929afbd0aadeea8f0d710f4358c58",
+      "archive": "AWSCLIV2-2.38.1.pkg",
+      "url": "https://awscli.amazonaws.com/AWSCLIV2-2.38.1.pkg",
+      "sha256": "390f461072e2cd65dfb11e9d53653ec66296a6efb4ce2c87a2e8473fff63433d",
+      "provenance": "Fixed publisher installer; pkgutil must verify AMZN Mobile LLC (94KV3E626L); no installer scripts are run"
+    }
+  ],
+  "notices": [
+    {
+      "name": "AWS-LICENSE.txt",
+      "cache": "aws-2.38.1-LICENSE.txt",
+      "url": "https://raw.githubusercontent.com/aws/aws-cli/10b7b71c678dd01942a88071be7cddb683daa802/LICENSE.txt",
+      "sha256": "9b3a0d5c384b013bfc56f2f265afdbbe5c2fb674b1d6ee54190d235f284a1af0"
+    },
+    {
+      "name": "AWS-THIRD-PARTY-LICENSES.txt",
+      "cache": "aws-2.38.1-THIRD_PARTY_LICENSES",
+      "url": "https://raw.githubusercontent.com/aws/aws-cli/10b7b71c678dd01942a88071be7cddb683daa802/exe/assets/THIRD_PARTY_LICENSES",
+      "sha256": "85fce11752b3b8364fb549cdb585657296043c3896251e7809095b2f58d584cd"
+    }
+  ]
+}

@@ -12,6 +12,12 @@ macOS 14 和其他设备尚未实机验收。App、worker 和 CLI 主程序均�
 
 ## 随包凭据工具
 
+`4690e79` 已生成包含工具的新整包；707 通过/66 条件跳过，21 个打包阶段通过。
+ZIP 130,946,101 字节，SHA256
+`0bebec70ba5860b25592024f8f6f00760b587ea91ef4c0d77c0fb0940bce360a`。
+工具移动后的隔离实际 UI 与整包载荷逐清单一致；最终安装升级和普通整包 GUI 仍待。
+详情与历史失败见 [生产工具交付记录](macos-production-tools.md)。
+
 `scripts/dev-macos.sh build` 的 Release 构建现会从
 `third_party/macos-tools.json` 固定的官方归档组装 GH 2.102.0 / AWS CLI 2.38.1，
 下载缓存为项目 `.downloads/`；校验 SHA256 后解包，AWS 另核对 Apple 安装器签名。

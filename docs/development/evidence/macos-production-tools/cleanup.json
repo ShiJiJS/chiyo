@@ -1,0 +1,16 @@
+{
+  "removedGeneratedDirectories": [
+    "apps/desktop/build",
+    "apps/desktop/.dart_tool/flutter_build",
+    "apps/desktop/.dart_tool/hooks_runner",
+    "build/macos-adaptation/issue50-package-10/AgentInfoManage/app",
+    "build/macos-adaptation/issue50-package-10/diagnostic-build",
+    "build/macos-adaptation/issue50-package-7/verify"
+  ],
+  "remainingGeneratedApplications": [
+    "build/macos-adaptation/issue50-package-10/verify/中文 空格 路径/AgentInfoManage/app/info_desktop.app"
+  ],
+  "remainingGeneratedDsym": 0,
+  "previousZipKeptForUpgradeBaseline": true,
+  "qaGeneratedAppsAndOwnedFixturesRemoved": true
+}
