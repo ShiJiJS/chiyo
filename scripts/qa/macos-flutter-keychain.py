@@ -33,10 +33,11 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('output', type=Path)
     parser.add_argument('--locked-keychain', action='store_true', help='Real private file-keychain lock/unlock and SQLCipher recovery; never locks login keychain')
+    parser.add_argument('--interactive-upgrade', action='store_true', help='Real system Keychain deny then owner approval; requires CUA/user; no simulated decision')
     parser.add_argument('--owner-access', action='store_true', help='Owner recovery UI with explicitly simulated system decisions; no authorization prompt')
     parser.add_argument('--backups', action='store_true', help='Real Keychain source export, source-key loss, fresh target restore/reopen')
     args = parser.parse_args()
-    if sum([args.owner_access, args.backups, args.locked_keychain]) > 1:
+    if sum([args.owner_access, args.backups, args.locked_keychain, args.interactive_upgrade]) > 1:
         parser.error('Choose one scenario')
     if sys.platform != 'darwin':
         parser.error('Requires macOS')
@@ -49,12 +50,12 @@ def main():
     source.mkdir()
     owner = uuid.uuid4().hex
     service = 'org.shijijs.agent-info-manage.qa.' + str(uuid.uuid4())
-    identity = 'org.shijijs.agent-info-manage.qa.flutterkeychain'
+    identity = 'org.shijijs.agent-info-manage.qa.flutterkeychain' + ('.' + owner if args.interactive_upgrade else '')
     result = {'complete': False, 'baseCommit': subprocess.check_output(
         ['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip(),
         'service': service, 'bundleIdentifier': identity, 'commands': [], 'cases': [],
         'scope': 'isolated Release Flutter copy; real Keychain and SQLCipher; injected failure conditions/events'}
-    result['scenario'] = 'locked-private-keychain' if args.locked_keychain else 'owner-access-fixtures' if args.owner_access else 'backups' if args.backups else 'keychain-failures'
+    result['scenario'] = 'actual-owner-upgrade' if args.interactive_upgrade else 'locked-private-keychain' if args.locked_keychain else 'owner-access-fixtures' if args.owner_access else 'backups' if args.backups else 'keychain-failures'
     roots, processes = set(), []
     private_cleaned = set()
     binary = None
@@ -93,9 +94,14 @@ def main():
         with log_path.open('wb') as log:
             process = subprocess.Popen([str(executable or binary)], cwd=source, env=environment,
                                        stdout=log, stderr=subprocess.STDOUT)
+        if mode == 'upgrade-interactive':
+            result['interactiveProcess'] = {'pid': process.pid, 'executable': str(executable or binary),
+                'log': str(log_path), 'running': True}
+            save()
+            print('ACTUAL_KEYCHAIN_UPGRADE_PID=' + str(process.pid), flush=True)
         processes.append(process)
         actual = None
-        deadline = time.monotonic() + 45
+        deadline = time.monotonic() + (780 if mode == 'upgrade-interactive' else 45)
         while time.monotonic() < deadline:
             for line in log_path.read_text(errors='replace').splitlines():
                 if line.startswith('MAC_KEYCHAIN_ROOT='):
@@ -112,6 +118,10 @@ def main():
             time.sleep(0.05)
         if actual is None or (root is not None and actual != root):
             raise RuntimeError(label + ': no valid QA root')
+        if mode == 'upgrade-interactive':
+            result['interactiveProcess']['root'] = str(actual)
+            save()
+            print('ACTUAL_KEYCHAIN_UPGRADE_ROOT=' + str(actual), flush=True)
         try:
             code = process.wait(timeout=max(1, deadline - time.monotonic()))
         except subprocess.TimeoutExpired:
@@ -121,6 +131,7 @@ def main():
         report = actual / (mode + '-result.json')
         facts = json.loads(report.read_text()) if report.exists() else {}
         case = {'label': label, 'exit': code, 'seconds': round(time.monotonic() - started, 3), **facts}
+        if mode == 'upgrade-interactive': result['interactiveProcess']['running'] = False
         result['cases'].append(case)
         (output / (label + '.json')).write_text(json.dumps(case, indent=2) + '\n')
         save()
@@ -247,6 +258,27 @@ def main():
                         raise RuntimeError('Native exit did not interrupt the simulated 30-second key wait')
                     case['nativeExitBeforeSimulatedKeyWaitReturned'] = True
             launch('reopen', 'owner-access-normal-reopen', root)
+        elif args.interactive_upgrade:
+            upgraded = output / 'Changed-Version.app'
+            shutil.copytree(app, upgraded, symlinks=True)
+            info = upgraded / 'Contents/Info.plist'
+            data = plistlib.loads(info.read_bytes())
+            data['CFBundleVersion'] = str(int(data['CFBundleVersion']) + 1)
+            info.write_bytes(plistlib.dumps(data))
+            run('sign-changed-version', ['codesign', '--force', '--sign', '-', '--entitlements',
+                str(source / 'apps/desktop/macos/Runner/Release.entitlements'), str(upgraded)], timeout=30)
+            run('signature-changed-version', ['codesign', '--verify', '--deep', '--strict', str(upgraded)], timeout=30)
+            run('signature-details-changed-version', ['codesign', '-d', '--verbose=4', str(upgraded)], timeout=30)
+            changed_binary = upgraded / 'Contents/MacOS/info_desktop'
+            result['changedVersionBinarySha256'] = digest(changed_binary)
+            assert result['changedVersionBinarySha256'] != result['binarySha256']
+            root = launch('create', 'actual-upgrade-create')
+            launch('upgrade', 'actual-upgrade-default-refused', root, changed_binary)
+            launch('upgrade-interactive', 'actual-upgrade-owner-access', root, changed_binary)
+            result['upgradeAccess'] = result['cases'][-1].get('upgradeAccess')
+            launch('reopen', 'actual-upgrade-approved-reopen', root, changed_binary)
+            launch('reopen', 'actual-upgrade-original-reopen', root)
+            launch('cleanup', 'actual-upgrade-cleanup', root)
         elif args.backups:
             root = launch('backup-export', 'backup-export')
             backup = root / '中文 完整备份.aimbackup'
