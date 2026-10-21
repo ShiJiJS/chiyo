@@ -1,0 +1,44 @@
+Window: "info_desktop", App: info_desktop.
+0 standard window info_desktop, Secondary Actions: Raise
+	1 container info_desktop
+		2 container (settable)
+			3 container (settable)
+				4 text (settable) 批准凭据使用
+				5 button (settable) ×
+				6 text (settable) 允许本次会话在有效期内重复使用「MacPackageSyntheticSsh」版本 1，使用方式固定。
+				7 text (settable) 凭据许可
+				8 text (settable) 15 分钟内可重复使用，不续期
+				9 text (settable) 注入位置
+				10 text (settable) -i {file:ssh_key} ← 受限临时文件
+				11 text (settable) 主机快照与隔离
+				12 text (settable) 严格校验主机 · 仅所选私钥 · 禁用 agent、密码和交互回退
+主机快照 R6zhFbyOlGRGpsilEkwAI5tMeT-BQi5PgTE3HhjnCbU=
+sha256:03c9cda3a31e0e7901859c01202245db63a2814e95d56556e6661eb24f483e96
+				13 text (settable) ssh -F {临时空SSH配置} -o IdentitiesOnly=yes -o IdentityAgent=none -o PasswordAuthentication=no -o KbdInteractiveAuthentication=no -o StrictHostKeyChecking=yes -o UserKnownHostsFile={确认主机快照} -o GlobalKnownHostsFile={临时空主机记录} -T -o BatchMode=yes -i {{file:ssh_key}} -p 56895 fixture@127.0.0.1 /fixture/wait
+				14 text (settable) 程序位置
+				15 text (settable) /usr/bin/ssh
+				16 text (settable) 参数（按项）
+				17 text (settable) ["-F",{"internalMaterial":"ssh_config"},"-o","IdentitiesOnly=yes","-o","IdentityAgent=none","-o","PasswordAuthentication=no","-o","KbdInteractiveAuthentication=no","-o","StrictHostKeyChecking=yes","-o",{"internalMaterial":"ssh_user_hosts_option"},"-o",{"internalMaterial":"ssh_global_hosts_option"},"-T","-o","BatchMode=yes","-i",{"file":"ssh_key"},"-p","56895","fixture@127.0.0.1","/fixture/wait"]
+				18 text (settable) 工作目录
+				19 text (settable) /Users/jiangxinyi/Library/Containers/com.example.infoDesktop/Data
+				20 text (settable) 凭据标识 / 版本
+				21 text (settable) BQwXKS8usoP9hpINmOz4ovelKh0McfwciSDbGxLksmE= / 1
+				22 text (settable) 计划 hash
+				23 text (settable) sha256:1e80ed453da0a4f6c784b59f921d46157dc0d7de63249f77d4f28566de82780a
+				24 text (settable) 首条命令用于理解用途，批准不会立即运行。同一批准范围内的新命令不重新审批；每次操作冻结自己的完整计划和操作 ID。增加未批准的凭据或使用方式需要新申请。
+				25 text (settable) 程序可接触原文。撤销只会阻止新的启动，不能收回已注入的内容，也不会终止已运行进程。
+				26 button (settable) 返回核对
+				27 button (settable) 确认批准
+			28 text (settable) Dismiss
+	29 close button
+	30 full screen button Help: this button also has an action to zoom the window, Secondary Actions: zoom the window
+	31 minimize button
+	32 text info_desktop
+33 menu bar
+	34 info_desktop
+	35 Edit
+	36 View
+	37 Window
+	38 Help
+
+The focused UI element is 1 container info_desktop

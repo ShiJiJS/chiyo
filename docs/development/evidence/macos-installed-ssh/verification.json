@@ -1,0 +1,516 @@
+{
+  "completeForListedSSHScenarios": true,
+  "completeMacGoal": false,
+  "installedSource": "4690e79357bb728da22193d8dadd6dc8a8ce2ce6",
+  "release": "0.4.0+12-mac-dev.4690e79357bb",
+  "publicCommands": 47,
+  "credentialGrantsCreated": 5,
+  "registeredOperations": 7,
+  "targetProcessStarts": 6,
+  "operations": [
+    {
+      "operationId": "installed-ssh-unknown-host",
+      "executionId": "ffsConOzKhnsSpuHxDN-_GhavFizVCvS8b45QhahM5E=",
+      "state": "exited",
+      "exitCode": 255,
+      "processStarted": true,
+      "cleanupState": "complete"
+    },
+    {
+      "operationId": "installed-ssh-mismatched-host",
+      "executionId": "Qx1BObAPjWSv1SqThwETVkcRO7OdLC7mC1eopL-GiyE=",
+      "state": "exited",
+      "exitCode": 255,
+      "processStarted": true,
+      "cleanupState": "complete"
+    },
+    {
+      "operationId": "installed-ssh-true",
+      "executionId": "yp1-7BskSsyOTToVskdHvxnbLfWhxE7LwUfGbnZ8X_8=",
+      "state": "exited",
+      "exitCode": 0,
+      "processStarted": true,
+      "cleanupState": "complete"
+    },
+    {
+      "operationId": "installed-ssh-false",
+      "executionId": "o1xeepXPCQEFuB1V6jTbVDfoosnpisdMayQ48qc5KYA=",
+      "state": "exited",
+      "exitCode": 1,
+      "processStarted": true,
+      "cleanupState": "complete"
+    },
+    {
+      "operationId": "installed-ssh-wrong-key",
+      "executionId": "Uu0elUFsGutrHDD6Y4C2Y4muzbM5AhG_w2uBFLniBag=",
+      "state": "exited",
+      "exitCode": 255,
+      "processStarted": true,
+      "cleanupState": "complete"
+    },
+    {
+      "operationId": "installed-ssh-ungranted-cwd",
+      "executionId": "cF4LiA5jXTqVKNzmEWenk2-57ZdD6e00oG4T7oHywT4=",
+      "state": "start_failed",
+      "exitCode": null,
+      "processStarted": false,
+      "cleanupState": "complete"
+    },
+    {
+      "operationId": "installed-ssh-normal-quit-hold",
+      "executionId": "BYl5rMwFbWY17TXTnP6OufL0FPCP-9jhADG_LbLmlIM=",
+      "stateAfterHostQuit": "unknown",
+      "exitCode": null,
+      "finalCleanup": "complete",
+      "heldRemoteCommandStarts": 1
+    }
+  ],
+  "openSSH": "OpenSSH_10.3p1, LibreSSL 3.3.6",
+  "unknownAndMismatchedHostStrictlyRefused": true,
+  "wrongPrivateKeyAuthenticationRefused": true,
+  "hostReplacementInvalidatedOldGrantBeforeClaim": true,
+  "actualLifetimeMinutes": 15,
+  "initialOneMinutePurposeWasNotActualUISelection": true,
+  "actualExpiryObserved": "2026-10-21T15:34:03.920Z",
+  "expiredNewOperationNotClaimed": true,
+  "duplicateIDsDidNotRerunOrRenew": true,
+  "unscopedOutsideContainerCwd": "start_failed/process_start_failed; processStarted=false; only cwd changed; exact OS errno/deny message not captured",
+  "nativePanels": {
+    "zeroByteCredentialAndHostRecordRejected": true,
+    "zeroByteOrdinaryAttachmentAccepted": true,
+    "zeroByteSaveCanceledThenSaved": true,
+    "overwriteRefusedAndSourceTargetInodeMtimeBytesPreserved": true,
+    "zeroByteExportAfterIndependentAppReopenMatched": true,
+    "chineseSpacePaths": true
+  },
+  "normalQuitWhileSSHRunning": {
+    "appPID": 41097,
+    "nativeExitCode": 0,
+    "endpointClosed": true,
+    "reopenedAppPID": 42786,
+    "newKeychainOwnerAction": false,
+    "SSHAndWorkerStayedAlive": true,
+    "fourMaterialFilesMode": "0600",
+    "materialDirectoryMode": "0700",
+    "originalSyntheticKeyMatched": true,
+    "reopenHistoryUnknownWithoutExitCode": true,
+    "heldCommandNotReplayed": true,
+    "materialsRetainedWhileActiveOrUncertain": true,
+    "materialsRetainedAfterGroupExitUntilOwnerChecked": true,
+    "actualOwnerReceiptCleanupRemovedAllFourAndDirectory": true
+  },
+  "historicalEvidenceAudit": [
+    {
+      "rawRunGitHead": "0fd328566e73f8b50dd901da9e947e89625668de",
+      "changedFilesInComparedScopes": [
+        "apps/desktop/lib/desktop_runtime.dart",
+        "packages/info_cli/lib/macos_bundled_tools.dart",
+        "packages/info_core/lib/agent_server.dart"
+      ],
+      "meaning": "desktop stopped getter; optional public tool location discovery only; core authorization/audit/material/process/SQLCipher logic unchanged"
+    },
+    {
+      "rawRunGitHead": "d97a8c54c93f32b7326a6f4c48b1bcd7079a581e",
+      "changedFilesInComparedScopes": [
+        "apps/desktop/lib/desktop_runtime.dart",
+        "packages/info_cli/lib/macos_bundled_tools.dart",
+        "packages/info_core/lib/agent_server.dart"
+      ],
+      "meaning": "desktop stopped getter; optional public tool location discovery only; core authorization/audit/material/process/SQLCipher logic unchanged"
+    }
+  ],
+  "cleanup": {
+    "fixtureSourceBytesVerifiedBeforeRemoval": true,
+    "twoNativeZeroByteExportsMatchedOriginal": true,
+    "ownedReceiverPID": 41835,
+    "signal": "SIGTERM",
+    "privateFixtureRemoved": true,
+    "privateControllerRemoved": true,
+    "allOwnedLiveMaterialRemovedByProduct": true,
+    "originalHostTrustEmptyStateRestored": true,
+    "twoSyntheticSSHCredentialsDisabledAndHidden": true,
+    "at": 1792597554.278021
+  },
+  "projectApps": [
+    "local/中文 Mac 预览/AgentInfoManage/app/info_desktop.app"
+  ],
+  "generatedDSYM": [],
+  "payloadEntriesReverified": 7971,
+  "strictSignatureExitCode": 0,
+  "serverCleanupExitCode": 143,
+  "publicClientExitCode": 0,
+  "newAppKeptOpen": true,
+  "keyboardScope": "Escape closed an unchanged form. Command-A/native Select All produced no conclusive selection evidence; no text was modified and no product defect/IME success claimed.",
+  "notCovered": "No actual OS sleep/wake, direct Dock/status-item, code-signing update, clean user, new cloud account or post-4d45dfe packaged UI acceptance.",
+  "historicalRawFilesReverified": [
+    {
+      "path": "docs/development/evidence/macos-app-lifecycle/raw/run-02/result.json",
+      "bytes": 4151,
+      "sha256": "38a2ef88e51eab4ae26d96c805bceaa119913844fbbab40bd080e8d9c6bfc13f",
+      "publishedSourceCommit": "1fea9d0a6a2657ed0235c848b73618bc986de85f"
+    },
+    {
+      "path": "docs/development/evidence/macos-app-lifecycle/raw/run-02/audit-failure.json",
+      "bytes": 241,
+      "sha256": "a6098ab2d125ec0c331dd9a1c54e7f254e1fa8b97ea6b93eb75c551f0e0ce1cb",
+      "publishedSourceCommit": "1fea9d0a6a2657ed0235c848b73618bc986de85f"
+    },
+    {
+      "path": "docs/development/evidence/macos-app-lifecycle/raw/run-02/audit-reopen.json",
+      "bytes": 277,
+      "sha256": "6b38dc42adb683a577e0d0b746b440a972b5559bb64e6c08c644fcc7e6451b3c",
+      "publishedSourceCommit": "1fea9d0a6a2657ed0235c848b73618bc986de85f"
+    },
+    {
+      "path": "docs/development/evidence/macos-app-worker-recovery/raw/run-02/result.json",
+      "bytes": 3832,
+      "sha256": "14daa7f939803500edf973745ab04c8f1e238c85b676fffcd8ea2d2531953aa9",
+      "publishedSourceCommit": "17faee8c8df148e3748b27240b517b2847b47541"
+    },
+    {
+      "path": "docs/development/evidence/macos-app-worker-recovery/raw/run-02/app-crash-reopen.json",
+      "bytes": 397,
+      "sha256": "f7a139ca63b98b858d39987753149592dccf7b6b137586befb22c1c5debb9668",
+      "publishedSourceCommit": "17faee8c8df148e3748b27240b517b2847b47541"
+    },
+    {
+      "path": "docs/development/evidence/macos-app-worker-recovery/raw/run-02/worker-and-app-crash-reopen.json",
+      "bytes": 408,
+      "sha256": "153a3f2dd6585ee688e6f8c5101e687f95cdf60248cc030b9bc95384aa5d2871",
+      "publishedSourceCommit": "17faee8c8df148e3748b27240b517b2847b47541"
+    }
+  ],
+  "originalFiles": [
+    {
+      "path": "raw/run-01/00-no-host-trust.ax.txt",
+      "bytes": 1912,
+      "sha256": "14287aff4d6d7d8ab301fe15fa4cd053dac0ef53dd8f2d26061c286403bfebc9"
+    },
+    {
+      "path": "raw/run-01/01-empty-hosts-rejected.ax.txt",
+      "bytes": 2078,
+      "sha256": "03a6da4cad0f177d8b6689d14d9b76efe0a27bc7d21aca1bd47df1e7de78c5ab"
+    },
+    {
+      "path": "raw/run-01/02-unknown-hosts-confirm.ax.txt",
+      "bytes": 1185,
+      "sha256": "5443fcfc56cdace4669f892fa963ed1c56d07f178f810dc43d20d8800592057e"
+    },
+    {
+      "path": "raw/run-01/02-unknown-hosts-panel.txt",
+      "bytes": 405,
+      "sha256": "27046578758aae4b199c95d2e6a0d0599369a8bac53ad2e4c063ba5ace304597"
+    },
+    {
+      "path": "raw/run-01/03-empty-key-panel.txt",
+      "bytes": 393,
+      "sha256": "97ea0a9caf2d63e5deb6a3bfe1a95ce4783a6feefbdc7295e6a811481f755d4f"
+    },
+    {
+      "path": "raw/run-01/03-empty-key-rejected.ax.txt",
+      "bytes": 1374,
+      "sha256": "2d252072b514a72c3e6cb25952424377ed1917f17bfb18f628b5d9194a2c349e"
+    },
+    {
+      "path": "raw/run-01/04-correct-key-created.ax.txt",
+      "bytes": 3015,
+      "sha256": "aa0219158a38a9adea2cd7285fd1a1f39ca3142dcda7f135be09c74ad79fae61"
+    },
+    {
+      "path": "raw/run-01/04-correct-key-panel.txt",
+      "bytes": 391,
+      "sha256": "575350463a91e9cdc788b49293f3a7feb298509b4086d01e9f060996333b7737"
+    },
+    {
+      "path": "raw/run-01/05-unknown-host-pending.png",
+      "bytes": 591399,
+      "sha256": "da74efaf367aef4c383fe95a84069a9b04c749ffba885e7ba35f819713016dd2"
+    },
+    {
+      "path": "raw/run-01/06-unknown-host-review.png",
+      "bytes": 585768,
+      "sha256": "45d30841515976360b63e1673454854cd631acfd4bdd2ed9bf4fd3b2cefa3d14"
+    },
+    {
+      "path": "raw/run-01/07-unknown-host-confirm.ax.txt",
+      "bytes": 2904,
+      "sha256": "497353fa334603697fd9e9e6d8a3740ec967b9ab5caff78d2022066e006c647b"
+    },
+    {
+      "path": "raw/run-01/08-mismatched-hosts-confirm.ax.txt",
+      "bytes": 1172,
+      "sha256": "cdae563f0b37925d0e3e8d21c28d7e6c79373019d0973af655494740b5b6e402"
+    },
+    {
+      "path": "raw/run-01/08-mismatched-hosts-panel.txt",
+      "bytes": 405,
+      "sha256": "984c5e87477ca23a8d6c915de4f327de9aca56349fe4ac75fa830378334ae6b9"
+    },
+    {
+      "path": "raw/run-01/09-mismatch-confirm.ax.txt",
+      "bytes": 2904,
+      "sha256": "b8e00144e3791cdc6abe363be2a864d45a99721d1015a538036498cdedbdb855"
+    },
+    {
+      "path": "raw/run-01/10-matching-hosts-confirm.ax.txt",
+      "bytes": 1172,
+      "sha256": "b49cf43aa575cfc0141778fdce2e3852cb1350b5b003933c2d740e22f34354a4"
+    },
+    {
+      "path": "raw/run-01/10-matching-hosts-panel.txt",
+      "bytes": 405,
+      "sha256": "5a2c4a4f8bce2fcaa7b80a054196d9f8e871eea20fe701619ef227a01aef3533"
+    },
+    {
+      "path": "raw/run-01/11-lifetime-menu.png",
+      "bytes": 607990,
+      "sha256": "7b1ca0a1ad8d211fd8b75908f03b9879c610a0b926877d3efa3a8a243ac2ffb4"
+    },
+    {
+      "path": "raw/run-01/12-good-fifteen-minute-confirm.ax.txt",
+      "bytes": 2904,
+      "sha256": "2028ea10a08bb5452a45d4e837d0962976741a36702e0811e9a5d14d9c0ba581"
+    },
+    {
+      "path": "raw/run-01/13-wrong-key-created.ax.txt",
+      "bytes": 3056,
+      "sha256": "606f5342e29c370d1b220e51004dee2c4ff65a1ef1256347d12d6f354ba54a6b"
+    },
+    {
+      "path": "raw/run-01/13-wrong-key-panel.txt",
+      "bytes": 391,
+      "sha256": "c98bf5f4a6a8c83ba76644b71b18a2ea44973c1393a2d95c0768b688739945a6"
+    },
+    {
+      "path": "raw/run-01/14-wrong-key-confirm.ax.txt",
+      "bytes": 2909,
+      "sha256": "d2ad3b93b2a6a442d352fb8754205a920cd81228b113fabe545302584b421518"
+    },
+    {
+      "path": "raw/run-01/15-empty-attachment-created.ax.txt",
+      "bytes": 2907,
+      "sha256": "341f3f3fd8caebaf2bb17510619952b3fd90e604d8136238286acb93e3f65ce0"
+    },
+    {
+      "path": "raw/run-01/15-empty-attachment-created.png",
+      "bytes": 424202,
+      "sha256": "e661705099d396fa50375cb209347a87d27b0d9a420327bca7ef270b3bddde65"
+    },
+    {
+      "path": "raw/run-01/15-empty-attachment-panel.txt",
+      "bytes": 401,
+      "sha256": "9b5bcc9963aa3fc87408cc0c6c485e0bb0356ae3b35daa9f6b672c6b96ea2ab9"
+    },
+    {
+      "path": "raw/run-01/16-empty-save-cancel.ax.txt",
+      "bytes": 2907,
+      "sha256": "341f3f3fd8caebaf2bb17510619952b3fd90e604d8136238286acb93e3f65ce0"
+    },
+    {
+      "path": "raw/run-01/17-zero-replace-refused.ax.txt",
+      "bytes": 2907,
+      "sha256": "341f3f3fd8caebaf2bb17510619952b3fd90e604d8136238286acb93e3f65ce0"
+    },
+    {
+      "path": "raw/run-01/18-edit-before-shortcut.png",
+      "bytes": 345183,
+      "sha256": "e4ce2c3ba354e81539c224af58671154f580fc372d256cb7d3bbc84e6725cd13"
+    },
+    {
+      "path": "raw/run-01/19-command-a-selection.png",
+      "bytes": 346641,
+      "sha256": "abb2854edf6bdee7bb41bb6cfcb26f222ebac1a9ee37a729e891d437400ee1ed"
+    },
+    {
+      "path": "raw/run-01/20-native-select-all.png",
+      "bytes": 346829,
+      "sha256": "9d04764f36f680ae3f6df96d3639f780f061edea6605e3f917e489d8df226e44"
+    },
+    {
+      "path": "raw/run-01/21-hold-confirm.ax.txt",
+      "bytes": 2904,
+      "sha256": "ecc806fa2ef47686c3282513b3226a564bac1cbd9186065fc205574b60d39f31"
+    },
+    {
+      "path": "raw/run-01/22-reopened-held-history.ax.txt",
+      "bytes": 4373,
+      "sha256": "7ce920572e76255b5bcafb625015541eb34e3d611b4d640d1a9048f9e43817f0"
+    },
+    {
+      "path": "raw/run-01/23-owner-cleanup-complete.ax.txt",
+      "bytes": 4350,
+      "sha256": "4e4d6d9b635a37935d317588ca5cbb5bc8f22f84514338b1dad9172993513e4f"
+    },
+    {
+      "path": "raw/run-01/24-correct-key-disabled-hidden.ax.txt",
+      "bytes": 3277,
+      "sha256": "a0b7a3c5bc476b82306fd2af24048c4020919236e06e1f530e21ab4d07de3aa0"
+    },
+    {
+      "path": "raw/run-01/25-wrong-key-disabled-hidden.ax.txt",
+      "bytes": 3285,
+      "sha256": "34f1da3830b0d8e2f9533622ed12322c5ed0854000d3eb162a4b9eabae3835f1"
+    },
+    {
+      "path": "raw/run-01/26-original-host-state-restored.ax.txt",
+      "bytes": 2003,
+      "sha256": "688d68cad2d84690e4e1fe3802350f7b3e7417514549c9b1235f2b01e9e3c483"
+    },
+    {
+      "path": "raw/run-01/27-original-777-preserved.ax.txt",
+      "bytes": 3012,
+      "sha256": "81e5a6e24207c1629a04574b6a902448395ee37adbe0a10948fcb98645c308c4"
+    },
+    {
+      "path": "raw/run-01/28-zero-attachment-reexported.ax.txt",
+      "bytes": 3013,
+      "sha256": "caede449f328959214b0c0b731b13f01aafd5e0501bf7edc55939f5ab7a16c09"
+    },
+    {
+      "path": "raw/run-01/28-zero-attachment-reopened.ax.txt",
+      "bytes": 2918,
+      "sha256": "832b7e7c4dec3a80c795deaf1af628e985012aad0e09c487418b239db8137149"
+    },
+    {
+      "path": "raw/run-01/cleanup.json",
+      "bytes": 403,
+      "sha256": "a0c95fcd98e015a93b4177acf96d3f7519aa3df8dce745b86eb863ce6e4be500"
+    },
+    {
+      "path": "raw/run-01/fixed-app-signature.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/run-01/fixture-source-hashes.json",
+      "bytes": 1098,
+      "sha256": "c86d6d9ea8358168ce8d4912d020d059f30ffe7d2c071ccf8378c6b6aa15b44c"
+    },
+    {
+      "path": "raw/run-01/hold-after-owner-cleanup.json",
+      "bytes": 267,
+      "sha256": "7c43de762ea10e46ab7136e770cd35f64bf5a8551e82b9b3d24072cec8033286"
+    },
+    {
+      "path": "raw/run-01/hold-after-quit.json",
+      "bytes": 554,
+      "sha256": "f5da5e573fec9d9cd25121b5aa3c0f8cbfd32f548b098cafb2fe42deb2f366b4"
+    },
+    {
+      "path": "raw/run-01/hold-after-release.json",
+      "bytes": 256,
+      "sha256": "b6784c9de0e3604fbf7c40342388ef695b54ddb48d8fd44f927710188e1dc8a4"
+    },
+    {
+      "path": "raw/run-01/hold-after-reopen.json",
+      "bytes": 558,
+      "sha256": "f7cf2205f9b1164b4613369d6d1cd682cabcf641d0eb3267ee0b433a31663f76"
+    },
+    {
+      "path": "raw/run-01/hold-before-quit.json",
+      "bytes": 560,
+      "sha256": "bb762fd7cbd4760ed09f6419febb43f2e9311cf518fec8678070d23a628581fb"
+    },
+    {
+      "path": "raw/run-01/hold-release.json",
+      "bytes": 92,
+      "sha256": "f089db60163d7d8f1e96cc5243dc453a23142cc28973e112b74a31428a6dafd8"
+    },
+    {
+      "path": "raw/run-01/hosted-public-client.dart",
+      "bytes": 933,
+      "sha256": "079521d4bec302be19d2995846fed71adcf29d05822c6f469b0fb693e3631c21"
+    },
+    {
+      "path": "raw/run-01/observe-owned-hold.py",
+      "bytes": 2797,
+      "sha256": "7e367823e150faf5c9494358f2538a3d447fdcc261d71987eccb36567d0c2af2"
+    },
+    {
+      "path": "raw/run-01/observed-native-processes.json",
+      "bytes": 583,
+      "sha256": "d366c90bb3798d56ca324ab6402ee08a0722e2baeec01edcb7be65001346e4f7"
+    },
+    {
+      "path": "raw/run-01/ordinary-exit-while-running.json",
+      "bytes": 475,
+      "sha256": "ed96b9df78dd918d5fd82c1d3ec2aa8a589d1345f049399b68291db7a320409c"
+    },
+    {
+      "path": "raw/run-01/owned-cwd-sandbox-log.txt",
+      "bytes": 44,
+      "sha256": "9f56fca152030dba9e8ee76dee4fc8967ab667507b5878f0f9ab819d55b6b9a6"
+    },
+    {
+      "path": "raw/run-01/public-client.jsonl",
+      "bytes": 30455,
+      "sha256": "138909249621c0d40f1660a6193491fe2d72f7e1f521a4b9125db65260efba74"
+    },
+    {
+      "path": "raw/run-01/receiver-command-audit.jsonl",
+      "bytes": 89,
+      "sha256": "f8fdf32abeae2e9ade6474332338a1689d03ec11692d2bb2e5e661b8ea744096"
+    },
+    {
+      "path": "raw/run-01/receiver-command-count",
+      "bytes": 1,
+      "sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "path": "raw/run-01/receiver-fixture.json",
+      "bytes": 167,
+      "sha256": "f390200c28d86e958a08cafa04b1b6ab9a0bffd98e8de573d0c186c3acd8fa5f"
+    },
+    {
+      "path": "raw/run-01/reopen-running/application.txt",
+      "bytes": 132,
+      "sha256": "dbc01fad753a943417e50e983fddc5339e7268c74255b60f06d0b78ea171aa93"
+    },
+    {
+      "path": "raw/run-01/reopen-running/installation.json",
+      "bytes": 815,
+      "sha256": "882300f8d0144ca3024210c39557368cc58ae9fb3228b085846a0459c4e9b8e7"
+    },
+    {
+      "path": "raw/run-01/reopen-running/process.json",
+      "bytes": 392,
+      "sha256": "afbc6b213d2372f07eb0c820a1e564820451e58d215e06a16da344d91ba5f1dc"
+    },
+    {
+      "path": "raw/run-01/reopen-running/run-main.py",
+      "bytes": 1264,
+      "sha256": "b9ba68ff855af39013b6869661b39d18f18c1d19446bd2c6932de9ffe17745b3"
+    },
+    {
+      "path": "raw/run-01/source-comparison-0fd3285.diff.txt",
+      "bytes": 8078,
+      "sha256": "b2a93e44a9e1946bc20cc5a8442d78839252eb779c6f09f2ee055442aaed911a"
+    },
+    {
+      "path": "raw/run-01/source-comparison-d97a8c5.diff.txt",
+      "bytes": 8078,
+      "sha256": "b2a93e44a9e1946bc20cc5a8442d78839252eb779c6f09f2ee055442aaed911a"
+    },
+    {
+      "path": "raw/run-01/sources/scripts/qa/macos-ssh-fixture.py.txt",
+      "bytes": 4700,
+      "sha256": "44df658433b41ae1c660688945f00a629277d29619d47401da7da26219c64cba"
+    },
+    {
+      "path": "raw/run-01/verification.json",
+      "bytes": 5525,
+      "sha256": "340663ff4580f466c42f4a95dd2072d98e451165a059c9b851cd8cc91e147651"
+    },
+    {
+      "path": "raw/run-01/zero-before-replace.json",
+      "bytes": 410,
+      "sha256": "a572f55791cc9b7f943a6a81d48a3d3c79112a105e32d01ff3d9c568e9d854a4"
+    },
+    {
+      "path": "raw/run-01/zero-save-verification.json",
+      "bytes": 645,
+      "sha256": "bb6858a7ab3d1284d7abe0a97c771911e10bcd859fd81c3d539adff9f9e2b446"
+    }
+  ],
+  "rawScope": "Original synthetic UI/protocol/process/test artifacts; no private key payloads, private observer controller, production DB or session capabilities. Historical evidence referenced and byte-verified rather than relabeled as this ordinary app run."
+}

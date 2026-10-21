@@ -1,0 +1,3 @@
+							362 text field (selected, settable) Value: 错误 SSH 私钥, Secondary Actions: Open Finder item, URL: file:///Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue50-installed-ssh-1/%E4%B8%AD%E6%96%87%20SSH%20%E5%90%88%E6%88%90%E7%9B%AE%E5%BD%95/%E9%94%99%E8%AF%AF%20SSH%20%E7%A7%81%E9%92%A5
+		389 button Cancel, ID: CancelButton
+		390 button Open, ID: OKButton

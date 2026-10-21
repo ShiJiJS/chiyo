@@ -1,0 +1,14 @@
+[
+  {
+    "pid": 42111,
+    "parentPID": 41097,
+    "path": "/Users/jiangxinyi/Documents/Project/agent-info/local/中文 Mac 预览/AgentInfoManage/app/info_desktop.app/Contents/MacOS/info-runtime-worker",
+    "sha256": "22a637fd42a8200e7d0d58e5f13ca4a06b5be109a489f13468ac3f7bbaf6fed0"
+  },
+  {
+    "pid": 42365,
+    "parentPID": 41097,
+    "path": "/Users/jiangxinyi/Documents/Project/agent-info/local/中文 Mac 预览/AgentInfoManage/app/info_desktop.app/Contents/MacOS/info-runtime-worker",
+    "sha256": "22a637fd42a8200e7d0d58e5f13ca4a06b5be109a489f13468ac3f7bbaf6fed0"
+  }
+]

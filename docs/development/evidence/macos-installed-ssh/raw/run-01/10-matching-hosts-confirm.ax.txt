@@ -1,0 +1,29 @@
+Window: "info_desktop", App: info_desktop.
+0 standard window info_desktop, Secondary Actions: Raise
+	1 container info_desktop
+		2 container (settable)
+			3 container (settable)
+				4 text (settable) 确认 SSH 主机记录
+				5 button (settable) ×
+				6 text (settable) 请先通过可信来源核对这些主机及文件指纹。导入不会连接服务器或自动信任扫描结果。
+				7 text (settable) 匹配 主机记录
+				8 text (settable) [127.0.0.1]:56895
+				9 text (settable) 文件 SHA256
+sha256:03c9cda3a31e0e7901859c01202245db63a2814e95d56556e6661eb24f483e96
+				10 text (settable) 旧的未启动 SSH 申请将失效
+				11 text (settable) 替换主机记录后需要重新申请。已经运行的任务继续使用原快照，不会自动终止。
+				12 button (settable) 返回核对
+				13 button (settable) 确认并启用
+			14 text (settable) Dismiss
+	15 close button
+	16 full screen button Help: this button also has an action to zoom the window, Secondary Actions: zoom the window
+	17 minimize button
+	18 text info_desktop
+19 menu bar
+	20 info_desktop
+	21 Edit
+	22 View
+	23 Window
+	24 Help
+
+The focused UI element is 1 container info_desktop

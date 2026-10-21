@@ -1,0 +1,2 @@
+{"command": "/usr/bin/true", "exitCode": 0}
+{"command": "/usr/bin/false", "exitCode": 1}

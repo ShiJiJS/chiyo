@@ -1,0 +1,82 @@
+Window: "info_desktop", App: info_desktop.
+0 standard window info_desktop, Secondary Actions: Raise
+	1 container info_desktop
+		2 container (settable)
+			3 text (settable) 信息授权
+			4 button (settable) 访问审批
+			5 button (settable) 信息库
+			6 button (settable) 录入提案
+			7 button (settable) 授权历史
+			8 button (settable) 设置
+			9 button (settable) 紫棠
+			10 button (settable) 松石
+			11 button (settable) 雾蓝
+			12 button (settable) 黑白
+			13 text (settable) 本机已连接
+			14 text (settable) 信息库
+			15 text (settable) 2
+			16 text (settable) 全部信息
+			17 button (settable) 2 条信息 · 包含下级目录
+			18 button (settable) ＋ 新建
+			19 text (settable) 信息库
+			20 text (settable) 信息详情
+			21 button (settable) 编辑
+			22 button (settable) 移入回收站
+			23 button (settable) 凭据
+			24 text (settable) 信息
+			25 text field (settable)
+			26 button (settable) 全部信息
+2
+			27 button (settable) 目录与标签
+			28 button (settable) 回收站
+			29 text (settable) 资料位置
+			30 text (settable) 常用标签
+			31 text (settable) 信息保存在本机
+			32 container (settable)
+				33 button (settable) MacPackageTest20MacPackageTest20261021261021
+未分类
+2 个字段 · 含文件
+				34 button (settable) MacSshAcceptanceEmptyAttachment
+未分类
+1 个字段 · 含文件
+			35 button (settable) ‹
+			36 text (settable) 1 / 1
+			37 text (settable) 共 2 条信息
+			38 button (settable) ›
+			39 button (settable) 未分类
+			40 text (settable) MacSshAcceptanceEmptyAttachment
+			41 text (settable) 所在位置
+			42 text (settable) 标签
+			43 text (settable) 最近更新
+			44 text (settable) 未分类
+			45 text (settable) 今天 23:24
+			46 text (settable) 信息内容
+			47 text (settable) 1 个字段
+			48 text (settable) ZeroByteAttachment
+			49 text (settable) 空 普通附件.txt
+			50 text (settable) 0 B · text/plain · 版本 1
+			51 button (settable) 更换文件
+			52 button (settable) 另存
+			53 button (settable) 公开预览
+			54 text (settable) 关联凭据
+			55 button (settable) 管理关联
+			56 text (settable) 凭据单独保管；批准读取这条信息不会同时提供凭据。
+			57 text (settable) 尚未关联凭据
+			58 text (settable) Agent 能看到什么？
+			59 text (settable) 公开目录包含名称、公开说明及字段说明。字段内容只有在你批准后才能读取。
+			60 button (settable) 预览公开目录
+			61 button (settable) 修改历史 ↗
+			62 text (settable) 按字段授权
+			63 button (settable) 转换旧秘密字段
+	64 close button
+	65 full screen button Help: this button also has an action to zoom the window, Secondary Actions: zoom the window
+	66 minimize button
+	67 text info_desktop
+68 menu bar
+	69 info_desktop
+	70 Edit
+	71 View
+	72 Window
+	73 Help
+
+The focused UI element is 1 container info_desktop
