@@ -1,0 +1,31 @@
+00:00 +0: loading /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/integration_test/macos_removed_scope_native_test.dart
+Building macOS application...                                   
+integration_test/macos_removed_scope_native_test.dart:523:22: Error: The method 'localToGlobal' isn't defined for the type 'RenderAbstractViewport'.
+ - 'RenderAbstractViewport' is from 'package:flutter/src/rendering/viewport.dart' ('../../.tools/flutter/packages/flutter/lib/src/rendering/viewport.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'localToGlobal'.
+            viewport.localToGlobal(Offset.zero),
+                     ^^^^^^^^^^^^^
+Target kernel_snapshot_program failed: Exception
+Failed to package /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop.
+Command PhaseScriptExecution failed with a nonzero exit code
+** BUILD FAILED **
+
+00:00 +0 -1: loading /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/integration_test/macos_removed_scope_native_test.dart [E]
+  Failed to load "/Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/integration_test/macos_removed_scope_native_test.dart": Build process failed
+  package:flutter_tools/src/base/common.dart 34:3                    throwToolExit
+  package:flutter_tools/src/macos/build_macos.dart 347:5             buildMacOS
+  ===== asynchronous gap ===========================
+  package:flutter_tools/src/macos/macos_device.dart 67:5             MacOSDevice.buildForDevice
+  ===== asynchronous gap ===========================
+  package:flutter_tools/src/desktop_device.dart 108:7                DesktopDevice.startApp
+  ===== asynchronous gap ===========================
+  package:flutter_tools/src/test/integration_test_device.dart 59:39  IntegrationTestTestDevice.start
+  ===== asynchronous gap ===========================
+  package:flutter_tools/src/test/flutter_platform.dart 679:51        FlutterPlatform._startTest.<fn>
+  ===== asynchronous gap ===========================
+  package:flutter_tools/src/base/async_guard.dart 108:24             asyncGuard.<fn>
+  
+00:00 +0 -1: Some tests failed.
+
+Failing tests:
+  /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/integration_test/macos_removed_scope_native_test.dart: loading /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/integration_test/macos_removed_scope_native_test.dart

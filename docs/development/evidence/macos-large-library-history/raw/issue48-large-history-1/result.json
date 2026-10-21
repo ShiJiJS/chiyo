@@ -1,0 +1,201 @@
+{
+  "complete": false,
+  "productSource": "01c1f141d876a9d3c49c61c7fc3d1e572c432c5a",
+  "cliSha256": "cb9971c43daa0bccf06c31d48c6ac3ab62f3e57c34bc96655c47202b9e14f5b7",
+  "phases": [
+    {
+      "phase": "request",
+      "checks": []
+    },
+    {
+      "phase": "approved",
+      "checks": [
+        {
+          "field": "FjWON5t-4oQyTikSYAXnXw5aR0Uh_Y6XBLL-5T1SNqA=",
+          "requestId": "lP0pZY8-bjZAE0nzsjFLKHQokAdsLdHtKmsc3fr_lSI=",
+          "status": "ok",
+          "expectedValueMatched": true
+        },
+        {
+          "field": "tA95rmukAkiyOifAm_I-5AGdxYuydPMuN03WffmxGbc=",
+          "requestId": "lP0pZY8-bjZAE0nzsjFLKHQokAdsLdHtKmsc3fr_lSI=",
+          "status": "ok",
+          "expectedValueMatched": true
+        }
+      ]
+    },
+    {
+      "phase": "partial",
+      "checks": [
+        {
+          "field": "FjWON5t-4oQyTikSYAXnXw5aR0Uh_Y6XBLL-5T1SNqA=",
+          "requestId": "lP0pZY8-bjZAE0nzsjFLKHQokAdsLdHtKmsc3fr_lSI=",
+          "status": "unauthorized",
+          "expectedValueMatched": false
+        },
+        {
+          "field": "tA95rmukAkiyOifAm_I-5AGdxYuydPMuN03WffmxGbc=",
+          "requestId": "lP0pZY8-bjZAE0nzsjFLKHQokAdsLdHtKmsc3fr_lSI=",
+          "status": "ok",
+          "expectedValueMatched": true
+        }
+      ]
+    },
+    {
+      "phase": "restored",
+      "checks": [
+        {
+          "field": "FjWON5t-4oQyTikSYAXnXw5aR0Uh_Y6XBLL-5T1SNqA=",
+          "requestId": "lP0pZY8-bjZAE0nzsjFLKHQokAdsLdHtKmsc3fr_lSI=",
+          "status": "unauthorized",
+          "expectedValueMatched": false
+        },
+        {
+          "field": "tA95rmukAkiyOifAm_I-5AGdxYuydPMuN03WffmxGbc=",
+          "requestId": "lP0pZY8-bjZAE0nzsjFLKHQokAdsLdHtKmsc3fr_lSI=",
+          "status": "ok",
+          "expectedValueMatched": true
+        },
+        {
+          "field": "hRAFu5XWelnslqynoIsZ_rPflYPQ_-frsCv9ePPEL6Q=",
+          "requestId": "lP0pZY8-bjZAE0nzsjFLKHQokAdsLdHtKmsc3fr_lSI=",
+          "status": "unauthorized",
+          "expectedValueMatched": false
+        }
+      ]
+    },
+    {
+      "phase": "reapproved",
+      "checks": [
+        {
+          "field": "FjWON5t-4oQyTikSYAXnXw5aR0Uh_Y6XBLL-5T1SNqA=",
+          "requestId": "lP0pZY8-bjZAE0nzsjFLKHQokAdsLdHtKmsc3fr_lSI=",
+          "status": "unauthorized",
+          "expectedValueMatched": false
+        },
+        {
+          "field": "tA95rmukAkiyOifAm_I-5AGdxYuydPMuN03WffmxGbc=",
+          "requestId": "lP0pZY8-bjZAE0nzsjFLKHQokAdsLdHtKmsc3fr_lSI=",
+          "status": "ok",
+          "expectedValueMatched": true
+        },
+        {
+          "field": "hRAFu5XWelnslqynoIsZ_rPflYPQ_-frsCv9ePPEL6Q=",
+          "requestId": "DzOiL1kDX6dKB5OJvHA5foDKx8qPRWIOO3B-dW082Vk=",
+          "status": "ok",
+          "expectedValueMatched": true
+        }
+      ]
+    },
+    {
+      "phase": "all-removed",
+      "checks": [
+        {
+          "field": "FjWON5t-4oQyTikSYAXnXw5aR0Uh_Y6XBLL-5T1SNqA=",
+          "requestId": "lP0pZY8-bjZAE0nzsjFLKHQokAdsLdHtKmsc3fr_lSI=",
+          "status": "unauthorized",
+          "expectedValueMatched": false
+        },
+        {
+          "field": "tA95rmukAkiyOifAm_I-5AGdxYuydPMuN03WffmxGbc=",
+          "requestId": "lP0pZY8-bjZAE0nzsjFLKHQokAdsLdHtKmsc3fr_lSI=",
+          "status": "unauthorized",
+          "expectedValueMatched": false
+        },
+        {
+          "field": "hRAFu5XWelnslqynoIsZ_rPflYPQ_-frsCv9ePPEL6Q=",
+          "requestId": "DzOiL1kDX6dKB5OJvHA5foDKx8qPRWIOO3B-dW082Vk=",
+          "status": "unauthorized",
+          "expectedValueMatched": false
+        }
+      ]
+    },
+    {
+      "phase": "archived",
+      "checks": [
+        {
+          "field": "FjWON5t-4oQyTikSYAXnXw5aR0Uh_Y6XBLL-5T1SNqA=",
+          "requestId": "lP0pZY8-bjZAE0nzsjFLKHQokAdsLdHtKmsc3fr_lSI=",
+          "status": "unauthorized",
+          "expectedValueMatched": false
+        },
+        {
+          "field": "tA95rmukAkiyOifAm_I-5AGdxYuydPMuN03WffmxGbc=",
+          "requestId": "lP0pZY8-bjZAE0nzsjFLKHQokAdsLdHtKmsc3fr_lSI=",
+          "status": "unauthorized",
+          "expectedValueMatched": false
+        },
+        {
+          "field": "hRAFu5XWelnslqynoIsZ_rPflYPQ_-frsCv9ePPEL6Q=",
+          "requestId": "DzOiL1kDX6dKB5OJvHA5foDKx8qPRWIOO3B-dW082Vk=",
+          "status": "unauthorized",
+          "expectedValueMatched": false
+        }
+      ]
+    },
+    {
+      "phase": "repository-reopened",
+      "checks": [
+        {
+          "field": "FjWON5t-4oQyTikSYAXnXw5aR0Uh_Y6XBLL-5T1SNqA=",
+          "requestId": "lP0pZY8-bjZAE0nzsjFLKHQokAdsLdHtKmsc3fr_lSI=",
+          "status": "unauthorized",
+          "expectedValueMatched": false
+        },
+        {
+          "field": "tA95rmukAkiyOifAm_I-5AGdxYuydPMuN03WffmxGbc=",
+          "requestId": "lP0pZY8-bjZAE0nzsjFLKHQokAdsLdHtKmsc3fr_lSI=",
+          "status": "unauthorized",
+          "expectedValueMatched": false
+        },
+        {
+          "field": "hRAFu5XWelnslqynoIsZ_rPflYPQ_-frsCv9ePPEL6Q=",
+          "requestId": "DzOiL1kDX6dKB5OJvHA5foDKx8qPRWIOO3B-dW082Vk=",
+          "status": "unauthorized",
+          "expectedValueMatched": false
+        }
+      ]
+    }
+  ],
+  "large": true,
+  "appBaseCommit": "82b374a5df475dee95542e1bbe37b0b19ae2d2cd",
+  "worktreeStatus": [
+    " M apps/desktop/integration_test/macos_library_filters_native_test.dart",
+    " M apps/desktop/integration_test/macos_removed_scope_native_test.dart",
+    " M scripts/qa/macos-library-filters-ui.py",
+    " M scripts/qa/macos-scope-ui.py"
+  ],
+  "qaSources": [
+    {
+      "path": "apps/desktop/integration_test/macos_removed_scope_native_test.dart",
+      "sha256": "36f71f7a6f0a93c80a40bfbfc66fc5fafa3f4623970eb6be7fade43bf0aee102"
+    },
+    {
+      "path": "scripts/qa/macos-scope-ui.py",
+      "sha256": "2671fb0faacc886c74ebc0c3e2bfea77161d1a76319d4d9c04c3ce73834ec06c"
+    },
+    {
+      "path": "apps/desktop/lib/history.dart",
+      "sha256": "fbc8ffbdadd1db69051f320370d1b0a26416edb0face822b6ce1ad624af8b1e3"
+    },
+    {
+      "path": "apps/desktop/lib/main.dart",
+      "sha256": "7a396b7917211b58906cd7bdd789d585d0cd511f1a93145246747cfaaf4cb883"
+    },
+    {
+      "path": "apps/desktop/integration_test/support/native_semantics_lifetime.dart",
+      "sha256": "a274da35d57e9bca3322b7e5b70a2bc610990e8e8dc3fba0821bbb1e9219036f"
+    }
+  ],
+  "failure": {
+    "type": "RuntimeError",
+    "message": "Flutter exited before expected evidence"
+  },
+  "cliExits": [
+    0,
+    0,
+    0
+  ],
+  "flutterProcessGroupRemaining": false,
+  "retainedOwnedRoot": "/Users/jiangxinyi/Library/Containers/com.example.infoDesktop/Data/tmp/aim-mac-scope-ui-2WG61T"
+}
