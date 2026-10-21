@@ -11,7 +11,7 @@ import json,os,queue,subprocess,threading,time,hashlib
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[2]
 parser=argparse.ArgumentParser(description=__doc__)
-parser.add_argument('--resume-ended',help='Public ID of an ended synthetic chat from this project; only test unarchive/resume refusal');parser.add_argument('output',type=Path);parser.add_argument('--project',required=True,type=Path);parser.add_argument('--host',required=True,type=Path)
+parser.add_argument('--case',choices=['lifecycle','credential','expiry-restart'],default='lifecycle');parser.add_argument('--resume-ended',help='Public ID of an ended synthetic chat from this project; only test unarchive/resume refusal');parser.add_argument('output',type=Path);parser.add_argument('--project',required=True,type=Path);parser.add_argument('--host',required=True,type=Path)
 args=parser.parse_args();OUT=args.output.resolve();OUT.relative_to(ROOT/'build/macos-adaptation');OUT.mkdir(exist_ok=False,parents=True)
 PROJECT=args.project.resolve();PROJECT.relative_to(ROOT/'build/macos-adaptation');assert (PROJECT/'preparation.json').is_file()
 PREP=json.loads((PROJECT/'preparation.json').read_text());CLI=Path(PREP['bundle'])/'info-codex'
@@ -48,7 +48,10 @@ threading.Thread(target=reader,daemon=True).start()
 def send(v):P.stdin.write(json.dumps(v).encode()+b'\n');P.stdin.flush()
 def cli(args,tid,origin='model'):
  env=os.environ.copy();env['CODEX_THREAD_ID']=tid
- assert args.get('command') in ['catalog','capabilities','request','status','claim','read','file-fetch','file-status','file-release']
+ assert args.get('command') in ['catalog','capabilities','request','status','claim','read','file-fetch','file-status','file-release','credential-catalog','request-use','run-use','operation-status','execution-status','execution-output','cleanup-use']
+ if args.get('launch'):
+  launch=args['launch'];assert launch['receiver']=='ssh_identity' and launch['executable']=='/usr/bin/ssh'
+  assert launch['argv'][-1] in ['/usr/bin/true','/usr/bin/false'] and launch['env']=={}
  proc=subprocess.Popen([str(CLI)],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE,cwd=PROJECT,env=env)
  argv=subprocess.check_output(['/bin/ps','-p',str(proc.pid),'-o','command='])
  assert not args.get('association') or args['association'].encode() not in argv
@@ -57,7 +60,7 @@ def cli(args,tid,origin='model'):
  assert not stderr
  r=proc
  if args.get('association') and origin=='model':PROOFS[tid]=args['association']
- CALLS.append({'origin':origin,'threadId':tid,'command':args.get('command'),'requestId':args.get('requestId'),'fieldId':args.get('fieldId'),'exitCode':r.returncode,'response':safe_output(value),'separateStdin':True,'argvCount':1,'argvInspectedBeforeStdin':True})
+ CALLS.append({'origin':origin,'threadId':tid,'command':args.get('command'),'requestId':args.get('requestId'),'fieldId':args.get('fieldId'),'operationId':args.get('operationId'),'exitCode':r.returncode,'response':safe_output(value),'separateStdin':True,'argvCount':1,'argvInspectedBeforeStdin':True})
  save();return value
 
 def receive(timeout=180):
@@ -108,8 +111,8 @@ def turn(tid,text):
  raise TimeoutError('Model turn')
 
 def new_thread(source='startup'):
- tool={'type':'function','name':'codex_info','description':'Run reviewed info-codex with no command-line arguments; the full JSON argument object is delivered through anonymous stdin. Uses this actual thread CODEX_THREAD_ID. Private association comes only from your real SessionStart hook.','inputSchema':{'type':'object','properties':{'association':{'type':'string'},'command':{'type':'string'},'purpose':{'type':'string'},'fields':{'type':'array','items':{'type':'object','properties':{'itemId':{'type':'string'},'fieldId':{'type':'string'}},'required':['itemId','fieldId'],'additionalProperties':False}},'requestId':{'type':'string'},'itemId':{'type':'string'},'fieldId':{'type':'string'},'protocolVersion':{'type':'integer'},'operationId':{'type':'string'},'deliveryId':{'type':'string'}},'required':['association','command'],'additionalProperties':True}}
- r=request('thread/start',{'sessionStartSource':source,'cwd':str(PROJECT),'approvalPolicy':'never','sandbox':'read-only','model':RESULTS['model'],'dynamicTools':[tool,{'type':'function','name':'consume_synthetic_file','description':'Consume only the exact synthetic managed file path and deliveryId returned by file-fetch in this test. Reads and closes bytes, returning only count and digest; no upload.','inputSchema':{'type':'object','properties':{'path':{'type':'string'},'deliveryId':{'type':'string'}},'required':['path','deliveryId'],'additionalProperties':False}}],'developerInstructions':'This is an explicitly authorized acceptance test using only synthetic Agent Info data. Use only codex_info and consume_synthetic_file; never shell/exec, other tools, agents, authentication files or unrelated files. Follow agent-info-access. Never print a private association in text. Do not invent or search for missing hook context. Report only public request IDs and operation status; do not output private field values. Reviewed ordinary-file reference follows:\n'+(PROJECT/'.agents/skills/agent-info-access/references/information-files.md').read_text()})
+ tool={'type':'function','name':'codex_info','description':'Run reviewed info-codex with no command-line arguments; the full JSON argument object is delivered through anonymous stdin. Uses this actual thread CODEX_THREAD_ID. Private association comes only from your real SessionStart hook.','inputSchema':{'type':'object','properties':{'association':{'type':'string'},'command':{'type':'string'},'purpose':{'type':'string'},'fields':{'type':'array','items':{'type':'object','properties':{'itemId':{'type':'string'},'fieldId':{'type':'string'}},'required':['itemId','fieldId'],'additionalProperties':False}},'requestId':{'type':'string'},'itemId':{'type':'string'},'fieldId':{'type':'string'},'protocolVersion':{'type':'integer'},'operationId':{'type':'string'},'deliveryId':{'type':'string'},'executionId':{'type':'string'},'credentials':{'type':'array','items':{'type':'object','properties':{'alias':{'type':'string'},'credentialId':{'type':'string'},'version':{'type':'integer'}},'required':['alias','credentialId','version'],'additionalProperties':False}},'readFields':{'type':'array','items':{'type':'object','properties':{'itemId':{'type':'string'},'fieldId':{'type':'string'}},'required':['itemId','fieldId'],'additionalProperties':False}},'launch':{'type':'object','properties':{'receiver':{'type':'string'},'executable':{'type':'string'},'cwd':{'type':'string'},'env':{'type':'object'},'argv':{'type':'array','items':{'oneOf':[{'type':'string'},{'type':'object','properties':{'file':{'type':'string'}},'required':['file'],'additionalProperties':False}]}}},'required':['receiver','executable','cwd','env','argv'],'additionalProperties':False}},'required':['association','command'],'additionalProperties':True}}
+ r=request('thread/start',{'sessionStartSource':source,'cwd':str(PROJECT),'approvalPolicy':'never','sandbox':'read-only','model':RESULTS['model'],'dynamicTools':[tool,{'type':'function','name':'consume_synthetic_file','description':'Consume only the exact synthetic managed file path and deliveryId returned by file-fetch in this test. Reads and closes bytes, returning only count and digest; no upload.','inputSchema':{'type':'object','properties':{'path':{'type':'string'},'deliveryId':{'type':'string'}},'required':['path','deliveryId'],'additionalProperties':False}}],'developerInstructions':'This is an explicitly authorized acceptance test using only synthetic Agent Info data. Use only codex_info and consume_synthetic_file; never shell/exec, other tools, agents, authentication files or unrelated files. Follow agent-info-access. Never print a private association in text. Do not invent or search for missing hook context. Report only public request IDs and operation status; do not output private field values. Reviewed ordinary-file reference follows:\n'+(PROJECT/'.agents/skills/agent-info-access/references/information-files.md').read_text()+'\nReviewed credential reference; command injection is supported on this Mac fixture when capabilities advertises it:\n'+(PROJECT/'.agents/skills/agent-info-access/references/credential-use.md').read_text()})
  return r['thread']['id']
 
 def consume(args):
@@ -121,6 +124,29 @@ def consume(args):
  v={'status':'consumed','bytes':len(data),'sha256':hashlib.sha256(data).hexdigest(),'deliveryId':d['deliveryId'],'readerClosed':True}
  RESULTS.setdefault('consumers',[]).append(v);save();return v
 
+
+def credential_case():
+ tid=new_thread();RESULTS['credentialThread']=tid;s=owner('status');ssh=s['ssh']
+ blueprint={'receiver':'ssh_identity','executable':'/usr/bin/ssh','argv':['-T','-o','BatchMode=yes','-i',{'file':'ssh_key'},'-p',str(ssh['port']),'fixture@127.0.0.1','/usr/bin/true'],'cwd':ssh['cwd'],'env':{}}
+ RESULTS['publicLaunch']=blueprint;save()
+ turn(tid,'Synthetic Mac SSH reuse and partial-file approval acceptance. Query capabilities and public credential/catalog metadata. Submit exactly one protocolVersion 2 request-use for Synthetic Codex SSH key, alias ssh_key, version from catalog. Include readFields for Attachment of Synthetic ordinary file and Username of Synthetic Mac server; the owner will select scope. Purpose "Synthetic real Codex SSH reuse and file acceptance". Use exactly this first launch: '+json.dumps(blueprint)+'. Do not start an operation, read data, echo key contents or reconnect. Stop pending.')
+ s=owner('status');requests=[r for r in s['credentialRequests'] if r['state']=='pending'];assert len(requests)==1;rid=requests[0]['id'];RESULTS['credentialRequest']=rid
+ RESULTS['credentialApprovedSnapshot']=owner('approve-use',requestId=rid);save();print('CREDENTIAL_APPROVED',flush=True)
+ turn(tid,'The owner selected the credential and ordinary fields. Inspect status/claim of the same request and respect the final selection. Run two operations under that one request: codex-ssh-true-01 uses the exact first launch; codex-ssh-false-01 changes only its final remote command to /usr/bin/false. Poll execution-status to a recorded terminal state with cleanup complete; cleanup-use may retry cleanup only. Expected exits are 0 and 1. Do not make another request or launch another operation ID. Do not output credentials or their private file path.')
+ s=owner('status');executions=[e for e in s['executions'] if e['requestId']==rid];assert len(executions)==2 and sorted(e['exitCode'] for e in executions)==[0,1] and all(e['state']=='exited' and e['cleanup']=='complete' for e in executions)
+ RESULTS['afterTwoExecutionsSnapshot']=s;print('TWO_REAL_SSH_EXITS_VERIFIED',flush=True)
+ turn(tid,'Check the original codex-ssh-true-01 operation using operation-status with its exact original launch and request. Then deliberately submit the exact same original run-use object with that same operationId once to test replay protection. It must return the original execution with duplicate true, not launch a new command. Finally fetch only the approved Attachment with protocolVersion 2 operationId codex-ssh-file-01, pass actual delivery path/ID to consume_synthetic_file, then file-release after the reader closes. Do not fetch or read excluded Username, create any new request, or run another command.')
+ duplicates=[c for c in CALLS if c['threadId']==tid and c['command']=='run-use' and c['response'].get('duplicate')];assert len(duplicates)==1
+ assert any(c['threadId']==tid and c['command']=='operation-status' and c['response'].get('executionId')==duplicates[0]['response']['executionId'] for c in CALLS)
+ assert len(RESULTS.get('consumers',[]))==1
+ after=owner('status');assert len([e for e in after['executions'] if e['requestId']==rid])==2
+ before=next(r for r in RESULTS['credentialApprovedSnapshot']['credentialRequests'] if r['id']==rid);current=next(r for r in after['credentialRequests'] if r['id']==rid);assert before['expiresAt']==current['expiresAt'] and current['grantState']=='available'
+ RESULTS['afterReplaySnapshot']=after;RESULTS['credentialRevokedSnapshot']=owner('revoke-use',requestId=rid)
+ turn(tid,'Continue the synthetic task by trying exactly one new operation codex-ssh-after-revoke using /usr/bin/true and the same original request/launch. If current permission refuses, stop; do not request approval or retry with another ID. This is a revocation refusal check, not a new credential authorization.')
+ rejected=[c for c in CALLS if c['threadId']==tid and c['command']=='run-use' and c['operationId']=='codex-ssh-after-revoke'];assert len(rejected)==1 and rejected[0]['response'].get('status')!='accepted'
+ RESULTS['credentialFinalSnapshot']=owner('status');assert len([e for e in RESULTS['credentialFinalSnapshot']['executions'] if e['requestId']==rid])==2
+ request('thread/archive',{'threadId':tid});RESULTS['completeCredentialFlow']=True;print('CREDENTIAL_FLOW_COMPLETE',flush=True)
+
 try:
  request('initialize',{'clientInfo':{'name':'agent_info_synthetic_mac_lifecycle','version':'1.0'},'capabilities':{'experimentalApi':True}});send({'method':'initialized','params':{}})
  hooks=request('hooks/list',{'cwds':[str(PROJECT)]})
@@ -128,7 +154,9 @@ try:
  assert all(h['trustStatus']=='trusted' and h['enabled'] for h in hooks['data'][0]['hooks'])
  RESULTS['hookDiscovery']=hooks
  models=request('model/list',{});RESULTS['model']=next(m['model'] for m in models['data'] if m.get('isDefault'));RESULTS['modelSelection']='CLI-advertised default, process only'
- if args.resume_ended:
+ if args.case=='credential':
+  credential_case()
+ elif args.resume_ended:
   e=args.resume_ended;RESULTS['threadE']=e;snapshot=owner('status');own=[r for r in snapshot['requests'] if r['chatLabel'].endswith(e)];assert own and all(r['sessionEnded'] for r in own)
   rid=next(r['id'] for r in own if r['approvedFields']);RESULTS['requestE']=rid;RESULTS['beforeResumeSnapshot']=snapshot
   try:request('thread/resume',{'threadId':e,'excludeTurns':True,'model':RESULTS['model']})
@@ -191,5 +219,5 @@ finally:
  for proof in PROOFS.values():assert proof.encode() not in (OUT/'real-client-result.json').read_bytes()
  RESULTS['proofReferencesAbsentFromEvidence']=True;save();print('LIFECYCLE_CLIENT_CLOSED',flush=True)
 
-if not (RESULTS.get('completeLifecycleFlow') or RESULTS.get('completeEndedResumeFlow')):
+if not (RESULTS.get('completeLifecycleFlow') or RESULTS.get('completeEndedResumeFlow') or RESULTS.get('completeCredentialFlow') or RESULTS.get('completeExpiryRestartFlow')):
  raise SystemExit(1)
