@@ -21,7 +21,7 @@ class _Keys implements DatabaseKeyStore {
 Future<void> main(List<String> args) async {
   if (!Platform.isMacOS ||
       args.length != 2 ||
-      !{'create', 'inspect', 'conflict', 'repair'}.contains(args[0])) {
+      !{'create', 'inspect', 'conflict', 'repair', 'snapshot'}.contains(args[0])) {
     exitCode = 64;
     return;
   }
