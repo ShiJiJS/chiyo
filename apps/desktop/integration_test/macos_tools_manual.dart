@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:info_cli/agent_client.dart';
 import 'package:info_core/info_core.dart';
+import 'package:info_core/macos_tool_probe.dart';
 import 'package:info_storage/info_storage.dart';
 import 'package:info_desktop/desktop_bootstrap.dart';
 import 'package:info_desktop/desktop_runtime.dart';
@@ -166,14 +167,57 @@ Future<void> main() async {
         'Wrong selected tool directories',
       );
       final identities = <Map<String, Object?>>[];
+      facts['withScope'] = await readability();
+      facts['inspectedTools'] = identities;
+      await save();
       for (final entry in [(gh, 'gh_token'), (aws, 'aws_shared_credentials')]) {
-        final identity = await inspectCredentialExecutable(entry.$1, entry.$2);
-        identities.add({
-          'receiver': entry.$2,
-          'path': identity.path,
-          'bytes': identity.byteLength,
-          'digest': identity.sha256,
-        });
+        try {
+          final identity = await inspectCredentialExecutable(
+            entry.$1,
+            entry.$2,
+          );
+          identities.add({
+            'receiver': entry.$2,
+            'path': identity.path,
+            'bytes': identity.byteLength,
+            'digest': identity.sha256,
+          });
+        } on CredentialUseFailure catch (error) {
+          final diagnostic = <String, Object?>{
+            'receiver': entry.$2,
+            'errorCode': error.code,
+            'fieldPath': error.fieldPath,
+          };
+          facts['versionFailure'] = diagnostic;
+          // Version-only public stdout/stderr; never any credential material.
+          final probe = await Directory(
+            '$canonical/version-diagnostic',
+          ).create();
+          try {
+            final result =
+                await probeMacOsToolVersion(entry.$1, '--version', probe.path, {
+                  'HOME': probe.path,
+                  'PATH': '/usr/bin:/bin',
+                  'LANG': 'C.UTF-8',
+                  'TMPDIR': probe.path,
+                });
+            diagnostic.addAll({
+              'exitCode': result.exitCode,
+              'stdout': result.stdout,
+              'stderr': result.stderr,
+            });
+          } on ProcessException catch (failure) {
+            diagnostic.addAll({
+              'processErrno': failure.errorCode,
+              'processMessage': failure.message,
+            });
+          } on Object catch (failure) {
+            diagnostic['diagnosticError'] = failure.runtimeType.toString();
+          }
+          await save();
+          rethrow;
+        }
+        await save();
       }
       facts['inspectedTools'] = identities;
       facts['restoredDirectories'] = selected.directories
@@ -452,6 +496,7 @@ Future<void> main() async {
     facts.addAll({
       'failed': true,
       'errorType': error.runtimeType.toString(),
+      if (error is CredentialUseFailure) 'errorCode': error.code,
       if (error is StateError) 'checkFailure': error.message,
     });
     await save();
