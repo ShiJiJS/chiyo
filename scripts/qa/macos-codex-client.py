@@ -7,11 +7,12 @@ Owner approval is a QA file controller, not physical owner UI acceptance.
 Private proofs stay in memory. No transcript/authentication files are read.
 """
 import argparse
+import secrets,socket,signal
 import json,os,queue,subprocess,threading,time,hashlib
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[2]
 parser=argparse.ArgumentParser(description=__doc__)
-parser.add_argument('--case',choices=['lifecycle','credential','expiry-restart'],default='lifecycle');parser.add_argument('--resume-ended',help='Public ID of an ended synthetic chat from this project; only test unarchive/resume refusal');parser.add_argument('output',type=Path);parser.add_argument('--project',required=True,type=Path);parser.add_argument('--host',required=True,type=Path)
+parser.add_argument('--case',choices=['lifecycle','credential','expiry-restart','transport-resume'],default='lifecycle');parser.add_argument('--resume-ended',help='Public ID of an ended synthetic chat from this project; only test unarchive/resume refusal');parser.add_argument('output',type=Path);parser.add_argument('--project',required=True,type=Path);parser.add_argument('--host',required=True,type=Path)
 args=parser.parse_args();OUT=args.output.resolve();OUT.relative_to(ROOT/'build/macos-adaptation');OUT.mkdir(exist_ok=False,parents=True)
 PROJECT=args.project.resolve();PROJECT.relative_to(ROOT/'build/macos-adaptation');assert (PROJECT/'preparation.json').is_file()
 PREP=json.loads((PROJECT/'preparation.json').read_text());CLI=Path(PREP['bundle'])/'info-codex'
@@ -38,14 +39,37 @@ def safe_output(v):
  return v
 
 ERR=(OUT/'real-client-stderr.txt').open('wb')
-P=subprocess.Popen(['codex','app-server','--stdio','-c','analytics.enabled=false'],cwd=PROJECT,stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=ERR)
-def reader():
- for line in P.stdout:
-  try:Q.put(json.loads(line))
-  except Exception:Q.put({'badJson':True})
- Q.put(None)
-threading.Thread(target=reader,daemon=True).start()
-def send(v):P.stdin.write(json.dumps(v).encode()+b'\n');P.stdin.flush()
+WS=None;token=None;token_file=None
+if args.case=='transport-resume':
+ from websockets.sync.client import connect
+ with socket.socket() as listener:
+  listener.bind(('127.0.0.1',0));port=listener.getsockname()[1]
+ endpoint='ws://127.0.0.1:'+str(port);token=secrets.token_urlsafe(48);token_file=OUT/'transport-token.private'
+ fd=os.open(token_file,os.O_WRONLY|os.O_CREAT|os.O_EXCL,0o600)
+ with os.fdopen(fd,'w') as f:f.write(token)
+ P=subprocess.Popen(['codex','app-server','--listen',endpoint,'--ws-auth','capability-token','--ws-token-file',str(token_file),'-c','analytics.enabled=false'],cwd=PROJECT,stdout=subprocess.DEVNULL,stderr=ERR)
+ def connect_transport():
+  end=time.monotonic()+30
+  while time.monotonic()<end:
+   try:return connect(endpoint,additional_headers={'Authorization':'Bearer '+token},open_timeout=2,max_size=16*1024*1024)
+   except OSError:
+    assert P.poll() is None;time.sleep(.1)
+  raise TimeoutError('Owned loopback WebSocket startup')
+ WS=connect_transport()
+else:
+ P=subprocess.Popen(['codex','app-server','--stdio','-c','analytics.enabled=false'],cwd=PROJECT,stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=ERR)
+def reader(channel):
+ try:
+  for line in channel:
+   try:Q.put(json.loads(line))
+   except Exception:Q.put({'badJson':True})
+ finally:Q.put(None)
+READER=threading.Thread(target=reader,args=(WS if WS is not None else P.stdout,),daemon=True);READER.start()
+def send(v):
+ data=json.dumps(v)
+ if WS is not None:WS.send(data)
+ else:P.stdin.write(data.encode()+b'\n');P.stdin.flush()
+
 def cli(args,tid,origin='model'):
  env=os.environ.copy();env['CODEX_THREAD_ID']=tid
  assert args.get('command') in ['catalog','capabilities','request','status','claim','read','file-fetch','file-status','file-release','credential-catalog','request-use','run-use','operation-status','execution-status','execution-output','cleanup-use']
@@ -67,6 +91,10 @@ def receive(timeout=180):
  m=Q.get(timeout=timeout)
  if m is None:raise RuntimeError('Server ended')
  method=m.get('method');p=m.get('params',{})
+ if method=='item/completed' and p.get('item',{}).get('type')=='agentMessage':
+  report=p['item'].get('text','')
+  assert all(proof not in report for proof in PROOFS.values())
+  RESULTS.setdefault('agentReportChecks',[]).append({'threadId':p.get('threadId'),'turnId':p.get('turnId'),'reconnectMentioned':any(word in report.lower() for word in ['reconnect','重新连接','重新接入']),'proofReferenceAbsent':True})
  if method=='error':
   RESULTS.setdefault('clientErrors',[]).append(p.get('error',{}))
  if method:
@@ -192,6 +220,40 @@ def expiry_restart_case():
  RESULTS['completeExpiryRestartFlow']=True;print('EXPIRY_RESTART_FLOW_COMPLETE',flush=True)
 
 
+
+def transport_resume_case():
+ global WS,READER,Q
+ tid=new_thread();RESULTS['transportThread']=tid;RESULTS['codexServerPidBeforeDisconnect']=P.pid
+ turn(tid,'Real authenticated WebSocket disconnect/resume acceptance. Use public catalog and actual hook association. Submit one request only for Address of Synthetic Mac server, purpose "Synthetic actual client transport reconnect". Stop pending.')
+ snap=owner('status');r=next(r for r in snap['requests'] if r['state']=='pending' and r['chatLabel'].endswith(tid));rid=r['id'];RESULTS['transportRequest']=rid
+ RESULTS['transportApprovedSnapshot']=owner('approve',requestId=rid,fields=[snap['addressField']])
+ turn(tid,'The owner selected its scope. Read Address exactly once under the original request without printing the value. Do not reconnect the information service or create a new request.')
+ assert any(c['threadId']==tid and c['command']=='read' and c['response'].get('status')=='ok' for c in CALLS)
+ original=PROOFS[tid];RESULTS['beforeDisconnectSnapshot']=owner('status');before_hooks=len([e for e in EVENTS if e.get('eventName')=='sessionEnd'])
+ WS.close();READER.join(timeout=5);assert not READER.is_alive();RESULTS['actualClientConnectionClosed']=True
+ time.sleep(2);assert P.poll() is None
+ RESULTS['whileDisconnectedSnapshot']=owner('status');g=next(g for g in RESULTS['whileDisconnectedSnapshot']['grants'] if g['requestId']==rid);assert g['active']
+ Q=queue.Queue();WS=connect_transport();READER=threading.Thread(target=reader,args=(WS,),daemon=True);READER.start()
+ request('initialize',{'clientInfo':{'name':'agent_info_synthetic_mac_reconnected','version':'1.0'},'capabilities':{'experimentalApi':True}});send({'method':'initialized','params':{}})
+ resumed=request('thread/resume',{'threadId':tid,'excludeTurns':True,'model':RESULTS['model']});assert resumed['thread']['cwd']==str(PROJECT)
+ turn(tid,'The client transport has disconnected and reconnected to the same still-running Codex server, and this original chat was formally resumed. Use only your association and request already retained in this chat context. Read Address exactly once again. Do not search private files, use --connect, renew or submit another request; do not print the value.')
+ reads=[c for c in CALLS if c['threadId']==tid and c['command']=='read'];assert len(reads)==2 and all(c['response'].get('status')=='ok' for c in reads)
+ assert PROOFS[tid]==original;RESULTS['sameAssociationFromRetainedContext']=True;RESULTS['codexServerPidAfterReconnect']=P.pid
+ RESULTS['afterTransportResumeSnapshot']=owner('status');before=next(g for g in RESULTS['transportApprovedSnapshot']['grants'] if g['requestId']==rid);after=next(g for g in RESULTS['afterTransportResumeSnapshot']['grants'] if g['requestId']==rid);assert before['expiresAt']==after['expiresAt'] and after['active']
+ assert len([e for e in EVENTS if e.get('eventName')=='sessionEnd'])==before_hooks
+ # Lose only this test chat's exact proof file, without reading or searching it.
+ proof_path=Path(PROOFS[tid]);expected_parent=Path.home()/'Library/Application Support/AgentInfo/codex'
+ assert proof_path.parent==expected_parent and proof_path.is_file() and not proof_path.is_symlink()
+ retained=proof_path.with_name(proof_path.name+'.synthetic-unavailable');assert not retained.exists();proof_path.rename(retained)
+ try:
+  turn(tid,'Try reading the same Address once under your existing request and retained reference. If the association is unavailable, stop and explain that an explicit user reconnect is needed. Never search association files or use a public chat ID to recover anything. Do not reconnect automatically or create a replacement request.')
+  assert CALLS[-1]['threadId']==tid and CALLS[-1]['response'].get('status')=='association_unavailable'
+  assert RESULTS['agentReportChecks'][-1]['reconnectMentioned'];RESULTS['missingAssociationRequiresReconnect']=True
+ finally:
+  # Exact file came from this owned synthetic chat; no capability is exposed.
+  assert retained.is_file() and not retained.is_symlink();retained.unlink();RESULTS['ownedUnavailableProofRemoved']=True
+ request('thread/archive',{'threadId':tid});RESULTS['completeTransportResumeFlow']=True;print('REAL_TRANSPORT_RESUME_COMPLETE',flush=True)
+
 try:
  request('initialize',{'clientInfo':{'name':'agent_info_synthetic_mac_lifecycle','version':'1.0'},'capabilities':{'experimentalApi':True}});send({'method':'initialized','params':{}})
  hooks=request('hooks/list',{'cwds':[str(PROJECT)]})
@@ -201,6 +263,8 @@ try:
  models=request('model/list',{});RESULTS['model']=next(m['model'] for m in models['data'] if m.get('isDefault'));RESULTS['modelSelection']='CLI-advertised default, process only'
  if args.case=='credential':
   credential_case()
+ elif args.case=='transport-resume':
+  transport_resume_case()
  elif args.case=='expiry-restart':
   expiry_restart_case()
  elif args.resume_ended:
@@ -259,12 +323,17 @@ try:
 except Exception as e:
  RESULTS['failure']={'type':type(e).__name__,'message':str(e)};save();print('ACCEPTANCE_FAILURE '+type(e).__name__+' '+str(e),flush=True)
 finally:
- P.stdin.close()
+ if WS is not None:
+  WS.close();P.send_signal(signal.SIGINT)
+ else:P.stdin.close()
  try:RESULTS['serverExitCode']=P.wait(timeout=20)
  except subprocess.TimeoutExpired:P.terminate();RESULTS['serverExitCode']=P.wait(timeout=10)
- ERR.close();RESULTS['finalSnapshot']=owner('status');save()
+ ERR.close()
+ if token_file is not None:
+  assert token.encode() not in (OUT/'real-client-stderr.txt').read_bytes();token_file.unlink();RESULTS['transportTokenRemoved']=True
+ RESULTS['finalSnapshot']=owner('status');save()
  for proof in PROOFS.values():assert proof.encode() not in (OUT/'real-client-result.json').read_bytes()
  RESULTS['proofReferencesAbsentFromEvidence']=True;save();print('LIFECYCLE_CLIENT_CLOSED',flush=True)
 
-if not (RESULTS.get('completeLifecycleFlow') or RESULTS.get('completeEndedResumeFlow') or RESULTS.get('completeCredentialFlow') or RESULTS.get('completeExpiryRestartFlow')):
+if not (RESULTS.get('completeLifecycleFlow') or RESULTS.get('completeEndedResumeFlow') or RESULTS.get('completeCredentialFlow') or RESULTS.get('completeExpiryRestartFlow') or RESULTS.get('completeTransportResumeFlow')):
  raise SystemExit(1)
