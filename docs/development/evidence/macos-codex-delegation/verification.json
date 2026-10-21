@@ -1,0 +1,205 @@
+{
+  "sourceCommit": "b6ff5c8d1b1456ab03a748e0a7f62572ac94cdf3",
+  "productSource": "01c1f141d876a9d3c49c61c7fc3d1e572c432c5a",
+  "realCodexClient": true,
+  "ownerApprovalFixture": true,
+  "notFinalDeliveryPackage": true,
+  "completeDelegationFlow": true,
+  "files": [
+    {
+      "path": "raw/client-1/child-count-after-interrupt.json",
+      "bytes": 199,
+      "sha256": "38737d453cb7589eb6cbb0948e4887f453205af1d105bfeed893b2556370a607"
+    },
+    {
+      "path": "raw/client-1/macos-codex-client.py",
+      "bytes": 41684,
+      "sha256": "6a276f9994ad5b4e0d8df06be40541aa22fa1aed3d23bf69b7179681af048664"
+    },
+    {
+      "path": "raw/client-1/real-client-result.json",
+      "bytes": 41171,
+      "sha256": "e462b6a75677ade35a0e7934b725b6539b3bfa3e0b6922683340ae5d5c130399"
+    },
+    {
+      "path": "raw/client-1/real-client-stderr.txt",
+      "bytes": 7327,
+      "sha256": "4314de9c8eb15e9f8067dc802f639542e1b697becf181bdef644daf01bf46e4f"
+    },
+    {
+      "path": "raw/client-2/macos-codex-client.py",
+      "bytes": 42071,
+      "sha256": "d4f874c9e0bcf8372e0f7ff03f3aa3de072ad19c4d41b3e4d2eeeafc618ac24d"
+    },
+    {
+      "path": "raw/client-2/real-client-result.json",
+      "bytes": 69740,
+      "sha256": "4d398acc16470c26955db22ae05f3aba1db58408fc3ec1d053073d3674947377"
+    },
+    {
+      "path": "raw/client-2/real-client-stderr.txt",
+      "bytes": 19269,
+      "sha256": "f75a87eb40a301e2e8871b736badc86d1fdaeb43c6452d34c4b7b11b8ad38aa6"
+    },
+    {
+      "path": "raw/client-3/macos-codex-client.py",
+      "bytes": 42708,
+      "sha256": "7af6807c168e56a6ad69b8f34fad961777ef813ca9658fea5e9656ab03893aba"
+    },
+    {
+      "path": "raw/client-3/real-client-result.json",
+      "bytes": 105432,
+      "sha256": "78d1afd00dacdb51bf9c9b919db7e1cea9a8d1a4d4feafebb3be43ea5831fa50"
+    },
+    {
+      "path": "raw/client-3/real-client-stderr.txt",
+      "bytes": 13846,
+      "sha256": "5aab1347d1e2d7ed562a360b3d729591d0e2387ca437fcd5a71751af938c5ccc"
+    },
+    {
+      "path": "raw/host-logs/analyze.txt",
+      "bytes": 96,
+      "sha256": "e8f3f850ba2d1bcecf30da764c6abe86e7a5ee6fb56363f9fbd18e8b1926050b"
+    },
+    {
+      "path": "raw/host-logs/app.txt",
+      "bytes": 1135,
+      "sha256": "bbda40f671ba029612b8e92be40840f789304795bbbfb202bf122b6157dda860"
+    },
+    {
+      "path": "raw/host-logs/build-release.txt",
+      "bytes": 5102,
+      "sha256": "f3dd4365247014321a04731f7b015094a80371d0e81e98ceca06e281febdfaec"
+    },
+    {
+      "path": "raw/host-logs/entitlements.txt",
+      "bytes": 763,
+      "sha256": "3f1477ba3a042be339291fff7fa5ae35b6336b1ce4ad3d019064d503ef641638"
+    },
+    {
+      "path": "raw/host-logs/signature.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/host-result.json",
+      "bytes": 89426,
+      "sha256": "148d3db69c5da70ce077749c5cc94b24c9eb04b93c38b81c07d7d4ccca7a2d58"
+    },
+    {
+      "path": "raw/host-sources/apps/desktop/integration_test/macos_codex_live.dart",
+      "bytes": 11184,
+      "sha256": "de4587501343596eb0edf1cc3d6172af41db4cb30ac69e0c6e405ee7706b0152"
+    },
+    {
+      "path": "raw/host-sources/scripts/qa/macos-codex-live.py",
+      "bytes": 8852,
+      "sha256": "f62cf7332c0497d46dfb6467823700ae11d9dd48a88acdfd4a70dc144d44dc66"
+    },
+    {
+      "path": "raw/mcp-1/macos-codex-client.py",
+      "bytes": 46463,
+      "sha256": "03d84572fd0c3d83e17b5aa3a470f7f9561c91904edd33513d0145ffb373ca47"
+    },
+    {
+      "path": "raw/mcp-1/macos-codex-mcp-qa.py",
+      "bytes": 3095,
+      "sha256": "d05c9688a7802efd92689e964e8004282d1b38aedd44a32df81aaad27493614a"
+    },
+    {
+      "path": "raw/mcp-1/real-client-result.json",
+      "bytes": 75563,
+      "sha256": "d89a7b9e07754fd88a312f85b768d1638b3d15733ed6a0ba5cd75f28f7445bf7"
+    },
+    {
+      "path": "raw/mcp-1/real-client-stderr.txt",
+      "bytes": 13846,
+      "sha256": "bd0906953129b5f4bab07068dfd705e8c602d224502b81f69ec676c799257a11"
+    },
+    {
+      "path": "raw/mcp-2/macos-codex-client.py",
+      "bytes": 49524,
+      "sha256": "04eadfdcf170cfa1533dc55831f599e8b8bc7f4e3fc65143528a9bcd6dac87b0"
+    },
+    {
+      "path": "raw/mcp-2/macos-codex-mcp-qa.py",
+      "bytes": 3095,
+      "sha256": "d05c9688a7802efd92689e964e8004282d1b38aedd44a32df81aaad27493614a"
+    },
+    {
+      "path": "raw/mcp-2/real-client-result.json",
+      "bytes": 78787,
+      "sha256": "dd2cd5ff641ce9cff84d824f43d4a69ffe8409929b6abf0af5916ec6c63fe485"
+    },
+    {
+      "path": "raw/mcp-2/real-client-stderr.txt",
+      "bytes": 13846,
+      "sha256": "e655854494fcec5306174520d41e76ba0e7349e41c4b8e5a8b446e41cac7385a"
+    },
+    {
+      "path": "raw/mcp-3/macos-codex-client.py",
+      "bytes": 46876,
+      "sha256": "73affa2fe6791632ac1f7ae4bf838356ad858249730e1f6002ea195da12c9d3f"
+    },
+    {
+      "path": "raw/mcp-3/macos-codex-mcp-qa.py",
+      "bytes": 3095,
+      "sha256": "d05c9688a7802efd92689e964e8004282d1b38aedd44a32df81aaad27493614a"
+    },
+    {
+      "path": "raw/mcp-3/real-client-result.json",
+      "bytes": 97911,
+      "sha256": "b74ae0e5c81a35809ef615c4cce815f11cacd5ad6ec683d36dc66ec27d2d92bc"
+    },
+    {
+      "path": "raw/mcp-3/real-client-stderr.txt",
+      "bytes": 13846,
+      "sha256": "b5a3f1875c80aaaad1ff525c73eb293b13298e92149182c5fe8b9bd8146d4388"
+    },
+    {
+      "path": "raw/mcp-4/macos-codex-client.py",
+      "bytes": 47795,
+      "sha256": "411814484a1c6aed617c63fbe6e8921dbf98047c51be09c4e60ab3ed90a49ecc"
+    },
+    {
+      "path": "raw/mcp-4/macos-codex-mcp-qa.py",
+      "bytes": 3395,
+      "sha256": "7e112a74ac6d3ccebd81f4b79536fff7ad2639dfa232b027d2cfc0d3a84bd932"
+    },
+    {
+      "path": "raw/mcp-4/real-client-result.json",
+      "bytes": 155719,
+      "sha256": "8b4363e1a9f642066088dc750785cf6eba44298351180a3d1ac249736f92de5d"
+    },
+    {
+      "path": "raw/mcp-4/real-client-stderr.txt",
+      "bytes": 13846,
+      "sha256": "342fc1c4d9a9b3a6b2668de1bde9a9f2f95ebe5271b16db3f6c0f85590f0a087"
+    },
+    {
+      "path": "raw/mcp-5/macos-codex-client.py",
+      "bytes": 48325,
+      "sha256": "47c4774ec40cc8020628d6350607541373716a62981694e3bec7fb54272cd29f"
+    },
+    {
+      "path": "raw/mcp-5/macos-codex-mcp-qa.py",
+      "bytes": 3395,
+      "sha256": "7e112a74ac6d3ccebd81f4b79536fff7ad2639dfa232b027d2cfc0d3a84bd932"
+    },
+    {
+      "path": "raw/mcp-5/real-client-result.json",
+      "bytes": 174353,
+      "sha256": "add6889d30e84602f80d4e0e338a2ee6ab34d994a657ff7940ff37da3d84a538"
+    },
+    {
+      "path": "raw/mcp-5/real-client-stderr.txt",
+      "bytes": 13846,
+      "sha256": "1bc17b683a170bbc74972cd9af5f7731791339e6e7c6750fd62df1549e60dd00"
+    },
+    {
+      "path": "raw/source-and-scope-verification.json",
+      "bytes": 28992,
+      "sha256": "3acd4ce1992268a08b74771688e5c0b802480440abae2e34c2bb3d11a1346705"
+    }
+  ]
+}
