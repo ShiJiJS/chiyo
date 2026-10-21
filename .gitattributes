@@ -143,3 +143,9 @@ docs/development/evidence/macos-installed-ssh/raw/** -text -diff
 docs/development/evidence/macos-installed-file-versions/raw/** -text -diff
 
 docs/development/evidence/macos-native-text-editing/raw/** -text -diff
+
+docs/development/evidence/macos-editor-focus/raw/** -text -diff
+
+docs/development/evidence/macos-key-routing/raw/** -text -diff
+
+docs/development/evidence/macos-default-keyboard-actions/raw/** -text -diff
