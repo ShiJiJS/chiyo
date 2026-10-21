@@ -1,0 +1,2553 @@
+{
+  "results": {
+    "sourceSha256": "c75e4cae7700a4e470690af17d2e8625bb2ed3cb4471ab9b3636ef6e04aad9e0",
+    "scope": "Real synthetic Codex lifecycle acceptance against macos-codex-live.py.\n\nRequires existing explicit project/hook trust; never installs or trusts hooks.\nOnly synthetic fixtures. Uses real app-server/model and anonymous CLI stdin.\nOwner approval is a QA file controller, not physical owner UI acceptance.\nPrivate proofs stay in memory. No transcript/authentication files are read.\n",
+    "hookDiscovery": {
+      "data": [
+        {
+          "cwd": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee",
+          "hooks": [
+            {
+              "key": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json:session_start:0:0",
+              "eventName": "sessionStart",
+              "handlerType": "command",
+              "command": "'/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u7a33\u5b9a \u4e2d\u6587 '\"'\"'quote $literal; bundle/info-codex-hook'",
+              "async": false,
+              "matcher": "^(startup|resume|clear|compact|fork)$",
+              "timeoutSec": 15,
+              "statusMessage": null,
+              "additionalContextLimit": 0,
+              "sourcePath": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json",
+              "source": "project",
+              "pluginId": null,
+              "displayOrder": 0,
+              "enabled": true,
+              "isManaged": false,
+              "currentHash": "sha256:0f869a94c72f506b6433e82b5e475ee5f3ab4bb1ee670d50b2a709df769b6708",
+              "trustStatus": "trusted"
+            },
+            {
+              "key": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json:session_end:0:0",
+              "eventName": "sessionEnd",
+              "handlerType": "command",
+              "command": "'/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u7a33\u5b9a \u4e2d\u6587 '\"'\"'quote $literal; bundle/info-codex-hook'",
+              "async": false,
+              "matcher": null,
+              "timeoutSec": 3,
+              "statusMessage": null,
+              "additionalContextLimit": null,
+              "sourcePath": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json",
+              "source": "project",
+              "pluginId": null,
+              "displayOrder": 1,
+              "enabled": true,
+              "isManaged": false,
+              "currentHash": "sha256:03bd283945cea71c863fc14ee26826fd4c1b45eea7b50ebcb92a02719cc276b8",
+              "trustStatus": "trusted"
+            },
+            {
+              "key": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json:subagent_start:0:0",
+              "eventName": "subagentStart",
+              "handlerType": "command",
+              "command": "'/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u7a33\u5b9a \u4e2d\u6587 '\"'\"'quote $literal; bundle/info-codex-hook'",
+              "async": false,
+              "matcher": null,
+              "timeoutSec": 5,
+              "statusMessage": null,
+              "additionalContextLimit": 0,
+              "sourcePath": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json",
+              "source": "project",
+              "pluginId": null,
+              "displayOrder": 2,
+              "enabled": true,
+              "isManaged": false,
+              "currentHash": "sha256:334648132fbd2fff2628e414c60918e002391227bd1b5ef9ed02a63fc4ae04ae",
+              "trustStatus": "trusted"
+            }
+          ],
+          "warnings": [
+            "ignoring additionalContextLimit for SessionEnd hook in /Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json: this event cannot emit additionalContext"
+          ],
+          "errors": []
+        }
+      ]
+    },
+    "model": "gpt-6-astra",
+    "modelSelection": "CLI-advertised default, process only",
+    "threadE": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+    "turns": [
+      {
+        "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+        "status": "completed",
+        "calls": 2
+      },
+      {
+        "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+        "status": "completed",
+        "calls": 2
+      },
+      {
+        "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+        "status": "completed",
+        "calls": 1
+      },
+      {
+        "threadId": "01a15cbf-133c-7a21-8751-06c9b48b24ae",
+        "status": "failed",
+        "calls": 0
+      }
+    ],
+    "requestE": "Cq_zXa_tXo_1QjSPzch71WIdswKsFj0IKXKFcQSqO4I=",
+    "approvedSnapshot": {
+      "ready": true,
+      "port": 47125,
+      "cipherVersion": "4.19.0 community",
+      "flutterErrors": 0,
+      "libraryCloses": 0,
+      "textItem": "zcoLLy1V3IkQN2MpvvoENfN1U1NwMYNx959Wd_Gh3Bg=",
+      "addressField": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8=",
+      "usernameField": "xz_-Aycuvz8QRgI6efkcNRm-SFE0DuCjospjyhbWuBo=",
+      "fileItem": "g-AG00sDYToGQTBQ_Ws-ga_x4WXM-NbBoE9YTYcU3tM=",
+      "fileField": "diXsqFKBzOszby6iIFCiKUWODze3wZRH_zwYuxX00kQ=",
+      "requests": [
+        {
+          "id": "zXBwjk3ieoNdw_EGVf_Au8X8_hT43aqBNPLkwzvxjwg=",
+          "state": "revoked",
+          "chatLabel": "Codex 01a15cb8-894e-7180-8c5f-49f6546faafd",
+          "sessionEnded": true,
+          "fields": [
+            {
+              "itemId": "zcoLLy1V3IkQN2MpvvoENfN1U1NwMYNx959Wd_Gh3Bg=",
+              "fieldId": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8="
+            },
+            {
+              "itemId": "zcoLLy1V3IkQN2MpvvoENfN1U1NwMYNx959Wd_Gh3Bg=",
+              "fieldId": "xz_-Aycuvz8QRgI6efkcNRm-SFE0DuCjospjyhbWuBo="
+            }
+          ],
+          "approvedFields": [
+            {
+              "itemId": "zcoLLy1V3IkQN2MpvvoENfN1U1NwMYNx959Wd_Gh3Bg=",
+              "fieldId": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8="
+            }
+          ],
+          "expiresAt": "2026-10-21T13:29:41.126010"
+        },
+        {
+          "id": "l77fILSf-bRcJUYI6RqBIbdsV1chtjXy3qD_uNxyQm4=",
+          "state": "revoked",
+          "chatLabel": "Codex 01a15cba-9209-79e0-9d00-e40787ffe6f3",
+          "sessionEnded": true,
+          "fields": [
+            {
+              "itemId": "g-AG00sDYToGQTBQ_Ws-ga_x4WXM-NbBoE9YTYcU3tM=",
+              "fieldId": "diXsqFKBzOszby6iIFCiKUWODze3wZRH_zwYuxX00kQ="
+            }
+          ],
+          "approvedFields": [
+            {
+              "itemId": "g-AG00sDYToGQTBQ_Ws-ga_x4WXM-NbBoE9YTYcU3tM=",
+              "fieldId": "diXsqFKBzOszby6iIFCiKUWODze3wZRH_zwYuxX00kQ="
+            }
+          ],
+          "expiresAt": "2026-10-21T13:31:59.182082"
+        },
+        {
+          "id": "ZDvl9mRZxKpHuYvFhAoJ6KsI4FsduH60PDNF7yFK27Q=",
+          "state": "revoked",
+          "chatLabel": "Codex 01a15cbc-074d-76f3-bfda-4b74a73b14fa",
+          "sessionEnded": true,
+          "fields": [
+            {
+              "itemId": "g-AG00sDYToGQTBQ_Ws-ga_x4WXM-NbBoE9YTYcU3tM=",
+              "fieldId": "diXsqFKBzOszby6iIFCiKUWODze3wZRH_zwYuxX00kQ="
+            }
+          ],
+          "approvedFields": [
+            {
+              "itemId": "g-AG00sDYToGQTBQ_Ws-ga_x4WXM-NbBoE9YTYcU3tM=",
+              "fieldId": "diXsqFKBzOszby6iIFCiKUWODze3wZRH_zwYuxX00kQ="
+            }
+          ],
+          "expiresAt": "2026-10-21T13:33:29.093299"
+        },
+        {
+          "id": "Cq_zXa_tXo_1QjSPzch71WIdswKsFj0IKXKFcQSqO4I=",
+          "state": "approved",
+          "chatLabel": "Codex 01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+          "sessionEnded": false,
+          "fields": [
+            {
+              "itemId": "zcoLLy1V3IkQN2MpvvoENfN1U1NwMYNx959Wd_Gh3Bg=",
+              "fieldId": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8="
+            }
+          ],
+          "approvedFields": [
+            {
+              "itemId": "zcoLLy1V3IkQN2MpvvoENfN1U1NwMYNx959Wd_Gh3Bg=",
+              "fieldId": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8="
+            }
+          ],
+          "expiresAt": "2026-10-21T13:35:19.573292"
+        }
+      ],
+      "grants": [
+        {
+          "id": "9fiiL2cqtH54zq_usfGpPuUuLu74Jo1KsByA_ddAe60=",
+          "requestId": "zXBwjk3ieoNdw_EGVf_Au8X8_hT43aqBNPLkwzvxjwg=",
+          "active": false,
+          "expiresAt": "2026-10-21T13:29:41.126010",
+          "events": [
+            "approved",
+            "revoked"
+          ]
+        },
+        {
+          "id": "ua_QBL4Ue4qV8YhzF1FNI9OYPVV-ozg139LqJHZadEg=",
+          "requestId": "l77fILSf-bRcJUYI6RqBIbdsV1chtjXy3qD_uNxyQm4=",
+          "active": false,
+          "expiresAt": "2026-10-21T13:31:59.182082",
+          "events": [
+            "approved",
+            "ended"
+          ]
+        },
+        {
+          "id": "PCTLWFDv1takrO2-CsieRE7pTh0iPn2_IQiivNoMxvA=",
+          "requestId": "ZDvl9mRZxKpHuYvFhAoJ6KsI4FsduH60PDNF7yFK27Q=",
+          "active": false,
+          "expiresAt": "2026-10-21T13:33:29.093299",
+          "events": [
+            "approved",
+            "ended"
+          ]
+        },
+        {
+          "id": "S2ZhA_POzh6kDelpPpZe9sDxfP8UxF3r8zAXHWh8a7k=",
+          "requestId": "Cq_zXa_tXo_1QjSPzch71WIdswKsFj0IKXKFcQSqO4I=",
+          "active": true,
+          "expiresAt": "2026-10-21T13:35:19.573292",
+          "events": [
+            "approved"
+          ]
+        }
+      ],
+      "accesses": [
+        {
+          "id": "nG6c__kATH1T2ImJ4Wb1mHn6WWeCSL-XEIP5pNH4eUI=",
+          "outcome": "allowed",
+          "grantId": "9fiiL2cqtH54zq_usfGpPuUuLu74Jo1KsByA_ddAe60=",
+          "fieldId": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8="
+        },
+        {
+          "id": "RG6dhhGQ25an_RLMotsNgIX8uAoCUHDQ0EvHknFYtOI=",
+          "outcome": "allowed",
+          "grantId": "9fiiL2cqtH54zq_usfGpPuUuLu74Jo1KsByA_ddAe60=",
+          "fieldId": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8="
+        },
+        {
+          "id": "8bIVqAXUldRURgcJYLX5lnV8AFcZrW8OYEVQ1n49nbk=",
+          "outcome": "unauthorized",
+          "grantId": "9fiiL2cqtH54zq_usfGpPuUuLu74Jo1KsByA_ddAe60=",
+          "fieldId": "xz_-Aycuvz8QRgI6efkcNRm-SFE0DuCjospjyhbWuBo="
+        }
+      ],
+      "deliveries": [
+        {
+          "id": "IapZIBPCF_qdw7e-n-rhdowlRNYFutcZyx4fpSzniuM=",
+          "state": "released",
+          "holdsCopy": false
+        }
+      ]
+    },
+    "beforeRejoinSnapshot": {
+      "ready": true,
+      "port": 47125,
+      "cipherVersion": "4.19.0 community",
+      "flutterErrors": 0,
+      "libraryCloses": 0,
+      "textItem": "zcoLLy1V3IkQN2MpvvoENfN1U1NwMYNx959Wd_Gh3Bg=",
+      "addressField": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8=",
+      "usernameField": "xz_-Aycuvz8QRgI6efkcNRm-SFE0DuCjospjyhbWuBo=",
+      "fileItem": "g-AG00sDYToGQTBQ_Ws-ga_x4WXM-NbBoE9YTYcU3tM=",
+      "fileField": "diXsqFKBzOszby6iIFCiKUWODze3wZRH_zwYuxX00kQ=",
+      "requests": [
+        {
+          "id": "zXBwjk3ieoNdw_EGVf_Au8X8_hT43aqBNPLkwzvxjwg=",
+          "state": "revoked",
+          "chatLabel": "Codex 01a15cb8-894e-7180-8c5f-49f6546faafd",
+          "sessionEnded": true,
+          "fields": [
+            {
+              "itemId": "zcoLLy1V3IkQN2MpvvoENfN1U1NwMYNx959Wd_Gh3Bg=",
+              "fieldId": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8="
+            },
+            {
+              "itemId": "zcoLLy1V3IkQN2MpvvoENfN1U1NwMYNx959Wd_Gh3Bg=",
+              "fieldId": "xz_-Aycuvz8QRgI6efkcNRm-SFE0DuCjospjyhbWuBo="
+            }
+          ],
+          "approvedFields": [
+            {
+              "itemId": "zcoLLy1V3IkQN2MpvvoENfN1U1NwMYNx959Wd_Gh3Bg=",
+              "fieldId": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8="
+            }
+          ],
+          "expiresAt": "2026-10-21T13:29:41.126010"
+        },
+        {
+          "id": "l77fILSf-bRcJUYI6RqBIbdsV1chtjXy3qD_uNxyQm4=",
+          "state": "revoked",
+          "chatLabel": "Codex 01a15cba-9209-79e0-9d00-e40787ffe6f3",
+          "sessionEnded": true,
+          "fields": [
+            {
+              "itemId": "g-AG00sDYToGQTBQ_Ws-ga_x4WXM-NbBoE9YTYcU3tM=",
+              "fieldId": "diXsqFKBzOszby6iIFCiKUWODze3wZRH_zwYuxX00kQ="
+            }
+          ],
+          "approvedFields": [
+            {
+              "itemId": "g-AG00sDYToGQTBQ_Ws-ga_x4WXM-NbBoE9YTYcU3tM=",
+              "fieldId": "diXsqFKBzOszby6iIFCiKUWODze3wZRH_zwYuxX00kQ="
+            }
+          ],
+          "expiresAt": "2026-10-21T13:31:59.182082"
+        },
+        {
+          "id": "ZDvl9mRZxKpHuYvFhAoJ6KsI4FsduH60PDNF7yFK27Q=",
+          "state": "revoked",
+          "chatLabel": "Codex 01a15cbc-074d-76f3-bfda-4b74a73b14fa",
+          "sessionEnded": true,
+          "fields": [
+            {
+              "itemId": "g-AG00sDYToGQTBQ_Ws-ga_x4WXM-NbBoE9YTYcU3tM=",
+              "fieldId": "diXsqFKBzOszby6iIFCiKUWODze3wZRH_zwYuxX00kQ="
+            }
+          ],
+          "approvedFields": [
+            {
+              "itemId": "g-AG00sDYToGQTBQ_Ws-ga_x4WXM-NbBoE9YTYcU3tM=",
+              "fieldId": "diXsqFKBzOszby6iIFCiKUWODze3wZRH_zwYuxX00kQ="
+            }
+          ],
+          "expiresAt": "2026-10-21T13:33:29.093299"
+        },
+        {
+          "id": "Cq_zXa_tXo_1QjSPzch71WIdswKsFj0IKXKFcQSqO4I=",
+          "state": "approved",
+          "chatLabel": "Codex 01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+          "sessionEnded": false,
+          "fields": [
+            {
+              "itemId": "zcoLLy1V3IkQN2MpvvoENfN1U1NwMYNx959Wd_Gh3Bg=",
+              "fieldId": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8="
+            }
+          ],
+          "approvedFields": [
+            {
+              "itemId": "zcoLLy1V3IkQN2MpvvoENfN1U1NwMYNx959Wd_Gh3Bg=",
+              "fieldId": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8="
+            }
+          ],
+          "expiresAt": "2026-10-21T13:35:19.573292"
+        }
+      ],
+      "grants": [
+        {
+          "id": "9fiiL2cqtH54zq_usfGpPuUuLu74Jo1KsByA_ddAe60=",
+          "requestId": "zXBwjk3ieoNdw_EGVf_Au8X8_hT43aqBNPLkwzvxjwg=",
+          "active": false,
+          "expiresAt": "2026-10-21T13:29:41.126010",
+          "events": [
+            "approved",
+            "revoked"
+          ]
+        },
+        {
+          "id": "ua_QBL4Ue4qV8YhzF1FNI9OYPVV-ozg139LqJHZadEg=",
+          "requestId": "l77fILSf-bRcJUYI6RqBIbdsV1chtjXy3qD_uNxyQm4=",
+          "active": false,
+          "expiresAt": "2026-10-21T13:31:59.182082",
+          "events": [
+            "approved",
+            "ended"
+          ]
+        },
+        {
+          "id": "PCTLWFDv1takrO2-CsieRE7pTh0iPn2_IQiivNoMxvA=",
+          "requestId": "ZDvl9mRZxKpHuYvFhAoJ6KsI4FsduH60PDNF7yFK27Q=",
+          "active": false,
+          "expiresAt": "2026-10-21T13:33:29.093299",
+          "events": [
+            "approved",
+            "ended"
+          ]
+        },
+        {
+          "id": "S2ZhA_POzh6kDelpPpZe9sDxfP8UxF3r8zAXHWh8a7k=",
+          "requestId": "Cq_zXa_tXo_1QjSPzch71WIdswKsFj0IKXKFcQSqO4I=",
+          "active": true,
+          "expiresAt": "2026-10-21T13:35:19.573292",
+          "events": [
+            "approved"
+          ]
+        }
+      ],
+      "accesses": [
+        {
+          "id": "nG6c__kATH1T2ImJ4Wb1mHn6WWeCSL-XEIP5pNH4eUI=",
+          "outcome": "allowed",
+          "grantId": "9fiiL2cqtH54zq_usfGpPuUuLu74Jo1KsByA_ddAe60=",
+          "fieldId": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8="
+        },
+        {
+          "id": "RG6dhhGQ25an_RLMotsNgIX8uAoCUHDQ0EvHknFYtOI=",
+          "outcome": "allowed",
+          "grantId": "9fiiL2cqtH54zq_usfGpPuUuLu74Jo1KsByA_ddAe60=",
+          "fieldId": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8="
+        },
+        {
+          "id": "8bIVqAXUldRURgcJYLX5lnV8AFcZrW8OYEVQ1n49nbk=",
+          "outcome": "unauthorized",
+          "grantId": "9fiiL2cqtH54zq_usfGpPuUuLu74Jo1KsByA_ddAe60=",
+          "fieldId": "xz_-Aycuvz8QRgI6efkcNRm-SFE0DuCjospjyhbWuBo="
+        },
+        {
+          "id": "ylBOC1t4YtfkQOMe9ar6Z9PQ19cc2vlXy1m-aa_pe58=",
+          "outcome": "allowed",
+          "grantId": "S2ZhA_POzh6kDelpPpZe9sDxfP8UxF3r8zAXHWh8a7k=",
+          "fieldId": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8="
+        }
+      ],
+      "deliveries": [
+        {
+          "id": "IapZIBPCF_qdw7e-n-rhdowlRNYFutcZyx4fpSzniuM=",
+          "state": "released",
+          "holdsCopy": false
+        }
+      ]
+    },
+    "runningRejoinDone": true,
+    "compactionEvents": [
+      {
+        "method": "thread/goal/cleared",
+        "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+        "turnId": null
+      },
+      {
+        "method": "thread/status/changed",
+        "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+        "turnId": null
+      },
+      {
+        "method": "turn/started",
+        "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+        "turnId": null
+      },
+      {
+        "method": "item/started",
+        "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+        "turnId": "01a15cbe-3ec9-79c1-bd3e-fc8128f4798f",
+        "itemType": "contextCompaction"
+      },
+      {
+        "method": "thread/tokenUsage/updated",
+        "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+        "turnId": "01a15cbe-3ec9-79c1-bd3e-fc8128f4798f"
+      },
+      {
+        "method": "account/rateLimits/updated",
+        "threadId": null,
+        "turnId": null
+      },
+      {
+        "method": "item/completed",
+        "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+        "turnId": "01a15cbe-3ec9-79c1-bd3e-fc8128f4798f",
+        "itemType": "contextCompaction"
+      },
+      {
+        "method": "thread/status/changed",
+        "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+        "turnId": null
+      },
+      {
+        "method": "turn/completed",
+        "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+        "turnId": null
+      }
+    ],
+    "afterCompactSnapshot": {
+      "ready": true,
+      "port": 47125,
+      "cipherVersion": "4.19.0 community",
+      "flutterErrors": 0,
+      "libraryCloses": 0,
+      "textItem": "zcoLLy1V3IkQN2MpvvoENfN1U1NwMYNx959Wd_Gh3Bg=",
+      "addressField": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8=",
+      "usernameField": "xz_-Aycuvz8QRgI6efkcNRm-SFE0DuCjospjyhbWuBo=",
+      "fileItem": "g-AG00sDYToGQTBQ_Ws-ga_x4WXM-NbBoE9YTYcU3tM=",
+      "fileField": "diXsqFKBzOszby6iIFCiKUWODze3wZRH_zwYuxX00kQ=",
+      "requests": [
+        {
+          "id": "zXBwjk3ieoNdw_EGVf_Au8X8_hT43aqBNPLkwzvxjwg=",
+          "state": "revoked",
+          "chatLabel": "Codex 01a15cb8-894e-7180-8c5f-49f6546faafd",
+          "sessionEnded": true,
+          "fields": [
+            {
+              "itemId": "zcoLLy1V3IkQN2MpvvoENfN1U1NwMYNx959Wd_Gh3Bg=",
+              "fieldId": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8="
+            },
+            {
+              "itemId": "zcoLLy1V3IkQN2MpvvoENfN1U1NwMYNx959Wd_Gh3Bg=",
+              "fieldId": "xz_-Aycuvz8QRgI6efkcNRm-SFE0DuCjospjyhbWuBo="
+            }
+          ],
+          "approvedFields": [
+            {
+              "itemId": "zcoLLy1V3IkQN2MpvvoENfN1U1NwMYNx959Wd_Gh3Bg=",
+              "fieldId": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8="
+            }
+          ],
+          "expiresAt": "2026-10-21T13:29:41.126010"
+        },
+        {
+          "id": "l77fILSf-bRcJUYI6RqBIbdsV1chtjXy3qD_uNxyQm4=",
+          "state": "revoked",
+          "chatLabel": "Codex 01a15cba-9209-79e0-9d00-e40787ffe6f3",
+          "sessionEnded": true,
+          "fields": [
+            {
+              "itemId": "g-AG00sDYToGQTBQ_Ws-ga_x4WXM-NbBoE9YTYcU3tM=",
+              "fieldId": "diXsqFKBzOszby6iIFCiKUWODze3wZRH_zwYuxX00kQ="
+            }
+          ],
+          "approvedFields": [
+            {
+              "itemId": "g-AG00sDYToGQTBQ_Ws-ga_x4WXM-NbBoE9YTYcU3tM=",
+              "fieldId": "diXsqFKBzOszby6iIFCiKUWODze3wZRH_zwYuxX00kQ="
+            }
+          ],
+          "expiresAt": "2026-10-21T13:31:59.182082"
+        },
+        {
+          "id": "ZDvl9mRZxKpHuYvFhAoJ6KsI4FsduH60PDNF7yFK27Q=",
+          "state": "revoked",
+          "chatLabel": "Codex 01a15cbc-074d-76f3-bfda-4b74a73b14fa",
+          "sessionEnded": true,
+          "fields": [
+            {
+              "itemId": "g-AG00sDYToGQTBQ_Ws-ga_x4WXM-NbBoE9YTYcU3tM=",
+              "fieldId": "diXsqFKBzOszby6iIFCiKUWODze3wZRH_zwYuxX00kQ="
+            }
+          ],
+          "approvedFields": [
+            {
+              "itemId": "g-AG00sDYToGQTBQ_Ws-ga_x4WXM-NbBoE9YTYcU3tM=",
+              "fieldId": "diXsqFKBzOszby6iIFCiKUWODze3wZRH_zwYuxX00kQ="
+            }
+          ],
+          "expiresAt": "2026-10-21T13:33:29.093299"
+        },
+        {
+          "id": "Cq_zXa_tXo_1QjSPzch71WIdswKsFj0IKXKFcQSqO4I=",
+          "state": "approved",
+          "chatLabel": "Codex 01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+          "sessionEnded": false,
+          "fields": [
+            {
+              "itemId": "zcoLLy1V3IkQN2MpvvoENfN1U1NwMYNx959Wd_Gh3Bg=",
+              "fieldId": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8="
+            }
+          ],
+          "approvedFields": [
+            {
+              "itemId": "zcoLLy1V3IkQN2MpvvoENfN1U1NwMYNx959Wd_Gh3Bg=",
+              "fieldId": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8="
+            }
+          ],
+          "expiresAt": "2026-10-21T13:35:19.573292"
+        }
+      ],
+      "grants": [
+        {
+          "id": "9fiiL2cqtH54zq_usfGpPuUuLu74Jo1KsByA_ddAe60=",
+          "requestId": "zXBwjk3ieoNdw_EGVf_Au8X8_hT43aqBNPLkwzvxjwg=",
+          "active": false,
+          "expiresAt": "2026-10-21T13:29:41.126010",
+          "events": [
+            "approved",
+            "revoked"
+          ]
+        },
+        {
+          "id": "ua_QBL4Ue4qV8YhzF1FNI9OYPVV-ozg139LqJHZadEg=",
+          "requestId": "l77fILSf-bRcJUYI6RqBIbdsV1chtjXy3qD_uNxyQm4=",
+          "active": false,
+          "expiresAt": "2026-10-21T13:31:59.182082",
+          "events": [
+            "approved",
+            "ended"
+          ]
+        },
+        {
+          "id": "PCTLWFDv1takrO2-CsieRE7pTh0iPn2_IQiivNoMxvA=",
+          "requestId": "ZDvl9mRZxKpHuYvFhAoJ6KsI4FsduH60PDNF7yFK27Q=",
+          "active": false,
+          "expiresAt": "2026-10-21T13:33:29.093299",
+          "events": [
+            "approved",
+            "ended"
+          ]
+        },
+        {
+          "id": "S2ZhA_POzh6kDelpPpZe9sDxfP8UxF3r8zAXHWh8a7k=",
+          "requestId": "Cq_zXa_tXo_1QjSPzch71WIdswKsFj0IKXKFcQSqO4I=",
+          "active": true,
+          "expiresAt": "2026-10-21T13:35:19.573292",
+          "events": [
+            "approved"
+          ]
+        }
+      ],
+      "accesses": [
+        {
+          "id": "nG6c__kATH1T2ImJ4Wb1mHn6WWeCSL-XEIP5pNH4eUI=",
+          "outcome": "allowed",
+          "grantId": "9fiiL2cqtH54zq_usfGpPuUuLu74Jo1KsByA_ddAe60=",
+          "fieldId": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8="
+        },
+        {
+          "id": "RG6dhhGQ25an_RLMotsNgIX8uAoCUHDQ0EvHknFYtOI=",
+          "outcome": "allowed",
+          "grantId": "9fiiL2cqtH54zq_usfGpPuUuLu74Jo1KsByA_ddAe60=",
+          "fieldId": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8="
+        },
+        {
+          "id": "8bIVqAXUldRURgcJYLX5lnV8AFcZrW8OYEVQ1n49nbk=",
+          "outcome": "unauthorized",
+          "grantId": "9fiiL2cqtH54zq_usfGpPuUuLu74Jo1KsByA_ddAe60=",
+          "fieldId": "xz_-Aycuvz8QRgI6efkcNRm-SFE0DuCjospjyhbWuBo="
+        },
+        {
+          "id": "ylBOC1t4YtfkQOMe9ar6Z9PQ19cc2vlXy1m-aa_pe58=",
+          "outcome": "allowed",
+          "grantId": "S2ZhA_POzh6kDelpPpZe9sDxfP8UxF3r8zAXHWh8a7k=",
+          "fieldId": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8="
+        },
+        {
+          "id": "c-Yv247x8sdYZTKhrbMAxskoCRwUWlJj6mwQfxVfhCU=",
+          "outcome": "allowed",
+          "grantId": "S2ZhA_POzh6kDelpPpZe9sDxfP8UxF3r8zAXHWh8a7k=",
+          "fieldId": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8="
+        }
+      ],
+      "deliveries": [
+        {
+          "id": "IapZIBPCF_qdw7e-n-rhdowlRNYFutcZyx4fpSzniuM=",
+          "state": "released",
+          "holdsCopy": false
+        }
+      ]
+    },
+    "threadF": "01a15cbf-133c-7a21-8751-06c9b48b24ae",
+    "clientErrors": [
+      {
+        "message": "{\"type\":\"error\",\"status\":400,\"error\":{\"type\":\"invalid_request_error\",\"message\":\"The 'gpt-6.1-sol' model is not supported when using Codex with a ChatGPT account.\"}}",
+        "codexErrorInfo": "other",
+        "additionalDetails": null,
+        "misalignment": null
+      }
+    ],
+    "failure": {
+      "type": "AssertionError",
+      "message": "failed"
+    },
+    "serverExitCode": 0,
+    "finalSnapshot": {
+      "ready": true,
+      "port": 47125,
+      "cipherVersion": "4.19.0 community",
+      "flutterErrors": 0,
+      "libraryCloses": 0,
+      "textItem": "zcoLLy1V3IkQN2MpvvoENfN1U1NwMYNx959Wd_Gh3Bg=",
+      "addressField": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8=",
+      "usernameField": "xz_-Aycuvz8QRgI6efkcNRm-SFE0DuCjospjyhbWuBo=",
+      "fileItem": "g-AG00sDYToGQTBQ_Ws-ga_x4WXM-NbBoE9YTYcU3tM=",
+      "fileField": "diXsqFKBzOszby6iIFCiKUWODze3wZRH_zwYuxX00kQ=",
+      "requests": [
+        {
+          "id": "zXBwjk3ieoNdw_EGVf_Au8X8_hT43aqBNPLkwzvxjwg=",
+          "state": "revoked",
+          "chatLabel": "Codex 01a15cb8-894e-7180-8c5f-49f6546faafd",
+          "sessionEnded": true,
+          "fields": [
+            {
+              "itemId": "zcoLLy1V3IkQN2MpvvoENfN1U1NwMYNx959Wd_Gh3Bg=",
+              "fieldId": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8="
+            },
+            {
+              "itemId": "zcoLLy1V3IkQN2MpvvoENfN1U1NwMYNx959Wd_Gh3Bg=",
+              "fieldId": "xz_-Aycuvz8QRgI6efkcNRm-SFE0DuCjospjyhbWuBo="
+            }
+          ],
+          "approvedFields": [
+            {
+              "itemId": "zcoLLy1V3IkQN2MpvvoENfN1U1NwMYNx959Wd_Gh3Bg=",
+              "fieldId": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8="
+            }
+          ],
+          "expiresAt": "2026-10-21T13:29:41.126010"
+        },
+        {
+          "id": "l77fILSf-bRcJUYI6RqBIbdsV1chtjXy3qD_uNxyQm4=",
+          "state": "revoked",
+          "chatLabel": "Codex 01a15cba-9209-79e0-9d00-e40787ffe6f3",
+          "sessionEnded": true,
+          "fields": [
+            {
+              "itemId": "g-AG00sDYToGQTBQ_Ws-ga_x4WXM-NbBoE9YTYcU3tM=",
+              "fieldId": "diXsqFKBzOszby6iIFCiKUWODze3wZRH_zwYuxX00kQ="
+            }
+          ],
+          "approvedFields": [
+            {
+              "itemId": "g-AG00sDYToGQTBQ_Ws-ga_x4WXM-NbBoE9YTYcU3tM=",
+              "fieldId": "diXsqFKBzOszby6iIFCiKUWODze3wZRH_zwYuxX00kQ="
+            }
+          ],
+          "expiresAt": "2026-10-21T13:31:59.182082"
+        },
+        {
+          "id": "ZDvl9mRZxKpHuYvFhAoJ6KsI4FsduH60PDNF7yFK27Q=",
+          "state": "revoked",
+          "chatLabel": "Codex 01a15cbc-074d-76f3-bfda-4b74a73b14fa",
+          "sessionEnded": true,
+          "fields": [
+            {
+              "itemId": "g-AG00sDYToGQTBQ_Ws-ga_x4WXM-NbBoE9YTYcU3tM=",
+              "fieldId": "diXsqFKBzOszby6iIFCiKUWODze3wZRH_zwYuxX00kQ="
+            }
+          ],
+          "approvedFields": [
+            {
+              "itemId": "g-AG00sDYToGQTBQ_Ws-ga_x4WXM-NbBoE9YTYcU3tM=",
+              "fieldId": "diXsqFKBzOszby6iIFCiKUWODze3wZRH_zwYuxX00kQ="
+            }
+          ],
+          "expiresAt": "2026-10-21T13:33:29.093299"
+        },
+        {
+          "id": "Cq_zXa_tXo_1QjSPzch71WIdswKsFj0IKXKFcQSqO4I=",
+          "state": "revoked",
+          "chatLabel": "Codex 01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+          "sessionEnded": true,
+          "fields": [
+            {
+              "itemId": "zcoLLy1V3IkQN2MpvvoENfN1U1NwMYNx959Wd_Gh3Bg=",
+              "fieldId": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8="
+            }
+          ],
+          "approvedFields": [
+            {
+              "itemId": "zcoLLy1V3IkQN2MpvvoENfN1U1NwMYNx959Wd_Gh3Bg=",
+              "fieldId": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8="
+            }
+          ],
+          "expiresAt": "2026-10-21T13:35:19.573292"
+        }
+      ],
+      "grants": [
+        {
+          "id": "9fiiL2cqtH54zq_usfGpPuUuLu74Jo1KsByA_ddAe60=",
+          "requestId": "zXBwjk3ieoNdw_EGVf_Au8X8_hT43aqBNPLkwzvxjwg=",
+          "active": false,
+          "expiresAt": "2026-10-21T13:29:41.126010",
+          "events": [
+            "approved",
+            "revoked"
+          ]
+        },
+        {
+          "id": "ua_QBL4Ue4qV8YhzF1FNI9OYPVV-ozg139LqJHZadEg=",
+          "requestId": "l77fILSf-bRcJUYI6RqBIbdsV1chtjXy3qD_uNxyQm4=",
+          "active": false,
+          "expiresAt": "2026-10-21T13:31:59.182082",
+          "events": [
+            "approved",
+            "ended"
+          ]
+        },
+        {
+          "id": "PCTLWFDv1takrO2-CsieRE7pTh0iPn2_IQiivNoMxvA=",
+          "requestId": "ZDvl9mRZxKpHuYvFhAoJ6KsI4FsduH60PDNF7yFK27Q=",
+          "active": false,
+          "expiresAt": "2026-10-21T13:33:29.093299",
+          "events": [
+            "approved",
+            "ended"
+          ]
+        },
+        {
+          "id": "S2ZhA_POzh6kDelpPpZe9sDxfP8UxF3r8zAXHWh8a7k=",
+          "requestId": "Cq_zXa_tXo_1QjSPzch71WIdswKsFj0IKXKFcQSqO4I=",
+          "active": false,
+          "expiresAt": "2026-10-21T13:35:19.573292",
+          "events": [
+            "approved",
+            "ended"
+          ]
+        }
+      ],
+      "accesses": [
+        {
+          "id": "nG6c__kATH1T2ImJ4Wb1mHn6WWeCSL-XEIP5pNH4eUI=",
+          "outcome": "allowed",
+          "grantId": "9fiiL2cqtH54zq_usfGpPuUuLu74Jo1KsByA_ddAe60=",
+          "fieldId": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8="
+        },
+        {
+          "id": "RG6dhhGQ25an_RLMotsNgIX8uAoCUHDQ0EvHknFYtOI=",
+          "outcome": "allowed",
+          "grantId": "9fiiL2cqtH54zq_usfGpPuUuLu74Jo1KsByA_ddAe60=",
+          "fieldId": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8="
+        },
+        {
+          "id": "8bIVqAXUldRURgcJYLX5lnV8AFcZrW8OYEVQ1n49nbk=",
+          "outcome": "unauthorized",
+          "grantId": "9fiiL2cqtH54zq_usfGpPuUuLu74Jo1KsByA_ddAe60=",
+          "fieldId": "xz_-Aycuvz8QRgI6efkcNRm-SFE0DuCjospjyhbWuBo="
+        },
+        {
+          "id": "ylBOC1t4YtfkQOMe9ar6Z9PQ19cc2vlXy1m-aa_pe58=",
+          "outcome": "allowed",
+          "grantId": "S2ZhA_POzh6kDelpPpZe9sDxfP8UxF3r8zAXHWh8a7k=",
+          "fieldId": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8="
+        },
+        {
+          "id": "c-Yv247x8sdYZTKhrbMAxskoCRwUWlJj6mwQfxVfhCU=",
+          "outcome": "allowed",
+          "grantId": "S2ZhA_POzh6kDelpPpZe9sDxfP8UxF3r8zAXHWh8a7k=",
+          "fieldId": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8="
+        }
+      ],
+      "deliveries": [
+        {
+          "id": "IapZIBPCF_qdw7e-n-rhdowlRNYFutcZyx4fpSzniuM=",
+          "state": "released",
+          "holdsCopy": false
+        }
+      ]
+    },
+    "proofReferencesAbsentFromEvidence": true
+  },
+  "events": [
+    {
+      "method": "remoteControl/status/changed",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "account/updated",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "thread/started",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "warning",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": null
+    },
+    {
+      "method": "mcpServer/startupStatus/updated",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": null
+    },
+    {
+      "method": "mcpServer/startupStatus/updated",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": null
+    },
+    {
+      "method": "mcpServer/startupStatus/updated",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": null
+    },
+    {
+      "method": "mcpServer/startupStatus/updated",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": null
+    },
+    {
+      "method": "thread/status/changed",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": null
+    },
+    {
+      "method": "turn/started",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": null
+    },
+    {
+      "method": "mcpServer/startupStatus/updated",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": null
+    },
+    {
+      "method": "mcpServer/startupStatus/updated",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": null
+    },
+    {
+      "method": "mcpServer/startupStatus/updated",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": null
+    },
+    {
+      "method": "mcpServer/startupStatus/updated",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": null
+    },
+    {
+      "method": "hook/started",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44",
+      "id": "session-start:0:/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json",
+      "eventName": "sessionStart",
+      "status": "running",
+      "sourcePath": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json",
+      "durationMs": null
+    },
+    {
+      "method": "hook/completed",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44",
+      "id": "session-start:0:/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json",
+      "eventName": "sessionStart",
+      "status": "completed",
+      "sourcePath": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json",
+      "durationMs": 25
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44",
+      "itemType": "userMessage"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44",
+      "itemType": "userMessage"
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "turn/moderationMetadata",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44"
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44",
+      "itemType": "dynamicToolCall"
+    },
+    {
+      "method": "item/tool/call",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44",
+      "itemType": "dynamicToolCall"
+    },
+    {
+      "method": "thread/tokenUsage/updated",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44"
+    },
+    {
+      "method": "account/rateLimits/updated",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "turn/moderationMetadata",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44"
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44",
+      "itemType": "dynamicToolCall"
+    },
+    {
+      "method": "item/tool/call",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44",
+      "itemType": "dynamicToolCall"
+    },
+    {
+      "method": "thread/tokenUsage/updated",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44"
+    },
+    {
+      "method": "account/rateLimits/updated",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44"
+    },
+    {
+      "method": "turn/moderationMetadata",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "thread/tokenUsage/updated",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbd-c5a1-7db2-a6e9-e87f30e94a44"
+    },
+    {
+      "method": "account/rateLimits/updated",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "thread/status/changed",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": null
+    },
+    {
+      "method": "turn/completed",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": null
+    },
+    {
+      "method": "thread/status/changed",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": null
+    },
+    {
+      "method": "turn/started",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": null
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55",
+      "itemType": "userMessage"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55",
+      "itemType": "userMessage"
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "turn/moderationMetadata",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55"
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55",
+      "itemType": "dynamicToolCall"
+    },
+    {
+      "method": "item/tool/call",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55",
+      "itemType": "dynamicToolCall"
+    },
+    {
+      "method": "thread/tokenUsage/updated",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55"
+    },
+    {
+      "method": "account/rateLimits/updated",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55",
+      "itemType": "dynamicToolCall"
+    },
+    {
+      "method": "item/tool/call",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55"
+    },
+    {
+      "method": "turn/moderationMetadata",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55",
+      "itemType": "dynamicToolCall"
+    },
+    {
+      "method": "thread/tokenUsage/updated",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55"
+    },
+    {
+      "method": "account/rateLimits/updated",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55"
+    },
+    {
+      "method": "turn/moderationMetadata",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "thread/tokenUsage/updated",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-05ce-7710-8742-d2b8b8239a55"
+    },
+    {
+      "method": "account/rateLimits/updated",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "thread/status/changed",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": null
+    },
+    {
+      "method": "turn/completed",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": null
+    },
+    {
+      "method": "thread/goal/cleared",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": null
+    },
+    {
+      "method": "thread/status/changed",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": null
+    },
+    {
+      "method": "turn/started",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": null
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-3ec9-79c1-bd3e-fc8128f4798f",
+      "itemType": "contextCompaction"
+    },
+    {
+      "method": "thread/tokenUsage/updated",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-3ec9-79c1-bd3e-fc8128f4798f"
+    },
+    {
+      "method": "account/rateLimits/updated",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-3ec9-79c1-bd3e-fc8128f4798f",
+      "itemType": "contextCompaction"
+    },
+    {
+      "method": "thread/status/changed",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": null
+    },
+    {
+      "method": "turn/completed",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": null
+    },
+    {
+      "method": "thread/status/changed",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": null
+    },
+    {
+      "method": "turn/started",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": null
+    },
+    {
+      "method": "hook/started",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d",
+      "id": "session-start:0:/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json",
+      "eventName": "sessionStart",
+      "status": "running",
+      "sourcePath": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json",
+      "durationMs": null
+    },
+    {
+      "method": "hook/completed",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d",
+      "id": "session-start:0:/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json",
+      "eventName": "sessionStart",
+      "status": "completed",
+      "sourcePath": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json",
+      "durationMs": 15
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d",
+      "itemType": "userMessage"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d",
+      "itemType": "userMessage"
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d",
+      "itemType": "dynamicToolCall"
+    },
+    {
+      "method": "item/tool/call",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d"
+    },
+    {
+      "method": "turn/moderationMetadata",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d",
+      "itemType": "dynamicToolCall"
+    },
+    {
+      "method": "thread/tokenUsage/updated",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d"
+    },
+    {
+      "method": "account/rateLimits/updated",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d"
+    },
+    {
+      "method": "turn/moderationMetadata",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "thread/tokenUsage/updated",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": "01a15cbe-df48-75b2-8d75-f4432ce62a3d"
+    },
+    {
+      "method": "account/rateLimits/updated",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "thread/status/changed",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": null
+    },
+    {
+      "method": "turn/completed",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "turnId": null
+    },
+    {
+      "method": "warning",
+      "threadId": "01a15cbf-133c-7a21-8751-06c9b48b24ae",
+      "turnId": null
+    },
+    {
+      "method": "mcpServer/startupStatus/updated",
+      "threadId": "01a15cbf-133c-7a21-8751-06c9b48b24ae",
+      "turnId": null
+    },
+    {
+      "method": "mcpServer/startupStatus/updated",
+      "threadId": "01a15cbf-133c-7a21-8751-06c9b48b24ae",
+      "turnId": null
+    },
+    {
+      "method": "mcpServer/startupStatus/updated",
+      "threadId": "01a15cbf-133c-7a21-8751-06c9b48b24ae",
+      "turnId": null
+    },
+    {
+      "method": "mcpServer/startupStatus/updated",
+      "threadId": "01a15cbf-133c-7a21-8751-06c9b48b24ae",
+      "turnId": null
+    },
+    {
+      "method": "thread/started",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "warning",
+      "threadId": "01a15cbf-133c-7a21-8751-06c9b48b24ae",
+      "turnId": null
+    },
+    {
+      "method": "thread/status/changed",
+      "threadId": "01a15cbf-133c-7a21-8751-06c9b48b24ae",
+      "turnId": null
+    },
+    {
+      "method": "turn/started",
+      "threadId": "01a15cbf-133c-7a21-8751-06c9b48b24ae",
+      "turnId": null
+    },
+    {
+      "method": "mcpServer/startupStatus/updated",
+      "threadId": "01a15cbf-133c-7a21-8751-06c9b48b24ae",
+      "turnId": null
+    },
+    {
+      "method": "mcpServer/startupStatus/updated",
+      "threadId": "01a15cbf-133c-7a21-8751-06c9b48b24ae",
+      "turnId": null
+    },
+    {
+      "method": "mcpServer/startupStatus/updated",
+      "threadId": "01a15cbf-133c-7a21-8751-06c9b48b24ae",
+      "turnId": null
+    },
+    {
+      "method": "mcpServer/startupStatus/updated",
+      "threadId": "01a15cbf-133c-7a21-8751-06c9b48b24ae",
+      "turnId": null
+    },
+    {
+      "method": "hook/started",
+      "threadId": "01a15cbf-133c-7a21-8751-06c9b48b24ae",
+      "turnId": "01a15cbf-13d4-7fc3-85a4-9ff0f309e462",
+      "id": "session-start:0:/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json",
+      "eventName": "sessionStart",
+      "status": "running",
+      "sourcePath": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json",
+      "durationMs": null
+    },
+    {
+      "method": "hook/completed",
+      "threadId": "01a15cbf-133c-7a21-8751-06c9b48b24ae",
+      "turnId": "01a15cbf-13d4-7fc3-85a4-9ff0f309e462",
+      "id": "session-start:0:/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json",
+      "eventName": "sessionStart",
+      "status": "completed",
+      "sourcePath": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json",
+      "durationMs": 23
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15cbf-133c-7a21-8751-06c9b48b24ae",
+      "turnId": "01a15cbf-13d4-7fc3-85a4-9ff0f309e462",
+      "itemType": "userMessage"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15cbf-133c-7a21-8751-06c9b48b24ae",
+      "turnId": "01a15cbf-13d4-7fc3-85a4-9ff0f309e462",
+      "itemType": "userMessage"
+    },
+    {
+      "method": "thread/status/changed",
+      "threadId": "01a15cbf-133c-7a21-8751-06c9b48b24ae",
+      "turnId": null
+    },
+    {
+      "method": "error",
+      "threadId": "01a15cbf-133c-7a21-8751-06c9b48b24ae",
+      "turnId": "01a15cbf-13d4-7fc3-85a4-9ff0f309e462"
+    },
+    {
+      "method": "turn/completed",
+      "threadId": "01a15cbf-133c-7a21-8751-06c9b48b24ae",
+      "turnId": null
+    }
+  ],
+  "calls": [
+    {
+      "origin": "model",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "command": "catalog",
+      "requestId": null,
+      "fieldId": null,
+      "exitCode": 0,
+      "response": {
+        "status": "ok",
+        "items": [
+          {
+            "id": "zcoLLy1V3IkQN2MpvvoENfN1U1NwMYNx959Wd_Gh3Bg=",
+            "version": 1,
+            "name": "Synthetic Mac server",
+            "description": "Codex acceptance only",
+            "directoryId": null,
+            "tagIds": [],
+            "fields": [
+              {
+                "id": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8=",
+                "name": "Address",
+                "description": "May be approved",
+                "kind": "structured"
+              },
+              {
+                "id": "xz_-Aycuvz8QRgI6efkcNRm-SFE0DuCjospjyhbWuBo=",
+                "name": "Username",
+                "description": "Remain unapproved",
+                "kind": "structured"
+              }
+            ]
+          },
+          {
+            "id": "g-AG00sDYToGQTBQ_Ws-ga_x4WXM-NbBoE9YTYcU3tM=",
+            "version": 1,
+            "name": "Synthetic ordinary file",
+            "description": "Codex acceptance only",
+            "directoryId": null,
+            "tagIds": [],
+            "fields": [
+              {
+                "id": "diXsqFKBzOszby6iIFCiKUWODze3wZRH_zwYuxX00kQ=",
+                "name": "Attachment",
+                "description": "Synthetic bytes",
+                "kind": "file"
+              }
+            ]
+          }
+        ],
+        "total": 2,
+        "offset": 0,
+        "nextOffset": null
+      },
+      "separateStdin": true,
+      "argvCount": 1,
+      "argvInspectedBeforeStdin": true
+    },
+    {
+      "origin": "model",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "command": "request",
+      "requestId": null,
+      "fieldId": null,
+      "exitCode": 0,
+      "response": {
+        "status": "pending",
+        "requestId": "Cq_zXa_tXo_1QjSPzch71WIdswKsFj0IKXKFcQSqO4I=",
+        "createdAt": "2026-10-21T04:35:16.080543Z",
+        "requestExpiresAt": "2026-10-21T05:05:16.080543Z"
+      },
+      "separateStdin": true,
+      "argvCount": 1,
+      "argvInspectedBeforeStdin": true
+    },
+    {
+      "origin": "model",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "command": "claim",
+      "requestId": "Cq_zXa_tXo_1QjSPzch71WIdswKsFj0IKXKFcQSqO4I=",
+      "fieldId": null,
+      "exitCode": 0,
+      "response": {
+        "status": "ok",
+        "fields": [
+          {
+            "itemId": "zcoLLy1V3IkQN2MpvvoENfN1U1NwMYNx959Wd_Gh3Bg=",
+            "fieldId": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8="
+          }
+        ],
+        "expiresAt": "2026-10-21T05:35:19.573292Z",
+        "scopeNotice": "Only these item and field identities are approved. New items and fields require a new request."
+      },
+      "separateStdin": true,
+      "argvCount": 1,
+      "argvInspectedBeforeStdin": true
+    },
+    {
+      "origin": "model",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "command": "read",
+      "requestId": "Cq_zXa_tXo_1QjSPzch71WIdswKsFj0IKXKFcQSqO4I=",
+      "fieldId": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8=",
+      "exitCode": 0,
+      "response": {
+        "status": "ok",
+        "value": "synthetic-host.invalid"
+      },
+      "separateStdin": true,
+      "argvCount": 1,
+      "argvInspectedBeforeStdin": true
+    },
+    {
+      "origin": "model",
+      "threadId": "01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+      "command": "read",
+      "requestId": "Cq_zXa_tXo_1QjSPzch71WIdswKsFj0IKXKFcQSqO4I=",
+      "fieldId": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8=",
+      "exitCode": 0,
+      "response": {
+        "status": "ok",
+        "value": "synthetic-host.invalid"
+      },
+      "separateStdin": true,
+      "argvCount": 1,
+      "argvInspectedBeforeStdin": true
+    }
+  ]
+}

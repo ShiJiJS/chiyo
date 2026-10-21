@@ -1,0 +1,10 @@
+2026-10-21 12:20:25.777 info_desktop[73673:4173151] TISFileInterrogator updateSystemInputSources false but old data invalid: currentCacheHeaderPtr nonNULL? 0, ->cacheFormatVersion 0, ->magicCookie 00000000, inputSourceTableCountSys 0
+Keyboard Layouts: duplicate keyboard layout identifier -17410.
+Keyboard Layouts: keyboard layout identifier -17410 has been replaced with -28673.
+Keyboard Layouts: duplicate keyboard layout identifier -30769.
+Keyboard Layouts: keyboard layout identifier -30769 has been replaced with -28674.
+Keyboard Layouts: duplicate keyboard layout identifier -14934.
+Keyboard Layouts: keyboard layout identifier -14934 has been replaced with -28675.
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+MAC_CODEX_LIVE_ROOT=/Users/jiangxinyi/Library/Containers/org.shijijs.agent-info-manage.qa.codex.<qa-bundle-identity>/Data/tmp/aim-mac-codex-live-6BhGxL
+MAC_CODEX_LIVE_READY=47125

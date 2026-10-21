@@ -1,0 +1,58 @@
+[
+  {
+    "scope": "bundleBusiness",
+    "from": "cccc37e4a1125f88c7714a26b1873fdb2ffb7a9c",
+    "to": "d83f65a",
+    "differences": [],
+    "treeObjects": {
+      "packages/info_core/lib": {
+        "cccc37e4a1125f88c7714a26b1873fdb2ffb7a9c": "6bd7d950d620b657fdcceee43155e9830dd791da",
+        "d83f65a": "6bd7d950d620b657fdcceee43155e9830dd791da"
+      },
+      "packages/info_cli/lib": {
+        "cccc37e4a1125f88c7714a26b1873fdb2ffb7a9c": "d6595412f6836a84d094450ebc912cf23cda0696",
+        "d83f65a": "d6595412f6836a84d094450ebc912cf23cda0696"
+      },
+      "packages/info_cli/bin": {
+        "cccc37e4a1125f88c7714a26b1873fdb2ffb7a9c": "45d5465e7d4269df45d07b40025e6b0cd4e4db12",
+        "d83f65a": "45d5465e7d4269df45d07b40025e6b0cd4e4db12"
+      },
+      "packages/info_storage/lib": {
+        "cccc37e4a1125f88c7714a26b1873fdb2ffb7a9c": "9a805d951885e0ef04e942b0fafcd52981a2fc30",
+        "d83f65a": "9a805d951885e0ef04e942b0fafcd52981a2fc30"
+      }
+    }
+  },
+  {
+    "scope": "deliveryProduction",
+    "from": "01c1f141d876a9d3c49c61c7fc3d1e572c432c5a",
+    "to": "d83f65a",
+    "differences": [],
+    "treeObjects": {
+      "apps/desktop/lib": {
+        "01c1f141d876a9d3c49c61c7fc3d1e572c432c5a": "a8edfba638f2d487e2568a4f252997b740cad88f",
+        "d83f65a": "a8edfba638f2d487e2568a4f252997b740cad88f"
+      },
+      "apps/desktop/macos": {
+        "01c1f141d876a9d3c49c61c7fc3d1e572c432c5a": "7482a2d1ca1ec08ebaacf928ff559d3b9275023c",
+        "d83f65a": "7482a2d1ca1ec08ebaacf928ff559d3b9275023c"
+      },
+      "packages/info_core/lib": {
+        "01c1f141d876a9d3c49c61c7fc3d1e572c432c5a": "6bd7d950d620b657fdcceee43155e9830dd791da",
+        "d83f65a": "6bd7d950d620b657fdcceee43155e9830dd791da"
+      },
+      "packages/info_cli/lib": {
+        "01c1f141d876a9d3c49c61c7fc3d1e572c432c5a": "d6595412f6836a84d094450ebc912cf23cda0696",
+        "d83f65a": "d6595412f6836a84d094450ebc912cf23cda0696"
+      },
+      "packages/info_cli/bin": {
+        "01c1f141d876a9d3c49c61c7fc3d1e572c432c5a": "45d5465e7d4269df45d07b40025e6b0cd4e4db12",
+        "d83f65a": "45d5465e7d4269df45d07b40025e6b0cd4e4db12"
+      },
+      "packages/info_storage/lib": {
+        "01c1f141d876a9d3c49c61c7fc3d1e572c432c5a": "9a805d951885e0ef04e942b0fafcd52981a2fc30",
+        "d83f65a": "9a805d951885e0ef04e942b0fafcd52981a2fc30"
+      }
+    }
+  }
+]

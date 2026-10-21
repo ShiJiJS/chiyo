@@ -100,3 +100,4 @@ docs/development/evidence/macos-file-lifecycle/raw/** -text -diff
 docs/development/evidence/macos-file-capacity/raw/** -text -diff
 docs/development/evidence/macos-schema20-upgrade/raw/** -text -diff
 docs/development/evidence/macos-actual-keychain-upgrade/raw/** -text -diff
+docs/development/evidence/macos-codex-real-client/raw/** -text -diff

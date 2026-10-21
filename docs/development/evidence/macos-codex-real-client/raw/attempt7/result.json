@@ -1,0 +1,1113 @@
+{
+  "results": {
+    "sourceSha256": "93c0c9717bb188ae31d46620ddd37fb50c7b58d474f61185a197195b326e9684",
+    "scope": "Real synthetic Codex lifecycle acceptance against macos-codex-live.py.\n\nRequires existing explicit project/hook trust; never installs or trusts hooks.\nOnly synthetic fixtures. Uses real app-server/model and anonymous CLI stdin.\nOwner approval is a QA file controller, not physical owner UI acceptance.\nPrivate proofs stay in memory. No transcript/authentication files are read.\n",
+    "hookDiscovery": {
+      "data": [
+        {
+          "cwd": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee",
+          "hooks": [
+            {
+              "key": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json:session_start:0:0",
+              "eventName": "sessionStart",
+              "handlerType": "command",
+              "command": "'/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u7a33\u5b9a \u4e2d\u6587 '\"'\"'quote $literal; bundle/info-codex-hook'",
+              "async": false,
+              "matcher": "^(startup|resume|clear|compact|fork)$",
+              "timeoutSec": 15,
+              "statusMessage": null,
+              "additionalContextLimit": 0,
+              "sourcePath": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json",
+              "source": "project",
+              "pluginId": null,
+              "displayOrder": 0,
+              "enabled": true,
+              "isManaged": false,
+              "currentHash": "sha256:0f869a94c72f506b6433e82b5e475ee5f3ab4bb1ee670d50b2a709df769b6708",
+              "trustStatus": "trusted"
+            },
+            {
+              "key": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json:session_end:0:0",
+              "eventName": "sessionEnd",
+              "handlerType": "command",
+              "command": "'/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u7a33\u5b9a \u4e2d\u6587 '\"'\"'quote $literal; bundle/info-codex-hook'",
+              "async": false,
+              "matcher": null,
+              "timeoutSec": 3,
+              "statusMessage": null,
+              "additionalContextLimit": null,
+              "sourcePath": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json",
+              "source": "project",
+              "pluginId": null,
+              "displayOrder": 1,
+              "enabled": true,
+              "isManaged": false,
+              "currentHash": "sha256:03bd283945cea71c863fc14ee26826fd4c1b45eea7b50ebcb92a02719cc276b8",
+              "trustStatus": "trusted"
+            },
+            {
+              "key": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json:subagent_start:0:0",
+              "eventName": "subagentStart",
+              "handlerType": "command",
+              "command": "'/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u7a33\u5b9a \u4e2d\u6587 '\"'\"'quote $literal; bundle/info-codex-hook'",
+              "async": false,
+              "matcher": null,
+              "timeoutSec": 5,
+              "statusMessage": null,
+              "additionalContextLimit": 0,
+              "sourcePath": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json",
+              "source": "project",
+              "pluginId": null,
+              "displayOrder": 2,
+              "enabled": true,
+              "isManaged": false,
+              "currentHash": "sha256:334648132fbd2fff2628e414c60918e002391227bd1b5ef9ed02a63fc4ae04ae",
+              "trustStatus": "trusted"
+            }
+          ],
+          "warnings": [
+            "ignoring additionalContextLimit for SessionEnd hook in /Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json: this event cannot emit additionalContext"
+          ],
+          "errors": []
+        }
+      ]
+    },
+    "model": "gpt-6-astra",
+    "modelSelection": "CLI-advertised default, process only",
+    "threadE": "01a15cbf-abb8-75c3-b0c4-7b2004ad0868",
+    "requestE": "vGEMeaW4j09QwqrqWQ-HDUPVAb9sZGy7Rt2K2yp3fjM=",
+    "beforeResumeSnapshot": {
+      "ready": true,
+      "port": 47125,
+      "cipherVersion": "4.19.0 community",
+      "flutterErrors": 0,
+      "libraryCloses": 0,
+      "textItem": "zcoLLy1V3IkQN2MpvvoENfN1U1NwMYNx959Wd_Gh3Bg=",
+      "addressField": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8=",
+      "usernameField": "xz_-Aycuvz8QRgI6efkcNRm-SFE0DuCjospjyhbWuBo=",
+      "fileItem": "g-AG00sDYToGQTBQ_Ws-ga_x4WXM-NbBoE9YTYcU3tM=",
+      "fileField": "diXsqFKBzOszby6iIFCiKUWODze3wZRH_zwYuxX00kQ=",
+      "requests": [
+        {
+          "id": "zXBwjk3ieoNdw_EGVf_Au8X8_hT43aqBNPLkwzvxjwg=",
+          "state": "revoked",
+          "chatLabel": "Codex 01a15cb8-894e-7180-8c5f-49f6546faafd",
+          "sessionEnded": true,
+          "fields": [
+            {
+              "itemId": "zcoLLy1V3IkQN2MpvvoENfN1U1NwMYNx959Wd_Gh3Bg=",
+              "fieldId": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8="
+            },
+            {
+              "itemId": "zcoLLy1V3IkQN2MpvvoENfN1U1NwMYNx959Wd_Gh3Bg=",
+              "fieldId": "xz_-Aycuvz8QRgI6efkcNRm-SFE0DuCjospjyhbWuBo="
+            }
+          ],
+          "approvedFields": [
+            {
+              "itemId": "zcoLLy1V3IkQN2MpvvoENfN1U1NwMYNx959Wd_Gh3Bg=",
+              "fieldId": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8="
+            }
+          ],
+          "expiresAt": "2026-10-21T13:29:41.126010"
+        },
+        {
+          "id": "l77fILSf-bRcJUYI6RqBIbdsV1chtjXy3qD_uNxyQm4=",
+          "state": "revoked",
+          "chatLabel": "Codex 01a15cba-9209-79e0-9d00-e40787ffe6f3",
+          "sessionEnded": true,
+          "fields": [
+            {
+              "itemId": "g-AG00sDYToGQTBQ_Ws-ga_x4WXM-NbBoE9YTYcU3tM=",
+              "fieldId": "diXsqFKBzOszby6iIFCiKUWODze3wZRH_zwYuxX00kQ="
+            }
+          ],
+          "approvedFields": [
+            {
+              "itemId": "g-AG00sDYToGQTBQ_Ws-ga_x4WXM-NbBoE9YTYcU3tM=",
+              "fieldId": "diXsqFKBzOszby6iIFCiKUWODze3wZRH_zwYuxX00kQ="
+            }
+          ],
+          "expiresAt": "2026-10-21T13:31:59.182082"
+        },
+        {
+          "id": "ZDvl9mRZxKpHuYvFhAoJ6KsI4FsduH60PDNF7yFK27Q=",
+          "state": "revoked",
+          "chatLabel": "Codex 01a15cbc-074d-76f3-bfda-4b74a73b14fa",
+          "sessionEnded": true,
+          "fields": [
+            {
+              "itemId": "g-AG00sDYToGQTBQ_Ws-ga_x4WXM-NbBoE9YTYcU3tM=",
+              "fieldId": "diXsqFKBzOszby6iIFCiKUWODze3wZRH_zwYuxX00kQ="
+            }
+          ],
+          "approvedFields": [
+            {
+              "itemId": "g-AG00sDYToGQTBQ_Ws-ga_x4WXM-NbBoE9YTYcU3tM=",
+              "fieldId": "diXsqFKBzOszby6iIFCiKUWODze3wZRH_zwYuxX00kQ="
+            }
+          ],
+          "expiresAt": "2026-10-21T13:33:29.093299"
+        },
+        {
+          "id": "Cq_zXa_tXo_1QjSPzch71WIdswKsFj0IKXKFcQSqO4I=",
+          "state": "revoked",
+          "chatLabel": "Codex 01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+          "sessionEnded": true,
+          "fields": [
+            {
+              "itemId": "zcoLLy1V3IkQN2MpvvoENfN1U1NwMYNx959Wd_Gh3Bg=",
+              "fieldId": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8="
+            }
+          ],
+          "approvedFields": [
+            {
+              "itemId": "zcoLLy1V3IkQN2MpvvoENfN1U1NwMYNx959Wd_Gh3Bg=",
+              "fieldId": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8="
+            }
+          ],
+          "expiresAt": "2026-10-21T13:35:19.573292"
+        },
+        {
+          "id": "vGEMeaW4j09QwqrqWQ-HDUPVAb9sZGy7Rt2K2yp3fjM=",
+          "state": "revoked",
+          "chatLabel": "Codex 01a15cbf-abb8-75c3-b0c4-7b2004ad0868",
+          "sessionEnded": true,
+          "fields": [
+            {
+              "itemId": "zcoLLy1V3IkQN2MpvvoENfN1U1NwMYNx959Wd_Gh3Bg=",
+              "fieldId": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8="
+            }
+          ],
+          "approvedFields": [
+            {
+              "itemId": "zcoLLy1V3IkQN2MpvvoENfN1U1NwMYNx959Wd_Gh3Bg=",
+              "fieldId": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8="
+            }
+          ],
+          "expiresAt": "2026-10-21T13:37:25.381380"
+        },
+        {
+          "id": "GXzOLzz-cdJLLwHP8H0fPqjh09SDW4rmXL28HVdzCuY=",
+          "state": "cancelled",
+          "chatLabel": "Codex 01a15cbf-abb8-75c3-b0c4-7b2004ad0868",
+          "sessionEnded": true,
+          "fields": [
+            {
+              "itemId": "zcoLLy1V3IkQN2MpvvoENfN1U1NwMYNx959Wd_Gh3Bg=",
+              "fieldId": "xz_-Aycuvz8QRgI6efkcNRm-SFE0DuCjospjyhbWuBo="
+            }
+          ],
+          "approvedFields": [],
+          "expiresAt": null
+        }
+      ],
+      "grants": [
+        {
+          "id": "9fiiL2cqtH54zq_usfGpPuUuLu74Jo1KsByA_ddAe60=",
+          "requestId": "zXBwjk3ieoNdw_EGVf_Au8X8_hT43aqBNPLkwzvxjwg=",
+          "active": false,
+          "expiresAt": "2026-10-21T13:29:41.126010",
+          "events": [
+            "approved",
+            "revoked"
+          ]
+        },
+        {
+          "id": "ua_QBL4Ue4qV8YhzF1FNI9OYPVV-ozg139LqJHZadEg=",
+          "requestId": "l77fILSf-bRcJUYI6RqBIbdsV1chtjXy3qD_uNxyQm4=",
+          "active": false,
+          "expiresAt": "2026-10-21T13:31:59.182082",
+          "events": [
+            "approved",
+            "ended"
+          ]
+        },
+        {
+          "id": "PCTLWFDv1takrO2-CsieRE7pTh0iPn2_IQiivNoMxvA=",
+          "requestId": "ZDvl9mRZxKpHuYvFhAoJ6KsI4FsduH60PDNF7yFK27Q=",
+          "active": false,
+          "expiresAt": "2026-10-21T13:33:29.093299",
+          "events": [
+            "approved",
+            "ended"
+          ]
+        },
+        {
+          "id": "S2ZhA_POzh6kDelpPpZe9sDxfP8UxF3r8zAXHWh8a7k=",
+          "requestId": "Cq_zXa_tXo_1QjSPzch71WIdswKsFj0IKXKFcQSqO4I=",
+          "active": false,
+          "expiresAt": "2026-10-21T13:35:19.573292",
+          "events": [
+            "approved",
+            "ended"
+          ]
+        },
+        {
+          "id": "g0IOqwpWpsF__344u2TRn-rBjf-S8zQvQRG1EBLB870=",
+          "requestId": "vGEMeaW4j09QwqrqWQ-HDUPVAb9sZGy7Rt2K2yp3fjM=",
+          "active": false,
+          "expiresAt": "2026-10-21T13:37:25.381380",
+          "events": [
+            "approved",
+            "ended"
+          ]
+        }
+      ],
+      "accesses": [
+        {
+          "id": "nG6c__kATH1T2ImJ4Wb1mHn6WWeCSL-XEIP5pNH4eUI=",
+          "outcome": "allowed",
+          "grantId": "9fiiL2cqtH54zq_usfGpPuUuLu74Jo1KsByA_ddAe60=",
+          "fieldId": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8="
+        },
+        {
+          "id": "RG6dhhGQ25an_RLMotsNgIX8uAoCUHDQ0EvHknFYtOI=",
+          "outcome": "allowed",
+          "grantId": "9fiiL2cqtH54zq_usfGpPuUuLu74Jo1KsByA_ddAe60=",
+          "fieldId": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8="
+        },
+        {
+          "id": "8bIVqAXUldRURgcJYLX5lnV8AFcZrW8OYEVQ1n49nbk=",
+          "outcome": "unauthorized",
+          "grantId": "9fiiL2cqtH54zq_usfGpPuUuLu74Jo1KsByA_ddAe60=",
+          "fieldId": "xz_-Aycuvz8QRgI6efkcNRm-SFE0DuCjospjyhbWuBo="
+        },
+        {
+          "id": "ylBOC1t4YtfkQOMe9ar6Z9PQ19cc2vlXy1m-aa_pe58=",
+          "outcome": "allowed",
+          "grantId": "S2ZhA_POzh6kDelpPpZe9sDxfP8UxF3r8zAXHWh8a7k=",
+          "fieldId": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8="
+        },
+        {
+          "id": "c-Yv247x8sdYZTKhrbMAxskoCRwUWlJj6mwQfxVfhCU=",
+          "outcome": "allowed",
+          "grantId": "S2ZhA_POzh6kDelpPpZe9sDxfP8UxF3r8zAXHWh8a7k=",
+          "fieldId": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8="
+        },
+        {
+          "id": "E6Zkxhg3DvviLHOMJ8MseGhMinu5GNGil4mwqcPayWU=",
+          "outcome": "allowed",
+          "grantId": "g0IOqwpWpsF__344u2TRn-rBjf-S8zQvQRG1EBLB870=",
+          "fieldId": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8="
+        },
+        {
+          "id": "4EaP47-YWSsHS-K2QHcOCiG_oVutdv3NKEYYZoy9O_c=",
+          "outcome": "allowed",
+          "grantId": "g0IOqwpWpsF__344u2TRn-rBjf-S8zQvQRG1EBLB870=",
+          "fieldId": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8="
+        }
+      ],
+      "deliveries": [
+        {
+          "id": "IapZIBPCF_qdw7e-n-rhdowlRNYFutcZyx4fpSzniuM=",
+          "state": "released",
+          "holdsCopy": false
+        }
+      ]
+    },
+    "rpcErrors": [
+      {
+        "code": -32600,
+        "message": "session 01a15cbf-abb8-75c3-b0c4-7b2004ad0868 is archived. Run `codex unarchive 01a15cbf-abb8-75c3-b0c4-7b2004ad0868` to unarchive it first."
+      }
+    ],
+    "archivedResumeRefused": true,
+    "turns": [
+      {
+        "threadId": "01a15cbf-abb8-75c3-b0c4-7b2004ad0868",
+        "status": "completed",
+        "calls": 1
+      }
+    ],
+    "afterEndedResumeSnapshot": {
+      "ready": true,
+      "port": 47125,
+      "cipherVersion": "4.19.0 community",
+      "flutterErrors": 0,
+      "libraryCloses": 0,
+      "textItem": "zcoLLy1V3IkQN2MpvvoENfN1U1NwMYNx959Wd_Gh3Bg=",
+      "addressField": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8=",
+      "usernameField": "xz_-Aycuvz8QRgI6efkcNRm-SFE0DuCjospjyhbWuBo=",
+      "fileItem": "g-AG00sDYToGQTBQ_Ws-ga_x4WXM-NbBoE9YTYcU3tM=",
+      "fileField": "diXsqFKBzOszby6iIFCiKUWODze3wZRH_zwYuxX00kQ=",
+      "requests": [
+        {
+          "id": "zXBwjk3ieoNdw_EGVf_Au8X8_hT43aqBNPLkwzvxjwg=",
+          "state": "revoked",
+          "chatLabel": "Codex 01a15cb8-894e-7180-8c5f-49f6546faafd",
+          "sessionEnded": true,
+          "fields": [
+            {
+              "itemId": "zcoLLy1V3IkQN2MpvvoENfN1U1NwMYNx959Wd_Gh3Bg=",
+              "fieldId": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8="
+            },
+            {
+              "itemId": "zcoLLy1V3IkQN2MpvvoENfN1U1NwMYNx959Wd_Gh3Bg=",
+              "fieldId": "xz_-Aycuvz8QRgI6efkcNRm-SFE0DuCjospjyhbWuBo="
+            }
+          ],
+          "approvedFields": [
+            {
+              "itemId": "zcoLLy1V3IkQN2MpvvoENfN1U1NwMYNx959Wd_Gh3Bg=",
+              "fieldId": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8="
+            }
+          ],
+          "expiresAt": "2026-10-21T13:29:41.126010"
+        },
+        {
+          "id": "l77fILSf-bRcJUYI6RqBIbdsV1chtjXy3qD_uNxyQm4=",
+          "state": "revoked",
+          "chatLabel": "Codex 01a15cba-9209-79e0-9d00-e40787ffe6f3",
+          "sessionEnded": true,
+          "fields": [
+            {
+              "itemId": "g-AG00sDYToGQTBQ_Ws-ga_x4WXM-NbBoE9YTYcU3tM=",
+              "fieldId": "diXsqFKBzOszby6iIFCiKUWODze3wZRH_zwYuxX00kQ="
+            }
+          ],
+          "approvedFields": [
+            {
+              "itemId": "g-AG00sDYToGQTBQ_Ws-ga_x4WXM-NbBoE9YTYcU3tM=",
+              "fieldId": "diXsqFKBzOszby6iIFCiKUWODze3wZRH_zwYuxX00kQ="
+            }
+          ],
+          "expiresAt": "2026-10-21T13:31:59.182082"
+        },
+        {
+          "id": "ZDvl9mRZxKpHuYvFhAoJ6KsI4FsduH60PDNF7yFK27Q=",
+          "state": "revoked",
+          "chatLabel": "Codex 01a15cbc-074d-76f3-bfda-4b74a73b14fa",
+          "sessionEnded": true,
+          "fields": [
+            {
+              "itemId": "g-AG00sDYToGQTBQ_Ws-ga_x4WXM-NbBoE9YTYcU3tM=",
+              "fieldId": "diXsqFKBzOszby6iIFCiKUWODze3wZRH_zwYuxX00kQ="
+            }
+          ],
+          "approvedFields": [
+            {
+              "itemId": "g-AG00sDYToGQTBQ_Ws-ga_x4WXM-NbBoE9YTYcU3tM=",
+              "fieldId": "diXsqFKBzOszby6iIFCiKUWODze3wZRH_zwYuxX00kQ="
+            }
+          ],
+          "expiresAt": "2026-10-21T13:33:29.093299"
+        },
+        {
+          "id": "Cq_zXa_tXo_1QjSPzch71WIdswKsFj0IKXKFcQSqO4I=",
+          "state": "revoked",
+          "chatLabel": "Codex 01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+          "sessionEnded": true,
+          "fields": [
+            {
+              "itemId": "zcoLLy1V3IkQN2MpvvoENfN1U1NwMYNx959Wd_Gh3Bg=",
+              "fieldId": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8="
+            }
+          ],
+          "approvedFields": [
+            {
+              "itemId": "zcoLLy1V3IkQN2MpvvoENfN1U1NwMYNx959Wd_Gh3Bg=",
+              "fieldId": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8="
+            }
+          ],
+          "expiresAt": "2026-10-21T13:35:19.573292"
+        },
+        {
+          "id": "vGEMeaW4j09QwqrqWQ-HDUPVAb9sZGy7Rt2K2yp3fjM=",
+          "state": "revoked",
+          "chatLabel": "Codex 01a15cbf-abb8-75c3-b0c4-7b2004ad0868",
+          "sessionEnded": true,
+          "fields": [
+            {
+              "itemId": "zcoLLy1V3IkQN2MpvvoENfN1U1NwMYNx959Wd_Gh3Bg=",
+              "fieldId": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8="
+            }
+          ],
+          "approvedFields": [
+            {
+              "itemId": "zcoLLy1V3IkQN2MpvvoENfN1U1NwMYNx959Wd_Gh3Bg=",
+              "fieldId": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8="
+            }
+          ],
+          "expiresAt": "2026-10-21T13:37:25.381380"
+        },
+        {
+          "id": "GXzOLzz-cdJLLwHP8H0fPqjh09SDW4rmXL28HVdzCuY=",
+          "state": "cancelled",
+          "chatLabel": "Codex 01a15cbf-abb8-75c3-b0c4-7b2004ad0868",
+          "sessionEnded": true,
+          "fields": [
+            {
+              "itemId": "zcoLLy1V3IkQN2MpvvoENfN1U1NwMYNx959Wd_Gh3Bg=",
+              "fieldId": "xz_-Aycuvz8QRgI6efkcNRm-SFE0DuCjospjyhbWuBo="
+            }
+          ],
+          "approvedFields": [],
+          "expiresAt": null
+        }
+      ],
+      "grants": [
+        {
+          "id": "9fiiL2cqtH54zq_usfGpPuUuLu74Jo1KsByA_ddAe60=",
+          "requestId": "zXBwjk3ieoNdw_EGVf_Au8X8_hT43aqBNPLkwzvxjwg=",
+          "active": false,
+          "expiresAt": "2026-10-21T13:29:41.126010",
+          "events": [
+            "approved",
+            "revoked"
+          ]
+        },
+        {
+          "id": "ua_QBL4Ue4qV8YhzF1FNI9OYPVV-ozg139LqJHZadEg=",
+          "requestId": "l77fILSf-bRcJUYI6RqBIbdsV1chtjXy3qD_uNxyQm4=",
+          "active": false,
+          "expiresAt": "2026-10-21T13:31:59.182082",
+          "events": [
+            "approved",
+            "ended"
+          ]
+        },
+        {
+          "id": "PCTLWFDv1takrO2-CsieRE7pTh0iPn2_IQiivNoMxvA=",
+          "requestId": "ZDvl9mRZxKpHuYvFhAoJ6KsI4FsduH60PDNF7yFK27Q=",
+          "active": false,
+          "expiresAt": "2026-10-21T13:33:29.093299",
+          "events": [
+            "approved",
+            "ended"
+          ]
+        },
+        {
+          "id": "S2ZhA_POzh6kDelpPpZe9sDxfP8UxF3r8zAXHWh8a7k=",
+          "requestId": "Cq_zXa_tXo_1QjSPzch71WIdswKsFj0IKXKFcQSqO4I=",
+          "active": false,
+          "expiresAt": "2026-10-21T13:35:19.573292",
+          "events": [
+            "approved",
+            "ended"
+          ]
+        },
+        {
+          "id": "g0IOqwpWpsF__344u2TRn-rBjf-S8zQvQRG1EBLB870=",
+          "requestId": "vGEMeaW4j09QwqrqWQ-HDUPVAb9sZGy7Rt2K2yp3fjM=",
+          "active": false,
+          "expiresAt": "2026-10-21T13:37:25.381380",
+          "events": [
+            "approved",
+            "ended"
+          ]
+        }
+      ],
+      "accesses": [
+        {
+          "id": "nG6c__kATH1T2ImJ4Wb1mHn6WWeCSL-XEIP5pNH4eUI=",
+          "outcome": "allowed",
+          "grantId": "9fiiL2cqtH54zq_usfGpPuUuLu74Jo1KsByA_ddAe60=",
+          "fieldId": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8="
+        },
+        {
+          "id": "RG6dhhGQ25an_RLMotsNgIX8uAoCUHDQ0EvHknFYtOI=",
+          "outcome": "allowed",
+          "grantId": "9fiiL2cqtH54zq_usfGpPuUuLu74Jo1KsByA_ddAe60=",
+          "fieldId": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8="
+        },
+        {
+          "id": "8bIVqAXUldRURgcJYLX5lnV8AFcZrW8OYEVQ1n49nbk=",
+          "outcome": "unauthorized",
+          "grantId": "9fiiL2cqtH54zq_usfGpPuUuLu74Jo1KsByA_ddAe60=",
+          "fieldId": "xz_-Aycuvz8QRgI6efkcNRm-SFE0DuCjospjyhbWuBo="
+        },
+        {
+          "id": "ylBOC1t4YtfkQOMe9ar6Z9PQ19cc2vlXy1m-aa_pe58=",
+          "outcome": "allowed",
+          "grantId": "S2ZhA_POzh6kDelpPpZe9sDxfP8UxF3r8zAXHWh8a7k=",
+          "fieldId": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8="
+        },
+        {
+          "id": "c-Yv247x8sdYZTKhrbMAxskoCRwUWlJj6mwQfxVfhCU=",
+          "outcome": "allowed",
+          "grantId": "S2ZhA_POzh6kDelpPpZe9sDxfP8UxF3r8zAXHWh8a7k=",
+          "fieldId": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8="
+        },
+        {
+          "id": "E6Zkxhg3DvviLHOMJ8MseGhMinu5GNGil4mwqcPayWU=",
+          "outcome": "allowed",
+          "grantId": "g0IOqwpWpsF__344u2TRn-rBjf-S8zQvQRG1EBLB870=",
+          "fieldId": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8="
+        },
+        {
+          "id": "4EaP47-YWSsHS-K2QHcOCiG_oVutdv3NKEYYZoy9O_c=",
+          "outcome": "allowed",
+          "grantId": "g0IOqwpWpsF__344u2TRn-rBjf-S8zQvQRG1EBLB870=",
+          "fieldId": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8="
+        }
+      ],
+      "deliveries": [
+        {
+          "id": "IapZIBPCF_qdw7e-n-rhdowlRNYFutcZyx4fpSzniuM=",
+          "state": "released",
+          "holdsCopy": false
+        }
+      ]
+    },
+    "completeEndedResumeFlow": true,
+    "serverExitCode": 0,
+    "finalSnapshot": {
+      "ready": true,
+      "port": 47125,
+      "cipherVersion": "4.19.0 community",
+      "flutterErrors": 0,
+      "libraryCloses": 0,
+      "textItem": "zcoLLy1V3IkQN2MpvvoENfN1U1NwMYNx959Wd_Gh3Bg=",
+      "addressField": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8=",
+      "usernameField": "xz_-Aycuvz8QRgI6efkcNRm-SFE0DuCjospjyhbWuBo=",
+      "fileItem": "g-AG00sDYToGQTBQ_Ws-ga_x4WXM-NbBoE9YTYcU3tM=",
+      "fileField": "diXsqFKBzOszby6iIFCiKUWODze3wZRH_zwYuxX00kQ=",
+      "requests": [
+        {
+          "id": "zXBwjk3ieoNdw_EGVf_Au8X8_hT43aqBNPLkwzvxjwg=",
+          "state": "revoked",
+          "chatLabel": "Codex 01a15cb8-894e-7180-8c5f-49f6546faafd",
+          "sessionEnded": true,
+          "fields": [
+            {
+              "itemId": "zcoLLy1V3IkQN2MpvvoENfN1U1NwMYNx959Wd_Gh3Bg=",
+              "fieldId": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8="
+            },
+            {
+              "itemId": "zcoLLy1V3IkQN2MpvvoENfN1U1NwMYNx959Wd_Gh3Bg=",
+              "fieldId": "xz_-Aycuvz8QRgI6efkcNRm-SFE0DuCjospjyhbWuBo="
+            }
+          ],
+          "approvedFields": [
+            {
+              "itemId": "zcoLLy1V3IkQN2MpvvoENfN1U1NwMYNx959Wd_Gh3Bg=",
+              "fieldId": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8="
+            }
+          ],
+          "expiresAt": "2026-10-21T13:29:41.126010"
+        },
+        {
+          "id": "l77fILSf-bRcJUYI6RqBIbdsV1chtjXy3qD_uNxyQm4=",
+          "state": "revoked",
+          "chatLabel": "Codex 01a15cba-9209-79e0-9d00-e40787ffe6f3",
+          "sessionEnded": true,
+          "fields": [
+            {
+              "itemId": "g-AG00sDYToGQTBQ_Ws-ga_x4WXM-NbBoE9YTYcU3tM=",
+              "fieldId": "diXsqFKBzOszby6iIFCiKUWODze3wZRH_zwYuxX00kQ="
+            }
+          ],
+          "approvedFields": [
+            {
+              "itemId": "g-AG00sDYToGQTBQ_Ws-ga_x4WXM-NbBoE9YTYcU3tM=",
+              "fieldId": "diXsqFKBzOszby6iIFCiKUWODze3wZRH_zwYuxX00kQ="
+            }
+          ],
+          "expiresAt": "2026-10-21T13:31:59.182082"
+        },
+        {
+          "id": "ZDvl9mRZxKpHuYvFhAoJ6KsI4FsduH60PDNF7yFK27Q=",
+          "state": "revoked",
+          "chatLabel": "Codex 01a15cbc-074d-76f3-bfda-4b74a73b14fa",
+          "sessionEnded": true,
+          "fields": [
+            {
+              "itemId": "g-AG00sDYToGQTBQ_Ws-ga_x4WXM-NbBoE9YTYcU3tM=",
+              "fieldId": "diXsqFKBzOszby6iIFCiKUWODze3wZRH_zwYuxX00kQ="
+            }
+          ],
+          "approvedFields": [
+            {
+              "itemId": "g-AG00sDYToGQTBQ_Ws-ga_x4WXM-NbBoE9YTYcU3tM=",
+              "fieldId": "diXsqFKBzOszby6iIFCiKUWODze3wZRH_zwYuxX00kQ="
+            }
+          ],
+          "expiresAt": "2026-10-21T13:33:29.093299"
+        },
+        {
+          "id": "Cq_zXa_tXo_1QjSPzch71WIdswKsFj0IKXKFcQSqO4I=",
+          "state": "revoked",
+          "chatLabel": "Codex 01a15cbd-c51f-7ec1-8ccb-7a56948b0a1d",
+          "sessionEnded": true,
+          "fields": [
+            {
+              "itemId": "zcoLLy1V3IkQN2MpvvoENfN1U1NwMYNx959Wd_Gh3Bg=",
+              "fieldId": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8="
+            }
+          ],
+          "approvedFields": [
+            {
+              "itemId": "zcoLLy1V3IkQN2MpvvoENfN1U1NwMYNx959Wd_Gh3Bg=",
+              "fieldId": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8="
+            }
+          ],
+          "expiresAt": "2026-10-21T13:35:19.573292"
+        },
+        {
+          "id": "vGEMeaW4j09QwqrqWQ-HDUPVAb9sZGy7Rt2K2yp3fjM=",
+          "state": "revoked",
+          "chatLabel": "Codex 01a15cbf-abb8-75c3-b0c4-7b2004ad0868",
+          "sessionEnded": true,
+          "fields": [
+            {
+              "itemId": "zcoLLy1V3IkQN2MpvvoENfN1U1NwMYNx959Wd_Gh3Bg=",
+              "fieldId": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8="
+            }
+          ],
+          "approvedFields": [
+            {
+              "itemId": "zcoLLy1V3IkQN2MpvvoENfN1U1NwMYNx959Wd_Gh3Bg=",
+              "fieldId": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8="
+            }
+          ],
+          "expiresAt": "2026-10-21T13:37:25.381380"
+        },
+        {
+          "id": "GXzOLzz-cdJLLwHP8H0fPqjh09SDW4rmXL28HVdzCuY=",
+          "state": "cancelled",
+          "chatLabel": "Codex 01a15cbf-abb8-75c3-b0c4-7b2004ad0868",
+          "sessionEnded": true,
+          "fields": [
+            {
+              "itemId": "zcoLLy1V3IkQN2MpvvoENfN1U1NwMYNx959Wd_Gh3Bg=",
+              "fieldId": "xz_-Aycuvz8QRgI6efkcNRm-SFE0DuCjospjyhbWuBo="
+            }
+          ],
+          "approvedFields": [],
+          "expiresAt": null
+        }
+      ],
+      "grants": [
+        {
+          "id": "9fiiL2cqtH54zq_usfGpPuUuLu74Jo1KsByA_ddAe60=",
+          "requestId": "zXBwjk3ieoNdw_EGVf_Au8X8_hT43aqBNPLkwzvxjwg=",
+          "active": false,
+          "expiresAt": "2026-10-21T13:29:41.126010",
+          "events": [
+            "approved",
+            "revoked"
+          ]
+        },
+        {
+          "id": "ua_QBL4Ue4qV8YhzF1FNI9OYPVV-ozg139LqJHZadEg=",
+          "requestId": "l77fILSf-bRcJUYI6RqBIbdsV1chtjXy3qD_uNxyQm4=",
+          "active": false,
+          "expiresAt": "2026-10-21T13:31:59.182082",
+          "events": [
+            "approved",
+            "ended"
+          ]
+        },
+        {
+          "id": "PCTLWFDv1takrO2-CsieRE7pTh0iPn2_IQiivNoMxvA=",
+          "requestId": "ZDvl9mRZxKpHuYvFhAoJ6KsI4FsduH60PDNF7yFK27Q=",
+          "active": false,
+          "expiresAt": "2026-10-21T13:33:29.093299",
+          "events": [
+            "approved",
+            "ended"
+          ]
+        },
+        {
+          "id": "S2ZhA_POzh6kDelpPpZe9sDxfP8UxF3r8zAXHWh8a7k=",
+          "requestId": "Cq_zXa_tXo_1QjSPzch71WIdswKsFj0IKXKFcQSqO4I=",
+          "active": false,
+          "expiresAt": "2026-10-21T13:35:19.573292",
+          "events": [
+            "approved",
+            "ended"
+          ]
+        },
+        {
+          "id": "g0IOqwpWpsF__344u2TRn-rBjf-S8zQvQRG1EBLB870=",
+          "requestId": "vGEMeaW4j09QwqrqWQ-HDUPVAb9sZGy7Rt2K2yp3fjM=",
+          "active": false,
+          "expiresAt": "2026-10-21T13:37:25.381380",
+          "events": [
+            "approved",
+            "ended"
+          ]
+        }
+      ],
+      "accesses": [
+        {
+          "id": "nG6c__kATH1T2ImJ4Wb1mHn6WWeCSL-XEIP5pNH4eUI=",
+          "outcome": "allowed",
+          "grantId": "9fiiL2cqtH54zq_usfGpPuUuLu74Jo1KsByA_ddAe60=",
+          "fieldId": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8="
+        },
+        {
+          "id": "RG6dhhGQ25an_RLMotsNgIX8uAoCUHDQ0EvHknFYtOI=",
+          "outcome": "allowed",
+          "grantId": "9fiiL2cqtH54zq_usfGpPuUuLu74Jo1KsByA_ddAe60=",
+          "fieldId": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8="
+        },
+        {
+          "id": "8bIVqAXUldRURgcJYLX5lnV8AFcZrW8OYEVQ1n49nbk=",
+          "outcome": "unauthorized",
+          "grantId": "9fiiL2cqtH54zq_usfGpPuUuLu74Jo1KsByA_ddAe60=",
+          "fieldId": "xz_-Aycuvz8QRgI6efkcNRm-SFE0DuCjospjyhbWuBo="
+        },
+        {
+          "id": "ylBOC1t4YtfkQOMe9ar6Z9PQ19cc2vlXy1m-aa_pe58=",
+          "outcome": "allowed",
+          "grantId": "S2ZhA_POzh6kDelpPpZe9sDxfP8UxF3r8zAXHWh8a7k=",
+          "fieldId": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8="
+        },
+        {
+          "id": "c-Yv247x8sdYZTKhrbMAxskoCRwUWlJj6mwQfxVfhCU=",
+          "outcome": "allowed",
+          "grantId": "S2ZhA_POzh6kDelpPpZe9sDxfP8UxF3r8zAXHWh8a7k=",
+          "fieldId": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8="
+        },
+        {
+          "id": "E6Zkxhg3DvviLHOMJ8MseGhMinu5GNGil4mwqcPayWU=",
+          "outcome": "allowed",
+          "grantId": "g0IOqwpWpsF__344u2TRn-rBjf-S8zQvQRG1EBLB870=",
+          "fieldId": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8="
+        },
+        {
+          "id": "4EaP47-YWSsHS-K2QHcOCiG_oVutdv3NKEYYZoy9O_c=",
+          "outcome": "allowed",
+          "grantId": "g0IOqwpWpsF__344u2TRn-rBjf-S8zQvQRG1EBLB870=",
+          "fieldId": "6x-cFUWjdp6gZZmE-neWsuESsJApdSJfIuQueV4j7U8="
+        }
+      ],
+      "deliveries": [
+        {
+          "id": "IapZIBPCF_qdw7e-n-rhdowlRNYFutcZyx4fpSzniuM=",
+          "state": "released",
+          "holdsCopy": false
+        }
+      ]
+    },
+    "proofReferencesAbsentFromEvidence": true
+  },
+  "events": [
+    {
+      "method": "remoteControl/status/changed",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "thread/unarchived",
+      "threadId": "01a15cbf-abb8-75c3-b0c4-7b2004ad0868",
+      "turnId": null
+    },
+    {
+      "method": "warning",
+      "threadId": "01a15cbf-abb8-75c3-b0c4-7b2004ad0868",
+      "turnId": null
+    },
+    {
+      "method": "mcpServer/startupStatus/updated",
+      "threadId": "01a15cbf-abb8-75c3-b0c4-7b2004ad0868",
+      "turnId": null
+    },
+    {
+      "method": "mcpServer/startupStatus/updated",
+      "threadId": "01a15cbf-abb8-75c3-b0c4-7b2004ad0868",
+      "turnId": null
+    },
+    {
+      "method": "mcpServer/startupStatus/updated",
+      "threadId": "01a15cbf-abb8-75c3-b0c4-7b2004ad0868",
+      "turnId": null
+    },
+    {
+      "method": "mcpServer/startupStatus/updated",
+      "threadId": "01a15cbf-abb8-75c3-b0c4-7b2004ad0868",
+      "turnId": null
+    },
+    {
+      "method": "thread/status/changed",
+      "threadId": "01a15cbf-abb8-75c3-b0c4-7b2004ad0868",
+      "turnId": null
+    },
+    {
+      "method": "thread/tokenUsage/updated",
+      "threadId": "01a15cbf-abb8-75c3-b0c4-7b2004ad0868",
+      "turnId": "01a15cc1-5efa-76e3-b33c-533bbf00ea1c"
+    },
+    {
+      "method": "thread/goal/cleared",
+      "threadId": "01a15cbf-abb8-75c3-b0c4-7b2004ad0868",
+      "turnId": null
+    },
+    {
+      "method": "thread/status/changed",
+      "threadId": "01a15cbf-abb8-75c3-b0c4-7b2004ad0868",
+      "turnId": null
+    },
+    {
+      "method": "turn/started",
+      "threadId": "01a15cbf-abb8-75c3-b0c4-7b2004ad0868",
+      "turnId": null
+    },
+    {
+      "method": "mcpServer/startupStatus/updated",
+      "threadId": "01a15cbf-abb8-75c3-b0c4-7b2004ad0868",
+      "turnId": null
+    },
+    {
+      "method": "mcpServer/startupStatus/updated",
+      "threadId": "01a15cbf-abb8-75c3-b0c4-7b2004ad0868",
+      "turnId": null
+    },
+    {
+      "method": "account/updated",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "mcpServer/startupStatus/updated",
+      "threadId": "01a15cbf-abb8-75c3-b0c4-7b2004ad0868",
+      "turnId": null
+    },
+    {
+      "method": "mcpServer/startupStatus/updated",
+      "threadId": "01a15cbf-abb8-75c3-b0c4-7b2004ad0868",
+      "turnId": null
+    },
+    {
+      "method": "mcpServer/startupStatus/updated",
+      "threadId": "01a15cbf-abb8-75c3-b0c4-7b2004ad0868",
+      "turnId": null
+    },
+    {
+      "method": "mcpServer/startupStatus/updated",
+      "threadId": "01a15cbf-abb8-75c3-b0c4-7b2004ad0868",
+      "turnId": null
+    },
+    {
+      "method": "hook/started",
+      "threadId": "01a15cbf-abb8-75c3-b0c4-7b2004ad0868",
+      "turnId": "01a15cc2-76ff-78f3-8b49-223ae4d13823",
+      "id": "session-start:0:/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json",
+      "eventName": "sessionStart",
+      "status": "running",
+      "sourcePath": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json",
+      "durationMs": null
+    },
+    {
+      "method": "hook/completed",
+      "threadId": "01a15cbf-abb8-75c3-b0c4-7b2004ad0868",
+      "turnId": "01a15cc2-76ff-78f3-8b49-223ae4d13823",
+      "id": "session-start:0:/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json",
+      "eventName": "sessionStart",
+      "status": "completed",
+      "sourcePath": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json",
+      "durationMs": 17
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15cbf-abb8-75c3-b0c4-7b2004ad0868",
+      "turnId": "01a15cc2-76ff-78f3-8b49-223ae4d13823",
+      "itemType": "userMessage"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15cbf-abb8-75c3-b0c4-7b2004ad0868",
+      "turnId": "01a15cc2-76ff-78f3-8b49-223ae4d13823",
+      "itemType": "userMessage"
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15cbf-abb8-75c3-b0c4-7b2004ad0868",
+      "turnId": "01a15cc2-76ff-78f3-8b49-223ae4d13823",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbf-abb8-75c3-b0c4-7b2004ad0868",
+      "turnId": "01a15cc2-76ff-78f3-8b49-223ae4d13823"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbf-abb8-75c3-b0c4-7b2004ad0868",
+      "turnId": "01a15cc2-76ff-78f3-8b49-223ae4d13823"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbf-abb8-75c3-b0c4-7b2004ad0868",
+      "turnId": "01a15cc2-76ff-78f3-8b49-223ae4d13823"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbf-abb8-75c3-b0c4-7b2004ad0868",
+      "turnId": "01a15cc2-76ff-78f3-8b49-223ae4d13823"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbf-abb8-75c3-b0c4-7b2004ad0868",
+      "turnId": "01a15cc2-76ff-78f3-8b49-223ae4d13823"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbf-abb8-75c3-b0c4-7b2004ad0868",
+      "turnId": "01a15cc2-76ff-78f3-8b49-223ae4d13823"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbf-abb8-75c3-b0c4-7b2004ad0868",
+      "turnId": "01a15cc2-76ff-78f3-8b49-223ae4d13823"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbf-abb8-75c3-b0c4-7b2004ad0868",
+      "turnId": "01a15cc2-76ff-78f3-8b49-223ae4d13823"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbf-abb8-75c3-b0c4-7b2004ad0868",
+      "turnId": "01a15cc2-76ff-78f3-8b49-223ae4d13823"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbf-abb8-75c3-b0c4-7b2004ad0868",
+      "turnId": "01a15cc2-76ff-78f3-8b49-223ae4d13823"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbf-abb8-75c3-b0c4-7b2004ad0868",
+      "turnId": "01a15cc2-76ff-78f3-8b49-223ae4d13823"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15cbf-abb8-75c3-b0c4-7b2004ad0868",
+      "turnId": "01a15cc2-76ff-78f3-8b49-223ae4d13823",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "turn/moderationMetadata",
+      "threadId": "01a15cbf-abb8-75c3-b0c4-7b2004ad0868",
+      "turnId": "01a15cc2-76ff-78f3-8b49-223ae4d13823"
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15cbf-abb8-75c3-b0c4-7b2004ad0868",
+      "turnId": "01a15cc2-76ff-78f3-8b49-223ae4d13823",
+      "itemType": "dynamicToolCall"
+    },
+    {
+      "method": "item/tool/call",
+      "threadId": "01a15cbf-abb8-75c3-b0c4-7b2004ad0868",
+      "turnId": "01a15cc2-76ff-78f3-8b49-223ae4d13823"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15cbf-abb8-75c3-b0c4-7b2004ad0868",
+      "turnId": "01a15cc2-76ff-78f3-8b49-223ae4d13823",
+      "itemType": "dynamicToolCall"
+    },
+    {
+      "method": "thread/tokenUsage/updated",
+      "threadId": "01a15cbf-abb8-75c3-b0c4-7b2004ad0868",
+      "turnId": "01a15cc2-76ff-78f3-8b49-223ae4d13823"
+    },
+    {
+      "method": "account/rateLimits/updated",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15cbf-abb8-75c3-b0c4-7b2004ad0868",
+      "turnId": "01a15cc2-76ff-78f3-8b49-223ae4d13823",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbf-abb8-75c3-b0c4-7b2004ad0868",
+      "turnId": "01a15cc2-76ff-78f3-8b49-223ae4d13823"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbf-abb8-75c3-b0c4-7b2004ad0868",
+      "turnId": "01a15cc2-76ff-78f3-8b49-223ae4d13823"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbf-abb8-75c3-b0c4-7b2004ad0868",
+      "turnId": "01a15cc2-76ff-78f3-8b49-223ae4d13823"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cbf-abb8-75c3-b0c4-7b2004ad0868",
+      "turnId": "01a15cc2-76ff-78f3-8b49-223ae4d13823"
+    },
+    {
+      "method": "turn/moderationMetadata",
+      "threadId": "01a15cbf-abb8-75c3-b0c4-7b2004ad0868",
+      "turnId": "01a15cc2-76ff-78f3-8b49-223ae4d13823"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15cbf-abb8-75c3-b0c4-7b2004ad0868",
+      "turnId": "01a15cc2-76ff-78f3-8b49-223ae4d13823",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "thread/tokenUsage/updated",
+      "threadId": "01a15cbf-abb8-75c3-b0c4-7b2004ad0868",
+      "turnId": "01a15cc2-76ff-78f3-8b49-223ae4d13823"
+    },
+    {
+      "method": "account/rateLimits/updated",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "thread/status/changed",
+      "threadId": "01a15cbf-abb8-75c3-b0c4-7b2004ad0868",
+      "turnId": null
+    },
+    {
+      "method": "turn/completed",
+      "threadId": "01a15cbf-abb8-75c3-b0c4-7b2004ad0868",
+      "turnId": null
+    },
+    {
+      "method": "hook/started",
+      "threadId": "01a15cbf-abb8-75c3-b0c4-7b2004ad0868",
+      "turnId": "auto-compact-2",
+      "id": "session-end:1:/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json",
+      "eventName": "sessionEnd",
+      "status": "running",
+      "sourcePath": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json",
+      "durationMs": null
+    },
+    {
+      "method": "hook/completed",
+      "threadId": "01a15cbf-abb8-75c3-b0c4-7b2004ad0868",
+      "turnId": "auto-compact-2",
+      "id": "session-end:1:/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json",
+      "eventName": "sessionEnd",
+      "status": "completed",
+      "sourcePath": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json",
+      "durationMs": 18
+    },
+    {
+      "method": "thread/status/changed",
+      "threadId": "01a15cbf-abb8-75c3-b0c4-7b2004ad0868",
+      "turnId": null
+    }
+  ],
+  "calls": [
+    {
+      "origin": "model",
+      "threadId": "01a15cbf-abb8-75c3-b0c4-7b2004ad0868",
+      "command": "status",
+      "requestId": "vGEMeaW4j09QwqrqWQ-HDUPVAb9sZGy7Rt2K2yp3fjM=",
+      "fieldId": null,
+      "exitCode": 0,
+      "response": {
+        "status": "unauthorized"
+      },
+      "separateStdin": true,
+      "argvCount": 1,
+      "argvInspectedBeforeStdin": true
+    }
+  ]
+}
