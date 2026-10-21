@@ -1,0 +1,10 @@
+{
+  "olderSource": "4690e79357bb728da22193d8dadd6dc8a8ce2ce6",
+  "newerSource": "7edb11c998a1e79e0e92c745b3d0c26d5086e3dd",
+  "paths": [
+    "packages/info_storage/lib",
+    "packages/info_core/lib"
+  ],
+  "gitDiffQuietExit": 0,
+  "scope": "Current exported backup is independently verified by unchanged production storage/core implementation; compiled harness is separate from shipped app."
+}

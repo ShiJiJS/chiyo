@@ -1,0 +1,380 @@
+{
+  "packageVerified": true,
+  "finalUpgradeAccepted": false,
+  "issuesRemainOpen": [
+    42,
+    45,
+    48,
+    50
+  ],
+  "sourceCommit": "7edb11c998a1e79e0e92c745b3d0c26d5086e3dd",
+  "package": {
+    "release": "0.4.0+12-mac-dev.7edb11c998a1",
+    "sourceCommit": "7edb11c998a1e79e0e92c745b3d0c26d5086e3dd",
+    "archive": "agent-info-manage-0.4.0+12-mac-dev.7edb11c998a1-macos-arm64.zip",
+    "archiveBytes": 130942359,
+    "archiveSha256": "62da41aad206de8f120e33c0a0315ee26f64a79cdcf5a44320cae788fb97c9c1",
+    "manifestSha256": "032a2a1448f132e6e8da5e57571f79ca864d426dbb4c1c16325a71d510d6ad42",
+    "fileEntries": 7971,
+    "machOCount": 75,
+    "minimumSystemVersion": "14.0",
+    "testedBuildHost": "27.0.1",
+    "sourceTests": {
+      "core": {
+        "pass": 285,
+        "skip": 6
+      },
+      "cli": {
+        "pass": 75,
+        "skip": 40
+      },
+      "storage": {
+        "pass": 159,
+        "skip": 18
+      },
+      "desktop": {
+        "pass": 194,
+        "skip": 2
+      }
+    },
+    "totalPass": 713,
+    "totalSkip": 66,
+    "fullSourceAnalysesPassed": true
+  },
+  "installedSource": "4690e79357bb728da22193d8dadd6dc8a8ce2ce6",
+  "installedPid": 51844,
+  "oldNormalExit": {
+    "pid": 43712,
+    "exit": 0,
+    "endpointClosed": true
+  },
+  "newPassiveLaunch": {
+    "pid": 51787,
+    "exit": 0,
+    "endpointClosed": true,
+    "keychainUnavailable": true,
+    "requestButtonClicked": false,
+    "profileUnchanged": true
+  },
+  "rollback": {
+    "originalManifestEntriesUnchanged": 7971,
+    "oldAppReadyWithoutOwnerAction": true,
+    "original777Preserved": true
+  },
+  "preUpgradeExport": {
+    "format": 9,
+    "information": 2,
+    "managedCredentials": 4,
+    "credentialVersions": 5,
+    "attachmentVersions": 3,
+    "attachmentBytes": 3073,
+    "fileDeliveries": 6,
+    "independentMemoryKeyTargetRestoredAndReopened": true,
+    "noLiveAuthority": true,
+    "backupUnchanged": true,
+    "keychainTouchedByValidation": false
+  },
+  "excludedOrFailedPreparation": [
+    "External-target diagnostic build could not find package config; same source built from owned ignored folder under storage package.",
+    "First validation assumed UI 3.0KiB meant exactly3072 bytes; actual authenticated export has3073. Corrected fixture assumption, second validation passed; no product change.",
+    "First upgrade attempt rejected extra GH runtime .local/state/gh/device-id; all7971 original manifest entries unchanged. Explicitly allowed only that observed extra path in local supervisor before actual replacement."
+  ],
+  "ownerKeychainActions": 0,
+  "currentOwnerActionRequired": "Final installation needs a system decision for new ad-hoc signature. No system request was triggered; usable previous installation restored.",
+  "cleanUserAccepted": false,
+  "finalNativeUiAccepted": false,
+  "finalCodexAccepted": false,
+  "windowsOrMainChanged": false,
+  "rawFiles": [
+    {
+      "path": "raw/verification.json",
+      "bytes": 2731,
+      "sha256": "82790dcadce1713e193e55ab64797b8fdcf8cd2281276cb6e4423d34690c6be1"
+    },
+    {
+      "path": "raw/package-summary.json",
+      "bytes": 831,
+      "sha256": "dfa08dfeca8ec6e1475c1ba053cdfbf9df9f157afd86ce7ba4e3db41dc80341c"
+    },
+    {
+      "path": "raw/cleanup.json",
+      "bytes": 1754,
+      "sha256": "417be24c73f8146f7c49c02a72bbee7fc1101931ad662fb6af4e37fba71efd69"
+    },
+    {
+      "path": "raw/logs/app-signature.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/logs/archive.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/logs/compile-info-codex-hook.txt",
+      "bytes": 136,
+      "sha256": "2cd791fd159a6f9f85eee72a994bb91eabba906961936d2874754f3bbc761ed5"
+    },
+    {
+      "path": "raw/logs/compile-info-codex.txt",
+      "bytes": 131,
+      "sha256": "1d43d3ffbe12ea20ebecb999fa3558a33983126a4c6a4ad9a7e55e34330a2b81"
+    },
+    {
+      "path": "raw/logs/compile-info-prepare-codex.txt",
+      "bytes": 139,
+      "sha256": "46cebce0d51c441e1f713e7f703a9da05f0198f2c609490c7ef41feceadf2d97"
+    },
+    {
+      "path": "raw/logs/compile-info-runtime-worker.txt",
+      "bytes": 140,
+      "sha256": "a0e5c53ce39e50270f8f37ebacdea5d426b6681b00dacbc9a6ab63cc28753a63"
+    },
+    {
+      "path": "raw/logs/compile-info.txt",
+      "bytes": 125,
+      "sha256": "1de9010b16894fca7dc71bc38148f4aa4462049a41f5d19010ac015926a2ad15"
+    },
+    {
+      "path": "raw/logs/diagnostic-build.txt",
+      "bytes": 300,
+      "sha256": "f0320a6630c2f76d89a14f8f67555abac77caf6ffc836cc3aa1a854c851bb832"
+    },
+    {
+      "path": "raw/logs/extract.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/logs/extracted-app-signature.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/logs/extracted-cli-and-worker.txt",
+      "bytes": 842,
+      "sha256": "7aca7085e00077c247eb493880ab1f386fb56abe15d52c2cd2781df8c92408ed"
+    },
+    {
+      "path": "raw/logs/extracted-storage.txt",
+      "bytes": 187,
+      "sha256": "bfe59e3f5c8148af626c8aa8416aa5c874f251127cecd3c3ec86f26dddfb1657"
+    },
+    {
+      "path": "raw/logs/release-build.txt",
+      "bytes": 4599,
+      "sha256": "07e25174cf580d6f2bc5d2cd29201d67c7893f0cfb6368c4bbb6e5e6252512ed"
+    },
+    {
+      "path": "raw/logs/sign-diagnostic-libsqlcipher.dylib.txt",
+      "bytes": 170,
+      "sha256": "71400290e18d59639c569c7ec3332256af6002979084d17d14ea655045663dc1"
+    },
+    {
+      "path": "raw/logs/sign-diagnostic-macos-storage-check.txt",
+      "bytes": 171,
+      "sha256": "92a592e56d04d798230549d2abe02139ae0c22124d0bb7d1a28beead9c557d76"
+    },
+    {
+      "path": "raw/logs/sign-info-codex-hook.txt",
+      "bytes": 155,
+      "sha256": "96cc2334257eb8275531ff41f72e8b1f59c184d15c4c145b4a534682016003be"
+    },
+    {
+      "path": "raw/logs/sign-info-codex.txt",
+      "bytes": 150,
+      "sha256": "bce3a097e5b57e3599697d3532f8f07ea3e40f3882c87d6e563866d0c5eaf943"
+    },
+    {
+      "path": "raw/logs/sign-info-prepare-codex.txt",
+      "bytes": 158,
+      "sha256": "8327413e1a51ecc1f8b1038a85e5e225cc2d4af121f60b672b7fd8174a206166"
+    },
+    {
+      "path": "raw/logs/sign-info-runtime-worker.txt",
+      "bytes": 159,
+      "sha256": "2fbfdc01031ba938470363f56231cd728a0d66a9971802ad2dcb84a2c6c0da3f"
+    },
+    {
+      "path": "raw/logs/sign-info.txt",
+      "bytes": 144,
+      "sha256": "424ee42ff39edeed4dd1220fef13407e3ae3c14279e6d62fe3bb2bc6b3d8eeec"
+    },
+    {
+      "path": "raw/logs/source-checks.txt",
+      "bytes": 198336,
+      "sha256": "a385dbc4cc6bbd750228fe3161baddff0d0da3a7051d80c7a4d34692a2359324"
+    },
+    {
+      "path": "raw/upgrade-preparation/backup-exported.ax.txt",
+      "bytes": 1978,
+      "sha256": "a5c19646286bf75bcdc02318332dbc289ba3b54bba67c683ee69f88a6ac37a7b"
+    },
+    {
+      "path": "raw/upgrade-preparation/backup-independent-restore-2.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/upgrade-preparation/backup-independent-restore.stderr.txt",
+      "bytes": 372,
+      "sha256": "72fc03d5f0a8fb009c5a84f48d579bdb01c84facefe79231b3e5435051557e00"
+    },
+    {
+      "path": "raw/upgrade-preparation/diagnostic-build-2.txt",
+      "bytes": 316,
+      "sha256": "551f43333ed67177835eb4a2593c59dc10c5367568583114b7488705157d3299"
+    },
+    {
+      "path": "raw/upgrade-preparation/diagnostic-build-retry.txt",
+      "bytes": 314,
+      "sha256": "bfdebcabb7577d0a44b1fc022568735bac789eb4f51cc75d1087f9fa50a29dd8"
+    },
+    {
+      "path": "raw/upgrade-preparation/diagnostic-build.txt",
+      "bytes": 60,
+      "sha256": "bf611ef3d56b2a1292876acda811f62ccbe33b7d6860bdcfac0901866285cddb"
+    },
+    {
+      "path": "raw/upgrade-preparation/new-designated-requirement.txt",
+      "bytes": 260,
+      "sha256": "2e916f48a8c027ef6f5f0989f4688512e1dd4abf7d41e62b63ba813d8b6b3912"
+    },
+    {
+      "path": "raw/upgrade-preparation/new-installed-first-state.ax.txt",
+      "bytes": 828,
+      "sha256": "1f50fc7911c6c0dde2b82fb59aba30db1b09805c710aa8a6116b9fd9cb1f5951"
+    },
+    {
+      "path": "raw/upgrade-preparation/old-designated-requirement.txt",
+      "bytes": 214,
+      "sha256": "167a785a2ba89e1661d72dd1c9662ade9b4af0c276464c178a7ff5e791b359f3"
+    },
+    {
+      "path": "raw/upgrade-preparation/original-information-before-upgrade.ax.txt",
+      "bytes": 2573,
+      "sha256": "1351e259446fcde6ba297d89ba0441c0943b915813cfaf05c25eb2fe2a0d2e2f"
+    },
+    {
+      "path": "raw/upgrade-preparation/recovery-key-saved.ax.txt",
+      "bytes": 1677,
+      "sha256": "ce41fd24cf893319f3815f499d3e5d33fc89b83043c94eaa159d9e19d45e43d2"
+    },
+    {
+      "path": "raw/upgrade-preparation/restored-old-first-state.ax.txt",
+      "bytes": 652,
+      "sha256": "a78d81a23ec3df51d3beab66bb352335bbf5ba2a98937864d697e19868242708"
+    },
+    {
+      "path": "raw/upgrade-preparation/restored-old-library.ax.txt",
+      "bytes": 2549,
+      "sha256": "861d98822f450d33434496aea0b3279db4e64d308942cc7201f0fa9c917a48ff"
+    },
+    {
+      "path": "raw/upgrade-preparation/rollback-supervisor.txt",
+      "bytes": 24,
+      "sha256": "4ab6609b5bf3600b9f2cf7ea1869ccc9f0c88e6c4418d87a1ce508a904842fe0"
+    },
+    {
+      "path": "raw/upgrade-preparation/upgrade-supervisor.txt",
+      "bytes": 65,
+      "sha256": "51f5356cceb6e1fad03810a63da8e0cc563c5b720c3d3006fd169c82ec155e49"
+    },
+    {
+      "path": "raw/upgrade-preparation/backup-export-metadata.json",
+      "bytes": 543,
+      "sha256": "f92cb939d1b8e8636965dba8d8baa1c722c4621696fdc7336dfe2f714dcd3fda"
+    },
+    {
+      "path": "raw/upgrade-preparation/backup-independent-restore.json",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/upgrade-preparation/closed-profile-before.json",
+      "bytes": 173,
+      "sha256": "1f1efa1dbc0086e6bf2ebd9013fb9b5689de87101e273e8af64ca4c603b91cb0"
+    },
+    {
+      "path": "raw/upgrade-preparation/new-delivery-manifest.json",
+      "bytes": 2126205,
+      "sha256": "032a2a1448f132e6e8da5e57571f79ca864d426dbb4c1c16325a71d510d6ad42"
+    },
+    {
+      "path": "raw/upgrade-preparation/old-installed-manifest.json",
+      "bytes": 2126207,
+      "sha256": "a846a01c0c876df29e8e92fc16fb7f7905ac6a2dc32d3c57597e02daf5fe86eb"
+    },
+    {
+      "path": "raw/upgrade-preparation/old-inventory-difference.json",
+      "bytes": 87,
+      "sha256": "1f8cca5c707af3bba7fa87afd349a2f3100dbd16e20297ff8a6d53acb4a4a73e"
+    },
+    {
+      "path": "raw/upgrade-preparation/passive-upgrade-key-unavailable.json",
+      "bytes": 519,
+      "sha256": "75cfdee27740f139fa7ff9a5fd1e21140e7b66e3340f30ad61346627ef41df7e"
+    },
+    {
+      "path": "raw/upgrade-preparation/restored-old-launch.json",
+      "bytes": 195,
+      "sha256": "def61c5dad649f8c382a9d540e2666ff32b49df7ea6695f6fdd963ea8b7d433a"
+    },
+    {
+      "path": "raw/upgrade-preparation/storage-core-source-equivalence.json",
+      "bytes": 394,
+      "sha256": "e8ca74780bdb5d572c7e042456829812a138ceaded9a3791c7edc074f1da52ce"
+    },
+    {
+      "path": "raw/upgrade-preparation/upgrade-launch.json",
+      "bytes": 637,
+      "sha256": "4a5a4db06863d6da2ad0839142ae0c2dfbaef60dbb0277940e307b47b65388bc"
+    },
+    {
+      "path": "raw/upgrade-preparation/backup-independent-restore-2.jsonl",
+      "bytes": 732,
+      "sha256": "395240263bf6009be28c050daaaf03ea9890002911b3210a04f5a55c41a84cc4"
+    },
+    {
+      "path": "raw/upgrade-preparation/new-installed-main.log",
+      "bytes": 132,
+      "sha256": "dbc01fad753a943417e50e983fddc5339e7268c74255b60f06d0b78ea171aa93"
+    },
+    {
+      "path": "raw/upgrade-preparation/restored-old-main.log",
+      "bytes": 132,
+      "sha256": "dbc01fad753a943417e50e983fddc5339e7268c74255b60f06d0b78ea171aa93"
+    },
+    {
+      "path": "raw/upgrade-preparation/shipped-CODEX-INTEGRATION.md",
+      "bytes": 3217,
+      "sha256": "bcf97cf90a2eb472f65ed2b89b89cbad54b6f8bd81ea04bffc5aa2c33452afba"
+    },
+    {
+      "path": "raw/upgrade-preparation/shipped-README.md",
+      "bytes": 4263,
+      "sha256": "2b1e4ebb617b9f9e8806ae0b9ee37d855f60fbc1aafeadb30a4bb8922125d846"
+    },
+    {
+      "path": "raw/upgrade-preparation/verify_export.dart",
+      "bytes": 5814,
+      "sha256": "ef703b482e1fb43384744aadf5a8eb0b17e3d8b1b04fed9f82d308cc54da33d0"
+    },
+    {
+      "path": "raw/upgrade-preparation/attempt_upgrade.py",
+      "bytes": 3215,
+      "sha256": "ff98933f5bd530facdf53f07af4c2abc753be8a6c1f3036c40958152458cd672"
+    },
+    {
+      "path": "raw/upgrade-preparation/restore_previous_installation.py",
+      "bytes": 2073,
+      "sha256": "9f50130227e8dd4b127aa00f8b5aa69c5f30b5d8d2f0c28158493c2478a0463f"
+    },
+    {
+      "path": "raw/cleanup-extra-inventory.json",
+      "bytes": 290,
+      "sha256": "175f4e7d354164a9a0e6d750dab1b2a6c7f5c032a2266bb7d246a56e69af67b3"
+    }
+  ]
+}

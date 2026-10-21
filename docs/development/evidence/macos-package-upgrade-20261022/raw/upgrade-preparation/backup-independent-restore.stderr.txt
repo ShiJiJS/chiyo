@@ -1,0 +1,5 @@
+Unhandled exception:
+Bad state: Installed export counts differ
+#0      require (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/build/mac-upgrade-20261022/verify_export.dart:21)
+#1      main (file:///Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/build/mac-upgrade-20261022/verify_export.dart:42)
+<asynchronous suspension>
