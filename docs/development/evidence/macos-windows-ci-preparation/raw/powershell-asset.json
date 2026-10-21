@@ -1,0 +1,6 @@
+{
+  "name": "powershell-7.5.4-osx-arm64.tar.gz",
+  "size": 71003475,
+  "digest": "sha256:3aaadd7ca62f1e4dbe59145b6af24e926d61f8da8a4782bc535e500c184135f0",
+  "browser_download_url": "https://github.com/PowerShell/PowerShell/releases/download/v7.5.4/powershell-7.5.4-osx-arm64.tar.gz"
+}

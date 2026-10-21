@@ -1,0 +1,38 @@
+{
+  "preparedOnly": true,
+  "cloudDispatched": false,
+  "nativeWindowsTested": false,
+  "ownerQuotaAgreementRequired": true,
+  "originalFiles": [
+    {
+      "path": "raw/mac-refusal.json",
+      "bytes": 89,
+      "sha256": "721b128a8a8c6b148f1fa0f49a1d629310bcb7633767367a840ee4607043f43f"
+    },
+    {
+      "path": "raw/macos-validation.yml",
+      "bytes": 4302,
+      "sha256": "d0fec109f105ac52174e8bcbfebcbd3a5a8134121066d0f952deab22ead49d8d"
+    },
+    {
+      "path": "raw/powershell-asset.json",
+      "bytes": 286,
+      "sha256": "7a7d0818709aac636f036d1765a7d20e1cc4cd0b471bcc8dd7689d2bfe8a58ba"
+    },
+    {
+      "path": "raw/powershell-parser.json",
+      "bytes": 276,
+      "sha256": "d5c0906569f06f4d9e6bf50818639fb0918cf445506015b9f827f75c673f822d"
+    },
+    {
+      "path": "raw/verification.json",
+      "bytes": 518,
+      "sha256": "af7d2bc657add6af1ed99b2e55d7a4c67730bf9d08b3e2dd08a9dbb12e0854ce"
+    },
+    {
+      "path": "raw/windows-mac-branch.ps1",
+      "bytes": 3977,
+      "sha256": "cf92877ac07cfbb2dd1f899c9c3deac5fb6198301e1f0366fed737dfa45c6662"
+    }
+  ]
+}

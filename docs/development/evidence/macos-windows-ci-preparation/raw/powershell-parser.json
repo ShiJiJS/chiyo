@@ -1,0 +1,14 @@
+{
+  "files": [
+    {
+      "parseErrors": 0,
+      "path": "scripts/qa/windows-mac-branch.ps1"
+    },
+    {
+      "parseErrors": 0,
+      "path": "scripts/check.ps1"
+    }
+  ],
+  "scope": "Parser only on Mac; no Windows execution or cloud dispatch",
+  "powershell": "7.5.4"
+}
