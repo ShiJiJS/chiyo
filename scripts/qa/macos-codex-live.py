@@ -5,6 +5,7 @@ Only synthetic data and a QA-only owner file controller. No Keychain, hooks,
 trust changes, Codex threads or models are started by this runner.
 """
 import argparse
+import base64
 import hashlib
 import json
 import os
@@ -21,7 +22,7 @@ ROOT=Path(__file__).resolve().parents[2]
 ENTRY='apps/desktop/integration_test/macos_codex_live.dart'
 
 def main():
-    parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('output',type=Path);args=parser.parse_args()
+    parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('output',type=Path);parser.add_argument('--ssh',action='store_true',help='Create fresh loopback SSH keys and synthetic managed credential');args=parser.parse_args()
     out=args.output.resolve();out.relative_to(ROOT/'build/macos-adaptation');out.mkdir(parents=True,exist_ok=False)
     with socket.socket() as s:
         s.settimeout(1)
@@ -44,7 +45,7 @@ def main():
     (source/'.tools').symlink_to(ROOT/'.tools',target_is_directory=True)
     (source/'.cache').mkdir();(source/'.cache/pub').symlink_to(ROOT/'.cache/pub',target_is_directory=True)
     config=source/'apps/desktop/macos/Runner/Configs/AppInfo.xcconfig';text=config.read_text();anchor='PRODUCT_BUNDLE_IDENTIFIER = com.example.infoDesktop';assert text.count(anchor)==1
-    identity='org.shijijs.agent-info-manage.qa.codex.'+owner;config.write_text(text.replace(anchor,'PRODUCT_BUNDLE_IDENTIFIER = '+identity));state['bundleIdentifier']=identity
+    identity='org.shijijs.agent-info-manage.qa.codex.'+uuid.uuid4().hex;config.write_text(text.replace(anchor,'PRODUCT_BUNDLE_IDENTIFIER = '+identity));state['bundleIdentifier']=identity
     state['copyModifications']={str(config.relative_to(source)):hashlib.sha256(config.read_bytes()).hexdigest()}
     for name,digest in hashes.items():
         if name not in state['copyModifications']:assert hashlib.sha256((source/name).read_bytes()).hexdigest()==digest
@@ -59,40 +60,70 @@ def main():
     run('entitlements',['/usr/bin/codesign','-d','--entitlements',':-',str(app)])
     state['binarySha256']=hashlib.sha256(binary.read_bytes()).hexdigest()
     environment=os.environ.copy();environment['MAC_QA_OWNER']=owner
-    with (logs/'app.txt').open('wb') as f:process=subprocess.Popen([str(binary)],cwd=source,env=environment,stdout=f,stderr=subprocess.STDOUT)
-    state['pid']=process.pid;state['running']=True;save();directory=None
-    deadline=time.monotonic()+60
-    while time.monotonic()<deadline:
-        lines=(logs/'app.txt').read_text(errors='replace');matches=re.findall(r'MAC_CODEX_LIVE_ROOT=([^\r\n]+)',lines)
-        if matches:
-            p=Path(matches[-1]);assert p.is_absolute() and p.name.startswith('aim-mac-codex-live-') and not p.is_symlink()
-            assert (p/'.qa-owner').read_text()==owner;directory=p.resolve()
-            if (directory/'ready.json').exists():break
-        assert process.poll() is None,'QA application exited before ready';time.sleep(.05)
-    assert directory and (directory/'ready.json').exists(),'QA application startup deadline'
-    controller=out/'controller.json';fd=os.open(controller,os.O_WRONLY|os.O_CREAT|os.O_EXCL,0o600)
-    with os.fdopen(fd,'w') as f:json.dump({'owner':owner,'root':str(directory),'pid':process.pid,'app':str(app)},f)
-    state['ready']=json.loads((directory/'ready.json').read_text());state['controllerReady']=True;save()
-    print('MAC_CODEX_SERVICE_READY='+str(directory),flush=True)
+    ssh=None;ssh_log=None;ssh_root=out/'ssh-fixture'
+    if args.ssh:
+        ssh_log=(logs/'ssh.txt').open('wb')
+        ssh=subprocess.Popen([str(ROOT/'.tools/qa-python/bin/python'),str(source/'scripts/qa/macos-ssh-fixture.py'),str(ssh_root),'--audit-commands'],stdout=ssh_log,stderr=subprocess.STDOUT)
+        deadline=time.monotonic()+30
+        while not (ssh_root/'fixture.json').exists():
+            assert ssh.poll() is None and time.monotonic()<deadline,'Synthetic SSH startup failed';time.sleep(.05)
+        facts=json.loads((ssh_root/'fixture.json').read_text());state['sshPort']=facts['port']
+        environment.update(MAC_QA_SSH_KEY=base64.b64encode((ssh_root/'client').read_bytes()).decode(),MAC_QA_SSH_PORT=str(facts['port']),MAC_QA_SSH_HOST=' '.join((ssh_root/'host.pub').read_text().split()[:2]))
+    controller=out/'controller.json';directory=None;process=None;epoch=0
     def request_quit(_signal=None,_frame=None):
+        if directory is None:return
         indices=[int(p.stem.split('-')[1]) for p in directory.glob('command-*.json')]
         target=directory/f'command-{max(indices,default=0)+1}.json'
         if not target.exists():target.write_text(json.dumps({'owner':owner,'action':'quit'}))
-    signal.signal(signal.SIGTERM,request_quit)
-    signal.signal(signal.SIGINT,request_quit)
+    signal.signal(signal.SIGTERM,request_quit);signal.signal(signal.SIGINT,request_quit)
     try:
-        while process.poll() is None:time.sleep(.2)
-        state['exitCode']=process.returncode;state['running']=False
-        replies=sorted(directory.glob('reply-*.json'),key=lambda p:int(p.stem.split('-')[1]))
-        if replies:state['lastOwnerReply']=json.loads(replies[-1].read_text())
-        state['complete']=process.returncode==0 and bool(state.get('lastOwnerReply',{}).get('quitting'))
-        for p in replies:shutil.copyfile(p,out/p.name)
-        if state['complete']:
-            assert (directory/'.qa-owner').read_text()==owner and not directory.is_symlink();shutil.rmtree(directory);state['ownedFixtureRemoved']=True
-            controller.unlink()
-        else:state['retainedOwnedRoot']=str(directory)
-    finally:save()
-    print(json.dumps({'complete':state['complete'],'exitCode':process.returncode}),flush=True)
+        while True:
+            epoch+=1
+            log=logs/('app.txt' if epoch==1 else f'app-reopen-{epoch}.txt')
+            if directory is not None:
+                (directory/'ready.json').unlink()
+                environment['MAC_QA_REOPEN_ROOT']=str(directory)
+            with log.open('wb') as f:process=subprocess.Popen([str(binary)],cwd=source,env=environment,stdout=f,stderr=subprocess.STDOUT)
+            state['pid']=process.pid;state['running']=True;state['epoch']=epoch;save()
+            deadline=time.monotonic()+60
+            while time.monotonic()<deadline:
+                matches=re.findall(r'MAC_CODEX_LIVE_ROOT=([^\r\n]+)',log.read_text(errors='replace'))
+                if matches:
+                    p=Path(matches[-1]);assert p.is_absolute() and p.name.startswith('aim-mac-codex-live-') and not p.is_symlink()
+                    assert (p/'.qa-owner').read_text()==owner
+                    if directory is not None:assert p.resolve()==directory
+                    directory=p.resolve()
+                    if (directory/'ready.json').exists():break
+                assert process.poll() is None,'QA application exited before ready';time.sleep(.05)
+            assert directory and (directory/'ready.json').exists(),'QA application startup deadline'
+            temp=controller.with_suffix('.partial');fd=os.open(temp,os.O_WRONLY|os.O_CREAT|os.O_EXCL,0o600)
+            with os.fdopen(fd,'w') as f:json.dump({'owner':owner,'root':str(directory),'pid':process.pid,'app':str(app),'epoch':epoch},f)
+            temp.replace(controller)
+            state['ready']=json.loads((directory/'ready.json').read_text());state['controllerReady']=True
+            state.setdefault('epochs',[]).append({'epoch':epoch,'pid':process.pid,'ready':state['ready']});save()
+            print('MAC_CODEX_SERVICE_READY_EPOCH='+str(epoch),flush=True)
+            while process.poll() is None:time.sleep(.2)
+            state['exitCode']=process.returncode;state['running']=False
+            replies=sorted(directory.glob('reply-*.json'),key=lambda p:int(p.stem.split('-')[1]))
+            if replies:state['lastOwnerReply']=json.loads(replies[-1].read_text())
+            for p in replies:shutil.copyfile(p,out/p.name)
+            last=state.get('lastOwnerReply',{})
+            state['epochs'][-1]['exitCode']=process.returncode
+            if process.returncode==0 and last.get('restarting'):
+                state['epochs'][-1]['beforeRestart']=last['status'];save();continue
+            state['complete']=process.returncode==0 and bool(last.get('quitting'))
+            if state['complete']:
+                assert (directory/'.qa-owner').read_text()==owner and not directory.is_symlink();shutil.rmtree(directory);state['ownedFixtureRemoved']=True;controller.unlink()
+            else:state['retainedOwnedRoot']=str(directory)
+            break
+    finally:
+        if ssh is not None:
+            if ssh.poll() is None:ssh.terminate()
+            state['sshExitCode']=ssh.wait(timeout=10);ssh_log.close()
+            audit=ssh_root/'command-audit.jsonl';state['sshReceipts']=[json.loads(line) for line in audit.read_text().splitlines()] if audit.exists() else []
+            assert ssh_root.parent==out and not ssh_root.is_symlink();shutil.rmtree(ssh_root);state['ownedSshKeysRemoved']=True
+        save()
+    print(json.dumps({'complete':state['complete'],'exitCode':process.returncode,'epochs':epoch}),flush=True)
     if not state['complete']:raise SystemExit(1)
 
 if __name__=='__main__':main()
