@@ -1,0 +1,31 @@
+{
+  "productionBase": "01c1f141d876a9d3c49c61c7fc3d1e572c432c5a",
+  "productionFilesCompared": 152,
+  "currentAndFixedProductionBytesMatch": true,
+  "exceptionTextMatches": {
+    "build-release.txt": 0,
+    "pub-desktop.txt": 0,
+    "close-reopen-menu-quit.txt": 0,
+    "settings-quit-reopen.txt": 0,
+    "analyze.txt": 0,
+    "settings-quit.txt": 0,
+    "close-reopen-menu-quit-reopen.txt": 0,
+    "pub-info_storage.txt": 0,
+    "command-q.txt": 0,
+    "pub-info_cli.txt": 0,
+    "signature.txt": 0,
+    "pub-info_core.txt": 0,
+    "command-q-reopen.txt": 0
+  },
+  "notAnExceptionCounter": true,
+  "controllerRemoved": true,
+  "generatedArtifactsRemoved": true,
+  "unverified": [
+    "direct status item and Dock clicks",
+    "independent hidden-window appearance",
+    "status item unavailable",
+    "visible startup errors",
+    "sleep/wake and expiration",
+    "final package joint acceptance"
+  ]
+}

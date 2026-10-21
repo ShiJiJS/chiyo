@@ -1,0 +1,26 @@
+{
+  "package": "issue50-package-7",
+  "binarySha256": "cb9971c43daa0bccf06c31d48c6ac3ab62f3e57c34bc96655c47202b9e14f5b7",
+  "results": [
+    {
+      "command": [
+        "info",
+        "app",
+        "status"
+      ],
+      "exitCode": 69,
+      "stdout": "{\"controlVersion\":1,\"status\":\"unsupported_platform\"}\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "info",
+        "app",
+        "quit"
+      ],
+      "exitCode": 69,
+      "stdout": "{\"controlVersion\":1,\"status\":\"unsupported_platform\"}\n",
+      "stderr": ""
+    }
+  ]
+}

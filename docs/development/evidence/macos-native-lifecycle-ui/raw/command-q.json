@@ -1,0 +1,15 @@
+{
+  "label": "command-q",
+  "exitCode": 0,
+  "portClosedAfterExit": true,
+  "mode": "ui-hold",
+  "startup": "ready",
+  "port": 58638,
+  "tray": true,
+  "syntheticGrantRead": true,
+  "nativeTerminationRequested": true,
+  "libraryCloses": 1,
+  "nativeEvents": [
+    "quit"
+  ]
+}
