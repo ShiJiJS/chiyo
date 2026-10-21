@@ -147,6 +147,51 @@ def credential_case():
  RESULTS['credentialFinalSnapshot']=owner('status');assert len([e for e in RESULTS['credentialFinalSnapshot']['executions'] if e['requestId']==rid])==2
  request('thread/archive',{'threadId':tid});RESULTS['completeCredentialFlow']=True;print('CREDENTIAL_FLOW_COMPLETE',flush=True)
 
+
+def expiry_restart_case():
+ tid=new_thread();RESULTS['expiryThread']=tid
+ turn(tid,'Natural expiry acceptance. Use public catalog and actual hook association. Submit one request only for Address of Synthetic Mac server, purpose "Synthetic natural sixty-second expiry". Stop pending, do not read or reconnect.')
+ snap=owner('status');r=next(r for r in snap['requests'] if r['state']=='pending' and r['chatLabel'].endswith(tid));rid=r['id'];RESULTS['expiryRequest']=rid
+ start=time.monotonic();RESULTS['expiryApprovedSnapshot']=owner('approve',requestId=rid,fields=[snap['addressField']],lifetimeSeconds=60)
+ turn(tid,'Owner selected the scope. Read Address once under the same original request without printing the value. Do not renew, reconnect or make another request.')
+ assert any(c['threadId']==tid and c['command']=='read' and c['response'].get('status')=='ok' for c in CALLS)
+ print('NATURAL_EXPIRY_WAIT_STARTED',flush=True)
+ announced=-1
+ while time.monotonic()-start<62:
+  elapsed=int(time.monotonic()-start)
+  if elapsed//15!=announced:announced=elapsed//15;print('EXPIRY_REAL_SECONDS='+str(elapsed),flush=True)
+  time.sleep(.2)
+ RESULTS['naturalElapsedSeconds']=time.monotonic()-start
+ turn(tid,'Continue reading Address exactly once using the original request. If the fixed deadline has expired, stop on refusal; do not reconnect, renew or submit any new request. Do not print the value.')
+ reads=[c for c in CALLS if c['threadId']==tid and c['command']=='read'];assert len(reads)==2 and reads[-1]['response'].get('status') in ['unauthorized','expired']
+ RESULTS['afterExpirySnapshot']=owner('status');g=next(g for g in RESULTS['afterExpirySnapshot']['grants'] if g['requestId']==rid);assert not g['active'];print('NATURAL_EXPIRY_VERIFIED',flush=True)
+ current=new_thread();RESULTS['restartThread']=current
+ turn(current,'Application restart acceptance. Use public catalog and your actual hook association. Submit exactly one request only for Address of Synthetic Mac server, purpose "Synthetic retained-library real application restart". Stop pending.')
+ snap=owner('status');r=next(r for r in snap['requests'] if r['state']=='pending' and r['chatLabel'].endswith(current));restart_rid=r['id'];RESULTS['restartRequest']=restart_rid
+ RESULTS['restartApprovedSnapshot']=owner('approve',requestId=restart_rid,fields=[snap['addressField']])
+ turn(current,'Owner selected the scope. Read Address once under that same request without printing its value. Keep the same context and request; do not reconnect or make a second request.')
+ assert any(c['threadId']==current and c['command']=='read' and c['response'].get('status')=='ok' for c in CALLS)
+ before=json.loads((host/'controller.json').read_text());RESULTS['beforeRestartSnapshot']=owner('restart')['status'];deadline=time.monotonic()+90
+ while time.monotonic()<deadline:
+  state=json.loads((host/'controller.json').read_text())
+  if state.get('epoch',1)>before.get('epoch',1):break
+  time.sleep(.1)
+ else:raise TimeoutError('Real application reopen deadline')
+ assert state['pid']!=before['pid'] and state['root']==before['root'];RESULTS['differentApplicationPid']=True;RESULTS['sameLibraryRoot']=True
+ after=owner('status');assert after['reopened'] and after['textItem']==snap['textItem'] and after['fileItem']==snap['fileItem'];RESULTS['afterReopenSnapshot']=after
+ print('REAL_APPLICATION_REOPENED',flush=True)
+ turn(current,'The application has now quit normally and reopened the same encrypted library in a new process. Try reading Address once with only your original retained association and request. Stop when refused; do not search private files, reconnect, renew, or submit another request.')
+ reads=[c for c in CALLS if c['threadId']==current and c['command']=='read'];assert len(reads)==2 and reads[-1]['response'].get('status') in ['unauthorized','association_unavailable']
+ fresh=new_thread();RESULTS['freshAfterRestartThread']=fresh
+ turn(fresh,'After real application restart, verify the retained synthetic library using this new chat and its own real SessionStart association. Inspect catalog and submit one new request for Address of Synthetic Mac server, purpose "Synthetic fresh authorization after restart". Stop pending.')
+ now=owner('status');new=next(r for r in now['requests'] if r['state']=='pending' and r['chatLabel'].endswith(fresh));RESULTS['freshAfterRestartRequest']=new['id'];owner('approve',requestId=new['id'],fields=[now['addressField']])
+ turn(fresh,'Owner approved this new request. Read Address exactly once under this new authorization without printing it. Do not use prior chats or grants.')
+ assert any(c['threadId']==fresh and c['command']=='read' and c['response']=={'status':'ok','value':'synthetic-host.invalid'} for c in CALLS)
+ RESULTS['freshAfterRestartSnapshot']=owner('status')
+ for t in [tid,current,fresh]:request('thread/archive',{'threadId':t})
+ RESULTS['completeExpiryRestartFlow']=True;print('EXPIRY_RESTART_FLOW_COMPLETE',flush=True)
+
+
 try:
  request('initialize',{'clientInfo':{'name':'agent_info_synthetic_mac_lifecycle','version':'1.0'},'capabilities':{'experimentalApi':True}});send({'method':'initialized','params':{}})
  hooks=request('hooks/list',{'cwds':[str(PROJECT)]})
@@ -156,6 +201,8 @@ try:
  models=request('model/list',{});RESULTS['model']=next(m['model'] for m in models['data'] if m.get('isDefault'));RESULTS['modelSelection']='CLI-advertised default, process only'
  if args.case=='credential':
   credential_case()
+ elif args.case=='expiry-restart':
+  expiry_restart_case()
  elif args.resume_ended:
   e=args.resume_ended;RESULTS['threadE']=e;snapshot=owner('status');own=[r for r in snapshot['requests'] if r['chatLabel'].endswith(e)];assert own and all(r['sessionEnded'] for r in own)
   rid=next(r['id'] for r in own if r['approvedFields']);RESULTS['requestE']=rid;RESULTS['beforeResumeSnapshot']=snapshot
