@@ -121,3 +121,5 @@ docs/development/evidence/macos-backup-native-panels/raw/** -text -diff
 docs/development/evidence/macos-native-lifecycle-ui/raw/** -text -diff
 
 docs/development/evidence/macos-startup-error-ui/raw/** -text -diff
+
+docs/development/evidence/macos-tool-execution-boundary/raw/** -text -diff

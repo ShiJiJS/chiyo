@@ -1,0 +1,45 @@
+{
+  "productionBase": "01c1f141d876a9d3c49c61c7fc3d1e572c432c5a",
+  "currentAndFixedProductionBytesMatch": true,
+  "runs": [
+    {
+      "run": "issue44-tools-actual-ui-1",
+      "sourceCommit": "074ecec5f0a1eb45c2f4bd0575a59e9313f67ce4",
+      "complete": false,
+      "productionFilesCompared": 152,
+      "ownedFixturesRemoved": true,
+      "generatedArtifactsRemoved": true,
+      "unchangedReleaseEntitlements": true,
+      "originalToolExecutableBytesUnchanged": true
+    },
+    {
+      "run": "issue44-tools-actual-ui-2",
+      "sourceCommit": "ddd3e3ba839e15366c5a2b71701f27b0a6ce3f18",
+      "complete": false,
+      "productionFilesCompared": 152,
+      "ownedFixturesRemoved": true,
+      "generatedArtifactsRemoved": true,
+      "unchangedReleaseEntitlements": true,
+      "originalToolExecutableBytesUnchanged": true
+    },
+    {
+      "run": "issue44-tools-bundled-ui-1",
+      "sourceCommit": "c84a28a8d74567317d248a217e316238032f4ae0",
+      "complete": true,
+      "productionFilesCompared": 152,
+      "ownedFixturesRemoved": true,
+      "generatedArtifactsRemoved": true,
+      "unchangedReleaseEntitlements": true,
+      "originalToolExecutableBytesUnchanged": true
+    }
+  ],
+  "sensitiveFilesExcluded": [
+    "bookmarks",
+    "controller.json",
+    "database",
+    "private session associations"
+  ],
+  "notProductionToolPackaging": true,
+  "notKeychainOrFinalPackageAcceptance": true,
+  "notExternalToolExecutionSuccess": true
+}

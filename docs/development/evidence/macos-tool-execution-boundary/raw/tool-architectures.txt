@@ -1,0 +1,4 @@
+.tools/gh-2.102.0/gh_2.102.0_macOS_arm64/bin/gh:               Mach-O 64-bit executable arm64
+.tools/aws-cli-2.38.1-package/aws-cli.pkg/Payload/aws-cli/aws: Mach-O universal binary with 2 architectures: [x86_64:Mach-O 64-bit executable x86_64] [arm64:Mach-O 64-bit executable arm64]
+.tools/aws-cli-2.38.1-package/aws-cli.pkg/Payload/aws-cli/aws (for architecture x86_64):	Mach-O 64-bit executable x86_64
+.tools/aws-cli-2.38.1-package/aws-cli.pkg/Payload/aws-cli/aws (for architecture arm64):	Mach-O 64-bit executable arm64
