@@ -1,0 +1,3 @@
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+TOOL_VERSION_ROOT=/Users/jiangxinyi/Library/Containers/org.shijijs.agent-info-manage.qa.tool-version.146474335bf14c7fbdd600e87ac81100/Data/tmp/aim-tool-version-IFK266
+TOOL_VERSION_COMPLETE=reopen

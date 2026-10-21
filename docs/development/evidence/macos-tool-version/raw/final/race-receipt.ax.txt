@@ -1,0 +1,59 @@
+Window: "info_desktop", App: info_desktop.
+0 standard window info_desktop, Secondary Actions: Raise
+	1 container info_desktop
+		2 container (settable)
+			3 container (settable)
+				4 text (settable) 执行记录
+				5 button (settable) ×
+				6 text (settable) 准备失败
+				7 text (settable) 操作 ID
+				8 text (settable) version-image-race
+				9 text (settable) 登记时间
+				10 text (settable) 2026-10-22 03:24:15
+				11 text (settable) 重试规则
+				12 text (settable) 同一操作不会重复启动；本次结果不消耗整个授权。
+				13 text (settable) 进程创建
+				14 text (settable) 尚未创建
+				15 text (settable) 退出码
+				16 text (settable) 尚无记录
+				17 text (settable) 文件清理
+				18 text (settable) 无需文件清理
+				19 text (settable) 开始时间
+				20 text (settable) 尚无记录
+				21 text (settable) 结束时间
+				22 text (settable) 2026-10-22 03:24:15
+				23 text (settable) 结果代码
+				24 text (settable) executable_changed
+				25 text (settable) 凭据 / 版本
+				26 text (settable) 6K0XpPy7Rcym4puatdk4Kq47Sfe1Y9geMLWMMKQUq68= / 1
+				27 text (settable) 注入位置
+				28 text (settable) GH_TOKEN ← {secret:fixture}
+				29 text (settable) 接收配置
+				30 text (settable) 仅本次子进程环境 · 独立 GitHub 配置 · 禁止交互登录
+				31 text (settable) 程序位置
+				32 text (settable) /Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue44-tool-version-ui-2/source/apps/desktop/build/relocated/工具 版本测试/info_desktop.app/Contents/Resources/QA/mutable/bin/gh
+				33 text (settable) 参数（按项）
+				34 text (settable) ["api","user","--method","GET"]
+				35 text (settable) 工作目录
+				36 text (settable) /Users/jiangxinyi/Library/Containers/org.shijijs.agent-info-manage.qa.tool-version.146474335bf14c7fbdd600e87ac81100/Data/tmp/aim-tool-version-IFK266
+				37 text (settable) 计划 hash
+				38 text (settable) sha256:84a5afe7c3b0e9b2b303ebb2c368d5b31c89e29ff3308b3931b63353a7ee617c
+				39 text (settable) 执行编号
+				40 text (settable) mR_qBY2fQziH-ev85E0B5pbCMhNJEmIizj-jf76nXGs=
+				41 text (settable) 申请编号
+				42 text (settable) eWCGmCDn3qQJM-Gt7hUpgN8VQUGp3lKNQxH3hHRRO6o=
+				43 text (settable) 这里只保留执行事实。完整输出不写入历史或备份；执行宿主退出、缓存淘汰或任务结束超过 30 分钟后，内存输出不再保留。
+				44 button (settable) 返回
+			45 text (settable) Dismiss
+	46 close button
+	47 full screen button Help: this button also has an action to zoom the window, Secondary Actions: zoom the window
+	48 minimize button
+	49 text info_desktop
+50 menu bar
+	51 info_desktop
+	52 Edit
+	53 View
+	54 Window
+	55 Help
+
+The focused UI element is 1 container info_desktop

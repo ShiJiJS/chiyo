@@ -1,0 +1,1 @@
+/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue44-tool-version-ui-2/source/apps/desktop/build/relocated/工具 版本测试/info_desktop.app: replacing existing signature
