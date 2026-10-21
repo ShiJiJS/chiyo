@@ -1,0 +1,145 @@
+{
+  "sourceCommit": "f2b927d7de5b1a694dae5221f256ea77ab832d4b",
+  "date": "2026-10-21",
+  "actualNativePanels": true,
+  "syntheticKeysNotKeychain": true,
+  "notFinalDeliveryPackage": true,
+  "applicationExitCode": 0,
+  "files": [
+    {
+      "path": "raw/existing-target-zoomed.png",
+      "bytes": 368834,
+      "sha256": "a68de1f1fcc3e7a1fcdaee0094ea376a6d3d6a180c83e3a3118113f627bf5255"
+    },
+    {
+      "path": "raw/existing-target.ax.txt",
+      "bytes": 1738,
+      "sha256": "20914d3e6b2e21dbc720777482fbdb77366e7193883cfbb103e49b05730fd852"
+    },
+    {
+      "path": "raw/exported.ax.txt",
+      "bytes": 1819,
+      "sha256": "d002770bc7d6908ec81ddd7a0d4fa2ac79e6f8904831fe530a3bb5cc84c0762e"
+    },
+    {
+      "path": "raw/exported.png",
+      "bytes": 192203,
+      "sha256": "c2e5eb664e2c04f80ae0589746abe83296e9b67a56ad7c81aa29dff767bc75a1"
+    },
+    {
+      "path": "raw/file-preservation.json",
+      "bytes": 289,
+      "sha256": "e566f62d627e6bd1b538edb747b294bb0e8a62ad78d98aa1f9daf67a39509937"
+    },
+    {
+      "path": "raw/key-saved.ax.txt",
+      "bytes": 1677,
+      "sha256": "ce41fd24cf893319f3815f499d3e5d33fc89b83043c94eaa159d9e19d45e43d2"
+    },
+    {
+      "path": "raw/key-saved.png",
+      "bytes": 182637,
+      "sha256": "e2cb9710672e7047c2e502676892581765ba581987290e79b4b8de57995f10ca"
+    },
+    {
+      "path": "raw/logs/analyze.txt",
+      "bytes": 96,
+      "sha256": "c70da5958f5db1a3bde6edb314eaeef015d4d71f5a2b2588fd2e6161a5b092c8"
+    },
+    {
+      "path": "raw/logs/application.txt",
+      "bytes": 2847,
+      "sha256": "c581ae0b86456ab0a2c75b3f0883a266708f7bf622ee997df75a24b0419ee8b9"
+    },
+    {
+      "path": "raw/logs/build-release.txt",
+      "bytes": 5060,
+      "sha256": "a4809e5b0a44b710c432ce5c0314c92abfc7d28dea737b7023f85dc56dc82f2c"
+    },
+    {
+      "path": "raw/logs/entitlements.txt",
+      "bytes": 756,
+      "sha256": "dd0b87cdfdac9f3d31de74907d5d39f092c414bed9bba978b4f9b5f70f658771"
+    },
+    {
+      "path": "raw/logs/pub-desktop.txt",
+      "bytes": 318,
+      "sha256": "ca68f707c22164511fc2b3f9af97ed7bd46538b1d334d9c806a6a59a556a6e05"
+    },
+    {
+      "path": "raw/logs/pub-info_cli.txt",
+      "bytes": 258,
+      "sha256": "a24779315fffab73870dfc7b15b56246a95b601b3432e434b43cd223bf752a6a"
+    },
+    {
+      "path": "raw/logs/pub-info_core.txt",
+      "bytes": 258,
+      "sha256": "a24779315fffab73870dfc7b15b56246a95b601b3432e434b43cd223bf752a6a"
+    },
+    {
+      "path": "raw/logs/pub-info_storage.txt",
+      "bytes": 258,
+      "sha256": "a24779315fffab73870dfc7b15b56246a95b601b3432e434b43cd223bf752a6a"
+    },
+    {
+      "path": "raw/logs/signature.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/panel-result.json",
+      "bytes": 1710,
+      "sha256": "0b8b1d403ed8d886971e8a2c7339803369219713948a996eac11718c7fc0bdb0"
+    },
+    {
+      "path": "raw/preview.png",
+      "bytes": 424661,
+      "sha256": "712a8de587911796283c741b0e15be805d6638d499c3404f7be827ad896149d8"
+    },
+    {
+      "path": "raw/restored-dialog.ax.txt",
+      "bytes": 2651,
+      "sha256": "14628d34fac8300e1593b8841d0f6e9a18c054cc9f1320cc9192e3e18bbd3208"
+    },
+    {
+      "path": "raw/restored-library.ax.txt",
+      "bytes": 2668,
+      "sha256": "d1dd851384a9cd715f6934220fd6d96aefd9889d09bae4fda2b3b23af1df13c9"
+    },
+    {
+      "path": "raw/restored-library.png",
+      "bytes": 377895,
+      "sha256": "e77bce2ff335434bad9aa9ba62d5905aeadb20b35f2823222eb65e8b9e0cb412"
+    },
+    {
+      "path": "raw/result.json",
+      "bytes": 78676,
+      "sha256": "0a7efc6433080f02e2db9de685e6f8f4608ca3eeb9df966fcc0c16ad57e66517"
+    },
+    {
+      "path": "raw/scope-verification.json",
+      "bytes": 393,
+      "sha256": "67708d9161d1ea8ed6c0e839ff3a79a1b1740a01d18b4983464dc86185b6bbd2"
+    },
+    {
+      "path": "raw/sources/apps/desktop/integration_test/macos_backup_manual.dart",
+      "bytes": 10673,
+      "sha256": "06ba33676659854b029a56c243771fac5942155bb7f586204025c77c4c90926b"
+    },
+    {
+      "path": "raw/sources/apps/desktop/lib/backups.dart",
+      "bytes": 22977,
+      "sha256": "2a5edfd9db271ccb9b1708079c1a70c7463e41a6001c85f23704a48aaba69ea0"
+    },
+    {
+      "path": "raw/sources/apps/desktop/macos/Runner/MainFlutterWindow.swift",
+      "bytes": 15982,
+      "sha256": "fb71fb34d4f645c5bcb242cd75a8572dc38e9ff6b69943f10da5d45f8b1b1dd4"
+    },
+    {
+      "path": "raw/sources/scripts/qa/macos-backup-panels.py",
+      "bytes": 9242,
+      "sha256": "f62b6e85d32c52b0fed09de9fa8f9291011044053dcc4b8e4d87db0f9a314ad9"
+    }
+  ]
+}
