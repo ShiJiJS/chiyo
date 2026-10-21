@@ -65,6 +65,23 @@ def inventory(root):
     return rows
 
 
+def verify_documentation(root):
+    """Shipped instructions must link to the shipped directory tree."""
+    checked = []
+    for name in ["README.md", "CODEX-INTEGRATION.md"]:
+        content = (root / name).read_text()
+        if re.search(r"@[A-Z_]+@", content):
+            raise RuntimeError(f"Unrendered documentation metadata: {name}")
+        for target in re.findall(r"\]\(([^\s)]+)\)", content):
+            parsed = urlparse(target)
+            if parsed.scheme or not parsed.path:
+                continue
+            path = (root / unquote(parsed.path)).resolve(strict=True)
+            path.relative_to(root.resolve())
+            checked.append({"document": name, "target": target})
+    return checked
+
+
 def minimum_versions(commands):
     values, command = [], ""
     for line in commands.splitlines():
@@ -215,7 +232,6 @@ def main():
             raise RuntimeError("Bundled tool dependency tree differs")
         shutil.copy2(tools_root / "manifest.json", provenance / "macos-tools.json")
         shutil.copytree(tools_root / "notices", notices / "macos-tools")
-        shutil.copy2(ROOT / "docs/development/macos-delivery.md", payload / "README.md")
         shutil.copy2(ROOT / "integrations/codex/MACOS-INTEGRATION.md", payload / "CODEX-INTEGRATION.md")
         notice_archives = list(app.rglob("NOTICES.Z"))
         if len(notice_archives) != 1:
@@ -269,6 +285,16 @@ def main():
         cipher = app / "Contents/Frameworks/sqlcipher.framework/Versions/A/sqlcipher"
         version = re.search(r"^version:\s*(.+)$", (ROOT / "apps/desktop/pubspec.yaml").read_text(), re.M).group(1)
         release = f"{version}-mac-dev.{commit[:12]}"
+        readme = (ROOT / "integrations/macos/README.md").read_text()
+        for token, value in {
+            "@RELEASE@": release, "@SOURCE_COMMIT@": commit,
+            "@MINIMUM_MACOS@": info["LSMinimumSystemVersion"],
+            "@TESTED_MACOS@": platform.mac_ver()[0],
+        }.items():
+            if token not in readme:
+                raise RuntimeError(f"Missing package README metadata: {token}")
+            readme = readme.replace(token, value)
+        (payload / "README.md").write_text(readme)
         manifest = {
             "format": 1, "product": "Agent Info Manage", "release": release,
             "sourceCommit": commit, "sourceDirty": False, "architecture": "macos-arm64",
@@ -297,6 +323,7 @@ def main():
             raise RuntimeError("Extracted bytes, permissions or symlinks differ")
         if (final / "manifest.json").read_bytes() != (payload / "manifest.json").read_bytes():
             raise RuntimeError("Extracted manifest differs")
+        facts["shippedDocumentationLinks"] = verify_documentation(final)
         run("extracted-app-signature", ["/usr/bin/codesign", "--verify", "--deep", "--strict",
                                        str(final / "app/info_desktop.app")])
         temporary = output / "verify/tmp"
