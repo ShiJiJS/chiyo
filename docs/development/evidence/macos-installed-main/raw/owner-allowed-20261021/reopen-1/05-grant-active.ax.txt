@@ -1,0 +1,75 @@
+Window: "info_desktop", App: info_desktop.
+0 standard window info_desktop, Secondary Actions: Raise
+	1 container info_desktop
+		2 container (settable)
+			3 text (settable) 信息授权
+			4 button (settable) 紫棠
+			5 button (settable) 松石
+			6 button (settable) 雾蓝
+			7 button (settable) 黑白
+			8 button (settable) 访问审批
+			9 button (settable) 信息库
+			10 button (settable) 录入提案
+			11 button (settable) 授权历史
+			12 button (settable) 设置
+			13 text (settable) 授权历史
+			14 text (settable) 2
+			15 text (settable) 授权历史
+			16 text (settable) 授权与访问记录
+			17 button (settable) 记录保留设置
+			18 text field (settable)
+			19 button (settable) 全部
+			20 button (settable) 有效
+			21 button (settable) 已结束
+			22 text (settable) 按授权时间排列
+			23 text (settable) 最近 90 天
+			24 container (settable)
+				25 button (settable) 合成字段读取和一分钟自然到期
+20:57
+Mac 普通安装包重开验收 20261021 · 
+1 次访问
+有效
+				26 button (settable) 仅对合成字段验证正式 Mac 包的读取及自然到期
+20:54
+Mac 普通安装包合成验收 20261021 · 
+0 次访问
+已取消
+			27 text (settable) ● 授权有效
+			28 text (settable) 读取信息
+			29 text (settable) yxw5JOdoygfiz3cM…
+			30 text (settable) 合成字段读取和一分钟自然到期
+			31 text (settable) M
+			32 text (settable) Mac 普通安装包重开验收 20261021
+			33 text (settable) 申请时的会话
+			34 text (settable) 批准范围
+			35 text (settable) 授权时间
+			36 text (settable) 到期时间
+			37 text (settable) 1
+			38 text (settable) 个字段
+			39 text (settable) 20:57
+			40 text (settable) 20:58
+			41 button (settable) 批准范围
+			42 button (settable) 实际访问 1
+			43 text (settable) MacPackageTest20MacPackageTest20261021261021
+			44 text (settable) 可读取
+			45 text (settable) AllowedSyntheticField
+			46 text (settable) 记录范围，不记录内容
+			47 text (settable) 这里不保留字段值、访问凭据或密钥。目录调整不会让授权范围随之扩大。
+			48 text (settable) 撤销会阻止后续读取，已经提供的内容无法收回。
+			49 button (settable) 撤销授权
+			50 text (settable) 2 条记录
+			51 button (settable) ‹
+			52 text (settable) 1 / 1
+			53 button (settable) ›
+	54 close button
+	55 full screen button Help: this button also has an action to zoom the window, Secondary Actions: zoom the window
+	56 minimize button
+	57 text info_desktop
+58 menu bar
+	59 info_desktop
+	60 Edit
+	61 View
+	62 Window
+	63 Help
+
+The focused UI element is 1 container info_desktop

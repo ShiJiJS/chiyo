@@ -1,0 +1,8 @@
+{
+  "ordinaryAppReachedService": true,
+  "pid": 30999,
+  "packagedCliExitCode": 0,
+  "packagedCliPATH": "/usr/bin:/bin",
+  "actualMappedSQLCipherMatchesManifest": true,
+  "scope": "ordinary fixed package main.dart startup and public packaged CLI capabilities; no approval or GUI workflow assertion"
+}

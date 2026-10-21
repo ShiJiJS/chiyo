@@ -1,0 +1,15 @@
+{
+  "sourceAndSavedCopyUnchangedAfterOverwriteAttempt": true,
+  "files": {
+    "中文 合成附件.txt": {
+      "size": 1024,
+      "sha256": "f6c60ea3fc9c95ab55985e490192c191742fcbb5b48189f93faf2ab4dba20b29",
+      "mtimeNs": 1792586845090986840
+    },
+    "另存 中文 空格.txt": {
+      "size": 1024,
+      "sha256": "f6c60ea3fc9c95ab55985e490192c191742fcbb5b48189f93faf2ab4dba20b29",
+      "mtimeNs": 1792587839503276310
+    }
+  }
+}

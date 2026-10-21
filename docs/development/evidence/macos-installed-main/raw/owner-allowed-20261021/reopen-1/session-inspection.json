@@ -1,0 +1,31 @@
+{
+  "cli-session.txt": {
+    "jsonLines": 70,
+    "decodedOutputs": [
+      "{\r\n  \"message\": \"Bad credentials\",\r\n  \"documentation_url\": \"https://docs.github.com/rest\",\r\n  \"status\": \"401\"\r\n}gh: Bad credentials (HTTP 401)\n"
+    ],
+    "privateCapabilitiesAbsent": true
+  },
+  "hosted-client-session.txt": {
+    "jsonLines": 12,
+    "decodedOutputs": [
+      "{\r\n  \"message\": \"Bad credentials\",\r\n  \"documentation_url\": \"https://docs.github.com/rest\",\r\n  \"status\": \"401\"\r\n}gh: Bad credentials (HTTP 401)\n"
+    ],
+    "privateCapabilitiesAbsent": true
+  },
+  "actualHostedWorker": {
+    "expectedParent": 35338,
+    "startedAt": 1792589431.06722,
+    "finishedAt": 1792589437.8220851,
+    "processes": [
+      {
+        "pid": 36231,
+        "ppid": 35338,
+        "executable": "/Users/jiangxinyi/Documents/Project/agent-info/local/中文 Mac 预览/AgentInfoManage/app/info_desktop.app/Contents/MacOS/info-runtime-worker",
+        "observedAt": 1792589435.7759612
+      }
+    ],
+    "scope": "kernel ps comm path and parent only; no process arguments or environment collected",
+    "sha256": "22a637fd42a8200e7d0d58e5f13ca4a06b5be109a489f13468ac3f7bbaf6fed0"
+  }
+}
