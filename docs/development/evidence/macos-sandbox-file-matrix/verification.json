@@ -1,0 +1,578 @@
+{
+  "listedMatrixObserved": true,
+  "completeIssue44": false,
+  "issue44ChecksRemain": [
+    true,
+    false,
+    false,
+    true,
+    true,
+    false
+  ],
+  "newProductGap": "External directory selection initially permits writes, but current persisted bookmarks restore read-only access. An explicit persistent working-directory read/write choice is missing; preserve legacy read-only entries and never silently broaden them.",
+  "summary": {
+    "installedSource": "4690e79357bb728da22193d8dadd6dc8a8ce2ce6",
+    "ordinaryApp": true,
+    "newKeychainActions": 0,
+    "appPids": [
+      51844,
+      53038,
+      53592
+    ],
+    "completedAppExits": {
+      "51844": 0,
+      "53038": 0
+    },
+    "finalAppKeptRunning": 53592,
+    "publicCommands": 50,
+    "registeredOperations": 13,
+    "targetProcessStarts": 12,
+    "operations": [
+      {
+        "operationId": "matrix-baseline",
+        "executionId": "v1IPGfixuGlMUGXLPSbQnqyL9lgwYI3QLs0nHjMjl5Q=",
+        "executionState": "exited",
+        "processStarted": true,
+        "exitCode": 0,
+        "errorCode": null,
+        "cleanupState": "complete"
+      },
+      {
+        "operationId": "matrix-no-scope-read",
+        "executionId": "7nipA3gTVagjvF17qBiARVigUdm3s3aSYk04UYwiH_8=",
+        "executionState": "exited",
+        "processStarted": true,
+        "exitCode": 252,
+        "errorCode": null,
+        "cleanupState": "complete"
+      },
+      {
+        "operationId": "matrix-no-scope-cwd",
+        "executionId": "cvguvr1fvQC9pMBc0-wTHaJdPgXeB4vKOkSE3BfFqG0=",
+        "executionState": "start_failed",
+        "processStarted": false,
+        "exitCode": null,
+        "errorCode": "process_start_failed",
+        "cleanupState": "complete"
+      },
+      {
+        "operationId": "matrix-ungranted-file-key",
+        "executionId": "DbGNrhgRgCVmsit7VsQxVhfbCZVXgnAC0dfGnsa-pjA=",
+        "executionState": "exited",
+        "processStarted": true,
+        "exitCode": 252,
+        "errorCode": null,
+        "cleanupState": "complete"
+      },
+      {
+        "operationId": "matrix-granted-read-cwd",
+        "executionId": "4-_E-LSI0mU3TFn70d176apAG7mxjQAlzCmc8Bq5beg=",
+        "executionState": "exited",
+        "processStarted": true,
+        "exitCode": 0,
+        "errorCode": null,
+        "cleanupState": "complete"
+      },
+      {
+        "operationId": "matrix-ungranted-write",
+        "executionId": "38rABAkM681lR2Y3Gog0lql6zo6O5nha48-D2Kl2tgg=",
+        "executionState": "exited",
+        "processStarted": true,
+        "exitCode": 255,
+        "errorCode": null,
+        "cleanupState": "complete"
+      },
+      {
+        "operationId": "matrix-posix-denied-read",
+        "executionId": "N1L2pHvpM7g9e4kguWRMEzZSdDQ-aI_LdPvSg_2jdjU=",
+        "executionState": "exited",
+        "processStarted": true,
+        "exitCode": 252,
+        "errorCode": null,
+        "cleanupState": "complete"
+      },
+      {
+        "operationId": "matrix-read-scope-denied-write",
+        "executionId": "qPSI358GpIFoN9-VK1L6d3s9HYhq6-k-rfrfideFGoM=",
+        "executionState": "exited",
+        "processStarted": true,
+        "exitCode": 0,
+        "errorCode": null,
+        "cleanupState": "complete"
+      },
+      {
+        "operationId": "matrix-persisted-read",
+        "executionId": "9kNdVj2OEx0mq5SGuOWzZ6QIXzIlzrqqmttv2siPw_w=",
+        "executionState": "exited",
+        "processStarted": true,
+        "exitCode": 0,
+        "errorCode": null,
+        "cleanupState": "complete"
+      },
+      {
+        "operationId": "matrix-persisted-write",
+        "executionId": "rxx5rtx6ePLseL_khIqhroWEgOn25JhRvnyaQ0yjAUw=",
+        "executionState": "exited",
+        "processStarted": true,
+        "exitCode": 255,
+        "errorCode": null,
+        "cleanupState": "complete"
+      },
+      {
+        "operationId": "matrix-explicit-file-write",
+        "executionId": "imkeDc_dNwAxWI03SxDdeh2eF5ZZJlz70EP5gwRLRac=",
+        "executionState": "exited",
+        "processStarted": true,
+        "exitCode": 0,
+        "errorCode": null,
+        "cleanupState": "complete"
+      },
+      {
+        "operationId": "matrix-unselected-neighbour-write",
+        "executionId": "eEeC32xn_3RQbTjgXsCbrlniLIXBrGb5sku3Zapix2c=",
+        "executionState": "exited",
+        "processStarted": true,
+        "exitCode": 255,
+        "errorCode": null,
+        "cleanupState": "complete"
+      },
+      {
+        "operationId": "matrix-after-forget-read",
+        "executionId": "rAoSG8eEDd7CtG_l_YHQSWtWN3BGXQOQQOrZCYygOJY=",
+        "executionState": "exited",
+        "processStarted": true,
+        "exitCode": 252,
+        "errorCode": null,
+        "cleanupState": "complete"
+      }
+    ],
+    "failedPreparationNotPermissionProof": [
+      "Static credentials with region field rejected; corrected to static authentication fields at version2.",
+      "AWS cli-input-json form lacked required bucket/key even outside sandbox; excluded from file-permission evidence.",
+      "Canonical PTY truncated longer JSON; closed both clients0, continued using noncanonical no-echo transport and explicit QA-only close command.",
+      "First process sampler missed completed tasks; second sampler observed own App53038, workers and AWS paths."
+    ],
+    "actualOSPermissionEvidence": [
+      "Unselected ordinary parameter file: EPERM1/exit252; after directory selection and after ordinary reopen read succeeds with exact2009-byte output.",
+      "Granted input with POSIX mode000: EACCES13/exit252; restored600 and bytes unchanged.",
+      "NSOpenPanel initial directory selection allows same-directory write; after reopen read-only bookmark restores reading, write fails EPERM1/exit255.",
+      "NSSavePanel explicitly selected output accepts tool write; neighbouring unselected output fails EPERM1/exit255.",
+      "After forgetting restored directory, new read fails EPERM1/exit252."
+    ],
+    "receiverAuthenticatedGETs": 10,
+    "directCLIReceiverSmokes": 2,
+    "nativeAuthenticatedGETs": 8,
+    "exactOutputBytes": 2009,
+    "originalAttachmentSourceBytes": 1024,
+    "originalAttachmentUnchanged": true,
+    "historyCountAfterFinalReopen": 16,
+    "historyOperationsPerGrant": [
+      8,
+      5
+    ],
+    "hiddenDisabledSyntheticCredential": true,
+    "original777Preserved": true,
+    "oldSessionAfterAppReopenRefused": true,
+    "runtimeNoSDK": true,
+    "clientScope": "Compiled local hosted public AgentClient harness; not claiming shipped info CLI selects hosted mode.",
+    "historyTotalChangedFrom14To16": true
+  },
+  "cleanup": {
+    "removedOwnedFixturesAndExecutables": [
+      "build/macos-adaptation/issue44-matrix-20261022/private",
+      "build/macos-adaptation/issue44-matrix-20261022/外部 只读目录",
+      "build/macos-adaptation/issue44-matrix-20261022/外部 输出目录",
+      "build/macos-adaptation/issue44-matrix-20261022/driver-smoke",
+      "packages/info_cli/build/mac-matrix-20261022",
+      "app-container/owned-mac-sandbox-matrix-20261022",
+      "owned-hosted-public-client-binary",
+      "receiver/owned-expected.bin"
+    ],
+    "testReceiverPortClosed": true,
+    "noOwnedRuntimeWorkerOrClient": true,
+    "remainingApp": [
+      "local/中文 Mac 预览/AgentInfoManage/app/info_desktop.app"
+    ],
+    "generatedDSYM": [],
+    "directoryEntriesAfterFinalReopen": 0,
+    "syntheticCredentialDisabledAndHidden": true,
+    "finalAppPid": 53592,
+    "finalAppKeptRunning": true,
+    "source": "4690e79357bb728da22193d8dadd6dc8a8ce2ce6",
+    "oldAndNewZipPreserved": true,
+    "privateUpgradeBackupAndRecoveryKeyPreserved": true
+  },
+  "rawFiles": [
+    {
+      "path": "raw/approval-confirmation.ax.txt",
+      "bytes": 129,
+      "sha256": "5fbf2f71f2fa38c7d47fbe10225bc1216256ac77c64951415e3006d613213acf"
+    },
+    {
+      "path": "raw/approval-reviewed.png",
+      "bytes": 656974,
+      "sha256": "bddacd2aeab72ce7775bf69f5c87321884f55e3f864db3044ab93bbb23b6997b"
+    },
+    {
+      "path": "raw/base-receiver-regression/fixture.json",
+      "bytes": 16,
+      "sha256": "a365f09c544ea00c112a93acb9a05b4210d32d61bd00c624fbf0089a8e63af99"
+    },
+    {
+      "path": "raw/base-receiver-regression/receiver-result.json",
+      "bytes": 350,
+      "sha256": "0779dc41fd47268ffed9c905bb5923489c13a889a65f7e4653d3cadaf50479ae"
+    },
+    {
+      "path": "raw/base-receiver-regression.log.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/bookmark-after-removal.json",
+      "bytes": 94,
+      "sha256": "e83a0a6a602c32fe1bac160203bcf1cc13c9d0561bd257921e61fa4fc2589bad"
+    },
+    {
+      "path": "raw/bookmark-after-reopen.json",
+      "bytes": 146,
+      "sha256": "92f7e9ebfbd87d3460939c5b3689ea8c311edc729970f442c4dabce652f748dd"
+    },
+    {
+      "path": "raw/bookmark-before-reopen.json",
+      "bytes": 313,
+      "sha256": "ad1a3e96c027dd9f2cfbab241cbd7a0458a6de1a74f3f5f99dafcb5617192bb0"
+    },
+    {
+      "path": "raw/cleanup.json",
+      "bytes": 985,
+      "sha256": "4ad9c166316d90477f034c327da061931060a76d6e434512a5676ced24e95db4"
+    },
+    {
+      "path": "raw/client-build-raw-transport.txt",
+      "bytes": 126,
+      "sha256": "70c6b9235b413e892a0a155fb0dbc68bf852fb3b5a3a187d38998bdfc9885494"
+    },
+    {
+      "path": "raw/client-build.txt",
+      "bytes": 126,
+      "sha256": "70c6b9235b413e892a0a155fb0dbc68bf852fb3b5a3a187d38998bdfc9885494"
+    },
+    {
+      "path": "raw/client-exit-observations.json",
+      "bytes": 365,
+      "sha256": "24f4f4d346b140868851f85beb693b0c108275c8bce6f0381b877206c891ce3c"
+    },
+    {
+      "path": "raw/credential-disabled-hidden.ax.txt",
+      "bytes": 3251,
+      "sha256": "757c73f1ad60b772d66b56d6891f0f4e131a25597307008487c0b6b6e87f0fdc"
+    },
+    {
+      "path": "raw/current-system-ssh-version.txt",
+      "bytes": 31,
+      "sha256": "9789ef3d4000ef44db5f4bc9e6609ec0791f15925195b846bb8a84a60daace88"
+    },
+    {
+      "path": "raw/decoded-tool-output.json",
+      "bytes": 3246,
+      "sha256": "97de2444442c5eec149a07e6b36846d9aadedc3b1b31a2bdfda77f7b45642e83"
+    },
+    {
+      "path": "raw/directory-granted.ax.txt",
+      "bytes": 4250,
+      "sha256": "8b25c6a812ded34d71e68e55999141326b57f002f638cf30d4184ef6c54c3d1f"
+    },
+    {
+      "path": "raw/directory-persisted-after-reopen.ax.txt",
+      "bytes": 2238,
+      "sha256": "d3d8b832dede2e0561b17b8771a5b8541abc6e96b439dc64a5d9b1a8756c8141"
+    },
+    {
+      "path": "raw/directory-removal-confirmed.ax.txt",
+      "bytes": 3743,
+      "sha256": "55da74975fe5efe6d3becd4847432f1c2097eb5416f2f57a8967b8080c827d3a"
+    },
+    {
+      "path": "raw/directory-removed.ax.txt",
+      "bytes": 695,
+      "sha256": "52019e04c8b616dbc5f7915abe847e78167b469234eeb1ab6489f70fdf7db76f"
+    },
+    {
+      "path": "raw/explicit-file-save-panel.ax.txt",
+      "bytes": 172,
+      "sha256": "bb1c48586b6119ec3199ef6eb888b52efaa6c058c350fc320191e296541bd71c"
+    },
+    {
+      "path": "raw/explicit-file-saved.ax.txt",
+      "bytes": 3297,
+      "sha256": "698ea97dd82d08997c166def80bb8facff4fee391c32da21f41e454170ebef40"
+    },
+    {
+      "path": "raw/explicit-output-before-tool.json",
+      "bytes": 254,
+      "sha256": "a9c106f4f68ccf5ec6a9da4c20ec96e2c13ba755ac3f78b556c7d9f4218578ba"
+    },
+    {
+      "path": "raw/final-payload-integrity.json",
+      "bytes": 190,
+      "sha256": "fa52cf87017782f3348266f079f2e25ac10725838f4406ff095477afba5ce2f5"
+    },
+    {
+      "path": "raw/final-payload-signature.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/final-reopen-first-grant-page1.ax.txt",
+      "bytes": 764,
+      "sha256": "b82a49c4c0faa92cd772a46a1de6b04442fb49503cfb024b5889da8d372263df"
+    },
+    {
+      "path": "raw/final-reopen-first-grant.ax.txt",
+      "bytes": 2933,
+      "sha256": "006a222b55479bc3d50930c8b8059fdf34e10f4af97cd84f90742b51575b04f9"
+    },
+    {
+      "path": "raw/final-reopen-history.ax.txt",
+      "bytes": 4580,
+      "sha256": "ad7e31243300af3438f31d2ea5176d3ec5270dff657e17db522c79f7183b5c69"
+    },
+    {
+      "path": "raw/final-reopen-library.ax.txt",
+      "bytes": 2593,
+      "sha256": "4a4234004a574a1aafd8e77831f29a2c07eb7279df882b6cbd8811b558a27044"
+    },
+    {
+      "path": "raw/history-first-grant-page1.ax.txt",
+      "bytes": 764,
+      "sha256": "3ba8aaa0301c5e450730f7cd17a7697eed1b5754a71e18730f24cea2d7e8cc51"
+    },
+    {
+      "path": "raw/history-first-grant.ax.txt",
+      "bytes": 2937,
+      "sha256": "2eeee7236ebcb469525edced6bcd8b2cdc62bc3d59ece6877557e7c2fc040dba"
+    },
+    {
+      "path": "raw/history-second-grant.ax.txt",
+      "bytes": 5462,
+      "sha256": "eea612749a5e9f7354d622b31f6c8731b812c3642db5fd9718a2354fa90b7044"
+    },
+    {
+      "path": "raw/history-second-grant.png",
+      "bytes": 558137,
+      "sha256": "c5b942df082c8ce7311738679741acdee32a9e8eed956a91889c5014ddfce382"
+    },
+    {
+      "path": "raw/hosted_public_client-canonical.dart",
+      "bytes": 933,
+      "sha256": "079521d4bec302be19d2995846fed71adcf29d05822c6f469b0fb693e3631c21"
+    },
+    {
+      "path": "raw/hosted_public_client.dart",
+      "bytes": 982,
+      "sha256": "03eff5787131e7094cbfde38d98ea6e38e3b3c789a7b56923b517b3eae7e03a9"
+    },
+    {
+      "path": "raw/immediate-granted-directory-write.json",
+      "bytes": 358,
+      "sha256": "1d08e3461054b5a6672d3d867f1dc8210c7e47c9486cf7af6a6e46fb3273feeb"
+    },
+    {
+      "path": "raw/initial-ordinary-app-quit.txt",
+      "bytes": 45,
+      "sha256": "3ffbd8d76242197274e3a28b53cb3416c57e8624515d91bc804cdb354c503338"
+    },
+    {
+      "path": "raw/matrix-paths.json",
+      "bytes": 420,
+      "sha256": "61a180f5548897f20f3028a3dc80d5f2ff7f30c46330982d9884e0746d8161f9"
+    },
+    {
+      "path": "raw/matrix-summary.json",
+      "bytes": 5736,
+      "sha256": "f91984371ab16dac682a0b20faa6b3fa866d4b06631c324f4d30900ba2c8fd7d"
+    },
+    {
+      "path": "raw/ordinary-final-reopen.json",
+      "bytes": 131,
+      "sha256": "5ad4892861ab6d1f471734bc59f01d5fc8d2fff7261e5cfdf1db06e83391b442"
+    },
+    {
+      "path": "raw/ordinary-final-reopen.log.txt",
+      "bytes": 132,
+      "sha256": "dbc01fad753a943417e50e983fddc5339e7268c74255b60f06d0b78ea171aa93"
+    },
+    {
+      "path": "raw/ordinary-reopen.json",
+      "bytes": 170,
+      "sha256": "8ae9a366c746df0243632b1b4ba69342b4fd50372abe46712831ec1735f9a5a6"
+    },
+    {
+      "path": "raw/ordinary-reopen.log.txt",
+      "bytes": 132,
+      "sha256": "dbc01fad753a943417e50e983fddc5339e7268c74255b60f06d0b78ea171aa93"
+    },
+    {
+      "path": "raw/original-source-after-matrix.ax.txt",
+      "bytes": 3363,
+      "sha256": "7ff7c382d11f7165e9777b9adf8275608dd795e299af236968eba0e39e1b8a8e"
+    },
+    {
+      "path": "raw/permission-denial-precondition.json",
+      "bytes": 209,
+      "sha256": "ee4874890bc189f104c08e1a25130f75779806a689f4f389bfd78ea20438df02"
+    },
+    {
+      "path": "raw/prior-tool-evidence-audit.json",
+      "bytes": 1814,
+      "sha256": "eeb290a2f1c64b7266de8b104b8d070edb08fbbcef08e6b5f51c1056128f1b67"
+    },
+    {
+      "path": "raw/process-observation-reopen.json",
+      "bytes": 1716,
+      "sha256": "4541a9621684c71f55aacb81bd627d920cdab60d4b7934a221a4b8a6158d9e65"
+    },
+    {
+      "path": "raw/process-observation.json",
+      "bytes": 84,
+      "sha256": "da9f3a981077fdef2f6683781e42a925c59d8757e841b55fc56d1022b8bb2da2"
+    },
+    {
+      "path": "raw/public-client.jsonl",
+      "bytes": 51204,
+      "sha256": "e9348cec173e2eba93d09df7ce37853382a1c3cd1ff78803d78dc200ab47e6fe"
+    },
+    {
+      "path": "raw/receiver/fixture.json",
+      "bytes": 16,
+      "sha256": "252e0ca9cbbce63e33f83ed7fa89321ff945b674cb7ae6461003fc7ba43e15ac"
+    },
+    {
+      "path": "raw/receiver/receiver-result.json",
+      "bytes": 755,
+      "sha256": "a7296fdfcd61cd351da353aeee607aa0e77a9d1fdf710d9577d2c257c3567782"
+    },
+    {
+      "path": "raw/receiver-json-input-smoke.stderr.txt",
+      "bytes": 281,
+      "sha256": "5629749dbb577943fca77ed2c4aaf2966b1bc0a06545e9d534905a86fdb99463"
+    },
+    {
+      "path": "raw/receiver-json-input-smoke.stdout.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/receiver-key-file-smoke.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/receiver-key-file-smoke.stdout.txt",
+      "bytes": 231,
+      "sha256": "bd5fba3253ef10b76cbad624d724423a3bf962d3f22b80649d7db6afaa5cabdc"
+    },
+    {
+      "path": "raw/receiver-regression.json",
+      "bytes": 838,
+      "sha256": "70387089cbb56b2099687ea41f24fa0c4454ea0c4e7d231ca04876edcf904941"
+    },
+    {
+      "path": "raw/receiver-regression.py",
+      "bytes": 3041,
+      "sha256": "6a0748ce2e1bb0aad00b5dde243e0ba787305abd1ac4fc9ff54abb92441aa495"
+    },
+    {
+      "path": "raw/receiver-smoke-stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/receiver-smoke-stdout.txt",
+      "bytes": 231,
+      "sha256": "bd5fba3253ef10b76cbad624d724423a3bf962d3f22b80649d7db6afaa5cabdc"
+    },
+    {
+      "path": "raw/receiver-stop-request.json",
+      "bytes": 83,
+      "sha256": "d5025e19f999e85c659d2f68d006a12dc1864199cc301b37e90109b90e4288cf"
+    },
+    {
+      "path": "raw/receiver.log.txt",
+      "bytes": 23,
+      "sha256": "c4fa909a33f3a482578d37a90a4fab3d968579b137e22f1245b4b90125004638"
+    },
+    {
+      "path": "raw/regression-get.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/regression-get.stdout.txt",
+      "bytes": 163,
+      "sha256": "fb4583c4119bb62e67e738221998ef04b5c4b3540dce82d2d191958a993af28a"
+    },
+    {
+      "path": "raw/regression-put.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/regression-put.stdout.txt",
+      "bytes": 45,
+      "sha256": "6b178cfde275e9e7b40a8fca5cecbd06f1e8cff3f51ebf5b22d012e0273809de"
+    },
+    {
+      "path": "raw/regression-sts.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/regression-sts.stdout.txt",
+      "bytes": 117,
+      "sha256": "58c895974d510018d65751de01e32b212829863eb17f05d5f63909ab2d7469fb"
+    },
+    {
+      "path": "raw/regression-wrong-secret.stderr.txt",
+      "bytes": 133,
+      "sha256": "40a3ecc1da629cb663e2360cb98025d31771e8be9bad8894b7aa7cf109b08654"
+    },
+    {
+      "path": "raw/regression-wrong-secret.stdout.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/reopen-approval-confirmation.ax.txt",
+      "bytes": 129,
+      "sha256": "5fbf2f71f2fa38c7d47fbe10225bc1216256ac77c64951415e3006d613213acf"
+    },
+    {
+      "path": "raw/runtime-artifact-metadata.json",
+      "bytes": 591,
+      "sha256": "df895e905064e8de2a49c3ebc659d9217ffbc3e910e9f7d2801c7a88753d7bd7"
+    },
+    {
+      "path": "raw/source-provenance.json",
+      "bytes": 906,
+      "sha256": "d96ad5cd4c2f555a91aa626e2fa9a07fa7f383aee2ab0ebd18bca0e7cd5ef84c"
+    },
+    {
+      "path": "raw/source-unchanged-after-tool.json",
+      "bytes": 196,
+      "sha256": "adce2dc91e73f05b7ed719f070e0e23dc5289f7b349c887cc4d567ddfa26678d"
+    },
+    {
+      "path": "raw/sources/macos-aws-receiver.py.txt",
+      "bytes": 4675,
+      "sha256": "78a9f299a02b9b640520151addc22c05b505942f2e036839a6677e7250bde17c"
+    },
+    {
+      "path": "raw/sources/macos-aws-file-receiver.py.txt",
+      "bytes": 2689,
+      "sha256": "d9537321c83b597c19f17c3cb7abcb10fcb5ed941c8eb429812ec44f831f7502"
+    }
+  ],
+  "privacy": "No new owner Keychain authorization request. Existing ordinary app reads its already-approved production Keychain normally. No database, credential file or bookmark bytes are published; synthetic material hashes and public command results only."
+}

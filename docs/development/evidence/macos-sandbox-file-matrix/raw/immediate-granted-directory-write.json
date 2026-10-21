@@ -1,0 +1,8 @@
+{
+  "observed": "write succeeded despite read-only bookmark option",
+  "actualBytes": 2009,
+  "actualSha256": "6090183a2952a9faea979bf20b3824e1cd5e940dd2baafa6977e7fb2705e3151",
+  "ordinarySourceRestoredMode": "600",
+  "ownedParameterBytesUnchanged": true,
+  "scope": "Actual current app session after NSOpenPanel selection; persisted scope still to test"
+}

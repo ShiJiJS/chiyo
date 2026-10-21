@@ -1,0 +1,140 @@
+Window: "info_desktop", App: info_desktop.
+0 standard window info_desktop, Secondary Actions: Raise
+	1 container info_desktop
+		2 container (settable)
+			3 text (settable) 信息授权
+			4 button (settable) 访问审批
+			5 button (settable) 信息库
+			6 button (settable) 录入提案
+			7 button (settable) 授权历史
+			8 button (settable) 设置
+			9 button (settable) 紫棠
+			10 button (settable) 松石
+			11 button (settable) 雾蓝
+			12 button (settable) 黑白
+			13 text (settable) 本机已连接
+			14 text (settable) 授权历史
+			15 text (settable) 16
+			16 text (settable) 授权历史
+			17 text (settable) 授权与访问记录
+			18 button (settable) 记录保留设置
+			19 text field (settable)
+			20 button (settable) 全部
+			21 button (settable) 有效
+			22 button (settable) 已结束
+			23 text (settable) 按授权时间排列
+			24 text (settable) 最近 90 天
+			25 container (settable)
+				26 button (settable) Mac 沙盒书签重开合成验收 20261022
+02:11
+Mac 沙盒书签重开合成验收 20261022 · 
+凭据使用
+使用条件已变化
+				27 button (settable) Mac 沙盒文件矩阵合成验收 20261022
+02:00
+Mac 沙盒文件矩阵合成验收 20261022 · 
+凭据使用
+已撤销
+				28 button (settable) 同一许可内核对普通附件旧操作固定原版、新操作使用替换版，不涉及个人资料。
+00:04
+普通 Mac 包附件版本验收 · 
+0 次读取
+ · 
+3 条文件交付
+已撤销
+				29 button (settable) 普通 Mac 包 SSH 合成验收
+23:36
+普通 Mac 包 SSH 合成验收 · 
+凭据使用
+已撤销
+				30 button (settable) 普通 Mac 包 SSH 合成验收
+23:22
+普通 Mac 包 SSH 合成验收 · 
+凭据使用
+已撤销
+				31 button (settable) 普通 Mac 包 SSH 合成验收
+23:19
+普通 Mac 包 SSH 合成验收 · 
+凭据使用
+已撤销
+				32 button (settable) 普通 Mac 包 SSH 合成验收
+23:15
+普通 Mac 包 SSH 合成验收 · 
+凭据使用
+已撤销
+				33 button (settable) 普通 Mac 包 SSH 合成验收
+23:12
+普通 Mac 包 SSH 合成验收 · 
+凭据使用
+已撤销
+			34 text (settable) 使用条件已变化
+			35 text (settable) 凭据使用 · 有效期内复用
+			36 text (settable) jR4ebAcPM0rb72d4…
+			37 text (settable) Mac 沙盒书签重开合成验收 20261022
+			38 text (settable) M
+			39 text (settable) Mac 沙盒书签重开合成验收 20261022
+			40 text (settable) 申请时的会话
+			41 text (settable) 使用凭据
+			42 text (settable) 固定版本
+			43 text (settable) 使用操作
+			44 text (settable) MacSandboxMatrix20261022
+			45 text (settable) 版本 2
+			46 text (settable) 5
+			47 text (settable) 次
+			48 text (settable) 授权到期
+			49 text (settable) 2026-10-22 02:26:47
+			50 text (settable) 允许方式
+			51 text (settable) 临时文件 · 环境变量
+			52 button (settable) ?
+			53 text (settable) 此授权只在当前会话及固定期限内有效。逐次使用不会延长截止时间；连接字段按独立授权处理。
+			54 text (settable) 逐次使用记录
+			55 button (settable) matrix-persisted-read
+2026-10-22 02:12:18
+已成功 · 退出码 0
+			56 button (settable) matrix-persisted-write
+2026-10-22 02:12:20
+已退出 · 退出码 255
+			57 button (settable) matrix-explicit-file-write
+2026-10-22 02:14:29
+已成功 · 退出码 0
+			58 button (settable) matrix-unselected-neighbour-write
+2026-10-22 02:14:30
+已退出 · 退出码 255
+			59 button (settable) matrix-after-forget-read
+2026-10-22 02:15:44
+已退出 · 退出码 252
+			60 text (settable) 本次 CLI 启动计划
+			61 text (settable) aws s3api get-object --bucket fixture-bucket --key "file:///Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue44-matrix-20261022/外部 只读目录/对象 名称.txt" --region us-east-1 --endpoint-url http://127.0.0.1:62275 --no-cli-pager /Users/jiangxinyi/Library/Containers/com.example.infoDesktop/Data/mac-sandbox-matrix-20261022/after-forget-read.bin
+			62 text (settable) 操作 ID
+			63 text (settable) matrix-after-forget-read
+			64 text (settable) 授权批准
+			65 text (settable) 2026-10-22 02:11:47
+			66 text (settable) 程序位置
+			67 text (settable) /Users/jiangxinyi/Documents/Project/agent-info/local/中文 Mac 预览/AgentInfoManage/app/info_desktop.app/Contents/Resources/ThirdParty/aws-cli/aws
+			68 text (settable) 工作目录
+			69 text (settable) /Users/jiangxinyi/Library/Containers/com.example.infoDesktop/Data/mac-sandbox-matrix-20261022
+			70 text (settable) 计划 hash
+			71 text (settable) sha256:9f0e3519407ccd5ebbd98b55d77d9eeccc2843c27755420da933a608eadd3daf
+			72 text (settable) 文件清理
+			73 text (settable) 已清理
+			74 text (settable) 本次操作未成功
+			75 text (settable) 此结果不消耗整个授权。修正并核查原因后，可在有效范围内明确提交新的操作 ID。
+			76 button (settable) 查看本次执行记录与清理 →
+			77 text (settable) 撤销阻止新使用；已经运行的进程继续，材料按各自进程组清理。
+			78 button (settable) 查看凭据 →
+			79 text (settable) 16 条记录
+			80 button (settable) ‹
+			81 text (settable) 1 / 2
+			82 button (settable) ›
+	83 close button
+	84 full screen button Help: this button also has an action to zoom the window, Secondary Actions: zoom the window
+	85 minimize button
+	86 text info_desktop
+87 menu bar
+	88 info_desktop
+	89 Edit
+	90 View
+	91 Window
+	92 Help
+
+The focused UI element is 1 container info_desktop

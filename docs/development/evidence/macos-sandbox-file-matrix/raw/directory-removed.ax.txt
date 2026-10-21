@@ -1,0 +1,10 @@
+The following is a diff from the previous accessibility tree for Window: "info_desktop" with ~ and + representing changed and added elements, respectively. Removed elements are summarized by ID range.
+Removed element IDs: 14-25, 83-128
++		83 container (settable)
++			84 container (settable) 移除保存的目录访问
++				85 button (settable) ×
++				86 text (settable) 应用下次启动不再恢复“外部 只读目录”的访问。不会删除目录中的文件；已经运行的工具可能继续访问已打开的文件。
++				87 button (settable) 取消
++				88 button (settable) 确认移除
++			89 text (settable) 关闭对话框
+The focused UI element is 13 container info_desktop

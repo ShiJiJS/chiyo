@@ -1,0 +1,9 @@
+{
+  "canonicalClient1Exit": 0,
+  "canonicalClient2Exit": 0,
+  "noncanonicalClientExit": 0,
+  "receiverShellExit": 143,
+  "meaning": "Observed exec session completions; serverSIGTERM is test cleanup, not product normal exit.",
+  "app51844Quit": "RESTORED_MAIN_EXIT0 from previous supervisor log",
+  "app53038Quit": "ordinary-reopen.json exit0; endpointClosedtrue"
+}

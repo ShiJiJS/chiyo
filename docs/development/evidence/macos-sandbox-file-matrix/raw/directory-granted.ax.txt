@@ -1,0 +1,79 @@
+The following is a diff from the previous accessibility tree for Window: "info_desktop" with ~ and + representing changed and added elements, respectively. Removed elements are summarized by ID range.
+Removed element IDs: 28-48, 50-1408
+~24 standard window info_desktop, Secondary Actions: Raise
+~	25 container info_desktop
+~		26 container (settable)
+~			27 text (settable) 信息授权
++			28 button (settable) 访问审批
++			29 button (settable) 信息库
++			30 button (settable) 录入提案
++			31 button (settable) 授权历史
++			32 button (settable) 设置
++			33 button (settable) 紫棠
++			34 button (settable) 松石
++			35 button (settable) 雾蓝
++			36 button (settable) 黑白
++			37 text (settable) 本机已连接
++			38 container (settable)
++				39 text (settable) 设置
++				40 button (settable) 外观
+主题与界面颜色
++				41 button (settable) 通知
+访问申请提醒
++				42 button (settable) 请求与记录
+等待时间与保留期限
++				43 button (settable) 录入模板
+常用信息的字段结构
++				44 button (settable) 备份与恢复
+加密导出与恢复密钥
++				45 button (settable) 应用运行
+后台运行与本机服务
++				46 button (settable) SSH 主机信任
+确认 SSH 服务器身份
++			47 text (settable) 应用运行
++			48 text (settable) 查看本机服务与窗口关闭后的运行方式。
+~			49 text (settable) Mac 凭据工具
++			50 text (settable) GH 和 AWS 使用应用随包版本，SSH 使用系统程序。入口核对不代表凭据已授权；每次使用仍核对程序身份与版本。
++			51 text (settable) GH 2.102.0
++			52 text (settable) /Users/jiangxinyi/Documents/Project/agent-info/local/中文 Mac 预览/AgentInfoManage/app/info_desktop.app/Contents/Resources/ThirdParty/gh/bin/gh
+随包入口摘要已核对。
++			53 button (settable) 复制路径
++			54 text (settable) AWS CLI 2.38.1
++			55 text (settable) /Users/jiangxinyi/Documents/Project/agent-info/local/中文 Mac 预览/AgentInfoManage/app/info_desktop.app/Contents/Resources/ThirdParty/aws-cli/aws
+随包入口摘要已核对。
++			56 button (settable) 复制路径
++			57 text (settable) 系统 SSH
++			58 text (settable) /usr/bin/ssh
+版本将在使用时核对。
++			59 button (settable) 复制路径
++			60 button (settable) 刷新随包工具状态
++			61 text (settable) Mac 外部工具目录
++			62 text (settable) 保存外部目录的文件访问。macOS 的目录选择不授予执行权限；GH 和 AWS 请使用上方的随包路径。
++			63 button (settable) 选择工具目录
++			64 text (settable) 外部 只读目录
++			65 text (settable) /Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue44-matrix-20261022/外部 只读目录
+目录文件可访问；不代表其中的程序可执行。
++			66 button (settable) 重新选择
++			67 button (settable) 移除
++			68 text (settable) 目录访问已保存。使用凭据仍需另行申请并由你批准。
++			69 button (settable) 刷新目录状态
++			70 text (settable) 临时凭据材料
++			71 text (settable) 暂无待核查的已结束执行。活动任务的文件会保留至进程组结束。
++			72 button (settable) 重新核查
++			73 text (settable) 普通附件维护
++			74 text (settable) 核查已登记副本及过期原文。撤销或到期后回收副本；回收与修订中的原文按30天保留期清理。
++			75 button (settable) 核查附件
++			76 text (settable) 本机服务运行中
++			77 text (settable) 应用为 Agent 提供访问请求入口；信息的实际读取需要你的授权。
++			78 text (settable) ● 已连接
++			79 text (settable) 关闭窗口后继续运行
++			80 text (settable) 关闭窗口会收起到系统托盘。点击托盘图标，可以重新打开审批与信息库。
++			81 text (settable) 托盘可用
++			82 text (settable) 完全退出应用
++			83 text (settable) 将停止本机服务，并结束当前会话中的授权。需要时可重新启动应用。
++			84 button (settable) 完全退出
++	85 close button
++	86 full screen button Help: this button also has an action to zoom the window, Secondary Actions: zoom the window
++	87 minimize button
++	88 text info_desktop
+The focused UI element is 25 container info_desktop

@@ -1,0 +1,65 @@
+[
+  {
+    "executionId": "7nipA3gTVagjvF17qBiARVigUdm3s3aSYk04UYwiH_8=",
+    "chunks": [
+      {
+        "stream": "stderr",
+        "text": "\naws: [ERROR]: An error occurred (ParamValidation): the following arguments are required: --bucket, --key\n\nusage: aws [options] <command> <subcommand> [<subcommand> ...] [parameters]\nTo see help text, you can run:\n\n  aws help\n  aws <command> help\n  aws <command> <subcommand> help\n"
+      }
+    ]
+  },
+  {
+    "executionId": "DbGNrhgRgCVmsit7VsQxVhfbCZVXgnAC0dfGnsa-pjA=",
+    "chunks": [
+      {
+        "stream": "stderr",
+        "text": "\naws: [ERROR]: An error occurred (ParamValidation): Error parsing parameter '--key': Unable to load paramfile file:///Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue44-matrix-20261022/外部 只读目录/对象 名称.txt: [Errno 1] Operation not permitted: '/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue44-matrix-20261022/外部 只读目录/对象 名称.txt'\n"
+      }
+    ]
+  },
+  {
+    "executionId": "N1L2pHvpM7g9e4kguWRMEzZSdDQ-aI_LdPvSg_2jdjU=",
+    "chunks": [
+      {
+        "stream": "stderr",
+        "text": "\naws: [ERROR]: An error occurred (ParamValidation): Error parsing parameter '--key': Unable to load paramfile file:///Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue44-matrix-20261022/外部 只读目录/对象 名称.txt: [Errno 13] Permission denied: '/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue44-matrix-20261022/外部 只读目录/对象 名称.txt'\n"
+      }
+    ]
+  },
+  {
+    "executionId": "38rABAkM681lR2Y3Gog0lql6zo6O5nha48-D2Kl2tgg=",
+    "chunks": [
+      {
+        "stream": "stderr",
+        "text": "\naws: [ERROR]: [Errno 1] Operation not permitted: '/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue44-matrix-20261022/外部 输出目录/ungranted-write.bin'\n"
+      }
+    ]
+  },
+  {
+    "executionId": "rxx5rtx6ePLseL_khIqhroWEgOn25JhRvnyaQ0yjAUw=",
+    "chunks": [
+      {
+        "stream": "stderr",
+        "text": "\naws: [ERROR]: [Errno 1] Operation not permitted: '/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue44-matrix-20261022/外部 只读目录/reopen-write.bin'\n"
+      }
+    ]
+  },
+  {
+    "executionId": "eEeC32xn_3RQbTjgXsCbrlniLIXBrGb5sku3Zapix2c=",
+    "chunks": [
+      {
+        "stream": "stderr",
+        "text": "\naws: [ERROR]: [Errno 1] Operation not permitted: '/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue44-matrix-20261022/外部 输出目录/not-selected-neighbour.bin'\n"
+      }
+    ]
+  },
+  {
+    "executionId": "rAoSG8eEDd7CtG_l_YHQSWtWN3BGXQOQQOrZCYygOJY=",
+    "chunks": [
+      {
+        "stream": "stderr",
+        "text": "\naws: [ERROR]: An error occurred (ParamValidation): Error parsing parameter '--key': Unable to load paramfile file:///Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue44-matrix-20261022/外部 只读目录/对象 名称.txt: [Errno 1] Operation not permitted: '/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue44-matrix-20261022/外部 只读目录/对象 名称.txt'\n"
+      }
+    ]
+  }
+]
