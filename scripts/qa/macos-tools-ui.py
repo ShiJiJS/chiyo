@@ -30,7 +30,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('output', type=Path)
     parser.add_argument('--bundled', action='store_true',
-                        help='QA proof: fixed official tools inside signed app static sandbox')
+                        help='Verify production assembled tools inside the signed app')
     args = parser.parse_args()
     if os.uname().sysname != 'Darwin':
         parser.error('macOS required')
@@ -93,6 +93,7 @@ def main():
             shutil.copy2(path, target)
             state['inputSourceHashes'][name] = digest(path)
         (source / '.tools').symlink_to(ROOT / '.tools', target_is_directory=True)
+        (source / '.downloads').symlink_to(ROOT / '.downloads', target_is_directory=True)
         (source / '.cache').mkdir()
         (source / '.cache/pub').symlink_to(ROOT / '.cache/pub', target_is_directory=True)
         config = source / 'apps/desktop/macos/Runner/Configs/AppInfo.xcconfig'
@@ -112,15 +113,12 @@ def main():
         selected_gh, selected_aws = GH, AWS
         if args.bundled:
             tools = app / 'Contents/Resources/ThirdParty'
-            shutil.copytree(GH.parent.parent, tools / 'gh', symlinks=True)
-            shutil.copytree(AWS.parent, tools / 'aws-cli', symlinks=True)
             selected_gh, selected_aws = tools / 'gh/bin/gh', tools / 'aws-cli/aws'
             assert digest(selected_gh) == digest(GH) and digest(selected_aws) == digest(AWS)
-            run('sign-with-qa-tools', ['/usr/bin/codesign', '--force', '--sign', '-',
-                                      '--preserve-metadata=entitlements,requirements,flags,runtime', str(app)])
-            state['qaBundledTools'] = {'gh': str(selected_gh), 'aws': str(selected_aws),
+            state['productionBundledTools'] = {'gh': str(selected_gh), 'aws': str(selected_aws),
                                       'toolExecutableBytesUnchanged': True,
-                                      'productionPackagingUnchanged': True}
+                                      'manifestSha256': digest(tools / 'manifest.json'),
+                                      'qaToolsCopiedAfterBuild': False}
         run('signature', ['/usr/bin/codesign', '--verify', '--deep', '--strict', str(app)])
         run('entitlements', ['/usr/bin/codesign', '-d', '--entitlements', ':-', str(app)])
         binary = app / 'Contents/MacOS/info_desktop'

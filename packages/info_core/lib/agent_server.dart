@@ -25,6 +25,29 @@ typedef CredentialExecutionHandler =
       Map<String, dynamic> input,
     );
 
+/// Public location hints only. These do not grant access or start a program.
+class CredentialToolLocation {
+  const CredentialToolLocation({
+    required this.receiver,
+    required this.source,
+    required this.available,
+    this.version,
+    this.executable,
+    this.unavailableReason,
+  });
+  final String receiver, source;
+  final bool available;
+  final String? version, executable, unavailableReason;
+  Map<String, Object?> toJson() => {
+    'receiver': receiver,
+    'source': source,
+    'available': available,
+    'version': ?version,
+    'executable': ?executable,
+    'unavailableReason': ?unavailableReason,
+  };
+}
+
 class AgentServer {
   AgentServer._(
     this._server,
@@ -33,12 +56,14 @@ class AgentServer {
     this.enableReusableCredentialUse,
     this.enableFocusedFill,
     this.enableInformationFiles,
+    this._credentialTools,
   ) {
     _server.listen(_handle);
   }
   final HttpServer _server;
   final AgentAccess _agent;
   final CredentialExecutionHandler? _credentialExecutionHandler;
+  final Future<List<CredentialToolLocation>> Function()? _credentialTools;
 
   /// Enable only after the caller's storage and executor support v2 semantics.
   final bool enableReusableCredentialUse;
@@ -64,6 +89,7 @@ class AgentServer {
     bool enableReusableCredentialUse = false,
     bool enableFocusedFill = false,
     bool enableInformationFiles = false,
+    Future<List<CredentialToolLocation>> Function()? credentialTools,
   }) async => AgentServer._(
     await HttpServer.bind(InternetAddress.loopbackIPv4, port, shared: false),
     agent,
@@ -71,6 +97,7 @@ class AgentServer {
     enableReusableCredentialUse,
     enableFocusedFill,
     enableInformationFiles,
+    credentialTools,
   );
   Future<void> close() async {
     await _server.close(force: true);
@@ -196,6 +223,7 @@ class AgentServer {
     switch (path) {
       case '/capabilities':
         if (body.isNotEmpty) throw const CredentialUseFailure('unknown_field');
+        final tools = await _credentialTools?.call();
         return {
           'protocolVersion': 1,
           'status': 'ok',
@@ -206,7 +234,10 @@ class AgentServer {
             if (_focusedFillEnabled && _agent.focusedFillDiscoveryAvailable)
               'credential-focused-target.v1',
             if (_informationFilesEnabled) 'information-attachments.v1',
+            if (tools != null) 'credential-tools.v1',
           ],
+          if (tools != null)
+            'credentialTools': tools.map((tool) => tool.toJson()).toList(),
         };
       case '/information-file/fetch':
       case '/information-file/status':

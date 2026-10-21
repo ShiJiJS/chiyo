@@ -10,6 +10,30 @@ bundle ID 保持 `com.example.infoDesktop`，不另建资料身份。
 macOS 14 和其他设备尚未实机验收。App、worker 和 CLI 主程序均为 ARM64，
 依赖库至少包含 ARM64；不提供 Intel 兼容承诺。
 
+## 随包凭据工具
+
+`scripts/dev-macos.sh build` 的 Release 构建现会从
+`third_party/macos-tools.json` 固定的官方归档组装 GH 2.102.0 / AWS CLI 2.38.1，
+下载缓存为项目 `.downloads/`；校验 SHA256 后解包，AWS 另核对 Apple 安装器签名。
+不执行安装器脚本。完整载荷与许可保留在
+`Contents/Resources/ThirdParty/`，逐文件清单含摘要、权限和内部符号链接；
+打包脚本同时核对原生依赖、架构与最低系统，再核对中文路径解包后的全部字节。
+GH 为 ARM64，AWS 官方依赖允许同时含 x86_64/ARM64，应用和 worker 仍只支持 ARM64。
+首次缺少缓存时构建需要联网；已有缓存摘要不符会失败，需核对来源后重新下载。
+
+Agent 的 `capabilities` 返回 `credential-tools.v1` 和 `credentialTools`：
+按 receiver 选择 `available:true` 的准确路径，移动应用后重新查询。
+设置 → 应用运行显示随包版本、入口状态及复制路径。发现仅检查入口摘要，
+不执行工具、不访问既有认证，也不提供凭据使用授权；实际申请和操作继续核对
+工具版本/身份与主人决定。系统 SSH 仍使用 `/usr/bin/ssh`，在操作时检查已支持版本。
+缺少或损坏工具不阻塞资料功能。普通 `flutter run` 的 Debug 构建不组装工具，
+需要工具实机验收时使用上述完整 Release 入口。
+
+外部目录书签保留文件访问管理；目录可读不能转换成程序执行权。
+GH/AWS 应使用随包路径。此机制不关闭 App Sandbox、不新增执行 entitlement，
+仍为本机 ad-hoc 开发签名；Developer ID/公证与最终安装升级验收继续由 #50 跟踪。
+下方 `01c1f14` 及更早的历史 ZIP 不含这次工具集成。
+
 ## 2026-10-21 纳入 Keychain 恢复入口的整包（#50 继续 OPEN）
 
 固定干净源码 `01c1f141d876a9d3c49c61c7fc3d1e572c432c5a`，版本

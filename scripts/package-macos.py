@@ -204,6 +204,17 @@ def main():
             shutil.copy2(ROOT / package / "pubspec.lock", provenance / (package.replace("/", "-") + "-pubspec.lock"))
         shutil.copy2(dependencies["sqlite3"] / "lib/src/hook/asset_hashes.dart",
                      provenance / "sqlite3-native-asset-hashes.dart")
+        tools_root = app / "Contents/Resources/ThirdParty"
+        tools_manifest = json.loads((tools_root / "manifest.json").read_text())
+        locked_tools = json.loads((ROOT / "third_party/macos-tools.json").read_text())
+        if {key: tools_manifest[key] for key in locked_tools} != locked_tools:
+            raise RuntimeError("Bundled tools differ from the source lock")
+        # The inner manifest describes the complete original publisher payload,
+        # including notices, modes and internal symlinks. Do not trust entry hashes alone.
+        if inventory(tools_root) != tools_manifest["files"]:
+            raise RuntimeError("Bundled tool dependency tree differs")
+        shutil.copy2(tools_root / "manifest.json", provenance / "macos-tools.json")
+        shutil.copytree(tools_root / "notices", notices / "macos-tools")
         shutil.copy2(ROOT / "docs/development/macos-delivery.md", payload / "README.md")
         shutil.copy2(ROOT / "integrations/codex/README.md", payload / "CODEX-INTEGRATION.md")
         notice_archives = list(app.rglob("NOTICES.Z"))
@@ -233,6 +244,8 @@ def main():
             if not minima or any(os_version(value) > minimum for value in minima):
                 raise RuntimeError(f"Payload minimum OS exceeds application: {binary}")
             for line in capture(["/usr/bin/otool", "-L", str(binary)]).splitlines()[1:]:
+                if line.endswith("):"):
+                    continue  # Universal binaries have a header for each slice.
                 dependency = line.strip().split(" (", 1)[0]
                 if dependency.startswith("/") and not dependency.startswith(("/usr/lib/", "/System/Library/")):
                     # A dylib's first entry is its own install name; packaged
@@ -268,6 +281,7 @@ def main():
             "dart": capture([str(SDK / "bin/cache/dart-sdk/bin/dart"), "--version"]),
             "sqlcipher": {"desktopSha256": digest(cipher), "desktopCipherVersion": cipher_version(cipher)},
             "appEntitlements": entitlements, "workerEntitlements": worker_entitlements,
+            "credentialTools": tools_manifest["tools"],
             "machO": architecture, "files": inventory(payload),
         }
         clean_source(commit)

@@ -236,6 +236,26 @@ Future<void> main() async {
     if (mode == 'choose' || mode == 'bundled') {
       final service = bootstrap.library!.service;
       final client = AgentClient(bootstrap.boundPort!);
+      final capabilities = await client.execute({'command': 'capabilities'});
+      check(
+        (capabilities['capabilities'] as List).contains('credential-tools.v1'),
+        'Missing production tool discovery',
+      );
+      final discovered = capabilities['credentialTools'] as List;
+      for (final entry in [(gh, 'gh_token'), (aws, 'aws_shared_credentials')]) {
+        if (mode == 'bundled') {
+          check(
+            discovered.any(
+              (row) =>
+                  row['receiver'] == entry.$2 &&
+                  row['available'] == true &&
+                  row['executable'] == entry.$1,
+            ),
+            'Production discovery differs from actual launch path',
+          );
+        }
+      }
+      facts['publicToolDiscovery'] = discovered;
       final executions = <Map<String, Object?>>[];
       final port = env['MAC_TOOLS_RECEIVER_PORT']!;
       final awsArgs = [

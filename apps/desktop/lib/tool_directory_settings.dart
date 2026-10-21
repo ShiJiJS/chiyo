@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'prototype_ui.dart';
 import 'settings_controls.dart';
 import 'tool_directory_access.dart';
+import 'bundled_tool_settings.dart';
 
 class ToolDirectorySettings extends StatefulWidget {
   const ToolDirectorySettings({
@@ -103,9 +104,10 @@ class _ToolDirectorySettingsState extends State<ToolDirectorySettings> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        const BundledToolSettings(),
         SettingsRow(
           'Mac 外部工具目录',
-          '选择 GH 或 AWS 的安装目录，让应用访问程序及其依赖文件。目录访问与凭据使用授权分别管理。',
+          '保存外部目录的文件访问。macOS 的目录选择不授予执行权限；GH 和 AWS 请使用上方的随包路径。',
           control: settingsAction(
             context,
             _busy ? '处理中…' : '选择工具目录',
@@ -117,12 +119,12 @@ class _ToolDirectorySettingsState extends State<ToolDirectorySettings> {
         if (!_busy && _snapshot != null && directories.isEmpty)
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 12),
-            child: Text('尚未保存外部工具目录。系统自带的 SSH 不需要在此添加。'),
+            child: Text('尚未保存外部目录。随包 GH、AWS 和系统 SSH 不需要在此添加。'),
           ),
         for (final directory in directories)
           SettingsRow(
             directory.name,
-            '${directory.path}\n${directory.available ? '目录可访问；工具版本将在使用时核对。' : '目录访问已失效或暂不可用，请重新选择。'}',
+            '${directory.path}\n${directory.available ? '目录文件可访问；不代表其中的程序可执行。' : '目录访问已失效或暂不可用，请重新选择。'}',
             control: Wrap(
               spacing: 8,
               children: [
