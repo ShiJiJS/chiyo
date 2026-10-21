@@ -178,11 +178,11 @@ class InboxQueue extends StatelessWidget {
                             ),
                             child: Text(
                               switch (f) {
-                                InboxFilter.all => '全部 ${page.total}',
+                                InboxFilter.all => '全部 ${page.allCount}',
                                 InboxFilter.pending =>
                                   '待处理 ${page.pendingCount}',
                                 InboxFilter.handled =>
-                                  '已处理 ${page.total - page.pendingCount}',
+                                  '已处理 ${page.allCount - page.pendingCount}',
                               },
                               style: prototypeText(
                                 context,

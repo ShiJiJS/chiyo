@@ -1,0 +1,5 @@
+00:00 +0: loading test/workspace_test.dart
+00:00 +0: handled inbox snapshot exposes the actual decided lifetime
+00:00 +1: theme survives reopening and failed changes keep the saved preference
+00:00 +2: owner searches and pages a stable mixed inbox without losing request identity
+00:00 +3: All tests passed!

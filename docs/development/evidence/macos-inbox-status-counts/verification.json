@@ -1,0 +1,115 @@
+{
+  "date": "2026-10-22",
+  "sourceBase": "6e6088a91391cd6ef53af3ce9c51213d87fe8bf0",
+  "scope": "Fix search-scope status counts discovered during actual Mac notification fallback; source and widget regression, not current installed package or new native UI rerun",
+  "actualBaselineObservation": "25 pending requests, handled filter showed all0/pending25/handled-25; actual CUA screenshot retained in conversation, transcribed in notification-reuse evidence",
+  "cause": "InboxPage.total is status-filtered; pendingCount is search-matched before status; UI subtracted mismatched populations",
+  "fix": "Expose InboxPage.allCount for search scope before status; use it for all/handled tab counts while total remains filtered for paging",
+  "baselineWidgetExitCode": 1,
+  "baselineFailedVariants": [
+    "macOS",
+    "windows"
+  ],
+  "fixedDesktopRelatedPassed": 11,
+  "fixedCoreWorkspacePassed": 3,
+  "sourceTests": {
+    "core": {
+      "passed": 285,
+      "conditionalSkipped": 6
+    },
+    "cli": {
+      "passed": 75,
+      "conditionalSkipped": 40
+    },
+    "storage": {
+      "passed": 159,
+      "conditionalSkipped": 18
+    },
+    "desktop": {
+      "passed": 201,
+      "conditionalSkipped": 2
+    }
+  },
+  "sourcePassed": 720,
+  "sourceConditionalSkipped": 66,
+  "fullSourceCheckExitCode": 0,
+  "currentFixedInstallChanged": false,
+  "currentCandidateA458IncludesThisFix": false,
+  "agentProtocolOrDatabaseSchemaChanged": false,
+  "windowsNativeOrCI": false,
+  "keychainCalls": 0,
+  "newSystemPrompts": 0,
+  "issue48Criteria": [
+    true,
+    true,
+    true,
+    false,
+    false,
+    false
+  ],
+  "issue50Criteria": [
+    true,
+    true,
+    false,
+    false,
+    false,
+    false
+  ],
+  "files": [
+    {
+      "path": "raw/all-source-checks.txt",
+      "bytes": 199889,
+      "sha256": "4011415c9a7613ec66e1369e56f3c2be6d3fe11e24fbbc5c320ef54e31505fe1"
+    },
+    {
+      "path": "raw/core-counts-after.txt",
+      "bytes": 308,
+      "sha256": "14bc6c4b20ac08b48e46fcd85a2a77e701043a90105fcd37872548a7f26e8869"
+    },
+    {
+      "path": "raw/counts-regression-before.txt",
+      "bytes": 4994,
+      "sha256": "5ece1104d1a2563d080d4959eb99088f665d0ab9f54ce26c1c063636b966a7e5"
+    },
+    {
+      "path": "raw/desktop-counts-after.txt",
+      "bytes": 2221,
+      "sha256": "86802ab29c6ad61aa338cda320e64b1cf94eb3a90508b5869885e26f7ea1f6c8"
+    },
+    {
+      "path": "raw/production.patch",
+      "bytes": 2741,
+      "sha256": "a3786688b0dfb9d3ef891b3f09a794747cfa28da52cc4baaf62985b68e61ab22"
+    },
+    {
+      "path": "raw/source-check-completion-hashes.json",
+      "bytes": 78966,
+      "sha256": "d541adc58252b21dec15c10dfdb80af88356feb316c5a875217a8c77e50a5c90"
+    },
+    {
+      "path": "raw/sources/apps/desktop/lib/approvals.dart",
+      "bytes": 80555,
+      "sha256": "c6fb3dc74d1f55892bb47b19e3320d856bda6a26518edfa1f35c89f25e3db7aa"
+    },
+    {
+      "path": "raw/sources/apps/desktop/lib/inbox_queue.dart",
+      "bytes": 18024,
+      "sha256": "fee6c1ccaf2a14d11194296b9c64d3a9f0cde12852688768341b75c69b02fb79"
+    },
+    {
+      "path": "raw/sources/apps/desktop/test/inbox_workspace_test.dart",
+      "bytes": 17514,
+      "sha256": "739d6222a19c6159817d5baa67484d44b886d5305ac06b4dc7ddaeab8e874431"
+    },
+    {
+      "path": "raw/sources/packages/info_core/lib/workspace_access.dart",
+      "bytes": 5942,
+      "sha256": "47823964c805a1ce2f74f84a2a67fd6fc347ac34c314934bbdc63dd6d87266af"
+    },
+    {
+      "path": "raw/sources/packages/info_core/test/workspace_test.dart",
+      "bytes": 5588,
+      "sha256": "8cb2addc222549287e5c03c7b95acb6ed172fba48a6a2dadb415ca3023a10fae"
+    }
+  ]
+}

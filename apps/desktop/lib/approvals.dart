@@ -295,7 +295,7 @@ class ApprovalsState extends State<Approvals> {
     final offline = !owner.serviceAvailable;
     final page = offline
         ? (_lastPage ??
-              InboxPage([], total: 0, pendingCount: 0, offset: 0, limit: 8))
+              InboxPage([], total: 0, allCount: 0, pendingCount: 0, offset: 0, limit: 8))
         : owner.queryInbox(
             search: _search.text,
             filter: _filter,

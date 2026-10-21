@@ -61,12 +61,15 @@ class InboxPage {
   InboxPage(
     Iterable<InboxEntry> entries, {
     required this.total,
+    required this.allCount,
     required this.pendingCount,
     required this.offset,
     required this.limit,
   }) : entries = List.unmodifiable(entries);
   final List<InboxEntry> entries;
-  final int total, pendingCount, offset, limit;
+  // total describes the selected status page. Counts describe the search
+  // scope before applying that status, so tabs share one consistent total.
+  final int total, allCount, pendingCount, offset, limit;
 }
 
 extension OwnerInbox on OwnerAccess {
@@ -139,6 +142,7 @@ extension OwnerInbox on OwnerAccess {
     return InboxPage(
       filtered.skip(effective).take(limit),
       total: filtered.length,
+      allCount: matching.length,
       pendingCount: pending,
       offset: effective,
       limit: limit,
