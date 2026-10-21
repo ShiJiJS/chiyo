@@ -1,0 +1,102 @@
+2026-10-22 04:59:14.845 info_desktop[68091:5378237] TISFileInterrogator updateSystemInputSources false but old data invalid: currentCacheHeaderPtr nonNULL? 0, ->cacheFormatVersion 0, ->magicCookie 00000000, inputSourceTableCountSys 0
+Keyboard Layouts: duplicate keyboard layout identifier -17410.
+Keyboard Layouts: keyboard layout identifier -17410 has been replaced with -28673.
+Keyboard Layouts: duplicate keyboard layout identifier -30769.
+Keyboard Layouts: keyboard layout identifier -30769 has been replaced with -28674.
+Keyboard Layouts: duplicate keyboard layout identifier -14934.
+Keyboard Layouts: keyboard layout identifier -14934 has been replaced with -28675.
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+EDITOR_FOCUS_ROOT=/Users/jiangxinyi/Library/Containers/org.shijijs.agent-info-manage.qa.editor-focus.528d027080de491596daf274afd1254b/Data/tmp/aim-editor-focus-pApwr9
+EDITOR_FOCUS_PHASE=actual-ui-edit-cancel-keyboard-and-save
+EDITOR_FOCUS_NATIVE_KEY={"event":11,"flags":1048576,"keyCode":0,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":10,"flags":131072,"keyCode":15,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":11,"flags":131072,"keyCode":15,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":10,"flags":0,"keyCode":31,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":11,"flags":0,"keyCode":31,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":10,"flags":0,"keyCode":32,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":11,"flags":0,"keyCode":32,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":10,"flags":0,"keyCode":17,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":11,"flags":0,"keyCode":17,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":10,"flags":0,"keyCode":34,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":11,"flags":0,"keyCode":34,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":10,"flags":0,"keyCode":45,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":11,"flags":0,"keyCode":45,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":10,"flags":0,"keyCode":5,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":11,"flags":0,"keyCode":5,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":10,"flags":131072,"keyCode":11,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":11,"flags":131072,"keyCode":11,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":10,"flags":0,"keyCode":0,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":11,"flags":0,"keyCode":0,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":10,"flags":0,"keyCode":1,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":11,"flags":0,"keyCode":1,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":10,"flags":0,"keyCode":14,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":11,"flags":0,"keyCode":14,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":10,"flags":0,"keyCode":37,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":11,"flags":0,"keyCode":37,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":10,"flags":0,"keyCode":34,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":11,"flags":0,"keyCode":34,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":10,"flags":0,"keyCode":45,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":11,"flags":0,"keyCode":45,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":10,"flags":0,"keyCode":14,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":11,"flags":0,"keyCode":14,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":10,"flags":0,"keyCode":48,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":11,"flags":0,"keyCode":48,"marked":false,"responder":"FlutterTextInputPlugin"}
+2026-10-22 05:00:53.815 info_desktop[68091:5378237] TSM AdjustCapsLockLEDForKeyTransitionHandling - _ISSetPhysicalKeyboardCapsLockLED Inhibit
+EDITOR_FOCUS_NATIVE_KEY={"event":10,"flags":131072,"keyCode":48,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":11,"flags":131072,"keyCode":48,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":10,"flags":131072,"keyCode":46,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":11,"flags":131072,"keyCode":46,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":10,"flags":0,"keyCode":0,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":11,"flags":0,"keyCode":0,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":10,"flags":0,"keyCode":8,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":11,"flags":0,"keyCode":8,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":10,"flags":131072,"keyCode":3,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":11,"flags":131072,"keyCode":3,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":10,"flags":0,"keyCode":31,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":11,"flags":0,"keyCode":31,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":10,"flags":0,"keyCode":8,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":11,"flags":0,"keyCode":8,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":10,"flags":0,"keyCode":32,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":11,"flags":0,"keyCode":32,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":10,"flags":0,"keyCode":1,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":11,"flags":0,"keyCode":1,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":10,"flags":131072,"keyCode":1,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":11,"flags":131072,"keyCode":1,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":10,"flags":0,"keyCode":0,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":11,"flags":0,"keyCode":0,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":10,"flags":0,"keyCode":9,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":11,"flags":0,"keyCode":9,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":10,"flags":0,"keyCode":14,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":11,"flags":0,"keyCode":14,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":10,"flags":0,"keyCode":2,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":11,"flags":0,"keyCode":2,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":11,"flags":1048576,"keyCode":0,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":10,"flags":131072,"keyCode":46,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":11,"flags":131072,"keyCode":46,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":10,"flags":0,"keyCode":0,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":11,"flags":0,"keyCode":0,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":10,"flags":0,"keyCode":8,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":11,"flags":0,"keyCode":8,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":10,"flags":131072,"keyCode":3,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":11,"flags":131072,"keyCode":3,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":10,"flags":0,"keyCode":31,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":11,"flags":0,"keyCode":31,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":10,"flags":0,"keyCode":8,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":11,"flags":0,"keyCode":8,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":10,"flags":0,"keyCode":32,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":11,"flags":0,"keyCode":32,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":10,"flags":0,"keyCode":1,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":11,"flags":0,"keyCode":1,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":10,"flags":131072,"keyCode":1,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":11,"flags":131072,"keyCode":1,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":10,"flags":0,"keyCode":0,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":11,"flags":0,"keyCode":0,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":10,"flags":0,"keyCode":9,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":11,"flags":0,"keyCode":9,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":10,"flags":0,"keyCode":14,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":11,"flags":0,"keyCode":14,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":10,"flags":0,"keyCode":2,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_NATIVE_KEY={"event":11,"flags":0,"keyCode":2,"marked":false,"responder":"FlutterTextInputPlugin"}
+EDITOR_FOCUS_COMPLETE=edit
+EDITOR_FOCUS_NATIVE_KEY={"event":10,"flags":1048576,"keyCode":12,"marked":false,"responder":"FlutterView"}
+EDITOR_FOCUS_NATIVE_KEY={"event":11,"flags":1048576,"keyCode":12,"marked":false,"responder":"FlutterView"}
