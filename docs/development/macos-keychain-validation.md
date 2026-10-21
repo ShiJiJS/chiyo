@@ -7,9 +7,13 @@ QA `0407589` 已用实际旧源码 `dbb94ac` 的 schema 20 加密库完成当前
 同目标排除测试冲突后迁移重试与当前程序重开通过。临时草稿回执按设计清除。
 见 [真实旧源迁移](macos-schema-upgrade.md)，不把独立 AOT/合成密钥证据合称为实际签名应用与 Keychain 升级。
 
-Mac 已解锁，正在以专属 QA service 和随机 bundle identity 进行两版签名 Release 应用的真实系统授权验证。
-普通升级两次非交互读取已拒绝且原库保持；真实系统提示需要用户亲自处理，Computer Use 工具禁止访问 SecurityAgent。
-正式允许/拒绝结果尚待，不据此关闭 #42 第 1/4 条；下方“仍锁屏”保留各次历史条件。
+Mac 解锁后，QA `aa0e3c3` 已以专属 QA service 和随机 bundle identity 构建两版签名 Release 应用。
+旧版真实 Keychain/SQLCipher 创建及获准读取通过；新版两次非交互读取拒绝且原库保持、不换密钥、不发布服务。
+Computer Use 实际点击生产“请求钥匙串访问”，应用进入真实系统确认等待；工具明确禁止操作 SecurityAgent。
+等待 720 秒后按 QA 时限退出 1，未收到允许/拒绝决定；原版清理进程正常退出并确认专属测试项不存在，失败合成根仅本机保留。
+这不是升级通过或已确认产品缺陷，也没有用模拟决定替代。实际允许/拒绝及后续重开仍待，重跑时需用户亲自处理新的系统提示。
+见 [本次未完成的原始实机记录](evidence/macos-actual-keychain-upgrade/verification.json)。
+第 1/4 条继续未完成；下方“仍锁屏”保留各次历史条件。
 
 ## 真实锁定钥匙串与恢复验收（2026-10-21）
 
