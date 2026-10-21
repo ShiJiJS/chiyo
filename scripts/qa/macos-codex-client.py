@@ -63,6 +63,8 @@ def reader(channel):
   for line in channel:
    try:Q.put(json.loads(line))
    except Exception:Q.put({'badJson':True})
+ except Exception as error:
+  RESULTS.setdefault('readerClosures',[]).append({'errorType':type(error).__name__})
  finally:Q.put(None)
 READER=threading.Thread(target=reader,args=(WS if WS is not None else P.stdout,),daemon=True);READER.start()
 def send(v):
