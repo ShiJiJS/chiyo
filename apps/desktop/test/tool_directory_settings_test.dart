@@ -20,13 +20,18 @@ class _Access implements ToolDirectoryAccess {
   bool failForget = false;
   int chooses = 0, forgets = 0;
   String? replacing;
+  ToolDirectoryPermission? permission;
 
   @override
   Future<ToolDirectorySnapshot> read() async => snapshot;
   @override
-  Future<ToolDirectorySnapshot?> choose({String? replacing}) async {
+  Future<ToolDirectorySnapshot?> choose({
+    String? replacing,
+    ToolDirectoryPermission permission = ToolDirectoryPermission.readOnly,
+  }) async {
     chooses++;
     this.replacing = replacing;
+    this.permission = permission;
     return selection?.call();
   }
 
@@ -87,7 +92,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(access.replacing, 'original');
       expect(find.text('新 GH'), findsOneWidget);
-      expect(find.textContaining('使用凭据仍需另行申请'), findsOneWidget);
+      expect(find.text('目录访问已保存。使用凭据仍需另行申请并由你批准。'), findsOneWidget);
       expect(find.text('工具 GH'), findsNothing);
     },
   );
@@ -130,6 +135,8 @@ void main() {
       await tester.pump();
       for (final key in [
         'choose-tool-directory',
+        'choose-working-directory',
+        'change-tool-permission-original',
         'forget-tool-original',
         'reselect-tool-original',
       ]) {
@@ -210,19 +217,91 @@ void main() {
       expect((await access.read()).directories, isEmpty);
       expect(await access.choose(), isNull);
       expect(await access.choose(replacing: 'entry-id'), isNull);
+      expect(
+        await access.choose(permission: ToolDirectoryPermission.readWrite),
+        isNull,
+      );
       await access.forget('entry-id');
       expect(calls.map((call) => call.method), [
         'read',
+        'choose',
         'choose',
         'choose',
         'forget',
       ]);
       expect(calls.map((call) => call.arguments), [
         null,
-        null,
-        'entry-id',
+        {'permission': 'readOnly'},
+        {'permission': 'readOnly', 'replacing': 'entry-id'},
+        {'permission': 'readWrite'},
         'entry-id',
       ]);
+    },
+  );
+
+  testWidgets(
+    'owner explicitly selects read-write range and reselect retains it',
+    (tester) async {
+      final access = _Access()
+        ..selection = () async => const ToolDirectorySnapshot([
+          ToolDirectory(
+            'original',
+            '工作 项目',
+            '/工作 项目',
+            true,
+            permission: ToolDirectoryPermission.readWrite,
+          ),
+        ]);
+      await _show(tester, access);
+      expect(find.textContaining('重开后恢复：读取。'), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey('choose-working-directory')));
+      await tester.pumpAndSettle();
+      expect(access.permission, ToolDirectoryPermission.readWrite);
+      expect(find.textContaining('重开后恢复：读取与写入。'), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey('reselect-tool-original')));
+      await tester.pumpAndSettle();
+      expect(access.permission, ToolDirectoryPermission.readWrite);
+      expect(access.replacing, 'original');
+      access.selection = () async => null;
+      await tester.tap(
+        find.byKey(const ValueKey('change-tool-permission-original')),
+      );
+      await tester.pumpAndSettle();
+      expect(access.permission, ToolDirectoryPermission.readOnly);
+      expect(find.textContaining('重开后恢复：读取与写入。'), findsOneWidget);
+    },
+  );
+
+  test(
+    'native ranges are explicit and unknown or absent modes fail closed',
+    () {
+      final row = <String, Object?>{
+        'id': 'id',
+        'name': 'folder',
+        'path': '/folder',
+        'available': true,
+      };
+      for (final permission in [null, 'readOnly', 'readWrite', 'unknown']) {
+        final data = <Object?, Object?>{
+          'storageUnavailable': false,
+          'directories': [
+            {...row, 'permission': ?permission},
+          ],
+        };
+        if (permission == 'readOnly' || permission == 'readWrite') {
+          expect(
+            ToolDirectorySnapshot.fromNative(
+              data,
+            ).directories.single.permission.name,
+            permission,
+          );
+        } else {
+          expect(
+            () => ToolDirectorySnapshot.fromNative(data),
+            throwsFormatException,
+          );
+        }
+      }
     },
   );
 

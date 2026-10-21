@@ -267,13 +267,22 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
           result(FlutterError(code: "tool_access_busy", message: "Directory chooser already open", details: nil))
           return
         }
-        guard call.arguments == nil || call.arguments is String else {
+        // The owner chooses the range before opening the OS panel. No path
+        // supplied by Flutter or an Agent can grant access.
+        guard let arguments = call.arguments as? [String: Any],
+              Set(arguments.keys).isSubset(of: ["permission", "replacing"]),
+              let value = arguments["permission"] as? String,
+              let permission = ToolDirectoryPermission(rawValue: value),
+              arguments["replacing"] == nil || arguments["replacing"] is String else {
           result(FlutterError(code: "tool_access_unknown", message: "Invalid directory reference", details: nil))
           return
         }
         let panel = NSOpenPanel()
-        panel.title = "选择外部工具目录"
-        panel.message = "选择 GH 或 AWS 的安装目录，包含程序及其依赖文件。"
+        let replacing = arguments["replacing"] as? String
+        panel.title = permission == .readWrite ? "选择工作目录（读写）" : "选择外部目录（读取）"
+        panel.message = permission == .readWrite
+          ? "保存所选目录及其文件的读取与写入访问，重开应用后恢复。工具可在其中创建、修改或删除文件；使用凭据仍需另外批准。"
+          : "保存所选目录的读取访问，重开应用后恢复。macOS 本次选择可能临时允许写入；保存的读取范围在重开后生效。目录选择不授予程序执行权限。"
         panel.prompt = "允许访问"
         panel.canChooseDirectories = true
         panel.canChooseFiles = false
@@ -285,7 +294,7 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
           window.showApprovalsWindow()
           guard response == .OK, let url = panel.url else { result(nil); return }
           do {
-            try store.rememberSelection(url, replacing: call.arguments as? String)
+            try store.rememberSelection(url, replacing: replacing, permission: permission)
             result(store.snapshot())
           } catch let error as ToolAccessFailure {
             result(FlutterError(code: error.code, message: "Directory access was not saved", details: nil))

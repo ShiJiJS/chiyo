@@ -1,0 +1,5 @@
+QA excerpt; unrelated file-list entries omitted.
+			3 container (settable) 移除保存的目录访问
+				5 text (settable) 应用下次启动不再恢复“读取 中文 空格”的访问。不会删除目录中的文件；已经运行的工具可能继续访问已打开的文件。
+				6 button (settable) 取消
+				7 button (settable) 确认移除

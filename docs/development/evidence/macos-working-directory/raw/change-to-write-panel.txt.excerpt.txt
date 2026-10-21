@@ -1,0 +1,6 @@
+QA excerpt; unrelated file-list entries omitted.
+0 sheet Description: 选择工作目录（读写）, ID: open-panel, Secondary Actions: Raise
+		1380 pop up button Where:, Value: 读写 中文 空格, ID: where popup
+		1383 text 保存所选目录及其文件的读取与写入访问，重开应用后恢复。工具可在其中创建、修改或删除文件；使用凭据仍需另外批准。
+		1384 button Cancel, ID: CancelButton
+		1385 button 允许访问, ID: OKButton

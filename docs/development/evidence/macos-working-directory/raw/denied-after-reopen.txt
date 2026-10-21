@@ -1,0 +1,39 @@
+Window: "info_desktop", App: info_desktop.
+0 standard window info_desktop, Secondary Actions: Raise
+	1 container info_desktop
+		2 container (settable)
+			3 text (settable) Mac 凭据工具
+			4 text (settable) GH 和 AWS 使用应用随包版本，SSH 使用系统程序。入口核对不代表凭据已授权；每次使用仍核对程序身份与版本。
+			5 text (settable) GH 2.102.0
+			6 text (settable) /Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue44-directory-ui-1/source/apps/desktop/build/relocated/目录 测试/info_desktop.app/Contents/Resources/ThirdParty/gh/bin/gh
+随包入口摘要已核对。
+			7 button (settable) 复制路径
+			8 text (settable) AWS CLI 2.38.1
+			9 text (settable) /Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue44-directory-ui-1/source/apps/desktop/build/relocated/目录 测试/info_desktop.app/Contents/Resources/ThirdParty/aws-cli/aws
+随包入口摘要已核对。
+			10 button (settable) 复制路径
+			11 text (settable) 系统 SSH
+			12 text (settable) /usr/bin/ssh
+版本将在使用时核对。
+			13 button (settable) 复制路径
+			14 button (settable) 刷新随包工具状态
+			15 text (settable) Mac 外部工具目录
+			16 text (settable) 保存目录的读取访问，重开后恢复。macOS 本次选择可能临时允许写入；保存的读取范围在重开后生效。目录选择不授予程序执行权限，GH 和 AWS 请使用随包路径。
+			17 button (settable) 选择工具目录
+			18 text (settable) Mac 工作目录
+			19 text (settable) 保存目录及其文件的读取与写入访问，重开后恢复。工具可在其中创建、修改或删除文件；使用凭据仍需另行申请并由你批准。
+			20 button (settable) 选择工作目录（读写）
+			21 text (settable) 尚未保存外部目录。随包 GH、AWS 和系统 SSH 不需要在此添加。
+			22 button (settable) 刷新目录状态
+	23 close button
+	24 full screen button Help: this button also has an action to zoom the window, Secondary Actions: zoom the window
+	25 minimize button
+	26 text info_desktop
+27 menu bar
+	28 info_desktop
+	29 Edit
+	30 View
+	31 Window
+	32 Help
+
+The focused UI element is 1 container info_desktop
