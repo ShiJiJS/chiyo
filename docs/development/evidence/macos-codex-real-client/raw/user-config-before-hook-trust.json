@@ -1,0 +1,10 @@
+{
+  "unrelatedNormalizedSha256": "afcdb1f3c6c7fe98fcf8ad2662fa661afd699e106a02988d26ef472666182301",
+  "allowedTrustKeys": [
+    "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json:session_start:0:0",
+    "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json:session_end:0:0",
+    "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json:subagent_start:0:0"
+  ],
+  "fileSha256": "c206504bcf005acf4a328592aca6b3c4536493817721b5e502c381566ecfbf65",
+  "projectTrust": "trusted"
+}

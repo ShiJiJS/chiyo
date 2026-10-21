@@ -46,7 +46,7 @@
 - [#48 附件保留闭环](evidence/macos-attachment-preserve-ui/verification.json)：原生文本编辑、修改提案确认、文本删除/恢复及库重开保持附件身份、版本与原文；最终十阶段/44 次 CLI 状态核对、六次真实交付/释放通过。初始文件准备与审批为夹具，实际系统面板仍待。
 - [#48 字符串凭据管理](evidence/macos-credential-management-ui/verification.json)：原生创建/元数据/关联/轮换/停用/版本与回收恢复/过期/隐藏及库重开，最终十五阶段、55 次 CLI 状态核对通过。明确使用测试文本通道；真实输入法清空到期时间、文件凭据面板与实际使用授权仍需联合验收。
 - [#48 目录、标签与搜索](evidence/macos-library-filters-ui/verification.json)：原生目录创建/循环拒绝/移动、标签改名、125 条资料分页/组合筛选/库重开及 38 次 CLI 核对通过；修复多标签侧栏和大字号计数溢出，52 标签、四主题及 100%/200% 矩阵通过。Windows 实机与真实输入仍待。
-- [#49 Codex 接入准备](evidence/macos-codex-preparation/verification.json)：已修复验收项目生成器只接受 Windows `.exe` 的问题，实际同源 ARM64 包生成独立项目并通过摘要/签名/拒绝覆盖核对；13 项真实聊天验收仍未运行，尚未安装或信任 hook。
+- [#49 真实 Codex 合成验收](macos-codex-real-client.md)：正式入口逐条信任了用户批准项目的三个 hook；真实模型完成部分批准、多次读取、隔离/撤销、附件实际消费与释放，以及压缩、分叉、清空、SessionEnd 和结束后恢复的组件验证。第二条验收条件已具备；完整恢复/到期/重开、真实主子委托、凭据复用、最终包联合验收仍待。
 - [#50 ARM64 交付](macos-delivery.md)：`01c1f14` 新包纳入 Keychain 恢复入口和迟到清理退出保护，四包 703 通过/66 跳过，21 个打包阶段及六项随包检查通过。此前原生资料/附件及隔离 Keychain 场景保持各自版本范围；第一项整包清单与身份/架构证据已刷新，稳定安装、真实 Keychain 授权/升级与最终实际 GUI/Codex 仍待。
 
 #43 已完成其范围，其余上述票据仍 OPEN；具体未完成条件以 GitHub 票据及各记录为准。现有证据不等于 Mac 总票 #19 已可交付。
@@ -410,7 +410,12 @@ Windows 实机回归仍待。Computer Use 再次确认 Mac 锁屏，
 六条整体验收不勾选。失败、最终三轮、源码摘要和视觉复核见
 [证据索引](evidence/macos-history-layout/verification.json)。
 
-### #49 可审查工作区与真实独立 stdin 接口
+### #49 初期工作区准备与独立 stdin 接口（历史检查点）
+
+以下是收到 hook 信任授权前的准备记录。后续用户已明确允许仅限该合成项目，
+实际信任与真实模型工具、附件和生命周期结果见
+[最新接入验收](macos-codex-real-client.md)；不能继续用本段的 `not_run`
+描述最新进度。
 
 源码 `2d4378b`。实际输入为已核对的 `cccc37e` Mac ARM64 交付包，
 用随包 SDK-free `info-prepare-codex` 在中文、空格、单引号及 shell 特殊字符
