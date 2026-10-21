@@ -1,0 +1,28 @@
+[
+  {
+    "name": "installed-storage",
+    "command": [
+      "/Users/jiangxinyi/Documents/Project/agent-info/local/中文 Mac 预览/AgentInfoManage/diagnostics/bin/macos-storage-check"
+    ],
+    "exitCode": 0,
+    "PATH": "/usr/bin:/bin"
+  },
+  {
+    "name": "installed-gh-version",
+    "command": [
+      "/Users/jiangxinyi/Documents/Project/agent-info/local/中文 Mac 预览/AgentInfoManage/app/info_desktop.app/Contents/Resources/ThirdParty/gh/bin/gh",
+      "--version"
+    ],
+    "exitCode": 0,
+    "PATH": "/usr/bin:/bin"
+  },
+  {
+    "name": "installed-aws-version",
+    "command": [
+      "/Users/jiangxinyi/Documents/Project/agent-info/local/中文 Mac 预览/AgentInfoManage/app/info_desktop.app/Contents/Resources/ThirdParty/aws-cli/aws",
+      "--version"
+    ],
+    "exitCode": 0,
+    "PATH": "/usr/bin:/bin"
+  }
+]

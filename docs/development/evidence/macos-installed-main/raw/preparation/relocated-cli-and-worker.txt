@@ -1,0 +1,9 @@
+00:00 +0: loading test/bundle_preparation_test.dart
+00:00 +0: test/bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:00 +1: test/bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:00 +2: test/bundle_preparation_test.dart: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
+00:00 +3: test/macos_worker_lifetime_test.dart: Darwin AOT worker lifetime: worker-crash
+00:02 +4: test/macos_worker_lifetime_test.dart: Darwin AOT worker lifetime: short-zero
+00:02 +5: test/macos_worker_lifetime_test.dart: Darwin AOT worker lifetime: short-signal
+00:02 +6: test/macos_worker_lifetime_test.dart: (tearDownAll)
+00:02 +6: All tests passed!
