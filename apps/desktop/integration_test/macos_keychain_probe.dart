@@ -89,6 +89,7 @@ Future<void> main() async {
     'corrupt',
     'cleanup',
     'upgrade',
+    'upgrade-interactive',
     'backup-export',
     'backup-restore',
     'backup-reopen',
@@ -205,7 +206,9 @@ Future<void> main() async {
       await db.writeAsBytes(damaged, flush: true);
     }
     final guarded = await db.exists() ? await db.readAsBytes() : null;
-    final ownerAccess = mode!.startsWith('access-');
+    final interactiveUpgrade = mode == 'upgrade-interactive';
+    final ownerAccess = mode!.startsWith('access-') || interactiveUpgrade;
+    var actualOwnerAccessAttempts = 0;
     final raw = sql.sqlite3.openInMemory();
     try {
       final version = raw
@@ -386,6 +389,7 @@ Future<void> main() async {
       port: 0,
       openLibraryWithKeyAccess: ownerAccess
           ? () async {
+              if (interactiveUpgrade) actualOwnerAccessAttempts++;
               final recovered = MacOsDatabaseKeyStore((method, arguments) {
                 _check(method == 'read', 'Recovery tried to replace a key');
                 return _channel.invokeMethod<Object?>(
@@ -408,7 +412,9 @@ Future<void> main() async {
             }
           : null,
       openLibrary: () async {
-        if (ownerAccess) throw const StorageFailure('key_unavailable');
+        if (ownerAccess && !interactiveUpgrade) {
+          throw const StorageFailure('key_unavailable');
+        }
         try {
           final repo = await EncryptedInformationRepository.open(
             libraryPath,
@@ -436,7 +442,66 @@ Future<void> main() async {
     final starting = bootstrap.start();
     runApp(DesktopLauncher(bootstrap: bootstrap));
     await starting;
-    if (ownerAccess) {
+    if (interactiveUpgrade) {
+      _check(
+        bootstrap.canRequestKeyAccess,
+        'Changed signature did not require owner access',
+      );
+      _check(
+        keys.creates == 0 && listEquals(await db.readAsBytes(), guarded),
+        'Ordinary failed upgrade replaced original data/key',
+      );
+      final phaseFile = File('$canonical/interactive-phase.json');
+      final deadline = DateTime.now().add(const Duration(minutes: 12));
+      var lastPhase = '';
+      var rejectedAttempts = 0;
+      var rejectedCheckedAt = 0;
+      while (bootstrap.state != DesktopStartupState.ready) {
+        _check(
+          DateTime.now().isBefore(deadline),
+          'Interactive upgrade deadline',
+        );
+        if (actualOwnerAccessAttempts > rejectedCheckedAt &&
+            bootstrap.state == DesktopStartupState.failed &&
+            !bootstrap.keyAccessPending) {
+          _check(
+            bootstrap.library == null &&
+                bootstrap.boundPort == null &&
+                keys.creates == 0 &&
+                listEquals(await db.readAsBytes(), guarded),
+            'Actual denied access changed data/key or published endpoint',
+          );
+          rejectedCheckedAt = actualOwnerAccessAttempts;
+          rejectedAttempts++;
+        }
+        final current = jsonEncode({
+          'state': bootstrap.state.name,
+          'pending': bootstrap.keyAccessPending,
+          'attempts': actualOwnerAccessAttempts,
+          'deniedAttempts': rejectedAttempts,
+          'canRequestAccess': bootstrap.canRequestKeyAccess,
+          'portPublished': bootstrap.boundPort != null,
+        });
+        if (current != lastPhase) {
+          await phaseFile.writeAsString(current, flush: true);
+          stdout.writeln('MAC_KEYCHAIN_INTERACTIVE_STATE=$current');
+          lastPhase = current;
+        }
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+      }
+      _check(
+        actualOwnerAccessAttempts >= 2 && rejectedAttempts >= 1,
+        'Must observe a real denied attempt before real approval',
+      );
+      facts.addAll({
+        'systemDecisionIsFixture': false,
+        'ownerButtonPhysicallyInvoked': true,
+        'actualOwnerAccessAttempts': actualOwnerAccessAttempts,
+        'actualDeniedAttempts': rejectedAttempts,
+        'failedUpgradeDatabasePreserved': true,
+        'originalDatabaseRecoveredAfterSystemApproval': true,
+      });
+    } else if (ownerAccess) {
       _check(bootstrap.canRequestKeyAccess, 'Owner recovery not offered');
       await WidgetsBinding.instance.endOfFrame;
       VoidCallback? action;
@@ -658,7 +723,11 @@ Future<void> main() async {
         'endedGrantAndAllowedReadPreserved': true,
       });
     }
-    if (mode == 'upgrade') facts['upgradeAccess'] = 'preserved';
+    if (mode == 'upgrade' || interactiveUpgrade) {
+      facts['upgradeAccess'] = interactiveUpgrade
+          ? 'owner-approved'
+          : 'preserved';
+    }
     facts['startupAfterFinalAttempt'] = 'ready';
     await bootstrap.runtime!.quit();
   } catch (error, stack) {
