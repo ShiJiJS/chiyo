@@ -1,0 +1,10 @@
+{
+  "expectedExitCode": 1,
+  "observedExitCode": 1,
+  "testSha256": "70a33fec6efae0f310d5d88fa0feb6d6d9e8a4372fd8a2276f4a709ee6ce1c5f",
+  "oldProductEditorSha256": "59d36a64441022117e9bfe43645b75531f71fc698da1372d3807d2fc51416989",
+  "oldProductRevision": "6deaeee645166b7d908971bf92a5b380d47c03c4",
+  "expectedFieldFocusButObservedModalScope": true,
+  "onlyAddedTestCopy": true,
+  "addedTestAndGeneratedTestBuildRemoved": true
+}

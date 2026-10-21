@@ -1,0 +1,27 @@
+Resolving dependencies...
+Downloading packages...
+  material_color_utilities 0.13.0 (0.13.1 available)
+  test_api 0.7.12 (0.7.15 available)
+  vector_math 2.4.0 (2.4.3 available)
+Got dependencies!
+3 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+00:00 +0: loading /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/information_file_editor_test.dart
+00:00 +0: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/window_frame_test.dart: caption controls remain accessible above the workspace route
+00:00 +1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_text_editing_test.dart: native Select All updates only the focused Flutter editor (variant: TargetPlatform.macOS)
+00:00 +2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/information_file_editor_test.dart: file controls are reachable by keyboard and Escape cleans the draft at 100.0%
+00:00 +3: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/information_file_editor_test.dart: file controls are reachable by keyboard and Escape cleans the draft at 100.0%
+00:00 +4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/information_file_editor_test.dart: file controls are reachable by keyboard and Escape cleans the draft at 100.0%
+00:00 +5: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/information_file_editor_test.dart: file controls are reachable by keyboard and Escape cleans the draft at 100.0%
+00:00 +6: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/information_file_editor_test.dart: file controls are reachable by keyboard and Escape cleans the draft at 100.0%
+00:00 +7: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/information_file_editor_test.dart: file controls are reachable by keyboard and Escape cleans the draft at 100.0%
+00:00 +8: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/information_file_editor_test.dart: file controls are reachable by keyboard and Escape cleans the draft at 100.0%
+00:01 +9: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/information_file_editor_test.dart: file controls are reachable by keyboard and Escape cleans the draft at 200.0%
+00:01 +10: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/information_file_editor_test.dart: real owner save retries unchanged input, preserves bytes and text-only edits
+00:01 +11: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/information_file_editor_test.dart: cancel waits for in-flight picker and releases its eventual stage; cleanup can retry
+00:01 +12: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/information_file_editor_test.dart: cancelled picker and failed replacement retain the original selection and other inputs
+00:01 +13: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/information_file_editor_test.dart: same-purpose file replacement retains identity, kind conversion changes it
+00:01 +14: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/information_file_editor_test.dart: a known committed save only retries cleanup and never submits a second version
+00:02 +15: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/information_file_editor_test.dart: file editor shows missing file error, saves real file and keeps the three-column library
+00:02 +16: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/information_file_editor_test.dart: (tearDownAll)
+00:02 +16: All tests passed!

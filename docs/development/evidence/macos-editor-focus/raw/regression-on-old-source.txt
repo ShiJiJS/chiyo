@@ -1,0 +1,45 @@
+Resolving dependencies...
+Downloading packages...
+  material_color_utilities 0.13.0 (0.13.1 available)
+  test_api 0.7.12 (0.7.15 available)
+  vector_math 2.4.0 (2.4.3 available)
+Got dependencies!
+3 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+00:00 +0: loading /Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue48-editor-focus-2/source/apps/desktop/test/qa_focus_regression_test.dart
+00:00 +0: (setUpAll)
+00:00 +0: native-style picker activation restores the last editor control
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown while running async test code:
+Expected: same instance as FocusNode:<FocusNode#ab7e7(context: Focus)>
+  Actual: FocusScopeNode:<FocusScopeNode#0023e(_ModalScopeState<dynamic> Focus Scope [PRIMARY
+FOCUS])(context: _FocusScopeWithExternalFocusNode, PRIMARY FOCUS)>
+
+When the exception was thrown, this was the stack:
+#0      fail (package:matcher/src/expect/expect.dart:187:31)
+#1      _expect (package:matcher/src/expect/expect.dart:182:3)
+#2      expect (package:matcher/src/expect/expect.dart:65:3)
+#3      expect (package:flutter_test/src/widget_tester.dart:473:18)
+#4      main.<anonymous closure>.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue48-editor-focus-2/source/apps/desktop/test/qa_focus_regression_test.dart:169:9)
+<asynchronous suspension>
+<asynchronous suspension>
+#6      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue48-editor-focus-2/source/apps/desktop/test/qa_focus_regression_test.dart:122:7)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 2 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:00 +0 -1: native-style picker activation restores the last editor control [E]
+  Test failed. See exception logs above.
+  The test description was: native-style picker activation restores the last editor control
+  
+00:00 +0 -1: (tearDownAll)
+00:00 +0 -1: Some tests failed.
+
+Failing tests:
+  /Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue48-editor-focus-2/source/apps/desktop/test/qa_focus_regression_test.dart: native-style picker activation restores the last editor control
