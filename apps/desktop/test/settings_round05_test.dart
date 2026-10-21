@@ -18,6 +18,59 @@ class _FailingPreferences extends MemoryInformationRepository {
 
 void main() {
   testWidgets(
+    'changing settings section starts at its heading and main navigation preserves its scroll',
+    (tester) async {
+      tester.view.physicalSize = const Size(1280, 800);
+      tester.view.devicePixelRatio = 1;
+      tester.platformDispatcher.textScaleFactorTestValue = 2;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+      final service = InformationService.fictional();
+      addTearDown(() async {
+        await tester.pumpWidget(const SizedBox());
+        final closing = service.close();
+        await tester.pump();
+        await closing;
+      });
+      await tester.pumpWidget(InformationApp(service: service, port: 0));
+      await tester.tap(find.byKey(const ValueKey('nav-4')));
+      await tester.pumpAndSettle();
+      Future<void> section(String name) async {
+        final target = find.byKey(ValueKey('settings-section-$name'));
+        await tester.ensureVisible(target);
+        await tester.tap(target);
+        await tester.pumpAndSettle();
+      }
+
+      ScrollPosition position(String name) => tester
+          .state<ScrollableState>(
+            find
+                .descendant(
+                  of: find.byKey(ValueKey('settings-content-$name')),
+                  matching: find.byType(Scrollable),
+                )
+                .first,
+          )
+          .position;
+      await section('records');
+      position('records').jumpTo(position('records').maxScrollExtent);
+      await tester.pumpAndSettle();
+      expect(position('records').pixels, greaterThan(0));
+      await section('application');
+      expect(position('application').pixels, 0);
+      position('application').jumpTo(100);
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('nav-0')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('nav-4')));
+      await tester.pumpAndSettle();
+      expect(position('application').pixels, 100);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
     'organization result opens its actual historical task across pages',
     (tester) async {
       tester.view.physicalSize = const Size(1440, 900);

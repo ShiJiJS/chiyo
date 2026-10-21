@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'ui_palette.dart';
+import 'anchored_surface.dart';
+import 'prototype_ui.dart';
+import 'dart:math' as math;
 import 'package:flutter/services.dart';
 
 // Labels stay outside the editable border, including after a value is entered.
@@ -150,7 +153,7 @@ class _FieldFrame extends StatelessWidget {
   }
 }
 
-// MenuAnchor supplies desktop pointer and keyboard navigation. Item identity
+// AnchoredSurface supplies one-sided desktop menus. Item identity
 // and disabled state are retained from the existing owner-facing selectors.
 class DesktopSelect<T> extends StatefulWidget {
   const DesktopSelect({
@@ -173,85 +176,275 @@ class DesktopSelect<T> extends StatefulWidget {
   State<DesktopSelect<T>> createState() => _DesktopSelectState<T>();
 }
 
-class _DesktopSelectState<T> extends State<DesktopSelect<T>> {
-  final _menu = MenuController();
-  final _buttonFocus = FocusNode();
-  // Existing forms own their draft; persisted settings update only on success.
-  T? get _selected => widget.value ?? widget.initialValue;
+class _SelectedValue<T> {
+  const _SelectedValue(this.value);
+  final T? value;
+}
 
+class _DesktopSelectState<T> extends State<DesktopSelect<T>> {
+  final _buttonFocus = FocusNode();
+  final _popup = AnchoredSurfaceController();
+  bool _open = false;
+  T? get _selected => widget.value ?? widget.initialValue;
   @override
   void dispose() {
+    final close = _popup.close;
+    if (close != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => close());
+    }
     _buttonFocus.dispose();
     super.dispose();
+  }
+
+  Future<void> _show(BuildContext triggerContext) async {
+    if (_open || widget.onChanged == null || widget.items.isEmpty) return;
+    setState(() => _open = true);
+    final scale = MediaQuery.textScalerOf(context).scale(1);
+    var width = 180.0;
+    for (final item in widget.items) {
+      if (item.child case Text(:final data?)) {
+        final text = TextPainter(
+          text: TextSpan(text: data, style: prototypeText(context, 13)),
+          textDirection: Directionality.of(context),
+          textScaler: MediaQuery.textScalerOf(context),
+        )..layout();
+        width = math.max(width, text.width + 75);
+      }
+    }
+    final result = await showAnchoredSurface<_SelectedValue<T>>(
+      triggerContext,
+      controller: _popup,
+      width: width.clamp(180, 520),
+      height: math.min(
+        340 * scale,
+        widget.items.length * (19.5 * scale + 20) +
+            12 +
+            (widget.items.length > 12 ? 20 * scale + 38 : 0),
+      ),
+      builder: (_) =>
+          _DesktopOptions<T>(items: widget.items, selected: _selected),
+    );
+    if (!mounted) return;
+    setState(() => _open = false);
+    _buttonFocus.requestFocus();
+    if (result != null) widget.onChanged?.call(result.value);
   }
 
   @override
   Widget build(BuildContext context) {
     final enabled = widget.onChanged != null && widget.items.isNotEmpty;
-    final focusItem =
-        widget.items
-            .where((item) => item.enabled && item.value == _selected)
-            .firstOrNull ??
-        widget.items.where((item) => item.enabled).firstOrNull;
     final label =
-        widget.items
-            .where((item) => item.value == _selected)
-            .firstOrNull
-            ?.child ??
+        widget.items.where((i) => i.value == _selected).firstOrNull?.child ??
         widget.hint ??
         const Text('请选择');
-    final control = MenuAnchor(
-      controller: _menu,
-      childFocusNode: _buttonFocus,
-      consumeOutsideTap: true,
-      menuChildren: [
-        for (final item in widget.items)
-          MenuItemButton(
-            autofocus: identical(item, focusItem),
-            onPressed: !enabled || !item.enabled
-                ? null
-                : () {
-                    widget.onChanged!(item.value);
-                  },
-            leadingIcon: item.value == _selected
-                ? Icon(Icons.check, size: 14)
-                : const SizedBox(width: 14),
-            child: item.child,
-          ),
-      ],
-      builder: (context, controller, child) => CallbackShortcuts(
+    final control = Builder(
+      builder: (triggerContext) => CallbackShortcuts(
         bindings: {
           const SingleActivator(LogicalKeyboardKey.arrowDown): () {
-            if (enabled) controller.open();
+            if (enabled) _show(triggerContext);
           },
         },
         child: OutlinedButton(
           focusNode: _buttonFocus,
           onPressed: enabled
-              ? () => controller.isOpen ? controller.close() : controller.open()
+              ? () => _open ? _popup.close?.call() : _show(triggerContext)
               : null,
-          style: OutlinedButton.styleFrom(
-            backgroundColor: UiPalette.of(context).paper,
-            alignment: Alignment.centerLeft,
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+          style: prototypeButton(
+            context,
+            size: 13,
+            foreground: UiPalette.of(context).ink,
+            background: UiPalette.of(context).paper,
+            side: BorderSide(
+              color: _open
+                  ? UiPalette.of(context).accent
+                  : UiPalette.of(context).line,
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 9),
+            radius: 5,
           ),
           child: Row(
             mainAxisSize: widget.isExpanded
                 ? MainAxisSize.max
                 : MainAxisSize.min,
             children: [
-              if (widget.isExpanded) Expanded(child: label) else label,
-              const SizedBox(width: 18),
-              Icon(Icons.expand_more, size: 16),
+              if (widget.isExpanded)
+                Expanded(child: label)
+              else
+                Flexible(child: label),
+              const SizedBox(width: 12),
+              Icon(_open ? Icons.expand_less : Icons.expand_more, size: 16),
             ],
           ),
         ),
       ),
     );
-    return widget.decoration == null
+    return widget.decoration?.labelText == null
         ? control
         : _FieldFrame(label: widget.decoration!.labelText, child: control);
   }
+}
+
+class _DesktopOptions<T> extends StatefulWidget {
+  const _DesktopOptions({required this.items, this.selected});
+  final List<DropdownMenuItem<T>> items;
+  final T? selected;
+  @override
+  State<_DesktopOptions<T>> createState() => _DesktopOptionsState<T>();
+}
+
+class _DesktopOptionsState<T> extends State<_DesktopOptions<T>> {
+  String _query = '';
+  final _searchFocus = FocusNode();
+  bool _matches(DropdownMenuItem<T> item) =>
+      _query.isEmpty ||
+      (item.child is Text
+              ? (item.child as Text).data ?? ''
+              : item.value.toString())
+          .toLowerCase()
+          .contains(_query.toLowerCase());
+  late final _nodes = [for (final _ in widget.items) FocusNode()];
+  late int _focused = math.max(
+    0,
+    widget.items.indexWhere((i) => i.enabled && i.value == widget.selected),
+  );
+  final _keys = <int, GlobalKey>{};
+  @override
+  void initState() {
+    super.initState();
+    if (!widget.items[_focused].enabled) {
+      _focused = widget.items.indexWhere((i) => i.enabled);
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final selectedContext = _keys[_focused]?.currentContext;
+      if (mounted && selectedContext != null) {
+        Scrollable.ensureVisible(selectedContext, alignment: .5);
+      }
+      if (mounted && widget.items.length > 12) {
+        _searchFocus.requestFocus();
+      } else if (mounted && _focused >= 0) {
+        _nodes[_focused].requestFocus();
+      }
+    });
+  }
+
+  void _step(int direction) {
+    for (var i = 1; i <= widget.items.length; i++) {
+      final next = (_focused + direction * i) % widget.items.length;
+      if (widget.items[next].enabled && _matches(widget.items[next])) {
+        setState(() => _focused = next);
+        _nodes[next].requestFocus();
+        final ctx = _keys[next]?.currentContext;
+        if (ctx != null) Scrollable.ensureVisible(ctx, alignment: .5);
+        break;
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _searchFocus.dispose();
+    for (final n in _nodes) {
+      n.dispose();
+    }
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => Focus(
+    onKeyEvent: (_, event) {
+      if (event is! KeyDownEvent) return KeyEventResult.ignored;
+      if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
+        _step(1);
+        return KeyEventResult.handled;
+      }
+      if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
+        _step(-1);
+        return KeyEventResult.handled;
+      }
+      return KeyEventResult.ignored;
+    },
+    child: Column(
+      children: [
+        if (widget.items.length > 12)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(10, 10, 10, 4),
+            child: TextField(
+              focusNode: _searchFocus,
+              decoration: const InputDecoration(
+                hintText: '搜索选项',
+                prefixIcon: Icon(Icons.search, size: 16),
+              ),
+              onChanged: (value) => setState(() {
+                _query = value;
+              }),
+              onSubmitted: (_) {
+                final item = widget.items
+                    .where((i) => i.enabled && _matches(i))
+                    .firstOrNull;
+                if (item != null) {
+                  Navigator.pop(context, _SelectedValue<T>(item.value));
+                }
+              },
+            ),
+          ),
+        Expanded(
+          child: SingleChildScrollView(
+            primary: false,
+            padding: const EdgeInsets.all(6),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (!widget.items.any(_matches))
+                  const Padding(
+                    padding: EdgeInsets.all(12),
+                    child: Text('没有匹配的选项'),
+                  ),
+                for (final (index, item) in widget.items.indexed)
+                  if (_matches(item))
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 2),
+                      child: TextButton(
+                        key: _keys.putIfAbsent(index, () => GlobalKey()),
+                        focusNode: _nodes[index],
+                        style: prototypeButton(
+                          context,
+                          size: 13,
+                          foreground: UiPalette.of(context).ink,
+                          background: item.value == widget.selected
+                              ? UiPalette.of(context).selected
+                              : null,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 9,
+                          ),
+                        ),
+                        onPressed: item.enabled
+                            ? () => Navigator.pop(
+                                context,
+                                _SelectedValue<T>(item.value),
+                              )
+                            : null,
+                        child: Row(
+                          children: [
+                            SizedBox(
+                              width: 18,
+                              child: item.value == widget.selected
+                                  ? const Icon(Icons.check, size: 14)
+                                  : null,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(child: item.child),
+                          ],
+                        ),
+                      ),
+                    ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
 }
 
 class DesktopDialog extends StatelessWidget {

@@ -104,6 +104,7 @@ class _OrganizationApprovalPanelState extends State<OrganizationApprovalPanel> {
       controller: _documentScroll,
       thumbVisibility: task.itemVersions.length > 6 || large,
       child: ListView(
+        primary: false,
         controller: _documentScroll,
         key: PageStorageKey('organization-document-${task.id}'),
         padding: EdgeInsets.fromLTRB(30, large ? 10 : 24, 30, 24),
@@ -393,19 +394,15 @@ class _OrganizationApprovalPanelState extends State<OrganizationApprovalPanel> {
                 border: Border.all(color: c.line),
                 borderRadius: BorderRadius.circular(4),
               ),
-              child: DropdownButtonHideUnderline(
-                child: DropdownButton<int>(
-                  isExpanded: true,
-                  key: ValueKey('organization-lifetime-${task.id}'),
-                  value: _minutes,
-                  icon: const PrototypeSelectCaret(),
-                  style: prototypeText(context, 13),
-                  items: const [
-                    DropdownMenuItem(value: 15, child: Text('15 分钟')),
-                    DropdownMenuItem(value: 30, child: Text('30 分钟')),
-                  ],
-                  onChanged: pending && !disabled ? _chooseMinutes : null,
-                ),
+              child: DesktopSelect<int>(
+                isExpanded: true,
+                key: ValueKey('organization-lifetime-${task.id}'),
+                value: _minutes,
+                items: const [
+                  DropdownMenuItem(value: 15, child: Text('15 分钟')),
+                  DropdownMenuItem(value: 30, child: Text('30 分钟')),
+                ],
+                onChanged: pending && !disabled ? _chooseMinutes : null,
               ),
             ),
           ],
@@ -672,6 +669,7 @@ class _ReviewOrganizationState extends State<_ReviewOrganization> {
         children: [
           Expanded(
             child: ListView(
+              primary: false,
               children: [
                 Text(
                   '聊天：${widget.task.chatLabel}\n${widget.task.changes.length} 条整理结果',

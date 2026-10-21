@@ -282,6 +282,7 @@ class SettingsDialog extends StatelessWidget {
             SizedBox(height: flow ? 14 : 20),
             Flexible(
               child: SingleChildScrollView(
+                primary: false,
                 padding: EdgeInsets.only(right: 0, bottom: flow ? 16 : 0),
                 child: child,
               ),

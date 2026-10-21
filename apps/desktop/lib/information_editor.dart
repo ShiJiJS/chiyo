@@ -1,6 +1,8 @@
+import 'desktop_controls.dart';
 import 'package:flutter/material.dart';
 import 'package:info_core/info_core.dart';
 import 'prototype_dialog.dart';
+import 'organization_selectors.dart';
 import 'prototype_ui.dart';
 import 'ui_palette.dart';
 import 'information_editor_draft.dart';
@@ -286,18 +288,11 @@ class _InformationEditorState extends State<InformationEditor> {
         const SizedBox(height: 7),
         SizedBox(
           height: 19.5 * MediaQuery.textScalerOf(context).scale(1) + 20,
-          child: DropdownButtonFormField<T>(
+          child: DesktopSelect<T>(
             key: key,
             initialValue: value,
             items: items,
             isExpanded: true,
-            style: prototypeText(context, 13),
-            icon: showChevron
-                ? const RotatedBox(
-                    quarterTurns: 1,
-                    child: PrototypeIcon(PrototypeIconGlyph.chev, size: 12),
-                  )
-                : const SizedBox.shrink(),
             decoration: InputDecoration(
               isDense: true,
               contentPadding: const EdgeInsets.symmetric(
@@ -321,18 +316,6 @@ class _InformationEditorState extends State<InformationEditor> {
       ],
     ),
   );
-  String _path(String id) {
-    final names = <String>[], seen = <String>{};
-    String? cursor = id;
-    while (cursor != null && seen.add(cursor)) {
-      final f = widget.directories.where((d) => d.id == cursor).firstOrNull;
-      if (f == null) break;
-      names.insert(0, f.name);
-      cursor = f.parentId;
-    }
-    return names.join(' / ');
-  }
-
   @override
   Widget build(BuildContext context) => Actions(
     actions: {
@@ -393,36 +376,25 @@ class _InformationEditorState extends State<InformationEditor> {
                 ),
                 const SizedBox(width: 15),
                 Expanded(
-                  child: _select<String>(
-                    '所在目录',
-                    d.directoryId,
-                    [
-                      const DropdownMenuItem(value: null, child: Text('未分类')),
-                      if (d.directoryId != null &&
-                          !widget.directories.any(
-                            (directory) => directory.id == d.directoryId,
-                          ))
-                        DropdownMenuItem(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text('所在目录', style: prototypeText(context, 13)),
+                        const SizedBox(height: 7),
+                        DirectoryField(
+                          key: const ValueKey('item-directory'),
+                          directories: widget.directories,
                           value: d.directoryId,
-                          child: Text(
-                            '不可用目录（${d.directoryId}）',
-                            overflow: TextOverflow.ellipsis,
-                          ),
+                          enabled: !_busy,
+                          onChanged: (id) => _changed(() {
+                            d.directoryId = id;
+                            d.suggestedDirectory = '';
+                          }),
                         ),
-                      for (final directory in widget.directories)
-                        DropdownMenuItem(
-                          value: directory.id,
-                          child: Text(
-                            _path(directory.id),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                    ],
-                    (v) {
-                      d.directoryId = v;
-                      d.suggestedDirectory = '';
-                    },
-                    key: const ValueKey('item-directory'),
+                      ],
+                    ),
                   ),
                 ),
               ],
@@ -629,13 +601,6 @@ class _InformationEditorState extends State<InformationEditor> {
   Future<void> _chooseTags() async {
     final selected = d.tagIds.toSet();
     final suggestions = d.suggestedTags.toSet();
-    final choices = {
-      for (final tag in widget.tags) tag.id: tag.name,
-      for (final id in selected.where(
-        (id) => !widget.tags.any((tag) => tag.id == id),
-      ))
-        id: '不可用标签（$id）',
-    };
     final applied = await showDialog<bool>(
       context: context,
       barrierColor: const Color(0x4f241b27),
@@ -646,32 +611,25 @@ class _InformationEditorState extends State<InformationEditor> {
           body: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (choices.isEmpty) const Text('暂无标签，请先在目录与标签中创建。'),
-              for (final tag in choices.entries)
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: Row(
-                    children: [
-                      PrototypeCheck(
-                        value: selected.contains(tag.key),
-                        onChanged: (v) => update(
-                          () => v == true
-                              ? selected.add(tag.key)
-                              : selected.remove(tag.key),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      TextButton(
-                        style: prototypeButton(context, size: 13),
-                        onPressed: () => update(
-                          () => selected.contains(tag.key)
-                              ? selected.remove(tag.key)
-                              : selected.add(tag.key),
-                        ),
-                        child: Text(tag.value),
-                      ),
-                    ],
-                  ),
+              SizedBox(
+                height: 260,
+                child: TagPicker(
+                  tags: widget.tags,
+                  selected: selected,
+                  onChanged: (ids) => update(() {
+                    selected
+                      ..clear()
+                      ..addAll(ids);
+                  }),
+                ),
+              ),
+              for (final id
+                  in selected
+                      .where((id) => !widget.tags.any((t) => t.id == id))
+                      .toList())
+                TextButton(
+                  onPressed: () => update(() => selected.remove(id)),
+                  child: Text('移除不可用标签（$id）'),
                 ),
               for (final name in d.suggestedTags)
                 Padding(

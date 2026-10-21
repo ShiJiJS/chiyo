@@ -142,7 +142,10 @@ class ProposalQueue extends StatelessWidget {
                                   )
                                 : null,
                           ),
-                          padding: const EdgeInsets.only(bottom: 12),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 8,
+                          ),
                           child: TextButton(
                             key: ValueKey('proposal-filter-${f.name}'),
                             style: prototypeButton(
@@ -177,6 +180,7 @@ class ProposalQueue extends StatelessWidget {
           Divider(height: 1, color: p.line),
           Expanded(
             child: ListView(
+              primary: false,
               padding: EdgeInsets.zero,
               children: [
                 Padding(

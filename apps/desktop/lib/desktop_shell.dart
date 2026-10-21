@@ -4,6 +4,7 @@ import 'package:info_core/info_core.dart';
 import 'desktop_runtime.dart';
 import 'ui.dart';
 import 'prototype_ui.dart';
+import 'desktop_scroll.dart';
 
 class DesktopShell extends StatefulWidget {
   const DesktopShell({
@@ -72,6 +73,7 @@ class _DesktopShellState extends State<DesktopShell> {
     final ink = selected ? c.strong : c.muted;
     return Container(
       height: 72,
+      padding: const EdgeInsets.symmetric(vertical: 10),
       decoration: BoxDecoration(
         border: Border(
           bottom: BorderSide(
@@ -83,7 +85,7 @@ class _DesktopShellState extends State<DesktopShell> {
       child: TextButton(
         key: ValueKey('nav-$index'),
         onPressed: () => widget.onSelected(index),
-        style: prototypeButton(context, size: 14, foreground: ink, radius: 0),
+        style: prototypeButton(context, size: 14, foreground: ink, radius: 6),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -231,15 +233,21 @@ class _DesktopShellState extends State<DesktopShell> {
                       ),
                     ],
                   );
-                  final nav = SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: [
-                        for (var i = 0; i < 5; i++) ...[
-                          if (i > 0) const SizedBox(width: 23),
-                          _destination(i),
+                  final nav = ScrollConfiguration(
+                    behavior: const DesktopScrollBehavior().copyWith(
+                      scrollbars: compact,
+                    ),
+                    child: SingleChildScrollView(
+                      primary: false,
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          for (var i = 0; i < 5; i++) ...[
+                            if (i > 0) const SizedBox(width: 12),
+                            _destination(i),
+                          ],
                         ],
-                      ],
+                      ),
                     ),
                   );
                   if (compact) {

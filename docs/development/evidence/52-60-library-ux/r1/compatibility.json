@@ -1,0 +1,11 @@
+{
+  "oldSource": "b37f96a089d6d4a0a9f872bd667be0c6b037f975",
+  "checks": [
+    "UNCHANGED_OLD_READER_CREATED_SCHEMA21",
+    "SCHEMA21_TO22_IDENTITY_AND_OLD_BACKUP_RESTORE_PASSED",
+    "UNCHANGED_OLD_READER_REJECTED_SCHEMA22_AND_FORMAT10"
+  ],
+  "syntheticOnly": true,
+  "oldSourceUnmodified": true,
+  "realWindowsDPAPI": true
+}

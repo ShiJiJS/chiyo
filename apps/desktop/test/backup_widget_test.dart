@@ -1,3 +1,4 @@
+import 'package:info_desktop/desktop_controls.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -128,7 +129,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(
         tester
-            .widget<DropdownButton<int>>(
+            .widget<DesktopSelect<int>>(
               find.byKey(const ValueKey('timeout-30')),
             )
             .value,
@@ -136,7 +137,7 @@ void main() {
       );
       expect(
         tester
-            .widget<DropdownButton<int>>(
+            .widget<DesktopSelect<int>>(
               find.byKey(const ValueKey('retention-90')),
             )
             .value,
@@ -226,15 +227,13 @@ void main() {
       await tester.pumpAndSettle();
       expect(
         tester
-            .widget<DropdownButton<int>>(
-              find.byKey(const ValueKey('timeout-5')),
-            )
+            .widget<DesktopSelect<int>>(find.byKey(const ValueKey('timeout-5')))
             .value,
         5,
       );
       expect(
         tester
-            .widget<DropdownButton<int>>(
+            .widget<DesktopSelect<int>>(
               find.byKey(const ValueKey('retention-180')),
             )
             .value,

@@ -755,6 +755,7 @@ class ApprovalsState extends State<Approvals> {
       thumbVisibility:
           groups.values.fold<int>(0, (n, f) => n + f.length) > 4 || largeType,
       child: ListView(
+        primary: false,
         controller: scroll,
         key: PageStorageKey('detail-${request.id}'),
         padding: EdgeInsets.fromLTRB(30, largeType ? 10 : 24, 30, 24),
@@ -1093,6 +1094,7 @@ class ApprovalsState extends State<Approvals> {
                     const SizedBox(height: 14),
                     Flexible(
                       child: ListView(
+                        primary: false,
                         shrinkWrap: true,
                         padding: const EdgeInsets.only(right: 15, bottom: 16),
                         children: [
@@ -1350,6 +1352,7 @@ class ApprovalsState extends State<Approvals> {
         border: Border(left: BorderSide(color: c.line)),
       ),
       child: SingleChildScrollView(
+        primary: false,
         padding: const EdgeInsets.fromLTRB(24, 28, 24, 28),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1406,6 +1409,7 @@ class ApprovalsState extends State<Approvals> {
                 controller: _scopeScroll,
                 thumbVisibility: true,
                 child: SingleChildScrollView(
+                  primary: false,
                   controller: _scopeScroll,
                   child: refs.isEmpty
                       ? Text(
@@ -1429,50 +1433,28 @@ class ApprovalsState extends State<Approvals> {
                   border: Border.all(color: c.line),
                   borderRadius: BorderRadius.circular(4),
                 ),
-                child: DropdownButtonHideUnderline(
-                  child: DropdownButton<int>(
-                    key: ValueKey('grant-lifetime-${request.id}'),
-                    isExpanded: true,
-                    value: minutes,
-                    style: prototypeText(context, 13),
-                    icon: Transform.translate(
-                      offset: Offset(2, 0),
-                      child: PrototypeSelectCaret(),
-                    ),
-                    selectedItemBuilder: (context) => [
-                      for (final n in {15, 30, 60, 480, minutes})
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: Transform.translate(
-                            offset: const Offset(0, -1),
-                            child: Text(
-                              n == 480 ? '8 小时（默认）' : _durationLabel(n),
-                            ),
-                          ),
-                        ),
-                      const SizedBox(),
-                    ],
-                    items: [
-                      for (final n in {15, 30, 60, 480, minutes})
-                        DropdownMenuItem(
-                          value: n,
-                          child: Text(
-                            n == 480 ? '8 小时（默认）' : _durationLabel(n),
-                          ),
-                        ),
-                      const DropdownMenuItem(value: -1, child: Text('自定义…')),
-                    ],
-                    onChanged: busy || !pending
-                        ? null
-                        : (n) async {
-                            if (n == null) return;
-                            if (n == -1) {
-                              await _customLifetime(request.id, minutes);
-                            } else {
-                              setState(() => _grantMinutes[request.id] = n);
-                            }
-                          },
-                  ),
+                child: DesktopSelect<int>(
+                  key: ValueKey('grant-lifetime-${request.id}'),
+                  isExpanded: true,
+                  value: minutes,
+                  items: [
+                    for (final n in {15, 30, 60, 480, minutes})
+                      DropdownMenuItem(
+                        value: n,
+                        child: Text(n == 480 ? '8 小时（默认）' : _durationLabel(n)),
+                      ),
+                    const DropdownMenuItem(value: -1, child: Text('自定义…')),
+                  ],
+                  onChanged: busy || !pending
+                      ? null
+                      : (n) async {
+                          if (n == null) return;
+                          if (n == -1) {
+                            await _customLifetime(request.id, minutes);
+                          } else {
+                            setState(() => _grantMinutes[request.id] = n);
+                          }
+                        },
                 ),
               ),
             ),
@@ -1748,6 +1730,7 @@ class ApprovalsState extends State<Approvals> {
                   controller: _scopeScroll,
                   thumbVisibility: true,
                   child: SingleChildScrollView(
+                    primary: false,
                     controller: _scopeScroll,
                     child: scope,
                   ),
@@ -1812,6 +1795,7 @@ class ApprovalsState extends State<Approvals> {
                           body: SizedBox(
                             height: 420,
                             child: SingleChildScrollView(
+                              primary: false,
                               child: _scopeGroups(selected),
                             ),
                           ),
@@ -1892,6 +1876,7 @@ class ApprovalsState extends State<Approvals> {
                     controller: _scopeScroll,
                     thumbVisibility: true,
                     child: SingleChildScrollView(
+                      primary: false,
                       controller: _scopeScroll,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -2032,6 +2017,7 @@ class ApprovalsState extends State<Approvals> {
                       body: SizedBox(
                         height: 420,
                         child: SingleChildScrollView(
+                          primary: false,
                           child: SelectableText(
                             field.value,
                             style: prototypeText(

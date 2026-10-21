@@ -8,9 +8,19 @@ import 'package:info_core/info_core.dart';
 import 'package:info_desktop/library.dart';
 import 'package:info_desktop/desktop_shell.dart';
 import 'package:info_desktop/ui.dart';
+import 'package:info_desktop/desktop_scroll.dart';
+import 'package:info_desktop/desktop_interaction_host.dart';
 
 class CaptureRepository extends MemoryInformationRepository {
   bool fail = false;
+  @override
+  Future<InformationDraftReceipt> commitInformationDraft(
+    InformationDraftChange change,
+  ) async {
+    if (fail) throw StateError('synthetic draft storage failure');
+    return super.commitInformationDraft(change);
+  }
+
   @override
   Future<void> commitRecycleChange({
     required String itemId,
@@ -266,6 +276,8 @@ void main() {
           key: boundaryKey,
           child: MaterialApp(
             theme: informationTheme(scenario.theme),
+            scrollBehavior: const DesktopScrollBehavior(),
+            builder: (_, child) => DesktopInteractionHost(child: child!),
             debugShowCheckedModeBanner: false,
             home: Scaffold(
               body: DesktopShell(
@@ -296,7 +308,8 @@ void main() {
           final image = await boundary.toImage(pixelRatio: 1);
           final data = await image.toByteData(format: ui.ImageByteFormat.png);
           final output = Directory(
-            '../../docs/development/evidence/24-library/fidelity',
+            Platform.environment['LIBRARY_CAPTURE_OUT'] ??
+                '../../build/library-ux/flutter/library',
           );
           await output.create(recursive: true);
           await File(
@@ -333,7 +346,7 @@ void main() {
           await tester.tap(find.text('取消'));
           await tester.pumpAndSettle();
         }
-        await tester.tap(find.text('目录与标签'));
+        await tester.tap(find.byKey(const ValueKey('new-directory')));
         await tester.pumpAndSettle();
         await capture('-taxonomy');
         await tester.tap(find.text('×'));
@@ -358,6 +371,16 @@ void main() {
             '',
           );
           await tester.pumpAndSettle();
+          await tester.scrollUntilVisible(
+            find.byKey(ValueKey(docs.id)),
+            220,
+            scrollable: find
+                .descendant(
+                  of: find.byKey(const ValueKey('library-list')),
+                  matching: find.byType(Scrollable),
+                )
+                .last,
+          );
           await tester.tap(find.byKey(ValueKey(docs.id)));
           await tester.pumpAndSettle();
           await tester.tap(find.text('修改历史 ↗'));

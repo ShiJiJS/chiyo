@@ -517,6 +517,7 @@ class _FocusedFillApprovalPanelState extends State<FocusedFillApprovalPanel> {
     return Scrollbar(
       controller: _document,
       child: SingleChildScrollView(
+        primary: false,
         controller: _document,
         padding: const EdgeInsets.all(26),
         child: Column(
@@ -714,6 +715,7 @@ class _FocusedFillApprovalPanelState extends State<FocusedFillApprovalPanel> {
       child: Scrollbar(
         controller: _decision,
         child: SingleChildScrollView(
+          primary: false,
           controller: _decision,
           padding: const EdgeInsets.all(24),
           child: Column(
@@ -1199,6 +1201,7 @@ class _FocusedFillHistoryDocumentState
             child: Scrollbar(
               controller: _scroll,
               child: SingleChildScrollView(
+                primary: false,
                 controller: _scroll,
                 padding: const EdgeInsets.fromLTRB(34, 28, 42, 28),
                 child: Column(

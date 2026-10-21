@@ -1,3 +1,4 @@
+import 'package:info_desktop/organization_selectors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -309,7 +310,7 @@ void main() {
       expect(
         find.descendant(
           of: find.byKey(const ValueKey('item-directory')),
-          matching: find.text('不可用目录（missing-directory）'),
+          matching: find.text('原目录不可用，请重新选择'),
         ),
         findsOneWidget,
       );
@@ -319,7 +320,7 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const ValueKey('item-tags')));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('不可用标签（missing-tag）').last);
+      await tester.tap(find.text('移除不可用标签（missing-tag）').last);
       await tester.tap(find.text('使用所选标签'));
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const ValueKey('save-information')));
@@ -711,10 +712,10 @@ void main() {
       await tester.pumpAndSettle();
       expect(
         tester
-            .widget<DropdownButtonFormField<String>>(
+            .widget<DirectoryField>(
               find.byKey(const ValueKey('item-directory')),
             )
-            .initialValue,
+            .value,
         isNull,
       );
       await tester.tap(find.text('取消'));

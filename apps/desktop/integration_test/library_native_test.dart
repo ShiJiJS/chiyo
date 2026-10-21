@@ -8,6 +8,7 @@ import 'package:info_core/info_core.dart';
 import 'package:info_storage/info_storage.dart';
 import 'package:info_desktop/main.dart' as app;
 import 'support/isolated_desktop.dart';
+import 'package:info_desktop/organization_selectors.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -63,7 +64,7 @@ void main() {
       await tap(find.text('Docs template').last);
       await input('item-name', 'Native documentation');
       await tap(find.byKey(const ValueKey('item-directory')));
-      await tap(find.text('Project / Services').last);
+      await tap(find.text('Services').last);
       await input('field-value-0', 'https://old.native.example');
       await input('field-value-1', 'controlled note');
       await tap(find.byKey(const ValueKey('save-information')));
@@ -141,12 +142,10 @@ void main() {
         'https://corrected.native.example',
       );
       await tap(find.byKey(const ValueKey('edit-information-category')));
-      await tap(find.byKey(const ValueKey('item-directory')));
+      await tap(find.byType(DirectoryField));
       await tap(find.text('Project').last);
-      await tap(find.byKey(const ValueKey('item-tags')));
       await tap(find.text('Self hosted').last);
-      await tap(find.text('使用所选标签'));
-      await tap(find.byKey(const ValueKey('save-information')));
+      await tap(find.text('保存整理'));
       item = owner.information.firstWhere((i) => i.id == item.id);
       expect(item.directoryId, owner.directories.first.id);
       expect(item.tagIds, [owner.tags.single.id]);

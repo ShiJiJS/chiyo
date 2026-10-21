@@ -332,6 +332,7 @@ class _CredentialHistoryDocumentState extends State<CredentialHistoryDocument> {
             child: Scrollbar(
               controller: _scroll,
               child: SingleChildScrollView(
+                primary: false,
                 controller: _scroll,
                 padding: const EdgeInsets.fromLTRB(34, 28, 42, 28),
                 child: Column(
