@@ -461,7 +461,9 @@ class _SettingsPageState extends State<SettingsPage> {
                 : widget.owner.notificationsEnabled
                 ? '应用提醒已开启'
                 : '应用提醒已关闭',
-            '系统通知权限、勿扰模式和专注助手也会影响提醒是否显示。',
+            Platform.isMacOS
+                ? 'macOS 的专注模式、屏幕共享和通知设置可能抑制横幅；仍可在通知中心或“访问审批”中查看请求。'
+                : '系统通知权限、勿扰模式和专注助手也会影响提醒是否显示。',
             control: settingsAction(
               context,
               '发送测试通知',
