@@ -209,13 +209,13 @@ def main():
             # Same sandbox/container identity, separately addressable bundle URL
             # and display name. No change to production startup or lock code.
             duplicate_app = app.parent / 'Mac Duplicate QA.app'
-            shutil.copytree(app, duplicate_app)
+            shutil.copytree(app, duplicate_app, symlinks=True)
             plist = duplicate_app / 'Contents/Info.plist'
             contents = plistlib.loads(plist.read_bytes())
             contents['CFBundleName'] = 'Mac Duplicate QA'
             contents['CFBundleDisplayName'] = 'Mac Duplicate QA'
             plist.write_bytes(plistlib.dumps(contents))
-            run('sign-duplicate', ['/usr/bin/codesign', '--force', '--deep', '--sign', '-',
+            run('sign-duplicate', ['/usr/bin/codesign', '--force', '--sign', '-',
                                    '--preserve-metadata=entitlements,requirements,flags,runtime', str(duplicate_app)])
             run('signature-duplicate', ['/usr/bin/codesign', '--verify', '--deep', '--strict', str(duplicate_app)])
             run('entitlements-duplicate', ['/usr/bin/codesign', '-d', '--entitlements', ':-', str(duplicate_app)])
