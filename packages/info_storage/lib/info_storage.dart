@@ -23,7 +23,7 @@ part 'information_attachments_storage.dart';
 part 'attachment_backup_integration.dart';
 part 'information_delivery_storage.dart';
 
-const _libraryFormat = 21;
+const _libraryFormat = 22;
 
 class StorageFailure implements Exception {
   const StorageFailure(this.code);
@@ -883,6 +883,54 @@ class EncryptedInformationRepository
       await _writeMetadata(() => _writeTag(tag));
       _tags[tag.id] = tag;
     } catch (_) {
+      throw const StorageFailure('save_failed');
+    }
+  }
+
+  @override
+  Future<void> commitOrganizationRemoval({
+    String? directoryId,
+    String? tagId,
+    List<InformationItem> items = const [],
+    List<InformationRevision> previous = const [],
+    required void Function() validate,
+  }) async {
+    if (_closed) throw const StorageFailure('library_closed');
+    try {
+      await _db.transaction(() async {
+        validate();
+        for (final item in items) {
+          await _writeItem(item);
+        }
+        for (final revision in previous) {
+          await _writeRevision(revision);
+        }
+        if (directoryId != null) {
+          await _db.customStatement(
+            'DELETE FROM information_directories WHERE id=?',
+            [directoryId],
+          );
+        }
+        if (tagId != null) {
+          await _db.customStatement(
+            'DELETE FROM information_item_tags WHERE tag_id=?',
+            [tagId],
+          );
+          await _db.customStatement('DELETE FROM information_tags WHERE id=?', [
+            tagId,
+          ]);
+        }
+        await _checkAttachmentBackupBudget();
+        validate();
+      });
+      if (directoryId != null) _directories.remove(directoryId);
+      if (tagId != null) _tags.remove(tagId);
+      for (final item in items) {
+        _items[item.id] = item;
+      }
+      _revisions.addAll(previous);
+    } catch (error) {
+      if (error is AccessFailure) rethrow;
       throw const StorageFailure('save_failed');
     }
   }

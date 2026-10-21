@@ -333,6 +333,15 @@ abstract interface class InformationRepository {
   List<InformationTag> get tags;
   Future<void> saveDirectory(InformationDirectory directory);
   Future<void> saveTag(InformationTag tag);
+
+  /// Owner-only removal; values, field identities and historical snapshots stay.
+  Future<void> commitOrganizationRemoval({
+    String? directoryId,
+    String? tagId,
+    List<InformationItem> items = const [],
+    List<InformationRevision> previous = const [],
+    required void Function() validate,
+  });
   int? readSetting(String key);
   Future<void> writeSetting(String key, int value);
   List<InformationTemplate> get templates;
@@ -693,6 +702,23 @@ class MemoryInformationRepository
       _directories[directory.id] = directory;
   @override
   Future<void> saveTag(InformationTag tag) async => _tags[tag.id] = tag;
+  @override
+  Future<void> commitOrganizationRemoval({
+    String? directoryId,
+    String? tagId,
+    List<InformationItem> items = const [],
+    List<InformationRevision> previous = const [],
+    required void Function() validate,
+  }) async {
+    validate();
+    if (directoryId != null) _directories.remove(directoryId);
+    if (tagId != null) _tags.remove(tagId);
+    for (final item in items) {
+      _items[item.id] = item;
+    }
+    _revisions.addAll(previous);
+  }
+
   final _templates = <String, InformationTemplate>{};
   final _proposals = <String, ImportProposal>{};
   final _updates = <String, UpdateProposal>{};

@@ -262,8 +262,8 @@ extension OwnerRecycle on OwnerAccess {
         for (final f in snapshot.fields)
           f.withMetadata(id: restoredIds[f.id]!, version: f.version + 1),
       ],
-      directoryId: source.directoryId,
-      tagIds: source.tagIds,
+      directoryId: _existingDirectory(source.directoryId),
+      tagIds: _existingTags(source.tagIds),
       createdAt: source.createdAt,
       modifiedAt: _service._clock(),
     );
