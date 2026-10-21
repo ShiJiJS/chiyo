@@ -1,0 +1,8 @@
+00:00 +0: loading /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/integration_test/macos_file_capacity_native_test.dart
+Building macOS application...                                   
+✓ Built build/macos/Build/Products/Debug/info_desktop.app
+Failed to foreground app; open returned 1
+00:00 +0: Mac real attachment and managed-copy capacity boundaries
+MAC_FILE_CAPACITY_ROOT=/Users/jiangxinyi/Library/Containers/com.example.infoDesktop/Data/tmp/aim-mac-file-capacity-S56ZqI
+00:14 +1: (tearDownAll)
+00:14 +1: All tests passed!
