@@ -105,3 +105,5 @@ docs/development/evidence/macos-codex-runtime-continuation/raw/** -text -diff
 docs/development/evidence/macos-windows-ci-preparation/raw/** -text -diff
 
 docs/development/evidence/macos-large-library-history/raw/** -text -diff
+
+docs/development/evidence/macos-history-states/raw/** -text -diff
