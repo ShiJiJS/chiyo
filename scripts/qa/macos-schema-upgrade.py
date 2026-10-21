@@ -94,7 +94,13 @@ def main():
         migrated=probe(new,'same-target-migration-retry')
         assert migrated['schema']==migrated['marker']==21 and migrated['integrity']=='ok'
         tables=migrated['beforeVerificationOperations']['tables']
-        assert all(tables[name]==fact for name,fact in original['tables'].items())
+        # Draft idempotency receipts are session-local owner form state; open
+        # deliberately clears them together with orphan stages. All durable
+        # content, attachment BLOBs and history rows must remain byte exact.
+        assert original['tables']['information_draft_commits']['rows']==2
+        assert tables['information_draft_commits']['rows']==0
+        assert all(tables[name]==fact for name,fact in original['tables'].items()
+                   if name != 'information_draft_commits')
         assert tables['information_deliveries']['rows']==0
         before=hashlib.sha256(db.read_bytes()).hexdigest()
         refused=probe(old,'old-reader-refuses-new-schema',expected=1)
@@ -105,7 +111,8 @@ def main():
         assert (fixture/'.qa-owner').read_text()==owner and not fixture.is_symlink()
         shutil.rmtree(fixture)
         state.update(complete=True,fixtureRemoved=True,productionSourceAndLocksUnchanged=True,
-                     allLegacyRowsPreservedBeforeVerification=True,wrongKeyDatabaseBytesPreserved=True,
+                     allDurableLegacyRowsPreservedBeforeVerification=True,
+                     transientDraftReceiptsClearedAsDesigned=True,wrongKeyDatabaseBytesPreserved=True,
                      failedMigrationDatabaseBytesPreserved=True,oldReaderRefusalBytesPreserved=True)
     finally:
         save()
