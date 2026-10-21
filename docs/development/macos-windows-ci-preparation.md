@@ -1,10 +1,10 @@
-# Mac 分支的独立 Windows 回归入口（待批准运行）
+# Mac 分支的独立 Windows 回归入口（本次不运行）
 
 2026-10-21，为 #41 尚未完成的当前共享改动 Windows 回归准备。代码和 workflow 只在 `codex/macos-adaptation`，没有更新主分支或 Windows 开发分支，没有触碰用户的 Windows 机器。
 
 现有 `.github/workflows/macos-validation.yml` 已明确规定：只有仓库主人同意使用私有仓库 Actions 额度/预算后才运行托管 runner。本轮确认该仓库为 Private。因而先完成可审查的入口和本机检查，**尚未调度云端任务，不宣称 Windows 已通过，也不勾选 #41 第四条**。
 
-原有手动工作流增加 `platform: windows | macos` 选项（此分支默认 Windows）；原专用 `ci/macos-validation` push 仍只跑 Mac。普通整合分支 push、PR 和本 Mac 分支 push 不触发付费 runner。并发组按平台与 ref 隔离。默认 main 上现有工作流不变。
+原有手动工作流增加 `platform: windows | macos` 选项（此分支默认 macOS；用户选择只推进 Mac，本次不运行 Windows）；原专用 `ci/macos-validation` push 仍只跑 Mac。普通整合分支 push、PR 和本 Mac 分支 push 不触发付费 runner。并发组按平台与 ref 隔离。默认 main 上现有工作流不变。
 
 Windows 目标使用 GitHub 托管的 `windows-2022` x64 独立临时机器，单 job 上限 30 分钟、仓库只读权限、checkout 不保留凭据，不部署、不安装用户配置、不注册或信任 hook。官方 runner 清单当前仍提供该标签；Flutter 固定为现有 `abaf9c523780a608bd46686fd5e53740a07077f8`，Actions 固定完整提交摘要。
 
@@ -21,4 +21,4 @@ Windows 目标使用 GitHub 托管的 `windows-2022` x64 独立临时机器，�
 
 保留 3 天的 artifact 只含 manifest、测试日志、文件流程的公开 result 与合成截图；不上传 exe、数据库、备份或恢复密钥。各阶段失败会保留退出事实，未完成不标为成功。只有取回实际 Windows 日志、逐项核对通过/跳过和原生结果后，才评估 #41 的 Windows 条件。
 
-本轮仍未消费 Actions runner 额度。后续是否运行，等待用户明确批准这一次 Windows job（最多 30 分钟，消耗私库额度或可能的按量费用）。
+2026-10-21 用户选择只推进 Mac 流程，本次 Windows CI 不运行，未消费 Actions runner 额度。已关闭未提交的表单，手动入口默认恢复 macOS。Windows 回归入口保留供将来明确安排；这不构成当前 Windows 回归通过，也不会自行调度 macOS 云端 runner。
