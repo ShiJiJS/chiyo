@@ -116,6 +116,71 @@ void main() {
     ],
   );
 
+  testWidgets(
+    'native-style picker activation restores the last editor control',
+    (tester) async {
+      await tester.runAsync(() async {
+        final pending = Completer<String?>();
+        files.pending = pending.future;
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: informationTheme(DesktopColorTheme.purple),
+            home: Builder(
+              builder: (context) => Scaffold(
+                body: TextButton(
+                  onPressed: () => showOwnerInformationEditor(
+                    context,
+                    owner: service.owner,
+                    draft: draft(),
+                    files: files,
+                  ),
+                  child: const Text('打开测试表单'),
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.tap(find.text('打开测试表单'));
+        await tester.pumpAndSettle();
+        final description = find.byKey(const ValueKey('item-description'));
+        await tester.enterText(description, '保留的输入');
+        await tester.pumpAndSettle();
+        final original = FocusManager.instance.primaryFocus;
+        expect(original, isNotNull);
+        // Native/AX activation may clear primary focus before dispatching the
+        // button action. It must not make the scope the cancellation target.
+        original!.unfocus(disposition: UnfocusDisposition.scope);
+        await tester.pumpAndSettle();
+        expect(FocusManager.instance.primaryFocus, isNot(same(original)));
+        final choose = find.byKey(const ValueKey('choose-file-1'));
+        tester.widget<TextButton>(choose).onPressed!();
+        await tester.pumpAndSettle();
+        expect(tester.widget<TextButton>(choose).onPressed, isNull);
+        pending.complete(null);
+        for (
+          var i = 0;
+          i < 20 && FocusManager.instance.primaryFocus != original;
+          i++
+        ) {
+          await Future<void>.delayed(Duration.zero);
+          await tester.pump();
+        }
+        await tester.pumpAndSettle();
+        expect(FocusManager.instance.primaryFocus, same(original));
+        expect(
+          tester.widget<TextFormField>(description).controller?.text ??
+              tester.state<FormFieldState<String>>(description).value,
+          '保留的输入',
+        );
+        expect(files.chooseCount, 1);
+        expect((await repository.informationFileStagingUsage()).files, 0);
+        expect(repository.items, isEmpty);
+        await tester.pumpWidget(const SizedBox.shrink());
+        await service.close();
+      });
+    },
+  );
+
   for (final scale in [1.0, 2.0]) {
     testWidgets(
       'file controls are reachable by keyboard and Escape cleans the draft at ${scale * 100}%',

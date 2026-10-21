@@ -71,8 +71,50 @@ class _InformationEditorState extends State<InformationEditor> {
   bool get _busy => _saving || _leaving || _fileWorking || _committed;
   final _fileErrors = <EditableInformationField, String>{};
   String? _error;
+  FocusNode? _lastEditorFocus;
   int _templateRevision = 0;
   InformationEditorDraft get d => widget.draft;
+
+  @override
+  void initState() {
+    super.initState();
+    FocusManager.instance.addListener(_rememberEditorFocus);
+  }
+
+  @override
+  void dispose() {
+    FocusManager.instance.removeListener(_rememberEditorFocus);
+    _lastEditorFocus = null;
+    super.dispose();
+  }
+
+  bool _isEditorFocus(FocusNode? node) {
+    if (node == null ||
+        node is FocusScopeNode ||
+        node.context?.mounted != true) {
+      return false;
+    }
+    var inside = identical(node.context, context);
+    node.context!.visitAncestorElements((element) {
+      inside = identical(element, context);
+      return !inside;
+    });
+    return inside;
+  }
+
+  void _rememberEditorFocus() {
+    if (_busy || !mounted) return;
+    final node = FocusManager.instance.primaryFocus;
+    if (_isEditorFocus(node)) _lastEditorFocus = node;
+  }
+
+  FocusNode? _captureEditorFocus() {
+    final current = FocusManager.instance.primaryFocus;
+    // Native/AX activation can first move focus to the dialog scope. A scope
+    // is not the originating editor control to restore after cancellation.
+    return _isEditorFocus(current) ? current : _lastEditorFocus;
+  }
+
   void _changed(VoidCallback change) => setState(() {
     change();
     _dirty = true;
@@ -95,7 +137,7 @@ class _InformationEditorState extends State<InformationEditor> {
     required String message,
     required String action,
   }) async {
-    final previousFocus = FocusManager.instance.primaryFocus;
+    final previousFocus = _captureEditorFocus();
     // Do not leave a focused editor control becoming disabled underneath a
     // newly mounted confirmation. Cancelling returns focus to that control.
     FocusScope.of(context).unfocus();
@@ -777,7 +819,8 @@ class _InformationEditorState extends State<InformationEditor> {
       }, field: field);
 
   Future<void> _chooseFile(EditableInformationField field) async {
-    final previousFocus = FocusManager.instance.primaryFocus;
+    if (_busy) return;
+    final previousFocus = _captureEditorFocus();
     await _fileAction(() async {
       final changed = await widget.fileSession!.choose(field);
       if (changed && mounted) _changed(() {});
