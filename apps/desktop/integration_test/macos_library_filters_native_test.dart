@@ -85,6 +85,15 @@ void main() {
         return result;
       }
 
+      Future<void> settle() async {
+        await tester.pumpAndSettle(
+          const Duration(milliseconds: 100),
+          EnginePhase.sendSemanticsUpdate,
+          const Duration(seconds: 15),
+        );
+      }
+
+      var taps = 0;
       Future<void> mount() async {
         tester.view.physicalSize = const Size(1440, 1000);
         tester.view.devicePixelRatio = 1;
@@ -94,23 +103,26 @@ void main() {
             child: InformationApp(service: service, port: server.port),
           ),
         );
-        await tester.pumpAndSettle();
+        await settle();
       }
 
       Future<void> tap(Finder target) async {
+        debugPrint('MAC_SCALE_TAP=${++taps}:ensure');
         await tester.ensureVisible(target);
-        await tester.pumpAndSettle();
+        debugPrint('MAC_SCALE_TAP=$taps:settle');
+        await settle();
         expect(target.hitTestable(), findsOneWidget);
         await tester.tap(target);
-        await tester.pumpAndSettle();
+        await settle();
         expect(tester.takeException(), isNull);
+        debugPrint('MAC_SCALE_TAP=$taps:done');
       }
 
       Future<void> input(String key, String value) async {
         final target = find.byKey(ValueKey(key));
         await tester.ensureVisible(target);
         await tester.enterText(target, value);
-        await tester.pumpAndSettle();
+        await settle();
       }
 
       Future<void> capture(String name) async {
@@ -185,8 +197,11 @@ void main() {
       await tap(find.text('取消').last);
       await closeManager();
       // Volume is fixture preparation; all label creation/editing above is UI.
+      const large = bool.fromEnvironment('MAC_QA_LARGE');
+      const itemCount = large ? 1000 : 125;
+      final seedTime = Stopwatch()..start();
       final items = <InformationItem>[];
-      for (var i = 0; i < 125; i++) {
+      for (var i = 0; i < itemCount; i++) {
         items.add(
           await service.owner.createInformation(
             '资料${i.toString().padLeft(3, '0')}',
@@ -194,7 +209,7 @@ void main() {
             [
               FieldInput(
                 '字段',
-                i == 124 ? '唯一公开检索词' : '公共字段说明',
+                i == itemCount - 1 ? '唯一公开检索词' : '公共字段说明',
                 'private-fixture-$i',
               ),
             ],
@@ -209,11 +224,12 @@ void main() {
           ),
         );
       }
+      seedTime.stop();
       // Remount to render the fixture data from the actual encrypted repository.
       await tester.pumpWidget(const SizedBox());
       await mount();
       await tap(find.byKey(const ValueKey('nav-1')));
-      total(125);
+      total(itemCount);
       final target = items.first;
       final grant = await exchange('request', {
         'itemId': target.id,
@@ -228,19 +244,28 @@ void main() {
         FieldRef(target.id, target.fields.single.id),
       ]);
       await exchange('approved');
-      expect(find.text('1 / 3'), findsOneWidget);
+      final pageCount = (itemCount / 50).ceil();
+      expect(find.text('1 / $pageCount'), findsOneWidget);
       await tap(find.text('›'));
-      expect(find.text('2 / 3'), findsOneWidget);
+      expect(find.text('2 / $pageCount'), findsOneWidget);
       expect(
         find.byKey(ValueKey('information-${items[50].id}')),
         findsOneWidget,
       );
       await tap(find.text('›'));
-      expect(find.text('3 / 3'), findsOneWidget);
+      expect(find.text('3 / $pageCount'), findsOneWidget);
       expect(
         find.byKey(ValueKey('information-${items[100].id}')),
         findsOneWidget,
       );
+      for (var page = 4; page <= pageCount; page++) {
+        await tap(find.text('›'));
+        expect(find.text('$page / $pageCount'), findsOneWidget);
+        expect(
+          find.byKey(ValueKey('information-${items[(page - 1) * 50].id}')),
+          findsOneWidget,
+        );
+      }
       final list = find.byKey(const ValueKey('library-item-scroll'));
       await tester.scrollUntilVisible(
         find.byKey(ValueKey(items.last.id)),
@@ -264,7 +289,11 @@ void main() {
         findsOneWidget,
       );
       await capture('04-public-field-search');
-      for (final query in ['private-fixture-124', '私人标签甲', '私人工作']) {
+      for (final query in [
+        'private-fixture-${itemCount - 1}',
+        '私人标签甲',
+        '私人工作',
+      ]) {
         await input('library-search', query);
         total(0);
         expect(find.text('请选择一条信息'), findsOneWidget);
@@ -274,7 +303,7 @@ void main() {
       expect(find.text('请选择一条信息'), findsOneWidget);
       await capture('05-invalid-query');
       await tap(find.text('查看全部'));
-      total(125);
+      total(itemCount);
       await tap(find.byKey(ValueKey('directory-${parent.id}')));
       total(75);
       await tap(find.text('75 条信息 · 包含下级目录'));
@@ -288,7 +317,7 @@ void main() {
       await capture('06-combined-filters');
       await exchange('filtered');
       await tap(find.text('全部信息').first);
-      total(125);
+      total(itemCount);
       await manager();
       await tap(directoryEdit('私人工作 / 私人子目录'));
       await input('organization-name', '私人移动后');
@@ -342,7 +371,7 @@ void main() {
       server = await AgentServer.start(service.agent, port: 0);
       await mount();
       await tap(find.byKey(const ValueKey('nav-1')));
-      total(125);
+      total(itemCount);
       await tap(find.byKey(ValueKey('directory-${archive.id}')));
       total(75);
       await tap(find.byKey(ValueKey('library-tag-${tagA.id}')));
@@ -359,10 +388,16 @@ void main() {
       await exchange('repository-reopened');
       // Label volume is controlled fixture setup. Test the complete native app
       // at both text scales; this does not prove physical scroll/keyboard input.
-      for (var i = 0; i < 50; i++) {
+      for (var i = 0; i < (large ? 126 : 50); i++) {
         await service.owner.createTag('资料分类标签 $i');
       }
+      if (large) {
+        for (var i = 0; i < 29; i++) {
+          await service.owner.createDirectory('规模验收目录 $i');
+        }
+      }
       final lastTag = service.owner.tags.last;
+      final lastDirectory = service.owner.directories.last;
       for (final theme in DesktopColorTheme.values) {
         for (final scale in [1.0, 2.0]) {
           await tester.pumpWidget(const SizedBox());
@@ -370,18 +405,50 @@ void main() {
           tester.platformDispatcher.textScaleFactorTestValue = scale;
           await mount();
           tester.view.physicalSize = const Size(1280, 800);
-          await tester.pumpAndSettle();
+          await settle();
           await tap(find.byKey(const ValueKey('nav-1')));
-          total(125);
+          total(itemCount);
           await capture('10-initial-${theme.name}-${(scale * 100).toInt()}');
           await tap(find.byKey(ValueKey('library-tag-${lastTag.id}')));
           total(0);
           expect(find.text('请选择一条信息'), findsOneWidget);
           await capture('10-tags-${theme.name}-${(scale * 100).toInt()}');
           await tap(find.text('全部信息').first);
-          total(125);
+          total(itemCount);
+          if (large) {
+            final tree = tester
+                .widget<ListView>(
+                  find
+                      .ancestor(
+                        of: find.byKey(ValueKey('directory-${parent.id}')),
+                        matching: find.byType(ListView),
+                      )
+                      .first,
+                )
+                .controller!;
+            // Controlled scroll position; physical wheel/trackpad remains open.
+            final lastDirectoryButton = find.byKey(
+              ValueKey('directory-${lastDirectory.id}'),
+            );
+            for (
+              var attempt = 0;
+              attempt < 20 && lastDirectoryButton.evaluate().isEmpty;
+              attempt++
+            ) {
+              tree.jumpTo(tree.position.maxScrollExtent);
+              await settle();
+            }
+            expect(lastDirectoryButton, findsOneWidget);
+            await tap(lastDirectoryButton);
+            total(0);
+            await capture(
+              '11-directory-${theme.name}-${(scale * 100).toInt()}',
+            );
+            await tap(find.text('全部信息').first);
+            total(itemCount);
+          }
           await tap(find.text('›'));
-          expect(find.text('2 / 3'), findsOneWidget);
+          expect(find.text('2 / $pageCount'), findsOneWidget);
           await capture('11-pagination-${theme.name}-${(scale * 100).toInt()}');
         }
       }
@@ -389,17 +456,19 @@ void main() {
       await File('${root.path}/result.json').writeAsString(
         jsonEncode({
           'complete': true,
-          'items': 125,
-          'directories': 3,
-          'tags': 52,
+          'items': itemCount,
+          'pagesTraversed': pageCount,
+          'directories': service.owner.directories.length,
+          'tags': service.owner.tags.length,
+          'seedWallMilliseconds': seedTime.elapsedMilliseconds,
           'captures': captures,
           'scope':
-              'Native Flutter SQLCipher and independent AOT CLI; tester input registered; 125 fixture items and owner grant approval; no physical IME, Keychain or process restart.',
+              'Native Flutter SQLCipher and independent AOT CLI; tester input registered; $itemCount fixture items and owner grant approval; no physical IME, Keychain or process restart.',
         }),
       );
       await exchange('complete');
     },
     semanticsEnabled: false,
-    timeout: const Timeout(Duration(minutes: 8)),
+    timeout: const Timeout(Duration(minutes: 15)),
   );
 }
