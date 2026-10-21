@@ -129,3 +129,5 @@ docs/development/evidence/macos-production-tools/raw/** -text -diff
 docs/development/evidence/macos-native-notifications/raw/** -text -diff
 
 docs/development/evidence/macos-installed-main/raw/** -text -diff
+
+docs/development/evidence/macos-signed-schema-preparation/raw/** -text -diff

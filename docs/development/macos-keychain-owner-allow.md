@@ -1,5 +1,9 @@
 # Mac 签名变更后主人允许 Keychain 访问
 
+后续 QA 已按用户要求移除“先失败一次”的前置条件，并准备真实旧 schema 与签名
+Keychain 的联合入口，见 [准备记录及尚未运行的边界](macos-signed-schema-preparation.md)。
+本页保留原版本结果，不将新的准备工作补写为运行通过。
+
 2026-10-21，用户亲自处理系统提示并报告选择“始终允许”后，真实 Keychain 恢复与两版应用重开通过。只在独立 `codex/macos-adaptation`，生产业务源码保持 `01c1f14`；本轮不再补做人工拒绝按钮验收。
 
 用例为 `issue42-actual-upgrade-unlocked-2`，QA/来源提交 `a8a14da22daa0a76c5d1b8fe3dcdd833b0a85242`。11 个准备/构建/验签步骤与 7 个实际签名 Release 应用进程全部退出 0，Flutter 错误为 0。

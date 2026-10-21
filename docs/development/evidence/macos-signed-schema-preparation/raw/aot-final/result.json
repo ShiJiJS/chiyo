@@ -1,0 +1,1921 @@
+{
+  "complete": true,
+  "scope": "Actual pinned schema20 AOT source to current Mac SQLCipher migration.\n\nSynthetic key exists only in parent/child memory and anonymous stdin. No Keychain,\nphysical UI, signed-app upgrade, Windows or production-data claim.\n",
+  "commands": [
+    {
+      "label": "legacy-archive",
+      "command": [
+        "git",
+        "archive",
+        "--format=zip",
+        "--output",
+        "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue42-shared-schema-fixture-2/legacy.zip",
+        "dbb94ac1427b95c5a7bfee5011e414876c22c63e",
+        "packages/info_core",
+        "packages/info_storage"
+      ],
+      "exitCode": 0
+    },
+    {
+      "label": "legacy-dependencies",
+      "command": [
+        "/Users/jiangxinyi/Documents/Project/agent-info/scripts/dev-macos.sh",
+        "dart",
+        "pub",
+        "get",
+        "--enforce-lockfile",
+        "--offline"
+      ],
+      "exitCode": 0
+    },
+    {
+      "label": "legacy-analyze",
+      "command": [
+        "/Users/jiangxinyi/Documents/Project/agent-info/scripts/dev-macos.sh",
+        "dart",
+        "analyze",
+        "macos-schema-upgrade-probe.dart",
+        "--fatal-infos"
+      ],
+      "exitCode": 0
+    },
+    {
+      "label": "legacy-aot",
+      "command": [
+        "/Users/jiangxinyi/Documents/Project/agent-info/scripts/dev-macos.sh",
+        "dart",
+        "build",
+        "cli",
+        "--target",
+        "macos-schema-upgrade-probe.dart",
+        "--output",
+        "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue42-shared-schema-fixture-2/legacy-aot"
+      ],
+      "exitCode": 0
+    },
+    {
+      "label": "current-archive",
+      "command": [
+        "git",
+        "archive",
+        "--format=zip",
+        "--output",
+        "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue42-shared-schema-fixture-2/current.zip",
+        "721c91fa526894f738356a87cc4e91b0fcf7c1ac",
+        "packages/info_core",
+        "packages/info_storage"
+      ],
+      "exitCode": 0
+    },
+    {
+      "label": "current-dependencies",
+      "command": [
+        "/Users/jiangxinyi/Documents/Project/agent-info/scripts/dev-macos.sh",
+        "dart",
+        "pub",
+        "get",
+        "--enforce-lockfile",
+        "--offline"
+      ],
+      "exitCode": 0
+    },
+    {
+      "label": "current-analyze",
+      "command": [
+        "/Users/jiangxinyi/Documents/Project/agent-info/scripts/dev-macos.sh",
+        "dart",
+        "analyze",
+        "macos-schema-upgrade-probe.dart",
+        "--fatal-infos"
+      ],
+      "exitCode": 0
+    },
+    {
+      "label": "current-aot",
+      "command": [
+        "/Users/jiangxinyi/Documents/Project/agent-info/scripts/dev-macos.sh",
+        "dart",
+        "build",
+        "cli",
+        "--target",
+        "macos-schema-upgrade-probe.dart",
+        "--output",
+        "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue42-shared-schema-fixture-2/current-aot"
+      ],
+      "exitCode": 0
+    },
+    {
+      "label": "old-schema20-create",
+      "command": [
+        "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue42-shared-schema-fixture-2/legacy-aot/bundle/bin/macos-schema-upgrade-probe",
+        "create",
+        "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue42-shared-schema-fixture-2/private-fixture"
+      ],
+      "exitCode": 0
+    },
+    {
+      "label": "old-raw-snapshot",
+      "command": [
+        "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue42-shared-schema-fixture-2/legacy-aot/bundle/bin/macos-schema-upgrade-probe",
+        "snapshot",
+        "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue42-shared-schema-fixture-2/private-fixture"
+      ],
+      "exitCode": 0
+    },
+    {
+      "label": "wrong-key-refused",
+      "command": [
+        "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue42-shared-schema-fixture-2/current-aot/bundle/bin/macos-schema-upgrade-probe",
+        "inspect",
+        "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue42-shared-schema-fixture-2/private-fixture"
+      ],
+      "exitCode": 1
+    },
+    {
+      "label": "controlled-registry-conflict",
+      "command": [
+        "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue42-shared-schema-fixture-2/legacy-aot/bundle/bin/macos-schema-upgrade-probe",
+        "conflict",
+        "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue42-shared-schema-fixture-2/private-fixture"
+      ],
+      "exitCode": 0
+    },
+    {
+      "label": "conflicting-migration-refused",
+      "command": [
+        "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue42-shared-schema-fixture-2/current-aot/bundle/bin/macos-schema-upgrade-probe",
+        "inspect",
+        "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue42-shared-schema-fixture-2/private-fixture"
+      ],
+      "exitCode": 1
+    },
+    {
+      "label": "remove-only-owned-conflict",
+      "command": [
+        "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue42-shared-schema-fixture-2/legacy-aot/bundle/bin/macos-schema-upgrade-probe",
+        "repair",
+        "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue42-shared-schema-fixture-2/private-fixture"
+      ],
+      "exitCode": 0
+    },
+    {
+      "label": "same-target-migration-retry",
+      "command": [
+        "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue42-shared-schema-fixture-2/current-aot/bundle/bin/macos-schema-upgrade-probe",
+        "inspect",
+        "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue42-shared-schema-fixture-2/private-fixture"
+      ],
+      "exitCode": 0
+    },
+    {
+      "label": "migrated-raw-snapshot",
+      "command": [
+        "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue42-shared-schema-fixture-2/current-aot/bundle/bin/macos-schema-upgrade-probe",
+        "snapshot",
+        "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue42-shared-schema-fixture-2/private-fixture"
+      ],
+      "exitCode": 0
+    },
+    {
+      "label": "old-reader-refuses-new-schema",
+      "command": [
+        "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue42-shared-schema-fixture-2/legacy-aot/bundle/bin/macos-schema-upgrade-probe",
+        "inspect",
+        "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue42-shared-schema-fixture-2/private-fixture"
+      ],
+      "exitCode": 1
+    },
+    {
+      "label": "current-reader-reopens",
+      "command": [
+        "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue42-shared-schema-fixture-2/current-aot/bundle/bin/macos-schema-upgrade-probe",
+        "inspect",
+        "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue42-shared-schema-fixture-2/private-fixture"
+      ],
+      "exitCode": 0
+    }
+  ],
+  "cases": [
+    {
+      "label": "old-schema20-create",
+      "status": "ok",
+      "cipherVersion": "4.19.0 community",
+      "oldAuthorityRefused": false,
+      "schema": 20,
+      "marker": 20,
+      "integrity": "ok",
+      "tables": {
+        "access_records": {
+          "rows": 1,
+          "sha256": "c78fbbf7505eeb2e8d62d57975a6e5f70155137bdcdd316adea8de7d72aa9dd2"
+        },
+        "backup_configuration": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "credential_focused_fills": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "credential_materials": {
+          "rows": 1,
+          "sha256": "be922d19c54a083510f03d46e287c6d2ade9e3163d79e8fae1b1aa0da2045bc3"
+        },
+        "credential_operations": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "credential_runtime_requests": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "delete_proposals": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "field_templates": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "grant_history": {
+          "rows": 1,
+          "sha256": "7210d0d96368bc52214216487ec06a20b0ef74df7965c6e58726f6e2ab252287"
+        },
+        "import_proposals": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "information_attachment_versions": {
+          "rows": 2,
+          "sha256": "f3713534d02372579f9d5e050afced6046a0a45308e3343513c7a187e73d009b"
+        },
+        "information_directories": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "information_draft_commits": {
+          "rows": 2,
+          "sha256": "b8e0c5f2078138b63734802ded6ad13f6e8f3b85bfecb3832956b664857a708f"
+        },
+        "information_fields": {
+          "rows": 2,
+          "sha256": "87b6a54478b7094718833a18a35bba9f10bd11a62bcc6ef2e796ff015b3f4800"
+        },
+        "information_file_fields": {
+          "rows": 1,
+          "sha256": "8ee3ae085a99e2837950ed6c7f11f28a3d8722269f15f990056e0a4ac9c1d1db"
+        },
+        "information_file_stages": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "information_item_tags": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "information_items": {
+          "rows": 2,
+          "sha256": "ecf05022fa059d7b7c5af7edc3eb1ec040fafefe3fbafe9e474bfd30f5643dc0"
+        },
+        "information_revisions": {
+          "rows": 1,
+          "sha256": "d65c1829e6155919ea6c6d0dbd9b612732be7733510e5a9d202820ffca4a3264"
+        },
+        "information_tags": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "managed_credentials": {
+          "rows": 1,
+          "sha256": "cd181b5903ba71f050e61ef6b395b909fd7309def51e0306092185d50387cc84"
+        },
+        "organization_tasks": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "recycle_entries": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "recycle_facts": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "request_history": {
+          "rows": 1,
+          "sha256": "8199ffc666fd5fbce8366f9d5b11aca719db0d39edd6c9a9542f66913d2b665c"
+        },
+        "revision_purge_facts": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "settings": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "ssh_host_trust": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "update_proposals": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        }
+      }
+    },
+    {
+      "label": "old-raw-snapshot",
+      "status": "ok",
+      "schema": 20,
+      "marker": 20,
+      "integrity": "ok",
+      "tables": {
+        "access_records": {
+          "rows": 1,
+          "sha256": "c78fbbf7505eeb2e8d62d57975a6e5f70155137bdcdd316adea8de7d72aa9dd2"
+        },
+        "backup_configuration": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "credential_focused_fills": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "credential_materials": {
+          "rows": 1,
+          "sha256": "be922d19c54a083510f03d46e287c6d2ade9e3163d79e8fae1b1aa0da2045bc3"
+        },
+        "credential_operations": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "credential_runtime_requests": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "delete_proposals": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "field_templates": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "grant_history": {
+          "rows": 1,
+          "sha256": "7210d0d96368bc52214216487ec06a20b0ef74df7965c6e58726f6e2ab252287"
+        },
+        "import_proposals": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "information_attachment_versions": {
+          "rows": 2,
+          "sha256": "f3713534d02372579f9d5e050afced6046a0a45308e3343513c7a187e73d009b"
+        },
+        "information_directories": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "information_draft_commits": {
+          "rows": 2,
+          "sha256": "b8e0c5f2078138b63734802ded6ad13f6e8f3b85bfecb3832956b664857a708f"
+        },
+        "information_fields": {
+          "rows": 2,
+          "sha256": "87b6a54478b7094718833a18a35bba9f10bd11a62bcc6ef2e796ff015b3f4800"
+        },
+        "information_file_fields": {
+          "rows": 1,
+          "sha256": "8ee3ae085a99e2837950ed6c7f11f28a3d8722269f15f990056e0a4ac9c1d1db"
+        },
+        "information_file_stages": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "information_item_tags": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "information_items": {
+          "rows": 2,
+          "sha256": "ecf05022fa059d7b7c5af7edc3eb1ec040fafefe3fbafe9e474bfd30f5643dc0"
+        },
+        "information_revisions": {
+          "rows": 1,
+          "sha256": "d65c1829e6155919ea6c6d0dbd9b612732be7733510e5a9d202820ffca4a3264"
+        },
+        "information_tags": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "managed_credentials": {
+          "rows": 1,
+          "sha256": "cd181b5903ba71f050e61ef6b395b909fd7309def51e0306092185d50387cc84"
+        },
+        "organization_tasks": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "recycle_entries": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "recycle_facts": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "request_history": {
+          "rows": 1,
+          "sha256": "8199ffc666fd5fbce8366f9d5b11aca719db0d39edd6c9a9542f66913d2b665c"
+        },
+        "revision_purge_facts": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "settings": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "ssh_host_trust": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "update_proposals": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        }
+      }
+    },
+    {
+      "label": "wrong-key-refused",
+      "status": "failed",
+      "errorType": "StorageFailure",
+      "storageFailure": "library_unavailable"
+    },
+    {
+      "label": "controlled-registry-conflict",
+      "status": "ok",
+      "fixtureMutation": "conflict",
+      "schema": 20,
+      "marker": 20,
+      "integrity": "ok",
+      "tables": {
+        "access_records": {
+          "rows": 1,
+          "sha256": "c78fbbf7505eeb2e8d62d57975a6e5f70155137bdcdd316adea8de7d72aa9dd2"
+        },
+        "backup_configuration": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "credential_focused_fills": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "credential_materials": {
+          "rows": 1,
+          "sha256": "be922d19c54a083510f03d46e287c6d2ade9e3163d79e8fae1b1aa0da2045bc3"
+        },
+        "credential_operations": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "credential_runtime_requests": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "delete_proposals": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "field_templates": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "grant_history": {
+          "rows": 1,
+          "sha256": "7210d0d96368bc52214216487ec06a20b0ef74df7965c6e58726f6e2ab252287"
+        },
+        "import_proposals": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "information_attachment_versions": {
+          "rows": 2,
+          "sha256": "f3713534d02372579f9d5e050afced6046a0a45308e3343513c7a187e73d009b"
+        },
+        "information_deliveries": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "information_directories": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "information_draft_commits": {
+          "rows": 2,
+          "sha256": "b8e0c5f2078138b63734802ded6ad13f6e8f3b85bfecb3832956b664857a708f"
+        },
+        "information_fields": {
+          "rows": 2,
+          "sha256": "87b6a54478b7094718833a18a35bba9f10bd11a62bcc6ef2e796ff015b3f4800"
+        },
+        "information_file_fields": {
+          "rows": 1,
+          "sha256": "8ee3ae085a99e2837950ed6c7f11f28a3d8722269f15f990056e0a4ac9c1d1db"
+        },
+        "information_file_stages": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "information_item_tags": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "information_items": {
+          "rows": 2,
+          "sha256": "ecf05022fa059d7b7c5af7edc3eb1ec040fafefe3fbafe9e474bfd30f5643dc0"
+        },
+        "information_revisions": {
+          "rows": 1,
+          "sha256": "d65c1829e6155919ea6c6d0dbd9b612732be7733510e5a9d202820ffca4a3264"
+        },
+        "information_tags": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "managed_credentials": {
+          "rows": 1,
+          "sha256": "cd181b5903ba71f050e61ef6b395b909fd7309def51e0306092185d50387cc84"
+        },
+        "organization_tasks": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "recycle_entries": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "recycle_facts": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "request_history": {
+          "rows": 1,
+          "sha256": "8199ffc666fd5fbce8366f9d5b11aca719db0d39edd6c9a9542f66913d2b665c"
+        },
+        "revision_purge_facts": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "settings": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "ssh_host_trust": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "update_proposals": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        }
+      }
+    },
+    {
+      "label": "conflicting-migration-refused",
+      "status": "failed",
+      "errorType": "StorageFailure",
+      "storageFailure": "unsupported_schema"
+    },
+    {
+      "label": "remove-only-owned-conflict",
+      "status": "ok",
+      "fixtureMutation": "repair",
+      "schema": 20,
+      "marker": 20,
+      "integrity": "ok",
+      "tables": {
+        "access_records": {
+          "rows": 1,
+          "sha256": "c78fbbf7505eeb2e8d62d57975a6e5f70155137bdcdd316adea8de7d72aa9dd2"
+        },
+        "backup_configuration": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "credential_focused_fills": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "credential_materials": {
+          "rows": 1,
+          "sha256": "be922d19c54a083510f03d46e287c6d2ade9e3163d79e8fae1b1aa0da2045bc3"
+        },
+        "credential_operations": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "credential_runtime_requests": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "delete_proposals": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "field_templates": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "grant_history": {
+          "rows": 1,
+          "sha256": "7210d0d96368bc52214216487ec06a20b0ef74df7965c6e58726f6e2ab252287"
+        },
+        "import_proposals": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "information_attachment_versions": {
+          "rows": 2,
+          "sha256": "f3713534d02372579f9d5e050afced6046a0a45308e3343513c7a187e73d009b"
+        },
+        "information_directories": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "information_draft_commits": {
+          "rows": 2,
+          "sha256": "b8e0c5f2078138b63734802ded6ad13f6e8f3b85bfecb3832956b664857a708f"
+        },
+        "information_fields": {
+          "rows": 2,
+          "sha256": "87b6a54478b7094718833a18a35bba9f10bd11a62bcc6ef2e796ff015b3f4800"
+        },
+        "information_file_fields": {
+          "rows": 1,
+          "sha256": "8ee3ae085a99e2837950ed6c7f11f28a3d8722269f15f990056e0a4ac9c1d1db"
+        },
+        "information_file_stages": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "information_item_tags": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "information_items": {
+          "rows": 2,
+          "sha256": "ecf05022fa059d7b7c5af7edc3eb1ec040fafefe3fbafe9e474bfd30f5643dc0"
+        },
+        "information_revisions": {
+          "rows": 1,
+          "sha256": "d65c1829e6155919ea6c6d0dbd9b612732be7733510e5a9d202820ffca4a3264"
+        },
+        "information_tags": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "managed_credentials": {
+          "rows": 1,
+          "sha256": "cd181b5903ba71f050e61ef6b395b909fd7309def51e0306092185d50387cc84"
+        },
+        "organization_tasks": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "recycle_entries": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "recycle_facts": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "request_history": {
+          "rows": 1,
+          "sha256": "8199ffc666fd5fbce8366f9d5b11aca719db0d39edd6c9a9542f66913d2b665c"
+        },
+        "revision_purge_facts": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "settings": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "ssh_host_trust": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "update_proposals": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        }
+      }
+    },
+    {
+      "label": "same-target-migration-retry",
+      "status": "ok",
+      "cipherVersion": "4.19.0 community",
+      "oldAuthorityRefused": true,
+      "beforeVerificationOperations": {
+        "schema": 21,
+        "marker": 21,
+        "integrity": "ok",
+        "tables": {
+          "access_records": {
+            "rows": 1,
+            "sha256": "c78fbbf7505eeb2e8d62d57975a6e5f70155137bdcdd316adea8de7d72aa9dd2"
+          },
+          "backup_configuration": {
+            "rows": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "credential_focused_fills": {
+            "rows": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "credential_materials": {
+            "rows": 1,
+            "sha256": "be922d19c54a083510f03d46e287c6d2ade9e3163d79e8fae1b1aa0da2045bc3"
+          },
+          "credential_operations": {
+            "rows": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "credential_runtime_requests": {
+            "rows": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "delete_proposals": {
+            "rows": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "field_templates": {
+            "rows": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "grant_history": {
+            "rows": 1,
+            "sha256": "7210d0d96368bc52214216487ec06a20b0ef74df7965c6e58726f6e2ab252287"
+          },
+          "import_proposals": {
+            "rows": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "information_attachment_versions": {
+            "rows": 2,
+            "sha256": "f3713534d02372579f9d5e050afced6046a0a45308e3343513c7a187e73d009b"
+          },
+          "information_deliveries": {
+            "rows": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "information_directories": {
+            "rows": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "information_draft_commits": {
+            "rows": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "information_fields": {
+            "rows": 2,
+            "sha256": "87b6a54478b7094718833a18a35bba9f10bd11a62bcc6ef2e796ff015b3f4800"
+          },
+          "information_file_fields": {
+            "rows": 1,
+            "sha256": "8ee3ae085a99e2837950ed6c7f11f28a3d8722269f15f990056e0a4ac9c1d1db"
+          },
+          "information_file_stages": {
+            "rows": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "information_item_tags": {
+            "rows": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "information_items": {
+            "rows": 2,
+            "sha256": "ecf05022fa059d7b7c5af7edc3eb1ec040fafefe3fbafe9e474bfd30f5643dc0"
+          },
+          "information_revisions": {
+            "rows": 1,
+            "sha256": "d65c1829e6155919ea6c6d0dbd9b612732be7733510e5a9d202820ffca4a3264"
+          },
+          "information_tags": {
+            "rows": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "managed_credentials": {
+            "rows": 1,
+            "sha256": "cd181b5903ba71f050e61ef6b395b909fd7309def51e0306092185d50387cc84"
+          },
+          "organization_tasks": {
+            "rows": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "recycle_entries": {
+            "rows": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "recycle_facts": {
+            "rows": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "request_history": {
+            "rows": 1,
+            "sha256": "8199ffc666fd5fbce8366f9d5b11aca719db0d39edd6c9a9542f66913d2b665c"
+          },
+          "revision_purge_facts": {
+            "rows": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "settings": {
+            "rows": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "ssh_host_trust": {
+            "rows": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "update_proposals": {
+            "rows": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          }
+        }
+      },
+      "schema": 21,
+      "marker": 21,
+      "integrity": "ok",
+      "tables": {
+        "access_records": {
+          "rows": 2,
+          "sha256": "d85d4f759ff7d6f74572cf7ee3940294177cf8396a09a65f65f207af074bb6ce"
+        },
+        "backup_configuration": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "credential_focused_fills": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "credential_materials": {
+          "rows": 1,
+          "sha256": "be922d19c54a083510f03d46e287c6d2ade9e3163d79e8fae1b1aa0da2045bc3"
+        },
+        "credential_operations": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "credential_runtime_requests": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "delete_proposals": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "field_templates": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "grant_history": {
+          "rows": 1,
+          "sha256": "7210d0d96368bc52214216487ec06a20b0ef74df7965c6e58726f6e2ab252287"
+        },
+        "import_proposals": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "information_attachment_versions": {
+          "rows": 2,
+          "sha256": "f3713534d02372579f9d5e050afced6046a0a45308e3343513c7a187e73d009b"
+        },
+        "information_deliveries": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "information_directories": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "information_draft_commits": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "information_fields": {
+          "rows": 2,
+          "sha256": "87b6a54478b7094718833a18a35bba9f10bd11a62bcc6ef2e796ff015b3f4800"
+        },
+        "information_file_fields": {
+          "rows": 1,
+          "sha256": "8ee3ae085a99e2837950ed6c7f11f28a3d8722269f15f990056e0a4ac9c1d1db"
+        },
+        "information_file_stages": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "information_item_tags": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "information_items": {
+          "rows": 2,
+          "sha256": "ecf05022fa059d7b7c5af7edc3eb1ec040fafefe3fbafe9e474bfd30f5643dc0"
+        },
+        "information_revisions": {
+          "rows": 1,
+          "sha256": "d65c1829e6155919ea6c6d0dbd9b612732be7733510e5a9d202820ffca4a3264"
+        },
+        "information_tags": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "managed_credentials": {
+          "rows": 1,
+          "sha256": "cd181b5903ba71f050e61ef6b395b909fd7309def51e0306092185d50387cc84"
+        },
+        "organization_tasks": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "recycle_entries": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "recycle_facts": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "request_history": {
+          "rows": 1,
+          "sha256": "8199ffc666fd5fbce8366f9d5b11aca719db0d39edd6c9a9542f66913d2b665c"
+        },
+        "revision_purge_facts": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "settings": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "ssh_host_trust": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "update_proposals": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        }
+      }
+    },
+    {
+      "label": "migrated-raw-snapshot",
+      "status": "ok",
+      "schema": 21,
+      "marker": 21,
+      "integrity": "ok",
+      "tables": {
+        "access_records": {
+          "rows": 2,
+          "sha256": "d85d4f759ff7d6f74572cf7ee3940294177cf8396a09a65f65f207af074bb6ce"
+        },
+        "backup_configuration": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "credential_focused_fills": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "credential_materials": {
+          "rows": 1,
+          "sha256": "be922d19c54a083510f03d46e287c6d2ade9e3163d79e8fae1b1aa0da2045bc3"
+        },
+        "credential_operations": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "credential_runtime_requests": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "delete_proposals": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "field_templates": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "grant_history": {
+          "rows": 1,
+          "sha256": "7210d0d96368bc52214216487ec06a20b0ef74df7965c6e58726f6e2ab252287"
+        },
+        "import_proposals": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "information_attachment_versions": {
+          "rows": 2,
+          "sha256": "f3713534d02372579f9d5e050afced6046a0a45308e3343513c7a187e73d009b"
+        },
+        "information_deliveries": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "information_directories": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "information_draft_commits": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "information_fields": {
+          "rows": 2,
+          "sha256": "87b6a54478b7094718833a18a35bba9f10bd11a62bcc6ef2e796ff015b3f4800"
+        },
+        "information_file_fields": {
+          "rows": 1,
+          "sha256": "8ee3ae085a99e2837950ed6c7f11f28a3d8722269f15f990056e0a4ac9c1d1db"
+        },
+        "information_file_stages": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "information_item_tags": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "information_items": {
+          "rows": 2,
+          "sha256": "ecf05022fa059d7b7c5af7edc3eb1ec040fafefe3fbafe9e474bfd30f5643dc0"
+        },
+        "information_revisions": {
+          "rows": 1,
+          "sha256": "d65c1829e6155919ea6c6d0dbd9b612732be7733510e5a9d202820ffca4a3264"
+        },
+        "information_tags": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "managed_credentials": {
+          "rows": 1,
+          "sha256": "cd181b5903ba71f050e61ef6b395b909fd7309def51e0306092185d50387cc84"
+        },
+        "organization_tasks": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "recycle_entries": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "recycle_facts": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "request_history": {
+          "rows": 1,
+          "sha256": "8199ffc666fd5fbce8366f9d5b11aca719db0d39edd6c9a9542f66913d2b665c"
+        },
+        "revision_purge_facts": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "settings": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "ssh_host_trust": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "update_proposals": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        }
+      }
+    },
+    {
+      "label": "old-reader-refuses-new-schema",
+      "status": "failed",
+      "errorType": "StorageFailure",
+      "storageFailure": "unsupported_schema"
+    },
+    {
+      "label": "current-reader-reopens",
+      "status": "ok",
+      "cipherVersion": "4.19.0 community",
+      "oldAuthorityRefused": true,
+      "beforeVerificationOperations": {
+        "schema": 21,
+        "marker": 21,
+        "integrity": "ok",
+        "tables": {
+          "access_records": {
+            "rows": 2,
+            "sha256": "d85d4f759ff7d6f74572cf7ee3940294177cf8396a09a65f65f207af074bb6ce"
+          },
+          "backup_configuration": {
+            "rows": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "credential_focused_fills": {
+            "rows": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "credential_materials": {
+            "rows": 1,
+            "sha256": "be922d19c54a083510f03d46e287c6d2ade9e3163d79e8fae1b1aa0da2045bc3"
+          },
+          "credential_operations": {
+            "rows": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "credential_runtime_requests": {
+            "rows": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "delete_proposals": {
+            "rows": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "field_templates": {
+            "rows": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "grant_history": {
+            "rows": 1,
+            "sha256": "7210d0d96368bc52214216487ec06a20b0ef74df7965c6e58726f6e2ab252287"
+          },
+          "import_proposals": {
+            "rows": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "information_attachment_versions": {
+            "rows": 2,
+            "sha256": "f3713534d02372579f9d5e050afced6046a0a45308e3343513c7a187e73d009b"
+          },
+          "information_deliveries": {
+            "rows": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "information_directories": {
+            "rows": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "information_draft_commits": {
+            "rows": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "information_fields": {
+            "rows": 2,
+            "sha256": "87b6a54478b7094718833a18a35bba9f10bd11a62bcc6ef2e796ff015b3f4800"
+          },
+          "information_file_fields": {
+            "rows": 1,
+            "sha256": "8ee3ae085a99e2837950ed6c7f11f28a3d8722269f15f990056e0a4ac9c1d1db"
+          },
+          "information_file_stages": {
+            "rows": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "information_item_tags": {
+            "rows": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "information_items": {
+            "rows": 2,
+            "sha256": "ecf05022fa059d7b7c5af7edc3eb1ec040fafefe3fbafe9e474bfd30f5643dc0"
+          },
+          "information_revisions": {
+            "rows": 1,
+            "sha256": "d65c1829e6155919ea6c6d0dbd9b612732be7733510e5a9d202820ffca4a3264"
+          },
+          "information_tags": {
+            "rows": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "managed_credentials": {
+            "rows": 1,
+            "sha256": "cd181b5903ba71f050e61ef6b395b909fd7309def51e0306092185d50387cc84"
+          },
+          "organization_tasks": {
+            "rows": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "recycle_entries": {
+            "rows": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "recycle_facts": {
+            "rows": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "request_history": {
+            "rows": 1,
+            "sha256": "8199ffc666fd5fbce8366f9d5b11aca719db0d39edd6c9a9542f66913d2b665c"
+          },
+          "revision_purge_facts": {
+            "rows": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "settings": {
+            "rows": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "ssh_host_trust": {
+            "rows": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "update_proposals": {
+            "rows": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          }
+        }
+      },
+      "schema": 21,
+      "marker": 21,
+      "integrity": "ok",
+      "tables": {
+        "access_records": {
+          "rows": 3,
+          "sha256": "4c479c6b9588977094c581c6a7a892b65358ccad729de30896af0559864c9ef1"
+        },
+        "backup_configuration": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "credential_focused_fills": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "credential_materials": {
+          "rows": 1,
+          "sha256": "be922d19c54a083510f03d46e287c6d2ade9e3163d79e8fae1b1aa0da2045bc3"
+        },
+        "credential_operations": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "credential_runtime_requests": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "delete_proposals": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "field_templates": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "grant_history": {
+          "rows": 1,
+          "sha256": "7210d0d96368bc52214216487ec06a20b0ef74df7965c6e58726f6e2ab252287"
+        },
+        "import_proposals": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "information_attachment_versions": {
+          "rows": 2,
+          "sha256": "f3713534d02372579f9d5e050afced6046a0a45308e3343513c7a187e73d009b"
+        },
+        "information_deliveries": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "information_directories": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "information_draft_commits": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "information_fields": {
+          "rows": 2,
+          "sha256": "87b6a54478b7094718833a18a35bba9f10bd11a62bcc6ef2e796ff015b3f4800"
+        },
+        "information_file_fields": {
+          "rows": 1,
+          "sha256": "8ee3ae085a99e2837950ed6c7f11f28a3d8722269f15f990056e0a4ac9c1d1db"
+        },
+        "information_file_stages": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "information_item_tags": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "information_items": {
+          "rows": 2,
+          "sha256": "ecf05022fa059d7b7c5af7edc3eb1ec040fafefe3fbafe9e474bfd30f5643dc0"
+        },
+        "information_revisions": {
+          "rows": 1,
+          "sha256": "d65c1829e6155919ea6c6d0dbd9b612732be7733510e5a9d202820ffca4a3264"
+        },
+        "information_tags": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "managed_credentials": {
+          "rows": 1,
+          "sha256": "cd181b5903ba71f050e61ef6b395b909fd7309def51e0306092185d50387cc84"
+        },
+        "organization_tasks": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "recycle_entries": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "recycle_facts": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "request_history": {
+          "rows": 1,
+          "sha256": "8199ffc666fd5fbce8366f9d5b11aca719db0d39edd6c9a9542f66913d2b665c"
+        },
+        "revision_purge_facts": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "settings": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "ssh_host_trust": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "update_proposals": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        }
+      }
+    }
+  ],
+  "sources": [
+    {
+      "label": "legacy",
+      "commit": "dbb94ac1427b95c5a7bfee5011e414876c22c63e",
+      "verifiedProductionFiles": [
+        {
+          "path": "packages/info_core/lib/agent_server.dart",
+          "sha256": "8d8d03489d30d818aaeab2eec5ab6e94ff97bed740d6c730dd1853ecdadceafd"
+        },
+        {
+          "path": "packages/info_core/lib/backup_access.dart",
+          "sha256": "ef78682a9a93be7b737aa85e70cc5f6f04f33bac6449b70225758f16041d9136"
+        },
+        {
+          "path": "packages/info_core/lib/credential_access.dart",
+          "sha256": "90e26c9f6ba3aec6fa6b5926c46cddea996f053be3ee1f608ac7f853b6f19474"
+        },
+        {
+          "path": "packages/info_core/lib/credential_field_migration.dart",
+          "sha256": "e16a4e9e9fc421848cc969262b64e3a492cab7508880f05b385ac6d37dde68f6"
+        },
+        {
+          "path": "packages/info_core/lib/credential_file_receivers.dart",
+          "sha256": "e17682b7589194c12b56b1e25ce94cae4c534b27007280c6d6ce7270f7416106"
+        },
+        {
+          "path": "packages/info_core/lib/credential_history_access.dart",
+          "sha256": "eedb596fbb071e3f0d37388b9d02ceeac38baa3c4c390866475f06561cb2d1de"
+        },
+        {
+          "path": "packages/info_core/lib/credential_material_access.dart",
+          "sha256": "d73950bb41258d160bca26eeda7dce801640fbab5ccd15f975f171ad301e88c3"
+        },
+        {
+          "path": "packages/info_core/lib/credential_runtime_access.dart",
+          "sha256": "bde7c48616b93c8ef079d50abf44867c4d838db49d5c1d49ce75c2ecffa6e989"
+        },
+        {
+          "path": "packages/info_core/lib/credential_runtime_models.dart",
+          "sha256": "cab91932ab79ea961e79000bc8323885cc01e32de94eaa1ee155ede8fef14fdd"
+        },
+        {
+          "path": "packages/info_core/lib/credentials.dart",
+          "sha256": "1cd7ccf1aaeec9ef88f4ac66a612ec057dfab97236bb33dd1eada9c40957e084"
+        },
+        {
+          "path": "packages/info_core/lib/focused_fill_access.dart",
+          "sha256": "089e903f47529d9cabcf9166d709da8ac3b5e7810724aa053d7d8e2d0226361c"
+        },
+        {
+          "path": "packages/info_core/lib/focused_fill_models.dart",
+          "sha256": "a86e9e9f86e4bc268655d0151eff1d59b5f1dbbd3b2093e5d74eff2a2ff45971"
+        },
+        {
+          "path": "packages/info_core/lib/history.dart",
+          "sha256": "ae07b6ee68779ab5405e13bb3d5af08f9b849fe231b935fccb5dedbba2b31284"
+        },
+        {
+          "path": "packages/info_core/lib/history_access.dart",
+          "sha256": "659c134433eae3b3f6676882202f66d5801d337029e5b4c1ea53df34555bfa77"
+        },
+        {
+          "path": "packages/info_core/lib/import_access.dart",
+          "sha256": "0b3dc5d4f6381f9a481dc0bbc6dd5a0ea333f34ad2a8b4bf17796103214b0a1d"
+        },
+        {
+          "path": "packages/info_core/lib/import_proposals.dart",
+          "sha256": "584e114f111e18e25f040b86742a42f493617e111d1d39f0c23352fe753a2db8"
+        },
+        {
+          "path": "packages/info_core/lib/info_core.dart",
+          "sha256": "dde358cc72163c7c5afa773444b646836b458f9a8d18b1e6a145d37c182a2128"
+        },
+        {
+          "path": "packages/info_core/lib/information.dart",
+          "sha256": "dc2415c03843b6ea85587232c6f5c9084cc4fd2ec00f1068320273050ef15d07"
+        },
+        {
+          "path": "packages/info_core/lib/information_attachment_access.dart",
+          "sha256": "36d2360a3b5d13958313051e4f16a1d0a734533443bf3b807b0b26ba8426a2eb"
+        },
+        {
+          "path": "packages/info_core/lib/information_draft_access.dart",
+          "sha256": "3354b9574e79d0de7db6228e674e406bde07688916960c985a2cf4ef8010741d"
+        },
+        {
+          "path": "packages/info_core/lib/information_draft_models.dart",
+          "sha256": "3611dd959e732af32e8020e13d4eb520d82092660536f98cfeef082b094f6501"
+        },
+        {
+          "path": "packages/info_core/lib/information_file_access.dart",
+          "sha256": "c62da2e97de6f11740fe41014bdf58aec32088e055a97388e05ab716ddfd70ef"
+        },
+        {
+          "path": "packages/info_core/lib/information_files.dart",
+          "sha256": "3a2cc1fc0a70491bcfb17ede8768222cb1054480aa23cc3f50b924918c1ed86e"
+        },
+        {
+          "path": "packages/info_core/lib/library_access.dart",
+          "sha256": "2b3b1b1990ac3efab0815cfbbb2ced628107b42b76d4f08147cc1ac079c785e0"
+        },
+        {
+          "path": "packages/info_core/lib/memory_information_files.dart",
+          "sha256": "62df771038d75cf7ba0d5251856d5c2be027bd9807ce91709e12978f15a383c5"
+        },
+        {
+          "path": "packages/info_core/lib/new_file_publish.dart",
+          "sha256": "ca3efb9367635aee14a8278127aeeca061881d71499373829a11154ba67de073"
+        },
+        {
+          "path": "packages/info_core/lib/organization.dart",
+          "sha256": "b055af140c2810c3e0a8a82c79ddf2e5c09d219cb015ee0d6463a166a654c15b"
+        },
+        {
+          "path": "packages/info_core/lib/organization_access.dart",
+          "sha256": "f226b45cc3eca5a43c20945a8775fee27718f8f637fc09858045268110171ee8"
+        },
+        {
+          "path": "packages/info_core/lib/organization_task_access.dart",
+          "sha256": "41993e7ef18f118ec0ac0db46dfa940c33944411fc293928d7b402af9d537e4e"
+        },
+        {
+          "path": "packages/info_core/lib/organization_tasks.dart",
+          "sha256": "c8e48814248c87257beff0107a3ae407462c2a84e405b485dd0feeeba1b8cf1f"
+        },
+        {
+          "path": "packages/info_core/lib/proposal_access.dart",
+          "sha256": "1a4617fe6ab9e91f39256a066f7d2c0d3138873ac0f73aaeee47ce6dd2d1ee6a"
+        },
+        {
+          "path": "packages/info_core/lib/protocol_json.dart",
+          "sha256": "74fbff4c85013f2cd1be577f37748d26e428f5756d786122b517614b4c2b4230"
+        },
+        {
+          "path": "packages/info_core/lib/recycle.dart",
+          "sha256": "c89f31d257e2ec98a99a4c9d841e69bd149bbde5c9a3e8116cbe0b35d568a9b6"
+        },
+        {
+          "path": "packages/info_core/lib/recycle_access.dart",
+          "sha256": "01bbb108cd31c9e77f5d4a0e2f5f09fc5c0d86c9fdbf77ff187e9fab5a2e7f06"
+        },
+        {
+          "path": "packages/info_core/lib/revision_access.dart",
+          "sha256": "cbd3fabc3a0a8bcc85e3707c8bc9b2503689495c016c0d646e42b10ea102fe3e"
+        },
+        {
+          "path": "packages/info_core/lib/revisions.dart",
+          "sha256": "756f8b3800b4d0a649dfeb6256ee928280720ea2267049da82b5c62318ed8385"
+        },
+        {
+          "path": "packages/info_core/lib/runtime_material_files.dart",
+          "sha256": "333979768cfa8f002facdf65d361bf8abc3d7179d6b563d8f4c76b16eae5fdd7"
+        },
+        {
+          "path": "packages/info_core/lib/runtime_process_identity.dart",
+          "sha256": "f7062ce1c66732266b27848483581db0e43d3324347fee9a748c61ff0414de4b"
+        },
+        {
+          "path": "packages/info_core/lib/ssh_host_trust.dart",
+          "sha256": "549330f392616a2e0270efe74743312b35320593f4ee30ccfe9af9b4d00f0f14"
+        },
+        {
+          "path": "packages/info_core/lib/templates.dart",
+          "sha256": "54960c287288d3b2a8982c9a3ba75dc920c525428990a87546087edc69590ce3"
+        },
+        {
+          "path": "packages/info_core/lib/update_access.dart",
+          "sha256": "83be31ff0957495e72f2856ce0d3ce31130a983a9f7504d3c84d645f870e41eb"
+        },
+        {
+          "path": "packages/info_core/lib/update_proposals.dart",
+          "sha256": "13bc11f82244cf59ad9a0500a153536c86fb7581b7d62ce92b3ea55a04827fd0"
+        },
+        {
+          "path": "packages/info_core/lib/workspace_access.dart",
+          "sha256": "b7bff4af9c9a98785595a373549efcf61af8d0da35ea736e6adf33ceea64765a"
+        },
+        {
+          "path": "packages/info_core/pubspec.lock",
+          "sha256": "f4b92b116d6017052bc0814be49221cab9e7e907c1fdbf44b32cf0050d449682"
+        },
+        {
+          "path": "packages/info_core/pubspec.yaml",
+          "sha256": "5a81d5c5c2d0d6a6ecefd332305ca6326e4e45864507add970fd8de31492a185"
+        },
+        {
+          "path": "packages/info_storage/lib/attachment_backup.dart",
+          "sha256": "210b88f8ca3c774893479311879693f5aba3fcc869fd6203d383689d73d02caa"
+        },
+        {
+          "path": "packages/info_storage/lib/attachment_backup_integration.dart",
+          "sha256": "b07401e69eabcd63cbe6bcf371b50d44c8dab301ac688b4f54b78e832a1a237c"
+        },
+        {
+          "path": "packages/info_storage/lib/backup_credentials.dart",
+          "sha256": "b0a03117c7bc823f67176a7c17adba8a4bab422f2fc9e8cc791a92b3d2c39df2"
+        },
+        {
+          "path": "packages/info_storage/lib/backup_history.dart",
+          "sha256": "83fc05ff51368cb547583d7c94a80e2e11722b230b6e5779bef028c29346a165"
+        },
+        {
+          "path": "packages/info_storage/lib/backup_publish.dart",
+          "sha256": "54e6f776f31e4d5a4c166bc9b146cdd6041d661d2a5137709988b708cb87fe68"
+        },
+        {
+          "path": "packages/info_storage/lib/backups.dart",
+          "sha256": "8f0a126670d741b0b7358c69918d52cfdf38c1279b2f98305b0d08dde251694f"
+        },
+        {
+          "path": "packages/info_storage/lib/credential_runtime_storage.dart",
+          "sha256": "74dd938d03de55161b356ab0e61031767d7e15248fa62f6ebe0481ce5e359844"
+        },
+        {
+          "path": "packages/info_storage/lib/credentials_storage.dart",
+          "sha256": "47eaeb53098376e478e54b54c857dc3a356c852cb908af4c1b33b910d4523163"
+        },
+        {
+          "path": "packages/info_storage/lib/focused_fill_storage.dart",
+          "sha256": "74db4f548a021bfd503404b024e744ca96020a446ce0d2f42f2724a268cb7f69"
+        },
+        {
+          "path": "packages/info_storage/lib/info_storage.dart",
+          "sha256": "d095a0799ec6a5bffc2557392e17c64d76847d8dd823861063cba86cb4483805"
+        },
+        {
+          "path": "packages/info_storage/lib/information_attachments_storage.dart",
+          "sha256": "07c5dd4078c6b343f62257ee4406eb384d87a043a9162fec0d65c726f6f8b800"
+        },
+        {
+          "path": "packages/info_storage/lib/information_files_storage.dart",
+          "sha256": "e6708302c877d2ebaa29c3ec40ee800d1c2a2a96ff0aed9d25c2d2d095aeaf71"
+        },
+        {
+          "path": "packages/info_storage/lib/platform_keys.dart",
+          "sha256": "608034729aa39b4e61bce4bc5e8a18ce6df913adbaa6ef635fbebf0e3daf0686"
+        },
+        {
+          "path": "packages/info_storage/pubspec.lock",
+          "sha256": "131f601be25b6a7759cf961d15fda9c4e176a759eb20d499a83e2bff8d9d1274"
+        },
+        {
+          "path": "packages/info_storage/pubspec.yaml",
+          "sha256": "63822f678a99ca9c343637fe5bf1ce57d52c79393b438247b200342a11afd179"
+        }
+      ],
+      "binarySha256": "8cfcf95a9ffdbf2d18ef89d951d88febfb678821f27b196618bc16672b7a0bfe"
+    },
+    {
+      "label": "current",
+      "commit": "721c91fa526894f738356a87cc4e91b0fcf7c1ac",
+      "verifiedProductionFiles": [
+        {
+          "path": "packages/info_core/lib/agent_server.dart",
+          "sha256": "23ac2a1ab7ca97d1650033bb358be2e60756b62bdbb32d5a5f46f16c214c183a"
+        },
+        {
+          "path": "packages/info_core/lib/backup_access.dart",
+          "sha256": "136ce2e4f36610331e0c76620fc1eda8094349fe907001289781142177e4f76b"
+        },
+        {
+          "path": "packages/info_core/lib/credential_access.dart",
+          "sha256": "90e26c9f6ba3aec6fa6b5926c46cddea996f053be3ee1f608ac7f853b6f19474"
+        },
+        {
+          "path": "packages/info_core/lib/credential_execution_audit.dart",
+          "sha256": "e210ad265d732cfd27e47f1db3e171e0924496099246feef91b4e794121bafd4"
+        },
+        {
+          "path": "packages/info_core/lib/credential_field_migration.dart",
+          "sha256": "e16a4e9e9fc421848cc969262b64e3a492cab7508880f05b385ac6d37dde68f6"
+        },
+        {
+          "path": "packages/info_core/lib/credential_file_receivers.dart",
+          "sha256": "e17682b7589194c12b56b1e25ce94cae4c534b27007280c6d6ce7270f7416106"
+        },
+        {
+          "path": "packages/info_core/lib/credential_history_access.dart",
+          "sha256": "0c46d02a5c26c615f3f9049599fb5463734a15bceeb156b6b739b84e44494791"
+        },
+        {
+          "path": "packages/info_core/lib/credential_material_access.dart",
+          "sha256": "ce0db8be4e3bee968f0567d7363e498334ca8c81e6d91030cfcccb785743c823"
+        },
+        {
+          "path": "packages/info_core/lib/credential_runtime_access.dart",
+          "sha256": "035016850403fd793b9e40da40cbe6d65d661f625d42047c2037296f0211980b"
+        },
+        {
+          "path": "packages/info_core/lib/credential_runtime_models.dart",
+          "sha256": "28c13bc5300d58b61402a6911166171c49393cd8840646f12d96f04d8e5af92a"
+        },
+        {
+          "path": "packages/info_core/lib/credentials.dart",
+          "sha256": "1cd7ccf1aaeec9ef88f4ac66a612ec057dfab97236bb33dd1eada9c40957e084"
+        },
+        {
+          "path": "packages/info_core/lib/focused_fill_access.dart",
+          "sha256": "c1e5457b7307f60a068c708690a3f5a2f9f44f2c3ab8cf2afaec9062a51915b3"
+        },
+        {
+          "path": "packages/info_core/lib/focused_fill_models.dart",
+          "sha256": "a86e9e9f86e4bc268655d0151eff1d59b5f1dbbd3b2093e5d74eff2a2ff45971"
+        },
+        {
+          "path": "packages/info_core/lib/history.dart",
+          "sha256": "ae07b6ee68779ab5405e13bb3d5af08f9b849fe231b935fccb5dedbba2b31284"
+        },
+        {
+          "path": "packages/info_core/lib/history_access.dart",
+          "sha256": "a1421104b15f477e11ecebc37e80a5ac3c8d9e8a4634c3c68303c6059d2b1571"
+        },
+        {
+          "path": "packages/info_core/lib/import_access.dart",
+          "sha256": "0b3dc5d4f6381f9a481dc0bbc6dd5a0ea333f34ad2a8b4bf17796103214b0a1d"
+        },
+        {
+          "path": "packages/info_core/lib/import_proposals.dart",
+          "sha256": "584e114f111e18e25f040b86742a42f493617e111d1d39f0c23352fe753a2db8"
+        },
+        {
+          "path": "packages/info_core/lib/info_core.dart",
+          "sha256": "781a9af4458d0d04fc32317a09135637637bba6e4e19ed19a7bbb947a2223df5"
+        },
+        {
+          "path": "packages/info_core/lib/information.dart",
+          "sha256": "1043b9b9b938e166b3821a504941125178f2f243508105dba9fce1495cb67e8b"
+        },
+        {
+          "path": "packages/info_core/lib/information_attachment_access.dart",
+          "sha256": "8f5283bde952383d36f8f96f274fd0c59360db3bfbece6565c7d3d8d7914794e"
+        },
+        {
+          "path": "packages/info_core/lib/information_delivery_access.dart",
+          "sha256": "c9353fab6d6af0da832ca9a9435896847b868b5bc33fc2558e7dc6a2d7589e3f"
+        },
+        {
+          "path": "packages/info_core/lib/information_delivery_driver.dart",
+          "sha256": "deb0f1794d1ea1f0eceef42f15f351f497ddffcb28f9a664a6aadf96539ae4c5"
+        },
+        {
+          "path": "packages/info_core/lib/information_delivery_models.dart",
+          "sha256": "8c648ad05f4575a0449fdaf06bce16d689be723f896c1730e68a538ea3cb5b9b"
+        },
+        {
+          "path": "packages/info_core/lib/information_draft_access.dart",
+          "sha256": "3354b9574e79d0de7db6228e674e406bde07688916960c985a2cf4ef8010741d"
+        },
+        {
+          "path": "packages/info_core/lib/information_draft_models.dart",
+          "sha256": "2be0cb43ad64fdd16cdfdbc74846232b40660f0245ee5269d0584261c874ae0c"
+        },
+        {
+          "path": "packages/info_core/lib/information_file_access.dart",
+          "sha256": "c62da2e97de6f11740fe41014bdf58aec32088e055a97388e05ab716ddfd70ef"
+        },
+        {
+          "path": "packages/info_core/lib/information_files.dart",
+          "sha256": "67ee282f7ac17aacfd6904c5463fe8e5f4ac2174d7366693de3fa71cbf395d64"
+        },
+        {
+          "path": "packages/info_core/lib/library_access.dart",
+          "sha256": "2b3b1b1990ac3efab0815cfbbb2ced628107b42b76d4f08147cc1ac079c785e0"
+        },
+        {
+          "path": "packages/info_core/lib/macos_runtime_target.dart",
+          "sha256": "351a3ff2d8ffc67036e1efe8af36ea5c5840aac42849e2d779103bc38c49881c"
+        },
+        {
+          "path": "packages/info_core/lib/macos_tool_probe.dart",
+          "sha256": "179a4879e8a54e933d76ce7cc6c5a1baec06904411cfcde8be26ada289c40a53"
+        },
+        {
+          "path": "packages/info_core/lib/memory_information_files.dart",
+          "sha256": "62df771038d75cf7ba0d5251856d5c2be027bd9807ce91709e12978f15a383c5"
+        },
+        {
+          "path": "packages/info_core/lib/new_file_publish.dart",
+          "sha256": "1ed8320812f6dc45b877e81dd1be9e14d16193e9076f936f27c97c19a3261eb0"
+        },
+        {
+          "path": "packages/info_core/lib/organization.dart",
+          "sha256": "b055af140c2810c3e0a8a82c79ddf2e5c09d219cb015ee0d6463a166a654c15b"
+        },
+        {
+          "path": "packages/info_core/lib/organization_access.dart",
+          "sha256": "f226b45cc3eca5a43c20945a8775fee27718f8f637fc09858045268110171ee8"
+        },
+        {
+          "path": "packages/info_core/lib/organization_task_access.dart",
+          "sha256": "41993e7ef18f118ec0ac0db46dfa940c33944411fc293928d7b402af9d537e4e"
+        },
+        {
+          "path": "packages/info_core/lib/organization_tasks.dart",
+          "sha256": "c8e48814248c87257beff0107a3ae407462c2a84e405b485dd0feeeba1b8cf1f"
+        },
+        {
+          "path": "packages/info_core/lib/proposal_access.dart",
+          "sha256": "1a4617fe6ab9e91f39256a066f7d2c0d3138873ac0f73aaeee47ce6dd2d1ee6a"
+        },
+        {
+          "path": "packages/info_core/lib/protocol_json.dart",
+          "sha256": "74fbff4c85013f2cd1be577f37748d26e428f5756d786122b517614b4c2b4230"
+        },
+        {
+          "path": "packages/info_core/lib/recycle.dart",
+          "sha256": "c89f31d257e2ec98a99a4c9d841e69bd149bbde5c9a3e8116cbe0b35d568a9b6"
+        },
+        {
+          "path": "packages/info_core/lib/recycle_access.dart",
+          "sha256": "6b507ca18900859ca787039c8e688ead44f96f569133df4ce97ae3deddf7ef57"
+        },
+        {
+          "path": "packages/info_core/lib/revision_access.dart",
+          "sha256": "cbd3fabc3a0a8bcc85e3707c8bc9b2503689495c016c0d646e42b10ea102fe3e"
+        },
+        {
+          "path": "packages/info_core/lib/revisions.dart",
+          "sha256": "756f8b3800b4d0a649dfeb6256ee928280720ea2267049da82b5c62318ed8385"
+        },
+        {
+          "path": "packages/info_core/lib/runtime_material_files.dart",
+          "sha256": "ee02dce692203031bc4946e2cde4cbd27a2f7ef86a5baf25411daf8b792ad140"
+        },
+        {
+          "path": "packages/info_core/lib/runtime_material_files_macos.dart",
+          "sha256": "74963ae7cb1933b7dcc56ab15f5a1673899b5365b484ddc07c321fb83901f01b"
+        },
+        {
+          "path": "packages/info_core/lib/runtime_process_identity.dart",
+          "sha256": "224a229275eddb4181f4481c67a580e0c4199cef0108ad8be9c28ca955399f4d"
+        },
+        {
+          "path": "packages/info_core/lib/runtime_process_identity_macos.dart",
+          "sha256": "b05abe9b4b6ea21f1fdb3c4920f639aabe32d9aae882e078dc6920a259182fc9"
+        },
+        {
+          "path": "packages/info_core/lib/ssh_host_trust.dart",
+          "sha256": "549330f392616a2e0270efe74743312b35320593f4ee30ccfe9af9b4d00f0f14"
+        },
+        {
+          "path": "packages/info_core/lib/templates.dart",
+          "sha256": "54960c287288d3b2a8982c9a3ba75dc920c525428990a87546087edc69590ce3"
+        },
+        {
+          "path": "packages/info_core/lib/update_access.dart",
+          "sha256": "83be31ff0957495e72f2856ce0d3ce31130a983a9f7504d3c84d645f870e41eb"
+        },
+        {
+          "path": "packages/info_core/lib/update_proposals.dart",
+          "sha256": "13bc11f82244cf59ad9a0500a153536c86fb7581b7d62ce92b3ea55a04827fd0"
+        },
+        {
+          "path": "packages/info_core/lib/windows_desktop_control.dart",
+          "sha256": "38cabb303e70e9471c66656277fdffdb298b22f5713fb296c075cc73b961a289"
+        },
+        {
+          "path": "packages/info_core/lib/workspace_access.dart",
+          "sha256": "b7bff4af9c9a98785595a373549efcf61af8d0da35ea736e6adf33ceea64765a"
+        },
+        {
+          "path": "packages/info_core/pubspec.lock",
+          "sha256": "f4b92b116d6017052bc0814be49221cab9e7e907c1fdbf44b32cf0050d449682"
+        },
+        {
+          "path": "packages/info_core/pubspec.yaml",
+          "sha256": "5a81d5c5c2d0d6a6ecefd332305ca6326e4e45864507add970fd8de31492a185"
+        },
+        {
+          "path": "packages/info_storage/lib/attachment_backup.dart",
+          "sha256": "73d78dc3898b82fce395390558c33ba56d921274d353f60b22b34bf56048b2ea"
+        },
+        {
+          "path": "packages/info_storage/lib/attachment_backup_integration.dart",
+          "sha256": "1a008f5e77741512259f4549592cbdc6ec87c3bb6be5073e7da4e9034d5d90ce"
+        },
+        {
+          "path": "packages/info_storage/lib/backup_credentials.dart",
+          "sha256": "b0a03117c7bc823f67176a7c17adba8a4bab422f2fc9e8cc791a92b3d2c39df2"
+        },
+        {
+          "path": "packages/info_storage/lib/backup_history.dart",
+          "sha256": "99343efc2a4eefdc73e857e442e2eeb0b1fcc9817573937dd6e5357bdc53ed69"
+        },
+        {
+          "path": "packages/info_storage/lib/backup_metadata_budget.dart",
+          "sha256": "b319cb9c7b4f646ec946e9fe5733dd6c3b1d36f41305e77dcbc04d681efba6a4"
+        },
+        {
+          "path": "packages/info_storage/lib/backup_publish.dart",
+          "sha256": "54e6f776f31e4d5a4c166bc9b146cdd6041d661d2a5137709988b708cb87fe68"
+        },
+        {
+          "path": "packages/info_storage/lib/backups.dart",
+          "sha256": "dcf5f86243818c07ad70a6174d29168a388339beb04ff26843e992e76a7241af"
+        },
+        {
+          "path": "packages/info_storage/lib/credential_runtime_storage.dart",
+          "sha256": "a6b48b2d83b4c3196e40a0f5d89531e9368a8f3f561afdaffd40aad9cc4b109b"
+        },
+        {
+          "path": "packages/info_storage/lib/credentials_storage.dart",
+          "sha256": "ebeab9a407a975dda5015200ee423313ec87f3b72121bae556fcf7ce262a47ce"
+        },
+        {
+          "path": "packages/info_storage/lib/focused_fill_storage.dart",
+          "sha256": "74db4f548a021bfd503404b024e744ca96020a446ce0d2f42f2724a268cb7f69"
+        },
+        {
+          "path": "packages/info_storage/lib/info_storage.dart",
+          "sha256": "010ba5b1fc02ce0fe806de2235b4bbdddbdf5a8f39b13d2e94786c4c18c17337"
+        },
+        {
+          "path": "packages/info_storage/lib/information_attachments_storage.dart",
+          "sha256": "31cffa916eccb15a2fd959323834f8dde3eeda66a7f8b7956be5def58b124ffc"
+        },
+        {
+          "path": "packages/info_storage/lib/information_delivery_storage.dart",
+          "sha256": "b22d68ff47c2148cc3600807ef9439633dd002b8b1514947e24a48ff917b1ae3"
+        },
+        {
+          "path": "packages/info_storage/lib/information_files_storage.dart",
+          "sha256": "e6708302c877d2ebaa29c3ec40ee800d1c2a2a96ff0aed9d25c2d2d095aeaf71"
+        },
+        {
+          "path": "packages/info_storage/lib/platform_keys.dart",
+          "sha256": "608034729aa39b4e61bce4bc5e8a18ce6df913adbaa6ef635fbebf0e3daf0686"
+        },
+        {
+          "path": "packages/info_storage/pubspec.lock",
+          "sha256": "131f601be25b6a7759cf961d15fda9c4e176a759eb20d499a83e2bff8d9d1274"
+        },
+        {
+          "path": "packages/info_storage/pubspec.yaml",
+          "sha256": "63822f678a99ca9c343637fe5bf1ce57d52c79393b438247b200342a11afd179"
+        }
+      ],
+      "binarySha256": "838ed01bba051ab964b6d3319b8f0286c5f3e1c9093ff12d5abefb170db2bb58"
+    }
+  ],
+  "sourceCommit": "721c91fa526894f738356a87cc4e91b0fcf7c1ac",
+  "legacyCommit": "dbb94ac1427b95c5a7bfee5011e414876c22c63e",
+  "helperSha256": "1788e0e18f3fbdb4abfdf550bc44b551d05c9c1473d4cbf2c98075ec31a5cdbb",
+  "fixtureRemoved": true,
+  "productionSourceAndLocksUnchanged": true,
+  "allDurableLegacyRowsPreservedBeforeVerification": true,
+  "transientDraftReceiptsClearedAsDesigned": true,
+  "wrongKeyDatabaseBytesPreserved": true,
+  "failedMigrationDatabaseBytesPreserved": true,
+  "oldReaderRefusalBytesPreserved": true
+}

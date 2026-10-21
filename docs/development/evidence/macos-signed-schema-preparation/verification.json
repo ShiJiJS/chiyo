@@ -1,0 +1,328 @@
+{
+  "date": "2026-10-21",
+  "branch": "codex/macos-adaptation",
+  "qaImplementation": "9caeedf",
+  "compiledAndAotSource": "721c91fa526894f738356a87cc4e91b0fcf7c1ac",
+  "archiveVerificationImplementation": "8e57add",
+  "currentHead": "a6b386c12ca593854f7fde552042c9063c80c1d2",
+  "legacySource": "dbb94ac1427b95c5a7bfee5011e414876c22c63e",
+  "aotRegression": {
+    "complete": true,
+    "commands": 18,
+    "cases": 10,
+    "rawSnapshotsPreserveBytes": true,
+    "sourceRowsAndTwoAttachmentOriginalsPreserved": true,
+    "ownedFixtureRemoved": true,
+    "expectedNegativeCases": [
+      "wrong key",
+      "migration conflict",
+      "legacy reader on migrated schema"
+    ]
+  },
+  "signedFlutterPreparation": {
+    "prepared": true,
+    "completeRuntime": false,
+    "actualKeychainAndMigrationJointProved": false,
+    "launches": 0,
+    "recordedCommandPhasesIncludingRepeatArchiveChecks": 28,
+    "allCommandPhaseExitCodes0": true,
+    "earlierArchiveVerificationAssertionFailed": true,
+    "earlierFailureScope": "Metadata retained 41 current-only legacy package filenames after replacing packages; fixed inventory composition, no copied production source or signed binary changed",
+    "archiveRoundTripSourceAndSignatureVerified": true,
+    "qaBundleIdentifier": "org.shijijs.agent-info-manage.qa.schemakeychain20261021",
+    "legacyHostScope": "current native Mac scaffolding plus exact pinned schema20 core/storage; minimal fixture UI and no credential worker; not a historical released Mac app",
+    "currentHostScope": "current production DesktopLauncher/Bootstrap and real native Keychain bridge; runtime owner approval still required"
+  },
+  "ticket42": "OPEN 3/5; joint runtime not counted as passed",
+  "privacy": "No database, key, private-controller, owner marker or association published; prepared native apps were not launched; only file sources/logs/digests retained",
+  "rawFiles": {
+    "raw/aot-final/conflicting-migration-refused.stderr.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "raw/aot-final/conflicting-migration-refused.stdout.txt": {
+      "bytes": 87,
+      "sha256": "9dec32b33dc9ff63fe08c31d449ccd88dd3dc06f3f770b085b3eb0a79f2307ed"
+    },
+    "raw/aot-final/controlled-registry-conflict.stderr.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "raw/aot-final/controlled-registry-conflict.stdout.txt": {
+      "bytes": 3361,
+      "sha256": "3754c5585b95bcd6b5dd29a2dc247ba4b6e0de6b9288390708a37438d9ce005f"
+    },
+    "raw/aot-final/current-analyze.stderr.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "raw/aot-final/current-analyze.stdout.txt": {
+      "bytes": 62,
+      "sha256": "9a24c287709f0486ec326a89679b72699535f2b52bd8c667c20a6dd54a0e345f"
+    },
+    "raw/aot-final/current-aot.stderr.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "raw/aot-final/current-aot.stdout.txt": {
+      "bytes": 315,
+      "sha256": "6ef00a48dbfb33c64bf5db22df6389185f1c59d5cf1474b52110b8ca410de013"
+    },
+    "raw/aot-final/current-archive.stderr.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "raw/aot-final/current-archive.stdout.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "raw/aot-final/current-dependencies.stderr.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "raw/aot-final/current-dependencies.stdout.txt": {
+      "bytes": 68,
+      "sha256": "d4cb7a3c68b4133b4f6e58c67ff5bfd13725d8021e930388cdc98da8a575919d"
+    },
+    "raw/aot-final/current-reader-reopens.stderr.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "raw/aot-final/current-reader-reopens.stdout.txt": {
+      "bytes": 6743,
+      "sha256": "373572d4ea6c9a96fbdf07f8ceacfee1861eb27f1c18c080022ea1c8c2b7350f"
+    },
+    "raw/aot-final/executed-shared-fixture.dart": {
+      "bytes": 9347,
+      "sha256": "1788e0e18f3fbdb4abfdf550bc44b551d05c9c1473d4cbf2c98075ec31a5cdbb"
+    },
+    "raw/aot-final/legacy-analyze.stderr.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "raw/aot-final/legacy-analyze.stdout.txt": {
+      "bytes": 62,
+      "sha256": "9a24c287709f0486ec326a89679b72699535f2b52bd8c667c20a6dd54a0e345f"
+    },
+    "raw/aot-final/legacy-aot.stderr.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "raw/aot-final/legacy-aot.stdout.txt": {
+      "bytes": 314,
+      "sha256": "77a89eadde0e521e394d2e9ade79cb97d7feea35a5746cfca35eb898d5ef6339"
+    },
+    "raw/aot-final/legacy-archive.stderr.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "raw/aot-final/legacy-archive.stdout.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "raw/aot-final/legacy-dependencies.stderr.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "raw/aot-final/legacy-dependencies.stdout.txt": {
+      "bytes": 68,
+      "sha256": "d4cb7a3c68b4133b4f6e58c67ff5bfd13725d8021e930388cdc98da8a575919d"
+    },
+    "raw/aot-final/migrated-raw-snapshot.stderr.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "raw/aot-final/migrated-raw-snapshot.stdout.txt": {
+      "bytes": 3332,
+      "sha256": "08bbf2f8bf5a26bdb4b7f276a602064da8fcffa4be4304131b994dc33b4ffca9"
+    },
+    "raw/aot-final/old-raw-snapshot.stderr.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "raw/aot-final/old-raw-snapshot.stdout.txt": {
+      "bytes": 3220,
+      "sha256": "561aca47be51643e7221a677269d00dc983b2b73b75a2340fbeb17a40f15acb8"
+    },
+    "raw/aot-final/old-reader-refuses-new-schema.stderr.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "raw/aot-final/old-reader-refuses-new-schema.stdout.txt": {
+      "bytes": 87,
+      "sha256": "9dec32b33dc9ff63fe08c31d449ccd88dd3dc06f3f770b085b3eb0a79f2307ed"
+    },
+    "raw/aot-final/old-schema20-create.stderr.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "raw/aot-final/old-schema20-create.stdout.txt": {
+      "bytes": 3283,
+      "sha256": "bcc5233ff35ac9e4efaf1d18ba84bb9eee3f00ca5b6cb47f342ee93c4fda45a4"
+    },
+    "raw/aot-final/remove-only-owned-conflict.stderr.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "raw/aot-final/remove-only-owned-conflict.stdout.txt": {
+      "bytes": 3247,
+      "sha256": "7094dafa68dce8a0cc9550abb710e7e1d493689599ef95dc770f0b3e33e9af25"
+    },
+    "raw/aot-final/result.json": {
+      "bytes": 74543,
+      "sha256": "fbaf2dfdd409a1f0f3f2b0ed3b953bca92e15c9a219e350049a0ee7822289158"
+    },
+    "raw/aot-final/same-target-migration-retry.stderr.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "raw/aot-final/same-target-migration-retry.stdout.txt": {
+      "bytes": 6743,
+      "sha256": "c6b4327bb56a3f652fe02d778f1fb1257e242b8d3365242499f7d943a3fcc037"
+    },
+    "raw/aot-final/wrong-key-refused.stderr.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "raw/aot-final/wrong-key-refused.stdout.txt": {
+      "bytes": 88,
+      "sha256": "96211806214ef60774aeae21332899b656438a15744cd9e7eaac16dd07ada2d7"
+    },
+    "raw/cleanup.json": {
+      "bytes": 582,
+      "sha256": "11a563b49e378bb52208690dbbd0131a9572ebb35fc14d257b72d0f34c3ac6c0"
+    },
+    "raw/prepared/archive-verification-1-result.json": {
+      "bytes": 169416,
+      "sha256": "1112be8a1a9ec705dfeb0d5236c66d5e81221ab10d4b1c4c155c7fd6303605b2"
+    },
+    "raw/prepared/executed-archive-verify-driver.py": {
+      "bytes": 17742,
+      "sha256": "bf7f49d737e5d8c19bb9d23aba098afd9c049e127aa318df3ee01e64b545a4c3"
+    },
+    "raw/prepared/logs/archive-prepared-current.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "raw/prepared/logs/archive-prepared-legacy.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "raw/prepared/logs/current-analyze.txt": {
+      "bytes": 96,
+      "sha256": "23d78d9f12385e1af6a015a98b93e08553e3f365d1afe9e0fab8137463e6c050"
+    },
+    "raw/prepared/logs/current-build.txt": {
+      "bytes": 14539,
+      "sha256": "57b2f5701513149239383308a80ec145c2f8ac53a1c43f36d92c16e63c5fd1b1"
+    },
+    "raw/prepared/logs/current-pub-desktop.txt": {
+      "bytes": 225,
+      "sha256": "140c91be887348ac9d362e6208e5540eb783c747962d3d5de3f7cec67f716bf2"
+    },
+    "raw/prepared/logs/current-pub-info_cli.txt": {
+      "bytes": 68,
+      "sha256": "d4cb7a3c68b4133b4f6e58c67ff5bfd13725d8021e930388cdc98da8a575919d"
+    },
+    "raw/prepared/logs/current-pub-info_core.txt": {
+      "bytes": 68,
+      "sha256": "d4cb7a3c68b4133b4f6e58c67ff5bfd13725d8021e930388cdc98da8a575919d"
+    },
+    "raw/prepared/logs/current-pub-info_storage.txt": {
+      "bytes": 68,
+      "sha256": "d4cb7a3c68b4133b4f6e58c67ff5bfd13725d8021e930388cdc98da8a575919d"
+    },
+    "raw/prepared/logs/current-resume-signature.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "raw/prepared/logs/current-signature-details.txt": {
+      "bytes": 1648,
+      "sha256": "fc0ec00dd0a176c3889332f71eb4f2599a27325f94b28a0e5fe213bbc0ac7360"
+    },
+    "raw/prepared/logs/current-signature.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "raw/prepared/logs/legacy-analyze.txt": {
+      "bytes": 96,
+      "sha256": "43c497af925eff8ea32b63ff9f33d70b768f33c06066019ae57aeac7044df2d0"
+    },
+    "raw/prepared/logs/legacy-build.txt": {
+      "bytes": 14368,
+      "sha256": "e01c74b8d2e5659fc32afb86a5f94fd8a911e195a253a286e2671c2398374b49"
+    },
+    "raw/prepared/logs/legacy-pub-desktop.txt": {
+      "bytes": 225,
+      "sha256": "140c91be887348ac9d362e6208e5540eb783c747962d3d5de3f7cec67f716bf2"
+    },
+    "raw/prepared/logs/legacy-pub-info_core.txt": {
+      "bytes": 68,
+      "sha256": "d4cb7a3c68b4133b4f6e58c67ff5bfd13725d8021e930388cdc98da8a575919d"
+    },
+    "raw/prepared/logs/legacy-pub-info_storage.txt": {
+      "bytes": 68,
+      "sha256": "d4cb7a3c68b4133b4f6e58c67ff5bfd13725d8021e930388cdc98da8a575919d"
+    },
+    "raw/prepared/logs/legacy-resume-signature.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "raw/prepared/logs/legacy-signature-details.txt": {
+      "bytes": 1647,
+      "sha256": "e1a7f715089231429078b70c49324f7ddd710a9d39d3ee35d289a2d353c73f2d"
+    },
+    "raw/prepared/logs/legacy-signature.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "raw/prepared/logs/legacy-source-archive.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "raw/prepared/logs/restore-prepared-current.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "raw/prepared/logs/restore-prepared-legacy.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "raw/prepared/result.json": {
+      "bytes": 170464,
+      "sha256": "7d8918e21a09730a8156274179b443e7f5d46520258cbdb5c3b9fa17afc629df"
+    },
+    "raw/prepared/source/current/apps/desktop/integration_test/macos_schema_keychain_upgrade.dart": {
+      "bytes": 9689,
+      "sha256": "78192673940b3b0e664706f4b56cb6f9a0309ea1f0583ac5967539881afa2d6e"
+    },
+    "raw/prepared/source/current/apps/desktop/macos/Runner/DatabaseKeyStore.swift": {
+      "bytes": 3084,
+      "sha256": "d157f50972cac3da88df60846cc7a634afeaf02e787d1f486effd1fb56634ef4"
+    },
+    "raw/prepared/source/legacy/apps/desktop/integration_test/macos_legacy_keychain_seed.dart": {
+      "bytes": 4478,
+      "sha256": "6ce2c9e7c0ce85570b5c31def980935e34bde5d49f38f383d3da4b3cfe462720"
+    },
+    "raw/prepared/source/legacy/apps/desktop/macos/Runner/Configs/AppInfo.xcconfig": {
+      "bytes": 642,
+      "sha256": "33742adcdddccf617caf6c0530eb549decc601fbefd941fab389ec5c4d375117"
+    },
+    "raw/prepared/source/legacy/apps/desktop/macos/Runner/DatabaseKeyStore.swift": {
+      "bytes": 3084,
+      "sha256": "d157f50972cac3da88df60846cc7a634afeaf02e787d1f486effd1fb56634ef4"
+    },
+    "raw/prepared/source/legacy/apps/desktop/macos/Runner/MainFlutterWindow.swift": {
+      "bytes": 17772,
+      "sha256": "ce428517626eeced6ede521450ebc23ca01a986c1d0810dbd0f921fb2af2d9ab"
+    },
+    "raw/prepared/source/legacy/apps/desktop/macos/Runner.xcodeproj/project.pbxproj": {
+      "bytes": 29348,
+      "sha256": "b60825c3eae37a4f55da75add563e377307fd099944f9bc5718bc6f827703313"
+    },
+    "raw/prepared/source/legacy/scripts/qa/macos-schema-keychain.py": {
+      "bytes": 15298,
+      "sha256": "73160b572e35403d333bcf55d3064a84df89d1c18862c0b1ede9505779846154"
+    }
+  }
+}
