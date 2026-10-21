@@ -1,0 +1,1 @@
+/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue42-actual-upgrade-unlocked-2/Changed-Version.app: replacing existing signature

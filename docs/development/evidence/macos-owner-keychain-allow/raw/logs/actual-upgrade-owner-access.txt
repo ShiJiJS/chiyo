@@ -1,0 +1,6 @@
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+MAC_KEYCHAIN_ROOT=[OWNED_SYNTHETIC_ROOT]
+MAC_KEYCHAIN_INTERACTIVE_STATE={"state":"failed","pending":false,"attempts":0,"deniedAttempts":0,"canRequestAccess":true,"portPublished":false}
+MAC_KEYCHAIN_INTERACTIVE_STATE={"state":"starting","pending":true,"attempts":1,"deniedAttempts":0,"canRequestAccess":false,"portPublished":false}
+MAC_KEYCHAIN_INTERACTIVE_STATE={"state":"failed","pending":false,"attempts":1,"deniedAttempts":1,"canRequestAccess":true,"portPublished":false}
+MAC_KEYCHAIN_INTERACTIVE_STATE={"state":"starting","pending":true,"attempts":2,"deniedAttempts":1,"canRequestAccess":false,"portPublished":false}
