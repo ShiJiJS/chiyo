@@ -113,3 +113,5 @@ docs/development/evidence/macos-management-current/raw/** -text -diff
 docs/development/evidence/macos-native-file-panels/raw/** -text -diff
 
 docs/development/evidence/macos-codex-delegation/raw/** -text -diff
+
+docs/development/evidence/macos-owner-keychain-allow/raw/** -text -diff
