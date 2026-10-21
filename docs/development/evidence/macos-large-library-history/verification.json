@@ -1,0 +1,1011 @@
+{
+  "scope": "Mac native Debug, SQLCipher, controlled tester input/owner fixtures and independent package-7 AOT CLI; no physical keyboard, Keychain or system panels.",
+  "sourceCommit": "4fd320cd3881b1a6143d5847b5a2576e1ee9631f",
+  "runs": [
+    {
+      "run": "issue48-large-library-1",
+      "complete": false,
+      "includedImages": [
+        "native-10-tags-purple-100.png"
+      ]
+    },
+    {
+      "run": "issue48-large-library-2",
+      "complete": false,
+      "includedImages": [
+        "native-11-pagination-purple-100.png"
+      ]
+    },
+    {
+      "run": "issue48-large-library-3",
+      "complete": false,
+      "includedImages": [
+        "native-10-tags-purple-100.png"
+      ]
+    },
+    {
+      "run": "issue48-large-library-4",
+      "complete": false,
+      "includedImages": [
+        "native-10-tags-purple-100.png"
+      ]
+    },
+    {
+      "run": "issue48-large-library-5",
+      "complete": false,
+      "includedImages": [
+        "native-11-pagination-purple-100.png"
+      ]
+    },
+    {
+      "run": "issue48-large-history-1",
+      "complete": false,
+      "includedImages": [
+        "native-reopened-history-green-1440-100.png"
+      ]
+    },
+    {
+      "run": "issue48-large-history-2",
+      "complete": false,
+      "includedImages": []
+    },
+    {
+      "run": "issue48-large-library-6",
+      "complete": true,
+      "includedImages": [
+        "native-01-created.png",
+        "native-02-cycle-rejected.png",
+        "native-03-last-page.png",
+        "native-04-public-field-search.png",
+        "native-05-invalid-query.png",
+        "native-06-combined-filters.png",
+        "native-07-moved-renamed.png",
+        "native-08-moved-filter.png",
+        "native-09-reopened.png",
+        "native-10-initial-blue-100.png",
+        "native-10-initial-blue-200.png",
+        "native-10-initial-green-100.png",
+        "native-10-initial-green-200.png",
+        "native-10-initial-mono-100.png",
+        "native-10-initial-mono-200.png",
+        "native-10-initial-purple-100.png",
+        "native-10-initial-purple-200.png",
+        "native-10-tags-blue-100.png",
+        "native-10-tags-blue-200.png",
+        "native-10-tags-green-100.png",
+        "native-10-tags-green-200.png",
+        "native-10-tags-mono-100.png",
+        "native-10-tags-mono-200.png",
+        "native-10-tags-purple-100.png",
+        "native-10-tags-purple-200.png",
+        "native-11-directory-blue-100.png",
+        "native-11-directory-blue-200.png",
+        "native-11-directory-green-100.png",
+        "native-11-directory-green-200.png",
+        "native-11-directory-mono-100.png",
+        "native-11-directory-mono-200.png",
+        "native-11-directory-purple-100.png",
+        "native-11-directory-purple-200.png",
+        "native-11-pagination-blue-100.png",
+        "native-11-pagination-blue-200.png",
+        "native-11-pagination-green-100.png",
+        "native-11-pagination-green-200.png",
+        "native-11-pagination-mono-100.png",
+        "native-11-pagination-mono-200.png",
+        "native-11-pagination-purple-100.png",
+        "native-11-pagination-purple-200.png"
+      ]
+    },
+    {
+      "run": "issue48-large-history-3",
+      "complete": true,
+      "includedImages": [
+        "native-all-removed-history-purple-1440-100.png",
+        "native-archived-history-blue-1280-200-scope-scrolled.png",
+        "native-archived-history-blue-1280-200.png",
+        "native-archived-history-green-1280-200-scope-scrolled.png",
+        "native-archived-history-green-1280-200.png",
+        "native-archived-history-mono-1280-200-scope-scrolled.png",
+        "native-archived-history-mono-1280-200.png",
+        "native-archived-history-purple-1280-200-scope-scrolled.png",
+        "native-archived-history-purple-1280-200.png",
+        "native-full-app-history-search-1280-200-scope-scrolled.png",
+        "native-full-app-history-search-1280-200.png",
+        "native-full-app-history-search-1440-100-scope-scrolled.png",
+        "native-full-app-history-search-1440-100.png",
+        "native-large-request-200-percent.png",
+        "native-partial-history-blue-1280-200-scope-scrolled.png",
+        "native-partial-history-blue-1280-200.png",
+        "native-partial-history-blue-1440-100.png",
+        "native-partial-history-green-1280-200-scope-scrolled.png",
+        "native-partial-history-green-1280-200.png",
+        "native-partial-history-green-1440-100.png",
+        "native-partial-history-mono-1280-200-scope-scrolled.png",
+        "native-partial-history-mono-1280-200.png",
+        "native-partial-history-mono-1440-100.png",
+        "native-partial-history-purple-1280-200-scope-scrolled.png",
+        "native-partial-history-purple-1280-200.png",
+        "native-partial-history-purple-1440-100.png",
+        "native-reopened-history-green-1440-100.png"
+      ]
+    }
+  ],
+  "failureImageSelection": "Only one selected image per failed run; successful runs include every captured PNG. No database, key or backup is included.",
+  "files": [
+    {
+      "path": "raw/issue48-large-analyze.txt",
+      "bytes": 96,
+      "sha256": "11b6681c6be022ad1bd1451d0952783104359cef9d576e82be083fa04893a464"
+    },
+    {
+      "path": "raw/issue48-large-codesign.txt",
+      "bytes": 2197,
+      "sha256": "bfc79d7cdeee2fa7bd17d4645565257a4633c4e7e2df6991a65282c163321f72"
+    },
+    {
+      "path": "raw/issue48-large-debug-build.txt",
+      "bytes": 125,
+      "sha256": "bb928504a91fe0ce4dc0bb921b142b31033cbbf74e92214ba34521fe3f2f22be"
+    },
+    {
+      "path": "raw/issue48-large-final-checks.json",
+      "bytes": 754,
+      "sha256": "e3076a26deef2ce22c6435c5f31ec2ff84348cd1d2fed63d9aed59d5a3437b84"
+    },
+    {
+      "path": "raw/issue48-large-fixture-cleanup.json",
+      "bytes": 405,
+      "sha256": "a141f346d28037a29f1e79e5424ed9a7c9f765fc8b63eaff4b103620bd1ddd12"
+    },
+    {
+      "path": "raw/issue48-large-history-1/cli-0-stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/issue48-large-history-1/cli-1-stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/issue48-large-history-1/cli-2-stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/issue48-large-history-1/flutter.txt",
+      "bytes": 2549,
+      "sha256": "f95186bb0536537b35cfdd9c3a405944558c98db287efae9ab10771d88ef8419"
+    },
+    {
+      "path": "raw/issue48-large-history-1/native-reopened-history-green-1440-100.png",
+      "bytes": 268783,
+      "sha256": "5bfe2bdb495cf01ba0a48e0963649e5992dff061161b59e97f93d757f85ad8b2"
+    },
+    {
+      "path": "raw/issue48-large-history-1/result.json",
+      "bytes": 6580,
+      "sha256": "0ef64307f63bd96cf5a24570fedd3089d60e8f6878d2bc2f709d67a43308e3bb"
+    },
+    {
+      "path": "raw/issue48-large-history-1/sources/history.dart",
+      "bytes": 56701,
+      "sha256": "fbc8ffbdadd1db69051f320370d1b0a26416edb0face822b6ce1ad624af8b1e3"
+    },
+    {
+      "path": "raw/issue48-large-history-1/sources/macos-scope-ui.py",
+      "bytes": 9788,
+      "sha256": "2671fb0faacc886c74ebc0c3e2bfea77161d1a76319d4d9c04c3ce73834ec06c"
+    },
+    {
+      "path": "raw/issue48-large-history-1/sources/macos_removed_scope_native_test.dart",
+      "bytes": 21300,
+      "sha256": "36f71f7a6f0a93c80a40bfbfc66fc5fafa3f4623970eb6be7fade43bf0aee102"
+    },
+    {
+      "path": "raw/issue48-large-history-1/sources/main.dart",
+      "bytes": 16729,
+      "sha256": "7a396b7917211b58906cd7bdd789d585d0cd511f1a93145246747cfaaf4cb883"
+    },
+    {
+      "path": "raw/issue48-large-history-1/sources/native_semantics_lifetime.dart",
+      "bytes": 1540,
+      "sha256": "a274da35d57e9bca3322b7e5b70a2bc610990e8e8dc3fba0821bbb1e9219036f"
+    },
+    {
+      "path": "raw/issue48-large-history-2/flutter.txt",
+      "bytes": 2386,
+      "sha256": "08bb1e40aef1f8cd63bf5b623469edb75916f4fb325233315f43dc6e001c76a3"
+    },
+    {
+      "path": "raw/issue48-large-history-2/result.json",
+      "bytes": 1548,
+      "sha256": "6f002309c103c9d6c1114dfa201c65136b0c31d396ca57e60b009030c99573da"
+    },
+    {
+      "path": "raw/issue48-large-history-2/sources/history.dart",
+      "bytes": 56701,
+      "sha256": "fbc8ffbdadd1db69051f320370d1b0a26416edb0face822b6ce1ad624af8b1e3"
+    },
+    {
+      "path": "raw/issue48-large-history-2/sources/macos-scope-ui.py",
+      "bytes": 9788,
+      "sha256": "2671fb0faacc886c74ebc0c3e2bfea77161d1a76319d4d9c04c3ce73834ec06c"
+    },
+    {
+      "path": "raw/issue48-large-history-2/sources/macos_removed_scope_native_test.dart",
+      "bytes": 23021,
+      "sha256": "2e6a0261cda81a4078a85f4110af2be84d97d93d4077a409065af4b5e4bd8ada"
+    },
+    {
+      "path": "raw/issue48-large-history-2/sources/main.dart",
+      "bytes": 16729,
+      "sha256": "7a396b7917211b58906cd7bdd789d585d0cd511f1a93145246747cfaaf4cb883"
+    },
+    {
+      "path": "raw/issue48-large-history-2/sources/native_semantics_lifetime.dart",
+      "bytes": 1540,
+      "sha256": "a274da35d57e9bca3322b7e5b70a2bc610990e8e8dc3fba0821bbb1e9219036f"
+    },
+    {
+      "path": "raw/issue48-large-history-3/cli-0-stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/issue48-large-history-3/cli-1-stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/issue48-large-history-3/cli-2-stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/issue48-large-history-3/cli-3-stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/issue48-large-history-3/flutter.txt",
+      "bytes": 529,
+      "sha256": "7756147d6c43d8e259da8382daae6ba1ae9d567e20fcbeaeeae534e245e356fa"
+    },
+    {
+      "path": "raw/issue48-large-history-3/native-all-removed-history-purple-1440-100.png",
+      "bytes": 243850,
+      "sha256": "e87f5f76073f36ce267feb5de896254b46ca30801c97741952119a4ace8c9883"
+    },
+    {
+      "path": "raw/issue48-large-history-3/native-archived-history-blue-1280-200-scope-scrolled.png",
+      "bytes": 352481,
+      "sha256": "f4f9343b657a2a5bfe9527ff334a7f8b52078e3df42b199ec32a92ffd6c172f2"
+    },
+    {
+      "path": "raw/issue48-large-history-3/native-archived-history-blue-1280-200.png",
+      "bytes": 369762,
+      "sha256": "b341f9de414fc947ea107e038f0378e10cf5445a263302932ee5bdae3a070b04"
+    },
+    {
+      "path": "raw/issue48-large-history-3/native-archived-history-green-1280-200-scope-scrolled.png",
+      "bytes": 352772,
+      "sha256": "f037f74e942eb065c01d81e901a736534688471ae34ba2d596cb7d9ed8ab5aaa"
+    },
+    {
+      "path": "raw/issue48-large-history-3/native-archived-history-green-1280-200.png",
+      "bytes": 369348,
+      "sha256": "aea1c5f4b51878c531dea3b78529fc454f6fe0ba8de55a06cc17a2fc48767104"
+    },
+    {
+      "path": "raw/issue48-large-history-3/native-archived-history-mono-1280-200-scope-scrolled.png",
+      "bytes": 332640,
+      "sha256": "eb9be49b0229fa5a4c92a6e5340632b5f82fe9693e7670158a07f4c8bade5618"
+    },
+    {
+      "path": "raw/issue48-large-history-3/native-archived-history-mono-1280-200.png",
+      "bytes": 347388,
+      "sha256": "77c17028bafd23608b919dfb8c2d6563af9386b6bc2767c0f94d634eb9c37401"
+    },
+    {
+      "path": "raw/issue48-large-history-3/native-archived-history-purple-1280-200-scope-scrolled.png",
+      "bytes": 350123,
+      "sha256": "93367e9eb526fcbf886f0beed4942aefdc2b7e0d9059b7ee7a7b61c0a504274f"
+    },
+    {
+      "path": "raw/issue48-large-history-3/native-archived-history-purple-1280-200.png",
+      "bytes": 364527,
+      "sha256": "b25dd0f9c5f551a782ad505225c4e25c954a44cca8f66c406d5a7dad0f761e67"
+    },
+    {
+      "path": "raw/issue48-large-history-3/native-full-app-history-search-1280-200-scope-scrolled.png",
+      "bytes": 458129,
+      "sha256": "7265c15b09780a954f06f0b8ebb0a2c644a4030528f7a948ad43bc162c51d579"
+    },
+    {
+      "path": "raw/issue48-large-history-3/native-full-app-history-search-1280-200.png",
+      "bytes": 409349,
+      "sha256": "0971bf6900f5d9aea8ff034da640730d981f64dbaa19d60b7407c2899ae2f496"
+    },
+    {
+      "path": "raw/issue48-large-history-3/native-full-app-history-search-1440-100-scope-scrolled.png",
+      "bytes": 430830,
+      "sha256": "569fd3d88c91e7d2afa23092b0f300db50f112b74d5c8c4b38d272d806be2088"
+    },
+    {
+      "path": "raw/issue48-large-history-3/native-full-app-history-search-1440-100.png",
+      "bytes": 526155,
+      "sha256": "a128c876c6e93553005d0e91a10b32ace040cb0736d2c013b7c587086f0c1fd0"
+    },
+    {
+      "path": "raw/issue48-large-history-3/native-large-request-200-percent.png",
+      "bytes": 276088,
+      "sha256": "b822bbe5ba17936b2fb4713c544dea3efb18b370b8cbe20789ac030f339846aa"
+    },
+    {
+      "path": "raw/issue48-large-history-3/native-partial-history-blue-1280-200-scope-scrolled.png",
+      "bytes": 328055,
+      "sha256": "2d55f4b3a5928c9401c7eace8e1e283f9e6c01dd282ce21e8d6ebda58a2390d1"
+    },
+    {
+      "path": "raw/issue48-large-history-3/native-partial-history-blue-1280-200.png",
+      "bytes": 347416,
+      "sha256": "03a3a9cc93a9013dd650f356f54e222d3c04e3bcf424edc4e33754afdec5dd3b"
+    },
+    {
+      "path": "raw/issue48-large-history-3/native-partial-history-blue-1440-100.png",
+      "bytes": 230381,
+      "sha256": "530632e0ffe0c3d763b04606a1483ab75da59e54299963c88a5a4f5fdf79eba5"
+    },
+    {
+      "path": "raw/issue48-large-history-3/native-partial-history-green-1280-200-scope-scrolled.png",
+      "bytes": 328467,
+      "sha256": "0ca3f749035cd2e48afae5e4ff6f250fb7ad46752042c3995c67bd43f9eaee76"
+    },
+    {
+      "path": "raw/issue48-large-history-3/native-partial-history-green-1280-200.png",
+      "bytes": 347258,
+      "sha256": "346513538d8c045501cc9e021154932cf25b2acdfdb2266df49720fc1b8356c3"
+    },
+    {
+      "path": "raw/issue48-large-history-3/native-partial-history-green-1440-100.png",
+      "bytes": 230608,
+      "sha256": "24794bf07718abebccd744b474b5f1589a0f05fe2956cb44e2c0ead0e2958543"
+    },
+    {
+      "path": "raw/issue48-large-history-3/native-partial-history-mono-1280-200-scope-scrolled.png",
+      "bytes": 309678,
+      "sha256": "24c78d6e3e92f2ea2dcbf36c1508d2e6036425b8471e99eb36c79ff90fb19984"
+    },
+    {
+      "path": "raw/issue48-large-history-3/native-partial-history-mono-1280-200.png",
+      "bytes": 325910,
+      "sha256": "ae70ccbcc1e8b5e5189ef57f397d0a689aeb6f06373280448fabe8f3a72ad3d6"
+    },
+    {
+      "path": "raw/issue48-large-history-3/native-partial-history-mono-1440-100.png",
+      "bytes": 219552,
+      "sha256": "bf9edc78799549cfccb86fad2fd7507514bf012b41945cdf8c20bd2842d3070d"
+    },
+    {
+      "path": "raw/issue48-large-history-3/native-partial-history-purple-1280-200-scope-scrolled.png",
+      "bytes": 325989,
+      "sha256": "2699372f32e2769339a10851709f6d8466c31e6b43cd3804e8f1c53fb5184c90"
+    },
+    {
+      "path": "raw/issue48-large-history-3/native-partial-history-purple-1280-200.png",
+      "bytes": 343778,
+      "sha256": "3f39e9f91cbf00ec0646d718061742d2f942988b12b0fff16f6a387b52cbcfba"
+    },
+    {
+      "path": "raw/issue48-large-history-3/native-partial-history-purple-1440-100.png",
+      "bytes": 228377,
+      "sha256": "e1e83a9011e9dac6867264183d5d17433f3d32e0353af1f36f1fd1ce705d7029"
+    },
+    {
+      "path": "raw/issue48-large-history-3/native-reopened-history-green-1440-100.png",
+      "bytes": 270258,
+      "sha256": "93aa133c43c5a2e3b2e0d87aaf63a34301d64c6fe73a919ab712122ad8f73e7f"
+    },
+    {
+      "path": "raw/issue48-large-history-3/native-result.json",
+      "bytes": 2985,
+      "sha256": "faf6dd8589842e862f87870784409e0cd4649e3bc67e0717d2b7b878c53d3f3e"
+    },
+    {
+      "path": "raw/issue48-large-history-3/result.json",
+      "bytes": 12014,
+      "sha256": "5421ee844e7f4486d661130d2768ab8074de11026ceaecb75ac6d6555f77b38c"
+    },
+    {
+      "path": "raw/issue48-large-history-3/sources/history.dart",
+      "bytes": 56701,
+      "sha256": "fbc8ffbdadd1db69051f320370d1b0a26416edb0face822b6ce1ad624af8b1e3"
+    },
+    {
+      "path": "raw/issue48-large-history-3/sources/macos-scope-ui.py",
+      "bytes": 9788,
+      "sha256": "2671fb0faacc886c74ebc0c3e2bfea77161d1a76319d4d9c04c3ce73834ec06c"
+    },
+    {
+      "path": "raw/issue48-large-history-3/sources/macos_removed_scope_native_test.dart",
+      "bytes": 23048,
+      "sha256": "e99634bf4be9933567194698cc73300693259e4de35b494ae76b6d969ca7dbd4"
+    },
+    {
+      "path": "raw/issue48-large-history-3/sources/main.dart",
+      "bytes": 16729,
+      "sha256": "7a396b7917211b58906cd7bdd789d585d0cd511f1a93145246747cfaaf4cb883"
+    },
+    {
+      "path": "raw/issue48-large-history-3/sources/native_semantics_lifetime.dart",
+      "bytes": 1540,
+      "sha256": "a274da35d57e9bca3322b7e5b70a2bc610990e8e8dc3fba0821bbb1e9219036f"
+    },
+    {
+      "path": "raw/issue48-large-library-1/cli-0-stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/issue48-large-library-1/cli-1-stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/issue48-large-library-1/flutter.txt",
+      "bytes": 2586,
+      "sha256": "867110a62fe972ffe7f3f5efcfc5197e916624d7296ad7a08a0690519ced5481"
+    },
+    {
+      "path": "raw/issue48-large-library-1/native-10-tags-purple-100.png",
+      "bytes": 89621,
+      "sha256": "b2bc277fa40e7be10b7d21931bd56b27aef15025f38951d469ee02ede84b96b0"
+    },
+    {
+      "path": "raw/issue48-large-library-1/result.json",
+      "bytes": 7777,
+      "sha256": "a14311536104c9d40818b35eca793d30bb2cbf4e89874edbf9d49af200cae06b"
+    },
+    {
+      "path": "raw/issue48-large-library-1/sources/information_editor.dart",
+      "bytes": 35266,
+      "sha256": "59d36a64441022117e9bfe43645b75531f71fc698da1372d3807d2fc51416989"
+    },
+    {
+      "path": "raw/issue48-large-library-1/sources/library.dart",
+      "bytes": 55925,
+      "sha256": "90f222b10538a3aa3f1c703dd3ff091154972813635147fb0cf354ac0c32e4ed"
+    },
+    {
+      "path": "raw/issue48-large-library-1/sources/macos-library-filters-ui.py",
+      "bytes": 9208,
+      "sha256": "9ab4d8bb4ba942ab0f38f762bb36abe908133e0e1df3655cb8f98c44e6e66be5"
+    },
+    {
+      "path": "raw/issue48-large-library-1/sources/macos_library_filters_native_test.dart",
+      "bytes": 17118,
+      "sha256": "d1c6cd9405a7dc835984907193d71191b139206adf8e89ab3068655ce6e2e9c3"
+    },
+    {
+      "path": "raw/issue48-large-library-1/sources/main.dart",
+      "bytes": 16729,
+      "sha256": "7a396b7917211b58906cd7bdd789d585d0cd511f1a93145246747cfaaf4cb883"
+    },
+    {
+      "path": "raw/issue48-large-library-1/sources/native_semantics_lifetime.dart",
+      "bytes": 1540,
+      "sha256": "a274da35d57e9bca3322b7e5b70a2bc610990e8e8dc3fba0821bbb1e9219036f"
+    },
+    {
+      "path": "raw/issue48-large-library-1/sources/organization.dart",
+      "bytes": 16785,
+      "sha256": "8e2d97624cac010295650f0179551a62f43131a81e086e95fef24c1cc377d319"
+    },
+    {
+      "path": "raw/issue48-large-library-2/cli-0-stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/issue48-large-library-2/cli-1-stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/issue48-large-library-2/flutter.txt",
+      "bytes": 2360,
+      "sha256": "63d02a32c63c3c6c3ba33b789ad0e23bdc9fd8a71d8ba365185dcc87f8a865e1"
+    },
+    {
+      "path": "raw/issue48-large-library-2/native-11-pagination-purple-100.png",
+      "bytes": 166691,
+      "sha256": "d9304cf0b8dfc39d876339943338b46f6f8bd4b1c405505fe8272946ae9dacea"
+    },
+    {
+      "path": "raw/issue48-large-library-2/result.json",
+      "bytes": 7797,
+      "sha256": "6a2a8c243f967a067c37a817714f8826ddf7901df8c817bac0406ca021c00d0c"
+    },
+    {
+      "path": "raw/issue48-large-library-2/sources/information_editor.dart",
+      "bytes": 35266,
+      "sha256": "59d36a64441022117e9bfe43645b75531f71fc698da1372d3807d2fc51416989"
+    },
+    {
+      "path": "raw/issue48-large-library-2/sources/library.dart",
+      "bytes": 55925,
+      "sha256": "90f222b10538a3aa3f1c703dd3ff091154972813635147fb0cf354ac0c32e4ed"
+    },
+    {
+      "path": "raw/issue48-large-library-2/sources/macos-library-filters-ui.py",
+      "bytes": 9208,
+      "sha256": "9ab4d8bb4ba942ab0f38f762bb36abe908133e0e1df3655cb8f98c44e6e66be5"
+    },
+    {
+      "path": "raw/issue48-large-library-2/sources/macos_library_filters_native_test.dart",
+      "bytes": 17601,
+      "sha256": "c64790871a5d097564db8e13e57f96dc34d767ebf1aae9950b1e6c79e60376c1"
+    },
+    {
+      "path": "raw/issue48-large-library-2/sources/main.dart",
+      "bytes": 16729,
+      "sha256": "7a396b7917211b58906cd7bdd789d585d0cd511f1a93145246747cfaaf4cb883"
+    },
+    {
+      "path": "raw/issue48-large-library-2/sources/native_semantics_lifetime.dart",
+      "bytes": 1540,
+      "sha256": "a274da35d57e9bca3322b7e5b70a2bc610990e8e8dc3fba0821bbb1e9219036f"
+    },
+    {
+      "path": "raw/issue48-large-library-2/sources/organization.dart",
+      "bytes": 16785,
+      "sha256": "8e2d97624cac010295650f0179551a62f43131a81e086e95fef24c1cc377d319"
+    },
+    {
+      "path": "raw/issue48-large-library-3/cli-0-stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/issue48-large-library-3/cli-1-stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/issue48-large-library-3/flutter.txt",
+      "bytes": 7349,
+      "sha256": "5201981956a37cd1c411e98006fa6c3476108133c67d39847d4bb55602e6f979"
+    },
+    {
+      "path": "raw/issue48-large-library-3/native-10-tags-purple-100.png",
+      "bytes": 161900,
+      "sha256": "407bde2481cf55da0dd0cb3072fcab772cfbb97fd8ea6f41f9bfe80004a49e05"
+    },
+    {
+      "path": "raw/issue48-large-library-3/result.json",
+      "bytes": 7777,
+      "sha256": "168c990b13f5490d62690c8653e5bb97e67b1e505327e1d22ad0389653a3bff3"
+    },
+    {
+      "path": "raw/issue48-large-library-3/sources/information_editor.dart",
+      "bytes": 35266,
+      "sha256": "59d36a64441022117e9bfe43645b75531f71fc698da1372d3807d2fc51416989"
+    },
+    {
+      "path": "raw/issue48-large-library-3/sources/library.dart",
+      "bytes": 55925,
+      "sha256": "90f222b10538a3aa3f1c703dd3ff091154972813635147fb0cf354ac0c32e4ed"
+    },
+    {
+      "path": "raw/issue48-large-library-3/sources/macos-library-filters-ui.py",
+      "bytes": 9231,
+      "sha256": "0b13ecabd2c23801f58463ee4636e591900076b60f44610f83f82031ff723dfa"
+    },
+    {
+      "path": "raw/issue48-large-library-3/sources/macos_library_filters_native_test.dart",
+      "bytes": 17922,
+      "sha256": "bf260f3790decceb2cb1bcd68ee2b4aedb6f6c9c1615db222793c26bb90e4f91"
+    },
+    {
+      "path": "raw/issue48-large-library-3/sources/main.dart",
+      "bytes": 16729,
+      "sha256": "7a396b7917211b58906cd7bdd789d585d0cd511f1a93145246747cfaaf4cb883"
+    },
+    {
+      "path": "raw/issue48-large-library-3/sources/native_semantics_lifetime.dart",
+      "bytes": 1540,
+      "sha256": "a274da35d57e9bca3322b7e5b70a2bc610990e8e8dc3fba0821bbb1e9219036f"
+    },
+    {
+      "path": "raw/issue48-large-library-3/sources/organization.dart",
+      "bytes": 16785,
+      "sha256": "8e2d97624cac010295650f0179551a62f43131a81e086e95fef24c1cc377d319"
+    },
+    {
+      "path": "raw/issue48-large-library-4/cli-0-stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/issue48-large-library-4/cli-1-stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/issue48-large-library-4/flutter.txt",
+      "bytes": 7391,
+      "sha256": "56a7f68b67c3305acf5ba6ee4dfa25062d7f2a68a8d863c61e4442776b7d5a1a"
+    },
+    {
+      "path": "raw/issue48-large-library-4/native-10-tags-purple-100.png",
+      "bytes": 161900,
+      "sha256": "407bde2481cf55da0dd0cb3072fcab772cfbb97fd8ea6f41f9bfe80004a49e05"
+    },
+    {
+      "path": "raw/issue48-large-library-4/result.json",
+      "bytes": 7818,
+      "sha256": "833673c055fc70de018bad3e257d815ec6aab2d18f930433adc025a41e769770"
+    },
+    {
+      "path": "raw/issue48-large-library-4/sources/information_editor.dart",
+      "bytes": 35266,
+      "sha256": "59d36a64441022117e9bfe43645b75531f71fc698da1372d3807d2fc51416989"
+    },
+    {
+      "path": "raw/issue48-large-library-4/sources/library.dart",
+      "bytes": 55925,
+      "sha256": "90f222b10538a3aa3f1c703dd3ff091154972813635147fb0cf354ac0c32e4ed"
+    },
+    {
+      "path": "raw/issue48-large-library-4/sources/macos-library-filters-ui.py",
+      "bytes": 9646,
+      "sha256": "ef9fd331117368089d9855c954a94ed179916515c7af8ae58557daca86a642e0"
+    },
+    {
+      "path": "raw/issue48-large-library-4/sources/macos_library_filters_native_test.dart",
+      "bytes": 18081,
+      "sha256": "bc93f3888ac9e719635a1406321e5ecb1fed0eacf8ddfcddcd43d1fedce82411"
+    },
+    {
+      "path": "raw/issue48-large-library-4/sources/main.dart",
+      "bytes": 16729,
+      "sha256": "7a396b7917211b58906cd7bdd789d585d0cd511f1a93145246747cfaaf4cb883"
+    },
+    {
+      "path": "raw/issue48-large-library-4/sources/native_semantics_lifetime.dart",
+      "bytes": 1540,
+      "sha256": "a274da35d57e9bca3322b7e5b70a2bc610990e8e8dc3fba0821bbb1e9219036f"
+    },
+    {
+      "path": "raw/issue48-large-library-4/sources/organization.dart",
+      "bytes": 16785,
+      "sha256": "8e2d97624cac010295650f0179551a62f43131a81e086e95fef24c1cc377d319"
+    },
+    {
+      "path": "raw/issue48-large-library-5/cli-0-stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/issue48-large-library-5/cli-1-stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/issue48-large-library-5/flutter.txt",
+      "bytes": 7553,
+      "sha256": "56c5d4e526386ee3d400a074baad85d66ff30a9deb3c82d6d83670d21535cd5c"
+    },
+    {
+      "path": "raw/issue48-large-library-5/native-11-pagination-purple-100.png",
+      "bytes": 303472,
+      "sha256": "387dca954834576b3c3c19012fcdf11f30d4aa591980021c2363d2fe628920bc"
+    },
+    {
+      "path": "raw/issue48-large-library-5/result.json",
+      "bytes": 7818,
+      "sha256": "2ce676276086ebeb6d48957572489e1bc4911871f03489c40a4907b04d899b3b"
+    },
+    {
+      "path": "raw/issue48-large-library-5/sources/information_editor.dart",
+      "bytes": 35266,
+      "sha256": "59d36a64441022117e9bfe43645b75531f71fc698da1372d3807d2fc51416989"
+    },
+    {
+      "path": "raw/issue48-large-library-5/sources/library.dart",
+      "bytes": 55925,
+      "sha256": "90f222b10538a3aa3f1c703dd3ff091154972813635147fb0cf354ac0c32e4ed"
+    },
+    {
+      "path": "raw/issue48-large-library-5/sources/macos-library-filters-ui.py",
+      "bytes": 9646,
+      "sha256": "ef9fd331117368089d9855c954a94ed179916515c7af8ae58557daca86a642e0"
+    },
+    {
+      "path": "raw/issue48-large-library-5/sources/macos_library_filters_native_test.dart",
+      "bytes": 17962,
+      "sha256": "37ef53d94b6543274c413a5f2a3c13a70ce6acaf0a9b7416cb8eb2b4aa3db824"
+    },
+    {
+      "path": "raw/issue48-large-library-5/sources/main.dart",
+      "bytes": 16729,
+      "sha256": "7a396b7917211b58906cd7bdd789d585d0cd511f1a93145246747cfaaf4cb883"
+    },
+    {
+      "path": "raw/issue48-large-library-5/sources/native_semantics_lifetime.dart",
+      "bytes": 1540,
+      "sha256": "a274da35d57e9bca3322b7e5b70a2bc610990e8e8dc3fba0821bbb1e9219036f"
+    },
+    {
+      "path": "raw/issue48-large-library-5/sources/organization.dart",
+      "bytes": 16785,
+      "sha256": "8e2d97624cac010295650f0179551a62f43131a81e086e95fef24c1cc377d319"
+    },
+    {
+      "path": "raw/issue48-large-library-6/cli-0-stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/issue48-large-library-6/cli-1-stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/issue48-large-library-6/flutter.txt",
+      "bytes": 8253,
+      "sha256": "28bb0959f5d6912519886b07bf1ae12d5ea067cee59b7a5d7160ecb897c12605"
+    },
+    {
+      "path": "raw/issue48-large-library-6/native-01-created.png",
+      "bytes": 268733,
+      "sha256": "321f1c7eb7349253a0332b1fe1a50a34fc8f455dd1c9c8178a4346d322845a35"
+    },
+    {
+      "path": "raw/issue48-large-library-6/native-02-cycle-rejected.png",
+      "bytes": 378993,
+      "sha256": "5e20f602e36201e469d63471996fe29e67a786a37004075bda53d127d10bdb51"
+    },
+    {
+      "path": "raw/issue48-large-library-6/native-03-last-page.png",
+      "bytes": 328496,
+      "sha256": "86193af0584d607b30528b0f3c602abc867f2367017bb2bdcab7ba2880aee3fb"
+    },
+    {
+      "path": "raw/issue48-large-library-6/native-04-public-field-search.png",
+      "bytes": 252833,
+      "sha256": "72a831a20e05509e8bf20f1b69ef7059d2eeb243886ea7b34f44d5008e519f60"
+    },
+    {
+      "path": "raw/issue48-large-library-6/native-05-invalid-query.png",
+      "bytes": 156219,
+      "sha256": "6f752a9dcca297f59df7a3777765e398ad20be8ecbd87662d7b229c9eb44cf20"
+    },
+    {
+      "path": "raw/issue48-large-library-6/native-06-combined-filters.png",
+      "bytes": 327301,
+      "sha256": "9c00b50fa38b0d875ea4303c6c70583c69817269d80485a435f763e42cc1e448"
+    },
+    {
+      "path": "raw/issue48-large-library-6/native-07-moved-renamed.png",
+      "bytes": 435265,
+      "sha256": "e6b5693fd430058b1d09948fa81327dfc087441338a2aaf2155729aa55e43c78"
+    },
+    {
+      "path": "raw/issue48-large-library-6/native-08-moved-filter.png",
+      "bytes": 337312,
+      "sha256": "7b529c1c23a74410f9a058dd2e97729f07206f9cbaa42c97306936717d3ce282"
+    },
+    {
+      "path": "raw/issue48-large-library-6/native-09-reopened.png",
+      "bytes": 337312,
+      "sha256": "7b529c1c23a74410f9a058dd2e97729f07206f9cbaa42c97306936717d3ce282"
+    },
+    {
+      "path": "raw/issue48-large-library-6/native-10-initial-blue-100.png",
+      "bytes": 299572,
+      "sha256": "2b5a4718439d226ec9bd9e81dd0ffdd3a85117f35f66a1d4576b83fb6bae8b8f"
+    },
+    {
+      "path": "raw/issue48-large-library-6/native-10-initial-blue-200.png",
+      "bytes": 346486,
+      "sha256": "f316acbdc83e1fb8e87203e500ebc80298793c4ca1685571fc9713e44bd046c7"
+    },
+    {
+      "path": "raw/issue48-large-library-6/native-10-initial-green-100.png",
+      "bytes": 300866,
+      "sha256": "852636863e42f174817662f427861d8412f0172e248bb8b1dadaf9d6e98e5544"
+    },
+    {
+      "path": "raw/issue48-large-library-6/native-10-initial-green-200.png",
+      "bytes": 347928,
+      "sha256": "7d3d3cd778a64335d3066c885aa4be4f9300e140490be82557104c2ac2519a57"
+    },
+    {
+      "path": "raw/issue48-large-library-6/native-10-initial-mono-100.png",
+      "bytes": 285018,
+      "sha256": "9925af52c7c569973ac2bf11d6e3463d2bde52151ba171258f166d49b5974884"
+    },
+    {
+      "path": "raw/issue48-large-library-6/native-10-initial-mono-200.png",
+      "bytes": 327064,
+      "sha256": "287e90c4dbe1f9f6217c2d6afbf0648f7dcec4e9ff6d697fec5d1239fa7e0d59"
+    },
+    {
+      "path": "raw/issue48-large-library-6/native-10-initial-purple-100.png",
+      "bytes": 299934,
+      "sha256": "895c64912390f862b4f9465be1fdf586727a93bab50cc0363d20e1ef1bbb79b4"
+    },
+    {
+      "path": "raw/issue48-large-library-6/native-10-initial-purple-200.png",
+      "bytes": 345304,
+      "sha256": "e5977bd0abe5fd60a2d40f1f0f27eb0f7e2f258f1f13fd6cc7454dbbfbec9307"
+    },
+    {
+      "path": "raw/issue48-large-library-6/native-10-tags-blue-100.png",
+      "bytes": 161463,
+      "sha256": "c6f72d7629f1752228423406cffc051eb8d83cb5d8771522355e4f697437c6bc"
+    },
+    {
+      "path": "raw/issue48-large-library-6/native-10-tags-blue-200.png",
+      "bytes": 231375,
+      "sha256": "393d15d9a301110c5aaa12c07ca0bbc926d3f7ed88ccb57079f84807f7096b44"
+    },
+    {
+      "path": "raw/issue48-large-library-6/native-10-tags-green-100.png",
+      "bytes": 162051,
+      "sha256": "9ff56e7ff2f9948000758064be9d94e0ee379e9754be8bd257b4fd7ee0682cb2"
+    },
+    {
+      "path": "raw/issue48-large-library-6/native-10-tags-green-200.png",
+      "bytes": 231433,
+      "sha256": "d5773d682d4528c576e7723d046cc574585466c8ab39c782022df5fb999c4f95"
+    },
+    {
+      "path": "raw/issue48-large-library-6/native-10-tags-mono-100.png",
+      "bytes": 155783,
+      "sha256": "480ba2b9a74f28e1794ce30c4f24a8df304d7230c454c059ce6832da011ace18"
+    },
+    {
+      "path": "raw/issue48-large-library-6/native-10-tags-mono-200.png",
+      "bytes": 220237,
+      "sha256": "06cb8dba6b8d1019bd4cfcf569e90877b9f30f82cccd0341565437f757b49e08"
+    },
+    {
+      "path": "raw/issue48-large-library-6/native-10-tags-purple-100.png",
+      "bytes": 161900,
+      "sha256": "407bde2481cf55da0dd0cb3072fcab772cfbb97fd8ea6f41f9bfe80004a49e05"
+    },
+    {
+      "path": "raw/issue48-large-library-6/native-10-tags-purple-200.png",
+      "bytes": 230341,
+      "sha256": "3f686695e864e8ba1c0871e9ca6c15fb00845a818449d3cdac7d6612feec4d44"
+    },
+    {
+      "path": "raw/issue48-large-library-6/native-11-directory-blue-100.png",
+      "bytes": 173345,
+      "sha256": "69b376e3f6aee7112b4c4785064b8d42358e54e6953484ff03b8e88cfbc19bf2"
+    },
+    {
+      "path": "raw/issue48-large-library-6/native-11-directory-blue-200.png",
+      "bytes": 244450,
+      "sha256": "c625bb44bbbefc5ca46855a6ad78cae2e0e2e1befda67bd1ca91f1a1aa20d85c"
+    },
+    {
+      "path": "raw/issue48-large-library-6/native-11-directory-green-100.png",
+      "bytes": 174415,
+      "sha256": "6bc96e253dc241156dd9c975cf570ab743b4a6b8ecf84ad2a92b420d295d1cfc"
+    },
+    {
+      "path": "raw/issue48-large-library-6/native-11-directory-green-200.png",
+      "bytes": 244921,
+      "sha256": "d108f44d1a52ec3aeffacd7627e2b67d0aba03187a0fdc1e1591fe2d3d32064a"
+    },
+    {
+      "path": "raw/issue48-large-library-6/native-11-directory-mono-100.png",
+      "bytes": 167287,
+      "sha256": "ede960833282be545d3776274b54a9c1c063f2d8323506f32811aea444fef8bf"
+    },
+    {
+      "path": "raw/issue48-large-library-6/native-11-directory-mono-200.png",
+      "bytes": 233262,
+      "sha256": "ff8faeae0d0325c7c1a03314976020c056558284c0a9f677891417842fd569f4"
+    },
+    {
+      "path": "raw/issue48-large-library-6/native-11-directory-purple-100.png",
+      "bytes": 174179,
+      "sha256": "4d0ca0d071f239de2b6d118c50785b4f59a16fd2d0a9dc48c692af1d4c65a8cb"
+    },
+    {
+      "path": "raw/issue48-large-library-6/native-11-directory-purple-200.png",
+      "bytes": 244086,
+      "sha256": "fedef8f974c657a55a35414924b9b33d43a34c82b7430ea16a4494f66621c279"
+    },
+    {
+      "path": "raw/issue48-large-library-6/native-11-pagination-blue-100.png",
+      "bytes": 303749,
+      "sha256": "27f7c624bd171dedaaed219030447501fb078e5add37fe4b5842380878eaa75a"
+    },
+    {
+      "path": "raw/issue48-large-library-6/native-11-pagination-blue-200.png",
+      "bytes": 358282,
+      "sha256": "949eb5f343fa0bc2319389c2014640c30cacd923b03c1c84c91c7a977d2a3e72"
+    },
+    {
+      "path": "raw/issue48-large-library-6/native-11-pagination-green-100.png",
+      "bytes": 305784,
+      "sha256": "7a00e2c05a300cee59d8ce7d796358492cbf53136f422fba2a96eac46538fd7d"
+    },
+    {
+      "path": "raw/issue48-large-library-6/native-11-pagination-green-200.png",
+      "bytes": 358504,
+      "sha256": "7cfc55b1a767547c3eeacc4a990a85ea2229c7d2233314154e1ae74e521ec07b"
+    },
+    {
+      "path": "raw/issue48-large-library-6/native-11-pagination-mono-100.png",
+      "bytes": 289917,
+      "sha256": "a1d0f5c695125dcb27d0994e5ab244f9d810aaf32b1a09f9fe194c8588c74402"
+    },
+    {
+      "path": "raw/issue48-large-library-6/native-11-pagination-mono-200.png",
+      "bytes": 337961,
+      "sha256": "813568cf650ec4679e031bb0ffcd1708041e2c2d782ff1186f44e23748e0d897"
+    },
+    {
+      "path": "raw/issue48-large-library-6/native-11-pagination-purple-100.png",
+      "bytes": 303694,
+      "sha256": "f61d09b68e31afe05ee18a9cf22c4996cf987a514f23f5bb90f5e5526e2b0ab9"
+    },
+    {
+      "path": "raw/issue48-large-library-6/native-11-pagination-purple-200.png",
+      "bytes": 356519,
+      "sha256": "8f8410f78c5cd5dea00ec7e51c10c0f1e49b2cb3b5bfe4ab0dc6b7a70b2f30d6"
+    },
+    {
+      "path": "raw/issue48-large-library-6/native-result.json",
+      "bytes": 1367,
+      "sha256": "7f0089dcb1e1409c907122349e19d3932bee85547eff864ec9efc93d89a60b60"
+    },
+    {
+      "path": "raw/issue48-large-library-6/result.json",
+      "bytes": 9395,
+      "sha256": "236c7d64090a915cc791dbc99437677bcdd090234e87ba64b596a68f169ae7f9"
+    },
+    {
+      "path": "raw/issue48-large-library-6/sources/information_editor.dart",
+      "bytes": 35266,
+      "sha256": "59d36a64441022117e9bfe43645b75531f71fc698da1372d3807d2fc51416989"
+    },
+    {
+      "path": "raw/issue48-large-library-6/sources/library.dart",
+      "bytes": 55925,
+      "sha256": "90f222b10538a3aa3f1c703dd3ff091154972813635147fb0cf354ac0c32e4ed"
+    },
+    {
+      "path": "raw/issue48-large-library-6/sources/macos-library-filters-ui.py",
+      "bytes": 9646,
+      "sha256": "ef9fd331117368089d9855c954a94ed179916515c7af8ae58557daca86a642e0"
+    },
+    {
+      "path": "raw/issue48-large-library-6/sources/macos_library_filters_native_test.dart",
+      "bytes": 18286,
+      "sha256": "71ec97e79974a33415f8ae0904ee45dcbbfc9ded022d8f7384cdcd57d9aae5e0"
+    },
+    {
+      "path": "raw/issue48-large-library-6/sources/main.dart",
+      "bytes": 16729,
+      "sha256": "7a396b7917211b58906cd7bdd789d585d0cd511f1a93145246747cfaaf4cb883"
+    },
+    {
+      "path": "raw/issue48-large-library-6/sources/native_semantics_lifetime.dart",
+      "bytes": 1540,
+      "sha256": "a274da35d57e9bca3322b7e5b70a2bc610990e8e8dc3fba0821bbb1e9219036f"
+    },
+    {
+      "path": "raw/issue48-large-library-6/sources/organization.dart",
+      "bytes": 16785,
+      "sha256": "8e2d97624cac010295650f0179551a62f43131a81e086e95fef24c1cc377d319"
+    }
+  ]
+}

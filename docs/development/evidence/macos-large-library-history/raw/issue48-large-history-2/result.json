@@ -1,0 +1,42 @@
+{
+  "complete": false,
+  "productSource": "01c1f141d876a9d3c49c61c7fc3d1e572c432c5a",
+  "cliSha256": "cb9971c43daa0bccf06c31d48c6ac3ab62f3e57c34bc96655c47202b9e14f5b7",
+  "phases": [],
+  "large": true,
+  "appBaseCommit": "82b374a5df475dee95542e1bbe37b0b19ae2d2cd",
+  "worktreeStatus": [
+    " M apps/desktop/integration_test/macos_library_filters_native_test.dart",
+    " M apps/desktop/integration_test/macos_removed_scope_native_test.dart",
+    " M scripts/qa/macos-library-filters-ui.py",
+    " M scripts/qa/macos-scope-ui.py",
+    "?? docs/development/macos-large-library-history.md"
+  ],
+  "qaSources": [
+    {
+      "path": "apps/desktop/integration_test/macos_removed_scope_native_test.dart",
+      "sha256": "2e6a0261cda81a4078a85f4110af2be84d97d93d4077a409065af4b5e4bd8ada"
+    },
+    {
+      "path": "scripts/qa/macos-scope-ui.py",
+      "sha256": "2671fb0faacc886c74ebc0c3e2bfea77161d1a76319d4d9c04c3ce73834ec06c"
+    },
+    {
+      "path": "apps/desktop/lib/history.dart",
+      "sha256": "fbc8ffbdadd1db69051f320370d1b0a26416edb0face822b6ce1ad624af8b1e3"
+    },
+    {
+      "path": "apps/desktop/lib/main.dart",
+      "sha256": "7a396b7917211b58906cd7bdd789d585d0cd511f1a93145246747cfaaf4cb883"
+    },
+    {
+      "path": "apps/desktop/integration_test/support/native_semantics_lifetime.dart",
+      "sha256": "a274da35d57e9bca3322b7e5b70a2bc610990e8e8dc3fba0821bbb1e9219036f"
+    }
+  ],
+  "failure": {
+    "type": "RuntimeError",
+    "message": "Flutter exited before expected evidence"
+  },
+  "flutterProcessGroupRemaining": false
+}

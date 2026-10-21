@@ -1,0 +1,236 @@
+00:00 +0: loading /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/integration_test/macos_library_filters_native_test.dart
+Building macOS application...                                   
+✓ Built build/macos/Build/Products/Debug/info_desktop.app
+00:00 +0: Mac native directory tags search pagination and reopen
+MAC_LIBRARY_FILTERS_ROOT=/Users/jiangxinyi/Library/Containers/com.example.infoDesktop/Data/tmp/aim-mac-library-filters-ui-emW7gp
+MAC_SCALE_TAP=1:ensure
+MAC_SCALE_TAP=1:settle
+MAC_SCALE_TAP=1:done
+MAC_SCALE_TAP=2:ensure
+MAC_SCALE_TAP=2:settle
+MAC_SCALE_TAP=2:done
+MAC_SCALE_TAP=3:ensure
+MAC_SCALE_TAP=3:settle
+MAC_SCALE_TAP=3:done
+MAC_SCALE_TAP=4:ensure
+MAC_SCALE_TAP=4:settle
+MAC_SCALE_TAP=4:done
+MAC_SCALE_TAP=5:ensure
+MAC_SCALE_TAP=5:settle
+MAC_SCALE_TAP=5:done
+MAC_SCALE_TAP=6:ensure
+MAC_SCALE_TAP=6:settle
+MAC_SCALE_TAP=6:done
+MAC_SCALE_TAP=7:ensure
+MAC_SCALE_TAP=7:settle
+MAC_SCALE_TAP=7:done
+MAC_SCALE_TAP=8:ensure
+MAC_SCALE_TAP=8:settle
+MAC_SCALE_TAP=8:done
+MAC_SCALE_TAP=9:ensure
+MAC_SCALE_TAP=9:settle
+MAC_SCALE_TAP=9:done
+MAC_SCALE_TAP=10:ensure
+MAC_SCALE_TAP=10:settle
+MAC_SCALE_TAP=10:done
+MAC_SCALE_TAP=11:ensure
+MAC_SCALE_TAP=11:settle
+MAC_SCALE_TAP=11:done
+MAC_SCALE_TAP=12:ensure
+MAC_SCALE_TAP=12:settle
+MAC_SCALE_TAP=12:done
+MAC_SCALE_TAP=13:ensure
+MAC_SCALE_TAP=13:settle
+MAC_SCALE_TAP=13:done
+MAC_SCALE_TAP=14:ensure
+MAC_SCALE_TAP=14:settle
+MAC_SCALE_TAP=14:done
+MAC_SCALE_TAP=15:ensure
+MAC_SCALE_TAP=15:settle
+MAC_SCALE_TAP=15:done
+MAC_SCALE_TAP=16:ensure
+MAC_SCALE_TAP=16:settle
+MAC_SCALE_TAP=16:done
+MAC_SCALE_TAP=17:ensure
+MAC_SCALE_TAP=17:settle
+MAC_SCALE_TAP=17:done
+MAC_SCALE_TAP=18:ensure
+MAC_SCALE_TAP=18:settle
+MAC_SCALE_TAP=18:done
+MAC_SCALE_TAP=19:ensure
+MAC_SCALE_TAP=19:settle
+MAC_SCALE_TAP=19:done
+MAC_SCALE_TAP=20:ensure
+MAC_SCALE_TAP=20:settle
+MAC_SCALE_TAP=20:done
+MAC_SCALE_TAP=21:ensure
+MAC_SCALE_TAP=21:settle
+MAC_SCALE_TAP=21:done
+MAC_SCALE_TAP=22:ensure
+MAC_SCALE_TAP=22:settle
+MAC_SCALE_TAP=22:done
+MAC_SCALE_TAP=23:ensure
+MAC_SCALE_TAP=23:settle
+MAC_SCALE_TAP=23:done
+MAC_SCALE_TAP=24:ensure
+MAC_SCALE_TAP=24:settle
+MAC_SCALE_TAP=24:done
+MAC_SCALE_TAP=25:ensure
+MAC_SCALE_TAP=25:settle
+MAC_SCALE_TAP=25:done
+MAC_SCALE_TAP=26:ensure
+MAC_SCALE_TAP=26:settle
+MAC_SCALE_TAP=26:done
+MAC_SCALE_TAP=27:ensure
+MAC_SCALE_TAP=27:settle
+MAC_SCALE_TAP=27:done
+MAC_SCALE_TAP=28:ensure
+MAC_SCALE_TAP=28:settle
+MAC_SCALE_TAP=28:done
+MAC_SCALE_TAP=29:ensure
+MAC_SCALE_TAP=29:settle
+MAC_SCALE_TAP=29:done
+MAC_SCALE_TAP=30:ensure
+MAC_SCALE_TAP=30:settle
+MAC_SCALE_TAP=30:done
+MAC_SCALE_TAP=31:ensure
+MAC_SCALE_TAP=31:settle
+MAC_SCALE_TAP=31:done
+MAC_SCALE_TAP=32:ensure
+MAC_SCALE_TAP=32:settle
+MAC_SCALE_TAP=32:done
+MAC_SCALE_TAP=33:ensure
+MAC_SCALE_TAP=33:settle
+MAC_SCALE_TAP=33:done
+MAC_SCALE_TAP=34:ensure
+MAC_SCALE_TAP=34:settle
+MAC_SCALE_TAP=34:done
+MAC_SCALE_TAP=35:ensure
+MAC_SCALE_TAP=35:settle
+MAC_SCALE_TAP=35:done
+MAC_SCALE_TAP=36:ensure
+MAC_SCALE_TAP=36:settle
+MAC_SCALE_TAP=36:done
+MAC_SCALE_TAP=37:ensure
+MAC_SCALE_TAP=37:settle
+MAC_SCALE_TAP=37:done
+MAC_SCALE_TAP=38:ensure
+MAC_SCALE_TAP=38:settle
+MAC_SCALE_TAP=38:done
+MAC_SCALE_TAP=39:ensure
+MAC_SCALE_TAP=39:settle
+MAC_SCALE_TAP=39:done
+MAC_SCALE_TAP=40:ensure
+MAC_SCALE_TAP=40:settle
+MAC_SCALE_TAP=40:done
+MAC_SCALE_TAP=41:ensure
+MAC_SCALE_TAP=41:settle
+MAC_SCALE_TAP=41:done
+MAC_SCALE_TAP=42:ensure
+MAC_SCALE_TAP=42:settle
+MAC_SCALE_TAP=42:done
+MAC_SCALE_TAP=43:ensure
+MAC_SCALE_TAP=43:settle
+MAC_SCALE_TAP=43:done
+MAC_SCALE_TAP=44:ensure
+MAC_SCALE_TAP=44:settle
+MAC_SCALE_TAP=44:done
+MAC_SCALE_TAP=45:ensure
+MAC_SCALE_TAP=45:settle
+MAC_SCALE_TAP=45:done
+MAC_SCALE_TAP=46:ensure
+MAC_SCALE_TAP=46:settle
+MAC_SCALE_TAP=46:done
+MAC_SCALE_TAP=47:ensure
+MAC_SCALE_TAP=47:settle
+MAC_SCALE_TAP=47:done
+MAC_SCALE_TAP=48:ensure
+MAC_SCALE_TAP=48:settle
+MAC_SCALE_TAP=48:done
+MAC_SCALE_TAP=49:ensure
+MAC_SCALE_TAP=49:settle
+MAC_SCALE_TAP=49:done
+MAC_SCALE_TAP=50:ensure
+MAC_SCALE_TAP=50:settle
+MAC_SCALE_TAP=50:done
+MAC_SCALE_TAP=51:ensure
+MAC_SCALE_TAP=51:settle
+MAC_SCALE_TAP=51:done
+MAC_SCALE_TAP=52:ensure
+MAC_SCALE_TAP=52:settle
+MAC_SCALE_TAP=52:done
+MAC_SCALE_TAP=53:ensure
+MAC_SCALE_TAP=53:settle
+MAC_SCALE_TAP=53:done
+MAC_SCALE_TAP=54:ensure
+MAC_SCALE_TAP=54:settle
+MAC_SCALE_TAP=54:done
+MAC_SCALE_TAP=55:ensure
+MAC_SCALE_TAP=55:settle
+MAC_SCALE_TAP=55:done
+MAC_SCALE_TAP=56:ensure
+MAC_SCALE_TAP=56:settle
+MAC_SCALE_TAP=56:done
+MAC_SCALE_TAP=57:ensure
+MAC_SCALE_TAP=57:settle
+MAC_SCALE_TAP=57:done
+MAC_SCALE_TAP=58:ensure
+MAC_SCALE_TAP=58:settle
+MAC_SCALE_TAP=58:done
+MAC_SCALE_TAP=59:ensure
+MAC_SCALE_TAP=59:settle
+MAC_SCALE_TAP=59:done
+MAC_SCALE_TAP=60:ensure
+MAC_SCALE_TAP=60:settle
+MAC_SCALE_TAP=60:done
+MAC_SCALE_TAP=61:ensure
+MAC_SCALE_TAP=61:settle
+MAC_SCALE_TAP=61:done
+MAC_SCALE_TAP=62:ensure
+MAC_SCALE_TAP=62:settle
+MAC_SCALE_TAP=62:done
+MAC_SCALE_TAP=63:ensure
+MAC_SCALE_TAP=63:settle
+MAC_SCALE_TAP=63:done
+MAC_SCALE_TAP=64:ensure
+MAC_SCALE_TAP=64:settle
+MAC_SCALE_TAP=64:done
+MAC_SCALE_TAP=65:ensure
+MAC_SCALE_TAP=65:settle
+MAC_SCALE_TAP=65:done
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following StateError was thrown running a test:
+Bad state: No element
+
+When the exception was thrown, this was the stack:
+#0      Iterable.single (dart:core/iterable.dart:694:25)
+#1      WidgetController.element (package:flutter_test/src/controller.dart:888:30)
+#2      WidgetController.dragUntilVisible.<anonymous closure> (package:flutter_test/src/controller.dart:2489:38)
+<asynchronous suspension>
+#3      TestAsyncUtils.guard.<anonymous closure> (package:flutter_test/src/test_async_utils.dart:130:27)
+<asynchronous suspension>
+#4      WidgetController.scrollUntilVisible.<anonymous closure> (package:flutter_test/src/controller.dart:2439:7)
+<asynchronous suspension>
+#5      TestAsyncUtils.guard.<anonymous closure> (package:flutter_test/src/test_async_utils.dart:130:27)
+<asynchronous suspension>
+#6      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/integration_test/macos_library_filters_native_test.dart:427:13)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+The test description was:
+  Mac native directory tags search pagination and reopen
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:50 +0 -1: Mac native directory tags search pagination and reopen [E]
+  Test failed. See exception logs above.
+  The test description was: Mac native directory tags search pagination and reopen
+  
+00:50 +0 -1: (tearDownAll)
+00:50 +0 -1: Some tests failed.
+
+Failing tests:
+  /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/integration_test/macos_library_filters_native_test.dart: Mac native directory tags search pagination and reopen

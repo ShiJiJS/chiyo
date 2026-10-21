@@ -1,0 +1,24 @@
+{
+  "desktopStrictAnalysis": true,
+  "pythonDriversSyntax": true,
+  "ordinaryDebugMainRebuilt": true,
+  "codesignDeepStrict": true,
+  "productionSourceCommit": "01c1f141d876a9d3c49c61c7fc3d1e572c432c5a",
+  "originMain": "b37f96a089d6d4a0a9f872bd667be0c6b037f975",
+  "sourceSnapshotMatches": [
+    "issue48-large-library-6",
+    "issue48-large-history-3"
+  ],
+  "notes": [
+    "An initial root-directory flutter analyze scanned retained build copies and was discarded; package-scoped desktop strict analysis passed.",
+    "No physical input, OS panel, Keychain or Windows native acceptance is claimed."
+  ],
+  "issue48-large-library-6": {
+    "checks": 70,
+    "captures": 41
+  },
+  "issue48-large-history-3": {
+    "checks": 23,
+    "captures": 27
+  }
+}

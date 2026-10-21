@@ -1,0 +1,362 @@
+{
+  "complete": false,
+  "productSource": "01c1f141d876a9d3c49c61c7fc3d1e572c432c5a",
+  "cliSha256": "cb9971c43daa0bccf06c31d48c6ac3ab62f3e57c34bc96655c47202b9e14f5b7",
+  "phases": [
+    {
+      "phase": "request",
+      "checks": [
+        {
+          "command": "request",
+          "status": "pending"
+        }
+      ]
+    },
+    {
+      "phase": "approved",
+      "checks": [
+        {
+          "command": "claim",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "read",
+          "status": "ok"
+        }
+      ]
+    },
+    {
+      "phase": "filtered",
+      "checks": [
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "read",
+          "status": "ok"
+        }
+      ]
+    },
+    {
+      "phase": "moved",
+      "checks": [
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "read",
+          "status": "ok"
+        }
+      ]
+    },
+    {
+      "phase": "repository-reopened",
+      "checks": [
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "catalog",
+          "status": "ok"
+        },
+        {
+          "command": "read",
+          "status": "unauthorized"
+        }
+      ]
+    }
+  ],
+  "large": true,
+  "itemCount": 1000,
+  "appBaseCommit": "82b374a5df475dee95542e1bbe37b0b19ae2d2cd",
+  "worktreeStatus": [
+    " M apps/desktop/integration_test/macos_library_filters_native_test.dart",
+    " M apps/desktop/integration_test/macos_removed_scope_native_test.dart",
+    " M scripts/qa/macos-library-filters-ui.py",
+    " M scripts/qa/macos-scope-ui.py",
+    "?? scripts/qa/__pycache__/"
+  ],
+  "qaSources": [
+    {
+      "path": "apps/desktop/integration_test/macos_library_filters_native_test.dart",
+      "sha256": "bc93f3888ac9e719635a1406321e5ecb1fed0eacf8ddfcddcd43d1fedce82411"
+    },
+    {
+      "path": "scripts/qa/macos-library-filters-ui.py",
+      "sha256": "ef9fd331117368089d9855c954a94ed179916515c7af8ae58557daca86a642e0"
+    },
+    {
+      "path": "apps/desktop/lib/library.dart",
+      "sha256": "90f222b10538a3aa3f1c703dd3ff091154972813635147fb0cf354ac0c32e4ed"
+    },
+    {
+      "path": "apps/desktop/lib/organization.dart",
+      "sha256": "8e2d97624cac010295650f0179551a62f43131a81e086e95fef24c1cc377d319"
+    },
+    {
+      "path": "apps/desktop/lib/information_editor.dart",
+      "sha256": "59d36a64441022117e9bfe43645b75531f71fc698da1372d3807d2fc51416989"
+    },
+    {
+      "path": "apps/desktop/lib/main.dart",
+      "sha256": "7a396b7917211b58906cd7bdd789d585d0cd511f1a93145246747cfaaf4cb883"
+    },
+    {
+      "path": "apps/desktop/integration_test/support/native_semantics_lifetime.dart",
+      "sha256": "a274da35d57e9bca3322b7e5b70a2bc610990e8e8dc3fba0821bbb1e9219036f"
+    }
+  ],
+  "failure": {
+    "type": "RuntimeError",
+    "message": "Flutter exited before expected evidence"
+  },
+  "cliExits": [
+    0,
+    0
+  ],
+  "flutterProcessGroupRemaining": false,
+  "retainedOwnedRoot": "/Users/jiangxinyi/Library/Containers/com.example.infoDesktop/Data/tmp/aim-mac-library-filters-ui-bFarv7"
+}
