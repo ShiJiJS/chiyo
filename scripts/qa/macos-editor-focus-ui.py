@@ -3,7 +3,9 @@
 
 Isolated memory-key SQLCipher library and actual CUA keyboard/dialog actions.
 Copied native additions only read current input-source ID and log picker begin/
-end; no input-source change, UI injection, path grants or callback substitution.
+end. Optional --diagnose-keys passively records key codes/modifiers in this test
+window and Flutter's hardware-key state; no input-source change, UI injection,
+path grants or callback substitution.
 Private libraries and generated apps/debug symbols are removed afterwards.
 """
 import argparse
@@ -44,6 +46,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('output', type=Path)
     parser.add_argument('--diagnose-focus', action='store_true')
+    parser.add_argument('--diagnose-keys', action='store_true')
     args = parser.parse_args()
     assert os.uname().sysname == 'Darwin'
     output = args.output.resolve()
@@ -102,6 +105,33 @@ def main():
         block = block.replace('          result(response == .OK ? panel.url?.path : nil)',
             '          if call.method == "informationFileInput" { print("EDITOR_FOCUS_PANEL_END=\\(response == .OK ? "selected" : "cancelled")") }\n          result(response == .OK ? panel.url?.path : nil)')
         swift.write_text(text[:begin] + block + text[end:])
+        if args.diagnose_keys:
+            text = swift.read_text()
+            anchor = '  private var desktopChannel: FlutterMethodChannel?\n'
+            assert text.count(anchor) == 1
+            text = text.replace(anchor, anchor + '  private var qaKeyMonitor: Any?\n')
+            anchor = '    super.awakeFromNib()\n'
+            assert text.count(anchor) == 1
+            text = text.replace(anchor, anchor + '''    qaKeyMonitor = NSEvent.addLocalMonitorForEvents(matching: [.keyDown, .keyUp]) { [weak self] event in
+      if let self, NSApp.keyWindow === self {
+        let record: [String: Any] = ["event": event.type.rawValue, "keyCode": event.keyCode,
+          "flags": event.modifierFlags.rawValue,
+          "responder": self.firstResponder.map { String(describing: type(of: $0)) } ?? "none",
+          "marked": (self.firstResponder as? NSTextInputClient)?.hasMarkedText() ?? false]
+        if let data = try? JSONSerialization.data(withJSONObject: record, options: [.sortedKeys]),
+           let json = String(data: data, encoding: .utf8) {
+          FileHandle.standardOutput.write(Data(("EDITOR_FOCUS_NATIVE_KEY=" + json + "\\n").utf8))
+        }
+      }
+      return event
+    }
+''')
+            anchor = '      case "terminate":\n'
+            assert text.count(anchor) == 1
+            text = text.replace(anchor, anchor + '''        if let monitor = self.qaKeyMonitor { NSEvent.removeMonitor(monitor) }
+        self.qaKeyMonitor = nil
+''')
+            swift.write_text(text)
         modified = [config, swift]
         if args.diagnose_focus:
             editor = source / 'apps/desktop/lib/information_editor.dart'
@@ -128,6 +158,8 @@ def main():
         for mode in ['edit', 'reopen']:
             environment = {k: os.environ[k] for k in ['HOME', 'USER', 'LOGNAME', 'LANG'] if k in os.environ}
             environment.update(PATH='/usr/bin:/bin:/usr/sbin:/sbin', MAC_FOCUS_MODE=mode, MAC_FOCUS_OWNER=owner)
+            if args.diagnose_keys:
+                environment['MAC_FOCUS_DIAGNOSE_KEYS'] = '1'
             if root is not None:
                 environment['MAC_FOCUS_ROOT'] = str(root)
             logpath = logs / (mode + '.txt')

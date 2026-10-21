@@ -60,6 +60,30 @@ Future<void> main() async {
     temp.renameSync(report.path);
   }
 
+  final hardwareKeys = <Map<String, Object?>>[];
+  bool observeHardwareKey(KeyEvent event) {
+    final keyboard = HardwareKeyboard.instance;
+    hardwareKeys.add({
+      'event': event.runtimeType.toString(),
+      'physical': event.physicalKey.usbHidUsage,
+      'logical': event.logicalKey.keyId,
+      'logicalName': event.logicalKey.debugName,
+      'synthesized': event.synthesized,
+      'shift': keyboard.isShiftPressed,
+      'control': keyboard.isControlPressed,
+      'alt': keyboard.isAltPressed,
+      'meta': keyboard.isMetaPressed,
+    });
+    facts['hardwareKeys'] = hardwareKeys;
+    write();
+    return false;
+  }
+
+  final diagnoseKeys = env['MAC_FOCUS_DIAGNOSE_KEYS'] == '1';
+  if (diagnoseKeys) {
+    HardwareKeyboard.instance.addHandler(observeHardwareKey);
+  }
+
   FlutterError.onError = (details) {
     flutterErrors++;
     FlutterError.presentError(details);
@@ -101,6 +125,9 @@ Future<void> main() async {
         backups: repository.backups,
         close: () async {
           timer?.cancel();
+          if (diagnoseKeys) {
+            HardwareKeyboard.instance.removeHandler(observeHardwareKey);
+          }
           await repository.close();
           closes++;
           write();

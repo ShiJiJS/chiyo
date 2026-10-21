@@ -82,3 +82,28 @@ python3 scripts/qa/macos-editor-focus-ui.py build/macos-adaptation/NEW-editor-fo
 取消与续写；选择不同字段重复核对。最后将公开说明实际保存为MacFocusSaved，正常⌘Q，
 监督脚本自动独立重开核对后再⌘Q。初始资料及7字节附件限定为合成数据。
 `--diagnose-focus`仅用于修正前源码定位；该模式严格核对插桩锚点，不可当作最终实机复验。
+
+## 后续真实按键路由诊断
+
+同日基于4e943c6另跑 `--diagnose-keys`，原生仅被动观察测试窗口的keyDown/keyUp、
+keyCode、modifierFlags、firstResponder类型及hasMarkedText，返回原事件；Dart可选的
+HardwareKeyboard监听返回false，记录物理/逻辑键及修饰键状态，不消费事件。未改SDK、
+生产键盘处理、输入源设置或TextInput通道，也未用程序调用焦点动作来补齐实机结果。
+[独立诊断及原始记录](evidence/macos-key-routing/verification.json)。
+
+实际Tab到达原生keyCode48/flags0和Flutter物理0x7002b、逻辑0x100000009，但公开说明
+的同一节点557703824、选区15:15和文本RoutingBaseline均未移动。Shift+Tab在原生层
+flags131072（Shift），Flutter对应Tab事件的shift仍false。当前只能证明两层的事件
+状态不同，不能断言整个故障来自自动化工具，也不能据此全局拦截Tab作为产品修复。
+当前Flutter的Mac文本快捷键先交还原生处理，再由insertTab:/insertBacktab:选择器映射
+NextFocusIntent/PreviousFocusIntent；本轮未观察该选择器通道，因果链仍不完整。
+
+CUA selectText随后虽未报错，下一次输入实际追加成RoutingBaselineMacFocusSaved；
+使用应用原生命令⌘A后精确替换为MacFocusSaved并实际保存，未把AX操作成功当成
+编辑结果正确。SQLCipher独立重开确认普通字段BaselineValue及原7字节附件/版本1保持。
+编辑68091、重开68180均退出0，库各关闭一次、Flutter异常0、端口关闭；输入源ID始终
+SCIM.ITABC，组合范围仍无效，本轮没有通过中文IME验收。
+
+严格分析、Release构建、deep/strict签名均通过。该轮测试应用、dSYM、合成库及控制文件
+已删除；固定预览7971项文件/模式/链接及签名保持，原进程53592仍运行。零Keychain调用、
+零系统确认。#48仍3/6、#50仍2/6，键盘、IME及最终同包验收继续保留未完成状态。

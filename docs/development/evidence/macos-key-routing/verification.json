@@ -1,0 +1,205 @@
+{
+  "date": "2026-10-22",
+  "sourceBase": "4e943c610e4c3124f1b05be7f709724b4fa37a12",
+  "scope": "Passive native and Flutter hardware-key diagnostics during actual CUA input in an isolated synthetic ordinary Flutter application; not final package or physical-keyboard/IME acceptance",
+  "productKeyboardBehaviorChanged": false,
+  "sdkOrTextInputHandlerChanged": false,
+  "nativeMonitorReturnsOriginalEvent": true,
+  "flutterObserverReturnsFalse": true,
+  "testWindowOnly": true,
+  "sourceFilesByteExactNow": 635,
+  "postBuildRunnerChange": "module documentation only; built input hashes retained in raw/result.json",
+  "unchangedEditorSha256": "27648452db0656ad08a70e4277e4e1dcf5c205ffbd10ff4b435af87f0269804a",
+  "tabNativeEvents": [
+    {
+      "event": 10,
+      "flags": 0,
+      "keyCode": 48,
+      "marked": false,
+      "responder": "FlutterTextInputPlugin"
+    },
+    {
+      "event": 11,
+      "flags": 0,
+      "keyCode": 48,
+      "marked": false,
+      "responder": "FlutterTextInputPlugin"
+    },
+    {
+      "event": 10,
+      "flags": 131072,
+      "keyCode": 48,
+      "marked": false,
+      "responder": "FlutterTextInputPlugin"
+    },
+    {
+      "event": 11,
+      "flags": 131072,
+      "keyCode": 48,
+      "marked": false,
+      "responder": "FlutterTextInputPlugin"
+    }
+  ],
+  "tabFlutterEvents": [
+    {
+      "event": "KeyDownEvent",
+      "physical": 458795,
+      "logical": 4294967305,
+      "logicalName": null,
+      "synthesized": false,
+      "shift": false,
+      "control": false,
+      "alt": false,
+      "meta": false
+    },
+    {
+      "event": "KeyUpEvent",
+      "physical": 458795,
+      "logical": 4294967305,
+      "logicalName": null,
+      "synthesized": false,
+      "shift": false,
+      "control": false,
+      "alt": false,
+      "meta": false
+    },
+    {
+      "event": "KeyDownEvent",
+      "physical": 458795,
+      "logical": 4294967305,
+      "logicalName": null,
+      "synthesized": false,
+      "shift": false,
+      "control": false,
+      "alt": false,
+      "meta": false
+    },
+    {
+      "event": "KeyUpEvent",
+      "physical": 458795,
+      "logical": 4294967305,
+      "logicalName": null,
+      "synthesized": false,
+      "shift": false,
+      "control": false,
+      "alt": false,
+      "meta": false
+    }
+  ],
+  "focusedNodeBeforeAndAfter": 557703824,
+  "focusedControl": "item-description",
+  "tabAndShiftTabFocusMoved": false,
+  "selectorDeliveryObserved": false,
+  "IMEAccepted": false,
+  "inputSource": "com.apple.inputmethod.SCIM.ITABC",
+  "CUASelectTextResult": "subsequent typing appended; recovered through actual native Command-A and verified exact saved value",
+  "actualSaveAndIndependentReopen": true,
+  "normalProcessExits": [
+    {
+      "mode": "edit",
+      "pid": 68091,
+      "exitCode": 0
+    },
+    {
+      "mode": "reopen",
+      "pid": 68180,
+      "exitCode": 0
+    }
+  ],
+  "keychainCalls": 0,
+  "systemApprovalPrompts": 0,
+  "allOwnedAppsDsymsAndPrivateTargetsRemoved": true,
+  "stableInstall": {
+    "manifestItems": 7971,
+    "mismatches": [],
+    "signatureExit": 0,
+    "apps": [
+      "local/中文 Mac 预览/AgentInfoManage/app/info_desktop.app"
+    ],
+    "dSYMs": [],
+    "stablePidAlive": true
+  },
+  "issue48Criteria": [
+    true,
+    true,
+    true,
+    false,
+    false,
+    false
+  ],
+  "issue50Criteria": [
+    true,
+    true,
+    false,
+    false,
+    false,
+    false
+  ],
+  "files": [
+    {
+      "path": "raw/after-shift-tab.json",
+      "bytes": 11205,
+      "sha256": "3bb87957671e9fe0bea38c26fe7bbd746c45a66e921f7a2d0480c4f1a891227e"
+    },
+    {
+      "path": "raw/after-tab.json",
+      "bytes": 8939,
+      "sha256": "de4631abc18922c70234a3749c542adebc7504fcffef58cf4ecf65fa41082d97"
+    },
+    {
+      "path": "raw/before-tab.json",
+      "bytes": 8461,
+      "sha256": "40f70efaf5aa87fa39fc44f68c952b138942465e03ab4cc17ee0ece1dca205ff"
+    },
+    {
+      "path": "raw/edit.json",
+      "bytes": 39035,
+      "sha256": "482201e08defdec6ec8f91a967f7c9ae7b46dd4a7d87bb114d0c0e5fc8f054c8"
+    },
+    {
+      "path": "raw/log-analyze.txt",
+      "bytes": 96,
+      "sha256": "23d5da4b16560e68200b071da06e60497193ba3c1dcf7a60efa293477e4ef50f"
+    },
+    {
+      "path": "raw/log-build.txt",
+      "bytes": 5387,
+      "sha256": "8969b14c8581fa75e796f1f00ff019603b76504466746ef767fcdf79f38175e9"
+    },
+    {
+      "path": "raw/log-edit.txt",
+      "bytes": 11327,
+      "sha256": "895c942aaeca644a8f27c4dca2546aac6bb886b8f0f7e5a0cf7ac66e77230e94"
+    },
+    {
+      "path": "raw/log-entitlements.txt",
+      "bytes": 754,
+      "sha256": "2670380e4771f4dcb5d4143e0c8faedc2adde6ea6a57b7280383afa77fb17128"
+    },
+    {
+      "path": "raw/log-reopen.txt",
+      "bytes": 542,
+      "sha256": "51e3566883329d59f03896c9a6f012706caa3d1228b1d3ff8deee3855eb64131"
+    },
+    {
+      "path": "raw/log-signature.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/reopen.json",
+      "bytes": 854,
+      "sha256": "715daa51d0b700dfefa2174e77ad04197c9cec5bdc5b0d7086799b9df7154fa1"
+    },
+    {
+      "path": "raw/result.json",
+      "bytes": 128952,
+      "sha256": "2a21b69212a274ad1f8ec83f451c77268627d91340fdb8e5f53669d9d6e93047"
+    },
+    {
+      "path": "raw/stable-cleanup.json",
+      "bytes": 195,
+      "sha256": "5bb9e85560fd26887c5b01978f7c3e7a28586698f20a4534dd76b83f830a7144"
+    }
+  ]
+}
