@@ -1,0 +1,4528 @@
+{
+  "results": {
+    "sourceSha256": "411814484a1c6aed617c63fbe6e8921dbf98047c51be09c4e60ab3ed90a49ecc",
+    "scope": "Real synthetic Codex lifecycle acceptance against macos-codex-live.py.\n\nRequires existing explicit project/hook trust; never installs or trusts hooks.\nOnly synthetic fixtures. Uses real app-server/model and anonymous CLI stdin.\nOwner approval is a QA file controller, not physical owner UI acceptance.\nPrivate proofs stay in memory. No transcript/authentication files are read.\n",
+    "ephemeralMcpBridgeSourceSha256": "7e112a74ac6d3ccebd81f4b79536fff7ad2639dfa232b027d2cfc0d3a84bd932",
+    "mcpScope": "Actual sole child; claim/status/read of this one synthetic request only. Existing user-authorized scenario; process-only tool policy, no config files or other tool policy changed.",
+    "hookDiscovery": {
+      "data": [
+        {
+          "cwd": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee",
+          "hooks": [
+            {
+              "key": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json:session_start:0:0",
+              "eventName": "sessionStart",
+              "handlerType": "command",
+              "command": "'/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u7a33\u5b9a \u4e2d\u6587 '\"'\"'quote $literal; bundle/info-codex-hook'",
+              "async": false,
+              "matcher": "^(startup|resume|clear|compact|fork)$",
+              "timeoutSec": 15,
+              "statusMessage": null,
+              "additionalContextLimit": 0,
+              "sourcePath": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json",
+              "source": "project",
+              "pluginId": null,
+              "displayOrder": 0,
+              "enabled": true,
+              "isManaged": false,
+              "currentHash": "sha256:0f869a94c72f506b6433e82b5e475ee5f3ab4bb1ee670d50b2a709df769b6708",
+              "trustStatus": "trusted"
+            },
+            {
+              "key": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json:session_end:0:0",
+              "eventName": "sessionEnd",
+              "handlerType": "command",
+              "command": "'/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u7a33\u5b9a \u4e2d\u6587 '\"'\"'quote $literal; bundle/info-codex-hook'",
+              "async": false,
+              "matcher": null,
+              "timeoutSec": 3,
+              "statusMessage": null,
+              "additionalContextLimit": null,
+              "sourcePath": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json",
+              "source": "project",
+              "pluginId": null,
+              "displayOrder": 1,
+              "enabled": true,
+              "isManaged": false,
+              "currentHash": "sha256:03bd283945cea71c863fc14ee26826fd4c1b45eea7b50ebcb92a02719cc276b8",
+              "trustStatus": "trusted"
+            },
+            {
+              "key": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json:subagent_start:0:0",
+              "eventName": "subagentStart",
+              "handlerType": "command",
+              "command": "'/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u7a33\u5b9a \u4e2d\u6587 '\"'\"'quote $literal; bundle/info-codex-hook'",
+              "async": false,
+              "matcher": null,
+              "timeoutSec": 5,
+              "statusMessage": null,
+              "additionalContextLimit": 0,
+              "sourcePath": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json",
+              "source": "project",
+              "pluginId": null,
+              "displayOrder": 2,
+              "enabled": true,
+              "isManaged": false,
+              "currentHash": "sha256:334648132fbd2fff2628e414c60918e002391227bd1b5ef9ed02a63fc4ae04ae",
+              "trustStatus": "trusted"
+            }
+          ],
+          "warnings": [
+            "ignoring additionalContextLimit for SessionEnd hook in /Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json: this event cannot emit additionalContext"
+          ],
+          "errors": []
+        }
+      ]
+    },
+    "model": "gpt-6-astra",
+    "modelSelection": "CLI-advertised default, process only",
+    "delegationRoot": "01a15d85-4b67-7632-9063-0673df29f867",
+    "agentReportChecks": [
+      {
+        "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+        "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d",
+        "reconnectMentioned": false,
+        "proofReferenceAbsent": true
+      },
+      {
+        "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+        "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d",
+        "reconnectMentioned": false,
+        "proofReferenceAbsent": true
+      },
+      {
+        "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+        "turnId": "01a15d85-8bb4-71f0-9946-c0ace30b88f0",
+        "reconnectMentioned": false,
+        "proofReferenceAbsent": true
+      },
+      {
+        "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+        "turnId": "01a15d85-8bb4-71f0-9946-c0ace30b88f0",
+        "reconnectMentioned": false,
+        "proofReferenceAbsent": true
+      },
+      {
+        "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+        "turnId": "01a15d85-dcf5-7002-b6a3-672321f7fbc7",
+        "reconnectMentioned": false,
+        "proofReferenceAbsent": true
+      },
+      {
+        "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+        "turnId": "01a15d85-f49d-7662-98cf-37557b89c024",
+        "reconnectMentioned": false,
+        "proofReferenceAbsent": true
+      },
+      {
+        "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+        "turnId": "01a15d85-dcf5-7002-b6a3-672321f7fbc7",
+        "reconnectMentioned": false,
+        "proofReferenceAbsent": true
+      },
+      {
+        "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+        "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce",
+        "reconnectMentioned": false,
+        "proofReferenceAbsent": true
+      },
+      {
+        "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+        "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a",
+        "reconnectMentioned": false,
+        "proofReferenceAbsent": true
+      },
+      {
+        "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+        "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a",
+        "reconnectMentioned": false,
+        "proofReferenceAbsent": true
+      },
+      {
+        "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+        "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce",
+        "reconnectMentioned": false,
+        "proofReferenceAbsent": true
+      },
+      {
+        "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+        "turnId": "01a15d87-0733-7f12-96cc-a1e8607e9ab3",
+        "reconnectMentioned": false,
+        "proofReferenceAbsent": true
+      },
+      {
+        "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+        "turnId": "01a15d87-0733-7f12-96cc-a1e8607e9ab3",
+        "reconnectMentioned": false,
+        "proofReferenceAbsent": true
+      },
+      {
+        "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+        "turnId": "01a15d87-3966-7d31-9a36-ec863264600c",
+        "reconnectMentioned": false,
+        "proofReferenceAbsent": true
+      },
+      {
+        "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+        "turnId": "01a15d87-3966-7d31-9a36-ec863264600c",
+        "reconnectMentioned": false,
+        "proofReferenceAbsent": true
+      }
+    ],
+    "turns": [
+      {
+        "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+        "status": "completed",
+        "calls": 2
+      },
+      {
+        "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+        "status": "completed",
+        "calls": 2
+      },
+      {
+        "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+        "status": "completed",
+        "calls": 0
+      },
+      {
+        "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+        "status": "completed",
+        "calls": 4
+      },
+      {
+        "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+        "status": "completed",
+        "calls": 1
+      },
+      {
+        "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+        "status": "completed",
+        "calls": 1
+      }
+    ],
+    "delegationRequest": "jBeQZDHxWcIzIx4R1-UBfMPDBhDf3kkrtOJXEV2qKV0=",
+    "delegationApproved": {
+      "ready": true,
+      "reopened": false,
+      "port": 47125,
+      "cipherVersion": "4.19.0 community",
+      "flutterErrors": 0,
+      "libraryCloses": 0,
+      "textItem": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+      "addressField": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4=",
+      "usernameField": "xk9yT1mh8vkn1ZR1uziVg-z5dhwp945Jz8nLQLpd0RU=",
+      "fileItem": "MjT0bePk-oGIDZExRxRA0aMZoQMHbvCrcQy5eMJP6ts=",
+      "fileField": "N8MCmxTXkfxsQCesv5cU9HGldcrUaVRl4vqrc5OGaQY=",
+      "requests": [
+        {
+          "id": "c5cSXOX-i0WSfM0Y_cE98HoepgojM9LJzAtLXd7unMo=",
+          "state": "revoked",
+          "chatLabel": "Codex 01a15d77-e3b3-7301-ad51-b00441ca6107",
+          "sessionEnded": true,
+          "fields": [
+            {
+              "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+              "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+            },
+            {
+              "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+              "fieldId": "xk9yT1mh8vkn1ZR1uziVg-z5dhwp945Jz8nLQLpd0RU="
+            }
+          ],
+          "approvedFields": [
+            {
+              "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+              "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+            }
+          ],
+          "expiresAt": "2026-10-21T16:58:38.793452"
+        },
+        {
+          "id": "XS6MVaP2RTw71sXZhorUhN35BlP0zcndcTqSSC6N3TQ=",
+          "state": "revoked",
+          "chatLabel": "Codex 01a15d7c-8396-7d92-a0d3-d0234fb84ecb",
+          "sessionEnded": true,
+          "fields": [
+            {
+              "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+              "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+            },
+            {
+              "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+              "fieldId": "xk9yT1mh8vkn1ZR1uziVg-z5dhwp945Jz8nLQLpd0RU="
+            }
+          ],
+          "approvedFields": [
+            {
+              "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+              "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+            }
+          ],
+          "expiresAt": "2026-10-21T17:03:43.711783"
+        },
+        {
+          "id": "XaCQ2FpodRQxaIYxeEtQ0t4FjBAz8QjMANWRUHyXUhU=",
+          "state": "revoked",
+          "chatLabel": "Codex 01a15d7f-e80d-7233-8592-9f2adcfdf6d6",
+          "sessionEnded": true,
+          "fields": [
+            {
+              "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+              "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+            },
+            {
+              "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+              "fieldId": "xk9yT1mh8vkn1ZR1uziVg-z5dhwp945Jz8nLQLpd0RU="
+            }
+          ],
+          "approvedFields": [
+            {
+              "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+              "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+            }
+          ],
+          "expiresAt": "2026-10-21T17:07:28.951346"
+        },
+        {
+          "id": "jBeQZDHxWcIzIx4R1-UBfMPDBhDf3kkrtOJXEV2qKV0=",
+          "state": "approved",
+          "chatLabel": "Codex 01a15d85-4b67-7632-9063-0673df29f867",
+          "sessionEnded": false,
+          "fields": [
+            {
+              "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+              "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+            },
+            {
+              "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+              "fieldId": "xk9yT1mh8vkn1ZR1uziVg-z5dhwp945Jz8nLQLpd0RU="
+            }
+          ],
+          "approvedFields": [
+            {
+              "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+              "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+            }
+          ],
+          "expiresAt": "2026-10-21T17:13:15.550239"
+        }
+      ],
+      "grants": [
+        {
+          "id": "UI915tVwJNHBydTXhKzjEdhu4a6gwW0IU8T4Ypgs1yQ=",
+          "requestId": "c5cSXOX-i0WSfM0Y_cE98HoepgojM9LJzAtLXd7unMo=",
+          "active": false,
+          "expiresAt": "2026-10-21T16:58:38.793452",
+          "events": [
+            "approved",
+            "ended"
+          ]
+        },
+        {
+          "id": "gIQWnyFta_pTGfFoR1UArewJImwDjI53kY316ungYjw=",
+          "requestId": "XS6MVaP2RTw71sXZhorUhN35BlP0zcndcTqSSC6N3TQ=",
+          "active": false,
+          "expiresAt": "2026-10-21T17:03:43.711783",
+          "events": [
+            "approved",
+            "ended"
+          ]
+        },
+        {
+          "id": "-nvSOz4hh6AECYFJS7hIJ2JjcyVsepTIpeYykJKeAY4=",
+          "requestId": "XaCQ2FpodRQxaIYxeEtQ0t4FjBAz8QjMANWRUHyXUhU=",
+          "active": false,
+          "expiresAt": "2026-10-21T17:07:28.951346",
+          "events": [
+            "approved",
+            "ended"
+          ]
+        },
+        {
+          "id": "BouciApSkO6WZDo2h-FbMQoj9x-klFSWpzeVBxVPFsc=",
+          "requestId": "jBeQZDHxWcIzIx4R1-UBfMPDBhDf3kkrtOJXEV2qKV0=",
+          "active": true,
+          "expiresAt": "2026-10-21T17:13:15.550239",
+          "events": [
+            "approved"
+          ]
+        }
+      ],
+      "accesses": [
+        {
+          "id": "N9tCKCJyLPAg5xxEnePO4DUpRAYdLltNKHc-3BTStV8=",
+          "outcome": "allowed",
+          "grantId": "UI915tVwJNHBydTXhKzjEdhu4a6gwW0IU8T4Ypgs1yQ=",
+          "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+        },
+        {
+          "id": "cRi-qZ2_LLSRgknk0jv3-43fPWVqU0m4esldv94ty8A=",
+          "outcome": "allowed",
+          "grantId": "gIQWnyFta_pTGfFoR1UArewJImwDjI53kY316ungYjw=",
+          "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+        },
+        {
+          "id": "aEx-qajWr2Crgpq8xl4cw-D-m5EPs9Q05ZkJHO1WkC4=",
+          "outcome": "allowed",
+          "grantId": "-nvSOz4hh6AECYFJS7hIJ2JjcyVsepTIpeYykJKeAY4=",
+          "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+        }
+      ],
+      "credentialRequests": [],
+      "executions": [],
+      "deliveries": []
+    },
+    "delegationChild": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+    "actualChildStartedAndParentDelegated": true,
+    "childModelProtocolCalls": 3,
+    "afterChildCompleted": {
+      "ready": true,
+      "reopened": false,
+      "port": 47125,
+      "cipherVersion": "4.19.0 community",
+      "flutterErrors": 0,
+      "libraryCloses": 0,
+      "textItem": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+      "addressField": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4=",
+      "usernameField": "xk9yT1mh8vkn1ZR1uziVg-z5dhwp945Jz8nLQLpd0RU=",
+      "fileItem": "MjT0bePk-oGIDZExRxRA0aMZoQMHbvCrcQy5eMJP6ts=",
+      "fileField": "N8MCmxTXkfxsQCesv5cU9HGldcrUaVRl4vqrc5OGaQY=",
+      "requests": [
+        {
+          "id": "c5cSXOX-i0WSfM0Y_cE98HoepgojM9LJzAtLXd7unMo=",
+          "state": "revoked",
+          "chatLabel": "Codex 01a15d77-e3b3-7301-ad51-b00441ca6107",
+          "sessionEnded": true,
+          "fields": [
+            {
+              "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+              "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+            },
+            {
+              "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+              "fieldId": "xk9yT1mh8vkn1ZR1uziVg-z5dhwp945Jz8nLQLpd0RU="
+            }
+          ],
+          "approvedFields": [
+            {
+              "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+              "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+            }
+          ],
+          "expiresAt": "2026-10-21T16:58:38.793452"
+        },
+        {
+          "id": "XS6MVaP2RTw71sXZhorUhN35BlP0zcndcTqSSC6N3TQ=",
+          "state": "revoked",
+          "chatLabel": "Codex 01a15d7c-8396-7d92-a0d3-d0234fb84ecb",
+          "sessionEnded": true,
+          "fields": [
+            {
+              "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+              "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+            },
+            {
+              "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+              "fieldId": "xk9yT1mh8vkn1ZR1uziVg-z5dhwp945Jz8nLQLpd0RU="
+            }
+          ],
+          "approvedFields": [
+            {
+              "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+              "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+            }
+          ],
+          "expiresAt": "2026-10-21T17:03:43.711783"
+        },
+        {
+          "id": "XaCQ2FpodRQxaIYxeEtQ0t4FjBAz8QjMANWRUHyXUhU=",
+          "state": "revoked",
+          "chatLabel": "Codex 01a15d7f-e80d-7233-8592-9f2adcfdf6d6",
+          "sessionEnded": true,
+          "fields": [
+            {
+              "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+              "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+            },
+            {
+              "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+              "fieldId": "xk9yT1mh8vkn1ZR1uziVg-z5dhwp945Jz8nLQLpd0RU="
+            }
+          ],
+          "approvedFields": [
+            {
+              "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+              "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+            }
+          ],
+          "expiresAt": "2026-10-21T17:07:28.951346"
+        },
+        {
+          "id": "jBeQZDHxWcIzIx4R1-UBfMPDBhDf3kkrtOJXEV2qKV0=",
+          "state": "approved",
+          "chatLabel": "Codex 01a15d85-4b67-7632-9063-0673df29f867",
+          "sessionEnded": false,
+          "fields": [
+            {
+              "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+              "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+            },
+            {
+              "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+              "fieldId": "xk9yT1mh8vkn1ZR1uziVg-z5dhwp945Jz8nLQLpd0RU="
+            }
+          ],
+          "approvedFields": [
+            {
+              "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+              "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+            }
+          ],
+          "expiresAt": "2026-10-21T17:13:15.550239"
+        }
+      ],
+      "grants": [
+        {
+          "id": "UI915tVwJNHBydTXhKzjEdhu4a6gwW0IU8T4Ypgs1yQ=",
+          "requestId": "c5cSXOX-i0WSfM0Y_cE98HoepgojM9LJzAtLXd7unMo=",
+          "active": false,
+          "expiresAt": "2026-10-21T16:58:38.793452",
+          "events": [
+            "approved",
+            "ended"
+          ]
+        },
+        {
+          "id": "gIQWnyFta_pTGfFoR1UArewJImwDjI53kY316ungYjw=",
+          "requestId": "XS6MVaP2RTw71sXZhorUhN35BlP0zcndcTqSSC6N3TQ=",
+          "active": false,
+          "expiresAt": "2026-10-21T17:03:43.711783",
+          "events": [
+            "approved",
+            "ended"
+          ]
+        },
+        {
+          "id": "-nvSOz4hh6AECYFJS7hIJ2JjcyVsepTIpeYykJKeAY4=",
+          "requestId": "XaCQ2FpodRQxaIYxeEtQ0t4FjBAz8QjMANWRUHyXUhU=",
+          "active": false,
+          "expiresAt": "2026-10-21T17:07:28.951346",
+          "events": [
+            "approved",
+            "ended"
+          ]
+        },
+        {
+          "id": "BouciApSkO6WZDo2h-FbMQoj9x-klFSWpzeVBxVPFsc=",
+          "requestId": "jBeQZDHxWcIzIx4R1-UBfMPDBhDf3kkrtOJXEV2qKV0=",
+          "active": true,
+          "expiresAt": "2026-10-21T17:13:15.550239",
+          "events": [
+            "approved"
+          ]
+        }
+      ],
+      "accesses": [
+        {
+          "id": "N9tCKCJyLPAg5xxEnePO4DUpRAYdLltNKHc-3BTStV8=",
+          "outcome": "allowed",
+          "grantId": "UI915tVwJNHBydTXhKzjEdhu4a6gwW0IU8T4Ypgs1yQ=",
+          "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+        },
+        {
+          "id": "cRi-qZ2_LLSRgknk0jv3-43fPWVqU0m4esldv94ty8A=",
+          "outcome": "allowed",
+          "grantId": "gIQWnyFta_pTGfFoR1UArewJImwDjI53kY316ungYjw=",
+          "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+        },
+        {
+          "id": "aEx-qajWr2Crgpq8xl4cw-D-m5EPs9Q05ZkJHO1WkC4=",
+          "outcome": "allowed",
+          "grantId": "-nvSOz4hh6AECYFJS7hIJ2JjcyVsepTIpeYykJKeAY4=",
+          "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+        },
+        {
+          "id": "duxzklOcIjbJopN0mUm0YNne_X_RkPwOVaUNOnuxkPE=",
+          "outcome": "allowed",
+          "grantId": "BouciApSkO6WZDo2h-FbMQoj9x-klFSWpzeVBxVPFsc=",
+          "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+        },
+        {
+          "id": "l_KLX8jiXpWkANF2Iss181LT2nYSTyW-fxEQkeqK0OE=",
+          "outcome": "allowed",
+          "grantId": "BouciApSkO6WZDo2h-FbMQoj9x-klFSWpzeVBxVPFsc=",
+          "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+        },
+        {
+          "id": "hUerDlUs62xdpfA1DmdWXLBkbZnR4lMX8PqgsRHVJCU=",
+          "outcome": "unauthorized",
+          "grantId": "BouciApSkO6WZDo2h-FbMQoj9x-klFSWpzeVBxVPFsc=",
+          "fieldId": "xk9yT1mh8vkn1ZR1uziVg-z5dhwp945Jz8nLQLpd0RU="
+        }
+      ],
+      "credentialRequests": [],
+      "executions": [],
+      "deliveries": []
+    },
+    "rootInterruptEvents": [
+      {
+        "method": "thread/status/changed",
+        "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+        "turnId": null
+      },
+      {
+        "method": "turn/started",
+        "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+        "turnId": "01a15d87-3915-7a52-80d5-a2984ea5b920"
+      },
+      {
+        "method": "item/started",
+        "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+        "turnId": "01a15d87-3915-7a52-80d5-a2984ea5b920",
+        "itemType": "userMessage"
+      },
+      {
+        "method": "item/completed",
+        "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+        "turnId": "01a15d87-3915-7a52-80d5-a2984ea5b920",
+        "itemType": "userMessage"
+      },
+      {
+        "method": "thread/status/changed",
+        "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+        "turnId": null
+      },
+      {
+        "method": "turn/completed",
+        "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+        "turnId": "01a15d87-3915-7a52-80d5-a2984ea5b920",
+        "turnStatus": "interrupted"
+      }
+    ],
+    "afterRootInterrupt": {
+      "ready": true,
+      "reopened": false,
+      "port": 47125,
+      "cipherVersion": "4.19.0 community",
+      "flutterErrors": 0,
+      "libraryCloses": 0,
+      "textItem": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+      "addressField": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4=",
+      "usernameField": "xk9yT1mh8vkn1ZR1uziVg-z5dhwp945Jz8nLQLpd0RU=",
+      "fileItem": "MjT0bePk-oGIDZExRxRA0aMZoQMHbvCrcQy5eMJP6ts=",
+      "fileField": "N8MCmxTXkfxsQCesv5cU9HGldcrUaVRl4vqrc5OGaQY=",
+      "requests": [
+        {
+          "id": "c5cSXOX-i0WSfM0Y_cE98HoepgojM9LJzAtLXd7unMo=",
+          "state": "revoked",
+          "chatLabel": "Codex 01a15d77-e3b3-7301-ad51-b00441ca6107",
+          "sessionEnded": true,
+          "fields": [
+            {
+              "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+              "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+            },
+            {
+              "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+              "fieldId": "xk9yT1mh8vkn1ZR1uziVg-z5dhwp945Jz8nLQLpd0RU="
+            }
+          ],
+          "approvedFields": [
+            {
+              "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+              "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+            }
+          ],
+          "expiresAt": "2026-10-21T16:58:38.793452"
+        },
+        {
+          "id": "XS6MVaP2RTw71sXZhorUhN35BlP0zcndcTqSSC6N3TQ=",
+          "state": "revoked",
+          "chatLabel": "Codex 01a15d7c-8396-7d92-a0d3-d0234fb84ecb",
+          "sessionEnded": true,
+          "fields": [
+            {
+              "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+              "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+            },
+            {
+              "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+              "fieldId": "xk9yT1mh8vkn1ZR1uziVg-z5dhwp945Jz8nLQLpd0RU="
+            }
+          ],
+          "approvedFields": [
+            {
+              "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+              "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+            }
+          ],
+          "expiresAt": "2026-10-21T17:03:43.711783"
+        },
+        {
+          "id": "XaCQ2FpodRQxaIYxeEtQ0t4FjBAz8QjMANWRUHyXUhU=",
+          "state": "revoked",
+          "chatLabel": "Codex 01a15d7f-e80d-7233-8592-9f2adcfdf6d6",
+          "sessionEnded": true,
+          "fields": [
+            {
+              "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+              "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+            },
+            {
+              "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+              "fieldId": "xk9yT1mh8vkn1ZR1uziVg-z5dhwp945Jz8nLQLpd0RU="
+            }
+          ],
+          "approvedFields": [
+            {
+              "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+              "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+            }
+          ],
+          "expiresAt": "2026-10-21T17:07:28.951346"
+        },
+        {
+          "id": "jBeQZDHxWcIzIx4R1-UBfMPDBhDf3kkrtOJXEV2qKV0=",
+          "state": "approved",
+          "chatLabel": "Codex 01a15d85-4b67-7632-9063-0673df29f867",
+          "sessionEnded": false,
+          "fields": [
+            {
+              "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+              "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+            },
+            {
+              "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+              "fieldId": "xk9yT1mh8vkn1ZR1uziVg-z5dhwp945Jz8nLQLpd0RU="
+            }
+          ],
+          "approvedFields": [
+            {
+              "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+              "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+            }
+          ],
+          "expiresAt": "2026-10-21T17:13:15.550239"
+        }
+      ],
+      "grants": [
+        {
+          "id": "UI915tVwJNHBydTXhKzjEdhu4a6gwW0IU8T4Ypgs1yQ=",
+          "requestId": "c5cSXOX-i0WSfM0Y_cE98HoepgojM9LJzAtLXd7unMo=",
+          "active": false,
+          "expiresAt": "2026-10-21T16:58:38.793452",
+          "events": [
+            "approved",
+            "ended"
+          ]
+        },
+        {
+          "id": "gIQWnyFta_pTGfFoR1UArewJImwDjI53kY316ungYjw=",
+          "requestId": "XS6MVaP2RTw71sXZhorUhN35BlP0zcndcTqSSC6N3TQ=",
+          "active": false,
+          "expiresAt": "2026-10-21T17:03:43.711783",
+          "events": [
+            "approved",
+            "ended"
+          ]
+        },
+        {
+          "id": "-nvSOz4hh6AECYFJS7hIJ2JjcyVsepTIpeYykJKeAY4=",
+          "requestId": "XaCQ2FpodRQxaIYxeEtQ0t4FjBAz8QjMANWRUHyXUhU=",
+          "active": false,
+          "expiresAt": "2026-10-21T17:07:28.951346",
+          "events": [
+            "approved",
+            "ended"
+          ]
+        },
+        {
+          "id": "BouciApSkO6WZDo2h-FbMQoj9x-klFSWpzeVBxVPFsc=",
+          "requestId": "jBeQZDHxWcIzIx4R1-UBfMPDBhDf3kkrtOJXEV2qKV0=",
+          "active": true,
+          "expiresAt": "2026-10-21T17:13:15.550239",
+          "events": [
+            "approved"
+          ]
+        }
+      ],
+      "accesses": [
+        {
+          "id": "N9tCKCJyLPAg5xxEnePO4DUpRAYdLltNKHc-3BTStV8=",
+          "outcome": "allowed",
+          "grantId": "UI915tVwJNHBydTXhKzjEdhu4a6gwW0IU8T4Ypgs1yQ=",
+          "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+        },
+        {
+          "id": "cRi-qZ2_LLSRgknk0jv3-43fPWVqU0m4esldv94ty8A=",
+          "outcome": "allowed",
+          "grantId": "gIQWnyFta_pTGfFoR1UArewJImwDjI53kY316ungYjw=",
+          "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+        },
+        {
+          "id": "aEx-qajWr2Crgpq8xl4cw-D-m5EPs9Q05ZkJHO1WkC4=",
+          "outcome": "allowed",
+          "grantId": "-nvSOz4hh6AECYFJS7hIJ2JjcyVsepTIpeYykJKeAY4=",
+          "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+        },
+        {
+          "id": "duxzklOcIjbJopN0mUm0YNne_X_RkPwOVaUNOnuxkPE=",
+          "outcome": "allowed",
+          "grantId": "BouciApSkO6WZDo2h-FbMQoj9x-klFSWpzeVBxVPFsc=",
+          "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+        },
+        {
+          "id": "l_KLX8jiXpWkANF2Iss181LT2nYSTyW-fxEQkeqK0OE=",
+          "outcome": "allowed",
+          "grantId": "BouciApSkO6WZDo2h-FbMQoj9x-klFSWpzeVBxVPFsc=",
+          "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+        },
+        {
+          "id": "hUerDlUs62xdpfA1DmdWXLBkbZnR4lMX8PqgsRHVJCU=",
+          "outcome": "unauthorized",
+          "grantId": "BouciApSkO6WZDo2h-FbMQoj9x-klFSWpzeVBxVPFsc=",
+          "fieldId": "xk9yT1mh8vkn1ZR1uziVg-z5dhwp945Jz8nLQLpd0RU="
+        },
+        {
+          "id": "ldRoBDCwGtcWliQW1KKXcY6X2pjvVccVLPVUHjrg7Qo=",
+          "outcome": "allowed",
+          "grantId": "BouciApSkO6WZDo2h-FbMQoj9x-klFSWpzeVBxVPFsc=",
+          "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+        }
+      ],
+      "credentialRequests": [],
+      "executions": [],
+      "deliveries": []
+    },
+    "beforeRootEnd": {
+      "ready": true,
+      "reopened": false,
+      "port": 47125,
+      "cipherVersion": "4.19.0 community",
+      "flutterErrors": 0,
+      "libraryCloses": 0,
+      "textItem": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+      "addressField": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4=",
+      "usernameField": "xk9yT1mh8vkn1ZR1uziVg-z5dhwp945Jz8nLQLpd0RU=",
+      "fileItem": "MjT0bePk-oGIDZExRxRA0aMZoQMHbvCrcQy5eMJP6ts=",
+      "fileField": "N8MCmxTXkfxsQCesv5cU9HGldcrUaVRl4vqrc5OGaQY=",
+      "requests": [
+        {
+          "id": "c5cSXOX-i0WSfM0Y_cE98HoepgojM9LJzAtLXd7unMo=",
+          "state": "revoked",
+          "chatLabel": "Codex 01a15d77-e3b3-7301-ad51-b00441ca6107",
+          "sessionEnded": true,
+          "fields": [
+            {
+              "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+              "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+            },
+            {
+              "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+              "fieldId": "xk9yT1mh8vkn1ZR1uziVg-z5dhwp945Jz8nLQLpd0RU="
+            }
+          ],
+          "approvedFields": [
+            {
+              "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+              "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+            }
+          ],
+          "expiresAt": "2026-10-21T16:58:38.793452"
+        },
+        {
+          "id": "XS6MVaP2RTw71sXZhorUhN35BlP0zcndcTqSSC6N3TQ=",
+          "state": "revoked",
+          "chatLabel": "Codex 01a15d7c-8396-7d92-a0d3-d0234fb84ecb",
+          "sessionEnded": true,
+          "fields": [
+            {
+              "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+              "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+            },
+            {
+              "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+              "fieldId": "xk9yT1mh8vkn1ZR1uziVg-z5dhwp945Jz8nLQLpd0RU="
+            }
+          ],
+          "approvedFields": [
+            {
+              "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+              "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+            }
+          ],
+          "expiresAt": "2026-10-21T17:03:43.711783"
+        },
+        {
+          "id": "XaCQ2FpodRQxaIYxeEtQ0t4FjBAz8QjMANWRUHyXUhU=",
+          "state": "revoked",
+          "chatLabel": "Codex 01a15d7f-e80d-7233-8592-9f2adcfdf6d6",
+          "sessionEnded": true,
+          "fields": [
+            {
+              "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+              "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+            },
+            {
+              "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+              "fieldId": "xk9yT1mh8vkn1ZR1uziVg-z5dhwp945Jz8nLQLpd0RU="
+            }
+          ],
+          "approvedFields": [
+            {
+              "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+              "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+            }
+          ],
+          "expiresAt": "2026-10-21T17:07:28.951346"
+        },
+        {
+          "id": "jBeQZDHxWcIzIx4R1-UBfMPDBhDf3kkrtOJXEV2qKV0=",
+          "state": "approved",
+          "chatLabel": "Codex 01a15d85-4b67-7632-9063-0673df29f867",
+          "sessionEnded": false,
+          "fields": [
+            {
+              "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+              "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+            },
+            {
+              "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+              "fieldId": "xk9yT1mh8vkn1ZR1uziVg-z5dhwp945Jz8nLQLpd0RU="
+            }
+          ],
+          "approvedFields": [
+            {
+              "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+              "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+            }
+          ],
+          "expiresAt": "2026-10-21T17:13:15.550239"
+        }
+      ],
+      "grants": [
+        {
+          "id": "UI915tVwJNHBydTXhKzjEdhu4a6gwW0IU8T4Ypgs1yQ=",
+          "requestId": "c5cSXOX-i0WSfM0Y_cE98HoepgojM9LJzAtLXd7unMo=",
+          "active": false,
+          "expiresAt": "2026-10-21T16:58:38.793452",
+          "events": [
+            "approved",
+            "ended"
+          ]
+        },
+        {
+          "id": "gIQWnyFta_pTGfFoR1UArewJImwDjI53kY316ungYjw=",
+          "requestId": "XS6MVaP2RTw71sXZhorUhN35BlP0zcndcTqSSC6N3TQ=",
+          "active": false,
+          "expiresAt": "2026-10-21T17:03:43.711783",
+          "events": [
+            "approved",
+            "ended"
+          ]
+        },
+        {
+          "id": "-nvSOz4hh6AECYFJS7hIJ2JjcyVsepTIpeYykJKeAY4=",
+          "requestId": "XaCQ2FpodRQxaIYxeEtQ0t4FjBAz8QjMANWRUHyXUhU=",
+          "active": false,
+          "expiresAt": "2026-10-21T17:07:28.951346",
+          "events": [
+            "approved",
+            "ended"
+          ]
+        },
+        {
+          "id": "BouciApSkO6WZDo2h-FbMQoj9x-klFSWpzeVBxVPFsc=",
+          "requestId": "jBeQZDHxWcIzIx4R1-UBfMPDBhDf3kkrtOJXEV2qKV0=",
+          "active": true,
+          "expiresAt": "2026-10-21T17:13:15.550239",
+          "events": [
+            "approved"
+          ]
+        }
+      ],
+      "accesses": [
+        {
+          "id": "N9tCKCJyLPAg5xxEnePO4DUpRAYdLltNKHc-3BTStV8=",
+          "outcome": "allowed",
+          "grantId": "UI915tVwJNHBydTXhKzjEdhu4a6gwW0IU8T4Ypgs1yQ=",
+          "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+        },
+        {
+          "id": "cRi-qZ2_LLSRgknk0jv3-43fPWVqU0m4esldv94ty8A=",
+          "outcome": "allowed",
+          "grantId": "gIQWnyFta_pTGfFoR1UArewJImwDjI53kY316ungYjw=",
+          "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+        },
+        {
+          "id": "aEx-qajWr2Crgpq8xl4cw-D-m5EPs9Q05ZkJHO1WkC4=",
+          "outcome": "allowed",
+          "grantId": "-nvSOz4hh6AECYFJS7hIJ2JjcyVsepTIpeYykJKeAY4=",
+          "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+        },
+        {
+          "id": "duxzklOcIjbJopN0mUm0YNne_X_RkPwOVaUNOnuxkPE=",
+          "outcome": "allowed",
+          "grantId": "BouciApSkO6WZDo2h-FbMQoj9x-klFSWpzeVBxVPFsc=",
+          "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+        },
+        {
+          "id": "l_KLX8jiXpWkANF2Iss181LT2nYSTyW-fxEQkeqK0OE=",
+          "outcome": "allowed",
+          "grantId": "BouciApSkO6WZDo2h-FbMQoj9x-klFSWpzeVBxVPFsc=",
+          "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+        },
+        {
+          "id": "hUerDlUs62xdpfA1DmdWXLBkbZnR4lMX8PqgsRHVJCU=",
+          "outcome": "unauthorized",
+          "grantId": "BouciApSkO6WZDo2h-FbMQoj9x-klFSWpzeVBxVPFsc=",
+          "fieldId": "xk9yT1mh8vkn1ZR1uziVg-z5dhwp945Jz8nLQLpd0RU="
+        },
+        {
+          "id": "ldRoBDCwGtcWliQW1KKXcY6X2pjvVccVLPVUHjrg7Qo=",
+          "outcome": "allowed",
+          "grantId": "BouciApSkO6WZDo2h-FbMQoj9x-klFSWpzeVBxVPFsc=",
+          "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+        },
+        {
+          "id": "DBJho1jcyr2MyAQnKHNDUQ_t49WWQ4s6w03mpuQ-COc=",
+          "outcome": "allowed",
+          "grantId": "BouciApSkO6WZDo2h-FbMQoj9x-klFSWpzeVBxVPFsc=",
+          "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+        }
+      ],
+      "credentialRequests": [],
+      "executions": [],
+      "deliveries": []
+    },
+    "afterRootEnd": {
+      "ready": true,
+      "reopened": false,
+      "port": 47125,
+      "cipherVersion": "4.19.0 community",
+      "flutterErrors": 0,
+      "libraryCloses": 0,
+      "textItem": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+      "addressField": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4=",
+      "usernameField": "xk9yT1mh8vkn1ZR1uziVg-z5dhwp945Jz8nLQLpd0RU=",
+      "fileItem": "MjT0bePk-oGIDZExRxRA0aMZoQMHbvCrcQy5eMJP6ts=",
+      "fileField": "N8MCmxTXkfxsQCesv5cU9HGldcrUaVRl4vqrc5OGaQY=",
+      "requests": [
+        {
+          "id": "c5cSXOX-i0WSfM0Y_cE98HoepgojM9LJzAtLXd7unMo=",
+          "state": "revoked",
+          "chatLabel": "Codex 01a15d77-e3b3-7301-ad51-b00441ca6107",
+          "sessionEnded": true,
+          "fields": [
+            {
+              "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+              "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+            },
+            {
+              "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+              "fieldId": "xk9yT1mh8vkn1ZR1uziVg-z5dhwp945Jz8nLQLpd0RU="
+            }
+          ],
+          "approvedFields": [
+            {
+              "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+              "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+            }
+          ],
+          "expiresAt": "2026-10-21T16:58:38.793452"
+        },
+        {
+          "id": "XS6MVaP2RTw71sXZhorUhN35BlP0zcndcTqSSC6N3TQ=",
+          "state": "revoked",
+          "chatLabel": "Codex 01a15d7c-8396-7d92-a0d3-d0234fb84ecb",
+          "sessionEnded": true,
+          "fields": [
+            {
+              "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+              "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+            },
+            {
+              "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+              "fieldId": "xk9yT1mh8vkn1ZR1uziVg-z5dhwp945Jz8nLQLpd0RU="
+            }
+          ],
+          "approvedFields": [
+            {
+              "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+              "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+            }
+          ],
+          "expiresAt": "2026-10-21T17:03:43.711783"
+        },
+        {
+          "id": "XaCQ2FpodRQxaIYxeEtQ0t4FjBAz8QjMANWRUHyXUhU=",
+          "state": "revoked",
+          "chatLabel": "Codex 01a15d7f-e80d-7233-8592-9f2adcfdf6d6",
+          "sessionEnded": true,
+          "fields": [
+            {
+              "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+              "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+            },
+            {
+              "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+              "fieldId": "xk9yT1mh8vkn1ZR1uziVg-z5dhwp945Jz8nLQLpd0RU="
+            }
+          ],
+          "approvedFields": [
+            {
+              "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+              "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+            }
+          ],
+          "expiresAt": "2026-10-21T17:07:28.951346"
+        },
+        {
+          "id": "jBeQZDHxWcIzIx4R1-UBfMPDBhDf3kkrtOJXEV2qKV0=",
+          "state": "revoked",
+          "chatLabel": "Codex 01a15d85-4b67-7632-9063-0673df29f867",
+          "sessionEnded": true,
+          "fields": [
+            {
+              "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+              "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+            },
+            {
+              "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+              "fieldId": "xk9yT1mh8vkn1ZR1uziVg-z5dhwp945Jz8nLQLpd0RU="
+            }
+          ],
+          "approvedFields": [
+            {
+              "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+              "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+            }
+          ],
+          "expiresAt": "2026-10-21T17:13:15.550239"
+        }
+      ],
+      "grants": [
+        {
+          "id": "UI915tVwJNHBydTXhKzjEdhu4a6gwW0IU8T4Ypgs1yQ=",
+          "requestId": "c5cSXOX-i0WSfM0Y_cE98HoepgojM9LJzAtLXd7unMo=",
+          "active": false,
+          "expiresAt": "2026-10-21T16:58:38.793452",
+          "events": [
+            "approved",
+            "ended"
+          ]
+        },
+        {
+          "id": "gIQWnyFta_pTGfFoR1UArewJImwDjI53kY316ungYjw=",
+          "requestId": "XS6MVaP2RTw71sXZhorUhN35BlP0zcndcTqSSC6N3TQ=",
+          "active": false,
+          "expiresAt": "2026-10-21T17:03:43.711783",
+          "events": [
+            "approved",
+            "ended"
+          ]
+        },
+        {
+          "id": "-nvSOz4hh6AECYFJS7hIJ2JjcyVsepTIpeYykJKeAY4=",
+          "requestId": "XaCQ2FpodRQxaIYxeEtQ0t4FjBAz8QjMANWRUHyXUhU=",
+          "active": false,
+          "expiresAt": "2026-10-21T17:07:28.951346",
+          "events": [
+            "approved",
+            "ended"
+          ]
+        },
+        {
+          "id": "BouciApSkO6WZDo2h-FbMQoj9x-klFSWpzeVBxVPFsc=",
+          "requestId": "jBeQZDHxWcIzIx4R1-UBfMPDBhDf3kkrtOJXEV2qKV0=",
+          "active": false,
+          "expiresAt": "2026-10-21T17:13:15.550239",
+          "events": [
+            "approved",
+            "ended"
+          ]
+        }
+      ],
+      "accesses": [
+        {
+          "id": "N9tCKCJyLPAg5xxEnePO4DUpRAYdLltNKHc-3BTStV8=",
+          "outcome": "allowed",
+          "grantId": "UI915tVwJNHBydTXhKzjEdhu4a6gwW0IU8T4Ypgs1yQ=",
+          "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+        },
+        {
+          "id": "cRi-qZ2_LLSRgknk0jv3-43fPWVqU0m4esldv94ty8A=",
+          "outcome": "allowed",
+          "grantId": "gIQWnyFta_pTGfFoR1UArewJImwDjI53kY316ungYjw=",
+          "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+        },
+        {
+          "id": "aEx-qajWr2Crgpq8xl4cw-D-m5EPs9Q05ZkJHO1WkC4=",
+          "outcome": "allowed",
+          "grantId": "-nvSOz4hh6AECYFJS7hIJ2JjcyVsepTIpeYykJKeAY4=",
+          "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+        },
+        {
+          "id": "duxzklOcIjbJopN0mUm0YNne_X_RkPwOVaUNOnuxkPE=",
+          "outcome": "allowed",
+          "grantId": "BouciApSkO6WZDo2h-FbMQoj9x-klFSWpzeVBxVPFsc=",
+          "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+        },
+        {
+          "id": "l_KLX8jiXpWkANF2Iss181LT2nYSTyW-fxEQkeqK0OE=",
+          "outcome": "allowed",
+          "grantId": "BouciApSkO6WZDo2h-FbMQoj9x-klFSWpzeVBxVPFsc=",
+          "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+        },
+        {
+          "id": "hUerDlUs62xdpfA1DmdWXLBkbZnR4lMX8PqgsRHVJCU=",
+          "outcome": "unauthorized",
+          "grantId": "BouciApSkO6WZDo2h-FbMQoj9x-klFSWpzeVBxVPFsc=",
+          "fieldId": "xk9yT1mh8vkn1ZR1uziVg-z5dhwp945Jz8nLQLpd0RU="
+        },
+        {
+          "id": "ldRoBDCwGtcWliQW1KKXcY6X2pjvVccVLPVUHjrg7Qo=",
+          "outcome": "allowed",
+          "grantId": "BouciApSkO6WZDo2h-FbMQoj9x-klFSWpzeVBxVPFsc=",
+          "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+        },
+        {
+          "id": "DBJho1jcyr2MyAQnKHNDUQ_t49WWQ4s6w03mpuQ-COc=",
+          "outcome": "allowed",
+          "grantId": "BouciApSkO6WZDo2h-FbMQoj9x-klFSWpzeVBxVPFsc=",
+          "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+        }
+      ],
+      "credentialRequests": [],
+      "executions": [],
+      "deliveries": []
+    },
+    "completeDelegationFlow": true,
+    "serverExitCode": 0,
+    "ephemeralMcpTransportRemoved": true,
+    "finalSnapshot": {
+      "ready": true,
+      "reopened": false,
+      "port": 47125,
+      "cipherVersion": "4.19.0 community",
+      "flutterErrors": 0,
+      "libraryCloses": 0,
+      "textItem": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+      "addressField": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4=",
+      "usernameField": "xk9yT1mh8vkn1ZR1uziVg-z5dhwp945Jz8nLQLpd0RU=",
+      "fileItem": "MjT0bePk-oGIDZExRxRA0aMZoQMHbvCrcQy5eMJP6ts=",
+      "fileField": "N8MCmxTXkfxsQCesv5cU9HGldcrUaVRl4vqrc5OGaQY=",
+      "requests": [
+        {
+          "id": "c5cSXOX-i0WSfM0Y_cE98HoepgojM9LJzAtLXd7unMo=",
+          "state": "revoked",
+          "chatLabel": "Codex 01a15d77-e3b3-7301-ad51-b00441ca6107",
+          "sessionEnded": true,
+          "fields": [
+            {
+              "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+              "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+            },
+            {
+              "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+              "fieldId": "xk9yT1mh8vkn1ZR1uziVg-z5dhwp945Jz8nLQLpd0RU="
+            }
+          ],
+          "approvedFields": [
+            {
+              "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+              "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+            }
+          ],
+          "expiresAt": "2026-10-21T16:58:38.793452"
+        },
+        {
+          "id": "XS6MVaP2RTw71sXZhorUhN35BlP0zcndcTqSSC6N3TQ=",
+          "state": "revoked",
+          "chatLabel": "Codex 01a15d7c-8396-7d92-a0d3-d0234fb84ecb",
+          "sessionEnded": true,
+          "fields": [
+            {
+              "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+              "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+            },
+            {
+              "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+              "fieldId": "xk9yT1mh8vkn1ZR1uziVg-z5dhwp945Jz8nLQLpd0RU="
+            }
+          ],
+          "approvedFields": [
+            {
+              "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+              "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+            }
+          ],
+          "expiresAt": "2026-10-21T17:03:43.711783"
+        },
+        {
+          "id": "XaCQ2FpodRQxaIYxeEtQ0t4FjBAz8QjMANWRUHyXUhU=",
+          "state": "revoked",
+          "chatLabel": "Codex 01a15d7f-e80d-7233-8592-9f2adcfdf6d6",
+          "sessionEnded": true,
+          "fields": [
+            {
+              "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+              "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+            },
+            {
+              "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+              "fieldId": "xk9yT1mh8vkn1ZR1uziVg-z5dhwp945Jz8nLQLpd0RU="
+            }
+          ],
+          "approvedFields": [
+            {
+              "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+              "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+            }
+          ],
+          "expiresAt": "2026-10-21T17:07:28.951346"
+        },
+        {
+          "id": "jBeQZDHxWcIzIx4R1-UBfMPDBhDf3kkrtOJXEV2qKV0=",
+          "state": "revoked",
+          "chatLabel": "Codex 01a15d85-4b67-7632-9063-0673df29f867",
+          "sessionEnded": true,
+          "fields": [
+            {
+              "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+              "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+            },
+            {
+              "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+              "fieldId": "xk9yT1mh8vkn1ZR1uziVg-z5dhwp945Jz8nLQLpd0RU="
+            }
+          ],
+          "approvedFields": [
+            {
+              "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+              "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+            }
+          ],
+          "expiresAt": "2026-10-21T17:13:15.550239"
+        }
+      ],
+      "grants": [
+        {
+          "id": "UI915tVwJNHBydTXhKzjEdhu4a6gwW0IU8T4Ypgs1yQ=",
+          "requestId": "c5cSXOX-i0WSfM0Y_cE98HoepgojM9LJzAtLXd7unMo=",
+          "active": false,
+          "expiresAt": "2026-10-21T16:58:38.793452",
+          "events": [
+            "approved",
+            "ended"
+          ]
+        },
+        {
+          "id": "gIQWnyFta_pTGfFoR1UArewJImwDjI53kY316ungYjw=",
+          "requestId": "XS6MVaP2RTw71sXZhorUhN35BlP0zcndcTqSSC6N3TQ=",
+          "active": false,
+          "expiresAt": "2026-10-21T17:03:43.711783",
+          "events": [
+            "approved",
+            "ended"
+          ]
+        },
+        {
+          "id": "-nvSOz4hh6AECYFJS7hIJ2JjcyVsepTIpeYykJKeAY4=",
+          "requestId": "XaCQ2FpodRQxaIYxeEtQ0t4FjBAz8QjMANWRUHyXUhU=",
+          "active": false,
+          "expiresAt": "2026-10-21T17:07:28.951346",
+          "events": [
+            "approved",
+            "ended"
+          ]
+        },
+        {
+          "id": "BouciApSkO6WZDo2h-FbMQoj9x-klFSWpzeVBxVPFsc=",
+          "requestId": "jBeQZDHxWcIzIx4R1-UBfMPDBhDf3kkrtOJXEV2qKV0=",
+          "active": false,
+          "expiresAt": "2026-10-21T17:13:15.550239",
+          "events": [
+            "approved",
+            "ended"
+          ]
+        }
+      ],
+      "accesses": [
+        {
+          "id": "N9tCKCJyLPAg5xxEnePO4DUpRAYdLltNKHc-3BTStV8=",
+          "outcome": "allowed",
+          "grantId": "UI915tVwJNHBydTXhKzjEdhu4a6gwW0IU8T4Ypgs1yQ=",
+          "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+        },
+        {
+          "id": "cRi-qZ2_LLSRgknk0jv3-43fPWVqU0m4esldv94ty8A=",
+          "outcome": "allowed",
+          "grantId": "gIQWnyFta_pTGfFoR1UArewJImwDjI53kY316ungYjw=",
+          "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+        },
+        {
+          "id": "aEx-qajWr2Crgpq8xl4cw-D-m5EPs9Q05ZkJHO1WkC4=",
+          "outcome": "allowed",
+          "grantId": "-nvSOz4hh6AECYFJS7hIJ2JjcyVsepTIpeYykJKeAY4=",
+          "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+        },
+        {
+          "id": "duxzklOcIjbJopN0mUm0YNne_X_RkPwOVaUNOnuxkPE=",
+          "outcome": "allowed",
+          "grantId": "BouciApSkO6WZDo2h-FbMQoj9x-klFSWpzeVBxVPFsc=",
+          "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+        },
+        {
+          "id": "l_KLX8jiXpWkANF2Iss181LT2nYSTyW-fxEQkeqK0OE=",
+          "outcome": "allowed",
+          "grantId": "BouciApSkO6WZDo2h-FbMQoj9x-klFSWpzeVBxVPFsc=",
+          "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+        },
+        {
+          "id": "hUerDlUs62xdpfA1DmdWXLBkbZnR4lMX8PqgsRHVJCU=",
+          "outcome": "unauthorized",
+          "grantId": "BouciApSkO6WZDo2h-FbMQoj9x-klFSWpzeVBxVPFsc=",
+          "fieldId": "xk9yT1mh8vkn1ZR1uziVg-z5dhwp945Jz8nLQLpd0RU="
+        },
+        {
+          "id": "ldRoBDCwGtcWliQW1KKXcY6X2pjvVccVLPVUHjrg7Qo=",
+          "outcome": "allowed",
+          "grantId": "BouciApSkO6WZDo2h-FbMQoj9x-klFSWpzeVBxVPFsc=",
+          "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+        },
+        {
+          "id": "DBJho1jcyr2MyAQnKHNDUQ_t49WWQ4s6w03mpuQ-COc=",
+          "outcome": "allowed",
+          "grantId": "BouciApSkO6WZDo2h-FbMQoj9x-klFSWpzeVBxVPFsc=",
+          "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+        }
+      ],
+      "credentialRequests": [],
+      "executions": [],
+      "deliveries": []
+    },
+    "proofReferencesAbsentFromEvidence": true
+  },
+  "events": [
+    {
+      "method": "remoteControl/status/changed",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "account/updated",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "thread/started",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "warning",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": null
+    },
+    {
+      "method": "mcpServer/startupStatus/updated",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": null
+    },
+    {
+      "method": "mcpServer/startupStatus/updated",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": null
+    },
+    {
+      "method": "mcpServer/startupStatus/updated",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": null
+    },
+    {
+      "method": "mcpServer/startupStatus/updated",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": null
+    },
+    {
+      "method": "mcpServer/startupStatus/updated",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": null
+    },
+    {
+      "method": "mcpServer/startupStatus/updated",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": null
+    },
+    {
+      "method": "thread/status/changed",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": null
+    },
+    {
+      "method": "turn/started",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "mcpServer/startupStatus/updated",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": null
+    },
+    {
+      "method": "mcpServer/startupStatus/updated",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": null
+    },
+    {
+      "method": "mcpServer/startupStatus/updated",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": null
+    },
+    {
+      "method": "mcpServer/startupStatus/updated",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": null
+    },
+    {
+      "method": "hook/started",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d",
+      "id": "session-start:0:/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json",
+      "eventName": "sessionStart",
+      "status": "running",
+      "sourcePath": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json",
+      "durationMs": null
+    },
+    {
+      "method": "hook/completed",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d",
+      "id": "session-start:0:/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json",
+      "eventName": "sessionStart",
+      "status": "completed",
+      "sourcePath": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json",
+      "durationMs": 25
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d",
+      "itemType": "userMessage"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d",
+      "itemType": "userMessage"
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "turn/moderationMetadata",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d",
+      "itemType": "dynamicToolCall"
+    },
+    {
+      "method": "item/tool/call",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d",
+      "itemType": "dynamicToolCall"
+    },
+    {
+      "method": "thread/tokenUsage/updated",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "account/rateLimits/updated",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "turn/moderationMetadata",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d",
+      "itemType": "dynamicToolCall"
+    },
+    {
+      "method": "item/tool/call",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d",
+      "itemType": "dynamicToolCall"
+    },
+    {
+      "method": "thread/tokenUsage/updated",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "account/rateLimits/updated",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "turn/moderationMetadata",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "thread/tokenUsage/updated",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d"
+    },
+    {
+      "method": "account/rateLimits/updated",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "thread/status/changed",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": null
+    },
+    {
+      "method": "turn/completed",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-4bec-74b0-a418-a7dfe5a4c02d",
+      "turnStatus": "completed"
+    },
+    {
+      "method": "thread/status/changed",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": null
+    },
+    {
+      "method": "turn/started",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-8bb4-71f0-9946-c0ace30b88f0"
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-8bb4-71f0-9946-c0ace30b88f0",
+      "itemType": "userMessage"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-8bb4-71f0-9946-c0ace30b88f0",
+      "itemType": "userMessage"
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-8bb4-71f0-9946-c0ace30b88f0",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-8bb4-71f0-9946-c0ace30b88f0"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-8bb4-71f0-9946-c0ace30b88f0"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-8bb4-71f0-9946-c0ace30b88f0"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-8bb4-71f0-9946-c0ace30b88f0"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-8bb4-71f0-9946-c0ace30b88f0"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-8bb4-71f0-9946-c0ace30b88f0"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-8bb4-71f0-9946-c0ace30b88f0"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-8bb4-71f0-9946-c0ace30b88f0"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-8bb4-71f0-9946-c0ace30b88f0",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-8bb4-71f0-9946-c0ace30b88f0",
+      "itemType": "dynamicToolCall"
+    },
+    {
+      "method": "item/tool/call",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-8bb4-71f0-9946-c0ace30b88f0"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-8bb4-71f0-9946-c0ace30b88f0",
+      "itemType": "dynamicToolCall"
+    },
+    {
+      "method": "turn/moderationMetadata",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-8bb4-71f0-9946-c0ace30b88f0"
+    },
+    {
+      "method": "thread/tokenUsage/updated",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-8bb4-71f0-9946-c0ace30b88f0"
+    },
+    {
+      "method": "account/rateLimits/updated",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-8bb4-71f0-9946-c0ace30b88f0",
+      "itemType": "dynamicToolCall"
+    },
+    {
+      "method": "item/tool/call",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-8bb4-71f0-9946-c0ace30b88f0"
+    },
+    {
+      "method": "turn/moderationMetadata",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-8bb4-71f0-9946-c0ace30b88f0"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-8bb4-71f0-9946-c0ace30b88f0",
+      "itemType": "dynamicToolCall"
+    },
+    {
+      "method": "thread/tokenUsage/updated",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-8bb4-71f0-9946-c0ace30b88f0"
+    },
+    {
+      "method": "account/rateLimits/updated",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-8bb4-71f0-9946-c0ace30b88f0",
+      "itemType": "reasoning"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-8bb4-71f0-9946-c0ace30b88f0",
+      "itemType": "reasoning"
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-8bb4-71f0-9946-c0ace30b88f0",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-8bb4-71f0-9946-c0ace30b88f0"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-8bb4-71f0-9946-c0ace30b88f0"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-8bb4-71f0-9946-c0ace30b88f0"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-8bb4-71f0-9946-c0ace30b88f0"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-8bb4-71f0-9946-c0ace30b88f0"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-8bb4-71f0-9946-c0ace30b88f0"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-8bb4-71f0-9946-c0ace30b88f0"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-8bb4-71f0-9946-c0ace30b88f0"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-8bb4-71f0-9946-c0ace30b88f0"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-8bb4-71f0-9946-c0ace30b88f0"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-8bb4-71f0-9946-c0ace30b88f0"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-8bb4-71f0-9946-c0ace30b88f0"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-8bb4-71f0-9946-c0ace30b88f0"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-8bb4-71f0-9946-c0ace30b88f0"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-8bb4-71f0-9946-c0ace30b88f0"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-8bb4-71f0-9946-c0ace30b88f0"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-8bb4-71f0-9946-c0ace30b88f0"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-8bb4-71f0-9946-c0ace30b88f0"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-8bb4-71f0-9946-c0ace30b88f0"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-8bb4-71f0-9946-c0ace30b88f0"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-8bb4-71f0-9946-c0ace30b88f0"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-8bb4-71f0-9946-c0ace30b88f0"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-8bb4-71f0-9946-c0ace30b88f0"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-8bb4-71f0-9946-c0ace30b88f0"
+    },
+    {
+      "method": "turn/moderationMetadata",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-8bb4-71f0-9946-c0ace30b88f0"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-8bb4-71f0-9946-c0ace30b88f0",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "thread/tokenUsage/updated",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-8bb4-71f0-9946-c0ace30b88f0"
+    },
+    {
+      "method": "account/rateLimits/updated",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "thread/status/changed",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": null
+    },
+    {
+      "method": "turn/completed",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-8bb4-71f0-9946-c0ace30b88f0",
+      "turnStatus": "completed"
+    },
+    {
+      "method": "thread/status/changed",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": null
+    },
+    {
+      "method": "turn/started",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-dcf5-7002-b6a3-672321f7fbc7"
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-dcf5-7002-b6a3-672321f7fbc7",
+      "itemType": "userMessage"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-dcf5-7002-b6a3-672321f7fbc7",
+      "itemType": "userMessage"
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-dcf5-7002-b6a3-672321f7fbc7",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-dcf5-7002-b6a3-672321f7fbc7"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-dcf5-7002-b6a3-672321f7fbc7"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-dcf5-7002-b6a3-672321f7fbc7"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-dcf5-7002-b6a3-672321f7fbc7"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-dcf5-7002-b6a3-672321f7fbc7"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-dcf5-7002-b6a3-672321f7fbc7"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-dcf5-7002-b6a3-672321f7fbc7"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-dcf5-7002-b6a3-672321f7fbc7"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-dcf5-7002-b6a3-672321f7fbc7"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-dcf5-7002-b6a3-672321f7fbc7"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-dcf5-7002-b6a3-672321f7fbc7"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-dcf5-7002-b6a3-672321f7fbc7"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-dcf5-7002-b6a3-672321f7fbc7"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-dcf5-7002-b6a3-672321f7fbc7"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-dcf5-7002-b6a3-672321f7fbc7",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "turn/moderationMetadata",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-dcf5-7002-b6a3-672321f7fbc7"
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-dcf5-7002-b6a3-672321f7fbc7",
+      "itemType": "subAgentActivity",
+      "kind": "started",
+      "agentThreadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "agentPath": "/root/acceptance_child"
+    },
+    {
+      "method": "thread/status/changed",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": null
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-dcf5-7002-b6a3-672321f7fbc7",
+      "itemType": "subAgentActivity",
+      "kind": "started",
+      "agentThreadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "agentPath": "/root/acceptance_child"
+    },
+    {
+      "method": "warning",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": null
+    },
+    {
+      "method": "mcpServer/startupStatus/updated",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": null
+    },
+    {
+      "method": "mcpServer/startupStatus/updated",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": null
+    },
+    {
+      "method": "thread/tokenUsage/updated",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-dcf5-7002-b6a3-672321f7fbc7"
+    },
+    {
+      "method": "account/rateLimits/updated",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "thread/status/changed",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": null
+    },
+    {
+      "method": "turn/started",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d85-f49d-7662-98cf-37557b89c024"
+    },
+    {
+      "method": "mcpServer/startupStatus/updated",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": null
+    },
+    {
+      "method": "mcpServer/startupStatus/updated",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": null
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-dcf5-7002-b6a3-672321f7fbc7",
+      "itemType": "collabAgentToolCall",
+      "tool": "wait",
+      "senderThreadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "receiverThreadIds": [],
+      "status": "inProgress",
+      "agentStatuses": {}
+    },
+    {
+      "method": "turn/moderationMetadata",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-dcf5-7002-b6a3-672321f7fbc7"
+    },
+    {
+      "method": "hook/started",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d85-f49d-7662-98cf-37557b89c024",
+      "id": "subagent-start:2:/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json",
+      "eventName": "subagentStart",
+      "status": "running",
+      "sourcePath": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json",
+      "durationMs": null
+    },
+    {
+      "method": "hook/completed",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d85-f49d-7662-98cf-37557b89c024",
+      "id": "subagent-start:2:/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json",
+      "eventName": "subagentStart",
+      "status": "completed",
+      "sourcePath": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json",
+      "durationMs": 389
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d85-f49d-7662-98cf-37557b89c024",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d85-f49d-7662-98cf-37557b89c024"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d85-f49d-7662-98cf-37557b89c024"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d85-f49d-7662-98cf-37557b89c024"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d85-f49d-7662-98cf-37557b89c024"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d85-f49d-7662-98cf-37557b89c024"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d85-f49d-7662-98cf-37557b89c024"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d85-f49d-7662-98cf-37557b89c024"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d85-f49d-7662-98cf-37557b89c024"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d85-f49d-7662-98cf-37557b89c024"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d85-f49d-7662-98cf-37557b89c024"
+    },
+    {
+      "method": "turn/moderationMetadata",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d85-f49d-7662-98cf-37557b89c024"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d85-f49d-7662-98cf-37557b89c024",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "thread/tokenUsage/updated",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d85-f49d-7662-98cf-37557b89c024"
+    },
+    {
+      "method": "account/rateLimits/updated",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-dcf5-7002-b6a3-672321f7fbc7",
+      "itemType": "subAgentActivity",
+      "kind": "completed",
+      "agentThreadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "agentPath": "/root/acceptance_child"
+    },
+    {
+      "method": "thread/status/changed",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": null
+    },
+    {
+      "method": "turn/completed",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d85-f49d-7662-98cf-37557b89c024",
+      "turnStatus": "completed"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-dcf5-7002-b6a3-672321f7fbc7",
+      "itemType": "subAgentActivity",
+      "kind": "completed",
+      "agentThreadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "agentPath": "/root/acceptance_child"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-dcf5-7002-b6a3-672321f7fbc7",
+      "itemType": "collabAgentToolCall",
+      "tool": "wait",
+      "senderThreadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "receiverThreadIds": [],
+      "status": "completed",
+      "agentStatuses": {}
+    },
+    {
+      "method": "thread/tokenUsage/updated",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-dcf5-7002-b6a3-672321f7fbc7"
+    },
+    {
+      "method": "account/rateLimits/updated",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-dcf5-7002-b6a3-672321f7fbc7",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-dcf5-7002-b6a3-672321f7fbc7"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-dcf5-7002-b6a3-672321f7fbc7"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-dcf5-7002-b6a3-672321f7fbc7"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-dcf5-7002-b6a3-672321f7fbc7"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-dcf5-7002-b6a3-672321f7fbc7"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-dcf5-7002-b6a3-672321f7fbc7"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-dcf5-7002-b6a3-672321f7fbc7"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-dcf5-7002-b6a3-672321f7fbc7"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-dcf5-7002-b6a3-672321f7fbc7"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-dcf5-7002-b6a3-672321f7fbc7"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-dcf5-7002-b6a3-672321f7fbc7"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-dcf5-7002-b6a3-672321f7fbc7"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-dcf5-7002-b6a3-672321f7fbc7"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-dcf5-7002-b6a3-672321f7fbc7"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-dcf5-7002-b6a3-672321f7fbc7"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-dcf5-7002-b6a3-672321f7fbc7"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-dcf5-7002-b6a3-672321f7fbc7"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-dcf5-7002-b6a3-672321f7fbc7"
+    },
+    {
+      "method": "turn/moderationMetadata",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-dcf5-7002-b6a3-672321f7fbc7"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-dcf5-7002-b6a3-672321f7fbc7",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "thread/tokenUsage/updated",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-dcf5-7002-b6a3-672321f7fbc7"
+    },
+    {
+      "method": "account/rateLimits/updated",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "thread/status/changed",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": null
+    },
+    {
+      "method": "turn/completed",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d85-dcf5-7002-b6a3-672321f7fbc7",
+      "turnStatus": "completed"
+    },
+    {
+      "method": "thread/status/changed",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": null
+    },
+    {
+      "method": "turn/started",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce"
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce",
+      "itemType": "userMessage"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce",
+      "itemType": "userMessage"
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce",
+      "itemType": "dynamicToolCall"
+    },
+    {
+      "method": "item/tool/call",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce"
+    },
+    {
+      "method": "turn/moderationMetadata",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce",
+      "itemType": "dynamicToolCall"
+    },
+    {
+      "method": "thread/tokenUsage/updated",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce"
+    },
+    {
+      "method": "account/rateLimits/updated",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce",
+      "itemType": "subAgentActivity",
+      "kind": "interacted",
+      "agentThreadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "agentPath": "/root/acceptance_child"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce",
+      "itemType": "subAgentActivity",
+      "kind": "interacted",
+      "agentThreadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "agentPath": "/root/acceptance_child"
+    },
+    {
+      "method": "thread/status/changed",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": null
+    },
+    {
+      "method": "turn/started",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "turn/moderationMetadata",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce"
+    },
+    {
+      "method": "thread/tokenUsage/updated",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce"
+    },
+    {
+      "method": "account/rateLimits/updated",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce",
+      "itemType": "collabAgentToolCall",
+      "tool": "wait",
+      "senderThreadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "receiverThreadIds": [],
+      "status": "inProgress",
+      "agentStatuses": {}
+    },
+    {
+      "method": "turn/moderationMetadata",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce"
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a",
+      "itemType": "reasoning"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a",
+      "itemType": "reasoning"
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "turn/moderationMetadata",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "thread/tokenUsage/updated",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "account/rateLimits/updated",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce",
+      "itemType": "collabAgentToolCall",
+      "tool": "wait",
+      "senderThreadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "receiverThreadIds": [],
+      "status": "completed",
+      "agentStatuses": {}
+    },
+    {
+      "method": "thread/tokenUsage/updated",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce"
+    },
+    {
+      "method": "account/rateLimits/updated",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "turn/moderationMetadata",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "mcpServer/startupStatus/updated",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": null
+    },
+    {
+      "method": "mcpServer/startupStatus/updated",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": null
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a",
+      "itemType": "mcpToolCall"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a",
+      "itemType": "mcpToolCall"
+    },
+    {
+      "method": "thread/tokenUsage/updated",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "account/rateLimits/updated",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce",
+      "itemType": "reasoning"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce",
+      "itemType": "reasoning"
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce",
+      "itemType": "collabAgentToolCall",
+      "tool": "wait",
+      "senderThreadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "receiverThreadIds": [],
+      "status": "inProgress",
+      "agentStatuses": {}
+    },
+    {
+      "method": "turn/moderationMetadata",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce"
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a",
+      "itemType": "mcpToolCall"
+    },
+    {
+      "method": "turn/moderationMetadata",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a",
+      "itemType": "mcpToolCall"
+    },
+    {
+      "method": "thread/tokenUsage/updated",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "account/rateLimits/updated",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce",
+      "itemType": "collabAgentToolCall",
+      "tool": "wait",
+      "senderThreadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "receiverThreadIds": [],
+      "status": "completed",
+      "agentStatuses": {}
+    },
+    {
+      "method": "thread/tokenUsage/updated",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce"
+    },
+    {
+      "method": "account/rateLimits/updated",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce",
+      "itemType": "collabAgentToolCall",
+      "tool": "wait",
+      "senderThreadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "receiverThreadIds": [],
+      "status": "inProgress",
+      "agentStatuses": {}
+    },
+    {
+      "method": "turn/moderationMetadata",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce"
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a",
+      "itemType": "mcpToolCall"
+    },
+    {
+      "method": "turn/moderationMetadata",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a",
+      "itemType": "mcpToolCall"
+    },
+    {
+      "method": "thread/tokenUsage/updated",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "account/rateLimits/updated",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "turn/moderationMetadata",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "thread/tokenUsage/updated",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a"
+    },
+    {
+      "method": "account/rateLimits/updated",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "thread/status/changed",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": null
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce",
+      "itemType": "subAgentActivity",
+      "kind": "completed",
+      "agentThreadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "agentPath": "/root/acceptance_child"
+    },
+    {
+      "method": "turn/completed",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": "01a15d86-6bbc-77a3-8117-fe19d704267a",
+      "turnStatus": "completed"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce",
+      "itemType": "subAgentActivity",
+      "kind": "completed",
+      "agentThreadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "agentPath": "/root/acceptance_child"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce",
+      "itemType": "collabAgentToolCall",
+      "tool": "wait",
+      "senderThreadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "receiverThreadIds": [],
+      "status": "completed",
+      "agentStatuses": {}
+    },
+    {
+      "method": "thread/tokenUsage/updated",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce"
+    },
+    {
+      "method": "account/rateLimits/updated",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce"
+    },
+    {
+      "method": "turn/moderationMetadata",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "thread/tokenUsage/updated",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce"
+    },
+    {
+      "method": "account/rateLimits/updated",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "thread/status/changed",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": null
+    },
+    {
+      "method": "turn/completed",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d86-19dc-72f1-9619-079b219e89ce",
+      "turnStatus": "completed"
+    },
+    {
+      "method": "thread/status/changed",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": null
+    },
+    {
+      "method": "turn/started",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d87-0733-7f12-96cc-a1e8607e9ab3"
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d87-0733-7f12-96cc-a1e8607e9ab3",
+      "itemType": "userMessage"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d87-0733-7f12-96cc-a1e8607e9ab3",
+      "itemType": "userMessage"
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d87-0733-7f12-96cc-a1e8607e9ab3",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d87-0733-7f12-96cc-a1e8607e9ab3"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d87-0733-7f12-96cc-a1e8607e9ab3"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d87-0733-7f12-96cc-a1e8607e9ab3"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d87-0733-7f12-96cc-a1e8607e9ab3"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d87-0733-7f12-96cc-a1e8607e9ab3"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d87-0733-7f12-96cc-a1e8607e9ab3",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d87-0733-7f12-96cc-a1e8607e9ab3",
+      "itemType": "dynamicToolCall"
+    },
+    {
+      "method": "item/tool/call",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d87-0733-7f12-96cc-a1e8607e9ab3"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d87-0733-7f12-96cc-a1e8607e9ab3",
+      "itemType": "dynamicToolCall"
+    },
+    {
+      "method": "turn/moderationMetadata",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d87-0733-7f12-96cc-a1e8607e9ab3"
+    },
+    {
+      "method": "thread/tokenUsage/updated",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d87-0733-7f12-96cc-a1e8607e9ab3"
+    },
+    {
+      "method": "account/rateLimits/updated",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d87-0733-7f12-96cc-a1e8607e9ab3",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d87-0733-7f12-96cc-a1e8607e9ab3"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d87-0733-7f12-96cc-a1e8607e9ab3"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d87-0733-7f12-96cc-a1e8607e9ab3"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d87-0733-7f12-96cc-a1e8607e9ab3"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d87-0733-7f12-96cc-a1e8607e9ab3"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d87-0733-7f12-96cc-a1e8607e9ab3"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d87-0733-7f12-96cc-a1e8607e9ab3"
+    },
+    {
+      "method": "turn/moderationMetadata",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d87-0733-7f12-96cc-a1e8607e9ab3"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d87-0733-7f12-96cc-a1e8607e9ab3",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "thread/tokenUsage/updated",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d87-0733-7f12-96cc-a1e8607e9ab3"
+    },
+    {
+      "method": "account/rateLimits/updated",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "thread/status/changed",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": null
+    },
+    {
+      "method": "turn/completed",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d87-0733-7f12-96cc-a1e8607e9ab3",
+      "turnStatus": "completed"
+    },
+    {
+      "method": "thread/status/changed",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": null
+    },
+    {
+      "method": "turn/started",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d87-3915-7a52-80d5-a2984ea5b920"
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d87-3915-7a52-80d5-a2984ea5b920",
+      "itemType": "userMessage"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d87-3915-7a52-80d5-a2984ea5b920",
+      "itemType": "userMessage"
+    },
+    {
+      "method": "thread/status/changed",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": null
+    },
+    {
+      "method": "turn/completed",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d87-3915-7a52-80d5-a2984ea5b920",
+      "turnStatus": "interrupted"
+    },
+    {
+      "method": "thread/status/changed",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": null
+    },
+    {
+      "method": "turn/started",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d87-3966-7d31-9a36-ec863264600c"
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d87-3966-7d31-9a36-ec863264600c",
+      "itemType": "userMessage"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d87-3966-7d31-9a36-ec863264600c",
+      "itemType": "userMessage"
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d87-3966-7d31-9a36-ec863264600c",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d87-3966-7d31-9a36-ec863264600c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d87-3966-7d31-9a36-ec863264600c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d87-3966-7d31-9a36-ec863264600c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d87-3966-7d31-9a36-ec863264600c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d87-3966-7d31-9a36-ec863264600c"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d87-3966-7d31-9a36-ec863264600c",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d87-3966-7d31-9a36-ec863264600c",
+      "itemType": "dynamicToolCall"
+    },
+    {
+      "method": "item/tool/call",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d87-3966-7d31-9a36-ec863264600c"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d87-3966-7d31-9a36-ec863264600c",
+      "itemType": "dynamicToolCall"
+    },
+    {
+      "method": "turn/moderationMetadata",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d87-3966-7d31-9a36-ec863264600c"
+    },
+    {
+      "method": "thread/tokenUsage/updated",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d87-3966-7d31-9a36-ec863264600c"
+    },
+    {
+      "method": "account/rateLimits/updated",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d87-3966-7d31-9a36-ec863264600c",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d87-3966-7d31-9a36-ec863264600c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d87-3966-7d31-9a36-ec863264600c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d87-3966-7d31-9a36-ec863264600c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d87-3966-7d31-9a36-ec863264600c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d87-3966-7d31-9a36-ec863264600c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d87-3966-7d31-9a36-ec863264600c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d87-3966-7d31-9a36-ec863264600c"
+    },
+    {
+      "method": "turn/moderationMetadata",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d87-3966-7d31-9a36-ec863264600c"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d87-3966-7d31-9a36-ec863264600c",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "thread/tokenUsage/updated",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d87-3966-7d31-9a36-ec863264600c"
+    },
+    {
+      "method": "account/rateLimits/updated",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "thread/status/changed",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": null
+    },
+    {
+      "method": "turn/completed",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "01a15d87-3966-7d31-9a36-ec863264600c",
+      "turnStatus": "completed"
+    },
+    {
+      "method": "hook/started",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "auto-compact-0",
+      "id": "session-end:1:/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json",
+      "eventName": "sessionEnd",
+      "status": "running",
+      "sourcePath": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json",
+      "durationMs": null
+    },
+    {
+      "method": "hook/completed",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": "auto-compact-0",
+      "id": "session-end:1:/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json",
+      "eventName": "sessionEnd",
+      "status": "completed",
+      "sourcePath": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json",
+      "durationMs": 26
+    },
+    {
+      "method": "thread/status/changed",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "turnId": null
+    },
+    {
+      "method": "thread/status/changed",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "turnId": null
+    }
+  ],
+  "calls": [
+    {
+      "origin": "model",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "command": "catalog",
+      "requestId": null,
+      "fieldId": null,
+      "operationId": null,
+      "exitCode": 0,
+      "response": {
+        "status": "ok",
+        "items": [
+          {
+            "id": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+            "version": 1,
+            "name": "Synthetic Mac server",
+            "description": "Codex acceptance only",
+            "directoryId": null,
+            "tagIds": [],
+            "fields": [
+              {
+                "id": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4=",
+                "name": "Address",
+                "description": "May be approved",
+                "kind": "structured"
+              },
+              {
+                "id": "xk9yT1mh8vkn1ZR1uziVg-z5dhwp945Jz8nLQLpd0RU=",
+                "name": "Username",
+                "description": "Remain unapproved",
+                "kind": "structured"
+              }
+            ]
+          },
+          {
+            "id": "MjT0bePk-oGIDZExRxRA0aMZoQMHbvCrcQy5eMJP6ts=",
+            "version": 1,
+            "name": "Synthetic ordinary file",
+            "description": "Codex acceptance only",
+            "directoryId": null,
+            "tagIds": [],
+            "fields": [
+              {
+                "id": "N8MCmxTXkfxsQCesv5cU9HGldcrUaVRl4vqrc5OGaQY=",
+                "name": "Attachment",
+                "description": "Synthetic bytes",
+                "kind": "file"
+              }
+            ]
+          }
+        ],
+        "total": 2,
+        "offset": 0,
+        "nextOffset": null
+      },
+      "separateStdin": true,
+      "argvCount": 1,
+      "argvInspectedBeforeStdin": true
+    },
+    {
+      "origin": "model",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "command": "request",
+      "requestId": null,
+      "fieldId": null,
+      "operationId": null,
+      "exitCode": 0,
+      "response": {
+        "status": "pending",
+        "requestId": "jBeQZDHxWcIzIx4R1-UBfMPDBhDf3kkrtOJXEV2qKV0=",
+        "createdAt": "2026-10-21T08:13:12.514131Z",
+        "requestExpiresAt": "2026-10-21T08:43:12.514131Z"
+      },
+      "separateStdin": true,
+      "argvCount": 1,
+      "argvInspectedBeforeStdin": true
+    },
+    {
+      "origin": "model",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "command": "claim",
+      "requestId": "jBeQZDHxWcIzIx4R1-UBfMPDBhDf3kkrtOJXEV2qKV0=",
+      "fieldId": null,
+      "operationId": null,
+      "exitCode": 0,
+      "response": {
+        "status": "ok",
+        "fields": [
+          {
+            "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+            "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+          }
+        ],
+        "expiresAt": "2026-10-21T09:13:15.550239Z",
+        "scopeNotice": "Only these item and field identities are approved. New items and fields require a new request."
+      },
+      "separateStdin": true,
+      "argvCount": 1,
+      "argvInspectedBeforeStdin": true
+    },
+    {
+      "origin": "model",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "command": "read",
+      "requestId": "jBeQZDHxWcIzIx4R1-UBfMPDBhDf3kkrtOJXEV2qKV0=",
+      "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4=",
+      "operationId": null,
+      "exitCode": 0,
+      "response": {
+        "status": "ok",
+        "value": "synthetic-host.invalid"
+      },
+      "separateStdin": true,
+      "argvCount": 1,
+      "argvInspectedBeforeStdin": true
+    },
+    {
+      "origin": "model",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "command": "delegate",
+      "requestId": null,
+      "fieldId": null,
+      "operationId": null,
+      "exitCode": 0,
+      "response": {
+        "status": "ok"
+      },
+      "separateStdin": true,
+      "argvCount": 1,
+      "argvInspectedBeforeStdin": true
+    },
+    {
+      "origin": "model",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "command": "claim",
+      "requestId": "jBeQZDHxWcIzIx4R1-UBfMPDBhDf3kkrtOJXEV2qKV0=",
+      "fieldId": null,
+      "operationId": null,
+      "exitCode": 0,
+      "response": {
+        "status": "ok",
+        "fields": [
+          {
+            "itemId": "EjHkxOAP6y5hzQHTEK-4SBC0FZxOz2nQiUduJ1Ed9kE=",
+            "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4="
+          }
+        ],
+        "expiresAt": "2026-10-21T09:13:15.550239Z",
+        "scopeNotice": "Only these item and field identities are approved. New items and fields require a new request."
+      },
+      "separateStdin": true,
+      "argvCount": 1,
+      "argvInspectedBeforeStdin": true,
+      "modelTransport": "MCP",
+      "callerMatchedActualAppServerThread": true
+    },
+    {
+      "origin": "model",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "command": "read",
+      "requestId": "jBeQZDHxWcIzIx4R1-UBfMPDBhDf3kkrtOJXEV2qKV0=",
+      "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4=",
+      "operationId": null,
+      "exitCode": 0,
+      "response": {
+        "status": "ok",
+        "value": "synthetic-host.invalid"
+      },
+      "separateStdin": true,
+      "argvCount": 1,
+      "argvInspectedBeforeStdin": true,
+      "modelTransport": "MCP",
+      "callerMatchedActualAppServerThread": true
+    },
+    {
+      "origin": "model",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "command": "read",
+      "requestId": "jBeQZDHxWcIzIx4R1-UBfMPDBhDf3kkrtOJXEV2qKV0=",
+      "fieldId": "xk9yT1mh8vkn1ZR1uziVg-z5dhwp945Jz8nLQLpd0RU=",
+      "operationId": null,
+      "exitCode": 0,
+      "response": {
+        "status": "unauthorized"
+      },
+      "separateStdin": true,
+      "argvCount": 1,
+      "argvInspectedBeforeStdin": true,
+      "modelTransport": "MCP",
+      "callerMatchedActualAppServerThread": true
+    },
+    {
+      "origin": "model",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "command": "read",
+      "requestId": "jBeQZDHxWcIzIx4R1-UBfMPDBhDf3kkrtOJXEV2qKV0=",
+      "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4=",
+      "operationId": null,
+      "exitCode": 0,
+      "response": {
+        "status": "ok",
+        "value": "synthetic-host.invalid"
+      },
+      "separateStdin": true,
+      "argvCount": 1,
+      "argvInspectedBeforeStdin": true
+    },
+    {
+      "origin": "model",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "command": "read",
+      "requestId": "jBeQZDHxWcIzIx4R1-UBfMPDBhDf3kkrtOJXEV2qKV0=",
+      "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4=",
+      "operationId": null,
+      "exitCode": 0,
+      "response": {
+        "status": "ok",
+        "value": "synthetic-host.invalid"
+      },
+      "separateStdin": true,
+      "argvCount": 1,
+      "argvInspectedBeforeStdin": true
+    },
+    {
+      "origin": "post-root-end-protocol-probe",
+      "threadId": "01a15d85-4b67-7632-9063-0673df29f867",
+      "command": "read",
+      "requestId": "jBeQZDHxWcIzIx4R1-UBfMPDBhDf3kkrtOJXEV2qKV0=",
+      "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4=",
+      "operationId": null,
+      "exitCode": 0,
+      "response": {
+        "status": "unauthorized"
+      },
+      "separateStdin": true,
+      "argvCount": 1,
+      "argvInspectedBeforeStdin": true
+    },
+    {
+      "origin": "post-root-end-protocol-probe",
+      "threadId": "01a15d85-f42d-7ec3-a14f-a7093a3c1878",
+      "command": "read",
+      "requestId": "jBeQZDHxWcIzIx4R1-UBfMPDBhDf3kkrtOJXEV2qKV0=",
+      "fieldId": "sEXs4JReCvJvP-7TF85twsNSRYk01EkQMOYP4SMtWw4=",
+      "operationId": null,
+      "exitCode": 0,
+      "response": {
+        "status": "unauthorized"
+      },
+      "separateStdin": true,
+      "argvCount": 1,
+      "argvInspectedBeforeStdin": true
+    }
+  ]
+}
