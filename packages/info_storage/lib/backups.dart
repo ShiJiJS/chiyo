@@ -333,7 +333,7 @@ class InformationBackups {
               (f) => f['kind'] == 'file',
             ),
           );
-      final formatVersion = deliveryRows.isNotEmpty
+      var formatVersion = deliveryRows.isNotEmpty
           ? 9
           : v8
           ? 8
@@ -351,6 +351,39 @@ class InformationBackups {
             )
             .get();
         tables[table.key] = rows.map((row) => row.data).toList();
+      }
+      final directoryIds = tables['information_directories']!
+          .map((r) => r['id'])
+          .toSet();
+      final tagIds = tables['information_tags']!.map((r) => r['id']).toSet();
+      bool removedOrganization(Map<String, dynamic> item) =>
+          (item['directoryId'] != null &&
+              !directoryIds.contains(item['directoryId'])) ||
+          (item['tagIds'] as List).any((id) => !tagIds.contains(id));
+      final detachedHistory =
+          tables['information_revisions']!.any(
+            (r) => removedOrganization(
+              jsonDecode(r['payload'] as String) as Map<String, dynamic>,
+            ),
+          ) ||
+          tables['recycle_entries']!.any((r) {
+            final entry =
+                jsonDecode(r['payload'] as String) as Map<String, dynamic>;
+            return entry['snapshot'] != null &&
+                removedOrganization(entry['snapshot'] as Map<String, dynamic>);
+          });
+      if (detachedHistory) {
+        formatVersion = 10;
+        for (final table in _v9Columns.entries.where(
+          (e) => !tables.containsKey(e.key),
+        )) {
+          final rows = await _repository._db
+              .customSelect(
+                'SELECT ${table.value.join(',')} FROM ${_physicalTables[table.key] ?? table.key} ORDER BY rowid',
+              )
+              .get();
+          tables[table.key] = rows.map((r) => r.data).toList();
+        }
       }
       // Persist only archive facts. Never serialize private runtime DTOs into
       // a portable backup, even when an execution is currently active.
@@ -677,7 +710,7 @@ class InformationBackups {
           await _installAttachmentBodies(contents, reader);
         }
         for (final table
-            in (contents.formatVersion == 9
+            in (contents.formatVersion >= 9
                     ? _v9Columns
                     : contents.formatVersion == 8
                     ? _v8Columns
@@ -720,7 +753,7 @@ class InformationBackups {
     if (decoded is! Map<String, dynamic>) invalid();
     if (decoded['format'] != _format ||
         decoded['version'] is! int ||
-        ![1, 2, 3, 4, 5, 6, 7, 8, 9].contains(decoded['version'])) {
+        ![1, 2, 3, 4, 5, 6, 7, 8, 9, 10].contains(decoded['version'])) {
       throw const StorageFailure('unsupported_backup');
     }
     final v8 = (decoded['version'] as int) >= 8;
@@ -738,7 +771,7 @@ class InformationBackups {
       4 => _v4Columns,
       5 || 6 => _v6Columns,
       8 => _v8Columns,
-      9 => _v9Columns,
+      9 || 10 => _v9Columns,
       _ => _allColumns,
     };
     final data = decoded['tables'] as Map<String, dynamic>;
@@ -943,6 +976,7 @@ class InformationBackups {
       tables,
       availableAttachments: v8 ? available : null,
       deliveries: deliveries,
+      allowRemovedOrganization: (decoded['version'] as int) >= 10,
     );
     _validateBackupCredentials(
       tables,

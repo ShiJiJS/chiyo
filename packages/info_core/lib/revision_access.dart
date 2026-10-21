@@ -80,8 +80,8 @@ extension OwnerRevisions on OwnerAccess {
                 1,
           ),
       ],
-      directoryId: old.directoryId,
-      tagIds: old.tagIds,
+      directoryId: _existingDirectory(old.directoryId),
+      tagIds: _existingTags(old.tagIds),
       createdAt: current.createdAt,
       modifiedAt: _service._clock(),
     );
