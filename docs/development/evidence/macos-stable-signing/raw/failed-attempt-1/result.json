@@ -1,0 +1,41 @@
+{
+  "sourceCommit": "2232777b5df431a79dfdbefc1d0f5e27288cfc34",
+  "complete": false,
+  "scope": "ephemeral self-signed identities in owned file keychain; actual production DatabaseKeyStore in native signed sandbox Apps; only UUID synthetic Keychain service; no production key/database, no trust-settings change",
+  "steps": [
+    {
+      "label": "generate-key-A",
+      "exit": 0,
+      "elapsedSeconds": 0.188
+    },
+    {
+      "label": "generate-certificate-A",
+      "exit": 0,
+      "elapsedSeconds": 0.012
+    },
+    {
+      "label": "generate-key-Other",
+      "exit": 0,
+      "elapsedSeconds": 0.078
+    },
+    {
+      "label": "generate-certificate-Other",
+      "exit": 1,
+      "elapsedSeconds": 0.008
+    }
+  ],
+  "service": "org.shijijs.agent-info-manage.qa.f072749f-3ee4-4fa0-a341-e52def48a577",
+  "keychainContextBefore": {
+    "searchListHash": "bfbcb66029e28e5f79a82ddde4d30ff0cb58ea04a686468ab138c06acf5da342",
+    "defaultHash": "bfbcb66029e28e5f79a82ddde4d30ff0cb58ea04a686468ab138c06acf5da342"
+  },
+  "certificateA": {
+    "sha1": "082B8E494E896FD83C0266036A6135886B738A28",
+    "sha256": "02824a380d32f6dc234351914c26c037577aa7cb6a12bd90cf0b6789f93ac5dc",
+    "validDays": 2,
+    "syntheticOnly": true
+  },
+  "searchListRestored": true,
+  "defaultKeychainUnchanged": true,
+  "temporarySigningKeysDeleted": true
+}

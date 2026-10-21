@@ -1,0 +1,12 @@
+{
+  "scope": "Before signing identity count and original requirement transcribed from actual tool output; after count separately saved raw",
+  "identityCountBefore": 0,
+  "identityCountAfter": 0,
+  "ordinaryRequirementBefore": "cdhash H\"98bb77bd33e39786cfb93f3d69086b417a75f4b1\"",
+  "applePrimaryReference": "https://developer.apple.com/library/archive/technotes/tn2206/_index.html",
+  "appleFullPageNotPublished": true,
+  "macOS": "27.0.1",
+  "machine": "arm64",
+  "xcode": "Xcode 27.1\nBuild version 27A9275",
+  "openssl": "OpenSSL 4.0.3 29 Sep 2026 (Library: OpenSSL 4.0.3 29 Sep 2026)"
+}

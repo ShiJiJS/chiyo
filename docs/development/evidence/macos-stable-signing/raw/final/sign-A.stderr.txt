@@ -1,0 +1,1 @@
+/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue42-stable-signing-final-4/StableSigner-A.app: replacing existing signature
