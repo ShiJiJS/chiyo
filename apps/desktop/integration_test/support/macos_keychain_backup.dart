@@ -98,6 +98,145 @@ Future<String> _refused(Future<Object?> Function() work) async {
   throw StateError('Expected storage refusal');
 }
 
+/// Compare an actual UI recipient with a separate restore of the same
+/// authenticated backup. Private values are compared in memory, never returned.
+Future<Map<String, Object?>> compareMacBackupRecipients(
+  InformationService actual,
+  EncryptedInformationRepository repository,
+  InformationService reference,
+  EncryptedInformationRepository referenceRepository,
+  BackupContents preview,
+) async {
+  _check(
+    jsonEncode(_contents(actual, repository)) ==
+        jsonEncode(_contents(reference, referenceRepository)),
+    'Restored contents differ',
+  );
+  void compare(
+    String name,
+    Iterable<Map<String, Object?>> left,
+    Iterable<Map<String, Object?>> right,
+  ) {
+    List<Map<String, Object?>> normalized(
+      Iterable<Map<String, Object?>> values,
+    ) => _sorted(
+      values.map((v) => Map<String, Object?>.of(v)..remove('restoredAt')),
+    );
+    _check(
+      jsonEncode(normalized(left)) == jsonEncode(normalized(right)),
+      'Restored $name differs',
+    );
+  }
+
+  compare(
+    'credential metadata',
+    actual.owner.credentials.map((c) => c.toJson()),
+    reference.owner.credentials.map((c) => c.toJson()),
+  );
+  compare(
+    'grants',
+    repository.grantHistory.map((g) => g.toJson()),
+    referenceRepository.grantHistory.map((g) => g.toJson()),
+  );
+  compare(
+    'requests',
+    repository.requestHistory.map((g) => g.toJson()),
+    referenceRepository.requestHistory.map((g) => g.toJson()),
+  );
+  compare(
+    'access',
+    repository.accessRecords.map((g) => g.toJson()),
+    referenceRepository.accessRecords.map((g) => g.toJson()),
+  );
+  compare(
+    'credential requests',
+    repository.credentialUseRequests.map((g) => g.toJson()),
+    referenceRepository.credentialUseRequests.map((g) => g.toJson()),
+  );
+  compare(
+    'executions',
+    repository.credentialExecutions.map((g) => g.toJson()),
+    referenceRepository.credentialExecutions.map((g) => g.toJson()),
+  );
+  compare(
+    'deliveries',
+    repository.informationFileDeliveries.map((g) => g.toArchiveJson()),
+    referenceRepository.informationFileDeliveries.map((g) => g.toArchiveJson()),
+  );
+  _check(
+    actual.owner.information.length == preview.informationCount &&
+        repository.managedCredentials.length == preview.credentialCount &&
+        repository.credentialMaterials.length ==
+            preview.credentialVersionCount &&
+        repository.grantHistory.length == preview.grantHistoryCount &&
+        repository.accessRecords.length == preview.accessRecordCount &&
+        repository.credentialUseRequests.length ==
+            preview.credentialUseHistoryCount &&
+        repository.credentialExecutions.length ==
+            preview.credentialExecutionCount &&
+        repository.informationFileDeliveries.length ==
+            preview.fileDeliveryCount,
+    'Authenticated preview counts differ',
+  );
+  _check(
+    repository.grantHistory.every((g) => !g.active) &&
+        actual.owner.requests.isEmpty &&
+        actual.owner.importProposals.isEmpty &&
+        repository.informationFileDeliveries.every(
+          (d) => !d.runtime && d.lease == null && d.sessionBinding == null,
+        ),
+    'Live authority restored',
+  );
+  var total = 0;
+  for (final attachment in preview.attachments.where((a) => a.available)) {
+    for (var offset = 0; offset < attachment.byteLength; offset += 65536) {
+      final size = (attachment.byteLength - offset).clamp(0, 65536);
+      final left = await repository.readInformationAttachmentChunk(
+        attachment.reference,
+        offset,
+        size,
+      );
+      final right = await referenceRepository.readInformationAttachmentChunk(
+        attachment.reference,
+        offset,
+        size,
+      );
+      _check(
+        left.length == size && listEquals(left, right),
+        'Attachment bytes differ',
+      );
+      total += left.length;
+    }
+  }
+  _check(total == preview.attachmentBytes, 'Attachment total differs');
+  _check(
+    await repository.backups.recoveryKey() == null,
+    'Source backup key configuration restored',
+  );
+  return {
+    'format': preview.formatVersion,
+    'information': preview.informationCount,
+    'directories': preview.directoryCount,
+    'tags': preview.tagCount,
+    'templates': preview.templateCount,
+    'revisions': preview.revisionCount,
+    'recycle': preview.recycleCount,
+    'credentials': preview.credentialCount,
+    'credentialVersions': preview.credentialVersionCount,
+    'grants': preview.grantHistoryCount,
+    'accesses': preview.accessRecordCount,
+    'credentialRequests': preview.credentialUseHistoryCount,
+    'executions': preview.credentialExecutionCount,
+    'deliveries': preview.fileDeliveryCount,
+    'attachmentVersions': preview.attachmentCount,
+    'attachmentBytes': total,
+    'exactPrivateContentsComparedInMemory': true,
+    'pastRelationshipsCompared': true,
+    'liveAuthorityAbsent': true,
+    'sourceBackupConfigurationAbsent': true,
+  };
+}
+
 Future<Map<String, Object?>> runMacKeychainBackup(
   DesktopBootstrap bootstrap,
   EncryptedInformationRepository repository,

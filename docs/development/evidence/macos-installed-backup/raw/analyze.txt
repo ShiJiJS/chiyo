@@ -1,0 +1,8 @@
+Analyzing desktop...                                            
+
+  error • There's no constant named 'text' in 'FieldKind'. Try correcting the name to the name of an existing constant, or defining a constant named 'text' • integration_test/macos_installed_backup_manual.dart:172:56 • undefined_enum_constant
+  error • There's no constant named 'text' in 'FieldKind'. Try correcting the name to the name of an existing constant, or defining a constant named 'text' • integration_test/macos_installed_backup_manual.dart:174:71 • undefined_enum_constant
+  error • The method 'toJson' isn't defined for the type 'InformationFileDelivery'. Try correcting the name to the name of an existing method, or defining a method named 'toJson' • integration_test/support/macos_keychain_backup.dart:163:55 • undefined_method
+  error • The method 'toJson' isn't defined for the type 'InformationFileDelivery'. Try correcting the name to the name of an existing method, or defining a method named 'toJson' • integration_test/support/macos_keychain_backup.dart:164:64 • undefined_method
+
+4 issues found. (ran in 2.5s)
