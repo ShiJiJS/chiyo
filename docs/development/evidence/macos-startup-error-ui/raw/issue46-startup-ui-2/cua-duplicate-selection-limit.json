@@ -1,0 +1,6 @@
+{
+  "notAccepted": true,
+  "reason": "CUA full-path binding selected the ready holder, not the second same-identity process",
+  "explicitFailureCleanupOfOwnedDuplicate": true,
+  "countThisAsNormalQuit": false
+}

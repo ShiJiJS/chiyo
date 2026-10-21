@@ -1,0 +1,12 @@
+{
+  "label": "ui-quit-opening",
+  "exitCode": 0,
+  "portClosedAfterExit": null,
+  "mode": "ui-quit-opening",
+  "quitWaitedForOpening": true,
+  "nativeTerminationRequested": true,
+  "libraryCloses": 1,
+  "nativeEvents": [
+    "quit"
+  ]
+}

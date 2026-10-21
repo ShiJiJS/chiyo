@@ -1,0 +1,16 @@
+{
+  "label": "ui-port-busy",
+  "exitCode": 0,
+  "portClosedAfterExit": null,
+  "mode": "ui-port-busy",
+  "startup": "failed",
+  "cleanupPending": false,
+  "keyReads": 1,
+  "keyCreates": 0,
+  "libraryCloses": 1,
+  "storageFailure": "",
+  "nativeTerminationRequested": true,
+  "nativeEvents": [
+    "closeWindow"
+  ]
+}

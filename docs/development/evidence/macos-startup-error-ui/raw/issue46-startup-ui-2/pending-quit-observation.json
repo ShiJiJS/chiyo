@@ -1,0 +1,6 @@
+{
+  "realCommandQObserved": true,
+  "processAliveBeforeRelease": true,
+  "initializationStillHeld": true,
+  "libraryClosesBeforeRelease": 0
+}
