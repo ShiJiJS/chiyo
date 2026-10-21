@@ -1,0 +1,100 @@
+{
+  "snapshot": "2026-10-21 preparation; ordinary app remains live awaiting owner Keychain decision",
+  "sourceCommit": "c1134160b21f079a92bc06b295e8a1dfbe81722a",
+  "packageSource": "4690e79357bb728da22193d8dadd6dc8a8ce2ce6",
+  "packageRelease": "0.4.0+12-mac-dev.4690e79357bb",
+  "installedPath": "/Users/jiangxinyi/Documents/Project/agent-info/local/中文 Mac 预览/AgentInfoManage",
+  "completeInstallationAcceptance": false,
+  "actualMainEntry": "Unmodified packaged main.dart; no test binding, copied identity, key injection or startup callback injection",
+  "stablePayloadEntriesVerifiedBeforeAndAfterMove": 7971,
+  "signatureExitCode": 0,
+  "runtimePATH": "/usr/bin:/bin:/usr/sbin:/sbin",
+  "sdkEnvironmentKeysPresent": false,
+  "initialDatabaseBytePreservation": true,
+  "endpointReadyAtSnapshot": false,
+  "mainProcessLiveAtSnapshot": true,
+  "readinessObserver": "build/macos-adaptation/issue50-installed-main-1/check-ready.py; async session 99412, 30-minute observation window, no app restart or forced termination",
+  "sourceChangesScope": "installation/upgrade documentation only; existing package bytes unchanged",
+  "runtimeChecks": {
+    "syntheticStorageDiagnostic": "SQLCipher4.19.0, reopen, independent restore, old authority rejected; memory key, not Keychain",
+    "ghVersion": "2.102.0",
+    "awsVersion": "2.38.1",
+    "relocatedAotCLIHookWorkerTests": 6,
+    "testDriverRequiresSDK": true,
+    "shippedProgramsRequireSDK": false
+  },
+  "privacy": "Private encrypted prelaunch DB snapshot stays only in ignored local directory; no keys, database, credentials or private association published; no owner approval or data changes performed in this preparation",
+  "remaining": [
+    "Owner allows actual system Keychain access",
+    "Ordinary main UI, packaged CLI capabilities and loaded cipher at service readiness",
+    "Physical synthetic daily workflow, normal exit and reopening",
+    "Two-version signed legacy-schema joint upgrade",
+    "Clean user/independent Mac; local restricted PATH is not clean-user evidence"
+  ],
+  "rawFiles": {
+    "raw/preparation/01-main-keychain-unavailable.ax.txt": {
+      "bytes": 981,
+      "sha256": "a397b0c534d126d5f6b23669bdc463d29b8966cd7b9e05af8abdaf4b421e15a1"
+    },
+    "raw/preparation/check-ready.py": {
+      "bytes": 1938,
+      "sha256": "f7a7f4b83a66e355b54aafa945b930540be955bed85f66646bb4e272c524f4eb"
+    },
+    "raw/preparation/initial-key-failure.json": {
+      "bytes": 107,
+      "sha256": "a6b945ee7283f367d0dc51216e105a76a42d424c83b38d517dccbae64be1db6e"
+    },
+    "raw/preparation/installation.json": {
+      "bytes": 815,
+      "sha256": "882300f8d0144ca3024210c39557368cc58ae9fb3228b085846a0459c4e9b8e7"
+    },
+    "raw/preparation/installed-aws-version.stderr.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "raw/preparation/installed-aws-version.stdout.txt": {
+      "bytes": 53,
+      "sha256": "1f1dee8955ac968c20cc20eafc9a24fa9b24321aab7a8bf345d663142050ef55"
+    },
+    "raw/preparation/installed-command-results.json": {
+      "bytes": 832,
+      "sha256": "52ac6e9eb4f8e7c6c3109d48bcd76f655247fe4b7b34f4ae4329e203c34d6631"
+    },
+    "raw/preparation/installed-gh-version.stderr.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "raw/preparation/installed-gh-version.stdout.txt": {
+      "bytes": 81,
+      "sha256": "a679442459bed23fdc13efb977dec3b17c3c923d8d48abc0d8e522182250955f"
+    },
+    "raw/preparation/installed-storage.stderr.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "raw/preparation/installed-storage.stdout.txt": {
+      "bytes": 187,
+      "sha256": "bfe59e3f5c8148af626c8aa8416aa5c874f251127cecd3c3ec86f26dddfb1657"
+    },
+    "raw/preparation/process.json": {
+      "bytes": 392,
+      "sha256": "db8cb514af4c5d336b7ad74e96158e47bb31bef8ae875ca1d39058cdcbf4d490"
+    },
+    "raw/preparation/relocated-cli-and-worker-result.json": {
+      "bytes": 479,
+      "sha256": "7cd975e1559c0bbc5c0ea884f36e0c3ed7470c5aa72e159740e7970b5c020b59"
+    },
+    "raw/preparation/relocated-cli-and-worker.txt": {
+      "bytes": 842,
+      "sha256": "a10c5bf18a0595f6919f911997eba17f65d2398372172e6f6b1a59030e0137ff"
+    },
+    "raw/preparation/run-main.py": {
+      "bytes": 1264,
+      "sha256": "b9ba68ff855af39013b6869661b39d18f18c1d19446bd2c6932de9ffe17745b3"
+    },
+    "raw/preparation/signature.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  }
+}

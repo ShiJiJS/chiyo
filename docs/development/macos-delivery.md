@@ -1,5 +1,8 @@
 # Agent Info Manage：Mac ARM64 开发预览
 
+当前本机稳定安装位置、身份保留与升级顺序见 [本机安装约定](macos-local-installation.md)。
+它补充历史交付记录；普通入口及升级是否通过，仍以各轮实际结果为准。
+
 这是本机开发预览包，最终安装升级验收由 #50 跟踪。当前整包的版本、源码和载荷
 以同目录 `manifest.json` 为准；下方按批次保留历史验证记录。产品名称为
 Agent Info Manage，应用文件仍固定为 `app/info_desktop.app`，
