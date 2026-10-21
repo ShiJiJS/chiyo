@@ -29,6 +29,8 @@ def digest(path):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('output', type=Path)
+    parser.add_argument('--reuse-permission', action='store_true',
+                        help='Require existing system grant; never request permission')
     args = parser.parse_args()
     if os.uname().sysname != 'Darwin':
         parser.error('macOS required')
@@ -41,7 +43,8 @@ def main():
     owner = uuid.uuid4().hex
     state = {'complete': False, 'sourceCommit': subprocess.check_output(
         ['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip(),
-        'bundleIdentifier': IDENTITY, 'commands': [], 'scope': __doc__}
+        'bundleIdentifier': IDENTITY, 'commands': [], 'scope': __doc__,
+        'reusePermission': args.reuse_permission}
     app, process, root = None, None, None
     controller = output / 'controller.json'
 
@@ -140,6 +143,8 @@ def main():
         state['binarySha256'] = digest(app / 'Contents/MacOS/info_desktop')
         environment = os.environ.copy()
         environment['MAC_NOTIFICATION_OWNER'] = owner
+        if args.reuse_permission:
+            environment['MAC_NOTIFICATION_REUSE_PERMISSION'] = '1'
         with (logs / 'application.txt').open('wb') as log:
             process = subprocess.Popen([str(app / 'Contents/MacOS/info_desktop')], cwd=source,
                                        env=environment, stdout=log, stderr=subprocess.STDOUT)

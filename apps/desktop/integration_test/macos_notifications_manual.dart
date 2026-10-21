@@ -9,6 +9,8 @@ import 'package:info_storage/info_storage.dart';
 import 'package:info_desktop/desktop_bootstrap.dart';
 import 'package:info_desktop/desktop_runtime.dart';
 import 'package:info_desktop/main.dart';
+import 'package:info_desktop/approvals.dart';
+import 'package:info_desktop/inbox_queue.dart';
 
 class _Keys implements DatabaseKeyStore {
   @override
@@ -53,7 +55,8 @@ void check(bool condition, String message) {
 
 Map<String, Object?> rendered(String id) {
   var detail = false, row = false;
-  String? search;
+  String? search, filter, focused;
+  int? offset, activeTab;
   void visit(Element element) {
     final widget = element.widget;
     detail |= widget.key == PageStorageKey('detail-$id');
@@ -61,16 +64,35 @@ Map<String, Object?> rendered(String id) {
     if (widget is TextField && widget.key == const ValueKey('inbox-search')) {
       search = widget.controller?.text;
     }
+    if (widget is InboxQueue) {
+      filter = widget.filter.name;
+      offset = widget.page.offset;
+      focused = widget.focused;
+    }
+    if (widget is IndexedStack &&
+        widget.children.any((child) => child is Approvals)) {
+      activeTab = widget.index;
+    }
     element.visitChildren(visit);
   }
 
   WidgetsBinding.instance.rootElement?.visitChildren(visit);
-  return {'detailPresent': detail, 'rowPresent': row, 'inboxSearch': search};
+  return {
+    'detailPresent': detail,
+    'rowPresent': row,
+    'inboxSearch': search,
+    'inboxFilter': filter,
+    'pageOffset': offset,
+    'focusedRequestId': focused,
+    'activeTab': activeTab,
+  };
 }
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final owner = Platform.environment['MAC_NOTIFICATION_OWNER'];
+  final reusePermission =
+      Platform.environment['MAC_NOTIFICATION_REUSE_PERMISSION'] == '1';
   check(
     Platform.isMacOS &&
         owner != null &&
@@ -146,6 +168,8 @@ Future<void> main() async {
       'libraryCloses': closes,
       'flutterErrors': errors,
       'nativeEvents': platform.events,
+      'permissionActions': platform.permissionActions,
+      'submissions': platform.submissions,
       'terminatedBeforeComplete': facts['complete'] != true,
     });
     await save();
@@ -180,14 +204,25 @@ Future<void> main() async {
       'Startup prompted or dispatched',
     );
     runApp(DesktopLauncher(bootstrap: bootstrap));
-    await phase('permission-via-actual-settings');
-    await until(
-      () =>
-          runtime.availability.notifications ==
-              NotificationAvailability.enabled &&
-          platform.permissionActions > 0,
-      'actual Settings permission action',
-    );
+    facts['reusePermission'] = reusePermission;
+    if (reusePermission) {
+      // Reuse the prior real system decision; do not request permission or
+      // silently simulate authorization if the grant is no longer available.
+      check(
+        runtime.availability.notifications == NotificationAvailability.enabled,
+        'Existing notification permission unavailable; no request made',
+      );
+      await phase('reused-existing-system-permission');
+    } else {
+      await phase('permission-via-actual-settings');
+      await until(
+        () =>
+            runtime.availability.notifications ==
+                NotificationAvailability.enabled &&
+            platform.permissionActions > 0,
+        'actual Settings permission action',
+      );
+    }
     facts['notificationStateAfterUI'] = runtime.availability.notifications.name;
     facts['permissionActionsAfterUI'] = platform.permissionActions;
     for (var i = 0; i < targets.length; i++) {
@@ -206,11 +241,21 @@ Future<void> main() async {
       await until(gate.exists, 'coordinated single $label dispatch');
       check(await gate.readAsString() == owner, 'Foreign dispatch');
       final before = rendered(target.id);
+      facts['before-$label'] = before;
+      await save();
       check(
         before['inboxSearch'] == 'no-such-notification-fixture' &&
             before['detailPresent'] == false,
         'CUA must leave a real nonmatching inbox search and another page',
       );
+      if (reusePermission) {
+        check(
+          before['inboxFilter'] == 'handled' &&
+              before['activeTab'] is int &&
+              before['activeTab'] != 0,
+          'CUA must also leave a handled filter and another actual page',
+        );
+      }
       final revision = runtime.openApprovalsRevision;
       final calls = platform.submissions;
       await phase('dispatching-$label');
@@ -237,6 +282,18 @@ Future<void> main() async {
             after['inboxSearch'] == '',
         'Actual notification did not reveal exact request and clear search',
       );
+      if (reusePermission) {
+        check(
+          after['inboxFilter'] == 'all' &&
+              after['activeTab'] == 0 &&
+              after['focusedRequestId'] == target.id &&
+              after['pageOffset'] ==
+                  service.owner
+                      .queryInbox(limit: 8, focusRequestId: target.id)
+                      .offset,
+          'Notification did not clear filter and select exact off-page request',
+        );
+      }
       check(
         service.owner
             .queryInbox(limit: 100)

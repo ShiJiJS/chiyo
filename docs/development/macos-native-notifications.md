@@ -1,5 +1,10 @@
 # Mac 原生通知权限、系统抑制和真实点击（#47）
 
+2026-10-22后续：[已有通知允许的复用及抑制兜底](macos-notification-reuse.md)确认同一
+合成身份在新构建中仍为authorization2、权限动作0；仅发一次前台通知，系统抑制时
+手动定位/批准/撤销通过，真实通知点击仍未完成，#47保持1/5。另发现并修正
+[审批筛选计数](macos-inbox-status-counts.md)，不把这项修正当作通知点击已通过。
+
 2026-10-21，独立 `codex/macos-adaptation`。QA 源码 `4e54b3a`，
 Mac 设置文案修正 `0911e97`。
 [原始记录、观察器源码、界面和逐文件摘要](evidence/macos-native-notifications/verification.json)。
