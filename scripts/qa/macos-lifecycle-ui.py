@@ -11,6 +11,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import plistlib
 import re
 import shutil
 import socket
@@ -29,8 +30,11 @@ def digest(path):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('output', type=Path)
-    parser.add_argument('--startup', action='store_true',
-                        help='Actual UI close of startup errors and quit during opening')
+    scenario = parser.add_mutually_exclusive_group()
+    scenario.add_argument('--startup', action='store_true',
+                          help='Actual UI close of startup errors and quit during opening')
+    scenario.add_argument('--duplicate-only', action='store_true',
+                          help='Only actual duplicate error close, holder quit and recovery')
     args = parser.parse_args()
     if os.uname().sysname != 'Darwin':
         parser.error('macOS required')
@@ -46,7 +50,7 @@ def main():
              'sourceCommit': subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip(),
              'bundleIdentifier': identity}
     processes, roots = [], set()
-    app = None
+    app, duplicate_app = None, None
     controller = output / 'controller.json'
 
     def save():
@@ -86,8 +90,9 @@ def main():
         if root is not None:
             environment['INFO_MAC_LIFECYCLE_ROOT'] = str(root)
         path = logs / (label + '.txt')
+        executable = duplicate_app / 'Contents/MacOS/info_desktop' if mode == 'ui-duplicate' else binary
         with path.open('wb') as log:
-            process = subprocess.Popen([str(binary)], cwd=source, env=environment,
+            process = subprocess.Popen([str(executable)], cwd=source, env=environment,
                                        stdout=log, stderr=subprocess.STDOUT)
         processes.append(process)
 
@@ -125,17 +130,17 @@ def main():
         save()
         return facts
 
-    def expose(process, root, label, ready):
+    def expose(process, root, label, ready, selected_app=None):
         fd = os.open(controller, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
         with os.fdopen(fd, 'w') as stream:
-            json.dump({'owner': owner, 'root': str(root), 'app': str(app),
+            json.dump({'owner': owner, 'root': str(root), 'app': str(selected_app or app),
                        'pid': process.pid, 'case': label, 'port': ready.get('port')}, stream)
         state['waitingForActualUI'] = label
         save()
         print('MAC_LIFECYCLE_UI_READY=' + label, flush=True)
 
     def startup_cases():
-        for mode in ['ui-key-failure', 'ui-port-busy', 'ui-quit-opening']:
+        for mode in ([] if args.duplicate_only else ['ui-key-failure', 'ui-port-busy', 'ui-quit-opening']):
             process, root = launch(mode, mode)
             ready = wait_for(lambda: read_report(root, mode), process)
             assert ready['startup'] == ('opening' if mode == 'ui-quit-opening' else 'failed')
@@ -155,7 +160,7 @@ def main():
         duplicate, _ = launch('ui-duplicate', 'duplicate-error', root)
         failure = wait_for(lambda: read_report(root, 'ui-duplicate'), duplicate)
         assert failure['startup'] == 'failed' and failure['keyReads'] == 0
-        expose(duplicate, root, 'ui-duplicate', failure)
+        expose(duplicate, root, 'ui-duplicate', failure, duplicate_app)
         facts = collect(duplicate, root, 'ui-duplicate', 'duplicate-error', closes=0)
         assert 'closeWindow' in facts['nativeEvents']
         assert digest(root / 'library/library.db') == before
@@ -200,9 +205,24 @@ def main():
         run('signature', ['/usr/bin/codesign', '--verify', '--deep', '--strict', str(app)])
         binary = app / 'Contents/MacOS/info_desktop'
         state['binarySha256'] = digest(binary)
-        if args.startup:
+        if args.startup or args.duplicate_only:
+            # Same sandbox/container identity, separately addressable bundle URL
+            # and display name. No change to production startup or lock code.
+            duplicate_app = app.parent / 'Mac Duplicate QA.app'
+            shutil.copytree(app, duplicate_app)
+            plist = duplicate_app / 'Contents/Info.plist'
+            contents = plistlib.loads(plist.read_bytes())
+            contents['CFBundleName'] = 'Mac Duplicate QA'
+            contents['CFBundleDisplayName'] = 'Mac Duplicate QA'
+            plist.write_bytes(plistlib.dumps(contents))
+            run('sign-duplicate', ['/usr/bin/codesign', '--force', '--deep', '--sign', '-',
+                                   '--preserve-metadata=entitlements,requirements,flags,runtime', str(duplicate_app)])
+            run('signature-duplicate', ['/usr/bin/codesign', '--verify', '--deep', '--strict', str(duplicate_app)])
+            run('entitlements-duplicate', ['/usr/bin/codesign', '-d', '--entitlements', ':-', str(duplicate_app)])
+            state['duplicateBundle'] = {'path': str(duplicate_app), 'sameBundleIdentifier': contents['CFBundleIdentifier'],
+                                        'displayName': contents['CFBundleDisplayName'], 'binarySha256': digest(duplicate_app / 'Contents/MacOS/info_desktop')}
             startup_cases()
-        for label in ([] if args.startup else ['close-reopen-menu-quit', 'command-q', 'settings-quit']):
+        for label in ([] if args.startup or args.duplicate_only else ['close-reopen-menu-quit', 'command-q', 'settings-quit']):
             process, root = launch('ui-hold', label)
             ready = wait_for(lambda: read_report(root, 'ui-hold'), process)
             assert ready.get('startup') == 'ready' and ready['tray'] and reachable(ready['port'])
@@ -237,9 +257,10 @@ def main():
                 shutil.rmtree(root)
         state['ownedFixturesRemoved'] = all(not root.exists() for root in roots)
         controller.unlink(missing_ok=True)
-        if app is not None and app.exists():
-            result = subprocess.run(['/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister', '-u', str(app)], capture_output=True, timeout=30)
-            state['unregisterExitCode'] = result.returncode
+        for bundle in [app, duplicate_app]:
+            if bundle is not None and bundle.exists():
+                result = subprocess.run(['/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister', '-u', str(bundle)], capture_output=True, timeout=30)
+                state.setdefault('unregisterExitCodes', []).append(result.returncode)
         removed = []
         for tail in ['apps/desktop/build', 'apps/desktop/.dart_tool/flutter_build', 'apps/desktop/.dart_tool/hooks_runner']:
             path = source / tail
