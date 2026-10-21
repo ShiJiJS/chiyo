@@ -12,10 +12,10 @@ on:
         description: 'Runner to use after owner quota/budget approval'
         type: choice
         required: true
-        default: windows
+        default: macos
         options:
-          - windows
           - macos
+          - windows
 
 permissions:
   contents: read
