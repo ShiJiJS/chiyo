@@ -6,6 +6,10 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
   private var selectAllMenu: NativeSelectAllMenu?
   private var desktopChannel: FlutterMethodChannel?
   private var statusItem: NSStatusItem?
+  private var statusItemVisibility: NSKeyValueObservation?
+  private var statusEntryAvailable: Bool {
+    statusItem?.button != nil && statusItem?.isVisible == true
+  }
   private(set) var desktopReady = false
   private var notificationsEnabled = false
   private var backupOutputs: [String: URL] = [:]
@@ -169,6 +173,17 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
             menu.addItem(quit)
             item.menu = menu
             self.statusItem = item
+            self.statusItemVisibility = item.observe(\.isVisible, options: [.new]) { [weak self] _, _ in
+              DispatchQueue.main.async { [weak self] in
+                guard let self, self.desktopReady else { return }
+                // A retained button does not mean the status item is usable.
+                // Restore the window before announcing a lost background entry.
+                if !self.statusEntryAvailable && (!self.isVisible || self.isMiniaturized) {
+                  self.showApprovalsWindow()
+                }
+                self.desktopChannel?.invokeMethod("availability", arguments: nil)
+              }
+            }
           } else { NSStatusBar.system.removeStatusItem(item) }
           self.desktopReady = true
           self.delegate = self
@@ -177,7 +192,7 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
         self.readAvailability(result)
       case "availability": self.readAvailability(result)
       case "hide":
-        let canHide = self.statusItem?.button != nil
+        let canHide = self.statusEntryAvailable
         if canHide { self.orderOut(nil) }
         result(canHide)
       case "show":
@@ -202,6 +217,9 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
           DispatchQueue.main.async { result(error == nil) }
         }
       case "terminate":
+        self.desktopReady = false
+        self.statusItemVisibility?.invalidate()
+        self.statusItemVisibility = nil
         if let item = self.statusItem { NSStatusBar.system.removeStatusItem(item) }
         self.statusItem = nil
         (NSApp.delegate as? AppDelegate)?.allowTermination = true
@@ -231,7 +249,7 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
       }
       DispatchQueue.main.async {
         self.notificationsEnabled = notificationState == "enabled"
-        result(["tray": self.statusItem?.button != nil, "notifications": notificationState])
+        result(["tray": self.statusEntryAvailable, "notifications": notificationState])
       }
     }
   }

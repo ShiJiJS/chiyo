@@ -1,5 +1,9 @@
 # Mac 实际应用退出与重开（#46）
 
+2026-10-22补充：[菜单栏入口不可见的窗口回退](macos-status-fallback.md)已实际复现并修正，
+两个真实关窗路径、后台入口消失时的原生自动恢复及独立重开通过；直接Dock/状态栏点击
+和OS睡眠唤醒仍未验收，#46保持OPEN、4/6。下文保留此前版本与边界。
+
 2026-10-21，独立 Mac 分支，QA 源码
 `19914f3ad342652a14bb21faa3d3c2bc07a647a0`。普通 Flutter binding、Release
 沙盒应用、生产 Cocoa channel 与实际 SQLCipher；合成内存密钥与合成授权，
