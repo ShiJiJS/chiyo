@@ -27,6 +27,79 @@ class _AuditRepository extends MemoryInformationRepository {
 
 void main() {
   testWidgets(
+    'inbox status counts share the search scope regardless of selected filter',
+    (tester) async {
+      tester.view.physicalSize = const Size(1440, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final service = InformationService.fictional();
+      addTearDown(() async {
+        final closing = service.close();
+        await tester.pump();
+        await closing;
+      });
+      final ids = <String>[];
+      for (var i = 0; i < 25; i++) {
+        final session = service.agent.openSession('Counts $i');
+        ids.add(
+          service.agent.request(session, 'Count scope $i', [
+            const FieldRef('demo-server', 'host'),
+          ]).id,
+        );
+      }
+      await tester.pumpWidget(InformationApp(service: service, port: 0));
+      await tester.pumpAndSettle();
+      void expectCounts(int all, int pending, int handled) {
+        for (final entry in {
+          'all': '全部 $all',
+          'pending': '待处理 $pending',
+          'handled': '已处理 $handled',
+        }.entries) {
+          expect(
+            find.descendant(
+              of: find.byKey(ValueKey('inbox-filter-${entry.key}')),
+              matching: find.text(entry.value),
+            ),
+            findsOneWidget,
+          );
+        }
+      }
+
+      expectCounts(25, 25, 0);
+      await tester.tap(find.byKey(const ValueKey('inbox-filter-handled')));
+      await tester.pumpAndSettle();
+      expectCounts(25, 25, 0);
+      await tester.tap(find.byKey(const ValueKey('inbox-filter-pending')));
+      await tester.pumpAndSettle();
+      service.owner.deny(ids.first);
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pumpAndSettle();
+      expectCounts(25, 24, 1);
+      await tester.enterText(
+        find.byKey(const ValueKey('inbox-search')),
+        'Counts 0',
+      );
+      await tester.pumpAndSettle();
+      expectCounts(1, 0, 1);
+      await tester.tap(find.byKey(const ValueKey('inbox-filter-handled')));
+      await tester.pumpAndSettle();
+      expectCounts(1, 0, 1);
+      expect(find.byKey(ValueKey('request-${ids.first}')), findsOneWidget);
+      await tester.enterText(
+        find.byKey(const ValueKey('inbox-search')),
+        'no-matching-counts',
+      );
+      await tester.pumpAndSettle();
+      expectCounts(0, 0, 0);
+      await tester.pumpWidget(const SizedBox());
+    },
+    variant: TargetPlatformVariant({
+      TargetPlatform.macOS,
+      TargetPlatform.windows,
+    }),
+  );
+  testWidgets(
     'slash focuses inbox outside editing and passes through in search input',
     (tester) async {
       tester.view.physicalSize = const Size(1440, 900);
@@ -343,7 +416,9 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const ValueKey('nav-1')));
       await tester.pumpAndSettle();
-      final green = Theme.of(tester.element(find.byKey(const ValueKey('new-information')))).colorScheme;
+      final green = Theme.of(
+        tester.element(find.byKey(const ValueKey('new-information'))),
+      ).colorScheme;
       expect(green.primary, isNot(initial.primary));
       expect(green.surfaceContainerLow, isNot(initial.surfaceContainerLow));
       expect(service.owner.colorTheme, DesktopColorTheme.green);
@@ -352,7 +427,9 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.textContaining('主题未保存'), findsOneWidget);
       expect(
-        Theme.of(tester.element(find.byKey(const ValueKey('new-information')))).colorScheme.primary,
+        Theme.of(
+          tester.element(find.byKey(const ValueKey('new-information'))),
+        ).colorScheme.primary,
         green.primary,
       );
       repository.fail = false;

@@ -91,6 +91,33 @@ void main() {
         ids.last,
       );
       expect(service.owner.queryInbox(filter: InboxFilter.pending).total, 239);
+      for (final filter in InboxFilter.values) {
+        final page = service.owner.queryInbox(filter: filter, limit: 20);
+        expect(page.allCount, 240);
+        expect(page.pendingCount, 239);
+        expect(
+          page.total,
+          filter == InboxFilter.handled
+              ? 1
+              : filter == InboxFilter.pending
+              ? 239
+              : 240,
+        );
+        final searched = service.owner.queryInbox(
+          search: 'deployment 239',
+          filter: filter,
+        );
+        expect(searched.allCount, 1);
+        expect(searched.pendingCount, 0);
+        expect(searched.total, filter == InboxFilter.pending ? 0 : 1);
+        final empty = service.owner.queryInbox(
+          search: 'missing',
+          filter: filter,
+        );
+        expect(empty.allCount, 0);
+        expect(empty.pendingCount, 0);
+        expect(empty.total, 0);
+      }
       final organization = await service.agent.requestOrganization(
         session,
         'Organization plan',

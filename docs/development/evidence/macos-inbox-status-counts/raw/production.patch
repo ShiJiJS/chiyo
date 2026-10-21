@@ -1,0 +1,60 @@
+diff --git a/apps/desktop/lib/approvals.dart b/apps/desktop/lib/approvals.dart
+index 37f14d5..071c80f 100644
+--- a/apps/desktop/lib/approvals.dart
++++ b/apps/desktop/lib/approvals.dart
+@@ -295,7 +295,7 @@ class ApprovalsState extends State<Approvals> {
+     final offline = !owner.serviceAvailable;
+     final page = offline
+         ? (_lastPage ??
+-              InboxPage([], total: 0, pendingCount: 0, offset: 0, limit: 8))
++              InboxPage([], total: 0, allCount: 0, pendingCount: 0, offset: 0, limit: 8))
+         : owner.queryInbox(
+             search: _search.text,
+             filter: _filter,
+diff --git a/apps/desktop/lib/inbox_queue.dart b/apps/desktop/lib/inbox_queue.dart
+index d0b9c21..93a4226 100644
+--- a/apps/desktop/lib/inbox_queue.dart
++++ b/apps/desktop/lib/inbox_queue.dart
+@@ -178,11 +178,11 @@ class InboxQueue extends StatelessWidget {
+                             ),
+                             child: Text(
+                               switch (f) {
+-                                InboxFilter.all => '全部 ${page.total}',
++                                InboxFilter.all => '全部 ${page.allCount}',
+                                 InboxFilter.pending =>
+                                   '待处理 ${page.pendingCount}',
+                                 InboxFilter.handled =>
+-                                  '已处理 ${page.total - page.pendingCount}',
++                                  '已处理 ${page.allCount - page.pendingCount}',
+                               },
+                               style: prototypeText(
+                                 context,
+diff --git a/packages/info_core/lib/workspace_access.dart b/packages/info_core/lib/workspace_access.dart
+index 2342ff1..cce0e11 100644
+--- a/packages/info_core/lib/workspace_access.dart
++++ b/packages/info_core/lib/workspace_access.dart
+@@ -61,12 +61,15 @@ class InboxPage {
+   InboxPage(
+     Iterable<InboxEntry> entries, {
+     required this.total,
++    required this.allCount,
+     required this.pendingCount,
+     required this.offset,
+     required this.limit,
+   }) : entries = List.unmodifiable(entries);
+   final List<InboxEntry> entries;
+-  final int total, pendingCount, offset, limit;
++  // total describes the selected status page. Counts describe the search
++  // scope before applying that status, so tabs share one consistent total.
++  final int total, allCount, pendingCount, offset, limit;
+ }
+ 
+ extension OwnerInbox on OwnerAccess {
+@@ -139,6 +142,7 @@ extension OwnerInbox on OwnerAccess {
+     return InboxPage(
+       filtered.skip(effective).take(limit),
+       total: filtered.length,
++      allCount: matching.length,
+       pendingCount: pending,
+       offset: effective,
+       limit: limit,
