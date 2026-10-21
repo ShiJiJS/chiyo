@@ -1,0 +1,12 @@
+{
+  "label": "actual-upgrade-owner-access",
+  "exit": 1,
+  "seconds": 720.275,
+  "mode": "upgrade-interactive",
+  "sqlCipherVersion": "4.19.0 community",
+  "failed": true,
+  "errorType": "StateError",
+  "stackTrace": "#0      _check (file:///Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue42-actual-upgrade-1/source/apps/desktop/integration_test/macos_keychain_probe.dart:72)\n#1      main (file:///Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue42-actual-upgrade-1/source/apps/desktop/integration_test/macos_keychain_probe.dart:460)\n<asynchronous suspension>\n",
+  "checkFailure": "Interactive upgrade deadline",
+  "storageFailure": "key_unavailable"
+}

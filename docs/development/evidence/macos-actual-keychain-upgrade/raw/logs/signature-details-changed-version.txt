@@ -1,0 +1,25 @@
+Executable=/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue42-actual-upgrade-1/Changed-Version.app/Contents/MacOS/info_desktop
+Identifier=org.shijijs.agent-info-manage.qa.flutterkeychain.4b3e2b4384a74038bd469cdbfd686516
+Format=app bundle with Mach-O thin (arm64)
+CodeDirectory v=20400 size=970 flags=0x2(adhoc) hashes=18+7 location=embedded
+VersionPlatform=1
+VersionMin=917504
+VersionSDK=1769472
+Hash type=sha256 size=32
+CandidateCDHash sha256=4e3fe952cf819d3ef2ad4bce1d4d44d781e7441a
+CandidateCDHashFull sha256=4e3fe952cf819d3ef2ad4bce1d4d44d781e7441acb60272168df881bb713582a
+Hash choices=sha256
+CMSDigest=4e3fe952cf819d3ef2ad4bce1d4d44d781e7441acb60272168df881bb713582a
+CMSDigestType=2
+Executable Segment base=0
+Executable Segment limit=114688
+Executable Segment flags=0x1
+Page size=16384
+CDHash=4e3fe952cf819d3ef2ad4bce1d4d44d781e7441a
+Signature=adhoc
+Info.plist entries=24
+TeamIdentifier=not set
+Sealed Resources version=2 rules=13 files=7
+Internal requirements count=0 size=12
+Total signatures=1
+Chosen signature=1
