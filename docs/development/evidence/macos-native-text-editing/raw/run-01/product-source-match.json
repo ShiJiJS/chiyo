@@ -1,0 +1,18 @@
+[
+  {
+    "path": "apps/desktop/lib/mac_text_editing.dart",
+    "sha256": "e1a7c3c6ba20db0f2cac4d1a9844df3354833592f7ea9d75a0d50a8169de85ef"
+  },
+  {
+    "path": "apps/desktop/lib/window_frame.dart",
+    "sha256": "391387c70159a0fa776b7b9cd85a419e67696f8dc70bbef69144370004578829"
+  },
+  {
+    "path": "apps/desktop/macos/Runner/NativeSelectAllMenu.swift",
+    "sha256": "1981190767b40791a768d6598dea4cb2d741cdc56918f76dd253ea4577d20355"
+  },
+  {
+    "path": "apps/desktop/macos/Runner.xcodeproj/project.pbxproj",
+    "sha256": "df2859c4b6da80a8f180ca8fd957b29dd3c936d64e0afede8c8cfcd9c4c11207"
+  }
+]

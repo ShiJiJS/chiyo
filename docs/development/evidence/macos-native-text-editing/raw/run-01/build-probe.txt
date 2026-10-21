@@ -1,0 +1,106 @@
+Building macOS application...                                   
+Xcode 27 no longer requires macOS binaries to support the x86_64 architecture. To build ARM-only macOS apps now, run: "flutter config --enable-macos-arm64-only". This will become the default behavior in a future Flutter release.
+error: the following command failed with exit code 0 but produced no further output
+SwiftCompile normal x86_64 (in target 'Runner' from project 'Runner')
+/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue48-native-editing-1/source/apps/desktop/macos/Runner/MainFlutterWindow.swift:122:86: warning: 'allowedFileTypes' was deprecated in macOS 12.0: Use -allowedContentTypes instead [#DeprecatedDeclaration]
+120 |         panel.canChooseFiles = true
+121 |         panel.allowsMultipleSelection = false
+122 |         if call.method == "backupInput" || call.method == "recoveryKeyInput" { panel.allowedFileTypes = [call.method == "recoveryKeyInput" ? "txt" : "aimbackup"] }
+    |                                                                                      `- warning: 'allowedFileTypes' was deprecated in macOS 12.0: Use -allowedContentTypes instead [#DeprecatedDeclaration]
+123 |         panel.beginSheetModal(for: window) { response in
+124 |           result(response == .OK ? panel.url?.path : nil)
+
+/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue48-native-editing-1/source/apps/desktop/macos/Runner/MainFlutterWindow.swift:140:15: warning: 'allowedFileTypes' was deprecated in macOS 12.0: Use -allowedContentTypes instead [#DeprecatedDeclaration]
+138 |         let recovery = call.method == "recoveryKeyOutput"
+139 |         let panel = NSSavePanel()
+140 |         panel.allowedFileTypes = [recovery ? "txt" : "aimbackup"]
+    |               `- warning: 'allowedFileTypes' was deprecated in macOS 12.0: Use -allowedContentTypes instead [#DeprecatedDeclaration]
+141 |         panel.nameFieldStringValue = recovery ? "agent-info-recovery-key.txt" : "information-backup.aimbackup"
+142 |         panel.canCreateDirectories = true
+
+/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue48-native-editing-1/source/apps/desktop/macos/Runner/MainFlutterWindow.swift:326:25: warning: 'alert' was deprecated in macOS 11.0 [#DeprecatedDeclaration]
+324 |       willPresent notification: UNNotification,
+325 |       withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+326 |     completionHandler([.alert])
+    |                         `- warning: 'alert' was deprecated in macOS 11.0 [#DeprecatedDeclaration]
+327 |   }
+328 | 
+
+/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue48-native-editing-1/source/apps/desktop/macos/Runner/DatabaseKeyStore.swift:40:22: warning: 'SecKeychainGetUserInteractionAllowed' was deprecated in macOS 10.10: SecKeychain is deprecated [#DeprecatedDeclaration]
+38 |     defer { Self.interactionLock.unlock() }
+39 |     var previous: DarwinBoolean = true
+40 |     let readStatus = SecKeychainGetUserInteractionAllowed(&previous)
+   |                      `- warning: 'SecKeychainGetUserInteractionAllowed' was deprecated in macOS 10.10: SecKeychain is deprecated [#DeprecatedDeclaration]
+41 |     guard readStatus == errSecSuccess else {
+42 |       throw DatabaseKeyFailure(code: "key_unavailable", status: readStatus)
+
+/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue48-native-editing-1/source/apps/desktop/macos/Runner/DatabaseKeyStore.swift:44:21: warning: 'SecKeychainSetUserInteractionAllowed' was deprecated in macOS 10.10: SecKeychain is deprecated [#DeprecatedDeclaration]
+42 |       throw DatabaseKeyFailure(code: "key_unavailable", status: readStatus)
+43 |     }
+44 |     let setStatus = SecKeychainSetUserInteractionAllowed(allowed)
+   |                     `- warning: 'SecKeychainSetUserInteractionAllowed' was deprecated in macOS 10.10: SecKeychain is deprecated [#DeprecatedDeclaration]
+45 |     guard setStatus == errSecSuccess else {
+46 |       throw DatabaseKeyFailure(code: "key_unavailable", status: setStatus)
+
+/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue48-native-editing-1/source/apps/desktop/macos/Runner/DatabaseKeyStore.swift:48:13: warning: 'SecKeychainSetUserInteractionAllowed' was deprecated in macOS 10.10: SecKeychain is deprecated [#DeprecatedDeclaration]
+46 |       throw DatabaseKeyFailure(code: "key_unavailable", status: setStatus)
+47 |     }
+48 |     defer { SecKeychainSetUserInteractionAllowed(previous.boolValue) }
+   |             `- warning: 'SecKeychainSetUserInteractionAllowed' was deprecated in macOS 10.10: SecKeychain is deprecated [#DeprecatedDeclaration]
+49 |     return try action()
+50 |   }
+
+[#DeprecatedDeclaration]: <https://docs.swift.org/compiler/documentation/diagnostics/deprecated-declaration>
+error: the following command failed with exit code 0 but produced no further output
+SwiftCompile normal arm64 (in target 'Runner' from project 'Runner')
+/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue48-native-editing-1/source/apps/desktop/macos/Runner/MainFlutterWindow.swift:122:86: warning: 'allowedFileTypes' was deprecated in macOS 12.0: Use -allowedContentTypes instead [#DeprecatedDeclaration]
+120 |         panel.canChooseFiles = true
+121 |         panel.allowsMultipleSelection = false
+122 |         if call.method == "backupInput" || call.method == "recoveryKeyInput" { panel.allowedFileTypes = [call.method == "recoveryKeyInput" ? "txt" : "aimbackup"] }
+    |                                                                                      `- warning: 'allowedFileTypes' was deprecated in macOS 12.0: Use -allowedContentTypes instead [#DeprecatedDeclaration]
+123 |         panel.beginSheetModal(for: window) { response in
+124 |           result(response == .OK ? panel.url?.path : nil)
+
+/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue48-native-editing-1/source/apps/desktop/macos/Runner/MainFlutterWindow.swift:140:15: warning: 'allowedFileTypes' was deprecated in macOS 12.0: Use -allowedContentTypes instead [#DeprecatedDeclaration]
+138 |         let recovery = call.method == "recoveryKeyOutput"
+139 |         let panel = NSSavePanel()
+140 |         panel.allowedFileTypes = [recovery ? "txt" : "aimbackup"]
+    |               `- warning: 'allowedFileTypes' was deprecated in macOS 12.0: Use -allowedContentTypes instead [#DeprecatedDeclaration]
+141 |         panel.nameFieldStringValue = recovery ? "agent-info-recovery-key.txt" : "information-backup.aimbackup"
+142 |         panel.canCreateDirectories = true
+
+/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue48-native-editing-1/source/apps/desktop/macos/Runner/MainFlutterWindow.swift:326:25: warning: 'alert' was deprecated in macOS 11.0 [#DeprecatedDeclaration]
+324 |       willPresent notification: UNNotification,
+325 |       withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+326 |     completionHandler([.alert])
+    |                         `- warning: 'alert' was deprecated in macOS 11.0 [#DeprecatedDeclaration]
+327 |   }
+328 | 
+
+/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue48-native-editing-1/source/apps/desktop/macos/Runner/DatabaseKeyStore.swift:40:22: warning: 'SecKeychainGetUserInteractionAllowed' was deprecated in macOS 10.10: SecKeychain is deprecated [#DeprecatedDeclaration]
+38 |     defer { Self.interactionLock.unlock() }
+39 |     var previous: DarwinBoolean = true
+40 |     let readStatus = SecKeychainGetUserInteractionAllowed(&previous)
+   |                      `- warning: 'SecKeychainGetUserInteractionAllowed' was deprecated in macOS 10.10: SecKeychain is deprecated [#DeprecatedDeclaration]
+41 |     guard readStatus == errSecSuccess else {
+42 |       throw DatabaseKeyFailure(code: "key_unavailable", status: readStatus)
+
+/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue48-native-editing-1/source/apps/desktop/macos/Runner/DatabaseKeyStore.swift:44:21: warning: 'SecKeychainSetUserInteractionAllowed' was deprecated in macOS 10.10: SecKeychain is deprecated [#DeprecatedDeclaration]
+42 |       throw DatabaseKeyFailure(code: "key_unavailable", status: readStatus)
+43 |     }
+44 |     let setStatus = SecKeychainSetUserInteractionAllowed(allowed)
+   |                     `- warning: 'SecKeychainSetUserInteractionAllowed' was deprecated in macOS 10.10: SecKeychain is deprecated [#DeprecatedDeclaration]
+45 |     guard setStatus == errSecSuccess else {
+46 |       throw DatabaseKeyFailure(code: "key_unavailable", status: setStatus)
+
+/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue48-native-editing-1/source/apps/desktop/macos/Runner/DatabaseKeyStore.swift:48:13: warning: 'SecKeychainSetUserInteractionAllowed' was deprecated in macOS 10.10: SecKeychain is deprecated [#DeprecatedDeclaration]
+46 |       throw DatabaseKeyFailure(code: "key_unavailable", status: setStatus)
+47 |     }
+48 |     defer { SecKeychainSetUserInteractionAllowed(previous.boolValue) }
+   |             `- warning: 'SecKeychainSetUserInteractionAllowed' was deprecated in macOS 10.10: SecKeychain is deprecated [#DeprecatedDeclaration]
+49 |     return try action()
+50 |   }
+
+[#DeprecatedDeclaration]: <https://docs.swift.org/compiler/documentation/diagnostics/deprecated-declaration>
+warning: Run script build phase 'Run Script' will be run during every build because it does not specify any outputs. To address this issue, either add output dependencies to the script phase, or configure it to run in every build by unchecking "Based on dependency analysis" in the script phase. (in target 'Flutter Assemble' from project 'Runner')
+✓ Built build/macos/Build/Products/Release/MacEditingProbe.app (67.0MB)

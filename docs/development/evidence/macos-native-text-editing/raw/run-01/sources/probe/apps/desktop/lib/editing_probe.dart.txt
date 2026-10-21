@@ -1,0 +1,59 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'ui.dart';
+import 'window_frame.dart';
+
+void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  final controller = TextEditingController();
+  controller.addListener(() {
+    debugPrint(
+      'QA_EDIT_VALUE text=${controller.text} selection=${controller.selection.baseOffset}:${controller.selection.extentOffset}',
+    );
+  });
+  HardwareKeyboard.instance.addHandler((event) {
+    debugPrint(
+      'QA_DART_KEY type=${event.runtimeType} logical=${event.logicalKey.debugName} meta=${HardwareKeyboard.instance.isMetaPressed} ctrl=${HardwareKeyboard.instance.isControlPressed}',
+    );
+    return false;
+  });
+  runApp(
+    MaterialApp(
+      theme: informationTheme(),
+      builder: (_, child) => DesktopWindowFrame(child: child!),
+      home: Scaffold(
+        body: Padding(
+          padding: const EdgeInsets.all(40),
+          child: Column(
+            children: [
+              const Text(
+                'Synthetic native editing probe — no library or Keychain',
+              ),
+              TextButton(
+                onPressed: () async {
+                  final result =
+                      await const MethodChannel(
+                        'agent_info_manage/backup_files',
+                      ).invokeMethod<String>(
+                        'informationFileOutput',
+                        'MacNativePanelProbe.txt',
+                      );
+                  debugPrint(
+                    'QA_NATIVE_SAVE_PANEL cancelled=${result == null}',
+                  );
+                },
+                child: const Text('Open native Save panel'),
+              ),
+              DesktopTextField(
+                controller: controller,
+                decoration: const InputDecoration(
+                  labelText: 'Synthetic editor',
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ),
+  );
+}

@@ -1,0 +1,5 @@
+{
+  "sourceCommit": "3b54881dfe1de4b949a8613afa01580d275a97ce",
+  "scope": "QA-only minimal DesktopTextField; passive native/Dart key and selection logs; no library, keys, server, owner API or production application mutations",
+  "source": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue48-native-editing-1/source"
+}
