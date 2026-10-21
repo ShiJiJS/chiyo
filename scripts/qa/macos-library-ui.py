@@ -7,6 +7,8 @@ render captures, not proof of physical panels, keyboard input or visible CUA.
 import argparse
 import hashlib
 import json
+import os
+import signal
 from pathlib import Path
 import queue
 import re
@@ -85,7 +87,7 @@ def main():
         with log.open('wb') as stream:
             flutter = subprocess.Popen([str(ROOT/'scripts/dev-macos.sh'), 'flutter', 'test', '--no-pub',
                 'integration_test/macos_library_native_test.dart', '-d', 'macos',
-                f'--dart-define=MAC_QA_OWNER={owner}'], cwd=ROOT/'apps/desktop', stdout=stream, stderr=subprocess.STDOUT)
+                f'--dart-define=MAC_QA_OWNER={owner}'], cwd=ROOT/'apps/desktop', stdout=stream, stderr=subprocess.STDOUT, start_new_session=True)
         def locate():
             matches = re.findall(r'MAC_LIBRARY_ROOT=([^\r\n]+)', log.read_text(errors='replace'))
             if not matches: return None
@@ -164,6 +166,14 @@ def main():
         if 'flutter' in locals() and flutter.poll() is None:
             flutter.terminate(); flutter.wait(timeout=15)
             state['forcedFailedRunCleanup']=True;state['complete']=False
+        if 'flutter' in locals():
+            try:
+                os.killpg(flutter.pid, 0)
+            except ProcessLookupError:
+                state['flutterProcessGroupRemaining']=False
+            else:
+                os.killpg(flutter.pid, signal.SIGTERM)
+                state['forcedProcessGroupCleanup']=True;state['complete']=False
         if directory:
             assert not directory.is_symlink() and (directory/'.qa-owner').read_text()==owner
             for p in directory.iterdir():

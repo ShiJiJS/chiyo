@@ -10,6 +10,7 @@ import 'package:info_core/agent_server.dart';
 import 'package:info_storage/info_storage.dart';
 import 'package:info_desktop/main.dart' show InformationApp;
 import 'package:info_desktop/credential_management.dart';
+import 'package:info_desktop/credential_files.dart';
 import 'support/native_semantics_lifetime.dart';
 
 class _Keys implements DatabaseKeyStore {
@@ -18,6 +19,25 @@ class _Keys implements DatabaseKeyStore {
   Future<List<int>?> read() async => value;
   @override
   Future<void> create(List<int> key) async => value = List.of(key);
+}
+
+// Test selection boundary only; actual local file validation/stream reading is
+// production readCredentialFile. This does not drive an OS file panel.
+class _QueuedFiles implements CredentialFilePicker {
+  _QueuedFiles(this.paths);
+  final List<String?> paths;
+  int selections = 0;
+  bool pending = false;
+  @override
+  Future<SelectedCredentialFile?> choose() async {
+    pending = true;
+    try {
+      final path = paths[selections++];
+      return path == null ? null : await readCredentialFile(path);
+    } finally {
+      pending = false;
+    }
+  }
 }
 
 // Native Flutter and SQLCipher with controlled owner approvals/ephemeral key.
@@ -35,6 +55,30 @@ void main() {
       );
       await File('${root.path}/.qa-owner').writeAsString(marker);
       debugPrint('MAC_CREDENTIAL_MANAGEMENT_ROOT=${root.path}');
+      const filesMode = bool.fromEnvironment('MAC_QA_FILE_CREDENTIAL');
+      final firstBytes = List<int>.generate(1048576, (i) => (i * 53 + 7) % 256);
+      final secondBytes = <int>[126];
+      final firstFile = File('${root.path}/私有凭据 v1.key');
+      final secondFile = File('${root.path}/私有凭据 v2.key');
+      final emptyFile = File('${root.path}/私有空文件.key');
+      final largeFile = File('${root.path}/私有超限文件.key');
+      final linkedFile = Link('${root.path}/私有链接.key');
+      if (filesMode) {
+        await firstFile.writeAsBytes(firstBytes, flush: true);
+        await secondFile.writeAsBytes(secondBytes, flush: true);
+        await emptyFile.writeAsBytes([]);
+        await largeFile.writeAsBytes(List<int>.filled(1048577, 11));
+        await linkedFile.create(firstFile.path);
+      }
+      final files = _QueuedFiles([
+        null,
+        emptyFile.path,
+        largeFile.path,
+        linkedFile.path,
+        firstFile.path,
+        null,
+        secondFile.path,
+      ]);
       final semantics = NativeSemanticsLifetime(tester);
       // Keep tester text injection on one deterministic channel. Integration
       // tests otherwise leave the real IME connected; this is not IME QA.
@@ -97,7 +141,11 @@ void main() {
         await tester.pumpWidget(
           RepaintBoundary(
             key: boundary,
-            child: InformationApp(service: service, port: server.port),
+            child: InformationApp(
+              service: service,
+              port: server.port,
+              credentialFiles: files,
+            ),
           ),
         );
         await tester.pumpAndSettle();
@@ -188,16 +236,53 @@ void main() {
       await credentials();
       await tap(find.byKey(const ValueKey('new-credential')));
       await input('credential-name', 'Mac managed token');
-      await input('credential-secret', 'synthetic-native-secret-one');
-      expect(
-        tester
-            .widget<TextField>(find.byKey(const ValueKey('credential-secret')))
-            .obscureText,
-        isTrue,
-      );
-      await input('credential-binding', 'GH_TOKEN');
+      if (filesMode) {
+        await tap(find.byKey(const ValueKey('credential-form-file')));
+        Future<void> select() async {
+          await tap(find.byKey(const ValueKey('choose-credential-file')));
+          await until(() => !files.pending, 'Fixture selection must finish');
+        }
+
+        await select();
+        expect(find.text('未选择任何文件'), findsOneWidget);
+        for (var i = 0; i < 3; i++) {
+          await select();
+          expect(find.textContaining('文件未导入'), findsOneWidget);
+          expect(service.owner.credentials, isEmpty);
+          expect(
+            tester
+                .widget<TextButton>(
+                  find.byKey(const ValueKey('save-credential')),
+                )
+                .onPressed,
+            isNull,
+          );
+        }
+        await capture('00-file-input-rejections');
+        await select();
+        expect(find.text('私有凭据 v1.key'), findsOneWidget);
+        await input('credential-binding', 'SSH_KEY');
+      } else {
+        await input('credential-secret', 'synthetic-native-secret-one');
+        expect(
+          tester
+              .widget<TextField>(
+                find.byKey(const ValueKey('credential-secret')),
+              )
+              .obscureText,
+          isTrue,
+        );
+        await input('credential-binding', 'GH_TOKEN');
+      }
       await tap(find.byKey(const ValueKey('save-credential')));
       final id = service.owner.credentials.single.id;
+      if (filesMode) {
+        expect(service.owner.credential(id).form, CredentialForm.file);
+        expect(service.owner.credential(id).byteLength, firstBytes.length);
+        // The encrypted copy must no longer depend on this source pathname.
+        await firstFile.writeAsString('CHANGED AFTER IMPORT', flush: true);
+        await firstFile.delete();
+      }
       ManagedCredential current() => service.owner.credential(id);
       void unchangedInfo() {
         final now = service.owner.information.single;
@@ -211,7 +296,20 @@ void main() {
         final value = repository.credentialMaterials.singleWhere(
           (m) => m.credentialId == id && m.version == version,
         );
-        expect(value.bytes, utf8.encode(text));
+        final expected = filesMode
+            ? (text.endsWith('two') ? secondBytes : firstBytes)
+            : utf8.encode(text);
+        expect(value.bytes.length, expected.length);
+        expect(
+          value.bytes.indexed.every((e) => e.$2 == expected[e.$1]),
+          isTrue,
+        );
+        if (filesMode) {
+          expect(
+            value.fileName,
+            text.endsWith('two') ? '私有凭据 v2.key' : '私有凭据 v1.key',
+          );
+        }
       }
 
       Future<void> checkpoint(String phase, {bool visible = true}) async {
@@ -233,6 +331,7 @@ void main() {
           'availability': current().availability(DateTime.now()).name,
           'discoverable': current().discoverable,
           'catalogVisible': visible,
+          'byteLength': current().byteLength,
         });
       }
 
@@ -250,8 +349,16 @@ void main() {
       await credentials();
       await tap(find.byKey(const ValueKey('credential-metadata')));
       await tap(find.text('编辑名称、用途与私有备注'));
-      await labelled('名称', 'Mac reviewed token');
-      await labelled('公开用途', 'Synthetic public token purpose');
+      await labelled(
+        '名称',
+        filesMode ? 'Mac reviewed file' : 'Mac reviewed token',
+      );
+      await labelled(
+        '公开用途',
+        filesMode
+            ? 'Synthetic public file purpose'
+            : 'Synthetic public token purpose',
+      );
       await labelled('私有备注', 'private-native-credential-note');
       await input('credential-expiry', 'not-a-date');
       await saveManagement(expectSuccess: false);
@@ -270,20 +377,42 @@ void main() {
       );
       await capture('02-metadata-before-save');
       await saveManagement();
-      expect(current().name, 'Mac reviewed token');
+      expect(
+        current().name,
+        filesMode ? 'Mac reviewed file' : 'Mac reviewed token',
+      );
       expect(current().privateNote, 'private-native-credential-note');
       expect(current().discoverable, isTrue);
       await checkpoint('03-public');
       await tap(find.text('更换版本'));
-      await input('credential-new-secret', 'synthetic-native-secret-two');
-      expect(
-        tester
-            .widget<TextField>(
-              find.byKey(const ValueKey('credential-new-secret')),
-            )
-            .obscureText,
-        isTrue,
-      );
+      if (filesMode) {
+        await tap(find.byKey(const ValueKey('credential-new-file')));
+        await until(
+          () => !files.pending,
+          'Cancelled rotation selection must finish',
+        );
+        await saveManagement(expectSuccess: false);
+        expect(find.textContaining('凭据变更未保存'), findsOneWidget);
+        expect(current().version, 1);
+        material(1, 'synthetic-native-secret-one');
+        await capture('03-file-rotation-cancelled');
+        await tap(find.byKey(const ValueKey('credential-new-file')));
+        await until(
+          () => !files.pending,
+          'Rotation file selection must finish',
+        );
+        expect(find.text('私有凭据 v2.key'), findsOneWidget);
+      } else {
+        await input('credential-new-secret', 'synthetic-native-secret-two');
+        expect(
+          tester
+              .widget<TextField>(
+                find.byKey(const ValueKey('credential-new-secret')),
+              )
+              .obscureText,
+          isTrue,
+        );
+      }
       await saveManagement();
       expect(current().version, 2);
       material(1, 'synthetic-native-secret-one');
@@ -367,7 +496,10 @@ void main() {
         port: 0,
         enableReusableCredentialUse: true,
       );
-      expect(current().name, 'Mac reviewed token');
+      expect(
+        current().name,
+        filesMode ? 'Mac reviewed file' : 'Mac reviewed token',
+      );
       expect(current().privateNote, 'private-native-credential-note');
       expect(current().linkedItemIds, [item.id]);
       expect(current().version, 4);
@@ -380,20 +512,28 @@ void main() {
       await mount();
       await credentials();
       await checkpoint('14-reopened', visible: false);
+      if (filesMode) {
+        expect(files.selections, 7);
+        expect(await firstFile.exists(), isFalse);
+        expect((await secondFile.readAsBytes()).single, secondBytes.single);
+      }
       await File('${root.path}/result.json').writeAsString(
         jsonEncode({
           'complete': true,
           'phases': step + 1,
           'captures': captures,
           'finalCredentialVersion': 4,
+          'fileMode': filesMode,
+          'filePickerSelections': filesMode ? files.selections : 0,
+          'fileSizes': filesMode ? [firstBytes.length, secondBytes.length] : [],
           'scope':
-              'Native tester drives string credential creation, metadata, discovery, links, rotation, disable/enable, version restore, recycle restore and expiry; real SQLCipher plus independent CLI catalog/negative eligibility; fixture ordinary information, ephemeral key; registered test text-input channel, no actual credential use grants/worker execution, physical input/IME, file credential picker or Keychain.',
+              'Native tester drives ${filesMode ? 'file' : 'string'} credential creation, metadata, discovery, links, rotation, disable/enable, version restore, recycle restore and expiry; real SQLCipher plus independent CLI catalog/negative eligibility; fixture ordinary information, ephemeral key; registered test text-input channel, no actual credential use grants/worker execution, physical input/IME, OS file panel or Keychain.',
         }),
         flush: true,
       );
       await exchange('complete');
     },
     semanticsEnabled: false,
-    timeout: const Timeout(Duration(minutes: 8)),
+    timeout: const Timeout(Duration(minutes: 12)),
   );
 }
