@@ -20,6 +20,7 @@ def main():
     parser.add_argument('directory', type=Path)
     parser.add_argument('--lifecycle-gate', action='store_true',
                         help='Allow one synthetic wait command until the owned release file exists')
+    parser.add_argument('--audit-commands', action='store_true', help='Record only fixed synthetic true/false command receipts, never secrets')
     args = parser.parse_args()
     root = args.directory.resolve()
     root.mkdir(exist_ok=False)
@@ -68,6 +69,10 @@ def main():
                         code = 0 if (root / 'release').exists() else 124
                     else:
                         code = 126
+                    if args.audit_commands and argv in (['/usr/bin/true'], ['/usr/bin/false']):
+                        with counter_lock:
+                            with (root / 'command-audit.jsonl').open('a') as audit:
+                                audit.write(json.dumps({'command':argv[0], 'exitCode':code})+'\n')
                     channel.send_exit_status(code)
                 finally:
                     channel.close()
