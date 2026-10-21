@@ -1,0 +1,228 @@
+{
+  "complete": true,
+  "productSource": "01c1f141d876a9d3c49c61c7fc3d1e572c432c5a",
+  "cliSha256": "cb9971c43daa0bccf06c31d48c6ac3ab62f3e57c34bc96655c47202b9e14f5b7",
+  "phases": [
+    {
+      "phase": "request",
+      "checks": []
+    },
+    {
+      "phase": "approved",
+      "checks": [
+        {
+          "field": "bSwjH7tM-VmZzYQq7I7wIZEqvfG-Ei90OiyLh7XA9zg=",
+          "requestId": "rGwz-rLAMbxA4WOOFjc2l1E9OUeIfRGV4zXnmDIIUm8=",
+          "status": "ok",
+          "expectedValueMatched": true
+        },
+        {
+          "field": "32xkStg0io7MtCeRUsrIQND72-cUGpZcyyXYfX3J01U=",
+          "requestId": "rGwz-rLAMbxA4WOOFjc2l1E9OUeIfRGV4zXnmDIIUm8=",
+          "status": "ok",
+          "expectedValueMatched": true
+        }
+      ]
+    },
+    {
+      "phase": "edited",
+      "checks": [
+        {
+          "field": "bSwjH7tM-VmZzYQq7I7wIZEqvfG-Ei90OiyLh7XA9zg=",
+          "requestId": "rGwz-rLAMbxA4WOOFjc2l1E9OUeIfRGV4zXnmDIIUm8=",
+          "status": "ok",
+          "expectedValueMatched": true
+        },
+        {
+          "field": "32xkStg0io7MtCeRUsrIQND72-cUGpZcyyXYfX3J01U=",
+          "requestId": "rGwz-rLAMbxA4WOOFjc2l1E9OUeIfRGV4zXnmDIIUm8=",
+          "status": "ok",
+          "expectedValueMatched": true
+        }
+      ]
+    },
+    {
+      "phase": "partial",
+      "checks": [
+        {
+          "field": "bSwjH7tM-VmZzYQq7I7wIZEqvfG-Ei90OiyLh7XA9zg=",
+          "requestId": "rGwz-rLAMbxA4WOOFjc2l1E9OUeIfRGV4zXnmDIIUm8=",
+          "status": "unauthorized",
+          "expectedValueMatched": false
+        },
+        {
+          "field": "32xkStg0io7MtCeRUsrIQND72-cUGpZcyyXYfX3J01U=",
+          "requestId": "rGwz-rLAMbxA4WOOFjc2l1E9OUeIfRGV4zXnmDIIUm8=",
+          "status": "ok",
+          "expectedValueMatched": true
+        }
+      ]
+    },
+    {
+      "phase": "restored",
+      "checks": [
+        {
+          "field": "bSwjH7tM-VmZzYQq7I7wIZEqvfG-Ei90OiyLh7XA9zg=",
+          "requestId": "rGwz-rLAMbxA4WOOFjc2l1E9OUeIfRGV4zXnmDIIUm8=",
+          "status": "unauthorized",
+          "expectedValueMatched": false
+        },
+        {
+          "field": "32xkStg0io7MtCeRUsrIQND72-cUGpZcyyXYfX3J01U=",
+          "requestId": "rGwz-rLAMbxA4WOOFjc2l1E9OUeIfRGV4zXnmDIIUm8=",
+          "status": "ok",
+          "expectedValueMatched": true
+        },
+        {
+          "field": "sule3-8QoVWcGmUJwftI1XV8Yt8g2y_iVx9yCaiVfKA=",
+          "requestId": "rGwz-rLAMbxA4WOOFjc2l1E9OUeIfRGV4zXnmDIIUm8=",
+          "status": "unauthorized",
+          "expectedValueMatched": false
+        }
+      ]
+    },
+    {
+      "phase": "reapproved",
+      "checks": [
+        {
+          "field": "bSwjH7tM-VmZzYQq7I7wIZEqvfG-Ei90OiyLh7XA9zg=",
+          "requestId": "rGwz-rLAMbxA4WOOFjc2l1E9OUeIfRGV4zXnmDIIUm8=",
+          "status": "unauthorized",
+          "expectedValueMatched": false
+        },
+        {
+          "field": "32xkStg0io7MtCeRUsrIQND72-cUGpZcyyXYfX3J01U=",
+          "requestId": "rGwz-rLAMbxA4WOOFjc2l1E9OUeIfRGV4zXnmDIIUm8=",
+          "status": "ok",
+          "expectedValueMatched": true
+        },
+        {
+          "field": "sule3-8QoVWcGmUJwftI1XV8Yt8g2y_iVx9yCaiVfKA=",
+          "requestId": "hsu2rGWm9DzYqrzKtYZPPFtT4M4rI-dWXd8lrLf2e3c=",
+          "status": "ok",
+          "expectedValueMatched": true
+        }
+      ]
+    },
+    {
+      "phase": "version-restored",
+      "checks": [
+        {
+          "field": "sule3-8QoVWcGmUJwftI1XV8Yt8g2y_iVx9yCaiVfKA=",
+          "requestId": "hsu2rGWm9DzYqrzKtYZPPFtT4M4rI-dWXd8lrLf2e3c=",
+          "status": "ok",
+          "expectedValueMatched": true
+        },
+        {
+          "field": "bSwjH7tM-VmZzYQq7I7wIZEqvfG-Ei90OiyLh7XA9zg=",
+          "requestId": "rGwz-rLAMbxA4WOOFjc2l1E9OUeIfRGV4zXnmDIIUm8=",
+          "status": "unauthorized",
+          "expectedValueMatched": false
+        },
+        {
+          "field": "32xkStg0io7MtCeRUsrIQND72-cUGpZcyyXYfX3J01U=",
+          "requestId": "rGwz-rLAMbxA4WOOFjc2l1E9OUeIfRGV4zXnmDIIUm8=",
+          "status": "ok",
+          "expectedValueMatched": true
+        }
+      ]
+    },
+    {
+      "phase": "repository-reopened",
+      "checks": [
+        {
+          "field": "bSwjH7tM-VmZzYQq7I7wIZEqvfG-Ei90OiyLh7XA9zg=",
+          "requestId": "rGwz-rLAMbxA4WOOFjc2l1E9OUeIfRGV4zXnmDIIUm8=",
+          "status": "unauthorized",
+          "expectedValueMatched": false
+        },
+        {
+          "field": "32xkStg0io7MtCeRUsrIQND72-cUGpZcyyXYfX3J01U=",
+          "requestId": "rGwz-rLAMbxA4WOOFjc2l1E9OUeIfRGV4zXnmDIIUm8=",
+          "status": "unauthorized",
+          "expectedValueMatched": false
+        },
+        {
+          "field": "sule3-8QoVWcGmUJwftI1XV8Yt8g2y_iVx9yCaiVfKA=",
+          "requestId": "hsu2rGWm9DzYqrzKtYZPPFtT4M4rI-dWXd8lrLf2e3c=",
+          "status": "unauthorized",
+          "expectedValueMatched": false
+        }
+      ]
+    },
+    {
+      "phase": "complete",
+      "checks": []
+    }
+  ],
+  "appBaseCommit": "4bdc3dab425cd8d541eed40d0c8e809b9d0c4605",
+  "worktreeStatus": [
+    " M apps/desktop/integration_test/macos_credential_management_native_test.dart",
+    " M apps/desktop/integration_test/macos_library_native_test.dart",
+    " M apps/desktop/integration_test/macos_organization_native_test.dart",
+    " M apps/desktop/integration_test/macos_proposals_native_test.dart",
+    " M scripts/qa/macos-credential-management-ui.py",
+    " M scripts/qa/macos-library-ui.py",
+    " M scripts/qa/macos-organization-ui.py",
+    " M scripts/qa/macos-proposals-ui.py"
+  ],
+  "qaSources": [
+    {
+      "path": "apps/desktop/integration_test/macos_library_native_test.dart",
+      "sha256": "4386fd62734db771c1c7c5d7ee28ea95697daf2d8e2d35719d3ea1d1dc9edfed"
+    },
+    {
+      "path": "scripts/qa/macos-library-ui.py",
+      "sha256": "92c15f93d0ef9d0be4d8ef2cb3f6b7353d2eb8ad82727d71b5cb15bfadfc9218"
+    },
+    {
+      "path": "apps/desktop/lib/library.dart",
+      "sha256": "90f222b10538a3aa3f1c703dd3ff091154972813635147fb0cf354ac0c32e4ed"
+    },
+    {
+      "path": "apps/desktop/lib/templates.dart",
+      "sha256": "16308476d1d7d15b089a9408dc75f2f138327fffac62f62f9ea3ac58e87dcc88"
+    },
+    {
+      "path": "apps/desktop/lib/information_editor.dart",
+      "sha256": "59d36a64441022117e9bfe43645b75531f71fc698da1372d3807d2fc51416989"
+    },
+    {
+      "path": "apps/desktop/lib/main.dart",
+      "sha256": "7a396b7917211b58906cd7bdd789d585d0cd511f1a93145246747cfaaf4cb883"
+    },
+    {
+      "path": "apps/desktop/integration_test/support/native_semantics_lifetime.dart",
+      "sha256": "a274da35d57e9bca3322b7e5b70a2bc610990e8e8dc3fba0821bbb1e9219036f"
+    }
+  ],
+  "nativeResult": {
+    "complete": true,
+    "phases": 9,
+    "itemId": "SgIcuHOIPBfP67O055RKqbuHDofv6BRB37YpreDTKPw=",
+    "oldField": "bSwjH7tM-VmZzYQq7I7wIZEqvfG-Ei90OiyLh7XA9zg=",
+    "restoredField": "sule3-8QoVWcGmUJwftI1XV8Yt8g2y_iVx9yCaiVfKA=",
+    "remainingField": "32xkStg0io7MtCeRUsrIQND72-cUGpZcyyXYfX3J01U=",
+    "finalVersion": 6,
+    "captures": [
+      "01-template.png",
+      "02-created.png",
+      "03-edited-category.png",
+      "04-delete-confirmation.png",
+      "05-restored.png",
+      "05-restored-detail.png",
+      "06-revision-history.png",
+      "07-revision-restored.png",
+      "07-revision-restored-detail.png",
+      "08-template-edited.png",
+      "09-reopened.png"
+    ],
+    "scope": "Real native Flutter/SQLCipher; tester-driven UI; ephemeral key, fixture directory/tag creation and owner approvals; independent parent AOT CLI. No physical input, Keychain or system panels."
+  },
+  "flutterExitCode": 0,
+  "cliExits": [
+    0,
+    0
+  ],
+  "flutterProcessGroupRemaining": false
+}
