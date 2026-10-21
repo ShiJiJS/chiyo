@@ -1,0 +1,180 @@
+{
+  "date": "2026-10-22",
+  "sourceCommit": "cce2f9a66fa2e355752fec391e6aac89e99eeff8",
+  "release": "0.4.0+12-mac-dev.cce2f9a66fa2",
+  "archive": "build/macos-adaptation/issue50-package-13/agent-info-manage-0.4.0+12-mac-dev.cce2f9a66fa2-macos-arm64.zip",
+  "archiveBytes": 130950924,
+  "archiveSha256": "1bd79368eb61309e9c8e34480cd46dc3bc8ce6ba1dd5218645eeea6c7db3f1d7",
+  "manifestSha256": "b148ccb8f1179620aac03775ccd0072faba30779bea15b9219e88f115cfd4322",
+  "packageSourceChecksRequested": false,
+  "separateSourceCheckPassed": 720,
+  "separateSourceCheckConditionalSkipped": 66,
+  "separateSourceCheckEvidence": "../macos-inbox-status-counts/verification.json",
+  "sourceSnapshotEvidence": "../macos-inbox-status-counts/raw/source-check-completion-hashes.json",
+  "sourceSnapshotSha256": "d541adc58252b21dec15c10dfdb80af88356feb316c5a875217a8c77e50a5c90",
+  "sourceInputsByteExactBeforeAndAfter": 637,
+  "packagePhasesPassed": 20,
+  "extractedCliHookWorkerPassed": 6,
+  "extractedChecksOverlapSource": true,
+  "payloadFileAndLinkCount": 7971,
+  "machOCount": 75,
+  "sourceIncludesInboxCountsFix": true,
+  "scope": "build and extracted synthetic checks; no clean-user, Keychain upgrade, native UI or real Codex acceptance",
+  "ordinaryNewPackageUiVerified": false,
+  "keychainUpgradeVerified": false,
+  "cleanUserVerified": false,
+  "keychainCalls": 0,
+  "newSystemPermissionRequests": 0,
+  "fixedInstallItemsVerified": 7971,
+  "fixedInstallMismatches": [],
+  "fixedInstallSignatureExit": 0,
+  "fixedInstallPid53592Alive": true,
+  "generatedAppsUnregistered": 3,
+  "allUnregisterExitCodesZero": true,
+  "cleanupTargets": 6,
+  "releasedAllocatedKiB": 1882004,
+  "remainingApps": [
+    "local/中文 Mac 预览/AgentInfoManage/app/info_desktop.app"
+  ],
+  "remainingGeneratedDsyms": [],
+  "issue50Criteria": [
+    true,
+    true,
+    false,
+    false,
+    false,
+    false
+  ],
+  "files": [
+    {
+      "path": "raw/logs/app-signature.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/logs/archive.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/logs/compile-info-codex-hook.txt",
+      "bytes": 136,
+      "sha256": "06bf2ed90650d2e8e89948438d4f8200b36633aaa837fa48718c2c7ecf21f97e"
+    },
+    {
+      "path": "raw/logs/compile-info-codex.txt",
+      "bytes": 131,
+      "sha256": "9706398f099b4316de3d943286272e68ad7bf46c1e3f8e78c2457e2e3c507693"
+    },
+    {
+      "path": "raw/logs/compile-info-prepare-codex.txt",
+      "bytes": 139,
+      "sha256": "2dca2a6e93d7c2ad0c6d7cb99ac1aa02c8e26a50a3dfb4e204551b2eaedd99b5"
+    },
+    {
+      "path": "raw/logs/compile-info-runtime-worker.txt",
+      "bytes": 140,
+      "sha256": "35ff7b9a0292402e1e704cd731bd3d2a3460a0ec4f5b45ed9db52c640969ac44"
+    },
+    {
+      "path": "raw/logs/compile-info.txt",
+      "bytes": 125,
+      "sha256": "c90328b6e49c9cbf95cbf6192cb9d27758c3e34addffdf11897b1bba95a6ed41"
+    },
+    {
+      "path": "raw/logs/diagnostic-build.txt",
+      "bytes": 300,
+      "sha256": "749028ae64390791ed27ec2db088fcca8f781d9199439b5f6be02f461afae899"
+    },
+    {
+      "path": "raw/logs/extract.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/logs/extracted-app-signature.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/logs/extracted-cli-and-worker.txt",
+      "bytes": 842,
+      "sha256": "7aca7085e00077c247eb493880ab1f386fb56abe15d52c2cd2781df8c92408ed"
+    },
+    {
+      "path": "raw/logs/extracted-storage.txt",
+      "bytes": 187,
+      "sha256": "bfe59e3f5c8148af626c8aa8416aa5c874f251127cecd3c3ec86f26dddfb1657"
+    },
+    {
+      "path": "raw/logs/release-build.txt",
+      "bytes": 4599,
+      "sha256": "72223cf04d1354d0f9aa48eeffdd5fa3c18c393598f43a63050988f75d5b48ab"
+    },
+    {
+      "path": "raw/logs/sign-diagnostic-libsqlcipher.dylib.txt",
+      "bytes": 170,
+      "sha256": "1e1511e5db7288b8560400d3a6dc75c73905262ecdc4415405b2f41857cf69b6"
+    },
+    {
+      "path": "raw/logs/sign-diagnostic-macos-storage-check.txt",
+      "bytes": 171,
+      "sha256": "3804d4652e78f91c74ca6fc8ce7124718e9699c6a313dfbaf2b249759ee7358c"
+    },
+    {
+      "path": "raw/logs/sign-info-codex-hook.txt",
+      "bytes": 155,
+      "sha256": "a42e52f30590bd35bdda8d88a5af672f8a57616a3093c8db0e5f75b7cf5f7269"
+    },
+    {
+      "path": "raw/logs/sign-info-codex.txt",
+      "bytes": 150,
+      "sha256": "463a3810a19f035468ea8e305106205c16b596eeb2720b4c03a3eac127991c38"
+    },
+    {
+      "path": "raw/logs/sign-info-prepare-codex.txt",
+      "bytes": 158,
+      "sha256": "a4f39bb5df28cf1f862c3fdbaa473496d1239d76d71f6239c7900dd8236ca9c5"
+    },
+    {
+      "path": "raw/logs/sign-info-runtime-worker.txt",
+      "bytes": 159,
+      "sha256": "c9aa38fede4c75440fd5ba806beda5185b79a6d7eaf1413e7bfa36b56b47892f"
+    },
+    {
+      "path": "raw/logs/sign-info.txt",
+      "bytes": 144,
+      "sha256": "6a71e2a091b50a84c707f0111462775c0798c47c5532c5f3f9179091d8ad347a"
+    },
+    {
+      "path": "raw/manifest.json",
+      "bytes": 2126206,
+      "sha256": "b148ccb8f1179620aac03775ccd0072faba30779bea15b9219e88f115cfd4322"
+    },
+    {
+      "path": "raw/package-run.txt",
+      "bytes": 635,
+      "sha256": "29f7ccc6f8248dfc885e5d396a0b29402f22e4f7d34a25f04f63431b7f54ada8"
+    },
+    {
+      "path": "raw/package-verification.json",
+      "bytes": 2671,
+      "sha256": "47d249a9848c0bad0e44f5e7f194215bd9e7cbe8b40969ee25a596345656721c"
+    },
+    {
+      "path": "raw/supervisor-result.json",
+      "bytes": 2377,
+      "sha256": "09639ea50a4669b85ac82e903a1f4668bddcdb0683582afe5ed112bbd7f0aba2"
+    },
+    {
+      "path": "raw/supervisor-run.txt",
+      "bytes": 160,
+      "sha256": "22dfa113874c6d38709e3d42cee976a33749e74fe231187d653974ad2a530204"
+    },
+    {
+      "path": "raw/supervisor.py",
+      "bytes": 6584,
+      "sha256": "545f0f4c35beb4e5ec8da69c8e1529ab8af2218fa2f1b86c3edfb4c4ec6fbd44"
+    }
+  ]
+}
