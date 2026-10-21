@@ -96,6 +96,10 @@ Future<void> main() async {
     'backup-recover',
     'ui-hold',
     'ui-recover',
+    'ui-key-failure',
+    'ui-port-busy',
+    'ui-duplicate',
+    'ui-quit-opening',
   };
   if (!Platform.isMacOS || !modes.contains(mode)) exit(64);
   final supplied = Platform.environment['INFO_MAC_LIFECYCLE_ROOT'];
@@ -119,7 +123,9 @@ Future<void> main() async {
   }
   stdout.writeln('MAC_LIFECYCLE_ROOT=$canonical');
   final report = File('$canonical/$mode-result.json');
-  final keys = _Keys(missing: mode == 'key-failure');
+  final keys = _Keys(
+    missing: mode == 'key-failure' || mode == 'ui-key-failure',
+  );
   final platform = _Platform();
   ServerSocket? occupied;
   DesktopBootstrap? bootstrap;
@@ -131,21 +137,21 @@ Future<void> main() async {
     final rollback = mode == 'backup-recover'
         ? checkMacBackupRollback(canonical)
         : null;
-    if (mode == 'key-failure') {
+    if (mode == 'key-failure' || mode == 'ui-key-failure') {
       final seed = await EncryptedInformationRepository.open(
         '$canonical/library',
         _Keys(),
       );
       await seed.close();
     }
-    if (mode == 'port-busy') {
+    if (mode == 'port-busy' || mode == 'ui-port-busy') {
       occupied = await ServerSocket.bind(InternetAddress.loopbackIPv4, 47125);
     }
     bootstrap = DesktopBootstrap(
       platform: platform,
       port: occupied?.port ?? 0,
       openLibrary: () async {
-        if (mode == 'quit-opening') {
+        if (mode == 'quit-opening' || mode == 'ui-quit-opening') {
           entered.complete();
           await releaseOpen.future;
         }
@@ -185,6 +191,35 @@ Future<void> main() async {
     // Start explicitly so a real window cannot initiate a second startup.
     final starting = bootstrap.start();
     runApp(DesktopLauncher(bootstrap: bootstrap));
+    if (mode == 'ui-quit-opening') {
+      await entered.future;
+      await report.writeAsString(
+        jsonEncode({'mode': mode, 'startup': 'opening', 'libraryCloses': 0}),
+        flush: true,
+      );
+      stdout.writeln('MAC_LIFECYCLE_READY=$mode');
+      final gate = File('$canonical/release-opening');
+      final limit = DateTime.now().add(const Duration(minutes: 30));
+      while (!await gate.exists()) {
+        _check(DateTime.now().isBefore(limit), 'UI opening deadline');
+        await Future<void>.delayed(const Duration(milliseconds: 25));
+      }
+      _check(
+        platform.nativeEvents.contains('quit') &&
+            !platform.terminateRequested &&
+            closes == 0,
+        'Actual quit did not wait for opening',
+      );
+      await report.writeAsString(
+        jsonEncode({'mode': mode, 'quitWaitedForOpening': true}),
+        flush: true,
+      );
+      releaseOpen.complete();
+      await starting;
+      // The already queued, real native quit performs termination.
+      await Future<void>.delayed(const Duration(minutes: 1));
+      throw StateError('Queued native quit did not terminate');
+    }
     Future<void>? pendingQuit;
     if (mode == 'quit-opening') {
       await entered.future;
@@ -201,25 +236,30 @@ Future<void> main() async {
       await pendingQuit;
       return;
     }
-    if (mode == 'key-failure' || mode == 'duplicate' || mode == 'port-busy') {
+    if (mode == 'key-failure' ||
+        mode == 'duplicate' ||
+        mode == 'port-busy' ||
+        mode == 'ui-key-failure' ||
+        mode == 'ui-duplicate' ||
+        mode == 'ui-port-busy') {
       _check(bootstrap.state == DesktopStartupState.failed, 'Expected refusal');
       _check(
         bootstrap.library == null && !bootstrap.cleanupPending,
         'Failure retained owned resources',
       );
-      if (mode == 'duplicate') {
+      if (mode == 'duplicate' || mode == 'ui-duplicate') {
         _check(
           keys.reads == 0 && keys.creates == 0,
           'Duplicate reached key store before exclusive lock',
         );
       }
-      if (mode == 'key-failure') {
+      if (mode == 'key-failure' || mode == 'ui-key-failure') {
         _check(
           bootstrap.systemKeyUnavailable && keys.creates == 0,
           'Missing key did not fail closed',
         );
       }
-      if (mode == 'port-busy') {
+      if (mode == 'port-busy' || mode == 'ui-port-busy') {
         _check(closes == 1, 'Owned library was not closed');
       }
       await occupied?.close();
@@ -235,6 +275,11 @@ Future<void> main() async {
           'storageFailure': failureCode,
         }),
       );
+      if (mode.startsWith('ui-')) {
+        stdout.writeln('MAC_LIFECYCLE_READY=$mode');
+        await Future<void>.delayed(const Duration(minutes: 30));
+        throw StateError('Actual startup-error UI close deadline');
+      }
       await platform.event(DesktopEvent.quit);
       return;
     }
