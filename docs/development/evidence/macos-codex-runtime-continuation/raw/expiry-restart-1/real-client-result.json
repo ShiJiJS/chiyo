@@ -1,0 +1,5664 @@
+{
+  "results": {
+    "sourceSha256": "94a333e01dcfe6c5cc826442151efe465381d6706cae25c6c472461dc4ba9664",
+    "scope": "Real synthetic Codex lifecycle acceptance against macos-codex-live.py.\n\nRequires existing explicit project/hook trust; never installs or trusts hooks.\nOnly synthetic fixtures. Uses real app-server/model and anonymous CLI stdin.\nOwner approval is a QA file controller, not physical owner UI acceptance.\nPrivate proofs stay in memory. No transcript/authentication files are read.\n",
+    "hookDiscovery": {
+      "data": [
+        {
+          "cwd": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee",
+          "hooks": [
+            {
+              "key": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json:session_start:0:0",
+              "eventName": "sessionStart",
+              "handlerType": "command",
+              "command": "'/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u7a33\u5b9a \u4e2d\u6587 '\"'\"'quote $literal; bundle/info-codex-hook'",
+              "async": false,
+              "matcher": "^(startup|resume|clear|compact|fork)$",
+              "timeoutSec": 15,
+              "statusMessage": null,
+              "additionalContextLimit": 0,
+              "sourcePath": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json",
+              "source": "project",
+              "pluginId": null,
+              "displayOrder": 0,
+              "enabled": true,
+              "isManaged": false,
+              "currentHash": "sha256:0f869a94c72f506b6433e82b5e475ee5f3ab4bb1ee670d50b2a709df769b6708",
+              "trustStatus": "trusted"
+            },
+            {
+              "key": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json:session_end:0:0",
+              "eventName": "sessionEnd",
+              "handlerType": "command",
+              "command": "'/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u7a33\u5b9a \u4e2d\u6587 '\"'\"'quote $literal; bundle/info-codex-hook'",
+              "async": false,
+              "matcher": null,
+              "timeoutSec": 3,
+              "statusMessage": null,
+              "additionalContextLimit": null,
+              "sourcePath": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json",
+              "source": "project",
+              "pluginId": null,
+              "displayOrder": 1,
+              "enabled": true,
+              "isManaged": false,
+              "currentHash": "sha256:03bd283945cea71c863fc14ee26826fd4c1b45eea7b50ebcb92a02719cc276b8",
+              "trustStatus": "trusted"
+            },
+            {
+              "key": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json:subagent_start:0:0",
+              "eventName": "subagentStart",
+              "handlerType": "command",
+              "command": "'/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u7a33\u5b9a \u4e2d\u6587 '\"'\"'quote $literal; bundle/info-codex-hook'",
+              "async": false,
+              "matcher": null,
+              "timeoutSec": 5,
+              "statusMessage": null,
+              "additionalContextLimit": 0,
+              "sourcePath": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json",
+              "source": "project",
+              "pluginId": null,
+              "displayOrder": 2,
+              "enabled": true,
+              "isManaged": false,
+              "currentHash": "sha256:334648132fbd2fff2628e414c60918e002391227bd1b5ef9ed02a63fc4ae04ae",
+              "trustStatus": "trusted"
+            }
+          ],
+          "warnings": [
+            "ignoring additionalContextLimit for SessionEnd hook in /Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json: this event cannot emit additionalContext"
+          ],
+          "errors": []
+        }
+      ]
+    },
+    "model": "gpt-6-astra",
+    "modelSelection": "CLI-advertised default, process only",
+    "expiryThread": "01a15cec-866f-7841-8a7a-69b15408f558",
+    "turns": [
+      {
+        "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+        "status": "completed",
+        "calls": 2
+      },
+      {
+        "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+        "status": "completed",
+        "calls": 3
+      },
+      {
+        "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+        "status": "completed",
+        "calls": 1
+      },
+      {
+        "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+        "status": "completed",
+        "calls": 2
+      },
+      {
+        "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+        "status": "completed",
+        "calls": 3
+      },
+      {
+        "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+        "status": "completed",
+        "calls": 1
+      },
+      {
+        "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+        "status": "completed",
+        "calls": 2
+      },
+      {
+        "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+        "status": "completed",
+        "calls": 3
+      }
+    ],
+    "expiryRequest": "MpYw0jAJxkSmXasZSnl94sPK33jCSrYzekE1X9mKXMs=",
+    "expiryApprovedSnapshot": {
+      "ready": true,
+      "reopened": false,
+      "ssh": {
+        "port": 51360,
+        "cwd": "/Users/jiangxinyi/Library/Containers/org.shijijs.agent-info-manage.qa.codex.3b172232364f48968d4d3ef1359d109f/Data/tmp/aim-mac-codex-live-vWJrNw",
+        "credentialId": "doHCoFtWUjspH_8Eibc05jkwQlfC8IRTMYQZfqWhNtc="
+      },
+      "port": 47125,
+      "cipherVersion": "4.19.0 community",
+      "flutterErrors": 0,
+      "libraryCloses": 0,
+      "textItem": "qI3iQ773g4KUMy0QR8T3UvDtKxDwKWoEv6LUCX-nHx0=",
+      "addressField": "aFo6Bd5-VFA5Pmz2tUNtMMTwj71NNSkHAyxZp6Brgbg=",
+      "usernameField": "H3GnUINvU2GyaZteWWghAydvO_L6bj9O-MQiWQEbrzs=",
+      "fileItem": "R_rjCl_KVCpglL_Pwb1Z2kQRTM7f7AuRjsizUx3SJZI=",
+      "fileField": "h8aJ5eIWTTYcu2ZSJ5e7FOoXgBi6_o-5nrlv8h4ld50=",
+      "requests": [
+        {
+          "id": "wPrSqpQD1nBd0jgiPwGOnMvu66tuV5ltWXAKnRgvy5s=",
+          "state": "revoked",
+          "chatLabel": "Codex 01a15cea-e089-7470-aff6-501370b7ce98",
+          "sessionEnded": true,
+          "fields": [
+            {
+              "itemId": "R_rjCl_KVCpglL_Pwb1Z2kQRTM7f7AuRjsizUx3SJZI=",
+              "fieldId": "h8aJ5eIWTTYcu2ZSJ5e7FOoXgBi6_o-5nrlv8h4ld50="
+            },
+            {
+              "itemId": "qI3iQ773g4KUMy0QR8T3UvDtKxDwKWoEv6LUCX-nHx0=",
+              "fieldId": "H3GnUINvU2GyaZteWWghAydvO_L6bj9O-MQiWQEbrzs="
+            }
+          ],
+          "approvedFields": [
+            {
+              "itemId": "R_rjCl_KVCpglL_Pwb1Z2kQRTM7f7AuRjsizUx3SJZI=",
+              "fieldId": "h8aJ5eIWTTYcu2ZSJ5e7FOoXgBi6_o-5nrlv8h4ld50="
+            }
+          ],
+          "expiresAt": "2026-10-21T13:24:44.425320Z"
+        },
+        {
+          "id": "MpYw0jAJxkSmXasZSnl94sPK33jCSrYzekE1X9mKXMs=",
+          "state": "approved",
+          "chatLabel": "Codex 01a15cec-866f-7841-8a7a-69b15408f558",
+          "sessionEnded": false,
+          "fields": [
+            {
+              "itemId": "qI3iQ773g4KUMy0QR8T3UvDtKxDwKWoEv6LUCX-nHx0=",
+              "fieldId": "aFo6Bd5-VFA5Pmz2tUNtMMTwj71NNSkHAyxZp6Brgbg="
+            }
+          ],
+          "approvedFields": [
+            {
+              "itemId": "qI3iQ773g4KUMy0QR8T3UvDtKxDwKWoEv6LUCX-nHx0=",
+              "fieldId": "aFo6Bd5-VFA5Pmz2tUNtMMTwj71NNSkHAyxZp6Brgbg="
+            }
+          ],
+          "expiresAt": "2026-10-21T13:27:22.833237"
+        }
+      ],
+      "grants": [
+        {
+          "id": "iqQsnxdecr14Th0RybStQRkbFI3jSYSQtFq5zGlC95k=",
+          "requestId": "wPrSqpQD1nBd0jgiPwGOnMvu66tuV5ltWXAKnRgvy5s=",
+          "active": false,
+          "expiresAt": "2026-10-21T13:24:44.425320Z",
+          "events": [
+            "approved",
+            "ended"
+          ]
+        },
+        {
+          "id": "rcOdIO9_gw26O02quSbuo9o9H_OcRtd-7VUuhTzobC8=",
+          "requestId": "MpYw0jAJxkSmXasZSnl94sPK33jCSrYzekE1X9mKXMs=",
+          "active": true,
+          "expiresAt": "2026-10-21T13:27:22.833237",
+          "events": [
+            "approved"
+          ]
+        }
+      ],
+      "accesses": [],
+      "credentialRequests": [
+        {
+          "id": "wPrSqpQD1nBd0jgiPwGOnMvu66tuV5ltWXAKnRgvy5s=",
+          "chatLabel": "Codex 01a15cea-e089-7470-aff6-501370b7ce98",
+          "state": "partially_approved",
+          "grantState": "revoked",
+          "expiresAt": "2026-10-21T05:39:44.425Z",
+          "approved": true
+        }
+      ],
+      "executions": [
+        {
+          "id": "QisFrRaDWpBVySvswunOGrlN3JACElHI8z41tWMPPB0=",
+          "requestId": "wPrSqpQD1nBd0jgiPwGOnMvu66tuV5ltWXAKnRgvy5s=",
+          "operationId": "codex-ssh-true-01",
+          "state": "exited",
+          "exitCode": 0,
+          "errorCode": null,
+          "cleanup": "complete"
+        },
+        {
+          "id": "TnAUjQKNeReF2zMTBkdxmKteKapOuF-X873yVWsxu6g=",
+          "requestId": "wPrSqpQD1nBd0jgiPwGOnMvu66tuV5ltWXAKnRgvy5s=",
+          "operationId": "codex-ssh-false-01",
+          "state": "exited",
+          "exitCode": 1,
+          "errorCode": null,
+          "cleanup": "complete"
+        }
+      ],
+      "deliveries": [
+        {
+          "id": "w0SvF9qMF6lJNNkRjVEmBa_OpZSjPNZvhVbLR01Z71E=",
+          "state": "released",
+          "holdsCopy": false
+        }
+      ]
+    },
+    "naturalElapsedSeconds": 62.02900008301367,
+    "afterExpirySnapshot": {
+      "ready": true,
+      "reopened": false,
+      "ssh": {
+        "port": 51360,
+        "cwd": "/Users/jiangxinyi/Library/Containers/org.shijijs.agent-info-manage.qa.codex.3b172232364f48968d4d3ef1359d109f/Data/tmp/aim-mac-codex-live-vWJrNw",
+        "credentialId": "doHCoFtWUjspH_8Eibc05jkwQlfC8IRTMYQZfqWhNtc="
+      },
+      "port": 47125,
+      "cipherVersion": "4.19.0 community",
+      "flutterErrors": 0,
+      "libraryCloses": 0,
+      "textItem": "qI3iQ773g4KUMy0QR8T3UvDtKxDwKWoEv6LUCX-nHx0=",
+      "addressField": "aFo6Bd5-VFA5Pmz2tUNtMMTwj71NNSkHAyxZp6Brgbg=",
+      "usernameField": "H3GnUINvU2GyaZteWWghAydvO_L6bj9O-MQiWQEbrzs=",
+      "fileItem": "R_rjCl_KVCpglL_Pwb1Z2kQRTM7f7AuRjsizUx3SJZI=",
+      "fileField": "h8aJ5eIWTTYcu2ZSJ5e7FOoXgBi6_o-5nrlv8h4ld50=",
+      "requests": [
+        {
+          "id": "wPrSqpQD1nBd0jgiPwGOnMvu66tuV5ltWXAKnRgvy5s=",
+          "state": "revoked",
+          "chatLabel": "Codex 01a15cea-e089-7470-aff6-501370b7ce98",
+          "sessionEnded": true,
+          "fields": [
+            {
+              "itemId": "R_rjCl_KVCpglL_Pwb1Z2kQRTM7f7AuRjsizUx3SJZI=",
+              "fieldId": "h8aJ5eIWTTYcu2ZSJ5e7FOoXgBi6_o-5nrlv8h4ld50="
+            },
+            {
+              "itemId": "qI3iQ773g4KUMy0QR8T3UvDtKxDwKWoEv6LUCX-nHx0=",
+              "fieldId": "H3GnUINvU2GyaZteWWghAydvO_L6bj9O-MQiWQEbrzs="
+            }
+          ],
+          "approvedFields": [
+            {
+              "itemId": "R_rjCl_KVCpglL_Pwb1Z2kQRTM7f7AuRjsizUx3SJZI=",
+              "fieldId": "h8aJ5eIWTTYcu2ZSJ5e7FOoXgBi6_o-5nrlv8h4ld50="
+            }
+          ],
+          "expiresAt": "2026-10-21T13:24:44.425320Z"
+        },
+        {
+          "id": "MpYw0jAJxkSmXasZSnl94sPK33jCSrYzekE1X9mKXMs=",
+          "state": "expired",
+          "chatLabel": "Codex 01a15cec-866f-7841-8a7a-69b15408f558",
+          "sessionEnded": false,
+          "fields": [
+            {
+              "itemId": "qI3iQ773g4KUMy0QR8T3UvDtKxDwKWoEv6LUCX-nHx0=",
+              "fieldId": "aFo6Bd5-VFA5Pmz2tUNtMMTwj71NNSkHAyxZp6Brgbg="
+            }
+          ],
+          "approvedFields": [
+            {
+              "itemId": "qI3iQ773g4KUMy0QR8T3UvDtKxDwKWoEv6LUCX-nHx0=",
+              "fieldId": "aFo6Bd5-VFA5Pmz2tUNtMMTwj71NNSkHAyxZp6Brgbg="
+            }
+          ],
+          "expiresAt": "2026-10-21T13:27:22.833237"
+        }
+      ],
+      "grants": [
+        {
+          "id": "iqQsnxdecr14Th0RybStQRkbFI3jSYSQtFq5zGlC95k=",
+          "requestId": "wPrSqpQD1nBd0jgiPwGOnMvu66tuV5ltWXAKnRgvy5s=",
+          "active": false,
+          "expiresAt": "2026-10-21T13:24:44.425320Z",
+          "events": [
+            "approved",
+            "ended"
+          ]
+        },
+        {
+          "id": "rcOdIO9_gw26O02quSbuo9o9H_OcRtd-7VUuhTzobC8=",
+          "requestId": "MpYw0jAJxkSmXasZSnl94sPK33jCSrYzekE1X9mKXMs=",
+          "active": false,
+          "expiresAt": "2026-10-21T13:27:22.833237",
+          "events": [
+            "approved",
+            "expired"
+          ]
+        }
+      ],
+      "accesses": [
+        {
+          "id": "E8Aiyqi54UyoLotynIFl9yBGj8hBvMF37EXSbki9CG0=",
+          "outcome": "allowed",
+          "grantId": "rcOdIO9_gw26O02quSbuo9o9H_OcRtd-7VUuhTzobC8=",
+          "fieldId": "aFo6Bd5-VFA5Pmz2tUNtMMTwj71NNSkHAyxZp6Brgbg="
+        }
+      ],
+      "credentialRequests": [
+        {
+          "id": "wPrSqpQD1nBd0jgiPwGOnMvu66tuV5ltWXAKnRgvy5s=",
+          "chatLabel": "Codex 01a15cea-e089-7470-aff6-501370b7ce98",
+          "state": "partially_approved",
+          "grantState": "revoked",
+          "expiresAt": "2026-10-21T05:39:44.425Z",
+          "approved": true
+        }
+      ],
+      "executions": [
+        {
+          "id": "QisFrRaDWpBVySvswunOGrlN3JACElHI8z41tWMPPB0=",
+          "requestId": "wPrSqpQD1nBd0jgiPwGOnMvu66tuV5ltWXAKnRgvy5s=",
+          "operationId": "codex-ssh-true-01",
+          "state": "exited",
+          "exitCode": 0,
+          "errorCode": null,
+          "cleanup": "complete"
+        },
+        {
+          "id": "TnAUjQKNeReF2zMTBkdxmKteKapOuF-X873yVWsxu6g=",
+          "requestId": "wPrSqpQD1nBd0jgiPwGOnMvu66tuV5ltWXAKnRgvy5s=",
+          "operationId": "codex-ssh-false-01",
+          "state": "exited",
+          "exitCode": 1,
+          "errorCode": null,
+          "cleanup": "complete"
+        }
+      ],
+      "deliveries": [
+        {
+          "id": "w0SvF9qMF6lJNNkRjVEmBa_OpZSjPNZvhVbLR01Z71E=",
+          "state": "released",
+          "holdsCopy": false
+        }
+      ]
+    },
+    "restartThread": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+    "restartRequest": "gtNPMwjCdEzs3Xl3P2RQ-AHcj87_3CrYV7rHriMi0BM=",
+    "restartApprovedSnapshot": {
+      "ready": true,
+      "reopened": false,
+      "ssh": {
+        "port": 51360,
+        "cwd": "/Users/jiangxinyi/Library/Containers/org.shijijs.agent-info-manage.qa.codex.3b172232364f48968d4d3ef1359d109f/Data/tmp/aim-mac-codex-live-vWJrNw",
+        "credentialId": "doHCoFtWUjspH_8Eibc05jkwQlfC8IRTMYQZfqWhNtc="
+      },
+      "port": 47125,
+      "cipherVersion": "4.19.0 community",
+      "flutterErrors": 0,
+      "libraryCloses": 0,
+      "textItem": "qI3iQ773g4KUMy0QR8T3UvDtKxDwKWoEv6LUCX-nHx0=",
+      "addressField": "aFo6Bd5-VFA5Pmz2tUNtMMTwj71NNSkHAyxZp6Brgbg=",
+      "usernameField": "H3GnUINvU2GyaZteWWghAydvO_L6bj9O-MQiWQEbrzs=",
+      "fileItem": "R_rjCl_KVCpglL_Pwb1Z2kQRTM7f7AuRjsizUx3SJZI=",
+      "fileField": "h8aJ5eIWTTYcu2ZSJ5e7FOoXgBi6_o-5nrlv8h4ld50=",
+      "requests": [
+        {
+          "id": "wPrSqpQD1nBd0jgiPwGOnMvu66tuV5ltWXAKnRgvy5s=",
+          "state": "revoked",
+          "chatLabel": "Codex 01a15cea-e089-7470-aff6-501370b7ce98",
+          "sessionEnded": true,
+          "fields": [
+            {
+              "itemId": "R_rjCl_KVCpglL_Pwb1Z2kQRTM7f7AuRjsizUx3SJZI=",
+              "fieldId": "h8aJ5eIWTTYcu2ZSJ5e7FOoXgBi6_o-5nrlv8h4ld50="
+            },
+            {
+              "itemId": "qI3iQ773g4KUMy0QR8T3UvDtKxDwKWoEv6LUCX-nHx0=",
+              "fieldId": "H3GnUINvU2GyaZteWWghAydvO_L6bj9O-MQiWQEbrzs="
+            }
+          ],
+          "approvedFields": [
+            {
+              "itemId": "R_rjCl_KVCpglL_Pwb1Z2kQRTM7f7AuRjsizUx3SJZI=",
+              "fieldId": "h8aJ5eIWTTYcu2ZSJ5e7FOoXgBi6_o-5nrlv8h4ld50="
+            }
+          ],
+          "expiresAt": "2026-10-21T13:24:44.425320Z"
+        },
+        {
+          "id": "MpYw0jAJxkSmXasZSnl94sPK33jCSrYzekE1X9mKXMs=",
+          "state": "expired",
+          "chatLabel": "Codex 01a15cec-866f-7841-8a7a-69b15408f558",
+          "sessionEnded": false,
+          "fields": [
+            {
+              "itemId": "qI3iQ773g4KUMy0QR8T3UvDtKxDwKWoEv6LUCX-nHx0=",
+              "fieldId": "aFo6Bd5-VFA5Pmz2tUNtMMTwj71NNSkHAyxZp6Brgbg="
+            }
+          ],
+          "approvedFields": [
+            {
+              "itemId": "qI3iQ773g4KUMy0QR8T3UvDtKxDwKWoEv6LUCX-nHx0=",
+              "fieldId": "aFo6Bd5-VFA5Pmz2tUNtMMTwj71NNSkHAyxZp6Brgbg="
+            }
+          ],
+          "expiresAt": "2026-10-21T13:27:22.833237"
+        },
+        {
+          "id": "gtNPMwjCdEzs3Xl3P2RQ-AHcj87_3CrYV7rHriMi0BM=",
+          "state": "approved",
+          "chatLabel": "Codex 01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+          "sessionEnded": false,
+          "fields": [
+            {
+              "itemId": "qI3iQ773g4KUMy0QR8T3UvDtKxDwKWoEv6LUCX-nHx0=",
+              "fieldId": "aFo6Bd5-VFA5Pmz2tUNtMMTwj71NNSkHAyxZp6Brgbg="
+            }
+          ],
+          "approvedFields": [
+            {
+              "itemId": "qI3iQ773g4KUMy0QR8T3UvDtKxDwKWoEv6LUCX-nHx0=",
+              "fieldId": "aFo6Bd5-VFA5Pmz2tUNtMMTwj71NNSkHAyxZp6Brgbg="
+            }
+          ],
+          "expiresAt": "2026-10-21T14:27:49.506416"
+        }
+      ],
+      "grants": [
+        {
+          "id": "iqQsnxdecr14Th0RybStQRkbFI3jSYSQtFq5zGlC95k=",
+          "requestId": "wPrSqpQD1nBd0jgiPwGOnMvu66tuV5ltWXAKnRgvy5s=",
+          "active": false,
+          "expiresAt": "2026-10-21T13:24:44.425320Z",
+          "events": [
+            "approved",
+            "ended"
+          ]
+        },
+        {
+          "id": "rcOdIO9_gw26O02quSbuo9o9H_OcRtd-7VUuhTzobC8=",
+          "requestId": "MpYw0jAJxkSmXasZSnl94sPK33jCSrYzekE1X9mKXMs=",
+          "active": false,
+          "expiresAt": "2026-10-21T13:27:22.833237",
+          "events": [
+            "approved",
+            "expired"
+          ]
+        },
+        {
+          "id": "NhcRGh0q3WJVmNlIsax-H1ICf3Fkab2UQKpYEw4qcl4=",
+          "requestId": "gtNPMwjCdEzs3Xl3P2RQ-AHcj87_3CrYV7rHriMi0BM=",
+          "active": true,
+          "expiresAt": "2026-10-21T14:27:49.506416",
+          "events": [
+            "approved"
+          ]
+        }
+      ],
+      "accesses": [
+        {
+          "id": "E8Aiyqi54UyoLotynIFl9yBGj8hBvMF37EXSbki9CG0=",
+          "outcome": "allowed",
+          "grantId": "rcOdIO9_gw26O02quSbuo9o9H_OcRtd-7VUuhTzobC8=",
+          "fieldId": "aFo6Bd5-VFA5Pmz2tUNtMMTwj71NNSkHAyxZp6Brgbg="
+        }
+      ],
+      "credentialRequests": [
+        {
+          "id": "wPrSqpQD1nBd0jgiPwGOnMvu66tuV5ltWXAKnRgvy5s=",
+          "chatLabel": "Codex 01a15cea-e089-7470-aff6-501370b7ce98",
+          "state": "partially_approved",
+          "grantState": "revoked",
+          "expiresAt": "2026-10-21T05:39:44.425Z",
+          "approved": true
+        }
+      ],
+      "executions": [
+        {
+          "id": "QisFrRaDWpBVySvswunOGrlN3JACElHI8z41tWMPPB0=",
+          "requestId": "wPrSqpQD1nBd0jgiPwGOnMvu66tuV5ltWXAKnRgvy5s=",
+          "operationId": "codex-ssh-true-01",
+          "state": "exited",
+          "exitCode": 0,
+          "errorCode": null,
+          "cleanup": "complete"
+        },
+        {
+          "id": "TnAUjQKNeReF2zMTBkdxmKteKapOuF-X873yVWsxu6g=",
+          "requestId": "wPrSqpQD1nBd0jgiPwGOnMvu66tuV5ltWXAKnRgvy5s=",
+          "operationId": "codex-ssh-false-01",
+          "state": "exited",
+          "exitCode": 1,
+          "errorCode": null,
+          "cleanup": "complete"
+        }
+      ],
+      "deliveries": [
+        {
+          "id": "w0SvF9qMF6lJNNkRjVEmBa_OpZSjPNZvhVbLR01Z71E=",
+          "state": "released",
+          "holdsCopy": false
+        }
+      ]
+    },
+    "beforeRestartSnapshot": {
+      "ready": true,
+      "reopened": false,
+      "ssh": {
+        "port": 51360,
+        "cwd": "/Users/jiangxinyi/Library/Containers/org.shijijs.agent-info-manage.qa.codex.3b172232364f48968d4d3ef1359d109f/Data/tmp/aim-mac-codex-live-vWJrNw",
+        "credentialId": "doHCoFtWUjspH_8Eibc05jkwQlfC8IRTMYQZfqWhNtc="
+      },
+      "port": 47125,
+      "cipherVersion": "4.19.0 community",
+      "flutterErrors": 0,
+      "libraryCloses": 0,
+      "textItem": "qI3iQ773g4KUMy0QR8T3UvDtKxDwKWoEv6LUCX-nHx0=",
+      "addressField": "aFo6Bd5-VFA5Pmz2tUNtMMTwj71NNSkHAyxZp6Brgbg=",
+      "usernameField": "H3GnUINvU2GyaZteWWghAydvO_L6bj9O-MQiWQEbrzs=",
+      "fileItem": "R_rjCl_KVCpglL_Pwb1Z2kQRTM7f7AuRjsizUx3SJZI=",
+      "fileField": "h8aJ5eIWTTYcu2ZSJ5e7FOoXgBi6_o-5nrlv8h4ld50=",
+      "requests": [
+        {
+          "id": "wPrSqpQD1nBd0jgiPwGOnMvu66tuV5ltWXAKnRgvy5s=",
+          "state": "revoked",
+          "chatLabel": "Codex 01a15cea-e089-7470-aff6-501370b7ce98",
+          "sessionEnded": true,
+          "fields": [
+            {
+              "itemId": "R_rjCl_KVCpglL_Pwb1Z2kQRTM7f7AuRjsizUx3SJZI=",
+              "fieldId": "h8aJ5eIWTTYcu2ZSJ5e7FOoXgBi6_o-5nrlv8h4ld50="
+            },
+            {
+              "itemId": "qI3iQ773g4KUMy0QR8T3UvDtKxDwKWoEv6LUCX-nHx0=",
+              "fieldId": "H3GnUINvU2GyaZteWWghAydvO_L6bj9O-MQiWQEbrzs="
+            }
+          ],
+          "approvedFields": [
+            {
+              "itemId": "R_rjCl_KVCpglL_Pwb1Z2kQRTM7f7AuRjsizUx3SJZI=",
+              "fieldId": "h8aJ5eIWTTYcu2ZSJ5e7FOoXgBi6_o-5nrlv8h4ld50="
+            }
+          ],
+          "expiresAt": "2026-10-21T13:24:44.425320Z"
+        },
+        {
+          "id": "MpYw0jAJxkSmXasZSnl94sPK33jCSrYzekE1X9mKXMs=",
+          "state": "expired",
+          "chatLabel": "Codex 01a15cec-866f-7841-8a7a-69b15408f558",
+          "sessionEnded": false,
+          "fields": [
+            {
+              "itemId": "qI3iQ773g4KUMy0QR8T3UvDtKxDwKWoEv6LUCX-nHx0=",
+              "fieldId": "aFo6Bd5-VFA5Pmz2tUNtMMTwj71NNSkHAyxZp6Brgbg="
+            }
+          ],
+          "approvedFields": [
+            {
+              "itemId": "qI3iQ773g4KUMy0QR8T3UvDtKxDwKWoEv6LUCX-nHx0=",
+              "fieldId": "aFo6Bd5-VFA5Pmz2tUNtMMTwj71NNSkHAyxZp6Brgbg="
+            }
+          ],
+          "expiresAt": "2026-10-21T13:27:22.833237"
+        },
+        {
+          "id": "gtNPMwjCdEzs3Xl3P2RQ-AHcj87_3CrYV7rHriMi0BM=",
+          "state": "approved",
+          "chatLabel": "Codex 01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+          "sessionEnded": false,
+          "fields": [
+            {
+              "itemId": "qI3iQ773g4KUMy0QR8T3UvDtKxDwKWoEv6LUCX-nHx0=",
+              "fieldId": "aFo6Bd5-VFA5Pmz2tUNtMMTwj71NNSkHAyxZp6Brgbg="
+            }
+          ],
+          "approvedFields": [
+            {
+              "itemId": "qI3iQ773g4KUMy0QR8T3UvDtKxDwKWoEv6LUCX-nHx0=",
+              "fieldId": "aFo6Bd5-VFA5Pmz2tUNtMMTwj71NNSkHAyxZp6Brgbg="
+            }
+          ],
+          "expiresAt": "2026-10-21T14:27:49.506416"
+        }
+      ],
+      "grants": [
+        {
+          "id": "iqQsnxdecr14Th0RybStQRkbFI3jSYSQtFq5zGlC95k=",
+          "requestId": "wPrSqpQD1nBd0jgiPwGOnMvu66tuV5ltWXAKnRgvy5s=",
+          "active": false,
+          "expiresAt": "2026-10-21T13:24:44.425320Z",
+          "events": [
+            "approved",
+            "ended"
+          ]
+        },
+        {
+          "id": "rcOdIO9_gw26O02quSbuo9o9H_OcRtd-7VUuhTzobC8=",
+          "requestId": "MpYw0jAJxkSmXasZSnl94sPK33jCSrYzekE1X9mKXMs=",
+          "active": false,
+          "expiresAt": "2026-10-21T13:27:22.833237",
+          "events": [
+            "approved",
+            "expired"
+          ]
+        },
+        {
+          "id": "NhcRGh0q3WJVmNlIsax-H1ICf3Fkab2UQKpYEw4qcl4=",
+          "requestId": "gtNPMwjCdEzs3Xl3P2RQ-AHcj87_3CrYV7rHriMi0BM=",
+          "active": true,
+          "expiresAt": "2026-10-21T14:27:49.506416",
+          "events": [
+            "approved"
+          ]
+        }
+      ],
+      "accesses": [
+        {
+          "id": "E8Aiyqi54UyoLotynIFl9yBGj8hBvMF37EXSbki9CG0=",
+          "outcome": "allowed",
+          "grantId": "rcOdIO9_gw26O02quSbuo9o9H_OcRtd-7VUuhTzobC8=",
+          "fieldId": "aFo6Bd5-VFA5Pmz2tUNtMMTwj71NNSkHAyxZp6Brgbg="
+        },
+        {
+          "id": "E20J3dRVtvJ7FvJIhiF2U2czWURKwmoyx61yZnLSJi4=",
+          "outcome": "allowed",
+          "grantId": "NhcRGh0q3WJVmNlIsax-H1ICf3Fkab2UQKpYEw4qcl4=",
+          "fieldId": "aFo6Bd5-VFA5Pmz2tUNtMMTwj71NNSkHAyxZp6Brgbg="
+        }
+      ],
+      "credentialRequests": [
+        {
+          "id": "wPrSqpQD1nBd0jgiPwGOnMvu66tuV5ltWXAKnRgvy5s=",
+          "chatLabel": "Codex 01a15cea-e089-7470-aff6-501370b7ce98",
+          "state": "partially_approved",
+          "grantState": "revoked",
+          "expiresAt": "2026-10-21T05:39:44.425Z",
+          "approved": true
+        }
+      ],
+      "executions": [
+        {
+          "id": "QisFrRaDWpBVySvswunOGrlN3JACElHI8z41tWMPPB0=",
+          "requestId": "wPrSqpQD1nBd0jgiPwGOnMvu66tuV5ltWXAKnRgvy5s=",
+          "operationId": "codex-ssh-true-01",
+          "state": "exited",
+          "exitCode": 0,
+          "errorCode": null,
+          "cleanup": "complete"
+        },
+        {
+          "id": "TnAUjQKNeReF2zMTBkdxmKteKapOuF-X873yVWsxu6g=",
+          "requestId": "wPrSqpQD1nBd0jgiPwGOnMvu66tuV5ltWXAKnRgvy5s=",
+          "operationId": "codex-ssh-false-01",
+          "state": "exited",
+          "exitCode": 1,
+          "errorCode": null,
+          "cleanup": "complete"
+        }
+      ],
+      "deliveries": [
+        {
+          "id": "w0SvF9qMF6lJNNkRjVEmBa_OpZSjPNZvhVbLR01Z71E=",
+          "state": "released",
+          "holdsCopy": false
+        }
+      ]
+    },
+    "differentApplicationPid": true,
+    "sameLibraryRoot": true,
+    "afterReopenSnapshot": {
+      "ready": true,
+      "reopened": true,
+      "ssh": {
+        "port": 51360,
+        "cwd": "/Users/jiangxinyi/Library/Containers/org.shijijs.agent-info-manage.qa.codex.3b172232364f48968d4d3ef1359d109f/Data/tmp/aim-mac-codex-live-vWJrNw",
+        "credentialId": "doHCoFtWUjspH_8Eibc05jkwQlfC8IRTMYQZfqWhNtc="
+      },
+      "port": 47125,
+      "cipherVersion": "4.19.0 community",
+      "flutterErrors": 0,
+      "libraryCloses": 0,
+      "textItem": "qI3iQ773g4KUMy0QR8T3UvDtKxDwKWoEv6LUCX-nHx0=",
+      "addressField": "aFo6Bd5-VFA5Pmz2tUNtMMTwj71NNSkHAyxZp6Brgbg=",
+      "usernameField": "H3GnUINvU2GyaZteWWghAydvO_L6bj9O-MQiWQEbrzs=",
+      "fileItem": "R_rjCl_KVCpglL_Pwb1Z2kQRTM7f7AuRjsizUx3SJZI=",
+      "fileField": "h8aJ5eIWTTYcu2ZSJ5e7FOoXgBi6_o-5nrlv8h4ld50=",
+      "requests": [],
+      "grants": [
+        {
+          "id": "iqQsnxdecr14Th0RybStQRkbFI3jSYSQtFq5zGlC95k=",
+          "requestId": "wPrSqpQD1nBd0jgiPwGOnMvu66tuV5ltWXAKnRgvy5s=",
+          "active": false,
+          "expiresAt": "2026-10-21T13:24:44.425320Z",
+          "events": [
+            "approved",
+            "ended"
+          ]
+        },
+        {
+          "id": "rcOdIO9_gw26O02quSbuo9o9H_OcRtd-7VUuhTzobC8=",
+          "requestId": "MpYw0jAJxkSmXasZSnl94sPK33jCSrYzekE1X9mKXMs=",
+          "active": false,
+          "expiresAt": "2026-10-21T05:27:22.833237Z",
+          "events": [
+            "approved",
+            "expired"
+          ]
+        },
+        {
+          "id": "NhcRGh0q3WJVmNlIsax-H1ICf3Fkab2UQKpYEw4qcl4=",
+          "requestId": "gtNPMwjCdEzs3Xl3P2RQ-AHcj87_3CrYV7rHriMi0BM=",
+          "active": false,
+          "expiresAt": "2026-10-21T06:27:49.506416Z",
+          "events": [
+            "approved",
+            "applicationClosed"
+          ]
+        }
+      ],
+      "accesses": [
+        {
+          "id": "E8Aiyqi54UyoLotynIFl9yBGj8hBvMF37EXSbki9CG0=",
+          "outcome": "allowed",
+          "grantId": "rcOdIO9_gw26O02quSbuo9o9H_OcRtd-7VUuhTzobC8=",
+          "fieldId": "aFo6Bd5-VFA5Pmz2tUNtMMTwj71NNSkHAyxZp6Brgbg="
+        },
+        {
+          "id": "E20J3dRVtvJ7FvJIhiF2U2czWURKwmoyx61yZnLSJi4=",
+          "outcome": "allowed",
+          "grantId": "NhcRGh0q3WJVmNlIsax-H1ICf3Fkab2UQKpYEw4qcl4=",
+          "fieldId": "aFo6Bd5-VFA5Pmz2tUNtMMTwj71NNSkHAyxZp6Brgbg="
+        }
+      ],
+      "credentialRequests": [
+        {
+          "id": "wPrSqpQD1nBd0jgiPwGOnMvu66tuV5ltWXAKnRgvy5s=",
+          "chatLabel": "Codex 01a15cea-e089-7470-aff6-501370b7ce98",
+          "state": "partially_approved",
+          "grantState": "revoked",
+          "expiresAt": "2026-10-21T05:39:44.425Z",
+          "approved": true
+        }
+      ],
+      "executions": [
+        {
+          "id": "QisFrRaDWpBVySvswunOGrlN3JACElHI8z41tWMPPB0=",
+          "requestId": "wPrSqpQD1nBd0jgiPwGOnMvu66tuV5ltWXAKnRgvy5s=",
+          "operationId": "codex-ssh-true-01",
+          "state": "exited",
+          "exitCode": 0,
+          "errorCode": null,
+          "cleanup": "complete"
+        },
+        {
+          "id": "TnAUjQKNeReF2zMTBkdxmKteKapOuF-X873yVWsxu6g=",
+          "requestId": "wPrSqpQD1nBd0jgiPwGOnMvu66tuV5ltWXAKnRgvy5s=",
+          "operationId": "codex-ssh-false-01",
+          "state": "exited",
+          "exitCode": 1,
+          "errorCode": null,
+          "cleanup": "complete"
+        }
+      ],
+      "deliveries": [
+        {
+          "id": "w0SvF9qMF6lJNNkRjVEmBa_OpZSjPNZvhVbLR01Z71E=",
+          "state": "released",
+          "holdsCopy": false
+        }
+      ]
+    },
+    "freshAfterRestartThread": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+    "freshAfterRestartRequest": "HVprOiGyjwWjPAl0glF9LH68SrA_qeR4PrnzNuMHuRw=",
+    "freshAfterRestartSnapshot": {
+      "ready": true,
+      "reopened": true,
+      "ssh": {
+        "port": 51360,
+        "cwd": "/Users/jiangxinyi/Library/Containers/org.shijijs.agent-info-manage.qa.codex.3b172232364f48968d4d3ef1359d109f/Data/tmp/aim-mac-codex-live-vWJrNw",
+        "credentialId": "doHCoFtWUjspH_8Eibc05jkwQlfC8IRTMYQZfqWhNtc="
+      },
+      "port": 47125,
+      "cipherVersion": "4.19.0 community",
+      "flutterErrors": 0,
+      "libraryCloses": 0,
+      "textItem": "qI3iQ773g4KUMy0QR8T3UvDtKxDwKWoEv6LUCX-nHx0=",
+      "addressField": "aFo6Bd5-VFA5Pmz2tUNtMMTwj71NNSkHAyxZp6Brgbg=",
+      "usernameField": "H3GnUINvU2GyaZteWWghAydvO_L6bj9O-MQiWQEbrzs=",
+      "fileItem": "R_rjCl_KVCpglL_Pwb1Z2kQRTM7f7AuRjsizUx3SJZI=",
+      "fileField": "h8aJ5eIWTTYcu2ZSJ5e7FOoXgBi6_o-5nrlv8h4ld50=",
+      "requests": [
+        {
+          "id": "HVprOiGyjwWjPAl0glF9LH68SrA_qeR4PrnzNuMHuRw=",
+          "state": "approved",
+          "chatLabel": "Codex 01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+          "sessionEnded": false,
+          "fields": [
+            {
+              "itemId": "qI3iQ773g4KUMy0QR8T3UvDtKxDwKWoEv6LUCX-nHx0=",
+              "fieldId": "aFo6Bd5-VFA5Pmz2tUNtMMTwj71NNSkHAyxZp6Brgbg="
+            }
+          ],
+          "approvedFields": [
+            {
+              "itemId": "qI3iQ773g4KUMy0QR8T3UvDtKxDwKWoEv6LUCX-nHx0=",
+              "fieldId": "aFo6Bd5-VFA5Pmz2tUNtMMTwj71NNSkHAyxZp6Brgbg="
+            }
+          ],
+          "expiresAt": "2026-10-21T14:28:48.085149"
+        }
+      ],
+      "grants": [
+        {
+          "id": "iqQsnxdecr14Th0RybStQRkbFI3jSYSQtFq5zGlC95k=",
+          "requestId": "wPrSqpQD1nBd0jgiPwGOnMvu66tuV5ltWXAKnRgvy5s=",
+          "active": false,
+          "expiresAt": "2026-10-21T13:24:44.425320Z",
+          "events": [
+            "approved",
+            "ended"
+          ]
+        },
+        {
+          "id": "rcOdIO9_gw26O02quSbuo9o9H_OcRtd-7VUuhTzobC8=",
+          "requestId": "MpYw0jAJxkSmXasZSnl94sPK33jCSrYzekE1X9mKXMs=",
+          "active": false,
+          "expiresAt": "2026-10-21T05:27:22.833237Z",
+          "events": [
+            "approved",
+            "expired"
+          ]
+        },
+        {
+          "id": "NhcRGh0q3WJVmNlIsax-H1ICf3Fkab2UQKpYEw4qcl4=",
+          "requestId": "gtNPMwjCdEzs3Xl3P2RQ-AHcj87_3CrYV7rHriMi0BM=",
+          "active": false,
+          "expiresAt": "2026-10-21T06:27:49.506416Z",
+          "events": [
+            "approved",
+            "applicationClosed"
+          ]
+        },
+        {
+          "id": "YZcV9a-RBGr3GquYsKafm_NEGyVkHDfH20WGtdHvLho=",
+          "requestId": "HVprOiGyjwWjPAl0glF9LH68SrA_qeR4PrnzNuMHuRw=",
+          "active": true,
+          "expiresAt": "2026-10-21T14:28:48.085149",
+          "events": [
+            "approved"
+          ]
+        }
+      ],
+      "accesses": [
+        {
+          "id": "E8Aiyqi54UyoLotynIFl9yBGj8hBvMF37EXSbki9CG0=",
+          "outcome": "allowed",
+          "grantId": "rcOdIO9_gw26O02quSbuo9o9H_OcRtd-7VUuhTzobC8=",
+          "fieldId": "aFo6Bd5-VFA5Pmz2tUNtMMTwj71NNSkHAyxZp6Brgbg="
+        },
+        {
+          "id": "E20J3dRVtvJ7FvJIhiF2U2czWURKwmoyx61yZnLSJi4=",
+          "outcome": "allowed",
+          "grantId": "NhcRGh0q3WJVmNlIsax-H1ICf3Fkab2UQKpYEw4qcl4=",
+          "fieldId": "aFo6Bd5-VFA5Pmz2tUNtMMTwj71NNSkHAyxZp6Brgbg="
+        },
+        {
+          "id": "7nPROYkuhvAxQymjgGa6MXeSUnhTFHuvtsuaNhwGfQk=",
+          "outcome": "allowed",
+          "grantId": "YZcV9a-RBGr3GquYsKafm_NEGyVkHDfH20WGtdHvLho=",
+          "fieldId": "aFo6Bd5-VFA5Pmz2tUNtMMTwj71NNSkHAyxZp6Brgbg="
+        }
+      ],
+      "credentialRequests": [
+        {
+          "id": "wPrSqpQD1nBd0jgiPwGOnMvu66tuV5ltWXAKnRgvy5s=",
+          "chatLabel": "Codex 01a15cea-e089-7470-aff6-501370b7ce98",
+          "state": "partially_approved",
+          "grantState": "revoked",
+          "expiresAt": "2026-10-21T05:39:44.425Z",
+          "approved": true
+        }
+      ],
+      "executions": [
+        {
+          "id": "QisFrRaDWpBVySvswunOGrlN3JACElHI8z41tWMPPB0=",
+          "requestId": "wPrSqpQD1nBd0jgiPwGOnMvu66tuV5ltWXAKnRgvy5s=",
+          "operationId": "codex-ssh-true-01",
+          "state": "exited",
+          "exitCode": 0,
+          "errorCode": null,
+          "cleanup": "complete"
+        },
+        {
+          "id": "TnAUjQKNeReF2zMTBkdxmKteKapOuF-X873yVWsxu6g=",
+          "requestId": "wPrSqpQD1nBd0jgiPwGOnMvu66tuV5ltWXAKnRgvy5s=",
+          "operationId": "codex-ssh-false-01",
+          "state": "exited",
+          "exitCode": 1,
+          "errorCode": null,
+          "cleanup": "complete"
+        }
+      ],
+      "deliveries": [
+        {
+          "id": "w0SvF9qMF6lJNNkRjVEmBa_OpZSjPNZvhVbLR01Z71E=",
+          "state": "released",
+          "holdsCopy": false
+        }
+      ]
+    },
+    "completeExpiryRestartFlow": true,
+    "serverExitCode": 0,
+    "finalSnapshot": {
+      "ready": true,
+      "reopened": true,
+      "ssh": {
+        "port": 51360,
+        "cwd": "/Users/jiangxinyi/Library/Containers/org.shijijs.agent-info-manage.qa.codex.3b172232364f48968d4d3ef1359d109f/Data/tmp/aim-mac-codex-live-vWJrNw",
+        "credentialId": "doHCoFtWUjspH_8Eibc05jkwQlfC8IRTMYQZfqWhNtc="
+      },
+      "port": 47125,
+      "cipherVersion": "4.19.0 community",
+      "flutterErrors": 0,
+      "libraryCloses": 0,
+      "textItem": "qI3iQ773g4KUMy0QR8T3UvDtKxDwKWoEv6LUCX-nHx0=",
+      "addressField": "aFo6Bd5-VFA5Pmz2tUNtMMTwj71NNSkHAyxZp6Brgbg=",
+      "usernameField": "H3GnUINvU2GyaZteWWghAydvO_L6bj9O-MQiWQEbrzs=",
+      "fileItem": "R_rjCl_KVCpglL_Pwb1Z2kQRTM7f7AuRjsizUx3SJZI=",
+      "fileField": "h8aJ5eIWTTYcu2ZSJ5e7FOoXgBi6_o-5nrlv8h4ld50=",
+      "requests": [
+        {
+          "id": "HVprOiGyjwWjPAl0glF9LH68SrA_qeR4PrnzNuMHuRw=",
+          "state": "revoked",
+          "chatLabel": "Codex 01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+          "sessionEnded": true,
+          "fields": [
+            {
+              "itemId": "qI3iQ773g4KUMy0QR8T3UvDtKxDwKWoEv6LUCX-nHx0=",
+              "fieldId": "aFo6Bd5-VFA5Pmz2tUNtMMTwj71NNSkHAyxZp6Brgbg="
+            }
+          ],
+          "approvedFields": [
+            {
+              "itemId": "qI3iQ773g4KUMy0QR8T3UvDtKxDwKWoEv6LUCX-nHx0=",
+              "fieldId": "aFo6Bd5-VFA5Pmz2tUNtMMTwj71NNSkHAyxZp6Brgbg="
+            }
+          ],
+          "expiresAt": "2026-10-21T14:28:48.085149"
+        }
+      ],
+      "grants": [
+        {
+          "id": "iqQsnxdecr14Th0RybStQRkbFI3jSYSQtFq5zGlC95k=",
+          "requestId": "wPrSqpQD1nBd0jgiPwGOnMvu66tuV5ltWXAKnRgvy5s=",
+          "active": false,
+          "expiresAt": "2026-10-21T13:24:44.425320Z",
+          "events": [
+            "approved",
+            "ended"
+          ]
+        },
+        {
+          "id": "rcOdIO9_gw26O02quSbuo9o9H_OcRtd-7VUuhTzobC8=",
+          "requestId": "MpYw0jAJxkSmXasZSnl94sPK33jCSrYzekE1X9mKXMs=",
+          "active": false,
+          "expiresAt": "2026-10-21T05:27:22.833237Z",
+          "events": [
+            "approved",
+            "expired"
+          ]
+        },
+        {
+          "id": "NhcRGh0q3WJVmNlIsax-H1ICf3Fkab2UQKpYEw4qcl4=",
+          "requestId": "gtNPMwjCdEzs3Xl3P2RQ-AHcj87_3CrYV7rHriMi0BM=",
+          "active": false,
+          "expiresAt": "2026-10-21T06:27:49.506416Z",
+          "events": [
+            "approved",
+            "applicationClosed"
+          ]
+        },
+        {
+          "id": "YZcV9a-RBGr3GquYsKafm_NEGyVkHDfH20WGtdHvLho=",
+          "requestId": "HVprOiGyjwWjPAl0glF9LH68SrA_qeR4PrnzNuMHuRw=",
+          "active": false,
+          "expiresAt": "2026-10-21T14:28:48.085149",
+          "events": [
+            "approved",
+            "ended"
+          ]
+        }
+      ],
+      "accesses": [
+        {
+          "id": "E8Aiyqi54UyoLotynIFl9yBGj8hBvMF37EXSbki9CG0=",
+          "outcome": "allowed",
+          "grantId": "rcOdIO9_gw26O02quSbuo9o9H_OcRtd-7VUuhTzobC8=",
+          "fieldId": "aFo6Bd5-VFA5Pmz2tUNtMMTwj71NNSkHAyxZp6Brgbg="
+        },
+        {
+          "id": "E20J3dRVtvJ7FvJIhiF2U2czWURKwmoyx61yZnLSJi4=",
+          "outcome": "allowed",
+          "grantId": "NhcRGh0q3WJVmNlIsax-H1ICf3Fkab2UQKpYEw4qcl4=",
+          "fieldId": "aFo6Bd5-VFA5Pmz2tUNtMMTwj71NNSkHAyxZp6Brgbg="
+        },
+        {
+          "id": "7nPROYkuhvAxQymjgGa6MXeSUnhTFHuvtsuaNhwGfQk=",
+          "outcome": "allowed",
+          "grantId": "YZcV9a-RBGr3GquYsKafm_NEGyVkHDfH20WGtdHvLho=",
+          "fieldId": "aFo6Bd5-VFA5Pmz2tUNtMMTwj71NNSkHAyxZp6Brgbg="
+        }
+      ],
+      "credentialRequests": [
+        {
+          "id": "wPrSqpQD1nBd0jgiPwGOnMvu66tuV5ltWXAKnRgvy5s=",
+          "chatLabel": "Codex 01a15cea-e089-7470-aff6-501370b7ce98",
+          "state": "partially_approved",
+          "grantState": "revoked",
+          "expiresAt": "2026-10-21T05:39:44.425Z",
+          "approved": true
+        }
+      ],
+      "executions": [
+        {
+          "id": "QisFrRaDWpBVySvswunOGrlN3JACElHI8z41tWMPPB0=",
+          "requestId": "wPrSqpQD1nBd0jgiPwGOnMvu66tuV5ltWXAKnRgvy5s=",
+          "operationId": "codex-ssh-true-01",
+          "state": "exited",
+          "exitCode": 0,
+          "errorCode": null,
+          "cleanup": "complete"
+        },
+        {
+          "id": "TnAUjQKNeReF2zMTBkdxmKteKapOuF-X873yVWsxu6g=",
+          "requestId": "wPrSqpQD1nBd0jgiPwGOnMvu66tuV5ltWXAKnRgvy5s=",
+          "operationId": "codex-ssh-false-01",
+          "state": "exited",
+          "exitCode": 1,
+          "errorCode": null,
+          "cleanup": "complete"
+        }
+      ],
+      "deliveries": [
+        {
+          "id": "w0SvF9qMF6lJNNkRjVEmBa_OpZSjPNZvhVbLR01Z71E=",
+          "state": "released",
+          "holdsCopy": false
+        }
+      ]
+    },
+    "proofReferencesAbsentFromEvidence": true
+  },
+  "events": [
+    {
+      "method": "remoteControl/status/changed",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "account/updated",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "thread/started",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "warning",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": null
+    },
+    {
+      "method": "mcpServer/startupStatus/updated",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": null
+    },
+    {
+      "method": "mcpServer/startupStatus/updated",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": null
+    },
+    {
+      "method": "mcpServer/startupStatus/updated",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": null
+    },
+    {
+      "method": "mcpServer/startupStatus/updated",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": null
+    },
+    {
+      "method": "thread/status/changed",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": null
+    },
+    {
+      "method": "turn/started",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": null
+    },
+    {
+      "method": "mcpServer/startupStatus/updated",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": null
+    },
+    {
+      "method": "mcpServer/startupStatus/updated",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": null
+    },
+    {
+      "method": "mcpServer/startupStatus/updated",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": null
+    },
+    {
+      "method": "mcpServer/startupStatus/updated",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": null
+    },
+    {
+      "method": "hook/started",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c",
+      "id": "session-start:0:/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json",
+      "eventName": "sessionStart",
+      "status": "running",
+      "sourcePath": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json",
+      "durationMs": null
+    },
+    {
+      "method": "hook/completed",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c",
+      "id": "session-start:0:/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json",
+      "eventName": "sessionStart",
+      "status": "completed",
+      "sourcePath": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json",
+      "durationMs": 25
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c",
+      "itemType": "userMessage"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c",
+      "itemType": "userMessage"
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "turn/moderationMetadata",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c",
+      "itemType": "dynamicToolCall"
+    },
+    {
+      "method": "item/tool/call",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c",
+      "itemType": "dynamicToolCall"
+    },
+    {
+      "method": "thread/tokenUsage/updated",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "account/rateLimits/updated",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c",
+      "itemType": "dynamicToolCall"
+    },
+    {
+      "method": "item/tool/call",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "turn/moderationMetadata",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c",
+      "itemType": "dynamicToolCall"
+    },
+    {
+      "method": "thread/tokenUsage/updated",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "account/rateLimits/updated",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "turn/moderationMetadata",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "thread/tokenUsage/updated",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-86e5-7790-b40d-459f1d99230c"
+    },
+    {
+      "method": "account/rateLimits/updated",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "thread/status/changed",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": null
+    },
+    {
+      "method": "turn/completed",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": null
+    },
+    {
+      "method": "thread/status/changed",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": null
+    },
+    {
+      "method": "turn/started",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": null
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef",
+      "itemType": "userMessage"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef",
+      "itemType": "userMessage"
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "turn/moderationMetadata",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef",
+      "itemType": "dynamicToolCall"
+    },
+    {
+      "method": "item/tool/call",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef",
+      "itemType": "dynamicToolCall"
+    },
+    {
+      "method": "thread/tokenUsage/updated",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "account/rateLimits/updated",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef",
+      "itemType": "dynamicToolCall"
+    },
+    {
+      "method": "item/tool/call",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef",
+      "itemType": "dynamicToolCall"
+    },
+    {
+      "method": "turn/moderationMetadata",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "thread/tokenUsage/updated",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "account/rateLimits/updated",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef",
+      "itemType": "dynamicToolCall"
+    },
+    {
+      "method": "item/tool/call",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef",
+      "itemType": "dynamicToolCall"
+    },
+    {
+      "method": "turn/moderationMetadata",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "thread/tokenUsage/updated",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "account/rateLimits/updated",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "turn/moderationMetadata",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "thread/tokenUsage/updated",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15cec-c3a9-75a1-8f17-bcd48cbea0ef"
+    },
+    {
+      "method": "account/rateLimits/updated",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "thread/status/changed",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": null
+    },
+    {
+      "method": "turn/completed",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": null
+    },
+    {
+      "method": "thread/status/changed",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": null
+    },
+    {
+      "method": "turn/started",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": null
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9",
+      "itemType": "userMessage"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9",
+      "itemType": "userMessage"
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9",
+      "itemType": "dynamicToolCall"
+    },
+    {
+      "method": "item/tool/call",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "turn/moderationMetadata",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9",
+      "itemType": "dynamicToolCall"
+    },
+    {
+      "method": "thread/tokenUsage/updated",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "account/rateLimits/updated",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "turn/moderationMetadata",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "thread/tokenUsage/updated",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "01a15ced-b5be-70d1-82c4-075c2a6812e9"
+    },
+    {
+      "method": "account/rateLimits/updated",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "thread/status/changed",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": null
+    },
+    {
+      "method": "turn/completed",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": null
+    },
+    {
+      "method": "thread/started",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "warning",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": null
+    },
+    {
+      "method": "mcpServer/startupStatus/updated",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": null
+    },
+    {
+      "method": "mcpServer/startupStatus/updated",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": null
+    },
+    {
+      "method": "mcpServer/startupStatus/updated",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": null
+    },
+    {
+      "method": "mcpServer/startupStatus/updated",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": null
+    },
+    {
+      "method": "thread/status/changed",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": null
+    },
+    {
+      "method": "turn/started",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": null
+    },
+    {
+      "method": "mcpServer/startupStatus/updated",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": null
+    },
+    {
+      "method": "mcpServer/startupStatus/updated",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": null
+    },
+    {
+      "method": "mcpServer/startupStatus/updated",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": null
+    },
+    {
+      "method": "mcpServer/startupStatus/updated",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": null
+    },
+    {
+      "method": "hook/started",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661",
+      "id": "session-start:0:/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json",
+      "eventName": "sessionStart",
+      "status": "running",
+      "sourcePath": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json",
+      "durationMs": null
+    },
+    {
+      "method": "hook/completed",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661",
+      "id": "session-start:0:/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json",
+      "eventName": "sessionStart",
+      "status": "completed",
+      "sourcePath": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json",
+      "durationMs": 22
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661",
+      "itemType": "userMessage"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661",
+      "itemType": "userMessage"
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661",
+      "itemType": "dynamicToolCall"
+    },
+    {
+      "method": "item/tool/call",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661"
+    },
+    {
+      "method": "turn/moderationMetadata",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661",
+      "itemType": "dynamicToolCall"
+    },
+    {
+      "method": "thread/tokenUsage/updated",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661"
+    },
+    {
+      "method": "account/rateLimits/updated",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "turn/moderationMetadata",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661"
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661",
+      "itemType": "dynamicToolCall"
+    },
+    {
+      "method": "item/tool/call",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661",
+      "itemType": "dynamicToolCall"
+    },
+    {
+      "method": "thread/tokenUsage/updated",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661"
+    },
+    {
+      "method": "account/rateLimits/updated",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661"
+    },
+    {
+      "method": "turn/moderationMetadata",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "thread/tokenUsage/updated",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15ced-d4dd-7aa0-b38d-e48e10fd0661"
+    },
+    {
+      "method": "account/rateLimits/updated",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "thread/status/changed",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": null
+    },
+    {
+      "method": "turn/completed",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": null
+    },
+    {
+      "method": "thread/status/changed",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": null
+    },
+    {
+      "method": "turn/started",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": null
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240",
+      "itemType": "userMessage"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240",
+      "itemType": "userMessage"
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "turn/moderationMetadata",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240",
+      "itemType": "dynamicToolCall"
+    },
+    {
+      "method": "item/tool/call",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240",
+      "itemType": "dynamicToolCall"
+    },
+    {
+      "method": "thread/tokenUsage/updated",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "account/rateLimits/updated",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240",
+      "itemType": "dynamicToolCall"
+    },
+    {
+      "method": "item/tool/call",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "turn/moderationMetadata",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240",
+      "itemType": "dynamicToolCall"
+    },
+    {
+      "method": "thread/tokenUsage/updated",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "account/rateLimits/updated",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240",
+      "itemType": "dynamicToolCall"
+    },
+    {
+      "method": "item/tool/call",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "turn/moderationMetadata",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240",
+      "itemType": "dynamicToolCall"
+    },
+    {
+      "method": "thread/tokenUsage/updated",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "account/rateLimits/updated",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "turn/moderationMetadata",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "thread/tokenUsage/updated",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-1638-7f91-b5bc-955182bf9240"
+    },
+    {
+      "method": "account/rateLimits/updated",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "thread/status/changed",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": null
+    },
+    {
+      "method": "turn/completed",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": null
+    },
+    {
+      "method": "thread/status/changed",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": null
+    },
+    {
+      "method": "turn/started",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": null
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15",
+      "itemType": "userMessage"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15",
+      "itemType": "userMessage"
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15",
+      "itemType": "dynamicToolCall"
+    },
+    {
+      "method": "item/tool/call",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "turn/moderationMetadata",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15",
+      "itemType": "dynamicToolCall"
+    },
+    {
+      "method": "thread/tokenUsage/updated",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "account/rateLimits/updated",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "turn/moderationMetadata",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "thread/tokenUsage/updated",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "01a15cee-847b-7043-998f-fe8180efdf15"
+    },
+    {
+      "method": "account/rateLimits/updated",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "thread/status/changed",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": null
+    },
+    {
+      "method": "turn/completed",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": null
+    },
+    {
+      "method": "thread/started",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "warning",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": null
+    },
+    {
+      "method": "mcpServer/startupStatus/updated",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": null
+    },
+    {
+      "method": "mcpServer/startupStatus/updated",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": null
+    },
+    {
+      "method": "mcpServer/startupStatus/updated",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": null
+    },
+    {
+      "method": "mcpServer/startupStatus/updated",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": null
+    },
+    {
+      "method": "thread/status/changed",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": null
+    },
+    {
+      "method": "turn/started",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": null
+    },
+    {
+      "method": "mcpServer/startupStatus/updated",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": null
+    },
+    {
+      "method": "mcpServer/startupStatus/updated",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": null
+    },
+    {
+      "method": "mcpServer/startupStatus/updated",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": null
+    },
+    {
+      "method": "mcpServer/startupStatus/updated",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": null
+    },
+    {
+      "method": "hook/started",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31",
+      "id": "session-start:0:/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json",
+      "eventName": "sessionStart",
+      "status": "running",
+      "sourcePath": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json",
+      "durationMs": null
+    },
+    {
+      "method": "hook/completed",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31",
+      "id": "session-start:0:/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json",
+      "eventName": "sessionStart",
+      "status": "completed",
+      "sourcePath": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json",
+      "durationMs": 20
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31",
+      "itemType": "userMessage"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31",
+      "itemType": "userMessage"
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31",
+      "itemType": "dynamicToolCall"
+    },
+    {
+      "method": "item/tool/call",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "turn/moderationMetadata",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31",
+      "itemType": "dynamicToolCall"
+    },
+    {
+      "method": "thread/tokenUsage/updated",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "account/rateLimits/updated",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31",
+      "itemType": "dynamicToolCall"
+    },
+    {
+      "method": "item/tool/call",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "turn/moderationMetadata",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31",
+      "itemType": "dynamicToolCall"
+    },
+    {
+      "method": "thread/tokenUsage/updated",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "account/rateLimits/updated",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "turn/moderationMetadata",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "thread/tokenUsage/updated",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-ba74-7732-a811-d18663aced31"
+    },
+    {
+      "method": "account/rateLimits/updated",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "thread/status/changed",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": null
+    },
+    {
+      "method": "turn/completed",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": null
+    },
+    {
+      "method": "thread/status/changed",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": null
+    },
+    {
+      "method": "turn/started",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": null
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-faeb-7da0-8460-100576fc25b1",
+      "itemType": "userMessage"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-faeb-7da0-8460-100576fc25b1",
+      "itemType": "userMessage"
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-faeb-7da0-8460-100576fc25b1",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-faeb-7da0-8460-100576fc25b1"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-faeb-7da0-8460-100576fc25b1"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-faeb-7da0-8460-100576fc25b1"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-faeb-7da0-8460-100576fc25b1"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-faeb-7da0-8460-100576fc25b1"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-faeb-7da0-8460-100576fc25b1"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-faeb-7da0-8460-100576fc25b1"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-faeb-7da0-8460-100576fc25b1"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-faeb-7da0-8460-100576fc25b1"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-faeb-7da0-8460-100576fc25b1"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-faeb-7da0-8460-100576fc25b1"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-faeb-7da0-8460-100576fc25b1"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-faeb-7da0-8460-100576fc25b1"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-faeb-7da0-8460-100576fc25b1"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-faeb-7da0-8460-100576fc25b1"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-faeb-7da0-8460-100576fc25b1"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-faeb-7da0-8460-100576fc25b1"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-faeb-7da0-8460-100576fc25b1"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-faeb-7da0-8460-100576fc25b1"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-faeb-7da0-8460-100576fc25b1"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-faeb-7da0-8460-100576fc25b1"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-faeb-7da0-8460-100576fc25b1"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-faeb-7da0-8460-100576fc25b1"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-faeb-7da0-8460-100576fc25b1",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-faeb-7da0-8460-100576fc25b1",
+      "itemType": "dynamicToolCall"
+    },
+    {
+      "method": "item/tool/call",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-faeb-7da0-8460-100576fc25b1"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-faeb-7da0-8460-100576fc25b1",
+      "itemType": "dynamicToolCall"
+    },
+    {
+      "method": "turn/moderationMetadata",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-faeb-7da0-8460-100576fc25b1"
+    },
+    {
+      "method": "thread/tokenUsage/updated",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-faeb-7da0-8460-100576fc25b1"
+    },
+    {
+      "method": "account/rateLimits/updated",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-faeb-7da0-8460-100576fc25b1",
+      "itemType": "dynamicToolCall"
+    },
+    {
+      "method": "item/tool/call",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-faeb-7da0-8460-100576fc25b1"
+    },
+    {
+      "method": "turn/moderationMetadata",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-faeb-7da0-8460-100576fc25b1"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-faeb-7da0-8460-100576fc25b1",
+      "itemType": "dynamicToolCall"
+    },
+    {
+      "method": "thread/tokenUsage/updated",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-faeb-7da0-8460-100576fc25b1"
+    },
+    {
+      "method": "account/rateLimits/updated",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-faeb-7da0-8460-100576fc25b1",
+      "itemType": "dynamicToolCall"
+    },
+    {
+      "method": "item/tool/call",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-faeb-7da0-8460-100576fc25b1"
+    },
+    {
+      "method": "turn/moderationMetadata",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-faeb-7da0-8460-100576fc25b1"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-faeb-7da0-8460-100576fc25b1",
+      "itemType": "dynamicToolCall"
+    },
+    {
+      "method": "thread/tokenUsage/updated",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-faeb-7da0-8460-100576fc25b1"
+    },
+    {
+      "method": "account/rateLimits/updated",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "item/started",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-faeb-7da0-8460-100576fc25b1",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-faeb-7da0-8460-100576fc25b1"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-faeb-7da0-8460-100576fc25b1"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-faeb-7da0-8460-100576fc25b1"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-faeb-7da0-8460-100576fc25b1"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-faeb-7da0-8460-100576fc25b1"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-faeb-7da0-8460-100576fc25b1"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-faeb-7da0-8460-100576fc25b1"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-faeb-7da0-8460-100576fc25b1"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-faeb-7da0-8460-100576fc25b1"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-faeb-7da0-8460-100576fc25b1"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-faeb-7da0-8460-100576fc25b1"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-faeb-7da0-8460-100576fc25b1"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-faeb-7da0-8460-100576fc25b1"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-faeb-7da0-8460-100576fc25b1"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-faeb-7da0-8460-100576fc25b1"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-faeb-7da0-8460-100576fc25b1"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-faeb-7da0-8460-100576fc25b1"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-faeb-7da0-8460-100576fc25b1"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-faeb-7da0-8460-100576fc25b1"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-faeb-7da0-8460-100576fc25b1"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-faeb-7da0-8460-100576fc25b1"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-faeb-7da0-8460-100576fc25b1"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-faeb-7da0-8460-100576fc25b1"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-faeb-7da0-8460-100576fc25b1"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-faeb-7da0-8460-100576fc25b1"
+    },
+    {
+      "method": "item/agentMessage/delta",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-faeb-7da0-8460-100576fc25b1"
+    },
+    {
+      "method": "turn/moderationMetadata",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-faeb-7da0-8460-100576fc25b1"
+    },
+    {
+      "method": "item/completed",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-faeb-7da0-8460-100576fc25b1",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "thread/tokenUsage/updated",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "01a15cee-faeb-7da0-8460-100576fc25b1"
+    },
+    {
+      "method": "account/rateLimits/updated",
+      "threadId": null,
+      "turnId": null
+    },
+    {
+      "method": "thread/status/changed",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": null
+    },
+    {
+      "method": "turn/completed",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": null
+    },
+    {
+      "method": "hook/started",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "auto-compact-0",
+      "id": "session-end:1:/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json",
+      "eventName": "sessionEnd",
+      "status": "running",
+      "sourcePath": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json",
+      "durationMs": null
+    },
+    {
+      "method": "hook/completed",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": "auto-compact-0",
+      "id": "session-end:1:/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json",
+      "eventName": "sessionEnd",
+      "status": "completed",
+      "sourcePath": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json",
+      "durationMs": 22
+    },
+    {
+      "method": "thread/status/changed",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": null
+    },
+    {
+      "method": "thread/archived",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "turnId": null
+    },
+    {
+      "method": "hook/started",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "auto-compact-0",
+      "id": "session-end:1:/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json",
+      "eventName": "sessionEnd",
+      "status": "running",
+      "sourcePath": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json",
+      "durationMs": null
+    },
+    {
+      "method": "hook/completed",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": "auto-compact-0",
+      "id": "session-end:1:/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json",
+      "eventName": "sessionEnd",
+      "status": "completed",
+      "sourcePath": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json",
+      "durationMs": 21
+    },
+    {
+      "method": "thread/status/changed",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": null
+    },
+    {
+      "method": "thread/archived",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "turnId": null
+    },
+    {
+      "method": "hook/started",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "auto-compact-0",
+      "id": "session-end:1:/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json",
+      "eventName": "sessionEnd",
+      "status": "running",
+      "sourcePath": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json",
+      "durationMs": null
+    },
+    {
+      "method": "hook/completed",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": "auto-compact-0",
+      "id": "session-end:1:/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json",
+      "eventName": "sessionEnd",
+      "status": "completed",
+      "sourcePath": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/\u72ec\u7acb Mac Codex \u9a8c\u6536\u9879\u76ee/.codex/hooks.json",
+      "durationMs": 19
+    },
+    {
+      "method": "thread/status/changed",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "turnId": null
+    }
+  ],
+  "calls": [
+    {
+      "origin": "model",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "command": "catalog",
+      "requestId": null,
+      "fieldId": null,
+      "operationId": null,
+      "exitCode": 0,
+      "response": {
+        "status": "ok",
+        "items": [
+          {
+            "id": "qI3iQ773g4KUMy0QR8T3UvDtKxDwKWoEv6LUCX-nHx0=",
+            "version": 1,
+            "name": "Synthetic Mac server",
+            "description": "Codex acceptance only",
+            "directoryId": null,
+            "tagIds": [],
+            "fields": [
+              {
+                "id": "aFo6Bd5-VFA5Pmz2tUNtMMTwj71NNSkHAyxZp6Brgbg=",
+                "name": "Address",
+                "description": "May be approved",
+                "kind": "structured"
+              },
+              {
+                "id": "H3GnUINvU2GyaZteWWghAydvO_L6bj9O-MQiWQEbrzs=",
+                "name": "Username",
+                "description": "Remain unapproved",
+                "kind": "structured"
+              }
+            ]
+          },
+          {
+            "id": "R_rjCl_KVCpglL_Pwb1Z2kQRTM7f7AuRjsizUx3SJZI=",
+            "version": 1,
+            "name": "Synthetic ordinary file",
+            "description": "Codex acceptance only",
+            "directoryId": null,
+            "tagIds": [],
+            "fields": [
+              {
+                "id": "h8aJ5eIWTTYcu2ZSJ5e7FOoXgBi6_o-5nrlv8h4ld50=",
+                "name": "Attachment",
+                "description": "Synthetic bytes",
+                "kind": "file"
+              }
+            ]
+          }
+        ],
+        "total": 2,
+        "offset": 0,
+        "nextOffset": null
+      },
+      "separateStdin": true,
+      "argvCount": 1,
+      "argvInspectedBeforeStdin": true
+    },
+    {
+      "origin": "model",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "command": "request",
+      "requestId": null,
+      "fieldId": null,
+      "operationId": null,
+      "exitCode": 0,
+      "response": {
+        "status": "pending",
+        "requestId": "MpYw0jAJxkSmXasZSnl94sPK33jCSrYzekE1X9mKXMs=",
+        "createdAt": "2026-10-21T05:26:18.764233Z",
+        "requestExpiresAt": "2026-10-21T05:56:18.764233Z"
+      },
+      "separateStdin": true,
+      "argvCount": 1,
+      "argvInspectedBeforeStdin": true
+    },
+    {
+      "origin": "model",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "command": "status",
+      "requestId": "MpYw0jAJxkSmXasZSnl94sPK33jCSrYzekE1X9mKXMs=",
+      "fieldId": null,
+      "operationId": null,
+      "exitCode": 0,
+      "response": {
+        "status": "approved",
+        "requestId": "MpYw0jAJxkSmXasZSnl94sPK33jCSrYzekE1X9mKXMs=",
+        "createdAt": "2026-10-21T05:26:18.764233Z",
+        "requestExpiresAt": "2026-10-21T05:56:18.764233Z"
+      },
+      "separateStdin": true,
+      "argvCount": 1,
+      "argvInspectedBeforeStdin": true
+    },
+    {
+      "origin": "model",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "command": "claim",
+      "requestId": "MpYw0jAJxkSmXasZSnl94sPK33jCSrYzekE1X9mKXMs=",
+      "fieldId": null,
+      "operationId": null,
+      "exitCode": 0,
+      "response": {
+        "status": "ok",
+        "fields": [
+          {
+            "itemId": "qI3iQ773g4KUMy0QR8T3UvDtKxDwKWoEv6LUCX-nHx0=",
+            "fieldId": "aFo6Bd5-VFA5Pmz2tUNtMMTwj71NNSkHAyxZp6Brgbg="
+          }
+        ],
+        "expiresAt": "2026-10-21T05:27:22.833237Z",
+        "scopeNotice": "Only these item and field identities are approved. New items and fields require a new request."
+      },
+      "separateStdin": true,
+      "argvCount": 1,
+      "argvInspectedBeforeStdin": true
+    },
+    {
+      "origin": "model",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "command": "read",
+      "requestId": "MpYw0jAJxkSmXasZSnl94sPK33jCSrYzekE1X9mKXMs=",
+      "fieldId": "aFo6Bd5-VFA5Pmz2tUNtMMTwj71NNSkHAyxZp6Brgbg=",
+      "operationId": null,
+      "exitCode": 0,
+      "response": {
+        "status": "ok",
+        "value": "synthetic-host.invalid"
+      },
+      "separateStdin": true,
+      "argvCount": 1,
+      "argvInspectedBeforeStdin": true
+    },
+    {
+      "origin": "model",
+      "threadId": "01a15cec-866f-7841-8a7a-69b15408f558",
+      "command": "read",
+      "requestId": "MpYw0jAJxkSmXasZSnl94sPK33jCSrYzekE1X9mKXMs=",
+      "fieldId": "aFo6Bd5-VFA5Pmz2tUNtMMTwj71NNSkHAyxZp6Brgbg=",
+      "operationId": null,
+      "exitCode": 0,
+      "response": {
+        "status": "unauthorized"
+      },
+      "separateStdin": true,
+      "argvCount": 1,
+      "argvInspectedBeforeStdin": true
+    },
+    {
+      "origin": "model",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "command": "catalog",
+      "requestId": null,
+      "fieldId": null,
+      "operationId": null,
+      "exitCode": 0,
+      "response": {
+        "status": "ok",
+        "items": [
+          {
+            "id": "qI3iQ773g4KUMy0QR8T3UvDtKxDwKWoEv6LUCX-nHx0=",
+            "version": 1,
+            "name": "Synthetic Mac server",
+            "description": "Codex acceptance only",
+            "directoryId": null,
+            "tagIds": [],
+            "fields": [
+              {
+                "id": "aFo6Bd5-VFA5Pmz2tUNtMMTwj71NNSkHAyxZp6Brgbg=",
+                "name": "Address",
+                "description": "May be approved",
+                "kind": "structured"
+              },
+              {
+                "id": "H3GnUINvU2GyaZteWWghAydvO_L6bj9O-MQiWQEbrzs=",
+                "name": "Username",
+                "description": "Remain unapproved",
+                "kind": "structured"
+              }
+            ]
+          },
+          {
+            "id": "R_rjCl_KVCpglL_Pwb1Z2kQRTM7f7AuRjsizUx3SJZI=",
+            "version": 1,
+            "name": "Synthetic ordinary file",
+            "description": "Codex acceptance only",
+            "directoryId": null,
+            "tagIds": [],
+            "fields": [
+              {
+                "id": "h8aJ5eIWTTYcu2ZSJ5e7FOoXgBi6_o-5nrlv8h4ld50=",
+                "name": "Attachment",
+                "description": "Synthetic bytes",
+                "kind": "file"
+              }
+            ]
+          }
+        ],
+        "total": 2,
+        "offset": 0,
+        "nextOffset": null
+      },
+      "separateStdin": true,
+      "argvCount": 1,
+      "argvInspectedBeforeStdin": true
+    },
+    {
+      "origin": "model",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "command": "request",
+      "requestId": null,
+      "fieldId": null,
+      "operationId": null,
+      "exitCode": 0,
+      "response": {
+        "status": "pending",
+        "requestId": "gtNPMwjCdEzs3Xl3P2RQ-AHcj87_3CrYV7rHriMi0BM=",
+        "createdAt": "2026-10-21T05:27:46.053974Z",
+        "requestExpiresAt": "2026-10-21T05:57:46.053974Z"
+      },
+      "separateStdin": true,
+      "argvCount": 1,
+      "argvInspectedBeforeStdin": true
+    },
+    {
+      "origin": "model",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "command": "status",
+      "requestId": "gtNPMwjCdEzs3Xl3P2RQ-AHcj87_3CrYV7rHriMi0BM=",
+      "fieldId": null,
+      "operationId": null,
+      "exitCode": 0,
+      "response": {
+        "status": "approved",
+        "requestId": "gtNPMwjCdEzs3Xl3P2RQ-AHcj87_3CrYV7rHriMi0BM=",
+        "createdAt": "2026-10-21T05:27:46.053974Z",
+        "requestExpiresAt": "2026-10-21T05:57:46.053974Z"
+      },
+      "separateStdin": true,
+      "argvCount": 1,
+      "argvInspectedBeforeStdin": true
+    },
+    {
+      "origin": "model",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "command": "claim",
+      "requestId": "gtNPMwjCdEzs3Xl3P2RQ-AHcj87_3CrYV7rHriMi0BM=",
+      "fieldId": null,
+      "operationId": null,
+      "exitCode": 0,
+      "response": {
+        "status": "ok",
+        "fields": [
+          {
+            "itemId": "qI3iQ773g4KUMy0QR8T3UvDtKxDwKWoEv6LUCX-nHx0=",
+            "fieldId": "aFo6Bd5-VFA5Pmz2tUNtMMTwj71NNSkHAyxZp6Brgbg="
+          }
+        ],
+        "expiresAt": "2026-10-21T06:27:49.506416Z",
+        "scopeNotice": "Only these item and field identities are approved. New items and fields require a new request."
+      },
+      "separateStdin": true,
+      "argvCount": 1,
+      "argvInspectedBeforeStdin": true
+    },
+    {
+      "origin": "model",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "command": "read",
+      "requestId": "gtNPMwjCdEzs3Xl3P2RQ-AHcj87_3CrYV7rHriMi0BM=",
+      "fieldId": "aFo6Bd5-VFA5Pmz2tUNtMMTwj71NNSkHAyxZp6Brgbg=",
+      "operationId": null,
+      "exitCode": 0,
+      "response": {
+        "status": "ok",
+        "value": "synthetic-host.invalid"
+      },
+      "separateStdin": true,
+      "argvCount": 1,
+      "argvInspectedBeforeStdin": true
+    },
+    {
+      "origin": "model",
+      "threadId": "01a15ced-d47b-75d2-9760-7f2f82bd85a1",
+      "command": "read",
+      "requestId": "gtNPMwjCdEzs3Xl3P2RQ-AHcj87_3CrYV7rHriMi0BM=",
+      "fieldId": "aFo6Bd5-VFA5Pmz2tUNtMMTwj71NNSkHAyxZp6Brgbg=",
+      "operationId": null,
+      "exitCode": 0,
+      "response": {
+        "status": "unauthorized"
+      },
+      "separateStdin": true,
+      "argvCount": 1,
+      "argvInspectedBeforeStdin": true
+    },
+    {
+      "origin": "model",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "command": "catalog",
+      "requestId": null,
+      "fieldId": null,
+      "operationId": null,
+      "exitCode": 0,
+      "response": {
+        "status": "ok",
+        "items": [
+          {
+            "id": "qI3iQ773g4KUMy0QR8T3UvDtKxDwKWoEv6LUCX-nHx0=",
+            "version": 1,
+            "name": "Synthetic Mac server",
+            "description": "Codex acceptance only",
+            "directoryId": null,
+            "tagIds": [],
+            "fields": [
+              {
+                "id": "aFo6Bd5-VFA5Pmz2tUNtMMTwj71NNSkHAyxZp6Brgbg=",
+                "name": "Address",
+                "description": "May be approved",
+                "kind": "structured"
+              },
+              {
+                "id": "H3GnUINvU2GyaZteWWghAydvO_L6bj9O-MQiWQEbrzs=",
+                "name": "Username",
+                "description": "Remain unapproved",
+                "kind": "structured"
+              }
+            ]
+          },
+          {
+            "id": "R_rjCl_KVCpglL_Pwb1Z2kQRTM7f7AuRjsizUx3SJZI=",
+            "version": 1,
+            "name": "Synthetic ordinary file",
+            "description": "Codex acceptance only",
+            "directoryId": null,
+            "tagIds": [],
+            "fields": [
+              {
+                "id": "h8aJ5eIWTTYcu2ZSJ5e7FOoXgBi6_o-5nrlv8h4ld50=",
+                "name": "Attachment",
+                "description": "Synthetic bytes",
+                "kind": "file"
+              }
+            ]
+          }
+        ],
+        "total": 2,
+        "offset": 0,
+        "nextOffset": null
+      },
+      "separateStdin": true,
+      "argvCount": 1,
+      "argvInspectedBeforeStdin": true
+    },
+    {
+      "origin": "model",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "command": "request",
+      "requestId": null,
+      "fieldId": null,
+      "operationId": null,
+      "exitCode": 0,
+      "response": {
+        "status": "pending",
+        "requestId": "HVprOiGyjwWjPAl0glF9LH68SrA_qeR4PrnzNuMHuRw=",
+        "createdAt": "2026-10-21T05:28:43.128101Z",
+        "requestExpiresAt": "2026-10-21T05:58:43.128101Z"
+      },
+      "separateStdin": true,
+      "argvCount": 1,
+      "argvInspectedBeforeStdin": true
+    },
+    {
+      "origin": "model",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "command": "status",
+      "requestId": "HVprOiGyjwWjPAl0glF9LH68SrA_qeR4PrnzNuMHuRw=",
+      "fieldId": null,
+      "operationId": null,
+      "exitCode": 0,
+      "response": {
+        "status": "approved",
+        "requestId": "HVprOiGyjwWjPAl0glF9LH68SrA_qeR4PrnzNuMHuRw=",
+        "createdAt": "2026-10-21T05:28:43.128101Z",
+        "requestExpiresAt": "2026-10-21T05:58:43.128101Z"
+      },
+      "separateStdin": true,
+      "argvCount": 1,
+      "argvInspectedBeforeStdin": true
+    },
+    {
+      "origin": "model",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "command": "claim",
+      "requestId": "HVprOiGyjwWjPAl0glF9LH68SrA_qeR4PrnzNuMHuRw=",
+      "fieldId": null,
+      "operationId": null,
+      "exitCode": 0,
+      "response": {
+        "status": "ok",
+        "fields": [
+          {
+            "itemId": "qI3iQ773g4KUMy0QR8T3UvDtKxDwKWoEv6LUCX-nHx0=",
+            "fieldId": "aFo6Bd5-VFA5Pmz2tUNtMMTwj71NNSkHAyxZp6Brgbg="
+          }
+        ],
+        "expiresAt": "2026-10-21T06:28:48.085149Z",
+        "scopeNotice": "Only these item and field identities are approved. New items and fields require a new request."
+      },
+      "separateStdin": true,
+      "argvCount": 1,
+      "argvInspectedBeforeStdin": true
+    },
+    {
+      "origin": "model",
+      "threadId": "01a15cee-b388-7e22-b5a3-e8d4acc6a640",
+      "command": "read",
+      "requestId": "HVprOiGyjwWjPAl0glF9LH68SrA_qeR4PrnzNuMHuRw=",
+      "fieldId": "aFo6Bd5-VFA5Pmz2tUNtMMTwj71NNSkHAyxZp6Brgbg=",
+      "operationId": null,
+      "exitCode": 0,
+      "response": {
+        "status": "ok",
+        "value": "synthetic-host.invalid"
+      },
+      "separateStdin": true,
+      "argvCount": 1,
+      "argvInspectedBeforeStdin": true
+    }
+  ]
+}

@@ -1,0 +1,185 @@
+{
+  "date": "2026-10-21",
+  "branch": "codex/macos-adaptation",
+  "hostSourceCommit": "da226aab9fc1f6fa766cb363d54307059bd65d09",
+  "clientSourceCommit": "b4efda8149a509fdfe840031e32aad26b66e730b",
+  "client": "codex-cli 0.158.0",
+  "model": "gpt-6-astra, CLI-advertised default in test requests only",
+  "priorEvidence": "../macos-codex-real-client/verification.json",
+  "acceptanceCriteria": [
+    true,
+    true,
+    true,
+    false,
+    true,
+    true
+  ],
+  "passedComponents": [
+    "actual Codex one SSH grant, two independent real signed-worker/OpenSSH operations, exits 0/1 and cleanup complete",
+    "operation-status and exact run-use replay share original execution; loopback SSH independently recorded exactly two commands",
+    "credential revocation blocks a new operation, no additional execution",
+    "same credential request partially approves ordinary Attachment and excludes Username; actual 1024-byte consumer and release",
+    "real 60-second ordinary grant naturally expires after 62.029 seconds; model read refused without renewal",
+    "actual application normal exit/reopen: new PID, same SQLCipher root and item IDs, two prior execution receipts retained",
+    "old model association cannot read after app restart; a fresh real chat/new approval can read retained content",
+    "actual authenticated WebSocket close/reconnect and formal thread/resume: retained association reads, same expiry and server PID",
+    "remove only the exact synthetic proof: actual model stops on association_unavailable and requests explicit reconnect; no locator search",
+    "all trusted project file hashes and unrelated global configuration unchanged; no focus-fill capability advertised"
+  ],
+  "remaining": [
+    "user-arranged real main/subagent delegation, SubagentStart, Stop/Interrupt/child-end and root-end propagation"
+  ],
+  "scope": "Synthetic data, fixed QA key, fixture owner controller; real Release sandbox/worker/SQLCipher/OpenSSH and real Codex model/hooks. Same-machine tool file consumer. Does not replace Keychain, physical panels/approval, final installed package, GH/AWS external directory permissions, Windows regression or cross-platform migration.",
+  "transportCloseObservation": "This CLI does not return a WebSocket close frame for the client close. First successful business run emitted reader tracebacks; the final rerun records ConnectionClosedError as typed close receipts. Real server remains alive for reconnect; final server exit 0.",
+  "secretAudit": "Exact synthetic SSH private key, escaped/encoded key and proof locators absent from public ledgers; temporary transport token absent from stderr and removed. No raw model or hook context, private controller, database, credential file or user authentication material published.",
+  "shutdown": {
+    "applicationEpochs": 2,
+    "applicationExitCodes": [
+      0,
+      0
+    ],
+    "ownedFixtureRemoved": true,
+    "ownedSshKeysRemoved": true,
+    "activeGrants": 0,
+    "availableCredentialGrants": 0,
+    "heldCopies": 0,
+    "flutterErrors": 0
+  },
+  "originalFiles": [
+    {
+      "path": "raw/credential-1/executed-script.py",
+      "bytes": 23146,
+      "sha256": "5d8d9f18a982bd3c36ae02b44c18a7ea15fab4938f59cd7a723081409c0375c8"
+    },
+    {
+      "path": "raw/credential-1/real-client-result.json",
+      "bytes": 129288,
+      "sha256": "a1fc02638b127b5f570113bafa1c59a950e5352f4024ce772f8b6c2d651b1f90"
+    },
+    {
+      "path": "raw/expiry-restart-1/executed-script.py",
+      "bytes": 28163,
+      "sha256": "94a333e01dcfe6c5cc826442151efe465381d6706cae25c6c472461dc4ba9664"
+    },
+    {
+      "path": "raw/expiry-restart-1/real-client-result.json",
+      "bytes": 191686,
+      "sha256": "7562a59376f08c1f6655af054ce73e1ad0f3bc8a73d5966fe199aa3448e6f30b"
+    },
+    {
+      "path": "raw/host-logs/analyze.txt",
+      "bytes": 96,
+      "sha256": "9fa0da1a20f841cad4e437c7c35bf9bf3c9be73a61c061d6a741635715fd1357"
+    },
+    {
+      "path": "raw/host-logs/app-reopen-2.txt",
+      "bytes": 323,
+      "sha256": "5070096507cd54279bc4e5f2f2113b4745fdd464da3895a5b94231aaf40e089b"
+    },
+    {
+      "path": "raw/host-logs/app.txt",
+      "bytes": 995,
+      "sha256": "a58c9fedfa0b72a254a03f88393835e50b0ab38a749bd09ba97dc8c000646bd5"
+    },
+    {
+      "path": "raw/host-logs/build-release.txt",
+      "bytes": 5036,
+      "sha256": "62e6b021097fd9e1c83caa90549a6efe3bc1e168c135d502fd1ba73b697fbe8e"
+    },
+    {
+      "path": "raw/host-logs/entitlements.txt",
+      "bytes": 752,
+      "sha256": "4e803a34a253dcb949e11e0e6a03c958bca55d1ace62def866adf6a7c1f4037b"
+    },
+    {
+      "path": "raw/host-logs/pub-desktop.txt",
+      "bytes": 318,
+      "sha256": "ca68f707c22164511fc2b3f9af97ed7bd46538b1d334d9c806a6a59a556a6e05"
+    },
+    {
+      "path": "raw/host-logs/pub-info_cli.txt",
+      "bytes": 258,
+      "sha256": "a24779315fffab73870dfc7b15b56246a95b601b3432e434b43cd223bf752a6a"
+    },
+    {
+      "path": "raw/host-logs/pub-info_core.txt",
+      "bytes": 258,
+      "sha256": "a24779315fffab73870dfc7b15b56246a95b601b3432e434b43cd223bf752a6a"
+    },
+    {
+      "path": "raw/host-logs/pub-info_storage.txt",
+      "bytes": 258,
+      "sha256": "a24779315fffab73870dfc7b15b56246a95b601b3432e434b43cd223bf752a6a"
+    },
+    {
+      "path": "raw/host-logs/signature.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/host-result.json",
+      "bytes": 100168,
+      "sha256": "26657a76dc77e963f92f8503c93cf5124adcea63731bb81a6484e1e7b7918cb2"
+    },
+    {
+      "path": "raw/host-sources/apps/desktop/integration_test/macos_codex_live.dart",
+      "bytes": 11184,
+      "sha256": "de4587501343596eb0edf1cc3d6172af41db4cb30ac69e0c6e405ee7706b0152"
+    },
+    {
+      "path": "raw/host-sources/scripts/qa/macos-codex-live.py",
+      "bytes": 8852,
+      "sha256": "f62cf7332c0497d46dfb6467823700ae11d9dd48a88acdfd4a70dc144d44dc66"
+    },
+    {
+      "path": "raw/host-sources/scripts/qa/macos-ssh-fixture.py",
+      "bytes": 4700,
+      "sha256": "44df658433b41ae1c660688945f00a629277d29619d47401da7da26219c64cba"
+    },
+    {
+      "path": "raw/native-ui-observation.json",
+      "bytes": 182,
+      "sha256": "de6b68fc4adbf18bd8052be060c7648e513ebd1854a872b6c279a64a98822a7a"
+    },
+    {
+      "path": "raw/production-source-equivalence.json",
+      "bytes": 510,
+      "sha256": "470b83ed5d08b8d218629c2c860eef22e6e39cb43710ca77265171a9fdb8e533"
+    },
+    {
+      "path": "raw/qa-dependencies.json",
+      "bytes": 93,
+      "sha256": "7c4e4f3889ac70e08065b99f1cb23d0e37e187a98103b952bc77af126f507a01"
+    },
+    {
+      "path": "raw/synthetic-secret-audit.json",
+      "bytes": 351,
+      "sha256": "2e523d23161b6fd206e776c86667df47db058e38b18a7f090fe1278f7ed3c6f2"
+    },
+    {
+      "path": "raw/transport-resume-1/executed-script.py",
+      "bytes": 34313,
+      "sha256": "78c794290ae9053a4d45e6fbb6c09e76c25aa3d976c794497e8094970eefd54c"
+    },
+    {
+      "path": "raw/transport-resume-1/real-client-result.json",
+      "bytes": 111469,
+      "sha256": "2f4e576736685ba8cf4c31e7f17ce9dbde979a2ebe978986052745dcba47f0fc"
+    },
+    {
+      "path": "raw/transport-resume-2/executed-script.py",
+      "bytes": 34426,
+      "sha256": "92f605c020a2039f80b6bb3a5b74fda39de219c7d7401473e694df611d1b8fda"
+    },
+    {
+      "path": "raw/transport-resume-2/real-client-result.json",
+      "bytes": 118263,
+      "sha256": "6b29c587354049f2abc978b08f7d9c2094d85f3b61c687f8efb511c5c309cb0e"
+    },
+    {
+      "path": "raw/user-config-continuation.json",
+      "bytes": 1029,
+      "sha256": "da5067605ec2545bd4c3dbbc22190e52fa3cb83b38292f0da29f8755952f20d1"
+    }
+  ]
+}
