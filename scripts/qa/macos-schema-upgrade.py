@@ -18,6 +18,7 @@ import zipfile
 ROOT = Path(__file__).resolve().parents[2]
 LEGACY = 'dbb94ac'
 HELPER = ROOT / 'scripts/qa/macos-schema-upgrade-probe.dart'
+BASELINE_CHECK = ROOT / 'scripts/qa/macos-schema-baseline-check.dart'
 
 
 def main():
@@ -113,6 +114,24 @@ def main():
         assert refused['storageFailure']=='unsupported_schema' and hashlib.sha256(db.read_bytes()).hexdigest()==before
         reopened=probe(new,'current-reader-reopens');assert reopened['schema']==21 and reopened['integrity']=='ok'
         assert migrated['oldAuthorityRefused'] and reopened['oldAuthorityRefused']
+        # Each deliberate rejected read records one audit event. Reopening must
+        # preserve that completed history, rather than compare to pre-test rows.
+        assert reopened['beforeVerificationOperations']['tables'] == migrated['tables']
+        for result in [migrated, reopened]:
+            before_tables = result['beforeVerificationOperations']['tables']
+            assert result['tables']['access_records']['rows'] == before_tables['access_records']['rows'] + 1
+            assert all(fact == result['tables'][name] for name, fact in before_tables.items()
+                       if name != 'access_records')
+        current_package = out/'current-source/packages/info_storage'
+        shutil.copyfile(BASELINE_CHECK, current_package/BASELINE_CHECK.name)
+        check=run('signed-host-baseline-validator',
+                  [str(ROOT/'scripts/dev-macos.sh'), 'dart', 'run', BASELINE_CHECK.name],
+                  current_package, stdin=json.dumps({'original':original,'migrated':migrated,'reopened':reopened}).encode())
+        check_facts=json.loads(check.stdout)
+        assert all([check_facts['migrationAndReopenBaselinesAccepted'],
+                    check_facts['oldBaselineAndMissingTableRefused']])
+        state['snapshotValidator'] = check_facts
+        state['baselineCheckSha256'] = hashlib.sha256(BASELINE_CHECK.read_bytes()).hexdigest()
         assert all(hashlib.sha256(p.read_bytes()).hexdigest()==digest for p,digest in protected.items())
         assert (fixture/'.qa-owner').read_text()==owner and not fixture.is_symlink()
         shutil.rmtree(fixture)

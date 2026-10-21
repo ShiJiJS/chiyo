@@ -1,0 +1,3 @@
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+MAC_SCHEMA_PHASE={"state":"failed","pending":false,"attempts":0,"canRequestAccess":true}
+MAC_SCHEMA_PHASE={"state":"starting","pending":true,"attempts":1,"canRequestAccess":false}
