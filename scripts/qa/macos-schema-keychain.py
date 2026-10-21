@@ -40,12 +40,16 @@ def main():
     modes = parser.add_mutually_exclusive_group()
     modes.add_argument('--prepare-only', action='store_true')
     modes.add_argument('--resume', action='store_true')
+    modes.add_argument('--archive-prepared', action='store_true',
+                       help='Archive prepared unlaunched apps and remove generated app/cache duplicates')
+    modes.add_argument('--verify-prepared', action='store_true',
+                       help='Restore and verify exact prepared apps, then clean them without launch or Keychain access')
     args = parser.parse_args()
     if os.uname().sysname != 'Darwin':
         parser.error('macOS required')
     out = args.output.resolve()
     out.relative_to(ROOT / 'build/macos-adaptation')
-    if not args.resume:
+    if not (args.resume or args.archive_prepared or args.verify_prepared):
         out.mkdir(parents=True, exist_ok=False)
         (out / 'logs').mkdir()
         private = {'owner': uuid.uuid4().hex,
@@ -75,6 +79,19 @@ def main():
         save()
         print(label, result.returncode, flush=True)
         assert result.returncode == 0, label
+
+    def remove_generated():
+        state['removedGeneratedArtifacts'] = []
+        for label in apps:
+            if apps[label].exists():
+                subprocess.run(['/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister',
+                                '-u', str(apps[label])], capture_output=True, timeout=30)
+            for tail in ['apps/desktop/build', 'apps/desktop/.dart_tool/flutter_build', 'apps/desktop/.dart_tool/hooks_runner']:
+                path = out / label / tail
+                if path.exists():
+                    assert not path.is_symlink() and path.resolve().is_relative_to(out)
+                    shutil.rmtree(path)
+                    state['removedGeneratedArtifacts'].append(label + '/' + tail)
 
     def launch(label, mode, case):
         nonlocal root
@@ -121,7 +138,7 @@ def main():
         return facts
 
     try:
-        if not args.resume:
+        if not (args.resume or args.archive_prepared or args.verify_prepared):
             names = subprocess.check_output(['git', 'ls-files', '-z', 'apps/desktop', 'packages',
                                              'scripts', 'third_party', 'integrations'], cwd=ROOT).decode().split('\0')
             names = sorted(set(filter(None, names)) | {OLD_ENTRY, NEW_ENTRY, HELPER, DRIVER, INJECTION})
@@ -152,6 +169,8 @@ def main():
                         exact = subprocess.check_output(['git', 'show', LEGACY + ':' + name], cwd=ROOT)
                         assert (source / name).read_bytes() == exact
                         legacy_inputs[name] = digest(source / name)
+                    inputs = {name: value for name, value in inputs.items()
+                              if not name.startswith(('packages/info_core/', 'packages/info_storage/'))}
                     inputs.update(legacy_inputs)
                 (source / '.tools').symlink_to(ROOT / '.tools', target_is_directory=True)
                 (source / '.cache').mkdir()
@@ -202,13 +221,38 @@ def main():
             assert state['sources']['legacy']['binarySha256'] != state['sources']['current']['binarySha256']
             state['prepared'] = True
             save()
-        if args.prepare_only:
+        if args.prepare_only or args.archive_prepared:
+            state['preparedAppArchives'] = {}
+            for label, app in apps.items():
+                assert digest(app / 'Contents/MacOS/info_desktop') == state['sources'][label]['binarySha256']
+                archive = out / ('prepared-' + label + '.zip')
+                assert not archive.exists(), 'Do not overwrite an existing prepared archive'
+                run('archive-prepared-' + label, ['/usr/bin/ditto', '-c', '-k', '--sequesterRsrc', '--keepParent', str(app), str(archive)])
+                state['preparedAppArchives'][label] = {'file': archive.name, 'sha256': digest(archive), 'bytes': archive.stat().st_size}
+            state['preparationArchiveDriverSha256'] = digest(ROOT / DRIVER)
+            remove_generated()
+            state['preparedWithoutLaunchingOrKeychainAccess'] = True
+            save()
             print('MAC_SCHEMA_PREPARED_NO_LAUNCH', flush=True)
             return
+        state['resumeDriverSha256'] = digest(ROOT / DRIVER)
+        for label, app in apps.items():
+            if not app.exists():
+                archive = state['preparedAppArchives'][label]
+                path = out / archive['file']
+                assert path.name == 'prepared-' + label + '.zip' and digest(path) == archive['sha256']
+                app.parent.mkdir(parents=True, exist_ok=True)
+                run('restore-prepared-' + label, ['/usr/bin/ditto', '-x', '-k', str(path), str(app.parent)])
         for label in apps:
+            assert digest(apps[label] / 'Contents/MacOS/info_desktop') == state['sources'][label]['binarySha256']
             for name, expected in state['sources'][label]['productionInputs'].items():
                 assert digest(out / label / name) == state['sources'][label]['copyModifications'].get(name, expected), name
             run(label + '-resume-signature', ['/usr/bin/codesign', '--verify', '--deep', '--strict', str(apps[label])])
+        if args.verify_prepared:
+            state['archivesRestoredAndSignaturesVerifiedWithoutLaunch'] = True
+            save()
+            print('MAC_SCHEMA_PREPARED_ARCHIVES_VERIFIED_NO_LAUNCH', flush=True)
+            return
         seeded = launch('legacy', 'seed', 'legacy-real-keychain-schema20')
         assert seeded['fixtureResult']['schema'] == 20
         upgraded = launch('current', 'upgrade', 'current-owner-allowed-migration')
@@ -224,7 +268,9 @@ def main():
         state['failure'] = str(error)
         raise
     finally:
-        if not args.prepare_only or not state.get('prepared'):
+        if args.verify_prepared:
+            remove_generated()
+        if not (args.prepare_only or args.archive_prepared or args.verify_prepared) or not state.get('prepared'):
             for process in processes:
                 if process.poll() is None:
                     process.kill()
@@ -241,17 +287,7 @@ def main():
                 shutil.rmtree(root)
                 state['ownedFixtureRemoved'] = True
             if root is None or state.get('ownedKeyCleanupVerified'):
-                state['removedGeneratedArtifacts'] = []
-                for label in apps:
-                    if apps[label].exists():
-                        subprocess.run(['/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister',
-                                        '-u', str(apps[label])], capture_output=True, timeout=30)
-                    for tail in ['apps/desktop/build', 'apps/desktop/.dart_tool/flutter_build', 'apps/desktop/.dart_tool/hooks_runner']:
-                        path = out / label / tail
-                        if path.exists():
-                            assert not path.is_symlink() and path.resolve().is_relative_to(out)
-                            shutil.rmtree(path)
-                            state['removedGeneratedArtifacts'].append(label + '/' + tail)
+                remove_generated()
                 (out / 'private-controller.json').unlink(missing_ok=True)
         save()
     print(json.dumps({'complete': state['complete'], 'cases': len(state['cases'])}), flush=True)
