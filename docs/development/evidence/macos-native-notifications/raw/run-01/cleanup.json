@@ -1,0 +1,9 @@
+{
+  "scope": "Project-owned generated test apps; toolchains and kept package excluded",
+  "apps": [
+    "build/macos-adaptation/issue50-package-10/verify/中文 空格 路径/AgentInfoManage/app/info_desktop.app"
+  ],
+  "dSYM": [],
+  "qaControllerExists": false,
+  "qaRootExists": false
+}

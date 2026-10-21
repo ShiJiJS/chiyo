@@ -1,0 +1,5 @@
+Targeted system AX entries; unrelated app preferences omitted.
+			54 文本 通知中心会在屏幕右上角显示通知。你可在菜单栏中点按时钟显示或隐藏。
+				56 弹出式按钮 显示预览, Value: 解锁时, ID: show-previews
+				60 弹出式按钮 当镜像或共享屏幕时, Value: 关闭通知, ID: allow-when-sharing
+				91 按钮 Mac 通知合成验收、声音和桌面

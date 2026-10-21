@@ -1,0 +1,17 @@
+The following is a diff from the previous accessibility tree for Window: "Mac 通知合成验收" with ~ and + representing changed and added elements, respectively. Removed elements are summarized by ID range.
+Removed element IDs: 37
+~			32 text (settable) 通知
+~			33 text (settable) 新申请到来时及时提醒，通知中不包含信息内容。
+~			34 text (settable) 访问申请通知
+~			35 text (settable) 新申请到来时发送系统提醒。关闭提醒后，仍可在访问审批中查看请求。
+~			36 switch (settable, boolean) 访问申请通知, Value: on
++				37 button (settable)
+~			38 text (settable) 应用提醒已开启
+~			39 text (settable) 系统通知权限、勿扰模式和专注助手也会影响提醒是否显示。
++			40 button (settable) 发送测试通知
++			41 text (settable) 尚未开启系统提醒
++			42 text (settable) 通知状态与本机服务状态分别检查，通知不可用时仍可处理访问申请。
++			43 button (settable) 开启或检查提醒
++			44 text (settable) 提醒只包含请求概况
++			45 text (settable) 不在系统通知中展示字段值、密钥或其他信息内容。打开应用后再查看申请范围。
+The focused UI element is 1 container Mac 通知合成验收
