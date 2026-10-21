@@ -29,6 +29,8 @@ def digest(path):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('output', type=Path)
+    parser.add_argument('--startup', action='store_true',
+                        help='Actual UI close of startup errors and quit during opening')
     args = parser.parse_args()
     if os.uname().sysname != 'Darwin':
         parser.error('macOS required')
@@ -109,17 +111,64 @@ def main():
             connection.settimeout(1)
             return connection.connect_ex(('127.0.0.1', port)) == 0
 
-    def collect(process, root, mode, label):
-        code = process.wait(timeout=1800 if mode == 'ui-hold' else 60)
+    def collect(process, root, mode, label, closes=1):
+        code = process.wait(timeout=1800 if mode != 'ui-recover' else 60)
         facts = read_report(root, mode)
         assert code == 0 and facts and not facts.get('failed'), 'Actual lifecycle failed'
-        assert facts.get('nativeTerminationRequested') and facts['libraryCloses'] == 1
-        assert not reachable(facts['port']), 'Endpoint remained after process exit'
-        record = {'label': label, 'exitCode': code, 'portClosedAfterExit': True, **facts}
+        assert facts.get('nativeTerminationRequested') and facts['libraryCloses'] == closes
+        if 'port' in facts:
+            assert not reachable(facts['port']), 'Endpoint remained after process exit'
+        record = {'label': label, 'exitCode': code,
+                  'portClosedAfterExit': True if 'port' in facts else None, **facts}
         state['cases'].append(record)
         (output / (label + '.json')).write_text(json.dumps(record, indent=2) + '\n')
         save()
         return facts
+
+    def expose(process, root, label, ready):
+        fd = os.open(controller, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
+        with os.fdopen(fd, 'w') as stream:
+            json.dump({'owner': owner, 'root': str(root), 'app': str(app),
+                       'pid': process.pid, 'case': label, 'port': ready.get('port')}, stream)
+        state['waitingForActualUI'] = label
+        save()
+        print('MAC_LIFECYCLE_UI_READY=' + label, flush=True)
+
+    def startup_cases():
+        for mode in ['ui-key-failure', 'ui-port-busy', 'ui-quit-opening']:
+            process, root = launch(mode, mode)
+            ready = wait_for(lambda: read_report(root, mode), process)
+            assert ready['startup'] == ('opening' if mode == 'ui-quit-opening' else 'failed')
+            expose(process, root, mode, ready)
+            facts = collect(process, root, mode, mode, closes=0 if mode == 'ui-key-failure' else 1)
+            assert ('quit' if mode == 'ui-quit-opening' else 'closeWindow') in facts['nativeEvents']
+            if mode == 'ui-key-failure':
+                assert facts['keyCreates'] == 0
+            if mode == 'ui-quit-opening':
+                assert facts['quitWaitedForOpening']
+            controller.unlink()
+            print('MAC_LIFECYCLE_UI_PASSED=' + mode, flush=True)
+        holder, root = launch('ui-hold', 'duplicate-holder')
+        ready = wait_for(lambda: read_report(root, 'ui-hold'), holder)
+        assert ready['startup'] == 'ready' and reachable(ready['port'])
+        before = digest(root / 'library/library.db')
+        duplicate, _ = launch('ui-duplicate', 'duplicate-error', root)
+        failure = wait_for(lambda: read_report(root, 'ui-duplicate'), duplicate)
+        assert failure['startup'] == 'failed' and failure['keyReads'] == 0
+        expose(duplicate, root, 'ui-duplicate', failure)
+        facts = collect(duplicate, root, 'ui-duplicate', 'duplicate-error', closes=0)
+        assert 'closeWindow' in facts['nativeEvents']
+        assert digest(root / 'library/library.db') == before
+        assert holder.poll() is None and reachable(ready['port'])
+        state['duplicatePreservedHolderDatabaseAndService'] = True
+        controller.unlink()
+        expose(holder, root, 'duplicate-holder-quit', ready)
+        facts = collect(holder, root, 'ui-hold', 'duplicate-holder-quit')
+        assert 'quit' in facts['nativeEvents']
+        controller.unlink()
+        recovered, _ = launch('ui-recover', 'duplicate-holder-reopen', root)
+        facts = collect(recovered, root, 'ui-recover', 'duplicate-holder-reopen')
+        assert facts['oldAuthorityRefused'] and facts['endedGrantAndAllowedReadPreserved']
 
     try:
         names = subprocess.check_output(['git', 'ls-files', '-z', 'apps/desktop', 'packages', 'scripts', 'integrations', 'third_party'], cwd=ROOT).decode().split('\0')
@@ -151,17 +200,13 @@ def main():
         run('signature', ['/usr/bin/codesign', '--verify', '--deep', '--strict', str(app)])
         binary = app / 'Contents/MacOS/info_desktop'
         state['binarySha256'] = digest(binary)
-        for label in ['close-reopen-menu-quit', 'command-q', 'settings-quit']:
+        if args.startup:
+            startup_cases()
+        for label in ([] if args.startup else ['close-reopen-menu-quit', 'command-q', 'settings-quit']):
             process, root = launch('ui-hold', label)
             ready = wait_for(lambda: read_report(root, 'ui-hold'), process)
             assert ready.get('startup') == 'ready' and ready['tray'] and reachable(ready['port'])
-            fd = os.open(controller, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
-            with os.fdopen(fd, 'w') as stream:
-                json.dump({'owner': owner, 'root': str(root), 'app': str(app),
-                           'pid': process.pid, 'case': label, 'port': ready['port']}, stream)
-            state['waitingForActualUI'] = label
-            save()
-            print('MAC_LIFECYCLE_UI_READY=' + label, flush=True)
+            expose(process, root, label, ready)
             facts = collect(process, root, 'ui-hold', label)
             if label == 'close-reopen-menu-quit':
                 assert facts['nativeEvents'].count('closeWindow') >= 2
