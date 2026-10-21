@@ -7,6 +7,8 @@ render captures, not proof of physical panels, keyboard input or visible CUA.
 import argparse
 import hashlib
 import json
+import os
+import signal
 from pathlib import Path
 import queue
 import re
@@ -23,6 +25,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('output', type=Path)
     parser.add_argument('--delivery', type=Path, required=True)
+    parser.add_argument('--large', action='store_true', help='502 history records and one 200-field scope')
     args = parser.parse_args()
     output = args.output.resolve(); output.relative_to(ROOT / 'build')
     output.mkdir(parents=True, exist_ok=False)
@@ -33,7 +36,7 @@ def main():
     assert hashlib.sha256(cli.read_bytes()).hexdigest() == entry['sha256']
     owner = uuid.uuid4().hex
     state = {'complete': False, 'productSource': manifest['sourceCommit'],
-             'cliSha256': entry['sha256'], 'phases': []}
+             'cliSha256': entry['sha256'], 'phases': [], 'large': args.large}
     state['appBaseCommit'] = subprocess.check_output(
         ['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip()
     state['worktreeStatus'] = subprocess.check_output(
@@ -53,7 +56,7 @@ def main():
     processes = []
     directory = None
     log = output / 'flutter.txt'
-    def wait_for(predicate, timeout=120):
+    def wait_for(predicate, timeout=300 if args.large else 120):
         deadline = time.monotonic() + timeout
         while time.monotonic() < deadline:
             value = predicate()
@@ -83,7 +86,8 @@ def main():
         with log.open('wb') as stream:
             flutter = subprocess.Popen([str(ROOT/'scripts/dev-macos.sh'), 'flutter', 'test', '--no-pub',
                 'integration_test/macos_removed_scope_native_test.dart', '-d', 'macos',
-                f'--dart-define=MAC_QA_OWNER={owner}'], cwd=ROOT/'apps/desktop', stdout=stream, stderr=subprocess.STDOUT)
+                f'--dart-define=MAC_QA_OWNER={owner}',
+                f'--dart-define=MAC_QA_LARGE={str(args.large).lower()}'], cwd=ROOT/'apps/desktop', stdout=stream, stderr=subprocess.STDOUT, start_new_session=True)
         def locate():
             matches = re.findall(r'MAC_SCOPE_ROOT=([^\r\n]+)', log.read_text(errors='replace'))
             if not matches: return None
@@ -96,7 +100,7 @@ def main():
         current_port = None
         old_request = fresh_request = None
         item = old_field = remaining = fresh_field = None
-        for index in range(1, 10):
+        for index in range(1, 12 if args.large else 10):
             phase = wait_for(lambda: read_phase(index))
             name = phase['phase']; reply = {'ok': True}; checks = []
             if phase['port'] != current_port:
@@ -129,8 +133,11 @@ def main():
                 elif name == 'reapproved':
                     command({'command':'claim','requestId':fresh_request})
                     read(fresh_field,fresh_request,'synthetic-private-address')
-            elif name in ['all-removed','archived','repository-reopened']:
+            elif name in ['all-removed','archived','repository-reopened','scale-reopened']:
                 read(old_field,old_request); read(remaining,old_request); read(fresh_field,fresh_request)
+            elif name == 'large-approved':
+                assert phase['fieldCount'] == phase['approvedCount'] == 200
+                checks.append({'controlledNativeUiApprovalFields':200})
             elif name == 'complete':
                 result=json.loads((directory/'result.json').read_text()); assert result['complete']
                 state['nativeResult']=result
@@ -157,6 +164,15 @@ def main():
         if 'flutter' in locals() and flutter.poll() is None:
             flutter.terminate(); flutter.wait(timeout=15)
             state['forcedFailedRunCleanup']=True;state['complete']=False
+        if 'flutter' in locals():
+            try:
+                os.killpg(flutter.pid, 0)
+            except ProcessLookupError:
+                state['flutterProcessGroupRemaining'] = False
+            else:
+                os.killpg(flutter.pid, signal.SIGTERM)
+                state['forcedProcessGroupCleanup'] = True
+                state['complete'] = False
         if directory:
             assert not directory.is_symlink() and (directory/'.qa-owner').read_text()==owner
             for p in directory.iterdir():

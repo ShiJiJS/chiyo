@@ -333,23 +333,105 @@ void main() {
         [old.fieldId],
       );
       await tester.pumpWidget(const SizedBox());
+      const large = bool.fromEnvironment('MAC_QA_LARGE');
+      const fieldCount = large ? 200 : 24;
+      const extraRecords = large ? 500 : 17;
+      const recordCount = extraRecords + 2;
+      final pageCount = (recordCount / 8).ceil();
+      final seedTime = Stopwatch()..start();
       final many = await service.owner.createInformation(
         '多字段分页资料',
         '受控合成资料',
         List.generate(
-          24,
+          fieldCount,
           (i) => FieldInput('字段${i + 1}', '公开说明', 'synthetic-private-$i'),
         ),
       );
       final pageSession = service.agent.openSession('分页与长记录合成会话');
-      for (var i = 0; i < 17; i++) {
-        final refs = many.fields.map((f) => FieldRef(many.id, f.id)).toList();
+      String? largeRequest;
+      for (var i = 0; i < extraRecords; i++) {
+        final refs = (large && i != 8 ? many.fields.take(1) : many.fields)
+            .map((f) => FieldRef(many.id, f.id))
+            .toList();
         final request = service.agent.request(
           pageSession,
-          '分页合成${i.toString().padLeft(2, '0')}：${List.filled(8, '核对多字段申请的完整范围与历史记录').join('；')}',
+          '分页合成${i.toString().padLeft(large ? 3 : 2, '0')}：${List.filled(large ? 80 : 8, '核对多字段申请的完整范围与历史记录').join('；')}',
           refs,
         );
-        service.owner.approve(request.id, refs);
+        if (large && i == 8) {
+          largeRequest = request.id;
+        } else {
+          service.owner.approve(request.id, refs);
+        }
+      }
+      seedTime.stop();
+      if (large) {
+        tester.view.physicalSize = const Size(1280, 800);
+        tester.platformDispatcher.textScaleFactorTestValue = 2;
+        await tester.pumpWidget(
+          RepaintBoundary(
+            key: boundary,
+            child: InformationApp(
+              key: UniqueKey(),
+              service: service,
+              port: server.port,
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        await tester.enterText(
+          find.byKey(const ValueKey('inbox-search')),
+          '分页合成008',
+        );
+        await tester.pumpAndSettle();
+        final last = find.byKey(ValueKey('field-${many.fields.last.id}'));
+        final document = tester
+            .widget<ListView>(
+              find.byKey(PageStorageKey('detail-$largeRequest')),
+            )
+            .controller!;
+        for (
+          var attempt = 0;
+          attempt < 20 && last.evaluate().isEmpty;
+          attempt++
+        ) {
+          document.jumpTo(document.position.maxScrollExtent);
+          await tester.pumpAndSettle();
+        }
+        await tester.ensureVisible(last);
+        await tester.pumpAndSettle();
+        expect(last.hitTestable(), findsOneWidget);
+        final approval = find.byKey(const ValueKey('approve-selection'));
+        await tester.ensureVisible(approval);
+        await tester.pumpAndSettle();
+        expect(approval.hitTestable(), findsOneWidget);
+        expect(tester.takeException(), isNull);
+        final image =
+            await (boundary.currentContext!.findRenderObject()
+                    as RenderRepaintBoundary)
+                .toImage(pixelRatio: 1);
+        final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
+        await File(
+          '${root.path}/large-request-200-percent.png',
+        ).writeAsBytes(bytes!.buffer.asUint8List());
+        image.dispose();
+        captures.add({
+          'file': 'large-request-200-percent.png',
+          'width': 1280,
+          'height': 800,
+          'textScale': 2.0,
+        });
+        await tester.tap(approval);
+        await tester.pumpAndSettle();
+        final decided = service.owner.requests.firstWhere(
+          (r) => r.id == largeRequest,
+        );
+        expect(decided.approvedFields, hasLength(fieldCount));
+        await exchange('large-approved', {
+          'fieldCount': fieldCount,
+          'approvedCount': decided.approvedFields!.length,
+        });
+        await tester.pumpWidget(const SizedBox());
       }
       await service.owner.setColorTheme(DesktopColorTheme.green);
       for (final view in [
@@ -371,29 +453,29 @@ void main() {
         await tester.pumpAndSettle();
         await tester.tap(find.byKey(const ValueKey('nav-3')));
         await tester.pumpAndSettle();
-        expect(find.text('19 条记录'), findsOneWidget);
-        for (final page in [1, 2, 3]) {
-          expect(find.text('$page / 3'), findsOneWidget);
+        expect(find.text('$recordCount 条记录'), findsOneWidget);
+        for (var page = 1; page <= pageCount; page++) {
+          expect(find.text('$page / $pageCount'), findsOneWidget);
           final next = tester.widget<TextButton>(
             find.ancestor(
               of: find.text('›'),
               matching: find.byType(TextButton),
             ),
           );
-          expect(next.onPressed == null, page == 3);
-          if (page < 3) {
+          expect(next.onPressed == null, page == pageCount);
+          if (page < pageCount) {
             await tester.tap(find.text('›'));
             await tester.pumpAndSettle();
           }
         }
         await tester.enterText(
           find.byKey(const ValueKey('history-search')),
-          '分页合成08',
+          large ? '分页合成008' : '分页合成08',
         );
         await tester.pumpAndSettle();
         expect(find.text('1 条记录'), findsOneWidget);
         expect(find.text('1 / 1'), findsOneWidget);
-        expect(find.text('24'), findsOneWidget);
+        expect(find.text('$fieldCount'), findsOneWidget);
         Future<void> captureFullApp(String suffix) async {
           final image =
               await (boundary.currentContext!.findRenderObject()
@@ -416,10 +498,42 @@ void main() {
 
         expect(tester.takeException(), isNull);
         await captureFullApp('');
-        final fields = find.textContaining('字段24');
-        await tester.ensureVisible(fields);
-        await tester.pumpAndSettle();
-        expect(fields.hitTestable(), findsOneWidget);
+        final fields = find.textContaining('字段$fieldCount');
+        if (large) {
+          final paragraph = tester.renderObject<RenderParagraph>(fields);
+          final text = paragraph.text.toPlainText();
+          final last = text.lastIndexOf('字段$fieldCount');
+          expect(last, greaterThanOrEqualTo(0));
+          final glyph = paragraph
+              .getBoxesForSelection(
+                TextSelection(baseOffset: last, extentOffset: text.length),
+              )
+              .last
+              .toRect();
+          final viewport = RenderAbstractViewport.of(paragraph);
+          final position = Scrollable.of(tester.element(fields)).position;
+          final reveal = viewport.getOffsetToReveal(paragraph, 1, rect: glyph);
+          position.jumpTo(
+            reveal.offset
+                .clamp(position.minScrollExtent, position.maxScrollExtent)
+                .toDouble(),
+          );
+          await tester.pumpAndSettle();
+          final visible = MatrixUtils.transformRect(
+            viewport.getTransformTo(null),
+            viewport.paintBounds,
+          );
+          expect(
+            visible.contains(paragraph.localToGlobal(glyph.center)),
+            isTrue,
+            reason:
+                'Last field glyph must be visible, not only the large paragraph',
+          );
+        } else {
+          await tester.ensureVisible(fields);
+          await tester.pumpAndSettle();
+          expect(fields.hitTestable(), findsOneWidget);
+        }
         expect(tester.takeException(), isNull);
         await captureFullApp('-scope-scrolled');
         await tester.enterText(
@@ -427,10 +541,31 @@ void main() {
           '',
         );
         await tester.pumpAndSettle();
-        expect(find.text('19 条记录'), findsOneWidget);
-        expect(find.text('1 / 3'), findsOneWidget);
+        expect(find.text('$recordCount 条记录'), findsOneWidget);
+        expect(find.text('1 / $pageCount'), findsOneWidget);
         expect(tester.takeException(), isNull);
         await tester.pumpWidget(const SizedBox());
+      }
+      if (large) {
+        await server.close();
+        await service.close();
+        await repository.close();
+        repository = await EncryptedInformationRepository.open(
+          '${root.path}/restored',
+          targetKeys,
+        );
+        service = InformationService(repository: repository);
+        server = await AgentServer.start(service.agent, port: 0);
+        expect(repository.grantHistory, hasLength(recordCount));
+        expect(repository.grantHistory.every((g) => !g.active), isTrue);
+        expect(
+          repository.grantHistory.where((g) => g.fields.length == fieldCount),
+          hasLength(1),
+        );
+        await exchange('scale-reopened', {
+          'records': recordCount,
+          'fieldCount': fieldCount,
+        });
       }
       await File('${root.path}/result.json').writeAsString(
         jsonEncode({
@@ -442,9 +577,12 @@ void main() {
           'physicalUiAcceptance': false,
           'countPhraseSingleLineAt200Percent': true,
           'fullAppHistoryPagination': {
-            'records': 19,
-            'pages': 3,
-            'fields': 24,
+            'records': recordCount,
+            'pages': pageCount,
+            'fields': fieldCount,
+            'seedWallMilliseconds': seedTime.elapsedMilliseconds,
+            'longRequestApprovedThroughUi': large,
+            'largeHistoryReopened': large,
             'searchAndClear': true,
             'globalNavigationIncluded': true,
           },
@@ -457,6 +595,6 @@ void main() {
     // NativeSemanticsLifetime tracks only handles requested by the platform.
     // The framework's default test handle is disposed before addTearDown runs.
     semanticsEnabled: false,
-    timeout: const Timeout(Duration(minutes: 8)),
+    timeout: const Timeout(Duration(minutes: 15)),
   );
 }

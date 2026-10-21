@@ -7,6 +7,8 @@ render captures, not proof of physical panels, keyboard input or visible CUA.
 import argparse
 import hashlib
 import json
+import os
+import signal
 from pathlib import Path
 import queue
 import re
@@ -23,7 +25,9 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('output', type=Path)
     parser.add_argument('--delivery', type=Path, required=True)
+    parser.add_argument('--large', action='store_true', help='1000 items, 32 directories and 128 tags')
     args = parser.parse_args()
+    item_count = 1000 if args.large else 125
     output = args.output.resolve(); output.relative_to(ROOT / 'build')
     output.mkdir(parents=True, exist_ok=False)
     delivery = args.delivery.resolve(strict=True)
@@ -33,7 +37,7 @@ def main():
     assert hashlib.sha256(cli.read_bytes()).hexdigest() == entry['sha256']
     owner = uuid.uuid4().hex
     state = {'complete': False, 'productSource': manifest['sourceCommit'],
-             'cliSha256': entry['sha256'], 'phases': []}
+             'cliSha256': entry['sha256'], 'phases': [], 'large': args.large, 'itemCount': item_count}
     state['appBaseCommit'] = subprocess.check_output(
         ['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip()
     state['worktreeStatus'] = subprocess.check_output(
@@ -55,7 +59,7 @@ def main():
     processes = []
     directory = None
     log = output / 'flutter.txt'
-    def wait_for(predicate, timeout=120):
+    def wait_for(predicate, timeout=300 if args.large else 120):
         deadline = time.monotonic() + timeout
         while time.monotonic() < deadline:
             value = predicate()
@@ -85,7 +89,8 @@ def main():
         with log.open('wb') as stream:
             flutter = subprocess.Popen([str(ROOT/'scripts/dev-macos.sh'), 'flutter', 'test', '--no-pub',
                 'integration_test/macos_library_filters_native_test.dart', '-d', 'macos',
-                f'--dart-define=MAC_QA_OWNER={owner}'], cwd=ROOT/'apps/desktop', stdout=stream, stderr=subprocess.STDOUT)
+                f'--dart-define=MAC_QA_OWNER={owner}',
+                f'--dart-define=MAC_QA_LARGE={str(args.large).lower()}'], cwd=ROOT/'apps/desktop', stdout=stream, stderr=subprocess.STDOUT, start_new_session=True)
         def locate():
             matches = re.findall(r'MAC_LIBRARY_FILTERS_ROOT=([^\r\n]+)', log.read_text(errors='replace'))
             if not matches: return None
@@ -117,19 +122,19 @@ def main():
             elif name in ['approved','filtered','moved','repository-reopened']:
                 if name=='approved': checked({'command':'claim','requestId':request},'ok')
                 seen=[]
-                for offset in [0,100]:
+                for offset in range(0,item_count,100):
                     result=checked({'command':'catalog','offset':offset,'limit':100},'ok')
-                    assert result['total']==125
+                    assert result['total']==item_count
                     seen.extend(x['id'] for x in result['items'])
                     text=json.dumps(result,ensure_ascii=False)
                     assert 'private-fixture-' not in text and '私人' not in text
-                assert len(seen)==125 and len(set(seen))==125
-                for query,total in [('唯一公开检索词',1),('private-fixture-124',0),('私人标签甲',0)]:
+                assert len(seen)==item_count and len(set(seen))==item_count
+                for query,total in [('唯一公开检索词',1),(f'private-fixture-{item_count-1}',0),('私人标签甲',0)]:
                     result=checked({'command':'catalog','query':query},'ok');assert result['total']==total
                 for key,total in [('parentId',25 if name in ['moved','repository-reopened'] else 75),
                                   ('archiveId',75 if name in ['moved','repository-reopened'] else 25)]:
                     result=checked({'command':'catalog','directoryId':ids[key]},'ok');assert result['total']==total
-                result=checked({'command':'catalog','tagId':ids['tagA']},'ok');assert result['total']==63
+                result=checked({'command':'catalog','tagId':ids['tagA']},'ok');assert result['total']==(item_count+1)//2
                 result=checked({'command':'read','requestId':request,'itemId':ids['itemId'],'fieldId':ids['fieldId']},
                                'unauthorized' if name=='repository-reopened' else 'ok')
                 if name!='repository-reopened':assert result['value']=='private-fixture-0'
@@ -158,6 +163,15 @@ def main():
         if 'flutter' in locals() and flutter.poll() is None:
             flutter.terminate(); flutter.wait(timeout=15)
             state['forcedFailedRunCleanup']=True;state['complete']=False
+        if 'flutter' in locals():
+            try:
+                os.killpg(flutter.pid, 0)
+            except ProcessLookupError:
+                state['flutterProcessGroupRemaining'] = False
+            else:
+                os.killpg(flutter.pid, signal.SIGTERM)
+                state['forcedProcessGroupCleanup'] = True
+                state['complete'] = False
         if directory:
             assert not directory.is_symlink() and (directory/'.qa-owner').read_text()==owner
             for p in directory.iterdir():
