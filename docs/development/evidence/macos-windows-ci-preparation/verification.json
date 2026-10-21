@@ -5,6 +5,11 @@
   "ownerQuotaAgreementRequired": true,
   "originalFiles": [
     {
+      "path": "raw/dispatch-form.json",
+      "bytes": 363,
+      "sha256": "89cfa3456dc50df9fdcab49b6162e4ce855bbfa12c2d049cb2d390898bf66f39"
+    },
+    {
       "path": "raw/mac-refusal.json",
       "bytes": 89,
       "sha256": "721b128a8a8c6b148f1fa0f49a1d629310bcb7633767367a840ee4607043f43f"
@@ -34,5 +39,9 @@
       "bytes": 3977,
       "sha256": "cf92877ac07cfbb2dd1f899c9c3deac5fb6198301e1f0366fed737dfa45c6662"
     }
-  ]
+  ],
+  "branchFormVerified": true,
+  "selectedBranch": "codex/macos-adaptation",
+  "selectedPlatform": "windows",
+  "workflowRunsObserved": 0
 }

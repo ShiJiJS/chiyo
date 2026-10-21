@@ -17,7 +17,7 @@ Windows 目标使用 GitHub 托管的 `windows-2022` x64 独立临时机器，�
 
 脚本为 `scripts/qa/windows-mac-branch.ps1`，拒绝已有输出或 build/ 外路径。在 Mac 用校验过官方发行摘要的项目本地 PowerShell 7.5.4 完成语法解析、确认 Windows 前置拒绝且不创建输出；YAML、手动分支条件、30 分钟上限、Action 摘要及只读权限做了静态核对。**这些检查不等于 Windows 运行**。
 
-预定入口：Actions 中选择该已存在 workflow 文件，ref=`codex/macos-adaptation`、platform=`windows`，只执行一次。批准后先核对表单的实际分支和平台，再触发；如果该版本 GitHub 的表单无法显示对应分支参数，不启动可能选错平台的任务。运行失败不自动续用额外预算重复调度。
+已在真实 Actions 表单中核对该已存在 workflow 文件：ref=`codex/macos-adaptation`、platform=`windows`，分支参数正常显示，观察到 0 次运行。尚未点击提交。批准后再次核对当前分支和平台，只执行一次；运行失败不自动续用额外预算重复调度。
 
 保留 3 天的 artifact 只含 manifest、测试日志、文件流程的公开 result 与合成截图；不上传 exe、数据库、备份或恢复密钥。各阶段失败会保留退出事实，未完成不标为成功。只有取回实际 Windows 日志、逐项核对通过/跳过和原生结果后，才评估 #41 的 Windows 条件。
 
