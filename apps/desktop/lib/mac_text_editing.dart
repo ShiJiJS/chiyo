@@ -19,7 +19,17 @@ class _MacTextEditingActionsState extends State<MacTextEditingActions> {
     if (!kIsWeb && defaultTargetPlatform == TargetPlatform.macOS) {
       _owner = this;
       _channel.setMethodCallHandler((call) async {
-        if (call.method != 'selectAll') throw MissingPluginException();
+        final Intent intent = switch (call.method) {
+          'selectAll' => const SelectAllTextIntent(
+            SelectionChangedCause.keyboard,
+          ),
+          'copy' => CopySelectionTextIntent.copy,
+          'cut' => const CopySelectionTextIntent.cut(
+            SelectionChangedCause.keyboard,
+          ),
+          'paste' => const PasteTextIntent(SelectionChangedCause.keyboard),
+          _ => throw MissingPluginException(),
+        };
         final context = FocusManager.instance.primaryFocus?.context;
         if (!mounted ||
             context == null ||
@@ -28,8 +38,7 @@ class _MacTextEditingActionsState extends State<MacTextEditingActions> {
                     null)) {
           return false;
         }
-        const intent = SelectAllTextIntent(SelectionChangedCause.keyboard);
-        final action = Actions.maybeFind<SelectAllTextIntent>(context);
+        final action = Actions.maybeFind(context, intent: intent);
         if (action == null || !action.isEnabled(intent)) return false;
         Actions.invoke(context, intent);
         return true;

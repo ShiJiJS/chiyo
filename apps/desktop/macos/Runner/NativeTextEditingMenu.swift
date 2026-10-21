@@ -1,15 +1,17 @@
 import Cocoa
 import FlutterMacOS
 
-/// Accessibility's NSTextView selection can diverge from EditableText. Route
-/// Select All to Flutter's action, preserving AppKit behavior in native sheets.
-final class NativeSelectAllMenu: NSObject, NSMenuItemValidation {
+/// Accessibility's NSTextView can diverge from EditableText. Route editing
+/// actions to Flutter, preserving AppKit behavior in native sheets.
+final class NativeTextEditingMenu: NSObject, NSMenuItemValidation {
   private weak var window: NSWindow?
-  private let selectAll = NSSelectorFromString("selectAll:")
+  private let methods = ["selectAll:": "selectAll", "copy:": "copy",
+                         "cut:": "cut", "paste:": "paste"]
+  private let keyMethods = ["a": "selectAll", "c": "copy", "x": "cut", "v": "paste"]
   private let channel: FlutterMethodChannel
   private var keyMonitor: Any?
   private var sheetObservers: [NSObjectProtocol] = []
-  private var originalItems: [(item: NSMenuItem, target: AnyObject?, action: Selector?)] = []
+  private var originalItems: [(item: NSMenuItem, target: AnyObject?, action: Selector, method: String)] = []
 
   init(window: NSWindow, messenger: FlutterBinaryMessenger) {
     self.window = window
@@ -25,7 +27,7 @@ final class NativeSelectAllMenu: NSObject, NSMenuItemValidation {
 
   func install(in menu: NSMenu) {
     guard keyMonitor == nil else { return }
-    replaceSelectAll(in: menu)
+    replaceEditingActions(in: menu)
     // Open/Save panels may edit in a remote AppKit process. Keep their exact
     // native menu actions, rather than resolving the parent's old responder.
     if let window {
@@ -36,25 +38,26 @@ final class NativeSelectAllMenu: NSObject, NSMenuItemValidation {
             object: window, queue: .main) { [weak self] _ in self?.installFlutterActions() }
       ]
     }
-    // The accessibility field editor consumes Cmd-A before menu dispatch.
+    // The accessibility field editor may consume these before menu dispatch.
     keyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
       guard let self, self.flutterEditor != nil,
             event.modifierFlags.contains(.command),
             event.modifierFlags.intersection([.control, .option, .shift]).isEmpty,
-            event.charactersIgnoringModifiers?.lowercased() == "a"
+            let key = event.charactersIgnoringModifiers?.lowercased(),
+            let method = self.keyMethods[key]
       else { return event }
-      self.channel.invokeMethod("selectAll", arguments: nil)
+      self.channel.invokeMethod(method, arguments: nil)
       return nil
     }
   }
 
-  private func replaceSelectAll(in menu: NSMenu) {
+  private func replaceEditingActions(in menu: NSMenu) {
     for item in menu.items {
-      if let submenu = item.submenu { replaceSelectAll(in: submenu) }
-      if item.action == selectAll {
-        originalItems.append((item, item.target, item.action))
+      if let submenu = item.submenu { replaceEditingActions(in: submenu) }
+      if let action = item.action, let method = methods[NSStringFromSelector(action)] {
+        originalItems.append((item, item.target, action, method))
         item.target = self
-        item.action = #selector(selectAllFromMenu(_:))
+        item.action = #selector(editFromMenu(_:))
       }
     }
   }
@@ -69,7 +72,7 @@ final class NativeSelectAllMenu: NSObject, NSMenuItemValidation {
   private func installFlutterActions() {
     for original in originalItems {
       original.item.target = self
-      original.item.action = #selector(selectAllFromMenu(_:))
+      original.item.action = #selector(editFromMenu(_:))
     }
   }
 
@@ -82,21 +85,25 @@ final class NativeSelectAllMenu: NSObject, NSMenuItemValidation {
     return editor
   }
 
-  @objc private func selectAllFromMenu(_ sender: NSMenuItem) {
+  @objc private func editFromMenu(_ sender: NSMenuItem) {
+    guard let original = originalItems.first(where: { $0.item === sender }) else { return }
     if flutterEditor != nil {
-      channel.invokeMethod("selectAll", arguments: nil)
+      // EditableText retains its own read-only, obscured-text and selection rules.
+      // Send only the action; never transport editor or clipboard text here.
+      channel.invokeMethod(original.method, arguments: nil)
     } else {
-      let native = NSMenuItem(title: sender.title, action: selectAll,
+      let native = NSMenuItem(title: sender.title, action: original.action,
                               keyEquivalent: sender.keyEquivalent)
-      NSApp.sendAction(selectAll, to: nil, from: native)
+      NSApp.sendAction(original.action, to: nil, from: native)
     }
   }
 
   func validateMenuItem(_ menuItem: NSMenuItem) -> Bool {
+    guard let original = originalItems.first(where: { $0.item === menuItem }) else { return false }
     if flutterEditor != nil { return true }
-    let native = NSMenuItem(title: menuItem.title, action: selectAll,
+    let native = NSMenuItem(title: menuItem.title, action: original.action,
                             keyEquivalent: menuItem.keyEquivalent)
-    guard let target = NSApp.target(forAction: selectAll, to: nil, from: native)
+    guard let target = NSApp.target(forAction: original.action, to: nil, from: native)
     else { return false }
     if let validator = target as? NSMenuItemValidation {
       return validator.validateMenuItem(native)

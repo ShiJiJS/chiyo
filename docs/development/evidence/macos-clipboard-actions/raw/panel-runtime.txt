@@ -1,0 +1,12 @@
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+QA_CLIPBOARD seeded synthetic text
+flutter: QA_VALUE {"length":0,"fixtureExact":false,"asciiExact":false,"empty":true,"selection":[0,0],"composing":[-1,-1]}
+flutter: QA_VALUE {"length":17,"fixtureExact":true,"asciiExact":false,"empty":false,"selection":[17,17],"composing":[-1,-1]}
+flutter: QA_PANEL cancelled=true
+QA_CLIPBOARD seeded synthetic text
+flutter: QA_VALUE {"length":17,"fixtureExact":true,"asciiExact":false,"empty":false,"selection":[17,17],"composing":[-1,-1]}
+flutter: QA_VALUE {"length":17,"fixtureExact":true,"asciiExact":false,"empty":false,"selection":[0,17],"composing":[-1,-1]}
+2026-10-22 06:37:10.894 MacClipboardProbe[82356:5536104] TSM AdjustCapsLockLEDForKeyTransitionHandling - _ISSetPhysicalKeyboardCapsLockLED Inhibit
+flutter: QA_VALUE {"length":0,"fixtureExact":false,"asciiExact":false,"empty":true,"selection":[0,0],"composing":[-1,-1]}
+flutter: QA_VALUE {"length":17,"fixtureExact":true,"asciiExact":false,"empty":false,"selection":[17,17],"composing":[-1,-1]}
+QA_CLIPBOARD restored original item types
