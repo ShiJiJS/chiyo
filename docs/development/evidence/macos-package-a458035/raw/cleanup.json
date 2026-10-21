@@ -1,0 +1,64 @@
+{
+  "sourceCommit": "a458035aba8aad582e14877553bd7e696b909957",
+  "archive": "build/macos-adaptation/issue50-package-12/agent-info-manage-0.4.0+12-mac-dev.a458035aba8a-macos-arm64.zip",
+  "archiveBytes": 130950765,
+  "archiveSha256": "927d9d0f0aa5a4c14fac3322c95e8cdfaf94e9f4e5f8dd00e1836ffd07c70c39",
+  "removed": [
+    {
+      "path": "build/macos-adaptation/issue50-package-12/AgentInfoManage",
+      "allocatedKiB": 380700,
+      "removed": true
+    },
+    {
+      "path": "build/macos-adaptation/issue50-package-12/verify",
+      "allocatedKiB": 380700,
+      "removed": true
+    },
+    {
+      "path": "build/macos-adaptation/issue50-package-12/diagnostic-build",
+      "allocatedKiB": 8888,
+      "removed": true
+    },
+    {
+      "path": "apps/desktop/build/macos",
+      "allocatedKiB": 1001428,
+      "removed": true
+    },
+    {
+      "path": "apps/desktop/.dart_tool/flutter_build",
+      "allocatedKiB": 83380,
+      "removed": true
+    },
+    {
+      "path": "apps/desktop/.dart_tool/hooks_runner",
+      "allocatedKiB": 26616,
+      "removed": true
+    }
+  ],
+  "unregister": [
+    {
+      "app": "build/macos-adaptation/issue50-package-12/AgentInfoManage/app/info_desktop.app",
+      "exitCode": 0
+    },
+    {
+      "app": "build/macos-adaptation/issue50-package-12/verify/中文 空格 路径/AgentInfoManage/app/info_desktop.app",
+      "exitCode": 0
+    },
+    {
+      "app": "apps/desktop/build/macos/Build/Products/Release/info_desktop.app",
+      "exitCode": 0
+    }
+  ],
+  "stableManifestShaUnchanged": true,
+  "stableManifestItems": 7971,
+  "stableMismatches": [],
+  "stableSignatureExit": 0,
+  "stablePid53592Alive": true,
+  "remainingApps": [
+    "local/中文 Mac 预览/AgentInfoManage/app/info_desktop.app"
+  ],
+  "remainingGeneratedDsyms": [],
+  "releasedAllocatedKiB": 1881712,
+  "keychainCalls": 0,
+  "newSystemApprovals": 0
+}
