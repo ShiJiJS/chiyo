@@ -1,0 +1,16 @@
+{
+  "dialogs": [
+    "Run workflow\nUse workflow from\ncodex/macos-adaptation\nRunner to use after owner quota/budget approval\n*\nwindows\nmacos\nplatform\nRun workflow"
+  ],
+  "selects": [
+    {
+      "name": "inputs[platform]",
+      "value": "windows",
+      "options": [
+        "windows",
+        "macos"
+      ]
+    }
+  ],
+  "runCount": "0 workflow runs"
+}
