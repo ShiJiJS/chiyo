@@ -4,7 +4,8 @@
 Isolated memory-key SQLCipher library and actual CUA keyboard/dialog actions.
 Copied native additions only read current input-source ID and log picker begin/
 end. Optional --diagnose-keys passively records key codes/modifiers in this test
-window and Flutter's hardware-key state; no input-source change, UI injection,
+window, Flutter's hardware-key state and incoming text-input method/selector
+names through a forwarding messenger; no input-source change, UI injection,
 path grants or callback substitution.
 Private libraries and generated apps/debug symbols are removed afterwards.
 """
@@ -112,12 +113,15 @@ def main():
             text = text.replace(anchor, anchor + '  private var qaKeyMonitor: Any?\n')
             anchor = '    super.awakeFromNib()\n'
             assert text.count(anchor) == 1
-            text = text.replace(anchor, anchor + '''    qaKeyMonitor = NSEvent.addLocalMonitorForEvents(matching: [.keyDown, .keyUp]) { [weak self] event in
+            text = text.replace(anchor, anchor + '''    qaKeyMonitor = NSEvent.addLocalMonitorForEvents(matching: [.keyDown, .keyUp, .flagsChanged]) { [weak self] event in
       if let self, NSApp.keyWindow === self {
-        let record: [String: Any] = ["event": event.type.rawValue, "keyCode": event.keyCode,
+        var record: [String: Any] = ["event": event.type.rawValue, "keyCode": event.keyCode,
           "flags": event.modifierFlags.rawValue,
           "responder": self.firstResponder.map { String(describing: type(of: $0)) } ?? "none",
           "marked": (self.firstResponder as? NSTextInputClient)?.hasMarkedText() ?? false]
+        if event.keyCode == 48 {
+          record["tabCharacters"] = event.characters.map { $0.utf16.map { Int($0) } } ?? []
+        }
         if let data = try? JSONSerialization.data(withJSONObject: record, options: [.sortedKeys]),
            let json = String(data: data, encoding: .utf8) {
           FileHandle.standardOutput.write(Data(("EDITOR_FOCUS_NATIVE_KEY=" + json + "\\n").utf8))

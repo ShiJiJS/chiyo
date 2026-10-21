@@ -3,6 +3,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -12,6 +13,56 @@ import 'package:info_desktop/desktop_bootstrap.dart';
 import 'package:info_desktop/desktop_runtime.dart';
 import 'package:info_desktop/information_editor.dart';
 import 'package:info_desktop/main.dart';
+
+// Only the optional diagnosis wraps the messenger. The original handler,
+// payload, reply and ordering are preserved; no platform input is injected.
+class _KeyDiagnosticBinding extends WidgetsFlutterBinding {
+  @override
+  BinaryMessenger createBinaryMessenger() =>
+      _KeyDiagnosticMessenger(super.createBinaryMessenger());
+}
+
+class _KeyDiagnosticMessenger extends BinaryMessenger {
+  const _KeyDiagnosticMessenger(this.delegate);
+  final BinaryMessenger delegate;
+
+  @override
+  Future<void> handlePlatformMessage(
+    String channel,
+    ByteData? data,
+    ui.PlatformMessageResponseCallback? callback,
+  ) async {
+    ui.channelBuffers.push(channel, data, (reply) => callback?.call(reply));
+  }
+
+  @override
+  Future<ByteData?>? send(String channel, ByteData? message) =>
+      delegate.send(channel, message);
+
+  @override
+  void setMessageHandler(String channel, MessageHandler? handler) {
+    if (channel != 'flutter/textinput' || handler == null) {
+      delegate.setMessageHandler(channel, handler);
+      return;
+    }
+    delegate.setMessageHandler(channel, (message) {
+      if (message != null) {
+        try {
+          final call = const JSONMethodCodec().decodeMethodCall(message);
+          final record = <String, Object?>{'method': call.method};
+          // Do not log text values, client IDs or other channel arguments.
+          if (call.method == 'TextInputClient.performSelectors') {
+            record['selectors'] = (call.arguments as List)[1];
+          }
+          stdout.writeln('EDITOR_FOCUS_TEXT_INPUT=${jsonEncode(record)}');
+        } catch (_) {
+          stdout.writeln('EDITOR_FOCUS_TEXT_INPUT_DECODE_FAILED');
+        }
+      }
+      return handler(message);
+    });
+  }
+}
 
 class _Keys implements DatabaseKeyStore {
   @override
@@ -25,8 +76,13 @@ void check(bool value, String message) {
 }
 
 Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
   final env = Platform.environment, mode = env['MAC_FOCUS_MODE']!;
+  final diagnoseKeys = env['MAC_FOCUS_DIAGNOSE_KEYS'] == '1';
+  if (diagnoseKeys) {
+    _KeyDiagnosticBinding();
+  } else {
+    WidgetsFlutterBinding.ensureInitialized();
+  }
   final owner = env['MAC_FOCUS_OWNER']!;
   check({'edit', 'reopen'}.contains(mode), 'QA mode');
   check(RegExp(r'^[a-f0-9]{32}$').hasMatch(owner), 'QA owner');
@@ -79,7 +135,6 @@ Future<void> main() async {
     return false;
   }
 
-  final diagnoseKeys = env['MAC_FOCUS_DIAGNOSE_KEYS'] == '1';
   if (diagnoseKeys) {
     HardwareKeyboard.instance.addHandler(observeHardwareKey);
   }
