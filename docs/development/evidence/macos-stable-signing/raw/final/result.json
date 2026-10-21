@@ -1,0 +1,291 @@
+{
+  "sourceCommit": "2232777b5df431a79dfdbefc1d0f5e27288cfc34",
+  "complete": true,
+  "scope": "ephemeral self-signed identities in owned file keychain; actual production DatabaseKeyStore in native signed sandbox Apps; only UUID synthetic Keychain service; no production key/database, no trust-settings change",
+  "steps": [
+    {
+      "label": "compile-signer-fixture",
+      "exit": 0,
+      "elapsedSeconds": 0.449
+    },
+    {
+      "label": "generate-key-A",
+      "exit": 0,
+      "elapsedSeconds": 0.193
+    },
+    {
+      "label": "generate-certificate-A",
+      "exit": 0,
+      "elapsedSeconds": 0.011
+    },
+    {
+      "label": "export-synthetic-identity-A",
+      "exit": 0,
+      "elapsedSeconds": 0.009
+    },
+    {
+      "label": "generate-key-Other",
+      "exit": 0,
+      "elapsedSeconds": 0.142
+    },
+    {
+      "label": "generate-certificate-Other",
+      "exit": 0,
+      "elapsedSeconds": 0.01
+    },
+    {
+      "label": "export-synthetic-identity-Other",
+      "exit": 0,
+      "elapsedSeconds": 0.009
+    },
+    {
+      "label": "prepare-private-signer",
+      "exit": 0,
+      "elapsedSeconds": 0.557
+    },
+    {
+      "label": "compile-A",
+      "exit": 0,
+      "elapsedSeconds": 0.528
+    },
+    {
+      "label": "sign-A",
+      "exit": 0,
+      "elapsedSeconds": 0.075
+    },
+    {
+      "label": "verify-A",
+      "exit": 0,
+      "elapsedSeconds": 0.013
+    },
+    {
+      "label": "requirement-A",
+      "exit": 0,
+      "elapsedSeconds": 0.014
+    },
+    {
+      "label": "signature-details-A",
+      "exit": 0,
+      "elapsedSeconds": 0.013
+    },
+    {
+      "label": "compile-B",
+      "exit": 0,
+      "elapsedSeconds": 0.501
+    },
+    {
+      "label": "sign-B",
+      "exit": 0,
+      "elapsedSeconds": 0.073
+    },
+    {
+      "label": "verify-B",
+      "exit": 0,
+      "elapsedSeconds": 0.013
+    },
+    {
+      "label": "requirement-B",
+      "exit": 0,
+      "elapsedSeconds": 0.013
+    },
+    {
+      "label": "signature-details-B",
+      "exit": 0,
+      "elapsedSeconds": 0.013
+    },
+    {
+      "label": "compile-C",
+      "exit": 0,
+      "elapsedSeconds": 0.501
+    },
+    {
+      "label": "sign-C",
+      "exit": 0,
+      "elapsedSeconds": 0.074
+    },
+    {
+      "label": "verify-C",
+      "exit": 0,
+      "elapsedSeconds": 0.014
+    },
+    {
+      "label": "requirement-C",
+      "exit": 0,
+      "elapsedSeconds": 0.014
+    },
+    {
+      "label": "signature-details-C",
+      "exit": 0,
+      "elapsedSeconds": 0.015
+    },
+    {
+      "label": "compile-D",
+      "exit": 0,
+      "elapsedSeconds": 0.506
+    },
+    {
+      "label": "sign-D",
+      "exit": 0,
+      "elapsedSeconds": 0.081
+    },
+    {
+      "label": "verify-D",
+      "exit": 0,
+      "elapsedSeconds": 0.014
+    },
+    {
+      "label": "requirement-D",
+      "exit": 0,
+      "elapsedSeconds": 0.014
+    },
+    {
+      "label": "signature-details-D",
+      "exit": 0,
+      "elapsedSeconds": 0.016
+    },
+    {
+      "label": "A-missing",
+      "exit": 0,
+      "elapsedSeconds": 0.554
+    },
+    {
+      "label": "A-create",
+      "exit": 0,
+      "elapsedSeconds": 0.05
+    },
+    {
+      "label": "A-read",
+      "exit": 0,
+      "elapsedSeconds": 0.032
+    },
+    {
+      "label": "A-owned-acl-metadata",
+      "exit": 0,
+      "elapsedSeconds": 0.025
+    },
+    {
+      "label": "B-read-different-path",
+      "exit": 73,
+      "elapsedSeconds": 0.455
+    },
+    {
+      "label": "verify-B-at-exact-original-path",
+      "exit": 0,
+      "elapsedSeconds": 0.015
+    },
+    {
+      "label": "B-read-exact-original-path",
+      "exit": 73,
+      "elapsedSeconds": 0.215
+    },
+    {
+      "label": "C-different-certificate-denied",
+      "exit": 0,
+      "elapsedSeconds": 0.43
+    },
+    {
+      "label": "D-different-identifier-denied",
+      "exit": 0,
+      "elapsedSeconds": 0.446
+    },
+    {
+      "label": "A-original-still-reads",
+      "exit": 0,
+      "elapsedSeconds": 0.116
+    },
+    {
+      "label": "cleanup-owned-test-item",
+      "exit": 0,
+      "elapsedSeconds": 0.03
+    },
+    {
+      "label": "verify-owned-test-item-absent",
+      "exit": 0,
+      "elapsedSeconds": 0.021
+    },
+    {
+      "label": "delete-private-signer",
+      "exit": 0,
+      "elapsedSeconds": 0.013
+    }
+  ],
+  "service": "org.shijijs.agent-info-manage.qa.8a1dff55-30a6-47dd-8e54-8b425b0e4491",
+  "keychainContextBefore": {
+    "searchListHash": "bfbcb66029e28e5f79a82ddde4d30ff0cb58ea04a686468ab138c06acf5da342",
+    "defaultHash": "bfbcb66029e28e5f79a82ddde4d30ff0cb58ea04a686468ab138c06acf5da342"
+  },
+  "sourceInputs": [
+    {
+      "path": "scripts/qa/macos-stable-signing.py",
+      "sha256": "9d93f802a0af8449f9296aec717c7cfeee45c2bd185158fc36bdf31a05da8da2"
+    },
+    {
+      "path": "scripts/qa/macos-signing-fixture.swift",
+      "sha256": "0a76da8e87a7a7e31d607e42a0656760ac434bb2696d9f95a2c343debd8432a3"
+    },
+    {
+      "path": "scripts/qa/macos-stable-signing-probe.swift",
+      "sha256": "5603f3959b0a6cea5c38ee98b64e8bae58cc249d3632a5bda65cc88266d78cc8"
+    },
+    {
+      "path": "apps/desktop/macos/Runner/DatabaseKeyStore.swift",
+      "sha256": "d157f50972cac3da88df60846cc7a634afeaf02e787d1f486effd1fb56634ef4"
+    },
+    {
+      "path": "apps/desktop/macos/Runner/Release.entitlements",
+      "sha256": "347f9ac78f9e449e6ae74757f5c339a525b8a5059d778f498edfd68f1af090ad"
+    }
+  ],
+  "certificateA": {
+    "sha1": "EA2ADE272A5DCF29065218FB49BEA4CB9752173C",
+    "pemSha256": "3ebfbd9438159430f1231d3f26ce3207dd80a2175e1ae65deab3b9cafe93af74",
+    "validDays": 2,
+    "syntheticOnly": true
+  },
+  "certificateOther": {
+    "sha1": "74521FB2198540830AC557AFF45F5BFD9140B273",
+    "pemSha256": "5812b3b0828cf1179a9b81df09484ad8cad374d08029b40774c1c7dccb445ba5",
+    "validDays": 2,
+    "syntheticOnly": true
+  },
+  "variantA": {
+    "binarySha256": "bd225a9b302e08e7e61e969f589d9f56a841df30b96e3cbfbe6ea1d9138bb42b",
+    "designatedRequirement": "designated => identifier \"org.shijijs.agent-info-manage.qa.stablesigning\" and certificate leaf = H\"ea2ade272a5dcf29065218fb49bea4cb9752173c\"",
+    "signingCertificate": "EA2ADE272A5DCF29065218FB49BEA4CB9752173C",
+    "cdhash": "17585927a7d0456aa14d062d22190b14b8fbc946"
+  },
+  "variantB": {
+    "binarySha256": "65f1c469b21820a604f40da2edfd0840c6b016601b736e0e28b9c94647c766fb",
+    "designatedRequirement": "designated => identifier \"org.shijijs.agent-info-manage.qa.stablesigning\" and certificate leaf = H\"ea2ade272a5dcf29065218fb49bea4cb9752173c\"",
+    "signingCertificate": "EA2ADE272A5DCF29065218FB49BEA4CB9752173C",
+    "cdhash": "3007533f789d0aec10951a2c333bbb0f41f2a2c6"
+  },
+  "variantC": {
+    "binarySha256": "0e01e75acf3d3e76810f611175226b8940243f4400845e785e04ee300364ce2e",
+    "designatedRequirement": "designated => identifier \"org.shijijs.agent-info-manage.qa.stablesigning\" and certificate leaf = H\"74521fb2198540830ac557aff45f5bfd9140b273\"",
+    "signingCertificate": "74521FB2198540830AC557AFF45F5BFD9140B273",
+    "cdhash": "f1b014d43d3607401e87e4ebae87e3257a1c7fdb"
+  },
+  "variantD": {
+    "binarySha256": "3628a1ea406e1278fc647b5541b60a2d6f0a1dcc20a41dd9798078947d67c96b",
+    "designatedRequirement": "designated => identifier \"org.shijijs.agent-info-manage.qa.stablesigning.other\" and certificate leaf = H\"ea2ade272a5dcf29065218fb49bea4cb9752173c\"",
+    "signingCertificate": "EA2ADE272A5DCF29065218FB49BEA4CB9752173C",
+    "cdhash": "e342318a632d690064d76cd6e3a0e8b7c18b4ea7"
+  },
+  "observedSyntheticItemPartitions": [
+    "cdhash:17585927a7d0456aa14d062d22190b14b8fbc946"
+  ],
+  "partitionMatchesOriginalCDHash": true,
+  "partitionIncludesUpgradeCDHash": false,
+  "sameCertificateDifferentPathAccess": false,
+  "sameCertificateSamePathAccess": false,
+  "crossVersionKeyAccessPreserved": false,
+  "unrelatedSignersDenied": true,
+  "probeCasesPassed": true,
+  "searchListRestored": true,
+  "defaultKeychainUnchanged": true,
+  "temporarySigningKeysDeleted": true,
+  "generatedAppsRemoved": true,
+  "ownedSyntheticItemAbsent": true,
+  "cleanupErrors": []
+}

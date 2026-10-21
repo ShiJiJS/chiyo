@@ -1,0 +1,20 @@
+Executable=/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue42-stable-signing-final-4/StableSigner-C.app/Contents/MacOS/probe
+Identifier=org.shijijs.agent-info-manage.qa.stablesigning
+Format=app bundle with Mach-O thin (arm64)
+CodeDirectory v=20400 size=615 flags=0x0(none) hashes=8+7 location=embedded
+Hash type=sha256 size=32
+CandidateCDHash sha256=f1b014d43d3607401e87e4ebae87e3257a1c7fdb
+CandidateCDHashFull sha256=f1b014d43d3607401e87e4ebae87e3257a1c7fdb3f6a7d968e3ccfb334a8dd25
+Hash choices=sha256
+CMSDigest=f1b014d43d3607401e87e4ebae87e3257a1c7fdb3f6a7d968e3ccfb334a8dd25
+CMSDigestType=2
+CDHash=f1b014d43d3607401e87e4ebae87e3257a1c7fdb
+Signature size=2212
+Authority=AgentInfo Synthetic Signing Other adf6a354bec44d42
+Signed Time=Oct 22, 2026 at 07:32:50
+Info.plist entries=5
+TeamIdentifier=not set
+Sealed Resources version=2 rules=13 files=0
+Internal requirements count=1 size=124
+Total signatures=1
+Chosen signature=1

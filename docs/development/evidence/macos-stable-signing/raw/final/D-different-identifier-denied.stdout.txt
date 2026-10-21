@@ -1,0 +1,2 @@
+{"deniedStatus":-25293}
+{"status":"passed","build":"B","step":"denied"}

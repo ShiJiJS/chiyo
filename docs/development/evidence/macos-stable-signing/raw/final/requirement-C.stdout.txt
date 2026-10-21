@@ -1,0 +1,1 @@
+designated => identifier "org.shijijs.agent-info-manage.qa.stablesigning" and certificate leaf = H"74521fb2198540830ac557aff45f5bfd9140b273"

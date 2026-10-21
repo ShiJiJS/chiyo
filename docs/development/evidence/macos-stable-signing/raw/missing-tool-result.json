@@ -1,0 +1,45 @@
+{
+  "sourceCommit": "2232777b5df431a79dfdbefc1d0f5e27288cfc34",
+  "complete": false,
+  "scope": "ephemeral self-signed identities in owned file keychain; actual production DatabaseKeyStore in native signed sandbox Apps; only UUID synthetic Keychain service; no production key/database, no trust-settings change",
+  "steps": [
+    {
+      "label": "compile-signer-fixture",
+      "exit": 127,
+      "elapsedSeconds": 0.0
+    }
+  ],
+  "service": "org.shijijs.agent-info-manage.qa.0fc122f8-d2ae-4929-bca1-0f058f18a46b",
+  "keychainContextBefore": {
+    "searchListHash": "bfbcb66029e28e5f79a82ddde4d30ff0cb58ea04a686468ab138c06acf5da342",
+    "defaultHash": "bfbcb66029e28e5f79a82ddde4d30ff0cb58ea04a686468ab138c06acf5da342"
+  },
+  "sourceInputs": [
+    {
+      "path": "scripts/qa/macos-stable-signing.py",
+      "sha256": "9d93f802a0af8449f9296aec717c7cfeee45c2bd185158fc36bdf31a05da8da2"
+    },
+    {
+      "path": "scripts/qa/macos-signing-fixture.swift",
+      "sha256": "0a76da8e87a7a7e31d607e42a0656760ac434bb2696d9f95a2c343debd8432a3"
+    },
+    {
+      "path": "scripts/qa/macos-stable-signing-probe.swift",
+      "sha256": "5603f3959b0a6cea5c38ee98b64e8bae58cc249d3632a5bda65cc88266d78cc8"
+    },
+    {
+      "path": "apps/desktop/macos/Runner/DatabaseKeyStore.swift",
+      "sha256": "d157f50972cac3da88df60846cc7a634afeaf02e787d1f486effd1fb56634ef4"
+    },
+    {
+      "path": "apps/desktop/macos/Runner/Release.entitlements",
+      "sha256": "347f9ac78f9e449e6ae74757f5c339a525b8a5059d778f498edfd68f1af090ad"
+    }
+  ],
+  "searchListRestored": true,
+  "defaultKeychainUnchanged": true,
+  "temporarySigningKeysDeleted": true,
+  "generatedAppsRemoved": true,
+  "ownedSyntheticItemAbsent": true,
+  "cleanupErrors": []
+}
