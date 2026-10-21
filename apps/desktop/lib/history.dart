@@ -677,7 +677,7 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
                 const Spacer(),
                 SizedBox(
                   width: 24,
-                  height: 25 * MediaQuery.textScalerOf(context).scale(12) / 12,
+                  height: 26,
                   child: TextButton(
                     onPressed: _page == 0
                         ? null
@@ -685,13 +685,14 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
                             _page--;
                             _selected = null;
                           }),
-                    style: prototypeButton(context, size: 18),
-                    child: Transform.translate(
-                      offset: const Offset(0, 3),
-                      child: _text(
-                        '‹',
+                    style: prototypeButton(context, size: 20, iconOnly: true),
+                    child: Text(
+                      '‹',
+                      textScaler: TextScaler.noScaling,
+                      style: prototypeText(
+                        context,
                         20,
-                        height: 1.2,
+                        height: 1,
                         color: _page == 0
                             ? c.muted.withValues(alpha: .45)
                             : c.muted,
@@ -714,7 +715,7 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
                 ),
                 SizedBox(
                   width: 24,
-                  height: 25 * MediaQuery.textScalerOf(context).scale(12) / 12,
+                  height: 26,
                   child: TextButton(
                     onPressed: (_page + 1) * 8 >= filtered.length
                         ? null
@@ -722,13 +723,14 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
                             _page++;
                             _selected = null;
                           }),
-                    style: prototypeButton(context, size: 18),
-                    child: Transform.translate(
-                      offset: const Offset(0, 3),
-                      child: _text(
-                        '›',
+                    style: prototypeButton(context, size: 20, iconOnly: true),
+                    child: Text(
+                      '›',
+                      textScaler: TextScaler.noScaling,
+                      style: prototypeText(
+                        context,
                         20,
-                        height: 1.2,
+                        height: 1,
                         color: (_page + 1) * 8 >= filtered.length
                             ? c.muted.withValues(alpha: .45)
                             : c.muted,

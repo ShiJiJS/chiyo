@@ -432,6 +432,7 @@ class _CredentialUseApprovalPanelState
                   style: prototypeButton(
                     context,
                     size: 14,
+                    iconOnly: true,
                     foreground: c.accent,
                     background: draft.tip == tip ? c.selected : null,
                     side: BorderSide(color: c.line),
@@ -441,11 +442,13 @@ class _CredentialUseApprovalPanelState
                       setState(() => draft.tip = draft.tip == tip ? null : tip),
                   child: Text(
                     '?',
+                    textScaler: TextScaler.noScaling,
                     style: prototypeText(
                       context,
                       14,
                       family: 'Georgia',
                       color: c.accent,
+                      height: 1,
                     ),
                   ),
                 ),

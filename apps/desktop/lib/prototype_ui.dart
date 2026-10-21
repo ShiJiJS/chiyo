@@ -65,7 +65,7 @@ double prototypeCh(BuildContext context, double size, double count) {
   return painter.width * count;
 }
 
-/// Removes Material's implicit minimum size while retaining focus/keyboard behavior.
+/// Matches label padding and fixed icon hit areas while retaining keyboard focus.
 ButtonStyle prototypeButton(
   BuildContext context, {
   double size = 12,
@@ -75,18 +75,26 @@ ButtonStyle prototypeButton(
   BorderSide side = BorderSide.none,
   double radius = 4,
   FontWeight weight = FontWeight.w400,
+  bool iconOnly = false,
 }) =>
     TextButton.styleFrom(
-      textStyle: prototypeText(context, size, weight: weight),
+      textStyle: prototypeText(
+        context,
+        size,
+        weight: weight,
+        height: iconOnly ? 1 : 1.5,
+      ),
       foregroundColor: foreground ?? UiPalette.of(context).muted,
       backgroundColor: background,
-      minimumSize: Size.zero,
-      padding: EdgeInsets.fromLTRB(
-        padding.left < 6 ? 6 : padding.left,
-        padding.top < 4 ? 4 : padding.top,
-        padding.right < 6 ? 6 : padding.right,
-        padding.bottom < 4 ? 4 : padding.bottom,
-      ),
+      minimumSize: iconOnly ? const Size(26, 26) : Size.zero,
+      padding: iconOnly
+          ? EdgeInsets.zero
+          : EdgeInsets.fromLTRB(
+              padding.left < 6 ? 6 : padding.left,
+              padding.top < 4 ? 4 : padding.top,
+              padding.right < 6 ? 6 : padding.right,
+              padding.bottom < 4 ? 4 : padding.bottom,
+            ),
       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
       shape: RoundedRectangleBorder(
         side: side,

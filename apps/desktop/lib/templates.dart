@@ -608,10 +608,11 @@ class _TemplateEditorState extends State<_TemplateEditor> {
                         ? null
                         : () =>
                               setState(() => _removed.add(_fields.removeAt(i))),
-                    style: prototypeButton(context, size: 20),
-                    child: Transform.translate(
-                      offset: const Offset(2.5, -3),
-                      child: const Text('×', textScaler: TextScaler.noScaling),
+                    style: prototypeButton(context, size: 20, iconOnly: true),
+                    child: const Text(
+                      '×',
+                      textScaler: TextScaler.noScaling,
+                      semanticsLabel: '移除字段',
                     ),
                   ),
                 ),

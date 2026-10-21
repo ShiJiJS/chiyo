@@ -1,10 +1,13 @@
 import 'dart:ui' show PointerDeviceKind;
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:info_desktop/ui.dart';
 import 'package:info_desktop/desktop_scroll.dart';
 import 'package:info_desktop/desktop_interaction_host.dart';
+import 'package:info_desktop/settings_controls.dart';
+import 'package:info_desktop/prototype_dialog.dart';
 
 Widget host(Widget child) => MaterialApp(
   theme: informationTheme().copyWith(platform: TargetPlatform.windows),
@@ -14,6 +17,51 @@ Widget host(Widget child) => MaterialApp(
 );
 
 void main() {
+  for (final scale in [1.0, 2.0]) {
+    for (final settings in [true, false]) {
+      testWidgets(
+        'dialog close glyph stays whole at $scale text (settings=$settings)',
+        (tester) async {
+          tester.platformDispatcher.textScaleFactorTestValue = scale;
+          addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+          await tester.pumpWidget(
+            host(
+              settings
+                  ? const SettingsDialog(
+                      title: 'Structure',
+                      actions: [],
+                      child: Text('Body'),
+                    )
+                  : PrototypeDialog(
+                      title: 'Structure',
+                      onClose: () {},
+                      body: const Text('Body'),
+                    ),
+            ),
+          );
+          await tester.pumpAndSettle();
+          final paragraph = tester.renderObject<RenderParagraph>(
+            find.descendant(
+              of: find.text('×'),
+              matching: find.byType(RichText),
+            ),
+          );
+          final glyph = paragraph
+              .getBoxesForSelection(
+                const TextSelection(baseOffset: 0, extentOffset: 1),
+              )
+              .single
+              .toRect();
+          expect(glyph.left, greaterThanOrEqualTo(-.01));
+          expect(glyph.right, lessThanOrEqualTo(paragraph.size.width + .01));
+          expect(glyph.bottom, lessThanOrEqualTo(paragraph.size.height + .01));
+          expect(find.text('×').hitTestable(), findsOneWidget);
+          expect(tester.takeException(), isNull);
+        },
+      );
+    }
+  }
+
   testWidgets(
     'popup aligns in an inset navigator such as the Windows title frame',
     (tester) async {
