@@ -128,7 +128,9 @@ def main():
         state['cases'].append({'label': case, 'exitCode': code, **facts})
         save()
         print(case, code, flush=True)
-        assert code == 0 and not facts.get('failed')
+        assert code == 0 and not facts.get('failed'), (
+            f"{case}: native exit {code}; failed={facts.get('failed')}; "
+            f"errorType={facts.get('errorType')}")
         assert facts['nativeTerminationRequested'] and facts['flutterErrors'] == 0
         if label == 'current':
             assert facts['complete'] and facts['keyCreates'] == 0 and facts['libraryCloses'] == 1

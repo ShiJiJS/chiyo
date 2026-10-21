@@ -78,9 +78,10 @@ Future<void> main() async {
       final result = await fixture.runSchemaUpgradeFixture(
         mode == 'seed' ? 'create' : 'inspect',
         root,
+        // The native store returns an immutable view. The shared fixture owns
+        // and clears this mutable copy in its finally block.
         List<int>.of(key),
       );
-      key.fillRange(0, key.length, 0);
       if (mode == 'seed') {
         if (result['status'] != 'ok' || result['schema'] != 20) {
           throw StateError('Actual legacy schema20 seed failed');
