@@ -1,0 +1,95 @@
+Window: "info_desktop", App: info_desktop.
+0 standard window info_desktop, Secondary Actions: Raise
+	1 container info_desktop
+		2 container (settable)
+			3 text (settable) 信息授权
+			4 button (settable) 紫棠
+			5 button (settable) 松石
+			6 button (settable) 雾蓝
+			7 button (settable) 黑白
+			8 button (settable) 访问审批
+			9 button (settable) 信息库
+			10 button (settable) 录入提案
+			11 button (settable) 授权历史
+			12 button (settable) 设置
+			13 text (settable) 信息库
+			14 text (settable) 凭据
+			15 text (settable) 4 项 · 原文默认隐藏
+			16 button (settable) 添加
+			17 container (settable)
+				18 text (settable) 信息库
+				19 text (settable) 凭据详情
+				20 button (settable) 可见性与有效期
+				21 button (settable) 更换版本
+				22 button (settable) 启用
+				23 button (settable) 删除
+			24 button (settable) 信息
+			25 text (settable) 凭据
+			26 text (settable) 凭据形式
+			27 button (settable) 全部凭据
+4
+			28 button (settable) 字符串
+1
+			29 button (settable) 文件
+3
+			30 text (settable) 凭据可以关联多条信息。
+关联只建立引用，使用时仍需审批。
+			31 text field (settable)
+			32 container (settable)
+				33 button (settable) MacPackageSyntheticGh
+字符串凭据
+字符串
+已停用
+				34 button (settable) MacPackageSyntheticAwsGood
+凭据文件
+文件
+已停用
+				35 button (settable) MacPackageSyntheticSsh
+凭据文件
+文件
+已停用
+				36 button (settable) MacPackageSyntheticSshWrong
+凭据文件
+文件
+已停用
+			37 text (settable) 独立保管 · 按次授权
+			38 container (settable)
+				39 text (settable) 凭据 / 文件
+				40 text (settable) MacPackageSyntheticSshWrong
+				41 text (settable) 用途
+				42 text (settable) 当前版本
+				43 text (settable) 到期时间
+				44 text (settable) 凭据文件
+				45 text (settable) 版本 1
+				46 text (settable) 未设置
+				47 text (settable) 错误 SSH 私钥
+				48 text (settable) 432 B · 文件内容不展示
+				49 text (settable) 加密文件
+				50 text (settable) 此凭据当前不可使用
+				51 text (settable) 过期或停用的凭据不能批准新的使用申请。
+				52 text (settable) 可用交付方式
+				53 text (settable) 临时路径 → 参数或环境变量
+				54 text (settable) 运行前生成临时文件，进程结束后尝试清理；不会将凭据放入项目目录。
+				55 text (settable) 文件引用别名
+				56 text (settable) CREDENTIAL_FILE
+				57 text (settable) 最近使用
+				58 text (settable) 尚未使用
+				59 text (settable) 关联信息
+				60 text (settable) 0 条
+				61 text (settable) 尚未关联信息。可在信息详情中添加关联。
+				62 text (settable) 运行时注入会让目标程序接触原文。此方式减少对话中的暴露，不提供同用户进程间的强隔离。
+			63 button (settable) 版本与恢复
+			64 text (settable) 关联不等于授权
+			65 button (settable) 查看使用记录 →
+	66 close button
+	67 full screen button Help: this button also has an action to zoom the window, Secondary Actions: zoom the window
+	68 minimize button
+	69 text info_desktop
+70 menu bar
+	71 info_desktop
+	72 Edit
+	73 View
+	74 Window
+	75 Help
+
+The focused UI element is 1 container info_desktop

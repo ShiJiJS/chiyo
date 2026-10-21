@@ -1,0 +1,3 @@
+							371 text field (selected, settable) Value: 空 普通附件.txt, Secondary Actions: Open Finder item, URL: file:///Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue50-installed-ssh-1/%E4%B8%AD%E6%96%87%20SSH%20%E5%90%88%E6%88%90%E7%9B%AE%E5%BD%95/%E7%A9%BA%20%E6%99%AE%E9%80%9A%E9%99%84%E4%BB%B6.txt
+		401 button Cancel, ID: CancelButton
+		402 button Open, ID: OKButton

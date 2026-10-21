@@ -137,3 +137,5 @@ docs/development/evidence/macos-signed-schema-runtime/raw/** -text -diff
 docs/development/evidence/macos-stable-codex-materials/raw/** -text -diff
 
 docs/development/evidence/macos-installed-aws/raw/** -text -diff
+
+docs/development/evidence/macos-installed-ssh/raw/** -text -diff

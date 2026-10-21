@@ -1,0 +1,51 @@
+Window: "info_desktop", App: info_desktop.
+0 standard window info_desktop, Secondary Actions: Raise
+	1 container info_desktop
+		2 container (settable)
+			3 text (settable) 信息授权
+			4 button (settable) 紫棠
+			5 button (settable) 松石
+			6 button (settable) 雾蓝
+			7 button (settable) 黑白
+			8 button (settable) 访问审批
+			9 button (settable) 信息库
+			10 button (settable) 录入提案
+			11 button (settable) 授权历史
+			12 button (settable) 设置
+			13 container (settable)
+				14 text (settable) 设置
+				15 button (settable) 外观
+主题与界面颜色
+				16 button (settable) 通知
+访问申请提醒
+				17 button (settable) 请求与记录
+等待时间与保留期限
+				18 button (settable) 录入模板
+常用信息的字段结构
+				19 button (settable) 备份与恢复
+加密导出与恢复密钥
+				20 button (settable) 应用运行
+后台运行与本机服务
+				21 button (settable) SSH 主机信任
+确认 SSH 服务器身份
+			22 text (settable) SSH 主机信任
+			23 text (settable) 明确确认主机记录，让每次 SSH 使用都连接到预期的服务器。
+			24 text (settable) 已确认的主机记录
+			25 text (settable) 尚未确认。SSH 使用申请会被拒绝，其他凭据接收方式不受影响。
+			26 button (settable) 导入主机记录
+			27 text (settable) 每次审批固定一份快照
+			28 text (settable) SSH 使用严格主机校验、所选私钥和独立空配置，不会自动读取个人 known_hosts、配置或 ssh-agent。未知主机或主机密钥变化时直接失败；请通过可信来源核对后再替换记录。
+			29 text (settable) 主机记录未保存
+			30 text (settable) 未能导入主机记录。请检查文件内容和本机存储，原有确认记录保持不变。
+	31 close button
+	32 full screen button Help: this button also has an action to zoom the window, Secondary Actions: zoom the window
+	33 minimize button
+	34 text info_desktop
+35 menu bar
+	36 info_desktop
+	37 Edit
+	38 View
+	39 Window
+	40 Help
+
+The focused UI element is 1 container info_desktop
