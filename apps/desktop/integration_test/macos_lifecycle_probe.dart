@@ -275,7 +275,7 @@ Future<void> main() async {
           'storageFailure': failureCode,
         }),
       );
-      if (mode.startsWith('ui-')) {
+      if (mode?.startsWith('ui-') == true) {
         stdout.writeln('MAC_LIFECYCLE_READY=$mode');
         await Future<void>.delayed(const Duration(minutes: 30));
         throw StateError('Actual startup-error UI close deadline');
