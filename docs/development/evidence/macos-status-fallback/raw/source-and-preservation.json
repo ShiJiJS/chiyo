@@ -1,0 +1,28 @@
+{
+  "issue46-status-baseline-1": {
+    "expectedBaselineRegression": true,
+    "all634InputsVerified": true,
+    "inputCount": 634,
+    "inputMismatches": [],
+    "onlyDocumentedNativeQAInjection": true,
+    "nativeProductionSha256": "f257f64aa7fdd4008a07bd0f642b2aadb3dff068803d554fd80a4d2fcd1b6178"
+  },
+  "issue46-status-fixed-1": {
+    "expectedBaselineRegression": false,
+    "all634InputsVerified": true,
+    "inputCount": 634,
+    "inputMismatches": [],
+    "onlyDocumentedNativeQAInjection": true,
+    "nativeProductionSha256": "83fc82a2282d6bde3e1df7052febd5b0fe89009728728729cdd6d49bd97b686a"
+  },
+  "ordinary": {
+    "sourceCommit": "4690e79357bb728da22193d8dadd6dc8a8ce2ce6",
+    "payloadEntriesVerified": 7971,
+    "mismatches": [],
+    "strictSignatureExitCode": 0,
+    "stablePid": 53592,
+    "projectAppCount": 1,
+    "generatedDSYMCount": 0,
+    "sdkCachesExcluded": true
+  }
+}
