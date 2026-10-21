@@ -4,6 +4,8 @@
 --prepare-only builds without launching or requesting system access. --resume
 uses those exact binaries, requires real owner approval in the production
 recovery UI, then checks old-reader refusal and current-process reopening.
+Without a mode, only preparation runs; --run-interactive explicitly opts into
+building and launching a new system-Keychain test that may need the owner.
 The legacy Mac host is current native scaffolding with pinned old core/storage;
 there was no released legacy Mac app. No production profile/key is accessed.
 """
@@ -39,12 +41,17 @@ def main():
     parser.add_argument('output', type=Path)
     modes = parser.add_mutually_exclusive_group()
     modes.add_argument('--prepare-only', action='store_true')
+    modes.add_argument('--run-interactive', action='store_true',
+                       help='Build and launch a new dedicated Keychain test; may require owner interaction')
     modes.add_argument('--resume', action='store_true')
     modes.add_argument('--archive-prepared', action='store_true',
                        help='Archive prepared unlaunched apps and remove generated app/cache duplicates')
     modes.add_argument('--verify-prepared', action='store_true',
                        help='Restore and verify exact prepared apps, then clean them without launch or Keychain access')
     args = parser.parse_args()
+    if not any((args.prepare_only, args.run_interactive, args.resume,
+                args.archive_prepared, args.verify_prepared)):
+        args.prepare_only = True
     if os.uname().sysname != 'Darwin':
         parser.error('macOS required')
     out = args.output.resolve()

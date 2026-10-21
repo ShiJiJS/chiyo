@@ -86,7 +86,11 @@ Future<void> main() async {
   final db = File('$actual/library/library.db');
   final originalBytes = await db.readAsBytes();
   final baseline =
-      jsonDecode(await File('$actual/legacy-baseline.json').readAsString())
+      jsonDecode(
+            await File(
+              '$actual/${mode == 'upgrade' ? 'legacy-baseline' : 'upgrade-post-verification-baseline'}.json',
+            ).readAsString(),
+          )
           as Map;
   var flutterErrors = 0, closes = 0, attempts = 0;
   FlutterError.onError = (details) {
@@ -115,6 +119,18 @@ Future<void> main() async {
 
   platform.beforeTerminate = () async {
     await WidgetsBinding.instance.endOfFrame;
+    if (mode == 'upgrade' && facts['complete'] == true) {
+      _check(closes == 1, 'Capture reopen baseline only after library close');
+      final snapshot = await fixture.runSchemaUpgradeFixture(
+        'snapshot',
+        root,
+        List<int>.of((interactive.last ?? ordinary.last)!),
+      );
+      await File(
+        '$actual/upgrade-post-verification-baseline.json',
+      ).writeAsString(jsonEncode(snapshot), flush: true);
+      facts['snapshotAfterVerificationAndLibraryClose'] = snapshot;
+    }
     ordinary.clear();
     interactive.clear();
     facts.addAll({
@@ -197,24 +213,11 @@ Future<void> main() async {
       root,
       List<int>.of(key!),
     );
-    _check(
-      snapshot['schema'] == 21 &&
-          snapshot['marker'] == 21 &&
-          snapshot['integrity'] == 'ok',
-      'Current production startup did not migrate to schema21',
-    );
-    final tables = snapshot['tables'] as Map;
-    for (final entry in (baseline['tables'] as Map).entries) {
-      if (entry.key == 'information_draft_commits') continue;
-      _check(
-        jsonEncode(tables[entry.key]) == jsonEncode(entry.value),
-        'Durable legacy table changed: ${entry.key}',
-      );
-    }
-    _check(
-      (tables['information_draft_commits'] as Map)['rows'] == 0 &&
-          (tables['information_deliveries'] as Map)['rows'] == 0,
-      'Transient drafts or new delivery registry invalid',
+    facts['snapshotBeforeVerificationOperations'] = snapshot;
+    fixture.verifySchemaUpgradeSnapshot(
+      snapshot,
+      baseline,
+      migratingLegacy: mode == 'upgrade',
     );
     final old =
         jsonDecode(
@@ -257,14 +260,16 @@ Future<void> main() async {
     }
     facts.addAll({
       'complete': true,
-      'snapshotBeforeVerificationOperations': snapshot,
-      'allDurableLegacyRowsPreserved': true,
+      'allExpectedDurableRowsPreserved': true,
+      if (mode == 'upgrade') 'allDurableLegacyRowsPreserved': true,
+      if (mode == 'reopen') 'postVerificationBaselinePreserved': true,
       'transientDraftsClearedAsDesigned': true,
       'twoAttachmentOriginalsAndRelationshipsPreserved': true,
       'oldAuthorityRefused': true,
       'cipherVersion': repository!.cipherVersion,
       'systemDecisionIsFixture': false,
-      'productionStartupPerformedMigration': true,
+      'productionStartupPerformedMigration': mode == 'upgrade',
+      if (mode == 'reopen') 'reopenedWithoutOwnerAccess': attempts == 0,
     });
     _check(flutterErrors == 0, 'Flutter reported an exception');
     await bootstrap.runtime!.quit();

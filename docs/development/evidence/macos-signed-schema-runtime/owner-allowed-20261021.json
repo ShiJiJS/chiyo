@@ -1,0 +1,448 @@
+{
+  "snapshot": "2026-10-21 owner allowed: real signed upgrade passed; full joint run failed at QA reopen baseline; corrected validator passed noninteractive AOT regression",
+  "completeJointAcceptance": false,
+  "sourceOfExecutedNativeRun": "26da28ffafc3537ad3794d954ce58b12a2968ae2",
+  "legacySource": "dbb94ac1427b95c5a7bfee5011e414876c22c63e",
+  "nativeCases": [
+    {
+      "label": "legacy-real-keychain-schema20",
+      "exitCode": 0,
+      "flutterErrors": 0
+    },
+    {
+      "label": "current-owner-allowed-migration",
+      "exitCode": 0,
+      "complete": true,
+      "flutterErrors": 0,
+      "libraryCloses": 1,
+      "keyCreates": 0,
+      "actualOwnerAccessAttempts": 1
+    },
+    {
+      "label": "legacy-refuses-upgraded-schema",
+      "exitCode": 0,
+      "flutterErrors": 0
+    },
+    {
+      "label": "current-signed-process-reopen",
+      "exitCode": 1,
+      "complete": false,
+      "failed": true,
+      "checkFailure": "Durable legacy table changed: access_records"
+    },
+    {
+      "label": "failure-original-key-cleanup",
+      "exitCode": 0,
+      "flutterErrors": 0,
+      "ownedKeyDeletedAndAbsenceVerified": true
+    }
+  ],
+  "productionUpgrade": {
+    "schema": 21,
+    "marker": 21,
+    "integrity": "ok",
+    "durableLegacyTablesPreserved": 28,
+    "attachmentVersionsAndOriginalsPreserved": 2,
+    "oldAuthorityRefused": true,
+    "originalKeyReadAfterActualOwnerAllow": true,
+    "replacementKeys": 0,
+    "nativeExitCode": 0,
+    "flutterErrors": 0,
+    "libraryCloses": 1,
+    "oldReaderRefusedUnsupportedSchemaWithoutChangingDatabase": true
+  },
+  "nativeReopen": {
+    "originalKeyStartupAndSQLCipherSnapshotReached": true,
+    "additionalOwnerActionRequested": false,
+    "nativeExitCode": 1,
+    "fullSuccessfulCloseNotProven": true,
+    "failure": "Compared pre-verification legacy baseline against audit history including prior test rejection; access_records mismatch"
+  },
+  "correction": {
+    "scope": "QA validator/runner only; production core, storage and Keychain unchanged",
+    "baseline": "Capture upgrade snapshot after verification and normal library close; reopen strictly compares all tables to that snapshot",
+    "retainsFirstMigrationLegacyRowCheck": true,
+    "defaultRunnerMode": "prepare-only; launching a new test now requires --run-interactive or --resume",
+    "signedNativeCorrectedRerun": false,
+    "noninteractiveAOTCases": 10,
+    "noninteractiveCommandPhases": 19,
+    "actualMigrationAndReopenBaselinesAccepted": true,
+    "changedTableDigestsRejected": 30,
+    "oldBaselineAndMissingTableRejected": true,
+    "noKeychainOrSystemPromptInRegression": true,
+    "strictFlutterAnalysisPassed": true
+  },
+  "cleanup": {
+    "checkedAt": "2026-10-21T14:25:23.882413+00:00",
+    "scope": "Project excluding .tools and .cache toolchains",
+    "apps": [
+      "local/中文 Mac 预览/AgentInfoManage/app/info_desktop.app"
+    ],
+    "dSYM": [],
+    "ownedFixtureRemoved": true,
+    "privateControllerAbsent": true
+  },
+  "scope": "Dedicated synthetic Keychain item, root and QA identity only; not ordinary4690 package or historically released old Mac app. No system decision injection. Existing pending snapshot retained unchanged. Passwords, keys, DBs and private controller excluded.",
+  "rawFiles": [
+    {
+      "path": "raw/owner-allowed-20261021/native/result.json",
+      "bytes": 174085,
+      "sha256": "b5e20d5d7a878691b9458750ab7d7e3532ef248ff48be584c32b04efad0ee047"
+    },
+    {
+      "path": "raw/owner-allowed-20261021/native/logs/current-analyze.txt",
+      "bytes": 96,
+      "sha256": "23d78d9f12385e1af6a015a98b93e08553e3f365d1afe9e0fab8137463e6c050"
+    },
+    {
+      "path": "raw/owner-allowed-20261021/native/logs/current-build.txt",
+      "bytes": 14467,
+      "sha256": "9d91f59abd5611a33492b866b19e36a4be96525377d562f9188236d0847db521"
+    },
+    {
+      "path": "raw/owner-allowed-20261021/native/logs/current-owner-allowed-migration.txt",
+      "bytes": 312,
+      "sha256": "0c7b47309531a2e40cde103f5fd794dcb53e720f7ef6dfbe0f38aa7819111804"
+    },
+    {
+      "path": "raw/owner-allowed-20261021/native/logs/current-pub-desktop.txt",
+      "bytes": 225,
+      "sha256": "140c91be887348ac9d362e6208e5540eb783c747962d3d5de3f7cec67f716bf2"
+    },
+    {
+      "path": "raw/owner-allowed-20261021/native/logs/current-pub-info_cli.txt",
+      "bytes": 68,
+      "sha256": "d4cb7a3c68b4133b4f6e58c67ff5bfd13725d8021e930388cdc98da8a575919d"
+    },
+    {
+      "path": "raw/owner-allowed-20261021/native/logs/current-pub-info_core.txt",
+      "bytes": 68,
+      "sha256": "d4cb7a3c68b4133b4f6e58c67ff5bfd13725d8021e930388cdc98da8a575919d"
+    },
+    {
+      "path": "raw/owner-allowed-20261021/native/logs/current-pub-info_storage.txt",
+      "bytes": 68,
+      "sha256": "d4cb7a3c68b4133b4f6e58c67ff5bfd13725d8021e930388cdc98da8a575919d"
+    },
+    {
+      "path": "raw/owner-allowed-20261021/native/logs/current-resume-signature.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/owner-allowed-20261021/native/logs/current-signature-details.txt",
+      "bytes": 1644,
+      "sha256": "fbc1cbbf23ad1d51c809d1d0a2df787e98d96fa5a20b81fdc1e898845d83855a"
+    },
+    {
+      "path": "raw/owner-allowed-20261021/native/logs/current-signature.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/owner-allowed-20261021/native/logs/current-signed-process-reopen.txt",
+      "bytes": 132,
+      "sha256": "dbc01fad753a943417e50e983fddc5339e7268c74255b60f06d0b78ea171aa93"
+    },
+    {
+      "path": "raw/owner-allowed-20261021/native/logs/failure-original-key-cleanup.txt",
+      "bytes": 281,
+      "sha256": "5272b26d842416b93aa42ec43816a156188d60ed403fc92d86f94e3d7fccf140"
+    },
+    {
+      "path": "raw/owner-allowed-20261021/native/logs/legacy-analyze.txt",
+      "bytes": 96,
+      "sha256": "935808c1371161ef0bd55ddf34e66b4ddf2b737e25903a5fd9dddefb342838f9"
+    },
+    {
+      "path": "raw/owner-allowed-20261021/native/logs/legacy-build.txt",
+      "bytes": 14449,
+      "sha256": "7dcb7ab0a2dd697218e829547102e12a9398fdbc999f8f715203180989fb05bb"
+    },
+    {
+      "path": "raw/owner-allowed-20261021/native/logs/legacy-pub-desktop.txt",
+      "bytes": 225,
+      "sha256": "140c91be887348ac9d362e6208e5540eb783c747962d3d5de3f7cec67f716bf2"
+    },
+    {
+      "path": "raw/owner-allowed-20261021/native/logs/legacy-pub-info_core.txt",
+      "bytes": 68,
+      "sha256": "d4cb7a3c68b4133b4f6e58c67ff5bfd13725d8021e930388cdc98da8a575919d"
+    },
+    {
+      "path": "raw/owner-allowed-20261021/native/logs/legacy-pub-info_storage.txt",
+      "bytes": 68,
+      "sha256": "d4cb7a3c68b4133b4f6e58c67ff5bfd13725d8021e930388cdc98da8a575919d"
+    },
+    {
+      "path": "raw/owner-allowed-20261021/native/logs/legacy-real-keychain-schema20.txt",
+      "bytes": 281,
+      "sha256": "5272b26d842416b93aa42ec43816a156188d60ed403fc92d86f94e3d7fccf140"
+    },
+    {
+      "path": "raw/owner-allowed-20261021/native/logs/legacy-refuses-upgraded-schema.txt",
+      "bytes": 281,
+      "sha256": "5272b26d842416b93aa42ec43816a156188d60ed403fc92d86f94e3d7fccf140"
+    },
+    {
+      "path": "raw/owner-allowed-20261021/native/logs/legacy-resume-signature.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/owner-allowed-20261021/native/logs/legacy-signature-details.txt",
+      "bytes": 1643,
+      "sha256": "b2d912a71634c220e406f24219c01978113129788f885471aa2a4687aaa50fd6"
+    },
+    {
+      "path": "raw/owner-allowed-20261021/native/logs/legacy-signature.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/owner-allowed-20261021/native/logs/legacy-source-archive.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/owner-allowed-20261021/native/executed-source/apps/desktop/integration_test/macos_schema_keychain_upgrade.dart.txt",
+      "bytes": 9689,
+      "sha256": "78192673940b3b0e664706f4b56cb6f9a0309ea1f0583ac5967539881afa2d6e"
+    },
+    {
+      "path": "raw/owner-allowed-20261021/native/executed-source/scripts/qa/macos-schema-keychain.py.txt",
+      "bytes": 17870,
+      "sha256": "6791eb9dc432f4e71af1338e9ab2fbcd6c68f5f545b2a3f9a045264ed01c536f"
+    },
+    {
+      "path": "raw/owner-allowed-20261021/native/executed-source/scripts/qa/macos-schema-upgrade-probe.dart.txt",
+      "bytes": 9396,
+      "sha256": "d7f17104f7a8b7273616e5e9be6012658cf3a70ff0d1ead4af40cc81b1a65518"
+    },
+    {
+      "path": "raw/owner-allowed-20261021/regression/result.json",
+      "bytes": 75156,
+      "sha256": "56b756549b82c5ee79e6ac2556ccf3e18392ab0a386eba94370e124c6c63bb8a"
+    },
+    {
+      "path": "raw/owner-allowed-20261021/regression/conflicting-migration-refused.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/owner-allowed-20261021/regression/conflicting-migration-refused.stdout.txt",
+      "bytes": 87,
+      "sha256": "9dec32b33dc9ff63fe08c31d449ccd88dd3dc06f3f770b085b3eb0a79f2307ed"
+    },
+    {
+      "path": "raw/owner-allowed-20261021/regression/controlled-registry-conflict.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/owner-allowed-20261021/regression/controlled-registry-conflict.stdout.txt",
+      "bytes": 3361,
+      "sha256": "ea510767bc0aac2af58eb256fe285c819b242d519ffa2e38827104f1df870f40"
+    },
+    {
+      "path": "raw/owner-allowed-20261021/regression/current-analyze.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/owner-allowed-20261021/regression/current-analyze.stdout.txt",
+      "bytes": 62,
+      "sha256": "9a24c287709f0486ec326a89679b72699535f2b52bd8c667c20a6dd54a0e345f"
+    },
+    {
+      "path": "raw/owner-allowed-20261021/regression/current-aot.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/owner-allowed-20261021/regression/current-aot.stdout.txt",
+      "bytes": 319,
+      "sha256": "20e351bb6bfbe452f00ceb33925649dd6b0ca81f8f066fe0e3480354fb7a3c5e"
+    },
+    {
+      "path": "raw/owner-allowed-20261021/regression/current-archive.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/owner-allowed-20261021/regression/current-archive.stdout.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/owner-allowed-20261021/regression/current-dependencies.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/owner-allowed-20261021/regression/current-dependencies.stdout.txt",
+      "bytes": 68,
+      "sha256": "d4cb7a3c68b4133b4f6e58c67ff5bfd13725d8021e930388cdc98da8a575919d"
+    },
+    {
+      "path": "raw/owner-allowed-20261021/regression/current-reader-reopens.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/owner-allowed-20261021/regression/current-reader-reopens.stdout.txt",
+      "bytes": 6743,
+      "sha256": "83389e12db6896f3727487d0b0878bdf5aec0cf81833ddfe52d49f021c96b080"
+    },
+    {
+      "path": "raw/owner-allowed-20261021/regression/legacy-analyze.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/owner-allowed-20261021/regression/legacy-analyze.stdout.txt",
+      "bytes": 62,
+      "sha256": "9a24c287709f0486ec326a89679b72699535f2b52bd8c667c20a6dd54a0e345f"
+    },
+    {
+      "path": "raw/owner-allowed-20261021/regression/legacy-aot.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/owner-allowed-20261021/regression/legacy-aot.stdout.txt",
+      "bytes": 318,
+      "sha256": "41a4fe258306a60df0f4a52bbe467c23169fbbed7a187f122929d96749ccbaec"
+    },
+    {
+      "path": "raw/owner-allowed-20261021/regression/legacy-archive.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/owner-allowed-20261021/regression/legacy-archive.stdout.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/owner-allowed-20261021/regression/legacy-dependencies.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/owner-allowed-20261021/regression/legacy-dependencies.stdout.txt",
+      "bytes": 68,
+      "sha256": "d4cb7a3c68b4133b4f6e58c67ff5bfd13725d8021e930388cdc98da8a575919d"
+    },
+    {
+      "path": "raw/owner-allowed-20261021/regression/migrated-raw-snapshot.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/owner-allowed-20261021/regression/migrated-raw-snapshot.stdout.txt",
+      "bytes": 3332,
+      "sha256": "f7b85fc880ffdfa95e8bfe417b927a15591a44ad62bde640eb6a1164786d132d"
+    },
+    {
+      "path": "raw/owner-allowed-20261021/regression/old-raw-snapshot.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/owner-allowed-20261021/regression/old-raw-snapshot.stdout.txt",
+      "bytes": 3220,
+      "sha256": "2a81ff9078cb62250a5d8c50294dbcf5fce4077781e536e327d05b5ec5ecb269"
+    },
+    {
+      "path": "raw/owner-allowed-20261021/regression/old-reader-refuses-new-schema.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/owner-allowed-20261021/regression/old-reader-refuses-new-schema.stdout.txt",
+      "bytes": 87,
+      "sha256": "9dec32b33dc9ff63fe08c31d449ccd88dd3dc06f3f770b085b3eb0a79f2307ed"
+    },
+    {
+      "path": "raw/owner-allowed-20261021/regression/old-schema20-create.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/owner-allowed-20261021/regression/old-schema20-create.stdout.txt",
+      "bytes": 3283,
+      "sha256": "7deb65fe9a317aefb04cb74854d8cd44242113c18a649b02d5c0da7b4c4e86e1"
+    },
+    {
+      "path": "raw/owner-allowed-20261021/regression/remove-only-owned-conflict.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/owner-allowed-20261021/regression/remove-only-owned-conflict.stdout.txt",
+      "bytes": 3247,
+      "sha256": "101d4eba184406e181579d6b6b5071823392cb623f984707f506668afbc68cb4"
+    },
+    {
+      "path": "raw/owner-allowed-20261021/regression/same-target-migration-retry.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/owner-allowed-20261021/regression/same-target-migration-retry.stdout.txt",
+      "bytes": 6743,
+      "sha256": "c81c083ec4db1be8a20ad38119d040f39d0bf81a496236536b2cd884b065bdd5"
+    },
+    {
+      "path": "raw/owner-allowed-20261021/regression/signed-host-baseline-validator.stderr.txt",
+      "bytes": 44,
+      "sha256": "dd35d399349c10aa3a96d7b290940c947560d0a57270cc0c46cfa73c85128ef6"
+    },
+    {
+      "path": "raw/owner-allowed-20261021/regression/signed-host-baseline-validator.stdout.txt",
+      "bytes": 116,
+      "sha256": "0a52daaf25c10131d9a6cc8b078fa233f21746028d03d9af344bed0fd55525f5"
+    },
+    {
+      "path": "raw/owner-allowed-20261021/regression/wrong-key-refused.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/owner-allowed-20261021/regression/wrong-key-refused.stdout.txt",
+      "bytes": 88,
+      "sha256": "96211806214ef60774aeae21332899b656438a15744cd9e7eaac16dd07ada2d7"
+    },
+    {
+      "path": "raw/owner-allowed-20261021/corrected-source/apps/desktop/integration_test/macos_schema_keychain_upgrade.dart.txt",
+      "bytes": 9946,
+      "sha256": "b9d6cce9b23540823e8eae63a997a1a356cddf5de051ec7c06f697748cffcea9"
+    },
+    {
+      "path": "raw/owner-allowed-20261021/corrected-source/scripts/qa/macos-schema-keychain.py.txt",
+      "bytes": 18363,
+      "sha256": "e4866ba7cf89fecd4e14bac793e35d292827abffbf52734ed4b5645c12659fe1"
+    },
+    {
+      "path": "raw/owner-allowed-20261021/corrected-source/scripts/qa/macos-schema-upgrade-probe.dart.txt",
+      "bytes": 10695,
+      "sha256": "ae1a3a7253e757cf4b4a6d9803c397aebca165c2796c314c972b2df224b357a4"
+    },
+    {
+      "path": "raw/owner-allowed-20261021/corrected-source/scripts/qa/macos-schema-upgrade.py.txt",
+      "bytes": 9242,
+      "sha256": "9c55718e510f4bc0390bdda60855509aec7ce13b9648648d1e6779c8bb88eb16"
+    },
+    {
+      "path": "raw/owner-allowed-20261021/corrected-source/scripts/qa/macos-schema-baseline-check.dart.txt",
+      "bytes": 1948,
+      "sha256": "5a149a5ad21be225c60ec98d72b77e0ba5400910036d719daa6ab983dee95802"
+    },
+    {
+      "path": "raw/owner-allowed-20261021/cleanup-inventory.json",
+      "bytes": 279,
+      "sha256": "a64c0a3e673f32f003b6cede674c33962b50b80fc87824253862cd0fe15b2529"
+    }
+  ]
+}

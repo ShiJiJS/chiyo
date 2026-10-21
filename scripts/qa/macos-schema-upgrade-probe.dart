@@ -18,6 +18,38 @@ class _Keys implements DatabaseKeyStore {
       throw StateError('Unexpected key creation');
 }
 
+/// Migration compares against the old library; reopening compares against the
+/// last completed run, including audit rows created by verification itself.
+void verifySchemaUpgradeSnapshot(
+  Map snapshot,
+  Map baseline, {
+  required bool migratingLegacy,
+}) {
+  if (snapshot['schema'] != 21 ||
+      snapshot['marker'] != 21 ||
+      snapshot['integrity'] != 'ok' ||
+      baseline['schema'] != (migratingLegacy ? 20 : 21)) {
+    throw StateError('Invalid migration/reopen snapshot');
+  }
+  final tables = snapshot['tables'] as Map;
+  final expected = baseline['tables'] as Map;
+  final names = {...expected.keys};
+  if (migratingLegacy) names.add('information_deliveries');
+  if (tables.length != names.length || !names.containsAll(tables.keys)) {
+    throw StateError('Migration/reopen table set changed');
+  }
+  for (final entry in expected.entries) {
+    if (migratingLegacy && entry.key == 'information_draft_commits') continue;
+    if (jsonEncode(tables[entry.key]) != jsonEncode(entry.value)) {
+      throw StateError('Durable expected table changed: ${entry.key}');
+    }
+  }
+  if ((tables['information_draft_commits'] as Map)['rows'] != 0 ||
+      (tables['information_deliveries'] as Map)['rows'] != 0) {
+    throw StateError('Transient drafts or new delivery registry invalid');
+  }
+}
+
 Future<void> main(List<String> args) async {
   if (!Platform.isMacOS ||
       args.length != 2 ||
