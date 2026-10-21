@@ -18,6 +18,9 @@ class _Keys implements DatabaseKeyStore {
 }
 
 class _Panels extends NativeBackupFilePicker {
+  _Panels(this.root);
+  final String root;
+  var stagingObservation = 0;
   String? savedKey, exported;
   final events = <Map<String, Object?>>[];
   void event(String kind, [Object? value]) {
@@ -59,6 +62,22 @@ class _Panels extends NativeBackupFilePicker {
   Future<BackupStaging?> prepareStaging(String output) async {
     final staging = await super.prepareStaging(output);
     event('stagingPrepared', staging?.directory);
+    if (staging != null) {
+      final index = ++stagingObservation;
+      await File('$root/staging-observation-$index.json').writeAsString(
+        jsonEncode({
+          'directory': staging.directory,
+          'destinationParent': File(output).parent.path,
+        }),
+        flush: true,
+      );
+      // The parent only observes stat.st_dev, then releases this QA wait.
+      // File selection and staging still use the production native channel.
+      await until(
+        () => File('$root/staging-observed-$index').exists(),
+        'observe-native-staging-$index',
+      );
+    }
     return staging;
   }
 
@@ -87,9 +106,12 @@ Future<void> until(FutureOr<bool> Function() done, String phase) async {
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   if (!Platform.isMacOS) exit(64);
+  final owner = Platform.environment['MAC_BACKUP_QA_OWNER'];
+  if (owner == null || !RegExp(r'^[a-f0-9]{32}$').hasMatch(owner)) exit(64);
   final root = await Directory.systemTemp.createTemp('aim-mac-backup-panel-');
+  await File('${root.path}/.qa-owner').writeAsString(owner, flush: true);
   stdout.writeln('MAC_BACKUP_ROOT=${root.path}');
-  final sourceKeys = _Keys(), targetKeys = _Keys(), panels = _Panels();
+  final sourceKeys = _Keys(), targetKeys = _Keys(), panels = _Panels(root.path);
   var repository = await EncryptedInformationRepository.open(
     '${root.path}/source',
     sourceKeys,
@@ -294,7 +316,8 @@ Future<void> main() async {
       final base = await Directory.systemTemp.resolveSymbolicLinks();
       final actual = await root.resolveSymbolicLinks();
       check(
-        actual.startsWith('$base/aim-mac-backup-panel-'),
+        actual.startsWith('$base/aim-mac-backup-panel-') &&
+            await File('$actual/.qa-owner').readAsString() == owner,
         'Foreign temporary root',
       );
       await root.delete(recursive: true);
