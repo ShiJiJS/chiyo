@@ -1,0 +1,19 @@
+{
+  "generatedApps": 0,
+  "generatedDSYM": 0,
+  "retainedInstalledApp": "local/中文 Mac 预览/AgentInfoManage/app/info_desktop.app",
+  "preparedArchivesOnly": {
+    "legacy": {
+      "file": "prepared-legacy.zip",
+      "sha256": "98d48d4b20f1bb4dc37e4dbbf5bb14ad7da55e6a4e95e6f7345cf1531554e70f",
+      "bytes": 32521115
+    },
+    "current": {
+      "file": "prepared-current.zip",
+      "sha256": "ebd56936e80fe35c232b8d4f4e5bb151929659b424270b0d8dedd2decd2e151f",
+      "bytes": 38779993
+    }
+  },
+  "noNewKeychainAccessOrFixtureCreated": true,
+  "nativeCasesLaunched": 0
+}
