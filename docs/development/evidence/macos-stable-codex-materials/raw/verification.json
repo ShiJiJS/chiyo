@@ -1,0 +1,100 @@
+{
+  "packageSource": "4690e79357bb728da22193d8dadd6dc8a8ce2ce6",
+  "release": "0.4.0+12-mac-dev.4690e79357bb",
+  "bundle": "/Users/jiangxinyi/Documents/Project/agent-info/local/中文 Mac 预览/Codex 接入材料",
+  "workspace": "/Users/jiangxinyi/Documents/Project/agent-info/local/中文 Mac 预览/正式包合成验收项目",
+  "generatorRuntimePath": "/usr/bin:/bin",
+  "generatorRequiresSDK": false,
+  "developerWorkspacePreparerRequiresPython": true,
+  "shippedBinaryHashesMatchManifest": true,
+  "binariesExecutable": true,
+  "events": [
+    "SessionStart",
+    "SubagentStart",
+    "SessionEnd"
+  ],
+  "sessionEndTimeoutSeconds": 3,
+  "repeatGenerationExitCode": 64,
+  "repeatGenerationPreservedEveryOutputByteAndMode": true,
+  "clientAcceptance": false,
+  "caseCount": 13,
+  "casesAllNotRun": true,
+  "installedOrTrustedInCodex": false,
+  "existingApprovedProjectChanged": false,
+  "officialHookDoc": "https://learn.chatgpt.com/docs/hooks",
+  "reviewDate": "2026-10-21",
+  "files": {
+    "hooks.json": {
+      "bytes": 2166,
+      "sha256": "93a733359e5b7d12f5a196496b40e119a1d5eac0995ceefa2ee9ca8922ee7956",
+      "mode": "0o644"
+    },
+    "info-codex": {
+      "bytes": 6732512,
+      "sha256": "4a1330ad311b50a2bbfcb4f5f619be78469aa3ef22e3ba19f0cb020abe7347b6",
+      "mode": "0o755"
+    },
+    "info-codex-hook": {
+      "bytes": 6666864,
+      "sha256": "1014f702936dd6f28c9ef27db4a4ae9810bc2d190704fc6d0dae62a8d1134180",
+      "mode": "0o755"
+    },
+    "info-runtime-worker": {
+      "bytes": 6010224,
+      "sha256": "03498f1ad32c962d57dfd44be47cdde3fecacb0966413e3f208644ac23555ef1",
+      "mode": "0o755"
+    },
+    "skills/agent-info-access/SKILL.md": {
+      "bytes": 11522,
+      "sha256": "9ff8ad6617d3ce5f249b7f25820f615be9befcb31b41a3394df1887fed694b15",
+      "mode": "0o644"
+    },
+    "skills/agent-info-access/references/credential-use.md": {
+      "bytes": 14301,
+      "sha256": "f846eadaafc5aabadfa0ea9efe3fd145b8433802535b7371d45296511295c8de",
+      "mode": "0o644"
+    },
+    "skills/agent-info-access/references/information-files.md": {
+      "bytes": 5748,
+      "sha256": "9dc64a5e38d8f88f28a73a8ce8de9656e21138ee0d5b0c9b226cfc7982777209",
+      "mode": "0o644"
+    }
+  },
+  "workspaceFiles": {
+    ".agents/skills/agent-info-access/SKILL.md": {
+      "bytes": 11522,
+      "sha256": "9ff8ad6617d3ce5f249b7f25820f615be9befcb31b41a3394df1887fed694b15",
+      "mode": "0o644"
+    },
+    ".agents/skills/agent-info-access/references/credential-use.md": {
+      "bytes": 14301,
+      "sha256": "f846eadaafc5aabadfa0ea9efe3fd145b8433802535b7371d45296511295c8de",
+      "mode": "0o644"
+    },
+    ".agents/skills/agent-info-access/references/information-files.md": {
+      "bytes": 5748,
+      "sha256": "9dc64a5e38d8f88f28a73a8ce8de9656e21138ee0d5b0c9b226cfc7982777209",
+      "mode": "0o644"
+    },
+    ".codex/hooks.json": {
+      "bytes": 2166,
+      "sha256": "93a733359e5b7d12f5a196496b40e119a1d5eac0995ceefa2ee9ca8922ee7956",
+      "mode": "0o644"
+    },
+    "README.txt": {
+      "bytes": 2338,
+      "sha256": "c27ae387ada041ac2be5302de97185ca5a452c4a2cc306670ebd7cc0ee9e36de",
+      "mode": "0o644"
+    },
+    "acceptance-cases.json": {
+      "bytes": 2059,
+      "sha256": "6c4e4ed10d120679e7ac30b158ef841c43708597eeb34443f3693176144f0498",
+      "mode": "0o644"
+    },
+    "preparation.json": {
+      "bytes": 1622,
+      "sha256": "3aca316127bd402010e3661fdf48e1fc0b0f035fc6e2b0129d759e82e37b43f6",
+      "mode": "0o644"
+    }
+  }
+}
