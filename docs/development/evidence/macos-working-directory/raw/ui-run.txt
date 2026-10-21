@@ -1,0 +1,26 @@
+pub-info_core 0
+pub-info_cli 0
+pub-info_storage 0
+pub-desktop 0
+analyze 0
+build 0
+signature 0
+entitlements 0
+DIRECTORY_UI_READY=choose
+DIRECTORY_FLOW_PASSED=choose
+DIRECTORY_CASE_PASSED=choose
+DIRECTORY_UI_READY=reopen
+DIRECTORY_FLOW_PASSED=reopen
+DIRECTORY_CASE_PASSED=reopen
+DIRECTORY_UI_READY=change
+DIRECTORY_FLOW_PASSED=change
+DIRECTORY_CASE_PASSED=change
+DIRECTORY_UI_READY=reopen-changed
+DIRECTORY_FLOW_PASSED=reopen-changed
+DIRECTORY_CASE_PASSED=reopen-changed
+DIRECTORY_UI_READY=remove
+DIRECTORY_FLOW_PASSED=remove
+DIRECTORY_CASE_PASSED=remove
+DIRECTORY_UI_READY=denied
+DIRECTORY_FLOW_PASSED=denied
+DIRECTORY_CASE_PASSED=denied

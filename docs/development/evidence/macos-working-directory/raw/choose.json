@@ -1,0 +1,52 @@
+{
+  "exitCode": 0,
+  "mode": "choose",
+  "complete": true,
+  "systemKeychainUsed": false,
+  "credentialApproval": "synthetic QA owner API; directory selection uses production UI and actual NSOpenPanel",
+  "initialDirectories": [],
+  "withoutScope": [
+    {
+      "directory": 0,
+      "read": false,
+      "readErrno": 1,
+      "write": false,
+      "writeErrno": 1
+    },
+    {
+      "directory": 1,
+      "read": false,
+      "readErrno": 1,
+      "write": false,
+      "writeErrno": 1
+    }
+  ],
+  "directories": [
+    {
+      "id": "8F880845-E627-4FE3-9102-CEF5441FD2BC",
+      "path": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue44-directory-ui-1/external/读取 中文 空格",
+      "permission": "readOnly",
+      "available": true
+    },
+    {
+      "id": "85A7272B-DA04-48DA-90ED-AB90E06F8A2B",
+      "path": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue44-directory-ui-1/external/读写 中文 空格",
+      "permission": "readWrite",
+      "available": true
+    }
+  ],
+  "initialSessionAccess": [
+    {
+      "directory": 0,
+      "read": true,
+      "write": true
+    },
+    {
+      "directory": 1,
+      "read": true,
+      "write": true
+    }
+  ],
+  "libraryCloses": 1,
+  "flutterErrors": 0
+}

@@ -1,0 +1,19 @@
+{
+  "balancedScopeCalls" : true,
+  "failed" : 0,
+  "passed" : [
+    "legacy read-only archive is restored without rewriting or recreating tokens",
+    "explicit range survives restart; failed range change retains saved token and scope",
+    "save, deduplicate, private permissions and no bookmark response",
+    "reopen restores, deinit balances access",
+    "failed save\/remove preserves previous archive and active entry",
+    "stale and denied bookmarks require reselect without deleting records",
+    "duplicate replacement and oversized bookmark preserve active entries",
+    "missing directory is unavailable and releases active scope",
+    "forget persists across reopen without deleting selected files",
+    "unknown or incomplete range formats fail closed and preserve archive",
+    "corrupt archive is retained and cannot be overwritten",
+    "symlink archive is refused without changing target"
+  ],
+  "scope" : "production store with controlled OS scope adapter; not sandbox grant evidence"
+}

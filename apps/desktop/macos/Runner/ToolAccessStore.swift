@@ -5,17 +5,22 @@ struct ToolAccessFailure: Error {
   let code: String
 }
 
+enum ToolDirectoryPermission: String, Codable {
+  case readOnly, readWrite
+}
+
 protocol ToolDirectoryScopes {
-  func bookmark(_ url: URL) throws -> Data
+  func bookmark(_ url: URL, permission: ToolDirectoryPermission) throws -> Data
   func resolve(_ data: Data) throws -> (URL, Bool)
   func start(_ url: URL) -> Bool
   func stop(_ url: URL)
 }
 
 struct SystemToolDirectoryScopes: ToolDirectoryScopes {
-  func bookmark(_ url: URL) throws -> Data {
-    try url.bookmarkData(options: [.withSecurityScope, .securityScopeAllowOnlyReadAccess],
-                         includingResourceValuesForKeys: nil, relativeTo: nil)
+  func bookmark(_ url: URL, permission: ToolDirectoryPermission) throws -> Data {
+    var options: URL.BookmarkCreationOptions = [.withSecurityScope]
+    if permission == .readOnly { options.insert(.securityScopeAllowOnlyReadAccess) }
+    return try url.bookmarkData(options: options, includingResourceValuesForKeys: nil, relativeTo: nil)
   }
   func resolve(_ data: Data) throws -> (URL, Bool) {
     var stale = false
@@ -36,6 +41,8 @@ final class ToolAccessStore {
     let id: String
     let path: String
     let bookmark: Data
+    let permission: ToolDirectoryPermission?
+    var savedPermission: ToolDirectoryPermission { permission ?? .readOnly }
   }
   private struct Archive: Codable {
     let version: Int
@@ -62,12 +69,13 @@ final class ToolAccessStore {
           throw ToolAccessFailure(code: "tool_access_storage_failed")
         }
         let archive = try JSONDecoder().decode(Archive.self, from: data)
-        guard archive.version == 1, archive.entries.count <= 16,
+        guard (archive.version == 1 || archive.version == 2), archive.entries.count <= 16,
               Set(archive.entries.map { $0.id }).count == archive.entries.count,
               archive.entries.allSatisfy({
                 UUID(uuidString: $0.id) != nil && $0.path.hasPrefix("/") &&
                   $0.path.utf8.count <= 16384 && !$0.bookmark.isEmpty &&
-                  $0.bookmark.count <= 65536
+                  $0.bookmark.count <= 65536 &&
+                  (archive.version == 1 ? $0.permission == nil : $0.permission != nil)
               }) else { throw ToolAccessFailure(code: "tool_access_storage_failed") }
         entries = archive.entries
         for entry in entries {
@@ -101,7 +109,8 @@ final class ToolAccessStore {
         return [
           "id": entry.id, "path": path,
           "name": URL(fileURLWithPath: path).lastPathComponent,
-          "available": active[entry.id] != nil
+          "available": active[entry.id] != nil,
+          "permission": entry.savedPermission.rawValue
         ]
       }
     ]
@@ -109,7 +118,8 @@ final class ToolAccessStore {
 
   /// Only call with an owner-selected NSOpenPanel URL. Paths from Agent input
   /// or Flutter text fields cannot create filesystem access.
-  func rememberSelection(_ selected: URL, replacing id: String? = nil) throws {
+  func rememberSelection(_ selected: URL, replacing id: String? = nil,
+                         permission: ToolDirectoryPermission = .readOnly) throws {
     guard !loadFailed else { throw ToolAccessFailure(code: "tool_access_storage_failed") }
     if let id = id, !entries.contains(where: { $0.id == id }) {
       throw ToolAccessFailure(code: "tool_access_unknown")
@@ -118,7 +128,7 @@ final class ToolAccessStore {
           try selected.resourceValues(forKeys: [.isDirectoryKey]).isDirectory == true else {
       throw ToolAccessFailure(code: "tool_access_not_directory")
     }
-    let bookmark = try scopes.bookmark(selected)
+    let bookmark = try scopes.bookmark(selected, permission: permission)
     guard !bookmark.isEmpty, bookmark.count <= 65536 else {
       throw ToolAccessFailure(code: "tool_access_unavailable")
     }
@@ -131,7 +141,7 @@ final class ToolAccessStore {
     if let duplicate = duplicate, duplicate.id != targetID {
       throw ToolAccessFailure(code: "tool_access_duplicate")
     }
-    let entry = Entry(id: targetID, path: resolved.path, bookmark: bookmark)
+    let entry = Entry(id: targetID, path: resolved.path, bookmark: bookmark, permission: permission)
     var next = entries.filter { $0.id != targetID }
     guard next.count < 16 else { throw ToolAccessFailure(code: "tool_access_limit") }
     next.append(entry)
@@ -179,7 +189,13 @@ final class ToolAccessStore {
       guard try directory.resourceValues(forKeys: [.isSymbolicLinkKey]).isSymbolicLink != true else {
         throw ToolAccessFailure(code: "tool_access_storage_failed")
       }
-      let data = try JSONEncoder().encode(Archive(version: 1, entries: next))
+      // v1 tokens were always read-only. Migrate their metadata only when an
+      // owner changes the list; never recreate or broaden those bookmarks.
+      // v2 makes old readers fail closed instead of mislabelling RW tokens.
+      let normalized = next.map {
+        Entry(id: $0.id, path: $0.path, bookmark: $0.bookmark, permission: $0.savedPermission)
+      }
+      let data = try JSONEncoder().encode(Archive(version: 2, entries: normalized))
       guard data.count <= 1024 * 1024 else {
         throw ToolAccessFailure(code: "tool_access_storage_failed")
       }

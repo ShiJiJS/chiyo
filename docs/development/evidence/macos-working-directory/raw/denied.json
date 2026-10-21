@@ -1,0 +1,26 @@
+{
+  "exitCode": 0,
+  "mode": "denied",
+  "complete": true,
+  "systemKeychainUsed": false,
+  "credentialApproval": "synthetic QA owner API; directory selection uses production UI and actual NSOpenPanel",
+  "initialDirectories": [],
+  "withoutScope": [
+    {
+      "directory": 0,
+      "read": false,
+      "readErrno": 1,
+      "write": false,
+      "writeErrno": 1
+    },
+    {
+      "directory": 1,
+      "read": false,
+      "readErrno": 1,
+      "write": false,
+      "writeErrno": 1
+    }
+  ],
+  "libraryCloses": 1,
+  "flutterErrors": 0
+}

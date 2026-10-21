@@ -1,0 +1,6 @@
+QA excerpt; unrelated file-list entries omitted.
+0 sheet Description: 选择外部目录（读取）, ID: open-panel, Secondary Actions: Raise
+		1382 pop up button Where:, Value: 读取 中文 空格, ID: where popup
+		1385 text 保存所选目录的读取访问，重开应用后恢复。macOS 本次选择可能临时允许写入；保存的读取范围在重开后生效。目录选择不授予程序执行权限。
+		1386 button Cancel, ID: CancelButton
+		1387 button 允许访问, ID: OKButton

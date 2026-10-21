@@ -1,0 +1,13 @@
+{
+  "scope": "project generated apps and dSYM excluding pinned toolchains/caches",
+  "stableSourceCommit": "4690e79357bb728da22193d8dadd6dc8a8ce2ce6",
+  "manifestEntriesUnchanged": 7971,
+  "strictSignatureExitCode": 0,
+  "apps": [
+    "local/中文 Mac 预览/AgentInfoManage/app/info_desktop.app"
+  ],
+  "generatedDsym": [],
+  "productionDirectoryArchiveUnchangedEmptyV1": true,
+  "productionDirectoryArchiveSha256": "a6a20076da005b27c9afc3a5d5b2457798c0ac817d1abc38b2fee4398ac3f133",
+  "stablePid": 53592
+}

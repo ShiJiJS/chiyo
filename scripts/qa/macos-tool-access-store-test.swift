@@ -10,8 +10,10 @@ private final class Scopes: ToolDirectoryScopes {
   var active = 0
   var starts = 0
   var stops = 0
-  func bookmark(_ url: URL) throws -> Data {
-    oversized ? Data(repeating: 1, count: 65537) : Data(url.path.utf8)
+  var permissions: [ToolDirectoryPermission] = []
+  func bookmark(_ url: URL, permission: ToolDirectoryPermission) throws -> Data {
+    permissions.append(permission)
+    return oversized ? Data(repeating: 1, count: 65537) : Data(url.path.utf8)
   }
   func resolve(_ data: Data) throws -> (URL, Bool) {
     (URL(fileURLWithPath: String(decoding: data, as: UTF8.self)), stale)
@@ -68,6 +70,47 @@ private struct Probe {
     let archive = root.appendingPathComponent("private/directories.json")
     let scopes = Scopes()
     var store: ToolAccessStore? = ToolAccessStore(file: archive, scopes: scopes)
+    try test("legacy read-only archive is restored without rewriting or recreating tokens") {
+      store = nil
+      let legacy: [String: Any] = ["version": 1, "entries": [[
+        "id": UUID().uuidString, "path": source.path,
+        "bookmark": Data(source.path.utf8).base64EncodedString()
+      ]]]
+      let data = try JSONSerialization.data(withJSONObject: legacy)
+      try fm.createDirectory(at: archive.deletingLastPathComponent(), withIntermediateDirectories: true)
+      try data.write(to: archive)
+      store = ToolAccessStore(file: archive, scopes: scopes)
+      try check(!store!.loadFailed && rows(store!).first!["permission"] as? String == "readOnly", "legacy range broadened")
+      try check(try Data(contentsOf: archive) == data && scopes.permissions.isEmpty, "legacy token recreated")
+      try store!.rememberSelection(second, permission: .readWrite)
+      let upgraded = try JSONSerialization.jsonObject(with: Data(contentsOf: archive)) as! [String: Any]
+      try check(upgraded["version"] as? Int == 2, "missing version boundary")
+      let entries = upgraded["entries"] as! [[String: Any]]
+      try check(entries.first!["bookmark"] as? String == Data(source.path.utf8).base64EncodedString(), "legacy bookmark changed")
+      try check(entries.map { $0["permission"] as! String } == ["readOnly", "readWrite"], "migration changed ranges")
+      try check(scopes.permissions == [.readWrite], "migration requested new read-only token")
+      for entry in rows(store!) { try store!.forget(entry["id"] as! String) }
+    }
+    try test("explicit range survives restart; failed range change retains saved token and scope") {
+      try store!.rememberSelection(source, permission: .readWrite)
+      let id = rows(store!).first!["id"] as! String
+      store = nil
+      store = ToolAccessStore(file: archive, scopes: scopes)
+      try check(rows(store!).first!["permission"] as? String == "readWrite", "read-write range lost")
+      let before = try Data(contentsOf: archive)
+      scopes.denied = true
+      try rejects("tool_access_unavailable") {
+        try store!.rememberSelection(source, replacing: id, permission: .readOnly)
+      }
+      scopes.denied = false
+      try check(try Data(contentsOf: archive) == before && scopes.active == 1, "failed downgrade mutated scope")
+      try store!.rememberSelection(source, replacing: id, permission: .readOnly)
+      try check(rows(store!).first!["permission"] as? String == "readOnly" && rows(store!).first!["id"] as? String == id, "range change changed identity")
+      store = nil
+      store = ToolAccessStore(file: archive, scopes: scopes)
+      try check(rows(store!).first!["permission"] as? String == "readOnly", "range change not persisted")
+      try store!.forget(id)
+    }
     try test("save, deduplicate, private permissions and no bookmark response") {
       try check(rows(store!).isEmpty, "expected empty")
       try store!.rememberSelection(source)
@@ -147,6 +190,21 @@ private struct Probe {
       store = ToolAccessStore(file: archive, scopes: scopes)
       try check(rows(store!).isEmpty, "forgotten entries restored")
       try check(fm.fileExists(atPath: payload.path), "selected file deleted")
+    }
+    try test("unknown or incomplete range formats fail closed and preserve archive") {
+      store = nil
+      for (version, permission) in [(2, "missing"), (2, "unknown"), (1, "readWrite"), (3, "readOnly")] {
+        var entry: [String: Any] = ["id": UUID().uuidString, "path": source.path,
+                                  "bookmark": Data(source.path.utf8).base64EncodedString()]
+        if permission != "missing" { entry["permission"] = permission }
+        let data = try JSONSerialization.data(withJSONObject: ["version": version, "entries": [entry]])
+        try data.write(to: archive)
+        store = ToolAccessStore(file: archive, scopes: scopes)
+        try check(store!.loadFailed && scopes.active == 0, "invalid range accepted")
+        try rejects("tool_access_storage_failed") { try store!.rememberSelection(source, permission: .readWrite) }
+        try check(try Data(contentsOf: archive) == data, "invalid range archive overwritten")
+        store = nil
+      }
     }
     try test("corrupt archive is retained and cannot be overwritten") {
       store = nil

@@ -64,8 +64,11 @@ class _ToolDirectorySettingsState extends State<ToolDirectorySettings> {
   }
 
   Future<void> _refresh() => _act(widget.access.read);
-  Future<void> _choose([String? id]) => _act(
-    () => widget.access.choose(replacing: id),
+  Future<void> _choose({
+    String? id,
+    ToolDirectoryPermission permission = ToolDirectoryPermission.readOnly,
+  }) => _act(
+    () => widget.access.choose(replacing: id, permission: permission),
     success: '目录访问已保存。使用凭据仍需另行申请并由你批准。',
   );
 
@@ -107,13 +110,26 @@ class _ToolDirectorySettingsState extends State<ToolDirectorySettings> {
         const BundledToolSettings(),
         SettingsRow(
           'Mac 外部工具目录',
-          '保存外部目录的文件访问。macOS 的目录选择不授予执行权限；GH 和 AWS 请使用上方的随包路径。',
+          '保存目录的读取访问，重开后恢复。macOS 本次选择可能临时允许写入；保存的读取范围在重开后生效。目录选择不授予程序执行权限，GH 和 AWS 请使用随包路径。',
           control: settingsAction(
             context,
             _busy ? '处理中…' : '选择工具目录',
             disabled ? null : () => _choose(),
             primary: true,
             key: const ValueKey('choose-tool-directory'),
+          ),
+        ),
+        SettingsRow(
+          'Mac 工作目录',
+          '保存目录及其文件的读取与写入访问，重开后恢复。工具可在其中创建、修改或删除文件；使用凭据仍需另行申请并由你批准。',
+          control: settingsAction(
+            context,
+            '选择工作目录（读写）',
+            disabled
+                ? null
+                : () => _choose(permission: ToolDirectoryPermission.readWrite),
+            primary: true,
+            key: const ValueKey('choose-working-directory'),
           ),
         ),
         if (!_busy && _snapshot != null && directories.isEmpty)
@@ -124,15 +140,37 @@ class _ToolDirectorySettingsState extends State<ToolDirectorySettings> {
         for (final directory in directories)
           SettingsRow(
             directory.name,
-            '${directory.path}\n${directory.available ? '目录文件可访问；不代表其中的程序可执行。' : '目录访问已失效或暂不可用，请重新选择。'}',
+            '${directory.path}\n重开后恢复：${directory.permission == ToolDirectoryPermission.readWrite ? '读取与写入' : '读取'}。\n${directory.available ? '目录访问可用；不代表其中的程序可执行。' : '目录访问已失效或暂不可用，请重新选择。'}',
             control: Wrap(
               spacing: 8,
               children: [
                 settingsAction(
                   context,
                   '重新选择',
-                  disabled ? null : () => _choose(directory.id),
+                  disabled
+                      ? null
+                      : () => _choose(
+                          id: directory.id,
+                          permission: directory.permission,
+                        ),
                   key: ValueKey('reselect-tool-${directory.id}'),
+                ),
+                settingsAction(
+                  context,
+                  directory.permission == ToolDirectoryPermission.readOnly
+                      ? '重新选择为读写…'
+                      : '重新选择为读取…',
+                  disabled
+                      ? null
+                      : () => _choose(
+                          id: directory.id,
+                          permission:
+                              directory.permission ==
+                                  ToolDirectoryPermission.readOnly
+                              ? ToolDirectoryPermission.readWrite
+                              : ToolDirectoryPermission.readOnly,
+                        ),
+                  key: ValueKey('change-tool-permission-${directory.id}'),
                 ),
                 settingsAction(
                   context,

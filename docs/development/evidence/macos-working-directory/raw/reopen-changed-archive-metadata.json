@@ -1,0 +1,15 @@
+{
+  "version": 2,
+  "entries": [
+    {
+      "id": "8F880845-E627-4FE3-9102-CEF5441FD2BC",
+      "path": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue44-directory-ui-1/external/读取 中文 空格",
+      "permission": "readWrite"
+    },
+    {
+      "id": "85A7272B-DA04-48DA-90ED-AB90E06F8A2B",
+      "path": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue44-directory-ui-1/external/读写 中文 空格",
+      "permission": "readOnly"
+    }
+  ]
+}
