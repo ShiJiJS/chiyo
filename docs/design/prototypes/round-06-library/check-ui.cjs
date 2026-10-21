@@ -66,7 +66,7 @@ let page;
    const overlap=await page.locator('.tree .more').evaluateAll(nodes=>nodes.some(n=>{const container=n.closest('.tree').getBoundingClientRect();return n.getBoundingClientRect().right>container.right-12;}));assert.equal(overlap,false);
    await page.screenshot({path:out+'/'+theme+'-'+size.width+'.png'});
   }
-  await page.goto(base+'?state=stress');await page.evaluate(()=>{const sizes=[...document.querySelectorAll('button,input,p,span,small,h1,h2,h3,label,code,strong')].map(e=>[e,parseFloat(getComputedStyle(e).fontSize)]);for(const [e,size] of sizes)e.style.fontSize=(size*2)+'px';});
+  await page.goto(base+'?state=stress');await page.evaluate(()=>{const parents=new Set([...document.querySelectorAll('body *')].filter(e=>!e.closest('svg,script,style')&&([...e.childNodes].some(n=>n.nodeType===Node.TEXT_NODE&&n.textContent.trim())||e.matches('input,textarea'))));const sizes=[...parents].map(e=>[e,parseFloat(getComputedStyle(e).fontSize)]);for(const [e,size] of sizes)e.style.fontSize=(size*2)+'px';});
   // This is text reflow, distinct from DPR screenshots. Production 200% uses Flutter TextScaler.
   await page.screenshot({path:out+'/stress-text-reflow.png'});
  });

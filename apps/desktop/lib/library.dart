@@ -3,6 +3,7 @@ import 'package:info_core/info_core.dart';
 import 'information_editor.dart';
 export 'information_editor.dart';
 import 'organization.dart';
+import 'anchored_surface.dart';
 import 'prototype_dialog.dart';
 import 'prototype_ui.dart';
 import 'recycle.dart';
@@ -44,6 +45,8 @@ class _InformationLibraryState extends State<InformationLibrary> {
   final _collapsed = <String>{}, _tagIds = <String>{};
   String? _directoryId, _selectedId;
   bool _descendants = true;
+  bool _unclassified = false, _sortDescending = false;
+  String? _filterNotice;
   bool _focusMissing = false;
   int _offset = 0;
   String? _queryError;
@@ -94,10 +97,16 @@ class _InformationLibraryState extends State<InformationLibrary> {
     super.dispose();
   }
 
-  void _filter({String? directory, bool all = false}) {
+  void _filter({
+    String? directory,
+    bool all = false,
+    bool unclassified = false,
+  }) {
     setState(() {
       _focusMissing = false;
       _directoryId = directory;
+      _unclassified = unclassified;
+      _filterNotice = null;
       _offset = 0;
       _selectedId = null;
       if (all) {
@@ -132,6 +141,7 @@ class _InformationLibraryState extends State<InformationLibrary> {
         if (saved != null) {
           _focusMissing = false;
           _directoryId = null;
+          _unclassified = false;
           _tagIds.clear();
           _search.clear();
           _selectedId = saved.id;
@@ -241,6 +251,14 @@ class _InformationLibraryState extends State<InformationLibrary> {
       if (_directoryId != null &&
           !owner.directories.any((d) => d.id == _directoryId)) {
         _directoryId = null;
+        _selectedId = null;
+        _offset = 0;
+        _filterNotice = '原目录已删除，已返回全部信息。';
+      }
+      if (_tagIds.any((id) => !owner.tags.any((t) => t.id == id))) {
+        _selectedId = null;
+        _offset = 0;
+        _filterNotice = '已移除失效的标签筛选。';
       }
       _tagIds.removeWhere((id) => !owner.tags.any((t) => t.id == id));
       page = owner.queryInformation(
@@ -248,6 +266,8 @@ class _InformationLibraryState extends State<InformationLibrary> {
         directoryId: _directoryId,
         tagIds: _tagIds,
         includeDescendants: _descendants,
+        unclassifiedOnly: _unclassified,
+        sortDescending: _sortDescending,
         offset: _offset,
         limit: _limit,
         focusItemId: _selectedId,
@@ -268,6 +288,7 @@ class _InformationLibraryState extends State<InformationLibrary> {
       child: LayoutBuilder(
         builder: (context, bounds) => bounds.maxWidth < 940
             ? SingleChildScrollView(
+                primary: false,
                 scrollDirection: Axis.horizontal,
                 child: SizedBox(
                   width: 940,
@@ -283,362 +304,503 @@ class _InformationLibraryState extends State<InformationLibrary> {
   Widget _columns(InformationPage page, InformationItem? current) => Row(
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
-      SizedBox(
-        width: 240,
-        child: LayoutBuilder(
-          builder: (context, bounds) =>
-              MediaQuery.textScalerOf(context).scale(1) > 1.5
-              ? SingleChildScrollView(
-                  child: SizedBox(
-                    height: bounds.maxHeight + 600,
-                    child: _directory(),
-                  ),
-                )
-              : _directory(),
-        ),
-      ),
+      SizedBox(width: 240, child: _directory()),
       SizedBox(width: 340, child: _list(page, current)),
       Expanded(child: _detail(current)),
     ],
   );
+  Future<void> _directoryAction(
+    InformationDirectory directory,
+    DirectoryOperation operation,
+  ) async {
+    final result = await editDirectory(
+      context,
+      owner,
+      directory: operation == DirectoryOperation.create ? null : directory,
+      parentId: operation == DirectoryOperation.create ? directory.id : null,
+      operation: operation,
+    );
+    if (!mounted || result == null) return;
+    if (operation == DirectoryOperation.delete) {
+      _filter(directory: result.isEmpty ? null : result);
+    } else {
+      final seen = <String>{};
+      String? id = result;
+      while (id != null && seen.add(id)) {
+        _collapsed.remove(id);
+        id = owner.directories.where((d) => d.id == id).firstOrNull?.parentId;
+      }
+      _filter(directory: result);
+    }
+  }
+
+  Future<void> _filterTags() async {
+    var selected = {..._tagIds};
+    final result = await showDialog<Object>(
+      context: context,
+      barrierColor: const Color(0x4f241b27),
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, update) => PrototypeDialog(
+          title: '筛选标签',
+          onClose: () => Navigator.pop(dialogContext),
+          body: SizedBox(
+            height: 320,
+            child: TagPicker(
+              tags: owner.tags,
+              selected: selected,
+              count: (id) =>
+                  owner.information.where((i) => i.tagIds.contains(id)).length,
+              onChanged: (ids) => update(() => selected = ids),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, 'manage'),
+              child: const Text('管理标签'),
+            ),
+            TextButton(
+              onPressed: () => update(() => selected = {}),
+              child: const Text('清除标签'),
+            ),
+            TextButton(
+              style: prototypeSecondary(context),
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('取消'),
+            ),
+            FilledButton(
+              style: prototypePrimary(context),
+              onPressed: () => Navigator.pop(dialogContext, selected),
+              child: const Text('使用所选标签'),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (!mounted) return;
+    if (result == 'manage') {
+      await manageTags(context, owner);
+      _refresh();
+    } else if (result is Set<String>) {
+      setState(() {
+        _tagIds
+          ..clear()
+          ..addAll(result);
+        _offset = 0;
+        _selectedId = null;
+      });
+    }
+  }
+
   Widget _directory() => Container(
     key: const ValueKey('library-directory'),
     decoration: BoxDecoration(
       color: p.canvas,
       border: Border(right: BorderSide(color: p.line)),
     ),
-    padding: const EdgeInsets.fromLTRB(18, 27, 18, 18),
+    padding: const EdgeInsets.fromLTRB(14, 25, 14, 14),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 5),
-          child: Column(
-            children: [
-              Row(
-                children: [
-                  t('信息库', 21, weight: FontWeight.w600),
-                  const Spacer(),
-                  t(
-                    '${owner.information.length}',
-                    24,
-                    color: p.muted,
-                    family: 'Georgia',
-                    height: 1,
-                  ),
-                ],
-              ),
-              Container(
-                margin: const EdgeInsets.only(top: 20),
-                padding: const EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  border: Border.all(color: p.line),
-                  borderRadius: BorderRadius.circular(5),
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: p.paper,
-                          borderRadius: BorderRadius.circular(3),
-                          boxShadow: const [
-                            BoxShadow(
-                              color: Color(0x11000000),
-                              offset: Offset(0, 1),
-                              blurRadius: 4,
-                            ),
-                          ],
-                        ),
-                        padding: const EdgeInsets.all(7),
-                        child: Center(child: t('信息', 13, color: p.strong)),
-                      ),
-                    ),
-                    const SizedBox(width: 3),
-                    Expanded(
-                      child: TextButton(
-                        key: const ValueKey('library-credentials-mode'),
-                        onPressed: widget.onOpenCredentials,
-                        style: prototypeButton(
-                          context,
-                          size: 13,
-                          foreground: p.muted,
-                          padding: const EdgeInsets.all(7),
-                        ),
-                        child: const Text('凭据'),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                margin: const EdgeInsets.only(top: 22),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 9,
-                ),
-                decoration: BoxDecoration(
-                  border: Border.all(color: p.line),
-                  borderRadius: BorderRadius.circular(5),
-                ),
-                child: Row(
-                  children: [
-                    PrototypeIcon(
-                      PrototypeIconGlyph.search,
-                      size: 16,
-                      color: p.muted,
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: SizedBox(
-                        height: 22 * MediaQuery.textScalerOf(context).scale(1),
-                        child: TextField(
-                          key: const ValueKey('library-search'),
-                          controller: _search,
-                          onChanged: (_) => setState(() {
-                            _offset = 0;
-                            _selectedId = null;
-                          }),
-                          style: prototypeText(context, 12),
-                          decoration: InputDecoration(
-                            isDense: true,
-                            contentPadding: EdgeInsets.zero,
-                            border: InputBorder.none,
-                            enabledBorder: InputBorder.none,
-                            focusedBorder: InputBorder.none,
-                            filled: false,
-                            hintText: '搜索信息',
-                            hintStyle: prototypeText(
-                              context,
-                              12,
-                              color: p.muted,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+          child: t('信息库', 21, weight: FontWeight.w600),
         ),
-        const SizedBox(height: 21),
-        TextButton(
-          onPressed: () => _filter(all: true),
-          style: prototypeButton(
-            context,
-            size: 13,
-            padding: const EdgeInsets.symmetric(
-              horizontal: 10,
-              vertical: 11.75,
-            ),
-            foreground: p.ink,
-            background: _directoryId == null && _tagIds.isEmpty
-                ? p.selected
-                : null,
-            radius: 5,
+        const SizedBox(height: 18),
+        Container(
+          padding: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            border: Border.all(color: p.line),
+            borderRadius: BorderRadius.circular(7),
           ),
           child: Row(
             children: [
-              const PrototypeIcon(PrototypeIconGlyph.folder, size: 17),
-              const SizedBox(width: 8),
-              const Text('全部信息'),
-              const Spacer(),
-              t(
-                '${owner.information.length}',
-                13,
-                family: 'Georgia',
-                color: p.muted,
+              Expanded(
+                child: TextButton(
+                  style: prototypeButton(
+                    context,
+                    size: 13,
+                    background: p.paper,
+                    foreground: p.strong,
+                  ),
+                  onPressed: () {},
+                  child: const Text('信息'),
+                ),
+              ),
+              const SizedBox(width: 4),
+              Expanded(
+                child: TextButton(
+                  key: const ValueKey('library-credentials-mode'),
+                  style: prototypeButton(context, size: 13),
+                  onPressed: widget.onOpenCredentials,
+                  child: const Text('凭据'),
+                ),
               ),
             ],
           ),
         ),
-        Padding(
-          padding: const EdgeInsets.only(top: 17, bottom: 14),
-          child: Wrap(
-            alignment: WrapAlignment.center,
-            spacing: 8,
-            runSpacing: 6,
-            children: [
-              b('目录与标签', () async {
-                await manageOrganization(
-                  context,
-                  owner,
-                  onSelectDirectory: (id) => _filter(directory: id),
-                );
-                _refresh();
-              }, border: true),
-              b('回收站', () async {
-                await showDialog<void>(
-                  context: context,
-                  barrierColor: const Color(0x4f241b27),
-                  builder: (_) => RecyclePage(owner: owner, asDialog: true),
-                );
-                _refresh();
-              }, border: true),
-            ],
-          ),
+        const SizedBox(height: 18),
+        _root(
+          '全部信息',
+          '${owner.information.length}',
+          _directoryId == null && !_unclassified,
+          () => _filter(all: true),
+        ),
+        const SizedBox(height: 3),
+        _root(
+          '未分类',
+          '${owner.information.where((i) => i.directoryId == null).length}',
+          _unclassified,
+          () => _filter(unclassified: true),
+        ),
+        const SizedBox(height: 18),
+        Row(
+          children: [
+            const SizedBox(width: 8),
+            Expanded(child: t('目录', 12, color: p.muted)),
+            IconButton(
+              key: const ValueKey('new-directory'),
+              tooltip: '新建目录',
+              icon: const Icon(Icons.add, size: 18),
+              onPressed: () async {
+                final id = await editDirectory(context, owner);
+                if (mounted && id != null) _filter(directory: id);
+              },
+            ),
+          ],
         ),
         Expanded(
           child: ListView(
+            primary: false,
             controller: _treeScroll,
             padding: EdgeInsets.zero,
             children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(10, 18, 10, 10),
-                child: t('资料位置', 11, color: p.muted),
-              ),
               ..._branches(null, 0, <String>{}),
+              if (owner.directories.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: t('还没有目录', 13, color: p.muted),
+                ),
             ],
           ),
         ),
         Container(
-          padding: const EdgeInsets.only(top: 18, bottom: 20),
+          padding: const EdgeInsets.only(top: 12),
           decoration: BoxDecoration(
             border: Border(top: BorderSide(color: p.line)),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(10, 0, 10, 10),
-                child: t('常用标签', 11, color: p.muted),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: Wrap(
-                  spacing: 7,
-                  runSpacing: 7,
-                  children: [
-                    for (final tag in owner.tags)
-                      TextButton(
-                        key: ValueKey('library-tag-${tag.id}'),
-                        onPressed: () => setState(() {
-                          _tagIds.contains(tag.id)
-                              ? _tagIds.remove(tag.id)
-                              : _tagIds.add(tag.id);
-                          _offset = 0;
-                          _selectedId = null;
-                        }),
-                        style: prototypeButton(
-                          context,
-                          size: 11,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 2,
-                          ),
-                          foreground: p.muted,
-                          background: _tagIds.contains(tag.id)
-                              ? p.selected
-                              : p.paper,
-                          side: BorderSide(color: p.line),
-                        ),
-                        child: Text(tag.name),
-                      ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(8, 12, 8, 0),
-          child: Row(
-            children: [
-              Container(
-                width: 5,
-                height: 5,
-                decoration: BoxDecoration(
-                  color: owner.serviceAvailable ? p.statusLive : p.danger,
-                  shape: BoxShape.circle,
-                ),
-              ),
-              const SizedBox(width: 7),
-              t(
-                owner.serviceAvailable ? '信息保存在本机' : '信息库暂不可用',
-                11,
-                color: p.muted,
-              ),
-            ],
-          ),
+          child: b('回收站', () async {
+            await showDialog<void>(
+              context: context,
+              barrierColor: const Color(0x4f241b27),
+              builder: (_) => RecyclePage(owner: owner, asDialog: true),
+            );
+            _refresh();
+          }, icon: PrototypeIconGlyph.folder),
         ),
       ],
     ),
   );
+
+  Widget _root(
+    String title,
+    String count,
+    bool selected,
+    VoidCallback action,
+  ) => TextButton(
+    style: prototypeButton(
+      context,
+      size: 13,
+      foreground: p.ink,
+      background: selected ? p.selected : null,
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+      radius: 6,
+    ),
+    onPressed: action,
+    child: Row(
+      children: [
+        Expanded(child: Text(title)),
+        t(count, 13, color: p.muted, family: 'Georgia'),
+      ],
+    ),
+  );
+
   List<Widget> _branches(String? parent, int depth, Set<String> visited) => [
     for (final d in owner.directories.where(
       (d) => d.parentId == parent && !visited.contains(d.id),
     )) ...[
-      Container(
-        margin: const EdgeInsets.only(bottom: 2),
-        constraints: const BoxConstraints(minHeight: 43),
-        padding: EdgeInsets.only(left: depth * 18 + 5),
-        decoration: BoxDecoration(
-          color: _directoryId == d.id ? p.selected : null,
-          borderRadius: BorderRadius.circular(5),
-        ),
-        child: Row(
-          children: [
-            SizedBox(
-              width: 20,
-              height: 28,
-              child: owner.directories.any((c) => c.parentId == d.id)
-                  ? TextButton(
-                      style: prototypeButton(context),
-                      onPressed: () => setState(
-                        () => _collapsed.contains(d.id)
-                            ? _collapsed.remove(d.id)
-                            : _collapsed.add(d.id),
-                      ),
-                      child: RotatedBox(
-                        quarterTurns: _collapsed.contains(d.id) ? 0 : 1,
-                        child: const PrototypeIcon(
-                          PrototypeIconGlyph.chev,
-                          size: 12,
+      Padding(
+        padding: const EdgeInsets.only(bottom: 3),
+        child: Material(
+          color: _directoryId == d.id ? p.selected : Colors.transparent,
+          borderRadius: BorderRadius.circular(6),
+          child: InkWell(
+            key: ValueKey('directory-${d.id}'),
+            borderRadius: BorderRadius.circular(6),
+            onTap: () => _filter(directory: d.id),
+            child: Padding(
+              padding: EdgeInsets.only(left: depth * 12.0),
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 24,
+                    height: 34,
+                    child: owner.directories.any((c) => c.parentId == d.id)
+                        ? IconButton(
+                            padding: EdgeInsets.zero,
+                            tooltip: '展开或收起${d.name}',
+                            icon: Icon(
+                              _collapsed.contains(d.id)
+                                  ? Icons.chevron_right
+                                  : Icons.expand_more,
+                              size: 16,
+                            ),
+                            onPressed: () => setState(
+                              () => _collapsed.contains(d.id)
+                                  ? _collapsed.remove(d.id)
+                                  : _collapsed.add(d.id),
+                            ),
+                          )
+                        : null,
+                  ),
+                  const PrototypeIcon(PrototypeIconGlyph.folder, size: 15),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 11),
+                      child: Tooltip(
+                        message: directoryPath(owner, d.id),
+                        child: t(
+                          d.name,
+                          13,
+                          lines: 1,
+                          weight: _directoryId == d.id
+                              ? FontWeight.w600
+                              : FontWeight.w400,
                         ),
                       ),
-                    )
-                  : null,
-            ),
-            const SizedBox(width: 5),
-            Expanded(
-              child: TextButton(
-                key: ValueKey('directory-${d.id}'),
-                style: prototypeButton(
-                  context,
-                  size: 13,
-                  foreground: p.ink,
-                  padding: const EdgeInsets.fromLTRB(0, 10, 8, 10),
-                  weight: _directoryId == d.id
-                      ? FontWeight.w600
-                      : FontWeight.w400,
-                ),
-                onPressed: () => _filter(directory: d.id),
-                child: Row(
-                  children: [
-                    if (depth == 0) ...[
-                      const PrototypeIcon(PrototypeIconGlyph.folder, size: 17),
-                      const SizedBox(width: 8),
-                    ],
-                    Expanded(child: Text(d.name)),
-                    t(
-                      _directoryCount(d.id),
-                      13,
-                      family: 'Georgia',
-                      color: p.muted,
                     ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(width: 4),
+                  t(
+                    _directoryCount(d.id),
+                    12,
+                    color: p.muted,
+                    family: 'Georgia',
+                  ),
+                  Builder(
+                    builder: (anchor) => TextButton(
+                      key: ValueKey('directory-menu-${d.id}'),
+                      style: prototypeButton(
+                        context,
+                        size: 13,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 6,
+                        ),
+                      ),
+                      onPressed: () async {
+                        final action =
+                            await showAnchoredSurface<DirectoryOperation>(
+                              anchor,
+                              width: 180,
+                              height: 190,
+                              builder: (popup) => ListView(
+                                primary: false,
+                                padding: const EdgeInsets.all(6),
+                                children: [
+                                  for (final op in DirectoryOperation.values)
+                                    TextButton(
+                                      style: prototypeButton(popup, size: 13),
+                                      onPressed: () => Navigator.pop(popup, op),
+                                      child: Align(
+                                        alignment: Alignment.centerLeft,
+                                        child: Text(switch (op) {
+                                          DirectoryOperation.create => '新建子目录',
+                                          DirectoryOperation.rename => '重命名',
+                                          DirectoryOperation.move => '移动',
+                                          DirectoryOperation.delete => '删除',
+                                        }),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            );
+                        if (action != null && mounted) {
+                          await _directoryAction(d, action);
+                        }
+                      },
+                      child: Icon(
+                        Icons.more_horiz,
+                        size: 16,
+                        semanticLabel: '${d.name}的操作',
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
+          ),
         ),
       ),
       if (!_collapsed.contains(d.id))
         ..._branches(d.id, depth + 1, {...visited, d.id}),
     ],
   ];
+
+  Widget _listHeader(InformationPage page, InformationDirectory? directory) {
+    final scope = _unclassified ? '未分类' : directory?.name ?? '全部信息';
+    return Container(
+      padding: const EdgeInsets.fromLTRB(20, 25, 20, 16),
+      decoration: BoxDecoration(
+        border: Border(bottom: BorderSide(color: p.line)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Expanded(child: t(scope, 18, weight: FontWeight.w700, lines: 2)),
+              const SizedBox(width: 8),
+              b(
+                '＋ 新建',
+                _edit,
+                key: const ValueKey('new-information'),
+                border: true,
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          t(
+            '${page.total} 条信息${directory != null && _descendants ? ' · 包含下级目录' : ''}',
+            12,
+            color: p.muted,
+          ),
+          const SizedBox(height: 16),
+          TextField(
+            key: const ValueKey('library-search'),
+            controller: _search,
+            style: prototypeText(context, 13),
+            decoration: InputDecoration(
+              hintText: '搜索$scope',
+              prefixIcon: const Icon(Icons.search, size: 16),
+            ),
+            onChanged: (_) => setState(() {
+              _offset = 0;
+              _selectedId = null;
+              _focusMissing = false;
+            }),
+          ),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              TextButton(
+                key: const ValueKey('library-tag-filter'),
+                onPressed: _filterTags,
+                style: prototypeButton(
+                  context,
+                  foreground: p.ink,
+                  background: p.paper,
+                  side: BorderSide(color: p.line),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 11,
+                    vertical: 8,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text('标签${_tagIds.isEmpty ? '' : ' ${_tagIds.length}'}'),
+                    const SizedBox(width: 7),
+                    const RotatedBox(
+                      quarterTurns: 1,
+                      child: PrototypeIcon(PrototypeIconGlyph.chev, size: 12),
+                    ),
+                  ],
+                ),
+              ),
+              b(
+                _sortDescending ? '名称 ↓' : '名称 ↑',
+                () => setState(() {
+                  _sortDescending = !_sortDescending;
+                  _offset = 0;
+                  _selectedId = null;
+                }),
+                border: true,
+              ),
+              if (directory != null || _unclassified)
+                b('在全部信息中搜索', () => _filter()),
+            ],
+          ),
+          if (directory != null)
+            Row(
+              children: [
+                Checkbox(
+                  value: _descendants,
+                  onChanged: (value) => setState(() {
+                    _descendants = value!;
+                    _offset = 0;
+                    _selectedId = null;
+                  }),
+                ),
+                Flexible(child: t('包含下级目录', 12, color: p.muted)),
+              ],
+            ),
+          if (_tagIds.isNotEmpty || _search.text.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxHeight: 100),
+                child: SingleChildScrollView(
+                  primary: false,
+                  child: Wrap(
+                    spacing: 6,
+                    runSpacing: 4,
+                    children: [
+                      for (final tag in owner.tags.where(
+                        (t) => _tagIds.contains(t.id),
+                      ))
+                        b(
+                          '${tag.name} ×',
+                          () => setState(() {
+                            _tagIds.remove(tag.id);
+                            _offset = 0;
+                            _selectedId = null;
+                          }),
+                          border: true,
+                        ),
+                      b(
+                        '清除筛选',
+                        () => setState(() {
+                          _tagIds.clear();
+                          _search.clear();
+                          _offset = 0;
+                          _selectedId = null;
+                        }),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          if (_filterNotice != null)
+            Row(
+              children: [
+                Expanded(child: t(_filterNotice!, 12, color: p.muted)),
+                IconButton(
+                  onPressed: () => setState(() => _filterNotice = null),
+                  tooltip: '关闭筛选提示',
+                  icon: const Icon(Icons.close, size: 15),
+                ),
+              ],
+            ),
+        ],
+      ),
+    );
+  }
+
   Widget _list(InformationPage page, InformationItem? current) {
     final directory = owner.directories
         .where((d) => d.id == _directoryId)
@@ -652,40 +814,7 @@ class _InformationLibraryState extends State<InformationLibrary> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Container(
-            padding: const EdgeInsets.fromLTRB(23, 28, 23, 21),
-            decoration: BoxDecoration(
-              border: Border(bottom: BorderSide(color: p.line)),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      t(directory?.name ?? '全部信息', 17, weight: FontWeight.w700),
-                      const SizedBox(height: 6),
-                      b(
-                        '${page.total} 条信息${_descendants ? ' · 包含下级目录' : ''}',
-                        () => setState(() {
-                          _descendants = !_descendants;
-                          _offset = 0;
-                          _selectedId = null;
-                        }),
-                        size: 11,
-                      ),
-                    ],
-                  ),
-                ),
-                b(
-                  '＋ 新建',
-                  _edit,
-                  key: const ValueKey('new-information'),
-                  border: true,
-                ),
-              ],
-            ),
-          ),
+          _listHeader(page, directory),
           Expanded(
             child: page.items.isEmpty
                 ? Center(
@@ -714,6 +843,7 @@ class _InformationLibraryState extends State<InformationLibrary> {
                     ),
                   )
                 : ListView.builder(
+                    primary: false,
                     key: const ValueKey('library-item-scroll'),
                     controller: _listScroll,
                     padding: const EdgeInsets.symmetric(
@@ -923,53 +1053,66 @@ class _InformationLibraryState extends State<InformationLibrary> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Container(
-                  height: 55,
-                  padding: const EdgeInsets.symmetric(horizontal: 25),
+                  constraints: const BoxConstraints(minHeight: 55),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 10,
+                  ),
                   decoration: BoxDecoration(
                     border: Border(bottom: BorderSide(color: p.line)),
                   ),
-                  child: Row(
-                    children: [
-                      t('信息库', 12, color: p.muted),
-                      const SizedBox(width: 10),
-                      const PrototypeIcon(PrototypeIconGlyph.chev, size: 12),
-                      const SizedBox(width: 10),
-                      t('信息详情', 12, color: p.muted),
-                      const Spacer(),
-                      Transform.translate(
-                        offset: const Offset(0, 4),
-                        child: b(
-                          '编辑',
-                          () => _edit(item),
-                          key: const ValueKey('edit-information-description'),
-                          icon: PrototypeIconGlyph.edit,
+                  child: LayoutBuilder(
+                    builder: (context, box) => Wrap(
+                      alignment: WrapAlignment.spaceBetween,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      spacing: 12,
+                      runSpacing: 8,
+                      children: [
+                        SizedBox(
+                          width: box.maxWidth.clamp(0, 220).toDouble(),
+                          child: t(
+                            directoryPath(owner, item.directoryId),
+                            12,
+                            color: p.muted,
+                            lines: 2,
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 20),
-                      Transform.translate(
-                        offset: const Offset(0, 4),
-                        child: b('移入回收站', () => _delete(item)),
-                      ),
-                    ],
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 6,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          children: [
+                            b(
+                              '调整目录与标签',
+                              () async {
+                                await organizeItem(context, owner, item);
+                                _refresh();
+                              },
+                              key: const ValueKey('edit-information-category'),
+                            ),
+                            b(
+                              '编辑',
+                              () => _edit(item),
+                              key: const ValueKey(
+                                'edit-information-description',
+                              ),
+                              icon: PrototypeIconGlyph.edit,
+                            ),
+                            b('移入回收站', () => _delete(item)),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
                 Expanded(
                   child: SingleChildScrollView(
+                    primary: false,
                     controller: _detailScroll,
                     padding: const EdgeInsets.fromLTRB(33, 23, 33, 28),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: b(
-                            directoryPath(owner, item.directoryId),
-                            () => _edit(item),
-                            key: const ValueKey('edit-information-category'),
-                            size: 12,
-                          ),
-                        ),
-                        const SizedBox(height: 24),
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [

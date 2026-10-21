@@ -523,6 +523,7 @@ class _CredentialUseApprovalPanelState
     return Scrollbar(
       controller: _document,
       child: SingleChildScrollView(
+        primary: false,
         controller: _document,
         key: PageStorageKey('credential-use-document-${r.id}'),
         padding: const EdgeInsets.fromLTRB(26, 24, 26, 24),
@@ -1013,6 +1014,7 @@ class _CredentialUseApprovalPanelState
       child: Scrollbar(
         controller: _decision,
         child: SingleChildScrollView(
+          primary: false,
           controller: _decision,
           padding: const EdgeInsets.fromLTRB(21, 25, 21, 25),
           child: Column(

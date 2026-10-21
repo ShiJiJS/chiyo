@@ -69,24 +69,61 @@ double prototypeCh(BuildContext context, double size, double count) {
 ButtonStyle prototypeButton(
   BuildContext context, {
   double size = 12,
-  EdgeInsets padding = EdgeInsets.zero,
+  EdgeInsets padding = const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
   Color? foreground,
   Color? background,
   BorderSide side = BorderSide.none,
   double radius = 4,
   FontWeight weight = FontWeight.w400,
-}) => TextButton.styleFrom(
-  textStyle: prototypeText(context, size, weight: weight),
-  foregroundColor: foreground ?? UiPalette.of(context).muted,
-  backgroundColor: background,
-  minimumSize: Size.zero,
-  padding: padding,
-  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-  shape: RoundedRectangleBorder(
-    side: side,
-    borderRadius: BorderRadius.circular(radius),
-  ),
-);
+}) =>
+    TextButton.styleFrom(
+      textStyle: prototypeText(context, size, weight: weight),
+      foregroundColor: foreground ?? UiPalette.of(context).muted,
+      backgroundColor: background,
+      minimumSize: Size.zero,
+      padding: EdgeInsets.fromLTRB(
+        padding.left < 6 ? 6 : padding.left,
+        padding.top < 4 ? 4 : padding.top,
+        padding.right < 6 ? 6 : padding.right,
+        padding.bottom < 4 ? 4 : padding.bottom,
+      ),
+      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      shape: RoundedRectangleBorder(
+        side: side,
+        borderRadius: BorderRadius.circular(radius),
+      ),
+    ).copyWith(
+      animationDuration: const Duration(milliseconds: 160),
+      overlayColor: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.disabled)) return Colors.transparent;
+        final ink = UiPalette.of(context).accent;
+        if (states.contains(WidgetState.pressed)) {
+          return ink.withValues(alpha: .13);
+        }
+        if (states.contains(WidgetState.hovered)) {
+          return ink.withValues(alpha: .06);
+        }
+        if (states.contains(WidgetState.focused)) {
+          return ink.withValues(alpha: .08);
+        }
+        return Colors.transparent;
+      }),
+      shape: WidgetStateProperty.resolveWith(
+        (states) => RoundedRectangleBorder(
+          side:
+              states.contains(WidgetState.focused) &&
+                  !states.contains(WidgetState.disabled)
+              ? BorderSide(
+                  color: background == UiPalette.of(context).accent
+                      ? UiPalette.of(context).ink
+                      : UiPalette.of(context).accent,
+                  width: 2,
+                )
+              : side,
+          borderRadius: BorderRadius.circular(radius < 4 ? 4 : radius),
+        ),
+      ),
+    );
 
 class PrototypeCheck extends StatelessWidget {
   const PrototypeCheck({

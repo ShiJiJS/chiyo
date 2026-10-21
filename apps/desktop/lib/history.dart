@@ -509,8 +509,11 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
                           }),
                           style: prototypeButton(
                             context,
-                            padding: const EdgeInsets.only(bottom: 12),
-                            radius: 0,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 8,
+                            ),
+                            radius: 6,
                           ),
                           child: _text(
                             ['全部', '有效', '已结束'][i],
@@ -547,6 +550,7 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
           ),
           Expanded(
             child: ListView(
+              primary: false,
               padding: EdgeInsets.zero,
               children: [
                 if (visible.isEmpty)
@@ -1188,6 +1192,7 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
             child: Scrollbar(
               controller: scroll,
               child: SingleChildScrollView(
+                primary: false,
                 controller: scroll,
                 padding: const EdgeInsets.fromLTRB(34, 28, 42, 28),
                 child: Column(
@@ -1299,7 +1304,7 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
                                     vertical: 13,
                                   ),
                                   size: 14,
-                                  radius: 0,
+                                  radius: 6,
                                 ),
                                 child: _text(
                                   i == 0

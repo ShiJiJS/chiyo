@@ -111,6 +111,7 @@ class PrototypeDialog extends StatelessWidget {
                 SizedBox(height: flow ? 13.5 : 20),
                 Flexible(
                   child: SingleChildScrollView(
+                    primary: false,
                     padding: EdgeInsets.only(
                       right: flow ? scrollGutter : 0,
                       bottom:

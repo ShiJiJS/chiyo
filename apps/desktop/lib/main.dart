@@ -8,6 +8,8 @@ import 'package:info_core/info_core.dart';
 import 'package:info_storage/info_storage.dart';
 import 'information_workspace.dart';
 import 'credential_files.dart';
+import 'desktop_scroll.dart';
+import 'desktop_interaction_host.dart';
 import 'import_proposals.dart';
 import 'desktop_runtime.dart';
 import 'desktop_bootstrap.dart';
@@ -289,6 +291,7 @@ class _InformationAppState extends State<InformationApp>
   Widget build(BuildContext context) => MaterialApp(
     title: '信息访问授权',
     debugShowCheckedModeBanner: false,
+    scrollBehavior: const DesktopScrollBehavior(),
     theme: informationTheme(_colorTheme),
     shortcuts: {
       ...WidgetsApp.defaultShortcuts,
@@ -302,7 +305,8 @@ class _InformationAppState extends State<InformationApp>
         },
       ),
     },
-    builder: (_, child) => DesktopWindowFrame(child: child!),
+    builder: (_, child) =>
+        DesktopInteractionHost(child: DesktopWindowFrame(child: child!)),
     home: Builder(
       builder: (context) => DesktopShell(
         service: widget.service,
