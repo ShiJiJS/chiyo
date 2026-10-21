@@ -1,0 +1,2 @@
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+MAC_SCHEMA_ROOT=/Users/jiangxinyi/Library/Containers/org.shijijs.agent-info-manage.qa.schemakeychain20261021/Data/tmp/aim-mac-schema-keychain-XK65II

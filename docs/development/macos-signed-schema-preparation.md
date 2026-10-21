@@ -1,5 +1,32 @@
 # Mac 真实旧 schema 与签名 Keychain 联合验收准备（#42）
 
+## 2026-10-21 实际运行进展：旧库已种入，等待新一次系统允许
+
+下文是较早的准备快照，其“没有启动”只指当时。随后普通安装包的主人允许已完成，
+实际流程见 [普通包追加验收](macos-local-installation.md)。本节是另一套专属合成测试，
+不能把普通包的允许当成这里的系统决定。
+
+恢复原归档后，第一次真实旧版种库退出 1：QA 在共享夹具已清零可变副本后，
+又对原生桥返回的只读 key view 调用 `fillRange`，产生 `UnsupportedError`。
+原签名清理进程退出 0，确认专属 Keychain 项已删除，合成根及生成 app/dSYM 均清理。
+失败结果和日志保留，没有改写成迁移通过，也未触及正式密钥或容器。
+
+修正 `26da28f` 只清理夹具拥有的可变副本，沿用 helper 的 finally；生产 Keychain
+实现不改动。新一轮重新固定来源、严格分析、构建两份 Release 及签名，16 个准备
+阶段和两份运行前签名核对均通过。真实旧源码已在真实专属 Keychain 下创建并写入
+schema/marker20，SQLCipher 4.19.0，旧版进程退出 0、Flutter 异常 0。
+
+新版进程 `38490` 已核对首次签名访问失败保留原库字节、没有创建替代密钥或开放
+服务；CUA 点击生产“请求钥匙串访问”后进入真实系统等待，尝试次数为 1。
+本快照尚未得到这次主人的系统允许；生产首次迁移、旧程序拒绝新库、新程序重开及
+本轮清理尚未到达，不提前勾选 #42 的剩余复合条件（保持 OPEN、3/5）。
+
+[两轮实际状态、失败及原始资料摘要](evidence/macos-signed-schema-runtime/verification.json)。
+第一轮失败已清理；第二轮的两份临时测试应用在运行结束后由 runner 清理，
+不删除唯一稳定预览 App。不导出密钥、数据库或私密 controller。
+
+## 历史准备快照
+
 2026-10-21，独立 `codex/macos-adaptation`。QA 实现 `9caeedf`，
 实际构建及最终 AOT 来源 `721c91f`，归档恢复检查实现 `8e57add`。
 [72 份原始源码、日志、准备结果与逐文件摘要](evidence/macos-signed-schema-preparation/verification.json)。
