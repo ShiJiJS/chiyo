@@ -1,0 +1,32 @@
+{
+  "mode": "reopen",
+  "complete": true,
+  "systemKeychainUsed": false,
+  "comparison": {
+    "format": 9,
+    "information": 2,
+    "directories": 0,
+    "tags": 0,
+    "templates": 0,
+    "revisions": 3,
+    "recycle": 0,
+    "credentials": 5,
+    "credentialVersions": 7,
+    "grants": 4,
+    "accesses": 4,
+    "credentialRequests": 11,
+    "executions": 27,
+    "deliveries": 6,
+    "attachmentVersions": 3,
+    "attachmentBytes": 3073,
+    "exactPrivateContentsComparedInMemory": true,
+    "pastRelationshipsCompared": true,
+    "liveAuthorityAbsent": true,
+    "sourceBackupConfigurationAbsent": true
+  },
+  "nonemptyTargetRefusedWithoutByteChange": true,
+  "historicalRequestRejectedInNewSession": true,
+  "freshUiApprovalReadAndRevoke": true,
+  "libraryCloses": 1,
+  "flutterErrors": 0
+}

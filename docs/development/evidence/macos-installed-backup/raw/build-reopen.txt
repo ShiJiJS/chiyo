@@ -1,0 +1,4 @@
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+INSTALLED_BACKUP_ROOT=/Users/jiangxinyi/Library/Containers/org.shijijs.agent-info-manage.qa.installed-backup.f678b019eaf046278f9da79287c608bc/Data/tmp/aim-installed-backup-yZYD3D
+INSTALLED_BACKUP_PHASE=fresh-field-request-approved-in-actual-ui
+INSTALLED_BACKUP_COMPLETE=reopen

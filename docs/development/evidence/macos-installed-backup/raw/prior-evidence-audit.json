@@ -1,0 +1,26 @@
+{
+  "macos-backup-recovery": {
+    "indexSha256": "b4837f2d9b473e27b0b7981a6354659841ba2cb37b61ea3d888c54e2cd5a39a9",
+    "filesVerified": 17,
+    "errors": [],
+    "source": "7687368b9639de34bfc27930b17fc8c4f41af23b"
+  },
+  "macos-keychain-backup": {
+    "indexSha256": "5bda22c9e42eb209ba1ac7c06fca351a8d7a79f3ccf29efbb784e4dae1cc2531",
+    "filesVerified": 74,
+    "errors": [],
+    "source": "9da5eb1e516f06dd0df3ac594a351d7b34f2ba62"
+  },
+  "macos-app-backup-recovery": {
+    "indexSha256": "e64a7f4991abdfc6a8f253f36293afc3335243c41dfa6ce2dae12887d173238a",
+    "filesVerified": 34,
+    "errors": [],
+    "source": "398f3a358d1813f611e51014355c323211cbfbfb"
+  },
+  "macos-backup-native-panels": {
+    "indexSha256": "32f56a7a19e7f1ee8d177f5c003b459b024750bf2fb7298c7891e2d0f93b25a9",
+    "filesVerified": 27,
+    "errors": [],
+    "source": "f2b927d7de5b1a694dae5221f256ea77ab832d4b"
+  }
+}
