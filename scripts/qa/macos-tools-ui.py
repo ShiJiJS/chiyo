@@ -110,6 +110,12 @@ def main():
         run('analyze', [launcher, 'flutter', 'analyze', '--no-pub', '--fatal-infos', '--fatal-warnings'], desktop)
         run('build-release', [launcher, 'build', '--target=integration_test/macos_tools_manual.dart'])
         app = desktop / 'build/macos/Build/Products/Release/info_desktop.app'
+        if args.bundled:
+            moved = desktop / 'build/relocated/移动 中文 空格/info_desktop.app'
+            moved.parent.mkdir(parents=True)
+            shutil.move(app, moved)
+            app = moved
+            state['productionAppMovedBeforeLaunch'] = True
         selected_gh, selected_aws = GH, AWS
         if args.bundled:
             tools = app / 'Contents/Resources/ThirdParty'

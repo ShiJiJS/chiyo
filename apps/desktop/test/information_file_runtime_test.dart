@@ -51,11 +51,13 @@ void main() {
           );
           await tester.pumpAndSettle();
           expect(find.textContaining('有 1 份副本待回收'), findsOneWidget);
+          await tester.ensureVisible(find.text('核查附件'));
           await tester.tap(find.text('核查附件'));
           await waitForCheck(tester);
           expect(find.text('附件维护未完成'), findsOneWidget);
           expect(find.textContaining('保留登记'), findsWidgets);
           f.driver.blocked = false;
+          await tester.ensureVisible(find.text('核查附件'));
           await tester.tap(find.text('核查附件'));
           await waitForCheck(tester);
           expect(find.text('附件维护未完成'), findsNothing);
