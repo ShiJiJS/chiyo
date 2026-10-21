@@ -1,0 +1,22 @@
+[
+  {
+    "from": "cccc37e4a1125f88c7714a26b1873fdb2ffb7a9c",
+    "to": "da226aab9fc1f6fa766cb363d54307059bd65d09",
+    "paths": [
+      "packages/info_core/lib",
+      "packages/info_cli/lib",
+      "packages/info_cli/bin",
+      "packages/info_storage/lib"
+    ],
+    "differences": []
+  },
+  {
+    "from": "01c1f141d876a9d3c49c61c7fc3d1e572c432c5a",
+    "to": "da226aab9fc1f6fa766cb363d54307059bd65d09",
+    "paths": [
+      "apps/desktop/lib",
+      "apps/desktop/macos"
+    ],
+    "differences": []
+  }
+]

@@ -1,5 +1,7 @@
 # Mac 真实 Codex 合成资料验收
 
+后续检查点已补齐自然到期、同库进程重开、实际传输恢复和真实 SSH 凭据复用，见[最新续验](macos-codex-runtime-continuation.md)。以下保留前一轮当时范围。
+
 2026-10-21，继续 #49，只在 `codex/macos-adaptation`。用户明确允许为准备好的独立合成项目接入并信任 SessionStart、SubagentStart、SessionEnd。没有把此许可扩展到其他项目，也没有安排真实主子 Agent 委托场景。
 
 本轮已从“材料准备”推进到真实客户端与模型工具调用。正式 CLI `/hooks` 逐条审查并信任三个准确命令；`hooks/list` 随后显示三项均 `trusted`，定义摘要与审查前一致。剔除这三个指定的 `hooks.state` 信任项后，用户配置的规范化摘要与审查前完全一致。没有直接写入信任摘要或使用绕过信任参数。正式信任和项目访问确认来自 Codex TUI，业务测试来自同版本独立 app-server。

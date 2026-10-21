@@ -1,0 +1,3 @@
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+MAC_CODEX_LIVE_ROOT=/Users/jiangxinyi/Library/Containers/org.shijijs.agent-info-manage.qa.codex.3b172232364f48968d4d3ef1359d109f/Data/tmp/aim-mac-codex-live-vWJrNw
+MAC_CODEX_LIVE_READY=47125
