@@ -97,3 +97,4 @@ docs/development/evidence/macos-delivery-keychain-access/raw/** -text -diff
 docs/development/evidence/macos-locked-keychain/raw/** -text -diff
 docs/development/evidence/macos-file-consumer/raw/** -text -diff
 docs/development/evidence/macos-file-lifecycle/raw/** -text -diff
+docs/development/evidence/macos-file-capacity/raw/** -text -diff

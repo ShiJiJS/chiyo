@@ -1,0 +1,55 @@
+[
+  {
+    "command": [
+      "/usr/bin/codesign",
+      "--verify",
+      "--deep",
+      "--strict",
+      "/Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/build/macos/Build/Products/Debug/info_desktop.app"
+    ],
+    "exitCode": 0
+  },
+  {
+    "command": [
+      "/usr/bin/codesign",
+      "-d",
+      "--entitlements",
+      ":-",
+      "/Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/build/macos/Build/Products/Debug/info_desktop.app"
+    ],
+    "exitCode": 0
+  },
+  {
+    "command": [
+      "/usr/bin/xcodebuild",
+      "-version"
+    ],
+    "exitCode": 0
+  },
+  {
+    "command": [
+      "/usr/bin/sw_vers"
+    ],
+    "exitCode": 0
+  },
+  {
+    "command": [
+      "/usr/bin/uname",
+      "-m"
+    ],
+    "exitCode": 0
+  },
+  {
+    "check": "desktop-strict-analysis",
+    "exitCode": 0
+  },
+  {
+    "check": "captured-input-hashes-match-current-committed-source",
+    "matched": true
+  },
+  {
+    "check": "restore-normal-debug-main-and-strict-signature",
+    "buildExitCode": 0,
+    "signatureExitCode": 0
+  }
+]
