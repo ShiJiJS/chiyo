@@ -1,0 +1,2 @@
+Executable=/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue50-package-11/verify/中文 空格 路径/AgentInfoManage/app/info_desktop.app/Contents/MacOS/info_desktop
+# designated => cdhash H"29b0c05313672dd3cb368da03a985fc198fa2ec6"
