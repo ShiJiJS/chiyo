@@ -1,0 +1,27 @@
+{
+  "kind": "transcription of actual CUA AX observations, not screenshot recording",
+  "application": "com.apple.TextEdit",
+  "cases": [
+    {
+      "action": "typeText ASCII",
+      "expected": "NativeClipboardBaseline",
+      "actual": "NativeClipboardBaseline"
+    },
+    {
+      "action": "Cmd+A then CUA paste",
+      "expected": "中文 合成粘贴 Clipboard",
+      "actual": "中文 合成粘贴 Clipboard"
+    },
+    {
+      "action": "Cmd+A then typeText Chinese + shifted underscore",
+      "expected": "中文_Probe",
+      "actual": "Probe"
+    }
+  ],
+  "conclusion": "CUA key-based Chinese input failure also occurs in native editor; does not by itself establish Flutter IME defect. Native CUA paste works.",
+  "cleanup": {
+    "documentCleared": true,
+    "savedOwnedBlankRtf": "ClipboardNativeControl.rtf",
+    "previousICloudAutosaveGone": true
+  }
+}

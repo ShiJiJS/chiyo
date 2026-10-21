@@ -1,0 +1,4 @@
+{
+  "sourceCommit": "8b82c03feee521a5b32c35b170ed3940998cdc8f",
+  "scope": "QA minimal current DesktopTextField + DesktopWindowFrame; no database/bootstrap/Keychain calls; only known text equality/selection logs; original plain clipboard held in memory only until explicit restore"
+}

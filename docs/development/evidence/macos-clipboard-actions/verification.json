@@ -1,0 +1,259 @@
+{
+  "date": "2026-10-22",
+  "sourceBase": "8b82c03feee521a5b32c35b170ed3940998cdc8f",
+  "scope": "Current Mac clipboard source fix, widget regressions and independent actual Release UI; no installed application upgrade",
+  "regressionBeforeExit": 1,
+  "relatedAfterPassed": 10,
+  "initialAllSourceScriptExit": 1,
+  "initialFailure": "Desktop test curly_braces_in_flow_control_structures; first three package analyses/tests passed",
+  "finalDesktopAnalysisExit": 0,
+  "sourceTests": {
+    "core": {
+      "passed": 285,
+      "conditionalSkipped": 6
+    },
+    "cli": {
+      "passed": 75,
+      "conditionalSkipped": 40
+    },
+    "storage": {
+      "passed": 159,
+      "conditionalSkipped": 18
+    },
+    "desktop": {
+      "passed": 203,
+      "conditionalSkipped": 2
+    }
+  },
+  "totalPassed": 722,
+  "totalConditionalSkipped": 66,
+  "sourceInputs": 637,
+  "keychainCalls": 0,
+  "newOSPermissionRequests": 0,
+  "ordinaryInstalledPackageChanged": false,
+  "latestCceCandidateIncludesFix": false,
+  "nativeWindowsOrCI": false,
+  "issue48Criteria": [
+    true,
+    true,
+    true,
+    false,
+    false,
+    false
+  ],
+  "issue50Criteria": [
+    true,
+    true,
+    false,
+    false,
+    false,
+    false
+  ],
+  "evidenceFiles": [
+    {
+      "path": "raw/.gitattributes",
+      "bytes": 31,
+      "sha256": "782c4e6d060063fe1615aab4a7cc4285e97b7807cd2abcb1b88fbf1bd7f4e8e3"
+    },
+    {
+      "path": "raw/ClipboardNativeControl.rtf",
+      "bytes": 219,
+      "sha256": "ffa85bc2b3bc9ceff66312367f67ded746a183312d43496871d04a15e9751be2"
+    },
+    {
+      "path": "raw/actual-ui-observations.json",
+      "bytes": 2058,
+      "sha256": "95364e3a86f9627d5f1952f0eda710cd9b3c9119d56f35975dd05cad4bdde893"
+    },
+    {
+      "path": "raw/all-source-checks.txt",
+      "bytes": 158542,
+      "sha256": "8d304282b850a387de47032b05db41fc5d9a77e0881480fe14c1f29b0a7aef4c"
+    },
+    {
+      "path": "raw/analyze-probe.txt",
+      "bytes": 96,
+      "sha256": "1c898b07876feb248af0ca567646ff58eb07627f8e00b23a10db61691ec3949f"
+    },
+    {
+      "path": "raw/baseline-build-stages.json",
+      "bytes": 1099,
+      "sha256": "48819af401761172ce999f1cc1bf1c862d76120424a4c2f17408be691447ee6b"
+    },
+    {
+      "path": "raw/baseline-exit.json",
+      "bytes": 16,
+      "sha256": "982b9e9bfb10ffe83cad665807abcfd3fa97b37822db5ab7831157a499548a9e"
+    },
+    {
+      "path": "raw/baseline-process.json",
+      "bytes": 335,
+      "sha256": "5b04d7fde14f7801d05c73e7c7a8bbddd586723268e2cd25cfcc7db90bd4c26c"
+    },
+    {
+      "path": "raw/baseline-runtime.txt",
+      "bytes": 3187,
+      "sha256": "c3e61d1c70140fccf4f4ef357f4a67b9067752fca09861f8b2eb47327e42edc9"
+    },
+    {
+      "path": "raw/build-probe.txt",
+      "bytes": 370,
+      "sha256": "96814ac3a8dcad03b5eeafc1cc170721e804e3bf23e0befbc1a9c7ebe8567a56"
+    },
+    {
+      "path": "raw/build-stages.json",
+      "bytes": 1099,
+      "sha256": "48819af401761172ce999f1cc1bf1c862d76120424a4c2f17408be691447ee6b"
+    },
+    {
+      "path": "raw/cleanup.json",
+      "bytes": 565,
+      "sha256": "3a195cffbc5cc4fc5b785e935ac03fe227bf969b2ec0ce1903af2303d1868f6a"
+    },
+    {
+      "path": "raw/desktop-analysis-after.txt",
+      "bytes": 96,
+      "sha256": "11b6681c6be022ad1bd1451d0952783104359cef9d576e82be083fa04893a464"
+    },
+    {
+      "path": "raw/desktop-tests-after.txt",
+      "bytes": 41499,
+      "sha256": "d76840e289213f813bc7d860febe2e54dbe13894f4e9d9f7efab0027bba9001d"
+    },
+    {
+      "path": "raw/final-source-hashes.json",
+      "bytes": 116589,
+      "sha256": "7cf9d1e22e31a96d3d42cd7cb7c282bbf7e11e39089fa1488c7b2a35f04e019b"
+    },
+    {
+      "path": "raw/fixed-exit.json",
+      "bytes": 16,
+      "sha256": "982b9e9bfb10ffe83cad665807abcfd3fa97b37822db5ab7831157a499548a9e"
+    },
+    {
+      "path": "raw/fixed-process.json",
+      "bytes": 334,
+      "sha256": "d6c380301bd88ce14f22225e9586264f2ebd6a3b9f49b539753a6cf36b64e713"
+    },
+    {
+      "path": "raw/fixed-runtime.txt",
+      "bytes": 8544,
+      "sha256": "cb60147eb6effc6ac74588a9147563f13b75b51287fc65092b633133156c8e63"
+    },
+    {
+      "path": "raw/fixed-signature.txt",
+      "bytes": 2303,
+      "sha256": "b47f6ed0248705f964a30b2a850127bfb51a94408df73c916993e4d28d7ac1af"
+    },
+    {
+      "path": "raw/native-control-observations.json",
+      "bytes": 869,
+      "sha256": "14b9214f8d7be1ecd09568e81266288035c5b266c7be52ef3d1c8076da29b10c"
+    },
+    {
+      "path": "raw/panel-exit.json",
+      "bytes": 16,
+      "sha256": "982b9e9bfb10ffe83cad665807abcfd3fa97b37822db5ab7831157a499548a9e"
+    },
+    {
+      "path": "raw/panel-process.json",
+      "bytes": 274,
+      "sha256": "21d828261a1e8c5fcbc54641880f1b6ee5aa5eb48ddc74cffe69e10f238e85ce"
+    },
+    {
+      "path": "raw/panel-runtime.txt",
+      "bytes": 1167,
+      "sha256": "5ddd40da1d88183b9613b0e782224db8293674125b7b1cd4b3960f9e66360321"
+    },
+    {
+      "path": "raw/panel-signature.txt",
+      "bytes": 2303,
+      "sha256": "aeddde89e493c8b1733c356161676f43aaaac91f094569c6d6cd89d597fc74ee"
+    },
+    {
+      "path": "raw/prepare-fixed.py",
+      "bytes": 3355,
+      "sha256": "fa0191015da5d42902c39f5058a07ae069ebdd4b233481d80e059f9eaf63845a"
+    },
+    {
+      "path": "raw/prepare.py",
+      "bytes": 3984,
+      "sha256": "81aaf66b7f503173405cef88ec9176dbab0d479df6ff8b8cf4e2e81bc31679ee"
+    },
+    {
+      "path": "raw/prepared.json",
+      "bytes": 284,
+      "sha256": "e2ba4547cd1c3728f9108cabce707f3dc6f4f10ce4c483d5cd95cd22245c3532"
+    },
+    {
+      "path": "raw/production.patch",
+      "bytes": 18613,
+      "sha256": "1f098e00d78c665b78f130595571313d0e203b40729b97fb1d60fd11aecd8566"
+    },
+    {
+      "path": "raw/qa-production-source-matches.json",
+      "bytes": 333,
+      "sha256": "162b6a608a549e6bee7797e7ffcfec9c618c73fba9260a76724936aafae8b1ce"
+    },
+    {
+      "path": "raw/qa-source/apps/desktop/lib/clipboard_probe.dart",
+      "bytes": 2987,
+      "sha256": "cd3b3838d1892ab8637dd30305e0983cbb9321b5d2ca9646c9b20b110b556b7b"
+    },
+    {
+      "path": "raw/qa-source/apps/desktop/macos/Runner/Configs/AppInfo.xcconfig",
+      "bytes": 642,
+      "sha256": "03a5407fff5d5a1de4cf45aebefe9e656ab9dcc985eefe2af4be2abde2eca024"
+    },
+    {
+      "path": "raw/qa-source/apps/desktop/macos/Runner/MainFlutterWindow.swift",
+      "bytes": 19846,
+      "sha256": "c2a981e4078bb97354d93134fc522c6bbadcccc8e7783c6b88dcea3bebd27b75"
+    },
+    {
+      "path": "raw/regression-after.txt",
+      "bytes": 1933,
+      "sha256": "9f56041780a90da0e5ea04066f1908893308b391694359164295af2ffe60dabb"
+    },
+    {
+      "path": "raw/regression-before.txt",
+      "bytes": 2665,
+      "sha256": "a205ef492774e700372c9e81b3224baad41591c0837e548da4bd64e2500cfd1a"
+    },
+    {
+      "path": "raw/sources/apps/desktop/lib/mac_text_editing.dart",
+      "bytes": 2042,
+      "sha256": "1a6a0609f2a714fc09ac2a23134f7b87d3fc15a8980da862a4ceee32c2479377"
+    },
+    {
+      "path": "raw/sources/apps/desktop/lib/window_frame.dart",
+      "bytes": 4566,
+      "sha256": "391387c70159a0fa776b7b9cd85a419e67696f8dc70bbef69144370004578829"
+    },
+    {
+      "path": "raw/sources/apps/desktop/macos/Runner/MainFlutterWindow.swift",
+      "bytes": 18177,
+      "sha256": "15e21718f27a9bcfcbdc17769ec2052b89380266f60e448a15c504eb62afd947"
+    },
+    {
+      "path": "raw/sources/apps/desktop/macos/Runner/NativeTextEditingMenu.swift",
+      "bytes": 4888,
+      "sha256": "f9920e19ecda65d611067bd8df8f115391cb33a028513df2d0eb88db71d754a2"
+    },
+    {
+      "path": "raw/sources/apps/desktop/macos/Runner.xcodeproj/project.pbxproj",
+      "bytes": 29905,
+      "sha256": "46f73affa3c195e1bb76e8aac7a167bc7e32143ed612336f0a2eecbfa8ec5f03"
+    },
+    {
+      "path": "raw/sources/apps/desktop/test/mac_text_editing_test.dart",
+      "bytes": 9470,
+      "sha256": "048422fbc72097206764abe3e9645c0dba317ca10ec91f3e67d1e9fffe67c181"
+    },
+    {
+      "path": "raw/unregister.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

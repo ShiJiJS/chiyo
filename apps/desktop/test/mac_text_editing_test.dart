@@ -5,20 +5,152 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:info_desktop/mac_text_editing.dart';
 
-Future<Object?> nativeSelectAll() async {
+Future<Object?> nativeAction(String method) async {
   final result = Completer<ByteData?>();
   const codec = StandardMethodCodec();
   TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
       .handlePlatformMessage(
         'agent_info_manage/text_editing',
-        codec.encodeMethodCall(const MethodCall('selectAll')),
+        codec.encodeMethodCall(MethodCall(method)),
         result.complete,
       );
   final reply = await result.future;
   return reply == null ? null : codec.decodeEnvelope(reply);
 }
 
+Future<Object?> nativeSelectAll() => nativeAction('selectAll');
+
 void main() {
+  testWidgets(
+    'native clipboard actions update the focused model and clipboard',
+    (tester) async {
+      final first = TextEditingController(text: '中文 合成粘贴 Clipboard');
+      final second = TextEditingController(text: 'Replace me');
+      addTearDown(first.dispose);
+      addTearDown(second.dispose);
+      String? clipboard;
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        (call) async {
+          if (call.method == 'Clipboard.setData') {
+            clipboard = (call.arguments as Map)['text'] as String;
+          }
+          if (call.method == 'Clipboard.getData') return {'text': clipboard};
+          if (call.method == 'Clipboard.hasStrings') {
+            return {'value': clipboard != null};
+          }
+          return null;
+        },
+      );
+      addTearDown(
+        () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.platform,
+          null,
+        ),
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          builder: (_, child) => MacTextEditingActions(child: child!),
+          home: Material(
+            child: Column(
+              children: [
+                TextField(key: const ValueKey('source'), controller: first),
+                TextField(key: const ValueKey('target'), controller: second),
+              ],
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.byKey(const ValueKey('source')));
+      await nativeSelectAll();
+      expect(await nativeAction('copy'), true);
+      await tester.pump();
+      expect(clipboard, first.text);
+      await tester.tap(find.byKey(const ValueKey('target')));
+      await nativeSelectAll();
+      expect(await nativeAction('paste'), true);
+      await tester.pump();
+      expect(second.text, first.text);
+      expect(
+        second.selection,
+        TextSelection.collapsed(offset: first.text.length),
+      );
+      await nativeSelectAll();
+      expect(await nativeAction('cut'), true);
+      await tester.pump();
+      expect(second.text, isEmpty);
+      expect(first.text, '中文 合成粘贴 Clipboard');
+      expect(clipboard, first.text);
+      await tester.pumpWidget(const SizedBox());
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.macOS),
+  );
+
+  testWidgets(
+    'native clipboard actions preserve read-only and obscured fields',
+    (tester) async {
+      final readOnly = TextEditingController(text: 'Read only');
+      final secret = TextEditingController(text: 'Synthetic secret');
+      addTearDown(readOnly.dispose);
+      addTearDown(secret.dispose);
+      var clipboard = 'Clipboard sentinel';
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        (call) async {
+          if (call.method == 'Clipboard.setData') {
+            clipboard = (call.arguments as Map)['text'] as String;
+          }
+          if (call.method == 'Clipboard.getData') return {'text': clipboard};
+          if (call.method == 'Clipboard.hasStrings') return {'value': true};
+          return null;
+        },
+      );
+      addTearDown(
+        () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.platform,
+          null,
+        ),
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          builder: (_, child) => MacTextEditingActions(child: child!),
+          home: Material(
+            child: Column(
+              children: [
+                TextField(
+                  key: const ValueKey('readonly'),
+                  controller: readOnly,
+                  readOnly: true,
+                ),
+                TextField(
+                  key: const ValueKey('secret'),
+                  controller: secret,
+                  obscureText: true,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.byKey(const ValueKey('readonly')));
+      await nativeSelectAll();
+      expect(await nativeAction('cut'), true);
+      expect(await nativeAction('paste'), true);
+      await tester.pump();
+      expect(readOnly.text, 'Read only');
+      expect(clipboard, 'Clipboard sentinel');
+      await tester.tap(find.byKey(const ValueKey('secret')));
+      await nativeSelectAll();
+      expect(await nativeAction('copy'), true);
+      expect(await nativeAction('cut'), true);
+      await tester.pump();
+      expect(secret.text, 'Synthetic secret');
+      expect(clipboard, 'Clipboard sentinel');
+      await tester.pumpWidget(const SizedBox());
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.macOS),
+  );
+
   testWidgets('native Select All updates only the focused Flutter editor', (
     tester,
   ) async {
@@ -82,6 +214,9 @@ void main() {
     buttonFocus.requestFocus();
     await tester.pump();
     expect(await nativeSelectAll(), false);
+    for (final method in ['copy', 'cut', 'paste']) {
+      expect(await nativeAction(method), false);
+    }
     expect(controller.text, 'Preserve input');
     expect(controller.selection.isValid, false);
     await tester.pumpWidget(const SizedBox());
@@ -120,6 +255,9 @@ void main() {
     );
     await tester.pumpWidget(const SizedBox());
     expect(await nativeSelectAll(), isNull);
+    for (final method in ['copy', 'cut', 'paste']) {
+      expect(await nativeAction(method), isNull);
+    }
   }, variant: TargetPlatformVariant.only(TargetPlatform.macOS));
 
   testWidgets('Windows keeps its existing editing path', (tester) async {

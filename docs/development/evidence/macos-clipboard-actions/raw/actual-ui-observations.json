@@ -1,0 +1,64 @@
+{
+  "kind": "Transcribed actual CUA AX and screenshot observations; no separately saved screenshot set",
+  "baselinePid": 79692,
+  "fixedPid": 80938,
+  "panelPid": 82356,
+  "baseline": {
+    "typed": "FlutterBaseline",
+    "CUAPasteAX": "中文 合成粘贴 Clipboard",
+    "controllerAfterPaste": {
+      "asciiExact": true,
+      "length": 15,
+      "selection": [
+        0,
+        15
+      ]
+    },
+    "afterLeftAX": "FlutterBaseline",
+    "exitCode": 0
+  },
+  "fixed": {
+    "CUAPasteController": {
+      "fixtureExact": true,
+      "length": 17,
+      "selection": [
+        17,
+        17
+      ]
+    },
+    "afterLeftAX": "中文 合成粘贴 Clipboard",
+    "nativeMenuCopyThenDeleteThenPaste": "FlutterBaseline",
+    "keyboardCutThenPaste": "FlutterBaseline",
+    "nativeMenuCutThenPaste": "中文 合成粘贴 Clipboard",
+    "keyboardCopyThenDeleteThenPaste": "FlutterBaseline",
+    "originalClipboardTypesRestored": true,
+    "exitCode": 0
+  },
+  "panel": {
+    "selectedInitialFilename": "ClipboardPanelSynthetic",
+    "nativeMenuCut": "empty filename, Save disabled",
+    "nativeMenuPaste": "ClipboardPanelSynthetic, Save enabled",
+    "actualCancel": true,
+    "FlutterDraftUnchanged": "中文 合成粘贴 Clipboard",
+    "FlutterNativeMenuPasteAfterCancel": true,
+    "controllerAfterCancelPasteFixtureExact": true,
+    "fileSaved": false,
+    "originalClipboardTypesRestored": true,
+    "exitCode": 0
+  },
+  "observationRestart": {
+    "originalPanelPidExited0": true,
+    "getAXAfterQuitOpenedExtraEmptyPid": 82380,
+    "extraPidQuitThroughCUA": true,
+    "extraPidExitCodeNotCaptured": true,
+    "noExtraPassCount": true
+  },
+  "limits": [
+    "CUA non-ASCII typeText also failed in native TextEdit; physical IME not accepted",
+    "CUA native sheet Cmd-A from earlier runs still unpassed; this run used menus",
+    "Paste and Match Style / Undo / Redo were not accepted by this run",
+    "No ordinary installed production application upgrade or final package acceptance"
+  ],
+  "newKeychainCalls": 0,
+  "newOSPermissionRequests": 0
+}

@@ -1,0 +1,392 @@
+diff --git a/apps/desktop/lib/mac_text_editing.dart b/apps/desktop/lib/mac_text_editing.dart
+index 2c1a9fa..0a9aae4 100644
+--- a/apps/desktop/lib/mac_text_editing.dart
++++ b/apps/desktop/lib/mac_text_editing.dart
+@@ -19,7 +19,17 @@ class _MacTextEditingActionsState extends State<MacTextEditingActions> {
+     if (!kIsWeb && defaultTargetPlatform == TargetPlatform.macOS) {
+       _owner = this;
+       _channel.setMethodCallHandler((call) async {
+-        if (call.method != 'selectAll') throw MissingPluginException();
++        final Intent intent = switch (call.method) {
++          'selectAll' => const SelectAllTextIntent(
++            SelectionChangedCause.keyboard,
++          ),
++          'copy' => CopySelectionTextIntent.copy,
++          'cut' => const CopySelectionTextIntent.cut(
++            SelectionChangedCause.keyboard,
++          ),
++          'paste' => const PasteTextIntent(SelectionChangedCause.keyboard),
++          _ => throw MissingPluginException(),
++        };
+         final context = FocusManager.instance.primaryFocus?.context;
+         if (!mounted ||
+             context == null ||
+@@ -28,8 +38,7 @@ class _MacTextEditingActionsState extends State<MacTextEditingActions> {
+                     null)) {
+           return false;
+         }
+-        const intent = SelectAllTextIntent(SelectionChangedCause.keyboard);
+-        final action = Actions.maybeFind<SelectAllTextIntent>(context);
++        final action = Actions.maybeFind(context, intent: intent);
+         if (action == null || !action.isEnabled(intent)) return false;
+         Actions.invoke(context, intent);
+         return true;
+diff --git a/apps/desktop/macos/Runner.xcodeproj/project.pbxproj b/apps/desktop/macos/Runner.xcodeproj/project.pbxproj
+index c18e921..c32d800 100644
+--- a/apps/desktop/macos/Runner.xcodeproj/project.pbxproj
++++ b/apps/desktop/macos/Runner.xcodeproj/project.pbxproj
+@@ -21,7 +21,7 @@
+ /* End PBXAggregateTarget section */
+ 
+ /* Begin PBXBuildFile section */
+-		7BAF00482610220000000001 /* NativeSelectAllMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BAF00482610220000000002 /* NativeSelectAllMenu.swift */; };
++		7BAF00482610220000000001 /* NativeTextEditingMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BAF00482610220000000002 /* NativeTextEditingMenu.swift */; };
+ 		7BAF00022610210000000001 /* ToolAccessStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BAF00022610210000000002 /* ToolAccessStore.swift */; };
+ 		7BAF00012610210000000001 /* DatabaseKeyStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BAF00012610210000000002 /* DatabaseKeyStore.swift */; };
+ 		331C80D8294CF71000263BE5 /* RunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 331C80D7294CF71000263BE5 /* RunnerTests.swift */; };
+@@ -64,7 +64,7 @@
+ /* End PBXCopyFilesBuildPhase section */
+ 
+ /* Begin PBXFileReference section */
+-		7BAF00482610220000000002 /* NativeSelectAllMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeSelectAllMenu.swift; sourceTree = "<group>"; };
++		7BAF00482610220000000002 /* NativeTextEditingMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeTextEditingMenu.swift; sourceTree = "<group>"; };
+ 		7BAF00022610210000000002 /* ToolAccessStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolAccessStore.swift; sourceTree = "<group>"; };
+ 		7BAF00012610210000000002 /* DatabaseKeyStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseKeyStore.swift; sourceTree = "<group>"; };
+ 		331C80D5294CF71000263BE5 /* RunnerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RunnerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+@@ -174,7 +174,7 @@
+ 			children = (
+ 				33CC10F02044A3C60003C045 /* AppDelegate.swift */,
+ 				33CC11122044BFA00003C045 /* MainFlutterWindow.swift */,
+-				7BAF00482610220000000002 /* NativeSelectAllMenu.swift */,
++				7BAF00482610220000000002 /* NativeTextEditingMenu.swift */,
+ 				7BAF00012610210000000002 /* DatabaseKeyStore.swift */,
+ 				7BAF00022610210000000002 /* ToolAccessStore.swift */,
+ 				33E51913231747F40026EE4D /* DebugProfile.entitlements */,
+@@ -379,7 +379,7 @@
+ 			buildActionMask = 2147483647;
+ 			files = (
+ 				33CC11132044BFA00003C045 /* MainFlutterWindow.swift in Sources */,
+-				7BAF00482610220000000001 /* NativeSelectAllMenu.swift in Sources */,
++				7BAF00482610220000000001 /* NativeTextEditingMenu.swift in Sources */,
+ 				7BAF00012610210000000001 /* DatabaseKeyStore.swift in Sources */,
+ 				7BAF00022610210000000001 /* ToolAccessStore.swift in Sources */,
+ 				33CC10F12044A3C60003C045 /* AppDelegate.swift in Sources */,
+diff --git a/apps/desktop/macos/Runner/MainFlutterWindow.swift b/apps/desktop/macos/Runner/MainFlutterWindow.swift
+index ca1660d..017d621 100644
+--- a/apps/desktop/macos/Runner/MainFlutterWindow.swift
++++ b/apps/desktop/macos/Runner/MainFlutterWindow.swift
+@@ -3,7 +3,7 @@ import FlutterMacOS
+ import UserNotifications
+ 
+ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDelegate {
+-  private var selectAllMenu: NativeSelectAllMenu?
++  private var textEditingMenu: NativeTextEditingMenu?
+   private var desktopChannel: FlutterMethodChannel?
+   private var statusItem: NSStatusItem?
+   private var statusItemVisibility: NSKeyValueObservation?
+@@ -232,9 +232,9 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
+     super.awakeFromNib()
+     DispatchQueue.main.async { [weak self] in
+       guard let self, let menu = NSApp.mainMenu else { return }
+-      let forwarding = NativeSelectAllMenu(window: self, messenger: flutterViewController.engine.binaryMessenger)
++      let forwarding = NativeTextEditingMenu(window: self, messenger: flutterViewController.engine.binaryMessenger)
+       forwarding.install(in: menu)
+-      self.selectAllMenu = forwarding
++      self.textEditingMenu = forwarding
+     }
+   }
+ 
+diff --git a/apps/desktop/macos/Runner/NativeSelectAllMenu.swift b/apps/desktop/macos/Runner/NativeTextEditingMenu.swift
+similarity index 60%
+rename from apps/desktop/macos/Runner/NativeSelectAllMenu.swift
+rename to apps/desktop/macos/Runner/NativeTextEditingMenu.swift
+index e7fbebe..5b4d622 100644
+--- a/apps/desktop/macos/Runner/NativeSelectAllMenu.swift
++++ b/apps/desktop/macos/Runner/NativeTextEditingMenu.swift
+@@ -1,15 +1,17 @@
+ import Cocoa
+ import FlutterMacOS
+ 
+-/// Accessibility's NSTextView selection can diverge from EditableText. Route
+-/// Select All to Flutter's action, preserving AppKit behavior in native sheets.
+-final class NativeSelectAllMenu: NSObject, NSMenuItemValidation {
++/// Accessibility's NSTextView can diverge from EditableText. Route editing
++/// actions to Flutter, preserving AppKit behavior in native sheets.
++final class NativeTextEditingMenu: NSObject, NSMenuItemValidation {
+   private weak var window: NSWindow?
+-  private let selectAll = NSSelectorFromString("selectAll:")
++  private let methods = ["selectAll:": "selectAll", "copy:": "copy",
++                         "cut:": "cut", "paste:": "paste"]
++  private let keyMethods = ["a": "selectAll", "c": "copy", "x": "cut", "v": "paste"]
+   private let channel: FlutterMethodChannel
+   private var keyMonitor: Any?
+   private var sheetObservers: [NSObjectProtocol] = []
+-  private var originalItems: [(item: NSMenuItem, target: AnyObject?, action: Selector?)] = []
++  private var originalItems: [(item: NSMenuItem, target: AnyObject?, action: Selector, method: String)] = []
+ 
+   init(window: NSWindow, messenger: FlutterBinaryMessenger) {
+     self.window = window
+@@ -25,7 +27,7 @@ final class NativeSelectAllMenu: NSObject, NSMenuItemValidation {
+ 
+   func install(in menu: NSMenu) {
+     guard keyMonitor == nil else { return }
+-    replaceSelectAll(in: menu)
++    replaceEditingActions(in: menu)
+     // Open/Save panels may edit in a remote AppKit process. Keep their exact
+     // native menu actions, rather than resolving the parent's old responder.
+     if let window {
+@@ -36,25 +38,26 @@ final class NativeSelectAllMenu: NSObject, NSMenuItemValidation {
+             object: window, queue: .main) { [weak self] _ in self?.installFlutterActions() }
+       ]
+     }
+-    // The accessibility field editor consumes Cmd-A before menu dispatch.
++    // The accessibility field editor may consume these before menu dispatch.
+     keyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
+       guard let self, self.flutterEditor != nil,
+             event.modifierFlags.contains(.command),
+             event.modifierFlags.intersection([.control, .option, .shift]).isEmpty,
+-            event.charactersIgnoringModifiers?.lowercased() == "a"
++            let key = event.charactersIgnoringModifiers?.lowercased(),
++            let method = self.keyMethods[key]
+       else { return event }
+-      self.channel.invokeMethod("selectAll", arguments: nil)
++      self.channel.invokeMethod(method, arguments: nil)
+       return nil
+     }
+   }
+ 
+-  private func replaceSelectAll(in menu: NSMenu) {
++  private func replaceEditingActions(in menu: NSMenu) {
+     for item in menu.items {
+-      if let submenu = item.submenu { replaceSelectAll(in: submenu) }
+-      if item.action == selectAll {
+-        originalItems.append((item, item.target, item.action))
++      if let submenu = item.submenu { replaceEditingActions(in: submenu) }
++      if let action = item.action, let method = methods[NSStringFromSelector(action)] {
++        originalItems.append((item, item.target, action, method))
+         item.target = self
+-        item.action = #selector(selectAllFromMenu(_:))
++        item.action = #selector(editFromMenu(_:))
+       }
+     }
+   }
+@@ -69,7 +72,7 @@ final class NativeSelectAllMenu: NSObject, NSMenuItemValidation {
+   private func installFlutterActions() {
+     for original in originalItems {
+       original.item.target = self
+-      original.item.action = #selector(selectAllFromMenu(_:))
++      original.item.action = #selector(editFromMenu(_:))
+     }
+   }
+ 
+@@ -82,21 +85,25 @@ final class NativeSelectAllMenu: NSObject, NSMenuItemValidation {
+     return editor
+   }
+ 
+-  @objc private func selectAllFromMenu(_ sender: NSMenuItem) {
++  @objc private func editFromMenu(_ sender: NSMenuItem) {
++    guard let original = originalItems.first(where: { $0.item === sender }) else { return }
+     if flutterEditor != nil {
+-      channel.invokeMethod("selectAll", arguments: nil)
++      // EditableText retains its own read-only, obscured-text and selection rules.
++      // Send only the action; never transport editor or clipboard text here.
++      channel.invokeMethod(original.method, arguments: nil)
+     } else {
+-      let native = NSMenuItem(title: sender.title, action: selectAll,
++      let native = NSMenuItem(title: sender.title, action: original.action,
+                               keyEquivalent: sender.keyEquivalent)
+-      NSApp.sendAction(selectAll, to: nil, from: native)
++      NSApp.sendAction(original.action, to: nil, from: native)
+     }
+   }
+ 
+   func validateMenuItem(_ menuItem: NSMenuItem) -> Bool {
++    guard let original = originalItems.first(where: { $0.item === menuItem }) else { return false }
+     if flutterEditor != nil { return true }
+-    let native = NSMenuItem(title: menuItem.title, action: selectAll,
++    let native = NSMenuItem(title: menuItem.title, action: original.action,
+                             keyEquivalent: menuItem.keyEquivalent)
+-    guard let target = NSApp.target(forAction: selectAll, to: nil, from: native)
++    guard let target = NSApp.target(forAction: original.action, to: nil, from: native)
+     else { return false }
+     if let validator = target as? NSMenuItemValidation {
+       return validator.validateMenuItem(native)
+diff --git a/apps/desktop/test/mac_text_editing_test.dart b/apps/desktop/test/mac_text_editing_test.dart
+index 1cdf02f..9e7a5a5 100644
+--- a/apps/desktop/test/mac_text_editing_test.dart
++++ b/apps/desktop/test/mac_text_editing_test.dart
+@@ -5,20 +5,152 @@ import 'package:flutter/services.dart';
+ import 'package:flutter_test/flutter_test.dart';
+ import 'package:info_desktop/mac_text_editing.dart';
+ 
+-Future<Object?> nativeSelectAll() async {
++Future<Object?> nativeAction(String method) async {
+   final result = Completer<ByteData?>();
+   const codec = StandardMethodCodec();
+   TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+       .handlePlatformMessage(
+         'agent_info_manage/text_editing',
+-        codec.encodeMethodCall(const MethodCall('selectAll')),
++        codec.encodeMethodCall(MethodCall(method)),
+         result.complete,
+       );
+   final reply = await result.future;
+   return reply == null ? null : codec.decodeEnvelope(reply);
+ }
+ 
++Future<Object?> nativeSelectAll() => nativeAction('selectAll');
++
+ void main() {
++  testWidgets(
++    'native clipboard actions update the focused model and clipboard',
++    (tester) async {
++      final first = TextEditingController(text: '中文 合成粘贴 Clipboard');
++      final second = TextEditingController(text: 'Replace me');
++      addTearDown(first.dispose);
++      addTearDown(second.dispose);
++      String? clipboard;
++      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
++        SystemChannels.platform,
++        (call) async {
++          if (call.method == 'Clipboard.setData') {
++            clipboard = (call.arguments as Map)['text'] as String;
++          }
++          if (call.method == 'Clipboard.getData') return {'text': clipboard};
++          if (call.method == 'Clipboard.hasStrings') {
++            return {'value': clipboard != null};
++          }
++          return null;
++        },
++      );
++      addTearDown(
++        () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
++          SystemChannels.platform,
++          null,
++        ),
++      );
++      await tester.pumpWidget(
++        MaterialApp(
++          builder: (_, child) => MacTextEditingActions(child: child!),
++          home: Material(
++            child: Column(
++              children: [
++                TextField(key: const ValueKey('source'), controller: first),
++                TextField(key: const ValueKey('target'), controller: second),
++              ],
++            ),
++          ),
++        ),
++      );
++      await tester.tap(find.byKey(const ValueKey('source')));
++      await nativeSelectAll();
++      expect(await nativeAction('copy'), true);
++      await tester.pump();
++      expect(clipboard, first.text);
++      await tester.tap(find.byKey(const ValueKey('target')));
++      await nativeSelectAll();
++      expect(await nativeAction('paste'), true);
++      await tester.pump();
++      expect(second.text, first.text);
++      expect(
++        second.selection,
++        TextSelection.collapsed(offset: first.text.length),
++      );
++      await nativeSelectAll();
++      expect(await nativeAction('cut'), true);
++      await tester.pump();
++      expect(second.text, isEmpty);
++      expect(first.text, '中文 合成粘贴 Clipboard');
++      expect(clipboard, first.text);
++      await tester.pumpWidget(const SizedBox());
++    },
++    variant: TargetPlatformVariant.only(TargetPlatform.macOS),
++  );
++
++  testWidgets(
++    'native clipboard actions preserve read-only and obscured fields',
++    (tester) async {
++      final readOnly = TextEditingController(text: 'Read only');
++      final secret = TextEditingController(text: 'Synthetic secret');
++      addTearDown(readOnly.dispose);
++      addTearDown(secret.dispose);
++      var clipboard = 'Clipboard sentinel';
++      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
++        SystemChannels.platform,
++        (call) async {
++          if (call.method == 'Clipboard.setData') {
++            clipboard = (call.arguments as Map)['text'] as String;
++          }
++          if (call.method == 'Clipboard.getData') return {'text': clipboard};
++          if (call.method == 'Clipboard.hasStrings') return {'value': true};
++          return null;
++        },
++      );
++      addTearDown(
++        () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
++          SystemChannels.platform,
++          null,
++        ),
++      );
++      await tester.pumpWidget(
++        MaterialApp(
++          builder: (_, child) => MacTextEditingActions(child: child!),
++          home: Material(
++            child: Column(
++              children: [
++                TextField(
++                  key: const ValueKey('readonly'),
++                  controller: readOnly,
++                  readOnly: true,
++                ),
++                TextField(
++                  key: const ValueKey('secret'),
++                  controller: secret,
++                  obscureText: true,
++                ),
++              ],
++            ),
++          ),
++        ),
++      );
++      await tester.tap(find.byKey(const ValueKey('readonly')));
++      await nativeSelectAll();
++      expect(await nativeAction('cut'), true);
++      expect(await nativeAction('paste'), true);
++      await tester.pump();
++      expect(readOnly.text, 'Read only');
++      expect(clipboard, 'Clipboard sentinel');
++      await tester.tap(find.byKey(const ValueKey('secret')));
++      await nativeSelectAll();
++      expect(await nativeAction('copy'), true);
++      expect(await nativeAction('cut'), true);
++      await tester.pump();
++      expect(secret.text, 'Synthetic secret');
++      expect(clipboard, 'Clipboard sentinel');
++      await tester.pumpWidget(const SizedBox());
++    },
++    variant: TargetPlatformVariant.only(TargetPlatform.macOS),
++  );
++
+   testWidgets('native Select All updates only the focused Flutter editor', (
+     tester,
+   ) async {
+@@ -82,6 +214,9 @@ void main() {
+     buttonFocus.requestFocus();
+     await tester.pump();
+     expect(await nativeSelectAll(), false);
++    for (final method in ['copy', 'cut', 'paste']) {
++      expect(await nativeAction(method), false);
++    }
+     expect(controller.text, 'Preserve input');
+     expect(controller.selection.isValid, false);
+     await tester.pumpWidget(const SizedBox());
+@@ -120,6 +255,9 @@ void main() {
+     );
+     await tester.pumpWidget(const SizedBox());
+     expect(await nativeSelectAll(), isNull);
++    for (final method in ['copy', 'cut', 'paste']) {
++      expect(await nativeAction(method), isNull);
++    }
+   }, variant: TargetPlatformVariant.only(TargetPlatform.macOS));
+ 
+   testWidgets('Windows keeps its existing editing path', (tester) async {
