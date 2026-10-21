@@ -25,7 +25,9 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('output', type=Path)
     parser.add_argument('--delivery', type=Path, required=True)
-    parser.add_argument('--large', action='store_true', help='502 history records and one 200-field scope')
+    modes = parser.add_mutually_exclusive_group()
+    modes.add_argument('--states', action='store_true', help='Real UI revoke and natural one-minute expiry with persisted history')
+    modes.add_argument('--large', action='store_true', help='502 history records and one 200-field scope')
     args = parser.parse_args()
     output = args.output.resolve(); output.relative_to(ROOT / 'build')
     output.mkdir(parents=True, exist_ok=False)
@@ -36,7 +38,7 @@ def main():
     assert hashlib.sha256(cli.read_bytes()).hexdigest() == entry['sha256']
     owner = uuid.uuid4().hex
     state = {'complete': False, 'productSource': manifest['sourceCommit'],
-             'cliSha256': entry['sha256'], 'phases': [], 'large': args.large}
+             'cliSha256': entry['sha256'], 'phases': [], 'large': args.large, 'states': args.states}
     state['appBaseCommit'] = subprocess.check_output(
         ['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip()
     state['worktreeStatus'] = subprocess.check_output(
@@ -56,7 +58,7 @@ def main():
     processes = []
     directory = None
     log = output / 'flutter.txt'
-    def wait_for(predicate, timeout=300 if args.large else 120):
+    def wait_for(predicate, timeout=300 if args.large or args.states else 120):
         deadline = time.monotonic() + timeout
         while time.monotonic() < deadline:
             value = predicate()
@@ -87,7 +89,8 @@ def main():
             flutter = subprocess.Popen([str(ROOT/'scripts/dev-macos.sh'), 'flutter', 'test', '--no-pub',
                 'integration_test/macos_removed_scope_native_test.dart', '-d', 'macos',
                 f'--dart-define=MAC_QA_OWNER={owner}',
-                f'--dart-define=MAC_QA_LARGE={str(args.large).lower()}'], cwd=ROOT/'apps/desktop', stdout=stream, stderr=subprocess.STDOUT, start_new_session=True)
+                f'--dart-define=MAC_QA_LARGE={str(args.large).lower()}',
+                f'--dart-define=MAC_QA_STATES={str(args.states).lower()}'], cwd=ROOT/'apps/desktop', stdout=stream, stderr=subprocess.STDOUT, start_new_session=True)
         def locate():
             matches = re.findall(r'MAC_SCOPE_ROOT=([^\r\n]+)', log.read_text(errors='replace'))
             if not matches: return None
@@ -100,7 +103,8 @@ def main():
         current_port = None
         old_request = fresh_request = None
         item = old_field = remaining = fresh_field = None
-        for index in range(1, 12 if args.large else 10):
+        state_requests = {}
+        for index in range(1, 17 if args.states else 12 if args.large else 10):
             phase = wait_for(lambda: read_phase(index))
             name = phase['phase']; reply = {'ok': True}; checks = []
             if phase['port'] != current_port:
@@ -135,6 +139,31 @@ def main():
                     read(fresh_field,fresh_request,'synthetic-private-address')
             elif name in ['all-removed','archived','repository-reopened','scale-reopened']:
                 read(old_field,old_request); read(remaining,old_request); read(fresh_field,fresh_request)
+            elif name == 'states-request':
+                mode = phase['mode']
+                request = command({'command':'request','purpose':f'历史状态验收 {mode}',
+                    'fields':[{'itemId':phase['itemId'],'fieldId':phase['fieldId']}]})
+                assert request['status'] == 'pending'
+                state_requests[mode] = {'requestId':request['requestId'],'itemId':phase['itemId'],'fieldId':phase['fieldId']}
+                reply['requestId'] = request['requestId']
+                checks.append({'mode':mode,'command':'request','status':'pending'})
+            elif name in ['states-approved','states-finished']:
+                mode=phase['mode']; target=state_requests[mode]
+                if name=='states-approved':
+                    claimed=command({'command':'claim','requestId':target['requestId']}); assert claimed['status']=='ok'
+                    checks.append({'mode':mode,'command':'claim','status':'ok'})
+                if mode=='expired' and name=='states-finished':
+                    started=time.monotonic(); time.sleep(62)
+                    state['naturalExpiryWaitSeconds']=time.monotonic()-started
+                value=command({'command':'read',**target})
+                expected='ok' if name=='states-approved' else 'unauthorized'
+                assert value['status']==expected,(mode,value['status'])
+                if expected=='ok': assert value['value']==f'synthetic-private-{mode}'
+                checks.append({'mode':mode,'command':'read','status':value['status']})
+            elif name == 'states-reopened':
+                for mode,target in state_requests.items():
+                    value=command({'command':'read',**target}); assert value['status']=='unauthorized'
+                    checks.append({'mode':mode,'command':'read','status':value['status']})
             elif name == 'large-approved':
                 assert phase['fieldCount'] == phase['approvedCount'] == 200
                 checks.append({'controlledNativeUiApprovalFields':200})
