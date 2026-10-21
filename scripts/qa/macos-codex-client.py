@@ -8,18 +8,36 @@ Private proofs stay in memory. No transcript/authentication files are read.
 """
 import argparse
 import secrets,socket,signal
-import json,os,queue,subprocess,threading,time,hashlib
+import json,os,queue,subprocess,threading,time,hashlib,tempfile,shutil
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[2]
 parser=argparse.ArgumentParser(description=__doc__)
-parser.add_argument('--case',choices=['lifecycle','credential','expiry-restart','transport-resume'],default='lifecycle');parser.add_argument('--resume-ended',help='Public ID of an ended synthetic chat from this project; only test unarchive/resume refusal');parser.add_argument('output',type=Path);parser.add_argument('--project',required=True,type=Path);parser.add_argument('--host',required=True,type=Path)
+parser.add_argument('--case',choices=['lifecycle','credential','expiry-restart','transport-resume','delegation'],default='lifecycle');parser.add_argument('--delegation-mcp',action='store_true',help='Use an ephemeral process-only MCP bridge inherited by the one synthetic child');parser.add_argument('--resume-ended',help='Public ID of an ended synthetic chat from this project; only test unarchive/resume refusal');parser.add_argument('output',type=Path);parser.add_argument('--project',required=True,type=Path);parser.add_argument('--host',required=True,type=Path)
 args=parser.parse_args();OUT=args.output.resolve();OUT.relative_to(ROOT/'build/macos-adaptation');OUT.mkdir(exist_ok=False,parents=True)
 PROJECT=args.project.resolve();PROJECT.relative_to(ROOT/'build/macos-adaptation');assert (PROJECT/'preparation.json').is_file()
 PREP=json.loads((PROJECT/'preparation.json').read_text());CLI=Path(PREP['bundle'])/'info-codex'
 for entry in PREP['files']:assert hashlib.sha256((PROJECT/entry['path']).read_bytes()).hexdigest()==entry['sha256']
 CLI.resolve().relative_to(PROJECT.parent);assert CLI.is_file() and not CLI.is_symlink()
 host=args.host.resolve();host.relative_to(ROOT/'build/macos-adaptation');CONTROL=json.loads((host/'controller.json').read_text());FIX=Path(CONTROL['root']);assert (FIX/'.qa-owner').read_text()==CONTROL['owner']
-EVENTS=[];CALLS=[];RESULTS={'sourceSha256':hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),'scope':__doc__};PROOFS={};Q=queue.Queue();COUNTER=0
+EVENTS=[];CALLS=[];RESULTS={'sourceSha256':hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),'scope':__doc__};PROOFS={};DELEGATED={};Q=queue.Queue();COUNTER=0
+MCP_PENDING={};MCP_EXPECTED={};MCP_SOCKET=None;MCP_DIRECTORY=None;MCP_CONFIG=[]
+if args.delegation_mcp:
+ assert args.case=='delegation'
+ MCP_DIRECTORY=Path(tempfile.mkdtemp(prefix='aim-mcp-',dir='/tmp'))
+ MCP_SOCKET=socket.socket(socket.AF_UNIX,socket.SOCK_STREAM);MCP_SOCKET.bind(str(MCP_DIRECTORY/'bridge'));os.chmod(MCP_DIRECTORY/'bridge',0o600);MCP_SOCKET.listen(4)
+ bridge=ROOT/'scripts/qa/macos-codex-mcp-qa.py';(OUT/'macos-codex-mcp-qa.py').write_bytes(bridge.read_bytes())
+ RESULTS['ephemeralMcpBridgeSourceSha256']=hashlib.sha256(bridge.read_bytes()).hexdigest()
+ MCP_CONFIG=['-c','mcp_servers.agent_info_synthetic.command='+json.dumps(str(ROOT/'.tools/qa-python/bin/python')),'-c','mcp_servers.agent_info_synthetic.args='+json.dumps([str(bridge),str(MCP_DIRECTORY/'bridge')]),'-c','mcp_servers.agent_info_synthetic.required=true']
+ def mcp_listener():
+  while True:
+   try:channel,_=MCP_SOCKET.accept()
+   except OSError:return
+   try:
+    channel.settimeout(60)
+    with channel.makefile('rb') as stream:payload=json.loads(stream.readline(300000))
+    Q.put({'_qaMcpArguments':payload,'_qaMcpChannel':channel})
+   except Exception:channel.close()
+ threading.Thread(target=mcp_listener,daemon=True).start()
 
 def save():
  (OUT/'real-client-result.json').write_text(json.dumps({'results':RESULTS,'events':EVENTS,'calls':CALLS},indent=2)+'\n')
@@ -57,7 +75,8 @@ if args.case=='transport-resume':
   raise TimeoutError('Owned loopback WebSocket startup')
  WS=connect_transport()
 else:
- P=subprocess.Popen(['codex','app-server','--stdio','-c','analytics.enabled=false'],cwd=PROJECT,stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=ERR)
+ config=['-c','agents.max_concurrent_threads_per_session=1','-c','agents.max_depth=1'] if args.case=='delegation' else []
+ P=subprocess.Popen(['codex','app-server','--stdio','-c','analytics.enabled=false',*config,*MCP_CONFIG],cwd=PROJECT,stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=ERR)
 def reader(channel):
  try:
   for line in channel:
@@ -74,7 +93,10 @@ def send(v):
 
 def cli(args,tid,origin='model'):
  env=os.environ.copy();env['CODEX_THREAD_ID']=tid
- assert args.get('command') in ['catalog','capabilities','request','status','claim','read','file-fetch','file-status','file-release','credential-catalog','request-use','run-use','operation-status','execution-status','execution-output','cleanup-use']
+ assert args.get('command') in ['catalog','capabilities','request','status','claim','read','file-fetch','file-status','file-release','credential-catalog','request-use','run-use','operation-status','execution-status','execution-output','cleanup-use','delegate']
+ if args.get('command')=='delegate':
+  assert globals()['args'].case=='delegation' and tid==RESULTS['delegationRoot']
+  assert args.get('childChatId')==RESULTS['delegationChild'] and not DELEGATED
  if args.get('launch'):
   launch=args['launch'];assert launch['receiver']=='ssh_identity' and launch['executable']=='/usr/bin/ssh'
   assert launch['argv'][-1] in ['/usr/bin/true','/usr/bin/false'] and launch['env']=={}
@@ -84,26 +106,69 @@ def cli(args,tid,origin='model'):
  stdout,stderr=proc.communicate(json.dumps(args).encode(),timeout=20)
  value=json.loads(stdout)
  assert not stderr
+ if args.get('command')=='delegate' and value.get('privateAssociation'):
+  DELEGATED[args['childChatId']]=value['privateAssociation']
  r=proc
  if args.get('association') and origin=='model':PROOFS[tid]=args['association']
  CALLS.append({'origin':origin,'threadId':tid,'command':args.get('command'),'requestId':args.get('requestId'),'fieldId':args.get('fieldId'),'operationId':args.get('operationId'),'exitCode':r.returncode,'response':safe_output(value),'separateStdin':True,'argvCount':1,'argvInspectedBeforeStdin':True})
  save();return value
 
+def mcp_key(payload):return hashlib.sha256(json.dumps(payload,sort_keys=True).encode()).hexdigest()
+
+def dispatch_mcp(key):
+ if key not in MCP_PENDING or key not in MCP_EXPECTED:return
+ channel,payload=MCP_PENDING.pop(key)
+ try:
+  actual=MCP_EXPECTED.pop(key)
+  assert payload['chatId']==actual and actual in [RESULTS['delegationRoot'],RESULTS.get('delegationChild')]
+  value=cli(payload['input'],actual)
+  CALLS[-1].update({'modelTransport':'MCP','callerMatchedActualAppServerThread':True});save()
+  channel.sendall(json.dumps(value).encode()+b'\n')
+ except Exception as error:
+  RESULTS.setdefault('mcpBridgeErrors',[]).append({'type':type(error).__name__});save()
+  channel.sendall(json.dumps({'qaBridgeError':type(error).__name__}).encode()+b'\n')
+ finally:channel.close()
+
 def receive(timeout=180):
  m=Q.get(timeout=timeout)
  if m is None:raise RuntimeError('Server ended')
+ if '_qaMcpArguments' in m:
+  key=mcp_key(m['_qaMcpArguments']);assert key not in MCP_PENDING
+  MCP_PENDING[key]=(m['_qaMcpChannel'],m['_qaMcpArguments']);dispatch_mcp(key);return {}
  method=m.get('method');p=m.get('params',{})
+ if method=='item/started' and p.get('item',{}).get('type')=='mcpToolCall' and p['item'].get('server')=='agent_info_synthetic':
+  payload=p['item']['arguments'];payload=json.loads(payload) if isinstance(payload,str) else payload
+  key=mcp_key(payload);assert key not in MCP_EXPECTED
+  MCP_EXPECTED[key]=p['threadId'];dispatch_mcp(key)
  if method=='item/completed' and p.get('item',{}).get('type')=='agentMessage':
   report=p['item'].get('text','')
-  assert all(proof not in report for proof in PROOFS.values())
+  assert all(proof not in report for proof in [*PROOFS.values(),*DELEGATED.values()])
   RESULTS.setdefault('agentReportChecks',[]).append({'threadId':p.get('threadId'),'turnId':p.get('turnId'),'reconnectMentioned':any(word in report.lower() for word in ['reconnect','重新连接','重新接入']),'proofReferenceAbsent':True})
  if method=='error':
   RESULTS.setdefault('clientErrors',[]).append(p.get('error',{}))
  if method:
-  event={'method':method,'threadId':p.get('threadId'),'turnId':p.get('turnId')}
+  event={'method':method,'threadId':p.get('threadId'),'turnId':p.get('turnId') or p.get('turn',{}).get('id')}
+  if method=='turn/completed':event['turnStatus']=p.get('turn',{}).get('status')
   if method in ['item/started','item/completed']:event['itemType']=p.get('item',{}).get('type')
+  item=p.get('item',{})
+  if item.get('type')=='collabAgentToolCall':
+   event.update({key:item.get(key) for key in ['tool','senderThreadId','receiverThreadIds','status']})
+   event['agentStatuses']={key:value.get('status') for key,value in item.get('agentsStates',{}).items()}
+   # Do not retain collab prompt text: send_input privately carries the child proof.
+   if method=='item/completed' and item.get('tool')=='spawnAgent' and item.get('status')=='completed':
+    assert args.case=='delegation' and item.get('senderThreadId')==RESULTS['delegationRoot']
+    assert len(item['receiverThreadIds'])==1
+    child=item['receiverThreadIds'][0]
+    assert not RESULTS.get('delegationChild') or RESULTS['delegationChild']==child
+    RESULTS['delegationChild']=child
+  if item.get('type')=='subAgentActivity':
+   event.update({key:item.get(key) for key in ['kind','agentThreadId','agentPath']})
   if method in ['hook/started','hook/completed'] or method.startswith('hooks/'):
    run=p.get('run',{});event.update({k:run.get(k) for k in ['id','eventName','status','sourcePath','durationMs']})
+   if args.case=='delegation' and method=='hook/completed' and (run.get('eventName') or '').lower()=='subagentstart':
+    child=p['threadId'];assert child!=RESULTS['delegationRoot']
+    assert not RESULTS.get('delegationChild') or RESULTS['delegationChild']==child
+    RESULTS['delegationChild']=child
   EVENTS.append(event)
  if method=='item/tool/call' and 'id' in m:
   if p.get('tool') not in ['codex_info','consume_synthetic_file']:raise RuntimeError('Unexpected dynamic tool')
@@ -142,7 +207,11 @@ def turn(tid,text):
 
 def new_thread(source='startup'):
  tool={'type':'function','name':'codex_info','description':'Run reviewed info-codex with no command-line arguments; the full JSON argument object is delivered through anonymous stdin. Uses this actual thread CODEX_THREAD_ID. Private association comes only from your real SessionStart hook.','inputSchema':{'type':'object','properties':{'association':{'type':'string'},'command':{'type':'string'},'purpose':{'type':'string'},'fields':{'type':'array','items':{'type':'object','properties':{'itemId':{'type':'string'},'fieldId':{'type':'string'}},'required':['itemId','fieldId'],'additionalProperties':False}},'requestId':{'type':'string'},'itemId':{'type':'string'},'fieldId':{'type':'string'},'protocolVersion':{'type':'integer'},'operationId':{'type':'string'},'deliveryId':{'type':'string'},'executionId':{'type':'string'},'credentials':{'type':'array','items':{'type':'object','properties':{'alias':{'type':'string'},'credentialId':{'type':'string'},'version':{'type':'integer'}},'required':['alias','credentialId','version'],'additionalProperties':False}},'readFields':{'type':'array','items':{'type':'object','properties':{'itemId':{'type':'string'},'fieldId':{'type':'string'}},'required':['itemId','fieldId'],'additionalProperties':False}},'launch':{'type':'object','properties':{'receiver':{'type':'string'},'executable':{'type':'string'},'cwd':{'type':'string'},'env':{'type':'object'},'argv':{'type':'array','items':{'oneOf':[{'type':'string'},{'type':'object','properties':{'file':{'type':'string'}},'required':['file'],'additionalProperties':False}]}}},'required':['receiver','executable','cwd','env','argv'],'additionalProperties':False}},'required':['association','command'],'additionalProperties':True}}
- r=request('thread/start',{'sessionStartSource':source,'cwd':str(PROJECT),'approvalPolicy':'never','sandbox':'read-only','model':RESULTS['model'],'dynamicTools':[tool,{'type':'function','name':'consume_synthetic_file','description':'Consume only the exact synthetic managed file path and deliveryId returned by file-fetch in this test. Reads and closes bytes, returning only count and digest; no upload.','inputSchema':{'type':'object','properties':{'path':{'type':'string'},'deliveryId':{'type':'string'}},'required':['path','deliveryId'],'additionalProperties':False}}],'developerInstructions':'This is an explicitly authorized acceptance test using only synthetic Agent Info data. Use only codex_info and consume_synthetic_file; never shell/exec, other tools, agents, authentication files or unrelated files. Follow agent-info-access. Never print a private association in text. Do not invent or search for missing hook context. Report only public request IDs and operation status; do not output private field values. Reviewed ordinary-file reference follows:\n'+(PROJECT/'.agents/skills/agent-info-access/references/information-files.md').read_text()+'\nReviewed credential reference; command injection is supported on this Mac fixture when capabilities advertises it:\n'+(PROJECT/'.agents/skills/agent-info-access/references/credential-use.md').read_text()})
+ instructions='This is an explicitly authorized acceptance test using only synthetic Agent Info data. Use only codex_info and consume_synthetic_file; never shell/exec, other tools, agents, authentication files or unrelated files.'
+ if args.case=='delegation':
+  instructions='This is a user-arranged, explicitly authorized real parent/child acceptance with synthetic data only. The root may spawn EXACTLY ONE real child, then privately send_input to that SAME child and wait for it. Never spawn a second child, close/reopen children, or let a child spawn grandchildren. Use only codex_info and the built-in spawn_agent/send_input/wait tools; no shell/exec, other tools, authentication files or unrelated files. Spawn without fork_context if that option exists. A child initially has no association: wait for the parent to explicitly delegate after its real ID is known. The root uses its own SessionStart reference, calls delegate with the actual child ID, then passes ONLY that child-bound reference directly in the private child task using send_input. Never pass the root reference. No new connection, hook or trust changes. Child completion must leave the root grant active.'
+ instructions+=' Follow agent-info-access. Never print a private association in text. Do not invent or search for missing hook context. Report only public request IDs and operation status; do not output private field values. Reviewed ordinary-file reference follows:\n'+(PROJECT/'.agents/skills/agent-info-access/references/information-files.md').read_text()+'\nReviewed credential reference; command injection is supported on this Mac fixture when capabilities advertises it:\n'+(PROJECT/'.agents/skills/agent-info-access/references/credential-use.md').read_text()
+ r=request('thread/start',{'sessionStartSource':source,'cwd':str(PROJECT),'approvalPolicy':'never','sandbox':'read-only','model':RESULTS['model'],'dynamicTools':[tool,{'type':'function','name':'consume_synthetic_file','description':'Consume only the exact synthetic managed file path and deliveryId returned by file-fetch in this test. Reads and closes bytes, returning only count and digest; no upload.','inputSchema':{'type':'object','properties':{'path':{'type':'string'},'deliveryId':{'type':'string'}},'required':['path','deliveryId'],'additionalProperties':False}}],'developerInstructions':instructions})
  return r['thread']['id']
 
 def consume(args):
@@ -154,6 +223,52 @@ def consume(args):
  v={'status':'consumed','bytes':len(data),'sha256':hashlib.sha256(data).hexdigest(),'deliveryId':d['deliveryId'],'readerClosed':True}
  RESULTS.setdefault('consumers',[]).append(v);save();return v
 
+
+def delegation_case():
+ previous={r['id'] for r in owner('status')['requests']}
+ tid=new_thread();RESULTS['delegationRoot']=tid;save()
+ turn(tid,'User-arranged one-child acceptance. Your actual root chat ID is '+tid+'. First stage: use the actual SessionStart association and catalog. Make exactly ONE ordinary request for Address AND Username of Synthetic Mac server, purpose "Synthetic real parent-child acceptance". Do not spawn yet. Stop while pending. No private values in reports.')
+ snapshot=owner('status');pending=[r for r in snapshot['requests'] if r['state']=='pending'];assert len(pending)==1
+ rid=pending[0]['id'];RESULTS['delegationRequest']=rid
+ RESULTS['delegationApproved']=owner('approve',requestId=rid,fields=[snapshot['addressField']])
+ turn(tid,'Claim the same request and read only approved Address once. Do not request anything else or spawn yet. Report only status.')
+ baseline=owner('status');grant=next(g for g in baseline['grants'] if g['requestId']==rid);assert grant['active']
+ turn(tid,'Now spawn EXACTLY ONE real child. Its initial task is only to acknowledge privately that it awaits an explicitly delegated association; no tools or access yet. Wait for its acknowledgement, do not close it, then stop this root turn. No second child and no delegation until the next stage.')
+ child=RESULTS['delegationChild']
+ transport=' The child has the inherited MCP tool mcp__agent_info_synthetic__codex_info. It must call that tool with chatId '+child+' and input containing the reviewed protocol JSON including its child-bound association. Do not use the root-only dynamic tool or shell.' if args.delegation_mcp else ''
+ turn(tid,'Continue with the SAME existing real child '+child+' only. Do not spawn another. Call codex_info with command delegate using your own association and childChatId '+child+'. Pass the returned child-bound privateAssociation directly in a private follow-up task to that SAME child, together with public request '+rid+' and catalog field IDs. Use the available private child messaging/follow-up tool. Instruct it to claim that same request, read approved Address exactly once, then attempt excluded Username once under that same request (expect refusal); no new requests, reconnects, files or agents. Never give it the root association. Wait for its result. Do not close the child. Report only public status, never references or values.'+transport)
+ child=RESULTS['delegationChild'];assert child in DELEGATED,'Parent did not explicitly delegate to the actual child'
+ RESULTS['actualChildStartedAndParentDelegated']=True
+ RESULTS['childModelProtocolCalls']=sum(c['origin']=='model' and c['threadId']==child for c in CALLS);save()
+ assert PROOFS.get(child)==DELEGATED[child] and PROOFS[child]!=PROOFS[tid], 'Child did not invoke the inherited protocol tool with its child-bound reference; inspect actual client tool availability'
+ child_reads=[c for c in CALLS if c['origin']=='model' and c['threadId']==child and c['command']=='read']
+ assert any(c['fieldId']==snapshot['addressField'] and c['response'].get('status')=='ok' for c in child_reads)
+ assert any(c['fieldId']==snapshot['usernameField'] and c['response'].get('status')=='unauthorized' for c in child_reads)
+ starts=[e for e in EVENTS if (e.get('eventName') or '').lower()=='subagentstart' and e['method']=='hook/completed'];assert len(starts)==1 and starts[0].get('status')=='completed'
+ after=owner('status');same=next(g for g in after['grants'] if g['requestId']==rid)
+ assert same['active'] and same['expiresAt']==grant['expiresAt'] and len([r for r in after['requests'] if r['id'] not in previous])==1
+ RESULTS['afterChildCompleted']=after
+ turn(tid,'The only child completed. Read the originally approved Address once yourself under the same request and original association. No more children, requests or reconnects. Report only status.')
+ assert CALLS[-1]['threadId']==tid and CALLS[-1]['command']=='read' and CALLS[-1]['response'].get('status')=='ok'
+ # Trigger an actual root interruption through the supported app-server RPC.
+ start=len(EVENTS);r=request('turn/start',{'threadId':tid,'input':[{'type':'text','text':'This test turn will immediately be interrupted. Do not call any tools, spawn agents, read information or modify anything.'}]})
+ turn_id=r['turn']['id'];request('turn/interrupt',{'threadId':tid,'turnId':turn_id});deadline=time.monotonic()+60
+ while not any(e['method']=='turn/completed' and e.get('turnId')==turn_id for e in EVENTS[start:]):
+  assert time.monotonic()<deadline;receive(max(.1,deadline-time.monotonic()))
+ assert any(e.get('turnId')==turn_id and e.get('turnStatus')=='interrupted' for e in EVENTS[start:])
+ RESULTS['rootInterruptEvents']=EVENTS[start:];RESULTS['afterRootInterrupt']=owner('status')
+ interrupted=next(g for g in RESULTS['afterRootInterrupt']['grants'] if g['requestId']==rid)
+ assert interrupted['active'] and interrupted['expiresAt']==grant['expiresAt']
+ turn(tid,'After the tester interrupted the previous turn, read Address once under the original request/reference. Do not create children, requests or a new session. Public status only.')
+ assert CALLS[-1]['threadId']==tid and CALLS[-1]['command']=='read' and CALLS[-1]['response'].get('status')=='ok'
+ RESULTS['beforeRootEnd']=owner('status');request('thread/archive',{'threadId':tid});RESULTS['afterRootEnd']=owner('status')
+ ended=RESULTS['afterRootEnd'];current=[r for r in ended['requests'] if r['id'] not in previous];assert len(current)==1 and current[0]['sessionEnded'] and not any(g['active'] for g in ended['grants'])
+ for subject in [tid,child]:
+  refusal=cli({'association':PROOFS[subject],'command':'read','requestId':rid,'itemId':snapshot['textItem'],'fieldId':snapshot['addressField']},subject,'post-root-end-protocol-probe')
+  assert refusal.get('status')=='unauthorized'
+ assert len({e['threadId'] for e in starts})==1
+ assert any((e.get('eventName') or '').lower()=='sessionend' and e['method']=='hook/completed' and e.get('status')=='completed' for e in EVENTS)
+ RESULTS['completeDelegationFlow']=True;save();print('REAL_ONE_CHILD_DELEGATION_COMPLETE',flush=True)
 
 def credential_case():
  tid=new_thread();RESULTS['credentialThread']=tid;s=owner('status');ssh=s['ssh']
@@ -263,7 +378,9 @@ try:
  assert all(h['trustStatus']=='trusted' and h['enabled'] for h in hooks['data'][0]['hooks'])
  RESULTS['hookDiscovery']=hooks
  models=request('model/list',{});RESULTS['model']=next(m['model'] for m in models['data'] if m.get('isDefault'));RESULTS['modelSelection']='CLI-advertised default, process only'
- if args.case=='credential':
+ if args.case=='delegation':
+  delegation_case()
+ elif args.case=='credential':
   credential_case()
  elif args.case=='transport-resume':
   transport_resume_case()
@@ -331,11 +448,16 @@ finally:
  try:RESULTS['serverExitCode']=P.wait(timeout=20)
  except subprocess.TimeoutExpired:P.terminate();RESULTS['serverExitCode']=P.wait(timeout=10)
  ERR.close()
+ if MCP_SOCKET is not None:
+  MCP_SOCKET.close()
+  for channel,_payload in MCP_PENDING.values():channel.close()
+  assert MCP_DIRECTORY.parent==Path('/tmp') and MCP_DIRECTORY.name.startswith('aim-mcp-') and not MCP_DIRECTORY.is_symlink()
+  shutil.rmtree(MCP_DIRECTORY);RESULTS['ephemeralMcpTransportRemoved']=True
  if token_file is not None:
   assert token.encode() not in (OUT/'real-client-stderr.txt').read_bytes();token_file.unlink();RESULTS['transportTokenRemoved']=True
  RESULTS['finalSnapshot']=owner('status');save()
- for proof in PROOFS.values():assert proof.encode() not in (OUT/'real-client-result.json').read_bytes()
+ for proof in [*PROOFS.values(),*DELEGATED.values()]:assert proof.encode() not in (OUT/'real-client-result.json').read_bytes()
  RESULTS['proofReferencesAbsentFromEvidence']=True;save();print('LIFECYCLE_CLIENT_CLOSED',flush=True)
 
-if not (RESULTS.get('completeLifecycleFlow') or RESULTS.get('completeEndedResumeFlow') or RESULTS.get('completeCredentialFlow') or RESULTS.get('completeExpiryRestartFlow') or RESULTS.get('completeTransportResumeFlow')):
+if not (RESULTS.get('completeLifecycleFlow') or RESULTS.get('completeEndedResumeFlow') or RESULTS.get('completeCredentialFlow') or RESULTS.get('completeExpiryRestartFlow') or RESULTS.get('completeTransportResumeFlow') or RESULTS.get('completeDelegationFlow')):
  raise SystemExit(1)
