@@ -1,0 +1,398 @@
+{
+  "date": "2026-10-21",
+  "sourceCommit": "c84a28a8d74567317d248a217e316238032f4ae0",
+  "externalRunsComplete": false,
+  "qaBundledRunComplete": true,
+  "actualUIApprovals": 3,
+  "actualWorkerOperations": 5,
+  "awsReceiverValid": 3,
+  "awsReceiverInvalid": 1,
+  "productionPackagingUnchanged": true,
+  "files": [
+    {
+      "path": "raw/issue44-tools-actual-ui-1/01-no-directories.ax.txt",
+      "bytes": 2767,
+      "sha256": "3280b5eb9d4faf6d75264754ec110648c4bce870fef43d2b7ee67652ba37cf70"
+    },
+    {
+      "path": "raw/issue44-tools-actual-ui-1/actual-panel-cancel.json",
+      "bytes": 110,
+      "sha256": "c8de8b7291f262227fc7a5635d9236c863213465fd792de8294b0d2d6f704445"
+    },
+    {
+      "path": "raw/issue44-tools-actual-ui-1/last-choose-result.json",
+      "bytes": 207,
+      "sha256": "27ca1f30afaf418b69b16b9016f258e3ad4f3a647ad67faf6c7c3d9134e03b02"
+    },
+    {
+      "path": "raw/issue44-tools-actual-ui-1/logs/analyze.txt",
+      "bytes": 96,
+      "sha256": "e1e9298c7ad0d147c3faed9c44aec49c9d9a09a0c6bc2331c7ee778dc70a5715"
+    },
+    {
+      "path": "raw/issue44-tools-actual-ui-1/logs/build-release.txt",
+      "bytes": 5072,
+      "sha256": "243cdded780da646d25816ece5186b540a4b2d5a8ac9e4504a572d1422965acf"
+    },
+    {
+      "path": "raw/issue44-tools-actual-ui-1/logs/choose.txt",
+      "bytes": 1055,
+      "sha256": "f98e23ae2ac7a662749ee98439f84cf80d29179b475a0b4b1c252511220e08c5"
+    },
+    {
+      "path": "raw/issue44-tools-actual-ui-1/logs/entitlements.txt",
+      "bytes": 758,
+      "sha256": "580861992862834295557fbd84344949fa36a9e8d0abe6d83352dd8fa1001074"
+    },
+    {
+      "path": "raw/issue44-tools-actual-ui-1/logs/pub-desktop.txt",
+      "bytes": 318,
+      "sha256": "ca68f707c22164511fc2b3f9af97ed7bd46538b1d334d9c806a6a59a556a6e05"
+    },
+    {
+      "path": "raw/issue44-tools-actual-ui-1/logs/pub-info_cli.txt",
+      "bytes": 258,
+      "sha256": "a24779315fffab73870dfc7b15b56246a95b601b3432e434b43cd223bf752a6a"
+    },
+    {
+      "path": "raw/issue44-tools-actual-ui-1/logs/pub-info_core.txt",
+      "bytes": 258,
+      "sha256": "a24779315fffab73870dfc7b15b56246a95b601b3432e434b43cd223bf752a6a"
+    },
+    {
+      "path": "raw/issue44-tools-actual-ui-1/logs/pub-info_storage.txt",
+      "bytes": 258,
+      "sha256": "a24779315fffab73870dfc7b15b56246a95b601b3432e434b43cd223bf752a6a"
+    },
+    {
+      "path": "raw/issue44-tools-actual-ui-1/logs/receiver.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/issue44-tools-actual-ui-1/logs/signature.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/issue44-tools-actual-ui-1/result.json",
+      "bytes": 79340,
+      "sha256": "317350f0affbaaacd9b2eefa3b485cae4fb95a98823dbcb3f3b8253c910471a6"
+    },
+    {
+      "path": "raw/issue44-tools-actual-ui-1/sandbox-denial.txt",
+      "bytes": 3360,
+      "sha256": "0c8419d59585b941871f98d11b22343078d2972f0de5c2181d68446e5626943a"
+    },
+    {
+      "path": "raw/issue44-tools-actual-ui-1/sources/apps/desktop/integration_test/macos_tools_manual.dart",
+      "bytes": 15317,
+      "sha256": "cc90aa9c693c4b7991c0217923b203a1ec585a4a7ba36adc79999270286aeddb"
+    },
+    {
+      "path": "raw/issue44-tools-actual-ui-1/sources/apps/desktop/lib/desktop_bootstrap.dart",
+      "bytes": 8326,
+      "sha256": "b92af076d8cd5cabb4be49f7e1f0a605a56306b9f342b08baf41b7b1d06a980c"
+    },
+    {
+      "path": "raw/issue44-tools-actual-ui-1/sources/apps/desktop/macos/Runner/MainFlutterWindow.swift",
+      "bytes": 15982,
+      "sha256": "fb71fb34d4f645c5bcb242cd75a8572dc38e9ff6b69943f10da5d45f8b1b1dd4"
+    },
+    {
+      "path": "raw/issue44-tools-actual-ui-1/sources/apps/desktop/macos/Runner/Release.entitlements",
+      "bytes": 488,
+      "sha256": "347f9ac78f9e449e6ae74757f5c339a525b8a5059d778f498edfd68f1af090ad"
+    },
+    {
+      "path": "raw/issue44-tools-actual-ui-1/sources/apps/desktop/macos/Runner/ToolAccessStore.swift",
+      "bytes": 8009,
+      "sha256": "bbd6ccb1b29d4ead99af9d01de953c90d952903036732e72eadd4e724ddff897"
+    },
+    {
+      "path": "raw/issue44-tools-actual-ui-1/sources/packages/info_core/lib/credential_runtime_models.dart",
+      "bytes": 40029,
+      "sha256": "28c13bc5300d58b61402a6911166171c49393cd8840646f12d96f04d8e5af92a"
+    },
+    {
+      "path": "raw/issue44-tools-actual-ui-1/sources/packages/info_core/lib/macos_tool_probe.dart",
+      "bytes": 2415,
+      "sha256": "179a4879e8a54e933d76ce7cc6c5a1baec06904411cfcde8be26ada289c40a53"
+    },
+    {
+      "path": "raw/issue44-tools-actual-ui-1/sources/scripts/qa/macos-aws-receiver.py",
+      "bytes": 4587,
+      "sha256": "153d61af6cb71805470df598abea245becd8b148b9984a43ce9110be8a30856c"
+    },
+    {
+      "path": "raw/issue44-tools-actual-ui-1/sources/scripts/qa/macos-tools-ui.py",
+      "bytes": 11919,
+      "sha256": "be02a871da9b4d6f0174d00434b71505de804d8c642735acbe13352dcdc867ff"
+    },
+    {
+      "path": "raw/issue44-tools-actual-ui-2/last-choose-result.json",
+      "bytes": 489,
+      "sha256": "8636211c0e1e0eed50a467b57cefaa7690b8e522882e819e0970b8e99cbe8c5a"
+    },
+    {
+      "path": "raw/issue44-tools-actual-ui-2/logs/analyze.txt",
+      "bytes": 96,
+      "sha256": "e1e9298c7ad0d147c3faed9c44aec49c9d9a09a0c6bc2331c7ee778dc70a5715"
+    },
+    {
+      "path": "raw/issue44-tools-actual-ui-2/logs/build-release.txt",
+      "bytes": 5072,
+      "sha256": "4aa3addc9318f79ae951849e36399fe428d69f3a54f7d74370a594be11655e14"
+    },
+    {
+      "path": "raw/issue44-tools-actual-ui-2/logs/choose.txt",
+      "bytes": 1055,
+      "sha256": "bd1793a5588c0b3b3c691a8e93064d94341edd1a6a2eb163b752d28c28c84e42"
+    },
+    {
+      "path": "raw/issue44-tools-actual-ui-2/logs/entitlements.txt",
+      "bytes": 758,
+      "sha256": "cbef57866ad9c36d45062577a2df5fa19757a4d133c907f6ebe308e21888a690"
+    },
+    {
+      "path": "raw/issue44-tools-actual-ui-2/logs/pub-desktop.txt",
+      "bytes": 318,
+      "sha256": "ca68f707c22164511fc2b3f9af97ed7bd46538b1d334d9c806a6a59a556a6e05"
+    },
+    {
+      "path": "raw/issue44-tools-actual-ui-2/logs/pub-info_cli.txt",
+      "bytes": 258,
+      "sha256": "a24779315fffab73870dfc7b15b56246a95b601b3432e434b43cd223bf752a6a"
+    },
+    {
+      "path": "raw/issue44-tools-actual-ui-2/logs/pub-info_core.txt",
+      "bytes": 258,
+      "sha256": "a24779315fffab73870dfc7b15b56246a95b601b3432e434b43cd223bf752a6a"
+    },
+    {
+      "path": "raw/issue44-tools-actual-ui-2/logs/pub-info_storage.txt",
+      "bytes": 258,
+      "sha256": "a24779315fffab73870dfc7b15b56246a95b601b3432e434b43cd223bf752a6a"
+    },
+    {
+      "path": "raw/issue44-tools-actual-ui-2/logs/receiver.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/issue44-tools-actual-ui-2/logs/signature.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/issue44-tools-actual-ui-2/result.json",
+      "bytes": 79340,
+      "sha256": "52979ef38f1302d0d19b8dac3c4b61ef3496bd4b0ea30bd2d1a9767783d4cca3"
+    },
+    {
+      "path": "raw/issue44-tools-actual-ui-2/sandbox-denial.txt",
+      "bytes": 3417,
+      "sha256": "721ea43c7fcfa5a69c035870a6b7e40c9815da6d2282ae9aa28273c3cc3795e2"
+    },
+    {
+      "path": "raw/issue44-tools-actual-ui-2/sources/apps/desktop/integration_test/macos_tools_manual.dart",
+      "bytes": 16939,
+      "sha256": "acf6b276d2bd299c2f65ae850bfd3ba05d7a02df4baad1f7467a5e6d43a6b5e9"
+    },
+    {
+      "path": "raw/issue44-tools-actual-ui-2/sources/apps/desktop/lib/desktop_bootstrap.dart",
+      "bytes": 8326,
+      "sha256": "b92af076d8cd5cabb4be49f7e1f0a605a56306b9f342b08baf41b7b1d06a980c"
+    },
+    {
+      "path": "raw/issue44-tools-actual-ui-2/sources/apps/desktop/macos/Runner/MainFlutterWindow.swift",
+      "bytes": 15982,
+      "sha256": "fb71fb34d4f645c5bcb242cd75a8572dc38e9ff6b69943f10da5d45f8b1b1dd4"
+    },
+    {
+      "path": "raw/issue44-tools-actual-ui-2/sources/apps/desktop/macos/Runner/Release.entitlements",
+      "bytes": 488,
+      "sha256": "347f9ac78f9e449e6ae74757f5c339a525b8a5059d778f498edfd68f1af090ad"
+    },
+    {
+      "path": "raw/issue44-tools-actual-ui-2/sources/apps/desktop/macos/Runner/ToolAccessStore.swift",
+      "bytes": 8009,
+      "sha256": "bbd6ccb1b29d4ead99af9d01de953c90d952903036732e72eadd4e724ddff897"
+    },
+    {
+      "path": "raw/issue44-tools-actual-ui-2/sources/packages/info_core/lib/credential_runtime_models.dart",
+      "bytes": 40029,
+      "sha256": "28c13bc5300d58b61402a6911166171c49393cd8840646f12d96f04d8e5af92a"
+    },
+    {
+      "path": "raw/issue44-tools-actual-ui-2/sources/packages/info_core/lib/macos_tool_probe.dart",
+      "bytes": 2415,
+      "sha256": "179a4879e8a54e933d76ce7cc6c5a1baec06904411cfcde8be26ada289c40a53"
+    },
+    {
+      "path": "raw/issue44-tools-actual-ui-2/sources/scripts/qa/macos-aws-receiver.py",
+      "bytes": 4587,
+      "sha256": "153d61af6cb71805470df598abea245becd8b148b9984a43ce9110be8a30856c"
+    },
+    {
+      "path": "raw/issue44-tools-actual-ui-2/sources/scripts/qa/macos-tools-ui.py",
+      "bytes": 11919,
+      "sha256": "be02a871da9b4d6f0174d00434b71505de804d8c642735acbe13352dcdc867ff"
+    },
+    {
+      "path": "raw/issue44-tools-bundled-ui-1/01-aws-good-before.png",
+      "bytes": 536283,
+      "sha256": "df265e576cff92bde55ef07a3e84b581d2b8d2242837a95d67617041fe72ae88"
+    },
+    {
+      "path": "raw/issue44-tools-bundled-ui-1/02-aws-good-confirm.ax.txt",
+      "bytes": 2574,
+      "sha256": "b06d518ecfce791963c275715f08d5f78ea58425bfafc7a9ced6082a339bed04"
+    },
+    {
+      "path": "raw/issue44-tools-bundled-ui-1/03-aws-wrong-confirm.ax.txt",
+      "bytes": 2574,
+      "sha256": "1da74fcf4e02ebee021173811a2dc565dd3a157bdede8ad95a46491d8a882bff"
+    },
+    {
+      "path": "raw/issue44-tools-bundled-ui-1/04-gh-exited.ax.txt",
+      "bytes": 2220,
+      "sha256": "a1afd6eb1778d47f0da1398c2e288171a7048c036f59294bbcb4f3ba6939c4a3"
+    },
+    {
+      "path": "raw/issue44-tools-bundled-ui-1/04-gh-exited.png",
+      "bytes": 448570,
+      "sha256": "64e504d6cd706706a312e8ad3abcb431e21da21ee2e1d426719578ec719e4512"
+    },
+    {
+      "path": "raw/issue44-tools-bundled-ui-1/bundled.json",
+      "bytes": 2713,
+      "sha256": "5fe8e34240d55530f97cf6aa638e49e698150d53c67c993745092263a127f456"
+    },
+    {
+      "path": "raw/issue44-tools-bundled-ui-1/last-bundled-result.json",
+      "bytes": 2139,
+      "sha256": "712b046117f56c2c28cddd7ebc9d8a598b9176a3724249db65de261ecfcaf948"
+    },
+    {
+      "path": "raw/issue44-tools-bundled-ui-1/logs/analyze.txt",
+      "bytes": 96,
+      "sha256": "9fa0da1a20f841cad4e437c7c35bf9bf3c9be73a61c061d6a741635715fd1357"
+    },
+    {
+      "path": "raw/issue44-tools-bundled-ui-1/logs/build-release.txt",
+      "bytes": 5078,
+      "sha256": "7d1db041092998caaebb8b22cf1dc4770fa424914e9820ccc2af87b1632dacd4"
+    },
+    {
+      "path": "raw/issue44-tools-bundled-ui-1/logs/bundled.txt",
+      "bytes": 1555,
+      "sha256": "6ac9ecce21f75d7f8d760879e99e35dd039c09dced1c6a701fbcee0ca5342f20"
+    },
+    {
+      "path": "raw/issue44-tools-bundled-ui-1/logs/entitlements.txt",
+      "bytes": 759,
+      "sha256": "2144126c4eb8e12c946e2289925459acb8e79333df263ff5bc9a033e2001b436"
+    },
+    {
+      "path": "raw/issue44-tools-bundled-ui-1/logs/pub-desktop.txt",
+      "bytes": 318,
+      "sha256": "ca68f707c22164511fc2b3f9af97ed7bd46538b1d334d9c806a6a59a556a6e05"
+    },
+    {
+      "path": "raw/issue44-tools-bundled-ui-1/logs/pub-info_cli.txt",
+      "bytes": 258,
+      "sha256": "a24779315fffab73870dfc7b15b56246a95b601b3432e434b43cd223bf752a6a"
+    },
+    {
+      "path": "raw/issue44-tools-bundled-ui-1/logs/pub-info_core.txt",
+      "bytes": 258,
+      "sha256": "a24779315fffab73870dfc7b15b56246a95b601b3432e434b43cd223bf752a6a"
+    },
+    {
+      "path": "raw/issue44-tools-bundled-ui-1/logs/pub-info_storage.txt",
+      "bytes": 258,
+      "sha256": "a24779315fffab73870dfc7b15b56246a95b601b3432e434b43cd223bf752a6a"
+    },
+    {
+      "path": "raw/issue44-tools-bundled-ui-1/logs/receiver.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/issue44-tools-bundled-ui-1/logs/sign-with-qa-tools.txt",
+      "bytes": 199,
+      "sha256": "08a5f89a7f3c9e1710529e1ebae14b2a635bdb44f2dcf64906ff797f6b675ff9"
+    },
+    {
+      "path": "raw/issue44-tools-bundled-ui-1/logs/signature.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/issue44-tools-bundled-ui-1/receiver-result.json",
+      "bytes": 350,
+      "sha256": "0779dc41fd47268ffed9c905bb5923489c13a889a65f7e4653d3cadaf50479ae"
+    },
+    {
+      "path": "raw/issue44-tools-bundled-ui-1/result.json",
+      "bytes": 83288,
+      "sha256": "00af2bfe89be34a0eb09333d9f0030a07bfd6f0aaa86015b7594a31a087939b2"
+    },
+    {
+      "path": "raw/issue44-tools-bundled-ui-1/sources/apps/desktop/integration_test/macos_tools_manual.dart",
+      "bytes": 17187,
+      "sha256": "9ccd57ed07e1cdbea5ead9c9cb69f27827a6209d4e305f902b4060ddd2ca7f13"
+    },
+    {
+      "path": "raw/issue44-tools-bundled-ui-1/sources/apps/desktop/lib/desktop_bootstrap.dart",
+      "bytes": 8326,
+      "sha256": "b92af076d8cd5cabb4be49f7e1f0a605a56306b9f342b08baf41b7b1d06a980c"
+    },
+    {
+      "path": "raw/issue44-tools-bundled-ui-1/sources/apps/desktop/macos/Runner/MainFlutterWindow.swift",
+      "bytes": 15982,
+      "sha256": "fb71fb34d4f645c5bcb242cd75a8572dc38e9ff6b69943f10da5d45f8b1b1dd4"
+    },
+    {
+      "path": "raw/issue44-tools-bundled-ui-1/sources/apps/desktop/macos/Runner/Release.entitlements",
+      "bytes": 488,
+      "sha256": "347f9ac78f9e449e6ae74757f5c339a525b8a5059d778f498edfd68f1af090ad"
+    },
+    {
+      "path": "raw/issue44-tools-bundled-ui-1/sources/apps/desktop/macos/Runner/ToolAccessStore.swift",
+      "bytes": 8009,
+      "sha256": "bbd6ccb1b29d4ead99af9d01de953c90d952903036732e72eadd4e724ddff897"
+    },
+    {
+      "path": "raw/issue44-tools-bundled-ui-1/sources/packages/info_core/lib/credential_runtime_models.dart",
+      "bytes": 40029,
+      "sha256": "28c13bc5300d58b61402a6911166171c49393cd8840646f12d96f04d8e5af92a"
+    },
+    {
+      "path": "raw/issue44-tools-bundled-ui-1/sources/packages/info_core/lib/macos_tool_probe.dart",
+      "bytes": 2415,
+      "sha256": "179a4879e8a54e933d76ce7cc6c5a1baec06904411cfcde8be26ada289c40a53"
+    },
+    {
+      "path": "raw/issue44-tools-bundled-ui-1/sources/scripts/qa/macos-aws-receiver.py",
+      "bytes": 4587,
+      "sha256": "153d61af6cb71805470df598abea245becd8b148b9984a43ce9110be8a30856c"
+    },
+    {
+      "path": "raw/issue44-tools-bundled-ui-1/sources/scripts/qa/macos-tools-ui.py",
+      "bytes": 13074,
+      "sha256": "1702ccb6cfbe43ed4ed1cef27b28673fb0988efe90141b6f28921625d8532546"
+    },
+    {
+      "path": "raw/scope-verification.json",
+      "bytes": 1452,
+      "sha256": "e7e33bf46605a8742564678102bd503b5c69043eb03a3da9b8e0e8dddc43706f"
+    },
+    {
+      "path": "raw/tool-architectures.txt",
+      "bytes": 523,
+      "sha256": "c7fbfd1e013b1273e80bdac01973c4e399963d6d1449f917455e05d1b38209c7"
+    }
+  ]
+}

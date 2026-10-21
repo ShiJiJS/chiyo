@@ -1,0 +1,19 @@
+Timestamp               Ty Process[PID:TID]
+2026-10-21 18:07:03.362 E  sandboxd[29038:46801c] [com.apple.sandbox.reporting:violation] Sandbox: info_desktop(19398) deny(1) process-exec* /Users/jiangxinyi/Documents/Project/agent-info/.tools/gh-2.102.0/gh_2.102.0_macOS_arm64/bin/gh
+Process:         info_desktop [19398]
+Path:            /Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue44-tools-actual-ui-1/source/apps/desktop/build/macos/Build/Products/Release/info_desktop.app/Contents/MacOS/info_desktop
+Identifier:      org.shijijs.agent-info-manage.qa.tools.21096460a94b435c92aec7f7f21a5228
+Version:         12 (0.4.0)
+Code Type:       unknown (Native)
+Parent Process:  info_desktop [19367]
+Responsible:     /Applications/ChatGPT.app/Contents/MacOS/ChatGPT
+User ID:         501
+
+Date/Time:       2026-10-21 18:07:03.384 GMT+8
+OS Version:      macOS 27.0.1 (26A434)
+Release Type:    User
+Report Version:  8
+
+MetaData: {"process":"info_desktop","primary-filter":"path","responsible-process-path":"\134/Applications\134/ChatGPT.app\134/Contents\134/MacOS\134/ChatGPT","signing-id":"org.shijijs.agent-info-manage.qa.tools.21096460a94b435c92aec7f7f21a5228","flags":5,"responsible-process-team-id":"2DC432GLL2","profile-flags":0,"primary-filter-value":"\134/Users\134/jiangxinyi\134/Documents\134/Project\134/agent-info\134/.tools\134/gh-2.102.0\134/gh_2.102.0_macOS_arm64\134/bin\134/gh","mount":"\134/","file-mode":493,"hardlinked":false,"responsible-process-signing-id":"com.openai.codex","normalized_target":["Users","jiangxinyi","Documents","Project","agent-info",".tools","gh-2.102.0","gh_2.102.0_macOS_arm64","bin","gh"],"process_path":["Users","jiangxinyi","Documents","Project","agent-info","build","macos-adaptation","issue44-tools-actual-ui-1","source","apps","desktop","build","macos","Build","Products","Release","info_desktop.app","Contents","MacOS","info_desktop"],"platform-binary":false,"parent-process-pid":19367,"container":"\134/Users\134/jiangxinyi\134/Library\134/Containers\134/org.shijijs.agent-info-manage.qa.tools.21096460a94b435c92aec7f7f21a5228\134/Data","operation":"process-exec*","pid":19398,"vnode-type":"REGULAR-FILE","policy-description":"Sandbox","uid":501,"rdev":0,"binary-in-trust-cache":false,"build":"macOS 27.0.1 (26A434)","profile-in-collection":false,"parent-process-name":"info_desktop","hardware":"J613","path":"\134/Users\134/jiangxinyi\134/Documents\134/Project\134/agent-info\134/.tools\134/gh-2.102.0\134/gh_2.102.0_macOS_arm64\134/bin\134/gh","apple-internal":false,"apfs-synthetic":false,"action":"deny","target":"\134/Users\134/jiangxinyi\134/Documents\134/Project\134/agent-info\134/.tools\134/gh-2.102.0\134/gh_2.102.0_macOS_arm64\134/bin\134/gh","errno":1,"platform-policy":false,"summary":"deny(1) process-exec* \134/Users\134/jiangxinyi\134/Documents\134/Project\134/agent-info\134/.tools\134/gh-2.102.0\134/gh_2.102.0_macOS_arm64\134/bin\134/gh","process-path":"\134/Users\134/jiangxinyi\134/Documents\134/Project\134/agent-info\134/build\134/macos-adaptation\134/issue44-tools-actual-ui-1\134/source\134/apps\134/desktop\134/build\134/macos\134/Build\134/Products\134/Release\134/info_desktop.app\134/Contents\134/MacOS\134/info_desktop","responsible-process-sdk":1703936,"translated":false,"platform_binary":"no","release-type":"User"}
+
+Failed to symbolicate: NULL symbolicator
