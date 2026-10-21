@@ -1,7 +1,8 @@
 param(
   [Parameter(Mandatory=$true)][string]$FlutterBin,
-  [ValidateSet('core','storage','desktop','all')][string]$Scope='all',
-  [switch]$FullDesktop
+  [ValidateSet('core','storage','cli','desktop','all')][string]$Scope='all',
+  [switch]$FullDesktop,
+  [switch]$FullCli
 )
 $ErrorActionPreference='Stop'
 $projectRoot=Split-Path -Parent $PSScriptRoot
@@ -22,8 +23,8 @@ try {
   foreach($path in $snapshots.Keys) {
     [IO.File]::WriteAllText($path,[Text.Encoding]::UTF8.GetString($snapshots[$path]).Replace('https://pub.dev','https://pub.flutter-io.cn'),(New-Object Text.UTF8Encoding($false)))
   }
-  foreach($package in @('packages/info_core','packages/info_storage','apps/desktop')) {
-    $kind=if($package -eq 'apps/desktop'){'desktop'}elseif($package.EndsWith('info_core')){'core'}else{'storage'}
+  foreach($package in @('packages/info_core','packages/info_storage','packages/info_cli','apps/desktop')) {
+    $kind=if($package -eq 'apps/desktop'){'desktop'}elseif($package.EndsWith('info_core')){'core'}elseif($package.EndsWith('info_cli')){'cli'}else{'storage'}
     if($Scope -ne 'all' -and $Scope -ne $kind){continue}
     Push-Location (Join-Path $projectRoot $package)
     try {
@@ -36,6 +37,10 @@ try {
       }elseif($kind -eq 'core') {
         Invoke-Checked $dartExe @('analyze','--fatal-infos')
         Invoke-Checked $dartExe @('test','test/organization_management_test.dart','test/library_test.dart','test/organization_tasks_test.dart','test/recycle_test.dart','--reporter','expanded')
+      }elseif($kind -eq 'cli') {
+        Invoke-Checked $dartExe @('analyze','--fatal-infos')
+        $testFiles=if($FullCli){@('test/')}else{@('test/file_credential_runtime_test.dart','test/file_json_lines_test.dart','test/codex_process_test.dart','test/bundle_preparation_test.dart','test/codex_focused_fill_test.dart','test/codex_information_files_test.dart')}
+        Invoke-Checked $dartExe (@('test','--concurrency','1','--reporter','expanded') + $testFiles)
       }else {
         Invoke-Checked $dartExe @('analyze','--fatal-infos')
         Invoke-Checked $dartExe @('test','test/organization_management_test.dart','test/organization_tasks_test.dart','test/backup_test.dart','test/complete_backup_test.dart','test/recycle_test.dart','test/revisions_test.dart','--reporter','expanded')
