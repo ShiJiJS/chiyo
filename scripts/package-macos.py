@@ -216,7 +216,7 @@ def main():
         shutil.copy2(tools_root / "manifest.json", provenance / "macos-tools.json")
         shutil.copytree(tools_root / "notices", notices / "macos-tools")
         shutil.copy2(ROOT / "docs/development/macos-delivery.md", payload / "README.md")
-        shutil.copy2(ROOT / "integrations/codex/README.md", payload / "CODEX-INTEGRATION.md")
+        shutil.copy2(ROOT / "integrations/codex/MACOS-INTEGRATION.md", payload / "CODEX-INTEGRATION.md")
         notice_archives = list(app.rglob("NOTICES.Z"))
         if len(notice_archives) != 1:
             raise RuntimeError("Expected Flutter's bundled license registry")

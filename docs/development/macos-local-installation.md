@@ -119,3 +119,26 @@ worker 已退出。第三个普通应用进程在本次快照时仍打开，保�
 最终同包的 SSH/AWS、文件版本替换、通知、备份恢复及 Codex 接入，两个签名版本
 的旧 schema 联合迁移，以及干净用户/独立 Mac 仍待。本轮不勾选这些复合验收，
 也不把此前隔离 QA 结果改写为此普通包通过。Windows/main/CI 均未修改。
+
+## 2026-10-21 固定路径的 Codex 接入材料
+
+从上述普通包实际运行 `cli/info-prepare-codex`，环境只有系统
+`PATH=/usr/bin:/bin`，已生成相邻的 `local/中文 Mac 预览/Codex 接入材料`。
+三个 AOT 程序与整包清单摘要相同，执行位保持；hook 命令正确引用含中文和空格的
+最终绝对路径。第二次生成同一目录退出 64，所有输出字节与模式保持。
+
+另由开发者 Python 准备工具生成 `local/中文 Mac 预览/正式包合成验收项目`，
+核对同源程序、Skill/引用、三类 hook 的路径与超时；13 项真实客户端清单全部为
+`not_run`。这两个目录没有在 Codex 注册或信任，未修改先前已批准的合成项目。
+材料准备、客户端信任和实际接入是不同阶段；这不是 #50 最终同包 Codex 闭环通过。
+按 [OpenAI Hooks 文档](https://learn.chatgpt.com/docs/hooks)审查准确的定义，变更后需要
+重新审查当前定义。保留之前仅限合成项目的授权范围。
+
+[准备命令、摘要、输出与未运行清单](evidence/macos-stable-codex-materials/verification.json)。
+生成器本身不需要 SDK；开发者项目准备器使用 Python，不增加应用的用户运行依赖。
+稳定目录另有 `开始使用.txt`，本轮没有生成额外 app 或 dSYM。
+
+当前整包里的通用接入说明含 Windows 示例和在 Mac 载荷中不存在的相对链接。
+Mac 打包器现改用 `integrations/codex/MACOS-INTEGRATION.md`，仅说明随包无 SDK
+生成器和实际存在的参考文件；两个相对参考链接已对当前实际载荷检查。该说明将进入
+下次 Mac 整包，本轮没有重建或修改已固定的 `4690e79` 程序与 manifest。

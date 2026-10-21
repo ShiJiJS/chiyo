@@ -1,0 +1,63 @@
+{
+  "scope": "SDK-free preparation at actual stable Chinese/space paths; payload hashes and command targets checked. No hooks executed, project registration, trust or client acceptance in this run. Existing approved synthetic project not changed.",
+  "packageSource": "4690e79357bb728da22193d8dadd6dc8a8ce2ce6",
+  "runtimePATH": "/usr/bin:/bin",
+  "preparedBundle": "local/中文 Mac 预览/Codex 接入材料",
+  "preparedProject": "local/中文 Mac 预览/正式包合成验收项目",
+  "bundleBytes": 19443337,
+  "newAppsOrDSYMCreated": 0,
+  "generatorSuccessExitCode": 0,
+  "repeatDestinationExitCode": 64,
+  "repeatPreservedAllBytesAndModes": true,
+  "caseCount": 13,
+  "casesRun": 0,
+  "officialSource": "https://learn.chatgpt.com/docs/hooks",
+  "officialSourceRead": "2026-10-21",
+  "futureMacPackageGuideUpdateNotYetRebuilt": true,
+  "rawFiles": {
+    "raw/SKILL.md": {
+      "bytes": 11522,
+      "sha256": "9ff8ad6617d3ce5f249b7f25820f615be9befcb31b41a3394df1887fed694b15"
+    },
+    "raw/acceptance-cases.json": {
+      "bytes": 2059,
+      "sha256": "6c4e4ed10d120679e7ac30b158ef841c43708597eeb34443f3693176144f0498"
+    },
+    "raw/command-result.json": {
+      "bytes": 359,
+      "sha256": "076173cd3ca01f7ce105ce06ac87fbfac033abce028696539b646a4b5d2b7be6"
+    },
+    "raw/documentation-check.json": {
+      "bytes": 478,
+      "sha256": "656709753acc9095b3220b1cdbebf55945bb2211271adddf27cc7e0ebac9975e"
+    },
+    "raw/hooks.json": {
+      "bytes": 2166,
+      "sha256": "93a733359e5b7d12f5a196496b40e119a1d5eac0995ceefa2ee9ca8922ee7956"
+    },
+    "raw/overwrite.stderr.txt": {
+      "bytes": 51,
+      "sha256": "7c42fd46f86f11a267bc39f9e253ca12e1868dc2319386d34d790fefadc51456"
+    },
+    "raw/overwrite.stdout.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "raw/prepare.stderr.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "raw/prepare.stdout.txt": {
+      "bytes": 166,
+      "sha256": "0661166f7fb3d1814274277e8351709b340d04672c3c27840dc3f3094460c423"
+    },
+    "raw/project-proof.json": {
+      "bytes": 1622,
+      "sha256": "3aca316127bd402010e3661fdf48e1fc0b0f035fc6e2b0129d759e82e37b43f6"
+    },
+    "raw/verification.json": {
+      "bytes": 3483,
+      "sha256": "e925e54c58786d9a2feaaf07a73de12ec3ae6b69a38a0b14ba42ede749c324ef"
+    }
+  }
+}
