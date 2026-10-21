@@ -29,6 +29,8 @@ def digest(path):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('output', type=Path)
+    parser.add_argument('--bundled', action='store_true',
+                        help='QA proof: fixed official tools inside signed app static sandbox')
     args = parser.parse_args()
     if os.uname().sysname != 'Darwin':
         parser.error('macOS required')
@@ -107,6 +109,18 @@ def main():
         run('analyze', [launcher, 'flutter', 'analyze', '--no-pub', '--fatal-infos', '--fatal-warnings'], desktop)
         run('build-release', [launcher, 'build', '--target=integration_test/macos_tools_manual.dart'])
         app = desktop / 'build/macos/Build/Products/Release/info_desktop.app'
+        selected_gh, selected_aws = GH, AWS
+        if args.bundled:
+            tools = app / 'Contents/Resources/ThirdParty'
+            shutil.copytree(GH.parent.parent, tools / 'gh', symlinks=True)
+            shutil.copytree(AWS.parent, tools / 'aws-cli', symlinks=True)
+            selected_gh, selected_aws = tools / 'gh/bin/gh', tools / 'aws-cli/aws'
+            assert digest(selected_gh) == digest(GH) and digest(selected_aws) == digest(AWS)
+            run('sign-with-qa-tools', ['/usr/bin/codesign', '--force', '--sign', '-',
+                                      '--preserve-metadata=entitlements,requirements,flags,runtime', str(app)])
+            state['qaBundledTools'] = {'gh': str(selected_gh), 'aws': str(selected_aws),
+                                      'toolExecutableBytesUnchanged': True,
+                                      'productionPackagingUnchanged': True}
         run('signature', ['/usr/bin/codesign', '--verify', '--deep', '--strict', str(app)])
         run('entitlements', ['/usr/bin/codesign', '-d', '--entitlements', ':-', str(app)])
         binary = app / 'Contents/MacOS/info_desktop'
@@ -118,9 +132,9 @@ def main():
         port = json.loads((receiver_root / 'fixture.json').read_text())['port']
         root = None
         chosen_bookmark_hash = None
-        for mode in ['choose', 'reopen', 'remove', 'denied']:
+        for mode in (['bundled'] if args.bundled else ['choose', 'reopen', 'remove', 'denied']):
             environment = os.environ.copy()
-            environment.update(MAC_TOOLS_MODE=mode, MAC_TOOLS_OWNER=owner, MAC_TOOLS_GH=str(GH), MAC_TOOLS_AWS=str(AWS), MAC_TOOLS_RECEIVER_PORT=str(port))
+            environment.update(MAC_TOOLS_MODE=mode, MAC_TOOLS_OWNER=owner, MAC_TOOLS_GH=str(selected_gh), MAC_TOOLS_AWS=str(selected_aws), MAC_TOOLS_RECEIVER_PORT=str(port))
             environment.pop('MAC_TOOLS_ROOT', None)
             if root is not None:
                 environment['MAC_TOOLS_ROOT'] = str(root)
@@ -142,7 +156,7 @@ def main():
             root = wait_for(locate, process)
             roots.add(root)
             ready = wait_for(lambda: read_report(root, mode), process)
-            if mode in ('choose', 'remove'):
+            if mode in ('choose', 'remove', 'bundled'):
                 fd = os.open(controller, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
                 with os.fdopen(fd, 'w') as stream:
                     json.dump({'owner': owner, 'root': str(root), 'app': str(app), 'pid': process.pid,
@@ -167,14 +181,15 @@ def main():
             record = {'exitCode': process.returncode, **facts}
             (output / (mode + '.json')).write_text(json.dumps(record, indent=2) + '\n')
             state['cases'].append(record)
+            if mode in ('choose', 'bundled'):
+                receiver_result = json.loads((receiver_root / 'receiver-result.json').read_text())
+                assert receiver_result['valid'] == 3 and receiver_result['invalid'] == 1
             if mode == 'choose':
                 assert bookmarks.is_file() and not bookmarks.is_symlink()
                 assert bookmarks.stat().st_mode & 0o777 == 0o600
                 chosen_bookmark_hash = digest(bookmarks)
                 state['savedBookmarkFileMode'] = '0600'
                 state['savedBookmarkFileSha256'] = chosen_bookmark_hash
-                receiver_result = json.loads((receiver_root / 'receiver-result.json').read_text())
-                assert receiver_result['valid'] == 3 and receiver_result['invalid'] == 1
             elif mode == 'reopen':
                 assert digest(bookmarks) == chosen_bookmark_hash
                 state['reopenPreservedBookmarkBytes'] = True

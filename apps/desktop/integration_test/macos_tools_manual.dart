@@ -48,7 +48,8 @@ Future<void> main() async {
   final mode = env['MAC_TOOLS_MODE'];
   final owner = env['MAC_TOOLS_OWNER'];
   check(
-    Platform.isMacOS && {'choose', 'reopen', 'remove', 'denied'}.contains(mode),
+    Platform.isMacOS &&
+        {'choose', 'reopen', 'remove', 'denied', 'bundled'}.contains(mode),
     'QA mode',
   );
   check(owner != null && RegExp(r'^[a-f0-9]{32}$').hasMatch(owner), 'QA owner');
@@ -156,16 +157,23 @@ Future<void> main() async {
     }
     if (mode != 'denied') {
       final selected = await access.read();
-      check(
-        selected.directories.length == 2 &&
-            selected.directories.every((d) => d.available),
-        'Saved tool scopes unavailable',
-      );
-      final expected = {File(gh).parent.parent.path, File(aws).parent.path};
-      check(
-        selected.directories.map((d) => d.path).toSet().containsAll(expected),
-        'Wrong selected tool directories',
-      );
+      if (mode != 'bundled') {
+        check(
+          selected.directories.length == 2 &&
+              selected.directories.every((d) => d.available),
+          'Saved tool scopes unavailable',
+        );
+        final expected = {File(gh).parent.parent.path, File(aws).parent.path};
+        check(
+          selected.directories.map((d) => d.path).toSet().containsAll(expected),
+          'Wrong selected tool directories',
+        );
+      } else {
+        check(
+          selected.directories.isEmpty,
+          'Bundled probe must not use scopes',
+        );
+      }
       final identities = <Map<String, Object?>>[];
       facts['withScope'] = await readability();
       facts['inspectedTools'] = identities;
@@ -225,7 +233,7 @@ Future<void> main() async {
           .toList();
       await save();
     }
-    if (mode == 'choose') {
+    if (mode == 'choose' || mode == 'bundled') {
       final service = bootstrap.library!.service;
       final client = AgentClient(bootstrap.boundPort!);
       final executions = <Map<String, Object?>>[];
@@ -487,7 +495,7 @@ Future<void> main() async {
     facts['complete'] = true;
     await save();
     stdout.writeln('MAC_TOOLS_RESULT=PASS:$mode');
-    if (mode == 'choose' || mode == 'remove') {
+    if (mode == 'choose' || mode == 'remove' || mode == 'bundled') {
       await Future<void>.delayed(const Duration(minutes: 25));
       throw StateError('Actual inspection quit deadline');
     }
