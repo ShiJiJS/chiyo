@@ -1,0 +1,41 @@
+{
+  "scope": "Only own app53038 descendants; executable paths only",
+  "rows": [
+    {
+      "pid": 53181,
+      "parentPid": 53038,
+      "executable": "/Users/jiangxinyi/Documents/Project/agent-info/local/\u4e2d\u6587 Mac \u9884\u89c8/AgentInfoManage/app/info_desktop.app/Contents/Resources/ThirdParty/aws-cli/aws",
+      "ancestorAppPid": 53038
+    },
+    {
+      "pid": 53193,
+      "parentPid": 53038,
+      "executable": "/Users/jiangxinyi/Documents/Project/agent-info/local/\u4e2d\u6587 Mac \u9884\u89c8/AgentInfoManage/app/info_desktop.app/Contents/MacOS/info-runtime-worker",
+      "ancestorAppPid": 53038
+    },
+    {
+      "pid": 53195,
+      "parentPid": 53193,
+      "executable": "/Users/jiangxinyi/Documents/Project/agent-info/local/\u4e2d\u6587 Mac \u9884\u89c8/AgentInfoManage/app/info_desktop.app/Contents/Resources/ThirdParty/aws-cli/aws",
+      "ancestorAppPid": 53038
+    },
+    {
+      "pid": 53210,
+      "parentPid": 53038,
+      "executable": "/Users/jiangxinyi/Documents/Project/agent-info/local/\u4e2d\u6587 Mac \u9884\u89c8/AgentInfoManage/app/info_desktop.app/Contents/Resources/ThirdParty/aws-cli/aws",
+      "ancestorAppPid": 53038
+    },
+    {
+      "pid": 53220,
+      "parentPid": 53038,
+      "executable": "/Users/jiangxinyi/Documents/Project/agent-info/local/\u4e2d\u6587 Mac \u9884\u89c8/AgentInfoManage/app/info_desktop.app/Contents/MacOS/info-runtime-worker",
+      "ancestorAppPid": 53038
+    },
+    {
+      "pid": 53222,
+      "parentPid": 53220,
+      "executable": "/Users/jiangxinyi/Documents/Project/agent-info/local/\u4e2d\u6587 Mac \u9884\u89c8/AgentInfoManage/app/info_desktop.app/Contents/Resources/ThirdParty/aws-cli/aws",
+      "ancestorAppPid": 53038
+    }
+  ]
+}

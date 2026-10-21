@@ -1,0 +1,48 @@
+{
+  "cases": [
+    {
+      "name": "sts",
+      "exit": 0,
+      "expectedExit": 0
+    },
+    {
+      "name": "put",
+      "exit": 0,
+      "expectedExit": 0
+    },
+    {
+      "name": "get",
+      "exit": 0,
+      "expectedExit": 0
+    },
+    {
+      "name": "wrong-secret",
+      "exit": 254,
+      "expectedExit": 254
+    }
+  ],
+  "scope": "Direct actual CLI fixture regression; not sandbox acceptance",
+  "receiver": {
+    "valid": 3,
+    "invalid": 1,
+    "actions": [
+      {
+        "action": "GetCallerIdentity",
+        "authenticated": true
+      },
+      {
+        "action": "PutParameter",
+        "authenticated": true
+      },
+      {
+        "action": "GetParameter",
+        "authenticated": true
+      },
+      {
+        "action": "GetParameter",
+        "authenticated": false
+      }
+    ]
+  },
+  "receiverExit": -15
+}

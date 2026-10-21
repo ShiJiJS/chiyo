@@ -1,0 +1,20 @@
+[
+  {
+    "name": "hosted-public-client",
+    "bytes": 6650448,
+    "sha256": "1d308f4481d461238b389c1d2e4b1696b7d4bb09c9725b764fb30e9f6c4b9941",
+    "privateSourceContentsNotPublished": false
+  },
+  {
+    "name": "仅合成 AWS 凭据.ini",
+    "bytes": 118,
+    "sha256": "4d082d7ddf7a67244ec7e22aa749db987530937d3293e8db3f347c446185ba15",
+    "privateSourceContentsNotPublished": true
+  },
+  {
+    "name": "仅合成 AWS 凭据 v2.ini",
+    "bytes": 99,
+    "sha256": "41f9c0b6f6ad9ed0dc615618423615a1add4e393b96b5b14aa2d7c841a0829b7",
+    "privateSourceContentsNotPublished": true
+  }
+]

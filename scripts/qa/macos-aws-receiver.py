@@ -13,14 +13,14 @@ ACCESS = 'TEST_ACCESS_ONLY'
 SECRET = 'SYNTHETIC_NOT_A_REAL_SECRET'
 
 
-def authenticates(handler, body):
+def authenticates(handler, body, *, services=('ssm', 'sts'), payload_hash=None):
     try:
         scheme, raw = handler.headers['Authorization'].split(' ', 1)
         values = dict(part.strip().split('=', 1) for part in raw.split(','))
         credential = values['Credential'].split('/')
         assert scheme == 'AWS4-HMAC-SHA256' and len(credential) == 5
         assert credential[0] == ACCESS and credential[2] == 'us-east-1'
-        assert credential[3] in ('ssm', 'sts') and credential[4] == 'aws4_request'
+        assert credential[3] in services and credential[4] == 'aws4_request'
         signed = values['SignedHeaders']
         names = signed.split(';')
         assert sorted(names) == names and 'host' in names and 'x-amz-date' in names
@@ -29,7 +29,8 @@ def authenticates(handler, body):
         assert timestamp[:8] == credential[1]
         url = urlsplit(handler.path)
         query = '&'.join(sorted(quote(k, safe='-_.~') + '=' + quote(v, safe='-_.~') for k, v in parse_qsl(url.query, keep_blank_values=True)))
-        canonical = '\n'.join([handler.command, url.path or '/', query, headers, signed, hashlib.sha256(body).hexdigest()])
+        canonical = '\n'.join([handler.command, url.path or '/', query, headers, signed,
+                               payload_hash or hashlib.sha256(body).hexdigest()])
         key = ('AWS4' + SECRET).encode()
         for value in credential[1:]:
             key = hmac.new(key, value.encode(), hashlib.sha256).digest()

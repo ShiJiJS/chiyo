@@ -1,0 +1,22 @@
+{
+  "valid": 3,
+  "invalid": 1,
+  "actions": [
+    {
+      "action": "GetCallerIdentity",
+      "authenticated": true
+    },
+    {
+      "action": "PutParameter",
+      "authenticated": true
+    },
+    {
+      "action": "GetParameter",
+      "authenticated": true
+    },
+    {
+      "action": "GetParameter",
+      "authenticated": false
+    }
+  ]
+}

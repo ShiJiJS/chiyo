@@ -1,0 +1,7 @@
+{
+  "port": 62275,
+  "ownedReceiverPids": [
+    52524
+  ],
+  "signal": "SIGTERM"
+}

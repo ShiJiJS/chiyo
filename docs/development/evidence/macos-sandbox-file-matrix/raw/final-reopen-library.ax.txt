@@ -1,0 +1,61 @@
+The following is a diff from the previous accessibility tree for Window: "info_desktop" with ~ and + representing changed and added elements, respectively. Removed elements are summarized by ID range.
+Removed element IDs: 35-39, 85-109, 113-137
+~			23 text (settable) 信息库
+~			24 text (settable) 2
+~			25 text (settable) 全部信息
+~			26 button (settable) 2 条信息 · 包含下级目录
+~			27 button (settable) ＋ 新建
+~			28 text (settable) 信息库
+~			29 text (settable) 信息详情
+~			30 button (settable) 编辑
+~			31 button (settable) 移入回收站
+~			32 button (settable) 凭据
+~			33 text (settable) 信息
+~			34 text field (settable)
++			35 button (settable) 全部信息
+2
++			36 button (settable) 目录与标签
++			37 button (settable) 回收站
++			38 text (settable) 资料位置
++			39 text (settable) 常用标签
++			40 text (settable) 信息保存在本机
++			41 container (settable)
++				42 button (settable) MacPackageTest20MacPackageTest20261021261021
+未分类
+2 个字段 · 含文件
++				43 button (settable) MacSshAcceptanceEmptyAttachment
+未分类
+1 个字段 · 含文件
++			44 button (settable) ‹
++			45 text (settable) 1 / 1
++			46 text (settable) 共 2 条信息
++			47 button (settable) ›
++			48 container (settable)
++				49 button (settable) 未分类
++				50 text (settable) MacPackageTest20MacPackageTest20261021261021
++				51 text (settable) 所在位置
++				52 text (settable) 标签
++				53 text (settable) 最近更新
++				54 text (settable) 未分类
++				55 text (settable) 2026-10-21 21:03
++				56 text (settable) 信息内容
++				57 text (settable) 2 个字段
++				58 text (settable) AllowedSyntheticField
++				59 text (settable)  777
++				60 text (settable) SyntheticAttachment
++				61 text (settable) 中文 合成附件.txt
++				62 text (settable) 1.0 KiB · text/plain · 版本 1
++				63 button (settable) 更换文件
++				64 button (settable) 另存
++				65 button (settable) 公开预览
++				66 text (settable) 关联凭据
++				67 button (settable) 管理关联
++				68 text (settable) 凭据单独保管；批准读取这条信息不会同时提供凭据。
++				69 text (settable) 尚未关联凭据
++				70 text (settable) Agent 能看到什么？
++				71 text (settable) 公开目录包含名称、公开说明及字段说明。字段内容只有在你批准后才能读取。
++				72 button (settable) 预览公开目录
++			73 text (settable) 按字段授权
++			74 button (settable) 转换旧秘密字段
++			75 button (settable) 修改历史 ↗
+The focused UI element is 1 container info_desktop

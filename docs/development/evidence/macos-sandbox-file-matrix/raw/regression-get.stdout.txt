@@ -1,0 +1,8 @@
+{
+    "Parameter": {
+        "Name": "/fixture/matrix-regression",
+        "Type": "String",
+        "Value": "synthetic-regression",
+        "Version": 1
+    }
+}
