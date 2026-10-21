@@ -49,7 +49,7 @@ Agent 路径或 Flutter 文本直接建立文件访问。
 | `remove` / PID55676 | 实际取消移除后两条仍在；逐条确认移除后列表为空。 |
 | `denied` / PID55720 | 独立进程重开，保存文件摘要不变、列表仍空。两个目录读写均回到 Errno1。文件保留由原生 store 单测另行核对，本轮 UI 后没有重新从非沙盒端读取原文。 |
 
-四个实际 AWS 凭据操作共两次退出0、两次退出255；都经过生产 `DesktopBootstrap` / 
+四个实际 AWS 凭据操作共两次退出0、两次退出255；都经过生产 `DesktopBootstrap` /
 `CredentialExecutionHost` 和随包 worker，四份材料 `cleanup=complete`。重复 operationId
 返回原 executionId，固定截止未变。本轮没有额外进程采样，不把调用链源码与实际
 结果说成新的内核父进程观察；此前普通包的父子身份事实另见上一轮矩阵。
