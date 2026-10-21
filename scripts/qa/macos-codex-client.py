@@ -11,7 +11,7 @@ import json,os,queue,subprocess,threading,time,hashlib
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[2]
 parser=argparse.ArgumentParser(description=__doc__)
-parser.add_argument('output',type=Path);parser.add_argument('--project',required=True,type=Path);parser.add_argument('--host',required=True,type=Path)
+parser.add_argument('--resume-ended',help='Public ID of an ended synthetic chat from this project; only test unarchive/resume refusal');parser.add_argument('output',type=Path);parser.add_argument('--project',required=True,type=Path);parser.add_argument('--host',required=True,type=Path)
 args=parser.parse_args();OUT=args.output.resolve();OUT.relative_to(ROOT/'build/macos-adaptation');OUT.mkdir(exist_ok=False,parents=True)
 PROJECT=args.project.resolve();PROJECT.relative_to(ROOT/'build/macos-adaptation');assert (PROJECT/'preparation.json').is_file()
 PREP=json.loads((PROJECT/'preparation.json').read_text());CLI=Path(PREP['bundle'])/'info-codex'
@@ -84,7 +84,9 @@ def receive(timeout=180):
  elif 'id' in m and method:
   # No execution/approval/user-input tools are authorized in this synthetic chat.
   send({'id':m['id'],'error':{'code':-32601,'message':'This acceptance uses codex_info only'}})
- if 'error' in m:raise RuntimeError('RPC error '+str(m['error'].get('code')))
+ if 'error' in m:
+  RESULTS.setdefault('rpcErrors',[]).append(m['error']);save()
+  raise RuntimeError('RPC error '+str(m['error'].get('code')))
  save();return m
 
 def request(method,params):
@@ -126,44 +128,59 @@ try:
  assert all(h['trustStatus']=='trusted' and h['enabled'] for h in hooks['data'][0]['hooks'])
  RESULTS['hookDiscovery']=hooks
  models=request('model/list',{});RESULTS['model']=next(m['model'] for m in models['data'] if m.get('isDefault'));RESULTS['modelSelection']='CLI-advertised default, process only'
- e=new_thread();RESULTS['threadE']=e;save();print('LIFECYCLE_THREAD_READY',flush=True)
- turn(e,'Synthetic real lifecycle acceptance. Use public catalog and your actual hook association. Request only Address of Synthetic Mac server once, purpose "Synthetic real lifecycle acceptance". Stop while pending; no new connections, no private data output.')
- s=owner('status');pending=[r for r in s['requests'] if r['state']=='pending'];assert len(pending)==1;r=pending[0];rid=r['id'];RESULTS['requestE']=rid
- RESULTS['approvedSnapshot']=owner('approve',requestId=rid,fields=[s['addressField']])
- turn(e,'The owner selected its scope. Claim the same request and read the approved Address exactly once. Do not print its value or request anything else.')
- RESULTS['beforeRejoinSnapshot']=owner('status');request('thread/resume',{'threadId':e,'excludeTurns':True,'model':RESULTS['model']});RESULTS['runningRejoinDone']=True
- # This is a real model compaction, not a synthetic hook payload.
- start=len(EVENTS);request('thread/compact/start',{'threadId':e});end=time.monotonic()+300
- while time.monotonic()<end:
-  m=receive(max(.1,end-time.monotonic()))
-  if m.get('method')=='turn/completed' and m['params'].get('threadId')==e:
-   assert m['params']['turn']['status']=='completed';break
-  if m.get('method')=='thread/compacted' and m['params'].get('threadId')==e:break
- else:raise TimeoutError('Compaction deadline')
- RESULTS['compactionEvents']=EVENTS[start:];save();print('REAL_COMPACT_COMPLETE',flush=True)
- turn(e,'After compaction, use only the association retained in your context. Read the same approved Address once more under the original request. Never search private files or reconnect silently. Do not print the field value.')
- RESULTS['afterCompactSnapshot']=owner('status')
- reads=[c for c in CALLS if c['threadId']==e and c['command']=='read'];assert len(reads)==2 and all(c['response'].get('status')=='ok' for c in reads)
- before=next(g for g in RESULTS['approvedSnapshot']['grants'] if g['requestId']==rid);after=next(g for g in RESULTS['afterCompactSnapshot']['grants'] if g['requestId']==rid);assert before['expiresAt']==after['expiresAt'] and after['active']
- f=request('thread/fork',{'threadId':e,'excludeTurns':True,'model':RESULTS['model']})['thread']['id'];RESULTS['threadF']=f
- turn(f,'Fork isolation acceptance. Use only your latest SessionStart association, never an older parent reference. Query status of public request '+rid+' once. Do not make requests or obtain another proof. Report public status only.')
- assert PROOFS.get(f) and PROOFS[f]!=PROOFS[e]
- assert any(c['threadId']==f and c['command']=='status' and c['response'].get('status')=='unauthorized' for c in CALLS)
- g=new_thread('clear');RESULTS['threadG']=g
- turn(g,'Clear-source isolation acceptance. Use your own new hook association and query status of public request '+rid+' once. Do not make requests, search for proof or reconnect; report status only.')
- assert any(c['threadId']==g and c['command']=='status' and c['response'].get('status')=='unauthorized' for c in CALLS)
- # Leave one pending request in the approved root before true SessionEnd.
- turn(e,'Synthetic pending-request cancellation acceptance. In the same current association, submit one additional request only for Username of Synthetic Mac server, purpose "Synthetic pending cancellation on SessionEnd". Leave it pending. Do not try to read Username or reconnect.')
- RESULTS['beforeEndSnapshot']=owner('status');request('thread/archive',{'threadId':e});RESULTS['afterEndSnapshot']=owner('status')
- rootRequests=[x for x in RESULTS['beforeEndSnapshot']['requests'] if x['chatLabel'].endswith(e)];assert len(rootRequests)==2 and {x['state'] for x in rootRequests}=={'approved','pending'}
- ended=[x for x in RESULTS['afterEndSnapshot']['requests'] if x['chatLabel'].endswith(e)];assert all(x['sessionEnded'] for x in ended) and {x['state'] for x in ended}=={'revoked','cancelled'}
- RESULTS['endedClaim']=cli({'association':PROOFS[e],'command':'claim','requestId':rid},e,'negative-protocol-probe');assert RESULTS['endedClaim']['status']=='unauthorized'
- request('thread/resume',{'threadId':e,'excludeTurns':True,'model':RESULTS['model']})
- turn(e,'This synthetic root has already received SessionEnd. Query the original request using only the association still in your context. Do not reconnect, search files or create any request. Report public refusal status only.')
- RESULTS['afterEndedResumeSnapshot']=owner('status')
- resumed=[c for c in CALLS if c['threadId']==e][-1];assert resumed['command'] in ['status','claim'] and resumed['response'].get('status')=='unauthorized'
- for tid in [e,f,g]:request('thread/archive',{'threadId':tid})
- RESULTS['completeLifecycleFlow']=True;save();print('LIFECYCLE_COMPLETE',flush=True)
+ if args.resume_ended:
+  e=args.resume_ended;RESULTS['threadE']=e;snapshot=owner('status');own=[r for r in snapshot['requests'] if r['chatLabel'].endswith(e)];assert own and all(r['sessionEnded'] for r in own)
+  rid=next(r['id'] for r in own if r['approvedFields']);RESULTS['requestE']=rid;RESULTS['beforeResumeSnapshot']=snapshot
+  try:request('thread/resume',{'threadId':e,'excludeTurns':True,'model':RESULTS['model']})
+  except RuntimeError:
+   assert RESULTS['rpcErrors'][-1]['code']==-32600
+   RESULTS['archivedResumeRefused']=True
+  else:raise AssertionError('Archived thread unexpectedly resumed')
+  request('thread/unarchive',{'threadId':e});resumed=request('thread/resume',{'threadId':e,'excludeTurns':True,'model':RESULTS['model']});assert resumed['thread']['cwd']==str(PROJECT)
+  turn(e,'This synthetic root already received SessionEnd. Query public original request '+rid+' using only your own association retained in context. Do not reconnect, search files or create any request. Report only the public refusal status.')
+  assert any(c['threadId']==e and c['command'] in ['status','claim'] and c['response'].get('status')=='unauthorized' for c in CALLS)
+  RESULTS['afterEndedResumeSnapshot']=owner('status');ended=[r for r in RESULTS['afterEndedResumeSnapshot']['requests'] if r['chatLabel'].endswith(e)];assert ended and all(r['sessionEnded'] for r in ended)
+  request('thread/archive',{'threadId':e});RESULTS['completeEndedResumeFlow']=True;save();print('ENDED_RESUME_COMPLETE',flush=True)
+ else:
+  e=new_thread();RESULTS['threadE']=e;save();print('LIFECYCLE_THREAD_READY',flush=True)
+  turn(e,'Synthetic real lifecycle acceptance. Use public catalog and your actual hook association. Request only Address of Synthetic Mac server once, purpose "Synthetic real lifecycle acceptance". Stop while pending; no new connections, no private data output.')
+  s=owner('status');pending=[r for r in s['requests'] if r['state']=='pending'];assert len(pending)==1;r=pending[0];rid=r['id'];RESULTS['requestE']=rid
+  RESULTS['approvedSnapshot']=owner('approve',requestId=rid,fields=[s['addressField']])
+  turn(e,'The owner selected its scope. Claim the same request and read the approved Address exactly once. Do not print its value or request anything else.')
+  RESULTS['beforeRejoinSnapshot']=owner('status');request('thread/resume',{'threadId':e,'excludeTurns':True,'model':RESULTS['model']});RESULTS['runningRejoinDone']=True
+  # This is a real model compaction, not a synthetic hook payload.
+  start=len(EVENTS);request('thread/compact/start',{'threadId':e});end=time.monotonic()+300
+  while time.monotonic()<end:
+   m=receive(max(.1,end-time.monotonic()))
+   if m.get('method')=='turn/completed' and m['params'].get('threadId')==e:
+    assert m['params']['turn']['status']=='completed';break
+   if m.get('method')=='thread/compacted' and m['params'].get('threadId')==e:break
+  else:raise TimeoutError('Compaction deadline')
+  RESULTS['compactionEvents']=EVENTS[start:];save();print('REAL_COMPACT_COMPLETE',flush=True)
+  turn(e,'After compaction, use only the association retained in your context. Read the same approved Address once more under the original request. Never search private files or reconnect silently. Do not print the field value.')
+  RESULTS['afterCompactSnapshot']=owner('status')
+  reads=[c for c in CALLS if c['threadId']==e and c['command']=='read'];assert len(reads)==2 and all(c['response'].get('status')=='ok' for c in reads)
+  before=next(g for g in RESULTS['approvedSnapshot']['grants'] if g['requestId']==rid);after=next(g for g in RESULTS['afterCompactSnapshot']['grants'] if g['requestId']==rid);assert before['expiresAt']==after['expiresAt'] and after['active']
+  f=request('thread/fork',{'threadId':e,'excludeTurns':True,'model':RESULTS['model']})['thread']['id'];RESULTS['threadF']=f
+  turn(f,'Fork isolation acceptance. Use only your latest SessionStart association, never an older parent reference. Query status of public request '+rid+' once. Do not make requests or obtain another proof. Report public status only.')
+  assert PROOFS.get(f) and PROOFS[f]!=PROOFS[e]
+  assert any(c['threadId']==f and c['command']=='status' and c['response'].get('status')=='unauthorized' for c in CALLS)
+  g=new_thread('clear');RESULTS['threadG']=g
+  turn(g,'Clear-source isolation acceptance. Use your own new hook association and query status of public request '+rid+' once. Do not make requests, search for proof or reconnect; report status only.')
+  assert any(c['threadId']==g and c['command']=='status' and c['response'].get('status')=='unauthorized' for c in CALLS)
+  # Leave one pending request in the approved root before true SessionEnd.
+  turn(e,'Synthetic pending-request cancellation acceptance. In the same current association, submit one additional request only for Username of Synthetic Mac server, purpose "Synthetic pending cancellation on SessionEnd". Leave it pending. Do not try to read Username or reconnect.')
+  RESULTS['beforeEndSnapshot']=owner('status');request('thread/archive',{'threadId':e});RESULTS['afterEndSnapshot']=owner('status')
+  rootRequests=[x for x in RESULTS['beforeEndSnapshot']['requests'] if x['chatLabel'].endswith(e)];assert len(rootRequests)==2 and {x['state'] for x in rootRequests}=={'approved','pending'}
+  ended=[x for x in RESULTS['afterEndSnapshot']['requests'] if x['chatLabel'].endswith(e)];assert all(x['sessionEnded'] for x in ended) and {x['state'] for x in ended}=={'revoked','cancelled'}
+  RESULTS['endedClaim']=cli({'association':PROOFS[e],'command':'claim','requestId':rid},e,'negative-protocol-probe');assert RESULTS['endedClaim']['status']=='unauthorized'
+  request('thread/unarchive',{'threadId':e})
+  request('thread/resume',{'threadId':e,'excludeTurns':True,'model':RESULTS['model']})
+  turn(e,'This synthetic root has already received SessionEnd. Query the original request using only the association still in your context. Do not reconnect, search files or create any request. Report public refusal status only.')
+  RESULTS['afterEndedResumeSnapshot']=owner('status')
+  resumed=[c for c in CALLS if c['threadId']==e][-1];assert resumed['command'] in ['status','claim'] and resumed['response'].get('status')=='unauthorized'
+  for tid in [e,f,g]:request('thread/archive',{'threadId':tid})
+  RESULTS['completeLifecycleFlow']=True;save();print('LIFECYCLE_COMPLETE',flush=True)
 except Exception as e:
  RESULTS['failure']={'type':type(e).__name__,'message':str(e)};save();print('ACCEPTANCE_FAILURE '+type(e).__name__+' '+str(e),flush=True)
 finally:
@@ -174,5 +191,5 @@ finally:
  for proof in PROOFS.values():assert proof.encode() not in (OUT/'real-client-result.json').read_bytes()
  RESULTS['proofReferencesAbsentFromEvidence']=True;save();print('LIFECYCLE_CLIENT_CLOSED',flush=True)
 
-if not RESULTS.get('completeLifecycleFlow'):
+if not (RESULTS.get('completeLifecycleFlow') or RESULTS.get('completeEndedResumeFlow')):
  raise SystemExit(1)
