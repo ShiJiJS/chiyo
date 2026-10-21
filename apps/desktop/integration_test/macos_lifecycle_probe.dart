@@ -36,13 +36,18 @@ class _Platform implements DesktopPlatform {
   final native = NativeDesktopPlatform();
   late Future<void> Function(DesktopEvent) event;
   bool terminateRequested = false;
+  final nativeEvents = <String>[];
   Future<void> Function()? beforeTerminate;
   @override
   Future<DesktopAvailability> initialize(
     Future<void> Function(DesktopEvent) onEvent,
   ) {
     event = onEvent;
-    return native.initialize(onEvent);
+    return native.initialize((value) async {
+      nativeEvents.add(value.name);
+      stdout.writeln('MAC_LIFECYCLE_NATIVE_EVENT=${value.name}');
+      await onEvent(value);
+    });
   }
 
   @override
@@ -89,6 +94,8 @@ Future<void> main() async {
     'backup-prepare',
     'backup-interrupt',
     'backup-recover',
+    'ui-hold',
+    'ui-recover',
   };
   if (!Platform.isMacOS || !modes.contains(mode)) exit(64);
   final supplied = Platform.environment['INFO_MAC_LIFECYCLE_ROOT'];
@@ -172,6 +179,7 @@ Future<void> main() async {
           : <String, dynamic>{'mode': mode};
       facts['nativeTerminationRequested'] = true;
       facts['libraryCloses'] = closes;
+      facts['nativeEvents'] = platform.nativeEvents;
       await report.writeAsString(jsonEncode(facts), flush: true);
     };
     // Start explicitly so a real window cannot initiate a second startup.
@@ -248,7 +256,7 @@ Future<void> main() async {
     }
     final service = bootstrap.library!.service;
     final stateFile = File('$canonical/synthetic-association.json');
-    if (mode == 'recover') {
+    if (mode == 'recover' || mode == 'ui-recover') {
       final old = jsonDecode(await stateFile.readAsString()) as Map;
       _check(
         service.owner.information.single.fields.single.value == 'synthetic',
@@ -352,6 +360,12 @@ Future<void> main() async {
       }),
     );
     stdout.writeln('MAC_LIFECYCLE_READY=$mode');
+    if (mode == 'ui-hold') {
+      // Only native close/open/quit events or the settings UI end this run.
+      // The driver never writes a finish marker or injects DesktopEvent.quit.
+      await Future<void>.delayed(const Duration(minutes: 30));
+      throw StateError('Actual native UI lifecycle deadline');
+    }
     final finish = File('$canonical/finish-$mode');
     final deadline = DateTime.now().add(const Duration(seconds: 90));
     while (!await finish.exists()) {
