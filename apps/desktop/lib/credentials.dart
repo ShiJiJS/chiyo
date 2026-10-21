@@ -3,6 +3,8 @@ import 'package:info_core/info_core.dart';
 import 'credential_dialogs.dart';
 import 'credential_files.dart';
 import 'credential_management.dart';
+import 'credential_execution_receipt.dart' show credentialExecutionLabel;
+import 'focused_fill_ui.dart' show focusedFillStateLabel;
 import 'prototype_ui.dart';
 import 'ui.dart';
 import 'organization.dart' show directoryPath;
@@ -40,6 +42,37 @@ class _CredentialLibraryState extends State<CredentialLibrary> {
   int _page = 0;
   UiPalette get p => UiPalette.of(context);
   OwnerAccess get owner => widget.owner;
+
+  String _recentUse(String credentialId) {
+    final requests = {
+      for (final request in owner.credentialUseRequests)
+        if (request.credentialId == credentialId) request.id: request,
+    };
+    final records = <(DateTime?, String)>[
+      for (final execution in owner.credentialExecutions)
+        if (requests.containsKey(execution.requestId))
+          (
+            execution.createdAt ??
+                execution.startedAt ??
+                requests[execution.requestId]!.attemptedAt,
+            credentialExecutionLabel(execution),
+          ),
+      for (final fill in owner.focusedFillOperations)
+        if (requests.containsKey(fill.requestId))
+          (
+            fill.createdAt,
+            focusedFillStateLabel(owner.focusedFillOperationState(fill.id)),
+          ),
+    ];
+    if (records.isEmpty) return '暂无保留的使用操作';
+    if (records.any((record) => record.$1 == null)) {
+      return '已有使用操作，部分时间未记录';
+    }
+    records.sort((a, b) => b.$1!.compareTo(a.$1!));
+    final latest = records.first;
+    return '${uiTime(latest.$1)} · ${latest.$2}';
+  }
+
   @override
   void initState() {
     super.initState();
@@ -925,9 +958,22 @@ class _CredentialLibraryState extends State<CredentialLibrary> {
                         ),
                         _fact(
                           c.form == CredentialForm.file ? '文件引用别名' : '建议环境变量名',
-                          t(c.suggestedBinding.isEmpty ? '未设置' : c.suggestedBinding, 13, family: 'Consolas'),
+                          t(
+                            c.suggestedBinding.isEmpty
+                                ? '未设置'
+                                : c.suggestedBinding,
+                            13,
+                            family: 'Consolas',
+                          ),
                         ),
-                        _fact('最近使用', t('尚未使用', 13)),
+                        _fact(
+                          '最近使用记录',
+                          Text(
+                            _recentUse(c.id),
+                            key: const ValueKey('credential-recent-use'),
+                            style: prototypeText(context, 13),
+                          ),
+                        ),
                         const SizedBox(height: 22),
                         Row(
                           children: [
