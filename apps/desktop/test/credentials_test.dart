@@ -5,6 +5,8 @@ import 'package:info_desktop/credentials.dart';
 import 'package:info_desktop/information_workspace.dart';
 import 'package:info_desktop/credential_dialogs.dart';
 import 'package:info_desktop/ui.dart';
+import 'credential_use_widget_test.dart' show fixture;
+import 'support/focused_fill_fixture.dart';
 
 class FailingCredentialRepository extends MemoryInformationRepository {
   int writes = 0;
@@ -19,6 +21,130 @@ class FailingCredentialRepository extends MemoryInformationRepository {
 }
 
 void main() {
+  testWidgets(
+    'credential details show the latest retained operation across versions and exclude other credentials',
+    (tester) async {
+      tester.view.physicalSize = const Size(1440, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      var now = DateTime.utc(2026, 10, 21, 10);
+      await tester.runAsync(() async {
+        final (service, session, request) = await fixture(
+          protocolVersion: 2,
+          clock: () => now,
+        );
+        Future<void> show(String id) async {
+          await tester.pumpWidget(
+            MaterialApp(
+              theme: informationTheme(),
+              home: Scaffold(
+                body: CredentialLibrary(
+                  key: ValueKey(id),
+                  owner: service.owner,
+                  initialCredentialId: id,
+                ),
+              ),
+            ),
+          );
+          await tester.pumpAndSettle();
+        }
+
+        String label() => tester
+            .widget<Text>(find.byKey(const ValueKey('credential-recent-use')))
+            .data!;
+        Future<CredentialOperationClaim> begin(String id) =>
+            service.agent.beginCredentialUseOperation(
+              session,
+              CredentialOperationInput.fromJson({
+                'protocolVersion': 2,
+                'command': 'run-use',
+                'requestId': request.id,
+                'operationId': id,
+                'launch': request.toRequestInputJson()['launch'],
+              }),
+            );
+        Future<void> fail(CredentialOperationClaim claim) =>
+            service.agent.reportCredentialExecution(
+              CredentialExecutionReport(
+                executionId: claim.execution.id,
+                executionCapability: claim.material!.executionCapability,
+                state: 'start_failed',
+                errorCode: 'process_start_failed',
+                finishedAt: now,
+              ),
+            );
+        try {
+          await service.owner.decideCredentialUse(
+            request.id,
+            approveCredential: true,
+          );
+          await show(request.credentialId);
+          expect(label(), '暂无保留的使用操作');
+          await fail(await begin('earlier'));
+          now = now.add(const Duration(minutes: 1));
+          final latest = await begin('latest');
+          await show(request.credentialId);
+          expect(label(), '${uiTime(now)} · 正在准备');
+          await fail(latest);
+          final current = service.owner.credentials.single;
+          await service.owner.rotateStringCredential(
+            current.id,
+            current.revision,
+            'new-synthetic-version',
+          );
+          await show(request.credentialId);
+          expect(label(), '${uiTime(now)} · 启动失败');
+          expect(find.textContaining('synthetic-token'), findsNothing);
+          expect(find.textContaining('new-synthetic-version'), findsNothing);
+          final other = await service.owner.createStringCredential(
+            name: 'Unrelated',
+            publicPurpose: '',
+            secret: 'other-synthetic',
+          );
+          await show(other.id);
+          expect(label(), '暂无保留的使用操作');
+        } finally {
+          await tester.pumpWidget(const SizedBox());
+          await service.close();
+        }
+      });
+    },
+  );
+  testWidgets(
+    'credential details include focused-fill results without claiming command success',
+    (tester) async {
+      tester.view.physicalSize = const Size(1440, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      await tester.runAsync(() async {
+        final f = await focusedFillFixture(approved: true);
+        try {
+          await f.fill('synthetic-fill');
+          await tester.pumpWidget(
+            MaterialApp(
+              theme: informationTheme(),
+              home: Scaffold(body: CredentialLibrary(owner: f.owner)),
+            ),
+          );
+          await tester.pumpAndSettle();
+          final label = tester
+              .widget<Text>(find.byKey(const ValueKey('credential-recent-use')))
+              .data!;
+          expect(label, contains('输入已发送'));
+          expect(label, isNot(contains('退出码')));
+          expect(
+            find.textContaining('synthetic-widget-password'),
+            findsNothing,
+          );
+        } finally {
+          await tester.pumpWidget(const SizedBox());
+          await f.service.close();
+        }
+      });
+    },
+  );
   testWidgets(
     '1280 failure keeps complete save action reachable without shrinking the form',
     (tester) async {
