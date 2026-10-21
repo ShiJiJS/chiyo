@@ -21,6 +21,79 @@ Future<Object?> nativeAction(String method) async {
 Future<Object?> nativeSelectAll() => nativeAction('selectAll');
 
 void main() {
+  testWidgets('native undo and redo use only the focused editor history', (
+    tester,
+  ) async {
+    final first = TextEditingController(text: 'Original first');
+    final second = TextEditingController(text: 'Original second');
+    addTearDown(first.dispose);
+    addTearDown(second.dispose);
+    await tester.pumpWidget(
+      MaterialApp(
+        builder: (_, child) => MacTextEditingActions(child: child!),
+        home: Material(
+          child: Column(
+            children: [
+              TextField(key: const ValueKey('first'), controller: first),
+              TextField(key: const ValueKey('second'), controller: second),
+            ],
+          ),
+        ),
+      ),
+    );
+    for (final field in ['first', 'second']) {
+      await tester.tap(find.byKey(ValueKey(field)));
+      await tester.pump(const Duration(seconds: 1));
+      await tester.enterText(find.byKey(ValueKey(field)), 'Changed $field');
+      await tester.pump(const Duration(seconds: 1));
+    }
+    expect(await nativeAction('undo'), true);
+    await tester.pump();
+    expect(first.text, 'Changed first');
+    expect(second.text, 'Original second');
+    expect(await nativeAction('redo'), true);
+    await tester.pump();
+    expect(second.text, 'Changed second');
+    await tester.tap(find.byKey(const ValueKey('first')));
+    expect(await nativeAction('undo'), true);
+    await tester.pump();
+    expect(first.text, 'Original first');
+    expect(second.text, 'Changed second');
+    await tester.pumpWidget(const SizedBox());
+  }, variant: TargetPlatformVariant.only(TargetPlatform.macOS));
+
+  testWidgets('native undo cannot change an editor switched to read-only', (
+    tester,
+  ) async {
+    final controller = TextEditingController(text: 'Original');
+    addTearDown(controller.dispose);
+    late StateSetter rebuild;
+    var readOnly = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        builder: (_, child) => MacTextEditingActions(child: child!),
+        home: Material(
+          child: StatefulBuilder(
+            builder: (context, setState) {
+              rebuild = setState;
+              return TextField(controller: controller, readOnly: readOnly);
+            },
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.byType(TextField));
+    await tester.pump(const Duration(seconds: 1));
+    await tester.enterText(find.byType(TextField), 'Changed');
+    await tester.pump(const Duration(seconds: 1));
+    rebuild(() => readOnly = true);
+    await tester.pump();
+    expect(await nativeAction('undo'), false);
+    expect(await nativeAction('redo'), false);
+    expect(controller.text, 'Changed');
+    await tester.pumpWidget(const SizedBox());
+  }, variant: TargetPlatformVariant.only(TargetPlatform.macOS));
+
   testWidgets(
     'native clipboard actions update the focused model and clipboard',
     (tester) async {
@@ -214,7 +287,7 @@ void main() {
     buttonFocus.requestFocus();
     await tester.pump();
     expect(await nativeSelectAll(), false);
-    for (final method in ['copy', 'cut', 'paste']) {
+    for (final method in ['copy', 'cut', 'paste', 'undo', 'redo']) {
       expect(await nativeAction(method), false);
     }
     expect(controller.text, 'Preserve input');
@@ -255,7 +328,7 @@ void main() {
     );
     await tester.pumpWidget(const SizedBox());
     expect(await nativeSelectAll(), isNull);
-    for (final method in ['copy', 'cut', 'paste']) {
+    for (final method in ['copy', 'cut', 'paste', 'undo', 'redo']) {
       expect(await nativeAction(method), isNull);
     }
   }, variant: TargetPlatformVariant.only(TargetPlatform.macOS));

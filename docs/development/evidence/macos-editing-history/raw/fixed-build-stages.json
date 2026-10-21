@@ -1,0 +1,74 @@
+[
+  {
+    "label": "pub-core",
+    "exitCode": 0,
+    "args": [
+      "dart",
+      "pub",
+      "get",
+      "--enforce-lockfile"
+    ]
+  },
+  {
+    "label": "pub-cli",
+    "exitCode": 0,
+    "args": [
+      "dart",
+      "pub",
+      "get",
+      "--enforce-lockfile"
+    ]
+  },
+  {
+    "label": "pub-storage",
+    "exitCode": 0,
+    "args": [
+      "dart",
+      "pub",
+      "get",
+      "--enforce-lockfile"
+    ]
+  },
+  {
+    "label": "pub-desktop",
+    "exitCode": 0,
+    "args": [
+      "flutter",
+      "pub",
+      "get",
+      "--enforce-lockfile"
+    ]
+  },
+  {
+    "label": "format-probe",
+    "exitCode": 0,
+    "args": [
+      "dart",
+      "format",
+      "lib/clipboard_probe.dart"
+    ]
+  },
+  {
+    "label": "analyze-probe",
+    "exitCode": 0,
+    "args": [
+      "flutter",
+      "analyze",
+      "--no-pub",
+      "--fatal-infos",
+      "lib/clipboard_probe.dart"
+    ]
+  },
+  {
+    "label": "build-probe",
+    "exitCode": 0,
+    "args": [
+      "flutter",
+      "build",
+      "macos",
+      "--release",
+      "--no-pub",
+      "--target=lib/clipboard_probe.dart"
+    ]
+  }
+]

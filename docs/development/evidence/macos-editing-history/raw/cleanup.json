@@ -1,0 +1,16 @@
+{
+  "qaProcessesRemaining": false,
+  "generatedAppUnregistered": true,
+  "sourceAndBuildRemoved": true,
+  "freedKiB": 976904,
+  "stablePid": 53592,
+  "stableSource": "4690e79357bb728da22193d8dadd6dc8a8ce2ce6",
+  "manifestEntries": 7971,
+  "stableMismatches": [],
+  "stableStrictSignatureExit": 0,
+  "completeApps": [
+    "/Users/jiangxinyi/Documents/Project/agent-info/local/中文 Mac 预览/AgentInfoManage/app/info_desktop.app"
+  ],
+  "generatedDSYMs": [],
+  "originalZIPsAndPrivateBackupsRetained": true
+}

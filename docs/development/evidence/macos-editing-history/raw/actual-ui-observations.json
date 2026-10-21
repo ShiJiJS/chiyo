@@ -1,0 +1,52 @@
+{
+  "kind": "Transcribed actual CUA AX/screenshot observations, not separately saved screenshot files",
+  "initialBaseline": {
+    "pid": 84493,
+    "nativeUndoRedoDisabled": true,
+    "CmdZAfterInitialTypeNotCountedAsDefectProof": "Initial empty + first typing may coalesce into one undo state",
+    "stylePasteAXChinese": true,
+    "stylePasteControllerStayedEnglish": true,
+    "LeftRestoredEnglish": true,
+    "originalClipboardAllTypesRestored": true,
+    "exitCode": 0
+  },
+  "properOldControl": {
+    "pid": 86016,
+    "editingSourcesExactOldCommit": "5e58c6d",
+    "firstStateControllerAsciiExact": true,
+    "secondStateControllerFixtureExact": true,
+    "actualCmdZChangedNothing": true,
+    "nativeUndoRedoDisabled": true,
+    "CUAPasteRestoresOriginalClipboard": true,
+    "exitCode": 0
+  },
+  "fixed": {
+    "pid": 85377,
+    "firstInitialStateUndoNoOpExcludedFromPass": true,
+    "twoStateCmdZ": "English restored",
+    "ShiftCmdZ": "Chinese restored",
+    "actualMenuUndoRedo": "English / Chinese restored",
+    "styleMenuPasteFixtureExact": true,
+    "styleMenuPasteLeftRetainedChinese": true,
+    "CommandOptionShiftVPasteFixtureExact": true,
+    "nativeSheet": {
+      "cutFilename": "empty, Save disabled",
+      "actualMenuUndo": "ClipboardPanelSynthetic, Save enabled",
+      "actualMenuRedo": "empty, Save disabled",
+      "actualCancel": true,
+      "noFileSaved": true,
+      "FlutterDraftRemainedChinese": true,
+      "refocusThenCmdZShiftCmdZ": "English / Chinese restored, no filename history"
+    },
+    "originalClipboardAllTypesRestored": true,
+    "exitCode": 0
+  },
+  "limits": [
+    "No physical IME acceptance",
+    "No final ordinary installed application upgrade or same-package workflow",
+    "Current native menu validation routes actions; does not reflect exact Flutter undo availability in disabled styling",
+    "No native Windows or Windows CI"
+  ],
+  "keychainCalls": 0,
+  "newOSPermissionRequests": 0
+}
