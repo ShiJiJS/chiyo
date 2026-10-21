@@ -69,7 +69,7 @@ void main() {
           flush: true,
         );
         final reply = File('${root.path}/reply-$step.json');
-        final deadline = DateTime.now().add(const Duration(seconds: 60));
+        final deadline = DateTime.now().add(const Duration(seconds: 180));
         while (!await reply.exists()) {
           expect(
             DateTime.now().isBefore(deadline),
@@ -333,6 +333,119 @@ void main() {
         [old.fieldId],
       );
       await tester.pumpWidget(const SizedBox());
+      const states = bool.fromEnvironment('MAC_QA_STATES');
+      if (states) {
+        final ended = <String, String>{};
+        for (final mode in ['revoked', 'expired']) {
+          final info = await service.owner.createInformation(
+            '历史状态合成资料 $mode',
+            '仅供独立原生验收',
+            [FieldInput('服务器地址', '公开连接说明', 'synthetic-private-$mode')],
+          );
+          final ref = FieldRef(info.id, info.fields.single.id);
+          final reply = await exchange('states-request', {
+            'mode': mode,
+            'itemId': ref.itemId,
+            'fieldId': ref.fieldId,
+          });
+          final request = reply['requestId'] as String;
+          service.owner.approve(request, [
+            ref,
+          ], lifetime: Duration(minutes: mode == 'expired' ? 1 : 15));
+          final grant = (await service.owner.history()).grants.singleWhere(
+            (g) => g.requestId == request,
+          );
+          ended[mode] = grant.id;
+          await exchange('states-approved', {'mode': mode});
+          tester.view.physicalSize = const Size(1440, 900);
+          tester.platformDispatcher.textScaleFactorTestValue = 1;
+          await tester.pumpWidget(
+            RepaintBoundary(
+              key: boundary,
+              child: InformationApp(
+                key: UniqueKey(),
+                service: service,
+                port: server.port,
+              ),
+            ),
+          );
+          await tester.pumpAndSettle();
+          await tester.tap(find.byKey(const ValueKey('nav-3')));
+          await tester.pumpAndSettle();
+          await tester.enterText(
+            find.byKey(const ValueKey('history-search')),
+            '历史状态验收 $mode',
+          );
+          await tester.pumpAndSettle();
+          expect(find.text('1 条记录'), findsOneWidget);
+          expect(find.text('可读取'), findsWidgets);
+          if (mode == 'revoked') {
+            await tester.tap(find.text('撤销授权'));
+            await tester.pumpAndSettle();
+            await tester.tap(find.text('确认撤销'));
+            await tester.pumpAndSettle();
+          }
+          await exchange('states-finished', {'mode': mode});
+          await tester.pumpWidget(const SizedBox());
+          for (final theme in DesktopColorTheme.values) {
+            for (final view in [
+              (const Size(1440, 900), 1.0),
+              (const Size(1280, 800), 2.0),
+            ]) {
+              await show(
+                '$mode-history',
+                AuthorizationHistory(
+                  owner: service.owner,
+                  initialRecordId: grant.id,
+                ),
+                theme,
+                view.$1,
+                view.$2,
+                ['授权已结束', mode == 'revoked' ? '已撤销' : '已到期'],
+                [ref.itemId, ref.fieldId],
+              );
+            }
+          }
+          await tester.pumpWidget(const SizedBox());
+        }
+        await server.close();
+        await service.close();
+        await repository.close();
+        repository = await EncryptedInformationRepository.open(
+          '${root.path}/restored',
+          targetKeys,
+        );
+        service = InformationService(repository: repository);
+        server = await AgentServer.start(service.agent, port: 0);
+        expect(repository.grantHistory, hasLength(4));
+        for (final mode in ended.keys) {
+          final grant = repository.grantHistory.singleWhere(
+            (g) => g.id == ended[mode],
+          );
+          expect(grant.active, isFalse);
+          expect(
+            grant.events.last.kind,
+            mode == 'revoked' ? GrantEventKind.revoked : GrantEventKind.expired,
+          );
+        }
+        await exchange('states-reopened');
+        await File('${root.path}/result.json').writeAsString(
+          jsonEncode({
+            'complete': true,
+            'encryptedRepository': true,
+            'realClockExpirySeconds': 60,
+            'controlledOwnerApproval': true,
+            'revokeThroughFullAppUi': true,
+            'endedStates': ended.keys.toList(),
+            'reopenedHistoryRecords': 4,
+            'physicalUiAcceptance': false,
+            'captures': captures,
+          }),
+          flush: true,
+        );
+        await exchange('complete');
+        return;
+      }
       const large = bool.fromEnvironment('MAC_QA_LARGE');
       const fieldCount = large ? 200 : 24;
       const extraRecords = large ? 500 : 17;
