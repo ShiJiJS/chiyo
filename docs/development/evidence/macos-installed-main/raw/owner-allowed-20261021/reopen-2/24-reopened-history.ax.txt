@@ -1,0 +1,114 @@
+Window: "info_desktop", App: info_desktop.
+0 standard window info_desktop, Secondary Actions: Raise
+	1 container info_desktop
+		2 container (settable)
+			3 text (settable) 信息授权
+			4 button (settable) 紫棠
+			5 button (settable) 松石
+			6 button (settable) 雾蓝
+			7 button (settable) 黑白
+			8 button (settable) 访问审批
+			9 button (settable) 信息库
+			10 button (settable) 录入提案
+			11 button (settable) 授权历史
+			12 button (settable) 设置
+			13 text (settable) 授权历史
+			14 text (settable) 6
+			15 text (settable) 授权历史
+			16 text (settable) 授权与访问记录
+			17 button (settable) 记录保留设置
+			18 text field (settable)
+			19 button (settable) 全部
+			20 button (settable) 有效
+			21 button (settable) 已结束
+			22 text (settable) 按授权时间排列
+			23 text (settable) 最近 90 天
+			24 container (settable)
+				25 button (settable) Mac 正式包托管 worker 合成验收
+21:30
+Mac 正式包托管 worker 合成验收 · 
+凭据使用
+已撤销
+				26 button (settable) Mac 普通安装包重开验收 20261021
+21:25
+Mac 普通安装包重开验收 20261021 · 
+凭据使用
+已撤销
+				27 button (settable) 合成附件一分钟自然到期清理
+21:15
+Mac 普通安装包重开验收 20261021 · 
+0 次读取
+ · 
+1 条文件交付
+已到期
+				28 button (settable) 合成附件部分批准、实际同机消费及撤销清理
+21:08
+Mac 普通安装包重开验收 20261021 · 
+1 次读取
+ · 
+2 条文件交付
+已撤销
+				29 button (settable) 合成字段读取和一分钟自然到期
+20:57
+Mac 普通安装包重开验收 20261021 · 
+3 次访问
+已到期
+			30 text (settable) 已撤销
+			31 text (settable) 凭据使用 · 有效期内复用
+			32 text (settable) y8b1698BSVLjBoh6…
+			33 text (settable) Mac 正式包托管 worker 合成验收
+			34 text (settable) M
+			35 text (settable) Mac 正式包托管 worker 合成验收
+			36 text (settable) 申请时的会话
+			37 text (settable) 使用凭据
+			38 text (settable) 固定版本
+			39 text (settable) 使用操作
+			40 text (settable) MacPackageSyntheticGh
+			41 text (settable) 版本 1
+			42 text (settable) 1
+			43 text (settable) 次
+			44 text (settable) 授权到期
+			45 text (settable) 2026-10-21 21:45:00
+			46 text (settable) 允许方式
+			47 text (settable) 秘密值 · 环境变量
+			48 button (settable) ?
+			49 text (settable) 此授权只在当前会话及固定期限内有效。逐次使用不会延长截止时间；连接字段按独立授权处理。
+			50 text (settable) 逐次使用记录
+			51 button (settable) installed-main-hosted-gh-1
+2026-10-21 21:30:33
+已退出 · 退出码 1
+			52 text (settable) 本次 CLI 启动计划
+			53 text (settable) gh api user --method GET
+			54 text (settable) 操作 ID
+			55 text (settable) installed-main-hosted-gh-1
+			56 text (settable) 授权批准
+			57 text (settable) 2026-10-21 21:30:00
+			58 text (settable) 程序位置
+			59 text (settable) /Users/jiangxinyi/Documents/Project/agent-info/local/中文 Mac 预览/AgentInfoManage/app/info_desktop.app/Contents/Resources/ThirdParty/gh/bin/gh
+			60 text (settable) 工作目录
+			61 text (settable) /Users/jiangxinyi/Library/Containers/com.example.infoDesktop/Data
+			62 text (settable) 计划 hash
+			63 text (settable) sha256:60a83c60f12e0eea595249ae76910a4df0cee97de6a753e314b654a0446d6eb3
+			64 text (settable) 文件清理
+			65 text (settable) 无需文件清理
+			66 text (settable) 本次操作未成功
+			67 text (settable) 此结果不消耗整个授权。修正并核查原因后，可在有效范围内明确提交新的操作 ID。
+			68 button (settable) 查看本次执行记录与清理 →
+			69 text (settable) 撤销阻止新使用；已经运行的进程继续，材料按各自进程组清理。
+			70 button (settable) 查看凭据 →
+			71 text (settable) 6 条记录
+			72 button (settable) ‹
+			73 text (settable) 1 / 1
+			74 button (settable) ›
+	75 close button
+	76 full screen button Help: this button also has an action to zoom the window, Secondary Actions: zoom the window
+	77 minimize button
+	78 text info_desktop
+79 menu bar
+	80 info_desktop
+	81 Edit
+	82 View
+	83 Window
+	84 Help
+
+The focused UI element is 1 container info_desktop

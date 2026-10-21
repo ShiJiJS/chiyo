@@ -1,0 +1,29 @@
+Window: "info_desktop", App: info_desktop.
+0 standard window info_desktop, Secondary Actions: Raise
+	1 container info_desktop
+		2 container (settable)
+			3 text (settable) 信息授权
+			4 button (settable) 访问审批
+1
+			5 button (settable) 信息库
+			6 button (settable) 录入提案
+			7 button (settable) 授权历史
+			8 button (settable) 设置
+			9 button (settable) 紫棠
+			10 button (settable) 松石
+			11 button (settable) 雾蓝
+			12 button (settable) 黑白
+			13 text (settable) 本机已连接
+			14 text field (settable)
+	15 close button
+	16 full screen button Help: this button also has an action to zoom the window, Secondary Actions: zoom the window
+	17 minimize button
+	18 text info_desktop
+19 menu bar
+	20 info_desktop
+	21 Edit
+	22 View
+	23 Window
+	24 Help
+
+The focused UI element is 1 container info_desktop
