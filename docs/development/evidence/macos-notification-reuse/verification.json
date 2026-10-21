@@ -1,0 +1,199 @@
+{
+  "date": "2026-10-22",
+  "sourceBase": "6e6088a91391cd6ef53af3ce9c51213d87fe8bf0",
+  "scope": "Existing notification grant reused in isolated synthetic Release; one real foreground submission suppressed; manual fallback observed; genuine notification-click workflow incomplete",
+  "bundleIdentifier": "org.shijijs.agent-info-manage.qa.notifications20261021",
+  "binarySha256": "03463dff72cd6603b8d72c056856e4d169a674fe39af74fde450339da07dc38d",
+  "inputFiles": 637,
+  "productionInputsMatchingBaseExceptTwoQaFiles": 635,
+  "qaInputExceptions": [
+    "apps/desktop/integration_test/macos_notifications_manual.dart",
+    "scripts/qa/macos-notifications-ui.py"
+  ],
+  "reusePermission": true,
+  "initialNativeAuthorization": 2,
+  "permissionActionCount": 0,
+  "keychainCalls": 0,
+  "newSystemPrompts": 0,
+  "preparedCommandsPassed": 9,
+  "foregroundSubmission": {
+    "appActive": true,
+    "event": "submit",
+    "identifier": "4F24792E-A33E-4465-A5A8-48F60B138CA9",
+    "requestId": "71V0lClwI9G_y3ReU8fPTc7gZgYO3wBF8ejt3ttV5ZA=",
+    "windowVisible": true
+  },
+  "accepted": {
+    "accepted": true,
+    "appActive": true,
+    "event": "accepted",
+    "identifier": "4F24792E-A33E-4465-A5A8-48F60B138CA9",
+    "requestId": "71V0lClwI9G_y3ReU8fPTc7gZgYO3wBF8ejt3ttV5ZA=",
+    "windowVisible": true
+  },
+  "nativeClickCallbacks": 0,
+  "verifiedClickCases": 0,
+  "backgroundSubmitted": false,
+  "complete": false,
+  "appExitCode": 0,
+  "driverExitCode": 1,
+  "terminatedBeforeClickWorkflowComplete": true,
+  "libraryCloses": 1,
+  "flutterErrors": 0,
+  "manualFallbackObserved": {
+    "targetRequestId": "71V0lClwI9G_y3ReU8fPTc7gZgYO3wBF8ejt3ttV5ZA=",
+    "page": "4/4",
+    "total": 25,
+    "pendingAfter": 24,
+    "handledAfter": 1,
+    "finalState": "revoked"
+  },
+  "systemSuppression": [
+    "displayMirrored",
+    "DND delay-delivery resolution; global settings unchanged"
+  ],
+  "systemExcerptDerived": true,
+  "privateSystemLogSha256": "f5772ecc7f74f465704aff3f9dfa0ad5f8d1624cd44842ea5acc1c3195c6f916",
+  "ownedAppFixtureAndCachesRemoved": true,
+  "cleanupHelperResult": "exact-target delivered-notification query matched0 before and0 after; no actual deletion inferred",
+  "issue47Criteria": [
+    false,
+    false,
+    false,
+    false,
+    true
+  ],
+  "postRunQaSourceChanges": "persist pre-dispatch snapshot and terminal counters; require activeTab non-null; no additional native notification dispatched",
+  "files": [
+    {
+      "path": "raw/final-cleanup.json",
+      "bytes": 374,
+      "sha256": "c8676e835a3359362dffe75eaa3131454c4d1ce6075826145bcbaad494295da3"
+    },
+    {
+      "path": "raw/last-application-result.json",
+      "bytes": 617,
+      "sha256": "a753645781be3142c91223cd426d8d39091048c2c8d89188b0c24995c745c54f"
+    },
+    {
+      "path": "raw/logs/analyze.txt",
+      "bytes": 96,
+      "sha256": "455acec47102096bced4893be96a6f944d95ccacffb6341def9ab9a487c56bf4"
+    },
+    {
+      "path": "raw/logs/application.txt",
+      "bytes": 1394,
+      "sha256": "5514954716f29f2aaa92e467cd74ea18b3ff7d4d37c5dfe9d1de868c68ce1a1c"
+    },
+    {
+      "path": "raw/logs/build-release.txt",
+      "bytes": 5470,
+      "sha256": "cc6b0470bb29476f838c5f2ca425c38a63c14388fe70456da44a4d80887045c3"
+    },
+    {
+      "path": "raw/logs/entitlements.txt",
+      "bytes": 760,
+      "sha256": "69c58caf0db4c7de53456e00681392bf77bd43fbb88b2bfb83bd1d9b69986444"
+    },
+    {
+      "path": "raw/logs/pub-desktop.txt",
+      "bytes": 318,
+      "sha256": "ca68f707c22164511fc2b3f9af97ed7bd46538b1d334d9c806a6a59a556a6e05"
+    },
+    {
+      "path": "raw/logs/pub-info_cli.txt",
+      "bytes": 438,
+      "sha256": "7652c98906e8f741dc56b0e7f018713f8985ac3d073ce66e4cb8e1d3274e15f6"
+    },
+    {
+      "path": "raw/logs/pub-info_core.txt",
+      "bytes": 438,
+      "sha256": "7652c98906e8f741dc56b0e7f018713f8985ac3d073ce66e4cb8e1d3274e15f6"
+    },
+    {
+      "path": "raw/logs/pub-info_storage.txt",
+      "bytes": 438,
+      "sha256": "7652c98906e8f741dc56b0e7f018713f8985ac3d073ce66e4cb8e1d3274e15f6"
+    },
+    {
+      "path": "raw/logs/sign-qa-name.txt",
+      "bytes": 200,
+      "sha256": "ab6619a9e17b3b37a6764321f620bc3b1817e5e94f596ba40fb94c9874a49915"
+    },
+    {
+      "path": "raw/logs/signature.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/manual-ui-observation.json",
+      "bytes": 1515,
+      "sha256": "08e176e5723e78a3f34069d54880ea26387e0700d1de23fbea2a1b6a53c030aa"
+    },
+    {
+      "path": "raw/notification-cleanup/cleanup-result.txt",
+      "bytes": 315,
+      "sha256": "cf45d1d050302aff7de8ab94ea69679eb896f169564b92bfd56f289bd600fd38"
+    },
+    {
+      "path": "raw/notification-cleanup/entitlements.plist",
+      "bytes": 240,
+      "sha256": "b746c74b201e6af4e0864fbd1f4f629f96156a7ec4b7208bc995d0a5089bb592"
+    },
+    {
+      "path": "raw/notification-cleanup/helper-removed.json",
+      "bytes": 93,
+      "sha256": "21a14b6577c5c2a3a62c111402461c9d068976d9a9f0ad86716d22c34970b3fc"
+    },
+    {
+      "path": "raw/notification-cleanup/prepare-0.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/notification-cleanup/prepare-1.txt",
+      "bytes": 183,
+      "sha256": "ab835954d6533096934d39ecb17301b828edabb373426e47b8ec3ecb79d98aa3"
+    },
+    {
+      "path": "raw/notification-cleanup/prepare-2.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/notification-cleanup/source.swift",
+      "bytes": 2331,
+      "sha256": "2969686c4c6b7c3bb0fa42bc9db5146ad584ed4e88f97e307980c4ccb6f47055"
+    },
+    {
+      "path": "raw/result.json",
+      "bytes": 83884,
+      "sha256": "fe90d28cb094b0449abaae216d1f544bd9c043aa95095c131d58b022bedc558e"
+    },
+    {
+      "path": "raw/run-sources/apps/desktop/integration_test/macos_notifications_manual.dart",
+      "bytes": 11268,
+      "sha256": "4aa57e293736c8b0bfc4145abe993ae91fa977c6f77388c8370b345b893d5356"
+    },
+    {
+      "path": "raw/run-sources/apps/desktop/macos/Runner/Configs/AppInfo.xcconfig",
+      "bytes": 641,
+      "sha256": "26495e1dadedcc4df2a7a9f8962a82ec29f51fb7a5c8bfb45f2875d14fcbfec0"
+    },
+    {
+      "path": "raw/run-sources/apps/desktop/macos/Runner/MainFlutterWindow.swift",
+      "bytes": 19711,
+      "sha256": "230f1b381c445e63e7347b1b9ed68f0c7104c8a709f8476ee37046520685bc14"
+    },
+    {
+      "path": "raw/run-sources/scripts/qa/macos-notifications-ui.py",
+      "bytes": 11769,
+      "sha256": "00c4062b5b71af918d24c62d96bacb0de6f46c6c6c926f6b4c70a6ccb3b56e80"
+    },
+    {
+      "path": "raw/system-target-excerpt.txt",
+      "bytes": 2401,
+      "sha256": "1e6284e1cff73a1b91c4601c03e589fa2024c024c00c300a639884d4b3c044ef"
+    }
+  ]
+}

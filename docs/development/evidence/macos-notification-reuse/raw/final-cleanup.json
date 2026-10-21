@@ -1,0 +1,14 @@
+{
+  "stableManifestItems": 7971,
+  "stableMismatches": [],
+  "stableSignatureExit": 0,
+  "stablePid53592Alive": true,
+  "apps": [
+    "local/中文 Mac 预览/AgentInfoManage/app/info_desktop.app"
+  ],
+  "generatedDsyms": [],
+  "keychainCalls": 0,
+  "newSystemPermissionRequests": 0,
+  "notificationPreferencesChanged": false,
+  "originalBackupSettingsPageRestored": true
+}

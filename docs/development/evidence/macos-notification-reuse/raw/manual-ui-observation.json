@@ -1,0 +1,38 @@
+{
+  "provenance": "Manually transcribed from actual CUA AX/screenshot tool outputs in this conversation; no standalone native screenshots saved",
+  "actualActions": [
+    "selected handled filter",
+    "typed ASCII nonmatching search",
+    "navigated to Settings",
+    "released one foreground notification gate",
+    "queried real NotificationCenter UI",
+    "tried official Fn-N; CUA returned keyNotFound(fn)",
+    "ControlCenter CUA observation timed out; PID437 remained alive, no restart",
+    "returned to inbox, cleared filter/search and paged to4/4",
+    "verified chat0/request prefix71V0lClw",
+    "approved synthetic field",
+    "verified pending24/handled1/approved detail",
+    "revoked synthetic grant and verified revoked detail",
+    "actual Command-Q exit"
+  ],
+  "negativeCountBeforeFix": {
+    "all": 0,
+    "pending": 25,
+    "handled": -25,
+    "selectedFilter": "handled"
+  },
+  "manualFallback": {
+    "targetRequestId": "71V0lClwI9G_y3ReU8fPTc7gZgYO3wBF8ejt3ttV5ZA=",
+    "page": "4/4",
+    "total": 25,
+    "pendingAfter": 24,
+    "handledAfter": 1,
+    "finalState": "revoked"
+  },
+  "chineseInput": "CUA typeText Chinese label left only0; paste did not produce the desired query; used real clear and paging instead, no IME pass claimed",
+  "unrelatedSystemNotificationContentPublished": false,
+  "notificationPreferencesChanged": false,
+  "systemShortcutPreferencesChanged": false,
+  "ordinaryInstallPermissionRequestMade": false,
+  "ordinaryInstallRestoredPage": "backup and recovery"
+}
