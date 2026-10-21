@@ -363,15 +363,19 @@ class _InformationAppState extends State<InformationApp>
       ...WidgetsApp.defaultShortcuts,
       const SearchInboxActivator(): const SearchInboxIntent(),
     },
-    actions: {
-      SearchInboxIntent: CallbackAction<SearchInboxIntent>(
-        onInvoke: (_) {
-          if (_tabs.index == 0) _approvalsKey.currentState?.focusSearch();
-          return null;
-        },
-      ),
-    },
-    builder: (_, child) => DesktopWindowFrame(child: child!),
+    // Keep WidgetsApp's focus, activation and scrolling actions intact. The
+    // application-level actions parameter replaces that entire default map.
+    builder: (_, child) => Actions(
+      actions: {
+        SearchInboxIntent: CallbackAction<SearchInboxIntent>(
+          onInvoke: (_) {
+            if (_tabs.index == 0) _approvalsKey.currentState?.focusSearch();
+            return null;
+          },
+        ),
+      },
+      child: DesktopWindowFrame(child: child!),
+    ),
     home: Builder(
       builder: (context) => DesktopShell(
         service: widget.service,
