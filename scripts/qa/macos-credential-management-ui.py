@@ -7,6 +7,8 @@ render captures, not proof of physical panels, keyboard input or visible CUA.
 import argparse
 import hashlib
 import json
+import os
+import signal
 from pathlib import Path
 import queue
 import re
@@ -23,6 +25,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('output', type=Path)
     parser.add_argument('--delivery', type=Path, required=True)
+    parser.add_argument('--files', action='store_true', help='Opaque file credentials: 1 MiB import, 1 byte rotation and persistent management lifecycle')
     args = parser.parse_args()
     output = args.output.resolve(); output.relative_to(ROOT / 'build')
     output.mkdir(parents=True, exist_ok=False)
@@ -33,7 +36,7 @@ def main():
     assert hashlib.sha256(cli.read_bytes()).hexdigest() == entry['sha256']
     owner = uuid.uuid4().hex
     state = {'complete': False, 'productSource': manifest['sourceCommit'],
-             'cliSha256': entry['sha256'], 'phases': []}
+             'cliSha256': entry['sha256'], 'phases': [], 'fileMode': args.files}
     state['appBaseCommit'] = subprocess.check_output(
         ['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip()
     state['worktreeStatus'] = subprocess.check_output(
@@ -46,6 +49,7 @@ def main():
                  'apps/desktop/lib/credentials.dart',
                  'apps/desktop/lib/credential_management.dart',
                  'apps/desktop/lib/credential_dialogs.dart',
+                 'apps/desktop/lib/credential_files.dart',
                  'apps/desktop/lib/information_workspace.dart',
                  'apps/desktop/lib/library.dart',
                  'apps/desktop/lib/main.dart',
@@ -87,7 +91,8 @@ def main():
         with log.open('wb') as stream:
             flutter = subprocess.Popen([str(ROOT/'scripts/dev-macos.sh'), 'flutter', 'test', '--no-pub',
                 'integration_test/macos_credential_management_native_test.dart', '-d', 'macos',
-                f'--dart-define=MAC_QA_OWNER={owner}'], cwd=ROOT/'apps/desktop', stdout=stream, stderr=subprocess.STDOUT)
+                f'--dart-define=MAC_QA_OWNER={owner}',
+                f'--dart-define=MAC_QA_FILE_CREDENTIAL={str(args.files).lower()}'], cwd=ROOT/'apps/desktop', stdout=stream, stderr=subprocess.STDOUT, start_new_session=True)
         def locate():
             matches = re.findall(r'MAC_CREDENTIAL_MANAGEMENT_ROOT=([^\r\n]+)', log.read_text(errors='replace'))
             if not matches: return None
@@ -122,8 +127,8 @@ def main():
             def checked(data,expected):
                 value=command(data)
                 assert value.get('status')==expected,(data['command'],value.get('status'),value.get('errorCode'))
-                encoded=json.dumps(value)
-                for secret in ['synthetic-native-secret-one','synthetic-native-secret-two','private-native-credential-note','private-linked-value']:
+                encoded=json.dumps(value,ensure_ascii=False)
+                for secret in ['synthetic-native-secret-one','synthetic-native-secret-two','private-native-credential-note','private-linked-value','私有凭据','私有空文件','私有超限文件','私有链接',str(directory)]:
                     assert secret not in encoded,'Private fixture content leaked'
                 checks.append({'command':data['command'],'status':value['status'],'privateFixtureContentAbsent':True})
                 return value
@@ -132,11 +137,12 @@ def main():
             else:
                 version,visible,availability=expectations[name]
                 credential=phase['credentialId']
+                if args.files: assert phase['byteLength']==(1 if version==2 else 1048576)
                 assert phase['version']==version and phase['catalogVisible']==visible and phase['availability']==availability
                 entries=checked({'command':'credential-catalog'},'ok')['credentials']
                 assert len(entries)==int(visible)
                 if visible:
-                    assert entries[0]=={'credentialId':credential,'name':'Mac reviewed token','publicPurpose':'Synthetic public token purpose','form':'string','version':version,'availability':availability}
+                    assert entries[0]=={'credentialId':credential,'name':'Mac reviewed file' if args.files else 'Mac reviewed token','publicPurpose':'Synthetic public file purpose' if args.files else 'Synthetic public token purpose','form':'file' if args.files else 'string','version':version,'availability':availability}
                 checks.append({'catalogCount':len(entries),'expectedVersion':version,'expectedAvailability':availability})
                 catalog=checked({'command':'catalog'},'ok')
                 assert catalog['total']==1
@@ -149,8 +155,9 @@ def main():
                 elif version>1:code='credential_version_changed';requested_version=version-1
                 if code:
                     expected='revoked' if availability in ['disabled','deleted'] else 'expired' if availability=='expired' else 'conflict' if code=='credential_version_changed' else 'invalid_request'
+                    launch = ({'receiver':'ssh_identity','executable':'/usr/bin/false','argv':['-T','-i',{'file':'token'},'fixture@127.0.0.1','true'],'cwd':'/tmp','env':{}} if args.files else {'receiver':'gh_token','executable':'/usr/bin/false','argv':['repo','view','synthetic/project'],'cwd':'/tmp','env':{'GH_TOKEN':{'secret':'token'}}})
                     denied=checked({'command':'request-use','protocolVersion':2,'purpose':'Synthetic ineligible management probe','credentials':[{'alias':'token','credentialId':credential,'version':requested_version}],
-                        'launch':{'receiver':'gh_token','executable':'/usr/bin/false','argv':['repo','view','synthetic/project'],'cwd':'/tmp','env':{'GH_TOKEN':{'secret':'token'}}}},expected)
+                        'launch':launch},expected)
                     assert denied['errorCode']==code and denied.get('operationClaimed') is False
                     checks.append({'eligibilityError':code,'operationClaimed':False})
             state['phases'].append({'phase':name,'checks':checks})
@@ -174,6 +181,14 @@ def main():
         if 'flutter' in locals() and flutter.poll() is None:
             flutter.terminate(); flutter.wait(timeout=15)
             state['forcedFailedRunCleanup']=True;state['complete']=False
+        if 'flutter' in locals():
+            try:
+                os.killpg(flutter.pid, 0)
+            except ProcessLookupError:
+                state['flutterProcessGroupRemaining']=False
+            else:
+                os.killpg(flutter.pid, signal.SIGTERM)
+                state['forcedProcessGroupCleanup']=True;state['complete']=False
         if directory:
             assert not directory.is_symlink() and (directory/'.qa-owner').read_text()==owner
             for p in directory.iterdir():

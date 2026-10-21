@@ -35,6 +35,7 @@ void main() {
       await File('${root.path}/.qa-owner').writeAsString(marker);
       debugPrint('MAC_ORGANIZATION_ROOT=${root.path}');
       final semantics = NativeSemanticsLifetime(tester);
+      tester.testTextInput.register();
       final shadows = debugDisableShadows;
       debugDisableShadows = false;
       final keys = _Keys();
@@ -53,6 +54,7 @@ void main() {
         await service.close();
         await repository.close();
         semantics.finishAfterUnmount();
+        tester.testTextInput.unregister();
         tester.view.resetPhysicalSize();
         tester.view.resetDevicePixelRatio();
         debugDisableShadows = shadows;
