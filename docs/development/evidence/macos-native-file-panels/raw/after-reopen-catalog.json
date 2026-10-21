@@ -1,0 +1,50 @@
+{
+  "catalog": {
+    "status": "ok",
+    "items": [
+      {
+        "id": "3hXK-XGDA8Vx2tHROj9zWd85S_4FOEiTzT80sp-SI3Y=",
+        "version": 1,
+        "name": "Synthetic Mac server",
+        "description": "Codex acceptance only",
+        "directoryId": null,
+        "tagIds": [],
+        "fields": [
+          {
+            "id": "BOMjS6a7o4ktBKtZ3HTuJNACY-GMLqPjGNcCWuQOPbA=",
+            "name": "Address",
+            "description": "May be approved",
+            "kind": "structured"
+          },
+          {
+            "id": "3nvdyOO3PN1rKF0MT0yFsL7BNpX3utRGurqvAH9hkkk=",
+            "name": "Username",
+            "description": "Remain unapproved",
+            "kind": "structured"
+          }
+        ]
+      },
+      {
+        "id": "mObTJ_SIL0awuy5_9eZMbpurEZhdHQJ6keP_HzDRiCM=",
+        "version": 2,
+        "name": "Synthetic ordinary file",
+        "description": "Codex acceptance only",
+        "directoryId": null,
+        "tagIds": [],
+        "fields": [
+          {
+            "id": "hxL0Vw5ZsZh8XRTiuLWY1DdLYc6KgAW9PvB5LDvh7NA=",
+            "name": "Attachment",
+            "description": "Synthetic bytes",
+            "kind": "file"
+          }
+        ]
+      }
+    ],
+    "total": 2,
+    "offset": 0,
+    "nextOffset": null
+  },
+  "unchangedFromBeforeReopen": true,
+  "exitCode": 0
+}
