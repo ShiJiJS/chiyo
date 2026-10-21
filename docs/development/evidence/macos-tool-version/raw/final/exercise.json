@@ -1,0 +1,605 @@
+{
+  "exitCode": 0,
+  "mode": "exercise",
+  "complete": true,
+  "systemKeychainUsed": false,
+  "commands": [
+    {
+      "input": {
+        "command": "request-use",
+        "protocolVersion": 2,
+        "purpose": "Mac 版本基线",
+        "credentials": [
+          {
+            "alias": "fixture",
+            "credentialId": "6K0XpPy7Rcym4puatdk4Kq47Sfe1Y9geMLWMMKQUq68=",
+            "version": 1
+          }
+        ],
+        "launch": {
+          "receiver": "gh_token",
+          "executable": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue44-tool-version-ui-2/source/apps/desktop/build/relocated/工具 版本测试/info_desktop.app/Contents/Resources/QA/mutable/bin/gh",
+          "argv": [
+            "api",
+            "user",
+            "--method",
+            "GET"
+          ],
+          "cwd": "/Users/jiangxinyi/Library/Containers/org.shijijs.agent-info-manage.qa.tool-version.146474335bf14c7fbdd600e87ac81100/Data/tmp/aim-tool-version-IFK266",
+          "env": {
+            "GH_TOKEN": {
+              "secret": "fixture"
+            }
+          }
+        }
+      },
+      "output": {
+        "protocolVersion": 2,
+        "status": "pending",
+        "requestId": "eWCGmCDn3qQJM-Gt7hUpgN8VQUGp3lKNQxH3hHRRO6o=",
+        "createdAt": "2026-10-21T19:23:17.593Z",
+        "requestExpiresAt": "2026-10-21T19:53:17.593Z",
+        "planHash": "sha256:84a5afe7c3b0e9b2b303ebb2c368d5b31c89e29ff3308b3931b63353a7ee617c"
+      }
+    },
+    {
+      "input": {
+        "command": "run-use",
+        "protocolVersion": 2,
+        "requestId": "eWCGmCDn3qQJM-Gt7hUpgN8VQUGp3lKNQxH3hHRRO6o=",
+        "operationId": "version-baseline",
+        "launch": {
+          "receiver": "gh_token",
+          "executable": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue44-tool-version-ui-2/source/apps/desktop/build/relocated/工具 版本测试/info_desktop.app/Contents/Resources/QA/mutable/bin/gh",
+          "argv": [
+            "api",
+            "user",
+            "--method",
+            "GET"
+          ],
+          "cwd": "/Users/jiangxinyi/Library/Containers/org.shijijs.agent-info-manage.qa.tool-version.146474335bf14c7fbdd600e87ac81100/Data/tmp/aim-tool-version-IFK266",
+          "env": {
+            "GH_TOKEN": {
+              "secret": "fixture"
+            }
+          }
+        }
+      },
+      "output": {
+        "protocolVersion": 2,
+        "status": "accepted",
+        "requestId": "eWCGmCDn3qQJM-Gt7hUpgN8VQUGp3lKNQxH3hHRRO6o=",
+        "executionId": "8QysFwIouaH4rbSH2iU86jRoMSUkVY4uJqYmHQFX0T8=",
+        "operationId": "version-baseline",
+        "operationClaimed": true,
+        "duplicate": false,
+        "grantState": "available",
+        "processStarted": false,
+        "executionState": "preparing"
+      }
+    },
+    {
+      "input": {
+        "command": "run-use",
+        "protocolVersion": 2,
+        "requestId": "eWCGmCDn3qQJM-Gt7hUpgN8VQUGp3lKNQxH3hHRRO6o=",
+        "operationId": "version-baseline",
+        "launch": {
+          "receiver": "gh_token",
+          "executable": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue44-tool-version-ui-2/source/apps/desktop/build/relocated/工具 版本测试/info_desktop.app/Contents/Resources/QA/mutable/bin/gh",
+          "argv": [
+            "api",
+            "user",
+            "--method",
+            "GET"
+          ],
+          "cwd": "/Users/jiangxinyi/Library/Containers/org.shijijs.agent-info-manage.qa.tool-version.146474335bf14c7fbdd600e87ac81100/Data/tmp/aim-tool-version-IFK266",
+          "env": {
+            "GH_TOKEN": {
+              "secret": "fixture"
+            }
+          }
+        }
+      },
+      "output": {
+        "protocolVersion": 2,
+        "operationId": "version-baseline",
+        "createdAt": "2026-10-21T19:24:06.232Z",
+        "status": "ok",
+        "executionId": "8QysFwIouaH4rbSH2iU86jRoMSUkVY4uJqYmHQFX0T8=",
+        "requestId": "eWCGmCDn3qQJM-Gt7hUpgN8VQUGp3lKNQxH3hHRRO6o=",
+        "executionState": "exited",
+        "operationClaimed": true,
+        "processStarted": true,
+        "exitCode": 1,
+        "errorCode": null,
+        "startedAt": "2026-10-21T19:24:06.599Z",
+        "finishedAt": "2026-10-21T19:24:07.809Z",
+        "cleanupState": "not_needed",
+        "outputAvailable": false,
+        "outputTruncated": false,
+        "grantState": "available",
+        "duplicate": true
+      }
+    },
+    {
+      "input": {
+        "command": "run-use",
+        "protocolVersion": 2,
+        "requestId": "eWCGmCDn3qQJM-Gt7hUpgN8VQUGp3lKNQxH3hHRRO6o=",
+        "operationId": "version-unclaimed-retry",
+        "launch": {
+          "receiver": "gh_token",
+          "executable": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue44-tool-version-ui-2/source/apps/desktop/build/relocated/工具 版本测试/info_desktop.app/Contents/Resources/QA/upgraded/bin/gh",
+          "argv": [
+            "api",
+            "user",
+            "--method",
+            "GET"
+          ],
+          "cwd": "/Users/jiangxinyi/Library/Containers/org.shijijs.agent-info-manage.qa.tool-version.146474335bf14c7fbdd600e87ac81100/Data/tmp/aim-tool-version-IFK266",
+          "env": {
+            "GH_TOKEN": {
+              "secret": "fixture"
+            }
+          }
+        }
+      },
+      "output": {
+        "protocolVersion": 2,
+        "status": "invalid_request",
+        "errorCode": "unsupported_tool_version",
+        "retryable": false,
+        "operationClaimed": false
+      }
+    },
+    {
+      "input": {
+        "command": "request-use",
+        "protocolVersion": 2,
+        "purpose": "未验收的新 GH 版本",
+        "credentials": [
+          {
+            "alias": "fixture",
+            "credentialId": "6K0XpPy7Rcym4puatdk4Kq47Sfe1Y9geMLWMMKQUq68=",
+            "version": 1
+          }
+        ],
+        "launch": {
+          "receiver": "gh_token",
+          "executable": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue44-tool-version-ui-2/source/apps/desktop/build/relocated/工具 版本测试/info_desktop.app/Contents/Resources/QA/upgraded/bin/gh",
+          "argv": [
+            "api",
+            "user",
+            "--method",
+            "GET"
+          ],
+          "cwd": "/Users/jiangxinyi/Library/Containers/org.shijijs.agent-info-manage.qa.tool-version.146474335bf14c7fbdd600e87ac81100/Data/tmp/aim-tool-version-IFK266",
+          "env": {
+            "GH_TOKEN": {
+              "secret": "fixture"
+            }
+          }
+        }
+      },
+      "output": {
+        "protocolVersion": 2,
+        "status": "invalid_request",
+        "errorCode": "unsupported_tool_version",
+        "retryable": false,
+        "operationClaimed": false
+      }
+    },
+    {
+      "input": {
+        "command": "run-use",
+        "protocolVersion": 2,
+        "requestId": "eWCGmCDn3qQJM-Gt7hUpgN8VQUGp3lKNQxH3hHRRO6o=",
+        "operationId": "version-unclaimed-retry",
+        "launch": {
+          "receiver": "gh_token",
+          "executable": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue44-tool-version-ui-2/source/apps/desktop/build/relocated/工具 版本测试/info_desktop.app/Contents/Resources/QA/mutable/bin/gh",
+          "argv": [
+            "api",
+            "user",
+            "--method",
+            "GET"
+          ],
+          "cwd": "/Users/jiangxinyi/Library/Containers/org.shijijs.agent-info-manage.qa.tool-version.146474335bf14c7fbdd600e87ac81100/Data/tmp/aim-tool-version-IFK266",
+          "env": {
+            "GH_TOKEN": {
+              "secret": "fixture"
+            }
+          }
+        }
+      },
+      "output": {
+        "protocolVersion": 2,
+        "status": "accepted",
+        "requestId": "eWCGmCDn3qQJM-Gt7hUpgN8VQUGp3lKNQxH3hHRRO6o=",
+        "executionId": "jy2FsaEYtHojtQtM0hGxCZ3PMwuN2y38PSA4EyOIl70=",
+        "operationId": "version-unclaimed-retry",
+        "operationClaimed": true,
+        "duplicate": false,
+        "grantState": "available",
+        "processStarted": false,
+        "executionState": "preparing"
+      }
+    },
+    {
+      "input": {
+        "command": "run-use",
+        "protocolVersion": 2,
+        "requestId": "eWCGmCDn3qQJM-Gt7hUpgN8VQUGp3lKNQxH3hHRRO6o=",
+        "operationId": "version-unclaimed-retry",
+        "launch": {
+          "receiver": "gh_token",
+          "executable": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue44-tool-version-ui-2/source/apps/desktop/build/relocated/工具 版本测试/info_desktop.app/Contents/Resources/QA/mutable/bin/gh",
+          "argv": [
+            "api",
+            "user",
+            "--method",
+            "GET"
+          ],
+          "cwd": "/Users/jiangxinyi/Library/Containers/org.shijijs.agent-info-manage.qa.tool-version.146474335bf14c7fbdd600e87ac81100/Data/tmp/aim-tool-version-IFK266",
+          "env": {
+            "GH_TOKEN": {
+              "secret": "fixture"
+            }
+          }
+        }
+      },
+      "output": {
+        "protocolVersion": 2,
+        "operationId": "version-unclaimed-retry",
+        "createdAt": "2026-10-21T19:24:11.388Z",
+        "status": "ok",
+        "executionId": "jy2FsaEYtHojtQtM0hGxCZ3PMwuN2y38PSA4EyOIl70=",
+        "requestId": "eWCGmCDn3qQJM-Gt7hUpgN8VQUGp3lKNQxH3hHRRO6o=",
+        "executionState": "exited",
+        "operationClaimed": true,
+        "processStarted": true,
+        "exitCode": 1,
+        "errorCode": null,
+        "startedAt": "2026-10-21T19:24:11.751Z",
+        "finishedAt": "2026-10-21T19:24:12.962Z",
+        "cleanupState": "not_needed",
+        "outputAvailable": false,
+        "outputTruncated": false,
+        "grantState": "available",
+        "duplicate": true
+      }
+    },
+    {
+      "input": {
+        "command": "run-use",
+        "protocolVersion": 2,
+        "requestId": "eWCGmCDn3qQJM-Gt7hUpgN8VQUGp3lKNQxH3hHRRO6o=",
+        "operationId": "version-image-race",
+        "launch": {
+          "receiver": "gh_token",
+          "executable": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue44-tool-version-ui-2/source/apps/desktop/build/relocated/工具 版本测试/info_desktop.app/Contents/Resources/QA/mutable/bin/gh",
+          "argv": [
+            "api",
+            "user",
+            "--method",
+            "GET"
+          ],
+          "cwd": "/Users/jiangxinyi/Library/Containers/org.shijijs.agent-info-manage.qa.tool-version.146474335bf14c7fbdd600e87ac81100/Data/tmp/aim-tool-version-IFK266",
+          "env": {
+            "GH_TOKEN": {
+              "secret": "fixture"
+            }
+          }
+        }
+      },
+      "output": {
+        "protocolVersion": 2,
+        "status": "accepted",
+        "requestId": "eWCGmCDn3qQJM-Gt7hUpgN8VQUGp3lKNQxH3hHRRO6o=",
+        "executionId": "mR_qBY2fQziH-ev85E0B5pbCMhNJEmIizj-jf76nXGs=",
+        "operationId": "version-image-race",
+        "operationClaimed": true,
+        "duplicate": false,
+        "grantState": "available",
+        "processStarted": false,
+        "executionState": "preparing"
+      }
+    },
+    {
+      "input": {
+        "command": "run-use",
+        "protocolVersion": 2,
+        "requestId": "eWCGmCDn3qQJM-Gt7hUpgN8VQUGp3lKNQxH3hHRRO6o=",
+        "operationId": "version-image-race",
+        "launch": {
+          "receiver": "gh_token",
+          "executable": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue44-tool-version-ui-2/source/apps/desktop/build/relocated/工具 版本测试/info_desktop.app/Contents/Resources/QA/mutable/bin/gh",
+          "argv": [
+            "api",
+            "user",
+            "--method",
+            "GET"
+          ],
+          "cwd": "/Users/jiangxinyi/Library/Containers/org.shijijs.agent-info-manage.qa.tool-version.146474335bf14c7fbdd600e87ac81100/Data/tmp/aim-tool-version-IFK266",
+          "env": {
+            "GH_TOKEN": {
+              "secret": "fixture"
+            }
+          }
+        }
+      },
+      "output": {
+        "protocolVersion": 2,
+        "operationId": "version-image-race",
+        "createdAt": "2026-10-21T19:24:15.273Z",
+        "status": "ok",
+        "executionId": "mR_qBY2fQziH-ev85E0B5pbCMhNJEmIizj-jf76nXGs=",
+        "requestId": "eWCGmCDn3qQJM-Gt7hUpgN8VQUGp3lKNQxH3hHRRO6o=",
+        "executionState": "prepare_failed",
+        "operationClaimed": true,
+        "processStarted": false,
+        "exitCode": null,
+        "errorCode": "executable_changed",
+        "startedAt": null,
+        "finishedAt": "2026-10-21T19:24:15.276Z",
+        "cleanupState": "not_needed",
+        "outputAvailable": false,
+        "outputTruncated": false,
+        "grantState": "available",
+        "duplicate": true
+      }
+    },
+    {
+      "input": {
+        "command": "run-use",
+        "protocolVersion": 2,
+        "requestId": "eWCGmCDn3qQJM-Gt7hUpgN8VQUGp3lKNQxH3hHRRO6o=",
+        "operationId": "version-image-race",
+        "launch": {
+          "receiver": "gh_token",
+          "executable": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue44-tool-version-ui-2/source/apps/desktop/build/relocated/工具 版本测试/info_desktop.app/Contents/Resources/QA/mutable/bin/gh",
+          "argv": [
+            "api",
+            "user",
+            "--method",
+            "GET"
+          ],
+          "cwd": "/Users/jiangxinyi/Library/Containers/org.shijijs.agent-info-manage.qa.tool-version.146474335bf14c7fbdd600e87ac81100/Data/tmp/aim-tool-version-IFK266",
+          "env": {
+            "GH_TOKEN": {
+              "secret": "fixture"
+            }
+          }
+        }
+      },
+      "output": {
+        "protocolVersion": 2,
+        "operationId": "version-image-race",
+        "createdAt": "2026-10-21T19:24:15.273Z",
+        "status": "ok",
+        "executionId": "mR_qBY2fQziH-ev85E0B5pbCMhNJEmIizj-jf76nXGs=",
+        "requestId": "eWCGmCDn3qQJM-Gt7hUpgN8VQUGp3lKNQxH3hHRRO6o=",
+        "executionState": "prepare_failed",
+        "operationClaimed": true,
+        "processStarted": false,
+        "exitCode": null,
+        "errorCode": "executable_changed",
+        "startedAt": null,
+        "finishedAt": "2026-10-21T19:24:15.276Z",
+        "cleanupState": "not_needed",
+        "outputAvailable": false,
+        "outputTruncated": false,
+        "grantState": "available",
+        "duplicate": true
+      }
+    },
+    {
+      "input": {
+        "command": "run-use",
+        "protocolVersion": 2,
+        "requestId": "eWCGmCDn3qQJM-Gt7hUpgN8VQUGp3lKNQxH3hHRRO6o=",
+        "operationId": "version-after-revoke",
+        "launch": {
+          "receiver": "gh_token",
+          "executable": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue44-tool-version-ui-2/source/apps/desktop/build/relocated/工具 版本测试/info_desktop.app/Contents/Resources/QA/mutable/bin/gh",
+          "argv": [
+            "api",
+            "user",
+            "--method",
+            "GET"
+          ],
+          "cwd": "/Users/jiangxinyi/Library/Containers/org.shijijs.agent-info-manage.qa.tool-version.146474335bf14c7fbdd600e87ac81100/Data/tmp/aim-tool-version-IFK266",
+          "env": {
+            "GH_TOKEN": {
+              "secret": "fixture"
+            }
+          }
+        }
+      },
+      "output": {
+        "protocolVersion": 2,
+        "status": "revoked",
+        "errorCode": "grant_revoked",
+        "retryable": false,
+        "operationClaimed": false
+      }
+    },
+    {
+      "input": {
+        "command": "request-use",
+        "protocolVersion": 2,
+        "purpose": "Mac 恢复支持版本后重审",
+        "credentials": [
+          {
+            "alias": "fixture",
+            "credentialId": "6K0XpPy7Rcym4puatdk4Kq47Sfe1Y9geMLWMMKQUq68=",
+            "version": 1
+          }
+        ],
+        "launch": {
+          "receiver": "gh_token",
+          "executable": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue44-tool-version-ui-2/source/apps/desktop/build/relocated/工具 版本测试/info_desktop.app/Contents/Resources/QA/mutable/bin/gh",
+          "argv": [
+            "api",
+            "user",
+            "--method",
+            "GET"
+          ],
+          "cwd": "/Users/jiangxinyi/Library/Containers/org.shijijs.agent-info-manage.qa.tool-version.146474335bf14c7fbdd600e87ac81100/Data/tmp/aim-tool-version-IFK266",
+          "env": {
+            "GH_TOKEN": {
+              "secret": "fixture"
+            }
+          }
+        }
+      },
+      "output": {
+        "protocolVersion": 2,
+        "status": "pending",
+        "requestId": "J8dwI1J7fNby1vu85uCaY7tN0Rs7fewPdv_-vsO-7ew=",
+        "createdAt": "2026-10-21T19:24:19.493Z",
+        "requestExpiresAt": "2026-10-21T19:54:19.493Z",
+        "planHash": "sha256:84a5afe7c3b0e9b2b303ebb2c368d5b31c89e29ff3308b3931b63353a7ee617c"
+      }
+    },
+    {
+      "input": {
+        "command": "run-use",
+        "protocolVersion": 2,
+        "requestId": "J8dwI1J7fNby1vu85uCaY7tN0Rs7fewPdv_-vsO-7ew=",
+        "operationId": "version-fresh-recheck",
+        "launch": {
+          "receiver": "gh_token",
+          "executable": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue44-tool-version-ui-2/source/apps/desktop/build/relocated/工具 版本测试/info_desktop.app/Contents/Resources/QA/mutable/bin/gh",
+          "argv": [
+            "api",
+            "user",
+            "--method",
+            "GET"
+          ],
+          "cwd": "/Users/jiangxinyi/Library/Containers/org.shijijs.agent-info-manage.qa.tool-version.146474335bf14c7fbdd600e87ac81100/Data/tmp/aim-tool-version-IFK266",
+          "env": {
+            "GH_TOKEN": {
+              "secret": "fixture"
+            }
+          }
+        }
+      },
+      "output": {
+        "protocolVersion": 2,
+        "status": "accepted",
+        "requestId": "J8dwI1J7fNby1vu85uCaY7tN0Rs7fewPdv_-vsO-7ew=",
+        "executionId": "2jzCjdkjMYs_zOfe6Dw_-j-6y3NAfftYwNVF2Ydkdzw=",
+        "operationId": "version-fresh-recheck",
+        "operationClaimed": true,
+        "duplicate": false,
+        "grantState": "available",
+        "processStarted": false,
+        "executionState": "preparing"
+      }
+    },
+    {
+      "input": {
+        "command": "run-use",
+        "protocolVersion": 2,
+        "requestId": "J8dwI1J7fNby1vu85uCaY7tN0Rs7fewPdv_-vsO-7ew=",
+        "operationId": "version-fresh-recheck",
+        "launch": {
+          "receiver": "gh_token",
+          "executable": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue44-tool-version-ui-2/source/apps/desktop/build/relocated/工具 版本测试/info_desktop.app/Contents/Resources/QA/mutable/bin/gh",
+          "argv": [
+            "api",
+            "user",
+            "--method",
+            "GET"
+          ],
+          "cwd": "/Users/jiangxinyi/Library/Containers/org.shijijs.agent-info-manage.qa.tool-version.146474335bf14c7fbdd600e87ac81100/Data/tmp/aim-tool-version-IFK266",
+          "env": {
+            "GH_TOKEN": {
+              "secret": "fixture"
+            }
+          }
+        }
+      },
+      "output": {
+        "protocolVersion": 2,
+        "operationId": "version-fresh-recheck",
+        "createdAt": "2026-10-21T19:25:08.862Z",
+        "status": "ok",
+        "executionId": "2jzCjdkjMYs_zOfe6Dw_-j-6y3NAfftYwNVF2Ydkdzw=",
+        "requestId": "J8dwI1J7fNby1vu85uCaY7tN0Rs7fewPdv_-vsO-7ew=",
+        "executionState": "exited",
+        "operationClaimed": true,
+        "processStarted": true,
+        "exitCode": 1,
+        "errorCode": null,
+        "startedAt": "2026-10-21T19:25:09.237Z",
+        "finishedAt": "2026-10-21T19:25:10.665Z",
+        "cleanupState": "not_needed",
+        "outputAvailable": false,
+        "outputTruncated": false,
+        "grantState": "available",
+        "duplicate": true
+      }
+    }
+  ],
+  "executions": [
+    {
+      "operation": "version-baseline",
+      "executionId": "8QysFwIouaH4rbSH2iU86jRoMSUkVY4uJqYmHQFX0T8=",
+      "executionState": "exited",
+      "processStarted": true,
+      "exitCode": 1,
+      "errorCode": null,
+      "output": "{\r\n  \"message\": \"Bad credentials\",\r\n  \"documentation_url\": \"https://docs.github.com/rest\",\r\n  \"status\": \"401\"\r\n}gh: Bad credentials (HTTP 401)\n",
+      "cleanupState": "not_needed",
+      "duplicateStable": true
+    },
+    {
+      "operation": "version-unclaimed-retry",
+      "executionId": "jy2FsaEYtHojtQtM0hGxCZ3PMwuN2y38PSA4EyOIl70=",
+      "executionState": "exited",
+      "processStarted": true,
+      "exitCode": 1,
+      "errorCode": null,
+      "output": "{\r\n  \"message\": \"Bad credentials\",\r\n  \"documentation_url\": \"https://docs.github.com/rest\",\r\n  \"status\": \"401\"\r\n}gh: Bad credentials (HTTP 401)\n",
+      "cleanupState": "not_needed",
+      "duplicateStable": true
+    },
+    {
+      "operation": "version-image-race",
+      "executionId": "mR_qBY2fQziH-ev85E0B5pbCMhNJEmIizj-jf76nXGs=",
+      "executionState": "prepare_failed",
+      "processStarted": false,
+      "exitCode": null,
+      "errorCode": "executable_changed",
+      "output": "",
+      "cleanupState": "not_needed",
+      "duplicateStable": true
+    },
+    {
+      "operation": "version-fresh-recheck",
+      "executionId": "2jzCjdkjMYs_zOfe6Dw_-j-6y3NAfftYwNVF2Ydkdzw=",
+      "executionState": "exited",
+      "processStarted": true,
+      "exitCode": 1,
+      "errorCode": null,
+      "output": "{\r\n  \"message\": \"Bad credentials\",\r\n  \"documentation_url\": \"https://docs.github.com/rest\",\r\n  \"status\": \"401\"\r\n}gh: Bad credentials (HTTP 401)\n",
+      "cleanupState": "not_needed",
+      "duplicateStable": true
+    }
+  ],
+  "actualUpgradedProbe": "unsupported_tool_version",
+  "raceFrozenIdentity": {
+    "path": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue44-tool-version-ui-2/source/apps/desktop/build/relocated/工具 版本测试/info_desktop.app/Contents/Resources/QA/mutable/bin/gh",
+    "byteLength": 39834784,
+    "modifiedMicros": 1790706718000000,
+    "sha256": "sha256:8a4258433c81106343144857750316241759d06dcf16265cf3c4864a8f2f2ad6"
+  },
+  "barrier": "restore-supported-tool",
+  "firstGrantDeadlineUnchanged": true,
+  "credentialRequestCount": 2,
+  "libraryCloses": 1,
+  "flutterErrors": 0
+}
