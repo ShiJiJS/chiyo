@@ -202,11 +202,17 @@ Future<void> main(List<String> args) async {
         final original = await File(
           '${root.path}/source-${version.reference.attachmentVersion}.bin',
         ).readAsBytes();
-        final actual = await repository.readInformationAttachmentChunk(
-          version.reference,
-          0,
-          original.length,
-        );
+        final actual = <int>[];
+        for (var offset = 0; offset < original.length; offset += 64 * 1024) {
+          final remaining = original.length - offset;
+          actual.addAll(
+            await repository.readInformationAttachmentChunk(
+              version.reference,
+              offset,
+              remaining > 64 * 1024 ? 64 * 1024 : remaining,
+            ),
+          );
+        }
         if (sha256.convert(original) != sha256.convert(actual))
           throw StateError('Original changed');
       }
@@ -236,6 +242,8 @@ Future<void> main(List<String> args) async {
       jsonEncode({
         'status': 'failed',
         'errorType': error.runtimeType.toString(),
+        if (error is AccessFailure) 'accessFailure': error.status,
+        if (error is StateError) 'checkFailure': error.message.toString(),
         if (error is StorageFailure) 'storageFailure': error.code,
       }),
     );
