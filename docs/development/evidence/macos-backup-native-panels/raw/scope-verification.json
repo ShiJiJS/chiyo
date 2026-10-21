@@ -1,0 +1,15 @@
+{
+  "productionBase": "01c1f141d876a9d3c49c61c7fc3d1e572c432c5a",
+  "productionFilesCompared": 152,
+  "allCurrentAndFixedProductionBytesMatch": true,
+  "exportsRemoved": true,
+  "controllerRemoved": true,
+  "generatedAppAndCachesRemoved": true,
+  "sensitiveFilesExcluded": [
+    "controller.json",
+    "recovery key",
+    "backup",
+    "database"
+  ],
+  "scrollAndKeyboardNotAccepted": true
+}

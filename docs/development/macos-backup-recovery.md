@@ -5,6 +5,10 @@
 没有修改生产备份格式或 Windows 源码。源码及产物摘要见
 [证据清单](evidence/macos-backup-recovery/verification.json)。
 
+后续已于 2026-10-21 解锁后完成真实系统面板、同卷暂存、同名保护和确认恢复，
+见 [真实面板验收](macos-backup-native-panels.md)。下文“面板尚未执行”保留的是
+此前各轮当时的边界，不再代表该独立面板验收的最新状态；最终整包联合验收仍待。
+
 ## 补充：真实 Keychain 源密钥丢失后的独立恢复
 
 2026-10-21，QA 源码 `9da5eb1`，未修改生产备份、密钥存储或 Windows 代码。
