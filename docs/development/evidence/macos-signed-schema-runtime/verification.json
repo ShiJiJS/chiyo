@@ -1,0 +1,170 @@
+{
+  "snapshot": "2026-10-21 real signed schema run: first QA failure cleaned; fixed second run seeded real legacy schema20 and awaits owner Keychain Allow",
+  "completeJointAcceptance": false,
+  "legacyCoreStorageCommit": "dbb94ac1427b95c5a7bfee5011e414876c22c63e",
+  "failedPreparedSource": "721c91f",
+  "fixedRuntimeSource": "26da28ffafc3537ad3794d954ce58b12a2968ae2",
+  "productionKeyStoreSha256": "d157f50972cac3da88df60846cc7a634afeaf02e787d1f486effd1fb56634ef4",
+  "firstRun": {
+    "nativeSeedExitCode": 1,
+    "errorType": "UnsupportedError",
+    "reason": "QA attempted fillRange on immutable native key view after shared helper had already cleared its owned mutable copy",
+    "ownedKeyCleanupExitCode": 0,
+    "ownedKeyDeletedAndAbsenceVerified": true,
+    "ownedFixtureRemoved": true,
+    "generatedAppsAndDSYMRemoved": true
+  },
+  "secondRun": {
+    "preparationStagesPassed": 16,
+    "resumeSignaturesPassed": 2,
+    "nativeLegacySeedExitCode": 0,
+    "actualLegacySchema": 20,
+    "actualLegacyMarker": 20,
+    "cipher": "4.19.0 community",
+    "initialCurrentSignatureFailurePreservedLibraryNoEndpointAndNoReplacementKey": true,
+    "actualCUAOwnerAccessButtonPressed": true,
+    "ownerAttemptsAtSnapshot": 1,
+    "ownerDecisionPending": true,
+    "currentPID": 38490,
+    "migrationOldReaderCurrentReopenAndCleanupNotReached": true
+  },
+  "scope": "Dedicated synthetic QA bundle/service/root only; no production Keychain/profile, no fake system decision, no denial prerequisite. This is not the installed4690e79 ordinary app or a released old Mac app. Logs copied while current host waits are snapshots.",
+  "rawFiles": {
+    "raw/failure-1/result.json": {
+      "bytes": 173091,
+      "sha256": "9e06b91e4a660926dc31f83c579c302c27c738e49c7b8e3616568f65cf128c2d"
+    },
+    "raw/failure-1/logs/current-resume-signature.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "raw/failure-1/logs/failure-original-key-cleanup.txt": {
+      "bytes": 281,
+      "sha256": "dbe210fd26adf95481c399f7f4690bd60a587e323ae40d248467c0d6db617a25"
+    },
+    "raw/failure-1/logs/legacy-real-keychain-schema20.txt": {
+      "bytes": 953,
+      "sha256": "d28bad44768c7abe978aadb41ef7db9e0d4dde5fc3942aff70362eb0657cd2a9"
+    },
+    "raw/failure-1/logs/legacy-resume-signature.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "raw/failure-1/logs/restore-prepared-current.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "raw/failure-1/logs/restore-prepared-legacy.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "raw/owner-pending-2/result.json": {
+      "bytes": 166662,
+      "sha256": "50b3d281ea0834bfab6a4dde3c4d917c27bdde96018081d6be3a269ad23299e0"
+    },
+    "raw/owner-pending-2/logs/current-analyze.txt": {
+      "bytes": 96,
+      "sha256": "23d78d9f12385e1af6a015a98b93e08553e3f365d1afe9e0fab8137463e6c050"
+    },
+    "raw/owner-pending-2/logs/current-build.txt": {
+      "bytes": 14467,
+      "sha256": "9d91f59abd5611a33492b866b19e36a4be96525377d562f9188236d0847db521"
+    },
+    "raw/owner-pending-2/logs/current-owner-allowed-migration.txt": {
+      "bytes": 312,
+      "sha256": "0c7b47309531a2e40cde103f5fd794dcb53e720f7ef6dfbe0f38aa7819111804"
+    },
+    "raw/owner-pending-2/logs/current-pub-desktop.txt": {
+      "bytes": 225,
+      "sha256": "140c91be887348ac9d362e6208e5540eb783c747962d3d5de3f7cec67f716bf2"
+    },
+    "raw/owner-pending-2/logs/current-pub-info_cli.txt": {
+      "bytes": 68,
+      "sha256": "d4cb7a3c68b4133b4f6e58c67ff5bfd13725d8021e930388cdc98da8a575919d"
+    },
+    "raw/owner-pending-2/logs/current-pub-info_core.txt": {
+      "bytes": 68,
+      "sha256": "d4cb7a3c68b4133b4f6e58c67ff5bfd13725d8021e930388cdc98da8a575919d"
+    },
+    "raw/owner-pending-2/logs/current-pub-info_storage.txt": {
+      "bytes": 68,
+      "sha256": "d4cb7a3c68b4133b4f6e58c67ff5bfd13725d8021e930388cdc98da8a575919d"
+    },
+    "raw/owner-pending-2/logs/current-resume-signature.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "raw/owner-pending-2/logs/current-signature-details.txt": {
+      "bytes": 1644,
+      "sha256": "fbc1cbbf23ad1d51c809d1d0a2df787e98d96fa5a20b81fdc1e898845d83855a"
+    },
+    "raw/owner-pending-2/logs/current-signature.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "raw/owner-pending-2/logs/legacy-analyze.txt": {
+      "bytes": 96,
+      "sha256": "935808c1371161ef0bd55ddf34e66b4ddf2b737e25903a5fd9dddefb342838f9"
+    },
+    "raw/owner-pending-2/logs/legacy-build.txt": {
+      "bytes": 14449,
+      "sha256": "7dcb7ab0a2dd697218e829547102e12a9398fdbc999f8f715203180989fb05bb"
+    },
+    "raw/owner-pending-2/logs/legacy-pub-desktop.txt": {
+      "bytes": 225,
+      "sha256": "140c91be887348ac9d362e6208e5540eb783c747962d3d5de3f7cec67f716bf2"
+    },
+    "raw/owner-pending-2/logs/legacy-pub-info_core.txt": {
+      "bytes": 68,
+      "sha256": "d4cb7a3c68b4133b4f6e58c67ff5bfd13725d8021e930388cdc98da8a575919d"
+    },
+    "raw/owner-pending-2/logs/legacy-pub-info_storage.txt": {
+      "bytes": 68,
+      "sha256": "d4cb7a3c68b4133b4f6e58c67ff5bfd13725d8021e930388cdc98da8a575919d"
+    },
+    "raw/owner-pending-2/logs/legacy-real-keychain-schema20.txt": {
+      "bytes": 281,
+      "sha256": "5272b26d842416b93aa42ec43816a156188d60ed403fc92d86f94e3d7fccf140"
+    },
+    "raw/owner-pending-2/logs/legacy-resume-signature.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "raw/owner-pending-2/logs/legacy-signature-details.txt": {
+      "bytes": 1643,
+      "sha256": "b2d912a71634c220e406f24219c01978113129788f885471aa2a4687aaa50fd6"
+    },
+    "raw/owner-pending-2/logs/legacy-signature.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "raw/owner-pending-2/logs/legacy-source-archive.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "raw/owner-pending-2/owner-pending-phase.json": {
+      "bytes": 263,
+      "sha256": "4d35d8724852d5d4389c439c51d8a5044f7bfbb61fb86fb0291f9ade74915afd"
+    },
+    "raw/owner-pending-2/current/apps/desktop/integration_test/macos_legacy_keychain_seed.dart": {
+      "bytes": 4580,
+      "sha256": "52ccb67fea2372afd59cfa0340dc24bdafbb90e2872c55a750810a3da769e7e8"
+    },
+    "raw/owner-pending-2/current/apps/desktop/integration_test/macos_schema_keychain_upgrade.dart": {
+      "bytes": 9689,
+      "sha256": "78192673940b3b0e664706f4b56cb6f9a0309ea1f0583ac5967539881afa2d6e"
+    },
+    "raw/owner-pending-2/current/scripts/qa/macos-schema-upgrade-probe.dart": {
+      "bytes": 9396,
+      "sha256": "d7f17104f7a8b7273616e5e9be6012658cf3a70ff0d1ead4af40cc81b1a65518"
+    },
+    "raw/owner-pending-2/current/scripts/qa/macos-schema-keychain.py": {
+      "bytes": 17870,
+      "sha256": "6791eb9dc432f4e71af1338e9ab2fbcd6c68f5f545b2a3f9a045264ed01c536f"
+    },
+    "raw/owner-pending-2/current/apps/desktop/macos/Runner/DatabaseKeyStore.swift": {
+      "bytes": 3084,
+      "sha256": "d157f50972cac3da88df60846cc7a634afeaf02e787d1f486effd1fb56634ef4"
+    }
+  }
+}
