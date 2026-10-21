@@ -14,6 +14,52 @@ Widget host(Widget child) => MaterialApp(
 );
 
 void main() {
+  testWidgets(
+    'popup aligns in an inset navigator such as the Windows title frame',
+    (tester) async {
+      tester.view.physicalSize = const Size(640, 480);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: informationTheme(),
+          builder: (_, child) => Padding(
+            padding: const EdgeInsets.fromLTRB(40, 60, 20, 20),
+            child: child,
+          ),
+          home: Scaffold(
+            body: Align(
+              alignment: Alignment.topLeft,
+              child: DesktopSelect<int>(
+                key: const ValueKey('inset-trigger'),
+                value: 1,
+                items: const [
+                  DropdownMenuItem(value: 1, child: Text('First')),
+                  DropdownMenuItem(value: 2, child: Text('Second')),
+                ],
+                onChanged: (_) {},
+              ),
+            ),
+          ),
+        ),
+      );
+      final trigger = tester.getRect(
+        find.byKey(const ValueKey('inset-trigger')),
+      );
+      await tester.tap(find.text('First'));
+      await tester.pumpAndSettle();
+      final popup = tester.getRect(
+        find.byWidgetPredicate((w) => w is Material && w.elevation == 4),
+      );
+      expect(popup.top, closeTo(trigger.bottom + 6, .01));
+      expect(popup.left, closeTo(trigger.left + 12, .01));
+      expect(popup.right, lessThanOrEqualTo(608));
+      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+      await tester.pumpAndSettle();
+    },
+  );
+
   testWidgets('long menu searches, reports no match, and commits with Enter', (
     tester,
   ) async {
