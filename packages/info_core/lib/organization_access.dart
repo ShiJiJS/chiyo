@@ -209,9 +209,15 @@ extension OwnerOrganization on OwnerAccess {
 
   Future<void> deleteTag(
     String id,
-    int expectedVersion,
-  ) => _serialize(() async {
+    int expectedVersion, {
+    Map<String, int>? reviewedInformation,
+  }) => _serialize(() async {
     final originals = information.where((i) => i.tagIds.contains(id)).toList();
+    if (reviewedInformation != null &&
+        (reviewedInformation.length != originals.length ||
+            originals.any((i) => reviewedInformation[i.id] != i.version))) {
+      throw const AccessFailure('organization_conflict');
+    }
     void validate() {
       if (!serviceAvailable) throw const AccessFailure('service_unavailable');
       final tag = tags.where((t) => t.id == id).firstOrNull;

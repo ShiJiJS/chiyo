@@ -6,6 +6,40 @@ Matcher fails(String status) =>
 
 void main() {
   test(
+    'tag removal rejects a changed impact review without partial cleanup',
+    () async {
+      final service = InformationService(
+        repository: MemoryInformationRepository(),
+      );
+      addTearDown(service.close);
+      final o = service.owner;
+      final tag = await o.createTag('Reviewed');
+      final item = await o.createInformation(
+        'A',
+        '',
+        [const FieldInput('Text', '', 'fake')],
+        tagIds: [tag.id],
+      );
+      final changed = await o.organizeInformation(item.id, tagIds: [tag.id]);
+      await expectLater(
+        o.deleteTag(
+          tag.id,
+          tag.version,
+          reviewedInformation: {item.id: item.version},
+        ),
+        fails('organization_conflict'),
+      );
+      expect(o.tags.single.id, tag.id);
+      expect(o.information.single.tagIds, [tag.id]);
+      await o.deleteTag(
+        tag.id,
+        tag.version,
+        reviewedInformation: {changed.id: changed.version},
+      );
+      expect(o.information.single.tagIds, isEmpty);
+    },
+  );
+  test(
     'single-level names and sibling uniqueness, moves preserve identity',
     () async {
       final service = InformationService(
