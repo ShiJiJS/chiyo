@@ -82,6 +82,9 @@ def main():
         original=probe(old,'old-schema20-create','create');assert original['schema']==original['marker']==20
         db=fixture/'library/library.db'
         before=hashlib.sha256(db.read_bytes()).hexdigest()
+        closed=probe(old,'old-raw-snapshot','snapshot')
+        assert closed['tables']==original['tables'] and closed['schema']==20
+        assert hashlib.sha256(db.read_bytes()).hexdigest()==before
         wrong=probe(new,'wrong-key-refused',wrong=True,expected=1)
         assert wrong['status']=='failed' and wrong['storageFailure']=='library_unavailable'
         assert hashlib.sha256(db.read_bytes()).hexdigest()==before
@@ -103,6 +106,9 @@ def main():
                    if name != 'information_draft_commits')
         assert tables['information_deliveries']['rows']==0
         before=hashlib.sha256(db.read_bytes()).hexdigest()
+        closed=probe(new,'migrated-raw-snapshot','snapshot')
+        assert closed['tables']==migrated['tables'] and closed['schema']==21
+        assert hashlib.sha256(db.read_bytes()).hexdigest()==before
         refused=probe(old,'old-reader-refuses-new-schema',expected=1)
         assert refused['storageFailure']=='unsupported_schema' and hashlib.sha256(db.read_bytes()).hexdigest()==before
         reopened=probe(new,'current-reader-reopens');assert reopened['schema']==21 and reopened['integrity']=='ok'
