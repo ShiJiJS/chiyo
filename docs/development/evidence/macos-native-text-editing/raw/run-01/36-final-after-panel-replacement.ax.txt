@@ -1,0 +1,19 @@
+Window: "MacEditingProbe", App: MacEditingProbe.
+0 standard window MacEditingProbe, Secondary Actions: Raise
+	1 container MacEditingProbe
+		2 container (settable)
+			3 text (settable) Synthetic native editing probe — no library or Keychain
+			4 button (settable) Open native Save panel
+			5 text field (settable) FinalReplacement
+	6 close button
+	7 full screen button Help: this button also has an action to zoom the window, Secondary Actions: zoom the window
+	8 minimize button
+	9 text MacEditingProbe
+10 menu bar
+	11 MacEditingProbe
+	12 Edit
+	13 View
+	14 Window
+	15 Help
+
+The focused UI element is 5 text field (settable) FinalReplacement

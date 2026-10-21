@@ -1,0 +1,6 @@
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+flutter: QA_NATIVE_SAVE_PANEL cancelled=true
+QA_NATIVE_KEY type=12 code=0 flags=1048576 responder=Optional(<FlutterView: 0x75af87cf00>) target=nil
+QA_NATIVE_KEY type=10 code=12 flags=1048576 responder=Optional(<FlutterView: 0x75af87cf00>) target=nil
+QA_NATIVE_KEY type=12 code=0 flags=0 responder=Optional(<FlutterView: 0x75af87cf00>) target=nil
+flutter: QA_DART_KEY type=KeyDownEvent logical=null meta=false ctrl=false

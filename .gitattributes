@@ -141,3 +141,5 @@ docs/development/evidence/macos-installed-aws/raw/** -text -diff
 docs/development/evidence/macos-installed-ssh/raw/** -text -diff
 
 docs/development/evidence/macos-installed-file-versions/raw/** -text -diff
+
+docs/development/evidence/macos-native-text-editing/raw/** -text -diff

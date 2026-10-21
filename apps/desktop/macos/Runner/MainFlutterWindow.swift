@@ -3,6 +3,7 @@ import FlutterMacOS
 import UserNotifications
 
 class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDelegate {
+  private var selectAllMenu: NativeSelectAllMenu?
   private var desktopChannel: FlutterMethodChannel?
   private var statusItem: NSStatusItem?
   private(set) var desktopReady = false
@@ -211,6 +212,12 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
     }
 
     super.awakeFromNib()
+    DispatchQueue.main.async { [weak self] in
+      guard let self, let menu = NSApp.mainMenu else { return }
+      let forwarding = NativeSelectAllMenu(window: self, messenger: flutterViewController.engine.binaryMessenger)
+      forwarding.install(in: menu)
+      self.selectAllMenu = forwarding
+    }
   }
 
   private func readAvailability(_ result: @escaping FlutterResult) {

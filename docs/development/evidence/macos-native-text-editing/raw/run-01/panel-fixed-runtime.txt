@@ -1,0 +1,345 @@
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+flutter: QA_NATIVE_SAVE_PANEL cancelled=true
+flutter: QA_EDIT_VALUE text= selection=0:0
+QA_NATIVE_KEY type=12 code=0 flags=131072 responder=Optional(<FlutterTextInputPlugin: 0x101159b80>
+    Frame = {{0.00, 0.00}, {0.00, 14.00}}, Bounds = {{0.00, 0.00}, {0.00, 14.00}}
+    Horizontally resizable: NO, Vertically resizable: YES
+    MinSize = {0.00, 0.00}, MaxSize = {0.00, 10000000.00}
+) target=Optional(<FlutterTextInputPlugin: 0x101159b80>
+    Frame = {{0.00, 0.00}, {0.00, 14.00}}, Bounds = {{0.00, 0.00}, {0.00, 14.00}}
+    Horizontally resizable: NO, Vertically resizable: YES
+    MinSize = {0.00, 0.00}, MaxSize = {0.00, 10000000.00}
+)
+QA_NATIVE_KEY type=10 code=0 flags=131072 responder=Optional(<FlutterTextInputPlugin: 0x101159b80>
+    Frame = {{0.00, 0.00}, {0.00, 14.00}}, Bounds = {{0.00, 0.00}, {0.00, 14.00}}
+    Horizontally resizable: NO, Vertically resizable: YES
+    MinSize = {0.00, 0.00}, MaxSize = {0.00, 10000000.00}
+) target=Optional(<FlutterTextInputPlugin: 0x101159b80>
+    Frame = {{0.00, 0.00}, {0.00, 14.00}}, Bounds = {{0.00, 0.00}, {0.00, 14.00}}
+    Horizontally resizable: NO, Vertically resizable: YES
+    MinSize = {0.00, 0.00}, MaxSize = {0.00, 10000000.00}
+)
+flutter: QA_DART_KEY type=KeyDownEvent logical=null meta=false ctrl=false
+flutter: QA_EDIT_VALUE text=A selection=1:1
+flutter: QA_DART_KEY type=KeyUpEvent logical=null meta=false ctrl=false
+QA_NATIVE_KEY type=12 code=0 flags=0 responder=Optional(<FlutterTextInputPlugin: 0x101159b80>
+    Frame = {{0.00, 0.00}, {0.00, 14.00}}, Bounds = {{0.00, 0.00}, {0.00, 14.00}}
+    Horizontally resizable: NO, Vertically resizable: YES
+    MinSize = {0.00, 0.00}, MaxSize = {0.00, 10000000.00}
+) target=Optional(<FlutterTextInputPlugin: 0x101159b80>
+    Frame = {{0.00, 0.00}, {0.00, 14.00}}, Bounds = {{0.00, 0.00}, {0.00, 14.00}}
+    Horizontally resizable: NO, Vertically resizable: YES
+    MinSize = {0.00, 0.00}, MaxSize = {0.00, 10000000.00}
+)
+QA_NATIVE_KEY type=10 code=3 flags=0 responder=Optional(<FlutterTextInputPlugin: 0x101159b80>
+    Frame = {{0.00, 0.00}, {0.00, 14.00}}, Bounds = {{0.00, 0.00}, {0.00, 14.00}}
+    Horizontally resizable: NO, Vertically resizable: YES
+    MinSize = {0.00, 0.00}, MaxSize = {0.00, 10000000.00}
+) target=Optional(<FlutterTextInputPlugin: 0x101159b80>
+    Frame = {{0.00, 0.00}, {0.00, 14.00}}, Bounds = {{0.00, 0.00}, {0.00, 14.00}}
+    Horizontally resizable: NO, Vertically resizable: YES
+    MinSize = {0.00, 0.00}, MaxSize = {0.00, 10000000.00}
+)
+QA_NATIVE_KEY type=10 code=17 flags=0 responder=Optional(<FlutterTextInputPlugin: 0x101159b80>
+    Frame = {{0.00, 0.00}, {0.00, 14.00}}, Bounds = {{0.00, 0.00}, {0.00, 14.00}}
+    Horizontally resizable: NO, Vertically resizable: YES
+    MinSize = {0.00, 0.00}, MaxSize = {0.00, 10000000.00}
+) target=Optional(<FlutterTextInputPlugin: 0x101159b80>
+    Frame = {{0.00, 0.00}, {0.00, 14.00}}, Bounds = {{0.00, 0.00}, {0.00, 14.00}}
+    Horizontally resizable: NO, Vertically resizable: YES
+    MinSize = {0.00, 0.00}, MaxSize = {0.00, 10000000.00}
+)
+QA_NATIVE_KEY type=10 code=14 flags=0 responder=Optional(<FlutterTextInputPlugin: 0x101159b80>
+    Frame = {{0.00, 0.00}, {0.00, 14.00}}, Bounds = {{0.00, 0.00}, {0.00, 14.00}}
+    Horizontally resizable: NO, Vertically resizable: YES
+    MinSize = {0.00, 0.00}, MaxSize = {0.00, 10000000.00}
+) target=Optional(<FlutterTextInputPlugin: 0x101159b80>
+    Frame = {{0.00, 0.00}, {0.00, 14.00}}, Bounds = {{0.00, 0.00}, {0.00, 14.00}}
+    Horizontally resizable: NO, Vertically resizable: YES
+    MinSize = {0.00, 0.00}, MaxSize = {0.00, 10000000.00}
+)
+flutter: QA_DART_KEY type=KeyDownEvent logical=null meta=false ctrl=false
+flutter: QA_EDIT_VALUE text=Af selection=2:2
+flutter: QA_DART_KEY type=KeyUpEvent logical=null meta=false ctrl=false
+flutter: QA_DART_KEY type=KeyDownEvent logical=null meta=false ctrl=false
+flutter: QA_EDIT_VALUE text=Aft selection=3:3
+flutter: QA_DART_KEY type=KeyUpEvent logical=null meta=false ctrl=false
+flutter: QA_DART_KEY type=KeyDownEvent logical=null meta=false ctrl=false
+flutter: QA_EDIT_VALUE text=Afte selection=4:4
+flutter: QA_DART_KEY type=KeyUpEvent logical=null meta=false ctrl=false
+QA_NATIVE_KEY type=10 code=15 flags=0 responder=Optional(<FlutterTextInputPlugin: 0x101159b80>
+    Frame = {{0.00, 0.00}, {0.00, 16.00}}, Bounds = {{0.00, 0.00}, {0.00, 16.00}}
+    Horizontally resizable: NO, Vertically resizable: YES
+    MinSize = {0.00, 0.00}, MaxSize = {40000.00, 40000.00}
+) target=Optional(<FlutterTextInputPlugin: 0x101159b80>
+    Frame = {{0.00, 0.00}, {0.00, 16.00}}, Bounds = {{0.00, 0.00}, {0.00, 16.00}}
+    Horizontally resizable: NO, Vertically resizable: YES
+    MinSize = {0.00, 0.00}, MaxSize = {40000.00, 40000.00}
+)
+flutter: QA_DART_KEY type=KeyDownEvent logical=null meta=false ctrl=false
+QA_NATIVE_KEY type=12 code=0 flags=131072 responder=Optional(<FlutterTextInputPlugin: 0x101159b80>
+    Frame = {{0.00, 0.00}, {0.00, 16.00}}, Bounds = {{0.00, 0.00}, {0.00, 16.00}}
+    Horizontally resizable: NO, Vertically resizable: YES
+    MinSize = {0.00, 0.00}, MaxSize = {40000.00, 40000.00}
+) target=Optional(<FlutterTextInputPlugin: 0x101159b80>
+    Frame = {{0.00, 0.00}, {0.00, 16.00}}, Bounds = {{0.00, 0.00}, {0.00, 16.00}}
+    Horizontally resizable: NO, Vertically resizable: YES
+    MinSize = {0.00, 0.00}, MaxSize = {40000.00, 40000.00}
+)
+QA_NATIVE_KEY type=10 code=35 flags=131072 responder=Optional(<FlutterTextInputPlugin: 0x101159b80>
+    Frame = {{0.00, 0.00}, {0.00, 16.00}}, Bounds = {{0.00, 0.00}, {0.00, 16.00}}
+    Horizontally resizable: NO, Vertically resizable: YES
+    MinSize = {0.00, 0.00}, MaxSize = {40000.00, 40000.00}
+) target=Optional(<FlutterTextInputPlugin: 0x101159b80>
+    Frame = {{0.00, 0.00}, {0.00, 16.00}}, Bounds = {{0.00, 0.00}, {0.00, 16.00}}
+    Horizontally resizable: NO, Vertically resizable: YES
+    MinSize = {0.00, 0.00}, MaxSize = {40000.00, 40000.00}
+)
+flutter: QA_EDIT_VALUE text=After selection=5:5
+flutter: QA_DART_KEY type=KeyUpEvent logical=null meta=false ctrl=false
+QA_NATIVE_KEY type=12 code=0 flags=0 responder=Optional(<FlutterTextInputPlugin: 0x101159b80>
+    Frame = {{0.00, 0.00}, {0.00, 16.00}}, Bounds = {{0.00, 0.00}, {0.00, 16.00}}
+    Horizontally resizable: NO, Vertically resizable: YES
+    MinSize = {0.00, 0.00}, MaxSize = {40000.00, 40000.00}
+) target=Optional(<FlutterTextInputPlugin: 0x101159b80>
+    Frame = {{0.00, 0.00}, {0.00, 16.00}}, Bounds = {{0.00, 0.00}, {0.00, 16.00}}
+    Horizontally resizable: NO, Vertically resizable: YES
+    MinSize = {0.00, 0.00}, MaxSize = {40000.00, 40000.00}
+)
+QA_NATIVE_KEY type=10 code=0 flags=0 responder=Optional(<FlutterTextInputPlugin: 0x101159b80>
+    Frame = {{0.00, 0.00}, {0.00, 16.00}}, Bounds = {{0.00, 0.00}, {0.00, 16.00}}
+    Horizontally resizable: NO, Vertically resizable: YES
+    MinSize = {0.00, 0.00}, MaxSize = {40000.00, 40000.00}
+) target=Optional(<FlutterTextInputPlugin: 0x101159b80>
+    Frame = {{0.00, 0.00}, {0.00, 16.00}}, Bounds = {{0.00, 0.00}, {0.00, 16.00}}
+    Horizontally resizable: NO, Vertically resizable: YES
+    MinSize = {0.00, 0.00}, MaxSize = {40000.00, 40000.00}
+)
+QA_NATIVE_KEY type=10 code=45 flags=0 responder=Optional(<FlutterTextInputPlugin: 0x101159b80>
+    Frame = {{0.00, 0.00}, {0.00, 16.00}}, Bounds = {{0.00, 0.00}, {0.00, 16.00}}
+    Horizontally resizable: NO, Vertically resizable: YES
+    MinSize = {0.00, 0.00}, MaxSize = {40000.00, 40000.00}
+) target=Optional(<FlutterTextInputPlugin: 0x101159b80>
+    Frame = {{0.00, 0.00}, {0.00, 16.00}}, Bounds = {{0.00, 0.00}, {0.00, 16.00}}
+    Horizontally resizable: NO, Vertically resizable: YES
+    MinSize = {0.00, 0.00}, MaxSize = {40000.00, 40000.00}
+)
+QA_NATIVE_KEY type=10 code=14 flags=0 responder=Optional(<FlutterTextInputPlugin: 0x101159b80>
+    Frame = {{0.00, 0.00}, {0.00, 16.00}}, Bounds = {{0.00, 0.00}, {0.00, 16.00}}
+    Horizontally resizable: NO, Vertically resizable: YES
+    MinSize = {0.00, 0.00}, MaxSize = {40000.00, 40000.00}
+) target=Optional(<FlutterTextInputPlugin: 0x101159b80>
+    Frame = {{0.00, 0.00}, {0.00, 16.00}}, Bounds = {{0.00, 0.00}, {0.00, 16.00}}
+    Horizontally resizable: NO, Vertically resizable: YES
+    MinSize = {0.00, 0.00}, MaxSize = {40000.00, 40000.00}
+)
+flutter: QA_DART_KEY type=KeyDownEvent logical=null meta=false ctrl=false
+flutter: QA_EDIT_VALUE text=AfterP selection=6:6
+flutter: QA_DART_KEY type=KeyUpEvent logical=null meta=false ctrl=false
+flutter: QA_DART_KEY type=KeyDownEvent logical=null meta=false ctrl=false
+flutter: QA_EDIT_VALUE text=AfterPa selection=7:7
+flutter: QA_DART_KEY type=KeyUpEvent logical=null meta=false ctrl=false
+flutter: QA_DART_KEY type=KeyDownEvent logical=null meta=false ctrl=false
+flutter: QA_EDIT_VALUE text=AfterPan selection=8:8
+flutter: QA_DART_KEY type=KeyUpEvent logical=null meta=false ctrl=false
+flutter: QA_DART_KEY type=KeyDownEvent logical=null meta=false ctrl=false
+flutter: QA_EDIT_VALUE text=AfterPane selection=9:9
+flutter: QA_DART_KEY type=KeyUpEvent logical=null meta=false ctrl=false
+QA_NATIVE_KEY type=10 code=37 flags=0 responder=Optional(<FlutterTextInputPlugin: 0x101159b80>
+    Frame = {{0.00, 0.00}, {0.00, 16.00}}, Bounds = {{0.00, 0.00}, {0.00, 16.00}}
+    Horizontally resizable: NO, Vertically resizable: YES
+    MinSize = {0.00, 0.00}, MaxSize = {40000.00, 40000.00}
+) target=Optional(<FlutterTextInputPlugin: 0x101159b80>
+    Frame = {{0.00, 0.00}, {0.00, 16.00}}, Bounds = {{0.00, 0.00}, {0.00, 16.00}}
+    Horizontally resizable: NO, Vertically resizable: YES
+    MinSize = {0.00, 0.00}, MaxSize = {40000.00, 40000.00}
+)
+flutter: QA_DART_KEY type=KeyDownEvent logical=null meta=false ctrl=false
+flutter: QA_EDIT_VALUE text=AfterPanel selection=10:10
+flutter: QA_DART_KEY type=KeyUpEvent logical=null meta=false ctrl=false
+QA_NATIVE_KEY type=12 code=0 flags=131072 responder=Optional(<FlutterTextInputPlugin: 0x101159b80>
+    Frame = {{0.00, 0.00}, {0.00, 16.00}}, Bounds = {{0.00, 0.00}, {0.00, 16.00}}
+    Horizontally resizable: NO, Vertically resizable: YES
+    MinSize = {0.00, 0.00}, MaxSize = {40000.00, 40000.00}
+) target=Optional(<FlutterTextInputPlugin: 0x101159b80>
+    Frame = {{0.00, 0.00}, {0.00, 16.00}}, Bounds = {{0.00, 0.00}, {0.00, 16.00}}
+    Horizontally resizable: NO, Vertically resizable: YES
+    MinSize = {0.00, 0.00}, MaxSize = {40000.00, 40000.00}
+)
+QA_NATIVE_KEY type=10 code=8 flags=131072 responder=Optional(<FlutterTextInputPlugin: 0x101159b80>
+    Frame = {{0.00, 0.00}, {0.00, 16.00}}, Bounds = {{0.00, 0.00}, {0.00, 16.00}}
+    Horizontally resizable: NO, Vertically resizable: YES
+    MinSize = {0.00, 0.00}, MaxSize = {40000.00, 40000.00}
+) target=Optional(<FlutterTextInputPlugin: 0x101159b80>
+    Frame = {{0.00, 0.00}, {0.00, 16.00}}, Bounds = {{0.00, 0.00}, {0.00, 16.00}}
+    Horizontally resizable: NO, Vertically resizable: YES
+    MinSize = {0.00, 0.00}, MaxSize = {40000.00, 40000.00}
+)
+QA_NATIVE_KEY type=12 code=0 flags=0 responder=Optional(<FlutterTextInputPlugin: 0x101159b80>
+    Frame = {{0.00, 0.00}, {0.00, 16.00}}, Bounds = {{0.00, 0.00}, {0.00, 16.00}}
+    Horizontally resizable: NO, Vertically resizable: YES
+    MinSize = {0.00, 0.00}, MaxSize = {40000.00, 40000.00}
+) target=Optional(<FlutterTextInputPlugin: 0x101159b80>
+    Frame = {{0.00, 0.00}, {0.00, 16.00}}, Bounds = {{0.00, 0.00}, {0.00, 16.00}}
+    Horizontally resizable: NO, Vertically resizable: YES
+    MinSize = {0.00, 0.00}, MaxSize = {40000.00, 40000.00}
+)
+QA_NATIVE_KEY type=10 code=0 flags=0 responder=Optional(<FlutterTextInputPlugin: 0x101159b80>
+    Frame = {{0.00, 0.00}, {0.00, 16.00}}, Bounds = {{0.00, 0.00}, {0.00, 16.00}}
+    Horizontally resizable: NO, Vertically resizable: YES
+    MinSize = {0.00, 0.00}, MaxSize = {40000.00, 40000.00}
+) target=Optional(<FlutterTextInputPlugin: 0x101159b80>
+    Frame = {{0.00, 0.00}, {0.00, 16.00}}, Bounds = {{0.00, 0.00}, {0.00, 16.00}}
+    Horizontally resizable: NO, Vertically resizable: YES
+    MinSize = {0.00, 0.00}, MaxSize = {40000.00, 40000.00}
+)
+QA_NATIVE_KEY type=10 code=45 flags=0 responder=Optional(<FlutterTextInputPlugin: 0x101159b80>
+    Frame = {{0.00, 0.00}, {0.00, 16.00}}, Bounds = {{0.00, 0.00}, {0.00, 16.00}}
+    Horizontally resizable: NO, Vertically resizable: YES
+    MinSize = {0.00, 0.00}, MaxSize = {40000.00, 40000.00}
+) target=Optional(<FlutterTextInputPlugin: 0x101159b80>
+    Frame = {{0.00, 0.00}, {0.00, 16.00}}, Bounds = {{0.00, 0.00}, {0.00, 16.00}}
+    Horizontally resizable: NO, Vertically resizable: YES
+    MinSize = {0.00, 0.00}, MaxSize = {40000.00, 40000.00}
+)
+QA_NATIVE_KEY type=10 code=8 flags=0 responder=Optional(<FlutterTextInputPlugin: 0x101159b80>
+    Frame = {{0.00, 0.00}, {0.00, 16.00}}, Bounds = {{0.00, 0.00}, {0.00, 16.00}}
+    Horizontally resizable: NO, Vertically resizable: YES
+    MinSize = {0.00, 0.00}, MaxSize = {40000.00, 40000.00}
+) target=Optional(<FlutterTextInputPlugin: 0x101159b80>
+    Frame = {{0.00, 0.00}, {0.00, 16.00}}, Bounds = {{0.00, 0.00}, {0.00, 16.00}}
+    Horizontally resizable: NO, Vertically resizable: YES
+    MinSize = {0.00, 0.00}, MaxSize = {40000.00, 40000.00}
+)
+flutter: QA_DART_KEY type=KeyDownEvent logical=null meta=false ctrl=false
+flutter: QA_EDIT_VALUE text=AfterPanelC selection=11:11
+flutter: QA_DART_KEY type=KeyUpEvent logical=null meta=false ctrl=false
+flutter: QA_DART_KEY type=KeyDownEvent logical=null meta=false ctrl=false
+flutter: QA_EDIT_VALUE text=AfterPanelCa selection=12:12
+flutter: QA_DART_KEY type=KeyUpEvent logical=null meta=false ctrl=false
+flutter: QA_DART_KEY type=KeyDownEvent logical=null meta=false ctrl=false
+flutter: QA_EDIT_VALUE text=AfterPanelCan selection=13:13
+flutter: QA_DART_KEY type=KeyUpEvent logical=null meta=false ctrl=false
+flutter: QA_DART_KEY type=KeyDownEvent logical=null meta=false ctrl=false
+flutter: QA_EDIT_VALUE text=AfterPanelCanc selection=14:14
+flutter: QA_DART_KEY type=KeyUpEvent logical=null meta=false ctrl=false
+QA_NATIVE_KEY type=10 code=14 flags=0 responder=Optional(<FlutterTextInputPlugin: 0x101159b80>
+    Frame = {{0.00, 0.00}, {0.00, 16.00}}, Bounds = {{0.00, 0.00}, {0.00, 16.00}}
+    Horizontally resizable: NO, Vertically resizable: YES
+    MinSize = {0.00, 0.00}, MaxSize = {40000.00, 40000.00}
+) target=Optional(<FlutterTextInputPlugin: 0x101159b80>
+    Frame = {{0.00, 0.00}, {0.00, 16.00}}, Bounds = {{0.00, 0.00}, {0.00, 16.00}}
+    Horizontally resizable: NO, Vertically resizable: YES
+    MinSize = {0.00, 0.00}, MaxSize = {40000.00, 40000.00}
+)
+flutter: QA_DART_KEY type=KeyDownEvent logical=null meta=false ctrl=false
+flutter: QA_EDIT_VALUE text=AfterPanelCance selection=15:15
+flutter: QA_DART_KEY type=KeyUpEvent logical=null meta=false ctrl=false
+QA_NATIVE_KEY type=10 code=37 flags=0 responder=Optional(<FlutterTextInputPlugin: 0x101159b80>
+    Frame = {{0.00, 0.00}, {0.00, 16.00}}, Bounds = {{0.00, 0.00}, {0.00, 16.00}}
+    Horizontally resizable: NO, Vertically resizable: YES
+    MinSize = {0.00, 0.00}, MaxSize = {40000.00, 40000.00}
+) target=Optional(<FlutterTextInputPlugin: 0x101159b80>
+    Frame = {{0.00, 0.00}, {0.00, 16.00}}, Bounds = {{0.00, 0.00}, {0.00, 16.00}}
+    Horizontally resizable: NO, Vertically resizable: YES
+    MinSize = {0.00, 0.00}, MaxSize = {40000.00, 40000.00}
+)
+QA_NATIVE_KEY type=10 code=37 flags=0 responder=Optional(<FlutterTextInputPlugin: 0x101159b80>
+    Frame = {{0.00, 0.00}, {0.00, 16.00}}, Bounds = {{0.00, 0.00}, {0.00, 16.00}}
+    Horizontally resizable: NO, Vertically resizable: YES
+    MinSize = {0.00, 0.00}, MaxSize = {40000.00, 40000.00}
+) target=Optional(<FlutterTextInputPlugin: 0x101159b80>
+    Frame = {{0.00, 0.00}, {0.00, 16.00}}, Bounds = {{0.00, 0.00}, {0.00, 16.00}}
+    Horizontally resizable: NO, Vertically resizable: YES
+    MinSize = {0.00, 0.00}, MaxSize = {40000.00, 40000.00}
+)
+QA_NATIVE_KEY type=10 code=14 flags=0 responder=Optional(<FlutterTextInputPlugin: 0x101159b80>
+    Frame = {{0.00, 0.00}, {0.00, 16.00}}, Bounds = {{0.00, 0.00}, {0.00, 16.00}}
+    Horizontally resizable: NO, Vertically resizable: YES
+    MinSize = {0.00, 0.00}, MaxSize = {40000.00, 40000.00}
+) target=Optional(<FlutterTextInputPlugin: 0x101159b80>
+    Frame = {{0.00, 0.00}, {0.00, 16.00}}, Bounds = {{0.00, 0.00}, {0.00, 16.00}}
+    Horizontally resizable: NO, Vertically resizable: YES
+    MinSize = {0.00, 0.00}, MaxSize = {40000.00, 40000.00}
+)
+QA_NATIVE_KEY type=10 code=2 flags=0 responder=Optional(<FlutterTextInputPlugin: 0x101159b80>
+    Frame = {{0.00, 0.00}, {0.00, 16.00}}, Bounds = {{0.00, 0.00}, {0.00, 16.00}}
+    Horizontally resizable: NO, Vertically resizable: YES
+    MinSize = {0.00, 0.00}, MaxSize = {40000.00, 40000.00}
+) target=Optional(<FlutterTextInputPlugin: 0x101159b80>
+    Frame = {{0.00, 0.00}, {0.00, 16.00}}, Bounds = {{0.00, 0.00}, {0.00, 16.00}}
+    Horizontally resizable: NO, Vertically resizable: YES
+    MinSize = {0.00, 0.00}, MaxSize = {40000.00, 40000.00}
+)
+flutter: QA_DART_KEY type=KeyDownEvent logical=null meta=false ctrl=false
+flutter: QA_EDIT_VALUE text=AfterPanelCancel selection=16:16
+flutter: QA_DART_KEY type=KeyUpEvent logical=null meta=false ctrl=false
+flutter: QA_DART_KEY type=KeyDownEvent logical=null meta=false ctrl=false
+flutter: QA_EDIT_VALUE text=AfterPanelCancell selection=17:17
+flutter: QA_DART_KEY type=KeyUpEvent logical=null meta=false ctrl=false
+flutter: QA_DART_KEY type=KeyDownEvent logical=null meta=false ctrl=false
+flutter: QA_EDIT_VALUE text=AfterPanelCancelle selection=18:18
+flutter: QA_DART_KEY type=KeyUpEvent logical=null meta=false ctrl=false
+flutter: QA_DART_KEY type=KeyDownEvent logical=null meta=false ctrl=false
+flutter: QA_EDIT_VALUE text=AfterPanelCancelled selection=19:19
+flutter: QA_DART_KEY type=KeyUpEvent logical=null meta=false ctrl=false
+QA_NATIVE_KEY type=12 code=0 flags=1048576 responder=Optional(<FlutterTextInputPlugin: 0x101159b80>
+    Frame = {{0.00, 0.00}, {0.00, 16.00}}, Bounds = {{0.00, 0.00}, {0.00, 16.00}}
+    Horizontally resizable: NO, Vertically resizable: YES
+    MinSize = {0.00, 0.00}, MaxSize = {40000.00, 40000.00}
+) target=Optional(<FlutterTextInputPlugin: 0x101159b80>
+    Frame = {{0.00, 0.00}, {0.00, 16.00}}, Bounds = {{0.00, 0.00}, {0.00, 16.00}}
+    Horizontally resizable: NO, Vertically resizable: YES
+    MinSize = {0.00, 0.00}, MaxSize = {40000.00, 40000.00}
+)
+flutter: QA_EDIT_VALUE text=AfterPanelCancelled selection=0:19
+QA_NATIVE_KEY type=12 code=0 flags=0 responder=Optional(<FlutterTextInputPlugin: 0x101159b80>
+    Frame = {{0.00, 0.00}, {0.00, 16.00}}, Bounds = {{0.00, 0.00}, {0.00, 16.00}}
+    Horizontally resizable: NO, Vertically resizable: YES
+    MinSize = {0.00, 0.00}, MaxSize = {40000.00, 40000.00}
+) target=Optional(<FlutterTextInputPlugin: 0x101159b80>
+    Frame = {{0.00, 0.00}, {0.00, 16.00}}, Bounds = {{0.00, 0.00}, {0.00, 16.00}}
+    Horizontally resizable: NO, Vertically resizable: YES
+    MinSize = {0.00, 0.00}, MaxSize = {40000.00, 40000.00}
+)
+QA_NATIVE_KEY type=10 code=51 flags=0 responder=Optional(<FlutterTextInputPlugin: 0x101159b80>
+    Frame = {{0.00, 0.00}, {0.00, 16.00}}, Bounds = {{0.00, 0.00}, {0.00, 16.00}}
+    Horizontally resizable: NO, Vertically resizable: YES
+    MinSize = {0.00, 0.00}, MaxSize = {40000.00, 40000.00}
+) target=Optional(<FlutterTextInputPlugin: 0x101159b80>
+    Frame = {{0.00, 0.00}, {0.00, 16.00}}, Bounds = {{0.00, 0.00}, {0.00, 16.00}}
+    Horizontally resizable: NO, Vertically resizable: YES
+    MinSize = {0.00, 0.00}, MaxSize = {40000.00, 40000.00}
+)
+flutter: QA_DART_KEY type=KeyDownEvent logical=null meta=false ctrl=false
+2026-10-22 01:02:22.522 MacEditingProbe[48258:5094580] TSM AdjustCapsLockLEDForKeyTransitionHandling - _ISSetPhysicalKeyboardCapsLockLED Inhibit
+flutter: QA_DART_KEY type=KeyUpEvent logical=null meta=false ctrl=false
+flutter: QA_EDIT_VALUE text= selection=0:0
+QA_NATIVE_KEY type=12 code=0 flags=1048576 responder=Optional(<FlutterTextInputPlugin: 0x101159b80>
+    Frame = {{0.00, 0.00}, {0.00, 16.00}}, Bounds = {{0.00, 0.00}, {0.00, 16.00}}
+    Horizontally resizable: NO, Vertically resizable: YES
+    MinSize = {0.00, 0.00}, MaxSize = {40000.00, 40000.00}
+) target=Optional(<FlutterTextInputPlugin: 0x101159b80>
+    Frame = {{0.00, 0.00}, {0.00, 16.00}}, Bounds = {{0.00, 0.00}, {0.00, 16.00}}
+    Horizontally resizable: NO, Vertically resizable: YES
+    MinSize = {0.00, 0.00}, MaxSize = {40000.00, 40000.00}
+)
+QA_NATIVE_KEY type=10 code=12 flags=1048576 responder=Optional(<FlutterTextInputPlugin: 0x101159b80>
+    Frame = {{0.00, 0.00}, {0.00, 16.00}}, Bounds = {{0.00, 0.00}, {0.00, 16.00}}
+    Horizontally resizable: NO, Vertically resizable: YES
+    MinSize = {0.00, 0.00}, MaxSize = {40000.00, 40000.00}
+) target=Optional(<FlutterTextInputPlugin: 0x101159b80>
+    Frame = {{0.00, 0.00}, {0.00, 16.00}}, Bounds = {{0.00, 0.00}, {0.00, 16.00}}
+    Horizontally resizable: NO, Vertically resizable: YES
+    MinSize = {0.00, 0.00}, MaxSize = {40000.00, 40000.00}
+)
+QA_NATIVE_KEY type=12 code=0 flags=0 responder=Optional(<FlutterTextInputPlugin: 0x101159b80>
+    Frame = {{0.00, 0.00}, {0.00, 16.00}}, Bounds = {{0.00, 0.00}, {0.00, 16.00}}
+    Horizontally resizable: NO, Vertically resizable: YES
+    MinSize = {0.00, 0.00}, MaxSize = {40000.00, 40000.00}
+) target=Optional(<FlutterTextInputPlugin: 0x101159b80>
+    Frame = {{0.00, 0.00}, {0.00, 16.00}}, Bounds = {{0.00, 0.00}, {0.00, 16.00}}
+    Horizontally resizable: NO, Vertically resizable: YES
+    MinSize = {0.00, 0.00}, MaxSize = {40000.00, 40000.00}
+)
+flutter: QA_DART_KEY type=KeyDownEvent logical=null meta=false ctrl=false
