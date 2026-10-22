@@ -272,38 +272,47 @@ class _InformationEditorState extends State<InformationEditor> {
       children: [
         SizedBox(
           height: 19.5 * MediaQuery.textScalerOf(context).scale(1),
-          child: Text(label, style: prototypeText(context, 13)),
+          child: ExcludeSemantics(
+            child: Text(label, style: prototypeText(context, 13)),
+          ),
         ),
         const SizedBox(height: 7),
         SizedBox(
           height: 19.5 * lines * MediaQuery.textScalerOf(context).scale(1) + 20,
-          child: TextFormField(
-            key: key,
-            initialValue: value,
-            enabled: !_busy && !readOnly,
-            maxLength: max,
-            minLines: lines,
-            maxLines: lines == 1 ? 1 : 6,
-            onChanged: (v) => _changed(() => update(v)),
-            style: prototypeText(context, 13),
-            buildCounter:
-                (_, {required currentLength, required isFocused, maxLength}) =>
-                    null,
-            decoration: InputDecoration(
-              isDense: true,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 6,
-                vertical: 10,
-              ),
-              filled: true,
-              fillColor: UiPalette.of(context).paper,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(4),
-                borderSide: BorderSide(color: UiPalette.of(context).line),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(4),
-                borderSide: BorderSide(color: UiPalette.of(context).line),
+          child: Semantics(
+            label: label,
+            child: TextFormField(
+              key: key,
+              initialValue: value,
+              enabled: !_busy && !readOnly,
+              maxLength: max,
+              minLines: lines,
+              maxLines: lines == 1 ? 1 : 6,
+              onChanged: (v) => _changed(() => update(v)),
+              style: prototypeText(context, 13),
+              buildCounter:
+                  (
+                    _, {
+                    required currentLength,
+                    required isFocused,
+                    maxLength,
+                  }) => null,
+              decoration: InputDecoration(
+                isDense: true,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 6,
+                  vertical: 10,
+                ),
+                filled: true,
+                fillColor: UiPalette.of(context).paper,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(4),
+                  borderSide: BorderSide(color: UiPalette.of(context).line),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(4),
+                  borderSide: BorderSide(color: UiPalette.of(context).line),
+                ),
               ),
             ),
           ),
@@ -325,34 +334,41 @@ class _InformationEditorState extends State<InformationEditor> {
       children: [
         SizedBox(
           height: 19.5 * MediaQuery.textScalerOf(context).scale(1),
-          child: Text(label, style: prototypeText(context, 13)),
+          child: ExcludeSemantics(
+            child: Text(label, style: prototypeText(context, 13)),
+          ),
         ),
         const SizedBox(height: 7),
         SizedBox(
           height: 19.5 * MediaQuery.textScalerOf(context).scale(1) + 20,
-          child: DesktopSelect<T>(
-            key: key,
-            initialValue: value,
-            items: items,
-            isExpanded: true,
-            decoration: InputDecoration(
-              isDense: true,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 6,
-                vertical: 9,
-              ),
-              filled: true,
-              fillColor: UiPalette.of(context).paper,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(3),
-                borderSide: BorderSide(color: UiPalette.of(context).line),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(3),
-                borderSide: BorderSide(color: UiPalette.of(context).line),
+          child: MergeSemantics(
+            child: Semantics(
+              label: label,
+              child: DesktopSelect<T>(
+                key: key,
+                initialValue: value,
+                items: items,
+                isExpanded: true,
+                decoration: InputDecoration(
+                  isDense: true,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 9,
+                  ),
+                  filled: true,
+                  fillColor: UiPalette.of(context).paper,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(3),
+                    borderSide: BorderSide(color: UiPalette.of(context).line),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(3),
+                    borderSide: BorderSide(color: UiPalette.of(context).line),
+                  ),
+                ),
+                onChanged: _busy ? null : (v) => _changed(() => change(v)),
               ),
             ),
-            onChanged: _busy ? null : (v) => _changed(() => change(v)),
           ),
         ),
       ],
@@ -423,17 +439,27 @@ class _InformationEditorState extends State<InformationEditor> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        Text('所在目录', style: prototypeText(context, 13)),
+                        ExcludeSemantics(
+                          child: Text(
+                            '所在目录',
+                            style: prototypeText(context, 13),
+                          ),
+                        ),
                         const SizedBox(height: 7),
-                        DirectoryField(
-                          key: const ValueKey('item-directory'),
-                          directories: widget.directories,
-                          value: d.directoryId,
-                          enabled: !_busy,
-                          onChanged: (id) => _changed(() {
-                            d.directoryId = id;
-                            d.suggestedDirectory = '';
-                          }),
+                        MergeSemantics(
+                          child: Semantics(
+                            label: '所在目录',
+                            child: DirectoryField(
+                              key: const ValueKey('item-directory'),
+                              directories: widget.directories,
+                              value: d.directoryId,
+                              enabled: !_busy,
+                              onChanged: (id) => _changed(() {
+                                d.directoryId = id;
+                                d.suggestedDirectory = '';
+                              }),
+                            ),
+                          ),
                         ),
                       ],
                     ),
@@ -472,40 +498,48 @@ class _InformationEditorState extends State<InformationEditor> {
                 children: [
                   SizedBox(
                     height: 19.5 * MediaQuery.textScalerOf(context).scale(1),
-                    child: Text('标签', style: prototypeText(context, 13)),
+                    child: ExcludeSemantics(
+                      child: Text('标签', style: prototypeText(context, 13)),
+                    ),
                   ),
                   const SizedBox(height: 7),
-                  TextButton(
-                    key: const ValueKey('item-tags'),
-                    onPressed: _busy ? null : _chooseTags,
-                    style: prototypeButton(
-                      context,
-                      size: 13,
-                      padding: const EdgeInsets.all(9),
-                      foreground: p.ink,
-                      side: BorderSide(color: p.line),
-                    ),
-                    child: SizedBox(
-                      height:
-                          19.5 * MediaQuery.textScalerOf(context).scale(1) + 2,
-                      width: double.infinity,
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          widget.tags
-                              .where((tag) => d.tagIds.contains(tag.id))
-                              .map((tag) => tag.name)
-                              .followedBy(
-                                d.tagIds
-                                    .where(
-                                      (id) => !widget.tags.any(
-                                        (tag) => tag.id == id,
-                                      ),
-                                    )
-                                    .map((id) => '不可用标签（$id）'),
-                              )
-                              .followedBy(d.suggestedTags)
-                              .join('、'),
+                  MergeSemantics(
+                    child: Semantics(
+                      label: '标签',
+                      child: TextButton(
+                        key: const ValueKey('item-tags'),
+                        onPressed: _busy ? null : _chooseTags,
+                        style: prototypeButton(
+                          context,
+                          size: 13,
+                          padding: const EdgeInsets.all(9),
+                          foreground: p.ink,
+                          side: BorderSide(color: p.line),
+                        ),
+                        child: SizedBox(
+                          height:
+                              19.5 * MediaQuery.textScalerOf(context).scale(1) +
+                              2,
+                          width: double.infinity,
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              widget.tags
+                                  .where((tag) => d.tagIds.contains(tag.id))
+                                  .map((tag) => tag.name)
+                                  .followedBy(
+                                    d.tagIds
+                                        .where(
+                                          (id) => !widget.tags.any(
+                                            (tag) => tag.id == id,
+                                          ),
+                                        )
+                                        .map((id) => '不可用标签（$id）'),
+                                  )
+                                  .followedBy(d.suggestedTags)
+                                  .join('、'),
+                            ),
+                          ),
                         ),
                       ),
                     ),
