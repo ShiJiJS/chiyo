@@ -1,0 +1,34 @@
+{
+  "source": "CUA conversation observation transcription plus native result",
+  "pid": 78162,
+  "systemAllowNotifications": [
+    "on",
+    "off",
+    "on"
+  ],
+  "restoredBeforeQuit": true,
+  "allPending": 26,
+  "newRequestVisible": true,
+  "nativeAcceptedDespiteSystemDisabled": true,
+  "nativeSubmit": {
+    "appActive": true,
+    "event": "submit",
+    "identifier": "AEEE4B19-10B3-4DBB-B293-846BC59FBEDD",
+    "requestId": "82hPK3liXRp31H0ogkVB84NIhaHpXnj2Yk4Tj_1x0Yg=",
+    "windowVisible": true
+  },
+  "nativeAccepted": {
+    "accepted": true,
+    "appActive": true,
+    "errorCode": 0,
+    "errorDomain": "",
+    "event": "accepted",
+    "identifier": "AEEE4B19-10B3-4DBB-B293-846BC59FBEDD",
+    "requestId": "82hPK3liXRp31H0ogkVB84NIhaHpXnj2Yk4Tj_1x0Yg=",
+    "windowVisible": true
+  },
+  "noNativeClickProved": true,
+  "failedDriverExit": 1,
+  "nativeAppNormalExit": 0,
+  "notARealUNError": true
+}

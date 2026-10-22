@@ -1,0 +1,1 @@
+/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue47-stale-permission-fix-20261022/native-ui/source/apps/desktop/build/macos/Build/Products/Release/info_desktop.app: replacing existing signature

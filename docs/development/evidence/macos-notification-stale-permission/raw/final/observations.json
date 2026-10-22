@@ -1,0 +1,19 @@
+{
+  "source": "Explicit CUA observation transcription; native images displayed in conversation, not separately saved",
+  "pid": 79527,
+  "actualSystemAllow": [
+    "on",
+    "off",
+    "on"
+  ],
+  "appDeniedNoticeBeforeManualCheck": true,
+  "settingsDeniedBeforeManualCheck": true,
+  "oldCacheRecheckedOnActualRequest": true,
+  "pendingAfterBothSyntheticRequests": 27,
+  "handled": 0,
+  "nativeNotifyCalls": 1,
+  "unUserNotificationCenterAddCalls": 0,
+  "ordinaryPackageUpgradeClaimed": false,
+  "actualFinalQuit": "CUA super+q",
+  "systemSettingsReturnedTo": "通知列表"
+}

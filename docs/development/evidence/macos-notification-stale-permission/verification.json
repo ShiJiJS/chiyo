@@ -1,0 +1,277 @@
+{
+  "date": "2026-10-22",
+  "baselineSource": "ecbf7573fef6d44e9cd4a9f95c4605ba796e9f7f",
+  "productSource": "438df68c5151b8b431240d5b342e5cd3d9a38c8b",
+  "baselineUnexpectedAccepted": true,
+  "baselineDriverPassed": false,
+  "baselineAppNormalExit": 0,
+  "regressionRedFailures": 2,
+  "targetedRuntimePassed": 13,
+  "finalNativeAppNormalExit": 0,
+  "finalNativeNotifyCalls": 1,
+  "finalUNAddCalls": 0,
+  "finalAuthorizationSequence": [
+    2,
+    2,
+    1,
+    1,
+    1,
+    2
+  ],
+  "systemPermissionRestored": true,
+  "newRealUNErrorClaimed": false,
+  "ordinaryPreviewUpgraded": false,
+  "rawFileCount": 50,
+  "files": [
+    {
+      "path": "raw/baseline/cleanup.json",
+      "bytes": 230,
+      "sha256": "489410b1b45da8e066be28c982f8b5a95ed79971a164fce9d783659cbeb03181"
+    },
+    {
+      "path": "raw/baseline/last-application-result.json",
+      "bytes": 614,
+      "sha256": "d307b94e7087de32d0e745c4467b43a61e782e23bbf2263745c3d6a5512a99a6"
+    },
+    {
+      "path": "raw/baseline/logs/analyze.txt",
+      "bytes": 96,
+      "sha256": "b03c49e825fb2b92e6720132661f531f3e9523415abe0920c52a0ef403856676"
+    },
+    {
+      "path": "raw/baseline/logs/application.txt",
+      "bytes": 1244,
+      "sha256": "7c6303dd37df54abfb383d8d1c1df34507ec508576a9eab135b58a539f8866ca"
+    },
+    {
+      "path": "raw/baseline/logs/build-release.txt",
+      "bytes": 5512,
+      "sha256": "e5224ac06d4a127da75633b8a4d24a2e63f8c28a522c75675db6b0ad029b2f73"
+    },
+    {
+      "path": "raw/baseline/logs/entitlements.txt",
+      "bytes": 766,
+      "sha256": "71b20f21e636b8cde7c1433cff627738dc9b7abd3b8fb2b2ffaf38a04d5533d2"
+    },
+    {
+      "path": "raw/baseline/logs/pub-desktop.txt",
+      "bytes": 318,
+      "sha256": "ca68f707c22164511fc2b3f9af97ed7bd46538b1d334d9c806a6a59a556a6e05"
+    },
+    {
+      "path": "raw/baseline/logs/pub-info_cli.txt",
+      "bytes": 438,
+      "sha256": "7652c98906e8f741dc56b0e7f018713f8985ac3d073ce66e4cb8e1d3274e15f6"
+    },
+    {
+      "path": "raw/baseline/logs/pub-info_core.txt",
+      "bytes": 438,
+      "sha256": "7652c98906e8f741dc56b0e7f018713f8985ac3d073ce66e4cb8e1d3274e15f6"
+    },
+    {
+      "path": "raw/baseline/logs/pub-info_storage.txt",
+      "bytes": 438,
+      "sha256": "7652c98906e8f741dc56b0e7f018713f8985ac3d073ce66e4cb8e1d3274e15f6"
+    },
+    {
+      "path": "raw/baseline/logs/sign-qa-name.txt",
+      "bytes": 206,
+      "sha256": "b5b480ccba46b809c5b120f05577fbd4028408e8557f21dc8c96cc42a02e752c"
+    },
+    {
+      "path": "raw/baseline/logs/signature.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/baseline/macos-notifications-ui.py",
+      "bytes": 13227,
+      "sha256": "e4abd6fea5cf876f8d88cea64023af6c4f6fe29b91ce8df239f2e2ad4a4d6ca7"
+    },
+    {
+      "path": "raw/baseline/macos_notifications_manual.dart",
+      "bytes": 17246,
+      "sha256": "ab06491a8078607e327297beefd4e48df6c3ce01b3bd0db5d7f114136654e8d5"
+    },
+    {
+      "path": "raw/baseline/observations.json",
+      "bytes": 909,
+      "sha256": "91a9af01fbc197bb19644e87f3aa92f90949e6da8d7493f7b0f09195879608a3"
+    },
+    {
+      "path": "raw/baseline/qa-copy/apps/desktop/macos/Runner/Configs/AppInfo.xcconfig",
+      "bytes": 641,
+      "sha256": "26495e1dadedcc4df2a7a9f8962a82ec29f51fb7a5c8bfb45f2875d14fcbfec0"
+    },
+    {
+      "path": "raw/baseline/qa-copy/apps/desktop/macos/Runner/MainFlutterWindow.swift",
+      "bytes": 21255,
+      "sha256": "eea427dd1daf3e3ef51647e383ee1af6fabbf045a4ba4f12d42d9f0f04661db7"
+    },
+    {
+      "path": "raw/baseline/result.json",
+      "bytes": 87894,
+      "sha256": "6b4d9cda5d31daafb7cd5558dc681d8ef48b6c3e4725e0d8e3a8280c24599b10"
+    },
+    {
+      "path": "raw/final/MainFlutterWindow.swift",
+      "bytes": 19868,
+      "sha256": "96b6aca9f9353f3f912953e2732a24288df8039577d9c6a4e9469063a581318f"
+    },
+    {
+      "path": "raw/final/cleanup.json",
+      "bytes": 230,
+      "sha256": "fb763f88c137d4958a5095f178ddfda865d9d6ce022a2867dd3a433a35182e48"
+    },
+    {
+      "path": "raw/final/desktop_runtime.dart",
+      "bytes": 12389,
+      "sha256": "51d837129829d50b56a33de1a5dd40a0f7ffb9acb0752f4f1aa78299139d6647"
+    },
+    {
+      "path": "raw/final/desktop_runtime_test.dart",
+      "bytes": 15845,
+      "sha256": "62a844f933be7c87ab7fdf0a8deb41ba54d79bbd1d70610cea7eac8db06ea42a"
+    },
+    {
+      "path": "raw/final/last-application-result.json",
+      "bytes": 1173,
+      "sha256": "d8c93cabb8cb0a00b831a58a6d1e5b1ba7195a5da0a5dd059db0c04675224f91"
+    },
+    {
+      "path": "raw/final/logs/analyze.txt",
+      "bytes": 96,
+      "sha256": "722c8a08e247f523ad074633591450b61f4cc939e22270bd8c69c6d968932fbf"
+    },
+    {
+      "path": "raw/final/logs/application.txt",
+      "bytes": 1598,
+      "sha256": "4e0017773af8c07dcdabb9cc82d540ac0b7478f5d3a52d348e1a0caf06fb6401"
+    },
+    {
+      "path": "raw/final/logs/build-release.txt",
+      "bytes": 5610,
+      "sha256": "5b586a8c8ca0de57c87cb7d1591ae00f58c7a8ec77f4ef584370b9052a7f8394"
+    },
+    {
+      "path": "raw/final/logs/entitlements.txt",
+      "bytes": 780,
+      "sha256": "1880acd0d5080189b6fd30960b079e5a95566b49a2b66e304c2628cf0bfc23ae"
+    },
+    {
+      "path": "raw/final/logs/pub-desktop.txt",
+      "bytes": 318,
+      "sha256": "ca68f707c22164511fc2b3f9af97ed7bd46538b1d334d9c806a6a59a556a6e05"
+    },
+    {
+      "path": "raw/final/logs/pub-info_cli.txt",
+      "bytes": 438,
+      "sha256": "7652c98906e8f741dc56b0e7f018713f8985ac3d073ce66e4cb8e1d3274e15f6"
+    },
+    {
+      "path": "raw/final/logs/pub-info_core.txt",
+      "bytes": 438,
+      "sha256": "7652c98906e8f741dc56b0e7f018713f8985ac3d073ce66e4cb8e1d3274e15f6"
+    },
+    {
+      "path": "raw/final/logs/pub-info_storage.txt",
+      "bytes": 438,
+      "sha256": "7652c98906e8f741dc56b0e7f018713f8985ac3d073ce66e4cb8e1d3274e15f6"
+    },
+    {
+      "path": "raw/final/logs/sign-qa-name.txt",
+      "bytes": 220,
+      "sha256": "1b4036a65335a623c61d242bf926054af90b43d22cd616200182de8e71ef4bf3"
+    },
+    {
+      "path": "raw/final/logs/signature.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/final/macos-notifications-ui.py",
+      "bytes": 13244,
+      "sha256": "83a7037f7480206ae75ef2947033a4cd6144c59e9402ddf0989ee3e9246c7394"
+    },
+    {
+      "path": "raw/final/macos_notifications_manual.dart",
+      "bytes": 17278,
+      "sha256": "a7bc8d0ce1e5c3140406218812cc0df0117a17c48c5f2db358af4839a2fe9311"
+    },
+    {
+      "path": "raw/final/native-events.json",
+      "bytes": 1173,
+      "sha256": "4c886eb63e16ada602502a9846ca45b6e6ede16b170f500784e848b82f6b6995"
+    },
+    {
+      "path": "raw/final/observations.json",
+      "bytes": 577,
+      "sha256": "7a0adb72b2fb9919fa0cf9cdf957851d9650cb18a482e14ef3da48b6b5196390"
+    },
+    {
+      "path": "raw/final/qa-copy/apps/desktop/macos/Runner/Configs/AppInfo.xcconfig",
+      "bytes": 641,
+      "sha256": "26495e1dadedcc4df2a7a9f8962a82ec29f51fb7a5c8bfb45f2875d14fcbfec0"
+    },
+    {
+      "path": "raw/final/qa-copy/apps/desktop/macos/Runner/MainFlutterWindow.swift",
+      "bytes": 21505,
+      "sha256": "a39a6bd3f084301e4abb5c280465c8b4317309391453af52f1a85f0099e40aba"
+    },
+    {
+      "path": "raw/final/result.json",
+      "bytes": 88817,
+      "sha256": "5f796c0d7f23684653a1a088541d2c3c4af1969272396a0f1e161c8a928420f7"
+    },
+    {
+      "path": "raw/notification-cleanup/cleanup-result.txt",
+      "bytes": 315,
+      "sha256": "fc3776f7b34d8fc561cc85206be22bebe562d031d74e7b8d2d1476c3aace6c1b"
+    },
+    {
+      "path": "raw/notification-cleanup/entitlements.plist",
+      "bytes": 240,
+      "sha256": "b746c74b201e6af4e0864fbd1f4f629f96156a7ec4b7208bc995d0a5089bb592"
+    },
+    {
+      "path": "raw/notification-cleanup/helper-removed.json",
+      "bytes": 42,
+      "sha256": "8bd3937c7d0faa5d5ab608e69c8ddee6e89d96f2e5a18c9ce3604941c3194aad"
+    },
+    {
+      "path": "raw/notification-cleanup/prepare-0.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/notification-cleanup/prepare-1.txt",
+      "bytes": 186,
+      "sha256": "f7c3a7a2b5e42a39e6f5dd1dc261352fff279b55aad2ddc5c5a36165439d748b"
+    },
+    {
+      "path": "raw/notification-cleanup/prepare-2.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/notification-cleanup/source.swift",
+      "bytes": 2331,
+      "sha256": "2969686c4c6b7c3bb0fa42bc9db5146ad584ed4e88f97e307980c4ccb6f47055"
+    },
+    {
+      "path": "raw/preparation/analyze.txt",
+      "bytes": 96,
+      "sha256": "8a120030a7421afda800a6fbf50b02dea547cbe98699c1f50afbea11bc65b643"
+    },
+    {
+      "path": "raw/preparation/regression-green.txt",
+      "bytes": 1350,
+      "sha256": "1a024c85d2c2a5e963806cf1e12481957ea5e1c94367e91794674bee6e70794a"
+    },
+    {
+      "path": "raw/preparation/regression-red.txt",
+      "bytes": 2586,
+      "sha256": "b7040955b0e98528438e351102db17fbe9e252448a1bca6ff7abc717afb2f831"
+    }
+  ]
+}
