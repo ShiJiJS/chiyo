@@ -1,0 +1,13 @@
+{
+  "source": "CUA session AX transcription, no separate native screenshot file",
+  "oldActualNativeSaveResult": "加密备份已导出。当前文件字段2，可恢复原文版本3，3.0KiB，文件交付事实6。",
+  "oldNormalQuitIssued": true,
+  "oldPidNoLongerLiveBeforeReplace": 53592,
+  "newActualInitialState": "无法打开信息库；无法访问系统钥匙串中的信息库密钥；原有资料不会被重建或覆盖。",
+  "clickedRequestKeychainAccessOnce": true,
+  "currentActualState": "请在系统提示中确认钥匙串访问。取消后可重新尝试。",
+  "newPid": 87410,
+  "newProcessKeptLive": true,
+  "ownerPasswordEnteredByAgent": false,
+  "normalUpgradeSuccessClaimed": false
+}
