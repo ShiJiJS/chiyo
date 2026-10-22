@@ -1,0 +1,10 @@
+{
+  "baselineProductSource": "770c67f7213de59cfeee34d9c0a482b9eac55f89",
+  "exactFinalTestSha256": "23f938680ce90c354d7e06b624cb6b5cb7164c2e545d41c2af87367687936db8",
+  "pubExitCode": 0,
+  "testExitCode": 1,
+  "failedCases": 2,
+  "failureScope": "Mac widget ordinary AX initial value/controller replacement absent",
+  "realWindowsRunnerUsed": false,
+  "ownedSourceRemoved": true
+}

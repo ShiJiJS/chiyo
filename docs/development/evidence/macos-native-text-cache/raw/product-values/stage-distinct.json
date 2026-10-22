@@ -1,0 +1,308 @@
+{
+  "mode": "edit",
+  "pid": 63306,
+  "native": {
+    "fields": [
+      {
+        "axScreenFrame": [
+          618,
+          629.5,
+          310.5,
+          41.5
+        ],
+        "axValue": "SyntheticNameAlpha",
+        "cellString": "SyntheticNameAlpha",
+        "editorIdentity": "none",
+        "editorInsideThisField": false,
+        "editorIsFirstResponder": false,
+        "editorString": "",
+        "fieldIdentity": "ObjectIdentifier(0x00000078da517480)",
+        "label": "信息名称",
+        "liveScreenFrame": [
+          617,
+          630.5,
+          312.5,
+          39.5
+        ],
+        "nativeString": "SyntheticNameAlpha",
+        "viewFrame": [
+          57,
+          414.5,
+          312.5,
+          39.5
+        ]
+      },
+      {
+        "axScreenFrame": [
+          618,
+          524,
+          638,
+          61
+        ],
+        "axValue": "SyntheticDescriptionBeta",
+        "cellString": "SyntheticDescriptionBeta",
+        "editorIdentity": "ObjectIdentifier(0x0000000100d19b80)",
+        "editorInsideThisField": true,
+        "editorIsFirstResponder": true,
+        "editorString": "SyntheticDescriptionBeta",
+        "fieldIdentity": "ObjectIdentifier(0x00000078da516300)",
+        "label": "公开说明",
+        "liveScreenFrame": [
+          617,
+          525,
+          640,
+          59
+        ],
+        "nativeString": "SyntheticDescriptionBeta",
+        "viewFrame": [
+          57,
+          309,
+          640,
+          59
+        ]
+      },
+      {
+        "axScreenFrame": [
+          618,
+          341,
+          206.33331298828125,
+          3
+        ],
+        "axValue": "",
+        "cellString": "",
+        "editorIdentity": "none",
+        "editorInsideThisField": false,
+        "editorIsFirstResponder": false,
+        "editorString": "",
+        "fieldIdentity": "ObjectIdentifier(0x00000078da517800)",
+        "label": "",
+        "liveScreenFrame": [
+          617,
+          342,
+          208.33331298828125,
+          1
+        ],
+        "nativeString": "",
+        "viewFrame": [
+          57,
+          126,
+          208.33331298828125,
+          1
+        ]
+      },
+      {
+        "axScreenFrame": [
+          618,
+          341,
+          638,
+          3
+        ],
+        "axValue": "",
+        "cellString": "",
+        "editorIdentity": "none",
+        "editorInsideThisField": false,
+        "editorIsFirstResponder": false,
+        "editorString": "",
+        "fieldIdentity": "ObjectIdentifier(0x00000078da514e00)",
+        "label": "",
+        "liveScreenFrame": [
+          617,
+          342,
+          640,
+          1
+        ],
+        "nativeString": "",
+        "viewFrame": [
+          57,
+          126,
+          640,
+          1
+        ]
+      },
+      {
+        "axScreenFrame": [
+          618,
+          341,
+          638,
+          3
+        ],
+        "axValue": "",
+        "cellString": "",
+        "editorIdentity": "none",
+        "editorInsideThisField": false,
+        "editorIsFirstResponder": false,
+        "editorString": "",
+        "fieldIdentity": "ObjectIdentifier(0x00000078da515c00)",
+        "label": "",
+        "liveScreenFrame": [
+          617,
+          342,
+          640,
+          1
+        ],
+        "nativeString": "",
+        "viewFrame": [
+          57,
+          126,
+          640,
+          1
+        ]
+      },
+      {
+        "axScreenFrame": [
+          618,
+          341,
+          206.33331298828125,
+          3
+        ],
+        "axValue": "",
+        "cellString": "",
+        "editorIdentity": "none",
+        "editorInsideThisField": false,
+        "editorIsFirstResponder": false,
+        "editorString": "",
+        "fieldIdentity": "ObjectIdentifier(0x00000078da517100)",
+        "label": "",
+        "liveScreenFrame": [
+          617,
+          342,
+          208.33331298828125,
+          1
+        ],
+        "nativeString": "",
+        "viewFrame": [
+          57,
+          126,
+          208.33331298828125,
+          1
+        ]
+      },
+      {
+        "axScreenFrame": [
+          618,
+          341,
+          638,
+          3
+        ],
+        "axValue": "",
+        "cellString": "",
+        "editorIdentity": "none",
+        "editorInsideThisField": false,
+        "editorIsFirstResponder": false,
+        "editorString": "",
+        "fieldIdentity": "ObjectIdentifier(0x00000078da5df100)",
+        "label": "",
+        "liveScreenFrame": [
+          617,
+          342,
+          640,
+          1
+        ],
+        "nativeString": "",
+        "viewFrame": [
+          57,
+          126,
+          640,
+          1
+        ]
+      }
+    ],
+    "labels": [
+      {
+        "label": "搜索信息",
+        "rect": [
+          260,
+          247,
+          283,
+          48
+        ]
+      },
+      {
+        "label": "信息名称",
+        "rect": [
+          57,
+          146,
+          312.5,
+          39.5
+        ]
+      },
+      {
+        "label": "公开说明",
+        "rect": [
+          57,
+          232,
+          640,
+          59
+        ]
+      }
+    ],
+    "viewBounds": [
+      0,
+      0,
+      800,
+      600
+    ],
+    "viewFlipped": false
+  },
+  "dart": {
+    "semanticsEnabled": true,
+    "focusIdentity": 1037873039,
+    "focusKeys": [
+      "item-description"
+    ],
+    "editingValue": {
+      "text": "SyntheticDescriptionBeta",
+      "selection": [
+        24,
+        24
+      ],
+      "composing": [
+        -1,
+        -1
+      ]
+    },
+    "confirmation": false,
+    "controlsEnabled": {
+      "theme-purple": true,
+      "theme-green": true,
+      "theme-blue": true,
+      "theme-mono": true,
+      "nav-0": true,
+      "nav-1": true,
+      "nav-2": true,
+      "nav-3": true,
+      "nav-4": true,
+      "inbox-filter-all": true,
+      "inbox-filter-pending": true,
+      "inbox-filter-handled": true,
+      "library-credentials-mode": true,
+      "new-information": true,
+      "library-tag-filter": true,
+      "pVJALO_rXzXi8rDPfnumu-A5Slc-c-U3sndxgTqu0FI=": true,
+      "edit-information-category": true,
+      "edit-information-description": true,
+      "export-file-QgHlUQbaxqz7meDTU2UWbBlR1_2Zto0-2WVvQ5sHfwU=": true,
+      "new-credential": true,
+      "item-name": true,
+      "item-description": true,
+      "item-tags": true,
+      "field-name-0": true,
+      "field-value-0": true,
+      "field-description-0": true,
+      "field-name-1": true,
+      "choose-file-1": true,
+      "field-description-1": true,
+      "add-field": true,
+      "save-information": true
+    },
+    "editor": {
+      "description": "SyntheticDescriptionBeta",
+      "name": "SyntheticNameAlpha",
+      "fileStages": 0
+    },
+    "persistedDescription": "BaselineDescription",
+    "observedAtEpochSeconds": 1792670247.603804,
+    "sequence": 7
+  },
+  "note": "Actual CUA name Alpha and description Beta match native strings/AX values and Dart draft."
+}

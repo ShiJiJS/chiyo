@@ -1,0 +1,1 @@
+/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue50-package-20/AgentInfoManage/diagnostics/bin/macos-storage-check: replacing existing signature
