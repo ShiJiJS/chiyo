@@ -1,0 +1,12 @@
+{
+  "scope": "This project only; public LaunchServices dump and Spotlight read-only inspection",
+  "stableAppRegistrationCommandExit": 0,
+  "registeredExistingProjectAppPaths": [
+    "local/中文 Mac 预览/AgentInfoManage/app/info_desktop.app"
+  ],
+  "otherHistoricalMissingPathRecords": 12,
+  "spotlightProjectAppCount": 1,
+  "spotlightMissingPaths": 0,
+  "launchServicesRecordHexSuffixIsNotPartOfFilesystemPath": true,
+  "globalRegistryResetPerformed": false
+}
