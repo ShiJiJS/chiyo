@@ -1,0 +1,9 @@
+FILE_CAPACITY_PHASE=request
+FILE_CAPACITY_PHASE=approved
+FILE_CAPACITY_PHASE=byte-full
+FILE_CAPACITY_PHASE=byte-retried
+FILE_CAPACITY_PHASE=byte-released
+FILE_CAPACITY_PHASE=count-full
+FILE_CAPACITY_PHASE=count-retried
+FILE_CAPACITY_PHASE=complete
+{"complete": true, "phases": 8}
