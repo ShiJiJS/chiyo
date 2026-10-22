@@ -1,0 +1,13 @@
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+flutter: QA_FOCUS secretButton=false textEditor=false
+flutter: QA_FOCUS secretButton=false textEditor=false
+flutter: QA_FOCUS secretButton=false textEditor=false
+flutter: QA_LIFECYCLE AppLifecycleState.inactive
+flutter: QA_FOCUS secretButton=false textEditor=false
+flutter: QA_FOCUS secretButton=false textEditor=false
+flutter: QA_FOCUS secretButton=false textEditor=true
+flutter: QA_LIFECYCLE AppLifecycleState.resumed
+flutter: QA_FOCUS secretButton=false textEditor=false
+2026-10-22 09:25:21.427 MacSecretEntryProbe[3739:5778206] TSM AdjustCapsLockLEDForKeyTransitionHandling - _ISSetPhysicalKeyboardCapsLockLED Inhibit
+flutter: QA_FOCUS secretButton=false textEditor=false
+flutter: QA_FOCUS secretButton=false textEditor=true
