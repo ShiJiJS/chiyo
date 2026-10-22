@@ -76,6 +76,66 @@ void main() {
   );
 
   testWidgets(
+    'concrete scroll position replacements keep geometry updates live',
+    (tester) async {
+      final scroll = ScrollController();
+      late StateSetter update;
+      ScrollPhysics physics = const ClampingScrollPhysics();
+      final input = MacTextFieldAccessibility(
+        label: '公开说明',
+        child: const TextField(),
+      );
+      try {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: StatefulBuilder(
+                builder: (context, change) {
+                  update = change;
+                  return SizedBox(
+                    width: 300,
+                    height: 120,
+                    child: SingleChildScrollView(
+                      controller: scroll,
+                      physics: physics,
+                      child: Column(
+                        children: [
+                          const SizedBox(height: 40),
+                          input,
+                          const SizedBox(height: 400),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        final state = tester.state<ScrollableState>(
+          find.byType(Scrollable).first,
+        );
+        final original = scroll.position;
+        update(() => physics = const BouncingScrollPhysics());
+        await tester.pumpAndSettle();
+        expect(tester.state(find.byType(Scrollable).first), same(state));
+        expect(scroll.position, isNot(same(original)));
+        final before = (calls.last.arguments as List).single as Map;
+        scroll.jumpTo(20);
+        await tester.pumpAndSettle();
+        final after = (calls.last.arguments as List).single as Map;
+        expect(after['top'], (before['top'] as double) - 20);
+      } finally {
+        await tester.pumpWidget(const SizedBox());
+        await tester.pump();
+        scroll.dispose();
+      }
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.macOS),
+  );
+
+  testWidgets(
     'other platforms keep framework semantics without native messages',
     (tester) async {
       await tester.pumpWidget(

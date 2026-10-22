@@ -22,6 +22,7 @@ class _MacTextFieldAccessibilityState extends State<MacTextFieldAccessibility>
     with WidgetsBindingObserver {
   final _box = GlobalKey();
   ScrollableState? _scrollable;
+  ScrollPosition? _position;
   final _native = !kIsWeb && defaultTargetPlatform == TargetPlatform.macOS;
 
   @override
@@ -39,11 +40,15 @@ class _MacTextFieldAccessibilityState extends State<MacTextFieldAccessibility>
     super.didChangeDependencies();
     if (!_native) return;
     final next = Scrollable.maybeOf(context);
-    if (!identical(next, _scrollable)) {
-      _scrollable?.position.removeListener(_Labels.changed);
-      _scrollable = next;
-      next?.position.addListener(_Labels.changed);
+    final position = next?.position;
+    // ScrollableState can survive a physics/theme change while its concrete
+    // ScrollPosition is replaced. Follow the actual listener owner.
+    if (!identical(position, _position)) {
+      _position?.removeListener(_Labels.changed);
+      _position = position;
+      position?.addListener(_Labels.changed);
     }
+    _scrollable = next;
     _Labels.changed();
   }
 
@@ -86,7 +91,7 @@ class _MacTextFieldAccessibilityState extends State<MacTextFieldAccessibility>
   void dispose() {
     if (_native) {
       WidgetsBinding.instance.removeObserver(this);
-      _scrollable?.position.removeListener(_Labels.changed);
+      _position?.removeListener(_Labels.changed);
       _Labels.fields.remove(this);
       _Labels.changed();
     }
