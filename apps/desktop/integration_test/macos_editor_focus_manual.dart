@@ -7,6 +7,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/semantics.dart';
 import 'package:info_core/info_core.dart';
 import 'package:info_storage/info_storage.dart';
 import 'package:info_desktop/desktop_bootstrap.dart';
@@ -84,6 +85,9 @@ Future<void> main() async {
     'Synthetic expected description',
   );
   final diagnoseKeys = env['MAC_FOCUS_DIAGNOSE_KEYS'] == '1';
+  final diagnoseAccessibilityState =
+      env['MAC_FOCUS_DIAGNOSE_A11Y_STATE'] == '1';
+  final observationOnly = env['MAC_FOCUS_OBSERVATION_ONLY'] == '1';
   if (diagnoseKeys) {
     _KeyDiagnosticBinding();
   } else {
@@ -112,6 +116,7 @@ Future<void> main() async {
     'complete': false,
     'systemKeychainUsed': false,
     'expectedSavedDescription': expectedDescription,
+    if (observationOnly) 'observationOnly': true,
   };
   final observations = <Map<String, Object?>>[];
   Timer? timer;
@@ -192,6 +197,10 @@ Future<void> main() async {
           }
           await repository.close();
           closes++;
+          if (observationOnly) {
+            facts['complete'] = true;
+            facts['observationFinishedByNormalClose'] = true;
+          }
           write();
         },
       );
@@ -241,6 +250,8 @@ Future<void> main() async {
       final value = editable?.widget.controller.value;
       final draft = editor?.draft;
       final snapshot = <String, Object?>{
+        if (diagnoseAccessibilityState)
+          'semanticsEnabled': SemanticsBinding.instance.semanticsEnabled,
         'focusIdentity': focus == null ? null : identityHashCode(focus),
         'focusKeys': focusKeys,
         if (value != null)
@@ -263,6 +274,11 @@ Future<void> main() async {
       final encoded = jsonEncode(snapshot);
       if (encoded != last) {
         last = encoded;
+        if (diagnoseAccessibilityState) {
+          snapshot['observedAtEpochSeconds'] =
+              DateTime.now().microsecondsSinceEpoch /
+              Duration.microsecondsPerSecond;
+        }
         snapshot['sequence'] = observations.length;
         observations.add(snapshot);
         facts['observations'] = observations;
@@ -271,6 +287,17 @@ Future<void> main() async {
       }
     }
 
+    if (observationOnly) {
+      check(mode == 'edit', 'Observation-only mode does not claim a reopen');
+      timer = Timer.periodic(
+        const Duration(milliseconds: 100),
+        (_) => observe(),
+      );
+      stdout.writeln(
+        'EDITOR_FOCUS_PHASE=passive-accessibility-state-observation',
+      );
+      return;
+    }
     if (mode == 'edit') {
       timer = Timer.periodic(
         const Duration(milliseconds: 100),
