@@ -1,0 +1,20 @@
+{
+  "scope": "CUA actions in actual ordinary-binding sandbox QA app; passive controller/focus/composition observer",
+  "realSCIMInputSource": "com.apple.inputmethod.SCIM.ITABC",
+  "inputSourceChanged": false,
+  "OSSettingsChanged": false,
+  "actualPinyinKeySequence": "n,i,h,a,o; Space commits 你好; no typeText/paste for IME evidence",
+  "compositionEscape": "Cancels pending zhong wen; committed 你好 remains, collapsed composing[2,2], editor stays open, no discard prompt",
+  "multiLineSaved": "你好测试\n你好",
+  "cancelDiscardPrompt": "Escape opens prompt only after composition ends; Escape retains Chinese draft",
+  "search": "ni hao composing => visible0 results; Space commits你好 => visible1 result; clear restores unfiltered list",
+  "nativePanel": "Actual file picker opened from visible button after native scrollbar drag; Escape cancels; focusKeys item-description restored; next actual key sequence composes [4,13] without clicking text again",
+  "discard": "New 中文 draft explicitly discarded; original saved Chinese retained and read-only SQLCipher verified again",
+  "checkpoint": "Existing harness then saves ASCII MacFocusSaved by paste, not counted as IME; independent app reopen verifies this ASCII checkpoint and original field/7-byte attachment",
+  "chineseAppProcessReopenProven": false,
+  "CUAScreenshots": "Shown inline only; no archived PNG claimed",
+  "physicalHumanKeyboardOrVoiceOverProven": false,
+  "finalOrdinaryZIPEntryProven": false,
+  "newOSPermissionRequests": 0,
+  "stableAppReplaced": false
+}

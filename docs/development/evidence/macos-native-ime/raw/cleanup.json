@@ -1,0 +1,24 @@
+{
+  "sourceInputsVerified": 662,
+  "ownedPrivateTargetsAndAppAlreadyRemovedByDriver": true,
+  "additionalRemoved": [
+    {
+      "path": "build/macos-adaptation/issue48-ime-current-20261022/source",
+      "allocatedKiB": 23456
+    },
+    {
+      "path": "build/macos-adaptation/issue48-ime-current-20261022/read-input-source",
+      "allocatedKiB": 36
+    }
+  ],
+  "releasedAllocatedKiB": 23492,
+  "stablePayloadItems": 7971,
+  "stableMismatches": [],
+  "stableStrictSignatureExit": 0,
+  "stablePid53592Alive": true,
+  "remainingApps": [
+    "local/中文 Mac 预览/AgentInfoManage/app/info_desktop.app"
+  ],
+  "remainingGeneratedDsyms": [],
+  "SDKCacheZIPsPrivateBackupsPreserved": true
+}
