@@ -75,7 +75,11 @@ final class NativeTextFieldAccessibility {
       for child in node.subviews { visit(child) }
     }
     visit(view)
-    let nativeFrames = fields.map { ($0, $0.accessibilityFrame()) }
+    func liveFrame(_ field: NSTextField) -> NSRect {
+      guard let parent = field.superview else { return .zero }
+      return window.convertToScreen(parent.convert(field.frame, to: nil))
+    }
+    let nativeFrames = fields.map { ($0, liveFrame($0)) }
     let targets = labels.map { label -> (String, NSRect) in
       let r = label.rect
       let y = view.isFlipped ? r.minY : view.bounds.maxY - r.maxY

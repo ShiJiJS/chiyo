@@ -24,6 +24,7 @@ import uuid
 ROOT = Path(__file__).resolve().parents[2]
 ENTRY = 'apps/desktop/integration_test/macos_editor_focus_manual.dart'
 SWIFT = 'apps/desktop/macos/Runner/MainFlutterWindow.swift'
+NATIVE_LABELS = 'apps/desktop/macos/Runner/NativeTextFieldAccessibility.swift'
 INJECTION = '''      case "qaReadInputSource":
         guard let source = TISCopyCurrentKeyboardInputSource()?.takeRetainedValue(),
               let raw = TISGetInputSourceProperty(source, kTISPropertyInputSourceID) else {
@@ -48,6 +49,8 @@ def main():
     parser.add_argument('output', type=Path)
     parser.add_argument('--diagnose-focus', action='store_true')
     parser.add_argument('--diagnose-keys', action='store_true')
+    parser.add_argument('--diagnose-accessibility', action='store_true',
+                        help='Passively record only field-purpose and geometry metadata in the QA copy')
     parser.add_argument('--expected-description', default='MacFocusSaved',
                         help='Synthetic text to save through the UI and verify after process restart')
     args = parser.parse_args()
@@ -65,6 +68,7 @@ def main():
     state = {'scope': __doc__, 'complete': False,
              'sourceCommit': subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip(),
              'expectedSavedDescription': args.expected_description,
+             'diagnoseAccessibility': args.diagnose_accessibility,
              'bundleIdentifier': identity, 'commands': [], 'cases': [], 'processExits': [], 'inputSourceHashes': {}}
     processes = []
     app = root = None
@@ -142,6 +146,34 @@ def main():
 ''')
             swift.write_text(text)
         modified = [config, swift]
+        if args.diagnose_accessibility:
+            labels = source / NATIVE_LABELS
+            text = labels.read_text()
+            anchor = '  private var timer: Timer?\n'
+            assert text.count(anchor) == 1
+            text = text.replace(anchor, anchor + '  private var qaLastGeometry = ""\n')
+            anchor = '    visit(view)\n'
+            assert text.count(anchor) == 1
+            text = text.replace(anchor, anchor + '''    if ProcessInfo.processInfo.environment["MAC_FOCUS_DIAGNOSE_A11Y"] == "1" {
+      func rect(_ value: NSRect) -> [Double] { [value.minX, value.minY, value.width, value.height] }
+      let data: [String: Any] = [
+        "viewBounds": rect(view.bounds), "viewFlipped": view.isFlipped,
+        "labels": labels.map { ["label": $0.name, "rect": rect($0.rect)] },
+        "fields": fields.map { field -> [String: Any] in
+          let live = field.superview.map { window.convertToScreen($0.convert(field.frame, to: nil)) } ?? .zero
+          return ["label": field.accessibilityLabel() ?? "", "viewFrame": rect(field.frame),
+                  "liveScreenFrame": rect(live), "axScreenFrame": rect(field.accessibilityFrame())]
+        }
+      ]
+      if let bytes = try? JSONSerialization.data(withJSONObject: data, options: [.sortedKeys]),
+         let json = String(data: bytes, encoding: .utf8), json != qaLastGeometry {
+        qaLastGeometry = json
+        FileHandle.standardOutput.write(Data(("NATIVE_FIELD_GEOMETRY=" + json + "\\n").utf8))
+      }
+    }
+''')
+            labels.write_text(text)
+            modified.append(labels)
         if args.diagnose_focus:
             editor = source / 'apps/desktop/lib/information_editor.dart'
             text = editor.read_text()
@@ -170,6 +202,8 @@ def main():
                                MAC_FOCUS_EXPECTED_DESCRIPTION=args.expected_description)
             if args.diagnose_keys:
                 environment['MAC_FOCUS_DIAGNOSE_KEYS'] = '1'
+            if args.diagnose_accessibility:
+                environment['MAC_FOCUS_DIAGNOSE_A11Y'] = '1'
             if root is not None:
                 environment['MAC_FOCUS_ROOT'] = str(root)
             logpath = logs / (mode + '.txt')
