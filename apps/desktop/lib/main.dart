@@ -451,8 +451,13 @@ class _InformationAppState extends State<InformationApp>
                     ),
                   ].indexed
                   .map(
+                    // Retained pages must not keep tooltip portals active in
+                    // the root overlay while another page owns the interface.
                     (entry) => _visited.contains(entry.$1)
-                        ? entry.$2
+                        ? TooltipVisibility(
+                            visible: entry.$1 == _tabs.index,
+                            child: entry.$2,
+                          )
                         : const SizedBox(),
                   )
                   .toList(),
