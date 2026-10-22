@@ -1,0 +1,1 @@
+{"stage": "after-actual-GUI-save", "SQLITE_OPEN_READONLY": true, "cipherVersion": "4.19.0 community", "schema": 22, "integrity": "ok", "informationCount": 1, "directoryCount": 1, "actualGUISelectedDirectory": "Mac Native QA", "originalInformationAndFieldIDsPreserved": true, "originalFieldValuePreserved": true, "databaseAndWalAndShmReadBytesUnchanged": true}

@@ -1,0 +1,14 @@
+pub-info_core 0
+pub-info_cli 0
+pub-info_storage 0
+pub-desktop 0
+analyze 0
+build-release 0
+signature 0
+MAC_LIFECYCLE_UI_READY=close-reopen-menu-quit
+MAC_LIFECYCLE_UI_PASSED=close-reopen-menu-quit
+MAC_LIFECYCLE_UI_READY=command-q
+MAC_LIFECYCLE_UI_PASSED=command-q
+MAC_LIFECYCLE_UI_READY=settings-quit
+MAC_LIFECYCLE_UI_PASSED=settings-quit
+{"complete": true, "cases": 6}

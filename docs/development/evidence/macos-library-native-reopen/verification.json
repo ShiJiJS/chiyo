@@ -1,0 +1,257 @@
+{
+  "date": "2026-10-22",
+  "frozenQASource": "556803ca2a6efbf9fa7ebc494348ff1f3f86e64c",
+  "productionCandidateSource": "5a509968400b2d140a69a02f89935c5db4e935ee",
+  "productionChanged": false,
+  "sourceInputsVerified": 662,
+  "strictPreparationPhases": 7,
+  "CUAUIQuitProcesses": 3,
+  "automaticReopenCheckProcesses": 3,
+  "normalProcessExitsZero": 6,
+  "libraryClosesPerProcess": 1,
+  "portsClosedAfterAllExits": true,
+  "forcedCleanup": false,
+  "actualCloseHiddenWindowsByPublicCGWindowList": 2,
+  "dockOrStatusClickProven": false,
+  "actualCUAGUIClassificationSavedAndReadOnlySQLCipherReopenVerified": true,
+  "keychainUsed": false,
+  "newOSPermissionPrompts": 0,
+  "physicalIMEOrVoiceOverProven": false,
+  "finalOrdinaryZIPGUIProven": false,
+  "issue46Criteria": [
+    false,
+    true,
+    true,
+    true,
+    false,
+    true
+  ],
+  "issue48Criteria": [
+    true,
+    true,
+    true,
+    false,
+    false,
+    false
+  ],
+  "issue50Criteria": [
+    true,
+    true,
+    false,
+    false,
+    false,
+    false
+  ],
+  "raw": [
+    {
+      "path": "raw/after-actual-GUI-save.json",
+      "bytes": 384,
+      "sha256": "9217303033e43ee5b345947e8a03bcc85805282e63d3544857e2cf0016e2a847"
+    },
+    {
+      "path": "raw/after-independent-reopen.json",
+      "bytes": 387,
+      "sha256": "9643764ceec086e4cb2ec9113f6dd69ede3c40319a4d0312d97ad9d5a90ef3cc"
+    },
+    {
+      "path": "raw/archive-cleanup.py",
+      "bytes": 5657,
+      "sha256": "be5c4f01453a888e357fc958d778c0cf5d1a7966858d9996315bd3498108245e"
+    },
+    {
+      "path": "raw/cleanup.json",
+      "bytes": 942,
+      "sha256": "3019852d6df6bd5c7a4317700a033e1ce73e6be9a22e2c07d7e72fcffa09c58a"
+    },
+    {
+      "path": "raw/close-reopen-menu-quit-reopen.json",
+      "bytes": 354,
+      "sha256": "a8d4e10f5ebcc350a4841e11a1cad5ba50b2f2dfc87c9430ebd3821ab3503de0"
+    },
+    {
+      "path": "raw/close-reopen-menu-quit.json",
+      "bytes": 370,
+      "sha256": "1b9f36d7669f5b87292daea2383bf9dfe377d252c86c355b9097d6da1f953ca7"
+    },
+    {
+      "path": "raw/command-q-reopen.json",
+      "bytes": 341,
+      "sha256": "e735bcc9f0a84d717894187dee5ba353c1b94c155961887694b689d48bb7031c"
+    },
+    {
+      "path": "raw/command-q.json",
+      "bytes": 277,
+      "sha256": "0fd9bbc0d0d2a985e18d9d19a4c2a2cc21c1d26b75538b0cfa43944338e9ddec"
+    },
+    {
+      "path": "raw/frozen-product/apps/desktop/lib/anchored_surface.dart",
+      "bytes": 3853,
+      "sha256": "e7f99467d583e45b1d6bda90ea352ef9e98fe5efd97d2f19ac35e0085e401e91"
+    },
+    {
+      "path": "raw/frozen-product/apps/desktop/lib/library.dart",
+      "bytes": 53565,
+      "sha256": "8f310aea6407d6eebf35bc3cb8e04af7f7d84ea67833147c1980d7a9b5c6de38"
+    },
+    {
+      "path": "raw/frozen-product/apps/desktop/lib/main.dart",
+      "bytes": 17080,
+      "sha256": "18766aaef7b5812976ac70edd17180556a0c8dc09b66f8f8fc0e039818749f0b"
+    },
+    {
+      "path": "raw/frozen-product/apps/desktop/lib/organization_selectors.dart",
+      "bytes": 9447,
+      "sha256": "1ae9b81ed0caa039b9028d09f859078d447fb85be65048a583af8022667eb46b"
+    },
+    {
+      "path": "raw/frozen-product/apps/desktop/macos/Runner/MainFlutterWindow.swift",
+      "bytes": 18794,
+      "sha256": "c07075d361745a80f5e08abda88f5075fa7c1a469fbb59c33c928e6a9d8e2b07"
+    },
+    {
+      "path": "raw/logs/analyze.txt",
+      "bytes": 96,
+      "sha256": "b03c49e825fb2b92e6720132661f531f3e9523415abe0920c52a0ef403856676"
+    },
+    {
+      "path": "raw/logs/build-release.txt",
+      "bytes": 5424,
+      "sha256": "d9f86675d9b33a665b24f58cd8ed660b6445ddcc3e7f507ec698f3b76f8985a6"
+    },
+    {
+      "path": "raw/logs/close-reopen-menu-quit-reopen.txt",
+      "bytes": 298,
+      "sha256": "d1aa79178230ac683fa56f3fa0931b1281dafdb612fe93477afad5469e46888c"
+    },
+    {
+      "path": "raw/logs/close-reopen-menu-quit.txt",
+      "bytes": 1190,
+      "sha256": "cca3c0be8171b45e1d3ce51e7f2cdc416e8d40be3a43267c10d0585e823cbe3d"
+    },
+    {
+      "path": "raw/logs/command-q-reopen.txt",
+      "bytes": 298,
+      "sha256": "afcd0038c46afb9c1af162ea384d3cf6c4157022dc6ba9733ff8bc942d804512"
+    },
+    {
+      "path": "raw/logs/command-q.txt",
+      "bytes": 358,
+      "sha256": "eba47d68426aeb2badec3f6e5aa2312ac4c69aa296f27722a75ce02babf6c6e7"
+    },
+    {
+      "path": "raw/logs/pub-desktop.txt",
+      "bytes": 318,
+      "sha256": "ca68f707c22164511fc2b3f9af97ed7bd46538b1d334d9c806a6a59a556a6e05"
+    },
+    {
+      "path": "raw/logs/pub-info_cli.txt",
+      "bytes": 438,
+      "sha256": "7652c98906e8f741dc56b0e7f018713f8985ac3d073ce66e4cb8e1d3274e15f6"
+    },
+    {
+      "path": "raw/logs/pub-info_core.txt",
+      "bytes": 438,
+      "sha256": "7652c98906e8f741dc56b0e7f018713f8985ac3d073ce66e4cb8e1d3274e15f6"
+    },
+    {
+      "path": "raw/logs/pub-info_storage.txt",
+      "bytes": 438,
+      "sha256": "7652c98906e8f741dc56b0e7f018713f8985ac3d073ce66e4cb8e1d3274e15f6"
+    },
+    {
+      "path": "raw/logs/settings-quit-reopen.txt",
+      "bytes": 298,
+      "sha256": "f38dfc0aace7057f5e04957d17d4984e1fef3b79d3ef0b990a1c85719e8a324e"
+    },
+    {
+      "path": "raw/logs/settings-quit.txt",
+      "bytes": 326,
+      "sha256": "5347a0647cdc3882b787cb4f9151cfb14e29972304d8761783580a8cf7584dbd"
+    },
+    {
+      "path": "raw/logs/signature.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/macos-lifecycle-ui.py",
+      "bytes": 14669,
+      "sha256": "bbe5b47381ad65b88b0e75cd12a87330a6711a4c83ade4106d3e97ddce069d19"
+    },
+    {
+      "path": "raw/macos_lifecycle_probe.dart",
+      "bytes": 14969,
+      "sha256": "f093b5862d0b422edf6ac0d820e05d48add9b2f4c9a96b396ded4e95a4fcb923"
+    },
+    {
+      "path": "raw/read-gui-classification-first.py",
+      "bytes": 2909,
+      "sha256": "0271c626e11875cecc66b6210237a97460f5bf1fb10de120fb4e19411e2101fe"
+    },
+    {
+      "path": "raw/read-gui-classification.py",
+      "bytes": 2977,
+      "sha256": "4306cc8b7646ebc440166b4fa98d4c79b1a55131b36bac9bdcc67d0559eb5188"
+    },
+    {
+      "path": "raw/read-window-state.swift",
+      "bytes": 1071,
+      "sha256": "ed3957cc53ca1c8017e86b29d8ea7e036145229b8e60bc8e0d0bdecc08135592"
+    },
+    {
+      "path": "raw/result.json",
+      "bytes": 87545,
+      "sha256": "5af2af567d67e4e30112a0a24c11cb9871b27f7c3eb77c8a106a90a154bc0474"
+    },
+    {
+      "path": "raw/run-supervisor.txt",
+      "bytes": 368,
+      "sha256": "2c657717e54fa4d6363816162e8df1cd9a9ccb2f1b15620f8c934f1188a8397d"
+    },
+    {
+      "path": "raw/settings-cancel.json",
+      "bytes": 111,
+      "sha256": "5f9accf6c293349f0815425ee14829f00da84203acc77db0857fd1012a7e02f9"
+    },
+    {
+      "path": "raw/settings-quit-reopen.json",
+      "bytes": 345,
+      "sha256": "9cca6ba08c15dd65119480369ab182766dc83d9d37d83862fb649b79f4fadabc"
+    },
+    {
+      "path": "raw/settings-quit.json",
+      "bytes": 267,
+      "sha256": "19f24a2487b3e4f1869c4f5f8e3545f19982945d1616d69c0810f7d42c39d710"
+    },
+    {
+      "path": "raw/sqlite-readonly-first.txt",
+      "bytes": 360,
+      "sha256": "6a231724528c07eb6173ae04f291aca0339d2373edd2b35f7d0b47839162638d"
+    },
+    {
+      "path": "raw/sqlite-readonly-reopen.txt",
+      "bytes": 363,
+      "sha256": "032fe0384c0c7adf0e4008bd8cf277ec70c9bd7f23aa0817bd1baacca97fc7b8"
+    },
+    {
+      "path": "raw/window-after-close-1.json",
+      "bytes": 354,
+      "sha256": "11bc1bb34cf370564f12ede66d4772067ca358b1d74664f673dcc718b5f185a9"
+    },
+    {
+      "path": "raw/window-after-close-2.json",
+      "bytes": 354,
+      "sha256": "11bc1bb34cf370564f12ede66d4772067ca358b1d74664f673dcc718b5f185a9"
+    },
+    {
+      "path": "raw/window-after-tool-reopen-1.json",
+      "bytes": 353,
+      "sha256": "04bbb92d141ac6c488a0d64d8b128bd5d326b8ce895bea51a9182945b08d5de2"
+    },
+    {
+      "path": "raw/window-before-close.json",
+      "bytes": 353,
+      "sha256": "04bbb92d141ac6c488a0d64d8b128bd5d326b8ce895bea51a9182945b08d5de2"
+    }
+  ]
+}
