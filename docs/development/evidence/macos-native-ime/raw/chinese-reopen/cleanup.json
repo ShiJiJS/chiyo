@@ -1,0 +1,14 @@
+{
+  "sourceInputsVerified": 662,
+  "driverOwnedLibraryAppAndCachesRemoved": true,
+  "additionalSourceRemoved": true,
+  "releasedAllocatedKiB": 23460,
+  "stablePayloadItemsVerified": 7971,
+  "stableStrictSignatureExit": 0,
+  "stablePid53592Alive": true,
+  "remainingApps": [
+    "local/中文 Mac 预览/AgentInfoManage/app/info_desktop.app"
+  ],
+  "remainingGeneratedDsyms": [],
+  "SDKCacheZIPsPrivateBackupsPreserved": true
+}

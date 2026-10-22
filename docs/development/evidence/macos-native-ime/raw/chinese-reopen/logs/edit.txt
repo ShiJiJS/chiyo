@@ -1,0 +1,13 @@
+2026-10-22 13:15:13.118 info_desktop[32664:6114723] TISFileInterrogator updateSystemInputSources false but old data invalid: currentCacheHeaderPtr nonNULL? 0, ->cacheFormatVersion 0, ->magicCookie 00000000, inputSourceTableCountSys 0
+Keyboard Layouts: duplicate keyboard layout identifier -17410.
+Keyboard Layouts: keyboard layout identifier -17410 has been replaced with -28673.
+Keyboard Layouts: duplicate keyboard layout identifier -30769.
+Keyboard Layouts: keyboard layout identifier -30769 has been replaced with -28674.
+Keyboard Layouts: duplicate keyboard layout identifier -14934.
+Keyboard Layouts: keyboard layout identifier -14934 has been replaced with -28675.
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+EDITOR_FOCUS_ROOT=/Users/jiangxinyi/Library/Containers/org.shijijs.agent-info-manage.qa.editor-focus.b7abc45fea304f4383f3f9b473f6e350/Data/tmp/aim-editor-focus-JSmo3h
+EDITOR_FOCUS_PHASE=actual-ui-edit-cancel-keyboard-and-save
+2026-10-22 13:15:54.820 info_desktop[32664:6114723] TSM AdjustCapsLockLEDForKeyTransitionHandling - _ISSetPhysicalKeyboardCapsLockLED Inhibit
+2026-10-22 13:15:54.864 info_desktop[32664:6114723] error messaging the mach port for IMKCFRunLoopWakeUpReliable
+EDITOR_FOCUS_COMPLETE=edit
