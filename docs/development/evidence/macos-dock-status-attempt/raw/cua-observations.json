@@ -1,0 +1,26 @@
+{
+  "source": "Agent CUA observations in this conversation; not a new recorded screenshot or test assertion",
+  "appPid": 73207,
+  "dockBindingAttempts": [
+    {
+      "target": "com.apple.dock",
+      "result": "Computer Use server -10005 timeoutReached"
+    },
+    {
+      "target": "/System/Library/CoreServices/Dock.app",
+      "result": "Computer Use server -10005 timeoutReached"
+    }
+  ],
+  "shortcutsTried": [
+    "ctrl+F3",
+    "ctrl+F8"
+  ],
+  "shortcutsProveActualDockOrStatusClick": false,
+  "ordinaryAppAccessible": true,
+  "statusItemClickProved": false,
+  "closeReopenCyclesPerformed": 0,
+  "finalAction": "Actual CUA super+q in QA app",
+  "acceptancePassed": false,
+  "recoveryProcessRun": false,
+  "reason": "Required close/reopen cycles were not performed; driver exited 1 at closeWindow count assertion. Native app exited normally 0."
+}

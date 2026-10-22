@@ -1,0 +1,122 @@
+{
+  "date": "2026-10-22",
+  "sourceCommit": "501bdcf75d62ac1e6de3b9bb227785829b95c14a",
+  "acceptancePassed": false,
+  "driverExit": 1,
+  "nativeAppNormalExit": 0,
+  "requiredCloseReopenCycles": 2,
+  "observedCloseReopenCycles": 0,
+  "actualDockOrStatusClickProved": false,
+  "nativeNormalQuitProved": true,
+  "independentRecoveryRun": false,
+  "cleanup": {
+    "inputFilesVerifiedAgainstGit": 669,
+    "copyModificationsVerified": 3,
+    "removedSourceAllocatedKiB": 97548,
+    "sourceRemoved": true,
+    "generatedApps": [
+      "local/中文 Mac 预览/AgentInfoManage/app/info_desktop.app"
+    ],
+    "generatedDSYMs": [],
+    "scanScope": [
+      "build",
+      "local"
+    ],
+    "sdkAndOtherUserAppsNotScannedOrDeleted": true,
+    "stablePreviewManifestEntriesVerified": 7971,
+    "stablePreviewSource": "4690e79357bb728da22193d8dadd6dc8a8ce2ce6",
+    "stablePreviewStrictSignatureExit": 0,
+    "stablePreviewPreservedPid": 53592,
+    "stableRuntimeExtraPreserved": [
+      ".local/state/gh/device-id"
+    ],
+    "backupAndRecoveryExist": true
+  },
+  "files": [
+    {
+      "path": "raw/cleanup.json",
+      "bytes": 655,
+      "sha256": "4babb7bff16fcc4fce94009933eb47d47ccf1dd5bc08754f2dfa0be82a336a2d"
+    },
+    {
+      "path": "raw/close-reopen-menu-quit.json",
+      "bytes": 290,
+      "sha256": "8a95422c8a4876f5cf197d1fa9e251077990cc4c672fc4426b1fd895f4254efa"
+    },
+    {
+      "path": "raw/cua-observations.json",
+      "bytes": 857,
+      "sha256": "bc7c1491aec167ab020b9b764af7d2f24eeb050f962c86d71148494124e52e1d"
+    },
+    {
+      "path": "raw/logs/analyze.txt",
+      "bytes": 96,
+      "sha256": "c70da5958f5db1a3bde6edb314eaeef015d4d71f5a2b2588fd2e6161a5b092c8"
+    },
+    {
+      "path": "raw/logs/build-release.txt",
+      "bytes": 5431,
+      "sha256": "009d2f5c3843c4be0087d459e41edcfaa91e8c9e4b3cc773987f23d7a9c6cc73"
+    },
+    {
+      "path": "raw/logs/close-reopen-menu-quit.txt",
+      "bytes": 1030,
+      "sha256": "03fc8fea0921f3bd1db85f68d6bc6cbe32d26145041a1a7659ca3f484dc354c7"
+    },
+    {
+      "path": "raw/logs/pub-desktop.txt",
+      "bytes": 318,
+      "sha256": "ca68f707c22164511fc2b3f9af97ed7bd46538b1d334d9c806a6a59a556a6e05"
+    },
+    {
+      "path": "raw/logs/pub-info_cli.txt",
+      "bytes": 438,
+      "sha256": "7652c98906e8f741dc56b0e7f018713f8985ac3d073ce66e4cb8e1d3274e15f6"
+    },
+    {
+      "path": "raw/logs/pub-info_core.txt",
+      "bytes": 438,
+      "sha256": "7652c98906e8f741dc56b0e7f018713f8985ac3d073ce66e4cb8e1d3274e15f6"
+    },
+    {
+      "path": "raw/logs/pub-info_storage.txt",
+      "bytes": 438,
+      "sha256": "7652c98906e8f741dc56b0e7f018713f8985ac3d073ce66e4cb8e1d3274e15f6"
+    },
+    {
+      "path": "raw/logs/signature.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/macos-lifecycle-ui.py",
+      "bytes": 16024,
+      "sha256": "3adee4a5afc3e00bc418a3449e1adc2bc5f4db6245b8bcfc454eafeb05ee2f6e"
+    },
+    {
+      "path": "raw/macos_lifecycle_probe.dart",
+      "bytes": 14969,
+      "sha256": "f093b5862d0b422edf6ac0d820e05d48add9b2f4c9a96b396ded4e95a4fcb923"
+    },
+    {
+      "path": "raw/qa-copy/apps/desktop/macos/Runner/Configs/AppInfo.xcconfig",
+      "bytes": 662,
+      "sha256": "174f5a715fbcf74402a59a99c2ea2353f6e881bfe3b50d6d25b8ae4dad88c3a5"
+    },
+    {
+      "path": "raw/qa-copy/apps/desktop/macos/Runner/Info.plist",
+      "bytes": 1138,
+      "sha256": "9c06ef9b18ac6d0505fbc47193f889f35f01068bc6c24602c1a338ebad00e553"
+    },
+    {
+      "path": "raw/qa-copy/apps/desktop/macos/Runner/MainFlutterWindow.swift",
+      "bytes": 19621,
+      "sha256": "e261108cece2716c192ac9f19b440acf1eefef7abb41b8323e566c552a8d6151"
+    },
+    {
+      "path": "raw/result.json",
+      "bytes": 86843,
+      "sha256": "12849d30c9704acd6fbd7806c39ea5927da34580bdf1abcad0f463483e56c8b2"
+    }
+  ]
+}
