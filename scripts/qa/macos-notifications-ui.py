@@ -31,7 +31,11 @@ def main():
     parser.add_argument('output', type=Path)
     parser.add_argument('--reuse-permission', action='store_true',
                         help='Require existing system grant; never request permission')
+    parser.add_argument('--permission-settings', action='store_true',
+                        help='Check actual Settings denial/restoration without submitting notifications')
     args = parser.parse_args()
+    if args.permission_settings and not args.reuse_permission:
+        parser.error('--permission-settings requires --reuse-permission')
     if os.uname().sysname != 'Darwin':
         parser.error('macOS required')
     output = args.output.resolve()
@@ -44,7 +48,8 @@ def main():
     state = {'complete': False, 'sourceCommit': subprocess.check_output(
         ['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip(),
         'bundleIdentifier': IDENTITY, 'commands': [], 'scope': __doc__,
-        'reusePermission': args.reuse_permission}
+        'reusePermission': args.reuse_permission,
+        'permissionSettings': args.permission_settings}
     app, process, root = None, None, None
     controller = output / 'controller.json'
 
@@ -145,6 +150,8 @@ def main():
         environment['MAC_NOTIFICATION_OWNER'] = owner
         if args.reuse_permission:
             environment['MAC_NOTIFICATION_REUSE_PERMISSION'] = '1'
+        if args.permission_settings:
+            environment['MAC_NOTIFICATION_PERMISSION_SETTINGS'] = '1'
         with (logs / 'application.txt').open('wb') as log:
             process = subprocess.Popen([str(app / 'Contents/MacOS/info_desktop')], cwd=source,
                                        env=environment, stdout=log, stderr=subprocess.STDOUT)
@@ -175,7 +182,12 @@ def main():
         state['application'] = {'exitCode': process.returncode, **facts}
         assert process.returncode == 0 and facts['complete'] and not facts.get('failed')
         assert facts['nativeTerminationRequested'] and facts['libraryCloses'] == 1 and facts['flutterErrors'] == 0
-        assert len(facts['cases']) == 2 and facts['submissions'] == 2
+        assert len(facts['cases']) == 2
+        if args.permission_settings:
+            assert facts['submissions'] == 0 and facts['permissionActions'] == 2
+            assert facts['permissionSettingsRestored'] and facts['pendingRequestPreservedWhileDenied']
+        else:
+            assert facts['submissions'] == 2
         state['complete'] = True
     finally:
         if process is not None and process.poll() is None:

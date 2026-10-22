@@ -93,6 +93,8 @@ Future<void> main() async {
   final owner = Platform.environment['MAC_NOTIFICATION_OWNER'];
   final reusePermission =
       Platform.environment['MAC_NOTIFICATION_REUSE_PERMISSION'] == '1';
+  final permissionSettings =
+      Platform.environment['MAC_NOTIFICATION_PERMISSION_SETTINGS'] == '1';
   check(
     Platform.isMacOS &&
         owner != null &&
@@ -225,6 +227,87 @@ Future<void> main() async {
     }
     facts['notificationStateAfterUI'] = runtime.availability.notifications.name;
     facts['permissionActionsAfterUI'] = platform.permissionActions;
+    if (permissionSettings) {
+      check(reusePermission, 'Settings test requires existing system decision');
+      await service.owner.setNotificationsEnabled(true);
+      await phase('settings-enabled-ready-disable-only-this-qa-app');
+      await until(
+        () =>
+            runtime.availability.notifications ==
+                NotificationAvailability.denied &&
+            platform.permissionActions == 1,
+        'CUA system Settings denial and actual app check button',
+      );
+      final item = service.owner.information.single;
+      final session = service.agent.openSession('系统拒绝时的合成聊天');
+      final request = service.agent.request(session, '系统拒绝不丢访问申请', [
+        FieldRef(item.id, item.fields.single.id),
+      ]);
+      // Let the production request stream settle while denied. No direct call
+      // to notify, no injected availability event or native settings response.
+      await Future<void>.delayed(const Duration(milliseconds: 500));
+      check(
+        service.owner.notificationsEnabled,
+        'Application reminders must remain enabled',
+      );
+      check(
+        platform.submissions == 0,
+        'Denied system permission dispatched notification',
+      );
+      check(
+        service.owner
+            .queryInbox(limit: 100)
+            .entries
+            .singleWhere((r) => r.id == request.id)
+            .pending,
+        'Denied system permission lost request',
+      );
+      facts['pendingRequestPreservedWhileDenied'] = true;
+      (facts['cases'] as List).add({
+        'label': 'actual-settings-denied',
+        'notificationState': runtime.availability.notifications.name,
+        'permissionActions': platform.permissionActions,
+        'submissions': platform.submissions,
+        'requestId': request.id,
+        'requestPending': true,
+        'totalPending': service.owner
+            .queryInbox(limit: 100)
+            .entries
+            .where((r) => r.pending)
+            .length,
+      });
+      await phase('settings-denied-verified-restore-only-this-qa-app');
+      await until(
+        () =>
+            runtime.availability.notifications ==
+                NotificationAvailability.enabled &&
+            platform.permissionActions == 2,
+        'CUA system Settings restore and actual app check button',
+      );
+      check(
+        platform.submissions == 0,
+        'Restoring permission replayed notification',
+      );
+      check(
+        service.owner
+            .queryInbox(limit: 100)
+            .entries
+            .singleWhere((r) => r.id == request.id)
+            .pending,
+        'Restoring permission approved request',
+      );
+      facts['permissionSettingsRestored'] = true;
+      (facts['cases'] as List).add({
+        'label': 'actual-settings-restored',
+        'notificationState': runtime.availability.notifications.name,
+        'permissionActions': platform.permissionActions,
+        'submissions': platform.submissions,
+        'requestPending': true,
+      });
+      facts['complete'] = true;
+      await phase('complete-await-native-quit');
+      return;
+    }
     for (var i = 0; i < targets.length; i++) {
       final label = i == 0 ? 'foreground' : 'background';
       final target = targets[i];
