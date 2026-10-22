@@ -1,0 +1,13 @@
+{
+  "ownPlaintextFixtureAndPrivateObserverControllerRemoved": true,
+  "temporaryPublicDriverBinaryRemoved": true,
+  "receiverPortClosed": true,
+  "driverExit": 0,
+  "receiverExit": 143,
+  "stableOrdinaryPid": 6826,
+  "remainingApps": [
+    "local/中文 Mac 预览/AgentInfoManage/app/info_desktop.app"
+  ],
+  "generatedDsym": [],
+  "sdkZipEncryptedProfileAndRecoveryMaterialsPreserved": true
+}
