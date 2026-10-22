@@ -130,8 +130,24 @@ class _CredentialManagementState extends State<CredentialManagement> {
     }
   }
 
+  void _close() {
+    if (!_busy) Navigator.pop(context);
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => Actions(
+    actions: {
+      DismissIntent: CallbackAction<DismissIntent>(
+        onInvoke: (_) {
+          _close();
+          return null;
+        },
+      ),
+    },
+    child: Focus(autofocus: true, skipTraversal: true, child: _dialog(context)),
+  );
+
+  Widget _dialog(BuildContext context) {
     final p = UiPalette.of(context), owner = widget.owner;
     Widget paragraph(String text, {String? leadingStrong}) => Padding(
       padding: const EdgeInsets.only(bottom: 14),
@@ -190,7 +206,7 @@ class _CredentialManagementState extends State<CredentialManagement> {
       scrollGutter: 0,
       simpleFlow: true,
       title: titles[action]!,
-      onClose: _busy ? null : () => Navigator.pop(context),
+      onClose: _busy ? null : _close,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
@@ -359,7 +375,7 @@ class _CredentialManagementState extends State<CredentialManagement> {
       actions: [
         TextButton(
           style: prototypeSecondary(context),
-          onPressed: _busy ? null : () => Navigator.pop(context),
+          onPressed: _busy ? null : _close,
           child: const Text('取消'),
         ),
         TextButton(

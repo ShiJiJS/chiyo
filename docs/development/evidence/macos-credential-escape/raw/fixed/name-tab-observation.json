@@ -1,0 +1,37 @@
+{
+  "phase": "name-Tab",
+  "latest": {
+    "focusIdentity": 159208089,
+    "focusKeys": [
+      "credential-secret"
+    ],
+    "confirmation": false,
+    "controlsEnabled": {
+      "theme-purple": true,
+      "theme-green": true,
+      "theme-blue": true,
+      "theme-mono": true,
+      "nav-0": true,
+      "nav-1": true,
+      "nav-2": true,
+      "nav-3": true,
+      "nav-4": true,
+      "inbox-filter-all": true,
+      "inbox-filter-pending": true,
+      "inbox-filter-handled": true,
+      "library-credentials-mode": true,
+      "new-information": true,
+      "doWIgG_uRax8HTP0UjtsC9x41kCmJ8zfWQygccwbj-o=": true,
+      "edit-information-description": true,
+      "edit-information-category": true,
+      "export-file-wbUqiALTVh2n7jwu6VBhNfyZqsz3dg7g4iCFixcREjY=": true,
+      "new-credential": true,
+      "credential-form-string": true,
+      "credential-form-file": true,
+      "save-credential": false
+    },
+    "editor": null,
+    "persistedDescription": "BaselineDescription",
+    "sequence": 8
+  }
+}

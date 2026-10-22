@@ -1,0 +1,21 @@
+{
+  "phase": "edit",
+  "currentVersion": 2,
+  "credentialCount": 1,
+  "materialVersions": [
+    1,
+    2
+  ],
+  "knownSyntheticBytesExact": [
+    true,
+    true
+  ],
+  "sqliteReadOnly": true,
+  "cipherVersion": "4.19.0 community",
+  "dbAndWalHashesUnchanged": true,
+  "hashes": {
+    "library.db": "ca2df070a7c81e0c8e1d049747e18370f9b9efa3d4dc0a689dec2881a754945d"
+  },
+  "productionKeychainUsed": false,
+  "plainValuesLogged": false
+}
