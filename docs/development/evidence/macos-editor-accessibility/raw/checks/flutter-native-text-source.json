@@ -1,0 +1,9 @@
+{
+  "flutterRevision": "abaf9c523780a608bd46686fd5e53740a07077f8",
+  "engineRevision": "deb287481e3ce9468f3434937ced4240a70539ca",
+  "source": ".tools/flutter/engine/src/flutter/shell/platform/darwin/macos/framework/Source/FlutterTextInputSemanticsObject.mm",
+  "bytes": 7060,
+  "sha256": "9c61d8fb2b849d08f030e807efcf1a4a8492ab48dfd7f370c048946a14129998",
+  "observation": "FlutterTextPlatformNode constructs native NSTextField and returns it as accessibility element; this source does not forward kName to accessibilityLabel",
+  "appAdapterUsesPrivateClassNamesOrEnginePatch": false
+}

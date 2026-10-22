@@ -1,0 +1,19 @@
+{
+  "source": "148a9fe",
+  "scope": "First native label bridge; not final success",
+  "actualNativeTopLabels": [
+    "信息名称",
+    "公开说明"
+  ],
+  "automaticScrollRefreshProven": false,
+  "actualScrollFailure": "After native scrollbar drag no field-purpose labels appeared. Editing then clearing the initially empty structured-field description triggered parent rebuild and native 字段内容/字段公开说明 appeared. Other fields not declared passed.",
+  "syntheticDescriptionRestoredBeforeSave": true,
+  "AXOffscreenValueAliasingObserved": true,
+  "valuesVerifiedByModelRatherThanAllAXFields": true,
+  "savedCheckpoint": "你好测试\n你好",
+  "checkpointWasPastedNotIME": true,
+  "normalCommandQProcesses": 2,
+  "newSystemPermissionRequests": 0,
+  "VoiceOverEnabled": false,
+  "completeResultScope": "Existing save/reopen harness only; does not mean all native label cases pass"
+}

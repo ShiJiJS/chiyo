@@ -1,0 +1,58 @@
+{
+  "focusIdentity": 64160805,
+  "focusKeys": [
+    "item-description"
+  ],
+  "editingValue": {
+    "text": "nihao",
+    "selection": [
+      5,
+      5
+    ],
+    "composing": [
+      -1,
+      -1
+    ]
+  },
+  "confirmation": false,
+  "controlsEnabled": {
+    "theme-purple": true,
+    "theme-green": true,
+    "theme-blue": true,
+    "theme-mono": true,
+    "nav-0": true,
+    "nav-1": true,
+    "nav-2": true,
+    "nav-3": true,
+    "nav-4": true,
+    "inbox-filter-all": true,
+    "inbox-filter-pending": true,
+    "inbox-filter-handled": true,
+    "library-credentials-mode": true,
+    "new-information": true,
+    "library-tag-filter": true,
+    "rHq-kiE4d4RRPI_lG7obi1Vl4b1N26tZkclRADKrCD4=": true,
+    "edit-information-category": true,
+    "edit-information-description": true,
+    "export-file-NT4_vEba_uKCSITCf9Cjb5UC695uDfOiMNLXxJr1esE=": true,
+    "new-credential": true,
+    "item-name": true,
+    "item-description": true,
+    "item-tags": true,
+    "field-name-0": true,
+    "field-value-0": true,
+    "field-description-0": true,
+    "field-name-1": true,
+    "choose-file-1": true,
+    "field-description-1": true,
+    "add-field": true,
+    "save-information": true
+  },
+  "editor": {
+    "description": "nihao",
+    "name": "Mac 焦点合成资料",
+    "fileStages": 0
+  },
+  "persistedDescription": "BaselineDescription",
+  "sequence": 6
+}

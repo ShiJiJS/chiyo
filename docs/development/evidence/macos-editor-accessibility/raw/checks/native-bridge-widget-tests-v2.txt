@@ -1,0 +1,23 @@
+Waiting for another flutter command to release the startup lock...
+00:00 +0: loading /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_text_field_accessibility_test.dart
+00:00 +0: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/app_keyboard_navigation_test.dart: search shortcut leaves forward and reverse form traversal available (variant: TargetPlatform.macOS)
+00:00 +1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/app_keyboard_navigation_test.dart: search shortcut leaves forward and reverse form traversal available (variant: TargetPlatform.macOS)
+00:00 +2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/app_keyboard_navigation_test.dart: search shortcut leaves forward and reverse form traversal available (variant: TargetPlatform.macOS)
+00:01 +3: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/app_keyboard_navigation_test.dart: search shortcut leaves forward and reverse form traversal available (variant: TargetPlatform.macOS)
+00:01 +4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/app_keyboard_navigation_test.dart: search shortcut leaves forward and reverse form traversal available (variant: TargetPlatform.macOS)
+00:01 +5: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/app_keyboard_navigation_test.dart: search shortcut leaves forward and reverse form traversal available (variant: TargetPlatform.macOS)
+00:02 +6: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/app_keyboard_navigation_test.dart: search shortcut leaves forward and reverse form traversal available (variant: TargetPlatform.macOS)
+00:02 +7: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/app_keyboard_navigation_test.dart: search shortcut leaves forward and reverse form traversal available (variant: TargetPlatform.macOS)
+00:02 +8: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/information_file_editor_test.dart: file controls are reachable by keyboard and Escape cleans the draft at 100.0%
+00:02 +9: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/information_file_editor_test.dart: file controls are reachable by keyboard and Escape cleans the draft at 100.0%
+00:02 +10: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/information_file_editor_test.dart: file controls are reachable by keyboard and Escape cleans the draft at 100.0%
+00:02 +11: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/information_file_editor_test.dart: file controls are reachable by keyboard and Escape cleans the draft at 100.0%
+00:02 +12: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/information_file_editor_test.dart: file controls are reachable by keyboard and Escape cleans the draft at 200.0%
+00:03 +13: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/information_file_editor_test.dart: real owner save retries unchanged input, preserves bytes and text-only edits
+00:03 +14: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/information_file_editor_test.dart: cancel waits for in-flight picker and releases its eventual stage; cleanup can retry
+00:03 +15: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/information_file_editor_test.dart: cancelled picker and failed replacement retain the original selection and other inputs
+00:03 +16: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/information_file_editor_test.dart: same-purpose file replacement retains identity, kind conversion changes it
+00:03 +17: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/information_file_editor_test.dart: a known committed save only retries cleanup and never submits a second version
+00:03 +18: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/information_file_editor_test.dart: file editor shows missing file error, saves real file and keeps the three-column library
+00:04 +19: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/information_file_editor_test.dart: (tearDownAll)
+00:04 +19: All tests passed!

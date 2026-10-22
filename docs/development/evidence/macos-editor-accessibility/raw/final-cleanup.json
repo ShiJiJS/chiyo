@@ -1,0 +1,18 @@
+{
+  "stableSource": "4690e79357bb728da22193d8dadd6dc8a8ce2ce6",
+  "stableManifestRowsVerified": 7971,
+  "hashBytesModesLinksVerified": true,
+  "strictCodesignExit": 0,
+  "stablePID": 53592,
+  "projectApps": [
+    "local/中文 Mac 预览/AgentInfoManage/app/info_desktop.app"
+  ],
+  "generatedDSYM": [],
+  "newSystemKeychainRequests": 0,
+  "run5TimeoutRecordedAsFailure": true,
+  "run6NormalExits": [
+    43243,
+    43282
+  ],
+  "standaloneOwnedDiagnosticBinariesRemoved": true
+}

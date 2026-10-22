@@ -1,0 +1,17 @@
+{
+  "VoiceOverInitial": false,
+  "CommandF5ViaCUAEnabledVoiceOver": false,
+  "actualSystemSettingsToggle": "Actual Accessibility > VoiceOver toggle off→on; welcome Use VoiceOver; display-welcome preference remained1",
+  "NSWorkspaceIsVoiceOverEnabledAfterWelcome": true,
+  "actualVoiceOverPid": 33953,
+  "realVoiceOverCursorNavigationProven": false,
+  "controlOptionRightObservation": "No confirmed VoiceOver navigation; product focusKeys changed to inbox-filter-all",
+  "VoiceOverCaptionObservation": "Caption panel preference already on; core VoiceOver CUA binding timed out, scrod not valid app; no speech/caption result claimed",
+  "AXFormBaseline": "Separate static labels; seven text fields have no purpose label; empty tags button has no label; directory button only says 未分类",
+  "actualCUAEditing": "BaselineDescription replaced by MacVoiceOverSaved and actual Save; normal CommandQ; independently reopened same synthetic library; actual CommandQ",
+  "VoiceOverAfter": false,
+  "systemSettingsRestored": "Notification page selected; no notification preference changed",
+  "voiceOverUtilityClosed": true,
+  "newSecurityPermissionRequests": 0,
+  "keychainUsed": false
+}
