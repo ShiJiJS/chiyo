@@ -1,0 +1,87 @@
+{
+  "complete": true,
+  "cleanup": [
+    {
+      "path": "build/macos-adaptation/issue50-package-15/AgentInfoManage",
+      "allocatedKiB": 380756,
+      "removed": true
+    },
+    {
+      "path": "build/macos-adaptation/issue50-package-15/verify",
+      "allocatedKiB": 380756,
+      "removed": true
+    },
+    {
+      "path": "build/macos-adaptation/issue50-package-15/diagnostic-build",
+      "allocatedKiB": 8888,
+      "removed": true
+    },
+    {
+      "path": "apps/desktop/build/macos",
+      "allocatedKiB": 1001808,
+      "removed": true
+    },
+    {
+      "path": "apps/desktop/.dart_tool/flutter_build",
+      "allocatedKiB": 83472,
+      "removed": true
+    },
+    {
+      "path": "apps/desktop/.dart_tool/hooks_runner",
+      "allocatedKiB": 26908,
+      "removed": true
+    },
+    {
+      "path": "apps/desktop/build/native_assets",
+      "allocatedKiB": 1772,
+      "removed": true
+    },
+    {
+      "path": "apps/desktop/build/test_cache",
+      "allocatedKiB": 53672,
+      "removed": true
+    },
+    {
+      "path": "apps/desktop/build/unit_test_assets",
+      "allocatedKiB": 18048,
+      "removed": true
+    }
+  ],
+  "unregister": [
+    {
+      "path": "build/macos-adaptation/issue50-package-15/AgentInfoManage/app/info_desktop.app",
+      "exitCode": 0
+    },
+    {
+      "path": "build/macos-adaptation/issue50-package-15/verify/中文 空格 路径/AgentInfoManage/app/info_desktop.app",
+      "exitCode": 0
+    },
+    {
+      "path": "apps/desktop/build/macos/Build/Products/Release/info_desktop.app",
+      "exitCode": 0
+    }
+  ],
+  "sourceCommit": "c6958daabcd77862f436db5088e08bb0bf3fa6b4",
+  "sourceSnapshotSha256": "cc3df4361407cd15a9fa3b646e9a516bb325b8685f0227c4686c26e5a72bab93",
+  "sourceInputsVerifiedBefore": 644,
+  "packageSourceChecksRequested": true,
+  "sourceCheckScope": "Full four-package source checks requested inside this stock package run; checked inputs frozen before and verified after packaging",
+  "packageExitCode": 0,
+  "archive": "build/macos-adaptation/issue50-package-15/agent-info-manage-0.4.0+12-mac-dev.c6958daabcd7-macos-arm64.zip",
+  "archiveBytes": 130969937,
+  "archiveSha256": "d9b0415f382a4c128adf9d55f5f18609eb78ef83b37745367b23066dd07988d7",
+  "manifestSha256": "364bbd6ae13c676fab8988b4da82095f7cbd3cd956a42ce503d87e42f0245f04",
+  "packagePhasesPassed": 21,
+  "sourceInputsVerifiedAfter": 644,
+  "sourceSnapshotGitObjectsVerified": 644,
+  "packageVerified": true,
+  "stableItemsVerified": 7971,
+  "stableMismatches": [],
+  "stableSignatureExit": 0,
+  "stablePid53592Alive": true,
+  "remainingApps": [
+    "local/中文 Mac 预览/AgentInfoManage/app/info_desktop.app"
+  ],
+  "remainingGeneratedDsyms": [],
+  "releasedAllocatedKiB": 1956080
+}
