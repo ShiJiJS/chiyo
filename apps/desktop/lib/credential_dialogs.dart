@@ -219,7 +219,17 @@ class _CredentialEditorState extends State<CredentialEditor> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => Actions(
+    actions: {
+      // The modal barrier is non-dismissible; Escape follows guarded Cancel.
+      DismissIntent: CallbackAction<DismissIntent>(onInvoke: (_) => _close()),
+    },
+    // Give an untouched dialog a descendant focus target for the local action,
+    // without adding an extra stop to the keyboard traversal order.
+    child: Focus(autofocus: true, skipTraversal: true, child: _dialog(context)),
+  );
+
+  Widget _dialog(BuildContext context) {
     final p = UiPalette.of(context);
     final ready =
         _name.text.trim().isNotEmpty &&

@@ -1,0 +1,21 @@
+{
+  "phase": "reopen",
+  "currentVersion": 2,
+  "credentialCount": 1,
+  "materialVersions": [
+    1,
+    2
+  ],
+  "knownSyntheticBytesExact": [
+    true,
+    true
+  ],
+  "sqliteReadOnly": true,
+  "cipherVersion": "4.19.0 community",
+  "dbAndWalHashesUnchanged": true,
+  "hashes": {
+    "library.db": "54a24510eb958f6540962868d1c41a56e5fdda7a128941f968c85d74d198de6a"
+  },
+  "productionKeychainUsed": false,
+  "plainValuesLogged": false
+}
