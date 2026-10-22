@@ -35,6 +35,8 @@ def main():
                           help='Actual UI close of startup errors and quit during opening')
     scenario.add_argument('--duplicate-only', action='store_true',
                           help='Only actual duplicate error close, holder quit and recovery')
+    scenario.add_argument('--dock-status', action='store_true',
+                          help='Only actual close and Dock/status-menu reopen, followed by normal quit/recovery')
     args = parser.parse_args()
     if os.uname().sysname != 'Darwin':
         parser.error('macOS required')
@@ -193,6 +195,23 @@ def main():
         assert config.read_text().count(original) == 1
         config.write_text(config.read_text().replace(original, 'PRODUCT_BUNDLE_IDENTIFIER = ' + identity))
         state['copyModifications'] = {str(config.relative_to(source)): digest(config)}
+        if args.dock_status:
+            # Distinguish this owned QA icon/item from the preserved preview.
+            # Only presentation labels change; lifecycle handlers stay exact.
+            plist = source / 'apps/desktop/macos/Runner/Info.plist'
+            contents = plistlib.loads(plist.read_bytes())
+            contents['CFBundleName'] = 'Mac Dock 合成验收'
+            contents['CFBundleDisplayName'] = 'Mac Dock 合成验收'
+            plist.write_bytes(plistlib.dumps(contents))
+            swift = source / 'apps/desktop/macos/Runner/MainFlutterWindow.swift'
+            text = swift.read_text()
+            for before, after in [('button.title = "信"', 'button.title = "验"'),
+                                  ('button.toolTip = "信息访问授权"', 'button.toolTip = "Mac Dock 合成验收"')]:
+                assert text.count(before) == 1
+                text = text.replace(before, after)
+            swift.write_text(text)
+            state['copyModifications'].update({str(p.relative_to(source)): digest(p) for p in [plist, swift]})
+            state['dockStatusLabelsOnlyInQACopy'] = True
         save()
         launcher = str(source / 'scripts/dev-macos.sh')
         for package in ['info_core', 'info_cli', 'info_storage']:
@@ -222,7 +241,7 @@ def main():
             state['duplicateBundle'] = {'path': str(duplicate_app), 'sameBundleIdentifier': contents['CFBundleIdentifier'],
                                         'displayName': contents['CFBundleDisplayName'], 'binarySha256': digest(duplicate_app / 'Contents/MacOS/info_desktop')}
             startup_cases()
-        for label in ([] if args.startup or args.duplicate_only else ['close-reopen-menu-quit', 'command-q', 'settings-quit']):
+        for label in ([] if args.startup or args.duplicate_only else ['close-reopen-menu-quit'] if args.dock_status else ['close-reopen-menu-quit', 'command-q', 'settings-quit']):
             process, root = launch('ui-hold', label)
             ready = wait_for(lambda: read_report(root, 'ui-hold'), process)
             assert ready.get('startup') == 'ready' and ready['tray'] and reachable(ready['port'])
