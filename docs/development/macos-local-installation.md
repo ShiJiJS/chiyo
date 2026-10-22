@@ -1,5 +1,10 @@
 # Mac 本机预览安装与升级约定（#42 / #50）
 
+2026-10-22 当前候选为[7b19d34系统通知修正包](macos-notification-stale-permission.md)，
+`0.4.1+13-mac-dev.7b19d34b61cf`（package23），784通过／66条件跳过、21阶段通过。
+ZIP保留、生成App和dSYM已清理，固定4690e79普通预览未换；不把同源合成QA的权限
+复验当作这份ZIP的普通Keychain升级。下方候选均保留其当时范围。
+
 2026-10-22 当前候选更新为[dd050f3键盘与原生AX焦点修正包](macos-keyboard-ax-focus.md)，
 `0.4.1+13-mac-dev.dd050f3caa1b`（package21）：781通过/66条件跳过、21阶段通过。
 纯焦点往返、原生/Dart选区、拼音组合、实际文件面板Escape取消及保存重开有同源实机证据；

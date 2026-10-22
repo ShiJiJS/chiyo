@@ -1,0 +1,11 @@
+{
+  "source": "6d1d7b1f",
+  "sourceChecksExit": 1,
+  "complete": false,
+  "noArchiveProduced": true,
+  "failedTest": "notification settings show permission and test-delivery outcomes without changing access",
+  "desktopPassed": 258,
+  "desktopSkipped": 2,
+  "desktopFailed": 1,
+  "fix": "Manual test notification keeps enabled status for retry when actual system permission remains enabled"
+}
