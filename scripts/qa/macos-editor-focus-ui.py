@@ -8,6 +8,10 @@ window, Flutter's hardware-key state and incoming text-input method/selector
 names through a forwarding messenger; no input-source change, UI injection,
 path grants or callback substitution.
 Private libraries and generated apps/debug symbols are removed afterwards.
+--observe-only records actual UI activity until normal app exit; it makes no
+save/reopen claim. --diagnose-accessibility-state observes system/window flags
+and Flutter's semanticsEnabled without changing them. An explicit comparator
+can omit only the native field-purpose adapter in the owned QA copy.
 """
 import argparse
 import hashlib
@@ -51,9 +55,17 @@ def main():
     parser.add_argument('--diagnose-keys', action='store_true')
     parser.add_argument('--diagnose-accessibility', action='store_true',
                         help='Passively record only field-purpose and geometry metadata in the QA copy')
+    parser.add_argument('--diagnose-accessibility-state', action='store_true',
+                        help='Read-only window/system flags, enhanced-UI notifications and Flutter semantics state')
+    parser.add_argument('--observe-only', action='store_true',
+                        help='Observe actual UI until normal quit; no save/reopen claim')
+    parser.add_argument('--without-purpose-adapter', action='store_true',
+                        help='QA comparator only: omit native field-purpose naming, keeping framework semantics')
     parser.add_argument('--expected-description', default='MacFocusSaved',
                         help='Synthetic text to save through the UI and verify after process restart')
     args = parser.parse_args()
+    if args.without_purpose_adapter and not (args.observe_only and args.diagnose_accessibility_state):
+        parser.error('Comparator requires --observe-only --diagnose-accessibility-state')
     if not args.expected_description or len(args.expected_description) > 4096:
         parser.error('Expected description must contain 1 to 4096 synthetic characters')
     assert os.uname().sysname == 'Darwin'
@@ -69,6 +81,9 @@ def main():
              'sourceCommit': subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip(),
              'expectedSavedDescription': args.expected_description,
              'diagnoseAccessibility': args.diagnose_accessibility,
+             'diagnoseAccessibilityState': args.diagnose_accessibility_state,
+             'observationOnly': args.observe_only,
+             'purposeAdapterDisabledInQACopy': args.without_purpose_adapter,
              'bundleIdentifier': identity, 'commands': [], 'cases': [], 'processExits': [], 'inputSourceHashes': {}}
     processes = []
     app = root = None
@@ -146,6 +161,71 @@ def main():
 ''')
             swift.write_text(text)
         modified = [config, swift]
+        if args.without_purpose_adapter:
+            text = swift.read_text()
+            init = '    textFieldAccessibility = NativeTextFieldAccessibility(view: flutterViewController.view)\n'
+            assert text.count(init) == 1
+            text = text.replace(init, '    // QA comparator: no native field-purpose adapter.\n')
+            start = text.index('    accessibility.setMethodCallHandler {')
+            end = text.index('\n    // Local, owner-process-only bridge;', start)
+            text = text[:start] + '''    accessibility.setMethodCallHandler { call, result in
+      guard call.method == "update" else { result(FlutterMethodNotImplemented); return }
+      result(nil)
+    }
+''' + text[end:]
+            swift.write_text(text)
+        if args.diagnose_accessibility_state:
+            text = swift.read_text()
+            anchor = '  override func awakeFromNib() {\n'
+            assert text.count(anchor) == 1
+            text = text.replace(anchor, '''  private var qaStateTimer: Timer?
+  private var qaEnhancedObserver: Any?
+  private var qaLastEnhanced: Bool?
+  private var qaEnhancedEvents = 0
+  private var qaLastAccessibilityState = ""
+  private func qaRecordAccessibilityState() {
+    let data: [String: Any] = [
+      "active": NSApp.isActive, "keyWindow": isKeyWindow, "visible": isVisible,
+      "voiceOver": NSWorkspace.shared.isVoiceOverEnabled,
+      "enhancedLast": qaLastEnhanced.map { $0 as Any } ?? NSNull(),
+      "enhancedEvents": qaEnhancedEvents
+    ]
+    if let bytes = try? JSONSerialization.data(withJSONObject: data, options: [.sortedKeys]),
+       let json = String(data: bytes, encoding: .utf8), json != qaLastAccessibilityState {
+      qaLastAccessibilityState = json
+      var payload = data
+      payload["observedAtEpochSeconds"] = Date().timeIntervalSince1970
+      if let bytes = try? JSONSerialization.data(withJSONObject: payload, options: [.sortedKeys]),
+         let record = String(data: bytes, encoding: .utf8) {
+        FileHandle.standardOutput.write(Data(("QA_ACCESSIBILITY_STATE=" + record + "\\n").utf8))
+      }
+    }
+  }
+''' + anchor)
+            anchor = '    super.awakeFromNib()\n'
+            assert text.count(anchor) == 1
+            text = text.replace(anchor, anchor + '''    // Observe the same status notification used by the pinned Flutter engine;
+    // never post it, toggle semantics, activate a window or change permissions.
+    qaEnhancedObserver = NotificationCenter.default.addObserver(
+      forName: NSNotification.Name("NSApplicationDidChangeAccessibilityEnhancedUserInterfaceNotification"),
+      object: nil, queue: .main) { [weak self] notification in
+        guard let self else { return }
+        self.qaLastEnhanced = notification.userInfo?["AXEnhancedUserInterface"] as? Bool
+        self.qaEnhancedEvents += 1
+        self.qaRecordAccessibilityState()
+      }
+    qaStateTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
+      self?.qaRecordAccessibilityState()
+    }
+''')
+            anchor = '      case "terminate":\n'
+            assert text.count(anchor) == 1
+            text = text.replace(anchor, anchor + '''        self.qaStateTimer?.invalidate()
+        self.qaStateTimer = nil
+        if let observer = self.qaEnhancedObserver { NotificationCenter.default.removeObserver(observer) }
+        self.qaEnhancedObserver = nil
+''')
+            swift.write_text(text)
         if args.diagnose_accessibility:
             labels = source / NATIVE_LABELS
             text = labels.read_text()
@@ -196,7 +276,7 @@ def main():
         app = desktop / 'build/macos/Build/Products/Release/info_desktop.app'
         run('signature', ['/usr/bin/codesign', '--verify', '--deep', '--strict', str(app)])
         run('entitlements', ['/usr/bin/codesign', '-d', '--entitlements', ':-', str(app)])
-        for mode in ['edit', 'reopen']:
+        for mode in (['edit'] if args.observe_only else ['edit', 'reopen']):
             environment = {k: os.environ[k] for k in ['HOME', 'USER', 'LOGNAME', 'LANG'] if k in os.environ}
             environment.update(PATH='/usr/bin:/bin:/usr/sbin:/sbin', MAC_FOCUS_MODE=mode, MAC_FOCUS_OWNER=owner,
                                MAC_FOCUS_EXPECTED_DESCRIPTION=args.expected_description)
@@ -204,6 +284,10 @@ def main():
                 environment['MAC_FOCUS_DIAGNOSE_KEYS'] = '1'
             if args.diagnose_accessibility:
                 environment['MAC_FOCUS_DIAGNOSE_A11Y'] = '1'
+            if args.diagnose_accessibility_state:
+                environment['MAC_FOCUS_DIAGNOSE_A11Y_STATE'] = '1'
+            if args.observe_only:
+                environment['MAC_FOCUS_OBSERVATION_ONLY'] = '1'
             if root is not None:
                 environment['MAC_FOCUS_ROOT'] = str(root)
             logpath = logs / (mode + '.txt')
