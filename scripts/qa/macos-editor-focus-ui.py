@@ -61,11 +61,15 @@ def main():
                         help='Observe actual UI until normal quit; no save/reopen claim')
     parser.add_argument('--without-purpose-adapter', action='store_true',
                         help='QA comparator only: omit native field-purpose naming, keeping framework semantics')
+    parser.add_argument('--await-confirm-transition', action='store_true',
+                        help='QA hypothesis only: wait for the confirming route to leave the overlay before returning')
     parser.add_argument('--expected-description', default='MacFocusSaved',
                         help='Synthetic text to save through the UI and verify after process restart')
     args = parser.parse_args()
     if args.without_purpose_adapter and not (args.observe_only and args.diagnose_accessibility_state):
         parser.error('Comparator requires --observe-only --diagnose-accessibility-state')
+    if args.await_confirm_transition and not (args.observe_only and args.diagnose_accessibility_state):
+        parser.error('Transition hypothesis requires --observe-only --diagnose-accessibility-state')
     if not args.expected_description or len(args.expected_description) > 4096:
         parser.error('Expected description must contain 1 to 4096 synthetic characters')
     assert os.uname().sysname == 'Darwin'
@@ -84,6 +88,7 @@ def main():
              'diagnoseAccessibilityState': args.diagnose_accessibility_state,
              'observationOnly': args.observe_only,
              'purposeAdapterDisabledInQACopy': args.without_purpose_adapter,
+             'awaitConfirmTransitionInQACopy': args.await_confirm_transition,
              'bundleIdentifier': identity, 'commands': [], 'cases': [], 'processExits': [], 'inputSourceHashes': {}}
     processes = []
     app = root = None
@@ -161,6 +166,22 @@ def main():
 ''')
             swift.write_text(text)
         modified = [config, swift]
+        if args.await_confirm_transition:
+            dialog = source / 'apps/desktop/lib/prototype_dialog.dart'
+            text = dialog.read_text()
+            start = text.index('Future<bool> prototypeConfirm(')
+            block = text[start:]
+            anchor = '}) async =>\n    await showDialog<bool>('
+            assert block.count(anchor) == 1
+            block = block.replace(anchor, '}) async {\n  ModalRoute<bool>? confirmationRoute;\n  final result = await showDialog<bool>(')
+            anchor = '      builder: (dialogContext) => PrototypeDialog('
+            assert block.count(anchor) == 1
+            block = block.replace(anchor, '      builder: (dialogContext) {\n        confirmationRoute = ModalRoute.of<bool>(dialogContext);\n        return PrototypeDialog(')
+            anchor = '      ),\n    ) ??\n    false;'
+            assert block.count(anchor) == 1
+            block = block.replace(anchor, '      );\n      },\n    );\n  await confirmationRoute?.completed;\n  return result ?? false;\n}')
+            dialog.write_text(text[:start] + block)
+            modified.append(dialog)
         if args.without_purpose_adapter:
             text = swift.read_text()
             init = '    textFieldAccessibility = NativeTextFieldAccessibility(view: flutterViewController.view)\n'
