@@ -63,6 +63,31 @@ def main():
         ROOT / 'scripts/qa/check-organization-compatibility.py')
     scenarios = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(scenarios)
+    # Also consume format10 on this platform: inspecting an export alone does
+    # not prove that its detached history can be restored and used safely.
+    marker = "  stdout.writeln('SCHEMA21_TO22_IDENTITY_AND_OLD_BACKUP_RESTORE_PASSED');"
+    assert scenarios.UPGRADE.count(marker) == 1
+    scenarios.UPGRADE = scenarios.UPGRADE.replace(marker, r'''
+  final modern = await EncryptedInformationRepository.open(
+    '$root/format10-restore', keys(root,'format10-restore'));
+  final restoredService = InformationService(repository: modern);
+  try {
+    final contents = await modern.backups.inspect('$root/new.aimbackup',recovery);
+    if(contents.formatVersion!=10) throw StateError('Not a format10 restore');
+    await modern.backups.restore(contents);
+    final o=restoredService.owner;
+    if(o.information.isNotEmpty||o.directories.isNotEmpty||o.tags.isNotEmpty)
+      throw StateError('Deleted current objects revived');
+    if(!o.informationRevisions.any((r)=>r.item.tagIds.isNotEmpty))
+      throw StateError('Detached historical references lost');
+    await o.restoreRecycled(modern.recycleEntries.single.id);
+    final item=o.information.single;
+    if(item.directoryId!=null||item.tagIds.isNotEmpty||
+       item.fields.single.value!='synthetic content')
+      throw StateError('Missing classification recovery changed content');
+  } finally {await restoredService.close();await modern.close();}
+  stdout.writeln('SCHEMA21_TO22_IDENTITIES_OLD_AND_FORMAT10_RESTORE_PASSED');
+''')
     original = "WindowsDatabaseKeyStore keys(String root, String name) => WindowsDatabaseKeyStore('$root/$name/key.dpapi');"
     replacement = '''
 class SyntheticKeys implements DatabaseKeyStore {
@@ -132,14 +157,17 @@ DatabaseKeyStore keys(String root, String name) => SyntheticKeys(name == 'source
                                    'binarySha256': digest(binary)})
             save()
         expected = ['UNCHANGED_OLD_READER_CREATED_SCHEMA21',
-                    'SCHEMA21_TO22_IDENTITY_AND_OLD_BACKUP_RESTORE_PASSED',
+                    'SCHEMA21_TO22_IDENTITIES_OLD_AND_FORMAT10_RESTORE_PASSED',
                     'UNCHANGED_OLD_READER_REJECTED_SCHEMA22_AND_FORMAT10']
         assert [case['marker'] for case in state['cases']] == expected
         assert all(digest(path) == value for path, value in protected.items())
         state.update(complete=True, sourceAndLocksUnchanged=True,
                      oldSourceGitObjectsExact=True, realMacSQLCipher=True,
                      systemKeychainUsed=False, oldReaderRefusalDatabaseBytesPreserved=True,
-                     oldBackupRestored=True, conditionalBackup10Verified=True)
+                     oldBackupRestored=True, conditionalBackup10Verified=True,
+                     format10RestoredAndRecycledWithMissingClassification=True,
+                     historicalReferencesRetained=True,
+                     sourceAndRecipientSyntheticKeysDistinct=True)
     except Exception as error:
         state['failure'] = type(error).__name__ + ': ' + str(error)
         raise
