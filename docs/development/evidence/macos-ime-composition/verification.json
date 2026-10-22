@@ -1,0 +1,131 @@
+{
+  "date": "2026-10-22",
+  "baseCommit": "f93c3bd8fe576c7002d42711c420426c0a29c92f",
+  "strictAnalysisExit": 0,
+  "relatedTestsPassed": 14,
+  "relatedTestsFailed": 0,
+  "fullDesktopRerunAfterNewTests": false,
+  "nativeImePassed": false,
+  "widgetCompositionOnly": true,
+  "productionCodeChanged": false,
+  "sourceAndModifiersRestored": true,
+  "ownedBlankDocumentArchivedAndRemoved": true,
+  "newKeychainCalls": 0,
+  "newSystemPermissionRequests": 0,
+  "initialFailures": "Incorrect test expectations: framework paste retains the replaced composing range; undo skips composing values until the IME commits. No production workaround applied.",
+  "issue48Criteria": [
+    true,
+    true,
+    true,
+    false,
+    false,
+    false
+  ],
+  "files": [
+    {
+      "path": "raw/NativeIMEControl.rtf",
+      "bytes": 219,
+      "sha256": "ffa85bc2b3bc9ceff66312367f67ded746a183312d43496871d04a15e9751be2"
+    },
+    {
+      "path": "raw/actual-ui-observations.json",
+      "bytes": 1498,
+      "sha256": "c7f8fa6fef1b7aded8ae4256073d80eab7e5032f752a161fb2d21bb98a5c5e41"
+    },
+    {
+      "path": "raw/composition-focus-debug.txt",
+      "bytes": 6058,
+      "sha256": "ba62059a56bdccdadd42ea0c59821c9fbc5c8ca0c24f5aca06dcf4746d784006"
+    },
+    {
+      "path": "raw/composition-regressions-accepted.txt",
+      "bytes": 2801,
+      "sha256": "7c4a94b9268eb49a80bcef2d9f328afe32f87a0f584eee74e9f9a79a0cd06a78"
+    },
+    {
+      "path": "raw/composition-regressions-final.txt",
+      "bytes": 4976,
+      "sha256": "8e95687bc5b57e3967800a9143582977a43a2de45414196a1dad032aa40dc017"
+    },
+    {
+      "path": "raw/composition-regressions.txt",
+      "bytes": 4875,
+      "sha256": "4cd3ad704aec950ff900055e8dce0262ba2f66f693341ee3eb335bc65e17526a"
+    },
+    {
+      "path": "raw/composition-tests.patch",
+      "bytes": 3648,
+      "sha256": "1c6cceda48f0561827dfd9e4f09bfb3d70b14ce025f14510388aebca1a248bb3"
+    },
+    {
+      "path": "raw/desktop-analysis-accepted.txt",
+      "bytes": 96,
+      "sha256": "8184004e4bf972d7022dba9ea8241226c40b7154c4cd655c8e5e02a462410005"
+    },
+    {
+      "path": "raw/desktop-analysis-before.txt",
+      "bytes": 425,
+      "sha256": "6bbfde7aef627ce8d03fb31d26ff715ffb185cf798c3e457843bdba68a369ff3"
+    },
+    {
+      "path": "raw/desktop-analysis-final.txt",
+      "bytes": 96,
+      "sha256": "ed407199b2b0553cd0da4eef9898bffc4410c87aeb2772f1ec34d4f5c6fe405b"
+    },
+    {
+      "path": "raw/desktop-analysis.txt",
+      "bytes": 96,
+      "sha256": "685fc40c722ef1185a6610cbf69e384c87059d21df64afcb4907910d76ff960b"
+    },
+    {
+      "path": "raw/input-source-after-control-space.json",
+      "bytes": 114,
+      "sha256": "ba1589e85b472d729f295a949cc18b97ea08db99ab58b205bf594199f08b5f22"
+    },
+    {
+      "path": "raw/input-source-after.json",
+      "bytes": 212,
+      "sha256": "98b80bc27cdc93c9b994ff95400d284229330570e03caec9f244f5d821e14250"
+    },
+    {
+      "path": "raw/input-source-before.json",
+      "bytes": 212,
+      "sha256": "98b80bc27cdc93c9b994ff95400d284229330570e03caec9f244f5d821e14250"
+    },
+    {
+      "path": "raw/input-source-restored-pinyin.json",
+      "bytes": 212,
+      "sha256": "98b80bc27cdc93c9b994ff95400d284229330570e03caec9f244f5d821e14250"
+    },
+    {
+      "path": "raw/mac_text_editing_test.dart",
+      "bytes": 16512,
+      "sha256": "c89feed779bbe85af094278fdb9fe4c7ee283fe42b7506833d72c0e45cb05541"
+    },
+    {
+      "path": "raw/modifier-flags-after-caps.json",
+      "bytes": 80,
+      "sha256": "8eac90b87a08f7a6e09d14faba177e3ca424bdf7b94f5156c3bfa6d0ed4adcf0"
+    },
+    {
+      "path": "raw/modifier-flags-after.json",
+      "bytes": 80,
+      "sha256": "8eac90b87a08f7a6e09d14faba177e3ca424bdf7b94f5156c3bfa6d0ed4adcf0"
+    },
+    {
+      "path": "raw/modifier-flags-before.json",
+      "bytes": 80,
+      "sha256": "8eac90b87a08f7a6e09d14faba177e3ca424bdf7b94f5156c3bfa6d0ed4adcf0"
+    },
+    {
+      "path": "raw/read-flags.swift",
+      "bytes": 387,
+      "sha256": "5d601401f38c5888041b5e30aea3aad7eb3a8b20ec29b44013ec5067eafb323c"
+    },
+    {
+      "path": "raw/read-source.swift",
+      "bytes": 767,
+      "sha256": "81ace1ee3f1b96d752d57032a6be34cadd370aece0dedf1e640070b919763cb4"
+    }
+  ]
+}

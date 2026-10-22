@@ -1,0 +1,29 @@
+{
+  "kind": "Actual CUA AX/screenshots transcribed; no separately saved screenshots",
+  "scope": "New owned TextEdit document, not Flutter app acceptance",
+  "directKeySequence": "z h o n g",
+  "observedText": "zhong",
+  "observedBubble": "English spelling suggestion Zhong; no Chinese candidate list observed",
+  "inputSourceBefore": "com.apple.inputmethod.SCIM.ITABC",
+  "controlSpaceChangedSourceTo": "com.apple.keylayout.ABC",
+  "secondControlSpaceRestored": "com.apple.inputmethod.SCIM.ITABC",
+  "keysAfterRestoredPinyin": "zhong, still English spelling suggestion",
+  "capsLockPressHadNoObservedGlobalFlagChange": true,
+  "keysAfterCapsLockPress": "zhong, no Chinese candidates observed",
+  "globalModifierFlagsBeforeAndAfterAllFalse": true,
+  "statusMenuControlF8": "No observable focus change in TextEdit screenshot/AX",
+  "TextInputMenuAgentToolSelection": "timeoutReached; process remained live, not restarted",
+  "AssistiveControlDirectLaunch": "RBSRequestErrorDomain5, underlying NSPOSIXErrorDomain162, no process started",
+  "documentClearedAndSavedOwnedBlank": "NativeIMEControl.rtf",
+  "actualDocumentClosed": true,
+  "sourceAndFlagsRestored": true,
+  "softwareImePassed": false,
+  "productDefectProven": false,
+  "internalChineseEnglishModeProven": false,
+  "newKeychainCalls": 0,
+  "newOSPermissionRequests": 0,
+  "primaryReferences": [
+    "https://support.apple.com/guide/mac-help/use-the-keyboard-viewer-on-mac-mchlp1015/mac",
+    "https://support.apple.com/zh-cn/102650"
+  ]
+}

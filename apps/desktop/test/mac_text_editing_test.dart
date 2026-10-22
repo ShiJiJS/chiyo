@@ -21,6 +21,113 @@ Future<Object?> nativeAction(String method) async {
 Future<Object?> nativeSelectAll() => nativeAction('selectAll');
 
 void main() {
+  testWidgets(
+    'native history keeps committed composition and skips marked pinyin',
+    (tester) async {
+      const prefix = '已保存 ';
+      final controller = TextEditingController(text: prefix);
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(
+        MaterialApp(
+          builder: (_, child) => MacTextEditingActions(child: child!),
+          home: Material(child: TextField(controller: controller)),
+        ),
+      );
+      await tester.tap(find.byType(TextField));
+      await tester.pump(const Duration(seconds: 1));
+      for (final marked in ['z', 'zh', 'zhong']) {
+        tester.testTextInput.updateEditingValue(
+          TextEditingValue(
+            text: '$prefix$marked',
+            selection: TextSelection.collapsed(
+              offset: prefix.length + marked.length,
+            ),
+            composing: TextRange(
+              start: prefix.length,
+              end: prefix.length + marked.length,
+            ),
+          ),
+        );
+        await tester.pump(const Duration(seconds: 1));
+        expect(controller.value.composing.textInside(controller.text), marked);
+      }
+      tester.testTextInput.updateEditingValue(
+        TextEditingValue(
+          text: '$prefix中',
+          selection: TextSelection.collapsed(offset: prefix.length + 1),
+        ),
+      );
+      await tester.pump(const Duration(seconds: 1));
+      expect(await nativeAction('undo'), true);
+      await tester.pump();
+      expect(controller.text, prefix);
+      expect(controller.value.composing.isCollapsed, true);
+      expect(await nativeAction('redo'), true);
+      await tester.pump();
+      expect(controller.text, '$prefix中');
+      expect(controller.value.composing.isCollapsed, true);
+      await tester.pumpWidget(const SizedBox());
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.macOS),
+  );
+
+  testWidgets(
+    'native paste replaces marked text and history skips pinyin after commit',
+    (tester) async {
+      final controller = TextEditingController(text: 'Saved');
+      addTearDown(controller.dispose);
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        (call) async {
+          if (call.method == 'Clipboard.getData') return {'text': '最终文字'};
+          if (call.method == 'Clipboard.hasStrings') return {'value': true};
+          return null;
+        },
+      );
+      addTearDown(
+        () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.platform,
+          null,
+        ),
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          builder: (_, child) => MacTextEditingActions(child: child!),
+          home: Material(child: TextField(controller: controller)),
+        ),
+      );
+      await tester.tap(find.byType(TextField));
+      await tester.pump(const Duration(seconds: 1));
+      tester.testTextInput.updateEditingValue(
+        const TextEditingValue(
+          text: 'Savedzhong',
+          selection: TextSelection(baseOffset: 5, extentOffset: 10),
+          composing: TextRange(start: 5, end: 10),
+        ),
+      );
+      await tester.pump(const Duration(seconds: 1));
+      expect(await nativeAction('paste'), true);
+      await tester.pump(const Duration(seconds: 1));
+      expect(controller.text, 'Saved最终文字');
+      expect(controller.selection, const TextSelection.collapsed(offset: 9));
+      // TextEditingValue.replaced keeps a valid composing range when the
+      // replacement exactly covers it. The marked bytes must now be the paste,
+      // followed by an IME commit before it can become an undo state.
+      expect(controller.value.isComposingRangeValid, true);
+      expect(controller.value.composing.textInside(controller.text), '最终文字');
+      tester.testTextInput.updateEditingValue(
+        controller.value.copyWith(composing: TextRange.empty),
+      );
+      await tester.pump(const Duration(seconds: 1));
+      expect(await nativeAction('undo'), true);
+      await tester.pump();
+      expect(controller.text, 'Saved');
+      expect(controller.value.composing.isCollapsed, true);
+      await tester.pumpWidget(const SizedBox());
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.macOS),
+  );
+
   testWidgets('native undo and redo use only the focused editor history', (
     tester,
   ) async {
