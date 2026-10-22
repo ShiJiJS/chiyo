@@ -1,0 +1,3 @@
+00:00 +0: loading /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_text_editing_test.dart
+No tests ran.
+No tests match "native menu state".

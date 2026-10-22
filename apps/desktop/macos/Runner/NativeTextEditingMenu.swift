@@ -7,9 +7,14 @@ final class NativeTextEditingMenu: NSObject, NSMenuItemValidation {
   private weak var window: NSWindow?
   private let methods = ["selectAll:": "selectAll", "copy:": "copy",
                          "cut:": "cut", "paste:": "paste",
-                         "pasteAsPlainText:": "paste", "undo:": "undo", "redo:": "redo"]
+                         "pasteAsPlainText:": "paste", "undo:": "undo", "redo:": "redo",
+                         "delete:": "deleteSelection"]
   private let keyMethods = ["a": "selectAll", "c": "copy", "x": "cut", "v": "paste", "z": "undo"]
   private let channel: FlutterMethodChannel
+  private var editingState: [String: Bool] = [:]
+  private var menuGeneration = 0
+  private var stateRequestPending = false
+  private var menuObservers: [NSObjectProtocol] = []
   private var keyMonitor: Any?
   private var sheetObservers: [NSObjectProtocol] = []
   private var originalItems: [(item: NSMenuItem, target: AnyObject?, action: Selector, method: String)] = []
@@ -23,12 +28,25 @@ final class NativeTextEditingMenu: NSObject, NSMenuItemValidation {
   deinit {
     restoreNativeActions()
     if let keyMonitor { NSEvent.removeMonitor(keyMonitor) }
-    for observer in sheetObservers { NotificationCenter.default.removeObserver(observer) }
+    for observer in sheetObservers + menuObservers {
+      NotificationCenter.default.removeObserver(observer)
+    }
   }
 
   func install(in menu: NSMenu) {
     guard keyMonitor == nil else { return }
     replaceEditingActions(in: menu)
+    menuObservers = [
+      NotificationCenter.default.addObserver(forName: NSMenu.didBeginTrackingNotification,
+          object: nil, queue: .main) { [weak self] _ in
+        self?.invalidateEditingState()
+        self?.refreshEditingState()
+      },
+      NotificationCenter.default.addObserver(forName: NSMenu.didEndTrackingNotification,
+          object: nil, queue: .main) { [weak self] _ in
+        self?.invalidateEditingState()
+      }
+    ]
     // Open/Save panels may edit in a remote AppKit process. Keep their exact
     // native menu actions, rather than resolving the parent's old responder.
     if let window {
@@ -46,6 +64,37 @@ final class NativeTextEditingMenu: NSObject, NSMenuItemValidation {
       else { return event }
       self.channel.invokeMethod(method, arguments: nil)
       return nil
+    }
+  }
+
+  private func invalidateEditingState() {
+    menuGeneration += 1
+    stateRequestPending = false
+    editingState = [:]
+  }
+
+  private func refreshEditingState() {
+    guard !stateRequestPending else { return }
+    guard let editor = flutterEditor else {
+      editingState = [:]
+      return
+    }
+    stateRequestPending = true
+    let generation = menuGeneration
+    channel.invokeMethod("getEditingState", arguments: nil) { [weak self, weak editor] reply in
+      guard let self, generation == self.menuGeneration else { return }
+      self.stateRequestPending = false
+      guard let editor, self.flutterEditor === editor,
+            let state = reply as? [String: Bool], state != self.editingState else { return }
+      self.editingState = state
+      // AppKit validation is synchronous. Refresh when its asynchronous state
+      // changes, without starting an update/query loop for identical snapshots.
+      var updated = Set<ObjectIdentifier>()
+      for original in self.originalItems {
+        if let menu = original.item.menu, updated.insert(ObjectIdentifier(menu)).inserted {
+          menu.update()
+        }
+      }
     }
   }
 
@@ -109,7 +158,12 @@ final class NativeTextEditingMenu: NSObject, NSMenuItemValidation {
 
   func validateMenuItem(_ menuItem: NSMenuItem) -> Bool {
     guard let original = originalItems.first(where: { $0.item === menuItem }) else { return false }
-    if flutterEditor != nil { return true }
+    if flutterEditor != nil {
+      // Accessibility menu opening also validates, but may not emit tracking
+      // notifications. Coalesce the requests from all items in this pass.
+      refreshEditingState()
+      return editingState[original.method] ?? false
+    }
     let native = NSMenuItem(title: menuItem.title, action: original.action,
                             keyEquivalent: menuItem.keyEquivalent)
     guard let target = NSApp.target(forAction: original.action, to: nil, from: native)

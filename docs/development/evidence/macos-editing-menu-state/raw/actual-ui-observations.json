@@ -1,0 +1,60 @@
+{
+  "kind": "Actual CUA AX/screenshots transcribed; no separate screenshot set",
+  "first": {
+    "pid": 94057,
+    "menusStayedDisabled": true,
+    "noTrackingNotificationLogObserved": true,
+    "exitCode": 0
+  },
+  "second": {
+    "pid": 94661,
+    "validationDrivenQueryWorkedAfterAsyncRefresh": true,
+    "emptyPasteOnlyEnabled": true,
+    "selectedCopyCutEnabled": true,
+    "readOnlyCopyOnlyEnabled": true,
+    "legacyDeleteStillEnabledReadOnly": true,
+    "exitCode": 0
+  },
+  "final": {
+    "pid": 95562,
+    "selectionMenuDeleteClearedFlutterModel": true,
+    "menuUndoRestoredAsciiExact": true,
+    "menuRedoClearedModel": true,
+    "readonlySelected": {
+      "copy": true,
+      "cut": false,
+      "paste": false,
+      "deleteSelection": false,
+      "undo": false,
+      "redo": false
+    },
+    "obscuredSelected": {
+      "copy": false,
+      "cut": false,
+      "paste": true,
+      "deleteSelection": true
+    },
+    "obscuredCopyShortcutDidNotOverwriteSyntheticClipboard": true,
+    "pasteAfterBlockedCopyReachedChineseFixture": true,
+    "nativeSavePanel": {
+      "deleteFilenameEmptiedAndDisabledSave": true,
+      "nativeUndoRestoredNameAndEnabledSave": true,
+      "nativeRedoEmptiedAndDisabledSave": true,
+      "cancelled": true,
+      "fileSaved": false,
+      "flutterModelRemainedAsciiUntilExplicitPaste": true
+    },
+    "visualObscuredFieldShowedDots": true,
+    "axSometimesReturnedKnownPlainSyntheticValueDespiteObscuredTrue": true,
+    "obscuredAccessibilityPrivacyAccepted": false,
+    "exitCode": 0
+  },
+  "limits": [
+    "Snapshots update asynchronously; first AX read can contain previous or disabled state until Flutter reply",
+    "No blanket accessibility privacy acceptance; masked field AX/plaintext discrepancy remains to investigate",
+    "No physical IME or ordinary installed-package upgrade acceptance",
+    "Other AppKit commands such as spelling/transformations are not covered"
+  ],
+  "keychainCalls": 0,
+  "newOSPermissionRequests": 0
+}

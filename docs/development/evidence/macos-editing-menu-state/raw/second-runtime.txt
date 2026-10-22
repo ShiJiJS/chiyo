@@ -1,0 +1,27 @@
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+QA_CLIPBOARD seeded synthetic text
+flutter: QA_VALUE {"length":0,"fixtureExact":false,"asciiExact":false,"empty":true,"selection":[0,0],"composing":[-1,-1]}
+QA_MENU request
+QA_MENU state ["redo": false, "copy": false, "cut": false, "undo": false, "paste": true, "selectAll": false]
+QA_MENU request
+QA_MENU request
+QA_MENU request
+flutter: QA_VALUE {"length":17,"fixtureExact":true,"asciiExact":false,"empty":false,"selection":[17,17],"composing":[-1,-1]}
+QA_MENU request
+QA_MENU state ["undo": true, "paste": true, "copy": false, "selectAll": true, "redo": false, "cut": false]
+QA_MENU request
+QA_MENU request
+QA_MENU request
+flutter: QA_VALUE {"length":17,"fixtureExact":true,"asciiExact":false,"empty":false,"selection":[0,17],"composing":[-1,-1]}
+QA_MENU request
+QA_MENU state ["copy": true, "cut": true, "paste": true, "selectAll": false, "redo": false, "undo": true]
+QA_MENU request
+QA_MENU request
+flutter: QA_VALUE {"length":17,"fixtureExact":true,"asciiExact":false,"empty":false,"selection":[12,12],"composing":[-1,-1]}
+flutter: QA_VALUE {"length":17,"fixtureExact":true,"asciiExact":false,"empty":false,"selection":[0,17],"composing":[-1,-1]}
+QA_MENU request
+QA_MENU state ["undo": false, "paste": false, "copy": true, "selectAll": false, "redo": false, "cut": false]
+QA_MENU request
+QA_MENU request
+2026-10-22 08:19:28.032 MacMenuStateProbe[94661:5684316] TSM AdjustCapsLockLEDForKeyTransitionHandling - _ISSetPhysicalKeyboardCapsLockLED Inhibit
+QA_CLIPBOARD restored original item types
