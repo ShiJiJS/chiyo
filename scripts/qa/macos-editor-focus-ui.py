@@ -63,6 +63,8 @@ def main():
                         help='QA comparator only: omit native field-purpose naming, keeping framework semantics')
     parser.add_argument('--await-confirm-transition', action='store_true',
                         help='QA hypothesis only: wait for the confirming route to leave the overlay before returning')
+    parser.add_argument('--visible-page-tooltips', action='store_true',
+                        help='QA hypothesis only: retain tooltips only for the visible IndexedStack page')
     parser.add_argument('--expected-description', default='MacFocusSaved',
                         help='Synthetic text to save through the UI and verify after process restart')
     args = parser.parse_args()
@@ -70,6 +72,8 @@ def main():
         parser.error('Comparator requires --observe-only --diagnose-accessibility-state')
     if args.await_confirm_transition and not (args.observe_only and args.diagnose_accessibility_state):
         parser.error('Transition hypothesis requires --observe-only --diagnose-accessibility-state')
+    if args.visible_page_tooltips and not (args.observe_only and args.diagnose_accessibility_state):
+        parser.error('Tooltip hypothesis requires --observe-only --diagnose-accessibility-state')
     if not args.expected_description or len(args.expected_description) > 4096:
         parser.error('Expected description must contain 1 to 4096 synthetic characters')
     assert os.uname().sysname == 'Darwin'
@@ -89,6 +93,7 @@ def main():
              'observationOnly': args.observe_only,
              'purposeAdapterDisabledInQACopy': args.without_purpose_adapter,
              'awaitConfirmTransitionInQACopy': args.await_confirm_transition,
+             'visiblePageTooltipsInQACopy': args.visible_page_tooltips,
              'bundleIdentifier': identity, 'commands': [], 'cases': [], 'processExits': [], 'inputSourceHashes': {}}
     processes = []
     app = root = None
@@ -166,6 +171,13 @@ def main():
 ''')
             swift.write_text(text)
         modified = [config, swift]
+        if args.visible_page_tooltips:
+            main = source / 'apps/desktop/lib/main.dart'
+            text = main.read_text()
+            anchor = '? entry.$2\n                        : const SizedBox(),'
+            assert text.count(anchor) == 1
+            main.write_text(text.replace(anchor, '? TooltipVisibility(visible: entry.$1 == _tabs.index, child: entry.$2)\n                        : const SizedBox(),'))
+            modified.append(main)
         if args.await_confirm_transition:
             dialog = source / 'apps/desktop/lib/prototype_dialog.dart'
             text = dialog.read_text()
