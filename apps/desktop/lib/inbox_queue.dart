@@ -140,22 +140,31 @@ class InboxQueue extends StatelessWidget {
                             width: 18,
                             height: 20,
                             child: TextButton(
-                              style: prototypeButton(context),
+                              style: prototypeButton(
+                                context,
+                                size: 14,
+                                iconOnly: true,
+                              ),
                               onPressed: () {
                                 searchController.clear();
                                 onSearch('');
                               },
-                              child: const Text('×'),
+                              child: const Text(
+                                '×',
+                                textScaler: TextScaler.noScaling,
+                                semanticsLabel: '清除搜索',
+                              ),
                             ),
                           ),
                       ],
                     ),
                   ),
                   const SizedBox(height: 22),
-                  Row(
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 4,
                     children: [
                       for (final f in InboxFilter.values) ...[
-                        if (f != InboxFilter.all) const SizedBox(width: 21),
                         Container(
                           decoration: BoxDecoration(
                             border: Border(
@@ -172,9 +181,12 @@ class InboxQueue extends StatelessWidget {
                             onPressed: () => onFilter(f),
                             style: prototypeButton(
                               context,
-                              padding: const EdgeInsets.only(bottom: 12),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 8,
+                              ),
                               foreground: filter == f ? c.strong : c.muted,
-                              radius: 0,
+                              radius: 6,
                             ),
                             child: Text(
                               switch (f) {
@@ -223,6 +235,7 @@ class InboxQueue extends StatelessWidget {
                       controller: scrollController,
                       thumbVisibility: page.total > 100,
                       child: ListView.builder(
+                        primary: false,
                         controller: scrollController,
                         key: PageStorageKey(
                           'inbox-${filter.name}-${searchController.text}-${page.offset}',
@@ -234,7 +247,7 @@ class InboxQueue extends StatelessWidget {
                           final chosen = entry.id == focused;
                           final count =
                               entry.access?.fields.length ??
-                              (entry.credentialUse!=null?1:null) ??
+                              (entry.credentialUse != null ? 1 : null) ??
                               entry.organization!.itemVersions.length;
                           return Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -318,7 +331,11 @@ class InboxQueue extends StatelessWidget {
                                         children: [
                                           Expanded(
                                             child: Text(
-                                              '${entry.organization?.agentName.isNotEmpty == true ? entry.organization!.agentName : 'Agent'} · ${entry.credentialUse!=null?'使用凭据':entry.organization == null ? '读取信息' : '整理资料'}',
+                                              '${entry.organization?.agentName.isNotEmpty == true ? entry.organization!.agentName : 'Agent'} · ${entry.credentialUse != null
+                                                  ? '使用凭据'
+                                                  : entry.organization == null
+                                                  ? '读取信息'
+                                                  : '整理资料'}',
                                               maxLines: 1,
                                               overflow: TextOverflow.ellipsis,
                                               style: muted,
@@ -327,7 +344,11 @@ class InboxQueue extends StatelessWidget {
                                           const SizedBox(width: 8),
                                           Text(
                                             entry.pending
-                                                ? '$count ${entry.credentialUse!=null?'项凭据':entry.organization == null ? '个字段' : '条信息'}'
+                                                ? '$count ${entry.credentialUse != null
+                                                      ? '项凭据'
+                                                      : entry.organization == null
+                                                      ? '个字段'
+                                                      : '条信息'}'
                                                 : stateLabel(entry),
                                             style: muted,
                                           ),
@@ -360,11 +381,14 @@ class InboxQueue extends StatelessWidget {
                     width: 24,
                     height: 26,
                     child: TextButton(
-                      style: prototypeButton(context, size: 20),
+                      style: prototypeButton(context, size: 20, iconOnly: true),
                       onPressed: page.offset == 0
                           ? null
                           : () => onPage(page.offset - page.limit),
-                      child: const Tooltip(message: '上一页请求', child: Text('‹')),
+                      child: const Tooltip(
+                        message: '上一页请求',
+                        child: Text('‹', textScaler: TextScaler.noScaling),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 7),
@@ -377,11 +401,14 @@ class InboxQueue extends StatelessWidget {
                     width: 24,
                     height: 26,
                     child: TextButton(
-                      style: prototypeButton(context, size: 20),
+                      style: prototypeButton(context, size: 20, iconOnly: true),
                       onPressed: page.offset + page.limit >= page.total
                           ? null
                           : () => onPage(page.offset + page.limit),
-                      child: const Tooltip(message: '下一页请求', child: Text('›')),
+                      child: const Tooltip(
+                        message: '下一页请求',
+                        child: Text('›', textScaler: TextScaler.noScaling),
+                      ),
                     ),
                   ),
                 ],

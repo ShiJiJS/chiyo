@@ -1,0 +1,16 @@
+Auto-merging apps/desktop/lib/approvals.dart
+Auto-merging apps/desktop/lib/credentials.dart
+CONFLICT (content): Merge conflict in apps/desktop/lib/credentials.dart
+Auto-merging apps/desktop/lib/desktop_controls.dart
+CONFLICT (content): Merge conflict in apps/desktop/lib/desktop_controls.dart
+Auto-merging apps/desktop/lib/history.dart
+Auto-merging apps/desktop/lib/inbox_queue.dart
+Auto-merging apps/desktop/lib/information_editor.dart
+Auto-merging apps/desktop/lib/library.dart
+CONFLICT (content): Merge conflict in apps/desktop/lib/library.dart
+Auto-merging apps/desktop/lib/main.dart
+CONFLICT (content): Merge conflict in apps/desktop/lib/main.dart
+Auto-merging apps/desktop/lib/settings.dart
+Auto-merging apps/desktop/test/inbox_workspace_test.dart
+Auto-merging packages/info_storage/test/information_delivery_storage_test.dart
+Automatic merge failed; fix conflicts and then commit the result.

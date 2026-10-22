@@ -8,6 +8,8 @@ import 'package:info_core/info_core.dart';
 import 'package:info_storage/info_storage.dart';
 import 'package:sqlite3/sqlite3.dart' as sql;
 
+const expectedCurrentSchema = 22;
+
 class _Keys implements DatabaseKeyStore {
   _Keys(this.bytes);
   final List<int> bytes;
@@ -25,10 +27,10 @@ void verifySchemaUpgradeSnapshot(
   Map baseline, {
   required bool migratingLegacy,
 }) {
-  if (snapshot['schema'] != 21 ||
-      snapshot['marker'] != 21 ||
+  if (snapshot['schema'] != expectedCurrentSchema ||
+      snapshot['marker'] != expectedCurrentSchema ||
       snapshot['integrity'] != 'ok' ||
-      baseline['schema'] != (migratingLegacy ? 20 : 21)) {
+      baseline['schema'] != (migratingLegacy ? 20 : expectedCurrentSchema)) {
     throw StateError('Invalid migration/reopen snapshot');
   }
   final tables = snapshot['tables'] as Map;

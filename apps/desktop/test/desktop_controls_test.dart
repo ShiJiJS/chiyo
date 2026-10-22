@@ -31,19 +31,19 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.tab);
     await tester.sendKeyEvent(LogicalKeyboardKey.enter);
     await tester.pumpAndSettle();
-    expect(find.byType(MenuItemButton), findsNWidgets(2));
+    expect(find.text('15 分钟'), findsOneWidget);
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
     await tester.pumpAndSettle();
     await tester.sendKeyEvent(LogicalKeyboardKey.enter);
     await tester.pumpAndSettle();
     expect(value, 15);
-    expect(find.byType(MenuItemButton), findsNothing);
+    expect(find.text('30 分钟'), findsNothing);
     await tester.tap(find.byKey(const ValueKey('duration')));
     await tester.pumpAndSettle();
     await tester.sendKeyEvent(LogicalKeyboardKey.escape);
     await tester.pumpAndSettle();
     expect(value, 15);
-    expect(find.byType(MenuItemButton), findsNothing);
+    expect(find.text('30 分钟'), findsNothing);
   });
 
   testWidgets('unsaved selection does not replace the persisted setting', (

@@ -190,37 +190,20 @@ class _SettingsPageState extends State<SettingsPage> {
     Map<int, String> options,
     ValueChanged<int> changed,
     String identity,
-  ) => Container(
-    width: 140 * MediaQuery.textScalerOf(context).scale(1),
-    padding: const EdgeInsets.fromLTRB(12, 10, 4, 10),
-    decoration: BoxDecoration(
-      color: UiPalette.of(context).paper,
-      border: Border.all(color: UiPalette.of(context).line),
-      borderRadius: BorderRadius.circular(4),
-    ),
-    child: SizedBox(
-      height: 20.5 * MediaQuery.textScalerOf(context).scale(1),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<int>(
-          key: ValueKey('$identity-$value'),
-          value: value,
-          isDense: true,
-          isExpanded: true,
-          style: prototypeText(context, 13),
-          icon: const PrototypeSelectCaret(),
-          iconSize: 10,
-          dropdownColor: UiPalette.of(context).paper,
-          borderRadius: BorderRadius.circular(4),
-          items: options.entries
-              .map((e) => DropdownMenuItem(value: e.key, child: Text(e.value)))
-              .toList(),
-          onChanged: _busy
-              ? null
-              : (v) {
-                  if (v != null) changed(v);
-                },
-        ),
-      ),
+  ) => SizedBox(
+    width: 150 * MediaQuery.textScalerOf(context).scale(1),
+    child: DesktopSelect<int>(
+      key: ValueKey('$identity-$value'),
+      value: value,
+      isExpanded: true,
+      items: options.entries
+          .map((e) => DropdownMenuItem(value: e.key, child: Text(e.value)))
+          .toList(),
+      onChanged: _busy
+          ? null
+          : (v) {
+              if (v != null) changed(v);
+            },
     ),
   );
   Widget _appearance() => Column(
@@ -677,7 +660,6 @@ class _SettingsPageState extends State<SettingsPage> {
     SettingsRow(
       widget.owner.serviceAvailable ? '本机服务运行中' : '本机服务暂不可用',
       '应用为 Agent 提供访问请求入口；信息的实际读取需要你的授权。',
-      first: true,
       control: Text(
         widget.owner.serviceAvailable ? '● 已连接' : '未连接',
         style: prototypeText(
@@ -747,6 +729,7 @@ class _SettingsPageState extends State<SettingsPage> {
             border: Border(right: BorderSide(color: c.line)),
           ),
           child: ListView(
+            primary: false,
             children: [
               Padding(
                 padding: const EdgeInsets.fromLTRB(13, 0, 13, 24),
@@ -817,6 +800,8 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
         Expanded(
           child: SingleChildScrollView(
+            key: ValueKey('settings-content-${_section.name}'),
+            primary: false,
             padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 30),
             child: Center(
               child: ConstrainedBox(

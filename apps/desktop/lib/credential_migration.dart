@@ -1,3 +1,4 @@
+import 'desktop_controls.dart';
 import 'package:flutter/material.dart';
 import 'package:info_core/info_core.dart';
 import 'credential_dialogs.dart';
@@ -113,12 +114,10 @@ class _CredentialMigrationDialogState extends State<CredentialMigrationDialog> {
             const SizedBox(height: 18),
             Text('选择要转换的字段', style: prototypeText(context, 13)),
             const SizedBox(height: 7),
-            DropdownButtonFormField<String>(
+            DesktopSelect<String>(
               key: const ValueKey('migration-field'),
               initialValue: _fieldId,
               isExpanded: true,
-              style: prototypeText(context, 13),
-              dropdownColor: p.paper,
               hint: Text(
                 '请选择字段',
                 style: prototypeText(context, 13, color: p.muted),

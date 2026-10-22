@@ -432,6 +432,7 @@ class _CredentialUseApprovalPanelState
                   style: prototypeButton(
                     context,
                     size: 14,
+                    iconOnly: true,
                     foreground: c.accent,
                     background: draft.tip == tip ? c.selected : null,
                     side: BorderSide(color: c.line),
@@ -441,11 +442,13 @@ class _CredentialUseApprovalPanelState
                       setState(() => draft.tip = draft.tip == tip ? null : tip),
                   child: Text(
                     '?',
+                    textScaler: TextScaler.noScaling,
                     style: prototypeText(
                       context,
                       14,
                       family: 'Georgia',
                       color: c.accent,
+                      height: 1,
                     ),
                   ),
                 ),
@@ -523,6 +526,7 @@ class _CredentialUseApprovalPanelState
     return Scrollbar(
       controller: _document,
       child: SingleChildScrollView(
+        primary: false,
         controller: _document,
         key: PageStorageKey('credential-use-document-${r.id}'),
         padding: const EdgeInsets.fromLTRB(26, 24, 26, 24),
@@ -1013,6 +1017,7 @@ class _CredentialUseApprovalPanelState
       child: Scrollbar(
         controller: _decision,
         child: SingleChildScrollView(
+          primary: false,
           controller: _decision,
           padding: const EdgeInsets.fromLTRB(21, 25, 21, 25),
           child: Column(

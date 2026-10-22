@@ -139,6 +139,7 @@ class _ReviewUpdateState extends State<_ReviewUpdate> {
       width: 900,
       height: 650,
       child: SingleChildScrollView(
+        primary: false,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [

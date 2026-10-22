@@ -153,11 +153,11 @@ class _InformationDeliveryHistoryState
                 const Spacer(),
                 TextButton(
                   key: const ValueKey('file-deliveries-previous'),
-                  style: prototypeButton(context, size: 14),
+                  style: prototypeButton(context, size: 20, iconOnly: true),
                   onPressed: page == 0
                       ? null
                       : () => setState(() => _page = page - 1),
-                  child: const Text('‹'),
+                  child: const Text('‹', textScaler: TextScaler.noScaling),
                 ),
                 Text(
                   '${page + 1} / $pages',
@@ -165,11 +165,11 @@ class _InformationDeliveryHistoryState
                 ),
                 TextButton(
                   key: const ValueKey('file-deliveries-next'),
-                  style: prototypeButton(context, size: 14),
+                  style: prototypeButton(context, size: 20, iconOnly: true),
                   onPressed: page + 1 == pages
                       ? null
                       : () => setState(() => _page = page + 1),
-                  child: const Text('›'),
+                  child: const Text('›', textScaler: TextScaler.noScaling),
                 ),
               ],
             ),

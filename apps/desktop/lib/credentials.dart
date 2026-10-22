@@ -220,6 +220,7 @@ class _CredentialLibraryState extends State<CredentialLibrary> {
             builder: (_, bounds) =>
                 MediaQuery.textScalerOf(context).scale(1) > 1.5
                 ? SingleChildScrollView(
+                    primary: false,
                     child: SizedBox(
                       height: bounds.maxHeight + 600,
                       child: _side(all),
@@ -237,6 +238,7 @@ class _CredentialLibraryState extends State<CredentialLibrary> {
       child: LayoutBuilder(
         builder: (_, bounds) => bounds.maxWidth < 1120
             ? SingleChildScrollView(
+                primary: false,
                 scrollDirection: Axis.horizontal,
                 child: SizedBox(
                   width: 1120,
@@ -491,6 +493,7 @@ class _CredentialLibraryState extends State<CredentialLibrary> {
                   ),
                 )
               : ListView(
+                  primary: false,
                   padding: const EdgeInsets.symmetric(
                     horizontal: 10,
                     vertical: 12,
@@ -681,6 +684,7 @@ class _CredentialLibraryState extends State<CredentialLibrary> {
                           MediaQuery.textScalerOf(context).scale(1) > 1.5,
                       interactive: true,
                       child: SingleChildScrollView(
+                        primary: false,
                         key: const ValueKey('credential-toolbar-scroll'),
                         controller: _toolbarScroll,
                         scrollDirection: Axis.horizontal,
@@ -745,6 +749,7 @@ class _CredentialLibraryState extends State<CredentialLibrary> {
                 ),
                 Expanded(
                   child: SingleChildScrollView(
+                    primary: false,
                     key: const ValueKey('credential-detail-scroll'),
                     controller: _detailScroll,
                     padding: const EdgeInsets.fromLTRB(33, 23, 33, 28),

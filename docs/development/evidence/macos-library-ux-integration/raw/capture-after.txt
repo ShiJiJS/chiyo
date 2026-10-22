@@ -1,0 +1,12 @@
+00:00 +0: loading /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/.dart_tool/mac-compact-capture.dart
+00:00 +0: (setUpAll)
+00:00 +0: capture purple 1.0
+00:03 +1: capture purple 2.0
+00:04 +2: capture green 1.0
+00:05 +3: capture green 2.0
+00:06 +4: capture blue 1.0
+00:07 +5: capture blue 2.0
+00:08 +6: capture mono 1.0
+00:09 +7: capture mono 2.0
+00:10 +8: (tearDownAll)
+00:10 +8: All tests passed!

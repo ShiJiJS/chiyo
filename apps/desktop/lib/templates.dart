@@ -305,6 +305,7 @@ class _TemplateLibraryState extends State<TemplateLibrary> {
           ],
           body: ReadingWorkspace(
             child: ListView(
+              primary: false,
               padding: const EdgeInsets.all(24),
               children: [
                 const Text(
@@ -578,45 +579,26 @@ class _TemplateEditorState extends State<_TemplateEditor> {
                   ),
                 ),
                 const SizedBox(width: 12),
-                PopupMenuButton<FieldKind>(
-                  tooltip: '字段形式',
-                  enabled: !_saving,
-                  initialValue: _fields[i].kind,
-                  onSelected: (value) =>
-                      setState(() => _fields[i].kind = value),
-                  itemBuilder: (_) => const [
-                    PopupMenuItem(
+                DesktopSelect<FieldKind>(
+                  value: _fields[i].kind,
+                  items: const [
+                    DropdownMenuItem(
                       value: FieldKind.structured,
                       child: Text('文本'),
                     ),
-                    PopupMenuItem(
+                    DropdownMenuItem(
                       value: FieldKind.textNote,
                       child: Text('多行文本'),
                     ),
-                    PopupMenuItem(value: FieldKind.file, child: Text('文件')),
+                    DropdownMenuItem(value: FieldKind.file, child: Text('文件')),
                   ],
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: UiPalette.of(context).line),
-                      borderRadius: BorderRadius.circular(3),
-                    ),
-                    child: Text(
-                      switch (_fields[i].kind) {
-                        FieldKind.textNote => '多行文本',
-                        FieldKind.structured => '文本',
-                        FieldKind.file => '文件',
-                      },
-                      style: prototypeText(
-                        context,
-                        11,
-                        color: UiPalette.of(context).muted,
-                      ),
-                    ),
-                  ),
+                  onChanged: _saving
+                      ? null
+                      : (value) {
+                          if (value != null) {
+                            setState(() => _fields[i].kind = value);
+                          }
+                        },
                 ),
                 const SizedBox(width: 12),
                 SizedBox.square(
@@ -626,10 +608,11 @@ class _TemplateEditorState extends State<_TemplateEditor> {
                         ? null
                         : () =>
                               setState(() => _removed.add(_fields.removeAt(i))),
-                    style: prototypeButton(context, size: 20),
-                    child: Transform.translate(
-                      offset: const Offset(2.5, -3),
-                      child: const Text('×', textScaler: TextScaler.noScaling),
+                    style: prototypeButton(context, size: 20, iconOnly: true),
+                    child: const Text(
+                      '×',
+                      textScaler: TextScaler.noScaling,
+                      semanticsLabel: '移除字段',
                     ),
                   ),
                 ),

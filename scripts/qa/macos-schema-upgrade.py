@@ -17,6 +17,7 @@ import zipfile
 
 ROOT = Path(__file__).resolve().parents[2]
 LEGACY = 'dbb94ac'
+CURRENT_SCHEMA = 22
 HELPER = ROOT / 'scripts/qa/macos-schema-upgrade-probe.dart'
 BASELINE_CHECK = ROOT / 'scripts/qa/macos-schema-baseline-check.dart'
 
@@ -96,7 +97,7 @@ def main():
         repaired=probe(old,'remove-only-owned-conflict','repair')
         assert repaired['schema']==20 and repaired['tables']==original['tables']
         migrated=probe(new,'same-target-migration-retry')
-        assert migrated['schema']==migrated['marker']==21 and migrated['integrity']=='ok'
+        assert migrated['schema']==migrated['marker']==CURRENT_SCHEMA and migrated['integrity']=='ok'
         tables=migrated['beforeVerificationOperations']['tables']
         # Draft idempotency receipts are session-local owner form state; open
         # deliberately clears them together with orphan stages. All durable
@@ -108,11 +109,11 @@ def main():
         assert tables['information_deliveries']['rows']==0
         before=hashlib.sha256(db.read_bytes()).hexdigest()
         closed=probe(new,'migrated-raw-snapshot','snapshot')
-        assert closed['tables']==migrated['tables'] and closed['schema']==21
+        assert closed['tables']==migrated['tables'] and closed['schema']==CURRENT_SCHEMA
         assert hashlib.sha256(db.read_bytes()).hexdigest()==before
         refused=probe(old,'old-reader-refuses-new-schema',expected=1)
         assert refused['storageFailure']=='unsupported_schema' and hashlib.sha256(db.read_bytes()).hexdigest()==before
-        reopened=probe(new,'current-reader-reopens');assert reopened['schema']==21 and reopened['integrity']=='ok'
+        reopened=probe(new,'current-reader-reopens');assert reopened['schema']==CURRENT_SCHEMA and reopened['integrity']=='ok'
         assert migrated['oldAuthorityRefused'] and reopened['oldAuthorityRefused']
         # Each deliberate rejected read records one audit event. Reopening must
         # preserve that completed history, rather than compare to pre-test rows.

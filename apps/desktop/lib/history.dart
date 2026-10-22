@@ -545,8 +545,11 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
                           }),
                           style: prototypeButton(
                             context,
-                            padding: const EdgeInsets.only(bottom: 12),
-                            radius: 0,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 8,
+                            ),
+                            radius: 6,
                           ),
                           child: _text(
                             ['全部', '有效', '已结束'][i],
@@ -583,6 +586,7 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
           ),
           Expanded(
             child: ListView(
+              primary: false,
               padding: EdgeInsets.zero,
               children: [
                 if (visible.isEmpty)
@@ -699,7 +703,7 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
                 const Spacer(),
                 SizedBox(
                   width: 24,
-                  height: 25 * MediaQuery.textScalerOf(context).scale(12) / 12,
+                  height: 26,
                   child: TextButton(
                     onPressed: _page == 0
                         ? null
@@ -707,13 +711,14 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
                             _page--;
                             _selected = null;
                           }),
-                    style: prototypeButton(context, size: 18),
-                    child: Transform.translate(
-                      offset: const Offset(0, 3),
-                      child: _text(
-                        '‹',
+                    style: prototypeButton(context, size: 20, iconOnly: true),
+                    child: Text(
+                      '‹',
+                      textScaler: TextScaler.noScaling,
+                      style: prototypeText(
+                        context,
                         20,
-                        height: 1.2,
+                        height: 1,
                         color: _page == 0
                             ? c.muted.withValues(alpha: .45)
                             : c.muted,
@@ -736,7 +741,7 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
                 ),
                 SizedBox(
                   width: 24,
-                  height: 25 * MediaQuery.textScalerOf(context).scale(12) / 12,
+                  height: 26,
                   child: TextButton(
                     onPressed: (_page + 1) * 8 >= filtered.length
                         ? null
@@ -744,13 +749,14 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
                             _page++;
                             _selected = null;
                           }),
-                    style: prototypeButton(context, size: 18),
-                    child: Transform.translate(
-                      offset: const Offset(0, 3),
-                      child: _text(
-                        '›',
+                    style: prototypeButton(context, size: 20, iconOnly: true),
+                    child: Text(
+                      '›',
+                      textScaler: TextScaler.noScaling,
+                      style: prototypeText(
+                        context,
                         20,
-                        height: 1.2,
+                        height: 1,
                         color: (_page + 1) * 8 >= filtered.length
                             ? c.muted.withValues(alpha: .45)
                             : c.muted,
@@ -1214,6 +1220,7 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
             child: Scrollbar(
               controller: scroll,
               child: SingleChildScrollView(
+                primary: false,
                 controller: scroll,
                 padding: const EdgeInsets.fromLTRB(34, 28, 42, 28),
                 child: Column(
@@ -1325,7 +1332,7 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
                                     vertical: 13,
                                   ),
                                   size: 14,
-                                  radius: 0,
+                                  radius: 6,
                                 ),
                                 child: _text(
                                   i == 0

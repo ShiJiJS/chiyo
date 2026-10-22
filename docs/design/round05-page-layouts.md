@@ -1,5 +1,7 @@
 # Round05 各页布局与控件变体
 
+> 2026-10-22 范围修订：Windows 信息库导航、目录／标签流程和全局控件状态按 [新版设计约定](library-ux-20261021.md) 与 Round06 原型实施（#52–#60）。其余页面结构、四主题与字体角色继续沿用本文；旧HTML及截图保留，不能再把旧混合分类弹窗当作新需求。
+
 > 当前目标更新（2026-10-18）：已确认授权期内复用、普通附件入SQLCipher及本机焦点填充，生产实现尚未开始。当前行为与后续界面要求见[设计修订](windows-credential-and-file-update.md)，排期见[Windows计划](../planning/windows-next-iteration.md)。下文/现有HTML保留Round05 v1视觉及流程基线，一次启动状态不代表新目标；新增状态由#33/#35及#34下的#36先补原型；附件核心由#37、Windows客户端由#38交付，保持四主题及三栏。
 
 2026-10-17。从已确认HTML的最终DOM/CSS级联读取，供#24–#26实施；不是新设计，也不代表Flutter已实现。共同约束见[忠实还原验收](prototype-fidelity.md)，唯一视觉来源仍为[原型](prototypes/round-05/index.html)。不能把审批页所有尺寸直接套到其他页面。
