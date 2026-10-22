@@ -57,6 +57,7 @@ class ApprovalsState extends State<Approvals> {
       _scopeScrolls.putIfAbsent(_focused ?? 'none', () => ScrollController());
   final _queueScrolls = <String, ScrollController>{};
   final _documentScrolls = <String, ScrollController>{};
+  final _decisionScrolls = <String, ScrollController>{};
   final _errors = <String, String>{};
   String? get _actionError => _errors[_focused];
   set _actionError(String? value) {
@@ -162,6 +163,7 @@ class ApprovalsState extends State<Approvals> {
     for (final controller in [
       ..._queueScrolls.values,
       ..._documentScrolls.values,
+      ..._decisionScrolls.values,
       ..._scopeScrolls.values,
     ]) {
       controller.dispose();
@@ -708,6 +710,10 @@ class ApprovalsState extends State<Approvals> {
             MediaQuery.textScalerOf(context).scale(14) <= 20;
         final document = _requestDocument(request, selected, available);
         final decision = _decision(request, selected, compact: !wide);
+        final decisionScroll = _decisionScrolls.putIfAbsent(
+          request.id,
+          () => ScrollController(),
+        );
         return wide
             ? Row(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -720,7 +726,20 @@ class ApprovalsState extends State<Approvals> {
                 children: [
                   Expanded(child: document),
                   if (request.state == AccessRequestState.pending)
-                    decision
+                    ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxHeight: size.maxHeight * .65,
+                      ),
+                      child: Scrollbar(
+                        controller: decisionScroll,
+                        thumbVisibility: true,
+                        child: SingleChildScrollView(
+                          primary: false,
+                          controller: decisionScroll,
+                          child: decision,
+                        ),
+                      ),
+                    )
                   else
                     ConstrainedBox(
                       constraints: BoxConstraints(
@@ -760,8 +779,7 @@ class ApprovalsState extends State<Approvals> {
     );
     return Scrollbar(
       controller: scroll,
-      thumbVisibility:
-          groups.values.fold<int>(0, (n, f) => n + f.length) > 4 || largeType,
+      thumbVisibility: true,
       child: ListView(
         primary: false,
         controller: scroll,
@@ -1668,6 +1686,9 @@ class ApprovalsState extends State<Approvals> {
     final reviewedVersions = _reviewedVersions(selected);
     final scopeChange =
         '原申请 ${request.fields.length} · 未选 ${request.fields.where((field) => !selected.contains(field)).length} · 补选 ${selected.where((field) => !request.fields.contains(field)).length}';
+    // Keep the editable semantics out of the surrounding workspace. AppKit
+    // represents a text-field node as a native editor and does not expose its
+    // merged workspace children as ordinary approval controls.
     final lifetime = SizedBox(
       width: compact ? 176 : double.infinity,
       child: DesktopTextFormField(
@@ -1676,6 +1697,7 @@ class ApprovalsState extends State<Approvals> {
         enabled: !busy,
         keyboardType: TextInputType.number,
         decoration: InputDecoration(
+          hintText: '授权有效期（分钟）',
           labelText: compact ? null : '有效期（分钟）',
           suffixText: compact ? '分钟' : null,
           helperText: !compact && valid
@@ -1840,11 +1862,7 @@ class ApprovalsState extends State<Approvals> {
                 );
                 final controls = Row(
                   mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Semantics(label: '授权有效期（分钟）', child: lifetime),
-                    const SizedBox(width: 16),
-                    actions,
-                  ],
+                  children: [lifetime, const SizedBox(width: 16), actions],
                 );
                 return Column(
                   mainAxisSize: MainAxisSize.min,
