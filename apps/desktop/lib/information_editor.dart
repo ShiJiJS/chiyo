@@ -9,6 +9,7 @@ import 'information_editor_draft.dart';
 export 'information_editor_draft.dart';
 import 'information_files.dart';
 import 'information_file_summary.dart';
+import 'mac_text_field_accessibility.dart';
 
 typedef SaveInformationDraft =
     Future<void> Function(InformationEditorDraft draft);
@@ -279,7 +280,7 @@ class _InformationEditorState extends State<InformationEditor> {
         const SizedBox(height: 7),
         SizedBox(
           height: 19.5 * lines * MediaQuery.textScalerOf(context).scale(1) + 20,
-          child: Semantics(
+          child: MacTextFieldAccessibility(
             label: label,
             child: TextFormField(
               key: key,

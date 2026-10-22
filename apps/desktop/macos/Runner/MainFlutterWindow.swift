@@ -5,6 +5,7 @@ import UserNotifications
 class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDelegate {
   private var textEditingMenu: NativeTextEditingMenu?
   private var secretEditor: NativeSecretEditor?
+  private var textFieldAccessibility: NativeTextFieldAccessibility?
   private var desktopChannel: FlutterMethodChannel?
   private var statusItem: NSStatusItem?
   private var statusItemVisibility: NSKeyValueObservation?
@@ -30,6 +31,16 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
     RegisterGeneratedPlugins(registry: flutterViewController)
     configureToolAccess(flutterViewController)
     secretEditor = NativeSecretEditor(window: self, messenger: flutterViewController.engine.binaryMessenger)
+    textFieldAccessibility = NativeTextFieldAccessibility(view: flutterViewController.view)
+    let accessibility = FlutterMethodChannel(name: "agent_info_manage/text_field_accessibility",
+                                             binaryMessenger: flutterViewController.engine.binaryMessenger)
+    accessibility.setMethodCallHandler { [weak self] call, result in
+      guard call.method == "update" else { result(FlutterMethodNotImplemented); return }
+      guard self?.textFieldAccessibility?.update(call.arguments) == true else {
+        result(FlutterError(code: "invalid_accessibility_labels", message: "Invalid field labels", details: nil)); return
+      }
+      result(nil)
+    }
 
     // Local, owner-process-only bridge; never exposed by the Agent HTTP server.
     let keyChannel = FlutterMethodChannel(name: "agent_info_manage/database_key", binaryMessenger: flutterViewController.engine.binaryMessenger)
@@ -219,6 +230,7 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
           DispatchQueue.main.async { result(error == nil) }
         }
       case "terminate":
+        self.textFieldAccessibility?.update([] as [[String: Any]])
         self.desktopReady = false
         self.statusItemVisibility?.invalidate()
         self.statusItemVisibility = nil
