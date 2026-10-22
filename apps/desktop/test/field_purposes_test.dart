@@ -111,7 +111,12 @@ void main() {
             {'显示名称', '申请原因', '搜索请求', '凭据名称'},
           );
           expect(calls.toString(), isNot(contains(secret.text)));
-          expect(calls.toString(), isNot(contains(name.text)));
+          expect(
+            (calls.last.arguments as List).singleWhere(
+              (row) => row['label'] == '显示名称',
+            )['text'],
+            name.text,
+          );
         } else {
           expect(calls, isEmpty);
         }
