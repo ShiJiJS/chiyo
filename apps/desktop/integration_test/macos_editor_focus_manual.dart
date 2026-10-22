@@ -77,6 +77,12 @@ void check(bool value, String message) {
 
 Future<void> main() async {
   final env = Platform.environment, mode = env['MAC_FOCUS_MODE']!;
+  final expectedDescription =
+      env['MAC_FOCUS_EXPECTED_DESCRIPTION'] ?? 'MacFocusSaved';
+  check(
+    expectedDescription.isNotEmpty && expectedDescription.length <= 4096,
+    'Synthetic expected description',
+  );
   final diagnoseKeys = env['MAC_FOCUS_DIAGNOSE_KEYS'] == '1';
   if (diagnoseKeys) {
     _KeyDiagnosticBinding();
@@ -105,6 +111,7 @@ Future<void> main() async {
     'mode': mode,
     'complete': false,
     'systemKeychainUsed': false,
+    'expectedSavedDescription': expectedDescription,
   };
   final observations = <Map<String, Object?>>[];
   Timer? timer;
@@ -273,7 +280,8 @@ Future<void> main() async {
       stdout.writeln(
         'EDITOR_FOCUS_PHASE=actual-ui-edit-cancel-keyboard-and-save',
       );
-      while (service.owner.information.single.description != 'MacFocusSaved') {
+      while (service.owner.information.single.description !=
+          expectedDescription) {
         check(DateTime.now().isBefore(deadline), 'Actual UI deadline');
         await Future<void>.delayed(const Duration(milliseconds: 100));
       }
@@ -284,7 +292,7 @@ Future<void> main() async {
       facts['actualUiSaved'] = true;
     } else {
       check(
-        service.owner.information.single.description == 'MacFocusSaved',
+        service.owner.information.single.description == expectedDescription,
         'Saved description did not persist',
       );
       facts['savedDescriptionPreserved'] = true;

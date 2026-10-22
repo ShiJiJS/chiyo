@@ -48,7 +48,11 @@ def main():
     parser.add_argument('output', type=Path)
     parser.add_argument('--diagnose-focus', action='store_true')
     parser.add_argument('--diagnose-keys', action='store_true')
+    parser.add_argument('--expected-description', default='MacFocusSaved',
+                        help='Synthetic text to save through the UI and verify after process restart')
     args = parser.parse_args()
+    if not args.expected_description or len(args.expected_description) > 4096:
+        parser.error('Expected description must contain 1 to 4096 synthetic characters')
     assert os.uname().sysname == 'Darwin'
     output = args.output.resolve()
     output.relative_to(ROOT / 'build/macos-adaptation')
@@ -60,6 +64,7 @@ def main():
     identity = 'org.shijijs.agent-info-manage.qa.editor-focus.' + owner
     state = {'scope': __doc__, 'complete': False,
              'sourceCommit': subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip(),
+             'expectedSavedDescription': args.expected_description,
              'bundleIdentifier': identity, 'commands': [], 'cases': [], 'processExits': [], 'inputSourceHashes': {}}
     processes = []
     app = root = None
@@ -161,7 +166,8 @@ def main():
         run('entitlements', ['/usr/bin/codesign', '-d', '--entitlements', ':-', str(app)])
         for mode in ['edit', 'reopen']:
             environment = {k: os.environ[k] for k in ['HOME', 'USER', 'LOGNAME', 'LANG'] if k in os.environ}
-            environment.update(PATH='/usr/bin:/bin:/usr/sbin:/sbin', MAC_FOCUS_MODE=mode, MAC_FOCUS_OWNER=owner)
+            environment.update(PATH='/usr/bin:/bin:/usr/sbin:/sbin', MAC_FOCUS_MODE=mode, MAC_FOCUS_OWNER=owner,
+                               MAC_FOCUS_EXPECTED_DESCRIPTION=args.expected_description)
             if args.diagnose_keys:
                 environment['MAC_FOCUS_DIAGNOSE_KEYS'] = '1'
             if root is not None:
