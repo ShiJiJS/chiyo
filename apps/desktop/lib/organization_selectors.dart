@@ -1,3 +1,4 @@
+import 'mac_text_field_accessibility.dart';
 import 'package:flutter/material.dart';
 import 'package:info_core/info_core.dart';
 import 'anchored_surface.dart';
@@ -127,12 +128,15 @@ class _DirectoryTreePickerState extends State<DirectoryTreePicker> {
   @override
   Widget build(BuildContext context) => Column(
     children: [
-      TextField(
-        decoration: const InputDecoration(
-          hintText: '搜索目录',
-          prefixIcon: Icon(Icons.search, size: 17),
+      MacTextFieldAccessibility(
+        label: '搜索目录',
+        child: TextField(
+          decoration: const InputDecoration(
+            hintText: '搜索目录',
+            prefixIcon: Icon(Icons.search, size: 17),
+          ),
+          onChanged: (v) => setState(() => _search = v),
         ),
-        onChanged: (v) => setState(() => _search = v),
       ),
       const SizedBox(height: 8),
       Expanded(
@@ -239,12 +243,15 @@ class _TagPickerState extends State<TagPicker> {
   @override
   Widget build(BuildContext context) => Column(
     children: [
-      TextField(
-        decoration: const InputDecoration(
-          hintText: '搜索标签',
-          prefixIcon: Icon(Icons.search, size: 17),
+      MacTextFieldAccessibility(
+        label: '搜索标签',
+        child: TextField(
+          decoration: const InputDecoration(
+            hintText: '搜索标签',
+            prefixIcon: Icon(Icons.search, size: 17),
+          ),
+          onChanged: (v) => setState(() => _search = v),
         ),
-        onChanged: (v) => setState(() => _search = v),
       ),
       const SizedBox(height: 8),
       Expanded(

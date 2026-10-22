@@ -1,3 +1,4 @@
+import 'mac_text_field_accessibility.dart';
 import 'ui.dart';
 import 'package:flutter/material.dart';
 import 'package:info_core/info_core.dart';
@@ -491,40 +492,45 @@ class _TemplateEditorState extends State<_TemplateEditor> {
 
   Widget _input(
     TextEditingController controller, {
+    required String label,
     Key? key,
     String? hint,
     int maxLength = 200,
     double size = 14,
   }) => SizedBox(
     height: size * 1.5 * MediaQuery.textScalerOf(context).scale(1) + 24,
-    child: TextField(
-      key: key,
-      controller: controller,
-      maxLength: maxLength,
-      buildCounter:
-          (_, {required currentLength, required isFocused, maxLength}) => null,
-      enabled: !_saving,
-      textAlignVertical: TextAlignVertical.top,
-      style: prototypeText(context, size),
-      decoration: InputDecoration(
-        hintText: hint,
-        counterText: '',
-        isDense: true,
-        filled: true,
-        fillColor: UiPalette.of(context).rail,
-        contentPadding: EdgeInsets.fromLTRB(
-          9,
-          size == 13 ? 12 : 11,
-          9,
-          size == 13 ? 12 : 13,
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: UiPalette.of(context).line),
-          borderRadius: BorderRadius.circular(4),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: UiPalette.of(context).accent),
-          borderRadius: BorderRadius.circular(4),
+    child: MacTextFieldAccessibility(
+      label: label,
+      child: TextField(
+        key: key,
+        controller: controller,
+        maxLength: maxLength,
+        buildCounter:
+            (_, {required currentLength, required isFocused, maxLength}) =>
+                null,
+        enabled: !_saving,
+        textAlignVertical: TextAlignVertical.top,
+        style: prototypeText(context, size),
+        decoration: InputDecoration(
+          hintText: hint,
+          counterText: '',
+          isDense: true,
+          filled: true,
+          fillColor: UiPalette.of(context).rail,
+          contentPadding: EdgeInsets.fromLTRB(
+            9,
+            size == 13 ? 12 : 11,
+            9,
+            size == 13 ? 12 : 13,
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: UiPalette.of(context).line),
+            borderRadius: BorderRadius.circular(4),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: UiPalette.of(context).accent),
+            borderRadius: BorderRadius.circular(4),
+          ),
         ),
       ),
     ),
@@ -556,10 +562,13 @@ class _TemplateEditorState extends State<_TemplateEditor> {
           ),
         ),
         const SizedBox(height: 20),
-        Text('模板名称', style: prototypeText(context, 13)),
+        ExcludeSemantics(
+          child: Text('模板名称', style: prototypeText(context, 13)),
+        ),
         const SizedBox(height: 7),
         _input(
           _name,
+          label: '模板名称',
           key: const ValueKey('template-name'),
           hint: '例如：服务器',
           size: 13,
@@ -574,6 +583,7 @@ class _TemplateEditorState extends State<_TemplateEditor> {
                 Expanded(
                   child: _input(
                     _fields[i].name,
+                    label: '字段名称',
                     key: ValueKey('template-field-name-$i'),
                     hint: '字段名称',
                   ),
@@ -661,12 +671,20 @@ class _TemplateEditorState extends State<_TemplateEditor> {
             ),
           ),
           const SizedBox(height: 10),
-          Text('模板说明', style: prototypeText(context, 13)),
-          _input(_description, maxLength: 2000),
+          ExcludeSemantics(
+            child: Text('模板说明', style: prototypeText(context, 13)),
+          ),
+          _input(_description, label: '模板说明', maxLength: 2000),
           for (var i = 0; i < _fields.length; i++) ...[
             const SizedBox(height: 10),
-            Text('字段 ${i + 1} 说明', style: prototypeText(context, 13)),
-            _input(_fields[i].description, maxLength: 2000),
+            ExcludeSemantics(
+              child: Text('字段 ${i + 1} 说明', style: prototypeText(context, 13)),
+            ),
+            _input(
+              _fields[i].description,
+              label: '字段 ${i + 1} 说明',
+              maxLength: 2000,
+            ),
           ],
         ],
         if (_error != null) SettingsNotice('模板尚未保存', _error!, error: true),

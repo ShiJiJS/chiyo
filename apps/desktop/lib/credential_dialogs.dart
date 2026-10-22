@@ -1,3 +1,4 @@
+import 'mac_text_field_accessibility.dart';
 import 'package:flutter/material.dart';
 import 'package:info_core/info_core.dart';
 import 'credential_files.dart';
@@ -45,7 +46,7 @@ Widget credentialInput(
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(label, style: prototypeText(context, 13)),
+        ExcludeSemantics(child: Text(label, style: prototypeText(context, 13))),
         SizedBox(height: flow ? 7 : 8),
         if (secret && usesNativeSecretEditor)
           MacSecretInput(
@@ -57,23 +58,26 @@ Widget credentialInput(
             style: prototypeText(context, flow ? 13 : 14),
           )
         else
-          TextField(
-            key: key,
-            controller: controller,
-            obscureText: secret,
-            enableSuggestions: !secret,
-            autocorrect: !secret,
-            maxLines: lines,
-            maxLength: maxLength,
-            buildCounter:
-                (
-                  _, {
-                  required currentLength,
-                  required isFocused,
-                  required maxLength,
-                }) => null,
-            style: prototypeText(context, flow ? 13 : 14),
-            decoration: decoration,
+          MacTextFieldAccessibility(
+            label: label,
+            child: TextField(
+              key: key,
+              controller: controller,
+              obscureText: secret,
+              enableSuggestions: !secret,
+              autocorrect: !secret,
+              maxLines: lines,
+              maxLength: maxLength,
+              buildCounter:
+                  (
+                    _, {
+                    required currentLength,
+                    required isFocused,
+                    required maxLength,
+                  }) => null,
+              style: prototypeText(context, flow ? 13 : 14),
+              decoration: decoration,
+            ),
           ),
       ],
     ),

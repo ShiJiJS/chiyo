@@ -1,3 +1,4 @@
+import 'mac_text_field_accessibility.dart';
 import 'package:flutter/material.dart';
 import 'package:info_core/info_core.dart';
 import 'information_editor.dart';
@@ -724,19 +725,22 @@ class _InformationLibraryState extends State<InformationLibrary> {
             color: p.muted,
           ),
           const SizedBox(height: 16),
-          TextField(
-            key: const ValueKey('library-search'),
-            controller: _search,
-            style: prototypeText(context, 13),
-            decoration: InputDecoration(
-              hintText: '搜索$scope',
-              prefixIcon: const Icon(Icons.search, size: 16),
+          MacTextFieldAccessibility(
+            label: '搜索$scope',
+            child: TextField(
+              key: const ValueKey('library-search'),
+              controller: _search,
+              style: prototypeText(context, 13),
+              decoration: InputDecoration(
+                hintText: '搜索$scope',
+                prefixIcon: const Icon(Icons.search, size: 16),
+              ),
+              onChanged: (_) => setState(() {
+                _offset = 0;
+                _selectedId = null;
+                _focusMissing = false;
+              }),
             ),
-            onChanged: (_) => setState(() {
-              _offset = 0;
-              _selectedId = null;
-              _focusMissing = false;
-            }),
           ),
           const SizedBox(height: 10),
           Wrap(
