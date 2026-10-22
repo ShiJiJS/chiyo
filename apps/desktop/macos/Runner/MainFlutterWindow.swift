@@ -218,16 +218,20 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
           DispatchQueue.main.async { self.readAvailability(result) }
         }
       case "notify", "testNotify":
-        guard self.notificationsEnabled else { result(false); return }
-        let content = UNMutableNotificationContent()
-        content.title = "信息访问授权"
-        content.body = call.method == "testNotify" ? "这是一条测试通知。访问申请提醒已连接到系统。" : "有新的访问请求。打开应用查看并审批。"
-        if call.method == "notify", let requestId = call.arguments as? String {
-          content.userInfo = ["requestId": requestId]
-        }
-        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
-        UNUserNotificationCenter.current().add(request) { error in
-          DispatchQueue.main.async { result(error == nil) }
+        // add() can accept a request after system notifications were disabled.
+        // Refresh the actual permission instead of trusting the startup cache.
+        self.readAvailability { _ in
+          guard self.desktopReady && self.notificationsEnabled else { result(false); return }
+          let content = UNMutableNotificationContent()
+          content.title = "信息访问授权"
+          content.body = call.method == "testNotify" ? "这是一条测试通知。访问申请提醒已连接到系统。" : "有新的访问请求。打开应用查看并审批。"
+          if call.method == "notify", let requestId = call.arguments as? String {
+            content.userInfo = ["requestId": requestId]
+          }
+          let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
+          UNUserNotificationCenter.current().add(request) { error in
+            DispatchQueue.main.async { result(error == nil) }
+          }
         }
       case "terminate":
         self.textFieldAccessibility?.update([] as [[String: Any]])

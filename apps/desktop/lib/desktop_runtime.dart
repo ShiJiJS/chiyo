@@ -234,10 +234,27 @@ class DesktopRuntime extends ChangeNotifier {
     } on Object {
       /* Unavailable notification delivery must not lose a request. */
     }
-    availability = DesktopAvailability(
+    await _refreshAfterNotificationFailure();
+  }
+
+  Future<void> _refreshAfterNotificationFailure() async {
+    var current = DesktopAvailability(
       tray: availability.tray,
       notifications: NotificationAvailability.unavailable,
     );
+    try {
+      final actual = await platform.readAvailability();
+      current = DesktopAvailability(
+        tray: actual.tray,
+        notifications: actual.notifications == NotificationAvailability.enabled
+            ? NotificationAvailability.unavailable
+            : actual.notifications,
+      );
+    } on Object {
+      // Keep a delivery failure visible even when the status query also fails.
+    }
+    if (quitting) return;
+    availability = current;
     notifyListeners();
   }
 
@@ -247,10 +264,12 @@ class DesktopRuntime extends ChangeNotifier {
       return false;
     }
     try {
-      return await platform.notifyTest();
+      if (await platform.notifyTest()) return true;
     } catch (_) {
-      return false;
+      /* Report the actual permission state when a test cannot be submitted. */
     }
+    await _refreshAfterNotificationFailure();
+    return false;
   }
 
   Future<void> enableNotifications() async {

@@ -298,6 +298,62 @@ void main() {
     },
   );
 
+  for (final state in [
+    NotificationAvailability.denied,
+    NotificationAvailability.notEnabled,
+  ]) {
+    test(
+      'notification rejection refreshes changed system permission: $state',
+      () async {
+        final service = InformationService.fictional();
+        final native = NativeDesktopFixture();
+        final runtime = DesktopRuntime(
+          service: service,
+          platform: native,
+          closeServer: () async {},
+          closeRepository: () async {},
+        );
+        await runtime.start();
+        native.availability = DesktopAvailability(
+          tray: true,
+          notifications: state,
+        );
+        native.deliveryAvailable = false;
+        final session = service.agent.openSession('Changed system permission');
+        final request = service.agent.request(session, 'Need address', [
+          const FieldRef('demo-server', 'host'),
+        ]);
+        await Future<void>.delayed(Duration.zero);
+        expect(runtime.availability.notifications, state);
+        expect(native.permissionRequests, 0);
+        expect(native.notices, ['new_request']);
+        expect(service.agent.status(session, request.id)['status'], 'pending');
+        await runtime.quit();
+      },
+    );
+  }
+
+  test('failed test notification refreshes denied system permission', () async {
+    final service = InformationService.fictional();
+    final native = NativeDesktopFixture();
+    final runtime = DesktopRuntime(
+      service: service,
+      platform: native,
+      closeServer: () async {},
+      closeRepository: () async {},
+    );
+    await runtime.start();
+    native.availability = const DesktopAvailability(
+      tray: true,
+      notifications: NotificationAvailability.denied,
+    );
+    native.deliveryAvailable = false;
+    expect(await runtime.testNotification(), isFalse);
+    expect(runtime.availability.notifications, NotificationAvailability.denied);
+    expect(native.permissionRequests, 0);
+    await runtime.quit();
+  });
+
   test(
     'new requests arriving during native startup notify once; polling and reopening never repeat',
     () async {
