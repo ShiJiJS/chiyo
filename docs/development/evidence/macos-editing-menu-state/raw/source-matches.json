@@ -1,0 +1,5 @@
+{
+  "dartBridgeExact": true,
+  "nativeBridgeExactExceptTwoQaBooleanLogLines": true,
+  "mainWindowExactExceptAuditedMemoryOnlyClipboardFixture": true
+}

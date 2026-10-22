@@ -1,0 +1,63 @@
+00:00 +0: loading /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_editing_menu_state_test.dart
+00:00 +0: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/window_frame_test.dart: caption controls remain accessible above the workspace route
+00:00 +1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_editing_menu_state_test.dart: native menu state follows selection history read-only and obscured focus (variant: TargetPlatform.macOS)
+00:00 +2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_editing_menu_state_test.dart: native menu state follows selection history read-only and obscured focus (variant: TargetPlatform.macOS)
+00:00 +3: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_editing_menu_state_test.dart: native menu state follows selection history read-only and obscured focus (variant: TargetPlatform.macOS)
+00:00 +4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_editing_menu_state_test.dart: native menu state follows selection history read-only and obscured focus (variant: TargetPlatform.macOS)
+00:00 +5: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_editing_menu_state_test.dart: native menu state follows selection history read-only and obscured focus (variant: TargetPlatform.macOS)
+00:00 +6: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_editing_menu_state_test.dart: native menu state follows selection history read-only and obscured focus (variant: TargetPlatform.macOS)
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: {
+            'deleteSelection': false,
+            'copy': false,
+            'cut': false,
+            'paste': true,
+            'selectAll': false,
+            'undo': false,
+            'redo': false
+          }
+  Actual: {
+            'copy': false,
+            'deleteSelection': true,
+            'cut': false,
+            'paste': true,
+            'selectAll': false,
+            'undo': false,
+            'redo': false
+          }
+   Which: at location ['deleteSelection'] is <true> instead of <false>
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_editing_menu_state_test.dart:115:7)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_editing_menu_state_test.dart line 115
+The test description was:
+  native menu state follows selection history read-only and obscured focus (variant:
+  TargetPlatform.macOS)
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:00 +6 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_text_editing_test.dart: native undo and redo use only the focused editor history (variant: TargetPlatform.macOS)
+00:00 +6 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_editing_menu_state_test.dart: native menu state follows selection history read-only and obscured focus (variant: TargetPlatform.macOS) [E]
+  Test failed. See exception logs above.
+  The test description was: native menu state follows selection history read-only and obscured focus (variant: TargetPlatform.macOS)
+  
+00:00 +7 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_text_editing_test.dart: native undo and redo use only the focused editor history (variant: TargetPlatform.macOS)
+00:00 +8 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_text_editing_test.dart: native undo cannot change an editor switched to read-only (variant: TargetPlatform.macOS)
+00:00 +9 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_text_editing_test.dart: native clipboard actions update the focused model and clipboard (variant: TargetPlatform.macOS)
+00:00 +10 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_text_editing_test.dart: native clipboard actions preserve read-only and obscured fields (variant: TargetPlatform.macOS)
+00:00 +11 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_text_editing_test.dart: native Select All updates only the focused Flutter editor (variant: TargetPlatform.macOS)
+00:00 +12 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_text_editing_test.dart: native Select All ignores non-editor focus (variant: TargetPlatform.macOS)
+00:01 +13 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_text_editing_test.dart: outgoing frame cannot remove its replacement handler (variant: TargetPlatform.macOS)
+00:01 +14 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_text_editing_test.dart: Windows keeps its existing editing path (variant: TargetPlatform.windows)
+00:01 +15 -1: Some tests failed.
+
+Failing tests:
+  /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_editing_menu_state_test.dart: native menu state follows selection history read-only and obscured focus (variant: TargetPlatform.macOS)

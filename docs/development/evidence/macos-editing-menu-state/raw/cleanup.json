@@ -1,0 +1,34 @@
+{
+  "removed": [
+    {
+      "path": "build/macos-adaptation/issue48-menu-state-20261022/source",
+      "allocatedKiB": 979268
+    },
+    {
+      "path": "apps/desktop/build/native_assets",
+      "allocatedKiB": 1772
+    },
+    {
+      "path": "apps/desktop/build/test_cache",
+      "allocatedKiB": 53660
+    },
+    {
+      "path": "apps/desktop/build/unit_test_assets",
+      "allocatedKiB": 18048
+    },
+    {
+      "path": "apps/desktop/.dart_tool/hooks_runner",
+      "allocatedKiB": 14484
+    }
+  ],
+  "releasedAllocatedKiB": 1067232,
+  "stableItemsVerified": 7971,
+  "stableMismatches": [],
+  "stableSignatureExit": 0,
+  "stablePid53592Alive": true,
+  "remainingApps": [
+    "local/中文 Mac 预览/AgentInfoManage/app/info_desktop.app"
+  ],
+  "remainingGeneratedDsyms": [],
+  "originalZIPsAndPrivateBackupsRetained": true
+}
