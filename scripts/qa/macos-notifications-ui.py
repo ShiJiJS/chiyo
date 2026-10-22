@@ -35,11 +35,15 @@ def main():
                         help='Check actual Settings denial/restoration without submitting notifications')
     parser.add_argument('--stale-permission', action='store_true',
                         help='With --permission-settings, check one native attempt after actual denial but before app refresh')
+    parser.add_argument('--allowed-once', action='store_true',
+                        help='With --reuse-permission, verify one new request through the allowed production path')
     args = parser.parse_args()
     if args.permission_settings and not args.reuse_permission:
         parser.error('--permission-settings requires --reuse-permission')
     if args.stale_permission and not args.permission_settings:
         parser.error('--stale-permission requires --permission-settings')
+    if args.allowed_once and (not args.reuse_permission or args.permission_settings):
+        parser.error('--allowed-once requires --reuse-permission and excludes --permission-settings')
     if os.uname().sysname != 'Darwin':
         parser.error('macOS required')
     output = args.output.resolve()
@@ -54,7 +58,8 @@ def main():
         'bundleIdentifier': IDENTITY, 'commands': [], 'scope': __doc__,
         'reusePermission': args.reuse_permission,
         'permissionSettings': args.permission_settings,
-        'stalePermission': args.stale_permission}
+        'stalePermission': args.stale_permission,
+        'allowedOnce': args.allowed_once}
     app, process, root = None, None, None
     controller = output / 'controller.json'
 
@@ -159,6 +164,8 @@ def main():
             environment['MAC_NOTIFICATION_PERMISSION_SETTINGS'] = '1'
         if args.stale_permission:
             environment['MAC_NOTIFICATION_STALE_PERMISSION'] = '1'
+        if args.allowed_once:
+            environment['MAC_NOTIFICATION_ALLOWED_ONCE'] = '1'
         with (logs / 'application.txt').open('wb') as log:
             process = subprocess.Popen([str(app / 'Contents/MacOS/info_desktop')], cwd=source,
                                        env=environment, stdout=log, stderr=subprocess.STDOUT)
@@ -189,8 +196,20 @@ def main():
         state['application'] = {'exitCode': process.returncode, **facts}
         assert process.returncode == 0 and facts['complete'] and not facts.get('failed')
         assert facts['nativeTerminationRequested'] and facts['libraryCloses'] == 1 and facts['flutterErrors'] == 0
-        assert len(facts['cases']) == (3 if args.stale_permission else 2)
-        if args.permission_settings:
+        assert len(facts['cases']) == (1 if args.allowed_once else 3 if args.stale_permission else 2)
+        if args.allowed_once:
+            assert facts['submissions'] == 1 and facts['permissionActions'] == 0
+            native = [json.loads(line.split('=', 1)[1]) for line in
+                      (logs / 'application.txt').read_text().splitlines()
+                      if line.startswith('MAC_NOTIFICATION_NATIVE=')]
+            submitted = [row for row in native if row['event'] == 'submit']
+            accepted = [row for row in native if row['event'] == 'accepted']
+            assert len(submitted) == len(accepted) == 1 and accepted[0]['accepted']
+            assert submitted[0]['requestId'] == accepted[0]['requestId'] == facts['cases'][0]['requestId']
+            assert submitted[0]['identifier'] == accepted[0]['identifier'] and submitted[0]['appActive']
+            assert all(row['authorization'] == 2 for row in native if row['event'] == 'settings')
+            state['nativeSingleAllowedSubmission'] = {'submitted': submitted[0], 'accepted': accepted[0]}
+        elif args.permission_settings:
             assert facts['submissions'] == (1 if args.stale_permission else 0) and facts['permissionActions'] == 2
             assert facts['permissionSettingsRestored'] and facts['pendingRequestPreservedWhileDenied']
             if args.stale_permission:
