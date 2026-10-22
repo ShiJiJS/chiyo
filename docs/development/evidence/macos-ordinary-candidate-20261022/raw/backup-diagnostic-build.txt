@@ -1,0 +1,31 @@
+Unexpected arguments: /Users/jiangxinyi/Documents/Project/agent-info/packages/info_storage/.dart_tool/mac-final-export-20261022/verify_export.dart
+
+Usage: dart build cli
+-h, --help                   Print this usage information.
+-o, --output=<path>                    Write the output to <output>/bundle/.
+                                       This can be an absolute or relative path.
+                             (defaults to "build/cli/macos_arm64/")
+-t, --target=<path>          The main entry-point file of the command-line application.
+                             Must be a Dart file.
+                             If the "--target" option is omitted, and there is a single Dart file in bin/,
+                             then that is used instead.
+-p, --packages=<path>        Get package locations from the specified file instead of .dart_tool/package_config.json.
+                             <path> can be relative or absolute.
+                             For example: dart compile cli --packages=/tmp/pkgs.json main.dart
+    --verbosity=<level>      Sets the verbosity level of the compilation.
+
+          [error]            Show only error messages
+          [warning]          Show only error and warning messages
+          [info]             Show error, warning, and info messages
+          [all] (default)    Show all messages
+
+    --depfile=<path>         Path to an output file in Ninja depfile format containing a list of compilation dependencies. This is passed to the compiler to support dependency tracking in build systems.
+    --target-sanitizer       Build with a specific target sanitizer.
+                             [none (default)]
+    --target-os              Compile to a specific target operating system.
+                             [android, fuchsia, ios, linux, macos, windows]
+    --target-arch            Compile to a specific target architecture.
+                             [arm, arm64, ia32, riscv32, riscv64, x64]
+    --root-package=<name>    The package for which hooks are run (including its transitive dependencies). Must be provided if the entry point(s) are outside the packages in the packages argument.
+
+Run "dart help" to see global options.

@@ -1,0 +1,22 @@
+{
+  "pid": 87410,
+  "oldSource": "4690e79357bb728da22193d8dadd6dc8a8ce2ce6",
+  "newSource": "7b19d34b61cf07d5a77db05adb8f0c9cdbf85805",
+  "payloadEntries": 7971,
+  "wholeDirectoryReplaced": true,
+  "oldAdditionalRuntimeFiles": [
+    ".local/state/gh/device-id"
+  ],
+  "profileFilesBefore": {
+    "library.lock": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "library.db": "142da77c857b2cc975a2f38723fd9f0f44591235ce87413e3dd105c8fd7dcc89"
+  },
+  "environmentKeys": [
+    "HOME",
+    "LANG",
+    "LOGNAME",
+    "PATH",
+    "USER"
+  ],
+  "automaticKeychainRequest": false
+}

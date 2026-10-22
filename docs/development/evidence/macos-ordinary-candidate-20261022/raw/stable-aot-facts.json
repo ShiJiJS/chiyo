@@ -1,0 +1,25 @@
+{
+  "environmentKeys": [
+    "PATH",
+    "TMPDIR"
+  ],
+  "storageDiagnostic": {
+    "exit": 0,
+    "result": {
+      "status": "ok",
+      "cipherVersion": "4.19.0 community",
+      "reopen": true,
+      "independentRecovery": true,
+      "oldAuthorityRefused": true,
+      "scope": "synthetic memory keys; not Keychain or desktop acceptance"
+    }
+  },
+  "unsupportedCliHelpProbe": {
+    "exit": 64,
+    "output": {
+      "status": "invalid_request"
+    },
+    "interpretation": "CLI is a JSON-lines protocol, not a --help interface. No product change or passing claim."
+  },
+  "scope": "actual AOT storage diagnostic at stable candidate path; synthetic memory keys, not original profile or Keychain upgrade"
+}
