@@ -12,6 +12,7 @@ import os
 from pathlib import Path
 import re
 import shutil
+import socket
 import subprocess
 import time
 import uuid
@@ -31,7 +32,11 @@ def main():
     parser.add_argument('output', type=Path)
     parser.add_argument('--bundled', action='store_true',
                         help='Verify production assembled tools inside the signed app')
+    parser.add_argument('--history-reopen', action='store_true',
+                        help='With --bundled, use synthetic owner decisions and independently reopen tool history')
     args = parser.parse_args()
+    if args.history_reopen and not args.bundled:
+        parser.error('--history-reopen requires --bundled')
     if os.uname().sysname != 'Darwin':
         parser.error('macOS required')
     output = args.output.resolve()
@@ -135,9 +140,17 @@ def main():
         wait_for(lambda: (receiver_root / 'fixture.json').exists(), receiver)
         port = json.loads((receiver_root / 'fixture.json').read_text())['port']
         root = None
+        receiver_checkpoint = None
         chosen_bookmark_hash = None
-        for mode in (['bundled'] if args.bundled else ['choose', 'reopen', 'remove', 'denied']):
-            environment = os.environ.copy()
+        modes = (['bundled', 'bundled-reopen'] if args.history_reopen else
+                 ['bundled'] if args.bundled else ['choose', 'reopen', 'remove', 'denied'])
+        state['syntheticOwnerHistoryMode'] = args.history_reopen
+        for mode in modes:
+            environment = ({key: os.environ[key] for key in ['HOME', 'USER', 'LOGNAME', 'LANG'] if key in os.environ}
+                           if args.history_reopen else os.environ.copy())
+            if args.history_reopen:
+                environment.update(PATH='/usr/bin:/bin:/usr/sbin:/sbin', MAC_TOOLS_AUTO_HISTORY='1')
+                state['appEnvironmentKeys'] = sorted(environment)
             environment.update(MAC_TOOLS_MODE=mode, MAC_TOOLS_OWNER=owner, MAC_TOOLS_GH=str(selected_gh), MAC_TOOLS_AWS=str(selected_aws), MAC_TOOLS_RECEIVER_PORT=str(port))
             environment.pop('MAC_TOOLS_ROOT', None)
             if root is not None:
@@ -160,7 +173,7 @@ def main():
             root = wait_for(locate, process)
             roots.add(root)
             ready = wait_for(lambda: read_report(root, mode), process)
-            if mode in ('choose', 'remove', 'bundled'):
+            if mode in ('choose', 'remove', 'bundled') and not args.history_reopen:
                 fd = os.open(controller, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
                 with os.fdopen(fd, 'w') as stream:
                     json.dump({'owner': owner, 'root': str(root), 'app': str(app), 'pid': process.pid,
@@ -182,12 +195,24 @@ def main():
             facts = read_report(root, mode)
             assert process.returncode == 0 and facts and facts.get('complete') and not facts.get('failed')
             assert facts.get('nativeTerminationRequested') and facts['libraryCloses'] == 1 and facts['flutterErrors'] == 0
-            record = {'exitCode': process.returncode, **facts}
+            with socket.socket() as probe:
+                port_closed = probe.connect_ex(('127.0.0.1', facts['port'])) != 0
+            assert port_closed
+            record = {'exitCode': process.returncode, 'pid': process.pid,
+                      'portClosedAfterExit': port_closed, **facts}
             (output / (mode + '.json')).write_text(json.dumps(record, indent=2) + '\n')
             state['cases'].append(record)
             if mode in ('choose', 'bundled'):
                 receiver_result = json.loads((receiver_root / 'receiver-result.json').read_text())
                 assert receiver_result['valid'] == 3 and receiver_result['invalid'] == 1
+                receiver_checkpoint = receiver_result
+                state['receiverAfterExecutions'] = receiver_result
+            if mode == 'bundled-reopen':
+                receiver_result = json.loads((receiver_root / 'receiver-result.json').read_text())
+                assert receiver_result == receiver_checkpoint
+                assert facts['historyRequestsPreserved'] == 3 and facts['historyExecutionsPreserved'] == 5
+                assert facts['oldSessionRefused'] and facts['newSessionCannotReuseOldRequest']
+                state['receiverUnchangedAfterIndependentReopen'] = True
             if mode == 'choose':
                 assert bookmarks.is_file() and not bookmarks.is_symlink()
                 assert bookmarks.stat().st_mode & 0o777 == 0o600

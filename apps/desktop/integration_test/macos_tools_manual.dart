@@ -47,9 +47,17 @@ Future<void> main() async {
   final env = Platform.environment;
   final mode = env['MAC_TOOLS_MODE'];
   final owner = env['MAC_TOOLS_OWNER'];
+  final historyMode = env['MAC_TOOLS_AUTO_HISTORY'] == '1';
   check(
     Platform.isMacOS &&
-        {'choose', 'reopen', 'remove', 'denied', 'bundled'}.contains(mode),
+        {
+          'choose',
+          'reopen',
+          'remove',
+          'denied',
+          'bundled',
+          'bundled-reopen',
+        }.contains(mode),
     'QA mode',
   );
   check(owner != null && RegExp(r'^[a-f0-9]{32}$').hasMatch(owner), 'QA owner');
@@ -110,7 +118,117 @@ Future<void> main() async {
   try {
     await bootstrap.start();
     check(bootstrap.state == DesktopStartupState.ready, 'Startup failed');
+    facts['port'] = bootstrap.boundPort;
     runApp(DesktopLauncher(bootstrap: bootstrap));
+    final service = bootstrap.library!.service;
+    List<Map<String, Object?>> requestFacts() => [
+      for (final r in service.owner.credentialUseRequests)
+        {
+          'id': r.id,
+          'purpose': r.purpose,
+          'credentialId': r.credentialId,
+          'credentialVersion': r.version,
+          'credentialApproved': r.credentialApproved,
+          'decidedAt': r.toJson()['decidedAt'],
+          'expiresAt': r.toJson()['credentialExpiresAt'],
+          'planHash': r.usePlanHash,
+        },
+    ]..sort((a, b) => (a['id'] as String).compareTo(b['id'] as String));
+    List<Map<String, Object?>> executionFacts() =>
+        [for (final e in service.owner.credentialExecutions) e.toJson()]..sort(
+          (a, b) => (a['executionId'] as String).compareTo(
+            b['executionId'] as String,
+          ),
+        );
+    final privateCheckpoint = File(
+      '$canonical/.private-history-checkpoint.json',
+    );
+    if (mode == 'bundled-reopen') {
+      check(
+        historyMode && supplied != null,
+        'History recovery requires owned existing library',
+      );
+      final expected =
+          jsonDecode(await privateCheckpoint.readAsString()) as Map;
+      check(
+        jsonEncode(requestFacts()) == jsonEncode(expected['requests']),
+        'Request history changed across process restart',
+      );
+      check(
+        jsonEncode(executionFacts()) == jsonEncode(expected['executions']),
+        'Execution history changed across process restart',
+      );
+      check(
+        service.owner.credentialUseRequests.length == 3 &&
+            service.owner.credentialExecutions.length == 5,
+        'History counts',
+      );
+      check(
+        service.owner.credentialUseRequests.every(
+          (r) => service.owner.credentialGrantState(r) == 'revoked',
+        ),
+        'Old grant revived after restart',
+      );
+      final oldClient = AgentClient(
+        bootstrap.boundPort!,
+        sessionSecret: expected['sessionSecret'] as String,
+      );
+      final newClient = AgentClient(bootstrap.boundPort!);
+      try {
+        final old = await oldClient.execute(
+          Map<String, dynamic>.from(expected['runCommand'] as Map),
+        );
+        check(
+          old['status'] == 'unauthorized' &&
+              old['errorCode'] == 'session_required',
+          'Old session accepted',
+        );
+        await newClient.execute({
+          'command': 'session',
+          'chatLabel': 'Mac 重开后独立聊天',
+        });
+        final fresh = await newClient.execute(
+          Map<String, dynamic>.from(expected['runCommand'] as Map),
+        );
+        check(
+          fresh['status'] == 'unauthorized' &&
+              fresh['errorCode'] == 'session_mismatch',
+          'New session reused old request',
+        );
+        final output = await oldClient.execute({
+          'command': 'execution-output',
+          'executionId': (expected['executions'] as List).first['executionId'],
+        });
+        check(
+          output['status'] == 'unauthorized',
+          'Old output capability revived',
+        );
+        check(
+          jsonEncode(executionFacts()) == jsonEncode(expected['executions']),
+          'Rejected operation changed execution facts',
+        );
+        facts.addAll({
+          'historyRequestsPreserved': 3,
+          'historyExecutionsPreserved': 5,
+          'historyExecutions': executionFacts(),
+          'historyRequests': requestFacts(),
+          'allOldGrantsRevoked': true,
+          'oldSessionRefused': true,
+          'oldSessionError': old['errorCode'],
+          'newSessionCannotReuseOldRequest': true,
+          'newSessionError': fresh['errorCode'],
+          'oldExecutionOutputRefused': true,
+          'rejectedOperationDidNotCreateExecution': true,
+        });
+      } finally {
+        oldClient.close();
+        newClient.close();
+      }
+      facts['complete'] = true;
+      await save();
+      await bootstrap.runtime!.quit();
+      return;
+    }
     final access = const NativeToolDirectoryAccess();
     final initial = await access.read();
     check(!initial.storageUnavailable, 'Bookmark storage unavailable');
@@ -234,7 +352,6 @@ Future<void> main() async {
       await save();
     }
     if (mode == 'choose' || mode == 'bundled') {
-      final service = bootstrap.library!.service;
       final client = AgentClient(bootstrap.boundPort!);
       final capabilities = await client.execute({'command': 'capabilities'});
       check(
@@ -326,6 +443,10 @@ Future<void> main() async {
           'Tool request failed: ${response['errorCode']}',
         );
         final id = response['requestId'] as String;
+        if (historyMode) {
+          await service.owner.decideCredentialUse(id, approveCredential: true);
+          facts['approvalSource'] = 'synthetic-owner-api-not-actual-ui';
+        }
         await until(
           () =>
               service.owner.credentialUseRequests
@@ -439,6 +560,29 @@ Future<void> main() async {
           'SYNTHETIC_NOT_A_REAL_SECRET',
           awsArgs,
         );
+        if (historyMode) {
+          await privateCheckpoint.writeAsString(
+            jsonEncode({
+              'sessionSecret': client.sessionSecret,
+              'runCommand': {
+                'command': 'run-use',
+                'protocolVersion': 2,
+                'requestId': good,
+                'operationId': 'aws-identity',
+                'launch': plan('aws_shared_credentials', awsArgs),
+              },
+            }),
+            flush: true,
+          );
+          check(
+            (await Process.run('/bin/chmod', [
+                  '600',
+                  privateCheckpoint.path,
+                ])).exitCode ==
+                0,
+            'Private history fixture permissions',
+          );
+        }
         check(
           (await execute(
             good,
@@ -501,6 +645,22 @@ Future<void> main() async {
           )).contains('HTTP 401'),
           'Network failure is not GH authentication evidence',
         );
+        if (historyMode) {
+          final expected =
+              jsonDecode(await privateCheckpoint.readAsString()) as Map;
+          await privateCheckpoint.writeAsString(
+            jsonEncode({
+              ...expected,
+              'requests': requestFacts(),
+              'executions': executionFacts(),
+            }),
+            flush: true,
+          );
+          facts.addAll({
+            'historyRequests': requestFacts(),
+            'historyExecutions': executionFacts(),
+          });
+        }
       } finally {
         client.close();
       }
@@ -515,7 +675,8 @@ Future<void> main() async {
     facts['complete'] = true;
     await save();
     stdout.writeln('MAC_TOOLS_RESULT=PASS:$mode');
-    if (mode == 'choose' || mode == 'remove' || mode == 'bundled') {
+    if ((mode == 'choose' || mode == 'remove' || mode == 'bundled') &&
+        !historyMode) {
       await Future<void>.delayed(const Duration(minutes: 25));
       throw StateError('Actual inspection quit deadline');
     }
