@@ -1,0 +1,228 @@
+{
+  "complete": true,
+  "cleanup": [
+    {
+      "path": "build/macos-adaptation/issue50-package-14/AgentInfoManage",
+      "allocatedKiB": 380700,
+      "removed": true
+    },
+    {
+      "path": "build/macos-adaptation/issue50-package-14/verify",
+      "allocatedKiB": 380700,
+      "removed": true
+    },
+    {
+      "path": "build/macos-adaptation/issue50-package-14/diagnostic-build",
+      "allocatedKiB": 8888,
+      "removed": true
+    },
+    {
+      "path": "apps/desktop/build/macos",
+      "allocatedKiB": 1001448,
+      "removed": true
+    },
+    {
+      "path": "apps/desktop/.dart_tool/flutter_build",
+      "allocatedKiB": 83384,
+      "removed": true
+    },
+    {
+      "path": "apps/desktop/.dart_tool/hooks_runner",
+      "allocatedKiB": 26616,
+      "removed": true
+    }
+  ],
+  "unregister": [
+    {
+      "path": "build/macos-adaptation/issue50-package-14/AgentInfoManage/app/info_desktop.app",
+      "exitCode": 0
+    },
+    {
+      "path": "build/macos-adaptation/issue50-package-14/verify/中文 空格 路径/AgentInfoManage/app/info_desktop.app",
+      "exitCode": 0
+    },
+    {
+      "path": "apps/desktop/build/macos/Build/Products/Release/info_desktop.app",
+      "exitCode": 0
+    }
+  ],
+  "sourceCommit": "f93c3bd8fe576c7002d42711c420426c0a29c92f",
+  "sourceSnapshotSha256": "b072ec6e721462d13cba95749024e79c2e6c97d3df61166ed95862bd379cd1ae",
+  "sourceInputsVerifiedBefore": 640,
+  "packageSourceChecksRequested": true,
+  "sourceCheckScope": "Full four-package source checks requested inside this stock package run; checked inputs frozen before and verified after packaging",
+  "packageExitCode": 0,
+  "archive": "build/macos-adaptation/issue50-package-14/agent-info-manage-0.4.0+12-mac-dev.f93c3bd8fe57-macos-arm64.zip",
+  "archiveBytes": 130953645,
+  "archiveSha256": "e1b964d36ce6f4d0cbf763a613d94d4a56dab60282e88fb043f5d68745b6b8c7",
+  "manifestSha256": "77e4c6d46b5e28ccb062d50b86142ba174a65981d8b91080cd394c37de689aab",
+  "packagePhasesPassed": 21,
+  "sourceInputsVerifiedAfter": 640,
+  "packageVerified": true,
+  "stableItemsVerified": 7971,
+  "stableMismatches": [],
+  "stableSignatureExit": 0,
+  "stablePid53592Alive": true,
+  "remainingApps": [
+    "local/中文 Mac 预览/AgentInfoManage/app/info_desktop.app"
+  ],
+  "remainingGeneratedDsyms": [],
+  "releasedAllocatedKiB": 1881736,
+  "date": "2026-10-22",
+  "sourceSnapshotGitObjectsVerified": 640,
+  "packageSourceCheckPassed": 724,
+  "packageSourceCheckConditionalSkipped": 66,
+  "payloadFileAndLinkCount": 7971,
+  "machOCount": 75,
+  "ordinaryNewPackageUiVerified": false,
+  "keychainUpgradeVerified": false,
+  "physicalImeVerified": false,
+  "cleanUserVerified": false,
+  "newKeychainCalls": 0,
+  "newSystemPermissionRequests": 0,
+  "issue50Criteria": [
+    true,
+    true,
+    false,
+    false,
+    false,
+    false
+  ],
+  "files": [
+    {
+      "path": "raw/logs/app-signature.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/logs/archive.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/logs/compile-info-codex-hook.txt",
+      "bytes": 136,
+      "sha256": "ab9e738a66e4698c139ed2561396c6b4b4ae5f8f06eb7f9ecb8d87ea5e56047c"
+    },
+    {
+      "path": "raw/logs/compile-info-codex.txt",
+      "bytes": 131,
+      "sha256": "dd2d430f8d03e2b6cab9c6c7f9f2fad9302c5d3a36377a5879fcf305216428eb"
+    },
+    {
+      "path": "raw/logs/compile-info-prepare-codex.txt",
+      "bytes": 139,
+      "sha256": "9fed8f7fa5a710b959f08a92d57729c1c0f155a0a7efd5ecd3e6397a09fe8ca3"
+    },
+    {
+      "path": "raw/logs/compile-info-runtime-worker.txt",
+      "bytes": 140,
+      "sha256": "5dc877b3079a4ed649176e10af3ea29805073856beac3c7587c569b634ac517a"
+    },
+    {
+      "path": "raw/logs/compile-info.txt",
+      "bytes": 125,
+      "sha256": "2c4c3c27653997f4eb2b2f09153e53c2c7ef30c4f7cd30068c6048a79455b7c8"
+    },
+    {
+      "path": "raw/logs/diagnostic-build.txt",
+      "bytes": 300,
+      "sha256": "7cdce2e16df3e09cb2abf933b034558492d961c254b4947500a07e861926b7b8"
+    },
+    {
+      "path": "raw/logs/extract.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/logs/extracted-app-signature.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/logs/extracted-cli-and-worker.txt",
+      "bytes": 842,
+      "sha256": "7aca7085e00077c247eb493880ab1f386fb56abe15d52c2cd2781df8c92408ed"
+    },
+    {
+      "path": "raw/logs/extracted-storage.txt",
+      "bytes": 187,
+      "sha256": "bfe59e3f5c8148af626c8aa8416aa5c874f251127cecd3c3ec86f26dddfb1657"
+    },
+    {
+      "path": "raw/logs/release-build.txt",
+      "bytes": 4599,
+      "sha256": "72223cf04d1354d0f9aa48eeffdd5fa3c18c393598f43a63050988f75d5b48ab"
+    },
+    {
+      "path": "raw/logs/sign-diagnostic-libsqlcipher.dylib.txt",
+      "bytes": 170,
+      "sha256": "74075c7825f201ef1d22006af9d49e8a9da86ead0f96edb5a790362623db2bb0"
+    },
+    {
+      "path": "raw/logs/sign-diagnostic-macos-storage-check.txt",
+      "bytes": 171,
+      "sha256": "978c5e39f2c48d0acf8337d188f2dfc6aa62cd1d750a1ed990f30c692e1c795c"
+    },
+    {
+      "path": "raw/logs/sign-info-codex-hook.txt",
+      "bytes": 155,
+      "sha256": "0a115710eb7ea887b4c26c9fb4373fb4b37c9682e47821498759fb11fc170350"
+    },
+    {
+      "path": "raw/logs/sign-info-codex.txt",
+      "bytes": 150,
+      "sha256": "c0f9aa22f5516cdd230355d52642f3f07126468d4bd3022c76a293c20786bca5"
+    },
+    {
+      "path": "raw/logs/sign-info-prepare-codex.txt",
+      "bytes": 158,
+      "sha256": "a6be038b6def0cc9ef605e2e7df7aa31d811741256793023425e97fecd714796"
+    },
+    {
+      "path": "raw/logs/sign-info-runtime-worker.txt",
+      "bytes": 159,
+      "sha256": "127b323166c2892957445e56a188c6796d6349aaf5c5c9a0c0537d8c58c56c64"
+    },
+    {
+      "path": "raw/logs/sign-info.txt",
+      "bytes": 144,
+      "sha256": "ee8f5e482ac701aa365d0f17f1000af9de5917d40d7591ed21810578b6c1de24"
+    },
+    {
+      "path": "raw/logs/source-checks.txt",
+      "bytes": 200860,
+      "sha256": "70ae7d378d93e072d602bfce8628fcd1541f396a28c5ea5ab0abad4e22189f43"
+    },
+    {
+      "path": "raw/manifest.json",
+      "bytes": 2126205,
+      "sha256": "77e4c6d46b5e28ccb062d50b86142ba174a65981d8b91080cd394c37de689aab"
+    },
+    {
+      "path": "raw/package-verification.json",
+      "bytes": 2731,
+      "sha256": "c5d7280647011d78702a3823dd86ef728275758f058aaaa657ef12a72bed3ef8"
+    },
+    {
+      "path": "raw/run.txt",
+      "bytes": 651,
+      "sha256": "689917e6155d7c82539666f003e93090ec54f9746fb05474bebe4f89b9664922"
+    },
+    {
+      "path": "raw/source-hashes.json",
+      "bytes": 79173,
+      "sha256": "b072ec6e721462d13cba95749024e79c2e6c97d3df61166ed95862bd379cd1ae"
+    },
+    {
+      "path": "raw/supervisor.json",
+      "bytes": 2328,
+      "sha256": "532b966cd6932d42fb20b8e4a85293fcde3c33a1e1f89d20573807c609a3df9c"
+    },
+    {
+      "path": "raw/supervisor.py",
+      "bytes": 6792,
+      "sha256": "0e7368495161d78708f2b06474f12f06610973fde9eebf546d28cedef2f78271"
+    }
+  ]
+}

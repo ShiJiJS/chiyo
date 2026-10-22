@@ -1,0 +1,112 @@
+00:00 +0: loading /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_text_editing_test.dart
+00:00 +0: native paste replaces a marked region without recording unfinished pinyin (variant: TargetPlatform.macOS)
+FocusManager#7d05c
+ │ primaryFocus: FocusNode#c94fa([PRIMARY FOCUS])
+ │ primaryFocusCreator: Focus ← _ActionsScope ← Actions ←
+ │   UndoHistory<TextEditingValue> ← MouseRegion ←
+ │   TextFieldTapRegion ← Builder ← _ActionsScope ← Actions ←
+ │   _CompositionCallback ←
+ │   EditableText-[LabeledGlobalKey<EditableTextState>#14cfe] ←
+ │   UnmanagedRestorationScope ← RepaintBoundary ← _Decorator ←
+ │   Semantics ← InputDecorator ← AnimatedBuilder ← Listener ←
+ │   RawGestureDetector ← TextSelectionGestureDetector ← ⋯
+ │
+ └─rootScope: FocusScopeNode#bbdd0(Root Focus Scope [IN FOCUS PATH])
+   │ IN FOCUS PATH
+   │ focusedChildren: FocusScopeNode#02816(View Scope [IN FOCUS PATH])
+   │
+   └─Child 1: _FocusTraversalGroupNode#06d49(FocusTraversalGroup [IN FOCUS PATH])
+     │ context: Focus
+     │ NOT FOCUSABLE
+     │ IN FOCUS PATH
+     │
+     └─Child 1: FocusScopeNode#02816(View Scope [IN FOCUS PATH])
+       │ context: _FocusScopeWithExternalFocusNode
+       │ IN FOCUS PATH
+       │ focusedChildren: FocusScopeNode#76340(Navigator Scope [IN FOCUS
+       │   PATH])
+       │
+       └─Child 1: FocusNode#4a1ea(Shortcuts: <Default WidgetsApp Shortcuts> [IN FOCUS PATH])
+         │ context: Focus
+         │ NOT FOCUSABLE
+         │ IN FOCUS PATH
+         │
+         └─Child 1: FocusNode#7a755(Shortcuts: <Default Text Editing Shortcuts> [IN FOCUS PATH])
+           │ context: Focus
+           │ NOT FOCUSABLE
+           │ IN FOCUS PATH
+           │
+           └─Child 1: FocusNode#4ef47(Shortcuts: <Web Disabling Text Editing Shortcuts> [IN FOCUS PATH])
+             │ context: Focus
+             │ NOT FOCUSABLE
+             │ IN FOCUS PATH
+             │
+             └─Child 1: _FocusTraversalGroupNode#da11e(FocusTraversalGroup [IN FOCUS PATH])
+               │ context: Focus
+               │ NOT FOCUSABLE
+               │ IN FOCUS PATH
+               │
+               └─Child 1: FocusNode#5785b(Shortcuts: <Shortcut Registrar> [IN FOCUS PATH])
+                 │ context: Focus
+                 │ NOT FOCUSABLE
+                 │ IN FOCUS PATH
+                 │
+                 └─Child 1: FocusNode#8a099([IN FOCUS PATH])
+                   │ context: Focus
+                   │ NOT FOCUSABLE
+                   │ IN FOCUS PATH
+                   │
+                   └─Child 1: FocusScopeNode#76340(Navigator Scope [IN FOCUS PATH])
+                     │ context: FocusScope
+                     │ IN FOCUS PATH
+                     │ focusedChildren: FocusScopeNode#0b2ff(_ModalScopeState<dynamic>
+                     │   Focus Scope [IN FOCUS PATH])
+                     │
+                     └─Child 1: _FocusTraversalGroupNode#78b34(FocusTraversalGroup [IN FOCUS PATH])
+                       │ context: Focus
+                       │ NOT FOCUSABLE
+                       │ IN FOCUS PATH
+                       │
+                       └─Child 1: FocusNode#56797(Navigator [IN FOCUS PATH])
+                         │ context: Focus
+                         │ IN FOCUS PATH
+                         │
+                         └─Child 1: FocusScopeNode#0b2ff(_ModalScopeState<dynamic> Focus Scope [IN FOCUS PATH])
+                           │ context: _FocusScopeWithExternalFocusNode
+                           │ IN FOCUS PATH
+                           │ focusedChildren: FocusNode#c94fa([PRIMARY FOCUS])
+                           │ traversalEdgeBehavior: TraversalEdgeBehavior.parentScope
+                           │
+                           └─Child 1: FocusNode#c94fa([PRIMARY FOCUS])
+                               context: Focus
+                               PRIMARY FOCUS
+
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: <true>
+  Actual: <false>
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_text_editing_test.dart:114:7)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_text_editing_test.dart line 114
+The test description was:
+  native paste replaces a marked region without recording unfinished pinyin (variant:
+  TargetPlatform.macOS)
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:00 +0 -1: native paste replaces a marked region without recording unfinished pinyin (variant: TargetPlatform.macOS) [E]
+  Test failed. See exception logs above.
+  The test description was: native paste replaces a marked region without recording unfinished pinyin (variant: TargetPlatform.macOS)
+  
+00:00 +0 -1: Some tests failed.
+
+Failing tests:
+  /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_text_editing_test.dart: native paste replaces a marked region without recording unfinished pinyin (variant: TargetPlatform.macOS)

@@ -1,0 +1,6 @@
+Analyzing desktop...                                            
+
+   info • Unnecessary braces in a string interpolation. Try removing the braces • test/mac_text_editing_test.dart:56:18 • unnecessary_brace_in_string_interps
+   info • Unnecessary braces in a string interpolation. Try removing the braces • test/mac_text_editing_test.dart:67:32 • unnecessary_brace_in_string_interps
+
+2 issues found. (ran in 1.7s)
