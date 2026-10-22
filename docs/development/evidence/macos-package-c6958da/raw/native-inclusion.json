@@ -1,0 +1,10 @@
+{
+  "executablePath": "app/info_desktop.app/Contents/MacOS/info_desktop",
+  "executableSha256": "956c3bb487975ba3c05e3bbe48af81ff17e67a23889a40df6a265ef75cd329c0",
+  "nmExit": 0,
+  "symbolMatches": 119,
+  "nativeSecretEditorPresent": true,
+  "nativeEditingMenuPresent": true,
+  "exactZIPEntryMatchesManifest": true,
+  "temporaryExecutableRemoved": true
+}
