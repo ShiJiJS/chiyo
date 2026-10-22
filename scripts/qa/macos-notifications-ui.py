@@ -30,7 +30,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('output', type=Path)
     parser.add_argument('--reuse-permission', action='store_true',
-                        help='Require existing system grant; never request permission')
+                        help='Require existing system grant; no startup permission request')
     parser.add_argument('--permission-settings', action='store_true',
                         help='Check actual Settings denial/restoration without submitting notifications')
     args = parser.parse_args()

@@ -1,0 +1,10 @@
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+MAC_NOTIFICATION_ROOT=/Users/jiangxinyi/Library/Containers/org.shijijs.agent-info-manage.qa.notifications20261021/Data/tmp/aim-mac-notifications-uo25q6
+MAC_NOTIFICATION_NATIVE={"alert":2,"appActive":true,"authorization":2,"event":"settings","identifier":"","notificationCenter":2,"requestId":"","windowVisible":true}
+MAC_NOTIFICATION_NATIVE={"alert":2,"appActive":true,"authorization":2,"event":"settings","identifier":"","notificationCenter":2,"requestId":"","windowVisible":true}
+MAC_NOTIFICATION_PHASE=reused-existing-system-permission
+MAC_NOTIFICATION_PHASE=settings-enabled-ready-disable-only-this-qa-app
+MAC_NOTIFICATION_NATIVE={"alert":2,"appActive":true,"authorization":1,"event":"settings","identifier":"","notificationCenter":2,"requestId":"","windowVisible":true}
+MAC_NOTIFICATION_PHASE=settings-denied-verified-restore-only-this-qa-app
+MAC_NOTIFICATION_NATIVE={"alert":2,"appActive":true,"authorization":2,"event":"settings","identifier":"","notificationCenter":2,"requestId":"","windowVisible":true}
+MAC_NOTIFICATION_PHASE=complete-await-native-quit
