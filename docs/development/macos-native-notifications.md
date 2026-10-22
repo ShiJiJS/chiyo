@@ -1,5 +1,9 @@
 # Mac 原生通知权限、系统抑制和真实点击（#47）
 
+2026-10-22 [新预检查的允许路径](macos-notification-allowed-once.md)也已实际通过：
+只协调一次生产新请求，许可查询允许、UN add/accepted/willPresent身份一致，无新权限申请。
+没有真实通知点击，仍与完整显示／点击条件分开记录；测试App和通知目标查询均已清理。
+
 2026-10-22 已修复[系统关闭通知后的旧允许缓存](macos-notification-stale-permission.md)：
 基线系统仍返回accepted，不能冒充投递错误；新实现实际提交前重查许可，系统拒绝时
 不调用UN add、自动显示拒绝并保留申请。package23纳入修正，最终普通预览未替换。

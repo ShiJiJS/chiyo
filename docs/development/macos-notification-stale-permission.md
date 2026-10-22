@@ -59,8 +59,9 @@ ZIP在 `build/macos-adaptation/issue50-package-23/`，130967495字节，SHA256
 两份完整解包的7971项文件／权限／链接与清单一致，75项Mach-O；准确包内桌面摘要
 `b778a781b736eb52bcb286fe1614cfbe129e6b004b2b8266a44d6a0da432678c`。
 ARM64／最低二进制系统14.0／本机ad-hoc未公证，实测宿主27.0.1；不称14.0、Intel、
-干净用户或其他机器Gatekeeper已验。原生预检查下允许侧的额外实际投递、最终普通
-Keychain换包及同包闭环继续待验，固定4690e79普通预览没有替换。
+干净用户或其他机器Gatekeeper已验。随后[允许路径单次原生回归](macos-notification-allowed-once.md)
+补齐同源新请求的提交／willPresent，仍不证明实际横幅或点击；最终普通Keychain换包
+及同包闭环继续待验，固定4690e79普通预览没有替换。
 
 [原始分轮结果、源码、日志与摘要](evidence/macos-notification-stale-permission/verification.json)。
 CUA界面事实为会话原始AX／截图及明确转录，未另存图片。临时App/dSYM/缓存、

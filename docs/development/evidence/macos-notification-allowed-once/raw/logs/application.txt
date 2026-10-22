@@ -1,0 +1,11 @@
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+MAC_NOTIFICATION_ROOT=/Users/jiangxinyi/Library/Containers/org.shijijs.agent-info-manage.qa.notifications20261021/Data/tmp/aim-mac-notifications-38SYjg
+MAC_NOTIFICATION_NATIVE={"alert":2,"appActive":true,"authorization":2,"event":"settings","identifier":"","notificationCenter":2,"requestId":"","windowVisible":true}
+MAC_NOTIFICATION_NATIVE={"alert":2,"appActive":true,"authorization":2,"event":"settings","identifier":"","notificationCenter":2,"requestId":"","windowVisible":true}
+MAC_NOTIFICATION_PHASE=reused-existing-system-permission
+MAC_NOTIFICATION_PHASE=allowed-ready-activate-qa-app-before-owned-dispatch-gate
+MAC_NOTIFICATION_NATIVE={"alert":2,"appActive":true,"authorization":2,"event":"settings","identifier":"","notificationCenter":2,"requestId":"","windowVisible":true}
+MAC_NOTIFICATION_NATIVE={"appActive":true,"event":"submit","identifier":"2112A597-6169-4471-9324-5F26DFED5E53","requestId":"UAz6cIUgITcDljvC4wFJ3s0_7uTsj2baSaEvRLFeKqg=","windowVisible":true}
+MAC_NOTIFICATION_NATIVE={"accepted":true,"appActive":true,"errorCode":0,"errorDomain":"","event":"accepted","identifier":"2112A597-6169-4471-9324-5F26DFED5E53","requestId":"UAz6cIUgITcDljvC4wFJ3s0_7uTsj2baSaEvRLFeKqg=","windowVisible":true}
+MAC_NOTIFICATION_PHASE=complete-await-native-quit
+MAC_NOTIFICATION_NATIVE={"appActive":true,"event":"willPresent","identifier":"2112A597-6169-4471-9324-5F26DFED5E53","requestId":"UAz6cIUgITcDljvC4wFJ3s0_7uTsj2baSaEvRLFeKqg=","windowVisible":true}
