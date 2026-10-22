@@ -1,0 +1,155 @@
+{
+  "date": "2026-10-22",
+  "frozenQASource": "dad1362945939f1069274223f3d2ebe85b21b42f",
+  "productionCandidateSource": "5a509968400b2d140a69a02f89935c5db4e935ee",
+  "productionChanged": false,
+  "sourceInputsVerified": 662,
+  "strictPreparationPhases": 8,
+  "actualCUAApprovals": 3,
+  "independentReceiverValid": 3,
+  "independentReceiverInvalid": 1,
+  "operationCount": 5,
+  "duplicateExecutionStableCount": 5,
+  "deadlineUnchangedCount": 5,
+  "awsMaterialCleanupCompleteCount": 4,
+  "ghRealHTTP401Asserted": true,
+  "ghAccountSuccessClaimed": false,
+  "actualCUACommandQNormalExit": true,
+  "libraryCloses": 1,
+  "keychainUsed": false,
+  "newOSPermissionPrompts": 0,
+  "processReopenTestedThisRun": false,
+  "finalOrdinaryZIPGUIProven": false,
+  "physicalIMEOrVoiceOverProven": false,
+  "issue44Criteria": [
+    true,
+    false,
+    false,
+    true,
+    true,
+    false
+  ],
+  "issue48Criteria": [
+    true,
+    true,
+    true,
+    false,
+    false,
+    false
+  ],
+  "issue50Criteria": [
+    true,
+    true,
+    false,
+    false,
+    false,
+    false
+  ],
+  "raw": [
+    {
+      "path": "raw/archive-cleanup.py",
+      "bytes": 6622,
+      "sha256": "0421b9f13037e176d23811e64799f36e7a9035d66e22fb6edfea4bdf110747a1"
+    },
+    {
+      "path": "raw/bundled.json",
+      "bytes": 3734,
+      "sha256": "5512102d923e85742812922eff4f351e69cf8a4e9703ce8144b7c03e79772c75"
+    },
+    {
+      "path": "raw/cleanup.json",
+      "bytes": 797,
+      "sha256": "03a5659b0a05ce43c5b9f6746c3f8c3ff911dec28fa339085da9ae2134c4d87b"
+    },
+    {
+      "path": "raw/cua-observations.json",
+      "bytes": 859,
+      "sha256": "4f355c564f781e91fc336c2945272415b079fa319adced3e8c6149c4ab82c7bf"
+    },
+    {
+      "path": "raw/last-bundled-result.json",
+      "bytes": 2939,
+      "sha256": "951177655d906017df012d369436b8486596181432d5b5c23bd9d9d466744612"
+    },
+    {
+      "path": "raw/logs/analyze.txt",
+      "bytes": 96,
+      "sha256": "c70da5958f5db1a3bde6edb314eaeef015d4d71f5a2b2588fd2e6161a5b092c8"
+    },
+    {
+      "path": "raw/logs/build-release.txt",
+      "bytes": 5431,
+      "sha256": "94b4f2b4985e53e825e8740ff2aa93ddba5a13beb442bce4124359469d6ca8de"
+    },
+    {
+      "path": "raw/logs/bundled.txt",
+      "bytes": 1555,
+      "sha256": "487505b82dce43cdcc826c03fbd9e90d71a36c4ecac4a450af197ec3e92ec2b9"
+    },
+    {
+      "path": "raw/logs/entitlements.txt",
+      "bytes": 773,
+      "sha256": "c9453616f1e82a7ace096bf85de22e0d15975dac3aae673e08d77a8f3978f8d8"
+    },
+    {
+      "path": "raw/logs/pub-desktop.txt",
+      "bytes": 318,
+      "sha256": "ca68f707c22164511fc2b3f9af97ed7bd46538b1d334d9c806a6a59a556a6e05"
+    },
+    {
+      "path": "raw/logs/pub-info_cli.txt",
+      "bytes": 438,
+      "sha256": "7652c98906e8f741dc56b0e7f018713f8985ac3d073ce66e4cb8e1d3274e15f6"
+    },
+    {
+      "path": "raw/logs/pub-info_core.txt",
+      "bytes": 438,
+      "sha256": "7652c98906e8f741dc56b0e7f018713f8985ac3d073ce66e4cb8e1d3274e15f6"
+    },
+    {
+      "path": "raw/logs/pub-info_storage.txt",
+      "bytes": 438,
+      "sha256": "7652c98906e8f741dc56b0e7f018713f8985ac3d073ce66e4cb8e1d3274e15f6"
+    },
+    {
+      "path": "raw/logs/receiver.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/logs/signature.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/macos-aws-receiver.py",
+      "bytes": 4675,
+      "sha256": "78a9f299a02b9b640520151addc22c05b505942f2e036839a6677e7250bde17c"
+    },
+    {
+      "path": "raw/macos-tools-ui.py",
+      "bytes": 13177,
+      "sha256": "1e01f70483a8619ff08dc75f5c26dd348dc32a011141473390ca0fec7de66230"
+    },
+    {
+      "path": "raw/macos_tools_manual.dart",
+      "bytes": 17967,
+      "sha256": "c1a1e24ff9e5bad925a24cc8923c914fd287d11e5352f93e12ca6d1e7a92ef1e"
+    },
+    {
+      "path": "raw/receiver-result.json",
+      "bytes": 350,
+      "sha256": "0779dc41fd47268ffed9c905bb5923489c13a889a65f7e4653d3cadaf50479ae"
+    },
+    {
+      "path": "raw/result.json",
+      "bytes": 90807,
+      "sha256": "0ced3ea1653720d08bf1c2c6a7cc304af5f52d9366e91cd95e5a9fd85fd6c758"
+    },
+    {
+      "path": "raw/supervisor.txt",
+      "bytes": 235,
+      "sha256": "cf2fb2cbef50e713a75ebbdb54c36867feca50eb935795eff84bc462ab7a7e59"
+    }
+  ]
+}
