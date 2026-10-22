@@ -1,5 +1,11 @@
 # Agent Info Manage：Mac ARM64 开发预览
 
+2026-10-22 当前候选为[系统通知许可复查与重试修正包](macos-notification-stale-permission.md)，
+`0.4.1+13-mac-dev.7b19d34b61cf`（package23）：784通过／66条件跳过、21阶段通过。
+系统关闭后旧缓存的原生对照及拒绝状态更新通过，手动测试重试行为保留；失败package22
+单列，不交付。固定4690e79普通预览未替换，最终Keychain／同包／干净环境仍待。
+以下package21等是各自历史版本的记录。
+
 2026-10-22 当前候选更新为[dd050f3键盘与原生AX焦点修正包](macos-keyboard-ax-focus.md)，
 `0.4.1+13-mac-dev.dd050f3caa1b`（package21）：781通过/66条件跳过、21阶段通过。
 纯焦点往返、原生/Dart选区、拼音组合、实际文件面板Escape取消及保存重开有同源实机证据；

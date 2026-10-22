@@ -1,6 +1,7 @@
 # 系统关闭通知后的旧允许缓存修正（#47）
 
-2026-10-22，产品 `438df68c5151b8b431240d5b342e5cd3d9a38c8b`，只在 Mac 分支。
+2026-10-22，原生修正 `438df68c5151b8b431240d5b342e5cd3d9a38c8b`，
+最终产品含重试修正 `7b19d34b61cf07d5a77db05adb8f0c9cdbf85805`，只在 Mac 分支。
 系统设置关闭本应用通知后，旧实现仍依据启动时的允许缓存调用 UN add；本机实测
 系统仍返回 accepted=true，没有 UN 错误，因此不能用返回值推断通知允许或实际显示。
 新实现投递前重新查询系统许可，拒绝时不提交；Dart 在返回不可投递后重新读取状态，
@@ -40,13 +41,40 @@ Dart拒绝结果复查只读availability，不调用权限申请；许可仍enab
 
 新增两条状态变化回归在旧逻辑上失败：denied/notEnabled都被误显示unavailable。
 修正后相关runtime共13项通过，另覆盖测试通知的拒绝状态刷新；严格分析通过。
-这些fixture测试与原生实机分开，不冒充真实UN错误。当前拒绝侧已经实测；新原生
-预检查下允许侧的额外投递回归及新候选整包仍继续准备，普通预览尚未替换。
+这些fixture测试与原生实机分开，不冒充真实UN错误。整包首次源码检查又发现测试通知
+失败后重试按钮被禁用，package22在检查阶段失败，258通过／2跳过／1失败，没有ZIP。
+最终 `7b19d34` 区分自动请求失败和手动测试：系统仍允许时，测试按钮可直接重试；
+真正拒绝则显示拒绝。既有导航回归与runtime共15项通过，不放宽原重试断言。
+该变化没有改原生预检查或已实测的普通新请求拒绝路径。
+
+## 最终候选 package23
+
+准确干净源码 `7b19d34b61cf07d5a77db05adb8f0c9cdbf85805`，版本
+`0.4.1+13-mac-dev.7b19d34b61cf`。stock `--check` 全部四包严格分析及测试通过：
+Core290/6、CLI75/40、Storage160/18、Desktop259/2（通过／条件跳过），合计784/66；
+21个构建／提取阶段退出0。跳过不算通过，package22的失败不混入成功计数。
+
+ZIP在 `build/macos-adaptation/issue50-package-23/`，130967495字节，SHA256
+`35618d464b4be2f369efb7bde3be910dd40cbd2328e67efcb44841f29147fbdf`。
+两份完整解包的7971项文件／权限／链接与清单一致，75项Mach-O；准确包内桌面摘要
+`b778a781b736eb52bcb286fe1614cfbe129e6b004b2b8266a44d6a0da432678c`。
+ARM64／最低二进制系统14.0／本机ad-hoc未公证，实测宿主27.0.1；不称14.0、Intel、
+干净用户或其他机器Gatekeeper已验。原生预检查下允许侧的额外实际投递、最终普通
+Keychain换包及同包闭环继续待验，固定4690e79普通预览没有替换。
 
 [原始分轮结果、源码、日志与摘要](evidence/macos-notification-stale-permission/verification.json)。
 CUA界面事实为会话原始AX／截图及明确转录，未另存图片。临时App/dSYM/缓存、
 合成库和源码副本均清理。基线那个准确UUID／请求由同身份无授权请求helper查询，
 before0/after0，不声称实际删除过一条；helper未提交通知或注入点击，结束后也已删除。
+两份整包解包、诊断程序和根构建缓存另清理约1908.8MiB，ZIP保留；固定预览7971项、
+strict签名和原PID53592、资料与恢复备份均保持，build/local只留一份固定App、生成dSYM为0。
 
 #47仍OPEN、1/5，原条件保持。这个修正补系统设置变化后的真实状态，不能当作真实
 UN投递错误、完整前台／后台点击或全部通知类型通过；Windows/main/CI未操作。
+
+拒绝侧复跑（全新输出目录）：
+
+```sh
+python3 scripts/qa/macos-notifications-ui.py build/macos-adaptation/NEW-stale-permission \
+  --reuse-permission --permission-settings --stale-permission
+```

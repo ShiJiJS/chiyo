@@ -1,0 +1,34 @@
+{
+  "source": "7b19d34b61cf07d5a77db05adb8f0c9cdbf85805",
+  "archive": "build/macos-adaptation/issue50-package-23/agent-info-manage-0.4.1+13-mac-dev.7b19d34b61cf-macos-arm64.zip",
+  "archiveBytes": 130967495,
+  "archiveSha256": "35618d464b4be2f369efb7bde3be910dd40cbd2328e67efcb44841f29147fbdf",
+  "phases": 21,
+  "counts": [
+    [
+      290,
+      6
+    ],
+    [
+      75,
+      40
+    ],
+    [
+      160,
+      18
+    ],
+    [
+      259,
+      2
+    ]
+  ],
+  "totalPassed": 784,
+  "conditionalSkips": 66,
+  "manifestFiles": 7971,
+  "machOFiles": 75,
+  "uncompressedCopiesVerified": 2,
+  "packagedDesktopSha256": "b778a781b736eb52bcb286fe1614cfbe129e6b004b2b8266a44d6a0da432678c",
+  "stableInstalledPreviewReplaced": false,
+  "ordinaryFinalGUIOrCleanUserClaimed": false,
+  "newKeychainRequests": 0
+}
