@@ -1,0 +1,10 @@
+{
+  "scope": "tool-observed terminal result",
+  "exit": 143,
+  "planned": true,
+  "stderr": [
+    "Socket exception: Connection reset by peer (54)",
+    "Socket exception: Connection reset by peer (54)"
+  ],
+  "portClosed": true
+}

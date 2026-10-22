@@ -1,0 +1,108 @@
+{
+  "date": "2026-10-23",
+  "scope": "Actual ordinary package23 SSH with GUI imports/approvals, strict host/key refusal, real execution, native process chain and history reopen; not whole #44/#50",
+  "productSource": "7b19d34b61cf07d5a77db05adb8f0c9cdbf85805",
+  "rawFiles": [
+    {
+      "path": "before-replay-facts.json",
+      "bytes": 234,
+      "sha256": "75cf8d9696a818d616d34d3af45bf491089a07e0033df2614f5812354b308751"
+    },
+    {
+      "path": "cleanup.json",
+      "bytes": 395,
+      "sha256": "05c9c4c5aed8a0884acb97ea08560354fd8b5dde8333b2cd8cc3a44ca83ce43b"
+    },
+    {
+      "path": "final-bundled-cli.json",
+      "bytes": 2626,
+      "sha256": "8cb80d5d3b5bcdec0b551511d53e90a3a402cd63c1c17088e66f10324f8d5f79"
+    },
+    {
+      "path": "final-checks.json",
+      "bytes": 374,
+      "sha256": "92d08c560a128b1fb5a9143635caf56e9e3029b544f0c0d76ef686df1c9b923c"
+    },
+    {
+      "path": "hosted_client.dart",
+      "bytes": 1083,
+      "sha256": "c7168de0a17ee8db2053777d34360d3b675384cf0112892d97220c46cbdcf666"
+    },
+    {
+      "path": "native-chain.json",
+      "bytes": 747,
+      "sha256": "0d7a14853fa583539e259139b03d6f1cdd36d80e08df0e442a87c2d5e25abdfa"
+    },
+    {
+      "path": "observe-chain.py",
+      "bytes": 2404,
+      "sha256": "70ce5e6282486e68bac49cc7e284c58b6f60976fb60a9e34df83ae7d015439ef"
+    },
+    {
+      "path": "ordinary-before-reopen-terminal.json",
+      "bytes": 301,
+      "sha256": "2029309333c2099c99b0b9acb54102d2b790775e85b4eb3df4e58054ff6fdfe1"
+    },
+    {
+      "path": "ordinary-reopen-checkpoint.log.txt",
+      "bytes": 132,
+      "sha256": "dbc01fad753a943417e50e983fddc5339e7268c74255b60f06d0b78ea171aa93"
+    },
+    {
+      "path": "ordinary-restored.json",
+      "bytes": 261,
+      "sha256": "4d415504f99cda99430ca47869a52cd5d4479ba85ab917e7b7a3a99688c27507"
+    },
+    {
+      "path": "payload-and-runtime.json",
+      "bytes": 735,
+      "sha256": "1cadeebd020905ce6557c86c5eebd5bac8bf7679c922a78ecfeb0a9c5fcd172c"
+    },
+    {
+      "path": "pre-cleanup-checks.json",
+      "bytes": 1826,
+      "sha256": "96bc1fdbad2b8f80a1889eaf858600357baaeed6b41dce762ef668ffeb20b2dc"
+    },
+    {
+      "path": "public-client.jsonl",
+      "bytes": 24126,
+      "sha256": "8e379c52269f5228b6376486b286ab1da9f067d1bccf622c1b2545dfa3f02d05"
+    },
+    {
+      "path": "receiver-final.json",
+      "bytes": 256,
+      "sha256": "082c04e990c6fc1efbd38d022b720696f80e58d3cf5287259fe1117cfebb4f68"
+    },
+    {
+      "path": "receiver-terminal.json",
+      "bytes": 231,
+      "sha256": "c82b0ddc9ff5dc87c20bb36f26b189525b543e5f4a922d11739789e0c85291e2"
+    },
+    {
+      "path": "reopen-supervisor.py",
+      "bytes": 1095,
+      "sha256": "4a971bc0ae77e2f72d56869ba7baea1b03dfcc4af11518d10ab0468fad4380d1"
+    },
+    {
+      "path": "source-preservation.json",
+      "bytes": 84,
+      "sha256": "f3b742e5ff8e725add5f48320ea4582b85a76848f88adf357e2475292e724c1e"
+    },
+    {
+      "path": "stable-signature.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "ui-transcript.json",
+      "bytes": 2073,
+      "sha256": "3037d51f24943b2b137f59e43afb38217ffd58b9530c72b8455f05641331d10b"
+    }
+  ],
+  "registeredOperations": 7,
+  "targetSshStarts": 6,
+  "normalOrdinaryQuitExit": 0,
+  "newKeychainActions": 0,
+  "receiverExit143WasPlanned": true,
+  "rawInputAndOutputSafetyChecked": true
+}

@@ -1,0 +1,11 @@
+{
+  "replaySameExecution": true,
+  "replayDidNotChangeDecisionOrDeadline": true,
+  "oldHostSnapshotRefusedBeforeClaim": true,
+  "oldCredentialVersionRefusedBeforeClaim": true,
+  "revokedUseRefusedBeforeClaim": true,
+  "oldSessionAfterReopenRefused": true,
+  "privateKeyMarkersAbsent": true,
+  "expectedRealSshErrorsSeen": true,
+  "finalPublicCredentialCatalogEmpty": true
+}
