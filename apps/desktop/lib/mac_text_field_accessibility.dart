@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 /// Supplies purpose/geometry and ordinary text to the owning AppKit AX shim.
-/// Obscured text is excluded. No selection or focus commands cross this seam.
+/// Obscured text is excluded. Mirrors the already-selected keyboard field and
+/// its selection; the adapter never chooses a different Flutter input target.
 class MacTextFieldAccessibility extends StatefulWidget {
   const MacTextFieldAccessibility({
     super.key,
@@ -119,7 +120,18 @@ class _MacTextFieldAccessibilityState extends State<MacTextFieldAccessibility>
       'top': rect.top,
       'width': rect.width,
       'height': rect.height,
-      if (editor != null) 'text': editor.controller.text,
+      if (editor != null) ...{
+        'text': editor.controller.text,
+        'keyboardFocused': editor.focusNode.hasFocus,
+        'selection': [
+          editor.controller.selection.baseOffset,
+          editor.controller.selection.extentOffset,
+        ],
+        'composing': [
+          editor.controller.value.composing.start,
+          editor.controller.value.composing.end,
+        ],
+      },
     };
   }
 

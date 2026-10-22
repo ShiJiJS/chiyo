@@ -8,6 +8,21 @@ private final class ActiveAXField: NSTextField {
   let editor = NSTextView()
   override func currentEditor() -> NSText? { editor }
 }
+private final class FocusAXField: NSTextField {
+  let editor = NSTextView()
+  var focusAssignments = 0
+  override func currentEditor() -> NSText? { editor }
+  override func setAccessibilityFocused(_ value: Bool) {
+    if value {
+      focusAssignments += 1
+      editor.selectedRange = NSRange(location: 0, length: editor.string.utf16.count)
+    }
+  }
+}
+private final class MarkedEditor: NSTextView {
+  var marked = true
+  override func hasMarkedText() -> Bool { marked }
+}
 private func check(_ condition: @autoclosure () -> Bool, _ message: String) throws {
   if !condition() { throw Failure(message: message) }
 }
@@ -135,6 +150,70 @@ private struct Probe {
       try check(active.stringValue == activeBefore, "active cache overwritten")
       try check(active.editor.string == "synthetic-composition", "composition changed")
       try check(secure.stringValue == "secure-original", "secure value overwritten")
+    }
+    func keyboardRow() -> [String: Any] {
+      var data = row("Keyboard field")
+      data["text"] = "Alpha"; data["keyboardFocused"] = true
+      data["selection"] = [4, 1]; data["composing"] = [-1, -1]
+      return data
+    }
+    try test("invalid keyboard payloads and multiple focused rows preserve state") {
+      var badBool = keyboardRow(); badBool["keyboardFocused"] = 1
+      var badOffset = keyboardRow(); badOffset["selection"] = [1.5, 2.0]
+      var outside = keyboardRow(); outside["selection"] = [0, 6]
+      var mixed = keyboardRow(); mixed["selection"] = [-1, 0]
+      var backwards = keyboardRow(); backwards["composing"] = [3, 1]
+      var extra = keyboardRow(); extra["target"] = "outside"
+      var another = keyboardRow(); another["top"] = 140.0
+      for rows in [[badBool], [badOffset], [outside], [mixed], [backwards], [extra], [keyboardRow(), another]] {
+        try check(!adapter.update(rows), "invalid focus metadata accepted")
+      }
+    }
+    try test("background windows do not receive AX focus") {
+      field.removeFromSuperview()
+      let native = FocusAXField(frame: field.frame)
+      native.editor.string = "Alpha"
+      root.addSubview(native)
+      defer { adapter.update([] as [[String: Any]]); native.removeFromSuperview(); root.addSubview(field) }
+      try check(adapter.update([keyboardRow()]), "valid focus metadata refused")
+      try check(native.focusAssignments == 0, "background focus changed")
+    }
+    // Active-window policy is supplied only in these isolated contract tests.
+    // Production defaults and actual Flutter/OS focus are checked through CUA;
+    // the background guard above uses the real default policy.
+    let activeAdapter = NativeTextFieldAccessibility(view: root, ownerIsActive: { _ in true })
+    try test("keyboard AX transition restores selection once without reselecting during browsing") {
+      field.removeFromSuperview()
+      let native = FocusAXField(frame: field.frame)
+      native.editor.string = "Alpha"
+      root.addSubview(native)
+      defer { activeAdapter.update([] as [[String: Any]]); native.removeFromSuperview(); root.addSubview(field) }
+      let data = keyboardRow()
+      try check(activeAdapter.update([data]), "valid focus metadata refused")
+      try check(native.focusAssignments == 1 && native.editor.selectedRange == NSRange(location: 1, length: 3), "focus selection not restored")
+      native.editor.selectedRange = NSRange(location: 2, length: 0)
+      activeAdapter.update([data])
+      try check(native.focusAssignments == 1 && native.editor.selectedRange == NSRange(location: 2, length: 0), "unchanged focus reselected editor")
+      var blurred = data; blurred["keyboardFocused"] = false
+      activeAdapter.update([blurred]); activeAdapter.update([data])
+      try check(native.focusAssignments == 2, "returning keyboard focus not aligned")
+    }
+    try test("canonical or native marked text defers focus alignment until composition ends") {
+      field.removeFromSuperview()
+      let native = FocusAXField(frame: field.frame)
+      native.editor.string = "Alpha"
+      let marked = MarkedEditor(frame: NSRect(x: 0, y: 0, width: 10, height: 10))
+      root.addSubview(native); root.addSubview(marked)
+      defer { activeAdapter.update([] as [[String: Any]]); marked.removeFromSuperview(); native.removeFromSuperview(); root.addSubview(field) }
+      var composing = keyboardRow(); composing["composing"] = [1, 4]
+      activeAdapter.update([composing])
+      try check(native.focusAssignments == 0, "Dart composition focus changed")
+      try check(window.makeFirstResponder(marked), "marked editor did not become responder")
+      activeAdapter.update([keyboardRow()])
+      try check(native.focusAssignments == 0, "native composition focus changed")
+      marked.marked = false
+      activeAdapter.update([keyboardRow()])
+      try check(native.focusAssignments == 1, "focus not resumed after composition")
     }
     print("PASS total=\(passed)")
     window.close()
