@@ -4,6 +4,18 @@
 CLI、SDK-free Codex 接入材料生成器、合成资料控制台检查、依赖许可和来源清单。
 它用于配合验收；Issue #18 的干净环境、真实桌面和 Codex 检查仍开放。
 
+## 本机安装与清理
+
+按用户2026-10-22约定，Windows软件固定放在 `C:\Software\AgentInfoManage`：`current`为完整程序，`package`只留同版本ZIP／SHA和验收记录，桌面“信息授权”快捷方式指向`current/app/info_desktop.exe`。个人数据库仍在原LOCALAPPDATA位置；已安装Codex hooks／Skill独立管理，交付不擅自改其路径或信任。
+
+`scripts/package-windows.ps1`完整检查通过后默认安装并清理；`-PackageOnly`只产包。安装先校验归档与全部载荷，暂存新目录，使用CLI正常退出旧实例，切换后保存快捷方式，再移除旧安装。保存／退出失败时保留原实例；不强杀。若需切换从构建目录启动的实例，先核对路径，再给安装脚本传入明确的`-RunningProcessId`。
+
+当前已知未通过全包验收的界面候选，仅在用户明确要求预览时使用`install-windows-preview.ps1 -ArchivePath <ZIP> -PreviewReason <具体限制> -CleanBuildArtifacts`，将失败原因写入安装记录，不伪造`.verified.json`。没有新版本交付成功时，保留现有安装和构建候选供定位。
+
+交付成功后，`clean-windows-artifacts.ps1`先复核外部安装及ZIP，再删除项目`build/windows-*`历次包、桌面build和四包`.dart_tool`生成缓存、QA／`.scratch`编译二进制。保留源代码、归档证据、日志、独立Codex接入材料、已下载测试工具，以及运行中产物；共享Flutter SDK／Pub缓存、用户资料库和Temp中的凭据／附件材料不属于本清理范围。测试临时资料按所属测试的finally清理，不按宽泛Temp前缀批量删除。清理支持`-WhatIf`，路径验证和非递归链接删除保护外部文件。
+
+当前本机安装为0.4.1+13-dev.9310b1090ecf，113项载荷及ZIP逐项校验通过，桌面快捷方式已经创建。仍保留#30的SessionEnd启动超时说明，不标记完整运行验收通过。首次迁移时原构建目录实例已自行退出；本轮没有强杀或启动正式库。移除11,222,148,115字节／4,829个生成文件，第二次`-WhatIf`候选数为0；归档证据和测试日志保留。原build路径的下载链接现由上述固定安装位置取代。
+
 本轮信息库分类与公共控件改版（#52–#60）使用schema22；首次打开旧库会迁移，此后旧程序会拒绝打开。含已删分类历史引用的完整备份为格式10，旧程序同样拒绝。新程序仍能读取旧备份，迁移／旧阅读器检查见改版记录；预览验证使用独立虚构库，未替用户运行正式库迁移。
 
 ## 当前 Round05 Windows 预览
