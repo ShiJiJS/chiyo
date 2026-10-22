@@ -12,6 +12,8 @@ Private libraries and generated apps/debug symbols are removed afterwards.
 save/reopen claim. --diagnose-accessibility-state observes system/window flags
 and Flutter's semanticsEnabled without changing them. An explicit comparator
 can omit only the native field-purpose adapter in the owned QA copy.
+--diagnose-synthetic-text-values additionally records native/AX/editor strings
+only in this isolated synthetic observation run; never enter personal data.
 """
 import argparse
 import hashlib
@@ -57,6 +59,8 @@ def main():
                         help='Passively record only field-purpose and geometry metadata in the QA copy')
     parser.add_argument('--diagnose-accessibility-state', action='store_true',
                         help='Read-only window/system flags, enhanced-UI notifications and Flutter semantics state')
+    parser.add_argument('--diagnose-synthetic-text-values', action='store_true',
+                        help='QA-only synthetic values: compare owned native field, cell, AX and shared editor; never use personal input')
     parser.add_argument('--observe-only', action='store_true',
                         help='Observe actual UI until normal quit; no save/reopen claim')
     parser.add_argument('--without-purpose-adapter', action='store_true',
@@ -68,6 +72,8 @@ def main():
     parser.add_argument('--expected-description', default='MacFocusSaved',
                         help='Synthetic text to save through the UI and verify after process restart')
     args = parser.parse_args()
+    if args.diagnose_synthetic_text_values and not (args.observe_only and args.diagnose_accessibility and args.diagnose_accessibility_state):
+        parser.error('Synthetic value diagnosis requires --observe-only --diagnose-accessibility --diagnose-accessibility-state')
     if args.without_purpose_adapter and not (args.observe_only and args.diagnose_accessibility_state):
         parser.error('Comparator requires --observe-only --diagnose-accessibility-state')
     if args.await_confirm_transition and not (args.observe_only and args.diagnose_accessibility_state):
@@ -90,6 +96,7 @@ def main():
              'expectedSavedDescription': args.expected_description,
              'diagnoseAccessibility': args.diagnose_accessibility,
              'diagnoseAccessibilityState': args.diagnose_accessibility_state,
+             'diagnoseSyntheticTextValues': args.diagnose_synthetic_text_values,
              'observationOnly': args.observe_only,
              'purposeAdapterDisabledInQACopy': args.without_purpose_adapter,
              'awaitConfirmTransitionInQACopy': args.await_confirm_transition,
@@ -287,6 +294,23 @@ def main():
 ''')
             labels.write_text(text)
             modified.append(labels)
+            if args.diagnose_synthetic_text_values:
+                text = labels.read_text()
+                anchor = '          return ["label": field.accessibilityLabel() ?? "", "viewFrame": rect(field.frame),\n                  "liveScreenFrame": rect(live), "axScreenFrame": rect(field.accessibilityFrame())]'
+                assert text.count(anchor) == 1
+                text = text.replace(anchor, '''          let editor = field.currentEditor()
+          return ["label": field.accessibilityLabel() ?? "", "viewFrame": rect(field.frame),
+                  "liveScreenFrame": rect(live), "axScreenFrame": rect(field.accessibilityFrame()),
+                  "fieldIdentity": String(describing: ObjectIdentifier(field)),
+                  "nativeString": field.stringValue,
+                  "cellString": field.cell?.stringValue ?? "",
+                  "axValue": field.accessibilityValue() ?? NSNull(),
+                  "editorIdentity": editor.map { String(describing: ObjectIdentifier($0)) } ?? "none",
+                  "editorString": editor?.string ?? "",
+                  "editorInsideThisField": editor?.isDescendant(of: field) ?? false,
+                  "editorIsFirstResponder": editor.map { window.firstResponder === $0 } ?? false]
+''')
+                labels.write_text(text)
         if args.diagnose_focus:
             editor = source / 'apps/desktop/lib/information_editor.dart'
             text = editor.read_text()
