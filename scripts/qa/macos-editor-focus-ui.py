@@ -63,6 +63,8 @@ def main():
                         help='QA-only synthetic values: compare owned native field, cell, AX and shared editor; never use personal input')
     parser.add_argument('--align-synthetic-focus', action='store_true',
                         help='QA hypothesis only: align the already-selected keyboard field through public AppKit accessibility focus')
+    parser.add_argument('--restore-synthetic-selection', action='store_true',
+                        help='QA hypothesis only: restore that field editor selection from the unchanged Dart selection after alignment')
     parser.add_argument('--observe-only', action='store_true',
                         help='Observe actual UI until normal quit; no save/reopen claim')
     parser.add_argument('--without-purpose-adapter', action='store_true',
@@ -78,6 +80,8 @@ def main():
         parser.error('Synthetic value diagnosis requires --diagnose-accessibility --diagnose-accessibility-state')
     if args.align_synthetic_focus and not (args.observe_only and args.diagnose_synthetic_text_values):
         parser.error('Focus hypothesis requires --observe-only --diagnose-synthetic-text-values')
+    if args.restore_synthetic_selection and not args.align_synthetic_focus:
+        parser.error('Selection hypothesis requires --align-synthetic-focus')
     if args.without_purpose_adapter and not (args.observe_only and args.diagnose_accessibility_state):
         parser.error('Comparator requires --observe-only --diagnose-accessibility-state')
     if args.await_confirm_transition and not (args.observe_only and args.diagnose_accessibility_state):
@@ -102,6 +106,7 @@ def main():
              'diagnoseAccessibilityState': args.diagnose_accessibility_state,
              'diagnoseSyntheticTextValues': args.diagnose_synthetic_text_values,
              'alignSyntheticFocusInQACopy': args.align_synthetic_focus,
+             'restoreSyntheticSelectionInQACopy': args.restore_synthetic_selection,
              'observationOnly': args.observe_only,
              'purposeAdapterDisabledInQACopy': args.without_purpose_adapter,
              'awaitConfirmTransitionInQACopy': args.await_confirm_transition,
@@ -220,6 +225,39 @@ def main():
                 text = text.replace(before, after)
             labels.write_text(text)
             modified.append(labels)
+            if args.restore_synthetic_selection:
+                text = widget.read_text()
+                anchor = "'keyboardFocused': editor.focusNode.hasFocus}"
+                assert text.count(anchor) == 1
+                widget.write_text(text.replace(anchor, "'keyboardFocused': editor.focusNode.hasFocus, 'selection': [editor.controller.selection.baseOffset, editor.controller.selection.extentOffset], 'composing': [editor.controller.value.composing.start, editor.controller.value.composing.end]}"))
+                text = labels.read_text()
+                anchor = '  private weak var qaLastKeyboardFocused: NSTextField?\n'
+                text = text.replace(anchor, anchor + '  private var qaKeyboardState: [String: Any]?\n')
+                text = text.replace('keys.union(["text", "keyboardFocused"]),', 'keys.union(["text", "keyboardFocused", "selection", "composing"]),')
+                text = text.replace('    labels = next\n', '    qaKeyboardState = rows.first { $0["keyboardFocused"] as? Bool == true }\n    labels = next\n')
+                start = text.index('  private func qaAlignKeyboardField(')
+                end = text.index('\n  private func restore(', start)
+                text = text[:start] + '''  private func qaAlignKeyboardField(_ field: NSTextField?, window: NSWindow) {
+    guard let field else { qaLastKeyboardFocused = nil; return }
+    guard window.isKeyWindow, window.isVisible, NSApp.isActive,
+          qaLastKeyboardFocused !== field,
+          let state = qaKeyboardState, let text = state["text"] as? String,
+          let selection = state["selection"] as? [Int], selection.count == 2,
+          let composing = state["composing"] as? [Int], composing.count == 2,
+          selection.allSatisfy({ $0 >= 0 && $0 <= text.utf16.count }),
+          !(composing[0] >= 0 && composing[1] > composing[0]),
+          (window.firstResponder as? NSTextInputClient)?.hasMarkedText() != true else { return }
+    let range = NSRange(location: min(selection[0], selection[1]), length: abs(selection[1] - selection[0]))
+    qaLastKeyboardFocused = field
+    field.setAccessibilityFocused(true)
+    if let editor = field.currentEditor(), editor.string == text {
+      editor.selectedRange = range
+    }
+    NSAccessibility.post(element: field, notification: .focusedUIElementChanged)
+    FileHandle.standardOutput.write(Data(("QA_ALIGN_KEYBOARD_FOCUS=" + (field.accessibilityLabel() ?? "") + "\\n").utf8))
+  }
+''' + text[end:]
+                labels.write_text(text)
         if args.visible_page_tooltips:
             main = source / 'apps/desktop/lib/main.dart'
             text = main.read_text()
@@ -349,6 +387,8 @@ def main():
                   "axValue": field.accessibilityValue() ?? NSNull(),
                   "editorIdentity": editor.map { String(describing: ObjectIdentifier($0)) } ?? "none",
                   "editorString": editor?.string ?? "",
+                  "editorSelection": editor.map { [$0.selectedRange.location, $0.selectedRange.length] } ?? [],
+                  "axSelectedText": field.accessibilitySelectedText() ?? "",
                   "editorInsideThisField": editor?.isDescendant(of: field) ?? false,
                   "editorIsFirstResponder": editor.map { window.firstResponder === $0 } ?? false]
 ''')
