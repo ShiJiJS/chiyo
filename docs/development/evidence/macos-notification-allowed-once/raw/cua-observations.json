@@ -1,0 +1,15 @@
+{
+  "source": "CUA screenshot/AX conversation observations, explicitly transcribed; no separately saved screenshot files",
+  "appPid": 84457,
+  "systemAllowNotifications": "on",
+  "systemNotificationPreferenceChanges": 0,
+  "permissionPromptObserved": false,
+  "settingsActualText": "系统接受通知",
+  "beforePending": 25,
+  "afterPending": 26,
+  "newChatVisible": "允许通知正向合成聊天",
+  "handled": 0,
+  "noActualNotificationClick": true,
+  "actualQuit": "CUA super+q",
+  "systemSettingsReturnedTo": "通知列表"
+}

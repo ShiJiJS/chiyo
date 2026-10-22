@@ -1,0 +1,1 @@
+/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue47-allowed-once-20261022/source/apps/desktop/build/macos/Build/Products/Release/info_desktop.app: replacing existing signature
