@@ -60,9 +60,13 @@ void main() {
         'width',
         'height',
         'text',
+        'keyboardFocused',
+        'selection',
+        'composing',
       });
       expect(first['label'], '公开说明');
       expect(first['text'], controller.text);
+      expect(first['keyboardFocused'], isFalse);
       controller.text = 'synthetic-new-value';
       await tester.pumpAndSettle();
       expect((calls.last.arguments as List).single['text'], controller.text);
@@ -81,6 +85,62 @@ void main() {
       expect(calls.last.arguments, isEmpty);
       controller.dispose();
       scroll.dispose();
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.macOS),
+  );
+
+  testWidgets(
+    'keyboard transitions publish canonical selection without editing controllers',
+    (tester) async {
+      final first = TextEditingController(text: 'Alpha');
+      final second = TextEditingController(text: 'Beta');
+      final firstFocus = FocusNode(), secondFocus = FocusNode();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Column(
+              children: [
+                MacTextFieldAccessibility(
+                  label: '名称',
+                  child: TextField(controller: first, focusNode: firstFocus),
+                ),
+                MacTextFieldAccessibility(
+                  label: '说明',
+                  child: TextField(controller: second, focusNode: secondFocus),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      firstFocus.requestFocus();
+      await tester.pumpAndSettle();
+      first.selection = const TextSelection(baseOffset: 4, extentOffset: 1);
+      await tester.pumpAndSettle();
+      Map focused() =>
+          (calls.last.arguments as List).singleWhere(
+                (row) => row['keyboardFocused'] == true,
+              )
+              as Map;
+      expect(focused()['label'], '名称');
+      expect(focused()['selection'], [4, 1]);
+      final before = first.value;
+      secondFocus.requestFocus();
+      await tester.pumpAndSettle();
+      expect(focused()['label'], '说明');
+      expect(focused()['selection'], [
+        second.selection.baseOffset,
+        second.selection.extentOffset,
+      ]);
+      expect(first.value, before);
+      expect(second.text, 'Beta');
+      await tester.pumpWidget(const SizedBox());
+      await tester.pump();
+      first.dispose();
+      second.dispose();
+      firstFocus.dispose();
+      secondFocus.dispose();
     },
     variant: TargetPlatformVariant.only(TargetPlatform.macOS),
   );
