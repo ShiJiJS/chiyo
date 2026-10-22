@@ -1,0 +1,14 @@
+{
+  "head": "2026-10-22 总票交付项已核对，完整首轮可用仍未收口\n\n本轮仅勾选原 Acceptance criteria 第1项：可复现Mac发行包与CLI安装方式，以及架构/系统/签",
+  "checks": [
+    false,
+    false,
+    false,
+    true,
+    false,
+    false,
+    false,
+    false,
+    false
+  ]
+}

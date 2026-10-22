@@ -1,0 +1,12 @@
+pub-info_core 0
+pub-info_cli 0
+pub-info_storage 0
+pub-desktop 0
+analyze 0
+build-release 0
+signature 0
+entitlements 0
+MAC_TOOLS_UI_READY=bundled
+MAC_TOOLS_FLOW_PASSED=bundled
+MAC_TOOLS_CASE_PASSED=bundled
+{"complete": true, "cases": 1}

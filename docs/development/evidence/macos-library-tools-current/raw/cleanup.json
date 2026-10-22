@@ -1,0 +1,26 @@
+{
+  "sourceInputsVerified": 662,
+  "candidateToolManifestIdentical": true,
+  "candidateEntitlementsIdentical": true,
+  "ownedFixturesAndAppAlreadyRemovedByDriver": true,
+  "additionalRemoved": [
+    {
+      "path": "build/macos-adaptation/issue44-library-current-tools-20261022/source",
+      "allocatedKiB": 23460
+    },
+    {
+      "path": "build/macos-adaptation/issue44-library-current-tools-20261022/receiver/fixture.json",
+      "allocatedKiB": 4
+    }
+  ],
+  "releasedAllocatedKiB": 23464,
+  "stablePayloadItems": 7971,
+  "stableMismatches": [],
+  "stableDeepStrictSignatureExit": 0,
+  "stablePid53592Alive": true,
+  "remainingApps": [
+    "local/中文 Mac 预览/AgentInfoManage/app/info_desktop.app"
+  ],
+  "remainingGeneratedDsyms": [],
+  "sdkCachesZIPsPrivateBackupsPreserved": true
+}

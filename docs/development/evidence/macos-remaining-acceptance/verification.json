@@ -43,6 +43,22 @@
       "path": "raw/remote-source-refs.json",
       "bytes": 268,
       "sha256": "2f8df8d3de43ccc3ceac9f9d29a396d27da2d94a461894d80a109a6a1c50ff37"
+    },
+    {
+      "path": "raw/parent-update-confirmed.json",
+      "bytes": 318,
+      "sha256": "9d38ca101380b26c31b03f5cb57f53c0cab053860a72397d341a1e99b2960592"
     }
+  ],
+  "parentCheckboxesAfter": [
+    false,
+    false,
+    false,
+    true,
+    false,
+    false,
+    false,
+    false,
+    false
   ]
 }
