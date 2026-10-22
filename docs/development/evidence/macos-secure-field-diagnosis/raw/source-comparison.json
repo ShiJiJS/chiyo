@@ -1,0 +1,6 @@
+{
+  "baselineAndCurrentDartDifferOnlyBridgeFlag": true,
+  "currentNativeWindowExactProduction": true,
+  "allThreeProductBridgeSourcesExact": true,
+  "productionFilesUnchanged": true
+}

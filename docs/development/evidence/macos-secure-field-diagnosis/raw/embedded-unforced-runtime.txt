@@ -1,0 +1,8 @@
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+flutter: QA_AX {"field":"secure","secureKnownExact":true,"toggleKnownExact":true,"length":17,"selection":[0,17]}
+flutter: QA_AX {"field":"secure","secureKnownExact":false,"toggleKnownExact":true,"length":1,"selection":[1,1]}
+flutter: QA_EMBEDDED_DART length=20 replacementExact=false
+QA_EMBEDDED length=20
+QA_OWN_AX [{"axKnownEmbedded":false,"axKnownSecret":false,"axKnownToggle":false,"axMasked":true,"class":"FlutterTextField","frameY":438,"nativeSecure":false,"rawKnownEmbedded":false,"rawKnownSecret":false,"rawKnownToggle":false},{"axKnownEmbedded":false,"axKnownSecret":false,"axKnownToggle":false,"axMasked":true,"class":"NSSecureTextField","frameY":0,"nativeSecure":true,"rawKnownEmbedded":false,"rawKnownSecret":false,"rawKnownToggle":false}]
+flutter: QA_EMBEDDED_DART length=22 replacementExact=true
+flutter: QA_AX panelCancelled=true

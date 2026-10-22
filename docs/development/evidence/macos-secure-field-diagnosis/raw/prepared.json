@@ -1,0 +1,6 @@
+{
+  "sourceBase": "aa9fdd35c848aeafd6e74bf2b22fd0ea7b85bd7a",
+  "baseline": "Same pinned Flutter and TextField configuration; no DesktopWindowFrame, no installed native editing bridge",
+  "keychainCalls": 0,
+  "realUserSecrets": false
+}

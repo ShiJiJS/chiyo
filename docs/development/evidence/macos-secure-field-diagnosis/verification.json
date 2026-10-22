@@ -1,0 +1,457 @@
+{
+  "date": "2026-10-22",
+  "sourceBase": "aa9fdd35c848aeafd6e74bf2b22fd0ea7b85bd7a",
+  "productionCodeChanged": false,
+  "normalDesktopTestsRerun": false,
+  "flutterFixtureReleaseBuildsPassed": 5,
+  "nativeControlBuildPassed": true,
+  "fixtureProcessesExitedZero": 6,
+  "secretAccessibilityBugReproduced": true,
+  "embeddedNativeWorkaroundAccepted": false,
+  "nativeSheetPrototypePassed": true,
+  "productionSecureEntryFixed": false,
+  "keychainCalls": 0,
+  "newOSPermissionRequests": 0,
+  "upstreamRelatedIssue": "https://github.com/flutter/flutter/issues/170721",
+  "upstreamIssueObservedOpen": true,
+  "issue48Criteria": [
+    true,
+    true,
+    true,
+    false,
+    false,
+    false
+  ],
+  "unregistered": [
+    {
+      "path": "build/macos-adaptation/issue48-secure-ax-20261022/native/MacAXNativeControl.app",
+      "exit": 0
+    },
+    {
+      "path": "build/macos-adaptation/issue48-secure-ax-20261022/source/apps/desktop/build/macos/Build/Products/Release/MacAXFlutterControl.app",
+      "exit": 0
+    }
+  ],
+  "removed": [
+    {
+      "path": "build/macos-adaptation/issue48-secure-ax-20261022/native",
+      "allocatedKiB": 140
+    },
+    {
+      "path": "build/macos-adaptation/issue48-secure-ax-20261022/source",
+      "allocatedKiB": 979752
+    }
+  ],
+  "releasedAllocatedKiB": 979892,
+  "stableItemsVerified": 7971,
+  "stableMismatches": [],
+  "stableSignatureExit": 0,
+  "stablePid53592Alive": true,
+  "remainingApps": [
+    "local/中文 Mac 预览/AgentInfoManage/app/info_desktop.app"
+  ],
+  "remainingGeneratedDsyms": [],
+  "sdksZIPsBackupsRecoveryKeysPreserved": true,
+  "files": [
+    {
+      "path": "raw/actual-ui-observations.json",
+      "bytes": 2533,
+      "sha256": "d60eb99e8bfefa513d1fab2e052b6b59998a3dec2a3b3f62e701d5a014e79ef9"
+    },
+    {
+      "path": "raw/archive-cleanup.py",
+      "bytes": 8862,
+      "sha256": "261d5a3708776ddf352d078821eb977b12f57ab010c5e0b7de3dc8a9b8989989"
+    },
+    {
+      "path": "raw/baseline-MainFlutterWindow.swift",
+      "bytes": 17871,
+      "sha256": "655492b5bf56a9abbc9202750bdcd689440cf43ceba5f9f3276803285f1474a9"
+    },
+    {
+      "path": "raw/baseline-analysis-first.txt",
+      "bytes": 275,
+      "sha256": "ba5fedbdda22882e54dd9631c57efa5d0e64862ec17d40b4eaf97ef1253368e4"
+    },
+    {
+      "path": "raw/baseline-analyze-probe.txt",
+      "bytes": 96,
+      "sha256": "641e26e808ae23877d0bcb7507bae0645ba5bd6c4fe2a8f09e110d70e71da77c"
+    },
+    {
+      "path": "raw/baseline-build-probe.txt",
+      "bytes": 9908,
+      "sha256": "f0c518cd5726a2c2a06213dae677e8d8b9125fa95b60ebd0ba7988d679df98d4"
+    },
+    {
+      "path": "raw/baseline-build-run-2.txt",
+      "bytes": 94,
+      "sha256": "16a9ba70d73679dd947aa2b7ee2c05a43ac305b43c83d9abc243b12e7927fd26"
+    },
+    {
+      "path": "raw/baseline-build-run.txt",
+      "bytes": 80,
+      "sha256": "6e4e137aeb5c468c5c86fa706719c23d2b2a58cfe1586d791e5c5cdbb8d319eb"
+    },
+    {
+      "path": "raw/baseline-build-stages.json",
+      "bytes": 1099,
+      "sha256": "55fdf84ae2010082ce9c16a1ee7864ee0c62f358f7cee6e5e78360bbc6051bf8"
+    },
+    {
+      "path": "raw/baseline-exit.json",
+      "bytes": 16,
+      "sha256": "982b9e9bfb10ffe83cad665807abcfd3fa97b37822db5ab7831157a499548a9e"
+    },
+    {
+      "path": "raw/baseline-format-probe.txt",
+      "bytes": 46,
+      "sha256": "1685974b88bd671112e17334bdc2abb8ef350e01ae026547459ec7a8307375ec"
+    },
+    {
+      "path": "raw/baseline-process.json",
+      "bytes": 354,
+      "sha256": "27d1a2c627ba5e0cdc1f51a3d54ffa70cf632d0236eff00a0f880dde3108c53f"
+    },
+    {
+      "path": "raw/baseline-runtime.txt",
+      "bytes": 1568,
+      "sha256": "f653a601215d5212bc220c9d60a6e2a6bb5122c25d99840d63458bc6bbb93726"
+    },
+    {
+      "path": "raw/baseline-secure_ax_probe.dart",
+      "bytes": 3369,
+      "sha256": "36649a03590af170eb76674d2576c6e3e1d730d1d3a662f4e851236be2a2d12f"
+    },
+    {
+      "path": "raw/baseline-signature.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/build.py",
+      "bytes": 1177,
+      "sha256": "39c4b64fa541348a2dece2d2de65307ae527738cc6d0ea4b9c857a7349cc336a"
+    },
+    {
+      "path": "raw/cleanup.json",
+      "bytes": 900,
+      "sha256": "ec78a8b79984af663b4812ad28d5de10d3feb35357d395958e9fea50738e71da"
+    },
+    {
+      "path": "raw/current-MainFlutterWindow.swift",
+      "bytes": 18177,
+      "sha256": "15e21718f27a9bcfcbdc17769ec2052b89380266f60e448a15c504eb62afd947"
+    },
+    {
+      "path": "raw/current-analyze-probe.txt",
+      "bytes": 96,
+      "sha256": "42fb7f6556428ba7eb3163fa5000a6d142c218a8cc714dc325c52f916476c83c"
+    },
+    {
+      "path": "raw/current-build-probe.txt",
+      "bytes": 9559,
+      "sha256": "ee6040b5487e034758287be0e36a912441eac5f3a5d136a7a4ef4c0f4ff677cf"
+    },
+    {
+      "path": "raw/current-build-run.txt",
+      "bytes": 94,
+      "sha256": "16a9ba70d73679dd947aa2b7ee2c05a43ac305b43c83d9abc243b12e7927fd26"
+    },
+    {
+      "path": "raw/current-build-stages.json",
+      "bytes": 1099,
+      "sha256": "55fdf84ae2010082ce9c16a1ee7864ee0c62f358f7cee6e5e78360bbc6051bf8"
+    },
+    {
+      "path": "raw/current-exit.json",
+      "bytes": 16,
+      "sha256": "982b9e9bfb10ffe83cad665807abcfd3fa97b37822db5ab7831157a499548a9e"
+    },
+    {
+      "path": "raw/current-format-probe.txt",
+      "bytes": 46,
+      "sha256": "1685974b88bd671112e17334bdc2abb8ef350e01ae026547459ec7a8307375ec"
+    },
+    {
+      "path": "raw/current-process.json",
+      "bytes": 355,
+      "sha256": "5c539a609aeede63a1b7b1770042e0341072469ee8a1a033f0e594eb60c0ed76"
+    },
+    {
+      "path": "raw/current-runtime.txt",
+      "bytes": 1003,
+      "sha256": "b1e97e26b731c0d563197e8f51e871a11721e8e9b6da608ba3c1f4f8b4df86d1"
+    },
+    {
+      "path": "raw/current-secure_ax_probe.dart",
+      "bytes": 3368,
+      "sha256": "3471a54374e6aab7453d614ee9dbda5ef486259476450781d9f2942f5d290802"
+    },
+    {
+      "path": "raw/current-signature.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/embedded-MainFlutterWindow.swift",
+      "bytes": 21653,
+      "sha256": "79cc66045d67c2522102dc283ff66afe196f1e7911f335ad7bb3367c30e57b27"
+    },
+    {
+      "path": "raw/embedded-build-run.txt",
+      "bytes": 94,
+      "sha256": "16a9ba70d73679dd947aa2b7ee2c05a43ac305b43c83d9abc243b12e7927fd26"
+    },
+    {
+      "path": "raw/embedded-exit.json",
+      "bytes": 16,
+      "sha256": "982b9e9bfb10ffe83cad665807abcfd3fa97b37822db5ab7831157a499548a9e"
+    },
+    {
+      "path": "raw/embedded-process.json",
+      "bytes": 355,
+      "sha256": "b526e54b153fb0c7ecc1e342b5747c55012b251cefaafdec8cdf848e4fa3424e"
+    },
+    {
+      "path": "raw/embedded-runtime.txt",
+      "bytes": 499,
+      "sha256": "343d6e2e25379a4feac6a57fabfe6634eb004aac004123b9d25487aaac1f286f"
+    },
+    {
+      "path": "raw/embedded-semantics-analyze-probe.txt",
+      "bytes": 96,
+      "sha256": "adedbdbff9db8fb45aad014b62dfc4aadf14a4a1caca7d2c708fb3d230b0313c"
+    },
+    {
+      "path": "raw/embedded-semantics-build-probe.txt",
+      "bytes": 372,
+      "sha256": "96de044c8a789c4766870c945e8c8a8073b8e9344ead5b7f0adf64a6d1ef96d8"
+    },
+    {
+      "path": "raw/embedded-semantics-build-run.txt",
+      "bytes": 94,
+      "sha256": "16a9ba70d73679dd947aa2b7ee2c05a43ac305b43c83d9abc243b12e7927fd26"
+    },
+    {
+      "path": "raw/embedded-semantics-build-stages.json",
+      "bytes": 1099,
+      "sha256": "55fdf84ae2010082ce9c16a1ee7864ee0c62f358f7cee6e5e78360bbc6051bf8"
+    },
+    {
+      "path": "raw/embedded-semantics-format-probe.txt",
+      "bytes": 46,
+      "sha256": "1685974b88bd671112e17334bdc2abb8ef350e01ae026547459ec7a8307375ec"
+    },
+    {
+      "path": "raw/embedded-semantics-secure_ax_probe.dart",
+      "bytes": 4866,
+      "sha256": "e4a4b13ff6673801b02728a97df2561516fedcc25169a2baaf1086e182cca7c3"
+    },
+    {
+      "path": "raw/embedded-signature.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/embedded-unforced-analyze-probe.txt",
+      "bytes": 96,
+      "sha256": "42fb7f6556428ba7eb3163fa5000a6d142c218a8cc714dc325c52f916476c83c"
+    },
+    {
+      "path": "raw/embedded-unforced-build-probe.txt",
+      "bytes": 10638,
+      "sha256": "fcced3e1136ee425c4f268b95637bb7822dcec302bf90490e9ac79cf64342799"
+    },
+    {
+      "path": "raw/embedded-unforced-build-stages.json",
+      "bytes": 1099,
+      "sha256": "55fdf84ae2010082ce9c16a1ee7864ee0c62f358f7cee6e5e78360bbc6051bf8"
+    },
+    {
+      "path": "raw/embedded-unforced-exit.json",
+      "bytes": 16,
+      "sha256": "982b9e9bfb10ffe83cad665807abcfd3fa97b37822db5ab7831157a499548a9e"
+    },
+    {
+      "path": "raw/embedded-unforced-format-probe.txt",
+      "bytes": 81,
+      "sha256": "534b8a80d086ddb1e317e17bea9dfff70f7fa1dc58547ee13cda12d035b45197"
+    },
+    {
+      "path": "raw/embedded-unforced-process.json",
+      "bytes": 355,
+      "sha256": "fa2e628d1ce4278c9d81aa7c1ff498a3bb150b6be22a3d6dbc75773007174de8"
+    },
+    {
+      "path": "raw/embedded-unforced-runtime.txt",
+      "bytes": 977,
+      "sha256": "36876748d166019272b4731b0c9ce3aaeee95d3816af3c961a4d89db8671eebc"
+    },
+    {
+      "path": "raw/embedded-unforced-secure_ax_probe.dart",
+      "bytes": 4774,
+      "sha256": "2cf55e7ffba1db171d0b2af2b2efaa7e551edcac196e10b5b576443511dcbce3"
+    },
+    {
+      "path": "raw/embedded-unforced-signature.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/native-Control.swift",
+      "bytes": 3159,
+      "sha256": "50a7e4f34a4072dc26199ce765f601a698043e22b64e249a89cfed9c472427b6"
+    },
+    {
+      "path": "raw/native-build-0.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/native-build-1.txt",
+      "bytes": 110,
+      "sha256": "9b8a2e90d565ba360060d6fc15e9af61ec0464a1f544d402d9a5735c30404512"
+    },
+    {
+      "path": "raw/native-build-2.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/native-build.json",
+      "bytes": 797,
+      "sha256": "7434cbc89c43b02e3efb1e29e2362669302bbb2d3f1471ed7abaf132932dfa56"
+    },
+    {
+      "path": "raw/native-entitlements.plist",
+      "bytes": 311,
+      "sha256": "f2e96d699140991e813f28f42f418789a730336e0a4c569806e3c0ffafca91fd"
+    },
+    {
+      "path": "raw/native-exit.json",
+      "bytes": 16,
+      "sha256": "982b9e9bfb10ffe83cad665807abcfd3fa97b37822db5ab7831157a499548a9e"
+    },
+    {
+      "path": "raw/native-process.json",
+      "bytes": 305,
+      "sha256": "9a24aab1cc619f27b2903d308c4577d82c474054798c39c24d993026ab839f8d"
+    },
+    {
+      "path": "raw/native-runtime.txt",
+      "bytes": 743,
+      "sha256": "158dd8127e3377fd2f5df4a01fce8bd5082efe5dce0aea80326a467ab572af36"
+    },
+    {
+      "path": "raw/native-signature.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/prepare-native-embedded.py",
+      "bytes": 5782,
+      "sha256": "85860f72dc3e1ce6e5f98b2e713584dc32389fc84c06746f294dc6afe5472953"
+    },
+    {
+      "path": "raw/prepare-sheet.py",
+      "bytes": 4053,
+      "sha256": "89f692c2e086abfcb472c359bd2d60e07e42dc96d1e0d02870da0c461d1d583a"
+    },
+    {
+      "path": "raw/prepare.py",
+      "bytes": 4598,
+      "sha256": "9c5f9b767706929c225282bb387da68df7555ae4a362160c21ea7ce22775626c"
+    },
+    {
+      "path": "raw/prepared.json",
+      "bytes": 237,
+      "sha256": "01525727f05aa3d989b2f8c14fff1ac2b644f81b70bc19bb14465b407ba512c4"
+    },
+    {
+      "path": "raw/production-source/apps/desktop/lib/mac_text_editing.dart",
+      "bytes": 4562,
+      "sha256": "a6587d545562d702626dbba235bcf9eb0f1af9b927aea57f134758723ce229bf"
+    },
+    {
+      "path": "raw/production-source/apps/desktop/lib/window_frame.dart",
+      "bytes": 4566,
+      "sha256": "391387c70159a0fa776b7b9cd85a419e67696f8dc70bbef69144370004578829"
+    },
+    {
+      "path": "raw/production-source/apps/desktop/macos/Runner/NativeTextEditingMenu.swift",
+      "bytes": 7338,
+      "sha256": "5aafc74399da83192160203cc8f49ba1de7c551e7278281fd669d819b4403109"
+    },
+    {
+      "path": "raw/run.py",
+      "bytes": 1126,
+      "sha256": "7d54f14b51e62da758755799c79bb390f3bdbeb2300597d8de53ccf2471eede5"
+    },
+    {
+      "path": "raw/sdk-source-context.json",
+      "bytes": 2149,
+      "sha256": "ba209e087a016d6ba069fc7d7636070ac14585b46b791760f75f15bf6ce19ccf"
+    },
+    {
+      "path": "raw/sheet-analyze-probe.txt",
+      "bytes": 96,
+      "sha256": "42fb7f6556428ba7eb3163fa5000a6d142c218a8cc714dc325c52f916476c83c"
+    },
+    {
+      "path": "raw/sheet-build-probe.txt",
+      "bytes": 9559,
+      "sha256": "f774696de2c7d203667bb522557fbf90c79c5fd336ae1f2c8680f5f63cedb9cf"
+    },
+    {
+      "path": "raw/sheet-build-run.txt",
+      "bytes": 94,
+      "sha256": "16a9ba70d73679dd947aa2b7ee2c05a43ac305b43c83d9abc243b12e7927fd26"
+    },
+    {
+      "path": "raw/sheet-build-stages.json",
+      "bytes": 1099,
+      "sha256": "55fdf84ae2010082ce9c16a1ee7864ee0c62f358f7cee6e5e78360bbc6051bf8"
+    },
+    {
+      "path": "raw/sheet-exit.json",
+      "bytes": 16,
+      "sha256": "982b9e9bfb10ffe83cad665807abcfd3fa97b37822db5ab7831157a499548a9e"
+    },
+    {
+      "path": "raw/sheet-format-probe.txt",
+      "bytes": 81,
+      "sha256": "534b8a80d086ddb1e317e17bea9dfff70f7fa1dc58547ee13cda12d035b45197"
+    },
+    {
+      "path": "raw/sheet-process.json",
+      "bytes": 354,
+      "sha256": "0066e592b72b4e7f4ced35168a609f722dca136f3df41c3f0f75d874fe245daf"
+    },
+    {
+      "path": "raw/sheet-runtime.txt",
+      "bytes": 581,
+      "sha256": "2a95eeb002258b00f1b9cb2ca4fff0feec4facc1002e70be41222d837eef4e66"
+    },
+    {
+      "path": "raw/sheet-signature.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/sheet-source/apps/desktop/lib/secure_ax_probe.dart",
+      "bytes": 2006,
+      "sha256": "002434096456e0b3a10d479cec29547247df649bb3d670cb691d8696b4a75ca1"
+    },
+    {
+      "path": "raw/sheet-source/apps/desktop/macos/Runner/MainFlutterWindow.swift",
+      "bytes": 19696,
+      "sha256": "da64d5c4644ba5935ad2e8ac093f2040315837a85c2fd7ac52dd47d55e56e965"
+    },
+    {
+      "path": "raw/source-comparison.json",
+      "bytes": 184,
+      "sha256": "863d82d68077685f1884557bd3efe8d32ed2bab7c77af71645d25124f22631a7"
+    }
+  ]
+}
