@@ -22,6 +22,7 @@ class _Keys implements DatabaseKeyStore {
 class _Platform extends NativeDesktopPlatform {
   Future<void> Function()? beforeTerminate;
   final events = <Map<String, Object?>>[];
+  final submissionResults = <Map<String, Object?>>[];
   int permissionActions = 0, submissions = 0;
   @override
   Future<DesktopAvailability> initialize(
@@ -37,9 +38,11 @@ class _Platform extends NativeDesktopPlatform {
   }
 
   @override
-  Future<bool> notifyNewRequest(String requestId) {
+  Future<bool> notifyNewRequest(String requestId) async {
     submissions++;
-    return super.notifyNewRequest(requestId);
+    final accepted = await super.notifyNewRequest(requestId);
+    submissionResults.add({'requestId': requestId, 'accepted': accepted});
+    return accepted;
   }
 
   @override
@@ -95,6 +98,8 @@ Future<void> main() async {
       Platform.environment['MAC_NOTIFICATION_REUSE_PERMISSION'] == '1';
   final permissionSettings =
       Platform.environment['MAC_NOTIFICATION_PERMISSION_SETTINGS'] == '1';
+  final deliveryFailure =
+      Platform.environment['MAC_NOTIFICATION_DELIVERY_FAILURE'] == '1';
   check(
     Platform.isMacOS &&
         owner != null &&
@@ -230,6 +235,63 @@ Future<void> main() async {
     if (permissionSettings) {
       check(reusePermission, 'Settings test requires existing system decision');
       await service.owner.setNotificationsEnabled(true);
+      if (deliveryFailure) {
+        final gate = File('$canonical/dispatch-after-system-denial');
+        await phase('disable-only-qa-app-then-create-owned-dispatch-gate');
+        await until(
+          gate.exists,
+          'CUA disabled actual system permission before request',
+        );
+        check(
+          await gate.readAsString() == owner,
+          'Foreign denied-dispatch gate',
+        );
+        check(
+          runtime.availability.notifications ==
+                  NotificationAvailability.enabled &&
+              platform.permissionActions == 0,
+          'App must retain actual initial cache until dispatch',
+        );
+        final item = service.owner.information.single;
+        final session = service.agent.openSession('实际投递失败合成聊天');
+        final request = service.agent.request(session, '实际系统拒绝投递后保留申请', [
+          FieldRef(item.id, item.fields.single.id),
+        ]);
+        await until(
+          () => platform.submissionResults.length == 1,
+          'Single actual native notification completion',
+        );
+        facts['deliveryAttempt'] = platform.submissionResults.single;
+        await save();
+        check(
+          platform.submissionResults.single['accepted'] == false,
+          'System accepted attempt; not proof of delivery failure',
+        );
+        await until(
+          () =>
+              runtime.availability.notifications ==
+              NotificationAvailability.unavailable,
+          'Production delivery failure fallback',
+        );
+        check(
+          service.owner
+              .queryInbox(limit: 100)
+              .entries
+              .singleWhere((r) => r.id == request.id)
+              .pending,
+          'Failed delivery lost request',
+        );
+        facts['deliveryFailureObserved'] = true;
+        (facts['cases'] as List).add({
+          'label': 'actual-native-delivery-failure',
+          'requestId': request.id,
+          'accepted': false,
+          'runtimeState': runtime.availability.notifications.name,
+          'requestPending': true,
+          'submissions': platform.submissions,
+        });
+        await phase('delivery-failure-observed-check-denied-in-app');
+      }
       await phase('settings-enabled-ready-disable-only-this-qa-app');
       await until(
         () =>
@@ -251,7 +313,7 @@ Future<void> main() async {
         'Application reminders must remain enabled',
       );
       check(
-        platform.submissions == 0,
+        platform.submissions == (deliveryFailure ? 1 : 0),
         'Denied system permission dispatched notification',
       );
       check(
@@ -285,7 +347,7 @@ Future<void> main() async {
         'CUA system Settings restore and actual app check button',
       );
       check(
-        platform.submissions == 0,
+        platform.submissions == (deliveryFailure ? 1 : 0),
         'Restoring permission replayed notification',
       );
       check(
