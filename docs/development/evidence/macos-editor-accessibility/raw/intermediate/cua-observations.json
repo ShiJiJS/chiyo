@@ -1,0 +1,22 @@
+{
+  "source": "bb98c80",
+  "scope": "Intermediate Dart semantic labels; native bridge not implemented yet",
+  "realMacAXSelectorLabels": [
+    "所在目录\n未分类",
+    "标签",
+    "字段类型\n结构化字段",
+    "字段类型\n文件"
+  ],
+  "realMacAXTextFieldPurposeLabelsStillMissing": true,
+  "actualNativeTextFieldCount": 7,
+  "VoiceOverEnabledDuringThisRound": false,
+  "actualIMEComposition": [
+    0,
+    6
+  ],
+  "actualSavedDescription": "你好测试\n你好",
+  "independentReopenPreservedChinese": true,
+  "actualCommandQNormalExits": 2,
+  "fullVoiceOverNavigationProven": false,
+  "nextStep": "Investigate native FlutterTextField mapping rather than treating widget labels as native success"
+}

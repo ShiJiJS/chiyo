@@ -1,0 +1,3 @@
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+EDITOR_FOCUS_ROOT=/Users/jiangxinyi/Library/Containers/org.shijijs.agent-info-manage.qa.editor-focus.8a60890c0a9a4e188666fa7372c98c6b/Data/tmp/aim-editor-focus-g3YKgW
+EDITOR_FOCUS_COMPLETE=reopen
