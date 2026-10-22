@@ -1,0 +1,159 @@
+{
+  "date": "2026-10-23",
+  "productSource": "08c0894e85685f33bbf343a687def2af54e2f9bd",
+  "scope": "build and extracted synthetic checks; no clean-user, Keychain upgrade, native UI or real Codex acceptance",
+  "rawFiles": [
+    {
+      "path": "agent-info-manage-0.4.1+13-mac-dev.08c0894e8568-macos-arm64.zip.sha256",
+      "bytes": 130,
+      "sha256": "2d2a48d3bdd5e8bf32097b69a806e3888c54f725598f52974b25059f13cae38d"
+    },
+    {
+      "path": "cleanup.json",
+      "bytes": 838,
+      "sha256": "90a7a3b3de4191c60dbb1c31ddc13a8f86e5eed9b498b3467830462120350ea8"
+    },
+    {
+      "path": "logs/app-signature.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/archive.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/compile-info-codex-hook.txt",
+      "bytes": 136,
+      "sha256": "f62cc5836b055486a0de94aeb42d94d583908896a6fb41d4ca4497b629545612"
+    },
+    {
+      "path": "logs/compile-info-codex.txt",
+      "bytes": 131,
+      "sha256": "9f57881ffa3afd6fdde58a19a120a8ac01fb06f57c64a1eedb4cd46b7dc76731"
+    },
+    {
+      "path": "logs/compile-info-prepare-codex.txt",
+      "bytes": 139,
+      "sha256": "177a47853d9d60c0fbd200a2db8babdae590e8e0916746fdd05c0607550b97db"
+    },
+    {
+      "path": "logs/compile-info-runtime-worker.txt",
+      "bytes": 140,
+      "sha256": "c1bd901960e206479279548e75133b4190638e2b4307ef194a2c76d3b5bd9462"
+    },
+    {
+      "path": "logs/compile-info.txt",
+      "bytes": 125,
+      "sha256": "88821bf16fe9c2d07b599e313d535d4ee697ba4f92b330d991eb067ae677fe68"
+    },
+    {
+      "path": "logs/diagnostic-build.txt",
+      "bytes": 300,
+      "sha256": "568a38586fdb38cd60797fa2c775fce6c26ffed61d6d391f93bc1b75848a6144"
+    },
+    {
+      "path": "logs/extract.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/extracted-app-signature.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/extracted-cli-and-worker.txt",
+      "bytes": 841,
+      "sha256": "8ea7439312ad07a34b91bb4e24fd44a97db7ca7fd5a98f85451768f46b06815e"
+    },
+    {
+      "path": "logs/extracted-storage.txt",
+      "bytes": 187,
+      "sha256": "bfe59e3f5c8148af626c8aa8416aa5c874f251127cecd3c3ec86f26dddfb1657"
+    },
+    {
+      "path": "logs/release-build.txt",
+      "bytes": 4599,
+      "sha256": "bc579a6747d519b3dd12595ccd20a7536bc6e5805c9223bc5d169ef5de25cbca"
+    },
+    {
+      "path": "logs/sign-diagnostic-libsqlcipher.dylib.txt",
+      "bytes": 170,
+      "sha256": "40b683a252b55b68460355c162dc0e7a57662c3b7ae5b279f7ddaeea1da06f5e"
+    },
+    {
+      "path": "logs/sign-diagnostic-macos-storage-check.txt",
+      "bytes": 171,
+      "sha256": "a3671ebaed71e1c053bcb9deb112f8352543c73b89dcc3326723698e5f59a14b"
+    },
+    {
+      "path": "logs/sign-info-codex-hook.txt",
+      "bytes": 155,
+      "sha256": "a0929778941644c026cef7956131fdc29d55e2be9b6d876dad50cbe4e5013007"
+    },
+    {
+      "path": "logs/sign-info-codex.txt",
+      "bytes": 150,
+      "sha256": "42e992fa964b409d6a9db471d58327078f9483a96d43a4924b0f919343b592da"
+    },
+    {
+      "path": "logs/sign-info-prepare-codex.txt",
+      "bytes": 158,
+      "sha256": "dddc8609fac3c81ce1a9ced61b58408a7f856e290cb721751826450f8f33ea8a"
+    },
+    {
+      "path": "logs/sign-info-runtime-worker.txt",
+      "bytes": 159,
+      "sha256": "b4ba4bad8e78e73bdc51b0176c0db234dae6c316f9c5d2df35bc78e62e0a1576"
+    },
+    {
+      "path": "logs/sign-info.txt",
+      "bytes": 144,
+      "sha256": "469d0c0f8633069611af7a70057e2babc308384c2fe716c7ff5103b0eedd782c"
+    },
+    {
+      "path": "logs/source-checks.txt",
+      "bytes": 217542,
+      "sha256": "3790456c37a9019da608b230b39666672c76dfa0cb48e008848514d4c0014d41"
+    },
+    {
+      "path": "manifest.json",
+      "bytes": 2126205,
+      "sha256": "b3f88ac839f35f88f0d574417fad400dd124feae861510fee8f0b4a6efbd06d6"
+    },
+    {
+      "path": "verification.json",
+      "bytes": 2731,
+      "sha256": "285de26aa8564114471847755208555eb4657e6a7256f1bea3bf5000a69b2290"
+    }
+  ],
+  "archive": "agent-info-manage-0.4.1+13-mac-dev.08c0894e8568-macos-arm64.zip",
+  "archiveBytes": 130967661,
+  "archiveSha256": "4c819c825ee0c1f13bd356770ee1b1c2d1285a3cb04730d9b8a6d817891d48de",
+  "phasesPassed": 21,
+  "tests": {
+    "core": [
+      290,
+      6
+    ],
+    "cli": [
+      75,
+      40
+    ],
+    "storage": [
+      160,
+      18
+    ],
+    "desktop": [
+      263,
+      2
+    ],
+    "total": [
+      788,
+      66
+    ]
+  },
+  "candidateNotInstalled": true
+}

@@ -1,0 +1,533 @@
+{
+  "date": "2026-10-23",
+  "productSource": "08c0894e85685f33bbf343a687def2af54e2f9bd",
+  "scope": "Scoped small-window UI regression and native memory-fixture diagnosis",
+  "rawFiles": [
+    {
+      "path": "analyze-desktop-final.txt",
+      "bytes": 96,
+      "sha256": "8184004e4bf972d7022dba9ea8241226c40b7154c4cd655c8e5e02a462410005"
+    },
+    {
+      "path": "analyze-desktop-purpose.txt",
+      "bytes": 96,
+      "sha256": "890d2159398ec84356308fc96f0c2dbe76d688a0eeced866b78a8e432a8eaa28"
+    },
+    {
+      "path": "analyze-desktop.txt",
+      "bytes": 661,
+      "sha256": "0299a99559d6e65ae4c1ac27dbcff4673d1182f2bc65f3229694666687c65211"
+    },
+    {
+      "path": "cleanup-progress.json",
+      "bytes": 2049,
+      "sha256": "74e4bf314e7cc4b347893866973e9dbe3d6f2474b790beba9d8729a7962f1174"
+    },
+    {
+      "path": "desktop-checks-final.json",
+      "bytes": 123,
+      "sha256": "a0db4d231b994dec64f73a9c13b6ffa05e50b4de5dc1bad19062cc1ce7eb28ea"
+    },
+    {
+      "path": "desktop-checks-purpose.json",
+      "bytes": 127,
+      "sha256": "9108c7590e1b3e50a2c3fea7813db71bd5039c259ec0afeba628bbf4d19ca2b1"
+    },
+    {
+      "path": "desktop-checks.json",
+      "bytes": 58,
+      "sha256": "9b686d3430243726393e4d8c688c15d9f0b0177d3a54f9859f3af205be18a1d4"
+    },
+    {
+      "path": "desktop-suite-final.txt",
+      "bytes": 52876,
+      "sha256": "c6d546e8217d72f7576b71a48266e81d2f5a2c190cc7088b97b0cb475adfaff5"
+    },
+    {
+      "path": "desktop-suite-purpose.txt",
+      "bytes": 52960,
+      "sha256": "8d8c994ef531325ea5bbfcf0229ef29dac4b2f33d1bc23661fbc5c642bd2b13f"
+    },
+    {
+      "path": "native-baseline/approval-source.dart",
+      "bytes": 80357,
+      "sha256": "434b5c5216dddb96d19b6ad2881f9f7a6109c147ed02486ef5f60c2546cc2e8f"
+    },
+    {
+      "path": "native-baseline/logs/analyze-entry.txt",
+      "bytes": 303,
+      "sha256": "aaa2d1f43fb7c276eac8a61f7fecc76e9d4032f6130c714dda6d670acaf2155d"
+    },
+    {
+      "path": "native-baseline/logs/pub-desktop.txt",
+      "bytes": 318,
+      "sha256": "ca68f707c22164511fc2b3f9af97ed7bd46538b1d334d9c806a6a59a556a6e05"
+    },
+    {
+      "path": "native-baseline/logs/pub-info_cli.txt",
+      "bytes": 438,
+      "sha256": "7652c98906e8f741dc56b0e7f018713f8985ac3d073ce66e4cb8e1d3274e15f6"
+    },
+    {
+      "path": "native-baseline/logs/pub-info_core.txt",
+      "bytes": 438,
+      "sha256": "7652c98906e8f741dc56b0e7f018713f8985ac3d073ce66e4cb8e1d3274e15f6"
+    },
+    {
+      "path": "native-baseline/logs/pub-info_storage.txt",
+      "bytes": 438,
+      "sha256": "7652c98906e8f741dc56b0e7f018713f8985ac3d073ce66e4cb8e1d3274e15f6"
+    },
+    {
+      "path": "native-baseline/qa-driver-source.py",
+      "bytes": 6119,
+      "sha256": "cd58eca0c9d380accb0d7f5983a8a178a2d8d1a5f003891c17bc05bc7b14d32b"
+    },
+    {
+      "path": "native-baseline/qa-entry-source.dart",
+      "bytes": 4656,
+      "sha256": "be8a4d4c615046d488ce7058cbe61b5b1e16c9e46c44ad50fd9f02cc693ca976"
+    },
+    {
+      "path": "native-baseline/result.json",
+      "bytes": 84855,
+      "sha256": "630c0186a8b9f18987a756363ca1fc4732646a9000d148808df6ebb74a0b318c"
+    },
+    {
+      "path": "native-baseline-2/approval-source.dart",
+      "bytes": 80357,
+      "sha256": "434b5c5216dddb96d19b6ad2881f9f7a6109c147ed02486ef5f60c2546cc2e8f"
+    },
+    {
+      "path": "native-baseline-2/logs/analyze-entry.txt",
+      "bytes": 96,
+      "sha256": "9f5eb6effdd80434ebba681ac46428aa806bd28ec8e7fdb47079da51b74a1f1c"
+    },
+    {
+      "path": "native-baseline-2/logs/app.txt",
+      "bytes": 3642,
+      "sha256": "7e24328fdeb156db76eae2e4b69ed4113f6aadfd5aa45d5940ed97c1e5f0fc35"
+    },
+    {
+      "path": "native-baseline-2/logs/build-ui-release.txt",
+      "bytes": 10047,
+      "sha256": "e6df7c1774ef2d19cf0cb4d62df562f637b4f5392dbab7aaf9ed00348c46cfc9"
+    },
+    {
+      "path": "native-baseline-2/logs/pub-desktop.txt",
+      "bytes": 318,
+      "sha256": "ca68f707c22164511fc2b3f9af97ed7bd46538b1d334d9c806a6a59a556a6e05"
+    },
+    {
+      "path": "native-baseline-2/logs/pub-info_cli.txt",
+      "bytes": 438,
+      "sha256": "7652c98906e8f741dc56b0e7f018713f8985ac3d073ce66e4cb8e1d3274e15f6"
+    },
+    {
+      "path": "native-baseline-2/logs/pub-info_core.txt",
+      "bytes": 438,
+      "sha256": "7652c98906e8f741dc56b0e7f018713f8985ac3d073ce66e4cb8e1d3274e15f6"
+    },
+    {
+      "path": "native-baseline-2/logs/pub-info_storage.txt",
+      "bytes": 438,
+      "sha256": "7652c98906e8f741dc56b0e7f018713f8985ac3d073ce66e4cb8e1d3274e15f6"
+    },
+    {
+      "path": "native-baseline-2/logs/strict-signature.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "native-baseline-2/qa-driver-source.py",
+      "bytes": 6119,
+      "sha256": "cd58eca0c9d380accb0d7f5983a8a178a2d8d1a5f003891c17bc05bc7b14d32b"
+    },
+    {
+      "path": "native-baseline-2/qa-entry-source.dart",
+      "bytes": 4670,
+      "sha256": "13551d3e55d4181a31a6011e085dced30ace540e6c2c6acc33068c2bc3cbd00b"
+    },
+    {
+      "path": "native-baseline-2/result.json",
+      "bytes": 85913,
+      "sha256": "23bab521b9f1c0b24cab66634c29a4e6cdb5e394605d87f4eaea9292cdc73b09"
+    },
+    {
+      "path": "native-final/approval-source.dart",
+      "bytes": 81271,
+      "sha256": "8098fad4b2f88aa38c18eec3fef38bea63137fc1d75d88c6f8371e3867fc2274"
+    },
+    {
+      "path": "native-final/logs/analyze-entry.txt",
+      "bytes": 96,
+      "sha256": "d62a4e3131d0daef4930e1414a14502c2fe91cfe99971baf3fa0de196a416aca"
+    },
+    {
+      "path": "native-final/logs/app.txt",
+      "bytes": 2163,
+      "sha256": "28845e73c678e307ae0051441c80e1a701ba6d1d4411c1f52dd3f27f30704ccf"
+    },
+    {
+      "path": "native-final/logs/build-ui-release.txt",
+      "bytes": 10141,
+      "sha256": "4be467b07ecbd9f798a4207a63ac6e3e12ca68900994fd84a2487de82d7201cf"
+    },
+    {
+      "path": "native-final/logs/pub-desktop.txt",
+      "bytes": 318,
+      "sha256": "ca68f707c22164511fc2b3f9af97ed7bd46538b1d334d9c806a6a59a556a6e05"
+    },
+    {
+      "path": "native-final/logs/pub-info_cli.txt",
+      "bytes": 438,
+      "sha256": "7652c98906e8f741dc56b0e7f018713f8985ac3d073ce66e4cb8e1d3274e15f6"
+    },
+    {
+      "path": "native-final/logs/pub-info_core.txt",
+      "bytes": 438,
+      "sha256": "7652c98906e8f741dc56b0e7f018713f8985ac3d073ce66e4cb8e1d3274e15f6"
+    },
+    {
+      "path": "native-final/logs/pub-info_storage.txt",
+      "bytes": 438,
+      "sha256": "7652c98906e8f741dc56b0e7f018713f8985ac3d073ce66e4cb8e1d3274e15f6"
+    },
+    {
+      "path": "native-final/logs/strict-signature.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "native-final/qa-driver-source.py",
+      "bytes": 6119,
+      "sha256": "cd58eca0c9d380accb0d7f5983a8a178a2d8d1a5f003891c17bc05bc7b14d32b"
+    },
+    {
+      "path": "native-final/qa-entry-source.dart",
+      "bytes": 4812,
+      "sha256": "76e72e1c3c8e34d80437e798c8f700933ef63e343be6e8b63c4f23e1db908e4a"
+    },
+    {
+      "path": "native-final/result.json",
+      "bytes": 85903,
+      "sha256": "573fb6818f9d41f676c4d51e7955fb50eee11e4d6e8c59c54f2af9a447597464"
+    },
+    {
+      "path": "native-fixed/approval-source.dart",
+      "bytes": 80577,
+      "sha256": "024eb11ecf80dc5f3809e9e6eb32a3706652079b1ac14eb0cebba34695bee253"
+    },
+    {
+      "path": "native-fixed/logs/analyze-entry.txt",
+      "bytes": 96,
+      "sha256": "02525ae8a666a286310e4cc988bd3d7e0f3a4f743f495748377cd5bd7894b506"
+    },
+    {
+      "path": "native-fixed/logs/app.txt",
+      "bytes": 2403,
+      "sha256": "9ea29dc4d71ffdbd90d104895a9b3047ff2a64770653d9e312eb2d2c115a485e"
+    },
+    {
+      "path": "native-fixed/logs/build-ui-release.txt",
+      "bytes": 10141,
+      "sha256": "d74765b46ba3343df2ddb7e7cf8ff58185e77a8994050e3703b689636c72218c"
+    },
+    {
+      "path": "native-fixed/logs/pub-desktop.txt",
+      "bytes": 318,
+      "sha256": "ca68f707c22164511fc2b3f9af97ed7bd46538b1d334d9c806a6a59a556a6e05"
+    },
+    {
+      "path": "native-fixed/logs/pub-info_cli.txt",
+      "bytes": 438,
+      "sha256": "7652c98906e8f741dc56b0e7f018713f8985ac3d073ce66e4cb8e1d3274e15f6"
+    },
+    {
+      "path": "native-fixed/logs/pub-info_core.txt",
+      "bytes": 438,
+      "sha256": "7652c98906e8f741dc56b0e7f018713f8985ac3d073ce66e4cb8e1d3274e15f6"
+    },
+    {
+      "path": "native-fixed/logs/pub-info_storage.txt",
+      "bytes": 438,
+      "sha256": "7652c98906e8f741dc56b0e7f018713f8985ac3d073ce66e4cb8e1d3274e15f6"
+    },
+    {
+      "path": "native-fixed/logs/strict-signature.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "native-fixed/qa-driver-source.py",
+      "bytes": 6119,
+      "sha256": "cd58eca0c9d380accb0d7f5983a8a178a2d8d1a5f003891c17bc05bc7b14d32b"
+    },
+    {
+      "path": "native-fixed/qa-entry-source.dart",
+      "bytes": 4812,
+      "sha256": "76e72e1c3c8e34d80437e798c8f700933ef63e343be6e8b63c4f23e1db908e4a"
+    },
+    {
+      "path": "native-fixed/result.json",
+      "bytes": 85903,
+      "sha256": "d214254f801f0553c61a8ff46237400b9d56a2ac70a7511d346ef5a4ef7dae47"
+    },
+    {
+      "path": "native-purpose-final/approval-source.dart",
+      "bytes": 81184,
+      "sha256": "e168e7cfb1bb1a3780f18bb79256c9337c3bda99b7c9d6b094c67e74164cec60"
+    },
+    {
+      "path": "native-purpose-final/logs/analyze-entry.txt",
+      "bytes": 96,
+      "sha256": "05a3e9d5b8139dae91705b47bbd1298e5b5f8cf987f459f062f148e451d6c42a"
+    },
+    {
+      "path": "native-purpose-final/logs/app.txt",
+      "bytes": 4573,
+      "sha256": "be3726a2c916d2d63af727b635ac143e6e5299310c099c1764dd58477c412a5a"
+    },
+    {
+      "path": "native-purpose-final/logs/build-ui-release.txt",
+      "bytes": 10237,
+      "sha256": "654e43a1b8d62be1c61bf8c3bffe693c52a77f7f0cd7c6c1517641f086c8d345"
+    },
+    {
+      "path": "native-purpose-final/logs/pub-desktop.txt",
+      "bytes": 318,
+      "sha256": "ca68f707c22164511fc2b3f9af97ed7bd46538b1d334d9c806a6a59a556a6e05"
+    },
+    {
+      "path": "native-purpose-final/logs/pub-info_cli.txt",
+      "bytes": 438,
+      "sha256": "7652c98906e8f741dc56b0e7f018713f8985ac3d073ce66e4cb8e1d3274e15f6"
+    },
+    {
+      "path": "native-purpose-final/logs/pub-info_core.txt",
+      "bytes": 438,
+      "sha256": "7652c98906e8f741dc56b0e7f018713f8985ac3d073ce66e4cb8e1d3274e15f6"
+    },
+    {
+      "path": "native-purpose-final/logs/pub-info_storage.txt",
+      "bytes": 438,
+      "sha256": "7652c98906e8f741dc56b0e7f018713f8985ac3d073ce66e4cb8e1d3274e15f6"
+    },
+    {
+      "path": "native-purpose-final/logs/strict-signature.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "native-purpose-final/qa-driver-source.py",
+      "bytes": 6946,
+      "sha256": "e6e26e79a7c091c54ac6525493ea50ce727bc6ff99daceb4452854eb5ab9705e"
+    },
+    {
+      "path": "native-purpose-final/qa-entry-source.dart",
+      "bytes": 5831,
+      "sha256": "f45fed2e93713e3c648ecc8049ec7641356bc70778602edf5a3016bbe5b41a8e"
+    },
+    {
+      "path": "native-purpose-final/qa-window-source.swift",
+      "bytes": 20631,
+      "sha256": "91658c023833d312103b5d36f2598c65e64084ced5adc80887ffd8c75e025ad4"
+    },
+    {
+      "path": "native-purpose-final/result.json",
+      "bytes": 85956,
+      "sha256": "508dc17a4cecf58a4b5885e1de5b0516c3d836f508460c95f8bbb2821fc70ec2"
+    },
+    {
+      "path": "native-scroll-fallback/approval-source.dart",
+      "bytes": 81271,
+      "sha256": "8098fad4b2f88aa38c18eec3fef38bea63137fc1d75d88c6f8371e3867fc2274"
+    },
+    {
+      "path": "native-scroll-fallback/logs/analyze-entry.txt",
+      "bytes": 96,
+      "sha256": "02525ae8a666a286310e4cc988bd3d7e0f3a4f743f495748377cd5bd7894b506"
+    },
+    {
+      "path": "native-scroll-fallback/logs/app.txt",
+      "bytes": 3955,
+      "sha256": "f801364a9b9c550ea4ac50f8d68f4019210116a48338f936c96472baa12c1617"
+    },
+    {
+      "path": "native-scroll-fallback/logs/build-ui-release.txt",
+      "bytes": 10261,
+      "sha256": "7664416cf0df98e2659dd42c2aba3b2a13c7226f40150079bab84873dbf9a8ba"
+    },
+    {
+      "path": "native-scroll-fallback/logs/pub-desktop.txt",
+      "bytes": 318,
+      "sha256": "ca68f707c22164511fc2b3f9af97ed7bd46538b1d334d9c806a6a59a556a6e05"
+    },
+    {
+      "path": "native-scroll-fallback/logs/pub-info_cli.txt",
+      "bytes": 438,
+      "sha256": "7652c98906e8f741dc56b0e7f018713f8985ac3d073ce66e4cb8e1d3274e15f6"
+    },
+    {
+      "path": "native-scroll-fallback/logs/pub-info_core.txt",
+      "bytes": 438,
+      "sha256": "7652c98906e8f741dc56b0e7f018713f8985ac3d073ce66e4cb8e1d3274e15f6"
+    },
+    {
+      "path": "native-scroll-fallback/logs/pub-info_storage.txt",
+      "bytes": 438,
+      "sha256": "7652c98906e8f741dc56b0e7f018713f8985ac3d073ce66e4cb8e1d3274e15f6"
+    },
+    {
+      "path": "native-scroll-fallback/logs/strict-signature.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "native-scroll-fallback/qa-driver-source.py",
+      "bytes": 6119,
+      "sha256": "cd58eca0c9d380accb0d7f5983a8a178a2d8d1a5f003891c17bc05bc7b14d32b"
+    },
+    {
+      "path": "native-scroll-fallback/qa-entry-source.dart",
+      "bytes": 5831,
+      "sha256": "f45fed2e93713e3c648ecc8049ec7641356bc70778602edf5a3016bbe5b41a8e"
+    },
+    {
+      "path": "native-scroll-fallback/result.json",
+      "bytes": 85923,
+      "sha256": "be3a33ec76b2298340830e3cacfffc30e81899d7f79482572248babc5f8985eb"
+    },
+    {
+      "path": "ordinary-restored-checkpoint.log.txt",
+      "bytes": 132,
+      "sha256": "dbc01fad753a943417e50e983fddc5339e7268c74255b60f06d0b78ea171aa93"
+    },
+    {
+      "path": "ordinary-restored-cli.json",
+      "bytes": 2587,
+      "sha256": "c322418b0695c55970f52ef3e587556c5df4e900918d5c0e7c5564d180b9b74c"
+    },
+    {
+      "path": "ordinary-restored.json",
+      "bytes": 219,
+      "sha256": "298fef65d458032440ea933383a2221bd44f3c10a427692493f0c9b27d9bc1db"
+    },
+    {
+      "path": "owned-container-data-cleanup.json",
+      "bytes": 489,
+      "sha256": "dcfd2e87a487497617e0ea50a8203de6b9429bbb00ecaade343acebb3cbb2e2a"
+    },
+    {
+      "path": "post-cleanup-protected-metadata.json",
+      "bytes": 1173,
+      "sha256": "8664e1c39be5c4b63bbaae9dbe312ac25a428524117adae6b7836959d2c47d9b"
+    },
+    {
+      "path": "protected-container-residue.json",
+      "bytes": 1593,
+      "sha256": "167324cc62427f83008559144fed22e850eb35b5b0a1b98c55e06f65df524811"
+    },
+    {
+      "path": "regression-after-fix.txt",
+      "bytes": 349,
+      "sha256": "8b5be21289f9dd85a8b1f029a88ad9f4de6c9c730ba641197d2614ff4153eb59"
+    },
+    {
+      "path": "regression-before-fix.dart",
+      "bytes": 3736,
+      "sha256": "78b5c91a561f66e082d4cf112fe617fcb5432f7d7ca929ba6bf0c04a971778ad"
+    },
+    {
+      "path": "regression-before-fix.txt",
+      "bytes": 4698,
+      "sha256": "ad833dc07048d63306a5c8ccafdf102e0ba32bd75b924b0eda499d2d65b839fa"
+    },
+    {
+      "path": "regression-purpose-final.txt",
+      "bytes": 581,
+      "sha256": "ed681fa781f04b953d51efbdc769f41f7247b8e7f5841259d36ab04f178b5a46"
+    },
+    {
+      "path": "regression-small-type-fixed.txt",
+      "bytes": 581,
+      "sha256": "ed681fa781f04b953d51efbdc769f41f7247b8e7f5841259d36ab04f178b5a46"
+    },
+    {
+      "path": "regression-small-type-matrix.txt",
+      "bytes": 26202,
+      "sha256": "fb86bac2ba1a63a53a1a6e50d30ee41f826cc916c16410059a3371c0b414c7e4"
+    },
+    {
+      "path": "restore-ordinary-supervisor.py",
+      "bytes": 1058,
+      "sha256": "b406b706bc75b7cc7e0f04e493226cf2ba29a16e379097fbaf36339b5a8739e1"
+    },
+    {
+      "path": "source-verification.json",
+      "bytes": 1540,
+      "sha256": "5d6343061aaf2f69a98b052f3fe759cd14370762770ab1faf6e0c77e9e06d9e1"
+    },
+    {
+      "path": "ui-transcript.json",
+      "bytes": 1392,
+      "sha256": "c98d91057b0dee0da6f051888d27fdb571c76ec0c91382704637dc73e12cc3cc"
+    },
+    {
+      "path": "unregister-owned-apps.json",
+      "bytes": 298,
+      "sha256": "d24025eecc3da0bcdf2f9e6365150894b2d9e5db4e87aa663ef10549aa220108"
+    },
+    {
+      "path": "widget-baseline-2.txt",
+      "bytes": 214,
+      "sha256": "573bf60c5ee176ba1124b81257f30b0a354e389a01a4750425fda6793ecc3737"
+    },
+    {
+      "path": "widget-baseline.txt",
+      "bytes": 1851,
+      "sha256": "5ef0091b638f7d1abf4e099f11c06aa5b1b7bb19d3843b280dc170d4d972bf89"
+    },
+    {
+      "path": "widget-platform-baseline.txt",
+      "bytes": 349,
+      "sha256": "8b5be21289f9dd85a8b1f029a88ad9f4de6c9c730ba641197d2614ff4153eb59"
+    },
+    {
+      "path": "widget-semantics-probe-2.txt",
+      "bytes": 34247,
+      "sha256": "789458ff8b0a746f0a5da0153b4f7e5eda7aa475ffcc2c88c5cbe18436595a20"
+    },
+    {
+      "path": "widget-semantics-probe.txt",
+      "bytes": 349,
+      "sha256": "8b5be21289f9dd85a8b1f029a88ad9f4de6c9c730ba641197d2614ff4153eb59"
+    }
+  ],
+  "beforeFixMacAndWindowsSemanticsRegressionFailed": true,
+  "afterFixWidgetMatrix": {
+    "window": [
+      800,
+      600
+    ],
+    "scales": [
+      1,
+      2
+    ],
+    "platformVariants": [
+      "macOS",
+      "Windows simulated widgets"
+    ],
+    "passed": 4
+  },
+  "strictDesktopAnalysisExit": 0,
+  "desktopTests": {
+    "passed": 263,
+    "skipped": 2
+  },
+  "nativeFinalNormalExit": 0,
+  "finalSourceVerified": true,
+  "installedPackageStill": 23,
+  "newKeychainActions": 0,
+  "protectedMetadataPreserved": true
+}

@@ -1,0 +1,13 @@
+2026-10-23 01:19:43.595 info_desktop[96494:7081953] TISFileInterrogator updateSystemInputSources false but old data invalid: currentCacheHeaderPtr nonNULL? 0, ->cacheFormatVersion 0, ->magicCookie 00000000, inputSourceTableCountSys 0
+Keyboard Layouts: duplicate keyboard layout identifier -17410.
+Keyboard Layouts: keyboard layout identifier -17410 has been replaced with -28673.
+Keyboard Layouts: duplicate keyboard layout identifier -30769.
+Keyboard Layouts: keyboard layout identifier -30769 has been replaced with -28674.
+Keyboard Layouts: duplicate keyboard layout identifier -14934.
+Keyboard Layouts: keyboard layout identifier -14934 has been replaced with -28675.
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+COMPACT_QA={"kind":"ready","facts":{"port":63934,"fixtureRoot":"/Users/jiangxinyi/Library/Containers/org.shijijs.agent-info-manage.qa.compact.1262ced334ad40208f85c8f3fd6715c8/Data/tmp/attachment-ui-hpH9Hn","systemKeychainUsed":false}}
+COMPACT_QA={"kind":"state","facts":{"pointerSignals":0,"pointerDowns":0,"keys":0,"documentScrolls":[{"pixels":0.0,"max":550.9285714285714,"viewport":148.49999999999997,"left":339.0,"top":228.0,"width":432.0,"height":148.49999999999997}],"fileSummariesBuilt":0,"approveEnabled":[false],"flutterErrors":0,"semanticsEnabled":false,"requestStatus":"pending"}}
+COMPACT_QA={"kind":"state","facts":{"pointerSignals":0,"pointerDowns":0,"keys":0,"documentScrolls":[{"pixels":0.0,"max":550.9285714285714,"viewport":148.49999999999997,"left":339.0,"top":224.0,"width":432.0,"height":148.49999999999997}],"fileSummariesBuilt":0,"approveEnabled":[false],"flutterErrors":0,"semanticsEnabled":false,"requestStatus":"pending"}}
+COMPACT_QA={"kind":"state","facts":{"pointerSignals":0,"pointerDowns":0,"keys":0,"documentScrolls":[{"pixels":0.0,"max":550.9285714285714,"viewport":148.49999999999997,"left":339.0,"top":224.0,"width":432.0,"height":148.49999999999997}],"fileSummariesBuilt":0,"approveEnabled":[false],"flutterErrors":0,"semanticsEnabled":true,"requestStatus":"pending"}}
+COMPACT_QA={"kind":"closed","facts":{"flutterErrors":0}}
