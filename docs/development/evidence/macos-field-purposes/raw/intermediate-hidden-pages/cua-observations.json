@@ -1,0 +1,18 @@
+{
+  "allWorkflowNativeLabelsPassed": false,
+  "checkpointPasted": true,
+  "fullIMEOrVoiceOverClaimed": false,
+  "nativeFailure": "Retained IndexedStack pages kept hidden descriptors; similar/duplicate geometries made later search/credential labels ambiguous or updates rejected",
+  "normalCommandQProcesses": [
+    {
+      "mode": "edit",
+      "pid": 45523,
+      "exitCode": 0
+    },
+    {
+      "mode": "reopen",
+      "pid": 47236,
+      "exitCode": 0
+    }
+  ]
+}

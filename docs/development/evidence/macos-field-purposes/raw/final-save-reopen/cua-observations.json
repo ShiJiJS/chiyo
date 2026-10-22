@@ -1,0 +1,20 @@
+{
+  "allWorkflowNativeLabelsPassed": false,
+  "saveReopenComplete": true,
+  "checkpointPasted": true,
+  "fullIMEOrVoiceOverClaimed": false,
+  "nativeFailure": null,
+  "normalCommandQProcesses": [
+    {
+      "mode": "edit",
+      "pid": 50021,
+      "exitCode": 0
+    },
+    {
+      "mode": "reopen",
+      "pid": 50391,
+      "exitCode": 0
+    }
+  ],
+  "scopeLimit": "Current source save/reopen check only, not all forms"
+}

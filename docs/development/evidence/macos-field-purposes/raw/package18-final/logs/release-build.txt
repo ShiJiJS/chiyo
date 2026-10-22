@@ -1,0 +1,4 @@
+Building macOS application...                                   
+✓ Built build/macos/Build/Products/Release/info_desktop.app (318.8MB)
+/Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/build/macos/Build/Products/Release/info_desktop.app: replacing existing signature
+Bundled GH 2.102.0 and AWS CLI 2.38.1 from verified official archives

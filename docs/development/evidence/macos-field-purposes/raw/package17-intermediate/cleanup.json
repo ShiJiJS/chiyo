@@ -1,0 +1,23 @@
+{
+  "intermediatePackageBuildPassed": true,
+  "completeNativeWorkflowPassed": false,
+  "reason": "Superseded after native retained-page ambiguity was identified; do not distribute as final candidate",
+  "uncompressedCopiesVerified": 2,
+  "manifestFiles": 7971,
+  "removed": [
+    {
+      "path": "build/macos-adaptation/issue50-package-17/AgentInfoManage",
+      "allocatedKiB": 380756
+    },
+    {
+      "path": "build/macos-adaptation/issue50-package-17/diagnostic-build",
+      "allocatedKiB": 8904
+    },
+    {
+      "path": "build/macos-adaptation/issue50-package-17/verify",
+      "allocatedKiB": 380756
+    }
+  ],
+  "intermediateZipRemovedBytes": 130963165,
+  "archiveSha256Retained": "ad6d2fb897d3f1399e80adbe8af7f0e193b6afe80bf9d627114cd9d73772dd76"
+}
