@@ -1,3 +1,4 @@
+import 'package:info_desktop/desktop_controls.dart';
 import 'support/approval_interactions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -180,7 +181,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       tester
-          .widget<DropdownButton<int>>(
+          .widget<DesktopSelect<int>>(
             find.byKey(ValueKey('grant-lifetime-${request.id}')),
           )
           .value,

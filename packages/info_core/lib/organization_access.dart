@@ -19,7 +19,7 @@ class _OrganizationPlan {
     }
     final name = suggestedDirectory.trim();
     if (id == null && name.isNotEmpty) {
-      owner._checkOrganizationName(name);
+      owner._checkDirectoryName(name);
       final found = [...owner.directories, ...newDirectories].where(
         (d) => d.parentId == null && d.name.toLowerCase() == name.toLowerCase(),
       );
@@ -82,12 +82,46 @@ extension OwnerOrganization on OwnerAccess {
     }
   }
 
+  void _checkDirectoryName(String name) {
+    _checkOrganizationName(name);
+    if (name.contains('/') || name.contains(r'\')) {
+      throw const AccessFailure('invalid_directory_name');
+    }
+  }
+
+  void _uniqueDirectory(String name, String? parentId, [String? except]) {
+    if (directories.any(
+      (d) =>
+          d.id != except &&
+          d.parentId == parentId &&
+          d.name.trim().toLowerCase() == name.trim().toLowerCase(),
+    )) {
+      throw const AccessFailure('duplicate_directory');
+    }
+  }
+
+  void _uniqueTag(String name, [String? except]) {
+    if (tags.any(
+      (t) =>
+          t.id != except &&
+          t.name.trim().toLowerCase() == name.trim().toLowerCase(),
+    )) {
+      throw const AccessFailure('duplicate_tag');
+    }
+  }
+
+  String? _existingDirectory(String? id) =>
+      directories.any((d) => d.id == id) ? id : null;
+  Iterable<String> _existingTags(Iterable<String> ids) =>
+      ids.where((id) => tags.any((t) => t.id == id));
+
   Future<InformationDirectory> createDirectory(
     String name, {
     String? parentId,
   }) => _serialize(() async {
-    _checkOrganizationName(name);
+    _checkDirectoryName(name);
     _checkParent(parentId);
+    _uniqueDirectory(name, parentId);
     final result = InformationDirectory(
       _service._secret(),
       name.trim(),
@@ -102,11 +136,20 @@ extension OwnerOrganization on OwnerAccess {
     String id,
     String name, {
     String? parentId,
+    int? expectedVersion,
   }) => _serialize(() async {
-    _checkOrganizationName(name);
     _checkParent(parentId, id);
     final previous = directories.where((d) => d.id == id);
     if (previous.isEmpty) throw const AccessFailure('invalid_information');
+    if (expectedVersion != null && previous.single.version != expectedVersion) {
+      throw const AccessFailure('organization_conflict');
+    }
+    if (name.trim() == previous.single.name) {
+      _checkOrganizationName(name);
+    } else {
+      _checkDirectoryName(name);
+    }
+    _uniqueDirectory(name, parentId, id);
     final result = InformationDirectory(
       id,
       name.trim(),
@@ -119,24 +162,100 @@ extension OwnerOrganization on OwnerAccess {
 
   Future<InformationTag> createTag(String name) => _serialize(() async {
     _checkOrganizationName(name);
+    _uniqueTag(name);
     final result = InformationTag(_service._secret(), name.trim(), 1);
     await _service._repository.saveTag(result);
     return result;
   });
 
-  Future<InformationTag> updateTag(String id, String name) =>
-      _serialize(() async {
-        _checkOrganizationName(name);
-        final previous = tags.where((t) => t.id == id);
-        if (previous.isEmpty) throw const AccessFailure('invalid_information');
-        final result = InformationTag(
-          id,
-          name.trim(),
-          previous.single.version + 1,
-        );
-        await _service._repository.saveTag(result);
-        return result;
-      });
+  Future<InformationTag> updateTag(
+    String id,
+    String name, {
+    int? expectedVersion,
+  }) => _serialize(() async {
+    _checkOrganizationName(name);
+    final previous = tags.where((t) => t.id == id);
+    if (previous.isEmpty) throw const AccessFailure('invalid_information');
+    if (expectedVersion != null && previous.single.version != expectedVersion) {
+      throw const AccessFailure('organization_conflict');
+    }
+    _uniqueTag(name, id);
+    final result = InformationTag(id, name.trim(), previous.single.version + 1);
+    await _service._repository.saveTag(result);
+    return result;
+  });
+
+  Future<void> deleteDirectory(String id, int expectedVersion) => _serialize(
+    () async {
+      void validate() {
+        if (!serviceAvailable) throw const AccessFailure('service_unavailable');
+        final directory = directories.where((d) => d.id == id).firstOrNull;
+        if (directory == null || directory.version != expectedVersion) {
+          throw const AccessFailure('organization_conflict');
+        }
+        if (directories.any((d) => d.parentId == id) ||
+            information.any((i) => i.directoryId == id)) {
+          throw const AccessFailure('directory_not_empty');
+        }
+      }
+
+      validate();
+      await _service._repository.commitOrganizationRemoval(
+        directoryId: id,
+        validate: validate,
+      );
+    },
+  );
+
+  Future<void> deleteTag(
+    String id,
+    int expectedVersion, {
+    Map<String, int>? reviewedInformation,
+  }) => _serialize(() async {
+    final originals = information.where((i) => i.tagIds.contains(id)).toList();
+    if (reviewedInformation != null &&
+        (reviewedInformation.length != originals.length ||
+            originals.any((i) => reviewedInformation[i.id] != i.version))) {
+      throw const AccessFailure('organization_conflict');
+    }
+    void validate() {
+      if (!serviceAvailable) throw const AccessFailure('service_unavailable');
+      final tag = tags.where((t) => t.id == id).firstOrNull;
+      if (tag == null ||
+          tag.version != expectedVersion ||
+          information.where((i) => i.tagIds.contains(id)).length !=
+              originals.length ||
+          originals.any(
+            (old) => !information.any(
+              (i) => i.id == old.id && i.version == old.version,
+            ),
+          )) {
+        throw const AccessFailure('organization_conflict');
+      }
+    }
+
+    validate();
+    final now = _service._clock();
+    await _service._repository.commitOrganizationRemoval(
+      tagId: id,
+      items: [
+        for (final old in originals)
+          InformationItem(
+            old.id,
+            old.name,
+            old.description,
+            old.version + 1,
+            old.fields,
+            directoryId: old.directoryId,
+            tagIds: old.tagIds.where((t) => t != id),
+            createdAt: old.createdAt,
+            modifiedAt: now,
+          ),
+      ],
+      previous: [for (final old in originals) InformationRevision(old, now)],
+      validate: validate,
+    );
+  });
 
   /// Only descriptions can change for an existing field. Changing its meaning
   /// requires a new field identity, never a rename behind an existing grant.
@@ -191,6 +310,7 @@ extension OwnerOrganization on OwnerAccess {
     String id, {
     String? directoryId,
     Iterable<String> tagIds = const [],
+    int? expectedVersion,
   }) => _serialize(() async {
     if (_service._closed) throw const AccessFailure('service_unavailable');
     _checkParent(directoryId);
@@ -202,6 +322,9 @@ extension OwnerOrganization on OwnerAccess {
       throw const AccessFailure('invalid_information');
     }
     final old = previous.single;
+    if (expectedVersion != null && old.version != expectedVersion) {
+      throw const AccessFailure('information_conflict');
+    }
     final item = InformationItem(
       old.id,
       old.name,

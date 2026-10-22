@@ -94,15 +94,30 @@ class PrototypeDialog extends StatelessWidget {
                               ),
                             ),
                     ),
-                    Transform.translate(
-                      offset: const Offset(2, 3),
+                    Padding(
+                      padding: EdgeInsets.only(
+                        top: math.max(
+                          0,
+                          (MediaQuery.textScalerOf(context).scale(23) * 1.5 -
+                                  30) /
+                              2,
+                        ),
+                      ),
                       child: SizedBox(
-                        width: 30 * MediaQuery.textScalerOf(context).scale(1),
-                        height: 30 * MediaQuery.textScalerOf(context).scale(1),
+                        width: 30,
+                        height: 30,
                         child: TextButton(
                           onPressed: onClose,
-                          style: prototypeButton(context, size: 22),
-                          child: const Text('×'),
+                          style: prototypeButton(
+                            context,
+                            size: 22,
+                            iconOnly: true,
+                          ),
+                          child: const Text(
+                            '×',
+                            textScaler: TextScaler.noScaling,
+                            semanticsLabel: '关闭',
+                          ),
                         ),
                       ),
                     ),
@@ -111,6 +126,7 @@ class PrototypeDialog extends StatelessWidget {
                 SizedBox(height: flow ? 13.5 : 20),
                 Flexible(
                   child: SingleChildScrollView(
+                    primary: false,
                     padding: EdgeInsets.only(
                       right: flow ? scrollGutter : 0,
                       bottom:

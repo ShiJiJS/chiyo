@@ -621,6 +621,7 @@ class _ImportProposalsPageState extends State<ImportProposalsPage> {
         );
         return width > constraints.maxWidth
             ? SingleChildScrollView(
+                primary: false,
                 scrollDirection: Axis.horizontal,
                 child: surface,
               )
@@ -649,6 +650,7 @@ class _ImportProposalsPageState extends State<ImportProposalsPage> {
       children: [
         Expanded(
           child: SingleChildScrollView(
+            primary: false,
             controller: _documentScroll,
             padding: const EdgeInsets.fromLTRB(34, 28, 42, 28),
             child: Column(

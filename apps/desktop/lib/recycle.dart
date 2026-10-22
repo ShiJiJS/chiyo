@@ -79,6 +79,7 @@ class _DeleteInformationState extends State<_DeleteInformation> {
     onClose: _saving ? null : () => Navigator.pop(context),
     body: SizedBox(
       child: SingleChildScrollView(
+        primary: false,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -155,7 +156,8 @@ class _RecyclePageState extends State<RecyclePage> {
         body: Padding(
           padding: const EdgeInsets.only(bottom: 22),
           child: Text(
-            '恢复“${entry.snapshot!.name}”${entry.wholeItem ? '' : '中的选定字段'}。\n恢复后，Agent 需要重新批准才能读取，旧授权不会复活。',
+            '恢复“${entry.snapshot!.name}”${entry.wholeItem ? '' : '中的选定字段'}。\n恢复后，Agent 需要重新批准才能读取，旧授权不会复活。'
+            '${organizationRecoveryNotice(widget.owner, entry.snapshot!) == null ? '' : '\n${organizationRecoveryNotice(widget.owner, entry.snapshot!)}'}',
           ),
         ),
         actions: [
@@ -199,6 +201,7 @@ class _RecyclePageState extends State<RecyclePage> {
             ? 360
             : 500,
         child: ListView(
+          primary: false,
           children: [
             Text(
               '${entry.wholeItem ? '整条信息' : '选定字段'}\n删除于 ${uiTime(entry.deletedAt)}',
@@ -222,6 +225,7 @@ class _RecyclePageState extends State<RecyclePage> {
   @override
   Widget build(BuildContext context) => _surface(
     ListView(
+      primary: false,
       shrinkWrap: widget.asDialog,
       physics: widget.asDialog ? const NeverScrollableScrollPhysics() : null,
       padding: widget.asDialog ? EdgeInsets.zero : UiSpace.page,

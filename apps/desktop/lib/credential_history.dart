@@ -228,6 +228,7 @@ class _CredentialHistoryDocumentState extends State<CredentialHistoryDocument> {
                         style: prototypeButton(
                           context,
                           radius: 13,
+                          iconOnly: true,
                           side: BorderSide(color: UiPalette.of(context).line),
                           background: _tip
                               ? UiPalette.of(context).selected
@@ -332,6 +333,7 @@ class _CredentialHistoryDocumentState extends State<CredentialHistoryDocument> {
             child: Scrollbar(
               controller: _scroll,
               child: SingleChildScrollView(
+                primary: false,
                 controller: _scroll,
                 padding: const EdgeInsets.fromLTRB(34, 28, 42, 28),
                 child: Column(

@@ -85,6 +85,7 @@ class _RevisionHistoryPageState extends State<RevisionHistoryPage> {
   @override
   Widget build(BuildContext context) => _surface(
     ListView(
+      primary: false,
       shrinkWrap: widget.asDialog,
       physics: widget.asDialog ? const NeverScrollableScrollPhysics() : null,
       padding: widget.asDialog ? EdgeInsets.zero : UiSpace.page,
@@ -389,6 +390,7 @@ class _RestoreRevisionState extends State<_RestoreRevision> {
       onClose: _busy ? null : () => Navigator.pop(context),
       body: SizedBox(
         child: SingleChildScrollView(
+          primary: false,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
@@ -396,6 +398,9 @@ class _RestoreRevisionState extends State<_RestoreRevision> {
               Text(
                 '确认后创建版本 ${p.restored.version}。仍有效的授权会读取恢复后的当前字段值；曾删除字段的旧授权不会复活。',
               ),
+              if (organizationRecoveryNotice(widget.owner, p.revision.item)
+                  case final notice?)
+                QuietNotice(notice),
               if (p.current.name != p.restored.name)
                 _difference('公开名称', p.current.name, p.restored.name),
               if (p.current.description != p.restored.description)
@@ -490,8 +495,11 @@ class _RestoreRevisionState extends State<_RestoreRevision> {
     );
   }
 
-  String _tags(InformationItem item) => widget.owner.tags
-      .where((t) => item.tagIds.contains(t.id))
-      .map((t) => t.name)
+  String _tags(InformationItem item) => item.tagIds
+      .map(
+        (id) =>
+            widget.owner.tags.where((t) => t.id == id).firstOrNull?.name ??
+            '已删除标签',
+      )
       .join('、');
 }

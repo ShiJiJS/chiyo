@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:info_desktop/desktop_controls.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 Future<void> selectGrantMinutes(
@@ -6,7 +6,7 @@ Future<void> selectGrantMinutes(
   Finder control,
   int minutes,
 ) async {
-  if (control.evaluate().single.widget is DropdownButton<int>) {
+  if (control.evaluate().single.widget is DesktopSelect<int>) {
     await tester.tap(control);
     await tester.pumpAndSettle();
     final label = minutes == 480

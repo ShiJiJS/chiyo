@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:info_core/info_core.dart';
 import 'package:info_desktop/library.dart';
 import 'package:info_desktop/ui.dart';
+import 'package:info_desktop/desktop_scroll.dart';
 
 void main() {
   testWidgets('many tags stay reachable at normal and large text sizes', (
@@ -31,6 +32,7 @@ void main() {
         MaterialApp(
           key: UniqueKey(),
           theme: informationTheme(),
+          scrollBehavior: const DesktopScrollBehavior(),
           builder: (context, child) => MediaQuery(
             data: MediaQuery.of(
               context,
@@ -42,13 +44,20 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
-      final last = find.byKey(
-        ValueKey('library-tag-${service.owner.tags.last.id}'),
-      );
+      await tester.tap(find.byKey(const ValueKey('library-tag-filter')));
+      await tester.pumpAndSettle();
+      final name = service.owner.tags.last.name;
+      await tester.enterText(find.widgetWithText(TextField, '搜索标签'), name);
+      await tester.pumpAndSettle();
+      final last = find.widgetWithText(CheckboxListTile, name);
       await tester.ensureVisible(last);
       await tester.pumpAndSettle();
       expect(last.hitTestable(), findsOneWidget);
       await tester.tap(last);
+      await tester.pumpAndSettle();
+      final apply = find.text('使用所选标签');
+      await tester.ensureVisible(apply);
+      await tester.tap(apply);
       await tester.pumpAndSettle();
       expect(find.text('没有匹配的信息'), findsOneWidget);
       expect(find.text('请选择一条信息'), findsOneWidget);

@@ -1,0 +1,400 @@
+00:00 +0: loading /Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue41-library-ux-integration-20261022/native-1/source/apps/desktop/.dart_tool/mac-compact-capture.dart
+00:00 +0: (setUpAll)
+00:00 +0: capture purple 1.0
+00:01 +1: capture purple 2.0
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 2.0 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue41-library-ux-integration-20261022/native-1/source/apps/desktop/lib/ui.dart:830:16
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#ca1f0 relayoutBoundary=up3 OVERFLOWING:
+  creator: Column ← ConstrainedBox ← Padding ← Center ← EmptyWorkspace ← Expanded ← Column ← Padding ←
+    Expanded ← Column ← LayoutBuilder ← KeyedSubtree-[GlobalKey#824f1] ← ⋯
+  parentData: <none> (can use size)
+  constraints: BoxConstraints(0.0<=w<=380.0, 0.0<=h<=223.0)
+  size: Size(380.0, 223.0)
+  direction: vertical
+  mainAxisAlignment: start
+  mainAxisSize: min
+  crossAxisAlignment: center
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 9.0 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue41-library-ux-integration-20261022/native-1/source/apps/desktop/lib/library.dart:432:12
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#9ce58 OVERFLOWING:
+  needs compositing
+  creator: Column ← Padding ← DecoratedBox ← Container-[<'library-directory'>] ← SizedBox ← Row ←
+    SizedBox ← _SingleChildViewport ← IgnorePointer-[GlobalKey#bd923] ← Semantics ← Listener ←
+    _GestureSemantics ← ⋯
+  parentData: offset=Offset(14.0, 25.0) (can use size)
+  constraints: BoxConstraints(w=211.0, h=381.0)
+  size: Size(211.0, 381.0)
+  direction: vertical
+  mainAxisAlignment: start
+  mainAxisSize: max
+  crossAxisAlignment: stretch
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 44 pixels on the right.
+
+The relevant error-causing widget was:
+  Row
+  Row:file:///Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue41-library-ux-integration-20261022/native-1/source/apps/desktop/lib/library.dart:1305:31
+
+The overflowing RenderFlex has an orientation of Axis.horizontal.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#0a452 relayoutBoundary=up7 OVERFLOWING:
+  creator: Row ← Column ← Padding ← DecoratedBox ← Padding ← Container ← Column ← Padding ←
+    _SingleChildViewport ← IgnorePointer-[GlobalKey#2d603] ← Semantics ← Listener ← ⋯
+  parentData: offset=Offset(0.0, 0.0); flex=null; fit=null (can use size)
+  constraints: BoxConstraints(0.0<=w<=228.0, 0.0<=h<=Infinity)
+  size: Size(228.0, 52.0)
+  direction: horizontal
+  mainAxisAlignment: start
+  mainAxisSize: max
+  crossAxisAlignment: center
+  textDirection: ltr
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
+EXPECTED_true_LAY/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue41-library-ux-integration-20261022/renders: Multiple exceptions (3) were detected during the running of the current test, and at least one was unexpected.
+00:01 +2: capture green 1.0
+00:01 +3: capture green 2.0
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 2.0 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue41-library-ux-integration-20261022/native-1/source/apps/desktop/lib/ui.dart:830:16
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#582ed relayoutBoundary=up3 OVERFLOWING:
+  creator: Column ← ConstrainedBox ← Padding ← Center ← EmptyWorkspace ← Expanded ← Column ← Padding ←
+    Expanded ← Column ← LayoutBuilder ← KeyedSubtree-[GlobalKey#1ac33] ← ⋯
+  parentData: <none> (can use size)
+  constraints: BoxConstraints(0.0<=w<=380.0, 0.0<=h<=223.0)
+  size: Size(380.0, 223.0)
+  direction: vertical
+  mainAxisAlignment: start
+  mainAxisSize: min
+  crossAxisAlignment: center
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 9.0 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue41-library-ux-integration-20261022/native-1/source/apps/desktop/lib/library.dart:432:12
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#1d61d OVERFLOWING:
+  needs compositing
+  creator: Column ← Padding ← DecoratedBox ← Container-[<'library-directory'>] ← SizedBox ← Row ←
+    SizedBox ← _SingleChildViewport ← IgnorePointer-[GlobalKey#2d012] ← Semantics ← Listener ←
+    _GestureSemantics ← ⋯
+  parentData: offset=Offset(14.0, 25.0) (can use size)
+  constraints: BoxConstraints(w=211.0, h=381.0)
+  size: Size(211.0, 381.0)
+  direction: vertical
+  mainAxisAlignment: start
+  mainAxisSize: max
+  crossAxisAlignment: stretch
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 44 pixels on the right.
+
+The relevant error-causing widget was:
+  Row
+  Row:file:///Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue41-library-ux-integration-20261022/native-1/source/apps/desktop/lib/library.dart:1305:31
+
+The overflowing RenderFlex has an orientation of Axis.horizontal.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#b4249 relayoutBoundary=up7 OVERFLOWING:
+  creator: Row ← Column ← Padding ← DecoratedBox ← Padding ← Container ← Column ← Padding ←
+    _SingleChildViewport ← IgnorePointer-[GlobalKey#4c876] ← Semantics ← Listener ← ⋯
+  parentData: offset=Offset(0.0, 0.0); flex=null; fit=null (can use size)
+  constraints: BoxConstraints(0.0<=w<=228.0, 0.0<=h<=Infinity)
+  size: Size(228.0, 52.0)
+  direction: horizontal
+  mainAxisAlignment: start
+  mainAxisSize: max
+  crossAxisAlignment: center
+  textDirection: ltr
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
+EXPECTED_true_LAY/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue41-library-ux-integration-20261022/renders: Multiple exceptions (3) were detected during the running of the current test, and at least one was unexpected.
+00:02 +4: capture blue 1.0
+00:02 +5: capture blue 2.0
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 2.0 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue41-library-ux-integration-20261022/native-1/source/apps/desktop/lib/ui.dart:830:16
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#487f8 relayoutBoundary=up3 OVERFLOWING:
+  creator: Column ← ConstrainedBox ← Padding ← Center ← EmptyWorkspace ← Expanded ← Column ← Padding ←
+    Expanded ← Column ← LayoutBuilder ← KeyedSubtree-[GlobalKey#7d05e] ← ⋯
+  parentData: <none> (can use size)
+  constraints: BoxConstraints(0.0<=w<=380.0, 0.0<=h<=223.0)
+  size: Size(380.0, 223.0)
+  direction: vertical
+  mainAxisAlignment: start
+  mainAxisSize: min
+  crossAxisAlignment: center
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 9.0 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue41-library-ux-integration-20261022/native-1/source/apps/desktop/lib/library.dart:432:12
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#b7b5f OVERFLOWING:
+  needs compositing
+  creator: Column ← Padding ← DecoratedBox ← Container-[<'library-directory'>] ← SizedBox ← Row ←
+    SizedBox ← _SingleChildViewport ← IgnorePointer-[GlobalKey#e1fc4] ← Semantics ← Listener ←
+    _GestureSemantics ← ⋯
+  parentData: offset=Offset(14.0, 25.0) (can use size)
+  constraints: BoxConstraints(w=211.0, h=381.0)
+  size: Size(211.0, 381.0)
+  direction: vertical
+  mainAxisAlignment: start
+  mainAxisSize: max
+  crossAxisAlignment: stretch
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 44 pixels on the right.
+
+The relevant error-causing widget was:
+  Row
+  Row:file:///Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue41-library-ux-integration-20261022/native-1/source/apps/desktop/lib/library.dart:1305:31
+
+The overflowing RenderFlex has an orientation of Axis.horizontal.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#80430 relayoutBoundary=up7 OVERFLOWING:
+  creator: Row ← Column ← Padding ← DecoratedBox ← Padding ← Container ← Column ← Padding ←
+    _SingleChildViewport ← IgnorePointer-[GlobalKey#ebcf0] ← Semantics ← Listener ← ⋯
+  parentData: offset=Offset(0.0, 0.0); flex=null; fit=null (can use size)
+  constraints: BoxConstraints(0.0<=w<=228.0, 0.0<=h<=Infinity)
+  size: Size(228.0, 52.0)
+  direction: horizontal
+  mainAxisAlignment: start
+  mainAxisSize: max
+  crossAxisAlignment: center
+  textDirection: ltr
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
+EXPECTED_true_LAY/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue41-library-ux-integration-20261022/renders: Multiple exceptions (3) were detected during the running of the current test, and at least one was unexpected.
+00:02 +6: capture mono 1.0
+00:03 +7: capture mono 2.0
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 2.0 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue41-library-ux-integration-20261022/native-1/source/apps/desktop/lib/ui.dart:830:16
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#f076a relayoutBoundary=up3 OVERFLOWING:
+  creator: Column ← ConstrainedBox ← Padding ← Center ← EmptyWorkspace ← Expanded ← Column ← Padding ←
+    Expanded ← Column ← LayoutBuilder ← KeyedSubtree-[GlobalKey#cf1ff] ← ⋯
+  parentData: <none> (can use size)
+  constraints: BoxConstraints(0.0<=w<=380.0, 0.0<=h<=223.0)
+  size: Size(380.0, 223.0)
+  direction: vertical
+  mainAxisAlignment: start
+  mainAxisSize: min
+  crossAxisAlignment: center
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 9.0 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue41-library-ux-integration-20261022/native-1/source/apps/desktop/lib/library.dart:432:12
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#a2efb OVERFLOWING:
+  needs compositing
+  creator: Column ← Padding ← DecoratedBox ← Container-[<'library-directory'>] ← SizedBox ← Row ←
+    SizedBox ← _SingleChildViewport ← IgnorePointer-[GlobalKey#ccffe] ← Semantics ← Listener ←
+    _GestureSemantics ← ⋯
+  parentData: offset=Offset(14.0, 25.0) (can use size)
+  constraints: BoxConstraints(w=211.0, h=381.0)
+  size: Size(211.0, 381.0)
+  direction: vertical
+  mainAxisAlignment: start
+  mainAxisSize: max
+  crossAxisAlignment: stretch
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 44 pixels on the right.
+
+The relevant error-causing widget was:
+  Row
+  Row:file:///Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue41-library-ux-integration-20261022/native-1/source/apps/desktop/lib/library.dart:1305:31
+
+The overflowing RenderFlex has an orientation of Axis.horizontal.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#33290 relayoutBoundary=up7 OVERFLOWING:
+  creator: Row ← Column ← Padding ← DecoratedBox ← Padding ← Container ← Column ← Padding ←
+    _SingleChildViewport ← IgnorePointer-[GlobalKey#0ac3b] ← Semantics ← Listener ← ⋯
+  parentData: offset=Offset(0.0, 0.0); flex=null; fit=null (can use size)
+  constraints: BoxConstraints(0.0<=w<=228.0, 0.0<=h<=Infinity)
+  size: Size(228.0, 52.0)
+  direction: horizontal
+  mainAxisAlignment: start
+  mainAxisSize: max
+  crossAxisAlignment: center
+  textDirection: ltr
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
+EXPECTED_true_LAY/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue41-library-ux-integration-20261022/renders: Multiple exceptions (3) were detected during the running of the current test, and at least one was unexpected.
+00:03 +8: (tearDownAll)
+00:03 +8: All tests passed!

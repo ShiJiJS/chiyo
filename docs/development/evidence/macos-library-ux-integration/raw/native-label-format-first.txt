@@ -1,0 +1,1 @@
+Initial diagnostic-label patch put dart:io after declarations; formatter exited65 before starting the final source check. Import moved to the directive block; no product logic was exercised by this failed preparation.

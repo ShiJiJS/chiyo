@@ -142,7 +142,10 @@ class ProposalQueue extends StatelessWidget {
                                   )
                                 : null,
                           ),
-                          padding: const EdgeInsets.only(bottom: 12),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 8,
+                          ),
                           child: TextButton(
                             key: ValueKey('proposal-filter-${f.name}'),
                             style: prototypeButton(
@@ -177,6 +180,7 @@ class ProposalQueue extends StatelessWidget {
           Divider(height: 1, color: p.line),
           Expanded(
             child: ListView(
+              primary: false,
               padding: EdgeInsets.zero,
               children: [
                 Padding(
@@ -346,11 +350,14 @@ class ProposalQueue extends StatelessWidget {
                   width: 24,
                   height: 26,
                   child: TextButton(
-                    style: prototypeButton(context, size: 20),
+                    style: prototypeButton(context, size: 20, iconOnly: true),
                     onPressed: page.offset == 0
                         ? null
                         : () => onPage(page.offset - page.limit),
-                    child: const Tooltip(message: '上一页提案', child: Text('‹')),
+                    child: const Tooltip(
+                      message: '上一页提案',
+                      child: Text('‹', textScaler: TextScaler.noScaling),
+                    ),
                   ),
                 ),
                 const SizedBox(width: 7),
@@ -366,11 +373,14 @@ class ProposalQueue extends StatelessWidget {
                   width: 24,
                   height: 26,
                   child: TextButton(
-                    style: prototypeButton(context, size: 20),
+                    style: prototypeButton(context, size: 20, iconOnly: true),
                     onPressed: page.offset + page.limit >= page.total
                         ? null
                         : () => onPage(page.offset + page.limit),
-                    child: const Tooltip(message: '下一页提案', child: Text('›')),
+                    child: const Tooltip(
+                      message: '下一页提案',
+                      child: Text('›', textScaler: TextScaler.noScaling),
+                    ),
                   ),
                 ),
               ],

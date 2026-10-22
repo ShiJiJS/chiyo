@@ -615,7 +615,7 @@ void main() {
   );
 
   test(
-    'schema21 reopen keeps all frozen operations but no usable session or worker capability',
+    'schema22 reopen keeps all frozen operations but no usable session or worker capability',
     () async {
       final f = await _Fixture.create();
       addTearDown(f.close);
@@ -636,7 +636,7 @@ void main() {
             .map((b) => b.toRadixString(16).padLeft(2, '0'))
             .join();
         db.execute('PRAGMA key = "x\'$hex\'"');
-        expect(db.select('PRAGMA user_version').single.values.single, 21);
+        expect(db.select('PRAGMA user_version').single.values.single, 22);
       } finally {
         db.close();
       }

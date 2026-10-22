@@ -304,7 +304,7 @@ void main() {
               raw.select('PRAGMA cipher_version').single.values.single,
               isNotEmpty,
             );
-            expect(raw.select('PRAGMA user_version').single.values.single, 21);
+            expect(raw.select('PRAGMA user_version').single.values.single, 22);
             expect(
               raw.select('PRAGMA integrity_check').single.values.single,
               'ok',

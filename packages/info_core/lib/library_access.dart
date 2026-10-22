@@ -18,6 +18,8 @@ extension OwnerLibrary on OwnerAccess {
     String search = '',
     String? directoryId,
     bool includeDescendants = true,
+    bool unclassifiedOnly = false,
+    bool sortDescending = false,
     Iterable<String> tagIds = const [],
     int offset = 0,
     int limit = 20,
@@ -46,6 +48,7 @@ extension OwnerLibrary on OwnerAccess {
             .where(
               (i) =>
                   (included == null || included.contains(i.directoryId)) &&
+                  (!unclassifiedOnly || i.directoryId == null) &&
                   selectedTags.every(i.tagIds.contains) &&
                   [
                     i.name,
@@ -56,7 +59,8 @@ extension OwnerLibrary on OwnerAccess {
             .toList()
           ..sort((a, b) {
             final name = a.name.toLowerCase().compareTo(b.name.toLowerCase());
-            return name == 0 ? a.id.compareTo(b.id) : name;
+            final result = name == 0 ? a.id.compareTo(b.id) : name;
+            return sortDescending ? -result : result;
           });
     if (focusItemId != null) {
       final index = matches.indexWhere((i) => i.id == focusItemId);

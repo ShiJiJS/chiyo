@@ -270,10 +270,11 @@ class SettingsDialog extends StatelessWidget {
                   dimension: 30,
                   child: TextButton(
                     onPressed: busy ? null : () => Navigator.pop(context),
-                    style: prototypeButton(context, size: 22),
-                    child: Transform.translate(
-                      offset: Offset(2, flow ? 0 : 1),
-                      child: const Text('×', textScaler: TextScaler.noScaling),
+                    style: prototypeButton(context, size: 22, iconOnly: true),
+                    child: const Text(
+                      '×',
+                      textScaler: TextScaler.noScaling,
+                      semanticsLabel: '关闭',
                     ),
                   ),
                 ),
@@ -282,6 +283,7 @@ class SettingsDialog extends StatelessWidget {
             SizedBox(height: flow ? 14 : 20),
             Flexible(
               child: SingleChildScrollView(
+                primary: false,
                 padding: EdgeInsets.only(right: 0, bottom: flow ? 16 : 0),
                 child: child,
               ),

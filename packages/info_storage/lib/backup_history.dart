@@ -71,6 +71,7 @@ void _validateBackupHistory(
   Map<String, List<Map<String, Object?>>> tables, {
   Set<InformationAttachmentRef>? availableAttachments,
   Iterable<InformationFileDelivery> deliveries = const [],
+  bool allowRemovedOrganization = false,
 }) {
   final directories = tables['information_directories']!
       .map((r) => r['id'])
@@ -120,13 +121,22 @@ void _validateBackupHistory(
     _backupText(item, 'name', 200, required: true);
     _backupText(item, 'description', 2000);
     _backupVersion(item);
-    if (item['directoryId'] != null &&
-        !directories.contains(item['directoryId'])) {
-      _backupInvalid();
+    if (item['directoryId'] != null) {
+      _backupId(item, 'directoryId');
+      if (!allowRemovedOrganization &&
+          !directories.contains(item['directoryId'])) {
+        _backupInvalid();
+      }
     }
     final itemTags = _backupList(item['tagIds'], 100);
     if (itemTags.toSet().length != itemTags.length ||
-        itemTags.any((t) => t is! String || !tags.contains(t))) {
+        itemTags.any(
+          (t) =>
+              t is! String ||
+              t.trim().isEmpty ||
+              t.length > 200 ||
+              (!allowRemovedOrganization && !tags.contains(t)),
+        )) {
       _backupInvalid();
     }
     final fields = _backupList(item['fields'], 200);

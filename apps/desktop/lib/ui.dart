@@ -9,7 +9,7 @@ abstract final class UiSpace {
 }
 
 abstract final class UiMotion {
-  static const feedback = Duration(milliseconds: 120);
+  static const feedback = Duration(milliseconds: 160);
   static const panel = Duration(milliseconds: 180);
   static const entrance = Duration(milliseconds: 150);
 }
@@ -52,9 +52,31 @@ ThemeData informationTheme([
     padding: WidgetStatePropertyAll(
       EdgeInsets.symmetric(horizontal: 12, vertical: 5),
     ),
-    shape: WidgetStatePropertyAll(shape),
+    shape: WidgetStateProperty.resolveWith(
+      (states) => RoundedRectangleBorder(
+        borderRadius: const BorderRadius.all(Radius.circular(6)),
+        side:
+            states.contains(WidgetState.focused) &&
+                !states.contains(WidgetState.disabled)
+            ? BorderSide(color: colors.ink, width: 2)
+            : BorderSide.none,
+      ),
+    ),
     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
     animationDuration: UiMotion.feedback,
+    overlayColor: WidgetStateProperty.resolveWith((states) {
+      if (states.contains(WidgetState.disabled)) return Colors.transparent;
+      if (states.contains(WidgetState.pressed)) {
+        return colors.accent.withValues(alpha: .13);
+      }
+      if (states.contains(WidgetState.hovered)) {
+        return colors.accent.withValues(alpha: .06);
+      }
+      if (states.contains(WidgetState.focused)) {
+        return colors.accent.withValues(alpha: .1);
+      }
+      return Colors.transparent;
+    }),
   );
   final controlInk = WidgetStateProperty.resolveWith<Color>(
     (states) => states.contains(WidgetState.disabled)
@@ -100,6 +122,7 @@ ThemeData informationTheme([
     visualDensity: VisualDensity.standard,
     dividerColor: colors.line,
     scrollbarTheme: ScrollbarThemeData(
+      thumbVisibility: const WidgetStatePropertyAll(true),
       thumbColor: WidgetStateProperty.resolveWith(
         (states) => colors.muted.withValues(
           alpha:
@@ -120,7 +143,7 @@ ThemeData informationTheme([
       circularTrackColor: colors.line,
     ),
     splashFactory: NoSplash.splashFactory,
-    highlightColor: Colors.transparent,
+    highlightColor: colors.accent.withValues(alpha: .11),
     hoverColor: colors.muted.withValues(alpha: .06),
     focusColor: colors.accent.withValues(alpha: .14),
     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -130,7 +153,14 @@ ThemeData informationTheme([
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: button.copyWith(
         foregroundColor: controlInk,
-        side: WidgetStatePropertyAll(BorderSide(color: colors.line)),
+        side: WidgetStateProperty.resolveWith(
+          (states) => BorderSide(
+            color: states.contains(WidgetState.focused)
+                ? colors.accent
+                : colors.line,
+            width: states.contains(WidgetState.focused) ? 2 : 1,
+          ),
+        ),
       ),
     ),
     textButtonTheme: TextButtonThemeData(
@@ -241,12 +271,25 @@ ThemeData informationTheme([
       showCheckmark: true,
     ),
     tooltipTheme: TooltipThemeData(
-      textStyle: texts.bodySmall!.copyWith(color: colors.paper),
+      constraints: const BoxConstraints(maxWidth: 320),
+      textStyle: texts.bodySmall!.copyWith(color: colors.ink, height: 1.6),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      margin: const EdgeInsets.all(8),
+      verticalOffset: 8,
+      preferBelow: false,
       decoration: BoxDecoration(
-        color: colors.ink,
-        borderRadius: BorderRadius.circular(4),
+        color: colors.paper,
+        border: Border.all(color: colors.line),
+        borderRadius: BorderRadius.circular(6),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x16000000),
+            blurRadius: 12,
+            offset: Offset(0, 3),
+          ),
+        ],
       ),
-      waitDuration: Duration(milliseconds: 450),
+      waitDuration: Duration(milliseconds: 400),
     ),
     snackBarTheme: SnackBarThemeData(
       behavior: SnackBarBehavior.floating,
@@ -780,27 +823,30 @@ class EmptyWorkspace extends StatelessWidget {
   final String title, description;
   @override
   Widget build(BuildContext context) => Center(
-    child: Padding(
-      padding: const EdgeInsets.all(28),
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 380),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 34, color: UiPalette.of(context).muted),
-            const SizedBox(height: 18),
-            Text(
-              title,
-              style: Theme.of(context).textTheme.titleMedium,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              description,
-              style: Theme.of(context).textTheme.bodySmall,
-              textAlign: TextAlign.center,
-            ),
-          ],
+    child: SingleChildScrollView(
+      primary: false,
+      child: Padding(
+        padding: const EdgeInsets.all(28),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 380),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 34, color: UiPalette.of(context).muted),
+              const SizedBox(height: 18),
+              Text(
+                title,
+                style: Theme.of(context).textTheme.titleMedium,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                description,
+                style: Theme.of(context).textTheme.bodySmall,
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
         ),
       ),
     ),
