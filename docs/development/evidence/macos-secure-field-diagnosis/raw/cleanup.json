@@ -1,0 +1,32 @@
+{
+  "unregistered": [
+    {
+      "path": "build/macos-adaptation/issue48-secure-ax-20261022/native/MacAXNativeControl.app",
+      "exit": 0
+    },
+    {
+      "path": "build/macos-adaptation/issue48-secure-ax-20261022/source/apps/desktop/build/macos/Build/Products/Release/MacAXFlutterControl.app",
+      "exit": 0
+    }
+  ],
+  "removed": [
+    {
+      "path": "build/macos-adaptation/issue48-secure-ax-20261022/native",
+      "allocatedKiB": 140
+    },
+    {
+      "path": "build/macos-adaptation/issue48-secure-ax-20261022/source",
+      "allocatedKiB": 979752
+    }
+  ],
+  "releasedAllocatedKiB": 979892,
+  "stableItemsVerified": 7971,
+  "stableMismatches": [],
+  "stableSignatureExit": 0,
+  "stablePid53592Alive": true,
+  "remainingApps": [
+    "local/中文 Mac 预览/AgentInfoManage/app/info_desktop.app"
+  ],
+  "remainingGeneratedDsyms": [],
+  "sdksZIPsBackupsRecoveryKeysPreserved": true
+}

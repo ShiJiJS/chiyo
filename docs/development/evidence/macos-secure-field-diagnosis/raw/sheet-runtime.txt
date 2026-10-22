@@ -1,0 +1,8 @@
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+QA_SHEET cancelled
+flutter: QA_SHEET_DART cancelled=true unchanged=true updatedExact=false
+QA_SHEET accepted updatedExact=true length=23
+flutter: QA_SHEET_DART cancelled=false unchanged=false updatedExact=true
+2026-10-22 08:58:11.343 MacAXFlutterControl[99966:5741910] TSM AdjustCapsLockLEDForKeyTransitionHandling - _ISSetPhysicalKeyboardCapsLockLED Inhibit
+QA_SHEET cancelled
+flutter: QA_SHEET_DART cancelled=true unchanged=true updatedExact=true
