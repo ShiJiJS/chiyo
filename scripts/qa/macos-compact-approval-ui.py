@@ -74,10 +74,16 @@ def main():
         anchor = '    super.awakeFromNib()\n'
         assert text.count(anchor) == 1
         text = text.replace(anchor, anchor + '''    NSEvent.addLocalMonitorForEvents(matching: [.scrollWheel, .leftMouseDown, .keyDown]) { [weak self] event in
-      if let self, event.window === self {
-        let record: [String: Any] = ["event": event.type.rawValue,
-          "x": event.locationInWindow.x, "y": event.locationInWindow.y,
-          "dy": event.scrollingDeltaY, "keyCode": event.keyCode]
+      if let self {
+        var record: [String: Any] = ["event": event.type.rawValue,
+          "hasWindow": event.window != nil, "matchesOwnedWindow": event.window === self,
+          "appActive": NSApp.isActive, "windowKey": self.isKeyWindow]
+        if event.type == .keyDown { record["keyCode"] = event.keyCode }
+        if event.type == .leftMouseDown || event.type == .scrollWheel {
+          record["x"] = event.locationInWindow.x
+          record["y"] = event.locationInWindow.y
+        }
+        if event.type == .scrollWheel { record["dy"] = event.scrollingDeltaY }
         if let data = try? JSONSerialization.data(withJSONObject: record, options: [.sortedKeys]),
            let json = String(data: data, encoding: .utf8) {
           FileHandle.standardOutput.write(Data(("COMPACT_NATIVE=" + json + "\\n").utf8))
