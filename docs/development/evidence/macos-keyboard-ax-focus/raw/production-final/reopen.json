@@ -1,0 +1,14 @@
+{
+  "mode": "reopen",
+  "complete": true,
+  "systemKeychainUsed": false,
+  "expectedSavedDescription": "MacFocusSaved",
+  "port": 50836,
+  "inputSourceAtStart": "com.apple.inputmethod.SCIM.ITABC",
+  "savedDescriptionPreserved": true,
+  "otherFieldsAndAttachmentPreserved": true,
+  "inputSourceAtEnd": "com.apple.inputmethod.SCIM.ITABC",
+  "libraryCloses": 1,
+  "flutterErrors": 0,
+  "portClosedAfterExit": true
+}

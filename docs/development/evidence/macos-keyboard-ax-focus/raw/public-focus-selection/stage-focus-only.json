@@ -1,0 +1,325 @@
+{
+  "mode": "edit",
+  "pid": 67985,
+  "native": {
+    "fields": [
+      {
+        "axScreenFrame": [
+          618,
+          629.5,
+          310.5,
+          41.5
+        ],
+        "axSelectedText": "",
+        "axValue": "Mac 焦点合成资料",
+        "cellString": "Mac 焦点合成资料",
+        "editorIdentity": "none",
+        "editorInsideThisField": false,
+        "editorIsFirstResponder": false,
+        "editorSelection": [],
+        "editorString": "",
+        "fieldIdentity": "ObjectIdentifier(0x0000007b899a6300)",
+        "label": "信息名称",
+        "liveScreenFrame": [
+          617,
+          630.5,
+          312.5,
+          39.5
+        ],
+        "nativeString": "Mac 焦点合成资料",
+        "viewFrame": [
+          57,
+          414.5,
+          312.5,
+          39.5
+        ]
+      },
+      {
+        "axScreenFrame": [
+          618,
+          524,
+          638,
+          61
+        ],
+        "axSelectedText": "",
+        "axValue": "SyntheticDescriptionBeta",
+        "cellString": "SyntheticDescriptionBeta",
+        "editorIdentity": "ObjectIdentifier(0x0000000104b65420)",
+        "editorInsideThisField": true,
+        "editorIsFirstResponder": true,
+        "editorSelection": [
+          24,
+          0
+        ],
+        "editorString": "SyntheticDescriptionBeta",
+        "fieldIdentity": "ObjectIdentifier(0x0000007b899a6a00)",
+        "label": "公开说明",
+        "liveScreenFrame": [
+          617,
+          525,
+          640,
+          59
+        ],
+        "nativeString": "SyntheticDescriptionBeta",
+        "viewFrame": [
+          57,
+          309,
+          640,
+          59
+        ]
+      },
+      {
+        "axScreenFrame": [
+          618,
+          341,
+          206.33331298828125,
+          3
+        ],
+        "axSelectedText": "",
+        "axValue": "",
+        "cellString": "",
+        "editorIdentity": "none",
+        "editorInsideThisField": false,
+        "editorIsFirstResponder": false,
+        "editorSelection": [],
+        "editorString": "",
+        "fieldIdentity": "ObjectIdentifier(0x0000007b899a4a80)",
+        "label": "",
+        "liveScreenFrame": [
+          617,
+          342,
+          208.33331298828125,
+          1
+        ],
+        "nativeString": "",
+        "viewFrame": [
+          57,
+          126,
+          208.33331298828125,
+          1
+        ]
+      },
+      {
+        "axScreenFrame": [
+          618,
+          341,
+          638,
+          3
+        ],
+        "axSelectedText": "",
+        "axValue": "",
+        "cellString": "",
+        "editorIdentity": "none",
+        "editorInsideThisField": false,
+        "editorIsFirstResponder": false,
+        "editorSelection": [],
+        "editorString": "",
+        "fieldIdentity": "ObjectIdentifier(0x0000007b899a5f80)",
+        "label": "",
+        "liveScreenFrame": [
+          617,
+          342,
+          640,
+          1
+        ],
+        "nativeString": "",
+        "viewFrame": [
+          57,
+          126,
+          640,
+          1
+        ]
+      },
+      {
+        "axScreenFrame": [
+          618,
+          341,
+          638,
+          3
+        ],
+        "axSelectedText": "",
+        "axValue": "",
+        "cellString": "",
+        "editorIdentity": "none",
+        "editorInsideThisField": false,
+        "editorIsFirstResponder": false,
+        "editorSelection": [],
+        "editorString": "",
+        "fieldIdentity": "ObjectIdentifier(0x0000007b899a5180)",
+        "label": "",
+        "liveScreenFrame": [
+          617,
+          342,
+          640,
+          1
+        ],
+        "nativeString": "",
+        "viewFrame": [
+          57,
+          126,
+          640,
+          1
+        ]
+      },
+      {
+        "axScreenFrame": [
+          618,
+          341,
+          206.33331298828125,
+          3
+        ],
+        "axSelectedText": "",
+        "axValue": "",
+        "cellString": "",
+        "editorIdentity": "none",
+        "editorInsideThisField": false,
+        "editorIsFirstResponder": false,
+        "editorSelection": [],
+        "editorString": "",
+        "fieldIdentity": "ObjectIdentifier(0x0000007b899a5c00)",
+        "label": "",
+        "liveScreenFrame": [
+          617,
+          342,
+          208.33331298828125,
+          1
+        ],
+        "nativeString": "",
+        "viewFrame": [
+          57,
+          126,
+          208.33331298828125,
+          1
+        ]
+      },
+      {
+        "axScreenFrame": [
+          618,
+          341,
+          638,
+          3
+        ],
+        "axSelectedText": "",
+        "axValue": "",
+        "cellString": "",
+        "editorIdentity": "none",
+        "editorInsideThisField": false,
+        "editorIsFirstResponder": false,
+        "editorSelection": [],
+        "editorString": "",
+        "fieldIdentity": "ObjectIdentifier(0x0000007b89a80a80)",
+        "label": "",
+        "liveScreenFrame": [
+          617,
+          342,
+          640,
+          1
+        ],
+        "nativeString": "",
+        "viewFrame": [
+          57,
+          126,
+          640,
+          1
+        ]
+      }
+    ],
+    "labels": [
+      {
+        "label": "搜索信息",
+        "rect": [
+          260,
+          247,
+          283,
+          48
+        ]
+      },
+      {
+        "label": "信息名称",
+        "rect": [
+          57,
+          146,
+          312.5,
+          39.5
+        ]
+      },
+      {
+        "label": "公开说明",
+        "rect": [
+          57,
+          232,
+          640,
+          59
+        ]
+      }
+    ],
+    "viewBounds": [
+      0,
+      0,
+      800,
+      600
+    ],
+    "viewFlipped": false
+  },
+  "dart": {
+    "semanticsEnabled": true,
+    "focusIdentity": 510176444,
+    "focusKeys": [
+      "item-description"
+    ],
+    "editingValue": {
+      "text": "SyntheticDescriptionBeta",
+      "selection": [
+        24,
+        24
+      ],
+      "composing": [
+        -1,
+        -1
+      ]
+    },
+    "confirmation": false,
+    "controlsEnabled": {
+      "theme-purple": true,
+      "theme-green": true,
+      "theme-blue": true,
+      "theme-mono": true,
+      "nav-0": true,
+      "nav-1": true,
+      "nav-2": true,
+      "nav-3": true,
+      "nav-4": true,
+      "inbox-filter-all": true,
+      "inbox-filter-pending": true,
+      "inbox-filter-handled": true,
+      "library-credentials-mode": true,
+      "new-information": true,
+      "library-tag-filter": true,
+      "QrBAzNHboqkswcMUPhmsTRnGHsRC-Hw1TSAznY-NtBY=": true,
+      "edit-information-category": true,
+      "edit-information-description": true,
+      "export-file-zhfqhWV8uBJFXxwsN7CAzsDsEyzswjuc8guTtsQlK6k=": true,
+      "new-credential": true,
+      "item-name": true,
+      "item-description": true,
+      "item-tags": true,
+      "field-name-0": true,
+      "field-value-0": true,
+      "field-description-0": true,
+      "field-name-1": true,
+      "choose-file-1": true,
+      "field-description-1": true,
+      "add-field": true,
+      "save-information": true
+    },
+    "editor": {
+      "description": "SyntheticDescriptionBeta",
+      "name": "Mac 焦点合成资料",
+      "fileStages": 0
+    },
+    "persistedDescription": "BaselineDescription",
+    "observedAtEpochSeconds": 1792671694.980636,
+    "sequence": 12
+  },
+  "note": "Exact old failure path with canonical selection restoration: native owner follows description; CUA no false selected-all text."
+}

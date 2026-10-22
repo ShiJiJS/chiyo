@@ -1,0 +1,748 @@
+{
+  "date": "2026-10-22",
+  "productSource": "dd050f3caa1bcd4a382a765672a5f8b603787d02",
+  "baselineSource": "bb665c5d6ca1fb2cef7673168774d9362a981d7d",
+  "exactBaselineWidgetFailures": 2,
+  "targetedPassed": 27,
+  "appKitContractPassed": 15,
+  "nativeHypotheses": {
+    "publicFocusOnly": "owner/value improved; selection not accepted as complete",
+    "publicFocusAndCanonicalSelection": "owner/value/editor range and model match"
+  },
+  "productionNormalExits": [
+    0,
+    0
+  ],
+  "productionPureFocusOwnerValueSelectionPassed": true,
+  "productionFilePanelActualEscapeAndInputFocusPassed": true,
+  "productionActualSCIMComposing": [
+    0,
+    6
+  ],
+  "productionSpaceCommitted": "你好",
+  "savedCheckpoint": "MacFocusSaved",
+  "fullVoiceOverPhysicalOrOrdinaryUpgradeClaimed": false,
+  "package": {
+    "source": "dd050f3caa1bcd4a382a765672a5f8b603787d02",
+    "archive": "build/macos-adaptation/issue50-package-21/agent-info-manage-0.4.1+13-mac-dev.dd050f3caa1b-macos-arm64.zip",
+    "archiveBytes": 130966982,
+    "archiveSha256": "2030d3d50a35d181341ef761b45a6045f52814695a85847417e409738be3058e",
+    "phases": 21,
+    "counts": {
+      "core": [
+        290,
+        6
+      ],
+      "cli": [
+        75,
+        40
+      ],
+      "storage": [
+        160,
+        18
+      ],
+      "desktop": [
+        256,
+        2
+      ]
+    },
+    "totalPassed": 781,
+    "conditionalSkips": 66,
+    "manifestFiles": 7971,
+    "machOFiles": 75,
+    "uncompressedCopiesVerified": 2,
+    "packagedNativeAdapterSymbols": 95,
+    "packagedDesktopSha256": "30d122ee814a31595d2bbaf58abdb373e081b98731f5cc41c8e42296d777139d",
+    "stableInstalledPreviewReplaced": false,
+    "ordinaryFinalGUIOrCleanUserClaimed": false,
+    "newKeychainRequests": 0
+  },
+  "cleanup": {
+    "scope": "project build/local only; SDK/cache and personal software not scanned",
+    "stableSource": "4690e79357bb728da22193d8dadd6dc8a8ce2ce6",
+    "manifestEntriesMatched": 7971,
+    "strictSignatureExitCode": 0,
+    "stablePid": 53592,
+    "apps": [
+      "local/中文 Mac 预览/AgentInfoManage/app/info_desktop.app"
+    ],
+    "generatedDebugSymbols": [],
+    "runtimeExtraPreserved": [
+      ".local/state/gh/device-id"
+    ],
+    "newKeychainRequests": 0
+  },
+  "rawFileCount": 134,
+  "files": [
+    {
+      "path": "raw/final-cleanup-and-preview.json",
+      "sha256": "aa983dc54a6f92f1b4c7368e22b3727db3cf4c9cc1c2b7bf52e3f0fab8c17fc7",
+      "bytes": 446
+    },
+    {
+      "path": "raw/observations-and-limits.json",
+      "sha256": "1cf8f9f70b6f990d296036cd2187a296f604076e4b0efea9aa16ca913e087a1a",
+      "bytes": 2285
+    },
+    {
+      "path": "raw/package21-final/cleanup.json",
+      "sha256": "d9c20926d4f48bf62dcfd63989ea2d3629f7b4a64003702482fcd74241e80393",
+      "bytes": 1161
+    },
+    {
+      "path": "raw/package21-final/delivery-audit.json",
+      "sha256": "06eeaf5401657d17e6caf284fa7b62e81bdca966df3ba24f9c6ee63931dc76bd",
+      "bytes": 876
+    },
+    {
+      "path": "raw/package21-final/logs/app-signature.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "raw/package21-final/logs/archive.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "raw/package21-final/logs/compile-info-codex-hook.txt",
+      "sha256": "997672f7ba0d1998c7d15f292ad32fd6604f6fc87d9f83ec819107efd577665c",
+      "bytes": 136
+    },
+    {
+      "path": "raw/package21-final/logs/compile-info-codex.txt",
+      "sha256": "034e85a461ee33d31681cf7373b8da3ec88c0cd49b0deedd704902d3f1a03d39",
+      "bytes": 131
+    },
+    {
+      "path": "raw/package21-final/logs/compile-info-prepare-codex.txt",
+      "sha256": "f11813a0c9ceb9fba332c2931f3501a4812067e7254d76bd01b18dad2e1ef281",
+      "bytes": 139
+    },
+    {
+      "path": "raw/package21-final/logs/compile-info-runtime-worker.txt",
+      "sha256": "efecfa5a1bbfb51fd6a77d445c1213539ebba9d5bbb0595f4765b52ae5caffbd",
+      "bytes": 140
+    },
+    {
+      "path": "raw/package21-final/logs/compile-info.txt",
+      "sha256": "e0741b437494ddd1518f3568e0d7f54f97f2d51d0a3538e256f2da3af675bd41",
+      "bytes": 125
+    },
+    {
+      "path": "raw/package21-final/logs/diagnostic-build.txt",
+      "sha256": "19d088455c9b0a567f7e7efa87769fb6f0f2eff65d17d12919c1a45626bd65cc",
+      "bytes": 300
+    },
+    {
+      "path": "raw/package21-final/logs/extract.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "raw/package21-final/logs/extracted-app-signature.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "raw/package21-final/logs/extracted-cli-and-worker.txt",
+      "sha256": "8ea7439312ad07a34b91bb4e24fd44a97db7ca7fd5a98f85451768f46b06815e",
+      "bytes": 841
+    },
+    {
+      "path": "raw/package21-final/logs/extracted-storage.txt",
+      "sha256": "bfe59e3f5c8148af626c8aa8416aa5c874f251127cecd3c3ec86f26dddfb1657",
+      "bytes": 187
+    },
+    {
+      "path": "raw/package21-final/logs/release-build.txt",
+      "sha256": "a06bc48199a1e29e3b541120bbe2c4e81d1cef6fd6e9449d98eec70d9fe46f81",
+      "bytes": 4599
+    },
+    {
+      "path": "raw/package21-final/logs/sign-diagnostic-libsqlcipher.dylib.txt",
+      "sha256": "fc849189f8d2217376ba0ddc375252de9d1593437d35fea798ecd6bab9dbed55",
+      "bytes": 170
+    },
+    {
+      "path": "raw/package21-final/logs/sign-diagnostic-macos-storage-check.txt",
+      "sha256": "cef123b987d8cb2db9c105335dc1404e0fe851b3d2d4314b48c36691964e0fdd",
+      "bytes": 171
+    },
+    {
+      "path": "raw/package21-final/logs/sign-info-codex-hook.txt",
+      "sha256": "907db5165af9a84c7e4eeabc0e6801dda9f6cb9f0fe59e36ad584b566cb5e553",
+      "bytes": 155
+    },
+    {
+      "path": "raw/package21-final/logs/sign-info-codex.txt",
+      "sha256": "8127725f25f0844bd62248d65db9a2558e3a2ebf52cfcbaecfe17a7ae4c6aa22",
+      "bytes": 150
+    },
+    {
+      "path": "raw/package21-final/logs/sign-info-prepare-codex.txt",
+      "sha256": "2ae628b387a8810089daff433e0de70c1cbf0cc7c7a25efa6583fedc4b0e47dd",
+      "bytes": 158
+    },
+    {
+      "path": "raw/package21-final/logs/sign-info-runtime-worker.txt",
+      "sha256": "b88d095d617398db4c96b5a42fb01a5ef2744fbbb2d4845e3b09eccc0fc20102",
+      "bytes": 159
+    },
+    {
+      "path": "raw/package21-final/logs/sign-info.txt",
+      "sha256": "090845f50a1fdf04026aa35f5ff3b5e8cedb0204c341f414cae3d55684a70041",
+      "bytes": 144
+    },
+    {
+      "path": "raw/package21-final/logs/source-checks.txt",
+      "sha256": "725055421a20568aa5cb83d8ed0672ef33c511e24ec8186a56379b6931cb5c66",
+      "bytes": 214947
+    },
+    {
+      "path": "raw/package21-final/manifest.json",
+      "sha256": "9b503c5a880cdcd9406a22ca950a8ea5699256a7ae34f9d5bea6ba66598f9b40",
+      "bytes": 2126205
+    },
+    {
+      "path": "raw/package21-final/native-accessibility-symbols.txt",
+      "sha256": "5a6bd48f9933f66448c3ea7fc1ebb8b838823145143df381d5695b9118ac8720",
+      "bytes": 16840
+    },
+    {
+      "path": "raw/package21-final/verification.json",
+      "sha256": "ad42e142c5d8ab8bd45f18a5b28390d3b688eea53ad512297ee7a9a7c1769036",
+      "bytes": 2731
+    },
+    {
+      "path": "raw/preparation/analyze.txt",
+      "sha256": "c1f0b92e93977f8acb9979f9a67c57fd186657c0df416a40d5cd4f8ff64852f4",
+      "bytes": 96
+    },
+    {
+      "path": "raw/preparation/archive-observation.py",
+      "sha256": "da5e5d8107bdd989e1f20c9bb349c2c457ec097c211b47067e1f85f72cfb6cdc",
+      "bytes": 2700
+    },
+    {
+      "path": "raw/preparation/archive-package21.py",
+      "sha256": "86b1c331423ccf2ccde8444b12004d5e96f9845c02af24ef070cfb43d12a1e94",
+      "bytes": 4098
+    },
+    {
+      "path": "raw/preparation/archive-product.py",
+      "sha256": "8e48a1e3fc3ab3a041c8145795bf426e0f70e10eba035accf7b19fb9f301ec4b",
+      "bytes": 2900
+    },
+    {
+      "path": "raw/preparation/baseline-focus.py",
+      "sha256": "c4812f6f12912fde81c56b049927b9d3ac848faa87b44f6f4f2b18dcbc78145d",
+      "bytes": 2114
+    },
+    {
+      "path": "raw/preparation/capture-values.py",
+      "sha256": "e9e701250e314a56878ed3292b1c4bc41ebd356c3bb23bbf0cf32ee81572ad4f",
+      "bytes": 1006
+    },
+    {
+      "path": "raw/preparation/final-regression-red.json",
+      "sha256": "e4e7ac39711bf9efe7090a45356b73273a43503c7b9d4e1492c42e7a2833f274",
+      "bytes": 380
+    },
+    {
+      "path": "raw/preparation/final-regression-red.txt",
+      "sha256": "74a5d34e60875593a81ae4d98efbdd2d926cf5036900d52d3ac43861d4e159be",
+      "bytes": 5839
+    },
+    {
+      "path": "raw/preparation/native-adapter-test-final.txt",
+      "sha256": "f6277f96da437fac022d0634304a9ed918f75dffc075587f66c3f1278f3830a0",
+      "bytes": 1073
+    },
+    {
+      "path": "raw/preparation/native-adapter-test.txt",
+      "sha256": "048cd2b52dca454a9211ebee08d483e3df0f395aa4ba7b810184eaa0f753d0e9",
+      "bytes": 166
+    },
+    {
+      "path": "raw/preparation/native-compile-final.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "raw/preparation/native-compile.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "raw/preparation/targeted.txt",
+      "sha256": "97d373d5a59000751083b7c0fa9106fdfc5dea83c4b88db76c269ee3f8533e17",
+      "bytes": 5987
+    },
+    {
+      "path": "raw/production-final/cleanup.json",
+      "sha256": "883a03229cb251abb6969e40ee54b94abb72a8f96fbb7012cb808cd9300e603e",
+      "bytes": 258
+    },
+    {
+      "path": "raw/production-final/edit.json",
+      "sha256": "bcb728bc064347e4f28f2e13e427de7738978c416c3661e77d71678336b5f229",
+      "bytes": 55204
+    },
+    {
+      "path": "raw/production-final/git-source/apps/desktop/lib/mac_text_field_accessibility.dart",
+      "sha256": "51a4a1fbf9d06e0ad887c4b6e5319ea07047aa7dbb5da7b1e1f61422ecf3c594",
+      "bytes": 5916
+    },
+    {
+      "path": "raw/production-final/git-source/apps/desktop/macos/Runner/NativeTextFieldAccessibility.swift",
+      "sha256": "25377a5350fae9d797b2b973b27b82095cd62382525942f8676295245f18e873",
+      "bytes": 9096
+    },
+    {
+      "path": "raw/production-final/git-source/apps/desktop/test/mac_text_field_accessibility_test.dart",
+      "sha256": "42b76aa0b6243625fef5d3e81d7f8bbb4f59fa5c70963330aedb2584dcbe2de1",
+      "bytes": 11966
+    },
+    {
+      "path": "raw/production-final/git-source/scripts/qa/macos-text-field-accessibility-test.swift",
+      "sha256": "f493083f55e1b9eedef3debc3f42898847f84af94856053d88d37b1d252c0e7b",
+      "bytes": 12323
+    },
+    {
+      "path": "raw/production-final/hidden_page_tooltip_test.dart",
+      "sha256": "17b50af9861a1ab0607ea56bfeca2578963c3e9da51bb6a353abd14025261dcf",
+      "bytes": 2639
+    },
+    {
+      "path": "raw/production-final/last-edit.json",
+      "sha256": "fd4b4103a34f20d2d97c02e18972c31033ccdf72244e1a2d736521c8cc5efff2",
+      "bytes": 37758
+    },
+    {
+      "path": "raw/production-final/last-reopen.json",
+      "sha256": "ca9c6beee5b2bdd1d7757aded91147f4d75be1bef1a5f5df6a82a332bf5ba106",
+      "bytes": 336
+    },
+    {
+      "path": "raw/production-final/logs/analyze.txt",
+      "sha256": "094e8802fb3c1707fd6920a603dfe1aee6898ec8135f9ad28c812a00a2b07fde",
+      "bytes": 96
+    },
+    {
+      "path": "raw/production-final/logs/build.txt",
+      "sha256": "76998f771558944793241f836d2bae939fd8551b430dcf0dafa8abf3092d7b5d",
+      "bytes": 5583
+    },
+    {
+      "path": "raw/production-final/logs/edit.txt",
+      "sha256": "13ef948cf34894899b90f8f9685e120711f19af0ceec632342ef08a141c5a7af",
+      "bytes": 208586
+    },
+    {
+      "path": "raw/production-final/logs/entitlements.txt",
+      "sha256": "6fbee3aa7c5a6389f9d04d1df7a61c35c2113b832c6be2d9b0b95ce2c5c04e3a",
+      "bytes": 782
+    },
+    {
+      "path": "raw/production-final/logs/pub-desktop.txt",
+      "sha256": "ca68f707c22164511fc2b3f9af97ed7bd46538b1d334d9c806a6a59a556a6e05",
+      "bytes": 318
+    },
+    {
+      "path": "raw/production-final/logs/pub-info_cli.txt",
+      "sha256": "7652c98906e8f741dc56b0e7f018713f8985ac3d073ce66e4cb8e1d3274e15f6",
+      "bytes": 438
+    },
+    {
+      "path": "raw/production-final/logs/pub-info_core.txt",
+      "sha256": "7652c98906e8f741dc56b0e7f018713f8985ac3d073ce66e4cb8e1d3274e15f6",
+      "bytes": 438
+    },
+    {
+      "path": "raw/production-final/logs/pub-info_storage.txt",
+      "sha256": "7652c98906e8f741dc56b0e7f018713f8985ac3d073ce66e4cb8e1d3274e15f6",
+      "bytes": 438
+    },
+    {
+      "path": "raw/production-final/logs/reopen.txt",
+      "sha256": "58b12a93eea61f2a0b74f71e5081e4833237db6d342b431154d41cc5ac98077f",
+      "bytes": 22306
+    },
+    {
+      "path": "raw/production-final/logs/signature.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "raw/production-final/macos-editor-focus-ui.py",
+      "sha256": "9ba1edfe5e4d6f5255d97ec9ec515ab42b4cc75834621e762ee9a773567b438c",
+      "bytes": 31995
+    },
+    {
+      "path": "raw/production-final/macos_editor_focus_manual.dart",
+      "sha256": "2bbc0ebb524fed1b5607427fc845bb9b530b2ee306e66bc64cb7fcffd1dd6875",
+      "bytes": 12591
+    },
+    {
+      "path": "raw/production-final/main.dart",
+      "sha256": "d99f048fa394ce563e73af736dd961b923e29c514620d8a221e071fb89b8bc68",
+      "bytes": 17382
+    },
+    {
+      "path": "raw/production-final/native-ax-errors.json",
+      "sha256": "cdbcb5e08d5bd5765cfb969e60d49bcb97f2e5b18aeefd0401d69b1b1467cd9e",
+      "bytes": 74
+    },
+    {
+      "path": "raw/production-final/qa-copy/apps/desktop/macos/Runner/Configs/AppInfo.xcconfig",
+      "sha256": "82414843bb61f03184422731038ebd6cb80282297e5fdf503ee60668071f7980",
+      "bytes": 665
+    },
+    {
+      "path": "raw/production-final/qa-copy/apps/desktop/macos/Runner/MainFlutterWindow.swift",
+      "sha256": "ba76bca3ffc80b30f05210f0384396d68a98d8db8dbf5fc5c4782e95f9134bc3",
+      "bytes": 22267
+    },
+    {
+      "path": "raw/production-final/qa-copy/apps/desktop/macos/Runner/NativeTextFieldAccessibility.swift",
+      "sha256": "5dfd17433ae5c3b9108dc1200d1bcf51b1a77e2d426fae0639c97e411f1280c4",
+      "bytes": 11029
+    },
+    {
+      "path": "raw/production-final/reopen.json",
+      "sha256": "5828dc814c9042c5eea2327778b0153c8913fce039c17971641b33ddd3b0273f",
+      "bytes": 413
+    },
+    {
+      "path": "raw/production-final/result.json",
+      "sha256": "3808e6a87a863fc54d1c84692858edd478ba6449d996677103c8266d2c1d5ccc",
+      "bytes": 151123
+    },
+    {
+      "path": "raw/production-final/stage-composing.json",
+      "sha256": "ca45be1ad0f2e3858437eb920ec28bfeb6552ecde5744f53ebac41c51a9f6abd",
+      "bytes": 7208
+    },
+    {
+      "path": "raw/production-final/stage-confirmation-cancel.json",
+      "sha256": "be04d67c7ba6565586db1421a87b1a199cd489de55ab698db50d3571683294f5",
+      "bytes": 7328
+    },
+    {
+      "path": "raw/production-final/stage-credential-focus.json",
+      "sha256": "c8927309f00b323c9c05a7d8f356fd40cb8b4fd02d0967cfd76f844fa5eb5b1c",
+      "bytes": 3829
+    },
+    {
+      "path": "raw/production-final/stage-keyboard-tab.json",
+      "sha256": "ac019657550221a3fddf7f11ac9e25901624b6050300e3c8043257b192e15f74",
+      "bytes": 7210
+    },
+    {
+      "path": "raw/production-final/stage-panel-cancel.json",
+      "sha256": "95410d783477813cf13c4c272792f3820d5f2a0414b9127afebfe0c15a9306a6",
+      "bytes": 7418
+    },
+    {
+      "path": "raw/production-final/stage-pure-focus.json",
+      "sha256": "c39236f141d404d65103217af02b75a1139def184844fbb2351a20fd0ab2227b",
+      "bytes": 7394
+    },
+    {
+      "path": "raw/production-final/stage-reopened.json",
+      "sha256": "83bb21893520b7424a7c18ab2393b95f57eb0deed426611b307d50092356dc20",
+      "bytes": 5779
+    },
+    {
+      "path": "raw/production-final/stage-selected-all.json",
+      "sha256": "08d5179f71032bd827ae605365a5f7880f2c0c3f379852f8c97b7ad2bfa9a132",
+      "bytes": 7342
+    },
+    {
+      "path": "raw/public-focus/cleanup.json",
+      "sha256": "8f912d188f7674e038e5617c69ba24bff5ed67c0f83f15bf507f3ca3ec4cbbb5",
+      "bytes": 248
+    },
+    {
+      "path": "raw/public-focus/edit.json",
+      "sha256": "fac696a5af9d2594de45fe5df3b32691a501671f062a7ba401fcc2d266978171",
+      "bytes": 36281
+    },
+    {
+      "path": "raw/public-focus/git-source/apps/desktop/lib/mac_text_field_accessibility.dart",
+      "sha256": "97564248da8b71bfa81e6a6bdc2f4e32f24138bf1d13b073c6df721df7ee6d4e",
+      "bytes": 5491
+    },
+    {
+      "path": "raw/public-focus/git-source/apps/desktop/macos/Runner/NativeTextFieldAccessibility.swift",
+      "sha256": "65fd03f42b9685341e3fcfcc4a5d82344e0d9a0772688142efe43a21e1ebfdda",
+      "bytes": 5868
+    },
+    {
+      "path": "raw/public-focus/git-source/apps/desktop/test/mac_text_field_accessibility_test.dart",
+      "sha256": "23f938680ce90c354d7e06b624cb6b5cb7164c2e545d41c2af87367687936db8",
+      "bytes": 9921
+    },
+    {
+      "path": "raw/public-focus/git-source/scripts/qa/macos-text-field-accessibility-test.swift",
+      "sha256": "23667c82aec9ef52c90fbe1370bc1c418220d37b3790d7e144936986d450b782",
+      "bytes": 7912
+    },
+    {
+      "path": "raw/public-focus/last-edit.json",
+      "sha256": "9065ee60102c555aa5f5e0c5883d7b026b1b0ea15163f52522c50331b4534679",
+      "bytes": 24727
+    },
+    {
+      "path": "raw/public-focus/logs/analyze.txt",
+      "sha256": "75822b9bdfc334d102e5674619422575d82a9e7f021dab952b8f2487a44c32b9",
+      "bytes": 96
+    },
+    {
+      "path": "raw/public-focus/logs/build.txt",
+      "sha256": "631ea999a43b360a4d08487dd0a41ed3ae4e6645b2155e6e1a68363f98096fb5",
+      "bytes": 5555
+    },
+    {
+      "path": "raw/public-focus/logs/edit.txt",
+      "sha256": "267e1845e2a9b6581b4b46586af45acdded279cc7f27ef235fd8492c9f176820",
+      "bytes": 94395
+    },
+    {
+      "path": "raw/public-focus/logs/entitlements.txt",
+      "sha256": "5a6469ded43e4c824e2a431fdd224415caf0a9d237d9e2aaa931cdf3102f5ee9",
+      "bytes": 778
+    },
+    {
+      "path": "raw/public-focus/logs/pub-desktop.txt",
+      "sha256": "ca68f707c22164511fc2b3f9af97ed7bd46538b1d334d9c806a6a59a556a6e05",
+      "bytes": 318
+    },
+    {
+      "path": "raw/public-focus/logs/pub-info_cli.txt",
+      "sha256": "7652c98906e8f741dc56b0e7f018713f8985ac3d073ce66e4cb8e1d3274e15f6",
+      "bytes": 438
+    },
+    {
+      "path": "raw/public-focus/logs/pub-info_core.txt",
+      "sha256": "7652c98906e8f741dc56b0e7f018713f8985ac3d073ce66e4cb8e1d3274e15f6",
+      "bytes": 438
+    },
+    {
+      "path": "raw/public-focus/logs/pub-info_storage.txt",
+      "sha256": "7652c98906e8f741dc56b0e7f018713f8985ac3d073ce66e4cb8e1d3274e15f6",
+      "bytes": 438
+    },
+    {
+      "path": "raw/public-focus/logs/signature.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "raw/public-focus/macos-editor-focus-ui.py",
+      "sha256": "589e502429e284a775c807d39d049da583e171dc3538e31d498383f21d42c25e",
+      "bytes": 28851
+    },
+    {
+      "path": "raw/public-focus/macos_editor_focus_manual.dart",
+      "sha256": "2bbc0ebb524fed1b5607427fc845bb9b530b2ee306e66bc64cb7fcffd1dd6875",
+      "bytes": 12591
+    },
+    {
+      "path": "raw/public-focus/native-ax-errors.json",
+      "sha256": "cdbcb5e08d5bd5765cfb969e60d49bcb97f2e5b18aeefd0401d69b1b1467cd9e",
+      "bytes": 74
+    },
+    {
+      "path": "raw/public-focus/prototype_dialog.dart",
+      "sha256": "7b8a49c82e6e8fe3f59c11f8773cf0be3a5b4c5433c445dde8a529fe19c4ec52",
+      "bytes": 7186
+    },
+    {
+      "path": "raw/public-focus/qa-copy/apps/desktop/lib/mac_text_field_accessibility.dart",
+      "sha256": "4e5ab1702e98e82d7e7e9cf1b2e59c2f5fbaa638f0ba421118afc6363aee822b",
+      "bytes": 5542
+    },
+    {
+      "path": "raw/public-focus/qa-copy/apps/desktop/macos/Runner/Configs/AppInfo.xcconfig",
+      "sha256": "8a61c6f8998d3d32848a04e34ace72974f75417bf36f98b29163eea642707028",
+      "bytes": 665
+    },
+    {
+      "path": "raw/public-focus/qa-copy/apps/desktop/macos/Runner/MainFlutterWindow.swift",
+      "sha256": "ba76bca3ffc80b30f05210f0384396d68a98d8db8dbf5fc5c4782e95f9134bc3",
+      "bytes": 22267
+    },
+    {
+      "path": "raw/public-focus/qa-copy/apps/desktop/macos/Runner/NativeTextFieldAccessibility.swift",
+      "sha256": "f1f6580bab904064fc3164221105e0f1b020622872b41ccda0ee2ed39b08da3b",
+      "bytes": 8534
+    },
+    {
+      "path": "raw/public-focus/result.json",
+      "sha256": "1a287570bc245c96d0e2b12c3e419e5ac42c3c02bc919d3e4c6715ac10eb22ce",
+      "bytes": 129139
+    },
+    {
+      "path": "raw/public-focus/stage-composing.json",
+      "sha256": "44882c6a091c9721a3cfcca6bbebef037df20b3d80e040f4be994666117b0a8e",
+      "bytes": 6777
+    },
+    {
+      "path": "raw/public-focus/stage-focus-only.json",
+      "sha256": "a2da25e5afb2e234f730b030311da0f5f80b7f5b5cb25a803abb8b582aa425cd",
+      "bytes": 6949
+    },
+    {
+      "path": "raw/public-focus/stage-keyboard-tab.json",
+      "sha256": "fe7e312bf654bb334cf3737de2bd0a4812a11037c856179d248ad92a30c9ae76",
+      "bytes": 6872
+    },
+    {
+      "path": "raw/public-focus-selection/cleanup.json",
+      "sha256": "8e17a558e3ded88da640e58d33ec90424103391269909c3662e9d564b53b63d9",
+      "bytes": 248
+    },
+    {
+      "path": "raw/public-focus-selection/edit.json",
+      "sha256": "a46b8f9ae463587db359ae4ad06200559d925236f92c0e483e6565af17387eef",
+      "bytes": 36076
+    },
+    {
+      "path": "raw/public-focus-selection/git-source/apps/desktop/lib/mac_text_field_accessibility.dart",
+      "sha256": "97564248da8b71bfa81e6a6bdc2f4e32f24138bf1d13b073c6df721df7ee6d4e",
+      "bytes": 5491
+    },
+    {
+      "path": "raw/public-focus-selection/git-source/apps/desktop/macos/Runner/NativeTextFieldAccessibility.swift",
+      "sha256": "65fd03f42b9685341e3fcfcc4a5d82344e0d9a0772688142efe43a21e1ebfdda",
+      "bytes": 5868
+    },
+    {
+      "path": "raw/public-focus-selection/git-source/apps/desktop/test/mac_text_field_accessibility_test.dart",
+      "sha256": "23f938680ce90c354d7e06b624cb6b5cb7164c2e545d41c2af87367687936db8",
+      "bytes": 9921
+    },
+    {
+      "path": "raw/public-focus-selection/git-source/scripts/qa/macos-text-field-accessibility-test.swift",
+      "sha256": "23667c82aec9ef52c90fbe1370bc1c418220d37b3790d7e144936986d450b782",
+      "bytes": 7912
+    },
+    {
+      "path": "raw/public-focus-selection/last-edit.json",
+      "sha256": "080b9a9aff45e2a443de61a57e1a791184afa5182518bb360e9e19d43f78acd1",
+      "bytes": 24645
+    },
+    {
+      "path": "raw/public-focus-selection/logs/analyze.txt",
+      "sha256": "722c8a08e247f523ad074633591450b61f4cc939e22270bd8c69c6d968932fbf",
+      "bytes": 96
+    },
+    {
+      "path": "raw/public-focus-selection/logs/build.txt",
+      "sha256": "bcdbd476fb9c76aa24b8eb4e6172b87158f479a36575a2a83b18e242d4f53bbb",
+      "bytes": 5625
+    },
+    {
+      "path": "raw/public-focus-selection/logs/edit.txt",
+      "sha256": "273f4f116dbdca7a22d1f92e97048962b09a7b0d6d8f643b177b2843e5976e4e",
+      "bytes": 101166
+    },
+    {
+      "path": "raw/public-focus-selection/logs/entitlements.txt",
+      "sha256": "b9f905b62184a9f9e2328be81d6ae0765d8118905014a59935a2cdff9a57fbd6",
+      "bytes": 788
+    },
+    {
+      "path": "raw/public-focus-selection/logs/pub-desktop.txt",
+      "sha256": "ca68f707c22164511fc2b3f9af97ed7bd46538b1d334d9c806a6a59a556a6e05",
+      "bytes": 318
+    },
+    {
+      "path": "raw/public-focus-selection/logs/pub-info_cli.txt",
+      "sha256": "7652c98906e8f741dc56b0e7f018713f8985ac3d073ce66e4cb8e1d3274e15f6",
+      "bytes": 438
+    },
+    {
+      "path": "raw/public-focus-selection/logs/pub-info_core.txt",
+      "sha256": "7652c98906e8f741dc56b0e7f018713f8985ac3d073ce66e4cb8e1d3274e15f6",
+      "bytes": 438
+    },
+    {
+      "path": "raw/public-focus-selection/logs/pub-info_storage.txt",
+      "sha256": "7652c98906e8f741dc56b0e7f018713f8985ac3d073ce66e4cb8e1d3274e15f6",
+      "bytes": 438
+    },
+    {
+      "path": "raw/public-focus-selection/logs/signature.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "raw/public-focus-selection/macos-editor-focus-ui.py",
+      "sha256": "9ba1edfe5e4d6f5255d97ec9ec515ab42b4cc75834621e762ee9a773567b438c",
+      "bytes": 31995
+    },
+    {
+      "path": "raw/public-focus-selection/macos_editor_focus_manual.dart",
+      "sha256": "2bbc0ebb524fed1b5607427fc845bb9b530b2ee306e66bc64cb7fcffd1dd6875",
+      "bytes": 12591
+    },
+    {
+      "path": "raw/public-focus-selection/native-ax-errors.json",
+      "sha256": "cdbcb5e08d5bd5765cfb969e60d49bcb97f2e5b18aeefd0401d69b1b1467cd9e",
+      "bytes": 74
+    },
+    {
+      "path": "raw/public-focus-selection/prototype_dialog.dart",
+      "sha256": "7b8a49c82e6e8fe3f59c11f8773cf0be3a5b4c5433c445dde8a529fe19c4ec52",
+      "bytes": 7186
+    },
+    {
+      "path": "raw/public-focus-selection/qa-copy/apps/desktop/lib/mac_text_field_accessibility.dart",
+      "sha256": "b95035a1d2a5cd4feb7fea8453f0858abe26a664fb47d3f5ff46d5243d64808c",
+      "bytes": 5734
+    },
+    {
+      "path": "raw/public-focus-selection/qa-copy/apps/desktop/macos/Runner/Configs/AppInfo.xcconfig",
+      "sha256": "3242af7e0b42d48a60cf9feedd63b84dde31f20267036b7d91432226d32bd10d",
+      "bytes": 665
+    },
+    {
+      "path": "raw/public-focus-selection/qa-copy/apps/desktop/macos/Runner/MainFlutterWindow.swift",
+      "sha256": "ba76bca3ffc80b30f05210f0384396d68a98d8db8dbf5fc5c4782e95f9134bc3",
+      "bytes": 22267
+    },
+    {
+      "path": "raw/public-focus-selection/qa-copy/apps/desktop/macos/Runner/NativeTextFieldAccessibility.swift",
+      "sha256": "7759f7b5821ff1a4771857e7b32d1108ffe9dc61714de221fd758acf77e89f7d",
+      "bytes": 9536
+    },
+    {
+      "path": "raw/public-focus-selection/result.json",
+      "sha256": "f8d5c48ac443ec1db930035500885643c44d2c1763310ed2f46870f96ea84794",
+      "bytes": 129007
+    },
+    {
+      "path": "raw/public-focus-selection/stage-composing.json",
+      "sha256": "6974a1671f2e96abb54270ed4e2df1a800c63050bca7ae8c74984625bfc88648",
+      "bytes": 7242
+    },
+    {
+      "path": "raw/public-focus-selection/stage-focus-only.json",
+      "sha256": "05aa9047dd0d2fab015ff05f6d1c2cb13fc6510f2ca4d1d907e69b2086b88f91",
+      "bytes": 7369
+    },
+    {
+      "path": "raw/public-focus-selection/stage-keyboard-tab.json",
+      "sha256": "3ab906723238600c3adfef9ff910e98e940f95e3caa163ee5acdcb794e83fbc2",
+      "bytes": 7249
+    },
+    {
+      "path": "raw/public-focus-selection/stage-selected-all.json",
+      "sha256": "3b4198bd5c87779ffddf590e6b70a3a31bda2c9f7f3b22f109e17ae0d87acfeb",
+      "bytes": 7332
+    }
+  ]
+}

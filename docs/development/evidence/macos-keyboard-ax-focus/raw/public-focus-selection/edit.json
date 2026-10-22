@@ -1,0 +1,1247 @@
+{
+  "mode": "edit",
+  "complete": true,
+  "systemKeychainUsed": false,
+  "expectedSavedDescription": "MacFocusSaved",
+  "observationOnly": true,
+  "port": 49519,
+  "inputSourceAtStart": "com.apple.inputmethod.SCIM.ITABC",
+  "observations": [
+    {
+      "semanticsEnabled": false,
+      "focusIdentity": 906238115,
+      "focusKeys": [],
+      "confirmation": false,
+      "controlsEnabled": {
+        "theme-purple": true,
+        "theme-green": true,
+        "theme-blue": true,
+        "theme-mono": true,
+        "nav-0": true,
+        "nav-1": true,
+        "nav-2": true,
+        "nav-3": true,
+        "nav-4": true,
+        "inbox-filter-all": true,
+        "inbox-filter-pending": true,
+        "inbox-filter-handled": true
+      },
+      "editor": null,
+      "persistedDescription": "BaselineDescription",
+      "observedAtEpochSeconds": 1792671640.997578,
+      "sequence": 0
+    },
+    {
+      "semanticsEnabled": true,
+      "focusIdentity": 906238115,
+      "focusKeys": [],
+      "confirmation": false,
+      "controlsEnabled": {
+        "theme-purple": true,
+        "theme-green": true,
+        "theme-blue": true,
+        "theme-mono": true,
+        "nav-0": true,
+        "nav-1": true,
+        "nav-2": true,
+        "nav-3": true,
+        "nav-4": true,
+        "inbox-filter-all": true,
+        "inbox-filter-pending": true,
+        "inbox-filter-handled": true
+      },
+      "editor": null,
+      "persistedDescription": "BaselineDescription",
+      "observedAtEpochSeconds": 1792671681.568238,
+      "sequence": 1
+    },
+    {
+      "semanticsEnabled": true,
+      "focusIdentity": 906238115,
+      "focusKeys": [],
+      "confirmation": false,
+      "controlsEnabled": {
+        "theme-purple": true,
+        "theme-green": true,
+        "theme-blue": true,
+        "theme-mono": true,
+        "nav-0": true,
+        "nav-1": true,
+        "nav-2": true,
+        "nav-3": true,
+        "nav-4": true,
+        "inbox-filter-all": true,
+        "inbox-filter-pending": true,
+        "inbox-filter-handled": true,
+        "library-credentials-mode": true,
+        "new-information": true,
+        "library-tag-filter": true,
+        "QrBAzNHboqkswcMUPhmsTRnGHsRC-Hw1TSAznY-NtBY=": true,
+        "edit-information-category": true,
+        "edit-information-description": true,
+        "export-file-zhfqhWV8uBJFXxwsN7CAzsDsEyzswjuc8guTtsQlK6k=": true,
+        "new-credential": true
+      },
+      "editor": null,
+      "persistedDescription": "BaselineDescription",
+      "observedAtEpochSeconds": 1792671681.773504,
+      "sequence": 2
+    },
+    {
+      "semanticsEnabled": true,
+      "focusIdentity": 947482795,
+      "focusKeys": [],
+      "confirmation": false,
+      "controlsEnabled": {
+        "theme-purple": true,
+        "theme-green": true,
+        "theme-blue": true,
+        "theme-mono": true,
+        "nav-0": true,
+        "nav-1": true,
+        "nav-2": true,
+        "nav-3": true,
+        "nav-4": true,
+        "inbox-filter-all": true,
+        "inbox-filter-pending": true,
+        "inbox-filter-handled": true,
+        "library-credentials-mode": true,
+        "new-information": true,
+        "library-tag-filter": true,
+        "QrBAzNHboqkswcMUPhmsTRnGHsRC-Hw1TSAznY-NtBY=": true,
+        "edit-information-category": true,
+        "edit-information-description": true,
+        "export-file-zhfqhWV8uBJFXxwsN7CAzsDsEyzswjuc8guTtsQlK6k=": true,
+        "new-credential": true,
+        "item-name": true,
+        "item-description": true,
+        "item-tags": true,
+        "field-name-0": true,
+        "field-value-0": true,
+        "field-description-0": true,
+        "field-name-1": true,
+        "choose-file-1": true,
+        "field-description-1": true,
+        "add-field": true,
+        "save-information": true
+      },
+      "editor": {
+        "description": "BaselineDescription",
+        "name": "Mac 焦点合成资料",
+        "fileStages": 0
+      },
+      "persistedDescription": "BaselineDescription",
+      "observedAtEpochSeconds": 1792671682.268666,
+      "sequence": 3
+    },
+    {
+      "semanticsEnabled": true,
+      "focusIdentity": 439057646,
+      "focusKeys": [
+        "item-name"
+      ],
+      "editingValue": {
+        "text": "Mac 焦点合成资料",
+        "selection": [
+          10,
+          10
+        ],
+        "composing": [
+          -1,
+          -1
+        ]
+      },
+      "confirmation": false,
+      "controlsEnabled": {
+        "theme-purple": true,
+        "theme-green": true,
+        "theme-blue": true,
+        "theme-mono": true,
+        "nav-0": true,
+        "nav-1": true,
+        "nav-2": true,
+        "nav-3": true,
+        "nav-4": true,
+        "inbox-filter-all": true,
+        "inbox-filter-pending": true,
+        "inbox-filter-handled": true,
+        "library-credentials-mode": true,
+        "new-information": true,
+        "library-tag-filter": true,
+        "QrBAzNHboqkswcMUPhmsTRnGHsRC-Hw1TSAznY-NtBY=": true,
+        "edit-information-category": true,
+        "edit-information-description": true,
+        "export-file-zhfqhWV8uBJFXxwsN7CAzsDsEyzswjuc8guTtsQlK6k=": true,
+        "new-credential": true,
+        "item-name": true,
+        "item-description": true,
+        "item-tags": true,
+        "field-name-0": true,
+        "field-value-0": true,
+        "field-description-0": true,
+        "field-name-1": true,
+        "choose-file-1": true,
+        "field-description-1": true,
+        "add-field": true,
+        "save-information": true
+      },
+      "editor": {
+        "description": "BaselineDescription",
+        "name": "Mac 焦点合成资料",
+        "fileStages": 0
+      },
+      "persistedDescription": "BaselineDescription",
+      "observedAtEpochSeconds": 1792671692.685632,
+      "sequence": 4
+    },
+    {
+      "semanticsEnabled": true,
+      "focusIdentity": 439057646,
+      "focusKeys": [
+        "item-name"
+      ],
+      "editingValue": {
+        "text": "Mac 焦点合成资料",
+        "selection": [
+          0,
+          10
+        ],
+        "composing": [
+          -1,
+          -1
+        ]
+      },
+      "confirmation": false,
+      "controlsEnabled": {
+        "theme-purple": true,
+        "theme-green": true,
+        "theme-blue": true,
+        "theme-mono": true,
+        "nav-0": true,
+        "nav-1": true,
+        "nav-2": true,
+        "nav-3": true,
+        "nav-4": true,
+        "inbox-filter-all": true,
+        "inbox-filter-pending": true,
+        "inbox-filter-handled": true,
+        "library-credentials-mode": true,
+        "new-information": true,
+        "library-tag-filter": true,
+        "QrBAzNHboqkswcMUPhmsTRnGHsRC-Hw1TSAznY-NtBY=": true,
+        "edit-information-category": true,
+        "edit-information-description": true,
+        "export-file-zhfqhWV8uBJFXxwsN7CAzsDsEyzswjuc8guTtsQlK6k=": true,
+        "new-credential": true,
+        "item-name": true,
+        "item-description": true,
+        "item-tags": true,
+        "field-name-0": true,
+        "field-value-0": true,
+        "field-description-0": true,
+        "field-name-1": true,
+        "choose-file-1": true,
+        "field-description-1": true,
+        "add-field": true,
+        "save-information": true
+      },
+      "editor": {
+        "description": "BaselineDescription",
+        "name": "Mac 焦点合成资料",
+        "fileStages": 0
+      },
+      "persistedDescription": "BaselineDescription",
+      "observedAtEpochSeconds": 1792671692.770905,
+      "sequence": 5
+    },
+    {
+      "semanticsEnabled": true,
+      "focusIdentity": 439057646,
+      "focusKeys": [
+        "item-name"
+      ],
+      "editingValue": {
+        "text": "SyntheticNameAlpha",
+        "selection": [
+          18,
+          18
+        ],
+        "composing": [
+          -1,
+          -1
+        ]
+      },
+      "confirmation": false,
+      "controlsEnabled": {
+        "theme-purple": true,
+        "theme-green": true,
+        "theme-blue": true,
+        "theme-mono": true,
+        "nav-0": true,
+        "nav-1": true,
+        "nav-2": true,
+        "nav-3": true,
+        "nav-4": true,
+        "inbox-filter-all": true,
+        "inbox-filter-pending": true,
+        "inbox-filter-handled": true,
+        "library-credentials-mode": true,
+        "new-information": true,
+        "library-tag-filter": true,
+        "QrBAzNHboqkswcMUPhmsTRnGHsRC-Hw1TSAznY-NtBY=": true,
+        "edit-information-category": true,
+        "edit-information-description": true,
+        "export-file-zhfqhWV8uBJFXxwsN7CAzsDsEyzswjuc8guTtsQlK6k=": true,
+        "new-credential": true,
+        "item-name": true,
+        "item-description": true,
+        "item-tags": true,
+        "field-name-0": true,
+        "field-value-0": true,
+        "field-description-0": true,
+        "field-name-1": true,
+        "choose-file-1": true,
+        "field-description-1": true,
+        "add-field": true,
+        "save-information": true
+      },
+      "editor": {
+        "description": "BaselineDescription",
+        "name": "SyntheticNameAlpha",
+        "fileStages": 0
+      },
+      "persistedDescription": "BaselineDescription",
+      "observedAtEpochSeconds": 1792671692.869094,
+      "sequence": 6
+    },
+    {
+      "semanticsEnabled": true,
+      "focusIdentity": 510176444,
+      "focusKeys": [
+        "item-description"
+      ],
+      "editingValue": {
+        "text": "BaselineDescription",
+        "selection": [
+          19,
+          19
+        ],
+        "composing": [
+          -1,
+          -1
+        ]
+      },
+      "confirmation": false,
+      "controlsEnabled": {
+        "theme-purple": true,
+        "theme-green": true,
+        "theme-blue": true,
+        "theme-mono": true,
+        "nav-0": true,
+        "nav-1": true,
+        "nav-2": true,
+        "nav-3": true,
+        "nav-4": true,
+        "inbox-filter-all": true,
+        "inbox-filter-pending": true,
+        "inbox-filter-handled": true,
+        "library-credentials-mode": true,
+        "new-information": true,
+        "library-tag-filter": true,
+        "QrBAzNHboqkswcMUPhmsTRnGHsRC-Hw1TSAznY-NtBY=": true,
+        "edit-information-category": true,
+        "edit-information-description": true,
+        "export-file-zhfqhWV8uBJFXxwsN7CAzsDsEyzswjuc8guTtsQlK6k=": true,
+        "new-credential": true,
+        "item-name": true,
+        "item-description": true,
+        "item-tags": true,
+        "field-name-0": true,
+        "field-value-0": true,
+        "field-description-0": true,
+        "field-name-1": true,
+        "choose-file-1": true,
+        "field-description-1": true,
+        "add-field": true,
+        "save-information": true
+      },
+      "editor": {
+        "description": "BaselineDescription",
+        "name": "SyntheticNameAlpha",
+        "fileStages": 0
+      },
+      "persistedDescription": "BaselineDescription",
+      "observedAtEpochSeconds": 1792671693.470248,
+      "sequence": 7
+    },
+    {
+      "semanticsEnabled": true,
+      "focusIdentity": 510176444,
+      "focusKeys": [
+        "item-description"
+      ],
+      "editingValue": {
+        "text": "SyntheticDescriptionBeta",
+        "selection": [
+          24,
+          24
+        ],
+        "composing": [
+          -1,
+          -1
+        ]
+      },
+      "confirmation": false,
+      "controlsEnabled": {
+        "theme-purple": true,
+        "theme-green": true,
+        "theme-blue": true,
+        "theme-mono": true,
+        "nav-0": true,
+        "nav-1": true,
+        "nav-2": true,
+        "nav-3": true,
+        "nav-4": true,
+        "inbox-filter-all": true,
+        "inbox-filter-pending": true,
+        "inbox-filter-handled": true,
+        "library-credentials-mode": true,
+        "new-information": true,
+        "library-tag-filter": true,
+        "QrBAzNHboqkswcMUPhmsTRnGHsRC-Hw1TSAznY-NtBY=": true,
+        "edit-information-category": true,
+        "edit-information-description": true,
+        "export-file-zhfqhWV8uBJFXxwsN7CAzsDsEyzswjuc8guTtsQlK6k=": true,
+        "new-credential": true,
+        "item-name": true,
+        "item-description": true,
+        "item-tags": true,
+        "field-name-0": true,
+        "field-value-0": true,
+        "field-description-0": true,
+        "field-name-1": true,
+        "choose-file-1": true,
+        "field-description-1": true,
+        "add-field": true,
+        "save-information": true
+      },
+      "editor": {
+        "description": "SyntheticDescriptionBeta",
+        "name": "SyntheticNameAlpha",
+        "fileStages": 0
+      },
+      "persistedDescription": "BaselineDescription",
+      "observedAtEpochSeconds": 1792671693.614344,
+      "sequence": 8
+    },
+    {
+      "semanticsEnabled": true,
+      "focusIdentity": 439057646,
+      "focusKeys": [
+        "item-name"
+      ],
+      "editingValue": {
+        "text": "SyntheticNameAlpha",
+        "selection": [
+          18,
+          18
+        ],
+        "composing": [
+          -1,
+          -1
+        ]
+      },
+      "confirmation": false,
+      "controlsEnabled": {
+        "theme-purple": true,
+        "theme-green": true,
+        "theme-blue": true,
+        "theme-mono": true,
+        "nav-0": true,
+        "nav-1": true,
+        "nav-2": true,
+        "nav-3": true,
+        "nav-4": true,
+        "inbox-filter-all": true,
+        "inbox-filter-pending": true,
+        "inbox-filter-handled": true,
+        "library-credentials-mode": true,
+        "new-information": true,
+        "library-tag-filter": true,
+        "QrBAzNHboqkswcMUPhmsTRnGHsRC-Hw1TSAznY-NtBY=": true,
+        "edit-information-category": true,
+        "edit-information-description": true,
+        "export-file-zhfqhWV8uBJFXxwsN7CAzsDsEyzswjuc8guTtsQlK6k=": true,
+        "new-credential": true,
+        "item-name": true,
+        "item-description": true,
+        "item-tags": true,
+        "field-name-0": true,
+        "field-value-0": true,
+        "field-description-0": true,
+        "field-name-1": true,
+        "choose-file-1": true,
+        "field-description-1": true,
+        "add-field": true,
+        "save-information": true
+      },
+      "editor": {
+        "description": "SyntheticDescriptionBeta",
+        "name": "SyntheticNameAlpha",
+        "fileStages": 0
+      },
+      "persistedDescription": "BaselineDescription",
+      "observedAtEpochSeconds": 1792671694.190735,
+      "sequence": 9
+    },
+    {
+      "semanticsEnabled": true,
+      "focusIdentity": 439057646,
+      "focusKeys": [
+        "item-name"
+      ],
+      "editingValue": {
+        "text": "SyntheticNameAlpha",
+        "selection": [
+          0,
+          18
+        ],
+        "composing": [
+          -1,
+          -1
+        ]
+      },
+      "confirmation": false,
+      "controlsEnabled": {
+        "theme-purple": true,
+        "theme-green": true,
+        "theme-blue": true,
+        "theme-mono": true,
+        "nav-0": true,
+        "nav-1": true,
+        "nav-2": true,
+        "nav-3": true,
+        "nav-4": true,
+        "inbox-filter-all": true,
+        "inbox-filter-pending": true,
+        "inbox-filter-handled": true,
+        "library-credentials-mode": true,
+        "new-information": true,
+        "library-tag-filter": true,
+        "QrBAzNHboqkswcMUPhmsTRnGHsRC-Hw1TSAznY-NtBY=": true,
+        "edit-information-category": true,
+        "edit-information-description": true,
+        "export-file-zhfqhWV8uBJFXxwsN7CAzsDsEyzswjuc8guTtsQlK6k=": true,
+        "new-credential": true,
+        "item-name": true,
+        "item-description": true,
+        "item-tags": true,
+        "field-name-0": true,
+        "field-value-0": true,
+        "field-description-0": true,
+        "field-name-1": true,
+        "choose-file-1": true,
+        "field-description-1": true,
+        "add-field": true,
+        "save-information": true
+      },
+      "editor": {
+        "description": "SyntheticDescriptionBeta",
+        "name": "SyntheticNameAlpha",
+        "fileStages": 0
+      },
+      "persistedDescription": "BaselineDescription",
+      "observedAtEpochSeconds": 1792671694.270391,
+      "sequence": 10
+    },
+    {
+      "semanticsEnabled": true,
+      "focusIdentity": 439057646,
+      "focusKeys": [
+        "item-name"
+      ],
+      "editingValue": {
+        "text": "Mac 焦点合成资料",
+        "selection": [
+          10,
+          10
+        ],
+        "composing": [
+          -1,
+          -1
+        ]
+      },
+      "confirmation": false,
+      "controlsEnabled": {
+        "theme-purple": true,
+        "theme-green": true,
+        "theme-blue": true,
+        "theme-mono": true,
+        "nav-0": true,
+        "nav-1": true,
+        "nav-2": true,
+        "nav-3": true,
+        "nav-4": true,
+        "inbox-filter-all": true,
+        "inbox-filter-pending": true,
+        "inbox-filter-handled": true,
+        "library-credentials-mode": true,
+        "new-information": true,
+        "library-tag-filter": true,
+        "QrBAzNHboqkswcMUPhmsTRnGHsRC-Hw1TSAznY-NtBY=": true,
+        "edit-information-category": true,
+        "edit-information-description": true,
+        "export-file-zhfqhWV8uBJFXxwsN7CAzsDsEyzswjuc8guTtsQlK6k=": true,
+        "new-credential": true,
+        "item-name": true,
+        "item-description": true,
+        "item-tags": true,
+        "field-name-0": true,
+        "field-value-0": true,
+        "field-description-0": true,
+        "field-name-1": true,
+        "choose-file-1": true,
+        "field-description-1": true,
+        "add-field": true,
+        "save-information": true
+      },
+      "editor": {
+        "description": "SyntheticDescriptionBeta",
+        "name": "Mac 焦点合成资料",
+        "fileStages": 0
+      },
+      "persistedDescription": "BaselineDescription",
+      "observedAtEpochSeconds": 1792671694.36929,
+      "sequence": 11
+    },
+    {
+      "semanticsEnabled": true,
+      "focusIdentity": 510176444,
+      "focusKeys": [
+        "item-description"
+      ],
+      "editingValue": {
+        "text": "SyntheticDescriptionBeta",
+        "selection": [
+          24,
+          24
+        ],
+        "composing": [
+          -1,
+          -1
+        ]
+      },
+      "confirmation": false,
+      "controlsEnabled": {
+        "theme-purple": true,
+        "theme-green": true,
+        "theme-blue": true,
+        "theme-mono": true,
+        "nav-0": true,
+        "nav-1": true,
+        "nav-2": true,
+        "nav-3": true,
+        "nav-4": true,
+        "inbox-filter-all": true,
+        "inbox-filter-pending": true,
+        "inbox-filter-handled": true,
+        "library-credentials-mode": true,
+        "new-information": true,
+        "library-tag-filter": true,
+        "QrBAzNHboqkswcMUPhmsTRnGHsRC-Hw1TSAznY-NtBY=": true,
+        "edit-information-category": true,
+        "edit-information-description": true,
+        "export-file-zhfqhWV8uBJFXxwsN7CAzsDsEyzswjuc8guTtsQlK6k=": true,
+        "new-credential": true,
+        "item-name": true,
+        "item-description": true,
+        "item-tags": true,
+        "field-name-0": true,
+        "field-value-0": true,
+        "field-description-0": true,
+        "field-name-1": true,
+        "choose-file-1": true,
+        "field-description-1": true,
+        "add-field": true,
+        "save-information": true
+      },
+      "editor": {
+        "description": "SyntheticDescriptionBeta",
+        "name": "Mac 焦点合成资料",
+        "fileStages": 0
+      },
+      "persistedDescription": "BaselineDescription",
+      "observedAtEpochSeconds": 1792671694.980636,
+      "sequence": 12
+    },
+    {
+      "semanticsEnabled": true,
+      "focusIdentity": 510176444,
+      "focusKeys": [
+        "item-description"
+      ],
+      "editingValue": {
+        "text": "SyntheticDescriptionBeta",
+        "selection": [
+          0,
+          24
+        ],
+        "composing": [
+          -1,
+          -1
+        ]
+      },
+      "confirmation": false,
+      "controlsEnabled": {
+        "theme-purple": true,
+        "theme-green": true,
+        "theme-blue": true,
+        "theme-mono": true,
+        "nav-0": true,
+        "nav-1": true,
+        "nav-2": true,
+        "nav-3": true,
+        "nav-4": true,
+        "inbox-filter-all": true,
+        "inbox-filter-pending": true,
+        "inbox-filter-handled": true,
+        "library-credentials-mode": true,
+        "new-information": true,
+        "library-tag-filter": true,
+        "QrBAzNHboqkswcMUPhmsTRnGHsRC-Hw1TSAznY-NtBY=": true,
+        "edit-information-category": true,
+        "edit-information-description": true,
+        "export-file-zhfqhWV8uBJFXxwsN7CAzsDsEyzswjuc8guTtsQlK6k=": true,
+        "new-credential": true,
+        "item-name": true,
+        "item-description": true,
+        "item-tags": true,
+        "field-name-0": true,
+        "field-value-0": true,
+        "field-description-0": true,
+        "field-name-1": true,
+        "choose-file-1": true,
+        "field-description-1": true,
+        "add-field": true,
+        "save-information": true
+      },
+      "editor": {
+        "description": "SyntheticDescriptionBeta",
+        "name": "Mac 焦点合成资料",
+        "fileStages": 0
+      },
+      "persistedDescription": "BaselineDescription",
+      "observedAtEpochSeconds": 1792671721.917789,
+      "sequence": 13
+    },
+    {
+      "semanticsEnabled": true,
+      "focusIdentity": 510176444,
+      "focusKeys": [
+        "item-description"
+      ],
+      "editingValue": {
+        "text": "n",
+        "selection": [
+          1,
+          1
+        ],
+        "composing": [
+          0,
+          1
+        ]
+      },
+      "confirmation": false,
+      "controlsEnabled": {
+        "theme-purple": true,
+        "theme-green": true,
+        "theme-blue": true,
+        "theme-mono": true,
+        "nav-0": true,
+        "nav-1": true,
+        "nav-2": true,
+        "nav-3": true,
+        "nav-4": true,
+        "inbox-filter-all": true,
+        "inbox-filter-pending": true,
+        "inbox-filter-handled": true,
+        "library-credentials-mode": true,
+        "new-information": true,
+        "library-tag-filter": true,
+        "QrBAzNHboqkswcMUPhmsTRnGHsRC-Hw1TSAznY-NtBY=": true,
+        "edit-information-category": true,
+        "edit-information-description": true,
+        "export-file-zhfqhWV8uBJFXxwsN7CAzsDsEyzswjuc8guTtsQlK6k=": true,
+        "new-credential": true,
+        "item-name": true,
+        "item-description": true,
+        "item-tags": true,
+        "field-name-0": true,
+        "field-value-0": true,
+        "field-description-0": true,
+        "field-name-1": true,
+        "choose-file-1": true,
+        "field-description-1": true,
+        "add-field": true,
+        "save-information": true
+      },
+      "editor": {
+        "description": "n",
+        "name": "Mac 焦点合成资料",
+        "fileStages": 0
+      },
+      "persistedDescription": "BaselineDescription",
+      "observedAtEpochSeconds": 1792671760.586056,
+      "sequence": 14
+    },
+    {
+      "semanticsEnabled": true,
+      "focusIdentity": 510176444,
+      "focusKeys": [
+        "item-description"
+      ],
+      "editingValue": {
+        "text": "ni hao",
+        "selection": [
+          6,
+          6
+        ],
+        "composing": [
+          0,
+          6
+        ]
+      },
+      "confirmation": false,
+      "controlsEnabled": {
+        "theme-purple": true,
+        "theme-green": true,
+        "theme-blue": true,
+        "theme-mono": true,
+        "nav-0": true,
+        "nav-1": true,
+        "nav-2": true,
+        "nav-3": true,
+        "nav-4": true,
+        "inbox-filter-all": true,
+        "inbox-filter-pending": true,
+        "inbox-filter-handled": true,
+        "library-credentials-mode": true,
+        "new-information": true,
+        "library-tag-filter": true,
+        "QrBAzNHboqkswcMUPhmsTRnGHsRC-Hw1TSAznY-NtBY=": true,
+        "edit-information-category": true,
+        "edit-information-description": true,
+        "export-file-zhfqhWV8uBJFXxwsN7CAzsDsEyzswjuc8guTtsQlK6k=": true,
+        "new-credential": true,
+        "item-name": true,
+        "item-description": true,
+        "item-tags": true,
+        "field-name-0": true,
+        "field-value-0": true,
+        "field-description-0": true,
+        "field-name-1": true,
+        "choose-file-1": true,
+        "field-description-1": true,
+        "add-field": true,
+        "save-information": true
+      },
+      "editor": {
+        "description": "ni hao",
+        "name": "Mac 焦点合成资料",
+        "fileStages": 0
+      },
+      "persistedDescription": "BaselineDescription",
+      "observedAtEpochSeconds": 1792671760.671353,
+      "sequence": 15
+    },
+    {
+      "semanticsEnabled": true,
+      "focusIdentity": 510176444,
+      "focusKeys": [
+        "item-description"
+      ],
+      "editingValue": {
+        "text": "你好",
+        "selection": [
+          2,
+          2
+        ],
+        "composing": [
+          -1,
+          -1
+        ]
+      },
+      "confirmation": false,
+      "controlsEnabled": {
+        "theme-purple": true,
+        "theme-green": true,
+        "theme-blue": true,
+        "theme-mono": true,
+        "nav-0": true,
+        "nav-1": true,
+        "nav-2": true,
+        "nav-3": true,
+        "nav-4": true,
+        "inbox-filter-all": true,
+        "inbox-filter-pending": true,
+        "inbox-filter-handled": true,
+        "library-credentials-mode": true,
+        "new-information": true,
+        "library-tag-filter": true,
+        "QrBAzNHboqkswcMUPhmsTRnGHsRC-Hw1TSAznY-NtBY=": true,
+        "edit-information-category": true,
+        "edit-information-description": true,
+        "export-file-zhfqhWV8uBJFXxwsN7CAzsDsEyzswjuc8guTtsQlK6k=": true,
+        "new-credential": true,
+        "item-name": true,
+        "item-description": true,
+        "item-tags": true,
+        "field-name-0": true,
+        "field-value-0": true,
+        "field-description-0": true,
+        "field-name-1": true,
+        "choose-file-1": true,
+        "field-description-1": true,
+        "add-field": true,
+        "save-information": true
+      },
+      "editor": {
+        "description": "你好",
+        "name": "Mac 焦点合成资料",
+        "fileStages": 0
+      },
+      "persistedDescription": "BaselineDescription",
+      "observedAtEpochSeconds": 1792671783.369699,
+      "sequence": 16
+    },
+    {
+      "semanticsEnabled": true,
+      "focusIdentity": 439057646,
+      "focusKeys": [
+        "item-name"
+      ],
+      "editingValue": {
+        "text": "Mac 焦点合成资料",
+        "selection": [
+          10,
+          10
+        ],
+        "composing": [
+          -1,
+          -1
+        ]
+      },
+      "confirmation": false,
+      "controlsEnabled": {
+        "theme-purple": true,
+        "theme-green": true,
+        "theme-blue": true,
+        "theme-mono": true,
+        "nav-0": true,
+        "nav-1": true,
+        "nav-2": true,
+        "nav-3": true,
+        "nav-4": true,
+        "inbox-filter-all": true,
+        "inbox-filter-pending": true,
+        "inbox-filter-handled": true,
+        "library-credentials-mode": true,
+        "new-information": true,
+        "library-tag-filter": true,
+        "QrBAzNHboqkswcMUPhmsTRnGHsRC-Hw1TSAznY-NtBY=": true,
+        "edit-information-category": true,
+        "edit-information-description": true,
+        "export-file-zhfqhWV8uBJFXxwsN7CAzsDsEyzswjuc8guTtsQlK6k=": true,
+        "new-credential": true,
+        "item-name": true,
+        "item-description": true,
+        "item-tags": true,
+        "field-name-0": true,
+        "field-value-0": true,
+        "field-description-0": true,
+        "field-name-1": true,
+        "choose-file-1": true,
+        "field-description-1": true,
+        "add-field": true,
+        "save-information": true
+      },
+      "editor": {
+        "description": "你好",
+        "name": "Mac 焦点合成资料",
+        "fileStages": 0
+      },
+      "persistedDescription": "BaselineDescription",
+      "observedAtEpochSeconds": 1792671783.791851,
+      "sequence": 17
+    },
+    {
+      "semanticsEnabled": true,
+      "focusIdentity": 510176444,
+      "focusKeys": [
+        "item-description"
+      ],
+      "editingValue": {
+        "text": "你好",
+        "selection": [
+          2,
+          2
+        ],
+        "composing": [
+          -1,
+          -1
+        ]
+      },
+      "confirmation": false,
+      "controlsEnabled": {
+        "theme-purple": true,
+        "theme-green": true,
+        "theme-blue": true,
+        "theme-mono": true,
+        "nav-0": true,
+        "nav-1": true,
+        "nav-2": true,
+        "nav-3": true,
+        "nav-4": true,
+        "inbox-filter-all": true,
+        "inbox-filter-pending": true,
+        "inbox-filter-handled": true,
+        "library-credentials-mode": true,
+        "new-information": true,
+        "library-tag-filter": true,
+        "QrBAzNHboqkswcMUPhmsTRnGHsRC-Hw1TSAznY-NtBY=": true,
+        "edit-information-category": true,
+        "edit-information-description": true,
+        "export-file-zhfqhWV8uBJFXxwsN7CAzsDsEyzswjuc8guTtsQlK6k=": true,
+        "new-credential": true,
+        "item-name": true,
+        "item-description": true,
+        "item-tags": true,
+        "field-name-0": true,
+        "field-value-0": true,
+        "field-description-0": true,
+        "field-name-1": true,
+        "choose-file-1": true,
+        "field-description-1": true,
+        "add-field": true,
+        "save-information": true
+      },
+      "editor": {
+        "description": "你好",
+        "name": "Mac 焦点合成资料",
+        "fileStages": 0
+      },
+      "persistedDescription": "BaselineDescription",
+      "observedAtEpochSeconds": 1792671784.288789,
+      "sequence": 18
+    },
+    {
+      "semanticsEnabled": true,
+      "focusIdentity": 92321889,
+      "focusKeys": [],
+      "confirmation": false,
+      "controlsEnabled": {
+        "theme-purple": true,
+        "theme-green": true,
+        "theme-blue": true,
+        "theme-mono": true,
+        "nav-0": true,
+        "nav-1": true,
+        "nav-2": true,
+        "nav-3": true,
+        "nav-4": true,
+        "inbox-filter-all": true,
+        "inbox-filter-pending": true,
+        "inbox-filter-handled": true,
+        "library-credentials-mode": true,
+        "new-information": true,
+        "library-tag-filter": true,
+        "QrBAzNHboqkswcMUPhmsTRnGHsRC-Hw1TSAznY-NtBY=": true,
+        "edit-information-category": true,
+        "edit-information-description": true,
+        "export-file-zhfqhWV8uBJFXxwsN7CAzsDsEyzswjuc8guTtsQlK6k=": true,
+        "new-credential": true,
+        "item-name": true,
+        "item-description": true,
+        "item-tags": true,
+        "field-name-0": true,
+        "field-value-0": true,
+        "field-description-0": true,
+        "field-name-1": true,
+        "choose-file-1": true,
+        "field-description-1": true,
+        "add-field": true,
+        "save-information": true
+      },
+      "editor": {
+        "description": "你好",
+        "name": "Mac 焦点合成资料",
+        "fileStages": 0
+      },
+      "persistedDescription": "BaselineDescription",
+      "observedAtEpochSeconds": 1792671808.387954,
+      "sequence": 19
+    },
+    {
+      "semanticsEnabled": true,
+      "focusIdentity": 862419942,
+      "focusKeys": [],
+      "confirmation": true,
+      "controlsEnabled": {
+        "theme-purple": true,
+        "theme-green": true,
+        "theme-blue": true,
+        "theme-mono": true,
+        "nav-0": true,
+        "nav-1": true,
+        "nav-2": true,
+        "nav-3": true,
+        "nav-4": true,
+        "inbox-filter-all": true,
+        "inbox-filter-pending": true,
+        "inbox-filter-handled": true,
+        "library-credentials-mode": true,
+        "new-information": true,
+        "library-tag-filter": true,
+        "QrBAzNHboqkswcMUPhmsTRnGHsRC-Hw1TSAznY-NtBY=": true,
+        "edit-information-category": true,
+        "edit-information-description": true,
+        "export-file-zhfqhWV8uBJFXxwsN7CAzsDsEyzswjuc8guTtsQlK6k=": true,
+        "new-credential": true,
+        "item-name": false,
+        "item-description": false,
+        "item-tags": false,
+        "field-name-0": false,
+        "field-value-0": false,
+        "field-description-0": false,
+        "field-name-1": false,
+        "choose-file-1": false,
+        "field-description-1": false,
+        "add-field": false,
+        "save-information": false
+      },
+      "editor": {
+        "description": "你好",
+        "name": "Mac 焦点合成资料",
+        "fileStages": 0
+      },
+      "persistedDescription": "BaselineDescription",
+      "observedAtEpochSeconds": 1792671808.470547,
+      "sequence": 20
+    },
+    {
+      "semanticsEnabled": true,
+      "focusIdentity": 906238115,
+      "focusKeys": [],
+      "confirmation": true,
+      "controlsEnabled": {
+        "theme-purple": true,
+        "theme-green": true,
+        "theme-blue": true,
+        "theme-mono": true,
+        "nav-0": true,
+        "nav-1": true,
+        "nav-2": true,
+        "nav-3": true,
+        "nav-4": true,
+        "inbox-filter-all": true,
+        "inbox-filter-pending": true,
+        "inbox-filter-handled": true,
+        "library-credentials-mode": true,
+        "new-information": true,
+        "library-tag-filter": true,
+        "QrBAzNHboqkswcMUPhmsTRnGHsRC-Hw1TSAznY-NtBY=": true,
+        "edit-information-category": true,
+        "edit-information-description": true,
+        "export-file-zhfqhWV8uBJFXxwsN7CAzsDsEyzswjuc8guTtsQlK6k=": true,
+        "new-credential": true,
+        "item-name": false,
+        "item-description": false,
+        "item-tags": false,
+        "field-name-0": false,
+        "field-value-0": false,
+        "field-description-0": false,
+        "field-name-1": false,
+        "choose-file-1": false,
+        "field-description-1": false,
+        "add-field": false,
+        "save-information": false
+      },
+      "editor": {
+        "description": "你好",
+        "name": "Mac 焦点合成资料",
+        "fileStages": 0
+      },
+      "persistedDescription": "BaselineDescription",
+      "observedAtEpochSeconds": 1792671808.869641,
+      "sequence": 21
+    },
+    {
+      "semanticsEnabled": true,
+      "focusIdentity": 906238115,
+      "focusKeys": [],
+      "confirmation": false,
+      "controlsEnabled": {
+        "theme-purple": true,
+        "theme-green": true,
+        "theme-blue": true,
+        "theme-mono": true,
+        "nav-0": true,
+        "nav-1": true,
+        "nav-2": true,
+        "nav-3": true,
+        "nav-4": true,
+        "inbox-filter-all": true,
+        "inbox-filter-pending": true,
+        "inbox-filter-handled": true,
+        "library-credentials-mode": true,
+        "new-information": true,
+        "library-tag-filter": true,
+        "QrBAzNHboqkswcMUPhmsTRnGHsRC-Hw1TSAznY-NtBY=": true,
+        "edit-information-category": true,
+        "edit-information-description": true,
+        "export-file-zhfqhWV8uBJFXxwsN7CAzsDsEyzswjuc8guTtsQlK6k=": true,
+        "new-credential": true
+      },
+      "editor": null,
+      "persistedDescription": "BaselineDescription",
+      "observedAtEpochSeconds": 1792671808.969864,
+      "sequence": 22
+    }
+  ],
+  "latest": {
+    "semanticsEnabled": true,
+    "focusIdentity": 906238115,
+    "focusKeys": [],
+    "confirmation": false,
+    "controlsEnabled": {
+      "theme-purple": true,
+      "theme-green": true,
+      "theme-blue": true,
+      "theme-mono": true,
+      "nav-0": true,
+      "nav-1": true,
+      "nav-2": true,
+      "nav-3": true,
+      "nav-4": true,
+      "inbox-filter-all": true,
+      "inbox-filter-pending": true,
+      "inbox-filter-handled": true,
+      "library-credentials-mode": true,
+      "new-information": true,
+      "library-tag-filter": true,
+      "QrBAzNHboqkswcMUPhmsTRnGHsRC-Hw1TSAznY-NtBY=": true,
+      "edit-information-category": true,
+      "edit-information-description": true,
+      "export-file-zhfqhWV8uBJFXxwsN7CAzsDsEyzswjuc8guTtsQlK6k=": true,
+      "new-credential": true
+    },
+    "editor": null,
+    "persistedDescription": "BaselineDescription",
+    "observedAtEpochSeconds": 1792671808.969864,
+    "sequence": 22
+  },
+  "libraryCloses": 1,
+  "flutterErrors": 0,
+  "observationFinishedByNormalClose": true,
+  "portClosedAfterExit": true
+}
