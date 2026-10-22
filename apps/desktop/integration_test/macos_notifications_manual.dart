@@ -98,8 +98,8 @@ Future<void> main() async {
       Platform.environment['MAC_NOTIFICATION_REUSE_PERMISSION'] == '1';
   final permissionSettings =
       Platform.environment['MAC_NOTIFICATION_PERMISSION_SETTINGS'] == '1';
-  final deliveryFailure =
-      Platform.environment['MAC_NOTIFICATION_DELIVERY_FAILURE'] == '1';
+  final stalePermission =
+      Platform.environment['MAC_NOTIFICATION_STALE_PERMISSION'] == '1';
   check(
     Platform.isMacOS &&
         owner != null &&
@@ -235,7 +235,7 @@ Future<void> main() async {
     if (permissionSettings) {
       check(reusePermission, 'Settings test requires existing system decision');
       await service.owner.setNotificationsEnabled(true);
-      if (deliveryFailure) {
+      if (stalePermission) {
         final gate = File('$canonical/dispatch-after-system-denial');
         await phase('disable-only-qa-app-then-create-owned-dispatch-gate');
         await until(
@@ -253,8 +253,8 @@ Future<void> main() async {
           'App must retain actual initial cache until dispatch',
         );
         final item = service.owner.information.single;
-        final session = service.agent.openSession('实际投递失败合成聊天');
-        final request = service.agent.request(session, '实际系统拒绝投递后保留申请', [
+        final session = service.agent.openSession('系统设置变化合成聊天');
+        final request = service.agent.request(session, '系统关闭通知后保留申请', [
           FieldRef(item.id, item.fields.single.id),
         ]);
         await until(
@@ -265,13 +265,13 @@ Future<void> main() async {
         await save();
         check(
           platform.submissionResults.single['accepted'] == false,
-          'System accepted attempt; not proof of delivery failure',
+          'Stale system permission allowed notification submission',
         );
         await until(
           () =>
               runtime.availability.notifications ==
-              NotificationAvailability.unavailable,
-          'Production delivery failure fallback',
+              NotificationAvailability.denied,
+          'Production stale permission refresh',
         );
         check(
           service.owner
@@ -279,20 +279,22 @@ Future<void> main() async {
               .entries
               .singleWhere((r) => r.id == request.id)
               .pending,
-          'Failed delivery lost request',
+          'Changed permission lost request',
         );
-        facts['deliveryFailureObserved'] = true;
+        facts['stalePermissionObserved'] = true;
         (facts['cases'] as List).add({
-          'label': 'actual-native-delivery-failure',
+          'label': 'actual-native-stale-permission',
           'requestId': request.id,
           'accepted': false,
           'runtimeState': runtime.availability.notifications.name,
           'requestPending': true,
           'submissions': platform.submissions,
         });
-        await phase('delivery-failure-observed-check-denied-in-app');
+        await phase('stale-permission-observed-check-denied-in-app');
       }
-      await phase('settings-enabled-ready-disable-only-this-qa-app');
+      if (!stalePermission) {
+        await phase('settings-enabled-ready-disable-only-this-qa-app');
+      }
       await until(
         () =>
             runtime.availability.notifications ==
@@ -313,7 +315,7 @@ Future<void> main() async {
         'Application reminders must remain enabled',
       );
       check(
-        platform.submissions == (deliveryFailure ? 1 : 0),
+        platform.submissions == (stalePermission ? 1 : 0),
         'Denied system permission dispatched notification',
       );
       check(
@@ -347,7 +349,7 @@ Future<void> main() async {
         'CUA system Settings restore and actual app check button',
       );
       check(
-        platform.submissions == (deliveryFailure ? 1 : 0),
+        platform.submissions == (stalePermission ? 1 : 0),
         'Restoring permission replayed notification',
       );
       check(

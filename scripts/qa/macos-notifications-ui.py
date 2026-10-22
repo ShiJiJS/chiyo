@@ -33,13 +33,13 @@ def main():
                         help='Require existing system grant; no startup permission request')
     parser.add_argument('--permission-settings', action='store_true',
                         help='Check actual Settings denial/restoration without submitting notifications')
-    parser.add_argument('--delivery-failure', action='store_true',
-                        help='With --permission-settings, submit once after actual denial but before app refresh')
+    parser.add_argument('--stale-permission', action='store_true',
+                        help='With --permission-settings, check one native attempt after actual denial but before app refresh')
     args = parser.parse_args()
     if args.permission_settings and not args.reuse_permission:
         parser.error('--permission-settings requires --reuse-permission')
-    if args.delivery_failure and not args.permission_settings:
-        parser.error('--delivery-failure requires --permission-settings')
+    if args.stale_permission and not args.permission_settings:
+        parser.error('--stale-permission requires --permission-settings')
     if os.uname().sysname != 'Darwin':
         parser.error('macOS required')
     output = args.output.resolve()
@@ -54,7 +54,7 @@ def main():
         'bundleIdentifier': IDENTITY, 'commands': [], 'scope': __doc__,
         'reusePermission': args.reuse_permission,
         'permissionSettings': args.permission_settings,
-        'deliveryFailure': args.delivery_failure}
+        'stalePermission': args.stale_permission}
     app, process, root = None, None, None
     controller = output / 'controller.json'
 
@@ -96,7 +96,7 @@ def main():
         observations = [
             ('    UNUserNotificationCenter.current().getNotificationSettings { settings in\n',
              '      self.qaNotificationTrace("settings", extra: ["authorization": settings.authorizationStatus.rawValue, "alert": settings.alertSetting.rawValue, "notificationCenter": settings.notificationCenterSetting.rawValue])\n'),
-            ('        UNUserNotificationCenter.current().add(request) { error in\n',
+            ('          UNUserNotificationCenter.current().add(request) { error in\n',
              '          self.qaNotificationTrace("accepted", identifier: request.identifier, requestId: content.userInfo["requestId"] as? String ?? "", extra: ["accepted": error == nil, "errorDomain": (error as NSError?)?.domain ?? "", "errorCode": (error as NSError?)?.code ?? 0])\n'),
             ('    completionHandler([.alert])\n',
              None),
@@ -108,7 +108,7 @@ def main():
                 text = text.replace(marker, before + marker)
             else:
                 text = text.replace(marker, marker + after)
-        marker = '        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)\n'
+        marker = '          let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)\n'
         assert text.count(marker) == 1
         text = text.replace(marker, marker + '        self.qaNotificationTrace("submit", identifier: request.identifier, requestId: content.userInfo["requestId"] as? String ?? "")\n')
         marker = '      self.desktopChannel?.invokeMethod("open", arguments: response.notification.request.content.userInfo["requestId"] as? String)\n'
@@ -157,8 +157,8 @@ def main():
             environment['MAC_NOTIFICATION_REUSE_PERMISSION'] = '1'
         if args.permission_settings:
             environment['MAC_NOTIFICATION_PERMISSION_SETTINGS'] = '1'
-        if args.delivery_failure:
-            environment['MAC_NOTIFICATION_DELIVERY_FAILURE'] = '1'
+        if args.stale_permission:
+            environment['MAC_NOTIFICATION_STALE_PERMISSION'] = '1'
         with (logs / 'application.txt').open('wb') as log:
             process = subprocess.Popen([str(app / 'Contents/MacOS/info_desktop')], cwd=source,
                                        env=environment, stdout=log, stderr=subprocess.STDOUT)
@@ -189,12 +189,12 @@ def main():
         state['application'] = {'exitCode': process.returncode, **facts}
         assert process.returncode == 0 and facts['complete'] and not facts.get('failed')
         assert facts['nativeTerminationRequested'] and facts['libraryCloses'] == 1 and facts['flutterErrors'] == 0
-        assert len(facts['cases']) == (3 if args.delivery_failure else 2)
+        assert len(facts['cases']) == (3 if args.stale_permission else 2)
         if args.permission_settings:
-            assert facts['submissions'] == (1 if args.delivery_failure else 0) and facts['permissionActions'] == 2
+            assert facts['submissions'] == (1 if args.stale_permission else 0) and facts['permissionActions'] == 2
             assert facts['permissionSettingsRestored'] and facts['pendingRequestPreservedWhileDenied']
-            if args.delivery_failure:
-                assert facts['deliveryFailureObserved']
+            if args.stale_permission:
+                assert facts['stalePermissionObserved']
         else:
             assert facts['submissions'] == 2
         state['complete'] = True
