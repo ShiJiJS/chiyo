@@ -1,0 +1,2 @@
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+2026-10-22 23:11:14.510 info_desktop[87410:6903259] error messaging the mach port for IMKCFRunLoopWakeUpReliable
