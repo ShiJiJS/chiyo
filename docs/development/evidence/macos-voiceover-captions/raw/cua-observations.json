@@ -1,0 +1,23 @@
+{
+  "source": "Session CUA AX and screenshot observations; explicit transcript, no separate screenshot files.",
+  "voiceOverInitiallyEnabled": false,
+  "captionPanelInitiallyEnabled": true,
+  "captionPanelTemporarilyToggledAndRestored": true,
+  "modifierObserved": "Control-Option or Caps Lock",
+  "voiceOverProcessObserved": 85797,
+  "voiceOverBindingTimeouts": 2,
+  "normalTabFocus": [
+    "信息名称",
+    "所在目录",
+    "公开说明"
+  ],
+  "oneControlOptionRightAttempted": true,
+  "focusAfterAttempt": "公开说明",
+  "spokenOutputVerified": false,
+  "voiceOverCursorNavigationVerified": false,
+  "savedOrReopenedClaimed": false,
+  "voiceOverFinallyEnabled": false,
+  "systemSettingsFinally": "通知",
+  "preferencesOtherwiseChanged": false,
+  "allowAppleScriptControlEnabled": false
+}
