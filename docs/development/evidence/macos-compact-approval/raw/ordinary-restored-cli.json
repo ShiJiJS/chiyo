@@ -1,0 +1,93 @@
+{
+  "exit": 0,
+  "outputs": [
+    {
+      "protocolVersion": 1,
+      "status": "ok",
+      "protocolVersions": [
+        1,
+        2
+      ],
+      "capabilities": [
+        "credential-use-reuse.v1",
+        "information-attachments.v1",
+        "credential-tools.v1"
+      ],
+      "credentialTools": [
+        {
+          "receiver": "gh_token",
+          "source": "app_bundle",
+          "available": true,
+          "version": "2.102.0",
+          "executable": "/Users/jiangxinyi/Documents/Project/agent-info/local/中文 Mac 预览/AgentInfoManage/app/info_desktop.app/Contents/Resources/ThirdParty/gh/bin/gh"
+        },
+        {
+          "receiver": "aws_shared_credentials",
+          "source": "app_bundle",
+          "available": true,
+          "version": "2.38.1",
+          "executable": "/Users/jiangxinyi/Documents/Project/agent-info/local/中文 Mac 预览/AgentInfoManage/app/info_desktop.app/Contents/Resources/ThirdParty/aws-cli/aws"
+        },
+        {
+          "receiver": "ssh_identity",
+          "source": "system",
+          "available": true,
+          "executable": "/usr/bin/ssh"
+        }
+      ]
+    },
+    {
+      "status": "ok",
+      "items": [
+        {
+          "id": "tv9sQSAODzcDEIyRJCGUm7bFdau11yMNhERmxXsFHEM=",
+          "version": 2,
+          "name": "MacPackageTest20MacPackageTest20261021261021",
+          "description": "",
+          "directoryId": null,
+          "tagIds": [],
+          "fields": [
+            {
+              "id": "ItUpylRSedlvkP-0QnIW5tkmr0Ml6HtqutjF79cPzsk=",
+              "name": "AllowedSyntheticField",
+              "description": "",
+              "kind": "structured"
+            },
+            {
+              "id": "4jzXsfbaOhkByLY1kiazgC7_oJOW-F7HOZc5BCKEelM=",
+              "name": "SyntheticAttachment",
+              "description": "",
+              "kind": "file"
+            }
+          ]
+        },
+        {
+          "id": "6lCtBfSCQPjdnvlg--OBvHoi1GNOaDWhscbS_v8bMSE=",
+          "version": 3,
+          "name": "MacSshAcceptanceEmptyAttachment",
+          "description": "",
+          "directoryId": null,
+          "tagIds": [],
+          "fields": [
+            {
+              "id": "P0dc6Vb1uWV4n_ZtIAwmGNopxSRO1qt7fEqXy0mmoyY=",
+              "name": "ZeroByteAttachment",
+              "description": "",
+              "kind": "file"
+            }
+          ]
+        }
+      ],
+      "total": 2,
+      "offset": 0,
+      "nextOffset": null
+    },
+    {
+      "protocolVersion": 1,
+      "status": "ok",
+      "credentials": [],
+      "nextCursor": null
+    }
+  ],
+  "stderr": ""
+}

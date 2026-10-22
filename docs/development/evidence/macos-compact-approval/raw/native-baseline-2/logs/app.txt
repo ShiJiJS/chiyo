@@ -1,0 +1,18 @@
+2026-10-23 01:02:12.497 info_desktop[93477:7052718] TISFileInterrogator updateSystemInputSources false but old data invalid: currentCacheHeaderPtr nonNULL? 0, ->cacheFormatVersion 0, ->magicCookie 00000000, inputSourceTableCountSys 0
+Keyboard Layouts: duplicate keyboard layout identifier -17410.
+Keyboard Layouts: keyboard layout identifier -17410 has been replaced with -28673.
+Keyboard Layouts: duplicate keyboard layout identifier -30769.
+Keyboard Layouts: keyboard layout identifier -30769 has been replaced with -28674.
+Keyboard Layouts: duplicate keyboard layout identifier -14934.
+Keyboard Layouts: keyboard layout identifier -14934 has been replaced with -28675.
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+COMPACT_QA={"kind":"ready","facts":{"port":62947,"fixtureRoot":"/Users/jiangxinyi/Library/Containers/org.shijijs.agent-info-manage.qa.compact.1a145758b50c4e7198c107495ff6f539/Data/tmp/attachment-ui-IUQ6nt","systemKeychainUsed":false}}
+COMPACT_QA={"kind":"state","facts":{"pointerSignals":0,"pointerDowns":0,"keys":0,"documentScrolls":[{"pixels":0.0,"max":591.6153846153846,"viewport":121.0,"rect":"Instance of 'Offset' Instance of 'Size'"}],"fileSummariesBuilt":0,"approveEnabled":[false],"flutterErrors":0,"semanticsEnabled":false,"requestStatus":"pending"}}
+COMPACT_QA={"kind":"state","facts":{"pointerSignals":0,"pointerDowns":0,"keys":0,"documentScrolls":[{"pixels":0.0,"max":591.6153846153846,"viewport":121.0,"rect":"Instance of 'Offset' Instance of 'Size'"}],"fileSummariesBuilt":0,"approveEnabled":[false],"flutterErrors":0,"semanticsEnabled":true,"requestStatus":"pending"}}
+COMPACT_QA={"kind":"state","facts":{"pointerSignals":0,"pointerDowns":0,"keys":0,"documentScrolls":[{"pixels":0.0,"max":435.1578947368421,"viewport":204.0,"rect":"Instance of 'Offset' Instance of 'Size'"}],"fileSummariesBuilt":0,"approveEnabled":[false],"flutterErrors":0,"semanticsEnabled":true,"requestStatus":"pending"}}
+COMPACT_QA={"kind":"state","facts":{"pointerSignals":0,"pointerDowns":0,"keys":0,"documentScrolls":[{"pixels":0.0,"max":0.0,"viewport":697.0,"rect":"Instance of 'Offset' Instance of 'Size'"}],"fileSummariesBuilt":1,"approveEnabled":[true],"flutterErrors":0,"semanticsEnabled":true,"requestStatus":"pending"}}
+COMPACT_QA={"kind":"state","facts":{"pointerSignals":0,"pointerDowns":0,"keys":0,"documentScrolls":[{"pixels":0.0,"max":0.0,"viewport":744.0,"rect":"Instance of 'Offset' Instance of 'Size'"}],"fileSummariesBuilt":1,"approveEnabled":[true],"flutterErrors":0,"semanticsEnabled":true,"requestStatus":"pending"}}
+COMPACT_QA={"kind":"state","facts":{"pointerSignals":0,"pointerDowns":0,"keys":0,"documentScrolls":[{"pixels":0.0,"max":0.0,"viewport":721.0,"rect":"Instance of 'Offset' Instance of 'Size'"}],"fileSummariesBuilt":1,"approveEnabled":[true],"flutterErrors":0,"semanticsEnabled":true,"requestStatus":"pending"}}
+COMPACT_QA={"kind":"state","facts":{"pointerSignals":0,"pointerDowns":0,"keys":0,"documentScrolls":[{"pixels":0.0,"max":365.7142857142858,"viewport":224.0,"rect":"Instance of 'Offset' Instance of 'Size'"}],"fileSummariesBuilt":0,"approveEnabled":[true],"flutterErrors":0,"semanticsEnabled":true,"requestStatus":"pending"}}
+COMPACT_QA={"kind":"state","facts":{"pointerSignals":0,"pointerDowns":0,"keys":0,"documentScrolls":[{"pixels":0.0,"max":591.6153846153846,"viewport":121.0,"rect":"Instance of 'Offset' Instance of 'Size'"}],"fileSummariesBuilt":0,"approveEnabled":[true],"flutterErrors":0,"semanticsEnabled":true,"requestStatus":"pending"}}
+COMPACT_QA={"kind":"closed","facts":{"flutterErrors":0}}

@@ -1,0 +1,19 @@
+{
+  "archiveRetained": "build/macos-adaptation/issue50-package-24/agent-info-manage-0.4.1+13-mac-dev.08c0894e8568-macos-arm64.zip",
+  "archiveSha256": "4c819c825ee0c1f13bd356770ee1b1c2d1285a3cb04730d9b8a6d817891d48de",
+  "manifestRetained": "manifest.json",
+  "removedGeneratedDirectories": [
+    "build/macos-adaptation/issue50-package-24/AgentInfoManage",
+    "build/macos-adaptation/issue50-package-24/verify",
+    "build/macos-adaptation/issue50-package-24/diagnostic-build",
+    "apps/desktop/build"
+  ],
+  "remainingAppBundles": [
+    "/Users/jiangxinyi/Documents/Project/agent-info/local/中文 Mac 预览/AgentInfoManage/app/info_desktop.app"
+  ],
+  "generatedDsym": [],
+  "stableOrdinaryAppPid": 98926,
+  "stableOrdinaryVersion": "package23 7b19d34",
+  "candidateNotInstalled": true,
+  "sdkAndRecoveryMaterialsPreserved": true
+}

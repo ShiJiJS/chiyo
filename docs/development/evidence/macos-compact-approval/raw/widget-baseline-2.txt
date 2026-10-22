@@ -1,0 +1,3 @@
+00:00 +0: loading /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/approval_compact_window_test.dart
+00:00 +0: compact full app can review a file before partial approval
+00:00 +1: All tests passed!

@@ -1,0 +1,22 @@
+[
+  {
+    "round": "native-baseline-2",
+    "exit": 0,
+    "output": ""
+  },
+  {
+    "round": "native-fixed",
+    "exit": 0,
+    "output": ""
+  },
+  {
+    "round": "native-final",
+    "exit": 0,
+    "output": ""
+  },
+  {
+    "round": "native-scroll-fallback",
+    "exit": 0,
+    "output": ""
+  }
+]

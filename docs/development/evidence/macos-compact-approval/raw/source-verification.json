@@ -1,0 +1,44 @@
+[
+  {
+    "round": "native-final",
+    "allInputFilesVerified": 671,
+    "commonBaseCommit": "ec1f863d98fd99792213372d9becf1a2a99ee1d7",
+    "threeVariableInputsVerifiedAgainstExactArchivedSources": true,
+    "productionUiMatchesFinalCommit": false
+  },
+  {
+    "round": "native-baseline",
+    "allInputFilesVerified": 671,
+    "commonBaseCommit": "ec1f863d98fd99792213372d9becf1a2a99ee1d7",
+    "threeVariableInputsVerifiedAgainstExactArchivedSources": true,
+    "productionUiMatchesFinalCommit": false
+  },
+  {
+    "round": "native-fixed",
+    "allInputFilesVerified": 671,
+    "commonBaseCommit": "ec1f863d98fd99792213372d9becf1a2a99ee1d7",
+    "threeVariableInputsVerifiedAgainstExactArchivedSources": true,
+    "productionUiMatchesFinalCommit": false
+  },
+  {
+    "round": "native-baseline-2",
+    "allInputFilesVerified": 671,
+    "commonBaseCommit": "ec1f863d98fd99792213372d9becf1a2a99ee1d7",
+    "threeVariableInputsVerifiedAgainstExactArchivedSources": true,
+    "productionUiMatchesFinalCommit": false
+  },
+  {
+    "round": "native-purpose-final",
+    "allInputFilesVerified": 671,
+    "commonBaseCommit": "ec1f863d98fd99792213372d9becf1a2a99ee1d7",
+    "threeVariableInputsVerifiedAgainstExactArchivedSources": true,
+    "productionUiMatchesFinalCommit": true
+  },
+  {
+    "round": "native-scroll-fallback",
+    "allInputFilesVerified": 671,
+    "commonBaseCommit": "ec1f863d98fd99792213372d9becf1a2a99ee1d7",
+    "threeVariableInputsVerifiedAgainstExactArchivedSources": true,
+    "productionUiMatchesFinalCommit": false
+  }
+]

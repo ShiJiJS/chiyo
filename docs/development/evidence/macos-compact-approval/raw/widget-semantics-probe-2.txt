@@ -1,0 +1,1048 @@
+00:00 +0: loading /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/approval_compact_window_test.dart
+00:00 +0: compact full app can review a file before partial approval (variant: TargetPlatform.macOS)
+COMPACT_DOCUMENT_SEMANTICS=SemanticsNode#15
+ │ Rect.fromLTRB(0.0, 146.0, 800.0, 632.0)
+ │ actions: didGainAccessibilityFocus, didLoseAccessibilityFocus,
+ │   focus, tap
+ │ flags: isTextField, hasEnabledState, isEnabled, isFocusable
+ │ label:
+ │   "请求收件箱
+ │   1
+ │   /
+ │   今天的请求
+ │   最新请求优先
+ │   显示 1–1 / 1 条
+ │   1 / 1
+ │   访问审批
+ │   请求详情
+ │   原申请 2 · 未选 0 · 补选 0
+ │   有效期 8 小时 · 读取不续期
+ │   每次提供信息，都由你决定范围。
+ │   信息保存在本机"
+ │ value: "480"
+ │ textDirection: ltr
+ │ sortKey: OrdinalSortKey#9db99(name: "447359326", order: 1.0)
+ │ currentValueLength: 3
+ │ inputType: text
+ │ validationResult: valid
+ │
+ ├─SemanticsNode#26
+ │   Rect.fromLTRB(677.0, 24.0, 772.0, 56.0)
+ │   actions: focus, tap
+ │   flags: isButton, hasEnabledState, isEnabled, isFocusable
+ │   label: "请求设置"
+ │   textDirection: ltr
+ │
+ ├─SemanticsNode#17
+ │   Rect.fromLTRB(58.0, 93.5, 255.0, 113.5)
+ │   actions: didGainAccessibilityFocus, didLoseAccessibilityFocus,
+ │     focus, tap
+ │   flags: isTextField, hasEnabledState, isEnabled, isFocusable
+ │   label:
+ │     "搜索聊天、信息名称
+ │     搜索聊天、信息名称"
+ │   textDirection: ltr
+ │   maxValueLength: 2000
+ │   currentValueLength: 0
+ │   inputType: text
+ │
+ ├─SemanticsNode#18
+ │   Rect.fromLTRB(21.0, 146.0, 85.0, 180.0)
+ │   actions: focus, tap
+ │   flags: isButton, hasEnabledState, isEnabled, isFocusable
+ │   label: "全部 1"
+ │   textDirection: ltr
+ │
+ ├─SemanticsNode#19
+ │   Rect.fromLTRB(91.0, 146.0, 167.0, 180.0)
+ │   actions: focus, tap
+ │   flags: isButton, hasEnabledState, isEnabled, isFocusable
+ │   label: "待处理 1"
+ │   textDirection: ltr
+ │
+ ├─SemanticsNode#20
+ │   Rect.fromLTRB(173.0, 146.0, 249.0, 180.0)
+ │   actions: focus, tap
+ │   flags: isButton, hasEnabledState, isEnabled, isFocusable
+ │   label: "已处理 0"
+ │   textDirection: ltr
+ │
+ ├─SemanticsNode#21
+ │ │ Rect.fromLTRB(0.0, 230.0, 293.0, 435.0)
+ │ │
+ │ └─SemanticsNode#23
+ │   │ Rect.fromLTRB(0.0, 0.0, 293.0, 205.0)
+ │   │ flags: hasImplicitScrolling
+ │   │ scrollChildren: 1
+ │   │ scrollIndex: 0
+ │   │ scrollExtentMin: 0.0
+ │   │ scrollPosition: 0.0
+ │   │ scrollExtentMax: 0.0
+ │   │
+ │   └─SemanticsNode#22
+ │       Rect.fromLTRB(0.0, 0.0, 293.0, 79.0)
+ │       tags: RenderViewport.twoPane
+ │       actions: focus, tap
+ │       flags: isFocusable
+ │       label:
+ │         "Mac 小窗口审批可达性独立复现 20261023
+ │         01:09
+ │         Agent · 读取信息
+ │         2 个字段"
+ │       textDirection: ltr
+ │       indexInParent: 0
+ │
+ ├─SemanticsNode#27
+ │ │ Rect.fromLTRB(339.0, 78.0, 755.0, 231.0)
+ │ │
+ │ └─SemanticsNode#42
+ │   │ Rect.fromLTRB(0.0, 0.0, 416.0, 153.0)
+ │   │ actions: scrollToOffset, scrollUp
+ │   │ flags: hasImplicitScrolling
+ │   │ scrollChildren: 24
+ │   │ scrollIndex: 0
+ │   │ scrollExtentMin: 0.0
+ │   │ scrollPosition: 0.0
+ │   │ scrollExtentMax: 637.2
+ │   │
+ │   ├─SemanticsNode#28
+ │   │   Rect.fromLTRB(30.0, 24.0, 386.0, 42.0)
+ │   │   tags: RenderViewport.twoPane
+ │   │   label:
+ │   │     "待处理
+ │   │     读取信息
+ │   │     还剩 30 分钟"
+ │   │   textDirection: ltr
+ │   │   indexInParent: 0
+ │   │
+ │   ├─SemanticsNode#29
+ │   │   Rect.fromLTRB(30.0, 42.0, 386.0, 54.0)
+ │   │   tags: RenderViewport.twoPane
+ │   │   indexInParent: 1
+ │   │
+ │   ├─SemanticsNode#30
+ │   │   Rect.fromLTRB(30.0, 54.0, 386.0, 153.0)
+ │   │   tags: RenderViewport.twoPane
+ │   │   label: "Mac 小窗口审批可达性独立复现 20261023"
+ │   │   textDirection: ltr
+ │   │   indexInParent: 2
+ │   │
+ │   ├─SemanticsNode#31
+ │   │   Rect.fromLTRB(30.0, 180.0, 386.0, 192.0)
+ │   │   tags: RenderViewport.twoPane
+ │   │   flags: isHidden
+ │   │   HIDDEN
+ │   │   indexInParent: 3
+ │   │
+ │   ├─SemanticsNode#32
+ │   │   Rect.fromLTRB(30.0, 192.0, 386.0, 220.0)
+ │   │   tags: RenderViewport.twoPane
+ │   │   flags: isHidden
+ │   │   HIDDEN
+ │   │   traversalParentIdentifier: _OverlayPortalState#61ec4
+ │   │   label:
+ │   │     "A
+ │   │     Agent
+ │   │     来源未记录
+ │   │     CmCHqtvF… · 01:09"
+ │   │   tooltip: "CmCHqtvFjoCrJTfmsPbnRgCv3V66GcgI1djrqQAhr3I="
+ │   │   textDirection: ltr
+ │   │   indexInParent: 4
+ │   │
+ │   ├─SemanticsNode#33
+ │   │   Rect.fromLTRB(30.0, 220.0, 386.0, 240.0)
+ │   │   tags: RenderViewport.twoPane
+ │   │   flags: isHidden
+ │   │   HIDDEN
+ │   │   indexInParent: 5
+ │   │
+ │   ├─SemanticsNode#34
+ │   │   Rect.fromLTRB(30.0, 240.0, 386.0, 258.0)
+ │   │   tags: RenderViewport.twoPane
+ │   │   flags: isHidden
+ │   │   HIDDEN
+ │   │   label: "申请用途"
+ │   │   textDirection: ltr
+ │   │   indexInParent: 6
+ │   │
+ │   ├─SemanticsNode#35
+ │   │   Rect.fromLTRB(30.0, 258.0, 386.0, 264.0)
+ │   │   tags: RenderViewport.twoPane
+ │   │   flags: isHidden
+ │   │   HIDDEN
+ │   │   indexInParent: 7
+ │   │
+ │   ├─SemanticsNode#36
+ │   │   Rect.fromLTRB(30.0, 264.0, 386.0, 291.0)
+ │   │   tags: RenderViewport.twoPane
+ │   │   flags: isHidden
+ │   │   HIDDEN
+ │   │   label: "仅合成资料复现窄窗口文件说明可达性，不修改原资料"
+ │   │   textDirection: ltr
+ │   │   indexInParent: 8
+ │   │
+ │   ├─SemanticsNode#37
+ │   │   Rect.fromLTRB(30.0, 291.0, 386.0, 297.0)
+ │   │   tags: RenderViewport.twoPane
+ │   │   flags: isHidden
+ │   │   HIDDEN
+ │   │   indexInParent: 9
+ │   │
+ │   ├─SemanticsNode#38
+ │   │   Rect.fromLTRB(30.0, 297.0, 386.0, 318.0)
+ │   │   tags: RenderViewport.twoPane
+ │   │   flags: isHidden
+ │   │   HIDDEN
+ │   │   label: "聊天名称和用途由 Agent 自述，仅供判断。"
+ │   │   textDirection: ltr
+ │   │   indexInParent: 10
+ │   │
+ │   ├─SemanticsNode#39
+ │   │   Rect.fromLTRB(30.0, 318.0, 386.0, 374.0)
+ │   │   tags: RenderViewport.twoPane
+ │   │   flags: isHidden
+ │   │   HIDDEN
+ │   │   label: "批准文件字段后，Agent 可领取并读取原文件，不只是查看文件名称。"
+ │   │   textDirection: ltr
+ │   │   indexInParent: 11
+ │   │
+ │   └─SemanticsNode#40
+ │     │ Rect.fromLTRB(30.0, 374.0, 386.0, 403.0)
+ │     │ tags: RenderViewport.twoPane
+ │     │ flags: isHidden
+ │     │ HIDDEN
+ │     │ indexInParent: 12
+ │     │
+ │     └─SemanticsNode#41
+ │         Rect.fromLTRB(0.0, 18.0, 204.0, 29.0)
+ │         actions: focus, tap
+ │         flags: isButton, hasEnabledState, isEnabled, isHidden,
+ │           isFocusable
+ │         HIDDEN
+ │         label: "调整提供范围 / 补选其他信息"
+ │         textDirection: ltr
+ │
+ ├─SemanticsNode#43
+ │   Rect.fromLTRB(354.0, 246.0, 510.0, 280.0)
+ │   actions: focus, tap
+ │   flags: isButton, hasEnabledState, isEnabled, isFocusable
+ │   label: "最终选择 2 个字段"
+ │   textDirection: ltr
+ │
+ ├─SemanticsNode#44
+ │   Rect.fromLTRB(354.0, 389.0, 434.0, 425.0)
+ │   actions: focus, tap
+ │   flags: isButton, hasEnabledState, isEnabled, isFocusable
+ │   label: "拒绝请求"
+ │   textDirection: ltr
+ │
+ ├─SemanticsNode#45
+ │   Rect.fromLTRB(442.0, 389.0, 575.0, 425.0)
+ │   flags: isButton, hasEnabledState
+ │   label: "批准所选字段"
+ │   textDirection: ltr
+ │
+ ├─SemanticsNode#24
+ │   Rect.fromLTRB(175.0, 448.0, 199.0, 474.0)
+ │   flags: isButton, hasEnabledState
+ │   traversalParentIdentifier: _OverlayPortalState#2ca9a
+ │   label: "‹"
+ │   tooltip: "上一页请求"
+ │   textDirection: ltr
+ │
+ └─SemanticsNode#25
+     Rect.fromLTRB(268.0, 448.0, 292.0, 474.0)
+     flags: isButton, hasEnabledState
+     traversalParentIdentifier: _OverlayPortalState#2bccb
+     label: "›"
+     tooltip: "下一页请求"
+     textDirection: ltr
+
+COMPACT_LIFETIME_SEMANTICS=SemanticsNode#15
+ │ Rect.fromLTRB(0.0, 146.0, 800.0, 632.0)
+ │ actions: didGainAccessibilityFocus, didLoseAccessibilityFocus,
+ │   focus, tap
+ │ flags: isTextField, hasEnabledState, isEnabled, isFocusable
+ │ label:
+ │   "请求收件箱
+ │   1
+ │   /
+ │   今天的请求
+ │   最新请求优先
+ │   显示 1–1 / 1 条
+ │   1 / 1
+ │   访问审批
+ │   请求详情
+ │   原申请 2 · 未选 0 · 补选 0
+ │   有效期 8 小时 · 读取不续期
+ │   每次提供信息，都由你决定范围。
+ │   信息保存在本机"
+ │ value: "480"
+ │ textDirection: ltr
+ │ sortKey: OrdinalSortKey#9db99(name: "447359326", order: 1.0)
+ │ currentValueLength: 3
+ │ inputType: text
+ │ validationResult: valid
+ │
+ ├─SemanticsNode#26
+ │   Rect.fromLTRB(677.0, 24.0, 772.0, 56.0)
+ │   actions: focus, tap
+ │   flags: isButton, hasEnabledState, isEnabled, isFocusable
+ │   label: "请求设置"
+ │   textDirection: ltr
+ │
+ ├─SemanticsNode#17
+ │   Rect.fromLTRB(58.0, 93.5, 255.0, 113.5)
+ │   actions: didGainAccessibilityFocus, didLoseAccessibilityFocus,
+ │     focus, tap
+ │   flags: isTextField, hasEnabledState, isEnabled, isFocusable
+ │   label:
+ │     "搜索聊天、信息名称
+ │     搜索聊天、信息名称"
+ │   textDirection: ltr
+ │   maxValueLength: 2000
+ │   currentValueLength: 0
+ │   inputType: text
+ │
+ ├─SemanticsNode#18
+ │   Rect.fromLTRB(21.0, 146.0, 85.0, 180.0)
+ │   actions: focus, tap
+ │   flags: isButton, hasEnabledState, isEnabled, isFocusable
+ │   label: "全部 1"
+ │   textDirection: ltr
+ │
+ ├─SemanticsNode#19
+ │   Rect.fromLTRB(91.0, 146.0, 167.0, 180.0)
+ │   actions: focus, tap
+ │   flags: isButton, hasEnabledState, isEnabled, isFocusable
+ │   label: "待处理 1"
+ │   textDirection: ltr
+ │
+ ├─SemanticsNode#20
+ │   Rect.fromLTRB(173.0, 146.0, 249.0, 180.0)
+ │   actions: focus, tap
+ │   flags: isButton, hasEnabledState, isEnabled, isFocusable
+ │   label: "已处理 0"
+ │   textDirection: ltr
+ │
+ ├─SemanticsNode#21
+ │ │ Rect.fromLTRB(0.0, 230.0, 293.0, 435.0)
+ │ │
+ │ └─SemanticsNode#23
+ │   │ Rect.fromLTRB(0.0, 0.0, 293.0, 205.0)
+ │   │ flags: hasImplicitScrolling
+ │   │ scrollChildren: 1
+ │   │ scrollIndex: 0
+ │   │ scrollExtentMin: 0.0
+ │   │ scrollPosition: 0.0
+ │   │ scrollExtentMax: 0.0
+ │   │
+ │   └─SemanticsNode#22
+ │       Rect.fromLTRB(0.0, 0.0, 293.0, 79.0)
+ │       tags: RenderViewport.twoPane
+ │       actions: focus, tap
+ │       flags: isFocusable
+ │       label:
+ │         "Mac 小窗口审批可达性独立复现 20261023
+ │         01:09
+ │         Agent · 读取信息
+ │         2 个字段"
+ │       textDirection: ltr
+ │       indexInParent: 0
+ │
+ ├─SemanticsNode#27
+ │ │ Rect.fromLTRB(339.0, 78.0, 755.0, 231.0)
+ │ │
+ │ └─SemanticsNode#42
+ │   │ Rect.fromLTRB(0.0, 0.0, 416.0, 153.0)
+ │   │ actions: scrollToOffset, scrollUp
+ │   │ flags: hasImplicitScrolling
+ │   │ scrollChildren: 24
+ │   │ scrollIndex: 0
+ │   │ scrollExtentMin: 0.0
+ │   │ scrollPosition: 0.0
+ │   │ scrollExtentMax: 637.2
+ │   │
+ │   ├─SemanticsNode#28
+ │   │   Rect.fromLTRB(30.0, 24.0, 386.0, 42.0)
+ │   │   tags: RenderViewport.twoPane
+ │   │   label:
+ │   │     "待处理
+ │   │     读取信息
+ │   │     还剩 30 分钟"
+ │   │   textDirection: ltr
+ │   │   indexInParent: 0
+ │   │
+ │   ├─SemanticsNode#29
+ │   │   Rect.fromLTRB(30.0, 42.0, 386.0, 54.0)
+ │   │   tags: RenderViewport.twoPane
+ │   │   indexInParent: 1
+ │   │
+ │   ├─SemanticsNode#30
+ │   │   Rect.fromLTRB(30.0, 54.0, 386.0, 153.0)
+ │   │   tags: RenderViewport.twoPane
+ │   │   label: "Mac 小窗口审批可达性独立复现 20261023"
+ │   │   textDirection: ltr
+ │   │   indexInParent: 2
+ │   │
+ │   ├─SemanticsNode#31
+ │   │   Rect.fromLTRB(30.0, 180.0, 386.0, 192.0)
+ │   │   tags: RenderViewport.twoPane
+ │   │   flags: isHidden
+ │   │   HIDDEN
+ │   │   indexInParent: 3
+ │   │
+ │   ├─SemanticsNode#32
+ │   │   Rect.fromLTRB(30.0, 192.0, 386.0, 220.0)
+ │   │   tags: RenderViewport.twoPane
+ │   │   flags: isHidden
+ │   │   HIDDEN
+ │   │   traversalParentIdentifier: _OverlayPortalState#61ec4
+ │   │   label:
+ │   │     "A
+ │   │     Agent
+ │   │     来源未记录
+ │   │     CmCHqtvF… · 01:09"
+ │   │   tooltip: "CmCHqtvFjoCrJTfmsPbnRgCv3V66GcgI1djrqQAhr3I="
+ │   │   textDirection: ltr
+ │   │   indexInParent: 4
+ │   │
+ │   ├─SemanticsNode#33
+ │   │   Rect.fromLTRB(30.0, 220.0, 386.0, 240.0)
+ │   │   tags: RenderViewport.twoPane
+ │   │   flags: isHidden
+ │   │   HIDDEN
+ │   │   indexInParent: 5
+ │   │
+ │   ├─SemanticsNode#34
+ │   │   Rect.fromLTRB(30.0, 240.0, 386.0, 258.0)
+ │   │   tags: RenderViewport.twoPane
+ │   │   flags: isHidden
+ │   │   HIDDEN
+ │   │   label: "申请用途"
+ │   │   textDirection: ltr
+ │   │   indexInParent: 6
+ │   │
+ │   ├─SemanticsNode#35
+ │   │   Rect.fromLTRB(30.0, 258.0, 386.0, 264.0)
+ │   │   tags: RenderViewport.twoPane
+ │   │   flags: isHidden
+ │   │   HIDDEN
+ │   │   indexInParent: 7
+ │   │
+ │   ├─SemanticsNode#36
+ │   │   Rect.fromLTRB(30.0, 264.0, 386.0, 291.0)
+ │   │   tags: RenderViewport.twoPane
+ │   │   flags: isHidden
+ │   │   HIDDEN
+ │   │   label: "仅合成资料复现窄窗口文件说明可达性，不修改原资料"
+ │   │   textDirection: ltr
+ │   │   indexInParent: 8
+ │   │
+ │   ├─SemanticsNode#37
+ │   │   Rect.fromLTRB(30.0, 291.0, 386.0, 297.0)
+ │   │   tags: RenderViewport.twoPane
+ │   │   flags: isHidden
+ │   │   HIDDEN
+ │   │   indexInParent: 9
+ │   │
+ │   ├─SemanticsNode#38
+ │   │   Rect.fromLTRB(30.0, 297.0, 386.0, 318.0)
+ │   │   tags: RenderViewport.twoPane
+ │   │   flags: isHidden
+ │   │   HIDDEN
+ │   │   label: "聊天名称和用途由 Agent 自述，仅供判断。"
+ │   │   textDirection: ltr
+ │   │   indexInParent: 10
+ │   │
+ │   ├─SemanticsNode#39
+ │   │   Rect.fromLTRB(30.0, 318.0, 386.0, 374.0)
+ │   │   tags: RenderViewport.twoPane
+ │   │   flags: isHidden
+ │   │   HIDDEN
+ │   │   label: "批准文件字段后，Agent 可领取并读取原文件，不只是查看文件名称。"
+ │   │   textDirection: ltr
+ │   │   indexInParent: 11
+ │   │
+ │   └─SemanticsNode#40
+ │     │ Rect.fromLTRB(30.0, 374.0, 386.0, 403.0)
+ │     │ tags: RenderViewport.twoPane
+ │     │ flags: isHidden
+ │     │ HIDDEN
+ │     │ indexInParent: 12
+ │     │
+ │     └─SemanticsNode#41
+ │         Rect.fromLTRB(0.0, 18.0, 204.0, 29.0)
+ │         actions: focus, tap
+ │         flags: isButton, hasEnabledState, isEnabled, isHidden,
+ │           isFocusable
+ │         HIDDEN
+ │         label: "调整提供范围 / 补选其他信息"
+ │         textDirection: ltr
+ │
+ ├─SemanticsNode#43
+ │   Rect.fromLTRB(354.0, 246.0, 510.0, 280.0)
+ │   actions: focus, tap
+ │   flags: isButton, hasEnabledState, isEnabled, isFocusable
+ │   label: "最终选择 2 个字段"
+ │   textDirection: ltr
+ │
+ ├─SemanticsNode#44
+ │   Rect.fromLTRB(354.0, 389.0, 434.0, 425.0)
+ │   actions: focus, tap
+ │   flags: isButton, hasEnabledState, isEnabled, isFocusable
+ │   label: "拒绝请求"
+ │   textDirection: ltr
+ │
+ ├─SemanticsNode#45
+ │   Rect.fromLTRB(442.0, 389.0, 575.0, 425.0)
+ │   flags: isButton, hasEnabledState
+ │   label: "批准所选字段"
+ │   textDirection: ltr
+ │
+ ├─SemanticsNode#24
+ │   Rect.fromLTRB(175.0, 448.0, 199.0, 474.0)
+ │   flags: isButton, hasEnabledState
+ │   traversalParentIdentifier: _OverlayPortalState#2ca9a
+ │   label: "‹"
+ │   tooltip: "上一页请求"
+ │   textDirection: ltr
+ │
+ └─SemanticsNode#25
+     Rect.fromLTRB(268.0, 448.0, 292.0, 474.0)
+     flags: isButton, hasEnabledState
+     traversalParentIdentifier: _OverlayPortalState#2bccb
+     label: "›"
+     tooltip: "下一页请求"
+     textDirection: ltr
+
+COMPACT_APPROVE_SEMANTICS=SemanticsNode#45
+   Rect.fromLTRB(442.0, 389.0, 575.0, 425.0)
+   flags: isButton, hasEnabledState
+   label: "批准所选字段"
+   textDirection: ltr
+
+00:01 +1: compact full app can review a file before partial approval (variant: TargetPlatform.windows)
+COMPACT_DOCUMENT_SEMANTICS=SemanticsNode#15
+ │ Rect.fromLTRB(0.0, 146.0, 800.0, 632.0)
+ │ actions: didGainAccessibilityFocus, didLoseAccessibilityFocus,
+ │   focus, tap
+ │ flags: isTextField, hasEnabledState, isEnabled, isFocusable
+ │ label:
+ │   "请求收件箱
+ │   1
+ │   /
+ │   今天的请求
+ │   最新请求优先
+ │   显示 1–1 / 1 条
+ │   1 / 1
+ │   访问审批
+ │   请求详情
+ │   原申请 2 · 未选 0 · 补选 0
+ │   有效期 8 小时 · 读取不续期
+ │   每次提供信息，都由你决定范围。
+ │   信息保存在本机"
+ │ value: "480"
+ │ textDirection: ltr
+ │ sortKey: OrdinalSortKey#afc21(name: "96070848", order: 1.0)
+ │ currentValueLength: 3
+ │ inputType: text
+ │ validationResult: valid
+ │
+ ├─SemanticsNode#26
+ │   Rect.fromLTRB(677.0, 24.0, 772.0, 56.0)
+ │   actions: focus, tap
+ │   flags: isButton, hasEnabledState, isEnabled, isFocusable
+ │   label: "请求设置"
+ │   textDirection: ltr
+ │
+ ├─SemanticsNode#17
+ │   Rect.fromLTRB(58.0, 93.5, 255.0, 113.5)
+ │   actions: didGainAccessibilityFocus, didLoseAccessibilityFocus,
+ │     focus, tap
+ │   flags: isTextField, hasEnabledState, isEnabled, isFocusable
+ │   label:
+ │     "搜索聊天、信息名称
+ │     搜索聊天、信息名称"
+ │   textDirection: ltr
+ │   maxValueLength: 2000
+ │   currentValueLength: 0
+ │   inputType: text
+ │
+ ├─SemanticsNode#18
+ │   Rect.fromLTRB(21.0, 146.0, 85.0, 180.0)
+ │   actions: focus, tap
+ │   flags: isButton, hasEnabledState, isEnabled, isFocusable
+ │   label: "全部 1"
+ │   textDirection: ltr
+ │
+ ├─SemanticsNode#19
+ │   Rect.fromLTRB(91.0, 146.0, 167.0, 180.0)
+ │   actions: focus, tap
+ │   flags: isButton, hasEnabledState, isEnabled, isFocusable
+ │   label: "待处理 1"
+ │   textDirection: ltr
+ │
+ ├─SemanticsNode#20
+ │   Rect.fromLTRB(173.0, 146.0, 249.0, 180.0)
+ │   actions: focus, tap
+ │   flags: isButton, hasEnabledState, isEnabled, isFocusable
+ │   label: "已处理 0"
+ │   textDirection: ltr
+ │
+ ├─SemanticsNode#21
+ │ │ Rect.fromLTRB(0.0, 230.0, 293.0, 435.0)
+ │ │
+ │ └─SemanticsNode#23
+ │   │ Rect.fromLTRB(0.0, 0.0, 293.0, 205.0)
+ │   │ flags: hasImplicitScrolling
+ │   │ scrollChildren: 1
+ │   │ scrollIndex: 0
+ │   │ scrollExtentMin: 0.0
+ │   │ scrollPosition: 0.0
+ │   │ scrollExtentMax: 0.0
+ │   │
+ │   └─SemanticsNode#22
+ │       Rect.fromLTRB(0.0, 0.0, 293.0, 79.0)
+ │       tags: RenderViewport.twoPane
+ │       actions: focus, tap
+ │       flags: isFocusable
+ │       label:
+ │         "Mac 小窗口审批可达性独立复现 20261023
+ │         01:09
+ │         Agent · 读取信息
+ │         2 个字段"
+ │       textDirection: ltr
+ │       indexInParent: 0
+ │
+ ├─SemanticsNode#27
+ │ │ Rect.fromLTRB(339.0, 78.0, 755.0, 231.0)
+ │ │
+ │ └─SemanticsNode#42
+ │   │ Rect.fromLTRB(0.0, 0.0, 416.0, 153.0)
+ │   │ actions: scrollToOffset, scrollUp
+ │   │ flags: hasImplicitScrolling
+ │   │ scrollChildren: 24
+ │   │ scrollIndex: 0
+ │   │ scrollExtentMin: 0.0
+ │   │ scrollPosition: 0.0
+ │   │ scrollExtentMax: 637.2
+ │   │
+ │   ├─SemanticsNode#28
+ │   │   Rect.fromLTRB(30.0, 24.0, 386.0, 42.0)
+ │   │   tags: RenderViewport.twoPane
+ │   │   label:
+ │   │     "待处理
+ │   │     读取信息
+ │   │     还剩 30 分钟"
+ │   │   textDirection: ltr
+ │   │   indexInParent: 0
+ │   │
+ │   ├─SemanticsNode#29
+ │   │   Rect.fromLTRB(30.0, 42.0, 386.0, 54.0)
+ │   │   tags: RenderViewport.twoPane
+ │   │   indexInParent: 1
+ │   │
+ │   ├─SemanticsNode#30
+ │   │   Rect.fromLTRB(30.0, 54.0, 386.0, 153.0)
+ │   │   tags: RenderViewport.twoPane
+ │   │   label: "Mac 小窗口审批可达性独立复现 20261023"
+ │   │   textDirection: ltr
+ │   │   indexInParent: 2
+ │   │
+ │   ├─SemanticsNode#31
+ │   │   Rect.fromLTRB(30.0, 180.0, 386.0, 192.0)
+ │   │   tags: RenderViewport.twoPane
+ │   │   flags: isHidden
+ │   │   HIDDEN
+ │   │   indexInParent: 3
+ │   │
+ │   ├─SemanticsNode#32
+ │   │   Rect.fromLTRB(30.0, 192.0, 386.0, 220.0)
+ │   │   tags: RenderViewport.twoPane
+ │   │   flags: isHidden
+ │   │   HIDDEN
+ │   │   traversalParentIdentifier: _OverlayPortalState#475be
+ │   │   label:
+ │   │     "A
+ │   │     Agent
+ │   │     来源未记录
+ │   │     iYc8Kq8H… · 01:09"
+ │   │   tooltip: "iYc8Kq8H2dGUlgfRXbAYRpmcui7oIUC_xc8D4AqW3EU="
+ │   │   textDirection: ltr
+ │   │   indexInParent: 4
+ │   │
+ │   ├─SemanticsNode#33
+ │   │   Rect.fromLTRB(30.0, 220.0, 386.0, 240.0)
+ │   │   tags: RenderViewport.twoPane
+ │   │   flags: isHidden
+ │   │   HIDDEN
+ │   │   indexInParent: 5
+ │   │
+ │   ├─SemanticsNode#34
+ │   │   Rect.fromLTRB(30.0, 240.0, 386.0, 258.0)
+ │   │   tags: RenderViewport.twoPane
+ │   │   flags: isHidden
+ │   │   HIDDEN
+ │   │   label: "申请用途"
+ │   │   textDirection: ltr
+ │   │   indexInParent: 6
+ │   │
+ │   ├─SemanticsNode#35
+ │   │   Rect.fromLTRB(30.0, 258.0, 386.0, 264.0)
+ │   │   tags: RenderViewport.twoPane
+ │   │   flags: isHidden
+ │   │   HIDDEN
+ │   │   indexInParent: 7
+ │   │
+ │   ├─SemanticsNode#36
+ │   │   Rect.fromLTRB(30.0, 264.0, 386.0, 291.0)
+ │   │   tags: RenderViewport.twoPane
+ │   │   flags: isHidden
+ │   │   HIDDEN
+ │   │   label: "仅合成资料复现窄窗口文件说明可达性，不修改原资料"
+ │   │   textDirection: ltr
+ │   │   indexInParent: 8
+ │   │
+ │   ├─SemanticsNode#37
+ │   │   Rect.fromLTRB(30.0, 291.0, 386.0, 297.0)
+ │   │   tags: RenderViewport.twoPane
+ │   │   flags: isHidden
+ │   │   HIDDEN
+ │   │   indexInParent: 9
+ │   │
+ │   ├─SemanticsNode#38
+ │   │   Rect.fromLTRB(30.0, 297.0, 386.0, 318.0)
+ │   │   tags: RenderViewport.twoPane
+ │   │   flags: isHidden
+ │   │   HIDDEN
+ │   │   label: "聊天名称和用途由 Agent 自述，仅供判断。"
+ │   │   textDirection: ltr
+ │   │   indexInParent: 10
+ │   │
+ │   ├─SemanticsNode#39
+ │   │   Rect.fromLTRB(30.0, 318.0, 386.0, 374.0)
+ │   │   tags: RenderViewport.twoPane
+ │   │   flags: isHidden
+ │   │   HIDDEN
+ │   │   label: "批准文件字段后，Agent 可领取并读取原文件，不只是查看文件名称。"
+ │   │   textDirection: ltr
+ │   │   indexInParent: 11
+ │   │
+ │   └─SemanticsNode#40
+ │     │ Rect.fromLTRB(30.0, 374.0, 386.0, 403.0)
+ │     │ tags: RenderViewport.twoPane
+ │     │ flags: isHidden
+ │     │ HIDDEN
+ │     │ indexInParent: 12
+ │     │
+ │     └─SemanticsNode#41
+ │         Rect.fromLTRB(0.0, 18.0, 204.0, 29.0)
+ │         actions: focus, tap
+ │         flags: isButton, hasEnabledState, isEnabled, isHidden,
+ │           isFocusable
+ │         HIDDEN
+ │         label: "调整提供范围 / 补选其他信息"
+ │         textDirection: ltr
+ │
+ ├─SemanticsNode#43
+ │   Rect.fromLTRB(354.0, 246.0, 510.0, 280.0)
+ │   actions: focus, tap
+ │   flags: isButton, hasEnabledState, isEnabled, isFocusable
+ │   label: "最终选择 2 个字段"
+ │   textDirection: ltr
+ │
+ ├─SemanticsNode#44
+ │   Rect.fromLTRB(354.0, 389.0, 434.0, 425.0)
+ │   actions: focus, tap
+ │   flags: isButton, hasEnabledState, isEnabled, isFocusable
+ │   label: "拒绝请求"
+ │   textDirection: ltr
+ │
+ ├─SemanticsNode#45
+ │   Rect.fromLTRB(442.0, 389.0, 575.0, 425.0)
+ │   flags: isButton, hasEnabledState
+ │   label: "批准所选字段"
+ │   textDirection: ltr
+ │
+ ├─SemanticsNode#24
+ │   Rect.fromLTRB(175.0, 448.0, 199.0, 474.0)
+ │   flags: isButton, hasEnabledState
+ │   traversalParentIdentifier: _OverlayPortalState#eb95d
+ │   label: "‹"
+ │   tooltip: "上一页请求"
+ │   textDirection: ltr
+ │
+ └─SemanticsNode#25
+     Rect.fromLTRB(268.0, 448.0, 292.0, 474.0)
+     flags: isButton, hasEnabledState
+     traversalParentIdentifier: _OverlayPortalState#9d308
+     label: "›"
+     tooltip: "下一页请求"
+     textDirection: ltr
+
+COMPACT_LIFETIME_SEMANTICS=SemanticsNode#15
+ │ Rect.fromLTRB(0.0, 146.0, 800.0, 632.0)
+ │ actions: didGainAccessibilityFocus, didLoseAccessibilityFocus,
+ │   focus, tap
+ │ flags: isTextField, hasEnabledState, isEnabled, isFocusable
+ │ label:
+ │   "请求收件箱
+ │   1
+ │   /
+ │   今天的请求
+ │   最新请求优先
+ │   显示 1–1 / 1 条
+ │   1 / 1
+ │   访问审批
+ │   请求详情
+ │   原申请 2 · 未选 0 · 补选 0
+ │   有效期 8 小时 · 读取不续期
+ │   每次提供信息，都由你决定范围。
+ │   信息保存在本机"
+ │ value: "480"
+ │ textDirection: ltr
+ │ sortKey: OrdinalSortKey#afc21(name: "96070848", order: 1.0)
+ │ currentValueLength: 3
+ │ inputType: text
+ │ validationResult: valid
+ │
+ ├─SemanticsNode#26
+ │   Rect.fromLTRB(677.0, 24.0, 772.0, 56.0)
+ │   actions: focus, tap
+ │   flags: isButton, hasEnabledState, isEnabled, isFocusable
+ │   label: "请求设置"
+ │   textDirection: ltr
+ │
+ ├─SemanticsNode#17
+ │   Rect.fromLTRB(58.0, 93.5, 255.0, 113.5)
+ │   actions: didGainAccessibilityFocus, didLoseAccessibilityFocus,
+ │     focus, tap
+ │   flags: isTextField, hasEnabledState, isEnabled, isFocusable
+ │   label:
+ │     "搜索聊天、信息名称
+ │     搜索聊天、信息名称"
+ │   textDirection: ltr
+ │   maxValueLength: 2000
+ │   currentValueLength: 0
+ │   inputType: text
+ │
+ ├─SemanticsNode#18
+ │   Rect.fromLTRB(21.0, 146.0, 85.0, 180.0)
+ │   actions: focus, tap
+ │   flags: isButton, hasEnabledState, isEnabled, isFocusable
+ │   label: "全部 1"
+ │   textDirection: ltr
+ │
+ ├─SemanticsNode#19
+ │   Rect.fromLTRB(91.0, 146.0, 167.0, 180.0)
+ │   actions: focus, tap
+ │   flags: isButton, hasEnabledState, isEnabled, isFocusable
+ │   label: "待处理 1"
+ │   textDirection: ltr
+ │
+ ├─SemanticsNode#20
+ │   Rect.fromLTRB(173.0, 146.0, 249.0, 180.0)
+ │   actions: focus, tap
+ │   flags: isButton, hasEnabledState, isEnabled, isFocusable
+ │   label: "已处理 0"
+ │   textDirection: ltr
+ │
+ ├─SemanticsNode#21
+ │ │ Rect.fromLTRB(0.0, 230.0, 293.0, 435.0)
+ │ │
+ │ └─SemanticsNode#23
+ │   │ Rect.fromLTRB(0.0, 0.0, 293.0, 205.0)
+ │   │ flags: hasImplicitScrolling
+ │   │ scrollChildren: 1
+ │   │ scrollIndex: 0
+ │   │ scrollExtentMin: 0.0
+ │   │ scrollPosition: 0.0
+ │   │ scrollExtentMax: 0.0
+ │   │
+ │   └─SemanticsNode#22
+ │       Rect.fromLTRB(0.0, 0.0, 293.0, 79.0)
+ │       tags: RenderViewport.twoPane
+ │       actions: focus, tap
+ │       flags: isFocusable
+ │       label:
+ │         "Mac 小窗口审批可达性独立复现 20261023
+ │         01:09
+ │         Agent · 读取信息
+ │         2 个字段"
+ │       textDirection: ltr
+ │       indexInParent: 0
+ │
+ ├─SemanticsNode#27
+ │ │ Rect.fromLTRB(339.0, 78.0, 755.0, 231.0)
+ │ │
+ │ └─SemanticsNode#42
+ │   │ Rect.fromLTRB(0.0, 0.0, 416.0, 153.0)
+ │   │ actions: scrollToOffset, scrollUp
+ │   │ flags: hasImplicitScrolling
+ │   │ scrollChildren: 24
+ │   │ scrollIndex: 0
+ │   │ scrollExtentMin: 0.0
+ │   │ scrollPosition: 0.0
+ │   │ scrollExtentMax: 637.2
+ │   │
+ │   ├─SemanticsNode#28
+ │   │   Rect.fromLTRB(30.0, 24.0, 386.0, 42.0)
+ │   │   tags: RenderViewport.twoPane
+ │   │   label:
+ │   │     "待处理
+ │   │     读取信息
+ │   │     还剩 30 分钟"
+ │   │   textDirection: ltr
+ │   │   indexInParent: 0
+ │   │
+ │   ├─SemanticsNode#29
+ │   │   Rect.fromLTRB(30.0, 42.0, 386.0, 54.0)
+ │   │   tags: RenderViewport.twoPane
+ │   │   indexInParent: 1
+ │   │
+ │   ├─SemanticsNode#30
+ │   │   Rect.fromLTRB(30.0, 54.0, 386.0, 153.0)
+ │   │   tags: RenderViewport.twoPane
+ │   │   label: "Mac 小窗口审批可达性独立复现 20261023"
+ │   │   textDirection: ltr
+ │   │   indexInParent: 2
+ │   │
+ │   ├─SemanticsNode#31
+ │   │   Rect.fromLTRB(30.0, 180.0, 386.0, 192.0)
+ │   │   tags: RenderViewport.twoPane
+ │   │   flags: isHidden
+ │   │   HIDDEN
+ │   │   indexInParent: 3
+ │   │
+ │   ├─SemanticsNode#32
+ │   │   Rect.fromLTRB(30.0, 192.0, 386.0, 220.0)
+ │   │   tags: RenderViewport.twoPane
+ │   │   flags: isHidden
+ │   │   HIDDEN
+ │   │   traversalParentIdentifier: _OverlayPortalState#475be
+ │   │   label:
+ │   │     "A
+ │   │     Agent
+ │   │     来源未记录
+ │   │     iYc8Kq8H… · 01:09"
+ │   │   tooltip: "iYc8Kq8H2dGUlgfRXbAYRpmcui7oIUC_xc8D4AqW3EU="
+ │   │   textDirection: ltr
+ │   │   indexInParent: 4
+ │   │
+ │   ├─SemanticsNode#33
+ │   │   Rect.fromLTRB(30.0, 220.0, 386.0, 240.0)
+ │   │   tags: RenderViewport.twoPane
+ │   │   flags: isHidden
+ │   │   HIDDEN
+ │   │   indexInParent: 5
+ │   │
+ │   ├─SemanticsNode#34
+ │   │   Rect.fromLTRB(30.0, 240.0, 386.0, 258.0)
+ │   │   tags: RenderViewport.twoPane
+ │   │   flags: isHidden
+ │   │   HIDDEN
+ │   │   label: "申请用途"
+ │   │   textDirection: ltr
+ │   │   indexInParent: 6
+ │   │
+ │   ├─SemanticsNode#35
+ │   │   Rect.fromLTRB(30.0, 258.0, 386.0, 264.0)
+ │   │   tags: RenderViewport.twoPane
+ │   │   flags: isHidden
+ │   │   HIDDEN
+ │   │   indexInParent: 7
+ │   │
+ │   ├─SemanticsNode#36
+ │   │   Rect.fromLTRB(30.0, 264.0, 386.0, 291.0)
+ │   │   tags: RenderViewport.twoPane
+ │   │   flags: isHidden
+ │   │   HIDDEN
+ │   │   label: "仅合成资料复现窄窗口文件说明可达性，不修改原资料"
+ │   │   textDirection: ltr
+ │   │   indexInParent: 8
+ │   │
+ │   ├─SemanticsNode#37
+ │   │   Rect.fromLTRB(30.0, 291.0, 386.0, 297.0)
+ │   │   tags: RenderViewport.twoPane
+ │   │   flags: isHidden
+ │   │   HIDDEN
+ │   │   indexInParent: 9
+ │   │
+ │   ├─SemanticsNode#38
+ │   │   Rect.fromLTRB(30.0, 297.0, 386.0, 318.0)
+ │   │   tags: RenderViewport.twoPane
+ │   │   flags: isHidden
+ │   │   HIDDEN
+ │   │   label: "聊天名称和用途由 Agent 自述，仅供判断。"
+ │   │   textDirection: ltr
+ │   │   indexInParent: 10
+ │   │
+ │   ├─SemanticsNode#39
+ │   │   Rect.fromLTRB(30.0, 318.0, 386.0, 374.0)
+ │   │   tags: RenderViewport.twoPane
+ │   │   flags: isHidden
+ │   │   HIDDEN
+ │   │   label: "批准文件字段后，Agent 可领取并读取原文件，不只是查看文件名称。"
+ │   │   textDirection: ltr
+ │   │   indexInParent: 11
+ │   │
+ │   └─SemanticsNode#40
+ │     │ Rect.fromLTRB(30.0, 374.0, 386.0, 403.0)
+ │     │ tags: RenderViewport.twoPane
+ │     │ flags: isHidden
+ │     │ HIDDEN
+ │     │ indexInParent: 12
+ │     │
+ │     └─SemanticsNode#41
+ │         Rect.fromLTRB(0.0, 18.0, 204.0, 29.0)
+ │         actions: focus, tap
+ │         flags: isButton, hasEnabledState, isEnabled, isHidden,
+ │           isFocusable
+ │         HIDDEN
+ │         label: "调整提供范围 / 补选其他信息"
+ │         textDirection: ltr
+ │
+ ├─SemanticsNode#43
+ │   Rect.fromLTRB(354.0, 246.0, 510.0, 280.0)
+ │   actions: focus, tap
+ │   flags: isButton, hasEnabledState, isEnabled, isFocusable
+ │   label: "最终选择 2 个字段"
+ │   textDirection: ltr
+ │
+ ├─SemanticsNode#44
+ │   Rect.fromLTRB(354.0, 389.0, 434.0, 425.0)
+ │   actions: focus, tap
+ │   flags: isButton, hasEnabledState, isEnabled, isFocusable
+ │   label: "拒绝请求"
+ │   textDirection: ltr
+ │
+ ├─SemanticsNode#45
+ │   Rect.fromLTRB(442.0, 389.0, 575.0, 425.0)
+ │   flags: isButton, hasEnabledState
+ │   label: "批准所选字段"
+ │   textDirection: ltr
+ │
+ ├─SemanticsNode#24
+ │   Rect.fromLTRB(175.0, 448.0, 199.0, 474.0)
+ │   flags: isButton, hasEnabledState
+ │   traversalParentIdentifier: _OverlayPortalState#eb95d
+ │   label: "‹"
+ │   tooltip: "上一页请求"
+ │   textDirection: ltr
+ │
+ └─SemanticsNode#25
+     Rect.fromLTRB(268.0, 448.0, 292.0, 474.0)
+     flags: isButton, hasEnabledState
+     traversalParentIdentifier: _OverlayPortalState#9d308
+     label: "›"
+     tooltip: "下一页请求"
+     textDirection: ltr
+
+COMPACT_APPROVE_SEMANTICS=SemanticsNode#45
+   Rect.fromLTRB(442.0, 389.0, 575.0, 425.0)
+   flags: isButton, hasEnabledState
+   label: "批准所选字段"
+   textDirection: ltr
+
+00:01 +2: All tests passed!

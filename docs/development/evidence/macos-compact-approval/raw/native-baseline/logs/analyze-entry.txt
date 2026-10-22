@@ -1,0 +1,5 @@
+Analyzing macos_compact_approval_manual.dart...                 
+
+   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block • integration_test/macos_compact_approval_manual.dart:95:13 • curly_braces_in_flow_control_structures
+
+1 issue found. (ran in 1.5s)
