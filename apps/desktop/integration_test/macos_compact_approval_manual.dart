@@ -51,6 +51,10 @@ Future<void> main() async {
   }
   const native = MethodChannel('agent_info_manage/desktop');
   await native.invokeMethod<void>('qaSetCompactWindow');
+  // The QA supervisor launches the executable directly, outside LaunchServices.
+  // Use the production show action for explicit test setup before CUA input;
+  // raising a background AX window alone does not make the app active/key.
+  await native.invokeMethod<void>('show');
   var pointerSignals = 0, pointerDowns = 0, keys = 0;
   bool observeKey(KeyEvent event) {
     keys++;
@@ -160,5 +164,6 @@ Future<void> main() async {
     'port': bootstrap.boundPort,
     'fixtureRoot': f.root.path,
     'systemKeychainUsed': false,
+    'productionShowRequestedForTestSetup': true,
   });
 }
