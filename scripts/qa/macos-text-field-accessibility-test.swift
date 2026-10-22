@@ -1,6 +1,9 @@
 import Cocoa
 
 private struct Failure: Error { let message: String }
+private final class StaleAXField: NSTextField {
+  override func accessibilityFrame() -> NSRect { .zero }
+}
 private func check(_ condition: @autoclosure () -> Bool, _ message: String) throws {
   if !condition() { throw Failure(message: message) }
 }
@@ -90,6 +93,17 @@ private struct Probe {
       try check(field.accessibilityLabel() == "Temporary", "temporary update failed")
       temporary = nil
       try check(field.accessibilityLabel() == "Original", "deinit did not restore")
+    }
+    try test("nested live view geometry works when the AX frame is stale") {
+      let nested = NSView(frame: NSRect(x: 40, y: 60, width: 300, height: 240))
+      let stale = StaleAXField(frame: NSRect(x: 20, y: 180, width: 200, height: 30))
+      stale.setAccessibilityLabel("Nested original")
+      nested.addSubview(stale); root.addSubview(nested)
+      defer { adapter.update([] as [[String: Any]]); nested.removeFromSuperview() }
+      try check(adapter.update([["label": "Nested purpose", "left": 60.0,
+                                 "top": 30.0, "width": 200.0, "height": 30.0]]), "nested labels refused")
+      try check(stale.accessibilityLabel() == "Nested purpose", "stale AX frame blocked live match")
+      try check(field.accessibilityLabel() == "Original", "unrelated field changed")
     }
     print("PASS total=\(passed)")
     window.close()

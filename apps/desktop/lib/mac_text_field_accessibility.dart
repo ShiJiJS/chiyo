@@ -113,6 +113,8 @@ abstract final class _Labels {
       final labels = [for (final field in fields) ?field.geometry()];
       unawaited(send(labels));
     });
+    // A callback added after a scroll frame must not wait for another edit.
+    WidgetsBinding.instance.ensureVisualUpdate();
   }
 
   static Future<void> send(List<Map<String, Object>> labels) async {
