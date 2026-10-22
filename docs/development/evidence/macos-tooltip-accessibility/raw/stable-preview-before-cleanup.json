@@ -1,0 +1,13 @@
+{
+  "source": "4690e79357bb728da22193d8dadd6dc8a8ce2ce6",
+  "manifestEntriesMatched": 7971,
+  "runtimeExtraPathsPreserved": [
+    ".local/state/gh/device-id"
+  ],
+  "runtimeExtraIsNotPackagedFile": true,
+  "runtimeExtraMtime": "2026-10-21T12:05:23.656183+00:00",
+  "strictSignatureExitCode": 0,
+  "pid": 53592,
+  "liveProcess": "/Users/jiangxinyi/Documents/Project/agent-info/local/中文 Mac 预览/AgentInfoManage/app/info_desktop.app/Contents/MacOS/info_desktop",
+  "initialWholeDirectoryEqualityAssertion": "failed on runtime extra; all manifest entries subsequently matched, extra preserved"
+}
