@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'ui_palette.dart';
+import 'mac_secret_input.dart';
 import 'package:flutter/services.dart';
 
 // Labels stay outside the editable border, including after a value is entered.
@@ -32,22 +33,33 @@ class DesktopTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) => _FieldFrame(
     label: decoration.labelText,
-    child: TextField(
-      controller: controller,
-      focusNode: focusNode,
-      decoration: _inside(decoration),
-      maxLength: maxLength,
-      minLines: minLines,
-      maxLines: maxLines,
-      enabled: enabled,
-      onChanged: onChanged,
-      keyboardType: keyboardType,
-      obscureText: obscureText,
-      enableSuggestions: enableSuggestions,
-      autocorrect: autocorrect,
-      style: Theme.of(context).textTheme.bodyMedium,
-      buildCounter: _counter,
-    ),
+    child: usesNativeSecretEditor && obscureText
+        ? MacSecretInput(
+            controller: controller,
+            focusNode: focusNode,
+            decoration: _inside(decoration),
+            maxLength: maxLength,
+            enabled: enabled ?? true,
+            onChanged: onChanged,
+            label: decoration.labelText ?? '秘密内容',
+            style: Theme.of(context).textTheme.bodyMedium,
+          )
+        : TextField(
+            controller: controller,
+            focusNode: focusNode,
+            decoration: _inside(decoration),
+            maxLength: maxLength,
+            minLines: minLines,
+            maxLines: maxLines,
+            enabled: enabled,
+            onChanged: onChanged,
+            keyboardType: keyboardType,
+            obscureText: obscureText,
+            enableSuggestions: enableSuggestions,
+            autocorrect: autocorrect,
+            style: Theme.of(context).textTheme.bodyMedium,
+            buildCounter: _counter,
+          ),
   );
 }
 

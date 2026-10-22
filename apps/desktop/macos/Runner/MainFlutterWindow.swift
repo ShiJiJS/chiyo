@@ -4,6 +4,7 @@ import UserNotifications
 
 class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDelegate {
   private var textEditingMenu: NativeTextEditingMenu?
+  private var secretEditor: NativeSecretEditor?
   private var desktopChannel: FlutterMethodChannel?
   private var statusItem: NSStatusItem?
   private var statusItemVisibility: NSKeyValueObservation?
@@ -28,6 +29,7 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
 
     RegisterGeneratedPlugins(registry: flutterViewController)
     configureToolAccess(flutterViewController)
+    secretEditor = NativeSecretEditor(window: self, messenger: flutterViewController.engine.binaryMessenger)
 
     // Local, owner-process-only bridge; never exposed by the Agent HTTP server.
     let keyChannel = FlutterMethodChannel(name: "agent_info_manage/database_key", binaryMessenger: flutterViewController.engine.binaryMessenger)
@@ -232,6 +234,7 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
     super.awakeFromNib()
     DispatchQueue.main.async { [weak self] in
       guard let self, let menu = NSApp.mainMenu else { return }
+      self.routeQuitMenu(in: menu)
       let forwarding = NativeTextEditingMenu(window: self, messenger: flutterViewController.engine.binaryMessenger)
       forwarding.install(in: menu)
       self.textEditingMenu = forwarding
@@ -255,6 +258,7 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
   }
 
   func windowShouldClose(_ sender: NSWindow) -> Bool {
+    secretEditor?.cancel()
     if !desktopReady { return true }
     desktopChannel?.invokeMethod("close", arguments: nil)
     return false
@@ -337,8 +341,23 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
     desktopChannel?.invokeMethod("open", arguments: nil)
   }
 
-  @objc private func quitFromMenu() { _ = requestFullQuit() }
+  private func routeQuitMenu(in menu: NSMenu) {
+    for item in menu.items {
+      if let submenu = item.submenu { routeQuitMenu(in: submenu) }
+      if item.action == #selector(NSApplication.terminate(_:)) {
+        item.target = self
+        item.action = #selector(quitFromMenu)
+      }
+    }
+  }
+
+  @objc private func quitFromMenu() {
+    if !requestFullQuit() {
+      DispatchQueue.main.async { NSApp.terminate(nil) }
+    }
+  }
   func requestFullQuit() -> Bool {
+    secretEditor?.cancel()
     guard desktopReady else { return false }
     desktopChannel?.invokeMethod("quit", arguments: nil)
     return true

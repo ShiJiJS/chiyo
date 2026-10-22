@@ -4,6 +4,7 @@ import 'credential_files.dart';
 import 'prototype_dialog.dart';
 import 'prototype_ui.dart';
 import 'ui_palette.dart';
+import 'mac_secret_input.dart';
 
 Widget credentialInput(
   BuildContext context,
@@ -17,6 +18,28 @@ Widget credentialInput(
   bool flow = false,
 }) {
   final p = UiPalette.of(context);
+  final decoration = InputDecoration(
+    isDense: true,
+    hintText: hint,
+    hintStyle: prototypeText(context, 13, color: p.muted),
+    contentPadding: flow
+        ? const EdgeInsets.all(9)
+        : const EdgeInsets.symmetric(horizontal: 12, vertical: 11.5),
+    filled: true,
+    fillColor: flow ? p.paper : p.rail,
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(4),
+      borderSide: BorderSide(color: p.line),
+    ),
+    enabledBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(4),
+      borderSide: BorderSide(color: p.line),
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(4),
+      borderSide: BorderSide(color: p.accent),
+    ),
+  );
   return Padding(
     padding: EdgeInsets.only(top: flow ? 10 : 18),
     child: Column(
@@ -24,45 +47,34 @@ Widget credentialInput(
       children: [
         Text(label, style: prototypeText(context, 13)),
         SizedBox(height: flow ? 7 : 8),
-        TextField(
-          key: key,
-          controller: controller,
-          obscureText: secret,
-          enableSuggestions: !secret,
-          autocorrect: !secret,
-          maxLines: lines,
-          maxLength: maxLength,
-          buildCounter:
-              (
-                _, {
-                required currentLength,
-                required isFocused,
-                required maxLength,
-              }) => null,
-          style: prototypeText(context, flow ? 13 : 14),
-          decoration: InputDecoration(
-            isDense: true,
-            hintText: hint,
-            hintStyle: prototypeText(context, 13, color: p.muted),
-            contentPadding: flow
-                ? const EdgeInsets.all(9)
-                : const EdgeInsets.symmetric(horizontal: 12, vertical: 11.5),
-            filled: true,
-            fillColor: flow ? p.paper : p.rail,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(4),
-              borderSide: BorderSide(color: p.line),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(4),
-              borderSide: BorderSide(color: p.line),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(4),
-              borderSide: BorderSide(color: p.accent),
-            ),
+        if (secret && usesNativeSecretEditor)
+          MacSecretInput(
+            key: key,
+            controller: controller,
+            label: label,
+            maxLength: maxLength,
+            decoration: decoration,
+            style: prototypeText(context, flow ? 13 : 14),
+          )
+        else
+          TextField(
+            key: key,
+            controller: controller,
+            obscureText: secret,
+            enableSuggestions: !secret,
+            autocorrect: !secret,
+            maxLines: lines,
+            maxLength: maxLength,
+            buildCounter:
+                (
+                  _, {
+                  required currentLength,
+                  required isFocused,
+                  required maxLength,
+                }) => null,
+            style: prototypeText(context, flow ? 13 : 14),
+            decoration: decoration,
           ),
-        ),
       ],
     ),
   );
@@ -215,7 +227,7 @@ class _CredentialEditorState extends State<CredentialEditor> {
             ? _secret.text.isNotEmpty
             : _file != null) &&
         (_binding.text.isEmpty ||
-          RegExp(r'^[A-Za-z_][A-Za-z0-9_]{0,63}$').hasMatch(_binding.text));
+            RegExp(r'^[A-Za-z_][A-Za-z0-9_]{0,63}$').hasMatch(_binding.text));
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {
