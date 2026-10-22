@@ -1,0 +1,15 @@
+{
+  "pid": 87410,
+  "ownerReportedChoice": "允许, not 始终允许",
+  "originalProcessReachedOrdinaryMain": true,
+  "servicePortOpen": true,
+  "informationCount": 2,
+  "originalTextStill": " 777",
+  "originalAttachmentName": "中文 合成附件.txt",
+  "attachmentDisplay": "1.0 KiB · text/plain · 版本 1",
+  "credentialCount": 5,
+  "allFiveSyntheticCredentialsStillDisabled": true,
+  "recentGhUseShown": "2026/10/21 21:30 · 已退出 · 退出码 1",
+  "newKeychainRequestIssued": false,
+  "scope": "Actual ordinary UI and packaged public CLI after owner action. Not yet independent reopen or full joint acceptance."
+}

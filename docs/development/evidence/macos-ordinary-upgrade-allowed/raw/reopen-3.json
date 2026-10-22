@@ -1,0 +1,14 @@
+{
+  "pid": 89073,
+  "environmentKeys": [
+    "HOME",
+    "LANG",
+    "LOGNAME",
+    "PATH",
+    "USER"
+  ],
+  "ordinaryMain": true,
+  "qaIdentityOrKeyInjection": false,
+  "firstProcess": 88836,
+  "firstNormalExit": 0
+}

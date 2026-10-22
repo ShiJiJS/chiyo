@@ -1,0 +1,189 @@
+{
+  "date": "2026-10-22",
+  "evidenceSourceBeforeCommit": "9cdf4315e819f82dc05e78cf4aa89d6320649da2",
+  "candidateSource": "7b19d34b61cf07d5a77db05adb8f0c9cdbf85805",
+  "productionDiffExit": 0,
+  "ordinaryKeychainUpgradePassed": true,
+  "newIdentityOrTestKeyInjected": false,
+  "normalExitCodes": [
+    0,
+    0,
+    0
+  ],
+  "promptFreeReopenPids": [
+    88836,
+    89073
+  ],
+  "currentOrdinaryPid": 89073,
+  "allPortableTablesExactMatch": 22,
+  "allAttachmentVersionMetadataMatch": true,
+  "authenticatedAttachmentVersions": 3,
+  "authenticatedAttachmentBytes": 3073,
+  "originalCredentials": 5,
+  "originalCredentialVersions": 7,
+  "originalCredentialExecutions": 27,
+  "actualMappedSqlcipherMatchesManifest": true,
+  "completeFinalJointAcceptanceClaimed": false,
+  "cleanUserAcceptanceClaimed": false,
+  "otherSignaturesAutomaticallyAllowedClaimed": false,
+  "postDiagnosticAndPlaintextExportsRemoved": true,
+  "backupsKeysAndClosedOriginalCopyKeptPrivate": true,
+  "files": [
+    {
+      "path": "raw/closed-profile-after-backup.json",
+      "bytes": 173,
+      "sha256": "62fd772287ef7831ca7232944bf73e01401ba59f852817d61b981f48a2acf537"
+    },
+    {
+      "path": "raw/closed-profile-after-first-allowed.json",
+      "bytes": 173,
+      "sha256": "273507492000333231940e94b0cb73b8d109204500360db19e0d9ddbd7fde3e7"
+    },
+    {
+      "path": "raw/cua-observations.json",
+      "bytes": 1406,
+      "sha256": "014126abf44e9bee59c5708540946ea24b6f75c7f1e6b6c89edb0fe1f95d2a16"
+    },
+    {
+      "path": "raw/current-designated-requirement.txt",
+      "bytes": 214,
+      "sha256": "6d33f110c7bebee477887bc5af6e945555d15f3c658815c9ab3646a1c464607f"
+    },
+    {
+      "path": "raw/current-entitlements.txt",
+      "bytes": 698,
+      "sha256": "144e7689b48ce6209b6d583e57260b7dcece56cc7ab40dbe3fce8bfaac6c9b69"
+    },
+    {
+      "path": "raw/current-signature.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/exported-attachments.json",
+      "bytes": 369,
+      "sha256": "6da0e29b3578317d7cccedf6948790bea1387f7cd46adcfc6ef32043dfc72081"
+    },
+    {
+      "path": "raw/final-audit.json",
+      "bytes": 901,
+      "sha256": "aab7ac3a41ba5b2d053d16ae751d919bccbc1ae59ec7179b0a28487a45498a52"
+    },
+    {
+      "path": "raw/final-cli-public.jsonl",
+      "bytes": 1603,
+      "sha256": "fd7d5de8a11b9d5ed2369172a31254fa66f023e44cf34375e28ea4cc621d94bf"
+    },
+    {
+      "path": "raw/final-cli-public.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/first-allowed-and-second-request.json",
+      "bytes": 1330,
+      "sha256": "f99b5c55f80c805fde9c18448d3b32f984c2d9542bf5fbddffed22c1c4f40490"
+    },
+    {
+      "path": "raw/first-allowed-ui.json",
+      "bytes": 629,
+      "sha256": "888e1cf156a25e8fbe4d3052700d2953510e7ba6b4bdfb15234c65bc702186a7"
+    },
+    {
+      "path": "raw/first-launch-terminal.json",
+      "bytes": 637,
+      "sha256": "a30f0f8aa409db873209fcffe7a977ee69fa0d0ddff2c3350a0393d9eab0f355"
+    },
+    {
+      "path": "raw/first-launch.log",
+      "bytes": 245,
+      "sha256": "bd72bb33a6d906542cf855509987a85e7d05d6e0f29e3b9b1c9cd7c591c48d22"
+    },
+    {
+      "path": "raw/installed-cli-public.jsonl",
+      "bytes": 1603,
+      "sha256": "fd7d5de8a11b9d5ed2369172a31254fa66f023e44cf34375e28ea4cc621d94bf"
+    },
+    {
+      "path": "raw/installed-cli-public.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/loaded-frameworks.txt",
+      "bytes": 527,
+      "sha256": "d2f3ee06656be594620cfc005bde1f18c0f988ca0cd55ed4ad87097abd1848fd"
+    },
+    {
+      "path": "raw/post-authenticated-restore.jsonl",
+      "bytes": 2548,
+      "sha256": "caade770e305f82363094758a061e7179431f84bf9335935e1a0672597cd0eb7"
+    },
+    {
+      "path": "raw/post-authenticated-restore.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/post-diagnostic-build.txt",
+      "bytes": 329,
+      "sha256": "b1c6ab2c776e4bf906b0fb913598b506d867e4a3def7b083dd3ea44ec4001d4f"
+    },
+    {
+      "path": "raw/reopen-1.json",
+      "bytes": 258,
+      "sha256": "438d48169d6ca016dec4c12b853dc299ac8786b7d0841893cfa904f89455dd80"
+    },
+    {
+      "path": "raw/reopen-1.log",
+      "bytes": 132,
+      "sha256": "dbc01fad753a943417e50e983fddc5339e7268c74255b60f06d0b78ea171aa93"
+    },
+    {
+      "path": "raw/reopen-2-supervisor.py",
+      "bytes": 1047,
+      "sha256": "7fcf75dbe5144c6119700b76a0d32b7a74bc5de3f03eb194ab02c53d932226f7"
+    },
+    {
+      "path": "raw/reopen-2.json",
+      "bytes": 258,
+      "sha256": "ef32ff1b01ea948565b61ef210f78fa2fa56614c060cea76bd2e7a8cbecf6547"
+    },
+    {
+      "path": "raw/reopen-2.log",
+      "bytes": 132,
+      "sha256": "dbc01fad753a943417e50e983fddc5339e7268c74255b60f06d0b78ea171aa93"
+    },
+    {
+      "path": "raw/reopen-3-supervisor.py",
+      "bytes": 1047,
+      "sha256": "c5e3b38985158092a7a83c75d79c2ad902c344f8bb08320404a0625ec2d518ab"
+    },
+    {
+      "path": "raw/reopen-3.json",
+      "bytes": 219,
+      "sha256": "fd8b1e28dcc3e50178ad4e0120b96daf7d95ed262a82623b8d527b922b8f583c"
+    },
+    {
+      "path": "raw/reopen-3.log",
+      "bytes": 132,
+      "sha256": "dbc01fad753a943417e50e983fddc5339e7268c74255b60f06d0b78ea171aa93"
+    },
+    {
+      "path": "raw/reopen-supervisor.py",
+      "bytes": 1047,
+      "sha256": "1944c3cc918f8b2676a0fb7689710e56f86930532b438d4b5a47e43fc92b8871"
+    },
+    {
+      "path": "raw/reopen-without-prompt.json",
+      "bytes": 403,
+      "sha256": "9732fb9057e4534ca4a89627617530457f9e5238d343c183ce64c81f60124f7e"
+    },
+    {
+      "path": "raw/verify-post-export.dart",
+      "bytes": 8157,
+      "sha256": "d4995a6fd4ef69b5530eb50f3694a951d3d7f7e31e7d30636af1d1e4b3930e1c"
+    }
+  ],
+  "rawFileCount": 31
+}
