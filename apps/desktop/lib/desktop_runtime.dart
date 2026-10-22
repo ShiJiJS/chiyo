@@ -237,7 +237,9 @@ class DesktopRuntime extends ChangeNotifier {
     await _refreshAfterNotificationFailure();
   }
 
-  Future<void> _refreshAfterNotificationFailure() async {
+  Future<void> _refreshAfterNotificationFailure({
+    bool markUnavailable = true,
+  }) async {
     var current = DesktopAvailability(
       tray: availability.tray,
       notifications: NotificationAvailability.unavailable,
@@ -246,7 +248,9 @@ class DesktopRuntime extends ChangeNotifier {
       final actual = await platform.readAvailability();
       current = DesktopAvailability(
         tray: actual.tray,
-        notifications: actual.notifications == NotificationAvailability.enabled
+        notifications:
+            markUnavailable &&
+                actual.notifications == NotificationAvailability.enabled
             ? NotificationAvailability.unavailable
             : actual.notifications,
       );
@@ -268,7 +272,8 @@ class DesktopRuntime extends ChangeNotifier {
     } catch (_) {
       /* Report the actual permission state when a test cannot be submitted. */
     }
-    await _refreshAfterNotificationFailure();
+    // A manual test can be retried when system permission remains enabled.
+    await _refreshAfterNotificationFailure(markUnavailable: false);
     return false;
   }
 
