@@ -1,0 +1,143 @@
+{
+  "date": "2026-10-22",
+  "qaSource": "7ed2de0d70fc3d7cbad5b1521bddea7053b97ae5",
+  "productSource": "dd050f3caa1bcd4a382a765672a5f8b603787d02",
+  "scope": "Independent signed Release sandbox QA app and SQLCipher reopen with production host/bundled tools; synthetic owner decisions and memory keys; not actual approval UI, ordinary installed ZIP, Keychain, or GH positive authentication.",
+  "normalAppExits": [
+    0,
+    0
+  ],
+  "requestsPreserved": 3,
+  "executionsPreserved": 5,
+  "receiverUnchangedAfterIndependentReopen": true,
+  "oldSessionError": "session_required",
+  "newSessionError": "session_mismatch",
+  "rawFileCount": 22,
+  "cleanup": {
+    "inputFilesVerifiedAgainstGit": 669,
+    "copyModificationsVerified": 1,
+    "privateCheckpointNotArchived": true,
+    "removed": [
+      {
+        "path": "source",
+        "allocatedKiB": 23560
+      },
+      {
+        "path": "receiver",
+        "allocatedKiB": 8
+      }
+    ]
+  },
+  "files": [
+    {
+      "path": "raw/bundled-reopen.json",
+      "bytes": 5059,
+      "sha256": "5ad848db248b7c8a0f8ee4ff0994a3cd3ae9a4be0391bf433d4e981d7e482264"
+    },
+    {
+      "path": "raw/bundled.json",
+      "bytes": 8324,
+      "sha256": "cf127c93d42e284c60da8b3029583106217555b79023baac47a79d48446078a2"
+    },
+    {
+      "path": "raw/cleanup.json",
+      "bytes": 263,
+      "sha256": "1e366c2baff5b5482fc18950655a7a2bf92d73228f37c8dda16079b975af33a7"
+    },
+    {
+      "path": "raw/last-bundled-reopen-result.json",
+      "bytes": 3959,
+      "sha256": "4e2a9b62e178bcee94c9550f01fbf2c894665e545f1c1ef91b26fca2f4b0bfc7"
+    },
+    {
+      "path": "raw/last-bundled-result.json",
+      "bytes": 6500,
+      "sha256": "b9d8b50e752ee017282a3d8b982a95607899c1ceabc632bc55c5d9d619551efc"
+    },
+    {
+      "path": "raw/logs/analyze.txt",
+      "bytes": 96,
+      "sha256": "c70da5958f5db1a3bde6edb314eaeef015d4d71f5a2b2588fd2e6161a5b092c8"
+    },
+    {
+      "path": "raw/logs/build-release.txt",
+      "bytes": 5368,
+      "sha256": "1c8805a33638a4c447552c9d4d191535f5c9e38d8f7ebdfeab26c3a21c20973a"
+    },
+    {
+      "path": "raw/logs/bundled-reopen.txt",
+      "bytes": 286,
+      "sha256": "913fb8725ced55840d03ecc430aae0533eecd877cf21ada04b240fa6e307c459"
+    },
+    {
+      "path": "raw/logs/bundled.txt",
+      "bytes": 1555,
+      "sha256": "c099adf5f659bf56ca18de461af259b416e13cdab1ae940444a1d4cdb59579e3"
+    },
+    {
+      "path": "raw/logs/entitlements.txt",
+      "bytes": 764,
+      "sha256": "281def4dce7324c2abd01296ffe6d33fffc98c208b4db3b7bb85715392bb2ac2"
+    },
+    {
+      "path": "raw/logs/pub-desktop.txt",
+      "bytes": 318,
+      "sha256": "ca68f707c22164511fc2b3f9af97ed7bd46538b1d334d9c806a6a59a556a6e05"
+    },
+    {
+      "path": "raw/logs/pub-info_cli.txt",
+      "bytes": 438,
+      "sha256": "7652c98906e8f741dc56b0e7f018713f8985ac3d073ce66e4cb8e1d3274e15f6"
+    },
+    {
+      "path": "raw/logs/pub-info_core.txt",
+      "bytes": 438,
+      "sha256": "7652c98906e8f741dc56b0e7f018713f8985ac3d073ce66e4cb8e1d3274e15f6"
+    },
+    {
+      "path": "raw/logs/pub-info_storage.txt",
+      "bytes": 438,
+      "sha256": "7652c98906e8f741dc56b0e7f018713f8985ac3d073ce66e4cb8e1d3274e15f6"
+    },
+    {
+      "path": "raw/logs/receiver.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/logs/signature.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/macos-aws-receiver.py",
+      "bytes": 4675,
+      "sha256": "78a9f299a02b9b640520151addc22c05b505942f2e036839a6677e7250bde17c"
+    },
+    {
+      "path": "raw/macos-tools-ui.py",
+      "bytes": 14888,
+      "sha256": "bb578b124a3680dd6fcc66de96b69fa160a590f9342519748bb36ffe33f16bd3"
+    },
+    {
+      "path": "raw/macos_tools_manual.dart",
+      "bytes": 23544,
+      "sha256": "11c542036cfcdff36a0480367b2c51904253edfce4c45364e5fc6a886fcf8df2"
+    },
+    {
+      "path": "raw/qa-copy/apps/desktop/macos/Runner/Configs/AppInfo.xcconfig",
+      "bytes": 658,
+      "sha256": "9b60cb76c2d2f7588a2bc9f295a229f182de0be8a63b3248a2dfda85c22c9045"
+    },
+    {
+      "path": "raw/receiver-result.json",
+      "bytes": 350,
+      "sha256": "0779dc41fd47268ffed9c905bb5923489c13a889a65f7e4653d3cadaf50479ae"
+    },
+    {
+      "path": "raw/result.json",
+      "bytes": 102887,
+      "sha256": "0ce5c1489e42e0a061dde94a47512fa5998262fb6ffff02d6b3a181cb4009ef6"
+    }
+  ]
+}

@@ -1,5 +1,9 @@
 # 新信息库审批界面的真实 GH/AWS 联合验证
 
+后续已补[独立 Release 进程的工具历史重开](macos-tools-history-current.md)：
+当前实现的 3 份授权／5 条执行保持、旧会话拒绝、接收端不重放通过。
+后续轮采用合成 owner 决定，不替代下文已完成的真实 GUI 审批。
+
 2026-10-22，#44/#48。冻结QA源码`dad1362945939f1069274223f3d2ebe85b21b42f`，
 生产实现与候选`5a509968400b2d140a69a02f89935c5db4e935ee`相同。本轮没有修改产品代码。
 [原始结果、构建输入及摘要](evidence/macos-library-tools-current/verification.json)。

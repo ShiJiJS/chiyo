@@ -1,0 +1,16 @@
+{
+  "inputFilesVerifiedAgainstGit": 669,
+  "qaSourcesVerifiedAgainstGit": 10,
+  "privateFixtureRootRemoved": true,
+  "removed": [
+    {
+      "path": "source",
+      "allocatedKiB": 486732
+    },
+    {
+      "path": "delivery",
+      "allocatedKiB": 8688
+    }
+  ],
+  "unregisterExitCode": 0
+}
