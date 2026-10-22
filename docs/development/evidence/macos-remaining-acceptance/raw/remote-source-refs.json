@@ -1,0 +1,7 @@
+{
+  "scope": "Read-only git ls-remote at turn start",
+  "main": "b37f96a089d6d4a0a9f872bd667be0c6b037f975",
+  "windowsProductBranch": "4ac428ff843802d598eacadde9119cdcc2fe0333",
+  "macBranch": "dad1362945939f1069274223f3d2ebe85b21b42f",
+  "WindowsWritesOrCI": false
+}

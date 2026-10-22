@@ -1,0 +1,42 @@
+{
+  "scope": "Only #19 original criterion1: reproducible Mac release archive and CLI delivery with declared conditions; not installation or all-user acceptance",
+  "sourceCommit": "5a509968400b2d140a69a02f89935c5db4e935ee",
+  "release": "0.4.1+13-mac-dev.5a509968400b",
+  "archive": "build/macos-adaptation/issue50-package-16/agent-info-manage-0.4.1+13-mac-dev.5a509968400b-macos-arm64.zip",
+  "archiveBytes": 130946552,
+  "archiveSha256": "71029812dbe5c6872917b59ba4d53faecc6c355f5c530c44cbcacd7077b1e5dd",
+  "preservedManifestMatchesArchivedBytes": true,
+  "payloadInventoryRows": 7971,
+  "architecture": "macos-arm64",
+  "minimumBinarySystemVersion": "14.0",
+  "testedBuildHost": "27.0.1",
+  "signingAndDistribution": "local ad-hoc development; not notarized",
+  "SDKRequiredAtRuntime": false,
+  "allRequiredRuntimeAndCLIEntriesPresent": true,
+  "machOEntryCount": 75,
+  "allPackagePhasesZero": 21,
+  "sourceChecksRequested": true,
+  "sourceTestCountsByCoreCLIStorageDesktop": [
+    [
+      "290",
+      "6"
+    ],
+    [
+      "75",
+      "40"
+    ],
+    [
+      "160",
+      "18"
+    ],
+    [
+      "239",
+      "2"
+    ]
+  ],
+  "normalInstalledPreviewNotReplaced": true,
+  "keychainAccessNotRequested": true,
+  "cleanUserAcceptanceClaimed": false,
+  "minimumVersionExecutionClaimed": false,
+  "sourceDirty": false
+}
