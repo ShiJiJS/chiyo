@@ -1,0 +1,50 @@
+{
+  "date": "2026-10-23",
+  "capacityQaSource": "7ed2de0d70fc3d7cbad5b1521bddea7053b97ae5",
+  "installedSource": "7b19d34b61cf07d5a77db05adb8f0c9cdbf85805",
+  "productChangedPaths": [
+    "apps/desktop/lib/desktop_runtime.dart",
+    "apps/desktop/macos/Runner/MainFlutterWindow.swift"
+  ],
+  "allRemainingComparedProductPathsUnchanged": true,
+  "diffFile": "capacity-source-diff.patch",
+  "changeScope": "Only notification availability refresh/submission; no capacity, file delivery, storage, CLI protocol, native file or history implementation change. Full patch retained for review.",
+  "rawEvidenceReverified": [
+    {
+      "evidence": "docs/development/evidence/macos-capacity-current/verification.json",
+      "manifestSha256": "ac81b3e69c3b41448803489f4e1c172eacedba910bdbe6ae50ce097cf8f222fe",
+      "verifiedFiles": 34
+    },
+    {
+      "evidence": "docs/development/evidence/macos-tools-history-current/verification.json",
+      "manifestSha256": "64ecf6dbfca3c5f165c4bd3e027eba1696d838091a24b9d6770fae2fd31da77a",
+      "verifiedFiles": 22
+    },
+    {
+      "evidence": "docs/development/evidence/macos-final-ordinary-tools/verification.json",
+      "manifestSha256": "7a2db40f165bb14f0c7b979232ea6375661fd4693d7a2738358304d632cbc8a4",
+      "verifiedFiles": 19
+    },
+    {
+      "evidence": "docs/development/evidence/macos-final-ordinary-ssh/verification.json",
+      "manifestSha256": "c3dd99421936208c3a352de3d3ba9d86434b348c3c6f4d060895957979e59311",
+      "verifiedFiles": 19
+    }
+  ],
+  "selectedBinaryComparison": {
+    "cli/info": {
+      "package21Sha256": "bcbd7d56bdc54a66bfe86d6611cc0242dd7710e020c259b1f82efc680e27b1b2",
+      "package23Sha256": "c3772405ad35823fe52779106dc5727ac07758a348116e66af8ff1b4ae0c832d",
+      "identicalBytes": false
+    },
+    "app/info_desktop.app/Contents/Frameworks/sqlcipher.framework/Versions/A/sqlcipher": {
+      "package21Sha256": "b763342c5c02e17991465e7a78bb446af4a9e9cd1b777b1d3659964d1aafe0b4",
+      "package23Sha256": "b763342c5c02e17991465e7a78bb446af4a9e9cd1b777b1d3659964d1aafe0b4",
+      "identicalBytes": true
+    }
+  },
+  "cliBinaryIdentityNotClaimed": true,
+  "capacityScopeRetained": "Original Debug sandbox SQLCipher/native file boundary run, 146 CLI assertions and 44 deliveries; not ordinary Release performance or full installed UI capacity rerun.",
+  "currentHistorySource": "Actual ordinary package23 AWS/SSH/GH independent app reopens, each documented separately.",
+  "criterion6Interpretation": "Original criterion expressly allows preserving source of prior passing evidence and separately retesting changed whole-package parts. Capacity evidence reused only after source audit; new ordinary package23 histories and notification changes separately verified."
+}

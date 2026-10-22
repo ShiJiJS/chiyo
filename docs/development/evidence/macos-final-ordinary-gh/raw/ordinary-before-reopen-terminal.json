@@ -1,0 +1,17 @@
+{
+  "pid": 6826,
+  "environmentKeys": [
+    "HOME",
+    "LANG",
+    "LOGNAME",
+    "PATH",
+    "USER"
+  ],
+  "ordinaryMain": true,
+  "qaIdentityOrKeyInjection": false,
+  "previousOrdinaryPid": 5885,
+  "previousNormalExit": 0,
+  "previousEndpointClosed": true,
+  "exit": 0,
+  "endpointClosed": true
+}

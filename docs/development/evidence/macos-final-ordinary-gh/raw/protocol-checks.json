@@ -1,0 +1,51 @@
+{
+  "registeredOperations": 2,
+  "targetGhStarts": 1,
+  "terminalResults": [
+    {
+      "protocolVersion": 2,
+      "operationId": "final-gh-bundled-invalid-token",
+      "createdAt": "2026-10-22T19:08:20.961Z",
+      "status": "ok",
+      "executionId": "eh9JrJZgohCuNYNkt2nHftjHuErCr8MM3M25mSdnI0A=",
+      "requestId": "dCYS_gGVj4DAuBJRL7TUuOjoi9eocXdXP7jCAhsv370=",
+      "executionState": "exited",
+      "operationClaimed": true,
+      "processStarted": true,
+      "exitCode": 1,
+      "errorCode": null,
+      "startedAt": "2026-10-22T19:08:21.338Z",
+      "finishedAt": "2026-10-22T19:08:22.587Z",
+      "cleanupState": "not_needed",
+      "outputAvailable": true,
+      "outputTruncated": false
+    },
+    {
+      "protocolVersion": 2,
+      "operationId": "final-gh-external-cwd-denied",
+      "createdAt": "2026-10-22T19:09:39.291Z",
+      "status": "ok",
+      "executionId": "8zHDEN1EjxTua--w2idL0U1bTeVgQn6CP1mqCmo5tRs=",
+      "requestId": "dCYS_gGVj4DAuBJRL7TUuOjoi9eocXdXP7jCAhsv370=",
+      "executionState": "start_failed",
+      "operationClaimed": true,
+      "processStarted": false,
+      "exitCode": null,
+      "errorCode": "process_start_failed",
+      "startedAt": null,
+      "finishedAt": "2026-10-22T19:09:39.611Z",
+      "cleanupState": "not_needed",
+      "outputAvailable": true,
+      "outputTruncated": false
+    }
+  ],
+  "replaySameExecution": true,
+  "decisionAndFixedExpiryUnchanged": true,
+  "externalProgramPreclaimRefusals": 2,
+  "specificOsErrnoObserved": false,
+  "decodedResult": "GitHub HTTP401 Bad credentials, not positive authentication",
+  "outputSecretAbsenceChecked": true,
+  "revocationRefused": true,
+  "oldSessionRefusedAfterReopen": true,
+  "publicCredentialCatalogEmpty": true
+}

@@ -1,0 +1,38 @@
+{
+  "sourceCommit": "7b19d34b61cf07d5a77db05adb8f0c9cdbf85805",
+  "selectedPayloadFiles": [
+    {
+      "path": "cli/info",
+      "sha256": "c3772405ad35823fe52779106dc5727ac07758a348116e66af8ff1b4ae0c832d",
+      "mode": 493,
+      "manifestMatch": true
+    },
+    {
+      "path": "app/info_desktop.app/Contents/MacOS/info_desktop",
+      "sha256": "b778a781b736eb52bcb286fe1614cfbe129e6b004b2b8266a44d6a0da432678c",
+      "mode": 493,
+      "manifestMatch": true
+    },
+    {
+      "path": "app/info_desktop.app/Contents/MacOS/info-runtime-worker",
+      "sha256": "ff4dd5675a0970bafb84b44874e499f28ee2cdaa69b82346a1bd11abde40ee1a",
+      "mode": 493,
+      "manifestMatch": true
+    },
+    {
+      "path": "app/info_desktop.app/Contents/Resources/ThirdParty/gh/bin/gh",
+      "sha256": "8a4258433c81106343144857750316241759d06dcf16265cf3c4864a8f2f2ad6",
+      "mode": 493,
+      "manifestMatch": true
+    },
+    {
+      "path": "app/info_desktop.app/Contents/Frameworks/sqlcipher.framework/Versions/A/sqlcipher",
+      "sha256": "b763342c5c02e17991465e7a78bb446af4a9e9cd1b777b1d3659964d1aafe0b4",
+      "mode": 420,
+      "manifestMatch": true
+    }
+  ],
+  "strictSignatureExit": 0,
+  "full7971EntryCheckPriorSource": "docs/development/evidence/macos-final-ordinary-ssh/raw/payload-and-runtime.json",
+  "fullManifestNotRepeatedThisGhPhase": true
+}

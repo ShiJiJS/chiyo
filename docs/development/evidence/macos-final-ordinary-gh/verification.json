@@ -1,0 +1,108 @@
+{
+  "date": "2026-10-23",
+  "scope": "Actual ordinary package23 GH execution, public refusals and independent reopen; capacity provenance audit reuses prior scoped evidence, not rerun",
+  "productSource": "7b19d34b61cf07d5a77db05adb8f0c9cdbf85805",
+  "registeredOperations": 2,
+  "targetGhStarts": 1,
+  "positiveGitHubAuthenticationVerified": false,
+  "currentOrdinaryHistoryTotal": 26,
+  "normalOrdinaryQuitExit": 0,
+  "publicDriverExitCode": null,
+  "newKeychainActions": 0,
+  "rawFiles": [
+    {
+      "path": "hosted_client.dart",
+      "bytes": 1082,
+      "sha256": "f159f17f789448ebae2c0147c240d6f4892fc6042091277f4263696ed007bc18"
+    },
+    {
+      "path": "observe-chain.py",
+      "bytes": 1542,
+      "sha256": "6f3f9417f26f66514379aad4765084e12880df97f075ae962a2bb8a8d223fe75"
+    },
+    {
+      "path": "native-chain.json",
+      "bytes": 813,
+      "sha256": "34d682d8dca4d98ccfa2ffee200f8d53dbba60ba228bb870b5a59c9be52b96f1"
+    },
+    {
+      "path": "external-tool-source.json",
+      "bytes": 297,
+      "sha256": "f6d4bb2c1d31b766c9cf6328d7bf5d1a8e9dc7e4aaf1a6dab2f897919309fce1"
+    },
+    {
+      "path": "public-client.jsonl",
+      "bytes": 10900,
+      "sha256": "4cc599e0cc4a1b77cf38062b81c2f051c49df07877cb9c4d00fa097664ceab9c"
+    },
+    {
+      "path": "ordinary-before-reopen-terminal.json",
+      "bytes": 300,
+      "sha256": "48044fbd3823fdecae55c919e78c604e2b92edeb867b970b06651874a0a74bce"
+    },
+    {
+      "path": "ordinary-restored.json",
+      "bytes": 261,
+      "sha256": "eafd1d4566f218c574b76ca928cf62e7f561d0360b98e675078517a352ae9691"
+    },
+    {
+      "path": "ordinary-reopen-checkpoint.log.txt",
+      "bytes": 132,
+      "sha256": "dbc01fad753a943417e50e983fddc5339e7268c74255b60f06d0b78ea171aa93"
+    },
+    {
+      "path": "reopen-supervisor.py",
+      "bytes": 1094,
+      "sha256": "9bf3396ee9ddc6d222d44f2b05b5eb7ce26881b9469436c890dc49fbf771c8f2"
+    },
+    {
+      "path": "protocol-checks.json",
+      "bytes": 1737,
+      "sha256": "0591a8ef677cfc228f3c5a8989923e2d1c81a2915004bedd207c60dff1fbd3da"
+    },
+    {
+      "path": "final-bundled-cli.json",
+      "bytes": 2626,
+      "sha256": "8cb80d5d3b5bcdec0b551511d53e90a3a402cd63c1c17088e66f10324f8d5f79"
+    },
+    {
+      "path": "payload-and-runtime.json",
+      "bytes": 1351,
+      "sha256": "2c8e9df3c306df47a98612c815fab9eb954c6e6a8f246eed5c29d7ea8ce42eb0"
+    },
+    {
+      "path": "stable-signature.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "cleanup.json",
+      "bytes": 640,
+      "sha256": "1b3c7a7104979dcc9b6cfb1d8e52be8af6ec72444e2c09ca026df2734e8669cb"
+    },
+    {
+      "path": "ui-transcript.json",
+      "bytes": 1560,
+      "sha256": "65ecc01c7a5a0e120a15a0cf77b9ccd28310ccfd57c0b5dff130919f9b062840"
+    },
+    {
+      "path": "capacity-source-diff.patch",
+      "bytes": 4130,
+      "sha256": "76b85791c37d8ceca53dd02e66ee51e1cc5cf70031f18bc0c7d4d1e856cfe138"
+    },
+    {
+      "path": "capacity-provenance-audit.json",
+      "bytes": 2749,
+      "sha256": "431a4f13eb22720fd82162df56aa2e746470445fc7471a0020dd58a7dc256165"
+    }
+  ],
+  "issue44AcceptanceAfterAudit": [
+    true,
+    true,
+    false,
+    true,
+    true,
+    true
+  ],
+  "wholeIssueComplete": false
+}

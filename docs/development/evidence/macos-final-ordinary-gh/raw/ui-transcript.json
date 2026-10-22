@@ -1,0 +1,33 @@
+{
+  "kind": "Derived CUA transcript, not machine-exported full AX log or saved screenshot",
+  "date": "2026-10-23",
+  "ordinarySource": "7b19d34b61cf07d5a77db05adb8f0c9cdbf85805",
+  "credential": "MacFinalOrdinaryGh20261023",
+  "credentialVersion": 1,
+  "actions": [
+    "Created one synthetic string credential through native secure sheet; native AX value remained masked and parent showed 已填写.",
+    "Real GUI approved GH use for 15 minutes with confirmation showing bundled executable, independent config and environment receiver.",
+    "Real GUI revoked use grant, confirmed disabling synthetic credential, unchecked public discovery and saved.",
+    "App6826 actual menu quit; same ordinary package reopened as7539 with no new Keychain interaction."
+  ],
+  "reopenObserved": {
+    "historyTotal": 26,
+    "selectedChat": "Mac 普通包 GH 联合复验 20261023",
+    "credential": "MacFinalOrdinaryGh20261023",
+    "state": "已撤销",
+    "version": 1,
+    "operationCount": 2,
+    "fixedExpiryLocal": "2026-10-23 03:22:11",
+    "operations": {
+      "final-gh-bundled-invalid-token": "已退出 · 退出码 1",
+      "final-gh-external-cwd-denied": "启动失败"
+    },
+    "cleanup": "无需文件清理",
+    "externalCwdPlanHash": "sha256:902fbac03edc8a5e5a62f2eb0d86c8d07566bfab04e82cc57687959e9945af7e",
+    "originalInformationCount": 2,
+    "originalStructuredField": " 777",
+    "originalAttachment": "中文 合成附件.txt · 1.0 KiB · text/plain · 版本 1"
+  },
+  "screenshotSaved": false,
+  "recheckedAfterContinuation": true
+}

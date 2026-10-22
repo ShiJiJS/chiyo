@@ -1,0 +1,26 @@
+{
+  "app": {
+    "pid": 6826,
+    "parentPID": 6823,
+    "state": "R",
+    "path": "/Users/jiangxinyi/Documents/Project/agent-info/local/中文 Mac 预览/AgentInfoManage/app/info_desktop.app/Contents/MacOS/info_desktop"
+  },
+  "worker": {
+    "pid": 7394,
+    "parentPID": 6826,
+    "state": "Ss",
+    "path": "/Users/jiangxinyi/Documents/Project/agent-info/local/中文 Mac 预览/AgentInfoManage/app/info_desktop.app/Contents/MacOS/info-runtime-worker"
+  },
+  "gh": {
+    "pid": 7396,
+    "parentPID": 7394,
+    "state": "R",
+    "path": "/Users/jiangxinyi/Documents/Project/agent-info/local/中文 Mac 预览/AgentInfoManage/app/info_desktop.app/Contents/Resources/ThirdParty/gh/bin/gh"
+  },
+  "observedAt": 1792696101.3547468,
+  "targetArguments": [
+    "api",
+    "user"
+  ],
+  "environmentNotRead": true
+}
