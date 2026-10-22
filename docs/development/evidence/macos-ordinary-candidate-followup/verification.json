@@ -1,0 +1,69 @@
+{
+  "date": "2026-10-22",
+  "sourceCommit": "fb2d271e3c4478db0a434282d96f99aadc7869aa",
+  "candidateSource": "7b19d34b61cf07d5a77db05adb8f0c9cdbf85805",
+  "sameAppPidStillLive": 87410,
+  "profileUnchanged": true,
+  "serviceClosed": true,
+  "keychainRequestRepeated": false,
+  "newOwnerConfirmationRequested": false,
+  "scope": "Recovery archive cleanup and SDK-free material generation; no upgrade or real Codex-client pass.",
+  "files": [
+    {
+      "path": "raw/candidate-codex/prepare.txt",
+      "bytes": 176,
+      "sha256": "d9a5e1a0cac25c6151c4f4bd8fb867a1a912c57131abb7140c45ae08307d2977"
+    },
+    {
+      "path": "raw/candidate-codex/repeat-refused.txt",
+      "bytes": 51,
+      "sha256": "7c42fd46f86f11a267bc39f9e253ca12e1868dc2319386d34d790fefadc51456"
+    },
+    {
+      "path": "raw/candidate-codex/result.json",
+      "bytes": 2991,
+      "sha256": "0e63f143963b84ee013c2c31014c92533f2431f9d7e8d32fb3a30643365b1284"
+    },
+    {
+      "path": "raw/generated-materials/hooks.json",
+      "bytes": 2280,
+      "sha256": "56bf04c15cc54e03ada3a3aa0e7298cde3023013a8ff8de68baffbccffe29089"
+    },
+    {
+      "path": "raw/generated-materials/skills/agent-info-access/SKILL.md",
+      "bytes": 11532,
+      "sha256": "fdb4e8e8368bec6e93c7aeff1d9260be3907b0824a96ccf5024ff5862b0b2d14"
+    },
+    {
+      "path": "raw/generated-materials/skills/agent-info-access/references/credential-use.md",
+      "bytes": 14301,
+      "sha256": "f846eadaafc5aabadfa0ea9efe3fd145b8433802535b7371d45296511295c8de"
+    },
+    {
+      "path": "raw/generated-materials/skills/agent-info-access/references/information-files.md",
+      "bytes": 5748,
+      "sha256": "9dc64a5e38d8f88f28a73a8ce8de9656e21138ee0d5b0c9b226cfc7982777209"
+    },
+    {
+      "path": "raw/recovery-archive/archive.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/recovery-archive/extract.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/recovery-archive/result.json",
+      "bytes": 852,
+      "sha256": "c352078050aba85fefbe6dae8656a24d13e574e2f3252653dba01fc138f75489"
+    },
+    {
+      "path": "raw/recovery-archive/signature.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "rawFileCount": 11
+}

@@ -1,0 +1,85 @@
+{
+  "sourceCommit": "7b19d34b61cf07d5a77db05adb8f0c9cdbf85805",
+  "outputRelativeToProject": "local/中文 Mac 预览/Codex 接入材料 package23",
+  "environmentKeys": [
+    "PATH"
+  ],
+  "prepareExit": 0,
+  "binaries": [
+    {
+      "name": "info-codex",
+      "bytes": 6732512,
+      "mode": "0o755",
+      "sha256": "e3996f3e9740faebdececd5b4fcd9fb61a2141947b7edd566f19b3a69d58b123"
+    },
+    {
+      "name": "info-codex-hook",
+      "bytes": 6666864,
+      "mode": "0o755",
+      "sha256": "427dbaf96d03f7ca8858df6fb7e7030dc79acd79f51f43be9f3ec4a68f68c3f7"
+    },
+    {
+      "name": "info-runtime-worker",
+      "bytes": 6010224,
+      "mode": "0o755",
+      "sha256": "5befb4ae970a4e179fc2cea366f8496606d6d8c2c1289a596a5603139124cf04"
+    }
+  ],
+  "hooks": [
+    {
+      "event": "SessionStart",
+      "command": "'/Users/jiangxinyi/Documents/Project/agent-info/local/中文 Mac 预览/Codex 接入材料 package23/info-codex-hook'",
+      "timeout": 15
+    },
+    {
+      "event": "SubagentStart",
+      "command": "'/Users/jiangxinyi/Documents/Project/agent-info/local/中文 Mac 预览/Codex 接入材料 package23/info-codex-hook'",
+      "timeout": 5
+    },
+    {
+      "event": "SessionEnd",
+      "command": "'/Users/jiangxinyi/Documents/Project/agent-info/local/中文 Mac 预览/Codex 接入材料 package23/info-codex-hook'",
+      "timeout": 3
+    }
+  ],
+  "defaultPortVerifiedInSource": 47125,
+  "oldHooksAndSkillMatchOriginalEvidence": true,
+  "repeatRefusedExit": 64,
+  "allNewFilesBytesAndModesUnchangedAfterRepeat": true,
+  "installedInCodex": false,
+  "hookDefinitionsTrusted": false,
+  "hooksExecuted": false,
+  "realClientAcceptanceClaimed": false,
+  "existingApprovedIssue49ProjectModified": false,
+  "preparationVerifierMistake": "Initial verifier incorrectly expected explicit --port in generated hooks. Actual hooks correctly use the existing 47125 default; generation itself succeeded. No product change.",
+  "fileFacts": {
+    "info-codex-hook": {
+      "sha256": "427dbaf96d03f7ca8858df6fb7e7030dc79acd79f51f43be9f3ec4a68f68c3f7",
+      "mode": 493
+    },
+    "info-codex": {
+      "sha256": "e3996f3e9740faebdececd5b4fcd9fb61a2141947b7edd566f19b3a69d58b123",
+      "mode": 493
+    },
+    "info-runtime-worker": {
+      "sha256": "5befb4ae970a4e179fc2cea366f8496606d6d8c2c1289a596a5603139124cf04",
+      "mode": 493
+    },
+    "hooks.json": {
+      "sha256": "56bf04c15cc54e03ada3a3aa0e7298cde3023013a8ff8de68baffbccffe29089",
+      "mode": 420
+    },
+    "skills/agent-info-access/SKILL.md": {
+      "sha256": "fdb4e8e8368bec6e93c7aeff1d9260be3907b0824a96ccf5024ff5862b0b2d14",
+      "mode": 420
+    },
+    "skills/agent-info-access/references/credential-use.md": {
+      "sha256": "f846eadaafc5aabadfa0ea9efe3fd145b8433802535b7371d45296511295c8de",
+      "mode": 420
+    },
+    "skills/agent-info-access/references/information-files.md": {
+      "sha256": "9dc64a5e38d8f88f28a73a8ce8de9656e21138ee0d5b0c9b226cfc7982777209",
+      "mode": 420
+    }
+  }
+}
