@@ -1,0 +1,24 @@
+{
+  "inputFilesVerifiedAgainstGit": 669,
+  "copyModificationsVerified": 2,
+  "removedSourceAllocatedKiB": 23576,
+  "sourceRemoved": true,
+  "qaFixtureRemoved": true,
+  "qaPortClosed": true,
+  "stablePreviewSource": "4690e79357bb728da22193d8dadd6dc8a8ce2ce6",
+  "stablePreviewManifestEntriesVerified": 7971,
+  "stablePreviewStrictSignatureExit": 0,
+  "stablePreviewPreservedPid": 53592,
+  "stableRuntimeExtraPreserved": [
+    ".local/state/gh/device-id"
+  ],
+  "scanScope": [
+    "build",
+    "local"
+  ],
+  "generatedApps": [
+    "local/中文 Mac 预览/AgentInfoManage/app/info_desktop.app"
+  ],
+  "generatedDSYMs": [],
+  "systemNotificationSettingsRestored": true
+}

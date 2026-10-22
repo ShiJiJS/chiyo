@@ -1,0 +1,140 @@
+{
+  "date": "2026-10-22",
+  "qaSource": "e68bdc659ee5cd54349f82d57b9dc796fc063226",
+  "productSource": "dd050f3caa1bcd4a382a765672a5f8b603787d02",
+  "bundleIdentifier": "org.shijijs.agent-info-manage.qa.notifications20261021",
+  "binarySha256": "26cff406c20a4bca61af40f80fe035c3ba09cc5a3ae3cf07779b2d5694ed20c5",
+  "actualSystemAuthorizationSequence": [
+    2,
+    2,
+    1,
+    2
+  ],
+  "permissionActions": 2,
+  "notificationSubmissions": 0,
+  "actualAppExit": 0,
+  "actualQuit": "CUA Command-Q",
+  "scope": "Real system Settings allow/deny/restore plus actual application check buttons; existing synthetic notification identity, memory key/SQLCipher; no real notification submission or click; not final ordinary package or unavailable-framework state.",
+  "rawFileCount": 19,
+  "cleanup": {
+    "inputFilesVerifiedAgainstGit": 669,
+    "copyModificationsVerified": 2,
+    "removedSourceAllocatedKiB": 23576,
+    "sourceRemoved": true,
+    "qaFixtureRemoved": true,
+    "qaPortClosed": true,
+    "stablePreviewSource": "4690e79357bb728da22193d8dadd6dc8a8ce2ce6",
+    "stablePreviewManifestEntriesVerified": 7971,
+    "stablePreviewStrictSignatureExit": 0,
+    "stablePreviewPreservedPid": 53592,
+    "stableRuntimeExtraPreserved": [
+      ".local/state/gh/device-id"
+    ],
+    "scanScope": [
+      "build",
+      "local"
+    ],
+    "generatedApps": [
+      "local/中文 Mac 预览/AgentInfoManage/app/info_desktop.app"
+    ],
+    "generatedDSYMs": [],
+    "systemNotificationSettingsRestored": true
+  },
+  "files": [
+    {
+      "path": "raw/cleanup.json",
+      "bytes": 669,
+      "sha256": "755d69d66fba53756f990dd053d79c1a0f6026af7af959da46f3e4265748923d"
+    },
+    {
+      "path": "raw/cua-observations.json",
+      "bytes": 1108,
+      "sha256": "4f79493272c34942a5f290330087367b9fb08aadbf1ba74f8c4f8445d75b50f2"
+    },
+    {
+      "path": "raw/last-application-result.json",
+      "bytes": 865,
+      "sha256": "9596f4b62c09d9a8f6e8e837587abba8a54a0176fbc0e8328f1c8eaef86a6da6"
+    },
+    {
+      "path": "raw/logs/analyze.txt",
+      "bytes": 96,
+      "sha256": "75822b9bdfc334d102e5674619422575d82a9e7f021dab952b8f2487a44c32b9"
+    },
+    {
+      "path": "raw/logs/application.txt",
+      "bytes": 1195,
+      "sha256": "be1c256bb33805d1247be48b3ec5a5ed7dae5b3bcec829a0fcf8b257f70aa4f1"
+    },
+    {
+      "path": "raw/logs/build-release.txt",
+      "bytes": 5533,
+      "sha256": "7ace7aaeb937a1ca02ab5471259361f2dfb37d1f2d9fdbd21d30df5b3fbb0b13"
+    },
+    {
+      "path": "raw/logs/entitlements.txt",
+      "bytes": 769,
+      "sha256": "b71d8a73cae692c4dcf1438d3f859a5708571bfc03342cf39df023a245a1e444"
+    },
+    {
+      "path": "raw/logs/pub-desktop.txt",
+      "bytes": 318,
+      "sha256": "ca68f707c22164511fc2b3f9af97ed7bd46538b1d334d9c806a6a59a556a6e05"
+    },
+    {
+      "path": "raw/logs/pub-info_cli.txt",
+      "bytes": 438,
+      "sha256": "7652c98906e8f741dc56b0e7f018713f8985ac3d073ce66e4cb8e1d3274e15f6"
+    },
+    {
+      "path": "raw/logs/pub-info_core.txt",
+      "bytes": 438,
+      "sha256": "7652c98906e8f741dc56b0e7f018713f8985ac3d073ce66e4cb8e1d3274e15f6"
+    },
+    {
+      "path": "raw/logs/pub-info_storage.txt",
+      "bytes": 438,
+      "sha256": "7652c98906e8f741dc56b0e7f018713f8985ac3d073ce66e4cb8e1d3274e15f6"
+    },
+    {
+      "path": "raw/logs/sign-qa-name.txt",
+      "bytes": 209,
+      "sha256": "0943bd02f796b79cd936b12b77408a9b9c53559a1d6e47b585e61a235971c209"
+    },
+    {
+      "path": "raw/logs/signature.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/macos-notifications-ui.py",
+      "bytes": 12495,
+      "sha256": "62a6198150647ce7daa902e8ea9b3c8adc2bd0b7d6b4fce58954a44453965b38"
+    },
+    {
+      "path": "raw/macos_notifications_manual.dart",
+      "bytes": 14700,
+      "sha256": "b291daa5211b1403e9227b135be49cf7883dcc997c28ce9017bfe9d641907bb0"
+    },
+    {
+      "path": "raw/native-events.json",
+      "bytes": 783,
+      "sha256": "b33e0e379be3ab33486a48482d01e3c46889b3d39d7e65801dc180bc44b50ab4"
+    },
+    {
+      "path": "raw/qa-copy/apps/desktop/macos/Runner/Configs/AppInfo.xcconfig",
+      "bytes": 641,
+      "sha256": "26495e1dadedcc4df2a7a9f8962a82ec29f51fb7a5c8bfb45f2875d14fcbfec0"
+    },
+    {
+      "path": "raw/qa-copy/apps/desktop/macos/Runner/MainFlutterWindow.swift",
+      "bytes": 21160,
+      "sha256": "aad45a5d9865372616a15e7480d000c9dd3ebe4f4f315e320bc9e436485487fe"
+    },
+    {
+      "path": "raw/result.json",
+      "bytes": 88276,
+      "sha256": "59b63d8c0c20621bc2da899207e68fa1a3a453ee6b7bae6eab8039e937d8685e"
+    }
+  ]
+}

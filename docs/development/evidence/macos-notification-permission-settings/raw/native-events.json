@@ -1,0 +1,42 @@
+[
+  {
+    "alert": 2,
+    "appActive": true,
+    "authorization": 2,
+    "event": "settings",
+    "identifier": "",
+    "notificationCenter": 2,
+    "requestId": "",
+    "windowVisible": true
+  },
+  {
+    "alert": 2,
+    "appActive": true,
+    "authorization": 2,
+    "event": "settings",
+    "identifier": "",
+    "notificationCenter": 2,
+    "requestId": "",
+    "windowVisible": true
+  },
+  {
+    "alert": 2,
+    "appActive": true,
+    "authorization": 1,
+    "event": "settings",
+    "identifier": "",
+    "notificationCenter": 2,
+    "requestId": "",
+    "windowVisible": true
+  },
+  {
+    "alert": 2,
+    "appActive": true,
+    "authorization": 2,
+    "event": "settings",
+    "identifier": "",
+    "notificationCenter": 2,
+    "requestId": "",
+    "windowVisible": true
+  }
+]

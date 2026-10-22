@@ -1,0 +1,39 @@
+{
+  "source": "Explicit transcription of CUA AX/screenshots in this conversation; no separately saved native image files",
+  "appPid": 76903,
+  "systemApp": "Mac 通知合成验收",
+  "initialAllowNotifications": "on",
+  "temporaryAllowNotifications": "off",
+  "restoredAllowNotifications": "on",
+  "unchangedOwnSettings": {
+    "desktop": true,
+    "notificationCenter": true,
+    "lockScreen": true,
+    "alertStyle": "临时",
+    "sounds": "on",
+    "preview": "默认",
+    "grouping": "自动"
+  },
+  "actualAppCheckClicks": 2,
+  "appStatusSequence": [
+    "系统接受通知",
+    "系统已拒绝通知权限",
+    "系统接受通知"
+  ],
+  "deniedInboxScreenshot": {
+    "newChatVisible": "系统拒绝时的合成聊天",
+    "all": 26,
+    "pending": 26,
+    "handled": 0,
+    "deniedNoticeVisible": true
+  },
+  "systemSettingsReturnedTo": "通知列表",
+  "globalPreferencesObservedUnchanged": {
+    "sleeping": "off",
+    "locked": "on",
+    "sharing": "关闭通知"
+  },
+  "finalAction": "Actual CUA super+q",
+  "passwordPromptObserved": false,
+  "newNotificationPromptObserved": false
+}
