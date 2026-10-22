@@ -1,0 +1,50 @@
+{
+  "focusOnlyHypothesis": {
+    "actualPid": 67106,
+    "normalExit": 0,
+    "correctNativeOwnerAndValues": true,
+    "selectionLimitation": "CUA selected text all while Dart caret at end; no direct editor range instrumentation in this first run"
+  },
+  "focusAndSelectionHypothesis": {
+    "actualPid": 67985,
+    "normalExit": 0,
+    "nativeEditorRangeAndDartMatch": true,
+    "actualCommandAAndSCIM": true
+  },
+  "production": {
+    "editPid": 69364,
+    "reopenPid": 71569,
+    "defaultRealWindowPolicyUsed": true,
+    "nativeOwnerValuesSelectionMatchInPureFocus": true,
+    "credentialNameAndBindingPureFocusMatch": true,
+    "SCIMComposing": [
+      0,
+      6
+    ],
+    "spaceCommitted": "你好",
+    "nativeOpenPanelEscapeCancelled": true,
+    "panelReturnDescriptionAndCursorPreserved": true,
+    "unsavedConfirmationCancelPreservedDraftFocusAndSelection": true,
+    "normalSaveIndependentReopenPassed": true,
+    "EnglishSavedCheckpoint": "MacFocusSaved",
+    "ChinesePersistenceClaimed": false,
+    "noSecretDraftEntered": true,
+    "normalExits": [
+      0,
+      0
+    ],
+    "nativeAXTreeErrors": 0
+  },
+  "failuresAndLimits": {
+    "nativeUnitFirstExit": 133,
+    "nativeUnitFirstReason": "Unbundled foreground AppKit fixture failed to activate; environmental predicate isolated in final instrumented contract tests, default production policy remains real NSApp/key/visible checks.",
+    "nativeUnitFinalPassed": 15,
+    "selectedAllAssertionMistake": "First assertion also required field.accessibilitySelectedText to equal full text. It returned empty while editor.selectedRange and Dart were both0..24 and CUA selected text correct. Truth now uses native editor range plus model, not that direct field getter.",
+    "scrollAttempt": "A CUA wheel attempt did not move form; actual visible scrollbar drag reached file field. Not classified as a proven production regression.",
+    "instantaneousValues": "One immediate CUA query during credential typing had stale name before the existing100ms reconciliation; settled state and pure focus checks match. No claim every intermediate query is correct.",
+    "fullVoiceOverOrPhysicalKeyboardPassed": false,
+    "ordinaryAccurateZipUpgradePassed": false,
+    "keychainRequests": 0,
+    "windowsMainCIChanged": false
+  }
+}
