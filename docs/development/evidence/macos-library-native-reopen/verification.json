@@ -54,6 +54,11 @@
       "sha256": "9643764ceec086e4cb2ec9113f6dd69ede3c40319a4d0312d97ad9d5a90ef3cc"
     },
     {
+      "path": "raw/application-index-final.json",
+      "bytes": 465,
+      "sha256": "ba03c4288baefd3d1a663ebc1876f4a867f1ae51e081038a2674127618ffd835"
+    },
+    {
       "path": "raw/archive-cleanup.py",
       "bytes": 5657,
       "sha256": "be5c4f01453a888e357fc958d778c0cf5d1a7966858d9996315bd3498108245e"
@@ -253,5 +258,7 @@
       "bytes": 353,
       "sha256": "04bbb92d141ac6c488a0d64d8b128bd5d326b8ce895bea51a9182945b08d5de2"
     }
-  ]
+  ],
+  "spotlightProjectApplicationCount": 1,
+  "retainedAppRegistrationVerified": true
 }
