@@ -1,0 +1,23 @@
+{
+  "SQLITE_OPEN_READONLY": true,
+  "cipherVersion": "4.19.0 community",
+  "schema": 22,
+  "integrity": "ok",
+  "template": {
+    "name": "SyntheticNativeTemplate",
+    "description": "Synthetic template description",
+    "version": 1,
+    "fields": [
+      {
+        "id": "hj7S46UqEjdZQThKZaS8ZugiqzABEmXt5b5v1igoRc4=",
+        "name": "SyntheticField",
+        "description": "",
+        "kind": "structured"
+      }
+    ]
+  },
+  "originalInformationUnchanged": true,
+  "credentialDraftDiscardedWithoutPersisting": true,
+  "readOnlyConnectionIsNotAppProcessReopen": true,
+  "databaseWalShmBytesUnchanged": true
+}
