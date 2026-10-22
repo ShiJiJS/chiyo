@@ -100,6 +100,8 @@ Future<void> main() async {
       Platform.environment['MAC_NOTIFICATION_PERMISSION_SETTINGS'] == '1';
   final stalePermission =
       Platform.environment['MAC_NOTIFICATION_STALE_PERMISSION'] == '1';
+  final allowedOnce =
+      Platform.environment['MAC_NOTIFICATION_ALLOWED_ONCE'] == '1';
   check(
     Platform.isMacOS &&
         owner != null &&
@@ -232,6 +234,59 @@ Future<void> main() async {
     }
     facts['notificationStateAfterUI'] = runtime.availability.notifications.name;
     facts['permissionActionsAfterUI'] = platform.permissionActions;
+    if (allowedOnce) {
+      check(reusePermission && !permissionSettings, 'Allowed probe mode');
+      await service.owner.setNotificationsEnabled(true);
+      final gate = File('$canonical/dispatch-allowed-once');
+      await phase('allowed-ready-activate-qa-app-before-owned-dispatch-gate');
+      await until(
+        gate.exists,
+        'CUA actual foreground before one allowed request',
+      );
+      check(
+        await gate.readAsString() == owner,
+        'Foreign allowed-dispatch gate',
+      );
+      final item = service.owner.information.single;
+      final session = service.agent.openSession('允许通知正向合成聊天');
+      final request = service.agent.request(session, '系统允许时正常提交一次', [
+        FieldRef(item.id, item.fields.single.id),
+      ]);
+      await until(
+        () => platform.submissionResults.length == 1,
+        'Single allowed native completion',
+      );
+      check(
+        platform.submissionResults.single['accepted'] == true,
+        'Allowed path did not submit',
+      );
+      check(
+        runtime.availability.notifications ==
+                NotificationAvailability.enabled &&
+            platform.permissionActions == 0,
+        'Allowed path changed permission state',
+      );
+      check(
+        service.owner
+            .queryInbox(limit: 100)
+            .entries
+            .singleWhere((r) => r.id == request.id)
+            .pending,
+        'Allowed notification approved or lost request',
+      );
+      (facts['cases'] as List).add({
+        'label': 'allowed-single-production-request',
+        'requestId': request.id,
+        'nativeAccepted': true,
+        'notificationState': runtime.availability.notifications.name,
+        'requestPending': true,
+        'permissionActions': platform.permissionActions,
+        'submissions': platform.submissions,
+      });
+      facts['complete'] = true;
+      await phase('complete-await-native-quit');
+      return;
+    }
     if (permissionSettings) {
       check(reusePermission, 'Settings test requires existing system decision');
       await service.owner.setNotificationsEnabled(true);
