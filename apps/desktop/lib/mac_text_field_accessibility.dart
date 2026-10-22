@@ -23,6 +23,7 @@ class _MacTextFieldAccessibilityState extends State<MacTextFieldAccessibility>
   final _box = GlobalKey();
   ScrollableState? _scrollable;
   ScrollPosition? _position;
+  bool _visible = true;
   final _native = !kIsWeb && defaultTargetPlatform == TargetPlatform.macOS;
 
   @override
@@ -39,6 +40,9 @@ class _MacTextFieldAccessibilityState extends State<MacTextFieldAccessibility>
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!_native) return;
+    // IndexedStack retains all pages and their layout. Subscribe to all
+    // ancestor visibility scopes so a tab switch refreshes even const fields.
+    _visible = Visibility.of(context);
     final next = Scrollable.maybeOf(context);
     final position = next?.position;
     // ScrollableState can survive a physics/theme change while its concrete
@@ -63,7 +67,11 @@ class _MacTextFieldAccessibilityState extends State<MacTextFieldAccessibility>
 
   Map<String, Object>? geometry() {
     final box = _box.currentContext?.findRenderObject();
-    if (!mounted || box is! RenderBox || !box.attached || !box.hasSize) {
+    if (!mounted ||
+        !_visible ||
+        box is! RenderBox ||
+        !box.attached ||
+        !box.hasSize) {
       return null;
     }
     var rect = box.localToGlobal(Offset.zero) & box.size;

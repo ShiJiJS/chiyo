@@ -136,6 +136,70 @@ void main() {
   );
 
   testWidgets(
+    'retained indexed pages publish only the currently visible field purpose',
+    (tester) async {
+      late StateSetter update;
+      int? index = 0;
+      var visible = true;
+      const children = [
+        MacTextFieldAccessibility(label: '搜索请求', child: TextField()),
+        MacTextFieldAccessibility(label: '搜索历史', child: TextField()),
+      ];
+      try {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: StatefulBuilder(
+                builder: (context, change) {
+                  update = change;
+                  return Visibility(
+                    visible: visible,
+                    maintainState: true,
+                    child: IndexedStack(index: index, children: children),
+                  );
+                },
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        final originalStates = tester
+            .stateList(
+              find.byType(MacTextFieldAccessibility, skipOffstage: false),
+            )
+            .toList();
+        List<Object?> labels() =>
+            (calls.last.arguments as List).map((e) => e['label']).toList();
+        expect(labels(), ['搜索请求']);
+        update(() => index = 1);
+        await tester.pumpAndSettle();
+        expect(
+          tester
+              .stateList(
+                find.byType(MacTextFieldAccessibility, skipOffstage: false),
+              )
+              .toList(),
+          originalStates,
+        );
+        expect(labels(), ['搜索历史']);
+        update(() => visible = false);
+        await tester.pumpAndSettle();
+        expect(labels(), isEmpty);
+        update(() => visible = true);
+        await tester.pumpAndSettle();
+        expect(labels(), ['搜索历史']);
+        update(() => index = null);
+        await tester.pumpAndSettle();
+        expect(labels(), isEmpty);
+      } finally {
+        await tester.pumpWidget(const SizedBox());
+        await tester.pump();
+      }
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.macOS),
+  );
+
+  testWidgets(
     'other platforms keep framework semantics without native messages',
     (tester) async {
       await tester.pumpWidget(

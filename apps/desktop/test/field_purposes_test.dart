@@ -141,7 +141,7 @@ void main() {
         await tester.pumpAndSettle();
         for (final entry in [
           ('nav-0', 'inbox-search', '搜索聊天、信息名称'),
-          ('nav-1', 'library-search', '搜索全部信息'),
+          ('nav-1', 'library-search', '搜索信息'),
           ('nav-2', 'proposal-search', '搜索提案、提交方'),
           ('nav-3', 'history-search', '搜索聊天、Agent、记录编号'),
         ]) {
@@ -149,6 +149,12 @@ void main() {
           await tester.pumpAndSettle();
           final search = find.byKey(ValueKey(entry.$2));
           purpose(tester, search, entry.$3);
+          if (debugDefaultTargetPlatformOverride == TargetPlatform.macOS) {
+            expect(
+              (calls.last.arguments as List).map((e) => e['label']).toList(),
+              [entry.$3],
+            );
+          }
           await tester.enterText(search, 'Synthetic query');
           await tester.pumpAndSettle();
           purpose(tester, search, entry.$3);

@@ -726,7 +726,7 @@ class _InformationLibraryState extends State<InformationLibrary> {
           ),
           const SizedBox(height: 16),
           MacTextFieldAccessibility(
-            label: '搜索$scope',
+            label: '搜索信息',
             child: TextField(
               key: const ValueKey('library-search'),
               controller: _search,
