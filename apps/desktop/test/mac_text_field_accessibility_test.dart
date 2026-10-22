@@ -20,7 +20,7 @@ void main() {
   });
 
   testWidgets(
-    'native metadata contains only purpose and visible geometry, updates on scroll and clears',
+    'ordinary AX cache follows actual controller values and visible geometry',
     (tester) async {
       final controller = TextEditingController(text: 'synthetic-private-value');
       final scroll = ScrollController();
@@ -53,9 +53,19 @@ void main() {
       await tester.pumpAndSettle();
       final first = (calls.last.arguments as List).single as Map;
       expect(calls.last.method, 'update');
-      expect(first.keys.toSet(), {'label', 'left', 'top', 'width', 'height'});
+      expect(first.keys.toSet(), {
+        'label',
+        'left',
+        'top',
+        'width',
+        'height',
+        'text',
+      });
       expect(first['label'], '公开说明');
-      expect(calls.toString(), isNot(contains(controller.text)));
+      expect(first['text'], controller.text);
+      controller.text = 'synthetic-new-value';
+      await tester.pumpAndSettle();
+      expect((calls.last.arguments as List).single['text'], controller.text);
       scroll.jumpTo(20);
       await tester.pumpAndSettle();
       final moved = (calls.last.arguments as List).single as Map;
@@ -71,6 +81,69 @@ void main() {
       expect(calls.last.arguments, isEmpty);
       controller.dispose();
       scroll.dispose();
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.macOS),
+  );
+
+  testWidgets('obscured text never enters ordinary native AX cache messages', (
+    tester,
+  ) async {
+    final controller = TextEditingController(text: 'synthetic-secret');
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: MacTextFieldAccessibility(
+            label: '秘密',
+            child: TextField(controller: controller, obscureText: true),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect((calls.last.arguments as List).single.containsKey('text'), isFalse);
+    expect(calls.toString(), isNot(contains(controller.text)));
+    await tester.pumpWidget(const SizedBox());
+    await tester.pump();
+    controller.dispose();
+  }, variant: TargetPlatformVariant.only(TargetPlatform.macOS));
+
+  testWidgets(
+    'controller replacement drops old subscriptions and publishes current value',
+    (tester) async {
+      final first = TextEditingController(text: 'synthetic-first');
+      final second = TextEditingController(text: 'synthetic-second');
+      var current = first;
+      late StateSetter update;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: StatefulBuilder(
+              builder: (context, change) {
+                update = change;
+                return MacTextFieldAccessibility(
+                  label: '名称',
+                  child: TextField(controller: current),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      update(() => current = second);
+      await tester.pumpAndSettle();
+      expect((calls.last.arguments as List).single['text'], second.text);
+      calls.clear();
+      first.text = 'synthetic-stale';
+      await tester.pumpAndSettle();
+      expect(calls, isEmpty);
+      second.text = 'synthetic-current';
+      await tester.pumpAndSettle();
+      expect((calls.last.arguments as List).single['text'], second.text);
+      await tester.pumpWidget(const SizedBox());
+      await tester.pump();
+      first.dispose();
+      second.dispose();
     },
     variant: TargetPlatformVariant.only(TargetPlatform.macOS),
   );

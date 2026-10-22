@@ -4,6 +4,10 @@ private struct Failure: Error { let message: String }
 private final class StaleAXField: NSTextField {
   override func accessibilityFrame() -> NSRect { .zero }
 }
+private final class ActiveAXField: NSTextField {
+  let editor = NSTextView()
+  override func currentEditor() -> NSText? { editor }
+}
 private func check(_ condition: @autoclosure () -> Bool, _ message: String) throws {
   if !condition() { throw Failure(message: message) }
 }
@@ -104,6 +108,33 @@ private struct Probe {
                                  "top": 30.0, "width": 200.0, "height": 30.0]]), "nested labels refused")
       try check(stale.accessibilityLabel() == "Nested purpose", "stale AX frame blocked live match")
       try check(field.accessibilityLabel() == "Original", "unrelated field changed")
+    }
+    try test("ordinary inactive cache mirrors its own value without changing focus or editor") {
+      let responder = window.firstResponder
+      var metadata = row("Ordinary value"); metadata["text"] = "synthetic-correct"
+      try check(adapter.update([metadata]), "ordinary text refused")
+      try check(field.stringValue == "synthetic-correct", "inactive cache stale")
+      try check(window.firstResponder === responder, "focus changed")
+      metadata["text"] = false
+      try check(!adapter.update([metadata]), "non-string value accepted")
+      try check(field.stringValue == "synthetic-correct", "invalid value changed cache")
+      adapter.update([] as [[String: Any]])
+    }
+    try test("active editor and secure text never receive ordinary cache writes") {
+      field.removeFromSuperview()
+      let active = ActiveAXField(frame: field.frame)
+      active.stringValue = "active-original"
+      active.editor.string = "synthetic-composition"
+      let activeBefore = active.stringValue
+      let secure = NSSecureTextField(frame: field.frame)
+      secure.stringValue = "secure-original"
+      root.addSubview(active); root.addSubview(secure)
+      defer { adapter.update([] as [[String: Any]]); active.removeFromSuperview(); secure.removeFromSuperview(); root.addSubview(field) }
+      var metadata = row("Active value"); metadata["text"] = "must-not-replace"
+      try check(adapter.update([metadata]), "valid text refused")
+      try check(active.stringValue == activeBefore, "active cache overwritten")
+      try check(active.editor.string == "synthetic-composition", "composition changed")
+      try check(secure.stringValue == "secure-original", "secure value overwritten")
     }
     print("PASS total=\(passed)")
     window.close()

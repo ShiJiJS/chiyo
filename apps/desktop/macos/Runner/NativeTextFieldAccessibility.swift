@@ -1,11 +1,13 @@
 import Cocoa
 
-/// Names only the owning Flutter view's unambiguously matched AppKit fields.
-/// The public AppKit adapter never reads/writes text or moves input focus.
+/// Maintains the owning Flutter view's unambiguously matched AppKit AX shims.
+/// Only inactive ordinary-field caches are synchronized; active editors,
+/// secure fields, selection and input focus remain owned by Flutter/AppKit.
 final class NativeTextFieldAccessibility {
   private struct Label {
     let name: String
     let rect: NSRect // Flutter logical coordinates, top-left origin.
+    let text: String?
   }
   private final class Assignment: NSObject {
     let original: String?
@@ -28,8 +30,10 @@ final class NativeTextFieldAccessibility {
     guard let rows = value as? [[String: Any]], rows.count <= 4096 else { return false }
     var next: [Label] = []
     for row in rows {
-      guard Set(row.keys) == Set(["label", "left", "top", "width", "height"]),
+      let keys = Set(["label", "left", "top", "width", "height"])
+      guard Set(row.keys) == keys || Set(row.keys) == keys.union(["text"]),
             let name = row["label"] as? String, !name.isEmpty, name.utf8.count <= 512 else { return false }
+      if row.keys.contains("text"), !(row["text"] is String) { return false }
       var numbers: [Double] = []
       for key in ["left", "top", "width", "height"] {
         guard let n = row[key] as? NSNumber,
@@ -40,7 +44,7 @@ final class NativeTextFieldAccessibility {
       guard numbers[2] > 0, numbers[3] > 0 else { return false }
       let rect = NSRect(x: numbers[0], y: numbers[1], width: numbers[2], height: numbers[3])
       guard !next.contains(where: { $0.rect == rect }) else { return false }
-      next.append(Label(name: name, rect: rect))
+      next.append(Label(name: name, rect: rect, text: row["text"] as? String))
     }
     labels = next
     if labels.isEmpty {
@@ -80,11 +84,11 @@ final class NativeTextFieldAccessibility {
       return window.convertToScreen(parent.convert(field.frame, to: nil))
     }
     let nativeFrames = fields.map { ($0, liveFrame($0)) }
-    let targets = labels.map { label -> (String, NSRect) in
+    let targets = labels.map { label -> (String, NSRect, String?) in
       let r = label.rect
       let y = view.isFlipped ? r.minY : view.bounds.maxY - r.maxY
       let local = NSRect(x: r.minX, y: y, width: r.width, height: r.height)
-      return (label.name, window.convertToScreen(view.convert(local, to: nil)))
+      return (label.name, window.convertToScreen(view.convert(local, to: nil)), label.text)
     }
     func matches(_ a: NSRect, _ b: NSRect) -> Bool {
       !a.isEmpty && abs(a.minX - b.minX) <= 2 && abs(a.minY - b.minY) <= 2 &&
@@ -102,6 +106,13 @@ final class NativeTextFieldAccessibility {
       if field.accessibilityLabel() != target.0 {
         field.setAccessibilityLabel(target.0)
         NSAccessibility.post(element: field, notification: .titleChanged)
+      }
+      // Flutter's shared field editor can leave an inactive shim with the next
+      // field's value, or with an empty initial cache. Never touch a live editor:
+      // doing so could replace selection or an in-progress IME composition.
+      if let text = target.2, field.currentEditor() == nil, field.stringValue != text {
+        field.stringValue = text
+        NSAccessibility.post(element: field, notification: .valueChanged)
       }
       kept.insert(ObjectIdentifier(field))
     }

@@ -13,7 +13,7 @@ save/reopen claim. --diagnose-accessibility-state observes system/window flags
 and Flutter's semanticsEnabled without changing them. An explicit comparator
 can omit only the native field-purpose adapter in the owned QA copy.
 --diagnose-synthetic-text-values additionally records native/AX/editor strings
-only in this isolated synthetic observation run; never enter personal data.
+only in this isolated synthetic run; never enter personal data.
 """
 import argparse
 import hashlib
@@ -72,8 +72,8 @@ def main():
     parser.add_argument('--expected-description', default='MacFocusSaved',
                         help='Synthetic text to save through the UI and verify after process restart')
     args = parser.parse_args()
-    if args.diagnose_synthetic_text_values and not (args.observe_only and args.diagnose_accessibility and args.diagnose_accessibility_state):
-        parser.error('Synthetic value diagnosis requires --observe-only --diagnose-accessibility --diagnose-accessibility-state')
+    if args.diagnose_synthetic_text_values and not (args.diagnose_accessibility and args.diagnose_accessibility_state):
+        parser.error('Synthetic value diagnosis requires --diagnose-accessibility --diagnose-accessibility-state')
     if args.without_purpose_adapter and not (args.observe_only and args.diagnose_accessibility_state):
         parser.error('Comparator requires --observe-only --diagnose-accessibility-state')
     if args.await_confirm_transition and not (args.observe_only and args.diagnose_accessibility_state):
