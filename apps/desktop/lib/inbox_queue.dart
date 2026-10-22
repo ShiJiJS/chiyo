@@ -1,3 +1,4 @@
+import 'mac_text_field_accessibility.dart';
 import 'package:flutter/material.dart';
 import 'package:info_core/info_core.dart';
 import 'ui.dart';
@@ -89,29 +90,32 @@ class InboxQueue extends StatelessWidget {
                         ),
                         const SizedBox(width: 8),
                         Expanded(
-                          child: TextField(
-                            key: const ValueKey('inbox-search'),
-                            controller: searchController,
-                            focusNode: searchFocus,
-                            maxLength: 2000,
-                            style: prototypeText(context, 13),
-                            decoration: InputDecoration(
-                              isCollapsed: true,
-                              isDense: true,
-                              border: InputBorder.none,
-                              enabledBorder: InputBorder.none,
-                              focusedBorder: InputBorder.none,
-                              filled: false,
-                              hintText: '搜索聊天、信息名称',
-                              hintStyle: prototypeText(
-                                context,
-                                13,
-                                color: c.muted,
+                          child: MacTextFieldAccessibility(
+                            label: '搜索聊天、信息名称',
+                            child: TextField(
+                              key: const ValueKey('inbox-search'),
+                              controller: searchController,
+                              focusNode: searchFocus,
+                              maxLength: 2000,
+                              style: prototypeText(context, 13),
+                              decoration: InputDecoration(
+                                isCollapsed: true,
+                                isDense: true,
+                                border: InputBorder.none,
+                                enabledBorder: InputBorder.none,
+                                focusedBorder: InputBorder.none,
+                                filled: false,
+                                hintText: '搜索聊天、信息名称',
+                                hintStyle: prototypeText(
+                                  context,
+                                  13,
+                                  color: c.muted,
+                                ),
+                                counterText: '',
+                                contentPadding: EdgeInsets.zero,
                               ),
-                              counterText: '',
-                              contentPadding: EdgeInsets.zero,
+                              onChanged: onSearch,
                             ),
-                            onChanged: onSearch,
                           ),
                         ),
                         if (searchController.text.isEmpty)

@@ -99,8 +99,12 @@ class _MacTextFieldAccessibilityState extends State<MacTextFieldAccessibility>
   }
 
   @override
-  Widget build(BuildContext context) =>
-      Semantics(key: _box, label: widget.label, child: widget.child);
+  Widget build(BuildContext context) => Semantics(
+    key: _box,
+    container: true,
+    label: widget.label,
+    child: widget.child,
+  );
 }
 
 abstract final class _Labels {

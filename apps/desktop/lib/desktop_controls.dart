@@ -1,3 +1,4 @@
+import 'mac_text_field_accessibility.dart';
 import 'package:flutter/material.dart';
 import 'ui_palette.dart';
 import 'mac_secret_input.dart';
@@ -36,6 +37,9 @@ class DesktopTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) => _FieldFrame(
     label: decoration.labelText,
+    inputPurpose: usesNativeSecretEditor && obscureText
+        ? null
+        : decoration.labelText ?? decoration.hintText,
     child: usesNativeSecretEditor && obscureText
         ? MacSecretInput(
             controller: controller,
@@ -90,6 +94,7 @@ class DesktopTextFormField extends StatelessWidget {
   @override
   Widget build(BuildContext context) => _FieldFrame(
     label: decoration.labelText,
+    inputPurpose: decoration.labelText ?? decoration.hintText,
     child: TextFormField(
       initialValue: initialValue,
       controller: controller,
@@ -127,8 +132,8 @@ Widget? _counter(
     : null;
 
 class _FieldFrame extends StatelessWidget {
-  const _FieldFrame({required this.child, this.label});
-  final String? label;
+  const _FieldFrame({required this.child, this.label, this.inputPurpose});
+  final String? label, inputPurpose;
   final Widget child;
   @override
   Widget build(BuildContext context) {
@@ -157,7 +162,10 @@ class _FieldFrame extends StatelessWidget {
             ),
             const SizedBox(height: 6),
           ],
-          Semantics(label: label, child: child),
+          if (inputPurpose?.isNotEmpty == true)
+            MacTextFieldAccessibility(label: inputPurpose!, child: child)
+          else
+            Semantics(label: label, child: child),
           if (protected) const SizedBox(height: 14),
         ],
       ),
@@ -380,23 +388,26 @@ class _DesktopOptionsState<T> extends State<_DesktopOptions<T>> {
         if (widget.items.length > 12)
           Padding(
             padding: const EdgeInsets.fromLTRB(10, 10, 10, 4),
-            child: TextField(
-              focusNode: _searchFocus,
-              decoration: const InputDecoration(
-                hintText: '搜索选项',
-                prefixIcon: Icon(Icons.search, size: 16),
+            child: MacTextFieldAccessibility(
+              label: '搜索选项',
+              child: TextField(
+                focusNode: _searchFocus,
+                decoration: const InputDecoration(
+                  hintText: '搜索选项',
+                  prefixIcon: Icon(Icons.search, size: 16),
+                ),
+                onChanged: (value) => setState(() {
+                  _query = value;
+                }),
+                onSubmitted: (_) {
+                  final item = widget.items
+                      .where((i) => i.enabled && _matches(i))
+                      .firstOrNull;
+                  if (item != null) {
+                    Navigator.pop(context, _SelectedValue<T>(item.value));
+                  }
+                },
               ),
-              onChanged: (value) => setState(() {
-                _query = value;
-              }),
-              onSubmitted: (_) {
-                final item = widget.items
-                    .where((i) => i.enabled && _matches(i))
-                    .firstOrNull;
-                if (item != null) {
-                  Navigator.pop(context, _SelectedValue<T>(item.value));
-                }
-              },
             ),
           ),
         Expanded(

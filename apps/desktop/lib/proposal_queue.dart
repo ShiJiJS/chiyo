@@ -1,3 +1,4 @@
+import 'mac_text_field_accessibility.dart';
 import 'package:flutter/material.dart';
 import 'package:info_core/info_core.dart';
 import 'prototype_ui.dart';
@@ -97,29 +98,32 @@ class ProposalQueue extends StatelessWidget {
                       PrototypeIcon(PrototypeIconGlyph.search, color: p.muted),
                       const SizedBox(width: 8),
                       Expanded(
-                        child: TextField(
-                          key: const ValueKey('proposal-search'),
-                          controller: search,
-                          focusNode: searchFocus,
-                          maxLength: 2000,
-                          style: prototypeText(context, 13),
-                          decoration: InputDecoration(
-                            isCollapsed: true,
-                            isDense: true,
-                            filled: false,
-                            border: InputBorder.none,
-                            enabledBorder: InputBorder.none,
-                            focusedBorder: InputBorder.none,
-                            contentPadding: EdgeInsets.zero,
-                            counterText: '',
-                            hintText: '搜索提案、提交方',
-                            hintStyle: prototypeText(
-                              context,
-                              13,
-                              color: p.muted,
+                        child: MacTextFieldAccessibility(
+                          label: '搜索提案、提交方',
+                          child: TextField(
+                            key: const ValueKey('proposal-search'),
+                            controller: search,
+                            focusNode: searchFocus,
+                            maxLength: 2000,
+                            style: prototypeText(context, 13),
+                            decoration: InputDecoration(
+                              isCollapsed: true,
+                              isDense: true,
+                              filled: false,
+                              border: InputBorder.none,
+                              enabledBorder: InputBorder.none,
+                              focusedBorder: InputBorder.none,
+                              contentPadding: EdgeInsets.zero,
+                              counterText: '',
+                              hintText: '搜索提案、提交方',
+                              hintStyle: prototypeText(
+                                context,
+                                13,
+                                color: p.muted,
+                              ),
                             ),
+                            onChanged: onSearch,
                           ),
-                          onChanged: onSearch,
                         ),
                       ),
                     ],

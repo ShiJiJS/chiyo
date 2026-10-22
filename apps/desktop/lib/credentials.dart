@@ -1,3 +1,4 @@
+import 'mac_text_field_accessibility.dart';
 import 'package:flutter/material.dart';
 import 'package:info_core/info_core.dart';
 import 'credential_dialogs.dart';
@@ -446,23 +447,26 @@ class _CredentialLibraryState extends State<CredentialLibrary> {
               Expanded(
                 child: SizedBox(
                   height: 22 * MediaQuery.textScalerOf(context).scale(1),
-                  child: TextField(
-                    controller: _search,
-                    key: const ValueKey('credential-search'),
-                    onChanged: (_) => setState(() {
-                      _selected = null;
-                      _page = 0;
-                    }),
-                    style: prototypeText(context, 12),
-                    decoration: InputDecoration(
-                      isDense: true,
-                      filled: false,
-                      contentPadding: EdgeInsets.zero,
-                      border: InputBorder.none,
-                      enabledBorder: InputBorder.none,
-                      focusedBorder: InputBorder.none,
-                      hintText: '搜索名称、用途',
-                      hintStyle: prototypeText(context, 12, color: p.muted),
+                  child: MacTextFieldAccessibility(
+                    label: '搜索名称、用途',
+                    child: TextField(
+                      controller: _search,
+                      key: const ValueKey('credential-search'),
+                      onChanged: (_) => setState(() {
+                        _selected = null;
+                        _page = 0;
+                      }),
+                      style: prototypeText(context, 12),
+                      decoration: InputDecoration(
+                        isDense: true,
+                        filled: false,
+                        contentPadding: EdgeInsets.zero,
+                        border: InputBorder.none,
+                        enabledBorder: InputBorder.none,
+                        focusedBorder: InputBorder.none,
+                        hintText: '搜索名称、用途',
+                        hintStyle: prototypeText(context, 12, color: p.muted),
+                      ),
                     ),
                   ),
                 ),

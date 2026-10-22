@@ -1,3 +1,4 @@
+import 'mac_text_field_accessibility.dart';
 import 'dart:async';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
@@ -295,7 +296,14 @@ class ApprovalsState extends State<Approvals> {
     final offline = !owner.serviceAvailable;
     final page = offline
         ? (_lastPage ??
-              InboxPage([], total: 0, allCount: 0, pendingCount: 0, offset: 0, limit: 8))
+              InboxPage(
+                [],
+                total: 0,
+                allCount: 0,
+                pendingCount: 0,
+                offset: 0,
+                limit: 8,
+              ))
         : owner.queryInbox(
             search: _search.text,
             filter: _filter,
@@ -1123,22 +1131,25 @@ class ApprovalsState extends State<Approvals> {
                           const SizedBox(height: 15),
                           Text('搜索信息', style: prototypeText(context, 13)),
                           const SizedBox(height: 7),
-                          TextField(
-                            key: const ValueKey('scope-search'),
-                            style: prototypeText(context, 13),
-                            decoration: InputDecoration(
-                              hintText: '搜索名称或说明',
-                              fillColor: c.paper,
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 6,
-                                vertical: 9,
+                          MacTextFieldAccessibility(
+                            label: '搜索信息',
+                            child: TextField(
+                              key: const ValueKey('scope-search'),
+                              style: prototypeText(context, 13),
+                              decoration: InputDecoration(
+                                hintText: '搜索名称或说明',
+                                fillColor: c.paper,
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 9,
+                                ),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(4),
+                                  borderSide: BorderSide(color: c.line),
+                                ),
                               ),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(4),
-                                borderSide: BorderSide(color: c.line),
-                              ),
+                              onChanged: (v) => update(() => search = v),
                             ),
-                            onChanged: (v) => update(() => search = v),
                           ),
                           for (final item in items) ...[
                             // Flutter rounds each 19.5px line box to 20px.

@@ -1,3 +1,4 @@
+import 'mac_text_field_accessibility.dart';
 import 'dart:math' as math;
 import 'dart:async';
 import 'package:flutter/material.dart';
@@ -488,32 +489,35 @@ class _AuthorizationHistoryState extends State<AuthorizationHistory> {
                       PrototypeIcon(PrototypeIconGlyph.search, color: c.muted),
                       const SizedBox(width: 8),
                       Expanded(
-                        child: TextField(
-                          key: const ValueKey('history-search'),
-                          controller: _search,
-                          maxLength: 2000,
-                          style: prototypeText(context, 13),
-                          decoration: InputDecoration(
-                            isCollapsed: true,
-                            isDense: true,
-                            border: InputBorder.none,
-                            enabledBorder: InputBorder.none,
-                            focusedBorder: InputBorder.none,
-                            filled: false,
-                            hintText: '搜索聊天、Agent、记录编号',
-                            hintStyle: prototypeText(
-                              context,
-                              13,
-                              color: c.muted,
+                        child: MacTextFieldAccessibility(
+                          label: '搜索聊天、Agent、记录编号',
+                          child: TextField(
+                            key: const ValueKey('history-search'),
+                            controller: _search,
+                            maxLength: 2000,
+                            style: prototypeText(context, 13),
+                            decoration: InputDecoration(
+                              isCollapsed: true,
+                              isDense: true,
+                              border: InputBorder.none,
+                              enabledBorder: InputBorder.none,
+                              focusedBorder: InputBorder.none,
+                              filled: false,
+                              hintText: '搜索聊天、Agent、记录编号',
+                              hintStyle: prototypeText(
+                                context,
+                                13,
+                                color: c.muted,
+                              ),
+                              counterText: '',
+                              contentPadding: EdgeInsets.zero,
                             ),
-                            counterText: '',
-                            contentPadding: EdgeInsets.zero,
+                            onChanged: (_) => setState(() {
+                              _focusMissing = false;
+                              _page = 0;
+                              _selected = null;
+                            }),
                           ),
-                          onChanged: (_) => setState(() {
-                            _focusMissing = false;
-                            _page = 0;
-                            _selected = null;
-                          }),
                         ),
                       ),
                     ],

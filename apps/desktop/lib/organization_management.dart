@@ -1,3 +1,4 @@
+import 'mac_text_field_accessibility.dart';
 import 'package:flutter/material.dart';
 import 'package:info_core/info_core.dart';
 import 'organization_selectors.dart';
@@ -141,15 +142,18 @@ class _DirectoryEditorState extends State<_DirectoryEditor> {
               if (operation == DirectoryOperation.move)
                 Text('将“${d!.name}”移到新位置')
               else
-                TextField(
-                  key: const ValueKey('organization-name'),
-                  controller: _name,
-                  enabled: !_busy,
-                  autofocus: true,
-                  maxLength: 200,
-                  decoration: const InputDecoration(
-                    labelText: '目录名称',
-                    hintText: '例如：运维',
+                MacTextFieldAccessibility(
+                  label: '目录名称',
+                  child: TextField(
+                    key: const ValueKey('organization-name'),
+                    controller: _name,
+                    enabled: !_busy,
+                    autofocus: true,
+                    maxLength: 200,
+                    decoration: const InputDecoration(
+                      labelText: '目录名称',
+                      hintText: '例如：运维',
+                    ),
                   ),
                 ),
               if (operation != DirectoryOperation.rename) ...[
@@ -296,12 +300,15 @@ class _TagManagerState extends State<_TagManager> {
             Row(
               children: [
                 Expanded(
-                  child: TextField(
-                    decoration: const InputDecoration(
-                      hintText: '搜索标签',
-                      prefixIcon: Icon(Icons.search, size: 17),
+                  child: MacTextFieldAccessibility(
+                    label: '搜索标签',
+                    child: TextField(
+                      decoration: const InputDecoration(
+                        hintText: '搜索标签',
+                        prefixIcon: Icon(Icons.search, size: 17),
+                      ),
+                      onChanged: (v) => setState(() => _query = v),
                     ),
-                    onChanged: (v) => setState(() => _query = v),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -325,11 +332,14 @@ class _TagManagerState extends State<_TagManager> {
                 child: Row(
                   children: [
                     Expanded(
-                      child: TextField(
-                        key: const ValueKey('tag-name'),
-                        controller: _name,
-                        enabled: !_busy,
-                        decoration: const InputDecoration(hintText: '标签名称'),
+                      child: MacTextFieldAccessibility(
+                        label: '标签名称',
+                        child: TextField(
+                          key: const ValueKey('tag-name'),
+                          controller: _name,
+                          enabled: !_busy,
+                          decoration: const InputDecoration(hintText: '标签名称'),
+                        ),
                       ),
                     ),
                     const SizedBox(width: 8),
