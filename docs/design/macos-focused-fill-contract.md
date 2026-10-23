@@ -208,7 +208,9 @@ python3 scripts/package-macos.py build/macos-adaptation/package-candidate-new --
 使已有目标失效，通知消失/恢复也不恢复旧目标，不把通知当启动时就绪证明。
 
 条件格式迁移已实现；尚需有效会话策略、真实权限归属与目标支持证据，再连接生产能力。
-当前已完成可选内嵌/外层签名流程及合成封装检查；完整Flutter候选包尚未在本轮生成。
+当前已完成可选内嵌/外层签名流程及合成封装检查；`6ff99169`完整Flutter开发候选包已
+构建并归档，解压后签名/载荷检查通过，能力仍关闭，未安装或启动App/helper。
+准确产物与范围见[当前构建回执](../development/evidence/macos-current-candidate/verification.json)。
 私有签名要求已编译并有独立包/合成嵌套签名检查，
 没有在真实XPC连接上证明ad-hoc产物被系统接受；不能把“代码中设置了要求”写成
 签名/权限验收通过。不同版本不自动重连恢复输入，旧helper可能需明确退出后重启。

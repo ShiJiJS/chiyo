@@ -1,5 +1,41 @@
 # Mac 首轮可用：剩余验收与交付项核对
 
+## 2026-10-23：当前适配源码已汇入完整ARM64开发候选
+
+将`6ff9916905e98b669a5b3c5a02959509f8037123`的干净源码构建成完整开发包，包含
+近期的唤醒维护、窗口/设置/搜索入口、目录书签恢复、原生文本范围、Mac应用控制CLI，
+以及Mac填充身份、条件格式迁移和关闭状态的私有helper候选。完整包已完成构建与封装，
+不再仅有独立helper或合成小App。产品主入口仍不加载Mac填充驱动，不能宣告填充可用。
+
+产物留在`build/macos-adaptation/issue51-full-candidate-1/`，ZIP为
+`agent-info-manage-0.4.1+13-mac-dev.6ff9916905e9-focused-fill-candidate-macos-arm64.zip`，
+131127912字节，SHA256 `17cb1defabd678b5d5e80a30762729aaaa7e082f17820f53d850425eb3fab392`。
+清单含7975项载荷、76项Mach-O；仅ARM64、本机ad-hoc签名、未公证；二进制最低14.0，
+构建宿主27.0.1，没有扩大为在14.0或其他Mac运行通过。helper与App使用同一源码提交，
+清单明确记录`capabilityEnabled:false`和`systemAcceptance:false`。
+
+打包20阶段均退出0；解压到中文/空格路径后签名、SQLCipher诊断、独立AOT CLI材料准备
+及五个合成worker生存期场景通过。没有重跑全部源码套件，六个解压后开发检查不算
+系统或最终同包验收。首次干净源码门正确拒绝复用SDK/缓存的三个链接，随后仅在一次性
+源码副本的本地exclude中登记准确链接再构建；主工作目录的`.local`及源码门规则未动。
+
+构建完保留ZIP、校验和、完整manifest/provenance及日志，删除一次性源码和所有这轮
+App/dSYM副本，移除约2.6GB临时目录。项目交付/构建范围当前只剩固定普通预览的一份
+App，生成dSYM为零；SDK、公共缓存、历史恢复资料保留。固定预览仍为已允许的
+package23，未启动或安装新包，没有computer use、Keychain访问或系统授权提示。
+
+最后只读刷新远端，`origin/main`仍为`b37f96a`，Windows产品分支仍为`4ac428ff`；
+未发现本轮新增待移植产品提交。只读引用Windows会话的最近两轮，没有发消息或改动
+Windows分支，也没有运行Windows CI。
+
+当前首轮可用范围的下一步集中在下表已有的真实工具/双设备迁移、系统通知、锁屏/
+睡眠、物理输入/旁白及最终同包/干净环境验收，按主人要求后置。#51另有尚未冻结的
+有效桌面策略和真实XPC/权限/目标支持门槛；默认拒绝策略继续保留，不能将其写成已
+完成的生产功能。本轮不修改复合票据勾选，GitHub尚未同步。
+
+[准确产物、阶段、输入和清理回执](evidence/macos-current-candidate/verification.json)、
+[解压后CLI/worker开发检查原始日志](evidence/macos-current-candidate/extracted-cli-and-worker.txt)。
+
 ## 2026-10-23：Mac填充条件格式迁移与旧源码读取器检查
 
 继续补 #51 的功能：普通资料库保持格式22，只有首次保存Mac填充请求或恢复格式11

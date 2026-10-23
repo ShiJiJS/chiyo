@@ -1,5 +1,10 @@
 # Mac 本机预览安装与升级约定（#42 / #50）
 
+2026-10-23 当前构建：`6ff99169`的完整ARM64开发候选已归档，纳入近期Mac适配及
+关闭状态的焦点填充helper；[产物与清理回执](evidence/macos-current-candidate/verification.json)
+明确区分构建检查和系统验收。只保留新ZIP及构建记录，本轮App/dSYM副本已清理；
+固定普通预览仍package23，未换包、未启动新App或请求Keychain访问。
+
 2026-10-23追加：[当前普通package23的GH复验及条件映射](macos-final-ordinary-gh.md)
 已补实际随包GH/worker链、HTTP401、外部位置/cwd拒绝、防重放、撤销及独立重开。
 原两条资料及附件保持；#44第2/6项补齐后5/6、仍开放，真实GH成功认证待验。
