@@ -102,6 +102,13 @@ final class ToolAccessStore {
         active.removeValue(forKey: id)
       }
     }
+    // A volume may reconnect after launch or after the previous status read.
+    // Retry only the already saved security-scoped bookmark: never fall back
+    // to the stored path, recreate a stale bookmark, mount a volume, or prompt.
+    // An active token must not be started twice by repeated refreshes.
+    for entry in entries where active[entry.id] == nil {
+      if let url = try? activate(entry.bookmark) { active[entry.id] = url }
+    }
     return [
       "storageUnavailable": loadFailed,
       "directories": entries.map { entry -> [String: Any] in

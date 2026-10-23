@@ -8,6 +8,7 @@ enum DesktopEvent {
   closeWindow,
   openApprovals,
   openSettings,
+  searchApprovals,
   quit,
   availabilityChanged,
   resumed,
@@ -41,7 +42,14 @@ abstract interface class DesktopPlatform {
   Future<void> terminate();
 }
 
-class NativeDesktopPlatform implements DesktopPlatform {
+/// Optional native navigation controls. Lifetime interception is initialized
+/// before opening the library, so it does not imply the workspace is ready.
+abstract interface class DesktopNavigationPlatform {
+  Future<void> setNavigationEnabled(bool enabled);
+}
+
+class NativeDesktopPlatform
+    implements DesktopPlatform, DesktopNavigationPlatform {
   @override
   String? openedRequestId;
   static const _channel = MethodChannel('agent_info_manage/desktop');
@@ -72,6 +80,7 @@ class NativeDesktopPlatform implements DesktopPlatform {
         'close' => DesktopEvent.closeWindow,
         'open' => DesktopEvent.openApprovals,
         'openSettings' => DesktopEvent.openSettings,
+        'searchApprovals' => DesktopEvent.searchApprovals,
         'quit' => DesktopEvent.quit,
         'availability' => DesktopEvent.availabilityChanged,
         'resume' => DesktopEvent.resumed,
@@ -107,6 +116,12 @@ class NativeDesktopPlatform implements DesktopPlatform {
       _decode(await _channel.invokeMethod<Object?>('availability'));
   @override
   Future<void> terminate() => _channel.invokeMethod<void>('terminate');
+
+  @override
+  Future<void> setNavigationEnabled(bool enabled) async {
+    if (defaultTargetPlatform != TargetPlatform.macOS) return;
+    await _channel.invokeMethod<void>('setNavigationEnabled', enabled);
+  }
 }
 
 /// Owns background lifetime independently of the currently visible Flutter tab.
@@ -125,6 +140,7 @@ class DesktopRuntime extends ChangeNotifier {
   DesktopAvailability availability = DesktopAvailability.unavailable;
   int openApprovalsRevision = 0;
   int openSettingsRevision = 0;
+  int searchApprovalsRevision = 0;
   String? openRequestId;
   bool quitting = false;
   bool shutdownFailed = false;
@@ -162,8 +178,21 @@ class DesktopRuntime extends ChangeNotifier {
     } on Object {
       availability = DesktopAvailability.unavailable;
     }
-    _ready.complete();
+    if (!_ready.isCompleted) _ready.complete();
+    if (!quitting && !_stopped) await _setNavigationEnabled(true);
     notifyListeners();
+  }
+
+  Future<void> _setNavigationEnabled(bool enabled) async {
+    if (platform case final DesktopNavigationPlatform navigation) {
+      try {
+        await navigation
+            .setNavigationEnabled(enabled)
+            .timeout(const Duration(seconds: 2));
+      } on Object {
+        // Older runners and native startup failures retain the in-app entry.
+      }
+    }
   }
 
   Future<void> _maintain() => _maintenance = _maintenance.then((_) async {
@@ -335,7 +364,8 @@ class DesktopRuntime extends ChangeNotifier {
       if (event == DesktopEvent.closeWindow || event == DesktopEvent.quit) {
         await platform.terminate();
       } else if (event == DesktopEvent.openApprovals ||
-          event == DesktopEvent.openSettings) {
+          event == DesktopEvent.openSettings ||
+          event == DesktopEvent.searchApprovals) {
         await platform.showWindow();
       }
       return;
@@ -374,9 +404,18 @@ class DesktopRuntime extends ChangeNotifier {
         // Wake and active-session notifications often arrive together.
         await (_resuming ??= _resumeDesktop());
       case DesktopEvent.openSettings:
+        await _ready.future;
+        if (quitting || _stopped) return;
         await platform.showWindow();
         if (quitting || _stopped) return;
         openSettingsRevision++;
+        notifyListeners();
+      case DesktopEvent.searchApprovals:
+        await _ready.future;
+        if (quitting || _stopped) return;
+        await platform.showWindow();
+        if (quitting || _stopped) return;
+        searchApprovalsRevision++;
         notifyListeners();
       case DesktopEvent.quit:
         break;
@@ -394,11 +433,13 @@ class DesktopRuntime extends ChangeNotifier {
     if (!_ready.isCompleted) _ready.complete();
     notifyListeners();
     try {
+      final navigation = _setNavigationEnabled(false);
       // close synchronously rejects capabilities, then waits for queued facts.
       // The database must stay open when those facts cannot yet be saved.
       await Future.wait([
         service.close(),
         closeServer(),
+        navigation,
         _maintenance,
         if (_requests case final requests?) requests.cancel(),
       ]);

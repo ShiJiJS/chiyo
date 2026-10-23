@@ -1,11 +1,13 @@
 import 'package:info_desktop/desktop_runtime.dart';
 
-class NativeDesktopFixture implements DesktopPlatform {
+class NativeDesktopFixture
+    implements DesktopPlatform, DesktopNavigationPlatform {
   @override
   String? openedRequestId;
   Future<void> Function(DesktopEvent)? events;
   bool hidden = false;
   bool terminated = false;
+  final navigationStates = <bool>[];
   final notices = <String>[];
   DesktopAvailability availability = const DesktopAvailability(
     tray: true,
@@ -58,5 +60,10 @@ class NativeDesktopFixture implements DesktopPlatform {
   @override
   Future<void> terminate() async {
     terminated = true;
+  }
+
+  @override
+  Future<void> setNavigationEnabled(bool enabled) async {
+    navigationStates.add(enabled);
   }
 }

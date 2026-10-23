@@ -244,6 +244,7 @@ class _InformationAppState extends State<InformationApp>
   late final _tabs = TabController(length: 5, vsync: this);
   int _openRevision = 0;
   int _openSettingsRevision = 0;
+  int _searchApprovalsRevision = 0;
   // A restored data source can reset history; ordinary tabs refresh in place.
   int _libraryRevision = 0;
   final _visited = <int>{0};
@@ -349,6 +350,18 @@ class _InformationAppState extends State<InformationApp>
     if (runtime.openSettingsRevision != _openSettingsRevision) {
       _openSettingsRevision = runtime.openSettingsRevision;
       _tabs.index = 4;
+    }
+    if (runtime.searchApprovalsRevision != _searchApprovalsRevision) {
+      _searchApprovalsRevision = runtime.searchApprovalsRevision;
+      _tabs.index = 0;
+      final revision = _searchApprovalsRevision;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted &&
+            _tabs.index == 0 &&
+            _searchApprovalsRevision == revision) {
+          _approvalsKey.currentState?.focusSearch();
+        }
+      });
     }
     if (mounted) setState(() {});
   }
