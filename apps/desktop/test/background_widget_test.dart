@@ -7,10 +7,57 @@ import 'support/desktop_platform_fixture.dart';
 
 void main() {
   testWidgets(
+    'native settings action restores the window and selects settings',
+    (tester) async {
+      tester.view.physicalSize = const Size(1440, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final service = InformationService.fictional();
+      final native = NativeDesktopFixture();
+      final runtime = DesktopRuntime(
+        service: service,
+        platform: native,
+        closeServer: () async {},
+        closeRepository: () async {},
+      );
+      await tester.runAsync(runtime.start);
+      await tester.pumpWidget(
+        InformationApp(service: service, port: 0, runtime: runtime),
+      );
+      await tester.pumpAndSettle();
+      await native.events!(DesktopEvent.closeWindow);
+      expect(native.hidden, isTrue);
+      await native.events!(DesktopEvent.openSettings);
+      await tester.pumpAndSettle();
+      expect(native.hidden, isFalse);
+      expect(
+        find.byKey(const ValueKey('settings-section-notifications')),
+        findsOneWidget,
+      );
+      expect(runtime.openApprovalsRevision, 0);
+      expect(native.permissionRequests, 0);
+      await native.events!(DesktopEvent.openApprovals);
+      await tester.pumpAndSettle();
+      await native.events!(DesktopEvent.openSettings);
+      await tester.pumpAndSettle();
+      expect(runtime.openSettingsRevision, 2);
+      expect(
+        find.byKey(const ValueKey('settings-section-notifications')),
+        findsOneWidget,
+      );
+      await tester.pumpWidget(const SizedBox());
+      await tester.runAsync(runtime.quit);
+    },
+  );
+
+  testWidgets(
     'unavailable background entry keeps window reachable; notification denial leaves pending approvals usable',
     (tester) async {
-      tester.view.physicalSize=const Size(1440,900);tester.view.devicePixelRatio=1;
-      addTearDown(tester.view.resetPhysicalSize);addTearDown(tester.view.resetDevicePixelRatio);
+      tester.view.physicalSize = const Size(1440, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
       final service = InformationService.fictional();
       final native = NativeDesktopFixture()
         ..availability = const DesktopAvailability(

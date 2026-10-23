@@ -10,6 +10,130 @@ import 'support/desktop_platform_fixture.dart';
 
 void main() {
   test(
+    'resume reconciles expired material once without opening or replaying',
+    () async {
+      var now = DateTime.utc(2026, 10, 1);
+      final service = InformationService.fictional(clock: () => now);
+      final native = _ResumeDesktopFixture();
+      final runtime = DesktopRuntime(
+        service: service,
+        platform: native,
+        closeServer: () async {},
+        closeRepository: () async {},
+      );
+      await runtime.start();
+      final session = service.agent.openSession('Resume synthetic');
+      const field = FieldRef('demo-server', 'host');
+      final request = service.agent.request(session, 'Resume', [field]);
+      service.owner.approve(request.id, [field]);
+      await Future<void>.delayed(Duration.zero);
+      final notices = List<String>.of(native.notices);
+      final old = await service.owner.createStringCredential(
+        name: 'Resume synthetic',
+        publicPurpose: '',
+        secret: 'old-synthetic',
+      );
+      final current = await service.owner.rotateStringCredential(
+        old.id,
+        old.revision,
+        'current-synthetic',
+      );
+      await native.events!(DesktopEvent.closeWindow);
+      now = now.add(const Duration(days: 31));
+      // macOS can emit both wake and session-activation events for one return.
+      await Future.wait([
+        native.events!(DesktopEvent.resumed),
+        native.events!(DesktopEvent.resumed),
+      ]);
+      expect(native.reads, 1);
+      expect(native.hidden, isTrue);
+      expect(native.permissionRequests, 0);
+      expect(native.notices, notices);
+      expect(runtime.openApprovalsRevision, 0);
+      expect(service.agent.status(session, request.id)['status'], 'expired');
+      now = now.subtract(const Duration(days: 2));
+      await expectLater(
+        service.owner.restoreCredentialVersion(current.id, current.revision, 1),
+        throwsA(
+          isA<AccessFailure>().having(
+            (e) => e.status,
+            'status',
+            'credential_material_purged',
+          ),
+        ),
+      );
+      await runtime.quit();
+      await native.events!(DesktopEvent.resumed);
+      expect(native.reads, 1);
+    },
+  );
+
+  test(
+    'return from system settings refreshes permission without requesting it',
+    () async {
+      final service = InformationService.fictional();
+      final native = _ResumeDesktopFixture()
+        ..availability = const DesktopAvailability(
+          tray: true,
+          notifications: NotificationAvailability.denied,
+        );
+      final runtime = DesktopRuntime(
+        service: service,
+        platform: native,
+        closeServer: () async {},
+        closeRepository: () async {},
+      );
+      await runtime.start();
+      native.availability = const DesktopAvailability(
+        tray: true,
+        notifications: NotificationAvailability.enabled,
+      );
+      await native.events!(DesktopEvent.availabilityChanged);
+      final session = service.agent.openSession('Changed permission');
+      service.agent.request(session, 'New request', [
+        const FieldRef('demo-server', 'host'),
+      ]);
+      await Future<void>.delayed(Duration.zero);
+      expect(
+        runtime.availability.notifications,
+        NotificationAvailability.enabled,
+      );
+      expect(native.notices, ['new_request']);
+      expect(native.permissionRequests, 0);
+      await runtime.quit();
+    },
+  );
+
+  test('late resume availability cannot update a closed runtime', () async {
+    final service = InformationService.fictional();
+    final native = _ResumeDesktopFixture();
+    final runtime = DesktopRuntime(
+      service: service,
+      platform: native,
+      closeServer: () async {},
+      closeRepository: () async {},
+    );
+    await runtime.start();
+    native.pendingRead = Completer<void>();
+    final resuming = native.events!(DesktopEvent.resumed);
+    while (native.reads == 0) {
+      await Future<void>.delayed(Duration.zero);
+    }
+    await runtime.quit();
+    var changes = 0;
+    runtime.addListener(() => changes++);
+    native.availability = DesktopAvailability.unavailable;
+    native.pendingRead!.complete();
+    await resuming;
+    expect(changes, 0);
+    expect(runtime.stopped, isTrue);
+    expect(
+      runtime.availability.notifications,
+      NotificationAvailability.enabled,
+    );
+  });
+
+  test(
     'startup removes expired attachment originals while preserving the current file',
     () async {
       var now = DateTime.utc(2026, 10, 1);
@@ -469,5 +593,16 @@ class _FailingAttachmentRepository extends MemoryInformationRepository {
   @override
   Future<void> reconcileInformationAttachments(DateTime now) async {
     throw StateError('synthetic attachment cleanup unavailable');
+  }
+}
+
+class _ResumeDesktopFixture extends NativeDesktopFixture {
+  int reads = 0;
+  Completer<void>? pendingRead;
+  @override
+  Future<DesktopAvailability> readAvailability() async {
+    reads++;
+    await pendingRead?.future;
+    return availability;
   }
 }
