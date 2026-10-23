@@ -242,6 +242,73 @@ Map<String, dynamic> _payload(String path, String recovery) {
 
 void main() {
   test(
+    'portable Mac metadata cannot silently enter the current persisted fill format',
+    () async {
+      final f = await _Fixture.create();
+      addTearDown(f.close);
+      final original = await f.request();
+      final changed = original.changed({
+        'fill': {
+          ...original.focusedFill!.toJson(),
+          'application': {
+            'executable': '/Applications/中文 Browser.app/Contents/MacOS/Browser',
+            'sha256': 'b' * 64,
+          },
+        },
+      });
+      await expectLater(
+        f.repo.commitFocusedFillRuntime([changed], []),
+        throwsA(
+          isA<StorageFailure>().having(
+            (e) => e.code,
+            'code',
+            'invalid_runtime_snapshot',
+          ),
+        ),
+      );
+      expect(
+        f.repo.credentialUseRequests.single.focusedFill!.application.executable,
+        r'C:\Synthetic\Browser.exe',
+      );
+      expect(f.repo.focusedFillOperations, isEmpty);
+      final (backup, recovery) = await f.backup('existing-windows-fill');
+      expect(
+        (await f.repo.backups.inspect(
+          backup,
+          recovery,
+        )).credentialUseHistoryCount,
+        1,
+      );
+      final altered = _payload(backup, recovery);
+      final rows = altered['tables']['credential_use_requests'] as List;
+      final raw =
+          jsonDecode(rows.single['payload'] as String) as Map<String, dynamic>;
+      (raw['fill']['application'] as Map)['executable'] =
+          '/Applications/中文 Browser.app/Contents/MacOS/Browser';
+      rows.single['payload'] = jsonEncode(raw);
+      final incompatible = '${f.root.path}/unmarked-mac-fill.aimbackup';
+      await File(backup).copy(incompatible);
+      final db = _backupDb(incompatible, recovery);
+      try {
+        db.execute('UPDATE backup_snapshot SET payload=?', [
+          jsonEncode(altered),
+        ]);
+      } finally {
+        db.close();
+      }
+      await expectLater(
+        f.repo.backups.inspect(incompatible, recovery),
+        throwsA(isA<StorageFailure>()),
+      );
+      await f.reopen();
+      expect(
+        f.repo.credentialUseRequests.single.focusedFill!.application.executable,
+        r'C:\Synthetic\Browser.exe',
+      );
+    },
+  );
+
+  test(
     'metadata admission reserves command and released fill outcomes at the actual64MiB boundary',
     () async {
       final f = await _Fixture.create();
