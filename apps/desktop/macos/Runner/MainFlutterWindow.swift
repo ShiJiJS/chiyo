@@ -6,6 +6,7 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
   private var textEditingMenu: NativeTextEditingMenu?
   private var secretEditor: NativeSecretEditor?
   private var textFieldAccessibility: NativeTextFieldAccessibility?
+  private var focusedFill: MacFocusedFillBridge?
   private var desktopChannel: FlutterMethodChannel?
   private var statusItem: NSStatusItem?
   private var statusItemVisibility: NSKeyValueObservation?
@@ -35,6 +36,9 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
     RegisterGeneratedPlugins(registry: flutterViewController)
     configureToolAccess(flutterViewController)
     secretEditor = NativeSecretEditor(window: self, messenger: flutterViewController.engine.binaryMessenger)
+    // Registers a local owner channel only. No helper/permission/AX work until
+    // an explicit call, and Dart's Mac focused-fill capability remains disabled.
+    focusedFill = MacFocusedFillBridge(messenger: flutterViewController.engine.binaryMessenger)
     textFieldAccessibility = NativeTextFieldAccessibility(view: flutterViewController.view)
     let accessibility = FlutterMethodChannel(name: "agent_info_manage/text_field_accessibility",
                                              binaryMessenger: flutterViewController.engine.binaryMessenger)
@@ -245,6 +249,7 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
           }
         }
       case "terminate":
+        self.focusedFill?.close()
         self.textFieldAccessibility?.update([] as [[String: Any]])
         self.desktopReady = false
         self.navigationEnabled = false

@@ -1,12 +1,13 @@
 import FlutterMacOS
 import Foundation
 
-/// Candidate owner bridge, intentionally not registered in MainFlutterWindow or
-/// its Xcode target yet. The connection ID is local cancellation bookkeeping;
+/// Owner bridge; constructing it only registers the private method channel.
+/// The connection ID is local cancellation bookkeeping;
 /// actual peer authentication and native target leases remain inside XPC.
 final class MacFocusedFillBridge {
   private let channel: FlutterMethodChannel
   private var active: (id: String, client: MacFocusOwnerClient?)?
+  private var closed = false
 
   init(messenger: FlutterBinaryMessenger) {
     channel = FlutterMethodChannel(name: "agent_info_manage/focused_fill", binaryMessenger: messenger)
@@ -15,7 +16,14 @@ final class MacFocusedFillBridge {
 
   deinit { channel.setMethodCallHandler(nil); active?.client?.close() }
 
+  func close() {
+    closed = true
+    active?.client?.close()
+    active = nil
+  }
+
   private func handle(_ call: FlutterMethodCall, _ reply: @escaping FlutterResult) {
+    guard !closed else { refused("session_unavailable", reply); return }
     guard let arguments = call.arguments as? [String: Any],
           let id = arguments["connection"] as? String, id.utf8.count == 32,
           id.utf8.allSatisfy({ (48...57).contains($0) || (97...102).contains($0) }) else {
