@@ -20,8 +20,15 @@ class FocusedFillApplication {
       max: 64,
       empty: false,
     );
-    if (!RegExp(r'^[A-Za-z]:[/\\]').hasMatch(path) ||
-        !path.toLowerCase().endsWith('.exe') ||
+    final windows =
+        RegExp(r'^[A-Za-z]:[/\\]').hasMatch(path) &&
+        path.toLowerCase().endsWith('.exe');
+    final macos =
+        path.startsWith('/') &&
+        !path.startsWith('//') &&
+        path.length > 1 &&
+        !path.endsWith('/');
+    if ((!windows && !macos) ||
         path.codeUnits.any((c) => c < 32 || c == 127) ||
         !RegExp(r'^[0-9a-f]{64}$').hasMatch(digest)) {
       throw const CredentialUseFailure(
@@ -31,9 +38,13 @@ class FocusedFillApplication {
     }
     return FocusedFillApplication._(path, digest);
   }
+  bool get _windowsPath => !executable.startsWith('/');
   Map<String, Object?> toJson() => {'executable': executable, 'sha256': sha256};
   bool matches(FocusedFillApplication other) =>
-      executable.toLowerCase() == other.executable.toLowerCase() &&
+      _windowsPath == other._windowsPath &&
+      (_windowsPath
+          ? executable.toLowerCase() == other.executable.toLowerCase()
+          : executable == other.executable) &&
       sha256 == other.sha256;
 }
 
@@ -357,6 +368,11 @@ Future<FocusedFillApplication> inspectFocusedFillApplication(
   FocusedFillApplication requested,
 ) async {
   try {
+    // Portable history can describe either platform. A local inspector cannot
+    // interpret a foreign path using its own drive/root or filesystem rules.
+    if (requested._windowsPath ? !Platform.isWindows : !Platform.isMacOS) {
+      throw const CredentialUseFailure('unsupported_desktop');
+    }
     final file = File(await File(requested.executable).resolveSymbolicLinks());
     final before = await file.stat();
     if (before.type != FileSystemEntityType.file) {

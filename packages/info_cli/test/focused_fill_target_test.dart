@@ -93,6 +93,29 @@ void main() {
       expect(service.owner.credentialUseRequests, isEmpty);
     },
   );
+  test(
+    'portable Mac discovery metadata reaches the CLI without case folding or input',
+    () async {
+      final (repo, driver, service, _, client) = await _fixture();
+      const path = '/Applications/中文 Browser.app/Contents/MacOS/Browser';
+      driver.result = FocusedFillTarget.ready(
+        FocusedFillApplication.fromJson({
+          'executable': path,
+          'sha256': 'b' * 64,
+        }),
+      );
+      await client.execute({
+        'command': 'session',
+        'chatLabel': 'Synthetic Mac metadata',
+      });
+      final result = await client.execute({'command': 'focus-target'});
+      expect((result['application'] as Map)['executable'], path);
+      expect(driver.preparations, 0);
+      expect(repo.reads, 0);
+      expect(service.owner.credentialUseRequests, isEmpty);
+    },
+  );
+
   test('ended sessions cannot obtain delayed discovery results', () async {
     final (_, driver, service, _, client) = await _fixture();
     await client.execute({

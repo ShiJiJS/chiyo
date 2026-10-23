@@ -12,7 +12,9 @@ void main() {
       final f = await fixture();
       f.driver.preparation = Completer<void>();
       addTearDown(() {
-        if (!f.driver.preparation!.isCompleted) f.driver.preparation!.complete();
+        if (!f.driver.preparation!.isCompleted) {
+          f.driver.preparation!.complete();
+        }
       });
       final second = await f.service.agent.requestFocusedFill(
         f.session,
@@ -259,6 +261,6 @@ void main() {
         code('application_changed'),
       );
     },
-    skip: !Platform.isWindows,
+    skip: !Platform.isWindows && !Platform.isMacOS,
   );
 }

@@ -75,7 +75,12 @@ void _validateFocusedFillSnapshot(
     }
   }
   for (final request in requests.where((r) => r.isFocusedFill)) {
-    if (request.protocolVersion != 2 ||
+    // Current library/backup formats were published with Windows-only fill
+    // identities. Core's portable metadata preparation must not silently make
+    // these old formats write/read Mac fill history. Enabling native Mac fill
+    // requires an explicit format migration and older-reader rejection first.
+    if (request.focusedFill!.application.executable.startsWith('/') ||
+        request.protocolVersion != 2 ||
         request.attemptConsumed ||
         request.executionId != null ||
         request.fields.isNotEmpty ||
