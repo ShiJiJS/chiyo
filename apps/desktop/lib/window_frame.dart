@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'ui.dart';
 import 'mac_text_editing.dart';
+import 'mac_text_field_accessibility.dart';
 
 /// The native caption stays available until these controls have been installed.
 /// Closing follows the existing native close event (including tray behavior).
@@ -93,7 +94,9 @@ class _DesktopWindowFrameState extends State<DesktopWindowFrame> {
   @override
   Widget build(BuildContext context) {
     if (!kIsWeb && defaultTargetPlatform == TargetPlatform.macOS) {
-      return MacTextEditingActions(child: widget.child);
+      return MacTextFieldAccessibilityHost(
+        child: MacTextEditingActions(child: widget.child),
+      );
     }
     if (!_enabled) return widget.child;
     return Overlay.wrap(

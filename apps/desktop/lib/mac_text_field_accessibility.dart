@@ -3,6 +3,32 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+/// Layout changes can replace an outer ScrollPosition without rebuilding a
+/// retained field. Scroll/metrics notifications reach this window-level host even
+/// when the field itself is below that scrollable in the widget tree.
+class MacTextFieldAccessibilityHost extends StatelessWidget {
+  const MacTextFieldAccessibilityHost({super.key, required this.child});
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    if (kIsWeb || defaultTargetPlatform != TargetPlatform.macOS) return child;
+    return NotificationListener<ScrollMetricsNotification>(
+      onNotification: (_) {
+        _Labels.changed();
+        return false;
+      },
+      child: NotificationListener<ScrollNotification>(
+        onNotification: (_) {
+          _Labels.changed();
+          return false;
+        },
+        child: child,
+      ),
+    );
+  }
+}
+
 /// Supplies purpose/geometry and ordinary text to the owning AppKit AX shim.
 /// Obscured text is excluded. Mirrors the already-selected keyboard field and
 /// its selection; the adapter never chooses a different Flutter input target.
@@ -22,8 +48,8 @@ class MacTextFieldAccessibility extends StatefulWidget {
 class _MacTextFieldAccessibilityState extends State<MacTextFieldAccessibility>
     with WidgetsBindingObserver {
   final _box = GlobalKey();
-  ScrollableState? _scrollable;
-  ScrollPosition? _position;
+  final _positions = <ScrollPosition>{};
+  final _scrollables = <ScrollableState>[];
   TextEditingController? _controller;
   FocusNode? _focus;
   bool _visible = true;
@@ -46,16 +72,9 @@ class _MacTextFieldAccessibilityState extends State<MacTextFieldAccessibility>
     // IndexedStack retains all pages and their layout. Subscribe to all
     // ancestor visibility scopes so a tab switch refreshes even const fields.
     _visible = Visibility.of(context);
-    final next = Scrollable.maybeOf(context);
-    final position = next?.position;
-    // ScrollableState can survive a physics/theme change while its concrete
-    // ScrollPosition is replaced. Follow the actual listener owner.
-    if (!identical(position, _position)) {
-      _position?.removeListener(_Labels.changed);
-      _position = position;
-      position?.addListener(_Labels.changed);
-    }
-    _scrollable = next;
+    // Retain the nearest inherited dependency as well as all outer positions.
+    Scrollable.maybeOf(context);
+    _observeScrollables();
     _Labels.changed();
   }
 
@@ -68,6 +87,28 @@ class _MacTextFieldAccessibilityState extends State<MacTextFieldAccessibility>
   @override
   void didChangeMetrics() => _Labels.changed();
 
+  void _observeScrollables() {
+    _scrollables.clear();
+    context.visitAncestorElements((element) {
+      if (element is StatefulElement && element.state is ScrollableState) {
+        _scrollables.add(element.state as ScrollableState);
+      }
+      return true;
+    });
+    final positions = {
+      for (final scrollable in _scrollables) scrollable.position,
+    };
+    for (final position in _positions.difference(positions)) {
+      position.removeListener(_Labels.changed);
+    }
+    for (final position in positions.difference(_positions)) {
+      position.addListener(_Labels.changed);
+    }
+    _positions
+      ..clear()
+      ..addAll(positions);
+  }
+
   Map<String, Object>? geometry() {
     final box = _box.currentContext?.findRenderObject();
     if (!mounted ||
@@ -77,16 +118,19 @@ class _MacTextFieldAccessibilityState extends State<MacTextFieldAccessibility>
         !box.hasSize) {
       return null;
     }
+    _observeScrollables();
     var rect = box.localToGlobal(Offset.zero) & box.size;
     final view = View.of(context);
     rect = rect.intersect(
       Offset.zero & (view.physicalSize / view.devicePixelRatio),
     );
-    final viewport = _scrollable?.context.findRenderObject();
-    if (viewport is RenderBox && viewport.attached && viewport.hasSize) {
-      rect = rect.intersect(
-        viewport.localToGlobal(Offset.zero) & viewport.size,
-      );
+    for (final scrollable in _scrollables) {
+      final viewport = scrollable.context.findRenderObject();
+      if (viewport is RenderBox && viewport.attached && viewport.hasSize) {
+        rect = rect.intersect(
+          viewport.localToGlobal(Offset.zero) & viewport.size,
+        );
+      }
     }
     if (!rect.isFinite || rect.isEmpty) return null;
     // TextFormField may own its controller internally. Follow the actual
@@ -139,7 +183,9 @@ class _MacTextFieldAccessibilityState extends State<MacTextFieldAccessibility>
   void dispose() {
     if (_native) {
       WidgetsBinding.instance.removeObserver(this);
-      _position?.removeListener(_Labels.changed);
+      for (final position in _positions) {
+        position.removeListener(_Labels.changed);
+      }
       _controller?.removeListener(_Labels.changed);
       _focus?.removeListener(_Labels.changed);
       _Labels.fields.remove(this);
