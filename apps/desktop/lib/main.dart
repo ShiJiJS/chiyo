@@ -21,6 +21,7 @@ import 'ui.dart';
 import 'window_frame.dart';
 import 'prototype_dialog.dart';
 import 'bundled_focused_fill.dart';
+import 'package:info_core/macos_desktop_control.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -37,6 +38,21 @@ Future<void> main() async {
             ? () => _openLibrary(requestKeyAccess: true)
             : null,
         platform: NativeDesktopPlatform(),
+        openAppControl: Platform.isMacOS
+            ? (state, quit) {
+                final base = Platform.environment['HOME'];
+                if (base == null || base.isEmpty) {
+                  throw StateError('control_unavailable');
+                }
+                return MacDesktopControlHost.start(
+                  directory: Directory(
+                    '$base/Library/Application Support/AgentInfoManage/app-control',
+                  ),
+                  state: state,
+                  quit: quit,
+                );
+              }
+            : null,
       ),
     ),
   );

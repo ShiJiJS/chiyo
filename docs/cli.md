@@ -29,12 +29,46 @@
 `timeout` 表示期限内未确认结束（退出码75），不能当成功或强杀理由，先查询原实例。
 可用 `--timeout-ms 100–60000` 调整等待。
 `target_mismatch` / `target_unavailable` / `ambiguous_target` / `control_unavailable` 为75；
-`unexpected_exit` 为1；旧版不支持或非Windows为69；参数错误为64。
+`unexpected_exit` 为1；旧版不支持或对应平台没有实现时为69；参数错误为64。
 显式PID不存在或不可确认不会伪装成成功；旧版 `unsupported_version` 需按原有托盘入口退出。
 
 入口使用同一本机桌面的Windows消息、程序身份及进程句柄；消息只含目标PID和状态/退出操作。
 不向公开HTTP添加主人接口，不靠请求编号退出应用，也不是同一Windows用户进程之间的安全沙箱。
 运行中的已启动命令仍遵守原有生命周期规则；退出不会擅自杀死它们，材料可能待下次启动核查回收。
+
+## Mac 应用状态与正常退出
+
+Mac 新源码提供对应的 `cli/info app status` / `cli/info app quit`；需要桌面应用与CLI
+一起更新，旧预览包仍不支持。命令不读取标准输入，不依赖信息授权，也不申请系统输入
+或辅助功能许可。正常退出复用应用的保存、撤销会话、关闭服务/库和原生退出流程。
+
+```sh
+'/稳定路径/AgentInfoManage/cli/info' app status
+'/稳定路径/AgentInfoManage/cli/info' app quit --timeout-ms 15000
+```
+
+只匹配该CLI同包的 `app/info_desktop.app/Contents/MacOS/info_desktop` 规范路径，
+同时核对当前用户、PID及内核启动时间。`--pid` 也不能选择另一目录的应用；多实例
+不指定PID时返回 `ambiguous_target`。使用源码直接运行CLI时，SDK旁没有同包应用，
+因此不能靠指定PID把它变成任意应用的控制器。
+
+输出仍为单行 `controlVersion:1` JSON；`running`、`starting`、`exiting`、`not_running`
+退出码0，`startup_failed`、`shutdown_failed`、`unexpected_exit` 为1，`timeout` 和
+无法确认身份/通信的结果为75；`unsupported_version` 为69。每次 `quit` 只发一次退出
+请求，丢回复或超时后只查询原实例；保存失败后，新的显式CLI调用才重新尝试退出。
+
+Mac 的 `exited` 表示本机私有回执已确认应用完成收尾，并且绑定的内核进程身份已结束，
+不表示已取得原生退出码。输出显式保留 `exitCode:null`，不能与Windows进程句柄确认的
+退出码0混用。没有收尾回执就消失的进程返回 `unexpected_exit`；不会强杀、重开应用、
+修复资料库或自动删除不确定的登记。
+
+私有控制通道仅监听IPv4 loopback的临时端口，登记在当前Mac应用容器的
+`Library/Application Support/AgentInfoManage/app-control/`。目录0700、登记0600，
+每次启动随机控制证明、单一文件锁和进程身份绑定；只接受状态/退出，没有AgentServer
+主人接口，不输出证明、内部地址或资料。它不构成同一系统用户进程间的强安全隔离。
+登记、锁及回执不属于可迁移备份。控制登记损坏不会阻止应用正常开库或原生菜单退出。
+
+这些是源码能力和无界面接收进程的开发检查；最终签名Mac应用及新整包的联合验收仍待。
 
 ## 信息申请
 

@@ -26,6 +26,11 @@ Xcode、Flutter、Dart 或 Python。完整载荷、来源与摘要见 [manifest.
 红色关窗保留后台服务，菜单栏提供“打开访问审批”。使用应用菜单退出、⌘Q 或
 设置中的“完全退出”结束服务。退出或重开后，原聊天的许可不会恢复。
 
+同一完整包的 [cli/info](cli/info) 也提供 `app status` 和 `app quit`，可用
+`app quit --timeout-ms 15000` 请求正常退出。命令只控制同包应用，超时不会强杀或
+重发退出请求；保存失败会明确返回 `shutdown_failed`。Mac 返回 `exited` 时只确认
+应用收尾及该进程结束，原生退出码保持 `null`。移动包后从新位置调用随包CLI。
+
 ## 日常使用
 
 1. 在“信息库”保存信息字段或普通附件。Token、密码和 SSH 私钥保存在“凭据”，

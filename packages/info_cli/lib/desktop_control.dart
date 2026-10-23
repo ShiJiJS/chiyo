@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:info_core/windows_desktop_control.dart';
+import 'package:info_core/macos_desktop_control.dart';
 
 /// Separate from JSON-lines content/session commands. No grant can approve or
 /// manage the library through this narrow native lifetime entry.
@@ -35,9 +36,12 @@ Future<({Map<String, Object?> output, int exitCode})> desktopControlCommand(
     }
   }
   final executable = File(
-    '${File(Platform.resolvedExecutable).parent.parent.path}/app/info_desktop.exe',
+    '${File(Platform.resolvedExecutable).parent.parent.path}/app/${Platform.isMacOS ? 'info_desktop.app/Contents/MacOS/info_desktop' : 'info_desktop.exe'}',
   ).absolute.path;
-  final result = await WindowsDesktopControl.execute(
+  final execute = Platform.isMacOS
+      ? MacDesktopControl.execute
+      : WindowsDesktopControl.execute;
+  final result = await execute(
     quit: args[1] == 'quit',
     executable: executable,
     processId: processId,
@@ -49,7 +53,7 @@ Future<({Map<String, Object?> output, int exitCode})> desktopControlCommand(
       'running' || 'starting' || 'exiting' || 'exited' || 'not_running' => 0,
       'invalid_request' => 64,
       'unsupported_platform' || 'unsupported_version' => 69,
-      'shutdown_failed' || 'unexpected_exit' => 1,
+      'shutdown_failed' || 'startup_failed' || 'unexpected_exit' => 1,
       _ => 75,
     },
   );
