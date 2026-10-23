@@ -90,6 +90,147 @@ void main() {
   );
 
   testWidgets(
+    'nested viewport clipping and both scroll positions update the native field without edits',
+    (tester) async {
+      final controller = TextEditingController(text: 'Synthetic nested value');
+      final outer = ScrollController(), inner = ScrollController();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Align(
+              alignment: Alignment.topLeft,
+              child: SizedBox(
+                width: 300,
+                height: 80,
+                child: SingleChildScrollView(
+                  controller: outer,
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 40),
+                      SizedBox(
+                        height: 180,
+                        child: SingleChildScrollView(
+                          controller: inner,
+                          child: Column(
+                            children: [
+                              MacTextFieldAccessibility(
+                                label: '嵌套字段',
+                                child: TextField(controller: controller),
+                              ),
+                              const SizedBox(height: 400),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 300),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      Map field() => (calls.last.arguments as List).single as Map;
+      expect(field()['top'], 40);
+      expect(field()['height'], 40);
+      calls.clear();
+      outer.jumpTo(20);
+      await tester.pumpAndSettle();
+      expect(calls, isNotEmpty);
+      expect(field()['top'], 20);
+      outer.jumpTo(150);
+      await tester.pumpAndSettle();
+      expect(calls.last.arguments, isEmpty);
+      outer.jumpTo(0);
+      await tester.pumpAndSettle();
+      expect(field()['text'], controller.text);
+      inner.jumpTo(100);
+      await tester.pumpAndSettle();
+      expect(calls.last.arguments, isEmpty);
+      inner.jumpTo(0);
+      await tester.pumpAndSettle();
+      expect(field()['height'], 40);
+      await tester.pumpWidget(const SizedBox());
+      await tester.pump();
+      controller.dispose();
+      outer.dispose();
+      inner.dispose();
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.macOS),
+  );
+
+  testWidgets(
+    'window host follows a replaced outer position around a retained nested field',
+    (tester) async {
+      final outer = ScrollController(), inner = ScrollController();
+      ScrollPhysics physics = const ClampingScrollPhysics();
+      late StateSetter update;
+      final retained = Column(
+        children: [
+          const SizedBox(height: 40),
+          SizedBox(
+            height: 180,
+            child: SingleChildScrollView(
+              controller: inner,
+              child: const Column(
+                children: [
+                  MacTextFieldAccessibility(label: '保留字段', child: TextField()),
+                  SizedBox(height: 400),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 300),
+        ],
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: MacTextFieldAccessibilityHost(
+              child: Align(
+                alignment: Alignment.topLeft,
+                child: SizedBox(
+                  width: 300,
+                  height: 100,
+                  child: StatefulBuilder(
+                    builder: (context, change) {
+                      update = change;
+                      return SingleChildScrollView(
+                        controller: outer,
+                        physics: physics,
+                        child: retained,
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final previous = outer.position;
+      update(() => physics = const BouncingScrollPhysics());
+      await tester.pumpAndSettle();
+      expect(identical(previous, outer.position), isFalse);
+      calls.clear();
+      outer.jumpTo(25);
+      await tester.pumpAndSettle();
+      expect((calls.last.arguments as List).single['top'], 15);
+      outer.jumpTo(150);
+      await tester.pumpAndSettle();
+      expect(calls.last.arguments, isEmpty);
+      await tester.pumpWidget(const SizedBox());
+      await tester.pump();
+      outer.dispose();
+      inner.dispose();
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.macOS),
+  );
+
+  testWidgets(
     'keyboard transitions publish canonical selection without editing controllers',
     (tester) async {
       final first = TextEditingController(text: 'Alpha');
