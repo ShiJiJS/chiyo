@@ -79,6 +79,7 @@ extension _CredentialRuntimeStorage on EncryptedInformationRepository {
       _credentialUseRequests,
       _credentialExecutions,
       _focusedFillOperations,
+      portableApplications: await _portableFocusedFillFormat(),
     );
     // Loading only persists terminal facts; it never reconstructs capabilities.
     if (_credentialUseRequests.isNotEmpty) {
@@ -99,10 +100,18 @@ extension _CredentialRuntimeStorage on EncryptedInformationRepository {
   }) async {
     if (_closed) throw const StorageFailure('library_closed');
     final fillSnapshot = fills ?? List.of(_focusedFillOperations);
-    _validateRuntimeSnapshot(requests, executions, fillSnapshot);
+    _validateRuntimeSnapshot(
+      requests,
+      executions,
+      fillSnapshot,
+      portableApplications: true,
+    );
     try {
       await _writeMetadata(() async {
         validate?.call();
+        if (_hasPortableFocusedFill(requests)) {
+          await _requirePortableFocusedFillFormat();
+        }
         await _db.customStatement('DELETE FROM credential_focused_fills');
         await _db.customStatement('DELETE FROM credential_operations');
         await _db.customStatement('DELETE FROM credential_runtime_requests');
@@ -167,9 +176,10 @@ extension _CredentialRuntimeStorage on EncryptedInformationRepository {
 
 void _validateRuntimeSnapshot(
   List<CredentialUseRequest> requests,
-  List<CredentialExecution> executions, [
-  List<FocusedFillOperation> fills = const [],
-]) {
+  List<CredentialExecution> executions,
+  List<FocusedFillOperation> fills, {
+  bool portableApplications = false,
+}) {
   Never invalid() => throw const StorageFailure('invalid_runtime_snapshot');
   final byId = {for (final r in requests) r.id: r};
   if (byId.length != requests.length ||
@@ -210,7 +220,12 @@ void _validateRuntimeSnapshot(
     }
     executionById[e.id] = e;
   }
-  _validateFocusedFillSnapshot(requests, executions, fills);
+  _validateFocusedFillSnapshot(
+    requests,
+    executions,
+    fills,
+    portableApplications: portableApplications,
+  );
   for (final r in requests) {
     if (!{1, 2}.contains(r.protocolVersion)) invalid();
     if (r.isFocusedFill) continue;

@@ -40,9 +40,9 @@ class _Fixture {
     'Synthetic fill storage session',
   );
   late ManagedCredential credential;
-  static Future<_Fixture> create() async {
+  static Future<_Fixture> create({List<int>? key}) async {
     final root = await Directory.systemTemp.createTemp('focused-fill-storage-');
-    final keys = TestKeyStore();
+    final keys = TestKeyStore()..key = key;
     final repo = await EncryptedInformationRepository.open(
       '${root.path}/source',
       keys,
@@ -79,7 +79,10 @@ class _Fixture {
         credentialExecutableInspector: (p, r) async =>
             ExecutableIdentity(p, 10, 100, 'sha256:${'a' * 64}'),
       );
-  Future<CredentialUseRequest> request({bool approve = true}) async {
+  Future<CredentialUseRequest> request({
+    bool approve = true,
+    String executable = r'C:\Synthetic\Browser.exe',
+  }) async {
     final r = await service.agent.requestFocusedFill(
       session,
       FocusedFillInput.fromJson({
@@ -90,10 +93,7 @@ class _Fixture {
           {'alias': 'password', 'credentialId': credential.id, 'version': 1},
         ],
         'fill': {
-          'application': {
-            'executable': r'C:\Synthetic\Browser.exe',
-            'sha256': 'b' * 64,
-          },
+          'application': {'executable': executable, 'sha256': 'b' * 64},
           'targetHint': 'Synthetic portal',
         },
       }),
@@ -240,53 +240,57 @@ Map<String, dynamic> _payload(String path, String recovery) {
   }
 }
 
+sqlite.Database _keyedDb(String path, TestKeyStore keys) {
+  final db = sqlite.sqlite3.open(path);
+  final hex = keys.key!
+      .map((value) => value.toRadixString(16).padLeft(2, '0'))
+      .join();
+  db.execute('PRAGMA key = "x\'$hex\'"');
+  return db;
+}
+
+List<int> _dbFormat(sqlite.Database db) => [
+  db.select('PRAGMA user_version').single.values.single as int,
+  db
+          .select('SELECT version FROM library_format WHERE singleton=1')
+          .single['version']
+      as int,
+];
+
+List<int> _format(_Fixture f) {
+  final db = _keyedDb('${f.root.path}/source/library.db', f.keys);
+  try {
+    return _dbFormat(db);
+  } finally {
+    db.close();
+  }
+}
+
 void main() {
   test(
-    'portable Mac metadata cannot silently enter the current persisted fill format',
+    'Mac fill commits explicitly upgrade format22 to23 and require backup11',
     () async {
       final f = await _Fixture.create();
       addTearDown(f.close);
-      final original = await f.request();
-      final changed = original.changed({
-        'fill': {
-          ...original.focusedFill!.toJson(),
-          'application': {
-            'executable': '/Applications/中文 Browser.app/Contents/MacOS/Browser',
-            'sha256': 'b' * 64,
-          },
-        },
-      });
-      await expectLater(
-        f.repo.commitFocusedFillRuntime([changed], []),
-        throwsA(
-          isA<StorageFailure>().having(
-            (e) => e.code,
-            'code',
-            'invalid_runtime_snapshot',
-          ),
-        ),
-      );
+      final (ordinary, ordinaryKey) = await f.backup('ordinary-format7');
+      expect(_format(f), [22, 22]);
       expect(
-        f.repo.credentialUseRequests.single.focusedFill!.application.executable,
-        r'C:\Synthetic\Browser.exe',
+        (await f.repo.backups.inspect(ordinary, ordinaryKey)).formatVersion,
+        7,
       );
-      expect(f.repo.focusedFillOperations, isEmpty);
-      final (backup, recovery) = await f.backup('existing-windows-fill');
-      expect(
-        (await f.repo.backups.inspect(
-          backup,
-          recovery,
-        )).credentialUseHistoryCount,
-        1,
-      );
+      const executable = '/Applications/中文 Browser.app/Contents/MacOS/Browser';
+      final r = await f.request(executable: executable);
+      expect(_format(f), [23, 23]);
+      final result = await f.fill(r.id, 'synthetic-mac-fill');
+      expect(result.state, FocusedFillState.sent);
+      final (backup, recovery) = await f.backup('mac-format11');
+      final preview = await f.repo.backups.inspect(backup, recovery);
+      expect(preview.formatVersion, 11);
+      expect(preview.credentialUseHistoryCount, 1);
+      expect(preview.focusedFillCount, 1);
       final altered = _payload(backup, recovery);
-      final rows = altered['tables']['credential_use_requests'] as List;
-      final raw =
-          jsonDecode(rows.single['payload'] as String) as Map<String, dynamic>;
-      (raw['fill']['application'] as Map)['executable'] =
-          '/Applications/中文 Browser.app/Contents/MacOS/Browser';
-      rows.single['payload'] = jsonEncode(raw);
-      final incompatible = '${f.root.path}/unmarked-mac-fill.aimbackup';
+      altered['version'] = 10;
+      final incompatible = '${f.root.path}/unmarked-mac-format10.aimbackup';
       await File(backup).copy(incompatible);
       final db = _backupDb(incompatible, recovery);
       try {
@@ -301,11 +305,340 @@ void main() {
         throwsA(isA<StorageFailure>()),
       );
       await f.reopen();
+      expect(_format(f), [23, 23]);
       expect(
         f.repo.credentialUseRequests.single.focusedFill!.application.executable,
-        r'C:\Synthetic\Browser.exe',
+        executable,
+      );
+      expect(f.repo.focusedFillOperations.single.state, FocusedFillState.sent);
+      expect(
+        (await f.repo.backups.inspect(ordinary, ordinaryKey)).formatVersion,
+        7,
       );
     },
+  );
+
+  test('ordinary Windows fill history keeps library22 and backup7', () async {
+    final f = await _Fixture.create();
+    addTearDown(f.close);
+    final r = await f.request();
+    await f.fill(r.id, 'ordinary');
+    final (path, key) = await f.backup('ordinary');
+    expect(_format(f), [22, 22]);
+    expect((await f.repo.backups.inspect(path, key)).formatVersion, 7);
+    await f.reopen();
+    expect(_format(f), [22, 22]);
+  });
+
+  test(
+    'Mac pending requests upgrade local storage but remain excluded from backup',
+    () async {
+      final f = await _Fixture.create();
+      addTearDown(f.close);
+      final r = await f.request(
+        approve: false,
+        executable: '/Applications/Synthetic.app/Contents/MacOS/Synthetic',
+      );
+      expect(_format(f), [23, 23]);
+      final (path, key) = await f.backup('pending-only');
+      final preview = await f.repo.backups.inspect(path, key);
+      expect(preview.formatVersion, 7);
+      expect(preview.credentialUseHistoryCount, 0);
+      await f.service.owner.decideCredentialUse(r.id, approveCredential: false);
+      final (decided, sameKey) = await f.backup('denied-mac');
+      expect(
+        (await f.repo.backups.inspect(decided, sameKey)).formatVersion,
+        11,
+      );
+    },
+  );
+
+  test('failed Mac audit rolls marker header and rows back to22', () async {
+    final f = await _Fixture.create();
+    addTearDown(f.close);
+    final original = await f.request();
+    final changed = original.changed({
+      'fill': {
+        ...original.focusedFill!.toJson(),
+        'application': {
+          'executable': '/Applications/合成.app/Contents/MacOS/Synthetic',
+          'sha256': 'b' * 64,
+        },
+      },
+    });
+    var calls = 0;
+    await expectLater(
+      f.repo.commitFocusedFillRuntime(
+        [changed],
+        [],
+        validate: () {
+          if (++calls == 3) throw const CredentialUseFailure('grant_revoked');
+        },
+      ),
+      throwsA(isA<CredentialUseFailure>()),
+    );
+    expect(calls, 3);
+    expect(_format(f), [22, 22]);
+    expect(
+      f.repo.credentialUseRequests.single.focusedFill!.application.executable,
+      r'C:\Synthetic\Browser.exe',
+    );
+    await f.reopen();
+    expect(_format(f), [22, 22]);
+  });
+
+  test(
+    'Mac format11 restore is atomic and never restores active grants or input leases',
+    () async {
+      final f = await _Fixture.create();
+      addTearDown(f.close);
+      final r = await f.request(
+        executable: '/Applications/合成.app/Contents/MacOS/Synthetic',
+      );
+      await f.intent(r, released: true);
+      final (path, key) = await f.backup('released-mac');
+      final targetPath = '${f.root.path}/recipient';
+      final targetKeys = TestKeyStore();
+      final target = await EncryptedInformationRepository.open(
+        targetPath,
+        targetKeys,
+        clock: () => f.now,
+      );
+      addTearDown(target.close);
+      final db = _keyedDb('$targetPath/library.db', targetKeys);
+      try {
+        db.execute(
+          "CREATE TRIGGER fail_portable_restore BEFORE INSERT ON credential_focused_fills BEGIN SELECT RAISE(ABORT,'synthetic'); END",
+        );
+      } finally {
+        db.close();
+      }
+      await expectLater(
+        target.backups.restoreFrom(path, key),
+        throwsA(isA<StorageFailure>()),
+      );
+      final failed = _keyedDb('$targetPath/library.db', targetKeys);
+      try {
+        expect(_dbFormat(failed), [22, 22]);
+        expect(
+          failed
+              .select('SELECT count(*) FROM credential_runtime_requests')
+              .single
+              .values
+              .single,
+          0,
+        );
+        failed.execute('DROP TRIGGER fail_portable_restore');
+      } finally {
+        failed.close();
+      }
+      expect(target.managedCredentials, isEmpty);
+      await target.backups.restoreFrom(path, key);
+      expect(
+        target.focusedFillOperations.single.state,
+        FocusedFillState.unknown,
+      );
+      expect(target.focusedFillOperations.single.restoredAt, f.now);
+      expect(
+        target.credentialUseRequests.single.invalidatedCode,
+        'grant_revoked',
+      );
+      final restored = f.newService(target);
+      addTearDown(restored.close);
+      final session = restored.agent.openSession(
+        'Fresh synthetic restored session',
+      );
+      await expectLater(
+        restored.agent.startFocusedFill(
+          session,
+          f.input(r.id, 'fresh-after-restore'),
+        ),
+        throwsA(isA<CredentialUseFailure>()),
+      );
+      final current = _keyedDb('$targetPath/library.db', targetKeys);
+      try {
+        expect(_dbFormat(current), [23, 23]);
+      } finally {
+        current.close();
+      }
+    },
+  );
+
+  test(
+    'unmarked Mac records in a format22 library are refused on reopen',
+    () async {
+      final f = await _Fixture.create();
+      addTearDown(f.close);
+      await f.request(
+        executable: '/Applications/合成.app/Contents/MacOS/Synthetic',
+      );
+      await f.service.close();
+      await f.repo.close();
+      final path = '${f.root.path}/source';
+      final db = _keyedDb('$path/library.db', f.keys);
+      try {
+        db.execute('UPDATE library_format SET version=22');
+        db.execute('PRAGMA user_version=22');
+      } finally {
+        db.close();
+      }
+      await expectLater(
+        EncryptedInformationRepository.open(path, f.keys, clock: () => f.now),
+        throwsA(
+          isA<StorageFailure>().having(
+            (e) => e.code,
+            'code',
+            'invalid_runtime_snapshot',
+          ),
+        ),
+      );
+      final fix = _keyedDb('$path/library.db', f.keys);
+      try {
+        fix.execute('UPDATE library_format SET version=23');
+        fix.execute('PRAGMA user_version=23');
+      } finally {
+        fix.close();
+      }
+    },
+  );
+
+  test(
+    'Mac format11 retains Windows fills and ordinary attachment bytes',
+    () async {
+      final f = await _Fixture.create();
+      addTearDown(f.close);
+      final original = await f.request();
+      await f.fill(original.id, 'windows-before-mac');
+      final bytes = <int>[0, 255, ...utf8.encode('合成附件，不是个人资料')];
+      final file = File('${f.root.path}/attachment.bin');
+      await file.writeAsBytes(bytes);
+      final draft = await f.service.owner.beginInformationFileDraft();
+      late InformationItem item;
+      try {
+        final stage = await f.service.owner.stageInformationFile(
+          draft,
+          file.path,
+        );
+        item = await f.service.owner.commitInformationDraft(
+          draft,
+          'mixed-file',
+          InformationDraftInput(
+            name: '合成文件',
+            description: '',
+            fields: [InformationDraftField.stagedFile('文件', '', stage.id)],
+          ),
+        );
+      } finally {
+        await f.service.owner.releaseInformationFileDraft(draft);
+      }
+      final mac = await f.request(
+        executable: '/Applications/合成.app/Contents/MacOS/Synthetic',
+      );
+      await f.fill(mac.id, 'mac-after-windows');
+      final (path, recovery) = await f.backup('mixed-portable');
+      final target = await EncryptedInformationRepository.open(
+        '${f.root.path}/mixed-recipient',
+        TestKeyStore(),
+        clock: () => f.now,
+      );
+      addTearDown(target.close);
+      final contents = await target.backups.restoreFrom(path, recovery);
+      expect(contents.formatVersion, 11);
+      expect(contents.focusedFillCount, 2);
+      expect(contents.attachmentCount, 1);
+      expect(
+        target.focusedFillOperations.map((o) => o.state),
+        everyElement(FocusedFillState.sent),
+      );
+      expect(
+        await target.readInformationAttachmentChunk(
+          item.fields.single.attachment!,
+          0,
+          bytes.length,
+        ),
+        bytes,
+      );
+    },
+  );
+
+  final format22Probe = Platform.environment['INFO_TEST_FORMAT22_PROBE'];
+  test(
+    'format22 source reader rejects library23 and backup11 before modifying data',
+    () async {
+      final f = await _Fixture.create(key: List.filled(32, 61));
+      addTearDown(f.close);
+      final (ordinaryBackup, recovery) = await f.backup('old-compatible');
+      final recoveryFile = File('${f.root.path}/synthetic-recovery.txt');
+      await recoveryFile.writeAsString(recovery);
+      final empty = '${f.root.path}/old-inspector';
+      final emptyStore = await EncryptedInformationRepository.open(
+        empty,
+        TestKeyStore()..key = List.filled(32, 61),
+        clock: () => f.now,
+      );
+      await emptyStore.close();
+      Future<Map<String, dynamic>> probe(List<String> action) async {
+        final process = await Process.run(format22Probe!, [
+          action.first,
+          f.root.path,
+          ...action.skip(1),
+        ]);
+        expect(process.exitCode, 0, reason: '${process.stderr}');
+        return jsonDecode((process.stdout as String).trim())
+            as Map<String, dynamic>;
+      }
+
+      final profile = '${f.root.path}/source';
+      await f.service.close();
+      await f.repo.close();
+      final baseline = await probe(['library', profile]);
+      expect(baseline['status'], 'opened');
+      expect(baseline['cipherVersion'], startsWith('4.'));
+      expect(
+        await probe(['backup', empty, ordinaryBackup, recoveryFile.path]),
+        {'status': 'accepted', 'backupFormat': 7},
+      );
+      await f.reopen();
+      final request = await f.request(
+        executable: '/Applications/中文 Browser.app/Contents/MacOS/Browser',
+      );
+      await f.fill(request.id, 'portable');
+      final (backup, _) = await f.backup('portable-for-old-reader');
+      await f.service.close();
+      await f.repo.close();
+      final library = File('$profile/library.db');
+      String digest(File file) =>
+          sha256.convert(file.readAsBytesSync()).toString();
+      var original = digest(library);
+      expect(await probe(['library', profile]), {
+        'status': 'rejected',
+        'errorCode': 'unsupported_schema',
+      });
+      expect(digest(library), original);
+      final lowered = _keyedDb(library.path, f.keys);
+      try {
+        lowered.execute('PRAGMA user_version=22');
+      } finally {
+        lowered.close();
+      }
+      original = digest(library);
+      expect(await probe(['library', profile]), {
+        'status': 'rejected',
+        'errorCode': 'unsupported_schema',
+      });
+      expect(digest(library), original);
+      final backupDigest = digest(File(backup));
+      expect(await probe(['backup', empty, backup, recoveryFile.path]), {
+        'status': 'rejected',
+        'errorCode': 'unsupported_backup',
+      });
+      expect(digest(File(backup)), backupDigest);
+      await f.reopen();
+      expect(_format(f), [23, 23]);
+      expect(f.repo.focusedFillOperations.single.state, FocusedFillState.sent);
+    },
+    skip: format22Probe == null,
+    timeout: const Timeout(Duration(seconds: 30)),
   );
 
   test(

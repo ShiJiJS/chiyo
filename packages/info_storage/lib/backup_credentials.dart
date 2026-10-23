@@ -454,6 +454,7 @@ void _validateBackupCredentialHistory(
       requests.values.toList(),
       executions.values.toList(),
       fills,
+      portableApplications: formatVersion >= 11,
     );
   } on Object {
     _backupInvalid();

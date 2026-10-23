@@ -1,6 +1,39 @@
 part of 'info_storage.dart';
 
 extension _FocusedFillStorage on EncryptedInformationRepository {
+  Future<bool> _portableFocusedFillFormat() async =>
+      (await _db
+              .customSelect(
+                'SELECT version FROM library_format WHERE singleton=1',
+              )
+              .getSingle())
+          .read<int>('version') ==
+      _portableFocusedFillLibraryFormat;
+
+  /// Called only inside the transaction installing the first portable request
+  /// or restore. Both marker and header roll back with all associated facts.
+  /// The open Drift connection keeps its initial schema target; no DDL changes
+  /// here. A later open selects target23 from the independent marker.
+  Future<void> _requirePortableFocusedFillFormat() async {
+    final version =
+        (await _db
+                .customSelect(
+                  'SELECT version FROM library_format WHERE singleton=1',
+                )
+                .getSingle())
+            .read<int>('version');
+    if (version == _portableFocusedFillLibraryFormat) return;
+    if (version != _libraryFormat)
+      throw const StorageFailure('unsupported_schema');
+    await _db.customStatement(
+      'UPDATE library_format SET version=? WHERE singleton=1',
+      [_portableFocusedFillLibraryFormat],
+    );
+    await _db.customStatement(
+      'PRAGMA user_version = $_portableFocusedFillLibraryFormat',
+    );
+  }
+
   Future<void> _loadFocusedFills() async {
     for (final row
         in await _db
@@ -22,6 +55,13 @@ extension _FocusedFillStorage on EncryptedInformationRepository {
   }
 }
 
+bool _hasPortableFocusedFill(Iterable<CredentialUseRequest> requests) =>
+    requests.any(
+      (request) =>
+          request.isFocusedFill &&
+          request.focusedFill!.application.executable.startsWith('/'),
+    );
+
 FocusedFillOperation _archiveFocusedFill(
   FocusedFillOperation operation,
   DateTime now, {
@@ -38,8 +78,9 @@ FocusedFillOperation _archiveFocusedFill(
 void _validateFocusedFillSnapshot(
   List<CredentialUseRequest> requests,
   List<CredentialExecution> executions,
-  List<FocusedFillOperation> fills,
-) {
+  List<FocusedFillOperation> fills, {
+  bool portableApplications = false,
+}) {
   Never invalid() => throw const StorageFailure('invalid_runtime_snapshot');
   final byId = {for (final r in requests) r.id: r};
   final recordIds = executions.map((e) => e.id).toSet();
@@ -75,11 +116,10 @@ void _validateFocusedFillSnapshot(
     }
   }
   for (final request in requests.where((r) => r.isFocusedFill)) {
-    // Current library/backup formats were published with Windows-only fill
-    // identities. Core's portable metadata preparation must not silently make
-    // these old formats write/read Mac fill history. Enabling native Mac fill
-    // requires an explicit format migration and older-reader rejection first.
-    if (request.focusedFill!.application.executable.startsWith('/') ||
+    // Legacy formats remain Windows-only. Portable identities require the
+    // independent library23 marker or explicit backup11 label.
+    if (!portableApplications &&
+            request.focusedFill!.application.executable.startsWith('/') ||
         request.protocolVersion != 2 ||
         request.attemptConsumed ||
         request.executionId != null ||

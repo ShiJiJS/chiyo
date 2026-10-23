@@ -372,8 +372,19 @@ class InformationBackups {
             return entry['snapshot'] != null &&
                 removedOrganization(entry['snapshot'] as Map<String, dynamic>);
           });
-      if (detachedHistory) {
-        formatVersion = 10;
+      // Pending requests are not portable history. Select the new label only
+      // after archiving, but before metadata admission/validation or publication.
+      _archiveCredentialRuntime(tables, now);
+      final portableFills = _hasPortableFocusedFill(
+        tables['credential_use_requests']!.map(
+          (row) => CredentialUseRequest.fromJson(_backupJson(row)),
+        ),
+      );
+      if (portableFills && !await _repository._portableFocusedFillFormat()) {
+        throw const StorageFailure('invalid_runtime_snapshot');
+      }
+      if (detachedHistory || portableFills) {
+        formatVersion = portableFills ? 11 : 10;
         for (final table in _v9Columns.entries.where(
           (e) => !tables.containsKey(e.key),
         )) {
@@ -387,7 +398,6 @@ class InformationBackups {
       }
       // Persist only archive facts. Never serialize private runtime DTOs into
       // a portable backup, even when an execution is currently active.
-      _archiveCredentialRuntime(tables, now);
       if (reserveLifecycleOutcomes) _reserveRuntimeBackupOutcomes(tables);
       if (tables.containsKey('information_deliveries')) {
         tables['information_deliveries'] = [
@@ -703,6 +713,9 @@ class InformationBackups {
         );
         await _repository._db.customStatement('DELETE FROM settings');
         await _repository._db.customStatement('DELETE FROM organization_tasks');
+        if (contents.formatVersion >= 11) {
+          await _repository._requirePortableFocusedFillFormat();
+        }
         // Directory parents may appear after a moved child in source row order.
         await _repository._db.customStatement('PRAGMA defer_foreign_keys = ON');
         if (contents.formatVersion >= 8) {
@@ -753,7 +766,7 @@ class InformationBackups {
     if (decoded is! Map<String, dynamic>) invalid();
     if (decoded['format'] != _format ||
         decoded['version'] is! int ||
-        ![1, 2, 3, 4, 5, 6, 7, 8, 9, 10].contains(decoded['version'])) {
+        ![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].contains(decoded['version'])) {
       throw const StorageFailure('unsupported_backup');
     }
     final v8 = (decoded['version'] as int) >= 8;
@@ -771,7 +784,7 @@ class InformationBackups {
       4 => _v4Columns,
       5 || 6 => _v6Columns,
       8 => _v8Columns,
-      9 || 10 => _v9Columns,
+      9 || 10 || 11 => _v9Columns,
       _ => _allColumns,
     };
     final data = decoded['tables'] as Map<String, dynamic>;

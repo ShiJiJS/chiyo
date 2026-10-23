@@ -1,5 +1,37 @@
 # Mac 首轮可用：剩余验收与交付项核对
 
+## 2026-10-23：Mac填充条件格式迁移与旧源码读取器检查
+
+继续补 #51 的功能：普通资料库保持格式22，只有首次保存Mac填充请求或恢复格式11
+备份时，在同一事务中将独立格式标记/数据库头升到23。Mac历史用明确备份11标签，
+仍沿用SQLCipher4/独立恢复密钥/附件分块；读旧备份1–10，不接受在旧标签下混入Mac
+路径。pending请求依旧不导出，已升版的库不自动降级，不更改原生产库或OS密钥。
+
+实际SQLCipher检查证明：审计最后验证失败时标记/头/记录回到22；恢复末段失败时
+目标仍22且缓存/资料不发布；成功恢复为23，检查中输入归unknown、原授权失效。
+混合Windows/Mac填充事实与普通附件原字节均保留，普通Windows历史仍使用库22/
+备份7。主启动仍不加载Mac输入驱动，没有因此启用任何生产能力。
+
+以真实旧提交`0eb8ece5`的Core/Storage源码构建独立AOT格式22读取器，正向核对旧库/
+备份可读，再核对库23/备份11被明确拒绝、文件摘要不变。单独回退头部仍被独立标记
+拒绝；当前读取器可重开并保留历史。旧源码/AOT/合成资料已清理，只留脚本与证据。
+这不是Windows本机回归、两设备迁移或真实输入验收，未运行Windows CI。
+
+必要开发检查：填充存储21项通过、1项既有schema17条件跳过（新的真实格式22读取器
+场景实际执行）；库升级/完整备份/凭据/附件容器/交付及组织历史68项定向回归通过；
+Storage严格分析通过。测试中同时打开两个独立合成库保留Drift原有debug提示，没有
+关闭诊断选项。取主分支和Windows产品分支的源码核对当前仍为格式21与22；不改动
+其分支，正式合并/启用前仍需对齐未来编号及实际Windows兼容。
+
+后续仍需有效桌面策略与真实XPC/权限/目标证据、最终产品同包验收。固定普通预览未
+替换，没有computer use、Keychain访问或新系统提示，不修改 #51 的复合验收勾选；
+GitHub本轮尚未同步。
+
+本轮[来源与开发检查回执](evidence/macos-focused-fill-format/verification.json)、
+[填充存储日志](evidence/macos-focused-fill-format/portable-tests.txt)及
+[相关回归日志](evidence/macos-focused-fill-format/regression-tests.txt)保留原始范围；
+`scripts/qa/check-macos-focused-format.py`可在项目下重建同一旧源读取器并重跑定向检查。
+
 ## 2026-10-23：候选helper内嵌、外层签名和完整包入口已接入
 
 继续补 #51：`dev-macos.sh build --with-focused-fill-candidate`会在固定GH/AWS工具

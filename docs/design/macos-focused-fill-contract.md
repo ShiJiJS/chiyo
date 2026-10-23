@@ -54,11 +54,32 @@ Seam仍是核心服务与原生驱动之间，审批/存储不直接调用系统
 }
 ```
 
-本轮没有提升SQLCipher库/备份格式。当前持久化格式的填充身份仍限Windows，写入、
-重开及备份校验共同拒绝未标记的Mac填充记录。公共模型可序列化Mac身份，不等于
-当前库可以写它。启用原生Mac填充前，必须另做明确格式迁移、旧读取器拒绝和双端
-备份兼容核查；不能让旧Windows读取器把新历史当坏库，或依赖较宽的JSON解析器
-偷偷扩展已发布格式。
+本分支已实现明确的条件迁移：普通库仍以格式22创建/重开；首次提交Mac填充请求时，
+在同一SQLCipher事务中将独立`library_format`标记和`PRAGMA user_version`升到23，
+再写关联记录。验证、审计或预算失败时全部回滚；不把只有公共模型变化当作旧格式
+可写Mac历史。持久化格式没有新增表、密钥或原生句柄；连接按打开时的22/23目标
+选择Drift迁移，下一次打开依独立标记选择23，避免普通库无故升版。
+
+备份格式11沿用完整的9/10表结构、附件分块及SQLCipher4封装，显式允许POSIX应用
+身份。当前读取器仍支持备份1–10；旧版本标签1–10中的Mac历史仍拒绝。未触发Mac
+功能的库与备份保持原范围；只有pending Mac请求时，库必须23，但不导出pending
+请求，备份仍可使用7–10。曾升到23的库不自动降级；恢复显式格式11时也原子升为23。
+恢复只安装历史/原字节，不恢复授权、输入目标、PID、连接或租约；检查中/已放行未
+确认输入继续归unknown，已终结事实保留。
+
+独立开发检查从提交`0eb8ece5d56c716bd93ddddb550e45871ec8774a`的真实Core/Storage
+源码构建旧格式22 AOT读取器：它接受普通库22/备份7，拒绝库23/备份11；将头部
+手工降回22但保留独立标记23时仍拒绝，数据库和备份文件摘要不变。新读取器能再次
+打开，恢复头部23并保留原事实；Mac/Windows混合填充历史及普通附件字节完整恢复。
+审计最终验证失败和恢复末段SQL故障均证明标记、头部、资料行及内存发布一起回滚。
+这些是Mac上的共享Dart/SQLCipher代码检查，不是Windows原生、实际跨设备迁移或
+输入验收；23/11仍为本分支未启用能力的格式准备，正式启用/合并前应重新对齐当时
+Windows发布格式，不能假定未来其他分支不会使用相同编号。
+复现入口为`scripts/qa/check-macos-focused-format.py`；
+[旧源身份/摘要及当前检查回执](../development/evidence/macos-focused-fill-format/verification.json)、
+[填充存储日志](../development/evidence/macos-focused-fill-format/portable-tests.txt)及
+[相关存储回归](../development/evidence/macos-focused-fill-format/regression-tests.txt)明确区分共享
+代码检查与尚未执行的系统/Windows验收。
 
 ## 原生执行方案审查
 
@@ -152,7 +173,7 @@ helper候选的签名没有entitlements；这不替代真实launchd沙盒与TCC�
 只允许修改`apps/desktop/build/macos/Build/Products`或`build/macos-adaptation`下的构建App；完整包和解压
 目录仅允许只读检查，不处理固定普通安装或`/Applications`中的应用。
 
-显式构建候选（只改变封装内容，不改变能力、会话策略或库格式）：
+显式构建候选（只改变封装内容，不改变能力、会话策略或触发库格式迁移）：
 
 ```sh
 ./scripts/dev-macos.sh build --with-focused-fill-candidate
@@ -186,7 +207,7 @@ python3 scripts/package-macos.py build/macos-adaptation/package-candidate-new --
 将其自行改成“已解锁”。睡眠、屏幕休眠、会话退出活动及受保护数据不可用通知只
 使已有目标失效，通知消失/恢复也不恢复旧目标，不把通知当启动时就绪证明。
 
-尚需有效会话策略、真实权限归属与目标支持证据，再进行格式迁移及生产能力连接。
+条件格式迁移已实现；尚需有效会话策略、真实权限归属与目标支持证据，再连接生产能力。
 当前已完成可选内嵌/外层签名流程及合成封装检查；完整Flutter候选包尚未在本轮生成。
 私有签名要求已编译并有独立包/合成嵌套签名检查，
 没有在真实XPC连接上证明ad-hoc产物被系统接受；不能把“代码中设置了要求”写成
@@ -242,9 +263,9 @@ python3 scripts/package-macos.py build/macos-adaptation/package-candidate-new --
 | 阶段 | 当前结果 | 后续门槛 |
 | --- | --- | --- |
 | 公共身份模型和本机文件检查 | 本轮实现 | 保持Windows线协议与大小写语义；Mac路径精确匹配。 |
-| 持久化兼容保护 | 本轮实现 | 当前格式继续拒绝Mac填充记录；正式能力前增加格式迁移。 |
+| 持久化/备份格式 | 条件库23及备份11已实现；普通库22与备份1–10保持 | 实际Windows/跨设备及合并前编号/格式对齐仍待；不复活许可。 |
 | 原生实现方案 | 有独立候选源码，尚未冻结全部依据 | 核对私有XPC签名/权限归属、实际连接及桌面就绪依据。 |
-| 目标/投递实现 | helper、主人桥及可选内嵌/打包流程已实现，未接通生产 | 补有效会话策略、格式迁移和完整产品/真实目标证据，不访问个人密码。 |
+| 目标/投递实现 | helper、主人桥及可选内嵌/打包流程已实现，未接通生产 | 补有效会话策略及完整产品/真实目标证据，不访问个人密码。 |
 | 正式宣告 | 关闭 | 实现、签名产物、权限/锁屏/目标证据齐备后再更新capabilities、Skill和UI。 |
 
 必要开发检查：`scripts/qa/check-macos-focused-controller.py`对全部候选Swift源码

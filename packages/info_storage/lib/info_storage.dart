@@ -24,6 +24,9 @@ part 'attachment_backup_integration.dart';
 part 'information_delivery_storage.dart';
 
 const _libraryFormat = 22;
+// A content-triggered extension, not the default format of ordinary libraries.
+// Older readers reject this independent marker before loading portable fills.
+const _portableFocusedFillLibraryFormat = 23;
 
 class StorageFailure implements Exception {
   const StorageFailure(this.code);
@@ -377,7 +380,8 @@ class EncryptedInformationRepository
       native.select('SELECT count(*) FROM sqlite_master');
       final headerVersion =
           native.select('PRAGMA user_version').single.values.single as int;
-      if (headerVersion > _libraryFormat) {
+      var openingFormat = _libraryFormat;
+      if (headerVersion > _portableFocusedFillLibraryFormat) {
         throw const StorageFailure('unsupported_schema');
       }
       if (native
@@ -392,19 +396,22 @@ class EncryptedInformationRepository
             marker.single['singleton'] != 1 ||
             marker.single['version'] is! int ||
             (marker.single['version'] as int) < 17 ||
-            (marker.single['version'] as int) > _libraryFormat ||
+            (marker.single['version'] as int) >
+                _portableFocusedFillLibraryFormat ||
             headerVersion > (marker.single['version'] as int)) {
           throw const StorageFailure('unsupported_schema');
         }
-      } else if (native
-          .select(
-            "SELECT name FROM sqlite_master WHERE type='table' AND name IN ('credential_runtime_requests','credential_operations','credential_focused_fills')",
-          )
-          .isNotEmpty) {
+        openingFormat = max(_libraryFormat, marker.single['version'] as int);
+      } else if (headerVersion > _libraryFormat ||
+          native
+              .select(
+                "SELECT name FROM sqlite_master WHERE type='table' AND name IN ('credential_runtime_requests','credential_operations','credential_focused_fills')",
+              )
+              .isNotEmpty) {
         throw const StorageFailure('unsupported_schema');
       }
       native.execute('PRAGMA foreign_keys = ON');
-      db = _InformationDatabase(NativeDatabase.opened(native));
+      db = _InformationDatabase(NativeDatabase.opened(native), openingFormat);
       native = null; // Drift owns the handle now.
       final repository = EncryptedInformationRepository._(
         db,
@@ -1406,9 +1413,10 @@ class EncryptedInformationRepository
 }
 
 class _InformationDatabase extends GeneratedDatabase {
-  _InformationDatabase(super.executor);
+  _InformationDatabase(super.executor, this._openingFormat);
+  final int _openingFormat;
   @override
-  int get schemaVersion => _libraryFormat;
+  int get schemaVersion => _openingFormat;
   @override
   Iterable<TableInfo<Table, Object?>> get allTables => const [];
   @override
@@ -1442,7 +1450,7 @@ class _InformationDatabase extends GeneratedDatabase {
       await _backupSchema();
     },
     onUpgrade: (_, from, to) async {
-      if (from < 1 || from > to || to != _libraryFormat) {
+      if (from < 1 || from > to || to != schemaVersion) {
         throw const StorageFailure('unsupported_schema');
       }
       var sourceVersion = from;
@@ -1453,7 +1461,7 @@ class _InformationDatabase extends GeneratedDatabase {
         final marker = await customSelect(
           'SELECT version FROM library_format WHERE singleton=1',
         ).getSingle();
-        if (marker.read<int>('version') == _libraryFormat) return;
+        if (marker.read<int>('version') == schemaVersion) return;
         sourceVersion = marker.read<int>('version');
       }
       await transaction(() async {
@@ -1548,7 +1556,7 @@ class _InformationDatabase extends GeneratedDatabase {
     );
     await customStatement(
       'INSERT INTO library_format(singleton,version) VALUES(1,?) ON CONFLICT(singleton) DO UPDATE SET version=excluded.version WHERE version<excluded.version',
-      [_libraryFormat],
+      [schemaVersion],
     );
   }
 

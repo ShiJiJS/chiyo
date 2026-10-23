@@ -1,0 +1,69 @@
+{
+  "format": 1,
+  "oldReaderSource": "0eb8ece5d56c716bd93ddddb550e45871ec8774a",
+  "complete": true,
+  "scope": "real SQLCipher and old Dart source on macOS; no Windows-native/system/UI acceptance",
+  "phases": [
+    {
+      "name": "old-pub-get",
+      "exit": 0
+    },
+    {
+      "name": "old-compile",
+      "exit": 0
+    },
+    {
+      "name": "portable-tests",
+      "exit": 0
+    }
+  ],
+  "productionLibraryOpened": false,
+  "osKeyStoreUsed": false,
+  "nativeInputExecuted": false,
+  "windowsCIExecuted": false,
+  "oldStorageSourceSha256": "90b02a61fe94be1932873e2353ad6caa26a8cda1500166f9181486309e377977",
+  "oldReaderExecutableSha256": "29a0fabbda7bbc732a96d5131cb87f2ef40a34c177721ce995b671546c42d4a1",
+  "temporaryOldSourceAndBinaryRemoved": true,
+  "focusedStorageChecks": {
+    "passed": 21,
+    "skipped": 1
+  },
+  "storageRegressionChecks": {
+    "passed": 68,
+    "skipped": 0
+  },
+  "analysis": {
+    "package": "info_storage",
+    "fatalInfos": true,
+    "exit": 0
+  },
+  "currentSourceInputs": {
+    "packages/info_storage/lib/attachment_backup.dart": "41adaee34dd768bb6815885293c0cc293c703bdd38bbc4202273333c8db9eff8",
+    "packages/info_storage/lib/backup_publish.dart": "54e6f776f31e4d5a4c166bc9b146cdd6041d661d2a5137709988b708cb87fe68",
+    "packages/info_storage/lib/backup_metadata_budget.dart": "b319cb9c7b4f646ec946e9fe5733dd6c3b1d36f41305e77dcbc04d681efba6a4",
+    "packages/info_storage/lib/credentials_storage.dart": "ebeab9a407a975dda5015200ee423313ec87f3b72121bae556fcf7ce262a47ce",
+    "packages/info_storage/lib/platform_keys.dart": "608034729aa39b4e61bce4bc5e8a18ce6df913adbaa6ef635fbebf0e3daf0686",
+    "packages/info_storage/lib/info_storage.dart": "86f1bb06a2f838199c8756780e9c82c8c05fef21a8fc122401b71bfb01dd3e0f",
+    "packages/info_storage/lib/information_delivery_storage.dart": "b22d68ff47c2148cc3600807ef9439633dd002b8b1514947e24a48ff917b1ae3",
+    "packages/info_storage/lib/backup_credentials.dart": "215a330a6c4478b631150213ac3f32eb81c627b15906c3fec19df24d1a889881",
+    "packages/info_storage/lib/focused_fill_storage.dart": "9e9d5763df8b7221188975eef079711315bf21a47a21cd0600355b592bd7bc16",
+    "packages/info_storage/lib/credential_runtime_storage.dart": "adbc5c4a56cf0039ef731edf8c9565d47f25614b2e317ceacfebdcbe38877a5e",
+    "packages/info_storage/lib/attachment_backup_integration.dart": "1a008f5e77741512259f4549592cbdc6ec87c3bb6be5073e7da4e9034d5d90ce",
+    "packages/info_storage/lib/information_attachments_storage.dart": "31cffa916eccb15a2fd959323834f8dde3eeda66a7f8b7956be5def58b124ffc",
+    "packages/info_storage/lib/backup_history.dart": "ad7d2850054ba601561bd3099223ec9dac729d399c2f2168cfe795493348cc91",
+    "packages/info_storage/lib/information_files_storage.dart": "e6708302c877d2ebaa29c3ec40ee800d1c2a2a96ff0aed9d25c2d2d095aeaf71",
+    "packages/info_storage/lib/backups.dart": "f208a0063978923e8f3be4beb8e8fa444bd2c5ec6e8a71d3299b02f9c8384a9d",
+    "packages/info_storage/test/focused_fill_storage_test.dart": "42845fda68a755c4aaf041e0ac5a6285d47a063cf2aca2e67af67a7e5e0cfac1",
+    "packages/info_storage/test/support/format22_reader.dart": "c4e70bc9b738a07f58f3d2922d363f36e404ea943597b15152e48dd274db8d3e",
+    "scripts/qa/check-macos-focused-format.py": "5e97f43753d8cdcc6819265f964bf32b129dd7bb6704a7c8d06c38b3ebff6c55"
+  },
+  "upstreamReadOnlyCheck": {
+    "mainCommit": "b37f96a089d6d4a0a9f872bd667be0c6b037f975",
+    "mainLibraryFormat": 21,
+    "windowsProductRef": "origin/codex/windows-library-ux",
+    "windowsProductCommit": "4ac428ff",
+    "windowsProductLibraryFormat": 22,
+    "branchWritten": false,
+    "windowsNativeAcceptance": false
+  }
+}
