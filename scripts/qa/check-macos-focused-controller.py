@@ -3,7 +3,7 @@
 
 Never link/instantiate SystemMacFocusEnvironment in the executed binary. This
 does not launch an App, request TCC, inspect a window, or send system input.
-Temporary executables/lock fixtures are removed; keep only a small JSON report.
+Temporary executables/lock fixtures are removed; keep a small report/diagnostic log.
 """
 
 import json

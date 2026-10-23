@@ -1,5 +1,35 @@
 # Mac 首轮可用：剩余验收与交付项核对
 
+## 2026-10-23：私有helper可构建，主人桥已接入Mac工程
+
+继续补 #51 的功能准备：新增私有XPC可执行入口、准确服务Info.plist和独立构建脚本。
+固定Application服务、NSRunLoop及调用者安全会话，不开放通用CLI、Mach服务或环境
+覆盖。构建只接受项目下新目录，编译/本机ad-hoc签名后核对架构、最低系统、系统动态
+依赖及空entitlements；不执行、安装或自动嵌入helper，不使用个人签名证书。
+
+主人桥相关5个共享/客户端Swift文件已加入Runner，并在窗口创建时登记私有通道；
+主App终止时关闭它。此构造仅登记MethodChannel，没有辅助功能、输入权限、签名检查
+或helper连接。AX/投递、文件门、控制器、服务监听和入口均留在独立helper，主App和
+原worker的沙盒设置不变。Dart启动/AgentServer仍不加载或宣告Mac填充能力。
+
+实现提交 `2499197` 的干净helper输入已实际构建为
+`build/macos-adaptation/issue51-helper-package-2`：ARM64，Mach-O最低14.0，构建宿主
+27.0.1，签名与载荷摘要通过，依赖均为系统路径；不声称在14.0运行或实际XPC连接
+通过。精确输入及产物摘要保存在[候选清单](evidence/macos-focused-fill-native-preparation/helper-manifest.json)，
+[检查范围回执](evidence/macos-focused-fill-native-preparation/verification.json)明确标记
+helper未执行、未嵌入App，支持矩阵为空、生产能力关闭。
+
+必要开发检查：17项原生无界面场景、4项目录覆盖/越界保护通过；Dart驱动及已有
+bundle/bootstrap联合20项通过、2项Windows原生条件跳过。候选Swift严格类型检查和
+Runner合并类型检查通过，后者保留既有弃用警告；Xcode工程源清单核查确认系统输入
+实现不进入Runner。它们不是实机辅助功能/锁屏/权限/真实目标验收。
+
+临时编译缓存和测试二进制已移除，第一轮被替代的helper仅移除准确候选体、保留
+清单与日志；当前只保留第二份小型`.xpc`候选，没有新增App/dSYM。固定普通候选23、
+原库/Keychain及恢复材料未动，Windows分支和CI未动，本轮没有computer use。
+尚需受控App内嵌/外层签名接入、有效桌面会话策略、正式格式迁移与后置实机证据，
+不关闭 #51 或修改其他复合验收勾选；GitHub本轮尚未同步。
+
 ## 2026-10-23：补充Mac原生焦点填充候选代码
 
 继续按主人“先适配功能、系统验收后置、暂不computer use”的范围推进 #51：新增

@@ -1,0 +1,52 @@
+{
+  "recordedAt": "2026-10-23T10:58:42.553207+00:00",
+  "sourceCommit": "2499197b5300ce4ace93c19ee9f907ec1c158f5b",
+  "scope": "native implementation/build preparation; no real XPC/AX/system acceptance",
+  "helperManifest": "helper-manifest.json",
+  "candidateDirectory": "build/macos-adaptation/issue51-helper-package-2",
+  "sourceInputHashesMatch": true,
+  "helperPayloadHashesMatch": true,
+  "helperExecuted": false,
+  "controller": {
+    "inputEventsPosted": false,
+    "kind": "headless-native-controller",
+    "passed": 17,
+    "scenarios": [
+      "application identity is exact and bounded",
+      "discovery returns public identity without input or a retained gate",
+      "prepare binds the exact approved path and digest",
+      "gate is nonqueued and close releases it once",
+      "Unicode batches preserve units and private sequence prevents replay",
+      "unknown lease cannot cancel the prepared target",
+      "reject malformed batches before posting",
+      "target changes before input refuse and after a batch preserve partial",
+      "ambiguous posting closes the lease and cannot replay",
+      "unapproved native errors are sanitized",
+      "monotonic expiry and backwards time stop unused batches",
+      "disconnect closes a lease without posting",
+      "slow capture cannot prepare a future target",
+      "close cancels an in-flight capture",
+      "concurrent duplicate batches post once after rechecking",
+      "idle lease automatically releases the global gate",
+      "real private file gate excludes a second instance and refuses aliases"
+    ],
+    "systemAXExecuted": false,
+    "systemAdapterTypechecked": true,
+    "runnerOwnerSourcesTypechecked": true,
+    "systemAXAndServiceSourcesInRunner": false,
+    "temporaryExecutableRemoved": true
+  },
+  "builderDestinationChecks": {
+    "passed": 4
+  },
+  "dartDriverAndBootstrapChecks": {
+    "passed": 20,
+    "skipped": 2,
+    "skipReason": "Windows-native prerequisites"
+  },
+  "realXPCConnectionVerified": false,
+  "systemPermissionsRequested": false,
+  "capabilityEnabled": false,
+  "installedPreviewChanged": false,
+  "windowsCIExecuted": false
+}
