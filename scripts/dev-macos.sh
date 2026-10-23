@@ -21,6 +21,7 @@ Usage: ./scripts/dev-macos.sh <command> [arguments]
   doctor        Show Flutter and native toolchain diagnostics
   check         Analyze and test all Dart packages and desktop widgets
   build         Compile release with fixed GH/AWS tools (requires full Xcode)
+                Optional --with-focused-fill-candidate embeds a disabled XPC candidate
   run           Open the macOS app in debug mode (requires full Xcode)
   bundle <dir>  Compile CLI/hook installation materials into a NEW directory
   flutter ...   Run the project Flutter SDK in your current working directory
@@ -133,11 +134,35 @@ case "$command_name" in
     # Scope architecture selection to this invocation, not Flutter's global
     # preferences. The shipped worker and Dart CLI are ARM64 as well.
     export FLUTTER_MACOS_ARM64_ONLY=true
+    with_focused_fill_candidate=false
+    flutter_arguments=()
+    for argument in "$@"; do
+      if [[ "$argument" == --with-focused-fill-candidate ]]; then
+        if [[ "$command_name" != build ]]; then
+          echo 'The focused-fill candidate option is available for build only.' >&2
+          exit 64
+        fi
+        with_focused_fill_candidate=true
+      else
+        flutter_arguments+=("$argument")
+      fi
+    done
+    # macOS Bash 3.2 treats an empty array as unset with nounset. Preserve an
+    # empty argument list without passing an extra empty string to Flutter.
+    set -- ${flutter_arguments[@]+"${flutter_arguments[@]}"}
     cd "$project_root/apps/desktop"
     if [[ "$command_name" == build ]]; then
       flutter build macos --release --no-pub "$@"
       python3 "$project_root/scripts/bundle-macos-tools.py" \
         "$project_root/apps/desktop/build/macos/Build/Products/Release/info_desktop.app"
+      if [[ "$with_focused_fill_candidate" == true ]]; then
+        python3 "$project_root/scripts/bundle-macos-focused-helper.py" \
+          "$project_root/apps/desktop/build/macos/Build/Products/Release/info_desktop.app" \
+          --with-focused-fill-candidate
+      else
+        python3 "$project_root/scripts/bundle-macos-focused-helper.py" \
+          "$project_root/apps/desktop/build/macos/Build/Products/Release/info_desktop.app"
+      fi
     else
       flutter run -d macos "$@"
     fi

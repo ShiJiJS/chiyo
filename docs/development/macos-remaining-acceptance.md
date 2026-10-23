@@ -1,5 +1,32 @@
 # Mac 首轮可用：剩余验收与交付项核对
 
+## 2026-10-23：候选helper内嵌、外层签名和完整包入口已接入
+
+继续补 #51：`dev-macos.sh build --with-focused-fill-candidate`会在固定GH/AWS工具
+封装后编译/内嵌原生helper，再保留主人entitlements及worker字节/继承声明重新封装
+外层App。当前仅支持本机ad-hoc构建，不降级其他签名；不启动App/helper或请求权限。
+默认构建不含候选；若工作目录曾构建候选，只移除准确登记且字节匹配的旧内容。
+未知或改变的资源保留并报错，不静默删除，也不将未知候选带入默认包。
+
+`package-macos.py`已接同名可选参数，保留原干净源码校验，增加helper同提交/架构/
+载荷及解压后记录检查。候选ZIP用独立版本后缀，manifest明确表示能力关闭及系统
+验收未完成。本轮没有生成完整Flutter产品包，也没有更换固定普通候选23；合成封装
+检查不等于同包运行或实际XPC通信通过。
+
+必要开发检查18项通过：小型合成App/worker和真实helper进行实际内嵌、内外签名、
+默认恢复、重复候选、未知/修改/重定向内容拒绝、归档及中文路径解压；实际Mac Bash
+启动器以Flutter/Python替身验证空参数、空格和候选参数转发。签名检查仅证实封装及
+沙盒声明保留，未执行任何合成程序/helper，没有TCC、Keychain、真实窗口或Windows CI。
+检查结束后全部这轮临时App/XPC/编译目录清理；原独立小型helper候选及证据保留。
+额外覆盖构建根目录本身的别名越界，保留越界/未知内容；
+[输入摘要与结果](evidence/macos-focused-fill-embedding/verification.json)和
+[原始日志](evidence/macos-focused-fill-embedding/checks.txt)保留检查范围，不把签名检查写成
+真实系统权限或运行时沙盒验收。
+
+剩余有效桌面策略、正式格式迁移及后置实机证据仍未完成，生产能力继续关闭；
+不勾选 #51 或其他复合验收条件。详见[Mac填充合同](../design/macos-focused-fill-contract.md)。
+GitHub本轮尚未同步，改动仍仅在Mac分支。
+
 ## 2026-10-23：私有helper可构建，主人桥已接入Mac工程
 
 继续补 #51 的功能准备：新增私有XPC可执行入口、准确服务Info.plist和独立构建脚本。

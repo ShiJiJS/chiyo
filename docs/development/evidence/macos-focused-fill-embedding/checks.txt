@@ -1,0 +1,23 @@
+test_build_root_alias_cannot_grant_access_to_an_outside_app (scripts.qa.test_macos_focused_helper_bundle.EmbeddedCandidateTests) ... ok
+test_default_without_candidate_does_not_modify_the_app (scripts.qa.test_macos_focused_helper_bundle.EmbeddedCandidateTests) ... ok
+test_embedding_and_incremental_default_remove_preserve_sandbox_and_worker (scripts.qa.test_macos_focused_helper_bundle.EmbeddedCandidateTests) ... ok
+test_modified_recorded_payload_is_not_deleted (scripts.qa.test_macos_focused_helper_bundle.EmbeddedCandidateTests) ... ok
+test_outside_build_app_is_refused_before_any_changes (scripts.qa.test_macos_focused_helper_bundle.EmbeddedCandidateTests) ... ok
+test_package_outputs_under_build_can_be_inspected_but_not_mutated (scripts.qa.test_macos_focused_helper_bundle.EmbeddedCandidateTests) ... ok
+test_repeated_candidate_build_keeps_one_helper (scripts.qa.test_macos_focused_helper_bundle.EmbeddedCandidateTests) ... ok
+test_unknown_resources_and_redirected_service_directory_are_preserved (scripts.qa.test_macos_focused_helper_bundle.EmbeddedCandidateTests) ... ok
+test_unmanaged_helper_is_preserved_for_default_and_candidate_modes (scripts.qa.test_macos_focused_helper_bundle.EmbeddedCandidateTests) ... ok
+test_candidate_option_is_consumed_and_other_arguments_keep_spaces (scripts.qa.test_macos_build_arguments.MacBuildArgumentsTests) ... ok
+test_empty_arguments_work_on_macos_bash_without_extra_empty_string (scripts.qa.test_macos_build_arguments.MacBuildArgumentsTests) ... ok
+test_run_preserves_ordinary_arguments_without_packaging (scripts.qa.test_macos_build_arguments.MacBuildArgumentsTests) ... ok
+test_run_rejects_candidate_flag_before_calling_flutter (scripts.qa.test_macos_build_arguments.MacBuildArgumentsTests) ... ok
+test_dangling_link_and_outside_path_are_preserved (scripts.qa.test_macos_focused_helper_builder.CandidateDestinationTests) ... ok
+test_existing_directory_and_contents_are_preserved (scripts.qa.test_macos_focused_helper_builder.CandidateDestinationTests) ... ok
+test_output_root_itself_cannot_be_redirected (scripts.qa.test_macos_focused_helper_builder.CandidateDestinationTests) ... ok
+test_symlink_parent_cannot_redirect_a_new_output (scripts.qa.test_macos_focused_helper_builder.CandidateDestinationTests) ... ok
+test_unicode_new_candidate_is_allowed_but_direct_app_output_is_not (scripts.qa.test_macos_focused_helper_builder.CandidateDestinationTests) ... ok
+
+----------------------------------------------------------------------
+Ran 18 tests in 12.814s
+
+OK

@@ -58,6 +58,20 @@ class CandidateDestinationTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 MODULE.output_path(MODULE.OUTPUT_ROOT / ("candidate." + suffix))
 
+    def test_output_root_itself_cannot_be_redirected(self):
+        original = MODULE.OUTPUT_ROOT
+        outside = self.root / "outside"
+        outside.mkdir()
+        alias = self.root / "alias"
+        alias.symlink_to(outside, target_is_directory=True)
+        try:
+            MODULE.OUTPUT_ROOT = alias
+            with self.assertRaises(ValueError):
+                MODULE.output_path(alias / "candidate")
+            self.assertEqual(list(outside.iterdir()), [])
+        finally:
+            MODULE.OUTPUT_ROOT = original
+
 
 if __name__ == "__main__":
     unittest.main()

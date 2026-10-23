@@ -144,13 +144,51 @@ python3 scripts/build-macos-focused-helper.py build/macos-adaptation/focus-helpe
 helper候选的签名没有entitlements；这不替代真实launchd沙盒与TCC归属检查，主应用
 和worker仍保留各自的沙盒声明。它不进入默认发行包，不宣告能力、不注册常驻服务。
 
+### 受控App内嵌与可选候选包
+
+`scripts/bundle-macos-focused-helper.py`已接到`dev-macos.sh build`：固定工具封装完成后，
+默认检查并移除先前由本工具登记、且全部字节仍匹配的候选helper；不存在时不改App。
+未知helper、资源文件、被修改载荷或重定向目录均保留并报错，不能按名字覆盖或删除。
+只允许修改`apps/desktop/build/macos/Build/Products`或`build/macos-adaptation`下的构建App；完整包和解压
+目录仅允许只读检查，不处理固定普通安装或`/Applications`中的应用。
+
+显式构建候选（只改变封装内容，不改变能力、会话策略或库格式）：
+
+```sh
+./scripts/dev-macos.sh build --with-focused-fill-candidate
+python3 scripts/package-macos.py build/macos-adaptation/package-candidate-new --with-focused-fill-candidate
+```
+
+候选模式先在临时目录编译并签名独立helper，核对固定3份载荷和服务Info，再复制到
+`Contents/XPCServices`、登记`Contents/Resources/FocusedFill/manifest.json`。最后仅对
+外层App重新签名，保留原entitlements/requirements/flags/runtime；不使用deep签名
+重签worker或第三方代码。封装前后核对主人沙盒声明、worker继承声明及worker字节
+保持一致。只接受当前本机ad-hoc开发签名，不把Developer ID产物降成ad-hoc。
+
+完整包入口继续执行原固定干净源码检查；候选helper必须来自同一提交且输入干净。
+它被加入主要ARM64程序清单，解压后再检查原生候选记录与载荷。候选版本/ZIP增加
+`-focused-fill-candidate`后缀，manifest明确标为`capabilityEnabled:false`及
+`systemAcceptance:false`，不能与普通发行包或已支持Mac填充混同。默认完整包仍不含
+候选；从候选切回默认的增量构建会按准确记录移除旧内容，未知内容不悄悄带入包。
+
+开发检查使用小型合成App/worker和真实helper二进制，实际执行内外签名核查、候选
+替换、恢复默认、归档/中文路径解压和签名/记录复核；没有执行任一合成程序或helper。
+另以惰性的Flutter/Python替身核对实际Mac Bash启动器的参数转发，包含空参数、空格
+及候选参数只在build消费；不是一次完整Flutter产品构建。所有这轮App/XPC/编译
+夹具在检查后删除，未触碰普通预览、数据库、Keychain、TCC或系统配置。
+本轮18项构建/目录/参数检查的输入摘要和原始日志见
+[回执](../development/evidence/macos-focused-fill-embedding/verification.json)与
+[日志](../development/evidence/macos-focused-fill-embedding/checks.txt)。构建根目录本身
+也不能通过符号链接转到工作区外；候选构建和App内嵌均在修改前拒绝这类重定向。
+
 上述系统Adapter的主人侧桌面策略默认拒绝，当前支持矩阵仍为空。控制台、登录完成
 和受保护数据三种公开事实只是必要条件；没有Agent参数、配置开关或环境变量可以
 将其自行改成“已解锁”。睡眠、屏幕休眠、会话退出活动及受保护数据不可用通知只
 使已有目标失效，通知消失/恢复也不恢复旧目标，不把通知当启动时就绪证明。
 
-尚需把准确候选helper接入受控App封装及外层重签、有效会话策略、真实权限归属与目标
-支持证据，再进行格式迁移及生产能力连接。当前私有签名要求已编译并有独立包签名检查，
+尚需有效会话策略、真实权限归属与目标支持证据，再进行格式迁移及生产能力连接。
+当前已完成可选内嵌/外层签名流程及合成封装检查；完整Flutter候选包尚未在本轮生成。
+私有签名要求已编译并有独立包/合成嵌套签名检查，
 没有在真实XPC连接上证明ad-hoc产物被系统接受；不能把“代码中设置了要求”写成
 签名/权限验收通过。不同版本不自动重连恢复输入，旧helper可能需明确退出后重启。
 
@@ -206,7 +244,7 @@ helper候选的签名没有entitlements；这不替代真实launchd沙盒与TCC�
 | 公共身份模型和本机文件检查 | 本轮实现 | 保持Windows线协议与大小写语义；Mac路径精确匹配。 |
 | 持久化兼容保护 | 本轮实现 | 当前格式继续拒绝Mac填充记录；正式能力前增加格式迁移。 |
 | 原生实现方案 | 有独立候选源码，尚未冻结全部依据 | 核对私有XPC签名/权限归属、实际连接及桌面就绪依据。 |
-| 目标/投递实现 | helper可独立构建，主人桥已接入工程，未接通生产 | 补受控App内嵌封装和会话策略，再用合成目标验收，不访问个人密码。 |
+| 目标/投递实现 | helper、主人桥及可选内嵌/打包流程已实现，未接通生产 | 补有效会话策略、格式迁移和完整产品/真实目标证据，不访问个人密码。 |
 | 正式宣告 | 关闭 | 实现、签名产物、权限/锁屏/目标证据齐备后再更新capabilities、Skill和UI。 |
 
 必要开发检查：`scripts/qa/check-macos-focused-controller.py`对全部候选Swift源码

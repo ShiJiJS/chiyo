@@ -38,8 +38,10 @@ def output_path(requested):
     # dangling symlink. Never accept an existing output, even an empty directory.
     if requested.exists() or requested.is_symlink():
         raise ValueError("Output already exists; choose a NEW directory")
+    if OUTPUT_ROOT.resolve() != OUTPUT_ROOT:
+        raise ValueError("Candidate output root must not be redirected")
     resolved = requested.resolve()
-    relative = resolved.relative_to(OUTPUT_ROOT.resolve())
+    relative = resolved.relative_to(OUTPUT_ROOT)
     if not relative.parts or resolved.suffix.lower() in {".app", ".xpc", ".dsym"}:
         raise ValueError("Output must be a new candidate directory under build/macos-adaptation")
     return resolved

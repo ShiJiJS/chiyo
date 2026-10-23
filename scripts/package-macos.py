@@ -9,6 +9,7 @@ import argparse
 import ctypes
 import gzip
 import hashlib
+import importlib.util
 import json
 import os
 from pathlib import Path
@@ -26,6 +27,9 @@ SDK = ROOT / ".tools/flutter"
 LAUNCHER = str(ROOT / "scripts/dev-macos.sh")
 MACHO = {b"\xcf\xfa\xed\xfe", b"\xfe\xed\xfa\xcf", b"\xca\xfe\xba\xbe",
          b"\xbe\xba\xfe\xca", b"\xca\xfe\xba\xbf", b"\xbf\xba\xfe\xca"}
+FOCUS_SPEC = importlib.util.spec_from_file_location("focused_bundle", ROOT / "scripts/bundle-macos-focused-helper.py")
+FOCUS_BUNDLE = importlib.util.module_from_spec(FOCUS_SPEC)
+FOCUS_SPEC.loader.exec_module(FOCUS_BUNDLE)
 
 
 def digest(path):
@@ -135,6 +139,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("output", type=Path, help="NEW directory under this checkout's build/")
     parser.add_argument("--check", action="store_true", help="Also run all four source test suites")
+    parser.add_argument("--with-focused-fill-candidate", action="store_true",
+                        help="Embed the disabled native XPC candidate; no permission, input or capability activation")
     args = parser.parse_args()
     if sys.platform != "darwin" or platform.machine() != "arm64":
         parser.error("Build on ARM64 macOS")
@@ -167,13 +173,19 @@ def main():
     try:
         if args.check:
             run("source-checks", [LAUNCHER, "check"], timeout=1200)
-        run("release-build", [LAUNCHER, "build"])
+        build_arguments = [LAUNCHER, "build"]
+        if args.with_focused_fill_candidate:
+            build_arguments.append("--with-focused-fill-candidate")
+        run("release-build", build_arguments)
         clean_source(commit)
         payload = output / "AgentInfoManage"
         app = payload / "app/info_desktop.app"
         app.parent.mkdir(parents=True)
         shutil.copytree(ROOT / "apps/desktop/build/macos/Build/Products/Release/info_desktop.app",
                         app, symlinks=True)
+        focus = FOCUS_BUNDLE.inspect(app)
+        if (focus is not None) != args.with_focused_fill_candidate:
+            raise RuntimeError("Focused-fill candidate state differs from the requested package")
         cli = payload / "cli"
         cli.mkdir()
         for entry, name in [
@@ -243,6 +255,10 @@ def main():
             *[cli / name for name in ["info", "info-codex", "info-codex-hook", "info-runtime-worker", "info-prepare-codex"]],
             payload / "diagnostics/bin/macos-storage-check",
         ]
+        if focus is not None:
+            if focus["helper"]["sourceCommit"] != commit or focus["helper"]["sourceInputsDirty"]:
+                raise RuntimeError("Focused-fill helper differs from the fixed clean source")
+            primary.append(app / FOCUS_BUNDLE.HELPER / "Contents/MacOS/AgentInfoFocusedFill")
         info = plistlib.loads((app / "Contents/Info.plist").read_bytes())
         minimum = os_version(info["LSMinimumSystemVersion"])
         architecture = []
@@ -285,6 +301,8 @@ def main():
         cipher = app / "Contents/Frameworks/sqlcipher.framework/Versions/A/sqlcipher"
         version = re.search(r"^version:\s*(.+)$", (ROOT / "apps/desktop/pubspec.yaml").read_text(), re.M).group(1)
         release = f"{version}-mac-dev.{commit[:12]}"
+        if focus is not None:
+            release += "-focused-fill-candidate"
         readme = (ROOT / "integrations/macos/README.md").read_text()
         for token, value in {
             "@RELEASE@": release, "@SOURCE_COMMIT@": commit,
@@ -310,6 +328,9 @@ def main():
             "credentialTools": tools_manifest["tools"],
             "machO": architecture, "files": inventory(payload),
         }
+        if focus is not None:
+            manifest["focusedFillCandidate"] = {"included": True, "capabilityEnabled": False,
+                "systemAcceptance": False, "helper": focus["helper"]}
         clean_source(commit)
         (payload / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
         archive = output / f"agent-info-manage-{release}-macos-arm64.zip"
@@ -323,6 +344,8 @@ def main():
             raise RuntimeError("Extracted bytes, permissions or symlinks differ")
         if (final / "manifest.json").read_bytes() != (payload / "manifest.json").read_bytes():
             raise RuntimeError("Extracted manifest differs")
+        if FOCUS_BUNDLE.inspect(final / "app/info_desktop.app") != focus:
+            raise RuntimeError("Extracted focused-fill candidate differs")
         facts["shippedDocumentationLinks"] = verify_documentation(final)
         run("extracted-app-signature", ["/usr/bin/codesign", "--verify", "--deep", "--strict",
                                        str(final / "app/info_desktop.app")])
