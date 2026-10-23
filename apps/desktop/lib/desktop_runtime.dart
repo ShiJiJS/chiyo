@@ -4,7 +4,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:info_core/info_core.dart';
 
-enum DesktopEvent { closeWindow, openApprovals, quit, availabilityChanged }
+enum DesktopEvent {
+  closeWindow,
+  openApprovals,
+  openSettings,
+  quit,
+  availabilityChanged,
+  resumed,
+}
 
 enum NotificationAvailability { enabled, notEnabled, denied, unavailable }
 
@@ -64,8 +71,10 @@ class NativeDesktopPlatform implements DesktopPlatform {
       final event = switch (call.method) {
         'close' => DesktopEvent.closeWindow,
         'open' => DesktopEvent.openApprovals,
+        'openSettings' => DesktopEvent.openSettings,
         'quit' => DesktopEvent.quit,
         'availability' => DesktopEvent.availabilityChanged,
+        'resume' => DesktopEvent.resumed,
         _ => null,
       };
       if (event != null) await onEvent(event);
@@ -115,6 +124,7 @@ class DesktopRuntime extends ChangeNotifier {
   final Future<void> Function() closeRepository;
   DesktopAvailability availability = DesktopAvailability.unavailable;
   int openApprovalsRevision = 0;
+  int openSettingsRevision = 0;
   String? openRequestId;
   bool quitting = false;
   bool shutdownFailed = false;
@@ -130,6 +140,7 @@ class DesktopRuntime extends ChangeNotifier {
   int runtimeMaterialChecks = 0;
   Future<void>? _quit;
   Future<void>? _stop;
+  Future<void>? _resuming;
   bool _stopped = false;
   // Native termination may fail after the repository is already closed. The
   // launcher must keep repository-backed widgets unmounted in that state.
@@ -290,13 +301,41 @@ class DesktopRuntime extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> _refreshAvailability() async {
+    DesktopAvailability current;
+    try {
+      current = await platform.readAvailability();
+    } on Object {
+      current = DesktopAvailability.unavailable;
+    }
+    if (quitting || _stopped) return;
+    availability = current;
+    notifyListeners();
+  }
+
+  Future<void> _resumeDesktop() async {
+    try {
+      // Wake/session events may arrive before native initialization replies.
+      await _ready.future;
+      if (quitting || _stopped) return;
+      // Reconcile expired material immediately, in the same queue as periodic
+      // maintenance. No new session, extended grant or repeated notification.
+      await _maintain();
+      if (quitting || _stopped) return;
+      await _refreshAvailability();
+    } finally {
+      _resuming = null;
+    }
+  }
+
   Future<void> handleEvent(DesktopEvent event) async {
     if (_stopped) {
       // Native close interception can outlive failed-startup cleanup. This
       // runtime no longer owns data, but must keep the error window closable.
       if (event == DesktopEvent.closeWindow || event == DesktopEvent.quit) {
         await platform.terminate();
-      } else if (event == DesktopEvent.openApprovals) {
+      } else if (event == DesktopEvent.openApprovals ||
+          event == DesktopEvent.openSettings) {
         await platform.showWindow();
       }
       return;
@@ -328,11 +367,16 @@ class DesktopRuntime extends ChangeNotifier {
         notifyListeners();
       case DesktopEvent.availabilityChanged:
         // Native code restores a hidden window before reporting entry failure.
-        try {
-          availability = await platform.readAvailability();
-        } on Object {
-          availability = DesktopAvailability.unavailable;
-        }
+        await _ready.future;
+        if (quitting || _stopped) return;
+        await _refreshAvailability();
+      case DesktopEvent.resumed:
+        // Wake and active-session notifications often arrive together.
+        await (_resuming ??= _resumeDesktop());
+      case DesktopEvent.openSettings:
+        await platform.showWindow();
+        if (quitting || _stopped) return;
+        openSettingsRevision++;
         notifyListeners();
       case DesktopEvent.quit:
         break;

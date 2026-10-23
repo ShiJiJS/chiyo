@@ -20,6 +20,9 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
   private var informationStaging: [String: URL] = [:]
   private var toolAccess: ToolAccessStore?
   private var choosingToolDirectory = false
+  private var lifecycleObservers: [(NotificationCenter, NSObjectProtocol)] = []
+
+  deinit { removeLifecycleObservers() }
 
   override func awakeFromNib() {
     let flutterViewController = FlutterViewController()
@@ -201,6 +204,7 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
           self.desktopReady = true
           self.delegate = self
           UNUserNotificationCenter.current().delegate = self
+          self.observeDesktopLifecycle()
         }
         self.readAvailability(result)
       case "availability": self.readAvailability(result)
@@ -236,6 +240,7 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
       case "terminate":
         self.textFieldAccessibility?.update([] as [[String: Any]])
         self.desktopReady = false
+        self.removeLifecycleObservers()
         self.statusItemVisibility?.invalidate()
         self.statusItemVisibility = nil
         if let item = self.statusItem { NSStatusBar.system.removeStatusItem(item) }
@@ -271,6 +276,29 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
         result(["tray": self.statusEntryAvailable, "notifications": notificationState])
       }
     }
+  }
+
+  private func observeDesktopLifecycle() {
+    guard lifecycleObservers.isEmpty else { return }
+    // Public workspace events also cover resuming while the app stays hidden.
+    // Merely returning to the app refreshes permission changes made in Settings.
+    let events: [(NotificationCenter, Notification.Name, String)] = [
+      (NSWorkspace.shared.notificationCenter, NSWorkspace.didWakeNotification, "resume"),
+      (NSWorkspace.shared.notificationCenter, NSWorkspace.sessionDidBecomeActiveNotification, "resume"),
+      (NotificationCenter.default, NSApplication.didBecomeActiveNotification, "availability"),
+    ]
+    for (center, name, method) in events {
+      let observer = center.addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in
+        guard let self, self.desktopReady else { return }
+        self.desktopChannel?.invokeMethod(method, arguments: nil)
+      }
+      lifecycleObservers.append((center, observer))
+    }
+  }
+
+  private func removeLifecycleObservers() {
+    for (center, observer) in lifecycleObservers { center.removeObserver(observer) }
+    lifecycleObservers.removeAll()
   }
 
   func windowShouldClose(_ sender: NSWindow) -> Bool {
@@ -355,6 +383,14 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
   @objc func openApprovals() {
     showApprovalsWindow()
     desktopChannel?.invokeMethod("open", arguments: nil)
+  }
+
+  var canOpenSettings: Bool { desktopReady && attachedSheet == nil }
+
+  func openSettings() {
+    guard canOpenSettings else { return }
+    showApprovalsWindow()
+    desktopChannel?.invokeMethod("openSettings", arguments: nil)
   }
 
   private func routeQuitMenu(in menu: NSMenu) {
