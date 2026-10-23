@@ -50,6 +50,7 @@ abstract interface class DesktopNavigationPlatform {
 
 class NativeDesktopPlatform
     implements DesktopPlatform, DesktopNavigationPlatform {
+  Future<void> Function()? commitAppControlExit;
   @override
   String? openedRequestId;
   static const _channel = MethodChannel('agent_info_manage/desktop');
@@ -115,7 +116,15 @@ class NativeDesktopPlatform
   Future<DesktopAvailability> readAvailability() async =>
       _decode(await _channel.invokeMethod<Object?>('availability'));
   @override
-  Future<void> terminate() => _channel.invokeMethod<void>('terminate');
+  Future<void> terminate() async {
+    try {
+      await commitAppControlExit?.call().timeout(const Duration(seconds: 2));
+    } on Object {
+      // An unavailable control receipt cannot prevent the owner from quitting.
+      // CLI must then leave the process exit unconfirmed instead of inventing it.
+    }
+    await _channel.invokeMethod<void>('terminate');
+  }
 
   @override
   Future<void> setNavigationEnabled(bool enabled) async {

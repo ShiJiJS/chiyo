@@ -33,8 +33,10 @@ void main() {
     ]);
     expect(
       result.output['status'],
-      Platform.isWindows ? 'target_mismatch' : 'unsupported_platform',
+      Platform.isWindows || Platform.isMacOS
+          ? 'target_mismatch'
+          : 'unsupported_platform',
     );
-    expect(result.exitCode, Platform.isWindows ? 75 : 69);
+    expect(result.exitCode, Platform.isWindows || Platform.isMacOS ? 75 : 69);
   });
 }

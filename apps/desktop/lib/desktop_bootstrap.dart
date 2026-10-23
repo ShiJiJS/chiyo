@@ -5,6 +5,7 @@ import 'package:info_cli/credential_execution_host.dart';
 import 'package:info_cli/macos_bundled_tools.dart';
 import 'package:info_core/agent_server.dart';
 import 'package:info_core/info_core.dart';
+import 'package:info_core/macos_desktop_control.dart';
 import 'package:info_storage/info_storage.dart';
 import 'desktop_runtime.dart';
 import 'bundled_focused_fill.dart';
@@ -30,6 +31,7 @@ class DesktopBootstrap extends ChangeNotifier {
     this.port = 47125,
     this.credentialWorkerExecutable,
     this.openLibraryWithKeyAccess,
+    this.openAppControl,
   });
   final Future<DesktopLibrary> Function() openLibrary;
 
@@ -38,6 +40,12 @@ class DesktopBootstrap extends ChangeNotifier {
   final DesktopPlatform platform;
   final int port;
   final String? credentialWorkerExecutable;
+  final Future<MacDesktopControlHost> Function(
+    String Function() state,
+    Future<void> Function() quit,
+  )?
+  openAppControl;
+  MacDesktopControlHost? _appControl;
   DesktopStartupState state = DesktopStartupState.idle;
   DesktopLibrary? library;
   DesktopRuntime? runtime;
@@ -93,6 +101,20 @@ class DesktopBootstrap extends ChangeNotifier {
       // Install the lifetime entry before opening data. A failed key/open must
       // still be closable, and a quit during startup waits for owned work.
       await platform.initialize(_handleStartupEvent);
+      if (_appControl == null && openAppControl != null) {
+        try {
+          _appControl = await openAppControl!(
+            _controlState,
+            () => _handleStartupEvent(DesktopEvent.quit),
+          );
+          if (platform case final NativeDesktopPlatform native) {
+            native.commitAppControlExit = _appControl!.commitExit;
+          }
+        } on Object {
+          // Lifetime control is optional. A stale/private registry failure
+          // must not stop the information library or erase its old record.
+        }
+      }
       await _release();
       if (_keyAccessQuitRequested) {
         state = DesktopStartupState.failed;
@@ -231,6 +253,18 @@ class DesktopBootstrap extends ChangeNotifier {
     } else if (event == DesktopEvent.openApprovals) {
       await platform.showWindow();
     }
+  }
+
+  String _controlState() {
+    if (cleanupPending || runtime?.shutdownFailed == true) {
+      return 'shutdown_failed';
+    }
+    if (_keyAccessQuitRequested || runtime?.quitting == true) return 'exiting';
+    return switch (state) {
+      DesktopStartupState.ready => 'running',
+      DesktopStartupState.failed => 'startup_failed',
+      _ => 'starting',
+    };
   }
 
   Future<void> _release() async {
