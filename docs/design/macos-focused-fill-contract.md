@@ -70,7 +70,8 @@ AX调用或给继承沙盒的worker增加代码，不能据此声称已经获得
 候选方案是在App内放置仅负责填充的私有XPC Module，让它持有系统控制许可；主应用
 继续负责库、授权和审计。Apple的XPC模型支持独立权限和进程生命周期，但不能据此
 推断本项目ad-hoc签名、辅助功能许可归属或权限持久化已可用。这些必须用准确签名
-产物确认。当前没有打包、启动或自动注册新的helper，没有改变现有entitlements。
+产物确认。当前已能构建独立候选XPC包，尚未嵌入/启动新的helper，没有改变主应用和
+现有worker的entitlements，也没有注册常驻服务。
 [Apple XPC结构与生命周期](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingXPCServices.html)。
 
 候选XPC实现必须满足：
@@ -93,8 +94,11 @@ AX调用或给继承沙盒的worker增加代码，不能据此声称已经获得
 
 ### 已补的独立候选代码
 
-代码位于 `apps/desktop/macos/focused_input/`；没有加入Runner的Xcode源文件列表，
-没有新增默认XPC打包、entitlements、常驻登记或权限请求。它不是可用能力的宣告。
+代码位于 `apps/desktop/macos/focused_input/`。共享合同、内核进程身份、XPC身份/协议、
+主人客户端和Flutter桥这5个源文件已加入Runner目标，窗口创建时仅登记私有MethodChannel，
+终止时关闭当前连接。构造不校验签名、不创建XPC连接、不访问AX或请求权限；Dart主
+启动仍不加载Mac驱动。系统AX/投递、控制器、文件门、服务监听及可执行入口均不在
+Runner目标，继续只在独立helper编译。它不是可用能力的宣告。
 
 - `FocusedFillController.swift`：发现/准备只处理元数据，短时租约固定实际目标；
   默认60秒自动失效并释放用户级串行门。私有批次序号阻止重复RPC再次投递，同内容
@@ -108,7 +112,9 @@ AX调用或给继承沙盒的worker增加代码，不能据此声称已经获得
   不能据此承诺所有AppKit密码框兼容。AX单次消息最多0.15秒，一轮观察有2秒预算；
   文件流式摘要同样受预算约束。每批最多16个UTF-16单元，以定向CGEvent down/up投递；
   最后复核后再次确认连接仍活动，不清空、不激活、不提交，也不读取目标结果。
-- `FocusedFillXPC.swift`：私有、固定服务名协议；从封装包检查两侧签名、规范路径、
+- `FocusedFillContract.swift` / `FocusProcessIdentity.swift`：公共本机DTO、内部Interface
+  及当前用户/内核创建时间/程序路径核查，供两侧共用，不包含AX或系统输入。
+- `FocusedFillXPC.swift` / `FocusedFillXPCService.swift`：私有、固定服务名协议；从封装包检查两侧签名、规范路径、
   原生架构CodeDirectory摘要并核对当前运行代码，用准确cdhash要求在resume前双向绑定
   XPC peer；不以自报PID或bundle ID替代代码认证。根进程内核身份、退出观察与连接
   失效共同关闭该连接的租约；慢主线程队列不保留等待未来焦点的调用。
@@ -119,14 +125,32 @@ AX调用或给继承沙盒的worker增加代码，不能据此声称已经获得
   只有有界小端UTF-16字节跨私有MethodChannel，超时/畸形发送回复变unknown并关闭，
   不自动重发。主启动入口没有加载它。可变字节尽力清零，不声称Swift/Dart、平台
   编解码及系统输入对象的所有内存副本都能可靠擦除。
+- `ServiceMain.swift` / `ServiceInfo.plist`：仅在准确封装包及运行身份核查成功后，保留
+  listener delegate并进入私有服务循环；启动失败终止，不退回公开监听或通用CLI。
+  固定`XPC!`类型、Application服务、NSRunLoop及加入调用者安全会话；不声明Mach
+  服务、环境覆盖或新的钥匙串访问范围。结构依据[Apple XPC说明](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingXPCServices.html)
+  和本机Xcode模板；加入同一安全会话不等于获得辅助功能、系统输入或资料库访问。
+
+独立构建命令（不安装、不嵌入、不启动）：
+
+```sh
+python3 scripts/build-macos-focused-helper.py build/macos-adaptation/focus-helper-candidate-new
+```
+
+只接受项目`build/macos-adaptation`下的新目录；既有输出、越界/符号链接转向及直接App
+输出均拒绝，不覆盖未知文件。构建使用固定源码、ARM64/macOS14.0、优化及警告视为
+错误，生成本机ad-hoc签名`.xpc`，再检查签名、架构、Mach-O最低系统和仅系统动态
+依赖；输出源码摘要、载荷摘要、阶段日志和manifest。临时编译模块缓存自动移除。
+helper候选的签名没有entitlements；这不替代真实launchd沙盒与TCC归属检查，主应用
+和worker仍保留各自的沙盒声明。它不进入默认发行包，不宣告能力、不注册常驻服务。
 
 上述系统Adapter的主人侧桌面策略默认拒绝，当前支持矩阵仍为空。控制台、登录完成
 和受保护数据三种公开事实只是必要条件；没有Agent参数、配置开关或环境变量可以
 将其自行改成“已解锁”。睡眠、屏幕休眠、会话退出活动及受保护数据不可用通知只
 使已有目标失效，通知消失/恢复也不恢复旧目标，不把通知当启动时就绪证明。
 
-尚需签名XPC可执行入口/准确封装和原生桥注册、有效会话策略、真实权限归属与目标
-支持证据，再进行格式迁移及生产能力连接。当前私有签名要求只完成SDK类型检查，
+尚需把准确候选helper接入受控App封装及外层重签、有效会话策略、真实权限归属与目标
+支持证据，再进行格式迁移及生产能力连接。当前私有签名要求已编译并有独立包签名检查，
 没有在真实XPC连接上证明ad-hoc产物被系统接受；不能把“代码中设置了要求”写成
 签名/权限验收通过。不同版本不自动重连恢复输入，旧helper可能需明确退出后重启。
 
@@ -182,15 +206,19 @@ AX调用或给继承沙盒的worker增加代码，不能据此声称已经获得
 | 公共身份模型和本机文件检查 | 本轮实现 | 保持Windows线协议与大小写语义；Mac路径精确匹配。 |
 | 持久化兼容保护 | 本轮实现 | 当前格式继续拒绝Mac填充记录；正式能力前增加格式迁移。 |
 | 原生实现方案 | 有独立候选源码，尚未冻结全部依据 | 核对私有XPC签名/权限归属、实际连接及桌面就绪依据。 |
-| 目标/投递实现 | 候选代码及Dart桥接已补，未接通生产 | 补准确helper入口/封装和会话策略，再用合成目标验收，不访问个人密码。 |
+| 目标/投递实现 | helper可独立构建，主人桥已接入工程，未接通生产 | 补受控App内嵌封装和会话策略，再用合成目标验收，不访问个人密码。 |
 | 正式宣告 | 关闭 | 实现、签名产物、权限/锁屏/目标证据齐备后再更新capabilities、Skill和UI。 |
 
 必要开发检查：`scripts/qa/check-macos-focused-controller.py`对全部候选Swift源码
 进行ARM64/macOS14.0类型检查（警告视为错误），执行17项无界面控制器/私有文件门
 场景；执行程序只包含Foundation/Darwin和受控环境，不链接或运行系统AX Adapter。
 另11项Dart MethodChannel检查覆盖发现、准确身份、字节批次、并发、超时/迟到回复、
-异常终态和关闭；严格分析通过。它们不是实际XPC、系统权限或真实密码目标验收。
-脚本删除自建测试二进制和锁目录，只保留小JSON回执，不生成App/dSYM。
+异常终态和关闭；与已有bundle/bootstrap检查联合运行共20项通过、2项Windows原生
+条件跳过，Mac能力仍关闭，不能借已配置driver宣告支持。4项构建目录保护检查通过。
+Runner源文件及主人桥共同类型检查通过，保留已有弃用警告；Xcode源文件清单核查确认
+系统AX/服务实现不进入Runner。独立XPC候选成功编译及签名检查；这些不是实际XPC
+连接、系统权限或真实密码目标验收。检查脚本删除自建执行二进制和锁目录；独立构建
+只保留小型候选`.xpc`及清单/日志，不生成App/dSYM。
 
 本轮没有系统权限调用、helper启动、屏幕操作或原生输入。
 按#51原要求，第一条复合验收尚不能勾选，不能把公共模型和元数据回归算真实填充完成。
