@@ -17,8 +17,13 @@ class AppDelegate: FlutterAppDelegate, NSMenuItemValidation {
     authorizationWindow?.openSettings()
   }
 
+  @IBAction func searchApprovals(_ sender: Any?) {
+    authorizationWindow?.searchApprovals()
+  }
+
   func validateMenuItem(_ menuItem: NSMenuItem) -> Bool {
-    if menuItem.action == #selector(openSettings(_:)) {
+    if menuItem.action == #selector(openSettings(_:)) ||
+        menuItem.action == #selector(searchApprovals(_:)) {
       return authorizationWindow?.canOpenSettings ?? false
     }
     return true

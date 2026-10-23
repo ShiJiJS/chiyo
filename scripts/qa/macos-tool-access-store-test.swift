@@ -183,6 +183,46 @@ private struct Probe {
       try check(rows(store!).last!["available"] as? Bool == false, "missing directory accepted")
       try check(scopes.active == 1, "missing scope not released")
     }
+    try test("refresh restores saved access after a transient disconnect without rewriting ranges") {
+      let original = try Data(contentsOf: archive)
+      let before = rows(store!)
+      let permissions = scopes.permissions
+      try fm.createDirectory(at: second, withIntermediateDirectories: false)
+      let restored = rows(store!)
+      try check(restored.last!["available"] as? Bool == true && scopes.active == 2,
+                "reconnected bookmark was not retried")
+      try check(restored.last!["id"] as? String == before.last!["id"] as? String,
+                "refresh changed directory identity")
+      try check(restored.last!["permission"] as? String == before.last!["permission"] as? String,
+                "refresh broadened saved range")
+      let starts = scopes.starts
+      for _ in 0..<5 { _ = rows(store!) }
+      try check(scopes.starts == starts && scopes.active == 2, "refresh leaked scope references")
+      try check(try Data(contentsOf: archive) == original && scopes.permissions == permissions,
+                "refresh rewrote or recreated a bookmark")
+    }
+    try test("startup-unavailable bookmarks recover on refresh but stale bookmarks still require selection") {
+      store = nil
+      let original = try Data(contentsOf: archive)
+      let permissions = scopes.permissions
+      scopes.denied = true
+      store = ToolAccessStore(file: archive, scopes: scopes)
+      try check(rows(store!).allSatisfy { $0["available"] as? Bool == false }, "denied accepted")
+      scopes.denied = false
+      try check(rows(store!).allSatisfy { $0["available"] as? Bool == true }, "startup access not retried")
+      store = nil
+      scopes.stale = true
+      store = ToolAccessStore(file: archive, scopes: scopes)
+      for _ in 0..<3 {
+        try check(rows(store!).allSatisfy { $0["available"] as? Bool == false }, "stale accepted on refresh")
+      }
+      try check(scopes.active == 0, "stale activated a scope")
+      try check(try Data(contentsOf: archive) == original && scopes.permissions == permissions,
+                "retry recreated bookmarks or changed saved ranges")
+      store = nil
+      scopes.stale = false
+      store = ToolAccessStore(file: archive, scopes: scopes)
+    }
     try test("forget persists across reopen without deleting selected files") {
       for entry in rows(store!) { try store!.forget(entry["id"] as! String) }
       try check(scopes.active == 0, "forget leaked scope")

@@ -22,6 +22,7 @@ void main() {
         closeRepository: () async {},
       );
       await tester.runAsync(runtime.start);
+      expect(native.navigationStates, [true]);
       await tester.pumpWidget(
         InformationApp(service: service, port: 0, runtime: runtime),
       );
@@ -46,8 +47,28 @@ void main() {
         find.byKey(const ValueKey('settings-section-notifications')),
         findsOneWidget,
       );
+      await native.events!(DesktopEvent.searchApprovals);
+      await tester.pumpAndSettle();
+      final search = find.descendant(
+        of: find.byKey(const ValueKey('inbox-search')),
+        matching: find.byType(EditableText),
+      );
+      expect(search, findsOneWidget);
+      expect(tester.widget<EditableText>(search).focusNode.hasFocus, isTrue);
+      await tester.enterText(search, 'Synthetic search');
+      await native.events!(DesktopEvent.openSettings);
+      await tester.pumpAndSettle();
+      await native.events!(DesktopEvent.searchApprovals);
+      await tester.pumpAndSettle();
+      expect(runtime.searchApprovalsRevision, 2);
+      expect(
+        tester.widget<EditableText>(search).controller.text,
+        'Synthetic search',
+      );
+      expect(tester.widget<EditableText>(search).focusNode.hasFocus, isTrue);
       await tester.pumpWidget(const SizedBox());
       await tester.runAsync(runtime.quit);
+      expect(native.navigationStates, [true, false]);
     },
   );
 

@@ -13,6 +13,7 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
     statusItem?.button != nil && statusItem?.isVisible == true
   }
   private(set) var desktopReady = false
+  private var navigationEnabled = false
   private var notificationsEnabled = false
   private var backupOutputs: [String: URL] = [:]
   private var backupStaging: [String: URL] = [:]
@@ -208,6 +209,12 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
         }
         self.readAvailability(result)
       case "availability": self.readAvailability(result)
+      case "setNavigationEnabled":
+        guard let enabled = call.arguments as? Bool else {
+          result(FlutterError(code: "invalid_navigation_state", message: "Invalid navigation state", details: nil)); return
+        }
+        self.navigationEnabled = enabled && self.desktopReady
+        result(nil)
       case "hide":
         let canHide = self.statusEntryAvailable
         if canHide { self.orderOut(nil) }
@@ -240,6 +247,7 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
       case "terminate":
         self.textFieldAccessibility?.update([] as [[String: Any]])
         self.desktopReady = false
+        self.navigationEnabled = false
         self.removeLifecycleObservers()
         self.statusItemVisibility?.invalidate()
         self.statusItemVisibility = nil
@@ -284,6 +292,7 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
     // Merely returning to the app refreshes permission changes made in Settings.
     let events: [(NotificationCenter, Notification.Name, String)] = [
       (NSWorkspace.shared.notificationCenter, NSWorkspace.didWakeNotification, "resume"),
+      (NSWorkspace.shared.notificationCenter, NSWorkspace.screensDidWakeNotification, "resume"),
       (NSWorkspace.shared.notificationCenter, NSWorkspace.sessionDidBecomeActiveNotification, "resume"),
       (NotificationCenter.default, NSApplication.didBecomeActiveNotification, "availability"),
     ]
@@ -385,12 +394,18 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
     desktopChannel?.invokeMethod("open", arguments: nil)
   }
 
-  var canOpenSettings: Bool { desktopReady && attachedSheet == nil }
+  var canOpenSettings: Bool { desktopReady && navigationEnabled && attachedSheet == nil }
 
   func openSettings() {
     guard canOpenSettings else { return }
     showApprovalsWindow()
     desktopChannel?.invokeMethod("openSettings", arguments: nil)
+  }
+
+  func searchApprovals() {
+    guard canOpenSettings else { return }
+    showApprovalsWindow()
+    desktopChannel?.invokeMethod("searchApprovals", arguments: nil)
   }
 
   private func routeQuitMenu(in menu: NSMenu) {
