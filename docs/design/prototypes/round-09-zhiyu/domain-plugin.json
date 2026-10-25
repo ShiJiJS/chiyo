@@ -1,0 +1,90 @@
+{
+  "id": "local.domain",
+  "name": "域名管理",
+  "version": "1.0.0",
+  "hostApi": 1,
+  "author": "本机 Agent",
+  "description": "记录域名、续费时间与 DNS 配置，按需关联服务器。",
+  "templates": [
+    {
+      "id": "domain",
+      "name": "域名",
+      "icon": "globe",
+      "fields": [
+        {
+          "key": "domain",
+          "label": "域名",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "registrar",
+          "label": "注册商",
+          "type": "text",
+          "required": false
+        },
+        {
+          "key": "expires",
+          "label": "到期日期",
+          "type": "date",
+          "required": false
+        },
+        {
+          "key": "dns",
+          "label": "DNS 服务",
+          "type": "text",
+          "required": false
+        },
+        {
+          "key": "purpose",
+          "label": "域名用途",
+          "type": "text",
+          "required": false
+        }
+      ],
+      "sections": [
+        {
+          "kind": "fields",
+          "title": "域名概览",
+          "keys": [
+            "domain",
+            "registrar",
+            "expires",
+            "dns"
+          ]
+        },
+        {
+          "kind": "text",
+          "key": "purpose",
+          "title": "用途说明"
+        },
+        {
+          "kind": "relations",
+          "key": "pointsTo",
+          "title": "指向的服务器"
+        }
+      ],
+      "relations": [
+        {
+          "key": "pointsTo",
+          "label": "指向服务器",
+          "targetTemplates": [
+            "server"
+          ]
+        }
+      ],
+      "instructions": "先按完整域名检索已有资料，避免重复录入。注册商与 DNS 服务分别填写；没有到期日期时留空，不推测。关联服务器需要明确依据，可以暂不关联。认证材料作为独立托管凭据，不写入域名字段。",
+      "example": {
+        "name": "北辰服务域名",
+        "summary": "统一访问个人自托管服务",
+        "values": {
+          "domain": "beichen.example",
+          "registrar": "示范注册商",
+          "expires": "2027-06-18",
+          "dns": "托管 DNS",
+          "purpose": "为笔记、任务管理与健康记录提供统一入口。"
+        }
+      }
+    }
+  ]
+}
