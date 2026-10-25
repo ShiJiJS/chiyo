@@ -1,0 +1,138 @@
+{
+  "date": "2026-10-25",
+  "repo": "ShiJiJS/agent-info-manage",
+  "sourceRevision": "7fc2072d18dc56731ea71f07926d9b49d0539f66",
+  "branch": "codex/zhiyu-round09-plan",
+  "scope": "7 frontend issues plus 1 deferred planning issue",
+  "verification": {
+    "bodyAndTitleMatch": true,
+    "labelsMatch": true,
+    "nativeDependenciesMatch": true,
+    "nativeEdgeCount": 11
+  },
+  "tasks": {
+    "U01": {
+      "number": 62,
+      "url": "https://github.com/ShiJiJS/agent-info-manage/issues/62",
+      "title": "知予前端 U01：软件外壳、明暗外观与通用控件",
+      "blockedBy": [],
+      "blockedByNumbers": [],
+      "labels": [
+        "enhancement",
+        "ready-for-agent"
+      ]
+    },
+    "U02": {
+      "number": 63,
+      "url": "https://github.com/ShiJiJS/agent-info-manage/issues/63",
+      "title": "知予前端 U02：三栏信息库与服务器、应用资料界面",
+      "blockedBy": [
+        "U01"
+      ],
+      "blockedByNumbers": [
+        62
+      ],
+      "labels": [
+        "enhancement",
+        "ready-for-agent"
+      ]
+    },
+    "U03": {
+      "number": 64,
+      "url": "https://github.com/ShiJiJS/agent-info-manage/issues/64",
+      "title": "知予前端 U03：个人档案、文档、文件与凭据界面",
+      "blockedBy": [
+        "U02"
+      ],
+      "blockedByNumbers": [
+        63
+      ],
+      "labels": [
+        "enhancement",
+        "ready-for-agent"
+      ]
+    },
+    "U04": {
+      "number": 65,
+      "url": "https://github.com/ShiJiJS/agent-info-manage/issues/65",
+      "title": "知予前端 U04：插件管理、专属设置与旧资料采用模板界面",
+      "blockedBy": [
+        "U01"
+      ],
+      "blockedByNumbers": [
+        62
+      ],
+      "labels": [
+        "enhancement",
+        "ready-for-agent"
+      ]
+    },
+    "U05": {
+      "number": 66,
+      "url": "https://github.com/ShiJiJS/agent-info-manage/issues/66",
+      "title": "知予前端 U05：普通信息与凭据使用的访问审批界面",
+      "blockedBy": [
+        "U01"
+      ],
+      "blockedByNumbers": [
+        62
+      ],
+      "labels": [
+        "enhancement",
+        "ready-for-agent"
+      ]
+    },
+    "U06": {
+      "number": 67,
+      "url": "https://github.com/ShiJiJS/agent-info-manage/issues/67",
+      "title": "知予前端 U06：录入提案与授权历史界面",
+      "blockedBy": [
+        "U01"
+      ],
+      "blockedByNumbers": [
+        62
+      ],
+      "labels": [
+        "enhancement",
+        "ready-for-agent"
+      ]
+    },
+    "U07": {
+      "number": 68,
+      "url": "https://github.com/ShiJiJS/agent-info-manage/issues/68",
+      "title": "知予前端 U07：全局设置界面",
+      "blockedBy": [
+        "U01"
+      ],
+      "blockedByNumbers": [
+        62
+      ],
+      "labels": [
+        "enhancement",
+        "ready-for-agent"
+      ]
+    },
+    "F01": {
+      "number": 69,
+      "url": "https://github.com/ShiJiJS/agent-info-manage/issues/69",
+      "title": "知予后续规划 F01：界面完成后拆分真实功能、测试与 Windows 交付",
+      "blockedBy": [
+        "U03",
+        "U04",
+        "U05",
+        "U06",
+        "U07"
+      ],
+      "blockedByNumbers": [
+        64,
+        65,
+        66,
+        67,
+        68
+      ],
+      "labels": [
+        "documentation"
+      ]
+    }
+  }
+}
