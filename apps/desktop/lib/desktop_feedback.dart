@@ -10,6 +10,8 @@ class DesktopFeedback extends StatefulWidget {
   final Widget child;
   static void show(BuildContext context, String message) =>
       context.findAncestorStateOfType<_DesktopFeedbackState>()?.show(message);
+  static void dismiss(BuildContext context) =>
+      context.findAncestorStateOfType<_DesktopFeedbackState>()?.dismiss();
   @override
   State<DesktopFeedback> createState() => _DesktopFeedbackState();
 }
@@ -18,6 +20,11 @@ class _DesktopFeedbackState extends State<DesktopFeedback> {
   Timer? _timer;
   String? _message;
   int _revision = 0;
+  void dismiss() {
+    _timer?.cancel();
+    if (_message != null) setState(() => _message = null);
+  }
+
   void show(String message) {
     _timer?.cancel();
     setState(() {

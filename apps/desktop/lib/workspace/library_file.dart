@@ -121,6 +121,7 @@ class _LibraryFileState extends State<LibraryFile> {
 
   Future<void> _modal(Future<void> Function() action) async {
     if (_busy) return;
+    DesktopFeedback.dismiss(context);
     setState(() => _busy = true);
     widget.onModalChanged?.call(true);
     try {
