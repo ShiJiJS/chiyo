@@ -2,7 +2,7 @@
 
 2026-10-25用户确认本轮发布 **U01–U07这7张前端任务，加F01这1张后续阶段规划票**，编号和核验结果见[发布清单](publication.md)。2026-10-26 Windows实现已收尾暂停，当前仍为U01；[实施记录](../../development/zhiyu-round09-frontend.md)区分已实现、已验证与剩余验收。
 
-2026-10-26最新目标已恢复持续Mac开发：以Mac ARM64为主、Windows适配后置；从尚未完成的#62继续，见[Mac实施记录](../../development/zhiyu-macos-foundation.md)。已有代码与证据保留，工作区中的未提交实现不计为已完成。接手基线、#62新增准备及旧票安排以[Mac接手计划](macos-continuation.md)为准；原[Windows交接说明](../../development/handoffs/zhiyu-frontend-20261026.md)保留既有事实。
+2026-10-26当前只调整GitHub tickets和相关文档，暂不开发。后续以Mac ARM64为主、Windows适配后置；恢复时从尚未完成的#62及已有本机代码审阅继续，见[Mac实施记录](../../development/zhiyu-macos-foundation.md)。已有代码与证据保留，工作区中的未提交实现不计为已完成。接手基线、#62新增准备及旧票安排以[Mac接手计划](macos-continuation.md)为准；原[Windows交接说明](../../development/handoffs/zhiyu-frontend-20261026.md)保留既有事实。
 
 [先看开发顺序](frontend-first.md) · [后续阶段与待拆分内容](issues/F01.md) · [规格总入口](../../specs/zhiyu-round09/README.md) · [产品差距](gap-audit.md) · [冻结原型](../../design/prototypes/round-09-zhiyu/offline.html)
 
@@ -57,3 +57,7 @@ F01会依据实际完成的界面、最新代码和已有GitHub问题重新拆�
 | 代码结构与数据来源 | U01建立边界，其他U票复用 | 同一界面接真实服务，不扩大无关重构 |
 
 此前的27票/39依赖核验属于旧草稿版本，不能代表本轮发布范围。本轮发布核验以publication.md为准。文档检查不代表产品实现或Mac/Windows验收通过。
+
+## 当前整理范围
+
+本次同步原8张票及阶段文档，不新增后台实现票、不改变完成勾选或原生依赖。#62保持10/12；#63有本机未推送的首轮代码和未提交说明，GitHub仍0/7，恢复时先审阅和归档，不能记为整票完成；#64–#68未开始。独立文档发布分支为`codex/zhiyu-mac-priority-plan`，不包含本机未发布的功能提交。
