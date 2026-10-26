@@ -137,7 +137,9 @@ void main() {
       expect((await model.source.loadSummary()).records, 30);
       await t.tap(find.byKey(const ValueKey('library-open-recycle')));
       await t.pumpAndSettle();
-      final entry = (await model.source.queryRecycled()).items.single;
+      final entry = (await model.source.queryRecycled()).items.singleWhere(
+        (e) => e.record.ref == ref,
+      );
       await capture(t, 'recycle-list-1280-light');
       await t.tap(find.byKey(ValueKey('library-recycle-view-${entry.id}')));
       await t.pumpAndSettle();
@@ -148,7 +150,7 @@ void main() {
       await t.tap(find.byKey(const ValueKey('library-recycle-back')));
       await t.pumpAndSettle();
       expect(model.query.directoryId, directory);
-      expect((await model.source.queryRecycled()).total, 0);
+      expect((await model.source.queryRecycled()).total, 1);
       expect(t.takeException(), isNull);
     },
   );
@@ -163,7 +165,9 @@ void main() {
       await t.pumpAndSettle();
       await t.tap(find.byKey(const ValueKey('library-open-recycle')));
       await t.pumpAndSettle();
-      final entry = (await model.source.queryRecycled()).items.single;
+      final entry = (await model.source.queryRecycled()).items.singleWhere(
+        (e) => e.record.ref == ref,
+      );
       await t.tap(find.byKey(ValueKey('library-recycle-view-${entry.id}')));
       await t.pumpAndSettle();
       await t.tap(find.byKey(const ValueKey('library-recycle-purge')));
@@ -187,7 +191,7 @@ void main() {
           t.getRect(find.byKey(const ValueKey('library-recycle-submit'))).top,
         ),
       );
-      expect((await model.source.queryRecycled()).total, 1);
+      expect((await model.source.queryRecycled()).total, 2);
       await capture(t, 'purge-confirm-1280-dark-200');
       (model.source as SampleWorkspaceSource).nextSaveFailure =
           const WorkspaceFailure('unavailable', '合成清理失败');
@@ -205,8 +209,11 @@ void main() {
       await t.pumpAndSettle();
       await t.tap(find.byKey(const ValueKey('library-recycle-submit')));
       await t.pumpAndSettle();
-      expect(find.text('回收站为空'), findsOneWidget);
-      expect((await model.source.queryRecycled()).total, 0);
+      expect(
+        find.byKey(ValueKey('library-recycle-view-${entry.id}')),
+        findsNothing,
+      );
+      expect((await model.source.queryRecycled()).total, 1);
       expect(t.takeException(), isNull);
     },
   );

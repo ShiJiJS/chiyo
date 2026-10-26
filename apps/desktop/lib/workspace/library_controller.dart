@@ -12,8 +12,25 @@ class LibraryController extends WorkspaceRecordsController {
   int _navigation = 0;
   bool _closed = false;
   String? navigationNotice;
-  int searchFocusRequest = 0;
+  int searchFocusRequest = 0, viewReset = 0;
   bool get canGoBack => _back.isNotEmpty;
+
+  Future<void> resetView() {
+    viewReset++;
+    ++_navigation;
+    _back.clear();
+    scrollOffset = 0;
+    navigationNotice = null;
+    selection = null;
+    detail = null;
+    return load(
+      const WorkspaceQuery(directoryId: 'selfhost'),
+      keepSelection: const WorkspaceRecordRef(
+        WorkspaceRecordKind.information,
+        'azure',
+      ),
+    );
+  }
 
   void focusSearch() {
     if (_closed) return;
