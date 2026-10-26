@@ -11,6 +11,8 @@ import 'sample_credential_links.dart';
 import 'workspace_source.dart';
 import 'sample_workspace_plugins.dart';
 import 'sample_plugin_fixture.dart';
+import 'sample_workspace_hosts.dart';
+export 'sample_workspace_hosts.dart' show SampleHostScenario;
 
 part 'sample_workspace_history.dart';
 
@@ -73,6 +75,30 @@ class SampleWorkspaceSource
   );
   @override
   WorkspacePluginSource get plugins => _plugins;
+  late final _hosts = SampleWorkspaceHosts(
+    readable: _readable,
+    beforeWrite: () {
+      if (nextSaveFailure case final failure?) {
+        nextSaveFailure = null;
+        throw failure;
+      }
+    },
+    changed: () => _changes.add(null),
+    records: () => _records.values,
+    plugin: () => _plugins.forType('server'),
+    pluginVersion: () => _plugins.version,
+    empty: () => _scenario == SampleWorkspaceScenario.empty,
+  );
+  @override
+  WorkspaceHostSource get hosts => _hosts;
+  void observeHost(WorkspaceHostEndpoint endpoint, String? fingerprint) =>
+      _hosts.observe(endpoint, fingerprint);
+  set loseNextHostReply(bool value) => _hosts.loseNextReply = value;
+  Future<void> demonstrateHost(SampleHostScenario scenario) async {
+    await _readable();
+    _hosts.demonstrate(scenario);
+  }
+
   Future<List<WorkspacePluginCandidate>> pluginChoices() => _plugins.choices();
   set loseNextPluginReply(bool value) => _plugins.loseNextReply = value;
   set nextCredentialReadFailure(WorkspaceFailure? value) =>
@@ -692,6 +718,7 @@ class SampleWorkspaceSource
     );
     _initialCatalog = _catalog;
     _plugins.seed(_initial.values);
+    _hosts.seed();
     for (final row in trashRows) {
       final detail = trashDetails[rowRef(row)]!;
       if (detail.record.ref.kind != WorkspaceRecordKind.information ||
@@ -1807,6 +1834,7 @@ class SampleWorkspaceSource
     _basePending = _baseProposals = 0;
     _credentialLinks.clearCurrent();
     _credentials.clearCurrent();
+    _hosts.clearCurrent();
     _records.clear();
     _revisions.clear();
     _recycled.clear();
@@ -1840,6 +1868,7 @@ class SampleWorkspaceSource
     _credentialLinks.clear();
     _credentials.clear();
     _plugins.clear();
+    _hosts.clear();
     _fileOperations.clear();
     _clock = _nextRecord = _nextDirectory = _nextRecycle = 0;
     _catalogVersion++;
@@ -1854,6 +1883,7 @@ class SampleWorkspaceSource
     _credentialLinks.reset();
     _credentials.reset();
     _plugins.reset();
+    _hosts.reset();
     _basePending = _initialPending;
     _baseProposals = _initialProposals;
     _fileOperations.clear();

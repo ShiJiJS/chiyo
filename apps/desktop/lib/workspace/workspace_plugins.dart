@@ -18,6 +18,8 @@ class WorkspacePluginTemplate {
   final Map<String, Object?> definition;
 }
 
+enum WorkspacePluginPanel { sshTrust }
+
 class WorkspacePlugin {
   WorkspacePlugin({
     required this.id,
@@ -31,9 +33,14 @@ class WorkspacePlugin {
     this.enabled = true,
     this.builtin = false,
     this.affectedRecords = 0,
-  }) : templates = List.unmodifiable(templates);
+    Iterable<WorkspacePluginPanel> panels = const [],
+  }) : templates = List.unmodifiable(templates),
+       panels = Set.unmodifiable(panels);
   final String id, name, version, author, description, digest, origin;
   final List<WorkspacePluginTemplate> templates;
+
+  /// Registered by the host, never decoded from external package JSON.
+  final Set<WorkspacePluginPanel> panels;
   final bool enabled, builtin;
   final int affectedRecords;
   WorkspacePlugin project({bool? enabled, int? affectedRecords}) =>
@@ -48,6 +55,7 @@ class WorkspacePlugin {
         templates: templates,
         enabled: enabled ?? this.enabled,
         builtin: builtin,
+        panels: panels,
         affectedRecords: affectedRecords ?? this.affectedRecords,
       );
 }

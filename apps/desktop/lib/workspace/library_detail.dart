@@ -10,6 +10,7 @@ import 'library_document.dart';
 import 'library_file.dart';
 import 'library_credential.dart';
 import 'workspace_source.dart';
+import 'host_settings.dart';
 
 /// Reads a template snapshot for display; it does not own persistence or infer
 /// authorization from a link. Related identities resolve as metadata only.
@@ -578,15 +579,10 @@ class _LibraryDetailState extends State<LibraryDetail> {
                                 padding: const EdgeInsets.only(top: 7),
                                 child: Align(
                                   alignment: Alignment.centerLeft,
-                                  child: DesktopButton(
-                                    kind: DesktopButtonKind.quiet,
+                                  child: HostIdentityButton(
+                                    source: widget.source,
+                                    record: record.ref,
                                     onPressed: widget.onSettings,
-                                    fontSize: 13,
-                                    leading: const PrototypeIcon(
-                                      PrototypeIconGlyph.shield,
-                                      size: 16,
-                                    ),
-                                    child: const Text('主机身份'),
                                   ),
                                 ),
                               ),

@@ -107,16 +107,228 @@ void main() {
   }
 
   testWidgets(
+    'server identity deep link selects the exact host and shares readback with settings and library',
+    (t) async {
+      final m = await start(t);
+      await tap(t, find.byKey(const ValueKey('plugin-select-builtin.profile')));
+      await tap(t, find.byKey(const ValueKey('workspace-nav-library')));
+      expect(find.text('主机身份 · 已确认'), findsOneWidget);
+      final before = m.library.query;
+      await tap(t, find.byKey(const ValueKey('library-host-identity')));
+      expect(m.plugins.selected!.id, 'builtin.server');
+      expect(m.plugins.tab, PluginTab.settings);
+      expect(find.byType(DesktopDialog), findsOneWidget);
+      expect(find.text('tokyo.beichen.example:2222'), findsWidgets);
+      await capture(t, 'hosts-1440-light-confirmed');
+      await tap(t, find.byKey(const ValueKey('host-revoke')));
+      expect(
+        (await m.source.hosts.read(
+          const WorkspaceHostTarget.record(
+            WorkspaceRecordRef(WorkspaceRecordKind.information, 'azure'),
+          ),
+        )).state,
+        WorkspaceHostState.revoked,
+      );
+      await tap(t, find.byKey(const ValueKey('host-close')));
+      expect(find.text('SSH 主机信任'), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('host-state-information:azure')),
+        findsOneWidget,
+      );
+      await capture(t, 'hosts-1440-light-settings');
+      await tap(t, find.byKey(const ValueKey('workspace-nav-library')));
+      expect(m.library.detail!.record.ref.id, 'azure');
+      expect(m.library.query, before);
+      expect(find.text('主机身份 · 已撤销'), findsOneWidget);
+      await tap(t, find.byKey(const ValueKey('workspace-nav-settings')));
+      expect(
+        find.byType(DesktopDialog),
+        findsNothing,
+      ); // Consumed route, no repeated popup.
+      await tap(t, find.byKey(const ValueKey('host-open-information:aliyun')));
+      await tap(t, find.byKey(const ValueKey('host-confirm')));
+      expect(find.text('已确认'), findsWidgets);
+      await tap(t, find.byKey(const ValueKey('host-view-record')));
+      expect(m.library.detail!.record.ref.id, 'aliyun');
+      expect(find.text('主机身份 · 已确认'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'dark200 host changes warn, missing fingerprints block confirmation and disabled plugin retains revocation',
+    (t) async {
+      final m = await start(t, dark: true);
+      const target = WorkspaceHostTarget.record(
+        WorkspaceRecordRef(WorkspaceRecordKind.information, 'azure'),
+      );
+      final original = await m.source.hosts.read(target);
+      await tap(t, find.byKey(const ValueKey('preview-guide')));
+      await tap(
+        t,
+        find.byKey(const ValueKey('preview-host-fingerprintChanged')),
+      );
+      await tap(t, find.byKey(const ValueKey('plugin-tab-settings')));
+      await tap(t, find.byKey(const ValueKey('host-open-information:azure')));
+      expect(find.text('指纹已变化'), findsWidgets);
+      expect(
+        t
+            .widget<DesktopButton>(find.byKey(const ValueKey('host-confirm')))
+            .onPressed,
+        isNull,
+      );
+      await t.ensureVisible(find.text('当前 ED25519 指纹'));
+      await t.pumpAndSettle();
+      await capture(t, 'hosts-1280-dark-200-changed');
+      await tap(t, find.byKey(const ValueKey('host-acknowledge-change')));
+      await tap(t, find.byKey(const ValueKey('host-confirm')));
+      expect(
+        (await m.source.hosts.read(target)).state,
+        WorkspaceHostState.trusted,
+      );
+      await tap(t, find.byKey(const ValueKey('host-close')));
+      await tap(t, find.byKey(const ValueKey('plugin-toggle')));
+      await tap(t, find.byKey(const ValueKey('plugin-change-submit')));
+      await tap(t, find.byKey(const ValueKey('host-open-information:azure')));
+      await tap(t, find.byKey(const ValueKey('host-revoke')));
+      expect(
+        (await m.source.hosts.read(target)).state,
+        WorkspaceHostState.revoked,
+      );
+      expect(
+        t
+            .widget<DesktopButton>(find.byKey(const ValueKey('host-confirm')))
+            .onPressed,
+        isNull,
+      );
+      await capture(t, 'hosts-1280-dark-200-disabled-revoked');
+      await tap(t, find.byKey(const ValueKey('host-close')));
+      m.source.observeHost(original.endpoint!, null);
+      await t.pumpAndSettle();
+      await tap(t, find.byKey(const ValueKey('host-open-information:azure')));
+      expect(find.text('尚未取得指纹，不能确认主机。'), findsOneWidget);
+      expect(
+        t
+            .widget<DesktopButton>(find.byKey(const ValueKey('host-confirm')))
+            .onPressed,
+        isNull,
+      );
+      expect(t.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'host save failure, stale review and unknown reply retain exact intent and reconcile without replay',
+    (t) async {
+      final m = await start(t);
+      await tap(t, find.byKey(const ValueKey('plugin-tab-settings')));
+      await tap(t, find.byKey(const ValueKey('host-open-information:aliyun')));
+      m.source.nextSaveFailure = const WorkspaceFailure('offline', '合成主机保存失败');
+      await tap(t, find.byKey(const ValueKey('host-confirm')));
+      expect(find.text('合成主机保存失败'), findsOneWidget);
+      final d = await m.source.readDetail(
+        const WorkspaceRecordRef(WorkspaceRecordKind.information, 'aliyun'),
+      );
+      await m.source.saveRecord(
+        WorkspaceEdit(
+          operationId: 'while-reviewing',
+          expectedVersion: d.version,
+          record: d.record.copyWith(name: '已更新的杭州服务器'),
+          values: const {},
+        ),
+      );
+      await t.pumpAndSettle();
+      await tap(t, find.byKey(const ValueKey('host-confirm')));
+      expect(find.text('主机或插件已变化，请重新读取并核对。'), findsOneWidget);
+      expect(
+        t
+            .widget<DesktopButton>(find.byKey(const ValueKey('host-confirm')))
+            .onPressed,
+        isNull,
+      );
+      await tap(t, find.byKey(const ValueKey('host-refresh')));
+      expect(find.text('已更新的杭州服务器'), findsWidgets);
+      m.source.loseNextHostReply = true;
+      await tap(t, find.byKey(const ValueKey('host-confirm')));
+      expect(
+        t
+            .widget<DesktopButton>(find.byKey(const ValueKey('host-close')))
+            .onPressed,
+        isNull,
+      );
+      await tap(t, find.byKey(const ValueKey('desktop-dialog-close')));
+      await t.sendKeyEvent(LogicalKeyboardKey.escape);
+      await t.pumpAndSettle();
+      expect(find.byType(DesktopDialog), findsOneWidget);
+      m.source.setScenario(SampleWorkspaceScenario.failure);
+      await tap(t, find.byKey(const ValueKey('host-reconcile')));
+      expect(find.text('仍无法确认结果，请稍后核对。'), findsOneWidget);
+      await capture(t, 'hosts-1440-light-unknown');
+      m.source.setScenario(SampleWorkspaceScenario.ready);
+      await tap(t, find.byKey(const ValueKey('host-reconcile')));
+      expect(find.byKey(const ValueKey('host-reconcile')), findsNothing);
+      expect(
+        t
+            .widget<DesktopButton>(find.byKey(const ValueKey('host-confirm')))
+            .onPressed,
+        isNull,
+      );
+      await tap(t, find.byKey(const ValueKey('host-close')));
+      expect(find.text('已确认'), findsWidgets);
+    },
+  );
+
+  testWidgets(
+    'host panel distinguishes waiting, failed read, retry and true empty states',
+    (t) async {
+      final m = await start(t);
+      m.source.setScenario(SampleWorkspaceScenario.waiting);
+      await tap(t, find.byKey(const ValueKey('plugin-tab-settings')));
+      expect(find.text('正在读取主机身份…'), findsOneWidget);
+      m.source.setScenario(SampleWorkspaceScenario.failure);
+      await t.pumpAndSettle();
+      expect(find.text('主机身份暂不可用。'), findsOneWidget);
+      expect(find.text('还没有服务器或保留的主机身份。'), findsNothing);
+      m.source.setScenario(SampleWorkspaceScenario.ready);
+      await tap(t, find.byKey(const ValueKey('hosts-retry')));
+      expect(
+        find.byKey(const ValueKey('host-open-information:azure')),
+        findsOneWidget,
+      );
+      m.source.setScenario(SampleWorkspaceScenario.empty);
+      await m.plugins.load();
+      await t.pumpAndSettle();
+      expect(find.text('还没有服务器或保留的主机身份。'), findsOneWidget);
+    },
+  );
+  testWidgets(
+    'closing a waiting host read ignores the cancelled result without reopening the dialog',
+    (t) async {
+      final m = await start(t);
+      await tap(t, find.byKey(const ValueKey('plugin-tab-settings')));
+      await tap(t, find.byKey(const ValueKey('host-open-information:azure')));
+      m.source.setScenario(SampleWorkspaceScenario.waiting);
+      await tap(t, find.byKey(const ValueKey('host-refresh')));
+      expect(find.text('正在读取主机身份…'), findsOneWidget);
+      await tap(t, find.byKey(const ValueKey('host-close')));
+      m.source.setScenario(SampleWorkspaceScenario.ready);
+      await t.pumpAndSettle();
+      expect(find.byType(DesktopDialog), findsNothing);
+      expect(t.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
     'settings install, shared external form, update, removal, generic editing and reinstall preserve the original snapshot',
     (t) async {
       final m = await start(t);
       expect(find.text('SSH 主机信任'), findsNothing);
-      expect(find.text('插件设置'), findsNothing); // No empty capability pane.
+      expect(find.text('插件设置'), findsOneWidget); // Registered server pane.
       await capture(t, 'plugins-1440-light-overview');
       await choose(t, '域名管理-1.0.0.json');
       expect((await m.source.plugins.load()).packages, hasLength(3));
       await tap(t, find.byKey(const ValueKey('plugin-change-submit')));
       expect(m.plugins.selected!.id, 'local.domain');
+      expect(find.text('插件设置'), findsNothing); // No external capability pane.
       await tap(t, find.byKey(const ValueKey('plugin-tab-instructions')));
       expect(find.textContaining('注册商与 DNS 服务分别填写'), findsOneWidget);
       await tap(t, find.byKey(const ValueKey('plugin-tab-preview')));

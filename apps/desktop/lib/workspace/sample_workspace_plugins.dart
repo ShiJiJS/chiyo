@@ -25,6 +25,7 @@ class SampleWorkspacePlugins implements WorkspacePluginSource {
   final _operations =
       <String, ({String fingerprint, WorkspacePluginReceipt receipt})>{};
   int _version = 1;
+  int get version => _version;
   bool loseNextReply = false;
 
   void seed(Iterable<WorkspaceDetail> records) {
@@ -70,6 +71,7 @@ class SampleWorkspacePlugins implements WorkspacePluginSource {
         origin: '内置',
         templates: [template],
         builtin: true,
+        panels: key == 'server' ? [WorkspacePluginPanel.sshTrust] : const [],
       );
       _initial[id] = _current[id] = package;
       _knownTypes[template.type.id] = template.type;

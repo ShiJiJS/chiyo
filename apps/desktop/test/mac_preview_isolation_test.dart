@@ -153,6 +153,27 @@ void main() {
       expect((await source.readDetail(ssh)).values, isEmpty);
       await t.tap(find.byKey(const ValueKey('workspace-nav-settings')));
       await t.pumpAndSettle();
+      await t.ensureVisible(find.byKey(const ValueKey('plugin-tab-settings')));
+      await t.tap(find.byKey(const ValueKey('plugin-tab-settings')));
+      await t.pumpAndSettle();
+      await t.ensureVisible(
+        find.byKey(const ValueKey('host-open-information:azure')),
+      );
+      await t.tap(find.byKey(const ValueKey('host-open-information:azure')));
+      await t.pumpAndSettle();
+      await t.ensureVisible(find.byKey(const ValueKey('host-revoke')));
+      await t.tap(find.byKey(const ValueKey('host-revoke')));
+      await t.pumpAndSettle();
+      expect(
+        (await source.hosts.read(
+          const WorkspaceHostTarget.record(
+            WorkspaceRecordRef(WorkspaceRecordKind.information, 'azure'),
+          ),
+        )).state,
+        WorkspaceHostState.revoked,
+      );
+      await t.tap(find.byKey(const ValueKey('host-close')));
+      await t.pumpAndSettle();
       await t.tap(find.byKey(const ValueKey('plugin-install')));
       await t.pumpAndSettle();
       await t.tap(find.textContaining('域名管理-1.0.0.json').last);
@@ -181,6 +202,14 @@ void main() {
       expect((await source.credentials.read(ssh)).privateNote, isEmpty);
       expect((await source.loadSummary()).records, 31);
       expect((await source.plugins.load()).packages, hasLength(3));
+      expect(
+        (await source.hosts.read(
+          const WorkspaceHostTarget.record(
+            WorkspaceRecordRef(WorkspaceRecordKind.information, 'azure'),
+          ),
+        )).state,
+        WorkspaceHostState.trusted,
+      );
       expect(forbidden, isEmpty);
       expect(network.calls, 0);
       expect(filesystem.rejected, isEmpty);
