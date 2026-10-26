@@ -38,6 +38,7 @@ class WorkspaceCatalog {
     Map<String, int> directoryCounts = const {},
     Map<String, int> tagCounts = const {},
     this.version = 1,
+    this.recycledCount = 0,
   }) : directories = List.unmodifiable(directories),
        tags = List.unmodifiable(tags),
        types = List.unmodifiable(types),
@@ -47,7 +48,7 @@ class WorkspaceCatalog {
   final List<WorkspaceTag> tags;
   final List<WorkspaceType> types;
   final Map<String, int> directoryCounts, tagCounts;
-  final int version;
+  final int version, recycledCount;
 }
 
 enum WorkspaceDirectoryAction { create, update, delete }

@@ -1,15 +1,31 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:crypto/crypto.dart';
 import 'sample_workspace_fixture.dart';
 import 'workspace_source.dart';
+
+part 'sample_workspace_history.dart';
 
 enum SampleWorkspaceScenario { ready, empty, waiting, failure }
 
 /// The isolated composition root creates this provider. All values are the
 /// approved prototype's fictional data; no production adapter imports it.
 class SampleWorkspaceSource implements WorkspaceSource {
-  SampleWorkspaceSource({String fixtureJson = sampleWorkspaceJson})
-    : _fixtureJson = fixtureJson;
+  SampleWorkspaceSource({
+    String fixtureJson = sampleWorkspaceJson,
+    DateTime Function()? now,
+  }) : _fixtureJson = fixtureJson,
+       _now = now ?? (() => DateTime.utc(2026, 10, 26));
+  final DateTime Function() _now;
+  final _revisions = <WorkspaceRecordRef, List<WorkspaceArchive>>{};
+  final _recycled =
+      <String, ({WorkspaceRecycleEntry entry, WorkspaceArchive archive})>{};
+  final _recordOperations =
+      <String, ({String fingerprint, WorkspaceRecordReceipt receipt})>{};
+  final _versions = <WorkspaceRecordRef, int>{};
+  int _nextRecycle = 0;
+  String _fingerprint(Object value) =>
+      sha256.convert(utf8.encode(jsonEncode(value))).toString();
   final String _fixtureJson;
   static const _genericDefinition = <String, Object?>{
     'name': '通用资料',
@@ -170,6 +186,9 @@ class SampleWorkspaceSource implements WorkspaceSource {
       );
     }
     _records.addAll(_initial);
+    for (final detail in _initial.values) {
+      _versions[detail.record.ref] = detail.version;
+    }
     _catalog = WorkspaceCatalog(
       directories: [
         for (final row in data['directories'] as List)
@@ -200,6 +219,7 @@ class SampleWorkspaceSource implements WorkspaceSource {
     if (_disposed || epoch != _epoch) {
       throw const WorkspaceFailure('cancelled', '已切换预览状态。');
     }
+    _expireHistory();
   }
 
   @override
@@ -222,6 +242,9 @@ class SampleWorkspaceSource implements WorkspaceSource {
         : _records.values.map((d) => d.record);
     return WorkspaceCatalog(
       version: _catalogVersion,
+      recycledCount: _scenario == SampleWorkspaceScenario.empty
+          ? 0
+          : _recycled.length,
       directories: _catalog.directories,
       tags: _catalog.tags,
       types: _catalog.types,
@@ -245,7 +268,7 @@ class SampleWorkspaceSource implements WorkspaceSource {
     WorkspaceDirectoryChange change,
   ) async {
     await _readable();
-    final fingerprint = jsonEncode({
+    final fingerprint = _fingerprint({
       'action': change.action.name,
       'version': change.expectedVersion,
       'target': change.directoryId,
@@ -422,13 +445,14 @@ class SampleWorkspaceSource implements WorkspaceSource {
     for (final r in items) {
       counts.update(group(r), (count) => count + 1, ifAbsent: () => 1);
     }
+    final offset = _pageOffset(query.offset, query.limit, items.length);
     final selection = items.any((r) => r.ref == keepSelection)
         ? keepSelection
-        : (items.isEmpty ? null : items.skip(query.offset).firstOrNull?.ref);
+        : (items.isEmpty ? null : items.skip(offset).firstOrNull?.ref);
     return WorkspaceResults(
-      items: items.skip(query.offset).take(query.limit),
+      items: items.skip(offset).take(query.limit),
       total: items.length,
-      offset: query.offset,
+      offset: offset,
       selection: selection,
       selectionIndex: selection == null
           ? null
@@ -503,10 +527,11 @@ class SampleWorkspaceSource implements WorkspaceSource {
       final named = a.name.compareTo(b.name);
       return named != 0 ? named : a.ref.key.compareTo(b.ref.key);
     });
+    final offset = _pageOffset(query.offset, query.limit, candidates.length);
     return WorkspaceResults(
-      items: candidates.skip(query.offset).take(query.limit),
+      items: candidates.skip(offset).take(query.limit),
       total: candidates.length,
-      offset: query.offset,
+      offset: offset,
     );
   }
 
@@ -607,7 +632,7 @@ class SampleWorkspaceSource implements WorkspaceSource {
     } on WorkspaceFailure catch (error) {
       return WorkspaceRejected(error);
     }
-    final fingerprint = jsonEncode({
+    final fingerprint = _fingerprint({
       'operation': 'create',
       'type': draft.typeId,
       'name': draft.name,
@@ -693,6 +718,7 @@ class SampleWorkspaceSource implements WorkspaceSource {
         _records.clear();
         _scenario = SampleWorkspaceScenario.ready;
       }
+      _versions[record.ref] = detail.version;
       _records[record.ref] = detail;
       _changes.add(record.ref);
       result = WorkspaceSaved(detail);
@@ -708,7 +734,7 @@ class SampleWorkspaceSource implements WorkspaceSource {
     } on WorkspaceFailure catch (failure) {
       return WorkspaceRejected(failure);
     }
-    final fingerprint = jsonEncode({
+    final fingerprint = _fingerprint({
       'target': edit.record.ref.key,
       'version': edit.expectedVersion,
       'name': edit.record.name,
@@ -796,6 +822,10 @@ class SampleWorkspaceSource implements WorkspaceSource {
         values: values,
         relations: {...current.relations, ...edit.relations},
       );
+      if (edit.record.ref.kind == WorkspaceRecordKind.information) {
+        (_revisions[edit.record.ref] ??= []).add(_archive(current));
+      }
+      _versions[edit.record.ref] = detail.version;
       _records[edit.record.ref] = detail;
       _changes.add(edit.record.ref);
       result = WorkspaceSaved(detail);
@@ -804,12 +834,43 @@ class SampleWorkspaceSource implements WorkspaceSource {
     return result;
   }
 
+  @override
+  Future<List<WorkspaceRevision>> loadRevisions(WorkspaceRecordRef ref) =>
+      _loadRevisions(ref);
+  @override
+  Future<WorkspaceRevisionPreview> previewRevision(
+    WorkspaceRecordRef ref,
+    int version, {
+    required int expectedVersion,
+  }) => _previewRevision(ref, version, expectedVersion: expectedVersion);
+  @override
+  Future<WorkspaceRecycleResults> queryRecycled({
+    String keyword = '',
+    int offset = 0,
+    int limit = 25,
+  }) => _queryRecycled(keyword: keyword, offset: offset, limit: limit);
+  @override
+  Future<WorkspaceArchive> readRecycled(String entryId) =>
+      _readRecycled(entryId);
+  @override
+  Future<WorkspaceRecordReceipt> changeRecord(WorkspaceRecordChange change) =>
+      _changeRecord(change);
+
   void reset() {
     setScenario(SampleWorkspaceScenario.ready);
     _records
       ..clear()
       ..addAll(_initial);
     _operations.clear();
+    _revisions.clear();
+    _recycled.clear();
+    _recordOperations.clear();
+    _versions
+      ..clear()
+      ..addEntries(
+        _initial.entries.map((e) => MapEntry(e.key, e.value.version)),
+      );
+    _nextRecycle = 0;
     _directoryOperations.clear();
     if (_initialCatalog case final initial?) _catalog = initial;
     _catalogVersion++;

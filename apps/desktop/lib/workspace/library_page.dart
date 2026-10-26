@@ -11,6 +11,8 @@ import 'library_controller.dart';
 import 'library_detail.dart';
 import 'library_directory_dialog.dart';
 import 'library_edit_dialog.dart';
+import 'library_history_dialog.dart';
+import 'library_recycle.dart';
 import 'library_widgets.dart';
 import 'workspace_source.dart';
 
@@ -35,7 +37,7 @@ class _LibraryPageState extends State<LibraryPage> {
   final _search = TextEditingController();
   final _searchFocus = FocusNode();
   int _focusRequest = 0;
-  bool _reading = false;
+  bool _reading = false, _recyclePage = false;
   WorkspaceRecordRef? _lastSelection;
   LibraryController get model => widget.controller;
   @override
@@ -106,6 +108,38 @@ class _LibraryPageState extends State<LibraryPage> {
       if (!mounted || ref == null) return;
       await model.openRelated(ref, rememberOrigin: create);
       if (mounted) DesktopFeedback.show(context, create ? '已添加资料' : '已保存资料');
+    } finally {
+      widget.onModalChanged?.call(false);
+    }
+  }
+
+  Future<void> _history() async {
+    final ref = model.detail?.record.ref;
+    if (ref == null) return;
+    widget.onModalChanged?.call(true);
+    try {
+      final restored = await showLibraryHistory(context, model.source, ref);
+      if (!mounted || restored != true) return;
+      await model.openRelated(ref, rememberOrigin: false);
+      if (mounted) DesktopFeedback.show(context, '已恢复为新版本');
+    } finally {
+      widget.onModalChanged?.call(false);
+    }
+  }
+
+  Future<void> _recycleCurrent() async {
+    final detail = model.detail;
+    if (detail == null) return;
+    widget.onModalChanged?.call(true);
+    try {
+      final receipt = await showLibraryRecycle(
+        context,
+        model.source,
+        current: detail,
+      );
+      if (!mounted || receipt == null) return;
+      await model.load(model.query);
+      if (mounted) DesktopFeedback.show(context, '已移到回收站');
     } finally {
       widget.onModalChanged?.call(false);
     }
@@ -366,6 +400,22 @@ class _LibraryPageState extends State<LibraryPage> {
                   ),
                 ],
               ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.fromLTRB(12, 10, 10, 12),
+            decoration: BoxDecoration(
+              border: Border(top: BorderSide(color: c.line)),
+            ),
+            child: DesktopButton(
+              key: const ValueKey('library-open-recycle'),
+              kind: DesktopButtonKind.quiet,
+              alignment: Alignment.centerLeft,
+              onPressed: () => setState(() {
+                _recyclePage = true;
+                _reading = false;
+              }),
+              child: Text('回收站 · ${catalog?.recycledCount ?? 0}'),
             ),
           ),
         ],
@@ -888,6 +938,18 @@ class _LibraryPageState extends State<LibraryPage> {
                         onEdit: model.loadState == WorkspaceLoad.loading
                             ? null
                             : () => _edit(),
+                        onHistory:
+                            detail.record.ref.kind ==
+                                    WorkspaceRecordKind.information &&
+                                model.loadState != WorkspaceLoad.loading
+                            ? _history
+                            : null,
+                        onRecycle:
+                            detail.record.ref.kind ==
+                                    WorkspaceRecordKind.information &&
+                                model.loadState != WorkspaceLoad.loading
+                            ? _recycleCurrent
+                            : null,
                         onTag: (id) =>
                             model.apply(model.query.copyWith(tagId: id)),
                         onSettings: () => widget.onNavigate(
@@ -917,6 +979,17 @@ class _LibraryPageState extends State<LibraryPage> {
       child: LayoutBuilder(
         builder: (context, bounds) {
           final metrics = LibraryMetrics(bounds.maxWidth);
+          if (_recyclePage) {
+            return LibraryRecyclePage(
+              source: model.source,
+              onModalChanged: widget.onModalChanged,
+              onBack: () => setState(() => _recyclePage = false),
+              onOpen: (ref) {
+                setState(() => _recyclePage = false);
+                model.openRelated(ref);
+              },
+            );
+          }
           if (_reading) {
             return Align(
               alignment: Alignment.topCenter,

@@ -16,6 +16,8 @@ class LibraryDetail extends StatefulWidget {
     required this.revision,
     required this.onOpen,
     required this.onEdit,
+    this.onHistory,
+    this.onRecycle,
     required this.onSettings,
     required this.onTag,
     required this.onExpand,
@@ -25,7 +27,7 @@ class LibraryDetail extends StatefulWidget {
   final LibraryMetrics metrics;
   final int revision;
   final ValueChanged<WorkspaceRecordRef> onOpen;
-  final VoidCallback? onEdit;
+  final VoidCallback? onEdit, onHistory, onRecycle;
   final VoidCallback onSettings, onExpand;
   final ValueChanged<String> onTag;
   @override
@@ -359,12 +361,32 @@ class _LibraryDetailState extends State<LibraryDetail> {
                   compact: true,
                   quiet: true,
                   triggerLabel: const PrototypeIcon(PrototypeIconGlyph.more),
-                  items: const [
-                    DropdownMenuItem(value: 'edit', child: Text('编辑信息')),
+                  key: const ValueKey('library-record-actions'),
+                  items: [
+                    const DropdownMenuItem(value: 'edit', child: Text('编辑信息')),
+                    if (widget.onHistory != null)
+                      const DropdownMenuItem(
+                        value: 'history',
+                        child: Text('内容版本'),
+                      ),
+                    if (widget.onRecycle != null)
+                      const DropdownMenuItem(
+                        value: 'recycle',
+                        child: Text('移到回收站'),
+                      ),
                   ],
                   onChanged: widget.onEdit == null
                       ? null
-                      : (_) => widget.onEdit?.call(),
+                      : (action) {
+                          switch (action) {
+                            case 'history':
+                              widget.onHistory?.call();
+                            case 'recycle':
+                              widget.onRecycle?.call();
+                            default:
+                              widget.onEdit?.call();
+                          }
+                        },
                 ),
               ),
             ],
