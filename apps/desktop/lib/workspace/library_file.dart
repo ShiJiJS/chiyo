@@ -469,11 +469,24 @@ class _LibraryFilePreviewViewState extends State<LibraryFilePreviewView> {
                 primary: false,
                 child: SizedBox(
                   width: width,
-                  child: Image(
-                    image: _image!,
-                    semanticLabel: '${p.file.filename}，第${p.page + 1}页',
-                    fit: BoxFit.contain,
-                    errorBuilder: (_, _, _) => const Text('图像无法显示，可重试预览或另存文件。'),
+                  child: AspectRatio(
+                    aspectRatio: p.pixelWidth! / p.pixelHeight!,
+                    child: Image(
+                      image: _image!,
+                      semanticLabel: '${p.file.filename}，第${p.page + 1}页',
+                      fit: BoxFit.contain,
+                      frameBuilder: (context, child, frame, synchronous) =>
+                          frame != null || synchronous
+                          ? child
+                          : Center(
+                              child: Text(
+                                '正在显示文件页面…',
+                                style: libraryText(context, 13),
+                              ),
+                            ),
+                      errorBuilder: (_, _, _) =>
+                          const Text('图像无法显示，可重试预览或另存文件。'),
+                    ),
                   ),
                 ),
               );

@@ -40,8 +40,36 @@ void main() {
     });
   }
 
+  Future<void> ready(WidgetTester t, bool Function() predicate) async {
+    for (var i = 0; i < 200; i++) {
+      await t.pumpAndSettle();
+      if (predicate()) return;
+      await t.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 2)),
+      );
+    }
+    fail('Expected visible content did not finish loading.');
+  }
+
   Future<void> capture(WidgetTester t, String name) async {
     if (evidence.isEmpty) return;
+    await ready(
+      t,
+      () => find
+          .byType(Image)
+          .evaluate()
+          .every(
+            (element) => find
+                .descendant(
+                  of: find.byWidget(element.widget),
+                  matching: find.byWidgetPredicate(
+                    (w) => w is RawImage && w.image != null,
+                  ),
+                )
+                .evaluate()
+                .isNotEmpty,
+          ),
+    );
     await t.runAsync(() async {
       final boundary = t.renderObject<RenderRepaintBoundary>(
         find.byKey(const ValueKey('content-capture')),
@@ -53,17 +81,6 @@ void main() {
       ).writeAsBytes(data!.buffer.asUint8List());
       image.dispose();
     });
-  }
-
-  Future<void> ready(WidgetTester t, bool Function() predicate) async {
-    for (var i = 0; i < 200; i++) {
-      await t.pumpAndSettle();
-      if (predicate()) return;
-      await t.runAsync(
-        () => Future<void>.delayed(const Duration(milliseconds: 2)),
-      );
-    }
-    fail('Expected visible content did not finish loading.');
   }
 
   Future<void> tap(WidgetTester t, Finder target) async {
@@ -117,8 +134,25 @@ void main() {
       t.widget<LibraryFilePreviewView>(
         find.byType(LibraryFilePreviewView).first,
       );
-  Future<void> fileReady(WidgetTester t) =>
-      ready(t, () => find.byType(LibraryFilePreviewView).evaluate().isNotEmpty);
+  Future<void> fileReady(WidgetTester t) => ready(
+    t,
+    () =>
+        find.byType(LibraryFilePreviewView).evaluate().isNotEmpty &&
+        find
+            .byType(Image)
+            .evaluate()
+            .every(
+              (element) => find
+                  .descendant(
+                    of: find.byWidget(element.widget),
+                    matching: find.byWidgetPredicate(
+                      (w) => w is RawImage && w.image != null,
+                    ),
+                  )
+                  .evaluate()
+                  .isNotEmpty,
+            ),
+  );
   Finder value(String text) => find.byWidgetPredicate(
     (w) =>
         w is SelectableText &&
