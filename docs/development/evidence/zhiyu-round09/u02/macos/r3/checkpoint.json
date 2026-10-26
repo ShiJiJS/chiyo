@@ -1,0 +1,66 @@
+{
+  "sourceCommit": "a67b096c40997b4fc836215a8c18f86808086731",
+  "createdAt": "2026-10-26T14:43:20.734336+00:00",
+  "platform": {
+    "system": "Darwin",
+    "release": "27.0.0",
+    "machine": "arm64"
+  },
+  "scope": "U02 relation chooser + atomic relation patches + generic legacy content editing. Only isolated synthetic data.",
+  "sourceSha256": {
+    "apps/desktop/lib/workspace/library_controller.dart": "678811d5f17fe6e95208e5dd58700b86892f49e684ba3c3cc38bd5dbdbbda0d8",
+    "apps/desktop/lib/workspace/library_edit_dialog.dart": "483c26818d7e944d523739305cae6df254d7184fa0446fdea94419d0cf6f3f40",
+    "apps/desktop/lib/workspace/library_page.dart": "ea3d73fcd72f18a81c6cded2f3851aaef94cba98d473fe6a21b452df2d64d04c",
+    "apps/desktop/lib/workspace/library_relation_picker.dart": "ded9ace21fb3c72478d3e9590ab2d950de4f31e7fae167f463bc7f4f2ad97208",
+    "apps/desktop/lib/workspace/sample_workspace_source.dart": "c284b08e7fa300df647b342f5c43a7e9a0cef86e07bf517dca2c108c9d9d4494",
+    "apps/desktop/lib/workspace/workspace_records.dart": "0d6b08b6bd32ab16ad83a1d80bd41d2884ff598a2b3597cb414c9b9e572124ee",
+    "apps/desktop/lib/workspace/workspace_source.dart": "3837dbefb6a6401422c43d9b33762a2d9123653095c59f90d161948534c9698f",
+    "apps/desktop/test/zhiyu_relations_test.dart": "6152503bf3a3336f7f3c6968ab6c7327caddbc8368e00d71afb3a3cdc4295423"
+  },
+  "fixtureSha256": "21bb44967f41aadba392b4b795f9a7180674f6cd1c306ece694242a1d8427116",
+  "frozenTrackedFilesSha256": {
+    "docs/design/prototypes/round-09-zhiyu/.gitattributes": "be8fff64e0ee0af7a63993677ad78f51872c1457e8ec6f92bc6dc9d8ccf6fb34",
+    "docs/design/prototypes/round-09-zhiyu/README.md": "83cb39534e169a7466ac41e552fce7f43b02b4317cbc41c7673bed8f9c1eda78",
+    "docs/design/prototypes/round-09-zhiyu/app.js": "33cf6e5087237d776f05927996c6d514db404dd7955b3e118974774ba341a8b8",
+    "docs/design/prototypes/round-09-zhiyu/base.css": "8b88bab1dc47654393fff0ee43198b7fc31486c85f054f75adbb32c48522255d",
+    "docs/design/prototypes/round-09-zhiyu/design-notes.md": "6ebeaa6840d1bbddfe0a031f53892cee8e05947ca9377a6d628d727ad1565897",
+    "docs/design/prototypes/round-09-zhiyu/domain-plugin.json": "f3d3532eef70ea5d748d25fcae1029abd3298eb52fcb3a737095448644947be4",
+    "docs/design/prototypes/round-09-zhiyu/fixtures.js": "4d60ad4e87102fd462aca84d27719dc7989828429d650962a4898ba81e97d131",
+    "docs/design/prototypes/round-09-zhiyu/guide.html": "211d1d44ee4026e7bc709183e0c9ca2a318683d5d68503eea5620534c852f788",
+    "docs/design/prototypes/round-09-zhiyu/index.html": "f93205742c87b58c40e0fad10801fa21270fd7e000fc36916dc8d52cd24afa7b",
+    "docs/design/prototypes/round-09-zhiyu/model.js": "9259f18a86a8d04718b9a2fdde7118f7d0ca725ec64b9bd9ea5e3220571f0544",
+    "docs/design/prototypes/round-09-zhiyu/offline.html": "05a65aa7cbff7faf1357533bd4750c6261bceb4a9838dea2fa801087c9764578",
+    "docs/design/prototypes/round-09-zhiyu/plugin-spec.md": "2419309aa8aa6eb8f07ff86a6efbea9d837b88bd8b0cb9a49ac71ef33d5dbca2",
+    "docs/design/prototypes/round-09-zhiyu/reference-manifest.json": "cd1424b7815cccbaca08274aaec49ded8def20863e506082fd3d153eaddd256c",
+    "docs/design/prototypes/round-09-zhiyu/seed.js": "a17338d547ea400cb3b382262210bf370c6973ddc2835883b10423b43c0a6c6d",
+    "docs/design/prototypes/round-09-zhiyu/style.css": "518459f2a96c7fcdc963ab9c193c49965e21dacf7da16f0e91dc1605fea4461d",
+    "docs/design/prototypes/round-09-zhiyu/theme.css": "5e480a0e703f33c675d9edee49acd2a31fe949026c5efc57b64af007a86fd407",
+    "docs/design/prototypes/round-09-zhiyu/util.js": "c53e83500f1b6f3c70fce1534d2e33bb5cf257c63402f23a957ed103ac2d5ed8",
+    "docs/design/prototypes/round-09-zhiyu/workspace.css": "beafe11207a513575caedc72233848c962a107b985c1dfd9618a78733f4ff9b9"
+  },
+  "installedFontSha256": {
+    "Zhiyu System": "44890958f3e0b997028121ed7c7a789f3f5cce227c7a93ce8f86ec0db26da571",
+    "PingFang SC": "9ff3ce9439fe285cdabb46f9ceb46b1ac58f1ca07e6f4a764e8286db621a0af9",
+    "Menlo": "f2d400484a6aace67980730ec0a9ef24ce9e535a2604f118e6fdc2510021b85f"
+  },
+  "checks": {
+    "desktopAnalyze": "No issues, fatal-infos enabled",
+    "focused": "45 checks passed in each of three consecutive runs (same suite, not 135 unique checks)",
+    "capture": "9 relation checks passed; four final-source offscreen screenshots reviewed"
+  },
+  "behaviors": [
+    "Candidate queries return metadata only; template restrictions and pagination happen before display.",
+    "Changed relation keys share record version and operation identity; untouched legacy links survive.",
+    "Self/duplicate/missing/type-invalid links reject atomically; graph cycles remain valid.",
+    "Search and paging retain chosen objects; latest query wins and closed/disposed menus ignore late results.",
+    "Known generic string fields remain editable; unknown composite values remain readable and untouched. New generic records use an empty core definition.",
+    "Saving an existing object no longer adds a self-return entry; new object creation still retains origin."
+  ],
+  "selfReview": "All four current screenshots reviewed. Shared anchored surface flips above/below and restores focus. No independent review; no subagents.",
+  "motion": "Reuses unchanged #62 button150/menu120/dialog180ms. New-context full timing/fidelity audit remains pending.",
+  "limits": [
+    "Not a new native NSWindow or physical OS input verification.",
+    "No real persistence, production adapter, personal Keychain, hooks, notifications or credentials execution.",
+    "#63 remains OPEN; revision/recycle, stress fixture and complete S5 still pending."
+  ]
+}
