@@ -1,0 +1,98 @@
+{
+  "viewport": {
+    "width": 1280,
+    "height": 800
+  },
+  "elements": {
+    ".side": {
+      "x": 0,
+      "y": 66,
+      "width": 194,
+      "height": 734
+    },
+    ".browse-pane": {
+      "x": 194,
+      "y": 66,
+      "width": 275,
+      "height": 734
+    },
+    ".detail-shell": {
+      "x": 479,
+      "y": 76,
+      "width": 791,
+      "height": 714
+    },
+    ".detail-header h1": {
+      "x": 584,
+      "y": 177,
+      "width": 537,
+      "height": 34.796875
+    },
+    ".list-item.selected": {
+      "x": 212,
+      "y": 284.796875,
+      "width": 241,
+      "height": 155.78125
+    },
+    ".facts": {
+      "x": 531,
+      "y": 475.484375,
+      "width": 676,
+      "height": 192.1796875
+    },
+    ".fact label": {
+      "x": 531,
+      "y": 475.484375,
+      "width": 321,
+      "height": 20.796875
+    },
+    ".fact .mono": {
+      "x": 531,
+      "y": 500.28125,
+      "width": 321,
+      "height": 23.3984375
+    },
+    ".host-identity-link": {
+      "x": 523,
+      "y": 425.6875,
+      "width": 172.1953125,
+      "height": 36.796875
+    },
+    "#detail-scroll": {
+      "x": 480,
+      "y": 126,
+      "width": 789,
+      "height": 663
+    }
+  },
+  "sections": [
+    {
+      "label": "连接概览",
+      "x": 531,
+      "y": 381.1875,
+      "width": 676,
+      "height": 25.5
+    },
+    {
+      "label": "登录凭据",
+      "x": 531,
+      "y": 694.6640625,
+      "width": 68,
+      "height": 25.5
+    },
+    {
+      "label": "维护文档",
+      "x": 531,
+      "y": 845.65625,
+      "width": 68,
+      "height": 25.5
+    },
+    {
+      "label": "运行的应用与相关设备",
+      "x": 531,
+      "y": 1072.140625,
+      "width": 170,
+      "height": 25.5
+    }
+  ]
+}
