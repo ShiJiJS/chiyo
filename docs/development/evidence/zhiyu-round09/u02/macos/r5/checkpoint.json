@@ -1,0 +1,114 @@
+{
+  "sourceCommit": "454cd550147c9e1b3d53cee13e8722d3702abcdb",
+  "createdAt": "2026-10-26T15:58:40.334994+00:00",
+  "platform": {
+    "system": "Darwin",
+    "release": "27.0.0",
+    "macOS": "27.0.1",
+    "machine": "arm64"
+  },
+  "scope": "U02 capacity/query/selection and large-text navigation, plus exact frozen seed trash. Fictional provider only.",
+  "sourceSha256": {
+    "apps/desktop/lib/desktop_controls.dart": "9a02d4b171d18a5b6a90facfb8a726cc368e9adc1c16986fb7ca62d60271efe8",
+    "apps/desktop/lib/workspace/library_controller.dart": "3b808e2a7d2ada1924a9e323fadc92a2dfda25cf01c93c0e50ff54302db9c0a0",
+    "apps/desktop/lib/workspace/library_page.dart": "76bcc89914869e3d9a47ecf72edd03f3a12dda21747feadb89e93daf96642290",
+    "apps/desktop/lib/workspace/library_recycle.dart": "9f2b0319536398819ac86bffda069749c3199d0e80e65936028206010620f31f",
+    "apps/desktop/lib/workspace/library_widgets.dart": "093b24e3368deac90e75dd074ac3fbd25aea9dec4050c657b393d6710ea1610b",
+    "apps/desktop/lib/workspace/preview_workspace.dart": "3860b0dac56ef563bdfe2d7202de4e926dce2c5621b6c95cc3cb7fad4226f46e",
+    "apps/desktop/lib/workspace/sample_workspace_fixture.dart": "12b1946583553866c1ecc6cea2e6f557f59250b149133a0658c834a6a7663972",
+    "apps/desktop/lib/workspace/sample_workspace_history.dart": "df4c5192e4c2abe525b3b47fe3a849147d3af82fcaa6052b6f2903bc42825ea2",
+    "apps/desktop/lib/workspace/sample_workspace_source.dart": "e745f2fbb397a2873d208ef2f52fb2134c5ff309c43e81121c2bad298088827a",
+    "apps/desktop/lib/workspace/sample_workspace_stress_fixture.dart": "5063bc82af61c3880bc74c5765cdc2aef7d1e37b79798b0c1d46896ec7ad18d0",
+    "apps/desktop/test/workspace_history_test.dart": "6ff25b7f11fb101a8335b778823b692f61141e8e3c782ee4e4f5ffed609ccc98",
+    "apps/desktop/test/workspace_stress_test.dart": "bdbd65e3fd697bc19f231fe0c9456ffd5c1d13c53eb9beffe9ffe3a572c4eb75",
+    "apps/desktop/test/zhiyu_history_test.dart": "b45be2d558220451040ed1b6644c656f60558ec27d2750b51e73956d6478ef8a",
+    "apps/desktop/test/zhiyu_stress_test.dart": "f17437c3069e54c05759f145d749081842f69ade3b2e0c47541fe142f3833627"
+  },
+  "fixture": {
+    "seed": 902026,
+    "sha256": "25c8b88ce34273f5405d90061abe3d38784b13eaaaf7755daabdef4b4fea1a0d",
+    "utf8Bytes": 442290,
+    "information": 200,
+    "credentials": 8,
+    "realDirectories": 50,
+    "tags": 100,
+    "trash": 1
+  },
+  "baselineFixtureSha256": "12b1946583553866c1ecc6cea2e6f557f59250b149133a0658c834a6a7663972",
+  "frozenTrackedFilesSha256": {
+    "docs/design/prototypes/round-09-zhiyu/.gitattributes": "be8fff64e0ee0af7a63993677ad78f51872c1457e8ec6f92bc6dc9d8ccf6fb34",
+    "docs/design/prototypes/round-09-zhiyu/README.md": "83cb39534e169a7466ac41e552fce7f43b02b4317cbc41c7673bed8f9c1eda78",
+    "docs/design/prototypes/round-09-zhiyu/app.js": "33cf6e5087237d776f05927996c6d514db404dd7955b3e118974774ba341a8b8",
+    "docs/design/prototypes/round-09-zhiyu/base.css": "8b88bab1dc47654393fff0ee43198b7fc31486c85f054f75adbb32c48522255d",
+    "docs/design/prototypes/round-09-zhiyu/design-notes.md": "6ebeaa6840d1bbddfe0a031f53892cee8e05947ca9377a6d628d727ad1565897",
+    "docs/design/prototypes/round-09-zhiyu/domain-plugin.json": "f3d3532eef70ea5d748d25fcae1029abd3298eb52fcb3a737095448644947be4",
+    "docs/design/prototypes/round-09-zhiyu/fixtures.js": "4d60ad4e87102fd462aca84d27719dc7989828429d650962a4898ba81e97d131",
+    "docs/design/prototypes/round-09-zhiyu/guide.html": "211d1d44ee4026e7bc709183e0c9ca2a318683d5d68503eea5620534c852f788",
+    "docs/design/prototypes/round-09-zhiyu/index.html": "f93205742c87b58c40e0fad10801fa21270fd7e000fc36916dc8d52cd24afa7b",
+    "docs/design/prototypes/round-09-zhiyu/model.js": "9259f18a86a8d04718b9a2fdde7118f7d0ca725ec64b9bd9ea5e3220571f0544",
+    "docs/design/prototypes/round-09-zhiyu/offline.html": "05a65aa7cbff7faf1357533bd4750c6261bceb4a9838dea2fa801087c9764578",
+    "docs/design/prototypes/round-09-zhiyu/plugin-spec.md": "2419309aa8aa6eb8f07ff86a6efbea9d837b88bd8b0cb9a49ac71ef33d5dbca2",
+    "docs/design/prototypes/round-09-zhiyu/reference-manifest.json": "cd1424b7815cccbaca08274aaec49ded8def20863e506082fd3d153eaddd256c",
+    "docs/design/prototypes/round-09-zhiyu/seed.js": "a17338d547ea400cb3b382262210bf370c6973ddc2835883b10423b43c0a6c6d",
+    "docs/design/prototypes/round-09-zhiyu/style.css": "518459f2a96c7fcdc963ab9c193c49965e21dacf7da16f0e91dc1605fea4461d",
+    "docs/design/prototypes/round-09-zhiyu/theme.css": "5e480a0e703f33c675d9edee49acd2a31fe949026c5efc57b64af007a86fd407",
+    "docs/design/prototypes/round-09-zhiyu/util.js": "c53e83500f1b6f3c70fce1534d2e33bb5cf257c63402f23a957ed103ac2d5ed8",
+    "docs/design/prototypes/round-09-zhiyu/workspace.css": "beafe11207a513575caedc72233848c962a107b985c1dfd9618a78733f4ff9b9"
+  },
+  "installedFontSha256": {
+    "system": "44890958f3e0b997028121ed7c7a789f3f5cce227c7a93ce8f86ec0db26da571",
+    "monospace": "f2d400484a6aace67980730ec0a9ef24ce9e535a2604f118e6fdc2510021b85f",
+    "CJK": "9ff3ce9439fe285cdabb46f9ceb46b1ac58f1ca07e6f4a764e8286db621a0af9"
+  },
+  "checks": {
+    "analyze": "No issues, fatal-infos enabled.",
+    "focused": "80 related tests passed in each of three consecutive runs. Same suite, not 240 unique checks.",
+    "capture": "6 widget workflows passed; 10 offscreen Flutter screenshots at DPR1, 1280x800 light and 1280x800/1440x900 dark 200% selected contexts."
+  },
+  "behaviors": [
+    "Composition-root dataset switch cancels stale reads and resets query, return stack, internal recycle/reading location. Explicit reset retains current dataset.",
+    "200 ordinary items plus 8 credentials, 50 real directories plus 2 virtual scopes, 100 tags. Stable seed/hash; repeated names and mixed long text.",
+    "Global group/sort before paging, typed-ID ties, cross-page target positioning and exact origin page/selection/scroll return.",
+    "100-tag keyboard-search menu and full editor; page-six relation multiselection survives failure and retries through the source.",
+    "Long compact labels are bounded; complete menu text/tooltips retained. At 200%, directory indentation narrows, names use two lines and counts move below.",
+    "Empty/error results scroll independently, actions stay above fixed footer after scrolling. No shared-primary-scrollbar error.",
+    "Frozen retired-doc trash fact is excluded from live results, restores above deletion watermark, and resets exactly; empty mutation cannot revive it.",
+    "Same string IDs for information/credential remain distinct. Ambiguous raw relation references reject instead of guessing."
+  ],
+  "criteria": {
+    "issue": 63,
+    "completed": 5,
+    "total": 7,
+    "newlyCompleted": [
+      1,
+      3
+    ],
+    "state": "OPEN"
+  },
+  "selfReview": "All 10 final images inspected; no independent review or subagents.",
+  "motion": "Existing 120/150/180ms controls reused unchanged. Complete contextual timing/fidelity audit pending.",
+  "limits": [
+    "Offscreen/widget results are not a new native NSWindow or actual OS input/IME/trackpad/accessibility verification or video.",
+    "Full R01-R04 both themes/sizes, remaining visual deltas and final UI handoff remain open; Issue63 is not closed.",
+    "No real storage, secrets, hooks, system authorization, notifications, operating-system execution, Windows CI, extra App/dSYM copies.",
+    "The pressure-data capacity does not claim production backend performance or supported storage limits."
+  ],
+  "artifactsSha256": {
+    "stress-long-tag-empty-1440-dark-200.png": "74a36a49973cd180a4e95c3b9369a7ebbeb7daf4c065f741fdc7e65c488aecdf",
+    "capture.log": "fbdb05410669a4727e39957dcb5207e527e6e92e28efcda951f140df8f862102",
+    "stress-long-detail-1280-dark-200.png": "0ac78443c91b9d986c31d749d9feb8af7314aaee49f8fbc4c63b53fa419494a1",
+    "stress-page-selection-1280-light.png": "78380024b9936c867aafe75811430fa57afd6ecdc4803f253f121c59bf2874d4",
+    "stress-directory-tail-1440-dark-200.png": "65ad44a4ff0003ee4e15e8f3a6de16e70a706b5c8bc57c64f62707415e2d2b10",
+    "stress-tag-menu-1280-dark-200.png": "5f55062c7baee08d281217be890aadba1130a8d7d0e7a9e03d25cc4c6237d23f",
+    "stress-long-tag-empty-1280-dark-200.png": "c5c853769097a221554b8df860fde8de2dab36e3f3b0b1e1e57b6b57b7e7bdd3",
+    "stress-long-detail-1440-dark-200.png": "1713fed5b303234c24dad56f4eeb088971e503dd9628bb59911fa707903e2759",
+    "stress-directory-tail-1280-dark-200.png": "7aa84344975a7c3438b7c07d460ee0f91514b35073380472593c592f2e323fe5",
+    "stress-tag-menu-1440-dark-200.png": "a2e292d7ad88ad71f4fcaa4047d7ab9a74e213f8fb30138c2802793cc9a45642",
+    "fixture-profile.json": "1b47e044e089fb5de022137ef465635d3d7f5bcdd7c762ad27b104d5b948aaed",
+    "focused-2.log": "738b3a2aa68448d875811fc9f4e72501587a352a26b60b88bb22507478637ddc",
+    "stress-relation-page-six-1280-light.png": "70a0fa6739826f229c13f0268fd2b5f5b890678de51648f46a1aec436dbad104",
+    "focused-3.log": "9797b561956ab8f904326f12e3148eb3e4a8977b84f829d3b0518ad98fa59971",
+    "focused-1.log": "f960f6865d5fdd934f05669c4b28385176ccff48404da22a83863f3935fbfdc5",
+    "analyze.log": "2e9e11837cc3dca4b32abcd84e9c2af2d7deb2d2fdf87346f1413ffe6803ca03"
+  }
+}
