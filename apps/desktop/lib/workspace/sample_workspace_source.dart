@@ -20,7 +20,7 @@ class SampleWorkspaceSource implements WorkspaceSource {
   final _operations =
       <String, ({String fingerprint, WorkspaceSaveResult result})>{};
   WorkspaceFailure? nextSaveFailure;
-  int _epoch = 0, _clock = 0;
+  int _epoch = 0, _clock = 0, _nextRecord = 0;
   bool _disposed = false;
   static const initial = WorkspaceSummary(
     records: 31,
@@ -166,7 +166,26 @@ class SampleWorkspaceSource implements WorkspaceSource {
   @override
   Future<WorkspaceCatalog> loadCatalog() async {
     await _readable();
-    return _catalog;
+    final records = _scenario == SampleWorkspaceScenario.empty
+        ? <WorkspaceRecordSummary>[]
+        : _records.values.map((d) => d.record);
+    return WorkspaceCatalog(
+      directories: _catalog.directories,
+      tags: _catalog.tags,
+      types: _catalog.types,
+      directoryCounts: {
+        for (final directory in _catalog.directories)
+          directory.id: records
+              .where((r) => _inDirectory(r.directoryId, directory.id))
+              .length,
+      },
+      tagCounts: {
+        for (final tag in _catalog.tags)
+          tag.id: records
+              .where((r) => r.tags.any((t) => t.id == tag.id))
+              .length,
+      },
+    );
   }
 
   bool _inDirectory(String? id, String? ancestor) {
@@ -179,6 +198,19 @@ class SampleWorkspaceSource implements WorkspaceSource {
       id = matches.isEmpty ? null : matches.first.parentId;
     }
     return false;
+  }
+
+  @override
+  Future<Map<String, Object?>> loadTemplate(String typeId) async {
+    await _readable();
+    final template = _initial.values
+        .where((d) => d.record.type.id == typeId)
+        .firstOrNull;
+    if (template == null ||
+        template.record.ref.kind == WorkspaceRecordKind.credential) {
+      throw const WorkspaceFailure('not_found', '资料模板不可用。');
+    }
+    return template.definition;
   }
 
   @override
@@ -231,6 +263,9 @@ class SampleWorkspaceSource implements WorkspaceSource {
       total: items.length,
       offset: query.offset,
       selection: selection,
+      selectionIndex: selection == null
+          ? null
+          : items.indexWhere((r) => r.ref == selection),
       groupCounts: counts,
     );
   }
@@ -245,6 +280,142 @@ class SampleWorkspaceSource implements WorkspaceSource {
       throw const WorkspaceFailure('not_found', '资料已不存在，请返回列表。');
     }
     return detail;
+  }
+
+  @override
+  Future<List<WorkspaceRecordSummary>> readSummaries(
+    Iterable<WorkspaceRecordRef> refs,
+  ) async {
+    await _readable();
+    return List.unmodifiable([
+      if (_scenario != SampleWorkspaceScenario.empty)
+        for (final ref in refs.toSet())
+          if (_records[ref] case final detail?) detail.record,
+    ]);
+  }
+
+  Map<String, String> _fieldErrors(
+    String name,
+    String description,
+    Map<String, Object?> definition,
+    Map<String, Object?> values,
+  ) {
+    final fields = <String, String>{};
+    if (name.trim().isEmpty || name.length > 160) {
+      fields['name'] = '请输入1–160字的名称。';
+    }
+    if (description.length > 2000) fields['description'] = '说明不能超过2000字。';
+    for (final field in definition['fields'] as List? ?? []) {
+      final text = values[field['key']]?.toString().trim() ?? '';
+      if (field['required'] == true && text.isEmpty) {
+        fields[field['key'] as String] = '请填写${field['label']}。';
+      } else if (text.isNotEmpty &&
+          field['type'] == 'number' &&
+          (!RegExp(r'^-?(?:0|[1-9]\d*)(?:\.\d+)?$').hasMatch(text) ||
+              num.tryParse(text)?.isFinite != true)) {
+        fields[field['key'] as String] = '请输入有限的十进制数字。';
+      } else if (text.isNotEmpty && field['type'] == 'date') {
+        final date = DateTime.tryParse(text);
+        if (!RegExp(r'^\d{4}-\d{2}-\d{2}$').hasMatch(text) ||
+            date == null ||
+            date.toIso8601String().substring(0, 10) != text) {
+          fields[field['key'] as String] = '请输入有效日期（YYYY-MM-DD）。';
+        }
+      }
+    }
+    return fields;
+  }
+
+  @override
+  Future<WorkspaceSaveResult> createRecord(WorkspaceCreate draft) async {
+    try {
+      await _readable();
+    } on WorkspaceFailure catch (error) {
+      return WorkspaceRejected(error);
+    }
+    final fingerprint = jsonEncode({
+      'operation': 'create',
+      'type': draft.typeId,
+      'name': draft.name,
+      'description': draft.description,
+      'directory': draft.directoryId,
+      'tags': draft.tagIds,
+      'values': draft.values,
+    });
+    final previous = _operations[draft.operationId];
+    if (previous != null) {
+      return previous.fingerprint == fingerprint
+          ? previous.result
+          : const WorkspaceRejected(
+              WorkspaceFailure('operation_conflict', '同一次保存不能用于不同内容。'),
+            );
+    }
+    final prototype = _initial.values
+        .where((d) => d.record.type.id == draft.typeId)
+        .firstOrNull;
+    WorkspaceSaveResult result;
+    final errors = _fieldErrors(
+      draft.name,
+      draft.description,
+      prototype?.definition ?? {},
+      draft.values,
+    );
+    if (draft.operationId.isEmpty ||
+        prototype == null ||
+        prototype.record.ref.kind == WorkspaceRecordKind.credential) {
+      result = const WorkspaceRejected(
+        WorkspaceFailure('unsupported', '请选择可创建的普通资料类型。'),
+      );
+    } else if (errors.isNotEmpty) {
+      result = WorkspaceRejected(
+        WorkspaceFailure('validation', '请检查标记的字段。', fieldErrors: errors),
+      );
+    } else if ((draft.directoryId != null &&
+            !_catalog.directories.any(
+              (d) =>
+                  d.id == draft.directoryId &&
+                  !['all', 'unfiled'].contains(d.id),
+            )) ||
+        draft.tagIds.any((id) => !_catalog.tags.any((t) => t.id == id))) {
+      result = const WorkspaceRejected(
+        WorkspaceFailure('validation', '目录或标签引用已失效。'),
+      );
+    } else if (nextSaveFailure != null) {
+      result = WorkspaceRejected(nextSaveFailure!);
+      nextSaveFailure = null;
+    } else {
+      final record = WorkspaceRecordSummary(
+        ref: WorkspaceRecordRef(
+          WorkspaceRecordKind.information,
+          'preview-record-${++_nextRecord}',
+        ),
+        name: draft.name.trim(),
+        description: draft.description,
+        type: prototype.record.type,
+        updatedAt: DateTime.utc(
+          2026,
+          10,
+          26,
+        ).add(Duration(microseconds: _clock++)),
+        directoryId: draft.directoryId,
+        tags: _catalog.tags.where((t) => draft.tagIds.contains(t.id)),
+      );
+      final detail = WorkspaceDetail(
+        record: record,
+        version: 1,
+        definition: prototype.definition,
+        values: draft.values,
+      );
+      if (_scenario == SampleWorkspaceScenario.empty) {
+        _records.clear();
+        _scenario = SampleWorkspaceScenario.ready;
+      }
+      _records[record.ref] = detail;
+      _changes.add(record.ref);
+      result = WorkspaceSaved(detail);
+    }
+    _operations[draft.operationId] = (fingerprint: fingerprint, result: result);
+    return result;
   }
 
   @override
@@ -276,20 +447,13 @@ class SampleWorkspaceSource implements WorkspaceSource {
     final current = _scenario == SampleWorkspaceScenario.empty
         ? null
         : _records[edit.record.ref];
-    final fields = <String, String>{};
-    if (edit.record.name.trim().isEmpty || edit.record.name.length > 160) {
-      fields['name'] = '请输入1–160字的名称。';
-    }
-    if (edit.record.description.length > 2000) {
-      fields['description'] = '说明不能超过2000字。';
-    }
     final values = {...?current?.values, ...edit.values};
-    for (final field in current?.definition['fields'] as List? ?? []) {
-      if (field['required'] == true &&
-          (values[field['key']]?.toString().trim() ?? '').isEmpty) {
-        fields[field['key'] as String] = '请填写${field['label']}。';
-      }
-    }
+    final fields = _fieldErrors(
+      edit.record.name,
+      edit.record.description,
+      current?.definition ?? {},
+      values,
+    );
     if (edit.operationId.trim().isEmpty || current == null) {
       result = const WorkspaceRejected(
         WorkspaceFailure('not_found', '保存目标或操作身份无效。'),
@@ -352,6 +516,7 @@ class SampleWorkspaceSource implements WorkspaceSource {
     _operations.clear();
     nextSaveFailure = null;
     _clock = 0;
+    _nextRecord = 0;
     if (!_disposed) _changes.add(null);
   }
 

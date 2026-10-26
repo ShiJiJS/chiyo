@@ -25,6 +25,7 @@ class WorkspaceRecordsController extends ChangeNotifier {
   WorkspaceLoad loadState = WorkspaceLoad.idle;
   WorkspaceSaveState saveState = WorkspaceSaveState.idle;
   double scrollOffset = 0;
+  int revision = 0;
   int _queryGeneration = 0, _detailGeneration = 0;
   bool _disposed = false;
 
@@ -39,7 +40,6 @@ class WorkspaceRecordsController extends ChangeNotifier {
     loadState = WorkspaceLoad.loading;
     failure = null;
     detailFailure = null;
-    detail = null;
     notifyListeners();
     try {
       final currentCatalog = await source.loadCatalog();
@@ -50,7 +50,9 @@ class WorkspaceRecordsController extends ChangeNotifier {
       if (_disposed || generation != _queryGeneration) return;
       catalog = currentCatalog;
       results = value;
+      revision++;
       selection = value.selection;
+      if (selection == null) detail = null;
       loadState = value.total == 0 ? WorkspaceLoad.empty : WorkspaceLoad.ready;
       notifyListeners();
       if (selection != null) await select(selection!);
@@ -70,8 +72,8 @@ class WorkspaceRecordsController extends ChangeNotifier {
   Future<void> select(WorkspaceRecordRef ref) async {
     if (_disposed) return;
     final generation = ++_detailGeneration;
+    if (detail?.record.ref != ref) detail = null;
     selection = ref;
-    detail = null;
     detailFailure = null;
     notifyListeners();
     try {
@@ -82,6 +84,7 @@ class WorkspaceRecordsController extends ChangeNotifier {
     } on WorkspaceFailure catch (error) {
       if (_disposed || generation != _detailGeneration) return;
       detailFailure = error;
+      if (error.code == 'not_found') detail = null;
       notifyListeners();
     } catch (_) {
       if (_disposed || generation != _detailGeneration) return;

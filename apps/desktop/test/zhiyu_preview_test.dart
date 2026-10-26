@@ -96,12 +96,12 @@ void main() {
       expect(find.text('暂时无法读取资料，请重试。'), findsOneWidget);
       await tester.tap(find.text('重试'));
       await tester.pumpAndSettle();
-      expect(find.text('31 项资料 · 5 条待处理请求 · 2 条录入提案'), findsOneWidget);
+      expect(find.text('15 项'), findsOneWidget);
       await scenario(tester, 'waiting');
-      expect(find.text('正在读取…'), findsOneWidget);
+      expect(find.text('正在更新…'), findsOneWidget);
       await scenario(tester, 'ready');
       await tester.pumpAndSettle();
-      expect(find.text('正在读取…'), findsNothing);
+      expect(find.text('正在更新…'), findsNothing);
       expect(tester.takeException(), isNull);
     },
   );
@@ -111,7 +111,10 @@ void main() {
     (tester) async {
       await start(tester);
       await guide(tester);
-      final select = find.byType(DesktopSelect<String>);
+      final select = find.descendant(
+        of: find.byType(DesktopDialog),
+        matching: find.byType(DesktopSelect<String>),
+      );
       await tester.ensureVisible(select);
       final anchor = tester.getRect(select);
       await tester.tap(find.text('文本'));

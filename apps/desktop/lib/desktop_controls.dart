@@ -188,6 +188,10 @@ class DesktopSelect<T> extends StatefulWidget {
     this.hint,
     this.isExpanded = false,
     this.decoration,
+    this.compact = false,
+    this.quiet = false,
+    this.triggerLabel,
+    this.leading,
   });
   final T? value, initialValue;
   final List<DropdownMenuItem<T>> items;
@@ -195,6 +199,8 @@ class DesktopSelect<T> extends StatefulWidget {
   final Widget? hint;
   final bool isExpanded;
   final InputDecoration? decoration;
+  final bool compact, quiet;
+  final Widget? triggerLabel, leading;
   @override
   State<DesktopSelect<T>> createState() => _DesktopSelectState<T>();
 }
@@ -267,38 +273,73 @@ class _DesktopSelectState<T> extends State<DesktopSelect<T>> {
             if (enabled) _show(triggerContext);
           },
         },
-        child: OutlinedButton(
-          focusNode: _buttonFocus,
-          onPressed: enabled
-              ? () => _open ? _popup.close?.call() : _show(triggerContext)
-              : null,
-          style: prototypeButton(
-            context,
-            size: 13,
-            foreground: UiPalette.of(context).ink,
-            background: UiPalette.of(context).paper,
-            side: BorderSide(
-              color: _open
-                  ? UiPalette.of(context).accent
-                  : UiPalette.of(context).line,
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 9),
-            radius: 5,
-          ),
-          child: Row(
-            mainAxisSize: widget.isExpanded
-                ? MainAxisSize.max
-                : MainAxisSize.min,
-            children: [
-              if (widget.isExpanded)
-                Expanded(child: label)
-              else
-                Flexible(child: label),
-              const SizedBox(width: 12),
-              Icon(_open ? Icons.expand_less : Icons.expand_more, size: 16),
-            ],
-          ),
-        ),
+        child: widget.compact
+            ? DesktopButton(
+                focusNode: _buttonFocus,
+                onPressed: enabled
+                    ? () => _open ? _popup.close?.call() : _show(triggerContext)
+                    : null,
+                kind: widget.quiet
+                    ? DesktopButtonKind.quiet
+                    : DesktopButtonKind.outline,
+                fontSize: 13,
+                leading: widget.leading,
+                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
+                minimumSize: Size(0, widget.quiet ? 33 : 34.8),
+                child:
+                    widget.triggerLabel ??
+                    Row(
+                      mainAxisSize: widget.isExpanded
+                          ? MainAxisSize.max
+                          : MainAxisSize.min,
+                      children: [
+                        if (widget.isExpanded)
+                          Expanded(child: label)
+                        else
+                          Flexible(child: label),
+                        const SizedBox(width: 7),
+                        const PrototypeSelectCaret(),
+                      ],
+                    ),
+              )
+            : OutlinedButton(
+                focusNode: _buttonFocus,
+                onPressed: enabled
+                    ? () => _open ? _popup.close?.call() : _show(triggerContext)
+                    : null,
+                style: prototypeButton(
+                  context,
+                  size: 13,
+                  foreground: UiPalette.of(context).ink,
+                  background: UiPalette.of(context).paper,
+                  side: BorderSide(
+                    color: _open
+                        ? UiPalette.of(context).accent
+                        : UiPalette.of(context).line,
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 11,
+                    vertical: 9,
+                  ),
+                  radius: 5,
+                ),
+                child: Row(
+                  mainAxisSize: widget.isExpanded
+                      ? MainAxisSize.max
+                      : MainAxisSize.min,
+                  children: [
+                    if (widget.isExpanded)
+                      Expanded(child: label)
+                    else
+                      Flexible(child: label),
+                    const SizedBox(width: 12),
+                    Icon(
+                      _open ? Icons.expand_less : Icons.expand_more,
+                      size: 16,
+                    ),
+                  ],
+                ),
+              ),
       ),
     );
     return widget.decoration?.labelText == null
