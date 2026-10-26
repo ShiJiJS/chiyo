@@ -15,12 +15,13 @@ Future<WorkspaceRecordRef?> showLibraryEditor(
   BuildContext context,
   LibraryController controller, {
   WorkspaceDetail? detail,
+  WorkspaceType? selectedType,
   WorkspaceFilePicker? filePicker,
   WorkspaceCredentialPicker? credentialPicker,
 }) async {
   final catalog = controller.catalog;
   if (catalog == null) return null;
-  var type = detail?.record.type;
+  var type = detail?.record.type ?? selectedType;
   type ??= await showDesktopDialog<WorkspaceType>(
     context,
     builder: (context) => DesktopDialog(
@@ -29,17 +30,7 @@ Future<WorkspaceRecordRef?> showLibraryEditor(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          for (final candidate in catalog.types.where(
-            (t) => [
-              'server',
-              'service',
-              'generic',
-              'profile',
-              'document',
-              'file',
-              'credential',
-            ].contains(t.id),
-          ))
+          for (final candidate in catalog.creatableTypes)
             Padding(
               padding: const EdgeInsets.only(bottom: 10),
               child: DesktopButton(
@@ -266,6 +257,10 @@ class _EditorState extends State<_Editor> {
                 WorkspaceCreate(
                   operationId: id,
                   typeId: widget.type.id,
+                  expectedTemplateVersion:
+                      widget.definition['templateVersion'] as String?,
+                  expectedTemplateDigest:
+                      widget.definition['packageDigest'] as String?,
                   name: _name.text,
                   description: _description.text,
                   directoryId: _directory,

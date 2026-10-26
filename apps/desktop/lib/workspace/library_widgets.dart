@@ -71,6 +71,8 @@ class RecordIcon extends StatelessWidget {
       'user' => PrototypeIconGlyph.user,
       'book' => PrototypeIconGlyph.book,
       'key' => PrototypeIconGlyph.key,
+      'plugin' => PrototypeIconGlyph.plugin,
+      'globe' => PrototypeIconGlyph.globe,
       _ => PrototypeIconGlyph.file,
     };
     return Container(

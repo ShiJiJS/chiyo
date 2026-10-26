@@ -18,6 +18,10 @@ import 'library_controller.dart';
 import 'library_page.dart';
 import 'library_file_dialogs.dart';
 import 'library_credential_choices.dart';
+import 'plugins_controller.dart';
+import 'plugins_page.dart';
+import 'plugin_dialogs.dart';
+import 'library_edit_dialog.dart';
 
 /// Only the isolated composition root knows which provider is a sample.
 /// U02–U07 register their production widgets through pageBuilder.
@@ -33,6 +37,7 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
   late final SampleWorkspaceSource _source;
   late final WorkspaceController _controller;
   late final LibraryController _library;
+  late final PluginsController _plugins;
   StreamSubscription<WorkspaceRecordRef?>? _summaryChanges;
   final _guideFocus = FocusNode();
   bool _stress = false;
@@ -47,6 +52,8 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
     );
     _controller = WorkspaceController(_source);
     _library = LibraryController(_source);
+    _plugins = PluginsController(_source.plugins, _source.changes);
+    unawaited(_plugins.load());
     _summaryChanges = _source.changes.listen(
       (_) => unawaited(_controller.refresh()),
     );
@@ -71,6 +78,7 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
     _guideFocus.dispose();
     _controller.dispose();
     _library.dispose();
+    _plugins.dispose();
     unawaited(_summaryChanges?.cancel());
     _source.dispose();
     widget.desktop?.dispose();
@@ -81,6 +89,33 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
     _source.setScenario(value);
     unawaited(_controller.refresh());
     unawaited(_library.load(_library.query));
+    unawaited(_plugins.load());
+  }
+
+  Future<void> _createWithTemplate(
+    BuildContext context,
+    WorkspaceType type,
+  ) async {
+    unawaited(widget.desktop?.setNavigationEnabled(false));
+    try {
+      await _library.load(_library.query);
+      if (!context.mounted) return;
+      final ref = await showLibraryEditor(
+        context,
+        _library,
+        selectedType: type,
+      );
+      if (!context.mounted || ref == null) return;
+      await _library.openRelated(ref);
+      _controller.navigate(WorkspacePage.library);
+    } finally {
+      unawaited(widget.desktop?.setNavigationEnabled(true));
+    }
+  }
+
+  Future<void> _templateRecords(WorkspaceType type) async {
+    await _library.apply(WorkspaceQuery(typeId: type.id));
+    _controller.navigate(WorkspacePage.library);
   }
 
   Future<void> _dataset(bool stress) async {
@@ -282,6 +317,21 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
                 onRetry: () => _scenario(SampleWorkspaceScenario.ready),
                 onNavigate: (page, id) =>
                     _controller.navigate(page, objectId: id, remember: true),
+                onModalChanged: (open) =>
+                    unawaited(widget.desktop?.setNavigationEnabled(!open)),
+              )
+            : location.page == WorkspacePage.settings
+            ? PluginsPage(
+                controller: _plugins,
+                picker: () => showPluginChoices(
+                  context,
+                  _source.pluginChoices,
+                  _source.plugins.releaseCandidate,
+                ),
+                onRetry: () => _scenario(SampleWorkspaceScenario.ready),
+                onCreate: (type) =>
+                    unawaited(_createWithTemplate(context, type)),
+                onRecords: (type) => unawaited(_templateRecords(type)),
                 onModalChanged: (open) =>
                     unawaited(widget.desktop?.setNavigationEnabled(!open)),
               )

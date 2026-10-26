@@ -7,6 +7,7 @@ import 'package:info_desktop/workspace/preview_workspace.dart';
 import 'package:info_desktop/workspace/zhiyu_theme.dart';
 import 'package:info_desktop/workspace/zhiyu_app.dart';
 import 'package:info_desktop/workspace/workspace_source.dart';
+import 'package:info_desktop/workspace/plugins_page.dart';
 
 void main() {
   Future<void> start(
@@ -73,8 +74,30 @@ void main() {
       await tester.tap(find.byKey(ValueKey('workspace-nav-$page')));
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
+      expect(
+        tester
+            .widget<ZhiyuApp>(find.byType(ZhiyuApp))
+            .controller
+            .location
+            .page
+            .name,
+        page,
+      );
     }
-    expect(find.text('31 项资料 · 5 条待处理请求 · 2 条录入提案'), findsOneWidget);
+    expect(find.byType(PluginsPage), findsOneWidget);
+    expect(
+      tester
+          .widget<PluginsPage>(find.byType(PluginsPage))
+          .controller
+          .catalog!
+          .packages,
+      hasLength(3),
+    );
+    expect(find.byKey(const ValueKey('plugin-workspace')), findsOneWidget);
+    expect(
+      tester.getSize(find.byKey(const ValueKey('zhiyu-appbar'))).height,
+      66,
+    );
   });
 
   testWidgets(

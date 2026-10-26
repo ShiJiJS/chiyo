@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../desktop_controls.dart';
+import '../desktop_fonts.dart';
 import '../prototype_icons.dart';
 import '../ui_palette.dart';
 import 'library_widgets.dart';
@@ -141,6 +143,13 @@ class _LibraryDetailState extends State<LibraryDetail> {
                       onModalChanged: widget.onModalChanged,
                     ),
                   )
+                else if (field['type'] == 'entries')
+                  SizedBox(
+                    width: bounds.maxWidth,
+                    child: LibraryEntryTimeline(
+                      widget.detail.values[field['key']],
+                    ),
+                  )
                 else
                   SizedBox(
                     width: (bounds.maxWidth - 34 * (columns - 1)) / columns,
@@ -167,7 +176,10 @@ class _LibraryDetailState extends State<LibraryDetail> {
                                   field['key'] == 'host'
                               ? libraryText(context, 13, height: 1.8).copyWith(
                                   fontFamily: 'Menlo',
-                                  fontFamilyFallback: const ['monospace'],
+                                  fontFamilyFallback: [
+                                    ...desktopFontFallback,
+                                    'monospace',
+                                  ],
                                 )
                               : libraryText(context, 14, height: 1.8),
                         ),
@@ -455,10 +467,27 @@ class _LibraryDetailState extends State<LibraryDetail> {
               ],
             ),
           ),
+          if (detail.templateState != WorkspaceTemplateState.available)
+            Padding(
+              padding: const EdgeInsets.only(top: 20),
+              child: Text(
+                detail.templateState == WorkspaceTemplateState.disabled
+                    ? '模板插件已停用，按保留的字段显示。已有内容可继续编辑。'
+                    : detail.templateState ==
+                          WorkspaceTemplateState.removedDefinition
+                    ? '当前插件不再提供此模板，按保留的字段显示。已有内容可继续编辑。'
+                    : '模板插件未安装，按保留的字段显示。已有内容可继续编辑。',
+                key: const ValueKey('library-template-unavailable'),
+                style: libraryText(context, 13, color: c.muted),
+              ),
+            ),
           FutureBuilder<List<WorkspaceRecordSummary>>(
             future: _links,
             builder: (context, snapshot) {
-              final sections = detail.definition['sections'] as List? ?? [];
+              final sections =
+                  detail.templateState == WorkspaceTemplateState.available
+                  ? detail.definition['sections'] as List? ?? []
+                  : const [];
               if (_relations) {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -501,6 +530,27 @@ class _LibraryDetailState extends State<LibraryDetail> {
                       SelectableText(
                         _value(detail.values['body'] ?? record.description),
                       ),
+                    if (detail.templateState !=
+                        WorkspaceTemplateState.available)
+                      for (final entry in detail.values.entries)
+                        if (!(detail.definition['fields'] as List? ?? []).any(
+                              (f) => f['key'] == entry.key,
+                            ) &&
+                            !((detail.definition['fields'] as List? ?? [])
+                                    .isEmpty &&
+                                entry.key == 'body'))
+                          _section(
+                            context,
+                            entry.key,
+                            SelectableText(
+                              entry.value is String
+                                  ? entry.value as String
+                                  : const JsonEncoder.withIndent(
+                                      '  ',
+                                    ).convert(entry.value),
+                              style: libraryText(context, 14, height: 1.7),
+                            ),
+                          ),
                     for (final relation in detail.relations.entries)
                       if (record.ref.kind != WorkspaceRecordKind.credential)
                         _section(

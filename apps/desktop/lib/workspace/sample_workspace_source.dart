@@ -9,6 +9,8 @@ import 'sample_workspace_credentials.dart';
 import 'sample_credential_records.dart';
 import 'sample_credential_links.dart';
 import 'workspace_source.dart';
+import 'sample_workspace_plugins.dart';
+import 'sample_plugin_fixture.dart';
 
 part 'sample_workspace_history.dart';
 
@@ -22,10 +24,13 @@ class SampleWorkspaceSource
     String fixtureJson = sampleWorkspaceJson,
     DateTime Function()? now,
     WorkspaceAssetReader? readAsset,
+    Map<String, ({String filename, List<int> bytes})>? pluginInputs,
   }) : _fixtureJson = fixtureJson,
        _files = SampleWorkspaceFiles(readAsset),
+       _pluginInputs = pluginInputs,
        _now = now ?? (() => DateTime.utc(2026, 10, 26));
   final SampleWorkspaceFiles _files;
+  final Map<String, ({String filename, List<int> bytes})>? _pluginInputs;
   final _credentialLinks = SampleCredentialLinks();
   late final _credentials = SampleWorkspaceCredentials(
     readable: _readable,
@@ -41,6 +46,35 @@ class SampleWorkspaceSource
   );
   @override
   WorkspaceCredentialSource get credentials => _credentials;
+  late final _plugins = SampleWorkspacePlugins(
+    readable: _readable,
+    beforeWrite: () {
+      if (nextSaveFailure case final failure?) {
+        nextSaveFailure = null;
+        throw failure;
+      }
+    },
+    changed: () {
+      _catalogVersion++;
+      _changes.add(null);
+    },
+    recordCounts: () {
+      final counts = <String, int>{};
+      if (_scenario == SampleWorkspaceScenario.empty) return counts;
+      for (final detail in _records.values) {
+        final package = detail.definition['packageId'] as String?;
+        if (package != null) {
+          counts.update(package, (n) => n + 1, ifAbsent: () => 1);
+        }
+      }
+      return counts;
+    },
+    inputs: _pluginInputs ?? samplePluginInputs(),
+  );
+  @override
+  WorkspacePluginSource get plugins => _plugins;
+  Future<List<WorkspacePluginCandidate>> pluginChoices() => _plugins.choices();
+  set loseNextPluginReply(bool value) => _plugins.loseNextReply = value;
   set nextCredentialReadFailure(WorkspaceFailure? value) =>
       _credentials.nextReadFailure = value;
   @override
@@ -162,6 +196,12 @@ class SampleWorkspaceSource
     return WorkspaceDetail(
       record: raw.record,
       version: raw.version,
+      templateState: raw.definition['packageId'] is String
+          ? _plugins.stateFor(
+              raw.record.type.id,
+              raw.definition['packageId'] as String,
+            )
+          : WorkspaceTemplateState.available,
       definition: raw.definition,
       values: raw.values,
       relations: relations,
@@ -552,6 +592,10 @@ class SampleWorkspaceSource
                       ? _genericDefinitionFor(row['values'] as Map? ?? {})
                       : {}),
       );
+      if (row['packageId'] case final String package) {
+        definition['packageId'] = package;
+        definition['templateVersion'] = row['templateVersion'];
+      }
       final detail = WorkspaceDetail(
         record: record,
         version: 1,
@@ -647,6 +691,7 @@ class SampleWorkspaceSource
       types: types.values,
     );
     _initialCatalog = _catalog;
+    _plugins.seed(_initial.values);
     for (final row in trashRows) {
       final detail = trashDetails[rowRef(row)]!;
       if (detail.record.ref.kind != WorkspaceRecordKind.information ||
@@ -719,7 +764,14 @@ class SampleWorkspaceSource
           : _recycled.length,
       directories: _catalog.directories,
       tags: _catalog.tags,
-      types: _catalog.types,
+      types: {
+        for (final type in [..._catalog.types, ..._plugins.knownTypes])
+          type.id: type,
+      }.values,
+      creatableTypes: {
+        for (final type in [..._catalog.types, ..._plugins.knownTypes])
+          if (_plugins.available(type.id)) type.id: type,
+      }.values,
       directoryCounts: {
         for (final directory in _catalog.directories)
           directory.id: records
@@ -871,6 +923,12 @@ class SampleWorkspaceSource
   Future<Map<String, Object?>> loadTemplate(String typeId) async {
     await _readable();
     if (typeId == 'generic') return _genericDefinition;
+    if (!_plugins.available(typeId)) {
+      throw const WorkspaceFailure('not_found', '模板所属插件已停用或移除，请使用已有资料快照继续编辑。');
+    }
+    if (_plugins.template(typeId) case final template?) {
+      return template.definition;
+    }
     final template = _initial.values
         .where((d) => d.record.type.id == typeId)
         .firstOrNull;
@@ -976,10 +1034,19 @@ class SampleWorkspaceSource
         : _scenario == SampleWorkspaceScenario.empty
         ? null
         : _records[query.source];
-    if (source == null || source.record.type.id != query.typeId) {
+    if (query.source == null && !_plugins.available(query.typeId)) {
+      throw const WorkspaceFailure('not_found', '模板已停用或移除，请重新选择。');
+    }
+    final definition = query.source == null
+        ? _plugins.template(query.typeId)?.definition ?? source?.definition
+        : source?.definition;
+    if (definition == null ||
+        source != null && source.record.type.id != query.typeId) {
       throw const WorkspaceFailure('not_found', '来源资料或模板已不可用。');
     }
-    final rule = _relationRule(source.definition, query.key);
+    final sourceKind =
+        source?.record.ref.kind ?? WorkspaceRecordKind.information;
+    final rule = _relationRule(definition, query.key);
     if (rule == null) {
       throw const WorkspaceFailure('unsupported', '此资料没有该关联类型。');
     }
@@ -988,10 +1055,10 @@ class SampleWorkspaceSource
         : [
             for (final detail in _records.values)
               if (detail.record.ref != query.source &&
-                  (source.record.ref.kind != WorkspaceRecordKind.credential ||
+                  (sourceKind != WorkspaceRecordKind.credential ||
                       detail.record.ref.kind ==
                           WorkspaceRecordKind.information) &&
-                  (source.record.ref.kind != WorkspaceRecordKind.information ||
+                  (sourceKind != WorkspaceRecordKind.information ||
                       query.key != 'credentials' ||
                       detail.record.ref.kind ==
                           WorkspaceRecordKind.credential) &&
@@ -1158,6 +1225,8 @@ class SampleWorkspaceSource
     final fingerprint = _fingerprint({
       'operation': 'create',
       'type': draft.typeId,
+      'templateVersion': draft.expectedTemplateVersion,
+      'templateDigest': draft.expectedTemplateDigest,
       'name': draft.name,
       'description': draft.description,
       'directory': draft.directoryId,
@@ -1184,9 +1253,13 @@ class SampleWorkspaceSource
     final prototype = _initial.values
         .where((d) => d.record.type.id == draft.typeId)
         .firstOrNull;
+    final registered = _plugins.template(draft.typeId);
+    final type = registered?.type ?? prototype?.record.type;
     final definition = draft.typeId == 'generic'
         ? _genericDefinition
-        : prototype?.definition ?? <String, Object?>{};
+        : registered?.definition ??
+              prototype?.definition ??
+              <String, Object?>{};
     WorkspaceSaveResult result;
     final errors = _fieldErrors(
       draft.name,
@@ -1195,9 +1268,22 @@ class SampleWorkspaceSource
       draft.values,
     );
     errors.addAll(_relationErrors(null, definition, draft.relations));
-    if (draft.operationId.isEmpty ||
-        prototype == null ||
-        prototype.record.ref.kind == WorkspaceRecordKind.credential ||
+    if (!_plugins.available(draft.typeId)) {
+      result = const WorkspaceRejected(
+        WorkspaceFailure('template_unavailable', '所选模板已停用或移除，请重新选择；草稿仍保留。'),
+      );
+    } else if (registered != null &&
+        (draft.expectedTemplateVersion != null &&
+                draft.expectedTemplateVersion !=
+                    definition['templateVersion'] ||
+            draft.expectedTemplateDigest != null &&
+                draft.expectedTemplateDigest != definition['packageDigest'])) {
+      result = const WorkspaceRejected(
+        WorkspaceFailure('conflict', '所选模板已更新，请重新读取并核对表单。'),
+      );
+    } else if (draft.operationId.isEmpty ||
+        type == null ||
+        draft.typeId == 'credential' ||
         draft.typeId == 'file') {
       result = const WorkspaceRejected(
         WorkspaceFailure('unsupported', '请选择可创建的普通资料类型。'),
@@ -1227,7 +1313,7 @@ class SampleWorkspaceSource
         ),
         name: draft.name.trim(),
         description: draft.description,
-        type: prototype.record.type,
+        type: type,
         updatedAt: DateTime.utc(
           2026,
           10,
@@ -1250,7 +1336,7 @@ class SampleWorkspaceSource
       _putRecord(detail);
       _entryIdentityOwners.addAll(sampleEntryOwners(detail));
       _changes.add(record.ref);
-      result = WorkspaceSaved(detail);
+      result = WorkspaceSaved(_projectRecord(_records[record.ref]!));
     }
     _operations[draft.operationId] = (fingerprint: fingerprint, result: result);
     if (result case WorkspaceSaved(:final detail)) {
@@ -1378,7 +1464,7 @@ class SampleWorkspaceSource
       _putRecord(detail);
       _entryIdentityOwners.addAll(sampleEntryOwners(detail));
       _changes.add(edit.record.ref);
-      result = WorkspaceSaved(detail);
+      result = WorkspaceSaved(_projectRecord(_records[edit.record.ref]!));
     }
     _operations[edit.operationId] = (fingerprint: fingerprint, result: result);
     if (result case WorkspaceSaved(
@@ -1753,6 +1839,7 @@ class SampleWorkspaceSource
     _files.clear();
     _credentialLinks.clear();
     _credentials.clear();
+    _plugins.clear();
     _fileOperations.clear();
     _clock = _nextRecord = _nextDirectory = _nextRecycle = 0;
     _catalogVersion++;
@@ -1766,6 +1853,7 @@ class SampleWorkspaceSource
     _files.reset();
     _credentialLinks.reset();
     _credentials.reset();
+    _plugins.reset();
     _basePending = _initialPending;
     _baseProposals = _initialProposals;
     _fileOperations.clear();
