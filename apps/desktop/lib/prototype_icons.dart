@@ -17,6 +17,7 @@ enum PrototypeIconGlyph {
   edit,
   key,
   grid,
+  arrow,
 }
 
 /// An approved round-05 SVG icon, using its original 24-unit geometry.
@@ -90,7 +91,9 @@ class _PrototypeIconPainter extends CustomPainter {
       ..strokeCap = StrokeCap.round
       ..strokeJoin = StrokeJoin.round;
 
-    if (round09 || glyph == PrototypeIconGlyph.grid) {
+    if (round09 ||
+        glyph == PrototypeIconGlyph.grid ||
+        glyph == PrototypeIconGlyph.arrow) {
       canvas.drawPath(_round09Path(glyph), stroke);
       canvas.restore();
       return;
@@ -270,6 +273,7 @@ class _PrototypeIconPainter extends CustomPainter {
           stroke,
         );
       case PrototypeIconGlyph.grid:
+      case PrototypeIconGlyph.arrow:
         break; // Drawn through the approved Round09 path above.
     }
     canvas.restore();
@@ -284,6 +288,13 @@ class _PrototypeIconPainter extends CustomPainter {
 
 /// Paths from the frozen Round09 util.js; legacy callers retain their symbols.
 Path _round09Path(PrototypeIconGlyph glyph) => switch (glyph) {
+  PrototypeIconGlyph.arrow =>
+    Path()
+      ..moveTo(5, 12)
+      ..lineTo(19, 12)
+      ..moveTo(13, 6)
+      ..lineTo(19, 12)
+      ..lineTo(13, 18),
   PrototypeIconGlyph.layers =>
     Path()
       ..moveTo(12, 3)

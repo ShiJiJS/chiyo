@@ -4,6 +4,7 @@ import '../desktop_controls.dart';
 import '../desktop_feedback.dart';
 import '../desktop_motion.dart';
 import '../ui_palette.dart';
+import '../prototype_icons.dart';
 import 'sample_workspace_source.dart';
 import 'workspace_controller.dart';
 import 'workspace_source.dart';
@@ -128,8 +129,27 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
       focusNode: _guideFocus,
       kind: DesktopButtonKind.quiet,
       fontSize: 12,
+      padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 8),
       onPressed: () => _guide(context),
-      child: const Text('设计说明  ↗'),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text('设计说明'),
+          const SizedBox(width: 7),
+          SizedBox(
+            width: 19,
+            height: 24.1875,
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: PrototypeIcon(
+                PrototypeIconGlyph.arrow,
+                size: 19,
+                color: UiPalette.of(context).ink,
+              ),
+            ),
+          ),
+        ],
+      ),
     ),
     pageBuilder:
         widget.pageBuilder ??

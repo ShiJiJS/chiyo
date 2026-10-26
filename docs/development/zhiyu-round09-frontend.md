@@ -2,11 +2,13 @@
 
 本轮按[已发布计划](../planning/zhiyu-round09/README.md)先完成7项正式Flutter界面。使用独立示例数据，后续真实功能由[#69](https://github.com/ShiJiJS/agent-info-manage/issues/69)重新拆分。仅Windows，无子Agent、无服务器同步。
 
+**2026-10-26已按用户要求收尾并暂停。** [交接说明](handoffs/zhiyu-frontend-20261026.md)列出当前源码、证据、限制和接手顺序。
+
 ## 当前任务
 
 | 任务 | 进度 |
 | --- | --- |
-| [#62 外壳和通用控件](https://github.com/ShiJiJS/agent-info-manage/issues/62) | 2026-10-26进行中：预览入口、主题、基础控件及状态管理已实现；完整视觉/动画验收未完成 |
+| [#62 外壳和通用控件](https://github.com/ShiJiJS/agent-info-manage/issues/62) | 2026-10-26暂停：基础实现、顶栏几何及原生集成检查已推进；最终视觉/动画验收未完成 |
 | [#63 三栏信息库](https://github.com/ShiJiJS/agent-info-manage/issues/63) | 等待#62 |
 | [#64 档案、文档、文件、凭据](https://github.com/ShiJiJS/agent-info-manage/issues/64) | 等待#63 |
 | [#65 插件与旧资料套模板](https://github.com/ShiJiJS/agent-info-manage/issues/65) | 等待#62 |
@@ -47,6 +49,8 @@
 原生截图记录的是开发中的基础控件弹窗；它早于本检查点最后的顶栏响应式/表单保护调整。它只能证明原生窗口基本运行，不代表最后源码的完整视觉验收，不替代固定源码重启后的最终取证。
 
 ## #62下一步
+
+本次暂停收尾新增：[r2检查点](evidence/zhiyu-round09/u01/r2/checkpoint.json)。顶栏的20组对照已达到0.0078125逻辑像素偏差；原生集成覆盖当前DPR=2、200%文字和减少动画，已生成原始时钟GIF。下面旧检查点提出的事项以交接说明的最新状态为准，不能把记录生成等同动态审阅完成。
 
 1. 读取冻结原型最终计算样式，对照顶栏的实际文字和图标边界，完成两个桌面尺寸的几何检查。当前不能声称已经达到S5的≤2逻辑像素目标；不靠改小字体或修改原型迁就实现。
 2. 在固定源码重新启动原生预览，补齐菜单、提示、快速开关、焦点、放大文字及减少动画的检查；原生系统DPI和文字放大分别记录。
