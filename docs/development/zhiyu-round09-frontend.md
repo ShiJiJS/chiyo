@@ -1,14 +1,14 @@
 # 知予 Round09 前端实施记录
 
-本轮按[已发布计划](../planning/zhiyu-round09/README.md)先完成7项正式Flutter界面。使用独立示例数据，后续真实功能由[#69](https://github.com/ShiJiJS/agent-info-manage/issues/69)重新拆分。仅Windows，无子Agent、无服务器同步。
+本轮按[已发布计划](../planning/zhiyu-round09/README.md)先完成7项正式Flutter界面。使用独立示例数据，后续真实功能由[#69](https://github.com/ShiJiJS/agent-info-manage/issues/69)重新拆分。2026-10-26起改为Mac优先、Windows适配后置；无子Agent、无服务器同步。
 
-**2026-10-26已按用户要求收尾并暂停。** [交接说明](handoffs/zhiyu-frontend-20261026.md)列出当前源码、证据、限制和接手顺序。
+**2026-10-26已按用户要求收尾并暂停；本次只调整tickets与文档，未恢复产品开发。** [Mac接手计划](../planning/zhiyu-round09/macos-continuation.md)规定后续基线与顺序。 [交接说明](handoffs/zhiyu-frontend-20261026.md)列出当前源码、证据、限制和接手顺序。
 
 ## 当前任务
 
 | 任务 | 进度 |
 | --- | --- |
-| [#62 外壳和通用控件](https://github.com/ShiJiJS/agent-info-manage/issues/62) | 2026-10-26暂停：基础实现、顶栏几何及原生集成检查已推进；最终视觉/动画验收未完成 |
+| [#62 外壳和通用控件](https://github.com/ShiJiJS/agent-info-manage/issues/62) | 2026-10-26暂停：基础实现、顶栏几何及原生集成检查已推进；最终视觉/动画验收未完成；Mac原生隔离、字体/菜单/检查工具及Mac验收待实施 |
 | [#63 三栏信息库](https://github.com/ShiJiJS/agent-info-manage/issues/63) | 等待#62 |
 | [#64 档案、文档、文件、凭据](https://github.com/ShiJiJS/agent-info-manage/issues/64) | 等待#63 |
 | [#65 插件与旧资料套模板](https://github.com/ShiJiJS/agent-info-manage/issues/65) | 等待#62 |
@@ -16,9 +16,9 @@
 | [#67 提案与历史](https://github.com/ShiJiJS/agent-info-manage/issues/67) | 等待#62 |
 | [#68 全局设置](https://github.com/ShiJiJS/agent-info-manage/issues/68) | 等待#62 |
 
-## #62已经实现什么
+## #62已经实现什么（Windows检查点）
 
-- 独立入口为`apps/desktop/lib/preview_main.dart`。它只创建示例数据来源和新界面，不进入正式启动器、数据库、本机服务、hooks、通知或凭据执行。当前库和安装目录均未替换。
+- 独立入口为`apps/desktop/lib/preview_main.dart`。它只创建示例数据来源和新界面，不进入正式启动器、数据库、本机服务、hooks、通知或凭据执行。当前库和安装目录均未替换。这描述Dart入口及当时Windows范围；Mac原生MainFlutterWindow仍有目录授权存储初始化，须在#62补齐隔离后才能作同样保证。
 - `workspace`模块中的App/Shell通过调用者提供的页面和数据来源组装；它们不引用示例实现。集中示例来源仅在预览组装入口创建，支持正常、空资料、持续等待、读取失败和重置。
 - 控制器保留页面与稳定资料身份、返回位置和明暗外观；晚到的旧读取结果不能覆盖新结果，关闭后不再通知UI。失败不会退回示例成功分支。
 - 复用现有颜色、按钮、选择器、锚定浮层、滚动和交互宿主。在同一基础上增加Round09明暗颜色、系统字栈、150ms按钮反馈/1px按下位移、120ms菜单和180ms弹窗/详情/反馈过渡。
@@ -26,7 +26,7 @@
 - 修复新增动效过程中发现的旧触发器失效访问和关闭后焦点恢复问题。旧入口未切到新页面，相关既有公共控件测试继续通过。
 - Windows字体从本机已安装文件注册，不随软件分发字体。原生启动和离屏截图使用同一字体加载方法；实际字体/几何仍需最终对照，不能凭已加载字体推定一致。
 
-## 怎样运行和检查
+## Windows历史重现方法（Mac命令由#62补齐）
 
 在桌面包目录执行`flutter run -d windows --no-pub --target lib/preview_main.dart`。窗口标题明确标记“知予 · 界面预览·示例数据”。点击右上设计说明可以切明暗、改变读取状态和重置数据；这个面板也用于基础控件检查。
 
@@ -48,7 +48,7 @@
 
 原生截图记录的是开发中的基础控件弹窗；它早于本检查点最后的顶栏响应式/表单保护调整。它只能证明原生窗口基本运行，不代表最后源码的完整视觉验收，不替代固定源码重启后的最终取证。
 
-## #62下一步
+## Windows暂停时剩余项（保留历史，当前顺序见Mac接手计划）
 
 本次暂停收尾新增：[r2检查点](evidence/zhiyu-round09/u01/r2/checkpoint.json)。顶栏的20组对照已达到0.0078125逻辑像素偏差；原生集成覆盖当前DPR=2、200%文字和减少动画，已生成原始时钟GIF。下面旧检查点提出的事项以交接说明的最新状态为准，不能把记录生成等同动态审阅完成。
 
