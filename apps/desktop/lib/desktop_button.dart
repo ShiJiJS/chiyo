@@ -16,6 +16,7 @@ class DesktopButton extends StatefulWidget {
     this.selected = false,
     this.busy = false,
     this.leading,
+    this.leadingGap = 7,
     this.focusNode,
     this.tooltip,
     this.fontSize = 14,
@@ -28,6 +29,7 @@ class DesktopButton extends StatefulWidget {
   final DesktopButtonKind kind;
   final bool selected, busy;
   final Widget? leading;
+  final double leadingGap;
   final FocusNode? focusNode;
   final String? tooltip;
   final double fontSize;
@@ -151,13 +153,13 @@ class _DesktopButtonState extends State<DesktopButton> {
                     color: ink,
                   ),
                 ),
-                const SizedBox(width: 7),
+                SizedBox(width: widget.leadingGap),
               ] else if (widget.leading != null) ...[
                 IconTheme(
                   data: IconThemeData(size: 19, color: ink),
                   child: widget.leading!,
                 ),
-                const SizedBox(width: 7),
+                SizedBox(width: widget.leadingGap),
               ],
               Flexible(child: widget.child),
             ],

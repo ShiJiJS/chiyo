@@ -48,13 +48,23 @@ class ZhiyuShell extends StatelessWidget {
         kind: DesktopButtonKind.quiet,
         selected: selected,
         fontSize: dense ? 13 : 14,
+        leadingGap: 8,
         padding: EdgeInsets.symmetric(horizontal: dense ? 9 : 11, vertical: 8),
         leading: compact
             ? null
-            : PrototypeIcon(
-                glyph,
-                size: 19,
-                color: selected ? c.accent : c.ink,
+            : SizedBox(
+                width: 19,
+                // HTML keeps the inline SVG's baseline/descent in its span.
+                // These line boxes come from the frozen cascade at 1x text.
+                height: dense ? 24.796875 : 25.390625,
+                child: Align(
+                  alignment: Alignment.topCenter,
+                  child: PrototypeIcon(
+                    glyph,
+                    size: 19,
+                    color: selected ? c.accent : c.ink,
+                  ),
+                ),
               ),
         onPressed: () => onNavigate(destination),
         child: Row(
@@ -97,12 +107,20 @@ class ZhiyuShell extends StatelessWidget {
               final compact = constraints.maxWidth <= 1050 || scale > 1.3;
               final dense = constraints.maxWidth <= 1300;
               final brand = Row(
+                key: const ValueKey('zhiyu-brand'),
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  PrototypeIcon(
-                    PrototypeIconGlyph.layers,
-                    size: 24,
-                    color: c.accent,
+                  SizedBox(
+                    width: 24,
+                    height: 31.390625,
+                    child: Align(
+                      alignment: Alignment.topCenter,
+                      child: PrototypeIcon(
+                        PrototypeIconGlyph.layers,
+                        size: 24,
+                        color: c.accent,
+                      ),
+                    ),
                   ),
                   const SizedBox(width: 11),
                   Text(
@@ -136,7 +154,7 @@ class ZhiyuShell extends StatelessWidget {
               return Container(
                 key: const ValueKey('zhiyu-appbar'),
                 constraints: const BoxConstraints(minHeight: 66),
-                padding: EdgeInsets.symmetric(horizontal: dense ? 15 : 25),
+                padding: EdgeInsets.symmetric(horizontal: dense ? 15 : 22),
                 decoration: BoxDecoration(
                   color: c.paper,
                   border: Border(bottom: BorderSide(color: c.line)),
@@ -164,7 +182,7 @@ class ZhiyuShell extends StatelessWidget {
                         child: Row(
                           children: [
                             brand,
-                            SizedBox(width: dense ? 12 : 28),
+                            SizedBox(width: dense ? 12 : 22),
                             navigation,
                             const Spacer(),
                             ?trailing,

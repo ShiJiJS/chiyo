@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:convert';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -43,6 +44,32 @@ void main() {
         }
         final prefix =
             '../../build/zhiyu-ui/u01/flutter/${dark ? 'dark' : 'light'}-${size.width.toInt()}';
+        final geometry = <String, Object>{};
+        for (final (name, key) in [
+          ('appbar', 'zhiyu-appbar'),
+          ('brand', 'zhiyu-brand'),
+          ('library', 'workspace-nav-library'),
+          ('approvals', 'workspace-nav-approvals'),
+          ('proposals', 'workspace-nav-proposals'),
+          ('history', 'workspace-nav-history'),
+          ('settings', 'workspace-nav-settings'),
+          ('guide', 'preview-guide'),
+        ]) {
+          final rect = tester.getRect(find.byKey(ValueKey(key)));
+          geometry[name] = {
+            'x': rect.left,
+            'y': rect.top,
+            'width': rect.width,
+            'height': rect.height,
+          };
+        }
+        await tester.runAsync(() async {
+          final file = File('$prefix-geometry.json');
+          await file.parent.create(recursive: true);
+          await file.writeAsString(
+            const JsonEncoder.withIndent('  ').convert(geometry),
+          );
+        });
         Future<void> capture(String suffix) async {
           await tester.runAsync(() async {
             final boundary =
