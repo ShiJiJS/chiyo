@@ -1,0 +1,28 @@
+{
+  "sourceCommit": "e4685dcbc05143a7a0d31d443a79bfe9db6a588b",
+  "scope": "U02 inline directory tree create/rename/move/empty-delete; generic metadata contract and safe filter repair. Isolated sample only.",
+  "sourceSha256": {
+    "apps/desktop/lib/workspace/library_directory_dialog.dart": "8ada1dd832e639f226fa16579bea305dc35c68be36e9c78638c1f3463d114185",
+    "apps/desktop/lib/workspace/library_edit_dialog.dart": "649bfb2dc42baa51a1d0313faf002baec56654e50d069553c06343abf3f414b4",
+    "apps/desktop/lib/workspace/library_page.dart": "0f2565412d5e066a2b586d63d53ba6bc82559a45e3c5fff199a3254f16f738d9",
+    "apps/desktop/lib/workspace/library_widgets.dart": "4a557e42ff07eaecdeb3bc00d735b7d09d57603795ed70a1b34a6f4d0f69cc53",
+    "apps/desktop/lib/workspace/sample_workspace_source.dart": "ca2e478a434b66f7303ab128acb8b8bdd3b82efd70f9ec64d94adf7c9192ff91",
+    "apps/desktop/lib/workspace/workspace_records.dart": "de612a1fbdc74b6e6ebf6cf0d487cdc5570aa179121d8e23945a334a39c09598",
+    "apps/desktop/lib/workspace/workspace_records_controller.dart": "82858564a0fae44a7847c6366da5847c564fcf1da9c9c278b21aef236affac06",
+    "apps/desktop/lib/workspace/workspace_source.dart": "6c402ce51a69b6af53ce85543221d452e9302cc1d37e34364bbb007cc711c7d8",
+    "apps/desktop/test/zhiyu_directory_test.dart": "397c0434c9f6866729a6e0a7b6627fd6e68656e0ebcbbbba9ea45daebc52a890"
+  },
+  "checks": {
+    "desktopAnalyze": "passed with fatal-infos",
+    "focused": "23 passed, three consecutive runs; library + record + directory scope, counts overlap",
+    "capture": "7 directory checks passed; four offscreen Flutter screenshots with installed Mac fonts"
+  },
+  "screenshots": "1280x800 light form/failure/delete and dark at text scale 2. These are offscreen rendered Widgets, not native OS screenshots.",
+  "selfReview": "Reviewed all four screenshots, moved contextual menu into sidebar header to preserve directory names. Not independently reviewed.",
+  "motion": "Uses shared #62 150ms button, 120ms menu, 180ms dialog. No new animation semantics; full new-context S5 audit pending.",
+  "frozenTrackedFilesUnchanged": 18,
+  "remaining": [
+    "Relation selection/editing, revision/recycle, stress fixture, complete R01-R04 comparison",
+    "Real native/window/physical input for this new context deferred to fixed candidate."
+  ]
+}

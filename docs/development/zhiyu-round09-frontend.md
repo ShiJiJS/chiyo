@@ -2,19 +2,19 @@
 
 本轮按[已发布计划](../planning/zhiyu-round09/README.md)先完成7项正式Flutter界面。使用独立示例数据，后续真实功能由[#69](https://github.com/ShiJiJS/agent-info-manage/issues/69)重新拆分。2026-10-26起改为Mac优先、Windows适配后置；无子Agent、无服务器同步。
 
-**2026-10-26当前范围：只整理GitHub tickets和相关文档，暂不开发。** 后续以Mac为主、Windows适配后置。`codex/zhiyu-macos`已整合两侧基线，#62保持10/12，见[Mac外壳实施记录](zhiyu-macos-foundation.md)。本机另有尚未推送的#63实现`058b5b41`及未提交说明；恢复时先审阅源码与证据，不把它们直接记成GitHub通过项。下文Windows检查点仅保留历史范围；最新顺序见[Mac接手计划](../planning/zhiyu-round09/macos-continuation.md)。
+**2026-10-26最新指令：恢复持续Mac开发，按既有tickets推进。** 后续以Mac为主、Windows适配后置。`codex/zhiyu-macos`已整合两侧基线，#62保持10/12，见[Mac外壳实施记录](zhiyu-macos-foundation.md)。本机#63首轮`058b5b41`已接续到目录后继`e4685dcb`，分版证据见[信息库记录](zhiyu-macos-library.md)；当前2/7，继续补关联等缺口。下文Windows检查点仅保留历史范围；最新顺序见[Mac接手计划](../planning/zhiyu-round09/macos-continuation.md)。
 
 ## 当前任务
 
 | 任务 | 进度 |
 | --- | --- |
 | [#62 外壳和通用控件](https://github.com/ShiJiJS/agent-info-manage/issues/62) | Mac 10/12；原生隔离、字体/菜单与检查工具已有证据；实际系统输入及完整S5仍待收口 |
-| [#63 三栏信息库](https://github.com/ShiJiJS/agent-info-manage/issues/63) | GitHub 0/7；已有本机未发布代码，恢复时先审阅归档 |
+| [#63 三栏信息库](https://github.com/ShiJiJS/agent-info-manage/issues/63) | Mac 2/7；浏览/编辑和目录就地操作已推进，继续关联、修订回收、压力状态及S5 |
 | [#64 档案、文档、文件、凭据](https://github.com/ShiJiJS/agent-info-manage/issues/64) | 等待#63 |
-| [#65 插件与旧资料套模板](https://github.com/ShiJiJS/agent-info-manage/issues/65) | 等待#62；当前暂不开发 |
-| [#66 访问审批](https://github.com/ShiJiJS/agent-info-manage/issues/66) | 等待#62；当前暂不开发 |
-| [#67 提案与历史](https://github.com/ShiJiJS/agent-info-manage/issues/67) | 等待#62；当前暂不开发 |
-| [#68 全局设置](https://github.com/ShiJiJS/agent-info-manage/issues/68) | 等待#62；当前暂不开发 |
+| [#65 插件与旧资料套模板](https://github.com/ShiJiJS/agent-info-manage/issues/65) | 等待#62；按依赖继续排队 |
+| [#66 访问审批](https://github.com/ShiJiJS/agent-info-manage/issues/66) | 等待#62；按依赖继续排队 |
+| [#67 提案与历史](https://github.com/ShiJiJS/agent-info-manage/issues/67) | 等待#62；按依赖继续排队 |
+| [#68 全局设置](https://github.com/ShiJiJS/agent-info-manage/issues/68) | 等待#62；按依赖继续排队 |
 
 ## #62已经实现什么（Windows历史检查点）
 
