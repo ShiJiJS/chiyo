@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'workspace_credentials.dart';
+import 'sample_credential_records.dart';
 import 'workspace_operation.dart';
 import 'workspace_records.dart';
 
@@ -66,28 +67,18 @@ class _CredentialState {
   final bool enabled;
 }
 
-typedef PrepareCredentialRecord =
-    WorkspaceDetail Function(
-      WorkspaceRecordRef ref,
-      WorkspaceCredentialWrite? write,
-    );
-
 /// Independent fictional credential state. It never stores or reads secret
 /// bytes, files, database handles, process handles or system fill capabilities.
 class SampleWorkspaceCredentials implements WorkspaceCredentialSource {
   SampleWorkspaceCredentials({
     required this.readable,
-    required this.current,
-    required this.prepareRecord,
-    required this.commitRecord,
+    required this.records,
     required this.beforeWrite,
     required this.changed,
     required this.now,
   });
   final Future<void> Function() readable;
-  final WorkspaceDetail Function(WorkspaceRecordRef) current;
-  final PrepareCredentialRecord prepareRecord;
-  final void Function(WorkspaceDetail) commitRecord;
+  final SampleCredentialRecordStore records;
   final void Function() beforeWrite;
   final void Function(WorkspaceRecordRef) changed;
   final DateTime Function() now;
@@ -97,7 +88,54 @@ class SampleWorkspaceCredentials implements WorkspaceCredentialSource {
   final _requests = <String, WorkspaceCredentialUseRequest>{};
   final _operations =
       <String, ({String fingerprint, WorkspaceCredentialReceipt receipt})>{};
+  final _materials =
+      <WorkspaceRecordRef, Map<int, WorkspaceCredentialMaterial>>{};
   WorkspaceFailure? nextReadFailure;
+  void _rememberMaterial(WorkspaceRecordRef ref, _CredentialState state) {
+    final versions = _materials.putIfAbsent(ref, () => {});
+    _retireMaterial(ref);
+    versions[state.version] = WorkspaceCredentialMaterial(
+      version: state.version,
+      form: state.candidate.form,
+      format: state.candidate.format,
+      filename: state.candidate.filename,
+      createdAt: now(),
+    );
+  }
+
+  void _retireMaterial(WorkspaceRecordRef ref) {
+    final versions = _materials[ref];
+    if (versions == null) return;
+    for (final e in versions.entries.toList()) {
+      final m = e.value;
+      if (m.retiredAt == null) {
+        versions[e.key] = WorkspaceCredentialMaterial(
+          version: m.version,
+          form: m.form,
+          format: m.format,
+          filename: m.filename,
+          createdAt: m.createdAt,
+          retiredAt: now(),
+        );
+      }
+    }
+  }
+
+  void expireMaterials() {
+    final cutoff = now().subtract(const Duration(days: 30));
+    for (final versions in _materials.values) {
+      versions.removeWhere(
+        (_, m) => m.retiredAt != null && !m.retiredAt!.isAfter(cutoff),
+      );
+    }
+  }
+
+  void forget(WorkspaceRecordRef ref) {
+    _states.remove(ref);
+    _materials.remove(ref);
+    // Audit facts and content-free receipts never contain material/private notes.
+  }
+
   int get pendingCount => _requests.values
       .where((r) => r.state == WorkspaceCredentialRequestState.pending)
       .length;
@@ -134,6 +172,7 @@ class SampleWorkspaceCredentials implements WorkspaceCredentialSource {
       candidate,
       binding: binding,
     );
+    _rememberMaterial(ref, _states[ref]!);
     if ([
       WorkspaceCredentialDelivery.environment,
       WorkspaceCredentialDelivery.file,
@@ -169,6 +208,7 @@ class SampleWorkspaceCredentials implements WorkspaceCredentialSource {
 
   void clearCurrent() {
     _states.clear();
+    _materials.clear();
     _requests.clear();
     _operations.clear();
   }
@@ -183,6 +223,9 @@ class SampleWorkspaceCredentials implements WorkspaceCredentialSource {
   void reset() {
     clearCurrent();
     _states.addAll(_initial);
+    for (final e in _states.entries) {
+      _rememberMaterial(e.key, e.value);
+    }
     nextReadFailure = null;
   }
 
@@ -190,13 +233,20 @@ class SampleWorkspaceCredentials implements WorkspaceCredentialSource {
     if (ref.kind != WorkspaceRecordKind.credential) {
       throw const WorkspaceFailure('unsupported', '此入口只管理托管凭据。');
     }
-    final record = current(ref), state = _states[ref];
+    final record = records.currentCredentialRecord(ref), state = _states[ref];
     if (state == null) throw const WorkspaceFailure('not_found', '凭据已不可用。');
     return (state, record);
   }
 
   WorkspaceCredentialDetail _detail(WorkspaceRecordRef ref) {
     final (state, record) = _get(ref);
+    return _detailFrom(state, record);
+  }
+
+  WorkspaceCredentialDetail _detailFrom(
+    _CredentialState state,
+    WorkspaceDetail record,
+  ) {
     return WorkspaceCredentialDetail(
       record: record.record,
       recordVersion: record.version,
@@ -221,14 +271,215 @@ class SampleWorkspaceCredentials implements WorkspaceCredentialSource {
     );
   }
 
-  @override
-  Future<WorkspaceCredentialDetail> read(WorkspaceRecordRef ref) async {
-    await readable();
+  void _consumeReadFailure() {
     if (nextReadFailure case final failure?) {
       nextReadFailure = null;
       throw failure;
     }
+  }
+
+  @override
+  Future<WorkspaceCredentialDetail> read(WorkspaceRecordRef ref) async {
+    await readable();
+    _consumeReadFailure();
     return _detail(ref);
+  }
+
+  @override
+  Future<WorkspaceCredentialMaterialHistory> materials(
+    WorkspaceRecordRef ref,
+  ) async {
+    await readable();
+    _consumeReadFailure();
+    final detail = _detail(ref);
+    final versions = (_materials[ref]?.values.toList() ?? [])
+      ..sort((a, b) => b.version.compareTo(a.version));
+    return WorkspaceCredentialMaterialHistory(detail, versions);
+  }
+
+  _CredentialState _restoredState(
+    _CredentialState current,
+    WorkspaceCredentialMaterial material,
+  ) => _CredentialState(
+    WorkspaceCredentialCandidate(
+      id: workspaceOperationId(),
+      label: material.format,
+      form: material.form,
+      format: material.format,
+      filename: material.filename,
+      delivery: current.candidate.delivery,
+      binding: current.binding,
+    ),
+    binding: current.binding,
+    note: current.note,
+    version: current.version + 1,
+    generation: current.generation + 1,
+    enabled: false,
+  );
+  WorkspaceCredentialMaterial _retained(WorkspaceRecordRef ref, int version) =>
+      _materials[ref]?[version] ??
+      (throw const WorkspaceFailure(
+        'material_unavailable',
+        '材料版本已到期或已清理，不能恢复。',
+      ));
+
+  @override
+  Future<WorkspaceCredentialRecycled> readRecycled(String entryId) async {
+    await readable();
+    _consumeReadFailure();
+    final recycled = records.recycledCredentialRecord(entryId);
+    final state = recycled == null ? null : _states[recycled.entry.record.ref];
+    if (recycled == null || state == null) {
+      throw const WorkspaceFailure('not_found', '回收凭据已恢复、清理或到期。');
+    }
+    final entry = recycled.entry;
+    final archived = WorkspaceDetail(
+      record: entry.record,
+      version: entry.version,
+      definition: recycled.archive.detail.definition,
+      values: const {},
+      relations: recycled.archive.detail.relations,
+    );
+    final prepared = records.prepareCredentialRestore(
+      entryId,
+      entry.version + 1,
+    );
+    final restored = _restoredState(
+      state,
+      _retained(entry.record.ref, state.version),
+    );
+    return WorkspaceCredentialRecycled(
+      entry,
+      _detailFrom(state, archived),
+      restored: _detailFrom(restored, prepared.detail),
+      catalogVersion: records.credentialCatalogVersion,
+      notices: prepared.notices,
+    );
+  }
+
+  @override
+  Future<WorkspaceCredentialReceipt> change(
+    WorkspaceCredentialChange change,
+  ) async {
+    await readable();
+    final fingerprint = _fingerprint({
+      'kind': 'lifecycle',
+      'action': change.action.name,
+      'ref': change.ref.key,
+      'record': change.expectedRecordVersion,
+      'material': change.expectedMaterialVersion,
+      'selected': change.materialVersion,
+      'entry': change.entryId,
+      'catalog': change.expectedCatalogVersion,
+    });
+    if (_replay(change.operationId, fingerprint) case final receipt?) {
+      return receipt;
+    }
+    if (change.ref.kind != WorkspaceRecordKind.credential) {
+      throw const WorkspaceFailure('unsupported', '此入口只管理托管凭据。');
+    }
+    final recycledAction = [
+      WorkspaceCredentialAction.restoreRecycled,
+      WorkspaceCredentialAction.purge,
+    ].contains(change.action);
+    final recycle = change.entryId == null
+        ? null
+        : records.recycledCredentialRecord(change.entryId!);
+    late final WorkspaceCredentialDetail before;
+    if (recycledAction) {
+      if (recycle == null ||
+          recycle.entry.record.ref != change.ref ||
+          _states[change.ref] == null) {
+        throw const WorkspaceFailure('not_found', '回收凭据已恢复、清理或到期。');
+      }
+      before = _detailFrom(
+        _states[change.ref]!,
+        WorkspaceDetail(
+          record: recycle.entry.record,
+          version: recycle.entry.version,
+          definition: recycle.archive.detail.definition,
+          values: const {},
+          relations: recycle.archive.detail.relations,
+        ),
+      );
+    } else {
+      before = _detail(change.ref);
+    }
+    _expect(
+      before,
+      change.expectedRecordVersion,
+      change.expectedMaterialVersion,
+    );
+    if ((!recycledAction && change.entryId != null) ||
+        (change.action != WorkspaceCredentialAction.restoreMaterial &&
+            change.materialVersion != null)) {
+      throw const WorkspaceFailure('invalid_request', '生命周期操作参数不符。');
+    }
+    final old = _states[change.ref]!, nextVersion = before.recordVersion + 1;
+    WorkspaceDetail? prepared;
+    var notices = <String>[];
+    _CredentialState? restored;
+    if (change.action == WorkspaceCredentialAction.restoreMaterial) {
+      if (change.materialVersion == old.version) {
+        throw const WorkspaceFailure('conflict', '所选材料已是当前版本。');
+      }
+      restored = _restoredState(
+        old,
+        _retained(change.ref, change.materialVersion ?? -1),
+      );
+      prepared = records.prepareCredentialRecord(change.ref, null);
+    } else if (change.action == WorkspaceCredentialAction.restoreRecycled) {
+      if (change.expectedCatalogVersion != records.credentialCatalogVersion) {
+        throw const WorkspaceFailure('conflict', '目录或标签已变化，请重新读取恢复范围。');
+      }
+      restored = _restoredState(old, _retained(change.ref, old.version));
+      final normalized = records.prepareCredentialRestore(
+        change.entryId!,
+        nextVersion,
+      );
+      prepared = normalized.detail;
+      notices = normalized.notices;
+    }
+    beforeWrite();
+    String? entryId = change.entryId;
+    switch (change.action) {
+      case WorkspaceCredentialAction.recycle:
+        entryId = records.recycleCredentialRecord(change.ref, nextVersion).id;
+        _states[change.ref] = _CredentialState(
+          old.candidate,
+          binding: old.binding,
+          note: old.note,
+          version: old.version,
+          generation: old.generation + 1,
+          enabled: false,
+        );
+        _retireMaterial(change.ref);
+        _invalidate(change.ref, WorkspaceCredentialRequestState.recycled);
+      case WorkspaceCredentialAction.restoreMaterial:
+        records.commitCredentialRecord(prepared!);
+        _states[change.ref] = restored!;
+        _rememberMaterial(change.ref, restored);
+        _invalidate(change.ref, WorkspaceCredentialRequestState.superseded);
+      case WorkspaceCredentialAction.restoreRecycled:
+        records.commitCredentialRestore(change.entryId!, prepared!);
+        _states[change.ref] = restored!;
+        _rememberMaterial(change.ref, restored);
+      case WorkspaceCredentialAction.purge:
+        records.purgeCredentialRecord(change.entryId!);
+    }
+    final receipt = WorkspaceCredentialReceipt(
+      change.ref,
+      nextVersion,
+      restored?.version ?? old.version,
+      entryId: entryId,
+      notices: List.unmodifiable(notices),
+    );
+    _operations[change.operationId] = (
+      fingerprint: fingerprint,
+      receipt: receipt,
+    );
+    changed(change.ref);
+    return receipt;
   }
 
   @override
@@ -354,7 +605,7 @@ class SampleWorkspaceCredentials implements WorkspaceCredentialSource {
           WorkspaceRecordKind.credential,
           workspaceOperationId(),
         );
-    final prepared = prepareRecord(ref, write);
+    final prepared = records.prepareCredentialRecord(ref, write);
     beforeWrite();
     final old = before == null ? null : _states[ref]!;
     final state = _CredentialState(
@@ -367,8 +618,9 @@ class SampleWorkspaceCredentials implements WorkspaceCredentialSource {
           : old!.generation + (candidate == null ? 0 : 1),
       enabled: old?.enabled ?? true,
     );
-    commitRecord(prepared);
+    records.commitCredentialRecord(prepared);
     _states[ref] = state;
+    if (before == null || candidate != null) _rememberMaterial(ref, state);
     if (candidate != null && before != null) {
       _invalidate(ref, WorkspaceCredentialRequestState.superseded);
     }
@@ -406,10 +658,10 @@ class SampleWorkspaceCredentials implements WorkspaceCredentialSource {
       change.expectedRecordVersion,
       change.expectedMaterialVersion,
     );
-    final prepared = prepareRecord(change.ref, null);
+    final prepared = records.prepareCredentialRecord(change.ref, null);
     beforeWrite();
     final old = _states[change.ref]!;
-    commitRecord(prepared);
+    records.commitCredentialRecord(prepared);
     _states[change.ref] = _CredentialState(
       old.candidate,
       binding: old.binding,

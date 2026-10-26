@@ -6,6 +6,7 @@ import 'sample_workspace_entries.dart';
 import 'sample_workspace_content_fixture.dart';
 import 'sample_workspace_files.dart';
 import 'sample_workspace_credentials.dart';
+import 'sample_credential_records.dart';
 import 'sample_credential_links.dart';
 import 'workspace_source.dart';
 
@@ -15,7 +16,8 @@ enum SampleWorkspaceScenario { ready, empty, waiting, failure }
 
 /// The isolated composition root creates this provider. All values are the
 /// approved prototype's fictional data; no production adapter imports it.
-class SampleWorkspaceSource implements WorkspaceSource {
+class SampleWorkspaceSource
+    implements WorkspaceSource, SampleCredentialRecordStore {
   SampleWorkspaceSource({
     String fixtureJson = sampleWorkspaceJson,
     DateTime Function()? now,
@@ -27,12 +29,7 @@ class SampleWorkspaceSource implements WorkspaceSource {
   final _credentialLinks = SampleCredentialLinks();
   late final _credentials = SampleWorkspaceCredentials(
     readable: _readable,
-    current: _credentialRecord,
-    prepareRecord: _prepareCredentialRecord,
-    commitRecord: (detail) {
-      if (_scenario == SampleWorkspaceScenario.empty) _materializeEmpty();
-      _putRecord(detail);
-    },
+    records: this,
     beforeWrite: () {
       if (nextSaveFailure case final failure?) {
         nextSaveFailure = null;
@@ -46,6 +43,90 @@ class SampleWorkspaceSource implements WorkspaceSource {
   WorkspaceCredentialSource get credentials => _credentials;
   set nextCredentialReadFailure(WorkspaceFailure? value) =>
       _credentials.nextReadFailure = value;
+  @override
+  int get credentialCatalogVersion => _catalogVersion;
+  @override
+  void commitCredentialRecord(WorkspaceDetail detail) {
+    if (_scenario == SampleWorkspaceScenario.empty) _materializeEmpty();
+    _putRecord(detail);
+  }
+
+  @override
+  SampleCredentialRecycleRecord? recycledCredentialRecord(String entryId) {
+    final value = _scenario == SampleWorkspaceScenario.empty
+        ? null
+        : _recycled[entryId];
+    return value?.entry.record.ref.kind == WorkspaceRecordKind.credential
+        ? value
+        : null;
+  }
+
+  @override
+  WorkspaceRecycleEntry recycleCredentialRecord(
+    WorkspaceRecordRef ref,
+    int version,
+  ) {
+    final current = currentCredentialRecord(ref), now = _now();
+    final archive = _archive(current);
+    final entry = WorkspaceRecycleEntry(
+      id: workspaceOperationId(),
+      record: current.record,
+      version: version,
+      deletedAt: now,
+      expiresAt: now.add(const Duration(days: 30)),
+      directoryName: archive.directoryName,
+    );
+    // Update the same relation fact and affected information revisions before
+    // hiding this record. The immutable recycle snapshot retains old links.
+    _putRecord(
+      WorkspaceDetail(
+        record: current.record,
+        version: version,
+        definition: current.definition,
+        values: const {},
+        relations: const {'related': []},
+      ),
+    );
+    _records.remove(ref);
+    _recycled[entry.id] = (entry: entry, archive: archive);
+    return entry;
+  }
+
+  @override
+  SampleCredentialRestoreRecord prepareCredentialRestore(
+    String entryId,
+    int version,
+  ) {
+    final recycled = recycledCredentialRecord(entryId);
+    if (recycled == null) {
+      throw const WorkspaceFailure('not_found', '回收凭据已不可用。');
+    }
+    if (_records.containsKey(recycled.entry.record.ref)) {
+      throw const WorkspaceFailure('conflict', '凭据已存在，请重新核对。');
+    }
+    final notices = <String>[];
+    final detail = _normalizeArchive(recycled.archive, version, notices);
+    return (
+      detail: detail,
+      notices: notices.map((n) => n.replaceAll('“related”', '“关联资料”')).toList(),
+    );
+  }
+
+  @override
+  void commitCredentialRestore(String entryId, WorkspaceDetail detail) {
+    _recycled.remove(entryId);
+    _putRecord(detail);
+  }
+
+  @override
+  void purgeCredentialRecord(String entryId) {
+    final recycled = _recycled.remove(entryId);
+    if (recycled != null) {
+      _versions[recycled.entry.record.ref] = recycled.entry.version + 1;
+      _forgetContent(recycled.entry.record.ref);
+    }
+  }
+
   WorkspaceDetail? _visibleRecord(WorkspaceRecordRef ref) {
     final raw = _scenario == SampleWorkspaceScenario.empty
         ? null
@@ -53,7 +134,8 @@ class SampleWorkspaceSource implements WorkspaceSource {
     return raw == null ? null : _projectRecord(raw);
   }
 
-  WorkspaceDetail _credentialRecord(WorkspaceRecordRef ref) {
+  @override
+  WorkspaceDetail currentCredentialRecord(WorkspaceRecordRef ref) {
     if (ref.kind != WorkspaceRecordKind.credential) {
       throw const WorkspaceFailure('unsupported', '此入口只管理托管凭据。');
     }
@@ -164,13 +246,14 @@ class SampleWorkspaceSource implements WorkspaceSource {
     _versions[ref] = detail.version;
   }
 
-  WorkspaceDetail _prepareCredentialRecord(
+  @override
+  WorkspaceDetail prepareCredentialRecord(
     WorkspaceRecordRef ref,
     WorkspaceCredentialWrite? write,
   ) {
     final old = write?.ref == null && write != null
         ? null
-        : _credentialRecord(ref);
+        : currentCredentialRecord(ref);
     if (write == null) {
       return WorkspaceDetail(
         record: old!.record.copyWith(updatedAt: _now()),

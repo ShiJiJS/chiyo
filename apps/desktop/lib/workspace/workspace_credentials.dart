@@ -1,4 +1,5 @@
 import 'workspace_records.dart';
+import 'workspace_history.dart';
 
 enum WorkspaceCredentialForm { string, file }
 
@@ -157,7 +158,8 @@ class WorkspaceCredentialUseDraft {
 enum WorkspaceCredentialRequestState {
   pending('待审批'),
   superseded('凭据已更换'),
-  disabled('凭据已停用');
+  disabled('凭据已停用'),
+  recycled('凭据已回收');
 
   const WorkspaceCredentialRequestState(this.label);
   final String label;
@@ -235,21 +237,95 @@ class WorkspaceCredentialUseHistory {
   final List<WorkspaceCredentialUseOperation> operations;
 }
 
+/// Metadata for one retained immutable material version, never raw material.
+class WorkspaceCredentialMaterial {
+  const WorkspaceCredentialMaterial({
+    required this.version,
+    required this.form,
+    required this.format,
+    required this.createdAt,
+    this.filename,
+    this.retiredAt,
+  });
+  final int version;
+  final WorkspaceCredentialForm form;
+  final String format;
+  final String? filename;
+  final DateTime createdAt;
+  final DateTime? retiredAt;
+  String get mask => '••••••••';
+}
+
+class WorkspaceCredentialMaterialHistory {
+  WorkspaceCredentialMaterialHistory(
+    this.current,
+    Iterable<WorkspaceCredentialMaterial> materials,
+  ) : materials = List.unmodifiable(materials);
+  final WorkspaceCredentialDetail current;
+  final List<WorkspaceCredentialMaterial> materials;
+}
+
+class WorkspaceCredentialRecycled {
+  WorkspaceCredentialRecycled(
+    this.entry,
+    this.detail, {
+    required this.restored,
+    required this.catalogVersion,
+    Iterable<String> notices = const [],
+  }) : notices = List.unmodifiable(notices);
+  final WorkspaceRecycleEntry entry;
+  final WorkspaceCredentialDetail detail, restored;
+  final int catalogVersion;
+  final List<String> notices;
+}
+
+enum WorkspaceCredentialAction {
+  recycle,
+  restoreMaterial,
+  restoreRecycled,
+  purge,
+}
+
+class WorkspaceCredentialChange {
+  const WorkspaceCredentialChange({
+    required this.operationId,
+    required this.ref,
+    required this.expectedRecordVersion,
+    required this.expectedMaterialVersion,
+    required this.action,
+    this.materialVersion,
+    this.entryId,
+    this.expectedCatalogVersion,
+  });
+  final String operationId;
+  final WorkspaceRecordRef ref;
+  final int expectedRecordVersion, expectedMaterialVersion;
+  final WorkspaceCredentialAction action;
+  final int? materialVersion, expectedCatalogVersion;
+  final String? entryId;
+}
+
 /// Contains only committed identities/versions, never credential contents.
 class WorkspaceCredentialReceipt {
-  const WorkspaceCredentialReceipt(
+  WorkspaceCredentialReceipt(
     this.ref,
     this.recordVersion,
     this.materialVersion, {
     this.requestId,
-  });
+    this.entryId,
+    Iterable<String> notices = const [],
+  }) : notices = List.unmodifiable(notices);
   final WorkspaceRecordRef ref;
   final int recordVersion, materialVersion;
-  final String? requestId;
+  final String? requestId, entryId;
+  final List<String> notices;
 }
 
 abstract interface class WorkspaceCredentialSource {
   Future<WorkspaceCredentialDetail> read(WorkspaceRecordRef ref);
+  Future<WorkspaceCredentialMaterialHistory> materials(WorkspaceRecordRef ref);
+  Future<WorkspaceCredentialRecycled> readRecycled(String entryId);
+  Future<WorkspaceCredentialReceipt> change(WorkspaceCredentialChange change);
   Future<List<WorkspaceCredentialCandidate>> candidates();
 
   /// Releases a form's staging lease. Committed/uncertain operations retain

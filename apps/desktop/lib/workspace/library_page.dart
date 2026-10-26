@@ -12,6 +12,7 @@ import 'library_detail.dart';
 import 'library_directory_dialog.dart';
 import 'library_edit_dialog.dart';
 import 'library_history_dialog.dart';
+import 'library_credential_lifecycle.dart';
 import 'library_recycle.dart';
 import 'library_widgets.dart';
 import 'workspace_source.dart';
@@ -132,7 +133,9 @@ class _LibraryPageState extends State<LibraryPage> {
     if (ref == null) return;
     widget.onModalChanged?.call(true);
     try {
-      final restored = await showLibraryHistory(context, model.source, ref);
+      final restored = ref.kind == WorkspaceRecordKind.credential
+          ? await showCredentialMaterials(context, model.source, ref)
+          : await showLibraryHistory(context, model.source, ref);
       if (!mounted || restored != true) return;
       await model.openRelated(ref, rememberOrigin: false);
       if (mounted) DesktopFeedback.show(context, '已恢复为新版本');
@@ -990,16 +993,10 @@ class _LibraryPageState extends State<LibraryPage> {
                         onEdit: model.loadState == WorkspaceLoad.loading
                             ? null
                             : () => _edit(),
-                        onHistory:
-                            detail.record.ref.kind ==
-                                    WorkspaceRecordKind.information &&
-                                model.loadState != WorkspaceLoad.loading
+                        onHistory: model.loadState != WorkspaceLoad.loading
                             ? _history
                             : null,
-                        onRecycle:
-                            detail.record.ref.kind ==
-                                    WorkspaceRecordKind.information &&
-                                model.loadState != WorkspaceLoad.loading
+                        onRecycle: model.loadState != WorkspaceLoad.loading
                             ? _recycleCurrent
                             : null,
                         onTag: (id) =>
