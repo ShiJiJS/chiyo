@@ -259,6 +259,11 @@ class WorkspaceCreate {
   final Map<String, List<WorkspaceRecordRef>> relations;
 }
 
+/// Metadata name/description errors remain separate from template values with
+/// the same keys. Existing other template field error keys stay compatible.
+String workspaceValueErrorKey(String key) =>
+    ['name', 'description'].contains(key) ? 'value:$key' : key;
+
 class WorkspaceFailure implements Exception {
   const WorkspaceFailure(
     this.code,

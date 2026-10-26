@@ -101,7 +101,7 @@ extension _SampleHistory on SampleWorkspaceSource {
       ),
       version: version,
       definition: old.definition,
-      values: old.values,
+      values: sampleRestoredEntries(old, _records[old.record.ref], version),
       relations: relations,
     );
   }
@@ -315,6 +315,9 @@ extension _SampleWorkspaceHistory on SampleWorkspaceSource {
         _forgetContent(ref);
     }
     _versions[ref] = version;
+    if (restored != null) {
+      _entryIdentityOwners.addAll(sampleEntryOwners(restored));
+    }
     final receipt = WorkspaceRecordReceipt(
       ref: ref,
       version: version,

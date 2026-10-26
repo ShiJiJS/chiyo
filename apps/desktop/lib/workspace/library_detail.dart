@@ -3,6 +3,7 @@ import '../desktop_controls.dart';
 import '../prototype_icons.dart';
 import '../ui_palette.dart';
 import 'library_widgets.dart';
+import 'library_entries.dart';
 import 'workspace_source.dart';
 
 /// Reads a template snapshot for display; it does not own persistence or infer
@@ -516,6 +517,12 @@ class _LibraryDetailState extends State<LibraryDetail> {
                         ),
                         trailing:
                             '${detail.relations[section['key']]?.length ?? 0} 项',
+                      )
+                    else if (section['kind'] == 'timeline')
+                      _section(
+                        context,
+                        section['title'] as String,
+                        LibraryEntryTimeline(detail.values[section['key']]),
                       )
                     else
                       _section(
