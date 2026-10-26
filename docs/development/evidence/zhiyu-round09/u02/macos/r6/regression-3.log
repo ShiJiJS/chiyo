@@ -1,0 +1,100 @@
+Resolving dependencies...
+Downloading packages...
+  crypto 3.0.7 (3.0.8 available)
+  drift 2.35.2 (2.35.3 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  sqlite3 3.7.1 (3.8.0 available)
+  test_api 0.7.12 (0.7.15 available)
+  vector_math 2.4.0 (2.4.3 available)
+  web 1.1.1 (1.1.2 available)
+Got dependencies!
+7 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+00:00 +0: loading /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_fidelity_test.dart
+00:00 +0: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_history_test.dart: (setUpAll)
+00:00 +0: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_history_test.dart: real library menu compares full versions, keeps failure visible and restores a new version
+00:00 +1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_history_test.dart: real library menu compares full versions, keeps failure visible and restores a new version
+00:00 +2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_history_test.dart: real library menu compares full versions, keeps failure visible and restores a new version
+00:00 +3: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_history_test.dart: real library menu compares full versions, keeps failure visible and restores a new version
+00:00 +4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_history_test.dart: real library menu compares full versions, keeps failure visible and restores a new version
+00:00 +5: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_history_test.dart: real library menu compares full versions, keeps failure visible and restores a new version
+00:00 +6: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_history_test.dart: real library menu compares full versions, keeps failure visible and restores a new version
+00:00 +7: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_history_test.dart: real library menu compares full versions, keeps failure visible and restores a new version
+00:00 +8: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_history_test.dart: real library menu compares full versions, keeps failure visible and restores a new version
+00:01 +9: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_history_test.dart: real library menu compares full versions, keeps failure visible and restores a new version
+00:01 +10: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_history_test.dart: real library menu compares full versions, keeps failure visible and restores a new version
+00:01 +11: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_history_test.dart: real library menu compares full versions, keeps failure visible and restores a new version
+00:01 +12: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_history_test.dart: real library menu compares full versions, keeps failure visible and restores a new version
+00:01 +13: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_history_test.dart: real library menu compares full versions, keeps failure visible and restores a new version
+00:01 +14: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_history_test.dart: real library menu compares full versions, keeps failure visible and restores a new version
+00:01 +15: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_history_test.dart: real library menu compares full versions, keeps failure visible and restores a new version
+00:01 +16: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_history_test.dart: real library menu compares full versions, keeps failure visible and restores a new version
+00:01 +17: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_history_test.dart: real library menu compares full versions, keeps failure visible and restores a new version
+00:01 +18: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_history_test.dart: real library menu compares full versions, keeps failure visible and restores a new version
+00:01 +19: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_history_test.dart: real library menu compares full versions, keeps failure visible and restores a new version
+00:01 +20: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_history_test.dart: real library menu compares full versions, keeps failure visible and restores a new version
+00:01 +21: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_history_test.dart: real library menu compares full versions, keeps failure visible and restores a new version
+00:01 +22: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_history_test.dart: real library menu compares full versions, keeps failure visible and restores a new version
+00:02 +23: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: real pressure switch, pagination, related navigation and return preserve selected row and list scroll
+00:03 +24: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: real pressure switch, pagination, related navigation and return preserve selected row and list scroll
+00:03 +25: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: real pressure switch, pagination, related navigation and return preserve selected row and list scroll
+00:04 +26: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: real pressure switch, pagination, related navigation and return preserve selected row and list scroll
+00:04 +27: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_relations_test.dart: multi-selection survives search and failure, then saved detail rereads the actual links
+00:05 +28: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_relations_test.dart: multi-selection survives search and failure, then saved detail rereads the actual links
+00:05 +29: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_history_test.dart: permanent purge needs a second explicit action, and a failed submission retains the snapshot
+00:05 +30: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+00:05 +31: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+00:06 +32: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+00:06 +33: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+00:06 +34: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+00:07 +35: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+00:07 +36: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_test.dart: real preview has responsive three panes and metadata filtering
+00:07 +37: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_test.dart: real preview has responsive three panes and metadata filtering
+00:07 +38: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_test.dart: real preview has responsive three panes and metadata filtering
+00:07 +39: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_test.dart: real preview has responsive three panes and metadata filtering
+00:07 +40: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_test.dart: real preview has responsive three panes and metadata filtering
+00:07 +41: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_test.dart: real preview has responsive three panes and metadata filtering
+00:07 +42: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_test.dart: real preview has responsive three panes and metadata filtering
+00:07 +43: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_test.dart: real preview has responsive three panes and metadata filtering
+00:07 +44: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_test.dart: real preview has responsive three panes and metadata filtering
+00:08 +45: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_test.dart: real preview has responsive three panes and metadata filtering
+00:08 +46: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_test.dart: real preview has responsive three panes and metadata filtering
+00:08 +47: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_test.dart: real preview has responsive three panes and metadata filtering
+00:08 +48: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_test.dart: real preview has responsive three panes and metadata filtering
+00:08 +49: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_test.dart: real preview has responsive three panes and metadata filtering
+00:08 +50: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_test.dart: real preview has responsive three panes and metadata filtering
+00:08 +51: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_test.dart: real preview has responsive three panes and metadata filtering
+00:08 +52: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_test.dart: real preview has responsive three panes and metadata filtering
+00:09 +53: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1440.0
+00:09 +54: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_directory_test.dart: directory menu creates, preserves failed draft, moves and deletes from the actual library
+00:11 +55: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_directory_test.dart: directory menu creates, preserves failed draft, moves and deletes from the actual library
+00:11 +56: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_directory_test.dart: directory menu creates, preserves failed draft, moves and deletes from the actual library
+00:12 +57: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: one shell has five working destinations and a 66px appbar
+00:12 +58: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: large edit form retains hundred-tag choices and cross-page relation selections through failed save
+00:12 +59: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: large edit form retains hundred-tag choices and cross-page relation selections through failed save
+00:13 +60: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_directory_test.dart: concurrent catalog changes require explicit reload without dropping a large-text draft
+00:14 +61: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_directory_test.dart: concurrent catalog changes require explicit reload without dropping a large-text draft
+00:14 +62: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: theme, empty, error/retry and waiting recover through visible controls
+00:15 +63: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: theme, empty, error/retry and waiting recover through visible controls
+00:15 +64: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: theme, empty, error/retry and waiting recover through visible controls
+00:15 +65: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: theme, empty, error/retry and waiting recover through visible controls
+00:15 +66: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: theme, empty, error/retry and waiting recover through visible controls
+00:15 +67: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: theme, empty, error/retry and waiting recover through visible controls
+00:15 +68: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: theme, empty, error/retry and waiting recover through visible controls
+00:15 +69: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: theme, empty, error/retry and waiting recover through visible controls
+00:17 +70: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: theme, empty, error/retry and waiting recover through visible controls
+00:17 +71: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: theme, empty, error/retry and waiting recover through visible controls
+00:17 +72: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_motion_contract_test.dart: button hover colors and pressed displacement follow 150ms CSS ease
+00:17 +73: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_motion_contract_test.dart: button hover colors and pressed displacement follow 150ms CSS ease
+00:17 +74: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: menu opens on one side, keyboard selects, Escape restores focus
+00:17 +75: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: menu opens on one side, keyboard selects, Escape restores focus
+00:17 +76: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: menu opens on one side, keyboard selects, Escape restores focus
+00:17 +77: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_motion_contract_test.dart: dialog measures 7px/180ms; rapid closing leaves no blocking route
+00:18 +78: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: large text can scroll the modal without obscuring actions
+00:18 +79: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: large text can scroll the modal without obscuring actions
+00:18 +80: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: large text can scroll the modal without obscuring actions
+00:18 +81: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: Escape respects a form that is blocking accidental dismissal
+00:18 +82: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: pressed motion is transient and disabled actions do not execute
+00:18 +83: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: a shared refresh preserves the editing selection and active IME composition
+00:18 +84: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: a failed sample save preserves the draft and explicit retry updates shared data
+00:19 +85: All tests passed!
