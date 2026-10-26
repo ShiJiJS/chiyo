@@ -2,14 +2,14 @@
 
 本轮按[已发布计划](../planning/zhiyu-round09/README.md)先完成7项正式Flutter界面。使用独立示例数据，后续真实功能由[#69](https://github.com/ShiJiJS/agent-info-manage/issues/69)重新拆分。2026-10-26起改为Mac优先、Windows适配后置；无子Agent、无服务器同步。
 
-**2026-10-26最新指令：恢复持续Mac开发，按既有tickets推进。** 后续以Mac为主、Windows适配后置。`codex/zhiyu-macos`已整合两侧基线，#62保持10/12，见[Mac外壳实施记录](zhiyu-macos-foundation.md)。本机#63首轮`058b5b41`已接续到目录后继`e4685dcb`，分版证据见[信息库记录](zhiyu-macos-library.md)；当前2/7，继续补关联等缺口。下文Windows检查点仅保留历史范围；最新顺序见[Mac接手计划](../planning/zhiyu-round09/macos-continuation.md)。
+**2026-10-26最新指令：恢复持续Mac开发，按既有tickets推进。** 后续以Mac为主、Windows适配后置。`codex/zhiyu-macos`已整合两侧基线，#62保持10/12，见[Mac外壳实施记录](zhiyu-macos-foundation.md)。本机#63首轮`058b5b41`已接续到目录后继`e4685dcb`及关联后继`a67b096c`，分版证据见[信息库记录](zhiyu-macos-library.md)；当前3/7，继续修订/回收等缺口。下文Windows检查点仅保留历史范围；最新顺序见[Mac接手计划](../planning/zhiyu-round09/macos-continuation.md)。
 
 ## 当前任务
 
 | 任务 | 进度 |
 | --- | --- |
 | [#62 外壳和通用控件](https://github.com/ShiJiJS/agent-info-manage/issues/62) | Mac 10/12；原生隔离、字体/菜单与检查工具已有证据；实际系统输入及完整S5仍待收口 |
-| [#63 三栏信息库](https://github.com/ShiJiJS/agent-info-manage/issues/63) | Mac 2/7；浏览/编辑和目录就地操作已推进，继续关联、修订回收、压力状态及S5 |
+| [#63 三栏信息库](https://github.com/ShiJiJS/agent-info-manage/issues/63) | Mac 3/7；浏览/编辑、目录及关联已推进，继续修订回收、压力状态及S5 |
 | [#64 档案、文档、文件、凭据](https://github.com/ShiJiJS/agent-info-manage/issues/64) | 等待#63 |
 | [#65 插件与旧资料套模板](https://github.com/ShiJiJS/agent-info-manage/issues/65) | 等待#62；按依赖继续排队 |
 | [#66 访问审批](https://github.com/ShiJiJS/agent-info-manage/issues/66) | 等待#62；按依赖继续排队 |
