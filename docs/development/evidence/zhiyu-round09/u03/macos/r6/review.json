@@ -1,0 +1,27 @@
+{
+  "reviewedAt": "2026-10-26T21:48:41.454710+00:00",
+  "review": "self review; no independent reviewer or subagent",
+  "actualWidgetImagesViewed": [
+    "create-absence-1440-light.png",
+    "edit-unknown-1440-light.png",
+    "purge-unknown-1280-dark-200.png",
+    "recycle-unknown-1280-dark-200.png",
+    "restore-unknown-1440-light.png"
+  ],
+  "scope": "Fictional PreviewWorkspace, real shared Flutter controls. SFNS/system desktop fonts loaded by the existing font loader. 1440x900 light 100%, 1280x800 dark 200%. No native/CUA runtime.",
+  "findings": [
+    "Draft text, disabled classification/relations and receipt query are visible in unknown edit state.",
+    "Confirmed absence retains the name/body and explicit Save action.",
+    "Revision comparison retains current and historical version scope; unknown blocks reload and restore.",
+    "Recycle and purge retain object name and consequences at 200%; all actions fit the dialog.",
+    "Receipt query remains the available recovery action while ordinary mutation controls are disabled."
+  ],
+  "style": "Frozen R05/R06, same palette/controls/120-150-180ms feedback. No added material or redesign; no new timing video. No necessary text/function removed.",
+  "notClaimed": [
+    "Full S5 matrix",
+    "Real OS input or system file panels",
+    "Production persistence or cross-navigation/restart recovery",
+    "New Cocoa isolation runtime"
+  ],
+  "remaining": "Continue U04; keep U01/U02/U03 manual and full-S5 criteria open."
+}
