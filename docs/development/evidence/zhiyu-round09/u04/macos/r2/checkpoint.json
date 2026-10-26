@@ -1,0 +1,146 @@
+{
+  "createdAt": "2026-10-26T23:13:35.716728+00:00",
+  "sourceCommit": "8e7b0b47dd3421b7bfcdc4daf75b3fce277835e8",
+  "branch": "codex/zhiyu-macos",
+  "goalStatus": "active",
+  "issue65": {
+    "state": "OPEN",
+    "completed": 2,
+    "total": 7,
+    "newCriterion": 2,
+    "next": "Template adoption, legacy templates, Agent brief, full state/contracts and S5/OS gates"
+  },
+  "platform": {
+    "system": "Darwin",
+    "macOS": "27.0.1",
+    "machine": "arm64",
+    "sdk": {
+      "frameworkVersion": "3.47.7",
+      "channel": "[user-branch]",
+      "repositoryUrl": "https://github.com/flutter/flutter.git",
+      "frameworkRevision": "abaf9c523780a608bd46686fd5e53740a07077f8",
+      "frameworkCommitDate": "2026-10-08 09:51:21 -0700",
+      "engineRevision": "deb287481e3ce9468f3434937ced4240a70539ca",
+      "engineCommitDate": "2026-10-07 17:09:12.000Z",
+      "engineContentHash": "d8a2d6c768c334d53e16277f837970ffa1e2de81",
+      "engineBuildDate": "2026-10-08 01:51:44.552",
+      "dartSdkVersion": "3.13.5",
+      "devToolsVersion": "2.60.0",
+      "flutterVersion": "3.47.7",
+      "flutterRoot": "/Users/jiangxinyi/Documents/Project/agent-info/.tools/flutter"
+    },
+    "xcode": "Xcode 27.1\nBuild version 27A9275",
+    "DPR": 1
+  },
+  "sourceSha256": {
+    "apps/desktop/lib/workspace/host_mutation.dart": "ece770965760cc30035f86253f06fe5d0421f97a96d5ee04fd314f63c667ae07",
+    "apps/desktop/lib/workspace/host_settings.dart": "86daa0b8db7d46341b8a41ee8f8a8e0015193a44e7de62e8eafee167ab93b59c",
+    "apps/desktop/lib/workspace/library_detail.dart": "33e24c8c51e69167a4b9643ab8348e58c413bf596917e69c22bc1b8851dc2e46",
+    "apps/desktop/lib/workspace/plugins_controller.dart": "4ead2e07ad0676173f1b14e666fe2673580c417d279dbbdd57409f7b97612e65",
+    "apps/desktop/lib/workspace/plugins_page.dart": "04b6701a3fcf5b53c2468c94ff7c01a503153e72319cedf79b77755e3f97db2c",
+    "apps/desktop/lib/workspace/preview_workspace.dart": "388e9ce2b47f6010e613b40799a1cbf6b5357ff6bb5ef8a49c73bb725ed69fe1",
+    "apps/desktop/lib/workspace/sample_workspace_hosts.dart": "1507d638fef37b58276384ee1634511cc742d042bac285bec63a9ff2712ee90e",
+    "apps/desktop/lib/workspace/sample_workspace_plugins.dart": "06a26b738543a8907a3e821270216305eefe7531d1f35c74eee2c5d5e540d035",
+    "apps/desktop/lib/workspace/sample_workspace_source.dart": "9a7db1be73f7f3ae158993bf68b001697431b78d13762538f87e4cbc01129822",
+    "apps/desktop/lib/workspace/workspace_hosts.dart": "13d752cf7566aadb9987d20e52782e7e35b184eccc1f0aa1e894efdb98f26234",
+    "apps/desktop/lib/workspace/workspace_plugins.dart": "d0021da73c05b3b746df794c394d589362334cf2d1c98b6474a31c6f6be6dd95",
+    "apps/desktop/lib/workspace/workspace_source.dart": "ca50642a2f280c76c7e5cd76a1260c04eea210e456a76d4f5a0330ec70a53ffd",
+    "apps/desktop/test/mac_preview_isolation_test.dart": "467143464ec48df5b3ebdbbea07b2ad547bdded87b8e4f5bda50b5771ebb3608",
+    "apps/desktop/test/workspace_hosts_test.dart": "daaee5a58ff6ee7f163c5db199d2c4d563570e17669c8e763cd44509eba16c29",
+    "apps/desktop/test/zhiyu_plugins_test.dart": "b6595f8edf86d587e0e981325e996f30eecbf1d899a6f79eb47521d2678dacb6"
+  },
+  "checks": {
+    "consecutiveFocusedRuns": {
+      "targeted-1.log": 24,
+      "regression.log": 184,
+      "targeted-3.log": 24
+    },
+    "newSourceAndControllerTests": 9,
+    "newWidgetTests": 5,
+    "analysis": "No issues found!",
+    "isolation": "Existing actual controls guard extended through host revoke/reset; no test skip on this Mac",
+    "productionCalls": 0,
+    "networkCalls": 0,
+    "rejectedPersonalPaths": 0
+  },
+  "previewBuild": {
+    "path": "apps/desktop/build/macos/Build/Products/Debug/info_desktop.app",
+    "bundleId": "com.example.infoDesktop.zhiyuPreview",
+    "isolatedPreviewFlag": "YES",
+    "newRuntimeClaim": false
+  },
+  "nativeSourceUnchanged": {
+    "apps/desktop/macos/Runner/MainFlutterWindow.swift": {
+      "sha256": "bc24813874c5e4a3db30cc7e2bc964e2a35fca9eefa1dd9950c92d7bc2f6333a",
+      "sameAsVerifiedSource": "8645c10bfa88abe81641e823d0c46d0ee846c913"
+    },
+    "apps/desktop/lib/preview_main.dart": {
+      "sha256": "8ea387c251c40080ddc65e2ae89483a88e56753f8dea3b0d1eb370bfa9355d33",
+      "sameAsVerifiedSource": "8645c10bfa88abe81641e823d0c46d0ee846c913"
+    },
+    "apps/desktop/lib/workspace/mac_preview_desktop.dart": {
+      "sha256": "15adcb657fcfd807a0dd78a066f417c860de21ecf4bed0adb9fd9b12cd8e643a",
+      "sameAsVerifiedSource": "8645c10bfa88abe81641e823d0c46d0ee846c913"
+    }
+  },
+  "visuals": {
+    "reviewedImages": 5,
+    "scope": "Actual Flutter Widget rendering; 1440x900 light 100%, 1280x800 dark 200%, Mac fonts",
+    "independentReview": false,
+    "video": false,
+    "fullS5": false,
+    "OSInput": false
+  },
+  "boundaries": [
+    "Only fictional resettable data",
+    "No production known_hosts, SSH, secrets, hooks or credential grant",
+    "No computer use/subagents/Windows CI",
+    "Core global known_hosts snapshot mapping remains F01"
+  ],
+  "files": {
+    "analysis.log": {
+      "sha256": "aa3a88f121849dc640a9424c6b9fc805bb0d89c3367a99c106b6c57e82bd0b97",
+      "bytes": 96
+    },
+    "build.log": {
+      "sha256": "bb928504a91fe0ce4dc0bb921b142b31033cbbf74e92214ba34521fe3f2f22be",
+      "bytes": 125
+    },
+    "regression.log": {
+      "sha256": "1bb4ef9e4f8710c2cb5c70c077a508848bf0624c75f3ecad824f5c1810ccb286",
+      "bytes": 35499
+    },
+    "review.md": {
+      "sha256": "c871005a3b6688aed047a32f6e26262260425e3e769de35e19585e13575846aa",
+      "bytes": 1995
+    },
+    "screenshots/hosts-1280-dark-200-changed.png": {
+      "sha256": "d3d479414daa9e342a4797b2253997c735417f8ccd0772bdebcb883fbeb5dc54",
+      "bytes": 161578
+    },
+    "screenshots/hosts-1280-dark-200-disabled-revoked.png": {
+      "sha256": "307ae8023059fa3b43c0172d9c714860b1f2db8631f85a940ed55ef528b7fe34",
+      "bytes": 138715
+    },
+    "screenshots/hosts-1440-light-confirmed.png": {
+      "sha256": "ff944336fd1c08312bb6585b020bbc938f0d853113237e36813d0950c883a228",
+      "bytes": 137371
+    },
+    "screenshots/hosts-1440-light-settings.png": {
+      "sha256": "cdfdf2f234ad807da73616b5686dd44f63338abfb2f77a34b389ec7e406b5b7c",
+      "bytes": 154532
+    },
+    "screenshots/hosts-1440-light-unknown.png": {
+      "sha256": "68ab1bbe8e750d459a7c81e5f87e62e44481c2dc51b61eeadbebaed964434c03",
+      "bytes": 133708
+    },
+    "targeted-1.log": {
+      "sha256": "f1e95f5a750615ee7b513dc048675d18c23eb9f1d241e559eca7d37e23498466",
+      "bytes": 5103
+    },
+    "targeted-3.log": {
+      "sha256": "2d947bfd77e38b7b97eb7f11b2662d35c32d46720be95dcb33dc877bc94aabba",
+      "bytes": 5165
+    }
+  }
+}
