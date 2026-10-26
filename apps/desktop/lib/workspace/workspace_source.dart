@@ -1,9 +1,12 @@
 import 'workspace_records.dart';
 import 'workspace_history.dart';
 import 'workspace_files.dart';
+import 'workspace_credentials.dart';
 export 'workspace_history.dart';
 export 'workspace_records.dart';
 export 'workspace_files.dart';
+export 'workspace_credentials.dart';
+export 'workspace_operation.dart';
 
 /// Frontend-only summaries and failures. No database, authorization proof,
 /// secret material or operating-system handle crosses this boundary.
@@ -19,6 +22,8 @@ class WorkspaceSummary {
 }
 
 abstract interface class WorkspaceSource {
+  WorkspaceCredentialSource get credentials;
+
   /// Invalidates UI projections; null means a reset or a catalog change.
   Stream<WorkspaceRecordRef?> get changes;
   Future<WorkspaceSummary> loadSummary();

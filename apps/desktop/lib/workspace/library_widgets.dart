@@ -4,6 +4,12 @@ import '../prototype_icons.dart';
 import '../ui_palette.dart';
 import 'workspace_records.dart';
 
+String libraryLocalDateTime(DateTime value) {
+  final time = value.toLocal();
+  String pair(int value) => value.toString().padLeft(2, '0');
+  return '${time.year}-${pair(time.month)}-${pair(time.day)} ${pair(time.hour)}:${pair(time.minute)}';
+}
+
 /// Final Round09 workspace.css metrics, including the <=1300px overrides.
 class LibraryMetrics {
   const LibraryMetrics(this.width);

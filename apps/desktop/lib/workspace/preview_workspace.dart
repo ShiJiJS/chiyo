@@ -17,6 +17,7 @@ import 'workspace_records_controller.dart';
 import 'library_controller.dart';
 import 'library_page.dart';
 import 'library_file_dialogs.dart';
+import 'library_credential_choices.dart';
 
 /// Only the isolated composition root knows which provider is a sample.
 /// U02–U07 register their production widgets through pageBuilder.
@@ -197,6 +198,18 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
                 },
                 child: const Text('下一次文件预览失败（刷新预览后生效）'),
               ),
+              const SizedBox(height: 12),
+              DesktopButton(
+                key: const ValueKey('preview-credential-error'),
+                onPressed: () {
+                  _source.nextCredentialReadFailure = const WorkspaceFailure(
+                    'unavailable',
+                    '凭据资料读取失败，请重试。',
+                  );
+                  Navigator.pop(dialogContext);
+                },
+                child: const Text('下一次凭据读取失败（刷新凭据资料后生效）'),
+              ),
             ],
           ),
           actions: [
@@ -261,6 +274,11 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
                 controller: _library,
                 filePicker: () =>
                     showWorkspaceFileChoices(context, _source.fileChoices),
+                credentialPicker: (form) => showWorkspaceCredentialChoices(
+                  context,
+                  _source.credentials.candidates,
+                  form: form,
+                ),
                 onRetry: () => _scenario(SampleWorkspaceScenario.ready),
                 onNavigate: (page, id) =>
                     _controller.navigate(page, objectId: id, remember: true),
