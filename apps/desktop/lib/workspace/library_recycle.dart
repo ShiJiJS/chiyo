@@ -425,7 +425,11 @@ class _LibraryRecyclePageState extends State<LibraryRecyclePage> {
                       ),
                     )
                   : results == null || results.total == 0
-                  ? const Center(child: Text('回收站为空'))
+                  ? Center(
+                      child: Text(
+                        _search.text.trim().isEmpty ? '回收站为空' : '没有匹配的回收资料',
+                      ),
+                    )
                   : ListView.builder(
                       key: const PageStorageKey('library-recycle-list'),
                       padding: const EdgeInsets.symmetric(horizontal: 28),

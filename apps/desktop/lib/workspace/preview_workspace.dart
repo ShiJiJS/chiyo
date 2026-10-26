@@ -6,6 +6,8 @@ import '../desktop_motion.dart';
 import '../ui_palette.dart';
 import '../prototype_icons.dart';
 import 'sample_workspace_source.dart';
+import 'sample_workspace_fixture.dart';
+import 'sample_workspace_stress_fixture.dart';
 import 'workspace_controller.dart';
 import 'workspace_source.dart';
 import 'zhiyu_app.dart';
@@ -30,6 +32,7 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
   late final LibraryController _library;
   StreamSubscription<WorkspaceRecordRef?>? _summaryChanges;
   final _guideFocus = FocusNode();
+  bool _stress = false;
   @override
   void initState() {
     super.initState();
@@ -72,6 +75,16 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
     unawaited(_library.load(_library.query));
   }
 
+  Future<void> _dataset(bool stress) async {
+    await _source.replaceFixture(
+      stress ? buildWorkspaceStressFixture() : sampleWorkspaceJson,
+    );
+    _stress = stress;
+    await _controller.refresh();
+    await _library.resetView();
+    if (stress) await _library.showAll();
+  }
+
   void _guide(BuildContext context) {
     unawaited(widget.desktop?.setNavigationEnabled(false));
     unawaited(
@@ -100,6 +113,31 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
                         Navigator.pop(dialogContext);
                       },
                       child: Text(value == Brightness.light ? '明亮' : '黑暗'),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 22),
+              const Text('资料规模', style: TextStyle(fontWeight: FontWeight.w600)),
+              const SizedBox(height: 10),
+              const Text(
+                '压力场景含200条普通信息、8条凭据、50个目录和100个标签，全部为虚构内容。切换规模会重置预览修改与返回位置。',
+              ),
+              const SizedBox(height: 10),
+              Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: [
+                  for (final stress in [false, true])
+                    DesktopButton(
+                      key: ValueKey(
+                        'preview-dataset-${stress ? 'stress' : 'reference'}',
+                      ),
+                      selected: _stress == stress,
+                      onPressed: () async {
+                        Navigator.pop(dialogContext);
+                        await _dataset(stress);
+                      },
+                      child: Text(stress ? '压力资料' : '基准资料'),
                     ),
                 ],
               ),
@@ -146,6 +184,7 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
             DesktopButton(
               onPressed: () {
                 _source.reset();
+                unawaited(_library.resetView());
                 unawaited(_controller.refresh());
                 Navigator.pop(dialogContext);
                 DesktopFeedback.show(context, '已重置预览资料');

@@ -119,7 +119,9 @@ class LibraryMessage extends StatelessWidget {
   final Widget? action;
   @override
   Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.all(24),
+    padding: EdgeInsets.all(
+      MediaQuery.textScalerOf(context).scale(1) >= 1.6 ? 16 : 24,
+    ),
     child: Column(
       mainAxisSize: MainAxisSize.min,
       children: [

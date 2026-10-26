@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'package:info_desktop/workspace/sample_workspace_fixture.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:info_desktop/workspace/sample_workspace_source.dart';
 import 'package:info_desktop/workspace/workspace_source.dart';
@@ -48,7 +50,9 @@ Future<WorkspaceRecordReceipt> recycle(
 void main() {
   late SampleWorkspaceSource source;
   setUp(() {
-    source = SampleWorkspaceSource();
+    source = SampleWorkspaceSource(
+      fixtureJson: jsonEncode(jsonDecode(sampleWorkspaceJson)..remove('trash')),
+    );
   });
   tearDown(() {
     source.dispose();

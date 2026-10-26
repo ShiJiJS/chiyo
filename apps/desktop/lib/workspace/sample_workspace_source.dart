@@ -26,7 +26,7 @@ class SampleWorkspaceSource implements WorkspaceSource {
   int _nextRecycle = 0;
   String _fingerprint(Object value) =>
       sha256.convert(utf8.encode(jsonEncode(value))).toString();
-  final String _fixtureJson;
+  String _fixtureJson;
   static const _genericDefinition = <String, Object?>{
     'name': '通用资料',
     'fields': [
@@ -68,6 +68,8 @@ class SampleWorkspaceSource implements WorkspaceSource {
   int _catalogVersion = 1, _nextDirectory = 0;
   final _directoryOperations =
       <String, ({String fingerprint, WorkspaceDirectory? directory})>{};
+  final _initialRecycled =
+      <String, ({WorkspaceRecycleEntry entry, WorkspaceArchive archive})>{};
   final _initial = <WorkspaceRecordRef, WorkspaceDetail>{};
   final _records = <WorkspaceRecordRef, WorkspaceDetail>{};
   final _operations =
@@ -93,9 +95,14 @@ class SampleWorkspaceSource implements WorkspaceSource {
 
   Future<void> _ensureData() => _loading ??= () async {
     final data = jsonDecode(_fixtureJson) as Map<String, dynamic>;
-    final rows = (data['records'] as List).cast<Map<String, dynamic>>();
+    final activeRows = (data['records'] as List).cast<Map<String, dynamic>>();
+    final trashRows = (data['trash'] as List? ?? [])
+        .cast<Map<String, dynamic>>();
+    final rows = [...activeRows, ...trashRows];
+    final trashDetails = <WorkspaceRecordRef, WorkspaceDetail>{};
     final tagNames = <String>{
       for (final row in rows) ...List<String>.from(row['tags'] ?? []),
+      ...List<String>.from(data['tags'] ?? []),
     };
     final tags = {
       for (final (index, name) in tagNames.indexed)
@@ -137,29 +144,50 @@ class SampleWorkspaceSource implements WorkspaceSource {
       });
     }
 
-    final refs = {
-      for (final row in rows)
-        row['id'] as String: WorkspaceRecordRef(
-          row['kind'] == 'credential'
-              ? WorkspaceRecordKind.credential
-              : WorkspaceRecordKind.information,
-          row['id'] as String,
-        ),
-    };
+    WorkspaceRecordRef rowRef(Map<String, dynamic> row) => WorkspaceRecordRef(
+      row['kind'] == 'credential'
+          ? WorkspaceRecordKind.credential
+          : WorkspaceRecordKind.information,
+      row['id'] as String,
+    );
+    final refs = <String, Set<WorkspaceRecordRef>>{};
     for (final row in rows) {
-      final ref = refs[row['id']]!;
+      (refs[row['id'] as String] ??= {}).add(rowRef(row));
+    }
+    WorkspaceRecordRef relationRef(Object? raw) {
+      if (raw is Map) {
+        final kind = WorkspaceRecordKind.values.singleWhere(
+          (k) => k.name == raw['kind'],
+        );
+        return WorkspaceRecordRef(kind, raw['id'] as String);
+      }
+      final id = raw as String;
+      final matches = refs[id] ?? {};
+      if (matches.length > 1) {
+        throw const FormatException(
+          'Ambiguous fixture reference: use a typed identity.',
+        );
+      }
+      return matches.firstOrNull ??
+          WorkspaceRecordRef(WorkspaceRecordKind.information, id);
+    }
+
+    for (final row in rows) {
+      final ref = rowRef(row);
       final rawDirectory = row['directory'] as String?;
       final record = WorkspaceRecordSummary(
         ref: ref,
         name: row['name'] as String,
         description: row['summary'] as String? ?? '',
         type: type(row),
-        updatedAt: DateTime.parse('${row['updatedAt']}T00:00:00Z'),
+        updatedAt: DateTime.parse(
+          '${row['updatedAt'] ?? row['deletedAt']}T00:00:00Z',
+        ),
         directoryId: rawDirectory == 'unfiled' ? null : rawDirectory,
         tags: [for (final name in row['tags'] as List? ?? []) tags[name]!],
       );
       final relations = row['relations'] as Map<String, dynamic>? ?? {};
-      _initial[ref] = WorkspaceDetail(
+      final detail = WorkspaceDetail(
         record: record,
         version: 1,
         definition: Map<String, Object?>.from(
@@ -175,15 +203,15 @@ class SampleWorkspaceSource implements WorkspaceSource {
         relations: {
           for (final entry in relations.entries)
             entry.key: [
-              for (final id in entry.value as List)
-                refs[id] ??
-                    WorkspaceRecordRef(
-                      WorkspaceRecordKind.information,
-                      id as String,
-                    ),
+              for (final raw in entry.value as List) relationRef(raw),
             ],
         },
       );
+      final destination = activeRows.contains(row) ? _initial : trashDetails;
+      if (destination.containsKey(ref)) {
+        throw const FormatException('Duplicate fixture identity.');
+      }
+      destination[ref] = detail;
     }
     _records.addAll(_initial);
     for (final detail in _initial.values) {
@@ -202,6 +230,33 @@ class SampleWorkspaceSource implements WorkspaceSource {
       types: types.values,
     );
     _initialCatalog = _catalog;
+    for (final row in trashRows) {
+      final detail = trashDetails[rowRef(row)]!;
+      if (detail.record.ref.kind != WorkspaceRecordKind.information ||
+          _records.containsKey(detail.record.ref)) {
+        throw const FormatException(
+          'Recycled fixture identity must be an absent ordinary record.',
+        );
+      }
+      final deletedAt = DateTime.parse('${row['deletedAt']}T00:00:00Z');
+      final id = 'seed-recycle-${detail.record.ref.id}';
+      _initialRecycled[id] = (
+        entry: WorkspaceRecycleEntry(
+          id: id,
+          record: detail.record,
+          version: detail.version + 1,
+          deletedAt: deletedAt,
+          expiresAt: deletedAt.add(const Duration(days: 30)),
+          directoryName: _catalog.directories
+              .where((d) => d.id == detail.record.directoryId)
+              .firstOrNull
+              ?.name,
+        ),
+        archive: _archive(detail, at: deletedAt),
+      );
+      _versions[detail.record.ref] = detail.version + 1;
+    }
+    _recycled.addAll(_initialRecycled);
   }();
 
   Future<void> _readable() async {
@@ -373,8 +428,7 @@ class SampleWorkspaceSource implements WorkspaceSource {
     );
     _catalogVersion++;
     if (_scenario == SampleWorkspaceScenario.empty) {
-      _records.clear();
-      _scenario = SampleWorkspaceScenario.ready;
+      _materializeEmpty();
     }
     _directoryOperations[change.operationId] = (
       fingerprint: fingerprint,
@@ -715,8 +769,7 @@ class SampleWorkspaceSource implements WorkspaceSource {
         relations: draft.relations,
       );
       if (_scenario == SampleWorkspaceScenario.empty) {
-        _records.clear();
-        _scenario = SampleWorkspaceScenario.ready;
+        _materializeEmpty();
       }
       _versions[record.ref] = detail.version;
       _records[record.ref] = detail;
@@ -856,6 +909,38 @@ class SampleWorkspaceSource implements WorkspaceSource {
   Future<WorkspaceRecordReceipt> changeRecord(WorkspaceRecordChange change) =>
       _changeRecord(change);
 
+  void _materializeEmpty() {
+    _records.clear();
+    _revisions.clear();
+    _recycled.clear();
+    _operations.clear();
+    _recordOperations.clear();
+    _scenario = SampleWorkspaceScenario.ready;
+  }
+
+  /// Composition-root-only fixture switch. All pending reads are cancelled;
+  /// page code still consumes the same WorkspaceSource contract.
+  Future<void> replaceFixture(String fixtureJson) async {
+    setScenario(SampleWorkspaceScenario.ready);
+    _fixtureJson = fixtureJson;
+    _loading = null;
+    _initial.clear();
+    _initialRecycled.clear();
+    _records.clear();
+    _initialCatalog = null;
+    _revisions.clear();
+    _recycled.clear();
+    _operations.clear();
+    _recordOperations.clear();
+    _directoryOperations.clear();
+    _versions.clear();
+    _clock = _nextRecord = _nextDirectory = _nextRecycle = 0;
+    _catalogVersion++;
+    nextSaveFailure = null;
+    await _ensureData();
+    if (!_disposed) _changes.add(null);
+  }
+
   void reset() {
     setScenario(SampleWorkspaceScenario.ready);
     _records
@@ -863,13 +948,20 @@ class SampleWorkspaceSource implements WorkspaceSource {
       ..addAll(_initial);
     _operations.clear();
     _revisions.clear();
-    _recycled.clear();
+    _recycled
+      ..clear()
+      ..addAll(_initialRecycled);
     _recordOperations.clear();
     _versions
       ..clear()
       ..addEntries(
         _initial.entries.map((e) => MapEntry(e.key, e.value.version)),
       );
+    _versions.addEntries(
+      _initialRecycled.values.map(
+        (r) => MapEntry(r.entry.record.ref, r.entry.version),
+      ),
+    );
     _nextRecycle = 0;
     _directoryOperations.clear();
     if (_initialCatalog case final initial?) _catalog = initial;

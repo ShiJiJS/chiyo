@@ -4,18 +4,19 @@ extension _SampleHistory on SampleWorkspaceSource {
   int _pageOffset(int offset, int limit, int total) =>
       total == 0 ? 0 : offset.clamp(0, (total - 1) ~/ limit * limit);
 
-  WorkspaceArchive _archive(WorkspaceDetail detail) => WorkspaceArchive(
-    detail: detail,
-    archivedAt: _now(),
-    directoryName: _catalog.directories
-        .where((d) => d.id == detail.record.directoryId)
-        .firstOrNull
-        ?.name,
-    targets: {
-      for (final ref in detail.relations.values.expand((r) => r))
-        if (_records[ref] case final target?) ref: target.record,
-    },
-  );
+  WorkspaceArchive _archive(WorkspaceDetail detail, {DateTime? at}) =>
+      WorkspaceArchive(
+        detail: detail,
+        archivedAt: at ?? _now(),
+        directoryName: _catalog.directories
+            .where((d) => d.id == detail.record.directoryId)
+            .firstOrNull
+            ?.name,
+        targets: {
+          for (final ref in detail.relations.values.expand((r) => r))
+            if (_records[ref] case final target?) ref: target.record,
+        },
+      );
 
   void _forgetContent(WorkspaceRecordRef ref) {
     _revisions.remove(ref);

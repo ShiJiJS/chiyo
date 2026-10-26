@@ -2334,6 +2334,23 @@ const sampleWorkspaceJson = r'''
     }
   ],
   "pending": 5,
-  "proposals": 2
+  "proposals": 2,
+  "trash": [
+    {
+      "id": "retired-doc",
+      "name": "旧部署笔记",
+      "summary": "已迁移到新的维护文档",
+      "kind": "document",
+      "directory": "selfhost",
+      "tags": [
+        "归档"
+      ],
+      "values": {
+        "body": "旧的容器部署步骤。"
+      },
+      "deletedAt": "2026-10-20",
+      "relations": {}
+    }
+  ]
 }
 ''';

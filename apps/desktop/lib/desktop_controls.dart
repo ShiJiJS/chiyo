@@ -262,10 +262,17 @@ class _DesktopSelectState<T> extends State<DesktopSelect<T>> {
   @override
   Widget build(BuildContext context) {
     final enabled = widget.onChanged != null && widget.items.isNotEmpty;
-    final label =
+    final labelContent =
         widget.items.where((i) => i.value == _selected).firstOrNull?.child ??
         widget.hint ??
         const Text('请选择');
+    // A compact trigger has one line; its menu retains the complete label.
+    // Long directory paths/tags must not consume an entire workspace column.
+    final label = DefaultTextStyle.merge(
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      child: labelContent,
+    );
     final control = Builder(
       builder: (triggerContext) => CallbackShortcuts(
         bindings: {
@@ -275,6 +282,9 @@ class _DesktopSelectState<T> extends State<DesktopSelect<T>> {
         },
         child: widget.compact
             ? DesktopButton(
+                tooltip: widget.triggerLabel == null && labelContent is Text
+                    ? labelContent.data
+                    : null,
                 focusNode: _buttonFocus,
                 onPressed: enabled
                     ? () => _open ? _popup.close?.call() : _show(triggerContext)

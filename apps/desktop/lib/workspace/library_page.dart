@@ -36,7 +36,7 @@ class _LibraryPageState extends State<LibraryPage> {
   final _list = ScrollController(), _detailScroll = ScrollController();
   final _search = TextEditingController();
   final _searchFocus = FocusNode();
-  int _focusRequest = 0;
+  int _focusRequest = 0, _viewReset = 0;
   bool _reading = false, _recyclePage = false;
   WorkspaceRecordRef? _lastSelection;
   LibraryController get model => widget.controller;
@@ -47,6 +47,7 @@ class _LibraryPageState extends State<LibraryPage> {
     _lastSelection = model.selection;
     model.addListener(_changed);
     _focusRequest = model.searchFocusRequest;
+    _viewReset = model.viewReset;
     if (_focusRequest > 0) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) _searchFocus.requestFocus();
@@ -73,6 +74,10 @@ class _LibraryPageState extends State<LibraryPage> {
         !_search.value.composing.isValid) {
       _search.text = model.query.keyword;
     }
+    if (_viewReset != model.viewReset) {
+      _viewReset = model.viewReset;
+      _recyclePage = _reading = false;
+    }
     setState(() {});
     if (_lastSelection != model.selection) {
       _lastSelection = model.selection;
@@ -82,6 +87,9 @@ class _LibraryPageState extends State<LibraryPage> {
     }
     if (_focusRequest != model.searchFocusRequest) {
       _focusRequest = model.searchFocusRequest;
+      setState(() {
+        _recyclePage = _reading = false;
+      });
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) _searchFocus.requestFocus();
       });
@@ -183,6 +191,8 @@ class _LibraryPageState extends State<LibraryPage> {
   ) {
     final selected = (model.query.directoryId ?? 'all') == directory.id;
     final path = libraryDirectoryAncestors(model.catalog!, directory);
+    final largeText = MediaQuery.textScalerOf(context).scale(1) >= 1.6;
+    final count = '${model.catalog?.directoryCounts[directory.id] ?? 0}';
     return Padding(
       padding: const EdgeInsets.only(bottom: 3),
       child: Row(
@@ -200,7 +210,7 @@ class _LibraryPageState extends State<LibraryPage> {
                     ),
               fontSize: metrics.compact ? 13 : 14,
               padding: EdgeInsets.fromLTRB(
-                10 + (path.length - 1).clamp(0, 3) * 22.0,
+                10 + (path.length - 1).clamp(0, 3) * (largeText ? 10.0 : 22.0),
                 8,
                 10,
                 8,
@@ -217,21 +227,38 @@ class _LibraryPageState extends State<LibraryPage> {
                   ),
                   const SizedBox(width: 10),
                   Expanded(
-                    child: Text(
-                      directory.name,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          directory.name,
+                          maxLines: largeText ? 2 : 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        if (largeText)
+                          Text(
+                            '$count 项',
+                            style: libraryText(
+                              context,
+                              12,
+                              color: UiPalette.of(context).muted,
+                            ),
+                          ),
+                      ],
                     ),
                   ),
-                  const SizedBox(width: 5),
-                  Text(
-                    '${model.catalog?.directoryCounts[directory.id] ?? 0}',
-                    style: libraryText(
-                      context,
-                      12,
-                      color: UiPalette.of(context).muted,
+                  if (!largeText) ...[
+                    const SizedBox(width: 5),
+                    Text(
+                      count,
+                      style: libraryText(
+                        context,
+                        12,
+                        color: UiPalette.of(context).muted,
+                      ),
                     ),
-                  ),
+                  ],
                 ],
               ),
             ),
@@ -443,6 +470,8 @@ class _LibraryPageState extends State<LibraryPage> {
               Expanded(
                 child: Text(
                   _directoryName,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                   style: libraryText(
                     context,
                     17,
@@ -714,24 +743,30 @@ class _LibraryPageState extends State<LibraryPage> {
     final c = UiPalette.of(context), results = model.results;
     Widget contents;
     if (model.loadState == WorkspaceLoad.error) {
-      contents = LibraryMessage(
-        '暂时无法读取',
-        description: model.failure?.message,
-        action: DesktopButton(
-          onPressed: widget.onRetry ?? () => model.load(model.query),
-          child: const Text('重试'),
+      contents = SingleChildScrollView(
+        primary: false,
+        child: LibraryMessage(
+          '暂时无法读取',
+          description: model.failure?.message,
+          action: DesktopButton(
+            onPressed: widget.onRetry ?? () => model.load(model.query),
+            child: const Text('重试'),
+          ),
         ),
       );
     } else if (results == null) {
       contents = const Center(child: CircularProgressIndicator(strokeWidth: 2));
     } else if (results.total == 0) {
       final empty = (model.catalog?.directoryCounts['all'] ?? 0) == 0;
-      contents = LibraryMessage(
-        empty ? '暂无资料' : '没有匹配的资料',
-        description: empty ? '添加一份资料开始整理。' : '换个关键词，或取消类型和标签。',
-        action: DesktopButton(
-          onPressed: empty ? () => _edit(create: true) : model.clearFilters,
-          child: Text(empty ? '添加资料' : '清除筛选'),
+      contents = SingleChildScrollView(
+        primary: false,
+        child: LibraryMessage(
+          empty ? '暂无资料' : '没有匹配的资料',
+          description: empty ? '添加一份资料开始整理。' : '换个关键词，或取消类型和标签。',
+          action: DesktopButton(
+            onPressed: empty ? () => _edit(create: true) : model.clearFilters,
+            child: Text(empty ? '添加资料' : '清除筛选'),
+          ),
         ),
       );
     } else {
@@ -781,6 +816,7 @@ class _LibraryPageState extends State<LibraryPage> {
           _header(context),
           Expanded(child: contents),
           Container(
+            key: const ValueKey('library-results-footer'),
             constraints: const BoxConstraints(minHeight: 45),
             padding: const EdgeInsets.symmetric(horizontal: 17, vertical: 10),
             decoration: BoxDecoration(
