@@ -1,0 +1,91 @@
+{
+  "createdAt": "2026-10-26T21:53:08.737667+00:00",
+  "branch": "codex/zhiyu-macos",
+  "sourceCommit": "b19d087208b7e6aaf583cc455bb47c3e3a53aec5",
+  "documentCommit": "130a3589deb7cf6ef1823775ab08200aee70ed56",
+  "goalStatus": "active",
+  "issues": [
+    {
+      "issue": 64,
+      "url": "https://github.com/ShiJiJS/agent-info-manage/issues/64",
+      "title": "知予前端 U03：个人档案、文档、文件与凭据界面",
+      "state": "OPEN",
+      "checked": 6,
+      "total": 7,
+      "labels": [
+        "enhancement",
+        "ready-for-agent"
+      ],
+      "comments": 0,
+      "beforeBodySha256": "9ff8bcd2b253cc10b55c2e116bcc99b1b7986a350eca9460646fc9a169700a19",
+      "afterBodySha256": "93bd0f519aaf69179ad0d4561bea382303471f948048353940da80823318eba6",
+      "exactReadback": true,
+      "nativeDependenciesBeforeAndAfter": [
+        63
+      ]
+    },
+    {
+      "issue": 65,
+      "url": "https://github.com/ShiJiJS/agent-info-manage/issues/65",
+      "title": "知予前端 U04：插件管理、专属设置与旧资料采用模板界面",
+      "state": "OPEN",
+      "checked": 0,
+      "total": 7,
+      "labels": [
+        "enhancement",
+        "ready-for-agent"
+      ],
+      "comments": 0,
+      "beforeBodySha256": "69f59015fd3184fd2ec8324946aa7df45929399d72a2d0b16587905f96f8fc6d",
+      "afterBodySha256": "f87ee1fe7c957c6acc96ef3a5dc7e8ac64ea57f9f088194623065b5cfd4560ac",
+      "exactReadback": true,
+      "nativeDependenciesBeforeAndAfter": [
+        62
+      ]
+    },
+    {
+      "issue": 69,
+      "url": "https://github.com/ShiJiJS/agent-info-manage/issues/69",
+      "title": "知予后续规划 F01：界面完成后拆分真实功能、测试与 Mac 交付",
+      "state": "OPEN",
+      "checked": 0,
+      "total": 6,
+      "labels": [
+        "documentation"
+      ],
+      "comments": 0,
+      "beforeBodySha256": "5f37f7fe5f5c1d9e8c617243383dd13f1bc41bc1a786c6bed7580d073bb66747",
+      "afterBodySha256": "168ba7558d5444e848153dfd603026150f63712f64d2fb4c95d1d44c818613a0",
+      "exactReadback": true,
+      "nativeDependenciesBeforeAndAfter": [
+        64,
+        65,
+        66,
+        67,
+        68
+      ]
+    }
+  ],
+  "browser": {
+    "spaceId": 169,
+    "finished": true
+  },
+  "evidence": {
+    "directory": "docs/development/evidence/zhiyu-round09/u03/macos/r6",
+    "files": 12,
+    "bytes": 790541,
+    "gitBytesVerified": true
+  },
+  "cleanup": {
+    "removedDirectory": "build/zhiyu-ui/u03/macos/receipts-r6",
+    "files": 24,
+    "bytes": 1349565,
+    "preserved": [
+      "single fixed preview App",
+      "versioned evidence",
+      "unknown .local/",
+      "personal containers/keys"
+    ]
+  },
+  "next": "Continue U04 implementation from docs/planning/zhiyu-round09/u04-template-flow.md; all manual S5/OS gates remain open; no Windows CI or CUA."
+}
