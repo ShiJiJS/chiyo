@@ -15,6 +15,10 @@ class SampleWorkspaceSource implements WorkspaceSource {
   Stream<WorkspaceRecordRef?> get changes => _changes.stream;
   Future<void>? _loading;
   late WorkspaceCatalog _catalog;
+  WorkspaceCatalog? _initialCatalog;
+  int _catalogVersion = 1, _nextDirectory = 0;
+  final _directoryOperations =
+      <String, ({String fingerprint, WorkspaceDirectory? directory})>{};
   final _initial = <WorkspaceRecordRef, WorkspaceDetail>{};
   final _records = <WorkspaceRecordRef, WorkspaceDetail>{};
   final _operations =
@@ -132,6 +136,7 @@ class SampleWorkspaceSource implements WorkspaceSource {
       tags: tags.values,
       types: types.values,
     );
+    _initialCatalog = _catalog;
   }();
 
   Future<void> _readable() async {
@@ -170,6 +175,7 @@ class SampleWorkspaceSource implements WorkspaceSource {
         ? <WorkspaceRecordSummary>[]
         : _records.values.map((d) => d.record);
     return WorkspaceCatalog(
+      version: _catalogVersion,
       directories: _catalog.directories,
       tags: _catalog.tags,
       types: _catalog.types,
@@ -186,6 +192,127 @@ class SampleWorkspaceSource implements WorkspaceSource {
               .length,
       },
     );
+  }
+
+  @override
+  Future<WorkspaceDirectory?> changeDirectory(
+    WorkspaceDirectoryChange change,
+  ) async {
+    await _readable();
+    final fingerprint = jsonEncode({
+      'action': change.action.name,
+      'version': change.expectedVersion,
+      'target': change.directoryId,
+      'name': change.name,
+      'parent': change.parentId,
+    });
+    final previous = _directoryOperations[change.operationId];
+    if (previous != null) {
+      if (previous.fingerprint != fingerprint) {
+        throw const WorkspaceFailure('operation_conflict', '同一次操作不能用于不同目录内容。');
+      }
+      return previous.directory;
+    }
+    if (change.operationId.trim().isEmpty) {
+      throw const WorkspaceFailure('validation', '目录操作身份不能为空。');
+    }
+    if (change.expectedVersion != _catalogVersion) {
+      throw const WorkspaceFailure('conflict', '目录已变化，请重新读取后核对。');
+    }
+    final current = _catalog.directories
+        .where((d) => d.id == change.directoryId)
+        .firstOrNull;
+    final creating = change.action == WorkspaceDirectoryAction.create;
+    if ((!creating &&
+            (current == null || ['all', 'unfiled'].contains(current.id))) ||
+        (creating && change.directoryId != null)) {
+      throw const WorkspaceFailure('not_found', '目录已不存在或不能修改。');
+    }
+    WorkspaceDirectory? result;
+    if (change.action == WorkspaceDirectoryAction.delete) {
+      if (_catalog.directories.any((d) => d.parentId == current!.id) ||
+          (_scenario != SampleWorkspaceScenario.empty &&
+              _records.values.any(
+                (d) => d.record.directoryId == current!.id,
+              ))) {
+        throw const WorkspaceFailure(
+          'directory_not_empty',
+          '目录包含资料、凭据或子目录，请先移出后再删除。',
+        );
+      }
+    } else {
+      final name = change.name.trim();
+      final errors = <String, String>{};
+      if (name.isEmpty ||
+          change.name.length > 200 ||
+          name.contains('/') ||
+          name.contains(r'\')) {
+        errors['name'] = '请输入1–200字的目录名，不包含斜线。';
+      }
+      final visited = <String>{if (!creating) current!.id};
+      var parent = change.parentId;
+      while (parent != null) {
+        final found = _catalog.directories
+            .where((d) => d.id == parent && !['all', 'unfiled'].contains(d.id))
+            .firstOrNull;
+        if (found == null || !visited.add(parent)) {
+          errors['parent'] = '请选择现存目录，不能移入自身或子目录。';
+          break;
+        }
+        parent = found.parentId;
+      }
+      if (_catalog.directories.any(
+        (d) =>
+            d.id != current?.id &&
+            d.parentId == change.parentId &&
+            d.name.toLowerCase() == name.toLowerCase(),
+      )) {
+        errors['name'] = '此位置已有同名目录。';
+      }
+      if (errors.isNotEmpty) {
+        throw WorkspaceFailure(
+          'validation',
+          '请检查标记的目录内容。',
+          fieldErrors: errors,
+        );
+      }
+      result = WorkspaceDirectory(
+        creating ? 'preview-directory-${++_nextDirectory}' : current!.id,
+        name,
+        parentId: change.parentId,
+      );
+    }
+    if (nextSaveFailure case final failure?) {
+      nextSaveFailure = null;
+      throw failure;
+    }
+    final directories = [..._catalog.directories];
+    if (current != null) {
+      final index = directories.indexWhere((d) => d.id == current.id);
+      if (result == null) {
+        directories.removeAt(index);
+      } else {
+        directories[index] = result;
+      }
+    } else if (result != null) {
+      directories.add(result);
+    }
+    _catalog = WorkspaceCatalog(
+      directories: directories,
+      tags: _catalog.tags,
+      types: _catalog.types,
+    );
+    _catalogVersion++;
+    if (_scenario == SampleWorkspaceScenario.empty) {
+      _records.clear();
+      _scenario = SampleWorkspaceScenario.ready;
+    }
+    _directoryOperations[change.operationId] = (
+      fingerprint: fingerprint,
+      directory: result,
+    );
+    _changes.add(null);
+    return result;
   }
 
   bool _inDirectory(String? id, String? ancestor) {
@@ -514,6 +641,9 @@ class SampleWorkspaceSource implements WorkspaceSource {
       ..clear()
       ..addAll(_initial);
     _operations.clear();
+    _directoryOperations.clear();
+    if (_initialCatalog case final initial?) _catalog = initial;
+    _catalogVersion++;
     nextSaveFailure = null;
     _clock = 0;
     _nextRecord = 0;

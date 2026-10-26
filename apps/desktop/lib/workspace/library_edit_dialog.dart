@@ -244,20 +244,9 @@ class _EditorState extends State<_Editor> {
               ),
             ),
             const SizedBox(height: 18),
-            DesktopSelect<String?>(
+            LibraryDirectorySelect(
+              catalog: catalog,
               value: _directory,
-              isExpanded: true,
-              decoration: const InputDecoration(labelText: '资料目录'),
-              items: [
-                const DropdownMenuItem(value: null, child: Text('未分类')),
-                for (final directory in catalog.directories.where(
-                  (d) => !['all', 'unfiled'].contains(d.id),
-                ))
-                  DropdownMenuItem(
-                    value: directory.id,
-                    child: Text(directory.name),
-                  ),
-              ],
               onChanged: _saving
                   ? null
                   : (value) => setState(() {

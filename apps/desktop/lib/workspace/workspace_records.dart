@@ -37,6 +37,7 @@ class WorkspaceCatalog {
     required Iterable<WorkspaceType> types,
     Map<String, int> directoryCounts = const {},
     Map<String, int> tagCounts = const {},
+    this.version = 1,
   }) : directories = List.unmodifiable(directories),
        tags = List.unmodifiable(tags),
        types = List.unmodifiable(types),
@@ -46,6 +47,27 @@ class WorkspaceCatalog {
   final List<WorkspaceTag> tags;
   final List<WorkspaceType> types;
   final Map<String, int> directoryCounts, tagCounts;
+  final int version;
+}
+
+enum WorkspaceDirectoryAction { create, update, delete }
+
+/// A full desired directory state, checked against the catalog being edited.
+/// Null parent means a root directory, never a filesystem path.
+class WorkspaceDirectoryChange {
+  const WorkspaceDirectoryChange({
+    required this.operationId,
+    required this.expectedVersion,
+    required this.action,
+    this.directoryId,
+    this.name = '',
+    this.parentId,
+  });
+  final String operationId;
+  final int expectedVersion;
+  final WorkspaceDirectoryAction action;
+  final String? directoryId, parentId;
+  final String name;
 }
 
 class WorkspaceRecordSummary {

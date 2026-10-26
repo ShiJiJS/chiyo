@@ -22,6 +22,7 @@ class WorkspaceRecordsController extends ChangeNotifier {
   WorkspaceRecordRef? selection;
   WorkspaceDetail? detail;
   WorkspaceFailure? failure, detailFailure, saveFailure;
+  String? scopeNotice;
   WorkspaceLoad loadState = WorkspaceLoad.idle;
   WorkspaceSaveState saveState = WorkspaceSaveState.idle;
   double scrollOffset = 0;
@@ -43,6 +44,23 @@ class WorkspaceRecordsController extends ChangeNotifier {
     notifyListeners();
     try {
       final currentCatalog = await source.loadCatalog();
+      if (_disposed || generation != _queryGeneration) return;
+      final lostDirectory =
+          next.directoryId != null &&
+          !currentCatalog.directories.any((d) => d.id == next.directoryId);
+      final lostTag =
+          next.tagId != null &&
+          !currentCatalog.tags.any((t) => t.id == next.tagId);
+      scopeNotice = lostDirectory || lostTag ? '原目录或标签已移除，已清除失效的筛选条件。' : null;
+      if (lostDirectory || lostTag) {
+        next = next.copyWith(
+          clearDirectory: lostDirectory,
+          clearTag: lostTag,
+          offset: 0,
+        );
+        query = next;
+        scrollOffset = 0;
+      }
       final value = await source.queryRecords(
         next,
         keepSelection: keepSelection ?? selection,
