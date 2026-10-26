@@ -1,0 +1,146 @@
+[
+  {
+    "size": {
+      "width": 1440,
+      "height": 900
+    },
+    "geometry": {
+      "appbar": {
+        "x": 0,
+        "y": 0,
+        "width": 1440,
+        "height": 66,
+        "font": "\"Zhiyu System\", \"PingFang SC\", sans-serif",
+        "lineHeight": "22.4px"
+      },
+      "brand": {
+        "x": 22,
+        "y": 16.296875,
+        "width": 73,
+        "height": 32.3984375,
+        "font": "\"Zhiyu System\", \"PingFang SC\", sans-serif",
+        "lineHeight": "30.4px"
+      },
+      "library": {
+        "x": 117,
+        "y": 11.796875,
+        "width": 91,
+        "height": 41.3984375,
+        "font": "\"Zhiyu System\", \"PingFang SC\", sans-serif",
+        "lineHeight": "22.4px"
+      },
+      "approvals": {
+        "x": 211,
+        "y": 11.796875,
+        "width": 133,
+        "height": 41.3984375,
+        "font": "\"Zhiyu System\", \"PingFang SC\", sans-serif",
+        "lineHeight": "22.4px"
+      },
+      "proposals": {
+        "x": 347,
+        "y": 11.796875,
+        "width": 133,
+        "height": 41.3984375,
+        "font": "\"Zhiyu System\", \"PingFang SC\", sans-serif",
+        "lineHeight": "22.4px"
+      },
+      "history": {
+        "x": 483,
+        "y": 11.796875,
+        "width": 105,
+        "height": 41.3984375,
+        "font": "\"Zhiyu System\", \"PingFang SC\", sans-serif",
+        "lineHeight": "22.4px"
+      },
+      "settings": {
+        "x": 591,
+        "y": 11.796875,
+        "width": 77,
+        "height": 41.3984375,
+        "font": "\"Zhiyu System\", \"PingFang SC\", sans-serif",
+        "lineHeight": "22.4px"
+      },
+      "guide": {
+        "x": 1318,
+        "y": 12.3984375,
+        "width": 100,
+        "height": 40.1953125,
+        "font": "\"Zhiyu System\", \"PingFang SC\", sans-serif",
+        "lineHeight": "19.2px"
+      }
+    }
+  },
+  {
+    "size": {
+      "width": 1280,
+      "height": 800
+    },
+    "geometry": {
+      "appbar": {
+        "x": 0,
+        "y": 0,
+        "width": 1280,
+        "height": 66,
+        "font": "\"Zhiyu System\", \"PingFang SC\", sans-serif",
+        "lineHeight": "22.4px"
+      },
+      "brand": {
+        "x": 15,
+        "y": 16.296875,
+        "width": 73,
+        "height": 32.3984375,
+        "font": "\"Zhiyu System\", \"PingFang SC\", sans-serif",
+        "lineHeight": "30.4px"
+      },
+      "library": {
+        "x": 100,
+        "y": 12.1015625,
+        "width": 84,
+        "height": 40.796875,
+        "font": "\"Zhiyu System\", \"PingFang SC\", sans-serif",
+        "lineHeight": "20.8px"
+      },
+      "approvals": {
+        "x": 187,
+        "y": 12.1015625,
+        "width": 125,
+        "height": 40.796875,
+        "font": "\"Zhiyu System\", \"PingFang SC\", sans-serif",
+        "lineHeight": "20.8px"
+      },
+      "proposals": {
+        "x": 315,
+        "y": 12.1015625,
+        "width": 125,
+        "height": 40.796875,
+        "font": "\"Zhiyu System\", \"PingFang SC\", sans-serif",
+        "lineHeight": "20.8px"
+      },
+      "history": {
+        "x": 443,
+        "y": 12.1015625,
+        "width": 97,
+        "height": 40.796875,
+        "font": "\"Zhiyu System\", \"PingFang SC\", sans-serif",
+        "lineHeight": "20.8px"
+      },
+      "settings": {
+        "x": 543,
+        "y": 12.1015625,
+        "width": 71,
+        "height": 40.796875,
+        "font": "\"Zhiyu System\", \"PingFang SC\", sans-serif",
+        "lineHeight": "20.8px"
+      },
+      "guide": {
+        "x": 1165,
+        "y": 12.3984375,
+        "width": 100,
+        "height": 40.1953125,
+        "font": "\"Zhiyu System\", \"PingFang SC\", sans-serif",
+        "lineHeight": "19.2px"
+      }
+    }
+  }
+]

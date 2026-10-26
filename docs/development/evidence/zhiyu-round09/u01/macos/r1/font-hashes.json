@@ -1,0 +1,10 @@
+{
+  "Zhiyu System": {
+    "path": "/System/Library/Fonts/SFNS.ttf",
+    "sha256": "44890958f3e0b997028121ed7c7a789f3f5cce227c7a93ce8f86ec0db26da571"
+  },
+  "PingFang SC": {
+    "path": "/System/Library/AssetsV2/com_apple_MobileAsset_Font8/86ba2c91f017a3749571a82f2c6d890ac7ffb2fb.asset/AssetData/PingFang.ttc",
+    "sha256": "9ff3ce9439fe285cdabb46f9ceb46b1ac58f1ca07e6f4a764e8286db621a0af9"
+  }
+}

@@ -2,7 +2,7 @@
 
 本轮按[已发布计划](../planning/zhiyu-round09/README.md)先完成7项正式Flutter界面。使用独立示例数据，后续真实功能由[#69](https://github.com/ShiJiJS/agent-info-manage/issues/69)重新拆分。2026-10-26起改为Mac优先、Windows适配后置；无子Agent、无服务器同步。
 
-**2026-10-26已按用户要求收尾并暂停；本次只调整tickets与文档，未恢复产品开发。** [Mac接手计划](../planning/zhiyu-round09/macos-continuation.md)规定后续基线与顺序。 [交接说明](handoffs/zhiyu-frontend-20261026.md)列出当前源码、证据、限制和接手顺序。
+**2026-10-26已按用户新指令恢复Mac开发。** 当前分支codex/zhiyu-macos，#62准备与证据见[Mac外壳实施记录](zhiyu-macos-foundation.md)。下文Windows检查点保留历史范围。 [Mac接手计划](../planning/zhiyu-round09/macos-continuation.md)规定后续基线与顺序。 [交接说明](handoffs/zhiyu-frontend-20261026.md)列出当前源码、证据、限制和接手顺序。
 
 ## 当前任务
 

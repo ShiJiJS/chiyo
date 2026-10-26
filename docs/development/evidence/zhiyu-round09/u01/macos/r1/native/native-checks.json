@@ -1,0 +1,34 @@
+{
+  "platform": "macos",
+  "fonts": {
+    "platform": "macos",
+    "Zhiyu System": "/System/Library/Fonts/SFNS.ttf",
+    "PingFang SC": "/System/Library/AssetsV2/com_apple_MobileAsset_Font8/86ba2c91f017a3749571a82f2c6d890ac7ffb2fb.asset/AssetData/PingFang.ttc"
+  },
+  "nativeIsolationChecked": true,
+  "nativePreview": {
+    "isolated": true,
+    "title": "知予 · 界面预览·示例数据",
+    "savedDirectories": false,
+    "productionServices": false,
+    "applicationId": "com.example.infoDesktop.zhiyuPreview"
+  },
+  "physicalSize": {
+    "width": 1600.0,
+    "height": 1200.0
+  },
+  "actualSystemDpr": 2.0,
+  "initialTextScale": 1.0,
+  "largeTextMethod": "test platform text scaler; not a system DPI change",
+  "checks": [
+    "light-menu-keyboard-selection",
+    "dialog-escape-restores-focus",
+    "rapid-close-removes-modal",
+    "dark-menu-and-modal",
+    "native-rendered-200-percent-text-scroll-and-actions",
+    "reduced-motion-still-operable"
+  ],
+  "productionBootstrapUsed": false,
+  "databaseOpened": false,
+  "inputScope": "native Flutter widget-input integration; OS input smoke recorded separately"
+}
