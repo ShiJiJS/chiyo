@@ -1,0 +1,20 @@
+00:00 +0: loading /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_content_test.dart
+00:00 +0: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_content_test.dart: document body/format are private versioned text; unknown format and oversized writes fail atomically
+00:00 +1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_content_test.dart: file metadata never reads original bytes; current/old PDF pages follow explicit version and are immutable
+00:00 +2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_content_test.dart: replace and restore create new file heads, preserve record history and coalesce concurrent duplicate mutations
+00:00 +3: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_content_test.dart: import validates selection/metadata, failed writes preserve state, and duplicate import does not create two records
+00:00 +4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_content_test.dart: file actions report cancellation, failure or one committed fact without changing file version
+00:00 +5: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_content_test.dart: credential and unrelated metadata never pass the file aperture; preview failures leave metadata usable
+00:00 +6: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_content_test.dart: corrupt preview data is rejected; a pending old preview is cancelled after the record changes
+00:00 +7: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_content_test.dart: recycle blocks file reads; restore renews its file head, purge removes access, reset restores only the fictional baseline
+00:00 +8: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_content_test.dart: manifest PDF text, original sizes and page hashes correspond to the bundled immutable resources
+00:01 +9: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_test.dart: (setUpAll)
+00:01 +9: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_test.dart: closed Markdown renderer shows rich content and inert HTML/links/images without network
+00:04 +10: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_test.dart: document editing preserves failed draft and saves plain text/Markdown as distinct versioned facts
+00:11 +11: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_test.dart: PDF current pages, text alternative and preview retry keep metadata/actions available
+00:14 +12: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_test.dart: file replace failure retains selected file; historical restore creates a new current head
+00:20 +13: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_test.dart: new document starts empty and saves through the common add entry
+00:24 +14: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_test.dart: PNG and plain text use their own bytes through the same file replacement entry
+00:27 +15: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_test.dart: file import reviews metadata, resolves unknown result before retry and leaves unknown-format save/open usable
+00:30 +16: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_test.dart: (tearDownAll)
+00:30 +16: All tests passed!
