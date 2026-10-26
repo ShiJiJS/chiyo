@@ -16,16 +16,24 @@ abstract final class UiMotion {
 
 ThemeData informationTheme([
   DesktopColorTheme colorTheme = DesktopColorTheme.purple,
-]) {
-  final colors = UiPalette.forTheme(colorTheme);
-  final body = TextStyle(
-    fontFamily: 'ProductSans',
-    fontSize: 14,
-    fontWeight: FontWeight.w400,
-    letterSpacing: 0,
-    height: 1.5,
-    color: colors.ink,
-  );
+]) => desktopTheme(palette: UiPalette.forTheme(colorTheme));
+
+ThemeData desktopTheme({
+  required UiPalette palette,
+  TextStyle? typography,
+  Duration feedbackDuration = UiMotion.feedback,
+}) {
+  final colors = palette;
+  final body =
+      typography ??
+      TextStyle(
+        fontFamily: 'ProductSans',
+        fontSize: 14,
+        fontWeight: FontWeight.w400,
+        letterSpacing: 0,
+        height: 1.5,
+        color: colors.ink,
+      );
   final texts = TextTheme(
     displayLarge: body.copyWith(fontSize: 26, fontWeight: FontWeight.w500),
     displayMedium: body.copyWith(fontSize: 24, fontWeight: FontWeight.w500),
@@ -63,7 +71,7 @@ ThemeData informationTheme([
       ),
     ),
     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-    animationDuration: UiMotion.feedback,
+    animationDuration: feedbackDuration,
     overlayColor: WidgetStateProperty.resolveWith((states) {
       if (states.contains(WidgetState.disabled)) return Colors.transparent;
       if (states.contains(WidgetState.pressed)) {
@@ -102,14 +110,15 @@ ThemeData informationTheme([
         TargetPlatform.linux: DesktopPageTransitionsBuilder(),
       },
     ),
-    fontFamily: 'ProductSans',
+    fontFamily: body.fontFamily,
+    fontFamilyFallback: body.fontFamilyFallback,
     textTheme: texts,
     primaryTextTheme: texts,
     colorScheme: ColorScheme.light(
       primary: colors.accent,
-      onPrimary: colors.paper,
+      onPrimary: colors.onAccent,
       secondary: colors.accent,
-      onSecondary: colors.paper,
+      onSecondary: colors.onAccent,
       surface: colors.paper,
       surfaceContainerLow: colors.rail,
       onSurface: colors.ink,
@@ -117,7 +126,7 @@ ThemeData informationTheme([
       outline: colors.line,
       outlineVariant: colors.line,
       error: colors.danger,
-    ),
+    ).copyWith(brightness: colors.brightness),
     scaffoldBackgroundColor: colors.paper,
     visualDensity: VisualDensity.standard,
     dividerColor: colors.line,

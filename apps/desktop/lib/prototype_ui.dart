@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'ui_palette.dart';
+import 'desktop_motion.dart';
 export 'prototype_icons.dart';
 
 /// Chromium's native select caret, distinct from the SVG chevron symbol.
@@ -41,16 +42,21 @@ TextStyle prototypeText(
   double size, {
   Color? color,
   FontWeight weight = FontWeight.w400,
-  double height = 1.5,
+  double? height,
   String? family,
 }) => TextStyle(
-  fontFamily: family ?? 'ProductSans',
+  fontFamily:
+      family ??
+      Theme.of(context).textTheme.bodyMedium?.fontFamily ??
+      'ProductSans',
   // Resolve CJK through the bundled face before a platform-only family, while
   // keeping an explicitly selected code or serif face for its supported glyphs.
-  fontFamilyFallback: const ['ProductSans', 'AppSans', 'Songti SC'],
+  fontFamilyFallback:
+      Theme.of(context).textTheme.bodyMedium?.fontFamilyFallback ??
+      const ['ProductSans', 'AppSans', 'Songti SC'],
   fontSize: size,
   fontWeight: weight,
-  height: height,
+  height: height ?? Theme.of(context).textTheme.bodyMedium?.height ?? 1.5,
   letterSpacing: 0,
   color: color ?? UiPalette.of(context).ink,
 );
@@ -101,7 +107,7 @@ ButtonStyle prototypeButton(
         borderRadius: BorderRadius.circular(radius),
       ),
     ).copyWith(
-      animationDuration: const Duration(milliseconds: 160),
+      animationDuration: DesktopMotion.feedbackOf(context),
       overlayColor: WidgetStateProperty.resolveWith((states) {
         if (states.contains(WidgetState.disabled)) return Colors.transparent;
         final ink = UiPalette.of(context).accent;

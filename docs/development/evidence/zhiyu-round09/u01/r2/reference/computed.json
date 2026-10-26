@@ -1,0 +1,324 @@
+[
+  {
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "data": {
+      "body": {
+        "text": "知予信息库访问审批 5录入提案 2授权历史设置设计说明 予\n资料目录全部资料31自托管服务15家庭与设备4Telegram 工具5个人资料6求职材料5未分类1新建目录标签管理日本公网入口生产环境杭州应用部署家庭存储回收站 1资料保存在本机自托管服务⌃ K全部类型全部标签15 项分组排序Azure 日本服务器公网入口 · 域名与 HTTPS 反向代理服务器信息日本公网入口阿里云 SSH 私钥登录阿里云杭州服务器凭据SSH阿里云杭州服务器业务服务 · 应用容器与数据存储服务器信息杭州应用部署Blinko API Token通过 API 读取和创建笔记凭据APIVikunja Agent Token管理指定项目的任务凭据APIBlinko 笔记随手记录与饮食笔记应用与服务笔记Vikunja 任务管理项目任务、进度与协作应用与服务任务管理SparkyFitness饮食、运动与健康记录应用与服务健康GitHub 仓库 Token查看 northstar/agent-skills 仓库与事项；授权范围仅限该仓库凭据代码仓库Skillshare技能仓库与跨设备分发应用与服务开发工具域名与 HTTPSDNS、反向代理与新增服务的操作说明文档运维HTTPSVikunja 登录密码任务管理网页登录使用，与 Agent API Token 分开保管凭据任务管理SSH 连接与维护连接步骤、主机校验与常见故障文档运维自托管服务部署容器部署、数据目录与更新流程文档运维Azure SSH 私钥登录 Azure 日本服务器凭据SSH不分组 · 最近更新优先自托管服务 / 服务器信息添加资料Azure 日本服务器公网入口 · 域名与 HTTPS 反向代理服务器信息日本公网入口生产环境标签概览关联资料编辑信息连接概览主机身份 · 已信任主机地址tokyo.beichen.exampleSSH 端口2222登录用户developer服务器用途HTTPS 入口与反向代理运行环境生产地区日本 · 东京登录凭据1 项Azure SSH 私钥登录 Azure 日本服务器维护文档2 项域名与 HTTPSDNS、反向代理与新增服务的操作说明SSH 连接与维护连接步骤、主机校验与常见故障运行的应用与相关设备3 项阿里云杭州服务器业务服务 · 应用容器与数据存储Vikunja 任务管理项目任务、进度与协作Blinko 笔记随手记录与饮食笔记",
+        "rect": {
+          "x": 0,
+          "y": 0,
+          "width": 1440,
+          "height": 900
+        },
+        "fontFamily": "\"Segoe UI\", \"Microsoft YaHei\", sans-serif",
+        "fontSize": "14px",
+        "fontWeight": "400",
+        "lineHeight": "22.4px",
+        "gap": "normal",
+        "padding": "0px",
+        "border": "0px none rgb(36, 41, 54)",
+        "boxSizing": "border-box"
+      },
+      ".appbar": {
+        "text": "知予信息库访问审批 5录入提案 2授权历史设置设计说明 予",
+        "rect": {
+          "x": 0,
+          "y": 0,
+          "width": 1440,
+          "height": 66
+        },
+        "fontFamily": "\"Segoe UI\", \"Microsoft YaHei\", sans-serif",
+        "fontSize": "14px",
+        "fontWeight": "400",
+        "lineHeight": "22.4px",
+        "gap": "22px",
+        "padding": "0px 22px",
+        "border": "",
+        "boxSizing": "border-box"
+      },
+      ".brand": {
+        "text": "知予",
+        "rect": {
+          "x": 22,
+          "y": 16.796875,
+          "width": 73,
+          "height": 31.390625
+        },
+        "fontFamily": "\"Segoe UI\", \"Microsoft YaHei\", sans-serif",
+        "fontSize": "19px",
+        "fontWeight": "650",
+        "lineHeight": "30.4px",
+        "gap": "11px",
+        "padding": "0px",
+        "border": "0px none rgb(36, 41, 54)",
+        "boxSizing": "border-box"
+      },
+      ".brand [data-icon]": {
+        "text": "",
+        "rect": {
+          "x": 22,
+          "y": 16.796875,
+          "width": 24,
+          "height": 31.390625
+        },
+        "fontFamily": "\"Segoe UI\", \"Microsoft YaHei\", sans-serif",
+        "fontSize": "19px",
+        "fontWeight": "650",
+        "lineHeight": "30.4px",
+        "gap": "normal",
+        "padding": "0px",
+        "border": "0px none rgb(102, 82, 142)",
+        "boxSizing": "border-box"
+      },
+      ".brand .icon": {
+        "text": "",
+        "rect": {
+          "x": 22,
+          "y": 16.796875,
+          "width": 24,
+          "height": 24
+        },
+        "fontFamily": "\"Segoe UI\", \"Microsoft YaHei\", sans-serif",
+        "fontSize": "19px",
+        "fontWeight": "650",
+        "lineHeight": "30.4px",
+        "gap": "normal",
+        "padding": "0px",
+        "border": "0px none rgb(102, 82, 142)",
+        "boxSizing": "border-box"
+      },
+      ".topnav": {
+        "text": "信息库访问审批 5录入提案 2授权历史设置",
+        "rect": {
+          "x": 117,
+          "y": 11.796875,
+          "width": 551,
+          "height": 41.390625
+        },
+        "fontFamily": "\"Segoe UI\", \"Microsoft YaHei\", sans-serif",
+        "fontSize": "14px",
+        "fontWeight": "400",
+        "lineHeight": "22.4px",
+        "gap": "3px",
+        "padding": "0px",
+        "border": "0px none rgb(36, 41, 54)",
+        "boxSizing": "border-box"
+      },
+      ".navbtn.active": {
+        "text": "信息库",
+        "rect": {
+          "x": 117,
+          "y": 11.796875,
+          "width": 91,
+          "height": 41.390625
+        },
+        "fontFamily": "\"Segoe UI\", \"Microsoft YaHei\", sans-serif",
+        "fontSize": "14px",
+        "fontWeight": "500",
+        "lineHeight": "22.4px",
+        "gap": "8px",
+        "padding": "8px 11px",
+        "border": "0px none rgb(102, 82, 142)",
+        "boxSizing": "border-box"
+      },
+      ".navbtn:nth-child(2)": {
+        "text": "访问审批 5",
+        "rect": {
+          "x": 211,
+          "y": 11.796875,
+          "width": 133,
+          "height": 41.390625
+        },
+        "fontFamily": "\"Segoe UI\", \"Microsoft YaHei\", sans-serif",
+        "fontSize": "14px",
+        "fontWeight": "500",
+        "lineHeight": "22.4px",
+        "gap": "8px",
+        "padding": "8px 11px",
+        "border": "0px none rgb(36, 41, 54)",
+        "boxSizing": "border-box"
+      },
+      ".appbar>a.btn": {
+        "text": "设计说明",
+        "rect": {
+          "x": 1318,
+          "y": 12.40625,
+          "width": 100,
+          "height": 40.1875
+        },
+        "fontFamily": "\"Segoe UI\", \"Microsoft YaHei\", sans-serif",
+        "fontSize": "12px",
+        "fontWeight": "500",
+        "lineHeight": "19.2px",
+        "gap": "7px",
+        "padding": "7px 12px",
+        "border": "1px solid rgba(0, 0, 0, 0)",
+        "boxSizing": "border-box"
+      }
+    }
+  },
+  {
+    "viewport": {
+      "width": 1280,
+      "height": 800
+    },
+    "data": {
+      "body": {
+        "text": "知予信息库访问审批 5录入提案 2授权历史设置设计说明 予\n资料目录全部资料31自托管服务15家庭与设备4Telegram 工具5个人资料6求职材料5未分类1新建目录标签管理日本公网入口生产环境杭州应用部署家庭存储回收站 1资料保存在本机自托管服务⌃ K全部类型全部标签15 项分组排序Azure 日本服务器公网入口 · 域名与 HTTPS 反向代理服务器信息日本公网入口阿里云 SSH 私钥登录阿里云杭州服务器凭据SSH阿里云杭州服务器业务服务 · 应用容器与数据存储服务器信息杭州应用部署Blinko API Token通过 API 读取和创建笔记凭据APIVikunja Agent Token管理指定项目的任务凭据APIBlinko 笔记随手记录与饮食笔记应用与服务笔记Vikunja 任务管理项目任务、进度与协作应用与服务任务管理SparkyFitness饮食、运动与健康记录应用与服务健康GitHub 仓库 Token查看 northstar/agent-skills 仓库与事项；授权范围仅限该仓库凭据代码仓库Skillshare技能仓库与跨设备分发应用与服务开发工具域名与 HTTPSDNS、反向代理与新增服务的操作说明文档运维HTTPSVikunja 登录密码任务管理网页登录使用，与 Agent API Token 分开保管凭据任务管理SSH 连接与维护连接步骤、主机校验与常见故障文档运维自托管服务部署容器部署、数据目录与更新流程文档运维Azure SSH 私钥登录 Azure 日本服务器凭据SSH不分组 · 最近更新优先自托管服务 / 服务器信息添加资料Azure 日本服务器公网入口 · 域名与 HTTPS 反向代理服务器信息日本公网入口生产环境标签概览关联资料编辑信息连接概览主机身份 · 已信任主机地址tokyo.beichen.exampleSSH 端口2222登录用户developer服务器用途HTTPS 入口与反向代理运行环境生产地区日本 · 东京登录凭据1 项Azure SSH 私钥登录 Azure 日本服务器维护文档2 项域名与 HTTPSDNS、反向代理与新增服务的操作说明SSH 连接与维护连接步骤、主机校验与常见故障运行的应用与相关设备3 项阿里云杭州服务器业务服务 · 应用容器与数据存储Vikunja 任务管理项目任务、进度与协作Blinko 笔记随手记录与饮食笔记",
+        "rect": {
+          "x": 0,
+          "y": 0,
+          "width": 1280,
+          "height": 800
+        },
+        "fontFamily": "\"Segoe UI\", \"Microsoft YaHei\", sans-serif",
+        "fontSize": "14px",
+        "fontWeight": "400",
+        "lineHeight": "22.4px",
+        "gap": "normal",
+        "padding": "0px",
+        "border": "0px none rgb(36, 41, 54)",
+        "boxSizing": "border-box"
+      },
+      ".appbar": {
+        "text": "知予信息库访问审批 5录入提案 2授权历史设置设计说明 予",
+        "rect": {
+          "x": 0,
+          "y": 0,
+          "width": 1280,
+          "height": 66
+        },
+        "fontFamily": "\"Segoe UI\", \"Microsoft YaHei\", sans-serif",
+        "fontSize": "14px",
+        "fontWeight": "400",
+        "lineHeight": "22.4px",
+        "gap": "12px",
+        "padding": "0px 15px",
+        "border": "",
+        "boxSizing": "border-box"
+      },
+      ".brand": {
+        "text": "知予",
+        "rect": {
+          "x": 15,
+          "y": 16.796875,
+          "width": 73,
+          "height": 31.390625
+        },
+        "fontFamily": "\"Segoe UI\", \"Microsoft YaHei\", sans-serif",
+        "fontSize": "19px",
+        "fontWeight": "650",
+        "lineHeight": "30.4px",
+        "gap": "11px",
+        "padding": "0px",
+        "border": "0px none rgb(36, 41, 54)",
+        "boxSizing": "border-box"
+      },
+      ".brand [data-icon]": {
+        "text": "",
+        "rect": {
+          "x": 15,
+          "y": 16.796875,
+          "width": 24,
+          "height": 31.390625
+        },
+        "fontFamily": "\"Segoe UI\", \"Microsoft YaHei\", sans-serif",
+        "fontSize": "19px",
+        "fontWeight": "650",
+        "lineHeight": "30.4px",
+        "gap": "normal",
+        "padding": "0px",
+        "border": "0px none rgb(102, 82, 142)",
+        "boxSizing": "border-box"
+      },
+      ".brand .icon": {
+        "text": "",
+        "rect": {
+          "x": 15,
+          "y": 16.796875,
+          "width": 24,
+          "height": 24
+        },
+        "fontFamily": "\"Segoe UI\", \"Microsoft YaHei\", sans-serif",
+        "fontSize": "19px",
+        "fontWeight": "650",
+        "lineHeight": "30.4px",
+        "gap": "normal",
+        "padding": "0px",
+        "border": "0px none rgb(102, 82, 142)",
+        "boxSizing": "border-box"
+      },
+      ".topnav": {
+        "text": "信息库访问审批 5录入提案 2授权历史设置",
+        "rect": {
+          "x": 100,
+          "y": 12.09375,
+          "width": 514,
+          "height": 40.796875
+        },
+        "fontFamily": "\"Segoe UI\", \"Microsoft YaHei\", sans-serif",
+        "fontSize": "14px",
+        "fontWeight": "400",
+        "lineHeight": "22.4px",
+        "gap": "3px",
+        "padding": "0px",
+        "border": "0px none rgb(36, 41, 54)",
+        "boxSizing": "border-box"
+      },
+      ".navbtn.active": {
+        "text": "信息库",
+        "rect": {
+          "x": 100,
+          "y": 12.09375,
+          "width": 84,
+          "height": 40.796875
+        },
+        "fontFamily": "\"Segoe UI\", \"Microsoft YaHei\", sans-serif",
+        "fontSize": "13px",
+        "fontWeight": "500",
+        "lineHeight": "20.8px",
+        "gap": "8px",
+        "padding": "8px 9px",
+        "border": "0px none rgb(102, 82, 142)",
+        "boxSizing": "border-box"
+      },
+      ".navbtn:nth-child(2)": {
+        "text": "访问审批 5",
+        "rect": {
+          "x": 187,
+          "y": 12.09375,
+          "width": 125,
+          "height": 40.796875
+        },
+        "fontFamily": "\"Segoe UI\", \"Microsoft YaHei\", sans-serif",
+        "fontSize": "13px",
+        "fontWeight": "500",
+        "lineHeight": "20.8px",
+        "gap": "8px",
+        "padding": "8px 9px",
+        "border": "0px none rgb(36, 41, 54)",
+        "boxSizing": "border-box"
+      },
+      ".appbar>a.btn": {
+        "text": "设计说明",
+        "rect": {
+          "x": 1165,
+          "y": 12.40625,
+          "width": 100,
+          "height": 40.1875
+        },
+        "fontFamily": "\"Segoe UI\", \"Microsoft YaHei\", sans-serif",
+        "fontSize": "12px",
+        "fontWeight": "500",
+        "lineHeight": "19.2px",
+        "gap": "7px",
+        "padding": "7px 12px",
+        "border": "1px solid rgba(0, 0, 0, 0)",
+        "boxSizing": "border-box"
+      }
+    }
+  }
+]

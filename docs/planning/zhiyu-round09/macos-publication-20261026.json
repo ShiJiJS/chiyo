@@ -1,0 +1,147 @@
+{
+  "checkedAt": "2026-10-26",
+  "repository": "ShiJiJS/agent-info-manage",
+  "planningBranch": "codex/zhiyu-mac-plan",
+  "issueDocumentationCommit": "c47500111daa2d836f3bce61a9ba6a59ec586173",
+  "windowsHandoffCommit": "14d192bd69007f1ca48ab5c3c3733c2fbc66b860",
+  "macBaselineCommit": "3ed4573e17d6d70c2e27c4f1e64b8513f9ce147b",
+  "scope": "Documentation and eight existing issues only; product development paused.",
+  "verification": {
+    "exactBodyAndTitleReadback": true,
+    "labelsStatesAndCommentCountsUnchanged": true,
+    "nativeBlockedByRelations": 11,
+    "dependencySource": "Rendered GitHub Relationships lists; #69 View all dialog expanded to all five blockers.",
+    "checkedMarkdownFiles": 46,
+    "checkedRelativeLinks": 225,
+    "frozenPrototypeFilesUnchanged": 15,
+    "productCodeChanged": false,
+    "productBuildOrRuntimeTestsRun": false,
+    "windowsCIRun": false,
+    "newIssuesCreated": 0,
+    "oldIssuesModified": 0,
+    "mergeTreeSimulation": "Mac baseline with 2632dfa6: no textual conflict; no real merge or runtime claim."
+  },
+  "issues": [
+    {
+      "number": 62,
+      "title": "知予前端 U01：软件外壳、明暗外观与通用控件",
+      "url": "https://github.com/ShiJiJS/agent-info-manage/issues/62",
+      "state": "OPEN",
+      "labels": [
+        "enhancement",
+        "ready-for-agent"
+      ],
+      "commentsPreserved": 3,
+      "bodySha256": "f5db099d5645cad3e921a04d5f6c66839b8a1b152d03b99640c9a26743712bd6",
+      "blockedBy": []
+    },
+    {
+      "number": 63,
+      "title": "知予前端 U02：三栏信息库与服务器、应用资料界面",
+      "url": "https://github.com/ShiJiJS/agent-info-manage/issues/63",
+      "state": "OPEN",
+      "labels": [
+        "enhancement",
+        "ready-for-agent"
+      ],
+      "commentsPreserved": 0,
+      "bodySha256": "5c6fb8b479b93e57a06ade5f9346f2c73a3b0f16196eb1bf91dcf40908041ee8",
+      "blockedBy": [
+        62
+      ]
+    },
+    {
+      "number": 64,
+      "title": "知予前端 U03：个人档案、文档、文件与凭据界面",
+      "url": "https://github.com/ShiJiJS/agent-info-manage/issues/64",
+      "state": "OPEN",
+      "labels": [
+        "enhancement",
+        "ready-for-agent"
+      ],
+      "commentsPreserved": 0,
+      "bodySha256": "4644f112206ddef84a58144d3abfb032031cd8f864c12a4b35651646cba719c7",
+      "blockedBy": [
+        63
+      ]
+    },
+    {
+      "number": 65,
+      "title": "知予前端 U04：插件管理、专属设置与旧资料采用模板界面",
+      "url": "https://github.com/ShiJiJS/agent-info-manage/issues/65",
+      "state": "OPEN",
+      "labels": [
+        "enhancement",
+        "ready-for-agent"
+      ],
+      "commentsPreserved": 0,
+      "bodySha256": "8468d97a908633af249743c8804b25ebf715035f7b4550ed98222985b6d9eacb",
+      "blockedBy": [
+        62
+      ]
+    },
+    {
+      "number": 66,
+      "title": "知予前端 U05：普通信息与凭据使用的访问审批界面",
+      "url": "https://github.com/ShiJiJS/agent-info-manage/issues/66",
+      "state": "OPEN",
+      "labels": [
+        "enhancement",
+        "ready-for-agent"
+      ],
+      "commentsPreserved": 0,
+      "bodySha256": "50b72b115b070fc689ee103fb318771f38a6edb34ba5dbf5064c415eff86b342",
+      "blockedBy": [
+        62
+      ]
+    },
+    {
+      "number": 67,
+      "title": "知予前端 U06：录入提案与授权历史界面",
+      "url": "https://github.com/ShiJiJS/agent-info-manage/issues/67",
+      "state": "OPEN",
+      "labels": [
+        "enhancement",
+        "ready-for-agent"
+      ],
+      "commentsPreserved": 0,
+      "bodySha256": "ae80f7139dbd6898c616f626bd3e8e4b51683da4c7575b8d883a1ac9aff5d999",
+      "blockedBy": [
+        62
+      ]
+    },
+    {
+      "number": 68,
+      "title": "知予前端 U07：全局设置界面",
+      "url": "https://github.com/ShiJiJS/agent-info-manage/issues/68",
+      "state": "OPEN",
+      "labels": [
+        "enhancement",
+        "ready-for-agent"
+      ],
+      "commentsPreserved": 0,
+      "bodySha256": "1ca0b43331c36f103a3b8614b677e345753c9c4a6af40ed7926d2ce2b944443a",
+      "blockedBy": [
+        62
+      ]
+    },
+    {
+      "number": 69,
+      "title": "知予后续规划 F01：界面完成后拆分真实功能、测试与 Mac 交付",
+      "url": "https://github.com/ShiJiJS/agent-info-manage/issues/69",
+      "state": "OPEN",
+      "labels": [
+        "documentation"
+      ],
+      "commentsPreserved": 0,
+      "bodySha256": "88726ff9b4edff66dc6be9085a5850e743284c0c3268de8a07b41c76b2fc897e",
+      "blockedBy": [
+        64,
+        65,
+        66,
+        67,
+        68
+      ]
+    }
+  ]
+}

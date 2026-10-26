@@ -1,0 +1,112 @@
+{
+  "date": "2026-10-26",
+  "issue": 62,
+  "status": "in-progress",
+  "sourceBase": "d8686d69",
+  "sourceFingerprintFormat": "SHA-256 of UTF-8 source normalized to LF",
+  "sourceFiles": {
+    "apps/desktop/lib/anchored_surface.dart": "d38559a7e780756e1b075bc78185c42e7af97af3eff5d62f1b01831e63471f88",
+    "apps/desktop/lib/desktop_controls.dart": "5b233599658d481f78efbc6f4c7885beb4d4356f051ebe8996d3463bb8788711",
+    "apps/desktop/lib/desktop_scroll.dart": "f93ada74e489a826b03c8f7c951d77bc5c6a63a843a3b1aab9712cddd1a346b4",
+    "apps/desktop/lib/prototype_icons.dart": "034b1c61d19af634335797d396f7748ab4f30884f912ccf38c9bc8621a028600",
+    "apps/desktop/lib/prototype_ui.dart": "a600acb40d2d87732a9954b7c6c94cb133638e816d3eb71c6d8ceed4dc9b702b",
+    "apps/desktop/lib/ui.dart": "9a3c79eadb285b11bfbb81fc454575b43507a3c9574129274fedd5762a4e1736",
+    "apps/desktop/lib/ui_palette.dart": "42ed6af9de4483c5ccd905e5e983f63d12bb55bce479d0e1a45b6a5326cc3d0e",
+    "apps/desktop/lib/window_frame.dart": "d713676185e37a9043a568c1d88be11b2621438d52345d6ed6f4affa81cb46e7",
+    "apps/desktop/lib/desktop_button.dart": "af7fa3c4c3c2ac74ef0ae9fedbbd115b228008b59b21982dc181a06b09f5010e",
+    "apps/desktop/lib/desktop_feedback.dart": "3a0d789ec4d7f064262cff634e5cffcd52afd9de945b4a3a9a11696d0d00c66b",
+    "apps/desktop/lib/desktop_fonts.dart": "f85577892952785fbdcccd980185608f9e90f97d348de5a8de706bc91351bfce",
+    "apps/desktop/lib/desktop_motion.dart": "449769afd6fc956c0e4acefd19265f9ed36cf969ddd8f07ac7035ad4afd50749",
+    "apps/desktop/lib/preview_main.dart": "1aa6a8c2dc0d903bc5811519afda641e8efe645a4dfb911376247d2fb0558044",
+    "apps/desktop/lib/workspace/preview_workspace.dart": "2a16a010d2aeadbed782bf8f0bf4adf6c3ed76ab9f05e37f4d0096025e8c6f8c",
+    "apps/desktop/lib/workspace/sample_workspace_source.dart": "4b8485c583585aaaf21ffa5689c5a1b932aae31279095ba37f6c6607c5f7d3e7",
+    "apps/desktop/lib/workspace/workspace_controller.dart": "837cc668288f6d168f4c09deab2b1d16bb446c74756efed82b10a38b7647c73e",
+    "apps/desktop/lib/workspace/workspace_source.dart": "cd379ec6e50323dbb6f55ef25b69ec74e7255b1d77a034bc6fa7626b5c0bfc02",
+    "apps/desktop/lib/workspace/zhiyu_app.dart": "5343535ef3dca5314193792945807ecf867493fd55718a07447aa42617896e2a",
+    "apps/desktop/lib/workspace/zhiyu_shell.dart": "c0bf7f8cf8cfaffefe861ea3ef2f9e21f98541d458f6cf33624ea1cb6dd5118f",
+    "apps/desktop/lib/workspace/zhiyu_theme.dart": "b1573b090e8f162682b8dbfe05581e77e905ff417bade75ce130d51292b7da93",
+    "apps/desktop/test/workspace_controller_test.dart": "921aac58b46fa5504dfd9972166c75296216b9e2fd3142c151f3736a3851980e",
+    "apps/desktop/test/zhiyu_preview_test.dart": "cd6653000daa31faed508862b7653a0d61bec349c1561c710becf771b343ae53",
+    "apps/desktop/tool/capture_zhiyu_foundation.dart": "962afda8e0504eefa6a8f3b650b84907abdf68f88883b2effa7bdab227560e82"
+  },
+  "checks": {
+    "analysis": {
+      "command": "flutter analyze --no-pub --fatal-infos",
+      "result": "No issues found"
+    },
+    "targetedTests": {
+      "command": "flutter test --no-pub test/workspace_controller_test.dart test/zhiyu_preview_test.dart test/desktop_controls_test.dart test/library_ux_controls_test.dart --reporter json",
+      "trials": [
+        {
+          "trial": 1,
+          "tests": 27,
+          "success": true,
+          "durationMs": 4077,
+          "log": "checks/trial-1.jsonl"
+        },
+        {
+          "trial": 2,
+          "tests": 27,
+          "success": true,
+          "durationMs": 4142,
+          "log": "checks/trial-2.jsonl"
+        },
+        {
+          "trial": 3,
+          "tests": 27,
+          "success": true,
+          "durationMs": 4126,
+          "log": "checks/trial-3.jsonl"
+        }
+      ]
+    },
+    "offscreen": {
+      "command": "flutter test --no-pub tool/capture_zhiyu_foundation.dart --reporter expanded",
+      "passedFixtures": 4,
+      "viewports": [
+        "1440x900",
+        "1280x800"
+      ],
+      "brightness": [
+        "light",
+        "dark"
+      ],
+      "images": [
+        "offscreen/dark-1280-dialog.png",
+        "offscreen/dark-1280-menu.png",
+        "offscreen/dark-1280-shell.png",
+        "offscreen/dark-1440-dialog.png",
+        "offscreen/dark-1440-menu.png",
+        "offscreen/dark-1440-shell.png",
+        "offscreen/light-1280-dialog.png",
+        "offscreen/light-1280-menu.png",
+        "offscreen/light-1280-shell.png",
+        "offscreen/light-1440-dialog.png",
+        "offscreen/light-1440-menu.png",
+        "offscreen/light-1440-shell.png"
+      ],
+      "scope": "Rendered shared widgets with Windows system fonts; not OS input or native DPI proof"
+    },
+    "nativeSmoke": {
+      "result": "partial",
+      "record": "native-smoke.json",
+      "image": "native-smoke.png",
+      "source": "development tree before final header responsiveness and form-close protection edits"
+    }
+  },
+  "pending": [
+    "Final computed-style and <=2 logical-pixel geometry comparison",
+    "Native restart at fixed source and complete interaction matrix",
+    "Native DPI and 200% text evidence",
+    "Normal-speed animation recording and cancellation review",
+    "Independent review not performed because user requested no subagents"
+  ],
+  "delivery": {
+    "productionDatabaseOpened": false,
+    "productionInstallReplaced": false,
+    "subagentsUsed": false,
+    "syncImplemented": false,
+    "temporaryNativePreviewExited": true,
+    "computerUseSessionReset": true
+  }
+}
