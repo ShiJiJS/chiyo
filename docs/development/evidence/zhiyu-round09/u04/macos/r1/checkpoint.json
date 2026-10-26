@@ -1,0 +1,187 @@
+{
+  "createdAt": "2026-10-26T22:49:05.340860+00:00",
+  "sourceCommit": "538dc130afdcec4df11aaf6f9e1207c2c85d7695",
+  "branch": "codex/zhiyu-macos",
+  "goalStatus": "active",
+  "issue65": {
+    "state": "OPEN",
+    "completed": 1,
+    "total": 7,
+    "newCriterion": 1,
+    "remaining": "Host identity/settings routing, template adoption and legacy conversion, Agent brief entry, full state/contracts and S5/OS gates"
+  },
+  "platform": {
+    "system": "Darwin",
+    "macOS": "27.0.1",
+    "machine": "arm64",
+    "sdk": {
+      "frameworkVersion": "3.47.7",
+      "channel": "[user-branch]",
+      "repositoryUrl": "https://github.com/flutter/flutter.git",
+      "frameworkRevision": "abaf9c523780a608bd46686fd5e53740a07077f8",
+      "frameworkCommitDate": "2026-10-08 09:51:21 -0700",
+      "engineRevision": "deb287481e3ce9468f3434937ced4240a70539ca",
+      "engineCommitDate": "2026-10-07 17:09:12.000Z",
+      "engineContentHash": "d8a2d6c768c334d53e16277f837970ffa1e2de81",
+      "engineBuildDate": "2026-10-08 01:51:44.552",
+      "dartSdkVersion": "3.13.5",
+      "devToolsVersion": "2.60.0",
+      "flutterVersion": "3.47.7",
+      "flutterRoot": "/Users/jiangxinyi/Documents/Project/agent-info/.tools/flutter"
+    },
+    "xcode": "Xcode 27.1\nBuild version 27A9275",
+    "DPR": 1
+  },
+  "sourceSha256": {
+    "apps/desktop/lib/prototype_icons.dart": "321c6a1141a946a7be81b97c2e1b57bdf296f08a5c2d6f31c202ab013b326e5e",
+    "apps/desktop/lib/workspace/library_detail.dart": "941a11c095a756363e64146fd5a0f3e7d7a4e6000e234c898899e3e670085299",
+    "apps/desktop/lib/workspace/library_edit_dialog.dart": "6563174f9afa5008f14aee5feb650e0746ce128a9486fa735f487e9d68daf24b",
+    "apps/desktop/lib/workspace/library_widgets.dart": "4aba0013f2f6db0c965e083d5654d5ad5f46d9509875d6dfb6bed181445cb571",
+    "apps/desktop/lib/workspace/plugin_dialogs.dart": "579f3fb4d74bac7842dc09d11a2048e5fa42bb923392934491a2774e3574a895",
+    "apps/desktop/lib/workspace/plugin_mutation.dart": "14c1ea823bcfbb129780a9f684cbe418766546484668eacc78dc90c05937b06b",
+    "apps/desktop/lib/workspace/plugin_widgets.dart": "7ee9c4730275dcfd9bab78d8d4e6c0f2bd8614007b5938f4f75143c617b5224e",
+    "apps/desktop/lib/workspace/plugins_controller.dart": "25ecb74e43e4ed39314bbc2e99210be7fd8bd42bcba63730f23befa1a3a30280",
+    "apps/desktop/lib/workspace/plugins_page.dart": "f49c5898685fb54cdce0c87b631230968490051f6ca46aa8ddaabf42571cd421",
+    "apps/desktop/lib/workspace/preview_workspace.dart": "763a5d5efe62bedb3f5e1433af99c723b419e26b2d3ec8b27ab2627cbb705c77",
+    "apps/desktop/lib/workspace/sample_plugin_fixture.dart": "124b1f666e50c75fa1e7c86b5eda2f2ca7580a3d52b8c3f33bc3418a1699310c",
+    "apps/desktop/lib/workspace/sample_workspace_plugins.dart": "a530086356b9d9d6caf5177bb00274204f73b46b5023aae0ba510ff0a6b90566",
+    "apps/desktop/lib/workspace/sample_workspace_source.dart": "9253b9f33d3e06e96a521cc7eff1eb98092caea61ce8958ca4d222bca582d72c",
+    "apps/desktop/lib/workspace/template_package_decoder.dart": "bfe96072fd7b02352720a07bf335a6490b159951b3b9e2ca5849571d15caf27e",
+    "apps/desktop/lib/workspace/workspace_plugins.dart": "9306189017709f2c270d650c18bbbd0bd01002461269053a3d0e95a58f34f466",
+    "apps/desktop/lib/workspace/workspace_records.dart": "5f97df08e6d8acb98714a0c397c6cc7e0380cd179a2cda2fbb7ac9a970b8156e",
+    "apps/desktop/lib/workspace/workspace_source.dart": "bdaaf9e5c64ef3f5b5dc2b1354af51a535a18fcf43ed5fc74253dad0ecab045d",
+    "apps/desktop/test/mac_preview_isolation_test.dart": "c8060f0336ac2d1c8f95601f80f2920d422e0057dc202cec7befdc5447fb3fdc",
+    "apps/desktop/test/plugin_mutation_test.dart": "346e75823d9da2b24cf269d5e76d1b9e16789bccdb838c7b2fced1cf168a984d",
+    "apps/desktop/test/workspace_plugins_test.dart": "a51e9edb6dd304fd09f2bae17290a152ba99e7f8450aa20d2abb9e263e8c8397",
+    "apps/desktop/test/zhiyu_plugins_test.dart": "aaf26e3c48a6de7aebc24d2b191cf66653a159e317a26377afc16e9470ecfdbd",
+    "apps/desktop/test/zhiyu_preview_test.dart": "e3a3f44859418ce6b42d15aa09fe4ee977f0932db8f0b72bf85943a9f7b232d9",
+    "docs/design/zhiyu-template-package.schema.json": "12d2ae356a4497419e95fc4d191efa81d0ae9d9008eb8baf7778f5cdc9fc20b2"
+  },
+  "checks": {
+    "consecutiveFocusedRuns": {
+      "targeted-1.log": 25,
+      "regression.log": 170,
+      "targeted-3.log": 25
+    },
+    "newSourceAndDecoderTests": 8,
+    "newMutationAndProjectionTests": 3,
+    "newWidgetTests": 5,
+    "modifiedIsolationAndShellTests": "Existing guard and shell navigation checks updated, not additional counted tests",
+    "analysis": "No issues found!",
+    "productionCalls": 0,
+    "networkCalls": 0,
+    "rejectedPersonalPaths": 0
+  },
+  "previewBuild": {
+    "path": "apps/desktop/build/macos/Build/Products/Debug/info_desktop.app",
+    "bundleId": "com.example.infoDesktop.zhiyuPreview",
+    "isolatedPreviewFlag": "YES",
+    "newRuntimeClaim": false
+  },
+  "nativeSourceUnchanged": {
+    "apps/desktop/macos/Runner/MainFlutterWindow.swift": {
+      "sha256": "bc24813874c5e4a3db30cc7e2bc964e2a35fca9eefa1dd9950c92d7bc2f6333a",
+      "sameAsVerifiedSource": "8645c10bfa88abe81641e823d0c46d0ee846c913"
+    },
+    "apps/desktop/lib/preview_main.dart": {
+      "sha256": "8ea387c251c40080ddc65e2ae89483a88e56753f8dea3b0d1eb370bfa9355d33",
+      "sameAsVerifiedSource": "8645c10bfa88abe81641e823d0c46d0ee846c913"
+    },
+    "apps/desktop/lib/workspace/mac_preview_desktop.dart": {
+      "sha256": "15adcb657fcfd807a0dd78a066f417c860de21ecf4bed0adb9fd9b12cd8e643a",
+      "sameAsVerifiedSource": "8645c10bfa88abe81641e823d0c46d0ee846c913"
+    }
+  },
+  "images": {
+    "plugins-1280-dark-200-disabled-actions.png": {
+      "width": 1280,
+      "height": 800,
+      "viewed": true
+    },
+    "plugins-1280-dark-200-disabled.png": {
+      "width": 1280,
+      "height": 800,
+      "viewed": true
+    },
+    "plugins-1280-dark-200-unknown.png": {
+      "width": 1280,
+      "height": 800,
+      "viewed": true
+    },
+    "plugins-1440-light-invalid.png": {
+      "width": 1440,
+      "height": 900,
+      "viewed": true
+    },
+    "plugins-1440-light-missing-record.png": {
+      "width": 1440,
+      "height": 900,
+      "viewed": true
+    },
+    "plugins-1440-light-overview.png": {
+      "width": 1440,
+      "height": 900,
+      "viewed": true
+    },
+    "plugins-1440-light-update-diff.png": {
+      "width": 1440,
+      "height": 900,
+      "viewed": true
+    }
+  },
+  "deferred": "F01 real host picker/staging/TTL/recovery, persistent transactions/journal, core instance-field mapping, full backup/migration and OS capabilities; all UI first. No Windows CI.",
+  "artifacts": {
+    "analyze.log": {
+      "sha256": "7985cf2e2d4fed8d4b17e72a8edffe50a6ea4b5c44b138463c1601bffc3ba62a",
+      "bytes": 201
+    },
+    "build.log": {
+      "sha256": "bb928504a91fe0ce4dc0bb921b142b31033cbbf74e92214ba34521fe3f2f22be",
+      "bytes": 125
+    },
+    "plugins-1280-dark-200-disabled-actions.png": {
+      "sha256": "b13dfb7124d401444ac7f2197b75557cc0bc29bba0df3737867ec6d807a1e5ef",
+      "bytes": 111651
+    },
+    "plugins-1280-dark-200-disabled.png": {
+      "sha256": "faee771fe2ed0ff5f7ffb89868f380f961a2e09e2282e546c68dbdabd01fc0e2",
+      "bytes": 143008
+    },
+    "plugins-1280-dark-200-unknown.png": {
+      "sha256": "d3541628d78d1032e17b995f2b424c2616586879931e4af261fd7512e7d86022",
+      "bytes": 147835
+    },
+    "plugins-1440-light-invalid.png": {
+      "sha256": "4b12ae0fdd69f07fe7b230d0c0e99517314ffb5e4580266fd8ea578945a48601",
+      "bytes": 138310
+    },
+    "plugins-1440-light-missing-record.png": {
+      "sha256": "fb6709148d0a6b3e21ebd28716c47a75903d6f8b75cf4e61a0123ed7e0fc9c26",
+      "bytes": 177068
+    },
+    "plugins-1440-light-overview.png": {
+      "sha256": "87b6021496d2c1c07c3fdd97920a47581721a3d0d53d6c291c5158663d98150b",
+      "bytes": 151373
+    },
+    "plugins-1440-light-update-diff.png": {
+      "sha256": "d53caee82c0f94edeafa9946e757897c19af43e8b4d42e18406fb50689f58b50",
+      "bytes": 145753
+    },
+    "regression.log": {
+      "sha256": "8a56da090cc589e4246925619531913a046ce2b8623e9c70a6419fd7ba4f03c9",
+      "bytes": 32782
+    },
+    "review.json": {
+      "sha256": "ff18cf4d0f495cdc59a6dfe94329b3b8a3465d03be8b3d4eb9dcdb1b428355d4",
+      "bytes": 1977
+    },
+    "targeted-1.log": {
+      "sha256": "c623c764707c2f9397478064bccbdd4c4fcce213539c3bd8637be4389285ce11",
+      "bytes": 5356
+    },
+    "targeted-3.log": {
+      "sha256": "c0324810c48f021dcbc415f03bf13499b1e9ea5aba9a2023fd09704fc8d7e088",
+      "bytes": 5323
+    }
+  }
+}
