@@ -4,6 +4,8 @@ import '../ui_palette.dart';
 import 'library_controller.dart';
 import 'library_widgets.dart';
 import 'library_relation_picker.dart';
+import 'library_entries.dart';
+import 'workspace_entries.dart';
 import 'workspace_source.dart';
 
 Future<WorkspaceRecordRef?> showLibraryEditor(
@@ -23,7 +25,7 @@ Future<WorkspaceRecordRef?> showLibraryEditor(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           for (final candidate in catalog.types.where(
-            (t) => ['server', 'service', 'generic'].contains(t.id),
+            (t) => ['server', 'service', 'generic', 'profile'].contains(t.id),
           ))
             Padding(
               padding: const EdgeInsets.only(bottom: 10),
@@ -98,6 +100,8 @@ class _Editor extends StatefulWidget {
 class _EditorState extends State<_Editor> {
   late final TextEditingController _name, _description;
   final _fields = <String, TextEditingController>{};
+  final _entries = <String, List<WorkspaceRepeatedEntry>>{};
+  final _readOnlyEntries = <String, Object?>{};
   final _tags = <String>{};
   final _relations = <String, List<WorkspaceRecordRef>>{};
   final _editedRelations = <String>{};
@@ -122,11 +126,31 @@ class _EditorState extends State<_Editor> {
       _relations[key] = List.of(detail?.relations[key] ?? []);
     }
     for (final field in widget.definition['fields'] as List? ?? []) {
-      if (field['type'] == 'entries') continue;
       final key = field['key'] as String;
+      if (field['type'] == 'entries') {
+        try {
+          final entries = WorkspaceRepeatedEntry.read(detail?.values[key]);
+          if (entries.length > WorkspaceRepeatedEntry.maxEntriesPerField) {
+            _readOnlyEntries[key] = detail?.values[key];
+          } else {
+            _entries[key] = entries;
+          }
+        } on FormatException {
+          _readOnlyEntries[key] = detail?.values[key];
+        }
+        continue;
+      }
       _fields[key] = TextEditingController(
         text: detail?.values[key]?.toString() ?? '',
       );
+    }
+    if (_fields.length +
+            _entries.values.fold<int>(0, (sum, list) => sum + list.length) * 3 >
+        WorkspaceRepeatedEntry.maxLeavesPerRecord) {
+      for (final key in _entries.keys) {
+        _readOnlyEntries[key] = detail?.values[key];
+      }
+      _entries.clear();
     }
   }
 
@@ -154,6 +178,8 @@ class _EditorState extends State<_Editor> {
     final catalog = widget.controller.catalog!;
     final values = {
       for (final entry in _fields.entries) entry.key: entry.value.text,
+      for (final entry in _entries.entries)
+        entry.key: [for (final value in entry.value) value.toJson()],
     };
     final id = 'library-form-${_operation++}';
     WorkspaceSaveResult result;
@@ -289,10 +315,49 @@ class _EditorState extends State<_Editor> {
               ],
             ),
             for (final field in widget.definition['fields'] as List? ?? [])
-              if (_fields.containsKey(field['key'])) ...[
+              if (_entries[field['key']] case final entries?) ...[
+                const SizedBox(height: 18),
+                LibraryEntriesEditor(
+                  key: ValueKey('library-entries-${field['key']}'),
+                  fieldKey: field['key'] as String,
+                  label: field['label'] as String,
+                  entries: entries,
+                  enabled: !_saving,
+                  canAdd:
+                      _readOnlyEntries.isEmpty &&
+                      entries.length <
+                          WorkspaceRepeatedEntry.maxEntriesPerField &&
+                      _fields.length +
+                              (_entries.values.fold<int>(
+                                        0,
+                                        (sum, list) => sum + list.length,
+                                      ) +
+                                      1) *
+                                  3 <=
+                          WorkspaceRepeatedEntry.maxLeavesPerRecord,
+                  errors: _failure?.fieldErrors ?? const {},
+                  onChanged: (value) => setState(() {
+                    _entries[field['key'] as String] = value;
+                    _dirty = true;
+                  }),
+                ),
+              ] else if (_readOnlyEntries.containsKey(field['key'])) ...[
+                const SizedBox(height: 18),
+                Text(
+                  field['label'] as String,
+                  style: libraryText(context, 13, weight: FontWeight.w600),
+                ),
+                Text(
+                  '这些经历暂不能编辑，原有内容会保留。',
+                  style: libraryText(context, 13, color: c.warning),
+                ),
+                LibraryEntryTimeline(_readOnlyEntries[field['key']]),
+              ] else if (_fields.containsKey(field['key'])) ...[
                 const SizedBox(height: 18),
                 DesktopTextField(
-                  key: ValueKey('library-edit-${field['key']}'),
+                  key: ValueKey(
+                    'library-edit-${['name', 'description'].contains(field['key']) ? 'value-' : ''}${field['key']}',
+                  ),
                   controller: _fields[field['key']],
                   enabled: !_saving,
                   onChanged: _changed,
@@ -301,7 +366,10 @@ class _EditorState extends State<_Editor> {
                   decoration: InputDecoration(
                     labelText:
                         '${field['label']}${field['required'] == true ? ' *' : ''}',
-                    errorText: _failure?.fieldErrors[field['key']],
+                    errorText:
+                        _failure?.fieldErrors[workspaceValueErrorKey(
+                          field['key'] as String,
+                        )],
                   ),
                 ),
               ],

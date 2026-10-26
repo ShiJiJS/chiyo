@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'sample_workspace_fixture.dart';
+import 'sample_workspace_entries.dart';
 import 'workspace_source.dart';
 
 part 'sample_workspace_history.dart';
@@ -23,6 +24,7 @@ class SampleWorkspaceSource implements WorkspaceSource {
   final _recordOperations =
       <String, ({String fingerprint, WorkspaceRecordReceipt receipt})>{};
   final _versions = <WorkspaceRecordRef, int>{};
+  final _entryIdentityOwners = <String, String>{};
   int _nextRecycle = 0;
   String _fingerprint(Object value) =>
       sha256.convert(utf8.encode(jsonEncode(value))).toString();
@@ -187,19 +189,24 @@ class SampleWorkspaceSource implements WorkspaceSource {
         tags: [for (final name in row['tags'] as List? ?? []) tags[name]!],
       );
       final relations = row['relations'] as Map<String, dynamic>? ?? {};
+      final definition = Map<String, Object?>.from(
+        row['definition'] as Map? ??
+            (record.type.id == 'generic'
+                ? _genericDefinitionFor(row['values'] as Map? ?? {})
+                : {}),
+      );
       final detail = WorkspaceDetail(
         record: record,
         version: 1,
-        definition: Map<String, Object?>.from(
-          row['definition'] as Map? ??
-              (record.type.id == 'generic'
-                  ? _genericDefinitionFor(row['values'] as Map? ?? {})
-                  : {}),
-        ),
+        definition: definition,
         // A credential's actual content is deliberately not a generic detail.
         values: ref.kind == WorkspaceRecordKind.credential
             ? {}
-            : Map<String, Object?>.from(row['values'] as Map? ?? {}),
+            : sampleInitialEntries(
+                ref,
+                definition,
+                Map<String, Object?>.from(row['values'] as Map? ?? {}),
+              ),
         relations: {
           for (final entry in relations.entries)
             entry.key: [
@@ -212,6 +219,7 @@ class SampleWorkspaceSource implements WorkspaceSource {
         throw const FormatException('Duplicate fixture identity.');
       }
       destination[ref] = detail;
+      _entryIdentityOwners.addAll(sampleEntryOwners(detail));
     }
     _records.addAll(_initial);
     for (final detail in _initial.values) {
@@ -645,37 +653,53 @@ class SampleWorkspaceSource implements WorkspaceSource {
     String name,
     String description,
     Map<String, Object?> definition,
-    Map<String, Object?> values,
-  ) {
+    Map<String, Object?> values, {
+    WorkspaceDetail? current,
+  }) {
     final fields = <String, String>{};
     if (name.trim().isEmpty || name.length > 160) {
       fields['name'] = '请输入1–160字的名称。';
     }
     if (description.length > 2000) fields['description'] = '说明不能超过2000字。';
     for (final field in definition['fields'] as List? ?? []) {
-      if (field['type'] != 'entries' &&
-          values[field['key']] != null &&
-          values[field['key']] is! String) {
-        fields[field['key'] as String] = '此字段需要文本值，请勿用复合内容覆盖。';
+      if (field['type'] == 'entries') continue;
+      final errorKey = workspaceValueErrorKey(field['key'] as String);
+      if (values[field['key']] != null && values[field['key']] is! String) {
+        fields[errorKey] = '此字段需要文本值，请勿用复合内容覆盖。';
         continue;
       }
       final text = values[field['key']]?.toString().trim() ?? '';
       if (field['required'] == true && text.isEmpty) {
-        fields[field['key'] as String] = '请填写${field['label']}。';
+        fields[errorKey] = '请填写${field['label']}。';
       } else if (text.isNotEmpty &&
           field['type'] == 'number' &&
           (!RegExp(r'^-?(?:0|[1-9]\d*)(?:\.\d+)?$').hasMatch(text) ||
               num.tryParse(text)?.isFinite != true)) {
-        fields[field['key'] as String] = '请输入有限的十进制数字。';
+        fields[errorKey] = '请输入有限的十进制数字。';
       } else if (text.isNotEmpty && field['type'] == 'date') {
         final date = DateTime.tryParse(text);
         if (!RegExp(r'^\d{4}-\d{2}-\d{2}$').hasMatch(text) ||
             date == null ||
             date.toIso8601String().substring(0, 10) != text) {
-          fields[field['key'] as String] = '请输入有效日期（YYYY-MM-DD）。';
+          fields[errorKey] = '请输入有效日期（YYYY-MM-DD）。';
         }
       }
     }
+    fields.addAll(
+      sampleEntryErrors(
+        definition,
+        values,
+        current: current,
+        identityOwners: _entryIdentityOwners,
+        known: [
+          ..._initial.values,
+          ..._records.values,
+          for (final history in _revisions.values)
+            for (final item in history) item.detail,
+          for (final item in _recycled.values) item.archive.detail,
+        ],
+      ),
+    );
     return fields;
   }
 
@@ -773,6 +797,7 @@ class SampleWorkspaceSource implements WorkspaceSource {
       }
       _versions[record.ref] = detail.version;
       _records[record.ref] = detail;
+      _entryIdentityOwners.addAll(sampleEntryOwners(detail));
       _changes.add(record.ref);
       result = WorkspaceSaved(detail);
     }
@@ -819,6 +844,7 @@ class SampleWorkspaceSource implements WorkspaceSource {
       edit.record.description,
       current?.definition ?? {},
       values,
+      current: current,
     );
     fields.addAll(
       _relationErrors(
@@ -880,6 +906,7 @@ class SampleWorkspaceSource implements WorkspaceSource {
       }
       _versions[edit.record.ref] = detail.version;
       _records[edit.record.ref] = detail;
+      _entryIdentityOwners.addAll(sampleEntryOwners(detail));
       _changes.add(edit.record.ref);
       result = WorkspaceSaved(detail);
     }
@@ -934,6 +961,7 @@ class SampleWorkspaceSource implements WorkspaceSource {
     _recordOperations.clear();
     _directoryOperations.clear();
     _versions.clear();
+    _entryIdentityOwners.clear();
     _clock = _nextRecord = _nextDirectory = _nextRecycle = 0;
     _catalogVersion++;
     nextSaveFailure = null;
@@ -943,6 +971,15 @@ class SampleWorkspaceSource implements WorkspaceSource {
 
   void reset() {
     setScenario(SampleWorkspaceScenario.ready);
+    _entryIdentityOwners
+      ..clear()
+      ..addAll({
+        for (final detail in [
+          ..._initial.values,
+          ..._initialRecycled.values.map((r) => r.archive.detail),
+        ])
+          ...sampleEntryOwners(detail),
+      });
     _records
       ..clear()
       ..addAll(_initial);
