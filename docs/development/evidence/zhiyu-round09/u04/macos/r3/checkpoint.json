@@ -1,0 +1,148 @@
+{
+  "createdAt": "2026-10-26T23:43:35.405667+00:00",
+  "sourceCommit": "eccf481be607727aa609212358bdacf96631f31c",
+  "branch": "codex/zhiyu-macos",
+  "goalStatus": "active",
+  "issue65": {
+    "state": "OPEN",
+    "completed": 3,
+    "total": 7,
+    "newCriterion": 3,
+    "next": "Legacy template compatibility/local conversion, Agent brief, state/contracts and S5/OS gates"
+  },
+  "platform": {
+    "system": "Darwin",
+    "macOS": "27.0.1",
+    "machine": "arm64",
+    "sdk": {
+      "frameworkVersion": "3.47.7",
+      "channel": "[user-branch]",
+      "repositoryUrl": "https://github.com/flutter/flutter.git",
+      "frameworkRevision": "abaf9c523780a608bd46686fd5e53740a07077f8",
+      "frameworkCommitDate": "2026-10-08 09:51:21 -0700",
+      "engineRevision": "deb287481e3ce9468f3434937ced4240a70539ca",
+      "engineCommitDate": "2026-10-07 17:09:12.000Z",
+      "engineContentHash": "d8a2d6c768c334d53e16277f837970ffa1e2de81",
+      "engineBuildDate": "2026-10-08 01:51:44.552",
+      "dartSdkVersion": "3.13.5",
+      "devToolsVersion": "2.60.0",
+      "flutterVersion": "3.47.7",
+      "flutterRoot": "/Users/jiangxinyi/Documents/Project/agent-info/.tools/flutter"
+    },
+    "xcode": "Xcode 27.1\nBuild version 27A9275",
+    "DPR": 1
+  },
+  "sourceSha256": {
+    "apps/desktop/lib/workspace/library_adoption_dialog.dart": "d10467b106d0fd0e4a2d834d3b424928d1b230ae3d0052f5c76cf9de6078a7e4",
+    "apps/desktop/lib/workspace/library_detail.dart": "db151a9ac280a922407805dec246c351fc28fe4b2af684dcb9019d9137993552",
+    "apps/desktop/lib/workspace/library_edit_dialog.dart": "b7896a8c9cdefc94bff79b89f01a4622e9a07abc01679b656439d77f7b477f2d",
+    "apps/desktop/lib/workspace/library_history_dialog.dart": "28f61414e5eef38a5c921a7947afc6d731db47385ad5c05432d0cd535f4bbfbd",
+    "apps/desktop/lib/workspace/library_page.dart": "fe9b5718c45b250a1ae7e5099987b90ff799bea93224c812a868163f078554db",
+    "apps/desktop/lib/workspace/sample_workspace_adoption.dart": "ec9f8e013158610f273e35efc16ac782bbb87f45dfce2dc76a5bbb4a559070bf",
+    "apps/desktop/lib/workspace/sample_workspace_entries.dart": "7c1603f0eefbdff017ca9307dd657d3dc0e4cd005818d4f645a8afdbd94ba371",
+    "apps/desktop/lib/workspace/sample_workspace_field_ids.dart": "a1b35f57cf81752ce6b81d9de60387fe11a90c89e577120761c79665c15c650f",
+    "apps/desktop/lib/workspace/sample_workspace_files.dart": "af183822d19714efeb6661f9cfcc7f4998a98ad664e2aaad8d4564d22fb26e7b",
+    "apps/desktop/lib/workspace/sample_workspace_history.dart": "756d85f51eb0492c4aba3d194f80f2ad95a059e38634cfc4bb5957c28c2451ef",
+    "apps/desktop/lib/workspace/sample_workspace_source.dart": "951e8fc685538f41cedc26a4bac11d17ff44cbd8046d54c0a19f4c83858e3171",
+    "apps/desktop/lib/workspace/workspace_adoption.dart": "d29df8e5b83416a76f1da6c1007242fdf110df35f3393e3acd3d6647903c78b7",
+    "apps/desktop/lib/workspace/workspace_history.dart": "ffa45720d59975bdeeaca10be8b931a1e11d6a30d5d30da52426ebc77e267a1f",
+    "apps/desktop/lib/workspace/workspace_records.dart": "7db8cf2bc75c3a5eb7957c4aae37deadc39135ff4383f5f7807a064c93275b38",
+    "apps/desktop/lib/workspace/workspace_source.dart": "a5d0bcade5cf9423f2fd7c1c976f04cca5e43acb7018e6aa83dc73f4d215ee40",
+    "apps/desktop/test/mac_preview_isolation_test.dart": "78d595be2e1a2426e7214df061fa684624de5109d6b6a263f87ee7b014093f3b",
+    "apps/desktop/test/workspace_adoption_test.dart": "09e869ce54758bf2e7af4dc4decee34d46c57b154f7dccb0cb1e97ab3a0e9d7e",
+    "apps/desktop/test/zhiyu_adoption_test.dart": "6c2d69d6d5206999e6d8504a4587ad95d600cd313b671f388f6270c3d53aa627"
+  },
+  "checks": {
+    "consecutiveFocusedRuns": {
+      "targeted-1.log": 20,
+      "regression.log": 199,
+      "targeted-3.log": 20
+    },
+    "newSourceAndControllerTests": 11,
+    "newWidgetTests": 4,
+    "analysis": "No issues found!",
+    "isolation": "Actual controls adoption, original field identity and reset guarded on Mac; no skip",
+    "productionCalls": 0,
+    "networkCalls": 0,
+    "rejectedPersonalPaths": 0
+  },
+  "previewBuild": {
+    "path": "apps/desktop/build/macos/Build/Products/Debug/info_desktop.app",
+    "bundleId": "com.example.infoDesktop.zhiyuPreview",
+    "isolatedPreviewFlag": "YES",
+    "newRuntimeClaim": false
+  },
+  "nativeSourceUnchanged": {
+    "apps/desktop/macos/Runner/MainFlutterWindow.swift": {
+      "sha256": "bc24813874c5e4a3db30cc7e2bc964e2a35fca9eefa1dd9950c92d7bc2f6333a",
+      "sameAsVerifiedSource": "8645c10bfa88abe81641e823d0c46d0ee846c913"
+    },
+    "apps/desktop/lib/preview_main.dart": {
+      "sha256": "8ea387c251c40080ddc65e2ae89483a88e56753f8dea3b0d1eb370bfa9355d33",
+      "sameAsVerifiedSource": "8645c10bfa88abe81641e823d0c46d0ee846c913"
+    },
+    "apps/desktop/lib/workspace/mac_preview_desktop.dart": {
+      "sha256": "15adcb657fcfd807a0dd78a066f417c860de21ecf4bed0adb9fd9b12cd8e643a",
+      "sameAsVerifiedSource": "8645c10bfa88abe81641e823d0c46d0ee846c913"
+    }
+  },
+  "visuals": {
+    "reviewedImages": 5,
+    "independentReview": false,
+    "video": false,
+    "fullS5": false,
+    "OSInput": false
+  },
+  "boundaries": [
+    "Fictional resettable source only",
+    "No production schema, grants or storage migration",
+    "No computer use, subagents or Windows CI",
+    "Sample field IDs, in-memory plan leases and attachment aliases are not production migration"
+  ],
+  "files": {
+    "analysis.log": {
+      "sha256": "1f6b69ec6591751e86aea3d1d0deb820c06d045065e56e328eed664f700b2711",
+      "bytes": 96
+    },
+    "build.log": {
+      "sha256": "bb928504a91fe0ce4dc0bb921b142b31033cbbf74e92214ba34521fe3f2f22be",
+      "bytes": 125
+    },
+    "regression.log": {
+      "sha256": "e53cd2ca766ece7f509364e02434df510bd56612bfadb8679d5c7806024e07a3",
+      "bytes": 39365
+    },
+    "review.md": {
+      "sha256": "fce6b59d0095843ff37476fe78659e2244c82f7a4280790a813168894ec5606d",
+      "bytes": 2417
+    },
+    "screenshots/adoption-1280-dark-200-conflict.png": {
+      "sha256": "892cda4062a7369e238c2e401df3dab9378cb49fc7c3121a81bb7cdc20892c8d",
+      "bytes": 145928
+    },
+    "screenshots/adoption-1440-light-mapping.png": {
+      "sha256": "e362f27beb67a04f5c87447d53944c911e3fa89e4c2491ac093f6bd4e50ba8fd",
+      "bytes": 116378
+    },
+    "screenshots/adoption-1440-light-result.png": {
+      "sha256": "b6dc81173636f71c317b1d78c84d3d4e0d93c1ae96ed1d3494dfa8f725864d07",
+      "bytes": 167529
+    },
+    "screenshots/adoption-1440-light-review.png": {
+      "sha256": "23c710296460120eb40485a3a9961b6cefb2e2562d06ab76a824478e29ace57d",
+      "bytes": 143452
+    },
+    "screenshots/adoption-1440-light-unknown.png": {
+      "sha256": "62ba695bde05c0046b4935689e43ea97341fe52f61454294b6780983fce1027c",
+      "bytes": 140773
+    },
+    "targeted-1.log": {
+      "sha256": "54835025e762688e1c232d02a1f736c73b4e9c186160045dcb45923fa3ab3cbc",
+      "bytes": 4608
+    },
+    "targeted-3.log": {
+      "sha256": "12f6ab9ef5150520fad4af2d59ebb3d09c82cd5bd5f4013edb8da1ff1e4ff581",
+      "bytes": 4623
+    }
+  }
+}
