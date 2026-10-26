@@ -16,6 +16,7 @@ import 'library_credential_lifecycle.dart';
 import 'library_recycle.dart';
 import 'library_widgets.dart';
 import 'workspace_source.dart';
+import 'library_adoption_dialog.dart';
 
 class LibraryPage extends StatefulWidget {
   const LibraryPage({
@@ -152,6 +153,20 @@ class _LibraryPageState extends State<LibraryPage> {
               ? '已恢复为新版本'
               : '恢复已提交，当前资料暂不可用，请查看读取结果。',
         );
+      }
+    } finally {
+      widget.onModalChanged?.call(false);
+    }
+  }
+
+  Future<void> _adopt() async {
+    final ref = model.detail?.record.ref;
+    if (ref == null || ref.kind != WorkspaceRecordKind.information) return;
+    widget.onModalChanged?.call(true);
+    try {
+      final adopted = await showLibraryAdoption(context, model.source, ref);
+      if (mounted && adopted != null) {
+        await model.openRelated(adopted, rememberOrigin: false);
       }
     } finally {
       widget.onModalChanged?.call(false);
@@ -1012,6 +1027,12 @@ class _LibraryPageState extends State<LibraryPage> {
                             : null,
                         onRecycle: model.loadState != WorkspaceLoad.loading
                             ? _recycleCurrent
+                            : null,
+                        onAdopt:
+                            model.loadState != WorkspaceLoad.loading &&
+                                detail.record.ref.kind ==
+                                    WorkspaceRecordKind.information
+                            ? _adopt
                             : null,
                         onTag: (id) =>
                             model.apply(model.query.copyWith(tagId: id)),

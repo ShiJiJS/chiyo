@@ -101,11 +101,12 @@ class WorkspaceRecordSummary {
     bool unfiled = false,
     Iterable<WorkspaceTag>? tags,
     DateTime? updatedAt,
+    WorkspaceType? type,
   }) => WorkspaceRecordSummary(
     ref: ref,
     name: name ?? this.name,
     description: description ?? this.description,
-    type: type,
+    type: type ?? this.type,
     updatedAt: updatedAt ?? this.updatedAt,
     directoryId: unfiled ? null : directoryId ?? this.directoryId,
     tags: tags ?? this.tags,
@@ -224,9 +225,19 @@ class WorkspaceDetail {
     Map<String, Object?> definition = const {},
     Map<String, Object?> values = const {},
     Map<String, List<WorkspaceRecordRef>> relations = const {},
+    Map<String, String> fieldIds = const {},
+    Iterable<Map<String, Object?>> retainedFields = const [],
+    Iterable<Map<String, Object?>> retainedRelations = const [],
   }) : definition = _freeze(definition) as Map<String, Object?>,
        values = _freeze(values) as Map<String, Object?>,
-       relations = _freezeRelations(relations);
+       relations = _freezeRelations(relations),
+       fieldIds = Map.unmodifiable(fieldIds),
+       retainedFields = List.unmodifiable(
+         retainedFields.map(workspaceImmutableMap),
+       ),
+       retainedRelations = List.unmodifiable(
+         retainedRelations.map(workspaceImmutableMap),
+       );
   final WorkspaceRecordSummary record;
   final int version;
 
@@ -234,7 +245,30 @@ class WorkspaceDetail {
   final WorkspaceTemplateState templateState;
   final Map<String, Object?> definition, values;
   final Map<String, List<WorkspaceRecordRef>> relations;
+
+  /// Definition keys address values; these opaque instance identities do not.
+  final Map<String, String> fieldIds;
+
+  /// Instance-owned descriptors, separate from the exact target snapshot.
+  final List<Map<String, Object?>> retainedFields;
+  final List<Map<String, Object?>> retainedRelations;
 }
+
+List<Map<String, Object?>> workspaceFields(WorkspaceDetail detail) => [
+  for (final field in detail.definition['fields'] as List? ?? [])
+    Map<String, Object?>.from(field as Map),
+  ...detail.retainedFields,
+];
+
+Map<String, Object?> workspaceEditingDefinition(WorkspaceDetail detail) => {
+  ...detail.definition,
+  'fields': workspaceFields(detail),
+  'relations': [
+    for (final rule in detail.definition['relations'] as List? ?? [])
+      if (!detail.retainedRelations.any((r) => r['key'] == rule['key'])) rule,
+    ...detail.retainedRelations,
+  ],
+};
 
 class WorkspaceEdit {
   WorkspaceEdit({

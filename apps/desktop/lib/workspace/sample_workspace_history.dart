@@ -21,6 +21,7 @@ extension _SampleHistory on SampleWorkspaceSource {
   void _forgetContent(WorkspaceRecordRef ref) {
     if (ref.kind == WorkspaceRecordKind.credential) _credentials.forget(ref);
     _revisions.remove(ref);
+    _adoptionPlans.removeWhere((_, p) => p.current.record.ref == ref);
     _files.forget(ref);
     for (final credential in _credentialLinks.credentials(ref).toList()) {
       if (_records[credential] case final raw?) {
@@ -28,6 +29,9 @@ extension _SampleHistory on SampleWorkspaceSource {
           record: raw.record.copyWith(updatedAt: _now()),
           version: raw.version + 1,
           definition: raw.definition,
+          fieldIds: raw.fieldIds,
+          retainedFields: raw.retainedFields,
+          retainedRelations: raw.retainedRelations,
           values: raw.values,
           relations: raw.relations,
         );
@@ -99,7 +103,7 @@ extension _SampleHistory on SampleWorkspaceSource {
     if (tags.length != old.record.tags.length) notices.add('已移除的标签不会恢复。');
     final relations = <String, List<WorkspaceRecordRef>>{};
     for (final entry in old.relations.entries) {
-      final rule = _relationRule(old.definition, entry.key);
+      final rule = _relationRule(workspaceEditingDefinition(old), entry.key);
       relations[entry.key] = [
         for (final ref in entry.value)
           if (_records[ref] case final target?
@@ -118,6 +122,9 @@ extension _SampleHistory on SampleWorkspaceSource {
       ),
       version: version,
       definition: old.definition,
+      fieldIds: sampleRestoredFieldIds(old, _records[old.record.ref], version),
+      retainedFields: old.retainedFields,
+      retainedRelations: old.retainedRelations,
       values: _files.restoredValues(
         old,
         _records[old.record.ref],
@@ -177,7 +184,10 @@ extension _SampleWorkspaceHistory on SampleWorkspaceSource {
       catalogVersion: _catalogVersion,
       notices: notices,
       missingFields: archive.detail.values.keys.where(
-        (k) => !current.values.containsKey(k),
+        (k) => archive.detail.fieldIds[k] != null
+            ? !current.fieldIds.values.contains(archive.detail.fieldIds[k])
+            : !current.values.containsKey(k) &&
+                  !current.retainedFields.any((f) => f['originKey'] == k),
       ),
     );
   }

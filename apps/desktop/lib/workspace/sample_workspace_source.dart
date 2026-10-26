@@ -12,9 +12,12 @@ import 'workspace_source.dart';
 import 'sample_workspace_plugins.dart';
 import 'sample_plugin_fixture.dart';
 import 'sample_workspace_hosts.dart';
+import 'sample_workspace_field_ids.dart';
+import 'workspace_entries.dart';
 export 'sample_workspace_hosts.dart' show SampleHostScenario;
 
 part 'sample_workspace_history.dart';
+part 'sample_workspace_adoption.dart';
 
 enum SampleWorkspaceScenario { ready, empty, waiting, failure }
 
@@ -143,6 +146,9 @@ class SampleWorkspaceSource
         record: current.record,
         version: version,
         definition: current.definition,
+        fieldIds: current.fieldIds,
+        retainedFields: current.retainedFields,
+        retainedRelations: current.retainedRelations,
         values: const {},
         relations: const {'related': []},
       ),
@@ -229,6 +235,9 @@ class SampleWorkspaceSource
             )
           : WorkspaceTemplateState.available,
       definition: raw.definition,
+      fieldIds: raw.fieldIds,
+      retainedFields: raw.retainedFields,
+      retainedRelations: raw.retainedRelations,
       values: raw.values,
       relations: relations,
     );
@@ -252,12 +261,16 @@ class SampleWorkspaceSource
       record: detail.record,
       version: detail.version,
       definition: detail.definition,
+      fieldIds: detail.fieldIds,
+      retainedFields: detail.retainedFields,
+      retainedRelations: detail.retainedRelations,
       values: detail.values,
       relations: relations,
     );
   }
 
   void _putRecord(WorkspaceDetail detail) {
+    detail = sampleWithFieldIds(detail, previous: _records[detail.record.ref]);
     final ref = detail.record.ref,
         isCredential = ref.kind == WorkspaceRecordKind.credential;
     final key = isCredential ? 'related' : 'credentials';
@@ -301,6 +314,9 @@ class SampleWorkspaceSource
             ),
             version: old.version + 1,
             definition: old.definition,
+            fieldIds: old.fieldIds,
+            retainedFields: old.retainedFields,
+            retainedRelations: old.retainedRelations,
             values: old.values,
             relations: _projectRecord(_records[e.key]!).relations,
           ),
@@ -325,6 +341,9 @@ class SampleWorkspaceSource
         record: old!.record.copyWith(updatedAt: _now()),
         version: old.version + 1,
         definition: old.definition,
+        fieldIds: old.fieldIds,
+        retainedFields: old.retainedFields,
+        retainedRelations: old.retainedRelations,
         values: const {},
         relations: old.relations,
       );
@@ -393,6 +412,21 @@ class SampleWorkspaceSource
   final _recordOperations =
       <String, ({String fingerprint, WorkspaceRecordReceipt receipt})>{};
   final _committedRecordOperations = <String, WorkspaceOperationReceipt>{};
+  final _adoptionPlans = <String, WorkspaceAdoptionPreview>{};
+
+  @override
+  Future<WorkspaceAdoptionPreview> previewAdoption(
+    WorkspaceAdoptionDraft draft,
+  ) => _previewAdoption(draft);
+  @override
+  Future<WorkspaceRecordReceipt> applyAdoption(
+    String operationId,
+    String planId,
+  ) => _applyAdoption(operationId, planId);
+  @override
+  Future<void> releaseAdoption(String planId) async {
+    _adoptionPlans.remove(planId);
+  }
 
   /// Composition-only fault: commit the next ordinary write, then lose its reply.
   bool loseNextRecordReply = false;
@@ -662,7 +696,7 @@ class SampleWorkspaceSource
       if (destination.containsKey(ref)) {
         throw const FormatException('Duplicate fixture identity.');
       }
-      destination[ref] = detail;
+      destination[ref] = sampleWithFieldIds(detail);
       if (ref.kind == WorkspaceRecordKind.credential) {
         _credentials.seed(ref, row);
       }
@@ -1065,8 +1099,11 @@ class SampleWorkspaceSource
       throw const WorkspaceFailure('not_found', '模板已停用或移除，请重新选择。');
     }
     final definition = query.source == null
-        ? _plugins.template(query.typeId)?.definition ?? source?.definition
-        : source?.definition;
+        ? _plugins.template(query.typeId)?.definition ??
+              (source == null ? null : workspaceEditingDefinition(source))
+        : source == null
+        ? null
+        : workspaceEditingDefinition(source);
     if (definition == null ||
         source != null && source.record.type.id != query.typeId) {
       throw const WorkspaceFailure('not_found', '来源资料或模板已不可用。');
@@ -1179,7 +1216,7 @@ class SampleWorkspaceSource
     }
     if (description.length > 2000) fields['description'] = '说明不能超过2000字。';
     for (final field in definition['fields'] as List? ?? []) {
-      if (field['type'] == 'entries') continue;
+      if (['entries', 'unknown'].contains(field['type'])) continue;
       final errorKey = workspaceValueErrorKey(field['key'] as String);
       if (field['type'] == 'file') {
         if (current == null ||
@@ -1218,10 +1255,11 @@ class SampleWorkspaceSource
         identityOwners: _entryIdentityOwners,
         known: [
           ..._initial.values,
-          ..._records.values,
           for (final history in _revisions.values)
             for (final item in history) item.detail,
           for (final item in _recycled.values) item.archive.detail,
+          ..._records.values,
+          ?current,
         ],
       ),
     );
@@ -1421,14 +1459,14 @@ class SampleWorkspaceSource
     final fields = _fieldErrors(
       edit.record.name,
       edit.record.description,
-      current?.definition ?? {},
+      current == null ? const {} : workspaceEditingDefinition(current),
       values,
       current: current,
     );
     fields.addAll(
       _relationErrors(
         edit.record.ref,
-        current?.definition ?? {},
+        current == null ? const {} : workspaceEditingDefinition(current),
         edit.relations,
       ),
     );
@@ -1481,6 +1519,9 @@ class SampleWorkspaceSource
         ),
         version: current.version + 1,
         definition: current.definition,
+        fieldIds: current.fieldIds,
+        retainedFields: current.retainedFields,
+        retainedRelations: current.retainedRelations,
         values: values,
         relations: {...current.relations, ...edit.relations},
       );
@@ -1514,9 +1555,9 @@ class SampleWorkspaceSource
   WorkspaceDetail _fileRecord(WorkspaceRecordRef ref, String key) {
     final detail = _current(ref);
     if (ref.kind != WorkspaceRecordKind.information ||
-        !(detail.definition['fields'] as List? ?? []).any(
-          (f) => f['key'] == key && f['type'] == 'file',
-        )) {
+        !workspaceFields(
+          detail,
+        ).any((f) => f['key'] == key && f['type'] == 'file')) {
       throw const WorkspaceFailure('unsupported', '此入口只读取普通信息中的文件字段。');
     }
     return detail;
@@ -1693,6 +1734,9 @@ class SampleWorkspaceSource
       record: current.record.copyWith(updatedAt: now),
       version: current.version + 1,
       definition: current.definition,
+      fieldIds: current.fieldIds,
+      retainedFields: current.retainedFields,
+      retainedRelations: current.retainedRelations,
       values: {...current.values, change.fieldKey: file.toJson()},
       relations: current.relations,
     );
@@ -1840,6 +1884,7 @@ class SampleWorkspaceSource
     _recycled.clear();
     _operations.clear();
     _recordOperations.clear();
+    _adoptionPlans.clear();
     _committedRecordOperations.clear();
     _fileOperations.clear();
     _scenario = SampleWorkspaceScenario.ready;
@@ -1859,6 +1904,7 @@ class SampleWorkspaceSource
     _recycled.clear();
     _operations.clear();
     _recordOperations.clear();
+    _adoptionPlans.clear();
     _committedRecordOperations.clear();
     loseNextRecordReply = false;
     _directoryOperations.clear();
@@ -1907,6 +1953,7 @@ class SampleWorkspaceSource
       ..clear()
       ..addAll(_initialRecycled);
     _recordOperations.clear();
+    _adoptionPlans.clear();
     _committedRecordOperations.clear();
     loseNextRecordReply = false;
     _versions

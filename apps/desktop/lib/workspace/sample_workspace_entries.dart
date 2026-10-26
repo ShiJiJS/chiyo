@@ -15,7 +15,7 @@ String _identity(String seed) => sha256.convert(utf8.encode(seed)).toString();
 /// identities available to a different new record in the same sample session.
 Map<String, String> sampleEntryOwners(WorkspaceDetail detail) {
   final owners = <String, String>{};
-  for (final key in _entryKeys(detail.definition)) {
+  for (final key in _entryKeys(workspaceEditingDefinition(detail))) {
     try {
       for (final entry in WorkspaceRepeatedEntry.read(detail.values[key])) {
         owners[entry.id] = '${detail.record.ref.key}/$key/${entry.id}/entry';
@@ -76,7 +76,7 @@ Map<String, String> sampleEntryErrors(
   String owner(WorkspaceRecordRef ref, String key, String id, String part) =>
       '${ref.key}/$key/$id/$part';
   for (final detail in known) {
-    for (final key in _entryKeys(detail.definition)) {
+    for (final key in _entryKeys(workspaceEditingDefinition(detail))) {
       try {
         for (final entry in WorkspaceRepeatedEntry.read(detail.values[key])) {
           owners[entry.id] = owner(detail.record.ref, key, entry.id, 'entry');
@@ -169,11 +169,17 @@ Map<String, Object?> sampleRestoredEntries(
   int version,
 ) {
   final values = {...old.values};
-  for (final key in _entryKeys(old.definition)) {
+  for (final key in _entryKeys(workspaceEditingDefinition(old))) {
     try {
       final active = {
-        for (final e in WorkspaceRepeatedEntry.read(current?.values[key]))
-          e.id: e,
+        if (current != null)
+          for (final field in workspaceFields(
+            current,
+          ).where((f) => f['type'] == 'entries'))
+            for (final e in WorkspaceRepeatedEntry.read(
+              current.values[field['key']],
+            ))
+              e.id: e,
       };
       values[key] = [
         for (final entry in WorkspaceRepeatedEntry.read(old.values[key]))
