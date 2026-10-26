@@ -6,12 +6,14 @@ import 'library_widgets.dart';
 import 'library_relation_picker.dart';
 import 'library_entries.dart';
 import 'workspace_entries.dart';
+import 'library_file_dialogs.dart';
 import 'workspace_source.dart';
 
 Future<WorkspaceRecordRef?> showLibraryEditor(
   BuildContext context,
   LibraryController controller, {
   WorkspaceDetail? detail,
+  WorkspaceFilePicker? filePicker,
 }) async {
   final catalog = controller.catalog;
   if (catalog == null) return null;
@@ -25,7 +27,14 @@ Future<WorkspaceRecordRef?> showLibraryEditor(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           for (final candidate in catalog.types.where(
-            (t) => ['server', 'service', 'generic', 'profile'].contains(t.id),
+            (t) => [
+              'server',
+              'service',
+              'generic',
+              'profile',
+              'document',
+              'file',
+            ].contains(t.id),
           ))
             Padding(
               padding: const EdgeInsets.only(bottom: 10),
@@ -49,6 +58,15 @@ Future<WorkspaceRecordRef?> showLibraryEditor(
     ),
   );
   if (type == null || !context.mounted) return null;
+  if (type.id == 'file' && detail == null) {
+    return showLibraryFileImport(
+      context,
+      controller.source,
+      catalog,
+      filePicker,
+      controller.query.directoryId,
+    );
+  }
   Map<String, Object?> definition;
   try {
     definition =
@@ -100,6 +118,11 @@ class _Editor extends StatefulWidget {
 class _EditorState extends State<_Editor> {
   late final TextEditingController _name, _description;
   final _fields = <String, TextEditingController>{};
+  late final _documentFormats = {
+    for (final section in widget.definition['sections'] as List? ?? [])
+      if (section['kind'] == 'text' && section['formatKey'] is String)
+        section['formatKey'] as String,
+  };
   final _entries = <String, List<WorkspaceRepeatedEntry>>{};
   final _readOnlyEntries = <String, Object?>{};
   final _tags = <String>{};
@@ -127,6 +150,7 @@ class _EditorState extends State<_Editor> {
     }
     for (final field in widget.definition['fields'] as List? ?? []) {
       final key = field['key'] as String;
+      if (field['type'] == 'file') continue;
       if (field['type'] == 'entries') {
         try {
           final entries = WorkspaceRepeatedEntry.read(detail?.values[key]);
@@ -141,7 +165,9 @@ class _EditorState extends State<_Editor> {
         continue;
       }
       _fields[key] = TextEditingController(
-        text: detail?.values[key]?.toString() ?? '',
+        text:
+            detail?.values[key]?.toString() ??
+            (_documentFormats.contains(key) ? 'markdown' : ''),
       );
     }
     if (_fields.length +
@@ -315,7 +341,13 @@ class _EditorState extends State<_Editor> {
               ],
             ),
             for (final field in widget.definition['fields'] as List? ?? [])
-              if (_entries[field['key']] case final entries?) ...[
+              if (field['type'] == 'file') ...[
+                const SizedBox(height: 18),
+                Text(
+                  '文件内容通过详情中的“替换文件”入口更新。',
+                  style: libraryText(context, 13, color: c.muted),
+                ),
+              ] else if (_entries[field['key']] case final entries?) ...[
                 const SizedBox(height: 18),
                 LibraryEntriesEditor(
                   key: ValueKey('library-entries-${field['key']}'),
@@ -352,6 +384,32 @@ class _EditorState extends State<_Editor> {
                   style: libraryText(context, 13, color: c.warning),
                 ),
                 LibraryEntryTimeline(_readOnlyEntries[field['key']]),
+              ] else if (_documentFormats.contains(field['key'])) ...[
+                const SizedBox(height: 18),
+                DesktopSelect<String>(
+                  key: ValueKey('library-edit-${field['key']}'),
+                  value: _fields[field['key']]!.text,
+                  items: [
+                    for (final format in workspaceDocumentFormats.entries)
+                      DropdownMenuItem(
+                        value: format.key,
+                        child: Text(format.value),
+                      ),
+                  ],
+                  decoration: InputDecoration(
+                    labelText: field['label'] as String,
+                    errorText:
+                        _failure?.fieldErrors[workspaceValueErrorKey(
+                          field['key'] as String,
+                        )],
+                  ),
+                  onChanged: _saving
+                      ? null
+                      : (value) => setState(() {
+                          _fields[field['key']]!.text = value!;
+                          _dirty = true;
+                        }),
+                ),
               ] else if (_fields.containsKey(field['key'])) ...[
                 const SizedBox(height: 18),
                 DesktopTextField(

@@ -20,6 +20,8 @@ extension _SampleHistory on SampleWorkspaceSource {
 
   void _forgetContent(WorkspaceRecordRef ref) {
     _revisions.remove(ref);
+    _files.forget(ref);
+    // File receipts contain only opaque identities/result facts, no content.
     for (final id in _operations.keys.toList()) {
       final op = _operations[id]!;
       if (op.result case WorkspaceSaved(
@@ -101,7 +103,11 @@ extension _SampleHistory on SampleWorkspaceSource {
       ),
       version: version,
       definition: old.definition,
-      values: sampleRestoredEntries(old, _records[old.record.ref], version),
+      values: _files.restoredValues(
+        old,
+        _records[old.record.ref],
+        values: sampleRestoredEntries(old, _records[old.record.ref], version),
+      ),
       relations: relations,
     );
   }
@@ -224,7 +230,7 @@ extension _SampleWorkspaceHistory on SampleWorkspaceSource {
     }
     final ref = change.ref;
     final notices = <String>[];
-    WorkspaceDetail? restored;
+    WorkspaceDetail? restored, fileRestoreOriginal;
     WorkspaceArchive? archive;
     String? entryId;
     var version = change.expectedVersion + 1;
@@ -249,6 +255,7 @@ extension _SampleWorkspaceHistory on SampleWorkspaceSource {
             );
           }
           restored = preview.restored;
+          fileRestoreOriginal = preview.archive.detail;
           notices.addAll(preview.notices);
         }
       case WorkspaceRecordAction.restoreRecycled:
@@ -268,6 +275,7 @@ extension _SampleWorkspaceHistory on SampleWorkspaceSource {
           }
           version = (_versions[ref] ?? recycled.entry.version) + 1;
           restored = _normalizeArchive(recycled.archive, version, notices);
+          fileRestoreOriginal = recycled.archive.detail;
         }
         entryId = recycled.entry.id;
     }
@@ -288,6 +296,9 @@ extension _SampleWorkspaceHistory on SampleWorkspaceSource {
     }
     // No awaits after validation: the mutation, history and receipt commit as
     // one in-memory transition. A failed command changes none of them.
+    if (restored != null && fileRestoreOriginal != null) {
+      _files.commitRestore(fileRestoreOriginal, restored, _now());
+    }
     switch (change.action) {
       case WorkspaceRecordAction.recycle:
         entryId = 'preview-recycle-${++_nextRecycle}';

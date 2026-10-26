@@ -1,7 +1,9 @@
 import 'workspace_records.dart';
 import 'workspace_history.dart';
+import 'workspace_files.dart';
 export 'workspace_history.dart';
 export 'workspace_records.dart';
+export 'workspace_files.dart';
 
 /// Frontend-only summaries and failures. No database, authorization proof,
 /// secret material or operating-system handle crosses this boundary.
@@ -54,6 +56,28 @@ abstract interface class WorkspaceSource {
   Future<WorkspaceRecordReceipt> changeRecord(WorkspaceRecordChange change);
   Future<WorkspaceSaveResult> saveRecord(WorkspaceEdit edit);
   Future<WorkspaceSaveResult> createRecord(WorkspaceCreate draft);
+  Future<WorkspaceFileHistory> loadFileHistory(
+    WorkspaceRecordRef record,
+    String fieldKey,
+  );
+  Future<WorkspaceFilePreview> readFilePreview(
+    WorkspaceRecordRef record,
+    String fieldKey, {
+    int? version,
+    int page = 0,
+  });
+  Future<WorkspaceRecordRef> importFile(WorkspaceFileImport input);
+  Future<WorkspaceFileRef> changeFile(WorkspaceFileChange change);
+  Future<WorkspaceFileOperationReceipt?> fileOperationReceipt(
+    String operationId,
+  );
+  Future<WorkspaceFileActionResult> fileAction(
+    WorkspaceRecordRef record,
+    String fieldKey,
+    int version,
+    WorkspaceFileAction action, {
+    required String operationId,
+  });
 }
 
 enum WorkspaceLoad { idle, loading, ready, empty, error }

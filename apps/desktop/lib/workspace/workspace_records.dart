@@ -2,6 +2,9 @@
 /// never contain database objects, grants, executable handles or file bytes.
 enum WorkspaceRecordKind { information, credential }
 
+const workspaceDocumentFormats = {'plain': '纯文本', 'markdown': 'Markdown'};
+const workspaceDocumentMaxLength = 1000000;
+
 class WorkspaceRecordRef {
   const WorkspaceRecordRef(this.kind, this.id);
   final WorkspaceRecordKind kind;

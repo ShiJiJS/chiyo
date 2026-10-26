@@ -4,6 +4,8 @@ import '../prototype_icons.dart';
 import '../ui_palette.dart';
 import 'library_widgets.dart';
 import 'library_entries.dart';
+import 'library_document.dart';
+import 'library_file.dart';
 import 'workspace_source.dart';
 
 /// Reads a template snapshot for display; it does not own persistence or infer
@@ -19,6 +21,8 @@ class LibraryDetail extends StatefulWidget {
     required this.onEdit,
     this.onHistory,
     this.onRecycle,
+    this.filePicker,
+    this.onModalChanged,
     required this.onSettings,
     required this.onTag,
     required this.onExpand,
@@ -31,6 +35,8 @@ class LibraryDetail extends StatefulWidget {
   final VoidCallback? onEdit, onHistory, onRecycle;
   final VoidCallback onSettings, onExpand;
   final ValueChanged<String> onTag;
+  final WorkspaceFilePicker? filePicker;
+  final ValueChanged<bool>? onModalChanged;
   @override
   State<LibraryDetail> createState() => _LibraryDetailState();
 }
@@ -118,34 +124,53 @@ class _LibraryDetailState extends State<LibraryDetail> {
             runSpacing: 22,
             children: [
               for (final field in fields)
-                SizedBox(
-                  width: (bounds.maxWidth - 34 * (columns - 1)) / columns,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Text(
-                        field['label'] as String,
-                        style: libraryText(
-                          context,
-                          13,
-                          color: UiPalette.of(context).muted,
+                if (field['type'] == 'file')
+                  SizedBox(
+                    width: bounds.maxWidth,
+                    child: LibraryFile(
+                      key: ValueKey(
+                        'library-file-${widget.detail.record.ref.key}-${field['key']}',
+                      ),
+                      detail: widget.detail,
+                      fieldKey: field['key'] as String,
+                      source: widget.source,
+                      picker: widget.filePicker,
+                      onModalChanged: widget.onModalChanged,
+                    ),
+                  )
+                else
+                  SizedBox(
+                    width: (bounds.maxWidth - 34 * (columns - 1)) / columns,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text(
+                          field['label'] as String,
+                          style: libraryText(
+                            context,
+                            13,
+                            color: UiPalette.of(context).muted,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 4),
-                      SelectableText(
-                        _value(widget.detail.values[field['key']]),
-                        style:
-                            ['number', 'url', 'date'].contains(field['type']) ||
-                                field['key'] == 'host'
-                            ? libraryText(context, 13, height: 1.8).copyWith(
-                                fontFamily: 'Menlo',
-                                fontFamilyFallback: const ['monospace'],
-                              )
-                            : libraryText(context, 14, height: 1.8),
-                      ),
-                    ],
+                        const SizedBox(height: 4),
+                        SelectableText(
+                          _value(widget.detail.values[field['key']]),
+                          style:
+                              [
+                                    'number',
+                                    'url',
+                                    'date',
+                                  ].contains(field['type']) ||
+                                  field['key'] == 'host'
+                              ? libraryText(context, 13, height: 1.8).copyWith(
+                                  fontFamily: 'Menlo',
+                                  fontFamilyFallback: const ['monospace'],
+                                )
+                              : libraryText(context, 14, height: 1.8),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
             ],
           ),
         );
@@ -523,6 +548,23 @@ class _LibraryDetailState extends State<LibraryDetail> {
                         context,
                         section['title'] as String,
                         LibraryEntryTimeline(detail.values[section['key']]),
+                      )
+                    else if (section['kind'] == 'text')
+                      _section(
+                        context,
+                        section['title'] as String,
+                        LibraryDocument(
+                          key: ValueKey('library-document-${section['key']}'),
+                          body: detail.values[section['key']] is String
+                              ? detail.values[section['key']] as String
+                              : _value(detail.values[section['key']]),
+                          format: section['formatKey'] is String
+                              ? (detail.values[section['formatKey']] is String
+                                    ? detail.values[section['formatKey']]
+                                          as String
+                                    : 'unknown')
+                              : 'plain',
+                        ),
                       )
                     else
                       _section(

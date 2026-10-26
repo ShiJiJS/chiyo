@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'sample_workspace_fixture.dart';
 import 'sample_workspace_entries.dart';
+import 'sample_workspace_content_fixture.dart';
+import 'sample_workspace_files.dart';
 import 'workspace_source.dart';
 
 part 'sample_workspace_history.dart';
@@ -15,8 +17,24 @@ class SampleWorkspaceSource implements WorkspaceSource {
   SampleWorkspaceSource({
     String fixtureJson = sampleWorkspaceJson,
     DateTime Function()? now,
+    WorkspaceAssetReader? readAsset,
   }) : _fixtureJson = fixtureJson,
+       _files = SampleWorkspaceFiles(readAsset),
        _now = now ?? (() => DateTime.utc(2026, 10, 26));
+  final SampleWorkspaceFiles _files;
+  final _fileOperations =
+      <
+        String,
+        ({
+          String fingerprint,
+          WorkspaceFileRef? file,
+          WorkspaceRecordRef record,
+          bool? actionCompleted,
+        })
+      >{};
+  WorkspaceFailure? nextFilePreviewFailure, nextFileActionFailure;
+  bool cancelNextFileAction = false;
+  Future<List<WorkspaceFileCandidate>> fileChoices() => _files.choices();
   final DateTime Function() _now;
   final _revisions = <WorkspaceRecordRef, List<WorkspaceArchive>>{};
   final _recycled =
@@ -188,10 +206,23 @@ class SampleWorkspaceSource implements WorkspaceSource {
         directoryId: rawDirectory == 'unfiled' ? null : rawDirectory,
         tags: [for (final name in row['tags'] as List? ?? []) tags[name]!],
       );
-      final relations = row['relations'] as Map<String, dynamic>? ?? {};
+      final relations = <String, dynamic>{
+        ...?row['relations'] as Map<String, dynamic>?,
+      };
+      if (record.type.id == 'document' && row['owner'] is String) {
+        final related = List<Object?>.from(relations['related'] as List? ?? []);
+        if (!related.contains(row['owner'])) {
+          related.add({'kind': 'information', 'id': row['owner']});
+        }
+        relations['related'] = related;
+      }
       final definition = Map<String, Object?>.from(
         row['definition'] as Map? ??
-            (record.type.id == 'generic'
+            (record.type.id == 'file'
+                ? sampleFileDefinition
+                : record.type.id == 'document'
+                ? sampleDocumentDefinition
+                : record.type.id == 'generic'
                 ? _genericDefinitionFor(row['values'] as Map? ?? {})
                 : {}),
       );
@@ -202,11 +233,28 @@ class SampleWorkspaceSource implements WorkspaceSource {
         // A credential's actual content is deliberately not a generic detail.
         values: ref.kind == WorkspaceRecordKind.credential
             ? {}
-            : sampleInitialEntries(
-                ref,
-                definition,
-                Map<String, Object?>.from(row['values'] as Map? ?? {}),
-              ),
+            : sampleInitialEntries(ref, definition, {
+                if (record.type.id == 'document') ...{
+                  'bodyFormat': 'markdown',
+                  'body': sampleDocumentBodies[ref.id] ?? record.description,
+                },
+                ...Map<String, Object?>.from(row['values'] as Map? ?? {}),
+                if (record.type.id == 'file')
+                  'file': _files
+                      .seed(
+                        ref,
+                        'file',
+                        record.updatedAt,
+                        row['filename'] as String? ?? record.name,
+                        twoVersions: ref.id == 'resume',
+                        assetId: ['resume', 'resume-en'].contains(ref.id)
+                            ? 'pdf-v2'
+                            : ref.id == 'portrait'
+                            ? 'image'
+                            : 'unknown',
+                      )
+                      .toJson(),
+              }),
         relations: {
           for (final entry in relations.entries)
             entry.key: [
@@ -664,6 +712,14 @@ class SampleWorkspaceSource implements WorkspaceSource {
     for (final field in definition['fields'] as List? ?? []) {
       if (field['type'] == 'entries') continue;
       final errorKey = workspaceValueErrorKey(field['key'] as String);
+      if (field['type'] == 'file') {
+        if (current == null ||
+            jsonEncode(current.values[field['key']]) !=
+                jsonEncode(values[field['key']])) {
+          fields[errorKey] = '文件请通过导入、替换或恢复入口修改。';
+        }
+        continue;
+      }
       if (values[field['key']] != null && values[field['key']] is! String) {
         fields[errorKey] = '此字段需要文本值，请勿用复合内容覆盖。';
         continue;
@@ -700,6 +756,20 @@ class SampleWorkspaceSource implements WorkspaceSource {
         ],
       ),
     );
+    for (final section in definition['sections'] as List? ?? []) {
+      if (section['kind'] != 'text' || section['formatKey'] is! String) {
+        continue;
+      }
+      final key = section['formatKey'] as String;
+      if (!workspaceDocumentFormats.containsKey(values[key])) {
+        fields[workspaceValueErrorKey(key)] = '请选择纯文本或Markdown。';
+      }
+      final body = values[section['key']];
+      if (body is String && body.length > workspaceDocumentMaxLength) {
+        fields[workspaceValueErrorKey(section['key'] as String)] =
+            '正文不能超过100万个字符。';
+      }
+    }
     return fields;
   }
 
@@ -747,7 +817,8 @@ class SampleWorkspaceSource implements WorkspaceSource {
     errors.addAll(_relationErrors(null, definition, draft.relations));
     if (draft.operationId.isEmpty ||
         prototype == null ||
-        prototype.record.ref.kind == WorkspaceRecordKind.credential) {
+        prototype.record.ref.kind == WorkspaceRecordKind.credential ||
+        draft.typeId == 'file') {
       result = const WorkspaceRejected(
         WorkspaceFailure('unsupported', '请选择可创建的普通资料类型。'),
       );
@@ -914,6 +985,303 @@ class SampleWorkspaceSource implements WorkspaceSource {
     return result;
   }
 
+  WorkspaceDetail _fileRecord(WorkspaceRecordRef ref, String key) {
+    final detail = _current(ref);
+    if (ref.kind != WorkspaceRecordKind.information ||
+        !(detail.definition['fields'] as List? ?? []).any(
+          (f) => f['key'] == key && f['type'] == 'file',
+        )) {
+      throw const WorkspaceFailure('unsupported', '此入口只读取普通信息中的文件字段。');
+    }
+    return detail;
+  }
+
+  void _checkFileRead(WorkspaceDetail detail, int epoch) {
+    if (_disposed ||
+        epoch != _epoch ||
+        _records[detail.record.ref]?.version != detail.version) {
+      throw const WorkspaceFailure('cancelled', '资料已变化，请重新读取文件。');
+    }
+  }
+
+  @override
+  Future<WorkspaceFileHistory> loadFileHistory(
+    WorkspaceRecordRef record,
+    String fieldKey,
+  ) async {
+    await _readable();
+    final epoch = _epoch, detail = _fileRecord(record, fieldKey);
+    final value = await _files.history(detail, fieldKey);
+    _checkFileRead(detail, epoch);
+    return value;
+  }
+
+  @override
+  Future<WorkspaceFilePreview> readFilePreview(
+    WorkspaceRecordRef record,
+    String fieldKey, {
+    int? version,
+    int page = 0,
+  }) async {
+    await _readable();
+    final epoch = _epoch, detail = _fileRecord(record, fieldKey);
+    if (nextFilePreviewFailure case final error?) {
+      nextFilePreviewFailure = null;
+      throw error;
+    }
+    final value = await _files.preview(
+      detail,
+      fieldKey,
+      version: version,
+      page: page,
+    );
+    _checkFileRead(detail, epoch);
+    return value;
+  }
+
+  @override
+  Future<WorkspaceRecordRef> importFile(WorkspaceFileImport input) async {
+    await _readable();
+    final epoch = _epoch, catalogVersion = _catalogVersion;
+    final fingerprint = _fingerprint({
+      'op': 'import-file',
+      'selection': input.selectionId,
+      'name': input.name,
+      'description': input.description,
+      'directory': input.directoryId,
+      'tags': input.tagIds,
+    });
+    if (_fileOperations[input.operationId] case final previous?) {
+      if (previous.fingerprint != fingerprint) {
+        throw const WorkspaceFailure('operation_conflict', '同一次操作不能用于不同内容。');
+      }
+      return previous.record;
+    }
+    final errors = _fieldErrors(input.name, input.description, {}, {});
+    if (input.operationId.isEmpty || errors.isNotEmpty) {
+      throw WorkspaceFailure('validation', '请检查文件名称和用途。', fieldErrors: errors);
+    }
+    if ((input.directoryId != null &&
+            !_catalog.directories.any(
+              (d) =>
+                  d.id == input.directoryId &&
+                  !['all', 'unfiled'].contains(d.id),
+            )) ||
+        input.tagIds.any((id) => !_catalog.tags.any((t) => t.id == id))) {
+      throw const WorkspaceFailure('validation', '目录或标签引用已失效。');
+    }
+    final type = _catalog.types.where((t) => t.id == 'file').firstOrNull;
+    if (type == null) throw const WorkspaceFailure('unsupported', '文件类型暂不可用。');
+    await _files.verifySelection(input.selectionId);
+    if (_disposed || epoch != _epoch) {
+      throw const WorkspaceFailure('cancelled', '预览状态已变化，请重新选择文件。');
+    }
+    if (_fileOperations[input.operationId] case final committed?) {
+      if (committed.fingerprint != fingerprint) {
+        throw const WorkspaceFailure('operation_conflict', '同一次操作不能用于不同内容。');
+      }
+      return committed.record;
+    }
+    if (_catalogVersion != catalogVersion) {
+      throw const WorkspaceFailure('conflict', '分类已变化，请核对后重新导入。');
+    }
+    if (nextSaveFailure case final failure?) {
+      nextSaveFailure = null;
+      throw failure;
+    }
+    if (_scenario == SampleWorkspaceScenario.empty) _materializeEmpty();
+    final ref = WorkspaceRecordRef(
+      WorkspaceRecordKind.information,
+      'preview-record-${++_nextRecord}',
+    );
+    final now = _now();
+    final file = _files.importFile(ref, 'file', input.selectionId, now);
+    final detail = WorkspaceDetail(
+      record: WorkspaceRecordSummary(
+        ref: ref,
+        name: input.name.trim(),
+        description: input.description,
+        type: type,
+        updatedAt: now,
+        directoryId: input.directoryId,
+        tags: _catalog.tags.where((t) => input.tagIds.contains(t.id)),
+      ),
+      version: 1,
+      definition: sampleFileDefinition,
+      values: {'file': file.toJson()},
+      relations: {'related': []},
+    );
+    _records[ref] = detail;
+    _versions[ref] = 1;
+    _fileOperations[input.operationId] = (
+      fingerprint: fingerprint,
+      file: file,
+      record: ref,
+      actionCompleted: null,
+    );
+    _changes.add(ref);
+    return ref;
+  }
+
+  @override
+  Future<WorkspaceFileRef> changeFile(WorkspaceFileChange change) async {
+    await _readable();
+    final epoch = _epoch;
+    final fingerprint = _fingerprint({
+      'op': 'file-change',
+      'record': change.record.key,
+      'key': change.fieldKey,
+      'recordVersion': change.expectedRecordVersion,
+      'fileVersion': change.expectedFileVersion,
+      'kind': change.kind.name,
+      'selection': change.selectionId,
+      'restore': change.restoreVersion,
+    });
+    if (_fileOperations[change.operationId] case final previous?) {
+      if (previous.fingerprint != fingerprint || previous.file == null) {
+        throw const WorkspaceFailure('operation_conflict', '同一次操作不能用于不同内容。');
+      }
+      return previous.file!;
+    }
+    if (change.operationId.isEmpty) {
+      throw const WorkspaceFailure('invalid_request', '操作身份无效。');
+    }
+    final current = _fileRecord(change.record, change.fieldKey);
+    await _files.validateChange(current, change);
+    final committed = epoch == _epoch && !_disposed
+        ? _fileOperations[change.operationId]
+        : null;
+    if (committed != null) {
+      if (committed.fingerprint != fingerprint || committed.file == null) {
+        throw const WorkspaceFailure('operation_conflict', '同一次操作不能用于不同内容。');
+      }
+      return committed.file!;
+    }
+    _checkFileRead(current, epoch);
+    if (nextSaveFailure case final failure?) {
+      nextSaveFailure = null;
+      throw failure;
+    }
+    final file = _files.next(current, change.fieldKey), now = _now();
+    final detail = WorkspaceDetail(
+      record: current.record.copyWith(updatedAt: now),
+      version: current.version + 1,
+      definition: current.definition,
+      values: {...current.values, change.fieldKey: file.toJson()},
+      relations: current.relations,
+    );
+    _files.commitChange(current, change, now);
+    (_revisions[change.record] ??= []).add(_archive(current));
+    _records[change.record] = detail;
+    _versions[change.record] = detail.version;
+    _fileOperations[change.operationId] = (
+      fingerprint: fingerprint,
+      file: file,
+      record: change.record,
+      actionCompleted: null,
+    );
+    _changes.add(change.record);
+    return file;
+  }
+
+  @override
+  Future<WorkspaceFileOperationReceipt?> fileOperationReceipt(
+    String operationId,
+  ) async {
+    await _readable();
+    final value = _fileOperations[operationId];
+    return value == null
+        ? null
+        : WorkspaceFileOperationReceipt(
+            value.record,
+            value.file,
+            actionCompleted: value.actionCompleted,
+          );
+  }
+
+  @override
+  Future<WorkspaceFileActionResult> fileAction(
+    WorkspaceRecordRef record,
+    String fieldKey,
+    int version,
+    WorkspaceFileAction action, {
+    required String operationId,
+  }) async {
+    await _readable();
+    if (operationId.isEmpty) {
+      throw const WorkspaceFailure('invalid_request', '操作身份无效。');
+    }
+    final fingerprint = _fingerprint({
+      'op': 'file-action',
+      'record': record.key,
+      'field': fieldKey,
+      'version': version,
+      'action': action.name,
+    });
+    final previous = _fileOperations[operationId];
+    if (previous != null &&
+        (previous.fingerprint != fingerprint ||
+            previous.actionCompleted == null)) {
+      throw const WorkspaceFailure('operation_conflict', '同一次操作不能用于不同内容。');
+    }
+    final epoch = _epoch, detail = _fileRecord(record, fieldKey);
+    final metadata = await _files.metadata(
+      record,
+      fieldKey,
+      WorkspaceFileRef(
+        WorkspaceFileRef.fromJson(detail.values[fieldKey]).id,
+        version,
+      ),
+    );
+    _checkFileRead(detail, epoch);
+    if (previous != null) {
+      return WorkspaceFileActionResult(
+        completed: previous.actionCompleted!,
+        filename: metadata.filename,
+      );
+    }
+    if (cancelNextFileAction) {
+      cancelNextFileAction = false;
+      _fileOperations[operationId] = (
+        fingerprint: fingerprint,
+        record: record,
+        file: metadata.ref,
+        actionCompleted: false,
+      );
+      return WorkspaceFileActionResult(
+        completed: false,
+        filename: metadata.filename,
+      );
+    }
+    if (nextFileActionFailure case final error?) {
+      nextFileActionFailure = null;
+      throw error;
+    }
+    await _files.verifyVersion(detail, fieldKey, version);
+    _checkFileRead(detail, epoch);
+    if (_fileOperations[operationId] case final committed?) {
+      if (committed.fingerprint != fingerprint ||
+          committed.actionCompleted == null) {
+        throw const WorkspaceFailure('operation_conflict', '同一次操作不能用于不同内容。');
+      }
+      return WorkspaceFileActionResult(
+        completed: committed.actionCompleted!,
+        filename: metadata.filename,
+      );
+    }
+    _fileOperations[operationId] = (
+      fingerprint: fingerprint,
+      record: record,
+      file: metadata.ref,
+      actionCompleted: true,
+    );
+    // The fictional adapter reports its result; it never writes or launches.
+    return WorkspaceFileActionResult(
+      completed: true,
+      filename: metadata.filename,
+    );
+  }
+
   @override
   Future<List<WorkspaceRevision>> loadRevisions(WorkspaceRecordRef ref) =>
       _loadRevisions(ref);
@@ -942,6 +1310,7 @@ class SampleWorkspaceSource implements WorkspaceSource {
     _recycled.clear();
     _operations.clear();
     _recordOperations.clear();
+    _fileOperations.clear();
     _scenario = SampleWorkspaceScenario.ready;
   }
 
@@ -962,6 +1331,8 @@ class SampleWorkspaceSource implements WorkspaceSource {
     _directoryOperations.clear();
     _versions.clear();
     _entryIdentityOwners.clear();
+    _files.clear();
+    _fileOperations.clear();
     _clock = _nextRecord = _nextDirectory = _nextRecycle = 0;
     _catalogVersion++;
     nextSaveFailure = null;
@@ -971,6 +1342,10 @@ class SampleWorkspaceSource implements WorkspaceSource {
 
   void reset() {
     setScenario(SampleWorkspaceScenario.ready);
+    _files.reset();
+    _fileOperations.clear();
+    nextFilePreviewFailure = nextFileActionFailure = null;
+    cancelNextFileAction = false;
     _entryIdentityOwners
       ..clear()
       ..addAll({

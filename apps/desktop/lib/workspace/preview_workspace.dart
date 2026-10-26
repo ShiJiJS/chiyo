@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import '../desktop_controls.dart';
 import '../desktop_feedback.dart';
@@ -15,6 +16,7 @@ import 'mac_preview_desktop.dart';
 import 'workspace_records_controller.dart';
 import 'library_controller.dart';
 import 'library_page.dart';
+import 'library_file_dialogs.dart';
 
 /// Only the isolated composition root knows which provider is a sample.
 /// U02–U07 register their production widgets through pageBuilder.
@@ -36,7 +38,12 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
   @override
   void initState() {
     super.initState();
-    _source = SampleWorkspaceSource();
+    _source = SampleWorkspaceSource(
+      readAsset: (asset) async {
+        final data = await rootBundle.load(asset);
+        return data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+      },
+    );
     _controller = WorkspaceController(_source);
     _library = LibraryController(_source);
     _summaryChanges = _source.changes.listen(
@@ -178,6 +185,18 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
                       '保存失败，输入已保留，请重试。',
                     ),
               ),
+              const SizedBox(height: 18),
+              DesktopButton(
+                key: const ValueKey('preview-file-error'),
+                onPressed: () {
+                  _source.nextFilePreviewFailure = const WorkspaceFailure(
+                    'preview_unavailable',
+                    '文件预览失败，文件信息仍可查看。',
+                  );
+                  Navigator.pop(dialogContext);
+                },
+                child: const Text('下一次文件预览失败（刷新预览后生效）'),
+              ),
             ],
           ),
           actions: [
@@ -240,6 +259,8 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
         (context, location) => location.page == WorkspacePage.library
             ? LibraryPage(
                 controller: _library,
+                filePicker: () =>
+                    showWorkspaceFileChoices(context, _source.fileChoices),
                 onRetry: () => _scenario(SampleWorkspaceScenario.ready),
                 onNavigate: (page, id) =>
                     _controller.navigate(page, objectId: id, remember: true),
