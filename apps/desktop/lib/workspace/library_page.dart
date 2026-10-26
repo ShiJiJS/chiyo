@@ -122,7 +122,14 @@ class _LibraryPageState extends State<LibraryPage> {
       );
       if (!mounted || ref == null) return;
       await model.openRelated(ref, rememberOrigin: create);
-      if (mounted) DesktopFeedback.show(context, create ? '已添加资料' : '已保存资料');
+      if (mounted) {
+        DesktopFeedback.show(
+          context,
+          model.detail?.record.ref == ref
+              ? (create ? '已添加资料' : '已保存资料')
+              : '操作已提交，当前资料暂不可用，请查看读取结果。',
+        );
+      }
     } finally {
       widget.onModalChanged?.call(false);
     }
@@ -138,7 +145,14 @@ class _LibraryPageState extends State<LibraryPage> {
           : await showLibraryHistory(context, model.source, ref);
       if (!mounted || restored != true) return;
       await model.openRelated(ref, rememberOrigin: false);
-      if (mounted) DesktopFeedback.show(context, '已恢复为新版本');
+      if (mounted) {
+        DesktopFeedback.show(
+          context,
+          model.detail?.record.ref == ref
+              ? '已恢复为新版本'
+              : '恢复已提交，当前资料暂不可用，请查看读取结果。',
+        );
+      }
     } finally {
       widget.onModalChanged?.call(false);
     }

@@ -326,6 +326,38 @@ class SampleWorkspaceSource
       <String, ({WorkspaceRecycleEntry entry, WorkspaceArchive archive})>{};
   final _recordOperations =
       <String, ({String fingerprint, WorkspaceRecordReceipt receipt})>{};
+  final _committedRecordOperations = <String, WorkspaceOperationReceipt>{};
+
+  /// Composition-only fault: commit the next ordinary write, then lose its reply.
+  bool loseNextRecordReply = false;
+
+  void _recordCommitted(
+    String id,
+    WorkspaceOperationIntent intent,
+    WorkspaceRecordReceipt result,
+  ) {
+    _committedRecordOperations[id] = WorkspaceOperationReceipt(
+      operationId: id,
+      intent: intent,
+      result: result,
+    );
+    if (loseNextRecordReply) {
+      loseNextRecordReply = false;
+      throw const WorkspaceFailure('unknown_outcome', '操作结果暂时无法确认，请先核对结果。');
+    }
+  }
+
+  @override
+  Future<WorkspaceOperationReceipt?> recordOperationReceipt(
+    String operationId,
+  ) async {
+    await _readable();
+    if (operationId.trim().isEmpty) {
+      throw const WorkspaceFailure('validation', '操作身份不能为空。');
+    }
+    return _committedRecordOperations[operationId];
+  }
+
   final _versions = <WorkspaceRecordRef, int>{};
   final _entryIdentityOwners = <String, String>{};
   int _nextRecycle = 0;
@@ -1137,6 +1169,11 @@ class SampleWorkspaceSource
       },
     });
     final previous = _operations[draft.operationId];
+    if (_recordOperations.containsKey(draft.operationId)) {
+      return const WorkspaceRejected(
+        WorkspaceFailure('operation_conflict', '同一次操作不能用于不同内容。'),
+      );
+    }
     if (previous != null) {
       return previous.fingerprint == fingerprint
           ? previous.result
@@ -1216,6 +1253,16 @@ class SampleWorkspaceSource
       result = WorkspaceSaved(detail);
     }
     _operations[draft.operationId] = (fingerprint: fingerprint, result: result);
+    if (result case WorkspaceSaved(:final detail)) {
+      _recordCommitted(
+        draft.operationId,
+        WorkspaceOperationIntent(
+          kind: WorkspaceOperationKind.create,
+          typeId: draft.typeId,
+        ),
+        WorkspaceRecordReceipt(ref: detail.record.ref, version: detail.version),
+      );
+    }
     return result;
   }
 
@@ -1241,6 +1288,11 @@ class SampleWorkspaceSource
       },
     });
     final previous = _operations[edit.operationId];
+    if (_recordOperations.containsKey(edit.operationId)) {
+      return const WorkspaceRejected(
+        WorkspaceFailure('operation_conflict', '同一次操作不能用于不同内容。'),
+      );
+    }
     if (previous != null) {
       return previous.fingerprint == fingerprint
           ? previous.result
@@ -1329,6 +1381,20 @@ class SampleWorkspaceSource
       result = WorkspaceSaved(detail);
     }
     _operations[edit.operationId] = (fingerprint: fingerprint, result: result);
+    if (result case WorkspaceSaved(
+      :final detail,
+    ) when detail.record.ref.kind == WorkspaceRecordKind.information) {
+      _recordCommitted(
+        edit.operationId,
+        WorkspaceOperationIntent(
+          kind: WorkspaceOperationKind.edit,
+          ref: edit.record.ref,
+          typeId: edit.record.type.id,
+          expectedVersion: edit.expectedVersion,
+        ),
+        WorkspaceRecordReceipt(ref: detail.record.ref, version: detail.version),
+      );
+    }
     return result;
   }
 
@@ -1660,6 +1726,7 @@ class SampleWorkspaceSource
     _recycled.clear();
     _operations.clear();
     _recordOperations.clear();
+    _committedRecordOperations.clear();
     _fileOperations.clear();
     _scenario = SampleWorkspaceScenario.ready;
   }
@@ -1678,6 +1745,8 @@ class SampleWorkspaceSource
     _recycled.clear();
     _operations.clear();
     _recordOperations.clear();
+    _committedRecordOperations.clear();
+    loseNextRecordReply = false;
     _directoryOperations.clear();
     _versions.clear();
     _entryIdentityOwners.clear();
@@ -1720,6 +1789,8 @@ class SampleWorkspaceSource
       ..clear()
       ..addAll(_initialRecycled);
     _recordOperations.clear();
+    _committedRecordOperations.clear();
+    loseNextRecordReply = false;
     _versions
       ..clear()
       ..addEntries(

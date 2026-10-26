@@ -9,6 +9,7 @@ import 'workspace_entries.dart';
 import 'library_file_dialogs.dart';
 import 'library_credential_editor.dart';
 import 'workspace_source.dart';
+import 'record_mutation.dart';
 
 Future<WorkspaceRecordRef?> showLibraryEditor(
   BuildContext context,
@@ -141,12 +142,21 @@ class _EditorState extends State<_Editor> {
   final _relations = <String, List<WorkspaceRecordRef>>{};
   final _editedRelations = <String>{};
   String? _directory;
-  bool _dirty = false, _discard = false, _saving = false;
-  WorkspaceFailure? _failure;
-  static int _operation = 0;
+  bool _dirty = false, _discard = false;
+  late final RecordMutation _mutation;
+  bool get _saving => _mutation.busy;
+  bool get _locked => _mutation.frozen;
+  WorkspaceFailure? get _failure => _mutation.failure;
+  String? _notice;
+  void _mutationChanged() {
+    if (mounted) setState(() {});
+  }
+
   @override
   void initState() {
     super.initState();
+    _mutation = RecordMutation(widget.controller.source)
+      ..addListener(_mutationChanged);
     final detail = widget.detail;
     _name = TextEditingController(text: detail?.record.name ?? '');
     _description = TextEditingController(
@@ -194,6 +204,7 @@ class _EditorState extends State<_Editor> {
 
   @override
   void dispose() {
+    _mutation.dispose();
     _name.dispose();
     _description.dispose();
     for (final field in _fields.values) {
@@ -203,15 +214,36 @@ class _EditorState extends State<_Editor> {
   }
 
   void _changed(String _) {
-    setState(() => _dirty = true);
+    _mutation.edited();
+    setState(() {
+      _dirty = true;
+      _notice = null;
+    });
+  }
+
+  void _finish(WorkspaceRecordReceipt receipt) {
+    setState(() {
+      _dirty = false;
+      _discard = false;
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) Navigator.pop(context, receipt.ref);
+    });
+  }
+
+  Future<void> _reconcile() async {
+    final receipt = await _mutation.reconcile();
+    if (!mounted) return;
+    if (receipt != null) {
+      _finish(receipt);
+    } else if (!_mutation.uncertain) {
+      setState(() => _notice = '已确认尚未提交。草稿已保留，可修改或重新保存。');
+    }
   }
 
   Future<void> _save() async {
-    if (_saving) return;
-    setState(() {
-      _saving = true;
-      _failure = null;
-    });
+    if (!_mutation.canSubmit) return;
+    _notice = null;
     final detail = widget.detail;
     final catalog = widget.controller.catalog!;
     final values = {
@@ -219,72 +251,65 @@ class _EditorState extends State<_Editor> {
       for (final entry in _entries.entries)
         entry.key: [for (final value in entry.value) value.toJson()],
     };
-    final id = 'library-form-${_operation++}';
-    WorkspaceSaveResult result;
-    try {
-      result = detail == null
-          ? await widget.controller.source.createRecord(
-              WorkspaceCreate(
-                operationId: id,
-                typeId: widget.type.id,
-                name: _name.text,
-                description: _description.text,
-                directoryId: _directory,
-                tagIds: _tags,
-                values: values,
-                relations: _relations,
-              ),
-            )
-          : await widget.controller.save(
-              WorkspaceEdit(
-                operationId: id,
-                expectedVersion: detail.version,
-                record: detail.record.copyWith(
+    final receipt = await _mutation.submit(
+      WorkspaceOperationIntent(
+        kind: detail == null
+            ? WorkspaceOperationKind.create
+            : WorkspaceOperationKind.edit,
+        ref: detail?.record.ref,
+        typeId: widget.type.id,
+        expectedVersion: detail?.version,
+      ),
+      (id) async {
+        final result = detail == null
+            ? await widget.controller.source.createRecord(
+                WorkspaceCreate(
+                  operationId: id,
+                  typeId: widget.type.id,
                   name: _name.text,
                   description: _description.text,
                   directoryId: _directory,
-                  unfiled: _directory == null,
-                  tags: catalog.tags.where((t) => _tags.contains(t.id)),
+                  tagIds: _tags,
+                  values: values,
+                  relations: _relations,
                 ),
-                values: values,
-                relations: {
-                  for (final key in _editedRelations) key: _relations[key]!,
-                },
-              ),
-            );
-    } on WorkspaceFailure catch (error) {
-      result = WorkspaceRejected(error);
-    } catch (_) {
-      result = const WorkspaceRejected(
-        WorkspaceFailure('unknown_outcome', '暂时无法确认保存结果，请重新读取核对，不要重复提交。'),
-      );
-    }
-    if (!mounted) return;
-    switch (result) {
-      case WorkspaceSaved(:final detail):
-        setState(() {
-          _dirty = false;
-          _saving = false;
-        });
-        // PopScope observes its new canPop before the explicit successful pop.
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) Navigator.pop(context, detail.record.ref);
-        });
-      case WorkspaceRejected(:final failure):
-        setState(() {
-          _saving = false;
-          _failure = failure;
-        });
-    }
+              )
+            : await widget.controller.save(
+                WorkspaceEdit(
+                  operationId: id,
+                  expectedVersion: detail.version,
+                  record: detail.record.copyWith(
+                    name: _name.text,
+                    description: _description.text,
+                    directoryId: _directory,
+                    unfiled: _directory == null,
+                    tags: catalog.tags.where((t) => _tags.contains(t.id)),
+                  ),
+                  values: values,
+                  relations: {
+                    for (final key in _editedRelations) key: _relations[key]!,
+                  },
+                ),
+              );
+        return switch (result) {
+          WorkspaceSaved(:final detail) => WorkspaceRecordReceipt(
+            ref: detail.record.ref,
+            version: detail.version,
+          ),
+          WorkspaceRejected(:final failure) => throw failure,
+        };
+      },
+    );
+    if (mounted && receipt != null) _finish(receipt);
   }
 
   @override
   Widget build(BuildContext context) {
     final catalog = widget.controller.catalog!, c = UiPalette.of(context);
     return PopScope(
-      canPop: !_dirty && !_saving,
+      canPop: !_dirty && !_locked,
       onPopInvokedWithResult: (popped, _) {
-        if (!popped && !_saving) setState(() => _discard = true);
+        if (!popped && !_locked) setState(() => _discard = true);
       },
       child: DesktopDialog(
         title: Text(
@@ -299,7 +324,7 @@ class _EditorState extends State<_Editor> {
             DesktopTextField(
               key: const ValueKey('library-edit-name'),
               controller: _name,
-              enabled: !_saving,
+              enabled: !_locked,
               onChanged: _changed,
               decoration: InputDecoration(
                 labelText: '名称',
@@ -310,7 +335,7 @@ class _EditorState extends State<_Editor> {
             DesktopTextField(
               key: const ValueKey('library-edit-description'),
               controller: _description,
-              enabled: !_saving,
+              enabled: !_locked,
               onChanged: _changed,
               minLines: 2,
               maxLines: 4,
@@ -323,7 +348,7 @@ class _EditorState extends State<_Editor> {
             LibraryDirectorySelect(
               catalog: catalog,
               value: _directory,
-              onChanged: _saving
+              onChanged: _locked
                   ? null
                   : (value) => setState(() {
                       _directory = value;
@@ -341,7 +366,7 @@ class _EditorState extends State<_Editor> {
                   LibraryTag(
                     tag.name,
                     selected: _tags.contains(tag.id),
-                    onPressed: _saving
+                    onPressed: _locked
                         ? null
                         : () => setState(() {
                             _tags.contains(tag.id)
@@ -366,7 +391,7 @@ class _EditorState extends State<_Editor> {
                   fieldKey: field['key'] as String,
                   label: field['label'] as String,
                   entries: entries,
-                  enabled: !_saving,
+                  enabled: !_locked,
                   canAdd:
                       _readOnlyEntries.isEmpty &&
                       entries.length <
@@ -415,7 +440,7 @@ class _EditorState extends State<_Editor> {
                           field['key'] as String,
                         )],
                   ),
-                  onChanged: _saving
+                  onChanged: _locked
                       ? null
                       : (value) => setState(() {
                           _fields[field['key']]!.text = value!;
@@ -429,7 +454,7 @@ class _EditorState extends State<_Editor> {
                     'library-edit-${['name', 'description'].contains(field['key']) ? 'value-' : ''}${field['key']}',
                   ),
                   controller: _fields[field['key']],
-                  enabled: !_saving,
+                  enabled: !_locked,
                   onChanged: _changed,
                   minLines: field['type'] == 'multiline' ? 3 : 1,
                   maxLines: field['type'] == 'multiline' ? 6 : 1,
@@ -454,7 +479,7 @@ class _EditorState extends State<_Editor> {
                 relationKey: rule['key'] as String,
                 label: rule['label'] as String,
                 selected: _relations[rule['key']]!,
-                enabled: !_saving,
+                enabled: !_locked,
                 errorText: _failure?.fieldErrors['relation:${rule['key']}'],
                 onChanged: (refs) => setState(() {
                   final key = rule['key'] as String;
@@ -467,6 +492,17 @@ class _EditorState extends State<_Editor> {
           ],
         ),
         actions: [
+          if (_notice != null)
+            SizedBox(
+              width: double.infinity,
+              child: Semantics(liveRegion: true, child: Text(_notice!)),
+            ),
+          if (_mutation.uncertain)
+            DesktopButton(
+              key: const ValueKey('library-edit-reconcile'),
+              onPressed: _saving ? null : _reconcile,
+              child: const Text('核对结果'),
+            ),
           if (_failure != null)
             SizedBox(
               width: double.infinity,
@@ -490,7 +526,7 @@ class _EditorState extends State<_Editor> {
           if (_discard)
             DesktopButton(
               kind: DesktopButtonKind.danger,
-              onPressed: _saving
+              onPressed: _locked
                   ? null
                   : () {
                       setState(() => _dirty = false);
@@ -501,7 +537,7 @@ class _EditorState extends State<_Editor> {
               child: const Text('放弃修改'),
             ),
           DesktopButton(
-            onPressed: _saving
+            onPressed: _locked
                 ? null
                 : () {
                     if (_dirty) {
@@ -516,7 +552,7 @@ class _EditorState extends State<_Editor> {
             key: const ValueKey('library-edit-save'),
             busy: _saving,
             kind: DesktopButtonKind.primary,
-            onPressed: _failure?.code == 'unknown_outcome' ? null : _save,
+            onPressed: _mutation.canSubmit ? _save : null,
             child: const Text('保存'),
           ),
         ],

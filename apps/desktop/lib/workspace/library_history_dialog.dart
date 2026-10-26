@@ -4,6 +4,7 @@ import '../desktop_controls.dart';
 import '../ui_palette.dart';
 import 'library_widgets.dart';
 import 'workspace_source.dart';
+import 'record_mutation.dart';
 
 Future<bool?> showLibraryHistory(
   BuildContext context,
@@ -94,23 +95,41 @@ class _HistoryDialogState extends State<_HistoryDialog> {
   WorkspaceDetail? _current;
   WorkspaceRevisionPreview? _preview;
   WorkspaceArchive? _currentArchive;
-  WorkspaceFailure? _failure;
-  bool _loading = true, _busy = false;
+  WorkspaceFailure? _readFailure;
+  late final RecordMutation _mutation;
+  WorkspaceFailure? get _failure => _mutation.failure ?? _readFailure;
+  bool get _busy => _mutation.busy;
+  bool get _locked => _mutation.frozen;
+  String? _notice;
+  bool _loading = true;
   int _generation = 0;
-  String? _operation;
+  void _mutationChanged() {
+    if (mounted) setState(() {});
+  }
+
+  @override
+  void dispose() {
+    ++_generation;
+    _mutation.dispose();
+    super.dispose();
+  }
+
   @override
   void initState() {
     super.initState();
+    _mutation = RecordMutation(widget.source)..addListener(_mutationChanged);
     _reload();
   }
 
   Future<void> _reload() async {
+    if (_locked) return;
+    _mutation.acceptCurrentVersion();
     final generation = ++_generation;
     setState(() {
       _loading = true;
       _preview = null;
-      _failure = null;
-      _operation = null;
+      _readFailure = null;
+      _notice = null;
     });
     try {
       final current = await widget.source.readDetail(widget.ref);
@@ -122,12 +141,12 @@ class _HistoryDialogState extends State<_HistoryDialog> {
       });
     } on WorkspaceFailure catch (error) {
       if (mounted && generation == _generation) {
-        setState(() => _failure = error);
+        setState(() => _readFailure = error);
       }
     } catch (_) {
       if (mounted && generation == _generation) {
         setState(
-          () => _failure = const WorkspaceFailure(
+          () => _readFailure = const WorkspaceFailure(
             'unavailable',
             '暂时无法读取内容版本，请重试。',
           ),
@@ -141,12 +160,14 @@ class _HistoryDialogState extends State<_HistoryDialog> {
   }
 
   Future<void> _select(WorkspaceRevision revision) async {
+    if (_locked) return;
+    _mutation.acceptCurrentVersion();
     final generation = ++_generation;
     setState(() {
       _loading = true;
       _preview = null;
-      _failure = null;
-      _operation = null;
+      _readFailure = null;
+      _notice = null;
     });
     try {
       final preview = await widget.source.previewRevision(
@@ -173,13 +194,15 @@ class _HistoryDialogState extends State<_HistoryDialog> {
       });
     } on WorkspaceFailure catch (error) {
       if (mounted && generation == _generation) {
-        setState(() => _failure = error);
+        setState(() => _readFailure = error);
       }
     } catch (_) {
       if (mounted && generation == _generation) {
         setState(
-          () =>
-              _failure = const WorkspaceFailure('unavailable', '暂时无法比较内容，请重试。'),
+          () => _readFailure = const WorkspaceFailure(
+            'unavailable',
+            '暂时无法比较内容，请重试。',
+          ),
         );
       }
     } finally {
@@ -189,43 +212,43 @@ class _HistoryDialogState extends State<_HistoryDialog> {
     }
   }
 
+  Future<void> _reconcile() async {
+    final receipt = await _mutation.reconcile();
+    if (!mounted) return;
+    if (receipt != null) {
+      Navigator.pop(context, true);
+    } else if (!_mutation.uncertain) {
+      setState(() => _notice = '已确认尚未提交，可重新恢复所选版本。');
+    }
+  }
+
   Future<void> _restore() async {
-    if (_busy || _preview == null || !_preview!.canRestore) return;
+    if (!_mutation.canSubmit || _preview == null || !_preview!.canRestore) {
+      return;
+    }
     final preview = _preview!;
-    setState(() {
-      _busy = true;
-      _failure = null;
-    });
-    try {
-      await widget.source.changeRecord(
+    _notice = null;
+    final intent = WorkspaceOperationIntent(
+      kind: WorkspaceOperationKind.restoreRevision,
+      ref: widget.ref,
+      expectedVersion: preview.current.version,
+      expectedCatalogVersion: preview.catalogVersion,
+      revisionVersion: preview.archive.detail.version,
+    );
+    final result = await _mutation.submit(
+      intent,
+      (id) => widget.source.changeRecord(
         WorkspaceRecordChange(
-          operationId: _operation ??= UniqueKey().toString(),
+          operationId: id,
           ref: widget.ref,
           expectedVersion: preview.current.version,
           expectedCatalogVersion: preview.catalogVersion,
           action: WorkspaceRecordAction.restoreRevision,
           revisionVersion: preview.archive.detail.version,
         ),
-      );
-      final current = await widget.source.readDetail(widget.ref);
-      if (current.version <= preview.current.version) {
-        throw const WorkspaceFailure('unknown_outcome', '恢复结果需要重新读取核对。');
-      }
-      if (mounted) Navigator.pop(context, true);
-    } on WorkspaceFailure catch (error) {
-      if (mounted) setState(() => _failure = error);
-    } catch (_) {
-      if (mounted) {
-        setState(
-          () => _failure = const WorkspaceFailure(
-            'unknown_outcome',
-            '恢复结果暂时无法确认，请先重新读取，不要重复提交。',
-          ),
-        );
-      }
-    } finally {
-      if (mounted) setState(() => _busy = false);
-    }
+      ),
+    );
+    if (mounted && result != null) Navigator.pop(context, true);
   }
 
   Widget _comparison(WorkspaceRevisionPreview preview) {
@@ -298,7 +321,7 @@ class _HistoryDialogState extends State<_HistoryDialog> {
 
   @override
   Widget build(BuildContext context) => PopScope<bool>(
-    canPop: !_busy,
+    canPop: !_locked,
     child: DesktopDialog(
       key: ValueKey('history-mode-${_preview?.archive.detail.version}'),
       title: const Text('内容版本'),
@@ -326,7 +349,7 @@ class _HistoryDialogState extends State<_HistoryDialog> {
                       kind: DesktopButtonKind.quiet,
                       alignment: Alignment.centerLeft,
                       padding: const EdgeInsets.symmetric(vertical: 14),
-                      onPressed: () => _select(r),
+                      onPressed: _locked ? null : () => _select(r),
                       child: Text(
                         'v${r.version} · ${r.record.name}\n${r.archivedAt.toIso8601String().substring(0, 16).replaceFirst('T', ' ')}',
                       ),
@@ -335,6 +358,17 @@ class _HistoryDialogState extends State<_HistoryDialog> {
               ),
       ),
       actions: [
+        if (_notice != null)
+          SizedBox(
+            width: double.infinity,
+            child: Semantics(liveRegion: true, child: Text(_notice!)),
+          ),
+        if (_mutation.uncertain)
+          DesktopButton(
+            key: const ValueKey('library-history-reconcile'),
+            onPressed: _busy ? null : _reconcile,
+            child: const Text('核对结果'),
+          ),
         if (_failure != null)
           SizedBox(
             width: double.infinity,
@@ -349,11 +383,11 @@ class _HistoryDialogState extends State<_HistoryDialog> {
           ),
         if (_failure != null || _preview != null)
           DesktopButton(
-            onPressed: _busy ? null : _reload,
+            onPressed: _locked ? null : _reload,
             child: const Text('重新读取版本'),
           ),
         DesktopButton(
-          onPressed: _busy ? null : () => Navigator.maybePop(context),
+          onPressed: _locked ? null : () => Navigator.maybePop(context),
           child: const Text('关闭'),
         ),
         if (_preview != null)

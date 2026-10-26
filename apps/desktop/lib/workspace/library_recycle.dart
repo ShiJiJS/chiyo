@@ -7,6 +7,7 @@ import 'library_history_dialog.dart';
 import 'library_credential_lifecycle.dart';
 import 'library_widgets.dart';
 import 'workspace_source.dart';
+import 'record_mutation.dart';
 
 Future<WorkspaceRecordReceipt?> showLibraryRecycle(
   BuildContext context,
@@ -40,22 +41,40 @@ class _RecycleDialog extends StatefulWidget {
 class _RecycleDialogState extends State<_RecycleDialog> {
   WorkspaceArchive? _archive;
   WorkspaceCatalog? _catalog;
-  WorkspaceFailure? _failure;
-  bool _loading = true, _busy = false, _purge = false;
+  WorkspaceFailure? _readFailure;
+  late final RecordMutation _mutation;
+  WorkspaceFailure? get _failure => _mutation.failure ?? _readFailure;
+  bool get _busy => _mutation.busy;
+  bool get _locked => _mutation.frozen;
+  String? _notice;
+  bool _loading = true, _purge = false;
   int _generation = 0;
-  String? _operation;
+  void _mutationChanged() {
+    if (mounted) setState(() {});
+  }
+
+  @override
+  void dispose() {
+    ++_generation;
+    _mutation.dispose();
+    super.dispose();
+  }
+
   @override
   void initState() {
     super.initState();
+    _mutation = RecordMutation(widget.source)..addListener(_mutationChanged);
     _reload();
   }
 
   Future<void> _reload() async {
+    if (_locked) return;
+    _mutation.acceptCurrentVersion();
     final generation = ++_generation;
     setState(() {
       _loading = true;
-      _failure = null;
-      _operation = null;
+      _readFailure = null;
+      _notice = null;
       _purge = false;
     });
     try {
@@ -83,13 +102,15 @@ class _RecycleDialogState extends State<_RecycleDialog> {
       });
     } on WorkspaceFailure catch (error) {
       if (mounted && generation == _generation) {
-        setState(() => _failure = error);
+        setState(() => _readFailure = error);
       }
     } catch (_) {
       if (mounted && generation == _generation) {
         setState(
-          () =>
-              _failure = const WorkspaceFailure('unavailable', '暂时无法读取资料，请重试。'),
+          () => _readFailure = const WorkspaceFailure(
+            'unavailable',
+            '暂时无法读取资料，请重试。',
+          ),
         );
       }
     } finally {
@@ -99,50 +120,53 @@ class _RecycleDialogState extends State<_RecycleDialog> {
     }
   }
 
-  Future<void> _submit() async {
-    if (_busy || _archive == null || _catalog == null) return;
-    final current = _archive!.detail, entry = widget.entry;
-    setState(() {
-      _busy = true;
-      _failure = null;
-    });
-    try {
-      final result = await widget.source.changeRecord(
-        WorkspaceRecordChange(
-          operationId: _operation ??= UniqueKey().toString(),
-          ref: current.record.ref,
-          expectedVersion: entry?.version ?? current.version,
-          expectedCatalogVersion: _catalog!.version,
-          entryId: entry?.id,
-          action: entry == null
-              ? WorkspaceRecordAction.recycle
-              : _purge
-              ? WorkspaceRecordAction.purge
-              : WorkspaceRecordAction.restoreRecycled,
-        ),
-      );
-      if (mounted) Navigator.pop(context, result);
-    } on WorkspaceFailure catch (error) {
-      if (mounted) setState(() => _failure = error);
-    } catch (_) {
-      if (mounted) {
-        setState(
-          () => _failure = const WorkspaceFailure(
-            'unknown_outcome',
-            '操作结果暂时无法确认，请先重新读取，不要重复提交。',
-          ),
-        );
-      }
-    } finally {
-      if (mounted) setState(() => _busy = false);
+  Future<void> _reconcile() async {
+    final receipt = await _mutation.reconcile();
+    if (!mounted) return;
+    if (receipt != null) {
+      Navigator.pop(context, receipt);
+    } else if (!_mutation.uncertain) {
+      setState(() => _notice = '已确认尚未提交，可重新执行已核对的操作。');
     }
+  }
+
+  Future<void> _submit() async {
+    if (!_mutation.canSubmit || _archive == null || _catalog == null) return;
+    final current = _archive!.detail, entry = widget.entry;
+    _notice = null;
+    final change = WorkspaceRecordChange(
+      operationId: '',
+      ref: current.record.ref,
+      expectedVersion: entry?.version ?? current.version,
+      expectedCatalogVersion: _catalog!.version,
+      entryId: entry?.id,
+      action: entry == null
+          ? WorkspaceRecordAction.recycle
+          : _purge
+          ? WorkspaceRecordAction.purge
+          : WorkspaceRecordAction.restoreRecycled,
+    );
+    final result = await _mutation.submit(
+      WorkspaceOperationIntent.change(change),
+      (id) => widget.source.changeRecord(
+        WorkspaceRecordChange(
+          operationId: id,
+          ref: change.ref,
+          expectedVersion: change.expectedVersion,
+          expectedCatalogVersion: change.expectedCatalogVersion,
+          entryId: change.entryId,
+          action: change.action,
+        ),
+      ),
+    );
+    if (mounted && result != null) Navigator.pop(context, result);
   }
 
   @override
   Widget build(BuildContext context) {
     final deleting = widget.entry == null, c = UiPalette.of(context);
     return PopScope<WorkspaceRecordReceipt>(
-      canPop: !_busy,
+      canPop: !_locked,
       child: DesktopDialog(
         key: ValueKey('recycle-mode-$_purge'),
         title: Text(
@@ -186,6 +210,17 @@ class _RecycleDialogState extends State<_RecycleDialog> {
                 ),
         ),
         actions: [
+          if (_notice != null)
+            SizedBox(
+              width: double.infinity,
+              child: Semantics(liveRegion: true, child: Text(_notice!)),
+            ),
+          if (_mutation.uncertain)
+            DesktopButton(
+              key: const ValueKey('library-recycle-reconcile'),
+              onPressed: _busy ? null : _reconcile,
+              child: const Text('核对结果'),
+            ),
           if (_failure != null)
             SizedBox(
               width: double.infinity,
@@ -200,24 +235,25 @@ class _RecycleDialogState extends State<_RecycleDialog> {
             ),
           if (_failure != null)
             DesktopButton(
-              onPressed: _busy ? null : _reload,
+              onPressed: _locked ? null : _reload,
               child: const Text('重新读取'),
             ),
           if (!deleting && !_purge)
             DesktopButton(
               key: const ValueKey('library-recycle-purge'),
               kind: DesktopButtonKind.danger,
-              onPressed: _busy || _loading || _archive == null
+              onPressed: _locked || _loading || _archive == null
                   ? null
                   : () => setState(() {
+                      _mutation.acceptCurrentVersion();
                       _purge = true;
-                      _failure = null;
-                      _operation = null;
+                      _readFailure = null;
+                      _notice = null;
                     }),
               child: const Text('永久清理…'),
             ),
           DesktopButton(
-            onPressed: _busy
+            onPressed: _locked
                 ? null
                 : () {
                     if (_purge) {
