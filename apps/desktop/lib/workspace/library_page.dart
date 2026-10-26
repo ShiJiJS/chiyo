@@ -104,7 +104,7 @@ class _LibraryPageState extends State<LibraryPage> {
         detail: create ? null : model.detail,
       );
       if (!mounted || ref == null) return;
-      await model.openRelated(ref);
+      await model.openRelated(ref, rememberOrigin: create);
       if (mounted) DesktopFeedback.show(context, create ? '已添加资料' : '已保存资料');
     } finally {
       widget.onModalChanged?.call(false);

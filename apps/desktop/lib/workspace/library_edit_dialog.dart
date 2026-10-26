@@ -3,6 +3,7 @@ import '../desktop_controls.dart';
 import '../ui_palette.dart';
 import 'library_controller.dart';
 import 'library_widgets.dart';
+import 'library_relation_picker.dart';
 import 'workspace_source.dart';
 
 Future<WorkspaceRecordRef?> showLibraryEditor(
@@ -27,6 +28,7 @@ Future<WorkspaceRecordRef?> showLibraryEditor(
             Padding(
               padding: const EdgeInsets.only(bottom: 10),
               child: DesktopButton(
+                key: ValueKey('library-new-type-${candidate.id}'),
                 onPressed: () => Navigator.pop(context, candidate),
                 leading: RecordIcon(candidate),
                 padding: const EdgeInsets.all(14),
@@ -97,6 +99,8 @@ class _EditorState extends State<_Editor> {
   late final TextEditingController _name, _description;
   final _fields = <String, TextEditingController>{};
   final _tags = <String>{};
+  final _relations = <String, List<WorkspaceRecordRef>>{};
+  final _editedRelations = <String>{};
   String? _directory;
   bool _dirty = false, _discard = false, _saving = false;
   WorkspaceFailure? _failure;
@@ -113,6 +117,10 @@ class _EditorState extends State<_Editor> {
         detail?.record.directoryId ?? widget.controller.query.directoryId;
     if (['all', 'unfiled'].contains(_directory)) _directory = null;
     _tags.addAll(detail?.record.tags.map((t) => t.id) ?? []);
+    for (final rule in widget.definition['relations'] as List? ?? []) {
+      final key = rule['key'] as String;
+      _relations[key] = List.of(detail?.relations[key] ?? []);
+    }
     for (final field in widget.definition['fields'] as List? ?? []) {
       if (field['type'] == 'entries') continue;
       final key = field['key'] as String;
@@ -160,6 +168,7 @@ class _EditorState extends State<_Editor> {
                 directoryId: _directory,
                 tagIds: _tags,
                 values: values,
+                relations: _relations,
               ),
             )
           : await widget.controller.save(
@@ -174,6 +183,9 @@ class _EditorState extends State<_Editor> {
                   tags: catalog.tags.where((t) => _tags.contains(t.id)),
                 ),
                 values: values,
+                relations: {
+                  for (final key in _editedRelations) key: _relations[key]!,
+                },
               ),
             );
     } on WorkspaceFailure catch (error) {
@@ -293,6 +305,27 @@ class _EditorState extends State<_Editor> {
                   ),
                 ),
               ],
+            for (final rule
+                in widget.definition['relations'] as List? ?? []) ...[
+              const SizedBox(height: 24),
+              LibraryRelationPicker(
+                key: ValueKey('library-relation-picker-${rule['key']}'),
+                source: widget.controller.source,
+                typeId: widget.type.id,
+                record: widget.detail?.record.ref,
+                relationKey: rule['key'] as String,
+                label: rule['label'] as String,
+                selected: _relations[rule['key']]!,
+                enabled: !_saving,
+                errorText: _failure?.fieldErrors['relation:${rule['key']}'],
+                onChanged: (refs) => setState(() {
+                  final key = rule['key'] as String;
+                  _relations[key] = List.unmodifiable(refs);
+                  _editedRelations.add(key);
+                  _dirty = true;
+                }),
+              ),
+            ],
           ],
         ),
         actions: [

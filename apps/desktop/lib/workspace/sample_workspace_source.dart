@@ -8,6 +8,39 @@ enum SampleWorkspaceScenario { ready, empty, waiting, failure }
 /// The isolated composition root creates this provider. All values are the
 /// approved prototype's fictional data; no production adapter imports it.
 class SampleWorkspaceSource implements WorkspaceSource {
+  SampleWorkspaceSource({String fixtureJson = sampleWorkspaceJson})
+    : _fixtureJson = fixtureJson;
+  final String _fixtureJson;
+  static const _genericDefinition = <String, Object?>{
+    'name': '通用资料',
+    'fields': [
+      {'key': 'body', 'label': '内容', 'type': 'multiline'},
+    ],
+    'relations': [
+      {'key': 'related', 'label': '相关资料', 'targetTemplates': <String>[]},
+    ],
+    'sections': [
+      {'kind': 'text', 'title': '内容', 'key': 'body'},
+      {'kind': 'relations', 'title': '相关资料', 'key': 'related'},
+    ],
+  };
+
+  Map<String, Object?> _genericDefinitionFor(Map values) => {
+    ..._genericDefinition,
+    'fields': [
+      if (!values.containsKey('body') || values['body'] is String)
+        ..._genericDefinition['fields'] as List,
+      for (final key in values.keys)
+        if (key != 'body' && values[key] is String)
+          {'key': key, 'label': key, 'type': 'multiline'},
+    ],
+    'sections': [
+      {'kind': 'text', 'title': '内容', 'key': 'body'},
+      for (final key in values.keys)
+        if (key != 'body') {'kind': 'text', 'title': key, 'key': key},
+      {'kind': 'relations', 'title': '相关资料', 'key': 'related'},
+    ],
+  };
   SampleWorkspaceScenario _scenario = SampleWorkspaceScenario.ready;
   final _waiting = <Completer<void>>[];
   final _changes = StreamController<WorkspaceRecordRef?>.broadcast();
@@ -43,7 +76,7 @@ class SampleWorkspaceSource implements WorkspaceSource {
   }
 
   Future<void> _ensureData() => _loading ??= () async {
-    final data = jsonDecode(sampleWorkspaceJson) as Map<String, dynamic>;
+    final data = jsonDecode(_fixtureJson) as Map<String, dynamic>;
     final rows = (data['records'] as List).cast<Map<String, dynamic>>();
     final tagNames = <String>{
       for (final row in rows) ...List<String>.from(row['tags'] ?? []),
@@ -56,7 +89,11 @@ class SampleWorkspaceSource implements WorkspaceSource {
     WorkspaceType type(Map<String, dynamic> row) {
       final id =
           row['templateId'] as String? ??
-          (row['kind'] == 'resume' ? 'file' : row['kind'] as String);
+          (row['kind'] == 'resume'
+              ? 'file'
+              : row['kind'] == 'note'
+              ? 'generic'
+              : row['kind'] as String);
       return types.putIfAbsent(id, () {
         final definition = row['definition'] as Map<String, dynamic>?;
         const names = {
@@ -109,7 +146,12 @@ class SampleWorkspaceSource implements WorkspaceSource {
       _initial[ref] = WorkspaceDetail(
         record: record,
         version: 1,
-        definition: Map<String, Object?>.from(row['definition'] as Map? ?? {}),
+        definition: Map<String, Object?>.from(
+          row['definition'] as Map? ??
+              (record.type.id == 'generic'
+                  ? _genericDefinitionFor(row['values'] as Map? ?? {})
+                  : {}),
+        ),
         // A credential's actual content is deliberately not a generic detail.
         values: ref.kind == WorkspaceRecordKind.credential
             ? {}
@@ -118,7 +160,11 @@ class SampleWorkspaceSource implements WorkspaceSource {
           for (final entry in relations.entries)
             entry.key: [
               for (final id in entry.value as List)
-                if (refs[id] != null) refs[id]!,
+                refs[id] ??
+                    WorkspaceRecordRef(
+                      WorkspaceRecordKind.information,
+                      id as String,
+                    ),
             ],
         },
       );
@@ -330,6 +376,7 @@ class SampleWorkspaceSource implements WorkspaceSource {
   @override
   Future<Map<String, Object?>> loadTemplate(String typeId) async {
     await _readable();
+    if (typeId == 'generic') return _genericDefinition;
     final template = _initial.values
         .where((d) => d.record.type.id == typeId)
         .firstOrNull;
@@ -349,21 +396,14 @@ class SampleWorkspaceSource implements WorkspaceSource {
     if (query.offset < 0 || query.limit < 1 || query.limit > 500) {
       throw const WorkspaceFailure('invalid_query', '无效的分页范围。');
     }
-    final terms = query.keyword
-        .toLowerCase()
-        .split(RegExp(r'\s+'))
-        .where((s) => s.isNotEmpty);
     final items = _scenario == SampleWorkspaceScenario.empty
         ? <WorkspaceRecordSummary>[]
         : _records.values.map((d) => d.record).where((r) {
-            final metadata =
-                '${r.name} ${r.description} ${r.type.name} ${r.tags.map((t) => t.name).join(' ')}'
-                    .toLowerCase();
             return _inDirectory(r.directoryId, query.directoryId) &&
                 (query.typeId == null || r.type.id == query.typeId) &&
                 (query.tagId == null ||
                     r.tags.any((t) => t.id == query.tagId)) &&
-                terms.every(metadata.contains);
+                _matchesKeyword(r, query.keyword);
           }).toList();
     String group(WorkspaceRecordSummary record) => switch (query.grouping) {
       WorkspaceGrouping.none => '',
@@ -395,6 +435,107 @@ class SampleWorkspaceSource implements WorkspaceSource {
           : items.indexWhere((r) => r.ref == selection),
       groupCounts: counts,
     );
+  }
+
+  bool _matchesKeyword(WorkspaceRecordSummary record, String keyword) {
+    final metadata =
+        '${record.name} ${record.description} ${record.type.name} ${record.tags.map((t) => t.name).join(' ')}'
+            .toLowerCase();
+    return keyword
+        .toLowerCase()
+        .split(RegExp(r'\s+'))
+        .where((s) => s.isNotEmpty)
+        .every(metadata.contains);
+  }
+
+  Map<String, Object?>? _relationRule(
+    Map<String, Object?> definition,
+    String key,
+  ) {
+    for (final rule in definition['relations'] as List? ?? []) {
+      if (rule['key'] == key) return Map<String, Object?>.from(rule as Map);
+    }
+    return null;
+  }
+
+  bool _acceptsRelation(
+    Map<String, Object?> rule,
+    WorkspaceRecordSummary target,
+  ) {
+    final types = rule['targetTemplates'] as List? ?? [];
+    return types.isEmpty || types.contains(target.type.id);
+  }
+
+  @override
+  Future<WorkspaceResults> queryRelationCandidates(
+    WorkspaceRelationQuery query,
+  ) async {
+    await _readable();
+    if (query.offset < 0 || query.limit < 1 || query.limit > 500) {
+      throw const WorkspaceFailure('invalid_query', '无效的关联分页范围。');
+    }
+    final source = query.source == null
+        ? _initial.values
+              .where((d) => d.record.type.id == query.typeId)
+              .firstOrNull
+        : _scenario == SampleWorkspaceScenario.empty
+        ? null
+        : _records[query.source];
+    if (source == null ||
+        source.record.type.id != query.typeId ||
+        source.record.ref.kind == WorkspaceRecordKind.credential) {
+      throw const WorkspaceFailure('not_found', '来源资料或模板已不可用。');
+    }
+    final rule = _relationRule(source.definition, query.key);
+    if (rule == null) {
+      throw const WorkspaceFailure('unsupported', '此资料没有该关联类型。');
+    }
+    final candidates = _scenario == SampleWorkspaceScenario.empty
+        ? <WorkspaceRecordSummary>[]
+        : [
+            for (final detail in _records.values)
+              if (detail.record.ref != query.source &&
+                  _acceptsRelation(rule, detail.record) &&
+                  _matchesKeyword(detail.record, query.keyword))
+                detail.record,
+          ];
+    candidates.sort((a, b) {
+      final named = a.name.compareTo(b.name);
+      return named != 0 ? named : a.ref.key.compareTo(b.ref.key);
+    });
+    return WorkspaceResults(
+      items: candidates.skip(query.offset).take(query.limit),
+      total: candidates.length,
+      offset: query.offset,
+    );
+  }
+
+  Map<String, String> _relationErrors(
+    WorkspaceRecordRef? source,
+    Map<String, Object?> definition,
+    Map<String, List<WorkspaceRecordRef>> changes,
+  ) {
+    final errors = <String, String>{};
+    for (final entry in changes.entries) {
+      final rule = _relationRule(definition, entry.key);
+      if (rule == null) {
+        errors['relation:${entry.key}'] = '关联类型已不可用。';
+      } else if (entry.value.toSet().length != entry.value.length) {
+        errors['relation:${entry.key}'] = '同一种关联不能重复选择同一份资料。';
+      } else if (entry.value.any((ref) => ref == source)) {
+        errors['relation:${entry.key}'] = '不能将资料关联到自身。';
+      } else if (entry.value.any(
+        (ref) =>
+            _records[ref] == null || _scenario == SampleWorkspaceScenario.empty,
+      )) {
+        errors['relation:${entry.key}'] = '关联目标已不可用，请移除后重新选择。';
+      } else if (entry.value.any(
+        (ref) => !_acceptsRelation(rule, _records[ref]!.record),
+      )) {
+        errors['relation:${entry.key}'] = '所选资料类型不符合此关联要求。';
+      }
+    }
+    return errors;
   }
 
   @override
@@ -433,6 +574,12 @@ class SampleWorkspaceSource implements WorkspaceSource {
     }
     if (description.length > 2000) fields['description'] = '说明不能超过2000字。';
     for (final field in definition['fields'] as List? ?? []) {
+      if (field['type'] != 'entries' &&
+          values[field['key']] != null &&
+          values[field['key']] is! String) {
+        fields[field['key'] as String] = '此字段需要文本值，请勿用复合内容覆盖。';
+        continue;
+      }
       final text = values[field['key']]?.toString().trim() ?? '';
       if (field['required'] == true && text.isEmpty) {
         fields[field['key'] as String] = '请填写${field['label']}。';
@@ -468,6 +615,10 @@ class SampleWorkspaceSource implements WorkspaceSource {
       'directory': draft.directoryId,
       'tags': draft.tagIds,
       'values': draft.values,
+      'relations': {
+        for (final entry in draft.relations.entries)
+          entry.key: entry.value.map((r) => r.key).toList(),
+      },
     });
     final previous = _operations[draft.operationId];
     if (previous != null) {
@@ -480,13 +631,17 @@ class SampleWorkspaceSource implements WorkspaceSource {
     final prototype = _initial.values
         .where((d) => d.record.type.id == draft.typeId)
         .firstOrNull;
+    final definition = draft.typeId == 'generic'
+        ? _genericDefinition
+        : prototype?.definition ?? <String, Object?>{};
     WorkspaceSaveResult result;
     final errors = _fieldErrors(
       draft.name,
       draft.description,
-      prototype?.definition ?? {},
+      definition,
       draft.values,
     );
+    errors.addAll(_relationErrors(null, definition, draft.relations));
     if (draft.operationId.isEmpty ||
         prototype == null ||
         prototype.record.ref.kind == WorkspaceRecordKind.credential) {
@@ -530,8 +685,9 @@ class SampleWorkspaceSource implements WorkspaceSource {
       final detail = WorkspaceDetail(
         record: record,
         version: 1,
-        definition: prototype.definition,
+        definition: definition,
         values: draft.values,
+        relations: draft.relations,
       );
       if (_scenario == SampleWorkspaceScenario.empty) {
         _records.clear();
@@ -561,6 +717,10 @@ class SampleWorkspaceSource implements WorkspaceSource {
       'directory': edit.record.directoryId,
       'tags': edit.record.tags.map((t) => t.id).toList(),
       'values': edit.values,
+      'relations': {
+        for (final entry in edit.relations.entries)
+          entry.key: entry.value.map((r) => r.key).toList(),
+      },
     });
     final previous = _operations[edit.operationId];
     if (previous != null) {
@@ -581,6 +741,13 @@ class SampleWorkspaceSource implements WorkspaceSource {
       current?.definition ?? {},
       values,
     );
+    fields.addAll(
+      _relationErrors(
+        edit.record.ref,
+        current?.definition ?? {},
+        edit.relations,
+      ),
+    );
     if (edit.operationId.trim().isEmpty || current == null) {
       result = const WorkspaceRejected(
         WorkspaceFailure('not_found', '保存目标或操作身份无效。'),
@@ -592,6 +759,11 @@ class SampleWorkspaceSource implements WorkspaceSource {
       result = const WorkspaceRejected(
         WorkspaceFailure('conflict', '资料已更新，请重新读取并核对修改。'),
       );
+    } else if (edit.record.ref.kind == WorkspaceRecordKind.credential &&
+        (edit.values.isNotEmpty || edit.relations.isNotEmpty)) {
+      result = const WorkspaceRejected(
+        WorkspaceFailure('unsupported', '凭据正文和关联不通过普通资料接口读写。'),
+      );
     } else if (fields.isNotEmpty) {
       result = WorkspaceRejected(
         WorkspaceFailure('validation', '请检查标记的字段。', fieldErrors: fields),
@@ -599,18 +771,15 @@ class SampleWorkspaceSource implements WorkspaceSource {
     } else if (edit.record.type.id != current.record.type.id ||
         (edit.record.directoryId != null &&
             !_catalog.directories.any(
-              (d) => d.id == edit.record.directoryId && d.id != 'all',
+              (d) =>
+                  d.id == edit.record.directoryId &&
+                  !['all', 'unfiled'].contains(d.id),
             )) ||
         edit.record.tags.any(
           (t) => !_catalog.tags.any((known) => known.id == t.id),
         )) {
       result = const WorkspaceRejected(
         WorkspaceFailure('validation', '类型、目录或标签引用已失效。'),
-      );
-    } else if (edit.record.ref.kind == WorkspaceRecordKind.credential &&
-        edit.values.isNotEmpty) {
-      result = const WorkspaceRejected(
-        WorkspaceFailure('unsupported', '凭据正文不通过普通资料接口读写。'),
       );
     } else {
       final detail = WorkspaceDetail(
@@ -625,7 +794,7 @@ class SampleWorkspaceSource implements WorkspaceSource {
         version: current.version + 1,
         definition: current.definition,
         values: values,
-        relations: current.relations,
+        relations: {...current.relations, ...edit.relations},
       );
       _records[edit.record.ref] = detail;
       _changes.add(edit.record.ref);

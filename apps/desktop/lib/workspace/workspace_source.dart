@@ -29,6 +29,9 @@ abstract interface class WorkspaceSource {
     WorkspaceRecordRef? keepSelection,
   });
   Future<WorkspaceDetail> readDetail(WorkspaceRecordRef ref);
+  Future<WorkspaceResults> queryRelationCandidates(
+    WorkspaceRelationQuery query,
+  );
 
   /// Resolves identities for relation links without loading their field values.
   Future<List<WorkspaceRecordSummary>> readSummaries(
