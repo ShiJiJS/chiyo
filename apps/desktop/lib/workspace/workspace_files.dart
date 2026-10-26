@@ -79,13 +79,23 @@ class WorkspaceFilePreview {
     this.page = 0,
     this.pageCount = 1,
     this.text = '',
+    this.pixelWidth,
+    this.pixelHeight,
     Uint8List? image,
   }) : image = image == null
            ? null
-           : Uint8List.fromList(image).asUnmodifiableView();
+           : Uint8List.fromList(image).asUnmodifiableView() {
+    if (kind == WorkspaceFilePreviewKind.image &&
+        (image == null || (pixelWidth ?? 0) < 1 || (pixelHeight ?? 0) < 1)) {
+      throw ArgumentError(
+        'Image previews require pixels and positive dimensions.',
+      );
+    }
+  }
   final WorkspaceFileVersion file;
   final WorkspaceFilePreviewKind kind;
   final int page, pageCount;
+  final int? pixelWidth, pixelHeight;
   final String text;
   final Uint8List? image;
 }

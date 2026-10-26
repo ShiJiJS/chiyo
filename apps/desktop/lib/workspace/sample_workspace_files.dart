@@ -265,11 +265,7 @@ class SampleWorkspaceFiles {
     }
     if (file.mediaType == 'image/png') {
       if (page != 0) throw const WorkspaceFailure('invalid_request', '页码无效。');
-      return WorkspaceFilePreview(
-        file: file,
-        kind: WorkspaceFilePreviewKind.image,
-        image: bytes,
-      );
+      return _imagePreview(file, bytes);
     }
     final pages = row['pages'] as List;
     if (page >= pages.length) {
@@ -279,13 +275,41 @@ class SampleWorkspaceFiles {
       pages[page]['asset'] as String,
       expectedHash: pages[page]['sha256'] as String,
     );
+    return _imagePreview(
+      file,
+      pixels,
+      page: page,
+      pageCount: pages.length,
+      text: pages[page]['text'] as String? ?? '',
+    );
+  }
+
+  WorkspaceFilePreview _imagePreview(
+    WorkspaceFileVersion file,
+    Uint8List pixels, {
+    int page = 0,
+    int pageCount = 1,
+    String text = '',
+  }) {
+    if (pixels.length < 24 ||
+        base64.encode(pixels.sublist(0, 8)) != 'iVBORw0KGgo=' ||
+        ascii.decode(pixels.sublist(12, 16), allowInvalid: true) != 'IHDR') {
+      throw const WorkspaceFailure('preview_unavailable', '预览图像格式无效。');
+    }
+    final header = ByteData.sublistView(pixels);
+    final width = header.getUint32(16), height = header.getUint32(20);
+    if (width < 1 || height < 1 || width > 16384 || height > 16384) {
+      throw const WorkspaceFailure('preview_unavailable', '预览图像尺寸无效。');
+    }
     return WorkspaceFilePreview(
       file: file,
       kind: WorkspaceFilePreviewKind.image,
       page: page,
-      pageCount: pages.length,
+      pageCount: pageCount,
       image: pixels,
-      text: pages[page]['text'] as String? ?? '',
+      text: text,
+      pixelWidth: width,
+      pixelHeight: height,
     );
   }
 

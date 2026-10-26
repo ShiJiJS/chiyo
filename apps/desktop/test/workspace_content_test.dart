@@ -121,6 +121,9 @@ void main() {
       expect(current.pageCount, 2);
       expect(current.text, contains('LIN YUAN'));
       expect(current.image!.take(4), [137, 80, 78, 71]);
+      final header = ByteData.sublistView(current.image!);
+      expect(current.pixelWidth, header.getUint32(16));
+      expect(current.pixelHeight, header.getUint32(20));
       expect(() => current.image![0] = 0, throwsUnsupportedError);
       final second = await source.readFilePreview(resume, 'file', page: 1);
       expect(second.text, contains('PROJECT NOTES'));
