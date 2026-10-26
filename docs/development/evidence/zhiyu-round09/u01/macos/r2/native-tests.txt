@@ -1,5 +1,5 @@
 00:00 +0: loading /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/integration_test/zhiyu_foundation_native_test.dart
-Building macOS application...                                   
+Building macOS application...
 error: the following command failed with exit code 0 but produced no further output
 SwiftCompile normal arm64 /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/macos/Runner/MainFlutterWindow.swift (in target 'Runner' from project 'Runner')
 /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/macos/Runner/MainFlutterWindow.swift:164:86: warning: 'allowedFileTypes' was deprecated in macOS 12.0: Use -allowedContentTypes instead [#DeprecatedDeclaration]
@@ -24,7 +24,7 @@ SwiftCompile normal arm64 /Users/jiangxinyi/Documents/Project/agent-info/apps/de
 563 |     completionHandler([.alert])
     |                         `- warning: 'alert' was deprecated in macOS 11.0 [#DeprecatedDeclaration]
 564 |   }
-565 | 
+565 |
 
 [#DeprecatedDeclaration]: <https://docs.swift.org/compiler/documentation/diagnostics/deprecated-declaration>
 ✓ Built build/macos/Build/Products/Debug/info_desktop.app
