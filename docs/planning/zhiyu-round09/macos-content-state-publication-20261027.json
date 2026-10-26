@@ -1,0 +1,84 @@
+{
+  "checkedAt": "2026-10-26T21:28:51.204911+00:00",
+  "goalStatus": "active",
+  "sourceCommit": "7120455fa33afd055c4b9d8be8be62e590a01336",
+  "evidenceCommit": "694c79720fc6fba5829d1586e5aa4ac97e98afc6",
+  "branch": "codex/zhiyu-macos",
+  "exactBodyReadback": true,
+  "newIssuesCreated": 0,
+  "dependencyMutations": 0,
+  "criteriaChange": "Only U03 criterion6 (preview isolation/reset/swap seam) newly checked: OPEN4/7. Generic receipt-query UI gap, whole-state/contracts and full S5 remain open. F01 OPEN0/6.",
+  "issues": [
+    {
+      "number": 64,
+      "title": "知予前端 U03：个人档案、文档、文件与凭据界面",
+      "state": "OPEN",
+      "labels": [
+        "enhancement",
+        "ready-for-agent"
+      ],
+      "commentsPreserved": 0,
+      "beforeBodySha256": "dc00ba3998012ab283efdbc9880be9149b71032147965afa532ecd9b9d665c8c",
+      "bodySha256": "9ff8bcd2b253cc10b55c2e116bcc99b1b7986a350eca9460646fc9a169700a19",
+      "criteriaCompleted": 4,
+      "criteriaTotal": 7
+    },
+    {
+      "number": 69,
+      "title": "知予后续规划 F01：界面完成后拆分真实功能、测试与 Mac 交付",
+      "state": "OPEN",
+      "labels": [
+        "documentation"
+      ],
+      "commentsPreserved": 0,
+      "beforeBodySha256": "6516ceade52d15eed9e1d6cd45319898b05f3714b5edbadce29b3821443e9c6c",
+      "bodySha256": "5f37f7fe5f5c1d9e8c617243383dd13f1bc41bc1a786c6bed7580d073bb66747",
+      "criteriaCompleted": 0,
+      "criteriaTotal": 6
+    }
+  ],
+  "nativeDependencies": {
+    "issue64BlockedBy": [
+      63
+    ],
+    "issue69BlockedBy": [
+      {
+        "url": "https://github.com/ShiJiJS/agent-info-manage/issues/68",
+        "title": "知予前端 U07：全局设置界面"
+      },
+      {
+        "url": "https://github.com/ShiJiJS/agent-info-manage/issues/67",
+        "title": "知予前端 U06：录入提案与授权历史界面"
+      },
+      {
+        "url": "https://github.com/ShiJiJS/agent-info-manage/issues/66",
+        "title": "知予前端 U05：普通信息与凭据使用的访问审批界面"
+      },
+      {
+        "url": "https://github.com/ShiJiJS/agent-info-manage/issues/65",
+        "title": "知予前端 U04：插件管理、专属设置与旧资料采用模板界面"
+      },
+      {
+        "url": "https://github.com/ShiJiJS/agent-info-manage/issues/64",
+        "title": "知予前端 U03：个人档案、文档、文件与凭据界面"
+      }
+    ]
+  },
+  "browser": {
+    "spaceId": 168,
+    "finished": true
+  },
+  "archive": {
+    "path": "docs/development/evidence/zhiyu-round09/u03/macos/r5",
+    "files": 18,
+    "bytes": 1004617,
+    "verifiedAgainstGit": "694c79720fc6fba5829d1586e5aa4ac97e98afc6"
+  },
+  "cleanup": {
+    "path": "build/zhiyu-ui/u03/macos/states-r5",
+    "filesRemoved": 44,
+    "bytesRemoved": 2285783,
+    "scope": "Only own r5 scratch after committed archive verification; unknown .local untouched; no App/dSYM copies."
+  },
+  "next": "Generic ordinary create/edit/revision/recycle content-free receipt query, frozen intent and random operation identity; keep UI gaps in U03."
+}
