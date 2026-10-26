@@ -177,6 +177,16 @@ void main() {
       final nameBounds = t.getRect(dialogName),
           dialogBounds = t.getRect(find.byType(DesktopDialog));
       expect(dialogBounds.contains(nameBounds.center), isTrue);
+      expect(
+        nameBounds.top,
+        greaterThan(t.getRect(find.text('永久清理资料')).bottom),
+      );
+      expect(
+        nameBounds.bottom,
+        lessThan(
+          t.getRect(find.byKey(const ValueKey('library-recycle-submit'))).top,
+        ),
+      );
       expect((await model.source.queryRecycled()).total, 1);
       await capture(t, 'purge-confirm-1280-dark-200');
       (model.source as SampleWorkspaceSource).nextSaveFailure =
