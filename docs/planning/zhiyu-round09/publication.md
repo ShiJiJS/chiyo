@@ -1,6 +1,6 @@
 # Round09 GitHub发布清单
 
-2026-10-26已将原8张票调整为Mac优先、Windows适配后置，并完成GitHub回读核验。本轮文档在`codex/zhiyu-mac-plan`；产品开发仍暂停。当前阶段安排见[Mac接手计划](macos-continuation.md)，同步结果见下方记录。
+2026-10-26已将原8张票调整为Mac优先、Windows适配后置，并完成GitHub回读核验。最初文档在`codex/zhiyu-mac-plan`；随后已整合到独立`codex/zhiyu-macos`并保存首轮Mac准备。最新指令仅调整tickets和文档，暂不继续开发。当前阶段安排见[Mac接手计划](macos-continuation.md)，同步结果见下方记录。
 
 2026-10-25已完成发布和回读核验：**7张前端任务 + 1张后续规划票，共8张**。旧T01–T20不发布；最小前端准备并入U01，其余由F01在界面完成后重新拆分。
 
