@@ -1,0 +1,6 @@
+00:00 +0: loading /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_preview_isolation_test.dart
+00:00 +0: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_preview_isolation_test.dart: Mac preview composition and U03 UI avoid production channels, network and personal paths
+00:09 +1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_preview_isolation_test.dart: Mac preview composition and U03 UI avoid production channels, network and personal paths
+00:13 +2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_states_test.dart: history paging keeps zoom/text through waiting/error/retry and resets only at version change dark=true
+00:14 +3: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_states_test.dart: (tearDownAll)
+00:14 +3: All tests passed!
