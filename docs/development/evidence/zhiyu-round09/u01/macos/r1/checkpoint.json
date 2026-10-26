@@ -63,6 +63,7 @@
     }
   },
   "remaining": [
+    "Extend minimum query/selection/detail/return and mutation-result contract: current source only supplies shell summary and navigation, not the full T01 preparation.",
     "Complete S5 state/motion review with measured 120/150/180 ms transitions, displacements and interruption evidence",
     "Mac editor/menu/window actual input and normal close/quit scope; synthetic/native rendering is not full OS input proof",
     "Close #62 only after its acceptance contract; #63 not started"
