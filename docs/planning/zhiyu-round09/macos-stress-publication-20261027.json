@@ -1,0 +1,38 @@
+{
+  "checkedAt": "2026-10-26T16:03:20.121Z",
+  "goalStatus": "active",
+  "sourceCommit": "454cd550147c9e1b3d53cee13e8722d3702abcdb",
+  "evidenceCommit": "2daff8dcde0e766a8cb884aac1fb2170198f3026",
+  "branch": "codex/zhiyu-macos",
+  "exactBodyReadback": true,
+  "newIssuesCreated": 0,
+  "dependencyMutations": 0,
+  "criteriaChange": "Only U02 summary/query contract and navigation/stress criterion newly checked; U02 5/7 OPEN, F01 checks unchanged.",
+  "issues": [
+    {
+      "number": 63,
+      "title": "知予前端 U02：三栏信息库与服务器、应用资料界面",
+      "state": "OPEN",
+      "labels": [
+        "enhancement",
+        "ready-for-agent"
+      ],
+      "commentsPreserved": 0,
+      "bodySha256": "c40773114f328bbff270318c5b4b4cdbb2e0139672bb22c963debe84cbeb57a6",
+      "criteriaCompleted": 5,
+      "criteriaTotal": 7
+    },
+    {
+      "number": 69,
+      "title": "知予后续规划 F01：界面完成后拆分真实功能、测试与 Mac 交付",
+      "state": "OPEN",
+      "labels": [
+        "documentation"
+      ],
+      "commentsPreserved": 0,
+      "bodySha256": "3916854f1a136893a4d7565eb605c3bcb1bf2236badf14e3db86244c9986fb4b",
+      "criteriaCompleted": 0,
+      "criteriaTotal": 6
+    }
+  ]
+}
