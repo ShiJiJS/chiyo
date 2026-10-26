@@ -40,7 +40,10 @@ class LibraryController extends WorkspaceRecordsController {
     ),
   );
 
-  Future<void> openRelated(WorkspaceRecordRef ref) async {
+  Future<void> openRelated(
+    WorkspaceRecordRef ref, {
+    bool rememberOrigin = true,
+  }) async {
     final generation = ++_navigation;
     final origin = (query: query, selected: selection, scroll: scrollOffset);
     try {
@@ -93,9 +96,13 @@ class LibraryController extends WorkspaceRecordsController {
         return;
       }
       next = next.copyWith(offset: index ~/ next.limit * next.limit);
-      _back.add(origin);
+      if (rememberOrigin) _back.add(origin);
       scrollOffset = 0;
-      navigationNotice = blocked.isEmpty ? null : '已调整范围以显示关联资料；可返回原查询。';
+      navigationNotice = blocked.isEmpty
+          ? null
+          : rememberOrigin
+          ? '已调整范围以显示关联资料；可返回原查询。'
+          : '已调整范围以显示保存后的资料。';
       await load(next, keepSelection: ref);
     } on WorkspaceFailure catch (error) {
       if (_closed || generation != _navigation) return;

@@ -167,6 +167,30 @@ class WorkspaceResults {
   final Map<String, int> groupCounts;
 }
 
+/// Candidate lookup reads metadata only, using the source record's snapshot
+/// (or the selected type for a new record) to constrain eligible targets.
+class WorkspaceRelationQuery {
+  const WorkspaceRelationQuery({
+    required this.typeId,
+    required this.key,
+    this.source,
+    this.keyword = '',
+    this.offset = 0,
+    this.limit = 30,
+  });
+  final String typeId, key, keyword;
+  final WorkspaceRecordRef? source;
+  final int offset, limit;
+}
+
+Map<String, List<WorkspaceRecordRef>> _freezeRelations(
+  Map<String, List<WorkspaceRecordRef>> relations,
+) => Map.unmodifiable(
+  relations.map(
+    (key, refs) => MapEntry(key, List<WorkspaceRecordRef>.unmodifiable(refs)),
+  ),
+);
+
 Object? _freeze(Object? value) {
   if (value is Map) {
     return Map<String, Object?>.unmodifiable(
@@ -189,12 +213,7 @@ class WorkspaceDetail {
     Map<String, List<WorkspaceRecordRef>> relations = const {},
   }) : definition = _freeze(definition) as Map<String, Object?>,
        values = _freeze(values) as Map<String, Object?>,
-       relations = Map.unmodifiable(
-         relations.map(
-           (key, value) =>
-               MapEntry(key, List<WorkspaceRecordRef>.unmodifiable(value)),
-         ),
-       );
+       relations = _freezeRelations(relations);
   final WorkspaceRecordSummary record;
   final int version;
   final Map<String, Object?> definition, values;
@@ -207,11 +226,16 @@ class WorkspaceEdit {
     required this.expectedVersion,
     required this.record,
     required Map<String, Object?> values,
-  }) : values = _freeze(values) as Map<String, Object?>;
+    Map<String, List<WorkspaceRecordRef>> relations = const {},
+  }) : values = _freeze(values) as Map<String, Object?>,
+       relations = _freezeRelations(relations);
   final String operationId;
   final int expectedVersion;
   final WorkspaceRecordSummary record;
   final Map<String, Object?> values;
+
+  /// Only changed keys are replaced; untouched legacy relations survive.
+  final Map<String, List<WorkspaceRecordRef>> relations;
 }
 
 class WorkspaceCreate {
@@ -223,12 +247,15 @@ class WorkspaceCreate {
     this.directoryId,
     Iterable<String> tagIds = const [],
     Map<String, Object?> values = const {},
+    Map<String, List<WorkspaceRecordRef>> relations = const {},
   }) : tagIds = List.unmodifiable(tagIds),
-       values = _freeze(values) as Map<String, Object?>;
+       values = _freeze(values) as Map<String, Object?>,
+       relations = _freezeRelations(relations);
   final String operationId, typeId, name, description;
   final String? directoryId;
   final List<String> tagIds;
   final Map<String, Object?> values;
+  final Map<String, List<WorkspaceRecordRef>> relations;
 }
 
 class WorkspaceFailure implements Exception {
