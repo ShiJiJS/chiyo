@@ -9,12 +9,14 @@ import 'sample_workspace_source.dart';
 import 'workspace_controller.dart';
 import 'workspace_source.dart';
 import 'zhiyu_app.dart';
+import 'mac_preview_desktop.dart';
 
 /// Only the isolated composition root knows which provider is a sample.
 /// U02–U07 register their production widgets through pageBuilder.
 class PreviewWorkspace extends StatefulWidget {
-  const PreviewWorkspace({super.key, this.pageBuilder});
+  const PreviewWorkspace({super.key, this.pageBuilder, this.desktop});
   final WorkspacePageBuilder? pageBuilder;
+  final MacPreviewDesktop? desktop;
   @override
   State<PreviewWorkspace> createState() => _PreviewWorkspaceState();
 }
@@ -28,6 +30,7 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
     super.initState();
     _source = SampleWorkspaceSource();
     _controller = WorkspaceController(_source);
+    widget.desktop?.onNavigate = (page) => _controller.navigate(page);
     unawaited(_controller.refresh());
   }
 
@@ -36,6 +39,7 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
     _guideFocus.dispose();
     _controller.dispose();
     _source.dispose();
+    widget.desktop?.dispose();
     super.dispose();
   }
 
@@ -44,86 +48,96 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
     unawaited(_controller.refresh());
   }
 
-  void _guide(BuildContext context) => showDesktopDialog<void>(
-    context,
-    returnFocus: _guideFocus,
-    builder: (dialogContext) => DesktopDialog(
-      title: const Text('设计说明与界面检查'),
-      content: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Text('按已确认的知予工作台布局制作。当前窗口使用独立示例数据，重启或重置后恢复初始内容。'),
-          const SizedBox(height: 22),
-          const Text('阅读外观', style: TextStyle(fontWeight: FontWeight.w600)),
-          const SizedBox(height: 10),
-          Wrap(
-            spacing: 10,
-            runSpacing: 10,
+  void _guide(BuildContext context) {
+    unawaited(widget.desktop?.setNavigationEnabled(false));
+    unawaited(
+      showDesktopDialog<void>(
+        context,
+        returnFocus: _guideFocus,
+        builder: (dialogContext) => DesktopDialog(
+          title: const Text('设计说明与界面检查'),
+          content: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisSize: MainAxisSize.min,
             children: [
-              for (final value in Brightness.values)
-                DesktopButton(
-                  key: ValueKey('preview-theme-${value.name}'),
-                  onPressed: () {
-                    _controller.setBrightness(value);
-                    Navigator.pop(dialogContext);
-                  },
-                  child: Text(value == Brightness.light ? '明亮' : '黑暗'),
-                ),
+              const Text('按已确认的知予工作台布局制作。当前窗口使用独立示例数据，重启或重置后恢复初始内容。'),
+              const SizedBox(height: 22),
+              const Text('阅读外观', style: TextStyle(fontWeight: FontWeight.w600)),
+              const SizedBox(height: 10),
+              Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: [
+                  for (final value in Brightness.values)
+                    DesktopButton(
+                      key: ValueKey('preview-theme-${value.name}'),
+                      onPressed: () {
+                        _controller.setBrightness(value);
+                        Navigator.pop(dialogContext);
+                      },
+                      child: Text(value == Brightness.light ? '明亮' : '黑暗'),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 22),
+              const Text('读取状态', style: TextStyle(fontWeight: FontWeight.w600)),
+              const SizedBox(height: 10),
+              Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: [
+                  for (final value in SampleWorkspaceScenario.values)
+                    DesktopButton(
+                      key: ValueKey('preview-scenario-${value.name}'),
+                      onPressed: () {
+                        _scenario(value);
+                        Navigator.pop(dialogContext);
+                      },
+                      child: Text(switch (value) {
+                        SampleWorkspaceScenario.ready => '正常资料',
+                        SampleWorkspaceScenario.empty => '空资料',
+                        SampleWorkspaceScenario.waiting => '持续等待',
+                        SampleWorkspaceScenario.failure => '读取失败',
+                      }),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 22),
+              const Text(
+                '按钮和表单',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 10),
+              const _ControlSample(),
             ],
           ),
-          const SizedBox(height: 22),
-          const Text('读取状态', style: TextStyle(fontWeight: FontWeight.w600)),
-          const SizedBox(height: 10),
-          Wrap(
-            spacing: 10,
-            runSpacing: 10,
-            children: [
-              for (final value in SampleWorkspaceScenario.values)
-                DesktopButton(
-                  key: ValueKey('preview-scenario-${value.name}'),
-                  onPressed: () {
-                    _scenario(value);
-                    Navigator.pop(dialogContext);
-                  },
-                  child: Text(switch (value) {
-                    SampleWorkspaceScenario.ready => '正常资料',
-                    SampleWorkspaceScenario.empty => '空资料',
-                    SampleWorkspaceScenario.waiting => '持续等待',
-                    SampleWorkspaceScenario.failure => '读取失败',
-                  }),
-                ),
-            ],
-          ),
-          const SizedBox(height: 22),
-          const Text('按钮和表单', style: TextStyle(fontWeight: FontWeight.w600)),
-          const SizedBox(height: 10),
-          const _ControlSample(),
-        ],
-      ),
-      actions: [
-        DesktopButton(
-          onPressed: () {
-            _source.reset();
-            unawaited(_controller.refresh());
-            Navigator.pop(dialogContext);
-            DesktopFeedback.show(context, '已重置预览资料');
-          },
-          child: const Text('重置预览资料'),
+          actions: [
+            DesktopButton(
+              onPressed: () {
+                _source.reset();
+                unawaited(_controller.refresh());
+                Navigator.pop(dialogContext);
+                DesktopFeedback.show(context, '已重置预览资料');
+              },
+              child: const Text('重置预览资料'),
+            ),
+            DesktopButton(
+              kind: DesktopButtonKind.primary,
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('完成'),
+            ),
+          ],
         ),
-        DesktopButton(
-          kind: DesktopButtonKind.primary,
-          onPressed: () => Navigator.pop(dialogContext),
-          child: const Text('完成'),
-        ),
-      ],
-    ),
-  );
+      ).whenComplete(() async {
+        if (mounted) await widget.desktop?.setNavigationEnabled(true);
+      }),
+    );
+  }
 
   @override
   Widget build(BuildContext context) => ZhiyuApp(
     controller: _controller,
-    windowTitle: '知予 · 界面预览·示例数据',
+    windowTitle: MacPreviewDesktop.windowTitle,
     trailingBuilder: (context) => DesktopButton(
       key: const ValueKey('preview-guide'),
       focusNode: _guideFocus,
@@ -197,6 +211,11 @@ class _ControlSampleState extends State<_ControlSample> {
             ),
           ),
         ],
+      ),
+      const SizedBox(height: 12),
+      const TextField(
+        key: ValueKey('preview-text-input'),
+        decoration: InputDecoration(labelText: '示例输入'),
       ),
       const SizedBox(height: 12),
       DesktopSelect<String>(

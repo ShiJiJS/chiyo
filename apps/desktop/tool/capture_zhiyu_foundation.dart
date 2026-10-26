@@ -8,16 +8,20 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:info_desktop/workspace/preview_workspace.dart';
 import 'package:info_desktop/desktop_fonts.dart';
 
-/// Real shared widgets rendered offscreen with Windows system fonts. This
+/// Real shared widgets rendered offscreen with installed platform fonts. This
 /// evidence is explicitly not a native desktop / OS input verification.
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   setUpAll(() async {
-    expect(
-      await loadWindowsDesktopFonts(),
-      isTrue,
-      reason: 'Windows reference fonts must be available',
+    final fonts = await loadDesktopFonts();
+    const configured = String.fromEnvironment('UI_EVIDENCE_DIR');
+    final output = Directory(
+      configured.isEmpty
+          ? '../../build/zhiyu-ui/u01/${Platform.operatingSystem}/offscreen'
+          : configured,
     );
+    await output.create(recursive: true);
+    await File('${output.path}/fonts.json').writeAsString(jsonEncode(fonts));
     await (FontLoader(
       'MaterialIcons',
     )..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'))).load();
@@ -42,8 +46,12 @@ void main() {
           await tester.tap(find.byKey(const ValueKey('preview-theme-dark')));
           await tester.pumpAndSettle();
         }
+        const configured = String.fromEnvironment('UI_EVIDENCE_DIR');
+        final directory = configured.isEmpty
+            ? '../../build/zhiyu-ui/u01/${Platform.operatingSystem}/offscreen'
+            : configured;
         final prefix =
-            '../../build/zhiyu-ui/u01/flutter/${dark ? 'dark' : 'light'}-${size.width.toInt()}';
+            '$directory/${dark ? 'dark' : 'light'}-${size.width.toInt()}';
         final geometry = <String, Object>{};
         for (final (name, key) in [
           ('appbar', 'zhiyu-appbar'),

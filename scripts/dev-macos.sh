@@ -23,6 +23,8 @@ Usage: ./scripts/dev-macos.sh <command> [arguments]
   build         Compile release with fixed GH/AWS tools (requires full Xcode)
                 Optional --with-focused-fill-candidate embeds a disabled XPC candidate
   run           Open the macOS app in debug mode (requires full Xcode)
+  preview       Run the isolated Zhiyu UI with its own application identity
+  preview-check Run the sandboxed native Zhiyu UI integration check
   bundle <dir>  Compile CLI/hook installation materials into a NEW directory
   flutter ...   Run the project Flutter SDK in your current working directory
   dart ...      Run the bundled Dart SDK in your current working directory
@@ -123,6 +125,20 @@ case "$command_name" in
       echo 'Desktop checks failed.' >&2
     fi
     exit "$checks_failed"
+    ;;
+  preview|preview-check)
+    require_sdk
+    require_xcode
+    export FLUTTER_MACOS_ARM64_ONLY=true
+    # Xcode's scoped override also applies when Flutter tests build a generated
+    # listener.dart entry point. Never edit the shared generated xcconfig.
+    export XCODE_XCCONFIG_FILE="$project_root/apps/desktop/macos/Runner/Configs/Preview.xcconfig"
+    cd "$project_root/apps/desktop"
+    if [[ "$command_name" == preview ]]; then
+      flutter run -d macos --no-pub --target lib/preview_main.dart "$@"
+    else
+      flutter test --no-pub -d macos integration_test/zhiyu_foundation_native_test.dart "$@"
+    fi
     ;;
   build|run)
     require_sdk
