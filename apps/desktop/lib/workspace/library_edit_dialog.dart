@@ -73,8 +73,9 @@ Future<WorkspaceRecordRef?> showLibraryEditor(
   }
   Map<String, Object?> definition;
   try {
-    definition =
-        detail?.definition ?? await controller.source.loadTemplate(type.id);
+    definition = detail == null
+        ? await controller.source.loadTemplate(type.id)
+        : workspaceEditingDefinition(detail);
   } on WorkspaceFailure catch (failure) {
     if (!context.mounted) return null;
     await showDesktopDialog<void>(
@@ -163,7 +164,7 @@ class _EditorState extends State<_Editor> {
     }
     for (final field in widget.definition['fields'] as List? ?? []) {
       final key = field['key'] as String;
-      if (field['type'] == 'file') continue;
+      if (['file', 'unknown'].contains(field['type'])) continue;
       if (field['type'] == 'entries') {
         try {
           final entries = WorkspaceRepeatedEntry.read(detail?.values[key]);

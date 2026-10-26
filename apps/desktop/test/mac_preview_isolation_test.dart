@@ -194,6 +194,33 @@ void main() {
       await t.pumpAndSettle();
       expect(controller.detail!.record.type.id, 'local.domain/domain');
       expect(controller.detail!.values['domain'], 'isolation.example');
+      final domainIdentity = controller.detail!.fieldIds['domain'];
+      await t.tap(find.byKey(const ValueKey('library-record-actions')));
+      await t.pumpAndSettle();
+      await t.tap(find.text('采用资料模板'));
+      await t.pumpAndSettle();
+      await t.ensureVisible(
+        find.byKey(const ValueKey('adoption-target-local.domain/domain')),
+      );
+      await t.tap(
+        find.byKey(const ValueKey('adoption-target-local.domain/domain')),
+      );
+      await t.pumpAndSettle();
+      await t.tap(find.byKey(const ValueKey('adoption-source-domain')));
+      await t.pumpAndSettle();
+      await t.tap(find.text('域名 · text').last);
+      await t.pumpAndSettle();
+      await t.ensureVisible(
+        find.byKey(const ValueKey('adoption-meaning-domain')),
+      );
+      await t.tap(find.byKey(const ValueKey('adoption-meaning-domain')));
+      await t.pumpAndSettle();
+      await t.tap(find.byKey(const ValueKey('adoption-preview')));
+      await t.pumpAndSettle();
+      await t.tap(find.byKey(const ValueKey('adoption-apply')));
+      await t.pumpAndSettle();
+      expect(controller.detail!.fieldIds['domain'], domainIdentity);
+      expect(controller.detail!.values['domain'], 'isolation.example');
       expect((await source.loadSummary()).records, 32);
       await t.tap(find.byKey(const ValueKey('preview-guide')));
       await t.pumpAndSettle();

@@ -24,7 +24,7 @@ Map<String, String> librarySnapshot(WorkspaceArchive archive) {
       ? v
       : const JsonEncoder.withIndent('  ').convert(v);
   final labels = <String, String>{
-    for (final f in detail.definition['fields'] as List? ?? [])
+    for (final f in workspaceFields(detail))
       f['key'] as String: f['label'] as String? ?? f['key'] as String,
   };
   return {
@@ -37,8 +37,13 @@ Map<String, String> librarySnapshot(WorkspaceArchive archive) {
         ? '无标签'
         : record.tags.map((t) => t.name).join('、'),
     for (final e in detail.values.entries)
-      '字段：${labels[e.key] ?? e.key}${labels[e.key] != null && labels[e.key] != e.key ? '（${e.key}）' : ''}':
-          value(e.value),
+      '字段：${labels[e.key] ?? e.key}${e.key.startsWith('retained:')
+          ? '（保留${detail.retainedFields.indexWhere((f) => f['key'] == e.key) + 1}）'
+          : labels[e.key] != null && labels[e.key] != e.key
+          ? '（${e.key}）'
+          : ''}': value(
+        e.value,
+      ),
     for (final e in detail.relations.entries)
       '关联：${e.key}': e.value.isEmpty
           ? '无关联'

@@ -4,6 +4,7 @@ import 'workspace_files.dart';
 import 'workspace_credentials.dart';
 import 'workspace_plugins.dart';
 import 'workspace_hosts.dart';
+import 'workspace_adoption.dart';
 export 'workspace_history.dart';
 export 'workspace_records.dart';
 export 'workspace_files.dart';
@@ -11,6 +12,7 @@ export 'workspace_credentials.dart';
 export 'workspace_operation.dart';
 export 'workspace_plugins.dart';
 export 'workspace_hosts.dart';
+export 'workspace_adoption.dart';
 
 /// Frontend-only summaries and failures. No database, authorization proof,
 /// secret material or operating-system handle crosses this boundary.
@@ -39,6 +41,14 @@ abstract interface class WorkspaceSource {
   /// Rejections throw WorkspaceFailure and leave classification unchanged.
   Future<WorkspaceDirectory?> changeDirectory(WorkspaceDirectoryChange change);
   Future<Map<String, Object?>> loadTemplate(String typeId);
+  Future<WorkspaceAdoptionPreview> previewAdoption(
+    WorkspaceAdoptionDraft draft,
+  );
+  Future<void> releaseAdoption(String planId);
+  Future<WorkspaceRecordReceipt> applyAdoption(
+    String operationId,
+    String planId,
+  );
   Future<WorkspaceResults> queryRecords(
     WorkspaceQuery query, {
     WorkspaceRecordRef? keepSelection,

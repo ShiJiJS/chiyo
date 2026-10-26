@@ -45,8 +45,13 @@ class SampleWorkspaceFiles {
   final _initialOwners = <String, WorkspaceRecordRef>{};
   Future<Map<String, dynamic>>? _catalog;
   static const _prefix = 'assets/zhiyu_files/';
+  final _aliases = <String, String>{};
+  void aliasField(WorkspaceRecordRef ref, String key, String original) {
+    _aliases['${ref.key}/$key'] = _aliases['${ref.key}/$original'] ?? original;
+  }
+
   String _id(WorkspaceRecordRef ref, String key) =>
-      'sample-attachment:${base64Url.encode(utf8.encode(jsonEncode([ref.kind.name, ref.id, key]))).replaceAll('=', '')}';
+      'sample-attachment:${base64Url.encode(utf8.encode(jsonEncode([ref.kind.name, ref.id, _aliases['${ref.key}/$key'] ?? key]))).replaceAll('=', '')}';
 
   WorkspaceFileRef seed(
     WorkspaceRecordRef owner,
@@ -91,6 +96,7 @@ class SampleWorkspaceFiles {
   }
 
   void reset() {
+    _aliases.clear();
     _files
       ..clear()
       ..addAll({for (final e in _initial.entries) e.key: List.of(e.value)});
@@ -100,6 +106,7 @@ class SampleWorkspaceFiles {
   }
 
   void clear() {
+    _aliases.clear();
     _files.clear();
     _initial.clear();
     _owners.clear();
@@ -380,7 +387,7 @@ class SampleWorkspaceFiles {
   }) => {
     ...?values,
     if (values == null) ...old.values,
-    for (final field in old.definition['fields'] as List? ?? [])
+    for (final field in workspaceFields(old))
       if (field['type'] == 'file')
         field['key'] as String: _restoredRef(
           old,
@@ -396,7 +403,12 @@ class SampleWorkspaceFiles {
     final oldRef = WorkspaceFileRef.fromJson(old.values[key]);
     _entry(old.record.ref, key, oldRef);
     if (current != null &&
-        WorkspaceFileRef.fromJson(current.values[key]) == oldRef) {
+        workspaceFields(current).any(
+          (f) =>
+              f['type'] == 'file' &&
+              current.values[f['key']] is Map &&
+              WorkspaceFileRef.fromJson(current.values[f['key']]) == oldRef,
+        )) {
       return oldRef;
     }
     return WorkspaceFileRef(oldRef.id, _files[oldRef.id]!.last.ref.version + 1);
@@ -408,7 +420,7 @@ class SampleWorkspaceFiles {
     DateTime now,
   ) {
     final planned = <_FileEntry>[];
-    for (final field in old.definition['fields'] as List? ?? []) {
+    for (final field in workspaceFields(old)) {
       if (field['type'] != 'file') continue;
       final key = field['key'] as String,
           target = WorkspaceFileRef.fromJson(restored.values[field['key']]);

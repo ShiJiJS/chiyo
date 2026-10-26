@@ -25,6 +25,7 @@ class LibraryDetail extends StatefulWidget {
     required this.onEdit,
     this.onHistory,
     this.onRecycle,
+    this.onAdopt,
     this.filePicker,
     this.credentialPicker,
     this.onModalChanged,
@@ -38,6 +39,7 @@ class LibraryDetail extends StatefulWidget {
   final int revision;
   final ValueChanged<WorkspaceRecordRef> onOpen;
   final VoidCallback? onEdit, onHistory, onRecycle;
+  final VoidCallback? onAdopt;
   final VoidCallback onSettings, onExpand;
   final ValueChanged<String> onTag;
   final WorkspaceFilePicker? filePicker;
@@ -112,7 +114,7 @@ class _LibraryDetailState extends State<LibraryDetail> {
   );
 
   Widget _fields(BuildContext context, List<dynamic> keys) {
-    final definition = widget.detail.definition['fields'] as List? ?? [];
+    final definition = workspaceFields(widget.detail);
     final fields = [
       for (final key in keys) ...definition.where((f) => f['key'] == key),
     ];
@@ -167,7 +169,11 @@ class _LibraryDetailState extends State<LibraryDetail> {
                         ),
                         const SizedBox(height: 4),
                         SelectableText(
-                          _value(widget.detail.values[field['key']]),
+                          field['type'] == 'unknown'
+                              ? const JsonEncoder.withIndent(
+                                  '  ',
+                                ).convert(widget.detail.values[field['key']])
+                              : _value(widget.detail.values[field['key']]),
                           style:
                               [
                                     'number',
@@ -406,6 +412,11 @@ class _LibraryDetailState extends State<LibraryDetail> {
                   key: const ValueKey('library-record-actions'),
                   items: [
                     const DropdownMenuItem(value: 'edit', child: Text('编辑信息')),
+                    if (widget.onAdopt != null)
+                      const DropdownMenuItem(
+                        value: 'adopt',
+                        child: Text('采用资料模板'),
+                      ),
                     if (widget.onHistory != null)
                       DropdownMenuItem(
                         value: 'history',
@@ -425,6 +436,8 @@ class _LibraryDetailState extends State<LibraryDetail> {
                       ? null
                       : (action) {
                           switch (action) {
+                            case 'adopt':
+                              widget.onAdopt?.call();
                             case 'history':
                               widget.onHistory?.call();
                             case 'recycle':
@@ -537,6 +550,9 @@ class _LibraryDetailState extends State<LibraryDetail> {
                         if (!(detail.definition['fields'] as List? ?? []).any(
                               (f) => f['key'] == entry.key,
                             ) &&
+                            !detail.retainedFields.any(
+                              (f) => f['key'] == entry.key,
+                            ) &&
                             !((detail.definition['fields'] as List? ?? [])
                                     .isEmpty &&
                                 entry.key == 'body'))
@@ -647,6 +663,24 @@ class _LibraryDetailState extends State<LibraryDetail> {
               );
             },
           ),
+          if (!_relations && detail.retainedFields.isNotEmpty)
+            _section(
+              context,
+              '保留的原字段',
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    '这些内容没有被目标模板覆盖。',
+                    style: libraryText(context, 13, color: c.muted),
+                  ),
+                  _fields(
+                    context,
+                    detail.retainedFields.map((f) => f['key']).toList(),
+                  ),
+                ],
+              ),
+            ),
         ],
       ),
     );
@@ -654,7 +688,8 @@ class _LibraryDetailState extends State<LibraryDetail> {
 
   String _relationName(String key) {
     for (final relation
-        in widget.detail.definition['relations'] as List? ?? []) {
+        in workspaceEditingDefinition(widget.detail)['relations'] as List? ??
+            []) {
       if (relation['key'] == key) return relation['label'] as String;
     }
     return key == 'credentials' ? '关联凭据' : '关联资料';

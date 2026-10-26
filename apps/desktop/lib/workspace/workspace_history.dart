@@ -70,6 +70,7 @@ enum WorkspaceRecordAction { recycle, restoreRevision, restoreRecycled, purge }
 enum WorkspaceOperationKind {
   create,
   edit,
+  adoptTemplate,
   recycle,
   restoreRevision,
   restoreRecycled,
@@ -89,6 +90,7 @@ class WorkspaceOperationIntent {
     this.revisionVersion,
     this.entryId,
     this.expectedCatalogVersion,
+    this.planId,
   });
   factory WorkspaceOperationIntent.change(WorkspaceRecordChange change) =>
       WorkspaceOperationIntent(
@@ -101,13 +103,14 @@ class WorkspaceOperationIntent {
       );
   final WorkspaceOperationKind kind;
   final WorkspaceRecordRef? ref;
-  final String? typeId, entryId;
+  final String? typeId, entryId, planId;
   final int? expectedVersion, revisionVersion, expectedCatalogVersion;
 
   bool matches(WorkspaceOperationIntent other) =>
       kind == other.kind &&
       ref == other.ref &&
       typeId == other.typeId &&
+      planId == other.planId &&
       entryId == other.entryId &&
       expectedVersion == other.expectedVersion &&
       revisionVersion == other.revisionVersion &&
