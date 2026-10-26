@@ -1,0 +1,23 @@
+{
+  "sourceReference": "../../r1/reference-geometry.json",
+  "maxDeltaToReference": 1.0078125,
+  "scope": "32 topbar comparisons only; current four geometry files unchanged from r1 actual",
+  "rows": [
+    {
+      "file": "light-1280-geometry.json",
+      "maxChangeFromR1": 0.0
+    },
+    {
+      "file": "light-1440-geometry.json",
+      "maxChangeFromR1": 0.0
+    },
+    {
+      "file": "dark-1280-geometry.json",
+      "maxChangeFromR1": 0.0
+    },
+    {
+      "file": "dark-1440-geometry.json",
+      "maxChangeFromR1": 0.0
+    }
+  ]
+}
