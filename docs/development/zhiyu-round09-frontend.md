@@ -2,21 +2,21 @@
 
 本轮按[已发布计划](../planning/zhiyu-round09/README.md)先完成7项正式Flutter界面。使用独立示例数据，后续真实功能由[#69](https://github.com/ShiJiJS/agent-info-manage/issues/69)重新拆分。2026-10-26起改为Mac优先、Windows适配后置；无子Agent、无服务器同步。
 
-**2026-10-26最新目标：恢复持续Mac开发，按票序完成可做的改造。** 此前Mac首轮准备已保存；保留的实现继续审阅、调试并取得证据后提交。 当前分支codex/zhiyu-macos，#62准备与证据见[Mac外壳实施记录](zhiyu-macos-foundation.md)。下文Windows检查点保留历史范围。 [Mac接手计划](../planning/zhiyu-round09/macos-continuation.md)规定后续基线与顺序。 [交接说明](handoffs/zhiyu-frontend-20261026.md)列出当前源码、证据、限制和接手顺序。
+**2026-10-26当前范围：只整理GitHub tickets和相关文档，暂不开发。** 后续以Mac为主、Windows适配后置。`codex/zhiyu-macos`已整合两侧基线，#62保持10/12，见[Mac外壳实施记录](zhiyu-macos-foundation.md)。本机另有尚未推送的#63实现`058b5b41`及未提交说明；恢复时先审阅源码与证据，不把它们直接记成GitHub通过项。下文Windows检查点仅保留历史范围；最新顺序见[Mac接手计划](../planning/zhiyu-round09/macos-continuation.md)。
 
 ## 当前任务
 
 | 任务 | 进度 |
 | --- | --- |
-| [#62 外壳和通用控件](https://github.com/ShiJiJS/agent-info-manage/issues/62) | 2026-10-26暂停：基础实现、顶栏几何及原生集成检查已推进；最终视觉/动画验收未完成；Mac原生隔离、字体/菜单/检查工具及Mac验收待实施 |
-| [#63 三栏信息库](https://github.com/ShiJiJS/agent-info-manage/issues/63) | 等待#62 |
+| [#62 外壳和通用控件](https://github.com/ShiJiJS/agent-info-manage/issues/62) | Mac 10/12；原生隔离、字体/菜单与检查工具已有证据；实际系统输入及完整S5仍待收口 |
+| [#63 三栏信息库](https://github.com/ShiJiJS/agent-info-manage/issues/63) | GitHub 0/7；已有本机未发布代码，恢复时先审阅归档 |
 | [#64 档案、文档、文件、凭据](https://github.com/ShiJiJS/agent-info-manage/issues/64) | 等待#63 |
-| [#65 插件与旧资料套模板](https://github.com/ShiJiJS/agent-info-manage/issues/65) | 等待#62 |
-| [#66 访问审批](https://github.com/ShiJiJS/agent-info-manage/issues/66) | 等待#62 |
-| [#67 提案与历史](https://github.com/ShiJiJS/agent-info-manage/issues/67) | 等待#62 |
-| [#68 全局设置](https://github.com/ShiJiJS/agent-info-manage/issues/68) | 等待#62 |
+| [#65 插件与旧资料套模板](https://github.com/ShiJiJS/agent-info-manage/issues/65) | 等待#62；当前暂不开发 |
+| [#66 访问审批](https://github.com/ShiJiJS/agent-info-manage/issues/66) | 等待#62；当前暂不开发 |
+| [#67 提案与历史](https://github.com/ShiJiJS/agent-info-manage/issues/67) | 等待#62；当前暂不开发 |
+| [#68 全局设置](https://github.com/ShiJiJS/agent-info-manage/issues/68) | 等待#62；当前暂不开发 |
 
-## #62已经实现什么（Windows检查点）
+## #62已经实现什么（Windows历史检查点）
 
 - 独立入口为`apps/desktop/lib/preview_main.dart`。它只创建示例数据来源和新界面，不进入正式启动器、数据库、本机服务、hooks、通知或凭据执行。当前库和安装目录均未替换。这描述Dart入口及当时Windows范围；Mac原生MainFlutterWindow仍有目录授权存储初始化，须在#62补齐隔离后才能作同样保证。
 - `workspace`模块中的App/Shell通过调用者提供的页面和数据来源组装；它们不引用示例实现。集中示例来源仅在预览组装入口创建，支持正常、空资料、持续等待、读取失败和重置。
@@ -26,7 +26,7 @@
 - 修复新增动效过程中发现的旧触发器失效访问和关闭后焦点恢复问题。旧入口未切到新页面，相关既有公共控件测试继续通过。
 - Windows字体从本机已安装文件注册，不随软件分发字体。原生启动和离屏截图使用同一字体加载方法；实际字体/几何仍需最终对照，不能凭已加载字体推定一致。
 
-## Windows历史重现方法（Mac命令由#62补齐）
+## Windows历史重现方法（Mac命令见外壳实施记录）
 
 在桌面包目录执行`flutter run -d windows --no-pub --target lib/preview_main.dart`。窗口标题明确标记“知予 · 界面预览·示例数据”。点击右上设计说明可以切明暗、改变读取状态和重置数据；这个面板也用于基础控件检查。
 
