@@ -5,7 +5,7 @@ import 'package:info_desktop/workspace/workspace_controller.dart';
 import 'package:info_desktop/workspace/workspace_source.dart';
 import 'package:info_desktop/workspace/sample_workspace_source.dart';
 
-class _DeferredSource implements WorkspaceSource {
+class _DeferredSource extends Fake implements WorkspaceSource {
   final requests = <Completer<WorkspaceSummary>>[];
   @override
   Future<WorkspaceSummary> loadSummary() {
@@ -16,6 +16,7 @@ class _DeferredSource implements WorkspaceSource {
 }
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
   test('a late response cannot overwrite the latest refresh', () async {
     final source = _DeferredSource();
     final controller = WorkspaceController(source);

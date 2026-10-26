@@ -25,6 +25,7 @@ Usage: ./scripts/dev-macos.sh <command> [arguments]
   run           Open the macOS app in debug mode (requires full Xcode)
   preview       Run the isolated Zhiyu UI with its own application identity
   preview-check Run the sandboxed native Zhiyu UI integration check
+  preview-lifecycle <new-dir> Check native close/quit and restore the UI preview
   bundle <dir>  Compile CLI/hook installation materials into a NEW directory
   flutter ...   Run the project Flutter SDK in your current working directory
   dart ...      Run the bundled Dart SDK in your current working directory
@@ -126,18 +127,31 @@ case "$command_name" in
     fi
     exit "$checks_failed"
     ;;
-  preview|preview-check)
+  preview|preview-check|preview-lifecycle)
     require_sdk
     require_xcode
     export FLUTTER_MACOS_ARM64_ONLY=true
     # Xcode's scoped override also applies when Flutter tests build a generated
     # listener.dart entry point. Never edit the shared generated xcconfig.
     export XCODE_XCCONFIG_FILE="$project_root/apps/desktop/macos/Runner/Configs/Preview.xcconfig"
+    if [[ "$command_name" == preview-lifecycle ]]; then
+      if [[ $# -ne 1 ]]; then usage >&2; exit 64; fi
+      case "$1" in
+        /*) lifecycle_output="$1" ;;
+        *) lifecycle_output="$PWD/$1" ;;
+      esac
+    fi
     cd "$project_root/apps/desktop"
     if [[ "$command_name" == preview ]]; then
       flutter run -d macos --no-pub --target lib/preview_main.dart "$@"
-    else
+    elif [[ "$command_name" == preview-check ]]; then
       flutter test --no-pub -d macos integration_test/zhiyu_foundation_native_test.dart "$@"
+    else
+      flutter build macos --debug --no-pub --target tool/zhiyu_preview_lifecycle.dart
+      python3 "$project_root/scripts/qa/zhiyu-preview-lifecycle.py" \
+        --app "$project_root/apps/desktop/build/macos/Build/Products/Debug/info_desktop.app" \
+        --output "$lifecycle_output"
+      flutter build macos --debug --no-pub --target lib/preview_main.dart
     fi
     ;;
   build|run)

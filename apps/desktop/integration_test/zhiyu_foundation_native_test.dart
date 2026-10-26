@@ -8,9 +8,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:info_desktop/desktop_controls.dart';
 import 'package:info_desktop/desktop_fonts.dart';
+import 'package:info_desktop/desktop_motion.dart';
 import 'package:info_desktop/workspace/preview_workspace.dart';
 import 'package:info_desktop/workspace/mac_preview_desktop.dart';
 import 'support/native_frame_recording.dart';
+import 'support/native_motion_probe.dart';
 
 void main() {
   final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -50,6 +52,8 @@ void main() {
       }
       final root = Directory(directory);
       await root.create(recursive: true);
+      // ignore: avoid_print
+      print('ZHIYU_NATIVE_EVIDENCE=$directory');
       final boundary = GlobalKey();
       final checks = <String>[];
       await tester.pumpWidget(
@@ -91,6 +95,238 @@ void main() {
           '$directory/$name.png',
         ).writeAsBytes(bytes!.buffer.asUint8List());
         image.dispose();
+      }
+
+      final nativeMotion = <String, Object>{};
+      double opacity(Finder target) {
+        var value = 1.0;
+        target.evaluate().single.visitAncestorElements((element) {
+          if (element.widget case Opacity(:final opacity)) value *= opacity;
+          if (element.widget case FadeTransition(:final opacity)) {
+            value *= opacity.value;
+          }
+          return true;
+        });
+        return value;
+      }
+
+      Future<void> checkTrace(
+        String name,
+        List<Map<String, Object>> samples,
+        int duration, {
+        double? displacement,
+      }) async {
+        nativeMotion[name] = {'targetMs': duration, 'samples': samples};
+        await File('$directory/native-motion.json').writeAsString(
+          const JsonEncoder.withIndent('  ').convert(nativeMotion),
+        );
+        expect(
+          (samples.last['frameMs']! as num) - duration,
+          closeTo(0, 20),
+          reason: '$name native frame clock',
+        );
+        expect(
+          (samples.last['wallMs']! as num) - duration,
+          closeTo(0, 20),
+          reason: '$name native wall clock',
+        );
+        if (displacement != null) {
+          expect(
+            (samples.first['y']! as double) - (samples.last['y']! as double),
+            closeTo(displacement, .2),
+            reason: '$name actual translation',
+          );
+        }
+      }
+
+      Future<void> traceOpacity(
+        String name,
+        Finder target,
+        Future<void> Function() trigger,
+        int duration,
+        double displacement,
+      ) async {
+        final pending = traceNativeMotion(
+          read: () => target.evaluate().isEmpty
+              ? null
+              : {
+                  'opacity': opacity(target),
+                  'y':
+                      (target.evaluate().single.findRenderObject()!
+                              as RenderBox)
+                          .localToGlobal(Offset.zero)
+                          .dy,
+                },
+          complete: (sample) => (sample['opacity']! as double) >= 1 - .000001,
+        );
+        await trigger();
+        await tester.pumpAndSettle();
+        await checkTrace(
+          name,
+          await pending,
+          duration,
+          displacement: displacement,
+        );
+      }
+
+      if (desktop != null) {
+        await const MethodChannel(
+          'agent_info_manage/secret_editor',
+        ).invokeMethod<void>('cancel', {
+          'requestId': 'synthetic-preview-no-draft',
+        });
+        expect(
+          await MacPreviewDesktop.channel.invokeMethod<bool>(
+            'activateMenu',
+            'settings',
+          ),
+          isTrue,
+        );
+        await tester.pumpAndSettle();
+        expect(
+          tester
+              .widget<DesktopButton>(
+                find.byKey(const ValueKey('workspace-nav-settings')),
+              )
+              .selected,
+          isTrue,
+        );
+        expect(
+          await MacPreviewDesktop.channel.invokeMethod<bool>(
+            'activateMenu',
+            'search',
+          ),
+          isTrue,
+        );
+        await tester.pumpAndSettle();
+        expect(
+          tester
+              .widget<DesktopButton>(
+                find.byKey(const ValueKey('workspace-nav-library')),
+              )
+              .selected,
+          isTrue,
+        );
+        await guide();
+        expect(
+          await MacPreviewDesktop.channel.invokeMethod<bool>(
+            'activateMenu',
+            'settings',
+          ),
+          isFalse,
+        );
+        await key(LogicalKeyboardKey.escape);
+        checks.add('native-AppKit-menu-dispatch-and-modal-gating');
+        checks.add('secure-editor-local-UI-channel-preserved');
+        await traceOpacity(
+          'detail',
+          find.descendant(
+            of: find.byType(DesktopEntrance),
+            matching: find.text('访问审批'),
+          ),
+          () async {
+            await tester.tap(
+              find.byKey(const ValueKey('workspace-nav-approvals')),
+            );
+            await tester.pump();
+          },
+          180,
+          3,
+        );
+        await traceOpacity(
+          'dialog',
+          find.text('设计说明与界面检查'),
+          () async {
+            await tester.tap(find.byKey(const ValueKey('preview-guide')));
+            await tester.pump();
+          },
+          180,
+          7,
+        );
+        await tester.ensureVisible(find.text('文本'));
+        await tester.pumpAndSettle();
+        await traceOpacity(
+          'menu',
+          find.text('文件'),
+          () async {
+            await tester.tap(find.text('文本'));
+            await tester.pump();
+          },
+          120,
+          -3,
+        );
+        await key(LogicalKeyboardKey.escape);
+        final save = find.byKey(const ValueKey('preview-action'));
+        await tester.ensureVisible(save);
+        await tester.pumpAndSettle();
+        Color background() =>
+            ((find
+                                .descendant(
+                                  of: save,
+                                  matching: find.byType(DecoratedBox),
+                                )
+                                .first
+                                .evaluate()
+                                .single
+                                .findRenderObject()!
+                            as RenderDecoratedBox)
+                        .decoration
+                    as BoxDecoration)
+                .color!;
+        final hover = await tester.createGesture(
+          kind: ui.PointerDeviceKind.mouse,
+        );
+        await hover.addPointer(location: Offset.zero);
+        await tester.pumpAndSettle();
+        final hovering = traceNativeMotion(
+          read: () => {'argb': background().toARGB32(), 'red': background().r},
+          complete: (sample) =>
+              ((sample['red']! as double) - const Color(0xffe9ecf1).r).abs() <
+              .000000001,
+        );
+        await hover.moveTo(tester.getCenter(save));
+        await tester.pumpAndSettle();
+        await checkTrace('hover', await hovering, 150);
+        final label = find.text('保存');
+        final y = (label.evaluate().single.findRenderObject()! as RenderBox)
+            .localToGlobal(Offset.zero)
+            .dy;
+        final pressing = traceNativeMotion(
+          read: () => {
+            'y': (label.evaluate().single.findRenderObject()! as RenderBox)
+                .localToGlobal(Offset.zero)
+                .dy,
+          },
+          complete: (sample) => (sample['y']! as double) - y >= 1 - .000001,
+        );
+        final press = await tester.startGesture(
+          tester.getCenter(save),
+          kind: ui.PointerDeviceKind.mouse,
+        );
+        await tester.pumpAndSettle();
+        final pressed = await pressing;
+        await checkTrace('pressed', pressed, 150, displacement: -1);
+        await traceOpacity(
+          'feedback',
+          find.text('已保存到预览资料'),
+          () async {
+            await press.up();
+            await tester.pump();
+          },
+          180,
+          6,
+        );
+        await hover.removePointer();
+        await key(LogicalKeyboardKey.escape);
+        for (
+          var frame = 0;
+          frame < 40 && find.text('已保存到预览资料').evaluate().isNotEmpty;
+          frame++
+        ) {
+          await tester.pump(const Duration(milliseconds: 100));
+        }
+        expect(find.text('已保存到预览资料'), findsNothing);
+        checks.add('native-frame-and-wall-clock-motion-contract');
       }
 
       final recording = NativeFrameRecording(
@@ -188,6 +424,49 @@ void main() {
       expect(find.byType(DesktopDialog), findsNothing);
       checks.add('reduced-motion-still-operable');
 
+      final contentViewports = <Map<String, Object>>[];
+      if (desktop != null) {
+        tester.platformDispatcher.clearTextScaleFactorTestValue();
+        tester.platformDispatcher.clearAccessibilityFeaturesTestValue();
+        for (final size in [const Size(1440, 900), const Size(1280, 800)]) {
+          await MacPreviewDesktop.channel.invokeMethod<void>('setContentSize', {
+            'width': size.width,
+            'height': size.height,
+          });
+          for (var frame = 0; frame < 60; frame++) {
+            await tester.pump(const Duration(milliseconds: 16));
+            if (tester.view.physicalSize / tester.view.devicePixelRatio ==
+                size) {
+              break;
+            }
+          }
+          expect(tester.view.physicalSize / tester.view.devicePixelRatio, size);
+          await tester.pumpAndSettle();
+          for (final dark in [false, true]) {
+            await guide();
+            await tap(
+              find.byKey(ValueKey('preview-theme-${dark ? 'dark' : 'light'}')),
+            );
+            final prefix = '${dark ? 'dark' : 'light'}-${size.width.toInt()}';
+            await screenshot('$prefix-shell');
+            await guide();
+            await screenshot('$prefix-dialog');
+            await tap(find.text('文本'));
+            await screenshot('$prefix-menu');
+            await key(LogicalKeyboardKey.escape);
+            await key(LogicalKeyboardKey.escape);
+            contentViewports.add({
+              'width': size.width,
+              'height': size.height,
+              'theme': dark ? 'dark' : 'light',
+              'devicePixelRatio': tester.view.devicePixelRatio,
+              'nativeWindowResized': true,
+            });
+          }
+        }
+        checks.add('native-NSWindow-resized-two-viewports-and-two-themes');
+      }
+
       await File('$directory/native-checks.json').writeAsString(
         const JsonEncoder.withIndent('  ').convert({
           'platform': Platform.operatingSystem,
@@ -200,6 +479,7 @@ void main() {
           },
           'actualSystemDpr': nativeDpr,
           'initialTextScale': initialScale,
+          'contentViewports': contentViewports,
           'largeTextMethod':
               'test platform text scaler; not a system DPI change',
           'checks': checks,
@@ -211,8 +491,6 @@ void main() {
       );
       // The host collects precisely this self-created directory after the app
       // exits, encodes the recording, and removes the temporary source.
-      // ignore: avoid_print
-      print('ZHIYU_NATIVE_EVIDENCE=$directory');
       await tester.pumpWidget(const SizedBox());
     },
     timeout: const Timeout(Duration(minutes: 2)),
