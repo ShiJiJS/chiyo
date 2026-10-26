@@ -1,5 +1,7 @@
 # 知予前端交接：2026-10-26用户要求暂停
 
+> 后续决定：用户已确认以Mac为主，当前仅调整规划。继续开发时以[Mac接手计划](../../planning/zhiyu-round09/macos-continuation.md)及更新后的#62–#69为准。以下Windows进度、命令和限制保留为交接时的历史记录；其中“Mac专项不做”已被新排期取代，未完成的Windows专用验收后置。
+
 用户要求“先把手中的工作收尾然后暂停”，后续可能移交另一个Agent。当前已保存检查点并停止推进；本文件供之后明确接手时使用，不代表现在继续执行的授权。
 
 ## 从哪里继续
@@ -30,7 +32,7 @@
 - [交互记录GIF](../evidence/zhiyu-round09/u01/r2/native/native-controls.gif)、[采样时间/动作](../evidence/zhiyu-round09/u01/r2/native/native-controls.json)、[编码时长与原帧摘要](../evidence/zhiyu-round09/u01/r2/native/native-controls-encoding.json)
 - 原始PNG帧仍在本机build/zhiyu-ui/u01/native-r2/native-controls-frames；只按manifest的frames列表读取，勿用目录glob混入重跑遗留帧。提交中保留GIF、关键PNG和记录；异机可按下面命令重现。
 
-## #62接下来必须完成
+## 暂停时的Windows剩余项（Mac接手顺序见上方计划）
 
 1. 以本次源码为基准复核GIF原始时间轴和画面，检查hover、按下、详情、弹窗、菜单与反馈是否都符合S5；补齐可观察的时长/位移及中断行为证据。录制成功不等于动画验收通过。本次暂停前未完成最终动态视觉审阅。
 2. 审阅其余控件状态、提示与键盘焦点、长内容/空数据/失败、两个尺寸及两主题的剩余对照。已做的20组顶栏几何不能扩大为全部页面都达到≤2像素。
