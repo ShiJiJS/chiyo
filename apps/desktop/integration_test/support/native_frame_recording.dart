@@ -89,13 +89,17 @@ class NativeFrameRecording {
         'systemDpiChanged': false,
       }),
     );
-    final encoder = await Process.run(python, [
-      encoderScript,
-      '--manifest',
-      '${output.path}/$name.json',
-    ]);
-    if (encoder.exitCode != 0) {
-      throw StateError('Recording encoding failed: ${encoder.stderr}');
+    // On macOS the sandboxed preview writes its own temporary evidence only.
+    // Encoding runs later in the host QA command, not as a sandbox escape.
+    if (python.isNotEmpty && encoderScript.isNotEmpty) {
+      final encoder = await Process.run(python, [
+        encoderScript,
+        '--manifest',
+        '${output.path}/$name.json',
+      ]);
+      if (encoder.exitCode != 0) {
+        throw StateError('Recording encoding failed: ${encoder.stderr}');
+      }
     }
     for (final entry in {
       'start': _frames.first,

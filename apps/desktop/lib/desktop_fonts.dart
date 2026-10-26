@@ -1,6 +1,49 @@
 import 'dart:io';
 import 'package:flutter/services.dart';
 
+String get desktopFontFamily => Platform.isMacOS ? 'Zhiyu System' : 'Segoe UI';
+List<String> get desktopFontFallback => Platform.isMacOS
+    ? const ['PingFang SC', 'sans-serif']
+    : const ['Microsoft YaHei', 'Microsoft YaHei UI', 'sans-serif'];
+
+/// System font paths are discovered locally, never copied into a distribution.
+/// The returned profile is also used by local reference/capture tooling.
+Future<Map<String, String>> loadDesktopFonts() async {
+  if (!Platform.isMacOS) {
+    if (!await loadWindowsDesktopFonts()) {
+      throw StateError('Desktop reference fonts are unavailable.');
+    }
+    return {'platform': Platform.operatingSystem, 'family': desktopFontFamily};
+  }
+  var pingFang = File('/System/Library/Fonts/PingFang.ttc');
+  if (!await pingFang.exists()) {
+    final assets = Directory(
+      '/System/Library/AssetsV2/com_apple_MobileAsset_Font8',
+    );
+    if (await assets.exists()) {
+      await for (final asset in assets.list(followLinks: false)) {
+        if (asset is! Directory) continue;
+        final candidate = File('${asset.path}/AssetData/PingFang.ttc');
+        if (await candidate.exists()) {
+          pingFang = candidate;
+          break;
+        }
+      }
+    }
+  }
+  final files = {
+    'Zhiyu System': '/System/Library/Fonts/SFNS.ttf',
+    'PingFang SC': pingFang.path,
+  };
+  for (final entry in files.entries) {
+    final bytes = await File(entry.value).readAsBytes();
+    await (FontLoader(
+      entry.key,
+    )..addFont(Future.value(ByteData.sublistView(bytes)))).load();
+  }
+  return {'platform': Platform.operatingSystem, ...files};
+}
+
 /// Uses the machine's installed fonts, without shipping Windows font files.
 /// Explicit registration also makes native Flutter and reference captures use
 /// the same CJK face rather than an engine-selected fallback such as SimSun.

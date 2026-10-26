@@ -5,6 +5,13 @@ import FlutterMacOS
 class AppDelegate: FlutterAppDelegate, NSMenuItemValidation {
   var allowTermination = false
 
+  override func applicationDidFinishLaunching(_ notification: Notification) {
+    super.applicationDidFinishLaunching(notification)
+    // Flutter's delegate supplies the bundle name as the initial title. Apply
+    // the preview display name after that, without changing production identity.
+    authorizationWindow?.configurePreviewAppearance()
+  }
+
   override func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
     return !(authorizationWindow?.desktopReady ?? false)
   }

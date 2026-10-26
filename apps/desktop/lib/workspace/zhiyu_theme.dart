@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../desktop_motion.dart';
 import '../ui.dart';
+import '../desktop_fonts.dart';
 
 /// One source of visual values for the real widgets used by preview and,
 /// later, production. No stored legacy preference is translated here.
@@ -9,12 +10,8 @@ ThemeData zhiyuTheme(Brightness brightness) {
   final base = desktopTheme(
     palette: palette,
     typography: TextStyle(
-      fontFamily: 'Segoe UI',
-      fontFamilyFallback: const [
-        'Microsoft YaHei',
-        'Microsoft YaHei UI',
-        'sans-serif',
-      ],
+      fontFamily: desktopFontFamily,
+      fontFamilyFallback: desktopFontFallback,
       fontSize: 14,
       height: 1.6,
       letterSpacing: 0,

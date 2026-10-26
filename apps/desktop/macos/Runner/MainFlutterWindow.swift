@@ -14,6 +14,17 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
     statusItem?.button != nil && statusItem?.isVisible == true
   }
   private(set) var desktopReady = false
+  private var previewReady = false
+  // The built entry point, not a Dart runtime request, selects isolation before
+  // any production service or saved security-scoped bookmark is constructed.
+  private var interfacePreview: Bool {
+    if Bundle.main.object(forInfoDictionaryKey: "AgentInfoInterfacePreview") as? String == "YES" {
+      return true
+    }
+    let target = Bundle.main.object(forInfoDictionaryKey: "AgentInfoFlutterTarget") as? String ?? ""
+    return ["preview_main.dart", "zhiyu_foundation_native_test.dart"].contains(
+      URL(fileURLWithPath: target).lastPathComponent)
+  }
   private var navigationEnabled = false
   private var notificationsEnabled = false
   private var backupOutputs: [String: URL] = [:]
@@ -34,6 +45,11 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
     self.title = "信息授权"
 
     RegisterGeneratedPlugins(registry: flutterViewController)
+    if interfacePreview {
+      configureInterfacePreview(flutterViewController)
+      finishWindowSetup(flutterViewController)
+      return
+    }
     configureToolAccess(flutterViewController)
     secretEditor = NativeSecretEditor(window: self, messenger: flutterViewController.engine.binaryMessenger)
     // Registers a local owner channel only. No helper/permission/AX work until
@@ -265,6 +281,62 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
       }
     }
 
+    finishWindowSetup(flutterViewController)
+  }
+
+  private func configureInterfacePreview(_ controller: FlutterViewController) {
+    title = "知予 · 界面预览·示例数据"
+    delegate = self
+    // Ordinary text editing/accessibility is shared with production. Secret
+    // editors, directories, file panels, notifications and database channels
+    // are deliberately absent from this runner mode.
+    textFieldAccessibility = NativeTextFieldAccessibility(view: controller.view)
+    let accessibility = FlutterMethodChannel(name: "agent_info_manage/text_field_accessibility",
+                                             binaryMessenger: controller.engine.binaryMessenger)
+    accessibility.setMethodCallHandler { [weak self] call, result in
+      guard call.method == "update" else { result(FlutterMethodNotImplemented); return }
+      guard self?.textFieldAccessibility?.update(call.arguments) == true else {
+        result(FlutterError(code: "invalid_accessibility_labels", message: "Invalid field labels", details: nil)); return
+      }
+      result(nil)
+    }
+    let channel = FlutterMethodChannel(name: "agent_info_manage/interface_preview",
+                                      binaryMessenger: controller.engine.binaryMessenger)
+    desktopChannel = channel
+    channel.setMethodCallHandler { [weak self] call, result in
+      guard let self else { result(nil); return }
+      switch call.method {
+      case "initialize":
+        guard Bundle.main.bundleIdentifier == "com.example.infoDesktop.zhiyuPreview" else {
+          result(FlutterError(code: "preview_configuration_required", message: "Use scripts/dev-macos.sh preview or preview-check", details: nil)); return
+        }
+        self.previewReady = true
+        self.navigationEnabled = true
+        self.configurePreviewAppearance()
+        result(["isolated": true, "title": self.title,
+                "applicationId": Bundle.main.bundleIdentifier ?? "",
+                "productionServices": self.desktopReady || self.focusedFill != nil || self.secretEditor != nil,
+                "savedDirectories": self.toolAccess != nil])
+      case "setNavigationEnabled":
+        guard let enabled = call.arguments as? Bool else {
+          result(FlutterError(code: "invalid_navigation_state", message: "Invalid navigation state", details: nil)); return
+        }
+        self.navigationEnabled = enabled && self.previewReady
+        result(nil)
+      case "createEvidenceDirectory":
+        do {
+          let directory = FileManager.default.temporaryDirectory.appendingPathComponent("ZhiyuUI-\(UUID().uuidString)")
+          try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: false)
+          result(directory.path)
+        } catch {
+          result(FlutterError(code: "preview_evidence_failed", message: "Temporary evidence directory unavailable", details: nil))
+        }
+      default: result(FlutterMethodNotImplemented)
+      }
+    }
+  }
+
+  private func finishWindowSetup(_ flutterViewController: FlutterViewController) {
     super.awakeFromNib()
     DispatchQueue.main.async { [weak self] in
       guard let self, let menu = NSApp.mainMenu else { return }
@@ -272,6 +344,15 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
       let forwarding = NativeTextEditingMenu(window: self, messenger: flutterViewController.engine.binaryMessenger)
       forwarding.install(in: menu)
       self.textEditingMenu = forwarding
+    }
+  }
+
+  func configurePreviewAppearance() {
+    guard interfacePreview else { return }
+    title = "知予 · 界面预览·示例数据"
+    if let item = NSApp.mainMenu?.items.first {
+      item.title = "知予"
+      item.submenu?.title = "知予"
     }
   }
 
@@ -396,10 +477,11 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
 
   @objc func openApprovals() {
     showApprovalsWindow()
+    if previewReady { return }
     desktopChannel?.invokeMethod("open", arguments: nil)
   }
 
-  var canOpenSettings: Bool { desktopReady && navigationEnabled && attachedSheet == nil }
+  var canOpenSettings: Bool { (desktopReady || previewReady) && navigationEnabled && attachedSheet == nil }
 
   func openSettings() {
     guard canOpenSettings else { return }

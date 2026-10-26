@@ -9,6 +9,7 @@ import 'package:integration_test/integration_test.dart';
 import 'package:info_desktop/desktop_controls.dart';
 import 'package:info_desktop/desktop_fonts.dart';
 import 'package:info_desktop/workspace/preview_workspace.dart';
+import 'package:info_desktop/workspace/mac_preview_desktop.dart';
 import 'support/native_frame_recording.dart';
 
 void main() {
@@ -17,24 +18,45 @@ void main() {
   testWidgets(
     'isolated Zhiyu native controls, motion, large text and reduced motion',
     (tester) async {
-      const directory = String.fromEnvironment('UI_EVIDENCE_DIR');
+      var directory = const String.fromEnvironment('UI_EVIDENCE_DIR');
       const python = String.fromEnvironment('VIDEO_PYTHON_EXECUTABLE');
       const encoderScript = String.fromEnvironment('VIDEO_ENCODER_SCRIPT');
-      if (!Platform.isWindows ||
-          directory.isEmpty ||
-          python.isEmpty ||
-          encoderScript.isEmpty) {
+      if ((!Platform.isWindows && !Platform.isMacOS) ||
+          (Platform.isWindows &&
+              (directory.isEmpty || python.isEmpty || encoderScript.isEmpty))) {
         throw StateError(
-          'Windows and explicit evidence/encoder paths are required',
+          'Desktop platform and explicit evidence/encoder paths are required',
         );
       }
-      expect(await loadWindowsDesktopFonts(), isTrue);
+      final fonts = await loadDesktopFonts();
+      final desktop = Platform.isMacOS ? MacPreviewDesktop() : null;
+      final nativeState = await desktop?.initialize();
+      if (desktop != null) {
+        directory = (await MacPreviewDesktop.channel.invokeMethod<String>(
+          'createEvidenceDirectory',
+        ))!;
+        for (final name in [
+          'database_key',
+          'tool_directories',
+          'backup_files',
+          'desktop',
+        ]) {
+          await expectLater(
+            MethodChannel('agent_info_manage/$name').invokeMethod<void>('read'),
+            throwsA(isA<MissingPluginException>()),
+            reason: 'Production channel $name must be absent in preview',
+          );
+        }
+      }
       final root = Directory(directory);
       await root.create(recursive: true);
       final boundary = GlobalKey();
       final checks = <String>[];
       await tester.pumpWidget(
-        RepaintBoundary(key: boundary, child: const PreviewWorkspace()),
+        RepaintBoundary(
+          key: boundary,
+          child: PreviewWorkspace(desktop: desktop),
+        ),
       );
       await tester.pumpAndSettle();
       final initial = tester.element(
@@ -169,6 +191,9 @@ void main() {
       await File('$directory/native-checks.json').writeAsString(
         const JsonEncoder.withIndent('  ').convert({
           'platform': Platform.operatingSystem,
+          'fonts': fonts,
+          'nativeIsolationChecked': desktop != null,
+          'nativePreview': nativeState,
           'physicalSize': {
             'width': nativeSize.width,
             'height': nativeSize.height,
@@ -184,6 +209,10 @@ void main() {
               'native Flutter widget-input integration; OS input smoke recorded separately',
         }),
       );
+      // The host collects precisely this self-created directory after the app
+      // exits, encodes the recording, and removes the temporary source.
+      // ignore: avoid_print
+      print('ZHIYU_NATIVE_EVIDENCE=$directory');
       await tester.pumpWidget(const SizedBox());
     },
     timeout: const Timeout(Duration(minutes: 2)),

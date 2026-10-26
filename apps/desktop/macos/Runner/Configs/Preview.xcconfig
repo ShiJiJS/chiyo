@@ -1,0 +1,4 @@
+// Passed only by the scoped preview/preview-check launcher. The production
+// identity, Keychain and personal application container remain unchanged.
+AGENT_INFO_INTERFACE_PREVIEW = YES
+PRODUCT_BUNDLE_IDENTIFIER = com.example.infoDesktop.zhiyuPreview

@@ -11,6 +11,19 @@ if [[ "$(uname -m)" != arm64 ]]; then
   exit 1
 fi
 worker_output="$TARGET_BUILD_DIR/$EXECUTABLE_FOLDER_PATH/info-runtime-worker"
+# The isolated UI entry points have no execution service. Remove a stale
+# product from this exact Xcode output when switching from a production build.
+flutter_target="${FLUTTER_TARGET:-}"
+if [[ "${AGENT_INFO_INTERFACE_PREVIEW:-NO}" == YES ]]; then
+  rm -f -- "$worker_output"
+  exit 0
+fi
+case "${flutter_target##*/}" in
+  preview_main.dart|zhiyu_foundation_native_test.dart)
+    rm -f -- "$worker_output"
+    exit 0
+    ;;
+esac
 mkdir -p "$(dirname "$worker_output")"
 (
   cd "$project_root/packages/info_cli"
