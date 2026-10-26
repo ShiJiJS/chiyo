@@ -1,0 +1,386 @@
+{
+  "kind": "native-flutter-framebuffer-with-widget-input",
+  "wallClockDurationMs": 4391,
+  "samplingTargetFps": 20,
+  "frames": [
+    {
+      "ms": 0,
+      "file": "native-controls-frames/frame-00000.png"
+    },
+    {
+      "ms": 83,
+      "file": "native-controls-frames/frame-00001.png"
+    },
+    {
+      "ms": 132,
+      "file": "native-controls-frames/frame-00002.png"
+    },
+    {
+      "ms": 183,
+      "file": "native-controls-frames/frame-00003.png"
+    },
+    {
+      "ms": 232,
+      "file": "native-controls-frames/frame-00004.png"
+    },
+    {
+      "ms": 287,
+      "file": "native-controls-frames/frame-00005.png"
+    },
+    {
+      "ms": 332,
+      "file": "native-controls-frames/frame-00006.png"
+    },
+    {
+      "ms": 393,
+      "file": "native-controls-frames/frame-00007.png"
+    },
+    {
+      "ms": 632,
+      "file": "native-controls-frames/frame-00008.png"
+    },
+    {
+      "ms": 683,
+      "file": "native-controls-frames/frame-00009.png"
+    },
+    {
+      "ms": 732,
+      "file": "native-controls-frames/frame-00010.png"
+    },
+    {
+      "ms": 782,
+      "file": "native-controls-frames/frame-00011.png"
+    },
+    {
+      "ms": 833,
+      "file": "native-controls-frames/frame-00012.png"
+    },
+    {
+      "ms": 933,
+      "file": "native-controls-frames/frame-00013.png"
+    },
+    {
+      "ms": 1032,
+      "file": "native-controls-frames/frame-00014.png"
+    },
+    {
+      "ms": 1082,
+      "file": "native-controls-frames/frame-00015.png"
+    },
+    {
+      "ms": 1132,
+      "file": "native-controls-frames/frame-00016.png"
+    },
+    {
+      "ms": 1182,
+      "file": "native-controls-frames/frame-00017.png"
+    },
+    {
+      "ms": 1231,
+      "file": "native-controls-frames/frame-00018.png"
+    },
+    {
+      "ms": 1281,
+      "file": "native-controls-frames/frame-00019.png"
+    },
+    {
+      "ms": 1332,
+      "file": "native-controls-frames/frame-00020.png"
+    },
+    {
+      "ms": 1383,
+      "file": "native-controls-frames/frame-00021.png"
+    },
+    {
+      "ms": 1432,
+      "file": "native-controls-frames/frame-00022.png"
+    },
+    {
+      "ms": 1483,
+      "file": "native-controls-frames/frame-00023.png"
+    },
+    {
+      "ms": 1532,
+      "file": "native-controls-frames/frame-00024.png"
+    },
+    {
+      "ms": 1583,
+      "file": "native-controls-frames/frame-00025.png"
+    },
+    {
+      "ms": 1633,
+      "file": "native-controls-frames/frame-00026.png"
+    },
+    {
+      "ms": 1682,
+      "file": "native-controls-frames/frame-00027.png"
+    },
+    {
+      "ms": 1732,
+      "file": "native-controls-frames/frame-00028.png"
+    },
+    {
+      "ms": 1782,
+      "file": "native-controls-frames/frame-00029.png"
+    },
+    {
+      "ms": 1832,
+      "file": "native-controls-frames/frame-00030.png"
+    },
+    {
+      "ms": 1890,
+      "file": "native-controls-frames/frame-00031.png"
+    },
+    {
+      "ms": 1982,
+      "file": "native-controls-frames/frame-00032.png"
+    },
+    {
+      "ms": 2290,
+      "file": "native-controls-frames/frame-00033.png"
+    },
+    {
+      "ms": 2388,
+      "file": "native-controls-frames/frame-00034.png"
+    },
+    {
+      "ms": 2482,
+      "file": "native-controls-frames/frame-00035.png"
+    },
+    {
+      "ms": 2542,
+      "file": "native-controls-frames/frame-00036.png"
+    },
+    {
+      "ms": 2585,
+      "file": "native-controls-frames/frame-00037.png"
+    },
+    {
+      "ms": 2634,
+      "file": "native-controls-frames/frame-00038.png"
+    },
+    {
+      "ms": 2733,
+      "file": "native-controls-frames/frame-00039.png"
+    },
+    {
+      "ms": 2782,
+      "file": "native-controls-frames/frame-00040.png"
+    },
+    {
+      "ms": 2852,
+      "file": "native-controls-frames/frame-00041.png"
+    },
+    {
+      "ms": 2943,
+      "file": "native-controls-frames/frame-00042.png"
+    },
+    {
+      "ms": 3033,
+      "file": "native-controls-frames/frame-00043.png"
+    },
+    {
+      "ms": 3093,
+      "file": "native-controls-frames/frame-00044.png"
+    },
+    {
+      "ms": 3135,
+      "file": "native-controls-frames/frame-00045.png"
+    },
+    {
+      "ms": 3182,
+      "file": "native-controls-frames/frame-00046.png"
+    },
+    {
+      "ms": 3284,
+      "file": "native-controls-frames/frame-00047.png"
+    },
+    {
+      "ms": 3331,
+      "file": "native-controls-frames/frame-00048.png"
+    },
+    {
+      "ms": 3386,
+      "file": "native-controls-frames/frame-00049.png"
+    },
+    {
+      "ms": 3483,
+      "file": "native-controls-frames/frame-00050.png"
+    },
+    {
+      "ms": 3533,
+      "file": "native-controls-frames/frame-00051.png"
+    },
+    {
+      "ms": 3582,
+      "file": "native-controls-frames/frame-00052.png"
+    },
+    {
+      "ms": 3631,
+      "file": "native-controls-frames/frame-00053.png"
+    },
+    {
+      "ms": 3682,
+      "file": "native-controls-frames/frame-00054.png"
+    },
+    {
+      "ms": 3732,
+      "file": "native-controls-frames/frame-00055.png"
+    },
+    {
+      "ms": 3782,
+      "file": "native-controls-frames/frame-00056.png"
+    },
+    {
+      "ms": 3833,
+      "file": "native-controls-frames/frame-00057.png"
+    },
+    {
+      "ms": 3883,
+      "file": "native-controls-frames/frame-00058.png"
+    },
+    {
+      "ms": 3931,
+      "file": "native-controls-frames/frame-00059.png"
+    },
+    {
+      "ms": 3982,
+      "file": "native-controls-frames/frame-00060.png"
+    },
+    {
+      "ms": 4032,
+      "file": "native-controls-frames/frame-00061.png"
+    },
+    {
+      "ms": 4084,
+      "file": "native-controls-frames/frame-00062.png"
+    },
+    {
+      "ms": 4133,
+      "file": "native-controls-frames/frame-00063.png"
+    },
+    {
+      "ms": 4182,
+      "file": "native-controls-frames/frame-00064.png"
+    },
+    {
+      "ms": 4233,
+      "file": "native-controls-frames/frame-00065.png"
+    },
+    {
+      "ms": 4284,
+      "file": "native-controls-frames/frame-00066.png"
+    },
+    {
+      "ms": 4333,
+      "file": "native-controls-frames/frame-00067.png"
+    },
+    {
+      "ms": 4367,
+      "file": "native-controls-frames/frame-00068.png"
+    }
+  ],
+  "sourceFrames": [
+    0,
+    83,
+    132,
+    183,
+    232,
+    287,
+    332,
+    393,
+    632,
+    683,
+    732,
+    782,
+    833,
+    933,
+    1032,
+    1082,
+    1132,
+    1182,
+    1231,
+    1281,
+    1332,
+    1383,
+    1432,
+    1483,
+    1532,
+    1583,
+    1633,
+    1682,
+    1732,
+    1782,
+    1832,
+    1890,
+    1982,
+    2290,
+    2388,
+    2482,
+    2542,
+    2585,
+    2634,
+    2733,
+    2782,
+    2852,
+    2943,
+    3033,
+    3093,
+    3135,
+    3182,
+    3284,
+    3331,
+    3386,
+    3483,
+    3533,
+    3582,
+    3631,
+    3682,
+    3732,
+    3782,
+    3833,
+    3883,
+    3931,
+    3982,
+    4032,
+    4084,
+    4133,
+    4182,
+    4233,
+    4284,
+    4333,
+    4367
+  ],
+  "events": [
+    {
+      "event": "light-hover",
+      "ms": 31
+    },
+    {
+      "event": "switch-page",
+      "ms": 138
+    },
+    {
+      "event": "open-dialog",
+      "ms": 360
+    },
+    {
+      "event": "open-menu",
+      "ms": 861
+    },
+    {
+      "event": "save-feedback",
+      "ms": 1874
+    },
+    {
+      "event": "rapid-open-close",
+      "ms": 2319
+    },
+    {
+      "event": "dark-theme",
+      "ms": 2818
+    }
+  ],
+  "osDesktopCapture": false,
+  "systemDpiChanged": false
+}

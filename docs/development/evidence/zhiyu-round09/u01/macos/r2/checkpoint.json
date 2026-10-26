@@ -1,0 +1,214 @@
+{
+  "issue": 62,
+  "branch": "codex/zhiyu-macos",
+  "sourceCommit": "8645c10bfa88abe81641e823d0c46d0ee846c913",
+  "status": "in-progress",
+  "criteriaCompleted": 10,
+  "criteriaTotal": 12,
+  "sourceSha256": {
+    "apps/desktop/integration_test/support/native_motion_probe.dart": "f4de249b1f4331491f39cff6d5cdc5c438d15239bb779feff9ce88b3c7ffaaf3",
+    "apps/desktop/integration_test/zhiyu_foundation_native_test.dart": "de368e870ed97c6eb0cf47bda86fca6034072d2ff02c3fc5841239ab7045fec5",
+    "apps/desktop/lib/desktop_button.dart": "010ef9a52b34ec080ee4c1cd101b3a12a893db4d7c22a5c44d12947b3c3b6d30",
+    "apps/desktop/lib/workspace/preview_workspace.dart": "39517c8fffc9aeda2bec6af7c84e4e498552735ec2e1e67d08c15dd2b6988f7e",
+    "apps/desktop/lib/workspace/sample_workspace_fixture.dart": "21bb44967f41aadba392b4b795f9a7180674f6cd1c306ece694242a1d8427116",
+    "apps/desktop/lib/workspace/sample_workspace_source.dart": "1d02328f2c707ad13064a89bc09dbbdb92d327ddc978c3958029953df1c1bf99",
+    "apps/desktop/lib/workspace/workspace_controller.dart": "c943d3fa55bafbbbe809682e3b370436845aec72921f00743448424ef8d7918e",
+    "apps/desktop/lib/workspace/workspace_records.dart": "727e46d2f71074e03965a78ad3bedb649e2a2fa7508c1837d6d6dc798290ffdd",
+    "apps/desktop/lib/workspace/workspace_records_controller.dart": "eea6d4f4ff40817df169f9baa3cd03f88e390d6bd45b9166f4165243678e8082",
+    "apps/desktop/lib/workspace/workspace_source.dart": "8cdb8f960a604a993baeb0f426fb5635eaec200cfacef44e93c5b94c773fbec4",
+    "apps/desktop/macos/Runner/MainFlutterWindow.swift": "bc24813874c5e4a3db30cc7e2bc964e2a35fca9eefa1dd9950c92d7bc2f6333a",
+    "apps/desktop/test/desktop_motion_contract_test.dart": "6e4eb1ff1beedea858722c739dd662b79b66ac135efd91b6c28b375ec43d736c",
+    "apps/desktop/test/workspace_controller_test.dart": "00f971b777d0d7fe26b4b185340c97c9d5d1625f86aa64c78ce831da9da11b47",
+    "apps/desktop/test/workspace_records_test.dart": "6bf52d44d58325fd6537e5aac033d4853afc3693d7f10fd573a04e2b4e456f8e",
+    "apps/desktop/test/zhiyu_preview_test.dart": "9bfbffbe679b860b9e8b234a9c5b6ab9ea09220ec670cc7f8361ad8665605383",
+    "apps/desktop/tool/zhiyu_preview_lifecycle.dart": "b45f92d7991272e246082b44235e6afdc504850707568da2aa9a41ab3bfaa895",
+    "scripts/dev-macos.sh": "e018d83cf06a73f2eb39255a548f9513774a978876acf60e3a96694c04da33bf",
+    "scripts/qa/zhiyu-preview-lifecycle.py": "66f07f3c14f06cbbda1e29e57a83c06da8274b5f2648b6505ef8c7eee0c0a275"
+  },
+  "checks": {
+    "strictAnalyze": "passed",
+    "desktopRegression": {
+      "passed": 311,
+      "skippedWindowsOnly": 2,
+      "scope": "before final IME preservation guard; final affected tests separately passed"
+    },
+    "finalContractAndPreviewTests": {
+      "passed": 16,
+      "scope": "8 source/controller tests and 8 widget tests, including new IME refresh regression"
+    },
+    "motionAndOtherFocusedTests": {
+      "passed": 26,
+      "scope": "before final IME regression, 6 deterministic motion traces included; overlaps other counts"
+    },
+    "offscreenScenarios": 4,
+    "nativeIntegration": {
+      "passed": 1,
+      "scope": "native engine render frames and Widget input, actual AppKit menu dispatch, NSWindow content-size changes; no global OS input",
+      "contentViewports": [
+        {
+          "width": 1440.0,
+          "height": 900.0,
+          "theme": "light",
+          "devicePixelRatio": 2.0,
+          "nativeWindowResized": true
+        },
+        {
+          "width": 1440.0,
+          "height": 900.0,
+          "theme": "dark",
+          "devicePixelRatio": 2.0,
+          "nativeWindowResized": true
+        },
+        {
+          "width": 1280.0,
+          "height": 800.0,
+          "theme": "light",
+          "devicePixelRatio": 2.0,
+          "nativeWindowResized": true
+        },
+        {
+          "width": 1280.0,
+          "height": 800.0,
+          "theme": "dark",
+          "devicePixelRatio": 2.0,
+          "nativeWindowResized": true
+        }
+      ],
+      "automaticallyForegrounded": false
+    },
+    "nativeMotion": [
+      {
+        "name": "detail",
+        "targetMs": 180,
+        "frameMs": 180.554,
+        "wallFrameStartMs": 180.693,
+        "translation": 3.0
+      },
+      {
+        "name": "dialog",
+        "targetMs": 180,
+        "frameMs": 180.554,
+        "wallFrameStartMs": 180.121,
+        "translation": 7.0
+      },
+      {
+        "name": "menu",
+        "targetMs": 120,
+        "frameMs": 124.999,
+        "wallFrameStartMs": 119.552,
+        "translation": -3.0
+      },
+      {
+        "name": "hover",
+        "targetMs": 150,
+        "frameMs": 152.777,
+        "wallFrameStartMs": 152.9,
+        "translation": null
+      },
+      {
+        "name": "pressed",
+        "targetMs": 150,
+        "frameMs": 152.776,
+        "wallFrameStartMs": 152.925,
+        "translation": -1.0
+      },
+      {
+        "name": "feedback",
+        "targetMs": 180,
+        "frameMs": 180.554,
+        "wallFrameStartMs": 180.681,
+        "translation": 6.0
+      }
+    ],
+    "cocoaLifecycle": {
+      "normalClose": true,
+      "normalQuit": true,
+      "scope": "actual self-menu termination and performClose, not physical Command-Q"
+    },
+    "prototypeHashesUnchanged": 15
+  },
+  "remaining": [
+    "Physical Command editing shortcuts, actual Chinese input method, trackpad and accessibility on the same fixed candidate, without claiming Widget input is OS input.",
+    "Full U01 S5 completion audit and remaining physical-input scope before closing #62; no business page has started yet."
+  ],
+  "failedAttempts": "Initial lifecycle parser missed flutter: prefix although app exited 0; initial native observer used guarded tester reads and late post-frame wall origin; custom binding collided with generated listener; touch press in scrollable triggered 100ms arena delay, corrected native desktop probe to mouse. These attempts were not counted as passes.",
+  "frameEvidence": {
+    "rawFramesCommitted": false,
+    "recordingSpeed": 1,
+    "traceOrigin": "engine frame-start transient callback, sampled after layout; post-layout observer latency separately retained",
+    "sampleFrameSha256": {
+      "frame-00063.png": "1b28822a8efca3b25f747157ac5f3f22219e8a3bd200c271f518fad845c3dbe3",
+      "frame-00062.png": "8ef4cae47ec36c65945aa7a2d908cd9777c90a6ee0678c1f2864c4a14f206023",
+      "frame-00060.png": "1b5cccdf0a1af94de212649926ee03bb7577acffc2b0cc7268278c6bee605677",
+      "frame-00048.png": "e4cf7a4a216df18d5dfa24b9eddd0caedf742607f952410635bbbc2c6943cab6",
+      "frame-00049.png": "70a32587c425ffead19092acf1d7a5d2779396ebfaa1643125489598d130a728",
+      "frame-00061.png": "527e636b47e897054dd1e97a96302e83d1f995b271102b8b052b809dd7efd983",
+      "frame-00059.png": "9b68f7befc7a70bf5dad802d654144cb6dadf119fc2145112ab106173338c0f7",
+      "frame-00065.png": "97809df6797f2c56f49c506cd1af55291c6718ae598d81ac3b960b8127d6f76a",
+      "frame-00064.png": "d152287f8c7cb14bbfe28f2bbbd04324868c86a2a21230a4265c3e0c2671395f",
+      "frame-00058.png": "287b845dfb37fa89b66fce7c046f0a228fd2aea8991611fc0b23d18eefe89f47",
+      "frame-00066.png": "527e2e55b0581a82bb7998d76dc6ddb71ab107202499c2ad26d989af69881973",
+      "frame-00067.png": "527e2e55b0581a82bb7998d76dc6ddb71ab107202499c2ad26d989af69881973",
+      "frame-00014.png": "9b106112258387df2179c309ff3ad9df7a8d87def976e490b998b0ab5fe6b84a",
+      "frame-00000.png": "f17f5e4d6eb99a4306f524a37dd0f4336f218cb780ca874492da85aa0355f34b",
+      "frame-00028.png": "5ca4ff6265235eb332c37b11ea9b58b4b29a054475006fea9d613fcc022bd461",
+      "frame-00029.png": "8c720db37a9bb8cbe0e835f8efb5d6d5c494923182cb90f491874741ea0f11a1",
+      "frame-00001.png": "f17f5e4d6eb99a4306f524a37dd0f4336f218cb780ca874492da85aa0355f34b",
+      "frame-00015.png": "8700f0f0676fd8d2d39ccb5fbb7d4faa62f37f548958f259d5c3062b7a4d6038",
+      "frame-00003.png": "bbdb0523c586d8cf2025cb9240278f96f7df4836560dc0c752fd2c36dc349182",
+      "frame-00017.png": "3b47712e4017f6286da48f330f15da86082a268fec9e9c7e6619f264f13099c9",
+      "frame-00016.png": "87701904e86a271de27af62fb74fd796d71e231496ad9375b7f5ca83caf1d73f",
+      "frame-00002.png": "f17f5e4d6eb99a4306f524a37dd0f4336f218cb780ca874492da85aa0355f34b",
+      "frame-00006.png": "6c6a523a7b6677e6064648555d47fb5f1c5a1482b0d5b9d1386aa158e2fdd436",
+      "frame-00012.png": "5b1d49a121478dd7547de58ed9dbd770103a6b1c4cacb51a809de97e406c9186",
+      "frame-00013.png": "64d01ed6f2e10e06d307b190b17fbc14b1d904ce561c2f3895f47ffe0e89a79b",
+      "frame-00007.png": "6c6a523a7b6677e6064648555d47fb5f1c5a1482b0d5b9d1386aa158e2fdd436",
+      "frame-00039.png": "f4000e5633472b03642a93a055470fa6681741b9c014af183fab3313f04f8e8c",
+      "frame-00011.png": "5b1d49a121478dd7547de58ed9dbd770103a6b1c4cacb51a809de97e406c9186",
+      "frame-00005.png": "d64e5a872f12699a82a5a68eee2922dbe5f7cc4f3a5b8ddb5cc113fa992e2d22",
+      "frame-00004.png": "2e87eacb33f33cf0de2b6842f3a976bab292c51ff3d5f6898bf9e987f8d56063",
+      "frame-00010.png": "5b1d49a121478dd7547de58ed9dbd770103a6b1c4cacb51a809de97e406c9186",
+      "frame-00038.png": "0bc4c4f05ea515db908e3414f292c2f539fd5e4b91c9cf639fc098a80f3aff44",
+      "frame-00035.png": "f2f8d01e7d28cb28f279f261cad49cf5b38fa2d581985e00880e8411de66e66e",
+      "frame-00021.png": "3b47712e4017f6286da48f330f15da86082a268fec9e9c7e6619f264f13099c9",
+      "frame-00009.png": "5b1d49a121478dd7547de58ed9dbd770103a6b1c4cacb51a809de97e406c9186",
+      "frame-00008.png": "601a2a5f67dd984c65c2a56574c4a1db6adc03e90065811025918ddb0a2b03b2",
+      "frame-00020.png": "3b47712e4017f6286da48f330f15da86082a268fec9e9c7e6619f264f13099c9",
+      "frame-00034.png": "f2f8d01e7d28cb28f279f261cad49cf5b38fa2d581985e00880e8411de66e66e",
+      "frame-00022.png": "3b47712e4017f6286da48f330f15da86082a268fec9e9c7e6619f264f13099c9",
+      "frame-00036.png": "224df0dd71043ebb250843e976d415c2c3d5ce8d020c1736d53901a37588c6b6",
+      "frame-00037.png": "d0e1559b26344ece077bdfd59d6f6c822f54154df0ee5da2a7978e31ef13c76b",
+      "frame-00023.png": "976f57d8a2fa3327132bef9e2902ff5395f3ab56e3210cb1288d312afd90f9d2",
+      "frame-00027.png": "a6448c1718ba37321f6471a5b375d1f653a757b38449ad9e194af01126caa0ae",
+      "frame-00033.png": "f2f8d01e7d28cb28f279f261cad49cf5b38fa2d581985e00880e8411de66e66e",
+      "frame-00032.png": "189e9ff0fbeb7270d50e8b984c7279ac5e81e24f396226b2acdf25776d945cb2",
+      "frame-00026.png": "867aa62302c0038b927120442c82eb4afe06e285954824ef6f894ad7ac3bff61",
+      "frame-00018.png": "3b47712e4017f6286da48f330f15da86082a268fec9e9c7e6619f264f13099c9",
+      "frame-00030.png": "6f511cbb4a16eb2116ce5572a152a683cdbbc58083b769d630d50e2e2fbd9552",
+      "frame-00024.png": "ce4c799beb2f1d04fdcbfcb72e9e64650f1c5f177dae411a78b615579619bbd7",
+      "frame-00025.png": "b23486c25d833a6eefecc6fe93d153fc7393ea32c9cb5888e61ef0f8189a8142",
+      "frame-00031.png": "6f511cbb4a16eb2116ce5572a152a683cdbbc58083b769d630d50e2e2fbd9552",
+      "frame-00019.png": "3b47712e4017f6286da48f330f15da86082a268fec9e9c7e6619f264f13099c9",
+      "frame-00056.png": "d6822e0be8c77ca521ee798b06373a2d751c62d4cbecdf56b2aebbc96358d8d9",
+      "frame-00042.png": "d5c15f9353683c6ed4486ca832871ff2516b52457d55cca49da3f8d7670447c4",
+      "frame-00043.png": "1371a6fa563bedcb89997ddf70d454151b4e87b6ec3ca7b520893982f8ec9798",
+      "frame-00057.png": "d6822e0be8c77ca521ee798b06373a2d751c62d4cbecdf56b2aebbc96358d8d9",
+      "frame-00041.png": "61c91b60b0052d1e9a95cbbd95ec8823101a76b16dc8de242784616125bf9120",
+      "frame-00055.png": "d6822e0be8c77ca521ee798b06373a2d751c62d4cbecdf56b2aebbc96358d8d9",
+      "frame-00068.png": "527e2e55b0581a82bb7998d76dc6ddb71ab107202499c2ad26d989af69881973",
+      "frame-00054.png": "d6822e0be8c77ca521ee798b06373a2d751c62d4cbecdf56b2aebbc96358d8d9",
+      "frame-00040.png": "76dce03c753eee963c0fcf243ff21de7e4f939b3ea006c8b729423cbc6a58b47",
+      "frame-00044.png": "1371a6fa563bedcb89997ddf70d454151b4e87b6ec3ca7b520893982f8ec9798",
+      "frame-00050.png": "7dd4f82db9e6df824e48f8fab142ee065a22404cb40fb4aa24528b69c8e0641c",
+      "frame-00051.png": "9d874d8986eacd8323d1f103fe99cf92efd7a39b0e6e24e8cf166ce4b289d587",
+      "frame-00045.png": "42a46e33f3f8e5191dddd51db28c70c200ec4fd5af7e9c543fca8332cbfb33b6",
+      "frame-00053.png": "6322a76d01628890a911f040e3cbcda233bca3b8e575148423ba9caa7b6285d6",
+      "frame-00047.png": "5d2c8d695768eec632ec2d055c1bd639476a5d3a81f36d6e266712d2852b16d3",
+      "frame-00046.png": "a3823a0809627db2700d849e92c4cb398867e9b1982cf98402430647607e64dd",
+      "frame-00052.png": "629d3e86de57219d54a484f7b2781111d5c2635e17856d4d6147f3d3c08d0ef6"
+    }
+  },
+  "personalKeychainOrProductionDataAccessed": false,
+  "windowsCIRun": false,
+  "computerUseUsed": false
+}

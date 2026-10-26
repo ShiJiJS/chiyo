@@ -1,6 +1,6 @@
 # 知予 Round09：Mac 优先改版规格与前端实施基线
 
-2026-10-25。用户已认可原型方向，并确认本轮仅发布U01–U07七张前端任务和F01后续阶段规划票；见[当前计划及发布记录](../../planning/zhiyu-round09/README.md)。本组规格约束界面与后续数据设计；真实功能任务暂不发布，待界面完成后在F01重审和拆分。2026-10-26已完成Windows检查点交接；后续转为Mac优先，本次仅改规划，开发暂停。接手顺序见[Mac计划](../../planning/zhiyu-round09/macos-continuation.md)，进度与未通过项见[实施记录](../../development/zhiyu-round09-frontend.md)。
+2026-10-25。用户已认可原型方向，并确认本轮仅发布U01–U07七张前端任务和F01后续阶段规划票；见[当前计划及发布记录](../../planning/zhiyu-round09/README.md)。本组规格约束界面与后续数据设计；真实功能任务暂不发布，待界面完成后在F01重审和拆分。2026-10-26已完成Windows检查点交接；后续转为Mac优先，最新指令已恢复持续开发，按#62起的票序推进。接手顺序见[Mac计划](../../planning/zhiyu-round09/macos-continuation.md)，进度与未通过项见[实施记录](../../development/zhiyu-round09-frontend.md)。
 
 设计北极星：以三栏浏览和按资料类型组织的详情，让人先找到、读懂资料，再明确决定向 Agent 提供什么。插件负责资料结构和展示，宿主负责数据、授权与执行。
 
