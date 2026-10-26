@@ -326,6 +326,7 @@ void main() {
       expect(preview(t).preview.file.ref.version, 3);
       expect(preview(t).preview.pageCount, 1);
       await tap(t, find.byKey(const ValueKey('library-file-versions-file')));
+      expect(find.text('已替换文件'), findsNothing);
       await tap(t, find.byKey(const ValueKey('library-file-version-2')));
       await ready(
         t,
