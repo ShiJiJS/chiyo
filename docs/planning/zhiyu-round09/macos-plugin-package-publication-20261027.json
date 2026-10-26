@@ -1,0 +1,75 @@
+{
+  "createdAt": "2026-10-26T22:53:46.485794+00:00",
+  "branch": "codex/zhiyu-macos",
+  "sourceCommit": "538dc130afdcec4df11aaf6f9e1207c2c85d7695",
+  "documentCommit": "cc73515943ac9c5f9c87daf4e863ca13c1c94828",
+  "goalStatus": "active",
+  "issues": [
+    {
+      "issue": 65,
+      "url": "https://github.com/ShiJiJS/agent-info-manage/issues/65",
+      "title": "知予前端 U04：插件管理、专属设置与旧资料采用模板界面",
+      "state": "OPEN",
+      "checked": 1,
+      "total": 7,
+      "labels": [
+        "enhancement",
+        "ready-for-agent"
+      ],
+      "comments": 0,
+      "beforeBodySha256": "f87ee1fe7c957c6acc96ef3a5dc7e8ac64ea57f9f088194623065b5cfd4560ac",
+      "afterBodySha256": "f68d744df684fbae52a2e12762ef462694443691b221e442af101c4e13943b8a",
+      "exactReadback": true,
+      "nativeDependenciesBeforeAndAfter": [
+        62
+      ]
+    },
+    {
+      "issue": 69,
+      "url": "https://github.com/ShiJiJS/agent-info-manage/issues/69",
+      "title": "知予后续规划 F01：界面完成后拆分真实功能、测试与 Mac 交付",
+      "state": "OPEN",
+      "checked": 0,
+      "total": 6,
+      "labels": [
+        "documentation"
+      ],
+      "comments": 0,
+      "beforeBodySha256": "168ba7558d5444e848153dfd603026150f63712f64d2fb4c95d1d44c818613a0",
+      "afterBodySha256": "f7322fef215b95e874b6e80906bcc5c1aa1963ee276a2dc8994602d8b2053957",
+      "exactReadback": true,
+      "nativeDependenciesBeforeAndAfter": [
+        64,
+        65,
+        66,
+        67,
+        68
+      ]
+    }
+  ],
+  "browser": {
+    "initialSpace": 170,
+    "initialSpaceUnavailable": true,
+    "replacementAuthorizedByStandingUserInstruction": true,
+    "publicationSpace": 172,
+    "finished": true
+  },
+  "evidence": {
+    "directory": "docs/development/evidence/zhiyu-round09/u04/macos/r1",
+    "files": 14,
+    "bytes": 1069248,
+    "gitBytesVerified": true
+  },
+  "cleanup": {
+    "removedDirectory": "build/zhiyu-ui/u04/macos/r1",
+    "files": 22,
+    "bytes": 1406273,
+    "preserved": [
+      "single fixed preview App",
+      "versioned source and evidence",
+      "unknown .local/",
+      "personal containers/keys"
+    ]
+  },
+  "next": "Continue U04 host identity/settings and existing plugin:builtin.server/host:<recordId> route, then template adoption/legacy compatibility and Agent brief entry. Full S5/OS gates remain open; all UI before F01; no Windows CI/CUA."
+}
