@@ -35,12 +35,17 @@ class WorkspaceCatalog {
     required Iterable<WorkspaceDirectory> directories,
     required Iterable<WorkspaceTag> tags,
     required Iterable<WorkspaceType> types,
+    Map<String, int> directoryCounts = const {},
+    Map<String, int> tagCounts = const {},
   }) : directories = List.unmodifiable(directories),
        tags = List.unmodifiable(tags),
-       types = List.unmodifiable(types);
+       types = List.unmodifiable(types),
+       directoryCounts = Map.unmodifiable(directoryCounts),
+       tagCounts = Map.unmodifiable(tagCounts);
   final List<WorkspaceDirectory> directories;
   final List<WorkspaceTag> tags;
   final List<WorkspaceType> types;
+  final Map<String, int> directoryCounts, tagCounts;
 }
 
 class WorkspaceRecordSummary {
@@ -98,6 +103,29 @@ class WorkspaceQuery {
   final WorkspaceGrouping grouping;
   final WorkspaceSort sort;
   final int offset, limit;
+
+  WorkspaceQuery copyWith({
+    String? directoryId,
+    bool clearDirectory = false,
+    String? keyword,
+    String? typeId,
+    bool clearType = false,
+    String? tagId,
+    bool clearTag = false,
+    WorkspaceGrouping? grouping,
+    WorkspaceSort? sort,
+    int? offset,
+    int? limit,
+  }) => WorkspaceQuery(
+    directoryId: clearDirectory ? null : directoryId ?? this.directoryId,
+    keyword: keyword ?? this.keyword,
+    typeId: clearType ? null : typeId ?? this.typeId,
+    tagId: clearTag ? null : tagId ?? this.tagId,
+    grouping: grouping ?? this.grouping,
+    sort: sort ?? this.sort,
+    offset: offset ?? this.offset,
+    limit: limit ?? this.limit,
+  );
 }
 
 class WorkspaceResults {
@@ -106,12 +134,14 @@ class WorkspaceResults {
     required this.total,
     required this.offset,
     this.selection,
+    this.selectionIndex,
     Map<String, int> groupCounts = const {},
   }) : items = List.unmodifiable(items),
        groupCounts = Map.unmodifiable(groupCounts);
   final List<WorkspaceRecordSummary> items;
   final int total, offset;
   final WorkspaceRecordRef? selection;
+  final int? selectionIndex;
   final Map<String, int> groupCounts;
 }
 
@@ -159,6 +189,23 @@ class WorkspaceEdit {
   final String operationId;
   final int expectedVersion;
   final WorkspaceRecordSummary record;
+  final Map<String, Object?> values;
+}
+
+class WorkspaceCreate {
+  WorkspaceCreate({
+    required this.operationId,
+    required this.typeId,
+    required this.name,
+    this.description = '',
+    this.directoryId,
+    Iterable<String> tagIds = const [],
+    Map<String, Object?> values = const {},
+  }) : tagIds = List.unmodifiable(tagIds),
+       values = _freeze(values) as Map<String, Object?>;
+  final String operationId, typeId, name, description;
+  final String? directoryId;
+  final List<String> tagIds;
   final Map<String, Object?> values;
 }
 

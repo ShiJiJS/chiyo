@@ -24,7 +24,7 @@ Usage: ./scripts/dev-macos.sh <command> [arguments]
                 Optional --with-focused-fill-candidate embeds a disabled XPC candidate
   run           Open the macOS app in debug mode (requires full Xcode)
   preview       Run the isolated Zhiyu UI with its own application identity
-  preview-check Run the sandboxed native Zhiyu UI integration check
+  preview-check [--library] Run the sandboxed native Zhiyu UI integration check
   preview-lifecycle <new-dir> Check native close/quit and restore the UI preview
   bundle <dir>  Compile CLI/hook installation materials into a NEW directory
   flutter ...   Run the project Flutter SDK in your current working directory
@@ -145,7 +145,12 @@ case "$command_name" in
     if [[ "$command_name" == preview ]]; then
       flutter run -d macos --no-pub --target lib/preview_main.dart "$@"
     elif [[ "$command_name" == preview-check ]]; then
-      flutter test --no-pub -d macos integration_test/zhiyu_foundation_native_test.dart "$@"
+      preview_test=integration_test/zhiyu_foundation_native_test.dart
+      if [[ "${1:-}" == --library ]]; then
+        preview_test=integration_test/zhiyu_library_native_test.dart
+        shift
+      fi
+      flutter test --no-pub -d macos "$preview_test" "$@"
     else
       flutter build macos --debug --no-pub --target tool/zhiyu_preview_lifecycle.dart
       python3 "$project_root/scripts/qa/zhiyu-preview-lifecycle.py" \

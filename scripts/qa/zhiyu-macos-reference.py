@@ -2,7 +2,7 @@
 """Serve the frozen prototype with a local-only macOS font profile.
 
 No prototype file or system font is copied or changed. Only manifest-listed
-reference files and the two fonts recorded by the Flutter capture are served.
+reference files and the system fonts recorded by the Flutter capture are served.
 """
 import argparse
 import hashlib
@@ -25,6 +25,8 @@ def main():
         raise ValueError('A captured macOS font profile is required')
     fonts = {name: Path(profile[key]) for name, key in (
         ('system.ttf', 'Zhiyu System'), ('cjk.ttc', 'PingFang SC'))}
+    if 'Menlo' in profile:
+        fonts['mono.ttc'] = Path(profile['Menlo'])
     for path in fonts.values():
         path.resolve().relative_to('/System/Library')
     manifest = json.loads((PROTOTYPE / 'reference-manifest.json').read_text())
@@ -38,6 +40,11 @@ def main():
 @font-face {font-family:"PingFang SC";src:url("/cjk.ttc");font-weight:100 900;}
 body {font-family:"Zhiyu System","PingFang SC",sans-serif !important;}
 </style>'''
+    if 'Menlo' in profile:
+        style = style.replace('</style>', '''
+@font-face {font-family:"Menlo";src:url("/mono.ttc");}
+.mono, pre, code {font-family:"Menlo",monospace !important;}
+</style>''')
 
     class Handler(http.server.BaseHTTPRequestHandler):
         def do_GET(self):

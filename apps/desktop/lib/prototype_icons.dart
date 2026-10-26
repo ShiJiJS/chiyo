@@ -18,6 +18,14 @@ enum PrototypeIconGlyph {
   key,
   grid,
   arrow,
+  server,
+  user,
+  book,
+  back,
+  more,
+  sort,
+  expand,
+  trash,
 }
 
 /// An approved round-05 SVG icon, using its original 24-unit geometry.
@@ -93,7 +101,8 @@ class _PrototypeIconPainter extends CustomPainter {
 
     if (round09 ||
         glyph == PrototypeIconGlyph.grid ||
-        glyph == PrototypeIconGlyph.arrow) {
+        glyph == PrototypeIconGlyph.arrow ||
+        glyph.index >= PrototypeIconGlyph.server.index) {
       canvas.drawPath(_round09Path(glyph), stroke);
       canvas.restore();
       return;
@@ -274,6 +283,14 @@ class _PrototypeIconPainter extends CustomPainter {
         );
       case PrototypeIconGlyph.grid:
       case PrototypeIconGlyph.arrow:
+      case PrototypeIconGlyph.server:
+      case PrototypeIconGlyph.user:
+      case PrototypeIconGlyph.book:
+      case PrototypeIconGlyph.back:
+      case PrototypeIconGlyph.more:
+      case PrototypeIconGlyph.sort:
+      case PrototypeIconGlyph.expand:
+      case PrototypeIconGlyph.trash:
         break; // Drawn through the approved Round09 path above.
     }
     canvas.restore();
@@ -288,6 +305,103 @@ class _PrototypeIconPainter extends CustomPainter {
 
 /// Paths from the frozen Round09 util.js; legacy callers retain their symbols.
 Path _round09Path(PrototypeIconGlyph glyph) => switch (glyph) {
+  PrototypeIconGlyph.server =>
+    Path()
+      ..addRect(const Rect.fromLTWH(4, 3, 16, 7))
+      ..addRect(const Rect.fromLTWH(4, 14, 16, 7))
+      ..moveTo(7, 6.5)
+      ..lineTo(7.01, 6.5)
+      ..moveTo(7, 17.5)
+      ..lineTo(7.01, 17.5)
+      ..moveTo(11, 6.5)
+      ..lineTo(17, 6.5)
+      ..moveTo(11, 17.5)
+      ..lineTo(17, 17.5),
+  PrototypeIconGlyph.user =>
+    Path()
+      ..addOval(const Rect.fromLTWH(8, 3, 8, 8))
+      ..moveTo(4, 21)
+      ..lineTo(4, 18)
+      ..arcToPoint(const Offset(20, 18), radius: const Radius.elliptical(8, 6))
+      ..lineTo(20, 21),
+  PrototypeIconGlyph.book =>
+    Path()
+      ..moveTo(3, 4)
+      ..lineTo(9, 4)
+      ..arcToPoint(const Offset(12, 7), radius: const Radius.circular(3))
+      ..lineTo(12, 21)
+      ..cubicTo(11, 19, 10, 19, 8, 19)
+      ..lineTo(3, 19)
+      ..close()
+      ..moveTo(21, 4)
+      ..lineTo(15, 4)
+      ..arcToPoint(
+        const Offset(12, 7),
+        radius: const Radius.circular(3),
+        clockwise: false,
+      )
+      ..lineTo(12, 21)
+      ..cubicTo(13, 19, 14, 19, 16, 19)
+      ..lineTo(21, 19)
+      ..close(),
+  PrototypeIconGlyph.back =>
+    Path()
+      ..moveTo(19, 12)
+      ..lineTo(5, 12)
+      ..moveTo(11, 6)
+      ..lineTo(5, 12)
+      ..lineTo(11, 18),
+  PrototypeIconGlyph.more =>
+    Path()
+      ..moveTo(5, 12)
+      ..lineTo(5.01, 12)
+      ..moveTo(12, 12)
+      ..lineTo(12.01, 12)
+      ..moveTo(19, 12)
+      ..lineTo(19.01, 12),
+  PrototypeIconGlyph.sort =>
+    Path()
+      ..moveTo(8, 4)
+      ..lineTo(8, 20)
+      ..moveTo(4, 16)
+      ..lineTo(8, 20)
+      ..lineTo(12, 16)
+      ..moveTo(14, 5)
+      ..lineTo(20, 5)
+      ..moveTo(14, 10)
+      ..lineTo(18, 10)
+      ..moveTo(14, 15)
+      ..lineTo(16, 15),
+  PrototypeIconGlyph.expand =>
+    Path()
+      ..moveTo(8, 3)
+      ..lineTo(3, 3)
+      ..lineTo(3, 8)
+      ..moveTo(16, 3)
+      ..lineTo(21, 3)
+      ..lineTo(21, 8)
+      ..moveTo(3, 16)
+      ..lineTo(3, 21)
+      ..lineTo(8, 21)
+      ..moveTo(21, 16)
+      ..lineTo(21, 21)
+      ..lineTo(16, 21),
+  PrototypeIconGlyph.trash =>
+    Path()
+      ..moveTo(3, 6)
+      ..lineTo(21, 6)
+      ..moveTo(9, 6)
+      ..lineTo(9, 3)
+      ..lineTo(15, 3)
+      ..lineTo(15, 6)
+      ..moveTo(5, 6)
+      ..lineTo(6, 21)
+      ..lineTo(18, 21)
+      ..lineTo(19, 6)
+      ..moveTo(10, 10)
+      ..lineTo(10, 17)
+      ..moveTo(14, 10)
+      ..lineTo(14, 17),
   PrototypeIconGlyph.arrow =>
     Path()
       ..moveTo(5, 12)

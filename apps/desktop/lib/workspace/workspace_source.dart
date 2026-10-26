@@ -19,12 +19,19 @@ abstract interface class WorkspaceSource {
   Stream<WorkspaceRecordRef?> get changes;
   Future<WorkspaceSummary> loadSummary();
   Future<WorkspaceCatalog> loadCatalog();
+  Future<Map<String, Object?>> loadTemplate(String typeId);
   Future<WorkspaceResults> queryRecords(
     WorkspaceQuery query, {
     WorkspaceRecordRef? keepSelection,
   });
   Future<WorkspaceDetail> readDetail(WorkspaceRecordRef ref);
+
+  /// Resolves identities for relation links without loading their field values.
+  Future<List<WorkspaceRecordSummary>> readSummaries(
+    Iterable<WorkspaceRecordRef> refs,
+  );
   Future<WorkspaceSaveResult> saveRecord(WorkspaceEdit edit);
+  Future<WorkspaceSaveResult> createRecord(WorkspaceCreate draft);
 }
 
 enum WorkspaceLoad { idle, loading, ready, empty, error }

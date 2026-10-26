@@ -34,6 +34,7 @@ Future<Map<String, String>> loadDesktopFonts() async {
   final files = {
     'Zhiyu System': '/System/Library/Fonts/SFNS.ttf',
     'PingFang SC': pingFang.path,
+    'Menlo': '/System/Library/Fonts/Menlo.ttc',
   };
   for (final entry in files.entries) {
     final bytes = await File(entry.value).readAsBytes();

@@ -78,6 +78,52 @@ void main() {
             const JsonEncoder.withIndent('  ').convert(geometry),
           );
         });
+        final libraryGeometry = <String, Object>{};
+        for (final key in [
+          'library-directory-pane',
+          'library-results-pane',
+          'library-detail-pane',
+          'library-detail-title',
+          'library-search',
+          'library-record-information:azure',
+        ]) {
+          final target = find.byKey(ValueKey(key));
+          if (target.evaluate().isEmpty) continue;
+          final rect = tester.getRect(
+            key == 'library-detail-pane'
+                ? find
+                      .descendant(
+                        of: target,
+                        matching: find.byType(DecoratedBox),
+                      )
+                      .first
+                : target,
+          );
+          libraryGeometry[key] = {
+            'x': rect.left,
+            'y': rect.top,
+            'width': rect.width,
+            'height': rect.height,
+          };
+        }
+        for (final label in ['连接概览', '登录凭据', 'tokyo.beichen.example']) {
+          final target = find.text(label);
+          if (target.evaluate().length != 1) continue;
+          final rect = tester.getRect(target);
+          libraryGeometry[label] = {
+            'x': rect.left,
+            'y': rect.top,
+            'width': rect.width,
+            'height': rect.height,
+          };
+        }
+        if (libraryGeometry.isNotEmpty) {
+          await tester.runAsync(
+            () => File('$prefix-library-geometry.json').writeAsString(
+              const JsonEncoder.withIndent('  ').convert(libraryGeometry),
+            ),
+          );
+        }
         Future<void> capture(String suffix) async {
           await tester.runAsync(() async {
             final boundary =

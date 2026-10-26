@@ -11,6 +11,8 @@ import 'workspace_source.dart';
 import 'zhiyu_app.dart';
 import 'mac_preview_desktop.dart';
 import 'workspace_records_controller.dart';
+import 'library_controller.dart';
+import 'library_page.dart';
 
 /// Only the isolated composition root knows which provider is a sample.
 /// U02–U07 register their production widgets through pageBuilder.
@@ -25,20 +27,40 @@ class PreviewWorkspace extends StatefulWidget {
 class _PreviewWorkspaceState extends State<PreviewWorkspace> {
   late final SampleWorkspaceSource _source;
   late final WorkspaceController _controller;
+  late final LibraryController _library;
+  StreamSubscription<WorkspaceRecordRef?>? _summaryChanges;
   final _guideFocus = FocusNode();
   @override
   void initState() {
     super.initState();
     _source = SampleWorkspaceSource();
     _controller = WorkspaceController(_source);
-    widget.desktop?.onNavigate = (page) => _controller.navigate(page);
+    _library = LibraryController(_source);
+    _summaryChanges = _source.changes.listen(
+      (_) => unawaited(_controller.refresh()),
+    );
+    widget.desktop?.onNavigate = (page) {
+      _controller.navigate(page);
+      if (page == WorkspacePage.library) _library.focusSearch();
+    };
     unawaited(_controller.refresh());
+    unawaited(
+      _library.load(
+        _library.query,
+        keepSelection: const WorkspaceRecordRef(
+          WorkspaceRecordKind.information,
+          'azure',
+        ),
+      ),
+    );
   }
 
   @override
   void dispose() {
     _guideFocus.dispose();
     _controller.dispose();
+    _library.dispose();
+    unawaited(_summaryChanges?.cancel());
     _source.dispose();
     widget.desktop?.dispose();
     super.dispose();
@@ -47,6 +69,7 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
   void _scenario(SampleWorkspaceScenario value) {
     _source.setScenario(value);
     unawaited(_controller.refresh());
+    unawaited(_library.load(_library.query));
   }
 
   void _guide(BuildContext context) {
@@ -175,10 +198,19 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
     ),
     pageBuilder:
         widget.pageBuilder ??
-        (context, location) => _FoundationPage(
-          controller: _controller,
-          onRetry: () => _scenario(SampleWorkspaceScenario.ready),
-        ),
+        (context, location) => location.page == WorkspacePage.library
+            ? LibraryPage(
+                controller: _library,
+                onRetry: () => _scenario(SampleWorkspaceScenario.ready),
+                onNavigate: (page, id) =>
+                    _controller.navigate(page, objectId: id, remember: true),
+                onModalChanged: (open) =>
+                    unawaited(widget.desktop?.setNavigationEnabled(!open)),
+              )
+            : _FoundationPage(
+                controller: _controller,
+                onRetry: () => _scenario(SampleWorkspaceScenario.ready),
+              ),
   );
 }
 
