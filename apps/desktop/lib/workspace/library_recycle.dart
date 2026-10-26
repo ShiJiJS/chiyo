@@ -4,6 +4,7 @@ import '../desktop_controls.dart';
 import '../desktop_feedback.dart';
 import '../ui_palette.dart';
 import 'library_history_dialog.dart';
+import 'library_credential_lifecycle.dart';
 import 'library_widgets.dart';
 import 'workspace_source.dart';
 
@@ -12,11 +13,20 @@ Future<WorkspaceRecordReceipt?> showLibraryRecycle(
   WorkspaceSource source, {
   WorkspaceDetail? current,
   WorkspaceRecycleEntry? entry,
-}) => showDesktopDialog<WorkspaceRecordReceipt>(
-  context,
-  builder: (_) =>
-      _RecycleDialog(source: source, current: current, entry: entry),
-);
+}) =>
+    (current?.record.ref ?? entry?.record.ref)?.kind ==
+        WorkspaceRecordKind.credential
+    ? showCredentialRecycle(
+        context,
+        source,
+        ref: current?.record.ref,
+        entry: entry,
+      )
+    : showDesktopDialog<WorkspaceRecordReceipt>(
+        context,
+        builder: (_) =>
+            _RecycleDialog(source: source, current: current, entry: entry),
+      );
 
 class _RecycleDialog extends StatefulWidget {
   const _RecycleDialog({required this.source, this.current, this.entry});

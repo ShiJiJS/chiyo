@@ -19,6 +19,7 @@ extension _SampleHistory on SampleWorkspaceSource {
       );
 
   void _forgetContent(WorkspaceRecordRef ref) {
+    if (ref.kind == WorkspaceRecordKind.credential) _credentials.forget(ref);
     _revisions.remove(ref);
     _files.forget(ref);
     for (final credential in _credentialLinks.credentials(ref).toList()) {
@@ -51,6 +52,7 @@ extension _SampleHistory on SampleWorkspaceSource {
   }
 
   void _expireHistory() {
+    _credentials.expireMaterials();
     final cutoff = _now().subtract(const Duration(days: 30));
     for (final revisions in _revisions.values) {
       revisions.removeWhere((r) => !r.archivedAt.isAfter(cutoff));

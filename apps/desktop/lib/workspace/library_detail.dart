@@ -394,9 +394,13 @@ class _LibraryDetailState extends State<LibraryDetail> {
                   items: [
                     const DropdownMenuItem(value: 'edit', child: Text('编辑信息')),
                     if (widget.onHistory != null)
-                      const DropdownMenuItem(
+                      DropdownMenuItem(
                         value: 'history',
-                        child: Text('内容版本'),
+                        child: Text(
+                          record.ref.kind == WorkspaceRecordKind.credential
+                              ? '材料版本'
+                              : '内容版本',
+                        ),
                       ),
                     if (widget.onRecycle != null)
                       const DropdownMenuItem(
