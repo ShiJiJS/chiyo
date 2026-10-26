@@ -1,0 +1,319 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/ShiJiJS/agent-info-manage/blob/codex/zhiyu-macos/docs/design/zhiyu-template-package.schema.json",
+  "title": "Zhiyu declarative template package hostApi 1",
+  "description": "Frontend package contract. x- annotations describe checks enforced by TemplatePackageDecoder in addition to structural JSON Schema. Text limits also use Dart UTF-16 code units. No executable package capabilities.",
+  "x-maxBytes": 1048576,
+  "x-maxJsonDepth": 16,
+  "x-uniqueObjectKeys": true,
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "maxLength": 128,
+      "pattern": "^[a-z][a-z0-9_-]*(\\.[a-z][a-z0-9_-]*)+$",
+      "not": {
+        "pattern": "^builtin\\."
+      }
+    },
+    "name": {
+      "type": "string",
+      "maxLength": 160,
+      "minLength": 1,
+      "pattern": "\\S"
+    },
+    "version": {
+      "type": "string",
+      "maxLength": 64,
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$"
+    },
+    "hostApi": {
+      "type": "integer",
+      "const": 1
+    },
+    "author": {
+      "type": "string",
+      "maxLength": 160,
+      "minLength": 1,
+      "pattern": "\\S"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 2000
+    },
+    "templates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 64,
+            "pattern": "^[a-z][a-zA-Z0-9_-]*$"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "pattern": "\\S"
+          },
+          "icon": {
+            "enum": [
+              "server",
+              "layers",
+              "user",
+              "book",
+              "file",
+              "globe",
+              "plugin"
+            ]
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "key": {
+                  "type": "string",
+                  "maxLength": 64,
+                  "pattern": "^[a-z][a-zA-Z0-9_-]*$"
+                },
+                "label": {
+                  "type": "string",
+                  "maxLength": 160,
+                  "minLength": 1,
+                  "pattern": "\\S"
+                },
+                "type": {
+                  "enum": [
+                    "text",
+                    "url",
+                    "number",
+                    "date",
+                    "multiline",
+                    "entries"
+                  ]
+                },
+                "required": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "key",
+                "label",
+                "type",
+                "required"
+              ]
+            },
+            "maxItems": 40,
+            "minItems": 0,
+            "x-uniqueBy": "key"
+          },
+          "sections": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "kind": {
+                      "const": "fields"
+                    },
+                    "title": {
+                      "type": "string",
+                      "maxLength": 160,
+                      "minLength": 1,
+                      "pattern": "\\S"
+                    },
+                    "keys": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "maxLength": 64,
+                        "pattern": "^[a-z][a-zA-Z0-9_-]*$"
+                      },
+                      "maxItems": 40,
+                      "minItems": 0,
+                      "uniqueItems": true,
+                      "x-reference": "template fields.key"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "title",
+                    "keys"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "kind": {
+                      "enum": [
+                        "text",
+                        "timeline",
+                        "relations"
+                      ]
+                    },
+                    "title": {
+                      "type": "string",
+                      "maxLength": 160,
+                      "minLength": 1,
+                      "pattern": "\\S"
+                    },
+                    "key": {
+                      "type": "string",
+                      "maxLength": 64,
+                      "pattern": "^[a-z][a-zA-Z0-9_-]*$",
+                      "x-reference": "matching field or relation; timeline requires entries"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "title",
+                    "key"
+                  ]
+                }
+              ]
+            },
+            "maxItems": 40,
+            "minItems": 0
+          },
+          "relations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "key": {
+                  "type": "string",
+                  "maxLength": 64,
+                  "pattern": "^[a-z][a-zA-Z0-9_-]*$"
+                },
+                "label": {
+                  "type": "string",
+                  "maxLength": 160,
+                  "minLength": 1,
+                  "pattern": "\\S"
+                },
+                "targetTemplates": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "maxItems": 40,
+                  "minItems": 0,
+                  "uniqueItems": true,
+                  "x-reference": "installed-or-local packageId/templateId"
+                }
+              },
+              "required": [
+                "key",
+                "label",
+                "targetTemplates"
+              ]
+            },
+            "maxItems": 40,
+            "minItems": 0,
+            "x-uniqueBy": "key"
+          },
+          "instructions": {
+            "type": "string",
+            "maxLength": 1048576,
+            "x-maxUtf8Bytes": 16384
+          },
+          "example": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "name": {
+                "type": "string",
+                "maxLength": 160,
+                "minLength": 1,
+                "pattern": "\\S"
+              },
+              "summary": {
+                "type": "string",
+                "maxLength": 2000
+              },
+              "values": {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string",
+                  "maxLength": 64,
+                  "pattern": "^[a-z][a-zA-Z0-9_-]*$"
+                },
+                "additionalProperties": {
+                  "oneOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "title": {
+                            "type": "string",
+                            "maxLength": 2000
+                          },
+                          "period": {
+                            "type": "string",
+                            "maxLength": 2000
+                          },
+                          "detail": {
+                            "type": "string",
+                            "maxLength": 2000
+                          }
+                        },
+                        "required": [
+                          "title",
+                          "period",
+                          "detail"
+                        ]
+                      },
+                      "maxItems": 100,
+                      "minItems": 0
+                    }
+                  ]
+                },
+                "x-reference": "defined field keys and matching content shape"
+              }
+            },
+            "required": [
+              "name",
+              "summary",
+              "values"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "icon",
+          "fields",
+          "sections",
+          "relations",
+          "instructions"
+        ]
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "x-uniqueBy": "id"
+    }
+  },
+  "required": [
+    "id",
+    "name",
+    "version",
+    "hostApi",
+    "author",
+    "description",
+    "templates"
+  ]
+}

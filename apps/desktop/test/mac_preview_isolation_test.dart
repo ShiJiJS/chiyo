@@ -63,7 +63,7 @@ final class _PreviewNetwork extends HttpOverrides {
 
 void main() {
   testWidgets(
-    'Mac preview composition and U03 UI avoid production channels, network and personal paths',
+    'Mac preview composition, U03 and plugin install/create avoid production channels, network and personal paths',
     (t) async {
       final previousIo = IOOverrides.current,
           previousHttp = HttpOverrides.current;
@@ -151,12 +151,36 @@ void main() {
       const ssh = WorkspaceRecordRef(WorkspaceRecordKind.credential, 'sshkey');
       expect((await source.credentials.read(ssh)).privateNote, '隔离检查的合成备注');
       expect((await source.readDetail(ssh)).values, isEmpty);
+      await t.tap(find.byKey(const ValueKey('workspace-nav-settings')));
+      await t.pumpAndSettle();
+      await t.tap(find.byKey(const ValueKey('plugin-install')));
+      await t.pumpAndSettle();
+      await t.tap(find.textContaining('域名管理-1.0.0.json').last);
+      await t.pumpAndSettle();
+      await t.tap(find.byKey(const ValueKey('plugin-change-submit')));
+      await t.pumpAndSettle();
+      expect((await source.plugins.load()).packages, hasLength(4));
+      await t.tap(find.byKey(const ValueKey('plugin-create')));
+      await t.pumpAndSettle();
+      await t.enterText(
+        find.byKey(const ValueKey('library-edit-name')),
+        '隔离检查域名',
+      );
+      final domain = find.byKey(const ValueKey('library-edit-domain'));
+      await t.ensureVisible(domain);
+      await t.enterText(domain, 'isolation.example');
+      await t.tap(find.byKey(const ValueKey('library-edit-save')));
+      await t.pumpAndSettle();
+      expect(controller.detail!.record.type.id, 'local.domain/domain');
+      expect(controller.detail!.values['domain'], 'isolation.example');
+      expect((await source.loadSummary()).records, 32);
       await t.tap(find.byKey(const ValueKey('preview-guide')));
       await t.pumpAndSettle();
       await t.tap(find.text('重置预览资料'));
       await t.pumpAndSettle();
       expect((await source.credentials.read(ssh)).privateNote, isEmpty);
       expect((await source.loadSummary()).records, 31);
+      expect((await source.plugins.load()).packages, hasLength(3));
       expect(forbidden, isEmpty);
       expect(network.calls, 0);
       expect(filesystem.rejected, isEmpty);

@@ -38,6 +38,7 @@ class WorkspaceCatalog {
     required Iterable<WorkspaceDirectory> directories,
     required Iterable<WorkspaceTag> tags,
     required Iterable<WorkspaceType> types,
+    Iterable<WorkspaceType>? creatableTypes,
     Map<String, int> directoryCounts = const {},
     Map<String, int> tagCounts = const {},
     this.version = 1,
@@ -45,11 +46,13 @@ class WorkspaceCatalog {
   }) : directories = List.unmodifiable(directories),
        tags = List.unmodifiable(tags),
        types = List.unmodifiable(types),
+       creatableTypes = List.unmodifiable(creatableTypes ?? types),
        directoryCounts = Map.unmodifiable(directoryCounts),
        tagCounts = Map.unmodifiable(tagCounts);
   final List<WorkspaceDirectory> directories;
   final List<WorkspaceTag> tags;
   final List<WorkspaceType> types;
+  final List<WorkspaceType> creatableTypes;
   final Map<String, int> directoryCounts, tagCounts;
   final int version, recycledCount;
 }
@@ -208,10 +211,16 @@ Object? _freeze(Object? value) {
   throw ArgumentError('Only JSON-compatible display values are supported');
 }
 
+Map<String, Object?> workspaceImmutableMap(Map<String, Object?> value) =>
+    _freeze(value) as Map<String, Object?>;
+
+enum WorkspaceTemplateState { available, disabled, missing, removedDefinition }
+
 class WorkspaceDetail {
   WorkspaceDetail({
     required this.record,
     required this.version,
+    this.templateState = WorkspaceTemplateState.available,
     Map<String, Object?> definition = const {},
     Map<String, Object?> values = const {},
     Map<String, List<WorkspaceRecordRef>> relations = const {},
@@ -220,6 +229,9 @@ class WorkspaceDetail {
        relations = _freezeRelations(relations);
   final WorkspaceRecordSummary record;
   final int version;
+
+  /// Current catalog projection, never part of the immutable instance snapshot.
+  final WorkspaceTemplateState templateState;
   final Map<String, Object?> definition, values;
   final Map<String, List<WorkspaceRecordRef>> relations;
 }
@@ -247,6 +259,8 @@ class WorkspaceCreate {
     required this.operationId,
     required this.typeId,
     required this.name,
+    this.expectedTemplateVersion,
+    this.expectedTemplateDigest,
     this.description = '',
     this.directoryId,
     Iterable<String> tagIds = const [],
@@ -256,6 +270,7 @@ class WorkspaceCreate {
        values = _freeze(values) as Map<String, Object?>,
        relations = _freezeRelations(relations);
   final String operationId, typeId, name, description;
+  final String? expectedTemplateVersion, expectedTemplateDigest;
   final String? directoryId;
   final List<String> tagIds;
   final Map<String, Object?> values;
