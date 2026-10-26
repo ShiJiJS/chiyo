@@ -383,6 +383,10 @@ class _LibraryFilePreviewViewState extends State<LibraryFilePreviewView> {
   @override
   void didUpdateWidget(LibraryFilePreviewView oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.preview.file.ref != widget.preview.file.ref) {
+      _zoom = 1;
+      _text = false;
+    }
     if (!identical(oldWidget.preview.image, widget.preview.image)) {
       _updateImage();
     }
@@ -434,10 +438,12 @@ class _LibraryFilePreviewViewState extends State<LibraryFilePreviewView> {
               child: const Text('下一页'),
             ),
             DesktopButton(
+              key: const ValueKey('library-file-zoom-in'),
               onPressed: _zoom < 2 ? () => setState(() => _zoom += .5) : null,
               child: const Text('放大'),
             ),
             DesktopButton(
+              key: const ValueKey('library-file-zoom-out'),
               onPressed: _zoom > 1 ? () => setState(() => _zoom -= .5) : null,
               child: const Text('缩小'),
             ),
@@ -531,7 +537,8 @@ class _FileVersionsState extends State<_FileVersions> {
     final generation = ++_generation;
     setState(() {
       _loading = true;
-      _preview = null;
+      // Keep the same mounted renderer through paging/retry. Offstage below
+      // hides the previous page while its replacement is not yet confirmed.
       _failure = null;
     });
     try {
@@ -589,6 +596,10 @@ class _FileVersionsState extends State<_FileVersions> {
     }
   }
 
+  WorkspaceFileVersion? get _selectedVersion => _history.versions
+      .where((file) => file.ref.version == _version)
+      .firstOrNull;
+
   @override
   Widget build(BuildContext context) => DesktopDialog(
     title: const Text('文件版本'),
@@ -618,6 +629,11 @@ class _FileVersionsState extends State<_FileVersions> {
               ),
           ],
         ),
+        if (_selectedVersion case final file?) ...[
+          const SizedBox(height: 12),
+          SelectableText(file.filename),
+          Text('${file.mediaType} · ${workspaceFileSize(file.byteLength)}'),
+        ],
         if (_loading)
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 20),
@@ -632,21 +648,25 @@ class _FileVersionsState extends State<_FileVersions> {
               color: UiPalette.of(context).danger,
             ),
           ),
-        if (_preview case final preview?) ...[
-          const SizedBox(height: 12),
-          SelectableText(preview.file.filename),
-          Text(
-            '${preview.file.mediaType} · ${workspaceFileSize(preview.file.byteLength)}',
+        if (_preview case final preview?)
+          Offstage(
+            key: const ValueKey('library-file-history-canvas'),
+            offstage: _loading || _failure != null,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(height: 12),
+                LibraryFilePreviewView(
+                  preview: preview,
+                  onPage: (page) {
+                    _page = page;
+                    unawaited(_read());
+                  },
+                ),
+              ],
+            ),
           ),
-          const SizedBox(height: 12),
-          LibraryFilePreviewView(
-            preview: preview,
-            onPage: (page) {
-              _page = page;
-              unawaited(_read());
-            },
-          ),
-        ],
       ],
     ),
     actions: [
