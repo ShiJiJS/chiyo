@@ -118,6 +118,30 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
     _controller.navigate(WorkspacePage.library);
   }
 
+  void _navigate(WorkspacePage page, String id) {
+    if (page == WorkspacePage.settings) {
+      const prefix = 'plugin:builtin.server/host:';
+      if (id.startsWith(prefix)) {
+        _plugins.showHostSettings(
+          WorkspaceHostTarget.record(
+            WorkspaceRecordRef(
+              WorkspaceRecordKind.information,
+              id.substring(prefix.length),
+            ),
+          ),
+        );
+      } else if (id == 'ssh-hosts') {
+        _plugins.showHostSettings(null);
+      }
+    }
+    _controller.navigate(page, objectId: id, remember: true);
+  }
+
+  Future<void> _hostRecord(WorkspaceRecordRef ref) async {
+    await _library.openRelated(ref);
+    if (mounted) _controller.navigate(WorkspacePage.library, remember: true);
+  }
+
   Future<void> _dataset(bool stress) async {
     await _source.replaceFixture(
       stress ? buildWorkspaceStressFixture() : sampleWorkspaceJson,
@@ -204,6 +228,35 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
                         SampleWorkspaceScenario.waiting => '持续等待',
                         SampleWorkspaceScenario.failure => '读取失败',
                       }),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 22),
+              const Text(
+                '主机身份状态',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 10),
+              Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: [
+                  for (final scenario in SampleHostScenario.values)
+                    DesktopButton(
+                      key: ValueKey('preview-host-${scenario.name}'),
+                      onPressed: () async {
+                        Navigator.pop(dialogContext);
+                        _scenario(SampleWorkspaceScenario.ready);
+                        await _source.demonstrateHost(scenario);
+                        if (!mounted) return;
+                        _plugins.showHostSettings(null);
+                        _controller.navigate(WorkspacePage.settings);
+                      },
+                      child: Text(
+                        scenario == SampleHostScenario.fingerprintChanged
+                            ? '东京主机指纹变化'
+                            : '东京主机缺少指纹',
+                      ),
                     ),
                 ],
               ),
@@ -315,14 +368,16 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
                   form: form,
                 ),
                 onRetry: () => _scenario(SampleWorkspaceScenario.ready),
-                onNavigate: (page, id) =>
-                    _controller.navigate(page, objectId: id, remember: true),
+                onNavigate: _navigate,
                 onModalChanged: (open) =>
                     unawaited(widget.desktop?.setNavigationEnabled(!open)),
               )
             : location.page == WorkspacePage.settings
             ? PluginsPage(
                 controller: _plugins,
+                hosts: _source.hosts,
+                hostChanges: _source.changes,
+                onRecord: (ref) => unawaited(_hostRecord(ref)),
                 picker: () => showPluginChoices(
                   context,
                   _source.pluginChoices,

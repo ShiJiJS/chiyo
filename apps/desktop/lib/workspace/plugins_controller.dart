@@ -14,6 +14,7 @@ enum PluginFilter {
 enum PluginTab {
   preview('模板预览'),
   structure('字段与关联'),
+  settings('插件设置'),
   instructions('Agent 录入说明');
 
   const PluginTab(this.label);
@@ -31,10 +32,28 @@ class PluginsController extends ChangeNotifier {
   WorkspaceFailure? failure;
   bool loading = false, _closed = false;
   int _generation = 0;
+  int get readGeneration => _generation;
   PluginFilter filter = PluginFilter.all;
   PluginTab tab = PluginTab.preview;
   String? selection, templateId;
   double scrollOffset = 0;
+  WorkspaceHostTarget? pendingHost;
+  void showHostSettings(WorkspaceHostTarget? target) {
+    filter = PluginFilter.all;
+    selection = 'builtin.server';
+    templateId = null;
+    tab = PluginTab.settings;
+    scrollOffset = 0;
+    pendingHost = target;
+    notifyListeners();
+  }
+
+  WorkspaceHostTarget? takeHostRequest() {
+    final result = pendingHost;
+    pendingHost = null;
+    return result;
+  }
+
   List<WorkspacePlugin> get visible => [
     for (final p in catalog?.packages ?? <WorkspacePlugin>[])
       if (filter == PluginFilter.all ||
@@ -59,6 +78,7 @@ class PluginsController extends ChangeNotifier {
       if (!visible.any((p) => p.id == selection)) {
         selection = visible.firstOrNull?.id;
         templateId = null;
+        tab = PluginTab.preview;
         scrollOffset = 0;
       }
     } on WorkspaceFailure catch (error) {
@@ -89,6 +109,7 @@ class PluginsController extends ChangeNotifier {
     if (!visible.any((p) => p.id == selection)) {
       selection = visible.firstOrNull?.id;
       templateId = null;
+      tab = PluginTab.preview;
     }
     notifyListeners();
   }

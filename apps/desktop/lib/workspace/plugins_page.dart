@@ -8,6 +8,7 @@ import 'plugin_dialogs.dart';
 import 'plugin_widgets.dart';
 import 'plugins_controller.dart';
 import 'workspace_source.dart';
+import 'host_settings.dart';
 
 /// Settings owns this entry; no package gets an everyday navigation destination.
 class PluginsPage extends StatefulWidget {
@@ -19,12 +20,18 @@ class PluginsPage extends StatefulWidget {
     required this.onRecords,
     this.picker,
     this.onModalChanged,
+    this.hosts,
+    this.hostChanges,
+    this.onRecord,
   });
   final PluginsController controller;
   final WorkspacePluginPicker? picker;
   final VoidCallback onRetry;
   final ValueChanged<WorkspaceType> onCreate, onRecords;
   final ValueChanged<bool>? onModalChanged;
+  final WorkspaceHostSource? hosts;
+  final Stream<WorkspaceRecordRef?>? hostChanges;
+  final ValueChanged<WorkspaceRecordRef>? onRecord;
   @override
   State<PluginsPage> createState() => _PluginsPageState();
 }
@@ -42,9 +49,33 @@ class _PluginsPageState extends State<PluginsPage> {
       });
     _shown = (model.selection, model.tab, model.templateId);
     model.addListener(_syncSelection);
+    _consumeHostRequest();
+  }
+
+  void _consumeHostRequest() {
+    final target = model.takeHostRequest();
+    if (target == null || widget.hosts == null) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _openHost(target);
+    });
+  }
+
+  Future<void> _openHost(WorkspaceHostTarget target) async {
+    widget.onModalChanged?.call(true);
+    try {
+      await showHostIdentity(
+        context,
+        widget.hosts!,
+        target,
+        onRecord: widget.onRecord,
+      );
+    } finally {
+      widget.onModalChanged?.call(false);
+    }
   }
 
   void _syncSelection() {
+    _consumeHostRequest();
     final next = (model.selection, model.tab, model.templateId);
     if (_shown == next) return;
     _shown = next;
@@ -290,7 +321,13 @@ class _PluginsPageState extends State<PluginsPage> {
                 spacing: 18,
                 runSpacing: 8,
                 children: [
-                  for (final tab in PluginTab.values)
+                  for (final tab in PluginTab.values.where(
+                    (tab) =>
+                        tab != PluginTab.settings ||
+                        p.panels.contains(WorkspacePluginPanel.sshTrust) &&
+                            widget.hosts != null &&
+                            widget.hostChanges != null,
+                  ))
                     DecoratedBox(
                       decoration: BoxDecoration(
                         border: Border(
@@ -324,7 +361,7 @@ class _PluginsPageState extends State<PluginsPage> {
               ),
             ),
             const SizedBox(height: 22),
-            if (p.templates.length > 1) ...[
+            if (model.tab != PluginTab.settings && p.templates.length > 1) ...[
               DesktopSelect<String>(
                 value: template.id,
                 items: [
@@ -338,7 +375,17 @@ class _PluginsPageState extends State<PluginsPage> {
               ),
               const SizedBox(height: 18),
             ],
-            if (model.tab == PluginTab.instructions) ...[
+            if (model.tab == PluginTab.settings &&
+                p.panels.contains(WorkspacePluginPanel.sshTrust) &&
+                widget.hosts != null &&
+                widget.hostChanges != null)
+              HostSettingsPanel(
+                source: widget.hosts!,
+                changes: widget.hostChanges!,
+                readGeneration: model.readGeneration,
+                onOpen: _openHost,
+              )
+            else if (model.tab == PluginTab.instructions) ...[
               Text(
                 '随插件提供的说明',
                 style: libraryText(context, 17, weight: FontWeight.w600),
