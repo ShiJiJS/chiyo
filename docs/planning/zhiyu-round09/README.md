@@ -2,7 +2,7 @@
 
 2026-10-25用户确认本轮发布 **U01–U07这7张前端任务，加F01这1张后续阶段规划票**，编号和核验结果见[发布清单](publication.md)。2026-10-26 Windows实现已收尾暂停，当前仍为U01；[实施记录](../../development/zhiyu-round09-frontend.md)区分已实现、已验证与剩余验收。
 
-2026-10-26用户确认后续以Mac为主、Windows适配后置；本次只调整tickets与文档，暂不继续产品开发。接手基线、#62新增准备及旧票安排以[Mac接手计划](macos-continuation.md)为准；原[Windows交接说明](../../development/handoffs/zhiyu-frontend-20261026.md)保留既有事实。
+2026-10-26用户确认后续以Mac为主、Windows适配后置；此前只调整规划；2026-10-26用户随后恢复Mac开发，当前从#62推进，见[Mac实施记录](../../development/zhiyu-macos-foundation.md)。接手基线、#62新增准备及旧票安排以[Mac接手计划](macos-continuation.md)为准；原[Windows交接说明](../../development/handoffs/zhiyu-frontend-20261026.md)保留既有事实。
 
 [先看开发顺序](frontend-first.md) · [后续阶段与待拆分内容](issues/F01.md) · [规格总入口](../../specs/zhiyu-round09/README.md) · [产品差距](gap-audit.md) · [冻结原型](../../design/prototypes/round-09-zhiyu/offline.html)
 
