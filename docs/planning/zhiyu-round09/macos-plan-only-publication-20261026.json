@@ -1,0 +1,171 @@
+{
+  "checkedAt": "2026-10-26T11:24:43.196257+00:00",
+  "branch": "codex/zhiyu-mac-priority-plan",
+  "planCommit": "72c1128b9c391fcce53f0d2a8c18b2447501d3c7",
+  "scope": "Documentation and existing tickets only; Mac first, Windows deferred; implementation paused by user.",
+  "exactBodyReadback": true,
+  "titlesStatesLabelsCommentsAndChecksPreserved": true,
+  "newIssuesCreated": 0,
+  "dependencyMutations": 0,
+  "issues": [
+    {
+      "number": 62,
+      "state": "OPEN",
+      "title": "知予前端 U01：软件外壳、明暗外观与通用控件",
+      "labels": [
+        "enhancement",
+        "ready-for-agent"
+      ],
+      "commentsPreserved": 3,
+      "criteriaCompleted": 10,
+      "criteriaTotal": 12,
+      "bodySha256": "59c6db516d672be6679bfad3d6ded3f89bd8adea70e1b32726c3a5c3dc6447a3"
+    },
+    {
+      "number": 63,
+      "state": "OPEN",
+      "title": "知予前端 U02：三栏信息库与服务器、应用资料界面",
+      "labels": [
+        "enhancement",
+        "ready-for-agent"
+      ],
+      "commentsPreserved": 0,
+      "criteriaCompleted": 0,
+      "criteriaTotal": 7,
+      "bodySha256": "9865a6ad75e9d853f8fc0e0e36f669ddacbdc0bdcd4520b4dccc7c2c89f7fe3a"
+    },
+    {
+      "number": 64,
+      "state": "OPEN",
+      "title": "知予前端 U03：个人档案、文档、文件与凭据界面",
+      "labels": [
+        "enhancement",
+        "ready-for-agent"
+      ],
+      "commentsPreserved": 0,
+      "criteriaCompleted": 0,
+      "criteriaTotal": 7,
+      "bodySha256": "c324df8e7eb28373e3cb3d404bf3a4a27113b4b6d9023321c609a2ea70d4e6d7"
+    },
+    {
+      "number": 65,
+      "state": "OPEN",
+      "title": "知予前端 U04：插件管理、专属设置与旧资料采用模板界面",
+      "labels": [
+        "enhancement",
+        "ready-for-agent"
+      ],
+      "commentsPreserved": 0,
+      "criteriaCompleted": 0,
+      "criteriaTotal": 7,
+      "bodySha256": "f9ae7b71bee15fcaea98cbf200b3543fd1e18c1c18bce70490135fdb462ebffc"
+    },
+    {
+      "number": 66,
+      "state": "OPEN",
+      "title": "知予前端 U05：普通信息与凭据使用的访问审批界面",
+      "labels": [
+        "enhancement",
+        "ready-for-agent"
+      ],
+      "commentsPreserved": 0,
+      "criteriaCompleted": 0,
+      "criteriaTotal": 8,
+      "bodySha256": "393c5babe80217c9d3721aafc766573a5a5e34a572ba1080aca6ca1672f01b7c"
+    },
+    {
+      "number": 67,
+      "state": "OPEN",
+      "title": "知予前端 U06：录入提案与授权历史界面",
+      "labels": [
+        "enhancement",
+        "ready-for-agent"
+      ],
+      "commentsPreserved": 0,
+      "criteriaCompleted": 0,
+      "criteriaTotal": 7,
+      "bodySha256": "a79befffd5401c20ed11d92f8655d432868a23733343e65bfef626855c856d0f"
+    },
+    {
+      "number": 68,
+      "state": "OPEN",
+      "title": "知予前端 U07：全局设置界面",
+      "labels": [
+        "enhancement",
+        "ready-for-agent"
+      ],
+      "commentsPreserved": 0,
+      "criteriaCompleted": 0,
+      "criteriaTotal": 8,
+      "bodySha256": "12857ab193bc66051ea0fca9c55f06c4c74e6a5b9b19e2ccd946f5d83038ecd0"
+    },
+    {
+      "number": 69,
+      "state": "OPEN",
+      "title": "知予后续规划 F01：界面完成后拆分真实功能、测试与 Mac 交付",
+      "labels": [
+        "documentation"
+      ],
+      "commentsPreserved": 0,
+      "criteriaCompleted": 0,
+      "criteriaTotal": 6,
+      "bodySha256": "2bd6d06235faacdf0dfdc987128d7e3beb5198950a1d01c0a3b582380ec85bbb"
+    }
+  ],
+  "limitations": [
+    "Remote Windows chat unavailable during this round; saved handoff and GitHub comments used.",
+    "Local unpushed source 058b5b41 preserved, not published or newly verified.",
+    "No product build, UI test, computer use, Windows CI, or personal data access this round."
+  ],
+  "documentationChecks": {
+    "markdownFiles": 42,
+    "relativeLinks": 219,
+    "frozenPrototypeTrackedFilesUnchanged": 18
+  },
+  "nativeDependenciesReadback": [
+    {
+      "issue": 63,
+      "blockedBy": 62
+    },
+    {
+      "issue": 64,
+      "blockedBy": 63
+    },
+    {
+      "issue": 65,
+      "blockedBy": 62
+    },
+    {
+      "issue": 66,
+      "blockedBy": 62
+    },
+    {
+      "issue": 67,
+      "blockedBy": 62
+    },
+    {
+      "issue": 68,
+      "blockedBy": 62
+    },
+    {
+      "issue": 69,
+      "blockedBy": 64
+    },
+    {
+      "issue": 69,
+      "blockedBy": 65
+    },
+    {
+      "issue": 69,
+      "blockedBy": 66
+    },
+    {
+      "issue": 69,
+      "blockedBy": 67
+    },
+    {
+      "issue": 69,
+      "blockedBy": 68
+    }
+  ]
+}
