@@ -229,7 +229,7 @@ class _DesktopSelectState<T> extends State<DesktopSelect<T>> {
     if (_open || widget.onChanged == null || widget.items.isEmpty) return;
     setState(() => _open = true);
     final scale = MediaQuery.textScalerOf(context).scale(1);
-    var width = 180.0;
+    var width = widget.compact ? 230.0 : 180.0;
     for (final item in widget.items) {
       if (item.child case Text(:final data?)) {
         final text = TextPainter(
@@ -243,10 +243,11 @@ class _DesktopSelectState<T> extends State<DesktopSelect<T>> {
     final result = await showAnchoredSurface<_SelectedValue<T>>(
       triggerContext,
       controller: _popup,
-      width: width.clamp(180, 520),
+      width: width.clamp(widget.compact ? 230 : 180, 520),
+      alignToEnd: true,
       height: math.min(
         340 * scale,
-        widget.items.length * (19.5 * scale + 20) +
+        widget.items.length * (13 * 1.7 * scale + 18) +
             12 +
             (widget.items.length > 12 ? 20 * scale + 38 : 0),
       ),
@@ -479,12 +480,15 @@ class _DesktopOptionsState<T> extends State<_DesktopOptions<T>> {
                 for (final (index, item) in widget.items.indexed)
                   if (_matches(item))
                     Padding(
-                      padding: const EdgeInsets.only(bottom: 2),
+                      padding: EdgeInsets.only(
+                        bottom: DesktopMotion.enabled(context) ? 0 : 2,
+                      ),
                       child: DesktopMotion.enabled(context)
                           ? DesktopButton(
                               key: _keys.putIfAbsent(index, () => GlobalKey()),
                               focusNode: _nodes[index],
-                              kind: DesktopButtonKind.quiet,
+                              kind: DesktopButtonKind.menu,
+                              radius: 5,
                               selected: item.value == widget.selected,
                               fontSize: 13,
                               alignment: Alignment.centerLeft,
@@ -500,7 +504,15 @@ class _DesktopOptionsState<T> extends State<_DesktopOptions<T>> {
                                   : null,
                               child: Row(
                                 children: [
-                                  Expanded(child: item.child),
+                                  Expanded(
+                                    child: DefaultTextStyle.merge(
+                                      style: const TextStyle(
+                                        height: 1.7,
+                                        fontWeight: FontWeight.w400,
+                                      ),
+                                      child: item.child,
+                                    ),
+                                  ),
                                   if (item.value == widget.selected) ...[
                                     const SizedBox(width: 9),
                                     const Icon(Icons.check, size: 15),

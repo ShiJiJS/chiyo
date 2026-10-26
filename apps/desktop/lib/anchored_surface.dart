@@ -14,6 +14,7 @@ Future<T?> showAnchoredSurface<T>(
   required Widget Function(BuildContext) builder,
   double width = 280,
   double height = 320,
+  bool alignToEnd = false,
   AnchoredSurfaceController? controller,
 }) async {
   Tooltip.dismissAllToolTips();
@@ -67,7 +68,10 @@ Future<T?> showAnchoredSurface<T>(
             math.max(width, anchor.width),
             screen.width - 24,
           );
-          final left = anchor.left.clamp(
+          final desiredLeft = alignToEnd
+              ? anchor.right - popupWidth
+              : anchor.left;
+          final left = desiredLeft.clamp(
             12.0,
             math.max(12.0, screen.width - popupWidth - 12),
           );

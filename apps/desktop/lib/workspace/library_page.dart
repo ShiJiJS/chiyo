@@ -656,10 +656,13 @@ class _LibraryPageState extends State<LibraryPage> {
       padding: const EdgeInsets.only(bottom: 3),
       child: DesktopButton(
         key: ValueKey('library-record-${r.ref.key}'),
+        radius: 8,
+        selectedBorder: true,
         kind: DesktopButtonKind.quiet,
         selected: selected,
         onPressed: () => model.select(r.ref),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+        // CSS border-box includes a 1px border outside its 12/14px padding.
+        padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 15),
         alignment: Alignment.topLeft,
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -679,20 +682,26 @@ class _LibraryPageState extends State<LibraryPage> {
                       color: selected ? c.accent : c.ink,
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 5),
-                    child: Text(
-                      r.description,
-                      style: libraryText(
-                        context,
-                        13,
-                        height: 1.7,
-                        color: c.muted,
+                  if (r.description.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 5),
+                      child: Text(
+                        r.description,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: libraryText(
+                          context,
+                          13,
+                          height: 1.7,
+                          color: c.muted,
+                        ),
                       ),
                     ),
-                  ),
                   Padding(
-                    padding: const EdgeInsets.only(top: 8),
+                    // Adjacent CSS margins collapse: max(summary bottom5, meta top8).
+                    padding: EdgeInsets.only(
+                      top: r.description.isEmpty ? 8 : 3,
+                    ),
                     child: Text(
                       r.type.name,
                       style: libraryText(context, 12, color: c.muted),
@@ -712,18 +721,16 @@ class _LibraryPageState extends State<LibraryPage> {
                                 vertical: 1,
                               ),
                               decoration: BoxDecoration(
-                                color: selected
-                                    ? c.paper.withValues(alpha: .6)
-                                    : c.rail,
+                                color: selected ? c.paper : c.rail,
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Text(
                                 tag.name,
                                 style: libraryText(
                                   context,
-                                  11,
+                                  12,
                                   height: 1.5,
-                                  color: selected ? c.accent : c.muted,
+                                  color: c.muted,
                                 ),
                               ),
                             ),
