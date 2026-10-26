@@ -1,0 +1,65 @@
+import 'package:flutter/material.dart';
+import 'workspace_source.dart';
+
+class WorkspaceController extends ChangeNotifier {
+  WorkspaceController(this.source);
+  final WorkspaceSource source;
+  WorkspaceLocation location = const WorkspaceLocation(WorkspacePage.library);
+  Brightness brightness = Brightness.light;
+  WorkspaceLoad load = WorkspaceLoad.idle;
+  WorkspaceSummary? summary;
+  WorkspaceFailure? failure;
+  final _back = <WorkspaceLocation>[];
+  int _generation = 0;
+  bool _closed = false;
+  bool get canGoBack => _back.isNotEmpty;
+
+  void navigate(WorkspacePage page, {String? objectId, bool remember = false}) {
+    if (_closed) return;
+    if (remember) _back.add(location);
+    location = WorkspaceLocation(page, objectId: objectId);
+    notifyListeners();
+  }
+
+  void goBack() {
+    if (_closed || _back.isEmpty) return;
+    location = _back.removeLast();
+    notifyListeners();
+  }
+
+  void setBrightness(Brightness value) {
+    if (_closed || value == brightness) return;
+    brightness = value;
+    notifyListeners();
+  }
+
+  Future<void> refresh() async {
+    if (_closed) return;
+    final generation = ++_generation;
+    load = WorkspaceLoad.loading;
+    failure = null;
+    notifyListeners();
+    try {
+      final result = await source.loadSummary();
+      if (_closed || generation != _generation) return;
+      summary = result;
+      load = result.isEmpty ? WorkspaceLoad.empty : WorkspaceLoad.ready;
+    } on WorkspaceFailure catch (error) {
+      if (_closed || generation != _generation) return;
+      failure = error;
+      load = WorkspaceLoad.error;
+    } catch (_) {
+      if (_closed || generation != _generation) return;
+      failure = const WorkspaceFailure('unavailable', '暂时无法读取，请稍后重试。');
+      load = WorkspaceLoad.error;
+    }
+    notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _closed = true;
+    _generation++;
+    super.dispose();
+  }
+}

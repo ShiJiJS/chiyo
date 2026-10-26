@@ -7,8 +7,9 @@ import 'ui.dart';
 /// The native caption stays available until these controls have been installed.
 /// Closing follows the existing native close event (including tray behavior).
 class DesktopWindowFrame extends StatefulWidget {
-  const DesktopWindowFrame({super.key, required this.child});
+  const DesktopWindowFrame({super.key, required this.child, this.caption});
   final Widget child;
+  final String? caption;
   @override
   State<DesktopWindowFrame> createState() => _DesktopWindowFrameState();
 }
@@ -112,7 +113,21 @@ class _DesktopWindowFrameState extends State<DesktopWindowFrame> {
                       behavior: HitTestBehavior.opaque,
                       onPanStart: (_) => _command('drag'),
                       onDoubleTap: () => _command('toggleMaximize'),
-                      child: const SizedBox.expand(),
+                      child: widget.caption == null
+                          ? const SizedBox.expand()
+                          : Container(
+                              alignment: Alignment.centerLeft,
+                              padding: const EdgeInsets.only(left: 14),
+                              child: Text(
+                                widget.caption!,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: UiPalette.of(context).muted,
+                                ),
+                              ),
+                            ),
                     ),
                   ),
                   _button('最小化', Icons.remove, 'minimize'),
