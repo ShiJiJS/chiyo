@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:info_desktop/workspace/preview_workspace.dart';
 import 'package:info_desktop/desktop_fonts.dart';
+import 'package:info_desktop/workspace/library_page.dart';
 
 /// Real shared widgets rendered offscreen with installed platform fonts. This
 /// evidence is explicitly not a native desktop / OS input verification.
@@ -117,6 +118,33 @@ void main() {
             'height': rect.height,
           };
         }
+        final model = tester
+            .widget<LibraryPage>(find.byType(LibraryPage))
+            .controller;
+        final record = model.results!.items.singleWhere(
+          (r) => r.ref.id == 'azure',
+        );
+        final row = find.byKey(
+          const ValueKey('library-record-information:azure'),
+        );
+        for (final entry in {
+          'row-name': record.name,
+          'row-summary': record.description,
+          'row-type': record.type.name,
+          'row-tag': record.tags.first.name,
+        }.entries) {
+          final target = find.descendant(
+            of: row,
+            matching: find.text(entry.value),
+          );
+          final rect = tester.getRect(target);
+          libraryGeometry[entry.key] = {
+            'x': rect.left,
+            'y': rect.top,
+            'width': rect.width,
+            'height': rect.height,
+          };
+        }
         if (libraryGeometry.isNotEmpty) {
           await tester.runAsync(
             () => File('$prefix-library-geometry.json').writeAsString(
@@ -139,11 +167,53 @@ void main() {
         }
 
         await capture('shell');
+
+        await tester.tap(find.byKey(const ValueKey('library-type-filter')));
+        await tester.pumpAndSettle();
+        final popup = find.byWidgetPredicate(
+          (w) =>
+              w is Material &&
+              w.clipBehavior == Clip.antiAlias &&
+              w.shape is RoundedRectangleBorder &&
+              (w.shape! as RoundedRectangleBorder).borderRadius
+                      .resolve(TextDirection.ltr)
+                      .topLeft ==
+                  const Radius.circular(8),
+        );
+        expect(popup, findsOneWidget);
+        final menuRect = tester.getRect(popup),
+            anchorRect = tester.getRect(
+              find.byKey(const ValueKey('library-type-filter')),
+            );
+        await tester.runAsync(
+          () => File('$prefix-library-menu-geometry.json').writeAsString(
+            jsonEncode({
+              'menu': {
+                'x': menuRect.left,
+                'y': menuRect.top,
+                'width': menuRect.width,
+                'height': menuRect.height,
+              },
+              'anchor': {
+                'x': anchorRect.left,
+                'y': anchorRect.top,
+                'width': anchorRect.width,
+                'height': anchorRect.height,
+              },
+            }),
+          ),
+        );
+        await capture('library-type-menu');
+        await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+        await tester.pumpAndSettle();
         await tester.tap(find.byKey(const ValueKey('preview-guide')));
         await tester.pumpAndSettle();
         await capture('dialog');
+        await tester.ensureVisible(find.text('文本'));
+        await tester.pumpAndSettle();
         await tester.tap(find.text('文本'));
         await tester.pumpAndSettle();
+        expect(find.text('多行文本'), findsOneWidget);
         await capture('menu');
         await tester.sendKeyEvent(LogicalKeyboardKey.escape);
         await tester.pumpAndSettle();

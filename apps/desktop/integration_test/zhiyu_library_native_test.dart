@@ -45,6 +45,7 @@ void main() {
           .controller;
       Future<void> tap(Finder target) async {
         await tester.ensureVisible(target);
+        await tester.pumpAndSettle();
         await tester.tap(target);
         await tester.pumpAndSettle();
         expect(tester.takeException(), isNull);
@@ -213,6 +214,42 @@ void main() {
       await tap(find.byKey(const ValueKey('library-edit-save')));
       expect(find.byType(DesktopDialog), findsNothing);
       checks.add('native-rendered-large-text-edit-and-save');
+      tester.platformDispatcher.textScaleFactorTestValue = 1;
+      await tester.pumpAndSettle();
+      const azure = WorkspaceRecordRef(
+        WorkspaceRecordKind.information,
+        'azure',
+      );
+      await tap(find.byKey(const ValueKey('library-record-actions')));
+      await tap(find.text('内容版本'));
+      await tap(find.byKey(const ValueKey('library-version-1')));
+      await screenshot('revision-compare-1280-dark');
+      await tap(find.byKey(const ValueKey('library-restore-version')));
+      expect((await model.source.readDetail(azure)).version, 3);
+      checks.add('native-widget-revision-comparison-restore-and-readback');
+      await tap(find.byKey(const ValueKey('library-record-actions')));
+      await tap(find.text('移到回收站'));
+      await tap(find.byKey(const ValueKey('library-recycle-submit')));
+      expect((await model.source.loadSummary()).records, 30);
+      await tap(find.byKey(const ValueKey('library-open-recycle')));
+      final entry = (await model.source.queryRecycled()).items.singleWhere(
+        (e) => e.record.ref == azure,
+      );
+      await screenshot('recycle-1280-dark');
+      await tap(find.byKey(ValueKey('library-recycle-view-${entry.id}')));
+      await tap(find.byKey(const ValueKey('library-recycle-submit')));
+      expect((await model.source.readDetail(azure)).version, 5);
+      await tap(find.text('查看已恢复资料'));
+      expect(model.selection, azure);
+      checks.add('native-widget-whole-record-recycle-restore-and-return');
+      await tap(find.byKey(const ValueKey('preview-guide')));
+      await tap(find.byKey(const ValueKey('preview-dataset-stress')));
+      expect(model.results!.total, 208);
+      await screenshot('stress-1280-dark');
+      await tap(find.byTooltip('下一页'));
+      expect(model.query.offset, 50);
+      checks.add('native-widget-pressure-fixture-and-pagination');
+
       await File('$directory/native-checks.json').writeAsString(
         const JsonEncoder.withIndent('  ').convert({
           'platform': 'macos',
@@ -226,7 +263,7 @@ void main() {
           'inputScope':
               'native Flutter framebuffer and Widget input; own AppKit window/menu only; no global OS input',
           'status':
-              'in-progress; directory/tag operations, relation editing, revisions/recycle and final fidelity audit still pending',
+              'in-progress; current-source browsing/edit, revision/recycle and pressure coverage; full R01-R04 geometry/motion and actual OS input remain pending',
         }),
       );
       await tester.pumpWidget(const SizedBox());
