@@ -61,6 +61,10 @@ abstract interface class WorkspaceSource {
   Future<WorkspaceRecordReceipt> changeRecord(WorkspaceRecordChange change);
   Future<WorkspaceSaveResult> saveRecord(WorkspaceEdit edit);
   Future<WorkspaceSaveResult> createRecord(WorkspaceCreate draft);
+
+  /// null means confirmed never committed. Read failures must throw instead.
+  /// This returns no content, including after recycle expiry or permanent purge.
+  Future<WorkspaceOperationReceipt?> recordOperationReceipt(String operationId);
   Future<WorkspaceFileHistory> loadFileHistory(
     WorkspaceRecordRef record,
     String fieldKey,

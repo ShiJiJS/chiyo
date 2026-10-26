@@ -237,6 +237,9 @@ extension _SampleWorkspaceHistory on SampleWorkspaceSource {
       throw const WorkspaceFailure('validation', '操作身份不能为空。');
     }
     final previous = _recordOperations[change.operationId];
+    if (_operations.containsKey(change.operationId)) {
+      throw const WorkspaceFailure('operation_conflict', '同一次操作不能用于不同内容。');
+    }
     if (previous != null) {
       if (previous.fingerprint != fingerprint) {
         throw const WorkspaceFailure('operation_conflict', '同一次操作不能用于不同内容。');
@@ -355,6 +358,11 @@ extension _SampleWorkspaceHistory on SampleWorkspaceSource {
       receipt: receipt,
     );
     _changes.add(ref);
+    _recordCommitted(
+      change.operationId,
+      WorkspaceOperationIntent.change(change),
+      receipt,
+    );
     return receipt;
   }
 }

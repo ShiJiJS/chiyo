@@ -67,6 +67,65 @@ class WorkspaceRecycleResults {
 
 enum WorkspaceRecordAction { recycle, restoreRevision, restoreRecycled, purge }
 
+enum WorkspaceOperationKind {
+  create,
+  edit,
+  recycle,
+  restoreRevision,
+  restoreRecycled,
+  purge;
+
+  static WorkspaceOperationKind lifecycle(WorkspaceRecordAction action) =>
+      WorkspaceOperationKind.values.byName(action.name);
+}
+
+/// Only the identity/version scope of a command, never its field values.
+class WorkspaceOperationIntent {
+  const WorkspaceOperationIntent({
+    required this.kind,
+    this.ref,
+    this.typeId,
+    this.expectedVersion,
+    this.revisionVersion,
+    this.entryId,
+    this.expectedCatalogVersion,
+  });
+  factory WorkspaceOperationIntent.change(WorkspaceRecordChange change) =>
+      WorkspaceOperationIntent(
+        kind: WorkspaceOperationKind.lifecycle(change.action),
+        ref: change.ref,
+        expectedVersion: change.expectedVersion,
+        revisionVersion: change.revisionVersion,
+        entryId: change.entryId,
+        expectedCatalogVersion: change.expectedCatalogVersion,
+      );
+  final WorkspaceOperationKind kind;
+  final WorkspaceRecordRef? ref;
+  final String? typeId, entryId;
+  final int? expectedVersion, revisionVersion, expectedCatalogVersion;
+
+  bool matches(WorkspaceOperationIntent other) =>
+      kind == other.kind &&
+      ref == other.ref &&
+      typeId == other.typeId &&
+      entryId == other.entryId &&
+      expectedVersion == other.expectedVersion &&
+      revisionVersion == other.revisionVersion &&
+      expectedCatalogVersion == other.expectedCatalogVersion;
+}
+
+/// Committed fact remains queryable after content has been permanently erased.
+class WorkspaceOperationReceipt {
+  const WorkspaceOperationReceipt({
+    required this.operationId,
+    required this.intent,
+    required this.result,
+  });
+  final String operationId;
+  final WorkspaceOperationIntent intent;
+  final WorkspaceRecordReceipt result;
+}
+
 class WorkspaceRecordChange {
   const WorkspaceRecordChange({
     required this.operationId,
