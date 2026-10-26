@@ -1,0 +1,8 @@
+00:00 +0: loading /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_history_test.dart
+00:00 +0: (setUpAll)
+00:00 +0: real library menu compares full versions, keeps failure visible and restores a new version
+00:01 +1: recycle and restore from actual sidebar retain the original query and reread restored content
+00:02 +2: permanent purge needs a second explicit action, and a failed submission retains the snapshot
+00:03 +3: dark large-text comparison keeps actions reachable and stale restore requires rereading
+00:03 +4: (tearDownAll)
+00:03 +4: All tests passed!
