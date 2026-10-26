@@ -5,6 +5,8 @@ import 'package:info_desktop/desktop_controls.dart';
 import 'package:info_desktop/ui_palette.dart';
 import 'package:info_desktop/workspace/preview_workspace.dart';
 import 'package:info_desktop/workspace/zhiyu_theme.dart';
+import 'package:info_desktop/workspace/zhiyu_app.dart';
+import 'package:info_desktop/workspace/workspace_source.dart';
 
 void main() {
   Future<void> start(
@@ -223,6 +225,77 @@ void main() {
       );
       await tester.tap(find.text('不可用'));
       expect(calls, 1);
+    },
+  );
+
+  testWidgets(
+    'a shared refresh preserves the editing selection and active IME composition',
+    (tester) async {
+      await start(tester);
+      await guide(tester);
+      final input = find.byKey(const ValueKey('preview-text-input'));
+      await tester.ensureVisible(input);
+      await tester.showKeyboard(input);
+      final controller = tester.widget<TextField>(input).controller!;
+      final composing = TextEditingValue(
+        text: controller.text,
+        selection: const TextSelection(baseOffset: 2, extentOffset: 4),
+        composing: const TextRange(start: 0, end: 5),
+      );
+      tester.testTextInput.updateEditingValue(composing);
+      await tester.pump();
+      final source = tester
+          .widget<ZhiyuApp>(find.byType(ZhiyuApp))
+          .controller
+          .source;
+      final other = await source.readDetail(
+        const WorkspaceRecordRef(WorkspaceRecordKind.information, 'aliyun'),
+      );
+      await source.saveRecord(
+        WorkspaceEdit(
+          operationId: 'ime-other-record-refresh',
+          expectedVersion: other.version,
+          record: other.record.copyWith(name: '另一条资料的修改'),
+          values: {},
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(controller.value, composing);
+      tester.testTextInput.updateEditingValue(
+        const TextEditingValue(
+          text: '中文组合输入已提交',
+          selection: TextSelection.collapsed(offset: 9),
+        ),
+      );
+      await tester.pump();
+      expect(controller.text, '中文组合输入已提交');
+      expect(controller.value.composing, TextRange.empty);
+    },
+  );
+
+  testWidgets(
+    'a failed sample save preserves the draft and explicit retry updates shared data',
+    (tester) async {
+      await start(tester);
+      await guide(tester);
+      final input = find.byKey(const ValueKey('preview-text-input'));
+      await tester.ensureVisible(input);
+      await tester.enterText(input, '日本服务器 · 新草稿');
+      await tester.ensureVisible(find.text('下次保存失败'));
+      await tester.tap(find.text('下次保存失败'));
+      await tester.ensureVisible(find.byKey(const ValueKey('preview-action')));
+      await tester.tap(find.byKey(const ValueKey('preview-action')));
+      await tester.pumpAndSettle();
+      expect(find.text('保存失败，输入已保留，请重试。'), findsOneWidget);
+      expect(tester.widget<TextField>(input).controller!.text, '日本服务器 · 新草稿');
+      expect(find.text('已保存到预览资料'), findsNothing);
+      await tester.tap(find.byKey(const ValueKey('preview-action')));
+      await tester.pumpAndSettle();
+      expect(find.text('已保存到预览资料'), findsOneWidget);
+      await tester.tap(find.text('完成'));
+      await tester.pumpAndSettle();
+      await guide(tester);
+      expect(tester.widget<TextField>(input).controller!.text, '日本服务器 · 新草稿');
     },
   );
 }

@@ -287,8 +287,11 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
   private func configureInterfacePreview(_ controller: FlutterViewController) {
     title = "知予 · 界面预览·示例数据"
     delegate = self
+    // This is an in-process Cocoa editor, not a credential/data service. Keep
+    // the same secure-input UI seam that the production forms already use.
+    secretEditor = NativeSecretEditor(window: self, messenger: controller.engine.binaryMessenger)
     // Ordinary text editing/accessibility is shared with production. Secret
-    // editors, directories, file panels, notifications and database channels
+    // execution, directories, file panels, notifications and database channels
     // are deliberately absent from this runner mode.
     textFieldAccessibility = NativeTextFieldAccessibility(view: controller.view)
     let accessibility = FlutterMethodChannel(name: "agent_info_manage/text_field_accessibility",
@@ -315,7 +318,7 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
         self.configurePreviewAppearance()
         result(["isolated": true, "title": self.title,
                 "applicationId": Bundle.main.bundleIdentifier ?? "",
-                "productionServices": self.desktopReady || self.focusedFill != nil || self.secretEditor != nil,
+                "productionServices": self.desktopReady || self.focusedFill != nil,
                 "savedDirectories": self.toolAccess != nil])
       case "setNavigationEnabled":
         guard let enabled = call.arguments as? Bool else {
@@ -331,6 +334,35 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
         } catch {
           result(FlutterError(code: "preview_evidence_failed", message: "Temporary evidence directory unavailable", details: nil))
         }
+      case "activateMenu":
+        let action: Selector
+        switch call.arguments as? String {
+        case "settings": action = #selector(AppDelegate.openSettings(_:))
+        case "search": action = #selector(AppDelegate.searchApprovals(_:))
+        default: result(FlutterMethodNotImplemented); return
+        }
+        guard let menu = NSApp.mainMenu, let item = self.findMenuItem(action, in: menu) else {
+          result(false); return
+        }
+        item.menu?.update()
+        guard item.isEnabled else { result(false); return }
+        result(NSApp.sendAction(action, to: item.target, from: item))
+      case "setContentSize":
+        guard let size = call.arguments as? [String: NSNumber],
+              let width = size["width"]?.doubleValue,
+              let height = size["height"]?.doubleValue,
+              width.isFinite, height.isFinite,
+              (600...1600).contains(width), (400...1000).contains(height) else {
+          result(FlutterError(code: "invalid_preview_size", message: "Invalid preview content size", details: nil)); return
+        }
+        self.setContentSize(NSSize(width: width, height: height))
+        result(nil)
+      case "quit":
+        result(nil)
+        DispatchQueue.main.async { self.quitFromMenu() }
+      case "close":
+        result(nil)
+        DispatchQueue.main.async { self.performClose(nil) }
       default: result(FlutterMethodNotImplemented)
       }
     }
@@ -354,6 +386,14 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
       item.title = "知予"
       item.submenu?.title = "知予"
     }
+  }
+
+  private func findMenuItem(_ action: Selector, in menu: NSMenu) -> NSMenuItem? {
+    for item in menu.items {
+      if item.action == action { return item }
+      if let submenu = item.submenu, let found = findMenuItem(action, in: submenu) { return found }
+    }
+    return nil
   }
 
   private func readAvailability(_ result: @escaping FlutterResult) {

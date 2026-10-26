@@ -42,7 +42,6 @@ class DesktopButton extends StatefulWidget {
 
 class _DesktopButtonState extends State<DesktopButton> {
   final _states = WidgetStatesController();
-  bool _pressed = false;
   @override
   void initState() {
     super.initState();
@@ -50,9 +49,6 @@ class _DesktopButtonState extends State<DesktopButton> {
   }
 
   void _changed() {
-    final pressed = _states.value.contains(WidgetState.pressed);
-    if (_pressed == pressed) return;
-    _pressed = pressed;
     if (SchedulerBinding.instance.schedulerPhase ==
         SchedulerPhase.persistentCallbacks) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -90,7 +86,9 @@ class _DesktopButtonState extends State<DesktopButton> {
       }
       if (widget.selected) return c.selected;
       if (states.contains(WidgetState.hovered)) return c.nav;
-      return quiet ? Colors.transparent : c.paper;
+      // Match CSS premultiplied-alpha interpolation when a quiet button fades
+      // from transparent to its hover surface, without an intermediate dark flash.
+      return quiet ? c.nav.withValues(alpha: 0) : c.paper;
     }
 
     Widget action = Opacity(
@@ -98,6 +96,10 @@ class _DesktopButtonState extends State<DesktopButton> {
       child: AnimatedContainer(
         duration: DesktopMotion.feedbackOf(context),
         curve: Curves.ease,
+        decoration: BoxDecoration(
+          color: background(_states.value),
+          borderRadius: BorderRadius.circular(7),
+        ),
         transform: Matrix4.translationValues(
           0,
           enabled && _states.value.contains(WidgetState.pressed) ? 1 : 0,
@@ -111,7 +113,9 @@ class _DesktopButtonState extends State<DesktopButton> {
             animationDuration: DesktopMotion.feedbackOf(context),
             alignment: widget.alignment,
             foregroundColor: WidgetStatePropertyAll(ink),
-            backgroundColor: WidgetStateProperty.resolveWith(background),
+            // Material does not tween this color on the pinned Flutter SDK.
+            // Keep the CSS ease transition in the shared animated surface.
+            backgroundColor: const WidgetStatePropertyAll(Colors.transparent),
             overlayColor: const WidgetStatePropertyAll(Colors.transparent),
             splashFactory: NoSplash.splashFactory,
             padding: WidgetStatePropertyAll(widget.padding),

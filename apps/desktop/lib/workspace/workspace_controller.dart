@@ -10,14 +10,29 @@ class WorkspaceController extends ChangeNotifier {
   WorkspaceSummary? summary;
   WorkspaceFailure? failure;
   final _back = <WorkspaceLocation>[];
+  final _locations = <WorkspacePage, WorkspaceLocation>{};
   int _generation = 0;
   bool _closed = false;
   bool get canGoBack => _back.isNotEmpty;
 
-  void navigate(WorkspacePage page, {String? objectId, bool remember = false}) {
+  void navigate(
+    WorkspacePage page, {
+    String? objectId,
+    bool remember = false,
+    WorkspaceQuery? query,
+    double? scrollOffset,
+    bool clearSelection = false,
+  }) {
     if (_closed) return;
     if (remember) _back.add(location);
-    location = WorkspaceLocation(page, objectId: objectId);
+    _locations[location.page] = location;
+    final prior = _locations[page];
+    location = WorkspaceLocation(
+      page,
+      objectId: clearSelection ? null : objectId ?? prior?.objectId,
+      query: query ?? prior?.query,
+      scrollOffset: scrollOffset ?? prior?.scrollOffset ?? 0,
+    );
     notifyListeners();
   }
 

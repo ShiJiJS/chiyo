@@ -1,3 +1,6 @@
+import 'workspace_records.dart';
+export 'workspace_records.dart';
+
 /// Frontend-only summaries and failures. No database, authorization proof,
 /// secret material or operating-system handle crosses this boundary.
 class WorkspaceSummary {
@@ -11,13 +14,17 @@ class WorkspaceSummary {
   bool get isEmpty => records == 0 && pending == 0 && proposals == 0;
 }
 
-class WorkspaceFailure implements Exception {
-  const WorkspaceFailure(this.code, this.message);
-  final String code, message;
-}
-
 abstract interface class WorkspaceSource {
+  /// Invalidates UI projections; null means a reset or a catalog change.
+  Stream<WorkspaceRecordRef?> get changes;
   Future<WorkspaceSummary> loadSummary();
+  Future<WorkspaceCatalog> loadCatalog();
+  Future<WorkspaceResults> queryRecords(
+    WorkspaceQuery query, {
+    WorkspaceRecordRef? keepSelection,
+  });
+  Future<WorkspaceDetail> readDetail(WorkspaceRecordRef ref);
+  Future<WorkspaceSaveResult> saveRecord(WorkspaceEdit edit);
 }
 
 enum WorkspaceLoad { idle, loading, ready, empty, error }
@@ -36,7 +43,14 @@ enum WorkspacePage {
 /// Identity is separate from display text. Each page can retain its own query,
 /// selection and scroll state while another destination is open.
 class WorkspaceLocation {
-  const WorkspaceLocation(this.page, {this.objectId});
+  const WorkspaceLocation(
+    this.page, {
+    this.objectId,
+    this.query,
+    this.scrollOffset = 0,
+  });
   final WorkspacePage page;
   final String? objectId;
+  final WorkspaceQuery? query;
+  final double scrollOffset;
 }

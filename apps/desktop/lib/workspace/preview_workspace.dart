@@ -10,6 +10,7 @@ import 'workspace_controller.dart';
 import 'workspace_source.dart';
 import 'zhiyu_app.dart';
 import 'mac_preview_desktop.dart';
+import 'workspace_records_controller.dart';
 
 /// Only the isolated composition root knows which provider is a sample.
 /// U02–U07 register their production widgets through pageBuilder.
@@ -108,7 +109,14 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
                 style: TextStyle(fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 10),
-              const _ControlSample(),
+              _ControlSample(
+                source: _source,
+                failNextSave: () =>
+                    _source.nextSaveFailure = const WorkspaceFailure(
+                      'sample_save_failed',
+                      '保存失败，输入已保留，请重试。',
+                    ),
+              ),
             ],
           ),
           actions: [
@@ -175,13 +183,68 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
 }
 
 class _ControlSample extends StatefulWidget {
-  const _ControlSample();
+  const _ControlSample({required this.source, required this.failNextSave});
+  final WorkspaceSource source;
+  final VoidCallback failNextSave;
   @override
   State<_ControlSample> createState() => _ControlSampleState();
 }
 
 class _ControlSampleState extends State<_ControlSample> {
   String _selection = '文本';
+  late final WorkspaceRecordsController _records;
+  final _name = TextEditingController();
+  WorkspaceDetail? _draft;
+  bool _dirty = false;
+  static int _nextOperationId = 0;
+  @override
+  void initState() {
+    super.initState();
+    _records = WorkspaceRecordsController(widget.source)..addListener(_changed);
+    unawaited(_records.load(const WorkspaceQuery(typeId: 'server')));
+  }
+
+  void _changed() {
+    if (!mounted) return;
+    final detail = _records.detail;
+    if (!_dirty && !_name.value.composing.isValid && detail != null) {
+      _draft = detail;
+      if (_name.text != detail.record.name) _name.text = detail.record.name;
+    }
+    setState(() {});
+  }
+
+  Future<void> _save() async {
+    final draft = _draft;
+    if (draft == null) return;
+    final submittedName = _name.text;
+    final result = await _records.save(
+      WorkspaceEdit(
+        operationId: 'preview-control-${_nextOperationId++}',
+        expectedVersion: draft.version,
+        record: draft.record.copyWith(name: submittedName),
+        values: const {},
+      ),
+    );
+    if (!mounted) return;
+    if (result case WorkspaceSaved(:final detail)) {
+      _draft = detail;
+      if (_name.text == submittedName) {
+        _dirty = false;
+        _name.text = detail.record.name;
+      }
+      DesktopFeedback.show(context, '已保存到预览资料');
+    }
+  }
+
+  @override
+  void dispose() {
+    _records.removeListener(_changed);
+    _records.dispose();
+    _name.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -193,7 +256,8 @@ class _ControlSampleState extends State<_ControlSample> {
         children: [
           DesktopButton(
             key: const ValueKey('preview-action'),
-            onPressed: () => DesktopFeedback.show(context, '已保存到预览资料'),
+            onPressed: _draft == null ? null : _save,
+            busy: _records.saveState == WorkspaceSaveState.saving,
             child: const Text('保存'),
           ),
           const DesktopButton(onPressed: null, child: Text('不可用')),
@@ -213,9 +277,36 @@ class _ControlSampleState extends State<_ControlSample> {
         ],
       ),
       const SizedBox(height: 12),
-      const TextField(
-        key: ValueKey('preview-text-input'),
-        decoration: InputDecoration(labelText: '示例输入'),
+      TextField(
+        key: const ValueKey('preview-text-input'),
+        controller: _name,
+        enabled: _records.saveState != WorkspaceSaveState.saving,
+        onChanged: (_) => _dirty = true,
+        decoration: InputDecoration(
+          labelText: '示例输入',
+          errorText: _records.saveFailure?.fieldErrors['name'],
+        ),
+      ),
+      if (_records.saveFailure != null)
+        Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: Text(
+            _records.saveFailure!.message,
+            style: TextStyle(color: UiPalette.of(context).danger),
+          ),
+        ),
+      if (_records.failure != null)
+        Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: Text('示例资料暂不可用：${_records.failure!.message}'),
+        ),
+      Align(
+        alignment: Alignment.centerLeft,
+        child: DesktopButton(
+          kind: DesktopButtonKind.quiet,
+          onPressed: widget.failNextSave,
+          child: const Text('下次保存失败'),
+        ),
       ),
       const SizedBox(height: 12),
       DesktopSelect<String>(
