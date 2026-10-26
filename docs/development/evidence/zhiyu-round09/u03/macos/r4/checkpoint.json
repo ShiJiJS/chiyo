@@ -1,0 +1,198 @@
+{
+  "createdAt": "2026-10-26T20:44:43.652943+00:00",
+  "sourceCommit": "2bb678dfbc772ac62127fa1aed162bb8bd71c209",
+  "branch": "codex/zhiyu-macos",
+  "goalStatus": "active",
+  "issue64": {
+    "state": "OPEN",
+    "completed": 3,
+    "total": 7,
+    "next": "Whole-ticket state and interface audit, S5/OS gates; then continueU04-U07"
+  },
+  "scope": "Fictional Owner credential lifecycle; immutable material metadata only, no secrets/DB/grants/execution.",
+  "platform": {
+    "system": "Darwin",
+    "release": "27.0.0",
+    "macOS": "27.0.1",
+    "machine": "arm64",
+    "DPR": 1,
+    "sdk": {
+      "frameworkVersion": "3.47.7",
+      "channel": "[user-branch]",
+      "repositoryUrl": "https://github.com/flutter/flutter.git",
+      "frameworkRevision": "abaf9c523780a608bd46686fd5e53740a07077f8",
+      "frameworkCommitDate": "2026-10-08 09:51:21 -0700",
+      "engineRevision": "deb287481e3ce9468f3434937ced4240a70539ca",
+      "engineCommitDate": "2026-10-07 17:09:12.000Z",
+      "engineContentHash": "d8a2d6c768c334d53e16277f837970ffa1e2de81",
+      "engineBuildDate": "2026-10-08 01:51:44.552",
+      "dartSdkVersion": "3.13.5",
+      "devToolsVersion": "2.60.0",
+      "flutterVersion": "3.47.7"
+    },
+    "xcode": "Xcode 27.1\nBuild version 27A9275"
+  },
+  "sourceSha256": {
+    "apps/desktop/lib/workspace/library_credential_lifecycle.dart": "c6984c468190aacd8909e13db934e2c1732f2d72e1ead6c87cf5ec67e3798dce",
+    "apps/desktop/lib/workspace/library_detail.dart": "b676c6d51b1c72d3675df0cef1ed763db8f84a182529827e624fc337b9e11e72",
+    "apps/desktop/lib/workspace/library_page.dart": "38dfca39c1aa51b63d70e18562ede0b0d790f0d497fac5700fe35fb78b4576a3",
+    "apps/desktop/lib/workspace/library_recycle.dart": "960befddf73d4d6160eb9f37dae8f05a393a0ed1394bb050dad27b8eaa9e0ed0",
+    "apps/desktop/lib/workspace/sample_credential_records.dart": "ffd4441a99e70dbf89e05426688921d42ae2a9b669b0ffe97ee7371c8a6c35ae",
+    "apps/desktop/lib/workspace/sample_workspace_credentials.dart": "40efd23471218a22940b582179f2db64ecc481a637a858d67bee5c8d26809fa4",
+    "apps/desktop/lib/workspace/sample_workspace_history.dart": "99541ddab407680b30d8995535fb55947ca924105d56b19438d5012d1c847040",
+    "apps/desktop/lib/workspace/sample_workspace_source.dart": "f707af261972b8458ade7c8ee024c3089e4129931d98d26b40dfd3f36f323025",
+    "apps/desktop/lib/workspace/workspace_credentials.dart": "7199f7fb344155ef004d9cfec7e30b0e646a8b388e59cf9c4db63fb5a34d5881",
+    "apps/desktop/test/credential_lifecycle_test.dart": "181475de8e07d06b82f6f373231535cf603f3fc8b031bd3d59c95ff430563071",
+    "apps/desktop/test/zhiyu_credential_lifecycle_test.dart": "f1586e01bcfc2a1386bd0040cd3a3d9472c7e7c21c44c063303b35541a786b5f",
+    "docs/planning/zhiyu-round09/u03-credential-flow.md": "ed9d035e49bc36939bafca88d263ceb4da95abc90c522dd1dd305032841c1c3e"
+  },
+  "frozenTrackedFilesSha256": {
+    "docs/design/prototypes/round-09-zhiyu/.gitattributes": "be8fff64e0ee0af7a63993677ad78f51872c1457e8ec6f92bc6dc9d8ccf6fb34",
+    "docs/design/prototypes/round-09-zhiyu/README.md": "83cb39534e169a7466ac41e552fce7f43b02b4317cbc41c7673bed8f9c1eda78",
+    "docs/design/prototypes/round-09-zhiyu/app.js": "33cf6e5087237d776f05927996c6d514db404dd7955b3e118974774ba341a8b8",
+    "docs/design/prototypes/round-09-zhiyu/base.css": "8b88bab1dc47654393fff0ee43198b7fc31486c85f054f75adbb32c48522255d",
+    "docs/design/prototypes/round-09-zhiyu/design-notes.md": "6ebeaa6840d1bbddfe0a031f53892cee8e05947ca9377a6d628d727ad1565897",
+    "docs/design/prototypes/round-09-zhiyu/domain-plugin.json": "f3d3532eef70ea5d748d25fcae1029abd3298eb52fcb3a737095448644947be4",
+    "docs/design/prototypes/round-09-zhiyu/fixtures.js": "4d60ad4e87102fd462aca84d27719dc7989828429d650962a4898ba81e97d131",
+    "docs/design/prototypes/round-09-zhiyu/guide.html": "211d1d44ee4026e7bc709183e0c9ca2a318683d5d68503eea5620534c852f788",
+    "docs/design/prototypes/round-09-zhiyu/index.html": "f93205742c87b58c40e0fad10801fa21270fd7e000fc36916dc8d52cd24afa7b",
+    "docs/design/prototypes/round-09-zhiyu/model.js": "9259f18a86a8d04718b9a2fdde7118f7d0ca725ec64b9bd9ea5e3220571f0544",
+    "docs/design/prototypes/round-09-zhiyu/offline.html": "05a65aa7cbff7faf1357533bd4750c6261bceb4a9838dea2fa801087c9764578",
+    "docs/design/prototypes/round-09-zhiyu/plugin-spec.md": "2419309aa8aa6eb8f07ff86a6efbea9d837b88bd8b0cb9a49ac71ef33d5dbca2",
+    "docs/design/prototypes/round-09-zhiyu/reference-manifest.json": "cd1424b7815cccbaca08274aaec49ded8def20863e506082fd3d153eaddd256c",
+    "docs/design/prototypes/round-09-zhiyu/seed.js": "a17338d547ea400cb3b382262210bf370c6973ddc2835883b10423b43c0a6c6d",
+    "docs/design/prototypes/round-09-zhiyu/style.css": "518459f2a96c7fcdc963ab9c193c49965e21dacf7da16f0e91dc1605fea4461d",
+    "docs/design/prototypes/round-09-zhiyu/theme.css": "5e480a0e703f33c675d9edee49acd2a31fe949026c5efc57b64af007a86fd407",
+    "docs/design/prototypes/round-09-zhiyu/util.js": "c53e83500f1b6f3c70fce1534d2e33bb5cf257c63402f23a957ed103ac2d5ed8",
+    "docs/design/prototypes/round-09-zhiyu/workspace.css": "beafe11207a513575caedc72233848c962a107b985c1dfd9618a78733f4ff9b9"
+  },
+  "fontSha256": {
+    "Zhiyu System": "44890958f3e0b997028121ed7c7a789f3f5cce227c7a93ce8f86ec0db26da571",
+    "PingFang SC": "9ff3ce9439fe285cdabb46f9ceb46b1ac58f1ca07e6f4a764e8286db621a0af9",
+    "Menlo": "f2d400484a6aace67980730ec0a9ef24ce9e535a2604f118e6fdc2510021b85f"
+  },
+  "checks": {
+    "runs": [
+      {
+        "log": "raw/related-final.txt",
+        "passed": 138
+      },
+      {
+        "log": "raw/focused-run2.txt",
+        "passed": 9
+      },
+      {
+        "log": "raw/focused-run3-capture.txt",
+        "passed": 9
+      }
+    ],
+    "repeatedScope": "6 source/failure +3 Widget flows, three consecutive final-source runs (full related + two focused); other129 once.",
+    "analysis": "No issues; fatal-infos; lib/workspace, lib/ui_palette.dart and5credential test files.",
+    "format": "49 scoped Dart files, 0 changed.",
+    "screenshots": 7,
+    "review": "All7 viewed full size; last recapture byte-identical to reviewed images. Self review only; no independent review.",
+    "native": "Build only; no new native runtime or OS-input/motion recording.",
+    "notDone": [
+      "Whole U03 state/interface completion audit",
+      "Full R05/R06 S5 and new motion recording",
+      "Real OS input",
+      "Real secure entry/file staging and persistent unknown-operation recovery",
+      "Core transaction, authorization, material backup and actual cleanup integration"
+    ]
+  },
+  "commands": {
+    "cwd": "apps/desktop",
+    "launcher": "../../scripts/dev-macos.sh",
+    "related": [
+      "flutter",
+      "test",
+      "--no-pub",
+      "--reporter",
+      "expanded",
+      "test/credential_lifecycle_test.dart",
+      "test/zhiyu_credential_lifecycle_test.dart",
+      "test/workspace_credentials_test.dart",
+      "test/credential_mutation_test.dart",
+      "test/zhiyu_credentials_test.dart",
+      "test/workspace_content_test.dart",
+      "test/zhiyu_content_test.dart",
+      "test/workspace_entries_test.dart",
+      "test/zhiyu_profile_test.dart",
+      "test/zhiyu_library_fidelity_test.dart",
+      "test/workspace_stress_test.dart",
+      "test/zhiyu_stress_test.dart",
+      "test/zhiyu_history_test.dart",
+      "test/workspace_history_test.dart",
+      "test/zhiyu_relations_test.dart",
+      "test/zhiyu_library_test.dart",
+      "test/workspace_records_test.dart",
+      "test/zhiyu_directory_test.dart",
+      "test/zhiyu_preview_test.dart",
+      "test/workspace_controller_test.dart",
+      "test/desktop_controls_test.dart",
+      "test/desktop_motion_contract_test.dart"
+    ],
+    "focused": [
+      "flutter",
+      "test",
+      "--no-pub",
+      "--reporter",
+      "expanded",
+      "test/credential_lifecycle_test.dart",
+      "test/zhiyu_credential_lifecycle_test.dart"
+    ],
+    "captureDefine": "UI_EVIDENCE_DIR=<new-output-directory>",
+    "analyze": [
+      "flutter",
+      "analyze",
+      "--no-pub",
+      "--fatal-infos",
+      "lib/workspace",
+      "lib/ui_palette.dart",
+      "test/credential_mutation_test.dart",
+      "test/workspace_credentials_test.dart",
+      "test/zhiyu_credentials_test.dart",
+      "test/credential_lifecycle_test.dart",
+      "test/zhiyu_credential_lifecycle_test.dart"
+    ],
+    "build": [
+      "flutter",
+      "build",
+      "macos",
+      "--debug",
+      "--no-pub",
+      "--target",
+      "lib/preview_main.dart"
+    ],
+    "buildEnv": {
+      "XCODE_XCCONFIG_FILE": "apps/desktop/macos/Runner/Configs/Preview.xcconfig (absolute path)",
+      "FLUTTER_MACOS_ARM64_ONLY": "true"
+    }
+  },
+  "fixedPreview": {
+    "path": "apps/desktop/build/macos/Build/Products/Debug/info_desktop.app",
+    "bundleIdentifier": "com.example.infoDesktop.zhiyuPreview",
+    "AgentInfoInterfacePreview": "YES",
+    "architecture": "/Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/build/macos/Build/Products/Debug/info_desktop.app/Contents/MacOS/info_desktop: Mach-O 64-bit executable arm64",
+    "executableSha256": "582e574e4af79d8e3d2935dc3dc4285e69f6ec8d5efaeb26fcfa329523cc0a8e",
+    "kernelBlobSha256": "3fa42b91adf85cb8164bbe064a7cefd7fe1216f56d5eba35a99c724f30d7de47"
+  },
+  "artifactsSha256": {
+    ".gitattributes": "de649f498d42f6721e54ec550c5c1583fa0cb41ccc31af24b54ddf35ce97318d",
+    "README.md": "b01be7f63bbdcdb9b108e81a77b2f4e08b37763f439b80dbc3357193e7b419a5",
+    "actual/credential-1280-dark-200-recycle-unknown.png": "1338ce3a1bbc8baf415879bb5e710a968523c96624d39c0a7e322b4efc400fb1",
+    "actual/credential-1280-dark-200-recycled-review.png": "ac7f61b34ddff0618ae912ebf13e80f1a6b9d613943b88dd085cc49bd00277bf",
+    "actual/credential-1280-dark-200-restored-reading.png": "da6ec2363ca904e19fb8bbfb70ac3ddd67b4aec52eec6527b89b625cfd7dd71a",
+    "actual/credential-1440-dark-purge-failure.png": "ec4d86134dfaabe67cabdb058ea73fe5d41805da6d859b6e3cb9a52b0b63f8de",
+    "actual/credential-1440-dark-purge-review.png": "5f3bc4c77bc3ec8ebed499e0b85c6699b775f11970ad80e64135a0d465b725fe",
+    "actual/credential-1440-light-material-restore-failure.png": "80c604b01e92c8ccd7a1d0015a22e2b90decdcd4d96341a81dbb9449763d475e",
+    "actual/credential-1440-light-material-restore-review.png": "660f904f182088cd65e123d9d25858ca2a202d528f3772c9a674d247beb7916f",
+    "actual/fonts.json": "6a64f84a850c349a6a7db28254cca2fe24ae2904d25a2b28164acf65fa830165",
+    "raw/analyze-final.txt": "da641d3767030e634a1081efbdd9dc38a07bbd3f00385fb71dcf15252d30dbdd",
+    "raw/focused-run2.txt": "d9077d57ef502721fabc15f0aa340bcdbc3c78193097c8443ba9a2a15bd75765",
+    "raw/focused-run3-capture.txt": "2be65dc01845da8763542241f22b8675b3b99dfd9fdb37fe452472c6b7ac63c7",
+    "raw/format-final.txt": "a1f2556b521c9add8e41ee92b1803a3e7f94ed5df0c549ade0b841e8c1f5ebb1",
+    "raw/preview-build-final.txt": "bb928504a91fe0ce4dc0bb921b142b31033cbbf74e92214ba34521fe3f2f22be",
+    "raw/related-final.txt": "10332cbdd03ecce7608ac818efcb3f47bbd047237af8c71836942331c30e29b3"
+  }
+}
