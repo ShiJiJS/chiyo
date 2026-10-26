@@ -23,11 +23,13 @@ class LibraryPage extends StatefulWidget {
     required this.onNavigate,
     this.onModalChanged,
     this.onRetry,
+    this.filePicker,
   });
   final LibraryController controller;
   final void Function(WorkspacePage, String) onNavigate;
   final ValueChanged<bool>? onModalChanged;
   final VoidCallback? onRetry;
+  final WorkspaceFilePicker? filePicker;
   @override
   State<LibraryPage> createState() => _LibraryPageState();
 }
@@ -112,6 +114,7 @@ class _LibraryPageState extends State<LibraryPage> {
         context,
         model,
         detail: create ? null : model.detail,
+        filePicker: widget.filePicker,
       );
       if (!mounted || ref == null) return;
       await model.openRelated(ref, rememberOrigin: create);
@@ -977,6 +980,8 @@ class _LibraryPageState extends State<LibraryPage> {
                         source: model.source,
                         metrics: metrics,
                         revision: model.revision,
+                        filePicker: widget.filePicker,
+                        onModalChanged: widget.onModalChanged,
                         onOpen: model.openRelated,
                         onEdit: model.loadState == WorkspaceLoad.loading
                             ? null

@@ -1,0 +1,67 @@
+{
+  "generator": "scripts/qa/generate-zhiyu-file-fixtures.py",
+  "files": [
+    {
+      "id": "pdf-v1",
+      "asset": "resume-v1.pdf",
+      "filename": "Lin-Yuan-Resume-v1.pdf",
+      "mediaType": "application/pdf",
+      "byteLength": 2075,
+      "sha256": "82789d1286ca9f9213beb6116e8d4deccc2e6ebab5fcb7fc38e0f9701f26ee9d",
+      "pages": [
+        {
+          "asset": "resume-v1-page-1.png",
+          "sha256": "d38ee97c00c6a166572f29dfab4d8dbed2a4a299f5893543c224d05bc9a3fef9",
+          "text": "LIN YUAN\nBackend engineering | Fictional record for interface development\nyuan.lin@example.com | Shanghai\nEDUCATION\nBeichen University - Computer Technology, 2024-2027\nEXPERIENCE\nBackend intern, April-August 2026\nWorked on task scheduling, service monitoring and recovery.\nPROJECT\nTask management tool\nDesigned structured owner-managed information and access workflows.\nSKILLS\nGo / Java / SQL / Linux / Docker\nFictional fixture | version 1 | page 1/1\n"
+        }
+      ]
+    },
+    {
+      "id": "pdf-v2",
+      "asset": "resume-v2.pdf",
+      "filename": "Lin-Yuan-Resume-v2.pdf",
+      "mediaType": "application/pdf",
+      "byteLength": 2884,
+      "sha256": "0c52efe44cbf06f8af2468d25aa06b8c15c13c1f3d887abfdce776da1ac217ad",
+      "pages": [
+        {
+          "asset": "resume-v2-page-1.png",
+          "sha256": "4bfc1b6592fa971f3671a879c75510def5495c81fead3f764f680626207e5a44",
+          "text": "LIN YUAN\nBackend engineering | Fictional record for interface development\nyuan.lin@example.com | Shanghai\nEDUCATION\nBeichen University - Computer Technology, 2024-2027\nEXPERIENCE\nBackend intern, April-August 2026\nWorked on task scheduling, service monitoring and recovery.\nPROJECT\nInformation and credential authorization workspace\nDesigned structured owner-managed information and access workflows.\nSKILLS\nGo / Java / SQL / Linux / Docker\nFictional fixture | version 2 | page 1/2\n"
+        },
+        {
+          "asset": "resume-v2-page-2.png",
+          "sha256": "9813f8c854327ab2bfffd70d01f5d5ae6d03acd7f46eaf4d922ed2937d6884cd",
+          "text": "PROJECT NOTES\nADDITIONAL PROJECT DETAILS\nThis is the second page of an actual bundled PDF.\nThe file-preview UI must display the selected immutable version.\nReplacing or restoring this file creates a new current version.\nNo personal data, account credential or executable content is included.\nFictional fixture | version 2 | page 2/2\n"
+        }
+      ]
+    },
+    {
+      "id": "image",
+      "asset": "geometric.png",
+      "filename": "geometric.png",
+      "mediaType": "image/png",
+      "byteLength": 2742,
+      "sha256": "d1c4e127233476ef0ca11a948a488f45a4b0bacf591562b46189a92d08224f13",
+      "pages": []
+    },
+    {
+      "id": "text",
+      "asset": "maintenance.txt",
+      "filename": "maintenance.txt",
+      "mediaType": "text/plain",
+      "byteLength": 101,
+      "sha256": "e444bef54a26b893855ccb897f2c82df0b9140b5273084d5490cfe82d18cb39b",
+      "pages": []
+    },
+    {
+      "id": "unknown",
+      "asset": "unsupported.bin",
+      "filename": "unsupported.bin",
+      "mediaType": "application/octet-stream",
+      "byteLength": 35,
+      "sha256": "e9f8c06c0a4c7f67f08374c8337960de08822b596bc3ae45e1d12ec53dcded20",
+      "pages": []
+    }
+  ]
+}

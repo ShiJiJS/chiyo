@@ -1,0 +1,4 @@
+Maintenance checklist
+1. Verify host identity.
+2. Check approved access scope.
+3. Record the result.

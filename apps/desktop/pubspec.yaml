@@ -6,6 +6,7 @@ environment:
   sdk: '>=3.9.0 <4.0.0'
 dependencies:
   crypto: 3.0.7
+  markdown: 7.3.1
   flutter:
     sdk: flutter
   info_core:
@@ -25,6 +26,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/fonts/OFL.txt
+    - assets/zhiyu_files/
   fonts:
     - family: ProductSans
       fonts:
