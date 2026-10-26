@@ -1,0 +1,20 @@
+{
+  "checkedAt": "2026-10-26T21:18:00.029544+00:00",
+  "unchangedNativeAndBootstrap": {
+    "apps/desktop/macos/Runner/MainFlutterWindow.swift": {
+      "sha256": "bc24813874c5e4a3db30cc7e2bc964e2a35fca9eefa1dd9950c92d7bc2f6333a",
+      "sameAsVerifiedSource": "8645c10bfa88abe81641e823d0c46d0ee846c913"
+    },
+    "apps/desktop/lib/preview_main.dart": {
+      "sha256": "8ea387c251c40080ddc65e2ae89483a88e56753f8dea3b0d1eb370bfa9355d33",
+      "sameAsVerifiedSource": "8645c10bfa88abe81641e823d0c46d0ee846c913"
+    },
+    "apps/desktop/lib/workspace/mac_preview_desktop.dart": {
+      "sha256": "15adcb657fcfd807a0dd78a066f417c860de21ecf4bed0adb9fd9b12cd8e643a",
+      "sameAsVerifiedSource": "8645c10bfa88abe81641e823d0c46d0ee846c913"
+    }
+  },
+  "scope": "Current U03 composition Widget test guards File/Directory factories, HttpClient creation and six production channels; native handshake is a test stub. Source equality corroborates existing U01 r2 native evidence; no new Cocoa runtime or OS-input claim.",
+  "allowedFilePaths": "System desktop fonts, bundled test assets, test source diagnostics; no personal containers. Not a security sandbox.",
+  "nextFrontendGap": "Generic ordinary save/revision/recycle unknown-outcome receipt query and frozen intent remain in U03."
+}
