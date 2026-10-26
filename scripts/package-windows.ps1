@@ -1,7 +1,8 @@
 param(
     [Parameter(Mandatory = $true)][string]$FlutterBin,
     [Parameter(Mandatory = $true)][string]$OutputDirectory,
-    [switch]$Offline
+    [switch]$Offline,
+    [switch]$PackageOnly
 )
 
 # Developer build only. The resulting ZIP needs neither Dart nor Flutter.
@@ -198,4 +199,10 @@ try {
         throw 'Sources changed during extracted verification; the archive is not a verified delivery.'
     }
     Write-Host "Verified development package: $archive"
+    Write-Json "$archive.verified.json" ([ordered]@{
+        archiveSha256=$digest; sourceCommit=$commit; verifiedAtUtc=[DateTime]::UtcNow.ToString('o')
+    })
+    if (-not $PackageOnly) {
+        & (Join-Path $PSScriptRoot 'install-windows-preview.ps1') -ArchivePath $archive -CleanBuildArtifacts
+    }
 } finally { Pop-Location }

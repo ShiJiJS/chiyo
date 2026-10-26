@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 /// Keeps the scrollbar's hit region outside content, including hover/drag.
 /// Explicit scrollbars keep their controller and paint outside this same lane.
 class DesktopScrollBehavior extends MaterialScrollBehavior {
-  const DesktopScrollBehavior();
+  const DesktopScrollBehavior({this.scrollbarGutter = gutter});
   static const gutter = 16.0;
+  final double scrollbarGutter;
 
   @override
   Widget buildScrollbar(
@@ -16,8 +17,8 @@ class DesktopScrollBehavior extends MaterialScrollBehavior {
         axisDirectionToAxis(details.direction) == Axis.horizontal;
     final inset = Padding(
       padding: horizontal
-          ? const EdgeInsets.only(bottom: gutter)
-          : const EdgeInsetsDirectional.only(end: gutter),
+          ? EdgeInsets.only(bottom: scrollbarGutter)
+          : EdgeInsetsDirectional.only(end: scrollbarGutter),
       child: child,
     );
     final existing = context.findAncestorWidgetOfExactType<Scrollbar>();

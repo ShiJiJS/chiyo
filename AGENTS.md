@@ -8,3 +8,7 @@
 
 采用单一领域布局：根目录 `GLOSSARY.md` 和 `docs/adr/`。
 探索或修改项目前，按 `docs/agents/domain.md` 读取相关领域文档。
+
+### Windows delivery
+
+Windows交付与构建清理按 `docs/development/windows-delivery.md` 的“本机安装与清理”执行。

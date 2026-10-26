@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'desktop_motion.dart';
 
 /// Symbol IDs from docs/design/prototypes/round-05/index.html.
 enum PrototypeIconGlyph {
@@ -15,6 +16,8 @@ enum PrototypeIconGlyph {
   file,
   edit,
   key,
+  grid,
+  arrow,
 }
 
 /// An approved round-05 SVG icon, using its original 24-unit geometry.
@@ -55,6 +58,7 @@ class PrototypeIcon extends StatelessWidget {
             opacity == 1
                 ? iconColor
                 : iconColor.withValues(alpha: iconColor.a * opacity),
+            round09: DesktopMotion.enabled(context),
           ),
         ),
       ),
@@ -63,10 +67,11 @@ class PrototypeIcon extends StatelessWidget {
 }
 
 class _PrototypeIconPainter extends CustomPainter {
-  const _PrototypeIconPainter(this.glyph, this.color);
+  const _PrototypeIconPainter(this.glyph, this.color, {this.round09 = false});
 
   final PrototypeIconGlyph glyph;
   final Color color;
+  final bool round09;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -82,10 +87,17 @@ class _PrototypeIconPainter extends CustomPainter {
     final stroke = Paint()
       ..color = color
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.65
+      ..strokeWidth = round09 ? 1.7 : 1.65
       ..strokeCap = StrokeCap.round
       ..strokeJoin = StrokeJoin.round;
 
+    if (round09 ||
+        glyph == PrototypeIconGlyph.grid ||
+        glyph == PrototypeIconGlyph.arrow) {
+      canvas.drawPath(_round09Path(glyph), stroke);
+      canvas.restore();
+      return;
+    }
     // Keep separate SVG elements separate, including their original order.
     switch (glyph) {
       case PrototypeIconGlyph.layers:
@@ -260,11 +272,161 @@ class _PrototypeIconPainter extends CustomPainter {
             ..lineTo(16, 11),
           stroke,
         );
+      case PrototypeIconGlyph.grid:
+      case PrototypeIconGlyph.arrow:
+        break; // Drawn through the approved Round09 path above.
     }
     canvas.restore();
   }
 
   @override
   bool shouldRepaint(_PrototypeIconPainter oldDelegate) =>
-      oldDelegate.glyph != glyph || oldDelegate.color != color;
+      oldDelegate.glyph != glyph ||
+      oldDelegate.color != color ||
+      oldDelegate.round09 != round09;
 }
+
+/// Paths from the frozen Round09 util.js; legacy callers retain their symbols.
+Path _round09Path(PrototypeIconGlyph glyph) => switch (glyph) {
+  PrototypeIconGlyph.arrow =>
+    Path()
+      ..moveTo(5, 12)
+      ..lineTo(19, 12)
+      ..moveTo(13, 6)
+      ..lineTo(19, 12)
+      ..lineTo(13, 18),
+  PrototypeIconGlyph.layers =>
+    Path()
+      ..moveTo(12, 3)
+      ..lineTo(3, 8)
+      ..lineTo(12, 13)
+      ..lineTo(21, 8)
+      ..close()
+      ..moveTo(3, 12)
+      ..lineTo(12, 17)
+      ..lineTo(21, 12)
+      ..moveTo(3, 16)
+      ..lineTo(12, 21)
+      ..lineTo(21, 16),
+  PrototypeIconGlyph.grid =>
+    Path()
+      ..addRect(const Rect.fromLTWH(3, 3, 7, 7))
+      ..addRect(const Rect.fromLTWH(14, 3, 7, 7))
+      ..addRect(const Rect.fromLTWH(3, 14, 7, 7))
+      ..addRect(const Rect.fromLTWH(14, 14, 7, 7)),
+  PrototypeIconGlyph.inbox =>
+    Path()
+      ..addRect(const Rect.fromLTWH(3, 4, 18, 16))
+      ..moveTo(3, 14)
+      ..lineTo(8, 14)
+      ..lineTo(10, 17)
+      ..lineTo(14, 17)
+      ..lineTo(16, 14)
+      ..lineTo(21, 14),
+  PrototypeIconGlyph.folder =>
+    Path()
+      ..moveTo(3, 5)
+      ..lineTo(10, 5)
+      ..lineTo(12, 8)
+      ..lineTo(21, 8)
+      ..lineTo(21, 21)
+      ..lineTo(3, 21)
+      ..close(),
+  PrototypeIconGlyph.search =>
+    Path()
+      ..addOval(const Rect.fromLTWH(3, 3, 14, 14))
+      ..moveTo(15, 15)
+      ..lineTo(21, 21),
+  PrototypeIconGlyph.clock =>
+    Path()
+      ..addOval(const Rect.fromLTWH(2, 2, 20, 20))
+      ..moveTo(12, 6)
+      ..lineTo(12, 12)
+      ..lineTo(16, 15),
+  PrototypeIconGlyph.plus =>
+    Path()
+      ..moveTo(12, 4)
+      ..lineTo(12, 20)
+      ..moveTo(4, 12)
+      ..lineTo(20, 12),
+  PrototypeIconGlyph.tune =>
+    Path()
+      ..moveTo(3, 6)
+      ..lineTo(7, 6)
+      ..moveTo(11, 6)
+      ..lineTo(21, 6)
+      ..moveTo(3, 18)
+      ..lineTo(13, 18)
+      ..moveTo(17, 18)
+      ..lineTo(21, 18)
+      ..moveTo(7, 3)
+      ..lineTo(7, 9)
+      ..moveTo(13, 15)
+      ..lineTo(13, 21)
+      ..moveTo(3, 12)
+      ..lineTo(21, 12),
+  PrototypeIconGlyph.chev =>
+    Path()
+      ..moveTo(9, 5)
+      ..lineTo(16, 12)
+      ..lineTo(9, 19),
+  PrototypeIconGlyph.shield =>
+    Path()
+      ..moveTo(12, 2)
+      ..lineTo(3, 6)
+      ..lineTo(3, 12)
+      ..cubicTo(3, 17, 12, 22, 12, 22)
+      ..cubicTo(12, 22, 21, 17, 21, 12)
+      ..lineTo(21, 6)
+      ..close()
+      ..moveTo(8, 11)
+      ..lineTo(11, 14)
+      ..lineTo(16, 8),
+  PrototypeIconGlyph.link =>
+    Path()
+      ..moveTo(9, 15)
+      ..lineTo(15, 9)
+      ..moveTo(10, 7)
+      ..lineTo(12, 5)
+      ..cubicTo(17, 0, 24, 7, 19, 12)
+      ..lineTo(17, 14)
+      ..moveTo(14, 17)
+      ..lineTo(12, 19)
+      ..cubicTo(7, 24, 0, 17, 5, 12)
+      ..lineTo(7, 10),
+  PrototypeIconGlyph.file =>
+    Path()
+      ..moveTo(5, 2)
+      ..lineTo(14, 2)
+      ..lineTo(19, 7)
+      ..lineTo(19, 22)
+      ..lineTo(5, 22)
+      ..close()
+      ..moveTo(14, 2)
+      ..lineTo(14, 8)
+      ..lineTo(19, 8)
+      ..moveTo(8, 12)
+      ..lineTo(16, 12)
+      ..moveTo(8, 16)
+      ..lineTo(14, 16),
+  PrototypeIconGlyph.edit =>
+    Path()
+      ..moveTo(15, 4)
+      ..lineTo(20, 9)
+      ..moveTo(4, 16)
+      ..lineTo(16, 4)
+      ..quadraticBezierTo(18, 2, 20, 4)
+      ..quadraticBezierTo(22, 6, 20, 8)
+      ..lineTo(8, 20)
+      ..lineTo(4, 20)
+      ..close(),
+  PrototypeIconGlyph.key =>
+    Path()
+      ..addOval(const Rect.fromLTWH(4, 2, 10, 10))
+      ..moveTo(13, 11)
+      ..lineTo(21, 19)
+      ..moveTo(16, 14)
+      ..lineTo(19, 11)
+      ..moveTo(19, 17)
+      ..lineTo(22, 14),
+};

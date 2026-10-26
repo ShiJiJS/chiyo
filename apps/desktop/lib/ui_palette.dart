@@ -15,12 +15,26 @@ class UiPalette extends ThemeExtension<UiPalette> {
     required this.line,
     required this.muted,
     required this.ink,
+    this.brightness = Brightness.light,
+    this.accentForeground,
+    this.navigation,
   });
   final Color accent, strong, selected, rail, canvas, paper, line, muted, ink;
+  final Brightness brightness;
+  final Color? accentForeground;
+  final Color? navigation;
+  Color get nav => navigation ?? rail;
+  Color get onAccent => accentForeground ?? paper;
   Color get brand => strong;
-  Color get success => const Color(0xff27735f);
-  Color get danger => const Color(0xffb54143);
-  Color get warning => const Color(0xff8d651e);
+  Color get success => brightness == Brightness.dark
+      ? const Color(0xff8ecfb2)
+      : const Color(0xff27735f);
+  Color get danger => brightness == Brightness.dark
+      ? const Color(0xfff0a39d)
+      : const Color(0xffb54143);
+  Color get warning => brightness == Brightness.dark
+      ? const Color(0xffdfbc7d)
+      : const Color(0xff8d651e);
   bool get isMono => accent == const Color(0xff333333);
   Color get statusAttention =>
       isMono ? const Color(0xff505055) : const Color(0xff986409);
@@ -35,6 +49,37 @@ class UiPalette extends ThemeExtension<UiPalette> {
   static UiPalette of(BuildContext context) =>
       Theme.of(context).extension<UiPalette>() ??
       forTheme(DesktopColorTheme.purple);
+
+  /// The approved Round09 palette. Legacy preferences remain a separate
+  /// persistence concern until the real-service integration stage.
+  static UiPalette zhiyu(Brightness brightness) => brightness == Brightness.dark
+      ? const UiPalette(
+          accent: Color(0xffc2abea),
+          strong: Color(0xffe4e7ef),
+          selected: Color(0xff393147),
+          rail: Color(0xff20242c),
+          canvas: Color(0xff181b22),
+          paper: Color(0xff242831),
+          line: Color(0xff39414f),
+          muted: Color(0xffa4aebf),
+          ink: Color(0xffe4e7ef),
+          brightness: Brightness.dark,
+          accentForeground: Color(0xff241d31),
+          navigation: Color(0xff2d333f),
+        )
+      : const UiPalette(
+          accent: Color(0xff66528e),
+          strong: Color(0xff242936),
+          selected: Color(0xffede8f5),
+          rail: Color(0xfff7f8fa),
+          canvas: Color(0xfff1f2f5),
+          paper: Color(0xffffffff),
+          line: Color(0xffdce1e8),
+          muted: Color(0xff586477),
+          ink: Color(0xff242936),
+          accentForeground: Color(0xffffffff),
+          navigation: Color(0xffe9ecf1),
+        );
   static UiPalette forTheme(DesktopColorTheme theme) {
     final values = switch (theme) {
       DesktopColorTheme.purple => [
@@ -106,6 +151,9 @@ class UiPalette extends ThemeExtension<UiPalette> {
     Color? line,
     Color? muted,
     Color? ink,
+    Brightness? brightness,
+    Color? accentForeground,
+    Color? navigation,
   }) => UiPalette(
     accent: accent ?? this.accent,
     strong: strong ?? this.strong,
@@ -116,6 +164,9 @@ class UiPalette extends ThemeExtension<UiPalette> {
     line: line ?? this.line,
     muted: muted ?? this.muted,
     ink: ink ?? this.ink,
+    brightness: brightness ?? this.brightness,
+    accentForeground: accentForeground ?? this.accentForeground,
+    navigation: navigation ?? this.navigation,
   );
   @override
   UiPalette lerp(covariant UiPalette? other, double t) => other == null
@@ -130,5 +181,8 @@ class UiPalette extends ThemeExtension<UiPalette> {
           line: Color.lerp(line, other.line, t)!,
           muted: Color.lerp(muted, other.muted, t)!,
           ink: Color.lerp(ink, other.ink, t)!,
+          brightness: t < .5 ? brightness : other.brightness,
+          accentForeground: Color.lerp(onAccent, other.onAccent, t),
+          navigation: Color.lerp(nav, other.nav, t),
         );
 }
