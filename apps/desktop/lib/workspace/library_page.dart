@@ -9,6 +9,7 @@ import '../prototype_icons.dart';
 import '../ui_palette.dart';
 import 'library_controller.dart';
 import 'library_detail.dart';
+import 'library_directory_dialog.dart';
 import 'library_edit_dialog.dart';
 import 'library_widgets.dart';
 import 'workspace_source.dart';
@@ -115,57 +116,142 @@ class _LibraryPageState extends State<LibraryPage> {
     _changed();
   }
 
+  Future<void> _changeDirectory(
+    WorkspaceDirectoryAction action, {
+    WorkspaceDirectory? directory,
+    String? parent,
+  }) async {
+    if (model.loadState == WorkspaceLoad.loading) return;
+    widget.onModalChanged?.call(true);
+    try {
+      final saved = await showLibraryDirectoryEditor(
+        context,
+        model,
+        action: action,
+        directory: directory,
+        initialParent: parent,
+      );
+      if (saved && mounted) {
+        DesktopFeedback.show(
+          context,
+          action == WorkspaceDirectoryAction.delete ? '已删除空目录' : '目录已保存',
+        );
+      }
+    } finally {
+      widget.onModalChanged?.call(false);
+    }
+  }
+
   Widget _directory(
     BuildContext context,
     WorkspaceDirectory directory,
     LibraryMetrics metrics,
   ) {
-    final current = model.query.directoryId ?? 'all';
+    final selected = (model.query.directoryId ?? 'all') == directory.id;
+    final path = libraryDirectoryAncestors(model.catalog!, directory);
     return Padding(
       padding: const EdgeInsets.only(bottom: 3),
-      child: DesktopButton(
-        key: ValueKey('library-directory-${directory.id}'),
-        selected: current == directory.id,
-        kind: DesktopButtonKind.quiet,
-        onPressed: () => directory.id == 'all'
-            ? model.showAll()
-            : model.apply(model.query.copyWith(directoryId: directory.id)),
-        fontSize: metrics.compact ? 13 : 14,
-        padding: EdgeInsets.fromLTRB(
-          directory.parentId == null ? 10 : 32,
-          8,
-          10,
-          8,
-        ),
-        minimumSize: const Size(0, 39),
-        alignment: Alignment.centerLeft,
-        child: Row(
-          children: [
-            PrototypeIcon(
-              directory.id == 'all'
-                  ? PrototypeIconGlyph.grid
-                  : PrototypeIconGlyph.folder,
-              size: 17,
-            ),
-            const SizedBox(width: 10),
-            Expanded(child: Text(directory.name)),
-            const SizedBox(width: 5),
-            Text(
-              '${model.catalog?.directoryCounts[directory.id] ?? 0}',
-              style: libraryText(
-                context,
-                12,
-                color: UiPalette.of(context).muted,
+      child: Row(
+        children: [
+          Expanded(
+            child: DesktopButton(
+              key: ValueKey('library-directory-${directory.id}'),
+              tooltip: path.map((d) => d.name).join(' › '),
+              selected: selected,
+              kind: DesktopButtonKind.quiet,
+              onPressed: () => directory.id == 'all'
+                  ? model.showAll()
+                  : model.apply(
+                      model.query.copyWith(directoryId: directory.id),
+                    ),
+              fontSize: metrics.compact ? 13 : 14,
+              padding: EdgeInsets.fromLTRB(
+                10 + (path.length - 1).clamp(0, 3) * 22.0,
+                8,
+                10,
+                8,
+              ),
+              minimumSize: const Size(0, 39),
+              alignment: Alignment.centerLeft,
+              child: Row(
+                children: [
+                  PrototypeIcon(
+                    directory.id == 'all'
+                        ? PrototypeIconGlyph.grid
+                        : PrototypeIconGlyph.folder,
+                    size: 17,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      directory.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  const SizedBox(width: 5),
+                  Text(
+                    '${model.catalog?.directoryCounts[directory.id] ?? 0}',
+                    style: libraryText(
+                      context,
+                      12,
+                      color: UiPalette.of(context).muted,
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
+  Widget _directoryMenu(WorkspaceDirectory directory) => DesktopSelect<String>(
+    key: ValueKey('library-directory-actions-${directory.id}'),
+    compact: true,
+    quiet: true,
+    triggerLabel: Semantics(
+      label: '目录操作：${directory.name}',
+      child: const PrototypeIcon(PrototypeIconGlyph.more, size: 16),
+    ),
+    items: const [
+      DropdownMenuItem(value: 'child', child: Text('新建子目录')),
+      DropdownMenuItem(value: 'edit', child: Text('重命名或移动')),
+      DropdownMenuItem(value: 'delete', child: Text('删除空目录')),
+    ],
+    onChanged: model.loadState == WorkspaceLoad.loading
+        ? null
+        : (action) {
+            switch (action) {
+              case 'child':
+                _changeDirectory(
+                  WorkspaceDirectoryAction.create,
+                  parent: directory.id,
+                );
+              case 'edit':
+                _changeDirectory(
+                  WorkspaceDirectoryAction.update,
+                  directory: directory,
+                );
+              case 'delete':
+                _changeDirectory(
+                  WorkspaceDirectoryAction.delete,
+                  directory: directory,
+                );
+            }
+          },
+  );
+
   Widget _side(BuildContext context, LibraryMetrics metrics) {
     final c = UiPalette.of(context), catalog = model.catalog;
+    final current = catalog?.directories
+        .where(
+          (d) =>
+              d.id == model.query.directoryId &&
+              !['all', 'unfiled'].contains(d.id),
+        )
+        .firstOrNull;
     return Container(
       key: const ValueKey('library-directory-pane'),
       width: metrics.directoryWidth,
@@ -180,20 +266,52 @@ class _LibraryPageState extends State<LibraryPage> {
               padding: const EdgeInsets.fromLTRB(12, 20, 10, 18),
               children: [
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(21, 20, 10, 20),
-                  child: Text(
-                    '资料目录',
-                    style: libraryText(
-                      context,
-                      12,
-                      color: c.muted,
-                      weight: FontWeight.w600,
+                  padding: const EdgeInsets.fromLTRB(21, 13, 0, 13),
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(minHeight: 33),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            '资料目录',
+                            style: libraryText(
+                              context,
+                              12,
+                              color: c.muted,
+                              weight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        if (current != null) _directoryMenu(current),
+                      ],
                     ),
                   ),
                 ),
                 if (catalog != null) ...[
-                  for (final directory in catalog.directories)
+                  for (final directory in libraryDirectoryTree(catalog))
                     _directory(context, directory, metrics),
+                  DesktopButton(
+                    key: const ValueKey('library-directory-create'),
+                    kind: DesktopButtonKind.quiet,
+                    alignment: Alignment.centerLeft,
+                    leading: const PrototypeIcon(
+                      PrototypeIconGlyph.plus,
+                      size: 17,
+                    ),
+                    onPressed: model.loadState == WorkspaceLoad.loading
+                        ? null
+                        : () => _changeDirectory(
+                            WorkspaceDirectoryAction.create,
+                            parent:
+                                [
+                                  'all',
+                                  'unfiled',
+                                ].contains(model.query.directoryId)
+                                ? null
+                                : model.query.directoryId,
+                          ),
+                    child: const Text('新建目录'),
+                  ),
                   Padding(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 8,
@@ -735,11 +853,11 @@ class _LibraryPageState extends State<LibraryPage> {
               ],
             ),
           ),
-          if (model.navigationNotice != null)
+          if (model.navigationNotice != null || model.scopeNotice != null)
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
               child: Text(
-                model.navigationNotice!,
+                model.navigationNotice ?? model.scopeNotice!,
                 style: libraryText(context, 12, color: c.muted),
               ),
             ),

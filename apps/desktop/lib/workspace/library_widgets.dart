@@ -137,3 +137,100 @@ class LibraryMessage extends StatelessWidget {
     ),
   );
 }
+
+const _virtualDirectories = {'all', 'unfiled'};
+
+/// One tree order and one path label for browsing and all assignment forms.
+List<WorkspaceDirectory> libraryDirectoryTree(WorkspaceCatalog catalog) {
+  final ordered = <WorkspaceDirectory>[];
+  final visited = <String>{};
+  void append(String? parent) {
+    for (final d in catalog.directories.where(
+      (d) => !_virtualDirectories.contains(d.id) && d.parentId == parent,
+    )) {
+      if (!visited.add(d.id)) continue;
+      ordered.add(d);
+      append(d.id);
+    }
+  }
+
+  ordered.addAll(catalog.directories.where((d) => d.id == 'all'));
+  append(null);
+  ordered.addAll(catalog.directories.where((d) => d.id == 'unfiled'));
+  return ordered;
+}
+
+List<WorkspaceDirectory> libraryDirectoryAncestors(
+  WorkspaceCatalog catalog,
+  WorkspaceDirectory directory,
+) {
+  final path = <WorkspaceDirectory>[directory];
+  final visited = {directory.id};
+  var parent = directory.parentId;
+  while (parent != null && visited.add(parent)) {
+    final d = catalog.directories.where((d) => d.id == parent).firstOrNull;
+    if (d == null) break;
+    path.insert(0, d);
+    parent = d.parentId;
+  }
+  return path;
+}
+
+class LibraryDirectorySelect extends StatelessWidget {
+  const LibraryDirectorySelect({
+    super.key,
+    required this.catalog,
+    required this.value,
+    required this.onChanged,
+    this.parentFor,
+    this.parentMode = false,
+    this.errorText,
+  });
+  final WorkspaceCatalog catalog;
+  final String? value, parentFor, errorText;
+  final bool parentMode;
+  final ValueChanged<String?>? onChanged;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      DesktopSelect<String?>(
+        value: value,
+        isExpanded: true,
+        decoration: InputDecoration(labelText: parentMode ? '上级目录' : '资料目录'),
+        items: [
+          DropdownMenuItem(
+            value: null,
+            child: Text(parentMode ? '顶层目录' : '未分类'),
+          ),
+          for (final d in libraryDirectoryTree(catalog))
+            if (!_virtualDirectories.contains(d.id) &&
+                (parentFor == null ||
+                    !libraryDirectoryAncestors(
+                      catalog,
+                      d,
+                    ).any((p) => p.id == parentFor)))
+              DropdownMenuItem(
+                value: d.id,
+                child: Text(
+                  libraryDirectoryAncestors(
+                    catalog,
+                    d,
+                  ).map((p) => p.name).join(' › '),
+                ),
+              ),
+        ],
+        onChanged: onChanged,
+      ),
+      if (errorText != null)
+        Padding(
+          padding: const EdgeInsets.only(top: 6),
+          child: Text(
+            errorText!,
+            style: TextStyle(color: UiPalette.of(context).danger),
+          ),
+        ),
+    ],
+  );
+}

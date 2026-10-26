@@ -19,6 +19,10 @@ abstract interface class WorkspaceSource {
   Stream<WorkspaceRecordRef?> get changes;
   Future<WorkspaceSummary> loadSummary();
   Future<WorkspaceCatalog> loadCatalog();
+
+  /// Returns the created/updated directory, or null after an empty deletion.
+  /// Rejections throw WorkspaceFailure and leave classification unchanged.
+  Future<WorkspaceDirectory?> changeDirectory(WorkspaceDirectoryChange change);
   Future<Map<String, Object?>> loadTemplate(String typeId);
   Future<WorkspaceResults> queryRecords(
     WorkspaceQuery query, {
