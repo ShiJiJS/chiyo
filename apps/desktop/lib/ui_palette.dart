@@ -37,6 +37,9 @@ class UiPalette extends ThemeExtension<UiPalette> {
   Color get warning => brightness == Brightness.dark
       ? const Color(0xffdfbc7d)
       : const Color(0xff8d651e);
+  Color get credentialSurface => brightness == Brightness.dark
+      ? const Color(0xff413828)
+      : const Color(0xfff7efdf);
   bool get isMono => accent == const Color(0xff333333);
   Color get statusAttention =>
       isMono ? const Color(0xff505055) : const Color(0xff986409);

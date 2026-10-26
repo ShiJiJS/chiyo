@@ -5,6 +5,8 @@ import 'sample_workspace_fixture.dart';
 import 'sample_workspace_entries.dart';
 import 'sample_workspace_content_fixture.dart';
 import 'sample_workspace_files.dart';
+import 'sample_workspace_credentials.dart';
+import 'sample_credential_links.dart';
 import 'workspace_source.dart';
 
 part 'sample_workspace_history.dart';
@@ -22,6 +24,206 @@ class SampleWorkspaceSource implements WorkspaceSource {
        _files = SampleWorkspaceFiles(readAsset),
        _now = now ?? (() => DateTime.utc(2026, 10, 26));
   final SampleWorkspaceFiles _files;
+  final _credentialLinks = SampleCredentialLinks();
+  late final _credentials = SampleWorkspaceCredentials(
+    readable: _readable,
+    current: _credentialRecord,
+    prepareRecord: _prepareCredentialRecord,
+    commitRecord: (detail) {
+      if (_scenario == SampleWorkspaceScenario.empty) _materializeEmpty();
+      _putRecord(detail);
+    },
+    beforeWrite: () {
+      if (nextSaveFailure case final failure?) {
+        nextSaveFailure = null;
+        throw failure;
+      }
+    },
+    changed: (ref) => _changes.add(ref),
+    now: _now,
+  );
+  @override
+  WorkspaceCredentialSource get credentials => _credentials;
+  set nextCredentialReadFailure(WorkspaceFailure? value) =>
+      _credentials.nextReadFailure = value;
+  WorkspaceDetail? _visibleRecord(WorkspaceRecordRef ref) {
+    final raw = _scenario == SampleWorkspaceScenario.empty
+        ? null
+        : _records[ref];
+    return raw == null ? null : _projectRecord(raw);
+  }
+
+  WorkspaceDetail _credentialRecord(WorkspaceRecordRef ref) {
+    if (ref.kind != WorkspaceRecordKind.credential) {
+      throw const WorkspaceFailure('unsupported', '此入口只管理托管凭据。');
+    }
+    return _visibleRecord(ref) ??
+        (throw const WorkspaceFailure('not_found', '凭据已不存在。'));
+  }
+
+  WorkspaceDetail _projectRecord(WorkspaceDetail raw) {
+    final ref = raw.record.ref, relations = {...raw.relations};
+    if (ref.kind == WorkspaceRecordKind.credential) {
+      relations['related'] = [
+        ...?raw.relations['related'],
+        ..._credentialLinks.information(ref),
+      ];
+    } else {
+      final linked = _credentialLinks.credentials(ref).toList();
+      if (linked.isNotEmpty || relations.containsKey('credentials')) {
+        relations['credentials'] = [
+          ...?raw.relations['credentials'],
+          ...linked,
+        ];
+      }
+    }
+    return WorkspaceDetail(
+      record: raw.record,
+      version: raw.version,
+      definition: raw.definition,
+      values: raw.values,
+      relations: relations,
+    );
+  }
+
+  WorkspaceDetail _rawRecord(WorkspaceDetail detail) {
+    final relations = {...detail.relations};
+    final key = detail.record.ref.kind == WorkspaceRecordKind.credential
+        ? 'related'
+        : 'credentials';
+    if (relations.containsKey(key)) {
+      final linkedKind =
+          detail.record.ref.kind == WorkspaceRecordKind.credential
+          ? WorkspaceRecordKind.information
+          : WorkspaceRecordKind.credential;
+      relations[key] = relations[key]!
+          .where((r) => r.kind != linkedKind)
+          .toList();
+    }
+    return WorkspaceDetail(
+      record: detail.record,
+      version: detail.version,
+      definition: detail.definition,
+      values: detail.values,
+      relations: relations,
+    );
+  }
+
+  void _putRecord(WorkspaceDetail detail) {
+    final ref = detail.record.ref,
+        isCredential = ref.kind == WorkspaceRecordKind.credential;
+    final key = isCredential ? 'related' : 'credentials';
+    if (detail.relations.containsKey(key)) {
+      final oldPeers =
+          (isCredential
+                  ? _credentialLinks.information(ref)
+                  : _credentialLinks.credentials(ref))
+              .toSet();
+      final newPeers = detail.relations[key]!
+          .where(
+            (r) =>
+                r.kind ==
+                (isCredential
+                    ? WorkspaceRecordKind.information
+                    : WorkspaceRecordKind.credential),
+          )
+          .toSet();
+      final changed = {
+        ...oldPeers.difference(newPeers),
+        ...newPeers.difference(oldPeers),
+      };
+      final prior = {
+        for (final peer in changed)
+          if (_records[peer] case final raw?) peer: _projectRecord(raw),
+      };
+      if (isCredential) {
+        _credentialLinks.replaceCredential(ref, newPeers);
+      } else {
+        _credentialLinks.replaceInformation(ref, newPeers);
+      }
+      for (final e in prior.entries) {
+        final old = e.value;
+        if (e.key.kind == WorkspaceRecordKind.information) {
+          (_revisions[e.key] ??= []).add(_archive(old));
+        }
+        _records[e.key] = _rawRecord(
+          WorkspaceDetail(
+            record: old.record.copyWith(
+              updatedAt: _now().add(Duration(microseconds: _clock++)),
+            ),
+            version: old.version + 1,
+            definition: old.definition,
+            values: old.values,
+            relations: _projectRecord(_records[e.key]!).relations,
+          ),
+        );
+        _versions[e.key] = old.version + 1;
+      }
+    }
+    _records[ref] = _rawRecord(detail);
+    _versions[ref] = detail.version;
+  }
+
+  WorkspaceDetail _prepareCredentialRecord(
+    WorkspaceRecordRef ref,
+    WorkspaceCredentialWrite? write,
+  ) {
+    final old = write?.ref == null && write != null
+        ? null
+        : _credentialRecord(ref);
+    if (write == null) {
+      return WorkspaceDetail(
+        record: old!.record.copyWith(updatedAt: _now()),
+        version: old.version + 1,
+        definition: old.definition,
+        values: const {},
+        relations: old.relations,
+      );
+    }
+    final errors = <String, String>{};
+    if (write.directoryId != null &&
+        !_catalog.directories.any(
+          (d) =>
+              d.id == write.directoryId && !['all', 'unfiled'].contains(d.id),
+        )) {
+      errors['directory'] = '目录已不可用。';
+    }
+    if (write.tagIds.toSet().length != write.tagIds.length ||
+        write.tagIds.any((id) => !_catalog.tags.any((t) => t.id == id))) {
+      errors['tags'] = '标签已不可用或重复。';
+    }
+    if (write.linkedInformation case final links?) {
+      if (links.any(
+        (r) =>
+            r.kind != WorkspaceRecordKind.information ||
+            _visibleRecord(r) == null,
+      )) {
+        errors['related'] = '关联资料已不可用，请重新选择。';
+      }
+    }
+    if (errors.isNotEmpty) {
+      throw WorkspaceFailure('validation', '请检查分类与关联。', fieldErrors: errors);
+    }
+    final type = _catalog.types.firstWhere((t) => t.id == 'credential');
+    final record = WorkspaceRecordSummary(
+      ref: ref,
+      name: write.name.trim(),
+      description: write.purpose,
+      type: type,
+      updatedAt: _now().add(Duration(microseconds: _clock++)),
+      directoryId: write.directoryId,
+      tags: _catalog.tags.where((t) => write.tagIds.contains(t.id)),
+    );
+    return WorkspaceDetail(
+      record: record,
+      version: (old?.version ?? 0) + 1,
+      definition: sampleCredentialDefinition,
+      relations: {
+        'related': write.linkedInformation ?? old?.relations['related'] ?? [],
+      },
+    );
+  }
+
   final _fileOperations =
       <
         String,
@@ -96,6 +298,10 @@ class SampleWorkspaceSource implements WorkspaceSource {
       <String, ({String fingerprint, WorkspaceSaveResult result})>{};
   WorkspaceFailure? nextSaveFailure;
   int _epoch = 0, _clock = 0, _nextRecord = 0;
+  int _basePending = 5,
+      _baseProposals = 2,
+      _initialPending = 5,
+      _initialProposals = 2;
   bool _disposed = false;
   static const initial = WorkspaceSummary(
     records: 31,
@@ -115,6 +321,9 @@ class SampleWorkspaceSource implements WorkspaceSource {
 
   Future<void> _ensureData() => _loading ??= () async {
     final data = jsonDecode(_fixtureJson) as Map<String, dynamic>;
+    _basePending = _initialPending = data['pending'] as int? ?? initial.pending;
+    _baseProposals = _initialProposals =
+        data['proposals'] as int? ?? initial.proposals;
     final activeRows = (data['records'] as List).cast<Map<String, dynamic>>();
     final trashRows = (data['trash'] as List? ?? [])
         .cast<Map<String, dynamic>>();
@@ -217,14 +426,16 @@ class SampleWorkspaceSource implements WorkspaceSource {
         relations['related'] = related;
       }
       final definition = Map<String, Object?>.from(
-        row['definition'] as Map? ??
-            (record.type.id == 'file'
-                ? sampleFileDefinition
-                : record.type.id == 'document'
-                ? sampleDocumentDefinition
-                : record.type.id == 'generic'
-                ? _genericDefinitionFor(row['values'] as Map? ?? {})
-                : {}),
+        ref.kind == WorkspaceRecordKind.credential
+            ? sampleCredentialDefinition
+            : row['definition'] as Map? ??
+                  (record.type.id == 'file'
+                      ? sampleFileDefinition
+                      : record.type.id == 'document'
+                      ? sampleDocumentDefinition
+                      : record.type.id == 'generic'
+                      ? _genericDefinitionFor(row['values'] as Map? ?? {})
+                      : {}),
       );
       final detail = WorkspaceDetail(
         record: record,
@@ -267,12 +478,47 @@ class SampleWorkspaceSource implements WorkspaceSource {
         throw const FormatException('Duplicate fixture identity.');
       }
       destination[ref] = detail;
+      if (ref.kind == WorkspaceRecordKind.credential) {
+        _credentials.seed(ref, row);
+      }
       _entryIdentityOwners.addAll(sampleEntryOwners(detail));
     }
     _records.addAll(_initial);
+    for (final row in activeRows) {
+      final ref = rowRef(row), detail = _records[ref]!;
+      if (ref.kind == WorkspaceRecordKind.credential) {
+        _credentialLinks.seed(
+          ref,
+          [
+            ...?detail.relations['related']?.where(
+              (r) => r.kind == WorkspaceRecordKind.information,
+            ),
+            if (row['owner'] is String)
+              WorkspaceRecordRef(
+                WorkspaceRecordKind.information,
+                row['owner'] as String,
+              ),
+          ].where((r) => r.kind == WorkspaceRecordKind.information),
+        );
+      } else {
+        for (final target
+            in detail.relations['credentials'] ?? <WorkspaceRecordRef>[]) {
+          if (target.kind == WorkspaceRecordKind.credential) {
+            _credentialLinks.seed(target, [ref]);
+          }
+        }
+      }
+    }
+    for (final e in _initial.entries.toList()) {
+      _initial[e.key] = _records[e.key] = _rawRecord(e.value);
+    }
     for (final detail in _initial.values) {
       _versions[detail.record.ref] = detail.version;
     }
+    types.putIfAbsent(
+      'credential',
+      () => const WorkspaceType('credential', '凭据', 'key'),
+    );
     _catalog = WorkspaceCatalog(
       directories: [
         for (final row in data['directories'] as List)
@@ -340,8 +586,8 @@ class SampleWorkspaceSource implements WorkspaceSource {
         ? const WorkspaceSummary.empty()
         : WorkspaceSummary(
             records: _records.length,
-            pending: initial.pending,
-            proposals: initial.proposals,
+            pending: _basePending + _credentials.pendingCount,
+            proposals: _baseProposals,
           );
   }
 
@@ -615,9 +861,7 @@ class SampleWorkspaceSource implements WorkspaceSource {
         : _scenario == SampleWorkspaceScenario.empty
         ? null
         : _records[query.source];
-    if (source == null ||
-        source.record.type.id != query.typeId ||
-        source.record.ref.kind == WorkspaceRecordKind.credential) {
+    if (source == null || source.record.type.id != query.typeId) {
       throw const WorkspaceFailure('not_found', '来源资料或模板已不可用。');
     }
     final rule = _relationRule(source.definition, query.key);
@@ -629,6 +873,13 @@ class SampleWorkspaceSource implements WorkspaceSource {
         : [
             for (final detail in _records.values)
               if (detail.record.ref != query.source &&
+                  (source.record.ref.kind != WorkspaceRecordKind.credential ||
+                      detail.record.ref.kind ==
+                          WorkspaceRecordKind.information) &&
+                  (source.record.ref.kind != WorkspaceRecordKind.information ||
+                      query.key != 'credentials' ||
+                      detail.record.ref.kind ==
+                          WorkspaceRecordKind.credential) &&
                   _acceptsRelation(rule, detail.record) &&
                   _matchesKeyword(detail.record, query.keyword))
                 detail.record,
@@ -657,6 +908,15 @@ class SampleWorkspaceSource implements WorkspaceSource {
         errors['relation:${entry.key}'] = '关联类型已不可用。';
       } else if (entry.value.toSet().length != entry.value.length) {
         errors['relation:${entry.key}'] = '同一种关联不能重复选择同一份资料。';
+      } else if (entry.key == 'credentials' &&
+          source?.kind != WorkspaceRecordKind.credential &&
+          entry.value.any(
+            (ref) =>
+                ref.kind != WorkspaceRecordKind.credential &&
+                !(_records[source]?.relations[entry.key]?.contains(ref) ??
+                    false),
+          )) {
+        errors['relation:${entry.key}'] = '此关联只接受托管凭据。';
       } else if (entry.value.any((ref) => ref == source)) {
         errors['relation:${entry.key}'] = '不能将资料关联到自身。';
       } else if (entry.value.any(
@@ -682,7 +942,7 @@ class SampleWorkspaceSource implements WorkspaceSource {
     if (detail == null) {
       throw const WorkspaceFailure('not_found', '资料已不存在，请返回列表。');
     }
-    return detail;
+    return _projectRecord(detail);
   }
 
   @override
@@ -867,7 +1127,7 @@ class SampleWorkspaceSource implements WorkspaceSource {
         _materializeEmpty();
       }
       _versions[record.ref] = detail.version;
-      _records[record.ref] = detail;
+      _putRecord(detail);
       _entryIdentityOwners.addAll(sampleEntryOwners(detail));
       _changes.add(record.ref);
       result = WorkspaceSaved(detail);
@@ -908,7 +1168,7 @@ class SampleWorkspaceSource implements WorkspaceSource {
     WorkspaceSaveResult result;
     final current = _scenario == SampleWorkspaceScenario.empty
         ? null
-        : _records[edit.record.ref];
+        : _visibleRecord(edit.record.ref);
     final values = {...?current?.values, ...edit.values};
     final fields = _fieldErrors(
       edit.record.name,
@@ -924,6 +1184,10 @@ class SampleWorkspaceSource implements WorkspaceSource {
         edit.relations,
       ),
     );
+    if (edit.record.ref.kind == WorkspaceRecordKind.credential &&
+        edit.record.name.length > 60) {
+      fields['name'] = '凭据名称不能超过60字。';
+    }
     if (edit.operationId.trim().isEmpty || current == null) {
       result = const WorkspaceRejected(
         WorkspaceFailure('not_found', '保存目标或操作身份无效。'),
@@ -976,7 +1240,7 @@ class SampleWorkspaceSource implements WorkspaceSource {
         (_revisions[edit.record.ref] ??= []).add(_archive(current));
       }
       _versions[edit.record.ref] = detail.version;
-      _records[edit.record.ref] = detail;
+      _putRecord(detail);
       _entryIdentityOwners.addAll(sampleEntryOwners(detail));
       _changes.add(edit.record.ref);
       result = WorkspaceSaved(detail);
@@ -1111,7 +1375,7 @@ class SampleWorkspaceSource implements WorkspaceSource {
       values: {'file': file.toJson()},
       relations: {'related': []},
     );
-    _records[ref] = detail;
+    _putRecord(detail);
     _versions[ref] = 1;
     _fileOperations[input.operationId] = (
       fingerprint: fingerprint,
@@ -1172,7 +1436,7 @@ class SampleWorkspaceSource implements WorkspaceSource {
     );
     _files.commitChange(current, change, now);
     (_revisions[change.record] ??= []).add(_archive(current));
-    _records[change.record] = detail;
+    _putRecord(detail);
     _versions[change.record] = detail.version;
     _fileOperations[change.operationId] = (
       fingerprint: fingerprint,
@@ -1305,6 +1569,9 @@ class SampleWorkspaceSource implements WorkspaceSource {
       _changeRecord(change);
 
   void _materializeEmpty() {
+    _basePending = _baseProposals = 0;
+    _credentialLinks.clearCurrent();
+    _credentials.clearCurrent();
     _records.clear();
     _revisions.clear();
     _recycled.clear();
@@ -1332,6 +1599,8 @@ class SampleWorkspaceSource implements WorkspaceSource {
     _versions.clear();
     _entryIdentityOwners.clear();
     _files.clear();
+    _credentialLinks.clear();
+    _credentials.clear();
     _fileOperations.clear();
     _clock = _nextRecord = _nextDirectory = _nextRecycle = 0;
     _catalogVersion++;
@@ -1343,6 +1612,10 @@ class SampleWorkspaceSource implements WorkspaceSource {
   void reset() {
     setScenario(SampleWorkspaceScenario.ready);
     _files.reset();
+    _credentialLinks.reset();
+    _credentials.reset();
+    _basePending = _initialPending;
+    _baseProposals = _initialProposals;
     _fileOperations.clear();
     nextFilePreviewFailure = nextFileActionFailure = null;
     cancelNextFileAction = false;

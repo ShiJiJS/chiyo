@@ -7,6 +7,7 @@ import 'library_relation_picker.dart';
 import 'library_entries.dart';
 import 'workspace_entries.dart';
 import 'library_file_dialogs.dart';
+import 'library_credential_editor.dart';
 import 'workspace_source.dart';
 
 Future<WorkspaceRecordRef?> showLibraryEditor(
@@ -14,6 +15,7 @@ Future<WorkspaceRecordRef?> showLibraryEditor(
   LibraryController controller, {
   WorkspaceDetail? detail,
   WorkspaceFilePicker? filePicker,
+  WorkspaceCredentialPicker? credentialPicker,
 }) async {
   final catalog = controller.catalog;
   if (catalog == null) return null;
@@ -34,6 +36,7 @@ Future<WorkspaceRecordRef?> showLibraryEditor(
               'profile',
               'document',
               'file',
+              'credential',
             ].contains(t.id),
           ))
             Padding(
@@ -58,6 +61,15 @@ Future<WorkspaceRecordRef?> showLibraryEditor(
     ),
   );
   if (type == null || !context.mounted) return null;
+  if (type.id == 'credential') {
+    return showLibraryCredentialEditor(
+      context,
+      controller.source,
+      catalog,
+      ref: detail?.record.ref,
+      picker: credentialPicker,
+    );
+  }
   if (type.id == 'file' && detail == null) {
     return showLibraryFileImport(
       context,

@@ -6,6 +6,7 @@ import 'library_widgets.dart';
 import 'library_entries.dart';
 import 'library_document.dart';
 import 'library_file.dart';
+import 'library_credential.dart';
 import 'workspace_source.dart';
 
 /// Reads a template snapshot for display; it does not own persistence or infer
@@ -22,6 +23,7 @@ class LibraryDetail extends StatefulWidget {
     this.onHistory,
     this.onRecycle,
     this.filePicker,
+    this.credentialPicker,
     this.onModalChanged,
     required this.onSettings,
     required this.onTag,
@@ -36,6 +38,7 @@ class LibraryDetail extends StatefulWidget {
   final VoidCallback onSettings, onExpand;
   final ValueChanged<String> onTag;
   final WorkspaceFilePicker? filePicker;
+  final WorkspaceCredentialPicker? credentialPicker;
   final ValueChanged<bool>? onModalChanged;
   @override
   State<LibraryDetail> createState() => _LibraryDetailState();
@@ -475,9 +478,14 @@ class _LibraryDetailState extends State<LibraryDetail> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     if (record.ref.kind == WorkspaceRecordKind.credential)
-                      Text(
-                        '凭据内容通过专用使用流程管理。',
-                        style: libraryText(context, 14, color: c.muted),
+                      LibraryCredential(
+                        key: ValueKey(record.ref),
+                        ref: record.ref,
+                        source: widget.source,
+                        revision: widget.revision,
+                        onOpen: widget.onOpen,
+                        onModalChanged: widget.onModalChanged,
+                        picker: widget.credentialPicker,
                       )
                     else if ((detail.definition['fields'] as List? ?? [])
                         .isNotEmpty)
@@ -490,11 +498,12 @@ class _LibraryDetailState extends State<LibraryDetail> {
                         _value(detail.values['body'] ?? record.description),
                       ),
                     for (final relation in detail.relations.entries)
-                      _section(
-                        context,
-                        _relationName(relation.key),
-                        _relationsFor(context, relation.key, snapshot),
-                      ),
+                      if (record.ref.kind != WorkspaceRecordKind.credential)
+                        _section(
+                          context,
+                          _relationName(relation.key),
+                          _relationsFor(context, relation.key, snapshot),
+                        ),
                   ],
                 );
               }
@@ -572,6 +581,18 @@ class _LibraryDetailState extends State<LibraryDetail> {
                         section['title'] as String,
                         SelectableText(_value(detail.values[section['key']])),
                       ),
+                  if ((detail.relations['credentials']?.isNotEmpty ?? false) &&
+                      !sections.any(
+                        (s) =>
+                            s['kind'] == 'relations' &&
+                            s['key'] == 'credentials',
+                      ))
+                    _section(
+                      context,
+                      '关联凭据',
+                      _relationsFor(context, 'credentials', snapshot),
+                      trailing: '${detail.relations['credentials']!.length} 项',
+                    ),
                 ],
               );
             },
@@ -586,6 +607,6 @@ class _LibraryDetailState extends State<LibraryDetail> {
         in widget.detail.definition['relations'] as List? ?? []) {
       if (relation['key'] == key) return relation['label'] as String;
     }
-    return '关联资料';
+    return key == 'credentials' ? '关联凭据' : '关联资料';
   }
 }

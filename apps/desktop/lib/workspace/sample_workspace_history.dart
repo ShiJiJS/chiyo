@@ -21,6 +21,19 @@ extension _SampleHistory on SampleWorkspaceSource {
   void _forgetContent(WorkspaceRecordRef ref) {
     _revisions.remove(ref);
     _files.forget(ref);
+    for (final credential in _credentialLinks.credentials(ref).toList()) {
+      if (_records[credential] case final raw?) {
+        _records[credential] = WorkspaceDetail(
+          record: raw.record.copyWith(updatedAt: _now()),
+          version: raw.version + 1,
+          definition: raw.definition,
+          values: raw.values,
+          relations: raw.relations,
+        );
+        _versions[credential] = raw.version + 1;
+      }
+    }
+    _credentialLinks.forgetInformation(ref);
     // File receipts contain only opaque identities/result facts, no content.
     for (final id in _operations.keys.toList()) {
       final op = _operations[id]!;
@@ -65,7 +78,7 @@ extension _SampleHistory on SampleWorkspaceSource {
     if (current == null) {
       throw const WorkspaceFailure('not_found', '资料已不存在，请先检查回收站。');
     }
-    return current;
+    return _projectRecord(current);
   }
 
   WorkspaceDetail _normalizeArchive(
@@ -317,10 +330,10 @@ extension _SampleWorkspaceHistory on SampleWorkspaceSource {
         _records.remove(ref);
       case WorkspaceRecordAction.restoreRevision:
         (_revisions[ref] ??= []).add(archive!);
-        _records[ref] = restored!;
+        _putRecord(restored!);
       case WorkspaceRecordAction.restoreRecycled:
         _recycled.remove(entryId);
-        _records[ref] = restored!;
+        _putRecord(restored!);
       case WorkspaceRecordAction.purge:
         _recycled.remove(entryId);
         _forgetContent(ref);
