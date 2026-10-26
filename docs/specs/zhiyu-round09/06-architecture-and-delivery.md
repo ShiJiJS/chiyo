@@ -2,7 +2,7 @@
 
 ## S6-C01：从当前基线增量演进
 
-2026-10-26起以Mac为当前平台。产品开发恢复时，从现有Mac适配3ed4573e的最新后继建立codex/zhiyu-macos，整合前端14d192bd及本次codex/zhiyu-mac-plan文档后继，保留PR #61修正和两侧已有成果；不从旧main覆盖。准确来源和顺序见[Mac接手计划](../../planning/zhiyu-round09/macos-continuation.md)。本次仅文档调整，未合并产品分支。开发前fetch、检查远端和未提交内容，不把日期hash写成永久HEAD。
+2026-10-26起以Mac为当前平台。产品开发恢复时，从现有Mac适配3ed4573e的最新后继建立codex/zhiyu-macos，整合前端14d192bd及本次codex/zhiyu-mac-plan文档后继，保留PR #61修正和两侧已有成果；不从旧main覆盖。准确来源和顺序见[Mac接手计划](../../planning/zhiyu-round09/macos-continuation.md)。最初规划之后，`36437d1a`已完成两条产品基线整合，已推送检查点为`9bf7c8ac`；本轮最新指令仅整理tickets和文档，暂不继续开发。恢复时从现有`codex/zhiyu-macos`工作区继续，先fetch并审阅未提交内容，不重复执行最初合并步骤，不把日期hash写成永久HEAD。
 
 2026-10-25按用户要求调整顺序：先做必要的小范围代码整理，然后在正式Flutter客户端中完成整套界面和交互，使用独立示例数据；完整界面可运行并完成原型对照后，再按功能模块接入本地服务，最后完成各模块的真实业务测试。不再先把服务器的后台功能全部做完才开始画其他页面。
 
