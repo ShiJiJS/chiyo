@@ -4,6 +4,9 @@ import 'anchored_surface.dart';
 import 'prototype_ui.dart';
 import 'dart:math' as math;
 import 'package:flutter/services.dart';
+import 'desktop_motion.dart';
+import 'desktop_button.dart';
+export 'desktop_button.dart';
 
 // Labels stay outside the editable border, including after a value is entered.
 class DesktopTextField extends StatelessWidget {
@@ -390,7 +393,7 @@ class _DesktopOptionsState<T> extends State<_DesktopOptions<T>> {
         Expanded(
           child: SingleChildScrollView(
             primary: false,
-            padding: const EdgeInsets.all(6),
+            padding: EdgeInsets.all(DesktopMotion.enabled(context) ? 5 : 6),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -403,40 +406,68 @@ class _DesktopOptionsState<T> extends State<_DesktopOptions<T>> {
                   if (_matches(item))
                     Padding(
                       padding: const EdgeInsets.only(bottom: 2),
-                      child: TextButton(
-                        key: _keys.putIfAbsent(index, () => GlobalKey()),
-                        focusNode: _nodes[index],
-                        style: prototypeButton(
-                          context,
-                          size: 13,
-                          foreground: UiPalette.of(context).ink,
-                          background: item.value == widget.selected
-                              ? UiPalette.of(context).selected
-                              : null,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 9,
-                          ),
-                        ),
-                        onPressed: item.enabled
-                            ? () => Navigator.pop(
-                                context,
-                                _SelectedValue<T>(item.value),
-                              )
-                            : null,
-                        child: Row(
-                          children: [
-                            SizedBox(
-                              width: 18,
-                              child: item.value == widget.selected
-                                  ? const Icon(Icons.check, size: 14)
+                      child: DesktopMotion.enabled(context)
+                          ? DesktopButton(
+                              key: _keys.putIfAbsent(index, () => GlobalKey()),
+                              focusNode: _nodes[index],
+                              kind: DesktopButtonKind.quiet,
+                              selected: item.value == widget.selected,
+                              fontSize: 13,
+                              alignment: Alignment.centerLeft,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 9,
+                              ),
+                              onPressed: item.enabled
+                                  ? () => Navigator.pop(
+                                      context,
+                                      _SelectedValue<T>(item.value),
+                                    )
                                   : null,
+                              child: Row(
+                                children: [
+                                  Expanded(child: item.child),
+                                  if (item.value == widget.selected) ...[
+                                    const SizedBox(width: 9),
+                                    const Icon(Icons.check, size: 15),
+                                  ],
+                                ],
+                              ),
+                            )
+                          : TextButton(
+                              key: _keys.putIfAbsent(index, () => GlobalKey()),
+                              focusNode: _nodes[index],
+                              style: prototypeButton(
+                                context,
+                                size: 13,
+                                foreground: UiPalette.of(context).ink,
+                                background: item.value == widget.selected
+                                    ? UiPalette.of(context).selected
+                                    : null,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 9,
+                                ),
+                              ),
+                              onPressed: item.enabled
+                                  ? () => Navigator.pop(
+                                      context,
+                                      _SelectedValue<T>(item.value),
+                                    )
+                                  : null,
+                              child: Row(
+                                children: [
+                                  SizedBox(
+                                    width: 18,
+                                    child: item.value == widget.selected
+                                        ? const Icon(Icons.check, size: 14)
+                                        : null,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(child: item.child),
+                                ],
+                              ),
                             ),
-                            const SizedBox(width: 8),
-                            Expanded(child: item.child),
-                          ],
-                        ),
-                      ),
                     ),
               ],
             ),
@@ -448,27 +479,173 @@ class _DesktopOptionsState<T> extends State<_DesktopOptions<T>> {
 }
 
 class DesktopDialog extends StatelessWidget {
-  const DesktopDialog({super.key, this.title, this.content, this.actions});
+  const DesktopDialog({
+    super.key,
+    this.title,
+    this.content,
+    this.actions,
+    this.width = 740,
+    this.onClose,
+  });
   final Widget? title, content;
   final List<Widget>? actions;
+  final double width;
+  final VoidCallback? onClose;
   @override
-  Widget build(BuildContext context) => AlertDialog(
-    insetPadding: const EdgeInsets.symmetric(horizontal: 28, vertical: 28),
-    titlePadding: EdgeInsets.zero,
-    title: title == null
-        ? null
-        : Container(
-            padding: const EdgeInsets.fromLTRB(24, 19, 24, 19),
-            decoration: BoxDecoration(
-              border: Border(
-                bottom: BorderSide(color: Theme.of(context).dividerColor),
+  Widget build(BuildContext context) {
+    if (DesktopMotion.enabled(context)) {
+      final c = UiPalette.of(context);
+      final viewport = MediaQuery.sizeOf(context);
+      return Center(
+        child: Container(
+          width: math.min(width, viewport.width - 40),
+          constraints: BoxConstraints(maxHeight: viewport.height - 70),
+          decoration: BoxDecoration(
+            color: c.paper,
+            border: Border.all(color: c.line),
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: .2),
+                blurRadius: 70,
+                offset: const Offset(0, 20),
               ),
-            ),
-            child: title,
+            ],
           ),
-    contentPadding: const EdgeInsets.fromLTRB(24, 24, 24, 12),
-    content: content,
-    actionsPadding: const EdgeInsets.fromLTRB(24, 12, 24, 20),
-    actions: actions,
-  );
+          child: Material(
+            type: MaterialType.transparency,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Container(
+                  padding: const EdgeInsets.fromLTRB(28, 20, 20, 20),
+                  decoration: BoxDecoration(
+                    border: Border(bottom: BorderSide(color: c.line)),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: DefaultTextStyle(
+                          style: Theme.of(context).textTheme.titleMedium!
+                              .copyWith(
+                                fontSize: 19,
+                                fontWeight: FontWeight.w600,
+                              ),
+                          child: title ?? const SizedBox(),
+                        ),
+                      ),
+                      Tooltip(
+                        message: '关闭',
+                        child: IconButton(
+                          key: const ValueKey('desktop-dialog-close'),
+                          onPressed:
+                              onClose ?? () => Navigator.of(context).maybePop(),
+                          icon: const Icon(Icons.close, size: 19),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Flexible(
+                  child: SingleChildScrollView(
+                    primary: false,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 28,
+                      vertical: 24,
+                    ),
+                    child: content ?? const SizedBox(),
+                  ),
+                ),
+                if (actions?.isNotEmpty ?? false)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 28,
+                      vertical: 15,
+                    ),
+                    decoration: BoxDecoration(
+                      border: Border(top: BorderSide(color: c.line)),
+                    ),
+                    child: Wrap(
+                      alignment: WrapAlignment.end,
+                      spacing: 12,
+                      runSpacing: 10,
+                      children: actions!,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+    return AlertDialog(
+      insetPadding: const EdgeInsets.symmetric(horizontal: 28, vertical: 28),
+      titlePadding: EdgeInsets.zero,
+      title: title == null
+          ? null
+          : Container(
+              padding: const EdgeInsets.fromLTRB(24, 19, 24, 19),
+              decoration: BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(color: Theme.of(context).dividerColor),
+                ),
+              ),
+              child: title,
+            ),
+      contentPadding: const EdgeInsets.fromLTRB(24, 24, 24, 12),
+      content: content,
+      actionsPadding: const EdgeInsets.fromLTRB(24, 12, 24, 20),
+      actions: actions,
+    );
+  }
+}
+
+/// Uses the shared modal surface with the approved opening motion. Callers
+/// own form drafts and only close after their source reports successful save.
+Future<T?> showDesktopDialog<T>(
+  BuildContext context, {
+  required WidgetBuilder builder,
+  bool barrierDismissible = true,
+  FocusNode? returnFocus,
+}) async {
+  Tooltip.dismissAllToolTips();
+  final focus = returnFocus ?? FocusManager.instance.primaryFocus;
+  final navigator = Navigator.of(context, rootNavigator: true);
+  try {
+    final route = RawDialogRoute<T>(
+      barrierDismissible: barrierDismissible,
+      barrierLabel: '关闭对话框',
+      barrierColor: UiPalette.of(context).brightness == Brightness.dark
+          ? const Color(0x8f080b12)
+          : const Color(0x55162238),
+      transitionDuration: DesktopMotion.duration(context, DesktopMotion.dialog),
+      pageBuilder: (dialogContext, _, _) => CallbackShortcuts(
+        bindings: {
+          const SingleActivator(LogicalKeyboardKey.escape): () =>
+              Navigator.of(dialogContext).maybePop(),
+        },
+        child: builder(dialogContext),
+      ),
+      transitionBuilder: (_, animation, _, child) => AnimatedBuilder(
+        animation: animation,
+        child: child,
+        builder: (_, child) {
+          final value = Curves.easeOut.transform(animation.value);
+          return Opacity(
+            opacity: value,
+            child: Transform.translate(
+              offset: Offset(0, 7 * (1 - value)),
+              child: child,
+            ),
+          );
+        },
+      ),
+    );
+    final result = await navigator.push<T>(route);
+    await route.completed;
+    return result;
+  } finally {
+    if (focus?.context?.mounted ?? false) focus!.requestFocus();
+  }
 }

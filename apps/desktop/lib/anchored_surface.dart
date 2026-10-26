@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'ui_palette.dart';
+import 'desktop_motion.dart';
 
 class AnchoredSurfaceController {
   VoidCallback? close;
@@ -27,6 +28,9 @@ Future<T?> showAnchoredSurface<T>(
   final originalSize = overlay.size;
   final sourceScroll = Scrollable.maybeOf(context)?.position;
   final sourceFocus = FocusManager.instance.primaryFocus;
+  // The trigger may disappear while the route closes. Transition frames must
+  // not look up ancestors through that removed context.
+  final usesMotion = DesktopMotion.enabled(context);
   BuildContext? popup;
   var closing = false;
   void close() {
@@ -46,7 +50,7 @@ Future<T?> showAnchoredSurface<T>(
       barrierDismissible: true,
       barrierLabel: '关闭菜单',
       barrierColor: Colors.transparent,
-      transitionDuration: const Duration(milliseconds: 120),
+      transitionDuration: DesktopMotion.duration(context, DesktopMotion.menu),
       pageBuilder: (_, _, _) => LayoutBuilder(
         builder: (popupContext, bounds) {
           popup = popupContext;
@@ -80,16 +84,37 @@ Future<T?> showAnchoredSurface<T>(
                   top: top,
                   width: popupWidth,
                   height: popupHeight,
-                  child: Material(
-                    color: c.paper,
-                    elevation: 4,
-                    shadowColor: const Color(0x22000000),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(7),
-                      side: BorderSide(color: c.line),
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(usesMotion ? 8 : 7),
+                      boxShadow: usesMotion
+                          ? [
+                              BoxShadow(
+                                color: c.brightness == Brightness.dark
+                                    ? const Color(0x55000000)
+                                    : const Color(0x20243047),
+                                offset: Offset(
+                                  0,
+                                  c.brightness == Brightness.dark ? 12 : 9,
+                                ),
+                                blurRadius: c.brightness == Brightness.dark
+                                    ? 36
+                                    : 32,
+                              ),
+                            ]
+                          : const [],
                     ),
-                    clipBehavior: Clip.antiAlias,
-                    child: builder(popupContext),
+                    child: Material(
+                      color: c.paper,
+                      elevation: usesMotion ? 0 : 4,
+                      shadowColor: const Color(0x22000000),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(usesMotion ? 8 : 7),
+                        side: BorderSide(color: c.line),
+                      ),
+                      clipBehavior: Clip.antiAlias,
+                      child: builder(popupContext),
+                    ),
                   ),
                 ),
               ],
@@ -97,8 +122,25 @@ Future<T?> showAnchoredSurface<T>(
           );
         },
       ),
-      transitionBuilder: (_, animation, _, child) =>
-          FadeTransition(opacity: animation, child: child),
+      transitionBuilder: (_, animation, _, child) {
+        if (!usesMotion) {
+          return FadeTransition(opacity: animation, child: child);
+        }
+        return AnimatedBuilder(
+          animation: animation,
+          child: child,
+          builder: (_, child) {
+            final value = Curves.easeOut.transform(animation.value);
+            return Opacity(
+              opacity: value,
+              child: Transform.translate(
+                offset: Offset(0, -3 * (1 - value)),
+                child: child,
+              ),
+            );
+          },
+        );
+      },
     );
   } finally {
     sourceScroll?.removeListener(close);

@@ -1,6 +1,6 @@
 # 知予 Round09 开发计划：先完成7项前端界面
 
-2026-10-25用户确认本轮只发布 **U01–U07这7张前端任务，加F01这1张后续阶段规划票**。本轮只整理、发布规划，不开发产品。发布后的GitHub编号和核验结果记录在[发布清单](publication.md)。
+2026-10-25用户确认本轮发布 **U01–U07这7张前端任务，加F01这1张后续阶段规划票**，编号和核验结果见[发布清单](publication.md)。2026-10-26已获授权开始前端实现，当前推进U01；[实施记录](../../development/zhiyu-round09-frontend.md)区分已实现、已验证与剩余验收。
 
 [先看开发顺序](frontend-first.md) · [后续阶段与待拆分内容](issues/F01.md) · [规格总入口](../../specs/zhiyu-round09/README.md) · [产品差距](gap-audit.md) · [冻结原型](../../design/prototypes/round-09-zhiyu/offline.html)
 
