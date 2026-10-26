@@ -1,0 +1,80 @@
+{
+  "library-directory-pane": {
+    "x": 0.0,
+    "y": 66.0,
+    "width": 194.0,
+    "height": 734.0
+  },
+  "library-results-pane": {
+    "x": 194.0,
+    "y": 66.0,
+    "width": 275.0,
+    "height": 734.0
+  },
+  "library-detail-pane": {
+    "x": 479.0,
+    "y": 76.0,
+    "width": 791.0,
+    "height": 714.0
+  },
+  "library-detail-title": {
+    "x": 584.0,
+    "y": 177.0,
+    "width": 535.0,
+    "height": 35.0
+  },
+  "library-search": {
+    "x": 246.0,
+    "y": 148.0,
+    "width": 174.55224609375,
+    "height": 21.0
+  },
+  "library-record-information:azure": {
+    "x": 212.0,
+    "y": 421.8,
+    "width": 241.0,
+    "height": 155.99999999999994
+  },
+  "连接概览": {
+    "x": 531.0,
+    "y": 381.4,
+    "width": 676.0,
+    "height": 25.0
+  },
+  "登录凭据": {
+    "x": 531.0,
+    "y": 694.4,
+    "width": 655.05859375,
+    "height": 25.0
+  },
+  "tokyo.beichen.example": {
+    "x": 531.0,
+    "y": 500.4,
+    "width": 321.0,
+    "height": 23.0
+  },
+  "row-name": {
+    "x": 270.0,
+    "y": 436.8,
+    "width": 170.0,
+    "height": 23.0
+  },
+  "row-summary": {
+    "x": 270.0,
+    "y": 464.8,
+    "width": 170.0,
+    "height": 44.0
+  },
+  "row-type": {
+    "x": 270.0,
+    "y": 516.8,
+    "width": 170.0,
+    "height": 19.0
+  },
+  "row-tag": {
+    "x": 275.0,
+    "y": 543.8,
+    "width": 24.0,
+    "height": 18.0
+  }
+}

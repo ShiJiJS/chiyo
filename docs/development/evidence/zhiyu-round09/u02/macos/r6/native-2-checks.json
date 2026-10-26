@@ -1,0 +1,62 @@
+{
+  "platform": "macos",
+  "fonts": {
+    "platform": "macos",
+    "Zhiyu System": "/System/Library/Fonts/SFNS.ttf",
+    "PingFang SC": "/System/Library/AssetsV2/com_apple_MobileAsset_Font8/86ba2c91f017a3749571a82f2c6d890ac7ffb2fb.asset/AssetData/PingFang.ttc",
+    "Menlo": "/System/Library/Fonts/Menlo.ttc"
+  },
+  "nativeIsolationChecked": true,
+  "nativePreview": {
+    "applicationId": "com.example.infoDesktop.zhiyuPreview",
+    "productionServices": false,
+    "isolated": true,
+    "savedDirectories": false,
+    "title": "知予 · 界面预览·示例数据"
+  },
+  "checks": [
+    "native-search-menu-opens-library-and-focuses-search",
+    "native-widget-filter-intersection",
+    "native-widget-save-failure-draft-and-success-readback",
+    "native-widget-related-query-return",
+    "native-window-two-content-viewports-and-both-themes",
+    "native-rendered-large-text-edit-and-save",
+    "native-widget-revision-comparison-restore-and-readback",
+    "native-widget-whole-record-recycle-restore-and-return",
+    "native-widget-pressure-fixture-and-pagination"
+  ],
+  "contentViewports": [
+    {
+      "width": 1440.0,
+      "height": 900.0,
+      "dark": false,
+      "devicePixelRatio": 2.0,
+      "nativeWindowResized": true
+    },
+    {
+      "width": 1440.0,
+      "height": 900.0,
+      "dark": true,
+      "devicePixelRatio": 2.0,
+      "nativeWindowResized": true
+    },
+    {
+      "width": 1280.0,
+      "height": 800.0,
+      "dark": false,
+      "devicePixelRatio": 2.0,
+      "nativeWindowResized": true
+    },
+    {
+      "width": 1280.0,
+      "height": 800.0,
+      "dark": true,
+      "devicePixelRatio": 2.0,
+      "nativeWindowResized": true
+    }
+  ],
+  "productionBootstrapUsed": false,
+  "databaseOpened": false,
+  "inputScope": "native Flutter framebuffer and Widget input; own AppKit window/menu only; no global OS input",
+  "status": "in-progress; current-source browsing/edit, revision/recycle and pressure coverage; full R01-R04 geometry/motion and actual OS input remain pending"
+}
