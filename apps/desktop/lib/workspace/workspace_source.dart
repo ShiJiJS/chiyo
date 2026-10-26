@@ -1,4 +1,6 @@
 import 'workspace_records.dart';
+import 'workspace_history.dart';
+export 'workspace_history.dart';
 export 'workspace_records.dart';
 
 /// Frontend-only summaries and failures. No database, authorization proof,
@@ -37,6 +39,19 @@ abstract interface class WorkspaceSource {
   Future<List<WorkspaceRecordSummary>> readSummaries(
     Iterable<WorkspaceRecordRef> refs,
   );
+  Future<List<WorkspaceRevision>> loadRevisions(WorkspaceRecordRef ref);
+  Future<WorkspaceRevisionPreview> previewRevision(
+    WorkspaceRecordRef ref,
+    int version, {
+    required int expectedVersion,
+  });
+  Future<WorkspaceRecycleResults> queryRecycled({
+    String keyword = '',
+    int offset = 0,
+    int limit = 25,
+  });
+  Future<WorkspaceArchive> readRecycled(String entryId);
+  Future<WorkspaceRecordReceipt> changeRecord(WorkspaceRecordChange change);
   Future<WorkspaceSaveResult> saveRecord(WorkspaceEdit edit);
   Future<WorkspaceSaveResult> createRecord(WorkspaceCreate draft);
 }

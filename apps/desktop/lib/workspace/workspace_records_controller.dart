@@ -68,6 +68,10 @@ class WorkspaceRecordsController extends ChangeNotifier {
       if (_disposed || generation != _queryGeneration) return;
       catalog = currentCatalog;
       results = value;
+      if (query.offset != value.offset) {
+        query = query.copyWith(offset: value.offset);
+        scrollOffset = 0;
+      }
       revision++;
       selection = value.selection;
       if (selection == null) detail = null;

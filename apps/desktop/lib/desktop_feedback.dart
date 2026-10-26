@@ -46,46 +46,51 @@ class _DesktopFeedbackState extends State<DesktopFeedback> {
             bottom: 25,
             left: 15,
             right: 15,
-            child: Center(
-              child: TweenAnimationBuilder<double>(
-                key: ValueKey(_revision),
-                tween: Tween(begin: 0, end: 1),
-                duration: DesktopMotion.duration(context, DesktopMotion.detail),
-                curve: Curves.easeOut,
-                builder: (_, value, child) => Opacity(
-                  opacity: value,
-                  child: Transform.translate(
-                    offset: Offset(0, 6 * (1 - value)),
-                    child: child,
+            child: IgnorePointer(
+              child: Center(
+                child: TweenAnimationBuilder<double>(
+                  key: ValueKey(_revision),
+                  tween: Tween(begin: 0, end: 1),
+                  duration: DesktopMotion.duration(
+                    context,
+                    DesktopMotion.detail,
                   ),
-                ),
-                child: Semantics(
-                  liveRegion: true,
-                  child: Container(
-                    constraints: BoxConstraints(
-                      maxWidth: MediaQuery.sizeOf(context).width - 30,
+                  curve: Curves.easeOut,
+                  builder: (_, value, child) => Opacity(
+                    opacity: value,
+                    child: Transform.translate(
+                      offset: Offset(0, 6 * (1 - value)),
+                      child: child,
                     ),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 12,
-                    ),
-                    decoration: BoxDecoration(
-                      color: c.paper,
-                      border: Border.all(color: c.line),
-                      borderRadius: BorderRadius.circular(9),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: .12),
-                          blurRadius: 28,
-                          offset: const Offset(0, 7),
-                        ),
-                      ],
-                    ),
-                    child: Text(
-                      _message!,
-                      style: Theme.of(
-                        context,
-                      ).textTheme.bodySmall!.copyWith(color: c.ink),
+                  ),
+                  child: Semantics(
+                    liveRegion: true,
+                    child: Container(
+                      constraints: BoxConstraints(
+                        maxWidth: MediaQuery.sizeOf(context).width - 30,
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 12,
+                      ),
+                      decoration: BoxDecoration(
+                        color: c.paper,
+                        border: Border.all(color: c.line),
+                        borderRadius: BorderRadius.circular(9),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: .12),
+                            blurRadius: 28,
+                            offset: const Offset(0, 7),
+                          ),
+                        ],
+                      ),
+                      child: Text(
+                        _message!,
+                        style: Theme.of(
+                          context,
+                        ).textTheme.bodySmall!.copyWith(color: c.ink),
+                      ),
                     ),
                   ),
                 ),

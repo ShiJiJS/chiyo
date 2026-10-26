@@ -5,6 +5,7 @@ version: 0.4.1+13
 environment:
   sdk: '>=3.9.0 <4.0.0'
 dependencies:
+  crypto: 3.0.7
   flutter:
     sdk: flutter
   info_core:

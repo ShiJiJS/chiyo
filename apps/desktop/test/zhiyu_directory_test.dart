@@ -464,7 +464,16 @@ void main() {
       await tester.tap(find.byKey(const ValueKey('preview-theme-dark')));
       await tester.pumpAndSettle();
       final create = find.byKey(const ValueKey('library-directory-create'));
-      await tester.ensureVisible(create);
+      await tester.scrollUntilVisible(
+        create,
+        160,
+        scrollable: find
+            .descendant(
+              of: find.byKey(const ValueKey('library-directory-pane')),
+              matching: find.byType(Scrollable),
+            )
+            .first,
+      );
       await tester.tap(create);
       await tester.pumpAndSettle();
       await enterName(tester, '集中验收目录');
