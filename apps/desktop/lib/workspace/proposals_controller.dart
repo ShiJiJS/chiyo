@@ -88,7 +88,11 @@ class ProposalsController extends ChangeNotifier {
       writeFailure?.code != 'conflict';
   bool get canReject => _readable && detail!.summary.pending;
   bool get canEdit =>
-      _readable && detail!.summary.pending && draft != null && !needsNewReview;
+      _readable &&
+      detail!.summary.pending &&
+      detail!.summary.kind != WorkspaceProposalKind.deletion &&
+      draft != null &&
+      !needsNewReview;
   void _notify() {
     if (!_closed) notifyListeners();
   }
@@ -337,6 +341,9 @@ class ProposalsController extends ChangeNotifier {
         r.records.any(
           (x) => x.ref.kind != WorkspaceRecordKind.information || x.version < 1,
         ) ||
+        d.summary.kind == WorkspaceProposalKind.deletion &&
+            c.action == WorkspaceProposalAction.confirm &&
+            r.records.any((x) => x.entryId == null || x.entryId!.isEmpty) ||
         original != null &&
             r.records.isNotEmpty &&
             (r.records.single.ref != original.record.ref ||

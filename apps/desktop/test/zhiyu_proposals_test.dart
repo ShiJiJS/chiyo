@@ -521,4 +521,84 @@ void main() {
       expect(m.canConfirm, false);
     },
   );
+  testWidgets(
+    'actual deletion guide reviews the full retained scope, moves the same object to recycle and opens only its exact pre-delete snapshot',
+    (t) async {
+      final s = await start(t);
+      await tap(t, find.byKey(const ValueKey('preview-guide')));
+      await tap(t, find.byKey(const ValueKey('preview-proposal-deletion')));
+      await closed(t);
+      await tap(t, find.byKey(const ValueKey('proposal-row-delete-service')));
+      final m = model(t), ref = m.detail!.items.single.before!.record.ref;
+      expect(find.text('删除整条资料'), findsOneWidget);
+      expect(find.byKey(const ValueKey('proposal-edit-service')), findsNothing);
+      expect(m.canConfirm, true);
+      await capture(t, 'proposals-1440-light-deletion');
+      await tap(t, find.byKey(const ValueKey('proposal-confirm')));
+      expect(m.detail!.summary.status, WorkspaceProposalStatus.completed);
+      expect(m.detail!.items, isEmpty);
+      expect(find.text('已移入回收站'), findsWidgets);
+      expect(
+        t
+            .widget<DesktopButton>(
+              find.byKey(ValueKey('proposal-current-${ref.key}')),
+            )
+            .onPressed,
+        isNull,
+      );
+      await tap(t, find.byKey(ValueKey('proposal-snapshot-${ref.key}')));
+      expect(find.byType(LibrarySnapshotView), findsOneWidget);
+      expect(
+        t
+            .widget<LibrarySnapshotView>(find.byType(LibrarySnapshotView))
+            .archive
+            .detail
+            .version,
+        1,
+      );
+      await capture(t, 'proposals-1440-light-deleted-snapshot');
+      await tap(t, find.byKey(const ValueKey('proposal-read-close')));
+      await closed(t);
+      await tap(t, find.byKey(const ValueKey('workspace-nav-library')));
+      await tap(t, find.byKey(const ValueKey('library-open-recycle')));
+      expect(find.text('Blinko 笔记'), findsWidgets);
+      final terminal = await s.proposals.read('delete-service');
+      expect(terminal.targets.single.record, ref);
+      expect(terminal.targets.single.snapshotAvailable, true);
+    },
+  );
+  testWidgets(
+    'whole deletion conflict compares the new version without changing the requested target or deleting it',
+    (t) async {
+      final s = await start(t);
+      await tap(t, find.byKey(const ValueKey('preview-guide')));
+      await tap(t, find.byKey(const ValueKey('preview-proposal-deletion')));
+      await closed(t);
+      await tap(t, find.byKey(const ValueKey('proposal-row-delete-service')));
+      final m = model(t), d = m.detail!.items.single.before!;
+      await t.runAsync(
+        () => s.saveRecord(
+          WorkspaceEdit(
+            operationId: 'delete-concurrent-ui',
+            expectedVersion: d.version,
+            record: d.record,
+            values: {'purpose': '删除前需要保留的新说明'},
+          ),
+        ),
+      );
+      await ready(t);
+      expect(m.canConfirm, false);
+      await tap(t, find.byKey(const ValueKey('proposal-compare-service')));
+      expect(find.text('删除前需要保留的新说明'), findsWidgets);
+      expect(find.textContaining('当前资料v2'), findsOneWidget);
+      await tap(t, find.byKey(const ValueKey('proposal-read-close')));
+      await closed(t);
+      await tap(t, find.byKey(const ValueKey('proposal-reject')));
+      expect(m.detail!.summary.status, WorkspaceProposalStatus.rejected);
+      expect(
+        (await s.readDetail(d.record.ref)).values['purpose'],
+        '删除前需要保留的新说明',
+      );
+    },
+  );
 }

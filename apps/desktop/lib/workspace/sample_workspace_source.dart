@@ -71,6 +71,11 @@ class SampleWorkspaceSource
   @override
   WorkspaceProposalSource get proposals => _proposals;
   set loseNextProposalReply(bool value) => _proposals.loseNextReply = value;
+  Future<void> demonstrateDeletionProposal() async {
+    await _readable();
+    _proposals.demonstrateDeletion();
+  }
+
   Future<void> demonstrateProposalConflict() async {
     await _readable();
     _proposals._seed();

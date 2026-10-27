@@ -1,9 +1,11 @@
 part of 'sample_workspace_source.dart';
 
 class _ProposalSaved {
-  const _ProposalSaved(this.receipt, this.name);
+  const _ProposalSaved(this.receipt, this.name, {this.snapshotVersion});
   final WorkspaceRecordReceipt receipt;
   final String name;
+  final int? snapshotVersion;
+  int get archivedVersion => snapshotVersion ?? receipt.version;
 }
 
 class _ProposalInput {
@@ -148,6 +150,36 @@ class _SampleProposals implements WorkspaceProposalSource {
     return _rows.values.where((r) => r.pending).length;
   }
 
+  void demonstrateDeletion() {
+    _seed();
+    if (_rows.containsKey('delete-service')) return;
+    final target = s._records[info('blinko')];
+    if (target == null) return;
+    final metadata = WorkspaceDetail(
+      record: target.record,
+      version: target.version,
+      definition: target.definition,
+      fieldIds: target.fieldIds,
+      retainedFields: target.retainedFields,
+      retainedRelations: target.retainedRelations,
+    );
+    _rows['delete-service'] = _ProposalInput(
+      'delete-service',
+      '删除停用的 Blinko 资料',
+      WorkspaceProposalKind.deletion,
+      '此示例服务已停用，申请将整条资料移入回收站。',
+      s._now(),
+      [
+        WorkspaceProposalItem(
+          id: 'service',
+          before: metadata,
+          proposed: metadata,
+        ),
+      ],
+    );
+    s._changes.add(null);
+  }
+
   _ProposalInput _row(String id) {
     _seed();
     if (s._scenario == SampleWorkspaceScenario.empty ||
@@ -240,7 +272,10 @@ class _SampleProposals implements WorkspaceProposalSource {
     );
   }
 
-  WorkspaceProposalItem _project(WorkspaceProposalItem item) {
+  WorkspaceProposalItem _project(
+    WorkspaceProposalItem item, {
+    bool wholeDeletion = false,
+  }) {
     final d = item.proposed;
     final state = d.definition['packageId'] is String
         ? s._plugins.stateFor(
@@ -270,10 +305,15 @@ class _SampleProposals implements WorkspaceProposalSource {
               fieldIds: original.fieldIds,
               retainedFields: original.retainedFields,
               retainedRelations: original.retainedRelations,
-              values: {
-                for (final c in item.changes)
-                  if (available(c)) c.key: archive!.detail.values[c.key],
-              },
+              values: wholeDeletion
+                  ? archive?.detail.values ?? const {}
+                  : {
+                      for (final c in item.changes)
+                        if (available(c)) c.key: archive!.detail.values[c.key],
+                    },
+              relations: wholeDeletion
+                  ? archive?.detail.relations ?? const {}
+                  : const {},
             ),
       changes: item.changes.map(
         (c) => c.withOwnerBefore(
@@ -304,18 +344,23 @@ class _SampleProposals implements WorkspaceProposalSource {
       reviewToken: _token(r),
       currentTargetRef: r.origin,
       currentAvailable: r.origin != null && s._records.containsKey(r.origin),
-      items: r.items.map(_project),
+      items: r.items.map(
+        (i) => _project(
+          i,
+          wholeDeletion: r.kind == WorkspaceProposalKind.deletion,
+        ),
+      ),
       targets: [
         for (final saved in r.saved)
           WorkspaceProposalTarget(
             record: saved.receipt.ref,
             name: saved.name,
-            version: saved.receipt.version,
+            version: saved.archivedVersion,
             exists: s._records.containsKey(saved.receipt.ref),
             snapshotAvailable:
                 s._grantHistory.archive(
                   saved.receipt.ref,
-                  saved.receipt.version,
+                  saved.archivedVersion,
                 ) !=
                 null,
           ),
@@ -365,6 +410,15 @@ class _SampleProposals implements WorkspaceProposalSource {
     WorkspaceProposalItem item,
     WorkspaceProposalItemReview review,
   ) {
+    if (r.kind == WorkspaceProposalKind.deletion) {
+      if (!_same(
+        review.toJson(),
+        WorkspaceProposalItemReview.fromItem(item).toJson(),
+      )) {
+        throw const WorkspaceFailure('validation', '删除提案只能核对原范围，不能夹带资料编辑。');
+      }
+      return;
+    }
     final d = item.proposed;
     final keys = {
       ...d.values.keys,
@@ -638,6 +692,23 @@ class _SampleProposals implements WorkspaceProposalSource {
             detail.record.name,
           ),
         );
+      } else if (r.kind == WorkspaceProposalKind.deletion) {
+        final before = r.items.single.before!;
+        final receipt = await s.changeRecord(
+          WorkspaceRecordChange(
+            operationId: 'proposal:${c.operationId}',
+            ref: before.record.ref,
+            expectedVersion: before.version,
+            action: WorkspaceRecordAction.recycle,
+          ),
+        );
+        saved.add(
+          _ProposalSaved(
+            receipt,
+            before.record.name,
+            snapshotVersion: before.version,
+          ),
+        );
       } else {
         throw const WorkspaceFailure('unsupported', '该类提案尚不可通过此决定处理。');
       }
@@ -701,7 +772,7 @@ class _SampleProposals implements WorkspaceProposalSource {
     if (saved == null || record.kind != WorkspaceRecordKind.information) {
       throw const WorkspaceFailure('unsupported', '没有属于本提案的普通资料结果。');
     }
-    return s._grantHistory.archive(record, saved.receipt.version) ??
+    return s._grantHistory.archive(record, saved.archivedVersion) ??
         (throw const WorkspaceFailure(
           'history_unavailable',
           '当时保存的资料快照已不可用，不会替换成当前或同名内容。',
