@@ -1,0 +1,18 @@
+[
+  {
+    "log": "analysis.log",
+    "exitCode": 0
+  },
+  {
+    "log": "focused.log",
+    "exitCode": 0
+  },
+  {
+    "log": "regression.log",
+    "exitCode": 0
+  },
+  {
+    "log": "build.log",
+    "exitCode": 0
+  }
+]
