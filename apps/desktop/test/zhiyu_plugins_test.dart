@@ -86,6 +86,7 @@ void main() {
     }
     final library = t.widget<LibraryPage>(find.byType(LibraryPage)).controller;
     await tap(t, find.byKey(const ValueKey('workspace-nav-settings')));
+    await tap(t, find.byKey(const ValueKey('settings-section-plugins')));
     final plugins = t.widget<PluginsPage>(find.byType(PluginsPage)).controller;
     return (
       library: library,

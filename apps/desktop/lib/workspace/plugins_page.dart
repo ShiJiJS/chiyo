@@ -28,6 +28,7 @@ class PluginsPage extends StatefulWidget {
     this.onRecord,
     this.legacy,
     this.onLegacyCreate,
+    this.embedded = false,
   });
   final PluginsController controller;
   final WorkspacePluginPicker? picker;
@@ -39,6 +40,7 @@ class PluginsPage extends StatefulWidget {
   final ValueChanged<WorkspaceRecordRef>? onRecord;
   final LegacyTemplatesController? legacy;
   final ValueChanged<WorkspaceLegacyTemplate>? onLegacyCreate;
+  final bool embedded;
   @override
   State<PluginsPage> createState() => _PluginsPageState();
 }
@@ -513,45 +515,46 @@ class _PluginsPageState extends State<PluginsPage> {
         builder: (context, bounds) => Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Container(
-              width: bounds.maxWidth <= 1300 ? 220 : 250,
-              padding: const EdgeInsets.fromLTRB(18, 26, 18, 20),
-              decoration: BoxDecoration(
-                color: c.rail,
-                border: Border(right: BorderSide(color: c.line)),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    '设置',
-                    style: libraryText(context, 24, weight: FontWeight.w600),
-                  ),
-                  const SizedBox(height: 24),
-                  DesktopButton(
-                    selected: !model.showingLegacy,
-                    alignment: Alignment.centerLeft,
-                    leading: const PrototypeIcon(PrototypeIconGlyph.plugin),
-                    onPressed: () {
-                      _top();
-                      model.showLegacy(false);
-                      model.setFilter(PluginFilter.all);
-                    },
-                    child: const Text('插件'),
-                  ),
-                  if (widget.legacy != null) ...[
-                    const SizedBox(height: 10),
-                    DesktopButton(
-                      key: const ValueKey('legacy-menu'),
-                      selected: model.showingLegacy,
-                      alignment: Alignment.centerLeft,
-                      onPressed: () => model.showLegacy(true),
-                      child: const Text('旧版模板'),
+            if (!widget.embedded)
+              Container(
+                width: bounds.maxWidth <= 1300 ? 220 : 250,
+                padding: const EdgeInsets.fromLTRB(18, 26, 18, 20),
+                decoration: BoxDecoration(
+                  color: c.rail,
+                  border: Border(right: BorderSide(color: c.line)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      '设置',
+                      style: libraryText(context, 24, weight: FontWeight.w600),
                     ),
+                    const SizedBox(height: 24),
+                    DesktopButton(
+                      selected: !model.showingLegacy,
+                      alignment: Alignment.centerLeft,
+                      leading: const PrototypeIcon(PrototypeIconGlyph.plugin),
+                      onPressed: () {
+                        _top();
+                        model.showLegacy(false);
+                        model.setFilter(PluginFilter.all);
+                      },
+                      child: const Text('插件'),
+                    ),
+                    if (widget.legacy != null) ...[
+                      const SizedBox(height: 10),
+                      DesktopButton(
+                        key: const ValueKey('legacy-menu'),
+                        selected: model.showingLegacy,
+                        alignment: Alignment.centerLeft,
+                        onPressed: () => model.showLegacy(true),
+                        child: const Text('旧版模板'),
+                      ),
+                    ],
                   ],
-                ],
+                ),
               ),
-            ),
             Expanded(
               child: Padding(
                 padding: EdgeInsets.fromLTRB(

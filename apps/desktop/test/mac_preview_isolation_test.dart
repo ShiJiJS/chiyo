@@ -9,6 +9,7 @@ import 'package:info_desktop/workspace/library_page.dart';
 import 'package:info_desktop/workspace/approvals_page.dart';
 import 'package:info_desktop/workspace/grant_history_page.dart';
 import 'package:info_desktop/workspace/proposals_page.dart';
+import 'package:info_desktop/workspace/settings_page.dart';
 import 'package:info_desktop/workspace/library_history_dialog.dart';
 import 'package:info_desktop/workspace/mac_preview_desktop.dart';
 import 'package:info_desktop/workspace/workspace_source.dart';
@@ -158,6 +159,8 @@ void main() {
       expect((await source.credentials.read(ssh)).privateNote, '隔离检查的合成备注');
       expect((await source.readDetail(ssh)).values, isEmpty);
       await t.tap(find.byKey(const ValueKey('workspace-nav-settings')));
+      await t.pumpAndSettle();
+      await t.tap(find.byKey(const ValueKey('settings-section-plugins')));
       await t.pumpAndSettle();
       await t.ensureVisible(find.byKey(const ValueKey('plugin-tab-settings')));
       await t.tap(find.byKey(const ValueKey('plugin-tab-settings')));
@@ -577,6 +580,43 @@ void main() {
         batchModel.detail!.organization!.outcome,
         WorkspaceOrganizationOutcome.applied,
       );
+      await t.tap(find.byKey(const ValueKey('workspace-nav-settings')));
+      await t.pumpAndSettle();
+      await t.tap(find.byKey(const ValueKey('settings-section-appearance')));
+      await t.pumpAndSettle();
+      final settings = t
+          .widget<WorkspaceSettingsPage>(find.byType(WorkspaceSettingsPage))
+          .controller;
+      source.settings.loseNextReply = true;
+      await t.ensureVisible(find.byKey(const ValueKey('settings-theme-dark')));
+      await t.tap(find.byKey(const ValueKey('settings-theme-dark')));
+      await t.pumpAndSettle();
+      expect(settings.frozen, true);
+      final queuedSettings = Completer<void>();
+      await messenger.handlePlatformMessage(
+        MacPreviewDesktop.channel.name,
+        const StandardMethodCodec().encodeMethodCall(
+          const MethodCall('openLibrary'),
+        ),
+        (_) => queuedSettings.complete(),
+      );
+      await queuedSettings.future;
+      await t.pumpAndSettle();
+      expect(find.byType(WorkspaceSettingsPage), findsOneWidget);
+      await t.ensureVisible(find.byKey(const ValueKey('settings-reconcile')));
+      await t.tap(find.byKey(const ValueKey('settings-reconcile')));
+      await t.pumpAndSettle();
+      expect(settings.frozen, false);
+      await t.tap(find.byKey(const ValueKey('settings-section-notifications')));
+      await t.pumpAndSettle();
+      await t.ensureVisible(
+        find.byKey(const ValueKey('settings-notification-preview')),
+      );
+      await t.tap(find.byKey(const ValueKey('settings-notification-preview')));
+      await t.pumpAndSettle();
+      await t.tap(find.byKey(const ValueKey('settings-notification-open')));
+      await t.pumpAndSettle();
+      expect(find.byType(ApprovalsPage), findsOneWidget);
       expect(forbidden, isEmpty);
       expect(network.calls, 0);
       expect(filesystem.rejected, isEmpty);

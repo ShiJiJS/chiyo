@@ -15,6 +15,7 @@ import 'sample_workspace_hosts.dart';
 import 'sample_workspace_field_ids.dart';
 import 'workspace_entries.dart';
 import 'sample_workspace_legacy.dart';
+import 'sample_workspace_settings.dart';
 export 'sample_workspace_hosts.dart' show SampleHostScenario;
 
 part 'sample_workspace_history.dart';
@@ -65,6 +66,19 @@ class SampleWorkspaceSource
   @override
   WorkspaceCredentialSource get credentials => _credentials;
   late final _approvals = _SampleApprovals(this);
+  @override
+  late final SampleWorkspaceSettings settings = SampleWorkspaceSettings(
+    readable: _readable,
+    epoch: () => _epoch,
+    beforeWrite: () {
+      if (nextSaveFailure case final failure?) {
+        nextSaveFailure = null;
+        throw failure;
+      }
+    },
+    changed: () => _changes.add(null),
+    approvals: approvals,
+  );
   @override
   WorkspaceApprovalSource get approvals => _approvals;
   late final _grantHistory = _SampleGrantHistory(this);

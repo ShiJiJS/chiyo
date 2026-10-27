@@ -27,6 +27,8 @@ import 'approvals_controller.dart';
 import 'approvals_page.dart';
 import 'grant_history_controller.dart';
 import 'grant_history_page.dart';
+import 'settings_controller.dart';
+import 'settings_page.dart';
 import 'proposals_controller.dart';
 import 'proposals_page.dart';
 
@@ -51,6 +53,8 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
   bool _historyFrozen = false;
   late final ProposalsController _proposals;
   bool _proposalFrozen = false;
+  late final WorkspaceSettingsController _settings;
+  bool _settingsFrozen = false;
   StreamSubscription<WorkspaceRecordRef?>? _summaryChanges;
   final _guideFocus = FocusNode();
   bool _stress = false;
@@ -85,6 +89,14 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
       _source.legacyTemplates,
       _source.changes,
     );
+    _settings = WorkspaceSettingsController(
+      _source.settings,
+      _source.changes,
+      onTheme: (theme) => _controller.setBrightness(
+        theme == WorkspaceTheme.dark ? Brightness.dark : Brightness.light,
+      ),
+    )..addListener(_settingsChanged);
+    unawaited(_settings.load());
     unawaited(_legacy.load());
     unawaited(_plugins.load());
     _summaryChanges = _source.changes.listen(
@@ -124,8 +136,18 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
     _syncNavigation();
   }
 
+  void _settingsChanged() {
+    _settingsFrozen = _settings.frozen;
+    if (_settingsFrozen) _pendingUiNavigation = null;
+    _syncNavigation();
+  }
+
   bool _deferNavigation(VoidCallback action) {
-    if (!mounted || _approvals.frozen || _historyFrozen || _proposalFrozen) {
+    if (!mounted ||
+        _approvals.frozen ||
+        _historyFrozen ||
+        _proposalFrozen ||
+        _settingsFrozen) {
       return true;
     }
     if (_modalDepth > 0) {
@@ -153,7 +175,8 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
         _modalDepth == 0 &&
         !_approvals.frozen &&
         !_historyFrozen &&
-        !_proposalFrozen;
+        !_proposalFrozen &&
+        !_settingsFrozen;
     _controller.setNavigationLocked(!enabled);
     if (_nativeNavigationEnabled != enabled) {
       _nativeNavigationEnabled = enabled;
@@ -174,6 +197,7 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
     _approvals.dispose();
     _history.dispose();
     _proposals.dispose();
+    _settings.dispose();
     _controller.dispose();
     _library.dispose();
     _plugins.dispose();
@@ -193,6 +217,7 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
     unawaited(_approvals.load());
     unawaited(_history.load());
     unawaited(_proposals.load());
+    unawaited(_settings.load());
   }
 
   Future<void> _createWithTemplate(
@@ -250,6 +275,7 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
     if (page == WorkspacePage.history) unawaited(_history.open(id));
     if (page == WorkspacePage.proposals) unawaited(_proposals.open(id));
     if (page == WorkspacePage.settings) {
+      _settings.select(WorkspaceSettingsSection.plugins);
       const prefix = 'plugin:builtin.server/host:';
       if (id.startsWith(prefix)) {
         _plugins.showHostSettings(
@@ -309,8 +335,13 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
                   for (final value in Brightness.values)
                     DesktopButton(
                       key: ValueKey('preview-theme-${value.name}'),
-                      onPressed: () {
-                        _controller.setBrightness(value);
+                      onPressed: () async {
+                        await _settings.setTheme(
+                          value == Brightness.dark
+                              ? WorkspaceTheme.dark
+                              : WorkspaceTheme.light,
+                        );
+                        if (!dialogContext.mounted) return;
                         Navigator.pop(dialogContext);
                       },
                       child: Text(value == Brightness.light ? '明亮' : '黑暗'),
@@ -551,6 +582,7 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
                         await _source.demonstrateHost(scenario);
                         if (!mounted) return;
                         _plugins.showHostSettings(null);
+                        _settings.select(WorkspaceSettingsSection.plugins);
                         _controller.navigate(WorkspacePage.settings);
                       },
                       child: Text(
@@ -733,23 +765,31 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
                 },
               )
             : location.page == WorkspacePage.settings
-            ? PluginsPage(
-                controller: _plugins,
-                legacy: _legacy,
-                onLegacyCreate: (t) => unawaited(_createWithLegacy(context, t)),
-                hosts: _source.hosts,
-                hostChanges: _source.changes,
-                onRecord: (ref) => unawaited(_hostRecord(ref)),
-                picker: () => showPluginChoices(
-                  context,
-                  _source.pluginChoices,
-                  _source.plugins.releaseCandidate,
-                ),
-                onRetry: () => _scenario(SampleWorkspaceScenario.ready),
-                onCreate: (type) =>
-                    unawaited(_createWithTemplate(context, type)),
-                onRecords: (type) => unawaited(_templateRecords(type)),
+            ? WorkspaceSettingsPage(
+                controller: _settings,
+                plugins: _plugins,
+                onRequest: (id) => _navigate(WorkspacePage.approvals, id),
                 onModalChanged: _modalChanged,
+                pluginBuilder: (context) => PluginsPage(
+                  embedded: true,
+                  controller: _plugins,
+                  legacy: _legacy,
+                  onLegacyCreate: (t) =>
+                      unawaited(_createWithLegacy(context, t)),
+                  hosts: _source.hosts,
+                  hostChanges: _source.changes,
+                  onRecord: (ref) => unawaited(_hostRecord(ref)),
+                  picker: () => showPluginChoices(
+                    context,
+                    _source.pluginChoices,
+                    _source.plugins.releaseCandidate,
+                  ),
+                  onRetry: () => _scenario(SampleWorkspaceScenario.ready),
+                  onCreate: (type) =>
+                      unawaited(_createWithTemplate(context, type)),
+                  onRecords: (type) => unawaited(_templateRecords(type)),
+                  onModalChanged: _modalChanged,
+                ),
               )
             : _FoundationPage(
                 controller: _controller,

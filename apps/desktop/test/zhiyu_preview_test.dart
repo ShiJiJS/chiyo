@@ -8,6 +8,7 @@ import 'package:info_desktop/workspace/zhiyu_theme.dart';
 import 'package:info_desktop/workspace/zhiyu_app.dart';
 import 'package:info_desktop/workspace/workspace_source.dart';
 import 'package:info_desktop/workspace/plugins_page.dart';
+import 'package:info_desktop/workspace/settings_page.dart';
 
 void main() {
   Future<void> start(
@@ -97,6 +98,9 @@ void main() {
         page,
       );
     }
+    expect(find.byType(WorkspaceSettingsPage), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('settings-section-plugins')));
+    await tester.pumpAndSettle();
     expect(find.byType(PluginsPage), findsOneWidget);
     expect(
       tester
