@@ -1,0 +1,19 @@
+{
+  "analysis.log": "0dddd13f3cded2e05e8625c7085a8723b444f687f31f48f456b1554314f5477a",
+  "build.log": "bb928504a91fe0ce4dc0bb921b142b31033cbbf74e92214ba34521fe3f2f22be",
+  "checkpoint.json": "d4e70c70768b63210cbed7be334042c0339e3397c8c2e64d6d09083d38081a5d",
+  "checks.json": "835019171b79012136d561f65b87f3b028df9d1ab2f54c93b101e9e2df8f8459",
+  "commands.json": "e72320c9613b6f16c5ad5241628e40053d2bd8904e0a83a34119f6014cdbae65",
+  "focused-first.log": "9957b84f9753726d1a8df04b14b92a247c61d8923e99173edd34bffd7380da3e",
+  "native-source-hashes.json": "feb5f415e16f9e138f8262df986596103ea3c11940d5b1ad4f5f602046a6beb7",
+  "pending-purge-reproduction.log": "ac3aa5629b92bc7db94c9a708d1d8e0a5b882681bdde0e45eae8ecdc738f115c",
+  "regression.log": "e69a279a788753e7072197ab2c4c91c0bb627004696b5b9663fd18a2d9449fd7",
+  "screenshots/proposals-1280-dark200-modification.png": "fda2454448061913db0fc759ed66bd9b9a6021bade194a35018186b978cb2fc7",
+  "screenshots/proposals-1440-light-conflict-comparison.png": "2aa9243f9322a3b8eb67efa3a70dad27fa4bf5fca002f5cd05a8000a7e18ee3c",
+  "screenshots/proposals-1440-light-import.png": "e5e6390883321fd72f35c9159025b05392a8cf6e608f15d1587240f8c358b129",
+  "screenshots/proposals-1440-light-imported.png": "29579f6337ff4301a1a8fa9d9291c2b8de41fbb5da3cf58c75856ee527aa4360",
+  "screenshots/proposals-1440-light-modification.png": "f0976e960259cbedf9bb3987ca8618940352757efcddf9b41ea23665baf1e085",
+  "screenshots/proposals-1440-light-unknown.png": "6ba133d33c1562b02c434f96dd78a1ed107868c6d328792f69c0c0858dad2a2c",
+  "source-files.json": "e02e5f53c6a9b6ec898b244da4a1d9f7ee46ef76d12b868ae21e7d6e05fe21c8",
+  "visual-review.md": "8c48a0191acd97575cf298f2d6fed4a0688880467dd3194a001fdfd358483b23"
+}

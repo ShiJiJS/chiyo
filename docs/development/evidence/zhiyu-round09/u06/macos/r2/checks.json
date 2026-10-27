@@ -1,0 +1,22 @@
+[
+  {
+    "log": "analysis.log",
+    "exitCode": 0,
+    "seconds": 2.18
+  },
+  {
+    "log": "focused-first.log",
+    "exitCode": 0,
+    "seconds": 12.33
+  },
+  {
+    "log": "regression.log",
+    "exitCode": 0,
+    "seconds": 120.35
+  },
+  {
+    "log": "build.log",
+    "exitCode": 0,
+    "seconds": 15.4
+  }
+]
