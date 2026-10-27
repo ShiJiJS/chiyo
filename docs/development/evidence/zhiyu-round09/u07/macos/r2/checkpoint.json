@@ -1,0 +1,76 @@
+{
+  "createdAt": "2026-10-27T15:52:57.907088+00:00",
+  "sourceCommit": "a939f529fd343828fd6727eafa73b80e060fa451",
+  "branch": "codex/zhiyu-macos",
+  "issue": 68,
+  "state": "OPEN",
+  "checkedTotal": 0,
+  "criteriaTotal": 8,
+  "scope": "U07 request wait and exact retention preview/confirmation; remaining settings still pending",
+  "checks": {
+    "analysis": "No issues found",
+    "relatedTests": 373,
+    "focusedTests": 37,
+    "newTests": 12,
+    "newModelControllerTests": 9,
+    "newWidgetPaths": 3,
+    "build": "fixed path Mac arm64 preview passed",
+    "screenshots": [
+      "screenshots/settings-1440-light-records.png",
+      "screenshots/settings-1440-light-retention-review.png",
+      "screenshots/settings-1440-light-retention-read-failure.png",
+      "screenshots/settings-1280-dark200-records.png",
+      "screenshots/settings-1280-dark200-retention-review.png"
+    ]
+  },
+  "native": {
+    "app": "apps/desktop/build/macos/Build/Products/Debug/info_desktop.app",
+    "bundleIdentifier": "com.example.infoDesktop.zhiyuPreview",
+    "AgentInfoInterfacePreview": "YES",
+    "architecture": "arm64",
+    "newCocoaRuntime": false
+  },
+  "environment": {
+    "macOS": "27.0.1 26A434",
+    "Xcode": "27.1 27A9275",
+    "Flutter": "3.47.7",
+    "Dart": "3.13.5",
+    "fonts": [
+      "SFNS",
+      "PingFang SC",
+      "Menlo"
+    ],
+    "DPR": 1,
+    "viewports": [
+      [
+        1440,
+        900
+      ],
+      [
+        1280,
+        800
+      ]
+    ],
+    "textScales": [
+      1,
+      2
+    ],
+    "reference": "frozen R13",
+    "data": "synthetic; clock advanced for retention cases"
+  },
+  "isolation": {
+    "computerUse": false,
+    "subagents": false,
+    "windowsCI": false,
+    "systemPermissions": false,
+    "personalData": false,
+    "method": "existing composition guard remains green; only sample sources and Flutter UI changed, no production adapter or native-boundary changes"
+  },
+  "pending": [
+    "directory/tag management",
+    "backup/recovery key/conflicts, runtime maintenance/exit, Agent connection",
+    "complete S5/real OS input/normal-speed video and existing dark200 topbar badge clipping",
+    "production integration after seven UI modules via F01"
+  ],
+  "next": "Continue U07 directory/tag management. Active goal."
+}
