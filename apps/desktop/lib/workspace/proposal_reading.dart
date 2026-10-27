@@ -82,13 +82,16 @@ class ProposalDiff extends StatelessWidget {
     required this.before,
     required this.after,
     this.currentLabel = '当前内容',
+    this.afterLabel = '提案内容',
+    this.highlightAfter = true,
   });
-  final String label, before, after, currentLabel;
+  final String label, before, after, currentLabel, afterLabel;
+  final bool highlightAfter;
   Widget _column(BuildContext context, String label, String value, bool next) =>
       Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: next
+          color: next && highlightAfter
               ? UiPalette.of(context).successSurface
               : UiPalette.of(context).rail,
           border: Border.all(color: UiPalette.of(context).line),
@@ -133,7 +136,7 @@ class ProposalDiff extends StatelessWidget {
                 children: [
                   _column(context, currentLabel, before, false),
                   const SizedBox(height: 16),
-                  _column(context, '提案内容', after, true),
+                  _column(context, afterLabel, after, true),
                 ],
               )
             : Row(
@@ -143,7 +146,7 @@ class ProposalDiff extends StatelessWidget {
                     child: _column(context, currentLabel, before, false),
                   ),
                   const SizedBox(width: 20),
-                  Expanded(child: _column(context, '提案内容', after, true)),
+                  Expanded(child: _column(context, afterLabel, after, true)),
                 ],
               ),
       ),

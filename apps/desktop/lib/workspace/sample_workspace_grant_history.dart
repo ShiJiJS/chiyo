@@ -23,6 +23,7 @@ class _SampleGrantHistory implements WorkspaceGrantHistorySource {
       WorkspaceApprovalState.revoked => WorkspaceGrantState.revoked,
       WorkspaceApprovalState.expired => WorkspaceGrantState.expired,
       WorkspaceApprovalState.sessionEnded => WorkspaceGrantState.sessionEnded,
+      WorkspaceApprovalState.completed => WorkspaceGrantState.completed,
       _ => WorkspaceGrantState.unavailable,
     };
   }
@@ -48,7 +49,9 @@ class _SampleGrantHistory implements WorkspaceGrantHistorySource {
       chatClaim: r.session.label,
       purpose: r.purpose,
       recordedAt: f.at,
-      operationCount: a._executions[r.id]?.length ?? 0,
+      operationCount:
+          (a._executions[r.id]?.length ?? 0) +
+          s._proposals.organizationEvents(r.id).length,
     );
   }
 
@@ -199,6 +202,7 @@ class _SampleGrantHistory implements WorkspaceGrantHistorySource {
             ),
         ],
         reviewToken: a._stamp(r),
+        events: s._proposals.organizationEvents(r.id),
         decidedAt: f.at,
         fieldExpiresAt: f.fieldEnd,
         credentialExpiresAt: f.credentialEnd,

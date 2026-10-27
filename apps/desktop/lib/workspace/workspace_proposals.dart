@@ -3,6 +3,8 @@ import 'package:crypto/crypto.dart';
 import 'workspace_records.dart';
 import 'workspace_history.dart';
 import 'workspace_entries.dart';
+import 'workspace_organization.dart';
+export 'workspace_organization.dart';
 
 enum WorkspaceProposalKind {
   addition('新增资料'),
@@ -60,6 +62,7 @@ class WorkspaceProposalSummary {
     required this.purpose,
     required this.itemCount,
     this.wholeDeletion = false,
+    this.organizationOutcome,
   });
   final String id, title, agentClaim, chatClaim, purpose;
   final WorkspaceProposalKind kind;
@@ -67,6 +70,7 @@ class WorkspaceProposalSummary {
   final bool pending;
   final int version, itemCount;
   final bool wholeDeletion;
+  final WorkspaceOrganizationOutcome? organizationOutcome;
   final DateTime at;
 }
 
@@ -193,6 +197,7 @@ class WorkspaceProposalDetail {
     this.notice,
     this.currentTargetRef,
     this.currentAvailable = false,
+    this.organization,
   }) : items = List.unmodifiable(items),
        targets = List.unmodifiable(targets);
   final WorkspaceProposalSummary summary;
@@ -202,6 +207,7 @@ class WorkspaceProposalDetail {
   final String? notice;
   final WorkspaceRecordRef? currentTargetRef;
   final bool currentAvailable;
+  final WorkspaceOrganizationReport? organization;
   late final String snapshotDigest = _snapshotDigest();
   String _snapshotDigest() {
     Map<String, Object?> snapshot(
@@ -245,6 +251,7 @@ class WorkspaceProposalDetail {
                 'purpose': summary.purpose,
                 'agent': summary.agentClaim,
                 'chat': summary.chatClaim,
+                'organization': organization?.toJson(),
                 'items': [
                   for (final i in items)
                     {
@@ -279,17 +286,19 @@ class WorkspaceProposalDetail {
       summary.pending &&
       summary.status == WorkspaceProposalStatus.pending &&
       items.isNotEmpty &&
-      items.every(
-        (i) =>
-            i.before == null ||
-            i.beforeState == WorkspaceProposalBeforeState.available &&
-                i.changes.every(
-                  (c) =>
-                      c.intent == WorkspaceProposalFieldIntent.add ||
-                      c.beforeAvailable,
-                ),
-      ) &&
-      summary.kind != WorkspaceProposalKind.organization;
+      (summary.kind == WorkspaceProposalKind.organization
+          ? organization?.legacyReview == true &&
+                organization?.outcome == WorkspaceOrganizationOutcome.proposed
+          : items.every(
+              (i) =>
+                  i.before == null ||
+                  i.beforeState == WorkspaceProposalBeforeState.available &&
+                      i.changes.every(
+                        (c) =>
+                            c.intent == WorkspaceProposalFieldIntent.add ||
+                            c.beforeAvailable,
+                      ),
+            ));
 }
 
 class WorkspaceProposalItemReview {
@@ -399,11 +408,12 @@ class WorkspaceProposalReceipt {
 class WorkspaceProposalExpectation {
   WorkspaceProposalExpectation(WorkspaceProposalDetail d)
     : kind = d.summary.kind,
-      original = d.items.firstOrNull?.before?.record.ref,
-      originalVersion = d.items.firstOrNull?.before?.version;
+      originals = {
+        for (final i in d.items)
+          if (i.before != null) i.before!.record.ref: i.before!.version,
+      };
   final WorkspaceProposalKind kind;
-  final WorkspaceRecordRef? original;
-  final int? originalVersion;
+  final Map<WorkspaceRecordRef, int> originals;
   WorkspaceProposalReceipt check(
     WorkspaceProposalChange c,
     WorkspaceProposalReceipt r,
@@ -426,11 +436,14 @@ class WorkspaceProposalExpectation {
         kind == WorkspaceProposalKind.deletion &&
             c.action == WorkspaceProposalAction.confirm &&
             r.records.any((x) => x.entryId == null || x.entryId!.isEmpty) ||
-        original != null &&
+        originals.isNotEmpty &&
             r.records.isNotEmpty &&
-            (r.records.length != 1 ||
-                r.records.single.ref != original ||
-                r.records.single.version <= originalVersion!)) {
+            (r.records.length != originals.length ||
+                r.records.any(
+                  (x) =>
+                      !originals.containsKey(x.ref) ||
+                      x.version <= originals[x.ref]!,
+                ))) {
       throw const WorkspaceFailure('unknown_outcome', '回执与本次提案决定不符，请继续核对原操作。');
     }
     return r;

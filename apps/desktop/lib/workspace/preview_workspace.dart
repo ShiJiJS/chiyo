@@ -429,6 +429,39 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
                 spacing: 10,
                 runSpacing: 10,
                 children: [
+                  for (final outcome
+                      in WorkspaceOrganizationOutcome.values.where(
+                        (x) => ![
+                          WorkspaceOrganizationOutcome.proposed,
+                          WorkspaceOrganizationOutcome.rejected,
+                        ].contains(x),
+                      ))
+                    DesktopButton(
+                      key: ValueKey('preview-organization-${outcome.name}'),
+                      onPressed: () async {
+                        await _source.demonstrateOrganization(outcome: outcome);
+                        if (!dialogContext.mounted) return;
+                        Navigator.pop(dialogContext);
+                      },
+                      child: Text('整理结果：${outcome.label}'),
+                    ),
+                  DesktopButton(
+                    key: const ValueKey('preview-organization-observe'),
+                    onPressed: () {
+                      _source.publishOrganizationObservation();
+                      Navigator.pop(dialogContext);
+                    },
+                    child: const Text('补齐原整理操作结果'),
+                  ),
+                  DesktopButton(
+                    key: const ValueKey('preview-organization-legacy'),
+                    onPressed: () async {
+                      await _source.demonstrateLegacyOrganization();
+                      if (!dialogContext.mounted) return;
+                      Navigator.pop(dialogContext);
+                    },
+                    child: const Text('显示旧版待确认整理方案'),
+                  ),
                   DesktopButton(
                     key: const ValueKey('preview-proposal-unknown'),
                     onPressed: () {
@@ -669,6 +702,12 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
             : location.page == WorkspacePage.proposals
             ? ProposalsPage(
                 controller: _proposals,
+                onWorkspaceBack: _controller.canGoBack
+                    ? _controller.goBack
+                    : null,
+                workspaceBackLabel:
+                    '返回${_controller.previousPage?.label ?? ''}',
+                onHistory: (id) => _navigate(WorkspacePage.history, id),
                 onRecord: (ref) => unawaited(_hostRecord(ref)),
                 onModalChanged: _modalChanged,
                 onRetry: () {
@@ -679,6 +718,12 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
             : location.page == WorkspacePage.history
             ? GrantHistoryPage(
                 controller: _history,
+                onWorkspaceBack: _controller.canGoBack
+                    ? _controller.goBack
+                    : null,
+                workspaceBackLabel:
+                    '返回${_controller.previousPage?.label ?? ''}',
+                onProposal: (id) => _navigate(WorkspacePage.proposals, id),
                 onRecord: (ref) => unawaited(_hostRecord(ref)),
                 onRequest: (id) => _navigate(WorkspacePage.approvals, id),
                 onModalChanged: _modalChanged,

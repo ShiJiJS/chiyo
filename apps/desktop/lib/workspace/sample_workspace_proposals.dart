@@ -15,13 +15,14 @@ class _ProposalInput {
     this.kind,
     this.purpose,
     this.at,
-    this.items,
-  ) : itemCount = items.length,
-      wholeDeletion =
-          kind == WorkspaceProposalKind.deletion &&
-          (items.firstOrNull?.changes.isEmpty ?? false),
-      origin = items.firstOrNull?.before?.record.ref,
-      originVersion = items.firstOrNull?.before?.version;
+    this.items, {
+    this.organization,
+  }) : itemCount = items.length,
+       wholeDeletion =
+           kind == WorkspaceProposalKind.deletion &&
+           (items.firstOrNull?.changes.isEmpty ?? false),
+       origin = items.firstOrNull?.before?.record.ref,
+       originVersion = items.firstOrNull?.before?.version;
   final String id, title, purpose;
   final WorkspaceProposalKind kind;
   final DateTime at;
@@ -29,6 +30,7 @@ class _ProposalInput {
   final int? originVersion;
   final bool wholeDeletion;
   List<WorkspaceProposalItem> items;
+  WorkspaceOrganizationReport? organization;
   List<_ProposalSaved> saved = const [];
   int version = 1, itemCount;
   WorkspaceProposalStatus status = WorkspaceProposalStatus.pending;
@@ -42,16 +44,29 @@ class _SampleProposals implements WorkspaceProposalSource {
   final SampleWorkspaceSource s;
   final _rows = <String, _ProposalInput>{};
   final _receipts = <String, WorkspaceProposalReceipt>{};
+  final _organizationUnobserved = <String, WorkspaceOrganizationReport>{};
   final _inFlight =
       <String, ({String digest, Future<WorkspaceProposalReceipt> future})>{};
   bool _seeded = false, loseNextReply = false;
   String? loseReplyFor;
   int _generation = 0;
+  Future<void>? _organizationDemo;
+  Future<void> demonstrateOrganization(WorkspaceOrganizationOutcome outcome) {
+    if (_organizationDemo case final pending?) return pending;
+    final active = _demonstrateOrganization(outcome);
+    _organizationDemo = active;
+    return active.whenComplete(() {
+      if (identical(_organizationDemo, active)) _organizationDemo = null;
+    });
+  }
+
   void reset() {
     _generation++;
     _seeded = false;
     _rows.clear();
     _receipts.clear();
+    _organizationUnobserved.clear();
+    _organizationDemo = null;
     _inFlight.clear();
     loseNextReply = false;
     loseReplyFor = null;
@@ -199,8 +214,12 @@ class _SampleProposals implements WorkspaceProposalSource {
 
   WorkspaceProposalStatus _status(_ProposalInput r) =>
       r.pending &&
-          r.origin != null &&
-          s._records[r.origin]?.version != r.originVersion
+          (r.organization?.legacyReview == true
+              ? r.organization!.members.any(
+                  (m) => s._records[m.record]?.version != m.baseVersion,
+                )
+              : r.origin != null &&
+                    s._records[r.origin]?.version != r.originVersion)
       ? WorkspaceProposalStatus.conflicted
       : r.status;
   WorkspaceProposalSummary _summary(_ProposalInput r) =>
@@ -217,6 +236,9 @@ class _SampleProposals implements WorkspaceProposalSource {
         purpose: r.purpose,
         itemCount: r.itemCount,
         wholeDeletion: r.wholeDeletion,
+        organizationOutcome: _status(r) == WorkspaceProposalStatus.conflicted
+            ? WorkspaceOrganizationOutcome.conflicted
+            : r.organization?.outcome,
       );
   String _token(_ProposalInput r) => s._fingerprint([
     s._epoch,
@@ -224,6 +246,10 @@ class _SampleProposals implements WorkspaceProposalSource {
     r.id,
     r.version,
     s._catalogVersion,
+    r.organization?.toJson(),
+    if (r.organization?.legacyReview == true)
+      for (final m in r.organization!.members)
+        [m.record.key, s._records[m.record]?.version],
     if (r.origin != null) [r.origin!.key, s._records[r.origin]?.version],
     for (final item in r.items)
       for (final ref in item.proposed.relations.values.expand((x) => x))
@@ -359,7 +385,18 @@ class _SampleProposals implements WorkspaceProposalSource {
       reviewToken: _token(r),
       currentTargetRef: r.origin,
       currentAvailable: r.origin != null && s._records.containsKey(r.origin),
-      items: r.items.map((i) => _project(i, wholeDeletion: r.wholeDeletion)),
+      organization: r.organization?.project(
+        members: r.organization!.members.map(
+          (m) => m.project(
+            exists: s._records.containsKey(m.record),
+            clearResult:
+                r.organization?.outcome == WorkspaceOrganizationOutcome.unknown,
+          ),
+        ),
+      ),
+      items: r.kind == WorkspaceProposalKind.organization
+          ? r.items
+          : r.items.map((i) => _project(i, wholeDeletion: r.wholeDeletion)),
       targets: [
         for (final saved in r.saved)
           WorkspaceProposalTarget(
@@ -558,6 +595,9 @@ class _SampleProposals implements WorkspaceProposalSource {
     }
     if (c.action == WorkspaceProposalAction.reject && c.reviewed.isNotEmpty) {
       throw const WorkspaceFailure('validation', '拒绝提案不提交资料内容。');
+    }
+    if (r.kind == WorkspaceProposalKind.organization) {
+      return _changeLegacyOrganization(r, c);
     }
     final saved = <_ProposalSaved>[];
     if (c.action == WorkspaceProposalAction.confirm) {

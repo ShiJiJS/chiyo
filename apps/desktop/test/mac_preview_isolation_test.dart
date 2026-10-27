@@ -547,6 +547,36 @@ void main() {
       await batchModel.batch.reconcile();
       await t.pumpAndSettle();
       expect(batchModel.frozen, false);
+      await source.demonstrateOrganization();
+      await batchModel.open('organized');
+      await t.pumpAndSettle();
+      expect(find.byKey(const ValueKey('proposal-confirm')), findsNothing);
+      await t.ensureVisible(find.byKey(const ValueKey('organization-history')));
+      await t.tap(find.byKey(const ValueKey('organization-history')));
+      await t.pumpAndSettle();
+      expect(find.byType(GrantHistoryPage), findsOneWidget);
+      expect(
+        t
+            .widget<GrantHistoryPage>(find.byType(GrantHistoryPage))
+            .controller
+            .detail!
+            .events
+            .single
+            .proposalId,
+        'organized',
+      );
+      await t.tap(find.byKey(const ValueKey('workspace-nav-proposals')));
+      await t.pumpAndSettle();
+      await source.demonstrateLegacyOrganization();
+      await batchModel.open('legacy-organize');
+      await t.pumpAndSettle();
+      await t.ensureVisible(find.byKey(const ValueKey('proposal-confirm')));
+      await t.tap(find.byKey(const ValueKey('proposal-confirm')));
+      await t.pumpAndSettle();
+      expect(
+        batchModel.detail!.organization!.outcome,
+        WorkspaceOrganizationOutcome.applied,
+      );
       expect(forbidden, isEmpty);
       expect(network.calls, 0);
       expect(filesystem.rejected, isEmpty);

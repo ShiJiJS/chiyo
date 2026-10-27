@@ -22,6 +22,7 @@ part 'sample_workspace_adoption.dart';
 part 'sample_workspace_approvals.dart';
 part 'sample_workspace_grant_history.dart';
 part 'sample_workspace_proposals.dart';
+part 'sample_workspace_organization.dart';
 part 'sample_workspace_proposal_fields.dart';
 part 'sample_workspace_partial_recycle.dart';
 
@@ -74,6 +75,22 @@ class SampleWorkspaceSource
   WorkspaceProposalSource get proposals => _proposals;
   set loseNextProposalReply(bool value) => _proposals.loseNextReply = value;
   void loseReplyForProposal(String id) => _proposals.loseReplyFor = id;
+  Future<void> demonstrateOrganization({
+    WorkspaceOrganizationOutcome outcome = WorkspaceOrganizationOutcome.applied,
+  }) => _proposals.demonstrateOrganization(outcome);
+  Future<void> demonstrateLegacyOrganization() async {
+    await _readable();
+    _proposals.demonstrateLegacyOrganization();
+  }
+
+  void publishOrganizationObservation() {
+    final report = _proposals._organizationUnobserved.remove('organized');
+    if (report == null) return;
+    _proposals._rows['organized']!.organization = report;
+    _proposals._rows['organized']!.status = WorkspaceProposalStatus.completed;
+    _changes.add(null);
+  }
+
   Future<void> demonstrateDeletionProposal() async {
     await _readable();
     _proposals.demonstrateDeletion();
