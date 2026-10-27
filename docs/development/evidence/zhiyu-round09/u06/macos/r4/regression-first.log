@@ -1,0 +1,333 @@
+00:00 +0: loading /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugin_contracts_test.dart
+00:00 +0: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_legacy_templates_test.dart: legacy templates remain form aids; each generic record gets independent instance identities and a versioned source map
+00:00 +1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_legacy_templates_test.dart: legacy file fields require typed selections and create ordinary attachments atomically; existing file APIs still work
+00:00 +2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_legacy_templates_test.dart: concurrent legacy changes or a reset during attachment verification cannot partially create a record
+00:00 +3: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_legacy_templates_test.dart: concurrent attachment deliveries commit once and reject reused operation identities with different input
+00:00 +4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_legacy_templates_test.dart: conversion uses the same declarative decoder and explicit install, keeps provenance and never migrates records
+00:00 +5: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_legacy_templates_test.dart: conversion guards the original legacy version before install; a new version changes only new definitions
+00:00 +6: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_legacy_templates_test.dart: file and oversized legacy templates stay usable but cannot be lossy-converted to hostApi1
+00:00 +7: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_legacy_templates_test.dart: lost conversion reply reconciles after the source changed and lease released, without re-installing or losing provenance
+00:00 +8: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_legacy_templates_test.dart: legacy controller discards stale reads, distinguishes real empty and contains failures after disposal
+00:00 +9: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_legacy_templates_test.dart: the authoring example passes the real decoder and cannot forge host conversion provenance
+00:00 +10: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugin_contracts_test.dart: (setUpAll)
+00:00 +10: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugin_contracts_test.dart: conflict comparison distinguishes two different related records with the same display name
+00:00 +11: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugin_contracts_test.dart: ordinary conflict review preserves the exact draft, tolerates failed reads, and rechecks a newer version before writing
+00:02 +12: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugin_contracts_test.dart: ordinary conflict review preserves the exact draft, tolerates failed reads, and rechecks a newer version before writing
+00:03 +13: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugin_contracts_test.dart: ordinary conflict review preserves the exact draft, tolerates failed reads, and rechecks a newer version before writing
+00:03 +14: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_legacy_templates_test.dart: dark200 legacy attachments use host selection and shared file versions; incompatible conversion stays explicit
+00:04 +15: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugin_contracts_test.dart: dark200 updated creation schema requires an explicit draft reset and then uses the reviewed current template
+00:04 +16: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_legacy_templates_test.dart: conversion conflict and lost reply preserve review and reconcile exact installation; authoring guide is reachable and selectable
+00:05 +17: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugin_contracts_test.dart: legacy definition identity changes do not carry old text into a new meaning, and reloading never creates records
+00:05 +18: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugin_contracts_test.dart: legacy definition identity changes do not carry old text into a new meaning, and reloading never creates records
+00:05 +19: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_adoption_test.dart: adoption preview preserves source and exact target snapshot, distinguishes same-meaning identity from same-named retained content
+00:05 +20: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugin_contracts_test.dart: removed profile entry identities cannot be revived by retaining an old editor draft
+00:05 +21: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugin_contracts_test.dart: removed profile entry identities cannot be revived by retaining an old editor draft
+00:05 +22: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugin_contracts_test.dart: removed profile entry identities cannot be revived by retaining an old editor draft
+00:05 +23: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugin_contracts_test.dart: removed profile entry identities cannot be revived by retaining an old editor draft
+00:05 +24: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugin_contracts_test.dart: removed profile entry identities cannot be revived by retaining an old editor draft
+00:05 +25: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugin_contracts_test.dart: removed profile entry identities cannot be revived by retaining an old editor draft
+00:05 +26: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugin_contracts_test.dart: removed profile entry identities cannot be revived by retaining an old editor draft
+00:05 +27: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugin_contracts_test.dart: removed profile entry identities cannot be revived by retaining an old editor draft
+00:05 +28: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugin_contracts_test.dart: removed profile entry identities cannot be revived by retaining an old editor draft
+00:05 +29: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugin_contracts_test.dart: removed profile entry identities cannot be revived by retaining an old editor draft
+00:05 +30: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugin_contracts_test.dart: removed profile entry identities cannot be revived by retaining an old editor draft
+00:06 +31: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_adoption_test.dart: actual record action maps same-meaning fields, previews retained collisions and reads back the same classified record
+00:07 +32: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_adoption_test.dart: actual record action maps same-meaning fields, previews retained collisions and reads back the same classified record
+00:07 +33: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_adoption_test.dart: actual record action maps same-meaning fields, previews retained collisions and reads back the same classified record
+00:07 +34: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_adoption_test.dart: actual record action maps same-meaning fields, previews retained collisions and reads back the same classified record
+00:07 +35: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_adoption_test.dart: actual record action maps same-meaning fields, previews retained collisions and reads back the same classified record
+00:07 +36: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_adoption_test.dart: actual record action maps same-meaning fields, previews retained collisions and reads back the same classified record
+00:07 +37: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_adoption_test.dart: actual record action maps same-meaning fields, previews retained collisions and reads back the same classified record
+00:07 +38: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_adoption_test.dart: actual record action maps same-meaning fields, previews retained collisions and reads back the same classified record
+00:07 +39: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_adoption_test.dart: actual record action maps same-meaning fields, previews retained collisions and reads back the same classified record
+00:07 +40: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_adoption_test.dart: actual record action maps same-meaning fields, previews retained collisions and reads back the same classified record
+00:07 +41: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_adoption_test.dart: actual record action maps same-meaning fields, previews retained collisions and reads back the same classified record
+00:08 +42: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_adoption_test.dart: actual record action maps same-meaning fields, previews retained collisions and reads back the same classified record
+00:08 +43: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_adoption_test.dart: actual record action maps same-meaning fields, previews retained collisions and reads back the same classified record
+00:08 +44: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_adoption_test.dart: actual record action maps same-meaning fields, previews retained collisions and reads back the same classified record
+00:08 +45: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_adoption_test.dart: actual record action maps same-meaning fields, previews retained collisions and reads back the same classified record
+00:08 +46: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_adoption_test.dart: actual record action maps same-meaning fields, previews retained collisions and reads back the same classified record
+00:08 +47: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_adoption_test.dart: actual record action maps same-meaning fields, previews retained collisions and reads back the same classified record
+00:08 +48: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_adoption_test.dart: actual record action maps same-meaning fields, previews retained collisions and reads back the same classified record
+00:08 +49: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_adoption_test.dart: actual record action maps same-meaning fields, previews retained collisions and reads back the same classified record
+00:08 +50: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_adoption_test.dart: actual record action maps same-meaning fields, previews retained collisions and reads back the same classified record
+00:08 +51: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_adoption_test.dart: actual record action maps same-meaning fields, previews retained collisions and reads back the same classified record
+00:08 +52: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_adoption_test.dart: actual record action maps same-meaning fields, previews retained collisions and reads back the same classified record
+00:08 +53: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_adoption_test.dart: dark200 incompatible attachment mapping shows a problem, allows adjustment and preserves original versions
+00:10 +54: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: server identity deep link selects the exact host and shares readback with settings and library
+00:11 +55: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: server identity deep link selects the exact host and shares readback with settings and library
+00:12 +56: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_adoption_test.dart: uncommitted unknown requires a new preview; cancelled waiting reads never reopen or write
+00:12 +57: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: dark200 host changes warn, missing fingerprints block confirmation and disabled plugin retains revocation
+00:12 +58: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: dark200 host changes warn, missing fingerprints block confirmation and disabled plugin retains revocation
+00:12 +59: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: dark200 host changes warn, missing fingerprints block confirmation and disabled plugin retains revocation
+00:12 +60: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: dark200 host changes warn, missing fingerprints block confirmation and disabled plugin retains revocation
+00:12 +61: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: dark200 host changes warn, missing fingerprints block confirmation and disabled plugin retains revocation
+00:12 +62: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: dark200 host changes warn, missing fingerprints block confirmation and disabled plugin retains revocation
+00:13 +63: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_record_receipts_test.dart: committed document edit freezes the original draft through failed receipt lookup and reads back once
+00:14 +64: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_record_receipts_test.dart: committed document edit freezes the original draft through failed receipt lookup and reads back once
+00:14 +65: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_record_receipts_test.dart: committed document edit freezes the original draft through failed receipt lookup and reads back once
+00:14 +66: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_record_receipts_test.dart: committed document edit freezes the original draft through failed receipt lookup and reads back once
+00:15 +67: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: settings install, shared external form, update, removal, generic editing and reinstall preserve the original snapshot
+00:16 +68: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: settings install, shared external form, update, removal, generic editing and reinstall preserve the original snapshot
+00:17 +69: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: settings install, shared external form, update, removal, generic editing and reinstall preserve the original snapshot
+00:17 +70: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_record_receipts_test.dart: recycle, restore and two-step purge reconcile their own lost replies in dark 200 percent
+00:17 +71: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_record_receipts_test.dart: recycle, restore and two-step purge reconcile their own lost replies in dark 200 percent
+00:18 +72: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_record_receipts_test.dart: recycle, restore and two-step purge reconcile their own lost replies in dark 200 percent
+00:18 +73: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: waiting and failed metadata refresh keep prior detail and retry retains selected package
+00:18 +74: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_record_receipts_test.dart: committed creation whose object is later purged reports the receipt without resurrecting content
+00:18 +75: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_record_receipts_test.dart: committed creation whose object is later purged reports the receipt without resurrecting content
+00:19 +76: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_preview_isolation_test.dart: Mac preview composition, plugins, adoption and legacy conversion avoid production channels, network and personal paths
+00:19 +77: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_preview_isolation_test.dart: Mac preview composition, plugins, adoption and legacy conversion avoid production channels, network and personal paths
+00:20 +78: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_preview_isolation_test.dart: Mac preview composition, plugins, adoption and legacy conversion avoid production channels, network and personal paths
+00:21 +79: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_preview_isolation_test.dart: Mac preview composition, plugins, adoption and legacy conversion avoid production channels, network and personal paths
+00:21 +80: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_preview_isolation_test.dart: Mac preview composition, plugins, adoption and legacy conversion avoid production channels, network and personal paths
+00:22 +81: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_preview_isolation_test.dart: Mac preview composition, plugins, adoption and legacy conversion avoid production channels, network and personal paths
+00:23 +82: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_preview_isolation_test.dart: Mac preview composition, plugins, adoption and legacy conversion avoid production channels, network and personal paths
+00:26 +83: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_preview_isolation_test.dart: Mac preview composition, plugins, adoption and legacy conversion avoid production channels, network and personal paths
+00:27 +84: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_states_test.dart: history paging keeps zoom/text through waiting/error/retry and resets only at version change dark=true
+00:27 +85: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_states_test.dart: history paging keeps zoom/text through waiting/error/retry and resets only at version change dark=true
+00:27 +86: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_states_test.dart: history paging keeps zoom/text through waiting/error/retry and resets only at version change dark=true
+00:27 +87: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_lifecycle_test.dart: permanent purge and expiration do not replay material or private metadata into existence
+00:27 +88: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_states_test.dart: (tearDownAll)
+00:27 +88: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_lifecycle_test.dart: retired materials expire independently and restore refuses current or missing versions
+00:27 +89: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_lifecycle_test.dart: restore normalizes removed classifications and links, rechecks catalog and never revives a purged object
+00:27 +90: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_lifecycle_test.dart: lost recycle reply retains the original operation and failed query cannot repeat deletion
+00:28 +91: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_credentials_test.dart: dedicated metadata/mask stay separate from generic values, file bytes and metadata search
+00:28 +92: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_credentials_test.dart: create validates core metadata budgets, preserves failed state and coalesces concurrent retries
+00:28 +93: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credential_lifecycle_test.dart: material list failure and explicit restore preserve metadata and create a disabled new head
+00:28 +94: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credential_lifecycle_test.dart: material list failure and explicit restore preserve metadata and create a disabled new head
+00:28 +95: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credential_lifecycle_test.dart: material list failure and explicit restore preserve metadata and create a disabled new head
+00:28 +96: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credential_lifecycle_test.dart: material list failure and explicit restore preserve metadata and create a disabled new head
+00:28 +97: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credential_lifecycle_test.dart: material list failure and explicit restore preserve metadata and create a disabled new head
+00:28 +98: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credential_lifecycle_test.dart: material list failure and explicit restore preserve metadata and create a disabled new head
+00:28 +99: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credential_lifecycle_test.dart: material list failure and explicit restore preserve metadata and create a disabled new head
+00:28 +100: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credential_lifecycle_test.dart: material list failure and explicit restore preserve metadata and create a disabled new head
+00:30 +101: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credentials_test.dart: credential reading, grouped usage history and failed use request reach one pending receipt
+00:31 +102: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credential_lifecycle_test.dart: dark200 recycle unknown result is reconciled before explicit retry and shared recycle restores disabled
+00:31 +103: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credentials_test.dart: dark 200% credential create and rotation preserve uncertain draft, disable and re-enable explicitly
+00:32 +104: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credentials_test.dart: dark 200% credential create and rotation preserve uncertain draft, disable and re-enable explicitly
+00:33 +105: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credentials_test.dart: dark 200% credential create and rotation preserve uncertain draft, disable and re-enable explicitly
+00:33 +106: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credentials_test.dart: dark 200% credential create and rotation preserve uncertain draft, disable and re-enable explicitly
+00:33 +107: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credentials_test.dart: dark 200% credential create and rotation preserve uncertain draft, disable and re-enable explicitly
+00:33 +108: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credentials_test.dart: dark 200% credential create and rotation preserve uncertain draft, disable and re-enable explicitly
+00:33 +109: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credentials_test.dart: dark 200% credential create and rotation preserve uncertain draft, disable and re-enable explicitly
+00:33 +110: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credentials_test.dart: dark 200% credential create and rotation preserve uncertain draft, disable and re-enable explicitly
+00:33 +111: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credentials_test.dart: dark 200% credential create and rotation preserve uncertain draft, disable and re-enable explicitly
+00:33 +112: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credentials_test.dart: dark 200% credential create and rotation preserve uncertain draft, disable and re-enable explicitly
+00:33 +113: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credentials_test.dart: dark 200% credential create and rotation preserve uncertain draft, disable and re-enable explicitly
+00:33 +114: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credentials_test.dart: focus unavailable, storage-only and a reachable read failure remain usable without secrets or execution
+00:34 +115: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credentials_test.dart: focus unavailable, storage-only and a reachable read failure remain usable without secrets or execution
+00:34 +116: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_test.dart: document editing preserves failed draft and saves plain text/Markdown as distinct versioned facts
+00:36 +117: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_test.dart: document editing preserves failed draft and saves plain text/Markdown as distinct versioned facts
+00:36 +118: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_test.dart: PDF current pages, text alternative and preview retry keep metadata/actions available
+00:36 +119: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_test.dart: PDF current pages, text alternative and preview retry keep metadata/actions available
+00:36 +120: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_test.dart: PDF current pages, text alternative and preview retry keep metadata/actions available
+00:36 +121: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_test.dart: PDF current pages, text alternative and preview retry keep metadata/actions available
+00:36 +121 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_test.dart: PDF current pages, text alternative and preview retry keep metadata/actions available
+00:36 +121 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_entries_test.dart: removed identities cannot be reused by ordinary saves; explicit restore renews removed leaves [E]
+  Instance of 'WorkspaceFailure'
+  package:info_desktop/workspace/sample_workspace_history.dart 360:13  _SampleWorkspaceHistory._changeRecord
+  
+00:36 +122 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_test.dart: PDF current pages, text alternative and preview retry keep metadata/actions available
+00:36 +123 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_test.dart: PDF current pages, text alternative and preview retry keep metadata/actions available
+00:36 +124 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_test.dart: PDF current pages, text alternative and preview retry keep metadata/actions available
+00:37 +125 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile entry add/move/remove and failed save retain draft at 1440.0 dark=false
+00:38 +126 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile entry add/move/remove and failed save retain draft at 1440.0 dark=false
+00:39 +127 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile entry add/move/remove and failed save retain draft at 1440.0 dark=false
+00:40 +128 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_test.dart: PNG and plain text use their own bytes through the same file replacement entry
+00:40 +129 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile entry add/move/remove and failed save retain draft at 1440.0 dark=true
+00:41 +130 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile entry add/move/remove and failed save retain draft at 1440.0 dark=true
+00:41 +131 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_fidelity_test.dart: (setUpAll)
+00:41 +131 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile entry add/move/remove and failed save retain draft at 1280.0 dark=false
+00:43 +132 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_fidelity_test.dart: CSS row box/labels and end-aligned 230px menu at 1440.0, dark=false
+00:43 +133 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile entry add/move/remove and failed save retain draft at 1280.0 dark=true
+00:44 +134 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile entry add/move/remove and failed save retain draft at 1280.0 dark=true
+00:44 +135 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_fidelity_test.dart: CSS row box/labels and end-aligned 230px menu at 1280.0, dark=false
+00:44 +136 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: record name errors do not mark the separate personal name field
+00:45 +137 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_fidelity_test.dart: CSS row box/labels and end-aligned 230px menu at 1280.0, dark=true
+00:45 +138 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: blank new entry shows its own field error and retains the original profile
+00:45 +139 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: blank new entry shows its own field error and retains the original profile
+00:45 +140 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: cancelling an entry removal discards the draft only
+00:46 +141 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: cancelling an entry removal discards the draft only
+00:46 +142 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: cancelling an entry removal discards the draft only
+00:46 +143 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: cancelling an entry removal discards the draft only
+00:46 +144 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: cancelling an entry removal discards the draft only
+00:46 +145 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: cancelling an entry removal discards the draft only
+00:46 +146 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_stress_test.dart: fixture replacement cancels pending reads and resets edits, versions, catalog and navigation
+00:46 +147 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile create is available from common add entry and supports an empty collection
+00:46 +148 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile create is available from common add entry and supports an empty collection
+00:46 +149 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile create is available from common add entry and supports an empty collection
+00:47 +150 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: (tearDownAll)
+00:47 +150 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: (setUpAll)
+00:47 +150 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: real pressure switch, pagination, related navigation and return preserve selected row and list scroll
+00:49 +151 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: real pressure switch, pagination, related navigation and return preserve selected row and list scroll
+00:50 +152 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_history_test.dart: recycle and restore from actual sidebar retain the original query and reread restored content
+00:50 +153 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+00:51 +154 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+00:52 +155 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_history_test.dart: dark large-text comparison keeps actions reachable and stale restore requires rereading
+00:52 +156 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1440.0
+00:53 +157 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1440.0
+00:53 +158 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1440.0
+00:53 +159 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1440.0
+00:53 +160 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1440.0
+00:53 +161 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1440.0
+00:53 +162 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1440.0
+00:53 +163 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1440.0
+00:53 +164 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1440.0
+00:53 +165 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1440.0
+00:53 +166 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1440.0
+00:53 +167 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1440.0
+00:53 +168 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1440.0
+00:53 +169 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1440.0
+00:53 +170 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_relations_test.dart: multi-selection survives search and failure, then saved detail rereads the actual links
+00:55 +171 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_relations_test.dart: multi-selection survives search and failure, then saved detail rereads the actual links
+00:56 +172 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: switching dataset from recycle clears internal location and return stack and restores baseline count
+00:56 +173 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_relations_test.dart: generic records offer body editing and creation without adopting an old instance
+00:57 +174 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: all tag options are keyboard searchable and clearing keeps other filters
+00:57 +175 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_relations_test.dart: large text keeps relation choices and fixed submit action reachable
+00:58 +176 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_relations_test.dart: large text keeps relation choices and fixed submit action reachable
+00:58 +177 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_relations_test.dart: large text keeps relation choices and fixed submit action reachable
+00:58 +178 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_test.dart: real preview has responsive three panes and metadata filtering
+00:58 +179 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_test.dart: real preview has responsive three panes and metadata filtering
+00:58 +180 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_test.dart: real preview has responsive three panes and metadata filtering
+00:59 +181 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_test.dart: real preview has responsive three panes and metadata filtering
+00:59 +182 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_test.dart: real preview has responsive three panes and metadata filtering
+00:59 +183 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_test.dart: real preview has responsive three panes and metadata filtering
+00:59 +184 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_test.dart: real preview has responsive three panes and metadata filtering
+00:59 +185 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_test.dart: real preview has responsive three panes and metadata filtering
+00:59 +186 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_test.dart: real preview has responsive three panes and metadata filtering
+00:59 +187 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_test.dart: real preview has responsive three panes and metadata filtering
+00:59 +188 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_test.dart: real preview has responsive three panes and metadata filtering
+00:59 +189 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_test.dart: real preview has responsive three panes and metadata filtering
+00:59 +190 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_test.dart: real preview has responsive three panes and metadata filtering
+00:59 +191 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_test.dart: real preview has responsive three panes and metadata filtering
+00:59 +192 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_test.dart: real preview has responsive three panes and metadata filtering
+00:59 +193 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_test.dart: real preview has responsive three panes and metadata filtering
+01:00 +194 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_directory_test.dart: directory menu creates, preserves failed draft, moves and deletes from the actual library
+01:01 +195 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_directory_test.dart: directory menu creates, preserves failed draft, moves and deletes from the actual library
+01:01 +196 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_directory_test.dart: directory menu creates, preserves failed draft, moves and deletes from the actual library
+01:01 +197 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_directory_test.dart: directory menu creates, preserves failed draft, moves and deletes from the actual library
+01:02 +198 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_test.dart: create validates required fields before adding and selecting a record
+01:02 +199 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_directory_test.dart: concurrent catalog changes require explicit reload without dropping a large-text draft
+01:03 +200 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_directory_test.dart: concurrent catalog changes require explicit reload without dropping a large-text draft
+01:03 +201 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_directory_test.dart: (tearDownAll)
+01:03 +201 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: one shell has five working destinations and a 66px appbar
+01:03 +202 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: one shell has five working destinations and a 66px appbar
+01:03 +203 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: one shell has five working destinations and a 66px appbar
+01:03 +204 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: one shell has five working destinations and a 66px appbar
+01:04 +205 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: one shell has five working destinations and a 66px appbar
+01:04 +206 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: one shell has five working destinations and a 66px appbar
+01:05 +207 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: one shell has five working destinations and a 66px appbar
+01:05 +208 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: one shell has five working destinations and a 66px appbar
+01:05 +209 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: theme, empty, error/retry and waiting recover through visible controls
+01:06 +210 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: theme, empty, error/retry and waiting recover through visible controls
+01:06 +211 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: theme, empty, error/retry and waiting recover through visible controls
+01:06 +212 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: theme, empty, error/retry and waiting recover through visible controls
+01:06 +213 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: theme, empty, error/retry and waiting recover through visible controls
+01:06 +214 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: theme, empty, error/retry and waiting recover through visible controls
+01:06 +215 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: theme, empty, error/retry and waiting recover through visible controls
+01:06 +216 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: theme, empty, error/retry and waiting recover through visible controls
+01:06 +217 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: theme, empty, error/retry and waiting recover through visible controls
+01:07 +218 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: theme, empty, error/retry and waiting recover through visible controls
+01:07 +219 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: theme, empty, error/retry and waiting recover through visible controls
+01:07 +220 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: theme, empty, error/retry and waiting recover through visible controls
+01:07 +221 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: theme, empty, error/retry and waiting recover through visible controls
+01:07 +222 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: theme, empty, error/retry and waiting recover through visible controls
+01:07 +223 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: theme, empty, error/retry and waiting recover through visible controls
+01:07 +224 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: theme, empty, error/retry and waiting recover through visible controls
+01:07 +225 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: theme, empty, error/retry and waiting recover through visible controls
+01:07 +226 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: theme, empty, error/retry and waiting recover through visible controls
+01:07 +227 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: theme, empty, error/retry and waiting recover through visible controls
+01:07 +228 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: theme, empty, error/retry and waiting recover through visible controls
+01:08 +229 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_approvals_test.dart: inbox paginates/searches, reviews partial field selection, records a decision and revokes that exact result
+01:09 +230 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_approvals_test.dart: inbox paginates/searches, reviews partial field selection, records a decision and revokes that exact result
+01:09 +231 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_approvals_test.dart: inbox paginates/searches, reviews partial field selection, records a decision and revokes that exact result
+01:09 +232 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_approvals_test.dart: inbox paginates/searches, reviews partial field selection, records a decision and revokes that exact result
+01:09 +233 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_approvals_test.dart: inbox paginates/searches, reviews partial field selection, records a decision and revokes that exact result
+01:10 +234 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_approvals_test.dart: inbox paginates/searches, reviews partial field selection, records a decision and revokes that exact result
+01:10 +235 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: a failed sample save preserves the draft and explicit retry updates shared data
+01:11 +236 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_approvals_test.dart: credential detail and submitted request reach the same approval identity and read back its decision
+01:11 +237 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_approvals_test.dart: credential detail and submitted request reach the same approval identity and read back its decision
+01:11 +238 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_approvals_test.dart: credential detail and submitted request reach the same approval identity and read back its decision
+01:11 +239 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_approvals_test.dart: credential detail and submitted request reach the same approval identity and read back its decision
+01:11 +240 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_approvals_test.dart: credential detail and submitted request reach the same approval identity and read back its decision
+01:12 +241 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_approvals_test.dart: dark200 file version and grouped entry leaves use real controls; approval pins only the selected identities
+01:12 +242 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_approvals_test.dart: dark200 file version and grouped entry leaves use real controls; approval pins only the selected identities
+01:12 +243 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_approvals_test.dart: dark200 file version and grouped entry leaves use real controls; approval pins only the selected identities
+01:12 +244 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_approvals_test.dart: dark200 file version and grouped entry leaves use real controls; approval pins only the selected identities
+01:12 +245 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_approvals_test.dart: dark200 file version and grouped entry leaves use real controls; approval pins only the selected identities
+01:12 +246 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_approvals_test.dart: dark200 file version and grouped entry leaves use real controls; approval pins only the selected identities
+01:12 +247 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_approvals_test.dart: dark200 file version and grouped entry leaves use real controls; approval pins only the selected identities
+01:13 +248 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/grant_history_controller_test.dart: late list and detail replies never replace a newer history selection
+01:13 +249 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_approvals_test.dart: env and focus plans have contextual tips; focus approval remains disabled and rejection is real
+01:13 +250 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_approvals_test.dart: env and focus plans have contextual tips; focus approval remains disabled and rejection is real
+01:13 +251 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_approvals_test.dart: env and focus plans have contextual tips; focus approval remains disabled and rejection is real
+01:13 +252 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_approvals_test.dart: env and focus plans have contextual tips; focus approval remains disabled and rejection is real
+01:13 +253 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_approvals_test.dart: env and focus plans have contextual tips; focus approval remains disabled and rejection is real
+01:13 +254 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_approvals_test.dart: lost decision reply freezes shell, chooser and exact draft through a failed lookup, then reads back without replay
+01:14 +255 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_grant_history_test.dart: actual approval links to identical grant history; typed record round trip retains filters, page and reading position
+01:14 +256 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_grant_history_test.dart: actual approval links to identical grant history; typed record round trip retains filters, page and reading position
+01:15 +257 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_grant_history_test.dart: actual approval links to identical grant history; typed record round trip retains filters, page and reading position
+01:15 +258 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_approvals_test.dart: dark200 use result and structured operation plan wrap without hiding the unknown warning
+01:16 +259 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_grant_history_test.dart: unknown revoke locks root navigation and original receipt readback updates the same approval without replay
+01:16 +260 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_approvals_test.dart: guide expiry and session end retain the selected request, invalidate active scopes and reset to baseline
+01:17 +261 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_approvals_test.dart: guide expiry and session end retain the selected request, invalidate active scopes and reset to baseline
+01:17 +262 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_grant_history_test.dart: history opens its pinned ordinary attachment through the real preview widget
+01:18 +263 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_approvals_test.dart: approval controls preserve a failed decision and distinguish empty, waiting and failed reads with real recovery actions
+01:18 +264 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_grant_history_test.dart: actual guide switches empty, waiting and failure states and history retry recovers
+01:19 +265 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_grant_history_test.dart: actual guide switches empty, waiting and failure states and history retry recovers
+01:19 +266 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_grant_history_test.dart: dark200 and narrow history keep readable controls, scrolling and current execution facts
+01:19 +267 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_grant_history_test.dart: dark200 and narrow history keep readable controls, scrolling and current execution facts
+01:19 +268 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_grant_history_test.dart: dark200 and narrow history keep readable controls, scrolling and current execution facts
+01:19 +269 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_grant_history_test.dart: dark200 and narrow history keep readable controls, scrolling and current execution facts
+01:20 +270 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_grant_history_test.dart: dark200 and narrow history keep readable controls, scrolling and current execution facts
+01:20 +271 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_grant_history_test.dart: dark200 and narrow history keep readable controls, scrolling and current execution facts
+01:20 +272 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_grant_history_test.dart: dark200 and narrow history keep readable controls, scrolling and current execution facts
+01:20 +273 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_grant_history_test.dart: dark200 and narrow history keep readable controls, scrolling and current execution facts
+01:20 +274 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_grant_history_test.dart: dark200 and narrow history keep readable controls, scrolling and current execution facts
+01:20 +275 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_grant_history_test.dart: dark200 and narrow history keep readable controls, scrolling and current execution facts
+01:20 +276 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_grant_history_test.dart: dark200 and narrow history keep readable controls, scrolling and current execution facts
+01:20 +277 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_grant_history_test.dart: (tearDownAll)
+01:20 +277 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/proposals_controller_test.dart: each proposal retains its own edits, selection and reading position across pages and query changes
+01:20 +278 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/proposals_controller_test.dart: late metadata and body reads cannot replace the newer selected proposal or its draft
+01:20 +279 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/proposals_controller_test.dart: lost reply freezes the exact review until original receipt resolves without a second write
+01:20 +280 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/proposals_controller_test.dart: confirmed absence preserves input and only an explicit new decision retries it
+01:20 +281 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/proposals_controller_test.dart: mismatched command digest remains unknown until matching original receipt, never replays
+01:20 +282 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/proposals_controller_test.dart: successful commit clears reviewed bodies even when terminal detail read fails; retry only reads
+01:20 +283 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/proposals_controller_test.dart: conflict preserves edited proposal values, explicit reread never rebases its target, rejection leaves current body intact
+01:20 +284 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/proposals_controller_test.dart: changed pending content with the same IDs cannot reinterpret or rebind the old Owner draft
+01:20 +285 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/proposals_controller_test.dart: Owner before-value observations invalidate even while the exact write intent remains unknown
+01:20 +286 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/proposals_controller_test.dart: deletion review has no editor or cached old body; unknown clearing does not change the fixed proposal meaning
+01:20 +287 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/proposals_controller_test.dart: deletion receipt without a recycle identity remains unknown until the original complete receipt is read
+01:21 +288 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: (setUpAll)
+01:21 +288 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: actual import editing, item reduction and confirmation update shared library and return to the exact processed proposal
+01:21 +289 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: actual import editing, item reduction and confirmation update shared library and return to the exact processed proposal
+01:21 +290 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: actual import editing, item reduction and confirmation update shared library and return to the exact processed proposal
+01:21 +291 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: actual import editing, item reduction and confirmation update shared library and return to the exact processed proposal
+01:21 +292 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: actual import editing, item reduction and confirmation update shared library and return to the exact processed proposal
+01:21 +293 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: actual import editing, item reduction and confirmation update shared library and return to the exact processed proposal
+01:21 +294 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: actual import editing, item reduction and confirmation update shared library and return to the exact processed proposal
+01:21 +295 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: actual import editing, item reduction and confirmation update shared library and return to the exact processed proposal
+01:21 +296 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: actual import editing, item reduction and confirmation update shared library and return to the exact processed proposal
+01:21 +297 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: actual import editing, item reduction and confirmation update shared library and return to the exact processed proposal
+01:21 +298 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: actual import editing, item reduction and confirmation update shared library and return to the exact processed proposal
+01:21 +299 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: actual import editing, item reduction and confirmation update shared library and return to the exact processed proposal
+01:23 +300 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: actual modification editor previews its correction and preserves unrelated field identities and relations
+01:23 +301 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: guide-injected lost reply freezes navigation until matching original receipt; terminal view retains no submitted bodies
+01:24 +302 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: conflict is reproduced from the actual guide, current comparison never writes, edited review is preserved and rejection leaves current values
+01:24 +303 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: explicit saved-version snapshot invalidates its mounted body after purge and never substitutes current content
+01:25 +304 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: dark200 uses real filtering, editing failure and retry without clipping or losing review
+01:25 +305 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: field validation points to the exact proposal input and editing it clears the error without discarding review
+01:26 +306 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: actual proposal guide reaches empty, failure, waiting and recovery states
+01:27 +307 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: relation picker edits a disabled-template proposal using its submitted rules and confirms after explicit reread
+01:28 +308 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: purging a pending target clears both the visible old diff and an already open current comparison
+01:28 +309 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: actual deletion guide reviews the full retained scope, moves the same object to recycle and opens only its exact pre-delete snapshot
+01:29 +310 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: whole deletion conflict compares the new version without changing the requested target or deleting it
+01:29 +311 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: field intent guide reviews explicit new meaning and edits only listed values, then reads replacement and added fields in the shared library
+01:30 +312 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: entry review edits a single leaf and renders independent new and retained identities in the same profile timeline
+01:30 +313 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: a field-only delete is distinct from whole deletion and restores through the existing recycle UI without restoring the former identity
+01:31 +314 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: (tearDownAll)
+01:31 +314 -1: Some tests failed.
+
+Failing tests:
+  /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_entries_test.dart: removed identities cannot be reused by ordinary saves; explicit restore renews removed leaves

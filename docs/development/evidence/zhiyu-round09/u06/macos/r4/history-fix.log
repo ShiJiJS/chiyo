@@ -1,0 +1,26 @@
+00:00 +0: loading /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_entries_test.dart
+00:00 +0: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_proposal_fields_test.dart: four scalar intents keep the exact template snapshot, preserve corrections and unrelated links, allocate new identities and recycle only removed scope
+00:00 +1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_history_test.dart: save archives immutable full snapshots; restore versions and idempotency remain monotonic
+00:00 +2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_history_test.dart: save archives immutable full snapshots; restore versions and idempotency remain monotonic
+00:00 +3: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_history_test.dart: save archives immutable full snapshots; restore versions and idempotency remain monotonic
+00:00 +4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_history_test.dart: save archives immutable full snapshots; restore versions and idempotency remain monotonic
+00:00 +5: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_history_test.dart: save archives immutable full snapshots; restore versions and idempotency remain monotonic
+00:00 +6: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_proposal_fields_test.dart: purging a partial entry erases old snapshots and observations while preserving live values and credential relations
+00:00 +7: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_history_test.dart: concurrent duplicate restore returns one receipt and competing restore cannot overwrite it
+00:00 +8: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_history_test.dart: concurrent duplicate restore returns one receipt and competing restore cannot overwrite it
+00:00 +9: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_history_test.dart: concurrent duplicate restore returns one receipt and competing restore cannot overwrite it
+00:00 +10: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_history_test.dart: rejected restore leaves body, revision history and counts intact; conflict requires fresh preview
+00:00 +11: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_history_test.dart: recycle excludes current queries and relation candidates, restores above deletion watermark
+00:00 +12: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_history_test.dart: deleted classifications stay historical; restoring never recreates a removed directory
+00:00 +13: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_history_test.dart: purge removes history and cached old save bodies; old commands never recreate the object
+00:00 +14: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_history_test.dart: 30-day expiration removes recycled content and revisions without resetting version facts
+00:00 +15: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_history_test.dart: credentials, stale identities, bad pages and failed recycle are rejected without mutation
+00:00 +16: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_entries_test.dart: entry and leaf identities survive editing, reorder, failure and reset; history stays immutable
+00:00 +17: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_entries_test.dart: entry and leaf identities survive editing, reorder, failure and reset; history stays immutable
+00:00 +18: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_entries_test.dart: source rejects duplicate identities, swapped leaf identities, malformed content and limits atomically
+00:00 +19: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_entries_test.dart: new profiles receive distinct identities, reject copying another profile identities and preserve unknown entry metadata
+00:00 +20: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_entries_test.dart: removed identities cannot be reused by ordinary saves; explicit restore renews removed leaves
+00:00 +21: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_entries_test.dart: purge removes entry content but cannot recycle its identities into another record
+00:00 +22: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_entries_test.dart: owner/backup 200-field budget accepts 199 leaves and rejects 202
+00:00 +23: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_entries_test.dart: legacy over-budget collections remain complete on read rather than truncating
+00:00 +24: All tests passed!
