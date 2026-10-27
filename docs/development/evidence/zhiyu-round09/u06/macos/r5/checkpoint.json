@@ -1,0 +1,76 @@
+{
+  "createdAt": "2026-10-27T06:39:18.782980+00:00",
+  "sourceCommit": "f02e8c34e65a52c2d0b6107099d0578e17bc1960",
+  "branch": "codex/zhiyu-macos",
+  "issue": 67,
+  "state": "OPEN",
+  "checkedTotal": 1,
+  "criteriaTotal": 7,
+  "scope": "independent mixed proposal batch and chapter differences; read-only new organization and legacy review pending",
+  "checks": {
+    "relatedTests": 330,
+    "newTests": 15,
+    "batchModelControllerTests": 12,
+    "actualBatchWidgetTests": 3,
+    "analysis": "No issues found",
+    "build": "fixed isolated arm64 Mac preview passed",
+    "screenshots": [
+      "screenshots/proposals-1440-light-mixed-results.png",
+      "screenshots/proposals-1440-light-mixed-unknown.png",
+      "screenshots/proposals-1280-dark200-mixed-failure.png"
+    ]
+  },
+  "native": {
+    "bundleIdentifier": "com.example.infoDesktop.zhiyuPreview",
+    "AgentInfoInterfacePreview": "YES",
+    "architecture": "arm64",
+    "fixedApp": "apps/desktop/build/macos/Build/Products/Debug/info_desktop.app",
+    "newCocoaRuntime": false,
+    "sourceHashes": "native-source-hashes.json"
+  },
+  "environment": {
+    "macOS": "27.0.1 26A434",
+    "Xcode": "27.1 27A9275",
+    "Flutter": "3.47.7",
+    "Dart": "3.13.5",
+    "fonts": [
+      "SFNS",
+      "PingFang SC",
+      "Menlo"
+    ],
+    "DPR": 1,
+    "viewports": [
+      [
+        1440,
+        900
+      ],
+      [
+        1280,
+        800
+      ]
+    ],
+    "textScales": [
+      1,
+      2
+    ],
+    "reference": "frozen R11"
+  },
+  "isolation": {
+    "productionChannels": 0,
+    "httpRequests": 0,
+    "rejectedFilePaths": 0,
+    "method": "preview composition guard also checks root navigation during nonmodal batch unknown; centralized resettable synthetic data",
+    "computerUse": false,
+    "subagents": false,
+    "windowsCI": false,
+    "personalData": false,
+    "systemPermissions": false
+  },
+  "pending": [
+    "read-only new organization result and legacy review",
+    "whole U06 states and interface audit",
+    "full S5/OS input/normal-speed recording; existing dark200 topbar badge clipping",
+    "production integration after seven UI modules via F01"
+  ],
+  "next": "Continue U06 organization result and legacy review, then U07. Active goal."
+}
