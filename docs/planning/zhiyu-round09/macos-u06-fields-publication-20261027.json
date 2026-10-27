@@ -1,0 +1,65 @@
+{
+  "createdAt": "2026-10-27T05:51:59.160110+00:00",
+  "sourceCommit": "0b06369bb242bcb3c5c3fc26dbbd90f60588d08a",
+  "documentationCommit": "d4875e0cfb2371e65c747f8bbe27f84b7dfb6858",
+  "branch": "codex/zhiyu-macos",
+  "tracker": [
+    {
+      "number": 67,
+      "url": "https://github.com/ShiJiJS/agent-info-manage/issues/67",
+      "title": "知予前端 U06：录入提案与授权历史界面",
+      "state": "OPEN",
+      "checked": 0,
+      "total": 7,
+      "comments": 0,
+      "labels": [
+        "enhancement",
+        "ready-for-agent"
+      ],
+      "nativeDependencies": [
+        62
+      ],
+      "dependenciesNotMutated": true,
+      "bodyBeforeSha256": "f56469b6734c5afcd733858f0b6bd4f103cbe57ca97e9ce3c3908a973b8e30c5",
+      "bodyAfterSha256": "b4839d782bb3d5c6985127203e3f02eb46cbfef61971c23f5f8ddad1d659d254",
+      "exactBodyReadback": true
+    },
+    {
+      "number": 69,
+      "url": "https://github.com/ShiJiJS/agent-info-manage/issues/69",
+      "title": "知予后续规划 F01：界面完成后拆分真实功能、测试与 Mac 交付",
+      "state": "OPEN",
+      "checked": 0,
+      "total": 6,
+      "comments": 0,
+      "labels": [
+        "documentation"
+      ],
+      "nativeDependencies": [
+        64,
+        65,
+        66,
+        67,
+        68
+      ],
+      "dependenciesNotMutated": true,
+      "bodyBeforeSha256": "8937b240b99c824091df146db6cc42b11fe85b122a9ede8f077cee47332c860c",
+      "bodyAfterSha256": "ab59615c81123da37b879e37b480a9daebb776b14bbf202bb82b5912369788e1",
+      "exactBodyReadback": true
+    }
+  ],
+  "archive": {
+    "path": "docs/development/evidence/zhiyu-round09/u06/macos/r4",
+    "files": 15,
+    "bytes": 584522,
+    "verifiedAgainstExactGitBlobs": true
+  },
+  "cleanup": {
+    "removedPath": "build/zhiyu-ui/u06/macos/r4",
+    "removedFiles": 47,
+    "removedBytes": 2372910,
+    "fixedPreviewRetained": true,
+    "localUntouched": true
+  },
+  "next": "Continue U06 mixed-queue per-item batch, new read-only organization results and legacy review, then U07. Goal active; do not pause at this checkpoint."
+}
