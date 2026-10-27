@@ -1,0 +1,20 @@
+00:00 +0: loading /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_approvals_test.dart
+00:00 +0: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_approvals_test.dart: one inbox supplies pending totals, query intersections, deterministic pagination and terminal readback
+00:00 +1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/approvals_controller_test.dart: late query/read and late failure cannot replace newer selection or leave it busy
+00:00 +2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/approvals_controller_test.dart: late query/read and late failure cannot replace newer selection or leave it busy
+00:00 +3: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/approvals_controller_test.dart: late query/read and late failure cannot replace newer selection or leave it busy
+00:00 +4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/approvals_controller_test.dart: late query/read and late failure cannot replace newer selection or leave it busy
+00:00 +5: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_approvals_test.dart: (setUpAll)
+00:00 +6: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_approvals_test.dart: (setUpAll)
+00:00 +7: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_approvals_test.dart: (setUpAll)
+00:00 +8: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_approvals_test.dart: (setUpAll)
+00:00 +9: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_approvals_test.dart: (setUpAll)
+00:00 +10: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_approvals_test.dart: (setUpAll)
+00:00 +10: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_preview_isolation_test.dart: Mac preview composition, plugins, adoption and legacy conversion avoid production channels, network and personal paths
+00:02 +11: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_preview_isolation_test.dart: Mac preview composition, plugins, adoption and legacy conversion avoid production channels, network and personal paths
+00:04 +12: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_preview_isolation_test.dart: Mac preview composition, plugins, adoption and legacy conversion avoid production channels, network and personal paths
+00:04 +13: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_preview_isolation_test.dart: Mac preview composition, plugins, adoption and legacy conversion avoid production channels, network and personal paths
+00:05 +14: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_preview_isolation_test.dart: Mac preview composition, plugins, adoption and legacy conversion avoid production channels, network and personal paths
+00:05 +15: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_preview_isolation_test.dart: Mac preview composition, plugins, adoption and legacy conversion avoid production channels, network and personal paths
+00:06 +16: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_preview_isolation_test.dart: Mac preview composition, plugins, adoption and legacy conversion avoid production channels, network and personal paths
+00:06 +17: All tests passed!
