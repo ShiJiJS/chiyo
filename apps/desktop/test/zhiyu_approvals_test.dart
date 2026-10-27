@@ -515,10 +515,16 @@ void main() {
       for (
         var frame = 0;
         frame < 40 &&
-            find
-                .byKey(const ValueKey('preview-scenario-waiting'))
-                .evaluate()
-                .isNotEmpty;
+            (find
+                    .byKey(const ValueKey('preview-scenario-waiting'))
+                    .evaluate()
+                    .isNotEmpty ||
+                t
+                        .widget<DesktopButton>(
+                          find.byKey(const ValueKey('preview-guide')),
+                        )
+                        .onPressed ==
+                    null);
         frame++
       ) {
         await t.pump(const Duration(milliseconds: 16));

@@ -46,6 +46,9 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
   StreamSubscription<WorkspaceRecordRef?>? _summaryChanges;
   final _guideFocus = FocusNode();
   bool _stress = false;
+  int _modalDepth = 0;
+  bool? _nativeNavigationEnabled;
+  VoidCallback? _pendingUiNavigation;
   @override
   void initState() {
     super.initState();
@@ -71,6 +74,7 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
       (_) => unawaited(_controller.refresh()),
     );
     widget.desktop?.onNavigate = (page) {
+      if (_controller.navigationLocked) return;
       _controller.navigate(page);
       if (page == WorkspacePage.library) _library.focusSearch();
     };
@@ -87,8 +91,46 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
   }
 
   void _approvalChanged() {
-    _controller.setNavigationLocked(_approvals.frozen);
-    unawaited(widget.desktop?.setNavigationEnabled(!_approvals.frozen));
+    if (_approvals.frozen) _pendingUiNavigation = null;
+    _syncNavigation();
+  }
+
+  bool _deferNavigation(VoidCallback action) {
+    if (!mounted || _approvals.frozen) return true;
+    if (_modalDepth > 0) {
+      // Only explicit UI destinations wait for modal completion. Native events
+      // are rejected, so an old system event never becomes a later navigation.
+      _pendingUiNavigation = action;
+      return true;
+    }
+    return false;
+  }
+
+  void _modalChanged(bool open) {
+    if (!mounted) return;
+    if (open) {
+      _modalDepth++;
+    } else if (_modalDepth > 0) {
+      _modalDepth--;
+    }
+    _syncNavigation();
+  }
+
+  void _syncNavigation() {
+    if (!mounted) return;
+    final enabled = _modalDepth == 0 && !_approvals.frozen;
+    _controller.setNavigationLocked(!enabled);
+    if (_nativeNavigationEnabled != enabled) {
+      _nativeNavigationEnabled = enabled;
+      unawaited(widget.desktop?.setNavigationEnabled(enabled));
+    }
+    if (enabled && _pendingUiNavigation != null) {
+      final navigate = _pendingUiNavigation!;
+      _pendingUiNavigation = null;
+      scheduleMicrotask(() {
+        if (mounted && !_controller.navigationLocked) navigate();
+      });
+    }
   }
 
   @override
@@ -118,7 +160,7 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
     BuildContext context,
     WorkspaceType type,
   ) async {
-    unawaited(widget.desktop?.setNavigationEnabled(false));
+    _modalChanged(true);
     try {
       await _library.load(_library.query);
       if (!context.mounted) return;
@@ -129,10 +171,10 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
       );
       if (!context.mounted || ref == null) return;
       await _library.openRelated(ref);
-      _controller.navigate(WorkspacePage.library);
     } finally {
-      unawaited(widget.desktop?.setNavigationEnabled(true));
+      _modalChanged(false);
     }
+    if (mounted) _controller.navigate(WorkspacePage.library);
   }
 
   Future<void> _templateRecords(WorkspaceType type) async {
@@ -144,7 +186,7 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
     BuildContext context,
     WorkspaceLegacyTemplate template,
   ) async {
-    unawaited(widget.desktop?.setNavigationEnabled(false));
+    _modalChanged(true);
     try {
       await _library.load(_library.query);
       if (!context.mounted) return;
@@ -157,13 +199,14 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
       );
       if (!context.mounted || ref == null) return;
       await _library.openRelated(ref);
-      _controller.navigate(WorkspacePage.library);
     } finally {
-      unawaited(widget.desktop?.setNavigationEnabled(true));
+      _modalChanged(false);
     }
+    if (mounted) _controller.navigate(WorkspacePage.library);
   }
 
   void _navigate(WorkspacePage page, String id) {
+    if (_deferNavigation(() => _navigate(page, id))) return;
     if (page == WorkspacePage.approvals) unawaited(_approvals.open(id));
     if (page == WorkspacePage.settings) {
       const prefix = 'plugin:builtin.server/host:';
@@ -184,6 +227,7 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
   }
 
   Future<void> _hostRecord(WorkspaceRecordRef ref) async {
+    if (_deferNavigation(() => unawaited(_hostRecord(ref)))) return;
     await _library.openRelated(ref);
     if (mounted) _controller.navigate(WorkspacePage.library, remember: true);
   }
@@ -200,7 +244,7 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
   }
 
   void _guide(BuildContext context) {
-    unawaited(widget.desktop?.setNavigationEnabled(false));
+    _modalChanged(true);
     unawaited(
       showDesktopDialog<void>(
         context,
@@ -446,8 +490,15 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
             ),
           ],
         ),
-      ).whenComplete(() async {
-        if (mounted) await widget.desktop?.setNavigationEnabled(true);
+      ).whenComplete(() {
+        _modalChanged(false);
+        // The guide trigger is disabled while a modal holds navigation. Restore
+        // focus after the enabled widget has rebuilt, not before gate release.
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted && !_controller.navigationLocked) {
+            _guideFocus.requestFocus();
+          }
+        });
       }),
     );
   }
@@ -497,8 +548,7 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
                 ),
                 onRetry: () => _scenario(SampleWorkspaceScenario.ready),
                 onNavigate: _navigate,
-                onModalChanged: (open) =>
-                    unawaited(widget.desktop?.setNavigationEnabled(!open)),
+                onModalChanged: _modalChanged,
               )
             : location.page == WorkspacePage.approvals
             ? ApprovalsPage(
@@ -526,8 +576,7 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
                 onCreate: (type) =>
                     unawaited(_createWithTemplate(context, type)),
                 onRecords: (type) => unawaited(_templateRecords(type)),
-                onModalChanged: (open) =>
-                    unawaited(widget.desktop?.setNavigationEnabled(!open)),
+                onModalChanged: _modalChanged,
               )
             : _FoundationPage(
                 controller: _controller,

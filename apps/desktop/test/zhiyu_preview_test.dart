@@ -48,12 +48,25 @@ void main() {
     await tester.pump();
     for (
       var frame = 0;
-      frame < 30 && find.byType(DesktopDialog).evaluate().isNotEmpty;
+      frame < 30 &&
+          (find.byType(DesktopDialog).evaluate().isNotEmpty ||
+              tester
+                      .widget<DesktopButton>(
+                        find.byKey(const ValueKey('preview-guide')),
+                      )
+                      .onPressed ==
+                  null);
       frame++
     ) {
       await tester.pump(const Duration(milliseconds: 16));
     }
     expect(find.byType(DesktopDialog), findsNothing);
+    expect(
+      tester
+          .widget<DesktopButton>(find.byKey(const ValueKey('preview-guide')))
+          .onPressed,
+      isNotNull,
+    );
   }
 
   testWidgets('one shell has five working destinations and a 66px appbar', (
