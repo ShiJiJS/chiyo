@@ -63,7 +63,7 @@ final class _PreviewNetwork extends HttpOverrides {
 
 void main() {
   testWidgets(
-    'Mac preview composition, U03 and plugin install/create avoid production channels, network and personal paths',
+    'Mac preview composition, plugins, adoption and legacy conversion avoid production channels, network and personal paths',
     (t) async {
       final previousIo = IOOverrides.current,
           previousHttp = HttpOverrides.current;
@@ -222,6 +222,53 @@ void main() {
       expect(controller.detail!.fieldIds['domain'], domainIdentity);
       expect(controller.detail!.values['domain'], 'isolation.example');
       expect((await source.loadSummary()).records, 32);
+      await t.tap(find.byKey(const ValueKey('workspace-nav-settings')));
+      await t.pumpAndSettle();
+      await t.tap(find.byKey(const ValueKey('legacy-menu')));
+      await t.pumpAndSettle();
+      final legacy = await source.legacyTemplates.read('legacy-resource');
+      final fields = legacy.definition['fields'] as List;
+      await t.ensureVisible(find.byKey(const ValueKey('legacy-create')));
+      await t.tap(find.byKey(const ValueKey('legacy-create')));
+      await t.pumpAndSettle();
+      await t.enterText(
+        find.byKey(const ValueKey('library-edit-name')),
+        '隔离检查旧版录入',
+      );
+      for (final f in fields) {
+        final input = find.byKey(ValueKey('library-edit-${f['key']}'));
+        await t.ensureVisible(input);
+        await t.enterText(input, '虚构的旧版字段内容');
+      }
+      await t.tap(find.byKey(const ValueKey('library-edit-save')));
+      await t.pumpAndSettle();
+      expect(controller.detail!.record.type.id, 'generic');
+      expect(controller.detail!.definition, legacy.definition);
+      expect(
+        controller.detail!.fieldIds.values.toSet().intersection(
+          legacy.fields.map((f) => f.id).toSet(),
+        ),
+        isEmpty,
+      );
+      final legacyRecord = controller.detail!;
+      await t.tap(find.byKey(const ValueKey('workspace-nav-settings')));
+      await t.pumpAndSettle();
+      await t.ensureVisible(find.byKey(const ValueKey('legacy-convert')));
+      await t.tap(find.byKey(const ValueKey('legacy-convert')));
+      await t.pumpAndSettle();
+      await t.tap(find.byKey(const ValueKey('plugin-change-submit')));
+      await t.pumpAndSettle();
+      expect((await source.plugins.load()).packages, hasLength(5));
+      expect(
+        (await source.readDetail(legacyRecord.record.ref)).definition,
+        legacyRecord.definition,
+      );
+      await t.tap(find.byKey(const ValueKey('plugin-authoring-guide')));
+      await t.pumpAndSettle();
+      expect(find.textContaining('生成后调用只读校验'), findsOneWidget);
+      await t.tap(find.byKey(const ValueKey('plugin-authoring-close')));
+      await t.pumpAndSettle();
+      expect((await source.loadSummary()).records, 33);
       await t.tap(find.byKey(const ValueKey('preview-guide')));
       await t.pumpAndSettle();
       await t.tap(find.text('重置预览资料'));
@@ -229,6 +276,7 @@ void main() {
       expect((await source.credentials.read(ssh)).privateNote, isEmpty);
       expect((await source.loadSummary()).records, 31);
       expect((await source.plugins.load()).packages, hasLength(3));
+      expect((await source.legacyTemplates.read('legacy-resource')).version, 1);
       expect(
         (await source.hosts.read(
           const WorkspaceHostTarget.record(

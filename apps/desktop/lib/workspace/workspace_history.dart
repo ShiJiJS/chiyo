@@ -91,6 +91,8 @@ class WorkspaceOperationIntent {
     this.entryId,
     this.expectedCatalogVersion,
     this.planId,
+    this.legacyTemplateId,
+    this.legacyTemplateVersion,
   });
   factory WorkspaceOperationIntent.change(WorkspaceRecordChange change) =>
       WorkspaceOperationIntent(
@@ -104,6 +106,8 @@ class WorkspaceOperationIntent {
   final WorkspaceOperationKind kind;
   final WorkspaceRecordRef? ref;
   final String? typeId, entryId, planId;
+  final String? legacyTemplateId;
+  final int? legacyTemplateVersion;
   final int? expectedVersion, revisionVersion, expectedCatalogVersion;
 
   bool matches(WorkspaceOperationIntent other) =>
@@ -111,6 +115,8 @@ class WorkspaceOperationIntent {
       ref == other.ref &&
       typeId == other.typeId &&
       planId == other.planId &&
+      legacyTemplateId == other.legacyTemplateId &&
+      legacyTemplateVersion == other.legacyTemplateVersion &&
       entryId == other.entryId &&
       expectedVersion == other.expectedVersion &&
       revisionVersion == other.revisionVersion &&

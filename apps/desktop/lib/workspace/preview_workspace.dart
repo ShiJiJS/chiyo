@@ -22,6 +22,7 @@ import 'plugins_controller.dart';
 import 'plugins_page.dart';
 import 'plugin_dialogs.dart';
 import 'library_edit_dialog.dart';
+import 'legacy_templates_controller.dart';
 
 /// Only the isolated composition root knows which provider is a sample.
 /// U02–U07 register their production widgets through pageBuilder.
@@ -38,6 +39,7 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
   late final WorkspaceController _controller;
   late final LibraryController _library;
   late final PluginsController _plugins;
+  late final LegacyTemplatesController _legacy;
   StreamSubscription<WorkspaceRecordRef?>? _summaryChanges;
   final _guideFocus = FocusNode();
   bool _stress = false;
@@ -53,6 +55,11 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
     _controller = WorkspaceController(_source);
     _library = LibraryController(_source);
     _plugins = PluginsController(_source.plugins, _source.changes);
+    _legacy = LegacyTemplatesController(
+      _source.legacyTemplates,
+      _source.changes,
+    );
+    unawaited(_legacy.load());
     unawaited(_plugins.load());
     _summaryChanges = _source.changes.listen(
       (_) => unawaited(_controller.refresh()),
@@ -79,6 +86,7 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
     _controller.dispose();
     _library.dispose();
     _plugins.dispose();
+    _legacy.dispose();
     unawaited(_summaryChanges?.cancel());
     _source.dispose();
     widget.desktop?.dispose();
@@ -90,6 +98,7 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
     unawaited(_controller.refresh());
     unawaited(_library.load(_library.query));
     unawaited(_plugins.load());
+    unawaited(_legacy.load());
   }
 
   Future<void> _createWithTemplate(
@@ -116,6 +125,29 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
   Future<void> _templateRecords(WorkspaceType type) async {
     await _library.apply(WorkspaceQuery(typeId: type.id));
     _controller.navigate(WorkspacePage.library);
+  }
+
+  Future<void> _createWithLegacy(
+    BuildContext context,
+    WorkspaceLegacyTemplate template,
+  ) async {
+    unawaited(widget.desktop?.setNavigationEnabled(false));
+    try {
+      await _library.load(_library.query);
+      if (!context.mounted) return;
+      final ref = await showLibraryEditor(
+        context,
+        _library,
+        legacyTemplate: template,
+        filePicker: () =>
+            showWorkspaceFileChoices(context, _source.fileChoices),
+      );
+      if (!context.mounted || ref == null) return;
+      await _library.openRelated(ref);
+      _controller.navigate(WorkspacePage.library);
+    } finally {
+      unawaited(widget.desktop?.setNavigationEnabled(true));
+    }
   }
 
   void _navigate(WorkspacePage page, String id) {
@@ -375,6 +407,8 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
             : location.page == WorkspacePage.settings
             ? PluginsPage(
                 controller: _plugins,
+                legacy: _legacy,
+                onLegacyCreate: (t) => unawaited(_createWithLegacy(context, t)),
                 hosts: _source.hosts,
                 hostChanges: _source.changes,
                 onRecord: (ref) => unawaited(_hostRecord(ref)),

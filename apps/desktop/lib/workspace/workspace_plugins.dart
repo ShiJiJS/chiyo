@@ -34,8 +34,12 @@ class WorkspacePlugin {
     this.builtin = false,
     this.affectedRecords = 0,
     Iterable<WorkspacePluginPanel> panels = const [],
+    Map<String, Object?>? legacySource,
   }) : templates = List.unmodifiable(templates),
-       panels = Set.unmodifiable(panels);
+       panels = Set.unmodifiable(panels),
+       legacySource = legacySource == null
+           ? null
+           : workspaceImmutableMap(legacySource);
   final String id, name, version, author, description, digest, origin;
   final List<WorkspacePluginTemplate> templates;
 
@@ -43,6 +47,7 @@ class WorkspacePlugin {
   final Set<WorkspacePluginPanel> panels;
   final bool enabled, builtin;
   final int affectedRecords;
+  final Map<String, Object?>? legacySource;
   WorkspacePlugin project({bool? enabled, int? affectedRecords}) =>
       WorkspacePlugin(
         id: id,
@@ -57,7 +62,30 @@ class WorkspacePlugin {
         builtin: builtin,
         panels: panels,
         affectedRecords: affectedRecords ?? this.affectedRecords,
+        legacySource: legacySource,
       );
+  WorkspacePlugin fromLegacy(Map<String, Object?> source) => WorkspacePlugin(
+    id: id,
+    name: name,
+    version: version,
+    author: author,
+    description: description,
+    digest: digest,
+    origin: origin,
+    enabled: enabled,
+    builtin: builtin,
+    panels: panels,
+    affectedRecords: affectedRecords,
+    legacySource: source,
+    templates: [
+      for (final t in templates)
+        WorkspacePluginTemplate(
+          id: t.id,
+          type: t.type,
+          definition: {...t.definition, 'legacySource': source},
+        ),
+    ],
+  );
 }
 
 class WorkspacePluginCatalog {

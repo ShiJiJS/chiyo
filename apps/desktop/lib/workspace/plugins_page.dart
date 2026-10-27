@@ -9,6 +9,9 @@ import 'plugin_widgets.dart';
 import 'plugins_controller.dart';
 import 'workspace_source.dart';
 import 'host_settings.dart';
+import 'legacy_templates_controller.dart';
+import 'legacy_templates_panel.dart';
+import 'plugin_authoring_guide.dart';
 
 /// Settings owns this entry; no package gets an everyday navigation destination.
 class PluginsPage extends StatefulWidget {
@@ -23,6 +26,8 @@ class PluginsPage extends StatefulWidget {
     this.hosts,
     this.hostChanges,
     this.onRecord,
+    this.legacy,
+    this.onLegacyCreate,
   });
   final PluginsController controller;
   final WorkspacePluginPicker? picker;
@@ -32,6 +37,8 @@ class PluginsPage extends StatefulWidget {
   final WorkspaceHostSource? hosts;
   final Stream<WorkspaceRecordRef?>? hostChanges;
   final ValueChanged<WorkspaceRecordRef>? onRecord;
+  final LegacyTemplatesController? legacy;
+  final ValueChanged<WorkspaceLegacyTemplate>? onLegacyCreate;
   @override
   State<PluginsPage> createState() => _PluginsPageState();
 }
@@ -294,6 +301,14 @@ class _PluginsPageState extends State<PluginsPage> {
               '${p.author} · ${p.builtin ? '内置' : '本地安装'} · v${p.version} · ${p.enabled ? '已启用' : '已停用'}',
               style: libraryText(context, 13, color: c.muted),
             ),
+            if (p.legacySource case final source?)
+              Padding(
+                padding: const EdgeInsets.only(top: 12),
+                child: Text(
+                  '由旧版模板第${source['version']}版转换，保留${(source['definitionIds'] as Map).length}项字段定义来源对应。',
+                  style: libraryText(context, 13, color: c.muted),
+                ),
+              ),
             Container(
               margin: const EdgeInsets.symmetric(vertical: 22),
               padding: const EdgeInsets.symmetric(vertical: 18),
@@ -514,15 +529,26 @@ class _PluginsPageState extends State<PluginsPage> {
                   ),
                   const SizedBox(height: 24),
                   DesktopButton(
-                    selected: true,
+                    selected: !model.showingLegacy,
                     alignment: Alignment.centerLeft,
                     leading: const PrototypeIcon(PrototypeIconGlyph.plugin),
                     onPressed: () {
                       _top();
+                      model.showLegacy(false);
                       model.setFilter(PluginFilter.all);
                     },
                     child: const Text('插件'),
                   ),
+                  if (widget.legacy != null) ...[
+                    const SizedBox(height: 10),
+                    DesktopButton(
+                      key: const ValueKey('legacy-menu'),
+                      selected: model.showingLegacy,
+                      alignment: Alignment.centerLeft,
+                      onPressed: () => model.showLegacy(true),
+                      child: const Text('旧版模板'),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -544,34 +570,64 @@ class _PluginsPageState extends State<PluginsPage> {
                       crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
                         Text(
-                          '插件',
+                          model.showingLegacy ? '旧版模板' : '插件',
                           style: libraryText(
                             context,
                             26,
                             weight: FontWeight.w600,
                           ),
                         ),
-                        DesktopButton(
-                          key: const ValueKey('plugin-install'),
-                          kind: DesktopButtonKind.primary,
-                          leading: const PrototypeIcon(PrototypeIconGlyph.plus),
-                          onPressed:
-                              widget.picker == null ||
-                                  model.loading ||
-                                  model.failure != null
-                              ? null
-                              : () => _operation(WorkspacePluginAction.install),
-                          child: const Text('安装插件包'),
+                        Wrap(
+                          spacing: 10,
+                          runSpacing: 10,
+                          children: [
+                            DesktopButton(
+                              key: const ValueKey('plugin-authoring-guide'),
+                              kind: DesktopButtonKind.quiet,
+                              onPressed: () async {
+                                widget.onModalChanged?.call(true);
+                                try {
+                                  await showPluginAuthoringGuide(
+                                    context,
+                                    model.catalog,
+                                  );
+                                } finally {
+                                  widget.onModalChanged?.call(false);
+                                }
+                              },
+                              child: const Text('Agent 制作指引'),
+                            ),
+                            if (!model.showingLegacy)
+                              DesktopButton(
+                                key: const ValueKey('plugin-install'),
+                                kind: DesktopButtonKind.primary,
+                                leading: const PrototypeIcon(
+                                  PrototypeIconGlyph.plus,
+                                ),
+                                onPressed:
+                                    widget.picker == null ||
+                                        model.loading ||
+                                        model.failure != null
+                                    ? null
+                                    : () => _operation(
+                                        WorkspacePluginAction.install,
+                                      ),
+                                child: const Text('安装插件包'),
+                              ),
+                          ],
                         ),
                       ],
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      '管理资料模板。已有资料始终由信息库保存。',
+                      model.showingLegacy
+                          ? '继续使用旧录入辅助，或明确转换为声明式插件。'
+                          : '管理资料模板。已有资料始终由信息库保存。',
                       style: libraryText(context, 13, color: c.muted),
                     ),
                     const SizedBox(height: 18),
-                    if (model.failure case final failure?) ...[
+                    if (model.failure case final failure?
+                        when !model.showingLegacy) ...[
                       PluginFailureView(failure),
                       Align(
                         alignment: Alignment.centerLeft,
@@ -581,35 +637,51 @@ class _PluginsPageState extends State<PluginsPage> {
                         ),
                       ),
                       const SizedBox(height: 12),
-                    ] else if (model.loading)
+                    ] else if (!model.showingLegacy && model.loading)
                       const Padding(
                         padding: EdgeInsets.only(bottom: 12),
                         child: Text('正在刷新插件…'),
                       ),
                     Expanded(
                       child: Container(
-                        key: const ValueKey('plugin-workspace'),
+                        key: ValueKey(
+                          model.showingLegacy
+                              ? 'legacy-workspace'
+                              : 'plugin-workspace',
+                        ),
                         clipBehavior: Clip.antiAlias,
                         decoration: BoxDecoration(
                           color: c.paper,
                           border: Border.all(color: c.line),
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            SizedBox(
-                              width: bounds.maxWidth <= 1300 ? 200 : 225,
-                              child: _list(context),
-                            ),
-                            VerticalDivider(
-                              width: 1,
-                              thickness: 1,
-                              color: c.line,
-                            ),
-                            Expanded(child: _detail(context)),
-                          ],
-                        ),
+                        child: model.showingLegacy && widget.legacy != null
+                            ? LegacyTemplatesPanel(
+                                controller: widget.legacy!,
+                                catalog: model.catalog,
+                                plugins: model.source,
+                                onCreate: widget.onLegacyCreate,
+                                onConverted: (id) async {
+                                  await model.load();
+                                  if (mounted) model.select(id);
+                                },
+                                onModalChanged: widget.onModalChanged,
+                              )
+                            : Row(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  SizedBox(
+                                    width: bounds.maxWidth <= 1300 ? 200 : 225,
+                                    child: _list(context),
+                                  ),
+                                  VerticalDivider(
+                                    width: 1,
+                                    thickness: 1,
+                                    color: c.line,
+                                  ),
+                                  Expanded(child: _detail(context)),
+                                ],
+                              ),
                       ),
                     ),
                   ],

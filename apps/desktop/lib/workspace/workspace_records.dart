@@ -295,16 +295,23 @@ class WorkspaceCreate {
     required this.name,
     this.expectedTemplateVersion,
     this.expectedTemplateDigest,
+    this.legacyTemplateId,
+    this.expectedLegacyVersion,
     this.description = '',
     this.directoryId,
     Iterable<String> tagIds = const [],
     Map<String, Object?> values = const {},
     Map<String, List<WorkspaceRecordRef>> relations = const {},
+    Map<String, String> fileSelections = const {},
   }) : tagIds = List.unmodifiable(tagIds),
        values = _freeze(values) as Map<String, Object?>,
-       relations = _freezeRelations(relations);
+       relations = _freezeRelations(relations),
+       fileSelections = Map.unmodifiable(fileSelections);
   final String operationId, typeId, name, description;
   final String? expectedTemplateVersion, expectedTemplateDigest;
+  final String? legacyTemplateId;
+  final int? expectedLegacyVersion;
+  final Map<String, String> fileSelections;
   final String? directoryId;
   final List<String> tagIds;
   final Map<String, Object?> values;
