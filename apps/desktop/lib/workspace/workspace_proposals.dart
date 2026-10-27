@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'workspace_records.dart';
 import 'workspace_history.dart';
+import 'workspace_entries.dart';
 
 enum WorkspaceProposalKind {
   addition('新增资料'),
@@ -58,12 +59,14 @@ class WorkspaceProposalSummary {
     required this.chatClaim,
     required this.purpose,
     required this.itemCount,
+    this.wholeDeletion = false,
   });
   final String id, title, agentClaim, chatClaim, purpose;
   final WorkspaceProposalKind kind;
   final WorkspaceProposalStatus status;
   final bool pending;
   final int version, itemCount;
+  final bool wholeDeletion;
   final DateTime at;
 }
 
@@ -118,6 +121,7 @@ class WorkspaceProposalItem {
         version: old.version,
         definition: old.definition,
         fieldIds: old.fieldIds,
+        fieldOverrides: old.fieldOverrides,
         retainedFields: old.retainedFields,
         retainedRelations: old.retainedRelations,
       ),
@@ -144,6 +148,7 @@ class WorkspaceProposalFieldChange {
   final WorkspaceProposalFieldIntent intent;
   final String key, label;
   final String? fieldId, entryId, leaf;
+  String get reviewKey => entryId == null ? key : '$key:$entryId:$leaf';
   final String? before, after;
   final bool beforeAvailable;
   final Map<String, Object?>? definition;
@@ -217,6 +222,7 @@ class WorkspaceProposalDetail {
       'definition': d.definition,
       'values': includeValues ? d.values : const <String, Object?>{},
       'fieldIds': d.fieldIds,
+      'fieldOverrides': d.fieldOverrides,
       'retainedFields': d.retainedFields,
       'retainedRelations': d.retainedRelations,
       'relations': includeValues
@@ -234,6 +240,7 @@ class WorkspaceProposalDetail {
                 'id': summary.id,
                 'version': summary.version,
                 'kind': summary.kind.name,
+                'wholeDeletion': summary.wholeDeletion,
                 'title': summary.title,
                 'purpose': summary.purpose,
                 'agent': summary.agentClaim,
@@ -412,4 +419,39 @@ abstract interface class WorkspaceProposalSource {
   /// Owner explicitly compares a pending/conflicted target with its current
   /// ordinary record. This is not part of queue metadata or an Agent aperture.
   Future<WorkspaceDetail> currentTarget(String proposalId);
+}
+
+String? workspaceProposalFieldId(
+  WorkspaceDetail detail,
+  WorkspaceProposalFieldChange c,
+) {
+  if (c.entryId == null) return detail.fieldIds[c.key];
+  try {
+    return WorkspaceRepeatedEntry.read(
+      detail.values[c.key],
+    ).where((e) => e.id == c.entryId).firstOrNull?.fieldIds[c.leaf];
+  } on FormatException {
+    return null;
+  }
+}
+
+String? workspaceProposalFieldValue(
+  WorkspaceDetail detail,
+  WorkspaceProposalFieldChange c,
+) {
+  if (c.entryId == null) {
+    return detail.values[c.key] is String
+        ? detail.values[c.key] as String
+        : null;
+  }
+  try {
+    final entry = WorkspaceRepeatedEntry.read(
+      detail.values[c.key],
+    ).where((e) => e.id == c.entryId).firstOrNull;
+    return entry?.fieldIds.containsKey(c.leaf) == true
+        ? entry!.toJson()[c.leaf] as String
+        : null;
+  } on FormatException {
+    return null;
+  }
 }

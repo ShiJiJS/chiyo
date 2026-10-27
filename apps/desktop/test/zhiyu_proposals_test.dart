@@ -13,6 +13,8 @@ import 'package:info_desktop/workspace/proposals_page.dart';
 import 'package:info_desktop/workspace/preview_workspace.dart';
 import 'package:info_desktop/workspace/sample_workspace_source.dart';
 import 'package:info_desktop/workspace/workspace_source.dart';
+import 'package:info_desktop/workspace/workspace_entries.dart';
+import 'package:info_desktop/workspace/library_entries.dart';
 
 void main() {
   const evidence = String.fromEnvironment('UI_EVIDENCE_DIR');
@@ -599,6 +601,133 @@ void main() {
         (await s.readDetail(d.record.ref)).values['purpose'],
         '删除前需要保留的新说明',
       );
+    },
+  );
+  testWidgets(
+    'field intent guide reviews explicit new meaning and edits only listed values, then reads replacement and added fields in the shared library',
+    (t) async {
+      final s = await start(t);
+      await tap(t, find.byKey(const ValueKey('preview-guide')));
+      await tap(t, find.byKey(const ValueKey('preview-proposal-fields')));
+      await closed(t);
+      await tap(t, find.byKey(const ValueKey('proposal-row-fields-server')));
+      final m = model(t),
+          before = await s.proposals.currentTarget('fields-server');
+      expect(find.textContaining('新字段定义：运维联系标识'), findsOneWidget);
+      expect(find.textContaining('旧授权不包含新字段'), findsOneWidget);
+      await t.ensureVisible(find.textContaining('新字段定义：恢复联系人'));
+      await capture(t, 'proposals-1440-light-field-intents');
+      await tap(t, find.byKey(const ValueKey('proposal-edit-fields-server')));
+      await t.enterText(
+        find.byKey(const ValueKey('proposal-edit-port')),
+        '2233',
+      );
+      await t.enterText(
+        find.byKey(const ValueKey('proposal-edit-recoveryContact')),
+        'owner@beichen.example',
+      );
+      expect(find.byKey(const ValueKey('proposal-edit-purpose')), findsNothing);
+      await tap(t, find.byKey(const ValueKey('proposal-edit-keep')));
+      await closed(t);
+      await tap(t, find.byKey(const ValueKey('proposal-confirm')));
+      final ref = m.detail!.targets.single.record;
+      await tap(t, find.byKey(ValueKey('proposal-current-${ref.key}')));
+      expect(find.text('运维联系标识'), findsOneWidget);
+      expect(find.text('恢复联系人'), findsOneWidget);
+      expect(find.text('owner@beichen.example'), findsOneWidget);
+      final current = await s.readDetail(ref);
+      expect(current.fieldIds['port'], before.fieldIds['port']);
+      expect(current.fieldIds['user'], isNot(before.fieldIds['user']));
+      expect(current.values['port'], '2233');
+      expect(current.values.containsKey('purpose'), false);
+    },
+  );
+  testWidgets(
+    'entry review edits a single leaf and renders independent new and retained identities in the same profile timeline',
+    (t) async {
+      final s = await start(t, dark: true);
+      await tap(t, find.byKey(const ValueKey('preview-guide')));
+      await tap(t, find.byKey(const ValueKey('preview-proposal-fields')));
+      await closed(t);
+      final list = find
+          .descendant(
+            of: find.byKey(const ValueKey('proposal-list')),
+            matching: find.byType(Scrollable),
+          )
+          .first;
+      await t.scrollUntilVisible(
+        find.byKey(const ValueKey('proposal-row-fields-profile')),
+        260,
+        scrollable: list,
+        maxScrolls: 20,
+      );
+      await tap(t, find.byKey(const ValueKey('proposal-row-fields-profile')));
+      final m = model(t),
+          before = await s.proposals.currentTarget('fields-profile'),
+          change = m.detail!.items.single.changes.first;
+      await tap(t, find.byKey(const ValueKey('proposal-edit-fields-profile')));
+      await t.enterText(
+        find.byKey(ValueKey('proposal-edit-${change.reviewKey}')),
+        'Owner核对后的教育名称',
+      );
+      await tap(t, find.byKey(const ValueKey('proposal-edit-keep')));
+      await closed(t);
+      await t.ensureVisible(find.textContaining('第一段教育 · 名称修正'));
+      await t.pumpAndSettle();
+      await capture(t, 'proposals-1280-dark200-entry-leaves');
+      await tap(t, find.byKey(const ValueKey('proposal-confirm')));
+      final ref = m.detail!.targets.single.record;
+      await tap(t, find.byKey(ValueKey('proposal-current-${ref.key}')));
+      expect(find.byType(LibraryEntryTimeline), findsWidgets);
+      expect(find.text('Owner核对后的教育名称'), findsOneWidget);
+      expect(find.text('研究成果'), findsOneWidget);
+      expect(find.text('北辰学院 · 继续教育'), findsOneWidget);
+      final old = WorkspaceRepeatedEntry.read(before.values['education']).first,
+          current = WorkspaceRepeatedEntry.read(
+            (await s.readDetail(ref)).values['education'],
+          ).first;
+      expect(current.fieldIds['title'], old.fieldIds['title']);
+      expect(current.fieldIds.containsKey('period'), false);
+      expect(current.fieldIds['detail'], isNot(old.fieldIds['detail']));
+    },
+  );
+  testWidgets(
+    'a field-only delete is distinct from whole deletion and restores through the existing recycle UI without restoring the former identity',
+    (t) async {
+      final s = await start(t);
+      await tap(t, find.byKey(const ValueKey('preview-guide')));
+      await tap(t, find.byKey(const ValueKey('preview-proposal-fields')));
+      await closed(t);
+      await tap(t, find.byKey(const ValueKey('proposal-row-delete-field')));
+      final m = model(t),
+          before = await s.proposals.currentTarget('delete-field');
+      expect(find.text('删除整条资料'), findsNothing);
+      expect(find.text('移除该字段；旧内容进入回收站。'), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('proposal-edit-delete-field')),
+        findsNothing,
+      );
+      await tap(t, find.byKey(const ValueKey('proposal-confirm')));
+      expect(find.text('字段已回收'), findsWidgets);
+      expect(m.detail!.targets.single.exists, true);
+      final entries = await s.queryRecycled(),
+          entry = entries.items.singleWhere(
+            (e) => e.record.ref == before.record.ref,
+          );
+      expect(entry.wholeItem, false);
+      await tap(t, find.byKey(const ValueKey('workspace-nav-library')));
+      await tap(t, find.byKey(const ValueKey('library-open-recycle')));
+      await tap(t, find.byKey(ValueKey('library-recycle-view-${entry.id}')));
+      expect(find.textContaining('这里只恢复回收字段'), findsOneWidget);
+      expect(find.text('恢复字段'), findsOneWidget);
+      expect(find.text('资料结构'), findsNothing);
+      await capture(t, 'proposals-1440-light-partial-restore');
+      await tap(t, find.byKey(const ValueKey('library-recycle-submit')));
+      expect(find.text('恢复字段'), findsNothing);
+      final restored = await s.readDetail(before.record.ref);
+      expect(restored.values['auth'], before.values['auth']);
+      expect(restored.fieldIds['auth'], isNot(before.fieldIds['auth']));
+      expect(restored.values['url'], before.values['url']);
     },
   );
 }

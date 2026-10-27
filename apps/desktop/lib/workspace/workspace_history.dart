@@ -7,11 +7,13 @@ class WorkspaceArchive {
     required this.detail,
     required this.archivedAt,
     this.directoryName,
+    this.wholeItem = true,
     Map<WorkspaceRecordRef, WorkspaceRecordSummary> targets = const {},
   }) : targets = Map.unmodifiable(targets);
   final WorkspaceDetail detail;
   final DateTime archivedAt;
   final String? directoryName;
+  final bool wholeItem;
   final Map<WorkspaceRecordRef, WorkspaceRecordSummary> targets;
 }
 
@@ -47,12 +49,14 @@ class WorkspaceRecycleEntry {
     required this.deletedAt,
     required this.expiresAt,
     this.directoryName,
+    this.wholeItem = true,
   });
   final String id;
   final WorkspaceRecordSummary record;
   final int version;
   final DateTime deletedAt, expiresAt;
   final String? directoryName;
+  final bool wholeItem;
 }
 
 class WorkspaceRecycleResults {
@@ -90,6 +94,7 @@ class WorkspaceOperationIntent {
     this.revisionVersion,
     this.entryId,
     this.expectedCatalogVersion,
+    this.expectedCurrentVersion,
     this.planId,
     this.legacyTemplateId,
     this.legacyTemplateVersion,
@@ -102,6 +107,7 @@ class WorkspaceOperationIntent {
         revisionVersion: change.revisionVersion,
         entryId: change.entryId,
         expectedCatalogVersion: change.expectedCatalogVersion,
+        expectedCurrentVersion: change.expectedCurrentVersion,
       );
   final WorkspaceOperationKind kind;
   final WorkspaceRecordRef? ref;
@@ -109,6 +115,7 @@ class WorkspaceOperationIntent {
   final String? legacyTemplateId;
   final int? legacyTemplateVersion;
   final int? expectedVersion, revisionVersion, expectedCatalogVersion;
+  final int? expectedCurrentVersion;
 
   bool matches(WorkspaceOperationIntent other) =>
       kind == other.kind &&
@@ -120,7 +127,8 @@ class WorkspaceOperationIntent {
       entryId == other.entryId &&
       expectedVersion == other.expectedVersion &&
       revisionVersion == other.revisionVersion &&
-      expectedCatalogVersion == other.expectedCatalogVersion;
+      expectedCatalogVersion == other.expectedCatalogVersion &&
+      expectedCurrentVersion == other.expectedCurrentVersion;
 }
 
 /// Committed fact remains queryable after content has been permanently erased.
@@ -144,12 +152,14 @@ class WorkspaceRecordChange {
     this.revisionVersion,
     this.entryId,
     this.expectedCatalogVersion,
+    this.expectedCurrentVersion,
   });
   final String operationId;
   final WorkspaceRecordRef ref;
   final int expectedVersion;
   final WorkspaceRecordAction action;
   final int? revisionVersion, expectedCatalogVersion;
+  final int? expectedCurrentVersion;
   final String? entryId;
 }
 

@@ -84,7 +84,7 @@ extension _SampleAdoption on SampleWorkspaceSource {
                     ...e.toJson(),
                     'entryId': 'adopt-entry-${_fingerprint([id, key, e.id])}',
                     'fieldIds': {
-                      for (final part in WorkspaceRepeatedEntry.parts)
+                      for (final part in e.activeParts)
                         part: sampleFieldId(
                           draft.ref,
                           '$id/$key/${e.id}/$part',
@@ -168,6 +168,7 @@ extension _SampleAdoption on SampleWorkspaceSource {
       version: current.version,
       definition: candidate.definition,
       values: candidate.values,
+      fieldOverrides: candidate.fieldOverrides,
       retainedFields: candidate.retainedFields,
       fieldIds: candidate.fieldIds,
     );

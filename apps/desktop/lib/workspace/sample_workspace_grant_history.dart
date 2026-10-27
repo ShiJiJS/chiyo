@@ -137,7 +137,8 @@ class _SampleGrantHistory implements WorkspaceGrantHistorySource {
       if (a.detail.version == version) return a;
     }
     for (final r in s._recycled.values) {
-      if (r.archive.detail.record.ref == ref &&
+      if (r.entry.wholeItem &&
+          r.archive.detail.record.ref == ref &&
           r.archive.detail.version == version) {
         return r.archive;
       }

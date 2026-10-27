@@ -447,6 +447,15 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
                     child: const Text('加入整条资料删除提案'),
                   ),
                   DesktopButton(
+                    key: const ValueKey('preview-proposal-fields'),
+                    onPressed: () async {
+                      _source.setScenario(SampleWorkspaceScenario.ready);
+                      await _source.demonstrateFieldProposals();
+                      if (dialogContext.mounted) Navigator.pop(dialogContext);
+                    },
+                    child: const Text('加入字段意图与经历叶提案'),
+                  ),
+                  DesktopButton(
                     key: const ValueKey('preview-proposal-conflict'),
                     onPressed: () async {
                       _source.setScenario(SampleWorkspaceScenario.ready);

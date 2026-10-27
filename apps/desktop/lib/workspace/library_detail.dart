@@ -679,6 +679,33 @@ class _LibraryDetailState extends State<LibraryDetail> {
               );
             },
           ),
+          if (!_relations &&
+              detail.fieldOverrides.entries.any(
+                (e) =>
+                    e.value != null &&
+                    !(detail.definition['fields'] as List? ?? []).any(
+                      (f) => f['key'] == e.key,
+                    ) &&
+                    !detail.retainedFields.any((f) => f['key'] == e.key),
+              ))
+            _section(
+              context,
+              '补充字段',
+              _fields(
+                context,
+                detail.fieldOverrides.entries
+                    .where(
+                      (e) =>
+                          e.value != null &&
+                          !(detail.definition['fields'] as List? ?? []).any(
+                            (f) => f['key'] == e.key,
+                          ) &&
+                          !detail.retainedFields.any((f) => f['key'] == e.key),
+                    )
+                    .map((e) => e.key)
+                    .toList(),
+              ),
+            ),
           if (!_relations && detail.retainedFields.isNotEmpty)
             _section(
               context,

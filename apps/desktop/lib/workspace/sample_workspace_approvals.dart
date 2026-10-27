@@ -283,15 +283,17 @@ class _SampleApprovals implements WorkspaceApprovalSource {
             for (final (i, e) in WorkspaceRepeatedEntry.read(
               d.values[key],
             ).indexed) {
-              for (final part in WorkspaceRepeatedEntry.parts) {
+              for (final part in e.activeParts) {
                 yield WorkspaceApprovalScope(
                   id: 'field:${ref.key}:${e.fieldIds[part]}',
                   record: ref,
-                  label: const {
-                    'title': '名称',
-                    'period': '时间',
-                    'detail': '说明',
-                  }[part]!,
+                  label: e.label(part) == WorkspaceRepeatedEntry.labels[part]
+                      ? const {
+                          'title': '名称',
+                          'period': '时间',
+                          'detail': '说明',
+                        }[part]!
+                      : e.label(part),
                   section: '${d.record.name} · $label ${i + 1}',
                   recordName: d.record.name,
                   kind: WorkspaceApprovalScopeKind.field,
