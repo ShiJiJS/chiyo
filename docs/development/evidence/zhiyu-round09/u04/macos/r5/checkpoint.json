@@ -1,0 +1,145 @@
+{
+  "createdAt": "2026-10-27T00:43:17.516210+00:00",
+  "sourceCommit": "f77a68e165e70e268a03df0b55b82d72924bba82",
+  "branch": "codex/zhiyu-macos",
+  "goalStatus": "active",
+  "issue65": {
+    "state": "OPEN",
+    "completed": 6,
+    "total": 7,
+    "newCriteria": [
+      4,
+      6,
+      7
+    ],
+    "remaining": "Full R07/R08/S5, video and real Mac input gates",
+    "next": "U05 access/credential-use approval UI (#66), then U06/U07; F01 waits for all UI"
+  },
+  "platform": {
+    "system": "Darwin",
+    "macOS": "27.0.1",
+    "machine": "arm64",
+    "sdk": {
+      "frameworkVersion": "3.47.7",
+      "channel": "[user-branch]",
+      "repositoryUrl": "https://github.com/flutter/flutter.git",
+      "frameworkRevision": "abaf9c523780a608bd46686fd5e53740a07077f8",
+      "frameworkCommitDate": "2026-10-08 09:51:21 -0700",
+      "engineRevision": "deb287481e3ce9468f3434937ced4240a70539ca",
+      "engineCommitDate": "2026-10-07 17:09:12.000Z",
+      "engineContentHash": "d8a2d6c768c334d53e16277f837970ffa1e2de81",
+      "engineBuildDate": "2026-10-08 01:51:44.552",
+      "dartSdkVersion": "3.13.5",
+      "devToolsVersion": "2.60.0",
+      "flutterVersion": "3.47.7",
+      "flutterRoot": "/Users/jiangxinyi/Documents/Project/agent-info/.tools/flutter"
+    },
+    "xcode": "Xcode 27.1\nBuild version 27A9275",
+    "DPR": 1
+  },
+  "sourceSha256": {
+    "apps/desktop/lib/workspace/library_detail.dart": "db8cd66e7c747f0a73229a923268e629bb7554fcf2e38a8725aac1e2125b99ac",
+    "apps/desktop/lib/workspace/library_edit_conflict.dart": "09ce7a2b5cd092c38dd121da650677e21d9506f9a85abd3b599f8508b768a744",
+    "apps/desktop/lib/workspace/library_edit_dialog.dart": "7c57a8b46cce210c51eba1e20d405424bd9283ea958a1097692c605b9d3f3c7e",
+    "apps/desktop/test/mac_preview_isolation_test.dart": "2e63df8043f16cbb4d130424bf71364c86bcd51aecf26895d05b82d6bc2a46cf",
+    "apps/desktop/test/zhiyu_plugin_contracts_test.dart": "09ae2db1a8de4a10497847920fa65faa264b29bdbb7d23ce3d0cb3c836fa627d"
+  },
+  "checks": {
+    "consecutiveFocusedRuns": {
+      "focused-first.log": 17,
+      "regression.log": 220,
+      "focused-final.log": 17
+    },
+    "newComparisonTests": 1,
+    "newWidgetTests": 5,
+    "analysis": "No issues found!",
+    "isolation": "Actual controls conflict review, explicit continue/save and retained field identity added to existing full U04 guard on Mac; no skip",
+    "productionCalls": 0,
+    "networkCalls": 0,
+    "rejectedPersonalPaths": 0
+  },
+  "previewBuild": {
+    "path": "apps/desktop/build/macos/Build/Products/Debug/info_desktop.app",
+    "bundleId": "com.example.infoDesktop.zhiyuPreview",
+    "isolatedPreviewFlag": "YES",
+    "newRuntimeClaim": false
+  },
+  "nativeSourceUnchanged": {
+    "apps/desktop/macos/Runner/MainFlutterWindow.swift": {
+      "sha256": "bc24813874c5e4a3db30cc7e2bc964e2a35fca9eefa1dd9950c92d7bc2f6333a",
+      "sameAsVerifiedSource": "8645c10bfa88abe81641e823d0c46d0ee846c913"
+    },
+    "apps/desktop/lib/preview_main.dart": {
+      "sha256": "8ea387c251c40080ddc65e2ae89483a88e56753f8dea3b0d1eb370bfa9355d33",
+      "sameAsVerifiedSource": "8645c10bfa88abe81641e823d0c46d0ee846c913"
+    },
+    "apps/desktop/lib/workspace/mac_preview_desktop.dart": {
+      "sha256": "15adcb657fcfd807a0dd78a066f417c860de21ecf4bed0adb9fd9b12cd8e643a",
+      "sameAsVerifiedSource": "8645c10bfa88abe81641e823d0c46d0ee846c913"
+    }
+  },
+  "visuals": {
+    "reviewedImages": 4,
+    "independentReview": false,
+    "video": false,
+    "fullS5": false,
+    "OSInput": false
+  },
+  "boundaries": [
+    "Fictional resettable source only",
+    "No production schema, grants or storage migration",
+    "No computer use, subagents or Windows CI",
+    "Conflict review does not write; expectedVersion still checked on the next explicit save",
+    "Changed field/entry identities cannot be adopted by retaining an old editor draft"
+  ],
+  "files": {
+    "analysis.log": {
+      "sha256": "b75cef94cb72c195332f1ee4df40055bd99010e12ec436862ec60b46fa667f4b",
+      "bytes": 96
+    },
+    "build.log": {
+      "sha256": "bb928504a91fe0ce4dc0bb921b142b31033cbbf74e92214ba34521fe3f2f22be",
+      "bytes": 125
+    },
+    "commands.json": {
+      "sha256": "82fc300dd7070da32b724571e504e0754a300b1cba5bd1ff8a0e3a2d362ccb31",
+      "bytes": 3666
+    },
+    "focused-final.log": {
+      "sha256": "92dd48e1a9b3a7b55f89d08ad758772462b5405dd058665a1a0b92893000dba9",
+      "bytes": 4171
+    },
+    "focused-first.log": {
+      "sha256": "8c44d9e780199361d0f8298f7f87fcfe108706b831698c0a9ce7454747f00b43",
+      "bytes": 4073
+    },
+    "format.log": {
+      "sha256": "e99e14af8a1911b1b95f6a92863bdf4e46441156533041058e5016b24f1afc8b",
+      "bytes": 146
+    },
+    "regression.log": {
+      "sha256": "c7fd300d8fecfa9e59fa08edb5e3564d5fdf9c3a8f356f8d37d573802d4170bd",
+      "bytes": 43511
+    },
+    "review.md": {
+      "sha256": "e18ec103ce67ec4aba8e5b9e13ca8ae321814134ec534c2e4365984271589d0c",
+      "bytes": 3182
+    },
+    "screenshots/contracts-1280-dark-200-schema-review.png": {
+      "sha256": "60e70e6aa67370d4e9ff085b6406a9c0e24564a3c32bc19fa97839e90ba97436",
+      "bytes": 133240
+    },
+    "screenshots/contracts-1440-light-edit-review.png": {
+      "sha256": "2d93a985eb42e26588c43f52e1e0f9b007ebfe0d3f1b7a99dd1ccca69fb29d3e",
+      "bytes": 155706
+    },
+    "screenshots/contracts-1440-light-entry-identity-review.png": {
+      "sha256": "7b575d597ec7f42602f355137e36b27af05025cd62ac525ddeb28aebd7b229d2",
+      "bytes": 159873
+    },
+    "screenshots/contracts-1440-light-retained-relations.png": {
+      "sha256": "07037fb3db8019ee7603d1bc709b3576d84e89fb813e24afd272fcd5bf929a18",
+      "bytes": 182377
+    }
+  }
+}
