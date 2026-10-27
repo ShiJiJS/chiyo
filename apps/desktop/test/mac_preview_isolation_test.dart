@@ -8,6 +8,7 @@ import 'package:info_desktop/workspace/preview_workspace.dart';
 import 'package:info_desktop/workspace/library_page.dart';
 import 'package:info_desktop/workspace/approvals_page.dart';
 import 'package:info_desktop/workspace/grant_history_page.dart';
+import 'package:info_desktop/workspace/proposals_page.dart';
 import 'package:info_desktop/workspace/library_history_dialog.dart';
 import 'package:info_desktop/workspace/mac_preview_desktop.dart';
 import 'package:info_desktop/workspace/workspace_source.dart';
@@ -439,6 +440,55 @@ void main() {
         (await source.approvals.read('token')).executions.length,
         uses.length,
       );
+      await t.tap(find.byKey(const ValueKey('workspace-nav-proposals')));
+      await t.pumpAndSettle();
+      final proposals = t
+          .widget<ProposalsPage>(find.byType(ProposalsPage))
+          .controller;
+      final reduce = find.byKey(const ValueKey('proposal-item-status'));
+      await t.ensureVisible(reduce);
+      await t.pumpAndSettle();
+      await t.tap(reduce);
+      await t.pumpAndSettle();
+      if (proposals.needsReview) {
+        final reread = find.byKey(const ValueKey('proposal-review-current'));
+        await t.ensureVisible(reread);
+        await t.pumpAndSettle();
+        await t.tap(reread);
+        await t.pumpAndSettle();
+      }
+      expect(proposals.canConfirm, true);
+      source.loseNextProposalReply = true;
+      final commit = find.byKey(const ValueKey('proposal-confirm'));
+      await t.ensureVisible(commit);
+      await t.pumpAndSettle();
+      await t.tap(commit);
+      await t.pumpAndSettle();
+      expect(proposals.frozen, true);
+      final queued = Completer<void>();
+      await messenger.handlePlatformMessage(
+        MacPreviewDesktop.channel.name,
+        const StandardMethodCodec().encodeMethodCall(
+          const MethodCall('openSettings'),
+        ),
+        (_) => queued.complete(),
+      );
+      await queued.future;
+      await t.pumpAndSettle();
+      expect(find.byType(ProposalsPage), findsOneWidget);
+      final queryProposal = find.byKey(const ValueKey('proposal-reconcile'));
+      await t.ensureVisible(queryProposal);
+      await t.pumpAndSettle();
+      await t.tap(queryProposal);
+      await t.pumpAndSettle();
+      expect(proposals.frozen, false);
+      expect(proposals.detail!.items, isEmpty);
+      expect(proposals.detail!.targets, hasLength(1));
+      final created = await source.readDetail(
+        proposals.detail!.targets.single.record,
+      );
+      expect(created.record.name, '北辰服务入口');
+      expect(created.values['url'], 'https://portal.beichen.example');
       await t.tap(find.byKey(const ValueKey('preview-guide')));
       await t.pumpAndSettle();
       await t.tap(find.text('重置预览资料'));
@@ -446,6 +496,8 @@ void main() {
       expect((await source.credentials.read(ssh)).privateNote, isEmpty);
       expect((await source.loadSummary()).records, 31);
       expect((await source.loadSummary()).pending, 5);
+      expect((await source.loadSummary()).proposals, 2);
+      expect((await source.proposals.read('import')).summary.pending, true);
       expect((await source.approvals.read('token')).executions, isEmpty);
       expect(
         (await source.approvals.read('server')).request.state,

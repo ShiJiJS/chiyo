@@ -51,7 +51,7 @@ class LibraryRelationPicker extends StatefulWidget {
     this.enabled = true,
     this.errorText,
   });
-  final WorkspaceSource source;
+  final WorkspaceRelationSource source;
   final String typeId, relationKey, label;
   final WorkspaceRecordRef? record;
   final List<WorkspaceRecordRef> selected;
@@ -242,7 +242,7 @@ class _RelationCandidates extends StatefulWidget {
     required this.onChanged,
     this.record,
   });
-  final WorkspaceSource source;
+  final WorkspaceRelationSource source;
   final String typeId, relationKey, label;
   final WorkspaceRecordRef? record;
   final List<WorkspaceRecordRef> selected;

@@ -31,6 +31,9 @@ class UiPalette extends ThemeExtension<UiPalette> {
   Color get success => brightness == Brightness.dark
       ? const Color(0xff8ecfb2)
       : const Color(0xff27735f);
+  Color get successSurface => brightness == Brightness.dark
+      ? const Color(0xff253c35)
+      : const Color(0xffe4f1eb);
   Color get danger => brightness == Brightness.dark
       ? const Color(0xfff0a39d)
       : const Color(0xffb54143);
