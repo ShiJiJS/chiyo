@@ -5,6 +5,7 @@ import '../desktop_motion.dart';
 import '../ui_palette.dart';
 import 'library_widgets.dart';
 import 'approvals_controller.dart';
+import 'approval_executions.dart';
 import 'workspace_source.dart';
 
 class ApprovalsPage extends StatefulWidget {
@@ -606,6 +607,7 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
               ],
             ),
           ),
+          ApprovalExecutions(controller: model),
           _section(
             context,
             '关联资料',

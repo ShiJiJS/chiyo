@@ -52,6 +52,8 @@ class _SampleApprovals implements WorkspaceApprovalSource {
   final _receipts =
       <String, ({String fingerprint, WorkspaceApprovalReceipt receipt})>{};
   final _ended = <String>{};
+  final _executions = <String, Map<String, WorkspaceApprovalExecution>>{};
+  WorkspaceFailure? nextExecutionReadFailure;
   bool _seeded = false;
   int _generation = 0, _revision = 0;
   Duration _offset = Duration.zero;
@@ -372,7 +374,12 @@ class _SampleApprovals implements WorkspaceApprovalSource {
   }
 
   bool _active(_ApprovalInput r, WorkspaceApprovalScope x, _ApprovalFact f) {
-    if (!x.available || !f.scopes.containsKey(x.id)) return false;
+    if (f.action != WorkspaceApprovalAction.approve ||
+        _ended.contains(r.session.id) ||
+        !x.available ||
+        !f.scopes.containsKey(x.id)) {
+      return false;
+    }
     final end = x.kind == WorkspaceApprovalScopeKind.credential
         ? f.credentialEnd
         : f.fieldEnd;
@@ -521,9 +528,9 @@ class _SampleApprovals implements WorkspaceApprovalSource {
         f = _facts[id],
         scopes = <WorkspaceApprovalScope>[];
     for (final rawScope in _scopes(r)) {
-      final x = f?.action == WorkspaceApprovalAction.approve
+      final x = f != null
           ? rawScope.project(
-              available: _active(r, rawScope, f!),
+              available: _active(r, rawScope, f),
               reason: !rawScope.available
                   ? rawScope.unavailableReason
                   : _active(r, rawScope, f)
@@ -551,6 +558,7 @@ class _SampleApprovals implements WorkspaceApprovalSource {
       reviewToken: stamp,
       scopes: scopes,
       credential: r.credential,
+      executions: _executions[id]?.values ?? const [],
       approved: f?.scopes.keys ?? const [],
       fileVersions: f?.files ?? const {},
       decidedAt: f?.at,
@@ -758,9 +766,114 @@ class _SampleApprovals implements WorkspaceApprovalSource {
               )
             ? '有效'
             : '凭据已失效',
-        operations: const [],
+        operations: [
+          for (final e
+              in _executions[r.id]?.values ?? <WorkspaceApprovalExecution>[])
+            WorkspaceCredentialUseOperation(
+              e.operationId,
+              e.createdAt,
+              e.plan.label,
+              e.resultLabel,
+            ),
+        ],
       );
     }
+  }
+
+  @override
+  Future<WorkspaceApprovalExecution> execution(
+    String requestId,
+    String operationId,
+  ) async {
+    await s._readable();
+    if (nextExecutionReadFailure case final error?) {
+      nextExecutionReadFailure = null;
+      throw error;
+    }
+    if (s._scenario == SampleWorkspaceScenario.empty) {
+      throw const WorkspaceFailure('not_found', '原使用记录不可读取，不能推断它没有执行。');
+    }
+    return _executions[requestId]?[operationId] ??
+        (throw const WorkspaceFailure('not_found', '原使用记录不可读取，不能推断它没有执行。'));
+  }
+
+  // Preview composition only. This records fictional observations, without
+  // process, file, material, runtime capability or production service access.
+  void demonstrateExecutions(String id) {
+    final r = _input(id), f = _facts[id];
+    if (r.credential == null ||
+        r.kind == WorkspaceApprovalKind.focus ||
+        f?.action != WorkspaceApprovalAction.approve ||
+        _state(r) != WorkspaceApprovalState.approved ||
+        !_scopes(r).any(
+          (x) =>
+              x.kind == WorkspaceApprovalScopeKind.credential &&
+              _active(r, x, f!),
+        )) {
+      throw const WorkspaceFailure('unavailable', '请先批准仍有效的凭据范围，再显示使用记录。');
+    }
+    if (_executions.containsKey(id)) return;
+    final credential = r.credential!,
+        rows = <String, WorkspaceApprovalExecution>{};
+    for (final (index, state) in [
+      WorkspaceExecutionState.exited,
+      WorkspaceExecutionState.startFailed,
+      WorkspaceExecutionState.unknown,
+    ].indexed) {
+      final plan = WorkspaceCredentialReceiver(
+        id: credential.receiver.id,
+        label: ['核对连接状态', '查询服务状态', '核对后续状态'][index],
+        executable: credential.receiver.executable,
+        workingDirectory: credential.receiver.workingDirectory,
+        arguments: [...credential.receiver.arguments],
+        binding: credential.receiver.binding,
+      );
+      final operation = WorkspaceApprovalExecution(
+        requestId: id,
+        grantId: 'preview-grant:$id',
+        operationId: 'preview-use:$id:${index + 1}',
+        credential: credential,
+        plan: plan,
+        createdAt: now,
+        state: state,
+        revision: 1,
+        processStarted: state != WorkspaceExecutionState.startFailed,
+        processEnded: state != WorkspaceExecutionState.unknown,
+        exitCode: state == WorkspaceExecutionState.exited ? 0 : null,
+        errorCode: state == WorkspaceExecutionState.startFailed
+            ? 'process_start_failed'
+            : state == WorkspaceExecutionState.unknown
+            ? 'execution_unknown'
+            : null,
+        cleanup: credential.delivery == WorkspaceCredentialDelivery.file
+            ? (state == WorkspaceExecutionState.unknown
+                  ? WorkspaceExecutionCleanup.needsCheck
+                  : WorkspaceExecutionCleanup.complete)
+            : WorkspaceExecutionCleanup.notNeeded,
+      );
+      rows[operation.operationId] = operation;
+    }
+    _executions[id] = rows;
+    s._changes.add(null);
+  }
+
+  void publishExecutionObservation(String id) {
+    final rows = _executions[id];
+    if (rows == null) return;
+    for (final e in rows.values.toList()) {
+      if (e.state != WorkspaceExecutionState.unknown || e.processEnded) {
+        continue;
+      }
+      rows[e.operationId] = e.observed(
+        revision: e.revision + 1,
+        processEnded: true,
+        cleanup: e.cleanup == WorkspaceExecutionCleanup.notNeeded
+            ? e.cleanup
+            : WorkspaceExecutionCleanup.complete,
+      );
+    }
+    // Simulate a host observation available to the next explicit status read.
+    // No UI event, launch/replay, success inference or grant deadline change.
   }
 
   void advance(Duration d) {
@@ -781,6 +894,8 @@ class _SampleApprovals implements WorkspaceApprovalSource {
     _facts.clear();
     _receipts.clear();
     _ended.clear();
+    _executions.clear();
+    nextExecutionReadFailure = null;
     _seeded = false;
     _offset = Duration.zero;
     _generation++;

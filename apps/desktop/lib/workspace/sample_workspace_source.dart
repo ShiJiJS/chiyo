@@ -64,6 +64,12 @@ class SampleWorkspaceSource
   WorkspaceApprovalSource get approvals => _approvals;
   bool get loseNextApprovalReply => _approvals.loseNextReply;
   set loseNextApprovalReply(bool value) => _approvals.loseNextReply = value;
+  void demonstrateApprovalExecutions(String id) =>
+      _approvals.demonstrateExecutions(id);
+  void publishApprovalExecutionObservation(String id) =>
+      _approvals.publishExecutionObservation(id);
+  set nextApprovalExecutionReadFailure(WorkspaceFailure? value) =>
+      _approvals.nextExecutionReadFailure = value;
   void advanceApprovalClock(Duration value) => _approvals.advance(value);
   void endApprovalSession(String id) => _approvals.endSession(id);
   void _beforeApprovalWrite() {

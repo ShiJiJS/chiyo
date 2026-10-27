@@ -3,6 +3,8 @@ import 'package:crypto/crypto.dart';
 import 'workspace_records.dart';
 import 'workspace_files.dart';
 import 'workspace_credentials.dart';
+import 'workspace_approval_execution.dart';
+export 'workspace_approval_execution.dart';
 
 enum WorkspaceApprovalKind {
   information('字段读取'),
@@ -136,9 +138,12 @@ class WorkspaceApprovalDetail {
     this.fieldExpiresAt,
     this.credentialExpiresAt,
     this.approveUnavailableReason,
-  }) : scopes = List.unmodifiable(scopes),
+    Iterable<WorkspaceApprovalExecution> executions = const [],
+  }) : executions = List.unmodifiable(executions),
+       scopes = List.unmodifiable(scopes),
        approved = Set.unmodifiable(approved),
        fileVersions = Map.unmodifiable(fileVersions);
+  final List<WorkspaceApprovalExecution> executions;
   final WorkspaceApprovalSummary request;
   final String reviewToken;
   final List<WorkspaceApprovalScope> scopes;
@@ -147,6 +152,23 @@ class WorkspaceApprovalDetail {
   final WorkspaceCredentialUseRequest? credential;
   final DateTime? decidedAt, fieldExpiresAt, credentialExpiresAt;
   final String? approveUnavailableReason;
+  WorkspaceApprovalDetail withExecution(WorkspaceApprovalExecution next) =>
+      WorkspaceApprovalDetail(
+        request: request,
+        reviewToken: reviewToken,
+        scopes: scopes,
+        approved: approved,
+        fileVersions: fileVersions,
+        credential: credential,
+        decidedAt: decidedAt,
+        fieldExpiresAt: fieldExpiresAt,
+        credentialExpiresAt: credentialExpiresAt,
+        approveUnavailableReason: approveUnavailableReason,
+        executions: [
+          for (final e in executions)
+            e.operationId == next.operationId ? next : e,
+        ],
+      );
   bool get canApprove =>
       request.state == WorkspaceApprovalState.pending &&
       scopes.any((s) => s.available) &&
@@ -213,6 +235,13 @@ abstract interface class WorkspaceApprovalSource {
   });
   Future<WorkspaceApprovalDetail> read(String id);
   Future<WorkspaceApprovalReceipt> change(WorkspaceApprovalChange change);
+
+  /// Read original operation metadata, even after its grant ends. Never execute,
+  /// replay or infer that a missing/failed lookup means no execution occurred.
+  Future<WorkspaceApprovalExecution> execution(
+    String requestId,
+    String operationId,
+  );
 
   /// null confirms no commit; a failed lookup must throw.
   Future<WorkspaceApprovalReceipt?> receipt(String operationId);
