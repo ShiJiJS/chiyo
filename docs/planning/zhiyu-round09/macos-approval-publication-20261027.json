@@ -1,0 +1,122 @@
+{
+  "createdAt": "2026-10-27T01:38:32.978022+00:00",
+  "sourceCommit": "e38ceb5a50c5d9cb6b305e7d64b324e5fb713120",
+  "documentationCommit": "506cc511d389c2904abbff77eaa70f04e90b45af",
+  "branch": "codex/zhiyu-macos",
+  "issues": [
+    {
+      "number": 66,
+      "title": "知予前端 U05：普通信息与凭据使用的访问审批界面",
+      "state": "OPEN",
+      "labels": [
+        "enhancement",
+        "ready-for-agent"
+      ],
+      "comments": 0,
+      "checked": 3,
+      "dependencies": [
+        62
+      ],
+      "beforeSha256": "fb58e1e368791286186f4a4bef83998934bfd7ef1016734647a2f64a544e79db",
+      "afterSha256": "9f7fc5afe96ec8211e30f5d2c62443d684a7af98fd358e0e8bf0d0965569e5a0"
+    },
+    {
+      "number": 69,
+      "title": "知予后续规划 F01：界面完成后拆分真实功能、测试与 Mac 交付",
+      "state": "OPEN",
+      "labels": [
+        "documentation"
+      ],
+      "comments": 0,
+      "checked": 0,
+      "dependencies": [
+        64,
+        65,
+        66,
+        67,
+        68
+      ],
+      "beforeSha256": "47a54826bc49eaf22ffb6e4d49a74caa7a6b1e65beae3dbefa2ada048b17bf5b",
+      "afterSha256": "37941de5cd72c4a7f48d05e5e702345805509cf4909f2ee046a5210c1642e1d6"
+    }
+  ],
+  "archiveFilesVerifiedAgainstGit": {
+    "docs/development/evidence/zhiyu-round09/u05/macos/r1/analysis-final.log": {
+      "sha256": "8cd7a571fc3d291208246f1776eaa5aad106364a3536a5dea73e95b8af82ea38",
+      "bytes": 96
+    },
+    "docs/development/evidence/zhiyu-round09/u05/macos/r1/build-final.log": {
+      "sha256": "bb928504a91fe0ce4dc0bb921b142b31033cbbf74e92214ba34521fe3f2f22be",
+      "bytes": 125
+    },
+    "docs/development/evidence/zhiyu-round09/u05/macos/r1/checkpoint.json": {
+      "sha256": "97b322f55fb35c774b0311c9d30d91a78d69f1d976a7e8230fff33030f31bf5a",
+      "bytes": 2175
+    },
+    "docs/development/evidence/zhiyu-round09/u05/macos/r1/commands.json": {
+      "sha256": "f9ae61057960a5bf5ece25b0d68f6c3edde70e8851b7934e6f127242d875a653",
+      "bytes": 4170
+    },
+    "docs/development/evidence/zhiyu-round09/u05/macos/r1/focused-final.log": {
+      "sha256": "32dbeef4e624b80007dd5439b9c09b544b2464b48e1463f2473b1b97ed2c95b6",
+      "bytes": 3378
+    },
+    "docs/development/evidence/zhiyu-round09/u05/macos/r1/focused-first.log": {
+      "sha256": "f83855793dffbbeaf427a1630ea5c6e0f703852151d9203b9a6c4a937085d025",
+      "bytes": 3753
+    },
+    "docs/development/evidence/zhiyu-round09/u05/macos/r1/native-source-hashes.json": {
+      "sha256": "87278f49da47d2a5d905cb0e779cf8e4b841321e7ec2f4fd468f8c56f5a4afc1",
+      "bytes": 359
+    },
+    "docs/development/evidence/zhiyu-round09/u05/macos/r1/regression.log": {
+      "sha256": "bd76e090d361c43b844604a4a0aa96060c5e0e44b667caacac1d15d5b17cb5fe",
+      "bytes": 46877
+    },
+    "docs/development/evidence/zhiyu-round09/u05/macos/r1/screenshots/approval-1280-dark-200-file-scope.png": {
+      "sha256": "34943c08710eb062712a59d2c52883f0019720a0ae7677e03371d8eb2e3ea2e0",
+      "bytes": 116914
+    },
+    "docs/development/evidence/zhiyu-round09/u05/macos/r1/screenshots/approval-1440-light-decided.png": {
+      "sha256": "d9814107c3d0fdfbd395feefd8668a2cb40d3dc2ba5ef8eead9134ee5edb4d01",
+      "bytes": 133502
+    },
+    "docs/development/evidence/zhiyu-round09/u05/macos/r1/screenshots/approval-1440-light-env.png": {
+      "sha256": "53c369b4aa076a80962c170b8d1095d50b76ffecdb90ee6ff20cb2f82a3a385f",
+      "bytes": 157771
+    },
+    "docs/development/evidence/zhiyu-round09/u05/macos/r1/screenshots/approval-1440-light-focus-unavailable.png": {
+      "sha256": "7e36c97bf2f7311b9224070239e2637d97541118f6ca582029ee6d5d9dd789a5",
+      "bytes": 163116
+    },
+    "docs/development/evidence/zhiyu-round09/u05/macos/r1/screenshots/approval-1440-light-server-review.png": {
+      "sha256": "31d53fee5de935026092c43d7e7f738ccacb34f72c140be78251e442b7071b35",
+      "bytes": 138917
+    },
+    "docs/development/evidence/zhiyu-round09/u05/macos/r1/screenshots/approval-1440-light-unknown.png": {
+      "sha256": "7a2e56dca122a934ba8714b9069bdac442d7b0547171b292f2cac205d4557eec",
+      "bytes": 160053
+    },
+    "docs/development/evidence/zhiyu-round09/u05/macos/r1/source-files.json": {
+      "sha256": "7fee383c888dc76e9fc67ec230d35de43efa3a4eefa88570263add2991390102",
+      "bytes": 3086
+    },
+    "docs/development/evidence/zhiyu-round09/u05/macos/r1/visual-review.md": {
+      "sha256": "3b4da18e3b724736481d2e86a576de91b24b4a0a8ea34cd994427c6c20a72bcf",
+      "bytes": 1532
+    }
+  },
+  "cleanup": {
+    "path": "build/zhiyu-ui/u05/macos/r1",
+    "files": 35,
+    "bytes": 1316184,
+    "archiveVerified": true,
+    "fixedPreviewPreserved": true,
+    "unknownLocalPreserved": true
+  },
+  "goal": "ACTIVE; continue U05 r2 then U06/U07; manual gates remain open",
+  "browserTaskSpace": 177,
+  "windowsCI": false,
+  "subagents": false,
+  "computerUse": false
+}
