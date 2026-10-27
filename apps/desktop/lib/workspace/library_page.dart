@@ -24,10 +24,16 @@ class LibraryPage extends StatefulWidget {
     required this.controller,
     required this.onNavigate,
     this.onModalChanged,
+    this.onWorkspaceBack,
+    this.workspaceBackLabel = '返回',
+    this.workspaceNavigationEnabled = true,
     this.onRetry,
     this.filePicker,
     this.credentialPicker,
   });
+  final VoidCallback? onWorkspaceBack;
+  final String workspaceBackLabel;
+  final bool workspaceNavigationEnabled;
   final LibraryController controller;
   final void Function(WorkspacePage, String) onNavigate;
   final ValueChanged<bool>? onModalChanged;
@@ -950,6 +956,15 @@ class _LibraryPageState extends State<LibraryPage> {
                       size: 16,
                     ),
                     child: const Text('退出展开'),
+                  ),
+                if (widget.onWorkspaceBack != null)
+                  DesktopButton(
+                    key: const ValueKey('workspace-back'),
+                    kind: DesktopButtonKind.quiet,
+                    onPressed: widget.workspaceNavigationEnabled
+                        ? widget.onWorkspaceBack
+                        : null,
+                    child: Text(widget.workspaceBackLabel),
                   ),
                 if (model.canGoBack)
                   DesktopButton(

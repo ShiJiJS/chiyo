@@ -100,6 +100,16 @@ class SampleWorkspaceCredentials implements WorkspaceCredentialSource {
   final _states = <WorkspaceRecordRef, _CredentialState>{},
       _initial = <WorkspaceRecordRef, _CredentialState>{};
   final _history = <WorkspaceRecordRef, List<WorkspaceCredentialUseHistory>>{};
+  final _initialHistory =
+      <WorkspaceRecordRef, List<WorkspaceCredentialUseHistory>>{};
+  Map<WorkspaceRecordRef, List<WorkspaceCredentialUseHistory>>
+  get retainedHistory =>
+      Map<WorkspaceRecordRef, List<WorkspaceCredentialUseHistory>>.unmodifiable(
+        {
+          for (final e in _history.entries)
+            e.key: List<WorkspaceCredentialUseHistory>.unmodifiable(e.value),
+        },
+      );
   final _requests = <String, WorkspaceCredentialUseRequest>{};
   final _operations =
       <String, ({String fingerprint, WorkspaceCredentialReceipt receipt})>{};
@@ -222,10 +232,12 @@ class SampleWorkspaceCredentials implements WorkspaceCredentialSource {
           ],
         ),
       ];
+      _initialHistory[ref] = List.unmodifiable(_history[ref]!);
     }
   }
 
   void clearCurrent() {
+    _history.clear();
     _states.clear();
     _materials.clear();
     _requests.clear();
@@ -235,6 +247,7 @@ class SampleWorkspaceCredentials implements WorkspaceCredentialSource {
   void clear() {
     clearCurrent();
     _initial.clear();
+    _initialHistory.clear();
     _history.clear();
     nextReadFailure = null;
   }
@@ -242,6 +255,7 @@ class SampleWorkspaceCredentials implements WorkspaceCredentialSource {
   void reset() {
     clearCurrent();
     _states.addAll(_initial);
+    _history.addAll(_initialHistory);
     for (final e in _states.entries) {
       _rememberMaterial(e.key, e.value);
     }

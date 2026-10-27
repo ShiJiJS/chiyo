@@ -258,6 +258,7 @@ class _SampleApprovals implements WorkspaceApprovalSource {
           record: ref,
           label: d.record.name,
           section: '目录与标签',
+          recordName: d.record.name,
           kind: WorkspaceApprovalScopeKind.organization,
           recordVersion: d.version,
           requested: true,
@@ -292,6 +293,7 @@ class _SampleApprovals implements WorkspaceApprovalSource {
                     'detail': '说明',
                   }[part]!,
                   section: '${d.record.name} · $label ${i + 1}',
+                  recordName: d.record.name,
                   kind: WorkspaceApprovalScopeKind.field,
                   recordVersion: d.version,
                   fieldKey: key,
@@ -311,6 +313,7 @@ class _SampleApprovals implements WorkspaceApprovalSource {
             record: ref,
             label: label,
             section: d.record.name,
+            recordName: d.record.name,
             kind: type == 'file'
                 ? WorkspaceApprovalScopeKind.file
                 : WorkspaceApprovalScopeKind.field,
@@ -347,6 +350,7 @@ class _SampleApprovals implements WorkspaceApprovalSource {
         record: r.ref,
         label: '${r.credentialName} · 材料v${r.materialVersion}',
         section: '凭据使用',
+        recordName: r.credentialName,
         kind: WorkspaceApprovalScopeKind.credential,
         recordVersion: s._records[r.ref]?.version ?? 0,
         requested: true,
