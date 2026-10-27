@@ -106,3 +106,26 @@ stateDiagram-v2
 旧版模板目录读取元数据，不预加载任何资料内容。用旧模板录入仍为通用资料，每份记录及字段实例独立；附件逐项由宿主选择。保存前核对旧模板版本、完整字段对应和选择，异步附件校验后再次核对版本/资料集及原operationId，失败无部分写入。成功从同一信息库读取，原模板保持。
 
 显式转换先生成候选，再走已有Validating→Review→Writing/Unknown→ReadBack流程，来源版本/字段定义映射一同展示；改动旧模板需要重预览。当前转换版本已安装时进入包详情，旧录入仍可用。附件或超过40字段不能转换，展示明确原因且保留旧表单；其余声明预算由同一解码器检查，不截断旧内容或改成不等价类型。Agent制作指引展示上次读取的目录版本、实际只读校验命令和虚构JSON，校验/安装/录入提案是不同步骤，不构成访问批准。
+
+## r5：共用表单冲突核对
+
+```mermaid
+stateDiagram-v2
+  Editing --> Saving: 明确保存
+  Saving --> Conflict: 所见资料或模板版本变化
+  Conflict --> Reading: 读取当前版本并核对
+  Reading --> ReadFailure: 读取失败，原草稿保持
+  ReadFailure --> Reading: 明确重读
+  Reading --> Compare: 当前内容与将保存的草稿
+  Compare --> Conflict: 返回原草稿，不解除冲突
+  Compare --> Editing: 身份/结构一致，明确保留草稿推进核对基线
+  Compare --> Editing: 明确清空草稿并载入当前表单
+  Saving --> Conflict: 核对之后又发生变化
+  Saving --> Unknown: 提交结果未知
+  Unknown --> Unknown: 回执读取失败或不符
+  Unknown --> Editing: 确认未提交，等待明确再保存
+  Unknown --> ReadBack: 原操作已提交
+  Saving --> ReadBack: 明确成功
+```
+
+读取、比较与推进表单基线均不保存资料。字段、经历叶身份、结构或草稿分类变化时不提供直接保留草稿继续；返回仍保存旧输入，只有明确清空载入才替换它。保留草稿前展示将覆盖的当前可编辑内容；附件/只读内容/未编辑关系使用当前事实，后续再次保存仍按核对版本检查。没有自动合并正文或自动重放未知提交。[完整合同](../../development/zhiyu-plugin-contracts.md)。
