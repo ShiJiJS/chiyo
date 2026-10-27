@@ -1,0 +1,19 @@
+00:00 +0: loading /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_classification_test.dart
+00:00 +0: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_classification_test.dart: tag rename keeps identity, current metadata search and both record kinds; names and duplicate operations are validated
+00:00 +1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_classification_test.dart: (setUpAll)
+00:00 +1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_classification_test.dart: tag removal commits reviewed members, revisions and catalog atomically without changing content, fields, credential relations or existing grants
+00:00 +2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_classification_test.dart: shared settings directory manager creates a hierarchy, preserves failed drafts, and uses the same library tree
+00:00 +3: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_classification_test.dart: shared settings directory manager creates a hierarchy, preserves failed drafts, and uses the same library tree
+00:00 +4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_classification_test.dart: shared settings directory manager creates a hierarchy, preserves failed drafts, and uses the same library tree
+00:00 +5: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_classification_test.dart: shared settings directory manager creates a hierarchy, preserves failed drafts, and uses the same library tree
+00:00 +6: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_classification_test.dart: shared settings directory manager creates a hierarchy, preserves failed drafts, and uses the same library tree
+00:00 +7: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_classification_test.dart: shared settings directory manager creates a hierarchy, preserves failed drafts, and uses the same library tree
+00:00 +8: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_classification_test.dart: shared settings directory manager creates a hierarchy, preserves failed drafts, and uses the same library tree
+00:00 +9: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_classification_test.dart: shared settings directory manager creates a hierarchy, preserves failed drafts, and uses the same library tree
+00:00 +10: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_classification_test.dart: shared settings directory manager creates a hierarchy, preserves failed drafts, and uses the same library tree
+00:00 +11: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_classification_test.dart: shared settings directory manager creates a hierarchy, preserves failed drafts, and uses the same library tree
+00:04 +12: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_classification_test.dart: tag rename updates current library metadata; deletion rechecks reviewed membership and preserves the actual content
+00:05 +13: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_classification_test.dart: dark200 tag edit failure keeps the draft; unknown commit blocks close and resolves only the original operation
+00:07 +14: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_classification_test.dart: classification read failure is distinct from empty and waiting; retry restores the same manager and empty tags can be created
+00:07 +15: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_classification_test.dart: (tearDownAll)
+00:07 +15: All tests passed!
