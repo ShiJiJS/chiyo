@@ -157,6 +157,12 @@ class WorkspaceCredentialUseDraft {
 
 enum WorkspaceCredentialRequestState {
   pending('待审批'),
+  approved('已批准'),
+  partiallyApproved('仅批准普通字段'),
+  denied('已拒绝'),
+  revoked('已撤销'),
+  expired('已到期'),
+  sessionEnded('会话已结束'),
   superseded('凭据已更换'),
   disabled('凭据已停用'),
   recycled('凭据已回收');
@@ -179,8 +185,11 @@ class WorkspaceCredentialUseRequest {
     required this.minutes,
     required this.submittedAt,
     this.state = WorkspaceCredentialRequestState.pending,
+    this.approvalReference,
   });
   final String id, credentialName, purpose;
+  final String? approvalReference;
+  String get approvalId => approvalReference ?? 'credential:$id';
   final WorkspaceRecordRef ref;
   final int materialVersion, useGeneration, minutes;
   final WorkspaceCredentialDelivery delivery;
@@ -203,6 +212,7 @@ class WorkspaceCredentialUseRequest {
     minutes: minutes,
     submittedAt: submittedAt,
     state: value,
+    approvalReference: approvalReference,
   );
 }
 

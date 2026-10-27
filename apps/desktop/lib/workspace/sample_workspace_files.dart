@@ -180,6 +180,16 @@ class SampleWorkspaceFiles {
     }
   }
 
+  bool retainsVersion(WorkspaceDetail detail, String key, int version) {
+    try {
+      final ref = WorkspaceFileRef.fromJson(detail.values[key]);
+      _entry(detail.record.ref, key, WorkspaceFileRef(ref.id, version));
+      return true;
+    } on Object {
+      return false;
+    }
+  }
+
   Future<void> verifyVersion(
     WorkspaceDetail detail,
     String key,

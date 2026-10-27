@@ -50,6 +50,7 @@ class ZhiyuApp extends StatelessWidget {
           key: const ValueKey('zhiyu-content'),
           child: ZhiyuShell(
             page: controller.location.page,
+            navigationEnabled: !controller.navigationLocked,
             summary: controller.summary,
             onNavigate: controller.navigate,
             trailing: trailingBuilder?.call(context),

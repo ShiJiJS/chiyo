@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:info_desktop/desktop_fonts.dart';
 import 'package:info_desktop/workspace/preview_workspace.dart';
 import 'package:info_desktop/workspace/library_page.dart';
+import 'package:info_desktop/workspace/approvals_page.dart';
 import 'package:info_desktop/workspace/mac_preview_desktop.dart';
 import 'package:info_desktop/workspace/workspace_source.dart';
 
@@ -298,12 +299,61 @@ void main() {
       await t.tap(find.byKey(const ValueKey('plugin-authoring-close')));
       await t.pumpAndSettle();
       expect((await source.loadSummary()).records, 33);
+      final historyBefore = await source.credentials.history(ssh);
+      await t.tap(find.byKey(const ValueKey('workspace-nav-approvals')));
+      await t.pumpAndSettle();
+      final approval = t
+          .widget<ApprovalsPage>(find.byType(ApprovalsPage))
+          .controller;
+      expect(approval.selection, 'server');
+      // Earlier owner edits changed the reviewed versions; acknowledge them
+      // through the same explicit control before narrowing this request.
+      expect(approval.needsReview, true);
+      final review = find.byKey(const ValueKey('approval-review-current'));
+      await t.ensureVisible(review);
+      await t.pumpAndSettle();
+      await t.tap(review);
+      await t.pumpAndSettle();
+      expect(approval.needsReview, false);
+      final host = approval.detail!.scopes.firstWhere(
+        (x) => x.fieldKey == 'host',
+      );
+      for (final scope in approval.detail!.scopes.where(
+        (x) => x.requested && x.id != host.id,
+      )) {
+        final choice = find.byKey(ValueKey('approval-scope-${scope.id}'));
+        await t.ensureVisible(choice);
+        await t.pumpAndSettle();
+        await t.tap(choice);
+        await t.pumpAndSettle();
+      }
+      final approve = find.byKey(const ValueKey('approval-approve'));
+      await t.ensureVisible(approve);
+      await t.pumpAndSettle();
+      await t.tap(approve);
+      await t.pumpAndSettle();
+      expect((await source.approvals.read('server')).approved, {host.id});
+      expect((await source.loadSummary()).pending, 4);
+      expect(
+        (await source.credentials.history(ssh)).length,
+        historyBefore.length,
+      );
+      expect((await source.credentials.read(ssh)).privateNote, '隔离检查的合成备注');
       await t.tap(find.byKey(const ValueKey('preview-guide')));
       await t.pumpAndSettle();
       await t.tap(find.text('重置预览资料'));
       await t.pumpAndSettle();
       expect((await source.credentials.read(ssh)).privateNote, isEmpty);
       expect((await source.loadSummary()).records, 31);
+      expect((await source.loadSummary()).pending, 5);
+      expect(
+        (await source.approvals.read('server')).request.state,
+        WorkspaceApprovalState.pending,
+      );
+      expect(
+        (await source.credentials.requests(ref: ssh)).single.state,
+        WorkspaceCredentialRequestState.pending,
+      );
       expect((await source.plugins.load()).packages, hasLength(3));
       expect((await source.legacyTemplates.read('legacy-resource')).version, 1);
       expect(

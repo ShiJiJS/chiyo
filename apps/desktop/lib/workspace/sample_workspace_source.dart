@@ -19,6 +19,7 @@ export 'sample_workspace_hosts.dart' show SampleHostScenario;
 
 part 'sample_workspace_history.dart';
 part 'sample_workspace_adoption.dart';
+part 'sample_workspace_approvals.dart';
 
 enum SampleWorkspaceScenario { ready, empty, waiting, failure }
 
@@ -44,6 +45,9 @@ class SampleWorkspaceSource
   late final _credentials = SampleWorkspaceCredentials(
     readable: _readable,
     records: this,
+    approvalState: (r) => _approvals.credentialState(r),
+    approvalHistory: (r) => _approvals.credentialHistory(r),
+    approvalRequests: (r) => _approvals.seedCredentialRequests(r),
     beforeWrite: () {
       if (nextSaveFailure case final failure?) {
         nextSaveFailure = null;
@@ -55,6 +59,20 @@ class SampleWorkspaceSource
   );
   @override
   WorkspaceCredentialSource get credentials => _credentials;
+  late final _approvals = _SampleApprovals(this);
+  @override
+  WorkspaceApprovalSource get approvals => _approvals;
+  bool get loseNextApprovalReply => _approvals.loseNextReply;
+  set loseNextApprovalReply(bool value) => _approvals.loseNextReply = value;
+  void advanceApprovalClock(Duration value) => _approvals.advance(value);
+  void endApprovalSession(String id) => _approvals.endSession(id);
+  void _beforeApprovalWrite() {
+    if (nextSaveFailure case final failure?) {
+      nextSaveFailure = null;
+      throw failure;
+    }
+  }
+
   late final _plugins = SampleWorkspacePlugins(
     readable: _readable,
     beforeWrite: () {
@@ -793,6 +811,7 @@ class SampleWorkspaceSource
       _versions[detail.record.ref] = detail.version + 1;
     }
     _recycled.addAll(_initialRecycled);
+    _approvals._seed();
   }();
 
   Future<void> _readable() async {
@@ -820,7 +839,7 @@ class SampleWorkspaceSource
         ? const WorkspaceSummary.empty()
         : WorkspaceSummary(
             records: _records.length,
-            pending: _basePending + _credentials.pendingCount,
+            pending: _approvals.pendingCount,
             proposals: _baseProposals,
           );
   }
@@ -1980,6 +1999,7 @@ class SampleWorkspaceSource
     _basePending = _baseProposals = 0;
     _credentialLinks.clearCurrent();
     _credentials.clearCurrent();
+    _approvals.reset();
     _hosts.clearCurrent();
     _records.clear();
     _revisions.clear();
@@ -2015,6 +2035,7 @@ class SampleWorkspaceSource
     _files.clear();
     _credentialLinks.clear();
     _credentials.clear();
+    _approvals.reset();
     _plugins.clear();
     _legacy.reset();
     _hosts.clear();
@@ -2031,6 +2052,7 @@ class SampleWorkspaceSource
     _files.reset();
     _credentialLinks.reset();
     _credentials.reset();
+    _approvals.reset();
     _plugins.reset();
     _legacy.reset();
     _hosts.reset();
@@ -2077,6 +2099,7 @@ class SampleWorkspaceSource
     nextSaveFailure = null;
     _clock = 0;
     _nextRecord = 0;
+    if (_loading != null) _approvals._seed();
     if (!_disposed) _changes.add(null);
   }
 
