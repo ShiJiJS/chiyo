@@ -11,6 +11,8 @@ import 'workspace_grant_history.dart';
 import 'workspace_proposals.dart';
 import 'workspace_settings.dart';
 import 'workspace_backups.dart';
+import 'workspace_runtime.dart';
+export 'workspace_runtime.dart';
 export 'workspace_backups.dart';
 export 'workspace_settings.dart';
 export 'workspace_history.dart';
@@ -42,6 +44,7 @@ class WorkspaceSummary {
 abstract interface class WorkspaceSource implements WorkspaceRelationSource {
   WorkspaceSettingsSource get settings;
   WorkspaceBackupSource get backups;
+  WorkspaceRuntimeSource get runtime;
   WorkspaceCredentialSource get credentials;
   WorkspaceApprovalSource get approvals;
   WorkspaceGrantHistorySource get grantHistory;

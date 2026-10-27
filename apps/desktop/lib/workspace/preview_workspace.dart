@@ -16,6 +16,7 @@ import 'mac_preview_desktop.dart';
 import 'workspace_records_controller.dart';
 import 'library_controller.dart';
 import 'library_page.dart';
+import 'library_widgets.dart';
 import 'library_file_dialogs.dart';
 import 'library_credential_choices.dart';
 import 'plugins_controller.dart';
@@ -32,6 +33,7 @@ import 'settings_page.dart';
 import 'classification_controller.dart';
 import 'backup_controller.dart';
 import 'backup_page.dart';
+import 'runtime_controller.dart';
 import 'proposals_controller.dart';
 import 'proposals_page.dart';
 
@@ -61,6 +63,9 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
   bool _settingsFrozen = false;
   late final BackupController _backups;
   bool _backupFrozen = false;
+  late final WorkspaceRuntimeController _runtime;
+  bool _runtimeFrozen = false, _runtimeGate = false;
+  WorkspaceRuntimePhase? _runtimePhase;
   StreamSubscription<WorkspaceRecordRef?>? _summaryChanges;
   final _guideFocus = FocusNode();
   bool _stress = false;
@@ -94,6 +99,9 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
     _backups = BackupController(_source.backups, _source.changes)
       ..addListener(_backupChanged);
     unawaited(_backups.load());
+    _runtime = WorkspaceRuntimeController(_source.runtime, _source.changes)
+      ..addListener(_runtimeChanged);
+    unawaited(_runtime.load());
     _plugins = PluginsController(_source.plugins, _source.changes);
     _legacy = LegacyTemplatesController(
       _source.legacyTemplates,
@@ -158,13 +166,25 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
     _syncNavigation();
   }
 
+  void _runtimeChanged() {
+    _runtimeFrozen = _runtime.frozen;
+    _runtimeGate = _runtime.shutdownGate;
+    if (_runtimeFrozen || _runtimeGate) _pendingUiNavigation = null;
+    if (_runtimePhase != _runtime.value?.phase && mounted) {
+      setState(() => _runtimePhase = _runtime.value?.phase);
+    }
+    _syncNavigation();
+  }
+
   bool _deferNavigation(VoidCallback action) {
     if (!mounted ||
         _approvals.frozen ||
         _historyFrozen ||
         _proposalFrozen ||
         _settingsFrozen ||
-        _backupFrozen) {
+        _backupFrozen ||
+        _runtimeFrozen ||
+        _runtimeGate) {
       return true;
     }
     if (_modalDepth > 0) {
@@ -194,7 +214,9 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
         !_historyFrozen &&
         !_proposalFrozen &&
         !_settingsFrozen &&
-        !_backupFrozen;
+        !_backupFrozen &&
+        !_runtimeFrozen &&
+        !_runtimeGate;
     _controller.setNavigationLocked(!enabled);
     if (_nativeNavigationEnabled != enabled) {
       _nativeNavigationEnabled = enabled;
@@ -217,6 +239,7 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
     _proposals.dispose();
     _settings.dispose();
     _backups.dispose();
+    _runtime.dispose();
     _classifications.dispose();
     _controller.dispose();
     _library.dispose();
@@ -240,6 +263,7 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
     unawaited(_settings.load());
     unawaited(_classifications.load());
     unawaited(_backups.load());
+    unawaited(_runtime.load());
   }
 
   Future<void> _createWithTemplate(
@@ -298,7 +322,9 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
     if (page == WorkspacePage.proposals) unawaited(_proposals.open(id));
     if (page == WorkspacePage.settings) {
       _settings.select(
-        id == 'backups'
+        id == 'runtime'
+            ? WorkspaceSettingsSection.runtime
+            : id == 'backups'
             ? WorkspaceSettingsSection.backups
             : WorkspaceSettingsSection.plugins,
       );
@@ -432,6 +458,74 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
                       _navigate(WorkspacePage.settings, 'backups');
                     },
                     child: const Text('独立空库恢复场景'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 22),
+              const Text(
+                '运行维护合成状态',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 10),
+              Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: [
+                  DesktopButton(
+                    key: const ValueKey('preview-runtime-maintenance'),
+                    onPressed: () async {
+                      Navigator.pop(dialogContext);
+                      await _source.prepareRuntimeMaintenance();
+                      if (mounted) _navigate(WorkspacePage.settings, 'runtime');
+                    },
+                    child: const Text('材料与附件维护'),
+                  ),
+                  DesktopButton(
+                    key: const ValueKey('preview-runtime-cleanup-ready'),
+                    onPressed: () {
+                      _source.runtime.allowCleanup();
+                      Navigator.pop(dialogContext);
+                    },
+                    child: const Text('登记身份核查已恢复'),
+                  ),
+                  DesktopButton(
+                    key: const ValueKey('preview-runtime-menu-unavailable'),
+                    onPressed: () {
+                      _source.runtime.setAvailability(menuBar: false);
+                      Navigator.pop(dialogContext);
+                      _navigate(WorkspacePage.settings, 'runtime');
+                    },
+                    child: const Text('菜单栏入口不可用'),
+                  ),
+                  DesktopButton(
+                    key: const ValueKey('preview-runtime-service-unavailable'),
+                    onPressed: () {
+                      _source.runtime.setAvailability(service: false);
+                      Navigator.pop(dialogContext);
+                      _navigate(WorkspacePage.settings, 'runtime');
+                    },
+                    child: const Text('本机服务不可用'),
+                  ),
+                  for (final phase in [
+                    WorkspaceRuntimePhase.saveFailed,
+                    WorkspaceRuntimePhase.terminationFailed,
+                  ])
+                    DesktopButton(
+                      key: ValueKey('preview-runtime-${phase.name}'),
+                      onPressed: () {
+                        _source.runtime.nextQuitPhase = phase;
+                        Navigator.pop(dialogContext);
+                        _navigate(WorkspacePage.settings, 'runtime');
+                      },
+                      child: Text('下一次${phase.label}'),
+                    ),
+                  DesktopButton(
+                    key: const ValueKey('preview-runtime-unknown'),
+                    onPressed: () {
+                      _source.runtime.loseNextReply = true;
+                      Navigator.pop(dialogContext);
+                    },
+                    child: const Text('下一次运行操作结果未知'),
                   ),
                 ],
               ),
@@ -762,7 +856,15 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
     ),
     pageBuilder:
         widget.pageBuilder ??
-        (context, location) => location.page == WorkspacePage.library
+        (context, location) => _runtime.value?.closed == true
+            ? _PreviewRuntimeStopped(
+                controller: _runtime,
+                onResume: () {
+                  _source.runtime.resumePreview();
+                  unawaited(_runtime.load());
+                },
+              )
+            : location.page == WorkspacePage.library
             ? LibraryPage(
                 controller: _library,
                 onWorkspaceBack: _controller.canGoBack
@@ -832,6 +934,7 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
                 plugins: _plugins,
                 classifications: _classifications,
                 backups: _backups,
+                runtime: _runtime,
                 backupPicker: (kind) => showWorkspaceBackupChoices(
                   context,
                   () => _source.backups.choices(kind),
@@ -1075,4 +1178,68 @@ class _FoundationPage extends StatelessWidget {
       ),
     );
   }
+}
+
+class _PreviewRuntimeStopped extends StatelessWidget {
+  const _PreviewRuntimeStopped({
+    required this.controller,
+    required this.onResume,
+  });
+  final WorkspaceRuntimeController controller;
+  final VoidCallback onResume;
+  @override
+  Widget build(BuildContext context) => ListenableBuilder(
+    listenable: controller,
+    builder: (context, _) {
+      final m = controller,
+          failed = m.value?.phase == WorkspaceRuntimePhase.terminationFailed;
+      return Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(36),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 860),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  failed ? '服务已停止，应用退出未完成' : '预览运行已停止',
+                  key: const ValueKey('runtime-stopped'),
+                  style: libraryText(context, 26, weight: FontWeight.w600),
+                ),
+                const SizedBox(height: 20),
+                const Text(
+                  '退出事实已保存，旧会话授权已结束。已启动的外部程序和未完成的材料回收分别保留状态，不因退出而假定结束。',
+                ),
+                const SizedBox(height: 16),
+                const Text('当前是合成运行的退出结果，预览窗口保持打开；仍可正常关闭窗口或使用 ⌘Q。恢复预览不会恢复旧授权。'),
+                const SizedBox(height: 24),
+                if (m.busy) const LinearProgressIndicator(),
+                if (m.failure != null) Text(m.failure!.message),
+                if (m.uncertain)
+                  DesktopButton(
+                    key: const ValueKey('runtime-stopped-reconcile'),
+                    onPressed: m.busy ? null : m.reconcile,
+                    child: const Text('核对原退出操作'),
+                  )
+                else if (failed)
+                  DesktopButton(
+                    key: const ValueKey('runtime-finish-exit'),
+                    onPressed: m.available
+                        ? () => m.write(WorkspaceRuntimeAction.finishExit)
+                        : null,
+                    child: const Text('重试退出应用'),
+                  ),
+                const SizedBox(height: 14),
+                DesktopButton(
+                  key: const ValueKey('preview-runtime-resume'),
+                  onPressed: m.frozen ? null : onResume,
+                  child: const Text('恢复预览运行'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    },
+  );
 }

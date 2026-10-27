@@ -583,6 +583,7 @@ class SampleWorkspaceBackups implements WorkspaceBackupSource {
 extension _SampleBackupInstall on SampleWorkspaceSource {
   void _installBackup(_PortableSample value) {
     _epoch++;
+    runtime.resetCurrent();
     _basePending = _baseProposals = 0;
     _approvals.reset();
     _proposals.reset();

@@ -36,6 +36,13 @@ extension _SampleRetention on SampleWorkspaceSource {
             WorkspaceApprovalState.sessionEnded,
             WorkspaceApprovalState.completed,
           }.contains(state) ||
+          runtime._copies.values
+              .map(runtime._project)
+              .any(
+                (e) =>
+                    e.requestId == r.id &&
+                    e.state != WorkspaceCopyState.released,
+              ) ||
           executions.any(
             (e) =>
                 !e.valid ||
