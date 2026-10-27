@@ -1,0 +1,16 @@
+{
+  "apps/desktop/lib/workspace/classification_controller.dart": "b76ce53b9c50ff85b8e9c9fabae597934fbd784a300b2df052664d4be804c626",
+  "apps/desktop/lib/workspace/classification_page.dart": "b10bcd379522311931373b389839f768d5835214cf514a37cce33cd2d5d8e68b",
+  "apps/desktop/lib/workspace/library_directory_dialog.dart": "45a4dc4d2b65c5f3a3e61319d35f6e1337a2a66b596292334793a8369dedfd32",
+  "apps/desktop/lib/workspace/library_widgets.dart": "0af5df0c286e53170d5d84bb0cad731b8dd9f6e8f25af4848f8904495c2257d3",
+  "apps/desktop/lib/workspace/preview_workspace.dart": "f74aa7e58e19620db703c200785cd6db08b9c0507cfc9f1cf200df0ea02e50cb",
+  "apps/desktop/lib/workspace/sample_workspace_classification.dart": "f2da929aacd6ee3eb2dd69577274e90b0980b824fd8e2f77e2b5c5bb2fd92e5c",
+  "apps/desktop/lib/workspace/sample_workspace_source.dart": "f9c4bb6d141a7cfe5fa0a34232da450cbf0b094346d39cde57a5c9e01ee2b579",
+  "apps/desktop/lib/workspace/settings_controller.dart": "d980ff66e3c56a4df975151cafd8557391f5a4325737c20d608c0d70a686482b",
+  "apps/desktop/lib/workspace/settings_page.dart": "64ef31b04ec9b9f4fd9698b3e1b4c4cbb8f9f4b87b83f421db22dc847e19797f",
+  "apps/desktop/lib/workspace/workspace_records.dart": "b6b90d2d3546a470e05b1447798c158e1b786a8698c7c25f5856186d52349c94",
+  "apps/desktop/lib/workspace/workspace_source.dart": "d07070a0dddc8dd9471bc2d08971f5f789373dfcb16298f033d6ee9516646db4",
+  "apps/desktop/test/workspace_classification_test.dart": "d884b1bc2e003c35dfb1b05380782b9f68cb254858ee33de883c60a282850684",
+  "apps/desktop/test/zhiyu_classification_test.dart": "a10e8a3b0d232a681cfbbcb435258ad8522a2792b0c2fd8b13d9e36966592ee3",
+  "apps/desktop/test/zhiyu_settings_test.dart": "b8fe3c1f28f85991dbd2993013f044f5ec3485e8b609e8eda6c2e6da7fbb73e5"
+}
