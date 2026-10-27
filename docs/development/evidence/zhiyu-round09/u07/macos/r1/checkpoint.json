@@ -1,0 +1,81 @@
+{
+  "createdAt": "2026-10-27T08:30:05.116509+00:00",
+  "sourceCommit": "1a0f992de46ae09a934b4b1ddaadded68010be3e",
+  "branch": "codex/zhiyu-macos",
+  "issue": 68,
+  "state": "OPEN",
+  "checkedTotal": 0,
+  "criteriaTotal": 8,
+  "scope": "shared settings shell, session theme/notifications, metadata notification route, plugin/legacy integration; other settings pending",
+  "checks": {
+    "analysis": "No issues found",
+    "relatedTests": 361,
+    "newTests": 14,
+    "newModelControllerTests": 9,
+    "newWidgetPaths": 5,
+    "earlierFocusedRange": 35,
+    "focusedScope": "before final cold-state and shell assertions; final 361 includes all",
+    "build": "fixed path isolated Mac arm64 preview passed",
+    "screenshots": [
+      "screenshots/settings-1440-light-appearance.png",
+      "screenshots/settings-1440-light-save-failure.png",
+      "screenshots/settings-1440-light-notification-preview.png",
+      "screenshots/settings-1280-dark200-appearance.png",
+      "screenshots/settings-1280-dark200-notifications.png"
+    ],
+    "reproduction": "regression-first.log: previous shell test assumed settings is directly PluginsPage; updated to assert shared settings and navigate to plugin while retaining original catalog checks"
+  },
+  "native": {
+    "bundleIdentifier": "com.example.infoDesktop.zhiyuPreview",
+    "AgentInfoInterfacePreview": "YES",
+    "architecture": "arm64",
+    "fixedApp": "apps/desktop/build/macos/Build/Products/Debug/info_desktop.app",
+    "newCocoaRuntime": false,
+    "sourceHashes": "native-source-hashes.json"
+  },
+  "environment": {
+    "macOS": "27.0.1 26A434",
+    "Xcode": "27.1 27A9275",
+    "Flutter": "3.47.7",
+    "Dart": "3.13.5",
+    "fonts": [
+      "SFNS",
+      "PingFang SC",
+      "Menlo"
+    ],
+    "DPR": 1,
+    "viewports": [
+      [
+        1440,
+        900
+      ],
+      [
+        1280,
+        800
+      ]
+    ],
+    "textScales": [
+      1,
+      2
+    ],
+    "reference": "frozen R13"
+  },
+  "isolation": {
+    "productionChannels": 0,
+    "httpRequests": 0,
+    "rejectedFilePaths": 0,
+    "method": "same composition guard adds original settings receipt and native-format navigation lock, in-app notification preview to pending request; no OS notification or approval",
+    "computerUse": false,
+    "subagents": false,
+    "windowsCI": false,
+    "systemPermissions": false,
+    "personalData": false
+  },
+  "pending": [
+    "request wait/audit retention preview, directory/tag management",
+    "backup/recovery key/conflicts, runtime maintenance/exit, agent connection UI",
+    "complete S5/real OS input/normal-speed video and existing dark200 topbar badge clipping",
+    "production integration after seven UI modules via F01"
+  ],
+  "next": "Continue U07 remaining settings. Active goal."
+}
