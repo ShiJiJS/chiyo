@@ -1,0 +1,63 @@
+{
+  "createdAt": "2026-10-27T05:00:47.366390+00:00",
+  "sourceCommit": "c4b6fff4b3e8739c7d469a476fc820b07515df82",
+  "documentationCommit": "72935699609bab94bab856253f1fbd9e3d6d4e44",
+  "branch": "codex/zhiyu-macos",
+  "tracker": [
+    {
+      "number": 67,
+      "url": "https://github.com/ShiJiJS/agent-info-manage/issues/67",
+      "title": "知予前端 U06：录入提案与授权历史界面",
+      "state": "OPEN",
+      "checked": 0,
+      "total": 7,
+      "comments": 0,
+      "labels": [
+        "enhancement",
+        "ready-for-agent"
+      ],
+      "nativeDependencies": [
+        62
+      ],
+      "bodyBeforeSha256": "802c932da4b64f97570ade82a6391e5a5d98a45a35f801b4aa7e422b4b99e62d",
+      "bodyAfterSha256": "b08c0804d63d0f74ba244fde2ebc1c22b35746e2675585ca5cc7a477f5dab224",
+      "exactBodyReadback": true
+    },
+    {
+      "number": 69,
+      "url": "https://github.com/ShiJiJS/agent-info-manage/issues/69",
+      "title": "知予后续规划 F01：界面完成后拆分真实功能、测试与 Mac 交付",
+      "state": "OPEN",
+      "checked": 0,
+      "total": 6,
+      "comments": 0,
+      "labels": [
+        "documentation"
+      ],
+      "nativeDependencies": [
+        64,
+        65,
+        66,
+        67,
+        68
+      ],
+      "bodyBeforeSha256": "cbe5ecfe8f8b61ef7d039bb8478b4679524a2db3f96a6fdf0bcb0d44a414fa16",
+      "bodyAfterSha256": "7d6eaafcbd954b878171b8544b489128ee41b304c83b97c7ac9c09e83702e260",
+      "exactBodyReadback": true
+    }
+  ],
+  "archive": {
+    "path": "docs/development/evidence/zhiyu-round09/u06/macos/r2",
+    "files": 18,
+    "bytes": 910982,
+    "verifiedAgainstExactGitBlobs": true
+  },
+  "cleanup": {
+    "removedPath": "build/zhiyu-ui/u06/macos/r2",
+    "removedFiles": 33,
+    "removedBytes": 1350172,
+    "fixedPreviewRetained": true,
+    "localUntouched": true
+  },
+  "next": "Continue U06 deletion, field mutations, mixed batch and organization result UI; U07 afterwards; goal remains active."
+}
