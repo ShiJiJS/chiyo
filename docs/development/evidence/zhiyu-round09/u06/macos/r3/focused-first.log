@@ -1,0 +1,99 @@
+00:00 +0: loading /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_deletion_proposals_test.dart
+00:00 +0: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_deletion_proposals_test.dart: whole deletion keeps one fixed scope, rejects edits, commits through the same recycle history and retains only exact metadata
+00:00 +0 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/proposals_controller_test.dart: each proposal retains its own edits, selection and reading position across pages and query changes
+00:00 +1 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/proposals_controller_test.dart: each proposal retains its own edits, selection and reading position across pages and query changes
+00:00 +1 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_deletion_proposals_test.dart: whole deletion keeps one fixed scope, rejects edits, commits through the same recycle history and retains only exact metadata [E]
+  Expected: <3>
+    Actual: <0>
+  
+  package:matcher                                     expect
+  package:flutter_test/src/widget_tester.dart 473:18  expect
+  test/workspace_deletion_proposals_test.dart 16:7    main.<fn>
+  
+00:00 +2 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_proposals_test.dart: one import commits all reviewed items atomically; invalid later item and write failure commit none
+00:00 +2 -2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_proposals_test.dart: one import commits all reviewed items atomically; invalid later item and write failure commit none
+00:00 +2 -2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_deletion_proposals_test.dart: changed target cannot be deleted or silently rebased and rejection preserves the concurrent content [E]
+  Instance of 'WorkspaceFailure'
+  package:info_desktop/workspace/sample_workspace_proposals.dart 187:7   _SampleProposals._row
+  package:info_desktop/workspace/sample_workspace_proposals.dart 341:15  _SampleProposals.read
+  
+00:00 +3 -2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_proposals_test.dart: one import commits all reviewed items atomically; invalid later item and write failure commit none
+00:00 +3 -3: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_proposals_test.dart: one import commits all reviewed items atomically; invalid later item and write failure commit none
+00:00 +4 -3: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/proposals_controller_test.dart: lost reply freezes the exact review until original receipt resolves without a second write
+00:00 +4 -3: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_deletion_proposals_test.dart: lost deletion reply is reconciled without a second recycle; purging removes the exact old snapshot and cannot erase another object [E]
+  Instance of 'WorkspaceFailure'
+  package:info_desktop/workspace/sample_workspace_proposals.dart 187:7   _SampleProposals._row
+  package:info_desktop/workspace/sample_workspace_proposals.dart 341:15  _SampleProposals.read
+  
+00:00 +5 -3: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/proposals_controller_test.dart: lost reply freezes the exact review until original receipt resolves without a second write
+00:00 +6 -3: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_proposals_test.dart: correction keeps exact field identities and unrelated relations, and concurrent duplicates share one commit
+00:00 +7 -3: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_proposals_test.dart: correction keeps exact field identities and unrelated relations, and concurrent duplicates share one commit
+00:00 +8 -3: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/proposals_controller_test.dart: mismatched command digest remains unknown until matching original receipt, never replays
+00:00 +9 -3: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/proposals_controller_test.dart: mismatched command digest remains unknown until matching original receipt, never replays
+00:00 +10 -3: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_proposals_test.dart: disabled template preserves the submitted definition; Owner confirms its frozen snapshot without reinterpretation
+00:00 +11 -3: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/proposals_controller_test.dart: successful commit clears reviewed bodies even when terminal detail read fails; retry only reads
+00:00 +12 -3: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_proposals_test.dart: unknown reply retains a content-free receipt; exact saved snapshot survives edits and becomes unavailable after purge
+00:00 +13 -3: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_proposals_test.dart: unknown reply retains a content-free receipt; exact saved snapshot survives edits and becomes unavailable after purge
+00:00 +14 -3: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/proposals_controller_test.dart: changed pending content with the same IDs cannot reinterpret or rebind the old Owner draft
+00:00 +15 -3: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_proposals_test.dart: empty materialization does not revive proposals while reset restores the shared baseline
+00:00 +16 -3: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/proposals_controller_test.dart: Owner before-value observations invalidate even while the exact write intent remains unknown
+00:00 +17 -3: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_proposals_test.dart: proposal relation candidates use the submitted snapshot even after disabling its plugin, then expire with the pending review
+00:00 +18 -3: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/proposals_controller_test.dart: deletion review has no editor or cached old body; unknown clearing does not change the fixed proposal meaning
+00:00 +19 -3: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/proposals_controller_test.dart: deletion review has no editor or cached old body; unknown clearing does not change the fixed proposal meaning
+00:00 +19 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/proposals_controller_test.dart: deletion review has no editor or cached old body; unknown clearing does not change the fixed proposal meaning [E]
+  Expected: <true>
+    Actual: <false>
+  
+  package:matcher                                     expect
+  package:flutter_test/src/widget_tester.dart 473:18  expect
+  test/proposals_controller_test.dart 354:7           main.<fn>
+  
+00:01 +19 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: (setUpAll)
+00:02 +19 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_preview_isolation_test.dart: Mac preview composition, plugins, adoption and legacy conversion avoid production channels, network and personal paths
+00:07 +20 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_preview_isolation_test.dart: Mac preview composition, plugins, adoption and legacy conversion avoid production channels, network and personal paths
+00:08 +21 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_preview_isolation_test.dart: Mac preview composition, plugins, adoption and legacy conversion avoid production channels, network and personal paths
+00:10 +22 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_preview_isolation_test.dart: Mac preview composition, plugins, adoption and legacy conversion avoid production channels, network and personal paths
+00:12 +23 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_preview_isolation_test.dart: Mac preview composition, plugins, adoption and legacy conversion avoid production channels, network and personal paths
+00:13 +24 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_preview_isolation_test.dart: Mac preview composition, plugins, adoption and legacy conversion avoid production channels, network and personal paths
+00:15 +25 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_preview_isolation_test.dart: Mac preview composition, plugins, adoption and legacy conversion avoid production channels, network and personal paths
+00:16 +26 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_preview_isolation_test.dart: Mac preview composition, plugins, adoption and legacy conversion avoid production channels, network and personal paths
+00:18 +27 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_preview_isolation_test.dart: Mac preview composition, plugins, adoption and legacy conversion avoid production channels, network and personal paths
+00:19 +28 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: relation picker edits a disabled-template proposal using its submitted rules and confirms after explicit reread
+00:21 +29 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: purging a pending target clears both the visible old diff and an already open current comparison
+00:22 +30 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: actual deletion guide reviews the full retained scope, moves the same object to recycle and opens only its exact pre-delete snapshot
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: at least one matching candidate
+  Actual: _TextWidgetFinder:<Found 0 widgets with text "Blinko": []>
+   Which: means none were found but some were expected
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart:564:7)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart line 564
+The test description was:
+  actual deletion guide reviews the full retained scope, moves the same object to recycle and opens
+  only its exact pre-delete snapshot
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:23 +30 -5: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: actual deletion guide reviews the full retained scope, moves the same object to recycle and opens only its exact pre-delete snapshot [E]
+  Test failed. See exception logs above.
+  The test description was: actual deletion guide reviews the full retained scope, moves the same object to recycle and opens only its exact pre-delete snapshot
+  
+00:23 +30 -5: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: whole deletion conflict compares the new version without changing the requested target or deleting it
+00:25 +31 -5: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: (tearDownAll)
+00:25 +31 -5: Some tests failed.
+
+Failing tests:
+  /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/proposals_controller_test.dart: deletion review has no editor or cached old body; unknown clearing does not change the fixed proposal meaning
+  /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_deletion_proposals_test.dart: changed target cannot be deleted or silently rebased and rejection preserves the concurrent content
+  /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_deletion_proposals_test.dart: lost deletion reply is reconciled without a second recycle; purging removes the exact old snapshot and cannot erase another object
+  /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_deletion_proposals_test.dart: whole deletion keeps one fixed scope, rejects edits, commits through the same recycle history and retains only exact metadata
+  /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: actual deletion guide reviews the full retained scope, moves the same object to recycle and opens only its exact pre-delete snapshot
