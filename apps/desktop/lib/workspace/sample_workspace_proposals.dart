@@ -45,6 +45,7 @@ class _SampleProposals implements WorkspaceProposalSource {
   final _inFlight =
       <String, ({String digest, Future<WorkspaceProposalReceipt> future})>{};
   bool _seeded = false, loseNextReply = false;
+  String? loseReplyFor;
   int _generation = 0;
   void reset() {
     _generation++;
@@ -53,6 +54,7 @@ class _SampleProposals implements WorkspaceProposalSource {
     _receipts.clear();
     _inFlight.clear();
     loseNextReply = false;
+    loseReplyFor = null;
   }
 
   WorkspaceRecordRef info(String id) =>
@@ -741,8 +743,9 @@ class _SampleProposals implements WorkspaceProposalSource {
     );
     _receipts[c.operationId] = receipt;
     s._changes.add(null);
-    if (loseNextReply) {
+    if (loseNextReply || loseReplyFor == c.proposalId) {
       loseNextReply = false;
+      loseReplyFor = null;
       throw const WorkspaceFailure('unknown_outcome', '提案处理结果暂时未知，请先核对本次操作。');
     }
     return receipt;

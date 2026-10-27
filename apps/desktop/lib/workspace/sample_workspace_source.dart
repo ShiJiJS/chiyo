@@ -73,6 +73,7 @@ class SampleWorkspaceSource
   @override
   WorkspaceProposalSource get proposals => _proposals;
   set loseNextProposalReply(bool value) => _proposals.loseNextReply = value;
+  void loseReplyForProposal(String id) => _proposals.loseReplyFor = id;
   Future<void> demonstrateDeletionProposal() async {
     await _readable();
     _proposals.demonstrateDeletion();

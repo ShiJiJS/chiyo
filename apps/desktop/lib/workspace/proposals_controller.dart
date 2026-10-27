@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'workspace_source.dart';
+import 'proposal_batch.dart';
 
 class ProposalDraft {
   ProposalDraft(WorkspaceProposalDetail d)
@@ -27,14 +28,138 @@ class ProposalDraft {
 /// Navigation keeps the controller alive; terminal source rows clear bodies.
 class ProposalsController extends ChangeNotifier {
   ProposalsController(this.source, this.changes) {
+    batch = ProposalBatch(source, onHandled: _batchHandled)
+      ..addListener(_batchChanged);
     _subscription = changes.listen((ref) {
       if (_closed) return;
       _invalidateOwnerBefore(ref);
       if (frozen) return;
+      unawaited(batch.refreshMetadata());
       unawaited(load());
     });
   }
   final WorkspaceProposalSource source;
+  late final ProposalBatch batch;
+  bool _batchWasFrozen = false;
+  ({
+    String keyword,
+    WorkspaceProposalFilter filter,
+    WorkspaceProposalKind? kind,
+    int offset,
+    String? selection,
+    double scroll,
+  })?
+  _batchLocation;
+  bool get hasBatchLocation => _batchLocation != null;
+  void rememberBatchLocation() {
+    _batchLocation ??= (
+      keyword: keyword,
+      filter: filter,
+      kind: kind,
+      offset: offset,
+      selection: selection,
+      scroll: listScroll,
+    );
+  }
+
+  void forgetBatchLocation() {
+    _batchLocation = null;
+    _notify();
+  }
+
+  Future<void> openBatchResult(String id) async {
+    if (frozen || _closed) return;
+    rememberBatchLocation();
+    await open(id);
+    final queued = batch.entry(id), c = batch.entry(id)?.command;
+    if (c != null &&
+        draft != null &&
+        detail != null &&
+        readFailure == null &&
+        _reviewedCommand(c.action, operationId: c.operationId).digest ==
+            c.digest) {
+      writeFailure = queued!.failure;
+      _notify();
+    }
+  }
+
+  Future<void> returnBatchLocation() async {
+    if (frozen || _closed || _batchLocation == null) return;
+    final b = _batchLocation!;
+    _batchLocation = null;
+    keyword = b.keyword;
+    filter = b.filter;
+    kind = b.kind;
+    offset = b.offset;
+    selection = b.selection;
+    listScroll = b.scroll;
+    detail = null;
+    viewRevision++;
+    notice = null;
+    writeFailure = null;
+    await load();
+  }
+
+  void _batchHandled(String id) {
+    _drafts.remove(id);
+    _positions[id] = 0;
+    if (selection == id) {
+      detail = null;
+      if (filter == WorkspaceProposalFilter.pending) {
+        filter = WorkspaceProposalFilter.all;
+      }
+    }
+  }
+
+  void _batchChanged() {
+    if (_closed) return;
+    final now = batch.frozen, was = _batchWasFrozen;
+    _batchWasFrozen = now;
+    if (now && !was) {
+      _generation++;
+      loading = reading = false;
+    }
+    _notify();
+    if (was && !now) {
+      unawaited(batch.refreshMetadata());
+      unawaited(load());
+    }
+  }
+
+  WorkspaceProposalChange _reviewedCommand(
+    WorkspaceProposalAction action, {
+    String? operationId,
+  }) {
+    final d = detail!;
+    return WorkspaceProposalChange(
+      operationId: operationId ?? workspaceOperationId(),
+      proposalId: d.summary.id,
+      version: d.summary.version,
+      reviewToken: action == WorkspaceProposalAction.confirm
+          ? draft!.reviewToken
+          : d.reviewToken,
+      action: action,
+      reviewed: action == WorkspaceProposalAction.reject
+          ? []
+          : [
+              for (final i in d.items)
+                if (draft!.selected.contains(i.id)) draft!.items[i.id]!,
+            ],
+    );
+  }
+
+  bool queueForBatch(WorkspaceProposalAction action) {
+    if (action == WorkspaceProposalAction.confirm ? !canConfirm : !canReject) {
+      return false;
+    }
+    final added = batch.stage(detail!, _reviewedCommand(action));
+    notice = added
+        ? '已保存本次审阅到批量清单；单独编辑不会自动改写清单，需明确更新。'
+        : '本次未加入；请核对提案状态和每批最多100份的范围。';
+    _notify();
+    return added;
+  }
+
   final Stream<WorkspaceRecordRef?> changes;
   late final StreamSubscription<WorkspaceRecordRef?> _subscription;
   WorkspaceProposalResults? results;
@@ -58,7 +183,8 @@ class ProposalsController extends ChangeNotifier {
   }
 
   bool get uncertain => writeFailure?.code == 'unknown_outcome';
-  bool get frozen => busy || uncertain;
+  bool get soloFrozen => busy || uncertain;
+  bool get frozen => soloFrozen || batch.frozen;
   bool get needsNewReview =>
       detail != null &&
       draft != null &&
@@ -184,6 +310,7 @@ class ProposalsController extends ChangeNotifier {
       catalog = currentCatalog;
       if (!current.summary.pending) {
         _drafts.remove(current.summary.id);
+        batch.observeHandled(current);
       } else {
         _drafts.putIfAbsent(current.summary.id, () => ProposalDraft(current));
       }
@@ -323,41 +450,15 @@ class ProposalsController extends ChangeNotifier {
     _notify();
   }
 
-  WorkspaceProposalReceipt _check(WorkspaceProposalReceipt r) {
-    final c = _command!, d = detail!;
-    final expected = c.action == WorkspaceProposalAction.reject
-        ? 0
-        : c.reviewed.length;
-    final original = d.items.firstOrNull?.before;
-    if (r.operationId != c.operationId ||
-        r.proposalId != c.proposalId ||
-        r.action != c.action ||
-        r.reviewToken != c.reviewToken ||
-        r.reviewedVersion != c.version ||
-        r.resultingVersion <= c.version ||
-        r.commandDigest != c.digest ||
-        r.records.length != expected ||
-        r.records.map((x) => x.ref).toSet().length != r.records.length ||
-        r.records.any(
-          (x) => x.ref.kind != WorkspaceRecordKind.information || x.version < 1,
-        ) ||
-        d.summary.kind == WorkspaceProposalKind.deletion &&
-            c.action == WorkspaceProposalAction.confirm &&
-            r.records.any((x) => x.entryId == null || x.entryId!.isEmpty) ||
-        original != null &&
-            r.records.isNotEmpty &&
-            (r.records.single.ref != original.record.ref ||
-                r.records.single.version <= original.version)) {
-      throw const WorkspaceFailure('unknown_outcome', '回执与本次提案决定不符，请继续核对原操作。');
-    }
-    return r;
-  }
+  WorkspaceProposalReceipt _check(WorkspaceProposalReceipt r) =>
+      WorkspaceProposalExpectation(detail!).check(_command!, r);
 
   Future<void> _finished(WorkspaceProposalReceipt r) async {
     busy = false;
     _command = null;
     writeFailure = null;
     _drafts.remove(r.proposalId);
+    batch.handledElsewhere(r.proposalId);
     detail = null;
     _positions[r.proposalId] = 0;
     selection = r.proposalId;
@@ -375,22 +476,7 @@ class ProposalsController extends ChangeNotifier {
     if (action == WorkspaceProposalAction.confirm ? !canConfirm : !canReject) {
       return;
     }
-    final d = detail!;
-    _command = WorkspaceProposalChange(
-      operationId: workspaceOperationId(),
-      proposalId: d.summary.id,
-      version: d.summary.version,
-      reviewToken: action == WorkspaceProposalAction.confirm
-          ? draft!.reviewToken
-          : d.reviewToken,
-      action: action,
-      reviewed: action == WorkspaceProposalAction.reject
-          ? []
-          : [
-              for (final i in d.items)
-                if (draft!.selected.contains(i.id)) draft!.items[i.id]!,
-            ],
-    );
+    _command = _reviewedCommand(action);
     busy = true;
     writeFailure = null;
     notice = null;
@@ -444,6 +530,8 @@ class ProposalsController extends ChangeNotifier {
     _generation++;
     _drafts.clear();
     _positions.clear();
+    batch.clear();
+    _batchLocation = null;
     selection = null;
     detail = null;
     results = null;
@@ -461,6 +549,8 @@ class ProposalsController extends ChangeNotifier {
   @override
   void dispose() {
     _closed = true;
+    batch.removeListener(_batchChanged);
+    batch.dispose();
     _generation++;
     _drafts.clear();
     _positions.clear();

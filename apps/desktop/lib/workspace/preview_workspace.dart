@@ -456,6 +456,16 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
                     child: const Text('加入字段意图与经历叶提案'),
                   ),
                   DesktopButton(
+                    key: const ValueKey('preview-proposal-batch-unknown'),
+                    onPressed: () async {
+                      _source.setScenario(SampleWorkspaceScenario.ready);
+                      await _source.demonstrateFieldProposals();
+                      _source.loseReplyForProposal('fields-server');
+                      if (dialogContext.mounted) Navigator.pop(dialogContext);
+                    },
+                    child: const Text('让服务器字段提案提交后回包丢失'),
+                  ),
+                  DesktopButton(
                     key: const ValueKey('preview-proposal-conflict'),
                     onPressed: () async {
                       _source.setScenario(SampleWorkspaceScenario.ready);

@@ -153,24 +153,33 @@ class _ProposalReadDialogState extends State<ProposalReadDialog> {
                 enabled: false,
               ),
           ],
-          for (final change in widget.item!.changes)
+          for (final section in proposalChangeSections(widget.item!)) ...[
             Padding(
-              padding: const EdgeInsets.only(top: 22),
-              child: ProposalDiff(
-                label: change.label,
-                before: change.intent == WorkspaceProposalFieldIntent.add
-                    ? '原提案申请新增字段；请核对当前版本。'
-                    : workspaceProposalFieldId(current, change) ==
-                          change.fieldId
-                    ? proposalValue(
-                        workspaceProposalFieldValue(current, change),
-                      )
-                    : '原字段已删除或替换，不能按同名字段对应。',
-                after: change.intent == WorkspaceProposalFieldIntent.remove
-                    ? '移除该字段；旧内容进入回收站。'
-                    : proposalValue(widget.review!.values[change.reviewKey]),
+              padding: const EdgeInsets.only(top: 18),
+              child: Text(
+                section.title,
+                style: libraryText(context, 16, weight: FontWeight.w600),
               ),
             ),
+            for (final change in section.changes)
+              Padding(
+                padding: const EdgeInsets.only(top: 22),
+                child: ProposalDiff(
+                  label: change.label,
+                  before: change.intent == WorkspaceProposalFieldIntent.add
+                      ? '原提案申请新增字段；请核对当前版本。'
+                      : workspaceProposalFieldId(current, change) ==
+                            change.fieldId
+                      ? proposalValue(
+                          workspaceProposalFieldValue(current, change),
+                        )
+                      : '原字段已删除或替换，不能按同名字段对应。',
+                  after: change.intent == WorkspaceProposalFieldIntent.remove
+                      ? '移除该字段；旧内容进入回收站。'
+                      : proposalValue(widget.review!.values[change.reviewKey]),
+                ),
+              ),
+          ],
         ],
       ],
     ),
