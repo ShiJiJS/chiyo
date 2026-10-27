@@ -27,6 +27,8 @@ import 'approvals_controller.dart';
 import 'approvals_page.dart';
 import 'grant_history_controller.dart';
 import 'grant_history_page.dart';
+import 'proposals_controller.dart';
+import 'proposals_page.dart';
 
 /// Only the isolated composition root knows which provider is a sample.
 /// U02–U07 register their production widgets through pageBuilder.
@@ -47,6 +49,8 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
   late final ApprovalsController _approvals;
   late final GrantHistoryController _history;
   bool _historyFrozen = false;
+  late final ProposalsController _proposals;
+  bool _proposalFrozen = false;
   StreamSubscription<WorkspaceRecordRef?>? _summaryChanges;
   final _guideFocus = FocusNode();
   bool _stress = false;
@@ -72,6 +76,9 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
       _source.changes,
     )..addListener(_historyChanged);
     unawaited(_history.load());
+    _proposals = ProposalsController(_source.proposals, _source.changes)
+      ..addListener(_proposalChanged);
+    unawaited(_proposals.load());
     _library = LibraryController(_source);
     _plugins = PluginsController(_source.plugins, _source.changes);
     _legacy = LegacyTemplatesController(
@@ -111,8 +118,16 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
     _syncNavigation();
   }
 
+  void _proposalChanged() {
+    _proposalFrozen = _proposals.frozen;
+    if (_proposalFrozen) _pendingUiNavigation = null;
+    _syncNavigation();
+  }
+
   bool _deferNavigation(VoidCallback action) {
-    if (!mounted || _approvals.frozen || _historyFrozen) return true;
+    if (!mounted || _approvals.frozen || _historyFrozen || _proposalFrozen) {
+      return true;
+    }
     if (_modalDepth > 0) {
       // Only explicit UI destinations wait for modal completion. Native events
       // are rejected, so an old system event never becomes a later navigation.
@@ -134,7 +149,11 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
 
   void _syncNavigation() {
     if (!mounted) return;
-    final enabled = _modalDepth == 0 && !_approvals.frozen && !_historyFrozen;
+    final enabled =
+        _modalDepth == 0 &&
+        !_approvals.frozen &&
+        !_historyFrozen &&
+        !_proposalFrozen;
     _controller.setNavigationLocked(!enabled);
     if (_nativeNavigationEnabled != enabled) {
       _nativeNavigationEnabled = enabled;
@@ -154,6 +173,7 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
     _guideFocus.dispose();
     _approvals.dispose();
     _history.dispose();
+    _proposals.dispose();
     _controller.dispose();
     _library.dispose();
     _plugins.dispose();
@@ -172,6 +192,7 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
     unawaited(_legacy.load());
     unawaited(_approvals.load());
     unawaited(_history.load());
+    unawaited(_proposals.load());
   }
 
   Future<void> _createWithTemplate(
@@ -227,6 +248,7 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
     if (_deferNavigation(() => _navigate(page, id))) return;
     if (page == WorkspacePage.approvals) unawaited(_approvals.open(id));
     if (page == WorkspacePage.history) unawaited(_history.open(id));
+    if (page == WorkspacePage.proposals) unawaited(_proposals.open(id));
     if (page == WorkspacePage.settings) {
       const prefix = 'plugin:builtin.server/host:';
       if (id.startsWith(prefix)) {
@@ -259,6 +281,7 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
     await _controller.refresh();
     _approvals.resetView();
     _history.resetView();
+    _proposals.resetView();
     await _library.resetView();
     if (stress) await _library.showAll();
   }
@@ -400,6 +423,32 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
                 ],
               ),
               const SizedBox(height: 22),
+              const Text('提案审阅', style: TextStyle(fontWeight: FontWeight.w600)),
+              const SizedBox(height: 10),
+              Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: [
+                  DesktopButton(
+                    key: const ValueKey('preview-proposal-unknown'),
+                    onPressed: () {
+                      _source.loseNextProposalReply = true;
+                      Navigator.pop(dialogContext);
+                    },
+                    child: const Text('下一次提案回包丢失'),
+                  ),
+                  DesktopButton(
+                    key: const ValueKey('preview-proposal-conflict'),
+                    onPressed: () async {
+                      _source.setScenario(SampleWorkspaceScenario.ready);
+                      await _source.demonstrateProposalConflict();
+                      if (dialogContext.mounted) Navigator.pop(dialogContext);
+                    },
+                    child: const Text('让修改目标产生新版本'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 22),
               const Text('读取状态', style: TextStyle(fontWeight: FontWeight.w600)),
               const SizedBox(height: 10),
               Wrap(
@@ -497,6 +546,7 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
                 _source.reset();
                 _approvals.resetView();
                 _history.resetView();
+                _proposals.resetView();
                 unawaited(_library.resetView());
                 unawaited(_controller.refresh());
                 Navigator.pop(dialogContext);
@@ -586,6 +636,16 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
                 onRetry: () {
                   _source.setScenario(SampleWorkspaceScenario.ready);
                   unawaited(_approvals.load());
+                },
+              )
+            : location.page == WorkspacePage.proposals
+            ? ProposalsPage(
+                controller: _proposals,
+                onRecord: (ref) => unawaited(_hostRecord(ref)),
+                onModalChanged: _modalChanged,
+                onRetry: () {
+                  _source.setScenario(SampleWorkspaceScenario.ready);
+                  unawaited(_proposals.load());
                 },
               )
             : location.page == WorkspacePage.history

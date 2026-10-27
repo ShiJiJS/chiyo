@@ -21,6 +21,7 @@ part 'sample_workspace_history.dart';
 part 'sample_workspace_adoption.dart';
 part 'sample_workspace_approvals.dart';
 part 'sample_workspace_grant_history.dart';
+part 'sample_workspace_proposals.dart';
 
 enum SampleWorkspaceScenario { ready, empty, waiting, failure }
 
@@ -66,6 +67,27 @@ class SampleWorkspaceSource
   late final _grantHistory = _SampleGrantHistory(this);
   @override
   WorkspaceGrantHistorySource get grantHistory => _grantHistory;
+  late final _proposals = _SampleProposals(this);
+  @override
+  WorkspaceProposalSource get proposals => _proposals;
+  set loseNextProposalReply(bool value) => _proposals.loseNextReply = value;
+  Future<void> demonstrateProposalConflict() async {
+    await _readable();
+    _proposals._seed();
+    final proposal = _proposals._rows['update'];
+    if (proposal == null || !proposal.pending) return;
+    final current = _records[proposal.origin];
+    if (current == null) return;
+    await saveRecord(
+      WorkspaceEdit(
+        operationId: workspaceOperationId(),
+        expectedVersion: current.version,
+        record: current.record,
+        values: {'port': '2200'},
+      ),
+    );
+  }
+
   bool get loseNextApprovalReply => _approvals.loseNextReply;
   set loseNextApprovalReply(bool value) => _approvals.loseNextReply = value;
   void demonstrateApprovalExecutions(String id) =>
@@ -850,7 +872,7 @@ class SampleWorkspaceSource
         : WorkspaceSummary(
             records: _records.length,
             pending: _approvals.pendingCount,
-            proposals: _baseProposals,
+            proposals: _proposals.pendingCount,
           );
   }
 
@@ -1152,6 +1174,14 @@ class SampleWorkspaceSource
     }
     final sourceKind =
         source?.record.ref.kind ?? WorkspaceRecordKind.information;
+    return _relationCandidates(query, definition, sourceKind);
+  }
+
+  WorkspaceResults _relationCandidates(
+    WorkspaceRelationQuery query,
+    Map<String, Object?> definition,
+    WorkspaceRecordKind sourceKind,
+  ) {
     final rule = _relationRule(definition, query.key);
     if (rule == null) {
       throw const WorkspaceFailure('unsupported', '此资料没有该关联类型。');
@@ -2010,6 +2040,7 @@ class SampleWorkspaceSource
     _credentialLinks.clearCurrent();
     _credentials.clearCurrent();
     _approvals.reset();
+    _proposals.reset();
     _hosts.clearCurrent();
     _records.clear();
     _revisions.clear();
@@ -2046,6 +2077,7 @@ class SampleWorkspaceSource
     _credentialLinks.clear();
     _credentials.clear();
     _approvals.reset();
+    _proposals.reset();
     _plugins.clear();
     _legacy.reset();
     _hosts.clear();
@@ -2063,6 +2095,7 @@ class SampleWorkspaceSource
     _credentialLinks.reset();
     _credentials.reset();
     _approvals.reset();
+    _proposals.reset();
     _plugins.reset();
     _legacy.reset();
     _hosts.reset();

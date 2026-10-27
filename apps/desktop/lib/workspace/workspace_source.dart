@@ -8,6 +8,7 @@ import 'workspace_adoption.dart';
 import 'workspace_legacy_templates.dart';
 import 'workspace_approvals.dart';
 import 'workspace_grant_history.dart';
+import 'workspace_proposals.dart';
 export 'workspace_history.dart';
 export 'workspace_records.dart';
 export 'workspace_files.dart';
@@ -19,6 +20,7 @@ export 'workspace_adoption.dart';
 export 'workspace_legacy_templates.dart';
 export 'workspace_approvals.dart';
 export 'workspace_grant_history.dart';
+export 'workspace_proposals.dart';
 
 /// Frontend-only summaries and failures. No database, authorization proof,
 /// secret material or operating-system handle crosses this boundary.
@@ -33,10 +35,11 @@ class WorkspaceSummary {
   bool get isEmpty => records == 0 && pending == 0 && proposals == 0;
 }
 
-abstract interface class WorkspaceSource {
+abstract interface class WorkspaceSource implements WorkspaceRelationSource {
   WorkspaceCredentialSource get credentials;
   WorkspaceApprovalSource get approvals;
   WorkspaceGrantHistorySource get grantHistory;
+  WorkspaceProposalSource get proposals;
   WorkspacePluginSource get plugins;
   WorkspaceHostSource get hosts;
   WorkspaceLegacyTemplateSource get legacyTemplates;
@@ -63,11 +66,13 @@ abstract interface class WorkspaceSource {
     WorkspaceRecordRef? keepSelection,
   });
   Future<WorkspaceDetail> readDetail(WorkspaceRecordRef ref);
+  @override
   Future<WorkspaceResults> queryRelationCandidates(
     WorkspaceRelationQuery query,
   );
 
   /// Resolves identities for relation links without loading their field values.
+  @override
   Future<List<WorkspaceRecordSummary>> readSummaries(
     Iterable<WorkspaceRecordRef> refs,
   );

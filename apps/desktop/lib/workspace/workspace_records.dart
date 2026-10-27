@@ -191,6 +191,16 @@ class WorkspaceRelationQuery {
   final int offset, limit;
 }
 
+/// Metadata-only aperture shared by record and fixed-snapshot proposal forms.
+abstract interface class WorkspaceRelationSource {
+  Future<WorkspaceResults> queryRelationCandidates(
+    WorkspaceRelationQuery query,
+  );
+  Future<List<WorkspaceRecordSummary>> readSummaries(
+    Iterable<WorkspaceRecordRef> refs,
+  );
+}
+
 Map<String, List<WorkspaceRecordRef>> _freezeRelations(
   Map<String, List<WorkspaceRecordRef>> relations,
 ) => Map.unmodifiable(
