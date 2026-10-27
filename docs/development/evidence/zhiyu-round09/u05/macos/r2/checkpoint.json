@@ -1,0 +1,77 @@
+{
+  "createdAt": "2026-10-27T02:03:03.763916+00:00",
+  "sourceCommit": "13066ad8fef8cee380a1d9cb3ddfd5f412f1b6eb",
+  "branch": "codex/zhiyu-macos",
+  "issue": 66,
+  "state": "OPEN",
+  "checkedCriteria": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    7,
+    8
+  ],
+  "checkedTotal": 7,
+  "criteriaTotal": 8,
+  "checks": {
+    "analysis": "No issues found",
+    "relatedTests": 248,
+    "newTests": 12,
+    "focusedRange": 29,
+    "consecutiveFocusedRangeRuns": [
+      "focused-first.log",
+      "regression.log (included in 248)",
+      "focused-final.log"
+    ],
+    "logsPassingCounts": {
+      "focused-first": 29,
+      "regression": 248,
+      "focused-final": 29
+    },
+    "build": "fixed path isolated Mac arm64 preview passed",
+    "screenshots": [
+      "screenshots/execution-1280-dark-200.png",
+      "screenshots/execution-1440-light-cleanup-confirmed.png",
+      "screenshots/execution-1440-light-unknown.png"
+    ],
+    "visualReview": "visual-review.md"
+  },
+  "native": {
+    "bundleIdentifier": "com.example.infoDesktop.zhiyuPreview",
+    "AgentInfoInterfacePreview": "YES",
+    "architecture": "arm64",
+    "fixedApp": "apps/desktop/build/macos/Build/Products/Debug/info_desktop.app",
+    "newCocoaRuntime": false,
+    "sourceHashes": "native-source-hashes.json"
+  },
+  "isolation": {
+    "productionChannels": 0,
+    "httpRequests": 0,
+    "rejectedFilePaths": 0,
+    "testedActualUIFlows": [
+      "partial field decision and readback",
+      "credential decision → three fictional observations → original operation query → reset"
+    ],
+    "realExecution": false,
+    "secrets": false,
+    "hooks": false,
+    "systemNotifications": false,
+    "computerUse": false,
+    "subagents": false,
+    "windowsCI": false
+  },
+  "contract": {
+    "readOriginalOperationOnly": true,
+    "failedMissingMismatchedOrOlderObservationKeepsPrior": true,
+    "cleanupDoesNotInferSuccess": true,
+    "approvalAndExecutionUnknownSeparate": true,
+    "fixedGrantDeadline": true
+  },
+  "pending": [
+    "complete S5, real Mac OS input and normal-speed video",
+    "production integration only after all seven UI modules via F01"
+  ],
+  "next": "continue U06 #67 then U07 #68; do not pause for manual gates"
+}
