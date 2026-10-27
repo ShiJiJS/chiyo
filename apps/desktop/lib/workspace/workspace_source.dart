@@ -5,6 +5,7 @@ import 'workspace_credentials.dart';
 import 'workspace_plugins.dart';
 import 'workspace_hosts.dart';
 import 'workspace_adoption.dart';
+import 'workspace_legacy_templates.dart';
 export 'workspace_history.dart';
 export 'workspace_records.dart';
 export 'workspace_files.dart';
@@ -13,6 +14,7 @@ export 'workspace_operation.dart';
 export 'workspace_plugins.dart';
 export 'workspace_hosts.dart';
 export 'workspace_adoption.dart';
+export 'workspace_legacy_templates.dart';
 
 /// Frontend-only summaries and failures. No database, authorization proof,
 /// secret material or operating-system handle crosses this boundary.
@@ -31,6 +33,7 @@ abstract interface class WorkspaceSource {
   WorkspaceCredentialSource get credentials;
   WorkspacePluginSource get plugins;
   WorkspaceHostSource get hosts;
+  WorkspaceLegacyTemplateSource get legacyTemplates;
 
   /// Invalidates UI projections; null means a reset or a catalog change.
   Stream<WorkspaceRecordRef?> get changes;

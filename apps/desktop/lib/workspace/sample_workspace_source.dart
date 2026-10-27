@@ -14,6 +14,7 @@ import 'sample_plugin_fixture.dart';
 import 'sample_workspace_hosts.dart';
 import 'sample_workspace_field_ids.dart';
 import 'workspace_entries.dart';
+import 'sample_workspace_legacy.dart';
 export 'sample_workspace_hosts.dart' show SampleHostScenario;
 
 part 'sample_workspace_history.dart';
@@ -30,12 +31,15 @@ class SampleWorkspaceSource
     DateTime Function()? now,
     WorkspaceAssetReader? readAsset,
     Map<String, ({String filename, List<int> bytes})>? pluginInputs,
+    Iterable<SampleLegacyInput>? legacyInputs,
   }) : _fixtureJson = fixtureJson,
        _files = SampleWorkspaceFiles(readAsset),
        _pluginInputs = pluginInputs,
+       _legacyInputs = legacyInputs,
        _now = now ?? (() => DateTime.utc(2026, 10, 26));
   final SampleWorkspaceFiles _files;
   final Map<String, ({String filename, List<int> bytes})>? _pluginInputs;
+  final Iterable<SampleLegacyInput>? _legacyInputs;
   final _credentialLinks = SampleCredentialLinks();
   late final _credentials = SampleWorkspaceCredentials(
     readable: _readable,
@@ -78,6 +82,15 @@ class SampleWorkspaceSource
   );
   @override
   WorkspacePluginSource get plugins => _plugins;
+  late final _legacy = SampleWorkspaceLegacy(
+    readable: _readable,
+    changed: () => _changes.add(null),
+    plugins: _plugins,
+    inputs: _legacyInputs ?? sampleLegacyInputs,
+  );
+  @override
+  WorkspaceLegacyTemplateSource get legacyTemplates => _legacy;
+  void reviseLegacyTemplate(String id) => _legacy.revise(id);
   late final _hosts = SampleWorkspaceHosts(
     readable: _readable,
     beforeWrite: () {
@@ -1209,6 +1222,7 @@ class SampleWorkspaceSource
     Map<String, Object?> definition,
     Map<String, Object?> values, {
     WorkspaceDetail? current,
+    bool creatingLegacy = false,
   }) {
     final fields = <String, String>{};
     if (name.trim().isEmpty || name.length > 160) {
@@ -1219,6 +1233,7 @@ class SampleWorkspaceSource
       if (['entries', 'unknown'].contains(field['type'])) continue;
       final errorKey = workspaceValueErrorKey(field['key'] as String);
       if (field['type'] == 'file') {
+        if (creatingLegacy && values[field['key']] == null) continue;
         if (current == null ||
             jsonEncode(current.values[field['key']]) !=
                 jsonEncode(values[field['key']])) {
@@ -1288,6 +1303,9 @@ class SampleWorkspaceSource
       return WorkspaceRejected(error);
     }
     final fingerprint = _fingerprint({
+      'legacyTemplateId': draft.legacyTemplateId,
+      'legacyTemplateVersion': draft.expectedLegacyVersion,
+      'fileSelections': draft.fileSelections,
       'operation': 'create',
       'type': draft.typeId,
       'templateVersion': draft.expectedTemplateVersion,
@@ -1302,35 +1320,111 @@ class SampleWorkspaceSource
           entry.key: entry.value.map((r) => r.key).toList(),
       },
     });
-    final previous = _operations[draft.operationId];
-    if (_recordOperations.containsKey(draft.operationId)) {
-      return const WorkspaceRejected(
-        WorkspaceFailure('operation_conflict', '同一次操作不能用于不同内容。'),
-      );
-    }
-    if (previous != null) {
+    WorkspaceSaveResult? previousResult() {
+      if (_recordOperations.containsKey(draft.operationId)) {
+        return const WorkspaceRejected(
+          WorkspaceFailure('operation_conflict', '同一次操作不能用于不同内容。'),
+        );
+      }
+      final previous = _operations[draft.operationId];
+      if (previous == null) return null;
       return previous.fingerprint == fingerprint
           ? previous.result
           : const WorkspaceRejected(
               WorkspaceFailure('operation_conflict', '同一次保存不能用于不同内容。'),
             );
     }
+
+    if (previousResult() case final prior?) return prior;
+    WorkspaceLegacyTemplate? legacy;
+    if (draft.legacyTemplateId case final id?) {
+      try {
+        legacy = _legacy.current(id);
+      } on WorkspaceFailure catch (e) {
+        return WorkspaceRejected(e);
+      }
+      if (draft.typeId != 'generic') {
+        return const WorkspaceRejected(
+          WorkspaceFailure('unsupported', '旧版模板只用于新建通用资料。'),
+        );
+      }
+      if (legacy.version != draft.expectedLegacyVersion) {
+        return const WorkspaceRejected(
+          WorkspaceFailure('conflict', '旧版模板已变化，请重新读取并核对表单。'),
+        );
+      }
+    } else if (draft.fileSelections.isNotEmpty ||
+        draft.expectedLegacyVersion != null) {
+      return const WorkspaceRejected(
+        WorkspaceFailure('unsupported', '此入口不接受普通附件选择或旧版模板版本。'),
+      );
+    }
+    final legacyFiles = {
+      for (final f in legacy?.definition['fields'] as List? ?? [])
+        if (f['type'] == 'file') f['key'] as String,
+    };
+    final legacyText = {
+      for (final f in legacy?.definition['fields'] as List? ?? [])
+        if (f['type'] != 'file') f['key'] as String,
+    };
+    if (legacy != null &&
+        (draft.values.length != legacyText.length ||
+            !legacyText.every(draft.values.containsKey))) {
+      return const WorkspaceRejected(
+        WorkspaceFailure('validation', '旧版录入需要完整的文本字段对应，附件请单独选择。'),
+      );
+    }
+    if (draft.fileSelections.keys.any((k) => !legacyFiles.contains(k)) ||
+        legacyFiles.any(
+          (k) =>
+              !draft.fileSelections.containsKey(k) || draft.values[k] != null,
+        )) {
+      return const WorkspaceRejected(
+        WorkspaceFailure('validation', '请通过宿主选择每个普通附件，不能用正文替代文件。'),
+      );
+    }
+    final epoch = _epoch;
+    try {
+      for (final selection in draft.fileSelections.values) {
+        await _files.candidate(selection);
+        await _files.verifySelection(selection);
+      }
+    } on WorkspaceFailure catch (e) {
+      return WorkspaceRejected(e);
+    }
+    if (_disposed || epoch != _epoch) {
+      return const WorkspaceRejected(
+        WorkspaceFailure('cancelled', '资料集已变化，请重新打开表单。'),
+      );
+    }
+    // Attachment verification yields. A concurrent delivery may have committed
+    // this same operation (or used its identity for another action) meanwhile.
+    if (previousResult() case final prior?) return prior;
+    if (legacy != null &&
+        _legacy.current(legacy.id).version != legacy.version) {
+      return const WorkspaceRejected(
+        WorkspaceFailure('conflict', '旧版模板已变化，请重新读取并核对表单。'),
+      );
+    }
     final prototype = _initial.values
         .where((d) => d.record.type.id == draft.typeId)
         .firstOrNull;
     final registered = _plugins.template(draft.typeId);
     final type = registered?.type ?? prototype?.record.type;
-    final definition = draft.typeId == 'generic'
-        ? _genericDefinition
-        : registered?.definition ??
-              prototype?.definition ??
-              <String, Object?>{};
+    final definition =
+        legacy?.definition ??
+        (draft.typeId == 'generic'
+            ? _genericDefinition
+            : registered?.definition ??
+                  prototype?.definition ??
+                  <String, Object?>{});
     WorkspaceSaveResult result;
     final errors = _fieldErrors(
       draft.name,
       draft.description,
       definition,
       draft.values,
+      creatingLegacy: legacy != null,
     );
     errors.addAll(_relationErrors(null, definition, draft.relations));
     if (!_plugins.available(draft.typeId)) {
@@ -1391,7 +1485,13 @@ class SampleWorkspaceSource
         record: record,
         version: 1,
         definition: definition,
-        values: draft.values,
+        values: {
+          ...draft.values,
+          for (final e in draft.fileSelections.entries)
+            e.key: _files
+                .importFile(record.ref, e.key, e.value, record.updatedAt)
+                .toJson(),
+        },
         relations: draft.relations,
       );
       if (_scenario == SampleWorkspaceScenario.empty) {
@@ -1410,6 +1510,8 @@ class SampleWorkspaceSource
         WorkspaceOperationIntent(
           kind: WorkspaceOperationKind.create,
           typeId: draft.typeId,
+          legacyTemplateId: draft.legacyTemplateId,
+          legacyTemplateVersion: draft.expectedLegacyVersion,
         ),
         WorkspaceRecordReceipt(ref: detail.record.ref, version: detail.version),
       );
@@ -1914,6 +2016,7 @@ class SampleWorkspaceSource
     _credentialLinks.clear();
     _credentials.clear();
     _plugins.clear();
+    _legacy.reset();
     _hosts.clear();
     _fileOperations.clear();
     _clock = _nextRecord = _nextDirectory = _nextRecycle = 0;
@@ -1929,6 +2032,7 @@ class SampleWorkspaceSource
     _credentialLinks.reset();
     _credentials.reset();
     _plugins.reset();
+    _legacy.reset();
     _hosts.reset();
     _basePending = _initialPending;
     _baseProposals = _initialProposals;

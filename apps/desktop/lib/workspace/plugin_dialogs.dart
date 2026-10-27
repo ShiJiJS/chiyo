@@ -289,6 +289,13 @@ class _PluginChangeState extends State<_PluginChange> {
                 ),
                 const SizedBox(height: 12),
                 Text(p.description, style: libraryText(context, 14)),
+                if (p.legacySource case final source?) ...[
+                  const SizedBox(height: 12),
+                  Text(
+                    '来自旧版模板第${source['version']}版；保留${(source['definitionIds'] as Map).length}项字段定义来源对应。已有资料不会批量改写。',
+                    style: libraryText(context, 13, color: c.muted),
+                  ),
+                ],
                 const SizedBox(height: 16),
                 if (_install) ...[
                   Text(

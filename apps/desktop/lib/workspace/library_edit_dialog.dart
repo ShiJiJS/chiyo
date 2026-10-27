@@ -16,12 +16,18 @@ Future<WorkspaceRecordRef?> showLibraryEditor(
   LibraryController controller, {
   WorkspaceDetail? detail,
   WorkspaceType? selectedType,
+  WorkspaceLegacyTemplate? legacyTemplate,
   WorkspaceFilePicker? filePicker,
   WorkspaceCredentialPicker? credentialPicker,
 }) async {
   final catalog = controller.catalog;
   if (catalog == null) return null;
-  var type = detail?.record.type ?? selectedType;
+  var type =
+      detail?.record.type ??
+      selectedType ??
+      (legacyTemplate == null
+          ? null
+          : catalog.types.where((t) => t.id == 'generic').firstOrNull);
   type ??= await showDesktopDialog<WorkspaceType>(
     context,
     builder: (context) => DesktopDialog(
@@ -73,9 +79,19 @@ Future<WorkspaceRecordRef?> showLibraryEditor(
   }
   Map<String, Object?> definition;
   try {
-    definition = detail == null
-        ? await controller.source.loadTemplate(type.id)
-        : workspaceEditingDefinition(detail);
+    if (legacyTemplate != null) {
+      final current = await controller.source.legacyTemplates.read(
+        legacyTemplate.id,
+      );
+      if (current.version != legacyTemplate.version) {
+        throw const WorkspaceFailure('conflict', '旧版模板已变化，请重新读取并核对。');
+      }
+      definition = current.definition;
+    } else {
+      definition = detail == null
+          ? await controller.source.loadTemplate(type.id)
+          : workspaceEditingDefinition(detail);
+    }
   } on WorkspaceFailure catch (failure) {
     if (!context.mounted) return null;
     await showDesktopDialog<void>(
@@ -101,6 +117,7 @@ Future<WorkspaceRecordRef?> showLibraryEditor(
       type: type!,
       definition: definition,
       detail: detail,
+      filePicker: filePicker,
     ),
   );
 }
@@ -111,11 +128,13 @@ class _Editor extends StatefulWidget {
     required this.type,
     required this.definition,
     this.detail,
+    this.filePicker,
   });
   final LibraryController controller;
   final WorkspaceType type;
   final Map<String, Object?> definition;
   final WorkspaceDetail? detail;
+  final WorkspaceFilePicker? filePicker;
   @override
   State<_Editor> createState() => _EditorState();
 }
@@ -130,6 +149,8 @@ class _EditorState extends State<_Editor> {
   };
   final _entries = <String, List<WorkspaceRepeatedEntry>>{};
   final _readOnlyEntries = <String, Object?>{};
+  final _fileSelections = <String, WorkspaceFileCandidate>{};
+  bool _pickingFile = false;
   final _tags = <String>{};
   final _relations = <String, List<WorkspaceRecordRef>>{};
   final _editedRelations = <String>{};
@@ -137,7 +158,7 @@ class _EditorState extends State<_Editor> {
   bool _dirty = false, _discard = false;
   late final RecordMutation _mutation;
   bool get _saving => _mutation.busy;
-  bool get _locked => _mutation.frozen;
+  bool get _locked => _mutation.frozen || _pickingFile;
   WorkspaceFailure? get _failure => _mutation.failure;
   String? _notice;
   void _mutationChanged() {
@@ -234,7 +255,7 @@ class _EditorState extends State<_Editor> {
   }
 
   Future<void> _save() async {
-    if (!_mutation.canSubmit) return;
+    if (!_mutation.canSubmit || _pickingFile) return;
     _notice = null;
     final detail = widget.detail;
     final catalog = widget.controller.catalog!;
@@ -251,6 +272,12 @@ class _EditorState extends State<_Editor> {
         ref: detail?.record.ref,
         typeId: widget.type.id,
         expectedVersion: detail?.version,
+        legacyTemplateId: detail == null
+            ? widget.definition['legacyTemplateId'] as String?
+            : null,
+        legacyTemplateVersion: detail == null
+            ? widget.definition['legacyTemplateVersion'] as int?
+            : null,
       ),
       (id) async {
         final result = detail == null
@@ -258,6 +285,14 @@ class _EditorState extends State<_Editor> {
                 WorkspaceCreate(
                   operationId: id,
                   typeId: widget.type.id,
+                  legacyTemplateId:
+                      widget.definition['legacyTemplateId'] as String?,
+                  expectedLegacyVersion:
+                      widget.definition['legacyTemplateVersion'] as int?,
+                  fileSelections: {
+                    for (final e in _fileSelections.entries)
+                      e.key: e.value.selectionId,
+                  },
                   expectedTemplateVersion:
                       widget.definition['templateVersion'] as String?,
                   expectedTemplateDigest:
@@ -376,10 +411,40 @@ class _EditorState extends State<_Editor> {
             for (final field in widget.definition['fields'] as List? ?? [])
               if (field['type'] == 'file') ...[
                 const SizedBox(height: 18),
-                Text(
-                  '文件内容通过详情中的“替换文件”入口更新。',
-                  style: libraryText(context, 13, color: c.muted),
-                ),
+                if (widget.detail == null)
+                  DesktopButton(
+                    key: ValueKey('legacy-file-${field['key']}'),
+                    onPressed: _locked || widget.filePicker == null
+                        ? null
+                        : () async {
+                            setState(() => _pickingFile = true);
+                            try {
+                              final selection = await widget.filePicker!();
+                              if (mounted && selection != null) {
+                                _fileSelections[field['key'] as String] =
+                                    selection;
+                                _dirty = true;
+                                _mutation.edited();
+                              }
+                            } on WorkspaceFailure catch (e) {
+                              if (mounted) setState(() => _notice = e.message);
+                            } catch (_) {
+                              if (mounted) {
+                                setState(() => _notice = '文件选择暂不可用，请重试。');
+                              }
+                            } finally {
+                              if (mounted) setState(() => _pickingFile = false);
+                            }
+                          },
+                    child: Text(
+                      '${field['label']} · ${_fileSelections[field['key']]?.filename ?? '选择普通附件'}',
+                    ),
+                  )
+                else
+                  Text(
+                    '文件内容通过详情中的“替换文件”入口更新。',
+                    style: libraryText(context, 13, color: c.muted),
+                  ),
               ] else if (_entries[field['key']] case final entries?) ...[
                 const SizedBox(height: 18),
                 LibraryEntriesEditor(

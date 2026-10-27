@@ -495,6 +495,14 @@ class _LibraryDetailState extends State<LibraryDetail> {
                 style: libraryText(context, 13, color: c.muted),
               ),
             ),
+          if (detail.definition['legacyTemplateVersion'] case final int version)
+            Padding(
+              padding: const EdgeInsets.only(top: 18),
+              child: Text(
+                '沿用旧版模板第$version版的录入结构；字段内容由这份资料独立保存。',
+                style: libraryText(context, 13, color: c.muted),
+              ),
+            ),
           FutureBuilder<List<WorkspaceRecordSummary>>(
             future: _links,
             builder: (context, snapshot) {
