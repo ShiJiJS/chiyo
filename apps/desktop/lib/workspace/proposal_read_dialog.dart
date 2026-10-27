@@ -158,10 +158,17 @@ class _ProposalReadDialogState extends State<ProposalReadDialog> {
               padding: const EdgeInsets.only(top: 22),
               child: ProposalDiff(
                 label: change.label,
-                before: current.fieldIds[change.key] == change.fieldId
-                    ? proposalValue(current.values[change.key])
+                before: change.intent == WorkspaceProposalFieldIntent.add
+                    ? '原提案申请新增字段；请核对当前版本。'
+                    : workspaceProposalFieldId(current, change) ==
+                          change.fieldId
+                    ? proposalValue(
+                        workspaceProposalFieldValue(current, change),
+                      )
                     : '原字段已删除或替换，不能按同名字段对应。',
-                after: proposalValue(widget.review!.values[change.key]),
+                after: change.intent == WorkspaceProposalFieldIntent.remove
+                    ? '移除该字段；旧内容进入回收站。'
+                    : proposalValue(widget.review!.values[change.reviewKey]),
               ),
             ),
         ],

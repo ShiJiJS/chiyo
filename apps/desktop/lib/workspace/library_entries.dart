@@ -59,13 +59,18 @@ class LibraryEntryTimeline extends StatelessWidget {
                     children: [
                       if (entry.period.isNotEmpty)
                         SelectableText(
-                          entry.period,
+                          entry.label('period') ==
+                                  WorkspaceRepeatedEntry.labels['period']
+                              ? entry.period
+                              : '${entry.label('period')}：${entry.period}',
                           style: libraryText(context, 13, color: c.muted),
                         ),
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 5),
                         child: SelectableText(
-                          entry.title,
+                          entry.fieldIds.containsKey('title')
+                              ? entry.title
+                              : '经历（仅保留部分字段）',
                           style: libraryText(
                             context,
                             16,
@@ -74,6 +79,12 @@ class LibraryEntryTimeline extends StatelessWidget {
                         ),
                       ),
                       if (entry.detail.isNotEmpty) ...[
+                        if (entry.label('detail') !=
+                            WorkspaceRepeatedEntry.labels['detail'])
+                          Text(
+                            entry.label('detail'),
+                            style: libraryText(context, 13, color: c.muted),
+                          ),
                         SelectableText(
                           entry.detail,
                           style: libraryText(context, 14),
@@ -215,7 +226,7 @@ class _EntryFields extends StatefulWidget {
 
 class _EntryFieldsState extends State<_EntryFields> {
   late final _text = {
-    for (final part in WorkspaceRepeatedEntry.parts)
+    for (final part in widget.entry.activeParts)
       part: TextEditingController(text: widget.entry.toJson()[part] as String),
   };
   final _titleFocus = FocusNode();
@@ -238,19 +249,29 @@ class _EntryFieldsState extends State<_EntryFields> {
     super.dispose();
   }
 
-  Widget _field(String part, String label) => DesktopTextField(
-    key: ValueKey('library-entry-${widget.fieldKey}-${widget.entry.id}-$part'),
-    controller: _text[part],
-    focusNode: part == 'title' ? _titleFocus : null,
-    enabled: widget.enabled,
-    minLines: part == 'detail' ? 2 : 1,
-    maxLines: part == 'detail' ? 5 : 1,
-    onChanged: (value) => widget.onChanged(widget.entry.withText(part, value)),
-    decoration: InputDecoration(
-      labelText: label,
-      errorText: widget.errors['${widget.fieldKey}:${widget.entry.id}:$part'],
-    ),
-  );
+  Widget _field(String part, String label) =>
+      !widget.entry.fieldIds.containsKey(part)
+      ? Text(
+          '$label已移除',
+          style: libraryText(context, 13, color: UiPalette.of(context).muted),
+        )
+      : DesktopTextField(
+          key: ValueKey(
+            'library-entry-${widget.fieldKey}-${widget.entry.id}-$part',
+          ),
+          controller: _text[part],
+          focusNode: part == 'title' ? _titleFocus : null,
+          enabled: widget.enabled,
+          minLines: part == 'detail' ? 2 : 1,
+          maxLines: part == 'detail' ? 5 : 1,
+          onChanged: (value) =>
+              widget.onChanged(widget.entry.withText(part, value)),
+          decoration: InputDecoration(
+            labelText: widget.entry.label(part),
+            errorText:
+                widget.errors['${widget.fieldKey}:${widget.entry.id}:$part'],
+          ),
+        );
   @override
   Widget build(BuildContext context) => Container(
     key: ValueKey('library-entry-row-${widget.fieldKey}-${widget.entry.id}'),

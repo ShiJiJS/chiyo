@@ -19,7 +19,7 @@ Map<String, String> sampleEntryOwners(WorkspaceDetail detail) {
     try {
       for (final entry in WorkspaceRepeatedEntry.read(detail.values[key])) {
         owners[entry.id] = '${detail.record.ref.key}/$key/${entry.id}/entry';
-        for (final part in WorkspaceRepeatedEntry.parts) {
+        for (final part in entry.activeParts) {
           owners[entry.fieldIds[part]!] =
               '${detail.record.ref.key}/$key/${entry.id}/$part';
         }
@@ -70,6 +70,7 @@ Map<String, String> sampleEntryErrors(
   WorkspaceDetail? current,
   required Iterable<WorkspaceDetail> known,
   Map<String, String> identityOwners = const {},
+  Set<String> changedLeaves = const {},
 }) {
   final errors = <String, String>{};
   final owners = {...identityOwners};
@@ -80,7 +81,7 @@ Map<String, String> sampleEntryErrors(
       try {
         for (final entry in WorkspaceRepeatedEntry.read(detail.values[key])) {
           owners[entry.id] = owner(detail.record.ref, key, entry.id, 'entry');
-          for (final part in WorkspaceRepeatedEntry.parts) {
+          for (final part in entry.activeParts) {
             owners[entry.fieldIds[part]!] = owner(
               detail.record.ref,
               key,
@@ -107,7 +108,7 @@ Map<String, String> sampleEntryErrors(
       errors[key] = '经历结构无法编辑，请保留原文并核对来源。';
       continue;
     }
-    leaves += entries.length * 3;
+    leaves += entries.fold(0, (sum, e) => sum + e.fieldIds.length);
     if (entries.length > WorkspaceRepeatedEntry.maxEntriesPerField ||
         leaves > WorkspaceRepeatedEntry.maxLeavesPerRecord) {
       errors[key] = '每组最多100段经历，每项资料最多200个字段。';
@@ -127,8 +128,9 @@ Map<String, String> sampleEntryErrors(
         ('period', entry.period, 160),
         ('detail', entry.detail, 2000),
       ]) {
-        if ((part == 'title' && value.trim().isEmpty) ||
-            value.length > maximum) {
+        if (entry.fieldIds.containsKey(part) &&
+            ((part == 'title' && value.trim().isEmpty) ||
+                value.length > maximum)) {
           errors['$path:$part'] = part == 'title'
               ? '请填写1–160字的经历名称。'
               : '不能超过$maximum字。';
@@ -137,8 +139,7 @@ Map<String, String> sampleEntryErrors(
       final retained = active[entry.id];
       for (final (part, id) in [
         ('entry', entry.id),
-        for (final part in WorkspaceRepeatedEntry.parts)
-          (part, entry.fieldIds[part]!),
+        for (final part in entry.activeParts) (part, entry.fieldIds[part]!),
       ]) {
         if (!identityPattern.hasMatch(id) || !seen.add(id)) {
           errors[key] = '经历与字段身份必须有效且不能重复。';
@@ -152,7 +153,8 @@ Map<String, String> sampleEntryErrors(
         }
         if (part != 'entry' &&
             retained != null &&
-            retained.fieldIds[part] != id) {
+            retained.fieldIds[part] != id &&
+            !changedLeaves.contains('$key:${entry.id}:$part')) {
           errors[key] = '修改和排序必须保留原字段身份。';
         }
       }
@@ -184,14 +186,22 @@ Map<String, Object?> sampleRestoredEntries(
       values[key] = [
         for (final entry in WorkspaceRepeatedEntry.read(old.values[key]))
           if (active[entry.id] case final retained?)
-            {...entry.toJson(), 'fieldIds': retained.fieldIds}
+            {
+              ...entry.toJson(),
+              'fieldIds': {
+                for (final part in entry.activeParts)
+                  part:
+                      retained.fieldIds[part] ??
+                      'restored-field-${_identity('${old.record.ref.key}/$version/$key/${entry.id}/$part')}',
+              },
+            }
           else
             {
               ...entry.toJson(),
               'entryId':
                   'restored-entry-${_identity('${old.record.ref.key}/$version/$key/${entry.id}')}',
               'fieldIds': {
-                for (final part in WorkspaceRepeatedEntry.parts)
+                for (final part in entry.activeParts)
                   part:
                       'restored-field-${_identity('${old.record.ref.key}/$version/$key/${entry.id}/$part')}',
               },

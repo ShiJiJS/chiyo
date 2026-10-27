@@ -37,12 +37,25 @@ class _ProposalItemEditorState extends State<ProposalItemEditor> {
   late Set<String> _tags;
   String? _directory, _error;
   bool get _new => widget.item.before == null;
-  List<Map<String, Object?>> get _fields =>
-      workspaceFields(widget.item.proposed)
-          .where(
-            (f) => _new || widget.item.changes.any((c) => c.key == f['key']),
-          )
-          .toList();
+  List<Map<String, Object?>> get _fields => _new
+      ? workspaceFields(widget.item.proposed)
+      : [
+          for (final change in widget.item.changes)
+            if (change.intent != WorkspaceProposalFieldIntent.remove)
+              {
+                ...?workspaceFields(
+                  widget.item.proposed,
+                ).where((f) => f['key'] == change.key).firstOrNull,
+                ...?change.definition,
+                'key': change.reviewKey,
+                'proposalRootKey': change.key,
+                'label': change.label,
+                if (change.entryId != null)
+                  'type':
+                      change.definition?['type'] ??
+                      (change.leaf == 'detail' ? 'multiline' : 'text'),
+              },
+        ];
   @override
   void initState() {
     super.initState();
@@ -126,12 +139,15 @@ class _ProposalItemEditorState extends State<ProposalItemEditor> {
               controller: _text[key],
               maxLines: f['type'] == 'multiline' ? 4 : 1,
               maxLength: 64000,
-              onChanged: (_) => setState(
-                () => _fieldErrors.remove(workspaceValueErrorKey(key)),
-              ),
+              onChanged: (_) => setState(() {
+                _fieldErrors.remove(workspaceValueErrorKey(key));
+                _fieldErrors.remove(key);
+              }),
               decoration: InputDecoration(
                 labelText: label,
-                errorText: _fieldErrors[workspaceValueErrorKey(key)],
+                errorText:
+                    _fieldErrors[workspaceValueErrorKey(key)] ??
+                    _fieldErrors[key],
               ),
             )
           : Column(

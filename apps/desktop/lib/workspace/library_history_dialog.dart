@@ -5,6 +5,7 @@ import '../ui_palette.dart';
 import 'library_widgets.dart';
 import 'workspace_source.dart';
 import 'record_mutation.dart';
+import 'library_entries.dart';
 
 Future<bool?> showLibraryHistory(
   BuildContext context,
@@ -16,7 +17,10 @@ Future<bool?> showLibraryHistory(
 );
 
 /// Selectable read-only snapshots, including composite legacy values.
-Map<String, String> librarySnapshot(WorkspaceArchive archive) {
+Map<String, String> librarySnapshot(
+  WorkspaceArchive archive, {
+  bool includeEntries = true,
+}) {
   final detail = archive.detail, record = detail.record;
   String value(Object? v) => v == null || v == ''
       ? '未填写'
@@ -37,13 +41,17 @@ Map<String, String> librarySnapshot(WorkspaceArchive archive) {
         ? '无标签'
         : record.tags.map((t) => t.name).join('、'),
     for (final e in detail.values.entries)
-      '字段：${labels[e.key] ?? e.key}${e.key.startsWith('retained:')
-          ? '（保留${detail.retainedFields.indexWhere((f) => f['key'] == e.key) + 1}）'
-          : labels[e.key] != null && labels[e.key] != e.key
-          ? '（${e.key}）'
-          : ''}': value(
-        e.value,
-      ),
+      if (includeEntries ||
+          !workspaceFields(
+            detail,
+          ).any((f) => f['key'] == e.key && f['type'] == 'entries'))
+        '字段：${labels[e.key] ?? e.key}${e.key.startsWith('retained:')
+            ? '（保留${detail.retainedFields.indexWhere((f) => f['key'] == e.key) + 1}）'
+            : labels[e.key] != null && labels[e.key] != e.key
+            ? '（${e.key}）'
+            : ''}': value(
+          e.value,
+        ),
     for (final e in detail.relations.entries)
       '关联：${e.key}': e.value.isEmpty
           ? '无关联'
@@ -61,7 +69,10 @@ class LibrarySnapshotView extends StatelessWidget {
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
-      for (final e in librarySnapshot(archive).entries)
+      for (final e in librarySnapshot(
+        archive,
+        includeEntries: false,
+      ).entries.where((e) => e.key != '资料结构'))
         Padding(
           padding: const EdgeInsets.only(bottom: 18),
           child: Column(
@@ -83,6 +94,17 @@ class LibrarySnapshotView extends StatelessWidget {
             ],
           ),
         ),
+      for (final field in workspaceFields(archive.detail).where(
+        (f) =>
+            f['type'] == 'entries' &&
+            archive.detail.values.containsKey(f['key']),
+      )) ...[
+        Text(
+          field['label'] as String,
+          style: libraryText(context, 13, color: UiPalette.of(context).muted),
+        ),
+        LibraryEntryTimeline(archive.detail.values[field['key']]),
+      ],
     ],
   );
 }

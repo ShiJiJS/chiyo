@@ -1,24 +1,67 @@
 part of 'sample_workspace_source.dart';
 
 extension _SampleHistory on SampleWorkspaceSource {
+  List<String> _missingEntryLeaves(
+    WorkspaceDetail old,
+    WorkspaceDetail current,
+  ) {
+    final active = <String, WorkspaceRepeatedEntry>{};
+    for (final f in workspaceFields(
+      current,
+    ).where((f) => f['type'] == 'entries')) {
+      try {
+        for (final e in WorkspaceRepeatedEntry.read(current.values[f['key']])) {
+          active[e.id] = e;
+        }
+      } on FormatException {
+        /* Unknown current shapes confer no leaf identity. */
+      }
+    }
+    final missing = <String>[];
+    for (final f in workspaceFields(old).where((f) => f['type'] == 'entries')) {
+      try {
+        for (final e in WorkspaceRepeatedEntry.read(old.values[f['key']])) {
+          // The existing whole-entry restore explicitly creates fresh entry
+          // and leaf identities. Only retained entries could bind old content
+          // to a replacement leaf's current identity.
+          final retained = active[e.id];
+          if (retained == null) continue;
+          for (final part in e.activeParts) {
+            if (retained.fieldIds[part] != e.fieldIds[part]) {
+              missing.add('${f['key']}:${e.id}:$part');
+            }
+          }
+        }
+      } on FormatException {
+        missing.add(f['key'] as String);
+      }
+    }
+    return missing;
+  }
+
   int _pageOffset(int offset, int limit, int total) =>
       total == 0 ? 0 : offset.clamp(0, (total - 1) ~/ limit * limit);
 
-  WorkspaceArchive _archive(WorkspaceDetail detail, {DateTime? at}) =>
-      WorkspaceArchive(
-        detail: detail,
-        archivedAt: at ?? _now(),
-        directoryName: _catalog.directories
-            .where((d) => d.id == detail.record.directoryId)
-            .firstOrNull
-            ?.name,
-        targets: {
-          for (final ref in detail.relations.values.expand((r) => r))
-            if (_records[ref] case final target?) ref: target.record,
-        },
-      );
+  WorkspaceArchive _archive(
+    WorkspaceDetail detail, {
+    DateTime? at,
+    bool wholeItem = true,
+  }) => WorkspaceArchive(
+    detail: detail,
+    wholeItem: wholeItem,
+    archivedAt: at ?? _now(),
+    directoryName: _catalog.directories
+        .where((d) => d.id == detail.record.directoryId)
+        .firstOrNull
+        ?.name,
+    targets: {
+      for (final ref in detail.relations.values.expand((r) => r))
+        if (_records[ref] case final target?) ref: target.record,
+    },
+  );
 
   void _forgetContent(WorkspaceRecordRef ref) {
+    _recycled.removeWhere((_, value) => value.entry.record.ref == ref);
     if (ref.kind == WorkspaceRecordKind.credential) _credentials.forget(ref);
     _revisions.remove(ref);
     _adoptionPlans.removeWhere((_, p) => p.current.record.ref == ref);
@@ -30,6 +73,7 @@ extension _SampleHistory on SampleWorkspaceSource {
           version: raw.version + 1,
           definition: raw.definition,
           fieldIds: raw.fieldIds,
+          fieldOverrides: raw.fieldOverrides,
           retainedFields: raw.retainedFields,
           retainedRelations: raw.retainedRelations,
           values: raw.values,
@@ -55,6 +99,34 @@ extension _SampleHistory on SampleWorkspaceSource {
     }
   }
 
+  void _forgetPartialHistory(WorkspaceArchive removed) {
+    final ref = removed.detail.record.ref;
+    Set<String> ids(WorkspaceDetail d) => {
+      ...d.fieldIds.values,
+      for (final f in workspaceFields(d).where((f) => f['type'] == 'entries'))
+        for (final entry in WorkspaceRepeatedEntry.read(d.values[f['key']]))
+          ...entry.fieldIds.values,
+    };
+    final erased = ids(removed.detail);
+    bool contains(WorkspaceDetail d) =>
+        d.record.ref == ref && ids(d).any(erased.contains);
+    _revisions[ref]?.removeWhere((a) => contains(a.detail));
+    _adoptionPlans.removeWhere(
+      (_, p) => contains(p.current) || contains(p.result),
+    );
+    for (final id in _operations.keys.toList()) {
+      final op = _operations[id]!;
+      if (op.result case WorkspaceSaved(:final detail) when contains(detail)) {
+        _operations[id] = (
+          fingerprint: op.fingerprint,
+          result: const WorkspaceRejected(
+            WorkspaceFailure('purged', '旧内容已清理，请读取当前资料。'),
+          ),
+        );
+      }
+    }
+  }
+
   void _expireHistory() {
     _credentials.expireMaterials();
     final cutoff = _now().subtract(const Duration(days: 30));
@@ -62,10 +134,16 @@ extension _SampleHistory on SampleWorkspaceSource {
       revisions.removeWhere((r) => !r.archivedAt.isAfter(cutoff));
     }
     for (final id in _recycled.keys.toList()) {
-      final entry = _recycled[id]!.entry;
+      final retained = _recycled[id];
+      if (retained == null) continue;
+      final entry = retained.entry;
       if (!entry.expiresAt.isAfter(_now())) {
         _recycled.remove(id);
-        _forgetContent(entry.record.ref);
+        if (entry.wholeItem) {
+          _forgetContent(entry.record.ref);
+        } else {
+          _forgetPartialHistory(retained.archive);
+        }
       }
     }
   }
@@ -123,6 +201,7 @@ extension _SampleHistory on SampleWorkspaceSource {
       version: version,
       definition: old.definition,
       fieldIds: sampleRestoredFieldIds(old, _records[old.record.ref], version),
+      fieldOverrides: old.fieldOverrides,
       retainedFields: old.retainedFields,
       retainedRelations: old.retainedRelations,
       values: _files.restoredValues(
@@ -183,12 +262,15 @@ extension _SampleWorkspaceHistory on SampleWorkspaceSource {
       restored: restored,
       catalogVersion: _catalogVersion,
       notices: notices,
-      missingFields: archive.detail.values.keys.where(
-        (k) => archive.detail.fieldIds[k] != null
-            ? !current.fieldIds.values.contains(archive.detail.fieldIds[k])
-            : !current.values.containsKey(k) &&
-                  !current.retainedFields.any((f) => f['originKey'] == k),
-      ),
+      missingFields: [
+        ...archive.detail.values.keys.where(
+          (k) => archive.detail.fieldIds[k] != null
+              ? !current.fieldIds.values.contains(archive.detail.fieldIds[k])
+              : !current.values.containsKey(k) &&
+                    !current.retainedFields.any((f) => f['originKey'] == k),
+        ),
+        ..._missingEntryLeaves(archive.detail, current),
+      ],
     );
   }
 
@@ -242,6 +324,7 @@ extension _SampleWorkspaceHistory on SampleWorkspaceSource {
       'revision': change.revisionVersion,
       'entry': change.entryId,
       'catalog': change.expectedCatalogVersion,
+      'currentVersion': change.expectedCurrentVersion,
     });
     if (change.operationId.trim().isEmpty) {
       throw const WorkspaceFailure('validation', '操作身份不能为空。');
@@ -261,6 +344,8 @@ extension _SampleWorkspaceHistory on SampleWorkspaceSource {
     WorkspaceDetail? restored, fileRestoreOriginal;
     WorkspaceArchive? archive;
     String? entryId;
+    var partial = false;
+    WorkspaceArchive? partialArchive;
     var version = change.expectedVersion + 1;
     switch (change.action) {
       case WorkspaceRecordAction.recycle:
@@ -297,13 +382,30 @@ extension _SampleWorkspaceHistory on SampleWorkspaceSource {
         if (recycled.entry.version != change.expectedVersion) {
           throw const WorkspaceFailure('conflict', '回收内容已变化，请重新读取。');
         }
+        partial = !recycled.entry.wholeItem;
+        partialArchive = partial ? recycled.archive : null;
         if (change.action == WorkspaceRecordAction.restoreRecycled) {
-          if (_records.containsKey(ref)) {
+          if (!partial && _records.containsKey(ref)) {
             throw const WorkspaceFailure('conflict', '资料已存在，请刷新后核对。');
           }
-          version = (_versions[ref] ?? recycled.entry.version) + 1;
-          restored = _normalizeArchive(recycled.archive, version, notices);
-          fileRestoreOriginal = recycled.archive.detail;
+          if (partial) {
+            final current = _current(ref);
+            if (current.version != change.expectedCurrentVersion) {
+              throw const WorkspaceFailure('conflict', '当前资料已变化，请重新核对要恢复的字段。');
+            }
+            version = current.version + 1;
+            restored = _restorePartial(
+              recycled.archive,
+              current,
+              version,
+              change.operationId,
+              notices,
+            );
+          } else {
+            version = (_versions[ref] ?? recycled.entry.version) + 1;
+            restored = _normalizeArchive(recycled.archive, version, notices);
+            fileRestoreOriginal = recycled.archive.detail;
+          }
         }
         entryId = recycled.entry.id;
     }
@@ -348,12 +450,19 @@ extension _SampleWorkspaceHistory on SampleWorkspaceSource {
         _putRecord(restored!);
       case WorkspaceRecordAction.restoreRecycled:
         _recycled.remove(entryId);
+        if (partial) (_revisions[ref] ??= []).add(_archive(_current(ref)));
         _putRecord(restored!);
       case WorkspaceRecordAction.purge:
         _recycled.remove(entryId);
-        _forgetContent(ref);
+        if (partial) {
+          _forgetPartialHistory(partialArchive!);
+        } else {
+          _forgetContent(ref);
+        }
     }
-    _versions[ref] = version;
+    if (!(partial && change.action == WorkspaceRecordAction.purge)) {
+      _versions[ref] = version;
+    }
     if (restored != null) {
       _entryIdentityOwners.addAll(sampleEntryOwners(restored));
     }

@@ -22,6 +22,8 @@ part 'sample_workspace_adoption.dart';
 part 'sample_workspace_approvals.dart';
 part 'sample_workspace_grant_history.dart';
 part 'sample_workspace_proposals.dart';
+part 'sample_workspace_proposal_fields.dart';
+part 'sample_workspace_partial_recycle.dart';
 
 enum SampleWorkspaceScenario { ready, empty, waiting, failure }
 
@@ -74,6 +76,11 @@ class SampleWorkspaceSource
   Future<void> demonstrateDeletionProposal() async {
     await _readable();
     _proposals.demonstrateDeletion();
+  }
+
+  Future<void> demonstrateFieldProposals() async {
+    await _readable();
+    _proposals.demonstrateFieldChanges();
   }
 
   Future<void> demonstrateProposalConflict() async {
@@ -215,6 +222,7 @@ class SampleWorkspaceSource
         version: version,
         definition: current.definition,
         fieldIds: current.fieldIds,
+        fieldOverrides: current.fieldOverrides,
         retainedFields: current.retainedFields,
         retainedRelations: current.retainedRelations,
         values: const {},
@@ -304,6 +312,7 @@ class SampleWorkspaceSource
           : WorkspaceTemplateState.available,
       definition: raw.definition,
       fieldIds: raw.fieldIds,
+      fieldOverrides: raw.fieldOverrides,
       retainedFields: raw.retainedFields,
       retainedRelations: raw.retainedRelations,
       values: raw.values,
@@ -330,6 +339,7 @@ class SampleWorkspaceSource
       version: detail.version,
       definition: detail.definition,
       fieldIds: detail.fieldIds,
+      fieldOverrides: detail.fieldOverrides,
       retainedFields: detail.retainedFields,
       retainedRelations: detail.retainedRelations,
       values: detail.values,
@@ -383,6 +393,7 @@ class SampleWorkspaceSource
             version: old.version + 1,
             definition: old.definition,
             fieldIds: old.fieldIds,
+            fieldOverrides: old.fieldOverrides,
             retainedFields: old.retainedFields,
             retainedRelations: old.retainedRelations,
             values: old.values,
@@ -410,6 +421,7 @@ class SampleWorkspaceSource
         version: old.version + 1,
         definition: old.definition,
         fieldIds: old.fieldIds,
+        fieldOverrides: old.fieldOverrides,
         retainedFields: old.retainedFields,
         retainedRelations: old.retainedRelations,
         values: const {},
@@ -1287,6 +1299,7 @@ class SampleWorkspaceSource
     Map<String, Object?> values, {
     WorkspaceDetail? current,
     bool creatingLegacy = false,
+    Set<String> changedLeaves = const {},
   }) {
     final fields = <String, String>{};
     if (name.trim().isEmpty || name.length > 160) {
@@ -1332,6 +1345,7 @@ class SampleWorkspaceSource
         values,
         current: current,
         identityOwners: _entryIdentityOwners,
+        changedLeaves: changedLeaves,
         known: [
           ..._initial.values,
           for (final history in _revisions.values)
@@ -1686,6 +1700,7 @@ class SampleWorkspaceSource
         version: current.version + 1,
         definition: current.definition,
         fieldIds: current.fieldIds,
+        fieldOverrides: current.fieldOverrides,
         retainedFields: current.retainedFields,
         retainedRelations: current.retainedRelations,
         values: values,
@@ -1901,6 +1916,7 @@ class SampleWorkspaceSource
       version: current.version + 1,
       definition: current.definition,
       fieldIds: current.fieldIds,
+      fieldOverrides: current.fieldOverrides,
       retainedFields: current.retainedFields,
       retainedRelations: current.retainedRelations,
       values: {...current.values, change.fieldKey: file.toJson()},

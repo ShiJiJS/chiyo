@@ -240,7 +240,12 @@ class _EditorState extends State<_Editor> {
       );
     }
     if (_fields.length +
-            _entries.values.fold<int>(0, (sum, list) => sum + list.length) * 3 >
+            _entries.values.fold<int>(
+              0,
+              (sum, list) =>
+                  sum +
+                  list.fold<int>(0, (n, entry) => n + entry.fieldIds.length),
+            ) >
         WorkspaceRepeatedEntry.maxLeavesPerRecord) {
       for (final key in _entries.keys) {
         _readOnlyEntries[key] = detail?.values[key];
@@ -653,11 +658,16 @@ class _EditorState extends State<_Editor> {
                           WorkspaceRepeatedEntry.maxEntriesPerField &&
                       _fields.length +
                               (_entries.values.fold<int>(
-                                        0,
-                                        (sum, list) => sum + list.length,
-                                      ) +
-                                      1) *
-                                  3 <=
+                                    0,
+                                    (sum, list) =>
+                                        sum +
+                                        list.fold<int>(
+                                          0,
+                                          (n, entry) =>
+                                              n + entry.fieldIds.length,
+                                        ),
+                                  ) +
+                                  3) <=
                           WorkspaceRepeatedEntry.maxLeavesPerRecord,
                   errors: _failure?.fieldErrors ?? const {},
                   onChanged: (value) => setState(() {

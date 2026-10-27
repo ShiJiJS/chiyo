@@ -236,12 +236,21 @@ class WorkspaceDetail {
     Map<String, Object?> values = const {},
     Map<String, List<WorkspaceRecordRef>> relations = const {},
     Map<String, String> fieldIds = const {},
+    Map<String, Map<String, Object?>?> fieldOverrides = const {},
     Iterable<Map<String, Object?>> retainedFields = const [],
     Iterable<Map<String, Object?>> retainedRelations = const [],
   }) : definition = _freeze(definition) as Map<String, Object?>,
        values = _freeze(values) as Map<String, Object?>,
        relations = _freezeRelations(relations),
        fieldIds = Map.unmodifiable(fieldIds),
+       fieldOverrides = Map.unmodifiable(
+         fieldOverrides.map(
+           (key, value) => MapEntry(
+             key,
+             value == null ? null : workspaceImmutableMap(value),
+           ),
+         ),
+       ),
        retainedFields = List.unmodifiable(
          retainedFields.map(workspaceImmutableMap),
        ),
@@ -259,16 +268,30 @@ class WorkspaceDetail {
   /// Definition keys address values; these opaque instance identities do not.
   final Map<String, String> fieldIds;
 
+  /// Explicit instance changes; null removes a field without rewriting the
+  /// submitted template snapshot. Historical versions keep their own overlay.
+  final Map<String, Map<String, Object?>?> fieldOverrides;
+
   /// Instance-owned descriptors, separate from the exact target snapshot.
   final List<Map<String, Object?>> retainedFields;
   final List<Map<String, Object?>> retainedRelations;
 }
 
-List<Map<String, Object?>> workspaceFields(WorkspaceDetail detail) => [
-  for (final field in detail.definition['fields'] as List? ?? [])
-    Map<String, Object?>.from(field as Map),
-  ...detail.retainedFields,
-];
+List<Map<String, Object?>> workspaceFields(WorkspaceDetail detail) {
+  final fields = <String, Map<String, Object?>>{
+    for (final field in detail.definition['fields'] as List? ?? [])
+      field['key'] as String: Map<String, Object?>.from(field as Map),
+    for (final field in detail.retainedFields) field['key'] as String: field,
+  };
+  for (final entry in detail.fieldOverrides.entries) {
+    if (entry.value == null) {
+      fields.remove(entry.key);
+    } else {
+      fields[entry.key] = entry.value!;
+    }
+  }
+  return List.unmodifiable(fields.values);
+}
 
 Map<String, Object?> workspaceEditingDefinition(WorkspaceDetail detail) => {
   ...detail.definition,

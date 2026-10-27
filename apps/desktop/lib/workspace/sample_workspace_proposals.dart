@@ -17,6 +17,9 @@ class _ProposalInput {
     this.at,
     this.items,
   ) : itemCount = items.length,
+      wholeDeletion =
+          kind == WorkspaceProposalKind.deletion &&
+          (items.firstOrNull?.changes.isEmpty ?? false),
       origin = items.firstOrNull?.before?.record.ref,
       originVersion = items.firstOrNull?.before?.version;
   final String id, title, purpose;
@@ -24,6 +27,7 @@ class _ProposalInput {
   final DateTime at;
   final WorkspaceRecordRef? origin;
   final int? originVersion;
+  final bool wholeDeletion;
   List<WorkspaceProposalItem> items;
   List<_ProposalSaved> saved = const [];
   int version = 1, itemCount;
@@ -126,6 +130,7 @@ class _SampleProposals implements WorkspaceProposalSource {
               version: target.version,
               definition: target.definition,
               fieldIds: target.fieldIds,
+              fieldOverrides: target.fieldOverrides,
               retainedFields: target.retainedFields,
               retainedRelations: target.retainedRelations,
               values: const {'port': '2222'},
@@ -160,6 +165,7 @@ class _SampleProposals implements WorkspaceProposalSource {
       version: target.version,
       definition: target.definition,
       fieldIds: target.fieldIds,
+      fieldOverrides: target.fieldOverrides,
       retainedFields: target.retainedFields,
       retainedRelations: target.retainedRelations,
     );
@@ -208,6 +214,7 @@ class _SampleProposals implements WorkspaceProposalSource {
         chatClaim: '当前维护会话（自述）',
         purpose: r.purpose,
         itemCount: r.itemCount,
+        wholeDeletion: r.wholeDeletion,
       );
   String _token(_ProposalInput r) => s._fingerprint([
     s._epoch,
@@ -290,7 +297,7 @@ class _SampleProposals implements WorkspaceProposalSource {
     bool available(WorkspaceProposalFieldChange c) =>
         archive != null &&
         c.fieldId != null &&
-        archive.detail.fieldIds[c.key] == c.fieldId;
+        workspaceProposalFieldId(archive.detail, c) == c.fieldId;
     return WorkspaceProposalItem(
       id: item.id,
       beforeState: archive == null
@@ -303,13 +310,18 @@ class _SampleProposals implements WorkspaceProposalSource {
               version: original.version,
               definition: original.definition,
               fieldIds: original.fieldIds,
+              fieldOverrides: original.fieldOverrides,
               retainedFields: original.retainedFields,
               retainedRelations: original.retainedRelations,
               values: wholeDeletion
                   ? archive?.detail.values ?? const {}
                   : {
                       for (final c in item.changes)
-                        if (available(c)) c.key: archive!.detail.values[c.key],
+                        if (available(c))
+                          c.reviewKey: workspaceProposalFieldValue(
+                            archive!.detail,
+                            c,
+                          ),
                     },
               relations: wholeDeletion
                   ? archive?.detail.relations ?? const {}
@@ -317,7 +329,7 @@ class _SampleProposals implements WorkspaceProposalSource {
             ),
       changes: item.changes.map(
         (c) => c.withOwnerBefore(
-          available(c) ? archive!.detail.values[c.key]?.toString() : null,
+          available(c) ? workspaceProposalFieldValue(archive!.detail, c) : null,
           available: available(c),
         ),
       ),
@@ -329,6 +341,7 @@ class _SampleProposals implements WorkspaceProposalSource {
         values: d.values,
         relations: d.relations,
         fieldIds: d.fieldIds,
+        fieldOverrides: d.fieldOverrides,
         retainedFields: d.retainedFields,
         retainedRelations: d.retainedRelations,
       ),
@@ -344,12 +357,7 @@ class _SampleProposals implements WorkspaceProposalSource {
       reviewToken: _token(r),
       currentTargetRef: r.origin,
       currentAvailable: r.origin != null && s._records.containsKey(r.origin),
-      items: r.items.map(
-        (i) => _project(
-          i,
-          wholeDeletion: r.kind == WorkspaceProposalKind.deletion,
-        ),
-      ),
+      items: r.items.map((i) => _project(i, wholeDeletion: r.wholeDeletion)),
       targets: [
         for (final saved in r.saved)
           WorkspaceProposalTarget(
@@ -419,6 +427,7 @@ class _SampleProposals implements WorkspaceProposalSource {
       }
       return;
     }
+    if (r.kind == WorkspaceProposalKind.modification) return;
     final d = item.proposed;
     final keys = {
       ...d.values.keys,
@@ -584,7 +593,7 @@ class _SampleProposals implements WorkspaceProposalSource {
               )) {
                 throw const WorkspaceFailure('validation', '经历字段超出当前提案预算。');
               }
-              fields += entries.length * WorkspaceRepeatedEntry.parts.length;
+              fields += entries.fold(0, (sum, e) => sum + e.fieldIds.length);
             } else {
               fields++;
             }
@@ -666,30 +675,21 @@ class _SampleProposals implements WorkspaceProposalSource {
         s._entryIdentityOwners.addAll(owners);
         s._clock += prepared.length;
         s._nextRecord += prepared.length;
-      } else if (r.kind == WorkspaceProposalKind.modification) {
-        final item = r.items.single,
-            review = c.reviewed.single,
-            before = item.before!;
-        final result = await s.saveRecord(
-          WorkspaceEdit(
-            operationId: 'proposal:${c.operationId}',
-            expectedVersion: before.version,
-            record: s._projectRecord(s._records[before.record.ref]!).record,
-            values: {
-              for (final change in item.changes)
-                change.key: review.values[change.key],
-            },
-          ),
+      } else if (r.kind == WorkspaceProposalKind.modification ||
+          r.kind == WorkspaceProposalKind.deletion && !r.wholeDeletion) {
+        final plan = _fieldPlan(
+          r.items.single,
+          c.reviewed.single,
+          c.operationId,
         );
-        if (result case WorkspaceRejected(:final failure)) throw failure;
-        final detail = (result as WorkspaceSaved).detail;
+        final receipt = _commitFieldPlan(plan);
         saved.add(
           _ProposalSaved(
-            WorkspaceRecordReceipt(
-              ref: detail.record.ref,
-              version: detail.version,
-            ),
-            detail.record.name,
+            receipt,
+            plan.result.record.name,
+            snapshotVersion: r.kind == WorkspaceProposalKind.deletion
+                ? plan.current.version
+                : null,
           ),
         );
       } else if (r.kind == WorkspaceProposalKind.deletion) {
@@ -750,6 +750,9 @@ class _SampleProposals implements WorkspaceProposalSource {
 
   @override
   Future<WorkspaceProposalReceipt?> receipt(String operationId) async {
+    if (_inFlight.containsKey(operationId)) {
+      throw const WorkspaceFailure('unknown_outcome', '本次操作仍在处理中，请稍后核对。');
+    }
     await s._readable();
     if (_inFlight.containsKey(operationId)) {
       throw const WorkspaceFailure('unknown_outcome', '本次操作仍在处理中，请稍后核对。');

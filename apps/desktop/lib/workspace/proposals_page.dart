@@ -17,7 +17,9 @@ String proposalStateLabel(WorkspaceProposalSummary s) =>
     : s.kind == WorkspaceProposalKind.modification
     ? '已采用'
     : s.kind == WorkspaceProposalKind.deletion
-    ? '已移入回收站'
+    ? s.wholeDeletion
+          ? '已移入回收站'
+          : '字段已回收'
     : '已完成';
 
 class ProposalsPage extends StatefulWidget {
@@ -172,7 +174,7 @@ class _ProposalsPageState extends State<ProposalsPage> {
               : '核对当前资料和原提案',
           item: item?.withoutOwnerBefore(),
           review: review,
-          wholeDeletion: d.summary.kind == WorkspaceProposalKind.deletion,
+          wholeDeletion: d.summary.wholeDeletion,
           catalog: m.catalog,
         ),
       );
@@ -514,7 +516,7 @@ class _ProposalsPageState extends State<ProposalsPage> {
               onRecord: widget.onRecord,
               enabled: !m.frozen,
             )
-          else if (d.summary.kind == WorkspaceProposalKind.deletion) ...[
+          else if (d.summary.wholeDeletion) ...[
             Text(
               '删除整条资料',
               style: libraryText(context, 22, weight: FontWeight.w700),
@@ -567,27 +569,70 @@ class _ProposalsPageState extends State<ProposalsPage> {
             for (final change in item.changes)
               Padding(
                 padding: const EdgeInsets.only(top: 20),
-                child: ProposalDiff(
-                  label:
-                      '字段：${change.label} · ${switch (change.intent) {
-                        WorkspaceProposalFieldIntent.correct => '修正原字段内容',
-                        WorkspaceProposalFieldIntent.add => '新增字段',
-                        WorkspaceProposalFieldIntent.replace => '替换字段含义',
-                        WorkspaceProposalFieldIntent.remove => '删除字段',
-                      }}',
-                  before:
-                      item.beforeState == WorkspaceProposalBeforeState.unread
-                      ? '原版本暂未读取，请先核对当前状态。'
-                      : item.beforeState ==
-                                WorkspaceProposalBeforeState.unavailable ||
-                            !change.beforeAvailable
-                      ? '原版本内容已不可用。'
-                      : proposalValue(change.before),
-                  currentLabel:
-                      d.summary.status == WorkspaceProposalStatus.conflicted
-                      ? '原资料v${item.before!.version}'
-                      : '当前内容',
-                  after: proposalValue(review.values[change.key]),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    ProposalDiff(
+                      label:
+                          '字段：${change.label} · ${switch (change.intent) {
+                            WorkspaceProposalFieldIntent.correct => '修正原字段内容',
+                            WorkspaceProposalFieldIntent.add => '新增字段',
+                            WorkspaceProposalFieldIntent.replace => '替换字段含义',
+                            WorkspaceProposalFieldIntent.remove => '删除字段',
+                          }}',
+                      before: change.intent == WorkspaceProposalFieldIntent.add
+                          ? '原资料没有此字段。'
+                          : item.beforeState ==
+                                WorkspaceProposalBeforeState.unread
+                          ? '原版本暂未读取，请先核对当前状态。'
+                          : item.beforeState ==
+                                    WorkspaceProposalBeforeState.unavailable ||
+                                !change.beforeAvailable
+                          ? '原版本内容已不可用。'
+                          : proposalValue(change.before),
+                      currentLabel:
+                          d.summary.status == WorkspaceProposalStatus.conflicted
+                          ? '原资料v${item.before!.version}'
+                          : '当前内容',
+                      after:
+                          change.intent == WorkspaceProposalFieldIntent.remove
+                          ? '移除该字段；旧内容进入回收站。'
+                          : proposalValue(review.values[change.reviewKey]),
+                    ),
+                    if (change.definition != null &&
+                        (change.intent == WorkspaceProposalFieldIntent.add ||
+                            change.intent ==
+                                WorkspaceProposalFieldIntent.replace))
+                      Padding(
+                        padding: const EdgeInsets.only(top: 10),
+                        child: Text(
+                          '新字段定义：${change.definition!['label']} · ${const {'text': '文本', 'multiline': '多行文本', 'number': '数字', 'date': '日期'}[change.definition!['type']] ?? '保留结构'}\n${change.definition!['description'] ?? ''}',
+                          style: libraryText(
+                            context,
+                            13,
+                            color: c.muted,
+                            height: 1.8,
+                          ),
+                        ),
+                      ),
+                    Text(
+                      switch (change.intent) {
+                        WorkspaceProposalFieldIntent.correct => '修正保留原字段身份。',
+                        WorkspaceProposalFieldIntent.add =>
+                          '新增字段使用新身份；旧授权不包含它。',
+                        WorkspaceProposalFieldIntent.replace =>
+                          '替换含义使用新身份；旧内容进入回收，旧授权不包含新字段。',
+                        WorkspaceProposalFieldIntent.remove =>
+                          '删除只影响此字段；恢复时重新分配身份，不恢复旧授权。',
+                      },
+                      style: libraryText(
+                        context,
+                        13,
+                        color: c.muted,
+                        height: 1.8,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             const SizedBox(height: 12),
@@ -603,7 +648,11 @@ class _ProposalsPageState extends State<ProposalsPage> {
               child: const Text('核对当前资料和原提案'),
             ),
           ],
-          if (d.summary.kind != WorkspaceProposalKind.deletion) ...[
+          if (item.before == null ||
+              d.summary.kind != WorkspaceProposalKind.deletion &&
+                  item.changes.any(
+                    (c) => c.intent != WorkspaceProposalFieldIntent.remove,
+                  )) ...[
             const SizedBox(height: 18),
             Align(
               alignment: Alignment.centerRight,

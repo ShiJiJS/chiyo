@@ -47,6 +47,7 @@ class _RecycleDialogState extends State<_RecycleDialog> {
   bool get _busy => _mutation.busy;
   bool get _locked => _mutation.frozen;
   String? _notice;
+  int? _currentVersion;
   bool _loading = true, _purge = false;
   int _generation = 0;
   void _mutationChanged() {
@@ -86,9 +87,20 @@ class _RecycleDialogState extends State<_RecycleDialog> {
       final current = widget.current != null
           ? await widget.source.readDetail(widget.current!.record.ref)
           : null;
+      int? liveVersion;
+      if (widget.entry?.wholeItem == false) {
+        try {
+          liveVersion = (await widget.source.readDetail(
+            widget.entry!.record.ref,
+          )).version;
+        } on WorkspaceFailure catch (e) {
+          if (e.code != 'not_found') rethrow;
+        }
+      }
       if (!mounted || generation != _generation) return;
       setState(() {
         _catalog = catalog;
+        _currentVersion = liveVersion;
         _archive =
             archive ??
             WorkspaceArchive(
@@ -139,6 +151,7 @@ class _RecycleDialogState extends State<_RecycleDialog> {
       ref: current.record.ref,
       expectedVersion: entry?.version ?? current.version,
       expectedCatalogVersion: _catalog!.version,
+      expectedCurrentVersion: _currentVersion,
       entryId: entry?.id,
       action: entry == null
           ? WorkspaceRecordAction.recycle
@@ -154,6 +167,7 @@ class _RecycleDialogState extends State<_RecycleDialog> {
           ref: change.ref,
           expectedVersion: change.expectedVersion,
           expectedCatalogVersion: change.expectedCatalogVersion,
+          expectedCurrentVersion: change.expectedCurrentVersion,
           entryId: change.entryId,
           action: change.action,
         ),
@@ -173,7 +187,9 @@ class _RecycleDialogState extends State<_RecycleDialog> {
           deleting
               ? '移到回收站'
               : _purge
-              ? '永久清理资料'
+              ? widget.entry?.wholeItem == false
+                    ? '永久清理回收字段'
+                    : '永久清理资料'
               : '回收内容',
         ),
         content: SizedBox(
@@ -198,7 +214,11 @@ class _RecycleDialogState extends State<_RecycleDialog> {
                         deleting
                             ? '回收后从信息库移除，30天内可在回收站恢复。旧授权不会恢复。'
                             : _purge
-                            ? '永久清理后无法从回收站或内容版本恢复。请核对以上资料名称。'
+                            ? widget.entry?.wholeItem == false
+                                  ? '清理这批旧字段及包含它们的旧版本，保留当前资料和其他版本。此操作无法撤销。'
+                                  : '永久清理后无法从回收站或内容版本恢复。请核对以上资料名称。'
+                            : widget.entry?.wholeItem == false
+                            ? '这里只恢复回收字段，不覆盖当前资料。同位置已有新字段时保留两份内容；恢复使用新身份，不恢复旧授权。当前资料${_currentVersion == null ? '已不可用，仍可永久清理' : 'v$_currentVersion'}。'
                             : '内容将在回收后30天到期。恢复不会重新启用旧授权；已移除的目录、标签及关联不会复活。',
                         style: TextStyle(color: _purge ? c.danger : c.muted),
                       ),
@@ -270,7 +290,13 @@ class _RecycleDialogState extends State<_RecycleDialog> {
                 ? DesktopButtonKind.danger
                 : DesktopButtonKind.primary,
             busy: _busy,
-            onPressed: _loading || _archive == null || _failure != null
+            onPressed:
+                _loading ||
+                    _archive == null ||
+                    _failure != null ||
+                    (!_purge &&
+                        widget.entry?.wholeItem == false &&
+                        _currentVersion == null)
                 ? null
                 : _submit,
             child: Text(
@@ -278,6 +304,8 @@ class _RecycleDialogState extends State<_RecycleDialog> {
                   ? '移到回收站'
                   : _purge
                   ? '确认永久清理'
+                  : widget.entry?.wholeItem == false
+                  ? '恢复字段'
                   : '恢复资料',
             ),
           ),
@@ -508,7 +536,7 @@ class _LibraryRecyclePageState extends State<LibraryRecyclePage> {
                                     ),
                                     const SizedBox(height: 6),
                                     Text(
-                                      '${entry.record.type.name} · 原目录：${entry.directoryName ?? '未分类'}\n回收于 ${entry.deletedAt.toIso8601String().substring(0, 10)}',
+                                      '${entry.wholeItem ? '整条资料' : '部分字段'} · ${entry.record.type.name} · 原目录：${entry.directoryName ?? '未分类'}\n回收于 ${entry.deletedAt.toIso8601String().substring(0, 10)}',
                                       style: libraryText(
                                         context,
                                         13,

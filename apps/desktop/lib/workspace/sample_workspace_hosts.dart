@@ -43,7 +43,9 @@ class SampleWorkspaceHosts implements WorkspaceHostSource {
       d.record.type.id == 'server' &&
       d.definition['packageId'] == 'builtin.server';
   WorkspaceHostEndpoint? _endpoint(WorkspaceDetail d) =>
-      WorkspaceHostEndpoint.parse(d.values['host'], d.values['port']);
+      d.fieldOverrides.keys.any((key) => key == 'host' || key == 'port')
+      ? null
+      : WorkspaceHostEndpoint.parse(d.values['host'], d.values['port']);
 
   void seed() {
     final azure = records()

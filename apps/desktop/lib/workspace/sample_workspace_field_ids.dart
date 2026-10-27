@@ -21,6 +21,7 @@ WorkspaceDetail sampleWithFieldIds(
     definition: d.definition,
     values: d.values,
     relations: d.relations,
+    fieldOverrides: d.fieldOverrides,
     retainedFields: d.retainedFields,
     retainedRelations: d.retainedRelations,
     fieldIds: {
