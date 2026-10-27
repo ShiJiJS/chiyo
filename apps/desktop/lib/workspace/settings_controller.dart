@@ -6,7 +6,8 @@ enum WorkspaceSettingsSection {
   appearance('外观', '明亮与黑暗主题'),
   notifications('通知', '访问申请提醒'),
   records('请求与记录', '等待时间与记录保留'),
-  plugins('插件', '资料模板与专属设置');
+  plugins('插件', '资料模板与专属设置'),
+  classifications('目录与标签', '归属层级与跨目录标记');
 
   const WorkspaceSettingsSection(this.label, this.description);
   final String label, description;

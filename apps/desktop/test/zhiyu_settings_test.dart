@@ -12,6 +12,7 @@ import 'package:info_desktop/workspace/library_page.dart';
 import 'package:info_desktop/workspace/approvals_page.dart';
 import 'package:info_desktop/workspace/settings_page.dart';
 import 'package:info_desktop/workspace/settings_controller.dart';
+import 'package:info_desktop/workspace/classification_controller.dart';
 import 'package:info_desktop/workspace/sample_workspace_source.dart';
 import 'package:info_desktop/workspace/workspace_source.dart';
 import 'package:info_desktop/workspace/plugins_controller.dart';
@@ -41,6 +42,8 @@ void main() {
           ),
           sample = SampleWorkspaceSource(),
           plugins = PluginsController(sample.plugins, const Stream.empty());
+      final classifications = ClassificationController(sample);
+      addTearDown(classifications.dispose);
       addTearDown(settings.dispose);
       addTearDown(plugins.dispose);
       addTearDown(sample.dispose);
@@ -53,6 +56,7 @@ void main() {
             body: WorkspaceSettingsPage(
               controller: settings,
               plugins: plugins,
+              classifications: classifications,
               pluginBuilder: (_) => const SizedBox(),
               onRequest: (_) {},
             ),

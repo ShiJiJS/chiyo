@@ -29,6 +29,7 @@ import 'grant_history_controller.dart';
 import 'grant_history_page.dart';
 import 'settings_controller.dart';
 import 'settings_page.dart';
+import 'classification_controller.dart';
 import 'proposals_controller.dart';
 import 'proposals_page.dart';
 
@@ -54,6 +55,7 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
   late final ProposalsController _proposals;
   bool _proposalFrozen = false;
   late final WorkspaceSettingsController _settings;
+  late final ClassificationController _classifications;
   bool _settingsFrozen = false;
   StreamSubscription<WorkspaceRecordRef?>? _summaryChanges;
   final _guideFocus = FocusNode();
@@ -84,6 +86,7 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
       ..addListener(_proposalChanged);
     unawaited(_proposals.load());
     _library = LibraryController(_source);
+    _classifications = ClassificationController(_source);
     _plugins = PluginsController(_source.plugins, _source.changes);
     _legacy = LegacyTemplatesController(
       _source.legacyTemplates,
@@ -198,6 +201,7 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
     _history.dispose();
     _proposals.dispose();
     _settings.dispose();
+    _classifications.dispose();
     _controller.dispose();
     _library.dispose();
     _plugins.dispose();
@@ -218,6 +222,7 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
     unawaited(_history.load());
     unawaited(_proposals.load());
     unawaited(_settings.load());
+    unawaited(_classifications.load());
   }
 
   Future<void> _createWithTemplate(
@@ -768,6 +773,7 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
             ? WorkspaceSettingsPage(
                 controller: _settings,
                 plugins: _plugins,
+                classifications: _classifications,
                 onRequest: (id) => _navigate(WorkspacePage.approvals, id),
                 onModalChanged: _modalChanged,
                 pluginBuilder: (context) => PluginsPage(

@@ -27,6 +27,7 @@ part 'sample_workspace_organization.dart';
 part 'sample_workspace_proposal_fields.dart';
 part 'sample_workspace_partial_recycle.dart';
 part 'sample_workspace_retention.dart';
+part 'sample_workspace_classification.dart';
 
 enum SampleWorkspaceScenario { ready, empty, waiting, failure }
 
@@ -339,7 +340,7 @@ class SampleWorkspaceSource
       }
     }
     return WorkspaceDetail(
-      record: raw.record,
+      record: _currentClassification(raw.record),
       version: raw.version,
       templateState: raw.definition['packageId'] is String
           ? _plugins.stateFor(
@@ -620,8 +621,17 @@ class SampleWorkspaceSource
   late WorkspaceCatalog _catalog;
   WorkspaceCatalog? _initialCatalog;
   int _catalogVersion = 1, _nextDirectory = 0;
-  final _directoryOperations =
-      <String, ({String fingerprint, WorkspaceDirectory? directory})>{};
+  final _classificationReceipts = <String, WorkspaceClassificationReceipt>{};
+  final _tagRemovalPlans =
+      <
+        String,
+        ({
+          int epoch,
+          WorkspaceTagRemovalPreview preview,
+          Map<WorkspaceRecordRef, int> versions,
+        })
+      >{};
+  bool loseNextClassificationReply = false;
   final _initialRecycled =
       <String, ({WorkspaceRecycleEntry entry, WorkspaceArchive archive})>{};
   final _initial = <WorkspaceRecordRef, WorkspaceDetail>{};
@@ -970,17 +980,14 @@ class SampleWorkspaceSource
   Future<WorkspaceDirectory?> changeDirectory(
     WorkspaceDirectoryChange change,
   ) async {
+    final epoch = _epoch;
     await _readable();
-    final fingerprint = _fingerprint({
-      'action': change.action.name,
-      'version': change.expectedVersion,
-      'target': change.directoryId,
-      'name': change.name,
-      'parent': change.parentId,
-    });
-    final previous = _directoryOperations[change.operationId];
+    if (epoch != _epoch) {
+      throw const WorkspaceFailure('cancelled', '资料来源已变化，请重新核对目录。');
+    }
+    final previous = _classificationReceipts[change.operationId];
     if (previous != null) {
-      if (previous.fingerprint != fingerprint) {
+      if (!previous.matches(change)) {
         throw const WorkspaceFailure('operation_conflict', '同一次操作不能用于不同目录内容。');
       }
       return previous.directory;
@@ -1078,13 +1085,29 @@ class SampleWorkspaceSource
     if (_scenario == SampleWorkspaceScenario.empty) {
       _materializeEmpty();
     }
-    _directoryOperations[change.operationId] = (
-      fingerprint: fingerprint,
+    _finishClassification(
+      change,
+      targetId: result?.id ?? current!.id,
       directory: result,
     );
-    _changes.add(null);
     return result;
   }
+
+  @override
+  Future<WorkspaceClassificationReceipt> changeClassification(
+    WorkspaceClassificationChange change,
+  ) => _changeClassification(change);
+  @override
+  Future<WorkspaceClassificationReceipt?> classificationOperationReceipt(
+    String operationId,
+  ) async {
+    await _readable();
+    return _classificationReceipts[operationId];
+  }
+
+  @override
+  Future<WorkspaceTagRemovalPreview> previewTagRemoval(String tagId) =>
+      _previewTagRemoval(tagId);
 
   bool _inDirectory(String? id, String? ancestor) {
     if (ancestor == null || ancestor == 'all') return true;
@@ -1127,9 +1150,14 @@ class SampleWorkspaceSource
     if (query.offset < 0 || query.limit < 1 || query.limit > 500) {
       throw const WorkspaceFailure('invalid_query', '无效的分页范围。');
     }
+    if (query.tagId != null && !_catalog.tags.any((t) => t.id == query.tagId)) {
+      throw const WorkspaceFailure('tag_unavailable', '原标签已移除，请重新选择筛选标签。');
+    }
     final items = _scenario == SampleWorkspaceScenario.empty
         ? <WorkspaceRecordSummary>[]
-        : _records.values.map((d) => d.record).where((r) {
+        : _records.values.map((d) => _currentClassification(d.record)).where((
+            r,
+          ) {
             return _inDirectory(r.directoryId, query.directoryId) &&
                 (query.typeId == null || r.type.id == query.typeId) &&
                 (query.tagId == null ||
@@ -1171,7 +1199,7 @@ class SampleWorkspaceSource
 
   bool _matchesKeyword(WorkspaceRecordSummary record, String keyword) {
     final metadata =
-        '${record.name} ${record.description} ${record.type.name} ${record.tags.map((t) => t.name).join(' ')}'
+        '${record.name} ${record.description} ${record.type.name} ${_currentClassification(record).tags.map((t) => t.name).join(' ')}'
             .toLowerCase();
     return keyword
         .toLowerCase()
@@ -1254,7 +1282,7 @@ class SampleWorkspaceSource
                           WorkspaceRecordKind.credential) &&
                   _acceptsRelation(rule, detail.record) &&
                   _matchesKeyword(detail.record, query.keyword))
-                detail.record,
+                _currentClassification(detail.record),
           ];
     candidates.sort((a, b) {
       final named = a.name.compareTo(b.name);
@@ -2128,7 +2156,8 @@ class SampleWorkspaceSource
     _adoptionPlans.clear();
     _committedRecordOperations.clear();
     loseNextRecordReply = false;
-    _directoryOperations.clear();
+    _tagRemovalPlans.clear();
+    loseNextClassificationReply = false;
     _versions.clear();
     _entryIdentityOwners.clear();
     _files.clear();
@@ -2140,7 +2169,7 @@ class SampleWorkspaceSource
     _legacy.reset();
     _hosts.clear();
     _fileOperations.clear();
-    _clock = _nextRecord = _nextDirectory = _nextRecycle = 0;
+    _clock = _nextRecord = _nextRecycle = 0;
     _catalogVersion++;
     nextSaveFailure = null;
     await _ensureData();
@@ -2194,7 +2223,8 @@ class SampleWorkspaceSource
       ),
     );
     _nextRecycle = 0;
-    _directoryOperations.clear();
+    _tagRemovalPlans.clear();
+    loseNextClassificationReply = false;
     if (_initialCatalog case final initial?) _catalog = initial;
     _catalogVersion++;
     nextSaveFailure = null;

@@ -55,6 +55,13 @@ abstract interface class WorkspaceSource implements WorkspaceRelationSource {
   /// Returns the created/updated directory, or null after an empty deletion.
   /// Rejections throw WorkspaceFailure and leave classification unchanged.
   Future<WorkspaceDirectory?> changeDirectory(WorkspaceDirectoryChange change);
+  Future<WorkspaceClassificationReceipt> changeClassification(
+    WorkspaceClassificationChange change,
+  );
+  Future<WorkspaceClassificationReceipt?> classificationOperationReceipt(
+    String operationId,
+  );
+  Future<WorkspaceTagRemovalPreview> previewTagRemoval(String tagId);
   Future<Map<String, Object?>> loadTemplate(String typeId);
   Future<WorkspaceAdoptionPreview> previewAdoption(
     WorkspaceAdoptionDraft draft,
