@@ -1,0 +1,33 @@
+00:00 +0: loading /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_grant_history_test.dart
+00:00 +0: metadata filters and pages the same decision facts, without content reads or duplicate credential grants
+00:00 +0 -1: metadata filters and pages the same decision facts, without content reads or duplicate credential grants [E]
+  type 'List<dynamic>' is not a subtype of type 'List<WorkspaceCredentialUseHistory>' in type cast
+  dart:core                                                                 new Map.unmodifiable
+  package:info_desktop/workspace/sample_workspace_credentials.dart 106:30   SampleWorkspaceCredentials.retainedHistory
+  package:info_desktop/workspace/sample_workspace_grant_history.dart 74:42  _SampleGrantHistory.all
+  package:info_desktop/workspace/sample_workspace_grant_history.dart 95:9   _SampleGrantHistory.query
+  
+00:00 +0 -1: separate deadlines, session ending and revocation project current status without extending approval
+00:00 +1 -1: Owner snapshot stays at approved record version; recycle preserves it, purge leaves only metadata
+00:00 +2 -1: ordinary file history pins the selected old attachment version and never exposes credential content
+00:00 +2 -2: ordinary file history pins the selected old attachment version and never exposes credential content [E]
+  type 'List<dynamic>' is not a subtype of type 'List<WorkspaceCredentialUseHistory>' in type cast
+  dart:core                                                                 new Map.unmodifiable
+  package:info_desktop/workspace/sample_workspace_credentials.dart 106:30   SampleWorkspaceCredentials.retainedHistory
+  package:info_desktop/workspace/sample_workspace_grant_history.dart 74:42  _SampleGrantHistory.all
+  package:info_desktop/workspace/sample_workspace_grant_history.dart 95:9   _SampleGrantHistory.query
+  
+00:00 +2 -2: reset restores baseline audit, while empty dataset never revives prior grants
+00:00 +2 -3: reset restores baseline audit, while empty dataset never revives prior grants [E]
+  type 'List<dynamic>' is not a subtype of type 'List<WorkspaceCredentialUseHistory>' in type cast
+  dart:core                                                                 new Map.unmodifiable
+  package:info_desktop/workspace/sample_workspace_credentials.dart 106:30   SampleWorkspaceCredentials.retainedHistory
+  package:info_desktop/workspace/sample_workspace_grant_history.dart 74:42  _SampleGrantHistory.all
+  package:info_desktop/workspace/sample_workspace_grant_history.dart 95:9   _SampleGrantHistory.query
+  
+00:00 +2 -3: Some tests failed.
+
+Failing tests:
+  /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_grant_history_test.dart: metadata filters and pages the same decision facts, without content reads or duplicate credential grants
+  /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_grant_history_test.dart: ordinary file history pins the selected old attachment version and never exposes credential content
+  /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_grant_history_test.dart: reset restores baseline audit, while empty dataset never revives prior grants
