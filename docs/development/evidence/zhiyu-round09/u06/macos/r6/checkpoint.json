@@ -1,0 +1,75 @@
+{
+  "createdAt": "2026-10-27T07:05:26.074809+00:00",
+  "sourceCommit": "8429122b7b5fb02d32b28092cf6add3a4ed0ef7d",
+  "branch": "codex/zhiyu-macos",
+  "issue": 67,
+  "state": "OPEN",
+  "checkedTotal": 6,
+  "criteriaTotal": 7,
+  "scope": "read-only organization, legacy whole-plan review, shared grant/operation links and U06 state/interface audit",
+  "checks": {
+    "analysis": "No issues found",
+    "relatedTests": 347,
+    "newTests": 17,
+    "newModelControllerTests": 13,
+    "newWidgetPaths": 4,
+    "build": "fixed path isolated Mac arm64 preview passed",
+    "screenshots": [
+      "screenshots/proposals-1440-light-organization-result.png",
+      "screenshots/proposals-1280-dark200-legacy-organization.png",
+      "screenshots/proposals-1440-light-organization-unknown.png",
+      "screenshots/proposals-1440-light-organization-conflict.png"
+    ]
+  },
+  "native": {
+    "bundleIdentifier": "com.example.infoDesktop.zhiyuPreview",
+    "AgentInfoInterfacePreview": "YES",
+    "architecture": "arm64",
+    "fixedApp": "apps/desktop/build/macos/Build/Products/Debug/info_desktop.app",
+    "newCocoaRuntime": false,
+    "sourceHashes": "native-source-hashes.json"
+  },
+  "environment": {
+    "macOS": "27.0.1 26A434",
+    "Xcode": "27.1 27A9275",
+    "Flutter": "3.47.7",
+    "Dart": "3.13.5",
+    "fonts": [
+      "SFNS",
+      "PingFang SC",
+      "Menlo"
+    ],
+    "DPR": 1,
+    "viewports": [
+      [
+        1440,
+        900
+      ],
+      [
+        1280,
+        800
+      ]
+    ],
+    "textScales": [
+      1,
+      2
+    ],
+    "reference": "frozen R11/R12"
+  },
+  "isolation": {
+    "productionChannels": 0,
+    "httpRequests": 0,
+    "rejectedFilePaths": 0,
+    "method": "same composition guard includes actual organization-to-history and legacy confirmation in addition to existing proposals/unknown batch",
+    "computerUse": false,
+    "subagents": false,
+    "windowsCI": false,
+    "systemPermissions": false,
+    "personalData": false
+  },
+  "pending": [
+    "complete S5 reference/actual matrix, real OS input, normal-speed recording and existing dark200 topbar badge clipping",
+    "production service integration after all seven UI modules via F01"
+  ],
+  "next": "U07 global settings. Active goal; manual gates remain open."
+}
