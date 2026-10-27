@@ -1,0 +1,20 @@
+00:00 +0: loading /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_grant_history_test.dart
+00:00 +0: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_grant_history_test.dart: metadata filters and pages the same decision facts, without content reads or duplicate credential grants
+00:00 +1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/grant_history_controller_test.dart: late list and detail replies never replace a newer history selection
+00:00 +2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/grant_history_controller_test.dart: late list and detail replies never replace a newer history selection
+00:00 +3: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_grant_history_test.dart: Owner snapshot stays at approved record version; recycle preserves it, purge leaves only metadata
+00:00 +4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/grant_history_controller_test.dart: paging keeps stable identity, active expiry retains the selected record and exact deadlines
+00:00 +5: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_grant_history_test.dart: ordinary file history pins the selected old attachment version and never exposes credential content
+00:00 +6: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_grant_history_test.dart: ordinary file history pins the selected old attachment version and never exposes credential content
+00:00 +7: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/grant_history_controller_test.dart: confirmed absence permits an explicit new revoke but does not retry automatically
+00:00 +8: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/grant_history_controller_test.dart: confirmed absence permits an explicit new revoke but does not retry automatically
+00:00 +9: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_grant_history_test.dart: historical target names are explicit facts, including separators and organization scopes
+00:00 +10: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/grant_history_controller_test.dart: failed refresh preserves old detail and positions while disabling stale revoke until explicit reread
+00:00 +11: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_preview_isolation_test.dart: Mac preview composition, plugins, adoption and legacy conversion avoid production channels, network and personal paths
+00:05 +12: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_preview_isolation_test.dart: Mac preview composition, plugins, adoption and legacy conversion avoid production channels, network and personal paths
+00:06 +13: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_preview_isolation_test.dart: Mac preview composition, plugins, adoption and legacy conversion avoid production channels, network and personal paths
+00:08 +14: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_preview_isolation_test.dart: Mac preview composition, plugins, adoption and legacy conversion avoid production channels, network and personal paths
+00:10 +15: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_preview_isolation_test.dart: Mac preview composition, plugins, adoption and legacy conversion avoid production channels, network and personal paths
+00:13 +16: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_preview_isolation_test.dart: Mac preview composition, plugins, adoption and legacy conversion avoid production channels, network and personal paths
+00:15 +17: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_preview_isolation_test.dart: Mac preview composition, plugins, adoption and legacy conversion avoid production channels, network and personal paths
+00:19 +18: All tests passed!

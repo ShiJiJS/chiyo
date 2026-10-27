@@ -1,0 +1,21 @@
+00:00 +0: loading /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_grant_history_test.dart
+00:00 +0: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_grant_history_test.dart: metadata filters and pages the same decision facts, without content reads or duplicate credential grants
+00:00 +1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/grant_history_controller_test.dart: late list and detail replies never replace a newer history selection
+00:00 +2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_grant_history_test.dart: separate deadlines, session ending and revocation project current status without extending approval
+00:00 +3: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/grant_history_controller_test.dart: paging keeps stable identity, active expiry retains the selected record and exact deadlines
+00:00 +4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_grant_history_test.dart: Owner snapshot stays at approved record version; recycle preserves it, purge leaves only metadata
+00:01 +5: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_grant_history_test.dart: Owner snapshot stays at approved record version; recycle preserves it, purge leaves only metadata
+00:01 +6: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/grant_history_controller_test.dart: confirmed absence permits an explicit new revoke but does not retry automatically
+00:01 +7: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_grant_history_test.dart: ordinary file history pins the selected old attachment version and never exposes credential content
+00:01 +8: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_grant_history_test.dart: ordinary file history pins the selected old attachment version and never exposes credential content
+00:01 +9: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_grant_history_test.dart: reset restores baseline audit, while empty dataset never revives prior grants
+00:01 +10: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_grant_history_test.dart: historical target names are explicit facts, including separators and organization scopes
+00:01 +11: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_grant_history_test.dart: (setUpAll)
+00:01 +11: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_preview_isolation_test.dart: Mac preview composition, plugins, adoption and legacy conversion avoid production channels, network and personal paths
+00:09 +12: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_preview_isolation_test.dart: Mac preview composition, plugins, adoption and legacy conversion avoid production channels, network and personal paths
+00:13 +13: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_preview_isolation_test.dart: Mac preview composition, plugins, adoption and legacy conversion avoid production channels, network and personal paths
+00:17 +14: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_preview_isolation_test.dart: Mac preview composition, plugins, adoption and legacy conversion avoid production channels, network and personal paths
+00:19 +15: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_preview_isolation_test.dart: Mac preview composition, plugins, adoption and legacy conversion avoid production channels, network and personal paths
+00:24 +16: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_preview_isolation_test.dart: Mac preview composition, plugins, adoption and legacy conversion avoid production channels, network and personal paths
+00:26 +17: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_preview_isolation_test.dart: Mac preview composition, plugins, adoption and legacy conversion avoid production channels, network and personal paths
+00:32 +18: All tests passed!
