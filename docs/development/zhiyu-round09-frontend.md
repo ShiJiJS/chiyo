@@ -13,7 +13,7 @@
 | [#64 档案、文档、文件、凭据](https://github.com/ShiJiJS/agent-info-manage/issues/64) | 等待#63 |
 | [#65 插件与旧资料套模板](https://github.com/ShiJiJS/agent-info-manage/issues/65) | 等待#62；按依赖继续排队 |
 | [#66 访问审批](https://github.com/ShiJiJS/agent-info-manage/issues/66) | Mac r2：7/8且OPEN，审批、单次结果与状态/接口交接已接；完整S5/OS输入后补，接着U06。[记录](zhiyu-macos-approvals.md) |
-| [#67 提案与历史](https://github.com/ShiJiJS/agent-info-manage/issues/67) | 等待#62；按依赖继续排队 |
+| [#67 提案与历史](https://github.com/ShiJiJS/agent-info-manage/issues/67) | Mac前置导航保护已完成，页面仍0/7；继续提案/历史。[记录](zhiyu-macos-navigation.md) |
 | [#68 全局设置](https://github.com/ShiJiJS/agent-info-manage/issues/68) | 等待#62；按依赖继续排队 |
 
 ## #62已经实现什么（Windows历史检查点）

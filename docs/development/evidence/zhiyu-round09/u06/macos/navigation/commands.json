@@ -1,0 +1,136 @@
+{
+  "cwd": "/Users/jiangxinyi/Documents/Project/agent-info/apps/desktop",
+  "commands": [
+    {
+      "log": "reproduction.log",
+      "argv": [
+        "/Users/jiangxinyi/Documents/Project/agent-info/scripts/dev-macos.sh",
+        "flutter",
+        "test",
+        "--no-pub",
+        "test/mac_preview_desktop_test.dart",
+        "--reporter",
+        "expanded"
+      ],
+      "productionSourceBase": "c8c84cbf",
+      "result": "two passed; three targeted failures reproduced"
+    },
+    {
+      "log": "analysis.log",
+      "argv": [
+        "/Users/jiangxinyi/Documents/Project/agent-info/scripts/dev-macos.sh",
+        "flutter",
+        "analyze",
+        "--no-pub",
+        "--fatal-infos",
+        "lib/workspace",
+        "test/mac_preview_desktop_test.dart",
+        "test/zhiyu_preview_test.dart",
+        "test/zhiyu_approvals_test.dart"
+      ]
+    },
+    {
+      "log": "focused-first.log",
+      "argv": [
+        "/Users/jiangxinyi/Documents/Project/agent-info/scripts/dev-macos.sh",
+        "flutter",
+        "test",
+        "--no-pub",
+        "test/mac_preview_desktop_test.dart",
+        "test/zhiyu_preview_test.dart",
+        "test/zhiyu_plugins_test.dart",
+        "test/zhiyu_legacy_templates_test.dart",
+        "test/zhiyu_approvals_test.dart",
+        "test/mac_preview_isolation_test.dart",
+        "--reporter",
+        "expanded"
+      ]
+    },
+    {
+      "log": "regression.log",
+      "argv": [
+        "/Users/jiangxinyi/Documents/Project/agent-info/scripts/dev-macos.sh",
+        "flutter",
+        "test",
+        "--no-pub",
+        "--concurrency=2",
+        "test/zhiyu_plugin_contracts_test.dart",
+        "test/workspace_legacy_templates_test.dart",
+        "test/zhiyu_legacy_templates_test.dart",
+        "test/workspace_adoption_test.dart",
+        "test/zhiyu_adoption_test.dart",
+        "test/workspace_hosts_test.dart",
+        "test/workspace_plugins_test.dart",
+        "test/plugin_mutation_test.dart",
+        "test/zhiyu_plugins_test.dart",
+        "test/record_mutation_test.dart",
+        "test/zhiyu_record_receipts_test.dart",
+        "test/mac_preview_isolation_test.dart",
+        "test/mac_preview_desktop_test.dart",
+        "test/zhiyu_content_states_test.dart",
+        "test/credential_lifecycle_test.dart",
+        "test/zhiyu_credential_lifecycle_test.dart",
+        "test/workspace_credentials_test.dart",
+        "test/credential_mutation_test.dart",
+        "test/zhiyu_credentials_test.dart",
+        "test/workspace_content_test.dart",
+        "test/zhiyu_content_test.dart",
+        "test/workspace_entries_test.dart",
+        "test/zhiyu_profile_test.dart",
+        "test/zhiyu_library_fidelity_test.dart",
+        "test/workspace_stress_test.dart",
+        "test/zhiyu_stress_test.dart",
+        "test/zhiyu_history_test.dart",
+        "test/workspace_history_test.dart",
+        "test/zhiyu_relations_test.dart",
+        "test/zhiyu_library_test.dart",
+        "test/workspace_records_test.dart",
+        "test/zhiyu_directory_test.dart",
+        "test/zhiyu_preview_test.dart",
+        "test/workspace_controller_test.dart",
+        "test/desktop_controls_test.dart",
+        "test/desktop_motion_contract_test.dart",
+        "test/workspace_approvals_test.dart",
+        "test/approvals_controller_test.dart",
+        "test/zhiyu_approvals_test.dart",
+        "test/workspace_approval_executions_test.dart",
+        "--reporter",
+        "expanded"
+      ]
+    },
+    {
+      "log": "focused-final.log",
+      "argv": [
+        "/Users/jiangxinyi/Documents/Project/agent-info/scripts/dev-macos.sh",
+        "flutter",
+        "test",
+        "--no-pub",
+        "test/mac_preview_desktop_test.dart",
+        "test/zhiyu_preview_test.dart",
+        "test/zhiyu_plugins_test.dart",
+        "test/zhiyu_legacy_templates_test.dart",
+        "test/zhiyu_approvals_test.dart",
+        "test/mac_preview_isolation_test.dart",
+        "--reporter",
+        "expanded"
+      ]
+    },
+    {
+      "log": "build.log",
+      "argv": [
+        "/Users/jiangxinyi/Documents/Project/agent-info/scripts/dev-macos.sh",
+        "flutter",
+        "build",
+        "macos",
+        "--debug",
+        "--no-pub",
+        "--target",
+        "lib/preview_main.dart"
+      ],
+      "environment": {
+        "XCODE_XCCONFIG_FILE": "/Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/macos/Runner/Configs/Preview.xcconfig",
+        "FLUTTER_MACOS_ARM64_ONLY": "true"
+      }
+    }
+  ]
+}
