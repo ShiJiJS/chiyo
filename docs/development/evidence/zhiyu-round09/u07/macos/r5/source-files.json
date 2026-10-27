@@ -1,0 +1,18 @@
+{
+  "apps/desktop/lib/workspace/preview_workspace.dart": "b3bb3866cb946d59d83dc7d712846897e1ee0697041d0cab2e43c5b1124f7a14",
+  "apps/desktop/lib/workspace/runtime_controller.dart": "656c1d3246e639cd6506926f392d415b13a942dea521d63d43819676e92336b4",
+  "apps/desktop/lib/workspace/runtime_page.dart": "7cfe83d5fa9bd8fad52b66058a85fe7a7628be0e672a8ff0557a48d985db5a05",
+  "apps/desktop/lib/workspace/sample_workspace_backup.dart": "99b1905af3e75e964d4d97eb337b3ba5fff49cdd25c67709158a475ccc49826b",
+  "apps/desktop/lib/workspace/sample_workspace_credentials.dart": "22069f74f8c6af6669fb192665fd4b07c29ceb9ebbb1cd76a9ec13eaa9eb4b8c",
+  "apps/desktop/lib/workspace/sample_workspace_retention.dart": "e4fc6a9b67625b1b9ee46dfb920a51d74e5730e7cf6ac3c4c708b280ba721f41",
+  "apps/desktop/lib/workspace/sample_workspace_runtime.dart": "02d6ea5c00a3070dc1fe8b110d1392dc339b56b09759b92faadc3ef0a3211608",
+  "apps/desktop/lib/workspace/sample_workspace_source.dart": "db1f67b2953afa91cb996f303fd0539d0667985e503a65dbdbc50a2d2df5682a",
+  "apps/desktop/lib/workspace/settings_controller.dart": "fac8e3354083e0f7fa4a482ee38da3b3d97228628ebd0d0c700ecb9320e62ef2",
+  "apps/desktop/lib/workspace/settings_page.dart": "28e509ebb39133200bb367283c1bbd6e3afa23bfaf46e5a0a62e02e43b6fba51",
+  "apps/desktop/lib/workspace/workspace_runtime.dart": "f9c4b63e40b693e9ab4e2964647635a4d5a2cf012e22e84f75d663fd3f4cc482",
+  "apps/desktop/lib/workspace/workspace_source.dart": "377732384384b3a4337c748a468ccc10e578ac18bbc7374851cb0486b98a9e87",
+  "apps/desktop/test/mac_preview_isolation_test.dart": "6bc40e591d4259fa44378ac77c7b4257403daeaa6defbd54c6520c89ac665d0b",
+  "apps/desktop/test/workspace_runtime_test.dart": "88f36b9fd8b9bf73746733e3ba98cc5ad3b22c47708dd90e72d2f7d23159d402",
+  "apps/desktop/test/zhiyu_runtime_test.dart": "65f1263e7aa51a283f65623691b228bf48ed6654c3804a9de009dd177f71ac1c",
+  "apps/desktop/test/zhiyu_settings_test.dart": "5186b26ef51167d497fbad934750b454b505da53df75bb062d6dc36a0f8768e0"
+}

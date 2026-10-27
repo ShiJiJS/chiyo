@@ -1,0 +1,87 @@
+{
+  "createdAt": "2026-10-27T17:57:32.013690+00:00",
+  "sourceCommit": "7fdee2cb1c96f8e22bffcb412c2503375e9c7b74",
+  "branch": "codex/zhiyu-macos",
+  "issue": 68,
+  "state": "OPEN",
+  "checkedTotal": 0,
+  "criteriaTotal": 8,
+  "scope": "U07 runtime status, background preference, canonical material/copy maintenance, reviewed shutdown and partial failure frontend; isolated synthetic state only",
+  "checks": {
+    "analysis": "No issues found",
+    "relatedTests": 424,
+    "focusedTests": 20,
+    "focusedConsecutivePasses": 2,
+    "newModelControllerTests": 14,
+    "newWidgetPaths": 6,
+    "newTests": 20,
+    "compositionGuard": "maintenance, hide/show, unknown quit native-navigation rejection and stopped preview with production channels/HTTP/unexpected files forbidden passed",
+    "build": "fixed-path Mac arm64 preview passed",
+    "screenshots": [
+      "screenshots/runtime-1280-dark200-attachments-failure.png",
+      "screenshots/runtime-1280-dark200-attachments-result.png",
+      "screenshots/runtime-1280-dark200-quit-unknown.png",
+      "screenshots/runtime-1280-dark200-termination-failed.png",
+      "screenshots/runtime-1440-light-materials-retained.png",
+      "screenshots/runtime-1440-light-overview.png",
+      "screenshots/runtime-1440-light-quit-review.png",
+      "screenshots/runtime-1440-light-save-failed.png",
+      "screenshots/runtime-1440-light-stopped.png"
+    ]
+  },
+  "native": {
+    "app": "apps/desktop/build/macos/Build/Products/Debug/info_desktop.app",
+    "bundleIdentifier": "com.example.infoDesktop.zhiyuPreview",
+    "AgentInfoInterfacePreview": "YES",
+    "architecture": "arm64",
+    "executableSha256": "8371aa1ca99e2d39397b488793aeda20db1b9237ec144ceecea096905fd9a4c0",
+    "newCocoaRuntime": false
+  },
+  "environment": {
+    "macOS": "27.0.1 26A434",
+    "Xcode": "Xcode 27.1\nBuild version 27A9275",
+    "Flutter": "3.47.7",
+    "Dart": "3.13.5",
+    "flutterRevision": "abaf9c523780a608bd46686fd5e53740a07077f8",
+    "fonts": {
+      "platform": "macos",
+      "Zhiyu System": "/System/Library/Fonts/SFNS.ttf",
+      "PingFang SC": "/System/Library/AssetsV2/com_apple_MobileAsset_Font8/86ba2c91f017a3749571a82f2c6d890ac7ffb2fb.asset/AssetData/PingFang.ttc",
+      "Menlo": "/System/Library/Fonts/Menlo.ttc"
+    },
+    "DPR": 1,
+    "viewports": [
+      [
+        1440,
+        900
+      ],
+      [
+        1280,
+        800
+      ]
+    ],
+    "textScales": [
+      1,
+      2
+    ],
+    "reference": "frozen R13; full S5 pending",
+    "data": "synthetic, resettable; same-source approved requests and runtime metadata"
+  },
+  "isolation": {
+    "computerUse": false,
+    "subagents": false,
+    "windowsCI": false,
+    "systemPermissions": false,
+    "personalData": false,
+    "realServiceStop": false,
+    "realWindowHideOrTerminate": false,
+    "realFileCleanup": false,
+    "productionDatabase": false
+  },
+  "pending": [
+    "U07 Agent connection and complete frontend handoff",
+    "complete S5/real OS input/normal-speed video and existing dark200 topbar badge clipping",
+    "real lifecycle, maintenance/retention and durable operation recovery after seven UI modules via F01"
+  ],
+  "next": "Continue U07 Agent connection. Active goal."
+}

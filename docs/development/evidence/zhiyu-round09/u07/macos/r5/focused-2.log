@@ -1,0 +1,24 @@
+00:00 +0: loading /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_runtime_test.dart
+00:00 +0: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_runtime_test.dart: (setUpAll)
+00:00 +0: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_runtime_test.dart: cold runtime state and read failure do not claim an available service or enable mutation
+00:00 +1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_runtime_test.dart: cold runtime state and read failure do not claim an available service or enable mutation
+00:00 +2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_runtime_test.dart: cold runtime state and read failure do not claim an available service or enable mutation
+00:00 +3: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_runtime_test.dart: cold runtime state and read failure do not claim an available service or enable mutation
+00:00 +4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_runtime_test.dart: cold runtime state and read failure do not claim an available service or enable mutation
+00:00 +5: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_runtime_test.dart: cold runtime state and read failure do not claim an available service or enable mutation
+00:00 +6: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_runtime_test.dart: cold runtime state and read failure do not claim an available service or enable mutation
+00:00 +7: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_runtime_test.dart: cold runtime state and read failure do not claim an available service or enable mutation
+00:00 +8: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_runtime_test.dart: cold runtime state and read failure do not claim an available service or enable mutation
+00:00 +9: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_runtime_test.dart: cold runtime state and read failure do not claim an available service or enable mutation
+00:00 +10: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_runtime_test.dart: cold runtime state and read failure do not claim an available service or enable mutation
+00:00 +11: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_runtime_test.dart: cold runtime state and read failure do not claim an available service or enable mutation
+00:00 +12: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_runtime_test.dart: cold runtime state and read failure do not claim an available service or enable mutation
+00:00 +13: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_runtime_test.dart: cold runtime state and read failure do not claim an available service or enable mutation
+00:00 +14: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_runtime_test.dart: cold runtime state and read failure do not claim an available service or enable mutation
+00:00 +15: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_runtime_test.dart: settings material flow retains unconfirmed processes, retries ended materials and routes to exact original request
+00:02 +16: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_runtime_test.dart: dark 200% attachment maintenance shows failure, pending identity and explicit cleanup without deleting original files
+00:03 +17: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_runtime_test.dart: background save failure preserves choice; close with background disabled requires cancellable quit confirmation
+00:04 +18: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_runtime_test.dart: save-failed quit retains readable data, ends grants and retries to preview stop without terminating the renderer
+00:05 +19: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_runtime_test.dart: unknown quit locks escape and navigation; verified termination failure retries only exit and keeps preview closable
+00:06 +20: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_runtime_test.dart: (tearDownAll)
+00:06 +20: All tests passed!
