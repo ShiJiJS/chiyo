@@ -75,6 +75,30 @@ class _WorkspaceSettingsPageState extends State<WorkspaceSettingsPage> {
     if (mounted && request != null) widget.onRequest(request);
   }
 
+  Future<void> _savePreferences() async {
+    if (!m.canPrepareSave) return;
+    if (!m.needsRetentionReview) {
+      await m.save();
+      return;
+    }
+    widget.onModalChanged?.call(true);
+    bool? confirmed;
+    try {
+      confirmed = await showDesktopDialog<bool>(
+        context,
+        builder: (_) => _RetentionReview(controller: m),
+      );
+    } finally {
+      widget.onModalChanged?.call(false);
+    }
+    if (!mounted) return;
+    if (confirmed == true) {
+      await m.save();
+    } else {
+      m.cancelRetention();
+    }
+  }
+
   Widget _feedback(BuildContext context) {
     final c = UiPalette.of(context);
     return Column(
@@ -123,13 +147,16 @@ class _WorkspaceSettingsPageState extends State<WorkspaceSettingsPage> {
               child: const Text('采用当前保存的设置'),
             ),
           ),
-        if (m.dirty && !m.uncertain && !m.conflicted)
+        if (m.dirty &&
+            !m.uncertain &&
+            !m.conflicted &&
+            m.section != WorkspaceSettingsSection.records)
           Align(
             alignment: Alignment.centerLeft,
             child: DesktopButton(
               key: const ValueKey('settings-save'),
-              onPressed: m.canSave ? m.save : null,
-              child: const Text('保存保留的选择'),
+              onPressed: m.canPrepareSave ? _savePreferences : null,
+              child: Text(m.needsRetentionReview ? '核对清理范围并保存' : '保存保留的选择'),
             ),
           ),
         const SizedBox(height: 18),
@@ -246,6 +273,84 @@ class _WorkspaceSettingsPageState extends State<WorkspaceSettingsPage> {
       ),
     ],
   );
+  Widget _records(BuildContext context) {
+    final enabled =
+        !m.frozen && !m.loading && m.readFailure == null && m.draft != null;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SettingsPreferenceRow(
+          title: '新申请等待时间',
+          description: '超过等待时间仍未处理的申请将到期。只影响之后提交的新申请；已有申请和已批准授权的到期时间不变。',
+          control: m.draft == null
+              ? const Text('尚未读取')
+              : SizedBox(
+                  width: 190,
+                  child: DesktopSelect<int>(
+                    key: const ValueKey('settings-request-minutes'),
+                    value: m.draft!.requestMinutes,
+                    items: [
+                      for (final n in [5, 15, 30, 60, 120])
+                        DropdownMenuItem(value: n, child: Text('$n 分钟')),
+                    ],
+                    onChanged: !enabled
+                        ? null
+                        : (n) {
+                            if (n != null) {
+                              m.stage(m.draft!.copyWith(requestMinutes: n));
+                            }
+                          },
+                  ),
+                ),
+        ),
+        SettingsPreferenceRow(
+          title: '记录保留期限',
+          description:
+              '管理申请、授权和操作结果记录。缩短期限前会显示清理范围；当前资料、文件原文、凭据材料、修订和回收站不随记录清理删除。',
+          control: m.draft == null
+              ? const Text('尚未读取')
+              : SizedBox(
+                  width: 190,
+                  child: DesktopSelect<int>(
+                    key: const ValueKey('settings-retention-days'),
+                    value: m.draft!.retentionDays,
+                    items: [
+                      for (final n in [30, 90, 180, 365])
+                        DropdownMenuItem(value: n, child: Text('$n 天')),
+                    ],
+                    onChanged: !enabled
+                        ? null
+                        : (n) {
+                            if (n != null) {
+                              m.stage(m.draft!.copyWith(retentionDays: n));
+                            }
+                          },
+                  ),
+                ),
+        ),
+        const SizedBox(height: 24),
+        Text(
+          '仍有效的授权、进行中的任务、未确认的执行结果和待清理材料会保留，不能通过缩短期限结束这些操作。',
+          style: libraryText(
+            context,
+            14,
+            color: UiPalette.of(context).muted,
+            height: 1.9,
+          ),
+        ),
+        const SizedBox(height: 24),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: DesktopButton(
+            key: const ValueKey('settings-records-save'),
+            onPressed: m.canPrepareSave ? _savePreferences : null,
+            child: Text(m.needsRetentionReview ? '核对清理范围并保存' : '保存设置'),
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _notifications(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
@@ -335,6 +440,8 @@ class _WorkspaceSettingsPageState extends State<WorkspaceSettingsPage> {
                         PrototypeIconGlyph.layers,
                       WorkspaceSettingsSection.notifications =>
                         PrototypeIconGlyph.inbox,
+                      WorkspaceSettingsSection.records =>
+                        PrototypeIconGlyph.clock,
                       WorkspaceSettingsSection.plugins =>
                         PrototypeIconGlyph.plugin,
                     }),
@@ -429,8 +536,11 @@ class _WorkspaceSettingsPageState extends State<WorkspaceSettingsPage> {
                               if (m.section ==
                                   WorkspaceSettingsSection.appearance)
                                 _appearance(context)
+                              else if (m.section ==
+                                  WorkspaceSettingsSection.notifications)
+                                _notifications(context)
                               else
-                                _notifications(context),
+                                _records(context),
                             ],
                           ),
                         ),
@@ -493,6 +603,90 @@ class SettingsPreferenceRow extends StatelessWidget {
       ),
     );
   }
+}
+
+class _RetentionReview extends StatefulWidget {
+  const _RetentionReview({required this.controller});
+  final WorkspaceSettingsController controller;
+  @override
+  State<_RetentionReview> createState() => _RetentionReviewState();
+}
+
+class _RetentionReviewState extends State<_RetentionReview> {
+  @override
+  void initState() {
+    super.initState();
+    Future<void>.microtask(widget.controller.prepareRetention);
+  }
+
+  @override
+  Widget build(BuildContext context) => ListenableBuilder(
+    listenable: widget.controller,
+    builder: (context, _) {
+      final m = widget.controller, p = m.retentionPreview;
+      return DesktopDialog(
+        title: const Text('核对记录清理范围'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (m.busy) ...[
+              const LinearProgressIndicator(),
+              const SizedBox(height: 16),
+              const Text('正在读取准确清理范围…'),
+            ],
+            if (m.retentionFailure != null) ...[
+              Text(m.retentionFailure!.message),
+              DesktopButton(
+                key: const ValueKey('settings-retention-retry'),
+                onPressed: m.busy ? null : m.prepareRetention,
+                child: const Text('重新读取范围'),
+              ),
+            ],
+            if (p != null) ...[
+              Text(
+                '将保留最近 ${p.days} 天的记录',
+                style: libraryText(context, 19, weight: FontWeight.w600),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                '截止时间：${p.cutoff.toLocal().toString().split(".").first}',
+                style: libraryText(context, 14),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                '清理 ${p.requests} 条申请、${p.grants} 条授权、${p.operations} 条操作结果。',
+                style: libraryText(context, 15, height: 1.9),
+              ),
+              Text(
+                '另有 ${p.preserved} 条活动或需继续核对的记录保留。',
+                style: libraryText(context, 14, height: 1.9),
+              ),
+              const SizedBox(height: 16),
+              const Text('清理后不能从记录页找回这些记录。资料内容、修订、回收站与凭据材料不会删除。范围变化时需要重新确认。'),
+            ],
+          ],
+        ),
+        actions: [
+          DesktopButton(
+            key: const ValueKey('settings-retention-cancel'),
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('取消'),
+          ),
+          DesktopButton(
+            key: const ValueKey('settings-retention-confirm'),
+            onPressed: m.busy || p == null
+                ? null
+                : () {
+                    m.confirmRetention(p);
+                    Navigator.pop(context, true);
+                  },
+            child: const Text('清理并保存'),
+          ),
+        ],
+      );
+    },
+  );
 }
 
 class _NotificationPreview extends StatefulWidget {

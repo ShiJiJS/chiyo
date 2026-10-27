@@ -186,6 +186,7 @@ class WorkspaceCredentialUseRequest {
     required this.submittedAt,
     this.state = WorkspaceCredentialRequestState.pending,
     this.approvalReference,
+    this.requestExpiresAt,
   });
   final String id, credentialName, purpose;
   final String? approvalReference;
@@ -196,6 +197,7 @@ class WorkspaceCredentialUseRequest {
   final WorkspaceCredentialReceiver receiver;
   final WorkspaceCredentialSession session;
   final DateTime submittedAt;
+  final DateTime? requestExpiresAt;
   final WorkspaceCredentialRequestState state;
   WorkspaceCredentialUseRequest withState(
     WorkspaceCredentialRequestState value,
@@ -213,6 +215,7 @@ class WorkspaceCredentialUseRequest {
     submittedAt: submittedAt,
     state: value,
     approvalReference: approvalReference,
+    requestExpiresAt: requestExpiresAt,
   );
 }
 

@@ -29,6 +29,7 @@ class _DeferredSettings extends Fake implements WorkspaceSettingsSource {
 
 void main() {
   const evidence = String.fromEnvironment('UI_EVIDENCE_DIR');
+
   testWidgets(
     'cold settings notification reading and failure never present an unconfirmed off switch',
     (t) async {
@@ -39,10 +40,7 @@ void main() {
             onTheme: (_) {},
           ),
           sample = SampleWorkspaceSource(),
-          plugins = PluginsController(
-        sample.plugins,
-            const Stream.empty(),
-          );
+          plugins = PluginsController(sample.plugins, const Stream.empty());
       addTearDown(settings.dispose);
       addTearDown(plugins.dispose);
       addTearDown(sample.dispose);
@@ -157,6 +155,11 @@ void main() {
       ).writeAsBytes(data!.buffer.asUint8List());
       image.dispose();
     });
+  }
+
+  Future<void> select(WidgetTester t, String key, String label) async {
+    await tap(t, find.byKey(ValueKey(key)));
+    await tap(t, find.text(label).last);
   }
 
   testWidgets(
@@ -287,6 +290,107 @@ void main() {
             .onPressed,
         isNull,
       );
+    },
+  );
+
+  testWidgets(
+    'retention preview read failure never permits cleanup and explicit retry reads a fresh scope',
+    (t) async {
+      final s = await start(t);
+      await tap(t, find.byKey(const ValueKey('settings-section-records')));
+      await select(t, 'settings-retention-days', '90 天');
+      s.setScenario(SampleWorkspaceScenario.failure);
+      await tap(t, find.byKey(const ValueKey('settings-records-save')));
+      expect(model(t).retentionFailure, isNotNull);
+      expect(
+        t
+            .widget<DesktopButton>(
+              find.byKey(const ValueKey('settings-retention-confirm')),
+            )
+            .onPressed,
+        isNull,
+      );
+      await capture(t, 'settings-1440-light-retention-read-failure');
+      s.setScenario(SampleWorkspaceScenario.ready);
+      await tap(t, find.byKey(const ValueKey('settings-retention-retry')));
+      expect(model(t).retentionFailure, isNull);
+      expect(model(t).retentionPreview!.grants, 0);
+      await tap(t, find.byKey(const ValueKey('settings-retention-confirm')));
+      expect((await s.settings.read()).retentionDays, 90);
+    },
+  );
+
+  testWidgets(
+    'records settings save from the shared sidebar and cancellation never clears history',
+    (t) async {
+      final s = await start(t);
+      await tap(t, find.byKey(const ValueKey('settings-section-records')));
+      await select(t, 'settings-request-minutes', '5 分钟');
+      expect((await s.settings.read()).requestMinutes, 30);
+      await tap(t, find.byKey(const ValueKey('settings-records-save')));
+      expect((await s.settings.read()).requestMinutes, 5);
+      s.advanceApprovalClock(const Duration(days: 60));
+      await ready(t);
+      final total = (await s.grantHistory.query(
+        const WorkspaceGrantQuery(),
+      )).total;
+      await select(t, 'settings-retention-days', '30 天');
+      await capture(t, 'settings-1440-light-records');
+      await tap(t, find.byKey(const ValueKey('settings-records-save')));
+      expect(find.text('核对记录清理范围'), findsOneWidget);
+      expect(find.textContaining('条操作结果。'), findsOneWidget);
+      await capture(t, 'settings-1440-light-retention-review');
+      await tap(t, find.byKey(const ValueKey('settings-retention-cancel')));
+      expect((await s.settings.read()).retentionDays, 180);
+      expect(model(t).draft!.retentionDays, 30);
+      expect(
+        (await s.grantHistory.query(const WorkspaceGrantQuery())).total,
+        total,
+      );
+      await tap(t, find.byKey(const ValueKey('settings-records-save')));
+      await tap(t, find.byKey(const ValueKey('settings-retention-confirm')));
+      expect((await s.settings.read()).retentionDays, 30);
+      expect(
+        (await s.grantHistory.query(const WorkspaceGrantQuery())).total,
+        0,
+      );
+      await tap(t, find.byKey(const ValueKey('workspace-nav-library')));
+      await tap(t, find.byKey(const ValueKey('workspace-nav-settings')));
+      expect(model(t).draft!.requestMinutes, 5);
+      expect(model(t).draft!.retentionDays, 30);
+    },
+  );
+
+  testWidgets(
+    'dark200 records confirmation preserves draft after a save failure and reconciles an unknown cleanup without replay',
+    (t) async {
+      final s = await start(t, dark: true);
+      await tap(t, find.byKey(const ValueKey('settings-section-records')));
+      s.advanceApprovalClock(const Duration(days: 60));
+      await ready(t);
+      await select(t, 'settings-retention-days', '30 天');
+      await t.ensureVisible(
+        find.byKey(const ValueKey('settings-records-save')),
+      );
+      await ready(t);
+      await capture(t, 'settings-1280-dark200-records');
+      await tap(t, find.byKey(const ValueKey('settings-records-save')));
+      await capture(t, 'settings-1280-dark200-retention-review');
+      s.nextSaveFailure = const WorkspaceFailure(
+        'disk_full',
+        '无法保存记录设置，选择已保留。',
+      );
+      await tap(t, find.byKey(const ValueKey('settings-retention-confirm')));
+      expect(model(t).writeFailure!.code, 'disk_full');
+      expect((await s.settings.read()).retentionDays, 180);
+      expect(model(t).draft!.retentionDays, 30);
+      await tap(t, find.byKey(const ValueKey('settings-records-save')));
+      s.settings.loseNextReply = true;
+      await tap(t, find.byKey(const ValueKey('settings-retention-confirm')));
+      expect(model(t).uncertain, true);
+      await tap(t, find.byKey(const ValueKey('settings-reconcile')));
+      expect(model(t).uncertain, false);
+      expect((await s.settings.read()).retentionDays, 30);
     },
   );
 }

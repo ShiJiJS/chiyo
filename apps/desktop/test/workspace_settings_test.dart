@@ -4,6 +4,7 @@ import 'package:info_desktop/workspace/sample_workspace_source.dart';
 import 'package:info_desktop/workspace/sample_workspace_fixture.dart';
 import 'package:info_desktop/workspace/settings_controller.dart';
 import 'package:info_desktop/workspace/workspace_source.dart';
+import 'workspace_approvals_test.dart' show decision;
 
 class _SettingsPort implements WorkspaceSettingsSource {
   _SettingsPort(this.inner);
@@ -11,6 +12,7 @@ class _SettingsPort implements WorkspaceSettingsSource {
   final writes = <WorkspaceSettingsChange>[], lookups = <String>[];
   bool absent = false, wrong = false, offline = false;
   Future<WorkspacePreferences> Function()? readOverride;
+  Future<WorkspaceRetentionPreview> Function(int)? previewOverride;
   WorkspaceSettingsReceipt _project(WorkspaceSettingsReceipt r) => wrong
       ? WorkspaceSettingsReceipt(
           operationId: r.operationId,
@@ -39,6 +41,9 @@ class _SettingsPort implements WorkspaceSettingsSource {
   @override
   Future<WorkspaceNotificationPreview> notificationPreview() =>
       inner.notificationPreview();
+  @override
+  Future<WorkspaceRetentionPreview> previewRetention(int days) =>
+      previewOverride?.call(days) ?? inner.previewRetention(days);
 }
 
 void main() {
@@ -287,6 +292,334 @@ void main() {
       await pending;
       expect((await s.settings.read()).version, 1);
       expect((await s.settings.read()).theme, WorkspaceTheme.light);
+    },
+  );
+
+  Future<WorkspaceCredentialUseRequest> request(String operation) async {
+    const ref = WorkspaceRecordRef(WorkspaceRecordKind.credential, 'sshkey');
+    final d = await s.credentials.read(ref);
+    final receipt = await s.credentials.requestUse(
+      WorkspaceCredentialUseDraft(
+        operationId: operation,
+        ref: ref,
+        expectedRecordVersion: d.recordVersion,
+        expectedMaterialVersion: d.materialVersion,
+        useGeneration: d.useGeneration,
+        purpose: '核对合成服务',
+        receiverId: (await s.credentials.receivers(ref)).first.id,
+        sessionId: (await s.credentials.sessions()).first.id,
+      ),
+    );
+    return (await s.approvals.read(
+      'credential:${receipt.requestId}',
+    )).credential!;
+  }
+
+  test(
+    'cancelled preview reading releases navigation and a late old scope cannot replace the next review',
+    () async {
+      await m.load();
+      m.stage(m.draft!.copyWith(retentionDays: 30));
+      final replies = <Completer<WorkspaceRetentionPreview>>[];
+      port.previewOverride = (days) {
+        final c = Completer<WorkspaceRetentionPreview>();
+        replies.add(c);
+        return c.future;
+      };
+      final first = m.prepareRetention();
+      expect(m.frozen, true);
+      m.cancelRetention();
+      expect(m.frozen, false);
+      final second = m.prepareRetention();
+      final p = await s.settings.previewRetention(30);
+      replies[1].complete(p);
+      await second;
+      expect(m.retentionPreview, same(p));
+      replies[0].completeError(const WorkspaceFailure('offline', '旧读取失败'));
+      await first;
+      expect(m.retentionPreview, same(p));
+      expect(m.retentionFailure, isNull);
+      expect(m.canSave, false);
+      m.confirmRetention(p);
+      expect(m.canSave, true);
+      m.stage(m.draft!.copyWith(retentionDays: 90));
+      expect(m.canSave, false);
+      m.confirmRetention(p);
+      expect(m.canSave, false);
+    },
+  );
+
+  Future<void> review(int days) async {
+    m.stage(m.draft!.copyWith(retentionDays: days));
+    await m.prepareRetention();
+    m.confirmRetention(m.retentionPreview!);
+  }
+
+  test(
+    'new request waiting deadlines are captured at submission and never rewrite old requests or grant deadlines',
+    () async {
+      await m.load();
+      final oldSeed = (await s.approvals.read('server')).request;
+      final first = await request('first');
+      expect(
+        first.requestExpiresAt!.difference(first.submittedAt),
+        const Duration(minutes: 30),
+      );
+      final firstDeadline = first.requestExpiresAt;
+      m.stage(m.draft!.copyWith(requestMinutes: 5));
+      await m.save();
+      final second = await request('second');
+      expect(
+        second.requestExpiresAt!.difference(second.submittedAt),
+        const Duration(minutes: 5),
+      );
+      expect(
+        (await s.approvals.read('server')).request.requestExpiresAt,
+        oldSeed.requestExpiresAt,
+      );
+      expect(
+        (await s.approvals.read(first.approvalId)).request.requestExpiresAt,
+        firstDeadline,
+      );
+      s.advanceApprovalClock(const Duration(minutes: 6));
+      expect(
+        (await s.approvals.read(second.approvalId)).request.state,
+        WorkspaceApprovalState.expired,
+      );
+      expect(
+        (await s.approvals.read(first.approvalId)).request.state,
+        WorkspaceApprovalState.pending,
+      );
+      final third = await request('third');
+      expect(
+        third.submittedAt,
+        first.submittedAt.add(const Duration(minutes: 6)),
+      );
+      final d = await s.approvals.read(first.approvalId);
+      await s.approvals.change(decision(d));
+      final granted = await s.approvals.read(first.approvalId);
+      m.stage(m.draft!.copyWith(requestMinutes: 120));
+      await m.save();
+      expect(
+        (await s.approvals.read(first.approvalId)).credentialExpiresAt,
+        granted.credentialExpiresAt,
+      );
+    },
+  );
+
+  test(
+    'retention preview is read only; missing or cancelled confirmation cannot prune or change preferences',
+    () async {
+      await m.load();
+      final before = await s.grantHistory.query(const WorkspaceGrantQuery());
+      s.advanceApprovalClock(const Duration(days: 60));
+      m.stage(m.draft!.copyWith(retentionDays: 30));
+      await m.save();
+      expect(port.writes, isEmpty);
+      await expectLater(
+        s.settings.change(
+          WorkspaceSettingsChange(
+            operationId: 'bypass',
+            expectedVersion: 1,
+            desired: m.draft!,
+          ),
+        ),
+        throwsA(
+          isA<WorkspaceFailure>().having(
+            (e) => e.code,
+            'code',
+            'review_required',
+          ),
+        ),
+      );
+      await m.prepareRetention();
+      expect(m.retentionPreview!.grants, before.total);
+      expect(m.retentionPreview!.requests, 5);
+      expect(
+        (await s.grantHistory.query(const WorkspaceGrantQuery())).total,
+        before.total,
+      );
+      m.cancelRetention();
+      await m.save();
+      expect(port.writes, isEmpty);
+      expect((await s.settings.read()).retentionDays, 180);
+    },
+  );
+
+  test(
+    'confirmed retention prunes exact canonical histories and requests, preserves content and receipts, and cannot resurface pending requests',
+    () async {
+      await m.load();
+      await s.approvals.change(
+        decision(
+          await s.approvals.read('token'),
+          action: WorkspaceApprovalAction.deny,
+          selected: [],
+        ),
+      );
+      final created = await request('old-request');
+      final contentBefore = await s.loadSummary();
+      s.advanceApprovalClock(const Duration(days: 60));
+      await review(30);
+      final p = m.retentionPreview!;
+      expect(p.requests, 6);
+      expect(p.grants, greaterThan(0));
+      expect(p.operations, greaterThan(0));
+      await m.save();
+      final command = port.writes.single;
+      expect((await s.settings.read()).retentionDays, 30);
+      expect(
+        (await s.grantHistory.query(const WorkspaceGrantQuery())).total,
+        0,
+      );
+      expect(
+        (await s.approvals.query(
+          const WorkspaceApprovalQuery(filter: WorkspaceApprovalFilter.all),
+        )).total,
+        0,
+      );
+      expect((await s.loadSummary()).records, contentBefore.records);
+      expect(
+        await s.credentials.history(
+          const WorkspaceRecordRef(WorkspaceRecordKind.credential, 'sshkey'),
+        ),
+        isEmpty,
+      );
+      await expectLater(
+        s.approvals.read(created.approvalId),
+        throwsA(isA<WorkspaceFailure>()),
+      );
+      final receipt = await s.settings.receipt(command.operationId);
+      expect(await s.settings.change(command), same(receipt));
+      expect((await s.settings.read()).version, 2);
+    },
+  );
+
+  test(
+    'history changes after preview reject the entire save and require a fresh confirmation',
+    () async {
+      await m.load();
+      s.advanceApprovalClock(const Duration(days: 60));
+      await review(30);
+      final before = await s.grantHistory.query(const WorkspaceGrantQuery());
+      await request('new-during-review');
+      await m.save();
+      expect(m.writeFailure!.code, 'retention_changed');
+      expect((await s.settings.read()).retentionDays, 180);
+      expect(
+        (await s.grantHistory.query(const WorkspaceGrantQuery())).total,
+        before.total,
+      );
+      expect(m.retentionPreview, isNull);
+      expect(m.canSave, false);
+      await m.prepareRetention();
+      expect(m.retentionPreview!.preserved, greaterThan(0));
+      m.confirmRetention(m.retentionPreview!);
+      await m.save();
+      expect((await s.loadSummary()).pending, 1);
+    },
+  );
+
+  test(
+    'definite save failure prunes nothing; explicit re-review and lost reply resolve exactly once without replay',
+    () async {
+      await m.load();
+      s.advanceApprovalClock(const Duration(days: 60));
+      await review(30);
+      final before = await s.grantHistory.query(const WorkspaceGrantQuery());
+      s.nextSaveFailure = const WorkspaceFailure('disk_full', '空间不足');
+      await m.save();
+      expect(m.writeFailure!.code, 'disk_full');
+      expect(m.draft!.retentionDays, 30);
+      expect(
+        (await s.grantHistory.query(const WorkspaceGrantQuery())).total,
+        before.total,
+      );
+      expect((await s.settings.read()).retentionDays, 180);
+      await m.prepareRetention();
+      m.confirmRetention(m.retentionPreview!);
+      s.settings.loseNextReply = true;
+      await m.save();
+      expect(m.uncertain, true);
+      expect(
+        (await s.grantHistory.query(const WorkspaceGrantQuery())).total,
+        0,
+      );
+      await m.reconcile();
+      expect(m.uncertain, false);
+      expect(port.writes, hasLength(2));
+      expect((await s.settings.read()).version, 2);
+    },
+  );
+
+  test(
+    'running or unresolved execution histories survive retention even after their grant expires',
+    () async {
+      await m.load();
+      await s.approvals.change(decision(await s.approvals.read('server')));
+      s.demonstrateApprovalExecutions('server');
+      s.advanceApprovalClock(const Duration(days: 60));
+      await review(30);
+      expect(m.retentionPreview!.preserved, greaterThan(0));
+      await m.save();
+      final h = await s.grantHistory.read('request:server');
+      expect(h.summary.operationCount, greaterThan(0));
+      expect((await s.approvals.read('server')).executions, isNotEmpty);
+    },
+  );
+
+  test(
+    'empty cleanup is explicit and preview reset invalidates its exact token',
+    () async {
+      await m.load();
+      s.setScenario(SampleWorkspaceScenario.empty);
+      await review(30);
+      expect(m.retentionPreview!.requests, 0);
+      expect(m.retentionPreview!.grants, 0);
+      await m.save();
+      expect((await s.settings.read()).retentionDays, 30);
+      m.stage(m.draft!.copyWith(retentionDays: 180));
+      await m.save();
+      await review(90);
+      s.setScenario(SampleWorkspaceScenario.ready);
+      await m.save();
+      expect(m.writeFailure!.code, 'review_required');
+      expect((await s.settings.read()).retentionDays, 180);
+    },
+  );
+  test(
+    'a recent process-end observation keeps the old execution until that observation also passes the retention cutoff',
+    () async {
+      await m.load();
+      await s.approvals.change(decision(await s.approvals.read('server')));
+      s.demonstrateApprovalExecutions('server');
+      s.advanceApprovalClock(const Duration(days: 60));
+      s.publishApprovalExecutionObservation('server');
+      final executions = (await s.approvals.read('server')).executions;
+      expect(
+        executions
+            .where((e) => e.state == WorkspaceExecutionState.unknown)
+            .single
+            .observedAt,
+        isNotNull,
+      );
+      await review(30);
+      await m.save();
+      expect(
+        (await s.grantHistory.read('request:server')).summary.operationCount,
+        3,
+      );
+      m.stage(m.draft!.copyWith(retentionDays: 90));
+      await m.save();
+      s.advanceApprovalClock(const Duration(days: 31));
+      await review(30);
+      expect(m.retentionPreview!.requests, 1);
+      expect(m.retentionPreview!.operations, 3);
+      await m.save();
+      await expectLater(
+        s.grantHistory.read('request:server'),
+        throwsA(isA<WorkspaceFailure>()),
+      );
     },
   );
 }

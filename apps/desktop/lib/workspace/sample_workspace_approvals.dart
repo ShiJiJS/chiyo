@@ -12,10 +12,13 @@ class _ApprovalInput {
     this.credential,
     this.requestedKeys = const {},
     this.additional = true,
-  });
+    DateTime? requestExpiresAt,
+  }) : requestExpiresAt =
+           requestExpiresAt ?? at.add(const Duration(minutes: 15));
   final String id, title, purpose;
   final WorkspaceApprovalKind kind;
   final DateTime at;
+  final DateTime requestExpiresAt;
   final WorkspaceCredentialSession session;
   final List<WorkspaceRecordRef> targets;
   final WorkspaceCredentialUseRequest? credential;
@@ -52,6 +55,7 @@ class _SampleApprovals implements WorkspaceApprovalSource {
   final _receipts =
       <String, ({String fingerprint, WorkspaceApprovalReceipt receipt})>{};
   final _ended = <String>{};
+  final _pruned = <String>{};
   final _organizationFinished = <String>{};
   final _executions = <String, Map<String, WorkspaceApprovalExecution>>{};
   WorkspaceFailure? nextExecutionReadFailure;
@@ -226,6 +230,7 @@ class _SampleApprovals implements WorkspaceApprovalSource {
     _seed();
     for (final r in s._credentials.requestFacts) {
       final id = 'credential:${r.id}';
+      if (_pruned.contains(id)) continue;
       if (!_dynamic.containsKey(id)) {
         final raw = _ApprovalInput(
           id,
@@ -237,12 +242,16 @@ class _SampleApprovals implements WorkspaceApprovalSource {
           [],
           credential: r,
           additional: false,
+          requestExpiresAt: r.requestExpiresAt,
         );
         _dynamic[id] = raw;
         raw.original = {for (final scope in _liveScopes(raw)) scope.id: scope};
       }
     }
-    return [..._inputs.values, ..._dynamic.values];
+    return [
+      ..._inputs.values,
+      ..._dynamic.values,
+    ].where((r) => !_pruned.contains(r.id)).toList();
   }
 
   _ApprovalInput _input(String id) =>
@@ -421,7 +430,7 @@ class _SampleApprovals implements WorkspaceApprovalSource {
       return WorkspaceApprovalState.sessionEnded;
     }
     if (f == null) {
-      if (!now.isBefore(r.at.add(const Duration(minutes: 15)))) {
+      if (!now.isBefore(r.requestExpiresAt)) {
         return WorkspaceApprovalState.expired;
       }
       final scopes = _scopes(r);
@@ -461,13 +470,14 @@ class _SampleApprovals implements WorkspaceApprovalSource {
         chatClaim: r.session.label,
         purpose: r.purpose,
         submittedAt: r.at,
-        requestExpiresAt: r.at.add(const Duration(minutes: 15)),
+        requestExpiresAt: r.requestExpiresAt,
         state: _state(r),
       );
   String _stamp(_ApprovalInput r) => hash({
     'epoch': s._epoch,
     'generation': _generation,
     'request': r.id,
+    'requestExpiresAt': r.requestExpiresAt.toIso8601String(),
     'fact': _facts[r.id]?.revision,
     'state': _state(r).name,
     'scope': [
@@ -878,6 +888,7 @@ class _SampleApprovals implements WorkspaceApprovalSource {
         continue;
       }
       rows[e.operationId] = e.observed(
+        at: now,
         revision: e.revision + 1,
         processEnded: true,
         cleanup: e.cleanup == WorkspaceExecutionCleanup.notNeeded
@@ -907,6 +918,7 @@ class _SampleApprovals implements WorkspaceApprovalSource {
     _facts.clear();
     _receipts.clear();
     _ended.clear();
+    _pruned.clear();
     _organizationFinished.clear();
     _executions.clear();
     nextExecutionReadFailure = null;
