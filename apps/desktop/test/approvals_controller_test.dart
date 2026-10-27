@@ -8,12 +8,21 @@ import 'package:info_desktop/workspace/workspace_source.dart';
 class _Port implements WorkspaceApprovalSource {
   _Port(this.inner);
   final WorkspaceApprovalSource inner;
+  Future<WorkspaceApprovalExecution> Function(String, String)?
+  executionOverride;
   Future<WorkspaceApprovalDetail> Function(String)? readOverride;
   Future<WorkspaceApprovalResults> Function(WorkspaceApprovalQuery, String?)?
   queryOverride;
   bool loseWithoutCommit = false, wrongDigest = false;
   int writes = 0;
   final commands = <WorkspaceApprovalChange>[];
+  @override
+  Future<WorkspaceApprovalExecution> execution(
+    String requestId,
+    String operationId,
+  ) =>
+      executionOverride?.call(requestId, operationId) ??
+      inner.execution(requestId, operationId);
   @override
   Future<WorkspaceApprovalDetail> read(String id) =>
       readOverride?.call(id) ?? inner.read(id);
@@ -174,6 +183,115 @@ void main() {
       expect(m.selection, isNull);
       expect(m.detail, isNull);
       expect(m.loading, false);
+    },
+  );
+  test(
+    'execution query preserves unknown on failure/wrong binding and reads only the original observation without a new write',
+    () async {
+      await m.load();
+      await m.decide(WorkspaceApprovalAction.approve);
+      s.demonstrateApprovalExecutions('server');
+      await m.load();
+      final old = m.detail!.executions.last,
+          expiry = m.detail!.credentialExpiresAt;
+      port.executionOverride = (_, _) async => m.detail!.executions.first;
+      await m.refreshExecution(old.operationId);
+      expect(m.executionError(old.operationId), contains('原操作不符'));
+      expect(
+        m.detail!.executions.last.observationDigest,
+        old.observationDigest,
+      );
+      port.executionOverride = (_, _) async => old.observed(
+        revision: old.revision,
+        processEnded: true,
+        cleanup: WorkspaceExecutionCleanup.complete,
+      );
+      await m.refreshExecution(old.operationId);
+      expect(m.executionError(old.operationId), isNotNull);
+      port.executionOverride = null;
+      s.nextApprovalExecutionReadFailure = const WorkspaceFailure(
+        'offline',
+        '查询失败',
+      );
+      await m.refreshExecution(old.operationId);
+      expect(m.executionError(old.operationId), '查询失败');
+      s.publishApprovalExecutionObservation('server');
+      expect(m.detail!.executions.last.processEnded, false);
+      await m.refreshExecution(old.operationId);
+      expect(m.executionError(old.operationId), isNull);
+      expect(m.detail!.executions.last.processEnded, true);
+      expect(m.detail!.executions.last.state, WorkspaceExecutionState.unknown);
+      expect(m.detail!.executions.last.exitCode, isNull);
+      expect(m.detail!.credentialExpiresAt, expiry);
+      expect(m.detail!.executions, hasLength(3));
+      expect(port.writes, 1);
+    },
+  );
+
+  test(
+    'late execution error cannot affect another request or a later visit',
+    () async {
+      await m.load();
+      await m.decide(WorkspaceApprovalAction.approve);
+      s.demonstrateApprovalExecutions('server');
+      await m.load();
+      final old = m.detail!.executions.last,
+          delayed = Completer<WorkspaceApprovalExecution>();
+      port.executionOverride = (_, _) => delayed.future;
+      final lookup = m.refreshExecution(old.operationId);
+      expect(m.readingExecution(old.operationId), true);
+      await m.select('token');
+      await m.select('server');
+      var newQueries = 0;
+      port.executionOverride = (request, operation) {
+        newQueries++;
+        return port.inner.execution(request, operation);
+      };
+      await m.refreshExecution(old.operationId);
+      expect(newQueries, 1);
+      delayed.completeError(const WorkspaceFailure('offline', '旧查询失败'));
+      await lookup;
+      expect(m.detail!.request.id, 'server');
+      expect(m.executionError(old.operationId), isNull);
+      expect(
+        m.detail!.executions.last.observationDigest,
+        old.observationDigest,
+      );
+      expect(m.executionError(old.operationId), isNull);
+      expect(m.readingExecution(old.operationId), false);
+    },
+  );
+
+  test(
+    'request-specific conflict does not block a different result and terminal selections use the approved members',
+    () async {
+      await m.load();
+      final original = Set.of(m.draft!.selected);
+      m.writeFailure = const WorkspaceFailure('conflict', '原请求变化');
+      await m.search('仓库');
+      expect(m.selection, 'token');
+      expect(m.canDecide, true);
+      await m.open('server');
+      final d = m.detail!,
+          host = d.scopes.firstWhere((x) => x.fieldKey == 'host');
+      await s.approvals.change(
+        WorkspaceApprovalChange(
+          operationId: 'other-owner',
+          requestId: 'server',
+          reviewToken: d.reviewToken,
+          action: WorkspaceApprovalAction.approve,
+          selected: [host.id],
+        ),
+      );
+      await m.select('token');
+      await m.select('server');
+      expect(m.draft!.selected, {host.id});
+      expect(m.draft!.selected, isNot(original));
+      m.writeFailure = const WorkspaceFailure('conflict', '旧错误');
+      m.resetView();
+      await m.load();
+      expect(m.writeFailure, isNull);
+      expect(m.notice, isNull);
     },
   );
 }

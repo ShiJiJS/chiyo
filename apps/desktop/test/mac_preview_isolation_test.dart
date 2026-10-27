@@ -339,6 +339,39 @@ void main() {
         historyBefore.length,
       );
       expect((await source.credentials.read(ssh)).privateNote, '隔离检查的合成备注');
+      final tokenRequest = find.byKey(const ValueKey('approval-select-token'));
+      await t.ensureVisible(tokenRequest);
+      await t.pumpAndSettle();
+      await t.tap(tokenRequest);
+      await t.pumpAndSettle();
+      await t.ensureVisible(approve);
+      await t.pumpAndSettle();
+      await t.tap(approve);
+      await t.pumpAndSettle();
+      await t.tap(find.byKey(const ValueKey('preview-guide')));
+      await t.pumpAndSettle();
+      final demoUses = find.byKey(
+        const ValueKey('preview-approval-executions'),
+      );
+      await t.ensureVisible(demoUses);
+      await t.tap(demoUses);
+      await t.pumpAndSettle();
+      final uses = (await source.approvals.read('token')).executions;
+      expect(uses, hasLength(3));
+      final lookup = find.byKey(
+        ValueKey('approval-operation-refresh-${uses.last.operationId}'),
+      );
+      await t.ensureVisible(lookup);
+      await t.pumpAndSettle();
+      await t.tap(lookup);
+      await t.pumpAndSettle();
+      expect(
+        (await source.approvals.execution(
+          'token',
+          uses.last.operationId,
+        )).state,
+        WorkspaceExecutionState.unknown,
+      );
       await t.tap(find.byKey(const ValueKey('preview-guide')));
       await t.pumpAndSettle();
       await t.tap(find.text('重置预览资料'));
@@ -346,6 +379,7 @@ void main() {
       expect((await source.credentials.read(ssh)).privateNote, isEmpty);
       expect((await source.loadSummary()).records, 31);
       expect((await source.loadSummary()).pending, 5);
+      expect((await source.approvals.read('token')).executions, isEmpty);
       expect(
         (await source.approvals.read('server')).request.state,
         WorkspaceApprovalState.pending,

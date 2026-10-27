@@ -56,6 +56,58 @@ class ApprovalsController extends ChangeNotifier {
       _refreshPending = false;
   double listScroll = 0, detailScroll = 0;
   final _drafts = <String, ApprovalDraft>{};
+  final _executionReads = <(String, String), ({int serial, int generation})>{};
+  int _executionSerial = 0;
+  final _executionErrors = <(String, String), String>{};
+  bool readingExecution(String id) =>
+      _executionReads[(selection, id)]?.generation == _generation;
+  String? executionError(String id) => _executionErrors[(selection, id)];
+
+  Future<void> refreshExecution(String id) async {
+    if (_closed ||
+        frozen ||
+        loading ||
+        reading ||
+        readingExecution(id) ||
+        detail == null) {
+      return;
+    }
+    final old = detail!.executions
+        .where((e) => e.operationId == id)
+        .firstOrNull;
+    if (old == null) return;
+    final request = selection!, generation = _generation, key = (request, id);
+    final serial = ++_executionSerial;
+    _executionReads[key] = (serial: serial, generation: generation);
+    _executionErrors.remove(key);
+    _notify();
+    try {
+      final next = await source.execution(request, id);
+      if (_closed ||
+          generation != _generation ||
+          selection != request ||
+          frozen) {
+        return;
+      }
+      if (!next.updates(old)) {
+        throw const WorkspaceFailure(
+          'unknown_outcome',
+          '使用结果与原操作不符，原状态已保留。请继续查询原操作，不要重跑。',
+        );
+      }
+      detail = detail!.withExecution(next);
+    } catch (error) {
+      if (!_closed && generation == _generation && selection == request) {
+        _executionErrors[key] = error is WorkspaceFailure
+            ? error.message
+            : '暂时无法确认原操作，原状态已保留。请稍后查询，不要重跑。';
+      }
+    } finally {
+      if (_executionReads[key]?.serial == serial) _executionReads.remove(key);
+      _notify();
+    }
+  }
+
   WorkspaceApprovalChange? _command;
   bool get uncertain => writeFailure?.code == 'unknown_outcome';
   bool get frozen => busy || uncertain;
@@ -136,6 +188,7 @@ class ApprovalsController extends ChangeNotifier {
         if (_closed || generation != _generation) return;
       }
       if (selection != found.selection) {
+        writeFailure = null;
         detail = null;
         detailScroll = 0;
       }
@@ -172,6 +225,12 @@ class ApprovalsController extends ChangeNotifier {
 
   Future<void> open(String id) async {
     if (frozen || _closed) return;
+    if (selection != id) {
+      detail = null;
+      detailScroll = 0;
+      readFailure = writeFailure = null;
+      notice = null;
+    }
     filter = WorkspaceApprovalFilter.all;
     keyword = '';
     offset = 0;
@@ -195,7 +254,11 @@ class ApprovalsController extends ChangeNotifier {
       final current = await source.read(id);
       if (_closed || generation != _generation) return;
       detail = current;
-      _drafts.putIfAbsent(id, () => ApprovalDraft(current));
+      if (current.request.state != WorkspaceApprovalState.pending) {
+        _drafts[id] = ApprovalDraft(current);
+      } else {
+        _drafts.putIfAbsent(id, () => ApprovalDraft(current));
+      }
     } catch (e) {
       if (!_closed && generation == _generation) {
         readFailure = e is WorkspaceFailure
@@ -406,6 +469,11 @@ class ApprovalsController extends ChangeNotifier {
   void resetView() {
     if (frozen) return;
     _drafts.clear();
+    _executionErrors.clear();
+    _executionReads.clear();
+    readFailure = writeFailure = null;
+    notice = null;
+    _command = null;
     selection = null;
     detail = null;
     keyword = '';

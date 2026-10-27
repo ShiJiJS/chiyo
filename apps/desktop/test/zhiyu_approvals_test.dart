@@ -356,4 +356,230 @@ void main() {
       expect(m.detail!.request.state, WorkspaceApprovalState.approved);
     },
   );
+  testWidgets(
+    'unknown execution read keeps the exact operation on query failure, and cleanup readback does not claim success',
+    (t) async {
+      final s = await start(t), m = model(t);
+      await tap(t, find.byKey(const ValueKey('approval-approve')));
+      expect(find.text('尚无使用记录。批准不等于已经启动程序。'), findsOneWidget);
+      final expiry = m.detail!.credentialExpiresAt;
+      await tap(t, find.byKey(const ValueKey('preview-guide')));
+      await tap(t, find.byKey(const ValueKey('preview-approval-executions')));
+      expect(m.detail!.executions, hasLength(3));
+      final unknown = m.detail!.executions.last;
+      expect(
+        m.uncertain,
+        false,
+      ); // The decision is known; only this use result is unknown.
+      await tap(
+        t,
+        find.byKey(ValueKey('approval-operation-plan-${unknown.operationId}')),
+      );
+      expect(find.textContaining('授权：preview-grant:server'), findsOneWidget);
+      await t.ensureVisible(
+        find.byKey(ValueKey('approval-operation-${unknown.operationId}')),
+      );
+      await t.pumpAndSettle();
+      await capture(t, 'execution-1440-light-unknown');
+      await tap(t, find.byKey(const ValueKey('preview-guide')));
+      await tap(
+        t,
+        find.byKey(const ValueKey('preview-approval-execution-failure')),
+      );
+      await tap(
+        t,
+        find.byKey(
+          ValueKey('approval-operation-refresh-${unknown.operationId}'),
+        ),
+      );
+      expect(find.text('原操作暂时无法查询，原状态已保留。不要重跑。'), findsOneWidget);
+      expect(
+        m.detail!.executions.last.observationDigest,
+        unknown.observationDigest,
+      );
+      await tap(t, find.byKey(const ValueKey('preview-guide')));
+      await tap(
+        t,
+        find.byKey(const ValueKey('preview-approval-execution-observe')),
+      );
+      expect(m.detail!.executions.last.processEnded, false);
+      await tap(
+        t,
+        find.byKey(
+          ValueKey('approval-operation-refresh-${unknown.operationId}'),
+        ),
+      );
+      expect(m.detail!.executions.last.state, WorkspaceExecutionState.unknown);
+      expect(m.detail!.executions.last.processEnded, true);
+      expect(
+        m.detail!.executions.last.cleanup,
+        WorkspaceExecutionCleanup.complete,
+      );
+      expect(m.detail!.executions.last.exitCode, isNull);
+      expect(m.detail!.credentialExpiresAt, expiry);
+      expect(
+        (await s.credentials.history(unknown.credential.ref)).last.operations,
+        hasLength(3),
+      );
+      await capture(t, 'execution-1440-light-cleanup-confirmed');
+      await tap(t, find.byKey(const ValueKey('preview-guide')));
+      await tap(t, find.text('重置预览资料'));
+      expect(m.detail!.executions, isEmpty);
+      expect(m.detail!.request.state, WorkspaceApprovalState.pending);
+    },
+  );
+
+  testWidgets(
+    'dark200 use result and structured operation plan wrap without hiding the unknown warning',
+    (t) async {
+      await start(t, dark: true);
+      final m = model(t);
+      await tap(t, find.byKey(const ValueKey('approval-approve')));
+      await tap(t, find.byKey(const ValueKey('preview-guide')));
+      await tap(t, find.byKey(const ValueKey('preview-approval-executions')));
+      final unknown = m.detail!.executions.last;
+      await tap(
+        t,
+        find.byKey(ValueKey('approval-operation-plan-${unknown.operationId}')),
+      );
+      await t.ensureVisible(
+        find.text('尚不能确认执行结果。进程结束或材料已清理不代表执行成功；请查询原操作，不要重跑。'),
+      );
+      await t.pumpAndSettle();
+      await capture(t, 'execution-1280-dark-200');
+      await tap(
+        t,
+        find.byKey(
+          ValueKey('approval-operation-refresh-${unknown.operationId}'),
+        ),
+      );
+      expect(m.detail!.executions.last.state, WorkspaceExecutionState.unknown);
+      expect(t.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'guide expiry and session end retain the selected request, invalidate active scopes and reset to baseline',
+    (t) async {
+      final s = await start(t), m = model(t);
+      await tap(t, find.byKey(const ValueKey('approval-approve')));
+      await tap(t, find.byKey(const ValueKey('preview-guide')));
+      await tap(t, find.byKey(const ValueKey('preview-approval-expire')));
+      expect(m.selection, 'server');
+      expect(m.detail!.request.state, WorkspaceApprovalState.expired);
+      expect(m.detail!.scopes.any((x) => x.available), false);
+      await tap(t, find.byKey(const ValueKey('preview-guide')));
+      await tap(t, find.text('重置预览资料'));
+      await tap(t, find.byKey(const ValueKey('approval-approve')));
+      await tap(t, find.byKey(const ValueKey('preview-guide')));
+      await tap(t, find.byKey(const ValueKey('preview-approval-session-end')));
+      expect(m.selection, 'server');
+      expect(m.detail!.request.state, WorkspaceApprovalState.sessionEnded);
+      expect(m.detail!.scopes.any((x) => x.available), false);
+      expect(
+        (await s.credentials.requests())
+            .singleWhere((r) => r.approvalId == 'server')
+            .state,
+        WorkspaceCredentialRequestState.sessionEnded,
+      );
+    },
+  );
+
+  testWidgets(
+    'approval controls preserve a failed decision and distinguish empty, waiting and failed reads with real recovery actions',
+    (t) async {
+      final s = await start(t),
+          m = model(t),
+          selected = Set.of(model(t).draft!.selected);
+      s.nextSaveFailure = const WorkspaceFailure('offline', '决定提交失败，选择仍保留。');
+      await tap(t, find.byKey(const ValueKey('approval-approve')));
+      expect(m.detail!.request.state, WorkspaceApprovalState.pending);
+      expect(m.draft!.selected, selected);
+      expect(find.text('决定提交失败，选择仍保留。'), findsOneWidget);
+      await tap(t, find.byKey(const ValueKey('preview-guide')));
+      await tap(t, find.byKey(const ValueKey('preview-scenario-empty')));
+      expect(m.results!.total, 0);
+      expect(m.readFailure, isNull);
+      await tap(t, find.byKey(const ValueKey('preview-guide')));
+      await tap(t, find.byKey(const ValueKey('preview-scenario-ready')));
+      expect(m.results!.total, 5);
+      await tap(t, find.byKey(const ValueKey('preview-guide')));
+      // An indeterminate progress indicator intentionally never settles.
+      await t.ensureVisible(
+        find.byKey(const ValueKey('preview-scenario-waiting')),
+      );
+      await t.tap(find.byKey(const ValueKey('preview-scenario-waiting')));
+      await t.pump();
+      expect(m.loading, true);
+      expect(m.readFailure, isNull);
+      for (
+        var frame = 0;
+        frame < 40 &&
+            find
+                .byKey(const ValueKey('preview-scenario-waiting'))
+                .evaluate()
+                .isNotEmpty;
+        frame++
+      ) {
+        await t.pump(const Duration(milliseconds: 16));
+      }
+      expect(
+        find.byKey(const ValueKey('preview-scenario-waiting')),
+        findsNothing,
+      );
+      await t.tap(find.byKey(const ValueKey('preview-guide')));
+      await t.pump();
+      final normal = find.byKey(const ValueKey('preview-scenario-ready'));
+      await t.ensureVisible(normal);
+      await t.tap(normal);
+      await ready(t, () => !m.loading && !m.reading);
+      expect(m.results!.total, 5);
+      await tap(t, find.byKey(const ValueKey('preview-guide')));
+      await tap(t, find.byKey(const ValueKey('preview-scenario-failure')));
+      expect(m.readFailure, isNotNull);
+      await tap(t, find.byKey(const ValueKey('approval-retry')));
+      expect(m.readFailure, isNull);
+      expect(m.results!.total, 5);
+      expect(m.detail!.request.state, WorkspaceApprovalState.pending);
+    },
+  );
+  testWidgets(
+    'organization approval narrows fixed records, caps its deadline and does not pretend to apply classification results',
+    (t) async {
+      final s = await start(t), m = model(t);
+      await t.scrollUntilVisible(
+        find.byKey(const ValueKey('approval-select-organize')),
+        150,
+        scrollable: find
+            .descendant(
+              of: find.byKey(const ValueKey('approval-inbox-list')),
+              matching: find.byType(Scrollable),
+            )
+            .first,
+      );
+      await tap(t, find.byKey(const ValueKey('approval-select-organize')));
+      final scopes = m.detail!.scopes;
+      expect(scopes, hasLength(3));
+      final before = await s.readDetail(scopes[1].record);
+      await tap(t, find.byKey(const ValueKey('approval-tip')));
+      expect(find.textContaining('不再进行第二次批准'), findsOneWidget);
+      await tap(t, find.text('明白了'));
+      await tap(t, find.byKey(ValueKey('approval-scope-${scopes.first.id}')));
+      await tap(t, find.byKey(const ValueKey('approval-field-ttl')));
+      expect(find.text('1 小时'), findsNothing);
+      await tap(t, find.text('15 分钟').last);
+      await tap(t, find.byKey(const ValueKey('approval-approve')));
+      expect(m.detail!.approved, scopes.skip(1).map((x) => x.id).toSet());
+      expect(
+        m.detail!.fieldExpiresAt,
+        m.detail!.decidedAt!.add(const Duration(minutes: 15)),
+      );
+      expect(m.detail!.credentialExpiresAt, isNull);
+      final after = await s.readDetail(scopes[1].record);
+      expect(after.version, before.version);
+      expect(after.values, before.values);
+      expect(after.record.tags, before.record.tags);
+      expect(m.detail!.executions, isEmpty);
+    },
+  );
 }

@@ -263,6 +263,53 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
                 runSpacing: 10,
                 children: [
                   DesktopButton(
+                    key: const ValueKey('preview-approval-executions'),
+                    onPressed:
+                        _approvals.detail?.credentialExpiresAt != null &&
+                            _approvals.detail!.scopes.any(
+                              (x) =>
+                                  x.kind ==
+                                      WorkspaceApprovalScopeKind.credential &&
+                                  x.available,
+                            )
+                        ? () {
+                            _source.demonstrateApprovalExecutions(
+                              _approvals.selection!,
+                            );
+                            Navigator.pop(dialogContext);
+                          }
+                        : null,
+                    child: const Text('显示三次凭据使用结果'),
+                  ),
+                  DesktopButton(
+                    key: const ValueKey('preview-approval-execution-observe'),
+                    onPressed:
+                        _approvals.detail?.executions.any(
+                              (e) => e.state == WorkspaceExecutionState.unknown,
+                            ) ==
+                            true
+                        ? () {
+                            _source.publishApprovalExecutionObservation(
+                              _approvals.selection!,
+                            );
+                            Navigator.pop(dialogContext);
+                          }
+                        : null,
+                    child: const Text('更新未知操作的清理状态'),
+                  ),
+                  DesktopButton(
+                    key: const ValueKey('preview-approval-execution-failure'),
+                    onPressed: () {
+                      _source.nextApprovalExecutionReadFailure =
+                          const WorkspaceFailure(
+                            'offline',
+                            '原操作暂时无法查询，原状态已保留。不要重跑。',
+                          );
+                      Navigator.pop(dialogContext);
+                    },
+                    child: const Text('下一次使用结果查询失败'),
+                  ),
+                  DesktopButton(
                     key: const ValueKey('preview-approval-expire'),
                     onPressed: () {
                       _source.advanceApprovalClock(const Duration(hours: 9));
