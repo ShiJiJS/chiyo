@@ -29,6 +29,7 @@ part 'sample_workspace_partial_recycle.dart';
 part 'sample_workspace_retention.dart';
 part 'sample_workspace_classification.dart';
 part 'sample_workspace_backup.dart';
+part 'sample_workspace_runtime.dart';
 
 enum SampleWorkspaceScenario { ready, empty, waiting, failure }
 
@@ -53,6 +54,7 @@ class SampleWorkspaceSource
   final _credentialLinks = SampleCredentialLinks();
   late final _credentials = SampleWorkspaceCredentials(
     readable: _readable,
+    acceptingRequests: () => runtime.acceptingRequests,
     records: this,
     approvalState: (r) => _approvals.credentialState(r),
     approvalHistory: (r) => _approvals.credentialHistory(r),
@@ -71,6 +73,8 @@ class SampleWorkspaceSource
   WorkspaceCredentialSource get credentials => _credentials;
   @override
   late final SampleWorkspaceBackups backups = SampleWorkspaceBackups(this);
+  @override
+  late final SampleWorkspaceRuntime runtime = SampleWorkspaceRuntime(this);
   late final _approvals = _SampleApprovals(this);
   @override
   late final SampleWorkspaceSettings settings = SampleWorkspaceSettings(
@@ -2155,6 +2159,7 @@ class SampleWorkspaceSource
   /// page code still consumes the same WorkspaceSource contract.
   Future<void> replaceFixture(String fixtureJson) async {
     _restoredTypeDefinitions.clear();
+    runtime.resetCurrent();
     setScenario(SampleWorkspaceScenario.ready);
     _fixtureJson = fixtureJson;
     _loading = null;
@@ -2191,6 +2196,7 @@ class SampleWorkspaceSource
 
   void reset() {
     _restoredTypeDefinitions.clear();
+    runtime.resetCurrent();
     setScenario(SampleWorkspaceScenario.ready);
     _files.reset();
     _credentialLinks.reset();

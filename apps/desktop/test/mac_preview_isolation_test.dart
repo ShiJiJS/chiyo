@@ -691,6 +691,55 @@ void main() {
       await backup.write(WorkspaceBackupAction.restore);
       expect(backup.result!.action, WorkspaceBackupAction.restore);
       await t.pumpAndSettle();
+      var preparedRuntime = false;
+      final preparingRuntime = source.prepareRuntimeMaintenance().then(
+        (_) => preparedRuntime = true,
+      );
+      for (var i = 0; i < 300 && !preparedRuntime; i++) {
+        await t.pump(const Duration(milliseconds: 20));
+        await t.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 2)),
+        );
+      }
+      expect(preparedRuntime, true);
+      await preparingRuntime;
+      await t.pumpAndSettle();
+      final runtime = t
+          .widget<WorkspaceSettingsPage>(find.byType(WorkspaceSettingsPage))
+          .runtime;
+      await runtime.load();
+      await t.pumpAndSettle();
+      await runtime.write(WorkspaceRuntimeAction.checkMaterials);
+      await t.pumpAndSettle();
+      expect(runtime.failure, isNull);
+      await runtime.write(WorkspaceRuntimeAction.checkAttachments);
+      await t.pumpAndSettle();
+      expect(runtime.failure, isNull);
+      await runtime.write(WorkspaceRuntimeAction.hideWindow);
+      await t.pumpAndSettle();
+      expect(runtime.failure, isNull);
+      expect(runtime.value!.windowHidden, true);
+      await runtime.write(WorkspaceRuntimeAction.showWindow);
+      await t.pumpAndSettle();
+      expect(runtime.failure, isNull);
+      await runtime.prepareQuit();
+      source.runtime.loseNextReply = true;
+      await runtime.write(WorkspaceRuntimeAction.quit);
+      expect(runtime.uncertain, true);
+      final queuedQuit = Completer<void>();
+      await messenger.handlePlatformMessage(
+        MacPreviewDesktop.channel.name,
+        const StandardMethodCodec().encodeMethodCall(
+          const MethodCall('openLibrary'),
+        ),
+        (_) => queuedQuit.complete(),
+      );
+      await queuedQuit.future;
+      await t.pumpAndSettle();
+      expect(find.byType(WorkspaceSettingsPage), findsOneWidget);
+      await runtime.reconcile();
+      await t.pumpAndSettle();
+      expect(find.byKey(const ValueKey('runtime-stopped')), findsOneWidget);
       expect(forbidden, isEmpty);
       expect(network.calls, 0);
       expect(filesystem.rejected, isEmpty);

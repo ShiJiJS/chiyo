@@ -94,8 +94,10 @@ class SampleWorkspaceCredentials implements WorkspaceCredentialSource {
     this.approvalHistory,
     this.requestMinutes,
     this.approvalRequests,
+    this.acceptingRequests,
   });
   final Future<void> Function() readable;
+  final bool Function()? acceptingRequests;
   final SampleCredentialRecordStore records;
   final void Function() beforeWrite;
   final void Function(WorkspaceRecordRef) changed;
@@ -133,6 +135,10 @@ class SampleWorkspaceCredentials implements WorkspaceCredentialSource {
       <WorkspaceRecordRef, Map<int, WorkspaceCredentialMaterial>>{};
   WorkspaceFailure? nextReadFailure;
   int _sessionEpoch = 0;
+  void startNewSessions() {
+    _sessionEpoch++;
+  }
+
   List<WorkspaceCredentialSession> get _currentSessions => _sessionEpoch == 0
       ? _sessions
       : [
@@ -827,6 +833,9 @@ class SampleWorkspaceCredentials implements WorkspaceCredentialSource {
     WorkspaceCredentialUseDraft draft,
   ) async {
     await readable();
+    if (acceptingRequests?.call() == false) {
+      throw const WorkspaceFailure('service_unavailable', '本机服务已停止接收新申请，尚未提交。');
+    }
     final fingerprint = _fingerprint({
       'kind': 'request',
       'ref': draft.ref.key,
