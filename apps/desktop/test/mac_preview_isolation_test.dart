@@ -222,6 +222,35 @@ void main() {
       expect(controller.detail!.fieldIds['domain'], domainIdentity);
       expect(controller.detail!.values['domain'], 'isolation.example');
       expect((await source.loadSummary()).records, 32);
+      await t.tap(find.text('编辑信息'));
+      await t.pumpAndSettle();
+      await t.enterText(
+        find.byKey(const ValueKey('library-edit-name')),
+        '隔离检查草稿',
+      );
+      final beforeConflict = await source.readDetail(
+        controller.detail!.record.ref,
+      );
+      await source.saveRecord(
+        WorkspaceEdit(
+          operationId: 'guard-concurrent-edit',
+          expectedVersion: beforeConflict.version,
+          record: beforeConflict.record.copyWith(name: '隔离检查当前版本'),
+          values: const {},
+        ),
+      );
+      await t.pumpAndSettle();
+      await t.tap(find.byKey(const ValueKey('library-edit-save')));
+      await t.pumpAndSettle();
+      await t.tap(find.byKey(const ValueKey('library-edit-review-current')));
+      await t.pumpAndSettle();
+      expect(find.text('核对当前版本与草稿'), findsOneWidget);
+      await t.tap(find.byKey(const ValueKey('library-edit-review-keep')));
+      await t.pumpAndSettle();
+      await t.tap(find.byKey(const ValueKey('library-edit-save')));
+      await t.pumpAndSettle();
+      expect(controller.detail!.record.name, '隔离检查草稿');
+      expect(controller.detail!.fieldIds['domain'], domainIdentity);
       await t.tap(find.byKey(const ValueKey('workspace-nav-settings')));
       await t.pumpAndSettle();
       await t.tap(find.byKey(const ValueKey('legacy-menu')));

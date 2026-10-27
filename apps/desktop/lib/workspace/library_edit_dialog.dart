@@ -10,6 +10,7 @@ import 'library_file_dialogs.dart';
 import 'library_credential_editor.dart';
 import 'workspace_source.dart';
 import 'record_mutation.dart';
+import 'library_edit_conflict.dart';
 
 Future<WorkspaceRecordRef?> showLibraryEditor(
   BuildContext context,
@@ -141,9 +142,14 @@ class _Editor extends StatefulWidget {
 
 class _EditorState extends State<_Editor> {
   late final TextEditingController _name, _description;
+  late WorkspaceType _type;
+  late Map<String, Object?> _definition;
+  late WorkspaceCatalog _catalog;
+  WorkspaceDetail? _detail;
+  bool _reviewing = false, _reviewOpen = false;
   final _fields = <String, TextEditingController>{};
-  late final _documentFormats = {
-    for (final section in widget.definition['sections'] as List? ?? [])
+  Set<String> get _documentFormats => {
+    for (final section in _definition['sections'] as List? ?? [])
       if (section['kind'] == 'text' && section['formatKey'] is String)
         section['formatKey'] as String,
   };
@@ -158,7 +164,8 @@ class _EditorState extends State<_Editor> {
   bool _dirty = false, _discard = false;
   late final RecordMutation _mutation;
   bool get _saving => _mutation.busy;
-  bool get _locked => _mutation.frozen || _pickingFile;
+  bool get _locked =>
+      _mutation.frozen || _pickingFile || _reviewing || _reviewOpen;
   WorkspaceFailure? get _failure => _mutation.failure;
   String? _notice;
   void _mutationChanged() {
@@ -170,20 +177,47 @@ class _EditorState extends State<_Editor> {
     super.initState();
     _mutation = RecordMutation(widget.controller.source)
       ..addListener(_mutationChanged);
-    final detail = widget.detail;
-    _name = TextEditingController(text: detail?.record.name ?? '');
-    _description = TextEditingController(
-      text: detail?.record.description ?? '',
-    );
-    _directory =
-        detail?.record.directoryId ?? widget.controller.query.directoryId;
+    _name = TextEditingController();
+    _description = TextEditingController();
+    _catalog = widget.controller.catalog!;
+    _setForm(widget.detail, widget.definition, widget.type);
+  }
+
+  void _setForm(
+    WorkspaceDetail? detail,
+    Map<String, Object?> definition,
+    WorkspaceType type,
+  ) {
+    final previous = _fields.values.toList();
+    _fields.clear();
+    _entries.clear();
+    _readOnlyEntries.clear();
+    _fileSelections.clear();
+    _tags.clear();
+    _relations.clear();
+    _editedRelations.clear();
+    _detail = detail;
+    _definition = definition;
+    _type = type;
+    if (previous.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        for (final c in previous) {
+          c.dispose();
+        }
+      });
+    }
+    _name.text = detail?.record.name ?? '';
+    _description.text = detail?.record.description ?? '';
+    _directory = detail == null
+        ? widget.controller.query.directoryId
+        : detail.record.directoryId;
     if (['all', 'unfiled'].contains(_directory)) _directory = null;
     _tags.addAll(detail?.record.tags.map((t) => t.id) ?? []);
-    for (final rule in widget.definition['relations'] as List? ?? []) {
+    for (final rule in _definition['relations'] as List? ?? []) {
       final key = rule['key'] as String;
       _relations[key] = List.of(detail?.relations[key] ?? []);
     }
-    for (final field in widget.definition['fields'] as List? ?? []) {
+    for (final field in _definition['fields'] as List? ?? []) {
       final key = field['key'] as String;
       if (['file', 'unknown'].contains(field['type'])) continue;
       if (field['type'] == 'entries') {
@@ -254,11 +288,176 @@ class _EditorState extends State<_Editor> {
     }
   }
 
+  Future<void> _reviewConflict() async {
+    if (_locked || _failure?.code != 'conflict') return;
+    setState(() {
+      _reviewing = true;
+      _notice = null;
+    });
+    try {
+      final source = widget.controller.source, original = _detail;
+      final fresh = original == null
+          ? null
+          : await source.readDetail(original.record.ref);
+      if (!mounted) return;
+      final catalog = await source.loadCatalog();
+      if (!mounted) return;
+      final legacyId = _definition['legacyTemplateId'] as String?;
+      final definition = fresh != null
+          ? workspaceEditingDefinition(fresh)
+          : legacyId != null
+          ? (await source.legacyTemplates.read(legacyId)).definition
+          : await source.loadTemplate(_type.id);
+      if (!mounted) return;
+      final type =
+          fresh?.record.type ??
+          catalog.creatableTypes.where((t) => t.id == _type.id).firstOrNull;
+      if (type == null) {
+        throw const WorkspaceFailure(
+          'template_unavailable',
+          '原模板已不可用于新建；草稿仍保留，可返回后选择其他模板。',
+        );
+      }
+      Map<String, Object?> shape(Map<String, Object?> d) => Map.of(d)
+        ..remove('templateVersion')
+        ..remove('packageDigest')
+        ..remove('legacyTemplateVersion');
+      bool entriesUnchanged() {
+        if (original == null) return true;
+        try {
+          Map<String, Object?> identities(WorkspaceDetail d) => {
+            for (final key in _entries.keys)
+              key: {
+                for (final entry in WorkspaceRepeatedEntry.read(d.values[key]))
+                  entry.id: entry.fieldIds,
+              },
+          };
+          return libraryEditorShapeEqual(
+            identities(original),
+            identities(fresh!),
+          );
+        } on FormatException {
+          return false;
+        }
+      }
+
+      final compatible =
+          type.id == _type.id &&
+          entriesUnchanged() &&
+          libraryEditorShapeEqual(shape(definition), shape(_definition)) &&
+          (original == null ||
+              libraryEditorShapeEqual(original.fieldIds, fresh!.fieldIds)) &&
+          (_directory == null ||
+              catalog.directories.any((d) => d.id == _directory)) &&
+          _tags.every((id) => catalog.tags.any((t) => t.id == id));
+      final currentRecord =
+          fresh?.record ??
+          WorkspaceRecordSummary(
+            ref: const WorkspaceRecordRef(
+              WorkspaceRecordKind.information,
+              'uncommitted-editor',
+            ),
+            name: '',
+            description: '',
+            type: type,
+            updatedAt: DateTime.utc(2026),
+          );
+      final draftRecord = currentRecord.copyWith(
+        name: _name.text,
+        description: _description.text,
+        directoryId: _directory,
+        unfiled: _directory == null,
+        tags: _catalog.tags.where((t) => _tags.contains(t.id)),
+      );
+      final draftRelations = {
+        ...?fresh?.relations,
+        for (final e in _relations.entries)
+          if (original == null || _editedRelations.contains(e.key))
+            e.key: e.value,
+      };
+      final targets = await source.readSummaries({
+        ...?fresh?.relations.values.expand((r) => r),
+        ...draftRelations.values.expand((r) => r),
+      });
+      if (!mounted) return;
+      final names = {for (final t in targets) t.ref: t};
+      setState(() {
+        _reviewing = false;
+        _reviewOpen = true;
+      });
+      final choice = await showLibraryEditConflict(
+        context,
+        currentLabel: fresh == null
+            ? '当前模板：${type.name} · ${definition['legacyTemplateVersion'] ?? definition['templateVersion'] ?? '当前版本'}'
+            : '当前资料：${fresh.record.name} · 第${fresh.version}版',
+        compatible: compatible,
+        current: libraryEditorReviewValues(
+          record: currentRecord,
+          definition: definition,
+          values: fresh?.values ?? const {},
+          relations: fresh?.relations ?? const {},
+          catalog: catalog,
+          targets: names,
+        ),
+        draft: libraryEditorReviewValues(
+          record: draftRecord,
+          definition: _definition,
+          values: {
+            ...?fresh?.values,
+            for (final e in _fields.entries) e.key: e.value.text,
+            for (final e in _entries.entries)
+              e.key: [for (final v in e.value) v.toJson()],
+          },
+          relations: draftRelations,
+          catalog: _catalog,
+          targets: names,
+        ),
+      );
+      if (!mounted || choice == null) return;
+      setState(() {
+        _catalog = catalog;
+        if (choice == LibraryEditConflictChoice.reload) {
+          _setForm(fresh, definition, type);
+          _dirty = false;
+          _discard = false;
+          _notice = '已明确重新载入当前表单，尚未保存。';
+        } else {
+          _detail = fresh;
+          _definition = definition;
+          _type = type;
+          if (fresh != null) {
+            for (final key in _relations.keys) {
+              if (!_editedRelations.contains(key)) {
+                _relations[key] = List.of(fresh.relations[key] ?? []);
+              }
+            }
+            for (final key in _readOnlyEntries.keys.toList()) {
+              _readOnlyEntries[key] = fresh.values[key];
+            }
+          }
+          _notice = '草稿已保留，按核对的当前版本继续；尚未保存。';
+        }
+        _mutation.acceptCurrentVersion();
+      });
+    } on WorkspaceFailure catch (e) {
+      if (mounted) setState(() => _notice = e.message);
+    } catch (_) {
+      if (mounted) setState(() => _notice = '暂时无法核对当前版本，草稿仍保留，请重试。');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _reviewing = false;
+          _reviewOpen = false;
+        });
+      }
+    }
+  }
+
   Future<void> _save() async {
-    if (!_mutation.canSubmit || _pickingFile) return;
+    if (!_mutation.canSubmit || _locked) return;
     _notice = null;
-    final detail = widget.detail;
-    final catalog = widget.controller.catalog!;
+    final detail = _detail;
+    final catalog = _catalog;
     final values = {
       for (final entry in _fields.entries) entry.key: entry.value.text,
       for (final entry in _entries.entries)
@@ -270,13 +469,13 @@ class _EditorState extends State<_Editor> {
             ? WorkspaceOperationKind.create
             : WorkspaceOperationKind.edit,
         ref: detail?.record.ref,
-        typeId: widget.type.id,
+        typeId: _type.id,
         expectedVersion: detail?.version,
         legacyTemplateId: detail == null
-            ? widget.definition['legacyTemplateId'] as String?
+            ? _definition['legacyTemplateId'] as String?
             : null,
         legacyTemplateVersion: detail == null
-            ? widget.definition['legacyTemplateVersion'] as int?
+            ? _definition['legacyTemplateVersion'] as int?
             : null,
       ),
       (id) async {
@@ -284,19 +483,18 @@ class _EditorState extends State<_Editor> {
             ? await widget.controller.source.createRecord(
                 WorkspaceCreate(
                   operationId: id,
-                  typeId: widget.type.id,
-                  legacyTemplateId:
-                      widget.definition['legacyTemplateId'] as String?,
+                  typeId: _type.id,
+                  legacyTemplateId: _definition['legacyTemplateId'] as String?,
                   expectedLegacyVersion:
-                      widget.definition['legacyTemplateVersion'] as int?,
+                      _definition['legacyTemplateVersion'] as int?,
                   fileSelections: {
                     for (final e in _fileSelections.entries)
                       e.key: e.value.selectionId,
                   },
                   expectedTemplateVersion:
-                      widget.definition['templateVersion'] as String?,
+                      _definition['templateVersion'] as String?,
                   expectedTemplateDigest:
-                      widget.definition['packageDigest'] as String?,
+                      _definition['packageDigest'] as String?,
                   name: _name.text,
                   description: _description.text,
                   directoryId: _directory,
@@ -336,18 +534,14 @@ class _EditorState extends State<_Editor> {
 
   @override
   Widget build(BuildContext context) {
-    final catalog = widget.controller.catalog!, c = UiPalette.of(context);
+    final catalog = _catalog, c = UiPalette.of(context);
     return PopScope(
       canPop: !_dirty && !_locked,
       onPopInvokedWithResult: (popped, _) {
         if (!popped && !_locked) setState(() => _discard = true);
       },
       child: DesktopDialog(
-        title: Text(
-          widget.detail == null
-              ? '添加${widget.type.name}'
-              : '编辑${widget.type.name}',
-        ),
+        title: Text(_detail == null ? '添加${_type.name}' : '编辑${_type.name}'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -408,10 +602,10 @@ class _EditorState extends State<_Editor> {
                   ),
               ],
             ),
-            for (final field in widget.definition['fields'] as List? ?? [])
+            for (final field in _definition['fields'] as List? ?? [])
               if (field['type'] == 'file') ...[
                 const SizedBox(height: 18),
-                if (widget.detail == null)
+                if (_detail == null)
                   DesktopButton(
                     key: ValueKey('legacy-file-${field['key']}'),
                     onPressed: _locked || widget.filePicker == null
@@ -529,14 +723,13 @@ class _EditorState extends State<_Editor> {
                   ),
                 ),
               ],
-            for (final rule
-                in widget.definition['relations'] as List? ?? []) ...[
+            for (final rule in _definition['relations'] as List? ?? []) ...[
               const SizedBox(height: 24),
               LibraryRelationPicker(
                 key: ValueKey('library-relation-picker-${rule['key']}'),
                 source: widget.controller.source,
-                typeId: widget.type.id,
-                record: widget.detail?.record.ref,
+                typeId: _type.id,
+                record: _detail?.record.ref,
                 relationKey: rule['key'] as String,
                 label: rule['label'] as String,
                 selected: _relations[rule['key']]!,
@@ -557,6 +750,13 @@ class _EditorState extends State<_Editor> {
             SizedBox(
               width: double.infinity,
               child: Semantics(liveRegion: true, child: Text(_notice!)),
+            ),
+          if (_failure?.code == 'conflict')
+            DesktopButton(
+              key: const ValueKey('library-edit-review-current'),
+              busy: _reviewing,
+              onPressed: _locked ? null : _reviewConflict,
+              child: const Text('读取当前版本并核对'),
             ),
           if (_mutation.uncertain)
             DesktopButton(
@@ -613,7 +813,7 @@ class _EditorState extends State<_Editor> {
             key: const ValueKey('library-edit-save'),
             busy: _saving,
             kind: DesktopButtonKind.primary,
-            onPressed: _mutation.canSubmit ? _save : null,
+            onPressed: _mutation.canSubmit && !_locked ? _save : null,
             child: const Text('保存'),
           ),
         ],

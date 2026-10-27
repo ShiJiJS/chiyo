@@ -617,7 +617,11 @@ class _LibraryDetailState extends State<LibraryDetail> {
                     else if (section['kind'] == 'relations')
                       _section(
                         context,
-                        section['title'] as String,
+                        detail.retainedRelations.any(
+                              (r) => r['key'] == section['key'],
+                            )
+                            ? _relationName(section['key'] as String)
+                            : section['title'] as String,
                         _relationsFor(
                           context,
                           section['key'] as String,
@@ -655,18 +659,19 @@ class _LibraryDetailState extends State<LibraryDetail> {
                         section['title'] as String,
                         SelectableText(_value(detail.values[section['key']])),
                       ),
-                  if ((detail.relations['credentials']?.isNotEmpty ?? false) &&
-                      !sections.any(
-                        (s) =>
-                            s['kind'] == 'relations' &&
-                            s['key'] == 'credentials',
-                      ))
-                    _section(
-                      context,
-                      '关联凭据',
-                      _relationsFor(context, 'credentials', snapshot),
-                      trailing: '${detail.relations['credentials']!.length} 项',
-                    ),
+                  for (final relation in detail.relations.entries)
+                    if (relation.value.isNotEmpty &&
+                        !sections.any(
+                          (s) =>
+                              s['kind'] == 'relations' &&
+                              s['key'] == relation.key,
+                        ))
+                      _section(
+                        context,
+                        _relationName(relation.key),
+                        _relationsFor(context, relation.key, snapshot),
+                        trailing: '${relation.value.length} 项',
+                      ),
                 ],
               );
             },
