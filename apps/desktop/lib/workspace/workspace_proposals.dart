@@ -395,6 +395,48 @@ class WorkspaceProposalReceipt {
   final List<WorkspaceRecordReceipt> records;
 }
 
+/// Receipt verification needs identities and versions, never Owner old values.
+class WorkspaceProposalExpectation {
+  WorkspaceProposalExpectation(WorkspaceProposalDetail d)
+    : kind = d.summary.kind,
+      original = d.items.firstOrNull?.before?.record.ref,
+      originalVersion = d.items.firstOrNull?.before?.version;
+  final WorkspaceProposalKind kind;
+  final WorkspaceRecordRef? original;
+  final int? originalVersion;
+  WorkspaceProposalReceipt check(
+    WorkspaceProposalChange c,
+    WorkspaceProposalReceipt r,
+  ) {
+    final expected = c.action == WorkspaceProposalAction.reject
+        ? 0
+        : c.reviewed.length;
+    if (r.operationId != c.operationId ||
+        r.proposalId != c.proposalId ||
+        r.action != c.action ||
+        r.reviewToken != c.reviewToken ||
+        r.reviewedVersion != c.version ||
+        r.resultingVersion <= c.version ||
+        r.commandDigest != c.digest ||
+        r.records.length != expected ||
+        r.records.map((x) => x.ref).toSet().length != r.records.length ||
+        r.records.any(
+          (x) => x.ref.kind != WorkspaceRecordKind.information || x.version < 1,
+        ) ||
+        kind == WorkspaceProposalKind.deletion &&
+            c.action == WorkspaceProposalAction.confirm &&
+            r.records.any((x) => x.entryId == null || x.entryId!.isEmpty) ||
+        original != null &&
+            r.records.isNotEmpty &&
+            (r.records.length != 1 ||
+                r.records.single.ref != original ||
+                r.records.single.version <= originalVersion!)) {
+      throw const WorkspaceFailure('unknown_outcome', '回执与本次提案决定不符，请继续核对原操作。');
+    }
+    return r;
+  }
+}
+
 abstract interface class WorkspaceProposalSource {
   Future<WorkspaceProposalResults> query(
     WorkspaceProposalQuery query, {

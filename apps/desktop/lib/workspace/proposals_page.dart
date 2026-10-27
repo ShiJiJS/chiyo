@@ -7,6 +7,7 @@ import 'proposal_editor.dart';
 import 'proposal_reading.dart';
 import 'proposal_read_dialog.dart';
 import 'proposals_controller.dart';
+import 'proposal_batch_dialog.dart';
 import 'workspace_source.dart';
 
 String proposalStateLabel(WorkspaceProposalSummary s) =>
@@ -48,6 +49,7 @@ class _ProposalsPageState extends State<ProposalsPage> {
   String _query = '';
   bool _restoring = false;
   double _restoreAt = 0;
+  double? _restoreListAt;
   @override
   void initState() {
     super.initState();
@@ -72,8 +74,14 @@ class _ProposalsPageState extends State<ProposalsPage> {
     if (!mounted) return;
     if (_query != _queryKey) {
       _query = _queryKey;
+      _restoreListAt = m.listScroll;
+    }
+    if (_restoreListAt != null && !m.loading && !m.reading) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted && _list.hasClients) _list.jumpTo(0);
+        if (!mounted || !_list.hasClients || _restoreListAt == null) return;
+        final offset = _restoreListAt!;
+        _restoreListAt = null;
+        _list.jumpTo(offset.clamp(0, _list.position.maxScrollExtent));
       });
     }
     if (_selection != m.selection || _stateKey != null && _stateKey != _state) {
@@ -180,6 +188,29 @@ class _ProposalsPageState extends State<ProposalsPage> {
       );
     } finally {
       widget.onModalChanged?.call(false);
+    }
+  }
+
+  Future<void> _showBatch() async {
+    if (m.soloFrozen) return;
+    if (m.hasBatchLocation && !m.batch.frozen) await m.returnBatchLocation();
+    if (!mounted) return;
+    m.rememberBatchLocation();
+    String? selected;
+    widget.onModalChanged?.call(true);
+    try {
+      selected = await showDesktopDialog<String>(
+        context,
+        barrierDismissible: false,
+        builder: (_) => ProposalBatchDialog(batch: m.batch),
+      );
+    } finally {
+      widget.onModalChanged?.call(false);
+    }
+    if (selected != null) {
+      await m.openBatchResult(selected);
+    } else {
+      m.forgetBatchLocation();
     }
   }
 
@@ -298,6 +329,15 @@ class _ProposalsPageState extends State<ProposalsPage> {
             '${r.agentClaim} · ${r.itemCount}项',
             style: libraryText(context, 12, color: UiPalette.of(context).muted),
           ),
+          if (m.batch.entry(r.id) case final queued?)
+            Text(
+              '本批次：${queued.action == WorkspaceProposalAction.confirm ? '确认' : '拒绝'} · ${queued.status.label}',
+              style: libraryText(
+                context,
+                12,
+                color: UiPalette.of(context).accent,
+              ),
+            ),
           Text(
             libraryLocalDateTime(r.at),
             style: libraryText(context, 12, color: UiPalette.of(context).muted),
@@ -316,6 +356,16 @@ class _ProposalsPageState extends State<ProposalsPage> {
           Text(
             '${r.total} 份提案 · ${r.pending} 份待确认',
             style: libraryText(context, 12, color: UiPalette.of(context).muted),
+          ),
+          const SizedBox(height: 8),
+          DesktopButton(
+            key: const ValueKey('proposal-batch-open'),
+            onPressed: m.soloFrozen || m.batch.entries.isEmpty
+                ? null
+                : _showBatch,
+            child: Text(
+              '${m.hasBatchLocation ? '返回本批次' : '批量清单'} · ${m.batch.entries.length}份',
+            ),
           ),
           const SizedBox(height: 8),
           Wrap(
@@ -566,75 +616,87 @@ class _ProposalsPageState extends State<ProposalsPage> {
               item.before!.record.name,
               style: libraryText(context, 22, weight: FontWeight.w700),
             ),
-            for (final change in item.changes)
+            for (final section in proposalChangeSections(item)) ...[
               Padding(
-                padding: const EdgeInsets.only(top: 20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    ProposalDiff(
-                      label:
-                          '字段：${change.label} · ${switch (change.intent) {
-                            WorkspaceProposalFieldIntent.correct => '修正原字段内容',
-                            WorkspaceProposalFieldIntent.add => '新增字段',
-                            WorkspaceProposalFieldIntent.replace => '替换字段含义',
-                            WorkspaceProposalFieldIntent.remove => '删除字段',
-                          }}',
-                      before: change.intent == WorkspaceProposalFieldIntent.add
-                          ? '原资料没有此字段。'
-                          : item.beforeState ==
-                                WorkspaceProposalBeforeState.unread
-                          ? '原版本暂未读取，请先核对当前状态。'
-                          : item.beforeState ==
-                                    WorkspaceProposalBeforeState.unavailable ||
-                                !change.beforeAvailable
-                          ? '原版本内容已不可用。'
-                          : proposalValue(change.before),
-                      currentLabel:
-                          d.summary.status == WorkspaceProposalStatus.conflicted
-                          ? '原资料v${item.before!.version}'
-                          : '当前内容',
-                      after:
-                          change.intent == WorkspaceProposalFieldIntent.remove
-                          ? '移除该字段；旧内容进入回收站。'
-                          : proposalValue(review.values[change.reviewKey]),
-                    ),
-                    if (change.definition != null &&
-                        (change.intent == WorkspaceProposalFieldIntent.add ||
-                            change.intent ==
-                                WorkspaceProposalFieldIntent.replace))
-                      Padding(
-                        padding: const EdgeInsets.only(top: 10),
-                        child: Text(
-                          '新字段定义：${change.definition!['label']} · ${const {'text': '文本', 'multiline': '多行文本', 'number': '数字', 'date': '日期'}[change.definition!['type']] ?? '保留结构'}\n${change.definition!['description'] ?? ''}',
-                          style: libraryText(
-                            context,
-                            13,
-                            color: c.muted,
-                            height: 1.8,
-                          ),
-                        ),
-                      ),
-                    Text(
-                      switch (change.intent) {
-                        WorkspaceProposalFieldIntent.correct => '修正保留原字段身份。',
-                        WorkspaceProposalFieldIntent.add =>
-                          '新增字段使用新身份；旧授权不包含它。',
-                        WorkspaceProposalFieldIntent.replace =>
-                          '替换含义使用新身份；旧内容进入回收，旧授权不包含新字段。',
-                        WorkspaceProposalFieldIntent.remove =>
-                          '删除只影响此字段；恢复时重新分配身份，不恢复旧授权。',
-                      },
-                      style: libraryText(
-                        context,
-                        13,
-                        color: c.muted,
-                        height: 1.8,
-                      ),
-                    ),
-                  ],
+                padding: const EdgeInsets.only(top: 22),
+                child: Text(
+                  section.title,
+                  style: libraryText(context, 18, weight: FontWeight.w600),
                 ),
               ),
+              for (final change in section.changes)
+                Padding(
+                  padding: const EdgeInsets.only(top: 20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      ProposalDiff(
+                        label:
+                            '字段：${change.label} · ${switch (change.intent) {
+                              WorkspaceProposalFieldIntent.correct => '修正原字段内容',
+                              WorkspaceProposalFieldIntent.add => '新增字段',
+                              WorkspaceProposalFieldIntent.replace => '替换字段含义',
+                              WorkspaceProposalFieldIntent.remove => '删除字段',
+                            }}',
+                        before:
+                            change.intent == WorkspaceProposalFieldIntent.add
+                            ? '原资料没有此字段。'
+                            : item.beforeState ==
+                                  WorkspaceProposalBeforeState.unread
+                            ? '原版本暂未读取，请先核对当前状态。'
+                            : item.beforeState ==
+                                      WorkspaceProposalBeforeState
+                                          .unavailable ||
+                                  !change.beforeAvailable
+                            ? '原版本内容已不可用。'
+                            : proposalValue(change.before),
+                        currentLabel:
+                            d.summary.status ==
+                                WorkspaceProposalStatus.conflicted
+                            ? '原资料v${item.before!.version}'
+                            : '当前内容',
+                        after:
+                            change.intent == WorkspaceProposalFieldIntent.remove
+                            ? '移除该字段；旧内容进入回收站。'
+                            : proposalValue(review.values[change.reviewKey]),
+                      ),
+                      if (change.definition != null &&
+                          (change.intent == WorkspaceProposalFieldIntent.add ||
+                              change.intent ==
+                                  WorkspaceProposalFieldIntent.replace))
+                        Padding(
+                          padding: const EdgeInsets.only(top: 10),
+                          child: Text(
+                            '新字段定义：${change.definition!['label']} · ${const {'text': '文本', 'multiline': '多行文本', 'number': '数字', 'date': '日期'}[change.definition!['type']] ?? '保留结构'}\n${change.definition!['description'] ?? ''}',
+                            style: libraryText(
+                              context,
+                              13,
+                              color: c.muted,
+                              height: 1.8,
+                            ),
+                          ),
+                        ),
+                      Text(
+                        switch (change.intent) {
+                          WorkspaceProposalFieldIntent.correct => '修正保留原字段身份。',
+                          WorkspaceProposalFieldIntent.add =>
+                            '新增字段使用新身份；旧授权不包含它。',
+                          WorkspaceProposalFieldIntent.replace =>
+                            '替换含义使用新身份；旧内容进入回收，旧授权不包含新字段。',
+                          WorkspaceProposalFieldIntent.remove =>
+                            '删除只影响此字段；恢复时重新分配身份，不恢复旧授权。',
+                        },
+                        style: libraryText(
+                          context,
+                          13,
+                          color: c.muted,
+                          height: 1.8,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
             const SizedBox(height: 12),
             Text(
               '只有列出的字段会被修改；目录、标签及凭据关联保持原样。',
@@ -894,6 +956,40 @@ class _ProposalsPageState extends State<ProposalsPage> {
                                 height: 1.8,
                               ),
                             ),
+                          const SizedBox(height: 12),
+                          Wrap(
+                            spacing: 10,
+                            runSpacing: 10,
+                            children: [
+                              DesktopButton(
+                                key: const ValueKey(
+                                  'proposal-batch-add-confirm',
+                                ),
+                                onPressed: m.canConfirm
+                                    ? () => m.queueForBatch(
+                                        WorkspaceProposalAction.confirm,
+                                      )
+                                    : null,
+                                child: Text(
+                                  m.batch.entry(s.id) == null
+                                      ? '加入批量确认'
+                                      : '更新本批次的确认审阅',
+                                ),
+                              ),
+                              DesktopButton(
+                                key: const ValueKey(
+                                  'proposal-batch-add-reject',
+                                ),
+                                kind: DesktopButtonKind.quiet,
+                                onPressed: m.canReject
+                                    ? () => m.queueForBatch(
+                                        WorkspaceProposalAction.reject,
+                                      )
+                                    : null,
+                                child: const Text('加入批量拒绝'),
+                              ),
+                            ],
+                          ),
                           const SizedBox(height: 12),
                           Wrap(
                             alignment: WrapAlignment.end,

@@ -572,11 +572,13 @@ class DesktopDialog extends StatelessWidget {
     this.actions,
     this.width = 740,
     this.onClose,
+    this.closeEnabled = true,
   });
   final Widget? title, content;
   final List<Widget>? actions;
   final double width;
   final VoidCallback? onClose;
+  final bool closeEnabled;
   @override
   Widget build(BuildContext context) {
     if (DesktopMotion.enabled(context)) {
@@ -625,8 +627,10 @@ class DesktopDialog extends StatelessWidget {
                         message: '关闭',
                         child: IconButton(
                           key: const ValueKey('desktop-dialog-close'),
-                          onPressed:
-                              onClose ?? () => Navigator.of(context).maybePop(),
+                          onPressed: closeEnabled
+                              ? onClose ??
+                                    () => Navigator.of(context).maybePop()
+                              : null,
                           icon: const Icon(Icons.close, size: 19),
                         ),
                       ),

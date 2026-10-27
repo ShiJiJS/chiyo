@@ -7,6 +7,32 @@ import 'library_entries.dart';
 import 'library_widgets.dart';
 import 'workspace_source.dart';
 
+List<({String title, List<WorkspaceProposalFieldChange> changes})>
+proposalChangeSections(WorkspaceProposalItem item) {
+  final remaining = List<WorkspaceProposalFieldChange>.of(item.changes);
+  final sections =
+      <({String title, List<WorkspaceProposalFieldChange> changes})>[];
+  for (final raw in item.proposed.definition['sections'] as List? ?? []) {
+    if (raw is! Map) continue;
+    final keys = <String>{
+      if (raw['keys'] is List) ...(raw['keys'] as List).whereType<String>(),
+      if (raw['key'] is String) raw['key'] as String,
+      if (raw['formatKey'] is String) raw['formatKey'] as String,
+    };
+    final changes = remaining.where((c) => keys.contains(c.key)).toList();
+    if (changes.isEmpty) continue;
+    sections.add((
+      title: raw['title'] is String ? raw['title'] as String : '字段变化',
+      changes: List.unmodifiable(changes),
+    ));
+    remaining.removeWhere((c) => keys.contains(c.key));
+  }
+  if (remaining.isNotEmpty) {
+    sections.add((title: '补充与保留字段', changes: List.unmodifiable(remaining)));
+  }
+  return List.unmodifiable(sections);
+}
+
 Widget proposalSection(BuildContext context, String title, Widget child) =>
     Padding(
       padding: const EdgeInsets.only(top: 25),

@@ -517,6 +517,36 @@ void main() {
         )).state,
         WorkspaceHostState.trusted,
       );
+      // Start an explicitly reviewed batch without a modal so this check
+      // isolates the root unknown-operation gate from modal navigation locks.
+      await t.tap(find.byKey(const ValueKey('workspace-nav-proposals')));
+      await t.pumpAndSettle();
+      final batchModel = t
+          .widget<ProposalsPage>(find.byType(ProposalsPage))
+          .controller;
+      await t.ensureVisible(
+        find.byKey(const ValueKey('proposal-batch-add-confirm')),
+      );
+      await t.tap(find.byKey(const ValueKey('proposal-batch-add-confirm')));
+      await t.pumpAndSettle();
+      source.loseNextProposalReply = true;
+      await batchModel.batch.runPending();
+      await t.pumpAndSettle();
+      expect(batchModel.frozen, true);
+      final queuedBatch = Completer<void>();
+      await messenger.handlePlatformMessage(
+        MacPreviewDesktop.channel.name,
+        const StandardMethodCodec().encodeMethodCall(
+          const MethodCall('openSettings'),
+        ),
+        (_) => queuedBatch.complete(),
+      );
+      await queuedBatch.future;
+      await t.pumpAndSettle();
+      expect(find.byType(ProposalsPage), findsOneWidget);
+      await batchModel.batch.reconcile();
+      await t.pumpAndSettle();
+      expect(batchModel.frozen, false);
       expect(forbidden, isEmpty);
       expect(network.calls, 0);
       expect(filesystem.rejected, isEmpty);

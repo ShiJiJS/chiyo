@@ -15,6 +15,7 @@ import 'package:info_desktop/workspace/sample_workspace_source.dart';
 import 'package:info_desktop/workspace/workspace_source.dart';
 import 'package:info_desktop/workspace/workspace_entries.dart';
 import 'package:info_desktop/workspace/library_entries.dart';
+import 'package:info_desktop/workspace/proposal_batch.dart';
 
 void main() {
   const evidence = String.fromEnvironment('UI_EVIDENCE_DIR');
@@ -37,7 +38,7 @@ void main() {
         return;
       }
       final m = model(t);
-      if (!m.loading && !m.reading && !m.busy) {
+      if (!m.loading && !m.reading && !m.busy && !m.batch.busy) {
         await t.pumpAndSettle();
         expect(t.takeException(), isNull);
         return;
@@ -54,6 +55,43 @@ void main() {
     await t.pumpAndSettle();
     await t.tap(f);
     await ready(t);
+  }
+
+  Future<void> pickProposal(WidgetTester t, String id) async {
+    final list = find
+        .descendant(
+          of: find.byKey(const ValueKey('proposal-list')),
+          matching: find.byType(Scrollable),
+        )
+        .first;
+    await t.drag(list, const Offset(0, 1600));
+    await t.pumpAndSettle();
+    await t.scrollUntilVisible(
+      find.byKey(ValueKey('proposal-row-$id')),
+      250,
+      scrollable: list,
+      maxScrolls: 25,
+    );
+    await tap(t, find.byKey(ValueKey('proposal-row-$id')));
+    expect(model(t).selection, id);
+  }
+
+  Future<void> openBatch(WidgetTester t) async {
+    final target = find.byKey(const ValueKey('proposal-batch-open'));
+    if (target.evaluate().isEmpty) {
+      await t.scrollUntilVisible(
+        target,
+        300,
+        scrollable: find
+            .descendant(
+              of: find.byKey(const ValueKey('proposal-list')),
+              matching: find.byType(Scrollable),
+            )
+            .first,
+        maxScrolls: 25,
+      );
+    }
+    await tap(t, target);
   }
 
   Future<void> closed(WidgetTester t) async {
@@ -662,6 +700,7 @@ void main() {
         maxScrolls: 20,
       );
       await tap(t, find.byKey(const ValueKey('proposal-row-fields-profile')));
+      expect(find.text('教育经历'), findsOneWidget);
       final m = model(t),
           before = await s.proposals.currentTarget('fields-profile'),
           change = m.detail!.items.single.changes.first;
@@ -728,6 +767,173 @@ void main() {
       expect(restored.values['auth'], before.values['auth']);
       expect(restored.fieldIds['auth'], isNot(before.fieldIds['auth']));
       expect(restored.values['url'], before.values['url']);
+    },
+  );
+  testWidgets(
+    'actual mixed batch confirms addition, modification and whole deletion independently',
+    (t) async {
+      final s = await start(t),
+          m = model(t),
+          before = (await s.loadSummary()).records;
+      await tap(t, find.byKey(const ValueKey('preview-guide')));
+      await tap(t, find.byKey(const ValueKey('preview-proposal-deletion')));
+      await closed(t);
+      for (final id in ['import', 'update', 'delete-service']) {
+        await pickProposal(t, id);
+        if (m.needsReview) {
+          await tap(t, find.byKey(const ValueKey('proposal-review-current')));
+        }
+        expect(
+          m.canConfirm,
+          true,
+          reason:
+              '$id / ${m.needsReview} / ${m.detail?.summary.status} / ${m.readFailure?.message}',
+        );
+        await tap(t, find.byKey(const ValueKey('proposal-batch-add-confirm')));
+        expect(m.batch.entry(id), isNotNull, reason: id);
+      }
+      expect(m.batch.entries, hasLength(3));
+      await openBatch(t);
+      await tap(t, find.byKey(const ValueKey('proposal-batch-run')));
+      expect(
+        m.batch.entries.every((e) => e.status == ProposalBatchStatus.completed),
+        true,
+      );
+      expect(m.batch.entries.every((e) => e.command == null), true);
+      expect((await s.loadSummary()).records, before + 1);
+      await capture(t, 'proposals-1440-light-mixed-results');
+      await tap(t, find.byKey(const ValueKey('proposal-batch-close')));
+      await closed(t);
+    },
+  );
+  testWidgets(
+    'actual middle-unknown batch stops the tail, blocks Escape and close, then explicitly continues and returns from results to its query',
+    (t) async {
+      final s = await start(t), m = model(t);
+      await tap(t, find.byKey(const ValueKey('preview-guide')));
+      await tap(
+        t,
+        find.byKey(const ValueKey('preview-proposal-batch-unknown')),
+      );
+      await closed(t);
+      for (final id in ['import', 'fields-server', 'delete-field']) {
+        await pickProposal(t, id);
+        if (m.needsReview) {
+          await tap(t, find.byKey(const ValueKey('proposal-review-current')));
+        }
+        expect(
+          m.canConfirm,
+          true,
+          reason:
+              '$id / ${m.needsReview} / ${m.detail?.summary.status} / ${m.readFailure?.message}',
+        );
+        await tap(t, find.byKey(const ValueKey('proposal-batch-add-confirm')));
+        expect(m.batch.entry(id), isNotNull, reason: id);
+      }
+      await t.enterText(
+        find.byKey(const ValueKey('proposal-search')),
+        'Blinko',
+      );
+      await ready(t);
+      await openBatch(t);
+      await tap(t, find.byKey(const ValueKey('proposal-batch-run')));
+      expect(m.batch.entries.map((e) => e.status).toList(), [
+        ProposalBatchStatus.completed,
+        ProposalBatchStatus.unknown,
+        ProposalBatchStatus.notStarted,
+      ]);
+      expect(m.frozen, true);
+      expect(
+        t
+            .widget<DesktopButton>(
+              find.byKey(const ValueKey('proposal-batch-close')),
+            )
+            .onPressed,
+        isNull,
+      );
+      expect(
+        t
+            .widget<IconButton>(
+              find.byKey(const ValueKey('desktop-dialog-close')),
+            )
+            .onPressed,
+        isNull,
+      );
+      await t.sendKeyEvent(LogicalKeyboardKey.escape);
+      await t.pumpAndSettle();
+      expect(
+        find.byKey(const ValueKey('proposal-batch-dialog')),
+        findsOneWidget,
+      );
+      await t.ensureVisible(
+        find.byKey(const ValueKey('proposal-batch-state-fields-server')),
+      );
+      await capture(t, 'proposals-1440-light-mixed-unknown');
+      await tap(t, find.byKey(const ValueKey('proposal-batch-reconcile')));
+      expect(m.batch.pendingCount, 1);
+      expect((await s.proposals.read('delete-field')).summary.pending, true);
+      await tap(t, find.byKey(const ValueKey('proposal-batch-run')));
+      expect(
+        m.batch.entries.every((e) => e.status == ProposalBatchStatus.completed),
+        true,
+      );
+      await t.scrollUntilVisible(
+        find.byKey(const ValueKey('proposal-batch-open-import')),
+        -200,
+        scrollable: find
+            .descendant(
+              of: find.byKey(const ValueKey('proposal-batch-list')),
+              matching: find.byType(Scrollable),
+            )
+            .first,
+        maxScrolls: 20,
+      );
+      await tap(t, find.byKey(const ValueKey('proposal-batch-open-import')));
+      await closed(t);
+      await ready(t);
+      expect(m.selection, 'import');
+      expect(m.keyword, '');
+      expect(m.detail!.items, isEmpty);
+      await openBatch(t);
+      expect(m.keyword, 'Blinko');
+      expect(m.selection, 'delete-field');
+      await tap(t, find.byKey(const ValueKey('proposal-batch-close')));
+      await closed(t);
+    },
+  );
+  testWidgets(
+    'dark200 batch keeps definite failure and rejection separate and explicitly retries only the failed proposal',
+    (t) async {
+      final s = await start(t, dark: true), m = model(t);
+      if (m.needsReview) {
+        await tap(t, find.byKey(const ValueKey('proposal-review-current')));
+      }
+      await tap(t, find.byKey(const ValueKey('proposal-batch-add-confirm')));
+      await t.enterText(find.byKey(const ValueKey('proposal-search')), '服务器');
+      await ready(t);
+      await pickProposal(t, 'update');
+      expect(m.canReject, true);
+      await tap(t, find.byKey(const ValueKey('proposal-batch-add-reject')));
+      await tap(t, find.byKey(const ValueKey('preview-guide')));
+      await tap(t, find.text('下次保存失败'));
+      await tap(t, find.text('完成'));
+      await closed(t);
+      await openBatch(t);
+      await tap(t, find.byKey(const ValueKey('proposal-batch-run')));
+      expect(m.batch.entry('import')!.status, ProposalBatchStatus.failed);
+      expect(m.batch.entry('update')!.status, ProposalBatchStatus.rejected);
+      expect(m.batch.entry('import')!.command!.reviewed, hasLength(2));
+      await t.ensureVisible(
+        find.byKey(const ValueKey('proposal-batch-retry-import')),
+      );
+      await t.pumpAndSettle();
+      await capture(t, 'proposals-1280-dark200-mixed-failure');
+      await tap(t, find.byKey(const ValueKey('proposal-batch-retry-import')));
+      expect(m.batch.entry('import')!.status, ProposalBatchStatus.completed);
+      expect(m.batch.entry('update')!.status, ProposalBatchStatus.rejected);
+      expect((await s.loadSummary()).records, 33);
+      await tap(t, find.byKey(const ValueKey('proposal-batch-close')));
+      await closed(t);
     },
   );
 }
