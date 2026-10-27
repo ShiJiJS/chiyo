@@ -1,0 +1,9 @@
+00:00 +0: loading /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_test.dart
+00:00 +0: (setUpAll)
+00:00 +0: cold settings notification reading and failure never present an unconfirmed off switch
+00:00 +1: settings theme and notification preferences save in one session source across navigation and the existing guide
+00:01 +2: failed settings save retains selection and unknown save locks root navigation until only its original receipt is read
+00:02 +3: notification preview opens the exact unapproved request after the modal finishes and never sends an OS notification
+00:02 +4: dark200 settings read failure retains values and recovers; empty notification metadata has no request destination
+00:03 +5: (tearDownAll)
+00:03 +5: All tests passed!

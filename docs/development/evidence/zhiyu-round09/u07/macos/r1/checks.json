@@ -1,0 +1,22 @@
+[
+  {
+    "log": "analysis.log",
+    "exitCode": 0,
+    "seconds": 3.73
+  },
+  {
+    "log": "widget-final.log",
+    "exitCode": 0,
+    "seconds": 5.19
+  },
+  {
+    "log": "regression.log",
+    "exitCode": 0,
+    "seconds": 143.95
+  },
+  {
+    "log": "build.log",
+    "exitCode": 0,
+    "seconds": 20.24
+  }
+]
