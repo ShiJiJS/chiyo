@@ -1,0 +1,15 @@
+{
+  "apps/desktop/lib/workspace/approvals_controller.dart": "23f8fe0d6b204cc7aba5ca564bdcc23c20b020af0ae7c18edad11685418788b5",
+  "apps/desktop/lib/workspace/approvals_page.dart": "41eb0ef24f2d05201185fe4985307ad2b49bb6e9d41102fab65fbe4fd2db6161",
+  "apps/desktop/lib/workspace/preview_workspace.dart": "00aa0222c1c60b7d5bf69d90282245993b66408fea05d72dba3c10c26f9be086",
+  "apps/desktop/lib/workspace/sample_workspace_approvals.dart": "c9aa5bd7b97d57853e9b3c3a986d6005d830dbccee6ba54ed4a09840da66067b",
+  "apps/desktop/lib/workspace/sample_workspace_source.dart": "61718205809ada4461b69b83685d1c6832571fbdf007edca8ca0af8b3d7dcad5",
+  "apps/desktop/lib/workspace/workspace_approvals.dart": "ded369c16a6fb860db41bfeef36054ae69ee1f308af92ea26846bdbe429598bf",
+  "apps/desktop/test/approvals_controller_test.dart": "b9e188ca82f70a5f4383bbb28e48340fa0449c650a0a9ec3be3dcb8b4e50f9d1",
+  "apps/desktop/test/mac_preview_isolation_test.dart": "17eae87f13c2acc28af777901750d5d5d7f169c338e9cef4b5e32086a8b5a799",
+  "apps/desktop/test/zhiyu_approvals_test.dart": "bde8404329a44245c7e31ae53e2530accc3a8cff8bd493f5b00dc200525e19f5",
+  "apps/desktop/lib/workspace/approval_executions.dart": "2a05a56c25a8e7f5372089a53e1c5ba228505c17a0d55f8d7c8db0b480aa4f0c",
+  "apps/desktop/lib/workspace/workspace_approval_execution.dart": "c8c8663dd9502b2c700a97dbd8ca6a1de5fed1006ab85609bee999f3a1034c99",
+  "apps/desktop/test/workspace_approval_executions_test.dart": "d76d66d371dbe243bec29d642f77d5b7c94ac4f5db6bfe5121f208e5818f6756",
+  "docs/planning/zhiyu-round09/u05-approval-flow.md": "3216852e2c5bd5e31e1df1a7a40643daf9ad5984ba7eaa6bdd161b7fa09c993b"
+}

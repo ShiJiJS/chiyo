@@ -12,7 +12,7 @@
 | [#63 三栏信息库](https://github.com/ShiJiJS/agent-info-manage/issues/63) | Mac 3/7；浏览/编辑、目录及关联已推进，继续修订回收、压力状态及S5 |
 | [#64 档案、文档、文件、凭据](https://github.com/ShiJiJS/agent-info-manage/issues/64) | 等待#63 |
 | [#65 插件与旧资料套模板](https://github.com/ShiJiJS/agent-info-manage/issues/65) | 等待#62；按依赖继续排队 |
-| [#66 访问审批](https://github.com/ShiJiJS/agent-info-manage/issues/66) | Mac r1：3/8且OPEN，审批范围/决定及凭据关联已接；继续单次结果与状态审计。[记录](zhiyu-macos-approvals.md) |
+| [#66 访问审批](https://github.com/ShiJiJS/agent-info-manage/issues/66) | Mac r2：7/8且OPEN，审批、单次结果与状态/接口交接已接；完整S5/OS输入后补，接着U06。[记录](zhiyu-macos-approvals.md) |
 | [#67 提案与历史](https://github.com/ShiJiJS/agent-info-manage/issues/67) | 等待#62；按依赖继续排队 |
 | [#68 全局设置](https://github.com/ShiJiJS/agent-info-manage/issues/68) | 等待#62；按依赖继续排队 |
 
