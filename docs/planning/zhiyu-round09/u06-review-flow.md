@@ -1,6 +1,6 @@
 # U06：提案与授权历史的实施流程
 
-沿用冻结R11/R12及S4。授权历史r1和新增/标量修正提案r2已接通正式Widget和集中可重置合成来源，见[历史](../../development/zhiyu-macos-grant-history.md)与[提案合同](../../development/zhiyu-macos-proposals.md)。r3已接整条资料删除；单字段删除、混合队列批量、字段add/replace/remove与经历叶变化、新整理结果及旧版审阅继续待实现。对应#67仍0/7，不能用已完成子流程代替整票条件。根级导航保护包含提案未决状态。没有真实Owner写入、SQLCipher、CLI、密钥或系统通知。
+沿用冻结R11/R12及S4。授权历史r1和新增/标量修正提案r2已接通正式Widget和集中可重置合成来源，见[历史](../../development/zhiyu-macos-grant-history.md)与[提案合同](../../development/zhiyu-macos-proposals.md)。r3/r4已接整条及单字段删除、字段四类意图与经历叶变化；混合队列批量、新整理结果及旧版审阅继续待实现。对应#67仍0/7，不能用已完成子流程代替整票条件。根级导航保护包含提案未决状态。没有真实Owner写入、SQLCipher、CLI、密钥或系统通知。
 
 ## 提案队列与审阅
 
