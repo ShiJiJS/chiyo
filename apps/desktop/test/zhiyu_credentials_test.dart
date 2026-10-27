@@ -145,13 +145,15 @@ void main() {
       );
       await capture(t, 'credential-1440-light-request-failure');
       await tap(t, find.byKey(const ValueKey('credential-request-submit')));
-      expect(find.text('待审批'), findsOneWidget);
+      expect(find.text('待审批'), findsWidgets);
       expect(find.text('提交申请不等于批准，也不会启动程序或填充内容。'), findsOneWidget);
       await capture(t, 'credential-1440-light-request-pending');
       await tap(t, find.byKey(const ValueKey('credential-request-done')));
       expect((await model.source.loadSummary()).pending, 6);
       expect(
-        (await model.source.credentials.requests(ref: ssh)).single.state,
+        (await model.source.credentials.requests(
+          ref: ssh,
+        )).singleWhere((r) => r.purpose == '核对合成服务器的状态').state,
         WorkspaceCredentialRequestState.pending,
       );
       expect((await model.source.readDetail(ssh)).values, isEmpty);

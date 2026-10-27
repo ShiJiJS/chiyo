@@ -13,6 +13,13 @@ class WorkspaceController extends ChangeNotifier {
   final _locations = <WorkspacePage, WorkspaceLocation>{};
   int _generation = 0;
   bool _closed = false;
+  bool navigationLocked = false;
+  void setNavigationLocked(bool value) {
+    if (_closed || navigationLocked == value) return;
+    navigationLocked = value;
+    notifyListeners();
+  }
+
   bool get canGoBack => _back.isNotEmpty;
 
   void navigate(
@@ -23,7 +30,7 @@ class WorkspaceController extends ChangeNotifier {
     double? scrollOffset,
     bool clearSelection = false,
   }) {
-    if (_closed) return;
+    if (_closed || navigationLocked) return;
     if (remember) _back.add(location);
     _locations[location.page] = location;
     final prior = _locations[page];
@@ -37,7 +44,7 @@ class WorkspaceController extends ChangeNotifier {
   }
 
   void goBack() {
-    if (_closed || _back.isEmpty) return;
+    if (_closed || navigationLocked || _back.isEmpty) return;
     location = _back.removeLast();
     notifyListeners();
   }

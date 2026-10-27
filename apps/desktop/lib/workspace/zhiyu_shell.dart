@@ -14,7 +14,9 @@ class ZhiyuShell extends StatelessWidget {
     required this.child,
     this.summary,
     this.trailing,
+    this.navigationEnabled = true,
   });
+  final bool navigationEnabled;
   final WorkspacePage page;
   final ValueChanged<WorkspacePage> onNavigate;
   final WorkspaceSummary? summary;
@@ -66,7 +68,7 @@ class ZhiyuShell extends StatelessWidget {
                   ),
                 ),
               ),
-        onPressed: () => onNavigate(destination),
+        onPressed: navigationEnabled ? () => onNavigate(destination) : null,
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [

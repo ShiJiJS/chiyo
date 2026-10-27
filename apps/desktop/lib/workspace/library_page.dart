@@ -1034,6 +1034,8 @@ class _LibraryPageState extends State<LibraryPage> {
                                     WorkspaceRecordKind.information
                             ? _adopt
                             : null,
+                        onApproval: (id) =>
+                            widget.onNavigate(WorkspacePage.approvals, id),
                         onTag: (id) =>
                             model.apply(model.query.copyWith(tagId: id)),
                         onSettings: () => widget.onNavigate(

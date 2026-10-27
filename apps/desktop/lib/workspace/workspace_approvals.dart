@@ -1,0 +1,219 @@
+import 'dart:convert';
+import 'package:crypto/crypto.dart';
+import 'workspace_records.dart';
+import 'workspace_files.dart';
+import 'workspace_credentials.dart';
+
+enum WorkspaceApprovalKind {
+  information('字段读取'),
+  file('文件与字段'),
+  credential('凭据与字段'),
+  focus('焦点填充'),
+  organization('分类整理');
+
+  const WorkspaceApprovalKind(this.label);
+  final String label;
+}
+
+enum WorkspaceApprovalState {
+  pending('待处理'),
+  approved('已批准'),
+  denied('已拒绝'),
+  revoked('已撤销'),
+  expired('已到期'),
+  sessionEnded('会话已结束'),
+  unavailable('范围已失效');
+
+  const WorkspaceApprovalState(this.label);
+  final String label;
+}
+
+enum WorkspaceApprovalFilter { pending, all, done }
+
+enum WorkspaceApprovalScopeKind { field, file, credential, organization }
+
+class WorkspaceApprovalScope {
+  WorkspaceApprovalScope({
+    required this.id,
+    required this.record,
+    required this.label,
+    required this.section,
+    required this.kind,
+    required this.recordVersion,
+    this.fieldKey,
+    this.fieldId,
+    this.entryId,
+    this.requested = false,
+    this.available = true,
+    this.unavailableReason,
+    Iterable<WorkspaceFileVersion> fileVersions = const [],
+  }) : fileVersions = List.unmodifiable(fileVersions);
+  final String id, label, section;
+  final WorkspaceRecordRef record;
+  final WorkspaceApprovalScopeKind kind;
+  final int recordVersion;
+  final String? fieldKey, fieldId, entryId, unavailableReason;
+  final bool requested, available;
+  final List<WorkspaceFileVersion> fileVersions;
+  WorkspaceApprovalScope project({
+    bool? requested,
+    bool? available,
+    String? reason,
+    Iterable<WorkspaceFileVersion>? files,
+  }) => WorkspaceApprovalScope(
+    id: id,
+    record: record,
+    label: label,
+    section: section,
+    kind: kind,
+    recordVersion: recordVersion,
+    fieldKey: fieldKey,
+    fieldId: fieldId,
+    entryId: entryId,
+    requested: requested ?? this.requested,
+    available: available ?? this.available,
+    unavailableReason: reason ?? unavailableReason,
+    fileVersions: files ?? fileVersions,
+  );
+}
+
+class WorkspaceApprovalSummary {
+  const WorkspaceApprovalSummary({
+    required this.id,
+    required this.title,
+    required this.kind,
+    required this.agentClaim,
+    required this.sessionId,
+    required this.chatClaim,
+    required this.purpose,
+    required this.submittedAt,
+    required this.requestExpiresAt,
+    required this.state,
+  });
+  final String id, title, agentClaim, sessionId, chatClaim, purpose;
+  final WorkspaceApprovalKind kind;
+  final WorkspaceApprovalState state;
+  final DateTime submittedAt, requestExpiresAt;
+}
+
+class WorkspaceApprovalQuery {
+  const WorkspaceApprovalQuery({
+    this.keyword = '',
+    this.filter = WorkspaceApprovalFilter.pending,
+    this.offset = 0,
+    this.limit = 20,
+  });
+  final String keyword;
+  final WorkspaceApprovalFilter filter;
+  final int offset, limit;
+}
+
+class WorkspaceApprovalResults {
+  WorkspaceApprovalResults({
+    required Iterable<WorkspaceApprovalSummary> items,
+    required this.total,
+    required this.pending,
+    required this.offset,
+    this.selection,
+    this.selectionIndex,
+  }) : items = List.unmodifiable(items);
+  final List<WorkspaceApprovalSummary> items;
+  final int total, pending, offset;
+  final String? selection;
+  final int? selectionIndex;
+}
+
+/// Owner metadata only: no field values, file bytes, credential material or token.
+class WorkspaceApprovalDetail {
+  WorkspaceApprovalDetail({
+    required this.request,
+    required this.reviewToken,
+    required Iterable<WorkspaceApprovalScope> scopes,
+    Iterable<String> approved = const [],
+    Map<String, int> fileVersions = const {},
+    this.credential,
+    this.decidedAt,
+    this.fieldExpiresAt,
+    this.credentialExpiresAt,
+    this.approveUnavailableReason,
+  }) : scopes = List.unmodifiable(scopes),
+       approved = Set.unmodifiable(approved),
+       fileVersions = Map.unmodifiable(fileVersions);
+  final WorkspaceApprovalSummary request;
+  final String reviewToken;
+  final List<WorkspaceApprovalScope> scopes;
+  final Set<String> approved;
+  final Map<String, int> fileVersions;
+  final WorkspaceCredentialUseRequest? credential;
+  final DateTime? decidedAt, fieldExpiresAt, credentialExpiresAt;
+  final String? approveUnavailableReason;
+  bool get canApprove =>
+      request.state == WorkspaceApprovalState.pending &&
+      scopes.any((s) => s.available) &&
+      approveUnavailableReason == null;
+}
+
+enum WorkspaceApprovalAction { approve, deny, revoke }
+
+class WorkspaceApprovalChange {
+  WorkspaceApprovalChange({
+    required this.operationId,
+    required this.requestId,
+    required this.reviewToken,
+    required this.action,
+    Iterable<String> selected = const [],
+    Map<String, int> fileVersions = const {},
+    this.fieldMinutes = 30,
+    this.credentialMinutes = 15,
+  }) : selected = List.unmodifiable(selected),
+       fileVersions = Map.unmodifiable(fileVersions);
+  final String operationId, requestId, reviewToken;
+  final WorkspaceApprovalAction action;
+  final List<String> selected;
+  final Map<String, int> fileVersions;
+  final int fieldMinutes, credentialMinutes;
+  String get digest => sha256
+      .convert(
+        utf8.encode(
+          jsonEncode([
+            requestId,
+            action.name,
+            reviewToken,
+            selected,
+            {
+              for (final k in (fileVersions.keys.toList()..sort()))
+                k: fileVersions[k],
+            },
+            fieldMinutes,
+            credentialMinutes,
+          ]),
+        ),
+      )
+      .toString();
+}
+
+class WorkspaceApprovalReceipt {
+  const WorkspaceApprovalReceipt({
+    required this.operationId,
+    required this.requestId,
+    required this.action,
+    required this.reviewToken,
+    required this.revision,
+    required this.commandDigest,
+  });
+  final String operationId, requestId, reviewToken, commandDigest;
+  final WorkspaceApprovalAction action;
+  final int revision;
+}
+
+abstract interface class WorkspaceApprovalSource {
+  Future<WorkspaceApprovalResults> query(
+    WorkspaceApprovalQuery query, {
+    String? keepSelection,
+  });
+  Future<WorkspaceApprovalDetail> read(String id);
+  Future<WorkspaceApprovalReceipt> change(WorkspaceApprovalChange change);
+
+  /// null confirms no commit; a failed lookup must throw.
+  Future<WorkspaceApprovalReceipt?> receipt(String operationId);
+}

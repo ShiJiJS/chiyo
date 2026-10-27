@@ -63,7 +63,7 @@ void main() {
       final current = await s.credentials.read(ssh);
       final receiver = (await s.credentials.receivers(ssh)).single,
           session = (await s.credentials.sessions()).first;
-      await s.credentials.requestUse(
+      final pending = await s.credentials.requestUse(
         WorkspaceCredentialUseDraft(
           operationId: 'request',
           ref: ssh,
@@ -99,7 +99,9 @@ void main() {
       expect(d.linkedInformation, current.linkedInformation);
       expect(d.useGeneration, current.useGeneration + 1);
       expect(
-        (await s.credentials.requests(ref: ssh)).single.state,
+        (await s.credentials.requests(
+          ref: ssh,
+        )).singleWhere((r) => r.id == pending.requestId).state,
         WorkspaceCredentialRequestState.superseded,
       );
       expect(
@@ -145,7 +147,7 @@ void main() {
       final receipt = await s.credentials.change(c);
       expect(identical(await s.credentials.change(c), receipt), isTrue);
       expect((await s.loadSummary()).records, count - 1);
-      expect((await s.loadSummary()).pending, 5);
+      expect((await s.loadSummary()).pending, 4);
       expect(
         (await s.credentials.requests())
             .singleWhere((r) => r.id == pending.requestId)

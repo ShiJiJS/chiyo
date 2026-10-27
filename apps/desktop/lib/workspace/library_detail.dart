@@ -26,6 +26,7 @@ class LibraryDetail extends StatefulWidget {
     this.onHistory,
     this.onRecycle,
     this.onAdopt,
+    this.onApproval,
     this.filePicker,
     this.credentialPicker,
     this.onModalChanged,
@@ -40,6 +41,7 @@ class LibraryDetail extends StatefulWidget {
   final ValueChanged<WorkspaceRecordRef> onOpen;
   final VoidCallback? onEdit, onHistory, onRecycle;
   final VoidCallback? onAdopt;
+  final ValueChanged<String>? onApproval;
   final VoidCallback onSettings, onExpand;
   final ValueChanged<String> onTag;
   final WorkspaceFilePicker? filePicker;
@@ -541,6 +543,7 @@ class _LibraryDetailState extends State<LibraryDetail> {
                         onOpen: widget.onOpen,
                         onModalChanged: widget.onModalChanged,
                         picker: widget.credentialPicker,
+                        onApproval: widget.onApproval,
                       )
                     else if ((detail.definition['fields'] as List? ?? [])
                         .isNotEmpty)

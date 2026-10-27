@@ -11,9 +11,11 @@ class CredentialUseDialog extends StatefulWidget {
     super.key,
     required this.source,
     required this.ref,
+    this.onApproval,
   });
   final WorkspaceCredentialSource source;
   final WorkspaceRecordRef ref;
+  final ValueChanged<String>? onApproval;
   @override
   State<CredentialUseDialog> createState() => _CredentialUseDialogState();
 }
@@ -204,6 +206,19 @@ class _CredentialUseDialogState extends State<CredentialUseDialog> {
             DesktopButton(
               onPressed: _resultLoading ? null : _loadResult,
               child: const Text('重新读取状态'),
+            ),
+          if (widget.onApproval != null && receipt.requestId != null)
+            DesktopButton(
+              key: const ValueKey('credential-request-open-approval'),
+              onPressed: () {
+                Navigator.pop(context, true);
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  widget.onApproval!(
+                    _request?.approvalId ?? 'credential:${receipt.requestId!}',
+                  );
+                });
+              },
+              child: const Text('前往审批'),
             ),
           DesktopButton(
             key: const ValueKey('credential-request-done'),

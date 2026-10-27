@@ -76,12 +76,27 @@ class SampleWorkspaceCredentials implements WorkspaceCredentialSource {
     required this.beforeWrite,
     required this.changed,
     required this.now,
+    this.approvalState,
+    this.approvalHistory,
+    this.approvalRequests,
   });
   final Future<void> Function() readable;
   final SampleCredentialRecordStore records;
   final void Function() beforeWrite;
   final void Function(WorkspaceRecordRef) changed;
   final DateTime Function() now;
+  final Iterable<WorkspaceCredentialUseRequest> Function(WorkspaceRecordRef?)?
+  approvalRequests;
+  final WorkspaceCredentialRequestState Function(WorkspaceCredentialUseRequest)?
+  approvalState;
+  final Iterable<WorkspaceCredentialUseHistory> Function(WorkspaceRecordRef)?
+  approvalHistory;
+  List<WorkspaceCredentialUseRequest> get requestFacts =>
+      List.unmodifiable(_requests.values);
+  WorkspaceCredentialDetail currentMetadata(WorkspaceRecordRef ref) =>
+      _detail(ref);
+  List<WorkspaceCredentialReceiver> receiverFacts(WorkspaceRecordRef ref) =>
+      List.unmodifiable(_receivers(_detail(ref)));
   final _states = <WorkspaceRecordRef, _CredentialState>{},
       _initial = <WorkspaceRecordRef, _CredentialState>{};
   final _history = <WorkspaceRecordRef, List<WorkspaceCredentialUseHistory>>{};
@@ -137,7 +152,11 @@ class SampleWorkspaceCredentials implements WorkspaceCredentialSource {
   }
 
   int get pendingCount => _requests.values
-      .where((r) => r.state == WorkspaceCredentialRequestState.pending)
+      .where(
+        (r) =>
+            (approvalState?.call(r) ?? r.state) ==
+            WorkspaceCredentialRequestState.pending,
+      )
       .length;
 
   void seed(WorkspaceRecordRef ref, Map<String, dynamic> row) {
@@ -809,8 +828,9 @@ class SampleWorkspaceCredentials implements WorkspaceCredentialSource {
     await readable();
     if (ref != null) _get(ref);
     return List.unmodifiable(
-      _requests.values
+      [...?approvalRequests?.call(ref), ..._requests.values]
           .where((r) => ref == null || r.ref == ref)
+          .map((r) => r.withState(approvalState?.call(r) ?? r.state))
           .toList()
           .reversed,
     );
@@ -822,6 +842,9 @@ class SampleWorkspaceCredentials implements WorkspaceCredentialSource {
   ) async {
     await readable();
     _get(ref);
-    return List.unmodifiable(_history[ref] ?? []);
+    return List.unmodifiable([
+      ...?_history[ref],
+      ...?approvalHistory?.call(ref),
+    ]);
   }
 }

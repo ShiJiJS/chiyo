@@ -23,6 +23,8 @@ import 'plugins_page.dart';
 import 'plugin_dialogs.dart';
 import 'library_edit_dialog.dart';
 import 'legacy_templates_controller.dart';
+import 'approvals_controller.dart';
+import 'approvals_page.dart';
 
 /// Only the isolated composition root knows which provider is a sample.
 /// U02–U07 register their production widgets through pageBuilder.
@@ -40,6 +42,7 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
   late final LibraryController _library;
   late final PluginsController _plugins;
   late final LegacyTemplatesController _legacy;
+  late final ApprovalsController _approvals;
   StreamSubscription<WorkspaceRecordRef?>? _summaryChanges;
   final _guideFocus = FocusNode();
   bool _stress = false;
@@ -53,6 +56,9 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
       },
     );
     _controller = WorkspaceController(_source);
+    _approvals = ApprovalsController(_source.approvals, _source.changes)
+      ..addListener(_approvalChanged);
+    unawaited(_approvals.load());
     _library = LibraryController(_source);
     _plugins = PluginsController(_source.plugins, _source.changes);
     _legacy = LegacyTemplatesController(
@@ -80,9 +86,15 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
     );
   }
 
+  void _approvalChanged() {
+    _controller.setNavigationLocked(_approvals.frozen);
+    unawaited(widget.desktop?.setNavigationEnabled(!_approvals.frozen));
+  }
+
   @override
   void dispose() {
     _guideFocus.dispose();
+    _approvals.dispose();
     _controller.dispose();
     _library.dispose();
     _plugins.dispose();
@@ -99,6 +111,7 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
     unawaited(_library.load(_library.query));
     unawaited(_plugins.load());
     unawaited(_legacy.load());
+    unawaited(_approvals.load());
   }
 
   Future<void> _createWithTemplate(
@@ -151,6 +164,7 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
   }
 
   void _navigate(WorkspacePage page, String id) {
+    if (page == WorkspacePage.approvals) unawaited(_approvals.open(id));
     if (page == WorkspacePage.settings) {
       const prefix = 'plugin:builtin.server/host:';
       if (id.startsWith(prefix)) {
@@ -180,6 +194,7 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
     );
     _stress = stress;
     await _controller.refresh();
+    _approvals.resetView();
     await _library.resetView();
     if (stress) await _library.showAll();
   }
@@ -238,6 +253,39 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
                       },
                       child: Text(stress ? '压力资料' : '基准资料'),
                     ),
+                ],
+              ),
+              const SizedBox(height: 22),
+              const Text('审批状态', style: TextStyle(fontWeight: FontWeight.w600)),
+              const SizedBox(height: 10),
+              Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: [
+                  DesktopButton(
+                    key: const ValueKey('preview-approval-expire'),
+                    onPressed: () {
+                      _source.advanceApprovalClock(const Duration(hours: 9));
+                      Navigator.pop(dialogContext);
+                    },
+                    child: const Text('推进请求与授权到期'),
+                  ),
+                  DesktopButton(
+                    key: const ValueKey('preview-approval-session-end'),
+                    onPressed: () {
+                      _source.endApprovalSession('session-maintenance');
+                      Navigator.pop(dialogContext);
+                    },
+                    child: const Text('结束维护会话'),
+                  ),
+                  DesktopButton(
+                    key: const ValueKey('preview-approval-unknown'),
+                    onPressed: () {
+                      _source.loseNextApprovalReply = true;
+                      Navigator.pop(dialogContext);
+                    },
+                    child: const Text('下一次审批回包丢失'),
+                  ),
                 ],
               ),
               const SizedBox(height: 22),
@@ -336,6 +384,7 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
             DesktopButton(
               onPressed: () {
                 _source.reset();
+                _approvals.resetView();
                 unawaited(_library.resetView());
                 unawaited(_controller.refresh());
                 Navigator.pop(dialogContext);
@@ -366,7 +415,7 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
       kind: DesktopButtonKind.quiet,
       fontSize: 12,
       padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 8),
-      onPressed: () => _guide(context),
+      onPressed: _controller.navigationLocked ? null : () => _guide(context),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -403,6 +452,15 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
                 onNavigate: _navigate,
                 onModalChanged: (open) =>
                     unawaited(widget.desktop?.setNavigationEnabled(!open)),
+              )
+            : location.page == WorkspacePage.approvals
+            ? ApprovalsPage(
+                controller: _approvals,
+                onRecord: (ref) => unawaited(_hostRecord(ref)),
+                onRetry: () {
+                  _source.setScenario(SampleWorkspaceScenario.ready);
+                  unawaited(_approvals.load());
+                },
               )
             : location.page == WorkspacePage.settings
             ? PluginsPage(

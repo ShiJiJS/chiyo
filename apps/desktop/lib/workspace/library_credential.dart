@@ -19,6 +19,7 @@ class LibraryCredential extends StatefulWidget {
     required this.onOpen,
     this.onModalChanged,
     this.picker,
+    this.onApproval,
   });
   final WorkspaceRecordRef ref;
   final int revision;
@@ -26,6 +27,7 @@ class LibraryCredential extends StatefulWidget {
   final ValueChanged<WorkspaceRecordRef> onOpen;
   final ValueChanged<bool>? onModalChanged;
   final WorkspaceCredentialPicker? picker;
+  final ValueChanged<String>? onApproval;
   @override
   State<LibraryCredential> createState() => _LibraryCredentialState();
 }
@@ -144,6 +146,7 @@ class _LibraryCredentialState extends State<LibraryCredential> {
       builder: (_) => CredentialUseDialog(
         source: widget.source.credentials,
         ref: widget.ref,
+        onApproval: widget.onApproval,
       ),
     );
     if (result == true && mounted) await _load();
@@ -408,6 +411,16 @@ class _LibraryCredentialState extends State<LibraryCredential> {
                           '${request.purpose} · 材料v${request.materialVersion} · 申请${request.minutes}分钟',
                           style: libraryText(context, 13, color: c.muted),
                         ),
+                        if (widget.onApproval != null)
+                          DesktopButton(
+                            key: ValueKey(
+                              'credential-open-request-${request.id}',
+                            ),
+                            kind: DesktopButtonKind.quiet,
+                            onPressed: () =>
+                                widget.onApproval!(request.approvalId),
+                            child: const Text('查看审批请求'),
+                          ),
                       ],
                     ),
                   ),

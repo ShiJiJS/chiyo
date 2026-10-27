@@ -185,7 +185,9 @@ void main() {
       expect(metadata.recordVersion, 2);
       expect(metadata.useGeneration, initial.useGeneration);
       expect(
-        (await source.credentials.requests(ref: token)).single.state,
+        (await source.credentials.requests(
+          ref: token,
+        )).singleWhere((r) => r.id == pending.requestId).state,
         WorkspaceCredentialRequestState.pending,
       );
       final oldHistory = (await source.credentials.history(token)).single;
@@ -202,7 +204,9 @@ void main() {
       expect(disabled.enabled, isFalse);
       expect(disabled.materialVersion, 1);
       expect(
-        (await source.credentials.requests(ref: token)).single.state,
+        (await source.credentials.requests(
+          ref: token,
+        )).singleWhere((r) => r.id == pending.requestId).state,
         WorkspaceCredentialRequestState.disabled,
       );
       expect((await source.loadSummary()).pending, 5);
@@ -224,7 +228,9 @@ void main() {
         ),
       );
       expect(
-        (await source.credentials.requests(ref: token)).single.state,
+        (await source.credentials.requests(
+          ref: token,
+        )).singleWhere((r) => r.id == pending.requestId).state,
         WorkspaceCredentialRequestState.disabled,
       );
       expect((await source.credentials.history(token)).single, oldHistory);
@@ -317,8 +323,10 @@ void main() {
         source.credentials.requestUse(input),
       ]);
       expect(receipts.first, receipts.last);
-      expect(await source.credentials.requests(), hasLength(1));
-      final pending = (await source.credentials.requests()).single;
+      expect(await source.credentials.requests(), hasLength(4));
+      final pending = (await source.credentials.requests()).singleWhere(
+        (r) => r.id == receipts.first.requestId,
+      );
       expect(pending.state, WorkspaceCredentialRequestState.pending);
       expect(pending.materialVersion, before.materialVersion);
       expect(pending.receiver.executable, '/usr/bin/ssh');
@@ -331,7 +339,9 @@ void main() {
         edit(before, 'replace-after-request', candidate: 'ssh-file'),
       );
       expect(
-        (await source.credentials.requests()).single.state,
+        (await source.credentials.requests())
+            .singleWhere((r) => r.id == pending.id)
+            .state,
         WorkspaceCredentialRequestState.superseded,
       );
       expect(pending.state, WorkspaceCredentialRequestState.pending);
@@ -366,7 +376,18 @@ void main() {
       source.reset();
       expect((await source.loadSummary()).records, 31);
       expect((await source.loadSummary()).pending, 5);
-      expect(await source.credentials.requests(), isEmpty);
+      final resetRequests = await source.credentials.requests();
+      expect(resetRequests.map((r) => r.approvalId).toSet(), {
+        'server',
+        'token',
+        'fill',
+      });
+      expect(
+        resetRequests.every(
+          (r) => r.state == WorkspaceCredentialRequestState.pending,
+        ),
+        isTrue,
+      );
       await expectLater(
         source.credentials.read(created.ref),
         throwsA(failure('not_found')),
