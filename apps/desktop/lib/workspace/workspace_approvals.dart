@@ -40,6 +40,7 @@ class WorkspaceApprovalScope {
     required this.record,
     required this.label,
     required this.section,
+    required this.recordName,
     required this.kind,
     required this.recordVersion,
     this.fieldKey,
@@ -50,7 +51,7 @@ class WorkspaceApprovalScope {
     this.unavailableReason,
     Iterable<WorkspaceFileVersion> fileVersions = const [],
   }) : fileVersions = List.unmodifiable(fileVersions);
-  final String id, label, section;
+  final String id, label, section, recordName;
   final WorkspaceRecordRef record;
   final WorkspaceApprovalScopeKind kind;
   final int recordVersion;
@@ -67,6 +68,7 @@ class WorkspaceApprovalScope {
     record: record,
     label: label,
     section: section,
+    recordName: recordName,
     kind: kind,
     recordVersion: recordVersion,
     fieldKey: fieldKey,

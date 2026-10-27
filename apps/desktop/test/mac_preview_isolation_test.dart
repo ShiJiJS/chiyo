@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -6,8 +7,11 @@ import 'package:info_desktop/desktop_fonts.dart';
 import 'package:info_desktop/workspace/preview_workspace.dart';
 import 'package:info_desktop/workspace/library_page.dart';
 import 'package:info_desktop/workspace/approvals_page.dart';
+import 'package:info_desktop/workspace/grant_history_page.dart';
+import 'package:info_desktop/workspace/library_history_dialog.dart';
 import 'package:info_desktop/workspace/mac_preview_desktop.dart';
 import 'package:info_desktop/workspace/workspace_source.dart';
+import 'package:info_desktop/workspace/sample_workspace_source.dart';
 
 // Keep the binding's existing real-IO/fake-frame clocks. The policy guard
 // normalizes paths without calling File factories, which would recurse.
@@ -371,6 +375,69 @@ void main() {
           uses.last.operationId,
         )).state,
         WorkspaceExecutionState.unknown,
+      );
+      // The history workbench uses the same fixture decision source. Explicit
+      // Owner snapshots and original operation reads remain within this guard.
+      await t.tap(find.byKey(const ValueKey('workspace-nav-history')));
+      await t.pumpAndSettle();
+      final grants = t
+          .widget<GrantHistoryPage>(find.byType(GrantHistoryPage))
+          .controller;
+      await grants.open('request:server');
+      await t.pumpAndSettle();
+      expect(grants.detail!.scopes.single.id, host.id);
+      final snapshot = find.byKey(
+        ValueKey('grant-snapshot-${host.record.key}'),
+      );
+      await t.ensureVisible(snapshot);
+      await t.pumpAndSettle();
+      await t.tap(snapshot);
+      await t.pumpAndSettle();
+      expect(find.byType(LibrarySnapshotView), findsOneWidget);
+      await t.tap(find.text('关闭').last);
+      await t.pumpAndSettle();
+      final revoke = find.byKey(const ValueKey('grant-revoke'));
+      await t.ensureVisible(revoke);
+      await t.pumpAndSettle();
+      (source as SampleWorkspaceSource).loseNextApprovalReply = true;
+      await t.tap(revoke);
+      await t.pumpAndSettle();
+      expect(grants.frozen, true);
+      final delivered = Completer<void>();
+      await messenger.handlePlatformMessage(
+        MacPreviewDesktop.channel.name,
+        const StandardMethodCodec().encodeMethodCall(
+          const MethodCall('openSettings'),
+        ),
+        (_) => delivered.complete(),
+      );
+      await delivered.future;
+      await t.pumpAndSettle();
+      expect(find.byType(GrantHistoryPage), findsOneWidget);
+      expect(grants.selection, 'request:server');
+      final reconcile = find.byKey(const ValueKey('grant-reconcile'));
+      await t.ensureVisible(reconcile);
+      await t.pumpAndSettle();
+      await t.tap(reconcile);
+      await t.pumpAndSettle();
+      expect(grants.frozen, false);
+      expect(
+        (await source.approvals.read('server')).request.state,
+        WorkspaceApprovalState.revoked,
+      );
+      await grants.open('request:token');
+      await t.pumpAndSettle();
+      expect(grants.decision.detail!.executions.length, uses.length);
+      final historicalLookup = find.byKey(
+        ValueKey('approval-operation-refresh-${uses.last.operationId}'),
+      );
+      await t.ensureVisible(historicalLookup);
+      await t.pumpAndSettle();
+      await t.tap(historicalLookup);
+      await t.pumpAndSettle();
+      expect(
+        (await source.approvals.read('token')).executions.length,
+        uses.length,
       );
       await t.tap(find.byKey(const ValueKey('preview-guide')));
       await t.pumpAndSettle();

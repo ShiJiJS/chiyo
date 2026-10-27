@@ -25,6 +25,8 @@ import 'library_edit_dialog.dart';
 import 'legacy_templates_controller.dart';
 import 'approvals_controller.dart';
 import 'approvals_page.dart';
+import 'grant_history_controller.dart';
+import 'grant_history_page.dart';
 
 /// Only the isolated composition root knows which provider is a sample.
 /// U02–U07 register their production widgets through pageBuilder.
@@ -43,6 +45,8 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
   late final PluginsController _plugins;
   late final LegacyTemplatesController _legacy;
   late final ApprovalsController _approvals;
+  late final GrantHistoryController _history;
+  bool _historyFrozen = false;
   StreamSubscription<WorkspaceRecordRef?>? _summaryChanges;
   final _guideFocus = FocusNode();
   bool _stress = false;
@@ -62,6 +66,12 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
     _approvals = ApprovalsController(_source.approvals, _source.changes)
       ..addListener(_approvalChanged);
     unawaited(_approvals.load());
+    _history = GrantHistoryController(
+      _source.grantHistory,
+      _source.approvals,
+      _source.changes,
+    )..addListener(_historyChanged);
+    unawaited(_history.load());
     _library = LibraryController(_source);
     _plugins = PluginsController(_source.plugins, _source.changes);
     _legacy = LegacyTemplatesController(
@@ -95,8 +105,14 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
     _syncNavigation();
   }
 
+  void _historyChanged() {
+    _historyFrozen = _history.frozen;
+    if (_historyFrozen) _pendingUiNavigation = null;
+    _syncNavigation();
+  }
+
   bool _deferNavigation(VoidCallback action) {
-    if (!mounted || _approvals.frozen) return true;
+    if (!mounted || _approvals.frozen || _historyFrozen) return true;
     if (_modalDepth > 0) {
       // Only explicit UI destinations wait for modal completion. Native events
       // are rejected, so an old system event never becomes a later navigation.
@@ -118,7 +134,7 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
 
   void _syncNavigation() {
     if (!mounted) return;
-    final enabled = _modalDepth == 0 && !_approvals.frozen;
+    final enabled = _modalDepth == 0 && !_approvals.frozen && !_historyFrozen;
     _controller.setNavigationLocked(!enabled);
     if (_nativeNavigationEnabled != enabled) {
       _nativeNavigationEnabled = enabled;
@@ -137,6 +153,7 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
   void dispose() {
     _guideFocus.dispose();
     _approvals.dispose();
+    _history.dispose();
     _controller.dispose();
     _library.dispose();
     _plugins.dispose();
@@ -154,6 +171,7 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
     unawaited(_plugins.load());
     unawaited(_legacy.load());
     unawaited(_approvals.load());
+    unawaited(_history.load());
   }
 
   Future<void> _createWithTemplate(
@@ -208,6 +226,7 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
   void _navigate(WorkspacePage page, String id) {
     if (_deferNavigation(() => _navigate(page, id))) return;
     if (page == WorkspacePage.approvals) unawaited(_approvals.open(id));
+    if (page == WorkspacePage.history) unawaited(_history.open(id));
     if (page == WorkspacePage.settings) {
       const prefix = 'plugin:builtin.server/host:';
       if (id.startsWith(prefix)) {
@@ -239,6 +258,7 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
     _stress = stress;
     await _controller.refresh();
     _approvals.resetView();
+    _history.resetView();
     await _library.resetView();
     if (stress) await _library.showAll();
   }
@@ -476,6 +496,7 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
               onPressed: () {
                 _source.reset();
                 _approvals.resetView();
+                _history.resetView();
                 unawaited(_library.resetView());
                 unawaited(_controller.refresh());
                 Navigator.pop(dialogContext);
@@ -539,6 +560,12 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
         (context, location) => location.page == WorkspacePage.library
             ? LibraryPage(
                 controller: _library,
+                onWorkspaceBack: _controller.canGoBack
+                    ? _controller.goBack
+                    : null,
+                workspaceBackLabel:
+                    '返回${_controller.previousPage?.label ?? ''}',
+                workspaceNavigationEnabled: !_controller.navigationLocked,
                 filePicker: () =>
                     showWorkspaceFileChoices(context, _source.fileChoices),
                 credentialPicker: (form) => showWorkspaceCredentialChoices(
@@ -553,10 +580,23 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
             : location.page == WorkspacePage.approvals
             ? ApprovalsPage(
                 controller: _approvals,
+                onHistory: (id) =>
+                    _navigate(WorkspacePage.history, 'request:$id'),
                 onRecord: (ref) => unawaited(_hostRecord(ref)),
                 onRetry: () {
                   _source.setScenario(SampleWorkspaceScenario.ready);
                   unawaited(_approvals.load());
+                },
+              )
+            : location.page == WorkspacePage.history
+            ? GrantHistoryPage(
+                controller: _history,
+                onRecord: (ref) => unawaited(_hostRecord(ref)),
+                onRequest: (id) => _navigate(WorkspacePage.approvals, id),
+                onModalChanged: _modalChanged,
+                onRetry: () {
+                  _source.setScenario(SampleWorkspaceScenario.ready);
+                  unawaited(_history.load(review: true));
                 },
               )
             : location.page == WorkspacePage.settings

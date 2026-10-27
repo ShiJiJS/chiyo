@@ -20,6 +20,7 @@ export 'sample_workspace_hosts.dart' show SampleHostScenario;
 part 'sample_workspace_history.dart';
 part 'sample_workspace_adoption.dart';
 part 'sample_workspace_approvals.dart';
+part 'sample_workspace_grant_history.dart';
 
 enum SampleWorkspaceScenario { ready, empty, waiting, failure }
 
@@ -62,6 +63,9 @@ class SampleWorkspaceSource
   late final _approvals = _SampleApprovals(this);
   @override
   WorkspaceApprovalSource get approvals => _approvals;
+  late final _grantHistory = _SampleGrantHistory(this);
+  @override
+  WorkspaceGrantHistorySource get grantHistory => _grantHistory;
   bool get loseNextApprovalReply => _approvals.loseNextReply;
   set loseNextApprovalReply(bool value) => _approvals.loseNextReply = value;
   void demonstrateApprovalExecutions(String id) =>

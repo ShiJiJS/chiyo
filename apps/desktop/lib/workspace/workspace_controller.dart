@@ -21,6 +21,7 @@ class WorkspaceController extends ChangeNotifier {
   }
 
   bool get canGoBack => _back.isNotEmpty;
+  WorkspacePage? get previousPage => _back.isEmpty ? null : _back.last.page;
 
   void navigate(
     WorkspacePage page, {
