@@ -4,6 +4,8 @@ import '../desktop_motion.dart';
 import '../prototype_icons.dart';
 import '../ui_palette.dart';
 import 'library_widgets.dart';
+import 'classification_controller.dart';
+import 'classification_page.dart';
 import 'plugins_controller.dart';
 import 'settings_controller.dart';
 import 'workspace_source.dart';
@@ -13,12 +15,14 @@ class WorkspaceSettingsPage extends StatefulWidget {
     super.key,
     required this.controller,
     required this.plugins,
+    required this.classifications,
     required this.pluginBuilder,
     required this.onRequest,
     this.onModalChanged,
   });
   final WorkspaceSettingsController controller;
   final PluginsController plugins;
+  final ClassificationController classifications;
   final WidgetBuilder pluginBuilder;
   final ValueChanged<String> onRequest;
   final ValueChanged<bool>? onModalChanged;
@@ -422,6 +426,7 @@ class _WorkspaceSettingsPageState extends State<WorkspaceSettingsPage> {
               border: Border(right: BorderSide(color: c.line)),
             ),
             child: ListView(
+              key: const ValueKey('settings-sidebar-scroll'),
               primary: false,
               padding: const EdgeInsets.fromLTRB(18, 26, 18, 20),
               children: [
@@ -444,6 +449,8 @@ class _WorkspaceSettingsPageState extends State<WorkspaceSettingsPage> {
                         PrototypeIconGlyph.clock,
                       WorkspaceSettingsSection.plugins =>
                         PrototypeIconGlyph.plugin,
+                      WorkspaceSettingsSection.classifications =>
+                        PrototypeIconGlyph.folder,
                     }),
                     selected:
                         m.section == section &&
@@ -506,6 +513,11 @@ class _WorkspaceSettingsPageState extends State<WorkspaceSettingsPage> {
           Expanded(
             child: m.section == WorkspaceSettingsSection.plugins
                 ? widget.pluginBuilder(context)
+                : m.section == WorkspaceSettingsSection.classifications
+                ? ClassificationPage(
+                    controller: widget.classifications,
+                    onModalChanged: widget.onModalChanged,
+                  )
                 : SingleChildScrollView(
                     key: const ValueKey('settings-detail-scroll'),
                     controller: _scroll,

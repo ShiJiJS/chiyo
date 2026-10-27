@@ -210,6 +210,14 @@ class LibraryDirectorySelect extends StatelessWidget {
         isExpanded: true,
         decoration: InputDecoration(labelText: parentMode ? '上级目录' : '资料目录'),
         items: [
+          if (parentMode &&
+              value != null &&
+              !catalog.directories.any((d) => d.id == value))
+            DropdownMenuItem(
+              value: value,
+              enabled: false,
+              child: const Text('原上级已移除，请重新选择'),
+            ),
           DropdownMenuItem(
             value: null,
             child: Text(parentMode ? '顶层目录' : '未分类'),

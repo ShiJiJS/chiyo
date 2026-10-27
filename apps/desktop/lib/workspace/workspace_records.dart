@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'package:crypto/crypto.dart';
+
 /// UI contracts contain metadata and explicitly requested owner detail. They
 /// never contain database objects, grants, executable handles or file bytes.
 enum WorkspaceRecordKind { information, credential }
@@ -59,9 +62,41 @@ class WorkspaceCatalog {
 
 enum WorkspaceDirectoryAction { create, update, delete }
 
+enum WorkspaceClassificationKind { directory, tag }
+
+abstract class WorkspaceClassificationChange {
+  const WorkspaceClassificationChange();
+  String get operationId;
+  int get expectedVersion;
+  WorkspaceClassificationKind get kind;
+  String get actionName;
+  String? get targetId;
+  String get name;
+  String? get parentId;
+  String? get removalToken => null;
+  bool get deleting => actionName == 'delete';
+  bool get creating => actionName == 'create';
+  String get digest => sha256
+      .convert(
+        utf8.encode(
+          jsonEncode({
+            'operationId': operationId,
+            'version': expectedVersion,
+            'kind': kind.name,
+            'action': actionName,
+            'targetId': targetId,
+            'name': name,
+            'parentId': parentId,
+            'removalToken': removalToken,
+          }),
+        ),
+      )
+      .toString();
+}
+
 /// A full desired directory state, checked against the catalog being edited.
 /// Null parent means a root directory, never a filesystem path.
-class WorkspaceDirectoryChange {
+class WorkspaceDirectoryChange extends WorkspaceClassificationChange {
   const WorkspaceDirectoryChange({
     required this.operationId,
     required this.expectedVersion,
@@ -70,11 +105,96 @@ class WorkspaceDirectoryChange {
     this.name = '',
     this.parentId,
   });
+  @override
   final String operationId;
+  @override
   final int expectedVersion;
   final WorkspaceDirectoryAction action;
-  final String? directoryId, parentId;
+  final String? directoryId;
+  @override
+  final String? parentId;
+  @override
   final String name;
+  @override
+  WorkspaceClassificationKind get kind => WorkspaceClassificationKind.directory;
+  @override
+  String get actionName => action.name;
+  @override
+  String? get targetId => directoryId;
+}
+
+enum WorkspaceTagAction { create, update, delete }
+
+class WorkspaceTagChange extends WorkspaceClassificationChange {
+  const WorkspaceTagChange({
+    required this.operationId,
+    required this.expectedVersion,
+    required this.action,
+    this.tagId,
+    this.name = '',
+    this.removalToken,
+  });
+  @override
+  final String operationId, name;
+  @override
+  final int expectedVersion;
+  final WorkspaceTagAction action;
+  final String? tagId;
+  @override
+  final String? removalToken;
+  @override
+  String? get targetId => tagId;
+  @override
+  String? get parentId => null;
+  @override
+  WorkspaceClassificationKind get kind => WorkspaceClassificationKind.tag;
+  @override
+  String get actionName => action.name;
+}
+
+/// Metadata only; deletion keeps historical classification references intact.
+class WorkspaceTagRemovalPreview {
+  const WorkspaceTagRemovalPreview({
+    required this.token,
+    required this.tagId,
+    required this.catalogVersion,
+    required this.affectedCount,
+  });
+  final String token, tagId;
+  final int catalogVersion, affectedCount;
+}
+
+class WorkspaceClassificationReceipt {
+  const WorkspaceClassificationReceipt({
+    required this.operationId,
+    required this.commandDigest,
+    required this.expectedVersion,
+    required this.version,
+    required this.targetId,
+    this.directory,
+    this.tag,
+  });
+  final String operationId, commandDigest, targetId;
+  final int expectedVersion, version;
+  final WorkspaceDirectory? directory;
+  final WorkspaceTag? tag;
+  bool matches(WorkspaceClassificationChange c) =>
+      operationId == c.operationId &&
+      commandDigest == c.digest &&
+      expectedVersion == c.expectedVersion &&
+      version > expectedVersion &&
+      targetId.isNotEmpty &&
+      (c.creating || targetId == c.targetId) &&
+      (c.deleting
+          ? directory == null && tag == null
+          : c.kind == WorkspaceClassificationKind.directory
+          ? tag == null &&
+                directory?.id == targetId &&
+                directory?.name == c.name.trim() &&
+                directory?.parentId == c.parentId
+          : directory == null &&
+                tag?.id == targetId &&
+                tag?.name == c.name.trim());
 }
 
 class WorkspaceRecordSummary {
