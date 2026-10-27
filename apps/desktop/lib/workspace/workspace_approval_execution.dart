@@ -41,11 +41,13 @@ class WorkspaceApprovalExecution {
     required this.cleanup,
     this.exitCode,
     this.errorCode,
+    this.observedAt,
   });
   final String requestId, grantId, operationId;
   final WorkspaceCredentialUseRequest credential;
   final WorkspaceCredentialReceiver plan;
   final DateTime createdAt;
+  final DateTime? observedAt;
   final WorkspaceExecutionState state;
   final WorkspaceExecutionCleanup cleanup;
   final int revision;
@@ -82,11 +84,13 @@ class WorkspaceApprovalExecution {
     cleanup.name,
     exitCode,
     errorCode,
+    observedAt?.toUtc().toIso8601String(),
   ]);
   String _hash(Object v) =>
       sha256.convert(utf8.encode(jsonEncode(v))).toString();
   bool get valid =>
       revision > 0 &&
+      (observedAt == null || !observedAt!.isBefore(createdAt)) &&
       (state == WorkspaceExecutionState.exited
           ? exitCode != null && processStarted && processEnded
           : exitCode == null) &&
@@ -108,6 +112,7 @@ class WorkspaceApprovalExecution {
     required int revision,
     required bool processEnded,
     required WorkspaceExecutionCleanup cleanup,
+    DateTime? at,
   }) => WorkspaceApprovalExecution(
     requestId: requestId,
     grantId: grantId,
@@ -122,5 +127,6 @@ class WorkspaceApprovalExecution {
     cleanup: cleanup,
     exitCode: exitCode,
     errorCode: errorCode,
+    observedAt: at ?? observedAt,
   );
 }

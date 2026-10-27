@@ -46,10 +46,12 @@ class WorkspaceSettingsChange {
     required this.operationId,
     required this.expectedVersion,
     required this.desired,
+    this.retentionToken,
   });
   final String operationId;
   final int expectedVersion;
   final WorkspacePreferences desired;
+  final String? retentionToken;
   String get digest => sha256
       .convert(
         utf8.encode(
@@ -57,6 +59,7 @@ class WorkspaceSettingsChange {
             'operation': operationId,
             'version': expectedVersion,
             'values': desired.values,
+            'retentionToken': retentionToken,
           }),
         ),
       )
@@ -75,6 +78,23 @@ class WorkspaceSettingsReceipt {
   final WorkspacePreferences preferences;
 }
 
+/// Exact, content-free cleanup scope. The token binds the observed history,
+/// settings version and cutoff; a changed scope requires a new confirmation.
+class WorkspaceRetentionPreview {
+  const WorkspaceRetentionPreview({
+    required this.token,
+    required this.days,
+    required this.cutoff,
+    required this.requests,
+    required this.grants,
+    required this.operations,
+    required this.preserved,
+  });
+  final String token;
+  final int days, requests, grants, operations, preserved;
+  final DateTime cutoff;
+}
+
 /// Notification metadata, never field values or a system authorization token.
 class WorkspaceNotificationPreview {
   const WorkspaceNotificationPreview({
@@ -91,4 +111,5 @@ abstract interface class WorkspaceSettingsSource {
   Future<WorkspaceSettingsReceipt> change(WorkspaceSettingsChange change);
   Future<WorkspaceSettingsReceipt?> receipt(String operationId);
   Future<WorkspaceNotificationPreview> notificationPreview();
+  Future<WorkspaceRetentionPreview> previewRetention(int days);
 }

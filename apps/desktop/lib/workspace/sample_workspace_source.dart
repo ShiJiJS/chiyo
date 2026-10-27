@@ -26,6 +26,7 @@ part 'sample_workspace_proposals.dart';
 part 'sample_workspace_organization.dart';
 part 'sample_workspace_proposal_fields.dart';
 part 'sample_workspace_partial_recycle.dart';
+part 'sample_workspace_retention.dart';
 
 enum SampleWorkspaceScenario { ready, empty, waiting, failure }
 
@@ -61,7 +62,8 @@ class SampleWorkspaceSource
       }
     },
     changed: (ref) => _changes.add(ref),
-    now: _now,
+    now: () => _approvals.now,
+    requestMinutes: () => settings.requestMinutes,
   );
   @override
   WorkspaceCredentialSource get credentials => _credentials;
@@ -78,6 +80,9 @@ class SampleWorkspaceSource
     },
     changed: () => _changes.add(null),
     approvals: approvals,
+    now: () => _approvals.now,
+    retentionScope: _retentionScope,
+    pruneRetention: _pruneRetention,
   );
   @override
   WorkspaceApprovalSource get approvals => _approvals;

@@ -78,6 +78,7 @@ class SampleWorkspaceCredentials implements WorkspaceCredentialSource {
     required this.now,
     this.approvalState,
     this.approvalHistory,
+    this.requestMinutes,
     this.approvalRequests,
   });
   final Future<void> Function() readable;
@@ -91,6 +92,7 @@ class SampleWorkspaceCredentials implements WorkspaceCredentialSource {
   approvalState;
   final Iterable<WorkspaceCredentialUseHistory> Function(WorkspaceRecordRef)?
   approvalHistory;
+  final int Function()? requestMinutes;
   List<WorkspaceCredentialUseRequest> get requestFacts =>
       List.unmodifiable(_requests.values);
   WorkspaceCredentialDetail currentMetadata(WorkspaceRecordRef ref) =>
@@ -808,6 +810,7 @@ class SampleWorkspaceCredentials implements WorkspaceCredentialSource {
     }
     beforeWrite();
     final id = workspaceOperationId();
+    final submittedAt = now();
     _requests[id] = WorkspaceCredentialUseRequest(
       id: id,
       ref: draft.ref,
@@ -819,7 +822,10 @@ class SampleWorkspaceCredentials implements WorkspaceCredentialSource {
       session: session,
       purpose: draft.purpose.trim(),
       minutes: draft.minutes,
-      submittedAt: now(),
+      submittedAt: submittedAt,
+      requestExpiresAt: submittedAt.add(
+        Duration(minutes: requestMinutes?.call() ?? 30),
+      ),
     );
     final receipt = WorkspaceCredentialReceipt(
       draft.ref,
@@ -848,6 +854,17 @@ class SampleWorkspaceCredentials implements WorkspaceCredentialSource {
           .toList()
           .reversed,
     );
+  }
+
+  // Only called within the shared sample settings transaction after its exact
+  // history scope has been revalidated. Operation receipts are retained.
+  void pruneRetainedHistory(Set<String> ids) {
+    for (final e in _history.entries) {
+      _history[e.key] = e.value
+          .where((h) => !ids.contains('legacy:${e.key.key}:${h.grantId}'))
+          .toList();
+    }
+    _requests.removeWhere((id, _) => ids.contains('request:credential:$id'));
   }
 
   @override
