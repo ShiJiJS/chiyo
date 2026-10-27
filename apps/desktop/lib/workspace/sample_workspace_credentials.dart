@@ -67,6 +67,20 @@ class _CredentialState {
   final bool enabled;
 }
 
+/// Opaque session snapshot; contains only the synthetic vault's metadata.
+class SampleCredentialBackup {
+  SampleCredentialBackup._(this._states, this._materials, this._history);
+  final Map<WorkspaceRecordRef, _CredentialState> _states;
+  final Map<WorkspaceRecordRef, Map<int, WorkspaceCredentialMaterial>>
+  _materials;
+  final Map<WorkspaceRecordRef, List<WorkspaceCredentialUseHistory>> _history;
+  int get materials => _materials.values.fold(0, (n, v) => n + v.length);
+  int get historyCount => _history.values.fold(0, (n, v) => n + v.length);
+  int get operationCount => _history.values
+      .expand((v) => v)
+      .fold(0, (n, v) => n + v.operations.length);
+}
+
 /// Independent fictional credential state. It never stores or reads secret
 /// bytes, files, database handles, process handles or system fill capabilities.
 class SampleWorkspaceCredentials implements WorkspaceCredentialSource {
@@ -118,6 +132,45 @@ class SampleWorkspaceCredentials implements WorkspaceCredentialSource {
   final _materials =
       <WorkspaceRecordRef, Map<int, WorkspaceCredentialMaterial>>{};
   WorkspaceFailure? nextReadFailure;
+  int _sessionEpoch = 0;
+  List<WorkspaceCredentialSession> get _currentSessions => _sessionEpoch == 0
+      ? _sessions
+      : [
+          for (final x in _sessions)
+            WorkspaceCredentialSession(
+              'restored-session-$_sessionEpoch:${x.id}',
+              x.label,
+              x.agentClaim,
+            ),
+        ];
+  bool get hasPortableData =>
+      _states.isNotEmpty ||
+      _materials.isNotEmpty ||
+      _history.values.any((h) => h.isNotEmpty) ||
+      _requests.isNotEmpty;
+  SampleCredentialBackup capturePortable() => SampleCredentialBackup._(
+    Map.unmodifiable(_states),
+    Map.unmodifiable({
+      for (final e in _materials.entries)
+        e.key: Map<int, WorkspaceCredentialMaterial>.unmodifiable(e.value),
+    }),
+    Map.unmodifiable({
+      for (final e in _history.entries)
+        e.key: List<WorkspaceCredentialUseHistory>.unmodifiable(e.value),
+    }),
+  );
+  void installPortable(SampleCredentialBackup state) {
+    clearCurrent();
+    _sessionEpoch++;
+    _states.addAll(state._states);
+    _materials.addAll({
+      for (final e in state._materials.entries) e.key: Map.of(e.value),
+    });
+    _history.addAll({
+      for (final e in state._history.entries) e.key: List.of(e.value),
+    });
+  }
+
   void _rememberMaterial(WorkspaceRecordRef ref, _CredentialState state) {
     final versions = _materials.putIfAbsent(ref, () => {});
     _retireMaterial(ref);
@@ -728,7 +781,7 @@ class SampleWorkspaceCredentials implements WorkspaceCredentialSource {
   @override
   Future<List<WorkspaceCredentialSession>> sessions() async {
     await readable();
-    return List.unmodifiable(_sessions);
+    return List.unmodifiable(_currentSessions);
   }
 
   List<WorkspaceCredentialReceiver> _receivers(
@@ -799,7 +852,9 @@ class SampleWorkspaceCredentials implements WorkspaceCredentialSource {
     final receiver = _receivers(
       detail,
     ).where((r) => r.id == draft.receiverId).firstOrNull;
-    final session = _sessions.where((s) => s.id == draft.sessionId).firstOrNull;
+    final session = _currentSessions
+        .where((s) => s.id == draft.sessionId)
+        .firstOrNull;
     if (receiver == null ||
         session == null ||
         ![15, 30].contains(draft.minutes) ||

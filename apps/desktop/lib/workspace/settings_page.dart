@@ -5,6 +5,8 @@ import '../prototype_icons.dart';
 import '../ui_palette.dart';
 import 'library_widgets.dart';
 import 'classification_controller.dart';
+import 'backup_controller.dart';
+import 'backup_page.dart';
 import 'classification_page.dart';
 import 'plugins_controller.dart';
 import 'settings_controller.dart';
@@ -16,6 +18,9 @@ class WorkspaceSettingsPage extends StatefulWidget {
     required this.controller,
     required this.plugins,
     required this.classifications,
+    required this.backups,
+    required this.backupPicker,
+    required this.onLibrary,
     required this.pluginBuilder,
     required this.onRequest,
     this.onModalChanged,
@@ -23,6 +28,9 @@ class WorkspaceSettingsPage extends StatefulWidget {
   final WorkspaceSettingsController controller;
   final PluginsController plugins;
   final ClassificationController classifications;
+  final BackupController backups;
+  final WorkspaceBackupPicker backupPicker;
+  final VoidCallback onLibrary;
   final WidgetBuilder pluginBuilder;
   final ValueChanged<String> onRequest;
   final ValueChanged<bool>? onModalChanged;
@@ -408,7 +416,7 @@ class _WorkspaceSettingsPageState extends State<WorkspaceSettingsPage> {
   );
   @override
   Widget build(BuildContext context) => ListenableBuilder(
-    listenable: Listenable.merge([m, widget.plugins]),
+    listenable: Listenable.merge([m, widget.plugins, widget.backups]),
     builder: (context, _) {
       final c = UiPalette.of(context),
           large = MediaQuery.textScalerOf(context).scale(1) >= 1.6;
@@ -451,12 +459,14 @@ class _WorkspaceSettingsPageState extends State<WorkspaceSettingsPage> {
                         PrototypeIconGlyph.plugin,
                       WorkspaceSettingsSection.classifications =>
                         PrototypeIconGlyph.folder,
+                      WorkspaceSettingsSection.backups =>
+                        PrototypeIconGlyph.shield,
                     }),
                     selected:
                         m.section == section &&
                         (section != WorkspaceSettingsSection.plugins ||
                             !widget.plugins.showingLegacy),
-                    onPressed: m.frozen
+                    onPressed: m.frozen || widget.backups.frozen
                         ? null
                         : () {
                             m.select(section);
@@ -496,7 +506,7 @@ class _WorkspaceSettingsPageState extends State<WorkspaceSettingsPage> {
                       selected:
                           m.section == section && widget.plugins.showingLegacy,
                       kind: DesktopButtonKind.quiet,
-                      onPressed: m.frozen
+                      onPressed: m.frozen || widget.backups.frozen
                           ? null
                           : () {
                               m.select(section);
@@ -516,6 +526,13 @@ class _WorkspaceSettingsPageState extends State<WorkspaceSettingsPage> {
                 : m.section == WorkspaceSettingsSection.classifications
                 ? ClassificationPage(
                     controller: widget.classifications,
+                    onModalChanged: widget.onModalChanged,
+                  )
+                : m.section == WorkspaceSettingsSection.backups
+                ? WorkspaceBackupPage(
+                    controller: widget.backups,
+                    picker: widget.backupPicker,
+                    onLibrary: widget.onLibrary,
                     onModalChanged: widget.onModalChanged,
                   )
                 : SingleChildScrollView(

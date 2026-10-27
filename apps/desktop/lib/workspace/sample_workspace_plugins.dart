@@ -45,6 +45,24 @@ class SampleWorkspacePlugins implements WorkspacePluginSource {
       <String, ({String fingerprint, WorkspacePluginReceipt receipt})>{};
   int _version = 1;
   int get version => _version;
+  Map<String, WorkspacePlugin> capturePortable() => Map.unmodifiable(_current);
+  void installPortable(Map<String, WorkspacePlugin> values) {
+    _selections.clear();
+    _legacySelections.clear();
+    _operations.clear();
+    _current
+      ..clear()
+      ..addAll(values);
+    _knownTypes
+      ..clear()
+      ..addEntries(
+        values.values
+            .expand((p) => p.templates)
+            .map((t) => MapEntry(t.type.id, t.type)),
+      );
+    _version++;
+  }
+
   bool loseNextReply = false;
 
   void seed(Iterable<WorkspaceDetail> records) {

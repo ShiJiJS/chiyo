@@ -56,6 +56,7 @@ class _SampleApprovals implements WorkspaceApprovalSource {
       <String, ({String fingerprint, WorkspaceApprovalReceipt receipt})>{};
   final _ended = <String>{};
   final _pruned = <String>{};
+  final _restored = <String>{};
   final _organizationFinished = <String>{};
   final _executions = <String, Map<String, WorkspaceApprovalExecution>>{};
   WorkspaceFailure? nextExecutionReadFailure;
@@ -882,6 +883,7 @@ class _SampleApprovals implements WorkspaceApprovalSource {
 
   void publishExecutionObservation(String id) {
     final rows = _executions[id];
+    if (_restored.contains(id)) return;
     if (rows == null) return;
     for (final e in rows.values.toList()) {
       if (e.state != WorkspaceExecutionState.unknown || e.processEnded) {
@@ -919,6 +921,7 @@ class _SampleApprovals implements WorkspaceApprovalSource {
     _receipts.clear();
     _ended.clear();
     _pruned.clear();
+    _restored.clear();
     _organizationFinished.clear();
     _executions.clear();
     nextExecutionReadFailure = null;

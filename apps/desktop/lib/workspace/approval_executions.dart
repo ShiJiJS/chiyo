@@ -96,23 +96,28 @@ class ApprovalExecutions extends StatelessWidget {
               style: libraryText(context, 13, color: c.muted, height: 1.9),
             ),
             Text(
-              '进程：${!e.processStarted
-                  ? e.state == WorkspaceExecutionState.unknown
-                        ? '是否启动尚未确认'
-                        : '未启动'
-                  : e.processEnded
-                  ? '已确认结束'
-                  : '尚未确认结束'} · 临时材料：${e.cleanup.label}',
+              e.fromBackup
+                  ? '备份中的原设备进程事实；本机不接管原进程或临时材料。'
+                  : '进程：${!e.processStarted
+                        ? e.state == WorkspaceExecutionState.unknown
+                              ? '是否启动尚未确认'
+                              : '未启动'
+                        : e.processEnded
+                        ? '已确认结束'
+                        : '尚未确认结束'} · 临时材料：${e.cleanup.label}',
               style: libraryText(context, 13, color: c.muted, height: 1.9),
             ),
             if (unknown) ...[
               const SizedBox(height: 8),
               Text(
-                '尚不能确认执行结果。进程结束或材料已清理不代表执行成功；请查询原操作，不要重跑。',
+                e.fromBackup
+                    ? '原设备的未知结果保留为历史事实；此处不能验证原进程，也不会重新执行。'
+                    : '尚不能确认执行结果。进程结束或材料已清理不代表执行成功；请查询原操作，不要重跑。',
                 style: libraryText(context, 13, color: c.warning, height: 1.9),
               ),
-            ] else if (e.state == WorkspaceExecutionState.prepareFailed ||
-                e.state == WorkspaceExecutionState.startFailed)
+            ] else if (!e.fromBackup &&
+                (e.state == WorkspaceExecutionState.prepareFailed ||
+                    e.state == WorkspaceExecutionState.startFailed))
               Text(
                 '本次未启动程序，不代表授权已失效。后续操作仍需独立检查会话、版本和期限。',
                 style: libraryText(context, 13, color: c.muted, height: 1.9),
@@ -140,7 +145,7 @@ class ApprovalExecutions extends StatelessWidget {
                           controller.readingExecution(e.operationId)
                       ? null
                       : () => controller.refreshExecution(e.operationId),
-                  child: const Text('查询原操作'),
+                  child: Text(e.fromBackup ? '重新读取历史事实' : '查询原操作'),
                 ),
               ],
             ),

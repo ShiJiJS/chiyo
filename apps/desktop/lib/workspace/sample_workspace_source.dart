@@ -28,6 +28,7 @@ part 'sample_workspace_proposal_fields.dart';
 part 'sample_workspace_partial_recycle.dart';
 part 'sample_workspace_retention.dart';
 part 'sample_workspace_classification.dart';
+part 'sample_workspace_backup.dart';
 
 enum SampleWorkspaceScenario { ready, empty, waiting, failure }
 
@@ -68,6 +69,8 @@ class SampleWorkspaceSource
   );
   @override
   WorkspaceCredentialSource get credentials => _credentials;
+  @override
+  late final SampleWorkspaceBackups backups = SampleWorkspaceBackups(this);
   late final _approvals = _SampleApprovals(this);
   @override
   late final SampleWorkspaceSettings settings = SampleWorkspaceSettings(
@@ -142,8 +145,11 @@ class SampleWorkspaceSource
   set loseNextApprovalReply(bool value) => _approvals.loseNextReply = value;
   void demonstrateApprovalExecutions(String id) =>
       _approvals.demonstrateExecutions(id);
-  void publishApprovalExecutionObservation(String id) =>
-      _approvals.publishExecutionObservation(id);
+  void publishApprovalExecutionObservation(String id) {
+    _approvals.publishExecutionObservation(id);
+    _backupRevision++;
+  }
+
   set nextApprovalExecutionReadFailure(WorkspaceFailure? value) =>
       _approvals.nextExecutionReadFailure = value;
   void advanceApprovalClock(Duration value) => _approvals.advance(value);
@@ -614,7 +620,8 @@ class SampleWorkspaceSource
   };
   SampleWorkspaceScenario _scenario = SampleWorkspaceScenario.ready;
   final _waiting = <Completer<void>>[];
-  final _changes = StreamController<WorkspaceRecordRef?>.broadcast();
+  int _backupRevision = 0;
+  late final _changes = _SampleChanges(() => _backupRevision++);
   @override
   Stream<WorkspaceRecordRef?> get changes => _changes.stream;
   Future<void>? _loading;
@@ -636,6 +643,7 @@ class SampleWorkspaceSource
       <String, ({WorkspaceRecycleEntry entry, WorkspaceArchive archive})>{};
   final _initial = <WorkspaceRecordRef, WorkspaceDetail>{};
   final _records = <WorkspaceRecordRef, WorkspaceDetail>{};
+  final _restoredTypeDefinitions = <String, Map<String, Object?>>{};
   final _operations =
       <String, ({String fingerprint, WorkspaceSaveResult result})>{};
   WorkspaceFailure? nextSaveFailure;
@@ -1130,6 +1138,9 @@ class SampleWorkspaceSource
     }
     if (_plugins.template(typeId) case final template?) {
       return template.definition;
+    }
+    if (_restoredTypeDefinitions[typeId] case final definition?) {
+      return definition;
     }
     final template = _initial.values
         .where((d) => d.record.type.id == typeId)
@@ -2122,6 +2133,7 @@ class SampleWorkspaceSource
       _changeRecord(change);
 
   void _materializeEmpty() {
+    _restoredTypeDefinitions.clear();
     _basePending = _baseProposals = 0;
     _credentialLinks.clearCurrent();
     _credentials.clearCurrent();
@@ -2142,6 +2154,7 @@ class SampleWorkspaceSource
   /// Composition-root-only fixture switch. All pending reads are cancelled;
   /// page code still consumes the same WorkspaceSource contract.
   Future<void> replaceFixture(String fixtureJson) async {
+    _restoredTypeDefinitions.clear();
     setScenario(SampleWorkspaceScenario.ready);
     _fixtureJson = fixtureJson;
     _loading = null;
@@ -2177,6 +2190,7 @@ class SampleWorkspaceSource
   }
 
   void reset() {
+    _restoredTypeDefinitions.clear();
     setScenario(SampleWorkspaceScenario.ready);
     _files.reset();
     _credentialLinks.reset();

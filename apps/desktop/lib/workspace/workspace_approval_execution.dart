@@ -42,12 +42,14 @@ class WorkspaceApprovalExecution {
     this.exitCode,
     this.errorCode,
     this.observedAt,
+    this.fromBackup = false,
   });
   final String requestId, grantId, operationId;
   final WorkspaceCredentialUseRequest credential;
   final WorkspaceCredentialReceiver plan;
   final DateTime createdAt;
   final DateTime? observedAt;
+  final bool fromBackup;
   final WorkspaceExecutionState state;
   final WorkspaceExecutionCleanup cleanup;
   final int revision;
@@ -74,6 +76,7 @@ class WorkspaceApprovalExecution {
     plan.arguments,
     plan.binding,
     createdAt.toUtc().toIso8601String(),
+    fromBackup,
   ]);
   String get observationDigest => _hash([
     bindingDigest,
@@ -128,5 +131,29 @@ class WorkspaceApprovalExecution {
     exitCode: exitCode,
     errorCode: errorCode,
     observedAt: at ?? observedAt,
+    fromBackup: fromBackup,
+  );
+  WorkspaceApprovalExecution asRestored() => WorkspaceApprovalExecution(
+    requestId: requestId,
+    grantId: grantId,
+    operationId: operationId,
+    credential: credential,
+    plan: plan,
+    createdAt: createdAt,
+    state:
+        {
+          WorkspaceExecutionState.preparing,
+          WorkspaceExecutionState.running,
+        }.contains(state)
+        ? WorkspaceExecutionState.unknown
+        : state,
+    revision: revision,
+    processEnded: processEnded,
+    processStarted: processStarted,
+    cleanup: WorkspaceExecutionCleanup.notNeeded,
+    exitCode: exitCode,
+    errorCode: errorCode,
+    observedAt: observedAt,
+    fromBackup: true,
   );
 }

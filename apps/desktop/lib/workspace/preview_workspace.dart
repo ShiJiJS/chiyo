@@ -30,6 +30,8 @@ import 'grant_history_page.dart';
 import 'settings_controller.dart';
 import 'settings_page.dart';
 import 'classification_controller.dart';
+import 'backup_controller.dart';
+import 'backup_page.dart';
 import 'proposals_controller.dart';
 import 'proposals_page.dart';
 
@@ -57,6 +59,8 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
   late final WorkspaceSettingsController _settings;
   late final ClassificationController _classifications;
   bool _settingsFrozen = false;
+  late final BackupController _backups;
+  bool _backupFrozen = false;
   StreamSubscription<WorkspaceRecordRef?>? _summaryChanges;
   final _guideFocus = FocusNode();
   bool _stress = false;
@@ -87,6 +91,9 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
     unawaited(_proposals.load());
     _library = LibraryController(_source);
     _classifications = ClassificationController(_source);
+    _backups = BackupController(_source.backups, _source.changes)
+      ..addListener(_backupChanged);
+    unawaited(_backups.load());
     _plugins = PluginsController(_source.plugins, _source.changes);
     _legacy = LegacyTemplatesController(
       _source.legacyTemplates,
@@ -145,12 +152,19 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
     _syncNavigation();
   }
 
+  void _backupChanged() {
+    _backupFrozen = _backups.frozen;
+    if (_backupFrozen) _pendingUiNavigation = null;
+    _syncNavigation();
+  }
+
   bool _deferNavigation(VoidCallback action) {
     if (!mounted ||
         _approvals.frozen ||
         _historyFrozen ||
         _proposalFrozen ||
-        _settingsFrozen) {
+        _settingsFrozen ||
+        _backupFrozen) {
       return true;
     }
     if (_modalDepth > 0) {
@@ -179,7 +193,8 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
         !_approvals.frozen &&
         !_historyFrozen &&
         !_proposalFrozen &&
-        !_settingsFrozen;
+        !_settingsFrozen &&
+        !_backupFrozen;
     _controller.setNavigationLocked(!enabled);
     if (_nativeNavigationEnabled != enabled) {
       _nativeNavigationEnabled = enabled;
@@ -201,6 +216,7 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
     _history.dispose();
     _proposals.dispose();
     _settings.dispose();
+    _backups.dispose();
     _classifications.dispose();
     _controller.dispose();
     _library.dispose();
@@ -223,6 +239,7 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
     unawaited(_proposals.load());
     unawaited(_settings.load());
     unawaited(_classifications.load());
+    unawaited(_backups.load());
   }
 
   Future<void> _createWithTemplate(
@@ -280,7 +297,11 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
     if (page == WorkspacePage.history) unawaited(_history.open(id));
     if (page == WorkspacePage.proposals) unawaited(_proposals.open(id));
     if (page == WorkspacePage.settings) {
-      _settings.select(WorkspaceSettingsSection.plugins);
+      _settings.select(
+        id == 'backups'
+            ? WorkspaceSettingsSection.backups
+            : WorkspaceSettingsSection.plugins,
+      );
       const prefix = 'plugin:builtin.server/host:';
       if (id.startsWith(prefix)) {
         _plugins.showHostSettings(
@@ -376,6 +397,42 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
                       },
                       child: Text(stress ? '压力资料' : '基准资料'),
                     ),
+                ],
+              ),
+              const SizedBox(height: 22),
+              const Text(
+                '备份合成资料',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 10),
+              const Text('仅切换本窗口的合成资料。完整资料场景用于备份往返；独立空库保留已生成的合成备份和密钥文件。'),
+              const SizedBox(height: 10),
+              Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: [
+                  DesktopButton(
+                    key: const ValueKey('preview-backup-complete'),
+                    onPressed: () async {
+                      Navigator.pop(dialogContext);
+                      await _source.prepareBackupExportFixture();
+                      if (!mounted) return;
+                      _settings.select(WorkspaceSettingsSection.backups);
+                      _navigate(WorkspacePage.settings, 'backups');
+                    },
+                    child: const Text('完整合成资料'),
+                  ),
+                  DesktopButton(
+                    key: const ValueKey('preview-backup-recipient'),
+                    onPressed: () async {
+                      Navigator.pop(dialogContext);
+                      await _source.prepareBackupRecipient();
+                      if (!mounted) return;
+                      _settings.select(WorkspaceSettingsSection.backups);
+                      _navigate(WorkspacePage.settings, 'backups');
+                    },
+                    child: const Text('独立空库恢复场景'),
+                  ),
                 ],
               ),
               const SizedBox(height: 22),
@@ -774,6 +831,12 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
                 controller: _settings,
                 plugins: _plugins,
                 classifications: _classifications,
+                backups: _backups,
+                backupPicker: (kind) => showWorkspaceBackupChoices(
+                  context,
+                  () => _source.backups.choices(kind),
+                ),
+                onLibrary: () => _navigate(WorkspacePage.library, ''),
                 onRequest: (id) => _navigate(WorkspacePage.approvals, id),
                 onModalChanged: _modalChanged,
                 pluginBuilder: (context) => PluginsPage(

@@ -35,6 +35,23 @@ class SampleWorkspaceHosts implements WorkspaceHostSource {
       <String, ({String intent, WorkspaceHostReceipt receipt})>{};
   int _version = 1;
   bool loseNextReply = false;
+  ({Map<String, WorkspaceHostEndpoint> endpoints, Map<String, String?> trusted})
+  capturePortable() => (
+    endpoints: Map.unmodifiable(_endpoints),
+    trusted: Map.unmodifiable(_trusted),
+  );
+  void installPortable(
+    ({
+      Map<String, WorkspaceHostEndpoint> endpoints,
+      Map<String, String?> trusted,
+    })
+    state,
+  ) {
+    clearCurrent();
+    _observed.clear();
+    _endpoints.addAll(state.endpoints);
+    _trusted.addAll(state.trusted);
+  }
 
   String _id(WorkspaceHostEndpoint endpoint) =>
       sha256.convert(utf8.encode(endpoint.key)).toString();
