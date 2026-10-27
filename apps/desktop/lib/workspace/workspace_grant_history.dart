@@ -12,6 +12,7 @@ enum WorkspaceGrantState {
   revoked('已撤销'),
   expired('已到期'),
   sessionEnded('会话已结束'),
+  completed('整理已结束'),
   unavailable('范围已失效');
 
   const WorkspaceGrantState(this.label);
@@ -108,8 +109,15 @@ class WorkspaceGrantTarget {
 }
 
 class WorkspaceGrantEvent {
-  const WorkspaceGrantEvent(this.id, this.at, this.description, this.result);
+  const WorkspaceGrantEvent(
+    this.id,
+    this.at,
+    this.description,
+    this.result, {
+    this.proposalId,
+  });
   final String id, description, result;
+  final String? proposalId;
   final DateTime at;
 }
 

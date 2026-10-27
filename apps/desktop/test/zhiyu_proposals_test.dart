@@ -16,6 +16,7 @@ import 'package:info_desktop/workspace/workspace_source.dart';
 import 'package:info_desktop/workspace/workspace_entries.dart';
 import 'package:info_desktop/workspace/library_entries.dart';
 import 'package:info_desktop/workspace/proposal_batch.dart';
+import 'package:info_desktop/workspace/grant_history_page.dart';
 
 void main() {
   const evidence = String.fromEnvironment('UI_EVIDENCE_DIR');
@@ -934,6 +935,201 @@ void main() {
       expect((await s.loadSummary()).records, 33);
       await tap(t, find.byKey(const ValueKey('proposal-batch-close')));
       await closed(t);
+    },
+  );
+  testWidgets(
+    'automatic organization result is read only and links the same original grant and operation, returning to its query',
+    (t) async {
+      await start(t);
+      await tap(t, find.byKey(const ValueKey('preview-guide')));
+      await tap(t, find.byKey(const ValueKey('preview-organization-applied')));
+      await closed(t);
+      await ready(t);
+      await t.enterText(find.byKey(const ValueKey('proposal-search')), '整理');
+      await ready(t);
+      await pickProposal(t, 'organized');
+      final m = model(t);
+      expect(
+        m.detail!.organization!.outcome,
+        WorkspaceOrganizationOutcome.applied,
+      );
+      expect(find.byKey(const ValueKey('proposal-confirm')), findsNothing);
+      expect(find.byKey(const ValueKey('proposal-reject')), findsNothing);
+      expect(
+        find.byKey(const ValueKey('proposal-batch-add-confirm')),
+        findsNothing,
+      );
+      expect(find.textContaining('无需再次确认'), findsOneWidget);
+      await capture(t, 'proposals-1440-light-organization-result');
+      await t.ensureVisible(
+        find.byKey(const ValueKey('organization-current-information:blinko')),
+      );
+      await t.pumpAndSettle();
+      final oldScroll = m.detailScroll;
+      await tap(
+        t,
+        find.byKey(const ValueKey('organization-current-information:blinko')),
+      );
+      expect(find.byType(LibraryPage), findsOneWidget);
+      expect(
+        t
+            .widget<LibraryPage>(find.byType(LibraryPage))
+            .controller
+            .detail!
+            .record
+            .ref,
+        const WorkspaceRecordRef(WorkspaceRecordKind.information, 'blinko'),
+      );
+      await tap(t, find.byKey(const ValueKey('workspace-back')));
+      expect(model(t).keyword, '整理');
+      expect(model(t).selection, 'organized');
+      expect(model(t).detailScroll, oldScroll);
+      await tap(t, find.byKey(const ValueKey('organization-history')));
+      final history = t
+          .widget<GrantHistoryPage>(find.byType(GrantHistoryPage))
+          .controller;
+      for (var i = 0; i < 100 && (history.loading || history.reading); i++) {
+        await t.pump();
+      }
+      await t.pumpAndSettle();
+      expect(history.selection, 'request:organize');
+      expect(history.detail!.events.single.proposalId, 'organized');
+      expect(history.detail!.summary.state, WorkspaceGrantState.completed);
+      await tap(t, find.byKey(const ValueKey('workspace-back')));
+      expect(model(t).keyword, '整理');
+      expect(model(t).selection, 'organized');
+      await tap(t, find.byKey(const ValueKey('organization-history')));
+      await t.pumpAndSettle();
+      final link = find.byKey(const ValueKey('grant-organization-organized'));
+      await tap(t, link);
+      expect(model(t).selection, 'organized');
+    },
+  );
+
+  testWidgets(
+    'legacy organization stays pending until explicit confirmation and recovers its original unknown receipt in dark200',
+    (t) async {
+      final s = await start(t, dark: true);
+      await tap(t, find.byKey(const ValueKey('preview-guide')));
+      await tap(t, find.byKey(const ValueKey('preview-organization-legacy')));
+      await closed(t);
+      await ready(t);
+      await pickProposal(t, 'legacy-organize');
+      expect(model(t).canConfirm, true);
+      expect(model(t).canEdit, false);
+      expect(find.textContaining('旧版方案保留主人确认'), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('proposal-edit-information:blinko')),
+        findsNothing,
+      );
+      await capture(t, 'proposals-1280-dark200-legacy-organization');
+      s.loseNextProposalReply = true;
+      await tap(t, find.byKey(const ValueKey('proposal-confirm')));
+      expect(model(t).uncertain, true);
+      await tap(t, find.byKey(const ValueKey('proposal-reconcile')));
+      expect(model(t).uncertain, false);
+      expect(model(t).draft, isNull);
+      expect(
+        model(t).detail!.organization!.outcome,
+        WorkspaceOrganizationOutcome.applied,
+      );
+      expect(find.byKey(const ValueKey('proposal-confirm')), findsNothing);
+      final target = model(t).detail!.targets.first;
+      await tap(
+        t,
+        find.byKey(ValueKey('proposal-snapshot-${target.record.key}')),
+      );
+      expect(
+        t
+            .widget<LibrarySnapshotView>(find.byType(LibrarySnapshotView))
+            .archive
+            .detail
+            .version,
+        target.version,
+      );
+      await tap(t, find.byKey(const ValueKey('proposal-read-close')));
+      await closed(t);
+    },
+  );
+
+  testWidgets(
+    'automatic organization unknown reload is read only and a later original observation enables no second approval',
+    (t) async {
+      final s = await start(t);
+      await tap(t, find.byKey(const ValueKey('preview-guide')));
+      await tap(t, find.byKey(const ValueKey('preview-organization-unknown')));
+      await closed(t);
+      await ready(t);
+      await pickProposal(t, 'organized');
+      final d = await s.readDetail(
+        const WorkspaceRecordRef(WorkspaceRecordKind.information, 'blinko'),
+      );
+      expect(
+        model(t).detail!.organization!.outcome,
+        WorkspaceOrganizationOutcome.unknown,
+      );
+      await tap(t, find.byKey(const ValueKey('organization-refresh')));
+      expect(
+        model(t).detail!.organization!.outcome,
+        WorkspaceOrganizationOutcome.unknown,
+      );
+      expect(find.byKey(const ValueKey('proposal-confirm')), findsNothing);
+      await capture(t, 'proposals-1440-light-organization-unknown');
+      await tap(t, find.byKey(const ValueKey('preview-guide')));
+      await tap(t, find.byKey(const ValueKey('preview-organization-observe')));
+      await closed(t);
+      await ready(t);
+      expect(
+        model(t).detail!.organization!.outcome,
+        WorkspaceOrganizationOutcome.applied,
+      );
+      expect((await s.readDetail(d.record.ref)).version, d.version);
+      expect(find.byKey(const ValueKey('proposal-confirm')), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'organization conflict result preserves metadata, has no second approval and handles a deleted target',
+    (t) async {
+      final s = await start(t);
+      await tap(t, find.byKey(const ValueKey('preview-guide')));
+      await tap(
+        t,
+        find.byKey(const ValueKey('preview-organization-conflicted')),
+      );
+      await closed(t);
+      await ready(t);
+      await pickProposal(t, 'organized');
+      expect(
+        model(t).detail!.organization!.outcome,
+        WorkspaceOrganizationOutcome.conflicted,
+      );
+      expect(find.byKey(const ValueKey('proposal-confirm')), findsNothing);
+      final ref = const WorkspaceRecordRef(
+            WorkspaceRecordKind.information,
+            'blinko',
+          ),
+          d = await s.readDetail(ref);
+      await s.changeRecord(
+        WorkspaceRecordChange(
+          operationId: 'org-widget-recycle',
+          ref: ref,
+          expectedVersion: d.version,
+          action: WorkspaceRecordAction.recycle,
+        ),
+      );
+      await ready(t);
+      expect(model(t).detail!.organization!.members.first.exists, false);
+      expect(
+        t
+            .widget<DesktopButton>(
+              find.byKey(ValueKey('organization-current-${ref.key}')),
+            )
+            .onPressed,
+        isNull,
+      );
+      expect(find.textContaining('保留原身份与分类记录'), findsOneWidget);
+      await capture(t, 'proposals-1440-light-organization-conflict');
     },
   );
 }

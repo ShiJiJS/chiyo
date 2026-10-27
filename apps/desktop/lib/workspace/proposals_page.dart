@@ -8,10 +8,13 @@ import 'proposal_reading.dart';
 import 'proposal_read_dialog.dart';
 import 'proposals_controller.dart';
 import 'proposal_batch_dialog.dart';
+import 'organization_reading.dart';
 import 'workspace_source.dart';
 
 String proposalStateLabel(WorkspaceProposalSummary s) =>
-    s.status != WorkspaceProposalStatus.completed
+    s.organizationOutcome != null
+    ? s.organizationOutcome!.label
+    : s.status != WorkspaceProposalStatus.completed
     ? s.status.label
     : s.kind == WorkspaceProposalKind.addition
     ? '已入库'
@@ -30,11 +33,17 @@ class ProposalsPage extends StatefulWidget {
     required this.onRecord,
     this.onModalChanged,
     this.onRetry,
+    this.onHistory,
+    this.onWorkspaceBack,
+    this.workspaceBackLabel = '返回上一页',
   });
   final ProposalsController controller;
   final ValueChanged<WorkspaceRecordRef> onRecord;
   final ValueChanged<bool>? onModalChanged;
   final VoidCallback? onRetry;
+  final ValueChanged<String>? onHistory;
+  final VoidCallback? onWorkspaceBack;
+  final String workspaceBackLabel;
   @override
   State<ProposalsPage> createState() => _ProposalsPageState();
 }
@@ -221,6 +230,13 @@ class _ProposalsPageState extends State<ProposalsPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          if (widget.onWorkspaceBack != null)
+            DesktopButton(
+              key: const ValueKey('workspace-back'),
+              kind: DesktopButtonKind.quiet,
+              onPressed: m.frozen ? null : widget.onWorkspaceBack,
+              child: Text(widget.workspaceBackLabel),
+            ),
           Text(
             '录入提案',
             style: libraryText(context, 23, weight: FontWeight.w700),
@@ -865,8 +881,16 @@ class _ProposalsPageState extends State<ProposalsPage> {
                         ),
                       ),
                     ),
-                  for (final item in m.reviewItems) _item(context, item),
-                  if (!s.pending && d.targets.isEmpty)
+                  if (d.organization case final org?)
+                    OrganizationReading(
+                      report: org,
+                      onRecord: m.frozen ? null : widget.onRecord,
+                      onHistory: m.frozen ? null : widget.onHistory,
+                      onRefresh: m.frozen ? null : m.load,
+                    ),
+                  if (d.organization == null)
+                    for (final item in m.reviewItems) _item(context, item),
+                  if (!s.pending && d.targets.isEmpty && d.organization == null)
                     Padding(
                       padding: const EdgeInsets.only(top: 28),
                       child: Text(
@@ -946,7 +970,7 @@ class _ProposalsPageState extends State<ProposalsPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          if (d.items.length > 1)
+                          if (d.items.length > 1 && d.organization == null)
                             Text(
                               '本次确认 ${m.draft?.selected.length ?? 0} / ${d.items.length} 份资料；未选中的内容不会入库。',
                               style: libraryText(
@@ -1017,6 +1041,8 @@ class _ProposalsPageState extends State<ProposalsPage> {
                                 child: Text(
                                   s.kind == WorkspaceProposalKind.addition
                                       ? '确认入库'
+                                      : d.organization?.legacyReview == true
+                                      ? '确认旧版整批分类'
                                       : s.kind == WorkspaceProposalKind.deletion
                                       ? '确认移入回收站'
                                       : '确认修改',

@@ -52,6 +52,7 @@ class _SampleApprovals implements WorkspaceApprovalSource {
   final _receipts =
       <String, ({String fingerprint, WorkspaceApprovalReceipt receipt})>{};
   final _ended = <String>{};
+  final _organizationFinished = <String>{};
   final _executions = <String, Map<String, WorkspaceApprovalExecution>>{};
   WorkspaceFailure? nextExecutionReadFailure;
   bool _seeded = false;
@@ -381,6 +382,7 @@ class _SampleApprovals implements WorkspaceApprovalSource {
 
   bool _active(_ApprovalInput r, WorkspaceApprovalScope x, _ApprovalFact f) {
     if (f.action != WorkspaceApprovalAction.approve ||
+        _organizationFinished.contains(r.id) ||
         _ended.contains(r.session.id) ||
         !x.available ||
         !f.scopes.containsKey(x.id)) {
@@ -405,6 +407,9 @@ class _SampleApprovals implements WorkspaceApprovalSource {
   }
 
   WorkspaceApprovalState _state(_ApprovalInput r) {
+    if (_organizationFinished.contains(r.id)) {
+      return WorkspaceApprovalState.completed;
+    }
     final f = _facts[r.id];
     if (f?.action == WorkspaceApprovalAction.deny) {
       return WorkspaceApprovalState.denied;
@@ -736,6 +741,8 @@ class _SampleApprovals implements WorkspaceApprovalSource {
         WorkspaceCredentialRequestState.sessionEnded,
       WorkspaceApprovalState.unavailable =>
         WorkspaceCredentialRequestState.superseded,
+      WorkspaceApprovalState.completed =>
+        WorkspaceCredentialRequestState.superseded,
     };
   }
 
@@ -900,6 +907,7 @@ class _SampleApprovals implements WorkspaceApprovalSource {
     _facts.clear();
     _receipts.clear();
     _ended.clear();
+    _organizationFinished.clear();
     _executions.clear();
     nextExecutionReadFailure = null;
     _seeded = false;

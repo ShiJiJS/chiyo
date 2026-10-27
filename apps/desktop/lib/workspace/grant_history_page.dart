@@ -16,12 +16,18 @@ class GrantHistoryPage extends StatefulWidget {
     required this.onRequest,
     this.onModalChanged,
     this.onRetry,
+    this.onProposal,
+    this.onWorkspaceBack,
+    this.workspaceBackLabel = '返回上一页',
   });
   final GrantHistoryController controller;
   final ValueChanged<WorkspaceRecordRef> onRecord;
   final ValueChanged<String> onRequest;
   final ValueChanged<bool>? onModalChanged;
   final VoidCallback? onRetry;
+  final ValueChanged<String>? onProposal;
+  final VoidCallback? onWorkspaceBack;
+  final String workspaceBackLabel;
   @override
   State<GrantHistoryPage> createState() => _GrantHistoryPageState();
 }
@@ -122,6 +128,13 @@ class _GrantHistoryPageState extends State<GrantHistoryPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          if (widget.onWorkspaceBack != null)
+            DesktopButton(
+              key: const ValueKey('workspace-back'),
+              kind: DesktopButtonKind.quiet,
+              onPressed: m.frozen ? null : widget.onWorkspaceBack,
+              child: Text(widget.workspaceBackLabel),
+            ),
           Text(
             '授权历史',
             style: libraryText(context, 26, weight: FontWeight.w700),
@@ -517,6 +530,15 @@ class _GrantHistoryPageState extends State<GrantHistoryPage> {
                           e.result,
                           style: libraryText(context, 13, color: c.muted),
                         ),
+                        if (e.proposalId != null)
+                          DesktopButton(
+                            key: ValueKey('grant-organization-${e.proposalId}'),
+                            kind: DesktopButtonKind.quiet,
+                            onPressed: m.frozen || widget.onProposal == null
+                                ? null
+                                : () => widget.onProposal!(e.proposalId!),
+                            child: const Text('查看这次整理结果'),
+                          ),
                       ],
                     ),
                   ),

@@ -217,6 +217,7 @@ class ProposalsController extends ChangeNotifier {
       _readable &&
       detail!.summary.pending &&
       detail!.summary.kind != WorkspaceProposalKind.deletion &&
+      detail!.summary.kind != WorkspaceProposalKind.organization &&
       draft != null &&
       !needsNewReview;
   void _notify() {
@@ -244,6 +245,7 @@ class ProposalsController extends ChangeNotifier {
       notice: d.notice,
       currentTargetRef: d.currentTargetRef,
       currentAvailable: d.currentAvailable,
+      organization: d.organization,
     );
     _notify();
   }
