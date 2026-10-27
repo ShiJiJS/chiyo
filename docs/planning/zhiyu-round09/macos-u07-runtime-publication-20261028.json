@@ -1,0 +1,67 @@
+{
+  "createdAt": "2026-10-27T18:01:33.417905+00:00",
+  "branch": "codex/zhiyu-macos",
+  "sourceCommit": "7fdee2cb1c96f8e22bffcb412c2503375e9c7b74",
+  "docsAndEvidenceCommit": "62b82396f619d8f8609051b28231aa651d682df0",
+  "issues": [
+    {
+      "number": 68,
+      "url": "https://github.com/ShiJiJS/agent-info-manage/issues/68",
+      "title": "知予前端 U07：全局设置界面",
+      "state": "OPEN",
+      "labels": [
+        "enhancement",
+        "ready-for-agent"
+      ],
+      "comments": 0,
+      "checked": 0,
+      "total": 8,
+      "beforeBodySha256": "870289df74b7ff5d9d987235555ca61f0c656569f86ee76c22cc6d954e27e887",
+      "verifiedBodySha256": "5db7a53c641f824cbfcee361f2ed957b93254d62201eb814c5ea4581bf033821",
+      "exactBodyReadback": true
+    },
+    {
+      "number": 69,
+      "url": "https://github.com/ShiJiJS/agent-info-manage/issues/69",
+      "title": "知予后续规划 F01：界面完成后拆分真实功能、测试与 Mac 交付",
+      "state": "OPEN",
+      "labels": [
+        "documentation"
+      ],
+      "comments": 0,
+      "checked": 0,
+      "total": 6,
+      "beforeBodySha256": "258c7083a2a4f2e6541f60b48256e14d6e72648230515a6c96a7087dd486bd4f",
+      "verifiedBodySha256": "4b9d3ee6c90a26bc37b51be1d1071cb39b914a225b40f3d4d234a6b01131baef",
+      "exactBodyReadback": true
+    }
+  ],
+  "nativeBlockedBy": {
+    "68": [
+      62
+    ],
+    "69": [
+      64,
+      65,
+      66,
+      67,
+      68
+    ]
+  },
+  "evidence": {
+    "path": "docs/development/evidence/zhiyu-round09/u07/macos/r5",
+    "files": 24,
+    "bytes": 1489082,
+    "manifestAndGitBlobsVerified": true,
+    "sourceBlobsVerified": true
+  },
+  "cleanup": {
+    "path": "build/zhiyu-ui/u07/macos/r5",
+    "files": 32,
+    "bytes": 2210274
+  },
+  "browserTaskSpaceId": 194,
+  "fixedAppRetained": "apps/desktop/build/macos/Build/Products/Debug/info_desktop.app",
+  "localUntouched": true,
+  "goal": "active; continue U07 Agent connection, complete UI handoff and remaining S5; no product completion claim"
+}
