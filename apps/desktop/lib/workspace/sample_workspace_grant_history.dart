@@ -206,6 +206,9 @@ class _SampleGrantHistory implements WorkspaceGrantHistorySource {
         decidedAt: f.at,
         fieldExpiresAt: f.fieldEnd,
         credentialExpiresAt: f.credentialEnd,
+        legacyNotice: a._restored.contains(r.id)
+            ? '来自备份的历史事实；授权与原设备进程、临时材料不在本机重新生效。'
+            : null,
       );
     }
     for (final e in s._credentials.retainedHistory.entries) {

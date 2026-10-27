@@ -34,6 +34,24 @@ class _FileEntry {
   final String? filename;
 }
 
+class SampleFileBackup {
+  SampleFileBackup._(
+    this._files,
+    this._owners,
+    this._aliases,
+    this._manifest,
+    this._bytes,
+    this.byteLength,
+  );
+  final Map<String, List<_FileEntry>> _files;
+  final Map<String, WorkspaceRecordRef> _owners;
+  final Map<String, String> _aliases;
+  final Map<String, dynamic> _manifest;
+  final Map<String, Uint8List> _bytes;
+  final int byteLength;
+  int get versions => _files.values.fold(0, (n, v) => n + v.length);
+}
+
 /// Owns sample file facts and approved resource loading. No filesystem, OS
 /// execution or production adapter import. Record transactions stay in source.
 class SampleWorkspaceFiles {
@@ -44,6 +62,93 @@ class SampleWorkspaceFiles {
   final _owners = <String, WorkspaceRecordRef>{};
   final _initialOwners = <String, WorkspaceRecordRef>{};
   Future<Map<String, dynamic>>? _catalog;
+  final _portableBytes = <String, Uint8List>{};
+  bool get hasPortableData => _files.isNotEmpty;
+  String _portableStamp() => jsonEncode([
+    for (final e in _files.entries)
+      [
+        e.key,
+        for (final f in e.value)
+          [
+            f.ref.toJson(),
+            f.assetId,
+            f.createdAt.toIso8601String(),
+            f.filename,
+          ],
+      ],
+    _aliases,
+  ]);
+  Future<SampleFileBackup> capturePortable() async {
+    final stamp = _portableStamp(),
+        files = {
+          for (final e in _files.entries)
+            e.key: List<_FileEntry>.unmodifiable(e.value),
+        },
+        bytes = <String, Uint8List>{};
+    final manifest = files.isEmpty ? <String, dynamic>{} : await _manifest();
+    var length = 0;
+    for (final rows in files.values) {
+      for (final f in rows) {
+        final entry = manifest[f.assetId] as Map<String, dynamic>?;
+        if (entry == null) {
+          throw const WorkspaceFailure(
+            'attachment_missing',
+            '有普通附件原文不可用，未生成备份；请补齐原文后重试。',
+          );
+        }
+        final name = entry['asset'] as String;
+        bytes[name] = Uint8List.fromList(
+          await _load(name, expectedHash: entry['sha256'] as String),
+        );
+        if (bytes[name]!.length != entry['byteLength']) {
+          throw const WorkspaceFailure(
+            'attachment_integrity',
+            '普通附件大小不符，未生成备份。',
+          );
+        }
+        length += bytes[name]!.length;
+        for (final page in entry['pages'] as List? ?? []) {
+          final asset = page['asset'] as String;
+          bytes[asset] = Uint8List.fromList(
+            await _load(asset, expectedHash: page['sha256'] as String),
+          );
+        }
+      }
+    }
+    if (stamp != _portableStamp()) {
+      throw const WorkspaceFailure('conflict', '附件版本已变化，请重新导出。');
+    }
+    return SampleFileBackup._(
+      Map.unmodifiable(files),
+      Map.unmodifiable(_owners),
+      Map.unmodifiable(_aliases),
+      jsonDecode(jsonEncode(manifest)) as Map<String, dynamic>,
+      Map.unmodifiable(bytes),
+      length,
+    );
+  }
+
+  void installPortable(SampleFileBackup state) {
+    _files
+      ..clear()
+      ..addAll({for (final e in state._files.entries) e.key: List.of(e.value)});
+    _owners
+      ..clear()
+      ..addAll(state._owners);
+    _aliases
+      ..clear()
+      ..addAll(state._aliases);
+    _portableBytes
+      ..clear()
+      ..addAll({
+        for (final e in state._bytes.entries)
+          e.key: Uint8List.fromList(e.value),
+      });
+    _catalog = Future.value(
+      jsonDecode(jsonEncode(state._manifest)) as Map<String, dynamic>,
+    );
+  }
+
   static const _prefix = 'assets/zhiyu_files/';
   final _aliases = <String, String>{};
   void aliasField(WorkspaceRecordRef ref, String key, String original) {
@@ -96,6 +201,8 @@ class SampleWorkspaceFiles {
   }
 
   void reset() {
+    _portableBytes.clear();
+    _catalog = null;
     _aliases.clear();
     _files
       ..clear()
@@ -106,6 +213,8 @@ class SampleWorkspaceFiles {
   }
 
   void clear() {
+    _portableBytes.clear();
+    _catalog = null;
     _aliases.clear();
     _files.clear();
     _initial.clear();
@@ -119,13 +228,15 @@ class SampleWorkspaceFiles {
   }
 
   Future<Uint8List> _load(String name, {String? expectedHash}) async {
-    if (readAsset == null ||
+    if (readAsset == null && !_portableBytes.containsKey(name) ||
         !RegExp(r'^[a-zA-Z0-9._-]+$').hasMatch(name) ||
         name.contains('..')) {
       throw const WorkspaceFailure('preview_unavailable', '文件预览服务不可用。');
     }
     try {
-      final bytes = await readAsset!('$_prefix$name');
+      final bytes = _portableBytes.containsKey(name)
+          ? Uint8List.fromList(_portableBytes[name]!)
+          : await readAsset!('$_prefix$name');
       if (bytes.length > 100 * 1024 * 1024 ||
           (expectedHash != null &&
               sha256.convert(bytes).toString() != expectedHash)) {

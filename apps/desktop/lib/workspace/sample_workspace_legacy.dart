@@ -67,6 +67,14 @@ class SampleWorkspaceLegacy implements WorkspaceLegacyTemplateSource {
   final SampleWorkspacePlugins plugins;
   final _initial = <String, WorkspaceLegacyTemplate>{},
       _current = <String, WorkspaceLegacyTemplate>{};
+  Map<String, WorkspaceLegacyTemplate> capturePortable() =>
+      Map.unmodifiable(_current);
+  void installPortable(Map<String, WorkspaceLegacyTemplate> values) {
+    _current
+      ..clear()
+      ..addAll(values);
+  }
+
   String _hash(String text) => sha256.convert(utf8.encode(text)).toString();
   WorkspaceLegacyTemplate _project(
     String id,

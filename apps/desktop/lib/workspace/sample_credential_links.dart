@@ -4,6 +4,19 @@ import 'workspace_records.dart';
 class SampleCredentialLinks {
   final _links = <WorkspaceRecordRef, Set<WorkspaceRecordRef>>{};
   final _initial = <WorkspaceRecordRef, Set<WorkspaceRecordRef>>{};
+  Map<WorkspaceRecordRef, Set<WorkspaceRecordRef>> capturePortable() =>
+      Map.unmodifiable({
+        for (final e in _links.entries)
+          e.key: Set<WorkspaceRecordRef>.unmodifiable(e.value),
+      });
+  void installPortable(
+    Map<WorkspaceRecordRef, Set<WorkspaceRecordRef>> values,
+  ) {
+    _links
+      ..clear()
+      ..addAll({for (final e in values.entries) e.key: Set.of(e.value)});
+  }
+
   Iterable<WorkspaceRecordRef> information(WorkspaceRecordRef credential) =>
       List.unmodifiable(_links[credential] ?? {});
   Iterable<WorkspaceRecordRef> credentials(WorkspaceRecordRef information) =>

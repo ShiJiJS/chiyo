@@ -47,6 +47,12 @@ class SampleWorkspaceSettings implements WorkspaceSettingsSource {
       >{};
   int _nextPlan = 0;
   int get requestMinutes => _value.requestMinutes;
+  WorkspacePreferences get portablePreferences => _value;
+  void installPortable(WorkspacePreferences value) {
+    _value = value.copyWith(version: _value.version + 1);
+    _plans.clear();
+  }
+
   bool loseNextReply = false;
   Future<void> _ready() async {
     final generation = epoch();

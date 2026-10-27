@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:info_desktop/desktop_fonts.dart';
+import 'package:info_desktop/desktop_controls.dart';
 import 'package:info_desktop/workspace/preview_workspace.dart';
 import 'package:info_desktop/workspace/library_page.dart';
 import 'package:info_desktop/workspace/approvals_page.dart';
@@ -617,6 +618,79 @@ void main() {
       await t.tap(find.byKey(const ValueKey('settings-notification-open')));
       await t.pumpAndSettle();
       expect(find.byType(ApprovalsPage), findsOneWidget);
+      await t.tap(find.byKey(const ValueKey('workspace-nav-settings')));
+      await t.pumpAndSettle();
+      await t.ensureVisible(
+        find.byKey(const ValueKey('settings-section-backups')),
+      );
+      await t.tap(find.byKey(const ValueKey('settings-section-backups')));
+      await t.pumpAndSettle();
+      final backup = t
+          .widget<WorkspaceSettingsPage>(find.byType(WorkspaceSettingsPage))
+          .backups;
+      await source.prepareBackupExportFixture();
+      await t.pumpAndSettle();
+      await backup.load();
+      await t.pumpAndSettle();
+      source.backups.loseNextReply = true;
+      await backup.write(WorkspaceBackupAction.enableKey);
+      await t.pumpAndSettle();
+      expect(backup.uncertain, true);
+      final queuedBackup = Completer<void>();
+      await messenger.handlePlatformMessage(
+        MacPreviewDesktop.channel.name,
+        const StandardMethodCodec().encodeMethodCall(
+          const MethodCall('openLibrary'),
+        ),
+        (_) => queuedBackup.complete(),
+      );
+      await queuedBackup.future;
+      await t.pumpAndSettle();
+      expect(find.byType(WorkspaceSettingsPage), findsOneWidget);
+      expect(
+        t
+            .widget<DesktopButton>(
+              find.byKey(const ValueKey('settings-section-appearance')),
+            )
+            .onPressed,
+        isNull,
+      );
+      await backup.reconcile();
+      final keyOutput = (await source.backups.choices(
+        WorkspaceBackupPick.keyOutput,
+      )).first;
+      await backup.pick(WorkspaceBackupPick.keyOutput, (_) async => keyOutput);
+      await backup.write(WorkspaceBackupAction.saveKey);
+      final archiveOutput = (await source.backups.choices(
+        WorkspaceBackupPick.archiveOutput,
+      )).first;
+      await backup.pick(
+        WorkspaceBackupPick.archiveOutput,
+        (_) async => archiveOutput,
+      );
+      final exporting = backup.write(WorkspaceBackupAction.export);
+      for (var i = 0; i < 300 && backup.busy; i++) {
+        await t.pump(const Duration(milliseconds: 20));
+        await t.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 2)),
+        );
+      }
+      expect(backup.busy, false);
+      await exporting;
+      final archive = backup.result!.resource!;
+      await source.prepareBackupRecipient();
+      await t.pumpAndSettle();
+      await backup.load();
+      await t.pumpAndSettle();
+      await backup.pick(WorkspaceBackupPick.archiveInput, (_) async => archive);
+      final key = (await source.backups.choices(
+        WorkspaceBackupPick.keyInput,
+      )).firstWhere((k) => k.id == keyOutput.id);
+      await backup.pick(WorkspaceBackupPick.keyInput, (_) async => key);
+      await backup.inspect();
+      await backup.write(WorkspaceBackupAction.restore);
+      expect(backup.result!.action, WorkspaceBackupAction.restore);
+      await t.pumpAndSettle();
       expect(forbidden, isEmpty);
       expect(network.calls, 0);
       expect(filesystem.rejected, isEmpty);
