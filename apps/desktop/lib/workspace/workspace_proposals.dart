@@ -219,10 +219,12 @@ class WorkspaceProposalDetail {
       'fieldIds': d.fieldIds,
       'retainedFields': d.retainedFields,
       'retainedRelations': d.retainedRelations,
-      'relations': {
-        for (final e in d.relations.entries)
-          e.key: e.value.map((r) => r.key).toList(),
-      },
+      'relations': includeValues
+          ? {
+              for (final e in d.relations.entries)
+                e.key: e.value.map((r) => r.key).toList(),
+            }
+          : const <String, Object?>{},
     };
     return sha256
         .convert(

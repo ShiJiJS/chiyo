@@ -165,12 +165,15 @@ class _ProposalsPageState extends State<ProposalsPage> {
           source: m.source,
           changes: m.changes,
           proposalId: d.summary.id,
+          proposalVersion: d.summary.version,
           record: ref,
           label: item == null
-              ? '${target!.name} · 当时保存v${target.version}'
+              ? '${target!.name} · ${d.summary.kind == WorkspaceProposalKind.deletion ? '删除前' : '当时保存'}v${target.version}'
               : '核对当前资料和原提案',
           item: item?.withoutOwnerBefore(),
           review: review,
+          wholeDeletion: d.summary.kind == WorkspaceProposalKind.deletion,
+          catalog: m.catalog,
         ),
       );
     } finally {
@@ -511,7 +514,52 @@ class _ProposalsPageState extends State<ProposalsPage> {
               onRecord: widget.onRecord,
               enabled: !m.frozen,
             )
-          else ...[
+          else if (d.summary.kind == WorkspaceProposalKind.deletion) ...[
+            Text(
+              '删除整条资料',
+              style: libraryText(context, 22, weight: FontWeight.w700),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              '“${item.before!.record.name}”将移入回收站并保留30天。相关旧授权将失效，恢复资料不会恢复旧授权。',
+              style: libraryText(context, 14, color: c.muted, height: 1.9),
+            ),
+            if (item.beforeState == WorkspaceProposalBeforeState.available)
+              ProposalItemReading(
+                item: WorkspaceProposalItem(
+                  id: item.id,
+                  proposed: item.before!,
+                ),
+                review: WorkspaceProposalItemReview.fromItem(
+                  WorkspaceProposalItem(id: item.id, proposed: item.before!),
+                ),
+                catalog: m.catalog!,
+                relations: m.source.relations(
+                  d.summary.id,
+                  item.id,
+                  d.summary.version,
+                ),
+                onRecord: widget.onRecord,
+                enabled: !m.frozen,
+              )
+            else
+              Padding(
+                padding: const EdgeInsets.only(top: 18),
+                child: Text(
+                  item.beforeState == WorkspaceProposalBeforeState.unread
+                      ? '原版本暂未读取，请先核对当前状态。'
+                      : '原版本内容已不可用，不能确认旧范围。',
+                  style: libraryText(context, 14, color: c.warning),
+                ),
+              ),
+            const SizedBox(height: 12),
+            DesktopButton(
+              key: ValueKey('proposal-compare-${item.id}'),
+              kind: DesktopButtonKind.quiet,
+              onPressed: m.frozen ? null : () => _read(item: item),
+              child: const Text('核对当前资料和原提案'),
+            ),
+          ] else ...[
             Text(
               item.before!.record.name,
               style: libraryText(context, 22, weight: FontWeight.w700),
@@ -555,15 +603,17 @@ class _ProposalsPageState extends State<ProposalsPage> {
               child: const Text('核对当前资料和原提案'),
             ),
           ],
-          const SizedBox(height: 18),
-          Align(
-            alignment: Alignment.centerRight,
-            child: DesktopButton(
-              key: ValueKey('proposal-edit-${item.id}'),
-              onPressed: m.canEdit ? () => _edit(item) : null,
-              child: const Text('编辑提案'),
+          if (d.summary.kind != WorkspaceProposalKind.deletion) ...[
+            const SizedBox(height: 18),
+            Align(
+              alignment: Alignment.centerRight,
+              child: DesktopButton(
+                key: ValueKey('proposal-edit-${item.id}'),
+                onPressed: m.canEdit ? () => _edit(item) : null,
+                child: const Text('编辑提案'),
+              ),
             ),
-          ),
+          ],
         ],
       ),
     );
@@ -723,7 +773,9 @@ class _ProposalsPageState extends State<ProposalsPage> {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           Text(
-                            '当时保存为资料v${target.version}',
+                            s.kind == WorkspaceProposalKind.deletion
+                                ? '删除前的资料v${target.version}；回收不恢复旧授权。'
+                                : '当时保存为资料v${target.version}',
                             style: libraryText(context, 13, color: c.muted),
                           ),
                           if (!target.exists)
@@ -757,13 +809,17 @@ class _ProposalsPageState extends State<ProposalsPage> {
                                 onPressed: m.frozen || !target.snapshotAvailable
                                     ? null
                                     : () => _read(target: target),
-                                child: Text('查看当时保存v${target.version}'),
+                                child: Text(
+                                  '查看${s.kind == WorkspaceProposalKind.deletion ? '删除前' : '当时保存'}v${target.version}',
+                                ),
                               ),
                             ],
                           ),
                           if (!target.snapshotAvailable)
                             Text(
-                              '当时保存的快照已不可用。',
+                              s.kind == WorkspaceProposalKind.deletion
+                                  ? '删除前的快照已不可用。'
+                                  : '当时保存的快照已不可用。',
                               style: libraryText(context, 13, color: c.muted),
                             ),
                         ],
@@ -816,6 +872,8 @@ class _ProposalsPageState extends State<ProposalsPage> {
                                 child: Text(
                                   s.kind == WorkspaceProposalKind.addition
                                       ? '确认入库'
+                                      : s.kind == WorkspaceProposalKind.deletion
+                                      ? '确认移入回收站'
                                       : '确认修改',
                                 ),
                               ),

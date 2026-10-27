@@ -13,17 +13,23 @@ class ProposalReadDialog extends StatefulWidget {
     required this.source,
     required this.changes,
     required this.proposalId,
+    required this.proposalVersion,
     required this.record,
     required this.label,
     this.item,
     this.review,
+    this.wholeDeletion = false,
+    this.catalog,
   });
   final WorkspaceProposalSource source;
   final Stream<WorkspaceRecordRef?> changes;
   final String proposalId, label;
+  final int proposalVersion;
   final WorkspaceRecordRef record;
   final WorkspaceProposalItem? item;
   final WorkspaceProposalItemReview? review;
+  final bool wholeDeletion;
+  final WorkspaceCatalog? catalog;
   @override
   State<ProposalReadDialog> createState() => _ProposalReadDialogState();
 }
@@ -122,6 +128,31 @@ class _ProposalReadDialogState extends State<ProposalReadDialog> {
               height: 1.9,
             ),
           ),
+          if (widget.wholeDeletion) ...[
+            const SizedBox(height: 18),
+            Text(
+              '原提案申请移入回收站；当前版本变化后须重新提交，比较不会确认删除。',
+              style: libraryText(context, 14, height: 1.9),
+            ),
+            if (widget.catalog case final catalog?)
+              ProposalItemReading(
+                item: WorkspaceProposalItem(
+                  id: widget.item!.id,
+                  proposed: current,
+                ),
+                review: WorkspaceProposalItemReview.fromItem(
+                  WorkspaceProposalItem(id: widget.item!.id, proposed: current),
+                ),
+                catalog: catalog,
+                relations: widget.source.relations(
+                  widget.proposalId,
+                  widget.item!.id,
+                  widget.proposalVersion,
+                ),
+                onRecord: (_) {},
+                enabled: false,
+              ),
+          ],
           for (final change in widget.item!.changes)
             Padding(
               padding: const EdgeInsets.only(top: 22),

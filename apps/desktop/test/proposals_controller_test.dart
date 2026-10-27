@@ -13,6 +13,7 @@ class _Port implements WorkspaceProposalSource {
   Future<WorkspaceProposalDetail> Function(String)? readOverride;
   bool absent = false,
       wrongDigest = false,
+      missingRecycleEntry = false,
       lookupFailure = false,
       failTerminalRead = false;
   final commands = <WorkspaceProposalChange>[];
@@ -41,22 +42,26 @@ class _Port implements WorkspaceProposalSource {
         reviewToken: r.reviewToken,
         reviewedVersion: r.reviewedVersion,
         resultingVersion: r.resultingVersion,
-        commandDigest: 'another-command',
-        records: r.records,
+        commandDigest: wrongDigest ? 'another-command' : r.commandDigest,
+        records: missingRecycleEntry
+            ? r.records.map(
+                (x) => WorkspaceRecordReceipt(ref: x.ref, version: x.version),
+              )
+            : r.records,
       );
   @override
   Future<WorkspaceProposalReceipt> change(WorkspaceProposalChange c) async {
     commands.add(c);
     if (absent) throw const WorkspaceFailure('unknown_outcome', '结果未知');
     final r = await inner.change(c);
-    return wrongDigest ? _wrong(r) : r;
+    return wrongDigest || missingRecycleEntry ? _wrong(r) : r;
   }
 
   @override
   Future<WorkspaceProposalReceipt?> receipt(String id) async {
     if (lookupFailure) throw const WorkspaceFailure('offline', '查询失败');
     final r = await inner.receipt(id);
-    return wrongDigest && r != null ? _wrong(r) : r;
+    return (wrongDigest || missingRecycleEntry) && r != null ? _wrong(r) : r;
   }
 
   @override
@@ -341,6 +346,51 @@ void main() {
       expect(live.detail!.items, isEmpty);
       expect(live.draft, isNull);
       expect(live.detail!.targets.single.snapshotAvailable, false);
+      expect(port.commands, hasLength(1));
+    },
+  );
+  test(
+    'deletion review has no editor or cached old body; unknown clearing does not change the fixed proposal meaning',
+    () async {
+      await s.demonstrateDeletionProposal();
+      final live = ProposalsController(port, s.changes);
+      addTearDown(live.dispose);
+      await live.open('delete-service');
+      expect(live.canConfirm, true);
+      expect(live.canEdit, false);
+      expect(live.detail!.items.single.before!.relations, isNotEmpty);
+      expect(live.draft!.originals.values.single.before!.values, isEmpty);
+      expect(live.draft!.originals.values.single.before!.relations, isEmpty);
+      s.loseNextProposalReply = true;
+      await live.decide(WorkspaceProposalAction.confirm);
+      await Future<void>.delayed(Duration.zero);
+      expect(live.uncertain, true);
+      expect(live.detail!.items.single.before!.values, isEmpty);
+      expect(live.detail!.items.single.before!.relations, isEmpty);
+      expect(live.needsNewReview, false);
+      await live.reconcile();
+      expect(live.frozen, false);
+      expect(live.draft, isNull);
+      expect(live.detail!.targets.single.exists, false);
+      expect(live.detail!.targets.single.snapshotAvailable, true);
+      expect(port.commands, hasLength(1));
+    },
+  );
+  test(
+    'deletion receipt without a recycle identity remains unknown until the original complete receipt is read',
+    () async {
+      await s.demonstrateDeletionProposal();
+      await m.open('delete-service');
+      port.missingRecycleEntry = true;
+      await m.decide(WorkspaceProposalAction.confirm);
+      expect(m.uncertain, true);
+      await m.reconcile();
+      expect(m.uncertain, true);
+      expect(port.commands, hasLength(1));
+      port.missingRecycleEntry = false;
+      await m.reconcile();
+      expect(m.frozen, false);
+      expect(m.detail!.targets.single.exists, false);
       expect(port.commands, hasLength(1));
     },
   );
