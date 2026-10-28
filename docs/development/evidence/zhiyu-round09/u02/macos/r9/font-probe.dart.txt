@@ -1,0 +1,21 @@
+import 'dart:ui' as ui;
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:info_desktop/desktop_fonts.dart';
+void main() {
+ TestWidgetsFlutterBinding.ensureInitialized();
+ test('installed Mac title optical-axis observation', () async {
+  await loadDesktopFonts();
+  final rows=<String,Object>{};
+  for(final size in [24.0,27.0]) {
+   final values=<String,double>{};
+   for(final optical in [17.0,18.0,20.25,24.0,27.0,28.0,36.0,96.0]) {
+    final p=TextPainter(text: TextSpan(text:'Azure 日本服务器',style:TextStyle(fontFamily:desktopFontFamily,fontFamilyFallback:desktopFontFallback,fontSize:size,height:1.45,letterSpacing:-.4,fontWeight:FontWeight.w600,fontVariations:[const ui.FontVariation('wght',650),ui.FontVariation.opticalSize(optical)])),textDirection:TextDirection.ltr)..layout();
+    values['$optical']=p.width;p.dispose();
+   }
+   rows['$size']=values;
+  }
+  print(jsonEncode(rows));
+ });
+}

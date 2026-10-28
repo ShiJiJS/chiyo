@@ -1,0 +1,16 @@
+{
+  "app": "apps/desktop/build/macos/Build/Products/Debug/info_desktop.app",
+  "bundleIdentifier": "com.example.infoDesktop.zhiyuPreview",
+  "AgentInfoInterfacePreview": "YES",
+  "architecture": "arm64",
+  "finalTarget": "lib/preview_main.dart",
+  "executableSha256": "15d8b2a42008dc6c446dd07b9dc47626189969c27139d47e07459cd2ca44e43b",
+  "applicationPayloadSha256": {
+    "Contents/Frameworks/App.framework/Versions/A/App": "d94ea346a4072a810a041e8e55ff207ce8169526051700b906deae3440492b8c",
+    "Contents/Frameworks/App.framework/Versions/A/Resources/flutter_assets/kernel_blob.bin": "71a9884333e21de82a9b4641492512254397bae83380742c990390ef65936a76",
+    "Contents/Info.plist": "b0392b04cf337de01a0484be85f17cc07aa0e893f53885df6be6071146107a1e"
+  },
+  "newBuild": true,
+  "newCocoaRuntime": false,
+  "scope": "ordinary fixed preview built; actual images are Widget renders; no new OS-input or Cocoa runtime conclusion"
+}

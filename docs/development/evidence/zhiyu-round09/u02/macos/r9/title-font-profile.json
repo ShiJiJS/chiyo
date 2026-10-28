@@ -1,0 +1,41 @@
+{
+  "font": "/System/Library/Fonts/SFNS.ttf",
+  "sha256": "44890958f3e0b997028121ed7c7a789f3f5cce227c7a93ce8f86ec0db26da571",
+  "axes": [
+    {
+      "axis": "wdth",
+      "min": 30.0,
+      "default": 100.0,
+      "max": 150.0
+    },
+    {
+      "axis": "opsz",
+      "min": 17.0,
+      "default": 28.0,
+      "max": 96.0
+    },
+    {
+      "axis": "GRAD",
+      "min": 400.0,
+      "default": 400.0,
+      "max": 1000.0
+    },
+    {
+      "axis": "wght",
+      "min": 1.0,
+      "default": 400.0,
+      "max": 1000.0
+    }
+  ],
+  "macOS": "27.0.1",
+  "macOSBuild": "26A434",
+  "scope": "Observed loaded Mac title face; no font file changed or distributed",
+  "observed": "Title advance without explicit opsz matched the 17.0 probe. Explicit actual logical 24/27 size matches the frozen CSS auto sizing measurements; not a claim about all Flutter/platform fonts.",
+  "finalTitle": {
+    "weight": 650,
+    "letterSpacing": -0.4,
+    "opticalSize": "actual scaled logical title font size"
+  },
+  "probeSource": "font-probe.dart.txt",
+  "probeLog": "font-probe.log"
+}
