@@ -1,0 +1,80 @@
+[
+  {
+    "log": "foundation-native-checked.log",
+    "source": "/Users/jiangxinyi/Library/Containers/com.example.infoDesktop.zhiyuPreview/Data/tmp/ZhiyuUI-18CF98FE-4BA3-4AFF-AF66-F3CD5543DD6A",
+    "diagnostics": [],
+    "primaryFoundationRecording": false
+  },
+  {
+    "log": "foundation-native-final.log",
+    "source": "/Users/jiangxinyi/Library/Containers/com.example.infoDesktop.zhiyuPreview/Data/tmp/ZhiyuUI-344674D7-343C-4A8F-AAD7-1AA4B1E1C0CF",
+    "diagnostics": [
+      {
+        "file": "light-menu.png",
+        "sha256": "eb91a55cd2573c67b065b734dd38ac6bd715e22d17549860385ed55874c406a6"
+      },
+      {
+        "file": "light-dialog.png",
+        "sha256": "4d76d167cbbe68d18ab505f5b28c7cf04fe52588f648bbbaa2e826b2388faac7"
+      },
+      {
+        "file": "native-motion.json",
+        "sha256": "27d99e5e9795b86c264cfdec4f81cfae09a9d898c009ade10868687983c749f2"
+      }
+    ],
+    "primaryFoundationRecording": false
+  },
+  {
+    "log": "foundation-native-complete.log",
+    "source": "/Users/jiangxinyi/Library/Containers/com.example.infoDesktop.zhiyuPreview/Data/tmp/ZhiyuUI-1109B31F-DAE8-4D5D-B352-E3EA9E769128",
+    "diagnostics": [
+      {
+        "file": "native-motion.json",
+        "sha256": "e271c09b64ef1a040a1a3901bb420241081cef8edffbdc0602ce72d879cad0b7"
+      }
+    ],
+    "primaryFoundationRecording": false
+  },
+  {
+    "log": "foundation-native-ref-checked.log",
+    "source": "/Users/jiangxinyi/Library/Containers/com.example.infoDesktop.zhiyuPreview/Data/tmp/ZhiyuUI-AF77018E-26EF-47C8-9C40-381DEE572FE7",
+    "diagnostics": [
+      {
+        "file": "native-motion.json",
+        "sha256": "e9756814847c286e75a2be3ca9a2b71475711c56edc4fd2570157a603b428c6e"
+      }
+    ],
+    "primaryFoundationRecording": false
+  },
+  {
+    "log": "foundation-native-pointer-checked.log",
+    "source": "/Users/jiangxinyi/Library/Containers/com.example.infoDesktop.zhiyuPreview/Data/tmp/ZhiyuUI-58EFAD9F-45D6-4180-9EC4-3C63175853E3",
+    "diagnostics": [
+      {
+        "file": "light-menu.png",
+        "sha256": "eb91a55cd2573c67b065b734dd38ac6bd715e22d17549860385ed55874c406a6"
+      },
+      {
+        "file": "light-dialog.png",
+        "sha256": "4d76d167cbbe68d18ab505f5b28c7cf04fe52588f648bbbaa2e826b2388faac7"
+      },
+      {
+        "file": "native-motion.json",
+        "sha256": "38b29304a0a86af90dfe73c698121aac029f008b26feaac7eff1f20dceb9e503"
+      }
+    ],
+    "primaryFoundationRecording": false
+  },
+  {
+    "log": "foundation-native-focus-fixed.log",
+    "source": "/Users/jiangxinyi/Library/Containers/com.example.infoDesktop.zhiyuPreview/Data/tmp/ZhiyuUI-DA2B1BEA-6D5B-48C5-88E9-555646954B08",
+    "diagnostics": [],
+    "primaryFoundationRecording": true
+  },
+  {
+    "log": "foundation-native.log",
+    "source": "/Users/jiangxinyi/Library/Containers/com.example.infoDesktop.zhiyuPreview/Data/tmp/ZhiyuUI-15C9E491-4167-401D-BACB-6F56B12A7E74",
+    "diagnostics": [],
+    "primaryFoundationRecording": false
+  }
+]

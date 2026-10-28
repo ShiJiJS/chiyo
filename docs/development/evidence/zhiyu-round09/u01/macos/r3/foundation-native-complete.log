@@ -1,0 +1,57 @@
+00:00 +0: loading /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/integration_test/zhiyu_foundation_native_test.dart
+Building macOS application...                                   
+✓ Built build/macos/Build/Products/Debug/info_desktop.app
+Failed to foreground app; open returned 1
+00:00 +0: isolated Zhiyu native controls, motion, large text and reduced motion
+ZHIYU_NATIVE_EVIDENCE=/Users/jiangxinyi/Library/Containers/com.example.infoDesktop.zhiyuPreview/Data/tmp/ZhiyuUI-1109B31F-DAE8-4D5D-B352-E3EA9E769128
+ZHIYU_NATIVE_MOTION=detail
+ZHIYU_NATIVE_MOTION=dialog
+ZHIYU_NATIVE_MOTION=menu
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown running a test:
+'package:flutter/src/rendering/mouse_tracker.dart': Failed assertion: line 220 pos 12: '(event is
+PointerAddedEvent) == (lastEvent is PointerRemovedEvent)': is not true.
+
+Either the assertion indicates an error in the framework itself, or we should provide substantially
+more information in this error message to help you determine and fix the underlying cause.
+In either case, please report this assertion by filing a bug on GitHub:
+  https://github.com/flutter/flutter/issues/new?template=02_bug.yml
+
+When the exception was thrown, this was the stack:
+#2      MouseTracker._shouldMarkStateDirty (package:flutter/src/rendering/mouse_tracker.dart:220:12)
+#3      MouseTracker.updateWithEvent (package:flutter/src/rendering/mouse_tracker.dart:314:10)
+#4      RendererBinding.dispatchEvent (package:flutter/src/rendering/binding.dart:466:20)
+#5      LiveTestWidgetsFlutterBinding.dispatchEvent (package:flutter_test/src/binding.dart:2980:15)
+#6      GestureBinding._handlePointerEventImmediately (package:flutter/src/gestures/binding.dart:447:7)
+#7      GestureBinding.handlePointerEvent (package:flutter/src/gestures/binding.dart:404:5)
+#8      LiveTestWidgetsFlutterBinding.handlePointerEvent (package:flutter_test/src/binding.dart:2952:15)
+#9      TestWidgetsFlutterBinding.handlePointerEventForSource.<anonymous closure> (package:flutter_test/src/binding.dart:1571:42)
+#10     TestWidgetsFlutterBinding.withPointerEventSource (package:flutter_test/src/binding.dart:1581:11)
+#11     TestWidgetsFlutterBinding.handlePointerEventForSource (package:flutter_test/src/binding.dart:1571:5)
+#12     WidgetTester.sendEventToBinding.<anonymous closure> (package:flutter_test/src/widget_tester.dart:869:15)
+#15     TestAsyncUtils.guard (package:flutter_test/src/test_async_utils.dart:74:41)
+#16     WidgetTester.sendEventToBinding (package:flutter_test/src/widget_tester.dart:868:27)
+#17     TestGesture.addPointer.<anonymous closure> (package:flutter_test/src/test_pointer.dart:517:25)
+#20     TestAsyncUtils.guard (package:flutter_test/src/test_async_utils.dart:74:41)
+#21     TestGesture.addPointer (package:flutter_test/src/test_pointer.dart:516:27)
+#22     main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/integration_test/zhiyu_foundation_native_test.dart:310:21)
+<asynchronous suspension>
+#23     testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#24     TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 7 frames from class _AssertionError, dart:async, and package:stack_trace)
+
+The test description was:
+  isolated Zhiyu native controls, motion, large text and reduced motion
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:07 +0 -1: isolated Zhiyu native controls, motion, large text and reduced motion [E]
+  Test failed. See exception logs above.
+  The test description was: isolated Zhiyu native controls, motion, large text and reduced motion
+  
+00:07 +0 -1: (tearDownAll)
+00:07 +0 -1: Some tests failed.
+
+Failing tests:
+  /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/integration_test/zhiyu_foundation_native_test.dart: isolated Zhiyu native controls, motion, large text and reduced motion

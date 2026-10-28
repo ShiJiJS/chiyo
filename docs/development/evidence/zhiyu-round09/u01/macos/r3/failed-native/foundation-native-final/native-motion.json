@@ -1,0 +1,349 @@
+{
+  "detail": {
+    "targetMs": 180,
+    "frameErrorMs": 0.554000000000002,
+    "wallErrorMs": -4.057999999999993,
+    "translation": 3.0,
+    "passed": true,
+    "samples": [
+      {
+        "frameMs": 0.0,
+        "wallMs": 0.0,
+        "observerDelayMs": 100.202,
+        "opacity": 0.0,
+        "y": 186.0
+      },
+      {
+        "frameMs": 111.11,
+        "wallMs": 106.294,
+        "observerDelayMs": 39.328,
+        "opacity": 0.8012365642935038,
+        "y": 183.5962903071195
+      },
+      {
+        "frameMs": 152.777,
+        "wallMs": 148.247,
+        "observerDelayMs": 14.015,
+        "opacity": 0.9632235020399094,
+        "y": 183.11032949388027
+      },
+      {
+        "frameMs": 159.721,
+        "wallMs": 163.095,
+        "observerDelayMs": 10.526,
+        "opacity": 0.9786509443074465,
+        "y": 183.06404716707766
+      },
+      {
+        "frameMs": 180.554,
+        "wallMs": 175.942,
+        "observerDelayMs": 10.297,
+        "opacity": 1.0,
+        "y": 183.0
+      }
+    ]
+  },
+  "dialog": {
+    "targetMs": 180,
+    "frameErrorMs": 7.5,
+    "wallErrorMs": 2.1639999999999873,
+    "translation": 7.0,
+    "passed": true,
+    "samples": [
+      {
+        "frameMs": 0.0,
+        "wallMs": 0.0,
+        "observerDelayMs": 176.375,
+        "opacity": 0.0,
+        "y": 66.5
+      },
+      {
+        "frameMs": 187.5,
+        "wallMs": 182.164,
+        "observerDelayMs": 43.837,
+        "opacity": 1.0,
+        "y": 59.5
+      }
+    ]
+  },
+  "menu": {
+    "targetMs": 120,
+    "frameErrorMs": 5.0,
+    "wallErrorMs": -6.9140000000000015,
+    "translation": -3.0,
+    "passed": true,
+    "samples": [
+      {
+        "frameMs": 0.0,
+        "wallMs": 0.0,
+        "observerDelayMs": 29.591,
+        "opacity": 0.0,
+        "y": 762.0
+      },
+      {
+        "frameMs": 48.611,
+        "wallMs": 35.987,
+        "observerDelayMs": 11.955,
+        "opacity": 0.5759099721908569,
+        "y": 763.7277299165726
+      },
+      {
+        "frameMs": 55.555,
+        "wallMs": 48.862,
+        "observerDelayMs": 8.591,
+        "opacity": 0.644621729850769,
+        "y": 763.9338651895523
+      },
+      {
+        "frameMs": 76.389,
+        "wallMs": 63.795,
+        "observerDelayMs": 7.855,
+        "opacity": 0.8189075440168381,
+        "y": 764.4567226320505
+      },
+      {
+        "frameMs": 83.333,
+        "wallMs": 72.388,
+        "observerDelayMs": 8.544,
+        "opacity": 0.8661731835454702,
+        "y": 764.5985195506364
+      },
+      {
+        "frameMs": 90.278,
+        "wallMs": 81.41,
+        "observerDelayMs": 7.688,
+        "opacity": 0.90771484375,
+        "y": 764.72314453125
+      },
+      {
+        "frameMs": 97.222,
+        "wallMs": 89.644,
+        "observerDelayMs": 7.277,
+        "opacity": 0.9433704614639282,
+        "y": 764.8301113843918
+      },
+      {
+        "frameMs": 111.111,
+        "wallMs": 98.812,
+        "observerDelayMs": 8.088,
+        "opacity": 0.9904233273118734,
+        "y": 764.9712699819356
+      },
+      {
+        "frameMs": 125.0,
+        "wallMs": 113.086,
+        "observerDelayMs": 8.347,
+        "opacity": 1.0,
+        "y": 765.0
+      }
+    ]
+  },
+  "hover": {
+    "targetMs": 150,
+    "frameErrorMs": 16.664999999999992,
+    "wallErrorMs": 9.080000000000013,
+    "translation": null,
+    "passed": true,
+    "samples": [
+      {
+        "frameMs": 0.0,
+        "wallMs": 0.0,
+        "observerDelayMs": 17.594,
+        "argb": 4294967295,
+        "red": 1.0
+      },
+      {
+        "frameMs": 27.777,
+        "wallMs": 20.238,
+        "observerDelayMs": 14.672,
+        "argb": 4294572795,
+        "red": 0.9774736123459011
+      },
+      {
+        "frameMs": 34.722,
+        "wallMs": 36.887,
+        "observerDelayMs": 13.761,
+        "argb": 4294441210,
+        "red": 0.968444191194048
+      },
+      {
+        "frameMs": 62.499,
+        "wallMs": 54.983,
+        "observerDelayMs": 12.685,
+        "argb": 4293915381,
+        "red": 0.9391902417295119
+      },
+      {
+        "frameMs": 69.444,
+        "wallMs": 68.858,
+        "observerDelayMs": 14.522,
+        "argb": 4293849588,
+        "red": 0.9342450551367273
+      },
+      {
+        "frameMs": 97.221,
+        "wallMs": 89.778,
+        "observerDelayMs": 13.787,
+        "argb": 4293652210,
+        "red": 0.9210890031620568
+      },
+      {
+        "frameMs": 104.166,
+        "wallMs": 104.601,
+        "observerDelayMs": 14.733,
+        "argb": 4293586418,
+        "red": 0.9190362400452003
+      },
+      {
+        "frameMs": 131.943,
+        "wallMs": 124.269,
+        "observerDelayMs": 12.962,
+        "argb": 4293520625,
+        "red": 0.9144461517298923
+      },
+      {
+        "frameMs": 138.888,
+        "wallMs": 138.691,
+        "observerDelayMs": 12.298,
+        "argb": 4293520625,
+        "red": 0.9139917675003993
+      },
+      {
+        "frameMs": 166.665,
+        "wallMs": 159.08,
+        "observerDelayMs": 12.133,
+        "argb": 4293520625,
+        "red": 0.9137254901960784
+      }
+    ]
+  },
+  "pressed": {
+    "targetMs": 150,
+    "frameErrorMs": 2.776999999999987,
+    "wallErrorMs": 3.669000000000011,
+    "translation": -1.0,
+    "passed": true,
+    "samples": [
+      {
+        "frameMs": 0.0,
+        "wallMs": 0.0,
+        "observerDelayMs": 8.82,
+        "y": 495.0
+      },
+      {
+        "frameMs": 6.944,
+        "wallMs": 9.9,
+        "observerDelayMs": 6.925,
+        "y": 495.03000754714014
+      },
+      {
+        "frameMs": 13.889,
+        "wallMs": 17.971,
+        "observerDelayMs": 6.285,
+        "y": 495.0849208831787
+      },
+      {
+        "frameMs": 20.833,
+        "wallMs": 25.571,
+        "observerDelayMs": 7.121,
+        "y": 495.1626739501953
+      },
+      {
+        "frameMs": 34.722,
+        "wallMs": 34.838,
+        "observerDelayMs": 8.25,
+        "y": 495.3657605111599
+      },
+      {
+        "frameMs": 48.611,
+        "wallMs": 48.581,
+        "observerDelayMs": 8.391,
+        "y": 495.5597225189209
+      },
+      {
+        "frameMs": 55.555,
+        "wallMs": 58.609,
+        "observerDelayMs": 6.82,
+        "y": 495.63905359730126
+      },
+      {
+        "frameMs": 62.5,
+        "wallMs": 66.465,
+        "observerDelayMs": 12.674,
+        "y": 495.7048403799534
+      },
+      {
+        "frameMs": 69.444,
+        "wallMs": 80.392,
+        "observerDelayMs": 9.069,
+        "y": 495.76215958818796
+      },
+      {
+        "frameMs": 97.221,
+        "wallMs": 97.65,
+        "observerDelayMs": 6.616,
+        "y": 495.9146501906216
+      },
+      {
+        "frameMs": 104.166,
+        "wallMs": 106.522,
+        "observerDelayMs": 9.444,
+        "y": 495.9384435812943
+      },
+      {
+        "frameMs": 111.11,
+        "wallMs": 117.285,
+        "observerDelayMs": 10.364,
+        "y": 495.9569674558006
+      },
+      {
+        "frameMs": 131.943,
+        "wallMs": 131.979,
+        "observerDelayMs": 9.091,
+        "y": 495.99164687767626
+      },
+      {
+        "frameMs": 138.888,
+        "wallMs": 142.596,
+        "observerDelayMs": 6.972,
+        "y": 495.99691360397264
+      },
+      {
+        "frameMs": 152.777,
+        "wallMs": 153.669,
+        "observerDelayMs": 5.585,
+        "y": 496.0
+      }
+    ]
+  },
+  "feedback": {
+    "targetMs": 180,
+    "frameErrorMs": 201.942,
+    "wallErrorMs": 203.62099999999998,
+    "translation": 6.0,
+    "passed": false,
+    "samples": [
+      {
+        "frameMs": 0.0,
+        "wallMs": 0.0,
+        "observerDelayMs": 251.228,
+        "opacity": 0.0,
+        "y": 847.0
+      },
+      {
+        "frameMs": 6.944,
+        "wallMs": 254.051,
+        "observerDelayMs": 124.85,
+        "opacity": 0.06255447864532471,
+        "y": 846.624673128128
+      },
+      {
+        "frameMs": 381.942,
+        "wallMs": 383.621,
+        "observerDelayMs": 49.341,
+        "opacity": 1.0,
+        "y": 841.0
+      }
+    ]
+  }
+}
