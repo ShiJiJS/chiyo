@@ -1,0 +1,10 @@
+{
+  "cwd": "apps/desktop unless noted",
+  "focused": "../../scripts/dev-macos.sh flutter test --no-pub test/zhiyu_content_states_test.dart test/zhiyu_content_test.dart test/zhiyu_file_types_test.dart test/zhiyu_attachment_reading_test.dart --reporter expanded --dart-define=UI_ATTACHMENT_EVIDENCE_DIR=/Users/jiangxinyi/Documents/Project/agent-info/build/zhiyu-ui/u03/macos/r11/actual --dart-define=UI_EVIDENCE_DIR=/Users/jiangxinyi/Documents/Project/agent-info/build/zhiyu-ui/u03/macos/r11/flows",
+  "related": "../../scripts/dev-macos.sh flutter test --no-pub test/zhiyu_*_test.dart test/workspace_*_test.dart test/mac_preview_desktop_test.dart test/mac_preview_isolation_test.dart test/desktop_controls_test.dart test/desktop_motion_contract_test.dart test/desktop_scrollbar_policy_test.dart --reporter expanded",
+  "analysis": "../../scripts/dev-macos.sh flutter analyze --no-pub --fatal-infos",
+  "native": "../../scripts/dev-macos.sh preview-check --library --reporter expanded",
+  "build": "FLUTTER_MACOS_ARM64_ONLY=true XCODE_XCCONFIG_FILE=/Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/macos/Runner/Configs/Preview.xcconfig ../../scripts/dev-macos.sh flutter build macos --debug --no-pub --target lib/preview_main.dart",
+  "comparison": "python3 scripts/qa/compare-zhiyu-attachments.py --reference /Users/jiangxinyi/Documents/Project/agent-info/docs/development/evidence/zhiyu-round09/u03/macos/r11/reference --actual /Users/jiangxinyi/Documents/Project/agent-info/docs/development/evidence/zhiyu-round09/u03/macos/r11/actual --output /tmp/zhiyu-r11-comparison.json (repo root)",
+  "ordering": "479 related passed, then only an if brace and metadata evidence capture added; unnecessary typed_data import removed. Final strict analysis,23 focused/current captures,native1/16,ordinary arm64 build. No application edits afterward."
+}
