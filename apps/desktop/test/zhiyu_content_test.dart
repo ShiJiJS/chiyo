@@ -209,7 +209,23 @@ void main() {
       expect(model.selection, https);
       expect(find.byType(LibraryDocument), findsOneWidget);
       expect(find.byType(Table), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byType(LibraryDocument),
+          matching: find.byWidgetPredicate(
+            (w) =>
+                w is SingleChildScrollView &&
+                w.scrollDirection == Axis.horizontal,
+          ),
+        ),
+        findsNothing,
+      );
       await capture(t, 'document-1440-light-reading');
+      await tap(t, find.byKey(const ValueKey('library-document-raw')));
+      expect(
+        find.byKey(const ValueKey('library-document-text')),
+        findsOneWidget,
+      );
       await tap(t, find.text('编辑信息'));
       const body = '## 保存后的正文\n\n**维护记录**，仅作为文字保存。';
       await enter(t, find.byKey(const ValueKey('library-edit-body')), body);
@@ -243,6 +259,14 @@ void main() {
         body,
       );
       expect(await model.source.loadRevisions(https), hasLength(1));
+      await tap(t, find.text('编辑信息'));
+      await tap(t, find.byKey(const ValueKey('library-edit-bodyFormat')));
+      await tap(t, find.text('Markdown').last);
+      await tap(t, find.byKey(const ValueKey('library-edit-save')));
+      expect(find.byKey(const ValueKey('library-document-text')), findsNothing);
+      expect(value('保存后的正文'), findsOneWidget);
+      expect(find.text('显示原文'), findsOneWidget);
+      expect(await model.source.loadRevisions(https), hasLength(2));
     },
   );
   check(

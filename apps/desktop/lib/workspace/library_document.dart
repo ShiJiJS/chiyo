@@ -4,10 +4,66 @@ import '../desktop_controls.dart';
 import '../ui_palette.dart';
 import 'library_widgets.dart';
 
+/// View-only state can be shared with tools in the existing detail header.
+/// An external owner resets it when the selected record/body changes; the
+/// renderer otherwise creates and disposes its own controller.
+class DocumentReadingController extends ValueNotifier<bool> {
+  DocumentReadingController() : super(false);
+  void toggle() => value = !value;
+}
+
+class LibraryDocumentTools extends StatelessWidget {
+  const LibraryDocumentTools({
+    super.key,
+    required this.controller,
+    required this.format,
+    required this.canToggle,
+  });
+  final DocumentReadingController controller;
+  final String format;
+  final bool canToggle;
+  @override
+  Widget build(BuildContext context) => ValueListenableBuilder<bool>(
+    valueListenable: controller,
+    builder: (context, raw, _) => Wrap(
+      spacing: 12,
+      runSpacing: 6,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        Text(
+          format == 'markdown' ? 'Markdown' : '纯文本',
+          style: libraryText(context, 12, color: UiPalette.of(context).muted),
+        ),
+        if (format == 'markdown' && canToggle)
+          DesktopButton(
+            kind: DesktopButtonKind.quiet,
+            fontSize: 13,
+            key: const ValueKey('library-document-raw'),
+            onPressed: controller.toggle,
+            child: Text(raw ? '阅读排版' : '显示原文'),
+          ),
+      ],
+    ),
+  );
+}
+
+bool libraryDocumentIsLarge(String body) =>
+    body.length > 200000 || '\n'.allMatches(body).length > 4000;
+
 /// Renders a Markdown AST to a closed set of Flutter text/layout widgets.
 /// There is no HTML host, URL launcher, resource resolver or network image.
 class LibraryDocument extends StatefulWidget {
-  const LibraryDocument({super.key, required this.body, this.format = 'plain'});
+  const LibraryDocument({
+    super.key,
+    required this.body,
+    this.format = 'plain',
+    this.controller,
+    this.showControls = true,
+    this.leadingGap = 0,
+  });
+  final DocumentReadingController? controller;
+  final bool showControls;
+  final double leadingGap;
   final String body, format;
   @override
   State<LibraryDocument> createState() => _LibraryDocumentState();
@@ -15,9 +71,15 @@ class LibraryDocument extends StatefulWidget {
 
 class _LibraryDocumentState extends State<LibraryDocument> {
   late List<md.Node> _nodes;
-  bool _raw = false;
-  bool get _large =>
-      widget.body.length > 200000 || '\n'.allMatches(widget.body).length > 4000;
+  final _local = DocumentReadingController();
+  DocumentReadingController get _reading => widget.controller ?? _local;
+  bool get _large => libraryDocumentIsLarge(widget.body);
+  @override
+  void dispose() {
+    _local.dispose();
+    super.dispose();
+  }
+
   @override
   void initState() {
     super.initState();
@@ -28,7 +90,7 @@ class _LibraryDocumentState extends State<LibraryDocument> {
   void didUpdateWidget(LibraryDocument oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.body != widget.body || oldWidget.format != widget.format) {
-      _raw = false;
+      _local.value = false;
       _parse();
     }
   }
@@ -83,7 +145,7 @@ class _LibraryDocumentState extends State<LibraryDocument> {
     return TextSpan(
       children: children,
       style: switch (node.tag) {
-        'strong' => const TextStyle(fontWeight: FontWeight.w600),
+        'strong' => const TextStyle(fontWeight: FontWeight.w700),
         'em' => const TextStyle(fontStyle: FontStyle.italic),
         'del' => const TextStyle(decoration: TextDecoration.lineThrough),
         'code' => TextStyle(
@@ -96,11 +158,22 @@ class _LibraryDocumentState extends State<LibraryDocument> {
     );
   }
 
-  Widget _text(List<md.Node> nodes, {double size = 14, FontWeight? weight}) =>
-      SelectableText.rich(
-        TextSpan(children: nodes.map(_inline).toList()),
-        style: libraryText(context, size, weight: weight, height: 1.95),
-      );
+  Widget _text(
+    List<md.Node> nodes, {
+    double size = 15,
+    FontWeight? weight,
+    double height = 1.95,
+    Color? color,
+  }) => SelectableText.rich(
+    TextSpan(children: nodes.map(_inline).toList()),
+    style: libraryText(
+      context,
+      size,
+      weight: weight,
+      height: height,
+      color: color,
+    ),
+  );
   Widget _block(md.Node node, [int depth = 0]) {
     if (node is! md.Element || depth > 32) {
       return SelectableText(
@@ -110,38 +183,62 @@ class _LibraryDocumentState extends State<LibraryDocument> {
     }
     final c = UiPalette.of(context), children = node.children ?? <md.Node>[];
     if (RegExp(r'^h[1-6]$').hasMatch(node.tag)) {
-      return Padding(
-        padding: const EdgeInsets.only(top: 27, bottom: 12),
-        child: _text(
-          children,
-          size: node.tag == 'h1'
-              ? 24
-              : node.tag == 'h2'
-              ? 20
-              : 16,
-          weight: FontWeight.w600,
-        ),
+      return _text(
+        children,
+        size: node.tag == 'h1'
+            ? 27
+            : node.tag == 'h2'
+            ? 20
+            : 16,
+        height: node.tag == 'h1'
+            ? 1.35
+            : node.tag == 'h2'
+            ? 1.5
+            : 1.6,
+        weight: FontWeight.w700,
       );
     }
     if (node.tag == 'pre') {
+      // The final newline belongs to the closing Markdown fence; source view
+      // retains it. Internal/intentional blank lines remain in the code block.
+      final code = node.textContent.replaceFirst(RegExp(r'\n$'), '');
+      final style = libraryText(
+        context,
+        13,
+        height: 1.85,
+      ).copyWith(fontFamily: 'Menlo');
       return Container(
-        margin: const EdgeInsets.symmetric(vertical: 10),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: c.rail,
           borderRadius: BorderRadius.circular(8),
         ),
-        child: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          primary: false,
-          child: SelectableText(
-            node.textContent,
-            style: libraryText(
-              context,
-              13,
-              height: 1.85,
-            ).copyWith(fontFamily: 'Menlo'),
-          ),
+        child: LayoutBuilder(
+          builder: (context, bounds) {
+            final painter = TextPainter(
+              text: TextSpan(text: code, style: style),
+              textDirection: Directionality.of(context),
+              textScaler: MediaQuery.textScalerOf(context),
+            )..layout();
+            final fits = painter.width <= bounds.maxWidth;
+            painter.dispose();
+            final text = SelectableText(
+              code,
+              style: style,
+              strutStyle: const StrutStyle(
+                fontFamily: 'Menlo',
+                fontSize: 15,
+                height: 1.85,
+              ),
+            );
+            return fits
+                ? text
+                : SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    primary: false,
+                    child: text,
+                  );
+          },
         ),
       );
     }
@@ -151,17 +248,17 @@ class _LibraryDocumentState extends State<LibraryDocument> {
         children: [
           for (final (index, child) in children.indexed)
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4),
+              padding: EdgeInsets.zero,
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SizedBox(
-                    width: 26,
+                    width: node.tag == 'ol' ? 40 : 22,
                     child: Text(
                       node.tag == 'ol'
                           ? '${(int.tryParse(node.attributes['start'] ?? '') ?? 1) + index}.'
                           : '•',
-                      style: libraryText(context, 14, height: 1.95),
+                      style: libraryText(context, 15, height: 1.95),
                     ),
                   ),
                   Expanded(child: _block(child, depth + 1)),
@@ -188,7 +285,11 @@ class _LibraryDocumentState extends State<LibraryDocument> {
         child: blocks
             ? Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [for (final n in children) _block(n, depth + 1)],
+                children: _spacedBlocks(
+                  children,
+                  depth: depth + 1,
+                  collapseFirstMargin: true,
+                ),
               )
             : _text(children),
       );
@@ -217,95 +318,153 @@ class _LibraryDocumentState extends State<LibraryDocument> {
           final width = (columns * 150 * scale)
               .clamp(bounds.maxWidth, double.infinity)
               .toDouble();
-          return SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            primary: false,
-            child: SizedBox(
-              width: width,
-              child: Table(
-                defaultVerticalAlignment: TableCellVerticalAlignment.top,
-                children: [
-                  for (final row in rows)
-                    TableRow(
-                      children: [
-                        for (var i = 0; i < columns; i++)
-                          Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color:
-                                  i < row.length &&
-                                      row[i] is md.Element &&
-                                      (row[i] as md.Element).tag == 'th'
-                                  ? c.rail
-                                  : null,
-                              border: Border(bottom: BorderSide(color: c.line)),
-                            ),
-                            child: i < row.length
-                                ? _text(
-                                    (row[i] as md.Element).children ?? [],
-                                    weight: (row[i] as md.Element).tag == 'th'
-                                        ? FontWeight.w600
-                                        : null,
-                                  )
-                                : const SizedBox(),
+          final table = SizedBox(
+            width: width,
+            child: Table(
+              defaultVerticalAlignment: TableCellVerticalAlignment.top,
+              children: [
+                for (final row in rows)
+                  TableRow(
+                    children: [
+                      for (var i = 0; i < columns; i++)
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color:
+                                i < row.length &&
+                                    row[i] is md.Element &&
+                                    (row[i] as md.Element).tag == 'th'
+                                ? c.rail
+                                : null,
+                            border: Border(bottom: BorderSide(color: c.line)),
                           ),
-                      ],
-                    ),
-                ],
-              ),
+                          child: i < row.length
+                              ? _text(
+                                  (row[i] as md.Element).children ?? [],
+                                  size: 14,
+                                  weight: (row[i] as md.Element).tag == 'th'
+                                      ? FontWeight.w700
+                                      : null,
+                                )
+                              : const SizedBox(),
+                        ),
+                    ],
+                  ),
+              ],
             ),
           );
+          return width <= bounds.maxWidth
+              ? table
+              : SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  primary: false,
+                  child: table,
+                );
         },
       );
     }
     if (node.tag == 'hr') return Divider(color: c.line);
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      child: _text(children),
+    return _text(
+      children,
+      size: node.tag == 'p' ? 14 : 15,
+      color: node.tag == 'p' ? c.readingInk : null,
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final c = UiPalette.of(context);
-    final raw = _raw || widget.format != 'markdown' || _large;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Wrap(
-          spacing: 12,
-          runSpacing: 6,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          children: [
-            Text(
-              widget.format == 'markdown' ? 'Markdown' : '纯文本',
-              style: libraryText(context, 12, color: c.muted),
-            ),
-            if (widget.format == 'markdown' && !_large)
-              DesktopButton(
-                kind: DesktopButtonKind.quiet,
-                key: const ValueKey('library-document-raw'),
-                onPressed: () => setState(() => _raw = !_raw),
-                child: Text(_raw ? '阅读排版' : '显示原文'),
-              ),
-          ],
-        ),
-        if (!['plain', 'markdown'].contains(widget.format) || _large)
-          Text(
-            _large ? '正文较长，按原文展示。' : '正文格式未知，按原文展示。',
-            style: libraryText(context, 13, color: c.muted),
-          ),
-        if (widget.body.isEmpty)
-          Text('尚未填写正文。', style: libraryText(context, 14, color: c.muted))
-        else if (raw)
-          SelectableText(
-            widget.body,
-            key: const ValueKey('library-document-text'),
-            style: libraryText(context, 14, height: 1.95),
-          )
-        else
-          for (final node in _nodes) _block(node),
-      ],
-    );
+  (double, double) _margins(md.Node node) {
+    if (node is! md.Element) return (0, 0);
+    return switch (node.tag) {
+      'h1' || 'h2' => (27, 12),
+      'h3' || 'h4' || 'h5' || 'h6' => (24, 10),
+      'p' => (10, 10),
+      'table' => (14, 14),
+      'ul' || 'ol' || 'pre' || 'blockquote' => (15, 15),
+      _ => (0, 0),
+    };
   }
+
+  List<Widget> _spacedBlocks(
+    List<md.Node> nodes, {
+    int depth = 0,
+    double leadingGap = 0,
+    bool collapseFirstMargin = false,
+  }) {
+    final blocks = <Widget>[];
+    var previous = leadingGap;
+    for (final node in nodes) {
+      final (top, bottom) = _margins(node);
+      final firstCollapsed = blocks.isEmpty && collapseFirstMargin;
+      blocks.add(
+        SizedBox(
+          height: firstCollapsed
+              ? 0
+              : previous > top
+              ? previous
+              : top,
+        ),
+      );
+      blocks.add(_block(node, depth));
+      previous = bottom;
+    }
+    return blocks;
+  }
+
+  @override
+  Widget build(BuildContext context) => ValueListenableBuilder<bool>(
+    valueListenable: _reading,
+    builder: (context, sourceVisible, _) {
+      final c = UiPalette.of(context);
+      final raw = sourceVisible || widget.format != 'markdown' || _large;
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (widget.showControls)
+            LibraryDocumentTools(
+              controller: _reading,
+              format: widget.format,
+              canToggle: !_large,
+            ),
+          if (!['plain', 'markdown'].contains(widget.format) || _large)
+            Text(
+              _large ? '正文较长，按原文展示。' : '正文格式未知，按原文展示。',
+              style: libraryText(context, 13, color: c.muted),
+            ),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: libraryChWidth(
+                  context,
+                  libraryText(context, 15, height: 1.95),
+                  74,
+                ),
+              ),
+              child: Column(
+                key: const ValueKey('library-document-reading'),
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (widget.body.isEmpty)
+                    Text(
+                      '尚未填写正文。',
+                      style: libraryText(context, 14, color: c.muted),
+                    )
+                  else if (raw)
+                    Padding(
+                      padding: EdgeInsets.only(top: widget.leadingGap),
+                      child: SelectableText(
+                        widget.body,
+                        key: const ValueKey('library-document-text'),
+                        style: libraryText(context, 14, height: 1.95),
+                      ),
+                    )
+                  else
+                    ..._spacedBlocks(_nodes, leadingGap: widget.leadingGap),
+                ],
+              ),
+            ),
+          ),
+        ],
+      );
+    },
+  );
 }

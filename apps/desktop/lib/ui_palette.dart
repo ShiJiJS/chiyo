@@ -24,6 +24,9 @@ class UiPalette extends ThemeExtension<UiPalette> {
   final Color? accentForeground;
   final Color? navigation;
   Color get nav => navigation ?? rail;
+  Color get readingInk => brightness == Brightness.dark
+      ? const Color(0xffc5cbd8)
+      : const Color(0xff424a59);
   Color get onAccent => accentForeground ?? paper;
   Color get brand => strong;
   // Frozen Round09 timeline ring, fixed in both themes.

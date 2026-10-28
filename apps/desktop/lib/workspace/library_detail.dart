@@ -53,6 +53,7 @@ class LibraryDetail extends StatefulWidget {
 
 class _LibraryDetailState extends State<LibraryDetail> {
   bool _relations = false;
+  final _documentReading = DocumentReadingController();
   late Future<List<WorkspaceRecordSummary>> _links;
   void _loadLinks() {
     _links = widget.source.readSummaries(
@@ -69,10 +70,22 @@ class _LibraryDetailState extends State<LibraryDetail> {
   @override
   void didUpdateWidget(covariant LibraryDetail oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.detail.record.ref != widget.detail.record.ref ||
+        oldWidget.detail.values['body'] != widget.detail.values['body'] ||
+        oldWidget.detail.values['bodyFormat'] !=
+            widget.detail.values['bodyFormat']) {
+      _documentReading.value = false;
+    }
     if (oldWidget.revision != widget.revision ||
         oldWidget.detail != widget.detail) {
       _loadLinks();
     }
+  }
+
+  @override
+  void dispose() {
+    _documentReading.dispose();
+    super.dispose();
   }
 
   Widget _section(
@@ -375,6 +388,41 @@ class _LibraryDetailState extends State<LibraryDetail> {
     final detail = widget.detail,
         record = detail.record,
         c = UiPalette.of(context);
+    final documentSection =
+        record.type.id == 'document' &&
+            detail.templateState == WorkspaceTemplateState.available
+        ? (detail.definition['sections'] as List? ?? [])
+              .whereType<Map>()
+              .where(
+                (s) =>
+                    s['kind'] == 'text' &&
+                    s['key'] == 'body' &&
+                    s['formatKey'] == 'bodyFormat',
+              )
+              .firstOrNull
+        : null;
+    final tabs = <Widget>[
+      _tab(
+        context,
+        '概览',
+        !_relations,
+        () => setState(() => _relations = false),
+      ),
+      const SizedBox(width: 24),
+      _tab(
+        context,
+        '关联资料',
+        _relations,
+        () => setState(() => _relations = true),
+      ),
+    ];
+    final editButton = DesktopButton(
+      kind: DesktopButtonKind.quiet,
+      onPressed: widget.onEdit,
+      fontSize: 13,
+      padding: EdgeInsets.symmetric(vertical: documentSection == null ? 10 : 8),
+      child: const Text('编辑信息'),
+    );
     return Padding(
       padding: const EdgeInsets.all(28),
       child: Column(
@@ -460,6 +508,18 @@ class _LibraryDetailState extends State<LibraryDetail> {
                           ),
                           child: const Text('标签'),
                         ),
+                        if (documentSection != null) ...[
+                          LibraryDocumentTools(
+                            controller: _documentReading,
+                            format: detail.values['bodyFormat'] is String
+                                ? detail.values['bodyFormat'] as String
+                                : 'unknown',
+                            canToggle: !libraryDocumentIsLarge(
+                              detail.values['body']?.toString() ?? '',
+                            ),
+                          ),
+                          editButton,
+                        ],
                       ],
                     ),
                   ],
@@ -529,37 +589,15 @@ class _LibraryDetailState extends State<LibraryDetail> {
               ),
             ],
           ),
-          const SizedBox(height: 18),
-          Container(
-            decoration: BoxDecoration(
-              border: Border(bottom: BorderSide(color: c.line)),
+          if (documentSection == null) ...[
+            const SizedBox(height: 18),
+            Container(
+              decoration: BoxDecoration(
+                border: Border(bottom: BorderSide(color: c.line)),
+              ),
+              child: Row(children: [...tabs, const Spacer(), editButton]),
             ),
-            child: Row(
-              children: [
-                _tab(
-                  context,
-                  '概览',
-                  !_relations,
-                  () => setState(() => _relations = false),
-                ),
-                const SizedBox(width: 24),
-                _tab(
-                  context,
-                  '关联资料',
-                  _relations,
-                  () => setState(() => _relations = true),
-                ),
-                const Spacer(),
-                DesktopButton(
-                  kind: DesktopButtonKind.quiet,
-                  onPressed: widget.onEdit,
-                  fontSize: 13,
-                  padding: const EdgeInsets.symmetric(vertical: 10),
-                  child: const Text('编辑信息'),
-                ),
-              ],
-            ),
-          ),
+          ],
           if (detail.templateState != WorkspaceTemplateState.available)
             Padding(
               padding: const EdgeInsets.only(top: 20),
@@ -589,7 +627,7 @@ class _LibraryDetailState extends State<LibraryDetail> {
                   detail.templateState == WorkspaceTemplateState.available
                   ? detail.definition['sections'] as List? ?? []
                   : const [];
-              if (_relations) {
+              if (_relations && documentSection == null) {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -721,7 +759,24 @@ class _LibraryDetailState extends State<LibraryDetail> {
                       _section(
                         context,
                         section['title'] as String,
-                        LibraryEntryTimeline(detail.values[section['key']]),
+                        LibraryEntryTimeline(
+                          detail.values[section['key']],
+                          key: ValueKey('library-timeline-${section['key']}'),
+                        ),
+                        headingGap: 0,
+                      )
+                    else if (identical(section, documentSection))
+                      LibraryDocument(
+                        key: ValueKey('library-document-${section['key']}'),
+                        body: detail.values['body'] is String
+                            ? detail.values['body'] as String
+                            : _value(detail.values['body']),
+                        format: detail.values['bodyFormat'] is String
+                            ? detail.values['bodyFormat'] as String
+                            : 'unknown',
+                        controller: _documentReading,
+                        showControls: false,
+                        leadingGap: 22,
                       )
                     else if (section['kind'] == 'text')
                       _section(
@@ -729,6 +784,7 @@ class _LibraryDetailState extends State<LibraryDetail> {
                         section['title'] as String,
                         LibraryDocument(
                           key: ValueKey('library-document-${section['key']}'),
+                          showControls: section['formatKey'] is String,
                           body: detail.values[section['key']] is String
                               ? detail.values[section['key']] as String
                               : _value(detail.values[section['key']]),
