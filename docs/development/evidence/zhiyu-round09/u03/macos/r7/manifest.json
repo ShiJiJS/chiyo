@@ -255,6 +255,10 @@
     "bytes": 32188,
     "sha256": "904ebc83c28f590c8b19df9f6261deb947fc1b39bcc9ca5e8c416c33af917b4f"
   },
+  "tracker-read.json": {
+    "bytes": 515,
+    "sha256": "afac62376dca44e7c4eebfd7194531e3cf26c0b3dd63245a2552fa80cf40fd3a"
+  },
   "visual-review.md": {
     "bytes": 1158,
     "sha256": "119f81e07d3bc9b89cb79c1f89bc2f8793bd33b3fa9bace5473af5ee9969977c"
