@@ -1,0 +1,16 @@
+{
+  "macOS": "27.0.1",
+  "build": "26A434",
+  "api": "CFStringCompareWithOptionsAndLocale",
+  "apiURL": "https://developer.apple.com/documentation/corefoundation/cfstringcomparewithoptionsandlocale(_:_:_:_:_:)",
+  "locale": "zh_CN",
+  "compareFlags": 0,
+  "ffi": "2.2.0; existing locked transitive dependency promoted to direct without version change",
+  "nativeResources": "one sort scope, explicit release in finally; cached full UTF-16 CFStrings; no private ICU exports",
+  "SDKHeaderSha256": {
+    "CFString.h": "ed49de9f86adc90f53a2f6d5a10666e1e4b865a15adea1311d8104083d9fac31",
+    "CFLocale.h": "c2af0caf4769bc0ac48c0484b6ad5a774254426f0148b01dca2fb4be6da50b18",
+    "CFBase.h": "b4cff7c99779f092e14fa6d3eea151d05c0324f106e1f103b27c5727223f023f"
+  },
+  "scope": "Chinese UI locale and 31-record ungrouped matching evidence; not universal cross-version ICU parity"
+}

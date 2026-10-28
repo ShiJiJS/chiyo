@@ -1,0 +1,7 @@
+00:00 +0: loading /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_order_test.dart
+00:00 +0: Mac Chinese names sort by locale, not Unicode code points
+00:00 +1: canonical equivalents use typed-ID ties and remain stable on reuse
+00:00 +2: UTF-16 names include NULs, supplementary characters and lexical digits
+00:00 +3: updated-date ties retain typed-ID order independently of locale
+00:00 +4: groups follow sorted first appearance and stay contiguous across pages
+00:00 +5: All tests passed!

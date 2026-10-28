@@ -1,0 +1,297 @@
+{
+  "expected": {
+    "viewport": {
+      "width": 1280,
+      "height": 800,
+      "dpr": 1
+    },
+    "theme": "dark",
+    "state": "R03-name-ungrouped",
+    "stateFields": {
+      "dir": "all",
+      "selected": "azure",
+      "filter": "all",
+      "tag": "",
+      "query": "",
+      "groupBy": "none",
+      "sort": "name"
+    },
+    "requiredBoxes": [
+      "library-detail-title"
+    ],
+    "scrollbarWidth": 11
+  },
+  "before": {
+    "viewport": {
+      "width": 1280,
+      "height": 800,
+      "dpr": 1
+    },
+    "fontFamily": "\"Zhiyu System\", \"PingFang SC\", sans-serif",
+    "canvas": "#181b22",
+    "state": {
+      "page": "library",
+      "dir": "all",
+      "selected": "azure",
+      "query": "",
+      "filter": "all",
+      "tag": "",
+      "groupBy": "none",
+      "sort": "name",
+      "detailTab": "overview",
+      "setting": "appearance",
+      "plugin": "builtin.server",
+      "pluginTab": "overview"
+    },
+    "boxes": {
+      "library-search-frame": {
+        "x": 210,
+        "y": 139,
+        "width": 242,
+        "height": 39
+      },
+      "library-group": {
+        "x": 329,
+        "y": 237.296875,
+        "width": 59,
+        "height": 32
+      },
+      "library-sort": {
+        "x": 393,
+        "y": 237.296875,
+        "width": 59,
+        "height": 32
+      },
+      "library-results-pane": {
+        "x": 194,
+        "y": 66,
+        "width": 275,
+        "height": 734
+      },
+      "library-results-footer": {
+        "x": 194,
+        "y": 755,
+        "width": 274,
+        "height": 45
+      },
+      "library-detail-toolbar": {
+        "x": 480,
+        "y": 77,
+        "width": 789,
+        "height": 49
+      },
+      "library-detail-create": {
+        "x": 1172,
+        "y": 82.6015625,
+        "width": 78,
+        "height": 36.796875
+      },
+      "library-detail-title": {
+        "x": 584,
+        "y": 177,
+        "width": 537,
+        "height": 34.796875
+      },
+      "library-relation-frame-information:https": {
+        "x": 531,
+        "y": 895.15625,
+        "width": 676,
+        "height": 74.4921875
+      },
+      "library-relation-frame-information:sshguide": {
+        "x": 531,
+        "y": 969.6484375,
+        "width": 676,
+        "height": 75.4921875
+      },
+      "library-relation-frame-credential:sshkey": {
+        "x": 531,
+        "y": 744.1640625,
+        "width": 676,
+        "height": 74.4921875
+      }
+    },
+    "searchFocused": false,
+    "searchAppearance": {
+      "borderColor": "rgb(57, 65, 79)",
+      "boxShadow": "none"
+    },
+    "scrollbarWidth": 11,
+    "resultCount": "31 项",
+    "order": [
+      "aliyunkey",
+      "aliyun",
+      "resume",
+      "profile",
+      "nas",
+      "offer",
+      "proof",
+      "ideas",
+      "resume-en",
+      "https",
+      "portrait",
+      "deploy",
+      "azure",
+      "sshkey",
+      "blinko",
+      "blinkokey",
+      "github-token",
+      "publickey",
+      "nasdoc",
+      "skillshare",
+      "sparky",
+      "sshguide",
+      "syncthing",
+      "tgapi",
+      "workflow",
+      "mtproto",
+      "tgsession",
+      "video",
+      "vikunja-password",
+      "vikunja",
+      "vikunjakey"
+    ],
+    "groups": [],
+    "detailTitle": "Azure 日本服务器",
+    "popupLabels": []
+  },
+  "after": {
+    "viewport": {
+      "width": 1280,
+      "height": 800,
+      "dpr": 1
+    },
+    "fontFamily": "\"Zhiyu System\", \"PingFang SC\", sans-serif",
+    "canvas": "#181b22",
+    "state": {
+      "page": "library",
+      "dir": "all",
+      "selected": "azure",
+      "query": "",
+      "filter": "all",
+      "tag": "",
+      "groupBy": "none",
+      "sort": "name",
+      "detailTab": "overview",
+      "setting": "appearance",
+      "plugin": "builtin.server",
+      "pluginTab": "overview"
+    },
+    "boxes": {
+      "library-search-frame": {
+        "x": 210,
+        "y": 139,
+        "width": 242,
+        "height": 39
+      },
+      "library-group": {
+        "x": 329,
+        "y": 237.296875,
+        "width": 59,
+        "height": 32
+      },
+      "library-sort": {
+        "x": 393,
+        "y": 237.296875,
+        "width": 59,
+        "height": 32
+      },
+      "library-results-pane": {
+        "x": 194,
+        "y": 66,
+        "width": 275,
+        "height": 734
+      },
+      "library-results-footer": {
+        "x": 194,
+        "y": 755,
+        "width": 274,
+        "height": 45
+      },
+      "library-detail-toolbar": {
+        "x": 480,
+        "y": 77,
+        "width": 789,
+        "height": 49
+      },
+      "library-detail-create": {
+        "x": 1172,
+        "y": 82.6015625,
+        "width": 78,
+        "height": 36.796875
+      },
+      "library-detail-title": {
+        "x": 584,
+        "y": 177,
+        "width": 537,
+        "height": 34.796875
+      },
+      "library-relation-frame-information:https": {
+        "x": 531,
+        "y": 895.15625,
+        "width": 676,
+        "height": 74.4921875
+      },
+      "library-relation-frame-information:sshguide": {
+        "x": 531,
+        "y": 969.6484375,
+        "width": 676,
+        "height": 75.4921875
+      },
+      "library-relation-frame-credential:sshkey": {
+        "x": 531,
+        "y": 744.1640625,
+        "width": 676,
+        "height": 74.4921875
+      }
+    },
+    "searchFocused": false,
+    "searchAppearance": {
+      "borderColor": "rgb(57, 65, 79)",
+      "boxShadow": "none"
+    },
+    "scrollbarWidth": 11,
+    "resultCount": "31 项",
+    "order": [
+      "aliyunkey",
+      "aliyun",
+      "resume",
+      "profile",
+      "nas",
+      "offer",
+      "proof",
+      "ideas",
+      "resume-en",
+      "https",
+      "portrait",
+      "deploy",
+      "azure",
+      "sshkey",
+      "blinko",
+      "blinkokey",
+      "github-token",
+      "publickey",
+      "nasdoc",
+      "skillshare",
+      "sparky",
+      "sshguide",
+      "syncthing",
+      "tgapi",
+      "workflow",
+      "mtproto",
+      "tgsession",
+      "video",
+      "vikunja-password",
+      "vikunja",
+      "vikunjakey"
+    ],
+    "groups": [],
+    "detailTitle": "Azure 日本服务器",
+    "popupLabels": []
+  },
+  "errors": [],
+  "accepted": true,
+  "imageSha256": "7db951381bf61db6a842254d604a811649944ba076310c99d9df06b005baf8f0",
+  "scope": "Frozen Mac workflow capture integrity; not full S5 or actual OS input",
+  "fullS5Passed": false
+}
