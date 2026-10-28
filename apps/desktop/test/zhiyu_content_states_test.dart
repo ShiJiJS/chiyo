@@ -239,6 +239,20 @@ void main() {
           findsOneWidget,
         );
         await capture(t, '$stem-text-page2');
+        final sameVersionReader = t.state(
+          dialogChild(find.byType(LibraryFilePreviewView)),
+        );
+        await tap(t, find.byKey(const ValueKey('library-file-version-2')));
+        await historyReady(t);
+        expect(historical(t).preview.page, 1);
+        expect(
+          t.state(dialogChild(find.byType(LibraryFilePreviewView))),
+          same(sameVersionReader),
+        );
+        expect(
+          dialogChild(value('ADDITIONAL PROJECT DETAILS')),
+          findsOneWidget,
+        );
         source.nextFilePreviewFailure = const WorkspaceFailure(
           'preview_unavailable',
           '历史页面读取失败，请重试。',

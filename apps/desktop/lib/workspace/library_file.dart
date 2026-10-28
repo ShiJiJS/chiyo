@@ -808,6 +808,7 @@ class _FileVersionsState extends State<_FileVersions> {
                 selected: _version == file.ref.version,
                 kind: DesktopButtonKind.quiet,
                 onPressed: () {
+                  if (_version == file.ref.version) return;
                   _version = file.ref.version;
                   _page = 0;
                   unawaited(_read());
@@ -820,8 +821,14 @@ class _FileVersionsState extends State<_FileVersions> {
         ),
         if (_selectedVersion case final file?) ...[
           const SizedBox(height: 12),
-          SelectableText(file.filename),
-          Text('${file.mediaType} · ${workspaceFileSize(file.byteLength)}'),
+          LibraryFileSummary(
+            label:
+                '正在查看 · v${file.ref.version}${file.ref == _history.current.ref ? ' · 当前' : ' · 历史'}',
+            filename: file.filename,
+            mediaType: file.mediaType,
+            byteLength: file.byteLength,
+            createdAt: file.createdAt,
+          ),
         ],
         if (_loading)
           const Padding(

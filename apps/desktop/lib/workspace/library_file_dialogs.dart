@@ -10,6 +10,48 @@ String workspaceFileSize(int bytes) => bytes < 1024
     ? '${(bytes / 1024).toStringAsFixed(1)} KB'
     : '${(bytes / 1024 / 1024).toStringAsFixed(1)} MB';
 
+/// The same complete file identity in selection, history and change review.
+/// No original bytes or local paths are needed to make this decision.
+class LibraryFileSummary extends StatelessWidget {
+  const LibraryFileSummary({
+    super.key,
+    required this.label,
+    required this.filename,
+    required this.mediaType,
+    required this.byteLength,
+    this.createdAt,
+  });
+  final String label, filename, mediaType;
+  final int byteLength;
+  final DateTime? createdAt;
+  @override
+  Widget build(BuildContext context) {
+    final c = UiPalette.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(label, style: libraryText(context, 13, color: c.muted)),
+        const SizedBox(height: 8),
+        SelectableText(
+          filename,
+          style: libraryText(context, 14, weight: FontWeight.w600),
+        ),
+        const SizedBox(height: 4),
+        SelectableText(
+          '$mediaType · ${workspaceFileSize(byteLength)}（$byteLength 字节）',
+          style: libraryText(context, 13, color: c.muted),
+        ),
+        if (createdAt != null)
+          Text(
+            '创建于 ${libraryLocalDateTime(createdAt!)}',
+            style: libraryText(context, 13, color: c.muted),
+          ),
+      ],
+    );
+  }
+}
+
 Future<WorkspaceFileCandidate?> showWorkspaceFileChoices(
   BuildContext context,
   Future<List<WorkspaceFileCandidate>> Function() load,
@@ -244,13 +286,11 @@ class _ImportFileState extends State<_ImportFile> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            widget.selected.filename,
-            style: libraryText(context, 15, weight: FontWeight.w600),
-          ),
-          Text(
-            '${widget.selected.mediaType} · ${workspaceFileSize(widget.selected.byteLength)}',
-            style: libraryText(context, 13, color: UiPalette.of(context).muted),
+          LibraryFileSummary(
+            label: '已选择的文件',
+            filename: widget.selected.filename,
+            mediaType: widget.selected.mediaType,
+            byteLength: widget.selected.byteLength,
           ),
           const SizedBox(height: 18),
           const Text('文件名、资料名称与用途可能出现在公开目录，请核对后导入。'),
@@ -268,7 +308,6 @@ class _ImportFileState extends State<_ImportFile> {
               errorText: _failure?.fieldErrors['name'],
             ),
           ),
-          const SizedBox(height: 18),
           DesktopTextField(
             key: const ValueKey('library-file-import-description'),
             controller: _description,
@@ -284,7 +323,6 @@ class _ImportFileState extends State<_ImportFile> {
               errorText: _failure?.fieldErrors['description'],
             ),
           ),
-          const SizedBox(height: 18),
           LibraryDirectorySelect(
             catalog: widget.catalog,
             value: _directory,
@@ -406,8 +444,16 @@ class _FileChangeState extends State<_FileChange> {
   WorkspaceFailure? _failure;
   late WorkspaceFileHistory _history = widget.history;
   String? _operation;
+  late final WorkspaceFileRef? _restoreRef = widget.history.versions
+      .where((file) => file.ref.version == widget.restoreVersion)
+      .firstOrNull
+      ?.ref;
+  WorkspaceFileVersion? get _restoreTarget =>
+      _history.versions.where((file) => file.ref == _restoreRef).firstOrNull;
+  bool get _targetAvailable =>
+      widget.selected != null || _restoreTarget != null;
   Future<void> _submit() async {
-    if (_busy) return;
+    if (_busy || !_targetAvailable) return;
     setState(() {
       _busy = true;
       _failure = null;
@@ -493,17 +539,51 @@ class _FileChangeState extends State<_FileChange> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            '当前：${_history.current.filename} · v${_history.current.ref.version}',
+          LibraryFileSummary(
+            key: const ValueKey('library-file-change-current'),
+            label: '当前文件 · v${_history.current.ref.version}',
+            filename: _history.current.filename,
+            mediaType: _history.current.mediaType,
+            byteLength: _history.current.byteLength,
+            createdAt: _history.current.createdAt,
           ),
           const SizedBox(height: 12),
           if (widget.selected case final file?) ...[
-            Text('替换为：${file.filename}'),
-            Text('${file.mediaType} · ${workspaceFileSize(file.byteLength)}'),
+            LibraryFileSummary(
+              key: const ValueKey('library-file-change-target'),
+              label: '替换为新文件版本',
+              filename: file.filename,
+              mediaType: file.mediaType,
+              byteLength: file.byteLength,
+            ),
+          ] else if (_restoreTarget case final file?) ...[
+            LibraryFileSummary(
+              key: const ValueKey('library-file-change-target'),
+              label: '恢复来源 · 历史 v${file.ref.version}',
+              filename: file.filename,
+              mediaType: file.mediaType,
+              byteLength: file.byteLength,
+              createdAt: file.createdAt,
+            ),
+            const SizedBox(height: 12),
+            Text('恢复后创建新文件版本 v${_history.current.ref.version + 1}，保留当前文件。'),
           ] else
-            Text('恢复历史 v${widget.restoreVersion}，并创建新的当前版本。'),
+            Semantics(
+              liveRegion: true,
+              child: Text(
+                '所选历史版本已不在当前保留列表中，请返回文件版本重新选择。',
+                key: const ValueKey('library-file-change-target-unavailable'),
+                style: libraryText(
+                  context,
+                  14,
+                  color: UiPalette.of(context).danger,
+                ),
+              ),
+            ),
           const SizedBox(height: 12),
-          const Text('旧文件版本仍可查看；已有授权不会因此恢复或扩大。'),
+          Text(
+            _targetAvailable ? '旧文件版本仍可查看；已有授权不会因此恢复或扩大。' : '已有授权不会因此恢复或扩大。',
+          ),
         ],
       ),
       actions: [
@@ -537,11 +617,12 @@ class _FileChangeState extends State<_FileChange> {
           kind: DesktopButtonKind.primary,
           busy: _busy,
           onPressed:
-              [
-                'conflict',
-                'unknown_outcome',
-                'cancelled',
-              ].contains(_failure?.code)
+              !_targetAvailable ||
+                  [
+                    'conflict',
+                    'unknown_outcome',
+                    'cancelled',
+                  ].contains(_failure?.code)
               ? null
               : _submit,
           child: Text(widget.restoreVersion == null ? '替换文件' : '恢复此版本'),
