@@ -1,0 +1,11 @@
+# r7 visual review
+
+The fourteen current settings Widget frames and four clean standalone shell frames were opened directly at their recorded sizes with the Mac system/PingFang font stack. Ten representative frames are retained: six current settings pages and four shell count cases. The other captures are redundant temporary evidence. All eight shell combinations retain their measured count/text-line geometry.
+
+The old badge forced a 20px box around a scaled text line of about 38px. The new minimum height plus content-sized centering keeps normal-text badges at 20px and lets enlarged text fit. Four-digit and two-digit counts are fully readable in both themes. The 1440 light normal-text header's eight measured objects are unchanged from the earlier Mac geometry; this is a local regression comparison, not full S5 geometry approval.
+
+Current 1440 light settings retain the existing sidebar, row spacing, line separators and action alignment. Current 1280 dark 200% content and sidebar scroll independently. Selecting each of eight destinations and leaving/re-entering settings preserves saved preferences. The notification screenshot retains its prior reading offset after toggling; the page title being above the viewport is intentional restoration of that position. Long forms and the classification header continue below the first screen; their row/action reachability is covered by the existing focused tests, not inferred from a single top screenshot. Counters in the real settings composition are no longer clipped.
+
+No design direction, font size, frozen HTML, token or motion vocabulary changed. DesktopButton/Dialog/Entrance and existing focus/scroll behavior remain. No new decorative imagery was needed for a settings inspector. No new product prose was added by the badge fix.
+
+The two Cocoa lifecycle runs render the real isolated composition and call its own quit handler/window performClose. They have no screenshot or actual OS keyboard/input claim. The final App was rebuilt to preview_main.dart in the same fixed location. Real IME, Command editing, trackpad/accessibility, the full reference/actual matrix and normal-speed motion review remain open. No independent subagent review: user excludes subagents and computer use.

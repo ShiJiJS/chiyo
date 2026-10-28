@@ -1,0 +1,10 @@
+{
+  "apps/desktop/lib/preview_main.dart": "8ea387c251c40080ddc65e2ae89483a88e56753f8dea3b0d1eb370bfa9355d33",
+  "apps/desktop/lib/workspace/mac_preview_desktop.dart": "dac561e70d263b97493c2f04b5a0f1fbf33d11f3569069e6107ae3b72778df06",
+  "apps/desktop/macos/Runner/Base.lproj/MainMenu.xib": "17c519d10c53ccbc70e015cf25007ae0d8c5a546529978a556d5f90e479d6420",
+  "apps/desktop/macos/Runner/Configs/Preview.xcconfig": "8e0d1a15c3f9654cd1dfabcb777743928c4dd3d7d4f281afe0c8652cd685d60e",
+  "apps/desktop/macos/Runner/MainFlutterWindow.swift": "bc24813874c5e4a3db30cc7e2bc964e2a35fca9eefa1dd9950c92d7bc2f6333a",
+  "apps/desktop/tool/zhiyu_preview_lifecycle.dart": "b45f92d7991272e246082b44235e6afdc504850707568da2aa9a41ab3bfaa895",
+  "scripts/dev-macos.sh": "f9054d0e6eae7d0a0b0cd35f6d183307d77c8cdd0911958ea402992c63f16606",
+  "scripts/qa/zhiyu-preview-lifecycle.py": "66f07f3c14f06cbbda1e29e57a83c06da8274b5f2648b6505ef8c7eee0c0a275"
+}

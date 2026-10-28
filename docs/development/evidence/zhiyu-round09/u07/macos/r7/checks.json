@@ -1,0 +1,35 @@
+[
+  {
+    "log": "shell-before.log",
+    "exitCode": 1,
+    "expectedFailure": true
+  },
+  {
+    "log": "shell-after.log",
+    "exitCode": 0
+  },
+  {
+    "log": "settings-handoff.log",
+    "exitCode": 0
+  },
+  {
+    "log": "analysis.log",
+    "exitCode": 0,
+    "seconds": 2.93
+  },
+  {
+    "log": "focused.log",
+    "exitCode": 0,
+    "seconds": 5.45
+  },
+  {
+    "log": "regression.log",
+    "exitCode": 0,
+    "seconds": 238.74
+  },
+  {
+    "log": "native-lifecycle.log",
+    "exitCode": 0,
+    "seconds": 40.44
+  }
+]

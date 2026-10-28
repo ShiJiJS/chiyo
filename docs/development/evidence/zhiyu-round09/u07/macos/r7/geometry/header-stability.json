@@ -1,0 +1,55 @@
+{
+  "reference": "docs/development/evidence/zhiyu-round09/u01/macos/r2/geometry/light-1440-geometry.json",
+  "scope": "current 1440 light normal-text header only; historical measured font baseline, not full S5",
+  "delta": {
+    "appbar": {
+      "x": 0.0,
+      "y": 0.0,
+      "width": 0.0,
+      "height": 0.0
+    },
+    "brand": {
+      "x": 0.0,
+      "y": 0.0,
+      "width": 0.0,
+      "height": 0.0
+    },
+    "guide": {
+      "x": 0.0,
+      "y": 0.0,
+      "width": 0.0,
+      "height": 0.0
+    },
+    "library": {
+      "x": 0.0,
+      "y": 0.0,
+      "width": 0.0,
+      "height": 0.0
+    },
+    "approvals": {
+      "x": 0.0,
+      "y": 0.0,
+      "width": 0.0,
+      "height": 0.0
+    },
+    "proposals": {
+      "x": 0.0,
+      "y": 0.0,
+      "width": 0.0,
+      "height": 0.0
+    },
+    "history": {
+      "x": 0.0,
+      "y": 0.0,
+      "width": 0.0,
+      "height": 0.0
+    },
+    "settings": {
+      "x": 0.0,
+      "y": 0.0,
+      "width": 0.0,
+      "height": 0.0
+    }
+  },
+  "maxDelta": 0.0
+}
