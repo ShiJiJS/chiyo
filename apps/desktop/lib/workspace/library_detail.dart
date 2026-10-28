@@ -401,6 +401,34 @@ class _LibraryDetailState extends State<LibraryDetail> {
               )
               .firstOrNull
         : null;
+    final declaredFields = (detail.definition['fields'] as List? ?? [])
+        .whereType<Map>()
+        .toList();
+    final declaredSections = (detail.definition['sections'] as List? ?? [])
+        .whereType<Map>()
+        .toList();
+    final primaryFile =
+        detail.templateState == WorkspaceTemplateState.available &&
+        workspaceFileTypeIds.contains(record.type.id) &&
+        detail.definition['id'] == record.type.id &&
+        declaredFields.length == 1 &&
+        declaredFields.single['key'] == 'file' &&
+        declaredFields.single['type'] == 'file' &&
+        declaredSections.any((s) => s['kind'] == 'fields') &&
+        declaredSections.every(
+          (s) =>
+              s['kind'] == 'relations' ||
+              (s['kind'] == 'fields' &&
+                  (s['keys'] as List?)?.length == 1 &&
+                  (s['keys'] as List).single == 'file'),
+        );
+    final primaryCredential =
+        record.ref.kind == WorkspaceRecordKind.credential &&
+        detail.templateState == WorkspaceTemplateState.available &&
+        declaredFields.isEmpty &&
+        declaredSections.isEmpty;
+    final standalone =
+        documentSection != null || primaryFile || primaryCredential;
     final tabs = <Widget>[
       _tab(
         context,
@@ -420,7 +448,7 @@ class _LibraryDetailState extends State<LibraryDetail> {
       kind: DesktopButtonKind.quiet,
       onPressed: widget.onEdit,
       fontSize: 13,
-      padding: EdgeInsets.symmetric(vertical: documentSection == null ? 10 : 8),
+      padding: EdgeInsets.symmetric(vertical: standalone ? 8 : 10),
       child: const Text('编辑信息'),
     );
     return Padding(
@@ -518,8 +546,8 @@ class _LibraryDetailState extends State<LibraryDetail> {
                               detail.values['body']?.toString() ?? '',
                             ),
                           ),
-                          editButton,
                         ],
+                        if (standalone) editButton,
                       ],
                     ),
                   ],
@@ -589,7 +617,7 @@ class _LibraryDetailState extends State<LibraryDetail> {
               ),
             ],
           ),
-          if (documentSection == null) ...[
+          if (!standalone) ...[
             const SizedBox(height: 18),
             Container(
               decoration: BoxDecoration(
@@ -627,7 +655,7 @@ class _LibraryDetailState extends State<LibraryDetail> {
                   detail.templateState == WorkspaceTemplateState.available
                   ? detail.definition['sections'] as List? ?? []
                   : const [];
-              if (_relations && documentSection == null) {
+              if (_relations && !standalone) {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -641,6 +669,36 @@ class _LibraryDetailState extends State<LibraryDetail> {
                       Text(
                         '还没有关联资料。',
                         style: libraryText(context, 13, color: c.muted),
+                      ),
+                  ],
+                );
+              }
+              if (primaryFile) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(top: 27),
+                      child: LibraryFile(
+                        key: ValueKey('library-file-${record.ref.key}-file'),
+                        detail: detail,
+                        fieldKey: 'file',
+                        source: widget.source,
+                        picker: widget.filePicker,
+                        onModalChanged: widget.onModalChanged,
+                      ),
+                    ),
+                    for (final section in declaredSections.where(
+                      (s) => s['kind'] == 'relations',
+                    ))
+                      _section(
+                        context,
+                        section['title'] as String,
+                        _relationsFor(
+                          context,
+                          section['key'] as String,
+                          snapshot,
+                        ),
                       ),
                   ],
                 );
@@ -819,7 +877,7 @@ class _LibraryDetailState extends State<LibraryDetail> {
               );
             },
           ),
-          if (!_relations &&
+          if ((!_relations || standalone) &&
               detail.fieldOverrides.entries.any(
                 (e) =>
                     e.value != null &&
@@ -846,7 +904,7 @@ class _LibraryDetailState extends State<LibraryDetail> {
                     .toList(),
               ),
             ),
-          if (!_relations && detail.retainedFields.isNotEmpty)
+          if ((!_relations || standalone) && detail.retainedFields.isNotEmpty)
             _section(
               context,
               '保留的原字段',

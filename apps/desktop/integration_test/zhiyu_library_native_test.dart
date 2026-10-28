@@ -8,6 +8,7 @@ import 'package:integration_test/integration_test.dart';
 import 'package:info_desktop/desktop_controls.dart';
 import 'package:info_desktop/desktop_fonts.dart';
 import 'package:info_desktop/workspace/library_page.dart';
+import 'package:info_desktop/workspace/library_file.dart';
 import 'package:info_desktop/workspace/mac_preview_desktop.dart';
 import 'package:info_desktop/workspace/preview_workspace.dart';
 import 'package:info_desktop/workspace/sample_workspace_source.dart';
@@ -399,6 +400,82 @@ void main() {
           originalBody,
         );
         await tap(find.byKey(const ValueKey('library-document-raw')));
+        final attachmentBoxes = <String, Object>{};
+        for (final (query, ref) in [
+          ('服务端开发简历', 'information:resume'),
+          ('Azure SSH', 'credential:sshkey'),
+        ]) {
+          await tap(find.byKey(const ValueKey('library-directory-all')));
+          final search = find.byKey(const ValueKey('library-search'));
+          await tap(search);
+          await tester.enterText(search, '');
+          await tester.pumpAndSettle();
+          await tester.enterText(search, query);
+          await tester.pumpAndSettle();
+          for (
+            var frame = 0;
+            frame < 120 && model.loadState == WorkspaceLoad.loading;
+            frame++
+          ) {
+            await tester.pump(const Duration(milliseconds: 16));
+          }
+          expect(model.query.keyword, query);
+          expect(model.loadState, WorkspaceLoad.ready);
+          final row = find.byKey(ValueKey('library-record-$ref'));
+          if (row.evaluate().isEmpty) {
+            await tester.scrollUntilVisible(
+              row,
+              150,
+              scrollable: find
+                  .descendant(
+                    of: find.byKey(const ValueKey('library-results-scroll')),
+                    matching: find.byType(Scrollable),
+                  )
+                  .first,
+            );
+          }
+          await tap(row);
+          if (ref == 'information:resume') {
+            final image = find.descendant(
+              of: find.byType(LibraryFilePreviewView),
+              matching: find.byWidgetPredicate(
+                (w) => w is RawImage && w.image != null,
+              ),
+            );
+            for (
+              var frame = 0;
+              frame < 120 && image.evaluate().isEmpty;
+              frame++
+            ) {
+              await tester.pump(const Duration(milliseconds: 16));
+            }
+            expect(image, findsOneWidget);
+            attachmentBoxes['resume'] = {
+              'detail-title': box(
+                find.byKey(const ValueKey('library-detail-title')),
+              ),
+              'file-stage': box(
+                find.byKey(const ValueKey('library-file-stage')),
+              ),
+            };
+          } else {
+            expect(
+              find.byKey(const ValueKey('credential-mask')),
+              findsOneWidget,
+            );
+            attachmentBoxes['sshkey'] = {
+              for (final key in [
+                'credential-summary',
+                'credential-summary-format',
+                'credential-status',
+              ])
+                key: box(find.byKey(ValueKey(key))),
+            };
+          }
+          await screenshot(
+            '${dark ? 'dark' : 'light'}-${size.width.toInt()}-${ref.split(':').last}',
+          );
+        }
         viewports.add({
           'width': size.width,
           'height': size.height,
@@ -408,6 +485,7 @@ void main() {
           'scrollbarStyle': native['scrollbarStyle']!,
           'actualScrollbarWidth': actualScrollbarWidth,
           'documentBoxes': documentBoxes,
+          'attachmentBoxes': attachmentBoxes,
         });
         await model.resetView();
         await tester.pumpAndSettle();
@@ -418,6 +496,9 @@ void main() {
     checks.add('native-chooser-two-viewports-two-themes-no-residual-barrier');
     checks.add(
       'native-document-two-viewports-two-themes-table-list-code-and-complete-raw-reading',
+    );
+    checks.add(
+      'native-file-real-frame-and-credential-summary-two-viewports-two-themes',
     );
     tester.platformDispatcher.textScaleFactorTestValue = 2;
     addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);

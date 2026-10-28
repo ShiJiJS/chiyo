@@ -167,7 +167,7 @@ class _LibraryCredentialState extends State<LibraryCredential> {
       children: [
         Text(
           title,
-          style: libraryText(context, 17, weight: FontWeight.w600, height: 1.5),
+          style: libraryText(context, 17, weight: FontWeight.w700, height: 1.5),
         ),
         const SizedBox(height: 12),
         child,
@@ -211,48 +211,75 @@ class _LibraryCredentialState extends State<LibraryCredential> {
             child: const Text('重新读取凭据'),
           ),
         ],
-        Container(
-          margin: const EdgeInsets.symmetric(vertical: 20),
-          padding: const EdgeInsets.all(18),
-          decoration: BoxDecoration(
-            color: c.credentialSurface,
-            border: Border.all(color: c.line),
-            borderRadius: BorderRadius.circular(9),
-          ),
-          child: Wrap(
-            spacing: 15,
-            runSpacing: 12,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: [
-              PrototypeIcon(PrototypeIconGlyph.shield, color: c.warning),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    detail.filename ?? 'Token 字符串',
-                    style: libraryText(context, 15, weight: FontWeight.w600),
-                  ),
-                  Text(
-                    '${detail.format} · 材料v${detail.materialVersion}',
-                    style: libraryText(context, 13, color: c.warning),
-                  ),
-                ],
-              ),
-              Text(
-                !detail.enabled
-                    ? '已停用'
-                    : detail.canRequestUse
-                    ? '可使用'
-                    : detail.delivery == WorkspaceCredentialDelivery.focus
-                    ? '本机填充未启用'
-                    : '仅保管',
-                style: libraryText(
-                  context,
-                  13,
-                  color: detail.canRequestUse ? c.success : c.warning,
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 20),
+          child: Container(
+            key: const ValueKey('credential-summary'),
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              color: c.credentialSurface,
+              border: Border.all(color: c.line),
+              borderRadius: BorderRadius.circular(9),
+            ),
+            child: Row(
+              children: [
+                PrototypeIcon(
+                  PrototypeIconGlyph.shield,
+                  size: 19,
+                  color: c.ink,
                 ),
-              ),
-            ],
+                const SizedBox(width: 15),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        detail.filename ?? 'Token 字符串',
+                        key: const ValueKey('credential-summary-title'),
+                        style: libraryText(
+                          context,
+                          14,
+                          weight: FontWeight.w700,
+                        ),
+                      ),
+                      Text(
+                        '${detail.format} · 材料v${detail.materialVersion}',
+                        key: const ValueKey('credential-summary-format'),
+                        style: libraryText(context, 13, color: c.warning),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 15),
+                Container(
+                  key: const ValueKey('credential-status'),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 9,
+                    vertical: 3,
+                  ),
+                  decoration: BoxDecoration(
+                    color: detail.canRequestUse
+                        ? c.successSurface
+                        : c.credentialSurface,
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                  child: Text(
+                    !detail.enabled
+                        ? '已停用'
+                        : detail.canRequestUse
+                        ? '可使用'
+                        : detail.delivery == WorkspaceCredentialDelivery.focus
+                        ? '本机填充未启用'
+                        : '仅保管',
+                    style: libraryText(
+                      context,
+                      13,
+                      color: detail.canRequestUse ? c.success : c.warning,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
         Wrap(

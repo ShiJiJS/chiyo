@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../desktop_controls.dart';
 import '../desktop_feedback.dart';
 import '../ui_palette.dart';
+import '../desktop_scroll.dart';
 import 'library_file_dialogs.dart';
 import 'library_widgets.dart';
 import 'workspace_source.dart';
@@ -260,13 +261,21 @@ class _LibraryFileState extends State<LibraryFile> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        SelectableText(
-          history.current.filename,
-          style: libraryText(context, 15, weight: FontWeight.w600),
-        ),
-        Text(
-          '${history.current.mediaType} · ${workspaceFileSize(history.current.byteLength)} · v${history.current.ref.version}',
-          style: libraryText(context, 13, color: c.muted),
+        Wrap(
+          spacing: 12,
+          runSpacing: 6,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            SelectableText(
+              history.current.filename,
+              key: ValueKey('library-file-filename-${widget.fieldKey}'),
+              style: libraryText(context, 13),
+            ),
+            Text(
+              '${history.current.mediaType} · ${workspaceFileSize(history.current.byteLength)} · v${history.current.ref.version}',
+              style: libraryText(context, 13, color: c.muted),
+            ),
+          ],
         ),
         const SizedBox(height: 12),
         Wrap(
@@ -465,37 +474,60 @@ class _LibraryFilePreviewViewState extends State<LibraryFilePreviewView> {
         else
           LayoutBuilder(
             builder: (context, bounds) {
+              final inset = MediaQuery.sizeOf(context).width <= 1300
+                  ? 12.0
+                  : 25.0;
+              final available = (bounds.maxWidth - inset * 2).clamp(
+                0.0,
+                double.infinity,
+              );
               final width =
-                  bounds.maxWidth.clamp(
+                  available.clamp(
                     0.0,
-                    p.file.mediaType == 'image/png' ? 480.0 : 800.0,
+                    p.file.mediaType == 'image/png' ? 480.0 : 610.0,
                   ) *
                   _zoom;
-              return SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                primary: false,
-                child: SizedBox(
-                  width: width,
-                  child: AspectRatio(
-                    aspectRatio: p.pixelWidth! / p.pixelHeight!,
-                    child: Image(
-                      image: _image!,
-                      semanticLabel: '${p.file.filename}，第${p.page + 1}页',
-                      fit: BoxFit.contain,
-                      frameBuilder: (context, child, frame, synchronous) =>
-                          frame != null || synchronous
-                          ? child
-                          : Center(
-                              child: Text(
-                                '正在显示文件页面…',
-                                style: libraryText(context, 13),
-                              ),
+              final image = SizedBox(
+                width: width,
+                child: AspectRatio(
+                  aspectRatio: p.pixelWidth! / p.pixelHeight!,
+                  child: Image(
+                    image: _image!,
+                    semanticLabel: '${p.file.filename}，第${p.page + 1}页',
+                    fit: BoxFit.contain,
+                    frameBuilder: (context, child, frame, synchronous) =>
+                        frame != null || synchronous
+                        ? child
+                        : Center(
+                            child: Text(
+                              '正在显示文件页面…',
+                              style: libraryText(context, 13),
                             ),
-                      errorBuilder: (_, _, _) =>
-                          const Text('图像无法显示，可重试预览或另存文件。'),
-                    ),
+                          ),
+                    errorBuilder: (_, _, _) => const Text('图像无法显示，可重试预览或另存文件。'),
                   ),
                 ),
+              );
+              return Container(
+                key: const ValueKey('library-file-stage'),
+                padding: EdgeInsets.all(inset),
+                decoration: BoxDecoration(
+                  color: c.nav,
+                  borderRadius: BorderRadius.circular(9),
+                ),
+                alignment: Alignment.topCenter,
+                child: width <= available
+                    ? image
+                    : ScrollConfiguration(
+                        behavior: const DesktopScrollBehavior(
+                          scrollbarGutter: 9,
+                        ),
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          primary: false,
+                          child: image,
+                        ),
+                      ),
               );
             },
           ),
