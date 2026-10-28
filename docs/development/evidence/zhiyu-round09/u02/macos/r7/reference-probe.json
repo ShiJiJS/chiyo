@@ -1,0 +1,38 @@
+{
+  "before": {
+    "ua": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36",
+    "platform": "MacIntel",
+    "width": 1255,
+    "height": 804,
+    "client": 263,
+    "offset": 274,
+    "row": {
+      "x": 212,
+      "y": 284.796875,
+      "width": 241,
+      "height": 155.78125,
+      "top": 284.796875,
+      "right": 453,
+      "bottom": 440.578125,
+      "left": 212
+    }
+  },
+  "after": {
+    "ua": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36",
+    "platform": "MacIntel",
+    "width": 1255,
+    "height": 804,
+    "client": 263,
+    "offset": 274,
+    "row": {
+      "x": 212,
+      "y": 284.796875,
+      "width": 241,
+      "height": 155.78125,
+      "top": 284.796875,
+      "right": 453,
+      "bottom": 440.578125,
+      "left": 212
+    }
+  }
+}

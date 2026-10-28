@@ -1,0 +1,62 @@
+{
+  "createdAt": "2026-10-28T02:01:40.808475+00:00",
+  "sourceCommit": "adaaa6008f803a4ec9b0a5435d6f31f027785297",
+  "branch": "codex/zhiyu-macos",
+  "issue": 63,
+  "state": "OPEN",
+  "criteria": "6/7, unchanged",
+  "scope": "R01/R02-hit row reference integrity; no product layout changes",
+  "checks": {
+    "analysis": "passed strict",
+    "targetedCases": 9,
+    "finalCaptureCases": 4,
+    "countsOverlap": true,
+    "referenceCases": 8,
+    "coveredMaxDelta": 0.6015625,
+    "R02AbsoluteYDelta": 0.0031250000000113687,
+    "R01AbsoluteYDelta": 137.003125,
+    "R01Ordering": "approved stable typed-ID tie break versus frozen seed order; retained",
+    "referencePolicyVariation": "accepted eight 11px captures, later zero observed in another round; never altered layout/system preferences",
+    "negativeGutterGuard": "impossible expected -1 rejected solely scrollbar_policy_mismatch",
+    "comparisonGuards": 4,
+    "fullS5Passed": false,
+    "newBuild": false,
+    "newCocoa": false
+  },
+  "viewedRepresentativePairs": [
+    "light-1440-R01",
+    "dark-1280-R01",
+    "dark-1440-R02",
+    "light-1280-R02"
+  ],
+  "environment": {
+    "viewports": [
+      [
+        1440,
+        900
+      ],
+      [
+        1280,
+        800
+      ]
+    ],
+    "DPR": 1,
+    "textScale": 1,
+    "fonts": "actual/fonts.json",
+    "data": "same synthetic Azure row"
+  },
+  "pending": [
+    "R02 empty and complete R03/R04 matrices",
+    "full details geometry incl tags, linked-row spacing and sidebar/footer",
+    "same-time stable-ID order differs from frozen seed order",
+    "normal-speed motion and actual OS input remain unverified",
+    "F01 real-service integration remains outstanding"
+  ],
+  "isolation": {
+    "computerUse": false,
+    "subagents": false,
+    "personalData": false,
+    "systemPermissions": false,
+    "WindowsCI": false
+  }
+}

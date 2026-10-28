@@ -1,0 +1,32 @@
+{
+  "library-record-information:azure": {
+    "x": 232.0,
+    "y": 284.8,
+    "width": 266.0,
+    "height": 156.0
+  },
+  "row-name": {
+    "x": 290.0,
+    "y": 299.8,
+    "width": 195.0,
+    "height": 23.0
+  },
+  "row-summary": {
+    "x": 290.0,
+    "y": 327.8,
+    "width": 195.0,
+    "height": 44.0
+  },
+  "row-type": {
+    "x": 290.0,
+    "y": 379.8,
+    "width": 195.0,
+    "height": 19.0
+  },
+  "row-tag": {
+    "x": 295.0,
+    "y": 406.8,
+    "width": 24.0,
+    "height": 18.0
+  }
+}
