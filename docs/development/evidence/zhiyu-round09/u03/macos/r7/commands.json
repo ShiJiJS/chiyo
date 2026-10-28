@@ -7,5 +7,6 @@
   "nativeProbe": "xcrun swift -module-cache-path build/zhiyu-ui/u03/macos/r7/swift-cache -e 'import AppKit; import Foundation; let style = NSScroller.preferredScrollerStyle; print(\"\\(style.rawValue)\")' (repo root; read only)",
   "nativeProbeHeader": "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/Library/Frameworks/AppKit.framework/Headers/NSScroller.h",
   "capture": "scripts/qa/zhiyu-content-reference.mjs captureContentReading; one same-call capture per condition",
-  "execution": "Sequential. 454 regression after nested-block fix; final unavailable-template guard and capture metadata added afterward, then final26, strict analysis, ordinary build. Earlier lazy-list locator, stale helper name and braces-lint failures corrected without skipping checks."
+  "execution": "Sequential. 454 regression after nested-block fix; final unavailable-template guard and capture metadata added afterward, then final26, strict analysis, ordinary build. Earlier lazy-list locator, stale helper name and braces-lint failures corrected without skipping checks.",
+  "nativeProbeNote": "Equivalent reproducible read-only query; raw observed result retained in native-scrollbar-probe.json."
 }
