@@ -1,0 +1,17 @@
+[
+  {
+    "case": "viewport",
+    "rejected": true,
+    "reason": "Viewport, theme and normal text scale must match"
+  },
+  {
+    "case": "query",
+    "rejected": true,
+    "reason": "Different search/filter conditions"
+  },
+  {
+    "case": "selection",
+    "rejected": true,
+    "reason": "Different selected record"
+  }
+]

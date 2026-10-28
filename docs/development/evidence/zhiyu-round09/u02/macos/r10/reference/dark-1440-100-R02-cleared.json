@@ -1,0 +1,262 @@
+{
+  "expected": {
+    "viewport": {
+      "width": 1440,
+      "height": 900,
+      "dpr": 1
+    },
+    "theme": "dark",
+    "state": "R02-cleared",
+    "stateFields": {
+      "dir": "all",
+      "selected": "azure",
+      "query": "",
+      "filter": "all",
+      "tag": "",
+      "groupBy": "none",
+      "sort": "updated"
+    },
+    "requiredBoxes": [
+      "library-detail-toolbar",
+      "library-detail-create"
+    ],
+    "scrollbarWidth": 11
+  },
+  "before": {
+    "viewport": {
+      "width": 1440,
+      "height": 900,
+      "dpr": 1
+    },
+    "fontFamily": "\"Zhiyu System\", \"PingFang SC\", sans-serif",
+    "canvas": "#181b22",
+    "state": {
+      "page": "library",
+      "dir": "all",
+      "selected": "azure",
+      "query": "",
+      "filter": "all",
+      "tag": "",
+      "groupBy": "none",
+      "sort": "updated",
+      "detailTab": "overview",
+      "setting": "appearance",
+      "plugin": "builtin.server",
+      "pluginTab": "overview"
+    },
+    "boxes": {
+      "library-search-frame": {
+        "x": 230,
+        "y": 139,
+        "width": 267,
+        "height": 39
+      },
+      "library-group": {
+        "x": 374,
+        "y": 237.296875,
+        "width": 59,
+        "height": 32
+      },
+      "library-sort": {
+        "x": 438,
+        "y": 237.296875,
+        "width": 59,
+        "height": 32
+      },
+      "library-results-pane": {
+        "x": 214,
+        "y": 66,
+        "width": 300,
+        "height": 834
+      },
+      "library-results-footer": {
+        "x": 214,
+        "y": 855,
+        "width": 299,
+        "height": 45
+      },
+      "library-detail-toolbar": {
+        "x": 529,
+        "y": 79,
+        "width": 896,
+        "height": 49
+      },
+      "library-detail-create": {
+        "x": 1324,
+        "y": 84.6015625,
+        "width": 78,
+        "height": 36.796875
+      },
+      "library-detail-title": {
+        "x": 647,
+        "y": 183,
+        "width": 622,
+        "height": 39.1484375
+      }
+    },
+    "searchFocused": false,
+    "searchAppearance": {
+      "borderColor": "rgb(57, 65, 79)",
+      "boxShadow": "none"
+    },
+    "scrollbarWidth": 11,
+    "resultCount": "31 项",
+    "order": [
+      "azure",
+      "profile",
+      "aliyunkey",
+      "aliyun",
+      "resume",
+      "blinkokey",
+      "nas",
+      "resume-en",
+      "vikunjakey",
+      "blinko",
+      "proof",
+      "tgsession",
+      "vikunja",
+      "offer",
+      "ideas",
+      "sparky",
+      "portrait",
+      "github-token",
+      "skillshare",
+      "https",
+      "vikunja-password",
+      "video",
+      "sshguide",
+      "syncthing",
+      "deploy",
+      "tgapi",
+      "nasdoc",
+      "mtproto",
+      "publickey",
+      "workflow",
+      "sshkey"
+    ],
+    "groups": [],
+    "detailTitle": "Azure 日本服务器",
+    "popupLabels": []
+  },
+  "after": {
+    "viewport": {
+      "width": 1440,
+      "height": 900,
+      "dpr": 1
+    },
+    "fontFamily": "\"Zhiyu System\", \"PingFang SC\", sans-serif",
+    "canvas": "#181b22",
+    "state": {
+      "page": "library",
+      "dir": "all",
+      "selected": "azure",
+      "query": "",
+      "filter": "all",
+      "tag": "",
+      "groupBy": "none",
+      "sort": "updated",
+      "detailTab": "overview",
+      "setting": "appearance",
+      "plugin": "builtin.server",
+      "pluginTab": "overview"
+    },
+    "boxes": {
+      "library-search-frame": {
+        "x": 230,
+        "y": 139,
+        "width": 267,
+        "height": 39
+      },
+      "library-group": {
+        "x": 374,
+        "y": 237.296875,
+        "width": 59,
+        "height": 32
+      },
+      "library-sort": {
+        "x": 438,
+        "y": 237.296875,
+        "width": 59,
+        "height": 32
+      },
+      "library-results-pane": {
+        "x": 214,
+        "y": 66,
+        "width": 300,
+        "height": 834
+      },
+      "library-results-footer": {
+        "x": 214,
+        "y": 855,
+        "width": 299,
+        "height": 45
+      },
+      "library-detail-toolbar": {
+        "x": 529,
+        "y": 79,
+        "width": 896,
+        "height": 49
+      },
+      "library-detail-create": {
+        "x": 1324,
+        "y": 84.6015625,
+        "width": 78,
+        "height": 36.796875
+      },
+      "library-detail-title": {
+        "x": 647,
+        "y": 183,
+        "width": 622,
+        "height": 39.1484375
+      }
+    },
+    "searchFocused": false,
+    "searchAppearance": {
+      "borderColor": "rgb(57, 65, 79)",
+      "boxShadow": "none"
+    },
+    "scrollbarWidth": 11,
+    "resultCount": "31 项",
+    "order": [
+      "azure",
+      "profile",
+      "aliyunkey",
+      "aliyun",
+      "resume",
+      "blinkokey",
+      "nas",
+      "resume-en",
+      "vikunjakey",
+      "blinko",
+      "proof",
+      "tgsession",
+      "vikunja",
+      "offer",
+      "ideas",
+      "sparky",
+      "portrait",
+      "github-token",
+      "skillshare",
+      "https",
+      "vikunja-password",
+      "video",
+      "sshguide",
+      "syncthing",
+      "deploy",
+      "tgapi",
+      "nasdoc",
+      "mtproto",
+      "publickey",
+      "workflow",
+      "sshkey"
+    ],
+    "groups": [],
+    "detailTitle": "Azure 日本服务器",
+    "popupLabels": []
+  },
+  "errors": [],
+  "accepted": true,
+  "imageSha256": "93565cf08f5b7cb9f7e6cb60353e2b6f82dc5d8c7b781ddcc54d9bf99f2735aa",
+  "scope": "Frozen Mac workflow capture integrity; not full S5 or actual OS input",
+  "fullS5Passed": false
+}

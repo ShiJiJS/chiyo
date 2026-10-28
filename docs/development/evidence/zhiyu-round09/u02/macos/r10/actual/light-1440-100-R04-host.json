@@ -1,0 +1,49 @@
+{
+  "state": "R04-host",
+  "viewport": {
+    "width": 1440.0,
+    "height": 900.0,
+    "dpr": 1
+  },
+  "theme": "light",
+  "textScale": 1.0,
+  "query": {
+    "directory": "selfhost",
+    "keyword": "",
+    "type": null,
+    "tag": null,
+    "tagName": null,
+    "grouping": "none",
+    "sort": "updated",
+    "offset": 0,
+    "limit": 50
+  },
+  "groupCounts": {
+    "": 15
+  },
+  "groups": [],
+  "total": 15,
+  "selection": "information:azure",
+  "order": [
+    "credential:aliyunkey",
+    "information:azure",
+    "credential:blinkokey",
+    "information:aliyun",
+    "credential:vikunjakey",
+    "information:blinko",
+    "information:vikunja",
+    "credential:github-token",
+    "information:sparky",
+    "credential:vikunja-password",
+    "information:https",
+    "information:skillshare",
+    "information:sshguide",
+    "information:deploy",
+    "credential:sshkey"
+  ],
+  "canGoBack": false,
+  "scrollOffset": 100.0,
+  "searchFocused": null,
+  "boxes": {},
+  "scope": "Actual synthetic Widget flow, mouse-kind/keyboard injection; not OS input"
+}

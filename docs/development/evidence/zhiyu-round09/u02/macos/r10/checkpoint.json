@@ -1,0 +1,56 @@
+{
+  "createdAt": "2026-10-28T15:43:33.069022+00:00",
+  "sourceCommit": "5a1a5539e7a221950306363629228cb553d282b9",
+  "issue": 63,
+  "issueState": "OPEN",
+  "checked": 6,
+  "totalCriteria": 7,
+  "checks": {
+    "workflows": 8,
+    "relatedRegression": 69,
+    "analysis": "passed --fatal-infos",
+    "fixedMacBuild": "passed arm64 preview_main.dart",
+    "matchingWorkflowCases": 40,
+    "maximumMeasuredGeometryDelta": 1.295312499999966,
+    "geometryThreshold": 2,
+    "comparisonRejectionGuards": 3,
+    "fullS5Passed": false,
+    "newCocoa": false
+  },
+  "environment": {
+    "macOS": "27.0.1",
+    "build": "26A434",
+    "DPR": 1,
+    "textScales": [
+      1,
+      2
+    ],
+    "fonts": "actual/fonts.json",
+    "fixture": "same synthetic PreviewWorkspace; no real data"
+  },
+  "retainedScreenshotPairs": [
+    "light-1440-100-R02-empty",
+    "dark-1280-100-R03-sort-menu",
+    "light-1280-100-R04-relations",
+    "dark-1440-100-R04-service"
+  ],
+  "additionalActualScreenshots": [
+    "dark-1280-200-R02-empty",
+    "light-1440-200-R02-empty",
+    "light-1440-100-R04-host"
+  ],
+  "pending": [
+    "group/name collation and stable-ID seed order differences",
+    "R04 relation row separators and service field spacing observed, not covered by outer-box geometry",
+    "full motion/normal-speed review and actual OS input across seven UI tickets",
+    "F01 real database/services/persistent transactions/integration and Mac delivery"
+  ],
+  "isolation": {
+    "computerUse": false,
+    "subagents": false,
+    "personalDatabase": false,
+    "systemPermissions": false,
+    "WindowsCI": false,
+    "copiedAppOrDSYM": false
+  }
+}
