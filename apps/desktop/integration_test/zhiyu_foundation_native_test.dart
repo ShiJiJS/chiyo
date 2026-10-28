@@ -11,6 +11,7 @@ import 'package:info_desktop/desktop_fonts.dart';
 import 'package:info_desktop/desktop_motion.dart';
 import 'package:info_desktop/workspace/preview_workspace.dart';
 import 'package:info_desktop/workspace/mac_preview_desktop.dart';
+import 'package:info_desktop/workspace/workspace_source.dart';
 import 'support/native_frame_recording.dart';
 import 'support/native_motion_probe.dart';
 
@@ -98,6 +99,7 @@ void main() {
       }
 
       final nativeMotion = <String, Object>{};
+      final motionFailures = <String>[];
       double opacity(Finder target) {
         var value = 1.0;
         target.evaluate().single.visitAncestorElements((element) {
@@ -116,25 +118,32 @@ void main() {
         int duration, {
         double? displacement,
       }) async {
-        nativeMotion[name] = {'targetMs': duration, 'samples': samples};
+        final frameError = (samples.last['frameMs']! as num) - duration;
+        final wallError = (samples.last['wallMs']! as num) - duration;
+        final translation = displacement == null
+            ? null
+            : (samples.first['y']! as double) - (samples.last['y']! as double);
+        final passed =
+            frameError.abs() <= 20 &&
+            wallError.abs() <= 20 &&
+            (translation == null || (translation - displacement!).abs() <= .2);
+        nativeMotion[name] = {
+          'targetMs': duration,
+          'frameErrorMs': frameError,
+          'wallErrorMs': wallError,
+          'translation': translation,
+          'passed': passed,
+          'samples': samples,
+        };
         await File('$directory/native-motion.json').writeAsString(
           const JsonEncoder.withIndent('  ').convert(nativeMotion),
         );
-        expect(
-          (samples.last['frameMs']! as num) - duration,
-          closeTo(0, 20),
-          reason: '$name native frame clock',
-        );
-        expect(
-          (samples.last['wallMs']! as num) - duration,
-          closeTo(0, 20),
-          reason: '$name native wall clock',
-        );
-        if (displacement != null) {
-          expect(
-            (samples.first['y']! as double) - (samples.last['y']! as double),
-            closeTo(displacement, .2),
-            reason: '$name actual translation',
+        // Preserve every stage and the recording before failing the same
+        // timing/translation contract. A cold-frame miss must stay observable.
+        if (!passed) {
+          motionFailures.add(
+            '$name: frame error $frameError ms, wall error $wallError ms, '
+            'translation $translation (target $displacement)',
           );
         }
       }
@@ -146,6 +155,9 @@ void main() {
         int duration,
         double displacement,
       ) async {
+        // Keep the stage in failed receipts as well as successful traces.
+        // ignore: avoid_print
+        print('ZHIYU_NATIVE_MOTION=$name');
         final pending = traceNativeMotion(
           read: () => target.evaluate().isEmpty
               ? null
@@ -218,16 +230,35 @@ void main() {
         await key(LogicalKeyboardKey.escape);
         checks.add('native-AppKit-menu-dispatch-and-modal-gating');
         checks.add('secure-editor-local-UI-channel-preserved');
+        // U02 replaced the old foundation placeholder. Observe the real
+        // record-specific entrance, not the approvals sidebar's static title.
+        final azure = find.byKey(
+          const ValueKey('library-record-information:azure'),
+        );
+        final aliyun = find.byKey(
+          const ValueKey('library-record-information:aliyun'),
+        );
+        await tap(azure);
+        await tester.ensureVisible(aliyun);
+        await tester.pumpAndSettle();
         await traceOpacity(
           'detail',
           find.descendant(
-            of: find.byType(DesktopEntrance),
-            matching: find.text('访问审批'),
+            of: find.byWidgetPredicate(
+              (widget) =>
+                  widget is DesktopEntrance &&
+                  widget.key ==
+                      const ValueKey(
+                        WorkspaceRecordRef(
+                          WorkspaceRecordKind.information,
+                          'aliyun',
+                        ),
+                      ),
+            ),
+            matching: find.byKey(const ValueKey('library-detail-title')),
           ),
           () async {
-            await tester.tap(
-              find.byKey(const ValueKey('workspace-nav-approvals')),
-            );
+            await tester.tap(aliyun);
             await tester.pump();
           },
           180,
@@ -326,7 +357,9 @@ void main() {
           await tester.pump(const Duration(milliseconds: 100));
         }
         expect(find.text('已保存到预览资料'), findsNothing);
-        checks.add('native-frame-and-wall-clock-motion-contract');
+        if (motionFailures.isEmpty) {
+          checks.add('native-frame-and-wall-clock-motion-contract');
+        }
       }
 
       final recording = NativeFrameRecording(
@@ -370,6 +403,9 @@ void main() {
       recording.mark('rapid-open-close');
       await tester.tap(find.byKey(const ValueKey('preview-guide')));
       await tester.pump();
+      // Match the deterministic rapid-close contract: dispatch during the
+      // entrance (40ms of 180ms), after the new route has acquired focus.
+      await tester.pump(const Duration(milliseconds: 40));
       await tester.sendKeyEvent(LogicalKeyboardKey.escape);
       await tester.pumpAndSettle();
       expect(find.byType(DesktopDialog), findsNothing);
@@ -483,6 +519,7 @@ void main() {
           'largeTextMethod':
               'test platform text scaler; not a system DPI change',
           'checks': checks,
+          'motionFailures': motionFailures,
           'productionBootstrapUsed': false,
           'databaseOpened': false,
           'inputScope':
@@ -492,6 +529,7 @@ void main() {
       // The host collects precisely this self-created directory after the app
       // exits, encodes the recording, and removes the temporary source.
       await tester.pumpWidget(const SizedBox());
+      expect(motionFailures, isEmpty, reason: 'Native motion contract');
     },
     timeout: const Timeout(Duration(minutes: 2)),
   );

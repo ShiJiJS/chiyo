@@ -70,6 +70,26 @@ void main() {
     );
   }
 
+  testWidgets('reopened guide accepts Escape during its entrance', (
+    tester,
+  ) async {
+    await start(tester);
+    final trigger = find.byKey(const ValueKey('preview-guide'));
+    for (var cycle = 0; cycle < 3; cycle++) {
+      // Closing returns keyboard focus to this trigger. Reopen while it owns
+      // focus, rather than starting with an unfocused mouse-only page.
+      tester.widget<DesktopButton>(trigger).focusNode!.requestFocus();
+      await tester.pump();
+      await tester.tap(trigger);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 40));
+      expect(find.byType(DesktopDialog), findsOneWidget);
+      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+      await tester.pumpAndSettle();
+      expect(find.byType(DesktopDialog), findsNothing, reason: 'cycle $cycle');
+    }
+  });
+
   testWidgets('one shell has five working destinations and a 66px appbar', (
     tester,
   ) async {
