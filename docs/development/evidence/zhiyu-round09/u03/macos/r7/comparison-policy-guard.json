@@ -1,0 +1,1320 @@
+{
+  "cases": [
+    {
+      "case": "dark-1280-100-R05-timeline",
+      "referenceScrollbarWidth": 0,
+      "actualScrollbarWidth": 11.0,
+      "qualified": false,
+      "reason": "Observed reference reserves 0px; actual reserves 11px. Geometry is diagnostic only until native scrollbar policy matches.",
+      "diagnosticDeltasOnly": {
+        "detail-title": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": -11.0,
+          "height": 0.20312
+        },
+        "field-name-label": {
+          "x": 0.0,
+          "y": -0.2875,
+          "width": -5.5,
+          "height": 0.20312
+        },
+        "field-name-value": {
+          "x": 0.0,
+          "y": -0.08437,
+          "width": -5.5,
+          "height": -0.19531
+        },
+        "field-email-label": {
+          "x": -5.5,
+          "y": -0.2875,
+          "width": -5.5,
+          "height": 0.20312
+        },
+        "field-email-value": {
+          "x": -5.5,
+          "y": -0.08437,
+          "width": -5.5,
+          "height": -0.19531
+        },
+        "field-direction-label": {
+          "x": 0.0,
+          "y": -0.27969,
+          "width": -5.5,
+          "height": 0.20312
+        },
+        "field-direction-value": {
+          "x": 0.0,
+          "y": -0.07656,
+          "width": -5.5,
+          "height": -0.19531
+        },
+        "field-city-label": {
+          "x": -5.5,
+          "y": -0.27969,
+          "width": -5.5,
+          "height": 0.20312
+        },
+        "field-city-value": {
+          "x": -5.5,
+          "y": -0.07656,
+          "width": -5.5,
+          "height": -0.19531
+        },
+        "section-education": {
+          "x": 0.0,
+          "y": -0.27188,
+          "width": -11.0,
+          "height": -0.5
+        },
+        "education-0": {
+          "x": 0.0,
+          "y": -0.77188,
+          "width": -11.0,
+          "height": 1.00937
+        },
+        "education-0-title": {
+          "x": 0.0,
+          "y": -0.77031,
+          "width": -11.0,
+          "height": 0.40625
+        },
+        "education-0-detail": {
+          "x": 0.0,
+          "y": -0.36406,
+          "width": -11.0,
+          "height": 0.60156
+        },
+        "education-0-dot": {
+          "x": 0.0,
+          "y": -0.77188,
+          "width": 0.0,
+          "height": 0.0
+        },
+        "education-1": {
+          "x": 0.0,
+          "y": 0.2375,
+          "width": -11.0,
+          "height": 1.00937
+        },
+        "education-1-title": {
+          "x": 0.0,
+          "y": 0.23906,
+          "width": -11.0,
+          "height": 0.40625
+        },
+        "education-1-detail": {
+          "x": 0.0,
+          "y": 0.64531,
+          "width": -11.0,
+          "height": 0.60156
+        },
+        "education-1-dot": {
+          "x": 0.0,
+          "y": 0.2375,
+          "width": 0.0,
+          "height": 0.0
+        },
+        "section-experience": {
+          "x": 0.0,
+          "y": 1.24688,
+          "width": -11.0,
+          "height": -0.5
+        },
+        "experience-0": {
+          "x": 0.0,
+          "y": 0.74688,
+          "width": -11.0,
+          "height": 1.00937
+        },
+        "experience-0-title": {
+          "x": 0.0,
+          "y": 0.74844,
+          "width": -11.0,
+          "height": 0.40625
+        },
+        "experience-0-detail": {
+          "x": 0.0,
+          "y": 1.15469,
+          "width": -11.0,
+          "height": 0.60156
+        },
+        "experience-0-dot": {
+          "x": 0.0,
+          "y": 0.74688,
+          "width": 0.0,
+          "height": 0.0
+        }
+      }
+    },
+    {
+      "case": "dark-1280-100-R05-top",
+      "referenceScrollbarWidth": 0,
+      "actualScrollbarWidth": 11.0,
+      "qualified": false,
+      "reason": "Observed reference reserves 0px; actual reserves 11px. Geometry is diagnostic only until native scrollbar policy matches.",
+      "diagnosticDeltasOnly": {
+        "detail-title": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": -11.0,
+          "height": 0.20312
+        },
+        "field-name-label": {
+          "x": 0.0,
+          "y": -0.2875,
+          "width": -5.5,
+          "height": 0.20312
+        },
+        "field-name-value": {
+          "x": 0.0,
+          "y": -0.08438,
+          "width": -5.5,
+          "height": -0.19531
+        },
+        "field-email-label": {
+          "x": -5.5,
+          "y": -0.2875,
+          "width": -5.5,
+          "height": 0.20312
+        },
+        "field-email-value": {
+          "x": -5.5,
+          "y": -0.08438,
+          "width": -5.5,
+          "height": -0.19531
+        },
+        "field-direction-label": {
+          "x": 0.0,
+          "y": -0.27969,
+          "width": -5.5,
+          "height": 0.20312
+        },
+        "field-direction-value": {
+          "x": 0.0,
+          "y": -0.07656,
+          "width": -5.5,
+          "height": -0.19531
+        },
+        "field-city-label": {
+          "x": -5.5,
+          "y": -0.27969,
+          "width": -5.5,
+          "height": 0.20312
+        },
+        "field-city-value": {
+          "x": -5.5,
+          "y": -0.07656,
+          "width": -5.5,
+          "height": -0.19531
+        },
+        "section-education": {
+          "x": 0.0,
+          "y": -0.27188,
+          "width": -11.0,
+          "height": -0.5
+        },
+        "education-0": {
+          "x": 0.0,
+          "y": -0.77188,
+          "width": -11.0,
+          "height": 1.00937
+        },
+        "education-0-title": {
+          "x": 0.0,
+          "y": -0.77031,
+          "width": -11.0,
+          "height": 0.40625
+        },
+        "education-0-detail": {
+          "x": 0.0,
+          "y": -0.36406,
+          "width": -11.0,
+          "height": 0.60156
+        },
+        "education-0-dot": {
+          "x": 0.0,
+          "y": -0.77188,
+          "width": 0.0,
+          "height": 0.0
+        },
+        "education-1": {
+          "x": 0.0,
+          "y": 0.2375,
+          "width": -11.0,
+          "height": 1.00937
+        },
+        "education-1-title": {
+          "x": 0.0,
+          "y": 0.23906,
+          "width": -11.0,
+          "height": 0.40625
+        },
+        "education-1-detail": {
+          "x": 0.0,
+          "y": 0.64531,
+          "width": -11.0,
+          "height": 0.60156
+        },
+        "education-1-dot": {
+          "x": 0.0,
+          "y": 0.2375,
+          "width": 0.0,
+          "height": 0.0
+        },
+        "section-experience": {
+          "x": 0.0,
+          "y": 1.24688,
+          "width": -11.0,
+          "height": -0.5
+        },
+        "experience-0": {
+          "x": 0.0,
+          "y": 0.74688,
+          "width": -11.0,
+          "height": 1.00937
+        },
+        "experience-0-title": {
+          "x": 0.0,
+          "y": 0.74844,
+          "width": -11.0,
+          "height": 0.40625
+        },
+        "experience-0-detail": {
+          "x": 0.0,
+          "y": 1.15469,
+          "width": -11.0,
+          "height": 0.60156
+        },
+        "experience-0-dot": {
+          "x": 0.0,
+          "y": 0.74688,
+          "width": 0.0,
+          "height": 0.0
+        }
+      }
+    },
+    {
+      "case": "dark-1280-100-R06-document",
+      "referenceScrollbarWidth": 0,
+      "actualScrollbarWidth": 11.0,
+      "qualified": false,
+      "reason": "Observed reference reserves 0px; actual reserves 11px. Geometry is diagnostic only until native scrollbar policy matches.",
+      "diagnosticDeltasOnly": {
+        "detail-title": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": -11.0,
+          "height": 0.20312
+        },
+        "document-heading-0": {
+          "x": 0.0,
+          "y": 0.21094,
+          "width": -11.0,
+          "height": 0.0
+        },
+        "document-heading-1": {
+          "x": 0.0,
+          "y": 28.91406,
+          "width": -11.0,
+          "height": 0.0
+        },
+        "document-heading-2": {
+          "x": 0.0,
+          "y": 31.02344,
+          "width": -11.0,
+          "height": 0.0
+        }
+      }
+    },
+    {
+      "case": "dark-1440-100-R05-timeline",
+      "referenceScrollbarWidth": 0,
+      "actualScrollbarWidth": 11.0,
+      "qualified": false,
+      "reason": "Observed reference reserves 0px; actual reserves 11px. Geometry is diagnostic only until native scrollbar policy matches.",
+      "diagnosticDeltasOnly": {
+        "detail-title": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": -11.0,
+          "height": -0.14844
+        },
+        "field-name-label": {
+          "x": 0.0,
+          "y": -0.63906,
+          "width": -5.5,
+          "height": 0.20312
+        },
+        "field-name-value": {
+          "x": 0.0,
+          "y": -0.43594,
+          "width": -5.5,
+          "height": -0.19531
+        },
+        "field-email-label": {
+          "x": -5.5,
+          "y": -0.63906,
+          "width": -5.5,
+          "height": 0.20312
+        },
+        "field-email-value": {
+          "x": -5.5,
+          "y": -0.43594,
+          "width": -5.5,
+          "height": -0.19531
+        },
+        "field-direction-label": {
+          "x": 0.0,
+          "y": -0.63125,
+          "width": -5.5,
+          "height": 0.20312
+        },
+        "field-direction-value": {
+          "x": 0.0,
+          "y": -0.42812,
+          "width": -5.5,
+          "height": -0.19531
+        },
+        "field-city-label": {
+          "x": -5.5,
+          "y": -0.63125,
+          "width": -5.5,
+          "height": 0.20312
+        },
+        "field-city-value": {
+          "x": -5.5,
+          "y": -0.42812,
+          "width": -5.5,
+          "height": -0.19531
+        },
+        "section-education": {
+          "x": 0.0,
+          "y": -0.62344,
+          "width": -11.0,
+          "height": -0.5
+        },
+        "education-0": {
+          "x": 0.0,
+          "y": -1.12344,
+          "width": -11.0,
+          "height": 1.00937
+        },
+        "education-0-title": {
+          "x": 0.0,
+          "y": -1.12188,
+          "width": -11.0,
+          "height": 0.40625
+        },
+        "education-0-detail": {
+          "x": 0.0,
+          "y": -0.71563,
+          "width": -11.0,
+          "height": 0.60156
+        },
+        "education-0-dot": {
+          "x": 0.0,
+          "y": -1.12344,
+          "width": 0.0,
+          "height": 0.0
+        },
+        "education-1": {
+          "x": 0.0,
+          "y": -0.11406,
+          "width": -11.0,
+          "height": 1.00937
+        },
+        "education-1-title": {
+          "x": 0.0,
+          "y": -0.1125,
+          "width": -11.0,
+          "height": 0.40625
+        },
+        "education-1-detail": {
+          "x": 0.0,
+          "y": 0.29375,
+          "width": -11.0,
+          "height": 0.60156
+        },
+        "education-1-dot": {
+          "x": 0.0,
+          "y": -0.11406,
+          "width": 0.0,
+          "height": 0.0
+        },
+        "section-experience": {
+          "x": 0.0,
+          "y": 0.89531,
+          "width": -11.0,
+          "height": -0.5
+        },
+        "experience-0": {
+          "x": 0.0,
+          "y": 0.39531,
+          "width": -11.0,
+          "height": 1.00937
+        },
+        "experience-0-title": {
+          "x": 0.0,
+          "y": 0.39688,
+          "width": -11.0,
+          "height": 0.40625
+        },
+        "experience-0-detail": {
+          "x": 0.0,
+          "y": 0.80313,
+          "width": -11.0,
+          "height": 0.60156
+        },
+        "experience-0-dot": {
+          "x": 0.0,
+          "y": 0.39531,
+          "width": 0.0,
+          "height": 0.0
+        }
+      }
+    },
+    {
+      "case": "dark-1440-100-R05-top",
+      "referenceScrollbarWidth": 0,
+      "actualScrollbarWidth": 11.0,
+      "qualified": false,
+      "reason": "Observed reference reserves 0px; actual reserves 11px. Geometry is diagnostic only until native scrollbar policy matches.",
+      "diagnosticDeltasOnly": {
+        "detail-title": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": -11.0,
+          "height": -0.14844
+        },
+        "field-name-label": {
+          "x": 0.0,
+          "y": -0.63906,
+          "width": -5.5,
+          "height": 0.20312
+        },
+        "field-name-value": {
+          "x": 0.0,
+          "y": -0.43594,
+          "width": -5.5,
+          "height": -0.19531
+        },
+        "field-email-label": {
+          "x": -5.5,
+          "y": -0.63906,
+          "width": -5.5,
+          "height": 0.20312
+        },
+        "field-email-value": {
+          "x": -5.5,
+          "y": -0.43594,
+          "width": -5.5,
+          "height": -0.19531
+        },
+        "field-direction-label": {
+          "x": 0.0,
+          "y": -0.63125,
+          "width": -5.5,
+          "height": 0.20312
+        },
+        "field-direction-value": {
+          "x": 0.0,
+          "y": -0.42813,
+          "width": -5.5,
+          "height": -0.19531
+        },
+        "field-city-label": {
+          "x": -5.5,
+          "y": -0.63125,
+          "width": -5.5,
+          "height": 0.20312
+        },
+        "field-city-value": {
+          "x": -5.5,
+          "y": -0.42813,
+          "width": -5.5,
+          "height": -0.19531
+        },
+        "section-education": {
+          "x": 0.0,
+          "y": -0.62344,
+          "width": -11.0,
+          "height": -0.5
+        },
+        "education-0": {
+          "x": 0.0,
+          "y": -1.12344,
+          "width": -11.0,
+          "height": 1.00937
+        },
+        "education-0-title": {
+          "x": 0.0,
+          "y": -1.12188,
+          "width": -11.0,
+          "height": 0.40625
+        },
+        "education-0-detail": {
+          "x": 0.0,
+          "y": -0.71563,
+          "width": -11.0,
+          "height": 0.60156
+        },
+        "education-0-dot": {
+          "x": 0.0,
+          "y": -1.12344,
+          "width": 0.0,
+          "height": 0.0
+        },
+        "education-1": {
+          "x": 0.0,
+          "y": -0.11406,
+          "width": -11.0,
+          "height": 1.00937
+        },
+        "education-1-title": {
+          "x": 0.0,
+          "y": -0.1125,
+          "width": -11.0,
+          "height": 0.40625
+        },
+        "education-1-detail": {
+          "x": 0.0,
+          "y": 0.29375,
+          "width": -11.0,
+          "height": 0.60156
+        },
+        "education-1-dot": {
+          "x": 0.0,
+          "y": -0.11406,
+          "width": 0.0,
+          "height": 0.0
+        },
+        "section-experience": {
+          "x": 0.0,
+          "y": 0.89531,
+          "width": -11.0,
+          "height": -0.5
+        },
+        "experience-0": {
+          "x": 0.0,
+          "y": 0.39531,
+          "width": -11.0,
+          "height": 1.00937
+        },
+        "experience-0-title": {
+          "x": 0.0,
+          "y": 0.39688,
+          "width": -11.0,
+          "height": 0.40625
+        },
+        "experience-0-detail": {
+          "x": 0.0,
+          "y": 0.80313,
+          "width": -11.0,
+          "height": 0.60156
+        },
+        "experience-0-dot": {
+          "x": 0.0,
+          "y": 0.39531,
+          "width": 0.0,
+          "height": 0.0
+        }
+      }
+    },
+    {
+      "case": "dark-1440-100-R06-document",
+      "referenceScrollbarWidth": 0,
+      "actualScrollbarWidth": 11.0,
+      "qualified": false,
+      "reason": "Observed reference reserves 0px; actual reserves 11px. Geometry is diagnostic only until native scrollbar policy matches.",
+      "diagnosticDeltasOnly": {
+        "detail-title": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": -11.0,
+          "height": 0.85156
+        },
+        "document-heading-0": {
+          "x": 0.0,
+          "y": 0.85938,
+          "width": 0.00586,
+          "height": 0.0
+        },
+        "document-heading-1": {
+          "x": 0.0,
+          "y": 1.5625,
+          "width": 0.00586,
+          "height": 0.0
+        },
+        "document-heading-2": {
+          "x": 0.0,
+          "y": 3.67188,
+          "width": 0.00586,
+          "height": 0.0
+        }
+      }
+    },
+    {
+      "case": "light-1280-100-R05-timeline",
+      "referenceScrollbarWidth": 0,
+      "actualScrollbarWidth": 11.0,
+      "qualified": false,
+      "reason": "Observed reference reserves 0px; actual reserves 11px. Geometry is diagnostic only until native scrollbar policy matches.",
+      "diagnosticDeltasOnly": {
+        "detail-title": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": -11.0,
+          "height": 0.20312
+        },
+        "field-name-label": {
+          "x": 0.0,
+          "y": -0.2875,
+          "width": -5.5,
+          "height": 0.20312
+        },
+        "field-name-value": {
+          "x": 0.0,
+          "y": -0.08437,
+          "width": -5.5,
+          "height": -0.19531
+        },
+        "field-email-label": {
+          "x": -5.5,
+          "y": -0.2875,
+          "width": -5.5,
+          "height": 0.20312
+        },
+        "field-email-value": {
+          "x": -5.5,
+          "y": -0.08437,
+          "width": -5.5,
+          "height": -0.19531
+        },
+        "field-direction-label": {
+          "x": 0.0,
+          "y": -0.27969,
+          "width": -5.5,
+          "height": 0.20312
+        },
+        "field-direction-value": {
+          "x": 0.0,
+          "y": -0.07656,
+          "width": -5.5,
+          "height": -0.19531
+        },
+        "field-city-label": {
+          "x": -5.5,
+          "y": -0.27969,
+          "width": -5.5,
+          "height": 0.20312
+        },
+        "field-city-value": {
+          "x": -5.5,
+          "y": -0.07656,
+          "width": -5.5,
+          "height": -0.19531
+        },
+        "section-education": {
+          "x": 0.0,
+          "y": -0.27188,
+          "width": -11.0,
+          "height": -0.5
+        },
+        "education-0": {
+          "x": 0.0,
+          "y": -0.77188,
+          "width": -11.0,
+          "height": 1.00937
+        },
+        "education-0-title": {
+          "x": 0.0,
+          "y": -0.77031,
+          "width": -11.0,
+          "height": 0.40625
+        },
+        "education-0-detail": {
+          "x": 0.0,
+          "y": -0.36406,
+          "width": -11.0,
+          "height": 0.60156
+        },
+        "education-0-dot": {
+          "x": 0.0,
+          "y": -0.77188,
+          "width": 0.0,
+          "height": 0.0
+        },
+        "education-1": {
+          "x": 0.0,
+          "y": 0.2375,
+          "width": -11.0,
+          "height": 1.00937
+        },
+        "education-1-title": {
+          "x": 0.0,
+          "y": 0.23906,
+          "width": -11.0,
+          "height": 0.40625
+        },
+        "education-1-detail": {
+          "x": 0.0,
+          "y": 0.64531,
+          "width": -11.0,
+          "height": 0.60156
+        },
+        "education-1-dot": {
+          "x": 0.0,
+          "y": 0.2375,
+          "width": 0.0,
+          "height": 0.0
+        },
+        "section-experience": {
+          "x": 0.0,
+          "y": 1.24688,
+          "width": -11.0,
+          "height": -0.5
+        },
+        "experience-0": {
+          "x": 0.0,
+          "y": 0.74688,
+          "width": -11.0,
+          "height": 1.00937
+        },
+        "experience-0-title": {
+          "x": 0.0,
+          "y": 0.74844,
+          "width": -11.0,
+          "height": 0.40625
+        },
+        "experience-0-detail": {
+          "x": 0.0,
+          "y": 1.15469,
+          "width": -11.0,
+          "height": 0.60156
+        },
+        "experience-0-dot": {
+          "x": 0.0,
+          "y": 0.74688,
+          "width": 0.0,
+          "height": 0.0
+        }
+      }
+    },
+    {
+      "case": "light-1280-100-R05-top",
+      "referenceScrollbarWidth": 0,
+      "actualScrollbarWidth": 11.0,
+      "qualified": false,
+      "reason": "Observed reference reserves 0px; actual reserves 11px. Geometry is diagnostic only until native scrollbar policy matches.",
+      "diagnosticDeltasOnly": {
+        "detail-title": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": -11.0,
+          "height": 0.20312
+        },
+        "field-name-label": {
+          "x": 0.0,
+          "y": -0.2875,
+          "width": -5.5,
+          "height": 0.20312
+        },
+        "field-name-value": {
+          "x": 0.0,
+          "y": -0.08438,
+          "width": -5.5,
+          "height": -0.19531
+        },
+        "field-email-label": {
+          "x": -5.5,
+          "y": -0.2875,
+          "width": -5.5,
+          "height": 0.20312
+        },
+        "field-email-value": {
+          "x": -5.5,
+          "y": -0.08438,
+          "width": -5.5,
+          "height": -0.19531
+        },
+        "field-direction-label": {
+          "x": 0.0,
+          "y": -0.27969,
+          "width": -5.5,
+          "height": 0.20312
+        },
+        "field-direction-value": {
+          "x": 0.0,
+          "y": -0.07656,
+          "width": -5.5,
+          "height": -0.19531
+        },
+        "field-city-label": {
+          "x": -5.5,
+          "y": -0.27969,
+          "width": -5.5,
+          "height": 0.20312
+        },
+        "field-city-value": {
+          "x": -5.5,
+          "y": -0.07656,
+          "width": -5.5,
+          "height": -0.19531
+        },
+        "section-education": {
+          "x": 0.0,
+          "y": -0.27188,
+          "width": -11.0,
+          "height": -0.5
+        },
+        "education-0": {
+          "x": 0.0,
+          "y": -0.77188,
+          "width": -11.0,
+          "height": 1.00937
+        },
+        "education-0-title": {
+          "x": 0.0,
+          "y": -0.77031,
+          "width": -11.0,
+          "height": 0.40625
+        },
+        "education-0-detail": {
+          "x": 0.0,
+          "y": -0.36406,
+          "width": -11.0,
+          "height": 0.60156
+        },
+        "education-0-dot": {
+          "x": 0.0,
+          "y": -0.77188,
+          "width": 0.0,
+          "height": 0.0
+        },
+        "education-1": {
+          "x": 0.0,
+          "y": 0.2375,
+          "width": -11.0,
+          "height": 1.00937
+        },
+        "education-1-title": {
+          "x": 0.0,
+          "y": 0.23906,
+          "width": -11.0,
+          "height": 0.40625
+        },
+        "education-1-detail": {
+          "x": 0.0,
+          "y": 0.64531,
+          "width": -11.0,
+          "height": 0.60156
+        },
+        "education-1-dot": {
+          "x": 0.0,
+          "y": 0.2375,
+          "width": 0.0,
+          "height": 0.0
+        },
+        "section-experience": {
+          "x": 0.0,
+          "y": 1.24688,
+          "width": -11.0,
+          "height": -0.5
+        },
+        "experience-0": {
+          "x": 0.0,
+          "y": 0.74688,
+          "width": -11.0,
+          "height": 1.00937
+        },
+        "experience-0-title": {
+          "x": 0.0,
+          "y": 0.74844,
+          "width": -11.0,
+          "height": 0.40625
+        },
+        "experience-0-detail": {
+          "x": 0.0,
+          "y": 1.15469,
+          "width": -11.0,
+          "height": 0.60156
+        },
+        "experience-0-dot": {
+          "x": 0.0,
+          "y": 0.74688,
+          "width": 0.0,
+          "height": 0.0
+        }
+      }
+    },
+    {
+      "case": "light-1280-100-R06-document",
+      "referenceScrollbarWidth": 0,
+      "actualScrollbarWidth": 11.0,
+      "qualified": false,
+      "reason": "Observed reference reserves 0px; actual reserves 11px. Geometry is diagnostic only until native scrollbar policy matches.",
+      "diagnosticDeltasOnly": {
+        "detail-title": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": -11.0,
+          "height": 0.20312
+        },
+        "document-heading-0": {
+          "x": 0.0,
+          "y": 0.21094,
+          "width": -11.0,
+          "height": 0.0
+        },
+        "document-heading-1": {
+          "x": 0.0,
+          "y": 28.91406,
+          "width": -11.0,
+          "height": 0.0
+        },
+        "document-heading-2": {
+          "x": 0.0,
+          "y": 31.02344,
+          "width": -11.0,
+          "height": 0.0
+        }
+      }
+    },
+    {
+      "case": "light-1440-100-R05-timeline",
+      "referenceScrollbarWidth": 0,
+      "actualScrollbarWidth": 11.0,
+      "qualified": false,
+      "reason": "Observed reference reserves 0px; actual reserves 11px. Geometry is diagnostic only until native scrollbar policy matches.",
+      "diagnosticDeltasOnly": {
+        "detail-title": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": -11.0,
+          "height": -0.14844
+        },
+        "field-name-label": {
+          "x": 0.0,
+          "y": -0.63906,
+          "width": -5.5,
+          "height": 0.20312
+        },
+        "field-name-value": {
+          "x": 0.0,
+          "y": -0.43594,
+          "width": -5.5,
+          "height": -0.19531
+        },
+        "field-email-label": {
+          "x": -5.5,
+          "y": -0.63906,
+          "width": -5.5,
+          "height": 0.20312
+        },
+        "field-email-value": {
+          "x": -5.5,
+          "y": -0.43594,
+          "width": -5.5,
+          "height": -0.19531
+        },
+        "field-direction-label": {
+          "x": 0.0,
+          "y": -0.63125,
+          "width": -5.5,
+          "height": 0.20312
+        },
+        "field-direction-value": {
+          "x": 0.0,
+          "y": -0.42812,
+          "width": -5.5,
+          "height": -0.19531
+        },
+        "field-city-label": {
+          "x": -5.5,
+          "y": -0.63125,
+          "width": -5.5,
+          "height": 0.20312
+        },
+        "field-city-value": {
+          "x": -5.5,
+          "y": -0.42812,
+          "width": -5.5,
+          "height": -0.19531
+        },
+        "section-education": {
+          "x": 0.0,
+          "y": -0.62344,
+          "width": -11.0,
+          "height": -0.5
+        },
+        "education-0": {
+          "x": 0.0,
+          "y": -1.12344,
+          "width": -11.0,
+          "height": 1.00937
+        },
+        "education-0-title": {
+          "x": 0.0,
+          "y": -1.12188,
+          "width": -11.0,
+          "height": 0.40625
+        },
+        "education-0-detail": {
+          "x": 0.0,
+          "y": -0.71563,
+          "width": -11.0,
+          "height": 0.60156
+        },
+        "education-0-dot": {
+          "x": 0.0,
+          "y": -1.12344,
+          "width": 0.0,
+          "height": 0.0
+        },
+        "education-1": {
+          "x": 0.0,
+          "y": -0.11406,
+          "width": -11.0,
+          "height": 1.00937
+        },
+        "education-1-title": {
+          "x": 0.0,
+          "y": -0.1125,
+          "width": -11.0,
+          "height": 0.40625
+        },
+        "education-1-detail": {
+          "x": 0.0,
+          "y": 0.29375,
+          "width": -11.0,
+          "height": 0.60156
+        },
+        "education-1-dot": {
+          "x": 0.0,
+          "y": -0.11406,
+          "width": 0.0,
+          "height": 0.0
+        },
+        "section-experience": {
+          "x": 0.0,
+          "y": 0.89531,
+          "width": -11.0,
+          "height": -0.5
+        },
+        "experience-0": {
+          "x": 0.0,
+          "y": 0.39531,
+          "width": -11.0,
+          "height": 1.00937
+        },
+        "experience-0-title": {
+          "x": 0.0,
+          "y": 0.39688,
+          "width": -11.0,
+          "height": 0.40625
+        },
+        "experience-0-detail": {
+          "x": 0.0,
+          "y": 0.80313,
+          "width": -11.0,
+          "height": 0.60156
+        },
+        "experience-0-dot": {
+          "x": 0.0,
+          "y": 0.39531,
+          "width": 0.0,
+          "height": 0.0
+        }
+      }
+    },
+    {
+      "case": "light-1440-100-R05-top",
+      "referenceScrollbarWidth": 0,
+      "actualScrollbarWidth": 11.0,
+      "qualified": false,
+      "reason": "Observed reference reserves 0px; actual reserves 11px. Geometry is diagnostic only until native scrollbar policy matches.",
+      "diagnosticDeltasOnly": {
+        "detail-title": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": -11.0,
+          "height": -0.14844
+        },
+        "field-name-label": {
+          "x": 0.0,
+          "y": -0.63906,
+          "width": -5.5,
+          "height": 0.20312
+        },
+        "field-name-value": {
+          "x": 0.0,
+          "y": -0.43594,
+          "width": -5.5,
+          "height": -0.19531
+        },
+        "field-email-label": {
+          "x": -5.5,
+          "y": -0.63906,
+          "width": -5.5,
+          "height": 0.20312
+        },
+        "field-email-value": {
+          "x": -5.5,
+          "y": -0.43594,
+          "width": -5.5,
+          "height": -0.19531
+        },
+        "field-direction-label": {
+          "x": 0.0,
+          "y": -0.63125,
+          "width": -5.5,
+          "height": 0.20312
+        },
+        "field-direction-value": {
+          "x": 0.0,
+          "y": -0.42813,
+          "width": -5.5,
+          "height": -0.19531
+        },
+        "field-city-label": {
+          "x": -5.5,
+          "y": -0.63125,
+          "width": -5.5,
+          "height": 0.20312
+        },
+        "field-city-value": {
+          "x": -5.5,
+          "y": -0.42813,
+          "width": -5.5,
+          "height": -0.19531
+        },
+        "section-education": {
+          "x": 0.0,
+          "y": -0.62344,
+          "width": -11.0,
+          "height": -0.5
+        },
+        "education-0": {
+          "x": 0.0,
+          "y": -1.12344,
+          "width": -11.0,
+          "height": 1.00937
+        },
+        "education-0-title": {
+          "x": 0.0,
+          "y": -1.12188,
+          "width": -11.0,
+          "height": 0.40625
+        },
+        "education-0-detail": {
+          "x": 0.0,
+          "y": -0.71563,
+          "width": -11.0,
+          "height": 0.60156
+        },
+        "education-0-dot": {
+          "x": 0.0,
+          "y": -1.12344,
+          "width": 0.0,
+          "height": 0.0
+        },
+        "education-1": {
+          "x": 0.0,
+          "y": -0.11406,
+          "width": -11.0,
+          "height": 1.00937
+        },
+        "education-1-title": {
+          "x": 0.0,
+          "y": -0.1125,
+          "width": -11.0,
+          "height": 0.40625
+        },
+        "education-1-detail": {
+          "x": 0.0,
+          "y": 0.29375,
+          "width": -11.0,
+          "height": 0.60156
+        },
+        "education-1-dot": {
+          "x": 0.0,
+          "y": -0.11406,
+          "width": 0.0,
+          "height": 0.0
+        },
+        "section-experience": {
+          "x": 0.0,
+          "y": 0.89531,
+          "width": -11.0,
+          "height": -0.5
+        },
+        "experience-0": {
+          "x": 0.0,
+          "y": 0.39531,
+          "width": -11.0,
+          "height": 1.00937
+        },
+        "experience-0-title": {
+          "x": 0.0,
+          "y": 0.39688,
+          "width": -11.0,
+          "height": 0.40625
+        },
+        "experience-0-detail": {
+          "x": 0.0,
+          "y": 0.80313,
+          "width": -11.0,
+          "height": 0.60156
+        },
+        "experience-0-dot": {
+          "x": 0.0,
+          "y": 0.39531,
+          "width": 0.0,
+          "height": 0.0
+        }
+      }
+    },
+    {
+      "case": "light-1440-100-R06-document",
+      "referenceScrollbarWidth": 0,
+      "actualScrollbarWidth": 11.0,
+      "qualified": false,
+      "reason": "Observed reference reserves 0px; actual reserves 11px. Geometry is diagnostic only until native scrollbar policy matches.",
+      "diagnosticDeltasOnly": {
+        "detail-title": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": -11.0,
+          "height": 0.85156
+        },
+        "document-heading-0": {
+          "x": 0.0,
+          "y": 0.85938,
+          "width": 0.00586,
+          "height": 0.0
+        },
+        "document-heading-1": {
+          "x": 0.0,
+          "y": 1.5625,
+          "width": 0.00586,
+          "height": 0.0
+        },
+        "document-heading-2": {
+          "x": 0.0,
+          "y": 3.67188,
+          "width": 0.00586,
+          "height": 0.0
+        }
+      }
+    }
+  ],
+  "qualified": false,
+  "fullS5Passed": false,
+  "next": "Resolve native overlay/legacy scrollbar policy rather than changing frozen CSS or reducing fonts.",
+  "source": "Each current actual JSON scrollbarWidth and frozen reference before.scrollbarWidth",
+  "nonComparableBoxes": [
+    "inline HTML period glyph vs SelectableText block",
+    "CSS-collapsed document root vs Flutter Column; compare eligible heading boxes only"
+  ]
+}
