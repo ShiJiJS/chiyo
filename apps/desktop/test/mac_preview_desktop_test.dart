@@ -10,6 +10,7 @@ import 'package:info_desktop/workspace/approvals_page.dart';
 import 'package:info_desktop/workspace/zhiyu_app.dart';
 import 'package:info_desktop/workspace/sample_workspace_source.dart';
 import 'package:info_desktop/desktop_controls.dart';
+import 'package:info_desktop/desktop_scroll.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -17,14 +18,15 @@ void main() {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
   const codec = StandardMethodCodec();
 
-  Future<void> nativeCommand(String method) async {
-    final done = Completer<void>();
+  Future<void> nativeCommand(String method, [Object? arguments]) async {
+    final done = Completer<ByteData?>();
     await messenger.handlePlatformMessage(
       MacPreviewDesktop.channel.name,
-      codec.encodeMethodCall(MethodCall(method)),
-      (_) => done.complete(),
+      codec.encodeMethodCall(MethodCall(method, arguments)),
+      done.complete,
     );
-    await done.future;
+    final response = await done.future;
+    if (response != null) codec.decodeEnvelope(response);
   }
 
   Future<MacPreviewDesktop> startDesktop(List<MethodCall> calls) async {
@@ -36,6 +38,8 @@ void main() {
           'productionServices': false,
           'savedDirectories': false,
           'title': MacPreviewDesktop.windowTitle,
+          'scrollbarStyle': 'legacy',
+          'scrollbarRevision': 0,
         };
       }
       return null;
@@ -48,6 +52,136 @@ void main() {
   tearDown(() {
     messenger.setMockMethodCallHandler(MacPreviewDesktop.channel, null);
   });
+
+  test(
+    'a newer appearance event wins over a delayed initialize snapshot',
+    () async {
+      final reply = Completer<Map<String, Object>>();
+      messenger.setMockMethodCallHandler(
+        MacPreviewDesktop.channel,
+        (_) => reply.future,
+      );
+      final desktop = MacPreviewDesktop();
+      addTearDown(desktop.dispose);
+      final start = desktop.initialize();
+      await nativeCommand('scrollbarStyleChanged', {
+        'style': 'overlay',
+        'revision': 1,
+      });
+      reply.complete({
+        'isolated': true,
+        'productionServices': false,
+        'savedDirectories': false,
+        'title': MacPreviewDesktop.windowTitle,
+        'scrollbarStyle': 'legacy',
+        'scrollbarRevision': 0,
+      });
+      await start;
+      expect(desktop.scrollbarStyle.value, DesktopScrollbarStyle.overlay);
+      await nativeCommand('scrollbarStyleChanged', {
+        'style': 'legacy',
+        'revision': 0,
+      });
+      expect(desktop.scrollbarStyle.value, DesktopScrollbarStyle.overlay);
+    },
+  );
+
+  test(
+    'host appearance updates while navigation is gated and stops on disposal',
+    () async {
+      final calls = <MethodCall>[], desktop = await startDesktop(calls);
+      final destinations = <WorkspacePage>[];
+      desktop.onNavigate = destinations.add;
+      var changes = 0;
+      desktop.scrollbarStyle.addListener(() => changes++);
+      expect(desktop.scrollbarStyle.value, DesktopScrollbarStyle.legacy);
+      await desktop.setNavigationEnabled(false);
+      await nativeCommand('scrollbarStyleChanged', {
+        'style': 'overlay',
+        'revision': 1,
+      });
+      await nativeCommand('openSettings');
+      expect(desktop.scrollbarStyle.value, DesktopScrollbarStyle.overlay);
+      expect(changes, 1);
+      expect(destinations, isEmpty);
+      await nativeCommand('scrollbarStyleChanged', {
+        'style': 'overlay',
+        'revision': 1,
+      });
+      expect(changes, 1);
+      await expectLater(
+        nativeCommand('scrollbarStyleChanged', {
+          'style': 'invalid',
+          'revision': 2,
+        }),
+        throwsA(isA<PlatformException>()),
+      );
+      expect(desktop.scrollbarStyle.value, DesktopScrollbarStyle.overlay);
+      await nativeCommand('scrollbarStyleChanged', {
+        'style': 'legacy',
+        'revision': 2,
+      });
+      expect(changes, 2);
+      desktop.dispose();
+      await nativeCommand('scrollbarStyleChanged', {
+        'style': 'overlay',
+        'revision': 1,
+      });
+      expect(changes, 2);
+      await expectLater(desktop.initialize(), throwsStateError);
+    },
+  );
+
+  testWidgets(
+    'host scrollbar changes resize library without replacing an unsaved editor',
+    (t) async {
+      t.view.physicalSize = const Size(1440, 900);
+      t.view.devicePixelRatio = 1;
+      addTearDown(t.view.resetPhysicalSize);
+      addTearDown(t.view.resetDevicePixelRatio);
+      final calls = <MethodCall>[], desktop = await startDesktop(calls);
+      await t.pumpWidget(PreviewWorkspace(desktop: desktop));
+      await t.pumpAndSettle();
+      final title = find.byKey(const ValueKey('library-detail-title'));
+      final width = t.getSize(title).width;
+      final page = t.widget<LibraryPage>(find.byType(LibraryPage));
+      final selected = page.controller.selection;
+      await t.tap(find.text('编辑信息'));
+      await t.pumpAndSettle();
+      final name = find.byKey(const ValueKey('library-edit-name'));
+      await t.enterText(name, 'Kept draft');
+      final editor = t.widget<DesktopTextField>(name).controller!;
+      final root = t.widget<ZhiyuApp>(find.byType(ZhiyuApp)).controller;
+      await nativeCommand('scrollbarStyleChanged', {
+        'style': 'overlay',
+        'revision': 1,
+      });
+      await nativeCommand('openSettings');
+      await t.pumpAndSettle();
+      expect(root.location.page, WorkspacePage.library);
+      expect(root.navigationLocked, true);
+      expect(t.widget<DesktopTextField>(name).controller, same(editor));
+      expect(editor.text, 'Kept draft');
+      expect(page.controller.selection, selected);
+      expect(t.getSize(title).width, width + 11);
+      final dialogBehavior = ScrollConfiguration.of(t.element(name));
+      expect((dialogBehavior as DesktopScrollBehavior).scrollbarGutter, 9);
+      await t.tap(find.text('取消'));
+      await t.pumpAndSettle();
+      await t.tap(find.text('放弃修改'));
+      await t.pumpAndSettle();
+      await nativeCommand('scrollbarStyleChanged', {
+        'style': 'legacy',
+        'revision': 2,
+      });
+      await t.pumpAndSettle();
+      expect(t.getSize(title).width, width);
+      expect(page.controller.selection, selected);
+      expect(t.takeException(), isNull);
+      await t.pumpWidget(const SizedBox());
+      await t.pumpAndSettle();
+    },
+  );
 
   test(
     'preview fails closed when the native mode is missing or incomplete',
@@ -83,6 +217,8 @@ void main() {
             'productionServices': false,
             'savedDirectories': false,
             'title': MacPreviewDesktop.windowTitle,
+            'scrollbarStyle': 'legacy',
+            'scrollbarRevision': 0,
           };
         }
         return null;

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../desktop_controls.dart';
 import '../desktop_feedback.dart';
 import '../desktop_motion.dart';
+import '../desktop_scroll.dart';
 import '../ui_palette.dart';
 import '../prototype_icons.dart';
 import 'sample_workspace_source.dart';
@@ -905,7 +906,19 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
   }
 
   @override
-  Widget build(BuildContext context) => ZhiyuApp(
+  Widget build(BuildContext context) {
+    final app = _buildApp();
+    final desktop = widget.desktop;
+    if (desktop == null) return app;
+    return ValueListenableBuilder<DesktopScrollbarStyle>(
+      valueListenable: desktop.scrollbarStyle,
+      child: app,
+      builder: (_, style, child) =>
+          DesktopScrollbarScope(style: style, child: child!),
+    );
+  }
+
+  Widget _buildApp() => ZhiyuApp(
     controller: _controller,
     windowTitle: MacPreviewDesktop.windowTitle,
     trailingBuilder: (context) => DesktopButton(

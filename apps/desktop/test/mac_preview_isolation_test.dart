@@ -110,6 +110,8 @@ void main() {
             'productionServices': false,
             'savedDirectories': false,
             'title': MacPreviewDesktop.windowTitle,
+            'scrollbarStyle': 'legacy',
+            'scrollbarRevision': 0,
           };
         }
         if (call.method == 'setNavigationEnabled') return null;

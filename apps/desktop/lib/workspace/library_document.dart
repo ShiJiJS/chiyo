@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:markdown/markdown.dart' as md;
 import '../desktop_controls.dart';
+import '../desktop_scroll.dart';
 import '../ui_palette.dart';
 import 'library_widgets.dart';
 
@@ -233,10 +234,13 @@ class _LibraryDocumentState extends State<LibraryDocument> {
             );
             return fits
                 ? text
-                : SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    primary: false,
-                    child: text,
+                : ScrollConfiguration(
+                    behavior: const DesktopScrollBehavior(scrollbarGutter: 9),
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      primary: false,
+                      child: text,
+                    ),
                   );
           },
         ),
@@ -355,10 +359,13 @@ class _LibraryDocumentState extends State<LibraryDocument> {
           );
           return width <= bounds.maxWidth
               ? table
-              : SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  primary: false,
-                  child: table,
+              : ScrollConfiguration(
+                  behavior: const DesktopScrollBehavior(scrollbarGutter: 9),
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    primary: false,
+                    child: table,
+                  ),
                 );
         },
       );
