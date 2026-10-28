@@ -118,40 +118,102 @@ void main() {
             'height': rect.height,
           };
         }
-        final model = tester
-            .widget<LibraryPage>(find.byType(LibraryPage))
-            .controller;
-        final record = model.results!.items.singleWhere(
-          (r) => r.ref.id == 'azure',
-        );
-        final row = find.byKey(
-          const ValueKey('library-record-information:azure'),
-        );
-        for (final entry in {
-          'row-name': record.name,
-          'row-summary': record.description,
-          'row-type': record.type.name,
-          'row-tag': record.tags.first.name,
-        }.entries) {
-          final target = find.descendant(
-            of: row,
-            matching: find.text(entry.value),
+        Future<void> observeRow(
+          String stem, {
+          Map<String, Object>? existing,
+        }) async {
+          final geometry = existing ?? <String, Object>{};
+          final model = tester
+              .widget<LibraryPage>(find.byType(LibraryPage))
+              .controller;
+          final record = model.results!.items.singleWhere(
+            (r) => r.ref.id == 'azure',
           );
-          final rect = tester.getRect(target);
-          libraryGeometry[entry.key] = {
-            'x': rect.left,
-            'y': rect.top,
-            'width': rect.width,
-            'height': rect.height,
+          final row = find.byKey(
+            const ValueKey('library-record-information:azure'),
+          );
+          final paneRect = tester.getRect(
+            find.byKey(const ValueKey('library-results-pane')),
+          );
+          final rowRect = tester.getRect(row);
+          geometry['library-record-information:azure'] = {
+            'x': rowRect.left,
+            'y': rowRect.top,
+            'width': rowRect.width,
+            'height': rowRect.height,
           };
-        }
-        if (libraryGeometry.isNotEmpty) {
           await tester.runAsync(
-            () => File('$prefix-library-geometry.json').writeAsString(
-              const JsonEncoder.withIndent('  ').convert(libraryGeometry),
+            () => File('$stem-library-state.json').writeAsString(
+              const JsonEncoder.withIndent('  ').convert({
+                'viewport': {
+                  'width': size.width,
+                  'height': size.height,
+                  'dpr': 1,
+                },
+                'textScale': tester.platformDispatcher.textScaleFactor,
+                'theme': dark ? 'dark' : 'light',
+                'selection': model.selection?.key,
+                'total': model.results!.total,
+                'selectedRowText': {
+                  'name': record.name,
+                  'summary': record.description,
+                  'type': record.type.name,
+                  'tag': record.tags.first.name,
+                },
+                'query': {
+                  'keyword': model.query.keyword,
+                  'type': model.query.typeId,
+                  'tag': model.query.tagId,
+                },
+                'filterLabels': {
+                  'type':
+                      model.catalog!.types
+                          .where((t) => t.id == model.query.typeId)
+                          .firstOrNull
+                          ?.name ??
+                      '全部类型',
+                  'tag':
+                      model.catalog!.tags
+                          .where((t) => t.id == model.query.tagId)
+                          .firstOrNull
+                          ?.name ??
+                      '全部标签',
+                },
+                'order': model.results!.items.map((r) => r.ref.key).toList(),
+                'rowPaneRightGap': paneRect.right - rowRect.right,
+                'scope':
+                    'Actual Widget metadata; record identity/order and viewport independently of reference',
+              }),
             ),
           );
+          for (final entry in {
+            'row-name': record.name,
+            'row-summary': record.description,
+            'row-type': record.type.name,
+            'row-tag': record.tags.first.name,
+          }.entries) {
+            final target = find.descendant(
+              of: row,
+              matching: find.text(entry.value),
+            );
+            final rect = tester.getRect(target);
+            geometry[entry.key] = {
+              'x': rect.left,
+              'y': rect.top,
+              'width': rect.width,
+              'height': rect.height,
+            };
+          }
+          if (geometry.isNotEmpty) {
+            await tester.runAsync(
+              () => File('$stem-library-geometry.json').writeAsString(
+                const JsonEncoder.withIndent('  ').convert(geometry),
+              ),
+            );
+          }
         }
+
+        await observeRow(prefix, existing: libraryGeometry);
         Future<void> capture(String suffix) async {
           await tester.runAsync(() async {
             final boundary =
@@ -219,6 +281,28 @@ void main() {
         await tester.pumpAndSettle();
         await tester.sendKeyEvent(LogicalKeyboardKey.escape);
         await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const ValueKey('library-directory-all')));
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const ValueKey('library-type-filter')));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('服务器信息').last);
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const ValueKey('library-tag-filter')));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('生产环境').last);
+        await tester.pumpAndSettle();
+        await tester.enterText(
+          find.byKey(const ValueKey('library-search')),
+          '日本',
+        );
+        await tester.pumpAndSettle();
+        final filtered = tester
+            .widget<LibraryPage>(find.byType(LibraryPage))
+            .controller;
+        expect(filtered.results!.total, 1);
+        expect(filtered.selection?.key, 'information:azure');
+        await observeRow('$prefix-R02');
+        await capture('R02-filtered');
         expect(tester.takeException(), isNull);
         await tester.pumpWidget(const SizedBox());
         debugDisableShadows = true;
