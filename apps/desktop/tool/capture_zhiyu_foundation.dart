@@ -86,6 +86,9 @@ void main() {
           'library-detail-pane',
           'library-detail-title',
           'library-search',
+          'library-side-footer',
+          'library-open-recycle',
+          'library-local-storage-note',
           'library-record-information:azure',
         ]) {
           final target = find.byKey(ValueKey(key));

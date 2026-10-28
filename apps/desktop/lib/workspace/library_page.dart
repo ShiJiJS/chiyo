@@ -474,19 +474,80 @@ class _LibraryPageState extends State<LibraryPage> {
             ),
           ),
           Container(
-            padding: const EdgeInsets.fromLTRB(12, 10, 10, 12),
+            key: const ValueKey('library-side-footer'),
+            width: double.infinity,
+            padding: const EdgeInsets.fromLTRB(12, 9, 12, 14),
             decoration: BoxDecoration(
               border: Border(top: BorderSide(color: c.line)),
             ),
-            child: DesktopButton(
-              key: const ValueKey('library-open-recycle'),
-              kind: DesktopButtonKind.quiet,
-              alignment: Alignment.centerLeft,
-              onPressed: () => setState(() {
-                _recyclePage = true;
-                _reading = false;
-              }),
-              child: Text('回收站 · ${catalog?.recycledCount ?? 0}'),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const SizedBox(height: 3),
+                DesktopButton(
+                  key: const ValueKey('library-open-recycle'),
+                  kind: DesktopButtonKind.quiet,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 8,
+                  ),
+                  minimumSize: const Size(0, 39),
+                  alignment: Alignment.centerLeft,
+                  onPressed: () => setState(() {
+                    _recyclePage = true;
+                    _reading = false;
+                  }),
+                  child: Row(
+                    children: [
+                      const PrototypeIcon(PrototypeIconGlyph.trash, size: 17),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          '回收站',
+                          style: libraryText(
+                            context,
+                            metrics.compact ? 13 : 14,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 5),
+                      Text(
+                        '${catalog?.recycledCount ?? 0}',
+                        style: libraryText(context, 12, color: c.muted),
+                      ),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(9, 7, 9, 0),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Row(
+                      children: [
+                        ExcludeSemantics(
+                          child: Container(
+                            width: 6,
+                            height: 6,
+                            decoration: BoxDecoration(
+                              color: c.success,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 7),
+                        Expanded(
+                          child: Text(
+                            '资料保存在本机',
+                            key: const ValueKey('library-local-storage-note'),
+                            style: libraryText(context, 12, color: c.muted),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ],
