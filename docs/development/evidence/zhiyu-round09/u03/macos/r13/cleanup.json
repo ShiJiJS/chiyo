@@ -1,0 +1,18 @@
+{
+  "deletedAt": "2026-10-28T21:57:24.025881+00:00",
+  "evidenceVerifiedAtCommit": "88750ed2e2a2ba751aa4b60d6d3da2676a3a869c",
+  "verifiedEvidenceGitBlobs": 66,
+  "verifiedSourceGitBlobs": 278,
+  "verifiedRawCaptures": 145,
+  "scratch": "build/zhiyu-ui/u03/macos/r13",
+  "removedFiles": 178,
+  "removedBytes": 32897305,
+  "ownedComparatorPycRemoved": false,
+  "scratchOnly": true,
+  "fixedOrdinaryAppPreserved": "apps/desktop/build/macos/Build/Products/Debug/info_desktop.app",
+  "copiedAppOrDSYM": false,
+  "unknownDotLocalTouched": false,
+  "nativeTemporarySourceAlreadyRemoved": true,
+  "taskSpace223Finished": true,
+  "referenceServerStopped": true
+}
