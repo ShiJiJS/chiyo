@@ -250,5 +250,13 @@
   "source-hashes.json": {
     "bytes": 33021,
     "sha256": "fc3a4fac840b1d0273f5eea05a3d828ec29f262f19038a9d7f395583f6f9cb65"
+  },
+  "tracker-read.json": {
+    "bytes": 527,
+    "sha256": "f1ed494b6a2129c78bee57bbce4c875e702162c573d56acfb3a07e405cadd3b4"
+  },
+  "visual-review.json": {
+    "bytes": 516,
+    "sha256": "8dbca1bddfb9b79460393baff4ea2bd10efc0fbcdf1ada60d25a044217fb6f85"
   }
 }
