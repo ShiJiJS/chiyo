@@ -1,0 +1,1137 @@
+{
+  "platform": "macos",
+  "fonts": {
+    "platform": "macos",
+    "Zhiyu System": "/System/Library/Fonts/SFNS.ttf",
+    "PingFang SC": "/System/Library/AssetsV2/com_apple_MobileAsset_Font8/86ba2c91f017a3749571a82f2c6d890ac7ffb2fb.asset/AssetData/PingFang.ttc",
+    "Menlo": "/System/Library/Fonts/Menlo.ttc"
+  },
+  "nativeIsolationChecked": true,
+  "nativePreview": {
+    "productionServices": false,
+    "isolated": true,
+    "scrollbarStyle": "overlay",
+    "applicationId": "com.example.infoDesktop.zhiyuPreview",
+    "savedDirectories": false,
+    "scrollbarRevision": 0,
+    "title": "知予 · 界面预览·示例数据"
+  },
+  "checks": [
+    "native-search-menu-opens-library-and-focuses-search",
+    "native-CoreFoundation-zh-CN-name-sort-and-first-appearance-groups",
+    "native-chooser-blurred-barrier-locked-menu-and-immediate-close",
+    "native-widget-filter-intersection",
+    "native-widget-save-failure-draft-and-success-readback",
+    "native-widget-related-query-return",
+    "native-file-metadata-and-menu-refresh-preserve-reading-state",
+    "native-file-history-same-version-page-and-restore-identity-cancel",
+    "native-credential-replacement-keeps-custom-reference-and-field-metrics",
+    "native-material-confirmation-back-keeps-selection-scroll-focus-and-cancel",
+    "native-credential-purpose-use-facts-relation-body-two-viewports-two-themes",
+    "native-window-two-content-viewports-and-both-themes",
+    "native-AppKit-scrollbar-style-matches-rendered-library-gutter",
+    "native-chooser-two-viewports-two-themes-no-residual-barrier",
+    "native-document-two-viewports-two-themes-table-list-code-and-complete-raw-reading",
+    "native-file-real-frame-and-credential-summary-two-viewports-two-themes",
+    "native-rendered-large-text-edit-and-save",
+    "native-widget-revision-comparison-restore-and-readback",
+    "native-widget-whole-record-recycle-restore-and-return",
+    "native-widget-pressure-fixture-and-pagination"
+  ],
+  "nameOrder": [
+    "credential:aliyunkey",
+    "credential:sshkey",
+    "credential:blinkokey",
+    "credential:github-token",
+    "credential:tgsession",
+    "credential:vikunja-password",
+    "credential:vikunjakey",
+    "information:aliyun",
+    "information:nas",
+    "information:azure",
+    "information:resume",
+    "information:resume-en",
+    "information:profile",
+    "information:offer",
+    "information:proof",
+    "information:portrait",
+    "information:publickey",
+    "information:ideas",
+    "information:https",
+    "information:deploy",
+    "information:nasdoc",
+    "information:sshguide",
+    "information:workflow",
+    "information:blinko",
+    "information:skillshare",
+    "information:sparky",
+    "information:syncthing",
+    "information:tgapi",
+    "information:mtproto",
+    "information:video",
+    "information:vikunja"
+  ],
+  "contentViewports": [
+    {
+      "width": 1440.0,
+      "height": 900.0,
+      "dark": false,
+      "devicePixelRatio": 2.0,
+      "nativeWindowResized": true,
+      "scrollbarStyle": "overlay",
+      "actualScrollbarWidth": 0.0,
+      "documentBoxes": {
+        "detail-title": {
+          "x": 647.0,
+          "y": 183.0,
+          "width": 633.0,
+          "height": 40.0
+        },
+        "document-heading-0": {
+          "x": 586.0,
+          "y": 329.0,
+          "width": 699.169921875,
+          "height": 30.0
+        },
+        "document-heading-1": {
+          "x": 586.0,
+          "y": 425.3,
+          "width": 699.169921875,
+          "height": 30.0
+        },
+        "document-heading-2": {
+          "x": 586.0,
+          "y": 641.2,
+          "width": 699.169921875,
+          "height": 30.0
+        },
+        "document-paragraph-0": {
+          "x": 586.0,
+          "y": 371.0,
+          "width": 699.169921875,
+          "height": 27.30000000000001
+        },
+        "document-table": {
+          "x": 586.0,
+          "y": 469.3,
+          "width": 699.169921875,
+          "height": 144.90000000000003
+        },
+        "document-list": {
+          "x": 586.0,
+          "y": 686.2,
+          "width": 699.169921875,
+          "height": 87.75
+        },
+        "document-code": {
+          "x": 586.0,
+          "y": 788.95,
+          "width": 699.169921875,
+          "height": 59.75
+        },
+        "document-paragraph-1": {
+          "x": 586.0,
+          "y": 863.7,
+          "width": 699.169921875,
+          "height": 27.299999999999955
+        },
+        "document-table-cell-0-0": {
+          "x": 586.0,
+          "y": 469.3,
+          "width": 401.0689626662522,
+          "height": 48.30000000000001
+        },
+        "document-table-cell-0-1": {
+          "x": 987.0689626662522,
+          "y": 469.3,
+          "width": 298.1009592087478,
+          "height": 48.30000000000001
+        },
+        "document-table-cell-1-0": {
+          "x": 586.0,
+          "y": 517.6,
+          "width": 401.0689626662522,
+          "height": 48.299999999999955
+        },
+        "document-table-cell-1-1": {
+          "x": 987.0689626662522,
+          "y": 517.6,
+          "width": 298.1009592087478,
+          "height": 48.299999999999955
+        },
+        "document-table-cell-2-0": {
+          "x": 586.0,
+          "y": 565.9,
+          "width": 401.0689626662522,
+          "height": 48.299999999999955
+        },
+        "document-table-cell-2-1": {
+          "x": 987.0689626662522,
+          "y": 565.9,
+          "width": 298.1009592087478,
+          "height": 48.299999999999955
+        },
+        "document-list-item-0": {
+          "x": 626.0,
+          "y": 686.2,
+          "width": 659.169921875,
+          "height": 29.25
+        },
+        "document-list-item-1": {
+          "x": 626.0,
+          "y": 715.45,
+          "width": 659.169921875,
+          "height": 29.25
+        },
+        "document-list-item-2": {
+          "x": 626.0,
+          "y": 744.7,
+          "width": 659.169921875,
+          "height": 29.25
+        }
+      },
+      "attachmentBoxes": {
+        "resume": {
+          "detail-title": {
+            "x": 647.0,
+            "y": 183.0,
+            "width": 633.0,
+            "height": 39.0
+          },
+          "file-stage": {
+            "x": 586.0,
+            "y": 369.0,
+            "width": 782.0,
+            "height": 912.7581863979849
+          }
+        },
+        "sshkey": {
+          "credential-summary": {
+            "x": 586.0,
+            "y": 322.0,
+            "width": 782.0,
+            "height": 81.0
+          },
+          "credential-summary-format": {
+            "x": 639.0,
+            "y": 363.0,
+            "width": 638.0,
+            "height": 21.0
+          },
+          "credential-status": {
+            "x": 1292.0,
+            "y": 349.0,
+            "width": 57.0,
+            "height": 27.0
+          },
+          "credential-section-purpose-title": {
+            "x": 586.0,
+            "y": 430.0,
+            "width": 782.0,
+            "height": 25.5
+          },
+          "credential-purpose": {
+            "x": 586.0,
+            "y": 467.5,
+            "width": 782.0,
+            "height": 27.30000000000001
+          },
+          "credential-section-use-title": {
+            "x": 586.0,
+            "y": 521.8,
+            "width": 782.0,
+            "height": 25.5
+          },
+          "credential-delivery-fact": {
+            "x": 586.0,
+            "y": 560.3,
+            "width": 374.0,
+            "height": 47.200000000000045
+          },
+          "credential-delivery-label": {
+            "x": 586.0,
+            "y": 560.3,
+            "width": 374.0,
+            "height": 20.799999999999955
+          },
+          "credential-binding-fact": {
+            "x": 994.0,
+            "y": 560.3,
+            "width": 374.0,
+            "height": 47.200000000000045
+          },
+          "credential-binding-label": {
+            "x": 994.0,
+            "y": 560.3,
+            "width": 374.0,
+            "height": 20.799999999999955
+          },
+          "credential-use-note": {
+            "x": 586.0,
+            "y": 631.5,
+            "width": 782.0,
+            "height": 22.399999999999977
+          },
+          "credential-section-relations-title": {
+            "x": 586.0,
+            "y": 680.9000000000001,
+            "width": 782.0,
+            "height": 25.5
+          },
+          "library-relation-frame-information:azure": {
+            "x": 586.0,
+            "y": 718.4000000000001,
+            "width": 782.0,
+            "height": 75.0
+          },
+          "library-relation-icon-information:azure": {
+            "x": 586.0,
+            "y": 738.9000000000001,
+            "width": 34.0,
+            "height": 34.0
+          },
+          "library-relation-text-information:azure": {
+            "x": 632.0,
+            "y": 732.4000000000001,
+            "width": 709.0,
+            "height": 47.0
+          },
+          "library-relation-description-information:azure": {
+            "x": 632.0,
+            "y": 757.4000000000001,
+            "width": 709.0,
+            "height": 22.0
+          },
+          "library-relation-chevron-information:azure": {
+            "x": 1353.0,
+            "y": 746.4000000000001,
+            "width": 15.0,
+            "height": 19.0
+          }
+        }
+      }
+    },
+    {
+      "width": 1440.0,
+      "height": 900.0,
+      "dark": true,
+      "devicePixelRatio": 2.0,
+      "nativeWindowResized": true,
+      "scrollbarStyle": "overlay",
+      "actualScrollbarWidth": 0.0,
+      "documentBoxes": {
+        "detail-title": {
+          "x": 647.0,
+          "y": 183.0,
+          "width": 633.0,
+          "height": 40.0
+        },
+        "document-heading-0": {
+          "x": 586.0,
+          "y": 329.0,
+          "width": 699.169921875,
+          "height": 30.0
+        },
+        "document-heading-1": {
+          "x": 586.0,
+          "y": 425.3,
+          "width": 699.169921875,
+          "height": 30.0
+        },
+        "document-heading-2": {
+          "x": 586.0,
+          "y": 641.2,
+          "width": 699.169921875,
+          "height": 30.0
+        },
+        "document-paragraph-0": {
+          "x": 586.0,
+          "y": 371.0,
+          "width": 699.169921875,
+          "height": 27.30000000000001
+        },
+        "document-table": {
+          "x": 586.0,
+          "y": 469.3,
+          "width": 699.169921875,
+          "height": 144.90000000000003
+        },
+        "document-list": {
+          "x": 586.0,
+          "y": 686.2,
+          "width": 699.169921875,
+          "height": 87.75
+        },
+        "document-code": {
+          "x": 586.0,
+          "y": 788.95,
+          "width": 699.169921875,
+          "height": 59.75
+        },
+        "document-paragraph-1": {
+          "x": 586.0,
+          "y": 863.7,
+          "width": 699.169921875,
+          "height": 27.299999999999955
+        },
+        "document-table-cell-0-0": {
+          "x": 586.0,
+          "y": 469.3,
+          "width": 401.0689626662522,
+          "height": 48.30000000000001
+        },
+        "document-table-cell-0-1": {
+          "x": 987.0689626662522,
+          "y": 469.3,
+          "width": 298.1009592087478,
+          "height": 48.30000000000001
+        },
+        "document-table-cell-1-0": {
+          "x": 586.0,
+          "y": 517.6,
+          "width": 401.0689626662522,
+          "height": 48.299999999999955
+        },
+        "document-table-cell-1-1": {
+          "x": 987.0689626662522,
+          "y": 517.6,
+          "width": 298.1009592087478,
+          "height": 48.299999999999955
+        },
+        "document-table-cell-2-0": {
+          "x": 586.0,
+          "y": 565.9,
+          "width": 401.0689626662522,
+          "height": 48.299999999999955
+        },
+        "document-table-cell-2-1": {
+          "x": 987.0689626662522,
+          "y": 565.9,
+          "width": 298.1009592087478,
+          "height": 48.299999999999955
+        },
+        "document-list-item-0": {
+          "x": 626.0,
+          "y": 686.2,
+          "width": 659.169921875,
+          "height": 29.25
+        },
+        "document-list-item-1": {
+          "x": 626.0,
+          "y": 715.45,
+          "width": 659.169921875,
+          "height": 29.25
+        },
+        "document-list-item-2": {
+          "x": 626.0,
+          "y": 744.7,
+          "width": 659.169921875,
+          "height": 29.25
+        }
+      },
+      "attachmentBoxes": {
+        "resume": {
+          "detail-title": {
+            "x": 647.0,
+            "y": 183.0,
+            "width": 633.0,
+            "height": 39.0
+          },
+          "file-stage": {
+            "x": 586.0,
+            "y": 369.0,
+            "width": 782.0,
+            "height": 912.7581863979849
+          }
+        },
+        "sshkey": {
+          "credential-summary": {
+            "x": 586.0,
+            "y": 322.0,
+            "width": 782.0,
+            "height": 81.0
+          },
+          "credential-summary-format": {
+            "x": 639.0,
+            "y": 363.0,
+            "width": 638.0,
+            "height": 21.0
+          },
+          "credential-status": {
+            "x": 1292.0,
+            "y": 349.0,
+            "width": 57.0,
+            "height": 27.0
+          },
+          "credential-section-purpose-title": {
+            "x": 586.0,
+            "y": 430.0,
+            "width": 782.0,
+            "height": 25.5
+          },
+          "credential-purpose": {
+            "x": 586.0,
+            "y": 467.5,
+            "width": 782.0,
+            "height": 27.30000000000001
+          },
+          "credential-section-use-title": {
+            "x": 586.0,
+            "y": 521.8,
+            "width": 782.0,
+            "height": 25.5
+          },
+          "credential-delivery-fact": {
+            "x": 586.0,
+            "y": 560.3,
+            "width": 374.0,
+            "height": 47.200000000000045
+          },
+          "credential-delivery-label": {
+            "x": 586.0,
+            "y": 560.3,
+            "width": 374.0,
+            "height": 20.799999999999955
+          },
+          "credential-binding-fact": {
+            "x": 994.0,
+            "y": 560.3,
+            "width": 374.0,
+            "height": 47.200000000000045
+          },
+          "credential-binding-label": {
+            "x": 994.0,
+            "y": 560.3,
+            "width": 374.0,
+            "height": 20.799999999999955
+          },
+          "credential-use-note": {
+            "x": 586.0,
+            "y": 631.5,
+            "width": 782.0,
+            "height": 22.399999999999977
+          },
+          "credential-section-relations-title": {
+            "x": 586.0,
+            "y": 680.9000000000001,
+            "width": 782.0,
+            "height": 25.5
+          },
+          "library-relation-frame-information:azure": {
+            "x": 586.0,
+            "y": 718.4000000000001,
+            "width": 782.0,
+            "height": 75.0
+          },
+          "library-relation-icon-information:azure": {
+            "x": 586.0,
+            "y": 738.9000000000001,
+            "width": 34.0,
+            "height": 34.0
+          },
+          "library-relation-text-information:azure": {
+            "x": 632.0,
+            "y": 732.4000000000001,
+            "width": 709.0,
+            "height": 47.0
+          },
+          "library-relation-description-information:azure": {
+            "x": 632.0,
+            "y": 757.4000000000001,
+            "width": 709.0,
+            "height": 22.0
+          },
+          "library-relation-chevron-information:azure": {
+            "x": 1353.0,
+            "y": 746.4000000000001,
+            "width": 15.0,
+            "height": 19.0
+          }
+        }
+      }
+    },
+    {
+      "width": 1280.0,
+      "height": 800.0,
+      "dark": false,
+      "devicePixelRatio": 2.0,
+      "nativeWindowResized": true,
+      "scrollbarStyle": "overlay",
+      "actualScrollbarWidth": 0.0,
+      "documentBoxes": {
+        "detail-title": {
+          "x": 584.0,
+          "y": 177.0,
+          "width": 548.0,
+          "height": 35.0
+        },
+        "document-heading-0": {
+          "x": 531.0,
+          "y": 318.0,
+          "width": 687.0,
+          "height": 30.0
+        },
+        "document-heading-1": {
+          "x": 531.0,
+          "y": 414.3,
+          "width": 687.0,
+          "height": 30.0
+        },
+        "document-heading-2": {
+          "x": 531.0,
+          "y": 630.2,
+          "width": 687.0,
+          "height": 30.0
+        },
+        "document-paragraph-0": {
+          "x": 531.0,
+          "y": 360.0,
+          "width": 687.0,
+          "height": 27.30000000000001
+        },
+        "document-table": {
+          "x": 531.0,
+          "y": 458.3,
+          "width": 687.0,
+          "height": 144.90000000000003
+        },
+        "document-list": {
+          "x": 531.0,
+          "y": 675.2,
+          "width": 687.0,
+          "height": 87.75
+        },
+        "document-code": {
+          "x": 531.0,
+          "y": 777.95,
+          "width": 687.0,
+          "height": 59.75
+        },
+        "document-paragraph-1": {
+          "x": 531.0,
+          "y": 852.7,
+          "width": 687.0,
+          "height": 27.299999999999955
+        },
+        "document-table-cell-0-0": {
+          "x": 531.0,
+          "y": 458.3,
+          "width": 394.0878586607396,
+          "height": 48.30000000000001
+        },
+        "document-table-cell-0-1": {
+          "x": 925.0878586607396,
+          "y": 458.3,
+          "width": 292.9121413392604,
+          "height": 48.30000000000001
+        },
+        "document-table-cell-1-0": {
+          "x": 531.0,
+          "y": 506.6,
+          "width": 394.0878586607396,
+          "height": 48.299999999999955
+        },
+        "document-table-cell-1-1": {
+          "x": 925.0878586607396,
+          "y": 506.6,
+          "width": 292.9121413392604,
+          "height": 48.299999999999955
+        },
+        "document-table-cell-2-0": {
+          "x": 531.0,
+          "y": 554.9,
+          "width": 394.0878586607396,
+          "height": 48.299999999999955
+        },
+        "document-table-cell-2-1": {
+          "x": 925.0878586607396,
+          "y": 554.9,
+          "width": 292.9121413392604,
+          "height": 48.299999999999955
+        },
+        "document-list-item-0": {
+          "x": 571.0,
+          "y": 675.2,
+          "width": 647.0,
+          "height": 29.25
+        },
+        "document-list-item-1": {
+          "x": 571.0,
+          "y": 704.45,
+          "width": 647.0,
+          "height": 29.25
+        },
+        "document-list-item-2": {
+          "x": 571.0,
+          "y": 733.7,
+          "width": 647.0,
+          "height": 29.25
+        }
+      },
+      "attachmentBoxes": {
+        "resume": {
+          "detail-title": {
+            "x": 584.0,
+            "y": 177.0,
+            "width": 548.0,
+            "height": 35.0
+          },
+          "file-stage": {
+            "x": 531.0,
+            "y": 359.0,
+            "width": 687.0,
+            "height": 886.7581863979849
+          }
+        },
+        "sshkey": {
+          "credential-summary": {
+            "x": 531.0,
+            "y": 311.0,
+            "width": 687.0,
+            "height": 81.0
+          },
+          "credential-summary-format": {
+            "x": 584.0,
+            "y": 352.0,
+            "width": 543.0,
+            "height": 21.0
+          },
+          "credential-status": {
+            "x": 1142.0,
+            "y": 338.0,
+            "width": 57.0,
+            "height": 27.0
+          },
+          "credential-section-purpose-title": {
+            "x": 531.0,
+            "y": 419.0,
+            "width": 687.0,
+            "height": 25.5
+          },
+          "credential-purpose": {
+            "x": 531.0,
+            "y": 456.5,
+            "width": 687.0,
+            "height": 27.30000000000001
+          },
+          "credential-section-use-title": {
+            "x": 531.0,
+            "y": 510.8,
+            "width": 687.0,
+            "height": 25.499999999999943
+          },
+          "credential-delivery-fact": {
+            "x": 531.0,
+            "y": 549.3,
+            "width": 326.5,
+            "height": 47.200000000000045
+          },
+          "credential-delivery-label": {
+            "x": 531.0,
+            "y": 549.3,
+            "width": 326.5,
+            "height": 20.799999999999955
+          },
+          "credential-binding-fact": {
+            "x": 891.5,
+            "y": 549.3,
+            "width": 326.5,
+            "height": 47.200000000000045
+          },
+          "credential-binding-label": {
+            "x": 891.5,
+            "y": 549.3,
+            "width": 326.5,
+            "height": 20.799999999999955
+          },
+          "credential-use-note": {
+            "x": 531.0,
+            "y": 620.5,
+            "width": 687.0,
+            "height": 22.399999999999977
+          },
+          "credential-section-relations-title": {
+            "x": 531.0,
+            "y": 669.9000000000001,
+            "width": 687.0,
+            "height": 25.5
+          },
+          "library-relation-frame-information:azure": {
+            "x": 531.0,
+            "y": 707.4000000000001,
+            "width": 687.0,
+            "height": 75.0
+          },
+          "library-relation-icon-information:azure": {
+            "x": 531.0,
+            "y": 727.9000000000001,
+            "width": 34.0,
+            "height": 34.0
+          },
+          "library-relation-text-information:azure": {
+            "x": 577.0,
+            "y": 721.4000000000001,
+            "width": 614.0,
+            "height": 47.0
+          },
+          "library-relation-description-information:azure": {
+            "x": 577.0,
+            "y": 746.4000000000001,
+            "width": 614.0,
+            "height": 22.0
+          },
+          "library-relation-chevron-information:azure": {
+            "x": 1203.0,
+            "y": 735.4000000000001,
+            "width": 15.0,
+            "height": 19.0
+          }
+        }
+      }
+    },
+    {
+      "width": 1280.0,
+      "height": 800.0,
+      "dark": true,
+      "devicePixelRatio": 2.0,
+      "nativeWindowResized": true,
+      "scrollbarStyle": "overlay",
+      "actualScrollbarWidth": 0.0,
+      "documentBoxes": {
+        "detail-title": {
+          "x": 584.0,
+          "y": 177.0,
+          "width": 548.0,
+          "height": 35.0
+        },
+        "document-heading-0": {
+          "x": 531.0,
+          "y": 318.0,
+          "width": 687.0,
+          "height": 30.0
+        },
+        "document-heading-1": {
+          "x": 531.0,
+          "y": 414.3,
+          "width": 687.0,
+          "height": 30.0
+        },
+        "document-heading-2": {
+          "x": 531.0,
+          "y": 630.2,
+          "width": 687.0,
+          "height": 30.0
+        },
+        "document-paragraph-0": {
+          "x": 531.0,
+          "y": 360.0,
+          "width": 687.0,
+          "height": 27.30000000000001
+        },
+        "document-table": {
+          "x": 531.0,
+          "y": 458.3,
+          "width": 687.0,
+          "height": 144.90000000000003
+        },
+        "document-list": {
+          "x": 531.0,
+          "y": 675.2,
+          "width": 687.0,
+          "height": 87.75
+        },
+        "document-code": {
+          "x": 531.0,
+          "y": 777.95,
+          "width": 687.0,
+          "height": 59.75
+        },
+        "document-paragraph-1": {
+          "x": 531.0,
+          "y": 852.7,
+          "width": 687.0,
+          "height": 27.299999999999955
+        },
+        "document-table-cell-0-0": {
+          "x": 531.0,
+          "y": 458.3,
+          "width": 394.0878586607396,
+          "height": 48.30000000000001
+        },
+        "document-table-cell-0-1": {
+          "x": 925.0878586607396,
+          "y": 458.3,
+          "width": 292.9121413392604,
+          "height": 48.30000000000001
+        },
+        "document-table-cell-1-0": {
+          "x": 531.0,
+          "y": 506.6,
+          "width": 394.0878586607396,
+          "height": 48.299999999999955
+        },
+        "document-table-cell-1-1": {
+          "x": 925.0878586607396,
+          "y": 506.6,
+          "width": 292.9121413392604,
+          "height": 48.299999999999955
+        },
+        "document-table-cell-2-0": {
+          "x": 531.0,
+          "y": 554.9,
+          "width": 394.0878586607396,
+          "height": 48.299999999999955
+        },
+        "document-table-cell-2-1": {
+          "x": 925.0878586607396,
+          "y": 554.9,
+          "width": 292.9121413392604,
+          "height": 48.299999999999955
+        },
+        "document-list-item-0": {
+          "x": 571.0,
+          "y": 675.2,
+          "width": 647.0,
+          "height": 29.25
+        },
+        "document-list-item-1": {
+          "x": 571.0,
+          "y": 704.45,
+          "width": 647.0,
+          "height": 29.25
+        },
+        "document-list-item-2": {
+          "x": 571.0,
+          "y": 733.7,
+          "width": 647.0,
+          "height": 29.25
+        }
+      },
+      "attachmentBoxes": {
+        "resume": {
+          "detail-title": {
+            "x": 584.0,
+            "y": 177.0,
+            "width": 548.0,
+            "height": 35.0
+          },
+          "file-stage": {
+            "x": 531.0,
+            "y": 359.0,
+            "width": 687.0,
+            "height": 886.7581863979849
+          }
+        },
+        "sshkey": {
+          "credential-summary": {
+            "x": 531.0,
+            "y": 311.0,
+            "width": 687.0,
+            "height": 81.0
+          },
+          "credential-summary-format": {
+            "x": 584.0,
+            "y": 352.0,
+            "width": 543.0,
+            "height": 21.0
+          },
+          "credential-status": {
+            "x": 1142.0,
+            "y": 338.0,
+            "width": 57.0,
+            "height": 27.0
+          },
+          "credential-section-purpose-title": {
+            "x": 531.0,
+            "y": 419.0,
+            "width": 687.0,
+            "height": 25.5
+          },
+          "credential-purpose": {
+            "x": 531.0,
+            "y": 456.5,
+            "width": 687.0,
+            "height": 27.30000000000001
+          },
+          "credential-section-use-title": {
+            "x": 531.0,
+            "y": 510.8,
+            "width": 687.0,
+            "height": 25.499999999999943
+          },
+          "credential-delivery-fact": {
+            "x": 531.0,
+            "y": 549.3,
+            "width": 326.5,
+            "height": 47.200000000000045
+          },
+          "credential-delivery-label": {
+            "x": 531.0,
+            "y": 549.3,
+            "width": 326.5,
+            "height": 20.799999999999955
+          },
+          "credential-binding-fact": {
+            "x": 891.5,
+            "y": 549.3,
+            "width": 326.5,
+            "height": 47.200000000000045
+          },
+          "credential-binding-label": {
+            "x": 891.5,
+            "y": 549.3,
+            "width": 326.5,
+            "height": 20.799999999999955
+          },
+          "credential-use-note": {
+            "x": 531.0,
+            "y": 620.5,
+            "width": 687.0,
+            "height": 22.399999999999977
+          },
+          "credential-section-relations-title": {
+            "x": 531.0,
+            "y": 669.9000000000001,
+            "width": 687.0,
+            "height": 25.5
+          },
+          "library-relation-frame-information:azure": {
+            "x": 531.0,
+            "y": 707.4000000000001,
+            "width": 687.0,
+            "height": 75.0
+          },
+          "library-relation-icon-information:azure": {
+            "x": 531.0,
+            "y": 727.9000000000001,
+            "width": 34.0,
+            "height": 34.0
+          },
+          "library-relation-text-information:azure": {
+            "x": 577.0,
+            "y": 721.4000000000001,
+            "width": 614.0,
+            "height": 47.0
+          },
+          "library-relation-description-information:azure": {
+            "x": 577.0,
+            "y": 746.4000000000001,
+            "width": 614.0,
+            "height": 22.0
+          },
+          "library-relation-chevron-information:azure": {
+            "x": 1203.0,
+            "y": 735.4000000000001,
+            "width": 15.0,
+            "height": 19.0
+          }
+        }
+      }
+    }
+  ],
+  "credentialFormChecks": [
+    {
+      "viewport": {
+        "width": 1440.0,
+        "height": 900.0,
+        "dpr": 2.0
+      },
+      "theme": "light",
+      "replace": true,
+      "fields": {
+        "name": {
+          "labelHeight": 21.0,
+          "gap": 8.0,
+          "inputHeight": 44.0,
+          "labelFontSize": 13.0,
+          "labelWeight": 500
+        },
+        "binding": {
+          "labelHeight": 21.0,
+          "gap": 8.0,
+          "inputHeight": 44.0,
+          "labelFontSize": 13.0,
+          "labelWeight": 500
+        }
+      }
+    }
+  ],
+  "chooserViewports": [
+    {
+      "width": 1440.0,
+      "height": 900.0,
+      "dark": false,
+      "surface": {
+        "x": 350.0,
+        "y": 150.39999999999998,
+        "width": 740.0,
+        "height": 599.2
+      },
+      "close": {
+        "x": 1025.0,
+        "y": 171.39999999999998,
+        "width": 36.0,
+        "height": 36.0
+      },
+      "devicePixelRatio": 2.0
+    },
+    {
+      "width": 1440.0,
+      "height": 900.0,
+      "dark": true,
+      "surface": {
+        "x": 350.0,
+        "y": 150.39999999999998,
+        "width": 740.0,
+        "height": 599.2
+      },
+      "close": {
+        "x": 1025.0,
+        "y": 171.39999999999998,
+        "width": 36.0,
+        "height": 36.0
+      },
+      "devicePixelRatio": 2.0
+    },
+    {
+      "width": 1280.0,
+      "height": 800.0,
+      "dark": false,
+      "surface": {
+        "x": 270.0,
+        "y": 100.39999999999998,
+        "width": 740.0,
+        "height": 599.2
+      },
+      "close": {
+        "x": 945.0,
+        "y": 121.39999999999998,
+        "width": 36.0,
+        "height": 36.0
+      },
+      "devicePixelRatio": 2.0
+    },
+    {
+      "width": 1280.0,
+      "height": 800.0,
+      "dark": true,
+      "surface": {
+        "x": 270.0,
+        "y": 100.39999999999998,
+        "width": 740.0,
+        "height": 599.2
+      },
+      "close": {
+        "x": 945.0,
+        "y": 121.39999999999998,
+        "width": 36.0,
+        "height": 36.0
+      },
+      "devicePixelRatio": 2.0
+    }
+  ],
+  "productionBootstrapUsed": false,
+  "databaseOpened": false,
+  "inputScope": "native Flutter framebuffer and Widget input; own AppKit window/menu only; no global OS input",
+  "status": "in-progress; current-source browsing/edit, revision/recycle and pressure coverage; full R01-R04 geometry/motion and actual OS input remain pending"
+}

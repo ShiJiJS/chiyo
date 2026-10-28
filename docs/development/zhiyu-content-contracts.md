@@ -109,3 +109,9 @@ WorkspaceCredentialCandidate.binding只为新建的未编辑字段提供建议�
 确认页的恢复来源以最初history中的WorkspaceFileRef冻结；后续history刷新必须同时匹配附件id和version。另一个附件复用同一版本号不是同一恢复意图，不能据此重新启用确认按钮。提交接口继续使用已有record/field、expectedRecordVersion、expectedFileVersion、restoreVersion和operationId，未增加服务或协议参数；原目标不再可比时在UI要求返回重选。
 
 LibraryFileSummary只复用元数据的排版，导入候选仍为opaque selectionId，历史仍为不可变附件引用，没有合并普通附件与凭据。未知结果查询和冲突重读继续分开，不把元数据刷新当写入回执。重复点击已选文件版本是保持当前阅读，显式刷新才重读；不为同一读取另存一份页码/缩放状态。
+
+## U03 r15恢复确认正文
+
+材料确认和列表以同一history/current/selected驱动；切换正文不复制当前版本或建立第二份材料状态。DesktopDialog.contentKey只提供正文元素身份，PageStorageKey在本次route保存两个阅读位置；业务草稿仍由Materials持有，固定动作的FocusNode保持。默认null及旧主题路径维持原行为，没有新文件、网络或正式配置持久化。
+
+确认正文仅显示所选历史材料和当前材料，风险与目标版本前置；原固定掩码、创建/保留时间及完整名称不删除。返回、确定失败和未知结果核对均不改材料或授权；真实更新仍由原CredentialMutation和Owner端口执行，成功后读回新版本且停用，恢复不回滚当前元数据/配置。
