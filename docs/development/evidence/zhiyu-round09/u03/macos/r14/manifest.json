@@ -3,6 +3,10 @@
     "bytes": 96,
     "sha256": "4b0e050a158c09e7a6de1f661fa5a54aaa3c1a13af5c3d5b479b18e7e2b4f2de"
   },
+  "archive-replay.json": {
+    "bytes": 617,
+    "sha256": "83e5dd66b6729f197216f474d0823906f4fde709a821b4c38272e81cbe651708"
+  },
   "attachment-identity-before.log": {
     "bytes": 2292,
     "sha256": "1685c6f272a25621141bfb18e6c2657cd4b578afdfa20163c4f14bcbb308bffc"
@@ -138,6 +142,10 @@
   "tracker-before.json": {
     "bytes": 144,
     "sha256": "d9e4e6338b07e0febca355322cac26cffae2a66df85062576619264edb5a1e5a"
+  },
+  "tracker-readback.json": {
+    "bytes": 554,
+    "sha256": "d2087c92cb825b9118e62de41e799347bd458714030f6ef64f99afa7602d72d7"
   },
   "visual-review.json": {
     "bytes": 1897,
