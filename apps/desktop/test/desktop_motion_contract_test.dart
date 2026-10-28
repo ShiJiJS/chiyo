@@ -284,12 +284,16 @@ void main() {
         initialY: 7,
       );
       await tester.sendKeyEvent(LogicalKeyboardKey.escape);
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump();
+      expect(find.byKey(marker), findsNothing);
       await tester.tap(find.text('打开'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 40));
       await tester.sendKeyEvent(LogicalKeyboardKey.escape);
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump();
+      expect(find.byKey(marker), findsNothing);
       expect(find.byKey(marker), findsNothing);
       expect(tester.takeException(), isNull);
     },
@@ -330,7 +334,9 @@ void main() {
         greaterThan(anchor.bottom),
       );
       await tester.sendKeyEvent(LogicalKeyboardKey.escape);
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump();
+      expect(find.byKey(marker), findsNothing);
     },
   );
 

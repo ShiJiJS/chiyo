@@ -5,6 +5,7 @@ import {createHash} from 'node:crypto';
 export function inspectLibraryCreate() {
   const selectors = {
     surface: '.modal',
+    'desktop-dialog-close': '.modal-head button',
     'library-create-intro': '.chooser-intro',
     'library-create-open-plugins': '.chooser-bottom button',
   };
