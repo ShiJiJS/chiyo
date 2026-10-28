@@ -1,0 +1,28 @@
+{
+  "sourceCommit": "5a1a5539e7a221950306363629228cb553d282b9",
+  "documentCommit": "11fde452a2ff6fe49ac9a68bf857f2d78dcafd10",
+  "issue": 63,
+  "state": "OPEN",
+  "checked": 6,
+  "total": 7,
+  "beforeBodySha256": "d086293323694ae154b30cf90af600471edcbcde1fbd1237fb329cb102f8fbd7",
+  "afterBodySha256": "4451406b140566fd09b9c8a45126f07273e613eb8401aa3311b952485646b24e",
+  "bodyMatchesDraft": true,
+  "labels": [
+    "enhancement",
+    "ready-for-agent"
+  ],
+  "nativeDependencies": [
+    62
+  ],
+  "comments": 0,
+  "scope": "same issue body appended; original criteria and native metadata retained",
+  "spaceId": 208,
+  "spaceFinished": true,
+  "verifiedBeforeCleanup": {
+    "evidenceGitBlobs": 120,
+    "sourceGitBlobs": 187,
+    "archivedComparisonReplay": 40,
+    "referenceServerStopped": true
+  }
+}
