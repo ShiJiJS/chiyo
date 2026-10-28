@@ -280,16 +280,37 @@ void main() {
           await tester.pump();
           expect(find.byType(DesktopDialog), findsNothing);
           expect(find.byType(BackdropFilter), findsNothing);
+          final actualScrollbarWidth =
+              tester
+                  .getSize(find.byKey(const ValueKey('library-detail-scroll')))
+                  .width -
+              (RenderAbstractViewport.of(
+                        tester.renderObject(
+                          find.byKey(const ValueKey('library-detail-title')),
+                        ),
+                      )
+                      as RenderBox)
+                  .size
+                  .width;
+          final expectedScrollbarWidth = native['scrollbarStyle'] == 'overlay'
+              ? 0.0
+              : 11.0;
+          expect(actualScrollbarWidth, closeTo(expectedScrollbarWidth, .001));
           viewports.add({
             'width': size.width,
             'height': size.height,
             'dark': dark,
             'devicePixelRatio': tester.view.devicePixelRatio,
             'nativeWindowResized': true,
+            'scrollbarStyle': native['scrollbarStyle']!,
+            'actualScrollbarWidth': actualScrollbarWidth,
           });
         }
       }
       checks.add('native-window-two-content-viewports-and-both-themes');
+      checks.add(
+        'native-AppKit-scrollbar-style-matches-rendered-library-gutter',
+      );
       checks.add('native-chooser-two-viewports-two-themes-no-residual-barrier');
       tester.platformDispatcher.textScaleFactorTestValue = 2;
       addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);

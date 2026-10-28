@@ -1230,7 +1230,9 @@ class _LibraryPageState extends State<LibraryPage> {
           _searchFocus.requestFocus,
     },
     child: ScrollConfiguration(
-      behavior: const DesktopScrollBehavior(scrollbarGutter: 11),
+      behavior: DesktopScrollBehavior(
+        scrollbarGutter: DesktopScrollbarScope.gutterOf(context, 11),
+      ),
       child: LayoutBuilder(
         builder: (context, bounds) {
           final metrics = LibraryMetrics(bounds.maxWidth);

@@ -6,6 +6,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:info_desktop/desktop_fonts.dart';
+import 'package:info_desktop/desktop_scroll.dart';
 import 'package:info_desktop/workspace/library_entries.dart';
 import 'package:info_desktop/workspace/library_document.dart';
 import 'package:info_desktop/workspace/zhiyu_theme.dart';
@@ -128,7 +129,12 @@ void main() {
               await t.pumpWidget(
                 const RepaintBoundary(
                   key: ValueKey('content-fidelity-capture'),
-                  child: PreviewWorkspace(),
+                  child: DesktopScrollbarScope(
+                    style: bool.fromEnvironment('UI_OVERLAY_SCROLLBARS')
+                        ? DesktopScrollbarStyle.overlay
+                        : DesktopScrollbarStyle.legacy,
+                    child: PreviewWorkspace(),
+                  ),
                 ),
               );
               await t.pumpAndSettle();

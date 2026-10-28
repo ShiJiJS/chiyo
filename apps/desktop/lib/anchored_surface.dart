@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'ui_palette.dart';
 import 'desktop_motion.dart';
+import 'desktop_scroll.dart';
 
 class AnchoredSurfaceController {
   VoidCallback? close;
@@ -27,6 +28,7 @@ Future<T?> showAnchoredSurface<T>(
           as RenderBox;
   final anchor = box.localToGlobal(Offset.zero, ancestor: overlay) & box.size;
   final originalSize = overlay.size;
+  final originalScrollbarStyle = DesktopScrollbarScope.of(context);
   final sourceScroll = Scrollable.maybeOf(context)?.position;
   final sourceFocus = FocusManager.instance.primaryFocus;
   // The trigger may disappear while the route closes. Transition frames must
@@ -56,7 +58,9 @@ Future<T?> showAnchoredSurface<T>(
         builder: (popupContext, bounds) {
           popup = popupContext;
           final screen = bounds.biggest;
-          if (screen != originalSize) {
+          if (screen != originalSize ||
+              DesktopScrollbarScope.of(popupContext) !=
+                  originalScrollbarStyle) {
             WidgetsBinding.instance.addPostFrameCallback((_) => close());
           }
           final below = math.max(0.0, screen.height - anchor.bottom - 18);

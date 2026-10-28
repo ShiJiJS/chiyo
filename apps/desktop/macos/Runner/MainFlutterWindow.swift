@@ -34,8 +34,15 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
   private var toolAccess: ToolAccessStore?
   private var choosingToolDirectory = false
   private var lifecycleObservers: [(NotificationCenter, NSObjectProtocol)] = []
+  private var previewScrollbarObserver: NSObjectProtocol?
+  private var previewScrollbarRevision = 0
 
-  deinit { removeLifecycleObservers() }
+  deinit {
+    removeLifecycleObservers()
+    if let observer = previewScrollbarObserver {
+      NotificationCenter.default.removeObserver(observer)
+    }
+  }
 
   override func awakeFromNib() {
     let flutterViewController = FlutterViewController()
@@ -306,6 +313,16 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
     let channel = FlutterMethodChannel(name: "agent_info_manage/interface_preview",
                                       binaryMessenger: controller.engine.binaryMessenger)
     desktopChannel = channel
+    previewScrollbarObserver = NotificationCenter.default.addObserver(
+      forName: NSScroller.preferredScrollerStyleDidChangeNotification,
+      object: nil, queue: .main
+    ) { [weak self] _ in
+      guard let self, self.previewReady else { return }
+      self.previewScrollbarRevision += 1
+      self.desktopChannel?.invokeMethod("scrollbarStyleChanged", arguments: [
+        "style": self.previewScrollbarStyle, "revision": self.previewScrollbarRevision
+      ])
+    }
     channel.setMethodCallHandler { [weak self] call, result in
       guard let self else { result(nil); return }
       switch call.method {
@@ -319,7 +336,9 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
         result(["isolated": true, "title": self.title,
                 "applicationId": Bundle.main.bundleIdentifier ?? "",
                 "productionServices": self.desktopReady || self.focusedFill != nil,
-                "savedDirectories": self.toolAccess != nil])
+                "savedDirectories": self.toolAccess != nil,
+                "scrollbarStyle": self.previewScrollbarStyle,
+                "scrollbarRevision": self.previewScrollbarRevision])
       case "setNavigationEnabled":
         guard let enabled = call.arguments as? Bool else {
           result(FlutterError(code: "invalid_navigation_state", message: "Invalid navigation state", details: nil)); return
@@ -386,6 +405,10 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
       item.title = "知予"
       item.submenu?.title = "知予"
     }
+  }
+
+  private var previewScrollbarStyle: String {
+    NSScroller.preferredScrollerStyle == .overlay ? "overlay" : "legacy"
   }
 
   private func findMenuItem(_ action: Selector, in menu: NSMenu) -> NSMenuItem? {
