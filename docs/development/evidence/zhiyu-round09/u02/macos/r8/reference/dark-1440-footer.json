@@ -1,0 +1,62 @@
+{
+  "before": {
+    "viewport": {
+      "width": 1440,
+      "height": 900,
+      "dpr": 1
+    },
+    "fontFamily": "\"Zhiyu System\", \"PingFang SC\", sans-serif",
+    "canvas": "#181b22",
+    "geometry": {
+      "library-side-footer": {
+        "x": 0,
+        "y": 783.8046875,
+        "width": 213,
+        "height": 116.1953125
+      },
+      "library-open-recycle": {
+        "x": 12,
+        "y": 796.8046875,
+        "width": 189,
+        "height": 39
+      },
+      "library-local-storage-note": {
+        "x": 21,
+        "y": 842.8046875,
+        "width": 171,
+        "height": 43.1953125
+      }
+    },
+    "scope": "footer outside scrolling rail; storage note paragraph box includes 12px inner padding; compare text rect after removing it"
+  },
+  "after": {
+    "viewport": {
+      "width": 1440,
+      "height": 900,
+      "dpr": 1
+    },
+    "fontFamily": "\"Zhiyu System\", \"PingFang SC\", sans-serif",
+    "canvas": "#181b22",
+    "geometry": {
+      "library-side-footer": {
+        "x": 0,
+        "y": 783.8046875,
+        "width": 213,
+        "height": 116.1953125
+      },
+      "library-open-recycle": {
+        "x": 12,
+        "y": 796.8046875,
+        "width": 189,
+        "height": 39
+      },
+      "library-local-storage-note": {
+        "x": 21,
+        "y": 842.8046875,
+        "width": 171,
+        "height": 43.1953125
+      }
+    },
+    "scope": "footer outside scrolling rail; storage note paragraph box includes 12px inner padding; compare text rect after removing it"
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "cwd": "apps/desktop",
+  "focused": [
+    "../../scripts/dev-macos.sh",
+    "flutter",
+    "test",
+    "--no-pub",
+    "--dart-define=UI_EVIDENCE_DIR=/Users/jiangxinyi/Documents/Project/agent-info/build/zhiyu-ui/u02/macos/r8/actual",
+    "tool/capture_zhiyu_foundation.dart",
+    "test/zhiyu_library_fidelity_test.dart",
+    "--reporter",
+    "expanded"
+  ],
+  "regression": [
+    "../../scripts/dev-macos.sh",
+    "flutter",
+    "test",
+    "--no-pub",
+    "test/zhiyu_stress_test.dart",
+    "test/zhiyu_history_test.dart",
+    "test/zhiyu_directory_test.dart",
+    "test/zhiyu_relations_test.dart",
+    "test/mac_preview_isolation_test.dart",
+    "test/zhiyu_preview_test.dart",
+    "--reporter",
+    "expanded"
+  ],
+  "analysis": [
+    "../../scripts/dev-macos.sh",
+    "flutter",
+    "analyze",
+    "--no-pub",
+    "--fatal-infos"
+  ],
+  "build": {
+    "env": {
+      "FLUTTER_MACOS_ARM64_ONLY": "true",
+      "XCODE_XCCONFIG_FILE": "/Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/macos/Runner/Configs/Preview.xcconfig"
+    },
+    "argv": [
+      "../../scripts/dev-macos.sh",
+      "flutter",
+      "build",
+      "macos",
+      "--debug",
+      "--no-pub",
+      "--target",
+      "lib/preview_main.dart"
+    ]
+  },
+  "comparison": "scripts/qa/compare-zhiyu-library-row.py with archived r7/reference and current r8/actual; same measured 11px row baseline",
+  "environment": "same installed macOS fonts/DPR1; normal/200% text; synthetic data only"
+}

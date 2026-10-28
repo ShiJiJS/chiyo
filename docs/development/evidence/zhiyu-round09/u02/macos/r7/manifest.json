@@ -11,6 +11,7 @@
   "native-build.json": "5bbb8fb0d18b7a03122413ea2e17361caaee2a2fef088238ef81fb45a00de065",
   "visual-review.md": "b05ced2642bcdcbd1428839553bd1bd4d5e994cb9d830acb66bc4da21dc414ee",
   "comparison-guards.json": "ea7e738ceb147e7e352e04fa7208708dbce26c2853bead10c4c4e6c26e1a32ed",
+  "tracker-read.json": "a39854d1bcf5649e9959a2ac02e347bd87b4090ffb001423c6189fa96aa88c19",
   "capture-final.log": "d63c0a56c1c9e2508441b6b4e044f0d6c54ae01cce14e44759f3b7d6aaf6a743",
   "actual/light-1280-R02-library-geometry.json": "f121e46af2bbdfd1fb5e2170c986f63fc671136e8800e2509a9e6d090d245d25",
   "actual/dark-1280-R02-library-geometry.json": "f121e46af2bbdfd1fb5e2170c986f63fc671136e8800e2509a9e6d090d245d25",
