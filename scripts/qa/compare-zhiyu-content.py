@@ -37,7 +37,12 @@ def compare(reference, actual):
                 if expected['scrollbarWidth'] != observed['scrollbarWidth']:
                     errors.append('scrollbar_policy')
                 keys = [key for key in expected['boxes'] if key != 'document' and not key.endswith('-period')]
-                if not keys or any(key not in observed['boxes'] for key in keys):
+                required = ({'document-table', 'document-list', 'document-code',
+                             'document-paragraph-0', 'document-paragraph-1',
+                             *[f'document-list-item-{i}' for i in range(3)],
+                             *[f'document-table-cell-{r}-{c}' for r in range(3) for c in range(2)]}
+                            if state == 'R06-document' else {'detail-title'})
+                if not required.issubset(keys) or not keys or any(key not in observed['boxes'] for key in keys):
                     errors.append('required_boxes_missing')
                 deltas = {} if errors else {
                     key: {axis: observed['boxes'][key][axis] - value

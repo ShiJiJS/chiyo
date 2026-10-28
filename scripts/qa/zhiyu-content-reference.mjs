@@ -24,6 +24,13 @@ export function inspectContentReading() {
   }else{
     boxes.document=rect(document.querySelector('.reading'));
     [...document.querySelectorAll('.reading>h2')].forEach((e,i)=>boxes[`document-heading-${i}`]=rect(e));
+    [...document.querySelectorAll('.reading>p')].forEach((e,i)=>boxes[`document-paragraph-${i}`]=rect(e));
+    const table=document.querySelector('.reading>table');
+    boxes['document-table']=rect(table);
+    [...table.rows].forEach((row,r)=>[...row.cells].forEach((cell,c)=>boxes[`document-table-cell-${r}-${c}`]=rect(cell)));
+    boxes['document-code']=rect(document.querySelector('.reading>pre'));
+    boxes['document-list']=rect(document.querySelector('.reading>ol'));
+    [...document.querySelectorAll('.reading>ol>li')].forEach((e,i)=>boxes[`document-list-item-${i}`]=rect(e));
   }
   return{viewport:{width:innerWidth,height:innerHeight,dpr:devicePixelRatio},theme:document.body.dataset.theme,font:getComputedStyle(document.body).fontFamily,selection:selected,query:ROUND9.state.query,scrollbarWidth:document.querySelector('#detail-scroll').offsetWidth-document.querySelector('#detail-scroll').clientWidth,scrollTop:document.querySelector('#detail-scroll').scrollTop,boxes};
 }

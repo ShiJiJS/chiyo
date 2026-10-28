@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:math' as math;
 import 'package:markdown/markdown.dart' as md;
 import '../desktop_controls.dart';
 import '../desktop_scroll.dart';
@@ -11,6 +12,66 @@ import 'library_widgets.dart';
 class DocumentReadingController extends ValueNotifier<bool> {
   DocumentReadingController() : super(false);
   void toggle() => value = !value;
+}
+
+/// CSS line boxes keep fractional leading between blocks. The engine's glyphs
+/// and selectable text stay at their original size; only layout leading is
+/// reserved independently from its rounded paragraph height.
+class _ReadingText extends StatelessWidget {
+  const _ReadingText({
+    required this.span,
+    required this.style,
+    this.fixedLineBox = true,
+    this.lineFontSize,
+    this.textAlign = TextAlign.start,
+  });
+  final TextSpan span;
+  final TextStyle style;
+  final bool fixedLineBox;
+  final double? lineFontSize;
+  final TextAlign textAlign;
+  @override
+  Widget build(BuildContext context) {
+    if (!fixedLineBox) return SelectableText.rich(span, style: style);
+    if (span.toPlainText().isEmpty) return const SizedBox.shrink();
+    final scaler = MediaQuery.textScalerOf(context);
+    final lineStyle = style.copyWith(fontSize: lineFontSize ?? style.fontSize);
+    final strut = StrutStyle.fromTextStyle(lineStyle, forceStrutHeight: true);
+    return LayoutBuilder(
+      builder: (context, bounds) {
+        final painter = TextPainter(
+          text: TextSpan(style: style, children: [span]),
+          strutStyle: strut,
+          textDirection: Directionality.of(context),
+          textAlign: textAlign,
+          textScaler: scaler,
+        )..layout(maxWidth: bounds.maxWidth);
+        final height =
+            painter.computeLineMetrics().length *
+            scaler.scale(lineStyle.fontSize!) *
+            lineStyle.height!;
+        final factor = painter.height == 0 ? 1.0 : height / painter.height;
+        final width = bounds.maxWidth.isFinite ? null : painter.width;
+        painter.dispose();
+        return SizedBox(
+          width: width,
+          child: Align(
+            alignment: AlignmentDirectional.topStart,
+            heightFactor: factor,
+            child: SizedBox(
+              width: width ?? bounds.maxWidth,
+              child: SelectableText.rich(
+                span,
+                style: style,
+                strutStyle: strut,
+                textAlign: textAlign,
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
 }
 
 class LibraryDocumentTools extends StatelessWidget {
@@ -165,8 +226,9 @@ class _LibraryDocumentState extends State<LibraryDocument> {
     FontWeight? weight,
     double height = 1.95,
     Color? color,
-  }) => SelectableText.rich(
-    TextSpan(children: nodes.map(_inline).toList()),
+    bool fixedLineBox = true,
+  }) => _ReadingText(
+    span: TextSpan(children: nodes.map(_inline).toList()),
     style: libraryText(
       context,
       size,
@@ -174,6 +236,7 @@ class _LibraryDocumentState extends State<LibraryDocument> {
       height: height,
       color: color,
     ),
+    fixedLineBox: fixedLineBox,
   );
   Widget _block(md.Node node, [int depth = 0]) {
     if (node is! md.Element || depth > 32) {
@@ -197,6 +260,7 @@ class _LibraryDocumentState extends State<LibraryDocument> {
             ? 1.5
             : 1.6,
         weight: FontWeight.w700,
+        fixedLineBox: false,
       );
     }
     if (node.tag == 'pre') {
@@ -223,14 +287,10 @@ class _LibraryDocumentState extends State<LibraryDocument> {
             )..layout();
             final fits = painter.width <= bounds.maxWidth;
             painter.dispose();
-            final text = SelectableText(
-              code,
+            final text = _ReadingText(
+              span: TextSpan(text: code),
               style: style,
-              strutStyle: const StrutStyle(
-                fontFamily: 'Menlo',
-                fontSize: 15,
-                height: 1.85,
-              ),
+              lineFontSize: 15,
             );
             return fits
                 ? text
@@ -247,6 +307,21 @@ class _LibraryDocumentState extends State<LibraryDocument> {
       );
     }
     if (node.tag == 'ul' || node.tag == 'ol') {
+      final start = int.tryParse(node.attributes['start'] ?? '') ?? 1;
+      final markerStyle = libraryText(context, 15, height: 1.95);
+      final marker = TextPainter(
+        text: TextSpan(
+          text: '${start + children.length - 1}.',
+          style: markerStyle,
+        ),
+        textDirection: Directionality.of(context),
+        textScaler: MediaQuery.textScalerOf(context),
+      )..layout();
+      final indent = math.max(
+        node.tag == 'ol' ? 40.0 : 22.0,
+        node.tag == 'ol' ? marker.width + 6 : 22.0,
+      );
+      marker.dispose();
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -257,12 +332,16 @@ class _LibraryDocumentState extends State<LibraryDocument> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SizedBox(
-                    width: node.tag == 'ol' ? 40 : 22,
-                    child: Text(
-                      node.tag == 'ol'
-                          ? '${(int.tryParse(node.attributes['start'] ?? '') ?? 1) + index}.'
-                          : '•',
-                      style: libraryText(context, 15, height: 1.95),
+                    width: indent,
+                    child: Padding(
+                      padding: const EdgeInsets.only(right: 6),
+                      child: _ReadingText(
+                        span: TextSpan(
+                          text: node.tag == 'ol' ? '${start + index}.' : '•',
+                        ),
+                        style: markerStyle,
+                        textAlign: TextAlign.right,
+                      ),
                     ),
                   ),
                   Expanded(child: _block(child, depth + 1)),
@@ -318,14 +397,52 @@ class _LibraryDocumentState extends State<LibraryDocument> {
           final columns = rows
               .map((r) => r.length)
               .reduce((a, b) => a > b ? a : b);
-          final scale = MediaQuery.textScalerOf(context).scale(1);
-          final width = (columns * 150 * scale)
-              .clamp(bounds.maxWidth, double.infinity)
-              .toDouble();
+          final minimum = List.filled(columns, 20.0);
+          final maximum = List.filled(columns, 20.0);
+          for (final row in rows) {
+            for (var i = 0; i < row.length; i++) {
+              final cell = row[i] as md.Element;
+              final painter = TextPainter(
+                text: TextSpan(
+                  children: (cell.children ?? []).map(_inline).toList(),
+                  style: libraryText(
+                    context,
+                    14,
+                    height: 1.95,
+                    weight: cell.tag == 'th' ? FontWeight.w700 : null,
+                  ),
+                ),
+                textDirection: Directionality.of(context),
+                textScaler: MediaQuery.textScalerOf(context),
+              )..layout();
+              minimum[i] = math.max(minimum[i], painter.minIntrinsicWidth + 20);
+              maximum[i] = math.max(maximum[i], painter.maxIntrinsicWidth + 20);
+              painter.dispose();
+            }
+          }
+          final minSum = minimum.fold(0.0, (a, b) => a + b);
+          final maxSum = maximum.fold(0.0, (a, b) => a + b);
+          final width = bounds.maxWidth.isFinite
+              ? math.max(bounds.maxWidth, minSum)
+              : maxSum;
+          final widths = List.generate(
+            columns,
+            (i) => width >= maxSum
+                ? maximum[i] * width / maxSum
+                : minimum[i] +
+                      (maximum[i] - minimum[i]) *
+                          (width - minSum) /
+                          (maxSum - minSum),
+          );
           final table = SizedBox(
             width: width,
             child: Table(
-              defaultVerticalAlignment: TableCellVerticalAlignment.top,
+              defaultVerticalAlignment:
+                  TableCellVerticalAlignment.intrinsicHeight,
+              columnWidths: {
+                for (var i = 0; i < columns; i++)
+                  i: FixedColumnWidth(widths[i]),
+              },
               children: [
                 for (final row in rows)
                   TableRow(
@@ -398,7 +515,7 @@ class _LibraryDocumentState extends State<LibraryDocument> {
   }) {
     final blocks = <Widget>[];
     var previous = leadingGap;
-    for (final node in nodes) {
+    for (final (index, node) in nodes.indexed) {
       final (top, bottom) = _margins(node);
       final firstCollapsed = blocks.isEmpty && collapseFirstMargin;
       blocks.add(
@@ -410,7 +527,12 @@ class _LibraryDocumentState extends State<LibraryDocument> {
               : top,
         ),
       );
-      blocks.add(_block(node, depth));
+      blocks.add(
+        KeyedSubtree(
+          key: depth == 0 ? ValueKey('library-document-block-$index') : null,
+          child: _block(node, depth),
+        ),
+      );
       previous = bottom;
     }
     return blocks;
