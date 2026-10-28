@@ -1,0 +1,21 @@
+{
+  "issue": 64,
+  "exactBodyReadback": true,
+  "checked": 6,
+  "total": 7,
+  "title": "知予前端 U03：个人档案、文档、文件与凭据界面 · Issue #64 · ShiJiJS/agent-info-manage",
+  "labels": [
+    "enhancementNew feature or request",
+    "ready-for-agentSpecification ready for agent work"
+  ],
+  "comments": [],
+  "blockedBy": [
+    "https://github.com/ShiJiJS/agent-info-manage/issues/63"
+  ],
+  "openActionObserved": true,
+  "bodySha256": "1196f39ba8fd45e544a328beb9014983963c541e445d924c473f66cc7fbac244",
+  "taskSpace": {
+    "id": 222,
+    "finished": true
+  }
+}

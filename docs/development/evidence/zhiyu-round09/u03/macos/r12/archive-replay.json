@@ -1,0 +1,14 @@
+{
+  "sourceCommit": "9df1ff682b7ff29f1ddd35684455717d1863aa26",
+  "evidenceCommit": "0af965d46adaeb2a18fcf9d2687560ed62ca20a0",
+  "sourceGitBlobsVerified": 275,
+  "evidenceGitBlobsVerified": 75,
+  "rawCaptureFilesVerified": 201,
+  "systemFontsVerified": 3,
+  "frozenFilesVerified": 15,
+  "fixedAppPayloadVerified": true,
+  "retainedBodyEvidenceReplaysSameComparison": true,
+  "comparisonExitCode": 0,
+  "fullS5Passed": false,
+  "scratchNotDeletedYet": true
+}

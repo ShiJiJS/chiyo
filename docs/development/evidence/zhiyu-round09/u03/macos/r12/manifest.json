@@ -107,6 +107,10 @@
     "bytes": 292,
     "sha256": "21bb7b85c3f69b5c3eb847598d92242539a81f9efd23437359ce9ffd37f2bcaa"
   },
+  "archive-replay.json": {
+    "bytes": 459,
+    "sha256": "ab854c3aca74c9065739c59a5206a76a20063de1c189d297baf9b866353055fd"
+  },
   "body-comparison-guards.json": {
     "bytes": 812,
     "sha256": "816a625d3400f47184516c6c25804496ace4005f836543f60156e2fe5e7caa4e"
@@ -294,6 +298,10 @@
   "summary-comparison.json": {
     "bytes": 7664,
     "sha256": "c4dfba1ba78b44fc7e8b9be2f5be3877cbe4ede70e1a4ac0ae342c806f44a06b"
+  },
+  "tracker-read.json": {
+    "bytes": 587,
+    "sha256": "8454716cb1dc57b8b3a932dc635bafe536ad4571cecc78d34e8c69d0dc47678b"
   },
   "visual-review.json": {
     "bytes": 609,
