@@ -1,0 +1,27 @@
+{
+  "cwd": "apps/desktop unless noted",
+  "targeted": "../../scripts/dev-macos.sh flutter test --no-pub test/workspace_file_types_test.dart test/workspace_content_test.dart test/workspace_adoption_test.dart --reporter expanded",
+  "finalTypes": "../../scripts/dev-macos.sh flutter test --no-pub test/workspace_file_types_test.dart --reporter expanded",
+  "workflows": "../../scripts/dev-macos.sh flutter test --no-pub --dart-define=UI_EVIDENCE_DIR=/Users/jiangxinyi/Documents/Project/agent-info/build/zhiyu-ui/u02/macos/r12/actual test/zhiyu_file_types_test.dart test/zhiyu_library_workflows_test.dart --reporter expanded",
+  "related": "../../scripts/dev-macos.sh flutter test --no-pub test/zhiyu_*_test.dart test/workspace_*_test.dart test/desktop_controls_test.dart test/desktop_motion_contract_test.dart --reporter expanded",
+  "analysis": "../../scripts/dev-macos.sh flutter analyze --no-pub --fatal-infos",
+  "build": "FLUTTER_MACOS_ARM64_ONLY=true XCODE_XCCONFIG_FILE=/Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/macos/Runner/Configs/Preview.xcconfig ../../scripts/dev-macos.sh flutter build macos --debug --no-pub --target lib/preview_main.dart",
+  "comparison": [
+    "python3",
+    "scripts/qa/compare-zhiyu-library-workflows.py",
+    "--reference",
+    "docs/development/evidence/zhiyu-round09/u02/macos/r10/reference",
+    "--reference",
+    "docs/development/evidence/zhiyu-round09/u02/macos/r11/reference",
+    "--reference",
+    "docs/development/evidence/zhiyu-round09/u02/macos/r12/reference",
+    "--actual",
+    "docs/development/evidence/zhiyu-round09/u02/macos/r12/actual",
+    "--case-count",
+    "48",
+    "--grouped-names",
+    "--output",
+    "docs/development/evidence/zhiyu-round09/u02/macos/r12/geometry.json"
+  ],
+  "execution": "sequential Dart/Flutter invocations; final screenshots regenerated after lint-only cleanup"
+}
