@@ -1,0 +1,35 @@
+{
+  "direction": "Frozen Round09 Mac fonts/tokens/shared DesktopDialog. Owner can identify current and target file before explicitly restoring a new head.",
+  "category": "private desktop information library",
+  "mainTask": "Choose a retained file and restore its bytes into a new current version, keeping current content in history.",
+  "walkthroughCountScope": "From an already open file detail; pointer clicks, not scroll actions.",
+  "before": {
+    "mainPathClicks": 4,
+    "dialogOpenings": 2,
+    "decisions": 2,
+    "memoryBurden": "Had to remember target filename/format/size from history."
+  },
+  "after": {
+    "mainPathClicks": 4,
+    "dialogOpenings": 2,
+    "decisions": 2,
+    "memoryBurden": "Current and target identity shown together in confirmation."
+  },
+  "selfReviewed": [
+    "confirmation/confirm-1440-light-100-review.png",
+    "confirmation/confirm-1280-dark-200-review.png",
+    "confirmation/confirm-1280-dark-200-target-unavailable.png",
+    "confirmation/file-1440-light-import-unknown.png",
+    "confirmation/file-1280-dark-200-replace-failure.png",
+    "native/file-restore-review-1440-light.png"
+  ],
+  "observed": "Normal and200% text remain readable, fixed title/actions retained, current/target identity and inline error distinguish states. No added cards or decorative assets. Existing short confirmation route is retained.",
+  "independentReviewer": false,
+  "allEightIndividuallyReviewed": false,
+  "sourceOfVisuals": "Frozen Round09 tokens/shared controls plus documented minimal R06 long-flow extension. No new whole-form HTML comparison.",
+  "necessaryTextRemoved": false,
+  "redundantSpacingRemoved": "18px gaps that duplicated the shared field bottom margin in import.",
+  "motion": "Existing180ms dialog entrance and150ms button feedback reused. No new animation or full motion acceptance.",
+  "fullS5Passed": false,
+  "physicalOSInputPassed": false
+}

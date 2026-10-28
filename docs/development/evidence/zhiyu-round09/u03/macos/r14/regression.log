@@ -1,0 +1,83 @@
+00:00 +0: loading /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_test.dart
+00:00 +0: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_test.dart: (setUpAll)
+00:00 +0: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_test.dart: closed Markdown renderer shows rich content and inert HTML/links/images without network
+00:01 +1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_states_test.dart: history paging keeps zoom/text through waiting/error/retry and resets only at version change dark=false
+00:02 +2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_states_test.dart: history paging keeps zoom/text through waiting/error/retry and resets only at version change dark=false
+00:02 +3: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_states_test.dart: history paging keeps zoom/text through waiting/error/retry and resets only at version change dark=false
+00:03 +4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_states_test.dart: history paging keeps zoom/text through waiting/error/retry and resets only at version change dark=false
+00:03 +5: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_states_test.dart: history paging keeps zoom/text through waiting/error/retry and resets only at version change dark=false
+00:04 +6: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_states_test.dart: history paging keeps zoom/text through waiting/error/retry and resets only at version change dark=false
+00:04 +7: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_states_test.dart: history paging keeps zoom/text through waiting/error/retry and resets only at version change dark=false
+00:04 +8: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_states_test.dart: history paging keeps zoom/text through waiting/error/retry and resets only at version change dark=false
+00:05 +9: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_states_test.dart: history paging keeps zoom/text through waiting/error/retry and resets only at version change dark=false
+00:09 +10: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_file_types_test.dart: file filter includes resumes and ordinary import keeps failure draft and type large=false
+00:10 +11: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_test.dart: document editing preserves failed draft and saves plain text/Markdown as distinct versioned facts
+00:12 +12: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_attachment_reading_test.dart: attachment reading Size(1440.0, 900.0) dark=false scale=1.0
+00:15 +13: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_states_test.dart: history paging keeps zoom/text through waiting/error/retry and resets only at version change dark=true
+00:15 +14: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_file_types_test.dart: file filter includes resumes and ordinary import keeps failure draft and type large=true
+00:17 +15: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_file_types_test.dart: file filter includes resumes and ordinary import keeps failure draft and type large=true
+00:17 +16: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_attachment_reading_test.dart: attachment reading Size(1440.0, 900.0) dark=false scale=2.0
+00:18 +17: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_states_test.dart: current attachment keeps reading state when only record metadata changes
+00:20 +18: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_test.dart: file replace failure retains selected file; historical restore creates a new current head
+00:20 +19: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_test.dart: file replace failure retains selected file; historical restore creates a new current head
+00:22 +20: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_test.dart: file replace failure retains selected file; historical restore creates a new current head
+00:22 +21: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_test.dart: file replace failure retains selected file; historical restore creates a new current head
+00:22 +22: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_test.dart: file replace failure retains selected file; historical restore creates a new current head
+00:22 +23: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_test.dart: file replace failure retains selected file; historical restore creates a new current head
+00:22 +24: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_test.dart: file replace failure retains selected file; historical restore creates a new current head
+00:22 +25: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_test.dart: file replace failure retains selected file; historical restore creates a new current head
+00:22 +26: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_test.dart: file replace failure retains selected file; historical restore creates a new current head
+00:22 +27: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_attachment_reading_test.dart: attachment reading Size(1440.0, 900.0) dark=true scale=1.0
+00:22 +28: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_attachment_reading_test.dart: attachment reading Size(1440.0, 900.0) dark=true scale=1.0
+00:22 +29: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_attachment_reading_test.dart: attachment reading Size(1440.0, 900.0) dark=true scale=1.0
+00:23 +30: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_fidelity_test.dart: R05/R06 reading and raw access Size(1440.0, 900.0) dark=false scale=1.0
+00:24 +31: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_fidelity_test.dart: R05/R06 reading and raw access Size(1440.0, 900.0) dark=false scale=1.0
+00:24 +32: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_fidelity_test.dart: R05/R06 reading and raw access Size(1440.0, 900.0) dark=false scale=1.0
+00:24 +33: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_fidelity_test.dart: R05/R06 reading and raw access Size(1440.0, 900.0) dark=false scale=1.0
+00:27 +34: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_fidelity_test.dart: R05/R06 reading and raw access Size(1440.0, 900.0) dark=false scale=1.0
+00:27 +35: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_test.dart: new document starts empty and saves through the common add entry
+00:27 +36: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_record_receipts_test.dart: committed document edit freezes the original draft through failed receipt lookup and reads back once
+00:29 +37: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_record_receipts_test.dart: committed document edit freezes the original draft through failed receipt lookup and reads back once
+00:31 +38: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_record_receipts_test.dart: committed document edit freezes the original draft through failed receipt lookup and reads back once
+00:31 +39: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_record_receipts_test.dart: committed document edit freezes the original draft through failed receipt lookup and reads back once
+00:31 +40: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_record_receipts_test.dart: committed document edit freezes the original draft through failed receipt lookup and reads back once
+00:34 +41: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_fidelity_test.dart: R05/R06 reading and raw access Size(1440.0, 900.0) dark=true scale=1.0
+00:34 +42: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_fidelity_test.dart: R05/R06 reading and raw access Size(1440.0, 900.0) dark=true scale=1.0
+00:35 +43: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_fidelity_test.dart: R05/R06 reading and raw access Size(1440.0, 900.0) dark=true scale=1.0
+00:36 +44: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_fidelity_test.dart: R05/R06 reading and raw access Size(1440.0, 900.0) dark=true scale=1.0
+00:36 +45: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_fidelity_test.dart: R05/R06 reading and raw access Size(1440.0, 900.0) dark=true scale=1.0
+00:36 +46: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_fidelity_test.dart: R05/R06 reading and raw access Size(1440.0, 900.0) dark=true scale=1.0
+00:36 +47: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_fidelity_test.dart: R05/R06 reading and raw access Size(1440.0, 900.0) dark=true scale=1.0
+00:36 +48: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_fidelity_test.dart: R05/R06 reading and raw access Size(1440.0, 900.0) dark=true scale=1.0
+00:36 +49: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_fidelity_test.dart: R05/R06 reading and raw access Size(1440.0, 900.0) dark=true scale=1.0
+00:36 +50: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_fidelity_test.dart: R05/R06 reading and raw access Size(1440.0, 900.0) dark=true scale=1.0
+00:36 +51: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_fidelity_test.dart: R05/R06 reading and raw access Size(1440.0, 900.0) dark=true scale=1.0
+00:37 +52: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_record_receipts_test.dart: uncommitted creation keeps fields, confirms absence, and only saves after an explicit retry
+00:37 +53: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_record_receipts_test.dart: uncommitted creation keeps fields, confirms absence, and only saves after an explicit retry
+00:37 +54: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_record_receipts_test.dart: uncommitted creation keeps fields, confirms absence, and only saves after an explicit retry
+00:37 +55: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_record_receipts_test.dart: uncommitted creation keeps fields, confirms absence, and only saves after an explicit retry
+00:38 +56: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_record_receipts_test.dart: uncommitted creation keeps fields, confirms absence, and only saves after an explicit retry
+00:38 +57: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_record_receipts_test.dart: uncommitted creation keeps fields, confirms absence, and only saves after an explicit retry
+00:38 +58: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_record_receipts_test.dart: uncommitted creation keeps fields, confirms absence, and only saves after an explicit retry
+00:38 +59: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_record_receipts_test.dart: uncommitted creation keeps fields, confirms absence, and only saves after an explicit retry
+00:38 +60: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_record_receipts_test.dart: uncommitted creation keeps fields, confirms absence, and only saves after an explicit retry
+00:38 +61: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_record_receipts_test.dart: uncommitted creation keeps fields, confirms absence, and only saves after an explicit retry
+00:38 +62: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_record_receipts_test.dart: uncommitted creation keeps fields, confirms absence, and only saves after an explicit retry
+00:38 +63: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_record_receipts_test.dart: uncommitted creation keeps fields, confirms absence, and only saves after an explicit retry
+00:38 +64: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_record_receipts_test.dart: uncommitted creation keeps fields, confirms absence, and only saves after an explicit retry
+00:38 +65: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_fidelity_test.dart: R05/R06 reading and raw access Size(1440.0, 900.0) dark=true scale=2.0
+00:41 +66: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_fidelity_test.dart: R05/R06 reading and raw access Size(1440.0, 900.0) dark=true scale=2.0
+00:41 +67: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_preview_isolation_test.dart: Mac preview composition, plugins, adoption and legacy conversion avoid production channels, network and personal paths
+00:43 +68: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_preview_isolation_test.dart: Mac preview composition, plugins, adoption and legacy conversion avoid production channels, network and personal paths
+00:46 +69: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_preview_isolation_test.dart: Mac preview composition, plugins, adoption and legacy conversion avoid production channels, network and personal paths
+00:46 +70: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_preview_isolation_test.dart: Mac preview composition, plugins, adoption and legacy conversion avoid production channels, network and personal paths
+00:48 +71: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_preview_isolation_test.dart: Mac preview composition, plugins, adoption and legacy conversion avoid production channels, network and personal paths
+00:50 +72: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_preview_isolation_test.dart: Mac preview composition, plugins, adoption and legacy conversion avoid production channels, network and personal paths
+00:51 +73: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_preview_isolation_test.dart: Mac preview composition, plugins, adoption and legacy conversion avoid production channels, network and personal paths
+00:52 +74: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_preview_isolation_test.dart: Mac preview composition, plugins, adoption and legacy conversion avoid production channels, network and personal paths
+00:52 +75: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_preview_isolation_test.dart: Mac preview composition, plugins, adoption and legacy conversion avoid production channels, network and personal paths
+00:52 +76: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_preview_isolation_test.dart: Mac preview composition, plugins, adoption and legacy conversion avoid production channels, network and personal paths
+00:52 +77: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_preview_isolation_test.dart: Mac preview composition, plugins, adoption and legacy conversion avoid production channels, network and personal paths
+00:52 +78: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_preview_isolation_test.dart: Mac preview composition, plugins, adoption and legacy conversion avoid production channels, network and personal paths
+00:53 +79: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_preview_isolation_test.dart: Mac preview composition, plugins, adoption and legacy conversion avoid production channels, network and personal paths
+01:00 +80: All tests passed!
