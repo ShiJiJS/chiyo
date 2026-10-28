@@ -1,0 +1,22 @@
+00:00 +0: loading /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/tool/capture_zhiyu_foundation.dart
+00:00 +0: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_fidelity_test.dart: (setUpAll)
+00:00 +0: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/tool/capture_zhiyu_foundation.dart: (setUpAll)
+00:00 +0: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_fidelity_test.dart: sidebar storage note and recycle stay reachable at Size(1440.0, 900.0) dark=false scale=1.0
+00:02 +1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/tool/capture_zhiyu_foundation.dart: 1440.0 / light
+00:02 +2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/tool/capture_zhiyu_foundation.dart: 1440.0 / light
+00:03 +3: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_fidelity_test.dart: sidebar storage note and recycle stay reachable at Size(1440.0, 900.0) dark=true scale=1.0
+00:03 +4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/tool/capture_zhiyu_foundation.dart: 1440.0 / dark
+00:04 +5: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/tool/capture_zhiyu_foundation.dart: 1440.0 / dark
+00:04 +6: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/tool/capture_zhiyu_foundation.dart: 1440.0 / dark
+00:05 +7: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/tool/capture_zhiyu_foundation.dart: 1440.0 / dark
+00:05 +8: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_fidelity_test.dart: sidebar storage note and recycle stay reachable at Size(1280.0, 800.0) dark=true scale=1.0
+00:05 +9: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/tool/capture_zhiyu_foundation.dart: 1280.0 / light
+00:06 +10: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_fidelity_test.dart: sidebar storage note and recycle stay reachable at Size(1280.0, 800.0) dark=true scale=2.0
+00:06 +11: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/tool/capture_zhiyu_foundation.dart: 1280.0 / dark
+00:06 +12: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/tool/capture_zhiyu_foundation.dart: 1280.0 / dark
+00:07 +13: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/tool/capture_zhiyu_foundation.dart: 1280.0 / dark
+00:07 +14: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/tool/capture_zhiyu_foundation.dart: 1280.0 / dark
+00:07 +15: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_fidelity_test.dart: CSS row box/labels and end-aligned 230px menu at 1280.0, dark=true
+00:07 +16: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_fidelity_test.dart: long summary clamps to two visible lines; empty purpose leaves CSS metadata gap
+00:07 +17: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_fidelity_test.dart: (tearDownAll)
+00:07 +17: All tests passed!
