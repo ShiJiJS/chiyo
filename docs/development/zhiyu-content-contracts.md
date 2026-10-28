@@ -103,3 +103,9 @@ LibraryFilePreviewView增加可选toolbarLeading槽：当前附件的版本、�
 WorkspaceCredentialCandidate.binding只为新建的未编辑字段提供建议；已有凭据与主人已编辑（含空值）的字段由表单自己的TextEditingController持有，换选候选不能覆盖。标志只记录主人对引用字段的修改，不用整个表单dirty状态代替。候选的形式/用途元数据仍可随选择变化，同形态校验、暂存释放、版本核对和未知结果冻结保持原合同；没有新增秘密读取、系统输入或服务写入能力。
 
 共享字段的Round09外观以现有DesktopMotion主题标记选择，旧主题不变；外部标签、输入内边距和表单外间距仍由同一Desktop controls管理，不引入第二套控件或按示例数据分支。原文输入/安全候选选择及Owner扩展元数据不同，只比较共同单行控件指标，不能用这个子集接受整张创建/更换表单或实际OS输入。
+
+## U03 r14文件恢复目标
+
+确认页的恢复来源以最初history中的WorkspaceFileRef冻结；后续history刷新必须同时匹配附件id和version。另一个附件复用同一版本号不是同一恢复意图，不能据此重新启用确认按钮。提交接口继续使用已有record/field、expectedRecordVersion、expectedFileVersion、restoreVersion和operationId，未增加服务或协议参数；原目标不再可比时在UI要求返回重选。
+
+LibraryFileSummary只复用元数据的排版，导入候选仍为opaque selectionId，历史仍为不可变附件引用，没有合并普通附件与凭据。未知结果查询和冲突重读继续分开，不把元数据刷新当写入回执。重复点击已选文件版本是保持当前阅读，显式刷新才重读；不为同一读取另存一份页码/缩放状态。
