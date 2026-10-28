@@ -1,0 +1,97 @@
+{
+  "before": {
+    "viewport": {
+      "width": 1440,
+      "height": 900,
+      "dpr": 1
+    },
+    "theme": "light",
+    "font": "\"Zhiyu System\", \"PingFang SC\", sans-serif",
+    "selection": "https",
+    "query": "HTTPS",
+    "scrollbarWidth": 0,
+    "scrollTop": 0,
+    "boxes": {
+      "detail-title": {
+        "x": 647,
+        "y": 183,
+        "width": 633,
+        "height": 39.1484375
+      },
+      "document": {
+        "x": 586,
+        "y": 328.140625,
+        "width": 699.1640625,
+        "height": 561.984375
+      },
+      "document-heading-0": {
+        "x": 586,
+        "y": 328.140625,
+        "width": 699.1640625,
+        "height": 30
+      },
+      "document-heading-1": {
+        "x": 586,
+        "y": 424.4375,
+        "width": 699.1640625,
+        "height": 30
+      },
+      "document-heading-2": {
+        "x": 586,
+        "y": 640.328125,
+        "width": 699.1640625,
+        "height": 30
+      }
+    }
+  },
+  "after": {
+    "viewport": {
+      "width": 1440,
+      "height": 900,
+      "dpr": 1
+    },
+    "theme": "light",
+    "font": "\"Zhiyu System\", \"PingFang SC\", sans-serif",
+    "selection": "https",
+    "query": "HTTPS",
+    "scrollbarWidth": 0,
+    "scrollTop": 0,
+    "boxes": {
+      "detail-title": {
+        "x": 647,
+        "y": 183,
+        "width": 633,
+        "height": 39.1484375
+      },
+      "document": {
+        "x": 586,
+        "y": 328.140625,
+        "width": 699.1640625,
+        "height": 561.984375
+      },
+      "document-heading-0": {
+        "x": 586,
+        "y": 328.140625,
+        "width": 699.1640625,
+        "height": 30
+      },
+      "document-heading-1": {
+        "x": 586,
+        "y": 424.4375,
+        "width": 699.1640625,
+        "height": 30
+      },
+      "document-heading-2": {
+        "x": 586,
+        "y": 640.328125,
+        "width": 699.1640625,
+        "height": 30
+      }
+    }
+  },
+  "accepted": true,
+  "errors": [],
+  "imageSha256": "6a3c9307c2d13b5c26ed272b6e96968084ae4891aa7e78ec2241c29db18ab7bb",
+  "fullS5Passed": false,
+  "scope": "Capture integrity only; scrollbar policy must match before a qualified geometry comparison; no OS-input or complete motion claim"
+}

@@ -94,3 +94,8 @@ python3 scripts/qa/collect-zhiyu-native.py --log <检查日志> --output <新输
 `9d8aea71`在现有控件层补齐Round09共用barrier模糊、标题和关闭SVG，并将弹窗/菜单退出时长设0，保留原入场、旧主题和减少动态效果。所有表单复用同一关闭保护；两处旧Material按钮类型断言迁移后，实际点击仍不能关闭未知结果。
 
 22项定向、444项相关回归通过，冗余import清理后严格分析、当前原生预览1项/12条功能断言和固定普通Mac构建通过。四组选择器关闭外框与冻结参考在2px目标内，限定原生逻辑外框匹配Widget。不是顶栏或整票新验收；原生GIF原速但采样稀疏，完整动效/本人OS输入仍开放。#62保持10/12、OPEN，参见[共用证据及准确范围](evidence/zhiyu-round09/u02/macos/r14/checkpoint.json)与[读图说明](evidence/zhiyu-round09/u02/macos/r14/visual-review.md)。
+
+
+## U03 r8共享外观接缝
+
+`257f6daa`在隔离预览增加只读NSScroller模式及变化通知，不注册生产服务。递增revision防晚到快照覆盖，外观更新与导航门禁分开；Dart销毁注销监听，原生窗口销毁移除观察者。共享ScrollBehavior通知占宽变化、锚定菜单随模式关闭，原表单保护保持。当前原生模式/四组占宽及验证范围见[U03 r8](zhiyu-macos-content.md#u03-r8原生滚动条模式)。#62仍10/12；没有新的完整系统输入、正常速度动画或F01完成声明。
