@@ -1,0 +1,15 @@
+00:00 +0: loading /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_document_probe_test.dart
+00:00 +0: diagnostic text metrics
+{forceHeight: 81.0, forceLines: [{height: 29.0, baseline: 22.11044692993164}, {height: 27.0, baseline: 49.11044692993164}, {height: 27.0, baseline: 76.1104507446289}]}
+{font: Zhiyu System, h: 1.95, height: 29.0, line: [{height: 29.0, ascent: 22.41044807434082, descent: 6.630000114440918, unscaledAscent: 22.41044807434082, baseline: 22.369998931884766}]}
+{textHeight: 29.0, selectableHeight: 29.0}
+{forceHeight: 81.0, forceLines: [{height: 28.0, baseline: 22.235820770263672}, {height: 27.0, baseline: 49.23582077026367}, {height: 27.0, baseline: 76.23582458496094}]}
+{font: Zhiyu System, h: 1.9, height: 28.0, line: [{height: 28.0, ascent: 21.8358211517334, descent: 6.460000038146973, unscaledAscent: 21.8358211517334, baseline: 21.540000915527344}]}
+{textHeight: 28.0, selectableHeight: 28.0}
+{forceHeight: 81.0, forceLines: [{height: 27.0, baseline: 20.369998931884766}, {height: 27.0, baseline: 47.369998931884766}, {height: 27.0, baseline: 74.37000274658203}]}
+{font: PingFang SC, h: 1.95, height: 27.0, line: [{height: 27.0, ascent: 20.670000076293945, descent: 6.630000114440918, unscaledAscent: 20.670000076293945, baseline: 20.369998931884766}]}
+{textHeight: 27.0, selectableHeight: 27.0}
+{forceHeight: 81.0, forceLines: [{height: 27.0, baseline: 20.540000915527344}, {height: 27.0, baseline: 47.540000915527344}, {height: 27.0, baseline: 74.54000091552734}]}
+{font: PingFang SC, h: 1.9, height: 27.0, line: [{height: 27.0, ascent: 20.139999389648438, descent: 6.460000038146973, unscaledAscent: 20.139999389648438, baseline: 20.540000915527344}]}
+{textHeight: 27.0, selectableHeight: 27.0}
+00:00 +1: All tests passed!

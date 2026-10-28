@@ -1,0 +1,265 @@
+{
+  "before": {
+    "viewport": {
+      "width": 1280,
+      "height": 800,
+      "dpr": 1
+    },
+    "theme": "light",
+    "font": "\"Zhiyu System\", \"PingFang SC\", sans-serif",
+    "selection": "https",
+    "query": "HTTPS",
+    "scrollbarWidth": 0,
+    "scrollTop": 0,
+    "boxes": {
+      "detail-title": {
+        "x": 584,
+        "y": 177,
+        "width": 548,
+        "height": 34.796875
+      },
+      "document": {
+        "x": 531,
+        "y": 317.7890625,
+        "width": 687,
+        "height": 561.984375
+      },
+      "document-heading-0": {
+        "x": 531,
+        "y": 317.7890625,
+        "width": 687,
+        "height": 30
+      },
+      "document-heading-1": {
+        "x": 531,
+        "y": 414.0859375,
+        "width": 687,
+        "height": 30
+      },
+      "document-heading-2": {
+        "x": 531,
+        "y": 629.9765625,
+        "width": 687,
+        "height": 30
+      },
+      "document-paragraph-0": {
+        "x": 531,
+        "y": 359.7890625,
+        "width": 687,
+        "height": 27.296875
+      },
+      "document-paragraph-1": {
+        "x": 531,
+        "y": 852.4765625,
+        "width": 687,
+        "height": 27.296875
+      },
+      "document-table": {
+        "x": 531,
+        "y": 458.0859375,
+        "width": 687,
+        "height": 144.890625
+      },
+      "document-table-cell-0-0": {
+        "x": 531,
+        "y": 458.0859375,
+        "width": 394.078125,
+        "height": 47.796875
+      },
+      "document-table-cell-0-1": {
+        "x": 925.078125,
+        "y": 458.0859375,
+        "width": 292.921875,
+        "height": 47.796875
+      },
+      "document-table-cell-1-0": {
+        "x": 531,
+        "y": 505.8828125,
+        "width": 394.078125,
+        "height": 48.296875
+      },
+      "document-table-cell-1-1": {
+        "x": 925.078125,
+        "y": 505.8828125,
+        "width": 292.921875,
+        "height": 48.296875
+      },
+      "document-table-cell-2-0": {
+        "x": 531,
+        "y": 554.1796875,
+        "width": 394.078125,
+        "height": 48.296875
+      },
+      "document-table-cell-2-1": {
+        "x": 925.078125,
+        "y": 554.1796875,
+        "width": 292.921875,
+        "height": 48.296875
+      },
+      "document-code": {
+        "x": 531,
+        "y": 777.7265625,
+        "width": 687,
+        "height": 59.75
+      },
+      "document-list": {
+        "x": 531,
+        "y": 674.9765625,
+        "width": 687,
+        "height": 87.75
+      },
+      "document-list-item-0": {
+        "x": 571,
+        "y": 674.9765625,
+        "width": 647,
+        "height": 29.25
+      },
+      "document-list-item-1": {
+        "x": 571,
+        "y": 704.2265625,
+        "width": 647,
+        "height": 29.25
+      },
+      "document-list-item-2": {
+        "x": 571,
+        "y": 733.4765625,
+        "width": 647,
+        "height": 29.25
+      }
+    }
+  },
+  "after": {
+    "viewport": {
+      "width": 1280,
+      "height": 800,
+      "dpr": 1
+    },
+    "theme": "light",
+    "font": "\"Zhiyu System\", \"PingFang SC\", sans-serif",
+    "selection": "https",
+    "query": "HTTPS",
+    "scrollbarWidth": 0,
+    "scrollTop": 0,
+    "boxes": {
+      "detail-title": {
+        "x": 584,
+        "y": 177,
+        "width": 548,
+        "height": 34.796875
+      },
+      "document": {
+        "x": 531,
+        "y": 317.7890625,
+        "width": 687,
+        "height": 561.984375
+      },
+      "document-heading-0": {
+        "x": 531,
+        "y": 317.7890625,
+        "width": 687,
+        "height": 30
+      },
+      "document-heading-1": {
+        "x": 531,
+        "y": 414.0859375,
+        "width": 687,
+        "height": 30
+      },
+      "document-heading-2": {
+        "x": 531,
+        "y": 629.9765625,
+        "width": 687,
+        "height": 30
+      },
+      "document-paragraph-0": {
+        "x": 531,
+        "y": 359.7890625,
+        "width": 687,
+        "height": 27.296875
+      },
+      "document-paragraph-1": {
+        "x": 531,
+        "y": 852.4765625,
+        "width": 687,
+        "height": 27.296875
+      },
+      "document-table": {
+        "x": 531,
+        "y": 458.0859375,
+        "width": 687,
+        "height": 144.890625
+      },
+      "document-table-cell-0-0": {
+        "x": 531,
+        "y": 458.0859375,
+        "width": 394.078125,
+        "height": 47.796875
+      },
+      "document-table-cell-0-1": {
+        "x": 925.078125,
+        "y": 458.0859375,
+        "width": 292.921875,
+        "height": 47.796875
+      },
+      "document-table-cell-1-0": {
+        "x": 531,
+        "y": 505.8828125,
+        "width": 394.078125,
+        "height": 48.296875
+      },
+      "document-table-cell-1-1": {
+        "x": 925.078125,
+        "y": 505.8828125,
+        "width": 292.921875,
+        "height": 48.296875
+      },
+      "document-table-cell-2-0": {
+        "x": 531,
+        "y": 554.1796875,
+        "width": 394.078125,
+        "height": 48.296875
+      },
+      "document-table-cell-2-1": {
+        "x": 925.078125,
+        "y": 554.1796875,
+        "width": 292.921875,
+        "height": 48.296875
+      },
+      "document-code": {
+        "x": 531,
+        "y": 777.7265625,
+        "width": 687,
+        "height": 59.75
+      },
+      "document-list": {
+        "x": 531,
+        "y": 674.9765625,
+        "width": 687,
+        "height": 87.75
+      },
+      "document-list-item-0": {
+        "x": 571,
+        "y": 674.9765625,
+        "width": 647,
+        "height": 29.25
+      },
+      "document-list-item-1": {
+        "x": 571,
+        "y": 704.2265625,
+        "width": 647,
+        "height": 29.25
+      },
+      "document-list-item-2": {
+        "x": 571,
+        "y": 733.4765625,
+        "width": 647,
+        "height": 29.25
+      }
+    }
+  },
+  "accepted": true,
+  "errors": [],
+  "imageSha256": "f54843335ccb46a3d35beae04dc6f8c963e42a84a7f6cfa7e1096c245a999ddb",
+  "fullS5Passed": false,
+  "scope": "Capture integrity only; scrollbar policy must match before a qualified geometry comparison; no OS-input or complete motion claim"
+}

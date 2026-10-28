@@ -1,0 +1,349 @@
+{
+  "before": {
+    "viewport": {
+      "width": 1280,
+      "height": 800,
+      "dpr": 1
+    },
+    "theme": "dark",
+    "font": "\"Zhiyu System\", \"PingFang SC\", sans-serif",
+    "selection": "profile",
+    "query": "个人档案",
+    "scrollbarWidth": 0,
+    "scrollTop": 300,
+    "boxes": {
+      "detail-title": {
+        "x": 584,
+        "y": -123,
+        "width": 548,
+        "height": 34.796875
+      },
+      "field-name-label": {
+        "x": 531,
+        "y": 119.6875,
+        "width": 326.5,
+        "height": 20.796875
+      },
+      "field-name-value": {
+        "x": 531,
+        "y": 144.484375,
+        "width": 326.5,
+        "height": 25.1953125
+      },
+      "field-email-label": {
+        "x": 891.5,
+        "y": 119.6875,
+        "width": 326.5,
+        "height": 20.796875
+      },
+      "field-email-value": {
+        "x": 891.5,
+        "y": 144.484375,
+        "width": 326.5,
+        "height": 25.1953125
+      },
+      "field-direction-label": {
+        "x": 531,
+        "y": 191.6796875,
+        "width": 326.5,
+        "height": 20.796875
+      },
+      "field-direction-value": {
+        "x": 531,
+        "y": 216.4765625,
+        "width": 326.5,
+        "height": 25.1953125
+      },
+      "field-city-label": {
+        "x": 891.5,
+        "y": 191.6796875,
+        "width": 326.5,
+        "height": 20.796875
+      },
+      "field-city-value": {
+        "x": 891.5,
+        "y": 216.4765625,
+        "width": 326.5,
+        "height": 25.1953125
+      },
+      "section-education": {
+        "x": 531,
+        "y": 268.671875,
+        "width": 687,
+        "height": 25.5
+      },
+      "education-0": {
+        "x": 565,
+        "y": 312.171875,
+        "width": 653,
+        "height": 108.390625
+      },
+      "education-0-period": {
+        "x": 565,
+        "y": 315.671875,
+        "width": 119.8125,
+        "height": 15
+      },
+      "education-0-title": {
+        "x": 565,
+        "y": 339.5703125,
+        "width": 653,
+        "height": 25.59375
+      },
+      "education-0-detail": {
+        "x": 565,
+        "y": 370.1640625,
+        "width": 653,
+        "height": 22.3984375
+      },
+      "education-0-dot": {
+        "x": 535,
+        "y": 318.171875,
+        "width": 9,
+        "height": 9
+      },
+      "education-1": {
+        "x": 565,
+        "y": 420.5625,
+        "width": 653,
+        "height": 80.390625
+      },
+      "education-1-period": {
+        "x": 565,
+        "y": 424.0625,
+        "width": 121.484375,
+        "height": 15
+      },
+      "education-1-title": {
+        "x": 565,
+        "y": 447.9609375,
+        "width": 653,
+        "height": 25.59375
+      },
+      "education-1-detail": {
+        "x": 565,
+        "y": 478.5546875,
+        "width": 653,
+        "height": 22.3984375
+      },
+      "education-1-dot": {
+        "x": 535,
+        "y": 426.5625,
+        "width": 9,
+        "height": 9
+      },
+      "section-experience": {
+        "x": 531,
+        "y": 527.953125,
+        "width": 687,
+        "height": 25.5
+      },
+      "experience-0": {
+        "x": 565,
+        "y": 571.453125,
+        "width": 653,
+        "height": 80.390625
+      },
+      "experience-0-period": {
+        "x": 565,
+        "y": 574.953125,
+        "width": 121.8515625,
+        "height": 15
+      },
+      "experience-0-title": {
+        "x": 565,
+        "y": 598.8515625,
+        "width": 653,
+        "height": 25.59375
+      },
+      "experience-0-detail": {
+        "x": 565,
+        "y": 629.4453125,
+        "width": 653,
+        "height": 22.3984375
+      },
+      "experience-0-dot": {
+        "x": 535,
+        "y": 577.453125,
+        "width": 9,
+        "height": 9
+      }
+    }
+  },
+  "after": {
+    "viewport": {
+      "width": 1280,
+      "height": 800,
+      "dpr": 1
+    },
+    "theme": "dark",
+    "font": "\"Zhiyu System\", \"PingFang SC\", sans-serif",
+    "selection": "profile",
+    "query": "个人档案",
+    "scrollbarWidth": 0,
+    "scrollTop": 300,
+    "boxes": {
+      "detail-title": {
+        "x": 584,
+        "y": -123,
+        "width": 548,
+        "height": 34.796875
+      },
+      "field-name-label": {
+        "x": 531,
+        "y": 119.6875,
+        "width": 326.5,
+        "height": 20.796875
+      },
+      "field-name-value": {
+        "x": 531,
+        "y": 144.484375,
+        "width": 326.5,
+        "height": 25.1953125
+      },
+      "field-email-label": {
+        "x": 891.5,
+        "y": 119.6875,
+        "width": 326.5,
+        "height": 20.796875
+      },
+      "field-email-value": {
+        "x": 891.5,
+        "y": 144.484375,
+        "width": 326.5,
+        "height": 25.1953125
+      },
+      "field-direction-label": {
+        "x": 531,
+        "y": 191.6796875,
+        "width": 326.5,
+        "height": 20.796875
+      },
+      "field-direction-value": {
+        "x": 531,
+        "y": 216.4765625,
+        "width": 326.5,
+        "height": 25.1953125
+      },
+      "field-city-label": {
+        "x": 891.5,
+        "y": 191.6796875,
+        "width": 326.5,
+        "height": 20.796875
+      },
+      "field-city-value": {
+        "x": 891.5,
+        "y": 216.4765625,
+        "width": 326.5,
+        "height": 25.1953125
+      },
+      "section-education": {
+        "x": 531,
+        "y": 268.671875,
+        "width": 687,
+        "height": 25.5
+      },
+      "education-0": {
+        "x": 565,
+        "y": 312.171875,
+        "width": 653,
+        "height": 108.390625
+      },
+      "education-0-period": {
+        "x": 565,
+        "y": 315.671875,
+        "width": 119.8125,
+        "height": 15
+      },
+      "education-0-title": {
+        "x": 565,
+        "y": 339.5703125,
+        "width": 653,
+        "height": 25.59375
+      },
+      "education-0-detail": {
+        "x": 565,
+        "y": 370.1640625,
+        "width": 653,
+        "height": 22.3984375
+      },
+      "education-0-dot": {
+        "x": 535,
+        "y": 318.171875,
+        "width": 9,
+        "height": 9
+      },
+      "education-1": {
+        "x": 565,
+        "y": 420.5625,
+        "width": 653,
+        "height": 80.390625
+      },
+      "education-1-period": {
+        "x": 565,
+        "y": 424.0625,
+        "width": 121.484375,
+        "height": 15
+      },
+      "education-1-title": {
+        "x": 565,
+        "y": 447.9609375,
+        "width": 653,
+        "height": 25.59375
+      },
+      "education-1-detail": {
+        "x": 565,
+        "y": 478.5546875,
+        "width": 653,
+        "height": 22.3984375
+      },
+      "education-1-dot": {
+        "x": 535,
+        "y": 426.5625,
+        "width": 9,
+        "height": 9
+      },
+      "section-experience": {
+        "x": 531,
+        "y": 527.953125,
+        "width": 687,
+        "height": 25.5
+      },
+      "experience-0": {
+        "x": 565,
+        "y": 571.453125,
+        "width": 653,
+        "height": 80.390625
+      },
+      "experience-0-period": {
+        "x": 565,
+        "y": 574.953125,
+        "width": 121.8515625,
+        "height": 15
+      },
+      "experience-0-title": {
+        "x": 565,
+        "y": 598.8515625,
+        "width": 653,
+        "height": 25.59375
+      },
+      "experience-0-detail": {
+        "x": 565,
+        "y": 629.4453125,
+        "width": 653,
+        "height": 22.3984375
+      },
+      "experience-0-dot": {
+        "x": 535,
+        "y": 577.453125,
+        "width": 9,
+        "height": 9
+      }
+    }
+  },
+  "accepted": true,
+  "errors": [],
+  "imageSha256": "f61f943e447904edc69c47ca79230996e3994119ddb22c992f3ee92ab92e2f74",
+  "fullS5Passed": false,
+  "scope": "Capture integrity only; scrollbar policy must match before a qualified geometry comparison; no OS-input or complete motion claim"
+}

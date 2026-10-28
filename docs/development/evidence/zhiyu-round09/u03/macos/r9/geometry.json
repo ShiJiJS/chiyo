@@ -1,0 +1,1698 @@
+{
+  "thresholdLogicalPixels": 2,
+  "fullS5Passed": false,
+  "scope": "Normal-size eligible logical boxes; not glyph pixels, full visual, motion or OS input acceptance.",
+  "excludedBoxes": {
+    "document": "CSS collapsed margins vs Flutter Column are not the same box; compare headings.",
+    "*-period": "Inline HTML glyph bounds vs SelectableText block are not the same box."
+  },
+  "cases": [
+    {
+      "case": "light-1440-100-R05-top",
+      "qualified": true,
+      "guardErrors": [],
+      "referenceScrollbarWidth": 0,
+      "actualScrollbarWidth": 0.0,
+      "eligibleBoxes": 23,
+      "maximumDelta": 1.1234375000000227,
+      "eligibleGeometryPassed": true,
+      "deltas": {
+        "detail-title": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": 0.0,
+          "height": -0.1484375
+        },
+        "field-name-label": {
+          "x": 0.0,
+          "y": -0.6390625000000227,
+          "width": 0.0,
+          "height": 0.203125
+        },
+        "field-name-value": {
+          "x": 0.0,
+          "y": -0.43593750000002274,
+          "width": 0.0,
+          "height": -0.1953125
+        },
+        "field-email-label": {
+          "x": 0.0,
+          "y": -0.6390625000000227,
+          "width": 0.0,
+          "height": 0.203125
+        },
+        "field-email-value": {
+          "x": 0.0,
+          "y": -0.43593750000002274,
+          "width": 0.0,
+          "height": -0.1953125
+        },
+        "field-direction-label": {
+          "x": 0.0,
+          "y": -0.6312500000000227,
+          "width": 0.0,
+          "height": 0.203125
+        },
+        "field-direction-value": {
+          "x": 0.0,
+          "y": -0.42812500000002274,
+          "width": 0.0,
+          "height": -0.1953125
+        },
+        "field-city-label": {
+          "x": 0.0,
+          "y": -0.6312500000000227,
+          "width": 0.0,
+          "height": 0.203125
+        },
+        "field-city-value": {
+          "x": 0.0,
+          "y": -0.42812500000002274,
+          "width": 0.0,
+          "height": -0.1953125
+        },
+        "section-education": {
+          "x": 0.0,
+          "y": -0.6234375000000227,
+          "width": 0.0,
+          "height": -0.5
+        },
+        "education-0": {
+          "x": 0.0,
+          "y": -1.1234375000000227,
+          "width": 0.0,
+          "height": 1.0093749999999773
+        },
+        "education-0-title": {
+          "x": 0.0,
+          "y": -1.1218750000000455,
+          "width": 0.0,
+          "height": 0.40625
+        },
+        "education-0-detail": {
+          "x": 0.0,
+          "y": -0.7156250000000455,
+          "width": 0.0,
+          "height": 0.6015625
+        },
+        "education-0-dot": {
+          "x": 0.0,
+          "y": -1.1234375000000227,
+          "width": 0.0,
+          "height": 0.0
+        },
+        "education-1": {
+          "x": 0.0,
+          "y": -0.11406250000004547,
+          "width": 0.0,
+          "height": 1.0093749999999773
+        },
+        "education-1-title": {
+          "x": 0.0,
+          "y": -0.11250000000006821,
+          "width": 0.0,
+          "height": 0.40625
+        },
+        "education-1-detail": {
+          "x": 0.0,
+          "y": 0.2937499999999318,
+          "width": 0.0,
+          "height": 0.6015625
+        },
+        "education-1-dot": {
+          "x": 0.0,
+          "y": -0.11406250000004547,
+          "width": 0.0,
+          "height": 0.0
+        },
+        "section-experience": {
+          "x": 0.0,
+          "y": 0.8953125000000455,
+          "width": 0.0,
+          "height": -0.5
+        },
+        "experience-0": {
+          "x": 0.0,
+          "y": 0.3953125000000455,
+          "width": 0.0,
+          "height": 1.0093749999999773
+        },
+        "experience-0-title": {
+          "x": 0.0,
+          "y": 0.39687500000002274,
+          "width": 0.0,
+          "height": 0.40625
+        },
+        "experience-0-detail": {
+          "x": 0.0,
+          "y": 0.8031250000000227,
+          "width": 0.0,
+          "height": 0.6015625
+        },
+        "experience-0-dot": {
+          "x": 0.0,
+          "y": 0.3953125000000455,
+          "width": 0.0,
+          "height": 0.0
+        }
+      }
+    },
+    {
+      "case": "light-1440-100-R05-timeline",
+      "qualified": true,
+      "guardErrors": [],
+      "referenceScrollbarWidth": 0,
+      "actualScrollbarWidth": 0.0,
+      "eligibleBoxes": 23,
+      "maximumDelta": 1.1234375000000227,
+      "eligibleGeometryPassed": true,
+      "deltas": {
+        "detail-title": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": 0.0,
+          "height": -0.1484375
+        },
+        "field-name-label": {
+          "x": 0.0,
+          "y": -0.6390624999999943,
+          "width": 0.0,
+          "height": 0.203125
+        },
+        "field-name-value": {
+          "x": 0.0,
+          "y": -0.4359374999999943,
+          "width": 0.0,
+          "height": -0.1953125
+        },
+        "field-email-label": {
+          "x": 0.0,
+          "y": -0.6390624999999943,
+          "width": 0.0,
+          "height": 0.203125
+        },
+        "field-email-value": {
+          "x": 0.0,
+          "y": -0.4359374999999943,
+          "width": 0.0,
+          "height": -0.1953125
+        },
+        "field-direction-label": {
+          "x": 0.0,
+          "y": -0.6312499999999943,
+          "width": 0.0,
+          "height": 0.203125
+        },
+        "field-direction-value": {
+          "x": 0.0,
+          "y": -0.4281249999999943,
+          "width": 0.0,
+          "height": -0.1953125
+        },
+        "field-city-label": {
+          "x": 0.0,
+          "y": -0.6312499999999943,
+          "width": 0.0,
+          "height": 0.203125
+        },
+        "field-city-value": {
+          "x": 0.0,
+          "y": -0.4281249999999943,
+          "width": 0.0,
+          "height": -0.1953125
+        },
+        "section-education": {
+          "x": 0.0,
+          "y": -0.6234375000000227,
+          "width": 0.0,
+          "height": -0.5
+        },
+        "education-0": {
+          "x": 0.0,
+          "y": -1.1234375000000227,
+          "width": 0.0,
+          "height": 1.0093749999999773
+        },
+        "education-0-title": {
+          "x": 0.0,
+          "y": -1.1218750000000455,
+          "width": 0.0,
+          "height": 0.40625
+        },
+        "education-0-detail": {
+          "x": 0.0,
+          "y": -0.7156250000000455,
+          "width": 0.0,
+          "height": 0.6015625
+        },
+        "education-0-dot": {
+          "x": 0.0,
+          "y": -1.1234375000000227,
+          "width": 0.0,
+          "height": 0.0
+        },
+        "education-1": {
+          "x": 0.0,
+          "y": -0.11406250000004547,
+          "width": 0.0,
+          "height": 1.0093749999999773
+        },
+        "education-1-title": {
+          "x": 0.0,
+          "y": -0.11250000000006821,
+          "width": 0.0,
+          "height": 0.40625
+        },
+        "education-1-detail": {
+          "x": 0.0,
+          "y": 0.2937499999999318,
+          "width": 0.0,
+          "height": 0.6015625
+        },
+        "education-1-dot": {
+          "x": 0.0,
+          "y": -0.11406250000004547,
+          "width": 0.0,
+          "height": 0.0
+        },
+        "section-experience": {
+          "x": 0.0,
+          "y": 0.8953125000000455,
+          "width": 0.0,
+          "height": -0.5
+        },
+        "experience-0": {
+          "x": 0.0,
+          "y": 0.3953125000000455,
+          "width": 0.0,
+          "height": 1.0093749999999773
+        },
+        "experience-0-title": {
+          "x": 0.0,
+          "y": 0.39687500000002274,
+          "width": 0.0,
+          "height": 0.40625
+        },
+        "experience-0-detail": {
+          "x": 0.0,
+          "y": 0.8031250000000227,
+          "width": 0.0,
+          "height": 0.6015625
+        },
+        "experience-0-dot": {
+          "x": 0.0,
+          "y": 0.3953125000000455,
+          "width": 0.0,
+          "height": 0.0
+        }
+      }
+    },
+    {
+      "case": "light-1440-100-R06-document",
+      "qualified": true,
+      "guardErrors": [],
+      "referenceScrollbarWidth": 0,
+      "actualScrollbarWidth": 0.0,
+      "eligibleBoxes": 18,
+      "maximumDelta": 1.3687499999999773,
+      "eligibleGeometryPassed": true,
+      "deltas": {
+        "detail-title": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": 0.0,
+          "height": 0.8515625
+        },
+        "document-heading-0": {
+          "x": 0.0,
+          "y": 0.859375,
+          "width": 0.005859375,
+          "height": 0.0
+        },
+        "document-heading-1": {
+          "x": 0.0,
+          "y": 0.8625000000000114,
+          "width": 0.005859375,
+          "height": 0.0
+        },
+        "document-heading-2": {
+          "x": 0.0,
+          "y": 0.8718750000000455,
+          "width": 0.005859375,
+          "height": 0.0
+        },
+        "document-paragraph-0": {
+          "x": 0.0,
+          "y": 0.859375,
+          "width": 0.005859375,
+          "height": 0.0031250000000113687
+        },
+        "document-paragraph-1": {
+          "x": 0.0,
+          "y": 0.8718750000000455,
+          "width": 0.005859375,
+          "height": 0.0031249999999545253
+        },
+        "document-table": {
+          "x": 0.0,
+          "y": 0.8625000000000114,
+          "width": 0.005859375,
+          "height": 0.009375000000034106
+        },
+        "document-table-cell-0-0": {
+          "x": 0.0,
+          "y": 0.8625000000000114,
+          "width": 0.014275166252218696,
+          "height": 0.5031250000000114
+        },
+        "document-table-cell-0-1": {
+          "x": 0.014275166252218696,
+          "y": 0.8625000000000114,
+          "width": -0.008415791252218696,
+          "height": 0.5031250000000114
+        },
+        "document-table-cell-1-0": {
+          "x": 0.0,
+          "y": 1.3656250000000227,
+          "width": 0.014275166252218696,
+          "height": 0.0031249999999545253
+        },
+        "document-table-cell-1-1": {
+          "x": 0.014275166252218696,
+          "y": 1.3656250000000227,
+          "width": -0.008415791252218696,
+          "height": 0.0031249999999545253
+        },
+        "document-table-cell-2-0": {
+          "x": 0.0,
+          "y": 1.3687499999999773,
+          "width": 0.014275166252218696,
+          "height": 0.0031249999999545253
+        },
+        "document-table-cell-2-1": {
+          "x": 0.014275166252218696,
+          "y": 1.3687499999999773,
+          "width": -0.008415791252218696,
+          "height": 0.0031249999999545253
+        },
+        "document-code": {
+          "x": 0.0,
+          "y": 0.8718750000000455,
+          "width": 0.005859375,
+          "height": 0.0
+        },
+        "document-list": {
+          "x": 0.0,
+          "y": 0.8718750000000455,
+          "width": 0.005859375,
+          "height": 0.0
+        },
+        "document-list-item-0": {
+          "x": 0.0,
+          "y": 0.8718750000000455,
+          "width": 0.005859375,
+          "height": 0.0
+        },
+        "document-list-item-1": {
+          "x": 0.0,
+          "y": 0.8718750000000455,
+          "width": 0.005859375,
+          "height": 0.0
+        },
+        "document-list-item-2": {
+          "x": 0.0,
+          "y": 0.8718750000000455,
+          "width": 0.005859375,
+          "height": 0.0
+        }
+      }
+    },
+    {
+      "case": "dark-1440-100-R05-top",
+      "qualified": true,
+      "guardErrors": [],
+      "referenceScrollbarWidth": 0,
+      "actualScrollbarWidth": 0.0,
+      "eligibleBoxes": 23,
+      "maximumDelta": 1.1234375000000227,
+      "eligibleGeometryPassed": true,
+      "deltas": {
+        "detail-title": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": 0.0,
+          "height": -0.1484375
+        },
+        "field-name-label": {
+          "x": 0.0,
+          "y": -0.6390625000000227,
+          "width": 0.0,
+          "height": 0.203125
+        },
+        "field-name-value": {
+          "x": 0.0,
+          "y": -0.43593750000002274,
+          "width": 0.0,
+          "height": -0.1953125
+        },
+        "field-email-label": {
+          "x": 0.0,
+          "y": -0.6390625000000227,
+          "width": 0.0,
+          "height": 0.203125
+        },
+        "field-email-value": {
+          "x": 0.0,
+          "y": -0.43593750000002274,
+          "width": 0.0,
+          "height": -0.1953125
+        },
+        "field-direction-label": {
+          "x": 0.0,
+          "y": -0.6312500000000227,
+          "width": 0.0,
+          "height": 0.203125
+        },
+        "field-direction-value": {
+          "x": 0.0,
+          "y": -0.42812500000002274,
+          "width": 0.0,
+          "height": -0.1953125
+        },
+        "field-city-label": {
+          "x": 0.0,
+          "y": -0.6312500000000227,
+          "width": 0.0,
+          "height": 0.203125
+        },
+        "field-city-value": {
+          "x": 0.0,
+          "y": -0.42812500000002274,
+          "width": 0.0,
+          "height": -0.1953125
+        },
+        "section-education": {
+          "x": 0.0,
+          "y": -0.6234375000000227,
+          "width": 0.0,
+          "height": -0.5
+        },
+        "education-0": {
+          "x": 0.0,
+          "y": -1.1234375000000227,
+          "width": 0.0,
+          "height": 1.0093749999999773
+        },
+        "education-0-title": {
+          "x": 0.0,
+          "y": -1.1218750000000455,
+          "width": 0.0,
+          "height": 0.40625
+        },
+        "education-0-detail": {
+          "x": 0.0,
+          "y": -0.7156250000000455,
+          "width": 0.0,
+          "height": 0.6015625
+        },
+        "education-0-dot": {
+          "x": 0.0,
+          "y": -1.1234375000000227,
+          "width": 0.0,
+          "height": 0.0
+        },
+        "education-1": {
+          "x": 0.0,
+          "y": -0.11406250000004547,
+          "width": 0.0,
+          "height": 1.0093749999999773
+        },
+        "education-1-title": {
+          "x": 0.0,
+          "y": -0.11250000000006821,
+          "width": 0.0,
+          "height": 0.40625
+        },
+        "education-1-detail": {
+          "x": 0.0,
+          "y": 0.2937499999999318,
+          "width": 0.0,
+          "height": 0.6015625
+        },
+        "education-1-dot": {
+          "x": 0.0,
+          "y": -0.11406250000004547,
+          "width": 0.0,
+          "height": 0.0
+        },
+        "section-experience": {
+          "x": 0.0,
+          "y": 0.8953125000000455,
+          "width": 0.0,
+          "height": -0.5
+        },
+        "experience-0": {
+          "x": 0.0,
+          "y": 0.3953125000000455,
+          "width": 0.0,
+          "height": 1.0093749999999773
+        },
+        "experience-0-title": {
+          "x": 0.0,
+          "y": 0.39687500000002274,
+          "width": 0.0,
+          "height": 0.40625
+        },
+        "experience-0-detail": {
+          "x": 0.0,
+          "y": 0.8031250000000227,
+          "width": 0.0,
+          "height": 0.6015625
+        },
+        "experience-0-dot": {
+          "x": 0.0,
+          "y": 0.3953125000000455,
+          "width": 0.0,
+          "height": 0.0
+        }
+      }
+    },
+    {
+      "case": "dark-1440-100-R05-timeline",
+      "qualified": true,
+      "guardErrors": [],
+      "referenceScrollbarWidth": 0,
+      "actualScrollbarWidth": 0.0,
+      "eligibleBoxes": 23,
+      "maximumDelta": 1.1234375000000227,
+      "eligibleGeometryPassed": true,
+      "deltas": {
+        "detail-title": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": 0.0,
+          "height": -0.1484375
+        },
+        "field-name-label": {
+          "x": 0.0,
+          "y": -0.6390624999999943,
+          "width": 0.0,
+          "height": 0.203125
+        },
+        "field-name-value": {
+          "x": 0.0,
+          "y": -0.4359374999999943,
+          "width": 0.0,
+          "height": -0.1953125
+        },
+        "field-email-label": {
+          "x": 0.0,
+          "y": -0.6390624999999943,
+          "width": 0.0,
+          "height": 0.203125
+        },
+        "field-email-value": {
+          "x": 0.0,
+          "y": -0.4359374999999943,
+          "width": 0.0,
+          "height": -0.1953125
+        },
+        "field-direction-label": {
+          "x": 0.0,
+          "y": -0.6312499999999943,
+          "width": 0.0,
+          "height": 0.203125
+        },
+        "field-direction-value": {
+          "x": 0.0,
+          "y": -0.4281249999999943,
+          "width": 0.0,
+          "height": -0.1953125
+        },
+        "field-city-label": {
+          "x": 0.0,
+          "y": -0.6312499999999943,
+          "width": 0.0,
+          "height": 0.203125
+        },
+        "field-city-value": {
+          "x": 0.0,
+          "y": -0.4281249999999943,
+          "width": 0.0,
+          "height": -0.1953125
+        },
+        "section-education": {
+          "x": 0.0,
+          "y": -0.6234375000000227,
+          "width": 0.0,
+          "height": -0.5
+        },
+        "education-0": {
+          "x": 0.0,
+          "y": -1.1234375000000227,
+          "width": 0.0,
+          "height": 1.0093749999999773
+        },
+        "education-0-title": {
+          "x": 0.0,
+          "y": -1.1218750000000455,
+          "width": 0.0,
+          "height": 0.40625
+        },
+        "education-0-detail": {
+          "x": 0.0,
+          "y": -0.7156250000000455,
+          "width": 0.0,
+          "height": 0.6015625
+        },
+        "education-0-dot": {
+          "x": 0.0,
+          "y": -1.1234375000000227,
+          "width": 0.0,
+          "height": 0.0
+        },
+        "education-1": {
+          "x": 0.0,
+          "y": -0.11406250000004547,
+          "width": 0.0,
+          "height": 1.0093749999999773
+        },
+        "education-1-title": {
+          "x": 0.0,
+          "y": -0.11250000000006821,
+          "width": 0.0,
+          "height": 0.40625
+        },
+        "education-1-detail": {
+          "x": 0.0,
+          "y": 0.2937499999999318,
+          "width": 0.0,
+          "height": 0.6015625
+        },
+        "education-1-dot": {
+          "x": 0.0,
+          "y": -0.11406250000004547,
+          "width": 0.0,
+          "height": 0.0
+        },
+        "section-experience": {
+          "x": 0.0,
+          "y": 0.8953125000000455,
+          "width": 0.0,
+          "height": -0.5
+        },
+        "experience-0": {
+          "x": 0.0,
+          "y": 0.3953125000000455,
+          "width": 0.0,
+          "height": 1.0093749999999773
+        },
+        "experience-0-title": {
+          "x": 0.0,
+          "y": 0.39687500000002274,
+          "width": 0.0,
+          "height": 0.40625
+        },
+        "experience-0-detail": {
+          "x": 0.0,
+          "y": 0.8031250000000227,
+          "width": 0.0,
+          "height": 0.6015625
+        },
+        "experience-0-dot": {
+          "x": 0.0,
+          "y": 0.3953125000000455,
+          "width": 0.0,
+          "height": 0.0
+        }
+      }
+    },
+    {
+      "case": "dark-1440-100-R06-document",
+      "qualified": true,
+      "guardErrors": [],
+      "referenceScrollbarWidth": 0,
+      "actualScrollbarWidth": 0.0,
+      "eligibleBoxes": 18,
+      "maximumDelta": 1.3687499999999773,
+      "eligibleGeometryPassed": true,
+      "deltas": {
+        "detail-title": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": 0.0,
+          "height": 0.8515625
+        },
+        "document-heading-0": {
+          "x": 0.0,
+          "y": 0.859375,
+          "width": 0.005859375,
+          "height": 0.0
+        },
+        "document-heading-1": {
+          "x": 0.0,
+          "y": 0.8625000000000114,
+          "width": 0.005859375,
+          "height": 0.0
+        },
+        "document-heading-2": {
+          "x": 0.0,
+          "y": 0.8718750000000455,
+          "width": 0.005859375,
+          "height": 0.0
+        },
+        "document-paragraph-0": {
+          "x": 0.0,
+          "y": 0.859375,
+          "width": 0.005859375,
+          "height": 0.0031250000000113687
+        },
+        "document-paragraph-1": {
+          "x": 0.0,
+          "y": 0.8718750000000455,
+          "width": 0.005859375,
+          "height": 0.0031249999999545253
+        },
+        "document-table": {
+          "x": 0.0,
+          "y": 0.8625000000000114,
+          "width": 0.005859375,
+          "height": 0.009375000000034106
+        },
+        "document-table-cell-0-0": {
+          "x": 0.0,
+          "y": 0.8625000000000114,
+          "width": 0.014275166252218696,
+          "height": 0.5031250000000114
+        },
+        "document-table-cell-0-1": {
+          "x": 0.014275166252218696,
+          "y": 0.8625000000000114,
+          "width": -0.008415791252218696,
+          "height": 0.5031250000000114
+        },
+        "document-table-cell-1-0": {
+          "x": 0.0,
+          "y": 1.3656250000000227,
+          "width": 0.014275166252218696,
+          "height": 0.0031249999999545253
+        },
+        "document-table-cell-1-1": {
+          "x": 0.014275166252218696,
+          "y": 1.3656250000000227,
+          "width": -0.008415791252218696,
+          "height": 0.0031249999999545253
+        },
+        "document-table-cell-2-0": {
+          "x": 0.0,
+          "y": 1.3687499999999773,
+          "width": 0.014275166252218696,
+          "height": 0.0031249999999545253
+        },
+        "document-table-cell-2-1": {
+          "x": 0.014275166252218696,
+          "y": 1.3687499999999773,
+          "width": -0.008415791252218696,
+          "height": 0.0031249999999545253
+        },
+        "document-code": {
+          "x": 0.0,
+          "y": 0.8718750000000455,
+          "width": 0.005859375,
+          "height": 0.0
+        },
+        "document-list": {
+          "x": 0.0,
+          "y": 0.8718750000000455,
+          "width": 0.005859375,
+          "height": 0.0
+        },
+        "document-list-item-0": {
+          "x": 0.0,
+          "y": 0.8718750000000455,
+          "width": 0.005859375,
+          "height": 0.0
+        },
+        "document-list-item-1": {
+          "x": 0.0,
+          "y": 0.8718750000000455,
+          "width": 0.005859375,
+          "height": 0.0
+        },
+        "document-list-item-2": {
+          "x": 0.0,
+          "y": 0.8718750000000455,
+          "width": 0.005859375,
+          "height": 0.0
+        }
+      }
+    },
+    {
+      "case": "light-1280-100-R05-top",
+      "qualified": true,
+      "guardErrors": [],
+      "referenceScrollbarWidth": 0,
+      "actualScrollbarWidth": 0.0,
+      "eligibleBoxes": 23,
+      "maximumDelta": 1.2468750000000455,
+      "eligibleGeometryPassed": true,
+      "deltas": {
+        "detail-title": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": 0.0,
+          "height": 0.203125
+        },
+        "field-name-label": {
+          "x": 0.0,
+          "y": -0.28750000000002274,
+          "width": 0.0,
+          "height": 0.203125
+        },
+        "field-name-value": {
+          "x": 0.0,
+          "y": -0.08437500000002274,
+          "width": 0.0,
+          "height": -0.1953125
+        },
+        "field-email-label": {
+          "x": 0.0,
+          "y": -0.28750000000002274,
+          "width": 0.0,
+          "height": 0.203125
+        },
+        "field-email-value": {
+          "x": 0.0,
+          "y": -0.08437500000002274,
+          "width": 0.0,
+          "height": -0.1953125
+        },
+        "field-direction-label": {
+          "x": 0.0,
+          "y": -0.27968750000002274,
+          "width": 0.0,
+          "height": 0.203125
+        },
+        "field-direction-value": {
+          "x": 0.0,
+          "y": -0.07656250000002274,
+          "width": 0.0,
+          "height": -0.1953125
+        },
+        "field-city-label": {
+          "x": 0.0,
+          "y": -0.27968750000002274,
+          "width": 0.0,
+          "height": 0.203125
+        },
+        "field-city-value": {
+          "x": 0.0,
+          "y": -0.07656250000002274,
+          "width": 0.0,
+          "height": -0.1953125
+        },
+        "section-education": {
+          "x": 0.0,
+          "y": -0.27187500000002274,
+          "width": 0.0,
+          "height": -0.5
+        },
+        "education-0": {
+          "x": 0.0,
+          "y": -0.7718750000000227,
+          "width": 0.0,
+          "height": 1.0093749999999773
+        },
+        "education-0-title": {
+          "x": 0.0,
+          "y": -0.7703125000000455,
+          "width": 0.0,
+          "height": 0.40625
+        },
+        "education-0-detail": {
+          "x": 0.0,
+          "y": -0.3640625000000455,
+          "width": 0.0,
+          "height": 0.6015625
+        },
+        "education-0-dot": {
+          "x": 0.0,
+          "y": -0.7718750000000227,
+          "width": 0.0,
+          "height": 0.0
+        },
+        "education-1": {
+          "x": 0.0,
+          "y": 0.23749999999995453,
+          "width": 0.0,
+          "height": 1.0093749999999773
+        },
+        "education-1-title": {
+          "x": 0.0,
+          "y": 0.2390624999999318,
+          "width": 0.0,
+          "height": 0.40625
+        },
+        "education-1-detail": {
+          "x": 0.0,
+          "y": 0.6453124999999318,
+          "width": 0.0,
+          "height": 0.6015625
+        },
+        "education-1-dot": {
+          "x": 0.0,
+          "y": 0.23749999999995453,
+          "width": 0.0,
+          "height": 0.0
+        },
+        "section-experience": {
+          "x": 0.0,
+          "y": 1.2468750000000455,
+          "width": 0.0,
+          "height": -0.5
+        },
+        "experience-0": {
+          "x": 0.0,
+          "y": 0.7468750000000455,
+          "width": 0.0,
+          "height": 1.0093749999999773
+        },
+        "experience-0-title": {
+          "x": 0.0,
+          "y": 0.7484375000000227,
+          "width": 0.0,
+          "height": 0.40625
+        },
+        "experience-0-detail": {
+          "x": 0.0,
+          "y": 1.1546875000000227,
+          "width": 0.0,
+          "height": 0.6015625
+        },
+        "experience-0-dot": {
+          "x": 0.0,
+          "y": 0.7468750000000455,
+          "width": 0.0,
+          "height": 0.0
+        }
+      }
+    },
+    {
+      "case": "light-1280-100-R05-timeline",
+      "qualified": true,
+      "guardErrors": [],
+      "referenceScrollbarWidth": 0,
+      "actualScrollbarWidth": 0.0,
+      "eligibleBoxes": 23,
+      "maximumDelta": 1.2468750000000455,
+      "eligibleGeometryPassed": true,
+      "deltas": {
+        "detail-title": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": 0.0,
+          "height": 0.203125
+        },
+        "field-name-label": {
+          "x": 0.0,
+          "y": -0.2874999999999943,
+          "width": 0.0,
+          "height": 0.203125
+        },
+        "field-name-value": {
+          "x": 0.0,
+          "y": -0.08437499999999432,
+          "width": 0.0,
+          "height": -0.1953125
+        },
+        "field-email-label": {
+          "x": 0.0,
+          "y": -0.2874999999999943,
+          "width": 0.0,
+          "height": 0.203125
+        },
+        "field-email-value": {
+          "x": 0.0,
+          "y": -0.08437499999999432,
+          "width": 0.0,
+          "height": -0.1953125
+        },
+        "field-direction-label": {
+          "x": 0.0,
+          "y": -0.2796874999999943,
+          "width": 0.0,
+          "height": 0.203125
+        },
+        "field-direction-value": {
+          "x": 0.0,
+          "y": -0.07656249999999432,
+          "width": 0.0,
+          "height": -0.1953125
+        },
+        "field-city-label": {
+          "x": 0.0,
+          "y": -0.2796874999999943,
+          "width": 0.0,
+          "height": 0.203125
+        },
+        "field-city-value": {
+          "x": 0.0,
+          "y": -0.07656249999999432,
+          "width": 0.0,
+          "height": -0.1953125
+        },
+        "section-education": {
+          "x": 0.0,
+          "y": -0.27187500000002274,
+          "width": 0.0,
+          "height": -0.5
+        },
+        "education-0": {
+          "x": 0.0,
+          "y": -0.7718750000000227,
+          "width": 0.0,
+          "height": 1.0093749999999773
+        },
+        "education-0-title": {
+          "x": 0.0,
+          "y": -0.7703125000000455,
+          "width": 0.0,
+          "height": 0.40625
+        },
+        "education-0-detail": {
+          "x": 0.0,
+          "y": -0.3640625000000455,
+          "width": 0.0,
+          "height": 0.6015625
+        },
+        "education-0-dot": {
+          "x": 0.0,
+          "y": -0.7718750000000227,
+          "width": 0.0,
+          "height": 0.0
+        },
+        "education-1": {
+          "x": 0.0,
+          "y": 0.23749999999995453,
+          "width": 0.0,
+          "height": 1.0093749999999773
+        },
+        "education-1-title": {
+          "x": 0.0,
+          "y": 0.2390624999999318,
+          "width": 0.0,
+          "height": 0.40625
+        },
+        "education-1-detail": {
+          "x": 0.0,
+          "y": 0.6453124999999318,
+          "width": 0.0,
+          "height": 0.6015625
+        },
+        "education-1-dot": {
+          "x": 0.0,
+          "y": 0.23749999999995453,
+          "width": 0.0,
+          "height": 0.0
+        },
+        "section-experience": {
+          "x": 0.0,
+          "y": 1.2468750000000455,
+          "width": 0.0,
+          "height": -0.5
+        },
+        "experience-0": {
+          "x": 0.0,
+          "y": 0.7468750000000455,
+          "width": 0.0,
+          "height": 1.0093749999999773
+        },
+        "experience-0-title": {
+          "x": 0.0,
+          "y": 0.7484375000000227,
+          "width": 0.0,
+          "height": 0.40625
+        },
+        "experience-0-detail": {
+          "x": 0.0,
+          "y": 1.1546875000000227,
+          "width": 0.0,
+          "height": 0.6015625
+        },
+        "experience-0-dot": {
+          "x": 0.0,
+          "y": 0.7468750000000455,
+          "width": 0.0,
+          "height": 0.0
+        }
+      }
+    },
+    {
+      "case": "light-1280-100-R06-document",
+      "qualified": true,
+      "guardErrors": [],
+      "referenceScrollbarWidth": 0,
+      "actualScrollbarWidth": 0.0,
+      "eligibleBoxes": 18,
+      "maximumDelta": 0.7203124999999773,
+      "eligibleGeometryPassed": true,
+      "deltas": {
+        "detail-title": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": 0.0,
+          "height": 0.203125
+        },
+        "document-heading-0": {
+          "x": 0.0,
+          "y": 0.2109375,
+          "width": 0.0,
+          "height": 0.0
+        },
+        "document-heading-1": {
+          "x": 0.0,
+          "y": 0.21406250000001137,
+          "width": 0.0,
+          "height": 0.0
+        },
+        "document-heading-2": {
+          "x": 0.0,
+          "y": 0.22343750000004547,
+          "width": 0.0,
+          "height": 0.0
+        },
+        "document-paragraph-0": {
+          "x": 0.0,
+          "y": 0.2109375,
+          "width": 0.0,
+          "height": 0.0031250000000113687
+        },
+        "document-paragraph-1": {
+          "x": 0.0,
+          "y": 0.22343750000004547,
+          "width": 0.0,
+          "height": 0.0031249999999545253
+        },
+        "document-table": {
+          "x": 0.0,
+          "y": 0.21406250000001137,
+          "width": 0.0,
+          "height": 0.009375000000034106
+        },
+        "document-table-cell-0-0": {
+          "x": 0.0,
+          "y": 0.21406250000001137,
+          "width": 0.009733660739584593,
+          "height": 0.5031250000000114
+        },
+        "document-table-cell-0-1": {
+          "x": 0.009733660739584593,
+          "y": 0.21406250000001137,
+          "width": -0.009733660739584593,
+          "height": 0.5031250000000114
+        },
+        "document-table-cell-1-0": {
+          "x": 0.0,
+          "y": 0.7171875000000227,
+          "width": 0.009733660739584593,
+          "height": 0.0031249999999545253
+        },
+        "document-table-cell-1-1": {
+          "x": 0.009733660739584593,
+          "y": 0.7171875000000227,
+          "width": -0.009733660739584593,
+          "height": 0.0031249999999545253
+        },
+        "document-table-cell-2-0": {
+          "x": 0.0,
+          "y": 0.7203124999999773,
+          "width": 0.009733660739584593,
+          "height": 0.0031249999999545253
+        },
+        "document-table-cell-2-1": {
+          "x": 0.009733660739584593,
+          "y": 0.7203124999999773,
+          "width": -0.009733660739584593,
+          "height": 0.0031249999999545253
+        },
+        "document-code": {
+          "x": 0.0,
+          "y": 0.22343750000004547,
+          "width": 0.0,
+          "height": 0.0
+        },
+        "document-list": {
+          "x": 0.0,
+          "y": 0.22343750000004547,
+          "width": 0.0,
+          "height": 0.0
+        },
+        "document-list-item-0": {
+          "x": 0.0,
+          "y": 0.22343750000004547,
+          "width": 0.0,
+          "height": 0.0
+        },
+        "document-list-item-1": {
+          "x": 0.0,
+          "y": 0.22343750000004547,
+          "width": 0.0,
+          "height": 0.0
+        },
+        "document-list-item-2": {
+          "x": 0.0,
+          "y": 0.22343750000004547,
+          "width": 0.0,
+          "height": 0.0
+        }
+      }
+    },
+    {
+      "case": "dark-1280-100-R05-top",
+      "qualified": true,
+      "guardErrors": [],
+      "referenceScrollbarWidth": 0,
+      "actualScrollbarWidth": 0.0,
+      "eligibleBoxes": 23,
+      "maximumDelta": 1.2468750000000455,
+      "eligibleGeometryPassed": true,
+      "deltas": {
+        "detail-title": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": 0.0,
+          "height": 0.203125
+        },
+        "field-name-label": {
+          "x": 0.0,
+          "y": -0.28750000000002274,
+          "width": 0.0,
+          "height": 0.203125
+        },
+        "field-name-value": {
+          "x": 0.0,
+          "y": -0.08437500000002274,
+          "width": 0.0,
+          "height": -0.1953125
+        },
+        "field-email-label": {
+          "x": 0.0,
+          "y": -0.28750000000002274,
+          "width": 0.0,
+          "height": 0.203125
+        },
+        "field-email-value": {
+          "x": 0.0,
+          "y": -0.08437500000002274,
+          "width": 0.0,
+          "height": -0.1953125
+        },
+        "field-direction-label": {
+          "x": 0.0,
+          "y": -0.27968750000002274,
+          "width": 0.0,
+          "height": 0.203125
+        },
+        "field-direction-value": {
+          "x": 0.0,
+          "y": -0.07656250000002274,
+          "width": 0.0,
+          "height": -0.1953125
+        },
+        "field-city-label": {
+          "x": 0.0,
+          "y": -0.27968750000002274,
+          "width": 0.0,
+          "height": 0.203125
+        },
+        "field-city-value": {
+          "x": 0.0,
+          "y": -0.07656250000002274,
+          "width": 0.0,
+          "height": -0.1953125
+        },
+        "section-education": {
+          "x": 0.0,
+          "y": -0.27187500000002274,
+          "width": 0.0,
+          "height": -0.5
+        },
+        "education-0": {
+          "x": 0.0,
+          "y": -0.7718750000000227,
+          "width": 0.0,
+          "height": 1.0093749999999773
+        },
+        "education-0-title": {
+          "x": 0.0,
+          "y": -0.7703125000000455,
+          "width": 0.0,
+          "height": 0.40625
+        },
+        "education-0-detail": {
+          "x": 0.0,
+          "y": -0.3640625000000455,
+          "width": 0.0,
+          "height": 0.6015625
+        },
+        "education-0-dot": {
+          "x": 0.0,
+          "y": -0.7718750000000227,
+          "width": 0.0,
+          "height": 0.0
+        },
+        "education-1": {
+          "x": 0.0,
+          "y": 0.23749999999995453,
+          "width": 0.0,
+          "height": 1.0093749999999773
+        },
+        "education-1-title": {
+          "x": 0.0,
+          "y": 0.2390624999999318,
+          "width": 0.0,
+          "height": 0.40625
+        },
+        "education-1-detail": {
+          "x": 0.0,
+          "y": 0.6453124999999318,
+          "width": 0.0,
+          "height": 0.6015625
+        },
+        "education-1-dot": {
+          "x": 0.0,
+          "y": 0.23749999999995453,
+          "width": 0.0,
+          "height": 0.0
+        },
+        "section-experience": {
+          "x": 0.0,
+          "y": 1.2468750000000455,
+          "width": 0.0,
+          "height": -0.5
+        },
+        "experience-0": {
+          "x": 0.0,
+          "y": 0.7468750000000455,
+          "width": 0.0,
+          "height": 1.0093749999999773
+        },
+        "experience-0-title": {
+          "x": 0.0,
+          "y": 0.7484375000000227,
+          "width": 0.0,
+          "height": 0.40625
+        },
+        "experience-0-detail": {
+          "x": 0.0,
+          "y": 1.1546875000000227,
+          "width": 0.0,
+          "height": 0.6015625
+        },
+        "experience-0-dot": {
+          "x": 0.0,
+          "y": 0.7468750000000455,
+          "width": 0.0,
+          "height": 0.0
+        }
+      }
+    },
+    {
+      "case": "dark-1280-100-R05-timeline",
+      "qualified": true,
+      "guardErrors": [],
+      "referenceScrollbarWidth": 0,
+      "actualScrollbarWidth": 0.0,
+      "eligibleBoxes": 23,
+      "maximumDelta": 1.2468750000000455,
+      "eligibleGeometryPassed": true,
+      "deltas": {
+        "detail-title": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": 0.0,
+          "height": 0.203125
+        },
+        "field-name-label": {
+          "x": 0.0,
+          "y": -0.2874999999999943,
+          "width": 0.0,
+          "height": 0.203125
+        },
+        "field-name-value": {
+          "x": 0.0,
+          "y": -0.08437499999999432,
+          "width": 0.0,
+          "height": -0.1953125
+        },
+        "field-email-label": {
+          "x": 0.0,
+          "y": -0.2874999999999943,
+          "width": 0.0,
+          "height": 0.203125
+        },
+        "field-email-value": {
+          "x": 0.0,
+          "y": -0.08437499999999432,
+          "width": 0.0,
+          "height": -0.1953125
+        },
+        "field-direction-label": {
+          "x": 0.0,
+          "y": -0.2796874999999943,
+          "width": 0.0,
+          "height": 0.203125
+        },
+        "field-direction-value": {
+          "x": 0.0,
+          "y": -0.07656249999999432,
+          "width": 0.0,
+          "height": -0.1953125
+        },
+        "field-city-label": {
+          "x": 0.0,
+          "y": -0.2796874999999943,
+          "width": 0.0,
+          "height": 0.203125
+        },
+        "field-city-value": {
+          "x": 0.0,
+          "y": -0.07656249999999432,
+          "width": 0.0,
+          "height": -0.1953125
+        },
+        "section-education": {
+          "x": 0.0,
+          "y": -0.27187500000002274,
+          "width": 0.0,
+          "height": -0.5
+        },
+        "education-0": {
+          "x": 0.0,
+          "y": -0.7718750000000227,
+          "width": 0.0,
+          "height": 1.0093749999999773
+        },
+        "education-0-title": {
+          "x": 0.0,
+          "y": -0.7703125000000455,
+          "width": 0.0,
+          "height": 0.40625
+        },
+        "education-0-detail": {
+          "x": 0.0,
+          "y": -0.3640625000000455,
+          "width": 0.0,
+          "height": 0.6015625
+        },
+        "education-0-dot": {
+          "x": 0.0,
+          "y": -0.7718750000000227,
+          "width": 0.0,
+          "height": 0.0
+        },
+        "education-1": {
+          "x": 0.0,
+          "y": 0.23749999999995453,
+          "width": 0.0,
+          "height": 1.0093749999999773
+        },
+        "education-1-title": {
+          "x": 0.0,
+          "y": 0.2390624999999318,
+          "width": 0.0,
+          "height": 0.40625
+        },
+        "education-1-detail": {
+          "x": 0.0,
+          "y": 0.6453124999999318,
+          "width": 0.0,
+          "height": 0.6015625
+        },
+        "education-1-dot": {
+          "x": 0.0,
+          "y": 0.23749999999995453,
+          "width": 0.0,
+          "height": 0.0
+        },
+        "section-experience": {
+          "x": 0.0,
+          "y": 1.2468750000000455,
+          "width": 0.0,
+          "height": -0.5
+        },
+        "experience-0": {
+          "x": 0.0,
+          "y": 0.7468750000000455,
+          "width": 0.0,
+          "height": 1.0093749999999773
+        },
+        "experience-0-title": {
+          "x": 0.0,
+          "y": 0.7484375000000227,
+          "width": 0.0,
+          "height": 0.40625
+        },
+        "experience-0-detail": {
+          "x": 0.0,
+          "y": 1.1546875000000227,
+          "width": 0.0,
+          "height": 0.6015625
+        },
+        "experience-0-dot": {
+          "x": 0.0,
+          "y": 0.7468750000000455,
+          "width": 0.0,
+          "height": 0.0
+        }
+      }
+    },
+    {
+      "case": "dark-1280-100-R06-document",
+      "qualified": true,
+      "guardErrors": [],
+      "referenceScrollbarWidth": 0,
+      "actualScrollbarWidth": 0.0,
+      "eligibleBoxes": 18,
+      "maximumDelta": 0.7203124999999773,
+      "eligibleGeometryPassed": true,
+      "deltas": {
+        "detail-title": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": 0.0,
+          "height": 0.203125
+        },
+        "document-heading-0": {
+          "x": 0.0,
+          "y": 0.2109375,
+          "width": 0.0,
+          "height": 0.0
+        },
+        "document-heading-1": {
+          "x": 0.0,
+          "y": 0.21406250000001137,
+          "width": 0.0,
+          "height": 0.0
+        },
+        "document-heading-2": {
+          "x": 0.0,
+          "y": 0.22343750000004547,
+          "width": 0.0,
+          "height": 0.0
+        },
+        "document-paragraph-0": {
+          "x": 0.0,
+          "y": 0.2109375,
+          "width": 0.0,
+          "height": 0.0031250000000113687
+        },
+        "document-paragraph-1": {
+          "x": 0.0,
+          "y": 0.22343750000004547,
+          "width": 0.0,
+          "height": 0.0031249999999545253
+        },
+        "document-table": {
+          "x": 0.0,
+          "y": 0.21406250000001137,
+          "width": 0.0,
+          "height": 0.009375000000034106
+        },
+        "document-table-cell-0-0": {
+          "x": 0.0,
+          "y": 0.21406250000001137,
+          "width": 0.009733660739584593,
+          "height": 0.5031250000000114
+        },
+        "document-table-cell-0-1": {
+          "x": 0.009733660739584593,
+          "y": 0.21406250000001137,
+          "width": -0.009733660739584593,
+          "height": 0.5031250000000114
+        },
+        "document-table-cell-1-0": {
+          "x": 0.0,
+          "y": 0.7171875000000227,
+          "width": 0.009733660739584593,
+          "height": 0.0031249999999545253
+        },
+        "document-table-cell-1-1": {
+          "x": 0.009733660739584593,
+          "y": 0.7171875000000227,
+          "width": -0.009733660739584593,
+          "height": 0.0031249999999545253
+        },
+        "document-table-cell-2-0": {
+          "x": 0.0,
+          "y": 0.7203124999999773,
+          "width": 0.009733660739584593,
+          "height": 0.0031249999999545253
+        },
+        "document-table-cell-2-1": {
+          "x": 0.009733660739584593,
+          "y": 0.7203124999999773,
+          "width": -0.009733660739584593,
+          "height": 0.0031249999999545253
+        },
+        "document-code": {
+          "x": 0.0,
+          "y": 0.22343750000004547,
+          "width": 0.0,
+          "height": 0.0
+        },
+        "document-list": {
+          "x": 0.0,
+          "y": 0.22343750000004547,
+          "width": 0.0,
+          "height": 0.0
+        },
+        "document-list-item-0": {
+          "x": 0.0,
+          "y": 0.22343750000004547,
+          "width": 0.0,
+          "height": 0.0
+        },
+        "document-list-item-1": {
+          "x": 0.0,
+          "y": 0.22343750000004547,
+          "width": 0.0,
+          "height": 0.0
+        },
+        "document-list-item-2": {
+          "x": 0.0,
+          "y": 0.22343750000004547,
+          "width": 0.0,
+          "height": 0.0
+        }
+      }
+    }
+  ],
+  "summary": {
+    "cases": 12,
+    "qualified": 12,
+    "eligibleGeometryPassed": 12,
+    "maximumProfileDelta": 1.2468750000000455,
+    "maximumDocumentDelta": 1.3687499999999773
+  }
+}

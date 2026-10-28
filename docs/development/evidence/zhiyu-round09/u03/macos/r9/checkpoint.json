@@ -1,0 +1,93 @@
+{
+  "createdAt": "2026-10-28T19:43:52.972434+00:00",
+  "sourceCommit": "4229136ec1e02ff933df7ad642dd02596d5e0d04",
+  "issue": {
+    "number": 64,
+    "checked": 6,
+    "total": 7,
+    "state": "OPEN",
+    "blockedBy": 63
+  },
+  "checks": {
+    "finalFocused": 28,
+    "relatedRegression": 467,
+    "ordering": "Only native QA interaction helpers changed after final28/467; final strict analysis, native1/14 and ordinary build followed. Application source unchanged.",
+    "analysis": "passed --fatal-infos",
+    "ordinaryMacBuild": "passed arm64 preview_main.dart",
+    "nativeTests": 1,
+    "nativeFunctionalChecks": 14,
+    "nativeDocumentCases": 4,
+    "referenceCases": 12,
+    "actualWidgetStates": 24,
+    "qualifiedComparisonCases": 12,
+    "eligibleBoxCasesPassed": 12,
+    "profileEligibleBoxesPerCase": 23,
+    "documentEligibleBoxesPerCase": 18,
+    "maximumProfileBoxDelta": 1.2468750000000455,
+    "maximumDocumentBoxDelta": 1.3687499999999773,
+    "maximumNativeVsWidgetLogicalDelta": 0.0,
+    "maximumNativeVsReferenceLogicalDelta": 1.3687499999999773,
+    "comparisonGuardChecks": 8,
+    "unscaledComparisonPairs": 2,
+    "fullS5Passed": false,
+    "fullMotionPassed": false
+  },
+  "environment": {
+    "macOS": "27.0.1",
+    "build": "26A434",
+    "WidgetDPR": 1,
+    "nativeDPR": 2.0,
+    "viewports": [
+      [
+        1440,
+        900
+      ],
+      [
+        1280,
+        800
+      ]
+    ],
+    "textScales": [
+      1,
+      2
+    ],
+    "fonts": "actual/fonts.json",
+    "fixture": "isolated synthetic PreviewWorkspace"
+  },
+  "changes": [
+    "table min/max intrinsic widths and content-proportional expansion instead of equal150px columns",
+    "full-height table cells retain shared row borders when content wraps",
+    "fractional outer line boxes with original glyph sizes/selection; fixed strut prevents fallback from expanding CSS leading",
+    "list markers align toward text with existing40/22px indentation; code15px line-box font retains13px glyphs",
+    "expanded reference/actual document boxes include paragraphs/table/cells/list/items/code; heading-only old scope rejected"
+  ],
+  "pending": [
+    "complete text baselines/glyph pixels including engine rounding inside long multiline paragraphs; this report verifies outer line boxes, not arbitrary glyph fidelity",
+    "remaining R06 ordinary file/resume/credential reading and dialogs; R05 edit/failure contexts",
+    "complete normal-speed motion, physical OS input and seven UI S5 gates",
+    "F01 real persistence/services/delivery after UI"
+  ],
+  "nativeScope": {
+    "foregroundRequest": "open returned1; current Cocoa Flutter framebuffer/menu/window-size tests passed, no foreground OS input acceptance",
+    "queryFlow": "explicit click, clear, enter HTTPS; actual controller/query/ready/result-row assertions retained",
+    "sameDPRPixelComparison": false,
+    "recording": "existing control recording precedes document matrix; not retained or accepted as document motion proof",
+    "unchangedNativeStartupAndBridge": {
+      "apps/desktop/lib/preview_main.dart": true,
+      "apps/desktop/lib/workspace/mac_preview_desktop.dart": true,
+      "apps/desktop/macos/Runner/MainFlutterWindow.swift": true
+    }
+  },
+  "isolation": {
+    "computerUse": false,
+    "subagents": false,
+    "personalDatabase": false,
+    "keychain": false,
+    "notifications": false,
+    "realHooks": false,
+    "systemClipboard": false,
+    "systemPreferenceMutation": false,
+    "WindowsCI": false,
+    "copiedAppOrDSYM": false
+  }
+}
