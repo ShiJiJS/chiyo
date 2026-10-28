@@ -1,0 +1,10 @@
+00:00 +0: loading /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_preview_desktop_test.dart
+00:00 +0: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_preview_desktop_test.dart: host appearance updates while navigation is gated and stops on disposal
+00:00 +1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_scrollbar_policy_test.dart: appearance change closes a menu whose anchor moves without a window resize
+00:01 +2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_preview_desktop_test.dart: host scrollbar changes resize library without replacing an unsaved editor
+00:06 +3: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_preview_desktop_test.dart: preview fails closed when the native mode is missing or incomplete
+00:06 +4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_preview_desktop_test.dart: Mac menu commands navigate the preview and modal gates navigation
+00:07 +5: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_preview_desktop_test.dart: queued native commands are ignored while the local navigation gate is closed
+00:07 +6: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_preview_desktop_test.dart: approval refresh cannot unlock an unsaved editor or an overlapping modal; native input preserves the draft
+00:11 +7: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_preview_desktop_test.dart: a late modal close cannot release an unresolved approval decision
+00:12 +8: All tests passed!

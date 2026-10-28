@@ -67,3 +67,8 @@ F01在全部七项UI完成后接实际Owner服务。必须补齐事务、迁移�
 ## U03 r7阅读视图状态
 
 主文档的DocumentReadingController归详情页面所有并销毁；原文/排版切换仅改变阅读状态，身份、正文或格式变化时重置。独立LibraryDocument无外部controller时自持有并销毁。不产生服务操作、版本或回执；工具栏与正文共用一个状态，模板不可用时不挂孤立工具。原文完整，排版只移除代码围栏的结构性末尾换行；HTML/链接/图片继续作为闭合组件内的惰性内容。条件横滚不改变正文或附件合同。下一步滚动条模式属于Mac宿主外观输入，不应触发导航或资料操作。
+
+
+## U03 r8宿主外观
+
+原生预览初始化额外返回scrollbarStyle（overlay或legacy）与scrollbarRevision；变化事件为同一只读模式和递增revision，不包含资料或操作能力。MacPreviewDesktop在请求初始化前注册监听，只采纳较新revision；页面布局通过DesktopScrollbarScope消费，导航锁继续拒绝导航而允许外观更新。模式变化不重建资料来源或编辑控制器，不写版本或回执。无原生宿主的Widget默认保留legacy，捕获明确注入overlay条件。自定义弹窗与文档横滚保持自己的9px布局；此接缝可在F01正式组装时复用，当前没有接生产服务。

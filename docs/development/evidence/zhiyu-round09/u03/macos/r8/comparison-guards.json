@@ -1,0 +1,40 @@
+{
+  "checks": [
+    {
+      "mutation": "scrollbar_policy",
+      "rejected": true,
+      "deltasSuppressed": true
+    },
+    {
+      "mutation": "viewport_or_dpr",
+      "rejected": true,
+      "deltasSuppressed": true
+    },
+    {
+      "mutation": "theme_or_text_scale",
+      "rejected": true,
+      "deltasSuppressed": true
+    },
+    {
+      "mutation": "selection",
+      "rejected": true,
+      "deltasSuppressed": true
+    },
+    {
+      "mutation": "query",
+      "rejected": true,
+      "deltasSuppressed": true
+    },
+    {
+      "mutation": "scroll_position",
+      "rejected": true,
+      "deltasSuppressed": true
+    },
+    {
+      "mutation": "required_boxes_missing",
+      "rejected": true,
+      "deltasSuppressed": true
+    }
+  ],
+  "frozenFilesMutated": false
+}

@@ -1,0 +1,183 @@
+{
+  "platform": "macos",
+  "fonts": {
+    "platform": "macos",
+    "Zhiyu System": "/System/Library/Fonts/SFNS.ttf",
+    "PingFang SC": "/System/Library/AssetsV2/com_apple_MobileAsset_Font8/86ba2c91f017a3749571a82f2c6d890ac7ffb2fb.asset/AssetData/PingFang.ttc",
+    "Menlo": "/System/Library/Fonts/Menlo.ttc"
+  },
+  "nativeIsolationChecked": true,
+  "nativePreview": {
+    "scrollbarStyle": "overlay",
+    "productionServices": false,
+    "scrollbarRevision": 0,
+    "savedDirectories": false,
+    "isolated": true,
+    "title": "知予 · 界面预览·示例数据",
+    "applicationId": "com.example.infoDesktop.zhiyuPreview"
+  },
+  "checks": [
+    "native-search-menu-opens-library-and-focuses-search",
+    "native-CoreFoundation-zh-CN-name-sort-and-first-appearance-groups",
+    "native-chooser-blurred-barrier-locked-menu-and-immediate-close",
+    "native-widget-filter-intersection",
+    "native-widget-save-failure-draft-and-success-readback",
+    "native-widget-related-query-return",
+    "native-window-two-content-viewports-and-both-themes",
+    "native-AppKit-scrollbar-style-matches-rendered-library-gutter",
+    "native-chooser-two-viewports-two-themes-no-residual-barrier",
+    "native-rendered-large-text-edit-and-save",
+    "native-widget-revision-comparison-restore-and-readback",
+    "native-widget-whole-record-recycle-restore-and-return",
+    "native-widget-pressure-fixture-and-pagination"
+  ],
+  "nameOrder": [
+    "credential:aliyunkey",
+    "credential:sshkey",
+    "credential:blinkokey",
+    "credential:github-token",
+    "credential:tgsession",
+    "credential:vikunja-password",
+    "credential:vikunjakey",
+    "information:aliyun",
+    "information:nas",
+    "information:azure",
+    "information:resume",
+    "information:resume-en",
+    "information:profile",
+    "information:offer",
+    "information:proof",
+    "information:portrait",
+    "information:publickey",
+    "information:ideas",
+    "information:https",
+    "information:deploy",
+    "information:nasdoc",
+    "information:sshguide",
+    "information:workflow",
+    "information:blinko",
+    "information:skillshare",
+    "information:sparky",
+    "information:syncthing",
+    "information:tgapi",
+    "information:mtproto",
+    "information:video",
+    "information:vikunja"
+  ],
+  "contentViewports": [
+    {
+      "width": 1440.0,
+      "height": 900.0,
+      "dark": false,
+      "devicePixelRatio": 2.0,
+      "nativeWindowResized": true,
+      "scrollbarStyle": "overlay",
+      "actualScrollbarWidth": 0.0
+    },
+    {
+      "width": 1440.0,
+      "height": 900.0,
+      "dark": true,
+      "devicePixelRatio": 2.0,
+      "nativeWindowResized": true,
+      "scrollbarStyle": "overlay",
+      "actualScrollbarWidth": 0.0
+    },
+    {
+      "width": 1280.0,
+      "height": 800.0,
+      "dark": false,
+      "devicePixelRatio": 2.0,
+      "nativeWindowResized": true,
+      "scrollbarStyle": "overlay",
+      "actualScrollbarWidth": 0.0
+    },
+    {
+      "width": 1280.0,
+      "height": 800.0,
+      "dark": true,
+      "devicePixelRatio": 2.0,
+      "nativeWindowResized": true,
+      "scrollbarStyle": "overlay",
+      "actualScrollbarWidth": 0.0
+    }
+  ],
+  "chooserViewports": [
+    {
+      "width": 1440.0,
+      "height": 900.0,
+      "dark": false,
+      "surface": {
+        "x": 350.0,
+        "y": 150.39999999999998,
+        "width": 740.0,
+        "height": 599.2
+      },
+      "close": {
+        "x": 1025.0,
+        "y": 171.39999999999998,
+        "width": 36.0,
+        "height": 36.0
+      },
+      "devicePixelRatio": 2.0
+    },
+    {
+      "width": 1440.0,
+      "height": 900.0,
+      "dark": true,
+      "surface": {
+        "x": 350.0,
+        "y": 150.39999999999998,
+        "width": 740.0,
+        "height": 599.2
+      },
+      "close": {
+        "x": 1025.0,
+        "y": 171.39999999999998,
+        "width": 36.0,
+        "height": 36.0
+      },
+      "devicePixelRatio": 2.0
+    },
+    {
+      "width": 1280.0,
+      "height": 800.0,
+      "dark": false,
+      "surface": {
+        "x": 270.0,
+        "y": 100.39999999999998,
+        "width": 740.0,
+        "height": 599.2
+      },
+      "close": {
+        "x": 945.0,
+        "y": 121.39999999999998,
+        "width": 36.0,
+        "height": 36.0
+      },
+      "devicePixelRatio": 2.0
+    },
+    {
+      "width": 1280.0,
+      "height": 800.0,
+      "dark": true,
+      "surface": {
+        "x": 270.0,
+        "y": 100.39999999999998,
+        "width": 740.0,
+        "height": 599.2
+      },
+      "close": {
+        "x": 945.0,
+        "y": 121.39999999999998,
+        "width": 36.0,
+        "height": 36.0
+      },
+      "devicePixelRatio": 2.0
+    }
+  ],
+  "productionBootstrapUsed": false,
+  "databaseOpened": false,
+  "inputScope": "native Flutter framebuffer and Widget input; own AppKit window/menu only; no global OS input",
+  "status": "in-progress; current-source browsing/edit, revision/recycle and pressure coverage; full R01-R04 geometry/motion and actual OS input remain pending"
+}
