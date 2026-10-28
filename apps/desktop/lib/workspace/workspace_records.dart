@@ -5,6 +5,13 @@ import 'package:crypto/crypto.dart';
 /// never contain database objects, grants, executable handles or file bytes.
 enum WorkspaceRecordKind { information, credential }
 
+/// Host file templates share ordinary attachment ownership and operations.
+/// The broad file filter includes resume files; template groups stay distinct.
+const workspaceFileTypeIds = {'file', 'resume'};
+bool workspaceTypeMatches(String actual, String requested) =>
+    actual == requested ||
+    (requested == 'file' && workspaceFileTypeIds.contains(actual));
+
 const workspaceDocumentFormats = {'plain': '纯文本', 'markdown': 'Markdown'};
 const workspaceDocumentMaxLength = 1000000;
 

@@ -8,7 +8,7 @@ from pathlib import Path
 FIELDS = ('x', 'y', 'width', 'height')
 
 
-def compare(reference, actual):
+def compare(reference, actual, *, grouped_names=False):
     expected = reference['expected']
     target = reference['after']
     if not reference['accepted'] or reference['errors']:
@@ -62,12 +62,21 @@ def compare(reference, actual):
     if group_deltas:
         maximum = max(maximum, *(abs(v) for g in group_deltas for k in ('labelBox', 'countBox') for v in g[k].values()))
     order = [key.split(':', 1)[1] for key in actual['order']]
-    if actual['state'] == 'R03-name-ungrouped' and order != target['order']:
-        raise ValueError('Ungrouped name order differs from the same frozen records')
+    if (actual['state'] == 'R03-name-ungrouped' or (grouped_names and actual['state'] == 'R03-name')) and order != target['order']:
+        raise ValueError('Name order differs from the same frozen records')
+    if grouped_names and actual['state'] == 'R03-name':
+        if 'groupLabels' not in actual:
+            raise ValueError('Grouped-name metadata is absent')
+        groups = [(actual['groupLabels'][key], count) for key, count in actual['groupCounts'].items()]
+        if groups != [(g['label'], int(g['count'])) for g in target['groups']]:
+            raise ValueError('Grouped names/counts differ from the frozen result')
+    if actual['state'] == 'R03-type-menu' and actual['popupLabels'] != target['popupLabels']:
+        raise ValueError('Type menu labels/order differ from the frozen reference')
     return {'state': actual['state'], 'viewport': actual['viewport'], 'theme': actual['theme'],
             'deltas': deltas, 'sameLeadingGroupDeltas': group_deltas,
             'maximumGeometryDelta': maximum, 'geometryWithin2px': maximum <= 2,
             'orderEqual': order == target['order'],
+            'groupedNameParityVerified': grouped_names and actual['state'] == 'R03-name',
             'actualOrder': order, 'referenceOrder': target['order'],
             'scope': 'Shared measured boxes only; grouped/name ordering, normal-speed motion and OS input remain separate',
             'fullS5Passed': False}
@@ -80,6 +89,7 @@ def main():
     parser.add_argument('--actual', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--case-count', type=int, default=40)
+    parser.add_argument('--grouped-names', action='store_true', help='Also require complete R03-name order, group labels and counts')
     args = parser.parse_args()
     cases = {}
     references = {}
@@ -87,7 +97,7 @@ def main():
         for path in sorted(directory.glob('*.json')):
             references[path.name] = path
     for path in references.values():
-        cases[path.stem] = compare(json.loads(path.read_text()), json.loads((args.actual / path.name).read_text()))
+        cases[path.stem] = compare(json.loads(path.read_text()), json.loads((args.actual / path.name).read_text()), grouped_names=args.grouped_names)
         cases[path.stem]['referencePath'] = str(path)
     if len(cases) != args.case_count:
         raise ValueError('Workflow case count differs from the explicit capture matrix')

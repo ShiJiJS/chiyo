@@ -249,7 +249,7 @@ void main() {
           expectedCatalogVersion: (await s.loadCatalog()).version,
         ),
       );
-      expect((await s.readDetail(restored.ref)).record.type.id, 'file');
+      expect((await s.readDetail(restored.ref)).record.type.id, 'resume');
       expect(
         (await s.loadFileHistory(resume, 'file')).current.ref.id,
         history.current.ref.id,
