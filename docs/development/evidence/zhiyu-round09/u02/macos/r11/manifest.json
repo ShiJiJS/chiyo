@@ -269,6 +269,10 @@
       "bytes": 2041,
       "sha256": "b1789850f14b8848f6d86a0a80ecdb8b0da7ae9c7598fd474d3d67b02fa61d8b"
     },
+    "cleanup.json": {
+      "bytes": 620,
+      "sha256": "45ea5911f5f4726986b772b069242febbff7d968ee70a9bbad3d0ea336895f48"
+    },
     "collation-profile.json": {
       "bytes": 873,
       "sha256": "eeee64f4bd569f06f694d4870744719245b6d18dd9a6ab84609dc8fdc724726c"
