@@ -1,0 +1,76 @@
+00:00 +0: loading /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_controls_test.dart
+00:00 +0: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_controls_test.dart: desktop menu supports keyboard selection and escape
+00:09 +1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_controls_test.dart: desktop menu supports keyboard selection and escape
+00:09 +2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_test.dart: related navigation removes only blocking filters and restores exact origin
+00:09 +3: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_motion_contract_test.dart: quiet hover preserves premultiplied color and selection owns one background
+00:09 +4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_controls_test.dart: unsaved selection does not replace the persisted setting
+00:09 +5: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_directory_test.dart: directory writes validate sibling names and paths, are versioned and idempotent
+00:09 +6: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_directory_test.dart: directory writes validate sibling names and paths, are versioned and idempotent
+00:10 +7: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_motion_contract_test.dart: detail entrance measures 3px/180ms and stable identity does not replay
+00:10 +8: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_motion_contract_test.dart: detail entrance measures 3px/180ms and stable identity does not replay
+00:10 +9: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_motion_contract_test.dart: detail entrance measures 3px/180ms and stable identity does not replay
+00:10 +10: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_motion_contract_test.dart: detail entrance measures 3px/180ms and stable identity does not replay
+00:10 +11: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_motion_contract_test.dart: detail entrance measures 3px/180ms and stable identity does not replay
+00:10 +12: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_test.dart: real preview has responsive three panes and metadata filtering
+00:11 +13: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_test.dart: real preview has responsive three panes and metadata filtering
+00:11 +14: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_test.dart: real preview has responsive three panes and metadata filtering
+00:11 +15: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_test.dart: real preview has responsive three panes and metadata filtering
+00:12 +16: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_test.dart: real preview has responsive three panes and metadata filtering
+00:12 +17: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_test.dart: real preview has responsive three panes and metadata filtering
+00:12 +18: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_test.dart: real preview has responsive three panes and metadata filtering
+00:13 +19: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_test.dart: real preview has responsive three panes and metadata filtering
+00:22 +20: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_directory_test.dart: directory menu creates, preserves failed draft, moves and deletes from the actual library
+00:28 +21: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_directory_test.dart: directory menu creates, preserves failed draft, moves and deletes from the actual library
+00:30 +22: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: real pressure switch, pagination, related navigation and return preserve selected row and list scroll
+00:31 +23: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: real pressure switch, pagination, related navigation and return preserve selected row and list scroll
+00:35 +24: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: real pressure switch, pagination, related navigation and return preserve selected row and list scroll
+00:37 +25: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: real pressure switch, pagination, related navigation and return preserve selected row and list scroll
+00:38 +26: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: real pressure switch, pagination, related navigation and return preserve selected row and list scroll
+00:40 +27: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_directory_test.dart: concurrent catalog changes require explicit reload without dropping a large-text draft
+00:40 +28: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_test.dart: create validates required fields before adding and selecting a record
+00:44 +29: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_relations_test.dart: large text keeps relation choices and fixed submit action reachable
+00:45 +30: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_relations_test.dart: large text keeps relation choices and fixed submit action reachable
+00:46 +31: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+00:47 +32: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+00:48 +33: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+00:48 +34: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+00:56 +35: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_test.dart: document editing preserves failed draft and saves plain text/Markdown as distinct versioned facts
+00:59 +36: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credentials_test.dart: credential reading, grouped usage history and failed use request reach one pending receipt
+01:06 +37: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile entry add/move/remove and failed save retain draft at 1440.0 dark=false
+01:08 +38: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile entry add/move/remove and failed save retain draft at 1440.0 dark=false
+01:12 +39: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile entry add/move/remove and failed save retain draft at 1440.0 dark=false
+01:13 +40: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credentials_test.dart: dark 200% credential create and rotation preserve uncertain draft, disable and re-enable explicitly
+01:19 +41: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credentials_test.dart: dark 200% credential create and rotation preserve uncertain draft, disable and re-enable explicitly
+01:27 +42: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credentials_test.dart: dark 200% credential create and rotation preserve uncertain draft, disable and re-enable explicitly
+01:28 +43: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credentials_test.dart: dark 200% credential create and rotation preserve uncertain draft, disable and re-enable explicitly
+01:28 +44: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_test.dart: new document starts empty and saves through the common add entry
+01:29 +45: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: switching dataset from recycle clears internal location and return stack and restores baseline count
+01:34 +46: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile entry add/move/remove and failed save retain draft at 1280.0 dark=false
+01:35 +47: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile entry add/move/remove and failed save retain draft at 1280.0 dark=false
+01:37 +48: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credentials_test.dart: focus unavailable, storage-only and a reachable read failure remain usable without secrets or execution
+01:37 +49: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: all tag options are keyboard searchable and clearing keeps other filters
+01:40 +50: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: all tag options are keyboard searchable and clearing keeps other filters
+01:42 +51: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile entry add/move/remove and failed save retain draft at 1280.0 dark=true
+01:48 +52: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile entry add/move/remove and failed save retain draft at 1280.0 dark=true
+01:48 +53: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: server identity deep link selects the exact host and shares readback with settings and library
+01:52 +54: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: server identity deep link selects the exact host and shares readback with settings and library
+01:58 +55: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: server identity deep link selects the exact host and shares readback with settings and library
+02:01 +56: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: server identity deep link selects the exact host and shares readback with settings and library
+02:03 +57: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: server identity deep link selects the exact host and shares readback with settings and library
+02:03 +58: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: cancelling an entry removal discards the draft only
+02:03 +59: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_classification_test.dart: tag rename updates current library metadata; deletion rechecks reviewed membership and preserves the actual content
+02:08 +60: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_classification_test.dart: tag rename updates current library metadata; deletion rechecks reviewed membership and preserves the actual content
+02:12 +61: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: settings-1280-dark200 all eight sidebar destinations share saved state without system effects or creating grants
+02:15 +62: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: dark200 host changes warn, missing fingerprints block confirmation and disabled plugin retains revocation
+02:19 +63: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_preview_isolation_test.dart: Mac preview composition, plugins, adoption and legacy conversion avoid production channels, network and personal paths
+02:20 +64: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_preview_isolation_test.dart: Mac preview composition, plugins, adoption and legacy conversion avoid production channels, network and personal paths
+02:23 +65: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_preview_isolation_test.dart: Mac preview composition, plugins, adoption and legacy conversion avoid production channels, network and personal paths
+02:23 +66: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_preview_isolation_test.dart: Mac preview composition, plugins, adoption and legacy conversion avoid production channels, network and personal paths
+02:25 +67: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_preview_isolation_test.dart: Mac preview composition, plugins, adoption and legacy conversion avoid production channels, network and personal paths
+02:27 +68: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_preview_isolation_test.dart: Mac preview composition, plugins, adoption and legacy conversion avoid production channels, network and personal paths
+02:41 +69: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_preview_isolation_test.dart: Mac preview composition, plugins, adoption and legacy conversion avoid production channels, network and personal paths
+02:44 +70: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_preview_isolation_test.dart: Mac preview composition, plugins, adoption and legacy conversion avoid production channels, network and personal paths
+02:48 +71: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_preview_isolation_test.dart: Mac preview composition, plugins, adoption and legacy conversion avoid production channels, network and personal paths
+02:50 +72: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_preview_isolation_test.dart: Mac preview composition, plugins, adoption and legacy conversion avoid production channels, network and personal paths
+02:50 +73: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/mac_preview_isolation_test.dart: Mac preview composition, plugins, adoption and legacy conversion avoid production channels, network and personal paths
+02:59 +74: All tests passed!

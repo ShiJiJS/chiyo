@@ -1,0 +1,396 @@
+{
+  "expected": {
+    "viewport": {
+      "width": 1280,
+      "height": 800,
+      "dpr": 1
+    },
+    "theme": "light",
+    "scrollbarWidth": 11,
+    "state": "R02"
+  },
+  "before": {
+    "viewport": {
+      "width": 1280,
+      "height": 800,
+      "dpr": 1
+    },
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36",
+    "fontFamily": "\"Zhiyu System\", \"PingFang SC\", sans-serif",
+    "canvas": "#f1f2f5",
+    "shortcut": "⌘ K",
+    "list": {
+      "rect": {
+        "x": 194,
+        "y": 281.796875,
+        "width": 274,
+        "height": 473.203125
+      },
+      "offsetWidth": 274,
+      "clientWidth": 263,
+      "scrollbarWidth": 11,
+      "scrollbarPolicy": "stable",
+      "padding": "3px 10px 18px 12px"
+    },
+    "row": {
+      "id": "azure",
+      "selected": true,
+      "rect": {
+        "x": 212,
+        "y": 284.796875,
+        "width": 241,
+        "height": 155.78125
+      },
+      "fields": {
+        "name": {
+          "text": "Azure 日本服务器",
+          "rect": {
+            "x": 270,
+            "y": 299.796875,
+            "width": 170,
+            "height": 22.3984375
+          },
+          "relative": {
+            "x": 58,
+            "y": 15,
+            "width": 170,
+            "height": 22.3984375
+          },
+          "fontSize": "14px",
+          "lineHeight": "22.4px"
+        },
+        "summary": {
+          "text": "公网入口 · 域名与 HTTPS 反向代理",
+          "rect": {
+            "x": 270,
+            "y": 327.1953125,
+            "width": 170,
+            "height": 44.1875
+          },
+          "relative": {
+            "x": 58,
+            "y": 42.3984375,
+            "width": 170,
+            "height": 44.1875
+          },
+          "fontSize": "13px",
+          "lineHeight": "22.1px"
+        },
+        "type": {
+          "text": "服务器信息",
+          "rect": {
+            "x": 270,
+            "y": 379.3828125,
+            "width": 170,
+            "height": 19.1953125
+          },
+          "relative": {
+            "x": 58,
+            "y": 94.5859375,
+            "width": 170,
+            "height": 19.1953125
+          },
+          "fontSize": "12px",
+          "lineHeight": "19.2px"
+        },
+        "tag": {
+          "text": "日本",
+          "rect": {
+            "x": 275,
+            "y": 406.578125,
+            "width": 24,
+            "height": 18
+          },
+          "relative": {
+            "x": 63,
+            "y": 121.78125,
+            "width": 24,
+            "height": 18
+          },
+          "fontSize": "12px",
+          "lineHeight": "18px"
+        }
+      }
+    },
+    "order": [
+      "azure"
+    ],
+    "query": "日本",
+    "filterLabels": {
+      "type": "服务器信息",
+      "tag": "生产环境"
+    },
+    "resultCount": "1 项",
+    "groupingAndSort": "不分组 · 最近更新优先",
+    "detailBoxes": {
+      "title": {
+        "x": 584,
+        "y": 177,
+        "width": 537,
+        "height": 34.796875
+      },
+      "description": {
+        "x": 584,
+        "y": 217.796875,
+        "width": 537,
+        "height": 25.1953125
+      },
+      "meta": {
+        "x": 584,
+        "y": 253.9921875,
+        "width": 537,
+        "height": 36.796875
+      },
+      "type": {
+        "x": 584,
+        "y": 253.9921875,
+        "width": 83,
+        "height": 36.796875
+      },
+      "japanTag": {
+        "x": 674,
+        "y": 253.9921875,
+        "width": 40,
+        "height": 36.796875
+      },
+      "editTags": {
+        "x": 863,
+        "y": 253.9921875,
+        "width": 78,
+        "height": 36.796875
+      },
+      "sideTagLabel": {
+        "x": 33,
+        "y": 519.9921875,
+        "width": 66,
+        "height": 19.1953125
+      },
+      "sideTagManage": {
+        "x": 109,
+        "y": 515.1953125,
+        "width": 42,
+        "height": 28.796875
+      },
+      "cloud": {
+        "x": 12,
+        "y": 563.9921875,
+        "width": 160,
+        "height": 138
+      },
+      "credential": {
+        "x": 531,
+        "y": 744.1640625,
+        "width": 676,
+        "height": 74.4921875
+      },
+      "https": {
+        "x": 531,
+        "y": 895.15625,
+        "width": 676,
+        "height": 74.4921875
+      },
+      "sshguide": {
+        "x": 531,
+        "y": 969.6484375,
+        "width": 676,
+        "height": 75.4921875
+      }
+    }
+  },
+  "after": {
+    "viewport": {
+      "width": 1280,
+      "height": 800,
+      "dpr": 1
+    },
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36",
+    "fontFamily": "\"Zhiyu System\", \"PingFang SC\", sans-serif",
+    "canvas": "#f1f2f5",
+    "shortcut": "⌘ K",
+    "list": {
+      "rect": {
+        "x": 194,
+        "y": 281.796875,
+        "width": 274,
+        "height": 473.203125
+      },
+      "offsetWidth": 274,
+      "clientWidth": 263,
+      "scrollbarWidth": 11,
+      "scrollbarPolicy": "stable",
+      "padding": "3px 10px 18px 12px"
+    },
+    "row": {
+      "id": "azure",
+      "selected": true,
+      "rect": {
+        "x": 212,
+        "y": 284.796875,
+        "width": 241,
+        "height": 155.78125
+      },
+      "fields": {
+        "name": {
+          "text": "Azure 日本服务器",
+          "rect": {
+            "x": 270,
+            "y": 299.796875,
+            "width": 170,
+            "height": 22.3984375
+          },
+          "relative": {
+            "x": 58,
+            "y": 15,
+            "width": 170,
+            "height": 22.3984375
+          },
+          "fontSize": "14px",
+          "lineHeight": "22.4px"
+        },
+        "summary": {
+          "text": "公网入口 · 域名与 HTTPS 反向代理",
+          "rect": {
+            "x": 270,
+            "y": 327.1953125,
+            "width": 170,
+            "height": 44.1875
+          },
+          "relative": {
+            "x": 58,
+            "y": 42.3984375,
+            "width": 170,
+            "height": 44.1875
+          },
+          "fontSize": "13px",
+          "lineHeight": "22.1px"
+        },
+        "type": {
+          "text": "服务器信息",
+          "rect": {
+            "x": 270,
+            "y": 379.3828125,
+            "width": 170,
+            "height": 19.1953125
+          },
+          "relative": {
+            "x": 58,
+            "y": 94.5859375,
+            "width": 170,
+            "height": 19.1953125
+          },
+          "fontSize": "12px",
+          "lineHeight": "19.2px"
+        },
+        "tag": {
+          "text": "日本",
+          "rect": {
+            "x": 275,
+            "y": 406.578125,
+            "width": 24,
+            "height": 18
+          },
+          "relative": {
+            "x": 63,
+            "y": 121.78125,
+            "width": 24,
+            "height": 18
+          },
+          "fontSize": "12px",
+          "lineHeight": "18px"
+        }
+      }
+    },
+    "order": [
+      "azure"
+    ],
+    "query": "日本",
+    "filterLabels": {
+      "type": "服务器信息",
+      "tag": "生产环境"
+    },
+    "resultCount": "1 项",
+    "groupingAndSort": "不分组 · 最近更新优先",
+    "detailBoxes": {
+      "title": {
+        "x": 584,
+        "y": 177,
+        "width": 537,
+        "height": 34.796875
+      },
+      "description": {
+        "x": 584,
+        "y": 217.796875,
+        "width": 537,
+        "height": 25.1953125
+      },
+      "meta": {
+        "x": 584,
+        "y": 253.9921875,
+        "width": 537,
+        "height": 36.796875
+      },
+      "type": {
+        "x": 584,
+        "y": 253.9921875,
+        "width": 83,
+        "height": 36.796875
+      },
+      "japanTag": {
+        "x": 674,
+        "y": 253.9921875,
+        "width": 40,
+        "height": 36.796875
+      },
+      "editTags": {
+        "x": 863,
+        "y": 253.9921875,
+        "width": 78,
+        "height": 36.796875
+      },
+      "sideTagLabel": {
+        "x": 33,
+        "y": 519.9921875,
+        "width": 66,
+        "height": 19.1953125
+      },
+      "sideTagManage": {
+        "x": 109,
+        "y": 515.1953125,
+        "width": 42,
+        "height": 28.796875
+      },
+      "cloud": {
+        "x": 12,
+        "y": 563.9921875,
+        "width": 160,
+        "height": 138
+      },
+      "credential": {
+        "x": 531,
+        "y": 744.1640625,
+        "width": 676,
+        "height": 74.4921875
+      },
+      "https": {
+        "x": 531,
+        "y": 895.15625,
+        "width": 676,
+        "height": 74.4921875
+      },
+      "sshguide": {
+        "x": 531,
+        "y": 969.6484375,
+        "width": 676,
+        "height": 75.4921875
+      }
+    }
+  },
+  "accepted": true,
+  "errors": [],
+  "imageSha256": "0da93598a692354d2fad79dc44bcff192941bcc8aafe25699d8432422de700b3",
+  "overrides": [
+    "installed Mac font families",
+    "search shortcut marker only"
+  ],
+  "scope": "Current R01/R02-hit reference capture integrity and measured scrollbar policy; not full S5"
+}

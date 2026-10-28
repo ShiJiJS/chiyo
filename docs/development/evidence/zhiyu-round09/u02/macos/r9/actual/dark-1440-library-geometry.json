@@ -1,0 +1,177 @@
+{
+  "library-directory-pane": {
+    "x": 0.0,
+    "y": 66.0,
+    "width": 214.0,
+    "height": 834.0
+  },
+  "library-results-pane": {
+    "x": 214.0,
+    "y": 66.0,
+    "width": 300.0,
+    "height": 834.0
+  },
+  "library-detail-pane": {
+    "x": 528.0,
+    "y": 78.0,
+    "width": 898.0,
+    "height": 810.0
+  },
+  "library-detail-title": {
+    "x": 647.0,
+    "y": 183.0,
+    "width": 622.0,
+    "height": 40.0
+  },
+  "library-search": {
+    "x": 266.0,
+    "y": 148.0,
+    "width": 199.55224609375,
+    "height": 21.0
+  },
+  "library-side-footer": {
+    "x": 0.0,
+    "y": 784.0,
+    "width": 213.0,
+    "height": 116.0
+  },
+  "library-open-recycle": {
+    "x": 12.0,
+    "y": 797.0,
+    "width": 189.0,
+    "height": 39.0
+  },
+  "library-local-storage-note": {
+    "x": 46.0,
+    "y": 855.0,
+    "width": 134.0,
+    "height": 19.0
+  },
+  "library-record-information:azure": {
+    "x": 232.0,
+    "y": 421.8,
+    "width": 266.0,
+    "height": 155.99999999999994
+  },
+  "连接概览": {
+    "x": 586.0,
+    "y": 392.4,
+    "width": 771.0,
+    "height": 25.0
+  },
+  "登录凭据": {
+    "x": 586.0,
+    "y": 705.4,
+    "width": 750.05859375,
+    "height": 25.0
+  },
+  "tokyo.beichen.example": {
+    "x": 586.0,
+    "y": 511.4,
+    "width": 368.5,
+    "height": 23.0
+  },
+  "library-detail-title-advance": 207.48105163872242,
+  "library-detail-description": {
+    "x": 647.0,
+    "y": 229.0,
+    "width": 573.193359375,
+    "height": 25.0
+  },
+  "library-detail-meta": {
+    "x": 647.0,
+    "y": 265.0,
+    "width": 622.0,
+    "height": 37.0
+  },
+  "library-detail-type": {
+    "x": 647.0,
+    "y": 265.0,
+    "width": 83.0,
+    "height": 37.0
+  },
+  "library-detail-edit-tags": {
+    "x": 926.0,
+    "y": 265.0,
+    "width": 78.0,
+    "height": 37.0
+  },
+  "library-tag-label": {
+    "x": 33.0,
+    "y": 520.0,
+    "width": 86.0,
+    "height": 19.0
+  },
+  "library-tags-manage": {
+    "x": 129.0,
+    "y": 515.0,
+    "width": 42.0,
+    "height": 29.0
+  },
+  "library-tag-cloud": {
+    "x": 12.0,
+    "y": 564.0,
+    "width": 180.0,
+    "height": 105.0
+  },
+  "library-relation-credential:sshkey": {
+    "x": 586.0,
+    "y": 754.4,
+    "width": 771.0,
+    "height": 75.0
+  },
+  "library-relation-information:https": {
+    "x": 586.0,
+    "y": 905.4,
+    "width": 771.0,
+    "height": 75.0
+  },
+  "library-relation-information:sshguide": {
+    "x": 586.0,
+    "y": 980.4,
+    "width": 771.0,
+    "height": 75.00000000000011
+  },
+  "library-detail-tag-tag-0": {
+    "x": 737.0,
+    "y": 265.0,
+    "width": 40.0,
+    "height": 37.0
+  },
+  "library-detail-tag-tag-1": {
+    "x": 784.0,
+    "y": 265.0,
+    "width": 64.0,
+    "height": 37.0
+  },
+  "library-detail-tag-tag-2": {
+    "x": 855.0,
+    "y": 265.0,
+    "width": 64.0,
+    "height": 37.0
+  },
+  "row-name": {
+    "x": 290.0,
+    "y": 436.8,
+    "width": 195.0,
+    "height": 23.0
+  },
+  "row-summary": {
+    "x": 290.0,
+    "y": 464.8,
+    "width": 195.0,
+    "height": 44.0
+  },
+  "row-type": {
+    "x": 290.0,
+    "y": 516.8,
+    "width": 195.0,
+    "height": 19.0
+  },
+  "row-tag": {
+    "x": 295.0,
+    "y": 543.8,
+    "width": 24.0,
+    "height": 18.0
+  }
+}
