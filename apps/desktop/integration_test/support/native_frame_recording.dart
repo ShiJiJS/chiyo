@@ -6,6 +6,47 @@ import 'dart:ui' as ui;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+typedef _NativePixels = ({
+  int width,
+  int height,
+  int captureUs,
+  Uint8List data,
+});
+
+Future<_NativePixels> _readPixels(RenderRepaintBoundary boundary) async {
+  final clock = Stopwatch()..start();
+  final image = await boundary.toImage(pixelRatio: 1);
+  try {
+    if (image.width > 4096 ||
+        image.height > 4096 ||
+        image.width * image.height > 8388608) {
+      throw StateError('Native framebuffer exceeds the pixel limit');
+    }
+    final bytes = await image.toByteData(
+      format: ui.ImageByteFormat.rawStraightRgba,
+    );
+    if (bytes == null ||
+        bytes.lengthInBytes != image.width * image.height * 4) {
+      throw StateError(
+        'Native framebuffer did not return complete RGBA pixels',
+      );
+    }
+    final data = Uint8List.fromList(
+      ZLibCodec(level: 1).encode(
+        bytes.buffer.asUint8List(bytes.offsetInBytes, bytes.lengthInBytes),
+      ),
+    );
+    return (
+      width: image.width,
+      height: image.height,
+      captureUs: clock.elapsedMicroseconds,
+      data: data,
+    );
+  } finally {
+    image.dispose();
+  }
+}
+
 /// Captures this test's real native Flutter framebuffer, never the desktop or
 /// another application. A real stopwatch preserves timing when sampling stalls.
 /// The resulting video is a native-rendering/widget-input recording, not proof
@@ -30,6 +71,9 @@ class NativeFrameRecording {
   static const _maximumBytes = 128 * 1024 * 1024;
   int _bufferedBytes = 0, _busyTicks = 0, _unpaintedTicks = 0;
   bool _started = false, _stopped = false;
+  bool _savingStill = false;
+  int _stillPixels = 0, _stillBytes = 0;
+  final _stills = <Map<String, Object?>>[];
   final events = <Map<String, Object>>[];
   Timer? _timer;
   Future<void>? _pending;
@@ -45,7 +89,7 @@ class NativeFrameRecording {
     _clock.start();
     await _capture();
     _timer = Timer.periodic(_interval, (_) {
-      if (_pending != null) {
+      if (_pending != null || _savingStill) {
         _busyTicks++;
         return;
       }
@@ -58,6 +102,77 @@ class NativeFrameRecording {
     });
   }
 
+  /// Retain exact pixels now; PNG filtering runs on the host after app exit.
+  /// Still capture shares the sampling gate so two framebuffer reads never
+  /// overlap. Screenshots before/after the clip use the same bounded format.
+  Future<void> saveStill(String name) async {
+    if (RegExp(r'^[A-Za-z0-9][A-Za-z0-9_-]{0,159}$').stringMatch(name) !=
+            name ||
+        _stills.any((s) => s['output'] == '$name.png')) {
+      throw ArgumentError.value(
+        name,
+        'name',
+        'Unique simple filename required',
+      );
+    }
+    if (_savingStill) throw StateError('A still capture is already active');
+    if (_stills.length >= 256) {
+      throw StateError('Native still count limit reached');
+    }
+    _savingStill = true;
+    Future<void>? pending;
+    try {
+      await _pending;
+      if (_error != null) throw StateError('Native recording failed: $_error');
+      pending = _saveStill(name);
+      _pending = pending;
+      await pending;
+    } finally {
+      if (identical(_pending, pending)) _pending = null;
+      _savingStill = false;
+    }
+  }
+
+  Future<void> _saveStill(String name) async {
+    final boundary = boundaryKey.currentContext?.findRenderObject();
+    if (boundary is! RenderRepaintBoundary || boundary.debugNeedsPaint) {
+      throw StateError('Native still requires a painted framebuffer');
+    }
+    final duringRecording = _started && !_stopped;
+    final ms = duringRecording ? _clock.elapsedMilliseconds : null;
+    final frame = await _readPixels(boundary);
+    if (_stillPixels + frame.width * frame.height > 512000000 ||
+        _stillBytes + frame.data.length > _maximumBytes) {
+      throw StateError('Native still resource limit reached');
+    }
+    final directory = Directory('${output.path}/native-stills');
+    await directory.create(recursive: true);
+    final file = 'native-stills/$name.rgba.zlib';
+    await File('${output.path}/$file').writeAsBytes(frame.data);
+    _stillPixels += frame.width * frame.height;
+    _stillBytes += frame.data.length;
+    _stills.add({
+      'file': file,
+      'output': '$name.png',
+      'format': 'rgba8888-zlib',
+      'width': frame.width,
+      'height': frame.height,
+      'captureUs': frame.captureUs,
+      'compressedBytes': frame.data.length,
+      'recordingActive': duringRecording,
+      'recordingMs': ms,
+    });
+    await File('${output.path}/native-stills.json').writeAsString(
+      const JsonEncoder.withIndent('  ').convert({
+        'kind': 'native-flutter-stills-raw-rgba',
+        'pixelRatio': 1,
+        'viewportCropped': false,
+        'pngEncodingDeferred': true,
+        'stills': _stills,
+      }),
+    );
+  }
+
   Future<void> _capture() async {
     final boundary = boundaryKey.currentContext?.findRenderObject();
     if (boundary is! RenderRepaintBoundary || boundary.debugNeedsPaint) {
@@ -68,36 +183,18 @@ class NativeFrameRecording {
       throw StateError('Native recording frame limit reached');
     }
     final startedUs = _clock.elapsedMicroseconds;
-    final image = await boundary.toImage(pixelRatio: 1);
-    try {
-      final bytes = await image.toByteData(
-        format: ui.ImageByteFormat.rawStraightRgba,
-      );
-      if (bytes == null ||
-          bytes.lengthInBytes != image.width * image.height * 4) {
-        throw StateError(
-          'Native framebuffer did not return complete RGBA pixels',
-        );
-      }
-      final compressed = Uint8List.fromList(
-        ZLibCodec(level: 1).encode(
-          bytes.buffer.asUint8List(bytes.offsetInBytes, bytes.lengthInBytes),
-        ),
-      );
-      if (_bufferedBytes + compressed.length > _maximumBytes) {
-        throw StateError('Native recording buffer limit reached');
-      }
-      _bufferedBytes += compressed.length;
-      _frames.add((
-        ms: startedUs ~/ 1000,
-        width: image.width,
-        height: image.height,
-        captureUs: _clock.elapsedMicroseconds - startedUs,
-        data: compressed,
-      ));
-    } finally {
-      image.dispose();
+    final frame = await _readPixels(boundary);
+    if (_bufferedBytes + frame.data.length > _maximumBytes) {
+      throw StateError('Native recording buffer limit reached');
     }
+    _bufferedBytes += frame.data.length;
+    _frames.add((
+      ms: startedUs ~/ 1000,
+      width: frame.width,
+      height: frame.height,
+      captureUs: frame.captureUs,
+      data: frame.data,
+    ));
   }
 
   Future<void> stop(String name) async {

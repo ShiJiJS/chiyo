@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -35,6 +34,8 @@ void main() {
     final root = Directory(directory),
         boundary = GlobalKey(),
         checks = <String>[];
+    final recording = NativeFrameRecording(boundary, root, '', '');
+    addTearDown(recording.dispose);
     await tester.pumpWidget(
       RepaintBoundary(
         key: boundary,
@@ -65,15 +66,7 @@ void main() {
 
     Future<void> screenshot(String name) async {
       await tester.pumpAndSettle();
-      final image =
-          await (boundary.currentContext!.findRenderObject()!
-                  as RenderRepaintBoundary)
-              .toImage(pixelRatio: 1);
-      final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
-      await File(
-        '$directory/$name.png',
-      ).writeAsBytes(bytes!.buffer.asUint8List());
-      image.dispose();
+      await recording.saveStill(name);
     }
 
     Future<void> resize(Size size) async {
@@ -141,8 +134,6 @@ void main() {
     await tap(find.byKey(const ValueKey('library-sort')));
     await tap(find.text('最近更新优先').last);
     await tap(find.byKey(const ValueKey('library-directory-selfhost')));
-    final recording = NativeFrameRecording(boundary, root, '', '');
-    addTearDown(recording.dispose);
     await recording.start();
     recording.mark('chooser-open-with-sharp-surface-and-blurred-barrier');
     await tap(find.byKey(const ValueKey('library-create')));

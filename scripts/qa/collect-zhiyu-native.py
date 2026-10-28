@@ -38,8 +38,12 @@ def main():
     if args.output.exists():
         raise FileExistsError('Choose a new output directory; never overwrite evidence')
     shutil.copytree(source, args.output)
-    subprocess.run([args.python, str(ROOT / 'scripts/qa/encode-native-ui-recording.py'),
-                    '--manifest', str(args.output / 'native-controls.json')], check=True)
+    command = [args.python, str(ROOT / 'scripts/qa/encode-native-ui-recording.py'),
+               '--manifest', str(args.output / 'native-controls.json')]
+    stills = args.output / 'native-stills.json'
+    if stills.exists():
+        command += ['--stills-manifest', str(stills)]
+    subprocess.run(command, check=True)
     shutil.rmtree(source)
     print(json.dumps({'output': str(args.output), 'checks': result['checks'],
                       'temporarySourceRemoved': True}, ensure_ascii=False))
