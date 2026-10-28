@@ -1,0 +1,13 @@
+{
+  "verifiedAt": "2026-10-28T21:49:00.197069+00:00",
+  "macOS": "27.0.1",
+  "macOSBuild": "26A434",
+  "Xcode": "27.1",
+  "XcodeBuild": "27A9275",
+  "XcodeOutput": "Xcode 27.1\nBuild version 27A9275",
+  "Flutter": "3.47.7",
+  "FlutterRevision": "abaf9c523780a608bd46686fd5e53740a07077f8",
+  "engineRevision": "deb287481e3ce9468f3434937ced4240a70539ca",
+  "Dart": "3.13.5",
+  "sourceOrToolchainChangedByThisRead": false
+}
