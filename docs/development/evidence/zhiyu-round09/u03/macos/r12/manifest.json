@@ -139,6 +139,10 @@
     "bytes": 336,
     "sha256": "72a7989afc7f6dc32fe3c2596c35983e3e724e3760302045ff852b0fb87fd2ac"
   },
+  "environment.json": {
+    "bytes": 635,
+    "sha256": "b89e8bdb384abf5e7136c1e599707ab534824b83082319839b62e9821a96777d"
+  },
   "flows/credential-1280-dark-200-disabled.png": {
     "bytes": 174593,
     "sha256": "efc8933c082a4846870ee94e67fb95260c0262f5cf99be1b0f167921b5c5cd51"
