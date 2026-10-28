@@ -21,7 +21,7 @@ class LibraryEntryTimeline extends StatelessWidget {
       return Text('尚未添加经历。', style: libraryText(context, 14, color: c.muted));
     }
     return Container(
-      margin: const EdgeInsets.fromLTRB(8, 18, 0, 12),
+      margin: const EdgeInsets.fromLTRB(8, 18, 0, 0),
       padding: const EdgeInsets.only(left: 25),
       decoration: BoxDecoration(
         border: Border(left: BorderSide(color: c.line)),
@@ -42,6 +42,7 @@ class LibraryEntryTimeline extends StatelessWidget {
                     left: -30,
                     top: 6,
                     child: Container(
+                      key: ValueKey('library-timeline-${entry.id}-dot'),
                       width: 9,
                       height: 9,
                       decoration: BoxDecoration(
@@ -58,23 +59,37 @@ class LibraryEntryTimeline extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       if (entry.period.isNotEmpty)
-                        SelectableText(
-                          entry.label('period') ==
-                                  WorkspaceRepeatedEntry.labels['period']
-                              ? entry.period
-                              : '${entry.label('period')}：${entry.period}',
-                          style: libraryText(context, 13, color: c.muted),
+                        ConstrainedBox(
+                          constraints: BoxConstraints(
+                            minHeight:
+                                MediaQuery.textScalerOf(context).scale(14) *
+                                1.6,
+                          ),
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: SelectableText(
+                              key: ValueKey(
+                                'library-timeline-${entry.id}-period',
+                              ),
+                              entry.label('period') ==
+                                      WorkspaceRepeatedEntry.labels['period']
+                                  ? entry.period
+                                  : '${entry.label('period')}：${entry.period}',
+                              style: libraryText(context, 13, color: c.muted),
+                            ),
+                          ),
                         ),
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 5),
                         child: SelectableText(
+                          key: ValueKey('library-timeline-${entry.id}-title'),
                           entry.fieldIds.containsKey('title')
                               ? entry.title
                               : '经历（仅保留部分字段）',
                           style: libraryText(
                             context,
                             16,
-                            weight: FontWeight.w600,
+                            weight: FontWeight.w700,
                           ),
                         ),
                       ),
@@ -87,6 +102,7 @@ class LibraryEntryTimeline extends StatelessWidget {
                           ),
                         SelectableText(
                           entry.detail,
+                          key: ValueKey('library-timeline-${entry.id}-detail'),
                           style: libraryText(context, 14),
                         ),
                       ],
