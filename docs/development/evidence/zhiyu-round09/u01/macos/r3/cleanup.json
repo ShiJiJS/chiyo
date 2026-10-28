@@ -1,0 +1,19 @@
+{
+  "completedAt": "2026-10-28T23:39:45.476104+00:00",
+  "sourceCommit": "ca45fa5898ac59f7f62c192f38c209f521d443c0",
+  "evidenceGitBlobsVerifiedBeforeCleanup": 60,
+  "sourceFilesVerified": 281,
+  "rawCaptureFilesVerified": 443,
+  "systemFontsVerified": 3,
+  "frozenFilesVerified": 15,
+  "fixedOrdinaryAppVerifiedAndPreserved": true,
+  "scratchDirectoryRemoved": "build/zhiyu-ui/u01/macos/r3",
+  "scratchFilesRemoved": 479,
+  "scratchBytesRemoved": 117767132,
+  "ownedNativeDirectoriesRemoved": 7,
+  "ownedNativeBytesRemoved": 29468598,
+  "ownedBytecodeRemoved": true,
+  "retainedEvidenceBytes": 17252018,
+  "localDirectoryUntouched": true,
+  "normalSpeedMotionAccepted": false
+}
