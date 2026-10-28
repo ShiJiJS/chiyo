@@ -1,0 +1,175 @@
+{
+  "before": {
+    "viewport": {
+      "width": 1440,
+      "height": 900,
+      "dpr": 1
+    },
+    "theme": "light",
+    "font": "\"Zhiyu System\", \"PingFang SC\", sans-serif",
+    "state": {
+      "page": "library",
+      "directory": "selfhost"
+    },
+    "labels": [
+      "服务器信息连接参数、维护文档与登录凭据，一处查找。",
+      "应用与服务记录访问入口、用途及可选的部署关系。",
+      "个人档案按经历组织个人资料，关联简历与证明。",
+      "通用信息",
+      "文档",
+      "普通文件",
+      "凭据"
+    ],
+    "boxes": {
+      "surface": {
+        "x": 350,
+        "y": 150.203125,
+        "width": 740,
+        "height": 599.5859375
+      },
+      "library-create-intro": {
+        "x": 379,
+        "y": 252.203125,
+        "width": 673,
+        "height": 20.796875
+      },
+      "library-create-open-plugins": {
+        "x": 491,
+        "y": 687.9921875,
+        "width": 89.1953125,
+        "height": 36.796875
+      },
+      "library-new-type-server": {
+        "x": 379,
+        "y": 290,
+        "width": 673,
+        "height": 84.3984375
+      },
+      "library-new-type-service": {
+        "x": 379,
+        "y": 374.3984375,
+        "width": 673,
+        "height": 84.3984375
+      },
+      "library-new-type-profile": {
+        "x": 379,
+        "y": 458.796875,
+        "width": 673,
+        "height": 84.3984375
+      },
+      "library-new-type-generic": {
+        "x": 379,
+        "y": 559.1953125,
+        "width": 331.5,
+        "height": 50.3984375
+      },
+      "library-new-type-document": {
+        "x": 720.5,
+        "y": 559.1953125,
+        "width": 331.5,
+        "height": 50.3984375
+      },
+      "library-new-type-file": {
+        "x": 379,
+        "y": 619.59375,
+        "width": 331.5,
+        "height": 50.3984375
+      },
+      "library-new-type-credential": {
+        "x": 720.5,
+        "y": 619.59375,
+        "width": 331.5,
+        "height": 50.3984375
+      }
+    }
+  },
+  "after": {
+    "viewport": {
+      "width": 1440,
+      "height": 900,
+      "dpr": 1
+    },
+    "theme": "light",
+    "font": "\"Zhiyu System\", \"PingFang SC\", sans-serif",
+    "state": {
+      "page": "library",
+      "directory": "selfhost"
+    },
+    "labels": [
+      "服务器信息连接参数、维护文档与登录凭据，一处查找。",
+      "应用与服务记录访问入口、用途及可选的部署关系。",
+      "个人档案按经历组织个人资料，关联简历与证明。",
+      "通用信息",
+      "文档",
+      "普通文件",
+      "凭据"
+    ],
+    "boxes": {
+      "surface": {
+        "x": 350,
+        "y": 150.203125,
+        "width": 740,
+        "height": 599.5859375
+      },
+      "library-create-intro": {
+        "x": 379,
+        "y": 252.203125,
+        "width": 673,
+        "height": 20.796875
+      },
+      "library-create-open-plugins": {
+        "x": 491,
+        "y": 687.9921875,
+        "width": 89.1953125,
+        "height": 36.796875
+      },
+      "library-new-type-server": {
+        "x": 379,
+        "y": 290,
+        "width": 673,
+        "height": 84.3984375
+      },
+      "library-new-type-service": {
+        "x": 379,
+        "y": 374.3984375,
+        "width": 673,
+        "height": 84.3984375
+      },
+      "library-new-type-profile": {
+        "x": 379,
+        "y": 458.796875,
+        "width": 673,
+        "height": 84.3984375
+      },
+      "library-new-type-generic": {
+        "x": 379,
+        "y": 559.1953125,
+        "width": 331.5,
+        "height": 50.3984375
+      },
+      "library-new-type-document": {
+        "x": 720.5,
+        "y": 559.1953125,
+        "width": 331.5,
+        "height": 50.3984375
+      },
+      "library-new-type-file": {
+        "x": 379,
+        "y": 619.59375,
+        "width": 331.5,
+        "height": 50.3984375
+      },
+      "library-new-type-credential": {
+        "x": 720.5,
+        "y": 619.59375,
+        "width": 331.5,
+        "height": 50.3984375
+      }
+    }
+  },
+  "accepted": true,
+  "errors": [],
+  "imageSha256": "433e91d019e56b92015bc1a6c9256d04073c60888782e5515bfd6ba3c608888f",
+  "scope": "Frozen chooser; not full S5 or actual OS input",
+  "fullS5Passed": false
+}

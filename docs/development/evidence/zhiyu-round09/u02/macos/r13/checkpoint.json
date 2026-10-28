@@ -1,0 +1,62 @@
+{
+  "createdAt": "2026-10-28T17:15:11.962660+00:00",
+  "sourceCommit": "5c78f4dd764b2247d4eb8ef673a97c77252a7b25",
+  "issues": {
+    "63": {
+      "checked": 6,
+      "total": 7,
+      "state": "OPEN"
+    },
+    "64": {
+      "checked": 6,
+      "total": 7,
+      "state": "OPEN"
+    }
+  },
+  "checks": {
+    "relatedRegression": 438,
+    "regressionScope": "passed before three chooser typography/color-only refinements; final 12 focused checks, strict analysis, build and regenerated evidence passed after refinements",
+    "finalFocused": 12,
+    "chooserMatrix": 8,
+    "referenceCases": 4,
+    "maximumMeasuredGeometryDelta": 0.40468750000002274,
+    "negativeGuards": 4,
+    "analysis": "passed desktop --fatal-infos",
+    "fixedMacBuild": "passed ordinary preview arm64",
+    "fullS5Passed": false,
+    "newCocoaRuntime": false
+  },
+  "environment": {
+    "viewports": [
+      [
+        1440,
+        900
+      ],
+      [
+        1280,
+        800
+      ]
+    ],
+    "textScales": [
+      1,
+      2
+    ],
+    "DPR": 1,
+    "fonts": "actual/fonts.json",
+    "fixture": "synthetic PreviewWorkspace"
+  },
+  "pending": [
+    "header/menu glyphs and remaining creation/editing contexts",
+    "shared modal backdrop blur, full motion and normal-speed review",
+    "actual OS shortcuts/IME/trackpad/accessibility, deferred to final candidate",
+    "remaining S5 in seven UI tickets, then F01 real persistence/services and Mac delivery"
+  ],
+  "isolation": {
+    "computerUse": false,
+    "subagents": false,
+    "personalDatabase": false,
+    "systemPermissions": false,
+    "WindowsCI": false,
+    "copiedAppOrDSYM": false
+  }
+}

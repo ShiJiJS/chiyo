@@ -63,3 +63,10 @@ Mac名称排序使用系统CoreFoundation的显式`zh_CN`比较，不随本机�
 已有简历使用独立resume显示模板，仍为information引用和普通file字段，不增加文件所有权体系。按类型分组区分resume/file；文件筛选和目标模板file的关联查询包含两者。目录、标签、选择与全局分页规则不变。筛选菜单和新建资料选择器不另加resume入口，普通导入仍生成file；文件名不决定模板，已有定义快照不因名称变化被转换。
 
 loadCatalog提供冻结的紧凑类型菜单顺序，动态插件类型追加；完整结果自己的type仍包含resume用于分组。通用宿主采用“通用信息”，用户/插件声明的名称仍来自其定义。真实适配须按已知模板身份映射，不能从含“简历”的文件名或内容猜类型。本轮未改WorkspaceFileImport或任何生产协议、数据库/Keychain/权限边界；[r12证据](evidence/zhiyu-round09/u02/macos/r12/checkpoint.json)覆盖源/Widget与构建，完整S5仍开放。
+
+
+## r13：内容形式选择与插件导航
+
+创建选择器以catalog.creatableTypes决定可选类型，插件load只补充启用包的模板说明，不读取资料详情。说明等待/失败不隐藏可选类型；未知类型保留，失败可重试。选择返回明确的模板或插件设置意图，不把导航误当创建结果。插件入口关闭弹窗后通过既有模态导航队列进入settings/plugins；没有新增持久化操作或真实插件执行能力。
+
+普通文件、凭据及通用/模板编辑仍走原接口和版本/幂等合同。选择器取消和插件导航不写记录；目录未选时显示未分类。四组几何及八组Widget入口不替代完整S5/OS输入，见[r13证据](evidence/zhiyu-round09/u02/macos/r13/checkpoint.json)。
