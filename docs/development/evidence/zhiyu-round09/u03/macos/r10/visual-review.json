@@ -1,0 +1,17 @@
+{
+  "reviewedCurrentRepresentatives": [
+    "actual/light-1440-100-resume.png",
+    "actual/light-1440-100-sshkey.png",
+    "actual/dark-1280-200-sshkey.png",
+    "native/light-1440-resume.png"
+  ],
+  "all16WidgetImagesVisuallyReviewed": false,
+  "independentReview": false,
+  "sourcePixelsNotScaledInPairs": true,
+  "newDecorativeAssets": false,
+  "pending": [
+    "file toolbar99px top difference",
+    "credential body/use grid/action placement/relations",
+    "full text baselines/shadows/motion/OS input"
+  ]
+}
