@@ -51,7 +51,11 @@
     "WidgetDPR": 1,
     "nativeDPR": 2,
     "fonts": "actual/fonts.json",
-    "fixture": "isolated synthetic PreviewWorkspace; no personal data"
+    "fixture": "isolated synthetic PreviewWorkspace; no personal data",
+    "macOS": "27.0.1",
+    "macOSBuild": "26A434",
+    "architecture": "arm64",
+    "fontHashes": "font-hashes.json"
   },
   "changes": [
     "shared Round09 entry-only overlay routes; zero reverse duration, barrier filter on dialogs only",
