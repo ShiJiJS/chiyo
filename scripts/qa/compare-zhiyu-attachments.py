@@ -40,15 +40,17 @@ def compare(reference, actual):
                               'credentialOuterGeometryPassed': maximum is not None and maximum <= 2,
                               'fileFrameWidthPassed': state == 'resume' and not errors and all(abs(deltas['file-stage'][axis]) <= 2 for axis in ['x', 'width']),
                               'fileToolbarTopDelta': deltas.get('file-stage', {}).get('y'),
+                              'fileFramePositionPassed': state == 'resume' and not errors and all(abs(deltas['file-stage'][axis]) <= 2 for axis in ['x', 'y', 'width']),
                               'fullS5Passed': False, 'deltas': deltas})
     return {'cases': cases, 'thresholdLogicalPixels': 2, 'fullS5Passed': False,
             'limits': ['File uses real bundled bytes; HTML fictional paper and natural page height are not pixel references.',
-                       'File toolbar top remains an explicit difference while page/zoom/save/replace/metadata controls are preserved.',
+                       'File comparison covers stage X/Y/width after preserving page/zoom/save/replace/metadata controls; natural paper height/content excluded.',
                        'Credential format includes material version; format boxes are diagnostic, not identical-text glyph acceptance.',
                        'Credential actions/sections, full text baselines, normal-speed motion and OS input still require checks.'],
             'summary': {'qualifiedCases': sum(c['qualifiedCaptureConditions'] for c in cases),
                         'credentialOuterCasesPassed': sum(c['credentialOuterGeometryPassed'] for c in cases),
                         'fileFrameWidthsPassed': sum(c['fileFrameWidthPassed'] for c in cases),
+                        'fileFramePositionsPassed': sum(c['fileFramePositionPassed'] for c in cases),
                         'maximumCredentialOuterDelta': max((c['credentialOuterMaximumDelta'] for c in cases if c['credentialOuterMaximumDelta'] is not None), default=None),
                         'maximumFileToolbarTopDelta': max((abs(c['fileToolbarTopDelta']) for c in cases if c['fileToolbarTopDelta'] is not None), default=None)}}
 
@@ -63,7 +65,7 @@ def main():
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(report, indent=2) + '\n')
     print(json.dumps(report['summary']))
-    return 0 if all(c['qualifiedCaptureConditions'] and (c['credentialOuterGeometryPassed'] if 'sshkey' in c['case'] else c['fileFrameWidthPassed'] and abs(c['fileToolbarTopDelta']) <= 2) for c in report['cases']) else 1
+    return 0 if all(c['qualifiedCaptureConditions'] and (c['credentialOuterGeometryPassed'] if 'sshkey' in c['case'] else c['fileFramePositionPassed']) for c in report['cases']) else 1
 
 
 if __name__ == '__main__':

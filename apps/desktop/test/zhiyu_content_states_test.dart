@@ -8,6 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:info_desktop/desktop_controls.dart';
 import 'package:info_desktop/desktop_fonts.dart';
 import 'package:info_desktop/workspace/library_file.dart';
+import 'package:info_desktop/workspace/zhiyu_theme.dart';
 import 'package:info_desktop/workspace/library_controller.dart';
 import 'package:info_desktop/workspace/library_page.dart';
 import 'package:info_desktop/workspace/preview_workspace.dart';
@@ -299,4 +300,173 @@ void main() {
       },
     );
   }
+  check(
+    'current attachment keeps reading state when only record metadata changes',
+    (t) async {
+      final model = await start(t, '服务端开发简历', width: 1440);
+      await fileReady(t);
+      final ref = preview(t).preview.file.ref;
+      final file = preview(t).preview.file;
+      await tap(t, find.byKey(const ValueKey('library-file-metadata-file')));
+      final metadata = t
+          .widget<SelectableText>(
+            find.byKey(const ValueKey('library-file-metadata-content')),
+          )
+          .data!;
+      expect(metadata, contains(file.filename));
+      expect(metadata, contains(file.mediaType));
+      expect(metadata, contains('${file.byteLength} 字节'));
+      await capture(t, 'file-metadata-light1440');
+      await tap(t, find.text('关闭'));
+      final initialWidth = t.getSize(find.byType(Image)).width;
+      await tap(t, find.byKey(const ValueKey('library-file-zoom-in')));
+      await tap(t, find.byKey(const ValueKey('library-file-text-mode')));
+      final state = t.state(find.byType(LibraryFilePreviewView));
+      await tap(t, find.text('编辑信息'));
+      await enter(
+        t,
+        find.byKey(const ValueKey('library-edit-name')),
+        '服务端开发简历（元数据）',
+      );
+      await tap(t, find.byKey(const ValueKey('library-edit-save')));
+      await fileReady(t);
+      expect(model.detail!.record.name, '服务端开发简历（元数据）');
+      expect(preview(t).preview.file.ref, ref);
+      expect(
+        find.byKey(const ValueKey('library-file-extracted-text')),
+        findsOneWidget,
+      );
+      expect(t.state(find.byType(LibraryFilePreviewView)), same(state));
+      await tap(t, find.byKey(const ValueKey('library-file-text-mode')));
+      await fileReady(t);
+      expect(
+        t.getSize(find.byType(Image)).width,
+        closeTo(initialWidth * 1.5, .1),
+      );
+      await t.pumpWidget(const SizedBox());
+      await t.pumpAndSettle();
+    },
+  );
+  check(
+    'metadata revalidation hides stale file, blocks actions and preserves reader on retry; new source resets it',
+    (t) async {
+      t.view.physicalSize = const Size(1440, 900);
+      t.view.devicePixelRatio = 1;
+      addTearDown(t.view.resetPhysicalSize);
+      addTearDown(t.view.resetDevicePixelRatio);
+      Future<Uint8List> asset(String name) async =>
+          (await rootBundle.load(name)).buffer.asUint8List();
+      final first = SampleWorkspaceSource(readAsset: asset),
+          second = SampleWorkspaceSource(readAsset: asset);
+      addTearDown(first.dispose);
+      addTearDown(second.dispose);
+      var source = first;
+      final detail = await first.readDetail(resume);
+      var revision = detail.version;
+      late StateSetter rebuild;
+      await t.pumpWidget(
+        MaterialApp(
+          theme: zhiyuTheme(Brightness.light),
+          home: Scaffold(
+            body: StatefulBuilder(
+              builder: (context, set) {
+                rebuild = set;
+                return SingleChildScrollView(
+                  child: LibraryFile(
+                    detail: WorkspaceDetail(
+                      record: detail.record,
+                      version: revision,
+                      definition: detail.definition,
+                      values: detail.values,
+                      fieldIds: detail.fieldIds,
+                    ),
+                    fieldKey: 'file',
+                    source: source,
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+      await fileReady(t);
+      final initialWidth = t.getSize(find.byType(Image)).width;
+      await tap(t, find.byKey(const ValueKey('library-file-page-next')));
+      await fileReady(t);
+      await tap(t, find.byKey(const ValueKey('library-file-zoom-in')));
+      await tap(t, find.byKey(const ValueKey('library-file-text-mode')));
+      final state = t.state(find.byType(LibraryFilePreviewView));
+      first.setScenario(SampleWorkspaceScenario.waiting);
+      rebuild(() => revision++);
+      await t.pumpAndSettle();
+      expect(find.text('正在读取文件信息…'), findsOneWidget);
+      expect(find.byType(LibraryFilePreviewView), findsNothing);
+      await tap(t, find.byKey(const ValueKey('library-file-actions-file')));
+      expect(
+        t
+            .widget<DesktopButton>(
+              find
+                  .ancestor(
+                    of: find.byKey(const ValueKey('library-file-save-file')),
+                    matching: find.byType(DesktopButton),
+                  )
+                  .first,
+            )
+            .onPressed,
+        isNull,
+      );
+      await t.sendKeyEvent(LogicalKeyboardKey.escape);
+      await t.pumpAndSettle();
+      first.setScenario(SampleWorkspaceScenario.ready);
+      await ready(t, () => find.text('已切换预览状态。').evaluate().isNotEmpty);
+      expect(find.byType(LibraryFilePreviewView), findsNothing);
+      expect(
+        t
+            .widget<DesktopButton>(
+              find.byKey(const ValueKey('library-file-versions-file')),
+            )
+            .onPressed,
+        isNull,
+      );
+      await tap(t, find.text('重新读取文件'));
+      await fileReady(t);
+      expect(t.state(find.byType(LibraryFilePreviewView)), same(state));
+      expect(preview(t).preview.page, 1);
+      expect(
+        find.byKey(const ValueKey('library-file-extracted-text')),
+        findsOneWidget,
+      );
+      await tap(t, find.byKey(const ValueKey('library-file-text-mode')));
+      await fileReady(t);
+      expect(
+        t.getSize(find.byType(Image)).width,
+        closeTo(initialWidth * 1.5, .1),
+      );
+      // A late result from the old source cannot revive its reader in the new
+      // source, even when both sources expose the same synthetic record/ref.
+      first.setScenario(SampleWorkspaceScenario.waiting);
+      rebuild(() => revision++);
+      await t.pumpAndSettle();
+      rebuild(() => source = second);
+      await fileReady(t);
+      first.setScenario(SampleWorkspaceScenario.ready);
+      await t.pumpAndSettle();
+      expect(t.state(find.byType(LibraryFilePreviewView)), isNot(same(state)));
+      expect(preview(t).preview.page, 0);
+      expect(
+        find.byKey(const ValueKey('library-file-extracted-text')),
+        findsNothing,
+      );
+      expect(
+        t
+            .widget<DesktopButton>(
+              find.byKey(const ValueKey('library-file-zoom-out')),
+            )
+            .onPressed,
+        isNull,
+      );
+      await t.pumpWidget(const SizedBox());
+      await t.pumpAndSettle();
+    },
+  );
 }
