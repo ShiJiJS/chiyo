@@ -1,0 +1,429 @@
+00:00 +0: loading /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_adoption_test.dart
+00:00 +0: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_approvals_test.dart: (setUpAll)
+00:00 +0: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_adoption_test.dart: (setUpAll)
+00:00 +0: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_backups_test.dart: (setUpAll)
+00:00 +0: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_agents_test.dart: normal settings connection has zero grants and routes to exact request only after modal closes
+00:01 +1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_agents_test.dart: normal settings connection has zero grants and routes to exact request only after modal closes
+00:06 +2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_agents_test.dart: normal settings connection has zero grants and routes to exact request only after modal closes
+00:06 +3: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_adoption_test.dart: actual record action maps same-meaning fields, previews retained collisions and reads back the same classified record
+00:09 +4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_backups_test.dart: real settings entry exports full sample, inspects into empty recipient and restores readable records
+00:11 +5: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_approvals_test.dart: credential detail and submitted request reach the same approval identity and read back its decision
+00:11 +6: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_approvals_test.dart: credential detail and submitted request reach the same approval identity and read back its decision
+00:12 +7: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_adoption_test.dart: dark200 incompatible attachment mapping shows a problem, allows adjustment and preserves original versions
+00:14 +8: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_backups_test.dart: dark large-text restore errors retain inputs, cancellation does not restore, cleanup retries from settings
+00:15 +9: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_backups_test.dart: dark large-text restore errors retain inputs, cancellation does not restore, cleanup retries from settings
+00:16 +10: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_backups_test.dart: dark large-text restore errors retain inputs, cancellation does not restore, cleanup retries from settings
+00:16 +11: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_adoption_test.dart: stale preview requires reread; failed save keeps mapping and committed lost reply freezes then reconciles exact plan
+00:16 +12: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_adoption_test.dart: stale preview requires reread; failed save keeps mapping and committed lost reply freezes then reconciles exact plan
+00:17 +13: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_agents_test.dart: current chat requests paginate canonical identities and reset safely on association change
+00:18 +14: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_agents_test.dart: current chat requests paginate canonical identities and reset safely on association change
+00:18 +15: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_backups_test.dart: unknown backup reply locks modal, section and workspace navigation and reconciles without repeated writes
+00:18 +16: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_adoption_test.dart: uncommitted unknown requires a new preview; cancelled waiting reads never reopen or write
+00:18 +17: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_adoption_test.dart: uncommitted unknown requires a new preview; cancelled waiting reads never reopen or write
+00:19 +18: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_adoption_test.dart: uncommitted unknown requires a new preview; cancelled waiting reads never reopen or write
+00:19 +19: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_approvals_test.dart: unknown execution read keeps the exact operation on query failure, and cleanup readback does not claim success
+00:22 +20: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_approvals_test.dart: unknown execution read keeps the exact operation on query failure, and cleanup readback does not claim success
+00:22 +21: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_classification_test.dart: shared settings directory manager creates a hierarchy, preserves failed drafts, and uses the same library tree
+00:24 +22: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_classification_test.dart: shared settings directory manager creates a hierarchy, preserves failed drafts, and uses the same library tree
+00:26 +23: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_classification_test.dart: shared settings directory manager creates a hierarchy, preserves failed drafts, and uses the same library tree
+00:26 +24: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_test.dart: document editing preserves failed draft and saves plain text/Markdown as distinct versioned facts
+00:27 +25: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_test.dart: document editing preserves failed draft and saves plain text/Markdown as distinct versioned facts
+00:28 +26: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_states_test.dart: history paging keeps zoom/text through waiting/error/retry and resets only at version change dark=true
+00:31 +27: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_classification_test.dart: tag rename updates current library metadata; deletion rechecks reviewed membership and preserves the actual content
+00:32 +28: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_approvals_test.dart: approval controls preserve a failed decision and distinguish empty, waiting and failed reads with real recovery actions
+00:32 +29: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_test.dart: PDF current pages, text alternative and preview retry keep metadata/actions available
+00:32 +30: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_classification_test.dart: dark200 tag edit failure keeps the draft; unknown commit blocks close and resolves only the original operation
+00:32 +31: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_classification_test.dart: dark200 tag edit failure keeps the draft; unknown commit blocks close and resolves only the original operation
+00:35 +32: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credential_lifecycle_test.dart: material list failure and explicit restore preserve metadata and create a disabled new head
+00:37 +33: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credential_lifecycle_test.dart: material list failure and explicit restore preserve metadata and create a disabled new head
+00:37 +34: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credential_lifecycle_test.dart: material list failure and explicit restore preserve metadata and create a disabled new head
+00:38 +35: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credential_lifecycle_test.dart: material list failure and explicit restore preserve metadata and create a disabled new head
+00:38 +36: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credential_lifecycle_test.dart: material list failure and explicit restore preserve metadata and create a disabled new head
+00:38 +37: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credential_lifecycle_test.dart: material list failure and explicit restore preserve metadata and create a disabled new head
+00:38 +38: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credential_lifecycle_test.dart: material list failure and explicit restore preserve metadata and create a disabled new head
+00:38 +39: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credential_lifecycle_test.dart: material list failure and explicit restore preserve metadata and create a disabled new head
+00:38 +40: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credentials_test.dart: credential reading, grouped usage history and failed use request reach one pending receipt
+00:40 +41: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credentials_test.dart: credential reading, grouped usage history and failed use request reach one pending receipt
+00:41 +42: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_directory_test.dart: directory menu creates, preserves failed draft, moves and deletes from the actual library
+00:43 +43: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_directory_test.dart: directory menu creates, preserves failed draft, moves and deletes from the actual library
+00:44 +44: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_directory_test.dart: directory menu creates, preserves failed draft, moves and deletes from the actual library
+00:46 +45: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_directory_test.dart: directory menu creates, preserves failed draft, moves and deletes from the actual library
+00:46 +46: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credentials_test.dart: dark 200% credential create and rotation preserve uncertain draft, disable and re-enable explicitly
+00:48 +47: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credentials_test.dart: dark 200% credential create and rotation preserve uncertain draft, disable and re-enable explicitly
+00:50 +48: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credentials_test.dart: dark 200% credential create and rotation preserve uncertain draft, disable and re-enable explicitly
+00:50 +49: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_grant_history_test.dart: actual approval links to identical grant history; typed record round trip retains filters, page and reading position
+00:52 +50: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_history_test.dart: real library menu compares full versions, keeps failure visible and restores a new version
+00:54 +51: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_history_test.dart: real library menu compares full versions, keeps failure visible and restores a new version
+00:54 +52: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_history_test.dart: real library menu compares full versions, keeps failure visible and restores a new version
+00:56 +53: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_legacy_templates_test.dart: legacy metadata enters the common editor and creates an independent generic record without changing the source template
+00:57 +54: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_legacy_templates_test.dart: legacy metadata enters the common editor and creates an independent generic record without changing the source template
+00:58 +55: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_legacy_templates_test.dart: legacy metadata enters the common editor and creates an independent generic record without changing the source template
+00:59 +56: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_history_test.dart: recycle and restore from actual sidebar retain the original query and reread restored content
+00:59 +57: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_history_test.dart: recycle and restore from actual sidebar retain the original query and reread restored content
+00:59 +58: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_legacy_templates_test.dart: explicit conversion previews real declarations and source mapping, then installs without migrating an existing record
+01:02 +59: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_grant_history_test.dart: actual guide switches empty, waiting and failure states and history retry recovers
+01:04 +60: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_grant_history_test.dart: actual guide switches empty, waiting and failure states and history retry recovers
+01:05 +61: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_grant_history_test.dart: actual guide switches empty, waiting and failure states and history retry recovers
+01:05 +62: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_legacy_templates_test.dart: dark200 legacy attachments use host selection and shared file versions; incompatible conversion stays explicit
+01:06 +63: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_legacy_templates_test.dart: dark200 legacy attachments use host selection and shared file versions; incompatible conversion stays explicit
+01:07 +64: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_history_test.dart: dark large-text comparison keeps actions reachable and stale restore requires rereading
+01:07 +65: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_history_test.dart: dark large-text comparison keeps actions reachable and stale restore requires rereading
+01:07 +66: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_fidelity_test.dart: sidebar storage note and recycle stay reachable at Size(1440.0, 900.0) dark=true scale=1.0
+01:09 +67: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_fidelity_test.dart: sidebar storage note and recycle stay reachable at Size(1440.0, 900.0) dark=true scale=1.0
+01:09 +68: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_fidelity_test.dart: sidebar storage note and recycle stay reachable at Size(1440.0, 900.0) dark=true scale=1.0
+01:09 +69: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_fidelity_test.dart: sidebar storage note and recycle stay reachable at Size(1440.0, 900.0) dark=true scale=1.0
+01:09 +70: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_fidelity_test.dart: sidebar storage note and recycle stay reachable at Size(1440.0, 900.0) dark=true scale=1.0
+01:11 +71: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_fidelity_test.dart: sidebar storage note and recycle stay reachable at Size(1440.0, 900.0) dark=true scale=1.0
+01:11 +72: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_workflows_test.dart: library R02–R04 Size(1440.0, 900.0) dark=false scale=1.0
+01:13 +73: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_workflows_test.dart: library R02–R04 Size(1440.0, 900.0) dark=false scale=1.0
+01:15 +74: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_workflows_test.dart: library R02–R04 Size(1440.0, 900.0) dark=false scale=1.0
+01:15 +75: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_workflows_test.dart: library R02–R04 Size(1440.0, 900.0) dark=false scale=1.0
+01:15 +76: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_workflows_test.dart: library R02–R04 Size(1440.0, 900.0) dark=false scale=1.0
+01:18 +77: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_workflows_test.dart: library R02–R04 Size(1440.0, 900.0) dark=false scale=1.0
+01:19 +78: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_workflows_test.dart: library R02–R04 Size(1440.0, 900.0) dark=false scale=1.0
+01:20 +79: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_workflows_test.dart: library R02–R04 Size(1440.0, 900.0) dark=false scale=1.0
+01:20 +80: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_workflows_test.dart: library R02–R04 Size(1440.0, 900.0) dark=false scale=1.0
+01:21 +81: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_workflows_test.dart: library R02–R04 Size(1440.0, 900.0) dark=false scale=1.0
+01:21 +82: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_workflows_test.dart: library R02–R04 Size(1440.0, 900.0) dark=false scale=1.0
+01:22 +83: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_fidelity_test.dart: CSS row box/labels and end-aligned 230px menu at 1440.0, dark=false
+01:23 +84: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_fidelity_test.dart: CSS row box/labels and end-aligned 230px menu at 1440.0, dark=false
+01:23 +85: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugin_contracts_test.dart: dark200 updated creation schema requires an explicit draft reset and then uses the reviewed current template
+01:24 +86: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugin_contracts_test.dart: dark200 updated creation schema requires an explicit draft reset and then uses the reviewed current template
+01:25 +87: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugin_contracts_test.dart: dark200 updated creation schema requires an explicit draft reset and then uses the reviewed current template
+01:27 +88: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_fidelity_test.dart: CSS row box/labels and end-aligned 230px menu at 1440.0, dark=true
+01:27 +89: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_workflows_test.dart: library R02–R04 Size(1440.0, 900.0) dark=true scale=1.0
+01:29 +90: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_workflows_test.dart: library R02–R04 Size(1440.0, 900.0) dark=true scale=1.0
+01:29 +91: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_workflows_test.dart: library R02–R04 Size(1440.0, 900.0) dark=true scale=1.0
+01:31 +92: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: server identity deep link selects the exact host and shares readback with settings and library
+01:31 +93: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: server identity deep link selects the exact host and shares readback with settings and library
+01:33 +94: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: server identity deep link selects the exact host and shares readback with settings and library
+01:34 +95: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: server identity deep link selects the exact host and shares readback with settings and library
+01:34 +96: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: server identity deep link selects the exact host and shares readback with settings and library
+01:34 +97: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: server identity deep link selects the exact host and shares readback with settings and library
+01:35 +98: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_library_workflows_test.dart: library R02–R04 Size(1280.0, 800.0) dark=false scale=1.0
+01:40 +99: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: one shell has five working destinations and a 66px appbar
+01:42 +100: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: one shell has five working destinations and a 66px appbar
+01:42 +101: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: dark200 host changes warn, missing fingerprints block confirmation and disabled plugin retains revocation
+01:44 +102: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile entry add/move/remove and failed save retain draft at 1440.0 dark=false
+01:46 +103: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile entry add/move/remove and failed save retain draft at 1440.0 dark=false
+01:48 +104: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile entry add/move/remove and failed save retain draft at 1440.0 dark=false
+01:48 +105: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile entry add/move/remove and failed save retain draft at 1440.0 dark=false
+01:48 +106: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: theme, empty, error/retry and waiting recover through visible controls
+01:49 +107: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: theme, empty, error/retry and waiting recover through visible controls
+01:50 +108: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: theme, empty, error/retry and waiting recover through visible controls
+01:55 +109: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: theme, empty, error/retry and waiting recover through visible controls
+01:55 +110: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: settings install, shared external form, update, removal, generic editing and reinstall preserve the original snapshot
+01:57 +111: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: settings install, shared external form, update, removal, generic editing and reinstall preserve the original snapshot
+01:58 +112: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: actual import editing, item reduction and confirmation update shared library and return to the exact processed proposal
+01:59 +113: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: actual import editing, item reduction and confirmation update shared library and return to the exact processed proposal
+01:59 +114: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: actual import editing, item reduction and confirmation update shared library and return to the exact processed proposal
+01:59 +115: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: actual import editing, item reduction and confirmation update shared library and return to the exact processed proposal
+01:59 +116: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: actual import editing, item reduction and confirmation update shared library and return to the exact processed proposal
+01:59 +117: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: invalid package path, failed install and explicit retry retain the review instead of installing early
+02:00 +118: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: a shared refresh preserves the editing selection and active IME composition
+02:01 +119: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile entry add/move/remove and failed save retain draft at 1280.0 dark=true
+02:01 +120: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile entry add/move/remove and failed save retain draft at 1280.0 dark=true
+02:03 +121: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile entry add/move/remove and failed save retain draft at 1280.0 dark=true
+02:04 +122: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile entry add/move/remove and failed save retain draft at 1280.0 dark=true
+02:04 +123: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: a failed sample save preserves the draft and explicit retry updates shared data
+02:04 +124: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: a failed sample save preserves the draft and explicit retry updates shared data
+02:04 +125: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: a failed sample save preserves the draft and explicit retry updates shared data
+02:04 +126: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: conflict is reproduced from the actual guide, current comparison never writes, edited review is preserved and rejection leaves current values
+02:06 +127: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: conflict is reproduced from the actual guide, current comparison never writes, edited review is preserved and rejection leaves current values
+02:06 +128: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: conflict is reproduced from the actual guide, current comparison never writes, edited review is preserved and rejection leaves current values
+02:06 +129: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: conflict is reproduced from the actual guide, current comparison never writes, edited review is preserved and rejection leaves current values
+02:06 +130: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: conflict is reproduced from the actual guide, current comparison never writes, edited review is preserved and rejection leaves current values
+02:06 +131: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: conflict is reproduced from the actual guide, current comparison never writes, edited review is preserved and rejection leaves current values
+02:07 +132: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_record_receipts_test.dart: committed document edit freezes the original draft through failed receipt lookup and reads back once
+02:09 +133: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_record_receipts_test.dart: committed document edit freezes the original draft through failed receipt lookup and reads back once
+02:09 +134: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_record_receipts_test.dart: committed document edit freezes the original draft through failed receipt lookup and reads back once
+02:11 +135: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_record_receipts_test.dart: committed document edit freezes the original draft through failed receipt lookup and reads back once
+02:12 +136: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_record_receipts_test.dart: committed document edit freezes the original draft through failed receipt lookup and reads back once
+02:14 +137: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_record_receipts_test.dart: committed document edit freezes the original draft through failed receipt lookup and reads back once
+02:14 +138: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_relations_test.dart: multi-selection survives search and failure, then saved detail rereads the actual links
+02:15 +139: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_relations_test.dart: multi-selection survives search and failure, then saved detail rereads the actual links
+02:15 +140: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_record_receipts_test.dart: uncommitted creation keeps fields, confirms absence, and only saves after an explicit retry
+02:18 +141: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_record_receipts_test.dart: uncommitted creation keeps fields, confirms absence, and only saves after an explicit retry
+02:18 +142: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: actual proposal guide reaches empty, failure, waiting and recovery states
+02:19 +143: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: actual proposal guide reaches empty, failure, waiting and recovery states
+02:21 +144: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_runtime_test.dart: settings material flow retains unconfirmed processes, retries ended materials and routes to exact original request
+02:22 +145: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_runtime_test.dart: settings material flow retains unconfirmed processes, retries ended materials and routes to exact original request
+02:23 +146: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_runtime_test.dart: settings material flow retains unconfirmed processes, retries ended materials and routes to exact original request
+02:24 +147: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_runtime_test.dart: settings material flow retains unconfirmed processes, retries ended materials and routes to exact original request
+02:24 +148: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_runtime_test.dart: settings material flow retains unconfirmed processes, retries ended materials and routes to exact original request
+02:24 +149: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_runtime_test.dart: settings material flow retains unconfirmed processes, retries ended materials and routes to exact original request
+02:25 +150: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_runtime_test.dart: settings material flow retains unconfirmed processes, retries ended materials and routes to exact original request
+02:27 +151: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_runtime_test.dart: settings material flow retains unconfirmed processes, retries ended materials and routes to exact original request
+02:27 +152: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_record_receipts_test.dart: recycle, restore and two-step purge reconcile their own lost replies in dark 200 percent
+02:29 +153: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: settings-1440-light all eight sidebar destinations share saved state without system effects or creating grants
+02:29 +154: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: settings-1440-light all eight sidebar destinations share saved state without system effects or creating grants
+02:32 +155: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: settings-1440-light all eight sidebar destinations share saved state without system effects or creating grants
+02:32 +156: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: settings-1440-light all eight sidebar destinations share saved state without system effects or creating grants
+02:32 +157: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: settings-1440-light all eight sidebar destinations share saved state without system effects or creating grants
+02:34 +158: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: entry review edits a single leaf and renders independent new and retained identities in the same profile timeline
+02:34 +159: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: entry review edits a single leaf and renders independent new and retained identities in the same profile timeline
+02:35 +160: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_runtime_test.dart: background save failure preserves choice; close with background disabled requires cancellable quit confirmation
+02:37 +161: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: settings-1280-dark200 all eight sidebar destinations share saved state without system effects or creating grants
+02:37 +162: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: settings-1280-dark200 all eight sidebar destinations share saved state without system effects or creating grants
+02:38 +163: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: settings-1280-dark200 all eight sidebar destinations share saved state without system effects or creating grants
+02:40 +164: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_runtime_test.dart: save-failed quit retains readable data, ends grants and retries to preview stop without terminating the renderer
+02:40 +165: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_runtime_test.dart: save-failed quit retains readable data, ends grants and retries to preview stop without terminating the renderer
+02:40 +166: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_test.dart: settings theme and notification preferences save in one session source across navigation and the existing guide
+02:43 +167: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_test.dart: settings theme and notification preferences save in one session source across navigation and the existing guide
+02:43 +168: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_test.dart: settings theme and notification preferences save in one session source across navigation and the existing guide
+02:43 +169: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_test.dart: settings theme and notification preferences save in one session source across navigation and the existing guide
+02:43 +170: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: actual middle-unknown batch stops the tail, blocks Escape and close, then explicitly continues and returns from results to its query
+02:43 +171: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_runtime_test.dart: unknown quit locks escape and navigation; verified termination failure retries only exit and keeps preview closable
+02:43 +172: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_runtime_test.dart: unknown quit locks escape and navigation; verified termination failure retries only exit and keeps preview closable
+02:44 +173: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_runtime_test.dart: unknown quit locks escape and navigation; verified termination failure retries only exit and keeps preview closable
+02:44 +174: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_test.dart: failed settings save retains selection and unknown save locks root navigation until only its original receipt is read
+02:44 +175: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_test.dart: failed settings save retains selection and unknown save locks root navigation until only its original receipt is read
+02:44 +176: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_test.dart: failed settings save retains selection and unknown save locks root navigation until only its original receipt is read
+02:44 +177: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_test.dart: failed settings save retains selection and unknown save locks root navigation until only its original receipt is read
+02:45 +178: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: dark200 batch keeps definite failure and rejection separate and explicitly retries only the failed proposal
+02:46 +179: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: dark200 batch keeps definite failure and rejection separate and explicitly retries only the failed proposal
+02:46 +180: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: dark200 batch keeps definite failure and rejection separate and explicitly retries only the failed proposal
+02:46 +181: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: dark200 batch keeps definite failure and rejection separate and explicitly retries only the failed proposal
+02:46 +182: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: dark200 batch keeps definite failure and rejection separate and explicitly retries only the failed proposal
+02:46 +183: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: dark200 batch keeps definite failure and rejection separate and explicitly retries only the failed proposal
+02:46 +184: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: dark200 batch keeps definite failure and rejection separate and explicitly retries only the failed proposal
+02:46 +185: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: dark200 batch keeps definite failure and rejection separate and explicitly retries only the failed proposal
+02:46 +186: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: dark200 batch keeps definite failure and rejection separate and explicitly retries only the failed proposal
+02:46 +187: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: dark200 batch keeps definite failure and rejection separate and explicitly retries only the failed proposal
+02:46 +188: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: dark200 batch keeps definite failure and rejection separate and explicitly retries only the failed proposal
+02:46 +189: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: real pressure switch, pagination, related navigation and return preserve selected row and list scroll
+02:46 +190: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: real pressure switch, pagination, related navigation and return preserve selected row and list scroll
+02:46 +191: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: real pressure switch, pagination, related navigation and return preserve selected row and list scroll
+02:47 +192: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: real pressure switch, pagination, related navigation and return preserve selected row and list scroll
+02:47 +193: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: real pressure switch, pagination, related navigation and return preserve selected row and list scroll
+02:47 +194: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: real pressure switch, pagination, related navigation and return preserve selected row and list scroll
+02:47 +195: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: real pressure switch, pagination, related navigation and return preserve selected row and list scroll
+02:47 +196: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: real pressure switch, pagination, related navigation and return preserve selected row and list scroll
+02:47 +197: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: real pressure switch, pagination, related navigation and return preserve selected row and list scroll
+02:48 +198: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: real pressure switch, pagination, related navigation and return preserve selected row and list scroll
+02:48 +199: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: real pressure switch, pagination, related navigation and return preserve selected row and list scroll
+02:48 +200: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: real pressure switch, pagination, related navigation and return preserve selected row and list scroll
+02:48 +201: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: real pressure switch, pagination, related navigation and return preserve selected row and list scroll
+02:48 +202: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: real pressure switch, pagination, related navigation and return preserve selected row and list scroll
+02:48 +203: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: real pressure switch, pagination, related navigation and return preserve selected row and list scroll
+02:48 +204: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: real pressure switch, pagination, related navigation and return preserve selected row and list scroll
+02:48 +205: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: real pressure switch, pagination, related navigation and return preserve selected row and list scroll
+02:48 +206: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: real pressure switch, pagination, related navigation and return preserve selected row and list scroll
+02:49 +207: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: real pressure switch, pagination, related navigation and return preserve selected row and list scroll
+02:49 +208: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: real pressure switch, pagination, related navigation and return preserve selected row and list scroll
+02:49 +209: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: real pressure switch, pagination, related navigation and return preserve selected row and list scroll
+02:49 +210: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: real pressure switch, pagination, related navigation and return preserve selected row and list scroll
+02:49 +211: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: real pressure switch, pagination, related navigation and return preserve selected row and list scroll
+02:49 +212: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: real pressure switch, pagination, related navigation and return preserve selected row and list scroll
+02:50 +213: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: real pressure switch, pagination, related navigation and return preserve selected row and list scroll
+02:51 +214: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: real pressure switch, pagination, related navigation and return preserve selected row and list scroll
+02:51 +215: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: real pressure switch, pagination, related navigation and return preserve selected row and list scroll
+02:51 +216: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: real pressure switch, pagination, related navigation and return preserve selected row and list scroll
+02:51 +217: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: real pressure switch, pagination, related navigation and return preserve selected row and list scroll
+02:51 +218: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: real pressure switch, pagination, related navigation and return preserve selected row and list scroll
+02:51 +219: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: real pressure switch, pagination, related navigation and return preserve selected row and list scroll
+02:51 +220: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: real pressure switch, pagination, related navigation and return preserve selected row and list scroll
+02:52 +221: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: real pressure switch, pagination, related navigation and return preserve selected row and list scroll
+02:52 +222: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: real pressure switch, pagination, related navigation and return preserve selected row and list scroll
+02:53 +223: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: real pressure switch, pagination, related navigation and return preserve selected row and list scroll
+02:53 +224: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: real pressure switch, pagination, related navigation and return preserve selected row and list scroll
+02:53 +225: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: real pressure switch, pagination, related navigation and return preserve selected row and list scroll
+02:53 +226: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: real pressure switch, pagination, related navigation and return preserve selected row and list scroll
+02:53 +227: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: real pressure switch, pagination, related navigation and return preserve selected row and list scroll
+02:53 +228: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: real pressure switch, pagination, related navigation and return preserve selected row and list scroll
+02:53 +229: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: real pressure switch, pagination, related navigation and return preserve selected row and list scroll
+02:53 +230: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: real pressure switch, pagination, related navigation and return preserve selected row and list scroll
+02:53 +231: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: real pressure switch, pagination, related navigation and return preserve selected row and list scroll
+02:53 +232: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: real pressure switch, pagination, related navigation and return preserve selected row and list scroll
+02:54 +233: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: real pressure switch, pagination, related navigation and return preserve selected row and list scroll
+02:54 +234: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: real pressure switch, pagination, related navigation and return preserve selected row and list scroll
+02:55 +235: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: real pressure switch, pagination, related navigation and return preserve selected row and list scroll
+02:55 +236: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: real pressure switch, pagination, related navigation and return preserve selected row and list scroll
+02:55 +237: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: real pressure switch, pagination, related navigation and return preserve selected row and list scroll
+02:55 +238: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: real pressure switch, pagination, related navigation and return preserve selected row and list scroll
+02:55 +239: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: real pressure switch, pagination, related navigation and return preserve selected row and list scroll
+02:55 +240: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: real pressure switch, pagination, related navigation and return preserve selected row and list scroll
+02:55 +241: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: real pressure switch, pagination, related navigation and return preserve selected row and list scroll
+02:55 +242: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: real pressure switch, pagination, related navigation and return preserve selected row and list scroll
+02:55 +243: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: real pressure switch, pagination, related navigation and return preserve selected row and list scroll
+02:55 +244: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: real pressure switch, pagination, related navigation and return preserve selected row and list scroll
+02:55 +245: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: real pressure switch, pagination, related navigation and return preserve selected row and list scroll
+02:55 +246: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: real pressure switch, pagination, related navigation and return preserve selected row and list scroll
+02:56 +247: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_test.dart: dark200 records confirmation preserves draft after a save failure and reconciles an unknown cleanup without replay
+02:56 +248: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_test.dart: dark200 records confirmation preserves draft after a save failure and reconciles an unknown cleanup without replay
+02:56 +249: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_test.dart: dark200 records confirmation preserves draft after a save failure and reconciles an unknown cleanup without replay
+02:56 +250: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_test.dart: dark200 records confirmation preserves draft after a save failure and reconciles an unknown cleanup without replay
+02:56 +251: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_test.dart: dark200 records confirmation preserves draft after a save failure and reconciles an unknown cleanup without replay
+02:56 +252: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_test.dart: dark200 records confirmation preserves draft after a save failure and reconciles an unknown cleanup without replay
+02:57 +253: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_test.dart: dark200 records confirmation preserves draft after a save failure and reconciles an unknown cleanup without replay
+02:57 +254: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_test.dart: dark200 records confirmation preserves draft after a save failure and reconciles an unknown cleanup without replay
+02:57 +255: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+02:57 +256: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+02:57 +257: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+02:57 +258: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+02:57 +259: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+02:57 +260: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+02:57 +261: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+02:57 +262: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+02:58 +263: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+02:58 +264: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+02:58 +265: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+02:58 +266: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+02:58 +267: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+02:58 +268: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+02:58 +269: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+02:58 +270: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+02:58 +271: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+02:58 +272: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+02:58 +273: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+02:58 +274: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+02:58 +275: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+02:58 +276: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+02:58 +277: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+02:59 +278: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+02:59 +279: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+03:00 +280: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+03:00 +281: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+03:00 +282: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+03:00 +283: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+03:00 +284: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+03:00 +285: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+03:00 +286: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+03:00 +287: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+03:00 +288: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+03:00 +289: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+03:00 +290: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+03:00 +291: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+03:00 +292: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+03:00 +293: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+03:00 +294: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+03:00 +295: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+03:00 +296: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+03:00 +297: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+03:00 +298: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+03:00 +299: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+03:00 +300: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+03:00 +301: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+03:00 +302: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+03:00 +303: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+03:01 +304: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+03:01 +305: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+03:01 +306: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+03:01 +307: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+03:01 +308: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+03:01 +309: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+03:01 +310: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+03:01 +311: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+03:01 +312: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+03:01 +313: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+03:02 +314: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+03:02 +315: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+03:02 +316: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+03:02 +317: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+03:02 +318: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+03:02 +319: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+03:02 +320: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+03:02 +321: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+03:02 +322: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+03:02 +323: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+03:02 +324: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+03:02 +325: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+03:02 +326: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+03:02 +327: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+03:02 +328: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+03:02 +329: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+03:02 +330: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+03:02 +331: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+03:02 +332: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+03:02 +333: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+03:02 +334: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+03:03 +335: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+03:03 +336: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+03:03 +337: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+03:03 +338: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+03:03 +339: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+03:03 +340: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+03:03 +341: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+03:03 +342: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+03:03 +343: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+03:03 +344: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+03:03 +345: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+03:03 +346: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+03:03 +347: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+03:03 +348: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+03:03 +349: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+03:03 +350: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1280.0
+03:03 +351: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_proposals_test.dart: correction keeps exact field identities and unrelated relations, and concurrent duplicates share one commit
+03:03 +352: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1440.0
+03:03 +353: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1440.0
+03:03 +354: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1440.0
+03:04 +355: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1440.0
+03:04 +356: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1440.0
+03:04 +357: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1440.0
+03:04 +358: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1440.0
+03:04 +359: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1440.0
+03:04 +360: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1440.0
+03:04 +361: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1440.0
+03:04 +362: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1440.0
+03:04 +363: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1440.0
+03:04 +364: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1440.0
+03:04 +365: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1440.0
+03:04 +366: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1440.0
+03:05 +367: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1440.0
+03:05 +368: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1440.0
+03:05 +369: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1440.0
+03:05 +370: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1440.0
+03:05 +371: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1440.0
+03:05 +372: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1440.0
+03:05 +373: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1440.0
+03:05 +374: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1440.0
+03:05 +375: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1440.0
+03:05 +376: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1440.0
+03:05 +377: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1440.0
+03:05 +378: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1440.0
+03:05 +379: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1440.0
+03:05 +380: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1440.0
+03:05 +381: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1440.0
+03:05 +382: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1440.0
+03:05 +383: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1440.0
+03:05 +384: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1440.0
+03:05 +385: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1440.0
+03:05 +386: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1440.0
+03:05 +387: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1440.0
+03:05 +388: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1440.0
+03:05 +389: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1440.0
+03:05 +390: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1440.0
+03:05 +391: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1440.0
+03:05 +392: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1440.0
+03:05 +393: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1440.0
+03:05 +394: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1440.0
+03:05 +395: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1440.0
+03:05 +396: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1440.0
+03:06 +397: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1440.0
+03:06 +398: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1440.0
+03:06 +399: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1440.0
+03:07 +400: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1440.0
+03:07 +401: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1440.0
+03:07 +402: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1440.0
+03:07 +403: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1440.0
+03:07 +404: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1440.0
+03:07 +405: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1440.0
+03:07 +406: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1440.0
+03:10 +407: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: 50-directory tree and 100-tag menu remain usable with a long title and 200% dark text at 1440.0
+03:10 +408: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_widget_test.dart: decision remains reachable at Size(1280.0, 800.0) with 1.0 text
+03:10 +409: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_widget_test.dart: decision remains reachable at Size(1280.0, 800.0) with 1.0 text
+03:10 +410: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_widget_test.dart: decision remains reachable at Size(1280.0, 800.0) with 1.0 text
+03:10 +411: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_widget_test.dart: decision remains reachable at Size(1280.0, 800.0) with 1.0 text
+03:10 +412: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_widget_test.dart: decision remains reachable at Size(1280.0, 800.0) with 1.0 text
+03:11 +413: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_widget_test.dart: decision remains reachable at Size(1280.0, 800.0) with 1.0 text
+03:11 +414: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: large edit form retains hundred-tag choices and cross-page relation selections through failed save
+03:11 +415: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: large edit form retains hundred-tag choices and cross-page relation selections through failed save
+03:11 +416: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: large edit form retains hundred-tag choices and cross-page relation selections through failed save
+03:12 +417: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: large edit form retains hundred-tag choices and cross-page relation selections through failed save
+03:12 +418: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: large edit form retains hundred-tag choices and cross-page relation selections through failed save
+03:13 +419: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: large edit form retains hundred-tag choices and cross-page relation selections through failed save
+03:14 +420: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_widget_test.dart: returning to history refreshes approvals made after its first visit
+03:15 +421: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: switching dataset from recycle clears internal location and return stack and restores baseline count
+03:16 +422: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: all tag options are keyboard searchable and clearing keeps other filters
+03:18 +423: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_stress_test.dart: (tearDownAll)
+03:18 +423: All tests passed!

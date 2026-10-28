@@ -1,0 +1,304 @@
+{
+  "expected": {
+    "viewport": {
+      "width": 1280,
+      "height": 800,
+      "dpr": 1
+    },
+    "theme": "light",
+    "state": "R04-service",
+    "stateFields": {
+      "dir": "selfhost",
+      "selected": "blinko",
+      "detailTab": "overview",
+      "groupBy": "none",
+      "sort": "updated"
+    },
+    "requiredBoxes": [
+      "library-field-url-label",
+      "library-field-url-value",
+      "library-field-purpose-label",
+      "library-field-purpose-value",
+      "library-field-auth-label",
+      "library-field-auth-value"
+    ],
+    "scrollbarWidth": 11
+  },
+  "before": {
+    "viewport": {
+      "width": 1280,
+      "height": 800,
+      "dpr": 1
+    },
+    "fontFamily": "\"Zhiyu System\", \"PingFang SC\", sans-serif",
+    "canvas": "#f1f2f5",
+    "state": {
+      "page": "library",
+      "dir": "selfhost",
+      "selected": "blinko",
+      "query": "",
+      "filter": "all",
+      "tag": "",
+      "groupBy": "none",
+      "sort": "updated",
+      "detailTab": "overview",
+      "setting": "appearance",
+      "plugin": "builtin.server",
+      "pluginTab": "overview"
+    },
+    "boxes": {
+      "library-search-frame": {
+        "x": 210,
+        "y": 139,
+        "width": 242,
+        "height": 39
+      },
+      "library-group": {
+        "x": 329,
+        "y": 237.296875,
+        "width": 59,
+        "height": 32
+      },
+      "library-sort": {
+        "x": 393,
+        "y": 237.296875,
+        "width": 59,
+        "height": 32
+      },
+      "library-results-pane": {
+        "x": 194,
+        "y": 66,
+        "width": 275,
+        "height": 734
+      },
+      "library-results-footer": {
+        "x": 194,
+        "y": 755,
+        "width": 274,
+        "height": 45
+      },
+      "library-detail-toolbar": {
+        "x": 480,
+        "y": 77,
+        "width": 789,
+        "height": 49
+      },
+      "library-detail-create": {
+        "x": 1172,
+        "y": 82.6015625,
+        "width": 78,
+        "height": 36.796875
+      },
+      "library-detail-title": {
+        "x": 584,
+        "y": 177,
+        "width": 537,
+        "height": 34.796875
+      },
+      "library-field-url-label": {
+        "x": 531,
+        "y": 419.6875,
+        "width": 321,
+        "height": 20.796875
+      },
+      "library-field-url-value": {
+        "x": 531,
+        "y": 444.484375,
+        "width": 321,
+        "height": 23.3984375
+      },
+      "library-field-purpose-label": {
+        "x": 886,
+        "y": 419.6875,
+        "width": 321,
+        "height": 20.796875
+      },
+      "library-field-purpose-value": {
+        "x": 886,
+        "y": 444.484375,
+        "width": 321,
+        "height": 25.1953125
+      },
+      "library-field-auth-label": {
+        "x": 531,
+        "y": 491.6796875,
+        "width": 321,
+        "height": 20.796875
+      },
+      "library-field-auth-value": {
+        "x": 531,
+        "y": 516.4765625,
+        "width": 321,
+        "height": 25.1953125
+      }
+    },
+    "searchFocused": false,
+    "searchAppearance": {
+      "borderColor": "rgb(220, 225, 232)",
+      "boxShadow": "none"
+    },
+    "scrollbarWidth": 11,
+    "resultCount": "15 项",
+    "order": [
+      "azure",
+      "aliyunkey",
+      "aliyun",
+      "blinkokey",
+      "vikunjakey",
+      "blinko",
+      "vikunja",
+      "sparky",
+      "github-token",
+      "skillshare",
+      "https",
+      "vikunja-password",
+      "sshguide",
+      "deploy",
+      "sshkey"
+    ],
+    "groups": [],
+    "detailTitle": "Blinko 笔记",
+    "popupLabels": []
+  },
+  "after": {
+    "viewport": {
+      "width": 1280,
+      "height": 800,
+      "dpr": 1
+    },
+    "fontFamily": "\"Zhiyu System\", \"PingFang SC\", sans-serif",
+    "canvas": "#f1f2f5",
+    "state": {
+      "page": "library",
+      "dir": "selfhost",
+      "selected": "blinko",
+      "query": "",
+      "filter": "all",
+      "tag": "",
+      "groupBy": "none",
+      "sort": "updated",
+      "detailTab": "overview",
+      "setting": "appearance",
+      "plugin": "builtin.server",
+      "pluginTab": "overview"
+    },
+    "boxes": {
+      "library-search-frame": {
+        "x": 210,
+        "y": 139,
+        "width": 242,
+        "height": 39
+      },
+      "library-group": {
+        "x": 329,
+        "y": 237.296875,
+        "width": 59,
+        "height": 32
+      },
+      "library-sort": {
+        "x": 393,
+        "y": 237.296875,
+        "width": 59,
+        "height": 32
+      },
+      "library-results-pane": {
+        "x": 194,
+        "y": 66,
+        "width": 275,
+        "height": 734
+      },
+      "library-results-footer": {
+        "x": 194,
+        "y": 755,
+        "width": 274,
+        "height": 45
+      },
+      "library-detail-toolbar": {
+        "x": 480,
+        "y": 77,
+        "width": 789,
+        "height": 49
+      },
+      "library-detail-create": {
+        "x": 1172,
+        "y": 82.6015625,
+        "width": 78,
+        "height": 36.796875
+      },
+      "library-detail-title": {
+        "x": 584,
+        "y": 177,
+        "width": 537,
+        "height": 34.796875
+      },
+      "library-field-url-label": {
+        "x": 531,
+        "y": 419.6875,
+        "width": 321,
+        "height": 20.796875
+      },
+      "library-field-url-value": {
+        "x": 531,
+        "y": 444.484375,
+        "width": 321,
+        "height": 23.3984375
+      },
+      "library-field-purpose-label": {
+        "x": 886,
+        "y": 419.6875,
+        "width": 321,
+        "height": 20.796875
+      },
+      "library-field-purpose-value": {
+        "x": 886,
+        "y": 444.484375,
+        "width": 321,
+        "height": 25.1953125
+      },
+      "library-field-auth-label": {
+        "x": 531,
+        "y": 491.6796875,
+        "width": 321,
+        "height": 20.796875
+      },
+      "library-field-auth-value": {
+        "x": 531,
+        "y": 516.4765625,
+        "width": 321,
+        "height": 25.1953125
+      }
+    },
+    "searchFocused": false,
+    "searchAppearance": {
+      "borderColor": "rgb(220, 225, 232)",
+      "boxShadow": "none"
+    },
+    "scrollbarWidth": 11,
+    "resultCount": "15 项",
+    "order": [
+      "azure",
+      "aliyunkey",
+      "aliyun",
+      "blinkokey",
+      "vikunjakey",
+      "blinko",
+      "vikunja",
+      "sparky",
+      "github-token",
+      "skillshare",
+      "https",
+      "vikunja-password",
+      "sshguide",
+      "deploy",
+      "sshkey"
+    ],
+    "groups": [],
+    "detailTitle": "Blinko 笔记",
+    "popupLabels": []
+  },
+  "errors": [],
+  "accepted": true,
+  "imageSha256": "4e57ae29a4fdd0175be7e9ca041d726b647875be70f9a9e3b0e0aea609950fb4",
+  "scope": "Frozen Mac workflow capture integrity; not full S5 or actual OS input",
+  "fullS5Passed": false
+}
