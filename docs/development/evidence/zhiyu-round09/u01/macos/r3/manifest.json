@@ -1,0 +1,238 @@
+{
+  "analysis-checked.log": {
+    "bytes": 96,
+    "sha256": "82ccc65e1ab8db37d6f40f6d7c534aa22b2a8020dc7e8211535ecc6fb4a621af"
+  },
+  "analysis-final.log": {
+    "bytes": 96,
+    "sha256": "c7429e59b909d6bf56838cd0365e3d564905308c5cf92b09e175bfe1ee0bd519"
+  },
+  "analysis.log": {
+    "bytes": 512,
+    "sha256": "025a92f16a46e3b05ae06e746c37e272acef1defc1d29d2d7b85945156e5c268"
+  },
+  "archive-replay.json": {
+    "bytes": 375,
+    "sha256": "45f7b1b3639580fa574fec0c6eda1ca49d1ed7fbdf74c287adf7ee8b5f694fa1"
+  },
+  "build.log": {
+    "bytes": 125,
+    "sha256": "bb928504a91fe0ce4dc0bb921b142b31033cbbf74e92214ba34521fe3f2f22be"
+  },
+  "capture-hashes.json": {
+    "bytes": 58462,
+    "sha256": "f0987ccc852e7578850ed2157efeac85090b80f2e51800c1dd2beb2511aec9e5"
+  },
+  "checkpoint.json": {
+    "bytes": 4094,
+    "sha256": "7854f056a959e7a77cee9b66c830e248a0aca4ea33b622a7823378321ee32136"
+  },
+  "codec-final.log": {
+    "bytes": 1637,
+    "sha256": "41611c9ae8217c51e24401f0024c2e86483a8b94ccb917a819d1990536599e99"
+  },
+  "codec.log": {
+    "bytes": 1637,
+    "sha256": "97612b3317206281b6a0dab70ac150cbcc46bf31e9b4dac75945bb1b9b04071c"
+  },
+  "commands.json": {
+    "bytes": 1577,
+    "sha256": "0b12f64a720151b070d02fe696d8047837d0ff8449beb27e9a9b593225913a9d"
+  },
+  "environment.json": {
+    "bytes": 357,
+    "sha256": "be8414a9e2586a57d125f54aafcbfa356ff6770a98ca30beba909f345ff1b99f"
+  },
+  "failed-native/foundation-native-complete/native-motion.json": {
+    "bytes": 3676,
+    "sha256": "e271c09b64ef1a040a1a3901bb420241081cef8edffbdc0602ce72d879cad0b7"
+  },
+  "failed-native/foundation-native-final/light-dialog.png": {
+    "bytes": 572237,
+    "sha256": "4d76d167cbbe68d18ab505f5b28c7cf04fe52588f648bbbaa2e826b2388faac7"
+  },
+  "failed-native/foundation-native-final/light-menu.png": {
+    "bytes": 498549,
+    "sha256": "eb91a55cd2573c67b065b734dd38ac6bd715e22d17549860385ed55874c406a6"
+  },
+  "failed-native/foundation-native-final/native-motion.json": {
+    "bytes": 7810,
+    "sha256": "27d99e5e9795b86c264cfdec4f81cfae09a9d898c009ade10868687983c749f2"
+  },
+  "failed-native/foundation-native-pointer-checked/light-dialog.png": {
+    "bytes": 572237,
+    "sha256": "4d76d167cbbe68d18ab505f5b28c7cf04fe52588f648bbbaa2e826b2388faac7"
+  },
+  "failed-native/foundation-native-pointer-checked/light-menu.png": {
+    "bytes": 498549,
+    "sha256": "eb91a55cd2573c67b065b734dd38ac6bd715e22d17549860385ed55874c406a6"
+  },
+  "failed-native/foundation-native-pointer-checked/native-motion.json": {
+    "bytes": 8116,
+    "sha256": "38b29304a0a86af90dfe73c698121aac029f008b26feaac7eff1f20dceb9e503"
+  },
+  "failed-native/foundation-native-ref-checked/native-motion.json": {
+    "bytes": 711,
+    "sha256": "e9756814847c286e75a2be3ca9a2b71475711c56edc4fd2570157a603b428c6e"
+  },
+  "font-hashes.json": {
+    "bytes": 407,
+    "sha256": "3431f386126515332c964c9ceaef6430d4516cec7d9c4367c3cacc302b663ac5"
+  },
+  "foundation/native-checks.json": {
+    "bytes": 2345,
+    "sha256": "6a84e19404b741f0e0375735415c4a5acf4a6dc087f806774b498657d34a3c3c"
+  },
+  "foundation/native-controls-encoding.json": {
+    "bytes": 28515,
+    "sha256": "18d19e2fadb415dbb5523e07152be603b389e01af27ba5fa5042cdbfa92cc0be"
+  },
+  "foundation/native-controls-end.png": {
+    "bytes": 159006,
+    "sha256": "3363f5570585aa8e764333670f77fd7893a9815cfaab5f8fe19b25404bebec90"
+  },
+  "foundation/native-controls-middle.png": {
+    "bytes": 163333,
+    "sha256": "bd2e41783775b63451084d2180012148860785712e805709711cbf6f800b28c1"
+  },
+  "foundation/native-controls-start.png": {
+    "bytes": 167393,
+    "sha256": "43492ce5ffd6b2e8fbab009f9f896871ed063b2a5da3fa1f54332f48adefd031"
+  },
+  "foundation/native-controls.gif": {
+    "bytes": 8616841,
+    "sha256": "e3c5f0473219e5a561c41a483b9115d99d2ec1df8d45a11a4d48db323aaf59b1"
+  },
+  "foundation/native-controls.json": {
+    "bytes": 21604,
+    "sha256": "d961cbf1d6a0eed8c03bd8dbddd2d5c51f120cda5396dff77311ff09261b63fe"
+  },
+  "foundation/native-motion.json": {
+    "bytes": 6356,
+    "sha256": "307bbe96b71ab6e461c1b40aa0fd2f4bece1204aebb93098302f26d4712fc5a6"
+  },
+  "foundation-collection.json": {
+    "bytes": 1212,
+    "sha256": "d841388555680d38b2000340ab6f67fe572e60fdee3ac7646ffb12d0dd22bdfd"
+  },
+  "foundation-encoding.log": {
+    "bytes": 1160,
+    "sha256": "36bd8a756626f70f4f360343bfaa5fc00411814ec17611fb3464301adcc8ea2c"
+  },
+  "foundation-native-checked.log": {
+    "bytes": 3761,
+    "sha256": "750d9ccb4287ad4cb4ea1c79637932aec372bd1a9646e4b53f55b6bee62de0f3"
+  },
+  "foundation-native-complete.log": {
+    "bytes": 4455,
+    "sha256": "5ba9804ff07a0de0b90eebb8a2c3eed089218482acb7b4d3db4ebd03ab3cf767"
+  },
+  "foundation-native-final.log": {
+    "bytes": 2854,
+    "sha256": "791e86b895f3312cc83980d255393118d08ab44e2e49d859f04c41eba85646c1"
+  },
+  "foundation-native-focus-fixed.log": {
+    "bytes": 2939,
+    "sha256": "fa3f44094627b7444ac257d339241bc62a4ee407ed051bd79519e8bae9c3af60"
+  },
+  "foundation-native-pointer-checked.log": {
+    "bytes": 2854,
+    "sha256": "80ddfcef9cdc3a1a101d1c250b55ddabd289b156c43c62155845e4f10146b381"
+  },
+  "foundation-native-ref-checked.log": {
+    "bytes": 2980,
+    "sha256": "5318b45f3192355cd3ac9b6167ece5dbfe9ca9a2135846c66ce0d54c84d6a8b1"
+  },
+  "foundation-native.log": {
+    "bytes": 3756,
+    "sha256": "feca02e86982f79abd369f55ceb47fb1537cdd483b05fb86141e4c6d14d85f45"
+  },
+  "library/native-checks.json": {
+    "bytes": 30546,
+    "sha256": "9b1f2026102fc9767cfee95b85b8485c8c373c59481bf23771f7a0a15f685e85"
+  },
+  "library/native-controls-encoding.json": {
+    "bytes": 39391,
+    "sha256": "6e814cf1404fe68a86cfdb11414a6220ac294284e063eff6a824e905b25f417c"
+  },
+  "library/native-controls-end.png": {
+    "bytes": 140405,
+    "sha256": "166a09dffde403719897f11cd16bb8ac80b13585e97abcc548ce3e230e0d99a7"
+  },
+  "library/native-controls-middle.png": {
+    "bytes": 137439,
+    "sha256": "9b5c67b322c80830d44bd352556ef837162b00edcf93258ad408d37a38144382"
+  },
+  "library/native-controls-start.png": {
+    "bytes": 166607,
+    "sha256": "b3a34f0f7ce04f46e0fb2c91fcb6feab9ed1753934202d08dec0d783c76102c4"
+  },
+  "library/native-controls.gif": {
+    "bytes": 5076994,
+    "sha256": "5677e80daf7d8ed1621cae78501fa201e1f136af9dbe93825dfc217b7f60d2fd"
+  },
+  "library/native-controls.json": {
+    "bytes": 30560,
+    "sha256": "b9830f753552259c6a46235d93662e5d6d9570126cbe5079d6e9af1f93187ea4"
+  },
+  "library-collection.log": {
+    "bytes": 2743,
+    "sha256": "0fb0e96ffc553034e13fa0c763bc7f7000ef686e561b31417320fdf6eebd0f0b"
+  },
+  "library-final-collection.log": {
+    "bytes": 2738,
+    "sha256": "e50b2dfb644a166cbec2b862dd5c0ae31eea963f78439629c053466a05f97fde"
+  },
+  "library-native-final.log": {
+    "bytes": 573,
+    "sha256": "ab362863830eaf910c3de58616559139fc90f80051d7ebb813c6c5a93106a9ad"
+  },
+  "library-native.log": {
+    "bytes": 573,
+    "sha256": "9cc976d6e338aca33debe5fd288531418df2d4c97719848463231b1a5114a3a2"
+  },
+  "native-build.json": {
+    "bytes": 793,
+    "sha256": "8e5a6d4395bee0268db7ecbb85fda9f8ccaf59e1e1f663b606b14e7ee513845e"
+  },
+  "owned-native-sources.json": {
+    "bytes": 2960,
+    "sha256": "d1a3b1690ae507085abc975a27da23c4296d58192b8fe1970428287b88cf4468"
+  },
+  "rapid-close-after.log": {
+    "bytes": 195,
+    "sha256": "87420e1390a926e61e77d8587a52e529ab621025b67e2655d4fa796af1abb48a"
+  },
+  "rapid-close-before.log": {
+    "bytes": 2220,
+    "sha256": "bb7366f25a7909aa3136b927b29b3192fa3fc476a4706199f636957ce5363bf9"
+  },
+  "recorder-first-run-encoding.json": {
+    "bytes": 40263,
+    "sha256": "617f5573f7508d627348874322cd74574dc6675d84e24a5ed61a24bc5623d1fa"
+  },
+  "reference-integrity.json": {
+    "bytes": 2467,
+    "sha256": "4a7ebb5f449fa309db3a496b9c4f2a5e4e8f1614fdeb9f06ec1d35c0bd3fda5e"
+  },
+  "regression.log": {
+    "bytes": 103594,
+    "sha256": "a6664b026bf1972b8f083349e7643c46931673b2789f88a4016e26f0519127b1"
+  },
+  "source-hashes.json": {
+    "bytes": 33871,
+    "sha256": "f8c2935c1b9174b76633c8531741739360509bc08f1798cc43cfa1b0503158cc"
+  },
+  "tracker-before.json": {
+    "bytes": 5153,
+    "sha256": "4588e0cfbac84bfc3882a5f96b4755d2ea4c2249fb0df803f407d2ff887a5294"
+  },
+  "tracker-readback.json": {
+    "bytes": 585,
+    "sha256": "deab15ee98064f60748481ac5e7cf2ef73265e3bdd791d3bdb1eb747f042d88c"
+  },
+  "verification.json": {
+    "bytes": 315,
+    "sha256": "ce30ac3850a84810c68e549f913585195d627e0b943fd75c913e2cd10d09c3c9"
+  }
+}
