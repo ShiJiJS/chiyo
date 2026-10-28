@@ -3,7 +3,7 @@ import 'package:flutter/scheduler.dart';
 import 'desktop_motion.dart';
 import 'ui_palette.dart';
 
-enum DesktopButtonKind { quiet, menu, outline, primary, danger }
+enum DesktopButtonKind { quiet, menu, link, outline, primary, danger }
 
 /// The shared desktop action. Its pressed translation does not move adjacent
 /// controls, and selection/hover resolve to a single background.
@@ -26,6 +26,7 @@ class DesktopButton extends StatefulWidget {
     this.radius = 7,
     this.selectedBorder = false,
     this.selectedBorderColor,
+    this.hoverBackgroundColor,
   });
   final Widget child;
   final VoidCallback? onPressed;
@@ -41,7 +42,7 @@ class DesktopButton extends StatefulWidget {
   final AlignmentGeometry alignment;
   final double radius;
   final bool selectedBorder;
-  final Color? selectedBorderColor;
+  final Color? selectedBorderColor, hoverBackgroundColor;
   @override
   State<DesktopButton> createState() => _DesktopButtonState();
 }
@@ -77,7 +78,8 @@ class _DesktopButtonState extends State<DesktopButton> {
     final enabled = widget.onPressed != null && !widget.busy;
     final primary = widget.kind == DesktopButtonKind.primary;
     final menu = widget.kind == DesktopButtonKind.menu;
-    final quiet = widget.kind == DesktopButtonKind.quiet || menu;
+    final link = widget.kind == DesktopButtonKind.link;
+    final quiet = widget.kind == DesktopButtonKind.quiet || menu || link;
     final menuFocus =
         menu &&
         _states.value.contains(WidgetState.focused) &&
@@ -86,12 +88,15 @@ class _DesktopButtonState extends State<DesktopButton> {
         menu && (_states.value.contains(WidgetState.hovered) || menuFocus);
     final ink = primary
         ? c.onAccent
-        : widget.selected || menuActive
+        : widget.selected ||
+              menuActive ||
+              (link && _states.value.contains(WidgetState.hovered))
         ? c.accent
         : widget.kind == DesktopButtonKind.danger
         ? c.danger
         : c.ink;
     Color background(Set<WidgetState> states) {
+      if (link) return c.nav.withValues(alpha: 0);
       if (primary) {
         return states.contains(WidgetState.hovered)
             ? Color.lerp(c.accent, Colors.black, .06)!
@@ -99,7 +104,7 @@ class _DesktopButtonState extends State<DesktopButton> {
       }
       if (widget.selected) return c.selected;
       if (states.contains(WidgetState.hovered) || menuFocus) {
-        return menu ? c.selected : c.nav;
+        return widget.hoverBackgroundColor ?? (menu ? c.selected : c.nav);
       }
       // Match CSS premultiplied-alpha interpolation when a quiet button fades
       // from transparent to its hover surface, without an intermediate dark flash.

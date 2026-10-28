@@ -132,6 +132,8 @@ class _LibraryPageState extends State<LibraryPage> {
         detail: create ? null : model.detail,
         filePicker: widget.filePicker,
         credentialPicker: widget.credentialPicker,
+        onOpenPlugins: () =>
+            widget.onNavigate(WorkspacePage.settings, 'plugins'),
       );
       if (!mounted || ref == null) return;
       await model.openRelated(ref, rememberOrigin: create);
