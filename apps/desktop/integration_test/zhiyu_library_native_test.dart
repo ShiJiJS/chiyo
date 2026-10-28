@@ -622,6 +622,85 @@ void main() {
             checks.add(
               'native-file-metadata-and-menu-refresh-preserve-reading-state',
             );
+            await tap(find.byKey(const ValueKey('library-file-versions-file')));
+            Finder historyPreview() => find.descendant(
+              of: find.byType(DesktopDialog),
+              matching: find.byType(LibraryFilePreviewView),
+            );
+            Future<void> waitHistory(int version, int page) async {
+              bool ready() =>
+                  historyPreview().evaluate().isNotEmpty &&
+                  tester
+                          .widget<LibraryFilePreviewView>(historyPreview())
+                          .preview
+                          .file
+                          .ref
+                          .version ==
+                      version &&
+                  tester
+                          .widget<LibraryFilePreviewView>(historyPreview())
+                          .preview
+                          .page ==
+                      page;
+              for (var frame = 0; frame < 120 && !ready(); frame++) {
+                await tester.pump(const Duration(milliseconds: 16));
+              }
+              expect(ready(), true);
+            }
+
+            await waitHistory(2, 0);
+            await tap(
+              find.descendant(
+                of: find.byType(DesktopDialog),
+                matching: find.byKey(const ValueKey('library-file-page-next')),
+              ),
+            );
+            await waitHistory(2, 1);
+            await tap(find.byKey(const ValueKey('library-file-version-2')));
+            expect(
+              tester
+                  .widget<LibraryFilePreviewView>(historyPreview())
+                  .preview
+                  .page,
+              1,
+            );
+            await tap(find.byKey(const ValueKey('library-file-version-1')));
+            await waitHistory(1, 0);
+            await tap(find.byKey(const ValueKey('library-file-restore')));
+            final old = (await model.source.loadFileHistory(
+              const WorkspaceRecordRef(
+                WorkspaceRecordKind.information,
+                'resume',
+              ),
+              'file',
+            )).versions.singleWhere((f) => f.ref.version == 1);
+            final target = find.descendant(
+              of: find.byKey(const ValueKey('library-file-change-target')),
+              matching: find.byType(SelectableText),
+            );
+            final displayed = tester
+                .widgetList<SelectableText>(target)
+                .map((w) => w.data)
+                .join('\n');
+            expect(displayed, contains(old.filename));
+            expect(displayed, contains('${old.byteLength} 字节'));
+            expect(find.text('恢复来源 · 历史 v1'), findsOneWidget);
+            await screenshot('file-restore-review-1440-light');
+            await tap(find.text('取消').last);
+            await tap(find.text('关闭').last);
+            expect(
+              tester
+                  .widget<LibraryFilePreviewView>(
+                    find.byType(LibraryFilePreviewView),
+                  )
+                  .preview
+                  .file
+                  .ref,
+              file.ref,
+            );
+            checks.add(
+              'native-file-history-same-version-page-and-restore-identity-cancel',
+            );
           }
         }
         viewports.add({
