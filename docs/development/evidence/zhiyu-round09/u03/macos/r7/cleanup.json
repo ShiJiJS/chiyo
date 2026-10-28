@@ -1,0 +1,17 @@
+{
+  "createdAt": "2026-10-28T18:50:49.534188+00:00",
+  "removedDirectory": "build/zhiyu-ui/u03/macos/r7",
+  "removedFiles": 324,
+  "removedBytes": 153108552,
+  "sourceGitBlobsVerified": 267,
+  "evidenceGitBlobsVerified": 66,
+  "frozenFilesVerified": 15,
+  "appAndFontHashesVerified": true,
+  "browserTaskSpace": 216,
+  "browserFinished": true,
+  "referenceServerStopped": true,
+  "retainedEvidence": "docs/development/evidence/zhiyu-round09/u03/macos/r7",
+  "retainedFixedApp": "apps/desktop/build/macos/Build/Products/Debug/info_desktop.app",
+  "unknownLocalDirectoryUntouched": true,
+  "removedDirectoryAbsent": true
+}
