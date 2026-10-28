@@ -3,11 +3,25 @@ import {dirname} from 'node:path';
 import {createHash} from 'node:crypto';
 export function inspectAttachmentReading(){
  const rect=e=>{const r=e.getBoundingClientRect();return{x:r.x,y:r.y,width:r.width,height:r.height};};
+ let credentialReading;
  const boxes={'detail-title':rect(document.querySelector('.detail-header h1'))};
  if(ROUND9.state.selected==='sshkey'){
   for(const [key,selector]of Object.entries({'credential-summary':'.credential-summary','credential-icon':'.credential-summary>.icon','credential-format':'.credential-summary p','credential-status':'.credential-summary .pill'})) boxes[key]=rect(document.querySelector(selector));
+  const sections=[...document.querySelectorAll('.content-section')],section=title=>sections.find(s=>s.querySelector('h2')?.textContent===title);
+  const purpose=section('用途与内容'),use=section('使用方式'),relations=section('关联资料');
+  const relation=relations.querySelector('.relation');const facts=[...use.querySelectorAll('.fact')];
+  credentialReading={purpose:purpose.querySelector('.body-copy').textContent,delivery:facts[0].querySelector('strong').textContent,binding:facts[1].querySelector('strong').textContent,relatedName:relation.querySelector('.relation-name').textContent,relatedDescription:relation.querySelector('p').textContent};
+  for(const [key,e] of Object.entries({
+   'credential-section-purpose-title':purpose.querySelector('h2'),'credential-purpose':purpose.querySelector('.body-copy'),
+   'credential-section-use-title':use.querySelector('h2'),'credential-delivery-fact':facts[0],'credential-delivery-label':facts[0].querySelector('label'),
+   'credential-binding-fact':facts[1],'credential-binding-label':facts[1].querySelector('label'),'credential-use-note':use.querySelector('p.muted'),
+   'credential-section-relations-title':relations.querySelector('h2'),
+   'library-relation-frame-information:azure':relation,'library-relation-icon-information:azure':relation.querySelector('.object-icon'),
+   'library-relation-text-information:azure':relation.querySelector('.grow'),'library-relation-description-information:azure':relation.querySelector('p'),
+   'library-relation-chevron-information:azure':relation.querySelector(':scope>.icon:last-child'),
+  }))boxes[key]=rect(e);
  }else boxes['file-stage']=rect(document.querySelector('.file-stage'));
- return{viewport:{width:innerWidth,height:innerHeight,dpr:devicePixelRatio},theme:document.body.dataset.theme,selection:ROUND9.state.selected,query:ROUND9.state.query,scrollTop:document.querySelector('#detail-scroll').scrollTop,scrollbarWidth:document.querySelector('#detail-scroll').offsetWidth-document.querySelector('#detail-scroll').clientWidth,font:getComputedStyle(document.body).fontFamily,boxes};
+ return{...(credentialReading?{credentialReading}:{}),viewport:{width:innerWidth,height:innerHeight,dpr:devicePixelRatio},theme:document.body.dataset.theme,selection:ROUND9.state.selected,query:ROUND9.state.query,scrollTop:document.querySelector('#detail-scroll').scrollTop,scrollbarWidth:document.querySelector('#detail-scroll').offsetWidth-document.querySelector('#detail-scroll').clientWidth,font:getComputedStyle(document.body).fontFamily,boxes};
 }
 export async function captureAttachmentReading(page,{width,height,theme,state,output}){
  if(![1440,1280].includes(width)||height!==(width===1440?900:800)||!['light','dark'].includes(theme)||!['resume','sshkey'].includes(state))throw Error('Explicit conditions required');

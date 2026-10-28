@@ -9,6 +9,7 @@ import 'package:info_desktop/desktop_controls.dart';
 import 'package:info_desktop/desktop_fonts.dart';
 import 'package:info_desktop/workspace/library_controller.dart';
 import 'package:info_desktop/workspace/library_credential.dart';
+import 'package:info_desktop/workspace/library_widgets.dart';
 import 'package:info_desktop/workspace/library_page.dart';
 import 'package:info_desktop/workspace/preview_workspace.dart';
 import 'package:info_desktop/workspace/sample_workspace_source.dart';
@@ -374,4 +375,74 @@ void main() {
       expect(model.canGoBack, isTrue);
     },
   );
+  for (final large in [false, true]) {
+    check(
+      'long private note preserves credential configuration and reachable actions/related return large=$large',
+      (t) async {
+        final model = await start(
+          t,
+          'Azure SSH 私钥',
+          width: large ? 1280 : 1440,
+          dark: large,
+          scale: large ? 2 : 1,
+        );
+        final original = await model.source.credentials.read(ssh);
+        final originalRequests = (await model.source.credentials.requests(
+          ref: ssh,
+        )).map((r) => (r.id, r.state, r.materialVersion, r.purpose)).toList();
+        final note = List.filled(200, '合成私有备注，用于检查滚动。').join();
+        expect(note.length, lessThan(4000));
+        await tap(t, find.text('编辑信息'));
+        await enter(
+          t,
+          find.byKey(const ValueKey('credential-edit-note')),
+          note,
+        );
+        await tap(t, find.byKey(const ValueKey('credential-edit-save')));
+        expect(find.byType(DesktopDialog), findsNothing);
+        final current = await model.source.credentials.read(ssh);
+        expect(current.privateNote, note);
+        expect(current.materialVersion, original.materialVersion);
+        expect(current.delivery, original.delivery);
+        expect(current.binding, original.binding);
+        expect(textValue(note), findsOneWidget);
+        expect(
+          t
+              .widget<LibraryReadingText>(
+                find.byKey(const ValueKey('credential-binding-value')),
+              )
+              .span
+              .toPlainText(),
+          original.binding,
+        );
+        await tap(t, find.byKey(const ValueKey('credential-use')));
+        expect(
+          find.byKey(const ValueKey('credential-request-submit')),
+          findsOneWidget,
+        );
+        await tap(t, find.text('取消').last);
+        expect(find.byType(DesktopDialog), findsNothing);
+        await capture(
+          t,
+          'credential-long-note-actions-${large ? '1280-dark-200' : '1440-light'}',
+        );
+        await tap(
+          t,
+          find.byKey(const ValueKey('library-relation-information:azure')),
+        );
+        expect(model.selection, azure);
+        await tap(t, find.byKey(const ValueKey('library-back')));
+        expect(model.selection, ssh);
+        expect(model.query.keyword, 'Azure SSH 私钥');
+        expect(textValue(note), findsOneWidget);
+        expect(
+          (await model.source.credentials.requests(
+            ref: ssh,
+          )).map((r) => (r.id, r.state, r.materialVersion, r.purpose)).toList(),
+          originalRequests,
+        );
+        expect(t.takeException(), isNull);
+      },
+    );
+  }
 }

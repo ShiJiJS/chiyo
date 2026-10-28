@@ -160,16 +160,36 @@ class _LibraryCredentialState extends State<LibraryCredential> {
       ),
     );
   });
-  Widget _section(String title, Widget child) => Padding(
+  String _purpose(WorkspaceCredentialDetail detail) {
+    final description = detail.record.description;
+    final explanation = detail.delivery == WorkspaceCredentialDelivery.storage
+        ? '凭据原文由知予保管；当前不支持运行时使用。'
+        : detail.delivery == WorkspaceCredentialDelivery.focus
+        ? '凭据原文由知予保存，使用需单独审批。'
+        : '凭据原文由知予保存，使用时交给执行器。';
+    if (description.isEmpty) return explanation;
+    final separator = '。！？.!?'.contains(description[description.length - 1])
+        ? ''
+        : '。';
+    return '$description$separator$explanation';
+  }
+
+  Widget _section(
+    String title,
+    Widget child, {
+    required String id,
+    double gap = 12,
+  }) => Padding(
     padding: const EdgeInsets.only(top: 27),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
-          title,
+        LibraryReadingText(
+          key: ValueKey('credential-section-$id-title'),
+          span: TextSpan(text: title),
           style: libraryText(context, 17, weight: FontWeight.w700, height: 1.5),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: gap),
         child,
       ],
     ),
@@ -212,7 +232,7 @@ class _LibraryCredentialState extends State<LibraryCredential> {
           ),
         ],
         Padding(
-          padding: const EdgeInsets.symmetric(vertical: 20),
+          padding: const EdgeInsets.only(top: 20),
           child: Container(
             key: const ValueKey('credential-summary'),
             padding: const EdgeInsets.all(18),
@@ -242,10 +262,26 @@ class _LibraryCredentialState extends State<LibraryCredential> {
                           weight: FontWeight.w700,
                         ),
                       ),
-                      Text(
-                        '${detail.format} · 材料v${detail.materialVersion}',
+                      Wrap(
                         key: const ValueKey('credential-summary-format'),
-                        style: libraryText(context, 13, color: c.warning),
+                        spacing: 10,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: [
+                          Text(
+                            '${detail.format} · 材料v${detail.materialVersion}',
+                            style: libraryText(context, 13, color: c.warning),
+                          ),
+                          SelectableText(
+                            detail.mask,
+                            key: const ValueKey('credential-mask'),
+                            semanticsLabel: '凭据内容已隐藏',
+                            style: libraryText(
+                              context,
+                              13,
+                              color: c.warning,
+                            ).copyWith(fontFamily: 'Menlo'),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -282,124 +318,131 @@ class _LibraryCredentialState extends State<LibraryCredential> {
             ),
           ),
         ),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            DesktopButton(
-              key: const ValueKey('credential-replace'),
-              onPressed: enabled ? _replace : null,
-              child: const Text('更换材料'),
-            ),
-            DesktopButton(
-              key: const ValueKey('credential-toggle'),
-              onPressed: enabled ? _toggle : null,
-              child: Text(detail.enabled ? '停用凭据' : '重新启用'),
-            ),
-            DesktopButton(
-              key: const ValueKey('credential-use'),
-              kind: DesktopButtonKind.primary,
-              onPressed: enabled && detail.canRequestUse ? _use : null,
-              child: const Text('申请使用'),
-            ),
-            DesktopButton(
-              key: const ValueKey('credential-history'),
-              onPressed: _busy ? null : _history,
-              child: const Text('使用记录'),
-            ),
-            DesktopButton(
-              key: const ValueKey('credential-refresh'),
-              onPressed: _busy ? null : _load,
-              child: const Text('刷新凭据资料'),
-            ),
-          ],
-        ),
         _section(
           '用途与内容',
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                detail.record.description,
-                style: libraryText(context, 14, height: 1.8),
-              ),
-              const SizedBox(height: 12),
-              SelectableText(
-                detail.mask,
-                key: const ValueKey('credential-mask'),
-                semanticsLabel: '凭据内容已隐藏',
-                style: libraryText(context, 16).copyWith(fontFamily: 'Menlo'),
-              ),
-              if (detail.privateNote.isNotEmpty) ...[
-                const SizedBox(height: 14),
-                Text('私有备注', style: libraryText(context, 13, color: c.muted)),
-                SelectableText(
-                  detail.privateNote,
-                  style: libraryText(context, 14, height: 1.8),
-                ),
-              ],
-            ],
+          LibraryReadingText(
+            key: const ValueKey('credential-purpose'),
+            span: TextSpan(text: _purpose(detail)),
+            style: libraryText(context, 14, height: 1.95),
           ),
+          id: 'purpose',
         ),
         _section(
           '使用方式',
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(detail.delivery.label, style: libraryText(context, 14)),
-              if (detail.binding.isNotEmpty) ...[
-                const SizedBox(height: 8),
-                Text('引用名称', style: libraryText(context, 13, color: c.muted)),
-                SelectableText(
-                  detail.binding,
-                  style: libraryText(context, 13).copyWith(fontFamily: 'Menlo'),
+          detail.delivery == WorkspaceCredentialDelivery.storage
+              ? Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 15,
+                    vertical: 13,
+                  ),
+                  decoration: BoxDecoration(
+                    color: c.credentialSurface,
+                    borderRadius: BorderRadius.circular(7),
+                  ),
+                  child: Text(
+                    detail.unavailableReason!,
+                    style: libraryText(
+                      context,
+                      13,
+                      color: c.warning,
+                      height: 1.8,
+                    ),
+                  ),
+                )
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    LayoutBuilder(
+                      builder: (context, bounds) {
+                        final columns =
+                            bounds.maxWidth >= 480 &&
+                                MediaQuery.textScalerOf(context).scale(1) < 1.6
+                            ? 2
+                            : 1;
+                        return Wrap(
+                          spacing: 34,
+                          runSpacing: 22,
+                          children: [
+                            for (final (id, label, value) in [
+                              ('delivery', '注入方式', detail.delivery.label),
+                              if (detail.binding.isNotEmpty)
+                                ('binding', '引用名称', detail.binding),
+                            ])
+                              SizedBox(
+                                width:
+                                    (bounds.maxWidth - 34 * (columns - 1)) /
+                                    columns,
+                                child: Column(
+                                  key: ValueKey('credential-$id-fact'),
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: [
+                                    LibraryReadingText(
+                                      key: ValueKey('credential-$id-label'),
+                                      span: TextSpan(text: label),
+                                      style: libraryText(
+                                        context,
+                                        13,
+                                        color: c.muted,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    LibraryReadingText(
+                                      key: ValueKey('credential-$id-value'),
+                                      lineFontSize: 14,
+                                      span: TextSpan(text: value),
+                                      style: id == 'binding'
+                                          ? libraryText(
+                                              context,
+                                              13,
+                                              weight: FontWeight.w500,
+                                            ).copyWith(fontFamily: 'Menlo')
+                                          : libraryText(
+                                              context,
+                                              14,
+                                              weight: FontWeight.w500,
+                                            ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                          ],
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 24),
+                    LibraryReadingText(
+                      key: const ValueKey('credential-use-note'),
+                      span: TextSpan(
+                        text:
+                            detail.unavailableReason ??
+                            '凭据使用单独审批；在授权期内可按批准方式重复使用。',
+                      ),
+                      style: libraryText(
+                        context,
+                        14,
+                        color: detail.unavailableReason == null
+                            ? c.muted
+                            : c.warning,
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-              const SizedBox(height: 12),
-              Text(
-                detail.unavailableReason ?? '凭据使用单独审批；在授权期内可按批准方式重复使用。',
-                style: libraryText(
-                  context,
-                  13,
-                  color: detail.unavailableReason == null ? c.muted : c.warning,
-                  height: 1.8,
-                ),
-              ),
-            ],
-          ),
+          id: 'use',
+          gap: detail.delivery == WorkspaceCredentialDelivery.storage ? 18 : 13,
         ),
         _section(
           '关联资料',
           Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              for (final ref in detail.linkedInformation)
+              for (final (index, ref) in detail.linkedInformation.indexed)
                 if (_links.where((r) => r.ref == ref).firstOrNull
                     case final linked?)
-                  DesktopButton(
-                    kind: DesktopButtonKind.quiet,
-                    alignment: Alignment.centerLeft,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  LibraryRelationRow(
+                    record: linked,
+                    first: index == 0,
                     onPressed: () => widget.onOpen(ref),
-                    child: Row(
-                      children: [
-                        RecordIcon(linked.type),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              Text(linked.name),
-                              Text(
-                                linked.description,
-                                style: libraryText(context, 13, color: c.muted),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const PrototypeIcon(PrototypeIconGlyph.chev),
-                      ],
-                    ),
                   )
                 else
                   Text(
@@ -411,6 +454,51 @@ class _LibraryCredentialState extends State<LibraryCredential> {
                   '尚未关联资料。',
                   style: libraryText(context, 13, color: c.muted),
                 ),
+            ],
+          ),
+          id: 'relations',
+        ),
+        if (detail.privateNote.isNotEmpty)
+          _section(
+            '私有备注',
+            LibraryReadingText(
+              span: TextSpan(text: detail.privateNote),
+              style: libraryText(context, 14, height: 1.8),
+            ),
+            id: 'private-note',
+          ),
+        Padding(
+          padding: const EdgeInsets.only(top: 27),
+          child: Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              DesktopButton(
+                key: const ValueKey('credential-replace'),
+                onPressed: enabled ? _replace : null,
+                child: const Text('更换材料'),
+              ),
+              DesktopButton(
+                key: const ValueKey('credential-toggle'),
+                onPressed: enabled ? _toggle : null,
+                child: Text(detail.enabled ? '停用凭据' : '重新启用'),
+              ),
+              DesktopButton(
+                key: const ValueKey('credential-use'),
+                kind: DesktopButtonKind.primary,
+                onPressed: enabled && detail.canRequestUse ? _use : null,
+                child: const Text('申请使用'),
+              ),
+              DesktopButton(
+                key: const ValueKey('credential-history'),
+                onPressed: _busy ? null : _history,
+                child: const Text('使用记录'),
+              ),
+              DesktopButton(
+                key: const ValueKey('credential-refresh'),
+                onPressed: _busy ? null : _load,
+                child: const Text('刷新凭据资料'),
+              ),
             ],
           ),
         ),
@@ -453,6 +541,7 @@ class _LibraryCredentialState extends State<LibraryCredential> {
                   ),
               ],
             ),
+            id: 'requests',
           ),
       ],
     );

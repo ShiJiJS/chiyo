@@ -358,3 +358,148 @@ class LibraryDirectorySelect extends StatelessWidget {
     ],
   );
 }
+
+/// CSS line boxes keep fractional leading between blocks. The engine's glyphs
+/// and selectable text stay at their original size; only layout leading is
+/// reserved independently from its rounded paragraph height.
+class LibraryReadingText extends StatelessWidget {
+  const LibraryReadingText({
+    super.key,
+    required this.span,
+    required this.style,
+    this.fixedLineBox = true,
+    this.lineFontSize,
+    this.textAlign = TextAlign.start,
+  });
+  final TextSpan span;
+  final TextStyle style;
+  final bool fixedLineBox;
+  final double? lineFontSize;
+  final TextAlign textAlign;
+  @override
+  Widget build(BuildContext context) {
+    if (!fixedLineBox) return SelectableText.rich(span, style: style);
+    if (span.toPlainText().isEmpty) return const SizedBox.shrink();
+    final scaler = MediaQuery.textScalerOf(context);
+    final lineStyle = style.copyWith(fontSize: lineFontSize ?? style.fontSize);
+    final strut = StrutStyle.fromTextStyle(lineStyle, forceStrutHeight: true);
+    return LayoutBuilder(
+      builder: (context, bounds) {
+        final painter = TextPainter(
+          text: TextSpan(style: style, children: [span]),
+          strutStyle: strut,
+          textDirection: Directionality.of(context),
+          textAlign: textAlign,
+          textScaler: scaler,
+        )..layout(maxWidth: bounds.maxWidth);
+        final height =
+            painter.computeLineMetrics().length *
+            scaler.scale(lineStyle.fontSize!) *
+            lineStyle.height!;
+        final factor = painter.height == 0 ? 1.0 : height / painter.height;
+        final width = bounds.maxWidth.isFinite ? null : painter.width;
+        painter.dispose();
+        return SizedBox(
+          width: width,
+          child: Align(
+            alignment: AlignmentDirectional.topStart,
+            heightFactor: factor,
+            child: SizedBox(
+              width: width ?? bounds.maxWidth,
+              child: SelectableText.rich(
+                span,
+                style: style,
+                strutStyle: strut,
+                textAlign: textAlign,
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// Ordinary and credential details navigate through the same relation row.
+class LibraryRelationRow extends StatelessWidget {
+  const LibraryRelationRow({
+    super.key,
+    required this.record,
+    required this.onPressed,
+    this.first = true,
+  });
+  final WorkspaceRecordSummary record;
+  final VoidCallback onPressed;
+  final bool first;
+  @override
+  Widget build(BuildContext context) => Container(
+    key: ValueKey('library-relation-frame-${record.ref.key}'),
+    decoration: BoxDecoration(
+      border: first
+          ? null
+          : Border(top: BorderSide(color: UiPalette.of(context).line)),
+    ),
+    child: DesktopButton(
+      key: ValueKey('library-relation-${record.ref.key}'),
+      kind: DesktopButtonKind.link,
+      radius: 0,
+      alignment: Alignment.centerLeft,
+      padding: const EdgeInsets.symmetric(vertical: 14),
+      onPressed: onPressed,
+      child: Row(
+        children: [
+          RecordIcon(
+            record.type,
+            key: ValueKey('library-relation-icon-${record.ref.key}'),
+            size: 34,
+            radius: 7,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              key: ValueKey('library-relation-text-${record.ref.key}'),
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  record.name,
+                  key: ValueKey('library-relation-name-${record.ref.key}'),
+                  style: const TextStyle(
+                    fontSize: 14,
+                    height: 1.6,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  record.description,
+                  key: ValueKey(
+                    'library-relation-description-${record.ref.key}',
+                  ),
+                  style: libraryText(
+                    context,
+                    13,
+                    color: UiPalette.of(context).muted,
+                    height: 1.7,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          SizedBox(
+            key: ValueKey('library-relation-chevron-${record.ref.key}'),
+            width: 15,
+            height: 19,
+            child: Center(
+              child: PrototypeIcon(
+                PrototypeIconGlyph.chev,
+                size: 15,
+                color: UiPalette.of(context).muted,
+              ),
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
