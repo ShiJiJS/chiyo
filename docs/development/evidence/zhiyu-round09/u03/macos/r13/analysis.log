@@ -1,0 +1,19 @@
+Analyzing desktop...                                            
+
+  error • Expected to find ';' • test/desktop_controls_test.dart:79:201 • expected_token
+  error • Expected to find '}' • test/desktop_controls_test.dart:79:202 • expected_token
+  error • The await expression can only be used in an async function. Try marking the function body with either 'async' or 'async*' • test/desktop_controls_test.dart:80:5 • await_in_wrong_context
+  error • Undefined name 't'. Try correcting the name to one that is defined, or defining the name • test/desktop_controls_test.dart:80:11 • undefined_identifier
+  error • Undefined name 't'. Try correcting the name to one that is defined, or defining the name • test/desktop_controls_test.dart:82:12 • undefined_identifier
+  error • Undefined name 't'. Try correcting the name to one that is defined, or defining the name • test/desktop_controls_test.dart:83:12 • undefined_identifier
+  error • Undefined name 't'. Try correcting the name to one that is defined, or defining the name • test/desktop_controls_test.dart:83:35 • undefined_identifier
+  error • Undefined name 't'. Try correcting the name to one that is defined, or defining the name • test/desktop_controls_test.dart:84:12 • undefined_identifier
+  error • The await expression can only be used in an async function. Try marking the function body with either 'async' or 'async*' • test/desktop_controls_test.dart:85:5 • await_in_wrong_context
+  error • Undefined name 't'. Try correcting the name to one that is defined, or defining the name • test/desktop_controls_test.dart:85:11 • undefined_identifier
+  error • The await expression can only be used in an async function. Try marking the function body with either 'async' or 'async*' • test/desktop_controls_test.dart:86:5 • await_in_wrong_context
+  error • Undefined name 't'. Try correcting the name to one that is defined, or defining the name • test/desktop_controls_test.dart:86:11 • undefined_identifier
+  error • Expected a method, getter, setter or operator declaration. This appears to be incomplete code. Try removing it or completing it • test/desktop_controls_test.dart:89:4 • expected_executable
+  error • Unexpected text ';'. Try removing the text • test/desktop_controls_test.dart:89:5 • unexpected_token
+  error • Expected a method, getter, setter or operator declaration. This appears to be incomplete code. Try removing it or completing it • test/desktop_controls_test.dart:91:1 • expected_executable
+
+15 issues found. (ran in 4.7s)
