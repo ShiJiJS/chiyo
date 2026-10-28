@@ -1,0 +1,45 @@
+00:00 +0: loading /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_attachment_reading_test.dart
+00:00 +0: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_attachment_reading_test.dart: (setUpAll)
+00:00 +0: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credentials_test.dart: (setUpAll)
+00:00 +0: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credential_lifecycle_test.dart: (setUpAll)
+00:00 +0: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_attachment_reading_test.dart: attachment reading Size(1440.0, 900.0) dark=false scale=1.0
+00:02 +1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_attachment_reading_test.dart: attachment reading Size(1440.0, 900.0) dark=false scale=1.0
+00:08 +2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credentials_test.dart: credential reading, grouped usage history and failed use request reach one pending receipt
+00:09 +3: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credentials_test.dart: credential reading, grouped usage history and failed use request reach one pending receipt
+00:11 +4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_test.dart: document editing preserves failed draft and saves plain text/Markdown as distinct versioned facts
+00:11 +5: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_test.dart: document editing preserves failed draft and saves plain text/Markdown as distinct versioned facts
+00:13 +6: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credential_lifecycle_test.dart: dark200 recycle unknown result is reconciled before explicit retry and shared recycle restores disabled
+00:17 +7: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credentials_test.dart: dark 200% credential create and rotation preserve uncertain draft, disable and re-enable explicitly
+00:17 +8: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credentials_test.dart: dark 200% credential create and rotation preserve uncertain draft, disable and re-enable explicitly
+00:17 +9: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credentials_test.dart: dark 200% credential create and rotation preserve uncertain draft, disable and re-enable explicitly
+00:21 +10: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credentials_test.dart: dark 200% credential create and rotation preserve uncertain draft, disable and re-enable explicitly
+00:21 +11: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credentials_test.dart: dark 200% credential create and rotation preserve uncertain draft, disable and re-enable explicitly
+00:22 +12: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_test.dart: file replace failure retains selected file; historical restore creates a new current head
+00:23 +13: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_attachment_reading_test.dart: attachment reading Size(1280.0, 800.0) dark=false scale=1.0
+00:23 +14: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credentials_test.dart: focus unavailable, storage-only and a reachable read failure remain usable without secrets or execution
+00:25 +15: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credentials_test.dart: focus unavailable, storage-only and a reachable read failure remain usable without secrets or execution
+00:26 +16: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_fidelity_test.dart: R05/R06 reading and raw access Size(1440.0, 900.0) dark=false scale=1.0
+00:27 +17: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_fidelity_test.dart: R05/R06 reading and raw access Size(1440.0, 900.0) dark=false scale=1.0
+00:28 +18: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_fidelity_test.dart: R05/R06 reading and raw access Size(1440.0, 900.0) dark=false scale=1.0
+00:30 +19: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_fidelity_test.dart: R05/R06 reading and raw access Size(1440.0, 900.0) dark=false scale=1.0
+00:30 +20: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credentials_test.dart: credential editor retains a conflict draft and requires current metadata review before rebase
+00:31 +21: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credentials_test.dart: credential editor retains a conflict draft and requires current metadata review before rebase
+00:31 +22: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_test.dart: file import reviews metadata, resolves unknown result before retry and leaves unknown-format save/open usable
+00:31 +23: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_test.dart: file import reviews metadata, resolves unknown result before retry and leaves unknown-format save/open usable
+00:31 +24: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_test.dart: file import reviews metadata, resolves unknown result before retry and leaves unknown-format save/open usable
+00:33 +25: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_fidelity_test.dart: R05/R06 reading and raw access Size(1440.0, 900.0) dark=false scale=2.0
+00:33 +26: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_fidelity_test.dart: R05/R06 reading and raw access Size(1440.0, 900.0) dark=false scale=2.0
+00:34 +27: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credentials_test.dart: long private note preserves credential configuration and reachable actions/related return large=true
+00:36 +28: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_fidelity_test.dart: R05/R06 reading and raw access Size(1440.0, 900.0) dark=true scale=1.0
+00:37 +29: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_fidelity_test.dart: R05/R06 reading and raw access Size(1440.0, 900.0) dark=true scale=2.0
+00:39 +30: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_fidelity_test.dart: R05/R06 reading and raw access Size(1280.0, 800.0) dark=false scale=1.0
+00:41 +31: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_fidelity_test.dart: R05/R06 reading and raw access Size(1280.0, 800.0) dark=false scale=2.0
+00:42 +32: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_fidelity_test.dart: R05/R06 reading and raw access Size(1280.0, 800.0) dark=true scale=1.0
+00:44 +33: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_fidelity_test.dart: R05/R06 reading and raw access Size(1280.0, 800.0) dark=true scale=2.0
+00:46 +34: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_fidelity_test.dart: wide Markdown table keeps horizontal access and fitting table has no empty scroll lane
+00:46 +35: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_fidelity_test.dart: nested Markdown paragraphs keep their reading separation
+00:46 +36: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_fidelity_test.dart: fractional multiline leading keeps full-size selectable text and complete copying (variant: TargetPlatform.macOS)
+00:46 +37: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_fidelity_test.dart: wrapped table cells share a row and wide code remains horizontally readable
+00:46 +38: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_fidelity_test.dart: unavailable document snapshot retains raw fields without disconnected reading tools
+00:46 +39: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_fidelity_test.dart: (tearDownAll)
+00:46 +39: All tests passed!
