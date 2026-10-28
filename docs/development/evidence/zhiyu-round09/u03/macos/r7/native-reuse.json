@@ -1,6 +1,6 @@
 {
   "newCocoaRuntime": false,
-  "priorEvidence": "../../../../u02/macos/r14",
+  "priorEvidence": "../../../u02/macos/r14",
   "sameSourceAsR14": {
     "apps/desktop/lib/preview_main.dart": true,
     "apps/desktop/lib/workspace/mac_preview_desktop.dart": true,

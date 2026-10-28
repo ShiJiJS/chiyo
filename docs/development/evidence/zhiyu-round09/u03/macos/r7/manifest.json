@@ -156,8 +156,8 @@
     "sha256": "32e6f1991a5d40b98bd017be41c3271d76d9a7cc3f79f84a640ae1e1d79249bb"
   },
   "commands.json": {
-    "bytes": 1708,
-    "sha256": "ccdbe06df148cd59b380fa13418301bcb325cde41454d2b9c184e84cdc2ef5eb"
+    "bytes": 1834,
+    "sha256": "67bc399de89512cc71fde9d630a72b5f64ab0c3425df0b7dfd1ae497a7de11d8"
   },
   "comparison-policy-guard.json": {
     "bytes": 32140,
@@ -176,8 +176,8 @@
     "sha256": "24e5cc2c415b6450a2760ccde45384a7914facf45455d5146a2a3c63ea1eee02"
   },
   "native-reuse.json": {
-    "bytes": 407,
-    "sha256": "2fda0c85324d4fe6f6346be39c9c8eda1795a98e1a2e3b65766c7cfbb03a32c7"
+    "bytes": 404,
+    "sha256": "facbf08672af998f0d162c513fc2cc6ff905b366ed0ab757c1026526c9d12ba0"
   },
   "native-scrollbar-probe.json": {
     "bytes": 131,
