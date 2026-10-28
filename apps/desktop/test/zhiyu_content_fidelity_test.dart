@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -225,6 +226,36 @@ void main() {
               for (var i = 0; i < headings.length; i++) {
                 boxes['document-heading-$i'] = rect(text(headings[i]));
               }
+              boxes['document-paragraph-0'] = rect(
+                key('library-document-block-1'),
+              );
+              boxes['document-paragraph-1'] = rect(
+                key('library-document-block-7'),
+              );
+              boxes['document-table'] = rect(key('library-document-block-3'));
+              final table = t.widget<Table>(
+                find.descendant(
+                  of: key('library-document-block-3'),
+                  matching: find.byType(Table),
+                ),
+              );
+              for (var r = 0; r < table.children.length; r++) {
+                for (var c = 0; c < table.children[r].children.length; c++) {
+                  boxes['document-table-cell-$r-$c'] = rect(
+                    find.byWidget(table.children[r].children[c]),
+                  );
+                }
+              }
+              boxes['document-code'] = rect(key('library-document-block-6'));
+              boxes['document-list'] = rect(key('library-document-block-5'));
+              final items = find.descendant(
+                of: key('library-document-block-5'),
+                matching: find.byType(Expanded),
+              );
+              expect(items, findsNWidgets(3));
+              for (var i = 0; i < 3; i++) {
+                boxes['document-list-item-$i'] = rect(items.at(i));
+              }
               await capture('R06-document', boxes);
               await tap(key('library-document-raw'));
               expect(key('library-document-text'), findsOneWidget);
@@ -261,7 +292,7 @@ void main() {
               child: LibraryDocument(
                 format: 'markdown',
                 body:
-                    '| 第一列 | 第二列 | 第三列 |\n| --- | --- | --- |\n| 首项 | 中间项 | 末项 |',
+                    '| 第一列 | 第二列 | 第三列 |\n| --- | --- | --- |\n| firstcolumnunbreakablevalue | middlecolumnunbreakablevalue | lastcolumnunbreakablevalue |',
               ),
             ),
           ),
@@ -273,7 +304,7 @@ void main() {
             w is SingleChildScrollView && w.scrollDirection == Axis.horizontal,
       );
       expect(horizontal, findsOneWidget);
-      await t.drag(horizontal, const Offset(-180, 0));
+      await t.drag(horizontal, const Offset(-700, 0));
       await t.pumpAndSettle();
       final position = t
           .state<ScrollableState>(
@@ -316,6 +347,126 @@ void main() {
     expect(t.takeException(), isNull);
     await t.pumpWidget(const SizedBox());
   });
+  testWidgets(
+    'fractional multiline leading keeps full-size selectable text and complete copying',
+    (t) async {
+      String? copied;
+      final messenger =
+          TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+      messenger.setMockMethodCallHandler(SystemChannels.platform, (call) async {
+        if (call.method == 'Clipboard.setData') {
+          copied = (call.arguments as Map)['text'] as String;
+        }
+        if (call.method == 'Clipboard.getData') return {'text': copied};
+        if (call.method == 'Clipboard.hasStrings') {
+          return {'value': copied?.isNotEmpty ?? false};
+        }
+        return null;
+      });
+      addTearDown(
+        () => messenger.setMockMethodCallHandler(SystemChannels.platform, null),
+      );
+      await t.pumpWidget(
+        MaterialApp(
+          theme: zhiyuTheme(Brightness.light),
+          home: const Scaffold(
+            body: SizedBox(
+              width: 500,
+              child: LibraryDocument(
+                format: 'markdown',
+                body: 'alpha  \nbeta\n\nfinal',
+              ),
+            ),
+          ),
+        ),
+      );
+      await t.pumpAndSettle();
+      final block = find.byKey(const ValueKey('library-document-block-0'));
+      final next = find.byKey(const ValueKey('library-document-block-1'));
+      expect(t.getSize(block).height, closeTo(54.6, .001));
+      expect(
+        t.getTopLeft(next).dy - t.getBottomLeft(block).dy,
+        closeTo(10, .001),
+      );
+      final text = find.descendant(
+        of: block,
+        matching: find.byType(SelectableText),
+      );
+      expect(t.widget<SelectableText>(text).style!.fontSize, 14);
+      await t.tap(text);
+      await t.pump();
+      await t.sendKeyDownEvent(LogicalKeyboardKey.metaLeft);
+      await t.sendKeyEvent(LogicalKeyboardKey.keyA);
+      await t.sendKeyEvent(LogicalKeyboardKey.keyC);
+      await t.sendKeyUpEvent(LogicalKeyboardKey.metaLeft);
+      await t.pump();
+      expect(copied, 'alpha\nbeta');
+      expect(t.takeException(), isNull);
+      await t.pumpWidget(const SizedBox());
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.macOS),
+  );
+  testWidgets(
+    'wrapped table cells share a row and wide code remains horizontally readable',
+    (t) async {
+      final code = '${List.filled(12, 'long_code_value').join('_')}_END';
+      await t.pumpWidget(
+        MaterialApp(
+          theme: zhiyuTheme(Brightness.light),
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: SizedBox(
+                width: 240,
+                child: LibraryDocument(
+                  format: 'markdown',
+                  body:
+                      '| Left | Right |\n| --- | --- |\n| Several words wrapping over multiple lines inside this cell | Short |\n\n```\n$code\n```',
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await t.pumpAndSettle();
+      final table = t.widget<Table>(find.byType(Table));
+      final left = t.getRect(find.byWidget(table.children[1].children[0]));
+      final right = t.getRect(find.byWidget(table.children[1].children[1]));
+      expect(left.height, greaterThan(50));
+      expect(left.height, right.height);
+      expect(left.bottom, right.bottom);
+      final horizontal = find.byWidgetPredicate(
+        (w) =>
+            w is SingleChildScrollView && w.scrollDirection == Axis.horizontal,
+      );
+      expect(horizontal, findsOneWidget);
+      await t.ensureVisible(horizontal);
+      await t.sendEventToBinding(
+        PointerScrollEvent(
+          position: t.getCenter(horizontal),
+          scrollDelta: const Offset(3000, 0),
+          kind: ui.PointerDeviceKind.mouse,
+        ),
+      );
+      await t.pumpAndSettle();
+      final position = t
+          .state<ScrollableState>(
+            find
+                .descendant(of: horizontal, matching: find.byType(Scrollable))
+                .first,
+          )
+          .position;
+      expect(position.pixels, greaterThan(0));
+      expect(position.extentAfter, lessThan(1));
+      final text = find.descendant(
+        of: horizontal,
+        matching: find.byType(SelectableText),
+      );
+      expect(t.widget<SelectableText>(text).textSpan!.toPlainText(), code);
+      expect(t.widget<SelectableText>(text).style!.fontSize, 13);
+      expect(t.takeException(), isNull);
+      await t.pumpWidget(const SizedBox());
+    },
+  );
   testWidgets(
     'unavailable document snapshot retains raw fields without disconnected reading tools',
     (t) async {
