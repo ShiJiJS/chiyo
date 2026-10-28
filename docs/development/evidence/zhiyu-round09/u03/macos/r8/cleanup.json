@@ -1,0 +1,19 @@
+{
+  "createdAt": "2026-10-28T19:09:36.758506+00:00",
+  "removedDirectory": "build/zhiyu-ui/u03/macos/r8",
+  "removedFiles": 163,
+  "removedBytes": 29605129,
+  "sourceGitBlobsVerified": 271,
+  "evidenceGitBlobsVerified": 77,
+  "frozenFilesVerified": 15,
+  "fontAndFixedAppHashesVerified": true,
+  "retainedEvidence": "docs/development/evidence/zhiyu-round09/u03/macos/r8",
+  "retainedEvidenceBytes": 3433632,
+  "retainedFixedApp": "apps/desktop/build/macos/Build/Products/Debug/info_desktop.app",
+  "ordinaryPreviewTarget": "lib/preview_main.dart",
+  "browserFinished": 218,
+  "referenceServerStopped": true,
+  "ownedNativeContainerEvidenceRemovedByCollector": true,
+  "unknownLocalDirectoryUntouched": true,
+  "removedDirectoryAbsent": true
+}
