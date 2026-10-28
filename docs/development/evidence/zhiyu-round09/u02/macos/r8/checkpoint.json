@@ -1,0 +1,44 @@
+{
+  "createdAt": "2026-10-28T08:00:49.685000+00:00",
+  "sourceCommit": "8f60fc5500a177939415e7169cbfc0be7bacd267",
+  "branch": "codex/zhiyu-macos",
+  "issue": 63,
+  "state": "OPEN",
+  "criteria": "6/7, unchanged",
+  "scope": "library footer restoration and accessible recycle path; synthetic preview",
+  "checks": {
+    "focusedAndCapture": 17,
+    "newScaleThemeViewportCases": 8,
+    "adjacentRegression": 35,
+    "analysis": "strict passed",
+    "build": "fixed ordinary preview arm64 passed",
+    "footerGeometryCases": 4,
+    "footerMaxDelta": 0.1953125,
+    "referenceGeometryTheme": "dark; geometry only reused across light/dark, not color fidelity proof",
+    "rowComparisonCases": 8,
+    "rowMaxCoveredDelta": 0.6015625,
+    "fullS5Passed": false,
+    "interruptedInitialCapture": "toImage awaited in fake test clock; explicitly stopped, moved into runAsync; final17 passed",
+    "newCocoa": false
+  },
+  "viewedActualFrames": [
+    "actual/light-1440-shell.png",
+    "actual/dark-1280-shell.png",
+    "actual/footer-1440-light-200.png",
+    "actual/footer-1280-dark-200.png"
+  ],
+  "pending": [
+    "details tag sizes and linked-row spacing",
+    "sidebar labels and selected filter styling",
+    "R02 empty, complete R03/R04, ordering/reference difference",
+    "normal-speed motion and actual OS input",
+    "F01 real database/services/transactions/integration and delivery"
+  ],
+  "isolation": {
+    "computerUse": false,
+    "subagents": false,
+    "personalDatabase": false,
+    "systemPermissions": false,
+    "WindowsCI": false
+  }
+}
