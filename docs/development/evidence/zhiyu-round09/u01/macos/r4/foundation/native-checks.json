@@ -1,0 +1,72 @@
+{
+  "platform": "macos",
+  "fonts": {
+    "platform": "macos",
+    "Zhiyu System": "/System/Library/Fonts/SFNS.ttf",
+    "PingFang SC": "/System/Library/AssetsV2/com_apple_MobileAsset_Font8/86ba2c91f017a3749571a82f2c6d890ac7ffb2fb.asset/AssetData/PingFang.ttc",
+    "Menlo": "/System/Library/Fonts/Menlo.ttc"
+  },
+  "nativeIsolationChecked": true,
+  "nativePreview": {
+    "applicationId": "com.example.infoDesktop.zhiyuPreview",
+    "isolated": true,
+    "productionServices": false,
+    "savedDirectories": false,
+    "scrollbarRevision": 0,
+    "title": "知予 · 界面预览·示例数据",
+    "scrollbarStyle": "overlay"
+  },
+  "physicalSize": {
+    "width": 2880.0,
+    "height": 1800.0
+  },
+  "actualSystemDpr": 2.0,
+  "initialTextScale": 1.0,
+  "contentViewports": [
+    {
+      "width": 1440.0,
+      "height": 900.0,
+      "theme": "light",
+      "devicePixelRatio": 2.0,
+      "nativeWindowResized": true
+    },
+    {
+      "width": 1440.0,
+      "height": 900.0,
+      "theme": "dark",
+      "devicePixelRatio": 2.0,
+      "nativeWindowResized": true
+    },
+    {
+      "width": 1280.0,
+      "height": 800.0,
+      "theme": "light",
+      "devicePixelRatio": 2.0,
+      "nativeWindowResized": true
+    },
+    {
+      "width": 1280.0,
+      "height": 800.0,
+      "theme": "dark",
+      "devicePixelRatio": 2.0,
+      "nativeWindowResized": true
+    }
+  ],
+  "largeTextMethod": "test platform text scaler; not a system DPI change",
+  "checks": [
+    "native-AppKit-menu-dispatch-and-modal-gating",
+    "secure-editor-local-UI-channel-preserved",
+    "native-frame-and-wall-clock-motion-contract",
+    "light-menu-keyboard-selection",
+    "dialog-escape-restores-focus",
+    "rapid-close-removes-modal",
+    "dark-menu-and-modal",
+    "native-rendered-200-percent-text-scroll-and-actions",
+    "reduced-motion-still-operable",
+    "native-NSWindow-resized-two-viewports-and-two-themes"
+  ],
+  "motionFailures": [],
+  "productionBootstrapUsed": false,
+  "databaseOpened": false,
+  "inputScope": "native Flutter widget-input integration; OS input smoke recorded separately"
+}
