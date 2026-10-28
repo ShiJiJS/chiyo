@@ -1,0 +1,57 @@
+{
+  "issues": [
+    {
+      "issue": 63,
+      "state": "OPEN",
+      "checked": 6,
+      "total": 7,
+      "sourceCommit": "0fa56498083b0069efe13056f24fefc08b2be31c",
+      "documentCommit": "993046f7270168d509d5696d879b80fe4b9eaa67",
+      "beforeBodySha256": "f09a79e554f316a2a90f8fb91ecc2e6a825911ccd5b9617037096530671949e1",
+      "afterBodySha256": "fdf487dd972d0bfcc2d5d118d29f24c7024e3b8cba1f31b177d774de58c0910c",
+      "bodyMatchesDraft": true,
+      "metadata": {
+        "dependencies": [
+          "https://github.com/ShiJiJS/agent-info-manage/issues/62"
+        ],
+        "dependencySelector": "ul labelled by Blocked by heading",
+        "labels": [
+          "https://github.com/ShiJiJS/agent-info-manage/issues?q=state%3Aopen%20label%3A%22enhancement%22",
+          "https://github.com/ShiJiJS/agent-info-manage/issues?q=state%3Aopen%20label%3A%22ready-for-agent%22"
+        ],
+        "comments": []
+      },
+      "spaceId": 211,
+      "spaceFinished": true
+    },
+    {
+      "issue": 64,
+      "state": "OPEN",
+      "checked": 6,
+      "total": 7,
+      "sourceCommit": "0fa56498083b0069efe13056f24fefc08b2be31c",
+      "documentCommit": "993046f7270168d509d5696d879b80fe4b9eaa67",
+      "beforeBodySha256": "93bd0f519aaf69179ad0d4561bea382303471f948048353940da80823318eba6",
+      "afterBodySha256": "407620e5ce3718764346abdacc8126aef1dd3b879b1943c518e42c81ac7ceff9",
+      "bodyMatchesDraft": true,
+      "metadata": {
+        "dependencies": [
+          "https://github.com/ShiJiJS/agent-info-manage/issues/63"
+        ],
+        "dependencySelector": "ul labelled by Blocked by heading",
+        "labels": [
+          "https://github.com/ShiJiJS/agent-info-manage/issues?q=state%3Aopen%20label%3A%22enhancement%22",
+          "https://github.com/ShiJiJS/agent-info-manage/issues?q=state%3Aopen%20label%3A%22ready-for-agent%22"
+        ],
+        "comments": []
+      },
+      "spaceId": 211,
+      "spaceFinished": true
+    }
+  ],
+  "referenceServerStopped": true,
+  "verifiedBeforeCleanup": {
+    "evidenceGitBlobs": 94,
+    "sourceGitBlobs": 246
+  }
+}
