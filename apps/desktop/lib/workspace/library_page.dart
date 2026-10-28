@@ -277,6 +277,16 @@ class _LibraryPageState extends State<LibraryPage> {
                       children: [
                         Text(
                           directory.name,
+                          style: libraryText(
+                            context,
+                            metrics.compact ? 13 : 14,
+                            color: selected
+                                ? UiPalette.of(context).accent
+                                : UiPalette.of(context).ink,
+                            weight: selected
+                                ? FontWeight.w600
+                                : FontWeight.w400,
+                          ),
                           maxLines: largeText ? 2 : 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -399,6 +409,12 @@ class _LibraryPageState extends State<LibraryPage> {
                     key: const ValueKey('library-directory-create'),
                     kind: DesktopButtonKind.quiet,
                     alignment: Alignment.centerLeft,
+                    minimumSize: const Size(0, 39),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 8,
+                    ),
+                    leadingGap: 10,
                     leading: const PrototypeIcon(
                       PrototypeIconGlyph.plus,
                       size: 17,
@@ -415,7 +431,10 @@ class _LibraryPageState extends State<LibraryPage> {
                                 ? null
                                 : model.query.directoryId,
                           ),
-                    child: const Text('新建目录'),
+                    child: Text(
+                      '新建目录',
+                      style: libraryText(context, 13, color: c.muted),
+                    ),
                   ),
                   Padding(
                     padding: const EdgeInsets.symmetric(
@@ -424,33 +443,44 @@ class _LibraryPageState extends State<LibraryPage> {
                     ),
                     child: Divider(height: 1, color: c.line),
                   ),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(21, 6, 0, 10),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(21, 6, 21, 20),
+                    child: Row(
+                      children: [
+                        Expanded(
                           child: Text(
                             '标签',
-                            style: libraryText(context, 12, color: c.muted),
+                            key: const ValueKey('library-tag-label'),
+                            style: libraryText(
+                              context,
+                              12,
+                              color: c.muted,
+                              weight: FontWeight.w600,
+                            ),
                           ),
                         ),
-                      ),
-                      DesktopButton(
-                        kind: DesktopButtonKind.quiet,
-                        fontSize: 12,
-                        minimumSize: const Size(0, 25),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 7,
-                          vertical: 3,
+                        const SizedBox(width: 10),
+                        DesktopButton(
+                          key: const ValueKey('library-tags-manage'),
+                          kind: DesktopButtonKind.quiet,
+                          fontSize: 13,
+                          minimumSize: const Size(0, 28.8),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          onPressed: () => widget.onNavigate(
+                            WorkspacePage.settings,
+                            'labels',
+                          ),
+                          child: const Text('管理'),
                         ),
-                        onPressed: () =>
-                            widget.onNavigate(WorkspacePage.settings, 'labels'),
-                        child: const Text('管理'),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    key: const ValueKey('library-tag-cloud'),
+                    padding: const EdgeInsets.fromLTRB(8, 0, 8, 13),
                     child: Wrap(
                       spacing: 7,
                       runSpacing: 7,
@@ -458,6 +488,7 @@ class _LibraryPageState extends State<LibraryPage> {
                         for (final tag in catalog.tags.take(7))
                           LibraryTag(
                             tag.name,
+                            key: ValueKey('library-sidebar-tag-${tag.id}'),
                             selected: model.query.tagId == tag.id,
                             onPressed: () => model.apply(
                               model.query.copyWith(
@@ -642,6 +673,7 @@ class _LibraryPageState extends State<LibraryPage> {
                 child: DesktopSelect<String?>(
                   key: const ValueKey('library-type-filter'),
                   value: query.typeId,
+                  highlighted: query.typeId != null,
                   compact: true,
                   isExpanded: true,
                   items: [
@@ -659,6 +691,7 @@ class _LibraryPageState extends State<LibraryPage> {
                 child: DesktopSelect<String?>(
                   key: const ValueKey('library-tag-filter'),
                   value: query.tagId,
+                  highlighted: query.tagId != null,
                   compact: true,
                   isExpanded: true,
                   items: [

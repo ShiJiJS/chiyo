@@ -37,6 +37,18 @@ export function inspectLibraryReference() {
       fontSize: style.fontSize, lineHeight: style.lineHeight,
     };
   }
+  const detailBoxes = {};
+  for (const [name, selector] of Object.entries({
+    title: '.detail-header h1', description: '.detail-header p',
+    meta: '.detail-meta', type: '.detail-meta .pill',
+    japanTag: '.detail-meta .tag[data-tag="日本"]',
+    editTags: '.detail-meta [data-action="edit-tags"]',
+    sideTagLabel: '.side-label.row .grow',
+    sideTagManage: '.side-label.row button', cloud: '.tag-cloud',
+    credential: '#record-detail .relation[data-item="sshkey"]',
+    https: '#record-detail .relation[data-item="https"]',
+    sshguide: '#record-detail .relation[data-item="sshguide"]',
+  })) detailBoxes[name] = rect(document.querySelector(selector));
   return {
     viewport: {width: innerWidth, height: innerHeight, dpr: devicePixelRatio},
     userAgent: navigator.userAgent,
@@ -57,6 +69,7 @@ export function inspectLibraryReference() {
     },
     resultCount: document.querySelector('#result-count')?.textContent,
     groupingAndSort: document.querySelector('#list-order')?.textContent,
+    detailBoxes,
   };
 }
 

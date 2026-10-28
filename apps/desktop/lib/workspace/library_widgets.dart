@@ -94,18 +94,29 @@ class LibraryTag extends StatelessWidget {
     super.key,
     this.onPressed,
     this.selected = false,
-  });
+  }) : _detail = false;
+  const LibraryTag.detail(
+    this.name, {
+    super.key,
+    this.onPressed,
+    this.selected = false,
+  }) : _detail = true;
   final String name;
   final VoidCallback? onPressed;
   final bool selected;
+  final bool _detail;
   @override
   Widget build(BuildContext context) {
     final c = UiPalette.of(context);
     return DesktopButton(
       onPressed: onPressed,
       selected: selected,
-      minimumSize: const Size(0, 26),
-      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+      selectedBorder: true,
+      selectedBorderColor: c.accent,
+      radius: 5,
+      minimumSize: Size(0, _detail ? libraryMetaHeight(context) : 26),
+      // CSS includes the one-pixel border outside the tag's 7/3px padding.
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       fontSize: 12,
       child: Text(
         name,
@@ -118,6 +129,23 @@ class LibraryTag extends StatelessWidget {
       ),
     );
   }
+}
+
+// The detail flex row stretches pills/tags to the small edit action's height.
+double libraryMetaHeight(BuildContext context) {
+  final line = TextPainter(
+    text: TextSpan(
+      text: '标签',
+      style: libraryText(context, 13, weight: FontWeight.w500),
+    ),
+    textDirection: Directionality.of(context),
+    textScaler: MediaQuery.textScalerOf(context),
+  )..layout();
+  // Flutter rounds the laid-out line box. Stretch peers to the actual action,
+  // including its CSS border-box padding, at the current font and text scale.
+  final height = line.height + 16;
+  line.dispose();
+  return height;
 }
 
 class LibraryMessage extends StatelessWidget {

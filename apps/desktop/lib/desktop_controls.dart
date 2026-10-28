@@ -192,6 +192,7 @@ class DesktopSelect<T> extends StatefulWidget {
     this.quiet = false,
     this.triggerLabel,
     this.leading,
+    this.highlighted = false,
   });
   final T? value, initialValue;
   final List<DropdownMenuItem<T>> items;
@@ -200,6 +201,7 @@ class DesktopSelect<T> extends StatefulWidget {
   final bool isExpanded;
   final InputDecoration? decoration;
   final bool compact, quiet;
+  final bool highlighted;
   final Widget? triggerLabel, leading;
   @override
   State<DesktopSelect<T>> createState() => _DesktopSelectState<T>();
@@ -295,6 +297,9 @@ class _DesktopSelectState<T> extends State<DesktopSelect<T>> {
                     : DesktopButtonKind.outline,
                 fontSize: 13,
                 leading: widget.leading,
+                selected: widget.highlighted,
+                selectedBorder: widget.highlighted,
+                selectedBorderColor: UiPalette.of(context).accent,
                 padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
                 minimumSize: Size(0, widget.quiet ? 33 : 34.8),
                 child:

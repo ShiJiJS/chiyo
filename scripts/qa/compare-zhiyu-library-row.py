@@ -61,6 +61,10 @@ def main():
     parser.add_argument('--reference', type=Path, required=True)
     parser.add_argument('--actual', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--details', action='store_true',
+                        help='Also compare the recorded R01/R02 Azure header, sidebar tags and relation boxes')
+    parser.add_argument('--title-reference', type=Path,
+                        help='Optional measured same-font CSS title advance profile')
     args = parser.parse_args()
     reports = {}
     for width, height in [(1440, 900), (1280, 800)]:
@@ -69,11 +73,46 @@ def main():
                 name = f'{theme}-{width}'
                 actual_name = name if reference_state == 'R01' else name + '-R02'
                 load = lambda path: json.loads(path.read_text())
-                reports[f'{name}-{reference_state}'] = compare(
-                    load(args.reference / f'{name}-{reference_state}.json'),
-                    load(args.actual / f'{actual_name}-library-geometry.json'),
-                    load(args.actual / f'{actual_name}-library-state.json'),
+                reference = load(args.reference / f'{name}-{reference_state}.json')
+                actual = load(args.actual / f'{actual_name}-library-geometry.json')
+                state = load(args.actual / f'{actual_name}-library-state.json')
+                report = compare(
+                    reference, actual,
+                    state,
                     width, height, theme, reference_state)
+                if args.details:
+                    keys = {
+                        'title': 'library-detail-title',
+                        'description': 'library-detail-description',
+                        'meta': 'library-detail-meta', 'type': 'library-detail-type',
+                        'japanTag': 'library-detail-tag-tag-0',
+                        'editTags': 'library-detail-edit-tags',
+                        'sideTagLabel': 'library-tag-label',
+                        'sideTagManage': 'library-tags-manage', 'cloud': 'library-tag-cloud',
+                        'credential': 'library-relation-credential:sshkey',
+                        'https': 'library-relation-information:https',
+                        'sshguide': 'library-relation-information:sshguide',
+                    }
+                    boxes = reference['after']['detailBoxes']
+                    deltas = {key: {axis: actual[target][axis] - boxes[key][axis]
+                                    for axis in ['x', 'y', 'width', 'height']}
+                              for key, target in keys.items()}
+                    maximum = max(abs(v) for box in deltas.values() for v in box.values())
+                    if maximum > 2:
+                        raise ValueError(f'{name}-{reference_state} detail boxes exceed 2px: {deltas}')
+                    report['detailBoxDeltas'] = deltas
+                    report['detailMaxDelta'] = maximum
+                    report['detailScope'] = 'Recorded Azure header, sidebar tag region and three relation boxes only; excludes motion, other records and actual OS input'
+                if args.title_reference:
+                    title = load(args.title_reference)[str(width)]
+                    if title['viewport'] != state['viewport'] or title['text'] != state['selectedRowText']['name']:
+                        raise ValueError('Title advance profile viewport/text does not match actual')
+                    delta = actual['library-detail-title-advance'] - title['advance']
+                    if abs(delta) > 2:
+                        raise ValueError(f'{name}-{reference_state} title advance exceeds 2px: {delta}')
+                    report['titleAdvanceDelta'] = delta
+                    report['titleAdvanceScope'] = 'Same-font CSS Range/Flutter fallback-run union widths; theme-independent font metrics, not glyph baseline/pixel equality'
+                reports[f'{name}-{reference_state}'] = report
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(reports, ensure_ascii=False, indent=2) + '\n')
     print(json.dumps({name: {'maxCoveredDelta': r['maxCoveredDelta'],

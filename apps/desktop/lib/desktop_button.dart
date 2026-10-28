@@ -25,6 +25,7 @@ class DesktopButton extends StatefulWidget {
     this.alignment = Alignment.center,
     this.radius = 7,
     this.selectedBorder = false,
+    this.selectedBorderColor,
   });
   final Widget child;
   final VoidCallback? onPressed;
@@ -40,6 +41,7 @@ class DesktopButton extends StatefulWidget {
   final AlignmentGeometry alignment;
   final double radius;
   final bool selectedBorder;
+  final Color? selectedBorderColor;
   @override
   State<DesktopButton> createState() => _DesktopButtonState();
 }
@@ -152,6 +154,8 @@ class _DesktopButtonState extends State<DesktopButton> {
                     : BorderSide(
                         color: primary
                             ? c.accent
+                            : widget.selected && widget.selectedBorder
+                            ? widget.selectedBorderColor ?? c.line
                             : quiet &&
                                   !(widget.selected && widget.selectedBorder)
                             ? Colors.transparent

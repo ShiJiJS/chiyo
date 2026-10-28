@@ -174,6 +174,68 @@ void main() {
           await t.pumpAndSettle();
           expect(popup, findsNothing);
           expect(model.query.typeId, isNull);
+          BorderSide borderOf(Finder control) {
+            final button = t.widget<TextButton>(
+              find.descendant(of: control, matching: find.byType(TextButton)),
+            );
+            return (button.style!.shape!.resolve({})! as RoundedRectangleBorder)
+                .side;
+          }
+
+          final japan = model.detail!.record.tags.first;
+          final detailTag = find.byKey(
+            ValueKey('library-detail-tag-${japan.id}'),
+          );
+          final editTags = find.byKey(
+            const ValueKey('library-detail-edit-tags'),
+          );
+          expect(
+            t.getRect(detailTag).height,
+            closeTo(t.getRect(editTags).height, .1),
+          );
+          expect(
+            t.getRect(detailTag).top,
+            closeTo(t.getRect(editTags).top, .1),
+          );
+          expect(t.getRect(detailTag).width, closeTo(40, 1));
+          await t.tap(anchor);
+          await t.pumpAndSettle();
+          await t.tap(find.text('服务器信息').last);
+          await t.pumpAndSettle();
+          final tagFilter = find.byKey(const ValueKey('library-tag-filter'));
+          await t.tap(tagFilter);
+          await t.pumpAndSettle();
+          await t.tap(find.text('生产环境').last);
+          await t.pumpAndSettle();
+          await t.enterText(find.byKey(const ValueKey('library-search')), '日本');
+          await t.pumpAndSettle();
+          expect(model.results!.total, 1);
+          expect(borderOf(anchor).color, palette.accent);
+          expect(borderOf(tagFilter).color, palette.accent);
+          await t.tap(anchor);
+          await t.pumpAndSettle();
+          await t.tap(find.text('全部类型').last);
+          await t.pumpAndSettle();
+          await t.tap(tagFilter);
+          await t.pumpAndSettle();
+          await t.tap(find.text('全部标签').last);
+          await t.pumpAndSettle();
+          expect(model.query.typeId, isNull);
+          expect(model.query.tagId, isNull);
+          expect(model.query.keyword, '日本');
+          expect(borderOf(anchor).color, palette.line);
+          expect(borderOf(tagFilter).color, palette.line);
+          await t.tap(detailTag);
+          await t.pumpAndSettle();
+          expect(model.query.tagId, japan.id);
+          final sideTag = find.byKey(
+            ValueKey('library-sidebar-tag-${japan.id}'),
+          );
+          expect(borderOf(sideTag).color, palette.accent);
+          expect(t.getRect(sideTag).height, closeTo(26, 1));
+          await t.tap(sideTag);
+          await t.pumpAndSettle();
+          expect(model.query.tagId, isNull);
           expect(t.takeException(), isNull);
         },
         skip: !Platform.isMacOS,
