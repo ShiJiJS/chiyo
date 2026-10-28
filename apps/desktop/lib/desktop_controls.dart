@@ -47,7 +47,7 @@ class DesktopTextField extends StatelessWidget {
         ? MacSecretInput(
             controller: controller,
             focusNode: focusNode,
-            decoration: _inside(decoration),
+            decoration: _inside(decoration, context),
             maxLength: maxLength,
             enabled: enabled ?? true,
             onChanged: onChanged,
@@ -57,7 +57,7 @@ class DesktopTextField extends StatelessWidget {
         : TextField(
             controller: controller,
             focusNode: focusNode,
-            decoration: _inside(decoration),
+            decoration: _inside(decoration, context),
             maxLength: maxLength,
             minLines: minLines,
             maxLines: maxLines,
@@ -101,7 +101,7 @@ class DesktopTextFormField extends StatelessWidget {
     child: TextFormField(
       initialValue: initialValue,
       controller: controller,
-      decoration: _inside(decoration),
+      decoration: _inside(decoration, context),
       maxLength: maxLength,
       minLines: minLines,
       maxLines: maxLines,
@@ -114,7 +114,16 @@ class DesktopTextFormField extends StatelessWidget {
   );
 }
 
-InputDecoration _inside(InputDecoration source) => source.copyWith(
+InputDecoration _inside(
+  InputDecoration source,
+  BuildContext context,
+) => source.copyWith(
+  // CSS includes a one-pixel border outside its 12/10px content padding.
+  contentPadding:
+      source.contentPadding ??
+      (DesktopMotion.enabled(context)
+          ? const EdgeInsets.symmetric(horizontal: 13, vertical: 11)
+          : null),
   // copyWith cannot clear a nullable label. An empty label leaves the visible
   // and semantic label in the persistent field frame instead.
   labelText: '',
@@ -141,8 +150,9 @@ class _FieldFrame extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final protected = label?.contains('需要授权') == true;
+    final round09 = DesktopMotion.enabled(context);
     return Container(
-      margin: const EdgeInsets.only(bottom: 14),
+      margin: EdgeInsets.only(bottom: round09 ? 12 : 14),
       padding: protected
           ? const EdgeInsets.fromLTRB(14, 12, 14, 0)
           : EdgeInsets.zero,
@@ -160,10 +170,16 @@ class _FieldFrame extends StatelessWidget {
             ExcludeSemantics(
               child: Text(
                 label!,
-                style: Theme.of(context).textTheme.bodyMedium,
+                style: round09
+                    ? Theme.of(context).textTheme.bodyMedium!.copyWith(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        height: 1.6,
+                      )
+                    : Theme.of(context).textTheme.bodyMedium,
               ),
             ),
-            const SizedBox(height: 6),
+            SizedBox(height: round09 ? 8 : 6),
           ],
           if (inputPurpose?.isNotEmpty == true)
             MacTextFieldAccessibility(label: inputPurpose!, child: child)

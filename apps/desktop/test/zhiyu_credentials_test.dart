@@ -445,4 +445,197 @@ void main() {
       },
     );
   }
+  for (final replace in [false, true]) {
+    for (final (width, dark, scale) in [
+      for (final width in [1440.0, 1280.0])
+        for (final dark in [false, true])
+          for (final scale in [1.0, 2.0]) (width, dark, scale),
+    ]) {
+      check(
+        'material choice preserves custom reference draft replace=$replace width=$width dark=$dark scale=$scale',
+        (t) async {
+          final model = await start(
+            t,
+            'Azure SSH 私钥',
+            width: width,
+            dark: dark,
+            scale: scale,
+          );
+          const custom = 'OWNER_CUSTOM_REFERENCE';
+          if (replace) {
+            await tap(t, find.text('编辑信息'));
+            await enter(
+              t,
+              find.byKey(const ValueKey('credential-edit-binding')),
+              custom,
+            );
+            await tap(t, find.byKey(const ValueKey('credential-edit-save')));
+            expect((await model.source.credentials.read(ssh)).binding, custom);
+            await tap(t, find.byKey(const ValueKey('credential-replace')));
+          } else {
+            await tap(t, find.byKey(const ValueKey('library-create')));
+            await tap(
+              t,
+              find.byKey(const ValueKey('library-new-type-credential')),
+            );
+            await enter(
+              t,
+              find.byKey(const ValueKey('credential-edit-name')),
+              '自定引用的凭据',
+            );
+            await enter(
+              t,
+              find.byKey(const ValueKey('credential-edit-binding')),
+              custom,
+            );
+          }
+          await tap(t, find.byKey(const ValueKey('credential-edit-candidate')));
+          await tap(
+            t,
+            find.byKey(
+              ValueKey(
+                'credential-candidate-${replace ? 'ssh-file' : 'string-env'}',
+              ),
+            ),
+          );
+          expect(
+            t
+                .widget<DesktopTextField>(
+                  find.byKey(const ValueKey('credential-edit-binding')),
+                )
+                .controller!
+                .text,
+            custom,
+          );
+          final nameOwner = find.byKey(const ValueKey('credential-edit-name'));
+          final label = find.descendant(
+            of: nameOwner,
+            matching: find.text('凭据名称'),
+          );
+          final input = find.descendant(
+            of: nameOwner,
+            matching: find.byType(TextField),
+          );
+          expect(t.widget<Text>(label).style!.fontSize, 13);
+          expect(t.widget<Text>(label).style!.fontWeight, FontWeight.w500);
+          expect(t.getRect(input).top - t.getRect(label).bottom, 8);
+          if (scale == 1) {
+            expect(t.getSize(input).height, closeTo(44.4, .5));
+          }
+          final purpose = find.byKey(const ValueKey('credential-edit-purpose'));
+          expect(t.getRect(purpose).top - t.getRect(input).bottom, 12);
+          if (evidence.isNotEmpty) {
+            await t.ensureVisible(
+              find.byKey(const ValueKey('credential-edit-binding')),
+            );
+            await t.pumpAndSettle();
+            final fields = <String, Object>{};
+            for (final (id, label) in [
+              ('name', '凭据名称'),
+              ('binding', '建议引用名'),
+            ]) {
+              final owner = find.byKey(ValueKey('credential-edit-$id'));
+              final input = find.descendant(
+                of: owner,
+                matching: find.byType(TextField),
+              );
+              final caption = find.descendant(
+                of: owner,
+                matching: find.text(label),
+              );
+              final lr = t.getRect(caption), ir = t.getRect(input);
+              fields[id] = {
+                'labelHeight': lr.height,
+                'gap': ir.top - lr.bottom,
+                'inputHeight': ir.height,
+                'labelFontSize': t.widget<Text>(caption).style!.fontSize,
+                'labelWeight': t.widget<Text>(caption).style!.fontWeight?.value,
+              };
+            }
+            fields['name'] = {
+              ...Map<String, Object?>.from(fields['name'] as Map),
+              'nextFieldGap': t.getRect(purpose).top - t.getRect(input).bottom,
+            };
+            final stem =
+                '${dark ? 'dark' : 'light'}-${width.toInt()}-${(scale * 100).toInt()}-replace-$replace';
+            await t.runAsync(
+              () => File('$evidence/field-$stem.json').writeAsString(
+                jsonEncode({
+                  'viewport': {
+                    'width': width,
+                    'height': width == 1440 ? 900 : 800,
+                    'dpr': 1,
+                  },
+                  'theme': dark ? 'dark' : 'light',
+                  'textScale': scale,
+                  'replace': replace,
+                  'fields': fields,
+                }),
+              ),
+            );
+            await capture(t, 'field-$stem');
+          }
+
+          await tap(t, find.byKey(const ValueKey('credential-edit-save')));
+          expect(find.byType(DesktopDialog), findsNothing);
+          final current = await model.source.credentials.read(model.selection!);
+          expect(current.binding, custom);
+          expect(current.materialVersion, replace ? 2 : 1);
+        },
+      );
+    }
+  }
+  for (final large in [false, true]) {
+    check(
+      'new reference follows material suggestion until edited, including explicit empty large=$large',
+      (t) async {
+        final model = await start(
+          t,
+          'Azure SSH 私钥',
+          width: large ? 1280 : 1440,
+          dark: large,
+          scale: large ? 2 : 1,
+        );
+        await tap(t, find.byKey(const ValueKey('library-create')));
+        await tap(t, find.byKey(const ValueKey('library-new-type-credential')));
+        await enter(
+          t,
+          find.byKey(const ValueKey('credential-edit-name')),
+          '引用建议与手动清空',
+        );
+        String binding() => t
+            .widget<DesktopTextField>(
+              find.byKey(const ValueKey('credential-edit-binding')),
+            )
+            .controller!
+            .text;
+        Future<void> choose(String id) async {
+          await tap(t, find.byKey(const ValueKey('credential-edit-candidate')));
+          await tap(t, find.byKey(ValueKey('credential-candidate-$id')));
+        }
+
+        await choose('string-env');
+        expect(binding(), 'API_TOKEN');
+        await tap(t, find.byKey(const ValueKey('credential-edit-candidate')));
+        await tap(t, find.text('取消').last);
+        expect(binding(), 'API_TOKEN');
+        await choose('ssh-file');
+        expect(binding(), 'SSH_KEY_FILE');
+        await enter(
+          t,
+          find.byKey(const ValueKey('credential-edit-binding')),
+          '',
+        );
+        await choose('string-env');
+        expect(binding(), '');
+        expect((await model.source.loadSummary()).records, 31);
+        await tap(t, find.byKey(const ValueKey('credential-edit-save')));
+        expect(find.byType(DesktopDialog), findsNothing);
+        expect(
+          (await model.source.credentials.read(model.selection!)).binding,
+          '',
+        );
+      },
+    );
+  }
 }

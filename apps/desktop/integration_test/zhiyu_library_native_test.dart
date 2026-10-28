@@ -213,6 +213,7 @@ void main() {
     checks.add('native-widget-related-query-return');
     await recording.stop('native-controls');
     final viewports = <Map<String, Object>>[];
+    final credentialFormChecks = <Map<String, Object>>[];
     final chooserViewports = <Map<String, Object>>[];
     (model.source as SampleWorkspaceSource).reset();
     await model.apply(const WorkspaceQuery(directoryId: 'selfhost'));
@@ -499,6 +500,80 @@ void main() {
           await screenshot(
             '${dark ? 'dark' : 'light'}-${size.width.toInt()}-${ref.split(':').last}',
           );
+          if (ref == 'credential:sshkey' && !dark && size.width == 1440) {
+            const credential = WorkspaceRecordRef(
+              WorkspaceRecordKind.credential,
+              'sshkey',
+            );
+            final before = await model.source.credentials.read(credential);
+            await tap(find.byKey(const ValueKey('credential-replace')));
+            await enter('credential-edit-binding', 'NATIVE_CUSTOM_REFERENCE');
+            await tap(find.byKey(const ValueKey('credential-edit-candidate')));
+            await tap(
+              find.byKey(const ValueKey('credential-candidate-ssh-file')),
+            );
+            expect(
+              tester
+                  .widget<DesktopTextField>(
+                    find.byKey(const ValueKey('credential-edit-binding')),
+                  )
+                  .controller!
+                  .text,
+              'NATIVE_CUSTOM_REFERENCE',
+            );
+            await tester.ensureVisible(
+              find.byKey(const ValueKey('credential-edit-binding')),
+            );
+            await tester.pumpAndSettle();
+            final metrics = <String, Object>{};
+            for (final (id, caption) in [
+              ('name', '凭据名称'),
+              ('binding', '建议引用名'),
+            ]) {
+              final owner = find.byKey(ValueKey('credential-edit-$id'));
+              final label = find.descendant(
+                of: owner,
+                matching: find.text(caption),
+              );
+              final input = find.descendant(
+                of: owner,
+                matching: find.byType(TextField),
+              );
+              final lr = tester.getRect(label), ir = tester.getRect(input);
+              metrics[id] = {
+                'labelHeight': lr.height,
+                'gap': ir.top - lr.bottom,
+                'inputHeight': ir.height,
+                'labelFontSize': tester.widget<Text>(label).style!.fontSize!,
+                'labelWeight': tester
+                    .widget<Text>(label)
+                    .style!
+                    .fontWeight!
+                    .value,
+              };
+              expect(ir.top - lr.bottom, 8);
+              expect(ir.height, 44);
+            }
+            credentialFormChecks.add({
+              'viewport': {
+                'width': size.width,
+                'height': size.height,
+                'dpr': tester.view.devicePixelRatio,
+              },
+              'theme': 'light',
+              'replace': true,
+              'fields': metrics,
+            });
+            await screenshot('credential-replacement-reference-1440-light');
+            await tap(find.text('取消').last);
+            await tap(find.text('放弃修改'));
+            final after = await model.source.credentials.read(credential);
+            expect(after.binding, before.binding);
+            expect(after.materialVersion, before.materialVersion);
+            checks.add(
+              'native-credential-replacement-keeps-custom-reference-and-field-metrics',
+            );
+          }
           if (ref == 'information:resume' && !dark && size.width == 1440) {
             final file = tester
                 .widget<LibraryFilePreviewView>(
@@ -627,6 +702,7 @@ void main() {
         'checks': checks,
         'nameOrder': nameOrder,
         'contentViewports': viewports,
+        'credentialFormChecks': credentialFormChecks,
         'chooserViewports': chooserViewports,
         'productionBootstrapUsed': false,
         'databaseOpened': false,

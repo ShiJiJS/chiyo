@@ -75,4 +75,33 @@ void main() {
     expect(find.text('30 分钟'), findsOneWidget);
     expect(find.text('15 分钟'), findsNothing);
   });
+  testWidgets(
+    'legacy text field keeps its established label and input spacing',
+    (t) async {
+      await t.pumpWidget(
+        MaterialApp(
+          theme: informationTheme(),
+          home: const Scaffold(
+            body: Center(
+              child: SizedBox(
+                width: 320,
+                child: DesktopTextField(
+                  decoration: InputDecoration(labelText: '旧入口字段'),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await t.pumpAndSettle();
+      final label = find.text('旧入口字段'), input = find.byType(TextField);
+      expect(t.widget<Text>(label).style!.fontSize, 14);
+      expect(t.getRect(input).top - t.getRect(label).bottom, 6);
+      expect(t.getSize(input).height, 39);
+      await t.enterText(input, '保留输入');
+      await t.pumpAndSettle();
+      expect(find.text('旧入口字段'), findsOneWidget);
+      expect(find.text('保留输入'), findsOneWidget);
+    },
+  );
 }
