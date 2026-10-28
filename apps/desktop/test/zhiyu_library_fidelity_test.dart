@@ -44,9 +44,9 @@ void main() {
         'CSS row box/labels and end-aligned 230px menu at ${size.width}, dark=$dark',
         (t) async {
           final model = await start(t, size, dark);
-          // Frozen classic-gutter component reference: 155.78125px with two
-          // summary lines. Current browser overlay-gutter delta is tracked
-          // separately; this is deliberately not a full-page fidelity claim.
+          // Measured 11px-gutter reference: 155.78125px, two summary lines.
+          // The reference capture must record its actual gutter and viewport;
+          // this row/menu check is not a full-page fidelity claim.
           expect(t.getRect(row()).height, closeTo(155.78125, 2));
           final palette = UiPalette.of(t.element(row()));
           final button = t.widget<TextButton>(

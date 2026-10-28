@@ -35,6 +35,10 @@ def main():
         data = (PROTOTYPE / name).read_bytes()
         if hashlib.sha256(data).hexdigest() != row['sha256']:
             raise ValueError('Frozen prototype changed: ' + name)
+    shortcut_source = '<kbd>⌃ K</kbd>'.encode()
+    shortcut_target = '<kbd>⌘ K</kbd>'.encode()
+    if (PROTOTYPE / 'app.js').read_bytes().count(shortcut_source) != 1:
+        raise ValueError('Expected exactly one frozen search shortcut marker')
     style = '''<style id="mac-platform-fonts">
 @font-face {font-family:"Zhiyu System";src:url("/system.ttf");font-weight:100 900;}
 @font-face {font-family:"PingFang SC";src:url("/cjk.ttc");font-weight:100 900;}
@@ -58,6 +62,10 @@ body {font-family:"Zhiyu System","PingFang SC",sans-serif !important;}
                                 '.json': 'application/json'}.get(Path(name).suffix, 'text/plain')
                 if name == 'index.html':
                     data = data.decode().replace('</head>', style + '</head>').encode()
+                elif name == 'app.js':
+                    # S5 permits this explicit platform input marker override.
+                    # No frozen file, layout, scrollbar or data is modified.
+                    data = data.replace(shortcut_source, shortcut_target)
             else:
                 self.send_error(404)
                 return
@@ -73,7 +81,9 @@ body {font-family:"Zhiyu System","PingFang SC",sans-serif !important;}
 
     server = http.server.ThreadingHTTPServer(('127.0.0.1', args.port), Handler)
     print(json.dumps({'url': f'http://127.0.0.1:{server.server_port}',
-                      'override': 'font families only', 'fontFiles': {k: str(v) for k, v in fonts.items()}}), flush=True)
+                      'override': 'font families and Mac search shortcut marker only',
+                      'shortcutReplacements': 1,
+                      'fontFiles': {k: str(v) for k, v in fonts.items()}}), flush=True)
     try:
         server.serve_forever()
     except KeyboardInterrupt:
