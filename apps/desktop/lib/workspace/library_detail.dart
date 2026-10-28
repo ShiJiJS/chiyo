@@ -109,7 +109,7 @@ class _LibraryDetailState extends State<LibraryDetail> {
               ),
           ],
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: trailing == null ? 12 : 24),
         child,
       ],
     ),
@@ -251,12 +251,14 @@ class _LibraryDetailState extends State<LibraryDetail> {
                             weight: FontWeight.w600,
                           ),
                         ),
+                        const SizedBox(height: 2),
                         Text(
                           record.description,
                           style: libraryText(
                             context,
                             13,
                             color: UiPalette.of(context).muted,
+                            height: 1.7,
                           ),
                         ),
                       ],
@@ -320,6 +322,35 @@ class _LibraryDetailState extends State<LibraryDetail> {
     ),
   );
 
+  Widget _description(BuildContext context, String value) {
+    final style = libraryText(
+      context,
+      14,
+      color: UiPalette.of(context).muted,
+      height: 1.8,
+    );
+    // The frozen paragraph has max-width:65ch. Use the same installed font
+    // and scaler for the zero glyph instead of a platform-specific pixel cap.
+    final zero = TextPainter(
+      text: TextSpan(text: '0', style: style),
+      textDirection: Directionality.of(context),
+      textScaler: MediaQuery.textScalerOf(context),
+    )..layout();
+    final width = zero.width * 65;
+    zero.dispose();
+    return Align(
+      alignment: AlignmentDirectional.centerStart,
+      child: SizedBox(
+        width: width,
+        child: Text(
+          value,
+          key: const ValueKey('library-detail-description'),
+          style: style,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final detail = widget.detail,
@@ -343,51 +374,71 @@ class _LibraryDetailState extends State<LibraryDetail> {
                     Text(
                       record.name,
                       key: const ValueKey('library-detail-title'),
-                      style: libraryText(
-                        context,
-                        widget.metrics.titleSize,
-                        height: 1.45,
-                        weight: FontWeight.w600,
-                      ),
+                      style:
+                          libraryText(
+                            context,
+                            widget.metrics.titleSize,
+                            height: 1.45,
+                            weight: FontWeight.w600,
+                          ).copyWith(
+                            letterSpacing: -.4,
+                            fontVariations: [
+                              const FontVariation('wght', 650),
+                              // Match CSS automatic optical sizing for the same
+                              // installed variable face and actual logical size.
+                              FontVariation.opticalSize(
+                                MediaQuery.textScalerOf(
+                                  context,
+                                ).scale(widget.metrics.titleSize),
+                              ),
+                            ],
+                          ),
                     ),
-                    const SizedBox(height: 7),
-                    Text(
-                      record.description,
-                      style: libraryText(context, 14, color: c.muted),
-                    ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 6),
+                    _description(context, record.description),
+                    const SizedBox(height: 11),
                     Wrap(
+                      key: const ValueKey('library-detail-meta'),
                       spacing: 7,
                       runSpacing: 7,
                       crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
                         Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 9,
-                            vertical: 7,
-                          ),
+                          key: const ValueKey('library-detail-type'),
+                          height: libraryMetaHeight(context),
+                          padding: const EdgeInsets.symmetric(horizontal: 9),
                           decoration: BoxDecoration(
                             color: c.nav,
                             borderRadius: BorderRadius.circular(5),
                           ),
-                          child: Text(
-                            record.type.name,
-                            style: libraryText(context, 12, color: c.muted),
+                          child: Center(
+                            widthFactor: 1,
+                            child: Text(
+                              record.type.name,
+                              style: libraryText(context, 13, color: c.muted),
+                            ),
                           ),
                         ),
                         for (final tag in record.tags)
-                          LibraryTag(
+                          LibraryTag.detail(
                             tag.name,
+                            key: ValueKey('library-detail-tag-${tag.id}'),
                             onPressed: () => widget.onTag(tag.id),
                           ),
                         DesktopButton(
+                          key: const ValueKey('library-detail-edit-tags'),
                           kind: DesktopButtonKind.quiet,
                           onPressed: widget.onEdit,
                           leading: const PrototypeIcon(
                             PrototypeIconGlyph.plus,
-                            size: 16,
+                            size: 19,
                           ),
                           fontSize: 13,
+                          minimumSize: Size(0, libraryMetaHeight(context)),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 13,
+                            vertical: 8,
+                          ),
                           child: const Text('标签'),
                         ),
                       ],
@@ -395,18 +446,18 @@ class _LibraryDetailState extends State<LibraryDetail> {
                   ],
                 ),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: widget.metrics.headerGap),
               DesktopButton(
                 onPressed: widget.onExpand,
                 tooltip: '展开阅读',
                 kind: DesktopButtonKind.quiet,
-                minimumSize: const Size(37, 36),
+                minimumSize: const Size(36, 36),
                 padding: const EdgeInsets.all(8),
                 child: const PrototypeIcon(PrototypeIconGlyph.expand),
               ),
               const SizedBox(width: 2),
               SizedBox(
-                width: 37,
+                width: 36,
                 child: DesktopSelect<String>(
                   compact: true,
                   quiet: true,

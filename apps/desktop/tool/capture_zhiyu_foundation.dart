@@ -139,6 +139,42 @@ void main() {
             find.byKey(const ValueKey('library-results-pane')),
           );
           final rowRect = tester.getRect(row);
+          final title = tester.renderObject<RenderParagraph>(
+            find.byKey(const ValueKey('library-detail-title')),
+          );
+          final titleBoxes = title.getBoxesForSelection(
+            TextSelection(baseOffset: 0, extentOffset: record.name.length),
+          );
+          expect(titleBoxes, isNotEmpty);
+          // Latin and CJK fallback runs produce separate selection boxes.
+          final titleBounds = titleBoxes
+              .map((box) => box.toRect())
+              .reduce((a, b) => a.expandToInclude(b));
+          geometry['library-detail-title-advance'] = titleBounds.width;
+          for (final key in [
+            'library-detail-title',
+            'library-detail-description',
+            'library-detail-meta',
+            'library-detail-type',
+            'library-detail-edit-tags',
+            'library-tag-label',
+            'library-tags-manage',
+            'library-tag-cloud',
+            'library-relation-credential:sshkey',
+            'library-relation-information:https',
+            'library-relation-information:sshguide',
+            for (final tag in record.tags) 'library-detail-tag-${tag.id}',
+          ]) {
+            final target = find.byKey(ValueKey(key));
+            expect(target, findsOneWidget, reason: key);
+            final rect = tester.getRect(target);
+            geometry[key] = {
+              'x': rect.left,
+              'y': rect.top,
+              'width': rect.width,
+              'height': rect.height,
+            };
+          }
           geometry['library-record-information:azure'] = {
             'x': rowRect.left,
             'y': rowRect.top,
