@@ -1,0 +1,209 @@
+{
+  "scope": "bounded r14; shared controls, chooser, native receipts/1x sparse recording; no App or dSYM copy",
+  "files": {
+    "actual/dark-1280-100-chooser.json": {
+      "bytes": 1026,
+      "sha256": "9df210f1a67927d856ba1e4c3d589e32d918945cd93a5c7c8ad08b55cacd07ed"
+    },
+    "actual/dark-1280-100-chooser.png": {
+      "bytes": 152974,
+      "sha256": "f5f542679fd8f5a4ec70b842e59cba973804b453f72f37f06f2f4c5ff965ed59"
+    },
+    "actual/dark-1280-200-chooser.json": {
+      "bytes": 924,
+      "sha256": "eb1a61771ac70a4e6abc8e49adb16d498167106e55858235f01ef4df1a8e7e74"
+    },
+    "actual/dark-1280-200-chooser.png": {
+      "bytes": 192493,
+      "sha256": "527a3e0d337797dadbade0fafffbcfac33e900889a44ebcdae6e569aa2535bd6"
+    },
+    "actual/dark-1440-100-chooser.json": {
+      "bytes": 1014,
+      "sha256": "b1d94db9431fbbcd6cf8d518df68fcc0cea87291eef0704655a7bd48bec80617"
+    },
+    "actual/dark-1440-100-chooser.png": {
+      "bytes": 185378,
+      "sha256": "67b3fe15a1ba779ceac8efce623b36c0e4f99b07786a2053ea88c5d1f4018e8b"
+    },
+    "actual/dark-1440-200-chooser.json": {
+      "bytes": 925,
+      "sha256": "68e49c9609dc2bbb5c4a21ee7740fc0dbfb865aa08483a97887397b9d4217d73"
+    },
+    "actual/fonts.json": {
+      "bytes": 249,
+      "sha256": "6a64f84a850c349a6a7db28254cca2fe24ae2904d25a2b28164acf65fa830165"
+    },
+    "actual/light-1280-100-chooser.json": {
+      "bytes": 1027,
+      "sha256": "469e445370e94c7720bd1e2c3d73b0e1967ac9994941a41a1b8ae269b8917592"
+    },
+    "actual/light-1280-100-chooser.png": {
+      "bytes": 176316,
+      "sha256": "8ad2530f3729725cc672b4d6535c6bb7e6dfa1c0f360c73a9ac21e6af1363401"
+    },
+    "actual/light-1280-200-chooser.json": {
+      "bytes": 925,
+      "sha256": "01b63e8d2a98c5151b18c5f7561fedffe618462ff550037a4868e8ff2e5e36de"
+    },
+    "actual/light-1440-100-chooser.json": {
+      "bytes": 1015,
+      "sha256": "c7dbb963c47aa67f026b05f6d96a2e20f53a38848d9f799b7f958fca8928522d"
+    },
+    "actual/light-1440-100-chooser.png": {
+      "bytes": 214692,
+      "sha256": "a86aa3f55fb250d835fa5522d37adf00f226769262d17b736f8d0db518ecec74"
+    },
+    "actual/light-1440-200-chooser.json": {
+      "bytes": 926,
+      "sha256": "9238fbe6d8075879d9db3d37c1858edd22e55157f08e718b44a1194cf5f9348f"
+    },
+    "analysis-final.log": {
+      "bytes": 96,
+      "sha256": "3b965f395dd71ccd8081754ca37d2e33002a37c90179b799a0c8639c042a4325"
+    },
+    "build.log": {
+      "bytes": 125,
+      "sha256": "bb928504a91fe0ce4dc0bb921b142b31033cbbf74e92214ba34521fe3f2f22be"
+    },
+    "checkpoint.json": {
+      "bytes": 2293,
+      "sha256": "fae7380cd4c14c34a5c12701104e00d2f7f6c866044267b3135b39b6cdc8a4f5"
+    },
+    "commands.json": {
+      "bytes": 1799,
+      "sha256": "91fd28f44e1a57a55161dbda8596af514faa9d3407e2c5300d0114096e7e9741"
+    },
+    "comparison-guards.json": {
+      "bytes": 383,
+      "sha256": "f0dc1ea9d364ad42f951b6a8f4821bb1fffeef084c9c11fd9b8a80bad01fc953"
+    },
+    "focused.log": {
+      "bytes": 4452,
+      "sha256": "43ec6ecdd04d10b2ab3039c59fe8ec5ff3b3fb63bcb1669bad09bb050bdd6625"
+    },
+    "geometry.json": {
+      "bytes": 8248,
+      "sha256": "62118764102f3a54eeedd97feafd9821928e5c44de3d1a54263f3e335a44298d"
+    },
+    "motion/motion-contract.json": {
+      "bytes": 12504,
+      "sha256": "914b6aa2aedbe131c5b7664969ae299892afedae064a5c65afa95fc27ce8b562"
+    },
+    "motion/overlay-render.json": {
+      "bytes": 1060,
+      "sha256": "3c0664ed6fa83cb58608739d39e0aa85695ad4f48ce095a83a1c45ca47683ee2"
+    },
+    "native/dark-1280-chooser.png": {
+      "bytes": 343849,
+      "sha256": "670b93d1b88ff7c66a63fe86f27388ab755deeb3181522c05c17a7b9810c1c79"
+    },
+    "native/edit-failure-light.png": {
+      "bytes": 383219,
+      "sha256": "b1893d0cced31ccf9edf93672672566f89bc9ae26146813fc4194477240271e1"
+    },
+    "native/frame-00002.png": {
+      "bytes": 473752,
+      "sha256": "053b5f7dc28ae1c49d5a69750d3b961f2c76be41f0c4d397bd6ebd4ace685da1"
+    },
+    "native/frame-00004.png": {
+      "bytes": 344530,
+      "sha256": "c28a689ac00610dd6b59c6f9b7b44764f25e42e885fd0290e3020ea4b8fc7bfe"
+    },
+    "native/light-1440-chooser.png": {
+      "bytes": 473752,
+      "sha256": "053b5f7dc28ae1c49d5a69750d3b961f2c76be41f0c4d397bd6ebd4ace685da1"
+    },
+    "native/native-checks.json": {
+      "bytes": 4575,
+      "sha256": "537aa3b154b7857a0c045c528a47b8ba6695616e25c5043581ecd5f90451c82e"
+    },
+    "native/native-controls-encoding.json": {
+      "bytes": 3231,
+      "sha256": "68b2a3eb3d7998a2236b1ff42b1a84abb4692b4f350dd5a95e0ae1ce33a3b60b"
+    },
+    "native/native-controls.gif": {
+      "bytes": 1676403,
+      "sha256": "45da5daacbc448074d3e693582700983c22c30f25441b0f79c31a95712a58be5"
+    },
+    "native/native-controls.json": {
+      "bytes": 2550,
+      "sha256": "ad8e4bc3c56f0c640386154ca4626ace104bd66447529569e5afbf6d20242f7d"
+    },
+    "native-build.json": {
+      "bytes": 828,
+      "sha256": "d49cc0039dd44958380b4e993f324b67b34693fce5966d39065e4c9df3ef9787"
+    },
+    "native-capture-hashes.json": {
+      "bytes": 4093,
+      "sha256": "e79970271e0cc776602f48297dc0802d1529a19a2739a39d4f00610a777609c4"
+    },
+    "native-logical-geometry.json": {
+      "bytes": 1685,
+      "sha256": "2c61f36cc072c34914de721e4b7754343a8df785c6b6b9415aa2af437a89c599"
+    },
+    "native.log": {
+      "bytes": 531,
+      "sha256": "091745a2de07ad99c2ffc8546a9a5126d220099cd8cca2dd9de15c3a6a8a12c4"
+    },
+    "recording-scope.json": {
+      "bytes": 1123,
+      "sha256": "c11bbcc239848092124b44b3280d73f1349d0dad0f989c5a88c8bdeac9f54b05"
+    },
+    "reference/dark-1280-100-chooser.json": {
+      "bytes": 4467,
+      "sha256": "100a01ef900ea2e3a3fb89176495a6b062a6f1590d1007bf093351169aadf97d"
+    },
+    "reference/dark-1280-100-chooser.png": {
+      "bytes": 138452,
+      "sha256": "c0c9baa8d86a450fcbe60753eaa04b7326e0cf650898ad321447c8d14496f3be"
+    },
+    "reference/dark-1440-100-chooser.json": {
+      "bytes": 4469,
+      "sha256": "723f840ff11474a4817cb50c34c53d41406189e3bce725042376735837b74c21"
+    },
+    "reference/dark-1440-100-chooser.png": {
+      "bytes": 169431,
+      "sha256": "99689753d1211ba15c4967ca1a4e1dc107b005802efafd75287e8abff3c340ee"
+    },
+    "reference/light-1280-100-chooser.json": {
+      "bytes": 4469,
+      "sha256": "285b44c839ed525207a61a5684f6f13692351767b084783e555494377d9c45bb"
+    },
+    "reference/light-1280-100-chooser.png": {
+      "bytes": 151118,
+      "sha256": "c12ba19fcf535e90f8a17ce769edbdfdd35a5b281eafdcc48333dd23e521dcb4"
+    },
+    "reference/light-1440-100-chooser.json": {
+      "bytes": 4471,
+      "sha256": "9d002a98ebb9abca1cbb9013271ac10cba94f8622a3cb19a3e6e43f9ec356ae2"
+    },
+    "reference/light-1440-100-chooser.png": {
+      "bytes": 187057,
+      "sha256": "433e91d019e56b92015bc1a6c9256d04073c60888782e5515bfd6ba3c608888f"
+    },
+    "reference-integrity.json": {
+      "bytes": 172,
+      "sha256": "8802f833e7a398bcc720211200860861778c74559b2481dec53f58a2d3425aff"
+    },
+    "reference-styles-dark.json": {
+      "bytes": 975,
+      "sha256": "97010d8284eeea764b5c2d06c8e088400400135c6a0bfbd3872f091859d3c56f"
+    },
+    "reference-styles.json": {
+      "bytes": 2039,
+      "sha256": "dd8f56427f25fa14110e2fc2c87a4f50831f878425d72b9bf32fceab21a85143"
+    },
+    "regression-final.log": {
+      "bytes": 88968,
+      "sha256": "8f75276772647ade315134cc4788b3c4f3072789c60d76085cdd7a1a7c85a36f"
+    },
+    "source-hashes.json": {
+      "bytes": 30266,
+      "sha256": "ae6a933d7036dda397c528d4d58d082794d9be1515e32705368536251c1f6c91"
+    },
+    "visual-review.md": {
+      "bytes": 2792,
+      "sha256": "7cb38a6f12fcac84a926dcfa0e55f5139382115b61e3f66c882cdd0065badc57"
+    }
+  }
+}

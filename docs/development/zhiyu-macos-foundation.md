@@ -87,3 +87,10 @@ python3 scripts/qa/collect-zhiyu-native.py --log <检查日志> --output <新输
 ## 后续共享壳修正（U07 r7）
 
 源码`edf42af293641771ff05670e1ec789ff9238c8af`修正导航计数固定20px高导致200%文字截断；改为内容收缩与最小高度，保留普通字号尺寸。两个视口/明暗/100%与200%的8组检查通过，完整设置八入口另有两条连续往返；454项相关回归和当前Cocoa两类正常退出均通过。1440明亮普通文字的8组顶栏几何相对本文件r2记录差0，限定该局部。见[U07统一合同](zhiyu-settings-contracts.md)及[r7证据](evidence/zhiyu-round09/u07/macos/r7/checkpoint.json)。已有徽标问题在Widget范围修复，#62仍10/12、OPEN：完整S5/实际OS输入、录屏和其他页面差异不因此关闭。
+
+
+## 后续共用浮层修正（U02 r14）
+
+`9d8aea71`在现有控件层补齐Round09共用barrier模糊、标题和关闭SVG，并将弹窗/菜单退出时长设0，保留原入场、旧主题和减少动态效果。所有表单复用同一关闭保护；两处旧Material按钮类型断言迁移后，实际点击仍不能关闭未知结果。
+
+22项定向、444项相关回归通过，冗余import清理后严格分析、当前原生预览1项/12条功能断言和固定普通Mac构建通过。四组选择器关闭外框与冻结参考在2px目标内，限定原生逻辑外框匹配Widget。不是顶栏或整票新验收；原生GIF原速但采样稀疏，完整动效/本人OS输入仍开放。#62保持10/12、OPEN，参见[共用证据及准确范围](evidence/zhiyu-round09/u02/macos/r14/checkpoint.json)与[读图说明](evidence/zhiyu-round09/u02/macos/r14/visual-review.md)。

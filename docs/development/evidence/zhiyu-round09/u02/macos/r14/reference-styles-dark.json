@@ -1,0 +1,40 @@
+{
+  "theme": "dark",
+  "styles": {
+    ".modal-scrim": {
+      "background": "rgba(8, 11, 18, 0.56)",
+      "shadow": "none",
+      "blur": "blur(2px)",
+      "color": "rgb(228, 231, 239)",
+      "padding": "26px"
+    },
+    ".modal": {
+      "background": "rgb(36, 40, 49)",
+      "shadow": "rgba(22, 34, 56, 0.2) 0px 20px 70px 0px",
+      "blur": "none",
+      "color": "rgb(228, 231, 239)",
+      "padding": "0px"
+    },
+    ".modal-head": {
+      "background": "rgba(0, 0, 0, 0)",
+      "shadow": "none",
+      "blur": "none",
+      "color": "rgb(228, 231, 239)",
+      "padding": "20px 28px"
+    },
+    ".modal-head button": {
+      "background": "rgba(0, 0, 0, 0)",
+      "shadow": "none",
+      "blur": "none",
+      "color": "rgb(228, 231, 239)",
+      "padding": "7px"
+    },
+    ".modal-head button svg": {
+      "background": "rgba(0, 0, 0, 0)",
+      "shadow": "none",
+      "blur": "none",
+      "color": "rgb(228, 231, 239)",
+      "padding": "0px"
+    }
+  }
+}

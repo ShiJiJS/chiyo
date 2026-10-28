@@ -1,0 +1,11 @@
+{
+  "cwd": "apps/desktop unless noted",
+  "focused": "../../scripts/dev-macos.sh flutter test --no-pub --dart-define=UI_EVIDENCE_DIR=/Users/jiangxinyi/Documents/Project/agent-info/build/zhiyu-ui/u02/macos/r14/actual --dart-define=UI_MOTION_EVIDENCE_DIR=/Users/jiangxinyi/Documents/Project/agent-info/build/zhiyu-ui/u02/macos/r14/motion test/zhiyu_overlay_test.dart test/desktop_motion_contract_test.dart test/zhiyu_library_create_test.dart --reporter expanded",
+  "related": "../../scripts/dev-macos.sh flutter test --no-pub test/zhiyu_*_test.dart test/workspace_*_test.dart test/desktop_controls_test.dart test/desktop_motion_contract_test.dart --reporter expanded",
+  "analysis": "../../scripts/dev-macos.sh flutter analyze --no-pub --fatal-infos",
+  "native": "../../scripts/dev-macos.sh preview-check --library --reporter expanded",
+  "collect": "python3 scripts/qa/collect-zhiyu-native.py --log build/zhiyu-ui/u02/macos/r14/native.log --output build/zhiyu-ui/u02/macos/r14/native --python /Users/jiangxinyi/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3 (repo root)",
+  "build": "FLUTTER_MACOS_ARM64_ONLY=true XCODE_XCCONFIG_FILE=/Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/macos/Runner/Configs/Preview.xcconfig ../../scripts/dev-macos.sh flutter build macos --debug --no-pub --target lib/preview_main.dart",
+  "comparison": "python3 scripts/qa/compare-zhiyu-library-create.py --reference build/zhiyu-ui/u02/macos/r14/reference --actual build/zhiyu-ui/u02/macos/r14/actual --output build/zhiyu-ui/u02/macos/r14/geometry.json",
+  "execution": "Sequential Dart/Flutter jobs. Initial regression stopped for migration of two IconButton casts; final complete suite passed. Redundant import removal followed by strict analysis and native/build checks."
+}

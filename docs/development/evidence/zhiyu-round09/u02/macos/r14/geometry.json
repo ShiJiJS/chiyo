@@ -1,0 +1,304 @@
+{
+  "cases": [
+    {
+      "case": "light-1440-100-chooser",
+      "maximumDelta": 0.40468750000002274,
+      "deltas": {
+        "surface": {
+          "x": 0.0,
+          "y": 0.19687499999997726,
+          "width": 0.0,
+          "height": 0.3859374999999545
+        },
+        "desktop-dialog-close": {
+          "x": 0.0,
+          "y": 0.19687499999997726,
+          "width": 0.0,
+          "height": 0.0
+        },
+        "library-create-intro": {
+          "x": 0.0,
+          "y": 0.19687499999997726,
+          "width": 0.0,
+          "height": 0.203125
+        },
+        "library-create-open-plugins": {
+          "x": 0.0,
+          "y": 0.39218749999997726,
+          "width": 0.0065155029296875,
+          "height": 0.203125
+        },
+        "library-new-type-server": {
+          "x": 0.0,
+          "y": 0.39999999999997726,
+          "width": 0.0,
+          "height": 0.0015624999999772626
+        },
+        "library-new-type-service": {
+          "x": 0.0,
+          "y": 0.4015624999999545,
+          "width": 0.0,
+          "height": 0.0015624999999772626
+        },
+        "library-new-type-profile": {
+          "x": 0.0,
+          "y": 0.40312499999998863,
+          "width": 0.0,
+          "height": 0.001562500000034106
+        },
+        "library-new-type-generic": {
+          "x": 0.0,
+          "y": 0.40468750000002274,
+          "width": 0.0,
+          "height": 0.3984375
+        },
+        "library-new-type-document": {
+          "x": 0.0,
+          "y": 0.40468750000002274,
+          "width": 0.0,
+          "height": 0.3984375
+        },
+        "library-new-type-file": {
+          "x": 0.0,
+          "y": 0.006250000000022737,
+          "width": 0.0,
+          "height": 0.3984375
+        },
+        "library-new-type-credential": {
+          "x": 0.0,
+          "y": 0.006250000000022737,
+          "width": 0.0,
+          "height": 0.3984375
+        }
+      },
+      "actualImageSha256": "a86aa3f55fb250d835fa5522d37adf00f226769262d17b736f8d0db518ecec74",
+      "accepted": true
+    },
+    {
+      "case": "dark-1440-100-chooser",
+      "maximumDelta": 0.40468750000002274,
+      "deltas": {
+        "surface": {
+          "x": 0.0,
+          "y": 0.19687499999997726,
+          "width": 0.0,
+          "height": 0.3859374999999545
+        },
+        "desktop-dialog-close": {
+          "x": 0.0,
+          "y": 0.19687499999997726,
+          "width": 0.0,
+          "height": 0.0
+        },
+        "library-create-intro": {
+          "x": 0.0,
+          "y": 0.19687499999997726,
+          "width": 0.0,
+          "height": 0.203125
+        },
+        "library-create-open-plugins": {
+          "x": 0.0,
+          "y": 0.39218749999997726,
+          "width": 0.0065155029296875,
+          "height": 0.203125
+        },
+        "library-new-type-server": {
+          "x": 0.0,
+          "y": 0.39999999999997726,
+          "width": 0.0,
+          "height": 0.0015624999999772626
+        },
+        "library-new-type-service": {
+          "x": 0.0,
+          "y": 0.4015624999999545,
+          "width": 0.0,
+          "height": 0.0015624999999772626
+        },
+        "library-new-type-profile": {
+          "x": 0.0,
+          "y": 0.40312499999998863,
+          "width": 0.0,
+          "height": 0.001562500000034106
+        },
+        "library-new-type-generic": {
+          "x": 0.0,
+          "y": 0.40468750000002274,
+          "width": 0.0,
+          "height": 0.3984375
+        },
+        "library-new-type-document": {
+          "x": 0.0,
+          "y": 0.40468750000002274,
+          "width": 0.0,
+          "height": 0.3984375
+        },
+        "library-new-type-file": {
+          "x": 0.0,
+          "y": 0.006250000000022737,
+          "width": 0.0,
+          "height": 0.3984375
+        },
+        "library-new-type-credential": {
+          "x": 0.0,
+          "y": 0.006250000000022737,
+          "width": 0.0,
+          "height": 0.3984375
+        }
+      },
+      "actualImageSha256": "67b3fe15a1ba779ceac8efce623b36c0e4f99b07786a2053ea88c5d1f4018e8b",
+      "accepted": true
+    },
+    {
+      "case": "light-1280-100-chooser",
+      "maximumDelta": 0.40468750000002274,
+      "deltas": {
+        "surface": {
+          "x": 0.0,
+          "y": 0.19687499999997726,
+          "width": 0.0,
+          "height": 0.3859374999999545
+        },
+        "desktop-dialog-close": {
+          "x": 0.0,
+          "y": 0.19687499999997726,
+          "width": 0.0,
+          "height": 0.0
+        },
+        "library-create-intro": {
+          "x": 0.0,
+          "y": 0.19687499999997726,
+          "width": 0.0,
+          "height": 0.203125
+        },
+        "library-create-open-plugins": {
+          "x": 0.0,
+          "y": 0.39218749999997726,
+          "width": 0.0065155029296875,
+          "height": 0.203125
+        },
+        "library-new-type-server": {
+          "x": 0.0,
+          "y": 0.39999999999997726,
+          "width": 0.0,
+          "height": 0.0015624999999772626
+        },
+        "library-new-type-service": {
+          "x": 0.0,
+          "y": 0.4015624999999545,
+          "width": 0.0,
+          "height": 0.0015624999999772626
+        },
+        "library-new-type-profile": {
+          "x": 0.0,
+          "y": 0.40312499999998863,
+          "width": 0.0,
+          "height": 0.001562500000034106
+        },
+        "library-new-type-generic": {
+          "x": 0.0,
+          "y": 0.40468750000002274,
+          "width": 0.0,
+          "height": 0.3984375
+        },
+        "library-new-type-document": {
+          "x": 0.0,
+          "y": 0.40468750000002274,
+          "width": 0.0,
+          "height": 0.3984375
+        },
+        "library-new-type-file": {
+          "x": 0.0,
+          "y": 0.006250000000022737,
+          "width": 0.0,
+          "height": 0.3984375
+        },
+        "library-new-type-credential": {
+          "x": 0.0,
+          "y": 0.006250000000022737,
+          "width": 0.0,
+          "height": 0.3984375
+        }
+      },
+      "actualImageSha256": "8ad2530f3729725cc672b4d6535c6bb7e6dfa1c0f360c73a9ac21e6af1363401",
+      "accepted": true
+    },
+    {
+      "case": "dark-1280-100-chooser",
+      "maximumDelta": 0.40468750000002274,
+      "deltas": {
+        "surface": {
+          "x": 0.0,
+          "y": 0.19687499999997726,
+          "width": 0.0,
+          "height": 0.3859374999999545
+        },
+        "desktop-dialog-close": {
+          "x": 0.0,
+          "y": 0.19687499999997726,
+          "width": 0.0,
+          "height": 0.0
+        },
+        "library-create-intro": {
+          "x": 0.0,
+          "y": 0.19687499999997726,
+          "width": 0.0,
+          "height": 0.203125
+        },
+        "library-create-open-plugins": {
+          "x": 0.0,
+          "y": 0.39218749999997726,
+          "width": 0.0065155029296875,
+          "height": 0.203125
+        },
+        "library-new-type-server": {
+          "x": 0.0,
+          "y": 0.39999999999997726,
+          "width": 0.0,
+          "height": 0.0015624999999772626
+        },
+        "library-new-type-service": {
+          "x": 0.0,
+          "y": 0.4015624999999545,
+          "width": 0.0,
+          "height": 0.0015624999999772626
+        },
+        "library-new-type-profile": {
+          "x": 0.0,
+          "y": 0.40312499999998863,
+          "width": 0.0,
+          "height": 0.001562500000034106
+        },
+        "library-new-type-generic": {
+          "x": 0.0,
+          "y": 0.40468750000002274,
+          "width": 0.0,
+          "height": 0.3984375
+        },
+        "library-new-type-document": {
+          "x": 0.0,
+          "y": 0.40468750000002274,
+          "width": 0.0,
+          "height": 0.3984375
+        },
+        "library-new-type-file": {
+          "x": 0.0,
+          "y": 0.006250000000022737,
+          "width": 0.0,
+          "height": 0.3984375
+        },
+        "library-new-type-credential": {
+          "x": 0.0,
+          "y": 0.006250000000022737,
+          "width": 0.0,
+          "height": 0.3984375
+        }
+      },
+      "actualImageSha256": "f5f542679fd8f5a4ec70b842e59cba973804b453f72f37f06f2f4c5ff965ed59",
+      "accepted": true
+    }
+  ],
+  "accepted": true,
+  "threshold": 2,
+  "fullS5Passed": false,
+  "scope": "Normal-size chooser geometry only; 200% covered by Widget navigation checks."
+}

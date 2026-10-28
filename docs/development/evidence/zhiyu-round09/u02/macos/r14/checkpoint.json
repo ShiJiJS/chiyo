@@ -1,0 +1,77 @@
+{
+  "createdAt": "2026-10-28T17:45:29.697277+00:00",
+  "sourceCommit": "9d8aea71828d916fc3926abed5e1def8a4a3eb80",
+  "issues": {
+    "62": {
+      "checked": 10,
+      "total": 12,
+      "state": "OPEN"
+    },
+    "63": {
+      "checked": 6,
+      "total": 7,
+      "state": "OPEN"
+    },
+    "64": {
+      "checked": 6,
+      "total": 7,
+      "state": "OPEN"
+    }
+  },
+  "checks": {
+    "focused": 22,
+    "relatedRegression": 444,
+    "regressionScope": "after migration of two old IconButton test casts; only redundant import removal afterward, followed by final strict analysis/native/build",
+    "analysis": "passed desktop --fatal-infos",
+    "nativeIntegrationTests": 1,
+    "nativeAssertions": 12,
+    "fixedMacBuild": "passed ordinary arm64 preview_main.dart restored",
+    "referenceCases": 4,
+    "maximumMeasuredGeometryDelta": 0.40468750000002274,
+    "comparisonGuards": 5,
+    "nativeLogicalBoxParity": true,
+    "fullS5Passed": false,
+    "fullMotionPassed": false
+  },
+  "environment": {
+    "viewports": [
+      [
+        1440,
+        900
+      ],
+      [
+        1280,
+        800
+      ]
+    ],
+    "textScales": [
+      1,
+      2
+    ],
+    "WidgetDPR": 1,
+    "nativeDPR": 2,
+    "fonts": "actual/fonts.json",
+    "fixture": "isolated synthetic PreviewWorkspace; no personal data"
+  },
+  "changes": [
+    "shared Round09 entry-only overlay routes; zero reverse duration, barrier filter on dialogs only",
+    "2px background blur; sharp modal content, correct title/header/close glyph and shadow color",
+    "detail toolbar icons19 inside36px controls and accessible actions tooltip",
+    "no changes to grants, data ownership, production storage or Windows branch"
+  ],
+  "pending": [
+    "remaining page/form contexts, text baselines, full shadow/visual and motion audit",
+    "sparse native recording is not complete normal-speed animation acceptance",
+    "real OS shortcuts/IME/trackpad/accessibility deferred to fixed candidate",
+    "remaining S5 across seven UI tickets, then F01 real services/persistence and Mac delivery"
+  ],
+  "isolation": {
+    "computerUse": false,
+    "subagents": false,
+    "personalDatabase": false,
+    "systemPermissions": false,
+    "WindowsCI": false,
+    "copiedAppOrDSYM": false,
+    "nativeTemporarySourceRemoved": true
+  }
+}
