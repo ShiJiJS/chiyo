@@ -1,0 +1,38 @@
+[
+  {
+    "text": "入口",
+    "outer": 372.8515625,
+    "textWidth": 28,
+    "font": "700 14px / 27.3px \"Zhiyu System\", \"PingFang SC\", sans-serif"
+  },
+  {
+    "text": "服务",
+    "outer": 277.1484375,
+    "textWidth": 28,
+    "font": "700 14px / 27.3px \"Zhiyu System\", \"PingFang SC\", sans-serif"
+  },
+  {
+    "text": "notes.beichen.example",
+    "outer": 372.8515625,
+    "textWidth": 152.140625,
+    "font": "14px / 27.3px \"Zhiyu System\", \"PingFang SC\", sans-serif"
+  },
+  {
+    "text": "Blinko 笔记",
+    "outer": 277.1484375,
+    "textWidth": 71.84375,
+    "font": "14px / 27.3px \"Zhiyu System\", \"PingFang SC\", sans-serif"
+  },
+  {
+    "text": "tasks.beichen.example",
+    "outer": 372.8515625,
+    "textWidth": 150.1875,
+    "font": "14px / 27.3px \"Zhiyu System\", \"PingFang SC\", sans-serif"
+  },
+  {
+    "text": "Vikunja 任务管理",
+    "outer": 277.1484375,
+    "textWidth": 107.953125,
+    "font": "14px / 27.3px \"Zhiyu System\", \"PingFang SC\", sans-serif"
+  }
+]

@@ -1,0 +1,265 @@
+{
+  "before": {
+    "viewport": {
+      "width": 1440,
+      "height": 900,
+      "dpr": 1
+    },
+    "theme": "dark",
+    "font": "\"Zhiyu System\", \"PingFang SC\", sans-serif",
+    "selection": "https",
+    "query": "HTTPS",
+    "scrollbarWidth": 0,
+    "scrollTop": 0,
+    "boxes": {
+      "detail-title": {
+        "x": 647,
+        "y": 183,
+        "width": 633,
+        "height": 39.1484375
+      },
+      "document": {
+        "x": 586,
+        "y": 328.140625,
+        "width": 699.1640625,
+        "height": 561.984375
+      },
+      "document-heading-0": {
+        "x": 586,
+        "y": 328.140625,
+        "width": 699.1640625,
+        "height": 30
+      },
+      "document-heading-1": {
+        "x": 586,
+        "y": 424.4375,
+        "width": 699.1640625,
+        "height": 30
+      },
+      "document-heading-2": {
+        "x": 586,
+        "y": 640.328125,
+        "width": 699.1640625,
+        "height": 30
+      },
+      "document-paragraph-0": {
+        "x": 586,
+        "y": 370.140625,
+        "width": 699.1640625,
+        "height": 27.296875
+      },
+      "document-paragraph-1": {
+        "x": 586,
+        "y": 862.828125,
+        "width": 699.1640625,
+        "height": 27.296875
+      },
+      "document-table": {
+        "x": 586,
+        "y": 468.4375,
+        "width": 699.1640625,
+        "height": 144.890625
+      },
+      "document-table-cell-0-0": {
+        "x": 586,
+        "y": 468.4375,
+        "width": 401.0546875,
+        "height": 47.796875
+      },
+      "document-table-cell-0-1": {
+        "x": 987.0546875,
+        "y": 468.4375,
+        "width": 298.109375,
+        "height": 47.796875
+      },
+      "document-table-cell-1-0": {
+        "x": 586,
+        "y": 516.234375,
+        "width": 401.0546875,
+        "height": 48.296875
+      },
+      "document-table-cell-1-1": {
+        "x": 987.0546875,
+        "y": 516.234375,
+        "width": 298.109375,
+        "height": 48.296875
+      },
+      "document-table-cell-2-0": {
+        "x": 586,
+        "y": 564.53125,
+        "width": 401.0546875,
+        "height": 48.296875
+      },
+      "document-table-cell-2-1": {
+        "x": 987.0546875,
+        "y": 564.53125,
+        "width": 298.109375,
+        "height": 48.296875
+      },
+      "document-code": {
+        "x": 586,
+        "y": 788.078125,
+        "width": 699.1640625,
+        "height": 59.75
+      },
+      "document-list": {
+        "x": 586,
+        "y": 685.328125,
+        "width": 699.1640625,
+        "height": 87.75
+      },
+      "document-list-item-0": {
+        "x": 626,
+        "y": 685.328125,
+        "width": 659.1640625,
+        "height": 29.25
+      },
+      "document-list-item-1": {
+        "x": 626,
+        "y": 714.578125,
+        "width": 659.1640625,
+        "height": 29.25
+      },
+      "document-list-item-2": {
+        "x": 626,
+        "y": 743.828125,
+        "width": 659.1640625,
+        "height": 29.25
+      }
+    }
+  },
+  "after": {
+    "viewport": {
+      "width": 1440,
+      "height": 900,
+      "dpr": 1
+    },
+    "theme": "dark",
+    "font": "\"Zhiyu System\", \"PingFang SC\", sans-serif",
+    "selection": "https",
+    "query": "HTTPS",
+    "scrollbarWidth": 0,
+    "scrollTop": 0,
+    "boxes": {
+      "detail-title": {
+        "x": 647,
+        "y": 183,
+        "width": 633,
+        "height": 39.1484375
+      },
+      "document": {
+        "x": 586,
+        "y": 328.140625,
+        "width": 699.1640625,
+        "height": 561.984375
+      },
+      "document-heading-0": {
+        "x": 586,
+        "y": 328.140625,
+        "width": 699.1640625,
+        "height": 30
+      },
+      "document-heading-1": {
+        "x": 586,
+        "y": 424.4375,
+        "width": 699.1640625,
+        "height": 30
+      },
+      "document-heading-2": {
+        "x": 586,
+        "y": 640.328125,
+        "width": 699.1640625,
+        "height": 30
+      },
+      "document-paragraph-0": {
+        "x": 586,
+        "y": 370.140625,
+        "width": 699.1640625,
+        "height": 27.296875
+      },
+      "document-paragraph-1": {
+        "x": 586,
+        "y": 862.828125,
+        "width": 699.1640625,
+        "height": 27.296875
+      },
+      "document-table": {
+        "x": 586,
+        "y": 468.4375,
+        "width": 699.1640625,
+        "height": 144.890625
+      },
+      "document-table-cell-0-0": {
+        "x": 586,
+        "y": 468.4375,
+        "width": 401.0546875,
+        "height": 47.796875
+      },
+      "document-table-cell-0-1": {
+        "x": 987.0546875,
+        "y": 468.4375,
+        "width": 298.109375,
+        "height": 47.796875
+      },
+      "document-table-cell-1-0": {
+        "x": 586,
+        "y": 516.234375,
+        "width": 401.0546875,
+        "height": 48.296875
+      },
+      "document-table-cell-1-1": {
+        "x": 987.0546875,
+        "y": 516.234375,
+        "width": 298.109375,
+        "height": 48.296875
+      },
+      "document-table-cell-2-0": {
+        "x": 586,
+        "y": 564.53125,
+        "width": 401.0546875,
+        "height": 48.296875
+      },
+      "document-table-cell-2-1": {
+        "x": 987.0546875,
+        "y": 564.53125,
+        "width": 298.109375,
+        "height": 48.296875
+      },
+      "document-code": {
+        "x": 586,
+        "y": 788.078125,
+        "width": 699.1640625,
+        "height": 59.75
+      },
+      "document-list": {
+        "x": 586,
+        "y": 685.328125,
+        "width": 699.1640625,
+        "height": 87.75
+      },
+      "document-list-item-0": {
+        "x": 626,
+        "y": 685.328125,
+        "width": 659.1640625,
+        "height": 29.25
+      },
+      "document-list-item-1": {
+        "x": 626,
+        "y": 714.578125,
+        "width": 659.1640625,
+        "height": 29.25
+      },
+      "document-list-item-2": {
+        "x": 626,
+        "y": 743.828125,
+        "width": 659.1640625,
+        "height": 29.25
+      }
+    }
+  },
+  "accepted": true,
+  "errors": [],
+  "imageSha256": "7bfced71b76fd6cd5c127e5f6748a4b18d8631ce6decd45fa2a761e8af9aebba",
+  "fullS5Passed": false,
+  "scope": "Capture integrity only; scrollbar policy must match before a qualified geometry comparison; no OS-input or complete motion claim"
+}

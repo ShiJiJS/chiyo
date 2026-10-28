@@ -1,0 +1,36 @@
+00:00 +0: loading /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_fidelity_test.dart
+00:00 +0: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_fidelity_test.dart: (setUpAll)
+00:00 +0: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_test.dart: (setUpAll)
+00:00 +0: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_fidelity_test.dart: R05/R06 reading and raw access Size(1440.0, 900.0) dark=false scale=1.0
+00:01 +1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_fidelity_test.dart: R05/R06 reading and raw access Size(1440.0, 900.0) dark=false scale=1.0
+00:07 +2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile entry add/move/remove and failed save retain draft at 1440.0 dark=false
+00:09 +3: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile entry add/move/remove and failed save retain draft at 1440.0 dark=false
+00:09 +4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_fidelity_test.dart: R05/R06 reading and raw access Size(1440.0, 900.0) dark=false scale=2.0
+00:10 +5: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_test.dart: PDF current pages, text alternative and preview retry keep metadata/actions available
+00:12 +6: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile entry add/move/remove and failed save retain draft at 1440.0 dark=true
+00:14 +7: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_fidelity_test.dart: R05/R06 reading and raw access Size(1440.0, 900.0) dark=true scale=1.0
+00:15 +8: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_test.dart: file replace failure retains selected file; historical restore creates a new current head
+00:16 +9: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile entry add/move/remove and failed save retain draft at 1280.0 dark=false
+00:18 +10: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_fidelity_test.dart: R05/R06 reading and raw access Size(1440.0, 900.0) dark=true scale=2.0
+00:18 +11: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_test.dart: new document starts empty and saves through the common add entry
+00:19 +12: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile entry add/move/remove and failed save retain draft at 1280.0 dark=true
+00:21 +13: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile entry add/move/remove and failed save retain draft at 1280.0 dark=true
+00:21 +14: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_test.dart: PNG and plain text use their own bytes through the same file replacement entry
+00:21 +15: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_fidelity_test.dart: R05/R06 reading and raw access Size(1280.0, 800.0) dark=false scale=2.0
+00:23 +16: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_fidelity_test.dart: R05/R06 reading and raw access Size(1280.0, 800.0) dark=false scale=2.0
+00:23 +17: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_test.dart: file import reviews metadata, resolves unknown result before retry and leaves unknown-format save/open usable
+00:24 +18: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: blank new entry shows its own field error and retains the original profile
+00:25 +19: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_fidelity_test.dart: R05/R06 reading and raw access Size(1280.0, 800.0) dark=true scale=1.0
+00:26 +20: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: cancelling an entry removal discards the draft only
+00:26 +21: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_fidelity_test.dart: R05/R06 reading and raw access Size(1280.0, 800.0) dark=true scale=2.0
+00:27 +22: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_fidelity_test.dart: R05/R06 reading and raw access Size(1280.0, 800.0) dark=true scale=2.0
+00:27 +23: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_fidelity_test.dart: wide Markdown table keeps horizontal access and fitting table has no empty scroll lane
+00:28 +24: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_fidelity_test.dart: nested Markdown paragraphs keep their reading separation
+00:28 +25: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_fidelity_test.dart: fractional multiline leading keeps full-size selectable text and complete copying
+01:17 +25 -1: loading /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_content_fidelity_test.dart [E]
+  Bad state: Cannot close sink while adding stream.
+  package:stream_channel/src/guarantee_channel.dart 180:7      _GuaranteeSink.close
+  package:flutter_tools/src/test/flutter_platform.dart 765:43  FlutterPlatform._startTest
+  
+One or more uncaught errors occurred shutting down:
+  Bad state: Cannot add event while adding stream.

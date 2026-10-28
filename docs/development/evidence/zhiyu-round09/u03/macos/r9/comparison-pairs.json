@@ -1,0 +1,18 @@
+[
+  {
+    "file": "pairs/light-1440-100-R06-document.png",
+    "width": 2880,
+    "height": 924,
+    "sourcePixelsUnscaled": true,
+    "referenceSha256": "9b41fcbcc3a00877b9ec31d5437ca425707335335d39a3e1c8c45063da831b97",
+    "actualSha256": "f01d5a9076f4214c52b5a4fd1eadc2761f08769d5e87f72b0b1d9b78a5e019ff"
+  },
+  {
+    "file": "pairs/dark-1280-100-R06-document.png",
+    "width": 2560,
+    "height": 824,
+    "sourcePixelsUnscaled": true,
+    "referenceSha256": "08abbf4364ccbe890444942a6193ad6b307a7d1c1334bdd6b05b762b78c4f493",
+    "actualSha256": "3b18c31ccd9546136a8bfa5f56f45d1a3b6897eded4d9fb4d68fa499fafef826"
+  }
+]
