@@ -1,0 +1,76 @@
+{
+  "issues": [
+    {
+      "issue": 62,
+      "exactBodyReadback": true,
+      "bodySha256": "d66c4312474e32cf45ef20a5405597259dfd6e15af6b5e8d35c8533be7bd0ff2",
+      "checked": 10,
+      "total": 12,
+      "open": true,
+      "comments": 3,
+      "commentUrls": [
+        "https://github.com/ShiJiJS/agent-info-manage/issues/62#issuecomment-6406299110",
+        "https://github.com/ShiJiJS/agent-info-manage/issues/62#issuecomment-6406738669",
+        "https://github.com/ShiJiJS/agent-info-manage/issues/62#issuecomment-6406989045"
+      ],
+      "labels": [
+        "enhancement",
+        "ready-for-agent"
+      ],
+      "relationships": [
+        {
+          "name": "Is blocking5",
+          "links": [
+            "https://github.com/ShiJiJS/agent-info-manage/issues/68",
+            "https://github.com/ShiJiJS/agent-info-manage/issues/67",
+            "https://github.com/ShiJiJS/agent-info-manage/issues/66",
+            "https://github.com/ShiJiJS/agent-info-manage/issues/65",
+            "https://github.com/ShiJiJS/agent-info-manage/issues/63"
+          ]
+        }
+      ],
+      "readbackDiagnostic": "Initial metadata guard saw only3 collapsed links; expanded View all and verified all5."
+    },
+    {
+      "issue": 64,
+      "exactBodyReadback": true,
+      "bodySha256": "0caf3d7eff832897ce95856b045d407def75952f3838468c0e0081890f988a0e",
+      "checked": 6,
+      "total": 7,
+      "open": true,
+      "comments": 0,
+      "labels": [
+        "enhancement",
+        "ready-for-agent"
+      ],
+      "relationships": [
+        {
+          "name": "Blocked by 1 (1)",
+          "links": [
+            "https://github.com/ShiJiJS/agent-info-manage/issues/63"
+          ]
+        },
+        {
+          "name": "Is blocking 1 (1)",
+          "links": [
+            "https://github.com/ShiJiJS/agent-info-manage/issues/69"
+          ]
+        }
+      ]
+    }
+  ],
+  "commentsReadBeforeWrite": {
+    "62": 3,
+    "64": 0
+  },
+  "bodyAppendOnly": true,
+  "nativeRelationshipsUnchanged": true,
+  "labelsUnchanged": true,
+  "noCommentsAdded": true,
+  "taskSpace223Finished": true,
+  "transportAndSelectorDiagnostics": [
+    "Initial long heredoc encoding failed before desired bodies were created; regenerated from separate UTF8 files.",
+    "Unsupported exact=true Save locator matched0; inspected same page and used supported Save locator. No duplicate write.",
+    "Collapsed relationship list initially showed3 of5; expanded View all to verify all5."
+  ]
+}
