@@ -76,17 +76,20 @@ class ZhiyuShell extends StatelessWidget {
             if (count > 0) ...[
               const SizedBox(width: 8),
               Container(
-                constraints: const BoxConstraints(minWidth: 20),
-                height: 20,
-                alignment: Alignment.center,
+                key: ValueKey('workspace-count-${destination.name}'),
+                constraints: const BoxConstraints(minWidth: 20, minHeight: 20),
                 padding: const EdgeInsets.symmetric(horizontal: 4),
                 decoration: BoxDecoration(
                   color: c.selected,
                   borderRadius: BorderRadius.circular(5),
                 ),
-                child: Text(
-                  '$count',
-                  style: TextStyle(fontSize: 12, color: c.accent),
+                child: Center(
+                  heightFactor: 1,
+                  widthFactor: 1,
+                  child: Text(
+                    '$count',
+                    style: TextStyle(fontSize: 12, color: c.accent),
+                  ),
                 ),
               ),
             ],
