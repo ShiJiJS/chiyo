@@ -1,0 +1,10 @@
+{
+  "all15FrozenHashesMatch": true,
+  "files": 15,
+  "overrides": [
+    "Mac system font family",
+    "Mac search shortcut marker"
+  ],
+  "captures": 4,
+  "fullS5Passed": false
+}

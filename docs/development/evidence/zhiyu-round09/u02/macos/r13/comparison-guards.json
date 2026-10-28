@@ -1,0 +1,21 @@
+{
+  "cases": [
+    {
+      "mutation": "viewport",
+      "rejected": true
+    },
+    {
+      "mutation": "theme",
+      "rejected": true
+    },
+    {
+      "mutation": "geometry",
+      "rejected": true
+    },
+    {
+      "mutation": "missing-box",
+      "rejected": true
+    }
+  ],
+  "allRejected": true
+}

@@ -1,0 +1,280 @@
+{
+  "cases": [
+    {
+      "case": "light-1440-100-chooser",
+      "maximumDelta": 0.40468750000002274,
+      "deltas": {
+        "surface": {
+          "x": 0.0,
+          "y": 0.19687499999997726,
+          "width": 0.0,
+          "height": 0.3859374999999545
+        },
+        "library-create-intro": {
+          "x": 0.0,
+          "y": 0.19687499999997726,
+          "width": 0.0,
+          "height": 0.203125
+        },
+        "library-create-open-plugins": {
+          "x": 0.0,
+          "y": 0.39218749999997726,
+          "width": 0.0065155029296875,
+          "height": 0.203125
+        },
+        "library-new-type-server": {
+          "x": 0.0,
+          "y": 0.39999999999997726,
+          "width": 0.0,
+          "height": 0.0015624999999772626
+        },
+        "library-new-type-service": {
+          "x": 0.0,
+          "y": 0.4015624999999545,
+          "width": 0.0,
+          "height": 0.0015624999999772626
+        },
+        "library-new-type-profile": {
+          "x": 0.0,
+          "y": 0.40312499999998863,
+          "width": 0.0,
+          "height": 0.001562500000034106
+        },
+        "library-new-type-generic": {
+          "x": 0.0,
+          "y": 0.40468750000002274,
+          "width": 0.0,
+          "height": 0.3984375
+        },
+        "library-new-type-document": {
+          "x": 0.0,
+          "y": 0.40468750000002274,
+          "width": 0.0,
+          "height": 0.3984375
+        },
+        "library-new-type-file": {
+          "x": 0.0,
+          "y": 0.006250000000022737,
+          "width": 0.0,
+          "height": 0.3984375
+        },
+        "library-new-type-credential": {
+          "x": 0.0,
+          "y": 0.006250000000022737,
+          "width": 0.0,
+          "height": 0.3984375
+        }
+      },
+      "actualImageSha256": "be4669a39081560a731689ee6aca3c765b0c12374473a511057563375b67968d",
+      "accepted": true
+    },
+    {
+      "case": "dark-1440-100-chooser",
+      "maximumDelta": 0.40468750000002274,
+      "deltas": {
+        "surface": {
+          "x": 0.0,
+          "y": 0.19687499999997726,
+          "width": 0.0,
+          "height": 0.3859374999999545
+        },
+        "library-create-intro": {
+          "x": 0.0,
+          "y": 0.19687499999997726,
+          "width": 0.0,
+          "height": 0.203125
+        },
+        "library-create-open-plugins": {
+          "x": 0.0,
+          "y": 0.39218749999997726,
+          "width": 0.0065155029296875,
+          "height": 0.203125
+        },
+        "library-new-type-server": {
+          "x": 0.0,
+          "y": 0.39999999999997726,
+          "width": 0.0,
+          "height": 0.0015624999999772626
+        },
+        "library-new-type-service": {
+          "x": 0.0,
+          "y": 0.4015624999999545,
+          "width": 0.0,
+          "height": 0.0015624999999772626
+        },
+        "library-new-type-profile": {
+          "x": 0.0,
+          "y": 0.40312499999998863,
+          "width": 0.0,
+          "height": 0.001562500000034106
+        },
+        "library-new-type-generic": {
+          "x": 0.0,
+          "y": 0.40468750000002274,
+          "width": 0.0,
+          "height": 0.3984375
+        },
+        "library-new-type-document": {
+          "x": 0.0,
+          "y": 0.40468750000002274,
+          "width": 0.0,
+          "height": 0.3984375
+        },
+        "library-new-type-file": {
+          "x": 0.0,
+          "y": 0.006250000000022737,
+          "width": 0.0,
+          "height": 0.3984375
+        },
+        "library-new-type-credential": {
+          "x": 0.0,
+          "y": 0.006250000000022737,
+          "width": 0.0,
+          "height": 0.3984375
+        }
+      },
+      "actualImageSha256": "42ab1fae21db4717fb8619433d715be0041dfd4bc52eadcc1f0e6e3b47649ee5",
+      "accepted": true
+    },
+    {
+      "case": "light-1280-100-chooser",
+      "maximumDelta": 0.40468750000002274,
+      "deltas": {
+        "surface": {
+          "x": 0.0,
+          "y": 0.19687499999997726,
+          "width": 0.0,
+          "height": 0.3859374999999545
+        },
+        "library-create-intro": {
+          "x": 0.0,
+          "y": 0.19687499999997726,
+          "width": 0.0,
+          "height": 0.203125
+        },
+        "library-create-open-plugins": {
+          "x": 0.0,
+          "y": 0.39218749999997726,
+          "width": 0.0065155029296875,
+          "height": 0.203125
+        },
+        "library-new-type-server": {
+          "x": 0.0,
+          "y": 0.39999999999997726,
+          "width": 0.0,
+          "height": 0.0015624999999772626
+        },
+        "library-new-type-service": {
+          "x": 0.0,
+          "y": 0.4015624999999545,
+          "width": 0.0,
+          "height": 0.0015624999999772626
+        },
+        "library-new-type-profile": {
+          "x": 0.0,
+          "y": 0.40312499999998863,
+          "width": 0.0,
+          "height": 0.001562500000034106
+        },
+        "library-new-type-generic": {
+          "x": 0.0,
+          "y": 0.40468750000002274,
+          "width": 0.0,
+          "height": 0.3984375
+        },
+        "library-new-type-document": {
+          "x": 0.0,
+          "y": 0.40468750000002274,
+          "width": 0.0,
+          "height": 0.3984375
+        },
+        "library-new-type-file": {
+          "x": 0.0,
+          "y": 0.006250000000022737,
+          "width": 0.0,
+          "height": 0.3984375
+        },
+        "library-new-type-credential": {
+          "x": 0.0,
+          "y": 0.006250000000022737,
+          "width": 0.0,
+          "height": 0.3984375
+        }
+      },
+      "actualImageSha256": "eb947b43d96637f334627fedda8672a445f589af106e1227b169283e50728213",
+      "accepted": true
+    },
+    {
+      "case": "dark-1280-100-chooser",
+      "maximumDelta": 0.40468750000002274,
+      "deltas": {
+        "surface": {
+          "x": 0.0,
+          "y": 0.19687499999997726,
+          "width": 0.0,
+          "height": 0.3859374999999545
+        },
+        "library-create-intro": {
+          "x": 0.0,
+          "y": 0.19687499999997726,
+          "width": 0.0,
+          "height": 0.203125
+        },
+        "library-create-open-plugins": {
+          "x": 0.0,
+          "y": 0.39218749999997726,
+          "width": 0.0065155029296875,
+          "height": 0.203125
+        },
+        "library-new-type-server": {
+          "x": 0.0,
+          "y": 0.39999999999997726,
+          "width": 0.0,
+          "height": 0.0015624999999772626
+        },
+        "library-new-type-service": {
+          "x": 0.0,
+          "y": 0.4015624999999545,
+          "width": 0.0,
+          "height": 0.0015624999999772626
+        },
+        "library-new-type-profile": {
+          "x": 0.0,
+          "y": 0.40312499999998863,
+          "width": 0.0,
+          "height": 0.001562500000034106
+        },
+        "library-new-type-generic": {
+          "x": 0.0,
+          "y": 0.40468750000002274,
+          "width": 0.0,
+          "height": 0.3984375
+        },
+        "library-new-type-document": {
+          "x": 0.0,
+          "y": 0.40468750000002274,
+          "width": 0.0,
+          "height": 0.3984375
+        },
+        "library-new-type-file": {
+          "x": 0.0,
+          "y": 0.006250000000022737,
+          "width": 0.0,
+          "height": 0.3984375
+        },
+        "library-new-type-credential": {
+          "x": 0.0,
+          "y": 0.006250000000022737,
+          "width": 0.0,
+          "height": 0.3984375
+        }
+      },
+      "actualImageSha256": "44fc4ed4add366607093c6120d56dc4467b889585de7bf19c5e7292226cb31c1",
+      "accepted": true
+    }
+  ],
+  "accepted": true,
+  "threshold": 2,
+  "fullS5Passed": false,
+  "scope": "Normal-size chooser geometry only; 200% covered by Widget navigation checks."
+}
