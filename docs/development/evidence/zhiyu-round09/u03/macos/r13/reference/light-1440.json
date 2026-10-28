@@ -1,0 +1,64 @@
+{
+  "before": {
+    "viewport": {
+      "width": 1440,
+      "height": 900,
+      "dpr": 1
+    },
+    "theme": "light",
+    "selection": "sshkey",
+    "query": "Azure SSH",
+    "kind": "credential",
+    "font": "\"Zhiyu System\", \"PingFang SC\", sans-serif",
+    "fields": {
+      "name": {
+        "labelHeight": 20.796875,
+        "gap": 8,
+        "inputHeight": 44.3984375,
+        "labelFontSize": 13,
+        "labelWeight": 500,
+        "nextFieldGap": 12
+      },
+      "binding": {
+        "labelHeight": 20.796875,
+        "gap": 8,
+        "inputHeight": 44.3984375,
+        "labelFontSize": 13,
+        "labelWeight": 500
+      }
+    }
+  },
+  "after": {
+    "viewport": {
+      "width": 1440,
+      "height": 900,
+      "dpr": 1
+    },
+    "theme": "light",
+    "selection": "sshkey",
+    "query": "Azure SSH",
+    "kind": "credential",
+    "font": "\"Zhiyu System\", \"PingFang SC\", sans-serif",
+    "fields": {
+      "name": {
+        "labelHeight": 20.796875,
+        "gap": 8,
+        "inputHeight": 44.3984375,
+        "labelFontSize": 13,
+        "labelWeight": 500,
+        "nextFieldGap": 12
+      },
+      "binding": {
+        "labelHeight": 20.796875,
+        "gap": 8,
+        "inputHeight": 44.3984375,
+        "labelFontSize": 13,
+        "labelWeight": 500
+      }
+    }
+  },
+  "accepted": true,
+  "imageSha256": "e784063d23ed3a322ae5a5e39d958b911c6ed62282d4ec46233925c830b62308",
+  "fullS5Passed": false,
+  "scope": "Only common single-line name/reference control metrics; secure picker and additional Owner metadata mean whole forms differ."
+}
