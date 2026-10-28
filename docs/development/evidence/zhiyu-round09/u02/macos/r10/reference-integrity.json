@@ -1,0 +1,27 @@
+{
+  "verifiedFrozenFiles": [
+    "index.html",
+    "base.css",
+    "style.css",
+    "workspace.css",
+    "theme.css",
+    "fixtures.js",
+    "model.js",
+    "seed.js",
+    "util.js",
+    "app.js",
+    "guide.html",
+    "design-notes.md",
+    "plugin-spec.md",
+    "domain-plugin.json",
+    "offline.html"
+  ],
+  "matchingCaptures": 40,
+  "gutter": 11,
+  "DPR": 1,
+  "fontOverrideOnly": true,
+  "shortcutOverride": "⌘ K",
+  "layoutCSSOverrides": false,
+  "toastWait": "wait until detached before capture",
+  "sameCallViewportAndStateReadback": true
+}

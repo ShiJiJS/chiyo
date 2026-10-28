@@ -1,0 +1,202 @@
+{
+  "expected": {
+    "viewport": {
+      "width": 1440,
+      "height": 900,
+      "dpr": 1
+    },
+    "theme": "dark",
+    "state": "R02-hit-focus",
+    "stateFields": {
+      "dir": "all",
+      "selected": "azure",
+      "query": "日本",
+      "filter": "server",
+      "tag": "生产环境",
+      "groupBy": "none",
+      "sort": "updated"
+    },
+    "requiredBoxes": [
+      "library-search-frame",
+      "library-detail-title"
+    ],
+    "scrollbarWidth": 11
+  },
+  "before": {
+    "viewport": {
+      "width": 1440,
+      "height": 900,
+      "dpr": 1
+    },
+    "fontFamily": "\"Zhiyu System\", \"PingFang SC\", sans-serif",
+    "canvas": "#181b22",
+    "state": {
+      "page": "library",
+      "dir": "all",
+      "selected": "azure",
+      "query": "日本",
+      "filter": "server",
+      "tag": "生产环境",
+      "groupBy": "none",
+      "sort": "updated",
+      "detailTab": "overview",
+      "setting": "appearance",
+      "plugin": "builtin.server",
+      "pluginTab": "overview"
+    },
+    "boxes": {
+      "library-search-frame": {
+        "x": 230,
+        "y": 139,
+        "width": 267,
+        "height": 39
+      },
+      "library-group": {
+        "x": 374,
+        "y": 237.296875,
+        "width": 59,
+        "height": 32
+      },
+      "library-sort": {
+        "x": 438,
+        "y": 237.296875,
+        "width": 59,
+        "height": 32
+      },
+      "library-results-pane": {
+        "x": 214,
+        "y": 66,
+        "width": 300,
+        "height": 834
+      },
+      "library-results-footer": {
+        "x": 214,
+        "y": 855,
+        "width": 299,
+        "height": 45
+      },
+      "library-detail-toolbar": {
+        "x": 529,
+        "y": 79,
+        "width": 896,
+        "height": 49
+      },
+      "library-detail-create": {
+        "x": 1324,
+        "y": 84.6015625,
+        "width": 78,
+        "height": 36.796875
+      },
+      "library-detail-title": {
+        "x": 647,
+        "y": 183,
+        "width": 622,
+        "height": 39.1484375
+      }
+    },
+    "searchFocused": true,
+    "searchAppearance": {
+      "borderColor": "rgb(194, 171, 234)",
+      "boxShadow": "rgb(57, 49, 71) 0px 0px 0px 2px"
+    },
+    "scrollbarWidth": 11,
+    "resultCount": "1 项",
+    "order": [
+      "azure"
+    ],
+    "groups": [],
+    "detailTitle": "Azure 日本服务器",
+    "popupLabels": []
+  },
+  "after": {
+    "viewport": {
+      "width": 1440,
+      "height": 900,
+      "dpr": 1
+    },
+    "fontFamily": "\"Zhiyu System\", \"PingFang SC\", sans-serif",
+    "canvas": "#181b22",
+    "state": {
+      "page": "library",
+      "dir": "all",
+      "selected": "azure",
+      "query": "日本",
+      "filter": "server",
+      "tag": "生产环境",
+      "groupBy": "none",
+      "sort": "updated",
+      "detailTab": "overview",
+      "setting": "appearance",
+      "plugin": "builtin.server",
+      "pluginTab": "overview"
+    },
+    "boxes": {
+      "library-search-frame": {
+        "x": 230,
+        "y": 139,
+        "width": 267,
+        "height": 39
+      },
+      "library-group": {
+        "x": 374,
+        "y": 237.296875,
+        "width": 59,
+        "height": 32
+      },
+      "library-sort": {
+        "x": 438,
+        "y": 237.296875,
+        "width": 59,
+        "height": 32
+      },
+      "library-results-pane": {
+        "x": 214,
+        "y": 66,
+        "width": 300,
+        "height": 834
+      },
+      "library-results-footer": {
+        "x": 214,
+        "y": 855,
+        "width": 299,
+        "height": 45
+      },
+      "library-detail-toolbar": {
+        "x": 529,
+        "y": 79,
+        "width": 896,
+        "height": 49
+      },
+      "library-detail-create": {
+        "x": 1324,
+        "y": 84.6015625,
+        "width": 78,
+        "height": 36.796875
+      },
+      "library-detail-title": {
+        "x": 647,
+        "y": 183,
+        "width": 622,
+        "height": 39.1484375
+      }
+    },
+    "searchFocused": true,
+    "searchAppearance": {
+      "borderColor": "rgb(194, 171, 234)",
+      "boxShadow": "rgb(57, 49, 71) 0px 0px 0px 2px"
+    },
+    "scrollbarWidth": 11,
+    "resultCount": "1 项",
+    "order": [
+      "azure"
+    ],
+    "groups": [],
+    "detailTitle": "Azure 日本服务器",
+    "popupLabels": []
+  },
+  "errors": [],
+  "accepted": true,
+  "imageSha256": "ba8392c6e3e8a7ab97666208c19476d1c6f105f5b1a9ae28f784d15ec3a0d522",
+  "scope": "Frozen Mac workflow capture integrity; not full S5 or actual OS input",
+  "fullS5Passed": false
+}

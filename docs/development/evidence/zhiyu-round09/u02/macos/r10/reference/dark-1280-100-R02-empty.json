@@ -1,0 +1,266 @@
+{
+  "expected": {
+    "viewport": {
+      "width": 1280,
+      "height": 800,
+      "dpr": 1
+    },
+    "theme": "dark",
+    "state": "R02-empty",
+    "stateFields": {
+      "selected": null,
+      "query": "没有匹配的测试词",
+      "filter": "server",
+      "tag": "生产环境"
+    },
+    "requiredBoxes": [
+      "library-results-empty",
+      "library-detail-empty",
+      "library-clear-filters"
+    ],
+    "scrollbarWidth": 11
+  },
+  "before": {
+    "viewport": {
+      "width": 1280,
+      "height": 800,
+      "dpr": 1
+    },
+    "fontFamily": "\"Zhiyu System\", \"PingFang SC\", sans-serif",
+    "canvas": "#181b22",
+    "state": {
+      "page": "library",
+      "dir": "all",
+      "selected": null,
+      "query": "没有匹配的测试词",
+      "filter": "server",
+      "tag": "生产环境",
+      "groupBy": "none",
+      "sort": "updated",
+      "detailTab": "overview",
+      "setting": "appearance",
+      "plugin": "builtin.server",
+      "pluginTab": "overview"
+    },
+    "boxes": {
+      "library-search-frame": {
+        "x": 210,
+        "y": 139,
+        "width": 242,
+        "height": 39
+      },
+      "library-group": {
+        "x": 329,
+        "y": 237.296875,
+        "width": 59,
+        "height": 32
+      },
+      "library-sort": {
+        "x": 393,
+        "y": 237.296875,
+        "width": 59,
+        "height": 32
+      },
+      "library-results-pane": {
+        "x": 194,
+        "y": 66,
+        "width": 275,
+        "height": 734
+      },
+      "library-results-footer": {
+        "x": 194,
+        "y": 755,
+        "width": 274,
+        "height": 45
+      },
+      "library-detail-toolbar": {
+        "x": 480,
+        "y": 77,
+        "width": 789,
+        "height": 49
+      },
+      "library-detail-create": {
+        "x": 1172,
+        "y": 82.6015625,
+        "width": 78,
+        "height": 36.796875
+      },
+      "library-clear-filters": {
+        "x": 285.5,
+        "y": 458.09375,
+        "width": 82,
+        "height": 38.3984375
+      },
+      "library-results-empty": {
+        "x": 206,
+        "y": 284.796875,
+        "width": 241,
+        "height": 276.6953125
+      },
+      "library-results-empty-title": {
+        "x": 240,
+        "y": 359.796875,
+        "width": 173,
+        "height": 25.5
+      },
+      "library-results-empty-description": {
+        "x": 230,
+        "y": 395.296875,
+        "width": 193,
+        "height": 44.796875
+      },
+      "library-detail-empty": {
+        "x": 503,
+        "y": 149,
+        "width": 732,
+        "height": 215.8984375
+      },
+      "library-detail-empty-title": {
+        "x": 537,
+        "y": 224,
+        "width": 664,
+        "height": 25.5
+      },
+      "library-detail-empty-description": {
+        "x": 666.1796875,
+        "y": 259.5,
+        "width": 405.640625,
+        "height": 22.3984375
+      }
+    },
+    "searchFocused": true,
+    "searchAppearance": {
+      "borderColor": "rgb(194, 171, 234)",
+      "boxShadow": "rgb(57, 49, 71) 0px 0px 0px 2px"
+    },
+    "scrollbarWidth": 11,
+    "resultCount": "0 项",
+    "order": [],
+    "groups": [],
+    "popupLabels": []
+  },
+  "after": {
+    "viewport": {
+      "width": 1280,
+      "height": 800,
+      "dpr": 1
+    },
+    "fontFamily": "\"Zhiyu System\", \"PingFang SC\", sans-serif",
+    "canvas": "#181b22",
+    "state": {
+      "page": "library",
+      "dir": "all",
+      "selected": null,
+      "query": "没有匹配的测试词",
+      "filter": "server",
+      "tag": "生产环境",
+      "groupBy": "none",
+      "sort": "updated",
+      "detailTab": "overview",
+      "setting": "appearance",
+      "plugin": "builtin.server",
+      "pluginTab": "overview"
+    },
+    "boxes": {
+      "library-search-frame": {
+        "x": 210,
+        "y": 139,
+        "width": 242,
+        "height": 39
+      },
+      "library-group": {
+        "x": 329,
+        "y": 237.296875,
+        "width": 59,
+        "height": 32
+      },
+      "library-sort": {
+        "x": 393,
+        "y": 237.296875,
+        "width": 59,
+        "height": 32
+      },
+      "library-results-pane": {
+        "x": 194,
+        "y": 66,
+        "width": 275,
+        "height": 734
+      },
+      "library-results-footer": {
+        "x": 194,
+        "y": 755,
+        "width": 274,
+        "height": 45
+      },
+      "library-detail-toolbar": {
+        "x": 480,
+        "y": 77,
+        "width": 789,
+        "height": 49
+      },
+      "library-detail-create": {
+        "x": 1172,
+        "y": 82.6015625,
+        "width": 78,
+        "height": 36.796875
+      },
+      "library-clear-filters": {
+        "x": 285.5,
+        "y": 458.09375,
+        "width": 82,
+        "height": 38.3984375
+      },
+      "library-results-empty": {
+        "x": 206,
+        "y": 284.796875,
+        "width": 241,
+        "height": 276.6953125
+      },
+      "library-results-empty-title": {
+        "x": 240,
+        "y": 359.796875,
+        "width": 173,
+        "height": 25.5
+      },
+      "library-results-empty-description": {
+        "x": 230,
+        "y": 395.296875,
+        "width": 193,
+        "height": 44.796875
+      },
+      "library-detail-empty": {
+        "x": 503,
+        "y": 149,
+        "width": 732,
+        "height": 215.8984375
+      },
+      "library-detail-empty-title": {
+        "x": 537,
+        "y": 224,
+        "width": 664,
+        "height": 25.5
+      },
+      "library-detail-empty-description": {
+        "x": 666.1796875,
+        "y": 259.5,
+        "width": 405.640625,
+        "height": 22.3984375
+      }
+    },
+    "searchFocused": true,
+    "searchAppearance": {
+      "borderColor": "rgb(194, 171, 234)",
+      "boxShadow": "rgb(57, 49, 71) 0px 0px 0px 2px"
+    },
+    "scrollbarWidth": 11,
+    "resultCount": "0 项",
+    "order": [],
+    "groups": [],
+    "popupLabels": []
+  },
+  "errors": [],
+  "accepted": true,
+  "imageSha256": "33ce9a14a2a413385a9219ce5e5eeb9cf98acecdd058ff555ae885ec2e820348",
+  "scope": "Frozen Mac workflow capture integrity; not full S5 or actual OS input",
+  "fullS5Passed": false
+}

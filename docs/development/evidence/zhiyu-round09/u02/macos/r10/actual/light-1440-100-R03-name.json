@@ -1,0 +1,144 @@
+{
+  "state": "R03-name",
+  "viewport": {
+    "width": 1440.0,
+    "height": 900.0,
+    "dpr": 1
+  },
+  "theme": "light",
+  "textScale": 1.0,
+  "query": {
+    "directory": null,
+    "keyword": "",
+    "type": null,
+    "tag": null,
+    "tagName": null,
+    "grouping": "type",
+    "sort": "name",
+    "offset": 0,
+    "limit": 50
+  },
+  "groupCounts": {
+    "credential": 7,
+    "document": 5,
+    "file": 6,
+    "generic": 1,
+    "profile": 1,
+    "server": 3,
+    "service": 8
+  },
+  "groups": [
+    {
+      "key": "credential",
+      "label": "凭据",
+      "count": "7",
+      "labelBox": {
+        "x": 244.0,
+        "y": 298.8,
+        "width": 223.16796875,
+        "height": 19.0
+      },
+      "countBox": {
+        "x": 467.16796875,
+        "y": 298.8,
+        "width": 6.83203125,
+        "height": 19.0
+      }
+    }
+  ],
+  "total": 31,
+  "selection": "information:azure",
+  "order": [
+    "credential:sshkey",
+    "credential:blinkokey",
+    "credential:github-token",
+    "credential:tgsession",
+    "credential:vikunjakey",
+    "credential:vikunja-password",
+    "credential:aliyunkey",
+    "information:nasdoc",
+    "information:sshguide",
+    "information:workflow",
+    "information:https",
+    "information:deploy",
+    "information:publickey",
+    "information:proof",
+    "information:offer",
+    "information:resume",
+    "information:resume-en",
+    "information:portrait",
+    "information:ideas",
+    "information:profile",
+    "information:azure",
+    "information:nas",
+    "information:aliyun",
+    "information:blinko",
+    "information:skillshare",
+    "information:sparky",
+    "information:syncthing",
+    "information:mtproto",
+    "information:tgapi",
+    "information:video",
+    "information:vikunja"
+  ],
+  "canGoBack": false,
+  "scrollOffset": 0.0,
+  "searchFocused": false,
+  "boxes": {
+    "library-search-frame": {
+      "x": 230.0,
+      "y": 139.0,
+      "width": 267.0,
+      "height": 39.0
+    },
+    "library-group": {
+      "x": 374.0,
+      "y": 237.3,
+      "width": 59.0,
+      "height": 32.0
+    },
+    "library-sort": {
+      "x": 438.0,
+      "y": 237.3,
+      "width": 59.0,
+      "height": 32.0
+    },
+    "library-results-pane": {
+      "x": 214.0,
+      "y": 66.0,
+      "width": 300.0,
+      "height": 834.0
+    },
+    "library-results-footer": {
+      "x": 214.0,
+      "y": 855.0,
+      "width": 299.0,
+      "height": 45.0
+    },
+    "library-detail-toolbar": {
+      "x": 529.0,
+      "y": 79.0,
+      "width": 896.0,
+      "height": 49.0
+    },
+    "library-detail-create": {
+      "x": 1324.0,
+      "y": 84.5,
+      "width": 78.0,
+      "height": 37.0
+    },
+    "library-detail-title": {
+      "x": 647.0,
+      "y": 183.0,
+      "width": 622.0,
+      "height": 40.0
+    },
+    "library-host-identity": {
+      "x": 586.0,
+      "y": 436.4,
+      "width": 149.1887969970703,
+      "height": 37.0
+    }
+  },
+  "scope": "Actual synthetic Widget flow, mouse-kind/keyboard injection; not OS input"
+}
