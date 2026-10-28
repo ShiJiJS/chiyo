@@ -1,0 +1,10 @@
+{
+  "manifest": "docs/design/prototypes/round-09-zhiyu/reference-manifest.json",
+  "filesVerified": 15,
+  "diskOverrides": [],
+  "responseOverrides": [
+    "Mac installed font families",
+    "exact search kbd marker Ctrl to Command"
+  ],
+  "historicalZeroGutterCause": "unknown"
+}

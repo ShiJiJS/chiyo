@@ -1,0 +1,9 @@
+{
+  "passed": true,
+  "expectedGutter": -1,
+  "observedGutter": 0,
+  "errors": [
+    "scrollbar_policy_mismatch"
+  ],
+  "note": "Impossible expected policy deliberately rejected. Earlier expected-zero observation was accepted when the browser actually measured zero; retained as policy variation evidence."
+}

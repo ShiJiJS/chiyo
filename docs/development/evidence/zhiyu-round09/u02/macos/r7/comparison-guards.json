@@ -1,0 +1,22 @@
+[
+  {
+    "case": "rejected_reference",
+    "rejected": true,
+    "reason": "A rejected reference cannot be used as a baseline"
+  },
+  {
+    "case": "viewport",
+    "rejected": true,
+    "reason": "Reference and actual must use the same measured viewport"
+  },
+  {
+    "case": "query",
+    "rejected": true,
+    "reason": "Query and filter labels must match the recorded reference state"
+  },
+  {
+    "case": "geometry",
+    "rejected": true,
+    "reason": "Covered row geometry exceeds the unchanged 2px S5 target: 3.0"
+  }
+]
