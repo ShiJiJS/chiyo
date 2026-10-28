@@ -1,0 +1,48 @@
+00:00 +0: loading /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/integration_test/zhiyu_foundation_native_test.dart
+Building macOS application...                                   
+✓ Built build/macos/Build/Products/Debug/info_desktop.app
+Failed to foreground app; open returned 1
+00:00 +0: isolated Zhiyu native controls, motion, large text and reduced motion
+ZHIYU_NATIVE_EVIDENCE=/Users/jiangxinyi/Library/Containers/com.example.infoDesktop.zhiyuPreview/Data/tmp/ZhiyuUI-18CF98FE-4BA3-4AFF-AF66-F3CD5543DD6A
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TimeoutException was thrown running a test:
+TimeoutException after 0:00:05.000000: Future not completed
+
+When the exception was thrown, this was the stack:
+<asynchronous suspension>
+#1      traceNativeMotion (file:///Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/integration_test/support/native_motion_probe.dart:57:12)
+<asynchronous suspension>
+(elided one frame from dart:async)
+
+The test description was:
+  isolated Zhiyu native controls, motion, large text and reduced motion
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:10 +0 -1: isolated Zhiyu native controls, motion, large text and reduced motion [E]
+  Test failed. See exception logs above.
+  The test description was: isolated Zhiyu native controls, motion, large text and reduced motion
+  
+  'package:flutter_test/src/binding.dart': Failed assertion: line 3082 pos 12: '_pendingFrame == null': is not true.
+  dart:core                                                                               _AssertionError._throwNew
+  package:flutter_test/src/binding.dart 3082:12                                           LiveTestWidgetsFlutterBinding.postTest
+  ===== asynchronous gap ===========================
+  package:stream_channel                                                                  _GuaranteeSink.add
+  ../../.cache/tmp/flutter_tools.SoQMwy/flutter_test_listener.KM1ZAZ/listener.dart 56:22  main.<fn>
+  
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TimeoutException was thrown running a test (but after the test had completed):
+TimeoutException after 0:00:05.000000: Future not completed
+
+When the exception was thrown, this was the stack:
+<asynchronous suspension>
+#1      traceNativeMotion (file:///Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/integration_test/support/native_motion_probe.dart:57:12)
+<asynchronous suspension>
+(elided one frame from dart:async)
+════════════════════════════════════════════════════════════════════════════════════════════════════
+  Test failed. See exception logs above.
+  The test description was: isolated Zhiyu native controls, motion, large text and reduced motion
+  
+00:10 +0 -1: (tearDownAll)
+00:10 +0 -1: Some tests failed.
+
+Failing tests:
+  /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/integration_test/zhiyu_foundation_native_test.dart: isolated Zhiyu native controls, motion, large text and reduced motion

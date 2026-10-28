@@ -1,0 +1,13 @@
+{
+  "flutterRevision": "abaf9c523780a608bd46686fd5e53740a07077f8",
+  "xcode": "Xcode 27.1\nBuild version 27A9275",
+  "architecture": "arm64",
+  "recordingPixelRatio": 1,
+  "sourceViewport": [
+    1440,
+    900
+  ],
+  "nativeDPR": 2,
+  "productionLibChanged": true,
+  "productChange": "Round09 dialog focus anchor during entrance; legacy default unchanged"
+}

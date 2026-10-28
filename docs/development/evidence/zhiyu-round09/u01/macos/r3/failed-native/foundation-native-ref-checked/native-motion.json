@@ -1,0 +1,35 @@
+{
+  "detail": {
+    "targetMs": 180,
+    "samples": [
+      {
+        "frameMs": 0.0,
+        "wallMs": 0.0,
+        "observerDelayMs": 114.987,
+        "opacity": 0.0,
+        "y": 186.0
+      },
+      {
+        "frameMs": 138.888,
+        "wallMs": 125.064,
+        "observerDelayMs": 37.152,
+        "opacity": 0.9206958133727312,
+        "y": 183.2379125598818
+      },
+      {
+        "frameMs": 145.832,
+        "wallMs": 163.613,
+        "observerDelayMs": 17.913,
+        "opacity": 0.9433704614639282,
+        "y": 183.16988861560822
+      },
+      {
+        "frameMs": 201.387,
+        "wallMs": 187.528,
+        "observerDelayMs": 12.35,
+        "opacity": 1.0,
+        "y": 183.0
+      }
+    ]
+  }
+}

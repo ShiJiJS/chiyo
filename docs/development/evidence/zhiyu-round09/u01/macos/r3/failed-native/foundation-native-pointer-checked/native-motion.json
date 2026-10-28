@@ -1,0 +1,362 @@
+{
+  "detail": {
+    "targetMs": 180,
+    "frameErrorMs": 7.498999999999995,
+    "wallErrorMs": 0.8480000000000132,
+    "translation": 3.0,
+    "passed": true,
+    "samples": [
+      {
+        "frameMs": 0.0,
+        "wallMs": 0.0,
+        "observerDelayMs": 108.88,
+        "opacity": 0.0,
+        "y": 186.0
+      },
+      {
+        "frameMs": 125.0,
+        "wallMs": 117.816,
+        "observerDelayMs": 41.554,
+        "opacity": 0.8661731835454702,
+        "y": 183.4014804493636
+      },
+      {
+        "frameMs": 131.944,
+        "wallMs": 160.566,
+        "observerDelayMs": 16.408,
+        "opacity": 0.8948725312948227,
+        "y": 183.31538240611553
+      },
+      {
+        "frameMs": 187.499,
+        "wallMs": 180.848,
+        "observerDelayMs": 13.02,
+        "opacity": 1.0,
+        "y": 183.0
+      }
+    ]
+  },
+  "dialog": {
+    "targetMs": 180,
+    "frameErrorMs": 7.498999999999995,
+    "wallErrorMs": 1.4370000000000118,
+    "translation": 7.0,
+    "passed": true,
+    "samples": [
+      {
+        "frameMs": 0.0,
+        "wallMs": 0.0,
+        "observerDelayMs": 173.74,
+        "opacity": 0.0,
+        "y": 66.5
+      },
+      {
+        "frameMs": 187.499,
+        "wallMs": 181.437,
+        "observerDelayMs": 40.919,
+        "opacity": 1.0,
+        "y": 59.5
+      }
+    ]
+  },
+  "menu": {
+    "targetMs": 120,
+    "frameErrorMs": 5.0,
+    "wallErrorMs": -7.698999999999998,
+    "translation": -3.0,
+    "passed": true,
+    "samples": [
+      {
+        "frameMs": 0.0,
+        "wallMs": 0.0,
+        "observerDelayMs": 30.083,
+        "opacity": 0.0,
+        "y": 762.0
+      },
+      {
+        "frameMs": 48.611,
+        "wallMs": 35.61,
+        "observerDelayMs": 15.433,
+        "opacity": 0.5759099721908569,
+        "y": 763.7277299165726
+      },
+      {
+        "frameMs": 55.555,
+        "wallMs": 51.801,
+        "observerDelayMs": 6.345,
+        "opacity": 0.644621729850769,
+        "y": 763.9338651895523
+      },
+      {
+        "frameMs": 76.389,
+        "wallMs": 63.367,
+        "observerDelayMs": 7.71,
+        "opacity": 0.8189075440168381,
+        "y": 764.4567226320505
+      },
+      {
+        "frameMs": 83.333,
+        "wallMs": 71.665,
+        "observerDelayMs": 6.919,
+        "opacity": 0.8661731835454702,
+        "y": 764.5985195506364
+      },
+      {
+        "frameMs": 90.278,
+        "wallMs": 79.025,
+        "observerDelayMs": 8.356,
+        "opacity": 0.90771484375,
+        "y": 764.72314453125
+      },
+      {
+        "frameMs": 97.222,
+        "wallMs": 87.848,
+        "observerDelayMs": 7.427,
+        "opacity": 0.9433704614639282,
+        "y": 764.8301113843918
+      },
+      {
+        "frameMs": 104.166,
+        "wallMs": 95.678,
+        "observerDelayMs": 7.49,
+        "opacity": 0.9711503982543945,
+        "y": 764.9134511947632
+      },
+      {
+        "frameMs": 111.111,
+        "wallMs": 103.655,
+        "observerDelayMs": 7.24,
+        "opacity": 0.9904233273118734,
+        "y": 764.9712699819356
+      },
+      {
+        "frameMs": 125.0,
+        "wallMs": 112.301,
+        "observerDelayMs": 7.228,
+        "opacity": 1.0,
+        "y": 765.0
+      }
+    ]
+  },
+  "hover": {
+    "targetMs": 150,
+    "frameErrorMs": 2.776999999999987,
+    "wallErrorMs": -2.3100000000000023,
+    "translation": null,
+    "passed": true,
+    "samples": [
+      {
+        "frameMs": 0.0,
+        "wallMs": 0.0,
+        "observerDelayMs": 17.349,
+        "argb": 4294967295,
+        "red": 1.0
+      },
+      {
+        "frameMs": 27.778,
+        "wallMs": 19.744,
+        "observerDelayMs": 16.669,
+        "argb": 4294572795,
+        "red": 0.9774736123459011
+      },
+      {
+        "frameMs": 34.722,
+        "wallMs": 37.573,
+        "observerDelayMs": 10.167,
+        "argb": 4294441210,
+        "red": 0.968444191194048
+      },
+      {
+        "frameMs": 62.5,
+        "wallMs": 54.865,
+        "observerDelayMs": 10.469,
+        "argb": 4293915381,
+        "red": 0.9391902417295119
+      },
+      {
+        "frameMs": 69.444,
+        "wallMs": 66.317,
+        "observerDelayMs": 11.183,
+        "argb": 4293849588,
+        "red": 0.9342450551367273
+      },
+      {
+        "frameMs": 90.277,
+        "wallMs": 82.006,
+        "observerDelayMs": 9.8,
+        "argb": 4293652211,
+        "red": 0.9234952961521989
+      },
+      {
+        "frameMs": 104.166,
+        "wallMs": 96.124,
+        "observerDelayMs": 10.358,
+        "argb": 4293586418,
+        "red": 0.9190362400452003
+      },
+      {
+        "frameMs": 111.11,
+        "wallMs": 107.613,
+        "observerDelayMs": 8.851,
+        "argb": 4293586418,
+        "red": 0.9174381018524953
+      },
+      {
+        "frameMs": 131.944,
+        "wallMs": 123.802,
+        "observerDelayMs": 10.165,
+        "argb": 4293520625,
+        "red": 0.9144461517298923
+      },
+      {
+        "frameMs": 145.832,
+        "wallMs": 137.512,
+        "observerDelayMs": 9.3,
+        "argb": 4293520625,
+        "red": 0.9137627334520221
+      },
+      {
+        "frameMs": 152.777,
+        "wallMs": 147.69,
+        "observerDelayMs": 8.776,
+        "argb": 4293520625,
+        "red": 0.9137254901960784
+      }
+    ]
+  },
+  "pressed": {
+    "targetMs": 150,
+    "frameErrorMs": 16.665999999999997,
+    "wallErrorMs": 17.105999999999995,
+    "translation": -1.0,
+    "passed": true,
+    "samples": [
+      {
+        "frameMs": 0.0,
+        "wallMs": 0.0,
+        "observerDelayMs": 8.497,
+        "y": 495.0
+      },
+      {
+        "frameMs": 13.889,
+        "wallMs": 14.0,
+        "observerDelayMs": 5.442,
+        "y": 495.0849208831787
+      },
+      {
+        "frameMs": 20.834,
+        "wallMs": 20.927,
+        "observerDelayMs": 6.383,
+        "y": 495.1626739501953
+      },
+      {
+        "frameMs": 27.778,
+        "wallMs": 28.847,
+        "observerDelayMs": 6.274,
+        "y": 495.26110131144526
+      },
+      {
+        "frameMs": 41.667,
+        "wallMs": 42.084,
+        "observerDelayMs": 5.857,
+        "y": 495.4677602000535
+      },
+      {
+        "frameMs": 55.555,
+        "wallMs": 55.927,
+        "observerDelayMs": 6.184,
+        "y": 495.63905359730126
+      },
+      {
+        "frameMs": 62.5,
+        "wallMs": 63.709,
+        "observerDelayMs": 5.854,
+        "y": 495.7048403799534
+      },
+      {
+        "frameMs": 69.444,
+        "wallMs": 70.935,
+        "observerDelayMs": 7.496,
+        "y": 495.76215958818796
+      },
+      {
+        "frameMs": 83.333,
+        "wallMs": 83.467,
+        "observerDelayMs": 6.214,
+        "y": 495.8517214380205
+      },
+      {
+        "frameMs": 90.277,
+        "wallMs": 91.13,
+        "observerDelayMs": 5.389,
+        "y": 495.8867590673268
+      },
+      {
+        "frameMs": 104.166,
+        "wallMs": 104.414,
+        "observerDelayMs": 6.491,
+        "y": 495.9384435812943
+      },
+      {
+        "frameMs": 118.055,
+        "wallMs": 118.309,
+        "observerDelayMs": 6.563,
+        "y": 495.9719605624676
+      },
+      {
+        "frameMs": 125.0,
+        "wallMs": 126.445,
+        "observerDelayMs": 7.779,
+        "y": 495.9835591860116
+      },
+      {
+        "frameMs": 131.944,
+        "wallMs": 135.236,
+        "observerDelayMs": 6.557,
+        "y": 495.99164687767626
+      },
+      {
+        "frameMs": 138.888,
+        "wallMs": 143.044,
+        "observerDelayMs": 7.009,
+        "y": 495.99691360397264
+      },
+      {
+        "frameMs": 166.666,
+        "wallMs": 167.106,
+        "observerDelayMs": 6.259,
+        "y": 496.0
+      }
+    ]
+  },
+  "feedback": {
+    "targetMs": 180,
+    "frameErrorMs": 215.83100000000002,
+    "wallErrorMs": 217.762,
+    "translation": 6.0,
+    "passed": false,
+    "samples": [
+      {
+        "frameMs": 0.0,
+        "wallMs": 0.0,
+        "observerDelayMs": 269.613,
+        "opacity": 0.0,
+        "y": 847.0
+      },
+      {
+        "frameMs": 6.945,
+        "wallMs": 273.393,
+        "observerDelayMs": 117.836,
+        "opacity": 0.06255447864532471,
+        "y": 846.624673128128
+      },
+      {
+        "frameMs": 395.831,
+        "wallMs": 397.762,
+        "observerDelayMs": 48.549,
+        "opacity": 1.0,
+        "y": 841.0
+      }
+    ]
+  }
+}

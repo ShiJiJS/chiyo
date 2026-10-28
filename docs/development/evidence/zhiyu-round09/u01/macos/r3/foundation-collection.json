@@ -1,0 +1,26 @@
+{
+  "log": "foundation-native-focus-fixed.log",
+  "source": "/Users/jiangxinyi/Library/Containers/com.example.infoDesktop.zhiyuPreview/Data/tmp/ZhiyuUI-DA2B1BEA-6D5B-48C5-88E9-555646954B08",
+  "output": "build/zhiyu-ui/u01/macos/r3/foundation-native",
+  "nativeIsolationChecked": true,
+  "functionalChecks": [
+    "native-AppKit-menu-dispatch-and-modal-gating",
+    "secure-editor-local-UI-channel-preserved",
+    "light-menu-keyboard-selection",
+    "dialog-escape-restores-focus",
+    "rapid-close-removes-modal",
+    "dark-menu-and-modal",
+    "native-rendered-200-percent-text-scroll-and-actions",
+    "reduced-motion-still-operable",
+    "native-NSWindow-resized-two-viewports-and-two-themes"
+  ],
+  "motionFailures": [
+    "dialog: frame error 63.05500000000001 ms, wall error 63.891999999999996 ms, translation 7.0 (target 7.0)",
+    "menu: frame error 18.888000000000005 ms, wall error -42.423 ms, translation -3.0 (target -3.0)",
+    "feedback: frame error 292.219 ms, wall error 294.635 ms, translation 6.0 (target 6.0)"
+  ],
+  "testPassed": false,
+  "successfulCollectorBypassed": false,
+  "method": "Explicit preservation of this failed run; not a successful native check",
+  "sourceRemoved": false
+}
