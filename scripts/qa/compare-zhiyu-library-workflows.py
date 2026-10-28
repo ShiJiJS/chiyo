@@ -62,6 +62,8 @@ def compare(reference, actual):
     if group_deltas:
         maximum = max(maximum, *(abs(v) for g in group_deltas for k in ('labelBox', 'countBox') for v in g[k].values()))
     order = [key.split(':', 1)[1] for key in actual['order']]
+    if actual['state'] == 'R03-name-ungrouped' and order != target['order']:
+        raise ValueError('Ungrouped name order differs from the same frozen records')
     return {'state': actual['state'], 'viewport': actual['viewport'], 'theme': actual['theme'],
             'deltas': deltas, 'sameLeadingGroupDeltas': group_deltas,
             'maximumGeometryDelta': maximum, 'geometryWithin2px': maximum <= 2,
@@ -73,15 +75,22 @@ def compare(reference, actual):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--reference', type=Path, required=True)
+    parser.add_argument('--reference', type=Path, action='append', required=True,
+                        help='Reference directories in precedence order; later captures override earlier files')
     parser.add_argument('--actual', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--case-count', type=int, default=40)
     args = parser.parse_args()
     cases = {}
-    for path in sorted(args.reference.glob('*.json')):
+    references = {}
+    for directory in args.reference:
+        for path in sorted(directory.glob('*.json')):
+            references[path.name] = path
+    for path in references.values():
         cases[path.stem] = compare(json.loads(path.read_text()), json.loads((args.actual / path.name).read_text()))
-    if len(cases) != 40:
-        raise ValueError('Expected ten workflow states across two sizes and themes')
+        cases[path.stem]['referencePath'] = str(path)
+    if len(cases) != args.case_count:
+        raise ValueError('Workflow case count differs from the explicit capture matrix')
     report = {'cases': cases, 'caseCount': len(cases),
               'maximumGeometryDelta': max(case['maximumGeometryDelta'] for case in cases.values()),
               'allMeasuredGeometryWithin2px': all(case['geometryWithin2px'] for case in cases.values()),

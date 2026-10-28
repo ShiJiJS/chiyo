@@ -106,6 +106,15 @@ void main() {
                 'library-detail-title',
                 'library-back',
                 'library-host-identity',
+                'library-field-url-label',
+                'library-field-url-value',
+                'library-field-purpose-label',
+                'library-field-purpose-value',
+                'library-field-auth-label',
+                'library-field-auth-value',
+                'library-relation-frame-information:https',
+                'library-relation-frame-information:sshguide',
+                'library-relation-frame-credential:sshkey',
               ]) {
                 final target = key(name);
                 if (target.evaluate().length == 1) boxes[name] = box(target);
@@ -269,6 +278,7 @@ void main() {
             expect(model.results!.total, 31);
             await capture('R03-name');
             await choose('library-group', '不分组');
+            await capture('R03-name-ungrouped');
             await choose('library-sort', '最近更新优先');
             await tap(key('library-directory-selfhost'));
             await tap(key('library-record-information:azure'));

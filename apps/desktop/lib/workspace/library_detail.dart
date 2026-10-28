@@ -80,6 +80,7 @@ class _LibraryDetailState extends State<LibraryDetail> {
     String title,
     Widget child, {
     String? trailing,
+    double? headingGap,
   }) => Padding(
     padding: const EdgeInsets.only(top: 27),
     child: Column(
@@ -109,7 +110,7 @@ class _LibraryDetailState extends State<LibraryDetail> {
               ),
           ],
         ),
-        SizedBox(height: trailing == null ? 12 : 24),
+        SizedBox(height: headingGap ?? (trailing == null ? 12 : 24)),
         child,
       ],
     ),
@@ -163,6 +164,7 @@ class _LibraryDetailState extends State<LibraryDetail> {
                       children: [
                         Text(
                           field['label'] as String,
+                          key: ValueKey('library-field-${field['key']}-label'),
                           style: libraryText(
                             context,
                             13,
@@ -176,6 +178,7 @@ class _LibraryDetailState extends State<LibraryDetail> {
                                   '  ',
                                 ).convert(widget.detail.values[field['key']])
                               : _value(widget.detail.values[field['key']]),
+                          key: ValueKey('library-field-${field['key']}-value'),
                           style:
                               [
                                     'number',
@@ -227,46 +230,57 @@ class _LibraryDetailState extends State<LibraryDetail> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        for (final ref in targets)
+        for (final (index, ref) in targets.indexed)
           if (summaries[ref] case final record?)
-            DesktopButton(
-              key: ValueKey('library-relation-${ref.key}'),
-              kind: DesktopButtonKind.quiet,
-              alignment: Alignment.centerLeft,
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              onPressed: () => widget.onOpen(ref),
-              child: Row(
-                children: [
-                  RecordIcon(record.type, size: 34),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Text(
-                          record.name,
-                          style: libraryText(
-                            context,
-                            14,
-                            weight: FontWeight.w600,
+            Container(
+              key: ValueKey('library-relation-frame-${ref.key}'),
+              decoration: BoxDecoration(
+                border: index == 0
+                    ? null
+                    : Border(
+                        top: BorderSide(color: UiPalette.of(context).line),
+                      ),
+              ),
+              child: DesktopButton(
+                key: ValueKey('library-relation-${ref.key}'),
+                kind: DesktopButtonKind.quiet,
+                radius: 0,
+                alignment: Alignment.centerLeft,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                onPressed: () => widget.onOpen(ref),
+                child: Row(
+                  children: [
+                    RecordIcon(record.type, size: 34),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Text(
+                            record.name,
+                            style: libraryText(
+                              context,
+                              14,
+                              weight: FontWeight.w600,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          record.description,
-                          style: libraryText(
-                            context,
-                            13,
-                            color: UiPalette.of(context).muted,
-                            height: 1.7,
+                          const SizedBox(height: 2),
+                          Text(
+                            record.description,
+                            style: libraryText(
+                              context,
+                              13,
+                              color: UiPalette.of(context).muted,
+                              height: 1.7,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 10),
-                  const PrototypeIcon(PrototypeIconGlyph.chev, size: 14),
-                ],
+                    const SizedBox(width: 10),
+                    const PrototypeIcon(PrototypeIconGlyph.chev, size: 14),
+                  ],
+                ),
               ),
             )
           else
@@ -661,6 +675,13 @@ class _LibraryDetailState extends State<LibraryDetail> {
                             _fields(context, section['keys'] as List),
                           ],
                         ),
+                        // Adjacent heading/grid CSS margins collapse to 13px.
+                        // A host-identity action separates them on servers.
+                        headingGap:
+                            record.type.id == 'server' &&
+                                (section['keys'] as List).contains('host')
+                            ? 12
+                            : 0,
                       )
                     else if (section['kind'] == 'relations')
                       _section(

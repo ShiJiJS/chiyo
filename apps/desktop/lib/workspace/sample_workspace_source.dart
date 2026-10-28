@@ -9,6 +9,7 @@ import 'sample_workspace_credentials.dart';
 import 'sample_credential_records.dart';
 import 'sample_credential_links.dart';
 import 'workspace_source.dart';
+import 'workspace_order.dart';
 import 'sample_workspace_plugins.dart';
 import 'sample_plugin_fixture.dart';
 import 'sample_workspace_hosts.dart';
@@ -1187,18 +1188,20 @@ class SampleWorkspaceSource
       WorkspaceGrouping.type => record.type.id,
       WorkspaceGrouping.directory => record.directoryId ?? 'unfiled',
     };
-    items.sort((a, b) {
-      final grouped = group(a).compareTo(group(b));
-      if (grouped != 0) return grouped;
-      final sorted = query.sort == WorkspaceSort.name
-          ? a.name.compareTo(b.name)
-          : b.updatedAt.compareTo(a.updatedAt);
-      return sorted != 0 ? sorted : a.ref.key.compareTo(b.ref.key);
-    });
-    final counts = <String, int>{};
-    for (final r in items) {
-      counts.update(group(r), (count) => count + 1, ifAbsent: () => 1);
+    sortWorkspaceSummaries(items, query.sort);
+    // Map insertion order follows the sorted list's first appearance, as in
+    // Round09. Partition the complete result before slicing a page, so groups
+    // remain contiguous and group counts do not depend on the visible page.
+    final groups = <String, List<WorkspaceRecordSummary>>{};
+    for (final record in items) {
+      groups.putIfAbsent(group(record), () => []).add(record);
     }
+    items
+      ..clear()
+      ..addAll(groups.values.expand((records) => records));
+    final counts = {
+      for (final entry in groups.entries) entry.key: entry.value.length,
+    };
     final offset = _pageOffset(query.offset, query.limit, items.length);
     final selection = items.any((r) => r.ref == keepSelection)
         ? keepSelection
@@ -1302,10 +1305,7 @@ class SampleWorkspaceSource
                   _matchesKeyword(detail.record, query.keyword))
                 _currentClassification(detail.record),
           ];
-    candidates.sort((a, b) {
-      final named = a.name.compareTo(b.name);
-      return named != 0 ? named : a.ref.key.compareTo(b.ref.key);
-    });
+    sortWorkspaceSummaries(candidates, WorkspaceSort.name);
     final offset = _pageOffset(query.offset, query.limit, candidates.length);
     return WorkspaceResults(
       items: candidates.skip(offset).take(query.limit),

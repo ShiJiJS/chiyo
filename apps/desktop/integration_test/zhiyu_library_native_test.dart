@@ -114,6 +114,31 @@ void main() {
         isTrue,
       );
       checks.add('native-search-menu-opens-library-and-focuses-search');
+      await tap(find.byKey(const ValueKey('library-directory-all')));
+      await tap(find.byKey(const ValueKey('library-group')));
+      await tap(find.text('按类型').last);
+      await tap(find.byKey(const ValueKey('library-sort')));
+      await tap(find.text('按名称').last);
+      final nameOrder = model.results!.items.map((r) => r.ref.key).toList();
+      expect(model.results!.total, 31);
+      expect(nameOrder.take(7), [
+        'credential:aliyunkey',
+        'credential:sshkey',
+        'credential:blinkokey',
+        'credential:github-token',
+        'credential:tgsession',
+        'credential:vikunja-password',
+        'credential:vikunjakey',
+      ]);
+      await screenshot('mac-chinese-name-order');
+      checks.add(
+        'native-CoreFoundation-zh-CN-name-sort-and-first-appearance-groups',
+      );
+      await tap(find.byKey(const ValueKey('library-group')));
+      await tap(find.text('不分组').last);
+      await tap(find.byKey(const ValueKey('library-sort')));
+      await tap(find.text('最近更新优先').last);
+      await tap(find.byKey(const ValueKey('library-directory-selfhost')));
       final recording = NativeFrameRecording(boundary, root, '', '');
       addTearDown(recording.dispose);
       await recording.start();
@@ -257,6 +282,7 @@ void main() {
           'nativeIsolationChecked': true,
           'nativePreview': native,
           'checks': checks,
+          'nameOrder': nameOrder,
           'contentViewports': viewports,
           'productionBootstrapUsed': false,
           'databaseOpened': false,

@@ -25,9 +25,19 @@ export function inspectLibraryWorkflow() {
     'library-detail-empty-title': '#record-detail .empty h2',
     'library-detail-empty-description': '#record-detail .empty p',
     popup: '#menu-root .floating-menu',
+    'library-relation-frame-information:https': '#record-detail .relation[data-item="https"]',
+    'library-relation-frame-information:sshguide': '#record-detail .relation[data-item="sshguide"]',
+    'library-relation-frame-credential:sshkey': '#record-detail .relation[data-item="sshkey"]',
   })) {
     const e = document.querySelector(selector);
     if (e) boxes[name] = rect(e);
+  }
+  for (const [key, name] of Object.entries({url: '访问入口', purpose: '应用用途', auth: '认证方式'})) {
+    const label = [...document.querySelectorAll('#record-detail .fact label')].find(e => e.textContent.trim() === name);
+    if (label) {
+      boxes[`library-field-${key}-label`] = rect(label);
+      boxes[`library-field-${key}-value`] = rect(label.nextElementSibling);
+    }
   }
   const raw = window.ROUND9?.state;
   if (!raw) throw new Error('Frozen reference is not initialized');
