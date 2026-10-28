@@ -584,6 +584,7 @@ extension _SampleBackupInstall on SampleWorkspaceSource {
   void _installBackup(_PortableSample value) {
     _epoch++;
     runtime.resetCurrent();
+    agents.invalidateAssociation();
     _basePending = _baseProposals = 0;
     _approvals.reset();
     _proposals.reset();

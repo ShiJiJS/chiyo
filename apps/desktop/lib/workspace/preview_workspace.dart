@@ -34,6 +34,7 @@ import 'classification_controller.dart';
 import 'backup_controller.dart';
 import 'backup_page.dart';
 import 'runtime_controller.dart';
+import 'agents_controller.dart';
 import 'proposals_controller.dart';
 import 'proposals_page.dart';
 
@@ -64,6 +65,7 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
   late final BackupController _backups;
   bool _backupFrozen = false;
   late final WorkspaceRuntimeController _runtime;
+  late final WorkspaceAgentsController _agents;
   bool _runtimeFrozen = false, _runtimeGate = false;
   WorkspaceRuntimePhase? _runtimePhase;
   StreamSubscription<WorkspaceRecordRef?>? _summaryChanges;
@@ -102,6 +104,8 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
     _runtime = WorkspaceRuntimeController(_source.runtime, _source.changes)
       ..addListener(_runtimeChanged);
     unawaited(_runtime.load());
+    _agents = WorkspaceAgentsController(_source.agents, _source.changes);
+    unawaited(_agents.load());
     _plugins = PluginsController(_source.plugins, _source.changes);
     _legacy = LegacyTemplatesController(
       _source.legacyTemplates,
@@ -240,6 +244,7 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
     _settings.dispose();
     _backups.dispose();
     _runtime.dispose();
+    _agents.dispose();
     _classifications.dispose();
     _controller.dispose();
     _library.dispose();
@@ -322,7 +327,9 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
     if (page == WorkspacePage.proposals) unawaited(_proposals.open(id));
     if (page == WorkspacePage.settings) {
       _settings.select(
-        id == 'runtime'
+        id == 'agents'
+            ? WorkspaceSettingsSection.agents
+            : id == 'runtime'
             ? WorkspaceSettingsSection.runtime
             : id == 'backups'
             ? WorkspaceSettingsSection.backups
@@ -527,6 +534,80 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
                     },
                     child: const Text('下一次运行操作结果未知'),
                   ),
+                ],
+              ),
+              const SizedBox(height: 22),
+              const Text(
+                'Agent 接入示例',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 10),
+              Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: [
+                  for (final scenario in SampleAgentScenario.values)
+                    DesktopButton(
+                      key: ValueKey('preview-agents-${scenario.name}'),
+                      onPressed: () async {
+                        await _source.agents.setScenario(scenario);
+                        if (!dialogContext.mounted) return;
+                        Navigator.pop(dialogContext);
+                        if (mounted) {
+                          _navigate(WorkspacePage.settings, 'agents');
+                        }
+                      },
+                      child: Text(switch (scenario) {
+                        SampleAgentScenario.ready => '接入就绪',
+                        SampleAgentScenario.missingCli => '缺少 CLI',
+                        SampleAgentScenario.missingSkill => '缺少 Skill',
+                        SampleAgentScenario.missingHooks => '缺少 hooks',
+                        SampleAgentScenario.untrustedHooks => 'hooks 待信任',
+                        SampleAgentScenario.changedCommand => 'hook 命令变化',
+                        SampleAgentScenario.noAssociation => '聊天未关联',
+                        SampleAgentScenario.bindingMismatch => '聊天绑定不符',
+                        SampleAgentScenario.ended => '聊天已结束',
+                        SampleAgentScenario.freshSession => '新的聊天',
+                      }),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 22),
+              Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: [
+                  for (final target in ['overview', 'diagnostics', 'session'])
+                    DesktopButton(
+                      key: ValueKey('preview-agents-error-$target'),
+                      onPressed: () {
+                        final error = WorkspaceFailure(
+                          'offline',
+                          target == 'overview'
+                              ? '接入状态暂时无法读取。'
+                              : target == 'diagnostics'
+                              ? '诊断暂时无法读取。'
+                              : '聊天关联暂时无法读取。',
+                        );
+                        if (target == 'overview') {
+                          _source.agents.nextReadFailure = error;
+                        } else if (target == 'diagnostics') {
+                          _source.agents.nextDiagnosticFailure = error;
+                        } else {
+                          _source.agents.nextSessionFailure = error;
+                        }
+                        Navigator.pop(dialogContext);
+                        _navigate(WorkspacePage.settings, 'agents');
+                        if (target == 'overview') {
+                          unawaited(_agents.load());
+                        }
+                      },
+                      child: Text(switch (target) {
+                        'overview' => '下一次接入读取失败',
+                        'diagnostics' => '下一次诊断失败',
+                        _ => '下一次聊天读取失败',
+                      }),
+                    ),
                 ],
               ),
               const SizedBox(height: 22),
@@ -935,6 +1016,7 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
                 classifications: _classifications,
                 backups: _backups,
                 runtime: _runtime,
+                agents: _agents,
                 backupPicker: (kind) => showWorkspaceBackupChoices(
                   context,
                   () => _source.backups.choices(kind),

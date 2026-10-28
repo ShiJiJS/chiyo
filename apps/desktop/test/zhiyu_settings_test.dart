@@ -15,6 +15,7 @@ import 'package:info_desktop/workspace/settings_controller.dart';
 import 'package:info_desktop/workspace/classification_controller.dart';
 import 'package:info_desktop/workspace/backup_controller.dart';
 import 'package:info_desktop/workspace/runtime_controller.dart';
+import 'package:info_desktop/workspace/agents_controller.dart';
 import 'package:info_desktop/workspace/sample_workspace_source.dart';
 import 'package:info_desktop/workspace/workspace_source.dart';
 import 'package:info_desktop/workspace/plugins_controller.dart';
@@ -52,6 +53,8 @@ void main() {
         sample.changes,
       );
       addTearDown(runtime.dispose);
+      final agents = WorkspaceAgentsController(sample.agents, sample.changes);
+      addTearDown(agents.dispose);
       addTearDown(classifications.dispose);
       addTearDown(settings.dispose);
       addTearDown(plugins.dispose);
@@ -68,6 +71,7 @@ void main() {
               classifications: classifications,
               backups: backups,
               runtime: runtime,
+              agents: agents,
               backupPicker: (_) async => null,
               onLibrary: () {},
               pluginBuilder: (_) => const SizedBox(),
