@@ -764,9 +764,10 @@ Future<T?> showDesktopDialog<T>(
   Tooltip.dismissAllToolTips();
   final focus = returnFocus ?? FocusManager.instance.primaryFocus;
   final navigator = Navigator.of(context, rootNavigator: true);
+  final round09 = DesktopMotion.enabled(context);
   try {
     final route = DesktopPopupRoute<T>(
-      round09: DesktopMotion.enabled(context),
+      round09: round09,
       blurBarrier: true,
       barrierDismissible: barrierDismissible,
       barrierLabel: '关闭对话框',
@@ -779,7 +780,16 @@ Future<T?> showDesktopDialog<T>(
           const SingleActivator(LogicalKeyboardKey.escape): () =>
               Navigator.of(dialogContext).maybePop(),
         },
-        child: builder(dialogContext),
+        // A disabled launch button can still own focus while the new route
+        // enters. Give Round09 shortcuts a focus anchor inside this route so
+        // Escape works before its first field or action is visited.
+        child: round09
+            ? Focus(
+                autofocus: true,
+                skipTraversal: true,
+                child: builder(dialogContext),
+              )
+            : builder(dialogContext),
       ),
       transitionBuilder: (_, animation, _, child) => AnimatedBuilder(
         animation: animation,
