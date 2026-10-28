@@ -3,6 +3,10 @@
     "bytes": 96,
     "sha256": "bf56e70e178ca59fc5094a5d9ded10bac964c7e6dcc1ff4b66742dabc637bb8d"
   },
+  "archive-replay.json": {
+    "bytes": 566,
+    "sha256": "bbf9993acdf6eb7f06568c5f4a1c414ce4839a44a5d4e22925ca72ada19857f6"
+  },
   "body-header.log": {
     "bytes": 293,
     "sha256": "f01225ec69156da23212aa0bbd913b5d9ded0129ffdcc69cfe48248cc3021368"
@@ -110,6 +114,10 @@
   "tracker-before.json": {
     "bytes": 144,
     "sha256": "56266b0bb7dff9e90d8f44771f7546710011c83d789209aba2286b53451b897b"
+  },
+  "tracker-readback.json": {
+    "bytes": 554,
+    "sha256": "d519358b359cbad3daa5bfce6437774733e49b206d0c9d408e6e20da3dac1948"
   },
   "visual-review.json": {
     "bytes": 1398,
