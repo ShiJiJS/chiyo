@@ -128,6 +128,37 @@ void main() {
                   },
                   'theme': dark ? 'dark' : 'light',
                   'textScale': scale,
+                  if (state == 'sshkey')
+                    'credentialReading': {
+                      'purpose': t
+                          .widget<LibraryReadingText>(key('credential-purpose'))
+                          .span
+                          .toPlainText(),
+                      'delivery': t
+                          .widget<LibraryReadingText>(
+                            key('credential-delivery-value'),
+                          )
+                          .span
+                          .toPlainText(),
+                      'binding': t
+                          .widget<LibraryReadingText>(
+                            key('credential-binding-value'),
+                          )
+                          .span
+                          .toPlainText(),
+                      'relatedName': t
+                          .widget<Text>(
+                            key('library-relation-name-information:azure'),
+                          )
+                          .data,
+                      'relatedDescription': t
+                          .widget<Text>(
+                            key(
+                              'library-relation-description-information:azure',
+                            ),
+                          )
+                          .data,
+                    },
                   'selection': model.selection!.key,
                   'query': model.query.keyword,
                   'scrollTop': scroll.pixels,
@@ -228,6 +259,32 @@ void main() {
               )
               .first;
           boxes['credential-icon'] = rect(icon);
+          expect(
+            find.descendant(
+              of: key('credential-summary'),
+              matching: key('credential-mask'),
+            ),
+            findsOneWidget,
+          );
+          for (final k in [
+            'credential-section-purpose-title',
+            'credential-purpose',
+            'credential-section-use-title',
+            'credential-delivery-fact',
+            'credential-delivery-label',
+            'credential-binding-fact',
+            'credential-binding-label',
+            'credential-use-note',
+            'credential-section-relations-title',
+            'library-relation-frame-information:azure',
+            'library-relation-icon-information:azure',
+            'library-relation-text-information:azure',
+            'library-relation-description-information:azure',
+            'library-relation-chevron-information:azure',
+          ]) {
+            boxes[k] = rect(key(k));
+          }
+
           await capture('sshkey', boxes);
           expect(t.takeException(), isNull);
           await t.pumpWidget(const SizedBox());

@@ -14,66 +14,6 @@ class DocumentReadingController extends ValueNotifier<bool> {
   void toggle() => value = !value;
 }
 
-/// CSS line boxes keep fractional leading between blocks. The engine's glyphs
-/// and selectable text stay at their original size; only layout leading is
-/// reserved independently from its rounded paragraph height.
-class _ReadingText extends StatelessWidget {
-  const _ReadingText({
-    required this.span,
-    required this.style,
-    this.fixedLineBox = true,
-    this.lineFontSize,
-    this.textAlign = TextAlign.start,
-  });
-  final TextSpan span;
-  final TextStyle style;
-  final bool fixedLineBox;
-  final double? lineFontSize;
-  final TextAlign textAlign;
-  @override
-  Widget build(BuildContext context) {
-    if (!fixedLineBox) return SelectableText.rich(span, style: style);
-    if (span.toPlainText().isEmpty) return const SizedBox.shrink();
-    final scaler = MediaQuery.textScalerOf(context);
-    final lineStyle = style.copyWith(fontSize: lineFontSize ?? style.fontSize);
-    final strut = StrutStyle.fromTextStyle(lineStyle, forceStrutHeight: true);
-    return LayoutBuilder(
-      builder: (context, bounds) {
-        final painter = TextPainter(
-          text: TextSpan(style: style, children: [span]),
-          strutStyle: strut,
-          textDirection: Directionality.of(context),
-          textAlign: textAlign,
-          textScaler: scaler,
-        )..layout(maxWidth: bounds.maxWidth);
-        final height =
-            painter.computeLineMetrics().length *
-            scaler.scale(lineStyle.fontSize!) *
-            lineStyle.height!;
-        final factor = painter.height == 0 ? 1.0 : height / painter.height;
-        final width = bounds.maxWidth.isFinite ? null : painter.width;
-        painter.dispose();
-        return SizedBox(
-          width: width,
-          child: Align(
-            alignment: AlignmentDirectional.topStart,
-            heightFactor: factor,
-            child: SizedBox(
-              width: width ?? bounds.maxWidth,
-              child: SelectableText.rich(
-                span,
-                style: style,
-                strutStyle: strut,
-                textAlign: textAlign,
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-}
-
 class LibraryDocumentTools extends StatelessWidget {
   const LibraryDocumentTools({
     super.key,
@@ -227,7 +167,7 @@ class _LibraryDocumentState extends State<LibraryDocument> {
     double height = 1.95,
     Color? color,
     bool fixedLineBox = true,
-  }) => _ReadingText(
+  }) => LibraryReadingText(
     span: TextSpan(children: nodes.map(_inline).toList()),
     style: libraryText(
       context,
@@ -287,7 +227,7 @@ class _LibraryDocumentState extends State<LibraryDocument> {
             )..layout();
             final fits = painter.width <= bounds.maxWidth;
             painter.dispose();
-            final text = _ReadingText(
+            final text = LibraryReadingText(
               span: TextSpan(text: code),
               style: style,
               lineFontSize: 15,
@@ -335,7 +275,7 @@ class _LibraryDocumentState extends State<LibraryDocument> {
                     width: indent,
                     child: Padding(
                       padding: const EdgeInsets.only(right: 6),
-                      child: _ReadingText(
+                      child: LibraryReadingText(
                         span: TextSpan(
                           text: node.tag == 'ol' ? '${start + index}.' : '•',
                         ),

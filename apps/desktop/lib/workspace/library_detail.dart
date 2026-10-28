@@ -245,68 +245,10 @@ class _LibraryDetailState extends State<LibraryDetail> {
       children: [
         for (final (index, ref) in targets.indexed)
           if (summaries[ref] case final record?)
-            Container(
-              key: ValueKey('library-relation-frame-${ref.key}'),
-              decoration: BoxDecoration(
-                border: index == 0
-                    ? null
-                    : Border(
-                        top: BorderSide(color: UiPalette.of(context).line),
-                      ),
-              ),
-              child: DesktopButton(
-                key: ValueKey('library-relation-${ref.key}'),
-                kind: DesktopButtonKind.link,
-                radius: 0,
-                alignment: Alignment.centerLeft,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                onPressed: () => widget.onOpen(ref),
-                child: Row(
-                  children: [
-                    RecordIcon(record.type, size: 34, radius: 7),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Text(
-                            record.name,
-                            key: ValueKey('library-relation-name-${ref.key}'),
-                            style: const TextStyle(
-                              fontSize: 14,
-                              height: 1.6,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            record.description,
-                            style: libraryText(
-                              context,
-                              13,
-                              color: UiPalette.of(context).muted,
-                              height: 1.7,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    SizedBox(
-                      key: ValueKey('library-relation-chevron-${ref.key}'),
-                      width: 15,
-                      height: 19,
-                      child: Center(
-                        child: PrototypeIcon(
-                          PrototypeIconGlyph.chev,
-                          size: 15,
-                          color: UiPalette.of(context).muted,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+            LibraryRelationRow(
+              record: record,
+              first: index == 0,
+              onPressed: () => widget.onOpen(ref),
             )
           else
             Padding(

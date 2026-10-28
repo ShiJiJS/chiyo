@@ -9,6 +9,7 @@ import 'package:info_desktop/desktop_controls.dart';
 import 'package:info_desktop/desktop_fonts.dart';
 import 'package:info_desktop/workspace/library_page.dart';
 import 'package:info_desktop/workspace/library_file.dart';
+import 'package:info_desktop/workspace/library_widgets.dart';
 import 'package:info_desktop/workspace/mac_preview_desktop.dart';
 import 'package:info_desktop/workspace/preview_workspace.dart';
 import 'package:info_desktop/workspace/sample_workspace_source.dart';
@@ -463,11 +464,34 @@ void main() {
               find.byKey(const ValueKey('credential-mask')),
               findsOneWidget,
             );
+            expect(
+              tester
+                  .widget<LibraryReadingText>(
+                    find.byKey(const ValueKey('credential-binding-value')),
+                  )
+                  .span
+                  .toPlainText(),
+              'SSH_KEY_FILE',
+            );
             attachmentBoxes['sshkey'] = {
               for (final key in [
                 'credential-summary',
                 'credential-summary-format',
                 'credential-status',
+                'credential-section-purpose-title',
+                'credential-purpose',
+                'credential-section-use-title',
+                'credential-delivery-fact',
+                'credential-delivery-label',
+                'credential-binding-fact',
+                'credential-binding-label',
+                'credential-use-note',
+                'credential-section-relations-title',
+                'library-relation-frame-information:azure',
+                'library-relation-icon-information:azure',
+                'library-relation-text-information:azure',
+                'library-relation-description-information:azure',
+                'library-relation-chevron-information:azure',
               ])
                 key: box(find.byKey(ValueKey(key))),
             };
@@ -540,6 +564,9 @@ void main() {
         await tester.pumpAndSettle();
       }
     }
+    checks.add(
+      'native-credential-purpose-use-facts-relation-body-two-viewports-two-themes',
+    );
     checks.add('native-window-two-content-viewports-and-both-themes');
     checks.add('native-AppKit-scrollbar-style-matches-rendered-library-gutter');
     checks.add('native-chooser-two-viewports-two-themes-no-residual-barrier');
