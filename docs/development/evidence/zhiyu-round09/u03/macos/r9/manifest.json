@@ -343,6 +343,14 @@
     "bytes": 1778,
     "sha256": "5e9c489ff502287e4f151b8ca70ab2883008a1911ee08141c7679d30d717ab7b"
   },
+  "tracker-read.json": {
+    "bytes": 527,
+    "sha256": "b5fa0581df6e2a6dcbc747eba7223045f0403873bbec62ce1f516f0a5fa34ed6"
+  },
+  "visual-review.json": {
+    "bytes": 535,
+    "sha256": "5b8c496896270c0e6cfea32ce24fba7ac7eef950dad9af3d7463507aacfa0edb"
+  },
   "wide-code.log": {
     "bytes": 275,
     "sha256": "fcd3c8567958b8ba4470b6863dd37cac2f3045b8ec3003475ba9e286a3462a71"
