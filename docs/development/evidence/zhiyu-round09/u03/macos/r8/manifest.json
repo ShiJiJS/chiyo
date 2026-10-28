@@ -123,6 +123,10 @@
     "bytes": 96,
     "sha256": "b6a08a97b92b64a385134827e8222eaa17ac61f0d9a687828b7837404814228d"
   },
+  "archive-replay.json": {
+    "bytes": 187,
+    "sha256": "98f7e09d7e03cd6ef245320b204e66b83af489d7eba08e63d52816ebdca489c7"
+  },
   "build.log": {
     "bytes": 125,
     "sha256": "bb928504a91fe0ce4dc0bb921b142b31033cbbf74e92214ba34521fe3f2f22be"
@@ -172,8 +176,8 @@
     "sha256": "af0b8c2887ef799fd2d61960de6bcabe83e16463fe9ee062cae8c58d5f8f4ac7"
   },
   "native-build.json": {
-    "bytes": 781,
-    "sha256": "85622144088b3b62e43052cb25debd274141202baa7b45a953900dc0582ca381"
+    "bytes": 830,
+    "sha256": "097e02a7ef847861e22479ebbf47e77e26a4818412f23a7ef58f46009ff532b0"
   },
   "native-collection.json": {
     "bytes": 1097,
@@ -195,41 +199,81 @@
     "bytes": 7655,
     "sha256": "f7f601641d2f54564d3ff5dffd0cfcefcd8dffac60da227ed6ece81c725917b6"
   },
+  "reference/dark-1280-100-R05-timeline.png": {
+    "bytes": 122465,
+    "sha256": "f61f943e447904edc69c47ca79230996e3994119ddb22c992f3ee92ab92e2f74"
+  },
   "reference/dark-1280-100-R05-top.json": {
     "bytes": 7649,
     "sha256": "bfe265c17933bcb86c5d08e69f149254c7cec8649ba88ca1dcc3169fa481c80c"
+  },
+  "reference/dark-1280-100-R05-top.png": {
+    "bytes": 117102,
+    "sha256": "691578b4440f44f3e3948afc81187932c3be8f9bbbad54820c8a85a2a562912a"
   },
   "reference/dark-1280-100-R06-document.json": {
     "bytes": 2125,
     "sha256": "2518407f3e53a075f64e7fd7dfbfb2345ff4b11bbcc38f105fe2ebec7b4f91e4"
   },
+  "reference/dark-1280-100-R06-document.png": {
+    "bytes": 144623,
+    "sha256": "08abbf4364ccbe890444942a6193ad6b307a7d1c1334bdd6b05b762b78c4f493"
+  },
   "reference/dark-1440-100-R05-timeline.json": {
     "bytes": 7629,
     "sha256": "feed7eefec9b28c912a84aa56b3eea2c2fed5652f220f3b00c855800d43728ea"
+  },
+  "reference/dark-1440-100-R05-timeline.png": {
+    "bytes": 132406,
+    "sha256": "475815cda582ae04cb1ad14d60afa2717add298fefe5dd01b14a672ea2b15398"
   },
   "reference/dark-1440-100-R05-top.json": {
     "bytes": 7623,
     "sha256": "778aab074e60285f95b22c28f52b152fadea0cb5d6bf86e9e3889bc416e047c1"
   },
+  "reference/dark-1440-100-R05-top.png": {
+    "bytes": 126284,
+    "sha256": "06eb96c7b53418e4654cad03c11849669001e3a99564e073c95deb3e15813af0"
+  },
   "reference/dark-1440-100-R06-document.json": {
     "bytes": 2179,
     "sha256": "4cc2508b830393844595e612d101e9cbda5e24fe168266b74f0e458b6fda25c8"
+  },
+  "reference/dark-1440-100-R06-document.png": {
+    "bytes": 163361,
+    "sha256": "7bfced71b76fd6cd5c127e5f6748a4b18d8631ce6decd45fa2a761e8af9aebba"
   },
   "reference/light-1280-100-R05-timeline.json": {
     "bytes": 7657,
     "sha256": "2224b003b00c628c3fbb55f946c7bf5c78f9dd573515d771553cc76a5b4963b5"
   },
+  "reference/light-1280-100-R05-timeline.png": {
+    "bytes": 121815,
+    "sha256": "86f9ecb5b5c04350853fb775d2cc9bb47958b9c31e9806f69557e05a4be0cd35"
+  },
   "reference/light-1280-100-R05-top.json": {
     "bytes": 7651,
     "sha256": "fca0d27074b06cfd54b9d26488173f79d16959b72c036827b14c58c80b6cf2fe"
+  },
+  "reference/light-1280-100-R05-top.png": {
+    "bytes": 116458,
+    "sha256": "4061608b001c579470d5916d84de8e61a3c66c39f6d4820b513df5c36752b8b0"
   },
   "reference/light-1280-100-R06-document.json": {
     "bytes": 2127,
     "sha256": "913387d5f830f9c1d5dfbd25226d1ee15089fc826c9869a8f72b7f8000328114"
   },
+  "reference/light-1280-100-R06-document.png": {
+    "bytes": 143523,
+    "sha256": "14cc8b320cc28bb776cc59b933e66fe579e60790e831b42d261b2b4fcaa1f56c"
+  },
   "reference/light-1440-100-R05-timeline.json": {
     "bytes": 7631,
     "sha256": "a4eb241a3fc97728734cd8252e5fc680b9cf1f1c865886248fb3fcf67a6204c6"
+  },
+  "reference/light-1440-100-R05-timeline.png": {
+    "bytes": 131863,
+    "sha256": "29670967f039c822fbc53f912bc4ad2084df6aad051e78e642b904f6ff6857a9"
   },
   "reference/light-1440-100-R05-top.json": {
     "bytes": 7625,
@@ -258,5 +302,9 @@
   "source-hashes.json": {
     "bytes": 32667,
     "sha256": "4415b507f467f8b14a7b52f83e78a006ca59a6f8794f98ff56bfcfd0c3b351ba"
+  },
+  "tracker-read.json": {
+    "bytes": 1130,
+    "sha256": "4bba0fd6562912e8db2f6a9232b3aea4814cd55932bf4c1b29252cfabd95ec48"
   }
 }

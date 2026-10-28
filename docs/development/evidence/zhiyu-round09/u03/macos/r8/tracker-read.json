@@ -1,0 +1,36 @@
+[
+  {
+    "issue": 63,
+    "exactBodyReadback": true,
+    "checked": 6,
+    "total": 7,
+    "title": "知予前端 U02：三栏信息库与服务器、应用资料界面 · Issue #63 · ShiJiJS/agent-info-manage",
+    "labels": [
+      "enhancementNew feature or request",
+      "ready-for-agentSpecification ready for agent work"
+    ],
+    "comments": [],
+    "blockedBy": [
+      "https://github.com/ShiJiJS/agent-info-manage/issues/62"
+    ],
+    "openTextObserved": true,
+    "bodySha256": "daeeba8a98d5ea335f0296c8e680885190045017a819b000f0f992200ee5f957"
+  },
+  {
+    "issue": 64,
+    "exactBodyReadback": true,
+    "checked": 6,
+    "total": 7,
+    "title": "知予前端 U03：个人档案、文档、文件与凭据界面 · Issue #64 · ShiJiJS/agent-info-manage",
+    "labels": [
+      "enhancementNew feature or request",
+      "ready-for-agentSpecification ready for agent work"
+    ],
+    "comments": [],
+    "blockedBy": [
+      "https://github.com/ShiJiJS/agent-info-manage/issues/63"
+    ],
+    "openTextObserved": true,
+    "bodySha256": "088206fc27eb86b66843999f71a7612970c9af36e8cd746cf6dfe6704dc9276e"
+  }
+]

@@ -1,0 +1,6 @@
+{
+  "sameComparisonFromRetainedEvidence": true,
+  "exitCode": 1,
+  "reason": "document heading drift remains outside2px; no acceptance override",
+  "all12ReferenceImagesRetained": true
+}
