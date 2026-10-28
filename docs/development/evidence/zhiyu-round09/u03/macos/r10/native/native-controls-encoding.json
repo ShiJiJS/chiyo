@@ -1,0 +1,166 @@
+{
+  "format": "GIF",
+  "playbackSpeed": 1,
+  "wallClockDurationMs": 6928,
+  "encodedDurationMs": 6930,
+  "sourceFrameCount": 39,
+  "cumulativeTimeQuantizationMs": 10,
+  "sourceHashes": [
+    {
+      "file": "native-controls-frames/frame-00000.png",
+      "sha256": "2b42164d56b3ef884bbdd5ca42fbebb9aab7f10267ae0b5ef9b6d0fb44ff439c"
+    },
+    {
+      "file": "native-controls-frames/frame-00001.png",
+      "sha256": "2b42164d56b3ef884bbdd5ca42fbebb9aab7f10267ae0b5ef9b6d0fb44ff439c"
+    },
+    {
+      "file": "native-controls-frames/frame-00002.png",
+      "sha256": "3edf62ffd63e18f56d738c03d9cf32410ef30c54d479db6dcb7e7e68a27b0f6c"
+    },
+    {
+      "file": "native-controls-frames/frame-00003.png",
+      "sha256": "8c4716a802443a146091f7b3a02ba590af77cc7baf14704cf7ceab786150d778"
+    },
+    {
+      "file": "native-controls-frames/frame-00004.png",
+      "sha256": "8c4716a802443a146091f7b3a02ba590af77cc7baf14704cf7ceab786150d778"
+    },
+    {
+      "file": "native-controls-frames/frame-00005.png",
+      "sha256": "8c4716a802443a146091f7b3a02ba590af77cc7baf14704cf7ceab786150d778"
+    },
+    {
+      "file": "native-controls-frames/frame-00006.png",
+      "sha256": "2b42164d56b3ef884bbdd5ca42fbebb9aab7f10267ae0b5ef9b6d0fb44ff439c"
+    },
+    {
+      "file": "native-controls-frames/frame-00007.png",
+      "sha256": "a4fa0b675a99c9292933a44359e9c96748b235d5ad4308f9346015cee0984803"
+    },
+    {
+      "file": "native-controls-frames/frame-00008.png",
+      "sha256": "9f10eabc04cfc80e9d28fa1e144cf5ed523e77d24c78a38b08be9bd7db04c3c9"
+    },
+    {
+      "file": "native-controls-frames/frame-00009.png",
+      "sha256": "9f10eabc04cfc80e9d28fa1e144cf5ed523e77d24c78a38b08be9bd7db04c3c9"
+    },
+    {
+      "file": "native-controls-frames/frame-00010.png",
+      "sha256": "2b42164d56b3ef884bbdd5ca42fbebb9aab7f10267ae0b5ef9b6d0fb44ff439c"
+    },
+    {
+      "file": "native-controls-frames/frame-00011.png",
+      "sha256": "45e96656e25ace8ce3a0b0d35a5d5705c6358116a3e0b09cf8a0393f2ca02d1b"
+    },
+    {
+      "file": "native-controls-frames/frame-00012.png",
+      "sha256": "45e96656e25ace8ce3a0b0d35a5d5705c6358116a3e0b09cf8a0393f2ca02d1b"
+    },
+    {
+      "file": "native-controls-frames/frame-00013.png",
+      "sha256": "81e3adf53604168f62a4b12e7c9e88b5bb26ab102f5c9c0b8f7e5cfcb1167356"
+    },
+    {
+      "file": "native-controls-frames/frame-00014.png",
+      "sha256": "def2db92f058dd18a845214487f40f87cd4338fe1084076b8839284f5ee45c25"
+    },
+    {
+      "file": "native-controls-frames/frame-00015.png",
+      "sha256": "791a820779b359584ee5af41e8b0afdc00451ee0c82b3a428423dbdcd5c0a847"
+    },
+    {
+      "file": "native-controls-frames/frame-00016.png",
+      "sha256": "c0b040a8bbd7e5990d1b31f73d17f05b2137a2c706f44ef2e31a9d2339c3a535"
+    },
+    {
+      "file": "native-controls-frames/frame-00017.png",
+      "sha256": "031b3db38c02e5250d93a2e68a8b7c729c389782d20f63c6d1aec39b27563e20"
+    },
+    {
+      "file": "native-controls-frames/frame-00018.png",
+      "sha256": "cc456ab0a1befe87b86dfd37aa973fc078a51455c5ca02b25273489645935cb7"
+    },
+    {
+      "file": "native-controls-frames/frame-00019.png",
+      "sha256": "8e16b547c83c675dca55e624ec5f7ab1d341033c2a0ae60a4da431dea37ffa5c"
+    },
+    {
+      "file": "native-controls-frames/frame-00020.png",
+      "sha256": "8e16b547c83c675dca55e624ec5f7ab1d341033c2a0ae60a4da431dea37ffa5c"
+    },
+    {
+      "file": "native-controls-frames/frame-00021.png",
+      "sha256": "8e16b547c83c675dca55e624ec5f7ab1d341033c2a0ae60a4da431dea37ffa5c"
+    },
+    {
+      "file": "native-controls-frames/frame-00022.png",
+      "sha256": "883a9344f2575533021b2d14af54662d8d3196efd6bc970ce41ec36fe44ba0b6"
+    },
+    {
+      "file": "native-controls-frames/frame-00023.png",
+      "sha256": "03b47a3896b8cec57993dccbfd0c7e37e082fcaad974bd7f2bbb948173501bcc"
+    },
+    {
+      "file": "native-controls-frames/frame-00024.png",
+      "sha256": "099f1420ae634b29c2c82b4c1ea4f5a9a8327adeffed7ea94db501945090a2e9"
+    },
+    {
+      "file": "native-controls-frames/frame-00025.png",
+      "sha256": "472cfe1e94046b5829e72ea3a3f31d8c035bc8e52cc9638422f92c1656e72881"
+    },
+    {
+      "file": "native-controls-frames/frame-00026.png",
+      "sha256": "321e6fe603fb4b3c5b1b5722a05e16e75cf80c22a1c08f2e6bcd2c9f265e5a5a"
+    },
+    {
+      "file": "native-controls-frames/frame-00027.png",
+      "sha256": "85a21a8bee0d8a2e85d913a2df03c521432b9eae6587966fc154d4f1aadb0cbf"
+    },
+    {
+      "file": "native-controls-frames/frame-00028.png",
+      "sha256": "85a21a8bee0d8a2e85d913a2df03c521432b9eae6587966fc154d4f1aadb0cbf"
+    },
+    {
+      "file": "native-controls-frames/frame-00029.png",
+      "sha256": "d674fbd2cfdb8364f4c7cd065001b01c924fef588770aba8ff9a8e8ba5f4bf52"
+    },
+    {
+      "file": "native-controls-frames/frame-00030.png",
+      "sha256": "aec2875deb04ce68ec3c2d86bd754ae4950f5806aacd1c41394d628f5251b6ac"
+    },
+    {
+      "file": "native-controls-frames/frame-00031.png",
+      "sha256": "bf05361328b19852a351a2369203142a44d70a67815d923cc6ce0fcf7eb42ae4"
+    },
+    {
+      "file": "native-controls-frames/frame-00032.png",
+      "sha256": "1d1c6b2a1bd18c8cd2443e92910906a5abf691e7533a5d560ae9a4a915299ff9"
+    },
+    {
+      "file": "native-controls-frames/frame-00033.png",
+      "sha256": "177eddb5d4d4a5043397b05c595ac0669309bcdfc4602b1a45a3f9c19855a296"
+    },
+    {
+      "file": "native-controls-frames/frame-00034.png",
+      "sha256": "177eddb5d4d4a5043397b05c595ac0669309bcdfc4602b1a45a3f9c19855a296"
+    },
+    {
+      "file": "native-controls-frames/frame-00035.png",
+      "sha256": "177eddb5d4d4a5043397b05c595ac0669309bcdfc4602b1a45a3f9c19855a296"
+    },
+    {
+      "file": "native-controls-frames/frame-00036.png",
+      "sha256": "9446c1578481e70b2e432d12f47879d29e372437890842948b457e5a9af52026"
+    },
+    {
+      "file": "native-controls-frames/frame-00037.png",
+      "sha256": "b87d0ca740527588cb59fd1d3d396ece3f54b4171ba23a07a0c961a38a7c974a"
+    },
+    {
+      "file": "native-controls-frames/frame-00038.png",
+      "sha256": "b87d0ca740527588cb59fd1d3d396ece3f54b4171ba23a07a0c961a38a7c974a"
+    }
+  ]
+}

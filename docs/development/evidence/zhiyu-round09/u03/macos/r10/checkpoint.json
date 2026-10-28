@@ -1,0 +1,86 @@
+{
+  "createdAt": "2026-10-28T20:11:38.543277+00:00",
+  "sourceCommit": "b6fc70455f78639ae56dae6504d4e4b15d8be95e",
+  "issue": {
+    "number": 64,
+    "checked": 6,
+    "total": 7,
+    "state": "OPEN",
+    "blockedBy": 63
+  },
+  "checks": {
+    "focused": 26,
+    "relatedRegression": 477,
+    "analysis": "passed --fatal-infos",
+    "nativeTests": 1,
+    "nativeFunctionalChecks": 15,
+    "nativeAttachmentCases": 8,
+    "nativeWidgetMaximumLogicalDelta": 0,
+    "ordinaryMacBuild": "passed arm64 preview_main.dart",
+    "actualWidgetStates": 16,
+    "referenceCases": 8,
+    "credentialOuterCasesPassed": 4,
+    "credentialOuterMaximumDelta": 0.859375,
+    "fileFrameWidthCasesPassed": 4,
+    "maximumFileToolbarTopDelta": 99.4140625,
+    "comparisonGuardChecks": 5,
+    "fullS5Passed": false,
+    "fullMotionPassed": false
+  },
+  "environment": {
+    "macOS": "27.0.1",
+    "macOSBuild": "26A434",
+    "WidgetDPR": 1,
+    "nativeDPR": 2.0,
+    "viewports": [
+      [
+        1440,
+        900
+      ],
+      [
+        1280,
+        800
+      ]
+    ],
+    "textScales": [
+      1,
+      2
+    ],
+    "fonts": "actual/fonts.json",
+    "fixture": "isolated synthetic PreviewWorkspace; real bundled fictional file bytes"
+  },
+  "changes": [
+    "strictly canonical available built-in file/resume and empty-field credential layouts omit duplicate generic tabs; edit remains in header",
+    "canonical file field renders directly; extended/custom/disabled templates keep generic fields/tabs and retained content",
+    "file metadata compact row; image stage uses frozen nav color/radius and25/12px padding, PDF max610px; true bytes and natural height preserved",
+    "fitting image avoids empty horizontal lane; zoom overflow retains9px lane and reading/zoom/page/version behavior",
+    "credential summary has growing metadata column, exact status pill and bold type hierarchy; masks and unavailable/read-failure/unknown-result actions preserved"
+  ],
+  "pending": [
+    "file toolbar remains99px below fictional reference due preserved metadata/replace/save/open/page/zoom/text controls; explicit comparison exit1",
+    "credential body/use grid, action placement, relation rows and detailed full visual remain open",
+    "check same-file metadata refresh preserves zoom/reading state before altering its interface",
+    "versions/replace forms, full glyph baselines/shadows, motion and physical OS input",
+    "F01 real PDF parser, actual storage/services/Keychain/file panels/delivery after all UI gates"
+  ],
+  "nativeScope": {
+    "foregroundRequest": "open returned1; application framebuffer/menu/window-size/test input passed, not foreground OS-input acceptance",
+    "sameDPRPixelComparison": false,
+    "recording": "Existing control recording is before the file/credential matrix; not acceptance of these transitions",
+    "unchangedNativeStartupAndBridge": {
+      "apps/desktop/lib/preview_main.dart": true,
+      "apps/desktop/lib/workspace/mac_preview_desktop.dart": true,
+      "apps/desktop/macos/Runner/MainFlutterWindow.swift": true
+    }
+  },
+  "isolation": {
+    "computerUse": false,
+    "subagents": false,
+    "personalData": false,
+    "keychain": false,
+    "notifications": false,
+    "realHooks": false,
+    "WindowsCI": false,
+    "copiedAppOrDSYM": false
+  }
+}

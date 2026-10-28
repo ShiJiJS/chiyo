@@ -1,0 +1,96 @@
+{
+  "before": {
+    "viewport": {
+      "width": 1280,
+      "height": 800,
+      "dpr": 1
+    },
+    "theme": "dark",
+    "selection": "sshkey",
+    "query": "Azure SSH",
+    "scrollTop": 0,
+    "scrollbarWidth": 0,
+    "font": "\"Zhiyu System\", \"PingFang SC\", sans-serif",
+    "boxes": {
+      "detail-title": {
+        "x": 584,
+        "y": 177,
+        "width": 548,
+        "height": 34.796875
+      },
+      "credential-summary": {
+        "x": 531,
+        "y": 310.7890625,
+        "width": 687,
+        "height": 81.1953125
+      },
+      "credential-icon": {
+        "x": 550,
+        "y": 341.8828125,
+        "width": 19,
+        "height": 19
+      },
+      "credential-format": {
+        "x": 584,
+        "y": 352.1875,
+        "width": 543,
+        "height": 20.796875
+      },
+      "credential-status": {
+        "x": 1142,
+        "y": 337.984375,
+        "width": 57,
+        "height": 26.796875
+      }
+    }
+  },
+  "after": {
+    "viewport": {
+      "width": 1280,
+      "height": 800,
+      "dpr": 1
+    },
+    "theme": "dark",
+    "selection": "sshkey",
+    "query": "Azure SSH",
+    "scrollTop": 0,
+    "scrollbarWidth": 0,
+    "font": "\"Zhiyu System\", \"PingFang SC\", sans-serif",
+    "boxes": {
+      "detail-title": {
+        "x": 584,
+        "y": 177,
+        "width": 548,
+        "height": 34.796875
+      },
+      "credential-summary": {
+        "x": 531,
+        "y": 310.7890625,
+        "width": 687,
+        "height": 81.1953125
+      },
+      "credential-icon": {
+        "x": 550,
+        "y": 341.8828125,
+        "width": 19,
+        "height": 19
+      },
+      "credential-format": {
+        "x": 584,
+        "y": 352.1875,
+        "width": 543,
+        "height": 20.796875
+      },
+      "credential-status": {
+        "x": 1142,
+        "y": 337.984375,
+        "width": 57,
+        "height": 26.796875
+      }
+    }
+  },
+  "accepted": true,
+  "fullS5Passed": false,
+  "imageSha256": "0d8e4a6a7224b6c572f659f59e76eeb75f103b5cb233d60e69f0379931e619d4",
+  "scope": "Capture integrity. Real file bytes/page height and required extra actions are separate from fictional HTML paper."
+}

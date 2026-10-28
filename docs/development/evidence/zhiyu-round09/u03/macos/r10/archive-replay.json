@@ -1,0 +1,5 @@
+{
+  "sameComparisonFromRetainedEvidence": true,
+  "exitCode": 1,
+  "reason": "File toolbar top still outside2px; real paper height excluded by explicit scope, not treated as passed"
+}
