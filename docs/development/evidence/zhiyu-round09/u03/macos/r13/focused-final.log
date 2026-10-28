@@ -1,0 +1,43 @@
+00:00 +0: loading /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credentials_test.dart
+00:00 +0: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_credentials_test.dart: dedicated metadata/mask stay separate from generic values, file bytes and metadata search
+00:00 +1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_mutation_test.dart: lost reply queries the committed operation; failed reconciliation never permits a second write
+00:00 +2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credentials_test.dart: (setUpAll)
+00:00 +3: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credentials_test.dart: (setUpAll)
+00:00 +4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credentials_test.dart: (setUpAll)
+00:00 +5: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credentials_test.dart: (setUpAll)
+00:00 +6: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credentials_test.dart: (setUpAll)
+00:00 +6: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_controls_test.dart: desktop menu supports keyboard selection and escape
+00:00 +7: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_controls_test.dart: desktop menu supports keyboard selection and escape
+00:00 +8: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_controls_test.dart: desktop menu supports keyboard selection and escape
+00:00 +9: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_controls_test.dart: desktop menu supports keyboard selection and escape
+00:04 +10: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credentials_test.dart: credential reading, grouped usage history and failed use request reach one pending receipt
+00:04 +11: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credentials_test.dart: credential reading, grouped usage history and failed use request reach one pending receipt
+00:05 +12: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credentials_test.dart: credential reading, grouped usage history and failed use request reach one pending receipt
+00:12 +13: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credential_lifecycle_test.dart: material list failure and explicit restore preserve metadata and create a disabled new head
+00:12 +14: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credentials_test.dart: dark 200% credential create and rotation preserve uncertain draft, disable and re-enable explicitly
+00:18 +15: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credentials_test.dart: dark 200% credential create and rotation preserve uncertain draft, disable and re-enable explicitly
+00:22 +16: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credential_lifecycle_test.dart: permanent purge needs second confirmation and failed purge retains masked owner snapshot
+00:23 +17: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credentials_test.dart: focus unavailable, storage-only and a reachable read failure remain usable without secrets or execution
+00:24 +18: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credentials_test.dart: credential editor retains a conflict draft and requires current metadata review before rebase
+00:27 +19: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credentials_test.dart: long private note preserves credential configuration and reachable actions/related return large=false
+00:28 +20: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credentials_test.dart: long private note preserves credential configuration and reachable actions/related return large=true
+00:30 +21: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credentials_test.dart: material choice preserves custom reference draft replace=false width=1440.0 dark=false scale=1.0
+00:31 +22: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credentials_test.dart: material choice preserves custom reference draft replace=false width=1440.0 dark=false scale=2.0
+00:32 +23: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credentials_test.dart: material choice preserves custom reference draft replace=false width=1440.0 dark=true scale=1.0
+00:34 +24: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credentials_test.dart: material choice preserves custom reference draft replace=false width=1440.0 dark=true scale=2.0
+00:36 +25: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credentials_test.dart: material choice preserves custom reference draft replace=false width=1280.0 dark=false scale=1.0
+00:37 +26: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credentials_test.dart: material choice preserves custom reference draft replace=false width=1280.0 dark=false scale=2.0
+00:38 +27: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credentials_test.dart: material choice preserves custom reference draft replace=false width=1280.0 dark=true scale=1.0
+00:40 +28: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credentials_test.dart: material choice preserves custom reference draft replace=false width=1280.0 dark=true scale=2.0
+00:41 +29: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credentials_test.dart: material choice preserves custom reference draft replace=true width=1440.0 dark=false scale=1.0
+00:43 +30: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credentials_test.dart: material choice preserves custom reference draft replace=true width=1440.0 dark=false scale=2.0
+00:44 +31: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credentials_test.dart: material choice preserves custom reference draft replace=true width=1440.0 dark=true scale=1.0
+00:46 +32: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credentials_test.dart: material choice preserves custom reference draft replace=true width=1440.0 dark=true scale=2.0
+00:48 +33: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credentials_test.dart: material choice preserves custom reference draft replace=true width=1280.0 dark=false scale=1.0
+00:49 +34: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credentials_test.dart: material choice preserves custom reference draft replace=true width=1280.0 dark=false scale=2.0
+00:50 +35: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credentials_test.dart: material choice preserves custom reference draft replace=true width=1280.0 dark=true scale=1.0
+00:52 +36: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credentials_test.dart: material choice preserves custom reference draft replace=true width=1280.0 dark=true scale=2.0
+00:53 +37: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credentials_test.dart: new reference follows material suggestion until edited, including explicit empty large=false
+00:55 +38: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credentials_test.dart: new reference follows material suggestion until edited, including explicit empty large=true
+00:56 +39: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credentials_test.dart: (tearDownAll)
+00:56 +39: All tests passed!
