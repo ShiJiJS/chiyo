@@ -26,6 +26,15 @@ const sampleFileDefinition = <String, Object?>{
   ],
 };
 
+Map<String, Object?> sampleFileDefinitionFor(String typeId) {
+  if (!workspaceFileTypeIds.contains(typeId)) {
+    throw ArgumentError.value(typeId, 'typeId', 'Not a host file template');
+  }
+  return typeId == 'resume'
+      ? {...sampleFileDefinition, 'id': 'resume', 'name': '简历文件'}
+      : sampleFileDefinition;
+}
+
 class _FileEntry {
   const _FileEntry(this.ref, this.assetId, this.createdAt, [this.filename]);
   final WorkspaceFileRef ref;

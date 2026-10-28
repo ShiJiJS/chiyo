@@ -597,7 +597,7 @@ class SampleWorkspaceSource
       sha256.convert(utf8.encode(jsonEncode(value))).toString();
   String _fixtureJson;
   static const _genericDefinition = <String, Object?>{
-    'name': '通用资料',
+    'name': '通用信息',
     'fields': [
       {'key': 'body', 'label': '内容', 'type': 'multiline'},
     ],
@@ -699,11 +699,7 @@ class SampleWorkspaceSource
     WorkspaceType type(Map<String, dynamic> row) {
       final id =
           row['templateId'] as String? ??
-          (row['kind'] == 'resume'
-              ? 'file'
-              : row['kind'] == 'note'
-              ? 'generic'
-              : row['kind'] as String);
+          (row['kind'] == 'note' ? 'generic' : row['kind'] as String);
       return types.putIfAbsent(id, () {
         final definition = row['definition'] as Map<String, dynamic>?;
         const names = {
@@ -712,8 +708,9 @@ class SampleWorkspaceSource
           'profile': '个人档案',
           'document': '文档',
           'file': '文件',
+          'resume': '简历文件',
           'credential': '凭据',
-          'generic': '通用资料',
+          'generic': '通用信息',
         };
         const icons = {
           'server': 'server',
@@ -721,11 +718,12 @@ class SampleWorkspaceSource
           'profile': 'user',
           'document': 'book',
           'file': 'file',
+          'resume': 'file',
           'credential': 'key',
         };
         return WorkspaceType(
           id,
-          definition?['name'] as String? ?? names[id] ?? '通用资料',
+          definition?['name'] as String? ?? names[id] ?? '通用信息',
           definition?['icon'] as String? ?? icons[id] ?? 'file',
         );
       });
@@ -787,8 +785,8 @@ class SampleWorkspaceSource
         ref.kind == WorkspaceRecordKind.credential
             ? sampleCredentialDefinition
             : row['definition'] as Map? ??
-                  (record.type.id == 'file'
-                      ? sampleFileDefinition
+                  (workspaceFileTypeIds.contains(record.type.id)
+                      ? sampleFileDefinitionFor(record.type.id)
                       : record.type.id == 'document'
                       ? sampleDocumentDefinition
                       : record.type.id == 'generic'
@@ -812,7 +810,7 @@ class SampleWorkspaceSource
                   'body': sampleDocumentBodies[ref.id] ?? record.description,
                 },
                 ...Map<String, Object?>.from(row['values'] as Map? ?? {}),
-                if (record.type.id == 'file')
+                if (workspaceFileTypeIds.contains(record.type.id))
                   'file': _files
                       .seed(
                         ref,
@@ -962,6 +960,21 @@ class SampleWorkspaceSource
     final records = _scenario == SampleWorkspaceScenario.empty
         ? <WorkspaceRecordSummary>[]
         : _records.values.map((d) => d.record);
+    final types = {
+      for (final type in [..._catalog.types, ..._plugins.knownTypes])
+        type.id: type,
+    };
+    // Match the frozen compact filter. Resume is a distinct existing template
+    // group, exposed through the broad file filter rather than an extra choice.
+    const filterOrder = [
+      'server',
+      'service',
+      'document',
+      'profile',
+      'file',
+      'credential',
+      'generic',
+    ];
     return WorkspaceCatalog(
       version: _catalogVersion,
       recycledCount: _scenario == SampleWorkspaceScenario.empty
@@ -969,13 +982,14 @@ class SampleWorkspaceSource
           : _recycled.length,
       directories: _catalog.directories,
       tags: _catalog.tags,
-      types: {
-        for (final type in [..._catalog.types, ..._plugins.knownTypes])
-          type.id: type,
-      }.values,
+      types: [
+        for (final id in filterOrder) ?types[id],
+        for (final type in types.values)
+          if (type.id != 'resume' && !filterOrder.contains(type.id)) type,
+      ],
       creatableTypes: {
         for (final type in [..._catalog.types, ..._plugins.knownTypes])
-          if (_plugins.available(type.id)) type.id: type,
+          if (type.id != 'resume' && _plugins.available(type.id)) type.id: type,
       }.values,
       directoryCounts: {
         for (final directory in _catalog.directories)
@@ -1178,7 +1192,8 @@ class SampleWorkspaceSource
             r,
           ) {
             return _inDirectory(r.directoryId, query.directoryId) &&
-                (query.typeId == null || r.type.id == query.typeId) &&
+                (query.typeId == null ||
+                    workspaceTypeMatches(r.type.id, query.typeId!)) &&
                 (query.tagId == null ||
                     r.tags.any((t) => t.id == query.tagId)) &&
                 _matchesKeyword(r, query.keyword);
@@ -1244,7 +1259,10 @@ class SampleWorkspaceSource
     WorkspaceRecordSummary target,
   ) {
     final types = rule['targetTemplates'] as List? ?? [];
-    return types.isEmpty || types.contains(target.type.id);
+    return types.isEmpty ||
+        types.any(
+          (type) => workspaceTypeMatches(target.type.id, type as String),
+        );
   }
 
   @override
@@ -1604,7 +1622,7 @@ class SampleWorkspaceSource
     } else if (draft.operationId.isEmpty ||
         type == null ||
         draft.typeId == 'credential' ||
-        draft.typeId == 'file') {
+        workspaceFileTypeIds.contains(draft.typeId)) {
       result = const WorkspaceRejected(
         WorkspaceFailure('unsupported', '请选择可创建的普通资料类型。'),
       );

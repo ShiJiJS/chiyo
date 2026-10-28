@@ -188,6 +188,19 @@ void main() {
                   'limit': model.query.limit,
                 },
                 'groupCounts': model.results?.groupCounts,
+                'groupLabels': {
+                  for (final record
+                      in model.results?.items ?? <WorkspaceRecordSummary>[])
+                    record.type.id: record.type.name,
+                },
+                if (state == 'R03-type-menu')
+                  'popupLabels': t
+                      .widget<DesktopSelect<String?>>(
+                        key('library-type-filter'),
+                      )
+                      .items
+                      .map((item) => (item.child as Text).data)
+                      .toList(),
                 'groups': groups,
                 'total': model.results?.total,
                 'selection': model.selection?.key,
@@ -265,6 +278,9 @@ void main() {
             }
             await tap(key('library-record-information:azure'));
             await capture('R02-cleared');
+            await tap(key('library-type-filter'));
+            await capture('R03-type-menu');
+            await tap(find.text('全部类型').last);
             await tap(key('library-group'));
             await capture('R03-group-menu');
             await tap(find.text('按类型').last);
