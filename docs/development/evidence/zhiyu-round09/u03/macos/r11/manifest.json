@@ -107,6 +107,10 @@
     "bytes": 357,
     "sha256": "74baa586a8b54c259d564e87635e20cd16be91dcb056695ce7c9a7387c000b7f"
   },
+  "archive-replay.json": {
+    "bytes": 455,
+    "sha256": "fedcde334779366ef5e774f519056721b1c7bbca06630eeb4e8fd78a8e428b38"
+  },
   "build.log": {
     "bytes": 125,
     "sha256": "bb928504a91fe0ce4dc0bb921b142b31033cbbf74e92214ba34521fe3f2f22be"
@@ -286,6 +290,10 @@
   "source-hashes.json": {
     "bytes": 33021,
     "sha256": "4012ea4cce5501df6b27e0dd1010552aa14c6f67dfd6ad74ffdbf5aacbd9bc3a"
+  },
+  "tracker-read.json": {
+    "bytes": 685,
+    "sha256": "21c3559fce99a0a4477fb34d3be42cd7459698b9ec00666898b15ac700027eae"
   },
   "visual-review.json": {
     "bytes": 575,
