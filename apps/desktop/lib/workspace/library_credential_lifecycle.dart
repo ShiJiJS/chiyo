@@ -51,6 +51,7 @@ class _MaterialsState extends State<_Materials> {
   String? readError, outcome;
   bool loading = true, confirm = false;
   int? selected;
+  final _restoreFocus = FocusNode();
   @override
   void initState() {
     super.initState();
@@ -63,6 +64,7 @@ class _MaterialsState extends State<_Materials> {
 
   @override
   void dispose() {
+    _restoreFocus.dispose();
     mutation.dispose();
     super.dispose();
   }
@@ -119,6 +121,88 @@ class _MaterialsState extends State<_Materials> {
     }
   }
 
+  Widget _versions(WorkspaceCredentialMaterialHistory h, bool writable) =>
+      Column(
+        key: const ValueKey('credential-material-list'),
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (final material in h.materials)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: _MaterialVersionRow(
+                material: material,
+                current: material.version == h.current.materialVersion,
+                selected: selected == material.version,
+                onSelected:
+                    !writable || material.version == h.current.materialVersion
+                    ? null
+                    : () => setState(() {
+                        selected = material.version;
+                        mutation.edited();
+                      }),
+              ),
+            ),
+          if (!h.materials.any((m) => m.version != h.current.materialVersion))
+            const Text('没有保留的历史材料。'),
+        ],
+      );
+
+  Widget _confirmation(
+    BuildContext context,
+    WorkspaceCredentialMaterialHistory h,
+    WorkspaceCredentialMaterial chosen,
+  ) {
+    final c = UiPalette.of(context);
+    final current = h.materials
+        .where((m) => m.version == h.current.materialVersion)
+        .firstOrNull;
+    return Column(
+      key: const ValueKey('credential-material-confirm'),
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          '恢复材料 v${chosen.version} → 新材料 v${h.current.materialVersion + 1}',
+          style: libraryText(context, 16, weight: FontWeight.w600),
+        ),
+        const SizedBox(height: 8),
+        const Text('恢复后凭据将停用，旧授权不会恢复。'),
+        const SizedBox(height: 16),
+        Text(
+          '恢复来源',
+          style: libraryText(
+            context,
+            13,
+            color: c.muted,
+            weight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: 8),
+        _MaterialVersionRow(material: chosen, current: false, selected: true),
+        const SizedBox(height: 16),
+        Text(
+          '当前材料',
+          style: libraryText(
+            context,
+            13,
+            color: c.muted,
+            weight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: 8),
+        if (current != null)
+          _MaterialVersionRow(material: current, current: true, selected: false)
+        else
+          Text(
+            '${h.current.format} · ${h.current.filename ?? '字符串'} · ${h.current.mask}',
+          ),
+        const SizedBox(height: 16),
+        const Text('仅恢复材料，保留当前名称、用途、私有备注、分类、关联和使用配置。'),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final c = UiPalette.of(context), h = history;
@@ -128,7 +212,8 @@ class _MaterialsState extends State<_Materials> {
     return PopScope<bool>(
       canPop: !mutation.busy,
       child: DesktopDialog(
-        title: const Text('凭据材料版本'),
+        title: Text(confirm ? '恢复凭据材料' : '凭据材料版本'),
+        contentKey: PageStorageKey('credential-material-view-$confirm'),
         content: SizedBox(
           width: 680,
           child: loading
@@ -157,42 +242,10 @@ class _MaterialsState extends State<_Materials> {
                         style: libraryText(context, 14, color: c.muted),
                       ),
                       const SizedBox(height: 16),
-                      for (final material in h.materials)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 10),
-                          child: _MaterialVersionRow(
-                            material: material,
-                            current:
-                                material.version == h.current.materialVersion,
-                            selected: selected == material.version,
-                            onSelected:
-                                !writable ||
-                                    confirm ||
-                                    material.version ==
-                                        h.current.materialVersion
-                                ? null
-                                : () => setState(() {
-                                    selected = material.version;
-                                    mutation.edited();
-                                  }),
-                          ),
-                        ),
-                      if (h.materials.length == 1) const Text('没有保留的历史材料。'),
-                      if (confirm && chosen != null) ...[
-                        const SizedBox(height: 14),
-                        Text(
-                          '恢复材料 v${chosen.version} → 新材料 v${h.current.materialVersion + 1}',
-                          style: libraryText(
-                            context,
-                            16,
-                            weight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        const Text(
-                          '仅恢复材料，保留当前名称、用途、私有备注、分类、关联和使用配置。恢复后凭据将停用，旧授权不会恢复。',
-                        ),
-                      ],
+                      if (confirm && chosen != null)
+                        _confirmation(context, h, chosen)
+                      else
+                        _versions(h, writable),
                     ],
                   ],
                 ),
@@ -227,17 +280,23 @@ class _MaterialsState extends State<_Materials> {
             ),
           if (confirm && !mutation.uncertain)
             DesktopButton(
+              key: const ValueKey('credential-material-back'),
               onPressed: mutation.busy
                   ? null
-                  : () => setState(() => confirm = false),
+                  : () {
+                      setState(() => confirm = false);
+                      _restoreFocus.requestFocus();
+                    },
               child: const Text('返回版本列表'),
             ),
           DesktopButton(
+            key: const ValueKey('credential-material-close'),
             onPressed: mutation.busy ? null : () => Navigator.pop(context),
             child: const Text('关闭'),
           ),
           DesktopButton(
             key: const ValueKey('credential-material-restore'),
+            focusNode: _restoreFocus,
             kind: DesktopButtonKind.primary,
             busy: mutation.busy,
             onPressed: !writable || !mutation.canSubmit || chosen == null

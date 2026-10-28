@@ -573,6 +573,66 @@ void main() {
             checks.add(
               'native-credential-replacement-keeps-custom-reference-and-field-metrics',
             );
+            // Prepare retained metadata through the isolated source; the
+            // confirmation/back/cancel path below uses the actual widgets.
+            for (var i = 0; i < 6; i++) {
+              final current = await model.source.credentials.read(credential);
+              await model.source.credentials.save(
+                WorkspaceCredentialWrite(
+                  operationId: 'native-material-confirmation-$i',
+                  ref: credential,
+                  expectedRecordVersion: current.recordVersion,
+                  expectedMaterialVersion: current.materialVersion,
+                  name: current.record.name,
+                  purpose: current.record.description,
+                  privateNote: current.privateNote,
+                  binding: current.binding,
+                  directoryId: current.record.directoryId,
+                  tagIds: current.record.tags.map((t) => t.id),
+                  candidateId: 'ssh-file',
+                ),
+              );
+            }
+            await tester.pumpAndSettle();
+            final retained = await model.source.credentials.read(credential);
+            await tap(find.byKey(const ValueKey('library-record-actions')));
+            await tap(find.text('材料版本'));
+            final old = find.byKey(const ValueKey('credential-material-1'));
+            await tap(old);
+            final offset = Scrollable.of(tester.element(old)).position.pixels;
+            final restore = find.byKey(
+              const ValueKey('credential-material-restore'),
+            );
+            final focus = tester.widget<DesktopButton>(restore).focusNode!;
+            focus.requestFocus();
+            await tester.pump();
+            await tap(restore);
+            expect(
+              find.byKey(const ValueKey('credential-material-2')),
+              findsNothing,
+            );
+            expect(
+              find.text('恢复后凭据将停用，旧授权不会恢复。').hitTestable(),
+              findsOneWidget,
+            );
+            expect(focus.hasFocus, true);
+            await screenshot('material-restore-confirmation-1440-light');
+            await tap(find.byKey(const ValueKey('credential-material-back')));
+            expect(
+              Scrollable.of(tester.element(old)).position.pixels,
+              closeTo(offset, .1),
+            );
+            expect(tester.widget<DesktopButton>(old).selected, true);
+            expect(focus.hasFocus, true);
+            await tap(find.byKey(const ValueKey('credential-material-close')));
+            final cancelled = await model.source.credentials.read(credential);
+            expect(cancelled.materialVersion, retained.materialVersion);
+            expect(cancelled.binding, retained.binding);
+            checks.add(
+              'native-material-confirmation-back-keeps-selection-scroll-focus-and-cancel',
+            );
+            (model.source as SampleWorkspaceSource).reset();
+            await tester.pumpAndSettle();
           }
           if (ref == 'information:resume' && !dark && size.width == 1440) {
             final file = tester

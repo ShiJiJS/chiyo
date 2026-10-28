@@ -616,12 +616,17 @@ class DesktopDialog extends StatelessWidget {
     super.key,
     this.title,
     this.content,
+    this.contentKey,
     this.actions,
     this.width = 740,
     this.onClose,
     this.closeEnabled = true,
   });
   final Widget? title, content;
+
+  /// Gives scrollable body views separate identities without replacing the
+  /// fixed title/actions. PageStorageKey also retains each view's position.
+  final Key? contentKey;
   final List<Widget>? actions;
   final double width;
   final VoidCallback? onClose;
@@ -693,6 +698,7 @@ class DesktopDialog extends StatelessWidget {
                 ),
                 Flexible(
                   child: SingleChildScrollView(
+                    key: contentKey,
                     primary: false,
                     padding: const EdgeInsets.symmetric(
                       horizontal: 28,
@@ -738,7 +744,9 @@ class DesktopDialog extends StatelessWidget {
               child: title,
             ),
       contentPadding: const EdgeInsets.fromLTRB(24, 24, 24, 12),
-      content: content,
+      content: contentKey == null
+          ? content
+          : KeyedSubtree(key: contentKey, child: content ?? const SizedBox()),
       actionsPadding: const EdgeInsets.fromLTRB(24, 12, 24, 20),
       actions: actions,
     );

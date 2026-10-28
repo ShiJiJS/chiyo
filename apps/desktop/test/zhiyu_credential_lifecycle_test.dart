@@ -108,11 +108,14 @@ void main() {
     await tap(t, find.text(text));
   }
 
-  Future<void> rotate(LibraryController model) async {
+  Future<void> rotate(
+    LibraryController model, {
+    String operationId = 'setup-rotation',
+  }) async {
     final d = await model.source.credentials.read(ssh);
     await model.source.credentials.save(
       WorkspaceCredentialWrite(
-        operationId: 'setup-rotation',
+        operationId: operationId,
         ref: ssh,
         expectedRecordVersion: d.recordVersion,
         expectedMaterialVersion: d.materialVersion,
@@ -125,6 +128,117 @@ void main() {
         candidateId: 'ssh-file',
       ),
     );
+  }
+
+  for (final width in [1440.0, 1280.0]) {
+    for (final dark in [false, true]) {
+      for (final scale in [1.0, 2.0]) {
+        check(
+          'material confirmation keeps selected version and list position $width dark=$dark scale=$scale',
+          (t) async {
+            final model = await start(
+              t,
+              'Azure SSH 私钥',
+              width: width,
+              dark: dark,
+              scale: scale,
+            );
+            for (var i = 0; i < 6; i++) {
+              await rotate(model, operationId: 'confirmation-rotation-$i');
+            }
+            await t.pumpAndSettle();
+            final before = await model.source.credentials.read(ssh);
+            await action(t, '材料版本');
+            final selected = find.byKey(
+              const ValueKey('credential-material-1'),
+            );
+            await tap(t, selected);
+            final offset = Scrollable.of(t.element(selected)).position.pixels;
+            expect(offset, greaterThan(0));
+            final restore = find.byKey(
+              const ValueKey('credential-material-restore'),
+            );
+            final focus = t.widget<DesktopButton>(restore).focusNode!;
+            focus.requestFocus();
+            await t.pump();
+            expect(focus.hasFocus, true);
+            await tap(
+              t,
+              find.byKey(const ValueKey('credential-material-restore')),
+            );
+            expect(
+              find.byKey(const ValueKey('credential-material-2')),
+              findsNothing,
+            );
+            expect(find.textContaining('恢复材料 v1'), findsOneWidget);
+            expect(
+              Scrollable.of(
+                t.element(
+                  find.byKey(const ValueKey('credential-material-confirm')),
+                ),
+              ).position.pixels,
+              0,
+            );
+            expect(
+              find
+                  .descendant(
+                    of: find.byType(DesktopDialog),
+                    matching: find.text('Azure SSH 私钥'),
+                  )
+                  .hitTestable(),
+              findsOneWidget,
+            );
+            expect(
+              find.text('恢复后凭据将停用，旧授权不会恢复。').hitTestable(),
+              findsOneWidget,
+            );
+            expect(t.widget<DesktopButton>(restore).focusNode, same(focus));
+            expect(focus.hasFocus, true);
+            final stem =
+                'materials-${width.toInt()}-${dark ? 'dark' : 'light'}-${(scale * 100).toInt()}';
+            await capture(t, '$stem-confirm');
+            await tap(t, find.text('返回版本列表'));
+            expect(t.widget<DesktopButton>(selected).selected, true);
+            expect(focus.hasFocus, true);
+            expect(
+              Scrollable.of(t.element(selected)).position.pixels,
+              closeTo(offset, .1),
+            );
+            await tap(
+              t,
+              find.byKey(const ValueKey('credential-material-restore')),
+            );
+            (model.source as SampleWorkspaceSource).nextSaveFailure =
+                const WorkspaceFailure('offline', '材料恢复失败，选择仍保留。');
+            await tap(
+              t,
+              find.byKey(const ValueKey('credential-material-restore')),
+            );
+            expect(find.text('材料恢复失败，选择仍保留。'), findsOneWidget);
+            expect(
+              find.byKey(const ValueKey('credential-material-2')),
+              findsNothing,
+            );
+            final failed = await model.source.credentials.read(ssh);
+            expect(failed.materialVersion, before.materialVersion);
+            await capture(t, '$stem-failure');
+            await tap(
+              t,
+              find.byKey(const ValueKey('credential-material-restore')),
+            );
+            final after = await model.source.credentials.read(ssh);
+            expect(after.materialVersion, before.materialVersion + 1);
+            expect(after.enabled, false);
+            expect(after.binding, before.binding);
+            expect(after.privateNote, before.privateNote);
+            expect(after.record.name, before.record.name);
+            expect(after.record.description, before.record.description);
+            expect(after.linkedInformation, before.linkedInformation);
+            expect(find.byType(DesktopDialog), findsNothing);
+          },
+        );
+      }
+    }
   }
 
   check(
