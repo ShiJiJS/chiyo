@@ -1,0 +1,35 @@
+{
+  "checks": [
+    {
+      "mutation": "viewport_or_dpr",
+      "rejected": true,
+      "deltasSuppressed": true
+    },
+    {
+      "mutation": "theme_or_text_scale",
+      "rejected": true,
+      "deltasSuppressed": true
+    },
+    {
+      "mutation": "identity_or_query",
+      "rejected": true,
+      "deltasSuppressed": true
+    },
+    {
+      "mutation": "scroll_condition",
+      "rejected": true,
+      "deltasSuppressed": true
+    },
+    {
+      "mutation": "required_boxes",
+      "rejected": true,
+      "deltasSuppressed": true
+    },
+    {
+      "mutation": "reference_integrity",
+      "rejected": true,
+      "deltasSuppressed": true
+    }
+  ],
+  "frozenFilesMutated": false
+}

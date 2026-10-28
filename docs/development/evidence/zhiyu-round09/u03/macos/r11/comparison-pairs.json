@@ -1,0 +1,14 @@
+[
+  {
+    "name": "light-1440-100-resume",
+    "left": "reference/light-1440-100-resume.png",
+    "right": "actual/light-1440-100-resume.png",
+    "rescaled": false
+  },
+  {
+    "name": "dark-1280-100-resume",
+    "left": "reference/dark-1280-100-resume.png",
+    "right": "actual/dark-1280-100-resume.png",
+    "rescaled": false
+  }
+]

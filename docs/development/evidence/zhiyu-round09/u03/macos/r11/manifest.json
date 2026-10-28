@@ -1,0 +1,294 @@
+{
+  "actual/dark-1280-100-resume.json": {
+    "bytes": 336,
+    "sha256": "4d222a38cf8a66a89e0f9f3f84dd293fbd0c8ce2f5ddbde3b1dd01885841acf5"
+  },
+  "actual/dark-1280-100-resume.png": {
+    "bytes": 163234,
+    "sha256": "60345cab0ec3f53c64203d6cc87d0b7fc3fd43b4772ac352eff93e615ee89650"
+  },
+  "actual/dark-1280-100-sshkey.json": {
+    "bytes": 525,
+    "sha256": "1cf57a8da7cb99e0574ce7033f9ac2aa3393562fb4ff4f9aa4cfbfa0e1691b04"
+  },
+  "actual/dark-1280-100-sshkey.png": {
+    "bytes": 138231,
+    "sha256": "e15c665e1f5d2dfb123f45486833e614425213b21ae5d3ee75d88017d2e628ee"
+  },
+  "actual/dark-1280-200-resume.json": {
+    "bytes": 336,
+    "sha256": "1c48bcd2edd700496a437cba7020502f302728d39e566a49402a2b69bca6505a"
+  },
+  "actual/dark-1280-200-resume.png": {
+    "bytes": 171196,
+    "sha256": "92730a56af653d6dadf01d5b4ce61cd24a04a04477bafc441837b4304ce2b331"
+  },
+  "actual/dark-1280-200-sshkey.json": {
+    "bytes": 526,
+    "sha256": "bce2d7eb84c117715d0f026117da38fee0896373e63c8fdea36ece95734532a0"
+  },
+  "actual/dark-1280-200-sshkey.png": {
+    "bytes": 165490,
+    "sha256": "7c7a0568b485d4db8b8f2f6fbc9ac33341be8c6f06dee4c9a8b7f8665b458fb7"
+  },
+  "actual/dark-1440-100-resume.json": {
+    "bytes": 336,
+    "sha256": "18d718933e10551871ff26c1a22ae80b7139ba36d09283a7fb7f414817b081e7"
+  },
+  "actual/dark-1440-100-resume.png": {
+    "bytes": 174112,
+    "sha256": "8ec39f4629594242bb68f18ef025e7d74e130b19b71c16b525473033dfd057fb"
+  },
+  "actual/dark-1440-100-sshkey.json": {
+    "bytes": 525,
+    "sha256": "110a7b8ec090cc7309a2af089bab25c54fb924cd47cf8ef507dab4dd481a17df"
+  },
+  "actual/dark-1440-200-resume.json": {
+    "bytes": 336,
+    "sha256": "a02f4dbf332f5c6245014c58008100743f3508838374c53e150a0ba08e4e83ad"
+  },
+  "actual/dark-1440-200-sshkey.json": {
+    "bytes": 526,
+    "sha256": "04a47879039e9db54241cfbb3bea64950acef7daa4b1224a7a88a04e717bda82"
+  },
+  "actual/fonts.json": {
+    "bytes": 249,
+    "sha256": "6a64f84a850c349a6a7db28254cca2fe24ae2904d25a2b28164acf65fa830165"
+  },
+  "actual/light-1280-100-resume.json": {
+    "bytes": 337,
+    "sha256": "a441102427538608fd414cbe7337a2f3f0fd29857c900ec63269d8c5ebcb13f9"
+  },
+  "actual/light-1280-100-resume.png": {
+    "bytes": 163404,
+    "sha256": "7487563539c59a67a41773981ec63834c6cf1ea123d3eb06ddb4865146897517"
+  },
+  "actual/light-1280-100-sshkey.json": {
+    "bytes": 526,
+    "sha256": "21e675f609b7495faf58c5cd128da90c85a5bbf4099cc0a9c94c30205a784baa"
+  },
+  "actual/light-1280-200-resume.json": {
+    "bytes": 337,
+    "sha256": "bb55fc1c701d8ead36dda998d1eca6ecf8a4f6d42a47cd7ff483afc97101f025"
+  },
+  "actual/light-1280-200-sshkey.json": {
+    "bytes": 527,
+    "sha256": "fd4b226497e0d7fa7993abd4d58b4b6b981f97948779f230320997f037a57f06"
+  },
+  "actual/light-1440-100-resume.json": {
+    "bytes": 337,
+    "sha256": "c3bcf9fc7d3b10c033133b1078938d4b8f3635d5073c96c3c802ce9b9676585b"
+  },
+  "actual/light-1440-100-resume.png": {
+    "bytes": 173827,
+    "sha256": "d078961b9adc6233410b1dba78deaf27d24fa5a7a5561c5c5e3f8ca7a7ebf78c"
+  },
+  "actual/light-1440-100-sshkey.json": {
+    "bytes": 526,
+    "sha256": "c59b3bd65755d3a1aff2971512d71c56ba53afb176ab03664b576a66adbf4b7d"
+  },
+  "actual/light-1440-100-sshkey.png": {
+    "bytes": 153415,
+    "sha256": "b841d11f89d74207a0cd997e76b5733051c2c26e6ea1547d2d6c7bf724ac9e66"
+  },
+  "actual/light-1440-200-resume.json": {
+    "bytes": 337,
+    "sha256": "c1aea158ee44f7f477d6b059a79131e8e6d695e0a1f4bf793596637aac0a835b"
+  },
+  "actual/light-1440-200-sshkey.json": {
+    "bytes": 527,
+    "sha256": "225e2eb36b532e761e83dd2d85d40542963c201107067bae04d8f3d62dbef2fe"
+  },
+  "analysis-checked.log": {
+    "bytes": 96,
+    "sha256": "ba79291f96b5b7d5ce707809217c42eb7149b4df558eac95b780b4cf994a5595"
+  },
+  "analysis.log": {
+    "bytes": 357,
+    "sha256": "74baa586a8b54c259d564e87635e20cd16be91dcb056695ce7c9a7387c000b7f"
+  },
+  "build.log": {
+    "bytes": 125,
+    "sha256": "bb928504a91fe0ce4dc0bb921b142b31033cbbf74e92214ba34521fe3f2f22be"
+  },
+  "capture-hashes.json": {
+    "bytes": 15597,
+    "sha256": "9df05dda2d7775a99bd5ad0cdf8f4b66ece2b2e36799832f16e45ec3d3f92077"
+  },
+  "checkpoint.json": {
+    "bytes": 3296,
+    "sha256": "401267fb69e93c6a1d4247801c5189757c9d1699b3989cecdd1374e6f99007e6"
+  },
+  "commands.json": {
+    "bytes": 1852,
+    "sha256": "9c0646134cfae297d4dc2944d01b0eb2cd5c072709c38b46727ad65f51876e62"
+  },
+  "comparison-guards.json": {
+    "bytes": 692,
+    "sha256": "530f9d2c4c818b1537709b11a9439e376ae4d7748da32323357f061256107af5"
+  },
+  "comparison-pairs.json": {
+    "bytes": 336,
+    "sha256": "4687b727e29b6eac9602c747b066f55363d1f87ec16c68f2695145d90642b9ab"
+  },
+  "comparison.json": {
+    "bytes": 7664,
+    "sha256": "662b5147a7771a04958f1b24456c4bde6f741ddbe78619e0fb4ac41e821d7d97"
+  },
+  "flows/file-1280-light-preview-failure.png": {
+    "bytes": 140895,
+    "sha256": "430d8253d534090c0ca633038ce52edbdde7343d0d0b8a2d3204f7fc553576c7"
+  },
+  "flows/file-1440-light-unknown-format.png": {
+    "bytes": 166026,
+    "sha256": "443686164eb58c2a9f8fb0cd5a5cb016f21ebf12585032b9dd69fa018e09da51"
+  },
+  "flows/file-metadata-light1440.png": {
+    "bytes": 157727,
+    "sha256": "a330ec45418c4fbfd1192483fdb7bb0bbdffc6b3d87aaa620ba2a4b377058963"
+  },
+  "focused-final-source.log": {
+    "bytes": 4801,
+    "sha256": "9b17fbadf27d01563175c033a9a9cb1b027bff83610b4469f8de735fe3440f22"
+  },
+  "focused-first.log": {
+    "bytes": 9131,
+    "sha256": "2629b99cdc02616d861204876cb6bdfd1e2bf63c3dd0027839141907fea44988"
+  },
+  "focused.log": {
+    "bytes": 7521,
+    "sha256": "bd242001ea94c56aa008f49c2b2284af6a2d7e0c80eb880b46d5817da2c13d2c"
+  },
+  "font-hashes.json": {
+    "bytes": 408,
+    "sha256": "8d1ef27b33738e2c5a57f8eacdc06f90367ef39d3380f66ccc3e16580c4ebccd"
+  },
+  "metadata-after.log": {
+    "bytes": 270,
+    "sha256": "a89d486efe1887f8ba98d5a89fa1dc343018464d2a091de1e434854e6f7086ea"
+  },
+  "metadata-before.log": {
+    "bytes": 2458,
+    "sha256": "1f0f1f82eee5747e793bb788d24ee3500705ab84a5080647b05480296d6f38ec"
+  },
+  "native/dark-1280-resume.png": {
+    "bytes": 300576,
+    "sha256": "de966b839be6ef1cbcfe6747b216c0f5c1761b17320155cc3f3c65bf15c0fb4d"
+  },
+  "native/light-1440-resume.png": {
+    "bytes": 318315,
+    "sha256": "c99d828eda9cee547583171acf500a849496a1c1ac9cc591e73cdc7c83a8cd34"
+  },
+  "native/native-checks.json": {
+    "bytes": 19896,
+    "sha256": "1b2783806be7e08afacede52f0203c94bc2cf41dc8edbdb73081593a463d6571"
+  },
+  "native/native-controls-encoding.json": {
+    "bytes": 5663,
+    "sha256": "3e0fa40e345c1700e7561b4ea2652948ca9953173186da068de22fe3797814b1"
+  },
+  "native-build.json": {
+    "bytes": 793,
+    "sha256": "8025c4302fcef569eedf6bda7fe596c94e3a98b7ac0b4545269cbfe82dd5dc3e"
+  },
+  "native-collection.json": {
+    "bytes": 1416,
+    "sha256": "b901180ecdb0f0d400cff9187e4bbaceb7385e08e735085eece2755f6e8a8078"
+  },
+  "native-logical-geometry.json": {
+    "bytes": 4039,
+    "sha256": "4fbb4b45861e502b60a4475f617d82da26a07cd4b6d35c4d2e0fc0a44a3934ff"
+  },
+  "native.log": {
+    "bytes": 573,
+    "sha256": "98d0cddc24592c48545155829342591ad906f7c3ef1114392b8c7dc60b94946e"
+  },
+  "pairs/dark-1280-100-resume.png": {
+    "bytes": 270277,
+    "sha256": "60300fb2fdb3ee6ce7c9fb611448f24f141b167c8bdf12cb3c83fa5c8193924a"
+  },
+  "pairs/light-1440-100-resume.png": {
+    "bytes": 296947,
+    "sha256": "2564721b478e73e9f85b6d375a294b266ed006df6546790433cc59dfda90c978"
+  },
+  "reference/dark-1280-100-resume.json": {
+    "bytes": 1374,
+    "sha256": "55584f444aeb56cad884b5936027c86a261d99e726bac6f122fb58bb27aed207"
+  },
+  "reference/dark-1280-100-resume.png": {
+    "bytes": 123146,
+    "sha256": "c14ed570f13c2ec007907137776d9da121fb85f57b8a835d17c74e2baea855e6"
+  },
+  "reference/dark-1280-100-sshkey.json": {
+    "bytes": 2132,
+    "sha256": "d7a23b8299cbee02bde42c398b46b2760e3127246f71a4805fab8cc2ae7dbaeb"
+  },
+  "reference/dark-1280-100-sshkey.png": {
+    "bytes": 121198,
+    "sha256": "0d8e4a6a7224b6c572f659f59e76eeb75f103b5cb233d60e69f0379931e619d4"
+  },
+  "reference/dark-1440-100-resume.json": {
+    "bytes": 1370,
+    "sha256": "00b88b74528b68e08da99e699066f49e472ef5c5ee226eb2f5cf9cf151f2b550"
+  },
+  "reference/dark-1440-100-resume.png": {
+    "bytes": 137783,
+    "sha256": "469f4534379b204e0388b5a7cbfdad63d3860941e767791c1231a195fdb13c2b"
+  },
+  "reference/dark-1440-100-sshkey.json": {
+    "bytes": 2138,
+    "sha256": "44c4ded21a8c7e1e8aef839ea0ea536d8c1aba9b819e481f36eb0aaab02c5710"
+  },
+  "reference/dark-1440-100-sshkey.png": {
+    "bytes": 131976,
+    "sha256": "96b6dd56dc5f538db95ef0e89c1e80d114019e3697898af1de3fa6cd744b6fe3"
+  },
+  "reference/light-1280-100-resume.json": {
+    "bytes": 1376,
+    "sha256": "30999c7edee6d99b30b057e9550ad2b45502199968e7ba9999c2957e754e8751"
+  },
+  "reference/light-1280-100-resume.png": {
+    "bytes": 124145,
+    "sha256": "8cbd30d4e26849c9570ea3713bef3560746eb4d6f836553814a6c4e7922c03c4"
+  },
+  "reference/light-1280-100-sshkey.json": {
+    "bytes": 2134,
+    "sha256": "ca74ac14e87348594e1cca930778af39fdda6e8be17f5016f00f7e96fcf0535e"
+  },
+  "reference/light-1280-100-sshkey.png": {
+    "bytes": 121601,
+    "sha256": "bc2908e0ab981c47a4571ade4f1cb81dd93ed18a22f232b0f8abb15523c64552"
+  },
+  "reference/light-1440-100-resume.json": {
+    "bytes": 1372,
+    "sha256": "31dd8ce766bdaa82455cce3010d4d8a2ee95cbc6b17889e184f0f2f0520388bc"
+  },
+  "reference/light-1440-100-resume.png": {
+    "bytes": 139076,
+    "sha256": "ad018de6cd9ecd244b3dee4bb3c3c23932250b738b355660aacec2c803e058cb"
+  },
+  "reference/light-1440-100-sshkey.json": {
+    "bytes": 2140,
+    "sha256": "6eb9039edc969b1d675415b2e71e14086caf69c5e62a596f385ae30448480d5c"
+  },
+  "reference/light-1440-100-sshkey.png": {
+    "bytes": 132140,
+    "sha256": "6603eef876a7b9d1262ed9715c1941d387a2e8cc1c239bac0070e385f0a8bf9a"
+  },
+  "reference-integrity.json": {
+    "bytes": 2434,
+    "sha256": "6fd3a58cf237028fba090f45dd57f93017f9600cbd88936e5737c7e0ddf5d171"
+  },
+  "regression.log": {
+    "bytes": 95468,
+    "sha256": "987d5f39a19d758441f6a0fab5415c06c920d8e1f30be367717f6c5dc07ece7d"
+  },
+  "source-hashes.json": {
+    "bytes": 33021,
+    "sha256": "4012ea4cce5501df6b27e0dd1010552aa14c6f67dfd6ad74ffdbf5aacbd9bc3a"
+  },
+  "visual-review.json": {
+    "bytes": 575,
+    "sha256": "8cf6b3a3bda56a37e50242991a0c5f6478e609fe830b9d045c4602ed1d4e0342"
+  }
+}

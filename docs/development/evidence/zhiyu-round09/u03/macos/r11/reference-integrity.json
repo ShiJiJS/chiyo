@@ -1,0 +1,85 @@
+{
+  "frozenFiles": [
+    {
+      "file": "index.html",
+      "sha256": "f93205742c87b58c40e0fad10801fa21270fd7e000fc36916dc8d52cd24afa7b",
+      "passed": true
+    },
+    {
+      "file": "base.css",
+      "sha256": "8b88bab1dc47654393fff0ee43198b7fc31486c85f054f75adbb32c48522255d",
+      "passed": true
+    },
+    {
+      "file": "style.css",
+      "sha256": "518459f2a96c7fcdc963ab9c193c49965e21dacf7da16f0e91dc1605fea4461d",
+      "passed": true
+    },
+    {
+      "file": "workspace.css",
+      "sha256": "beafe11207a513575caedc72233848c962a107b985c1dfd9618a78733f4ff9b9",
+      "passed": true
+    },
+    {
+      "file": "theme.css",
+      "sha256": "5e480a0e703f33c675d9edee49acd2a31fe949026c5efc57b64af007a86fd407",
+      "passed": true
+    },
+    {
+      "file": "fixtures.js",
+      "sha256": "4d60ad4e87102fd462aca84d27719dc7989828429d650962a4898ba81e97d131",
+      "passed": true
+    },
+    {
+      "file": "model.js",
+      "sha256": "9259f18a86a8d04718b9a2fdde7118f7d0ca725ec64b9bd9ea5e3220571f0544",
+      "passed": true
+    },
+    {
+      "file": "seed.js",
+      "sha256": "a17338d547ea400cb3b382262210bf370c6973ddc2835883b10423b43c0a6c6d",
+      "passed": true
+    },
+    {
+      "file": "util.js",
+      "sha256": "c53e83500f1b6f3c70fce1534d2e33bb5cf257c63402f23a957ed103ac2d5ed8",
+      "passed": true
+    },
+    {
+      "file": "app.js",
+      "sha256": "33cf6e5087237d776f05927996c6d514db404dd7955b3e118974774ba341a8b8",
+      "passed": true
+    },
+    {
+      "file": "guide.html",
+      "sha256": "211d1d44ee4026e7bc709183e0c9ca2a318683d5d68503eea5620534c852f788",
+      "passed": true
+    },
+    {
+      "file": "design-notes.md",
+      "sha256": "6ebeaa6840d1bbddfe0a031f53892cee8e05947ca9377a6d628d727ad1565897",
+      "passed": true
+    },
+    {
+      "file": "plugin-spec.md",
+      "sha256": "2419309aa8aa6eb8f07ff86a6efbea9d837b88bd8b0cb9a49ac71ef33d5dbca2",
+      "passed": true
+    },
+    {
+      "file": "domain-plugin.json",
+      "sha256": "f3d3532eef70ea5d748d25fcae1029abd3298eb52fcb3a737095448644947be4",
+      "passed": true
+    },
+    {
+      "file": "offline.html",
+      "sha256": "05a65aa7cbff7faf1357533bd4750c6261bceb4a9838dea2fa801087c9764578",
+      "passed": true
+    }
+  ],
+  "frozenManifestSha256": "cd1424b7815cccbaca08274aaec49ded8def20863e506082fd3d153eaddd256c",
+  "referenceOverrides": [
+    "macOS system fonts",
+    "Mac search shortcut marker"
+  ],
+  "layoutOverride": false
+}
