@@ -46,8 +46,8 @@ Future<T?> showAnchoredSurface<T>(
   controller?.close = close;
   sourceScroll?.addListener(close);
   try {
-    return await showGeneralDialog<T>(
-      context: context,
+    final route = DesktopPopupRoute<T>(
+      round09: usesMotion,
       barrierDismissible: true,
       barrierLabel: '关闭菜单',
       barrierColor: Colors.transparent,
@@ -146,6 +146,12 @@ Future<T?> showAnchoredSurface<T>(
         );
       },
     );
+    final result = await Navigator.of(
+      context,
+      rootNavigator: true,
+    ).push<T>(route);
+    await route.completed;
+    return result;
   } finally {
     sourceScroll?.removeListener(close);
     controller?.close = null;

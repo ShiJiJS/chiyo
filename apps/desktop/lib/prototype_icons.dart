@@ -28,6 +28,7 @@ enum PrototypeIconGlyph {
   trash,
   plugin,
   globe,
+  close,
 }
 
 /// An approved round-05 SVG icon, using its original 24-unit geometry.
@@ -295,6 +296,7 @@ class _PrototypeIconPainter extends CustomPainter {
       case PrototypeIconGlyph.trash:
       case PrototypeIconGlyph.plugin:
       case PrototypeIconGlyph.globe:
+      case PrototypeIconGlyph.close:
         break; // Drawn through the approved Round09 path above.
     }
     canvas.restore();
@@ -309,6 +311,12 @@ class _PrototypeIconPainter extends CustomPainter {
 
 /// Paths from the frozen Round09 util.js; legacy callers retain their symbols.
 Path _round09Path(PrototypeIconGlyph glyph) => switch (glyph) {
+  PrototypeIconGlyph.close =>
+    Path()
+      ..moveTo(6, 6)
+      ..lineTo(18, 18)
+      ..moveTo(6, 18)
+      ..lineTo(18, 6),
   PrototypeIconGlyph.plugin =>
     Path()
       ..moveTo(9, 3)

@@ -142,6 +142,26 @@ void main() {
       final recording = NativeFrameRecording(boundary, root, '', '');
       addTearDown(recording.dispose);
       await recording.start();
+      recording.mark('chooser-open-with-sharp-surface-and-blurred-barrier');
+      await tap(find.byKey(const ValueKey('library-create')));
+      expect(find.byType(BackdropFilter), findsOneWidget);
+      expect(
+        await MacPreviewDesktop.channel.invokeMethod<bool>(
+          'activateMenu',
+          'settings',
+        ),
+        isFalse,
+      );
+      await screenshot('chooser-1440-light-recording');
+      recording.mark('chooser-close-without-reverse-animation');
+      await tester.tap(find.byKey(const ValueKey('desktop-dialog-close')));
+      await tester.pump();
+      await tester.pump();
+      expect(find.byType(DesktopDialog), findsNothing);
+      expect(find.byType(BackdropFilter), findsNothing);
+      checks.add(
+        'native-chooser-blurred-barrier-locked-menu-and-immediate-close',
+      );
       recording.mark('query-server-and-tag');
       await tap(find.byKey(const ValueKey('library-type-filter')));
       await tap(find.text('服务器信息').last);
@@ -196,6 +216,7 @@ void main() {
       checks.add('native-widget-related-query-return');
       await recording.stop('native-controls');
       final viewports = <Map<String, Object>>[];
+      final chooserViewports = <Map<String, Object>>[];
       (model.source as SampleWorkspaceSource).reset();
       await model.apply(const WorkspaceQuery(directoryId: 'selfhost'));
       await tester.pumpAndSettle();
@@ -220,6 +241,45 @@ void main() {
           await screenshot(
             '${dark ? 'dark' : 'light'}-${size.width.toInt()}-library',
           );
+          await tap(find.byKey(const ValueKey('library-create')));
+          expect(find.byType(BackdropFilter), findsOneWidget);
+          await screenshot(
+            '${dark ? 'dark' : 'light'}-${size.width.toInt()}-chooser',
+          );
+          final close = tester.getRect(
+            find.byKey(const ValueKey('desktop-dialog-close')),
+          );
+          final surface = tester.getRect(
+            find
+                .descendant(
+                  of: find.byType(DesktopDialog),
+                  matching: find.byType(Container),
+                )
+                .first,
+          );
+          chooserViewports.add({
+            'width': size.width,
+            'height': size.height,
+            'dark': dark,
+            'surface': {
+              'x': surface.left,
+              'y': surface.top,
+              'width': surface.width,
+              'height': surface.height,
+            },
+            'close': {
+              'x': close.left,
+              'y': close.top,
+              'width': close.width,
+              'height': close.height,
+            },
+            'devicePixelRatio': tester.view.devicePixelRatio,
+          });
+          await tester.tap(find.byKey(const ValueKey('desktop-dialog-close')));
+          await tester.pump();
+          await tester.pump();
+          expect(find.byType(DesktopDialog), findsNothing);
+          expect(find.byType(BackdropFilter), findsNothing);
           viewports.add({
             'width': size.width,
             'height': size.height,
@@ -230,6 +290,7 @@ void main() {
         }
       }
       checks.add('native-window-two-content-viewports-and-both-themes');
+      checks.add('native-chooser-two-viewports-two-themes-no-residual-barrier');
       tester.platformDispatcher.textScaleFactorTestValue = 2;
       addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
       await tester.pumpAndSettle();
@@ -284,6 +345,7 @@ void main() {
           'checks': checks,
           'nameOrder': nameOrder,
           'contentViewports': viewports,
+          'chooserViewports': chooserViewports,
           'productionBootstrapUsed': false,
           'databaseOpened': false,
           'inputScope':

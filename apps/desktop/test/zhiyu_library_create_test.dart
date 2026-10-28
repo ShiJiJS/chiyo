@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:info_desktop/desktop_controls.dart';
 import 'package:info_desktop/desktop_fonts.dart';
+import 'package:info_desktop/prototype_icons.dart';
 import 'package:info_desktop/desktop_scroll.dart';
 import 'package:info_desktop/ui_palette.dart';
 import 'package:info_desktop/workspace/library_create_dialog.dart';
@@ -78,6 +79,19 @@ void main() {
                   .widget<LibraryPage>(find.byType(LibraryPage))
                   .controller;
               final originalCount = (await model.source.loadSummary()).records;
+              for (final id in [
+                'library-detail-expand',
+                'library-record-actions',
+              ]) {
+                final icon = find.descendant(
+                  of: key(id),
+                  matching: find.byType(PrototypeIcon),
+                );
+                expect(t.getSize(icon), const Size(19, 19));
+                expect(t.getSize(key(id)), const Size(36, 36));
+              }
+              expect(find.byTooltip('资料操作'), findsOneWidget);
+
               await tap(t, key('library-create'));
               expect(find.text('保存到 自托管服务'), findsOneWidget);
               final palette = UiPalette.of(
@@ -113,6 +127,7 @@ void main() {
               if (output.isNotEmpty) {
                 final boxes = <String, Object>{};
                 for (final id in [
+                  'desktop-dialog-close',
                   'library-create-intro',
                   ...[
                     'server',

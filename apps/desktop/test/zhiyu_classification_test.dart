@@ -211,7 +211,10 @@ void main() {
     (t) async {
       final s = await start(t, dark: true);
       await tap(t, find.byKey(const ValueKey('classification-child-selfhost')));
-      expect(find.byKey(const ValueKey('library-directory-name')), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('library-directory-name')),
+        findsOneWidget,
+      );
       await tap(t, find.text('取消'));
       await capture(t, 'classification-1280-dark200-directories');
       await tap(t, find.byKey(const ValueKey('classification-kind-tag')));
@@ -225,12 +228,13 @@ void main() {
       await tap(t, find.byKey(const ValueKey('classification-tag-save')));
       expect(
         t
-            .widget<IconButton>(
+            .widget<DesktopButton>(
               find.byKey(const ValueKey('desktop-dialog-close')),
             )
             .onPressed,
         isNull,
       );
+      await tap(t, find.byKey(const ValueKey('desktop-dialog-close')));
       expect(
         t
             .widget<DesktopButton>(
@@ -238,6 +242,10 @@ void main() {
             )
             .onPressed,
         isNull,
+      );
+      expect(
+        find.byKey(const ValueKey('classification-reconcile')),
+        findsOneWidget,
       );
       await capture(t, 'classification-1280-dark200-tag-unknown');
       await tap(t, find.byKey(const ValueKey('classification-reconcile')));

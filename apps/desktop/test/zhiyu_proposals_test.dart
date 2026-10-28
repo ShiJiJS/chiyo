@@ -854,12 +854,13 @@ void main() {
       );
       expect(
         t
-            .widget<IconButton>(
+            .widget<DesktopButton>(
               find.byKey(const ValueKey('desktop-dialog-close')),
             )
             .onPressed,
         isNull,
       );
+      await tap(t, find.byKey(const ValueKey('desktop-dialog-close')));
       await t.sendKeyEvent(LogicalKeyboardKey.escape);
       await t.pumpAndSettle();
       expect(

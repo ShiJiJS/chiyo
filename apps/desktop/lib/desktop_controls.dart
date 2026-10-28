@@ -195,6 +195,8 @@ class DesktopSelect<T> extends StatefulWidget {
     this.highlighted = false,
     this.toolbar = false,
     this.minimumTriggerSize,
+    this.triggerPadding,
+    this.tooltip,
   }) : assert(!toolbar || compact);
   final T? value, initialValue;
   final List<DropdownMenuItem<T>> items;
@@ -207,6 +209,8 @@ class DesktopSelect<T> extends StatefulWidget {
   // Small toolbar triggers share the same popup, focus and selection handling.
   final bool toolbar;
   final Size? minimumTriggerSize;
+  final EdgeInsetsGeometry? triggerPadding;
+  final String? tooltip;
   final Widget? triggerLabel, leading;
   @override
   State<DesktopSelect<T>> createState() => _DesktopSelectState<T>();
@@ -290,9 +294,11 @@ class _DesktopSelectState<T> extends State<DesktopSelect<T>> {
         },
         child: widget.compact
             ? DesktopButton(
-                tooltip: widget.triggerLabel == null && labelContent is Text
-                    ? labelContent.data
-                    : null,
+                tooltip:
+                    widget.tooltip ??
+                    (widget.triggerLabel == null && labelContent is Text
+                        ? labelContent.data
+                        : null),
                 focusNode: _buttonFocus,
                 onPressed: enabled
                     ? () => _open ? _popup.close?.call() : _show(triggerContext)
@@ -306,10 +312,12 @@ class _DesktopSelectState<T> extends State<DesktopSelect<T>> {
                 selected: widget.highlighted,
                 selectedBorder: widget.highlighted,
                 selectedBorderColor: UiPalette.of(context).accent,
-                padding: EdgeInsets.symmetric(
-                  horizontal: widget.toolbar ? 8 : 9,
-                  vertical: 6,
-                ),
+                padding:
+                    widget.triggerPadding ??
+                    EdgeInsets.symmetric(
+                      horizontal: widget.toolbar ? 8 : 9,
+                      vertical: 6,
+                    ),
                 minimumSize:
                     widget.minimumTriggerSize ??
                     Size(
@@ -617,7 +625,7 @@ class DesktopDialog extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: .2),
+                color: const Color(0x33162238),
                 blurRadius: 70,
                 offset: const Offset(0, 20),
               ),
@@ -630,7 +638,10 @@ class DesktopDialog extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Container(
-                  padding: const EdgeInsets.fromLTRB(28, 20, 20, 20),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 28,
+                    vertical: 20,
+                  ),
                   decoration: BoxDecoration(
                     border: Border(bottom: BorderSide(color: c.line)),
                   ),
@@ -641,20 +652,24 @@ class DesktopDialog extends StatelessWidget {
                           style: Theme.of(context).textTheme.titleMedium!
                               .copyWith(
                                 fontSize: 19,
-                                fontWeight: FontWeight.w600,
+                                height: 1.5,
+                                fontWeight: FontWeight.w700,
                               ),
                           child: title ?? const SizedBox(),
                         ),
                       ),
-                      Tooltip(
-                        message: '关闭',
-                        child: IconButton(
-                          key: const ValueKey('desktop-dialog-close'),
-                          onPressed: closeEnabled
-                              ? onClose ??
-                                    () => Navigator.of(context).maybePop()
-                              : null,
-                          icon: const Icon(Icons.close, size: 19),
+                      DesktopButton(
+                        key: const ValueKey('desktop-dialog-close'),
+                        tooltip: '关闭',
+                        kind: DesktopButtonKind.quiet,
+                        minimumSize: const Size(36, 36),
+                        padding: const EdgeInsets.all(8),
+                        onPressed: closeEnabled
+                            ? onClose ?? () => Navigator.of(context).maybePop()
+                            : null,
+                        child: const PrototypeIcon(
+                          PrototypeIconGlyph.close,
+                          size: 19,
                         ),
                       ),
                     ],
@@ -726,7 +741,9 @@ Future<T?> showDesktopDialog<T>(
   final focus = returnFocus ?? FocusManager.instance.primaryFocus;
   final navigator = Navigator.of(context, rootNavigator: true);
   try {
-    final route = RawDialogRoute<T>(
+    final route = DesktopPopupRoute<T>(
+      round09: DesktopMotion.enabled(context),
+      blurBarrier: true,
       barrierDismissible: barrierDismissible,
       barrierLabel: '关闭对话框',
       barrierColor: UiPalette.of(context).brightness == Brightness.dark

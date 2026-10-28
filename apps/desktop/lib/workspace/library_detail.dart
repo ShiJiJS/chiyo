@@ -467,12 +467,13 @@ class _LibraryDetailState extends State<LibraryDetail> {
               ),
               SizedBox(width: widget.metrics.headerGap),
               DesktopButton(
+                key: const ValueKey('library-detail-expand'),
                 onPressed: widget.onExpand,
                 tooltip: '展开阅读',
                 kind: DesktopButtonKind.quiet,
                 minimumSize: const Size(36, 36),
                 padding: const EdgeInsets.all(8),
-                child: const PrototypeIcon(PrototypeIconGlyph.expand),
+                child: const PrototypeIcon(PrototypeIconGlyph.expand, size: 19),
               ),
               const SizedBox(width: 2),
               SizedBox(
@@ -481,7 +482,12 @@ class _LibraryDetailState extends State<LibraryDetail> {
                   compact: true,
                   quiet: true,
                   minimumTriggerSize: const Size(36, 36),
-                  triggerLabel: const PrototypeIcon(PrototypeIconGlyph.more),
+                  triggerPadding: const EdgeInsets.all(8),
+                  tooltip: '资料操作',
+                  triggerLabel: const PrototypeIcon(
+                    PrototypeIconGlyph.more,
+                    size: 19,
+                  ),
                   key: const ValueKey('library-record-actions'),
                   items: [
                     const DropdownMenuItem(value: 'edit', child: Text('编辑信息')),

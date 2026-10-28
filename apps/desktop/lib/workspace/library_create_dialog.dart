@@ -60,21 +60,7 @@ class _LibraryCreateDialogState extends State<LibraryCreateDialog> {
             ?.name ??
         '未分类';
     return DesktopDialog(
-      title: ConstrainedBox(
-        constraints: const BoxConstraints(minHeight: 36),
-        child: const Align(
-          alignment: Alignment.centerLeft,
-          heightFactor: 1,
-          child: Text(
-            '添加资料',
-            style: TextStyle(
-              fontSize: 19,
-              height: 1.5,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ),
-      ),
+      title: const Text('添加资料'),
       content: FutureBuilder<WorkspacePluginCatalog>(
         future: _metadata,
         builder: (context, snapshot) {
