@@ -150,7 +150,7 @@ class _CredentialEditorState extends State<_CredentialEditor> {
     widget.detail?.linkedInformation ?? [],
   );
   WorkspaceCredentialCandidate? _candidate;
-  bool _picking = false;
+  bool _picking = false, _bindingEdited = false;
   bool _dirty = false, _discard = false, _linksDirty = false, _checking = false;
   String? _checkError;
   bool get _editable =>
@@ -202,7 +202,11 @@ class _CredentialEditorState extends State<_CredentialEditor> {
       final previous = _candidate;
       setState(() {
         _candidate = candidate;
-        _binding.text = candidate.binding;
+        // Suggestions belong to a new, untouched field. Choosing replacement
+        // material must not overwrite an existing or explicitly edited value.
+        if (widget.detail == null && !_bindingEdited) {
+          _binding.text = candidate.binding;
+        }
         _checkError = null;
         _edit();
       });
@@ -370,7 +374,6 @@ class _CredentialEditorState extends State<_CredentialEditor> {
                 errorText: failure?.fieldErrors['name'],
               ),
             ),
-            const SizedBox(height: 18),
             DesktopTextField(
               key: const ValueKey('credential-edit-purpose'),
               controller: _purpose,
@@ -383,7 +386,6 @@ class _CredentialEditorState extends State<_CredentialEditor> {
                 errorText: failure?.fieldErrors['purpose'],
               ),
             ),
-            const SizedBox(height: 18),
             Text(
               '名称、用途与标签可被接入的Agent发现；私有备注不进入公开目录。',
               style: libraryText(context, 13, color: c.muted),
@@ -401,18 +403,19 @@ class _CredentialEditorState extends State<_CredentialEditor> {
                 errorText: failure?.fieldErrors['privateNote'],
               ),
             ),
-            const SizedBox(height: 18),
             DesktopTextField(
               key: const ValueKey('credential-edit-binding'),
               controller: _binding,
               enabled: _editable,
-              onChanged: _edit,
+              onChanged: (value) {
+                _bindingEdited = true;
+                _edit(value);
+              },
               decoration: InputDecoration(
                 labelText: '建议引用名',
                 errorText: failure?.fieldErrors['binding'],
               ),
             ),
-            const SizedBox(height: 18),
             LibraryDirectorySelect(
               catalog: _catalog,
               value: _directory,
@@ -424,7 +427,6 @@ class _CredentialEditorState extends State<_CredentialEditor> {
                       _edit();
                     }),
             ),
-            const SizedBox(height: 18),
             Text('标签', style: libraryText(context, 13, color: c.muted)),
             const SizedBox(height: 8),
             Wrap(
