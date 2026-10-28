@@ -56,6 +56,7 @@ class _LibraryPageState extends State<LibraryPage> {
   void initState() {
     super.initState();
     _search.text = model.query.keyword;
+    _searchFocus.addListener(_searchFocusChanged);
     _lastSelection = model.selection;
     model.addListener(_changed);
     _focusRequest = model.searchFocusRequest;
@@ -76,8 +77,13 @@ class _LibraryPageState extends State<LibraryPage> {
     _list.dispose();
     _detailScroll.dispose();
     _search.dispose();
+    _searchFocus.removeListener(_searchFocusChanged);
     _searchFocus.dispose();
     super.dispose();
+  }
+
+  void _searchFocusChanged() {
+    if (mounted) setState(() {});
   }
 
   void _changed() {
@@ -632,12 +638,18 @@ class _LibraryPageState extends State<LibraryPage> {
           ),
           const SizedBox(height: 17),
           Container(
+            key: const ValueKey('library-search-frame'),
             height: 39 * MediaQuery.textScalerOf(context).scale(1),
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
               color: c.paper,
-              border: Border.all(color: c.line),
+              border: Border.all(
+                color: _searchFocus.hasFocus ? c.accent : c.line,
+              ),
               borderRadius: BorderRadius.circular(7),
+              boxShadow: _searchFocus.hasFocus
+                  ? [BoxShadow(color: c.selected, spreadRadius: 2)]
+                  : null,
             ),
             child: Row(
               children: [
@@ -709,56 +721,61 @@ class _LibraryPageState extends State<LibraryPage> {
           const SizedBox(height: 8),
           Padding(
             padding: const EdgeInsets.only(top: 3),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    model.loadState == WorkspaceLoad.loading
-                        ? '正在更新…'
-                        : '${model.results?.total ?? 0} 项',
-                    style: libraryText(context, 12, color: c.muted),
-                  ),
-                ),
-                DesktopSelect<WorkspaceGrouping>(
-                  key: const ValueKey('library-group'),
-                  value: query.grouping,
-                  compact: true,
-                  quiet: true,
-                  leading: const PrototypeIcon(
-                    PrototypeIconGlyph.grid,
-                    size: 15,
-                  ),
-                  triggerLabel: const Text('分组'),
-                  items: [
-                    for (final g in WorkspaceGrouping.values)
-                      DropdownMenuItem(value: g, child: Text(_groupName(g))),
-                  ],
-                  onChanged: (v) => model.apply(query.copyWith(grouping: v)),
-                ),
-                const SizedBox(width: 5),
-                DesktopSelect<WorkspaceSort>(
-                  key: const ValueKey('library-sort'),
-                  value: query.sort,
-                  compact: true,
-                  quiet: true,
-                  leading: const PrototypeIcon(
-                    PrototypeIconGlyph.sort,
-                    size: 15,
-                  ),
-                  triggerLabel: const Text('排序'),
-                  items: const [
-                    DropdownMenuItem(
-                      value: WorkspaceSort.updated,
-                      child: Text('最近更新'),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 33),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      model.loadState == WorkspaceLoad.loading
+                          ? '正在更新…'
+                          : '${model.results?.total ?? 0} 项',
+                      style: libraryText(context, 12, color: c.muted),
                     ),
-                    DropdownMenuItem(
-                      value: WorkspaceSort.name,
-                      child: Text('名称'),
+                  ),
+                  DesktopSelect<WorkspaceGrouping>(
+                    key: const ValueKey('library-group'),
+                    value: query.grouping,
+                    compact: true,
+                    quiet: true,
+                    toolbar: true,
+                    leading: const PrototypeIcon(
+                      PrototypeIconGlyph.grid,
+                      size: 14,
                     ),
-                  ],
-                  onChanged: (v) => model.apply(query.copyWith(sort: v)),
-                ),
-              ],
+                    triggerLabel: const Text('分组'),
+                    items: [
+                      for (final g in WorkspaceGrouping.values)
+                        DropdownMenuItem(value: g, child: Text(_groupName(g))),
+                    ],
+                    onChanged: (v) => model.apply(query.copyWith(grouping: v)),
+                  ),
+                  const SizedBox(width: 5),
+                  DesktopSelect<WorkspaceSort>(
+                    key: const ValueKey('library-sort'),
+                    value: query.sort,
+                    compact: true,
+                    quiet: true,
+                    toolbar: true,
+                    leading: const PrototypeIcon(
+                      PrototypeIconGlyph.sort,
+                      size: 14,
+                    ),
+                    triggerLabel: const Text('排序'),
+                    items: const [
+                      DropdownMenuItem(
+                        value: WorkspaceSort.updated,
+                        child: Text('最近更新优先'),
+                      ),
+                      DropdownMenuItem(
+                        value: WorkspaceSort.name,
+                        child: Text('按名称'),
+                      ),
+                    ],
+                    onChanged: (v) => model.apply(query.copyWith(sort: v)),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
@@ -905,12 +922,27 @@ class _LibraryPageState extends State<LibraryPage> {
       final empty = (model.catalog?.directoryCounts['all'] ?? 0) == 0;
       contents = SingleChildScrollView(
         primary: false,
-        child: LibraryMessage(
+        padding: const EdgeInsets.fromLTRB(12, 3, 10, 18),
+        child: LibraryEmpty(
           empty ? '暂无资料' : '没有匹配的资料',
+          key: const ValueKey('library-results-empty'),
           description: empty ? '添加一份资料开始整理。' : '换个关键词，或取消类型和标签。',
           action: DesktopButton(
+            key: ValueKey(
+              empty ? 'library-empty-create' : 'library-clear-filters',
+            ),
+            minimumSize: const Size(0, 38.4),
+            padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 8),
             onPressed: empty ? () => _edit(create: true) : model.clearFilters,
-            child: Text(empty ? '添加资料' : '清除筛选'),
+            child: Text(
+              empty ? '添加资料' : '清除筛选',
+              style: libraryText(
+                context,
+                14,
+                color: c.muted,
+                weight: FontWeight.w500,
+              ),
+            ),
           ),
         ),
       );
@@ -922,17 +954,19 @@ class _LibraryPageState extends State<LibraryPage> {
             (i == 0 || _groupKey(results.items[i - 1]) != group)) {
           rows.add(
             Padding(
-              padding: const EdgeInsets.fromLTRB(0, 14, 0, 8),
+              padding: const EdgeInsets.fromLTRB(12, 14, 24, 8),
               child: Row(
                 children: [
                   Expanded(
                     child: Text(
                       _groupLabel(r),
+                      key: ValueKey('library-group-label-$group'),
                       style: libraryText(context, 12, color: c.muted),
                     ),
                   ),
                   Text(
                     '${results.groupCounts[group] ?? 0}',
+                    key: ValueKey('library-group-count-$group'),
                     style: libraryText(context, 12, color: c.muted),
                   ),
                 ],
@@ -1034,12 +1068,14 @@ class _LibraryPageState extends State<LibraryPage> {
       child: Column(
         children: [
           Container(
+            key: const ValueKey('library-detail-toolbar'),
             constraints: const BoxConstraints(minHeight: 49),
             padding: EdgeInsets.symmetric(horizontal: metrics.toolbarPadding),
             decoration: BoxDecoration(
               border: Border(bottom: BorderSide(color: c.line)),
             ),
             child: Row(
+              spacing: 10,
               children: [
                 if (_reading)
                   DesktopButton(
@@ -1081,14 +1117,28 @@ class _LibraryPageState extends State<LibraryPage> {
                   ),
                 ),
                 DesktopButton(
+                  key: const ValueKey('library-detail-create'),
                   kind: DesktopButtonKind.quiet,
-                  fontSize: 12,
+                  fontSize: 13,
+                  minimumSize: const Size(0, 36.8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 13,
+                    vertical: 8,
+                  ),
                   onPressed:
                       model.catalog == null ||
                           model.loadState == WorkspaceLoad.loading
                       ? null
                       : () => _edit(create: true),
-                  child: const Text('添加资料'),
+                  child: Text(
+                    '添加资料',
+                    style: libraryText(
+                      context,
+                      13,
+                      color: c.muted,
+                      weight: FontWeight.w500,
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -1108,14 +1158,22 @@ class _LibraryPageState extends State<LibraryPage> {
               padding: metrics.detailPadding,
               child: model.loadState == WorkspaceLoad.error
                   ? LibraryMessage('资料暂不可用')
+                  : model.loadState == WorkspaceLoad.loading && detail == null
+                  ? const LibraryMessage('正在读取资料…')
                   : detail == null
-                  ? LibraryMessage(
-                      model.detailFailure?.code == 'not_found'
-                          ? '资料已不存在'
-                          : '选择一份资料',
-                      description:
-                          model.detailFailure?.message ?? '查看内容、文件与关联关系。',
-                    )
+                  ? model.detailFailure == null
+                        ? const LibraryEmpty(
+                            '选择一份资料',
+                            key: ValueKey('library-detail-empty'),
+                            description: '查看内容、文件与关联关系。',
+                          )
+                        : LibraryMessage(
+                            model.detailFailure?.code == 'not_found'
+                                ? '资料已不存在'
+                                : '选择一份资料',
+                            description:
+                                model.detailFailure?.message ?? '查看内容、文件与关联关系。',
+                          )
                   : DesktopEntrance(
                       key: ValueKey(detail.record.ref),
                       child: LibraryDetail(

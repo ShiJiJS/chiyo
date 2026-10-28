@@ -331,17 +331,10 @@ class _LibraryDetailState extends State<LibraryDetail> {
     );
     // The frozen paragraph has max-width:65ch. Use the same installed font
     // and scaler for the zero glyph instead of a platform-specific pixel cap.
-    final zero = TextPainter(
-      text: TextSpan(text: '0', style: style),
-      textDirection: Directionality.of(context),
-      textScaler: MediaQuery.textScalerOf(context),
-    )..layout();
-    final width = zero.width * 65;
-    zero.dispose();
     return Align(
       alignment: AlignmentDirectional.centerStart,
       child: SizedBox(
-        width: width,
+        width: libraryChWidth(context, style, 65),
         child: Text(
           value,
           key: const ValueKey('library-detail-description'),
@@ -461,6 +454,7 @@ class _LibraryDetailState extends State<LibraryDetail> {
                 child: DesktopSelect<String>(
                   compact: true,
                   quiet: true,
+                  minimumTriggerSize: const Size(36, 36),
                   triggerLabel: const PrototypeIcon(PrototypeIconGlyph.more),
                   key: const ValueKey('library-record-actions'),
                   items: [

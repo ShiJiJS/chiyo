@@ -193,7 +193,9 @@ class DesktopSelect<T> extends StatefulWidget {
     this.triggerLabel,
     this.leading,
     this.highlighted = false,
-  });
+    this.toolbar = false,
+    this.minimumTriggerSize,
+  }) : assert(!toolbar || compact);
   final T? value, initialValue;
   final List<DropdownMenuItem<T>> items;
   final ValueChanged<T?>? onChanged;
@@ -202,6 +204,9 @@ class DesktopSelect<T> extends StatefulWidget {
   final InputDecoration? decoration;
   final bool compact, quiet;
   final bool highlighted;
+  // Small toolbar triggers share the same popup, focus and selection handling.
+  final bool toolbar;
+  final Size? minimumTriggerSize;
   final Widget? triggerLabel, leading;
   @override
   State<DesktopSelect<T>> createState() => _DesktopSelectState<T>();
@@ -295,13 +300,26 @@ class _DesktopSelectState<T> extends State<DesktopSelect<T>> {
                 kind: widget.quiet
                     ? DesktopButtonKind.quiet
                     : DesktopButtonKind.outline,
-                fontSize: 13,
+                fontSize: widget.toolbar ? 12 : 13,
                 leading: widget.leading,
+                leadingGap: widget.toolbar ? 5 : 7,
                 selected: widget.highlighted,
                 selectedBorder: widget.highlighted,
                 selectedBorderColor: UiPalette.of(context).accent,
-                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
-                minimumSize: Size(0, widget.quiet ? 33 : 34.8),
+                padding: EdgeInsets.symmetric(
+                  horizontal: widget.toolbar ? 8 : 9,
+                  vertical: 6,
+                ),
+                minimumSize:
+                    widget.minimumTriggerSize ??
+                    Size(
+                      0,
+                      widget.toolbar
+                          ? 32
+                          : widget.quiet
+                          ? 33
+                          : 34.8,
+                    ),
                 child:
                     widget.triggerLabel ??
                     Row(

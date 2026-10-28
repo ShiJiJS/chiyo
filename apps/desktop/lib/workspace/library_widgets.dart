@@ -42,6 +42,17 @@ TextStyle libraryText(
   fontWeight: weight ?? FontWeight.w400,
 );
 
+double libraryChWidth(BuildContext context, TextStyle style, int count) {
+  final zero = TextPainter(
+    text: TextSpan(text: '0', style: style),
+    textDirection: Directionality.of(context),
+    textScaler: MediaQuery.textScalerOf(context),
+  )..layout();
+  final width = zero.width * count;
+  zero.dispose();
+  return width;
+}
+
 class RecordIcon extends StatelessWidget {
   const RecordIcon(this.type, {super.key, this.size = 33});
   final WorkspaceType type;
@@ -174,6 +185,61 @@ class LibraryMessage extends StatelessWidget {
       ],
     ),
   );
+}
+
+/// Frozen .empty presentation, shared by an empty result and selection pane.
+/// Reading failures keep LibraryMessage and their independent retry semantics.
+class LibraryEmpty extends StatelessWidget {
+  const LibraryEmpty(
+    this.title, {
+    super.key,
+    required this.description,
+    this.action,
+  });
+  final String title, description;
+  final Widget? action;
+
+  @override
+  Widget build(BuildContext context) {
+    final style = libraryText(context, 14, color: UiPalette.of(context).muted);
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 65),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(10),
+            child: Text(
+              title,
+              key: const ValueKey('library-empty-title'),
+              textAlign: TextAlign.center,
+              style: libraryText(
+                context,
+                17,
+                height: 1.5,
+                weight: FontWeight.w700,
+              ),
+            ),
+          ),
+          Center(
+            child: SizedBox(
+              width: libraryChWidth(context, style, 46),
+              child: Text(
+                description,
+                key: const ValueKey('library-empty-description'),
+                textAlign: TextAlign.center,
+                style: style,
+              ),
+            ),
+          ),
+          const SizedBox(height: 18),
+          if (action != null)
+            Align(alignment: Alignment.center, child: action!),
+        ],
+      ),
+    );
+  }
 }
 
 const _virtualDirectories = {'all', 'unfiled'};
