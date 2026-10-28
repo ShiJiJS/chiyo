@@ -1,0 +1,5 @@
+00:00 +0: loading /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_file_types_test.dart
+00:00 +0: distinct resume/file groups and generic names come from metadata without file reads
+00:00 +1: file-target relations include resume attachments and retain ordinary typed identities
+00:00 +2: resume replacement retains ordinary file identity and field ownership
+00:00 +3: All tests passed!

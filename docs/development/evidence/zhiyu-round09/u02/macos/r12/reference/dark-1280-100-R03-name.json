@@ -1,0 +1,651 @@
+{
+  "expected": {
+    "viewport": {
+      "width": 1280,
+      "height": 800,
+      "dpr": 1
+    },
+    "theme": "dark",
+    "state": "R03-name",
+    "stateFields": {
+      "dir": "all",
+      "selected": "azure",
+      "filter": "all",
+      "tag": "",
+      "query": "",
+      "sort": "name",
+      "groupBy": "template"
+    },
+    "requiredBoxes": [
+      "library-detail-title"
+    ],
+    "scrollbarWidth": 11
+  },
+  "before": {
+    "viewport": {
+      "width": 1280,
+      "height": 800,
+      "dpr": 1
+    },
+    "fontFamily": "\"Zhiyu System\", \"PingFang SC\", sans-serif",
+    "canvas": "#181b22",
+    "state": {
+      "page": "library",
+      "dir": "all",
+      "selected": "azure",
+      "query": "",
+      "filter": "all",
+      "tag": "",
+      "groupBy": "template",
+      "sort": "name",
+      "detailTab": "overview",
+      "setting": "appearance",
+      "plugin": "builtin.server",
+      "pluginTab": "overview"
+    },
+    "boxes": {
+      "library-search-frame": {
+        "x": 210,
+        "y": 139,
+        "width": 242,
+        "height": 39
+      },
+      "library-group": {
+        "x": 329,
+        "y": 237.296875,
+        "width": 59,
+        "height": 32
+      },
+      "library-sort": {
+        "x": 393,
+        "y": 237.296875,
+        "width": 59,
+        "height": 32
+      },
+      "library-results-pane": {
+        "x": 194,
+        "y": 66,
+        "width": 275,
+        "height": 734
+      },
+      "library-results-footer": {
+        "x": 194,
+        "y": 755,
+        "width": 274,
+        "height": 45
+      },
+      "library-detail-toolbar": {
+        "x": 480,
+        "y": 77,
+        "width": 789,
+        "height": 49
+      },
+      "library-detail-create": {
+        "x": 1172,
+        "y": 82.6015625,
+        "width": 78,
+        "height": 36.796875
+      },
+      "library-detail-title": {
+        "x": 584,
+        "y": 177,
+        "width": 537,
+        "height": 34.796875
+      },
+      "library-relation-frame-information:https": {
+        "x": 531,
+        "y": 895.15625,
+        "width": 676,
+        "height": 74.4921875
+      },
+      "library-relation-frame-information:sshguide": {
+        "x": 531,
+        "y": 969.6484375,
+        "width": 676,
+        "height": 75.4921875
+      },
+      "library-relation-frame-credential:sshkey": {
+        "x": 531,
+        "y": 744.1640625,
+        "width": 676,
+        "height": 74.4921875
+      }
+    },
+    "searchFocused": false,
+    "searchAppearance": {
+      "borderColor": "rgb(57, 65, 79)",
+      "boxShadow": "none"
+    },
+    "scrollbarWidth": 11,
+    "resultCount": "31 项",
+    "order": [
+      "aliyunkey",
+      "sshkey",
+      "blinkokey",
+      "github-token",
+      "tgsession",
+      "vikunja-password",
+      "vikunjakey",
+      "aliyun",
+      "nas",
+      "azure",
+      "resume",
+      "resume-en",
+      "profile",
+      "offer",
+      "proof",
+      "portrait",
+      "publickey",
+      "ideas",
+      "https",
+      "deploy",
+      "nasdoc",
+      "sshguide",
+      "workflow",
+      "blinko",
+      "skillshare",
+      "sparky",
+      "syncthing",
+      "tgapi",
+      "mtproto",
+      "video",
+      "vikunja"
+    ],
+    "groups": [
+      {
+        "label": "凭据",
+        "count": "7",
+        "box": {
+          "x": 206,
+          "y": 284.796875,
+          "width": 241,
+          "height": 41.1953125
+        },
+        "labelBox": {
+          "x": 224,
+          "y": 301.296875,
+          "width": 24,
+          "height": 14
+        },
+        "countBox": {
+          "x": 422.1640625,
+          "y": 298.796875,
+          "width": 6.8359375,
+          "height": 19.1953125
+        }
+      },
+      {
+        "label": "服务器信息",
+        "count": "3",
+        "box": {
+          "x": 206,
+          "y": 1349.0859375,
+          "width": 241,
+          "height": 41.1953125
+        },
+        "labelBox": {
+          "x": 224,
+          "y": 1365.5859375,
+          "width": 60,
+          "height": 14
+        },
+        "countBox": {
+          "x": 421.4765625,
+          "y": 1363.0859375,
+          "width": 7.5234375,
+          "height": 19.1953125
+        }
+      },
+      {
+        "label": "简历文件",
+        "count": "2",
+        "box": {
+          "x": 206,
+          "y": 1844.53125,
+          "width": 241,
+          "height": 41.1953125
+        },
+        "labelBox": {
+          "x": 224,
+          "y": 1861.03125,
+          "width": 48,
+          "height": 14
+        },
+        "countBox": {
+          "x": 421.7578125,
+          "y": 1858.53125,
+          "width": 7.2421875,
+          "height": 19.1953125
+        }
+      },
+      {
+        "label": "个人档案",
+        "count": "1",
+        "box": {
+          "x": 206,
+          "y": 2159.1015625,
+          "width": 241,
+          "height": 41.1953125
+        },
+        "labelBox": {
+          "x": 224,
+          "y": 2175.6015625,
+          "width": 48,
+          "height": 14
+        },
+        "countBox": {
+          "x": 423.4296875,
+          "y": 2173.1015625,
+          "width": 5.5703125,
+          "height": 19.1953125
+        }
+      },
+      {
+        "label": "文件",
+        "count": "4",
+        "box": {
+          "x": 206,
+          "y": 2336.984375,
+          "width": 241,
+          "height": 41.1953125
+        },
+        "labelBox": {
+          "x": 224,
+          "y": 2353.484375,
+          "width": 24,
+          "height": 14
+        },
+        "countBox": {
+          "x": 421.2734375,
+          "y": 2350.984375,
+          "width": 7.7265625,
+          "height": 19.1953125
+        }
+      },
+      {
+        "label": "通用信息",
+        "count": "1",
+        "box": {
+          "x": 206,
+          "y": 2924.9296875,
+          "width": 241,
+          "height": 41.1953125
+        },
+        "labelBox": {
+          "x": 224,
+          "y": 2941.4296875,
+          "width": 48,
+          "height": 14
+        },
+        "countBox": {
+          "x": 423.4296875,
+          "y": 2938.9296875,
+          "width": 5.5703125,
+          "height": 19.1953125
+        }
+      },
+      {
+        "label": "文档",
+        "count": "5",
+        "box": {
+          "x": 206,
+          "y": 3075.8125,
+          "width": 241,
+          "height": 41.1953125
+        },
+        "labelBox": {
+          "x": 224,
+          "y": 3092.3125,
+          "width": 24,
+          "height": 14
+        },
+        "countBox": {
+          "x": 421.578125,
+          "y": 3089.8125,
+          "width": 7.421875,
+          "height": 19.1953125
+        }
+      },
+      {
+        "label": "应用与服务",
+        "count": "8",
+        "box": {
+          "x": 206,
+          "y": 3866.7265625,
+          "width": 241,
+          "height": 41.1953125
+        },
+        "labelBox": {
+          "x": 224,
+          "y": 3883.2265625,
+          "width": 60,
+          "height": 14
+        },
+        "countBox": {
+          "x": 421.3359375,
+          "y": 3880.7265625,
+          "width": 7.6640625,
+          "height": 19.1953125
+        }
+      }
+    ],
+    "detailTitle": "Azure 日本服务器",
+    "popupLabels": []
+  },
+  "after": {
+    "viewport": {
+      "width": 1280,
+      "height": 800,
+      "dpr": 1
+    },
+    "fontFamily": "\"Zhiyu System\", \"PingFang SC\", sans-serif",
+    "canvas": "#181b22",
+    "state": {
+      "page": "library",
+      "dir": "all",
+      "selected": "azure",
+      "query": "",
+      "filter": "all",
+      "tag": "",
+      "groupBy": "template",
+      "sort": "name",
+      "detailTab": "overview",
+      "setting": "appearance",
+      "plugin": "builtin.server",
+      "pluginTab": "overview"
+    },
+    "boxes": {
+      "library-search-frame": {
+        "x": 210,
+        "y": 139,
+        "width": 242,
+        "height": 39
+      },
+      "library-group": {
+        "x": 329,
+        "y": 237.296875,
+        "width": 59,
+        "height": 32
+      },
+      "library-sort": {
+        "x": 393,
+        "y": 237.296875,
+        "width": 59,
+        "height": 32
+      },
+      "library-results-pane": {
+        "x": 194,
+        "y": 66,
+        "width": 275,
+        "height": 734
+      },
+      "library-results-footer": {
+        "x": 194,
+        "y": 755,
+        "width": 274,
+        "height": 45
+      },
+      "library-detail-toolbar": {
+        "x": 480,
+        "y": 77,
+        "width": 789,
+        "height": 49
+      },
+      "library-detail-create": {
+        "x": 1172,
+        "y": 82.6015625,
+        "width": 78,
+        "height": 36.796875
+      },
+      "library-detail-title": {
+        "x": 584,
+        "y": 177,
+        "width": 537,
+        "height": 34.796875
+      },
+      "library-relation-frame-information:https": {
+        "x": 531,
+        "y": 895.15625,
+        "width": 676,
+        "height": 74.4921875
+      },
+      "library-relation-frame-information:sshguide": {
+        "x": 531,
+        "y": 969.6484375,
+        "width": 676,
+        "height": 75.4921875
+      },
+      "library-relation-frame-credential:sshkey": {
+        "x": 531,
+        "y": 744.1640625,
+        "width": 676,
+        "height": 74.4921875
+      }
+    },
+    "searchFocused": false,
+    "searchAppearance": {
+      "borderColor": "rgb(57, 65, 79)",
+      "boxShadow": "none"
+    },
+    "scrollbarWidth": 11,
+    "resultCount": "31 项",
+    "order": [
+      "aliyunkey",
+      "sshkey",
+      "blinkokey",
+      "github-token",
+      "tgsession",
+      "vikunja-password",
+      "vikunjakey",
+      "aliyun",
+      "nas",
+      "azure",
+      "resume",
+      "resume-en",
+      "profile",
+      "offer",
+      "proof",
+      "portrait",
+      "publickey",
+      "ideas",
+      "https",
+      "deploy",
+      "nasdoc",
+      "sshguide",
+      "workflow",
+      "blinko",
+      "skillshare",
+      "sparky",
+      "syncthing",
+      "tgapi",
+      "mtproto",
+      "video",
+      "vikunja"
+    ],
+    "groups": [
+      {
+        "label": "凭据",
+        "count": "7",
+        "box": {
+          "x": 206,
+          "y": 284.796875,
+          "width": 241,
+          "height": 41.1953125
+        },
+        "labelBox": {
+          "x": 224,
+          "y": 301.296875,
+          "width": 24,
+          "height": 14
+        },
+        "countBox": {
+          "x": 422.1640625,
+          "y": 298.796875,
+          "width": 6.8359375,
+          "height": 19.1953125
+        }
+      },
+      {
+        "label": "服务器信息",
+        "count": "3",
+        "box": {
+          "x": 206,
+          "y": 1349.0859375,
+          "width": 241,
+          "height": 41.1953125
+        },
+        "labelBox": {
+          "x": 224,
+          "y": 1365.5859375,
+          "width": 60,
+          "height": 14
+        },
+        "countBox": {
+          "x": 421.4765625,
+          "y": 1363.0859375,
+          "width": 7.5234375,
+          "height": 19.1953125
+        }
+      },
+      {
+        "label": "简历文件",
+        "count": "2",
+        "box": {
+          "x": 206,
+          "y": 1844.53125,
+          "width": 241,
+          "height": 41.1953125
+        },
+        "labelBox": {
+          "x": 224,
+          "y": 1861.03125,
+          "width": 48,
+          "height": 14
+        },
+        "countBox": {
+          "x": 421.7578125,
+          "y": 1858.53125,
+          "width": 7.2421875,
+          "height": 19.1953125
+        }
+      },
+      {
+        "label": "个人档案",
+        "count": "1",
+        "box": {
+          "x": 206,
+          "y": 2159.1015625,
+          "width": 241,
+          "height": 41.1953125
+        },
+        "labelBox": {
+          "x": 224,
+          "y": 2175.6015625,
+          "width": 48,
+          "height": 14
+        },
+        "countBox": {
+          "x": 423.4296875,
+          "y": 2173.1015625,
+          "width": 5.5703125,
+          "height": 19.1953125
+        }
+      },
+      {
+        "label": "文件",
+        "count": "4",
+        "box": {
+          "x": 206,
+          "y": 2336.984375,
+          "width": 241,
+          "height": 41.1953125
+        },
+        "labelBox": {
+          "x": 224,
+          "y": 2353.484375,
+          "width": 24,
+          "height": 14
+        },
+        "countBox": {
+          "x": 421.2734375,
+          "y": 2350.984375,
+          "width": 7.7265625,
+          "height": 19.1953125
+        }
+      },
+      {
+        "label": "通用信息",
+        "count": "1",
+        "box": {
+          "x": 206,
+          "y": 2924.9296875,
+          "width": 241,
+          "height": 41.1953125
+        },
+        "labelBox": {
+          "x": 224,
+          "y": 2941.4296875,
+          "width": 48,
+          "height": 14
+        },
+        "countBox": {
+          "x": 423.4296875,
+          "y": 2938.9296875,
+          "width": 5.5703125,
+          "height": 19.1953125
+        }
+      },
+      {
+        "label": "文档",
+        "count": "5",
+        "box": {
+          "x": 206,
+          "y": 3075.8125,
+          "width": 241,
+          "height": 41.1953125
+        },
+        "labelBox": {
+          "x": 224,
+          "y": 3092.3125,
+          "width": 24,
+          "height": 14
+        },
+        "countBox": {
+          "x": 421.578125,
+          "y": 3089.8125,
+          "width": 7.421875,
+          "height": 19.1953125
+        }
+      },
+      {
+        "label": "应用与服务",
+        "count": "8",
+        "box": {
+          "x": 206,
+          "y": 3866.7265625,
+          "width": 241,
+          "height": 41.1953125
+        },
+        "labelBox": {
+          "x": 224,
+          "y": 3883.2265625,
+          "width": 60,
+          "height": 14
+        },
+        "countBox": {
+          "x": 421.3359375,
+          "y": 3880.7265625,
+          "width": 7.6640625,
+          "height": 19.1953125
+        }
+      }
+    ],
+    "detailTitle": "Azure 日本服务器",
+    "popupLabels": []
+  },
+  "errors": [],
+  "accepted": true,
+  "imageSha256": "bcc4375c2f5a80fb285b7bb1ee3ff58f37f5e211202c6003afae3612d19f3b59",
+  "scope": "Frozen Mac workflow capture integrity; not full S5 or actual OS input",
+  "fullS5Passed": false
+}
