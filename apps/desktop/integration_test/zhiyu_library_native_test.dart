@@ -475,6 +475,55 @@ void main() {
           await screenshot(
             '${dark ? 'dark' : 'light'}-${size.width.toInt()}-${ref.split(':').last}',
           );
+          if (ref == 'information:resume' && !dark && size.width == 1440) {
+            final file = tester
+                .widget<LibraryFilePreviewView>(
+                  find.byType(LibraryFilePreviewView),
+                )
+                .preview
+                .file;
+            final initialWidth = tester.getSize(find.byType(Image)).width;
+            await tap(find.byKey(const ValueKey('library-file-metadata-file')));
+            expect(
+              tester
+                  .widget<SelectableText>(
+                    find.byKey(const ValueKey('library-file-metadata-content')),
+                  )
+                  .data,
+              contains('${file.byteLength} 字节'),
+            );
+            await tap(find.text('关闭'));
+            await tap(find.byKey(const ValueKey('library-file-zoom-in')));
+            await tap(find.byKey(const ValueKey('library-file-text-mode')));
+            await tap(find.byKey(const ValueKey('library-file-actions-file')));
+            await tap(
+              find.byKey(const ValueKey('library-file-preview-refresh-file')),
+            );
+            for (
+              var frame = 0;
+              frame < 120 &&
+                  find
+                      .byKey(const ValueKey('library-file-extracted-text'))
+                      .evaluate()
+                      .isEmpty;
+              frame++
+            ) {
+              await tester.pump(const Duration(milliseconds: 16));
+            }
+            expect(
+              find.byKey(const ValueKey('library-file-extracted-text')),
+              findsOneWidget,
+            );
+            await tap(find.byKey(const ValueKey('library-file-text-mode')));
+            expect(
+              tester.getSize(find.byType(Image)).width,
+              closeTo(initialWidth * 1.5, .1),
+            );
+            await tap(find.byKey(const ValueKey('library-file-zoom-out')));
+            checks.add(
+              'native-file-metadata-and-menu-refresh-preserve-reading-state',
+            );
+          }
         }
         viewports.add({
           'width': size.width,

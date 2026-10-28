@@ -678,7 +678,7 @@ class _LibraryDetailState extends State<LibraryDetail> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Padding(
-                      padding: const EdgeInsets.only(top: 27),
+                      padding: const EdgeInsets.only(top: 18),
                       child: LibraryFile(
                         key: ValueKey('library-file-${record.ref.key}-file'),
                         detail: detail,

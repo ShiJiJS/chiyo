@@ -91,6 +91,11 @@ void main() {
     expect(t.takeException(), isNull);
   }
 
+  Future<void> fileAction(WidgetTester t, String action) async {
+    await tap(t, find.byKey(const ValueKey('library-file-actions-file')));
+    await tap(t, find.byKey(ValueKey('library-file-$action-file')));
+  }
+
   Future<void> enter(WidgetTester t, Finder target, String text) async {
     await t.ensureVisible(target);
     await t.pumpAndSettle();
@@ -288,10 +293,7 @@ void main() {
       expect(value('ADDITIONAL PROJECT DETAILS'), findsOneWidget);
       await tap(t, find.byKey(const ValueKey('preview-guide')));
       await tap(t, find.byKey(const ValueKey('preview-file-error')));
-      await tap(
-        t,
-        find.byKey(const ValueKey('library-file-preview-refresh-file')),
-      );
+      await fileAction(t, 'preview-refresh');
       await ready(
         t,
         () => find
@@ -299,6 +301,7 @@ void main() {
             .evaluate()
             .isNotEmpty,
       );
+      await tap(t, find.byKey(const ValueKey('library-file-actions-file')));
       expect(
         find.byKey(const ValueKey('library-file-save-file')),
         findsOneWidget,
@@ -309,6 +312,8 @@ void main() {
       );
       await t.pumpAndSettle();
       await capture(t, 'file-1280-light-preview-failure');
+      await t.sendKeyEvent(LogicalKeyboardKey.escape);
+      await t.pumpAndSettle();
       await tap(
         t,
         find.byKey(const ValueKey('library-file-preview-retry-file')),
@@ -323,7 +328,7 @@ void main() {
     (t) async {
       final model = await start(t, '服务端开发简历', dark: true, scale: 2);
       await fileReady(t);
-      await tap(t, find.byKey(const ValueKey('library-file-replace-file')));
+      await fileAction(t, 'replace');
       await ready(
         t,
         () => find
@@ -406,7 +411,7 @@ void main() {
       await start(t, '服务端开发简历');
       await fileReady(t);
       for (final selection in ['image', 'text']) {
-        await tap(t, find.byKey(const ValueKey('library-file-replace-file')));
+        await fileAction(t, 'replace');
         await ready(
           t,
           () => find
@@ -478,22 +483,30 @@ void main() {
       expect((await model.source.loadSummary()).records, 32);
       final source = model.source as SampleWorkspaceSource;
       source.cancelNextFileAction = true;
-      await tap(t, find.byKey(const ValueKey('library-file-save-file')));
+      await fileAction(t, 'save');
       source.nextFileActionFailure = const WorkspaceFailure(
         'unknown_outcome',
         '另存结果未知，请核对。',
       );
-      await tap(t, find.byKey(const ValueKey('library-file-save-file')));
+      await fileAction(t, 'save');
+      await tap(t, find.byKey(const ValueKey('library-file-actions-file')));
       expect(
         t
             .widget<DesktopButton>(
-              find.byKey(const ValueKey('library-file-save-file')),
+              find
+                  .ancestor(
+                    of: find.byKey(const ValueKey('library-file-save-file')),
+                    matching: find.byType(DesktopButton),
+                  )
+                  .first,
             )
             .onPressed,
         isNull,
       );
+      await t.sendKeyEvent(LogicalKeyboardKey.escape);
+      await t.pumpAndSettle();
       await tap(t, find.text('核对此次操作'));
-      await tap(t, find.byKey(const ValueKey('library-file-save-file')));
+      await fileAction(t, 'save');
       expect(find.text('已另存 unsupported.bin'), findsOneWidget);
       await capture(t, 'file-1440-light-unknown-format');
       expect(t.takeException(), isNull);

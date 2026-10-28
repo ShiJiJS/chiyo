@@ -2,11 +2,14 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import '../desktop_controls.dart';
 import '../desktop_feedback.dart';
+import '../prototype_icons.dart';
 import '../ui_palette.dart';
 import '../desktop_scroll.dart';
 import 'library_file_dialogs.dart';
 import 'library_widgets.dart';
 import 'workspace_source.dart';
+
+enum _FileAction { replace, save, open, refresh }
 
 class LibraryFile extends StatefulWidget {
   const LibraryFile({
@@ -43,12 +46,15 @@ class _LibraryFileState extends State<LibraryFile> {
   @override
   void didUpdateWidget(LibraryFile oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.detail.version != widget.detail.version ||
+    final changedContext =
         oldWidget.detail.record.ref != widget.detail.record.ref ||
-        oldWidget.fieldKey != widget.fieldKey) {
-      if (oldWidget.detail.values[oldWidget.fieldKey].toString() !=
-          widget.detail.values[widget.fieldKey].toString()) {
+        oldWidget.fieldKey != widget.fieldKey ||
+        !identical(oldWidget.source, widget.source);
+    if (changedContext || oldWidget.detail.version != widget.detail.version) {
+      if (changedContext) {
         _page = 0;
+        _history = null;
+        _preview = null;
       }
       unawaited(_load());
     }
@@ -61,8 +67,9 @@ class _LibraryFileState extends State<LibraryFile> {
     final generation = ++_generation;
     setState(() {
       _loading = _previewLoading = true;
-      _history = null;
-      _preview = null;
+      // Keep the mounted reader during metadata revalidation, hidden until
+      // the attachment version is confirmed. Its reading state belongs to the
+      // immutable attachment ref, not to the enclosing record's revision.
       _metadataFailure = _previewFailure = null;
     });
     try {
@@ -72,6 +79,7 @@ class _LibraryFileState extends State<LibraryFile> {
       );
       if (!mounted || generation != _generation) return;
       setState(() {
+        if (_history?.current.ref != history.current.ref) _page = 0;
         _history = history;
         _loading = false;
       });
@@ -111,6 +119,7 @@ class _LibraryFileState extends State<LibraryFile> {
   }
 
   void _turn(int page) {
+    if (_loading || _metadataFailure != null) return;
     final generation = ++_generation;
     setState(() {
       _page = page;
@@ -121,7 +130,7 @@ class _LibraryFileState extends State<LibraryFile> {
   }
 
   Future<void> _modal(Future<void> Function() action) async {
-    if (_busy) return;
+    if (_busy || _loading || _metadataFailure != null) return;
     DesktopFeedback.dismiss(context);
     setState(() => _busy = true);
     widget.onModalChanged?.call(true);
@@ -134,6 +143,28 @@ class _LibraryFileState extends State<LibraryFile> {
       widget.onModalChanged?.call(false);
     }
   }
+
+  Future<void> _metadata() => _modal(() async {
+    final file = _history?.current;
+    if (file == null) return;
+    await showDesktopDialog<void>(
+      context,
+      builder: (context) => DesktopDialog(
+        title: const Text('文件信息'),
+        content: SelectableText(
+          '文件名：${file.filename}\n格式：${file.mediaType}\n大小：${workspaceFileSize(file.byteLength)}（${file.byteLength} 字节）\n文件版本：v${file.ref.version}',
+          key: const ValueKey('library-file-metadata-content'),
+          style: libraryText(context, 14, height: 1.8),
+        ),
+        actions: [
+          DesktopButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('关闭'),
+          ),
+        ],
+      ),
+    );
+  });
 
   Future<void> _replace() => _modal(() async {
     final picker = widget.picker;
@@ -172,7 +203,13 @@ class _LibraryFileState extends State<LibraryFile> {
     }
   });
   Future<void> _action(WorkspaceFileAction action) async {
-    if (_history == null || _busy || _pendingAction != null) return;
+    if (_history == null ||
+        _loading ||
+        _metadataFailure != null ||
+        _busy ||
+        _pendingAction != null) {
+      return;
+    }
     final operation = workspaceFileOperationId();
     setState(() {
       _busy = true;
@@ -247,8 +284,8 @@ class _LibraryFileState extends State<LibraryFile> {
   @override
   Widget build(BuildContext context) {
     final c = UiPalette.of(context), history = _history;
-    if (_loading) return const Text('正在读取文件信息…');
-    if (_metadataFailure != null || history == null) {
+    if (_loading && history == null) return const Text('正在读取文件信息…');
+    if (history == null) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -257,62 +294,123 @@ class _LibraryFileState extends State<LibraryFile> {
         ],
       );
     }
-    final blocked = _busy || _pendingAction != null;
+    final blocked =
+        _busy || _pendingAction != null || _loading || _metadataFailure != null;
+    final visiblePreview =
+        !_loading &&
+        _metadataFailure == null &&
+        !_previewLoading &&
+        _previewFailure == null &&
+        _preview != null;
+    final toolbar = <Widget>[
+      DesktopButton(
+        key: ValueKey('library-file-versions-${widget.fieldKey}'),
+        kind: DesktopButtonKind.quiet,
+        fontSize: 13,
+        minimumSize: const Size(0, 32),
+        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+        tooltip: '文件版本 · 当前 v${history.current.ref.version}',
+        selected: true,
+        onPressed: blocked ? null : _versions,
+        child: Text('v${history.current.ref.version} · 已选用'),
+      ),
+      Tooltip(
+        message: history.current.filename,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: MediaQuery.sizeOf(context).width <= 1300 ? 100 : 180,
+          ),
+          child: SelectableText(
+            history.current.filename,
+            maxLines: 1,
+            key: ValueKey('library-file-filename-${widget.fieldKey}'),
+            style: libraryText(context, 13),
+          ),
+        ),
+      ),
+      DesktopButton(
+        key: ValueKey('library-file-metadata-${widget.fieldKey}'),
+        tooltip:
+            '${history.current.mediaType} · ${workspaceFileSize(history.current.byteLength)} · v${history.current.ref.version} · 查看文件信息',
+        kind: DesktopButtonKind.quiet,
+        fontSize: 13,
+        minimumSize: const Size(0, 32),
+        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+        onPressed: blocked ? null : _metadata,
+        child: Text(switch (history.current.mediaType) {
+          'application/pdf' => 'PDF',
+          'image/png' => 'PNG',
+          'text/plain' => 'TXT',
+          _ => '文件信息',
+        }),
+      ),
+      DesktopSelect<_FileAction>(
+        key: ValueKey('library-file-actions-${widget.fieldKey}'),
+        compact: true,
+        toolbar: true,
+        quiet: true,
+        tooltip: '文件操作',
+        triggerLabel: const PrototypeIcon(
+          PrototypeIconGlyph.more,
+          semanticLabel: '文件操作',
+        ),
+        minimumTriggerSize: const Size(32, 32),
+        triggerPadding: const EdgeInsets.all(6),
+        onChanged: (action) {
+          switch (action) {
+            case _FileAction.replace:
+              unawaited(_replace());
+            case _FileAction.save:
+              unawaited(_action(WorkspaceFileAction.saveAs));
+            case _FileAction.open:
+              unawaited(_action(WorkspaceFileAction.open));
+            case _FileAction.refresh:
+              _turn(_page);
+            case null:
+              break;
+          }
+        },
+        items: [
+          for (final (action, id, label) in const [
+            (_FileAction.replace, 'replace', '替换文件'),
+            (_FileAction.save, 'save', '另存为'),
+            (_FileAction.open, 'open', '用本机程序打开'),
+            (_FileAction.refresh, 'preview-refresh', '刷新预览'),
+          ])
+            DropdownMenuItem(
+              value: action,
+              enabled: action == _FileAction.refresh
+                  ? !_loading && _metadataFailure == null && !_previewLoading
+                  : !blocked,
+              child: Text(
+                label,
+                key: ValueKey('library-file-$id-${widget.fieldKey}'),
+              ),
+            ),
+        ],
+      ),
+    ];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Wrap(
-          spacing: 12,
-          runSpacing: 6,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          children: [
-            SelectableText(
-              history.current.filename,
-              key: ValueKey('library-file-filename-${widget.fieldKey}'),
-              style: libraryText(context, 13),
-            ),
-            Text(
-              '${history.current.mediaType} · ${workspaceFileSize(history.current.byteLength)} · v${history.current.ref.version}',
-              style: libraryText(context, 13, color: c.muted),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            DesktopButton(
-              key: ValueKey('library-file-replace-${widget.fieldKey}'),
-              onPressed: blocked ? null : _replace,
-              child: const Text('替换文件'),
-            ),
-            DesktopButton(
-              key: ValueKey('library-file-versions-${widget.fieldKey}'),
-              onPressed: blocked ? null : _versions,
-              child: const Text('文件版本'),
-            ),
-            DesktopButton(
-              key: ValueKey('library-file-save-${widget.fieldKey}'),
-              onPressed: blocked
-                  ? null
-                  : () => _action(WorkspaceFileAction.saveAs),
-              child: const Text('另存为'),
-            ),
-            DesktopButton(
-              key: ValueKey('library-file-open-${widget.fieldKey}'),
-              onPressed: blocked
-                  ? null
-                  : () => _action(WorkspaceFileAction.open),
-              child: const Text('用本机程序打开'),
-            ),
-            DesktopButton(
-              key: ValueKey('library-file-preview-refresh-${widget.fieldKey}'),
-              onPressed: _previewLoading ? null : () => _turn(_page),
-              child: const Text('刷新预览'),
-            ),
-          ],
-        ),
+        if (_loading) const Text('正在读取文件信息…'),
+        if (_metadataFailure case final failure?) ...[
+          Text(
+            failure.message,
+            style: libraryText(context, 13, color: c.danger),
+          ),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: DesktopButton(onPressed: _load, child: const Text('重新读取文件')),
+          ),
+        ],
+        if (!visiblePreview)
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: toolbar,
+          ),
         if (_actionFailure != null)
           Padding(
             padding: const EdgeInsets.only(top: 10),
@@ -329,7 +427,7 @@ class _LibraryFileState extends State<LibraryFile> {
               child: const Text('核对此次操作'),
             ),
           ),
-        const SizedBox(height: 18),
+        if (!visiblePreview) const SizedBox(height: 16),
         if (_previewLoading)
           const Text('正在读取预览…')
         else if (_previewFailure != null)
@@ -347,11 +445,16 @@ class _LibraryFileState extends State<LibraryFile> {
         if (_preview case final preview?)
           Offstage(
             key: ValueKey('library-file-canvas-${widget.fieldKey}'),
-            offstage: _previewLoading || _previewFailure != null,
+            offstage:
+                _loading ||
+                _metadataFailure != null ||
+                _previewLoading ||
+                _previewFailure != null,
             child: LibraryFilePreviewView(
               key: ValueKey('library-file-preview-${widget.fieldKey}'),
               preview: preview,
               onPage: _turn,
+              toolbarLeading: visiblePreview ? toolbar : const [],
             ),
           ),
       ],
@@ -364,9 +467,13 @@ class LibraryFilePreviewView extends StatefulWidget {
     super.key,
     required this.preview,
     required this.onPage,
+    this.toolbarLeading = const [],
   });
   final WorkspaceFilePreview preview;
   final ValueChanged<int> onPage;
+  // Owner controls and reader controls share one wrapping toolbar. Historical
+  // previews use the same reader without current-file actions.
+  final List<Widget> toolbarLeading;
   @override
   State<LibraryFilePreviewView> createState() => _LibraryFilePreviewViewState();
 }
@@ -410,127 +517,177 @@ class _LibraryFilePreviewViewState extends State<LibraryFilePreviewView> {
   @override
   Widget build(BuildContext context) {
     final p = widget.preview, c = UiPalette.of(context);
-    if (p.kind == WorkspaceFilePreviewKind.unsupported) {
-      return Text(
-        '此文件格式暂不支持预览，可另存或用本机程序打开。',
-        style: libraryText(context, 14, color: c.muted),
+    final visual =
+        p.kind != WorkspaceFilePreviewKind.unsupported &&
+        p.kind != WorkspaceFilePreviewKind.text;
+    Widget body() {
+      if (p.kind == WorkspaceFilePreviewKind.unsupported) {
+        return Text(
+          '此文件格式暂不支持预览，可另存或用本机程序打开。',
+          style: libraryText(context, 14, color: c.muted),
+        );
+      }
+      if (p.kind == WorkspaceFilePreviewKind.text) {
+        return SelectableText(
+          p.text,
+          style: libraryText(context, 14, height: 1.8),
+        );
+      }
+      if (_text) {
+        return SelectableText(
+          p.text,
+          key: const ValueKey('library-file-extracted-text'),
+          style: libraryText(context, 14, height: 1.8),
+        );
+      }
+      return LayoutBuilder(
+        builder: (context, bounds) {
+          final inset = MediaQuery.sizeOf(context).width <= 1300 ? 12.0 : 25.0;
+          final available = (bounds.maxWidth - inset * 2).clamp(
+            0.0,
+            double.infinity,
+          );
+          final width =
+              available.clamp(
+                0.0,
+                p.file.mediaType == 'image/png' ? 480.0 : 610.0,
+              ) *
+              _zoom;
+          final image = SizedBox(
+            width: width,
+            child: AspectRatio(
+              aspectRatio: p.pixelWidth! / p.pixelHeight!,
+              child: Image(
+                image: _image!,
+                semanticLabel: '${p.file.filename}，第${p.page + 1}页',
+                fit: BoxFit.contain,
+                frameBuilder: (context, child, frame, synchronous) =>
+                    frame != null || synchronous
+                    ? child
+                    : Center(
+                        child: Text(
+                          '正在显示文件页面…',
+                          style: libraryText(context, 13),
+                        ),
+                      ),
+                errorBuilder: (_, _, _) => const Text('图像无法显示，可重试预览或另存文件。'),
+              ),
+            ),
+          );
+          return Container(
+            key: const ValueKey('library-file-stage'),
+            padding: EdgeInsets.all(inset),
+            decoration: BoxDecoration(
+              color: c.nav,
+              borderRadius: BorderRadius.circular(9),
+            ),
+            alignment: Alignment.topCenter,
+            child: width <= available
+                ? image
+                : ScrollConfiguration(
+                    behavior: const DesktopScrollBehavior(scrollbarGutter: 9),
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      primary: false,
+                      child: image,
+                    ),
+                  ),
+          );
+        },
       );
     }
-    if (p.kind == WorkspaceFilePreviewKind.text) {
-      return SelectableText(
-        p.text,
-        style: libraryText(context, 14, height: 1.8),
-      );
-    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Wrap(
-          spacing: 6,
-          runSpacing: 6,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          children: [
-            DesktopButton(
-              key: const ValueKey('library-file-page-back'),
-              onPressed: p.page > 0 ? () => widget.onPage(p.page - 1) : null,
-              child: const Text('上一页'),
-            ),
-            Text(
-              '${p.page + 1} / ${p.pageCount}',
-              style: libraryText(context, 13),
-            ),
-            DesktopButton(
-              key: const ValueKey('library-file-page-next'),
-              onPressed: p.page + 1 < p.pageCount
-                  ? () => widget.onPage(p.page + 1)
-                  : null,
-              child: const Text('下一页'),
-            ),
-            DesktopButton(
-              key: const ValueKey('library-file-zoom-in'),
-              onPressed: _zoom < 2 ? () => setState(() => _zoom += .5) : null,
-              child: const Text('放大'),
-            ),
-            DesktopButton(
-              key: const ValueKey('library-file-zoom-out'),
-              onPressed: _zoom > 1 ? () => setState(() => _zoom -= .5) : null,
-              child: const Text('缩小'),
-            ),
-            if (p.text.isNotEmpty)
-              DesktopButton(
-                key: const ValueKey('library-file-text-mode'),
-                onPressed: () => setState(() => _text = !_text),
-                child: Text(_text ? '文件页面' : '文字内容'),
-              ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        if (_text)
-          SelectableText(
-            p.text,
-            key: const ValueKey('library-file-extracted-text'),
-            style: libraryText(context, 14, height: 1.8),
-          )
-        else
-          LayoutBuilder(
-            builder: (context, bounds) {
-              final inset = MediaQuery.sizeOf(context).width <= 1300
-                  ? 12.0
-                  : 25.0;
-              final available = (bounds.maxWidth - inset * 2).clamp(
-                0.0,
-                double.infinity,
-              );
-              final width =
-                  available.clamp(
-                    0.0,
-                    p.file.mediaType == 'image/png' ? 480.0 : 610.0,
-                  ) *
-                  _zoom;
-              final image = SizedBox(
-                width: width,
-                child: AspectRatio(
-                  aspectRatio: p.pixelWidth! / p.pixelHeight!,
-                  child: Image(
-                    image: _image!,
-                    semanticLabel: '${p.file.filename}，第${p.page + 1}页',
-                    fit: BoxFit.contain,
-                    frameBuilder: (context, child, frame, synchronous) =>
-                        frame != null || synchronous
-                        ? child
-                        : Center(
-                            child: Text(
-                              '正在显示文件页面…',
-                              style: libraryText(context, 13),
-                            ),
-                          ),
-                    errorBuilder: (_, _, _) => const Text('图像无法显示，可重试预览或另存文件。'),
+        if (visual || widget.toolbarLeading.isNotEmpty)
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              ...widget.toolbarLeading,
+              if (visual) ...[
+                DesktopButton(
+                  key: const ValueKey('library-file-page-back'),
+                  kind: DesktopButtonKind.quiet,
+                  minimumSize: const Size(32, 32),
+                  padding: const EdgeInsets.all(6),
+                  tooltip: '上一页',
+                  onPressed: p.page > 0
+                      ? () => widget.onPage(p.page - 1)
+                      : null,
+                  child: const PrototypeIcon(
+                    PrototypeIconGlyph.back,
+                    size: 16,
+                    semanticLabel: '上一页',
                   ),
                 ),
-              );
-              return Container(
-                key: const ValueKey('library-file-stage'),
-                padding: EdgeInsets.all(inset),
-                decoration: BoxDecoration(
-                  color: c.nav,
-                  borderRadius: BorderRadius.circular(9),
+                Text(
+                  '${p.page + 1} / ${p.pageCount}',
+                  style: libraryText(context, 13),
                 ),
-                alignment: Alignment.topCenter,
-                child: width <= available
-                    ? image
-                    : ScrollConfiguration(
-                        behavior: const DesktopScrollBehavior(
-                          scrollbarGutter: 9,
-                        ),
-                        child: SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          primary: false,
-                          child: image,
-                        ),
-                      ),
-              );
-            },
+                DesktopButton(
+                  key: const ValueKey('library-file-page-next'),
+                  kind: DesktopButtonKind.quiet,
+                  minimumSize: const Size(32, 32),
+                  padding: const EdgeInsets.all(6),
+                  tooltip: '下一页',
+                  onPressed: p.page + 1 < p.pageCount
+                      ? () => widget.onPage(p.page + 1)
+                      : null,
+                  child: const PrototypeIcon(
+                    PrototypeIconGlyph.arrow,
+                    size: 16,
+                    semanticLabel: '下一页',
+                  ),
+                ),
+                DesktopButton(
+                  key: const ValueKey('library-file-zoom-in'),
+                  kind: DesktopButtonKind.quiet,
+                  minimumSize: const Size(32, 32),
+                  padding: const EdgeInsets.all(6),
+                  tooltip: '放大',
+                  onPressed: _zoom < 2
+                      ? () => setState(() => _zoom += .5)
+                      : null,
+                  child: const PrototypeIcon(
+                    PrototypeIconGlyph.plus,
+                    size: 16,
+                    semanticLabel: '放大',
+                  ),
+                ),
+                DesktopButton(
+                  key: const ValueKey('library-file-zoom-out'),
+                  kind: DesktopButtonKind.quiet,
+                  minimumSize: const Size(32, 32),
+                  padding: const EdgeInsets.all(6),
+                  tooltip: '缩小',
+                  onPressed: _zoom > 1
+                      ? () => setState(() => _zoom -= .5)
+                      : null,
+                  child: Semantics(label: '缩小', child: const Text('−')),
+                ),
+                if (p.text.isNotEmpty)
+                  DesktopButton(
+                    key: const ValueKey('library-file-text-mode'),
+                    kind: DesktopButtonKind.quiet,
+                    fontSize: 13,
+                    minimumSize: const Size(0, 32),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 9,
+                      vertical: 5,
+                    ),
+                    selected: _text,
+                    onPressed: () => setState(() => _text = !_text),
+                    child: Text(_text ? '文件页面' : '文字内容'),
+                  ),
+              ],
+            ],
           ),
+        if (visual || widget.toolbarLeading.isNotEmpty)
+          const SizedBox(height: 16),
+        body(),
       ],
     );
   }

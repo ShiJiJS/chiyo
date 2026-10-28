@@ -125,6 +125,7 @@ void main() {
           1,
         );
         (model.source as SampleWorkspaceSource).cancelNextFileAction = true;
+        await tap(key('library-file-actions-file'));
         await tap(key('library-file-save-file'));
         expect(
           (await model.source.loadFileHistory(ref, 'file')).current.ref.version,
