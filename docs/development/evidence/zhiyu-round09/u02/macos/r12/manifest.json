@@ -289,6 +289,10 @@
       "bytes": 2112,
       "sha256": "1a912bb360d96f9f7189360c4ecf57d0d54acd575ecf47774c1381381e796167"
     },
+    "cleanup.json": {
+      "bytes": 562,
+      "sha256": "a5aaa25fa2be9f8300bfd1f22b2a1d78261d11521e74006596f6491bfcc2ba75"
+    },
     "commands.json": {
       "bytes": 1868,
       "sha256": "c41c3db8aa149424a214aa1e0e610755a7bfb71f5c05824ef7fbd4e02179bce2"
