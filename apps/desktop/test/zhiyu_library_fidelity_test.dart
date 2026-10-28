@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:info_desktop/desktop_fonts.dart';
@@ -20,7 +21,12 @@ void main() {
     t.view.devicePixelRatio = 1;
     addTearDown(t.view.resetPhysicalSize);
     addTearDown(t.view.resetDevicePixelRatio);
-    await t.pumpWidget(const PreviewWorkspace());
+    await t.pumpWidget(
+      const RepaintBoundary(
+        key: ValueKey('fidelity-root'),
+        child: PreviewWorkspace(),
+      ),
+    );
     await t.pumpAndSettle();
     if (dark) {
       await t.tap(find.byKey(const ValueKey('preview-guide')));
@@ -38,6 +44,64 @@ void main() {
       find.byKey(const ValueKey('library-record-information:azure'));
   Finder inside(String text) =>
       find.descendant(of: row(), matching: find.text(text));
+  for (final size in [const Size(1440, 900), const Size(1280, 800)]) {
+    for (final dark in [false, true]) {
+      for (final scale in [1.0, 2.0]) {
+        testWidgets(
+          'sidebar storage note and recycle stay reachable at $size dark=$dark scale=$scale',
+          (t) async {
+            t.platformDispatcher.textScaleFactorTestValue = scale;
+            addTearDown(t.platformDispatcher.clearTextScaleFactorTestValue);
+            final model = await start(t, size, dark);
+            final footer = find.byKey(const ValueKey('library-side-footer'));
+            final recycle = find.byKey(const ValueKey('library-open-recycle'));
+            final note = find.byKey(
+              const ValueKey('library-local-storage-note'),
+            );
+            final rail = t.getRect(
+              find.byKey(const ValueKey('library-directory-pane')),
+            );
+            final bounds = t.getRect(footer), text = t.getRect(note);
+            expect(bounds.left, rail.left);
+            expect(bounds.right, closeTo(rail.right - 1, 1));
+            expect(bounds.bottom, size.height);
+            expect(bounds.contains(text.topLeft), isTrue);
+            expect(bounds.contains(text.bottomRight), isTrue);
+            expect(text.top, greaterThan(t.getRect(recycle).bottom));
+            expect(recycle.hitTestable(), findsOneWidget);
+            expect(note.hitTestable(), findsOneWidget);
+            expect(t.widget<Text>(note).maxLines, isNull);
+            const output = String.fromEnvironment('UI_EVIDENCE_DIR');
+            if (output.isNotEmpty && scale == 2) {
+              final boundary = t.renderObject<RenderRepaintBoundary>(
+                find.byKey(const ValueKey('fidelity-root')),
+              );
+              await t.runAsync(() async {
+                final frame = await boundary.toImage(pixelRatio: 1);
+                final bytes = await frame.toByteData(
+                  format: ui.ImageByteFormat.png,
+                );
+                final file = File(
+                  '$output/footer-${size.width.toInt()}-${dark ? 'dark' : 'light'}-200.png',
+                );
+                await file.parent.create(recursive: true);
+                await file.writeAsBytes(bytes!.buffer.asUint8List());
+                frame.dispose();
+              });
+            }
+            await t.tap(recycle);
+            await t.pumpAndSettle();
+            await t.tap(find.byKey(const ValueKey('library-recycle-back')));
+            await t.pumpAndSettle();
+            expect(model.selection, azure);
+            expect(note, findsOneWidget);
+            expect(t.takeException(), isNull);
+          },
+          skip: !Platform.isMacOS,
+        );
+      }
+    }
+  }
   for (final size in [const Size(1440, 900), const Size(1280, 800)]) {
     for (final dark in [false, true]) {
       testWidgets(
