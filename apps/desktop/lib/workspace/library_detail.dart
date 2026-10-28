@@ -243,14 +243,14 @@ class _LibraryDetailState extends State<LibraryDetail> {
               ),
               child: DesktopButton(
                 key: ValueKey('library-relation-${ref.key}'),
-                kind: DesktopButtonKind.quiet,
+                kind: DesktopButtonKind.link,
                 radius: 0,
                 alignment: Alignment.centerLeft,
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 onPressed: () => widget.onOpen(ref),
                 child: Row(
                   children: [
-                    RecordIcon(record.type, size: 34),
+                    RecordIcon(record.type, size: 34, radius: 7),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(
@@ -258,10 +258,11 @@ class _LibraryDetailState extends State<LibraryDetail> {
                         children: [
                           Text(
                             record.name,
-                            style: libraryText(
-                              context,
-                              14,
-                              weight: FontWeight.w600,
+                            key: ValueKey('library-relation-name-${ref.key}'),
+                            style: const TextStyle(
+                              fontSize: 14,
+                              height: 1.6,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                           const SizedBox(height: 2),
@@ -277,8 +278,19 @@ class _LibraryDetailState extends State<LibraryDetail> {
                         ],
                       ),
                     ),
-                    const SizedBox(width: 10),
-                    const PrototypeIcon(PrototypeIconGlyph.chev, size: 14),
+                    const SizedBox(width: 12),
+                    SizedBox(
+                      key: ValueKey('library-relation-chevron-${ref.key}'),
+                      width: 15,
+                      height: 19,
+                      child: Center(
+                        child: PrototypeIcon(
+                          PrototypeIconGlyph.chev,
+                          size: 15,
+                          color: UiPalette.of(context).muted,
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),

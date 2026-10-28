@@ -54,9 +54,17 @@ double libraryChWidth(BuildContext context, TextStyle style, int count) {
 }
 
 class RecordIcon extends StatelessWidget {
-  const RecordIcon(this.type, {super.key, this.size = 33});
+  const RecordIcon(
+    this.type, {
+    super.key,
+    this.size = 33,
+    this.radius = 10,
+    this.glyphSize,
+  });
   final WorkspaceType type;
   final double size;
+  final double radius;
+  final double? glyphSize;
   @override
   Widget build(BuildContext context) {
     final dark = Theme.of(context).brightness == Brightness.dark;
@@ -92,9 +100,13 @@ class RecordIcon extends StatelessWidget {
       alignment: Alignment.center,
       decoration: BoxDecoration(
         color: Color(background),
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(radius),
       ),
-      child: PrototypeIcon(glyph, size: size > 40 ? 23 : 18, color: Color(ink)),
+      child: PrototypeIcon(
+        glyph,
+        size: glyphSize ?? (size > 40 ? 23 : 18),
+        color: Color(ink),
+      ),
     );
   }
 }

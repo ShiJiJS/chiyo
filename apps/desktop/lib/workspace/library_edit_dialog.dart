@@ -3,6 +3,7 @@ import '../desktop_controls.dart';
 import '../ui_palette.dart';
 import 'library_controller.dart';
 import 'library_widgets.dart';
+import 'library_create_dialog.dart';
 import 'library_relation_picker.dart';
 import 'library_entries.dart';
 import 'workspace_entries.dart';
@@ -20,6 +21,7 @@ Future<WorkspaceRecordRef?> showLibraryEditor(
   WorkspaceLegacyTemplate? legacyTemplate,
   WorkspaceFilePicker? filePicker,
   WorkspaceCredentialPicker? credentialPicker,
+  VoidCallback? onOpenPlugins,
 }) async {
   final catalog = controller.catalog;
   if (catalog == null) return null;
@@ -29,37 +31,34 @@ Future<WorkspaceRecordRef?> showLibraryEditor(
       (legacyTemplate == null
           ? null
           : catalog.types.where((t) => t.id == 'generic').firstOrNull);
-  type ??= await showDesktopDialog<WorkspaceType>(
-    context,
-    builder: (context) => DesktopDialog(
-      title: const Text('添加资料'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          for (final candidate in catalog.creatableTypes)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 10),
-              child: DesktopButton(
-                key: ValueKey('library-new-type-${candidate.id}'),
-                onPressed: () => Navigator.pop(context, candidate),
-                leading: RecordIcon(candidate),
-                padding: const EdgeInsets.all(14),
-                alignment: Alignment.centerLeft,
-                child: Text(candidate.name),
-              ),
-            ),
-        ],
+  if (type == null) {
+    final choice = await showDesktopDialog<LibraryCreateChoice>(
+      context,
+      builder: (_) => LibraryCreateDialog(
+        catalog: catalog,
+        plugins: controller.source.plugins,
+        directoryId: controller.query.directoryId,
+        canOpenPlugins: onOpenPlugins != null,
       ),
-      actions: [
-        DesktopButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('取消'),
-        ),
-      ],
-    ),
-  );
-  if (type == null || !context.mounted) return null;
+    );
+    if (!context.mounted) return null;
+    switch (choice) {
+      case LibraryCreateTemplate(:final type):
+        return showLibraryEditor(
+          context,
+          controller,
+          selectedType: type,
+          filePicker: filePicker,
+          credentialPicker: credentialPicker,
+        );
+      case LibraryCreatePlugins():
+        onOpenPlugins?.call();
+        return null;
+      case null:
+        return null;
+    }
+  }
+  if (!context.mounted) return null;
   if (type.id == 'credential') {
     return showLibraryCredentialEditor(
       context,
@@ -115,7 +114,7 @@ Future<WorkspaceRecordRef?> showLibraryEditor(
     context,
     builder: (_) => _Editor(
       controller: controller,
-      type: type!,
+      type: type,
       definition: definition,
       detail: detail,
       filePicker: filePicker,
