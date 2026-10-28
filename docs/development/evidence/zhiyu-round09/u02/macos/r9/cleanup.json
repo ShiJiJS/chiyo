@@ -1,0 +1,79 @@
+{
+  "createdAt": "2026-10-28T14:00:32.812898+00:00",
+  "removed": [
+    {
+      "path": "build/zhiyu-ui/u02/macos/r9",
+      "files": 108,
+      "bytes": 5815925
+    },
+    {
+      "path": "build/zhiyu-ui/u02/macos/r9-font-probe.log",
+      "files": 1,
+      "bytes": 612
+    },
+    {
+      "path": "build/zhiyu-ui/u02/macos/r9-build.log",
+      "files": 1,
+      "bytes": 125
+    },
+    {
+      "path": "build/zhiyu-ui/u02/macos/r9-capture-api-before.log",
+      "files": 1,
+      "bytes": 5865
+    },
+    {
+      "path": "build/zhiyu-ui/u02/macos/r9-regression.log",
+      "files": 1,
+      "bytes": 14357
+    },
+    {
+      "path": "build/zhiyu-ui/u02/macos/r9-analysis.log",
+      "files": 1,
+      "bytes": 96
+    },
+    {
+      "path": "build/zhiyu-ui/u02/macos/r9-final-targeted.log",
+      "files": 1,
+      "bytes": 3052
+    },
+    {
+      "path": "build/zhiyu-ui/u02/macos/r9-targeted.log",
+      "files": 1,
+      "bytes": 2879
+    },
+    {
+      "path": "build/zhiyu-ui/u02/macos/r9-meta-height-before.log",
+      "files": 1,
+      "bytes": 11256
+    },
+    {
+      "path": "build/zhiyu-ui/u02/macos/r9-layout-targeted.log",
+      "files": 1,
+      "bytes": 3032
+    },
+    {
+      "path": "build/zhiyu-ui/u02/macos/r9-title-run-before.log",
+      "files": 1,
+      "bytes": 11966
+    }
+  ],
+  "totalFiles": 118,
+  "totalBytes": 5869165,
+  "preserved": [
+    "fixed ordinary preview App",
+    "committed source and bounded evidence",
+    "unknown .local/"
+  ],
+  "verifiedBeforeCleanup": {
+    "evidenceGitBlobs": 60,
+    "sourceGitBlobs": 184,
+    "fixedAppPayloadHashes": true
+  },
+  "browser": "TaskSpace206 finished keep[] after verified publication; unrelated spaces untouched",
+  "referenceServer": {
+    "session": 77214,
+    "normalExitCode": 0,
+    "method": "own server Ctrl-C, drained"
+  },
+  "temporaryProbe": "moved out of product tool directory and archived as font-probe.dart.txt; no installed-font changes"
+}

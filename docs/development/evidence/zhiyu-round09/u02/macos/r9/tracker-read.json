@@ -1,0 +1,33 @@
+{
+  "createdAt": "2026-10-28T14:00:32.788678+00:00",
+  "sourceCommit": "c4e379ed7a88cc84acfd83db829a06fccaad30ce",
+  "documentCommit": "3c7df5247bc3c322f9a03995685cfca939204a17",
+  "issue": 63,
+  "title": "知予前端 U02：三栏信息库与服务器、应用资料界面",
+  "state": "OPEN",
+  "checkedTotal": 6,
+  "criteriaTotal": 7,
+  "labels": [
+    "enhancement",
+    "ready-for-agent"
+  ],
+  "comments": 0,
+  "beforeBodySha256": "3231f0025ccca3bb29d7a1bcaf16591fdd0e1e4492b9fd9355c70fadabb0ee8a",
+  "afterBodySha256": "d086293323694ae154b30cf90af600471edcbcde1fbd1237fb329cb102f8fbd7",
+  "bodyMatchesDraft": true,
+  "metadataUnchanged": true,
+  "publication": {
+    "issue": 63,
+    "verified": true,
+    "nativeDependencies": [
+      62
+    ],
+    "spaceId": 206,
+    "spaceFinished": true
+  },
+  "verifiedBeforeCleanup": {
+    "evidenceGitBlobs": 60,
+    "sourceGitBlobs": 184,
+    "fixedAppPayloadHashes": true
+  }
+}
