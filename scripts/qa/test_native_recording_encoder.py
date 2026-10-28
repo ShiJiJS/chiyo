@@ -35,6 +35,52 @@ class RecordingEncoderTests(unittest.TestCase):
                                     'viewportCropped': False}))
         return path
 
+    def still_receipt(self, frames, **changes):
+        path = self.root / 'native-stills.json'
+        data = {'kind': 'native-flutter-stills-raw-rgba', 'pixelRatio': 1,
+                'viewportCropped': False, 'stills': frames, **changes}
+        path.write_text(json.dumps(data))
+        return path
+
+    def test_deferred_stills_preserve_alpha_pixels_names_and_capture_metadata(self):
+        frame = {**self.raw(0), 'output': 'dialog-light.png',
+                 'recordingActive': True, 'recordingMs': 350}
+        report = encoder.encode_stills(self.still_receipt([frame]))
+        self.assertEqual(report['sourceCount'], 1)
+        self.assertEqual(report['format'], 'lossless-RGBA-PNG')
+        self.assertEqual(report['sources'][0]['recordingMs'], 350)
+        self.assertEqual(report['sources'][0]['captureUs'], 1000)
+        with Image.open(self.root / frame['output']) as image:
+            self.assertEqual(image.size, (8, 8))
+            self.assertEqual(image.mode, 'RGBA')
+            self.assertEqual(image.getpixel((0, 0)), (31, 77, 125, 128))
+        self.assertEqual(len(report['sources'][0]['pngSha256']), 64)
+
+    def test_deferred_still_outputs_reject_escape_duplicates_symlinks_and_source_overwrite(self):
+        frame = {**self.raw(0), 'output': 'good.png'}
+        link = self.root / 'link.png'
+        link.symlink_to(self.root / frame['file'])
+        for name in ['../escape.png', 'nested/file.png', frame['file'], 'bad\n.png', 'link.png']:
+            with self.subTest(name=name), self.assertRaises(ValueError):
+                encoder.encode_stills(self.still_receipt([{**frame, 'output': name}]))
+        with self.assertRaises(ValueError):
+            encoder.encode_stills(self.still_receipt([frame, frame]))
+        self.assertFalse((self.root / 'good.png').exists())
+
+    def test_deferred_still_receipts_require_full_resolution_raw_bounded_sources(self):
+        frame = {**self.raw(0), 'output': 'still.png'}
+        for changes in [{'kind': 'unknown'}, {'pixelRatio': .5}, {'pixelRatio': True},
+                        {'viewportCropped': True}, {'stills': []},
+                        {'stills': [frame] * 257},
+                        {'stills': [{**frame, 'format': 'png'}]}]:
+            with self.subTest(changes=list(changes)), self.assertRaises(ValueError):
+                encoder.encode_stills(self.still_receipt([frame], **changes))
+
+    def test_deferred_still_aggregate_pixel_budget_is_enforced(self):
+        frames = [{**self.raw(i), 'output': f'still-{i}.png'} for i in range(2)]
+        with patch.object(encoder, 'MAX_TOTAL_PIXELS', 100), self.assertRaises(ValueError):
+            encoder.encode_stills(self.still_receipt(frames))
+
     def test_straight_rgba_pixels_and_alpha_round_trip_without_scaling(self):
         frame = self.raw(0)
         image, identity = encoder.decode_frame(self.root, frame)

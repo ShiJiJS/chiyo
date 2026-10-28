@@ -57,6 +57,13 @@ void main() {
       print('ZHIYU_NATIVE_EVIDENCE=$directory');
       final boundary = GlobalKey();
       final checks = <String>[];
+      final recording = NativeFrameRecording(
+        boundary,
+        root,
+        python,
+        encoderScript,
+      );
+      addTearDown(recording.dispose);
       await tester.pumpWidget(
         RepaintBoundary(
           key: boundary,
@@ -87,6 +94,10 @@ void main() {
 
       Future<void> screenshot(String name) async {
         await tester.pumpAndSettle();
+        if (Platform.isMacOS) {
+          await recording.saveStill(name);
+          return;
+        }
         final render =
             boundary.currentContext!.findRenderObject()!
                 as RenderRepaintBoundary;
@@ -133,6 +144,10 @@ void main() {
           'wallErrorMs': wallError,
           'translation': translation,
           'passed': passed,
+          'readWallDurationMs': samples.last['readWallMs'],
+          'maximumFrameReadDelayMs': samples
+              .map((s) => s['frameReadDelayMs']! as num)
+              .reduce((a, b) => a > b ? a : b),
           'samples': samples,
         };
         await File('$directory/native-motion.json').writeAsString(
@@ -362,13 +377,6 @@ void main() {
         }
       }
 
-      final recording = NativeFrameRecording(
-        boundary,
-        root,
-        python,
-        encoderScript,
-      );
-      addTearDown(recording.dispose);
       await recording.start();
       recording.mark('light-hover');
       final pointer = await tester.createGesture(
