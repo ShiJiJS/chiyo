@@ -1,0 +1,10 @@
+{
+  "cwd": "apps/desktop unless specified",
+  "focused": "../../scripts/dev-macos.sh flutter test --no-pub test/zhiyu_attachment_reading_test.dart test/zhiyu_credentials_test.dart test/zhiyu_credential_lifecycle_test.dart test/zhiyu_content_test.dart test/zhiyu_content_fidelity_test.dart --reporter expanded --dart-define=UI_ATTACHMENT_EVIDENCE_DIR=/Users/jiangxinyi/Documents/Project/agent-info/build/zhiyu-ui/u03/macos/r12/actual --dart-define=UI_EVIDENCE_DIR=/Users/jiangxinyi/Documents/Project/agent-info/build/zhiyu-ui/u03/macos/r12/flows",
+  "related": "../../scripts/dev-macos.sh flutter test --no-pub test/zhiyu_*_test.dart test/workspace_*_test.dart test/mac_preview_desktop_test.dart test/mac_preview_isolation_test.dart test/desktop_controls_test.dart test/desktop_motion_contract_test.dart test/desktop_scrollbar_policy_test.dart --reporter expanded",
+  "analysis": "../../scripts/dev-macos.sh flutter analyze --no-pub --fatal-infos",
+  "native": "../../scripts/dev-macos.sh preview-check --library --reporter expanded",
+  "build": "FLUTTER_MACOS_ARM64_ONLY=true XCODE_XCCONFIG_FILE=/Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/macos/Runner/Configs/Preview.xcconfig ../../scripts/dev-macos.sh flutter build macos --debug --no-pub --target lib/preview_main.dart",
+  "bodyComparison": "python3 scripts/qa/compare-zhiyu-credential-body.py --reference /Users/jiangxinyi/Documents/Project/agent-info/docs/development/evidence/zhiyu-round09/u03/macos/r12/reference --actual /Users/jiangxinyi/Documents/Project/agent-info/docs/development/evidence/zhiyu-round09/u03/macos/r12/actual --output /tmp/zhiyu-r12-body.json (repo root)",
+  "ordering": "39 focused/current captures; only test metadata loop braces fixed; final strict analysis,481 related,native1/17,ordinary arm64 build. No later application edits."
+}

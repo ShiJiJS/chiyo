@@ -1,0 +1,14 @@
+[
+  {
+    "name": "light-1440-100-sshkey",
+    "left": "reference/light-1440-100-sshkey.png",
+    "right": "actual/light-1440-100-sshkey.png",
+    "rescaled": false
+  },
+  {
+    "name": "dark-1280-100-sshkey",
+    "left": "reference/dark-1280-100-sshkey.png",
+    "right": "actual/dark-1280-100-sshkey.png",
+    "rescaled": false
+  }
+]
