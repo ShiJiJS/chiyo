@@ -9,6 +9,8 @@ import 'backup_controller.dart';
 import 'backup_page.dart';
 import 'runtime_controller.dart';
 import 'runtime_page.dart';
+import 'agents_controller.dart';
+import 'agents_page.dart';
 import 'classification_page.dart';
 import 'plugins_controller.dart';
 import 'settings_controller.dart';
@@ -22,6 +24,7 @@ class WorkspaceSettingsPage extends StatefulWidget {
     required this.classifications,
     required this.backups,
     required this.runtime,
+    required this.agents,
     required this.backupPicker,
     required this.onLibrary,
     required this.pluginBuilder,
@@ -33,6 +36,7 @@ class WorkspaceSettingsPage extends StatefulWidget {
   final ClassificationController classifications;
   final BackupController backups;
   final WorkspaceRuntimeController runtime;
+  final WorkspaceAgentsController agents;
   final WorkspaceBackupPicker backupPicker;
   final VoidCallback onLibrary;
   final WidgetBuilder pluginBuilder;
@@ -472,6 +476,8 @@ class _WorkspaceSettingsPageState extends State<WorkspaceSettingsPage> {
                         PrototypeIconGlyph.shield,
                       WorkspaceSettingsSection.runtime =>
                         PrototypeIconGlyph.tune,
+                      WorkspaceSettingsSection.agents =>
+                        PrototypeIconGlyph.link,
                     }),
                     selected:
                         m.section == section &&
@@ -558,6 +564,12 @@ class _WorkspaceSettingsPageState extends State<WorkspaceSettingsPage> {
                 ? WorkspaceRuntimePage(
                     controller: widget.runtime,
                     preferences: m,
+                    onRequest: widget.onRequest,
+                    onModalChanged: widget.onModalChanged,
+                  )
+                : m.section == WorkspaceSettingsSection.agents
+                ? WorkspaceAgentsPage(
+                    controller: widget.agents,
                     onRequest: widget.onRequest,
                     onModalChanged: widget.onModalChanged,
                   )

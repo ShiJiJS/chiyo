@@ -691,6 +691,26 @@ void main() {
       await backup.write(WorkspaceBackupAction.restore);
       expect(backup.result!.action, WorkspaceBackupAction.restore);
       await t.pumpAndSettle();
+      final agents = t
+          .widget<WorkspaceSettingsPage>(find.byType(WorkspaceSettingsPage))
+          .agents;
+      await agents.load();
+      agents.open(WorkspaceAgentView.diagnostics);
+      await agents.readDetails();
+      expect(agents.report, isNotNull);
+      agents.close();
+      await source.agents.setScenario(SampleAgentScenario.bindingMismatch);
+      await agents.load();
+      agents.open(WorkspaceAgentView.session);
+      await agents.readDetails();
+      expect(agents.session!.requests, isEmpty);
+      expect(
+        agents.session!.session.state,
+        WorkspaceAgentSessionState.mismatch,
+      );
+      agents.close();
+      await source.agents.setScenario(SampleAgentScenario.ready);
+      await agents.load();
       var preparedRuntime = false;
       final preparingRuntime = source.prepareRuntimeMaintenance().then(
         (_) => preparedRuntime = true,
