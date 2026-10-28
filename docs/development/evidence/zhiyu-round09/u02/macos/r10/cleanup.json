@@ -1,0 +1,24 @@
+{
+  "createdAt": "2026-10-28T15:47:07.200760+00:00",
+  "removedFiles": 210,
+  "removedBytes": 15613302,
+  "scopes": [
+    "build/zhiyu-ui/u02/macos/r10",
+    "build/zhiyu-ui/u02/macos/r10-analysis.log",
+    "build/zhiyu-ui/u02/macos/r10-workflows.log",
+    "build/zhiyu-ui/u02/macos/r10-regression.log",
+    "build/zhiyu-ui/u02/macos/r10-native-build.log",
+    "build/zhiyu-ui/u02/macos/r10-first-flow.log"
+  ],
+  "verifiedBeforeRemoval": {
+    "evidenceGitBlobs": 121,
+    "sourceGitBlobs": 187,
+    "fixedAppPayloadHashes": true
+  },
+  "retainedEvidenceBytes": 2201485,
+  "fixedAppRetained": "apps/desktop/build/macos/Build/Products/Debug/info_desktop.app",
+  "unknownLocalUntouched": true,
+  "space208Finished": true,
+  "referenceServer28314Stopped": true,
+  "status": "complete"
+}
