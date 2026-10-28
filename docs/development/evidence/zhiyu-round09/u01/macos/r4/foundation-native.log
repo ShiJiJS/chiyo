@@ -1,0 +1,12 @@
+00:00 +0: loading /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/integration_test/zhiyu_foundation_native_test.dart
+Building macOS application...                                   
+✓ Built build/macos/Build/Products/Debug/info_desktop.app
+Failed to foreground app; open returned 1
+00:00 +0: isolated Zhiyu native controls, motion, large text and reduced motion
+ZHIYU_NATIVE_EVIDENCE=/Users/jiangxinyi/Library/Containers/com.example.infoDesktop.zhiyuPreview/Data/tmp/ZhiyuUI-3C557878-C313-4040-802E-B9CDC79FA78D
+ZHIYU_NATIVE_MOTION=detail
+ZHIYU_NATIVE_MOTION=dialog
+ZHIYU_NATIVE_MOTION=menu
+ZHIYU_NATIVE_MOTION=feedback
+00:24 +1: (tearDownAll)
+00:24 +1: All tests passed!

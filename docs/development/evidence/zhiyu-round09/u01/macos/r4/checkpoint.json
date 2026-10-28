@@ -1,0 +1,103 @@
+{
+  "createdAt": "2026-10-28T23:55:21.698824+00:00",
+  "sourceCommit": "9d8ccfec4e6175709394a7c530f3c56f287088a1",
+  "productSourceCommit": "ca45fa5898ac59f7f62c192f38c209f521d443c0",
+  "productionCodeUnchanged": true,
+  "issue": {
+    "number": 62,
+    "checked": 10,
+    "total": 12,
+    "state": "OPEN"
+  },
+  "checks": {
+    "analysis": "passed --fatal-infos",
+    "focusedTests": 24,
+    "codecTests": 14,
+    "nativeTestsPassed": 2,
+    "PNGCountPixelVerified": 47,
+    "nativeClockGateThisRunPassed": true,
+    "ordinaryArm64BuildPassed": true,
+    "fullS5Passed": false,
+    "normalSpeedMotionAccepted": false,
+    "OSInputAccepted": false
+  },
+  "recordings": {
+    "foundation": {
+      "testPassed": true,
+      "functionalChecks": 10,
+      "deferredPNGsPixelVerified": 16,
+      "stillsCapturedDuringClip": 3,
+      "sourceFrameCount": 122,
+      "wallClockDurationMs": 5418,
+      "sourceGaps": {
+        "count": 121,
+        "maximumMs": 137,
+        "medianMs": 34,
+        "p95Ms": 86
+      },
+      "captureTimeUs": {
+        "count": 122,
+        "maximumUs": 112117,
+        "medianUs": 26490.5,
+        "p95Us": 52056
+      },
+      "framebufferSize": [
+        1440,
+        900
+      ],
+      "viewportCropped": false
+    },
+    "library": {
+      "testPassed": true,
+      "functionalChecks": 20,
+      "deferredPNGsPixelVerified": 31,
+      "stillsCapturedDuringClip": 3,
+      "sourceFrameCount": 92,
+      "wallClockDurationMs": 8400,
+      "sourceGaps": {
+        "count": 91,
+        "maximumMs": 469,
+        "medianMs": 59,
+        "p95Ms": 324
+      },
+      "captureTimeUs": {
+        "count": 92,
+        "maximumUs": 468125,
+        "medianUs": 41894.0,
+        "p95Us": 199051
+      },
+      "framebufferSize": [
+        1440,
+        900
+      ],
+      "viewportCropped": false
+    }
+  },
+  "changes": [
+    "Raw deferred stills share the video sampling lock before/during/after recording; host alone encodes PNG after app exit.",
+    "Still manifests bound count/pixels/compressed bytes and validate unique safe output names; host refuses escapes/symlinks/duplicates and retains source/decoded/PNG hashes.",
+    "Native probe retains readWallMs/frameReadDelayMs for diagnosis. Original frame/wall20ms gates unchanged."
+  ],
+  "scope": [
+    "Six numeric native gates passed once, not a claim of cold-start stability; r3 failures retained.",
+    "Frame property read is not OS pixel presentation. Initial read delays up to118.331ms persist; information-library clip max gap469ms.",
+    "Foundation capture max gap improved from480ms to137ms in these observations; library did not improve. Different load/run conditions, not a causal benchmark.",
+    "Preview uses native Flutter framebuffer and Widget input, not global OS input or system DPI change.",
+    "Prior517 product regression belongs to ca45fa58; not rerun/claimed as this QA-only check."
+  ],
+  "pending": [
+    "Isolate Debug/JIT/initial layout/GPU readback and use suitable performance-mode evidence while keeping one fixed App.",
+    "Remaining full S5 state/baseline/shadow/normal-speed review across seven UI gates.",
+    "Real Cmd editing/IME/trackpad/accessibility in a fixed candidate; F01 after UI gates."
+  ],
+  "isolation": {
+    "computerUse": false,
+    "subagents": false,
+    "personalData": false,
+    "Keychain": false,
+    "notifications": false,
+    "realHooks": false,
+    "WindowsCI": false,
+    "copiedAppOrDSYM": false
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "architecture": "arm64",
+  "nativeDPR": 2,
+  "capturePixelRatio": 1,
+  "viewports": [
+    [
+      1440,
+      900
+    ],
+    [
+      1280,
+      800
+    ]
+  ],
+  "SDKRevision": "abaf9c523780a608bd46686fd5e53740a07077f8",
+  "Xcode": "Xcode 27.1\nBuild version 27A9275",
+  "nativeBuildMode": "debug; fixed SDK test.dart forcedBuildMode BuildMode.debug",
+  "profilePerformanceAccepted": false
+}

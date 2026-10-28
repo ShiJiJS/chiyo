@@ -1,0 +1,745 @@
+{
+  "format": "GIF",
+  "playbackSpeed": 1,
+  "wallClockDurationMs": 8400,
+  "firstFrameMs": 0,
+  "encodedStartMs": 0,
+  "encodedEndMs": 8400,
+  "encodedDurationMs": 8400,
+  "sourceFrameCount": 92,
+  "distinctSourceFrameCount": 32,
+  "sourceTimesMs": [
+    0,
+    62,
+    99,
+    129,
+    165,
+    489,
+    560,
+    606,
+    740,
+    905,
+    1165,
+    1628,
+    1806,
+    1880,
+    1944,
+    2011,
+    2053,
+    2110,
+    2143,
+    2175,
+    2215,
+    2248,
+    2279,
+    2355,
+    2557,
+    2603,
+    2639,
+    2716,
+    2781,
+    2807,
+    2842,
+    3019,
+    3069,
+    3105,
+    3139,
+    3198,
+    3263,
+    3303,
+    3362,
+    3405,
+    3461,
+    3537,
+    3596,
+    3721,
+    3828,
+    3888,
+    4088,
+    4263,
+    4292,
+    4353,
+    4418,
+    4452,
+    4486,
+    4524,
+    4879,
+    5041,
+    5135,
+    5193,
+    5355,
+    5470,
+    5559,
+    5607,
+    5670,
+    6042,
+    6126,
+    6275,
+    6432,
+    6526,
+    6626,
+    7095,
+    7291,
+    7326,
+    7357,
+    7408,
+    7557,
+    7699,
+    7752,
+    7799,
+    7826,
+    7849,
+    7885,
+    8040,
+    8083,
+    8113,
+    8148,
+    8180,
+    8215,
+    8254,
+    8284,
+    8312,
+    8345,
+    8375
+  ],
+  "encodedFrameCount": 34,
+  "cumulativeTimeQuantizationMs": 10,
+  "framebufferSize": [
+    1440,
+    900
+  ],
+  "sourcePixelRatio": 1,
+  "viewportCropped": false,
+  "sourceGaps": {
+    "count": 91,
+    "maximumMs": 469,
+    "medianMs": 59,
+    "p95Ms": 324
+  },
+  "eventWindows": [
+    {
+      "event": "chooser-open-with-sharp-surface-and-blurred-barrier",
+      "startMs": 26,
+      "endMs": 1128,
+      "sourceFrameCount": 9,
+      "coverageGaps": {
+        "count": 10,
+        "maximumMs": 324,
+        "medianMs": 58.5,
+        "p95Ms": 324
+      }
+    },
+    {
+      "event": "chooser-close-without-reverse-animation",
+      "startMs": 1128,
+      "endMs": 1625,
+      "sourceFrameCount": 1,
+      "coverageGaps": {
+        "count": 2,
+        "maximumMs": 460,
+        "medianMs": 248.5,
+        "p95Ms": 460
+      }
+    },
+    {
+      "event": "query-server-and-tag",
+      "startMs": 1625,
+      "endMs": 4413,
+      "sourceFrameCount": 39,
+      "coverageGaps": {
+        "count": 40,
+        "maximumMs": 202,
+        "medianMs": 59.0,
+        "p95Ms": 200
+      }
+    },
+    {
+      "event": "failed-save-preserves-draft",
+      "startMs": 4413,
+      "endMs": 7267,
+      "sourceFrameCount": 20,
+      "coverageGaps": {
+        "count": 21,
+        "maximumMs": 469,
+        "medianMs": 94,
+        "p95Ms": 372
+      }
+    },
+    {
+      "event": "open-related-and-return",
+      "startMs": 7267,
+      "endMs": 8400,
+      "sourceFrameCount": 22,
+      "coverageGaps": {
+        "count": 23,
+        "maximumMs": 155,
+        "medianMs": 35,
+        "p95Ms": 149
+      }
+    }
+  ],
+  "captureTimeUs": {
+    "count": 92,
+    "maximumUs": 468125,
+    "medianUs": 41894.0,
+    "p95Us": 199051
+  },
+  "busyTicksSkipped": 75,
+  "unpaintedTicksSkipped": 0,
+  "bufferedCompressedBytes": 16377837,
+  "gifPaletteColors": 256,
+  "sourceHashes": [
+    {
+      "file": "native-controls-frames/frame-00000.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "c58a0e698bb2bb72d0a7113f13feb36450a0400f1896c7aebc52e52ecedf7c13",
+      "decodedRgbaSha256": "a0f76b8b7cf10a6187ad3b3d37a38a489e2d6a52e8b55ab77aa8abcd869b9049"
+    },
+    {
+      "file": "native-controls-frames/frame-00001.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "c58a0e698bb2bb72d0a7113f13feb36450a0400f1896c7aebc52e52ecedf7c13",
+      "decodedRgbaSha256": "a0f76b8b7cf10a6187ad3b3d37a38a489e2d6a52e8b55ab77aa8abcd869b9049"
+    },
+    {
+      "file": "native-controls-frames/frame-00002.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "c58a0e698bb2bb72d0a7113f13feb36450a0400f1896c7aebc52e52ecedf7c13",
+      "decodedRgbaSha256": "a0f76b8b7cf10a6187ad3b3d37a38a489e2d6a52e8b55ab77aa8abcd869b9049"
+    },
+    {
+      "file": "native-controls-frames/frame-00003.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "c58a0e698bb2bb72d0a7113f13feb36450a0400f1896c7aebc52e52ecedf7c13",
+      "decodedRgbaSha256": "a0f76b8b7cf10a6187ad3b3d37a38a489e2d6a52e8b55ab77aa8abcd869b9049"
+    },
+    {
+      "file": "native-controls-frames/frame-00004.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "c58a0e698bb2bb72d0a7113f13feb36450a0400f1896c7aebc52e52ecedf7c13",
+      "decodedRgbaSha256": "a0f76b8b7cf10a6187ad3b3d37a38a489e2d6a52e8b55ab77aa8abcd869b9049"
+    },
+    {
+      "file": "native-controls-frames/frame-00005.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "3d4719b7ebfbefb28a13018659705b1a4245519e28e7757ded2b2188206d122a",
+      "decodedRgbaSha256": "2d1465bd91a284b241e57b98163ea92af8739632d0afd11b1d5ab4ecdefca0cd"
+    },
+    {
+      "file": "native-controls-frames/frame-00006.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "3d4719b7ebfbefb28a13018659705b1a4245519e28e7757ded2b2188206d122a",
+      "decodedRgbaSha256": "2d1465bd91a284b241e57b98163ea92af8739632d0afd11b1d5ab4ecdefca0cd"
+    },
+    {
+      "file": "native-controls-frames/frame-00007.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "3d4719b7ebfbefb28a13018659705b1a4245519e28e7757ded2b2188206d122a",
+      "decodedRgbaSha256": "2d1465bd91a284b241e57b98163ea92af8739632d0afd11b1d5ab4ecdefca0cd"
+    },
+    {
+      "file": "native-controls-frames/frame-00008.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "3d4719b7ebfbefb28a13018659705b1a4245519e28e7757ded2b2188206d122a",
+      "decodedRgbaSha256": "2d1465bd91a284b241e57b98163ea92af8739632d0afd11b1d5ab4ecdefca0cd"
+    },
+    {
+      "file": "native-controls-frames/frame-00009.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "3d4719b7ebfbefb28a13018659705b1a4245519e28e7757ded2b2188206d122a",
+      "decodedRgbaSha256": "2d1465bd91a284b241e57b98163ea92af8739632d0afd11b1d5ab4ecdefca0cd"
+    },
+    {
+      "file": "native-controls-frames/frame-00010.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "3d4719b7ebfbefb28a13018659705b1a4245519e28e7757ded2b2188206d122a",
+      "decodedRgbaSha256": "2d1465bd91a284b241e57b98163ea92af8739632d0afd11b1d5ab4ecdefca0cd"
+    },
+    {
+      "file": "native-controls-frames/frame-00011.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "c58a0e698bb2bb72d0a7113f13feb36450a0400f1896c7aebc52e52ecedf7c13",
+      "decodedRgbaSha256": "a0f76b8b7cf10a6187ad3b3d37a38a489e2d6a52e8b55ab77aa8abcd869b9049"
+    },
+    {
+      "file": "native-controls-frames/frame-00012.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "c58a0e698bb2bb72d0a7113f13feb36450a0400f1896c7aebc52e52ecedf7c13",
+      "decodedRgbaSha256": "a0f76b8b7cf10a6187ad3b3d37a38a489e2d6a52e8b55ab77aa8abcd869b9049"
+    },
+    {
+      "file": "native-controls-frames/frame-00013.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "c58a0e698bb2bb72d0a7113f13feb36450a0400f1896c7aebc52e52ecedf7c13",
+      "decodedRgbaSha256": "a0f76b8b7cf10a6187ad3b3d37a38a489e2d6a52e8b55ab77aa8abcd869b9049"
+    },
+    {
+      "file": "native-controls-frames/frame-00014.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "c141a50295a976da293c3cc74c11eac05cd8fdd5abc2232808816526784c8a52",
+      "decodedRgbaSha256": "7f977334f2857ea15e6174c4ae34defd40d582aad8baae0d50af604865da7650"
+    },
+    {
+      "file": "native-controls-frames/frame-00015.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "465d03694c3d0ec28ae829595e6c13ebb40d07b7f7edb0f6a3ab8fd4d7119813",
+      "decodedRgbaSha256": "d2b52037eb154c4d03a61eb5bf74aba9759a9e8efbc22dcdc450f3c983518d3c"
+    },
+    {
+      "file": "native-controls-frames/frame-00016.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "465d03694c3d0ec28ae829595e6c13ebb40d07b7f7edb0f6a3ab8fd4d7119813",
+      "decodedRgbaSha256": "d2b52037eb154c4d03a61eb5bf74aba9759a9e8efbc22dcdc450f3c983518d3c"
+    },
+    {
+      "file": "native-controls-frames/frame-00017.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "465d03694c3d0ec28ae829595e6c13ebb40d07b7f7edb0f6a3ab8fd4d7119813",
+      "decodedRgbaSha256": "d2b52037eb154c4d03a61eb5bf74aba9759a9e8efbc22dcdc450f3c983518d3c"
+    },
+    {
+      "file": "native-controls-frames/frame-00018.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "465d03694c3d0ec28ae829595e6c13ebb40d07b7f7edb0f6a3ab8fd4d7119813",
+      "decodedRgbaSha256": "d2b52037eb154c4d03a61eb5bf74aba9759a9e8efbc22dcdc450f3c983518d3c"
+    },
+    {
+      "file": "native-controls-frames/frame-00019.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "465d03694c3d0ec28ae829595e6c13ebb40d07b7f7edb0f6a3ab8fd4d7119813",
+      "decodedRgbaSha256": "d2b52037eb154c4d03a61eb5bf74aba9759a9e8efbc22dcdc450f3c983518d3c"
+    },
+    {
+      "file": "native-controls-frames/frame-00020.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "465d03694c3d0ec28ae829595e6c13ebb40d07b7f7edb0f6a3ab8fd4d7119813",
+      "decodedRgbaSha256": "d2b52037eb154c4d03a61eb5bf74aba9759a9e8efbc22dcdc450f3c983518d3c"
+    },
+    {
+      "file": "native-controls-frames/frame-00021.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "465d03694c3d0ec28ae829595e6c13ebb40d07b7f7edb0f6a3ab8fd4d7119813",
+      "decodedRgbaSha256": "d2b52037eb154c4d03a61eb5bf74aba9759a9e8efbc22dcdc450f3c983518d3c"
+    },
+    {
+      "file": "native-controls-frames/frame-00022.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "465d03694c3d0ec28ae829595e6c13ebb40d07b7f7edb0f6a3ab8fd4d7119813",
+      "decodedRgbaSha256": "d2b52037eb154c4d03a61eb5bf74aba9759a9e8efbc22dcdc450f3c983518d3c"
+    },
+    {
+      "file": "native-controls-frames/frame-00023.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "465d03694c3d0ec28ae829595e6c13ebb40d07b7f7edb0f6a3ab8fd4d7119813",
+      "decodedRgbaSha256": "d2b52037eb154c4d03a61eb5bf74aba9759a9e8efbc22dcdc450f3c983518d3c"
+    },
+    {
+      "file": "native-controls-frames/frame-00024.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "f1e7b15b93f16efd6399a426b03161742ee73e335ccef2589403f40ec14f5532",
+      "decodedRgbaSha256": "0d8bda8d7f0202610242947dbfd329c20f2ed7263400b6889d1a14a7e3328f01"
+    },
+    {
+      "file": "native-controls-frames/frame-00025.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "229413fb48fdf5b209c463334b3cc57c5af169bc21fd93a64a6a2eaf9aa6ef9e",
+      "decodedRgbaSha256": "600c14d7e61ff3b69b310c59d6feaa860e4c284329a120fceff57da8e61c9602"
+    },
+    {
+      "file": "native-controls-frames/frame-00026.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "229413fb48fdf5b209c463334b3cc57c5af169bc21fd93a64a6a2eaf9aa6ef9e",
+      "decodedRgbaSha256": "600c14d7e61ff3b69b310c59d6feaa860e4c284329a120fceff57da8e61c9602"
+    },
+    {
+      "file": "native-controls-frames/frame-00027.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "229413fb48fdf5b209c463334b3cc57c5af169bc21fd93a64a6a2eaf9aa6ef9e",
+      "decodedRgbaSha256": "600c14d7e61ff3b69b310c59d6feaa860e4c284329a120fceff57da8e61c9602"
+    },
+    {
+      "file": "native-controls-frames/frame-00028.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "229413fb48fdf5b209c463334b3cc57c5af169bc21fd93a64a6a2eaf9aa6ef9e",
+      "decodedRgbaSha256": "600c14d7e61ff3b69b310c59d6feaa860e4c284329a120fceff57da8e61c9602"
+    },
+    {
+      "file": "native-controls-frames/frame-00029.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "229413fb48fdf5b209c463334b3cc57c5af169bc21fd93a64a6a2eaf9aa6ef9e",
+      "decodedRgbaSha256": "600c14d7e61ff3b69b310c59d6feaa860e4c284329a120fceff57da8e61c9602"
+    },
+    {
+      "file": "native-controls-frames/frame-00030.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "229413fb48fdf5b209c463334b3cc57c5af169bc21fd93a64a6a2eaf9aa6ef9e",
+      "decodedRgbaSha256": "600c14d7e61ff3b69b310c59d6feaa860e4c284329a120fceff57da8e61c9602"
+    },
+    {
+      "file": "native-controls-frames/frame-00031.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "b39e8440d2ec08413bcba9990a424dd9559d49c9aa50cc5cad023ab1fe4ca9b0",
+      "decodedRgbaSha256": "ab6ac207cd4a96c4847683b1b7ceb71182e05e93ebe08617183a08535d3b4941"
+    },
+    {
+      "file": "native-controls-frames/frame-00032.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "2499e620fcabf07ee326bcc9ae9d792a21470e5297329088b2abc140eef84204",
+      "decodedRgbaSha256": "60fdd41ab6223bcd8afacc81a5125238acb228aa1233427aaf4fc58e7b71d88f"
+    },
+    {
+      "file": "native-controls-frames/frame-00033.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "1ca0a49ca14d39ec41bd541a7000fcc8725e95ebeaf0c91031fbd4bc70796af1",
+      "decodedRgbaSha256": "8e02bf2e458141fd6aab900c9115e848096d66ae88a6ee7b78f8c84d89b402f6"
+    },
+    {
+      "file": "native-controls-frames/frame-00034.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "dcfd421535c7cfd69a85c1e53931092850d7fadac148dbe275695069976ef059",
+      "decodedRgbaSha256": "2437f1c5df86e465433ae496b53718c7ce5580611a66c8bce6f7384374b0496f"
+    },
+    {
+      "file": "native-controls-frames/frame-00035.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "81ad68c9519472f1f1291b85213e918236c974cfedcbfed2607c91cf7ed421cd",
+      "decodedRgbaSha256": "c529c549cb916de95f1ae279f637c7807428f8de498efa3580f9556b5c6f72d2"
+    },
+    {
+      "file": "native-controls-frames/frame-00036.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "99674f12ed162b02a7188d71d915aa50f729dc3808a427e6877f786c25fab6cf",
+      "decodedRgbaSha256": "ab1260162fe726047ca23c3621c914792b1343322d14621d04f997f028dafd4e"
+    },
+    {
+      "file": "native-controls-frames/frame-00037.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "99674f12ed162b02a7188d71d915aa50f729dc3808a427e6877f786c25fab6cf",
+      "decodedRgbaSha256": "ab1260162fe726047ca23c3621c914792b1343322d14621d04f997f028dafd4e"
+    },
+    {
+      "file": "native-controls-frames/frame-00038.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "99674f12ed162b02a7188d71d915aa50f729dc3808a427e6877f786c25fab6cf",
+      "decodedRgbaSha256": "ab1260162fe726047ca23c3621c914792b1343322d14621d04f997f028dafd4e"
+    },
+    {
+      "file": "native-controls-frames/frame-00039.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "589674fb2ca300a026bd7271bd1db8ad319eae9cf8302d0fa9ceb5d19ca9799d",
+      "decodedRgbaSha256": "8b2ae295c52c3ea54d7ec8719218c130ad2c49e1752f2a14aeeb6d1a17c96eae"
+    },
+    {
+      "file": "native-controls-frames/frame-00040.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "589674fb2ca300a026bd7271bd1db8ad319eae9cf8302d0fa9ceb5d19ca9799d",
+      "decodedRgbaSha256": "8b2ae295c52c3ea54d7ec8719218c130ad2c49e1752f2a14aeeb6d1a17c96eae"
+    },
+    {
+      "file": "native-controls-frames/frame-00041.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "7c4fb99750501380402c31d9214dcbe170c917b55051bb3da36e228fd82adc4a",
+      "decodedRgbaSha256": "f947b94687c4853e1dc5f562db89abf6e3f9a3e3399d776057e659d9b12a744d"
+    },
+    {
+      "file": "native-controls-frames/frame-00042.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "229413fb48fdf5b209c463334b3cc57c5af169bc21fd93a64a6a2eaf9aa6ef9e",
+      "decodedRgbaSha256": "600c14d7e61ff3b69b310c59d6feaa860e4c284329a120fceff57da8e61c9602"
+    },
+    {
+      "file": "native-controls-frames/frame-00043.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "67507f9f9a9b82fa247b6251d74656d63d23790dad0cd6e6409432314611660e",
+      "decodedRgbaSha256": "5729400dbaf21b75b2d8914571398af96dfd290f9dab1f545d1eca2283421dc6"
+    },
+    {
+      "file": "native-controls-frames/frame-00044.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "ab8d032864125be506b1bcd9aed5e3a4dc9afb9e1cc82fa79e64335655dcb6e9",
+      "decodedRgbaSha256": "d506d46aad24689e426e470b19bfa1fb3cdca753495347ee64c5506f7b4ecf3f"
+    },
+    {
+      "file": "native-controls-frames/frame-00045.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "ab8d032864125be506b1bcd9aed5e3a4dc9afb9e1cc82fa79e64335655dcb6e9",
+      "decodedRgbaSha256": "d506d46aad24689e426e470b19bfa1fb3cdca753495347ee64c5506f7b4ecf3f"
+    },
+    {
+      "file": "native-controls-frames/frame-00046.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "12c405b653b0f902b3d0052f944a9a52979f140f446154a55b1d89b81013326c",
+      "decodedRgbaSha256": "c6f94d021e3fd81e5a3ac96b80b343a54fb1e903a93093d234ab2a4d48726a84"
+    },
+    {
+      "file": "native-controls-frames/frame-00047.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "7da28c7f93c74820419a5b2dbb91a104c79fe8b74ad166ccc3d551311df6b806",
+      "decodedRgbaSha256": "c3b5a89fe97bc9d33dffb45a3ede5c0b9a28148b2f6c680f12622ba1f97253a3"
+    },
+    {
+      "file": "native-controls-frames/frame-00048.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "7da28c7f93c74820419a5b2dbb91a104c79fe8b74ad166ccc3d551311df6b806",
+      "decodedRgbaSha256": "c3b5a89fe97bc9d33dffb45a3ede5c0b9a28148b2f6c680f12622ba1f97253a3"
+    },
+    {
+      "file": "native-controls-frames/frame-00049.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "7da28c7f93c74820419a5b2dbb91a104c79fe8b74ad166ccc3d551311df6b806",
+      "decodedRgbaSha256": "c3b5a89fe97bc9d33dffb45a3ede5c0b9a28148b2f6c680f12622ba1f97253a3"
+    },
+    {
+      "file": "native-controls-frames/frame-00050.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "7da28c7f93c74820419a5b2dbb91a104c79fe8b74ad166ccc3d551311df6b806",
+      "decodedRgbaSha256": "c3b5a89fe97bc9d33dffb45a3ede5c0b9a28148b2f6c680f12622ba1f97253a3"
+    },
+    {
+      "file": "native-controls-frames/frame-00051.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "3df58b31e4400bcdb1a565741aeea1157a32d961ce86f43a1d9b2f420ea2e8b1",
+      "decodedRgbaSha256": "c99e962929873269808c45cfbebe9a7d9eafa539157c52a3d4f5e412836a7cba"
+    },
+    {
+      "file": "native-controls-frames/frame-00052.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "3df58b31e4400bcdb1a565741aeea1157a32d961ce86f43a1d9b2f420ea2e8b1",
+      "decodedRgbaSha256": "c99e962929873269808c45cfbebe9a7d9eafa539157c52a3d4f5e412836a7cba"
+    },
+    {
+      "file": "native-controls-frames/frame-00053.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "3df58b31e4400bcdb1a565741aeea1157a32d961ce86f43a1d9b2f420ea2e8b1",
+      "decodedRgbaSha256": "c99e962929873269808c45cfbebe9a7d9eafa539157c52a3d4f5e412836a7cba"
+    },
+    {
+      "file": "native-controls-frames/frame-00054.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "e2798decc5953c88af9963a8f755dc0b731f8cb4ebf49b474a26aa6e4a692c09",
+      "decodedRgbaSha256": "647ca3e4a78bfa6b1526b8749200005256feb476294f4274f900f75771993a52"
+    },
+    {
+      "file": "native-controls-frames/frame-00055.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "db449aa9ac2671b277dec1cd2e24487fa63d3ecab2d67cc55a2e5229c39ec857",
+      "decodedRgbaSha256": "fd438b694afdf34be6824ed89ee9ba250c86d227a83d9dbf135919361732f620"
+    },
+    {
+      "file": "native-controls-frames/frame-00056.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "db449aa9ac2671b277dec1cd2e24487fa63d3ecab2d67cc55a2e5229c39ec857",
+      "decodedRgbaSha256": "fd438b694afdf34be6824ed89ee9ba250c86d227a83d9dbf135919361732f620"
+    },
+    {
+      "file": "native-controls-frames/frame-00057.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "be713f61e3a44b66c1abce417b5c408275453360035c10ccb8add42524ee1d44",
+      "decodedRgbaSha256": "c1e73c1ac903f079e5117d71fb49cedee4f4df61e0ba208e0842a94f244d1d83"
+    },
+    {
+      "file": "native-controls-frames/frame-00058.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "9c2b380e5ddacf648cc1d27787393f25d6211e3e5e823d38c01d8f85d1b4ea42",
+      "decodedRgbaSha256": "b5d44fba5aeaf387538e063e813d9737b5da6a2e6c93a3ccd484f3839710353f"
+    },
+    {
+      "file": "native-controls-frames/frame-00059.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "e4f63a375f1fdfd170e0312b847a5e30f40e3c860129e3d5ddc172007d1e0e94",
+      "decodedRgbaSha256": "c70024a6ce6a8525ed13cae36008a5bf48daa2f20ba886a9e00982b2d7d46075"
+    },
+    {
+      "file": "native-controls-frames/frame-00060.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "3c4bc51ecc159416491465731f80fc7f77a450af12136f808257b53d8802cb66",
+      "decodedRgbaSha256": "02ed91f9600f0124ddf1f67247d82a70b4b3215d3b26e8028c5efe60cc947fea"
+    },
+    {
+      "file": "native-controls-frames/frame-00061.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "3c4bc51ecc159416491465731f80fc7f77a450af12136f808257b53d8802cb66",
+      "decodedRgbaSha256": "02ed91f9600f0124ddf1f67247d82a70b4b3215d3b26e8028c5efe60cc947fea"
+    },
+    {
+      "file": "native-controls-frames/frame-00062.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "3c4bc51ecc159416491465731f80fc7f77a450af12136f808257b53d8802cb66",
+      "decodedRgbaSha256": "02ed91f9600f0124ddf1f67247d82a70b4b3215d3b26e8028c5efe60cc947fea"
+    },
+    {
+      "file": "native-controls-frames/frame-00063.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "2251cd3034b8b218a8fde5b3e2283d2339c6399cb051b798e0290437474a8b6e",
+      "decodedRgbaSha256": "86542f361aaa30a3c988033988a765136832b33603b3375b6d552b613367d093"
+    },
+    {
+      "file": "native-controls-frames/frame-00064.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "2251cd3034b8b218a8fde5b3e2283d2339c6399cb051b798e0290437474a8b6e",
+      "decodedRgbaSha256": "86542f361aaa30a3c988033988a765136832b33603b3375b6d552b613367d093"
+    },
+    {
+      "file": "native-controls-frames/frame-00065.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "2251cd3034b8b218a8fde5b3e2283d2339c6399cb051b798e0290437474a8b6e",
+      "decodedRgbaSha256": "86542f361aaa30a3c988033988a765136832b33603b3375b6d552b613367d093"
+    },
+    {
+      "file": "native-controls-frames/frame-00066.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "2251cd3034b8b218a8fde5b3e2283d2339c6399cb051b798e0290437474a8b6e",
+      "decodedRgbaSha256": "86542f361aaa30a3c988033988a765136832b33603b3375b6d552b613367d093"
+    },
+    {
+      "file": "native-controls-frames/frame-00067.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "2251cd3034b8b218a8fde5b3e2283d2339c6399cb051b798e0290437474a8b6e",
+      "decodedRgbaSha256": "86542f361aaa30a3c988033988a765136832b33603b3375b6d552b613367d093"
+    },
+    {
+      "file": "native-controls-frames/frame-00068.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "2251cd3034b8b218a8fde5b3e2283d2339c6399cb051b798e0290437474a8b6e",
+      "decodedRgbaSha256": "86542f361aaa30a3c988033988a765136832b33603b3375b6d552b613367d093"
+    },
+    {
+      "file": "native-controls-frames/frame-00069.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "81f42d453e625482f7c0dfd9c23d33a605087dcd9045b9e0f0d29c8f5cf46c88",
+      "decodedRgbaSha256": "2d28f9ab58594c3d74f5474feba2e088061c436b2bdb4760f79d4efe49e74122"
+    },
+    {
+      "file": "native-controls-frames/frame-00070.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "10f9d6e80507680ea5ffa9246fcc5c9bce2fca0959a6d90ee0dad8d549c5856b",
+      "decodedRgbaSha256": "4eb981e2b7264bafe74e07da65f5976d36cad990e46fb1d9d279ed2bcc065abe"
+    },
+    {
+      "file": "native-controls-frames/frame-00071.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "10f9d6e80507680ea5ffa9246fcc5c9bce2fca0959a6d90ee0dad8d549c5856b",
+      "decodedRgbaSha256": "4eb981e2b7264bafe74e07da65f5976d36cad990e46fb1d9d279ed2bcc065abe"
+    },
+    {
+      "file": "native-controls-frames/frame-00072.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "10f9d6e80507680ea5ffa9246fcc5c9bce2fca0959a6d90ee0dad8d549c5856b",
+      "decodedRgbaSha256": "4eb981e2b7264bafe74e07da65f5976d36cad990e46fb1d9d279ed2bcc065abe"
+    },
+    {
+      "file": "native-controls-frames/frame-00073.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "10f9d6e80507680ea5ffa9246fcc5c9bce2fca0959a6d90ee0dad8d549c5856b",
+      "decodedRgbaSha256": "4eb981e2b7264bafe74e07da65f5976d36cad990e46fb1d9d279ed2bcc065abe"
+    },
+    {
+      "file": "native-controls-frames/frame-00074.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "13e7e9b2f5cd142177cd4b26a7abc66254c7ee65203316c66817b7b5fd403f51",
+      "decodedRgbaSha256": "d303ee690e17714c5922a38b68987de20db725a625a831d6475557ac59071750"
+    },
+    {
+      "file": "native-controls-frames/frame-00075.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "72e31f6d3c8c925376ed080c228468fd75569b6b2fd592f90519d6cacc7da831",
+      "decodedRgbaSha256": "d7b0ab70726588b7ae13f9feba4429908e2efb655bdc7f50395b4fdd732f8ff1"
+    },
+    {
+      "file": "native-controls-frames/frame-00076.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "72e31f6d3c8c925376ed080c228468fd75569b6b2fd592f90519d6cacc7da831",
+      "decodedRgbaSha256": "d7b0ab70726588b7ae13f9feba4429908e2efb655bdc7f50395b4fdd732f8ff1"
+    },
+    {
+      "file": "native-controls-frames/frame-00077.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "72e31f6d3c8c925376ed080c228468fd75569b6b2fd592f90519d6cacc7da831",
+      "decodedRgbaSha256": "d7b0ab70726588b7ae13f9feba4429908e2efb655bdc7f50395b4fdd732f8ff1"
+    },
+    {
+      "file": "native-controls-frames/frame-00078.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "72e31f6d3c8c925376ed080c228468fd75569b6b2fd592f90519d6cacc7da831",
+      "decodedRgbaSha256": "d7b0ab70726588b7ae13f9feba4429908e2efb655bdc7f50395b4fdd732f8ff1"
+    },
+    {
+      "file": "native-controls-frames/frame-00079.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "72e31f6d3c8c925376ed080c228468fd75569b6b2fd592f90519d6cacc7da831",
+      "decodedRgbaSha256": "d7b0ab70726588b7ae13f9feba4429908e2efb655bdc7f50395b4fdd732f8ff1"
+    },
+    {
+      "file": "native-controls-frames/frame-00080.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "72e31f6d3c8c925376ed080c228468fd75569b6b2fd592f90519d6cacc7da831",
+      "decodedRgbaSha256": "d7b0ab70726588b7ae13f9feba4429908e2efb655bdc7f50395b4fdd732f8ff1"
+    },
+    {
+      "file": "native-controls-frames/frame-00081.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "2f3d5aa57f00d71f4a65aa1f6720093d71f5bb997525b58453c7c268163858a1",
+      "decodedRgbaSha256": "0b07c2edd73b4c97ab31eb7d2ed4a4882077fbacbb505628cd15e56326185ffd"
+    },
+    {
+      "file": "native-controls-frames/frame-00082.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "12b35fa2aa8762da8286aa08e94d41016b9d59bd5e520074994186eba5092f15",
+      "decodedRgbaSha256": "b82ae6dfcf6c8ca89b62de31378cbde4e0772f58e12b42e5d505a59a36de2341"
+    },
+    {
+      "file": "native-controls-frames/frame-00083.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "12b35fa2aa8762da8286aa08e94d41016b9d59bd5e520074994186eba5092f15",
+      "decodedRgbaSha256": "b82ae6dfcf6c8ca89b62de31378cbde4e0772f58e12b42e5d505a59a36de2341"
+    },
+    {
+      "file": "native-controls-frames/frame-00084.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "12b35fa2aa8762da8286aa08e94d41016b9d59bd5e520074994186eba5092f15",
+      "decodedRgbaSha256": "b82ae6dfcf6c8ca89b62de31378cbde4e0772f58e12b42e5d505a59a36de2341"
+    },
+    {
+      "file": "native-controls-frames/frame-00085.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "12b35fa2aa8762da8286aa08e94d41016b9d59bd5e520074994186eba5092f15",
+      "decodedRgbaSha256": "b82ae6dfcf6c8ca89b62de31378cbde4e0772f58e12b42e5d505a59a36de2341"
+    },
+    {
+      "file": "native-controls-frames/frame-00086.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "12b35fa2aa8762da8286aa08e94d41016b9d59bd5e520074994186eba5092f15",
+      "decodedRgbaSha256": "b82ae6dfcf6c8ca89b62de31378cbde4e0772f58e12b42e5d505a59a36de2341"
+    },
+    {
+      "file": "native-controls-frames/frame-00087.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "12b35fa2aa8762da8286aa08e94d41016b9d59bd5e520074994186eba5092f15",
+      "decodedRgbaSha256": "b82ae6dfcf6c8ca89b62de31378cbde4e0772f58e12b42e5d505a59a36de2341"
+    },
+    {
+      "file": "native-controls-frames/frame-00088.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "12b35fa2aa8762da8286aa08e94d41016b9d59bd5e520074994186eba5092f15",
+      "decodedRgbaSha256": "b82ae6dfcf6c8ca89b62de31378cbde4e0772f58e12b42e5d505a59a36de2341"
+    },
+    {
+      "file": "native-controls-frames/frame-00089.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "12b35fa2aa8762da8286aa08e94d41016b9d59bd5e520074994186eba5092f15",
+      "decodedRgbaSha256": "b82ae6dfcf6c8ca89b62de31378cbde4e0772f58e12b42e5d505a59a36de2341"
+    },
+    {
+      "file": "native-controls-frames/frame-00090.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "12b35fa2aa8762da8286aa08e94d41016b9d59bd5e520074994186eba5092f15",
+      "decodedRgbaSha256": "b82ae6dfcf6c8ca89b62de31378cbde4e0772f58e12b42e5d505a59a36de2341"
+    },
+    {
+      "file": "native-controls-frames/frame-00091.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "12b35fa2aa8762da8286aa08e94d41016b9d59bd5e520074994186eba5092f15",
+      "decodedRgbaSha256": "b82ae6dfcf6c8ca89b62de31378cbde4e0772f58e12b42e5d505a59a36de2341"
+    }
+  ]
+}
