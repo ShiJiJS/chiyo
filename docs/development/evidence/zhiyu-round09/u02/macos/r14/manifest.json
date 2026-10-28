@@ -66,8 +66,8 @@
       "sha256": "bb928504a91fe0ce4dc0bb921b142b31033cbbf74e92214ba34521fe3f2f22be"
     },
     "checkpoint.json": {
-      "bytes": 2293,
-      "sha256": "fae7380cd4c14c34a5c12701104e00d2f7f6c866044267b3135b39b6cdc8a4f5"
+      "bytes": 2411,
+      "sha256": "a924707db55c892286c6a3f0719d667551bbeb9eb2a809053c9d28e7ca2bd8a8"
     },
     "commands.json": {
       "bytes": 1799,
@@ -80,6 +80,10 @@
     "focused.log": {
       "bytes": 4452,
       "sha256": "43ec6ecdd04d10b2ab3039c59fe8ec5ff3b3fb63bcb1669bad09bb050bdd6625"
+    },
+    "font-hashes.json": {
+      "bytes": 611,
+      "sha256": "7b75c2f3cc94f118cf03f744ce5a9e6991486e27770122d3d8761d97e59bc039"
     },
     "geometry.json": {
       "bytes": 8248,
@@ -198,12 +202,16 @@
       "sha256": "8f75276772647ade315134cc4788b3c4f3072789c60d76085cdd7a1a7c85a36f"
     },
     "source-hashes.json": {
-      "bytes": 30266,
-      "sha256": "ae6a933d7036dda397c528d4d58d082794d9be1515e32705368536251c1f6c91"
+      "bytes": 31952,
+      "sha256": "225bc4fa96b8cfb4ca09c4eea09f593ac7f17f46257e74100ecc07e2f58b3539"
+    },
+    "tracker-read.json": {
+      "bytes": 1476,
+      "sha256": "594f40f699a8a337eb344cb016e4ac3d9dc9140cafac9d6f2f3b5c66d6e697b4"
     },
     "visual-review.md": {
-      "bytes": 2792,
-      "sha256": "7cb38a6f12fcac84a926dcfa0e55f5139382115b61e3f66c882cdd0065badc57"
+      "bytes": 2782,
+      "sha256": "ac4d6cc8e9ab2395942e2bc93a68b4f19c18d528102ca322f864d2fe37b3f297"
     }
   }
 }
