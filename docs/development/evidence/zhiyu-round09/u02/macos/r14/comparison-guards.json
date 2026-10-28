@@ -1,0 +1,25 @@
+{
+  "cases": [
+    {
+      "mutation": "viewport",
+      "rejected": true
+    },
+    {
+      "mutation": "theme",
+      "rejected": true
+    },
+    {
+      "mutation": "surface-offset",
+      "rejected": true
+    },
+    {
+      "mutation": "missing-box",
+      "rejected": true
+    },
+    {
+      "mutation": "close-offset",
+      "rejected": true
+    }
+  ],
+  "allRejected": true
+}

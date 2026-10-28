@@ -1,0 +1,133 @@
+{
+  "kind": "native-flutter-framebuffer-with-widget-input",
+  "wallClockDurationMs": 8692,
+  "samplingTargetFps": 20,
+  "frames": [
+    {
+      "ms": 0,
+      "file": "native-controls-frames/frame-00000.png"
+    },
+    {
+      "ms": 226,
+      "file": "native-controls-frames/frame-00001.png"
+    },
+    {
+      "ms": 575,
+      "file": "native-controls-frames/frame-00002.png"
+    },
+    {
+      "ms": 1327,
+      "file": "native-controls-frames/frame-00003.png"
+    },
+    {
+      "ms": 1881,
+      "file": "native-controls-frames/frame-00004.png"
+    },
+    {
+      "ms": 2176,
+      "file": "native-controls-frames/frame-00005.png"
+    },
+    {
+      "ms": 2532,
+      "file": "native-controls-frames/frame-00006.png"
+    },
+    {
+      "ms": 2983,
+      "file": "native-controls-frames/frame-00007.png"
+    },
+    {
+      "ms": 3277,
+      "file": "native-controls-frames/frame-00008.png"
+    },
+    {
+      "ms": 3758,
+      "file": "native-controls-frames/frame-00009.png"
+    },
+    {
+      "ms": 4227,
+      "file": "native-controls-frames/frame-00010.png"
+    },
+    {
+      "ms": 5154,
+      "file": "native-controls-frames/frame-00011.png"
+    },
+    {
+      "ms": 5737,
+      "file": "native-controls-frames/frame-00012.png"
+    },
+    {
+      "ms": 6233,
+      "file": "native-controls-frames/frame-00013.png"
+    },
+    {
+      "ms": 6846,
+      "file": "native-controls-frames/frame-00014.png"
+    },
+    {
+      "ms": 7461,
+      "file": "native-controls-frames/frame-00015.png"
+    },
+    {
+      "ms": 7728,
+      "file": "native-controls-frames/frame-00016.png"
+    },
+    {
+      "ms": 7975,
+      "file": "native-controls-frames/frame-00017.png"
+    },
+    {
+      "ms": 8276,
+      "file": "native-controls-frames/frame-00018.png"
+    },
+    {
+      "ms": 8539,
+      "file": "native-controls-frames/frame-00019.png"
+    }
+  ],
+  "sourceFrames": [
+    0,
+    226,
+    575,
+    1327,
+    1881,
+    2176,
+    2532,
+    2983,
+    3277,
+    3758,
+    4227,
+    5154,
+    5737,
+    6233,
+    6846,
+    7461,
+    7728,
+    7975,
+    8276,
+    8539
+  ],
+  "events": [
+    {
+      "event": "chooser-open-with-sharp-surface-and-blurred-barrier",
+      "ms": 174
+    },
+    {
+      "event": "chooser-close-without-reverse-animation",
+      "ms": 1499
+    },
+    {
+      "event": "query-server-and-tag",
+      "ms": 1661
+    },
+    {
+      "event": "failed-save-preserves-draft",
+      "ms": 4530
+    },
+    {
+      "event": "open-related-and-return",
+      "ms": 7215
+    }
+  ],
+  "osDesktopCapture": false,
+  "systemDpiChanged": false
+}

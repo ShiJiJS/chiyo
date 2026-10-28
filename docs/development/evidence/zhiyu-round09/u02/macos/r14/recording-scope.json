@@ -1,0 +1,58 @@
+{
+  "wallClockDurationMs": 8692,
+  "encodedDurationMs": 8690,
+  "playbackSpeed": 1,
+  "frames": 20,
+  "samplingTargetFps": 20,
+  "effectiveSampleFps": 2.300966405890474,
+  "sourceFrameTimesMs": [
+    0,
+    226,
+    575,
+    1327,
+    1881,
+    2176,
+    2532,
+    2983,
+    3277,
+    3758,
+    4227,
+    5154,
+    5737,
+    6233,
+    6846,
+    7461,
+    7728,
+    7975,
+    8276,
+    8539
+  ],
+  "events": [
+    {
+      "event": "chooser-open-with-sharp-surface-and-blurred-barrier",
+      "ms": 174
+    },
+    {
+      "event": "chooser-close-without-reverse-animation",
+      "ms": 1499
+    },
+    {
+      "event": "query-server-and-tag",
+      "ms": 1661
+    },
+    {
+      "event": "failed-save-preserves-draft",
+      "ms": 4530
+    },
+    {
+      "event": "open-related-and-return",
+      "ms": 7215
+    }
+  ],
+  "reviewedFrames": [
+    2,
+    4
+  ],
+  "review": "looked at full native chooser/failure captures and frame 2 (settled chooser) / frame 4 (closed); frame1 is still before painted chooser. Sparse samples do not prove smoothness, full entry motion or normal-speed S5 review",
+  "fullMotionPassed": false
+}
