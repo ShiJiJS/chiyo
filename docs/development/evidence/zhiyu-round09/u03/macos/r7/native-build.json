@@ -1,0 +1,14 @@
+{
+  "app": "apps/desktop/build/macos/Build/Products/Debug/info_desktop.app",
+  "bundleIdentifier": "com.example.infoDesktop.zhiyuPreview",
+  "AgentInfoInterfacePreview": "YES",
+  "architecture": "arm64",
+  "target": "lib/preview_main.dart",
+  "newCocoaRuntime": false,
+  "executableSha256": "cb06b4d4a0c0519181655313a7ab6d1cb851a2ad27ca403a57a4ac7bcca2589a",
+  "applicationPayloadSha256": {
+    "Contents/Frameworks/App.framework/Versions/A/App": "64df57aaaab8c1695cca99e93bd97c8e64d67a4a58bf8e58311851f79982e101",
+    "Contents/Frameworks/App.framework/Versions/A/Resources/flutter_assets/kernel_blob.bin": "d53fefa77da7b364551462e4b444f770f1ecaad27f67b6d77b9780421125a83c",
+    "Contents/Info.plist": "b0392b04cf337de01a0484be85f17cc07aa0e893f53885df6be6071146107a1e"
+  }
+}
