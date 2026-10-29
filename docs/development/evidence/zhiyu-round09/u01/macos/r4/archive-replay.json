@@ -1,0 +1,11 @@
+{
+  "verifiedAt": "2026-10-29T00:02:11.257210+00:00",
+  "sourceCommit": "9d8ccfec4e6175709394a7c530f3c56f287088a1",
+  "evidenceCommitBeforeTracker": "fc8f71e3e900d599689ffc878e4fc8f5db462358",
+  "evidenceGitBlobsVerifiedBeforeTracker": 39,
+  "taskSpace227Finished": true,
+  "referenceServerStarted": false,
+  "completionConditionLinesUnchanged": 12,
+  "fullS5Passed": false,
+  "scratchNotDeletedYet": true
+}
