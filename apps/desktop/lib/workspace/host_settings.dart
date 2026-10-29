@@ -159,7 +159,17 @@ class _HostSettingsPanelState extends State<HostSettingsPanel> {
     final status = LibraryPill(
       h.state.label,
       key: ValueKey('host-state-${h.target.key}'),
-      color: h.state == WorkspaceHostState.changed ? c.danger : c.muted,
+      color: switch (h.state) {
+        WorkspaceHostState.trusted => c.success,
+        WorkspaceHostState.changed => c.danger,
+        WorkspaceHostState.unconfirmed => c.warning,
+        _ => c.muted,
+      },
+      background: switch (h.state) {
+        WorkspaceHostState.trusted => c.successSurface,
+        WorkspaceHostState.unconfirmed => c.credentialSurface,
+        _ => c.nav,
+      },
     );
     final action = DesktopButton(
       key: ValueKey('host-open-${h.target.key}'),

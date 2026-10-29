@@ -432,7 +432,7 @@ class _WorkspaceSettingsPageState extends State<WorkspaceSettingsPage> {
                   )
                 : Semantics(
                     label: '访问申请通知',
-                    child: Switch(
+                    child: DesktopToggle(
                       key: const ValueKey('settings-notifications'),
                       value: m.draft!.notifications,
                       onChanged:

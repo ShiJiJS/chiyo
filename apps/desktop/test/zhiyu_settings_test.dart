@@ -104,7 +104,7 @@ void main() {
       await t.pumpAndSettle();
       expect(
         t
-            .widget<Switch>(
+            .widget<DesktopToggle>(
               find.byKey(const ValueKey('settings-notifications')),
             )
             .value,
@@ -207,7 +207,7 @@ void main() {
       expect(model(t).section, WorkspaceSettingsSection.notifications);
       expect(
         t
-            .widget<Switch>(
+            .widget<DesktopToggle>(
               find.byKey(const ValueKey('settings-notifications')),
             )
             .value,

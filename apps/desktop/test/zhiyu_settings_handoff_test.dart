@@ -6,6 +6,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:info_desktop/desktop_fonts.dart';
+import 'package:info_desktop/desktop_controls.dart';
 import 'package:info_desktop/workspace/agents_page.dart';
 import 'package:info_desktop/workspace/backup_page.dart';
 import 'package:info_desktop/workspace/classification_page.dart';
@@ -75,6 +76,104 @@ void main() {
       ).writeAsBytes(bytes!.buffer.asUint8List());
       i.dispose();
     });
+  }
+
+  for (final width in [1440.0, 1280.0]) {
+    for (final dark in [false, true]) {
+      testWidgets(
+        'Mac-font representative page heading baselines at $width dark=$dark',
+        (t) async {
+          t.view.physicalSize = Size(width, width == 1440 ? 900 : 800);
+          t.view.devicePixelRatio = 1;
+          addTearDown(t.view.resetPhysicalSize);
+          addTearDown(t.view.resetDevicePixelRatio);
+          await t.pumpWidget(
+            const RepaintBoundary(
+              key: ValueKey('settings-audit-capture'),
+              child: PreviewWorkspace(),
+            ),
+          );
+          await ready(t);
+          if (dark) {
+            await tap(t, 'preview-guide');
+            await tap(t, 'preview-theme-dark');
+          }
+          final observations = <String, Object>{};
+          final compact = width == 1280;
+          for (final (page, label, size, x, y, baseline) in [
+            (
+              'plugins',
+              '服务器信息',
+              22.0,
+              compact ? 571.0 : 607.0,
+              compact ? 215.4453125 : 219.4453125,
+              compact ? 239.4453125 : 243.4453125,
+            ),
+            (
+              'approvals',
+              '检查反向代理服务',
+              28.0,
+              compact ? 319.0 : 355.0,
+              compact ? 158.796875 : 169.796875,
+              compact ? 189.296875 : 200.296875,
+            ),
+            (
+              'proposals',
+              '补充北辰服务域名',
+              compact ? 24.0 : 27.0,
+              compact ? 327.0 : 372.5,
+              compact ? 164.796875 : 169.796875,
+              compact ? 190.796875 : 199.296875,
+            ),
+            ('history', '授权历史', 25.0, 28.0, 96.0, 123.0),
+          ]) {
+            await tap(
+              t,
+              'workspace-nav-${page == 'plugins' ? 'settings' : page}',
+            );
+            if (page == 'plugins') await tap(t, 'settings-section-plugins');
+            final title = find.byWidgetPredicate(
+              (w) => w is Text && w.data == label && w.style?.fontSize == size,
+            );
+            expect(title, findsOneWidget);
+            final rect = t.getRect(title);
+            final paragraph = t.renderObject<RenderParagraph>(
+              find.descendant(of: title, matching: find.byType(RichText)),
+            );
+            final actualBaseline = paragraph
+                .localToGlobal(
+                  Offset(
+                    0,
+                    paragraph.getDryBaseline(
+                      paragraph.constraints,
+                      TextBaseline.alphabetic,
+                    )!,
+                  ),
+                )
+                .dy;
+            observations[page] = {
+              'rect': [rect.left, rect.top, rect.width, rect.height],
+              'baseline': actualBaseline,
+              'referenceBaseline': baseline,
+            };
+            expect(rect.left, closeTo(x, 2), reason: '$page title x');
+            expect(rect.top, closeTo(y, 2), reason: '$page title y');
+            expect(
+              actualBaseline,
+              closeTo(baseline, 2),
+              reason: '$page title baseline',
+            );
+          }
+          await t.runAsync(
+            () => File(
+              '$evidence/headings-${width.toInt()}-${dark ? 'dark' : 'light'}.json',
+            ).writeAsString(jsonEncode(observations)),
+          );
+        },
+        // These values require the actual Mac fonts loaded by the evidence run.
+        skip: evidence.isEmpty,
+      );
+    }
   }
 
   for (final (width, dark, large) in [
@@ -159,8 +258,12 @@ void main() {
               );
             case WorkspaceSettingsSection.notifications:
               expect(
+                t.getSize(find.byKey(const ValueKey('settings-notifications'))),
+                const Size(40, 24),
+              );
+              expect(
                 t
-                    .widget<Switch>(
+                    .widget<DesktopToggle>(
                       find.byKey(const ValueKey('settings-notifications')),
                     )
                     .value,
@@ -263,7 +366,7 @@ void main() {
         await tap(t, 'settings-section-notifications');
         expect(
           t
-              .widget<Switch>(
+              .widget<DesktopToggle>(
                 find.byKey(const ValueKey('settings-notifications')),
               )
               .value,

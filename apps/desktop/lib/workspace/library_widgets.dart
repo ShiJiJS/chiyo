@@ -42,12 +42,11 @@ TextStyle libraryText(
   fontWeight: weight ?? FontWeight.w400,
 );
 
-TextStyle libraryHeading(BuildContext context, double size) => libraryText(
-  context,
-  size,
-  weight: FontWeight.w600,
-  height: 1.45,
-).copyWith(fontVariations: const [FontVariation('wght', 650)]);
+TextStyle libraryHeading(BuildContext context, double size) =>
+    libraryText(context, size, weight: FontWeight.w600, height: 1.45).copyWith(
+      letterSpacing: -.4,
+      fontVariations: const [FontVariation('wght', 650)],
+    );
 
 double libraryChWidth(BuildContext context, TextStyle style, int count) {
   final zero = TextPainter(
