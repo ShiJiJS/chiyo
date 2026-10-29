@@ -31,7 +31,7 @@
     "Initial capture command redirected to missing root scratch directory and did not run Flutter; corrected before baseline",
     "Evidence extraction initially expected XML from current codesign output format; corrected without modifying the app"
   ],
-  "cleanupPending": true,
+  "cleanupPending": false,
   "remaining": [
     "Other R07-R13 menu, selector and failure-state visual/motion differences",
     "Full frozen-reference glyph, baseline, shadow and normal-speed motion acceptance",
