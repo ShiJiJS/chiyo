@@ -1,0 +1,67 @@
+{
+  "before": {
+    "viewport": {
+      "width": 1280,
+      "height": 800,
+      "dpr": 1
+    },
+    "theme": "dark",
+    "font": "\"Zhiyu System\", \"PingFang SC\", sans-serif",
+    "focus": true,
+    "rect": {
+      "x": 100,
+      "y": 12.1015625,
+      "width": 84,
+      "height": 40.796875,
+      "top": 12.1015625,
+      "right": 184,
+      "bottom": 52.8984375,
+      "left": 100
+    },
+    "outline": {
+      "style": "solid",
+      "width": "2px",
+      "offset": "3px",
+      "color": "rgb(194, 171, 234)",
+      "radius": "7px"
+    },
+    "state": {
+      "page": "library",
+      "dir": "selfhost",
+      "selected": "azure"
+    }
+  },
+  "after": {
+    "viewport": {
+      "width": 1280,
+      "height": 800,
+      "dpr": 1
+    },
+    "theme": "dark",
+    "font": "\"Zhiyu System\", \"PingFang SC\", sans-serif",
+    "focus": true,
+    "rect": {
+      "x": 100,
+      "y": 12.1015625,
+      "width": 84,
+      "height": 40.796875,
+      "top": 12.1015625,
+      "right": 184,
+      "bottom": 52.8984375,
+      "left": 100
+    },
+    "outline": {
+      "style": "solid",
+      "width": "2px",
+      "offset": "3px",
+      "color": "rgb(194, 171, 234)",
+      "radius": "7px"
+    },
+    "state": {
+      "page": "library",
+      "dir": "selfhost",
+      "selected": "azure"
+    }
+  },
+  "accepted": true
+}

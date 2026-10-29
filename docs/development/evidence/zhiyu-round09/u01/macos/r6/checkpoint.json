@@ -1,0 +1,49 @@
+{
+  "sourceCommit": "b9160aa5bd7c21dd6df8109ca4db5401b6c0cab3",
+  "branch": "codex/zhiyu-macos",
+  "phase": "Formal UI acceptance: shared keyboard focus cues, first bounded slice",
+  "issue": 62,
+  "checked": 10,
+  "total": 12,
+  "state": "OPEN",
+  "checks": {
+    "strictAnalysis": true,
+    "relatedTests": 84,
+    "newFocusCasesIncluded": 18,
+    "nativeScenarioPassed": 1,
+    "nativeFunctionalAssertions": 10,
+    "nativeClockGatesPassed": 6,
+    "fullS5Passed": false,
+    "actualOSInputPassed": false
+  },
+  "app": {
+    "bundleIdentifier": "com.example.infoDesktop.zhiyuPreview",
+    "sandboxed": true,
+    "architecture": "arm64",
+    "executableSha256": "154dafd5fffa119375dc7f83a70b6b21e6a34df6666815b1c6b5fabab049c803",
+    "frameworkSha256": "24522017c1b46e93231ba112fd2f8357a794535c4eb9ace0f746f67e7f340a50",
+    "kernelPresent": true,
+    "aotSnapshotSymbolsPresent": false,
+    "aotSnapshotExports": []
+  },
+  "fixedApp": "/Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/build/macos/Build/Products/Debug/info_desktop.app",
+  "retainedImageScope": "Four unscaled header pairs, eight selected-navigation contexts, five small control frames and one native menu; no full glyph/pixel acceptance.",
+  "failuresRetained": [
+    "Eight pre-fix outline/menu regressions",
+    "One valid pre-modality keyboard-to-pointer regression",
+    "Incorrect initial test focus assumption and directional-arrow fixture, not counted as product regressions",
+    "Initial native lazy-row lookup before explicit viewport; empty owned UUID removed"
+  ],
+  "sourceFilesVerified": 288,
+  "rawCaptureSourcesVerified": 270,
+  "pixelExactStillsVerified": 32,
+  "fontFilesVerified": 3,
+  "frozenFilesVerified": 15,
+  "ordinaryPreviewRestored": true,
+  "cleanupPending": true,
+  "remaining": [
+    "Form/menu contexts and remaining R07-R13 state visual/motion review across seven UI gates",
+    "Owner: OS editing and IME; trackpad/window focus; accessibility and keyboard reachability",
+    "Real services remain F01; Windows deferred"
+  ]
+}
