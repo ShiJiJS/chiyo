@@ -1,0 +1,16 @@
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:61028/11jo4G_NsDw=/
+VMServiceFlutterDriver: Isolate found with number: 5309923166482999
+VMServiceFlutterDriver: Isolate 5309923166482999 is runnable.
+VMServiceFlutterDriver: Isolate is paused at start.
+VMServiceFlutterDriver: Attempting to resume isolate
+flutter: 00:00 +0: isolated Zhiyu native controls, motion, large text and reduced motion
+VMServiceFlutterDriver: Connected to Flutter application.
+flutter: ZHIYU_NATIVE_EVIDENCE=/Users/jiangxinyi/Library/Containers/com.example.infoDesktop.zhiyuPreview/Data/tmp/ZhiyuUI-5193F24E-7789-416C-8DC4-2488390FDA18
+2026-10-30 00:11:51.587 info_desktop[88427:25745813] error messaging the mach port for IMKCFRunLoopWakeUpReliable
+flutter: ZHIYU_NATIVE_MOTION=detail
+flutter: ZHIYU_NATIVE_MOTION=dialog
+flutter: ZHIYU_NATIVE_MOTION=menu
+flutter: ZHIYU_NATIVE_MOTION=feedback
+flutter: 00:23 +1: (tearDownAll)
+flutter: 00:23 +2: All tests passed!
+All tests passed.
