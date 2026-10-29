@@ -14,5 +14,9 @@
     "apps/desktop/build/macos/Build/Products/Release/native_assets/sqlcipher.framework.dSYM"
   ],
   "executableSha256": "a7f390d863f65018c88282c1688951bcfa73fbe52703dedd9d8148bff5815a3d",
-  "kernelSha256": "d6cceec8583b30164b198e63f200beb1802287d7d860cd09475bd30bffbd2c58"
+  "kernelSha256": "d6cceec8583b30164b198e63f200beb1802287d7d860cd09475bd30bffbd2c58",
+  "ordinaryOpenExitCode": 0,
+  "runningPidsObserved": [
+    89742
+  ]
 }

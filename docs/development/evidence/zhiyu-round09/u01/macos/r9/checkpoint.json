@@ -99,5 +99,8 @@
     "checked": 10,
     "total": 12,
     "existingCheckboxesAndRelationshipsUnchanged": true
-  }
+  },
+  "cleanupPending": false,
+  "ordinaryPreviewOpenExitCode": 0,
+  "trackerReadbackVerified": true
 }
