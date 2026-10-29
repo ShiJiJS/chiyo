@@ -13,5 +13,9 @@
     "apps/desktop/build/macos/Build/Products/Release/App.framework.dSYM",
     "apps/desktop/build/macos/Build/Products/Release/FlutterMacOS.framework.dSYM",
     "apps/desktop/build/macos/Build/Products/Release/native_assets/sqlcipher.framework.dSYM"
+  ],
+  "ordinaryOpenExitCode": 0,
+  "runningPidsObserved": [
+    9581
   ]
 }
