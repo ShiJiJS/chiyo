@@ -1,0 +1,16 @@
+00:00 +0: loading /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart
+00:00 +0: (setUpAll)
+00:00 +0: closure-1440-light bundled update banner uses the original review flow and retains snapshots
+00:02 +1: closure-1440-light host-file import cancels, rejects invalid input, preserves failed review and reads back unknown result
+00:03 +2: closure-1280-light bundled update banner uses the original review flow and retains snapshots
+00:04 +3: closure-1280-light host-file import cancels, rejects invalid input, preserves failed review and reads back unknown result
+00:04 +4: closure-1440-dark bundled update banner uses the original review flow and retains snapshots
+00:05 +5: closure-1440-dark host-file import cancels, rejects invalid input, preserves failed review and reads back unknown result
+00:07 +6: closure-1280-dark bundled update banner uses the original review flow and retains snapshots
+00:08 +7: closure-1280-dark host-file import cancels, rejects invalid input, preserves failed review and reads back unknown result
+00:08 +8: closure-1440-dark200 bundled update banner uses the original review flow and retains snapshots
+00:09 +9: closure-1440-dark200 host-file import cancels, rejects invalid input, preserves failed review and reads back unknown result
+00:10 +10: closure-1280-dark200 bundled update banner uses the original review flow and retains snapshots
+00:11 +11: closure-1280-dark200 host-file import cancels, rejects invalid input, preserves failed review and reads back unknown result
+00:12 +12: (tearDownAll)
+00:12 +12: All tests passed!

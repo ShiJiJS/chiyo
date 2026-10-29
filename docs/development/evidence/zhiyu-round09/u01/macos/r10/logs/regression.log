@@ -1,0 +1,67 @@
+00:00 +0: loading /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_plugins_test.dart
+00:00 +0: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_plugins_test.dart: scoped declarative definition is immutable and resolves only the host type alias
+00:00 +1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_plugin_host_import_test.dart: host-owned update is real metadata, preserves old instance snapshots and does not grant host trust
+00:00 +2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_plugin_host_import_test.dart: host-owned update is real metadata, preserves old instance snapshots and does not grant host trust
+00:00 +3: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_plugin_host_import_test.dart: host-owned update is real metadata, preserves old instance snapshots and does not grant host trust
+00:00 +4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_plugin_host_import_test.dart: host-owned update is real metadata, preserves old instance snapshots and does not grant host trust
+00:00 +5: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_plugin_host_import_test.dart: host-owned update is real metadata, preserves old instance snapshots and does not grant host trust
+00:00 +6: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_hosts_test.dart: registered panels cannot be inherited from external definitions and reads expose the shared host fact
+00:00 +7: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_plugins_test.dart: install and update share normal create/edit while old snapshots, relations and history remain unchanged
+00:00 +8: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_plugins_test.dart: install and update share normal create/edit while old snapshots, relations and history remain unchanged
+00:00 +9: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_plugins_test.dart: install and update share normal create/edit while old snapshots, relations and history remain unchanged
+00:00 +10: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_plugins_test.dart: install and update share normal create/edit while old snapshots, relations and history remain unchanged
+00:00 +11: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_plugins_test.dart: install and update share normal create/edit while old snapshots, relations and history remain unchanged
+00:00 +12: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_plugins_test.dart: install and update share normal create/edit while old snapshots, relations and history remain unchanged
+00:00 +13: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_plugin_host_import_test.dart: lost import reply freezes writes and reconciles the original receipt without replay
+00:00 +14: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_hosts_test.dart: fingerprint change requires explicit review, no fingerprint can be confirmed, disable permits revoke only
+00:00 +15: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_plugins_test.dart: disabled and removed definitions cannot create but existing records remain editable and reinstallation preserves their snapshot
+00:00 +16: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_plugin_host_import_test.dart: a mismatched receipt cannot complete an import or release the unknown-operation gate
+00:00 +17: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_hosts_test.dart: record, observed fingerprint and package revisions invalidate review before any write; errors preserve facts
+00:00 +18: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_plugins_test.dart: failed or conflicting commands are atomic, same-version different digest is rejected and a reviewed downgrade leaves instances alone
+00:00 +19: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_hosts_test.dart: committed reply loss reconciles exact intent and reset restores fictional baseline
+00:00 +20: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_plugins_test.dart: builtins can be disabled without mutating current material or immutable record definitions
+00:00 +21: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_hosts_test.dart: unknown mutation freezes replay and validates the original receipt; negative result permits only explicit new intent
+00:00 +22: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_plugins_test.dart: changed content shape requires a new field identity and removed template definitions do not rewrite old instances
+00:00 +23: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_hosts_test.dart: a late host result cannot update a disposed controller or become a new submission
+00:00 +24: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_hosts_test.dart: different server records at the same normalized endpoint share revocation, independent of their names
+00:00 +25: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: (setUpAll)
+00:00 +25: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: (setUpAll)
+00:00 +25: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugin_contracts_test.dart: (setUpAll)
+00:01 +25: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: closure-1440-light bundled update banner uses the original review flow and retains snapshots
+00:01 +26: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: closure-1440-light bundled update banner uses the original review flow and retains snapshots
+00:03 +27: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: closure-1440-light bundled update banner uses the original review flow and retains snapshots
+00:04 +28: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugin_contracts_test.dart: ordinary conflict review preserves the exact draft, tolerates failed reads, and rechecks a newer version before writing
+00:05 +29: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugin_contracts_test.dart: ordinary conflict review preserves the exact draft, tolerates failed reads, and rechecks a newer version before writing
+00:06 +30: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_navigation_test.dart: navigation switches one selection immediately and pages share an origin
+00:07 +31: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_navigation_test.dart: navigation switches one selection immediately and pages share an origin
+00:07 +32: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_navigation_test.dart: navigation switches one selection immediately and pages share an origin
+00:08 +33: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_navigation_test.dart: navigation switches one selection immediately and pages share an origin
+00:08 +34: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugin_contracts_test.dart: dark200 updated creation schema requires an explicit draft reset and then uses the reviewed current template
+00:09 +35: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: closure-1280-dark200 bundled update banner uses the original review flow and retains snapshots
+00:09 +36: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: closure-1280-dark200 bundled update banner uses the original review flow and retains snapshots
+00:09 +37: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: settings-handoff-1440-light all eight sidebar destinations share saved state without system effects or creating grants
+00:10 +38: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugin_contracts_test.dart: legacy definition identity changes do not carry old text into a new meaning, and reloading never creates records
+00:10 +39: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: closure-1280-dark200 host-file import cancels, rejects invalid input, preserves failed review and reads back unknown result
+00:11 +40: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: settings-handoff-1280-light all eight sidebar destinations share saved state without system effects or creating grants
+00:11 +41: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugin_contracts_test.dart: removed profile entry identities cannot be revived by retaining an old editor draft
+00:11 +42: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugin_contracts_test.dart: removed profile entry identities cannot be revived by retaining an old editor draft
+00:11 +43: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: settings-handoff-1440-dark all eight sidebar destinations share saved state without system effects or creating grants
+00:12 +44: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: settings-handoff-1440-dark all eight sidebar destinations share saved state without system effects or creating grants
+00:12 +45: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: settings-handoff-1440-dark all eight sidebar destinations share saved state without system effects or creating grants
+00:12 +46: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: settings-handoff-1440-dark all eight sidebar destinations share saved state without system effects or creating grants
+00:12 +47: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: R07 plugin workspace matches frozen frame at 1280.0 dark=true
+00:13 +48: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: settings-handoff-1280-dark all eight sidebar destinations share saved state without system effects or creating grants
+00:13 +49: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: server identity deep link selects the exact host and shares readback with settings and library
+00:14 +50: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: settings-handoff-1440-dark200 all eight sidebar destinations share saved state without system effects or creating grants
+00:14 +51: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: dark200 host changes warn, missing fingerprints block confirmation and disabled plugin retains revocation
+00:15 +52: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: settings-handoff-1280-dark200 all eight sidebar destinations share saved state without system effects or creating grants
+00:15 +53: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: host save failure, stale review and unknown reply retain exact intent and reconcile without replay
+00:15 +54: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: host panel distinguishes waiting, failed read, retry and true empty states
+00:16 +55: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: closing a waiting host read ignores the cancelled result without reopening the dialog
+00:16 +56: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: settings install, shared external form, update, removal, generic editing and reinstall preserve the original snapshot
+00:18 +57: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: invalid package path, failed install and explicit retry retain the review instead of installing early
+00:18 +58: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: dark200 committed install and uncommitted disable reconcile before any new submission
+00:19 +59: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: waiting and failed metadata refresh keep prior detail and retry retains selected package
+00:19 +60: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: cold plugin loading and failure never claim a confirmed zero; a real empty response does
+00:19 +61: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: (tearDownAll)
+00:19 +61: All tests passed!

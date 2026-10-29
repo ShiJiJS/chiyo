@@ -1,0 +1,8 @@
+00:00 +0: loading /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/integration_test/zhiyu_candidate_native_test.dart
+Building macOS application...                                   
+✓ Built build/macos/Build/Products/Debug/info_desktop.app
+Failed to foreground app; open returned 1
+00:00 +0: fixed Mac candidate continuously connects U01 through U07
+ZHIYU_NATIVE_EVIDENCE=/Users/jiangxinyi/Library/Containers/com.example.infoDesktop.zhiyuPreview/Data/tmp/ZhiyuUI-21AC9C8F-4A5A-4F1E-840C-D6ED5AF0AE61
+00:34 +1: (tearDownAll)
+00:34 +1: All tests passed!

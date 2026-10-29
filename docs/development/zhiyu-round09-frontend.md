@@ -2,7 +2,7 @@
 
 本轮按[已发布计划](../planning/zhiyu-round09/README.md)先完成7项正式Flutter界面。使用独立示例数据，后续真实功能由[#69](https://github.com/ShiJiJS/agent-info-manage/issues/69)重新拆分。2026-10-26起改为Mac优先、Windows适配后置；无子Agent、无服务器同步。
 
-**当前Mac开发持续推进，Windows适配后置。** 固定U01–U07示例预览已实现；本轮进一步修正插件、审批、提案、历史和设置的共用布局与字形，产品源码`7b197ea2`。当前验收按[#62有限清单](zhiyu-macos-acceptance-checklist.md)跟踪，不再沿用早期3/7或“等待开发”状态。七票保持OPEN，系统输入、短动效观察与两个明确数据/接入差异没有被记为通过。下文Windows检查点仅保留历史范围。
+**当前Mac开发持续推进，Windows适配后置。** 固定U01–U07示例预览已实现；产品后继`728d5126`已补齐内置插件更新提示和隔离主机文件导入流程。当前验收按[#62有限清单](zhiyu-macos-acceptance-checklist.md)跟踪，已知自主实现/自动检查缺项清零；七票仍OPEN，连续目视与真实系统输入未记通过，统一见[本人验收单](zhiyu-macos-owner-check.md)。下文Windows检查点仅保留历史范围。
 
 ## 当前任务
 
@@ -11,7 +11,7 @@
 | [#62 外壳和通用控件](https://github.com/ShiJiJS/agent-info-manage/issues/62) | Mac 10/12；原生隔离、字体/菜单与检查工具已有证据；实际系统输入及完整S5仍待收口 |
 | [#63 三栏信息库](https://github.com/ShiJiJS/agent-info-manage/issues/63) | Mac 6/7，OPEN；示例主路径已实现，完整验收保留 |
 | [#64 档案、文档、文件、凭据](https://github.com/ShiJiJS/agent-info-manage/issues/64) | Mac 6/7，OPEN；版本/材料及类型页面已实现 |
-| [#65 插件与旧资料套模板](https://github.com/ShiJiJS/agent-info-manage/issues/65) | Mac 6/7，OPEN；插件/采用流程已实现，有限清单D01/D02保留 |
+| [#65 插件与旧资料套模板](https://github.com/ShiJiJS/agent-info-manage/issues/65) | Mac 6/7，OPEN；插件/采用流程已实现，D01/D02隔离示例流程已补齐 |
 | [#66 访问审批](https://github.com/ShiJiJS/agent-info-manage/issues/66) | Mac 7/8，OPEN；审批、单次结果及身份检查已实现，本轮对照V03 |
 | [#67 提案与历史](https://github.com/ShiJiJS/agent-info-manage/issues/67) | Mac 6/7，OPEN；提案/历史及结果导航已实现，本轮对照V04/V05 |
 | [#68 全局设置](https://github.com/ShiJiJS/agent-info-manage/issues/68) | Mac 7/8，OPEN；八入口已实现，本轮对照V06 |
