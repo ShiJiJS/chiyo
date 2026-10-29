@@ -382,6 +382,42 @@ void main() {
     },
   );
 
+  for (final dark in [false, true]) {
+    testWidgets(
+      'keyboard cancellation returns to the retention launcher dark=$dark',
+      (t) async {
+        final s = await start(t, dark: dark);
+        await tap(t, find.byKey(const ValueKey('settings-section-records')));
+        s.advanceApprovalClock(const Duration(days: 60));
+        await ready(t);
+        await select(t, 'settings-retention-days', '30 天');
+        final launcher = find.byKey(const ValueKey('settings-records-save'));
+        await t.ensureVisible(launcher);
+        final focus = Focus.of(
+          t.element(find.descendant(of: launcher, matching: find.byType(Text))),
+        );
+        focus.requestFocus();
+        await ready(t);
+        expect(focus.hasPrimaryFocus, isTrue);
+        await t.sendKeyEvent(LogicalKeyboardKey.enter);
+        await ready(t);
+        expect(find.text('核对记录清理范围'), findsOneWidget);
+        await t.sendKeyEvent(LogicalKeyboardKey.escape);
+        await ready(t);
+        expect(find.byType(DesktopDialog), findsNothing);
+        expect(model(t).draft!.retentionDays, 30);
+        expect((await s.settings.read()).retentionDays, 180);
+        expect(focus.hasPrimaryFocus, isTrue);
+        // Returning to the launcher must allow reopening without a pointer.
+        await t.sendKeyEvent(LogicalKeyboardKey.enter);
+        await ready(t);
+        expect(find.text('核对记录清理范围'), findsOneWidget);
+        await t.sendKeyEvent(LogicalKeyboardKey.escape);
+        await ready(t);
+      },
+    );
+  }
+
   testWidgets(
     'dark200 records confirmation preserves draft after a save failure and reconciles an unknown cleanup without replay',
     (t) async {

@@ -183,6 +183,82 @@ void main() {
       );
     }
   }
+  for (final dark in [false, true]) {
+    for (final fromEnd in [false, true]) {
+      profileWidgets(
+        'keyboard removal continues in a surviving profile entry dark=$dark fromEnd=$fromEnd',
+        (t) async {
+          final model = await start(t, dark: dark);
+          final saved = await model.source.readDetail(profile);
+          await tap(t, find.text('编辑信息'));
+          while (draft(t).isNotEmpty) {
+            final entries = draft(t);
+            final removed = fromEnd ? entries.last : entries.first;
+            final remove = find.byKey(
+              ValueKey('library-entry-remove-${removed.id}'),
+            );
+            await t.ensureVisible(remove);
+            final focus = Focus.of(
+              t.element(
+                find.descendant(of: remove, matching: find.byType(Text)),
+              ),
+            );
+            focus.requestFocus();
+            await t.pumpAndSettle();
+            await t.sendKeyEvent(LogicalKeyboardKey.enter);
+            await t.pumpAndSettle();
+            if (draft(t).isNotEmpty) {
+              final retained = fromEnd ? draft(t).last : draft(t).first;
+              final title = t.widget<DesktopTextField>(
+                field(retained.id, 'title'),
+              );
+              expect(title.focusNode!.hasPrimaryFocus, isTrue);
+            } else {
+              final add = find.byKey(
+                const ValueKey('library-entry-add-education'),
+              );
+              expect(
+                Focus.of(
+                  t.element(
+                    find.descendant(of: add, matching: find.byType(Text)),
+                  ),
+                ).hasPrimaryFocus,
+                isTrue,
+              );
+            }
+          }
+          expect((await model.source.readDetail(profile)).values, saved.values);
+          await t.sendKeyEvent(LogicalKeyboardKey.enter);
+          await t.pumpAndSettle();
+          expect(draft(t), hasLength(1));
+          expect(
+            t
+                .widget<DesktopTextField>(field(draft(t).single.id, 'title'))
+                .focusNode!
+                .hasPrimaryFocus,
+            isTrue,
+          );
+          await t.sendKeyEvent(LogicalKeyboardKey.escape);
+          await t.pumpAndSettle();
+          expect(find.text('放弃修改'), findsOneWidget);
+          expect(find.byType(DesktopDialog), findsOneWidget);
+          expect(
+            t
+                .widget<DesktopTextField>(field(draft(t).single.id, 'title'))
+                .focusNode!
+                .hasPrimaryFocus,
+            isTrue,
+          );
+          expect((await model.source.readDetail(profile)).values, saved.values);
+          await capture(
+            t,
+            '${dark ? '1280-dark-200' : '1280-light'}-keyboard-removal-${fromEnd ? 'previous' : 'next'}',
+          );
+        },
+      );
+    }
+  }
+
   profileWidgets(
     'record name errors do not mark the separate personal name field',
     (t) async {
