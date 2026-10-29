@@ -23,6 +23,10 @@
     "bytes": 3447,
     "sha256": "603017962475c2488d134bb8c8d4592fd6a6a1527798eb73343a9ead85a294ab"
   },
+  "cleanup.json": {
+    "bytes": 623,
+    "sha256": "60c8a0d509af37da1fa4234fac63e871e32dd4f41a912dce159bc28f64429cf3"
+  },
   "codec-final.log": {
     "bytes": 2359,
     "sha256": "b77143c5499bb82f5e277d78f96955dc512c35caee0e422ea51e7a17dbf0739e"
