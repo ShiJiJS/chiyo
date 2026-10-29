@@ -1,0 +1,8 @@
+00:00 +0: loading /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_select_round09_test.dart
+00:00 +0: (setUpAll)
+00:00 +0: Round09 ordinary selector uses the shared focus and anchored menu dark=false large=false
+00:00 +1: Round09 ordinary selector uses the shared focus and anchored menu dark=false large=true
+00:00 +2: Round09 ordinary selector uses the shared focus and anchored menu dark=true large=false
+00:00 +3: Round09 ordinary selector uses the shared focus and anchored menu dark=true large=true
+00:01 +4: (tearDownAll)
+00:01 +4: All tests passed!
