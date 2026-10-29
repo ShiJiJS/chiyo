@@ -234,6 +234,9 @@ class NativeFrameRecording {
         'samplingIntervalUs': _interval.inMicroseconds,
         'busyTicksSkipped': _busyTicks,
         'unpaintedTicksSkipped': _unpaintedTicks,
+        'paintReadinessCheck': const bool.fromEnvironment('dart.vm.profile')
+            ? 'debug dirty flag unavailable in Profile; last painted layer captured'
+            : 'debug render dirty flag',
         'bufferedCompressedBytes': _bufferedBytes,
         'bufferLimitBytes': _maximumBytes,
         'pixelRatio': 1,

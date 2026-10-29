@@ -366,6 +366,15 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
         item.menu?.update()
         guard item.isEnabled else { result(false); return }
         result(NSApp.sendAction(action, to: item.target, from: item))
+      case "windowState":
+        result(["active": NSApp.isActive, "keyWindow": self.isKeyWindow,
+                "visible": self.isVisible, "miniaturized": self.isMiniaturized,
+                "occluded": !self.occlusionState.contains(.visible),
+                "onActiveSpace": self.isOnActiveSpace,
+                "scrollbarStyle": self.previewScrollbarStyle,
+                "scrollbarRevision": self.previewScrollbarRevision,
+                "width": self.contentView?.bounds.width ?? 0,
+                "height": self.contentView?.bounds.height ?? 0])
       case "setContentSize":
         guard let size = call.arguments as? [String: NSNumber],
               let width = size["width"]?.doubleValue,

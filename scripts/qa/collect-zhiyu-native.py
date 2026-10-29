@@ -16,14 +16,26 @@ def main():
     parser.add_argument('--log', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--python', required=True)
+    parser.add_argument('--profile-result', type=Path)
     args = parser.parse_args()
     log = args.log.read_text()
-    if 'All tests passed!' not in log:
+    profile = None
+    if args.profile_result:
+        profile = json.loads(args.profile_result.read_text())
+        if (profile.get('allTestsPassed') is not True or profile.get('driverExitCode') != 0 or
+                profile.get('runtime', {}).get('profileMode') is not True or
+                profile.get('profileApp', {}).get('sandboxed') is not True or
+                profile.get('profileApp', {}).get('aotSnapshotSymbolsPresent') is not True):
+            raise ValueError('Expected a passed, sandboxed AOT driver result')
+    elif 'All tests passed!' not in log:
         raise ValueError('Collect only a successfully completed native check')
     matches = re.findall(r'^ZHIYU_NATIVE_EVIDENCE=(.+)$', log, re.M)
-    if len(matches) != 1:
+    if profile:
+        source = Path(profile['runtime']['nativeEvidenceDirectory'])
+    elif len(matches) != 1:
         raise ValueError('Expected exactly one owned evidence directory')
-    source = Path(matches[0])
+    else:
+        source = Path(matches[0])
     if not source.name.startswith('ZhiyuUI-'):
         raise ValueError('Unexpected temporary evidence directory name')
     uuid.UUID(source.name.removeprefix('ZhiyuUI-'))
@@ -33,6 +45,8 @@ def main():
     result = json.loads((source / 'native-checks.json').read_text())
     if not result.get('nativeIsolationChecked'):
         raise ValueError('Native isolation was not checked')
+    if profile and result.get('runtime') != profile['runtime']:
+        raise ValueError('Native receipt and driver runtime must agree')
     if any(p.is_symlink() for p in source.rglob('*')):
         raise ValueError('Evidence must not contain symlinks')
     if args.output.exists():

@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:info_desktop/desktop_controls.dart';
 import 'package:info_desktop/desktop_fonts.dart';
+import 'package:info_desktop/desktop_scroll.dart';
 import 'package:info_desktop/workspace/library_page.dart';
 import 'package:info_desktop/workspace/library_file.dart';
 import 'package:info_desktop/workspace/library_widgets.dart';
@@ -14,6 +15,7 @@ import 'package:info_desktop/workspace/preview_workspace.dart';
 import 'package:info_desktop/workspace/sample_workspace_source.dart';
 import 'package:info_desktop/workspace/workspace_source.dart';
 import 'support/native_frame_recording.dart';
+import 'support/native_runtime.dart';
 
 void main() {
   final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -29,6 +31,13 @@ void main() {
     final directory = (await MacPreviewDesktop.channel.invokeMethod<String>(
       'createEvidenceDirectory',
     ))!;
+    final runtime = recordNativeRuntime(binding, directory);
+    if (runtime['profileMode'] == true) {
+      // Profile does not accept the SDK's debug-only client -1 shortcut.
+      // Capture real TextInput.setClient IDs for synthetic Widget text input.
+      tester.testTextInput.register();
+      addTearDown(tester.testTextInput.unregister);
+    }
     // ignore: avoid_print
     print('ZHIYU_NATIVE_EVIDENCE=$directory');
     final root = Directory(directory),
@@ -162,6 +171,7 @@ void main() {
     await tap(find.text('生产环境').last);
     await tester.enterText(find.byKey(const ValueKey('library-search')), '日本');
     await tester.pumpAndSettle();
+    expect(model.query.keyword, '日本');
     expect(model.results!.total, 1);
     expect(model.selection?.id, 'azure');
     await screenshot('filtered-1440-light');
@@ -281,7 +291,25 @@ void main() {
                     as RenderBox)
                 .size
                 .width;
-        final expectedScrollbarWidth = native['scrollbarStyle'] == 'overlay'
+        final windowState = (await MacPreviewDesktop.channel
+            .invokeMapMethod<String, Object?>('windowState'))!;
+        final liveScrollbarStyle = windowState['scrollbarStyle'];
+        final dartScrollbarStyle = desktop.scrollbarStyle.value.name;
+        final scopeScrollbarStyle = DesktopScrollbarScope.of(
+          tester.element(find.byType(LibraryPage)),
+        ).name;
+        await File('$directory/scrollbar-observation.json').writeAsString(
+          const JsonEncoder.withIndent('  ').convert({
+            'initialNativeStyle': native['scrollbarStyle'],
+            'window': windowState,
+            'dartStyle': dartScrollbarStyle,
+            'scopeStyle': scopeScrollbarStyle,
+            'actualScrollbarWidth': actualScrollbarWidth,
+          }),
+        );
+        expect(dartScrollbarStyle, liveScrollbarStyle);
+        expect(scopeScrollbarStyle, liveScrollbarStyle);
+        final expectedScrollbarWidth = liveScrollbarStyle == 'overlay'
             ? 0.0
             : 11.0;
         expect(actualScrollbarWidth, closeTo(expectedScrollbarWidth, .001));
@@ -760,7 +788,8 @@ void main() {
           'dark': dark,
           'devicePixelRatio': tester.view.devicePixelRatio,
           'nativeWindowResized': true,
-          'scrollbarStyle': native['scrollbarStyle']!,
+          'scrollbarStyle': liveScrollbarStyle!,
+          'scrollbarRevision': windowState['scrollbarRevision']!,
           'actualScrollbarWidth': actualScrollbarWidth,
           'documentBoxes': documentBoxes,
           'attachmentBoxes': attachmentBoxes,
@@ -826,6 +855,9 @@ void main() {
     await File('$directory/native-checks.json').writeAsString(
       const JsonEncoder.withIndent('  ').convert({
         'platform': 'macos',
+        'runtime': runtime,
+        'textInputScope':
+            'Widget input; Profile explicitly registers a test text-input client; not OS IME',
         'fonts': fonts,
         'nativeIsolationChecked': true,
         'nativePreview': native,
