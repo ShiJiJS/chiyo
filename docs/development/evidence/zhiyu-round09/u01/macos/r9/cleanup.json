@@ -1,0 +1,14 @@
+{
+  "removedOwnedPaths": [
+    "/Users/jiangxinyi/Library/Containers/com.example.infoDesktop.zhiyuPreview/Data/tmp/ZhiyuUI-724D0178-7BC9-4450-8E33-64F0BE847326",
+    "/Users/jiangxinyi/Documents/Project/agent-info/build/zhiyu-ui/u01/macos/ui-final-checklist"
+  ],
+  "removedBytes": 496084849,
+  "retainedEvidenceFilesVerified": 119,
+  "fixedPreviewPreserved": true,
+  "originalReleaseSymbolsPreserved": true,
+  "unknownLocalDirectoryUntouched": true,
+  "browserSpaceFinished": true,
+  "ordinaryOpenExitCode": 0,
+  "browserSpaceId": 244
+}
