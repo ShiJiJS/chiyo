@@ -10,6 +10,67 @@ import 'desktop_motion.dart';
 import 'desktop_button.dart';
 export 'desktop_button.dart';
 
+/// Frozen Round09 switch, using the existing button's keyboard/focus handling.
+class DesktopToggle extends StatelessWidget {
+  const DesktopToggle({
+    super.key,
+    required this.value,
+    required this.onChanged,
+  });
+  final bool value;
+  final ValueChanged<bool>? onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = UiPalette.of(context);
+    final duration = DesktopMotion.duration(context, DesktopMotion.detail);
+    return Semantics(
+      toggled: value,
+      child: DesktopButton(
+        kind: DesktopButtonKind.quiet,
+        minimumSize: const Size(40, 24),
+        padding: EdgeInsets.zero,
+        radius: 14,
+        onPressed: onChanged == null ? null : () => onChanged!(!value),
+        child: Opacity(
+          opacity: onChanged == null ? .45 : 1,
+          child: AnimatedContainer(
+            duration: duration,
+            curve: Curves.ease,
+            width: 40,
+            height: 24,
+            padding: const EdgeInsets.all(3),
+            decoration: BoxDecoration(
+              color: value ? c.accent : c.lineStrong,
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: AnimatedAlign(
+              duration: duration,
+              curve: Curves.ease,
+              alignment: value ? Alignment.centerRight : Alignment.centerLeft,
+              child: Container(
+                width: 18,
+                height: 18,
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Color(0x22000000),
+                      offset: Offset(0, 1),
+                      blurRadius: 4,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 // Labels stay outside the editable border, including after a value is entered.
 class DesktopTextField extends StatelessWidget {
   const DesktopTextField({

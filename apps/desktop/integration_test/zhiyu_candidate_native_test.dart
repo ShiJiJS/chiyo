@@ -203,6 +203,13 @@ void main() {
       }
       await tap(target);
       expect(settings.section, section);
+      if (section == WorkspaceSettingsSection.notifications) {
+        final enabled = (await source.settings.read()).notifications;
+        await press('settings-notifications');
+        expect((await source.settings.read()).notifications, !enabled);
+        await press('settings-notifications');
+        expect((await source.settings.read()).notifications, enabled);
+      }
       recording.mark('u07-${section.name}');
     }
     await stage('u07-settings-failure-retry-eight-sections');

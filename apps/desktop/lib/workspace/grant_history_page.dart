@@ -430,15 +430,15 @@ class _GrantHistoryPageState extends State<GrantHistoryPage> {
 
   Widget _section(BuildContext context, String title, List<Widget> children) =>
       Padding(
-        padding: const EdgeInsets.only(top: 26),
+        padding: const EdgeInsets.only(top: 28),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
               title,
-              style: libraryText(context, 16, weight: FontWeight.w600),
+              style: libraryText(context, 14, weight: FontWeight.w700),
             ),
-            const SizedBox(height: 14),
+            const SizedBox(height: 12),
             ...children,
           ],
         ),
@@ -560,37 +560,56 @@ class _GrantHistoryPageState extends State<GrantHistoryPage> {
             if (d.events.isNotEmpty)
               _section(context, '访问与使用事件', [
                 for (final e in d.events)
-                  Container(
-                    padding: const EdgeInsets.only(left: 17, bottom: 20),
-                    decoration: BoxDecoration(
-                      border: Border(left: BorderSide(color: c.line)),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Text(
-                          libraryLocalDateTime(e.at),
-                          style: libraryText(context, 12, color: c.muted),
-                        ),
-                        Text(
-                          e.description,
-                          style: libraryText(context, 14, height: 1.9),
-                        ),
-                        Text(
-                          e.result,
-                          style: libraryText(context, 13, color: c.muted),
-                        ),
-                        if (e.proposalId != null)
-                          DesktopButton(
-                            key: ValueKey('grant-organization-${e.proposalId}'),
-                            kind: DesktopButtonKind.quiet,
-                            onPressed: m.frozen || widget.onProposal == null
-                                ? null
-                                : () => widget.onProposal!(e.proposalId!),
-                            child: const Text('查看这次整理结果'),
+                  Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      Positioned(
+                        left: -3.5,
+                        top: 6,
+                        child: Container(
+                          width: 7,
+                          height: 7,
+                          decoration: BoxDecoration(
+                            color: c.accent,
+                            shape: BoxShape.circle,
                           ),
-                      ],
-                    ),
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.only(left: 17, bottom: 26),
+                        decoration: BoxDecoration(
+                          border: Border(left: BorderSide(color: c.line)),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Text(
+                              libraryLocalDateTime(e.at),
+                              style: libraryText(context, 12, color: c.muted),
+                            ),
+                            Text(
+                              e.description,
+                              style: libraryText(context, 14, height: 1.9),
+                            ),
+                            Text(
+                              e.result,
+                              style: libraryText(context, 13, color: c.muted),
+                            ),
+                            if (e.proposalId != null)
+                              DesktopButton(
+                                key: ValueKey(
+                                  'grant-organization-${e.proposalId}',
+                                ),
+                                kind: DesktopButtonKind.quiet,
+                                onPressed: m.frozen || widget.onProposal == null
+                                    ? null
+                                    : () => widget.onProposal!(e.proposalId!),
+                                child: const Text('查看这次整理结果'),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
               ])
             else if (h.operationCount == 0)
