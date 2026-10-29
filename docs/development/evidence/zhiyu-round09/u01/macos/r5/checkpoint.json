@@ -62,5 +62,7 @@
     "F01 real persistence/platform services and delivery; Windows deferred."
   ],
   "goalStateObserved": "blocked with old broad objective; tools do not expose resume or objective editing; not falsely marked complete",
-  "cleanupPending": true
+  "cleanupPending": false,
+  "boundedCandidateDelivered": true,
+  "formalUIAcceptanceComplete": false
 }

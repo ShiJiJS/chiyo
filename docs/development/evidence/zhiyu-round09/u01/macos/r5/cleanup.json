@@ -1,0 +1,270 @@
+{
+  "removed": [
+    {
+      "path": "build/zhiyu-ui/u01/macos/r5-attempt-1",
+      "files": 4,
+      "bytes": 6898
+    },
+    {
+      "path": "build/zhiyu-ui/u01/macos/r5-attempt-2",
+      "files": 5,
+      "bytes": 6784
+    },
+    {
+      "path": "build/zhiyu-ui/u01/macos/r5-attempt-3",
+      "files": 5,
+      "bytes": 7215
+    },
+    {
+      "path": "build/zhiyu-ui/u01/macos/r5-attempt-4",
+      "files": 8,
+      "bytes": 11924
+    },
+    {
+      "path": "build/zhiyu-ui/u01/macos/r5-attempt-5",
+      "files": 177,
+      "bytes": 52057626
+    },
+    {
+      "path": "build/zhiyu-ui/u01/macos/r5-final",
+      "files": 273,
+      "bytes": 74996892
+    },
+    {
+      "path": "build/zhiyu-ui/u01/macos/r5-library",
+      "files": 15,
+      "bytes": 817906
+    },
+    {
+      "path": "build/zhiyu-ui/u01/macos/r5-library-checked",
+      "files": 139,
+      "bytes": 27635146
+    },
+    {
+      "path": "build/zhiyu-ui/u01/macos/r5-library-live",
+      "files": 215,
+      "bytes": 42425379
+    },
+    {
+      "path": "build/zhiyu-ui/u01/macos/r5-observer-baseline",
+      "files": 125,
+      "bytes": 32644331
+    },
+    {
+      "path": "build/zhiyu-ui/u01/macos/r5-observer-cached",
+      "files": 390,
+      "bytes": 109822109
+    },
+    {
+      "path": "build/zhiyu-ui/u01/macos/r5-third",
+      "files": 128,
+      "bytes": 34123884
+    },
+    {
+      "path": "build/zhiyu-ui/u01/macos/candidate-20261029",
+      "files": 144,
+      "bytes": 22748043
+    },
+    {
+      "path": "build/zhiyu-ui/u01/macos/candidate-lifecycle-20261029",
+      "files": 3,
+      "bytes": 2373
+    },
+    {
+      "path": "build/candidate-analysis.log",
+      "files": 1,
+      "bytes": 96
+    },
+    {
+      "path": "build/candidate-stages.png",
+      "files": 1,
+      "bytes": 304963
+    },
+    {
+      "path": "build/candidate-focused.log",
+      "files": 1,
+      "bytes": 12874
+    },
+    {
+      "path": "build/profile-codec.log",
+      "files": 1,
+      "bytes": 2359
+    },
+    {
+      "path": "build/profile-analysis.log",
+      "files": 1,
+      "bytes": 96
+    },
+    {
+      "path": "build/candidate-final-analysis.log",
+      "files": 1,
+      "bytes": 96
+    },
+    {
+      "path": "build/r5-curation.log",
+      "files": 1,
+      "bytes": 78
+    },
+    {
+      "path": "build/profile-guards.log",
+      "files": 1,
+      "bytes": 716
+    },
+    {
+      "path": "build/profile-analysis-checked.log",
+      "files": 1,
+      "bytes": 96
+    },
+    {
+      "path": "build/candidate-launch.json",
+      "files": 1,
+      "bytes": 24
+    },
+    {
+      "path": "build/profile-analysis-final.log",
+      "files": 1,
+      "bytes": 1281
+    },
+    {
+      "path": "build/candidate-issue62-after.md",
+      "files": 1,
+      "bytes": 13938
+    },
+    {
+      "path": "build/profile-final-guards.log",
+      "files": 1,
+      "bytes": 578
+    },
+    {
+      "path": "build/r5-tracker-comments.json",
+      "files": 1,
+      "bytes": 4982
+    },
+    {
+      "path": "build/r5-issue62-before.md",
+      "files": 1,
+      "bytes": 8266
+    },
+    {
+      "path": "build/profile-final-analysis.log",
+      "files": 1,
+      "bytes": 96
+    },
+    {
+      "path": "build/candidate-lifecycle.log",
+      "files": 1,
+      "bytes": 1270
+    },
+    {
+      "path": "build/candidate-collection.log",
+      "files": 1,
+      "bytes": 1740
+    },
+    {
+      "path": "build/profile-complete-analysis.log",
+      "files": 1,
+      "bytes": 96
+    },
+    {
+      "path": "build/profile-final-focused.log",
+      "files": 1,
+      "bytes": 5503
+    },
+    {
+      "path": "build/profile-focused.log",
+      "files": 1,
+      "bytes": 4607
+    },
+    {
+      "path": "build/r5-curate.py",
+      "files": 1,
+      "bytes": 3875
+    },
+    {
+      "path": "build/profile-observer-analysis.log",
+      "files": 1,
+      "bytes": 303
+    },
+    {
+      "path": "build/candidate-timeline.png",
+      "files": 1,
+      "bytes": 220323
+    },
+    {
+      "path": "build/profile-scrollbar-format.log",
+      "files": 1,
+      "bytes": 46
+    },
+    {
+      "path": "build/r5-tracker-before.json",
+      "files": 1,
+      "bytes": 1426
+    },
+    {
+      "path": "build/candidate-issue62-before.md",
+      "files": 1,
+      "bytes": 11076
+    },
+    {
+      "path": "build/candidate-playback-3.png",
+      "files": 1,
+      "bytes": 136797
+    },
+    {
+      "path": "build/candidate-playback-contact.png",
+      "files": 1,
+      "bytes": 187506
+    },
+    {
+      "path": "build/candidate-format.log",
+      "files": 1,
+      "bytes": 119
+    },
+    {
+      "path": "build/candidate-playback-2.png",
+      "files": 1,
+      "bytes": 150009
+    },
+    {
+      "path": "build/candidate-tracker-readback.json",
+      "files": 1,
+      "bytes": 396
+    },
+    {
+      "path": "build/candidate-launch.log",
+      "files": 1,
+      "bytes": 0
+    },
+    {
+      "path": "build/profile-scrollbar-analysis.log",
+      "files": 1,
+      "bytes": 96
+    },
+    {
+      "path": "build/candidate-playback-0.png",
+      "files": 1,
+      "bytes": 136312
+    },
+    {
+      "path": "build/candidate-playback-1.png",
+      "files": 1,
+      "bytes": 99200
+    },
+    {
+      "path": "build/candidate-precleanup.json",
+      "files": 1,
+      "bytes": 1927
+    },
+    {
+      "path": "build/candidate-issue62-delivery.md",
+      "files": 1,
+      "bytes": 2993
+    }
+  ],
+  "totalFiles": 1669,
+  "totalBytes": 398622669,
+  "fixedPreviewAppKept": true,
+  "preExistingReleaseSymbolsKept": true,
+  "unknownLocalUntouched": true,
+  "sourceAndEvidenceVerifiedBeforeDeletion": true
+}
