@@ -1,0 +1,36 @@
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:54263/FLTG8cCF3Ug=/
+VMServiceFlutterDriver: Isolate found with number: 3962555882396163
+VMServiceFlutterDriver: Isolate 3962555882396163 is runnable.
+VMServiceFlutterDriver: Isolate is paused at start.
+VMServiceFlutterDriver: Attempting to resume isolate
+flutter: 00:00 +0: Mac library query, edit failure, related return and viewport matrix
+VMServiceFlutterDriver: Connected to Flutter application.
+flutter: ZHIYU_NATIVE_EVIDENCE=/Users/jiangxinyi/Library/Containers/com.example.infoDesktop.zhiyuPreview/Data/tmp/ZhiyuUI-0FDBCBB0-A28B-4CA7-A23D-15314D54EF8E
+flutter: Expected: <1>
+flutter:   Actual: <2>
+flutter: 
+flutter: #0      fail (package:matcher/src/expect/expect.dart:187)
+flutter: #1      _expect (package:matcher/src/expect/expect.dart:182)
+flutter: #2      expect (package:matcher/src/expect/expect.dart:65)
+flutter: #3      expect (package:flutter_test/src/widget_tester.dart:473)
+flutter: #4      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/integration_test/zhiyu_library_native_test.dart:167)
+flutter: <asynchronous suspension>
+flutter: #5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192)
+flutter: <asynchronous suspension>
+flutter: #6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953)
+flutter: <asynchronous suspension>
+flutter: #7      TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1707)
+flutter: <asynchronous suspension>
+flutter: 00:07 +0: Mac library query, edit failure, related return and viewport matrix [E]
+flutter:   Test failed. See exception logs above.
+  The test description was: Mac library query, edit failure, related return and viewport matrix
+flutter:   
+flutter: 00:07 +0 -1: (tearDownAll)
+flutter: 00:07 +1 -1: Some tests failed.
+Failure Details:
+Failure in method: Mac library query, edit failure, related return and viewport matrix
+Instance of 'FlutterErrorDetails'
+end of failure 1
+
+
+

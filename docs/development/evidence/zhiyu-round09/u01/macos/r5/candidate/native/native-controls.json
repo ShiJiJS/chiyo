@@ -1,0 +1,1180 @@
+{
+  "kind": "native-flutter-framebuffer-with-widget-input",
+  "wallClockDurationMs": 4959,
+  "samplingTargetFps": 30,
+  "samplingIntervalUs": 33000,
+  "busyTicksSkipped": 22,
+  "unpaintedTicksSkipped": 0,
+  "paintReadinessCheck": "debug render dirty flag",
+  "bufferedCompressedBytes": 16110483,
+  "bufferLimitBytes": 134217728,
+  "pixelRatio": 1,
+  "viewportCropped": false,
+  "frames": [
+    {
+      "ms": 0,
+      "file": "native-controls-frames/frame-00000.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 20084,
+      "compressedBytes": 159835
+    },
+    {
+      "ms": 56,
+      "file": "native-controls-frames/frame-00001.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 20830,
+      "compressedBytes": 159835
+    },
+    {
+      "ms": 91,
+      "file": "native-controls-frames/frame-00002.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 15400,
+      "compressedBytes": 159835
+    },
+    {
+      "ms": 122,
+      "file": "native-controls-frames/frame-00003.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 22520,
+      "compressedBytes": 159835
+    },
+    {
+      "ms": 262,
+      "file": "native-controls-frames/frame-00004.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 46283,
+      "compressedBytes": 79831
+    },
+    {
+      "ms": 319,
+      "file": "native-controls-frames/frame-00005.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 36564,
+      "compressedBytes": 158532
+    },
+    {
+      "ms": 356,
+      "file": "native-controls-frames/frame-00006.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 19707,
+      "compressedBytes": 160074
+    },
+    {
+      "ms": 385,
+      "file": "native-controls-frames/frame-00007.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 20556,
+      "compressedBytes": 159932
+    },
+    {
+      "ms": 418,
+      "file": "native-controls-frames/frame-00008.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 13480,
+      "compressedBytes": 160075
+    },
+    {
+      "ms": 453,
+      "file": "native-controls-frames/frame-00009.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 17760,
+      "compressedBytes": 160075
+    },
+    {
+      "ms": 499,
+      "file": "native-controls-frames/frame-00010.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 23105,
+      "compressedBytes": 160076
+    },
+    {
+      "ms": 551,
+      "file": "native-controls-frames/frame-00011.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 15720,
+      "compressedBytes": 160077
+    },
+    {
+      "ms": 583,
+      "file": "native-controls-frames/frame-00012.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 23687,
+      "compressedBytes": 160077
+    },
+    {
+      "ms": 619,
+      "file": "native-controls-frames/frame-00013.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 23439,
+      "compressedBytes": 160077
+    },
+    {
+      "ms": 649,
+      "file": "native-controls-frames/frame-00014.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 19584,
+      "compressedBytes": 154398
+    },
+    {
+      "ms": 683,
+      "file": "native-controls-frames/frame-00015.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 17626,
+      "compressedBytes": 154398
+    },
+    {
+      "ms": 716,
+      "file": "native-controls-frames/frame-00016.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 20881,
+      "compressedBytes": 154398
+    },
+    {
+      "ms": 783,
+      "file": "native-controls-frames/frame-00017.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 20284,
+      "compressedBytes": 154392
+    },
+    {
+      "ms": 818,
+      "file": "native-controls-frames/frame-00018.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 20856,
+      "compressedBytes": 154392
+    },
+    {
+      "ms": 852,
+      "file": "native-controls-frames/frame-00019.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 28181,
+      "compressedBytes": 154392
+    },
+    {
+      "ms": 885,
+      "file": "native-controls-frames/frame-00020.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 23936,
+      "compressedBytes": 154392
+    },
+    {
+      "ms": 913,
+      "file": "native-controls-frames/frame-00021.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 15681,
+      "compressedBytes": 154392
+    },
+    {
+      "ms": 946,
+      "file": "native-controls-frames/frame-00022.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 15379,
+      "compressedBytes": 154392
+    },
+    {
+      "ms": 980,
+      "file": "native-controls-frames/frame-00023.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 15220,
+      "compressedBytes": 160815
+    },
+    {
+      "ms": 1012,
+      "file": "native-controls-frames/frame-00024.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 15935,
+      "compressedBytes": 160815
+    },
+    {
+      "ms": 1051,
+      "file": "native-controls-frames/frame-00025.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 18713,
+      "compressedBytes": 160815
+    },
+    {
+      "ms": 1098,
+      "file": "native-controls-frames/frame-00026.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 24050,
+      "compressedBytes": 153898
+    },
+    {
+      "ms": 1144,
+      "file": "native-controls-frames/frame-00027.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 19301,
+      "compressedBytes": 153898
+    },
+    {
+      "ms": 1177,
+      "file": "native-controls-frames/frame-00028.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 17110,
+      "compressedBytes": 153898
+    },
+    {
+      "ms": 1211,
+      "file": "native-controls-frames/frame-00029.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 18322,
+      "compressedBytes": 147083
+    },
+    {
+      "ms": 1244,
+      "file": "native-controls-frames/frame-00030.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 21641,
+      "compressedBytes": 147083
+    },
+    {
+      "ms": 1281,
+      "file": "native-controls-frames/frame-00031.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 49487,
+      "compressedBytes": 147083
+    },
+    {
+      "ms": 1331,
+      "file": "native-controls-frames/frame-00032.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 17715,
+      "compressedBytes": 146968
+    },
+    {
+      "ms": 1376,
+      "file": "native-controls-frames/frame-00033.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 16870,
+      "compressedBytes": 146968
+    },
+    {
+      "ms": 1408,
+      "file": "native-controls-frames/frame-00034.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 14239,
+      "compressedBytes": 147060
+    },
+    {
+      "ms": 1446,
+      "file": "native-controls-frames/frame-00035.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 19141,
+      "compressedBytes": 147060
+    },
+    {
+      "ms": 1475,
+      "file": "native-controls-frames/frame-00036.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 21563,
+      "compressedBytes": 147060
+    },
+    {
+      "ms": 1515,
+      "file": "native-controls-frames/frame-00037.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 52230,
+      "compressedBytes": 147060
+    },
+    {
+      "ms": 1574,
+      "file": "native-controls-frames/frame-00038.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 17520,
+      "compressedBytes": 143426
+    },
+    {
+      "ms": 1607,
+      "file": "native-controls-frames/frame-00039.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 27075,
+      "compressedBytes": 143426
+    },
+    {
+      "ms": 1642,
+      "file": "native-controls-frames/frame-00040.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 19986,
+      "compressedBytes": 148149
+    },
+    {
+      "ms": 1672,
+      "file": "native-controls-frames/frame-00041.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 28673,
+      "compressedBytes": 148149
+    },
+    {
+      "ms": 1706,
+      "file": "native-controls-frames/frame-00042.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 22319,
+      "compressedBytes": 148149
+    },
+    {
+      "ms": 1771,
+      "file": "native-controls-frames/frame-00043.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 80310,
+      "compressedBytes": 148149
+    },
+    {
+      "ms": 1851,
+      "file": "native-controls-frames/frame-00044.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 34488,
+      "compressedBytes": 150367
+    },
+    {
+      "ms": 1906,
+      "file": "native-controls-frames/frame-00045.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 17066,
+      "compressedBytes": 149444
+    },
+    {
+      "ms": 1936,
+      "file": "native-controls-frames/frame-00046.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 16035,
+      "compressedBytes": 149444
+    },
+    {
+      "ms": 1970,
+      "file": "native-controls-frames/frame-00047.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 17719,
+      "compressedBytes": 149444
+    },
+    {
+      "ms": 2005,
+      "file": "native-controls-frames/frame-00048.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 19413,
+      "compressedBytes": 149444
+    },
+    {
+      "ms": 2040,
+      "file": "native-controls-frames/frame-00049.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 14646,
+      "compressedBytes": 149444
+    },
+    {
+      "ms": 2069,
+      "file": "native-controls-frames/frame-00050.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 12007,
+      "compressedBytes": 149444
+    },
+    {
+      "ms": 2102,
+      "file": "native-controls-frames/frame-00051.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 13104,
+      "compressedBytes": 149444
+    },
+    {
+      "ms": 2185,
+      "file": "native-controls-frames/frame-00052.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 50772,
+      "compressedBytes": 96708
+    },
+    {
+      "ms": 2269,
+      "file": "native-controls-frames/frame-00053.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 27962,
+      "compressedBytes": 147819
+    },
+    {
+      "ms": 2301,
+      "file": "native-controls-frames/frame-00054.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 15364,
+      "compressedBytes": 148969
+    },
+    {
+      "ms": 2332,
+      "file": "native-controls-frames/frame-00055.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 14995,
+      "compressedBytes": 148727
+    },
+    {
+      "ms": 2365,
+      "file": "native-controls-frames/frame-00056.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 11835,
+      "compressedBytes": 148726
+    },
+    {
+      "ms": 2401,
+      "file": "native-controls-frames/frame-00057.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 19588,
+      "compressedBytes": 148818
+    },
+    {
+      "ms": 2431,
+      "file": "native-controls-frames/frame-00058.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 21360,
+      "compressedBytes": 148818
+    },
+    {
+      "ms": 2467,
+      "file": "native-controls-frames/frame-00059.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 68798,
+      "compressedBytes": 148818
+    },
+    {
+      "ms": 2568,
+      "file": "native-controls-frames/frame-00060.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 23850,
+      "compressedBytes": 143971
+    },
+    {
+      "ms": 2596,
+      "file": "native-controls-frames/frame-00061.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 17780,
+      "compressedBytes": 144769
+    },
+    {
+      "ms": 2629,
+      "file": "native-controls-frames/frame-00062.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 43774,
+      "compressedBytes": 145199
+    },
+    {
+      "ms": 2732,
+      "file": "native-controls-frames/frame-00063.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 18659,
+      "compressedBytes": 145288
+    },
+    {
+      "ms": 2761,
+      "file": "native-controls-frames/frame-00064.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 15848,
+      "compressedBytes": 145288
+    },
+    {
+      "ms": 2794,
+      "file": "native-controls-frames/frame-00065.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 21650,
+      "compressedBytes": 145288
+    },
+    {
+      "ms": 2935,
+      "file": "native-controls-frames/frame-00066.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 58857,
+      "compressedBytes": 77119
+    },
+    {
+      "ms": 2994,
+      "file": "native-controls-frames/frame-00067.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 33259,
+      "compressedBytes": 127585
+    },
+    {
+      "ms": 3027,
+      "file": "native-controls-frames/frame-00068.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 41715,
+      "compressedBytes": 127448
+    },
+    {
+      "ms": 3105,
+      "file": "native-controls-frames/frame-00069.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 19056,
+      "compressedBytes": 127448
+    },
+    {
+      "ms": 3125,
+      "file": "native-controls-frames/frame-00070.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 35045,
+      "compressedBytes": 127448
+    },
+    {
+      "ms": 3160,
+      "file": "native-controls-frames/frame-00071.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 36784,
+      "compressedBytes": 127448
+    },
+    {
+      "ms": 3197,
+      "file": "native-controls-frames/frame-00072.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 19883,
+      "compressedBytes": 127448
+    },
+    {
+      "ms": 3229,
+      "file": "native-controls-frames/frame-00073.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 26371,
+      "compressedBytes": 120466
+    },
+    {
+      "ms": 3257,
+      "file": "native-controls-frames/frame-00074.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 18455,
+      "compressedBytes": 120466
+    },
+    {
+      "ms": 3289,
+      "file": "native-controls-frames/frame-00075.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 16020,
+      "compressedBytes": 120466
+    },
+    {
+      "ms": 3353,
+      "file": "native-controls-frames/frame-00076.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 39613,
+      "compressedBytes": 120549
+    },
+    {
+      "ms": 3392,
+      "file": "native-controls-frames/frame-00077.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 19769,
+      "compressedBytes": 120549
+    },
+    {
+      "ms": 3422,
+      "file": "native-controls-frames/frame-00078.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 17581,
+      "compressedBytes": 120549
+    },
+    {
+      "ms": 3467,
+      "file": "native-controls-frames/frame-00079.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 21138,
+      "compressedBytes": 131052
+    },
+    {
+      "ms": 3494,
+      "file": "native-controls-frames/frame-00080.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 37037,
+      "compressedBytes": 131052
+    },
+    {
+      "ms": 3531,
+      "file": "native-controls-frames/frame-00081.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 65737,
+      "compressedBytes": 131052
+    },
+    {
+      "ms": 3626,
+      "file": "native-controls-frames/frame-00082.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 23756,
+      "compressedBytes": 132997
+    },
+    {
+      "ms": 3652,
+      "file": "native-controls-frames/frame-00083.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 25891,
+      "compressedBytes": 132997
+    },
+    {
+      "ms": 3692,
+      "file": "native-controls-frames/frame-00084.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 21711,
+      "compressedBytes": 119812
+    },
+    {
+      "ms": 3719,
+      "file": "native-controls-frames/frame-00085.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 14798,
+      "compressedBytes": 119812
+    },
+    {
+      "ms": 3752,
+      "file": "native-controls-frames/frame-00086.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 42549,
+      "compressedBytes": 119812
+    },
+    {
+      "ms": 3795,
+      "file": "native-controls-frames/frame-00087.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 78798,
+      "compressedBytes": 119812
+    },
+    {
+      "ms": 3888,
+      "file": "native-controls-frames/frame-00088.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 36655,
+      "compressedBytes": 104944
+    },
+    {
+      "ms": 3925,
+      "file": "native-controls-frames/frame-00089.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 21633,
+      "compressedBytes": 104944
+    },
+    {
+      "ms": 3949,
+      "file": "native-controls-frames/frame-00090.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 14950,
+      "compressedBytes": 104944
+    },
+    {
+      "ms": 3981,
+      "file": "native-controls-frames/frame-00091.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 33728,
+      "compressedBytes": 104944
+    },
+    {
+      "ms": 4015,
+      "file": "native-controls-frames/frame-00092.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 23955,
+      "compressedBytes": 104944
+    },
+    {
+      "ms": 4049,
+      "file": "native-controls-frames/frame-00093.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 13152,
+      "compressedBytes": 104944
+    },
+    {
+      "ms": 4094,
+      "file": "native-controls-frames/frame-00094.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 12295,
+      "compressedBytes": 104944
+    },
+    {
+      "ms": 4114,
+      "file": "native-controls-frames/frame-00095.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 11095,
+      "compressedBytes": 104944
+    },
+    {
+      "ms": 4241,
+      "file": "native-controls-frames/frame-00096.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 37439,
+      "compressedBytes": 124940
+    },
+    {
+      "ms": 4289,
+      "file": "native-controls-frames/frame-00097.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 44870,
+      "compressedBytes": 168524
+    },
+    {
+      "ms": 4344,
+      "file": "native-controls-frames/frame-00098.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 19293,
+      "compressedBytes": 168436
+    },
+    {
+      "ms": 4379,
+      "file": "native-controls-frames/frame-00099.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 18607,
+      "compressedBytes": 168431
+    },
+    {
+      "ms": 4411,
+      "file": "native-controls-frames/frame-00100.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 20765,
+      "compressedBytes": 168515
+    },
+    {
+      "ms": 4448,
+      "file": "native-controls-frames/frame-00101.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 31323,
+      "compressedBytes": 168514
+    },
+    {
+      "ms": 4479,
+      "file": "native-controls-frames/frame-00102.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 21798,
+      "compressedBytes": 168514
+    },
+    {
+      "ms": 4512,
+      "file": "native-controls-frames/frame-00103.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 30835,
+      "compressedBytes": 168514
+    },
+    {
+      "ms": 4544,
+      "file": "native-controls-frames/frame-00104.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 31963,
+      "compressedBytes": 168514
+    },
+    {
+      "ms": 4577,
+      "file": "native-controls-frames/frame-00105.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 15881,
+      "compressedBytes": 168514
+    },
+    {
+      "ms": 4651,
+      "file": "native-controls-frames/frame-00106.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 13125,
+      "compressedBytes": 76610
+    },
+    {
+      "ms": 4678,
+      "file": "native-controls-frames/frame-00107.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 31265,
+      "compressedBytes": 106995
+    },
+    {
+      "ms": 4710,
+      "file": "native-controls-frames/frame-00108.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 35983,
+      "compressedBytes": 107323
+    },
+    {
+      "ms": 4746,
+      "file": "native-controls-frames/frame-00109.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 32901,
+      "compressedBytes": 106975
+    },
+    {
+      "ms": 4779,
+      "file": "native-controls-frames/frame-00110.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 18424,
+      "compressedBytes": 105100
+    },
+    {
+      "ms": 4808,
+      "file": "native-controls-frames/frame-00111.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 28629,
+      "compressedBytes": 104944
+    },
+    {
+      "ms": 4842,
+      "file": "native-controls-frames/frame-00112.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 16309,
+      "compressedBytes": 104944
+    },
+    {
+      "ms": 4876,
+      "file": "native-controls-frames/frame-00113.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 16840,
+      "compressedBytes": 104944
+    },
+    {
+      "ms": 4918,
+      "file": "native-controls-frames/frame-00114.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 13810,
+      "compressedBytes": 104944
+    },
+    {
+      "ms": 4945,
+      "file": "native-controls-frames/frame-00115.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 13159,
+      "compressedBytes": 104944
+    }
+  ],
+  "sourceFrames": [
+    0,
+    56,
+    91,
+    122,
+    262,
+    319,
+    356,
+    385,
+    418,
+    453,
+    499,
+    551,
+    583,
+    619,
+    649,
+    683,
+    716,
+    783,
+    818,
+    852,
+    885,
+    913,
+    946,
+    980,
+    1012,
+    1051,
+    1098,
+    1144,
+    1177,
+    1211,
+    1244,
+    1281,
+    1331,
+    1376,
+    1408,
+    1446,
+    1475,
+    1515,
+    1574,
+    1607,
+    1642,
+    1672,
+    1706,
+    1771,
+    1851,
+    1906,
+    1936,
+    1970,
+    2005,
+    2040,
+    2069,
+    2102,
+    2185,
+    2269,
+    2301,
+    2332,
+    2365,
+    2401,
+    2431,
+    2467,
+    2568,
+    2596,
+    2629,
+    2732,
+    2761,
+    2794,
+    2935,
+    2994,
+    3027,
+    3105,
+    3125,
+    3160,
+    3197,
+    3229,
+    3257,
+    3289,
+    3353,
+    3392,
+    3422,
+    3467,
+    3494,
+    3531,
+    3626,
+    3652,
+    3692,
+    3719,
+    3752,
+    3795,
+    3888,
+    3925,
+    3949,
+    3981,
+    4015,
+    4049,
+    4094,
+    4114,
+    4241,
+    4289,
+    4344,
+    4379,
+    4411,
+    4448,
+    4479,
+    4512,
+    4544,
+    4577,
+    4651,
+    4678,
+    4710,
+    4746,
+    4779,
+    4808,
+    4842,
+    4876,
+    4918,
+    4945
+  ],
+  "events": [],
+  "osDesktopCapture": false,
+  "systemDpiChanged": false
+}

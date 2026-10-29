@@ -1,5 +1,7 @@
 # 知予 Mac 外壳与预览准备（#62，进行中）
 
+2026-10-29当前交付范围改为固定U01–U07示例界面候选，主状态统一见[#62顶部](https://github.com/ShiJiJS/agent-info-manage/issues/62)。[本机候选启动指引](zhiyu-macos-candidate.md)记录入口和有限剩余；[r5检查点](evidence/zhiyu-round09/u01/macos/r5/checkpoint.json)保留Profile诊断及本轮连续路径结果。下文r4“下一步”属于历史，不再自动扩展成测量工程；完整S5与真实OS输入仍未通过。
+
 ## r4：截图延后编码与绘制延迟观测
 
 源码`9d8ccfec4e6175709394a7c530f3c56f287088a1`只修改检查工具及原生检查入口。Mac截图与录制复用完整straight-RGBA采集，在同一采样锁下读取画面；截图在应用内只压缩、写入独立临时目录，应用退出后由宿主编码PNG。保留原文件名、透明像素、尺寸和比例1；数量、像素总量和压缩字节数设上限。宿主拒绝越界、重复、符号链接及非RGBA输出。Windows原截图路径保留，未运行Windows CI。

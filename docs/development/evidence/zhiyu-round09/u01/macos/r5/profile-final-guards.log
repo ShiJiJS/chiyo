@@ -1,0 +1,10 @@
+test_additional_app_is_never_silently_removed (__main__.ProfileGuards) ... ok
+test_configuration_failure_preserves_initial_app_without_deleting_products (__main__.ProfileGuards) ... ok
+test_existing_output_is_rejected_without_inspecting_or_rebuilding_app (__main__.ProfileGuards) ... ok
+test_failed_or_unattested_profile_result_never_collects_or_deletes_sources (__main__.ProfileGuards) ... ok
+test_foreign_identity_is_rejected_before_native_tools (__main__.ProfileGuards) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.018s
+
+OK

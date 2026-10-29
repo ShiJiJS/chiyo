@@ -1,0 +1,74 @@
+{
+  "kind": "native-flutter-stills-raw-rgba",
+  "pixelRatio": 1,
+  "viewportCropped": false,
+  "pngEncodingDeferred": true,
+  "stills": [
+    {
+      "file": "native-stills/mac-chinese-name-order.rgba.zlib",
+      "output": "mac-chinese-name-order.png",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 52384,
+      "compressedBytes": 164431,
+      "recordingActive": false,
+      "recordingMs": null
+    },
+    {
+      "file": "native-stills/chooser-1440-light-recording.rgba.zlib",
+      "output": "chooser-1440-light-recording.png",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 38783,
+      "compressedBytes": 274152,
+      "recordingActive": true,
+      "recordingMs": 590
+    },
+    {
+      "file": "native-stills/filtered-1440-light.rgba.zlib",
+      "output": "filtered-1440-light.png",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 23963,
+      "compressedBytes": 143365,
+      "recordingActive": true,
+      "recordingMs": 2810
+    },
+    {
+      "file": "native-stills/edit-failure-light.rgba.zlib",
+      "output": "edit-failure-light.png",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 80806,
+      "compressedBytes": 230558,
+      "recordingActive": true,
+      "recordingMs": 4042
+    },
+    {
+      "file": "native-stills/light-1440-library.rgba.zlib",
+      "output": "light-1440-library.png",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 23163,
+      "compressedBytes": 173898,
+      "recordingActive": false,
+      "recordingMs": null
+    },
+    {
+      "file": "native-stills/light-1440-chooser.rgba.zlib",
+      "output": "light-1440-chooser.png",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 72889,
+      "compressedBytes": 274152,
+      "recordingActive": false,
+      "recordingMs": null
+    }
+  ]
+}

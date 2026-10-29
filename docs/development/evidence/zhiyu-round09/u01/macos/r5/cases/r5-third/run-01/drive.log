@@ -1,0 +1,44 @@
+Failed to foreground app; open returned 1
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:51829/7VsxnHy4RIc=/
+VMServiceFlutterDriver: Isolate found with number: 1723863538249319
+VMServiceFlutterDriver: Isolate 1723863538249319 is runnable.
+VMServiceFlutterDriver: Isolate is paused at start.
+VMServiceFlutterDriver: Attempting to resume isolate
+flutter: 00:00 +0: isolated Zhiyu native controls, motion, large text and reduced motion
+VMServiceFlutterDriver: Connected to Flutter application.
+flutter: ZHIYU_NATIVE_EVIDENCE=/Users/jiangxinyi/Library/Containers/com.example.infoDesktop.zhiyuPreview/Data/tmp/ZhiyuUI-E1E7A8D4-3015-41BD-9350-4721B2F7352C
+flutter: ZHIYU_NATIVE_MOTION=detail
+flutter: ZHIYU_NATIVE_MOTION=dialog
+flutter: ZHIYU_NATIVE_MOTION=menu
+flutter: ZHIYU_NATIVE_MOTION=feedback
+flutter: Expected: empty
+flutter:   Actual: [
+flutter:             'feedback: frame error 21.387 ms, wall error 22.433999999999997 ms, translation 6.0 (target 6.0)'
+flutter:           ]
+flutter: Native motion contract
+flutter: 
+flutter: #0      fail (package:matcher/src/expect/expect.dart:187)
+flutter: #1      _expect (package:matcher/src/expect/expect.dart:182)
+flutter: #2      expect (package:matcher/src/expect/expect.dart:65)
+flutter: #3      expect (package:flutter_test/src/widget_tester.dart:473)
+flutter: #4      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/integration_test/zhiyu_foundation_native_test.dart:570)
+flutter: <asynchronous suspension>
+flutter: #5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192)
+flutter: <asynchronous suspension>
+flutter: #6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953)
+flutter: <asynchronous suspension>
+flutter: #7      TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1707)
+flutter: <asynchronous suspension>
+flutter: 00:25 +0: isolated Zhiyu native controls, motion, large text and reduced motion [E]
+flutter:   Test failed. See exception logs above.
+  The test description was: isolated Zhiyu native controls, motion, large text and reduced motion
+flutter:   
+flutter: 00:25 +0 -1: (tearDownAll)
+flutter: 00:25 +1 -1: Some tests failed.
+Failure Details:
+Failure in method: isolated Zhiyu native controls, motion, large text and reduced motion
+Instance of 'FlutterErrorDetails'
+end of failure 1
+
+
+

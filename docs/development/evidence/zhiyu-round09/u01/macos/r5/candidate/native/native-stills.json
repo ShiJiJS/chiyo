@@ -1,0 +1,96 @@
+{
+  "kind": "native-flutter-stills-raw-rgba",
+  "pixelRatio": 1,
+  "viewportCropped": false,
+  "pngEncodingDeferred": true,
+  "stills": [
+    {
+      "file": "native-stills/u01-theme-roundtrip.rgba.zlib",
+      "output": "u01-theme-roundtrip.png",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 41083,
+      "compressedBytes": 168229,
+      "recordingActive": false,
+      "recordingMs": null
+    },
+    {
+      "file": "native-stills/u02-find-related-return-save-retry.rgba.zlib",
+      "output": "u02-find-related-return-save-retry.png",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 25809,
+      "compressedBytes": 153851,
+      "recordingActive": false,
+      "recordingMs": null
+    },
+    {
+      "file": "native-stills/u03-file-version-confirm-cancel.rgba.zlib",
+      "output": "u03-file-version-confirm-cancel.png",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 14563,
+      "compressedBytes": 160141,
+      "recordingActive": false,
+      "recordingMs": null
+    },
+    {
+      "file": "native-stills/u04-plugin-preview-install-adopt.rgba.zlib",
+      "output": "u04-plugin-preview-install-adopt.png",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 19668,
+      "compressedBytes": 159835,
+      "recordingActive": false,
+      "recordingMs": null
+    },
+    {
+      "file": "native-stills/u05-approval-result-in-shared-history.rgba.zlib",
+      "output": "u05-approval-result-in-shared-history.png",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 11988,
+      "compressedBytes": 145288,
+      "recordingActive": true,
+      "recordingMs": 2682
+    },
+    {
+      "file": "native-stills/u06-proposal-result-current-return.rgba.zlib",
+      "output": "u06-proposal-result-current-return.png",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 10710,
+      "compressedBytes": 104944,
+      "recordingActive": true,
+      "recordingMs": 4932
+    },
+    {
+      "file": "native-stills/u07-settings-failure-retry-eight-sections.rgba.zlib",
+      "output": "u07-settings-failure-retry-eight-sections.png",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 32168,
+      "compressedBytes": 158325,
+      "recordingActive": false,
+      "recordingMs": null
+    },
+    {
+      "file": "native-stills/all-primary-destinations-return.rgba.zlib",
+      "output": "all-primary-destinations-return.png",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 12569,
+      "compressedBytes": 158325,
+      "recordingActive": false,
+      "recordingMs": null
+    }
+  ]
+}

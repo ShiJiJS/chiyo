@@ -1,0 +1,133 @@
+{
+  "target": "integration_test/zhiyu_foundation_native_test.dart",
+  "fixedApp": "/Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/build/macos/Build/Products/Debug/info_desktop.app",
+  "initial": {
+    "bundleIdentifier": "com.example.infoDesktop.zhiyuPreview",
+    "sandboxed": true,
+    "architecture": "arm64",
+    "executableSha256": "a43d2b93a63ee5d03456d1197512574f775135e81572a4a302153a41343f8082",
+    "frameworkSha256": "48f4b7ace617465b74fdcfd632df07ed17e4bcd01125b26ddaa48c611620c2d4",
+    "kernelPresent": true,
+    "aotSnapshotSymbolsPresent": false,
+    "aotSnapshotExports": []
+  },
+  "runs": [
+    {
+      "driverExitCode": 0,
+      "allTestsPassed": true,
+      "runtime": {
+        "platform": "macos",
+        "profileMode": true,
+        "productMode": false,
+        "debugMode": false,
+        "nativeEvidenceDirectory": "/Users/jiangxinyi/Library/Containers/com.example.infoDesktop.zhiyuPreview/Data/tmp/ZhiyuUI-07A798A6-BCCA-4773-8AB9-9579882662CE"
+      },
+      "profileApp": {
+        "bundleIdentifier": "com.example.infoDesktop.zhiyuPreview",
+        "sandboxed": true,
+        "architecture": "arm64",
+        "executableSha256": "fa8eed383f24e7f44c3f6809935a98787f5002ccdc125e70c44afad7a133f97f",
+        "frameworkSha256": "d644373fc5a0cf65bef2fb61ce7baae2f4c95f36d2af8028f6143d2c14ee35aa",
+        "kernelPresent": false,
+        "aotSnapshotSymbolsPresent": true,
+        "aotSnapshotExports": [
+          "_kDartSnapshotData",
+          "_kDartSnapshotText"
+        ]
+      },
+      "seconds": 29.187800917000004
+    },
+    {
+      "driverExitCode": 0,
+      "allTestsPassed": true,
+      "runtime": {
+        "platform": "macos",
+        "profileMode": true,
+        "productMode": false,
+        "debugMode": false,
+        "nativeEvidenceDirectory": "/Users/jiangxinyi/Library/Containers/com.example.infoDesktop.zhiyuPreview/Data/tmp/ZhiyuUI-FD115F1D-6FC1-4DD4-B102-846DA2D4FE01"
+      },
+      "profileApp": {
+        "bundleIdentifier": "com.example.infoDesktop.zhiyuPreview",
+        "sandboxed": true,
+        "architecture": "arm64",
+        "executableSha256": "fa8eed383f24e7f44c3f6809935a98787f5002ccdc125e70c44afad7a133f97f",
+        "frameworkSha256": "d644373fc5a0cf65bef2fb61ce7baae2f4c95f36d2af8028f6143d2c14ee35aa",
+        "kernelPresent": false,
+        "aotSnapshotSymbolsPresent": true,
+        "aotSnapshotExports": [
+          "_kDartSnapshotData",
+          "_kDartSnapshotText"
+        ]
+      },
+      "seconds": 29.84451337499999
+    },
+    {
+      "driverExitCode": 0,
+      "allTestsPassed": true,
+      "runtime": {
+        "platform": "macos",
+        "profileMode": true,
+        "productMode": false,
+        "debugMode": false,
+        "nativeEvidenceDirectory": "/Users/jiangxinyi/Library/Containers/com.example.infoDesktop.zhiyuPreview/Data/tmp/ZhiyuUI-CFBE18A3-16EF-4CB4-BD31-D622DBF93A53"
+      },
+      "profileApp": {
+        "bundleIdentifier": "com.example.infoDesktop.zhiyuPreview",
+        "sandboxed": true,
+        "architecture": "arm64",
+        "executableSha256": "fa8eed383f24e7f44c3f6809935a98787f5002ccdc125e70c44afad7a133f97f",
+        "frameworkSha256": "d644373fc5a0cf65bef2fb61ce7baae2f4c95f36d2af8028f6143d2c14ee35aa",
+        "kernelPresent": false,
+        "aotSnapshotSymbolsPresent": true,
+        "aotSnapshotExports": [
+          "_kDartSnapshotData",
+          "_kDartSnapshotText"
+        ]
+      },
+      "seconds": 30.37744704100001
+    }
+  ],
+  "ordinaryRestorePassed": true,
+  "allProfileChecksPassed": true,
+  "configuration": {
+    "exitCode": 0,
+    "seconds": 6.696741916000001
+  },
+  "build": {
+    "exitCode": 0,
+    "seconds": 32.8963385
+  },
+  "profileApp": {
+    "bundleIdentifier": "com.example.infoDesktop.zhiyuPreview",
+    "sandboxed": true,
+    "architecture": "arm64",
+    "executableSha256": "fa8eed383f24e7f44c3f6809935a98787f5002ccdc125e70c44afad7a133f97f",
+    "frameworkSha256": "d644373fc5a0cf65bef2fb61ce7baae2f4c95f36d2af8028f6143d2c14ee35aa",
+    "kernelPresent": false,
+    "aotSnapshotSymbolsPresent": true,
+    "aotSnapshotExports": [
+      "_kDartSnapshotData",
+      "_kDartSnapshotText"
+    ]
+  },
+  "restore": {
+    "exitCode": 0,
+    "seconds": 26.031963416999986
+  },
+  "restoredApp": {
+    "bundleIdentifier": "com.example.infoDesktop.zhiyuPreview",
+    "sandboxed": true,
+    "architecture": "arm64",
+    "executableSha256": "46b383f59a0032c993fccd31ae6872bf4cecb602c712f0eaea2027d1fe25e015",
+    "frameworkSha256": "48f4b7ace617465b74fdcfd632df07ed17e4bcd01125b26ddaa48c611620c2d4",
+    "kernelPresent": true,
+    "aotSnapshotSymbolsPresent": false,
+    "aotSnapshotExports": []
+  },
+  "newDebugSymbolsRemoved": [
+    "/Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/build/macos/Build/Products/Debug/App.framework.dSYM",
+    "/Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/build/macos/Build/Products/Debug/info_desktop.app.dSYM",
+    "/Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/build/macos/Build/Products/Debug/sqlcipher.framework.dSYM"
+  ]
+}

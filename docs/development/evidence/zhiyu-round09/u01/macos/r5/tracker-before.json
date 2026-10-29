@@ -1,0 +1,37 @@
+{
+  "labels": [
+    "enhancementNew feature or request",
+    "ready-for-agentSpecification ready for agent work",
+    "enhancementNew feature or request",
+    "ready-for-agentSpecification ready for agent work",
+    "enhancementNew feature or request",
+    "ready-for-agentSpecification ready for agent work"
+  ],
+  "comments": [
+    "https://github.com/ShiJiJS/agent-info-manage/issues/62#issuecomment-6406299110",
+    "https://github.com/ShiJiJS/agent-info-manage/issues/62#issuecomment-6406738669",
+    "https://github.com/ShiJiJS/agent-info-manage/issues/62#issuecomment-6406989045"
+  ],
+  "relationships": [
+    {
+      "text": "知予前端 U07：全局设置界面",
+      "href": "https://github.com/ShiJiJS/agent-info-manage/issues/68"
+    },
+    {
+      "text": "知予前端 U06：录入提案与授权历史界面",
+      "href": "https://github.com/ShiJiJS/agent-info-manage/issues/67"
+    },
+    {
+      "text": "知予前端 U05：普通信息与凭据使用的访问审批界面",
+      "href": "https://github.com/ShiJiJS/agent-info-manage/issues/66"
+    },
+    {
+      "text": "知予前端 U04：插件管理、专属设置与旧资料采用模板界面",
+      "href": "https://github.com/ShiJiJS/agent-info-manage/issues/65"
+    },
+    {
+      "text": "知予前端 U02：三栏信息库与服务器、应用资料界面",
+      "href": "https://github.com/ShiJiJS/agent-info-manage/issues/63"
+    }
+  ]
+}
