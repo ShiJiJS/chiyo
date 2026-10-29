@@ -1,0 +1,37 @@
+00:00 +0: loading /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart
+00:00 +0: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_motion_contract_test.dart: button hover colors and pressed displacement follow 150ms CSS ease
+00:00 +1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_button_focus_test.dart: dark outline keyboard focus preserves the border and follows the external CSS outline
+00:00 +2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_button_focus_test.dart: dark outline keyboard focus preserves the border and follows the external CSS outline
+00:00 +3: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: Mac-font representative page heading baselines at 1440.0 dark=false
+00:00 +4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: Mac-font representative page heading baselines at 1440.0 dark=false
+00:00 +5: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: Mac-font representative page heading baselines at 1440.0 dark=false
+00:00 +6: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: Mac-font representative page heading baselines at 1440.0 dark=false
+00:00 +7: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: Mac-font representative page heading baselines at 1440.0 dark=false
+00:00 +8: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: Mac-font representative page heading baselines at 1440.0 dark=false
+00:00 +9: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: Mac-font representative page heading baselines at 1440.0 dark=false
+00:00 +10: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: Mac-font representative page heading baselines at 1440.0 dark=false
+00:00 +11: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: Mac-font representative page heading baselines at 1440.0 dark=false
+00:00 +12: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: Mac-font representative page heading baselines at 1440.0 dark=false
+00:00 +13: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: Mac-font representative page heading baselines at 1440.0 dark=false
+00:01 +14: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: Mac-font representative page heading baselines at 1440.0 dark=false
+00:01 +15: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: Mac-font representative page heading baselines at 1440.0 dark=false
+00:02 +16: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_button_focus_test.dart: selected navigation keyboard outline stays visible at Size(1440.0, 900.0) dark=false scale=2.0
+00:02 +17: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: Mac-font representative page heading baselines at 1440.0 dark=true
+00:03 +18: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: Mac-font representative page heading baselines at 1440.0 dark=true
+00:03 +19: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_button_focus_test.dart: selected navigation keyboard outline stays visible at Size(1440.0, 900.0) dark=true scale=2.0
+00:03 +20: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: Mac-font representative page heading baselines at 1280.0 dark=false
+00:04 +21: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_button_focus_test.dart: selected navigation keyboard outline stays visible at Size(1280.0, 800.0) dark=false scale=1.0
+00:04 +22: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: Mac-font representative page heading baselines at 1280.0 dark=true
+00:04 +23: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: Mac-font representative page heading baselines at 1280.0 dark=true
+00:05 +24: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: Mac-font representative page heading baselines at 1280.0 dark=true
+00:05 +25: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_button_focus_test.dart: selected navigation keyboard outline stays visible at Size(1280.0, 800.0) dark=true scale=2.0
+00:05 +26: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: settings-handoff-1440-light all eight sidebar destinations share saved state without system effects or creating grants
+00:05 +27: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: settings-handoff-1440-light all eight sidebar destinations share saved state without system effects or creating grants
+00:06 +28: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: settings-handoff-1440-light all eight sidebar destinations share saved state without system effects or creating grants
+00:06 +29: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: settings-handoff-1280-light all eight sidebar destinations share saved state without system effects or creating grants
+00:07 +30: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: settings-handoff-1440-dark all eight sidebar destinations share saved state without system effects or creating grants
+00:08 +31: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: settings-handoff-1280-dark all eight sidebar destinations share saved state without system effects or creating grants
+00:09 +32: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: settings-handoff-1440-dark200 all eight sidebar destinations share saved state without system effects or creating grants
+00:10 +33: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: settings-handoff-1280-dark200 all eight sidebar destinations share saved state without system effects or creating grants
+00:11 +34: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: (tearDownAll)
+00:11 +34: All tests passed!

@@ -1,0 +1,33 @@
+{
+  "runtime": {
+    "platform": "macos",
+    "profileMode": false,
+    "productMode": false,
+    "debugMode": true,
+    "nativeEvidenceDirectory": "/Users/jiangxinyi/Library/Containers/com.example.infoDesktop.zhiyuPreview/Data/tmp/ZhiyuUI-F61D9161-8F7D-4513-97A8-BDA4572AA432"
+  },
+  "nativeIsolationChecked": true,
+  "nativePreview": {
+    "applicationId": "com.example.infoDesktop.zhiyuPreview",
+    "scrollbarRevision": 0,
+    "title": "知予 · 界面预览·示例数据",
+    "scrollbarStyle": "overlay",
+    "isolated": true,
+    "productionServices": false,
+    "savedDirectories": false
+  },
+  "checks": [
+    "u01-theme-roundtrip",
+    "u02-find-related-return-save-retry",
+    "u03-file-version-confirm-cancel",
+    "u04-plugin-preview-install-adopt",
+    "u05-approval-result-in-shared-history",
+    "u06-proposal-result-current-return",
+    "u07-settings-failure-retry-eight-sections",
+    "all-primary-destinations-return"
+  ],
+  "status": "passed",
+  "databaseOpened": false,
+  "inputScope": "Native Flutter rendering and Widget input; not actual OS keyboard/IME",
+  "reusedCurrentLibraryChecks": "r5-library-live: credential materials and complete version/viewport coverage"
+}

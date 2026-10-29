@@ -2,19 +2,19 @@
 
 本轮按[已发布计划](../planning/zhiyu-round09/README.md)先完成7项正式Flutter界面。使用独立示例数据，后续真实功能由[#69](https://github.com/ShiJiJS/agent-info-manage/issues/69)重新拆分。2026-10-26起改为Mac优先、Windows适配后置；无子Agent、无服务器同步。
 
-**2026-10-26最新指令：恢复持续Mac开发，按既有tickets推进。** 后续以Mac为主、Windows适配后置。`codex/zhiyu-macos`已整合两侧基线，#62保持10/12，见[Mac外壳实施记录](zhiyu-macos-foundation.md)。本机#63首轮`058b5b41`已接续到目录后继`e4685dcb`及关联后继`a67b096c`，分版证据见[信息库记录](zhiyu-macos-library.md)；当前3/7，继续修订/回收等缺口。下文Windows检查点仅保留历史范围；最新顺序见[Mac接手计划](../planning/zhiyu-round09/macos-continuation.md)。
+**当前Mac开发持续推进，Windows适配后置。** 固定U01–U07示例预览已实现；本轮进一步修正插件、审批、提案、历史和设置的共用布局与字形，产品源码`7b197ea2`。当前验收按[#62有限清单](zhiyu-macos-acceptance-checklist.md)跟踪，不再沿用早期3/7或“等待开发”状态。七票保持OPEN，系统输入、短动效观察与两个明确数据/接入差异没有被记为通过。下文Windows检查点仅保留历史范围。
 
 ## 当前任务
 
 | 任务 | 进度 |
 | --- | --- |
 | [#62 外壳和通用控件](https://github.com/ShiJiJS/agent-info-manage/issues/62) | Mac 10/12；原生隔离、字体/菜单与检查工具已有证据；实际系统输入及完整S5仍待收口 |
-| [#63 三栏信息库](https://github.com/ShiJiJS/agent-info-manage/issues/63) | Mac 3/7；浏览/编辑、目录及关联已推进，继续修订回收、压力状态及S5 |
-| [#64 档案、文档、文件、凭据](https://github.com/ShiJiJS/agent-info-manage/issues/64) | 等待#63 |
-| [#65 插件与旧资料套模板](https://github.com/ShiJiJS/agent-info-manage/issues/65) | 等待#62；按依赖继续排队 |
-| [#66 访问审批](https://github.com/ShiJiJS/agent-info-manage/issues/66) | Mac r2：7/8且OPEN，审批、单次结果与状态/接口交接已接；完整S5/OS输入后补，接着U06。[记录](zhiyu-macos-approvals.md) |
-| [#67 提案与历史](https://github.com/ShiJiJS/agent-info-manage/issues/67) | Mac前置导航保护已完成，页面仍0/7；继续提案/历史。[记录](zhiyu-macos-navigation.md) |
-| [#68 全局设置](https://github.com/ShiJiJS/agent-info-manage/issues/68) | 等待#62；按依赖继续排队 |
+| [#63 三栏信息库](https://github.com/ShiJiJS/agent-info-manage/issues/63) | Mac 6/7，OPEN；示例主路径已实现，完整验收保留 |
+| [#64 档案、文档、文件、凭据](https://github.com/ShiJiJS/agent-info-manage/issues/64) | Mac 6/7，OPEN；版本/材料及类型页面已实现 |
+| [#65 插件与旧资料套模板](https://github.com/ShiJiJS/agent-info-manage/issues/65) | Mac 6/7，OPEN；插件/采用流程已实现，有限清单D01/D02保留 |
+| [#66 访问审批](https://github.com/ShiJiJS/agent-info-manage/issues/66) | Mac 7/8，OPEN；审批、单次结果及身份检查已实现，本轮对照V03 |
+| [#67 提案与历史](https://github.com/ShiJiJS/agent-info-manage/issues/67) | Mac 6/7，OPEN；提案/历史及结果导航已实现，本轮对照V04/V05 |
+| [#68 全局设置](https://github.com/ShiJiJS/agent-info-manage/issues/68) | Mac 7/8，OPEN；八入口已实现，本轮对照V06 |
 
 ## #62已经实现什么（Windows历史检查点）
 

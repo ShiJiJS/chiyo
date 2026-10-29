@@ -1,0 +1,126 @@
+00:00 +0: loading /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart
+00:00 +0: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_grant_history_test.dart: (setUpAll)
+00:00 +0: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: (setUpAll)
+00:00 +0: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: (setUpAll)
+00:00 +0: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_approvals_test.dart: (setUpAll)
+00:00 +0: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_grant_history_test.dart: R12 history title and detail rail match reference at 1440.0 dark=false
+00:02 +1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: R11 proposal paper matches frozen frame at 1440.0 dark=false
+00:02 +2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: R07 plugin workspace matches frozen frame at 1440.0 dark=false
+00:02 +3: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: R07 plugin workspace matches frozen frame at 1440.0 dark=false
+00:02 +4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_grant_history_test.dart: R12 history title and detail rail match reference at 1440.0 dark=true
+00:04 +5: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: R11 proposal paper matches frozen frame at 1440.0 dark=true
+00:04 +6: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_approvals_test.dart: R09 approval frame and decision rail match reference at 1440.0 dark=true
+00:04 +7: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: R07 plugin workspace matches frozen frame at 1440.0 dark=true
+00:05 +8: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_grant_history_test.dart: R12 history title and detail rail match reference at 1280.0 dark=false
+00:05 +9: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: R11 proposal paper matches frozen frame at 1280.0 dark=false
+00:05 +10: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_approvals_test.dart: R09 approval frame and decision rail match reference at 1280.0 dark=false
+00:05 +11: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: R07 plugin workspace matches frozen frame at 1280.0 dark=false
+00:05 +12: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_grant_history_test.dart: R12 history title and detail rail match reference at 1280.0 dark=true
+00:06 +13: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: R11 proposal paper matches frozen frame at 1280.0 dark=true
+00:06 +14: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_approvals_test.dart: R09 approval frame and decision rail match reference at 1280.0 dark=true
+00:07 +15: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: R07 plugin workspace matches frozen frame at 1280.0 dark=true
+00:07 +16: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_grant_history_test.dart: actual approval links to identical grant history; typed record round trip retains filters, page and reading position
+00:08 +17: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: actual import editing, item reduction and confirmation update shared library and return to the exact processed proposal
+00:08 +18: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: actual import editing, item reduction and confirmation update shared library and return to the exact processed proposal
+00:08 +19: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: server identity deep link selects the exact host and shares readback with settings and library
+00:09 +20: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: server identity deep link selects the exact host and shares readback with settings and library
+00:09 +21: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: server identity deep link selects the exact host and shares readback with settings and library
+00:09 +22: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_approvals_test.dart: credential detail and submitted request reach the same approval identity and read back its decision
+00:10 +23: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_approvals_test.dart: credential detail and submitted request reach the same approval identity and read back its decision
+00:11 +24: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_approvals_test.dart: credential detail and submitted request reach the same approval identity and read back its decision
+00:11 +25: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_approvals_test.dart: credential detail and submitted request reach the same approval identity and read back its decision
+00:11 +26: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: dark200 host changes warn, missing fingerprints block confirmation and disabled plugin retains revocation
+00:12 +27: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: dark200 host changes warn, missing fingerprints block confirmation and disabled plugin retains revocation
+00:13 +28: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: dark200 host changes warn, missing fingerprints block confirmation and disabled plugin retains revocation
+00:13 +29: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_grant_history_test.dart: actual guide switches empty, waiting and failure states and history retry recovers
+00:13 +30: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_grant_history_test.dart: actual guide switches empty, waiting and failure states and history retry recovers
+00:14 +31: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_approvals_test.dart: env and focus plans have contextual tips; focus approval remains disabled and rejection is real
+00:14 +32: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: host save failure, stale review and unknown reply retain exact intent and reconcile without replay
+00:15 +33: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: dark200 uses real filtering, editing failure and retry without clipping or losing review
+00:15 +34: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_grant_history_test.dart: dark200 and narrow history keep readable controls, scrolling and current execution facts
+00:15 +35: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_grant_history_test.dart: dark200 and narrow history keep readable controls, scrolling and current execution facts
+00:15 +36: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: host panel distinguishes waiting, failed read, retry and true empty states
+00:16 +37: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: field validation points to the exact proposal input and editing it clears the error without discarding review
+00:16 +38: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: field validation points to the exact proposal input and editing it clears the error without discarding review
+00:16 +39: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: closing a waiting host read ignores the cancelled result without reopening the dialog
+00:16 +40: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_approvals_test.dart: unknown execution read keeps the exact operation on query failure, and cleanup readback does not claim success
+00:17 +41: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_approvals_test.dart: unknown execution read keeps the exact operation on query failure, and cleanup readback does not claim success
+00:18 +42: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: actual proposal guide reaches empty, failure, waiting and recovery states
+00:18 +43: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: settings install, shared external form, update, removal, generic editing and reinstall preserve the original snapshot
+00:20 +44: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: settings install, shared external form, update, removal, generic editing and reinstall preserve the original snapshot
+00:20 +45: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: settings install, shared external form, update, removal, generic editing and reinstall preserve the original snapshot
+00:21 +46: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: settings install, shared external form, update, removal, generic editing and reinstall preserve the original snapshot
+00:21 +47: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: settings install, shared external form, update, removal, generic editing and reinstall preserve the original snapshot
+00:21 +48: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: settings install, shared external form, update, removal, generic editing and reinstall preserve the original snapshot
+00:22 +49: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: actual deletion guide reviews the full retained scope, moves the same object to recycle and opens only its exact pre-delete snapshot
+00:22 +50: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: actual deletion guide reviews the full retained scope, moves the same object to recycle and opens only its exact pre-delete snapshot
+00:22 +51: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_approvals_test.dart: approval controls preserve a failed decision and distinguish empty, waiting and failed reads with real recovery actions
+00:23 +52: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_approvals_test.dart: approval controls preserve a failed decision and distinguish empty, waiting and failed reads with real recovery actions
+00:23 +53: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_approvals_test.dart: approval controls preserve a failed decision and distinguish empty, waiting and failed reads with real recovery actions
+00:23 +54: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_approvals_test.dart: approval controls preserve a failed decision and distinguish empty, waiting and failed reads with real recovery actions
+00:23 +55: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: dark200 committed install and uncommitted disable reconcile before any new submission
+00:24 +56: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: dark200 committed install and uncommitted disable reconcile before any new submission
+00:25 +57: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_test.dart: dark200 settings read failure retains values and recovers; empty notification metadata has no request destination
+00:25 +58: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_test.dart: dark200 settings read failure retains values and recovers; empty notification metadata has no request destination
+00:25 +59: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: waiting and failed metadata refresh keep prior detail and retry retains selected package
+00:26 +60: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: entry review edits a single leaf and renders independent new and retained identities in the same profile timeline
+00:26 +61: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: entry review edits a single leaf and renders independent new and retained identities in the same profile timeline
+00:27 +62: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: entry review edits a single leaf and renders independent new and retained identities in the same profile timeline
+00:27 +63: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: entry review edits a single leaf and renders independent new and retained identities in the same profile timeline
+00:27 +64: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: entry review edits a single leaf and renders independent new and retained identities in the same profile timeline
+00:27 +65: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: settings-handoff-1440-light all eight sidebar destinations share saved state without system effects or creating grants
+00:28 +66: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: settings-handoff-1440-light all eight sidebar destinations share saved state without system effects or creating grants
+00:28 +67: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: settings-handoff-1440-light all eight sidebar destinations share saved state without system effects or creating grants
+00:29 +68: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: settings-handoff-1440-light all eight sidebar destinations share saved state without system effects or creating grants
+00:29 +69: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: settings-handoff-1440-light all eight sidebar destinations share saved state without system effects or creating grants
+00:29 +70: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: reopened guide accepts Escape during its entrance
+00:30 +71: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: reopened guide accepts Escape during its entrance
+00:31 +72: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: reopened guide accepts Escape during its entrance
+00:31 +73: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: settings-handoff-1280-light all eight sidebar destinations share saved state without system effects or creating grants
+00:32 +74: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: settings-handoff-1280-light all eight sidebar destinations share saved state without system effects or creating grants
+00:32 +75: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: dark200 batch keeps definite failure and rejection separate and explicitly retries only the failed proposal
+00:33 +76: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: one shell has five working destinations and a 66px appbar
+00:33 +77: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: settings-handoff-1440-dark all eight sidebar destinations share saved state without system effects or creating grants
+00:34 +78: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: settings-handoff-1440-dark all eight sidebar destinations share saved state without system effects or creating grants
+00:34 +79: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: settings-handoff-1440-dark all eight sidebar destinations share saved state without system effects or creating grants
+00:34 +80: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: settings-handoff-1440-dark all eight sidebar destinations share saved state without system effects or creating grants
+00:34 +81: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: settings-handoff-1440-dark all eight sidebar destinations share saved state without system effects or creating grants
+00:34 +82: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: settings-handoff-1440-dark all eight sidebar destinations share saved state without system effects or creating grants
+00:34 +83: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: settings-handoff-1440-dark all eight sidebar destinations share saved state without system effects or creating grants
+00:34 +84: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: settings-handoff-1440-dark all eight sidebar destinations share saved state without system effects or creating grants
+00:34 +85: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: settings-handoff-1440-dark all eight sidebar destinations share saved state without system effects or creating grants
+00:35 +86: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: settings-handoff-1440-dark all eight sidebar destinations share saved state without system effects or creating grants
+00:36 +87: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: theme, empty, error/retry and waiting recover through visible controls
+00:36 +88: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: theme, empty, error/retry and waiting recover through visible controls
+00:36 +89: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: theme, empty, error/retry and waiting recover through visible controls
+00:37 +90: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: theme, empty, error/retry and waiting recover through visible controls
+00:37 +91: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: theme, empty, error/retry and waiting recover through visible controls
+00:38 +92: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: theme, empty, error/retry and waiting recover through visible controls
+00:39 +93: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: theme, empty, error/retry and waiting recover through visible controls
+00:39 +94: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: theme, empty, error/retry and waiting recover through visible controls
+00:39 +95: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: settings-handoff-1440-dark200 all eight sidebar destinations share saved state without system effects or creating grants
+00:40 +96: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: settings-handoff-1440-dark200 all eight sidebar destinations share saved state without system effects or creating grants
+00:40 +97: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: settings-handoff-1440-dark200 all eight sidebar destinations share saved state without system effects or creating grants
+00:40 +98: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: settings-handoff-1440-dark200 all eight sidebar destinations share saved state without system effects or creating grants
+00:40 +99: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: settings-handoff-1440-dark200 all eight sidebar destinations share saved state without system effects or creating grants
+00:40 +100: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: settings-handoff-1440-dark200 all eight sidebar destinations share saved state without system effects or creating grants
+00:40 +101: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: settings-handoff-1440-dark200 all eight sidebar destinations share saved state without system effects or creating grants
+00:40 +102: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: settings-handoff-1440-dark200 all eight sidebar destinations share saved state without system effects or creating grants
+00:40 +103: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: settings-handoff-1440-dark200 all eight sidebar destinations share saved state without system effects or creating grants
+00:40 +104: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: settings-handoff-1440-dark200 all eight sidebar destinations share saved state without system effects or creating grants
+00:40 +105: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: settings-handoff-1440-dark200 all eight sidebar destinations share saved state without system effects or creating grants
+00:40 +106: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: settings-handoff-1440-dark200 all eight sidebar destinations share saved state without system effects or creating grants
+00:40 +107: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: settings-handoff-1440-dark200 all eight sidebar destinations share saved state without system effects or creating grants
+00:41 +108: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: settings-handoff-1440-dark200 all eight sidebar destinations share saved state without system effects or creating grants
+00:41 +109: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: a shared refresh preserves the editing selection and active IME composition
+00:42 +110: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_button_focus_test.dart: selected navigation keyboard outline stays visible at Size(1280.0, 800.0) dark=true scale=1.0
+00:42 +111: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: settings-handoff-1280-dark200 all eight sidebar destinations share saved state without system effects or creating grants
+00:42 +112: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: settings-handoff-1280-dark200 all eight sidebar destinations share saved state without system effects or creating grants
+00:43 +113: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: settings-handoff-1280-dark200 all eight sidebar destinations share saved state without system effects or creating grants
+00:43 +114: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: settings-handoff-1280-dark200 all eight sidebar destinations share saved state without system effects or creating grants
+00:43 +115: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: settings-handoff-1280-dark200 all eight sidebar destinations share saved state without system effects or creating grants
+00:43 +116: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart: settings-handoff-1280-dark200 all eight sidebar destinations share saved state without system effects or creating grants
+00:43 +117: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: a failed sample save preserves the draft and explicit retry updates shared data
+00:43 +118: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: a failed sample save preserves the draft and explicit retry updates shared data
+00:43 +119: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_preview_test.dart: a failed sample save preserves the draft and explicit retry updates shared data
+00:43 +120: All tests passed!

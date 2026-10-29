@@ -1,0 +1,250 @@
+{
+  "format": "lossless-RGBA-PNG",
+  "pngEncodingDeferred": true,
+  "pixelRatio": 1,
+  "viewportCropped": false,
+  "sourceCount": 16,
+  "totalPixels": 19104000,
+  "sources": [
+    {
+      "file": "native-stills/light-dialog.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "04c1d8cf71db464f558e08e01d5192b0253bb9ab8b14fcec6604330ad8745e0a",
+      "decodedRgbaSha256": "1a39bc9e872dc35bc5e2df94c184b85dbe7026ac8287e314cee4da0e93cf0e6c",
+      "output": "light-dialog.png",
+      "size": [
+        1440,
+        900
+      ],
+      "pngSha256": "df0df899ebfde3bc6b15d1e0863f23624029db22751eee3ed99626ad3a70d46f",
+      "captureUs": 13778,
+      "recordingActive": true,
+      "recordingMs": 1004
+    },
+    {
+      "file": "native-stills/light-menu.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "0057983bb563bb9852ecad0b3c5ac4c707feb89e12ffccca3eaa37bb93a59d83",
+      "decodedRgbaSha256": "1168f275aa44f0c75f265f99a2f67653a9dc83ff8c3b95f9491b20b6684cd10e",
+      "output": "light-menu.png",
+      "size": [
+        1440,
+        900
+      ],
+      "pngSha256": "595899649617e40f6baf65b758fd2060c7d07fc5ac770efd2ec9dd9d7f7bcc6f",
+      "captureUs": 17929,
+      "recordingActive": true,
+      "recordingMs": 1551
+    },
+    {
+      "file": "native-stills/dark-menu.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "8f4e88946d6ce9245dde3155915c926c29540677842e81c4a36c627e739df95e",
+      "decodedRgbaSha256": "0324d379e3479f07deddfb5b33e5125d3bd1efe66c9b8be0b13e2c059932c8c0",
+      "output": "dark-menu.png",
+      "size": [
+        1440,
+        900
+      ],
+      "pngSha256": "7fa962c3f88211de7560b37b42f0f91647f56c3802f96361e5ae72734df4f721",
+      "captureUs": 17788,
+      "recordingActive": true,
+      "recordingMs": 3912
+    },
+    {
+      "file": "native-stills/dark-large-text.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "6c23367d56a426dd80a24a9c7c4ba58a50533eff14bad4d6150729e04df604b0",
+      "decodedRgbaSha256": "6c625441d293776ce7f1a072796930c671d5c7c23f89eb379c22bbb16075f9b8",
+      "output": "dark-large-text.png",
+      "size": [
+        1440,
+        900
+      ],
+      "pngSha256": "f4255fb4661f33d7b2e16cafbd04121c9266b4a42fdb3e16a8652d76d1491e1a",
+      "captureUs": 18757,
+      "recordingActive": false,
+      "recordingMs": null
+    },
+    {
+      "file": "native-stills/light-1440-shell.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "88ca0f99016449e81cae45cee381104a1e3ad42ed96d625dcf997102f729b1fe",
+      "decodedRgbaSha256": "bdc00948a5ca8ebd2ca9cfc6ca8ccd2c27a84c42a1c968fedb6918493c65e175",
+      "output": "light-1440-shell.png",
+      "size": [
+        1440,
+        900
+      ],
+      "pngSha256": "8467330cf4bb4753c2780cda3bf73d5c111705e4350bb3c806caa81ba8b29048",
+      "captureUs": 15057,
+      "recordingActive": false,
+      "recordingMs": null
+    },
+    {
+      "file": "native-stills/light-1440-dialog.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "04c1d8cf71db464f558e08e01d5192b0253bb9ab8b14fcec6604330ad8745e0a",
+      "decodedRgbaSha256": "1a39bc9e872dc35bc5e2df94c184b85dbe7026ac8287e314cee4da0e93cf0e6c",
+      "output": "light-1440-dialog.png",
+      "size": [
+        1440,
+        900
+      ],
+      "pngSha256": "df0df899ebfde3bc6b15d1e0863f23624029db22751eee3ed99626ad3a70d46f",
+      "captureUs": 19177,
+      "recordingActive": false,
+      "recordingMs": null
+    },
+    {
+      "file": "native-stills/light-1440-menu.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "0057983bb563bb9852ecad0b3c5ac4c707feb89e12ffccca3eaa37bb93a59d83",
+      "decodedRgbaSha256": "1168f275aa44f0c75f265f99a2f67653a9dc83ff8c3b95f9491b20b6684cd10e",
+      "output": "light-1440-menu.png",
+      "size": [
+        1440,
+        900
+      ],
+      "pngSha256": "595899649617e40f6baf65b758fd2060c7d07fc5ac770efd2ec9dd9d7f7bcc6f",
+      "captureUs": 26573,
+      "recordingActive": false,
+      "recordingMs": null
+    },
+    {
+      "file": "native-stills/dark-1440-shell.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "c5e6c3974ece92894cea2f1af2cee1f4ab351d80a86b178ff01108e7b90ba8be",
+      "decodedRgbaSha256": "125ca02071f1abaadef6ca7976b3dcc5ff857de424ec114aa919bb1cf19dcec3",
+      "output": "dark-1440-shell.png",
+      "size": [
+        1440,
+        900
+      ],
+      "pngSha256": "8369c69b2aef59893afdf5df06ceabd5748fbfda0d6c01a9283121266b741033",
+      "captureUs": 14258,
+      "recordingActive": false,
+      "recordingMs": null
+    },
+    {
+      "file": "native-stills/dark-1440-dialog.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "cac7dbf881825abd4eaa46f677bc0c9db317189d062a97ba92ef33d6e868dd13",
+      "decodedRgbaSha256": "c9d6f7c053cfb64512ba973806b661669a9e8d81361d4fb38faa4ade6c19d75f",
+      "output": "dark-1440-dialog.png",
+      "size": [
+        1440,
+        900
+      ],
+      "pngSha256": "18dc9a5748b56087074528d444279575bf804eff4502d8f3cb003271969767c7",
+      "captureUs": 19648,
+      "recordingActive": false,
+      "recordingMs": null
+    },
+    {
+      "file": "native-stills/dark-1440-menu.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "43da3860ccd08dc4bc12806febf8ecc86958303dbc47e131b2943f984919981e",
+      "decodedRgbaSha256": "35bfdeeb55e8a49b4f02e7923ca8205dd6f17d7bd50b1f91e9b743b71ed861b2",
+      "output": "dark-1440-menu.png",
+      "size": [
+        1440,
+        900
+      ],
+      "pngSha256": "9a3a25b406cf0cb2975644b010d29b8974ed77f24c87a2446efc8b910875ee9e",
+      "captureUs": 26815,
+      "recordingActive": false,
+      "recordingMs": null
+    },
+    {
+      "file": "native-stills/light-1280-shell.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "b13609f9ae59f45445dc6fa765a36316440f9225d5d9706c4ad1cae3259ccf03",
+      "decodedRgbaSha256": "afa8c9c2dbba1d013c84acd6857780bdec21171ecc5b4c5d043b5d767d7facfd",
+      "output": "light-1280-shell.png",
+      "size": [
+        1280,
+        800
+      ],
+      "pngSha256": "629f0cb13b5eeb74151ac7a8e988e8402e2471d4e520adb53226e43b58875150",
+      "captureUs": 9753,
+      "recordingActive": false,
+      "recordingMs": null
+    },
+    {
+      "file": "native-stills/light-1280-dialog.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "d7cbdd79d59deced0d0963e6ca0c4d7abee429b86c8fb6d7b3e69624d657e4d7",
+      "decodedRgbaSha256": "1b60fba1058a36dadcc20ff2848b728070247cdcdce2d1547fdc6eccb53a78e5",
+      "output": "light-1280-dialog.png",
+      "size": [
+        1280,
+        800
+      ],
+      "pngSha256": "502baca9ec352f4669d03cf2158de36c4956a3bc58528111bd06711bed8eb7c5",
+      "captureUs": 16828,
+      "recordingActive": false,
+      "recordingMs": null
+    },
+    {
+      "file": "native-stills/light-1280-menu.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "db5f36489a34f51d8d7065254dd6a006e11c1aefb400adf073f89eec84e2547f",
+      "decodedRgbaSha256": "e9bd65ea985c8de2da66cff177d16d0a67ca1c577c883e98e05e819433eba2b3",
+      "output": "light-1280-menu.png",
+      "size": [
+        1280,
+        800
+      ],
+      "pngSha256": "0d09438a8527e0878b0beaed48516312537e6a87b60587f1bb6a4b1a08116995",
+      "captureUs": 25094,
+      "recordingActive": false,
+      "recordingMs": null
+    },
+    {
+      "file": "native-stills/dark-1280-shell.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "7a5aa14df6da7aef225f99c2f790b3856047d1cc68de19725fb529fbba136145",
+      "decodedRgbaSha256": "089b7107e2a57dc860097339922caaafd09730c12851148cc89d7390532cea33",
+      "output": "dark-1280-shell.png",
+      "size": [
+        1280,
+        800
+      ],
+      "pngSha256": "af793bdfe10d94f3d2418c60e22172d9f2f94278f4a32d1a2729433f8189eb3d",
+      "captureUs": 11539,
+      "recordingActive": false,
+      "recordingMs": null
+    },
+    {
+      "file": "native-stills/dark-1280-dialog.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "c1014c4d975cebfead28e4b77d057fbb863438cdc189feeda9e22ad6ff301f1e",
+      "decodedRgbaSha256": "d11c78fda0292cd734b48f979cd5c2a02945716f121093215fed0589b782f6e3",
+      "output": "dark-1280-dialog.png",
+      "size": [
+        1280,
+        800
+      ],
+      "pngSha256": "86d89575b2f3961caa33f33a08661462442e02b8288bc32055ba14fb8f35bc11",
+      "captureUs": 16394,
+      "recordingActive": false,
+      "recordingMs": null
+    },
+    {
+      "file": "native-stills/dark-1280-menu.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "bd3f27271ab6326d2b8833be4452aa21b13e94e3d98beb8f0a75e1fcac12e6f1",
+      "decodedRgbaSha256": "bbcea9d657571f0e31083dfba9e09b69b3b8985769d857ac68d86b79abcb33fe",
+      "output": "dark-1280-menu.png",
+      "size": [
+        1280,
+        800
+      ],
+      "pngSha256": "7e29c4536025402e49fd30d2ea8d7b37bd261f83cedd5c668b903684924e941a",
+      "captureUs": 27146,
+      "recordingActive": false,
+      "recordingMs": null
+    }
+  ]
+}

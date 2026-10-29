@@ -1,0 +1,27 @@
+{
+  "sourceRemoved": "/Users/jiangxinyi/Library/Containers/com.example.infoDesktop.zhiyuPreview/Data/tmp/ZhiyuUI-F61D9161-8F7D-4513-97A8-BDA4572AA432",
+  "rawCopyVerified": true,
+  "encoder": "existing encoder, two bounded original-speed segments, no limit change",
+  "segments": [
+    {
+      "sourceFrameCount": 265,
+      "encodedDurationMs": 10340,
+      "sourceGaps": {
+        "count": 264,
+        "maximumMs": 149,
+        "medianMs": 34.0,
+        "p95Ms": 67
+      }
+    },
+    {
+      "sourceFrameCount": 263,
+      "encodedDurationMs": 10040,
+      "sourceGaps": {
+        "count": 262,
+        "maximumMs": 259,
+        "medianMs": 33.0,
+        "p95Ms": 66
+      }
+    }
+  ]
+}
