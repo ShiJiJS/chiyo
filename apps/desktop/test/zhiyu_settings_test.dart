@@ -180,6 +180,7 @@ void main() {
 
   Future<void> select(WidgetTester t, String key, String label) async {
     await tap(t, find.byKey(ValueKey(key)));
+    await capture(t, 'settings-menu-$key-${t.view.physicalSize.width.toInt()}');
     await tap(t, find.text(label).last);
   }
 
