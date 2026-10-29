@@ -118,13 +118,18 @@
     },
     {
       "file": "app.json",
-      "bytes": 742,
-      "sha256": "1bc0bc774b2dd152ef5dcb6b45fbac7bb02665a6c758d845dba8c0a87fbada82"
+      "bytes": 812,
+      "sha256": "a1df6f5f9bfb2abd7fa07df827f5145cab47ce6d6d4fd3d662bdbf39f5ad09f7"
     },
     {
       "file": "checkpoint.json",
-      "bytes": 2066,
-      "sha256": "d91f0fde691ab95a55f688d338967d820dc86236ab5fd94feb927f1926d70622"
+      "bytes": 2131,
+      "sha256": "78f17e4640857499609a10b092c1f6dc4d31012df7056d193e39e848c6d8ceeb"
+    },
+    {
+      "file": "cleanup.json",
+      "bytes": 416,
+      "sha256": "939ee49fc42114d51a4bb564263bfc5a6a88747a8cc4c1488f7fc52abb40b313"
     },
     {
       "file": "font-hashes.json",
@@ -142,9 +147,39 @@
       "sha256": "89f6eed0233affad22e7e6bfce2f9e4609ef9f14d33588d3c26f8fd2772f5c87"
     },
     {
+      "file": "issue62-after.md",
+      "bytes": 17147,
+      "sha256": "fc280ba88a5759c34df23f5ba5715a827fa9ef387cc5149bfde5f837c6095a02"
+    },
+    {
+      "file": "issue62-before.md",
+      "bytes": 18101,
+      "sha256": "0e4e4cd28317d40a672eafc0fcb480380bc7cb34b583f0640d32debffc0af506"
+    },
+    {
+      "file": "issue62-readback.md",
+      "bytes": 17147,
+      "sha256": "fc280ba88a5759c34df23f5ba5715a827fa9ef387cc5149bfde5f837c6095a02"
+    },
+    {
+      "file": "issue65-after.md",
+      "bytes": 17524,
+      "sha256": "40f1d2aae920fa6d5232189e0e96462de8c52949c0546b4c7097de62a9ddcdd0"
+    },
+    {
       "file": "issue65-before.json",
       "bytes": 27222,
       "sha256": "748849b12485b275c839eb1bbd17950fa63c1b540172287c7a176649a0997b0e"
+    },
+    {
+      "file": "issue65-before.md",
+      "bytes": 16841,
+      "sha256": "925ced8f73a8aa3f023789183612c226d3dfabe18db2e9d6224503f6caa9f22f"
+    },
+    {
+      "file": "issue65-readback.md",
+      "bytes": 17524,
+      "sha256": "40f1d2aae920fa6d5232189e0e96462de8c52949c0546b4c7097de62a9ddcdd0"
     },
     {
       "file": "logs/analyze-delivery.log",
@@ -295,6 +330,11 @@
       "file": "tracker-before.json",
       "bytes": 23938,
       "sha256": "5580bc4ca3c0df6a6f30bb059ab8e152d4c2e30b13db744179c4d968b8750d5d"
+    },
+    {
+      "file": "tracker-readback.json",
+      "bytes": 1103,
+      "sha256": "d1d4220ab6451cd3ebdd4cb56f0657734914c3ae0e684ab7ab3e7eae87e677eb"
     }
   ]
 }

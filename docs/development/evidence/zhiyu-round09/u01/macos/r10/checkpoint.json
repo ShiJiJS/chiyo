@@ -58,6 +58,8 @@
   "windowsModified": false,
   "computerUse": false,
   "subagentsUsed": false,
-  "cleanupPending": true,
-  "isolationCheckCommit": "560b8327"
+  "cleanupPending": false,
+  "isolationCheckCommit": "560b8327",
+  "trackerReadbackVerified": true,
+  "ordinaryOpenExitCode": 0
 }

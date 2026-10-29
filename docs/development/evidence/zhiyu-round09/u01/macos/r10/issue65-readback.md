@@ -1,0 +1,135 @@
+## 当前补齐结果（2026-10-30）
+
+产品源码`728d5126`，文档/证据`59a0a51c`，分支`codex/zhiyu-macos`。#62有限清单的两项界面缺口已补齐：
+
+- D01：内置插件更新横幅由宿主合成目录提供元数据，核对目录版本/新旧摘要后复用原候选、差异、确认、失败重试和回执流程。旧资料快照及主机信任保持；外部JSON不能覆盖builtin。
+- D02：主机设置提供known_hosts导入界面，只选隔离合成公钥文件夹具，经纯格式校验和文件/摘要/主机模式/类型/指纹核对后明确确认；保存失败保留选择，未知冻结重发并核对原操作，结果可导航后重新读回。没有系统文件选择器、生产信任配置或真实SSH，逐台主机确认及凭据许可不变化。
+
+两尺寸明暗普通文字及两组200%共12项新流程检查、相关61项范围、隔离守卫与严格分析通过（计数重叠不相加）。同一Mac原生窗口完成包含两新流程的10阶段断言；原速录制抽样不能代替连续目视。实现范围与证据见[r10](https://github.com/ShiJiJS/agent-info-manage/tree/59a0a51c/docs/development/evidence/zhiyu-round09/u01/macos/r10)。
+
+本票仍6/7、OPEN，原依赖和勾选保留。限定自主实现/自动检查缺项已清零；M01-S1连续短动效目视及真实系统输入未通过，统一归[#62](https://github.com/ShiJiJS/agent-info-manage/issues/62)及[一轮本人验收单](https://github.com/ShiJiJS/agent-info-manage/blob/59a0a51c/docs/development/zhiyu-macos-owner-check.md)。不要求新的系统密码；#69真实功能未启动，Windows后置。
+
+---
+
+## 原规格与历史记录
+
+阶段：前端界面预览。仅使用独立示例数据，完成不代表真实功能已接入。领取前检查本票原生阻塞关系。
+
+2026-10-26最新指令：**持续推进Mac开发，按现有tickets完成能做的改造。Mac ARM64优先，Windows适配后置**。从#62已保留的实机输入缺口和#63已有代码继续，不从零重做；实机输入集中到固定候选，未验项保持开放。改动留在独立codex/zhiyu-macos分支，不运行Windows CI，不使用子Agent或computer use。界面完成后由#69拆分真实服务和Mac交付。[当前计划](https://github.com/ShiJiJS/agent-info-manage/blob/2346dc1dfa0b52550f028bb56596085cfb026327/docs/planning/zhiyu-round09/macos-continuation.md)。
+
+当前检查点（r5，2026-10-27）：**6/7，保持OPEN**。插件、主机、采用、旧模板与指引的正式组件/状态、隔离及接口交接已收口。完整R07/R08/S5及真实Mac输入仍开放，继续#66/U05审批，再U06/U07；F01等待全部UI，持续推进。
+
+## 要做什么
+
+入口放在设置的插件管理中，不占左下角或日常导航。完成插件管理全过程和旧资料改用模板的预览，让用户先看清安装、更新、停用、移除与字段对应关系。
+
+## 规格与原型依据
+
+[S2 插件](https://github.com/ShiJiJS/agent-info-manage/blob/5a561ad24b4f617bca054364bb5c9cc529b2caf7/docs/specs/zhiyu-round09/02-plugin-contract.md)、[S1 旧资料兼容](https://github.com/ShiJiJS/agent-info-manage/blob/5a561ad24b4f617bca054364bb5c9cc529b2caf7/docs/specs/zhiyu-round09/01-domain-and-data.md)；这里只演示页面所需状态，真实存储/权限/执行在后续阶段接入。
+
+[S5 视觉与动画](https://github.com/ShiJiJS/agent-info-manage/blob/5a561ad24b4f617bca054364bb5c9cc529b2caf7/docs/specs/zhiyu-round09/05-fidelity.md)、[S6-C06 示例与正式数据边界](https://github.com/ShiJiJS/agent-info-manage/blob/5a561ad24b4f617bca054364bb5c9cc529b2caf7/docs/specs/zhiyu-round09/06-architecture-and-delivery.md)、[先界面再接功能](https://github.com/ShiJiJS/agent-info-manage/blob/2346dc1dfa0b52550f028bb56596085cfb026327/docs/planning/zhiyu-round09/frontend-first.md)。参照状态：R07、R08及采用模板补充状态。
+
+## 完成条件
+
+- [x] 示例包的安装预览、格式错误、更新差异、停用/移除影响和缺插件通用展示都能操作；不依赖生产插件安装器。
+- [x] 服务器插件专属设置可进入，无设置能力的插件不出现空页签；单台主机身份、缺指纹、变化和停用状态可演示。
+- [x] 旧资料套模板先预览对应/未对应/冲突字段，再更新示例数据；缺失长流程先补有限状态图，不能用单个成功toast替代。
+- [x] 使用正式Flutter组件与控制器；从界面入口走到示例结果，正常、空数据、等待和失败状态可重现。不是另一套HTML或截图展示。
+- [ ] 1440×900、1280×800、明暗主题、200%文字、键盘和本票相关动效完成S5对照；提交实际Mac Flutter截图/录屏，注明示例数据、Mac字体和输入检查范围。
+- [x] 预览不连接真实资料库、秘密、hooks或系统执行能力；数据集中维护并可重置，未来通过同一接口换真实服务，不靠逐页isMock分支。
+- [x] 记录页面需要的数据、操作和失败结果，并完成相关前端检查；未接后台内容汇总给F01，不以示例成功宣称真实功能完成。
+
+## 怎么演示和检查
+
+从设置进入插件→预览虚构域名模板→模拟安装→查看新增类型；演示更新/停用/移除影响，打开服务器插件设置，再给旧资料套模板，查看无法对应的字段如何保留。
+
+在Mac原生预览的明暗主题和两个指定内容尺寸下对照S5平台参考，提交实际Flutter截图及正常速度交互录屏；Windows历史图不能代替本票Mac结果。
+
+## 执行边界
+
+用户明确要求先整套前端，因此本票不被新后台接口、数据库或CLI实现阻塞。只先确定页面所需数据合同，现有技术栈和安全规则保留；无子Agent、无服务器同步。界面反馈仅属于独立预览，不进入正式发布的成功分支。
+
+## 固定参考版本
+
+[整套规格](https://github.com/ShiJiJS/agent-info-manage/blob/5a561ad24b4f617bca054364bb5c9cc529b2caf7/docs/specs/zhiyu-round09/README.md) · [冻结原型与使用说明](https://github.com/ShiJiJS/agent-info-manage/tree/7fc2072d18dc56731ea71f07926d9b49d0539f66/docs/design/prototypes/round-09-zhiyu) · [前端先行顺序](https://github.com/ShiJiJS/agent-info-manage/blob/2346dc1dfa0b52550f028bb56596085cfb026327/docs/planning/zhiyu-round09/frontend-first.md)
+
+冻结原型保留原始固定版本；依照本次Mac规划版本的S5核对样式和动画、S6核对组件职责与示例/真实数据替换；不以“编译通过”代替界面验证。
+
+<!-- zhiyu-round09-ui-first-20261025:U04 -->
+
+## 完成界面后接着看
+
+[后续阶段与待拆分内容 · #69](https://github.com/ShiJiJS/agent-info-manage/issues/69)。只汇总未接真实服务的范围；全部前端完成后再由该票重新拆分，不直接照搬旧20项草稿。
+
+<!-- zhiyu-round09-mac-first-20261026:U04 -->
+
+<!-- zhiyu-u04-flow-preparation-20261027 -->
+
+## 实施准备（历史）：先补长流程状态图
+
+已读取本票、S1-D05/S2/S6及拟议ADR0016，补齐[安装/维护、单台主机与旧资料采用模板流程](https://github.com/ShiJiJS/agent-info-manage/blob/130a3589deb7cf6ef1823775ab08200aee70ed56/docs/planning/zhiyu-round09/u04-template-flow.md)。采用前逐字段核对映射、未映射保留与校验，核对资料/目标定义版本，失败保稿、冲突重预览、未知查原回执；插件更新/移除不改既有快照，地址/端口/指纹不共用信任布尔值。
+
+当前仅完成实现准备，尚未提供本票插件界面，0/7且OPEN保持。下一步从设置入口接可重置合成来源及共享表单/阅读合同；不启用真实插件安装器、SSH、known_hosts或秘密。原依赖#62、Windows后置、无子Agent/computer use保持。
+
+<!-- zhiyu-u04-package-r1-20261027 -->
+
+## r1：插件包管理、声明校验与共用资料入口
+
+源码`538dc130afdcec4df11aaf6f9e1207c2c85d7695`接通设置内包目录/筛选、安装前预览、格式错误路径、更新差异/旧定义、启用/停用/移除影响及重装。内置服务器与外部域名共用表单、阅读及关联选择；新建锁定所见模板版本/摘要，包变化不改旧快照，缺包或新版移除定义后仍可查看和编辑保留字段/复合值。结果未知冻结同一操作并查无正文回执，负回执后明确重试，不自动重装。
+
+声明输入先检查UTF-8、1 MiB、16层和重复键，再检查hostApi、命名空间、字段/布局/引用及各项S2预算；外部不能占用builtin身份、加载设置代码/脚本/远端资源或声明秘密字段。同版本不同摘要拒绝覆盖，内容形态改变需新定义身份；明确选择较早版本也只改后续新建。选择仅是不透明、可释放的合成租约。
+
+最终170项相关检查通过。新增8项来源/解码、3项控制器/未知及5项Widget，既有隔离和外壳检查也已更新；25项定向范围在定向、相关回归及带截图定向中连续三轮通过，不是170项三轮。严格分析无问题，同一固定App路径Mac预览构建通过。7张实际Widget图已逐一查看，包含1440明亮与1280黑暗200%。修复等宽空日期缺中文回退，移除后新对象滚动位置，以及首次加载/失败误报0个包；旧设置占位断言改为真实工作区，导航身份/66px栏高继续检查，没有跳过或提高超时。
+
+只新增第1条，当前1/7且OPEN；单台主机设置和现有详情跳转、旧资料采用/旧模板兼容转换、Agent制作指引入口及整票状态/接口/S5继续归本票。没有新Cocoa运行、真实包安装/SSH、个人库/系统权限或Windows CI；自行检查、未独立评审。继续当前票可做的UI，再推进U05–U07，原依赖#62及F01全部UI后接手不变。
+
+[实施与接口](https://github.com/ShiJiJS/agent-info-manage/blob/cc73515943ac9c5f9c87daf4e863ca13c1c94828/docs/development/zhiyu-macos-plugins.md) · [结构合同](https://github.com/ShiJiJS/agent-info-manage/blob/cc73515943ac9c5f9c87daf4e863ca13c1c94828/docs/design/zhiyu-template-package.schema.json) · [r1证据](https://github.com/ShiJiJS/agent-info-manage/blob/cc73515943ac9c5f9c87daf4e863ca13c1c94828/docs/development/evidence/zhiyu-round09/u04/macos/r1/checkpoint.json)
+
+<!-- zhiyu-u04-host-identity-r2-20261027 -->
+
+## r2：单台主机身份和宿主设置
+
+源码`8e7b0b47dd3421b7bfcdc4daf75b3fce277835e8`接通服务器详情到准确主机的一次性跳转、宿主注册的插件设置，以及详情/设置共享的身份来源。无设置能力的包不显示空页签；外部JSON不能注册宿主能力。同端点资料共享确认/撤销，改地址/端口不继承旧确认，旧端点保留维护。缺指纹不能确认；变化展示新旧值和明确核对，停用仍可查看/撤销，启用不会自动信任。
+
+确认/撤销核对资料、插件、端点和身份版本，失败保留原核对；未知冻结关闭/返回/重发，先核对无正文原回执；错对象/版本回执不能解冻。既有回收流程发现的晚到状态读取错误已修复，关闭/取消后的结果不回写页面。变化和缺指纹可从设计说明的主机身份状态重现。
+
+184项相关回归通过，24项主机/插件/隔离及回收定向范围在定向、相关回归和再次定向中连续三轮通过。新增9项来源/控制器和5项Widget检查，既有隔离守卫也走实际确认/撤销/重置入口；严格分析与同一固定App路径Mac预览构建通过。5张实际Widget图已查看，涵盖1440明亮和1280黑暗200%；自行检查、未独立评审，没有新Cocoa运行、实际OS输入、视频或完整S5证明。
+
+本轮仅新增第2条，2/7且OPEN；继续旧资料采用、旧手建模板兼容和Agent制作指引，再收口整票状态/接口及推进U05–U07。原依赖#62保持，F01仍等待全部UI。身份确认独立于凭据许可；没有真实SSH/known_hosts导入或个人资料访问。当前逐端点UI事实到核心全局known_hosts快照的真实映射留给F01，不能用Demo指纹或UI状态代替执行校验。
+
+[实施与接口](https://github.com/ShiJiJS/agent-info-manage/blob/cb13d6b9d0522971aa14beafba686ee9996c7623/docs/development/zhiyu-macos-plugins.md) · [r2证据](https://github.com/ShiJiJS/agent-info-manage/blob/cb13d6b9d0522971aa14beafba686ee9996c7623/docs/development/evidence/zhiyu-round09/u04/macos/r2/checkpoint.json)
+
+<!-- zhiyu-u04-template-adoption-r3-20261027 -->
+
+## r3：旧资料采用、保留内容和实例身份
+
+源码`eccf481be607727aa609212358bdacf96631f31c`从实际信息库资料菜单接通选模板、逐字段对应、新值/错误/保留内容预览和明确采用，同一资料重新读取。目标定义快照保持原样，保留字段/关系描述属于实例；同名旧字段不覆盖目标，复合未知形态按原JSON只读保留。明确同义且形态兼容保留原标量/经历叶身份，改变含义复制为新身份并保留来源；附件仍保留attachmentId/版本及原历史，布局恢复按仍存活身份而非展示key识别内容。目录、标签、凭据单一关联、原修订和其他资料保持。
+
+缺必填、形态不兼容、重复复用身份及保留内容＋目标超过200叶预算不提交。资料、插件目录或定义变化后需重新预览；失败保留原映射，未知冻结原计划/关闭/返回并查共享无正文回执，其他planId回执不能解冻。确认未提交需重新预览再明确决定，晚到/取消读取不提交，释放预览不删除原提交事实。表单与阅读继续使用正式Flutter控件，不接生产迁移。看图修复步骤切换滚动位置、隐藏的失败原因和重复空值/标签；保留内容提前展示，长预览明确标注前2000字，来源原文完整保留。
+
+新增11项来源/控制器、4项Widget检查；既有Mac隔离守卫也从实际控件走采用、原身份保持和重置，零生产通道/网络/个人路径。最终199项相关检查通过，20项采用/隔离/回收定向范围在定向、相关回归、再次定向中连续三轮通过，不是199项三轮。严格分析与同一固定App路径Mac预览构建通过，5张实际Widget图已查看，包含1440明亮和1280黑暗200%。自行检查、未独立评审，没有新Cocoa运行、实际OS输入、视频或完整S5证明。
+
+本轮仅新增第3条，3/7且OPEN；继续旧手建模板兼容/显式local转换、Agent制作指引与整票状态/接口，再推进U05–U07。原依赖#62和F01全部UI后接手不变；真实fieldId/授权失效、原子事务、完整备份和持久计划/回执仍需后续适配，不复制sample-field种子或合成附件键别名作为生产迁移。
+
+[实施与接口](https://github.com/ShiJiJS/agent-info-manage/blob/5c373690690735de9b48ffb3659e304054b8d773/docs/development/zhiyu-macos-plugins.md) · [r3证据](https://github.com/ShiJiJS/agent-info-manage/blob/5c373690690735de9b48ffb3659e304054b8d773/docs/development/evidence/zhiyu-round09/u04/macos/r3/checkpoint.json)
+
+
+<!-- zhiyu-u04-legacy-r4-20261027 -->
+
+## r4：旧版录入兼容、local转换与Agent制作指引
+
+源码b9e30167acb91f590eb4bbb5ea62eae6f52b571b接通旧版模板兼容目录、共享通用表单的文本/多行文本/普通附件录入及显式转换预览。转换保留宿主来源定义映射，不迁移已有资料；旧200字段表单仍可用，附件/超过40字段明确禁止有损转换。Agent制作指引提供上次目录版本、合法虚构JSON和实际只读校验命令，没有安装个人Skill或后台。
+
+214项相关回归、16项定向范围连续三轮、8种实际CLI输入、严格分析和固定路径Mac构建通过，5张Widget图已查看。[合同与真实接入边界](https://github.com/ShiJiJS/agent-info-manage/blob/4e7d5ec7/docs/development/zhiyu-macos-plugins.md) · [r4证据](https://github.com/ShiJiJS/agent-info-manage/blob/4e7d5ec7/docs/development/evidence/zhiyu-round09/u04/macos/r4/checkpoint.json)。
+
+当前3/7且OPEN，接着审计整票状态/接口和保留关系名称后继续U05–U07。完整S5/实际OS输入仍开放，没有新Cocoa运行；F01继续等待全部UI，原依赖#62、独立Mac分支及Windows后置保持，持续开发。
+
+<!-- zhiyu-u04-contracts-r5-20261027 -->
+
+## r5：状态、隔离和接口交接
+
+源码f77a68e165e70e268a03df0b55b82d72924bba82修复采用后保留关系的名称及目标布局未列出的关联展示，并补齐共用表单的当前值/草稿比较、失败重读和明确继续或清空载入。核对不提交；结构/字段及经历叶身份变化不复用旧草稿，再次修改仍会触发下一次保存冲突。同名关联目标可区分不同资料。
+
+220项相关回归、17项定向范围连续三轮、严格分析和固定路径Mac构建通过；更新后的隔离守卫覆盖实际冲突核对/保存，4张实际Widget图已查看。[完整前端数据/操作/失败合同](https://github.com/ShiJiJS/agent-info-manage/blob/b41277fb2267ffceb93a524d00d4e68f5e7b96b5/docs/development/zhiyu-plugin-contracts.md) · [r5证据](https://github.com/ShiJiJS/agent-info-manage/blob/b41277fb2267ffceb93a524d00d4e68f5e7b96b5/docs/development/evidence/zhiyu-round09/u04/macos/r5/checkpoint.json)。
+
+新增第4/6/7条，当前6/7且OPEN。完整S5、视频与真实Mac输入未关闭，没有新Cocoa运行；接着#66/U05、#67/U06及#68/U07，F01仍等待全部七张UI。原依赖#62、独立Mac分支及Windows后置保持，不因集中人工门槛暂停开发。
