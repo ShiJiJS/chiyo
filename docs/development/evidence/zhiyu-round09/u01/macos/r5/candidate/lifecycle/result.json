@@ -1,0 +1,47 @@
+{
+  "applicationId": "com.example.infoDesktop.zhiyuPreview",
+  "workerPresent": false,
+  "binarySha256": "fe7502f87368ff0539da1d1c8d28fca65531ce10f1a14f7b7f781eeafde366d0",
+  "scope": "Cocoa self-menu quit and window performClose; no OS key synthesis",
+  "runs": [
+    {
+      "action": "quit",
+      "pid": 48846,
+      "exitCode": 0,
+      "state": {
+        "action": "quit",
+        "native": {
+          "title": "知予 · 界面预览·示例数据",
+          "scrollbarRevision": 1,
+          "applicationId": "com.example.infoDesktop.zhiyuPreview",
+          "isolated": true,
+          "productionServices": false,
+          "savedDirectories": false,
+          "scrollbarStyle": "legacy"
+        },
+        "renderedFramesSettled": true
+      },
+      "normalExit": true
+    },
+    {
+      "action": "close",
+      "pid": 48911,
+      "exitCode": 0,
+      "state": {
+        "action": "close",
+        "native": {
+          "savedDirectories": false,
+          "productionServices": false,
+          "scrollbarStyle": "legacy",
+          "title": "知予 · 界面预览·示例数据",
+          "applicationId": "com.example.infoDesktop.zhiyuPreview",
+          "isolated": true,
+          "scrollbarRevision": 1
+        },
+        "renderedFramesSettled": true
+      },
+      "normalExit": true
+    }
+  ],
+  "complete": true
+}

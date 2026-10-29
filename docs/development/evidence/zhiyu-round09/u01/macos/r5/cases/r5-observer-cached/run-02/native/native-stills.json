@@ -1,0 +1,184 @@
+{
+  "kind": "native-flutter-stills-raw-rgba",
+  "pixelRatio": 1,
+  "viewportCropped": false,
+  "pngEncodingDeferred": true,
+  "stills": [
+    {
+      "file": "native-stills/light-dialog.rgba.zlib",
+      "output": "light-dialog.png",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 19580,
+      "compressedBytes": 299184,
+      "recordingActive": true,
+      "recordingMs": 1007
+    },
+    {
+      "file": "native-stills/light-menu.rgba.zlib",
+      "output": "light-menu.png",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 22010,
+      "compressedBytes": 282273,
+      "recordingActive": true,
+      "recordingMs": 1484
+    },
+    {
+      "file": "native-stills/dark-menu.rgba.zlib",
+      "output": "dark-menu.png",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 68791,
+      "compressedBytes": 251547,
+      "recordingActive": true,
+      "recordingMs": 4661
+    },
+    {
+      "file": "native-stills/dark-large-text.rgba.zlib",
+      "output": "dark-large-text.png",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 83958,
+      "compressedBytes": 246235,
+      "recordingActive": false,
+      "recordingMs": null
+    },
+    {
+      "file": "native-stills/light-1440-shell.rgba.zlib",
+      "output": "light-1440-shell.png",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 31418,
+      "compressedBytes": 160077,
+      "recordingActive": false,
+      "recordingMs": null
+    },
+    {
+      "file": "native-stills/light-1440-dialog.rgba.zlib",
+      "output": "light-1440-dialog.png",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 38060,
+      "compressedBytes": 299184,
+      "recordingActive": false,
+      "recordingMs": null
+    },
+    {
+      "file": "native-stills/light-1440-menu.rgba.zlib",
+      "output": "light-1440-menu.png",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 32910,
+      "compressedBytes": 282273,
+      "recordingActive": false,
+      "recordingMs": null
+    },
+    {
+      "file": "native-stills/dark-1440-shell.rgba.zlib",
+      "output": "dark-1440-shell.png",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 24257,
+      "compressedBytes": 159862,
+      "recordingActive": false,
+      "recordingMs": null
+    },
+    {
+      "file": "native-stills/dark-1440-dialog.rgba.zlib",
+      "output": "dark-1440-dialog.png",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 42656,
+      "compressedBytes": 267012,
+      "recordingActive": false,
+      "recordingMs": null
+    },
+    {
+      "file": "native-stills/dark-1440-menu.rgba.zlib",
+      "output": "dark-1440-menu.png",
+      "format": "rgba8888-zlib",
+      "width": 1440,
+      "height": 900,
+      "captureUs": 70475,
+      "compressedBytes": 246823,
+      "recordingActive": false,
+      "recordingMs": null
+    },
+    {
+      "file": "native-stills/light-1280-shell.rgba.zlib",
+      "output": "light-1280-shell.png",
+      "format": "rgba8888-zlib",
+      "width": 1280,
+      "height": 800,
+      "captureUs": 20795,
+      "compressedBytes": 137427,
+      "recordingActive": false,
+      "recordingMs": null
+    },
+    {
+      "file": "native-stills/light-1280-dialog.rgba.zlib",
+      "output": "light-1280-dialog.png",
+      "format": "rgba8888-zlib",
+      "width": 1280,
+      "height": 800,
+      "captureUs": 27274,
+      "compressedBytes": 262776,
+      "recordingActive": false,
+      "recordingMs": null
+    },
+    {
+      "file": "native-stills/light-1280-menu.rgba.zlib",
+      "output": "light-1280-menu.png",
+      "format": "rgba8888-zlib",
+      "width": 1280,
+      "height": 800,
+      "captureUs": 32558,
+      "compressedBytes": 245286,
+      "recordingActive": false,
+      "recordingMs": null
+    },
+    {
+      "file": "native-stills/dark-1280-shell.rgba.zlib",
+      "output": "dark-1280-shell.png",
+      "format": "rgba8888-zlib",
+      "width": 1280,
+      "height": 800,
+      "captureUs": 19774,
+      "compressedBytes": 139270,
+      "recordingActive": false,
+      "recordingMs": null
+    },
+    {
+      "file": "native-stills/dark-1280-dialog.rgba.zlib",
+      "output": "dark-1280-dialog.png",
+      "format": "rgba8888-zlib",
+      "width": 1280,
+      "height": 800,
+      "captureUs": 25594,
+      "compressedBytes": 228868,
+      "recordingActive": false,
+      "recordingMs": null
+    },
+    {
+      "file": "native-stills/dark-1280-menu.rgba.zlib",
+      "output": "dark-1280-menu.png",
+      "format": "rgba8888-zlib",
+      "width": 1280,
+      "height": 800,
+      "captureUs": 28314,
+      "compressedBytes": 207969,
+      "recordingActive": false,
+      "recordingMs": null
+    }
+  ]
+}

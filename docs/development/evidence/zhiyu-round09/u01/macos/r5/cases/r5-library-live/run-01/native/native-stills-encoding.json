@@ -1,0 +1,475 @@
+{
+  "format": "lossless-RGBA-PNG",
+  "pngEncodingDeferred": true,
+  "pixelRatio": 1,
+  "viewportCropped": false,
+  "sourceCount": 31,
+  "totalPixels": 36368000,
+  "sources": [
+    {
+      "file": "native-stills/mac-chinese-name-order.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "8f451ed90444cc1fae6b5d4b81935418fdb284d2e038591fc3f38cc79ceeae76",
+      "decodedRgbaSha256": "ecb053b6202209fad581bd14f0b5c1257e6f5d1bfae0dedb1b3e230f3a2cf83f",
+      "output": "mac-chinese-name-order.png",
+      "size": [
+        1440,
+        900
+      ],
+      "pngSha256": "d5c35b424c97b5ded461c46d94dc693b7cd3ef4299de4227b0bdeffee9b9db9a",
+      "captureUs": 36728,
+      "recordingActive": false,
+      "recordingMs": null
+    },
+    {
+      "file": "native-stills/chooser-1440-light-recording.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "d87a64c278b1fcbb48182ca9444cdb718a95855a4e94ca12a225c246989fccd3",
+      "decodedRgbaSha256": "2e26ea505f1f0fa0ba978f2878904c4c245ebbfe83245a00830782b0345b4659",
+      "output": "chooser-1440-light-recording.png",
+      "size": [
+        1440,
+        900
+      ],
+      "pngSha256": "6d5f79452dee70e37de4ff52a4becc42793cae8a2742574d2976b340adf7f544",
+      "captureUs": 19367,
+      "recordingActive": true,
+      "recordingMs": 569
+    },
+    {
+      "file": "native-stills/filtered-1440-light.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "2ebb55ead49caf2b1237518e9aac478a247dad5e5ac702306fbe0a0bc76c7684",
+      "decodedRgbaSha256": "059fd7609445d8a44d8c331cfa220e340fe4f20710c43fa35a65476986a99022",
+      "output": "filtered-1440-light.png",
+      "size": [
+        1440,
+        900
+      ],
+      "pngSha256": "97806290c8eb4d9979ffbf533ce9de59ee02b8df2ec6c998ebe4ff1dadaee893",
+      "captureUs": 10980,
+      "recordingActive": true,
+      "recordingMs": 2534
+    },
+    {
+      "file": "native-stills/edit-failure-light.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "64daba086cf76ed7169f8c6e82f98f185775cb4d66a018191374a66aa4c5685f",
+      "decodedRgbaSha256": "6be6ee26dbd6266a7dee39f80815f018071c2c4f67947a351a0d1267d02a9dc6",
+      "output": "edit-failure-light.png",
+      "size": [
+        1440,
+        900
+      ],
+      "pngSha256": "83b0dc6ec30f76fb2c25be3f025153f40f97c8a23e93619d81395b32e463c6ef",
+      "captureUs": 13307,
+      "recordingActive": true,
+      "recordingMs": 3662
+    },
+    {
+      "file": "native-stills/light-1440-library.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "ac917f4ead573ccb64be02d9f3ccad7e154717b3bb0499168d03b891819bcca9",
+      "decodedRgbaSha256": "04e76e7b5df12db3cf83cbee99496e344e131d969b100879a7b1bd3669da006e",
+      "output": "light-1440-library.png",
+      "size": [
+        1440,
+        900
+      ],
+      "pngSha256": "839d6e74691719734316256534904046502d417999cf15e4438d9d2266427a9b",
+      "captureUs": 12366,
+      "recordingActive": false,
+      "recordingMs": null
+    },
+    {
+      "file": "native-stills/light-1440-chooser.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "d87a64c278b1fcbb48182ca9444cdb718a95855a4e94ca12a225c246989fccd3",
+      "decodedRgbaSha256": "2e26ea505f1f0fa0ba978f2878904c4c245ebbfe83245a00830782b0345b4659",
+      "output": "light-1440-chooser.png",
+      "size": [
+        1440,
+        900
+      ],
+      "pngSha256": "6d5f79452dee70e37de4ff52a4becc42793cae8a2742574d2976b340adf7f544",
+      "captureUs": 22731,
+      "recordingActive": false,
+      "recordingMs": null
+    },
+    {
+      "file": "native-stills/light-1440-document.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "e0afb5cfeadff3fb80d177f1d6573cc316de2727689a9e33a232f7f47cdf1b3f",
+      "decodedRgbaSha256": "b726d6870973603ece631c89040cafb3e276963513c52c47b7a98bfb1bfcca29",
+      "output": "light-1440-document.png",
+      "size": [
+        1440,
+        900
+      ],
+      "pngSha256": "9384ff4c3950ec7ba06cb0635106caf0cf2b37424f51e45c069546270c7a223e",
+      "captureUs": 17545,
+      "recordingActive": false,
+      "recordingMs": null
+    },
+    {
+      "file": "native-stills/light-1440-resume.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "28019692400ee92c35ec1c7c32ab5af204b0205ed331f08e471f0ecc52356bce",
+      "decodedRgbaSha256": "312f3ee33dbc4b9215a3c6ea4dfe0e6920076ffcef2de2fbdeaad82ff956114f",
+      "output": "light-1440-resume.png",
+      "size": [
+        1440,
+        900
+      ],
+      "pngSha256": "372a441e4f51dffb83fc809ee2089e1328663f839ae542add701814d7ad2ff14",
+      "captureUs": 16550,
+      "recordingActive": false,
+      "recordingMs": null
+    },
+    {
+      "file": "native-stills/file-restore-review-1440-light.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "e390818b755050490f8e88d716073de0f60e68ae43a54de088120eba8b8f53fa",
+      "decodedRgbaSha256": "fed5acba376e3b69b44fd125443dd53888d2d1d2b3d48ea493729ff935805bba",
+      "output": "file-restore-review-1440-light.png",
+      "size": [
+        1440,
+        900
+      ],
+      "pngSha256": "5134dae52075af9d4425644636759736ca39de5ec2948ff4aa7d237f0905499e",
+      "captureUs": 26466,
+      "recordingActive": false,
+      "recordingMs": null
+    },
+    {
+      "file": "native-stills/light-1440-sshkey.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "2338c84d805668d41e93dab98c2c51eecb0f4d72a801b64bd1c2a31b6944ea11",
+      "decodedRgbaSha256": "cb72c85b2cd517cad31e87e4df405fd1ad448535a4152463123aa420410ca941",
+      "output": "light-1440-sshkey.png",
+      "size": [
+        1440,
+        900
+      ],
+      "pngSha256": "e33d80a08c7115ca7ef91c969cea6151ce8307949de209524f3ea07f9e867210",
+      "captureUs": 27137,
+      "recordingActive": false,
+      "recordingMs": null
+    },
+    {
+      "file": "native-stills/credential-replacement-reference-1440-light.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "198c45f4f2f4b3bb8b11bdcb326384b4266a1551a02d9b5b44eaff43c895d2ba",
+      "decodedRgbaSha256": "c09c1cab0294745301a2cb24566769413cd4d6b2d0c84e0291efb79281dde197",
+      "output": "credential-replacement-reference-1440-light.png",
+      "size": [
+        1440,
+        900
+      ],
+      "pngSha256": "0b123dde3695e728541025423f71b7db16d4f95b0050fef688e6521a04909346",
+      "captureUs": 25263,
+      "recordingActive": false,
+      "recordingMs": null
+    },
+    {
+      "file": "native-stills/material-restore-confirmation-1440-light.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "8216a035c05af67c6c537f48a810f4e0a54aa732ff2920519420c7b344057499",
+      "decodedRgbaSha256": "94065338c75ed4239a00e6e540b6b106c579850b13796418ca3c5738aa7ec968",
+      "output": "material-restore-confirmation-1440-light.png",
+      "size": [
+        1440,
+        900
+      ],
+      "pngSha256": "05816c7f4182fb8fa220a09a6ff5531e8c231cb0cd74dd5483e42aa8bd16a495",
+      "captureUs": 27871,
+      "recordingActive": false,
+      "recordingMs": null
+    },
+    {
+      "file": "native-stills/dark-1440-library.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "d0895b45eeb1506acc8447e74f6fd047e703257422af9674045341f4ac6a72e3",
+      "decodedRgbaSha256": "2ba496f32e4b8e54ee3237b2e6b8364ce8a4dea3f6ae6bacc52d169002c22f54",
+      "output": "dark-1440-library.png",
+      "size": [
+        1440,
+        900
+      ],
+      "pngSha256": "d5eb095e49ae02a3307a883e146987aca2821844c56fe6104b3d8d270cf5d7e8",
+      "captureUs": 16303,
+      "recordingActive": false,
+      "recordingMs": null
+    },
+    {
+      "file": "native-stills/dark-1440-chooser.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "9a8472901d8240aebfb15383af67ea474bc08826a813cd956d7421d53ebd9d96",
+      "decodedRgbaSha256": "9d30cc72926013110405fbf7ba4cbd9b7171071f1efeb656c12af30dbefb26b6",
+      "output": "dark-1440-chooser.png",
+      "size": [
+        1440,
+        900
+      ],
+      "pngSha256": "4c38b7f28712f0b742ae996f222fb187fa81696c524126d1f1f7adab1f185d92",
+      "captureUs": 19144,
+      "recordingActive": false,
+      "recordingMs": null
+    },
+    {
+      "file": "native-stills/dark-1440-document.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "fbe214b4139ff3cbdf35d0d35652d3a6593d233c1e1152e0feff7e415cdf9f4c",
+      "decodedRgbaSha256": "712f041d31d390ba35fa73a47e30a6514fde5e88fb1e8c5dae4612325ff868e6",
+      "output": "dark-1440-document.png",
+      "size": [
+        1440,
+        900
+      ],
+      "pngSha256": "e05aa1c8e2fdea4c812f413d00c84a9c10a95df5286ee0d6b01378e0a35d7cd3",
+      "captureUs": 16636,
+      "recordingActive": false,
+      "recordingMs": null
+    },
+    {
+      "file": "native-stills/dark-1440-resume.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "190000ab6f9c4daee1e41adb4d74a157fe729821be73603ddf9e12a9f27caab6",
+      "decodedRgbaSha256": "e843446deb9fccf3644a7baa8e1b5fb2873888a0bd5a59ab6c2cd5275153336a",
+      "output": "dark-1440-resume.png",
+      "size": [
+        1440,
+        900
+      ],
+      "pngSha256": "44e946e413fd6cc6ceab445ed721f7bbfb2ca972a1f2addc138636e6410f8482",
+      "captureUs": 13674,
+      "recordingActive": false,
+      "recordingMs": null
+    },
+    {
+      "file": "native-stills/dark-1440-sshkey.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "995cf84d8086f96b5e4af49410104c38dd11104ab90ef201b4686690b0d7686a",
+      "decodedRgbaSha256": "e4f45eb9bcccefebdef415b17dc21fc97ed6186725682771d106d9d880877d3e",
+      "output": "dark-1440-sshkey.png",
+      "size": [
+        1440,
+        900
+      ],
+      "pngSha256": "39a4cc2e5941e330332328cde030d1ba72126811046e29f7000aa659cd3c033f",
+      "captureUs": 25838,
+      "recordingActive": false,
+      "recordingMs": null
+    },
+    {
+      "file": "native-stills/light-1280-library.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "251c8c0199e08d4dbab986c71fec4527cd1fd33c9e9221262646704ff5a9d079",
+      "decodedRgbaSha256": "a3a223d75ee44987ad0d4de50590c453a372b46c2f6ff2972e361715a48badbb",
+      "output": "light-1280-library.png",
+      "size": [
+        1280,
+        800
+      ],
+      "pngSha256": "6db5290bdd3ae37274a6e153db862f2b580c7226450b9b74ef5ae303bb4691f9",
+      "captureUs": 11070,
+      "recordingActive": false,
+      "recordingMs": null
+    },
+    {
+      "file": "native-stills/light-1280-chooser.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "851e2a7ebb11e3d0983389d50cc10540e1da0cb53f74981aca56194f29c4f5d0",
+      "decodedRgbaSha256": "546596befb723190170b7a21e17daa343aca1d9ab562cc27503784eaa7046c68",
+      "output": "light-1280-chooser.png",
+      "size": [
+        1280,
+        800
+      ],
+      "pngSha256": "ba52975065d4fa283b52b9018a29239269c40a9483258a89ebfbd3e6478d81ed",
+      "captureUs": 16377,
+      "recordingActive": false,
+      "recordingMs": null
+    },
+    {
+      "file": "native-stills/light-1280-document.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "63393b0005ccec67987ce9447e66fbafd608879a175e4c2e1aa6bdb23ff11d2e",
+      "decodedRgbaSha256": "3578479fc68cd8140ea42aa36f76f00eafb976341ec2ce225c2f3c841b74c078",
+      "output": "light-1280-document.png",
+      "size": [
+        1280,
+        800
+      ],
+      "pngSha256": "cf773090e2412f95f48c1b36130387843ff735486341d8cb5643277939c899b1",
+      "captureUs": 15705,
+      "recordingActive": false,
+      "recordingMs": null
+    },
+    {
+      "file": "native-stills/light-1280-resume.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "6b0241752ef835a2929b2aa68ba0edee1f3d4b1580182f3da2a66d75ee18f3d6",
+      "decodedRgbaSha256": "6edf23eab65cce57ed5d17b7d44fafa18f0d9362820c33f6264a545f80953670",
+      "output": "light-1280-resume.png",
+      "size": [
+        1280,
+        800
+      ],
+      "pngSha256": "5cbb2fd9fa2f8723ecb8719f34b4f683019170ba140700b429b2102819eabb29",
+      "captureUs": 23796,
+      "recordingActive": false,
+      "recordingMs": null
+    },
+    {
+      "file": "native-stills/light-1280-sshkey.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "7a18c21193396bcb67d05255b6a623ff23894c499fa6c7b7e0ef51a79cb85049",
+      "decodedRgbaSha256": "1231daf482a1c8acbd0036220fff2e7ee415760238560139212c6b705da9cde5",
+      "output": "light-1280-sshkey.png",
+      "size": [
+        1280,
+        800
+      ],
+      "pngSha256": "f8ae9b3bc3798dd9c5d8ab13e80cafd807f1b85ce4b334b111bc22dfd09f49ad",
+      "captureUs": 25633,
+      "recordingActive": false,
+      "recordingMs": null
+    },
+    {
+      "file": "native-stills/dark-1280-library.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "b80b14fe34d3b9c2f83ce5edcb838a9766939b8f679ca515418bd49b76df12ac",
+      "decodedRgbaSha256": "3872fa1eb8de9805457648a43ab29c60e592652793a74de4313be167a099e553",
+      "output": "dark-1280-library.png",
+      "size": [
+        1280,
+        800
+      ],
+      "pngSha256": "63e8a19abd9a1553ccffcb149273cdc47990919ce0f834108bbc835b2a7abd2b",
+      "captureUs": 10839,
+      "recordingActive": false,
+      "recordingMs": null
+    },
+    {
+      "file": "native-stills/dark-1280-chooser.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "947fa77aa98e79f214ae5529e8293ddced83384aeb21ea4a170e84b5f8f99f2d",
+      "decodedRgbaSha256": "913ceb9c9619c987f1b9387a8c6957a83e1ddee01e8645c04c4422f9cf033806",
+      "output": "dark-1280-chooser.png",
+      "size": [
+        1280,
+        800
+      ],
+      "pngSha256": "89a9a292fd9a2c30f1bca77b0a88d1d49d92368eb81c60ea1aacf2bc3cc5a0c1",
+      "captureUs": 14997,
+      "recordingActive": false,
+      "recordingMs": null
+    },
+    {
+      "file": "native-stills/dark-1280-document.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "059dd7c4b47577e5365fefd00add410ef4bfd2b49a605c62a8da54141054ad26",
+      "decodedRgbaSha256": "58af4d70f63748def75861127659c97325ab8f915e0094c07937ca1bc674787b",
+      "output": "dark-1280-document.png",
+      "size": [
+        1280,
+        800
+      ],
+      "pngSha256": "f3751a8b97897fda5ba55335a6b352820db3bd515d54133f51ddaba3a0d98c09",
+      "captureUs": 13036,
+      "recordingActive": false,
+      "recordingMs": null
+    },
+    {
+      "file": "native-stills/dark-1280-resume.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "43b267bc133294707733daa29b0705d8097021817c0adbe43154204b3b7015d7",
+      "decodedRgbaSha256": "59a2db59b56bc1e30104d68167f37e1701e9fbc74845f98d75e137e8df4c2ae5",
+      "output": "dark-1280-resume.png",
+      "size": [
+        1280,
+        800
+      ],
+      "pngSha256": "ecb667d21a2a06c148b7b74dc5f9827eaef6c6d81cf156d88a1499854f49e093",
+      "captureUs": 21844,
+      "recordingActive": false,
+      "recordingMs": null
+    },
+    {
+      "file": "native-stills/dark-1280-sshkey.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "b0638b3465f2d36ccd2dfd134651b5bc4df6a53f00b0060a7b417ab59e80b7fb",
+      "decodedRgbaSha256": "6118674e98ab06429489cd9ec454bc33294a3d627d4ff7bb09a5b0f628299117",
+      "output": "dark-1280-sshkey.png",
+      "size": [
+        1280,
+        800
+      ],
+      "pngSha256": "4b61cf086b7c80b398ae5cd63d195141e0057d0071471ca8a87935bc048c109a",
+      "captureUs": 16734,
+      "recordingActive": false,
+      "recordingMs": null
+    },
+    {
+      "file": "native-stills/dark-1280-large-text.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "3639e6cb8a368eb14672f7fc703d099ff29df1d5079f37a686c489444f86e44e",
+      "decodedRgbaSha256": "9a80b1a2a25f3c28fa0b8916ee0f9c649cb31e45fc62839bc00801604b82f037",
+      "output": "dark-1280-large-text.png",
+      "size": [
+        1280,
+        800
+      ],
+      "pngSha256": "31b688fb43ea62f633aeaf14ea12e9135571c409529435c7e23e62fdb3dd8c30",
+      "captureUs": 17752,
+      "recordingActive": false,
+      "recordingMs": null
+    },
+    {
+      "file": "native-stills/revision-compare-1280-dark.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "283d30d7fdea780562952e798edd338887f9f93484e03a4187e3872794072e34",
+      "decodedRgbaSha256": "478452277382f3cbba42b728755bd79593321071126581e4a0b7e84f98d45c26",
+      "output": "revision-compare-1280-dark.png",
+      "size": [
+        1280,
+        800
+      ],
+      "pngSha256": "df1ada8f1542da8a736d21304d506baba2ad0920732dd2b369736641e12c8d4f",
+      "captureUs": 17598,
+      "recordingActive": false,
+      "recordingMs": null
+    },
+    {
+      "file": "native-stills/recycle-1280-dark.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "2e40a87af01a13e284ab8df0152f4944660c33ffd1af13997b2f59808df485a6",
+      "decodedRgbaSha256": "6e6c79140b0b0b3c940fc7932632580288becf9619ce69513d4b2cde90f254e6",
+      "output": "recycle-1280-dark.png",
+      "size": [
+        1280,
+        800
+      ],
+      "pngSha256": "1b2167bcd9c92deab54cb46e09057aa0a184a8b8396efdc121dacda4e86d0d4d",
+      "captureUs": 9477,
+      "recordingActive": false,
+      "recordingMs": null
+    },
+    {
+      "file": "native-stills/stress-1280-dark.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "82d8966d58411138acb582fbdec41779b9dd8505d6e6105a16cf29a7e81b9883",
+      "decodedRgbaSha256": "8037dc9eb77bd1983f00f7006587de631f6e7dabc8ffb4eaddd31e0b2d2fee17",
+      "output": "stress-1280-dark.png",
+      "size": [
+        1280,
+        800
+      ],
+      "pngSha256": "8dfe806fe73f672d228faef86413dcaae6d845c53dcc2d6f7dcbe4f3d733f27c",
+      "captureUs": 12084,
+      "recordingActive": false,
+      "recordingMs": null
+    }
+  ]
+}

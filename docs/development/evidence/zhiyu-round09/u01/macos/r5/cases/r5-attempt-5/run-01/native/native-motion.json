@@ -1,0 +1,1224 @@
+{
+  "detail": {
+    "targetMs": 180,
+    "frameErrorMs": 0.554000000000002,
+    "wallErrorMs": 0.532999999999987,
+    "translation": 3.0,
+    "passed": true,
+    "readWallDurationMs": 169.136,
+    "maximumFrameReadDelayMs": 14.234,
+    "samples": [
+      {
+        "frameMs": 0.0,
+        "wallMs": 0.0,
+        "observerDelayMs": 14.235,
+        "readWallMs": 0.0,
+        "frameReadDelayMs": 14.234,
+        "opacity": 0.0,
+        "y": 186.0
+      },
+      {
+        "frameMs": 6.945,
+        "wallMs": 14.974,
+        "observerDelayMs": 5.428,
+        "readWallMs": 6.168,
+        "frameReadDelayMs": 5.428,
+        "opacity": 0.06255447864532471,
+        "y": 185.81233656406403
+      },
+      {
+        "frameMs": 20.833,
+        "wallMs": 20.89,
+        "observerDelayMs": 4.797,
+        "readWallMs": 11.453,
+        "frameReadDelayMs": 4.797,
+        "opacity": 0.18341541290283203,
+        "y": 185.4497537612915
+      },
+      {
+        "frameMs": 27.778,
+        "wallMs": 27.729,
+        "observerDelayMs": 7.252,
+        "readWallMs": 20.746,
+        "frameReadDelayMs": 7.251,
+        "opacity": 0.24207210540771484,
+        "y": 185.27378368377686
+      },
+      {
+        "frameMs": 34.722,
+        "wallMs": 35.421,
+        "observerDelayMs": 3.229,
+        "readWallMs": 24.414,
+        "frameReadDelayMs": 3.227,
+        "opacity": 0.2973254770040512,
+        "y": 185.10802356898785
+      },
+      {
+        "frameMs": 41.667,
+        "wallMs": 41.631,
+        "observerDelayMs": 8.036,
+        "readWallMs": 35.433,
+        "frameReadDelayMs": 8.036,
+        "opacity": 0.3525625914335251,
+        "y": 184.94231222569942
+      },
+      {
+        "frameMs": 48.611,
+        "wallMs": 49.908,
+        "observerDelayMs": 2.998,
+        "readWallMs": 38.671,
+        "frameReadDelayMs": 2.997,
+        "opacity": 0.40529668517410755,
+        "y": 184.78410994447768
+      },
+      {
+        "frameMs": 55.555,
+        "wallMs": 55.486,
+        "observerDelayMs": 2.961,
+        "readWallMs": 44.212,
+        "frameReadDelayMs": 2.96,
+        "opacity": 0.45610497891902924,
+        "y": 184.6316850632429
+      },
+      {
+        "frameMs": 62.5,
+        "wallMs": 62.489,
+        "observerDelayMs": 3.437,
+        "readWallMs": 51.692,
+        "frameReadDelayMs": 3.437,
+        "opacity": 0.5058592557907104,
+        "y": 184.48242223262787
+      },
+      {
+        "frameMs": 69.444,
+        "wallMs": 69.401,
+        "observerDelayMs": 3.174,
+        "readWallMs": 58.34,
+        "frameReadDelayMs": 3.173,
+        "opacity": 0.5526474714279175,
+        "y": 184.34205758571625
+      },
+      {
+        "frameMs": 76.389,
+        "wallMs": 76.377,
+        "observerDelayMs": 3.504,
+        "readWallMs": 65.646,
+        "frameReadDelayMs": 3.503,
+        "opacity": 0.599023699760437,
+        "y": 184.2029289007187
+      },
+      {
+        "frameMs": 83.333,
+        "wallMs": 83.316,
+        "observerDelayMs": 3.432,
+        "readWallMs": 72.513,
+        "frameReadDelayMs": 3.431,
+        "opacity": 0.644621729850769,
+        "y": 184.0661348104477
+      },
+      {
+        "frameMs": 90.277,
+        "wallMs": 90.213,
+        "observerDelayMs": 3.139,
+        "readWallMs": 79.118,
+        "frameReadDelayMs": 3.139,
+        "opacity": 0.6863374561071396,
+        "y": 183.94098763167858
+      },
+      {
+        "frameMs": 97.222,
+        "wallMs": 97.154,
+        "observerDelayMs": 3.137,
+        "readWallMs": 86.057,
+        "frameReadDelayMs": 3.137,
+        "opacity": 0.72674560546875,
+        "y": 183.81976318359375
+      },
+      {
+        "frameMs": 104.166,
+        "wallMs": 104.096,
+        "observerDelayMs": 3.127,
+        "readWallMs": 92.988,
+        "frameReadDelayMs": 3.126,
+        "opacity": 0.7655444294214249,
+        "y": 183.70336671173573
+      },
+      {
+        "frameMs": 111.111,
+        "wallMs": 111.07,
+        "observerDelayMs": 3.413,
+        "readWallMs": 100.248,
+        "frameReadDelayMs": 3.412,
+        "opacity": 0.8012365642935038,
+        "y": 183.5962903071195
+      },
+      {
+        "frameMs": 118.055,
+        "wallMs": 118.0,
+        "observerDelayMs": 3.492,
+        "readWallMs": 107.257,
+        "frameReadDelayMs": 3.491,
+        "opacity": 0.8348703384399414,
+        "y": 183.49538898468018
+      },
+      {
+        "frameMs": 124.999,
+        "wallMs": 124.969,
+        "observerDelayMs": 3.248,
+        "readWallMs": 113.982,
+        "frameReadDelayMs": 3.247,
+        "opacity": 0.8661731835454702,
+        "y": 183.4014804493636
+      },
+      {
+        "frameMs": 131.944,
+        "wallMs": 131.916,
+        "observerDelayMs": 3.156,
+        "readWallMs": 120.838,
+        "frameReadDelayMs": 3.156,
+        "opacity": 0.8948725312948227,
+        "y": 183.31538240611553
+      },
+      {
+        "frameMs": 138.888,
+        "wallMs": 138.862,
+        "observerDelayMs": 3.157,
+        "readWallMs": 127.785,
+        "frameReadDelayMs": 3.157,
+        "opacity": 0.9206958133727312,
+        "y": 183.2379125598818
+      },
+      {
+        "frameMs": 145.833,
+        "wallMs": 145.824,
+        "observerDelayMs": 3.174,
+        "readWallMs": 134.763,
+        "frameReadDelayMs": 3.173,
+        "opacity": 0.9433704614639282,
+        "y": 183.16988861560822
+      },
+      {
+        "frameMs": 152.777,
+        "wallMs": 152.737,
+        "observerDelayMs": 2.944,
+        "readWallMs": 141.446,
+        "frameReadDelayMs": 2.943,
+        "opacity": 0.9632235020399094,
+        "y": 183.11032949388027
+      },
+      {
+        "frameMs": 159.721,
+        "wallMs": 159.695,
+        "observerDelayMs": 2.892,
+        "readWallMs": 148.352,
+        "frameReadDelayMs": 2.891,
+        "opacity": 0.9786509443074465,
+        "y": 183.06404716707766
+      },
+      {
+        "frameMs": 166.666,
+        "wallMs": 166.617,
+        "observerDelayMs": 2.765,
+        "readWallMs": 155.148,
+        "frameReadDelayMs": 2.765,
+        "opacity": 0.9904233273118734,
+        "y": 183.02873001806438
+      },
+      {
+        "frameMs": 173.61,
+        "wallMs": 173.576,
+        "observerDelayMs": 2.881,
+        "readWallMs": 162.222,
+        "frameReadDelayMs": 2.88,
+        "opacity": 0.9977978467941284,
+        "y": 183.00660645961761
+      },
+      {
+        "frameMs": 180.554,
+        "wallMs": 180.533,
+        "observerDelayMs": 2.838,
+        "readWallMs": 169.136,
+        "frameReadDelayMs": 2.837,
+        "opacity": 1.0,
+        "y": 183.0
+      }
+    ]
+  },
+  "dialog": {
+    "targetMs": 180,
+    "frameErrorMs": 0.554000000000002,
+    "wallErrorMs": 0.625,
+    "translation": 7.0,
+    "passed": true,
+    "readWallDurationMs": 165.277,
+    "maximumFrameReadDelayMs": 18.152,
+    "samples": [
+      {
+        "frameMs": 0.0,
+        "wallMs": 0.0,
+        "observerDelayMs": 18.153,
+        "readWallMs": 0.0,
+        "frameReadDelayMs": 18.152,
+        "opacity": 0.0,
+        "y": 66.5
+      },
+      {
+        "frameMs": 6.944,
+        "wallMs": 19.047,
+        "observerDelayMs": 13.146,
+        "readWallMs": 14.039,
+        "frameReadDelayMs": 13.144,
+        "opacity": 0.06255447864532471,
+        "y": 66.06211864948273
+      },
+      {
+        "frameMs": 34.722,
+        "wallMs": 35.399,
+        "observerDelayMs": 5.3,
+        "readWallMs": 22.545,
+        "frameReadDelayMs": 5.298,
+        "opacity": 0.2973254770040512,
+        "y": 64.41872166097164
+      },
+      {
+        "frameMs": 41.667,
+        "wallMs": 41.712,
+        "observerDelayMs": 6.971,
+        "readWallMs": 30.531,
+        "frameReadDelayMs": 6.971,
+        "opacity": 0.3525625914335251,
+        "y": 64.03206185996532
+      },
+      {
+        "frameMs": 48.611,
+        "wallMs": 49.034,
+        "observerDelayMs": 5.129,
+        "readWallMs": 36.01,
+        "frameReadDelayMs": 5.128,
+        "opacity": 0.40529668517410755,
+        "y": 63.66292320378125
+      },
+      {
+        "frameMs": 55.555,
+        "wallMs": 55.634,
+        "observerDelayMs": 6.804,
+        "readWallMs": 44.285,
+        "frameReadDelayMs": 6.803,
+        "opacity": 0.45610497891902924,
+        "y": 63.307265147566795
+      },
+      {
+        "frameMs": 62.5,
+        "wallMs": 62.675,
+        "observerDelayMs": 4.887,
+        "readWallMs": 49.408,
+        "frameReadDelayMs": 4.885,
+        "opacity": 0.5058592557907104,
+        "y": 62.95898520946503
+      },
+      {
+        "frameMs": 69.444,
+        "wallMs": 69.48,
+        "observerDelayMs": 6.099,
+        "readWallMs": 57.426,
+        "frameReadDelayMs": 6.098,
+        "opacity": 0.5526474714279175,
+        "y": 62.63146770000458
+      },
+      {
+        "frameMs": 76.388,
+        "wallMs": 76.489,
+        "observerDelayMs": 5.154,
+        "readWallMs": 63.49,
+        "frameReadDelayMs": 5.153,
+        "opacity": 0.599023699760437,
+        "y": 62.30683410167694
+      },
+      {
+        "frameMs": 83.333,
+        "wallMs": 83.361,
+        "observerDelayMs": 6.215,
+        "readWallMs": 71.424,
+        "frameReadDelayMs": 6.215,
+        "opacity": 0.644621729850769,
+        "y": 61.98764789104462
+      },
+      {
+        "frameMs": 90.277,
+        "wallMs": 90.314,
+        "observerDelayMs": 4.203,
+        "readWallMs": 76.364,
+        "frameReadDelayMs": 4.202,
+        "opacity": 0.6863374561071396,
+        "y": 61.69563780725002
+      },
+      {
+        "frameMs": 97.222,
+        "wallMs": 97.253,
+        "observerDelayMs": 6.324,
+        "readWallMs": 85.424,
+        "frameReadDelayMs": 6.323,
+        "opacity": 0.72674560546875,
+        "y": 61.41278076171875
+      },
+      {
+        "frameMs": 104.166,
+        "wallMs": 104.197,
+        "observerDelayMs": 3.803,
+        "readWallMs": 89.847,
+        "frameReadDelayMs": 3.802,
+        "opacity": 0.7655444294214249,
+        "y": 61.141188994050026
+      },
+      {
+        "frameMs": 111.11,
+        "wallMs": 111.192,
+        "observerDelayMs": 9.168,
+        "readWallMs": 102.207,
+        "frameReadDelayMs": 9.167,
+        "opacity": 0.8012365642935038,
+        "y": 60.891344049945474
+      },
+      {
+        "frameMs": 118.055,
+        "wallMs": 120.632,
+        "observerDelayMs": 6.287,
+        "readWallMs": 108.766,
+        "frameReadDelayMs": 6.286,
+        "opacity": 0.8348703384399414,
+        "y": 60.65590763092041
+      },
+      {
+        "frameMs": 124.999,
+        "wallMs": 127.276,
+        "observerDelayMs": 5.201,
+        "readWallMs": 114.324,
+        "frameReadDelayMs": 5.2,
+        "opacity": 0.8661731835454702,
+        "y": 60.43678771518171
+      },
+      {
+        "frameMs": 131.944,
+        "wallMs": 132.819,
+        "observerDelayMs": 6.793,
+        "readWallMs": 121.459,
+        "frameReadDelayMs": 6.792,
+        "opacity": 0.8948725312948227,
+        "y": 60.23589228093624
+      },
+      {
+        "frameMs": 138.888,
+        "wallMs": 139.862,
+        "observerDelayMs": 4.553,
+        "readWallMs": 126.261,
+        "frameReadDelayMs": 4.551,
+        "opacity": 0.9206958133727312,
+        "y": 60.05512930639088
+      },
+      {
+        "frameMs": 145.832,
+        "wallMs": 145.908,
+        "observerDelayMs": 6.814,
+        "readWallMs": 134.569,
+        "frameReadDelayMs": 6.813,
+        "opacity": 0.9433704614639282,
+        "y": 59.8964067697525
+      },
+      {
+        "frameMs": 159.721,
+        "wallMs": 159.831,
+        "observerDelayMs": 3.548,
+        "readWallMs": 145.226,
+        "frameReadDelayMs": 3.547,
+        "opacity": 0.9786509443074465,
+        "y": 59.649443389847875
+      },
+      {
+        "frameMs": 166.666,
+        "wallMs": 166.659,
+        "observerDelayMs": 2.308,
+        "readWallMs": 150.815,
+        "frameReadDelayMs": 2.308,
+        "opacity": 0.9904233273118734,
+        "y": 59.567036708816886
+      },
+      {
+        "frameMs": 173.61,
+        "wallMs": 173.625,
+        "observerDelayMs": 2.257,
+        "readWallMs": 157.73,
+        "frameReadDelayMs": 2.257,
+        "opacity": 0.9977978467941284,
+        "y": 59.5154150724411
+      },
+      {
+        "frameMs": 180.554,
+        "wallMs": 180.625,
+        "observerDelayMs": 2.805,
+        "readWallMs": 165.277,
+        "frameReadDelayMs": 2.804,
+        "opacity": 1.0,
+        "y": 59.5
+      }
+    ]
+  },
+  "menu": {
+    "targetMs": 120,
+    "frameErrorMs": 4.998999999999995,
+    "wallErrorMs": 5.076999999999998,
+    "translation": -3.0,
+    "passed": true,
+    "readWallDurationMs": 124.187,
+    "maximumFrameReadDelayMs": 6.1,
+    "samples": [
+      {
+        "frameMs": 0.0,
+        "wallMs": 0.0,
+        "observerDelayMs": 3.561,
+        "readWallMs": 0.0,
+        "frameReadDelayMs": 3.561,
+        "opacity": 0.0,
+        "y": 762.0
+      },
+      {
+        "frameMs": 6.945,
+        "wallMs": 7.005,
+        "observerDelayMs": 3.631,
+        "readWallMs": 7.074,
+        "frameReadDelayMs": 3.63,
+        "opacity": 0.09588420391082764,
+        "y": 762.2876526117325
+      },
+      {
+        "frameMs": 13.889,
+        "wallMs": 13.969,
+        "observerDelayMs": 2.397,
+        "readWallMs": 12.803,
+        "frameReadDelayMs": 2.395,
+        "opacity": 0.18341541290283203,
+        "y": 762.5502462387085
+      },
+      {
+        "frameMs": 20.833,
+        "wallMs": 20.875,
+        "observerDelayMs": 2.508,
+        "readWallMs": 19.822,
+        "frameReadDelayMs": 2.508,
+        "opacity": 0.2706144005060196,
+        "y": 762.8118432015181
+      },
+      {
+        "frameMs": 27.778,
+        "wallMs": 27.835,
+        "observerDelayMs": 2.297,
+        "readWallMs": 26.571,
+        "frameReadDelayMs": 2.297,
+        "opacity": 0.3525625914335251,
+        "y": 763.0576877743006
+      },
+      {
+        "frameMs": 34.722,
+        "wallMs": 34.792,
+        "observerDelayMs": 6.1,
+        "readWallMs": 37.331,
+        "frameReadDelayMs": 6.1,
+        "opacity": 0.42989349365234375,
+        "y": 763.289680480957
+      },
+      {
+        "frameMs": 41.667,
+        "wallMs": 41.666,
+        "observerDelayMs": 2.461,
+        "readWallMs": 40.566,
+        "frameReadDelayMs": 2.461,
+        "opacity": 0.5058592557907104,
+        "y": 763.5175777673721
+      },
+      {
+        "frameMs": 48.611,
+        "wallMs": 48.639,
+        "observerDelayMs": 2.634,
+        "readWallMs": 47.711,
+        "frameReadDelayMs": 2.633,
+        "opacity": 0.5759099721908569,
+        "y": 763.7277299165726
+      },
+      {
+        "frameMs": 55.555,
+        "wallMs": 55.588,
+        "observerDelayMs": 2.483,
+        "readWallMs": 54.509,
+        "frameReadDelayMs": 2.482,
+        "opacity": 0.644621729850769,
+        "y": 763.9338651895523
+      },
+      {
+        "frameMs": 62.5,
+        "wallMs": 62.564,
+        "observerDelayMs": 2.665,
+        "readWallMs": 61.668,
+        "frameReadDelayMs": 2.665,
+        "opacity": 0.7067238371819258,
+        "y": 764.1201715115458
+      },
+      {
+        "frameMs": 69.444,
+        "wallMs": 69.465,
+        "observerDelayMs": 2.755,
+        "readWallMs": 68.659,
+        "frameReadDelayMs": 2.755,
+        "opacity": 0.7655444294214249,
+        "y": 764.2966332882643
+      },
+      {
+        "frameMs": 76.389,
+        "wallMs": 76.398,
+        "observerDelayMs": 2.909,
+        "readWallMs": 75.746,
+        "frameReadDelayMs": 2.909,
+        "opacity": 0.8189075440168381,
+        "y": 764.4567226320505
+      },
+      {
+        "frameMs": 83.333,
+        "wallMs": 83.389,
+        "observerDelayMs": 2.804,
+        "readWallMs": 82.631,
+        "frameReadDelayMs": 2.803,
+        "opacity": 0.8661731835454702,
+        "y": 764.5985195506364
+      },
+      {
+        "frameMs": 90.277,
+        "wallMs": 90.316,
+        "observerDelayMs": 2.697,
+        "readWallMs": 89.452,
+        "frameReadDelayMs": 2.697,
+        "opacity": 0.90771484375,
+        "y": 764.72314453125
+      },
+      {
+        "frameMs": 97.222,
+        "wallMs": 97.238,
+        "observerDelayMs": 2.637,
+        "readWallMs": 96.313,
+        "frameReadDelayMs": 2.636,
+        "opacity": 0.9433704614639282,
+        "y": 764.8301113843918
+      },
+      {
+        "frameMs": 104.166,
+        "wallMs": 104.193,
+        "observerDelayMs": 2.884,
+        "readWallMs": 103.515,
+        "frameReadDelayMs": 2.883,
+        "opacity": 0.9711503982543945,
+        "y": 764.9134511947632
+      },
+      {
+        "frameMs": 111.111,
+        "wallMs": 111.175,
+        "observerDelayMs": 2.19,
+        "readWallMs": 109.804,
+        "frameReadDelayMs": 2.19,
+        "opacity": 0.9904233273118734,
+        "y": 764.9712699819356
+      },
+      {
+        "frameMs": 118.055,
+        "wallMs": 118.059,
+        "observerDelayMs": 2.34,
+        "readWallMs": 116.838,
+        "frameReadDelayMs": 2.34,
+        "opacity": 0.9995205793529749,
+        "y": 764.9985617380589
+      },
+      {
+        "frameMs": 124.999,
+        "wallMs": 125.077,
+        "observerDelayMs": 2.671,
+        "readWallMs": 124.187,
+        "frameReadDelayMs": 2.671,
+        "opacity": 1.0,
+        "y": 765.0
+      }
+    ]
+  },
+  "hover": {
+    "targetMs": 150,
+    "frameErrorMs": 2.7760000000000105,
+    "wallErrorMs": 2.6399999999999864,
+    "translation": null,
+    "passed": true,
+    "readWallDurationMs": 141.937,
+    "maximumFrameReadDelayMs": 13.876,
+    "samples": [
+      {
+        "frameMs": 0.0,
+        "wallMs": 0.0,
+        "observerDelayMs": 13.876,
+        "readWallMs": 0.0,
+        "frameReadDelayMs": 13.876,
+        "argb": 4294967295,
+        "red": 1.0
+      },
+      {
+        "frameMs": 6.944,
+        "wallMs": 14.188,
+        "observerDelayMs": 3.528,
+        "readWallMs": 3.839,
+        "frameReadDelayMs": 3.527,
+        "argb": 4294901503,
+        "red": 0.997411113580068
+      },
+      {
+        "frameMs": 20.833,
+        "wallMs": 20.761,
+        "observerDelayMs": 3.732,
+        "readWallMs": 10.616,
+        "frameReadDelayMs": 3.731,
+        "argb": 4294704381,
+        "red": 0.9859653846890318
+      },
+      {
+        "frameMs": 27.777,
+        "wallMs": 27.734,
+        "observerDelayMs": 8.469,
+        "readWallMs": 22.326,
+        "frameReadDelayMs": 8.468,
+        "argb": 4294572795,
+        "red": 0.9774736123459011
+      },
+      {
+        "frameMs": 34.722,
+        "wallMs": 36.703,
+        "observerDelayMs": 2.936,
+        "readWallMs": 25.763,
+        "frameReadDelayMs": 2.936,
+        "argb": 4294441210,
+        "red": 0.968444191194048
+      },
+      {
+        "frameMs": 41.666,
+        "wallMs": 41.593,
+        "observerDelayMs": 2.799,
+        "readWallMs": 30.515,
+        "frameReadDelayMs": 2.798,
+        "argb": 4294309624,
+        "red": 0.959644218034604
+      },
+      {
+        "frameMs": 48.61,
+        "wallMs": 48.57,
+        "observerDelayMs": 3.613,
+        "readWallMs": 38.306,
+        "frameReadDelayMs": 3.612,
+        "argb": 4294178039,
+        "red": 0.9517102140538832
+      },
+      {
+        "frameMs": 55.555,
+        "wallMs": 55.532,
+        "observerDelayMs": 3.28,
+        "readWallMs": 44.936,
+        "frameReadDelayMs": 3.28,
+        "argb": 4294046710,
+        "red": 0.9448659641544024
+      },
+      {
+        "frameMs": 62.499,
+        "wallMs": 62.42,
+        "observerDelayMs": 3.415,
+        "readWallMs": 51.958,
+        "frameReadDelayMs": 3.414,
+        "argb": 4293915381,
+        "red": 0.9391902417295119
+      },
+      {
+        "frameMs": 69.444,
+        "wallMs": 69.371,
+        "observerDelayMs": 3.729,
+        "readWallMs": 59.224,
+        "frameReadDelayMs": 3.729,
+        "argb": 4293849588,
+        "red": 0.9342450551367273
+      },
+      {
+        "frameMs": 76.388,
+        "wallMs": 76.325,
+        "observerDelayMs": 3.532,
+        "readWallMs": 65.981,
+        "frameReadDelayMs": 3.532,
+        "argb": 4293783796,
+        "red": 0.9300309543516121
+      },
+      {
+        "frameMs": 83.332,
+        "wallMs": 83.337,
+        "observerDelayMs": 2.819,
+        "readWallMs": 72.279,
+        "frameReadDelayMs": 2.818,
+        "argb": 4293718003,
+        "red": 0.926518150445293
+      },
+      {
+        "frameMs": 90.277,
+        "wallMs": 90.208,
+        "observerDelayMs": 2.844,
+        "readWallMs": 79.176,
+        "frameReadDelayMs": 2.844,
+        "argb": 4293652211,
+        "red": 0.9234952961521989
+      },
+      {
+        "frameMs": 97.221,
+        "wallMs": 97.142,
+        "observerDelayMs": 3.438,
+        "readWallMs": 86.703,
+        "frameReadDelayMs": 3.437,
+        "argb": 4293652210,
+        "red": 0.9210890031620568
+      },
+      {
+        "frameMs": 104.165,
+        "wallMs": 104.05,
+        "observerDelayMs": 3.132,
+        "readWallMs": 93.306,
+        "frameReadDelayMs": 3.132,
+        "argb": 4293586418,
+        "red": 0.9190362400452003
+      },
+      {
+        "frameMs": 111.11,
+        "wallMs": 110.998,
+        "observerDelayMs": 3.248,
+        "readWallMs": 100.37,
+        "frameReadDelayMs": 3.248,
+        "argb": 4293586418,
+        "red": 0.9174381018524953
+      },
+      {
+        "frameMs": 118.054,
+        "wallMs": 117.935,
+        "observerDelayMs": 3.313,
+        "readWallMs": 107.371,
+        "frameReadDelayMs": 3.312,
+        "argb": 4293586417,
+        "red": 0.9161445789243661
+      },
+      {
+        "frameMs": 124.999,
+        "wallMs": 124.887,
+        "observerDelayMs": 2.865,
+        "readWallMs": 113.875,
+        "frameReadDelayMs": 2.864,
+        "argb": 4293520625,
+        "red": 0.9151439133637091
+      },
+      {
+        "frameMs": 131.943,
+        "wallMs": 131.856,
+        "observerDelayMs": 3.096,
+        "readWallMs": 121.075,
+        "frameReadDelayMs": 3.095,
+        "argb": 4293520625,
+        "red": 0.9144461517298923
+      },
+      {
+        "frameMs": 138.887,
+        "wallMs": 138.789,
+        "observerDelayMs": 3.215,
+        "readWallMs": 128.128,
+        "frameReadDelayMs": 3.215,
+        "argb": 4293520625,
+        "red": 0.9139917675003993
+      },
+      {
+        "frameMs": 145.832,
+        "wallMs": 145.756,
+        "observerDelayMs": 2.855,
+        "readWallMs": 134.734,
+        "frameReadDelayMs": 2.854,
+        "argb": 4293520625,
+        "red": 0.9137627334520221
+      },
+      {
+        "frameMs": 152.776,
+        "wallMs": 152.64,
+        "observerDelayMs": 3.174,
+        "readWallMs": 141.937,
+        "frameReadDelayMs": 3.173,
+        "argb": 4293520625,
+        "red": 0.9137254901960784
+      }
+    ]
+  },
+  "pressed": {
+    "targetMs": 150,
+    "frameErrorMs": 2.776999999999987,
+    "wallErrorMs": 2.8189999999999884,
+    "translation": -1.0,
+    "passed": true,
+    "readWallDurationMs": 152.658,
+    "maximumFrameReadDelayMs": 1.855,
+    "samples": [
+      {
+        "frameMs": 0.0,
+        "wallMs": 0.0,
+        "observerDelayMs": 1.76,
+        "readWallMs": 0.0,
+        "frameReadDelayMs": 1.76,
+        "y": 495.0
+      },
+      {
+        "frameMs": 6.945,
+        "wallMs": 6.826,
+        "observerDelayMs": 1.855,
+        "readWallMs": 6.921,
+        "frameReadDelayMs": 1.855,
+        "y": 495.03000754714014
+      },
+      {
+        "frameMs": 13.889,
+        "wallMs": 13.806,
+        "observerDelayMs": 1.668,
+        "readWallMs": 13.713,
+        "frameReadDelayMs": 1.667,
+        "y": 495.0849208831787
+      },
+      {
+        "frameMs": 20.833,
+        "wallMs": 20.895,
+        "observerDelayMs": 1.72,
+        "readWallMs": 20.854,
+        "frameReadDelayMs": 1.719,
+        "y": 495.1626739501953
+      },
+      {
+        "frameMs": 27.778,
+        "wallMs": 27.686,
+        "observerDelayMs": 1.735,
+        "readWallMs": 27.661,
+        "frameReadDelayMs": 1.735,
+        "y": 495.26110131144526
+      },
+      {
+        "frameMs": 34.722,
+        "wallMs": 34.762,
+        "observerDelayMs": 1.722,
+        "readWallMs": 34.723,
+        "frameReadDelayMs": 1.721,
+        "y": 495.3657605111599
+      },
+      {
+        "frameMs": 41.667,
+        "wallMs": 41.589,
+        "observerDelayMs": 1.66,
+        "readWallMs": 41.489,
+        "frameReadDelayMs": 1.66,
+        "y": 495.4677602000535
+      },
+      {
+        "frameMs": 48.611,
+        "wallMs": 48.542,
+        "observerDelayMs": 1.604,
+        "readWallMs": 48.386,
+        "frameReadDelayMs": 1.604,
+        "y": 495.5597225189209
+      },
+      {
+        "frameMs": 55.555,
+        "wallMs": 55.465,
+        "observerDelayMs": 1.744,
+        "readWallMs": 55.448,
+        "frameReadDelayMs": 1.743,
+        "y": 495.63905359730126
+      },
+      {
+        "frameMs": 62.5,
+        "wallMs": 62.566,
+        "observerDelayMs": 1.57,
+        "readWallMs": 62.376,
+        "frameReadDelayMs": 1.57,
+        "y": 495.7048403799534
+      },
+      {
+        "frameMs": 69.444,
+        "wallMs": 69.376,
+        "observerDelayMs": 1.668,
+        "readWallMs": 69.284,
+        "frameReadDelayMs": 1.668,
+        "y": 495.76215958818796
+      },
+      {
+        "frameMs": 76.389,
+        "wallMs": 76.286,
+        "observerDelayMs": 1.761,
+        "readWallMs": 76.287,
+        "frameReadDelayMs": 1.761,
+        "y": 495.81100484728813
+      },
+      {
+        "frameMs": 83.333,
+        "wallMs": 83.226,
+        "observerDelayMs": 1.693,
+        "readWallMs": 83.158,
+        "frameReadDelayMs": 1.692,
+        "y": 495.8517214380205
+      },
+      {
+        "frameMs": 90.277,
+        "wallMs": 90.358,
+        "observerDelayMs": 1.825,
+        "readWallMs": 90.423,
+        "frameReadDelayMs": 1.825,
+        "y": 495.8867590673268
+      },
+      {
+        "frameMs": 97.222,
+        "wallMs": 97.36,
+        "observerDelayMs": 1.784,
+        "readWallMs": 97.384,
+        "frameReadDelayMs": 1.784,
+        "y": 495.9146501906216
+      },
+      {
+        "frameMs": 104.166,
+        "wallMs": 104.256,
+        "observerDelayMs": 1.781,
+        "readWallMs": 104.276,
+        "frameReadDelayMs": 1.78,
+        "y": 495.9384435812943
+      },
+      {
+        "frameMs": 111.111,
+        "wallMs": 111.162,
+        "observerDelayMs": 1.606,
+        "readWallMs": 111.007,
+        "frameReadDelayMs": 1.605,
+        "y": 495.9569674558006
+      },
+      {
+        "frameMs": 118.055,
+        "wallMs": 118.087,
+        "observerDelayMs": 1.598,
+        "readWallMs": 117.924,
+        "frameReadDelayMs": 1.597,
+        "y": 495.9719605624676
+      },
+      {
+        "frameMs": 124.999,
+        "wallMs": 124.973,
+        "observerDelayMs": 1.677,
+        "readWallMs": 124.89,
+        "frameReadDelayMs": 1.677,
+        "y": 495.9835591860116
+      },
+      {
+        "frameMs": 131.944,
+        "wallMs": 131.983,
+        "observerDelayMs": 1.427,
+        "readWallMs": 131.65,
+        "frameReadDelayMs": 1.427,
+        "y": 495.99164687767626
+      },
+      {
+        "frameMs": 138.888,
+        "wallMs": 138.957,
+        "observerDelayMs": 1.402,
+        "readWallMs": 138.599,
+        "frameReadDelayMs": 1.402,
+        "y": 495.99691360397264
+      },
+      {
+        "frameMs": 145.833,
+        "wallMs": 145.839,
+        "observerDelayMs": 1.539,
+        "readWallMs": 145.618,
+        "frameReadDelayMs": 1.539,
+        "y": 495.9995683168061
+      },
+      {
+        "frameMs": 152.777,
+        "wallMs": 152.819,
+        "observerDelayMs": 1.599,
+        "readWallMs": 152.658,
+        "frameReadDelayMs": 1.599,
+        "y": 496.0
+      }
+    ]
+  },
+  "feedback": {
+    "targetMs": 180,
+    "frameErrorMs": 0.554000000000002,
+    "wallErrorMs": 0.4259999999999877,
+    "translation": 6.0,
+    "passed": true,
+    "readWallDurationMs": 171.126,
+    "maximumFrameReadDelayMs": 12.624,
+    "samples": [
+      {
+        "frameMs": 0.0,
+        "wallMs": 0.0,
+        "observerDelayMs": 12.444,
+        "readWallMs": 0.0,
+        "frameReadDelayMs": 12.443,
+        "opacity": 0.0,
+        "y": 847.0
+      },
+      {
+        "frameMs": 6.944,
+        "wallMs": 12.99,
+        "observerDelayMs": 12.625,
+        "readWallMs": 13.171,
+        "frameReadDelayMs": 12.624,
+        "opacity": 0.06255447864532471,
+        "y": 846.624673128128
+      },
+      {
+        "frameMs": 27.777,
+        "wallMs": 27.816,
+        "observerDelayMs": 9.033,
+        "readWallMs": 24.405,
+        "frameReadDelayMs": 9.032,
+        "opacity": 0.24207210540771484,
+        "y": 845.5475673675537
+      },
+      {
+        "frameMs": 34.722,
+        "wallMs": 37.187,
+        "observerDelayMs": 9.163,
+        "readWallMs": 33.906,
+        "frameReadDelayMs": 9.162,
+        "opacity": 0.2973254770040512,
+        "y": 845.2160471379757
+      },
+      {
+        "frameMs": 41.666,
+        "wallMs": 46.837,
+        "observerDelayMs": 9.473,
+        "readWallMs": 43.865,
+        "frameReadDelayMs": 9.471,
+        "opacity": 0.3525625914335251,
+        "y": 844.8846244513988
+      },
+      {
+        "frameMs": 62.5,
+        "wallMs": 62.605,
+        "observerDelayMs": 8.787,
+        "readWallMs": 58.948,
+        "frameReadDelayMs": 8.786,
+        "opacity": 0.5058592557907104,
+        "y": 843.9648444652557
+      },
+      {
+        "frameMs": 76.388,
+        "wallMs": 76.357,
+        "observerDelayMs": 8.645,
+        "readWallMs": 72.558,
+        "frameReadDelayMs": 8.644,
+        "opacity": 0.599023699760437,
+        "y": 843.4058578014374
+      },
+      {
+        "frameMs": 83.333,
+        "wallMs": 85.406,
+        "observerDelayMs": 8.552,
+        "readWallMs": 81.514,
+        "frameReadDelayMs": 8.551,
+        "opacity": 0.644621729850769,
+        "y": 843.1322696208954
+      },
+      {
+        "frameMs": 90.277,
+        "wallMs": 94.448,
+        "observerDelayMs": 8.414,
+        "readWallMs": 90.418,
+        "frameReadDelayMs": 8.413,
+        "opacity": 0.6863374561071396,
+        "y": 842.8819752633572
+      },
+      {
+        "frameMs": 97.221,
+        "wallMs": 103.297,
+        "observerDelayMs": 8.847,
+        "readWallMs": 99.701,
+        "frameReadDelayMs": 8.847,
+        "opacity": 0.72674560546875,
+        "y": 842.6395263671875
+      },
+      {
+        "frameMs": 118.055,
+        "wallMs": 118.034,
+        "observerDelayMs": 8.509,
+        "readWallMs": 114.1,
+        "frameReadDelayMs": 8.509,
+        "opacity": 0.8348703384399414,
+        "y": 841.9907779693604
+      },
+      {
+        "frameMs": 124.999,
+        "wallMs": 127.014,
+        "observerDelayMs": 8.604,
+        "readWallMs": 123.175,
+        "frameReadDelayMs": 8.604,
+        "opacity": 0.8661731835454702,
+        "y": 841.8029608987272
+      },
+      {
+        "frameMs": 131.943,
+        "wallMs": 136.082,
+        "observerDelayMs": 8.666,
+        "readWallMs": 132.304,
+        "frameReadDelayMs": 8.665,
+        "opacity": 0.8948725312948227,
+        "y": 841.6307648122311
+      },
+      {
+        "frameMs": 138.888,
+        "wallMs": 145.185,
+        "observerDelayMs": 8.689,
+        "readWallMs": 141.431,
+        "frameReadDelayMs": 8.689,
+        "opacity": 0.9206958133727312,
+        "y": 841.4758251197636
+      },
+      {
+        "frameMs": 159.721,
+        "wallMs": 159.732,
+        "observerDelayMs": 5.117,
+        "readWallMs": 152.406,
+        "frameReadDelayMs": 5.117,
+        "opacity": 0.9786509443074465,
+        "y": 841.1280943341553
+      },
+      {
+        "frameMs": 166.665,
+        "wallMs": 166.524,
+        "observerDelayMs": 3.524,
+        "readWallMs": 157.604,
+        "frameReadDelayMs": 3.523,
+        "opacity": 0.9904233273118734,
+        "y": 841.0574600361288
+      },
+      {
+        "frameMs": 173.61,
+        "wallMs": 173.494,
+        "observerDelayMs": 5.82,
+        "readWallMs": 166.87,
+        "frameReadDelayMs": 5.819,
+        "opacity": 0.9977978467941284,
+        "y": 841.0132129192352
+      },
+      {
+        "frameMs": 180.554,
+        "wallMs": 180.426,
+        "observerDelayMs": 3.144,
+        "readWallMs": 171.126,
+        "frameReadDelayMs": 3.143,
+        "opacity": 1.0,
+        "y": 841.0
+      }
+    ]
+  }
+}

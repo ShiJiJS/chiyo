@@ -1,0 +1,3 @@
+#include "/Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/macos/Runner/Configs/Preview.xcconfig"
+CONFIGURATION_BUILD_DIR = /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/build/macos/Build/Products/Debug
+DWARF_DSYM_FOLDER_PATH = /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/build/macos/Build/Products/Debug

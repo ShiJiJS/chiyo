@@ -1,0 +1,25 @@
+{
+  "driverExitCode": 0,
+  "allTestsPassed": true,
+  "runtime": {
+    "platform": "macos",
+    "profileMode": true,
+    "productMode": false,
+    "debugMode": false,
+    "nativeEvidenceDirectory": "/Users/jiangxinyi/Library/Containers/com.example.infoDesktop.zhiyuPreview/Data/tmp/ZhiyuUI-56FE79DC-F3E9-4C48-80E0-2BF5ED553759"
+  },
+  "profileApp": {
+    "bundleIdentifier": "com.example.infoDesktop.zhiyuPreview",
+    "sandboxed": true,
+    "architecture": "arm64",
+    "executableSha256": "10a0df02a69dc10bc7be0fca82cd8a2f5f3bd4c796b61a886121887bb29fb04b",
+    "frameworkSha256": "8450c41e1141e100b1519fd0513c61857c6e73d731f965b42a4f9d84496602c4",
+    "kernelPresent": false,
+    "aotSnapshotSymbolsPresent": true,
+    "aotSnapshotExports": [
+      "_kDartSnapshotData",
+      "_kDartSnapshotText"
+    ]
+  },
+  "seconds": 30.117033833000008
+}

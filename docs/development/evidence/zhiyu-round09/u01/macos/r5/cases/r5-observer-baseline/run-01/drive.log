@@ -1,0 +1,15 @@
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:52216/alh0cm8RK_4=/
+VMServiceFlutterDriver: Isolate found with number: 5757824993765507
+VMServiceFlutterDriver: Isolate 5757824993765507 is runnable.
+VMServiceFlutterDriver: Isolate is paused at start.
+VMServiceFlutterDriver: Attempting to resume isolate
+flutter: 00:00 +0: isolated Zhiyu native controls, motion, large text and reduced motion
+VMServiceFlutterDriver: Connected to Flutter application.
+flutter: ZHIYU_NATIVE_EVIDENCE=/Users/jiangxinyi/Library/Containers/com.example.infoDesktop.zhiyuPreview/Data/tmp/ZhiyuUI-56FE79DC-F3E9-4C48-80E0-2BF5ED553759
+flutter: ZHIYU_NATIVE_MOTION=detail
+flutter: ZHIYU_NATIVE_MOTION=dialog
+flutter: ZHIYU_NATIVE_MOTION=menu
+flutter: ZHIYU_NATIVE_MOTION=feedback
+flutter: 00:25 +1: (tearDownAll)
+flutter: 00:25 +2: All tests passed!
+All tests passed.
