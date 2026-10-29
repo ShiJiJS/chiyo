@@ -1,0 +1,43 @@
+Failed to foreground app; open returned 1
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:60253/lsMl_YIX3bY=/
+VMServiceFlutterDriver: Isolate found with number: 7637551659484935
+VMServiceFlutterDriver: Isolate 7637551659484935 is runnable.
+VMServiceFlutterDriver: Isolate is paused at start.
+VMServiceFlutterDriver: Attempting to resume isolate
+flutter: 00:00 +0: isolated Zhiyu native controls, motion, large text and reduced motion
+VMServiceFlutterDriver: Connected to Flutter application.
+flutter: ZHIYU_NATIVE_EVIDENCE=/Users/jiangxinyi/Library/Containers/com.example.infoDesktop.zhiyuPreview/Data/tmp/ZhiyuUI-0FF795D9-B517-402B-B237-9E86D42D70CA
+2026-10-29 21:15:46.804 info_desktop[328:25319900] error messaging the mach port for IMKCFRunLoopWakeUpReliable
+flutter: Bad state: No element
+flutter: #0      Iterable.single (dart:core/iterable.dart:694)
+flutter: #1      WidgetController.element (package:flutter_test/src/controller.dart:888)
+flutter: #2      WidgetController.ensureVisible (package:flutter_test/src/controller.dart:2389)
+flutter: #3      main.<anonymous closure>.nativeMotionChecks (file:///Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/integration_test/zhiyu_foundation_native_test.dart:291)
+flutter: <asynchronous suspension>
+flutter: #4      IntegrationTestWidgetsFlutterBinding.traceTimeline (package:integration_test/integration_test.dart:304)
+flutter: <asynchronous suspension>
+flutter: #5      IntegrationTestWidgetsFlutterBinding._runAndGetGCInfo (package:integration_test/integration_test.dart:371)
+flutter: <asynchronous suspension>
+flutter: #6      IntegrationTestWidgetsFlutterBinding.watchPerformance (package:integration_test/integration_test.dart:420)
+flutter: <asynchronous suspension>
+flutter: #7      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/integration_test/zhiyu_foundation_native_test.dart:413)
+flutter: <asynchronous suspension>
+flutter: #8      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192)
+flutter: <asynchronous suspension>
+flutter: #9      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953)
+flutter: <asynchronous suspension>
+flutter: #10     TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1707)
+flutter: <asynchronous suspension>
+flutter: 00:04 +0: isolated Zhiyu native controls, motion, large text and reduced motion [E]
+flutter:   Test failed. See exception logs above.
+  The test description was: isolated Zhiyu native controls, motion, large text and reduced motion
+flutter:   
+flutter: 00:04 +0 -1: (tearDownAll)
+flutter: 00:04 +1 -1: Some tests failed.
+Failure Details:
+Failure in method: isolated Zhiyu native controls, motion, large text and reduced motion
+Instance of 'FlutterErrorDetails'
+end of failure 1
+
+
+

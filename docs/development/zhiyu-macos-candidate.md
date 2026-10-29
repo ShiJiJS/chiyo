@@ -1,5 +1,7 @@
 # Mac 示例界面候选 · 2026-10-29
 
+当前固定预览已更新到共享焦点修正`b9160aa5`，见[本段实现与验收范围](zhiyu-macos-focus-cues.md)。以下`e6ac4fa3`及57项检查属于首候选历史基线；当前84项相关检查和Profile原生检查通过，不代表七张UI正式验收已完成。
+
 本轮交付入口与当前状态以 [#62 顶部](https://github.com/ShiJiJS/agent-info-manage/issues/62)为准。本页只提供本机启动指引和检查边界，取代继续自动扩展开发范围的历史排期。
 
 源码：`e6ac4fa3dac8a056384149c8312fdd23fbc06a09`，分支 `codex/zhiyu-macos`。固定应用：`/Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/build/macos/Build/Products/Debug/info_desktop.app`。

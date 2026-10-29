@@ -1,5 +1,7 @@
 # 知予 Mac 外壳与预览准备（#62，进行中）
 
+当前已进入首候选之后的UI正式验收收尾。[共享焦点第一段](zhiyu-macos-focus-cues.md)修正外描边、菜单例外及鼠标/键盘切换，84项相关检查、严格分析和当前Mac Profile原生检查通过；只接受这一段，完整S5/本人系统输入仍开放。当前排期以[#62顶部](https://github.com/ShiJiJS/agent-info-manage/issues/62)为准，下段“候选交付后结束”仅指已结束的上一轮。
+
 2026-10-29当前交付范围改为固定U01–U07示例界面候选，主状态统一见[#62顶部](https://github.com/ShiJiJS/agent-info-manage/issues/62)。[本机候选启动指引](zhiyu-macos-candidate.md)记录入口和有限剩余；[r5检查点](evidence/zhiyu-round09/u01/macos/r5/checkpoint.json)保留Profile诊断及本轮连续路径结果。下文r4“下一步”属于历史，不再自动扩展成测量工程；完整S5与真实OS输入仍未通过。
 
 ## r4：截图延后编码与绘制延迟观测
