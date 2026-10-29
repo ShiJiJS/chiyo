@@ -1,0 +1,806 @@
+[
+  {
+    "path": "apps/desktop/lib/anchored_surface.dart",
+    "sha256": "e8384439edd8d824c60b918e0b28ad2b9728b6a3f831ef030be6bb1fd648fb9e"
+  },
+  {
+    "path": "apps/desktop/lib/approvals.dart",
+    "sha256": "e168e7cfb1bb1a3780f18bb79256c9337c3bda99b7c9d6b094c67e74164cec60"
+  },
+  {
+    "path": "apps/desktop/lib/backups.dart",
+    "sha256": "2a5edfd9db271ccb9b1708079c1a70c7463e41a6001c85f23704a48aaba69ea0"
+  },
+  {
+    "path": "apps/desktop/lib/bundled_focused_fill.dart",
+    "sha256": "501ed7b3e98e0a5929e96094f449da222f50447119b6c9f58c5466b5b4022e8f"
+  },
+  {
+    "path": "apps/desktop/lib/bundled_tool_settings.dart",
+    "sha256": "e111126d06fa316092a883a61117eda5779aca27b9592f4989f7dee3cb0faf9d"
+  },
+  {
+    "path": "apps/desktop/lib/credential_delivery.dart",
+    "sha256": "1ec1e26959e1d51eaa2a494597844efe7deaa153ca49e2ac9055f46bc6fea5b4"
+  },
+  {
+    "path": "apps/desktop/lib/credential_dialogs.dart",
+    "sha256": "28f4501c35478b76733cefc2122d9214f580b08a5b1c9438107c93254e49e435"
+  },
+  {
+    "path": "apps/desktop/lib/credential_execution_receipt.dart",
+    "sha256": "625eb8b2cbeeba2e20c74b5c201d84b8fe76dcf1f95be3eab04188eda45839c1"
+  },
+  {
+    "path": "apps/desktop/lib/credential_files.dart",
+    "sha256": "582e09014b0d8f144fc8e39f3a0966d5790414e87180daa0797237f9985cfe51"
+  },
+  {
+    "path": "apps/desktop/lib/credential_history.dart",
+    "sha256": "a6e086aa9806c26389d865a5bfc13b3ef4da3182bee5943bf2b4d5be279f6939"
+  },
+  {
+    "path": "apps/desktop/lib/credential_management.dart",
+    "sha256": "445d1bad1e020527ef67bb38cf7921578aee10e35956d5359114678c1b23cc4f"
+  },
+  {
+    "path": "apps/desktop/lib/credential_material_checks.dart",
+    "sha256": "3c518aa76bdd21a70c566c0d7e70b8f500d60b697677718d09b53172abaf51c8"
+  },
+  {
+    "path": "apps/desktop/lib/credential_migration.dart",
+    "sha256": "c180646ef267ec0cd25a63dc5723ed2fcaef9854dee85d71ebb8229b120e0944"
+  },
+  {
+    "path": "apps/desktop/lib/credential_operations.dart",
+    "sha256": "722963d521302ccd5ab287c3ef00a387b9d184aa4012ffa2434372d0344e5faa"
+  },
+  {
+    "path": "apps/desktop/lib/credential_use_approval.dart",
+    "sha256": "1b03aac91f1dea8971698d2124aa9a0db3ff0b39f27836659f86e8b7bdf252ae"
+  },
+  {
+    "path": "apps/desktop/lib/credential_use_draft.dart",
+    "sha256": "8e1fa8109a6886acbe07cbe7bdf8a87f1382c736353ea67cd225f381fed9806d"
+  },
+  {
+    "path": "apps/desktop/lib/credentials.dart",
+    "sha256": "304534550ffc3a77f21f5d48f9e053f515216d4761e9946730fcf47fd42a1988"
+  },
+  {
+    "path": "apps/desktop/lib/desktop_bootstrap.dart",
+    "sha256": "397db97856dff6a4fd37b305cefeeeaa6f71809746a711e39457c90937b97bf3"
+  },
+  {
+    "path": "apps/desktop/lib/desktop_button.dart",
+    "sha256": "9597d94b48a6911c98335e1c08c6f656521f6001a75a881a23b76b3bfb87336c"
+  },
+  {
+    "path": "apps/desktop/lib/desktop_controls.dart",
+    "sha256": "9f46aeaa140c564bac0ed0b65675b0800156d7a1eebf4290490a06cea023857c"
+  },
+  {
+    "path": "apps/desktop/lib/desktop_feedback.dart",
+    "sha256": "cb5562dcea0ccde9a3ce9242fa1c53a5b410265a352bb8903ee98f984ce30138"
+  },
+  {
+    "path": "apps/desktop/lib/desktop_fonts.dart",
+    "sha256": "4094ef5986fa18a47e5aef5243e49d980c5e1b2438ec1ed8be477a62db39ee19"
+  },
+  {
+    "path": "apps/desktop/lib/desktop_interaction_host.dart",
+    "sha256": "f4f0cb215a22ab1e8e3c239d2ce506dc2bf8b2e0de434551ea5a084f8566e2aa"
+  },
+  {
+    "path": "apps/desktop/lib/desktop_motion.dart",
+    "sha256": "967bff3f17353fc008d6ebeee3efad484c86a0bd2043b29c53c3e3525e85a4c5"
+  },
+  {
+    "path": "apps/desktop/lib/desktop_runtime.dart",
+    "sha256": "c2896f18701460f797e1e4b4b85b6cead84e5748ec6f1cedb432398119ab0972"
+  },
+  {
+    "path": "apps/desktop/lib/desktop_scroll.dart",
+    "sha256": "2375214b2e777ec5da24223e835cdf20169f9549f44c57f6af7856a3610c629c"
+  },
+  {
+    "path": "apps/desktop/lib/desktop_shell.dart",
+    "sha256": "baeb6b8758dfaf8bc7b30d9be1f56c4a2cec79acd6a41c3c6c7d374b30a5e7f5"
+  },
+  {
+    "path": "apps/desktop/lib/focused_fill_ui.dart",
+    "sha256": "19abce07c8a3f13f4571c93e6a909f381853530e8f53ce9c34ffc0ab09acd4bf"
+  },
+  {
+    "path": "apps/desktop/lib/history.dart",
+    "sha256": "fccc6d422a15b63a361be6a63c4f480050ff75d92ddcf0fe9e6a93c82671171d"
+  },
+  {
+    "path": "apps/desktop/lib/import_proposals.dart",
+    "sha256": "28807b9bf2a77c3a764ea3c223ec5fbdfda9dfd575781ed6f2e04f02b85cb764"
+  },
+  {
+    "path": "apps/desktop/lib/inbox_queue.dart",
+    "sha256": "95bed215acae10c283ae22eb4bc3622a70c697a2fe8b81f7256e0bf3c002402d"
+  },
+  {
+    "path": "apps/desktop/lib/information_attachment_capacity.dart",
+    "sha256": "210c091b49c0b1d57d40c4fd3c6676cca3ad22d1e11e068ffb0f3cc76a86e5de"
+  },
+  {
+    "path": "apps/desktop/lib/information_delivery_history.dart",
+    "sha256": "727fddccd16d9bb06fe7c907a6dd797f754487563336af47d6e138bd166537b3"
+  },
+  {
+    "path": "apps/desktop/lib/information_editor.dart",
+    "sha256": "187fec142e29827d9dad2ede9a6cad417d65303dbf8e8728b3754568d1c0641b"
+  },
+  {
+    "path": "apps/desktop/lib/information_editor_draft.dart",
+    "sha256": "b2f76f7de1081382994aad2686b3a085c73da7e02eac76500f7910e3bc4f23d1"
+  },
+  {
+    "path": "apps/desktop/lib/information_field_preview.dart",
+    "sha256": "0c1a44e226602ea3623037014460ee449f25a2349a50d117227420b5f591afd1"
+  },
+  {
+    "path": "apps/desktop/lib/information_file_summary.dart",
+    "sha256": "cecfb247e91e882af91f74f50ee0f9c2a31f7feec9465fb2b20005090a182308"
+  },
+  {
+    "path": "apps/desktop/lib/information_files.dart",
+    "sha256": "27e2f34e5a19bb6e11a97f4c85e7fc50ea897e3d3aef9232e8153ccfde49e083"
+  },
+  {
+    "path": "apps/desktop/lib/information_workspace.dart",
+    "sha256": "eb2c65a38db88be3557847f131d7fe8efca68616ffbef313d35fa5ca210737e6"
+  },
+  {
+    "path": "apps/desktop/lib/library.dart",
+    "sha256": "64608392c055fd0eb438942ae9bb26f9fd3f3b5dc3418d30a300e412616cd758"
+  },
+  {
+    "path": "apps/desktop/lib/mac_secret_input.dart",
+    "sha256": "44eb75c4e89b621799bc267f05efc13e32b917abdfd84b8e3fbedd8055c613df"
+  },
+  {
+    "path": "apps/desktop/lib/mac_text_editing.dart",
+    "sha256": "a6587d545562d702626dbba235bcf9eb0f1af9b927aea57f134758723ce229bf"
+  },
+  {
+    "path": "apps/desktop/lib/mac_text_field_accessibility.dart",
+    "sha256": "d75cbb14a7bfe80c9d38832b01a1343907d2e738dba898d2bdab3a878912be28"
+  },
+  {
+    "path": "apps/desktop/lib/macos_focused_fill.dart",
+    "sha256": "ed68b1a5bc6f832178850bce4630e05fd0d5da00ba33e4c5a2faa9baca4c41de"
+  },
+  {
+    "path": "apps/desktop/lib/main.dart",
+    "sha256": "e4e5d46190fa75b2df70ff1678bc4c526c13aa70f98db2a8b3635c43a45bfcac"
+  },
+  {
+    "path": "apps/desktop/lib/organization.dart",
+    "sha256": "1f4cb60b499552f9c83464a8bf214b82ed57bf0adf7cf29d6946ae6390e2960d"
+  },
+  {
+    "path": "apps/desktop/lib/organization_management.dart",
+    "sha256": "9ea58b2c3dc9e644f0d5a98cb7bc0e3e92bc57c874861c2407cd44aef6740c9a"
+  },
+  {
+    "path": "apps/desktop/lib/organization_selectors.dart",
+    "sha256": "4458ae838b6a9ef0bc584a96e770d83abb9ee800cf1f0afa8de948b11843d03a"
+  },
+  {
+    "path": "apps/desktop/lib/organization_tasks.dart",
+    "sha256": "629f186c59c368517b6d9952118876625cb56cc48c46b4851dcd384212377943"
+  },
+  {
+    "path": "apps/desktop/lib/preview_main.dart",
+    "sha256": "8ea387c251c40080ddc65e2ae89483a88e56753f8dea3b0d1eb370bfa9355d33"
+  },
+  {
+    "path": "apps/desktop/lib/proposal_queue.dart",
+    "sha256": "0365e942d6625b14956a6632a3a1cc06f7b510e7c764ba3523bfad21c3366eec"
+  },
+  {
+    "path": "apps/desktop/lib/proposal_workspace.dart",
+    "sha256": "72d59e46d57372510346b03c8577c88b61382ce0266bb3501a204d0c3690a765"
+  },
+  {
+    "path": "apps/desktop/lib/prototype_dialog.dart",
+    "sha256": "7b8a49c82e6e8fe3f59c11f8773cf0be3a5b4c5433c445dde8a529fe19c4ec52"
+  },
+  {
+    "path": "apps/desktop/lib/prototype_icons.dart",
+    "sha256": "ab2c200ba3afa51933d7d2e11189037a4c1a3603fb66e445c48b536669f958ed"
+  },
+  {
+    "path": "apps/desktop/lib/prototype_ui.dart",
+    "sha256": "a600acb40d2d87732a9954b7c6c94cb133638e816d3eb71c6d8ceed4dc9b702b"
+  },
+  {
+    "path": "apps/desktop/lib/recycle.dart",
+    "sha256": "770c7ffe0b76637bb35cc84429e2dd6b3994e77b15a578c853036016e86a3f3d"
+  },
+  {
+    "path": "apps/desktop/lib/revisions.dart",
+    "sha256": "fd656e819697f2dec00b4868fcecd6c8fa53285f14ed45d2abb21db1aece93eb"
+  },
+  {
+    "path": "apps/desktop/lib/settings.dart",
+    "sha256": "d4accb4fdbbfac3ef660ac48755858019bd48c9c19354150907740eb68c12360"
+  },
+  {
+    "path": "apps/desktop/lib/settings_controls.dart",
+    "sha256": "3e86c0860f7a88eedf210f55a6851b83e8e9f35dfedfabf506e78e4df9628033"
+  },
+  {
+    "path": "apps/desktop/lib/ssh_host_settings.dart",
+    "sha256": "8287cd1a989974e7d2fa1e3f0636557b0af75c7bef7dac295cea44a376947385"
+  },
+  {
+    "path": "apps/desktop/lib/templates.dart",
+    "sha256": "6db0c956cd9108b805ad86b399a1e95d159a8a806f65235037626e13e94c5f7a"
+  },
+  {
+    "path": "apps/desktop/lib/tool_directory_access.dart",
+    "sha256": "6eba0370c02b2204f8c011379e8132ced31c5bd5557c19b08871891ee9c9dc3c"
+  },
+  {
+    "path": "apps/desktop/lib/tool_directory_settings.dart",
+    "sha256": "a93518531bc6f9e3cfd956c5188a5e9c6831bc981aa6b344bbfe3ed98a47bdcb"
+  },
+  {
+    "path": "apps/desktop/lib/ui.dart",
+    "sha256": "9d3676ed99dd37d2c0da7a15a07cd1497d3672989e6b11cc2fee4921b1a597eb"
+  },
+  {
+    "path": "apps/desktop/lib/ui_palette.dart",
+    "sha256": "a7273b4310ef625648e169fe63159397ef09b8ae866ec7102774683838bc4cef"
+  },
+  {
+    "path": "apps/desktop/lib/update_proposals.dart",
+    "sha256": "8eb2378e33182e7ee67a0a6044cd4302ba899b116d17e118b26d655cdcba7815"
+  },
+  {
+    "path": "apps/desktop/lib/window_frame.dart",
+    "sha256": "b665fe3c0e63641c074f2168560d2e7a96cefc3cb06be935a35202b00c1d50cc"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/agents_controller.dart",
+    "sha256": "95e3c23c3351723bcb7268b05dd7199a646d4e8edca6a40fab510a0b691d7980"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/agents_page.dart",
+    "sha256": "bd9aeeab780c81f4901efd135814b64531aa568cdcf329c94c993c1a44b75fff"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/approval_executions.dart",
+    "sha256": "8dec96b271933556520c90075174a84e7130aa200731fb74dc3621a41128e06e"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/approvals_controller.dart",
+    "sha256": "23f8fe0d6b204cc7aba5ca564bdcc23c20b020af0ae7c18edad11685418788b5"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/approvals_page.dart",
+    "sha256": "41eb0ef24f2d05201185fe4985307ad2b49bb6e9d41102fab65fbe4fd2db6161"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/backup_controller.dart",
+    "sha256": "65ef9ce9e56240fb2e4dfc6125423a738e2a4b6b13d48532eda0d5c03d3ba7d9"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/backup_page.dart",
+    "sha256": "a3d6881baa7b1f97842efb84baa36507a08e3cb4c4e7f601ea9e1582c6bc8756"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/classification_controller.dart",
+    "sha256": "b76ce53b9c50ff85b8e9c9fabae597934fbd784a300b2df052664d4be804c626"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/classification_page.dart",
+    "sha256": "b10bcd379522311931373b389839f768d5835214cf514a37cce33cd2d5d8e68b"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/credential_mutation.dart",
+    "sha256": "2e9332bfe778764786b8137c6b7d014ba80a84cb5293dc7aaf15c60ac54e80a0"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/grant_history_controller.dart",
+    "sha256": "f4fa975f6dd4e60644d5b7eda75fd8b22baa231122f06c28165dd144a0af2850"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/grant_history_dialog.dart",
+    "sha256": "69805370387e00b8f247d7ebfb3e60bf0a67b191eac5824e5e46a54210415ef1"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/grant_history_page.dart",
+    "sha256": "82363a14f9e93d5639d793fcbdd5313017d36818d3fcedf50c3f3468973ab63e"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/host_mutation.dart",
+    "sha256": "ece770965760cc30035f86253f06fe5d0421f97a96d5ee04fd314f63c667ae07"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/host_settings.dart",
+    "sha256": "86daa0b8db7d46341b8a41ee8f8a8e0015193a44e7de62e8eafee167ab93b59c"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/legacy_templates_controller.dart",
+    "sha256": "46e45d6659a05552983bb775d119b0a2f70095a2394f9e74da948b41160160d1"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/legacy_templates_panel.dart",
+    "sha256": "383e176d8e79621c980f32b8a63f0694cd41684cf46cd2c91acd51112a4f64e9"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/library_adoption_dialog.dart",
+    "sha256": "d10467b106d0fd0e4a2d834d3b424928d1b230ae3d0052f5c76cf9de6078a7e4"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/library_controller.dart",
+    "sha256": "3b808e2a7d2ada1924a9e323fadc92a2dfda25cf01c93c0e50ff54302db9c0a0"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/library_create_dialog.dart",
+    "sha256": "f0fa88d89ae3a6ab9a1c79b67db02d533a461deaf96fe66e1172f20a15b4e8c4"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/library_credential.dart",
+    "sha256": "463c5d3b1c5670a3c764bfd33d9480a313a4ed83ced844efc94f654b49207392"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/library_credential_choices.dart",
+    "sha256": "d5f18604ad6e5d111787de2b9d8bf68a4131809ef7a9c328d2b098b4434ca7bd"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/library_credential_editor.dart",
+    "sha256": "a9f42df17fdffc84d01f42fa7193547cc90671c3ad34f3bec358f0283d7ecdbd"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/library_credential_lifecycle.dart",
+    "sha256": "8798a506e2864864f600a94adf2092841a6a5c133d86749b9f9c60286d096087"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/library_credential_use.dart",
+    "sha256": "32250442079c214ee8360bbf80fab1a4838daecf7da6c0ea8caa1cc5bae8ac8b"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/library_detail.dart",
+    "sha256": "9c825aff6b5db6363398d8e49867a29f485e09fff771437d67a7f41bb1835c50"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/library_directory_dialog.dart",
+    "sha256": "45a4dc4d2b65c5f3a3e61319d35f6e1337a2a66b596292334793a8369dedfd32"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/library_document.dart",
+    "sha256": "232d97efd3d412c7d8c1c907a960787d0f2932ce4c19f5aeecf89bf44aa5f4dd"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/library_edit_conflict.dart",
+    "sha256": "09ce7a2b5cd092c38dd121da650677e21d9506f9a85abd3b599f8508b768a744"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/library_edit_dialog.dart",
+    "sha256": "539a29e970079fb2d6f04c41f3c0679f671f4f2917af47802bb2b67474be9ec5"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/library_entries.dart",
+    "sha256": "eea1bee7146c0a6ef4e544d515b7dc9d4c068993bd50083cd4a06dfe3e4b1b11"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/library_file.dart",
+    "sha256": "673708dd3dd23d90863098d37f9e45003a8afda2c9c5367ed9c5bf2f6c455cb8"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/library_file_dialogs.dart",
+    "sha256": "50a79b326559a86f29dd47b8bfad15dd5d0d3405da254a4ec7942959a0daf47b"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/library_history_dialog.dart",
+    "sha256": "02032f7321bc4d431ad64bbe377e7de6b684363885fc3a855dd1c62331302b0f"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/library_page.dart",
+    "sha256": "f14d95b37bf98aff98e2aa00a3298e89f625068a157c5244cefba4f127dcea27"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/library_recycle.dart",
+    "sha256": "ea088e222f95586ab18305ef18e12d6bcd472475c9bcc6ae5cd61c75e8f841f5"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/library_relation_picker.dart",
+    "sha256": "70515fce9a91e2c62e24ecbace52ca92539b0e9cb3627d1c600bc52b85a255e6"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/library_widgets.dart",
+    "sha256": "7f6845e0265f0a43d71bdf839726e3269addc28748896de4505f61b7df7a81ca"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/mac_preview_desktop.dart",
+    "sha256": "96ad7bb87841ad7a0c4b71c4d451d8baa3a69df1eb0b511bf3cd6a39b9ab393d"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/organization_reading.dart",
+    "sha256": "20234cfc95c136bb8dea47fa3e2e6a7ccab69eaa290ee854afaa84214f5af17e"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/plugin_authoring_guide.dart",
+    "sha256": "f221b5893c7bb0a0f824730a9e6c9da1688496b335683eb8eed8a5ccf6fe4501"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/plugin_dialogs.dart",
+    "sha256": "0570f850a386fbf76959abfc9f3f11f65e021774e7c28a37e628a85ca8f0d66a"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/plugin_mutation.dart",
+    "sha256": "14c1ea823bcfbb129780a9f684cbe418766546484668eacc78dc90c05937b06b"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/plugin_widgets.dart",
+    "sha256": "7ee9c4730275dcfd9bab78d8d4e6c0f2bd8614007b5938f4f75143c617b5224e"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/plugins_controller.dart",
+    "sha256": "9da13bacac68eb69aa8c3a76885833d5f42f294f4e65b5b9099cf62791470b01"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/plugins_page.dart",
+    "sha256": "b7d913129b47362189b1a7fd176851f90c485fb0bd6feac27b30285635d08595"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/preview_workspace.dart",
+    "sha256": "2bd95fb624df9a8c5e4d22d4275d8c5e9cb4a7a6de2c074906f95bdb3a975cd0"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/proposal_batch.dart",
+    "sha256": "d18d579e9f2c12372f64a25e2901edef4afd97a760b78c4327393518bd676a24"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/proposal_batch_dialog.dart",
+    "sha256": "96577b5ec55842e09145001eaa70fded6c2d10108d1cdfe6b406f72215359741"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/proposal_editor.dart",
+    "sha256": "3a4f79d499d6294d7b13eae1aeeed0513ec5f56d2aa578a47751c9730dec5807"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/proposal_read_dialog.dart",
+    "sha256": "24f1f41e1319c99128c3e20c3bd034c86a279e98e038240f8289bba3160ae803"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/proposal_reading.dart",
+    "sha256": "9cb95759e8e202c60a63c6298faa0b6e0d0fe73008de00ad6ac4a202440b400f"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/proposals_controller.dart",
+    "sha256": "9e38a40a28ac38604f7f1396eeca130e00fdd3631877ceb7741d27dcf7cd0542"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/proposals_page.dart",
+    "sha256": "98f768e82ce44768c268205635cebd2139b808808a20c02ba474f041053c8a8e"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/record_mutation.dart",
+    "sha256": "874fe8f2271eb086c3582ce193c333ac56300ef31bebea3d160e0110e3a17092"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/runtime_controller.dart",
+    "sha256": "656c1d3246e639cd6506926f392d415b13a942dea521d63d43819676e92336b4"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/runtime_page.dart",
+    "sha256": "7cfe83d5fa9bd8fad52b66058a85fe7a7628be0e672a8ff0557a48d985db5a05"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/sample_credential_links.dart",
+    "sha256": "b8b4849ae420e32c5a6196b3e06f8e3082de7e56e629837b4cad865eaac1234d"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/sample_credential_records.dart",
+    "sha256": "ffd4441a99e70dbf89e05426688921d42ae2a9b669b0ffe97ee7371c8a6c35ae"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/sample_plugin_fixture.dart",
+    "sha256": "124b1f666e50c75fa1e7c86b5eda2f2ca7580a3d52b8c3f33bc3418a1699310c"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/sample_workspace_adoption.dart",
+    "sha256": "dfd3a58a263c59a5f3e3a2ad9b50efb01f9f94faa8f2e611a827e677cf1f86a4"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/sample_workspace_agents.dart",
+    "sha256": "967ba78bd9c0e37ea62ac3d8d89f20a2fe7a1187f5ab0b9a714b81379fbd4cd5"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/sample_workspace_approvals.dart",
+    "sha256": "97ee0b946fa0646fd911c5128c5a3b74fff799520291185a8277be0c74b83b0a"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/sample_workspace_backup.dart",
+    "sha256": "894021ce140b08da53b300414c7d7d619953984b322d6b13e6236697adee197f"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/sample_workspace_classification.dart",
+    "sha256": "f2da929aacd6ee3eb2dd69577274e90b0980b824fd8e2f77e2b5c5bb2fd92e5c"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/sample_workspace_content_fixture.dart",
+    "sha256": "4c89ccb8c1a7bd3fe6b3b09aac1df0a9cc6058e4a15bdfbd206f9a900467e4a1"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/sample_workspace_credentials.dart",
+    "sha256": "22069f74f8c6af6669fb192665fd4b07c29ceb9ebbb1cd76a9ec13eaa9eb4b8c"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/sample_workspace_entries.dart",
+    "sha256": "560682a7507a1918acb62471631fd2f0c73bf4bf8446bff0696a36e67903e393"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/sample_workspace_field_ids.dart",
+    "sha256": "f90bb9e96415b8490eea6adece61507c354b0bdb2037e5db2b5376cea255d316"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/sample_workspace_files.dart",
+    "sha256": "8391ac1ef22d5f26ef692258243758cacc1c3ef25a97fcea6a1283f8b61c1c98"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/sample_workspace_fixture.dart",
+    "sha256": "12b1946583553866c1ecc6cea2e6f557f59250b149133a0658c834a6a7663972"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/sample_workspace_grant_history.dart",
+    "sha256": "2f46c348c2702222021acb354cf733a4b1694103ddf623de2d62060707ac1966"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/sample_workspace_history.dart",
+    "sha256": "4939155f114bddd410b22dea0bc864dc0aff439d92b8598fefece5dd5fb61391"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/sample_workspace_hosts.dart",
+    "sha256": "8270bb70d2c20f975eb89e884917f12aebdf526f40fed9c96c29d2a58a9c90a3"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/sample_workspace_legacy.dart",
+    "sha256": "52fb9a12a9210cba836b8b3313236d2b6af1da84a8e4566a0f6d7353e8dc159b"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/sample_workspace_organization.dart",
+    "sha256": "dbbdcea64be05601b792fc459d66af466cbaff52a84e31cf962dac31affec309"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/sample_workspace_partial_recycle.dart",
+    "sha256": "53d13f6f1440efad45125775a38990c727107e8ab8cca6e7460b126b4f0e08b4"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/sample_workspace_plugins.dart",
+    "sha256": "c095acd229bcf98c8e15e9b308ed39c813c216aa34ad9416ed2477ca35f11652"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/sample_workspace_proposal_fields.dart",
+    "sha256": "40407b96b061d255fcc96599ee092198b466a6bb8c114da67241b360596a012c"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/sample_workspace_proposals.dart",
+    "sha256": "44ff6b44673b2000e8df755a7c2db0b1c171b219ff9ffd14bc9835725dbcb2a3"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/sample_workspace_retention.dart",
+    "sha256": "e4fc6a9b67625b1b9ee46dfb920a51d74e5730e7cf6ac3c4c708b280ba721f41"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/sample_workspace_runtime.dart",
+    "sha256": "02d6ea5c00a3070dc1fe8b110d1392dc339b56b09759b92faadc3ef0a3211608"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/sample_workspace_settings.dart",
+    "sha256": "2af4ff0e239dce6717df7c1f324296f412733312e9739a9428ff831e6da0ae3a"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/sample_workspace_source.dart",
+    "sha256": "439880bdf9d19a7fa1e5c767485ee0bf8eac3b000bbdd1996a45bfa5e8299d16"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/sample_workspace_stress_fixture.dart",
+    "sha256": "5063bc82af61c3880bc74c5765cdc2aef7d1e37b79798b0c1d46896ec7ad18d0"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/settings_controller.dart",
+    "sha256": "333966c53502d24789f08cb74cf61739b8924ebbe63ad748a97e0275e141884a"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/settings_page.dart",
+    "sha256": "1455380749032cac4b1748a6f352b6a5dbf8f26438fd595cac9aa7e2dc859737"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/template_package_decoder.dart",
+    "sha256": "bfe96072fd7b02352720a07bf335a6490b159951b3b9e2ca5849571d15caf27e"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/workspace_adoption.dart",
+    "sha256": "d29df8e5b83416a76f1da6c1007242fdf110df35f3393e3acd3d6647903c78b7"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/workspace_agents.dart",
+    "sha256": "a3adb2fd1e3f281d2518348ede9d31ce4cef037327c9072e260de257550d2449"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/workspace_approval_execution.dart",
+    "sha256": "a607dc64b242496b6b25abd435797bae850fccd11d1ceed87f4748c3f5023292"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/workspace_approvals.dart",
+    "sha256": "1279c528d6abe21b4d49b34a9b097d9a736320f1a9ac56f2f10c419bc90c39dd"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/workspace_backups.dart",
+    "sha256": "c8bd2fe0e9b315edf45eceb1e5e7bb0be23df916b7c246a48eeb3fe61945a8f5"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/workspace_controller.dart",
+    "sha256": "b646d7568210d4e3dff6c43a6a1a804adaad6d91b44c30ff6e300d441596789f"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/workspace_credentials.dart",
+    "sha256": "3b152c59f437d4b4d43f1e7aed5f437d655584db9769970b7c8adf1af3a8af0e"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/workspace_entries.dart",
+    "sha256": "49a9a20dbf0e883b2bf69a9601698152fa5cb67719d0d9c8a5426037d91e2281"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/workspace_files.dart",
+    "sha256": "f0b9a72bb4572006f8352ba2eb5339b0688b1eb309df2e7bfe80d03affd67254"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/workspace_grant_history.dart",
+    "sha256": "7040c0689bd43f311f03ee2e919bb7de3ab0439bcfc7a4b2b960f0c7fa41ec65"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/workspace_history.dart",
+    "sha256": "c3fc28daedb19208cb4b7b48558168c34b87dd034c171b6d52397bc897da3025"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/workspace_hosts.dart",
+    "sha256": "13d752cf7566aadb9987d20e52782e7e35b184eccc1f0aa1e894efdb98f26234"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/workspace_legacy_templates.dart",
+    "sha256": "51d29d69bd98f92bfc54666ee119459a2e7295cde235f816239ede34472009e2"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/workspace_operation.dart",
+    "sha256": "904a001558635751c6e836a36fa34926415aadc54353f98102943a7fa3d54b9b"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/workspace_order.dart",
+    "sha256": "0c26fc6febe05b34e13b24302fc96ac0e6a27fe237c66099ff44136a7414d67f"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/workspace_organization.dart",
+    "sha256": "ac2e5a71fc7f933a764e360f2fc4b59f82a439464d90e7d870df69d9db5fb97b"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/workspace_plugins.dart",
+    "sha256": "a0f97eac92384a7c06ac5622f58c398c293f2480a5514f768180c8032ba7b2af"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/workspace_proposals.dart",
+    "sha256": "4032e9ee67aeaaaa8ed7bd2c99141d16a653647006c4a3b9476efd656b0b1723"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/workspace_records.dart",
+    "sha256": "dda5c01b5843301b9e53fe1459261204de379d7553cb014d953f420ede7d0cd1"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/workspace_records_controller.dart",
+    "sha256": "7c0bb641001af8b30a182029ce4edfafe224d9efcd5a0532e68a5d7c324f26ef"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/workspace_runtime.dart",
+    "sha256": "f9c4b63e40b693e9ab4e2964647635a4d5a2cf012e22e84f75d663fd3f4cc482"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/workspace_settings.dart",
+    "sha256": "4bdb5a2e2a7580d3a6741a4e8d4169e279dac1cd3cca51f4d2d9a25deea4f8f6"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/workspace_source.dart",
+    "sha256": "db811aa873969ba763b08a9301d03b41763fee96934b528d39aa79f7a97a2b5c"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/zhiyu_app.dart",
+    "sha256": "2808df1e74a347c030fb89fdc73da4bf6d3fa980179ef28ed58923513f23ec6b"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/zhiyu_shell.dart",
+    "sha256": "e44b900c00831714f8278ffc22cd440c8022c84408c79ff03f2814cfadd14bca"
+  },
+  {
+    "path": "apps/desktop/lib/workspace/zhiyu_theme.dart",
+    "sha256": "e32689eac58805b9603b7f79f65ee1d9302d6f398e598332462bd9401399496c"
+  },
+  {
+    "path": "apps/desktop/test/desktop_select_round09_test.dart",
+    "sha256": "975075bb2c8d5e38c45c697ee51ff70fdb02bd820e97a44b1fa4637d63370cb3"
+  },
+  {
+    "path": "apps/desktop/test/zhiyu_settings_test.dart",
+    "sha256": "1c69d59d6883e306f2cb5c86fb526e32026df57ad90db6ed27e044a0caa2145b"
+  },
+  {
+    "path": "docs/design/prototypes/round-09-zhiyu/.gitattributes",
+    "sha256": "be8fff64e0ee0af7a63993677ad78f51872c1457e8ec6f92bc6dc9d8ccf6fb34"
+  },
+  {
+    "path": "docs/design/prototypes/round-09-zhiyu/README.md",
+    "sha256": "83cb39534e169a7466ac41e552fce7f43b02b4317cbc41c7673bed8f9c1eda78"
+  },
+  {
+    "path": "docs/design/prototypes/round-09-zhiyu/app.js",
+    "sha256": "33cf6e5087237d776f05927996c6d514db404dd7955b3e118974774ba341a8b8"
+  },
+  {
+    "path": "docs/design/prototypes/round-09-zhiyu/base.css",
+    "sha256": "8b88bab1dc47654393fff0ee43198b7fc31486c85f054f75adbb32c48522255d"
+  },
+  {
+    "path": "docs/design/prototypes/round-09-zhiyu/design-notes.md",
+    "sha256": "6ebeaa6840d1bbddfe0a031f53892cee8e05947ca9377a6d628d727ad1565897"
+  },
+  {
+    "path": "docs/design/prototypes/round-09-zhiyu/domain-plugin.json",
+    "sha256": "f3d3532eef70ea5d748d25fcae1029abd3298eb52fcb3a737095448644947be4"
+  },
+  {
+    "path": "docs/design/prototypes/round-09-zhiyu/fixtures.js",
+    "sha256": "4d60ad4e87102fd462aca84d27719dc7989828429d650962a4898ba81e97d131"
+  },
+  {
+    "path": "docs/design/prototypes/round-09-zhiyu/guide.html",
+    "sha256": "211d1d44ee4026e7bc709183e0c9ca2a318683d5d68503eea5620534c852f788"
+  },
+  {
+    "path": "docs/design/prototypes/round-09-zhiyu/index.html",
+    "sha256": "f93205742c87b58c40e0fad10801fa21270fd7e000fc36916dc8d52cd24afa7b"
+  },
+  {
+    "path": "docs/design/prototypes/round-09-zhiyu/model.js",
+    "sha256": "9259f18a86a8d04718b9a2fdde7118f7d0ca725ec64b9bd9ea5e3220571f0544"
+  },
+  {
+    "path": "docs/design/prototypes/round-09-zhiyu/offline.html",
+    "sha256": "05a65aa7cbff7faf1357533bd4750c6261bceb4a9838dea2fa801087c9764578"
+  },
+  {
+    "path": "docs/design/prototypes/round-09-zhiyu/plugin-spec.md",
+    "sha256": "2419309aa8aa6eb8f07ff86a6efbea9d837b88bd8b0cb9a49ac71ef33d5dbca2"
+  },
+  {
+    "path": "docs/design/prototypes/round-09-zhiyu/reference-manifest.json",
+    "sha256": "cd1424b7815cccbaca08274aaec49ded8def20863e506082fd3d153eaddd256c"
+  },
+  {
+    "path": "docs/design/prototypes/round-09-zhiyu/seed.js",
+    "sha256": "a17338d547ea400cb3b382262210bf370c6973ddc2835883b10423b43c0a6c6d"
+  },
+  {
+    "path": "docs/design/prototypes/round-09-zhiyu/style.css",
+    "sha256": "518459f2a96c7fcdc963ab9c193c49965e21dacf7da16f0e91dc1605fea4461d"
+  },
+  {
+    "path": "docs/design/prototypes/round-09-zhiyu/theme.css",
+    "sha256": "5e480a0e703f33c675d9edee49acd2a31fe949026c5efc57b64af007a86fd407"
+  },
+  {
+    "path": "docs/design/prototypes/round-09-zhiyu/util.js",
+    "sha256": "c53e83500f1b6f3c70fce1534d2e33bb5cf257c63402f23a957ed103ac2d5ed8"
+  },
+  {
+    "path": "docs/design/prototypes/round-09-zhiyu/workspace.css",
+    "sha256": "beafe11207a513575caedc72233848c962a107b985c1dfd9618a78733f4ff9b9"
+  }
+]

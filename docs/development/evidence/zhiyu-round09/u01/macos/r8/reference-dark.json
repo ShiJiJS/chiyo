@@ -1,0 +1,48 @@
+{
+  "viewport": [
+    1440,
+    900,
+    1
+  ],
+  "fontsLoaded": "loaded",
+  "menu": {
+    "x": 1095.5,
+    "y": 300.3125,
+    "width": 230,
+    "height": 212.46875,
+    "fontFamily": "\"Zhiyu System\", \"PingFang SC\", sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "400",
+    "lineHeight": "22.4px",
+    "padding": "5px",
+    "borderRadius": "8px",
+    "animation": "0.12s ease-out menu-in"
+  },
+  "trigger": {
+    "x": 1223.640625,
+    "y": 255.9140625,
+    "width": 101.859375,
+    "height": 38.3984375,
+    "fontFamily": "\"Zhiyu System\", \"PingFang SC\", sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "500",
+    "lineHeight": "22.4px",
+    "padding": "7px 12px",
+    "borderRadius": "7px",
+    "animation": "none"
+  },
+  "item": {
+    "x": 1101.5,
+    "y": 306.3125,
+    "width": 207,
+    "height": 40.09375,
+    "fontFamily": "\"Zhiyu System\", \"PingFang SC\", sans-serif",
+    "fontSize": "13px",
+    "fontWeight": "400",
+    "lineHeight": "22.1px",
+    "padding": "9px 10px",
+    "borderRadius": "5px",
+    "animation": "none"
+  },
+  "theme": "dark"
+}

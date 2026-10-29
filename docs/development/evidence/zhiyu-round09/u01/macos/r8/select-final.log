@@ -1,0 +1,114 @@
+00:00 +0: loading /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_select_round09_test.dart
+00:00 +0: (setUpAll)
+00:00 +0: Round09 ordinary selector uses the shared focus and anchored menu dark=false large=false
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: a numeric value within <0.1> of <38.4>
+  Actual: <37.0>
+   Which:  differs by <1.3999999999999986>
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_select_round09_test.dart:95:13)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_select_round09_test.dart line 95
+The test description was:
+  Round09 ordinary selector uses the shared focus and anchored menu dark=false large=false
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:00 +0 -1: Round09 ordinary selector uses the shared focus and anchored menu dark=false large=false [E]
+  Test failed. See exception logs above.
+  The test description was: Round09 ordinary selector uses the shared focus and anchored menu dark=false large=false
+  
+00:00 +0 -1: Round09 ordinary selector uses the shared focus and anchored menu dark=false large=true
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: a numeric value within <0.1> of <60.8>
+  Actual: <59.0>
+   Which:  differs by <1.7999999999999972>
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_select_round09_test.dart:95:13)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_select_round09_test.dart line 95
+The test description was:
+  Round09 ordinary selector uses the shared focus and anchored menu dark=false large=true
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:00 +0 -2: Round09 ordinary selector uses the shared focus and anchored menu dark=false large=true [E]
+  Test failed. See exception logs above.
+  The test description was: Round09 ordinary selector uses the shared focus and anchored menu dark=false large=true
+  
+00:00 +0 -2: Round09 ordinary selector uses the shared focus and anchored menu dark=true large=false
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: a numeric value within <0.1> of <38.4>
+  Actual: <37.0>
+   Which:  differs by <1.3999999999999986>
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_select_round09_test.dart:95:13)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_select_round09_test.dart line 95
+The test description was:
+  Round09 ordinary selector uses the shared focus and anchored menu dark=true large=false
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:00 +0 -3: Round09 ordinary selector uses the shared focus and anchored menu dark=true large=false [E]
+  Test failed. See exception logs above.
+  The test description was: Round09 ordinary selector uses the shared focus and anchored menu dark=true large=false
+  
+00:00 +0 -3: Round09 ordinary selector uses the shared focus and anchored menu dark=true large=true
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: a numeric value within <0.1> of <60.8>
+  Actual: <59.0>
+   Which:  differs by <1.7999999999999972>
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_select_round09_test.dart:95:13)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_select_round09_test.dart line 95
+The test description was:
+  Round09 ordinary selector uses the shared focus and anchored menu dark=true large=true
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:00 +0 -4: Round09 ordinary selector uses the shared focus and anchored menu dark=true large=true [E]
+  Test failed. See exception logs above.
+  The test description was: Round09 ordinary selector uses the shared focus and anchored menu dark=true large=true
+  
+00:00 +0 -4: (tearDownAll)
+00:00 +0 -4: Some tests failed.
+
+Failing tests:
+  /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_select_round09_test.dart: Round09 ordinary selector uses the shared focus and anchored menu dark=false large=false
+  /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_select_round09_test.dart: Round09 ordinary selector uses the shared focus and anchored menu dark=false large=true
+  /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_select_round09_test.dart: Round09 ordinary selector uses the shared focus and anchored menu dark=true large=false
+  /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_select_round09_test.dart: Round09 ordinary selector uses the shared focus and anchored menu dark=true large=true

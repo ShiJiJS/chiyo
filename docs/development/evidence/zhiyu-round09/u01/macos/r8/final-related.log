@@ -1,0 +1,223 @@
+00:00 +0: loading /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_select_round09_test.dart
+00:00 +0: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/library_ux_controls_test.dart: dialog close glyph stays whole at 1.0 text (settings=true)
+00:00 +1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_controls_test.dart: desktop menu supports keyboard selection and escape
+00:00 +2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_controls_test.dart: desktop menu supports keyboard selection and escape
+00:00 +3: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_controls_test.dart: desktop menu supports keyboard selection and escape
+00:00 +4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_controls_test.dart: desktop menu supports keyboard selection and escape
+00:00 +5: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_controls_test.dart: desktop menu supports keyboard selection and escape
+00:00 +6: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_controls_test.dart: desktop menu supports keyboard selection and escape
+00:00 +7: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_select_round09_test.dart: Round09 ordinary selector uses the shared focus and anchored menu dark=false large=false
+00:00 +8: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_select_round09_test.dart: Round09 ordinary selector uses the shared focus and anchored menu dark=false large=false
+00:01 +9: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_select_round09_test.dart: Round09 ordinary selector uses the shared focus and anchored menu dark=false large=false
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: a numeric value within <0.1> of <38.4>
+  Actual: <37.0>
+   Which:  differs by <1.3999999999999986>
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_select_round09_test.dart:95:13)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_select_round09_test.dart line 95
+The test description was:
+  Round09 ordinary selector uses the shared focus and anchored menu dark=false large=false
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:01 +9 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/library_ux_controls_test.dart: long menu searches, reports no match, and commits with Enter
+00:01 +9 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_select_round09_test.dart: Round09 ordinary selector uses the shared focus and anchored menu dark=false large=false [E]
+  Test failed. See exception logs above.
+  The test description was: Round09 ordinary selector uses the shared focus and anchored menu dark=false large=false
+  
+00:01 +10 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/library_ux_controls_test.dart: long menu searches, reports no match, and commits with Enter
+00:01 +10 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_select_round09_test.dart: Round09 ordinary selector uses the shared focus and anchored menu dark=false large=true
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: a numeric value within <0.1> of <60.8>
+  Actual: <59.0>
+   Which:  differs by <1.7999999999999972>
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_select_round09_test.dart:95:13)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_select_round09_test.dart line 95
+The test description was:
+  Round09 ordinary selector uses the shared focus and anchored menu dark=false large=true
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:01 +10 -2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/library_ux_controls_test.dart: long menu searches, reports no match, and commits with Enter
+00:01 +10 -2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_select_round09_test.dart: Round09 ordinary selector uses the shared focus and anchored menu dark=false large=true [E]
+  Test failed. See exception logs above.
+  The test description was: Round09 ordinary selector uses the shared focus and anchored menu dark=false large=true
+  
+00:01 +11 -2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/library_ux_controls_test.dart: long menu searches, reports no match, and commits with Enter
+00:01 +11 -2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_select_round09_test.dart: Round09 ordinary selector uses the shared focus and anchored menu dark=true large=false
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: a numeric value within <0.1> of <38.4>
+  Actual: <37.0>
+   Which:  differs by <1.3999999999999986>
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_select_round09_test.dart:95:13)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_select_round09_test.dart line 95
+The test description was:
+  Round09 ordinary selector uses the shared focus and anchored menu dark=true large=false
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:01 +11 -3: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/library_ux_controls_test.dart: long menu searches, reports no match, and commits with Enter
+00:01 +11 -3: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_select_round09_test.dart: Round09 ordinary selector uses the shared focus and anchored menu dark=true large=false [E]
+  Test failed. See exception logs above.
+  The test description was: Round09 ordinary selector uses the shared focus and anchored menu dark=true large=false
+  
+00:01 +12 -3: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/library_ux_controls_test.dart: long menu searches, reports no match, and commits with Enter
+00:01 +12 -3: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_select_round09_test.dart: Round09 ordinary selector uses the shared focus and anchored menu dark=true large=true
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: a numeric value within <0.1> of <60.8>
+  Actual: <59.0>
+   Which:  differs by <1.7999999999999972>
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_select_round09_test.dart:95:13)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_select_round09_test.dart line 95
+The test description was:
+  Round09 ordinary selector uses the shared focus and anchored menu dark=true large=true
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:01 +12 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/library_ux_controls_test.dart: long menu searches, reports no match, and commits with Enter
+00:01 +12 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_select_round09_test.dart: Round09 ordinary selector uses the shared focus and anchored menu dark=true large=true [E]
+  Test failed. See exception logs above.
+  The test description was: Round09 ordinary selector uses the shared focus and anchored menu dark=true large=true
+  
+00:01 +12 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/library_ux_controls_test.dart: long menu searches, reports no match, and commits with Enter
+00:01 +13 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/library_ux_controls_test.dart: long menu searches, reports no match, and commits with Enter
+00:01 +14 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_motion_contract_test.dart: feedback measures 6px/180ms, replacement cancels the old timer
+00:01 +15 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/library_ux_controls_test.dart: long menu keyboard reaches offscreen options and skips disabled ones
+00:02 +16 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/library_ux_controls_test.dart: resizing and clicking outside dismiss without changing a value
+00:02 +17 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/library_ux_controls_test.dart: menu stays wholly below its trigger and commits once
+00:02 +18 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/library_ux_controls_test.dart: menu stays wholly above its trigger and commits once
+00:02 +19 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/library_ux_controls_test.dart: scrollbar reserves a separate lane, drag never clicks content (false)
+00:02 +20 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_button_focus_test.dart: dark outline keyboard focus preserves the border and follows the external CSS outline
+00:02 +21 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_button_focus_test.dart: dark outline keyboard focus preserves the border and follows the external CSS outline
+00:02 +22 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_button_focus_test.dart: dark outline keyboard focus preserves the border and follows the external CSS outline
+00:02 +23 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_button_focus_test.dart: dark outline keyboard focus preserves the border and follows the external CSS outline
+00:03 +24 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile entry add/move/remove and failed save retain draft at 1440.0 dark=false
+00:03 +25 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile entry add/move/remove and failed save retain draft at 1440.0 dark=false
+00:03 +26 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile entry add/move/remove and failed save retain draft at 1440.0 dark=false
+00:03 +27 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile entry add/move/remove and failed save retain draft at 1440.0 dark=false
+00:03 +28 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile entry add/move/remove and failed save retain draft at 1440.0 dark=false
+00:03 +29 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile entry add/move/remove and failed save retain draft at 1440.0 dark=false
+00:03 +30 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile entry add/move/remove and failed save retain draft at 1440.0 dark=false
+00:03 +31 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile entry add/move/remove and failed save retain draft at 1440.0 dark=false
+00:03 +32 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile entry add/move/remove and failed save retain draft at 1440.0 dark=false
+00:04 +33 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile entry add/move/remove and failed save retain draft at 1440.0 dark=false
+00:04 +34 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile entry add/move/remove and failed save retain draft at 1440.0 dark=false
+00:06 +35 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile entry add/move/remove and failed save retain draft at 1440.0 dark=false
+00:06 +36 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile entry add/move/remove and failed save retain draft at 1440.0 dark=false
+00:07 +37 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile entry add/move/remove and failed save retain draft at 1440.0 dark=false
+00:07 +38 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile entry add/move/remove and failed save retain draft at 1440.0 dark=false
+00:08 +39 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: server identity deep link selects the exact host and shares readback with settings and library
+00:08 +40 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: server identity deep link selects the exact host and shares readback with settings and library
+00:08 +41 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: server identity deep link selects the exact host and shares readback with settings and library
+00:08 +42 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: server identity deep link selects the exact host and shares readback with settings and library
+00:08 +43 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile entry add/move/remove and failed save retain draft at 1440.0 dark=true
+00:09 +44 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile entry add/move/remove and failed save retain draft at 1440.0 dark=true
+00:09 +45 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile entry add/move/remove and failed save retain draft at 1440.0 dark=true
+00:10 +46 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile entry add/move/remove and failed save retain draft at 1440.0 dark=true
+00:10 +47 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile entry add/move/remove and failed save retain draft at 1440.0 dark=true
+00:10 +48 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile entry add/move/remove and failed save retain draft at 1440.0 dark=true
+00:10 +49 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile entry add/move/remove and failed save retain draft at 1440.0 dark=true
+00:11 +50 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: dark200 host changes warn, missing fingerprints block confirmation and disabled plugin retains revocation
+00:12 +51 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: dark200 host changes warn, missing fingerprints block confirmation and disabled plugin retains revocation
+00:12 +52 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_approvals_test.dart: inbox paginates/searches, reviews partial field selection, records a decision and revokes that exact result
+00:12 +53 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_approvals_test.dart: inbox paginates/searches, reviews partial field selection, records a decision and revokes that exact result
+00:14 +54 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_approvals_test.dart: inbox paginates/searches, reviews partial field selection, records a decision and revokes that exact result
+00:14 +55 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_approvals_test.dart: inbox paginates/searches, reviews partial field selection, records a decision and revokes that exact result
+00:14 +56 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_approvals_test.dart: inbox paginates/searches, reviews partial field selection, records a decision and revokes that exact result
+00:15 +57 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_approvals_test.dart: inbox paginates/searches, reviews partial field selection, records a decision and revokes that exact result
+00:15 +58 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile entry add/move/remove and failed save retain draft at 1280.0 dark=true
+00:16 +59 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile entry add/move/remove and failed save retain draft at 1280.0 dark=true
+00:16 +60 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile entry add/move/remove and failed save retain draft at 1280.0 dark=true
+00:17 +61 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_approvals_test.dart: credential detail and submitted request reach the same approval identity and read back its decision
+00:19 +62 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_approvals_test.dart: credential detail and submitted request reach the same approval identity and read back its decision
+00:19 +63 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: settings install, shared external form, update, removal, generic editing and reinstall preserve the original snapshot
+00:20 +64 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: settings install, shared external form, update, removal, generic editing and reinstall preserve the original snapshot
+00:21 +65 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: settings install, shared external form, update, removal, generic editing and reinstall preserve the original snapshot
+00:21 +66 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: actual import editing, item reduction and confirmation update shared library and return to the exact processed proposal
+00:21 +67 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: keyboard removal continues in a surviving profile entry dark=true fromEnd=false
+00:22 +68 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_approvals_test.dart: env and focus plans have contextual tips; focus approval remains disabled and rejection is real
+00:22 +69 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: invalid package path, failed install and explicit retry retain the review instead of installing early
+00:22 +70 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: actual modification editor previews its correction and preserves unrelated field identities and relations
+00:23 +71 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: keyboard removal continues in a surviving profile entry dark=true fromEnd=true
+00:23 +72 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: keyboard removal continues in a surviving profile entry dark=true fromEnd=true
+00:24 +73 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: dark200 committed install and uncommitted disable reconcile before any new submission
+00:24 +74 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: dark200 committed install and uncommitted disable reconcile before any new submission
+00:24 +75 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: guide-injected lost reply freezes navigation until matching original receipt; terminal view retains no submitted bodies
+00:24 +76 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: record name errors do not mark the separate personal name field
+00:25 +77 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_approvals_test.dart: unknown execution read keeps the exact operation on query failure, and cleanup readback does not claim success
+00:25 +78 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_approvals_test.dart: unknown execution read keeps the exact operation on query failure, and cleanup readback does not claim success
+00:25 +79 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_approvals_test.dart: unknown execution read keeps the exact operation on query failure, and cleanup readback does not claim success
+00:26 +80 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_approvals_test.dart: unknown execution read keeps the exact operation on query failure, and cleanup readback does not claim success
+00:26 +81 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: conflict is reproduced from the actual guide, current comparison never writes, edited review is preserved and rejection leaves current values
+00:26 +82 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: cancelling an entry removal discards the draft only
+00:27 +83 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: cancelling an entry removal discards the draft only
+00:27 +84 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_approvals_test.dart: dark200 use result and structured operation plan wrap without hiding the unknown warning
+00:28 +85 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: dark200 uses real filtering, editing failure and retry without clipping or losing review
+00:29 +86 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile create is available from common add entry and supports an empty collection
+00:29 +87 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_approvals_test.dart: guide expiry and session end retain the selected request, invalidate active scopes and reset to baseline
+00:29 +88 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: field validation points to the exact proposal input and editing it clears the error without discarding review
+00:29 +89 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_approvals_test.dart: approval controls preserve a failed decision and distinguish empty, waiting and failed reads with real recovery actions
+00:31 +90 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: actual proposal guide reaches empty, failure, waiting and recovery states
+00:31 +91 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: actual proposal guide reaches empty, failure, waiting and recovery states
+00:31 +92 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: relation picker edits a disabled-template proposal using its submitted rules and confirms after explicit reread
+00:33 +93 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: purging a pending target clears both the visible old diff and an already open current comparison
+00:33 +94 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: actual deletion guide reviews the full retained scope, moves the same object to recycle and opens only its exact pre-delete snapshot
+00:34 +95 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: whole deletion conflict compares the new version without changing the requested target or deleting it
+00:35 +96 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: field intent guide reviews explicit new meaning and edits only listed values, then reads replacement and added fields in the shared library
+00:36 +97 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: entry review edits a single leaf and renders independent new and retained identities in the same profile timeline
+00:38 +98 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: a field-only delete is distinct from whole deletion and restores through the existing recycle UI without restoring the former identity
+00:39 +99 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: actual mixed batch confirms addition, modification and whole deletion independently
+00:40 +100 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: actual middle-unknown batch stops the tail, blocks Escape and close, then explicitly continues and returns from results to its query
+00:42 +101 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: dark200 batch keeps definite failure and rejection separate and explicitly retries only the failed proposal
+00:43 +102 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: automatic organization result is read only and links the same original grant and operation, returning to its query
+00:44 +103 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: legacy organization stays pending until explicit confirmation and recovers its original unknown receipt in dark200
+00:45 +104 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: automatic organization unknown reload is read only and a later original observation enables no second approval
+00:46 +105 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: organization conflict result preserves metadata, has no second approval and handles a deleted target
+00:47 +106 -4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart: (tearDownAll)
+00:47 +106 -4: Some tests failed.
+
+Failing tests:
+  /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_select_round09_test.dart: Round09 ordinary selector uses the shared focus and anchored menu dark=false large=false
+  /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_select_round09_test.dart: Round09 ordinary selector uses the shared focus and anchored menu dark=false large=true
+  /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_select_round09_test.dart: Round09 ordinary selector uses the shared focus and anchored menu dark=true large=false
+  /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/desktop_select_round09_test.dart: Round09 ordinary selector uses the shared focus and anchored menu dark=true large=true
