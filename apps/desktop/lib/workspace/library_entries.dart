@@ -141,6 +141,31 @@ class LibraryEntriesEditor extends StatefulWidget {
 
 class _LibraryEntriesEditorState extends State<LibraryEntriesEditor> {
   String? _newId;
+  // A new request for the same surviving row must focus it again; ordinary
+  // draft rebuilds must leave the caret and IME composition alone.
+  String? _focusId;
+  int _focusRevision = 0;
+  final _addFocus = FocusNode();
+  @override
+  void dispose() {
+    _addFocus.dispose();
+    super.dispose();
+  }
+
+  void _remove(int index) {
+    final next = List.of(widget.entries)..removeAt(index);
+    setState(() {
+      _focusId = next.isEmpty ? null : next[index.clamp(0, next.length - 1)].id;
+      _focusRevision++;
+    });
+    widget.onChanged(next);
+    if (next.isEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && widget.enabled) _addFocus.requestFocus();
+      });
+    }
+  }
+
   void _move(int from, int to) {
     final next = List.of(widget.entries);
     next.insert(to, next.removeAt(from));
@@ -176,6 +201,7 @@ class _LibraryEntriesEditorState extends State<LibraryEntriesEditor> {
             enabled: widget.enabled,
             errors: widget.errors,
             focusOnMount: entry.id == _newId,
+            focusRevision: entry.id == _focusId ? _focusRevision : 0,
             onChanged: (value) {
               final next = List.of(widget.entries);
               next[index] = value;
@@ -185,13 +211,13 @@ class _LibraryEntriesEditorState extends State<LibraryEntriesEditor> {
             onDown: index + 1 < widget.entries.length
                 ? () => _move(index, index + 1)
                 : null,
-            onRemove: () =>
-                widget.onChanged(List.of(widget.entries)..removeAt(index)),
+            onRemove: () => _remove(index),
           ),
         Align(
           alignment: Alignment.centerLeft,
           child: DesktopButton(
             key: ValueKey('library-entry-add-${widget.fieldKey}'),
+            focusNode: _addFocus,
             kind: DesktopButtonKind.quiet,
             onPressed: widget.enabled && widget.canAdd
                 ? () {
@@ -223,6 +249,7 @@ class _EntryFields extends StatefulWidget {
     required this.enabled,
     required this.errors,
     required this.focusOnMount,
+    required this.focusRevision,
     required this.onChanged,
     required this.onUp,
     required this.onDown,
@@ -232,6 +259,7 @@ class _EntryFields extends StatefulWidget {
   final WorkspaceRepeatedEntry entry;
   final int ordinal;
   final bool enabled, focusOnMount;
+  final int focusRevision;
   final Map<String, String> errors;
   final ValueChanged<WorkspaceRepeatedEntry> onChanged;
   final VoidCallback? onUp, onDown;
@@ -245,15 +273,26 @@ class _EntryFieldsState extends State<_EntryFields> {
     for (final part in widget.entry.activeParts)
       part: TextEditingController(text: widget.entry.toJson()[part] as String),
   };
-  final _titleFocus = FocusNode();
+  final _entryFocus = FocusNode();
   @override
   void initState() {
     super.initState();
-    if (widget.focusOnMount) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) _titleFocus.requestFocus();
-      });
+    if (widget.focusOnMount) _focusEntry();
+  }
+
+  @override
+  void didUpdateWidget(covariant _EntryFields oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.focusRevision != 0 &&
+        widget.focusRevision != oldWidget.focusRevision) {
+      _focusEntry();
     }
+  }
+
+  void _focusEntry() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && widget.enabled) _entryFocus.requestFocus();
+    });
   }
 
   @override
@@ -261,7 +300,7 @@ class _EntryFieldsState extends State<_EntryFields> {
     for (final controller in _text.values) {
       controller.dispose();
     }
-    _titleFocus.dispose();
+    _entryFocus.dispose();
     super.dispose();
   }
 
@@ -276,7 +315,9 @@ class _EntryFieldsState extends State<_EntryFields> {
             'library-entry-${widget.fieldKey}-${widget.entry.id}-$part',
           ),
           controller: _text[part],
-          focusNode: part == 'title' ? _titleFocus : null,
+          focusNode: part == widget.entry.activeParts.first
+              ? _entryFocus
+              : null,
           enabled: widget.enabled,
           minLines: part == 'detail' ? 2 : 1,
           maxLines: part == 'detail' ? 5 : 1,
