@@ -66,10 +66,16 @@ void main() {
       SampleWorkspaceSource source,
     })
   >
-  start(WidgetTester t, {bool dark = false}) async {
-    t.view.physicalSize = dark ? const Size(1280, 800) : const Size(1440, 900);
+  start(
+    WidgetTester t, {
+    bool dark = false,
+    double? width,
+    double? scale,
+  }) async {
+    final viewport = width ?? (dark ? 1280.0 : 1440.0);
+    t.view.physicalSize = Size(viewport, viewport == 1440 ? 900 : 800);
     t.view.devicePixelRatio = 1;
-    t.platformDispatcher.textScaleFactorTestValue = dark ? 2 : 1;
+    t.platformDispatcher.textScaleFactorTestValue = scale ?? (dark ? 2 : 1);
     addTearDown(t.view.resetPhysicalSize);
     addTearDown(t.view.resetDevicePixelRatio);
     addTearDown(t.platformDispatcher.clearTextScaleFactorTestValue);
@@ -105,6 +111,40 @@ void main() {
     await t.ensureVisible(f);
     await t.enterText(f, value);
     await t.pumpAndSettle();
+  }
+
+  for (final width in [1440.0, 1280.0]) {
+    for (final dark in [false, true]) {
+      testWidgets(
+        'R07 plugin workspace matches frozen frame at $width dark=$dark',
+        (t) async {
+          await start(t, dark: dark, width: width, scale: 1);
+          final frame = t.getRect(
+            find.byKey(const ValueKey('plugin-workspace')),
+          );
+          final expected = width == 1440
+              ? const Rect.fromLTWH(274, 194.4453125, 1142, 687.5546875)
+              : const Rect.fromLTWH(238, 190.4453125, 1024, 587.5546875);
+          for (final delta in [
+            frame.left - expected.left,
+            frame.top - expected.top,
+            frame.width - expected.width,
+            frame.height - expected.height,
+          ]) {
+            expect(delta.abs(), lessThanOrEqualTo(2));
+          }
+          expect(
+            t.getSize(find.byKey(const ValueKey('plugin-sidebar'))).width,
+            250,
+          );
+          await capture(
+            t,
+            'matrix-plugins-${width.toInt()}-${dark ? 'dark' : 'light'}',
+          );
+          expect(t.takeException(), isNull);
+        },
+      );
+    }
   }
 
   testWidgets(
@@ -541,8 +581,7 @@ void main() {
       expect(m.plugins.failure, isNotNull);
       await tap(t, find.text('重新读取插件'));
       expect(m.plugins.failure, isNull);
-      await tap(t, find.byKey(const ValueKey('plugin-filter')));
-      await tap(t, find.text('已停用').last);
+      await tap(t, find.byKey(const ValueKey('plugin-filter-disabled')));
       expect(find.text('没有这个状态的插件。'), findsOneWidget);
     },
   );
@@ -576,18 +615,18 @@ void main() {
       );
       await t.pumpAndSettle();
       expect(find.text('正在读取…'), findsOneWidget);
-      expect(find.text('0个插件'), findsNothing);
+      expect(find.text('0 个插件'), findsNothing);
       source.reads.first.completeError(
         const WorkspaceFailure('offline', '读取失败'),
       );
       await pending;
       await t.pumpAndSettle();
       expect(find.text('暂不可用'), findsOneWidget);
-      expect(find.text('0个插件'), findsNothing);
+      expect(find.text('0 个插件'), findsNothing);
       await tap(t, find.text('重新读取插件'));
       source.reads.last.complete(WorkspacePluginCatalog(1, []));
       await t.pumpAndSettle();
-      expect(find.text('0个插件'), findsOneWidget);
+      expect(find.text('0 个插件'), findsOneWidget);
       expect(find.text('还没有安装插件。'), findsOneWidget);
     },
   );

@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import '../desktop_controls.dart';
-import '../desktop_motion.dart';
 import '../ui_palette.dart';
 import 'agents_controller.dart';
 import 'library_widgets.dart';
 import 'settings_page.dart' show SettingsPreferenceRow;
+import 'settings_layout.dart';
 import 'workspace_source.dart';
 
 class WorkspaceAgentsPage extends StatelessWidget {
@@ -71,83 +71,74 @@ class WorkspaceAgentsPage extends StatelessWidget {
           ),
         ),
       );
-      return DesktopEntrance(
-        child: SingleChildScrollView(
-          key: const ValueKey('agents-page-scroll'),
-          padding: const EdgeInsets.all(30),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                'Agent 接入',
-                style: libraryText(context, 26, weight: FontWeight.w600),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                '会话关联与接入状态',
-                style: libraryText(context, 14, color: c.muted),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 25),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+      return SettingsPageContent(
+        scrollKey: const ValueKey('agents-page-scroll'),
+        title: 'Agent 接入',
+        description: '会话关联与接入状态',
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 25),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
                   children: [
-                    Row(
-                      children: [
-                        Container(
-                          width: 45,
-                          height: 45,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color: c.selected,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Text(
-                            'C',
+                    Container(
+                      width: 45,
+                      height: 45,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: c.selected,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        'C',
+                        style: libraryText(
+                          context,
+                          20,
+                          color: c.accent,
+                          weight: FontWeight.w600,
+                          height: 1,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 15),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Codex',
                             style: libraryText(
                               context,
                               20,
-                              color: c.accent,
                               weight: FontWeight.w600,
-                              height: 1,
                             ),
                           ),
-                        ),
-                        const SizedBox(width: 15),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Codex',
-                                style: libraryText(
-                                  context,
-                                  20,
-                                  weight: FontWeight.w600,
-                                ),
-                              ),
-                              const SizedBox(height: 5),
-                              Text(
-                                '通过 Skill 与会话 hooks 接入',
-                                style: libraryText(context, 13, color: c.muted),
-                              ),
-                            ],
+                          const SizedBox(height: 5),
+                          Text(
+                            '通过 Skill 与会话 hooks 接入',
+                            style: libraryText(context, 13, color: c.muted),
                           ),
-                        ),
-                        if (!large) badge,
-                      ],
+                        ],
+                      ),
                     ),
-                    if (large) ...[const SizedBox(height: 14), badge],
+                    if (!large) badge,
                   ],
                 ),
-              ),
-              if (m.loading) const LinearProgressIndicator(),
-              if (m.readFailure != null)
-                Text(
-                  m.readFailure!.message,
-                  key: const ValueKey('agents-read-error'),
-                  style: libraryText(context, 14, color: c.danger, height: 1.9),
-                ),
+                if (large) ...[const SizedBox(height: 14), badge],
+              ],
+            ),
+          ),
+          if (m.loading) const LinearProgressIndicator(),
+          if (m.readFailure != null)
+            Text(
+              m.readFailure!.message,
+              key: const ValueKey('agents-read-error'),
+              style: libraryText(context, 14, color: c.danger, height: 1.9),
+            ),
+          SettingsCard(
+            children: [
               SettingsPreferenceRow(
                 title: '连接诊断',
                 description: v == null
@@ -209,20 +200,21 @@ class WorkspaceAgentsPage extends StatelessWidget {
               ),
               SettingsPreferenceRow(
                 title: 'Mac 本机焦点填充',
+                divider: false,
                 description: '当前默认关闭，独立于会话接入。连接成功不代表可以向前台应用填入凭据。',
                 control: Text(
                   '当前不可用',
                   style: libraryText(context, 14, color: c.muted),
                 ),
               ),
-              const SizedBox(height: 22),
-              Text(
-                '连接成功不会自动获得资料权限。聊天名称为 Agent 自述；聊天 ID 不能作为访问证明。私密关联由受控接入传递，本页不展示或复制。',
-                style: libraryText(context, 14, color: c.muted, height: 1.9),
-              ),
             ],
           ),
-        ),
+          const SizedBox(height: 22),
+          Text(
+            '连接成功不会自动获得资料权限。聊天名称为 Agent 自述；聊天 ID 不能作为访问证明。私密关联由受控接入传递，本页不展示或复制。',
+            style: libraryText(context, 14, color: c.muted, height: 1.9),
+          ),
+        ],
       );
     },
   );

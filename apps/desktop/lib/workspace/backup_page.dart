@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import '../desktop_controls.dart';
-import '../desktop_motion.dart';
 import '../ui_palette.dart';
 import 'backup_controller.dart';
 import 'library_widgets.dart';
 import 'settings_page.dart' show SettingsPreferenceRow;
+import 'settings_layout.dart';
 import 'workspace_source.dart';
 
 class WorkspaceBackupPage extends StatelessWidget {
@@ -41,38 +41,28 @@ class WorkspaceBackupPage extends StatelessWidget {
     listenable: controller,
     builder: (context, _) {
       final m = controller, v = m.value, c = UiPalette.of(context);
-      return DesktopEntrance(
-        child: SingleChildScrollView(
-          key: const ValueKey('backup-page-scroll'),
-          padding: const EdgeInsets.all(30),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+      return SettingsPageContent(
+        scrollKey: const ValueKey('backup-page-scroll'),
+        title: '备份与恢复',
+        description: '使用独立恢复密钥保管完整备份。文件与密钥请分开保存；备份可能包含信息与凭据原文。',
+        children: [
+          if (m.loading) const LinearProgressIndicator(),
+          if (m.readFailure != null) ...[
+            Text(
+              m.readFailure!.message,
+              style: libraryText(context, 14, color: c.danger),
+            ),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: DesktopButton(
+                key: const ValueKey('backup-status-retry'),
+                onPressed: m.frozen ? null : m.load,
+                child: const Text('重新读取备份状态'),
+              ),
+            ),
+          ],
+          SettingsCard(
             children: [
-              Text(
-                '备份与恢复',
-                style: libraryText(context, 26, weight: FontWeight.w600),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                '使用独立恢复密钥保管完整备份。文件与密钥请分开保存；备份可能包含信息与凭据原文。',
-                style: libraryText(context, 14, color: c.muted, height: 1.9),
-              ),
-              const SizedBox(height: 22),
-              if (m.loading) const LinearProgressIndicator(),
-              if (m.readFailure != null) ...[
-                Text(
-                  m.readFailure!.message,
-                  style: libraryText(context, 14, color: c.danger),
-                ),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: DesktopButton(
-                    key: const ValueKey('backup-status-retry'),
-                    onPressed: m.frozen ? null : m.load,
-                    child: const Text('重新读取备份状态'),
-                  ),
-                ),
-              ],
               SettingsPreferenceRow(
                 title: '独立恢复密钥',
                 description: v == null
@@ -106,6 +96,7 @@ class WorkspaceBackupPage extends StatelessWidget {
               ),
               SettingsPreferenceRow(
                 title: '恢复到空的信息库',
+                divider: false,
                 description: v == null
                     ? '正在核对目标库…'
                     : v.recipientEmpty
@@ -119,52 +110,45 @@ class WorkspaceBackupPage extends StatelessWidget {
                   child: const Text('查看恢复流程'),
                 ),
               ),
-              const SizedBox(height: 22),
-              Text(
-                '历史不会变回有效授权。恢复后 Agent 需要重新申请；活动会话、待审批、运行材料、输出和整理任务不随备份恢复。',
-                style: libraryText(context, 14, color: c.muted, height: 1.9),
-              ),
-              if (m.cleanupNotice != null ||
-                  v != null && v.cleanupCount > 0) ...[
-                const SizedBox(height: 20),
-                Text(
-                  m.cleanupNotice ??
-                      '有 ${v!.cleanupCount} 份临时资源待清理，资料操作结果不受此状态替代。',
-                  style: libraryText(
-                    context,
-                    14,
-                    color: c.warning,
-                    height: 1.8,
-                  ),
-                ),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: DesktopButton(
-                    key: const ValueKey('backup-cleanup'),
-                    onPressed: m.available && v != null && v.cleanupCount > 0
-                        ? () => m.write(WorkspaceBackupAction.cleanup)
-                        : null,
-                    child: const Text('重试清理临时资源'),
-                  ),
-                ),
-              ],
-              if (m.failure != null)
-                Text(
-                  m.failure!.message,
-                  style: libraryText(context, 14, color: c.danger, height: 1.8),
-                ),
-              if (m.uncertain)
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: DesktopButton(
-                    key: const ValueKey('backup-page-reconcile'),
-                    onPressed: m.busy ? null : m.reconcile,
-                    child: const Text('核对原备份操作'),
-                  ),
-                ),
             ],
           ),
-        ),
+          const SizedBox(height: 22),
+          Text(
+            '历史不会变回有效授权。恢复后 Agent 需要重新申请；活动会话、待审批、运行材料、输出和整理任务不随备份恢复。',
+            style: libraryText(context, 14, color: c.muted, height: 1.9),
+          ),
+          if (m.cleanupNotice != null || v != null && v.cleanupCount > 0) ...[
+            const SizedBox(height: 20),
+            Text(
+              m.cleanupNotice ?? '有 ${v!.cleanupCount} 份临时资源待清理，资料操作结果不受此状态替代。',
+              style: libraryText(context, 14, color: c.warning, height: 1.8),
+            ),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: DesktopButton(
+                key: const ValueKey('backup-cleanup'),
+                onPressed: m.available && v != null && v.cleanupCount > 0
+                    ? () => m.write(WorkspaceBackupAction.cleanup)
+                    : null,
+                child: const Text('重试清理临时资源'),
+              ),
+            ),
+          ],
+          if (m.failure != null)
+            Text(
+              m.failure!.message,
+              style: libraryText(context, 14, color: c.danger, height: 1.8),
+            ),
+          if (m.uncertain)
+            Align(
+              alignment: Alignment.centerLeft,
+              child: DesktopButton(
+                key: const ValueKey('backup-page-reconcile'),
+                onPressed: m.busy ? null : m.reconcile,
+                child: const Text('核对原备份操作'),
+              ),
+            ),
+        ],
       );
     },
   );

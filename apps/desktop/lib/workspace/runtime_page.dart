@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import '../desktop_controls.dart';
-import '../desktop_motion.dart';
 import '../ui_palette.dart';
 import 'library_widgets.dart';
 import 'runtime_controller.dart';
 import 'settings_controller.dart';
 import 'settings_page.dart' show SettingsPreferenceRow;
+import 'settings_layout.dart';
 import 'workspace_source.dart';
 
 class WorkspaceRuntimePage extends StatelessWidget {
@@ -70,29 +70,19 @@ class WorkspaceRuntimePage extends StatelessWidget {
           p.draft!
               .copyWith(background: p.value!.background)
               .sameValues(p.value!);
-      return DesktopEntrance(
-        child: SingleChildScrollView(
-          key: const ValueKey('runtime-page-scroll'),
-          padding: const EdgeInsets.all(30),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+      return SettingsPageContent(
+        scrollKey: const ValueKey('runtime-page-scroll'),
+        title: '应用运行',
+        description: '查看本机服务、登记材料和关闭方式。材料回收与外部进程是否结束分别核对。',
+        children: [
+          if (m.loading) const LinearProgressIndicator(),
+          if (m.readFailure != null)
+            Text(
+              m.readFailure!.message,
+              style: libraryText(context, 14, color: c.danger),
+            ),
+          SettingsCard(
             children: [
-              Text(
-                '应用运行',
-                style: libraryText(context, 26, weight: FontWeight.w600),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                '查看本机服务、登记材料和关闭方式。材料回收与外部进程是否结束分别核对。',
-                style: libraryText(context, 14, color: c.muted, height: 1.9),
-              ),
-              const SizedBox(height: 20),
-              if (m.loading) const LinearProgressIndicator(),
-              if (m.readFailure != null)
-                Text(
-                  m.readFailure!.message,
-                  style: libraryText(context, 14, color: c.danger),
-                ),
               SettingsPreferenceRow(
                 title: v == null
                     ? '正在核对本机服务…'
@@ -212,6 +202,7 @@ class WorkspaceRuntimePage extends StatelessWidget {
               ),
               SettingsPreferenceRow(
                 title: '完全退出应用',
+                divider: false,
                 description:
                     '先保存退出事实，再停止本机服务并结束会话授权。已启动的外部程序可能继续运行；使用中的材料和未确认副本不保证立即回收。',
                 control: DesktopButton(
@@ -224,31 +215,31 @@ class WorkspaceRuntimePage extends StatelessWidget {
                   ),
                 ),
               ),
-              if (m.failure != null)
-                Text(
-                  m.failure!.message,
-                  key: const ValueKey('runtime-error'),
-                  style: libraryText(context, 14, color: c.danger, height: 1.9),
-                ),
-              if (m.uncertain)
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: DesktopButton(
-                    key: const ValueKey('runtime-reconcile'),
-                    onPressed: m.busy ? null : m.reconcile,
-                    child: const Text('核对原运行操作'),
-                  ),
-                ),
-              if (m.result?.action == WorkspaceRuntimeAction.hideWindow ||
-                  m.result?.action == WorkspaceRuntimeAction.showWindow)
-                Text(
-                  m.result!.windowHidden ? '工作窗口已收起，服务继续接收申请。' : '工作窗口已重新打开。',
-                  key: const ValueKey('runtime-window-result'),
-                  style: libraryText(context, 14, color: c.accent, height: 1.8),
-                ),
             ],
           ),
-        ),
+          if (m.failure != null)
+            Text(
+              m.failure!.message,
+              key: const ValueKey('runtime-error'),
+              style: libraryText(context, 14, color: c.danger, height: 1.9),
+            ),
+          if (m.uncertain)
+            Align(
+              alignment: Alignment.centerLeft,
+              child: DesktopButton(
+                key: const ValueKey('runtime-reconcile'),
+                onPressed: m.busy ? null : m.reconcile,
+                child: const Text('核对原运行操作'),
+              ),
+            ),
+          if (m.result?.action == WorkspaceRuntimeAction.hideWindow ||
+              m.result?.action == WorkspaceRuntimeAction.showWindow)
+            Text(
+              m.result!.windowHidden ? '工作窗口已收起，服务继续接收申请。' : '工作窗口已重新打开。',
+              key: const ValueKey('runtime-window-result'),
+              style: libraryText(context, 14, color: c.accent, height: 1.8),
+            ),
+        ],
       );
     },
   );

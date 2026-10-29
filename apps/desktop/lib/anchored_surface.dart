@@ -95,22 +95,7 @@ Future<T?> showAnchoredSurface<T>(
                   child: DecoratedBox(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(usesMotion ? 8 : 7),
-                      boxShadow: usesMotion
-                          ? [
-                              BoxShadow(
-                                color: c.brightness == Brightness.dark
-                                    ? const Color(0x55000000)
-                                    : const Color(0x20243047),
-                                offset: Offset(
-                                  0,
-                                  c.brightness == Brightness.dark ? 12 : 9,
-                                ),
-                                blurRadius: c.brightness == Brightness.dark
-                                    ? 36
-                                    : 32,
-                              ),
-                            ]
-                          : const [],
+                      boxShadow: usesMotion ? [c.popupElevation] : const [],
                     ),
                     child: Material(
                       color: c.paper,

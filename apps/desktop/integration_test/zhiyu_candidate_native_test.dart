@@ -71,6 +71,7 @@ void main() {
 
     Future<void> stage(String name) async {
       checks.add(name);
+      recording.mark(name);
       await recording.saveStill(name);
     }
 
@@ -106,6 +107,10 @@ void main() {
     await tap(find.text('关闭').last);
     await stage('u03-file-version-confirm-cancel');
 
+    // Record the remaining R07–R13 surfaces with the existing bounded recorder.
+    // Real timestamps are retained; this is native rendering, not OS input.
+    await recording.start();
+    recording.mark('u04-plugin-start');
     await press('workspace-nav-settings');
     await press('settings-section-plugins');
     await press('plugin-install');
@@ -129,7 +134,7 @@ void main() {
     expect(library.detail!.values['domain'], 'candidate.example');
     await stage('u04-plugin-preview-install-adopt');
 
-    await recording.start();
+    recording.mark('u05-approval-start');
     await press('workspace-nav-approvals');
     final approval = t
         .widget<ApprovalsPage>(find.byType(ApprovalsPage))
@@ -154,6 +159,7 @@ void main() {
     expect(history.detail!.scopes.single.id, host.id);
     await stage('u05-approval-result-in-shared-history');
 
+    recording.mark('u06-proposal-start');
     await press('workspace-nav-proposals');
     final proposals = t
         .widget<ProposalsPage>(find.byType(ProposalsPage))
@@ -168,8 +174,8 @@ void main() {
     await press('workspace-back');
     expect(proposals.selection, 'import');
     await stage('u06-proposal-result-current-return');
-    await recording.stop('native-controls');
 
+    recording.mark('u07-settings-start');
     await press('workspace-nav-settings');
     await press('settings-section-appearance');
     source.nextSaveFailure = const WorkspaceFailure('disk_full', '候选设置失败，选择保留');
@@ -197,6 +203,7 @@ void main() {
       }
       await tap(target);
       expect(settings.section, section);
+      recording.mark('u07-${section.name}');
     }
     await stage('u07-settings-failure-retry-eight-sections');
     for (final destination in [
@@ -210,6 +217,7 @@ void main() {
     }
     expect(settings.section, WorkspaceSettingsSection.agents);
     await stage('all-primary-destinations-return');
+    await recording.stop('native-controls');
     await File('$directory/native-checks.json').writeAsString(
       const JsonEncoder.withIndent('  ').convert({
         'runtime': runtime,

@@ -28,6 +28,8 @@ class DesktopButton extends StatefulWidget {
     this.selectedBorder = false,
     this.selectedBorderColor,
     this.hoverBackgroundColor,
+    this.selectedBackgroundColor,
+    this.hoverBorderColor,
   });
   final Widget child;
   final VoidCallback? onPressed;
@@ -44,6 +46,8 @@ class DesktopButton extends StatefulWidget {
   final double radius;
   final bool selectedBorder;
   final Color? selectedBorderColor, hoverBackgroundColor;
+  final Color? selectedBackgroundColor;
+  final Color? hoverBorderColor;
   @override
   State<DesktopButton> createState() => _DesktopButtonState();
 }
@@ -111,7 +115,7 @@ class _DesktopButtonState extends State<DesktopButton> {
             ? Color.lerp(c.accent, Colors.black, .06)!
             : c.accent;
       }
-      if (widget.selected) return c.selected;
+      if (widget.selected) return widget.selectedBackgroundColor ?? c.selected;
       if (states.contains(WidgetState.hovered) || menuFocus) {
         return widget.hoverBackgroundColor ?? (menu ? c.selected : c.nav);
       }
@@ -176,6 +180,9 @@ class _DesktopButtonState extends State<DesktopButton> {
                               ? c.accent
                               : widget.selected && widget.selectedBorder
                               ? widget.selectedBorderColor ?? c.line
+                              : states.contains(WidgetState.hovered) &&
+                                    widget.hoverBorderColor != null
+                              ? widget.hoverBorderColor!
                               : quiet &&
                                     !(widget.selected && widget.selectedBorder)
                               ? Colors.transparent

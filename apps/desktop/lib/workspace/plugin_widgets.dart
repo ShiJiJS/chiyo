@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../ui_palette.dart';
+import '../prototype_icons.dart';
 import 'library_widgets.dart';
 import 'workspace_source.dart';
 
@@ -17,16 +18,18 @@ class PluginTemplatePreview extends StatelessWidget {
     super.key,
     required this.template,
     this.structure = false,
+    this.embedded = false,
   });
   final WorkspacePluginTemplate template;
   final bool structure;
+  final bool embedded;
   @override
   Widget build(BuildContext context) {
     final definition = template.definition, c = UiPalette.of(context);
     final fields = List<Map>.from(definition['fields'] as List? ?? []);
     final example = definition['example'] as Map?;
     final values = example?['values'] as Map? ?? {};
-    return Column(
+    final content = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         if (structure) ...[
@@ -78,17 +81,51 @@ class PluginTemplatePreview extends StatelessWidget {
               ),
             ),
         ] else ...[
-          for (final section in definition['sections'] as List? ?? [])
-            Padding(
-              padding: const EdgeInsets.only(bottom: 24),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            decoration: BoxDecoration(
+              color: c.selected,
+              border: Border(bottom: BorderSide(color: c.line)),
+            ),
+            child: Row(
+              children: [
+                PrototypeIcon(
+                  RecordIcon.glyphFor(template.type.icon),
+                  size: 18,
+                  color: c.accent,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    template.type.name,
+                    style: libraryText(
+                      context,
+                      15,
+                      weight: FontWeight.w700,
+                      color: c.accent,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          for (final (index, section)
+              in (definition['sections'] as List? ?? []).indexed)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 20),
+              decoration: BoxDecoration(
+                border: index == 0
+                    ? null
+                    : Border(top: BorderSide(color: c.line)),
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text(
                     section['title'] as String,
-                    style: libraryText(context, 17, weight: FontWeight.w600),
+                    style: libraryText(context, 14, weight: FontWeight.w700),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 13),
                   if (section['kind'] == 'fields')
                     LayoutBuilder(
                       builder: (context, bounds) {
@@ -96,8 +133,8 @@ class PluginTemplatePreview extends StatelessWidget {
                             bounds.maxWidth >= 400 &&
                             MediaQuery.textScalerOf(context).scale(1) < 1.5;
                         return Wrap(
-                          spacing: 24,
-                          runSpacing: 16,
+                          spacing: 15,
+                          runSpacing: 15,
                           children: [
                             for (final key in section['keys'] as List)
                               for (final f in fields.where(
@@ -105,7 +142,7 @@ class PluginTemplatePreview extends StatelessWidget {
                               ))
                                 SizedBox(
                                   width: two
-                                      ? (bounds.maxWidth - 24) / 2
+                                      ? (bounds.maxWidth - 15) / 2
                                       : bounds.maxWidth,
                                   child: Column(
                                     crossAxisAlignment:
@@ -115,7 +152,7 @@ class PluginTemplatePreview extends StatelessWidget {
                                         f['label'] as String,
                                         style: libraryText(
                                           context,
-                                          13,
+                                          12,
                                           color: c.muted,
                                         ),
                                       ),
@@ -124,7 +161,7 @@ class PluginTemplatePreview extends StatelessWidget {
                                         values[key] is String
                                             ? values[key] as String
                                             : '填写${f['label']}',
-                                        style: libraryText(context, 14),
+                                        style: libraryText(context, 13),
                                       ),
                                     ],
                                   ),
@@ -153,6 +190,22 @@ class PluginTemplatePreview extends StatelessWidget {
         ],
       ],
     );
+    return structure
+        ? content
+        : Container(
+            padding: embedded
+                ? const EdgeInsets.symmetric(vertical: 20)
+                : EdgeInsets.zero,
+            clipBehavior: embedded ? Clip.none : Clip.antiAlias,
+            decoration: BoxDecoration(
+              color: c.paper,
+              border: embedded
+                  ? Border(top: BorderSide(color: c.line))
+                  : Border.all(color: c.line),
+              borderRadius: embedded ? null : BorderRadius.circular(9),
+            ),
+            child: content,
+          );
   }
 }
 

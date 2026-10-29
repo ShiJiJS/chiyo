@@ -67,10 +67,11 @@ void main() {
     WidgetTester t, {
     bool dark = false,
     double width = 1440,
+    double? scale,
   }) async {
-    t.view.physicalSize = Size(width, dark ? 800 : 900);
+    t.view.physicalSize = Size(width, width == 1440 ? 900 : 800);
     t.view.devicePixelRatio = 1;
-    t.platformDispatcher.textScaleFactorTestValue = dark ? 2 : 1;
+    t.platformDispatcher.textScaleFactorTestValue = scale ?? (dark ? 2 : 1);
     addTearDown(t.view.resetPhysicalSize);
     addTearDown(t.view.resetDevicePixelRatio);
     addTearDown(t.platformDispatcher.clearTextScaleFactorTestValue);
@@ -106,6 +107,32 @@ void main() {
       ).writeAsBytes(bytes!.buffer.asUint8List());
       im.dispose();
     });
+  }
+
+  for (final width in [1440.0, 1280.0]) {
+    for (final dark in [false, true]) {
+      testWidgets(
+        'R12 history title and detail rail match reference at $width dark=$dark',
+        (t) async {
+          await start(t, dark: dark, width: width, scale: 1);
+          await history(t);
+          final pane = find.byType(GrantHistoryPage);
+          final title = find.descendant(of: pane, matching: find.text('授权历史'));
+          expect(t.getTopLeft(title).dy, closeTo(96, 2));
+          final detail = t.getRect(
+            find.byKey(const ValueKey('grant-history-detail-scroll')),
+          );
+          // The scroll viewport excludes the detail pane's 1px left border.
+          expect(detail.width + 1, width == 1440 ? 365 : 335);
+          expect(detail.top, 66);
+          await capture(
+            t,
+            'matrix-history-${width.toInt()}-${dark ? 'dark' : 'light'}',
+          );
+          expect(t.takeException(), isNull);
+        },
+      );
+    }
   }
 
   testWidgets(

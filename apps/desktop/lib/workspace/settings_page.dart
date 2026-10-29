@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../desktop_controls.dart';
-import '../desktop_motion.dart';
 import '../prototype_icons.dart';
 import '../ui_palette.dart';
 import 'library_widgets.dart';
@@ -14,6 +13,7 @@ import 'agents_page.dart';
 import 'classification_page.dart';
 import 'plugins_controller.dart';
 import 'settings_controller.dart';
+import 'settings_layout.dart';
 import 'workspace_source.dart';
 
 class WorkspaceSettingsPage extends StatefulWidget {
@@ -120,6 +120,13 @@ class _WorkspaceSettingsPageState extends State<WorkspaceSettingsPage> {
   }
 
   Widget _feedback(BuildContext context) {
+    if (!m.loading &&
+        m.readFailure == null &&
+        m.writeFailure == null &&
+        m.notice == null &&
+        !m.dirty) {
+      return const SizedBox.shrink();
+    }
     final c = UiPalette.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -190,62 +197,74 @@ class _WorkspaceSettingsPageState extends State<WorkspaceSettingsPage> {
           theme == WorkspaceTheme.dark ? Brightness.dark : Brightness.light,
         ),
         selected = m.draft?.theme == theme;
-    return DesktopButton(
-      key: ValueKey('settings-theme-${theme.name}'),
-      selected: selected,
-      alignment: Alignment.centerLeft,
-      padding: const EdgeInsets.all(20),
-      onPressed:
-          m.frozen || m.loading || m.readFailure != null || m.draft == null
-          ? null
-          : () => m.setTheme(theme),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Container(
-            height: 130,
-            decoration: BoxDecoration(
-              color: p.canvas,
-              border: Border.all(color: p.line),
-              borderRadius: BorderRadius.circular(7),
-            ),
-            padding: const EdgeInsets.all(13),
-            child: Row(
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: selected
+            ? [BoxShadow(color: c.selected, spreadRadius: 2)]
+            : null,
+      ),
+      child: DesktopButton(
+        key: ValueKey('settings-theme-${theme.name}'),
+        selected: selected,
+        selectedBorder: true,
+        selectedBorderColor: c.accent,
+        selectedBackgroundColor: c.paper,
+        hoverBackgroundColor: c.paper,
+        hoverBorderColor: c.lineStrong,
+        alignment: Alignment.centerLeft,
+        radius: 10,
+        padding: const EdgeInsets.all(15),
+        onPressed:
+            m.frozen || m.loading || m.readFailure != null || m.draft == null
+            ? null
+            : () => m.setTheme(theme),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SettingsThemePreview(brightness: p.brightness),
+            const SizedBox(height: 19),
+            Row(
               children: [
-                Container(width: 44, color: p.rail),
-                const SizedBox(width: 12),
                 Expanded(
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(height: 14, color: p.paper),
-                      const SizedBox(height: 13),
-                      Container(height: 15, color: p.selected),
-                      const SizedBox(height: 13),
-                      Container(height: 14, color: p.paper),
+                      Text(
+                        theme == WorkspaceTheme.light ? '明亮' : '黑暗',
+                        style: libraryText(
+                          context,
+                          15,
+                          weight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        theme == WorkspaceTheme.light
+                            ? '浅灰底色，清晰留白'
+                            : '深灰层次，柔和对比',
+                        style: libraryText(context, 12, color: c.muted),
+                      ),
                     ],
                   ),
                 ),
+                const SizedBox(width: 14),
+                Container(
+                  width: 21,
+                  height: 21,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: selected ? c.accent : Colors.transparent,
+                    border: Border.all(color: selected ? c.accent : c.muted),
+                  ),
+                  child: selected
+                      ? Icon(Icons.check, size: 14, color: c.onAccent)
+                      : null,
+                ),
               ],
             ),
-          ),
-          const SizedBox(height: 16),
-          Wrap(
-            alignment: WrapAlignment.spaceBetween,
-            spacing: 12,
-            children: [
-              Text(
-                theme == WorkspaceTheme.light ? '明亮' : '黑暗',
-                style: libraryText(context, 17, weight: FontWeight.w600),
-              ),
-              if (selected) Icon(Icons.check, size: 21, color: c.accent),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            theme == WorkspaceTheme.light ? '浅灰底色，清晰留白' : '深灰层次，柔和对比',
-            style: libraryText(context, 13, color: c.muted, height: 1.7),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -253,43 +272,67 @@ class _WorkspaceSettingsPageState extends State<WorkspaceSettingsPage> {
   Widget _appearance(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
-      Text('界面主题', style: libraryText(context, 19, weight: FontWeight.w600)),
-      const SizedBox(height: 8),
+      Text(
+        '界面主题',
+        style: libraryText(context, 17, weight: FontWeight.w700, height: 1.5),
+      ),
+      const SizedBox(height: 9),
       Text(
         '选择适合当前光线的阅读方式。',
-        style: libraryText(context, 14, color: UiPalette.of(context).muted),
+        style: libraryText(
+          context,
+          13,
+          color: UiPalette.of(context).muted,
+          height: 1.8,
+        ),
       ),
-      const SizedBox(height: 20),
-      LayoutBuilder(
-        builder: (context, b) =>
-            b.maxWidth < 650 || MediaQuery.textScalerOf(context).scale(1) >= 1.6
-            ? Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  _themeChoice(context, WorkspaceTheme.light),
-                  const SizedBox(height: 18),
-                  _themeChoice(context, WorkspaceTheme.dark),
-                ],
-              )
-            : Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(child: _themeChoice(context, WorkspaceTheme.light)),
-                  const SizedBox(width: 20),
-                  Expanded(child: _themeChoice(context, WorkspaceTheme.dark)),
-                ],
-              ),
+      const SizedBox(height: 22),
+      Align(
+        alignment: Alignment.centerLeft,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 650),
+          child: LayoutBuilder(
+            builder: (context, b) =>
+                b.maxWidth < 650 ||
+                    MediaQuery.textScalerOf(context).scale(1) >= 1.6
+                ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      _themeChoice(context, WorkspaceTheme.light),
+                      const SizedBox(height: 18),
+                      _themeChoice(context, WorkspaceTheme.dark),
+                    ],
+                  )
+                : Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: _themeChoice(context, WorkspaceTheme.light),
+                      ),
+                      const SizedBox(width: 20),
+                      Expanded(
+                        child: _themeChoice(context, WorkspaceTheme.dark),
+                      ),
+                    ],
+                  ),
+          ),
+        ),
       ),
-      const SizedBox(height: 26),
-      SettingsPreferenceRow(
-        title: '阅读层次',
-        description: '背景、列表和详情用不同明度区分；强调色用于当前选择与主要操作。',
-        control: const PrototypeIcon(PrototypeIconGlyph.layers),
-      ),
-      SettingsPreferenceRow(
-        title: '资料识别',
-        description: '保留服务器、文件和凭据的图标色，并始终显示类型名称。',
-        control: const PrototypeIcon(PrototypeIconGlyph.file),
+      const SizedBox(height: 32),
+      SettingsCard(
+        children: [
+          SettingsPreferenceRow(
+            title: '阅读层次',
+            description: '背景、列表和详情用不同明度区分；强调色用于当前选择与主要操作。',
+            control: const PrototypeIcon(PrototypeIconGlyph.layers),
+          ),
+          SettingsPreferenceRow(
+            title: '资料识别',
+            divider: false,
+            description: '保留服务器、文件和凭据的图标色，并始终显示类型名称。',
+            control: const PrototypeIcon(PrototypeIconGlyph.file),
+          ),
+        ],
       ),
     ],
   );
@@ -299,54 +342,53 @@ class _WorkspaceSettingsPageState extends State<WorkspaceSettingsPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        SettingsPreferenceRow(
-          title: '新申请等待时间',
-          description: '超过等待时间仍未处理的申请将到期。只影响之后提交的新申请；已有申请和已批准授权的到期时间不变。',
-          control: m.draft == null
-              ? const Text('尚未读取')
-              : SizedBox(
-                  width: 190,
-                  child: DesktopSelect<int>(
-                    key: const ValueKey('settings-request-minutes'),
-                    value: m.draft!.requestMinutes,
-                    items: [
-                      for (final n in [5, 15, 30, 60, 120])
-                        DropdownMenuItem(value: n, child: Text('$n 分钟')),
-                    ],
-                    onChanged: !enabled
-                        ? null
-                        : (n) {
-                            if (n != null) {
-                              m.stage(m.draft!.copyWith(requestMinutes: n));
-                            }
-                          },
-                  ),
-                ),
-        ),
-        SettingsPreferenceRow(
-          title: '记录保留期限',
-          description:
-              '管理申请、授权和操作结果记录。缩短期限前会显示清理范围；当前资料、文件原文、凭据材料、修订和回收站不随记录清理删除。',
-          control: m.draft == null
-              ? const Text('尚未读取')
-              : SizedBox(
-                  width: 190,
-                  child: DesktopSelect<int>(
-                    key: const ValueKey('settings-retention-days'),
-                    value: m.draft!.retentionDays,
-                    items: [
-                      for (final n in [30, 90, 180, 365])
-                        DropdownMenuItem(value: n, child: Text('$n 天')),
-                    ],
-                    onChanged: !enabled
-                        ? null
-                        : (n) {
-                            if (n != null) {
-                              m.stage(m.draft!.copyWith(retentionDays: n));
-                            }
-                          },
-                  ),
-                ),
+        SettingsCard(
+          children: [
+            SettingsPreferenceRow(
+              title: '新申请等待时间',
+              description: '超过等待时间仍未处理的申请将到期。只影响之后提交的新申请；已有申请和已批准授权的到期时间不变。',
+              control: m.draft == null
+                  ? const Text('尚未读取')
+                  : DesktopSelect<int>(
+                      key: const ValueKey('settings-request-minutes'),
+                      value: m.draft!.requestMinutes,
+                      items: [
+                        for (final n in [5, 15, 30, 60, 120])
+                          DropdownMenuItem(value: n, child: Text('$n 分钟')),
+                      ],
+                      onChanged: !enabled
+                          ? null
+                          : (n) {
+                              if (n != null) {
+                                m.stage(m.draft!.copyWith(requestMinutes: n));
+                              }
+                            },
+                    ),
+            ),
+            SettingsPreferenceRow(
+              title: '记录保留期限',
+              divider: false,
+              description:
+                  '管理申请、授权和操作结果记录。缩短期限前会显示清理范围；当前资料、文件原文、凭据材料、修订和回收站不随记录清理删除。',
+              control: m.draft == null
+                  ? const Text('尚未读取')
+                  : DesktopSelect<int>(
+                      key: const ValueKey('settings-retention-days'),
+                      value: m.draft!.retentionDays,
+                      items: [
+                        for (final n in [30, 90, 180, 365])
+                          DropdownMenuItem(value: n, child: Text('$n 天')),
+                      ],
+                      onChanged: !enabled
+                          ? null
+                          : (n) {
+                              if (n != null) {
+                                m.stage(m.draft!.copyWith(retentionDays: n));
+                              }
+                            },
+                    ),
+            ),
+          ],
         ),
         const SizedBox(height: 24),
         Text(
@@ -374,41 +416,46 @@ class _WorkspaceSettingsPageState extends State<WorkspaceSettingsPage> {
   Widget _notifications(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
-      SettingsPreferenceRow(
-        title: '访问申请通知',
-        description: '收到新申请时提醒。通知只显示请求概况，不包含字段值和密钥。',
-        control: m.draft == null
-            ? Text(
-                m.readFailure == null ? '正在读取…' : '暂不可用',
-                style: libraryText(
-                  context,
-                  13,
-                  color: UiPalette.of(context).muted,
-                ),
-              )
-            : Semantics(
-                label: '访问申请通知',
-                child: Switch(
-                  key: const ValueKey('settings-notifications'),
-                  value: m.draft!.notifications,
-                  onChanged:
-                      m.frozen ||
-                          m.loading ||
-                          m.readFailure != null ||
-                          m.draft == null
-                      ? null
-                      : m.setNotifications,
-                ),
-              ),
-      ),
-      SettingsPreferenceRow(
-        title: '检查提醒效果',
-        description: '预览通知的标题、说明与点击后的去向。',
-        control: DesktopButton(
-          key: const ValueKey('settings-notification-preview'),
-          onPressed: m.frozen ? null : _notification,
-          child: const Text('预览通知'),
-        ),
+      SettingsCard(
+        children: [
+          SettingsPreferenceRow(
+            title: '访问申请通知',
+            description: '收到新申请时提醒。通知只显示请求概况，不包含字段值和密钥。',
+            control: m.draft == null
+                ? Text(
+                    m.readFailure == null ? '正在读取…' : '暂不可用',
+                    style: libraryText(
+                      context,
+                      13,
+                      color: UiPalette.of(context).muted,
+                    ),
+                  )
+                : Semantics(
+                    label: '访问申请通知',
+                    child: Switch(
+                      key: const ValueKey('settings-notifications'),
+                      value: m.draft!.notifications,
+                      onChanged:
+                          m.frozen ||
+                              m.loading ||
+                              m.readFailure != null ||
+                              m.draft == null
+                          ? null
+                          : m.setNotifications,
+                    ),
+                  ),
+          ),
+          SettingsPreferenceRow(
+            title: '检查提醒效果',
+            divider: false,
+            description: '预览通知的标题、说明与点击后的去向。',
+            control: DesktopButton(
+              key: const ValueKey('settings-notification-preview'),
+              onPressed: m.frozen ? null : _notification,
+              child: const Text('预览通知'),
+            ),
+          ),
+        ],
       ),
       const SizedBox(height: 20),
       Text(
@@ -449,17 +496,23 @@ class _WorkspaceSettingsPageState extends State<WorkspaceSettingsPage> {
             child: ListView(
               key: const ValueKey('settings-sidebar-scroll'),
               primary: false,
-              padding: const EdgeInsets.fromLTRB(18, 26, 18, 20),
+              padding: const EdgeInsets.fromLTRB(17, 26, 17, 24),
               children: [
-                Text(
-                  '设置',
-                  style: libraryText(context, 24, weight: FontWeight.w600),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: Text('设置', style: libraryHeading(context, 24)),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 23),
                 for (final section in WorkspaceSettingsSection.values) ...[
                   DesktopButton(
                     key: ValueKey('settings-section-${section.name}'),
                     kind: DesktopButtonKind.quiet,
+                    radius: 8,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 13,
+                    ),
+                    leadingGap: 11,
                     alignment: Alignment.centerLeft,
                     leading: PrototypeIcon(switch (section) {
                       WorkspaceSettingsSection.appearance =>
@@ -502,24 +555,24 @@ class _WorkspaceSettingsPageState extends State<WorkspaceSettingsPage> {
                           section.label,
                           style: libraryText(
                             context,
-                            15,
+                            14,
                             weight: FontWeight.w600,
                           ),
                         ),
-                        const SizedBox(height: 5),
+                        const SizedBox(height: 3),
                         Text(
                           section.description,
                           style: libraryText(
                             context,
                             12,
                             color: c.muted,
-                            height: 1.7,
+                            height: 1.6,
                           ),
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 6),
                   if (section == WorkspaceSettingsSection.plugins) ...[
                     DesktopButton(
                       key: const ValueKey('legacy-menu'),
@@ -573,46 +626,22 @@ class _WorkspaceSettingsPageState extends State<WorkspaceSettingsPage> {
                     onRequest: widget.onRequest,
                     onModalChanged: widget.onModalChanged,
                   )
-                : SingleChildScrollView(
-                    key: const ValueKey('settings-detail-scroll'),
+                : SettingsPageContent(
+                    scrollKey: const ValueKey('settings-detail-scroll'),
                     controller: _scroll,
-                    padding: const EdgeInsets.all(30),
-                    child: Center(
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 1120),
-                        child: DesktopEntrance(
-                          key: ValueKey(m.section),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              Text(
-                                m.section.label,
-                                style: libraryText(
-                                  context,
-                                  26,
-                                  weight: FontWeight.w600,
-                                ),
-                              ),
-                              const SizedBox(height: 10),
-                              Text(
-                                m.section.description,
-                                style: libraryText(context, 14, color: c.muted),
-                              ),
-                              const SizedBox(height: 28),
-                              _feedback(context),
-                              if (m.section ==
-                                  WorkspaceSettingsSection.appearance)
-                                _appearance(context)
-                              else if (m.section ==
-                                  WorkspaceSettingsSection.notifications)
-                                _notifications(context)
-                              else
-                                _records(context),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
+                    entranceKey: ValueKey(m.section),
+                    title: m.section.label,
+                    description: m.section.description,
+                    children: [
+                      _feedback(context),
+                      if (m.section == WorkspaceSettingsSection.appearance)
+                        _appearance(context)
+                      else if (m.section ==
+                          WorkspaceSettingsSection.notifications)
+                        _notifications(context)
+                      else
+                        _records(context),
+                    ],
                   ),
           ),
         ],
@@ -627,27 +656,29 @@ class SettingsPreferenceRow extends StatelessWidget {
     required this.title,
     required this.description,
     required this.control,
+    this.divider = true,
   });
   final String title, description;
   final Widget control;
+  final bool divider;
   @override
   Widget build(BuildContext context) {
     final c = UiPalette.of(context);
     final text = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title, style: libraryText(context, 16, weight: FontWeight.w600)),
+        Text(title, style: libraryText(context, 15, weight: FontWeight.w600)),
         const SizedBox(height: 8),
         Text(
           description,
-          style: libraryText(context, 14, color: c.muted, height: 1.8),
+          style: libraryText(context, 13, color: c.muted, height: 1.85),
         ),
       ],
     );
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 22),
+      padding: const EdgeInsets.symmetric(vertical: 26),
       decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: c.line)),
+        border: divider ? Border(bottom: BorderSide(color: c.line)) : null,
       ),
       child: LayoutBuilder(
         builder: (context, b) =>

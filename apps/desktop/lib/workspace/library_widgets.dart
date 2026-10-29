@@ -42,6 +42,13 @@ TextStyle libraryText(
   fontWeight: weight ?? FontWeight.w400,
 );
 
+TextStyle libraryHeading(BuildContext context, double size) => libraryText(
+  context,
+  size,
+  weight: FontWeight.w600,
+  height: 1.45,
+).copyWith(fontVariations: const [FontVariation('wght', 650)]);
+
 double libraryChWidth(BuildContext context, TextStyle style, int count) {
   final zero = TextPainter(
     text: TextSpan(text: '0', style: style),
@@ -65,6 +72,16 @@ class RecordIcon extends StatelessWidget {
   final double size;
   final double radius;
   final double? glyphSize;
+  static PrototypeIconGlyph glyphFor(String icon) => switch (icon) {
+    'server' => PrototypeIconGlyph.server,
+    'layers' => PrototypeIconGlyph.layers,
+    'user' => PrototypeIconGlyph.user,
+    'book' => PrototypeIconGlyph.book,
+    'key' => PrototypeIconGlyph.key,
+    'plugin' => PrototypeIconGlyph.plugin,
+    'globe' => PrototypeIconGlyph.globe,
+    _ => PrototypeIconGlyph.file,
+  };
   @override
   Widget build(BuildContext context) {
     final dark = Theme.of(context).brightness == Brightness.dark;
@@ -84,16 +101,7 @@ class RecordIcon extends StatelessWidget {
       (_, true) => (0xffa2bde8, 0xff29394f),
       _ => (0xff456b9e, 0xffe8eef8),
     };
-    final glyph = switch (type.icon) {
-      'server' => PrototypeIconGlyph.server,
-      'layers' => PrototypeIconGlyph.layers,
-      'user' => PrototypeIconGlyph.user,
-      'book' => PrototypeIconGlyph.book,
-      'key' => PrototypeIconGlyph.key,
-      'plugin' => PrototypeIconGlyph.plugin,
-      'globe' => PrototypeIconGlyph.globe,
-      _ => PrototypeIconGlyph.file,
-    };
+    final glyph = glyphFor(type.icon);
     return Container(
       width: size,
       height: size,
@@ -106,6 +114,27 @@ class RecordIcon extends StatelessWidget {
         glyph,
         size: glyphSize ?? (size > 40 ? 23 : 18),
         color: Color(ink),
+      ),
+    );
+  }
+}
+
+class LibraryPill extends StatelessWidget {
+  const LibraryPill(this.label, {super.key, this.color, this.background});
+  final String label;
+  final Color? color, background;
+  @override
+  Widget build(BuildContext context) {
+    final c = UiPalette.of(context);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
+      decoration: BoxDecoration(
+        color: background ?? c.nav,
+        borderRadius: BorderRadius.circular(5),
+      ),
+      child: Text(
+        label,
+        style: libraryText(context, 13, color: color ?? c.muted),
       ),
     );
   }
