@@ -1,0 +1,160 @@
+{
+  "format": "lossless-RGBA-PNG",
+  "pngEncodingDeferred": true,
+  "pixelRatio": 1,
+  "viewportCropped": false,
+  "sourceCount": 10,
+  "totalPixels": 12960000,
+  "sources": [
+    {
+      "file": "native-stills/u01-theme-roundtrip.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "1b577559dc7b1480f70e2d0be2cdac9c32449009f7fcc32c65f5809cd7deb80e",
+      "decodedRgbaSha256": "da2d08fcae26a4cc821cc9499869584ad999374d84383fb85a0a3b86d46263a7",
+      "output": "u01-theme-roundtrip.png",
+      "size": [
+        1440,
+        900
+      ],
+      "pngSha256": "c66a85addba410c0340ee9b35992c827f1f8c2b9d8257013a7ccd388f12913b1",
+      "captureUs": 26729,
+      "recordingActive": false,
+      "recordingMs": null
+    },
+    {
+      "file": "native-stills/u02-find-related-return-save-retry.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "568e5738006bd073a6773e819331e4248fe7591261e3a7c9794694f2a9ee103c",
+      "decodedRgbaSha256": "a0229b1d5ad55692be1000869efac5ccd94112329993b6d69746d3f535c82eb4",
+      "output": "u02-find-related-return-save-retry.png",
+      "size": [
+        1440,
+        900
+      ],
+      "pngSha256": "e85237a1d2ff94b9c98e3967307bb72f0727b50fff3c40bd0d9d364250430741",
+      "captureUs": 19773,
+      "recordingActive": false,
+      "recordingMs": null
+    },
+    {
+      "file": "native-stills/u03-file-version-confirm-cancel.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "0a11e38ca534236bc13120a13fc4be87585832d1b2381484719573e9eb756628",
+      "decodedRgbaSha256": "678a18671d4f82851e1b2f77c12e5c884fdb80377b8f9727f5efad9a0320488c",
+      "output": "u03-file-version-confirm-cancel.png",
+      "size": [
+        1440,
+        900
+      ],
+      "pngSha256": "9ccc581bfd51d1851b61e02ce03cee1338e65e847f08cf53395b58eb74bde425",
+      "captureUs": 12906,
+      "recordingActive": false,
+      "recordingMs": null
+    },
+    {
+      "file": "native-stills/d01-bundled-update-keeps-record-snapshot.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "565f6e42488f6e4409a50eaf730e5fdbdd9a891a29a60a05af5c4eedc1a13475",
+      "decodedRgbaSha256": "1969e23cb6f89594a8da65b7511290d7fedb9219a4383e588853b0990f721ba3",
+      "output": "d01-bundled-update-keeps-record-snapshot.png",
+      "size": [
+        1440,
+        900
+      ],
+      "pngSha256": "3652910822e2a69094e24b0a2ff6222f9fd045b74fdbcdcbfa42bd083e7ca139",
+      "captureUs": 10890,
+      "recordingActive": true,
+      "recordingMs": 2914
+    },
+    {
+      "file": "native-stills/d02-host-file-import-original-receipt.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "1bba7b72af423729118113fa7e06437333a6248dd91e644f5641c46c001490e6",
+      "decodedRgbaSha256": "98f7a2fe7f29bc0c2536086ae2a97311be28cf23ac347f0394691ddaadcb248c",
+      "output": "d02-host-file-import-original-receipt.png",
+      "size": [
+        1440,
+        900
+      ],
+      "pngSha256": "05728fdbb944dd28c808a7aeb17c84b2c7c455c00c71e5fa4f7f55b3258c5f5b",
+      "captureUs": 10517,
+      "recordingActive": true,
+      "recordingMs": 6476
+    },
+    {
+      "file": "native-stills/u04-plugin-preview-install-adopt.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "01362fbef0c95e04f8d59983d25fe03b9e46c490463082d278ffa516f456cfd6",
+      "decodedRgbaSha256": "3355c901f6acec7561b8eec4efc808c4b01bc2e76ac3d2dd580355597f70e3dc",
+      "output": "u04-plugin-preview-install-adopt.png",
+      "size": [
+        1440,
+        900
+      ],
+      "pngSha256": "6f56adcb66a3f60876870368d782dad1a9faf277a6b1d8d51794edff355392f7",
+      "captureUs": 14260,
+      "recordingActive": false,
+      "recordingMs": null
+    },
+    {
+      "file": "native-stills/u05-approval-result-in-shared-history.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "a99a53a043e88771965b2c1fde96aeb0e655bacb311e92a701182e7dd7296d42",
+      "decodedRgbaSha256": "d2e34499ce8d8f2e6d90fe5d59c42c66317d4818b68751b7269ae1c87ef17a00",
+      "output": "u05-approval-result-in-shared-history.png",
+      "size": [
+        1440,
+        900
+      ],
+      "pngSha256": "8dc564dd5d9be95670794d0ef860bca6e429e8ee7f57e66dbcd0893236e4fb2a",
+      "captureUs": 31747,
+      "recordingActive": false,
+      "recordingMs": null
+    },
+    {
+      "file": "native-stills/u06-proposal-result-current-return.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "3295a0a05eb154fa69db10b55e104cfa50aa3cfbd6197b35dc22a9608d6e219b",
+      "decodedRgbaSha256": "31b28e2e92bcb886fb714ae68da6bfefe565490d097a0aaeafd03b196590df05",
+      "output": "u06-proposal-result-current-return.png",
+      "size": [
+        1440,
+        900
+      ],
+      "pngSha256": "793628c62ee1b73dc593e7051eb4e8c07b7d0105d621ae2693a6a021af56fb3d",
+      "captureUs": 12765,
+      "recordingActive": false,
+      "recordingMs": null
+    },
+    {
+      "file": "native-stills/u07-settings-failure-retry-eight-sections.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "d7f9d57666d54eb4bca552d4802f83c4684c7e0a1452812330e780df1b26d9e5",
+      "decodedRgbaSha256": "3690e80279c1a07304fd97a7afb31f2b423655423a21a88711727c773dcdb861",
+      "output": "u07-settings-failure-retry-eight-sections.png",
+      "size": [
+        1440,
+        900
+      ],
+      "pngSha256": "3072500c5a403053953b6e70c6ede1eca6a56b29b334b39537a42e227d19468f",
+      "captureUs": 22062,
+      "recordingActive": false,
+      "recordingMs": null
+    },
+    {
+      "file": "native-stills/all-primary-destinations-return.rgba.zlib",
+      "format": "rgba8888-zlib",
+      "sha256": "d7f9d57666d54eb4bca552d4802f83c4684c7e0a1452812330e780df1b26d9e5",
+      "decodedRgbaSha256": "3690e80279c1a07304fd97a7afb31f2b423655423a21a88711727c773dcdb861",
+      "output": "all-primary-destinations-return.png",
+      "size": [
+        1440,
+        900
+      ],
+      "pngSha256": "3072500c5a403053953b6e70c6ede1eca6a56b29b334b39537a42e227d19468f",
+      "captureUs": 9855,
+      "recordingActive": false,
+      "recordingMs": null
+    }
+  ]
+}

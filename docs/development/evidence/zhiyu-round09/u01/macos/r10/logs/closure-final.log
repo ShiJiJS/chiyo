@@ -1,0 +1,8 @@
+00:00 +0: loading /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart
+00:00 +0: (setUpAll)
+00:00 +0: closure-1440-light bundled update banner uses the original review flow and retains snapshots
+00:02 +1: closure-1440-light host-file import cancels, rejects invalid input, preserves failed review and reads back unknown result
+00:03 +2: closure-1280-dark200 bundled update banner uses the original review flow and retains snapshots
+00:04 +3: closure-1280-dark200 host-file import cancels, rejects invalid input, preserves failed review and reads back unknown result
+00:05 +4: (tearDownAll)
+00:05 +4: All tests passed!

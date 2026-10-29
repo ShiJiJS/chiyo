@@ -1,0 +1,87 @@
+00:00 +0: loading /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_plugin_host_import_test.dart
+00:00 +0: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_plugin_host_import_test.dart: host-owned update is real metadata, preserves old instance snapshots and does not grant host trust
+00:00 +1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_plugin_host_import_test.dart: file selection and invalid format never mutate imported status; confirmed bytes survive lease release
+00:00 +2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_plugin_host_import_test.dart: failed and stale file imports preserve the previous file and exact host/plugin review
+00:00 +3: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_plugin_host_import_test.dart: lost import reply freezes writes and reconciles the original receipt without replay
+00:00 +4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/workspace_plugin_host_import_test.dart: a mismatched receipt cannot complete an import or release the unknown-operation gate
+00:00 +5: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: (setUpAll)
+00:00 +5: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: closure-1440-light bundled update banner uses the original review flow and retains snapshots
+00:02 +6: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: closure-1440-light host-file import cancels, rejects invalid input, preserves failed review and reads back unknown result
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown running a test:
+pumpAndSettle timed out
+
+When the exception was thrown, this was the stack:
+#0      WidgetTester.pumpAndSettle.<anonymous closure> (package:flutter_test/src/widget_tester.dart:717:11)
+<asynchronous suspension>
+#1      TestAsyncUtils.guard.<anonymous closure> (package:flutter_test/src/test_async_utils.dart:130:27)
+<asynchronous suspension>
+#2      main.tap (file:///Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart:43:5)
+<asynchronous suspension>
+#3      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart:174:9)
+<asynchronous suspension>
+#4      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#5      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+The test description was:
+  closure-1440-light host-file import cancels, rejects invalid input, preserves failed review and
+  reads back unknown result
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:03 +6 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: closure-1440-light host-file import cancels, rejects invalid input, preserves failed review and reads back unknown result [E]
+  Test failed. See exception logs above.
+  The test description was: closure-1440-light host-file import cancels, rejects invalid input, preserves failed review and reads back unknown result
+  
+00:03 +6 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: closure-1280-dark200 bundled update banner uses the original review flow and retains snapshots
+00:05 +7 -1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: closure-1280-dark200 host-file import cancels, rejects invalid input, preserves failed review and reads back unknown result
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown running a test:
+pumpAndSettle timed out
+
+When the exception was thrown, this was the stack:
+#0      WidgetTester.pumpAndSettle.<anonymous closure> (package:flutter_test/src/widget_tester.dart:717:11)
+<asynchronous suspension>
+#1      TestAsyncUtils.guard.<anonymous closure> (package:flutter_test/src/test_async_utils.dart:130:27)
+<asynchronous suspension>
+#2      main.tap (file:///Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart:43:5)
+<asynchronous suspension>
+#3      main.<anonymous closure> (file:///Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart:174:9)
+<asynchronous suspension>
+#4      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#5      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+The test description was:
+  closure-1280-dark200 host-file import cancels, rejects invalid input, preserves failed review and
+  reads back unknown result
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:06 +7 -2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: closure-1280-dark200 host-file import cancels, rejects invalid input, preserves failed review and reads back unknown result [E]
+  Test failed. See exception logs above.
+  The test description was: closure-1280-dark200 host-file import cancels, rejects invalid input, preserves failed review and reads back unknown result
+  
+00:06 +7 -2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: R07 plugin workspace matches frozen frame at 1440.0 dark=false
+00:06 +8 -2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: R07 plugin workspace matches frozen frame at 1440.0 dark=true
+00:07 +9 -2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: R07 plugin workspace matches frozen frame at 1280.0 dark=false
+00:07 +10 -2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: R07 plugin workspace matches frozen frame at 1280.0 dark=true
+00:07 +11 -2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: server identity deep link selects the exact host and shares readback with settings and library
+00:08 +12 -2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: dark200 host changes warn, missing fingerprints block confirmation and disabled plugin retains revocation
+00:09 +13 -2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: host save failure, stale review and unknown reply retain exact intent and reconcile without replay
+00:10 +14 -2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: host panel distinguishes waiting, failed read, retry and true empty states
+00:10 +15 -2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: closing a waiting host read ignores the cancelled result without reopening the dialog
+00:10 +16 -2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: settings install, shared external form, update, removal, generic editing and reinstall preserve the original snapshot
+00:12 +17 -2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: invalid package path, failed install and explicit retry retain the review instead of installing early
+00:12 +18 -2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: dark200 committed install and uncommitted disable reconcile before any new submission
+00:13 +19 -2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: waiting and failed metadata refresh keep prior detail and retry retains selected package
+00:13 +20 -2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: cold plugin loading and failure never claim a confirmed zero; a real empty response does
+00:13 +21 -2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: (tearDownAll)
+00:13 +21 -2: Some tests failed.
+
+Failing tests:
+  /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: closure-1280-dark200 host-file import cancels, rejects invalid input, preserves failed review and reads back unknown result
+  /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_plugins_test.dart: closure-1440-light host-file import cancels, rejects invalid input, preserves failed review and reads back unknown result

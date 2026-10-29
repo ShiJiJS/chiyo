@@ -1,0 +1,1071 @@
+{
+  "productCommit": "728d5126",
+  "files": [
+    {
+      "path": "apps/desktop/integration_test/zhiyu_candidate_native_test.dart",
+      "gitBlob": "c0c3a5fc0f54a2d5a8a4556ee0c44d1f61b0179b",
+      "sha256": "82b568269ca50a4819cbaab0f3a4c7b25c94ada3d98ef30d06f54c95e5ffbb65"
+    },
+    {
+      "path": "apps/desktop/lib/anchored_surface.dart",
+      "gitBlob": "99a3e90fafa1b92893b6086945c8e0b213648244",
+      "sha256": "38cdcfe9bad3157699bdfaf7f8d0ea32d8ae1e7b90f09b3f6a67216e63d4a19f"
+    },
+    {
+      "path": "apps/desktop/lib/approvals.dart",
+      "gitBlob": "a0ecdee7e645a70810e33e5c7390e9c627d21f65",
+      "sha256": "e168e7cfb1bb1a3780f18bb79256c9337c3bda99b7c9d6b094c67e74164cec60"
+    },
+    {
+      "path": "apps/desktop/lib/backups.dart",
+      "gitBlob": "08b2cdc0bcb510acac6dad20c6e672ddcf95bbfd",
+      "sha256": "2a5edfd9db271ccb9b1708079c1a70c7463e41a6001c85f23704a48aaba69ea0"
+    },
+    {
+      "path": "apps/desktop/lib/bundled_focused_fill.dart",
+      "gitBlob": "3542f97589b9e260c419ef0332f510670a78021b",
+      "sha256": "501ed7b3e98e0a5929e96094f449da222f50447119b6c9f58c5466b5b4022e8f"
+    },
+    {
+      "path": "apps/desktop/lib/bundled_tool_settings.dart",
+      "gitBlob": "b22fe28c50c4c5b8433fa869695477fe8aa22167",
+      "sha256": "e111126d06fa316092a883a61117eda5779aca27b9592f4989f7dee3cb0faf9d"
+    },
+    {
+      "path": "apps/desktop/lib/credential_delivery.dart",
+      "gitBlob": "7a3870f6d3c2194203e52b6443a749d2b00064af",
+      "sha256": "1ec1e26959e1d51eaa2a494597844efe7deaa153ca49e2ac9055f46bc6fea5b4"
+    },
+    {
+      "path": "apps/desktop/lib/credential_dialogs.dart",
+      "gitBlob": "a67cb82b8e92d9c5227ca30bf5241fc7e3374c50",
+      "sha256": "28f4501c35478b76733cefc2122d9214f580b08a5b1c9438107c93254e49e435"
+    },
+    {
+      "path": "apps/desktop/lib/credential_execution_receipt.dart",
+      "gitBlob": "a94c62d5bbea9844f8dcd788380b2fcb48837eb5",
+      "sha256": "625eb8b2cbeeba2e20c74b5c201d84b8fe76dcf1f95be3eab04188eda45839c1"
+    },
+    {
+      "path": "apps/desktop/lib/credential_files.dart",
+      "gitBlob": "a195f0d0340f8d3e2924f9f898ba99f00dbecfde",
+      "sha256": "582e09014b0d8f144fc8e39f3a0966d5790414e87180daa0797237f9985cfe51"
+    },
+    {
+      "path": "apps/desktop/lib/credential_history.dart",
+      "gitBlob": "cf71493858cce3eb525296016171b4483ec8a497",
+      "sha256": "a6e086aa9806c26389d865a5bfc13b3ef4da3182bee5943bf2b4d5be279f6939"
+    },
+    {
+      "path": "apps/desktop/lib/credential_management.dart",
+      "gitBlob": "303098c827d3928ff4aa93fb0389bec2b1548463",
+      "sha256": "445d1bad1e020527ef67bb38cf7921578aee10e35956d5359114678c1b23cc4f"
+    },
+    {
+      "path": "apps/desktop/lib/credential_material_checks.dart",
+      "gitBlob": "9d9d2734a8f1a2fe5662dc1685355a60f26b55d9",
+      "sha256": "3c518aa76bdd21a70c566c0d7e70b8f500d60b697677718d09b53172abaf51c8"
+    },
+    {
+      "path": "apps/desktop/lib/credential_migration.dart",
+      "gitBlob": "b458605e1e1632c89c86dec1f32c6948edc4b759",
+      "sha256": "c180646ef267ec0cd25a63dc5723ed2fcaef9854dee85d71ebb8229b120e0944"
+    },
+    {
+      "path": "apps/desktop/lib/credential_operations.dart",
+      "gitBlob": "b10476bc9933f94b35d9b936e86e76e8cfdcfdb6",
+      "sha256": "722963d521302ccd5ab287c3ef00a387b9d184aa4012ffa2434372d0344e5faa"
+    },
+    {
+      "path": "apps/desktop/lib/credential_use_approval.dart",
+      "gitBlob": "df1d9bf50bf6d298cf1d49106a2b3126cae96532",
+      "sha256": "1b03aac91f1dea8971698d2124aa9a0db3ff0b39f27836659f86e8b7bdf252ae"
+    },
+    {
+      "path": "apps/desktop/lib/credential_use_draft.dart",
+      "gitBlob": "4a737f5e59ab6a8afefd026e84159769aa7924a1",
+      "sha256": "8e1fa8109a6886acbe07cbe7bdf8a87f1382c736353ea67cd225f381fed9806d"
+    },
+    {
+      "path": "apps/desktop/lib/credentials.dart",
+      "gitBlob": "2c878f5daa2f6c5919c1ddc849f35e1c6a9ca8d5",
+      "sha256": "304534550ffc3a77f21f5d48f9e053f515216d4761e9946730fcf47fd42a1988"
+    },
+    {
+      "path": "apps/desktop/lib/desktop_bootstrap.dart",
+      "gitBlob": "0746a2aba0afcf34388dc216217ea81f9ab1520f",
+      "sha256": "397db97856dff6a4fd37b305cefeeeaa6f71809746a711e39457c90937b97bf3"
+    },
+    {
+      "path": "apps/desktop/lib/desktop_button.dart",
+      "gitBlob": "5ee69214f2eda3e82cbcf6093ddb08dff05600a2",
+      "sha256": "ebee060cd013bcfe76702698122b21429ae690a525f913db3d7988c302728e11"
+    },
+    {
+      "path": "apps/desktop/lib/desktop_controls.dart",
+      "gitBlob": "42cc93190eff912d467297d306b4e9ce108e961b",
+      "sha256": "f23e6dd2e2ba64bf147d62a143f7c13b758311f8dde94328ac21583db136eecc"
+    },
+    {
+      "path": "apps/desktop/lib/desktop_feedback.dart",
+      "gitBlob": "b4e19f65e27550fae716ea02bb6f5f34f454ac30",
+      "sha256": "4c55ac892c3e57bf7fb7582aebda10a10ae4cffaa422ade738b47de44ccb3ba9"
+    },
+    {
+      "path": "apps/desktop/lib/desktop_fonts.dart",
+      "gitBlob": "b632e5c8dbeacc56ea90eef16fa4f07095002001",
+      "sha256": "4094ef5986fa18a47e5aef5243e49d980c5e1b2438ec1ed8be477a62db39ee19"
+    },
+    {
+      "path": "apps/desktop/lib/desktop_interaction_host.dart",
+      "gitBlob": "795bf33330a499aafdffff82339c0fcdf428c1ad",
+      "sha256": "f4f0cb215a22ab1e8e3c239d2ce506dc2bf8b2e0de434551ea5a084f8566e2aa"
+    },
+    {
+      "path": "apps/desktop/lib/desktop_motion.dart",
+      "gitBlob": "30808aaee467885b029855d7ce2abb9465541897",
+      "sha256": "967bff3f17353fc008d6ebeee3efad484c86a0bd2043b29c53c3e3525e85a4c5"
+    },
+    {
+      "path": "apps/desktop/lib/desktop_runtime.dart",
+      "gitBlob": "5128c2c8870399535bb12bc157bf5245edba09c4",
+      "sha256": "c2896f18701460f797e1e4b4b85b6cead84e5748ec6f1cedb432398119ab0972"
+    },
+    {
+      "path": "apps/desktop/lib/desktop_scroll.dart",
+      "gitBlob": "aaf9a96c76f7d5a82311cd48c6e11015a2892ea4",
+      "sha256": "2375214b2e777ec5da24223e835cdf20169f9549f44c57f6af7856a3610c629c"
+    },
+    {
+      "path": "apps/desktop/lib/desktop_shell.dart",
+      "gitBlob": "751a8c97856a602e436414fc276e72ddb463d5ea",
+      "sha256": "baeb6b8758dfaf8bc7b30d9be1f56c4a2cec79acd6a41c3c6c7d374b30a5e7f5"
+    },
+    {
+      "path": "apps/desktop/lib/focused_fill_ui.dart",
+      "gitBlob": "be0d2b9e82143027ca3c7258876a70974e00c1d0",
+      "sha256": "19abce07c8a3f13f4571c93e6a909f381853530e8f53ce9c34ffc0ab09acd4bf"
+    },
+    {
+      "path": "apps/desktop/lib/history.dart",
+      "gitBlob": "2c49cf9a23eb8ab81a8e9efcbb4e849a1f0c1e5e",
+      "sha256": "fccc6d422a15b63a361be6a63c4f480050ff75d92ddcf0fe9e6a93c82671171d"
+    },
+    {
+      "path": "apps/desktop/lib/import_proposals.dart",
+      "gitBlob": "a073fbe2389f5f14f88719c21bdadd6a85a820ec",
+      "sha256": "28807b9bf2a77c3a764ea3c223ec5fbdfda9dfd575781ed6f2e04f02b85cb764"
+    },
+    {
+      "path": "apps/desktop/lib/inbox_queue.dart",
+      "gitBlob": "380ae248287054555292b04534d0797df0828e0b",
+      "sha256": "95bed215acae10c283ae22eb4bc3622a70c697a2fe8b81f7256e0bf3c002402d"
+    },
+    {
+      "path": "apps/desktop/lib/information_attachment_capacity.dart",
+      "gitBlob": "303a9e4faec444d45d129f811637cbcdd823a426",
+      "sha256": "210c091b49c0b1d57d40c4fd3c6676cca3ad22d1e11e068ffb0f3cc76a86e5de"
+    },
+    {
+      "path": "apps/desktop/lib/information_delivery_history.dart",
+      "gitBlob": "c6cc443e3068c75624fc5efbcbd76d8a4bef4090",
+      "sha256": "727fddccd16d9bb06fe7c907a6dd797f754487563336af47d6e138bd166537b3"
+    },
+    {
+      "path": "apps/desktop/lib/information_editor.dart",
+      "gitBlob": "74a4d7840ac6ebf7570196bfd7321978960bd83f",
+      "sha256": "187fec142e29827d9dad2ede9a6cad417d65303dbf8e8728b3754568d1c0641b"
+    },
+    {
+      "path": "apps/desktop/lib/information_editor_draft.dart",
+      "gitBlob": "946f4f5ab45b5fdee3711cd210fbf2b60b99e894",
+      "sha256": "b2f76f7de1081382994aad2686b3a085c73da7e02eac76500f7910e3bc4f23d1"
+    },
+    {
+      "path": "apps/desktop/lib/information_field_preview.dart",
+      "gitBlob": "8f303dd403f53c05dbddea8cfbf8c4acef05bb40",
+      "sha256": "0c1a44e226602ea3623037014460ee449f25a2349a50d117227420b5f591afd1"
+    },
+    {
+      "path": "apps/desktop/lib/information_file_summary.dart",
+      "gitBlob": "77ee97230c0d5d356ad3d8ac6ca0eb2729c98320",
+      "sha256": "cecfb247e91e882af91f74f50ee0f9c2a31f7feec9465fb2b20005090a182308"
+    },
+    {
+      "path": "apps/desktop/lib/information_files.dart",
+      "gitBlob": "702e01abba1cb1b766ee66f4eef6b98795cc0be2",
+      "sha256": "27e2f34e5a19bb6e11a97f4c85e7fc50ea897e3d3aef9232e8153ccfde49e083"
+    },
+    {
+      "path": "apps/desktop/lib/information_workspace.dart",
+      "gitBlob": "dc137bdf875e0153f53e119c9caefa2ed6558a74",
+      "sha256": "eb2c65a38db88be3557847f131d7fe8efca68616ffbef313d35fa5ca210737e6"
+    },
+    {
+      "path": "apps/desktop/lib/library.dart",
+      "gitBlob": "5bcf71ad7a84658a13fe85426aa6a1e3620fcf5c",
+      "sha256": "64608392c055fd0eb438942ae9bb26f9fd3f3b5dc3418d30a300e412616cd758"
+    },
+    {
+      "path": "apps/desktop/lib/mac_secret_input.dart",
+      "gitBlob": "942a3cb1088024b648c31f1be5b06f38ee9fbc37",
+      "sha256": "44eb75c4e89b621799bc267f05efc13e32b917abdfd84b8e3fbedd8055c613df"
+    },
+    {
+      "path": "apps/desktop/lib/mac_text_editing.dart",
+      "gitBlob": "3091e6f4eefd54bbc4c0b3c950bf9821ff09852e",
+      "sha256": "a6587d545562d702626dbba235bcf9eb0f1af9b927aea57f134758723ce229bf"
+    },
+    {
+      "path": "apps/desktop/lib/mac_text_field_accessibility.dart",
+      "gitBlob": "045ace442d214581fd284e83662aa92cce39a20f",
+      "sha256": "d75cbb14a7bfe80c9d38832b01a1343907d2e738dba898d2bdab3a878912be28"
+    },
+    {
+      "path": "apps/desktop/lib/macos_focused_fill.dart",
+      "gitBlob": "20c7ff404ac802b15832f15e7dfde942ea42a6b6",
+      "sha256": "ed68b1a5bc6f832178850bce4630e05fd0d5da00ba33e4c5a2faa9baca4c41de"
+    },
+    {
+      "path": "apps/desktop/lib/main.dart",
+      "gitBlob": "0908db5660bf93a9f577b2a7996bf687975c1ad1",
+      "sha256": "e4e5d46190fa75b2df70ff1678bc4c526c13aa70f98db2a8b3635c43a45bfcac"
+    },
+    {
+      "path": "apps/desktop/lib/organization.dart",
+      "gitBlob": "01ab61de8cbe942157bbbee166ae8e61dc37166f",
+      "sha256": "1f4cb60b499552f9c83464a8bf214b82ed57bf0adf7cf29d6946ae6390e2960d"
+    },
+    {
+      "path": "apps/desktop/lib/organization_management.dart",
+      "gitBlob": "9253630b0dc60952aef711e6b16794e8de4bfda8",
+      "sha256": "9ea58b2c3dc9e644f0d5a98cb7bc0e3e92bc57c874861c2407cd44aef6740c9a"
+    },
+    {
+      "path": "apps/desktop/lib/organization_selectors.dart",
+      "gitBlob": "f6aa799fb2e0d0da60b1f068f6e3724f277000c6",
+      "sha256": "4458ae838b6a9ef0bc584a96e770d83abb9ee800cf1f0afa8de948b11843d03a"
+    },
+    {
+      "path": "apps/desktop/lib/organization_tasks.dart",
+      "gitBlob": "b49d4f1f31eb6f91908b6f3cac4e18c012b02cc0",
+      "sha256": "629f186c59c368517b6d9952118876625cb56cc48c46b4851dcd384212377943"
+    },
+    {
+      "path": "apps/desktop/lib/preview_main.dart",
+      "gitBlob": "5afd092102a14931606e0a8d633436184f4769d1",
+      "sha256": "8ea387c251c40080ddc65e2ae89483a88e56753f8dea3b0d1eb370bfa9355d33"
+    },
+    {
+      "path": "apps/desktop/lib/proposal_queue.dart",
+      "gitBlob": "d38817e3d792bb94c99db0148d1b6941db3d097d",
+      "sha256": "0365e942d6625b14956a6632a3a1cc06f7b510e7c764ba3523bfad21c3366eec"
+    },
+    {
+      "path": "apps/desktop/lib/proposal_workspace.dart",
+      "gitBlob": "08f3613ec36983b693f54960ee456094e005105a",
+      "sha256": "72d59e46d57372510346b03c8577c88b61382ce0266bb3501a204d0c3690a765"
+    },
+    {
+      "path": "apps/desktop/lib/prototype_dialog.dart",
+      "gitBlob": "431792771850cc9dbfd9ec5c2d3aa578ddb080aa",
+      "sha256": "7b8a49c82e6e8fe3f59c11f8773cf0be3a5b4c5433c445dde8a529fe19c4ec52"
+    },
+    {
+      "path": "apps/desktop/lib/prototype_icons.dart",
+      "gitBlob": "591922174187ac65c7ddaf21fbd0886084723aef",
+      "sha256": "ab2c200ba3afa51933d7d2e11189037a4c1a3603fb66e445c48b536669f958ed"
+    },
+    {
+      "path": "apps/desktop/lib/prototype_ui.dart",
+      "gitBlob": "dbd5237f3e715d88fb2bf6f03a1d5d473e2090ca",
+      "sha256": "a600acb40d2d87732a9954b7c6c94cb133638e816d3eb71c6d8ceed4dc9b702b"
+    },
+    {
+      "path": "apps/desktop/lib/recycle.dart",
+      "gitBlob": "2b1bc7c46263de44423132fde5346c80b0a16933",
+      "sha256": "770c7ffe0b76637bb35cc84429e2dd6b3994e77b15a578c853036016e86a3f3d"
+    },
+    {
+      "path": "apps/desktop/lib/revisions.dart",
+      "gitBlob": "43580ac68ce0ce0ec1675c0833de3f85f2af3705",
+      "sha256": "fd656e819697f2dec00b4868fcecd6c8fa53285f14ed45d2abb21db1aece93eb"
+    },
+    {
+      "path": "apps/desktop/lib/settings.dart",
+      "gitBlob": "c0a441b007a5e9d9a37b59a68b084758a21524b5",
+      "sha256": "d4accb4fdbbfac3ef660ac48755858019bd48c9c19354150907740eb68c12360"
+    },
+    {
+      "path": "apps/desktop/lib/settings_controls.dart",
+      "gitBlob": "eb58ebe5b82b9f5d33d5b11f1e0af84f5efddd96",
+      "sha256": "3e86c0860f7a88eedf210f55a6851b83e8e9f35dfedfabf506e78e4df9628033"
+    },
+    {
+      "path": "apps/desktop/lib/ssh_host_settings.dart",
+      "gitBlob": "0a98527dd5bc24b7591b9374aa75a0e2adfa0b6c",
+      "sha256": "8287cd1a989974e7d2fa1e3f0636557b0af75c7bef7dac295cea44a376947385"
+    },
+    {
+      "path": "apps/desktop/lib/templates.dart",
+      "gitBlob": "dc8efac30d00e57ec078adc65cb29191032e790a",
+      "sha256": "6db0c956cd9108b805ad86b399a1e95d159a8a806f65235037626e13e94c5f7a"
+    },
+    {
+      "path": "apps/desktop/lib/tool_directory_access.dart",
+      "gitBlob": "2b6657d545a82b47b48e926efcdb920c7ea11b1b",
+      "sha256": "6eba0370c02b2204f8c011379e8132ced31c5bd5557c19b08871891ee9c9dc3c"
+    },
+    {
+      "path": "apps/desktop/lib/tool_directory_settings.dart",
+      "gitBlob": "842d421f81110107c0e5c3ecdcb8e7900ba0add6",
+      "sha256": "a93518531bc6f9e3cfd956c5188a5e9c6831bc981aa6b344bbfe3ed98a47bdcb"
+    },
+    {
+      "path": "apps/desktop/lib/ui.dart",
+      "gitBlob": "f8db8c71c210dd8d3b8ac4022403b68adeb7c2f8",
+      "sha256": "9d3676ed99dd37d2c0da7a15a07cd1497d3672989e6b11cc2fee4921b1a597eb"
+    },
+    {
+      "path": "apps/desktop/lib/ui_palette.dart",
+      "gitBlob": "a090b10c41c065a6b528c8fefdfc9186dc43c0f4",
+      "sha256": "0c54a7d19aef8c1936a7a2b005cdb0efeafe08c38d631cc2499be52925ae10c3"
+    },
+    {
+      "path": "apps/desktop/lib/update_proposals.dart",
+      "gitBlob": "19f399fec4b895ad49f374d9b13738dd5b4af3d6",
+      "sha256": "8eb2378e33182e7ee67a0a6044cd4302ba899b116d17e118b26d655cdcba7815"
+    },
+    {
+      "path": "apps/desktop/lib/window_frame.dart",
+      "gitBlob": "a986ab51c41e198b278b79f99f328baf906efa14",
+      "sha256": "b665fe3c0e63641c074f2168560d2e7a96cefc3cb06be935a35202b00c1d50cc"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/agents_controller.dart",
+      "gitBlob": "60160b41efbfcf75b2a45ee7b997a681c2846cf1",
+      "sha256": "95e3c23c3351723bcb7268b05dd7199a646d4e8edca6a40fab510a0b691d7980"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/agents_page.dart",
+      "gitBlob": "9914f77ed9f337f2d3813532adff2074ddd503d7",
+      "sha256": "97308fee5d54a149d41289c25a434c725f8e26fa00f81a646f5ada542bab08bb"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/approval_executions.dart",
+      "gitBlob": "e5c12b7516bb4b6a5fb482f4f7b43af580fbe8ab",
+      "sha256": "8dec96b271933556520c90075174a84e7130aa200731fb74dc3621a41128e06e"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/approvals_controller.dart",
+      "gitBlob": "d51de92575b4d566e825463f2724a42b089e5a24",
+      "sha256": "23f8fe0d6b204cc7aba5ca564bdcc23c20b020af0ae7c18edad11685418788b5"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/approvals_page.dart",
+      "gitBlob": "3416fe09c199537b7b8d6b195bd8ba75e1d9ccfa",
+      "sha256": "86118d29a8c54108c12d05903e93c1d74e92cdb85a1992f101e76ba517fba448"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/backup_controller.dart",
+      "gitBlob": "956458bf78cc4f74129d6701525d097401b5de72",
+      "sha256": "65ef9ce9e56240fb2e4dfc6125423a738e2a4b6b13d48532eda0d5c03d3ba7d9"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/backup_page.dart",
+      "gitBlob": "5092400673664d8554b537ff9b3f83f62882c353",
+      "sha256": "834ba0830d1d97418e7059b7c82e918a2f989bd2c4a30c18d9a9a6dc43b79621"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/classification_controller.dart",
+      "gitBlob": "9dff9022d7306c75cbe1a6455f5c9c47ae9f5029",
+      "sha256": "b76ce53b9c50ff85b8e9c9fabae597934fbd784a300b2df052664d4be804c626"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/classification_page.dart",
+      "gitBlob": "59ca666a0d4343b28bdb212cd3a7f65b1c3a19d2",
+      "sha256": "2c65883784aa8a256fddc3e0232fdff83d2d3113b80f5cae9e89b801294969eb"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/credential_mutation.dart",
+      "gitBlob": "3b6efa9d6d7c9b779b002e3c3acd30e5822126cf",
+      "sha256": "2e9332bfe778764786b8137c6b7d014ba80a84cb5293dc7aaf15c60ac54e80a0"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/grant_history_controller.dart",
+      "gitBlob": "02f68a0c3b27404a4e57aac44a134fd5a683055e",
+      "sha256": "f4fa975f6dd4e60644d5b7eda75fd8b22baa231122f06c28165dd144a0af2850"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/grant_history_dialog.dart",
+      "gitBlob": "7e6185364baead2682a8a7725f228f7ba2938b1d",
+      "sha256": "69805370387e00b8f247d7ebfb3e60bf0a67b191eac5824e5e46a54210415ef1"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/grant_history_page.dart",
+      "gitBlob": "4cb6d682068e6ec6e7d8b05fed76874e0ec5ce73",
+      "sha256": "4a7bb2d50ff3f801795809c0840027edf4b5497432ceb8a1b9549ad40dc77d29"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/host_import_controller.dart",
+      "gitBlob": "89fff242b2fcda6ccd2fb91d8e6e6abdeb098358",
+      "sha256": "48be17eb713e752e03d63cf43864dc4b4ff23b00a4f0710ab145425ae5944ccc"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/host_import_dialog.dart",
+      "gitBlob": "1fbc232ee68fabf659bed0ae7340b5f217b057d8",
+      "sha256": "5eb789004cb393b27ee98eeca145de0441c27eb1270043d4cb07b0d27bb1b151"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/host_mutation.dart",
+      "gitBlob": "b936de0aea7a5cc9bd920baa5cec9b7eb1855da6",
+      "sha256": "ece770965760cc30035f86253f06fe5d0421f97a96d5ee04fd314f63c667ae07"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/host_settings.dart",
+      "gitBlob": "1244699cf72e47b6b29d3b61338aa7d92b64a167",
+      "sha256": "a2bf1c6bea2d93920533dd49de094cf4bc9aa9b4dadcda0e0a71b0bf4ab97155"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/legacy_templates_controller.dart",
+      "gitBlob": "4a50313b478bf47877d9d11b7f453770a7dad374",
+      "sha256": "46e45d6659a05552983bb775d119b0a2f70095a2394f9e74da948b41160160d1"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/legacy_templates_panel.dart",
+      "gitBlob": "9c9c887464864fd6c7387d981415006eeaf43a1b",
+      "sha256": "383e176d8e79621c980f32b8a63f0694cd41684cf46cd2c91acd51112a4f64e9"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/library_adoption_dialog.dart",
+      "gitBlob": "cdd8156b2be722e7d57c580dd2a49093002660de",
+      "sha256": "d10467b106d0fd0e4a2d834d3b424928d1b230ae3d0052f5c76cf9de6078a7e4"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/library_controller.dart",
+      "gitBlob": "fe614c7621e9052a0a319099739b85b0dbd936fa",
+      "sha256": "3b808e2a7d2ada1924a9e323fadc92a2dfda25cf01c93c0e50ff54302db9c0a0"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/library_create_dialog.dart",
+      "gitBlob": "897ee1fcefb6b0eeb1c21bc4419a26dc8a05390e",
+      "sha256": "f0fa88d89ae3a6ab9a1c79b67db02d533a461deaf96fe66e1172f20a15b4e8c4"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/library_credential.dart",
+      "gitBlob": "1c1a8e7d2065a6484fc911192f2aecbbcfc16ce0",
+      "sha256": "463c5d3b1c5670a3c764bfd33d9480a313a4ed83ced844efc94f654b49207392"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/library_credential_choices.dart",
+      "gitBlob": "431d1d872f9a61741c44ab6652a101769c94c62c",
+      "sha256": "d5f18604ad6e5d111787de2b9d8bf68a4131809ef7a9c328d2b098b4434ca7bd"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/library_credential_editor.dart",
+      "gitBlob": "c652737d0fc27e92347876610949dabf59f3718b",
+      "sha256": "a9f42df17fdffc84d01f42fa7193547cc90671c3ad34f3bec358f0283d7ecdbd"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/library_credential_lifecycle.dart",
+      "gitBlob": "a0bed22098bbecc4aeeb2238b25cf3dff8b7f022",
+      "sha256": "8798a506e2864864f600a94adf2092841a6a5c133d86749b9f9c60286d096087"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/library_credential_use.dart",
+      "gitBlob": "05daef83774574a65f33bdb78dfd728cd96755fb",
+      "sha256": "32250442079c214ee8360bbf80fab1a4838daecf7da6c0ea8caa1cc5bae8ac8b"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/library_detail.dart",
+      "gitBlob": "bf08046de137e43fe82b9562c355ae1c7f7dcda4",
+      "sha256": "9c825aff6b5db6363398d8e49867a29f485e09fff771437d67a7f41bb1835c50"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/library_directory_dialog.dart",
+      "gitBlob": "553932241011cf4272404fe0bc2b4f41ab7504b8",
+      "sha256": "45a4dc4d2b65c5f3a3e61319d35f6e1337a2a66b596292334793a8369dedfd32"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/library_document.dart",
+      "gitBlob": "a306b84b59d287af2271ae7d571d84d07968de76",
+      "sha256": "232d97efd3d412c7d8c1c907a960787d0f2932ce4c19f5aeecf89bf44aa5f4dd"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/library_edit_conflict.dart",
+      "gitBlob": "610f14fb1229a6914f8683a062d6b2b628051a2e",
+      "sha256": "09ce7a2b5cd092c38dd121da650677e21d9506f9a85abd3b599f8508b768a744"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/library_edit_dialog.dart",
+      "gitBlob": "a105fa5cd0caa3c2a0db0459eed0a1f48258c807",
+      "sha256": "539a29e970079fb2d6f04c41f3c0679f671f4f2917af47802bb2b67474be9ec5"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/library_entries.dart",
+      "gitBlob": "16db7aca257eaa297c0d4184e2477f5b0cc94309",
+      "sha256": "eea1bee7146c0a6ef4e544d515b7dc9d4c068993bd50083cd4a06dfe3e4b1b11"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/library_file.dart",
+      "gitBlob": "5d1782be86437b65e6f081c1095ac4a616978b53",
+      "sha256": "673708dd3dd23d90863098d37f9e45003a8afda2c9c5367ed9c5bf2f6c455cb8"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/library_file_dialogs.dart",
+      "gitBlob": "85d243c15b3e75d4226dc1fd6b1e7357d5addddf",
+      "sha256": "50a79b326559a86f29dd47b8bfad15dd5d0d3405da254a4ec7942959a0daf47b"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/library_history_dialog.dart",
+      "gitBlob": "0a0a758b1b863a3e4b0f5a6b044b13482685bd2a",
+      "sha256": "02032f7321bc4d431ad64bbe377e7de6b684363885fc3a855dd1c62331302b0f"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/library_page.dart",
+      "gitBlob": "9223f5a01eb815b792562031ed674e4152128736",
+      "sha256": "f14d95b37bf98aff98e2aa00a3298e89f625068a157c5244cefba4f127dcea27"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/library_recycle.dart",
+      "gitBlob": "97a9743106e2ecd2fcc934c23a9fb9e308e9d009",
+      "sha256": "ea088e222f95586ab18305ef18e12d6bcd472475c9bcc6ae5cd61c75e8f841f5"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/library_relation_picker.dart",
+      "gitBlob": "b358ea96543f066394a28f9e1ba3653374f7596f",
+      "sha256": "70515fce9a91e2c62e24ecbace52ca92539b0e9cb3627d1c600bc52b85a255e6"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/library_widgets.dart",
+      "gitBlob": "68b36801f718180f59195de3581da842d8d36805",
+      "sha256": "45a99e89674ddcef883a26e6c8fe3ce1e925ae796a5bc4e9ec57bfb1199171ab"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/mac_preview_desktop.dart",
+      "gitBlob": "312226f1223310fcc31230d8963da1c001ab64bb",
+      "sha256": "96ad7bb87841ad7a0c4b71c4d451d8baa3a69df1eb0b511bf3cd6a39b9ab393d"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/organization_reading.dart",
+      "gitBlob": "54afae097ca8baa0e71a1934ab435dd400d55f76",
+      "sha256": "20234cfc95c136bb8dea47fa3e2e6a7ccab69eaa290ee854afaa84214f5af17e"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/plugin_authoring_guide.dart",
+      "gitBlob": "8d00b91c082397b88dae3df0c835e343e4ccd744",
+      "sha256": "f221b5893c7bb0a0f824730a9e6c9da1688496b335683eb8eed8a5ccf6fe4501"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/plugin_dialogs.dart",
+      "gitBlob": "7a016dedcd7e097e13b0bbf2c5e37ac78dfe6bf1",
+      "sha256": "010dd85669bcbe63164c08ea762fabb7c4174201183d3e33c2ef93604ee807d9"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/plugin_mutation.dart",
+      "gitBlob": "391d86257e15437af7047d2988116c93c9dd10d1",
+      "sha256": "14c1ea823bcfbb129780a9f684cbe418766546484668eacc78dc90c05937b06b"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/plugin_widgets.dart",
+      "gitBlob": "eac2d4e31adb929c2aef0561626f8f60ca06003f",
+      "sha256": "12228da6e97183bf6956d9668ca0d8450615620b64821dc93e44650ccc232c3d"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/plugins_controller.dart",
+      "gitBlob": "d88338fa0667ddd10e59933177fd92132ebd097e",
+      "sha256": "89b9b208d7de600e02593deda56e5fd6b820a88df060cd0845a02d7de4e6a08b"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/plugins_page.dart",
+      "gitBlob": "615344539828baec7e968921073f998b8e473e1a",
+      "sha256": "602e2ea530835ecead35626f7c3cd065848d9170633da5dad007323c922eff49"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/preview_workspace.dart",
+      "gitBlob": "1de18a430a1bace1bc2a0ce63b92b5be4aa48886",
+      "sha256": "ebb5188bc056e83b9efd22e0038ecbd94d769bb994e55325838a8b9d71e601dc"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/proposal_batch.dart",
+      "gitBlob": "1d8d9ac55520389dc99632086f1799a79f572f13",
+      "sha256": "d18d579e9f2c12372f64a25e2901edef4afd97a760b78c4327393518bd676a24"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/proposal_batch_dialog.dart",
+      "gitBlob": "da697db6e5cf425dead30bcccb59b7f260a0d0a9",
+      "sha256": "96577b5ec55842e09145001eaa70fded6c2d10108d1cdfe6b406f72215359741"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/proposal_editor.dart",
+      "gitBlob": "3dbb5196c7a185966c1a48233e6f8b455d39fe7b",
+      "sha256": "3a4f79d499d6294d7b13eae1aeeed0513ec5f56d2aa578a47751c9730dec5807"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/proposal_read_dialog.dart",
+      "gitBlob": "ce47bea84a13facf1ce3a1d07219aad91ff87d79",
+      "sha256": "24f1f41e1319c99128c3e20c3bd034c86a279e98e038240f8289bba3160ae803"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/proposal_reading.dart",
+      "gitBlob": "64fbe5d5d9a8a1541e134d26cd95d4d6704074e3",
+      "sha256": "07bd86c4812d90e3bc894533fd172caee888f1d9ec37261c62087a8d7131236a"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/proposals_controller.dart",
+      "gitBlob": "58db7df60ae29b2dff206407c64f139b2190c34c",
+      "sha256": "9e38a40a28ac38604f7f1396eeca130e00fdd3631877ceb7741d27dcf7cd0542"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/proposals_page.dart",
+      "gitBlob": "f028dd23cd9ca6ee0d7fe53d1b3dedd2e78449d0",
+      "sha256": "109a8da28dbb294d05404fb2a76b36a2c1600cba127d0dbd85649809cc4a849c"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/record_mutation.dart",
+      "gitBlob": "12995eaca0dda46c54393ede9f7de57922dfbfd6",
+      "sha256": "874fe8f2271eb086c3582ce193c333ac56300ef31bebea3d160e0110e3a17092"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/runtime_controller.dart",
+      "gitBlob": "ea47d58c91aee7be63ba80a288090aadb9f5a9cd",
+      "sha256": "656c1d3246e639cd6506926f392d415b13a942dea521d63d43819676e92336b4"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/runtime_page.dart",
+      "gitBlob": "b3f81b9a00da95441e982a2f490d32132246fa4a",
+      "sha256": "20076c61ac3d51a1edd0a5042368bd354ffa10488cae80b91b45dc2888b75ac0"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/sample_credential_links.dart",
+      "gitBlob": "a85f8f68820939a38a1095596c8b7faff1559980",
+      "sha256": "b8b4849ae420e32c5a6196b3e06f8e3082de7e56e629837b4cad865eaac1234d"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/sample_credential_records.dart",
+      "gitBlob": "ee0b04ccb6c9fee48588475edd1b05d5534d3b5a",
+      "sha256": "ffd4441a99e70dbf89e05426688921d42ae2a9b669b0ffe97ee7371c8a6c35ae"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/sample_host_file_imports.dart",
+      "gitBlob": "27237dfc0eafb0524ef5c14f73e8f6f95662ad73",
+      "sha256": "2a43149d92c34438579ebf1bdf1071d4bb0edf25d081c1babb403761c5ef9c2b"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/sample_plugin_fixture.dart",
+      "gitBlob": "076b866399147c630a6f8c11c21bfe9d7ead4684",
+      "sha256": "124b1f666e50c75fa1e7c86b5eda2f2ca7580a3d52b8c3f33bc3418a1699310c"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/sample_workspace_adoption.dart",
+      "gitBlob": "9d3b55c2b94e7e99ba509ea6ced063576ac0d348",
+      "sha256": "dfd3a58a263c59a5f3e3a2ad9b50efb01f9f94faa8f2e611a827e677cf1f86a4"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/sample_workspace_agents.dart",
+      "gitBlob": "7b83d040bd3352e94ae87a25712d7a94c8764ebd",
+      "sha256": "967ba78bd9c0e37ea62ac3d8d89f20a2fe7a1187f5ab0b9a714b81379fbd4cd5"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/sample_workspace_approvals.dart",
+      "gitBlob": "9ae82d9a000c7e23fbb8811a57f3ef5de648e311",
+      "sha256": "97ee0b946fa0646fd911c5128c5a3b74fff799520291185a8277be0c74b83b0a"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/sample_workspace_backup.dart",
+      "gitBlob": "97da3fbddc54a169829247de99ff730fb25a6ddf",
+      "sha256": "894021ce140b08da53b300414c7d7d619953984b322d6b13e6236697adee197f"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/sample_workspace_classification.dart",
+      "gitBlob": "57e6fc6117bd033c7e05da19d7c8a3ddf318eacb",
+      "sha256": "f2da929aacd6ee3eb2dd69577274e90b0980b824fd8e2f77e2b5c5bb2fd92e5c"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/sample_workspace_content_fixture.dart",
+      "gitBlob": "9f070e5577242ffcb29e3254b70029fbbcec8511",
+      "sha256": "4c89ccb8c1a7bd3fe6b3b09aac1df0a9cc6058e4a15bdfbd206f9a900467e4a1"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/sample_workspace_credentials.dart",
+      "gitBlob": "dab9ed98d35b5ea3d977e25ad7daf39e77f35206",
+      "sha256": "22069f74f8c6af6669fb192665fd4b07c29ceb9ebbb1cd76a9ec13eaa9eb4b8c"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/sample_workspace_entries.dart",
+      "gitBlob": "bff95c567b88657fdd9659c30fda9f44cbeeed11",
+      "sha256": "560682a7507a1918acb62471631fd2f0c73bf4bf8446bff0696a36e67903e393"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/sample_workspace_field_ids.dart",
+      "gitBlob": "a66f0e0881bbf2bff79c41a753ef69847b3cca75",
+      "sha256": "f90bb9e96415b8490eea6adece61507c354b0bdb2037e5db2b5376cea255d316"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/sample_workspace_files.dart",
+      "gitBlob": "f99dd297477a6924c9ae7ce352b62ca303c117f0",
+      "sha256": "8391ac1ef22d5f26ef692258243758cacc1c3ef25a97fcea6a1283f8b61c1c98"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/sample_workspace_fixture.dart",
+      "gitBlob": "450acfa12dd455430985eb63986e899e927d7f34",
+      "sha256": "12b1946583553866c1ecc6cea2e6f557f59250b149133a0658c834a6a7663972"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/sample_workspace_grant_history.dart",
+      "gitBlob": "1ffe7897c3e378822256448ac6cef4b391c4fb39",
+      "sha256": "2f46c348c2702222021acb354cf733a4b1694103ddf623de2d62060707ac1966"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/sample_workspace_history.dart",
+      "gitBlob": "5ec45aadca931939f7285cc2c2c692377a346b8f",
+      "sha256": "4939155f114bddd410b22dea0bc864dc0aff439d92b8598fefece5dd5fb61391"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/sample_workspace_hosts.dart",
+      "gitBlob": "6268ee5fd9336375d06433e9ddd36ba1cd1eca12",
+      "sha256": "f3ed9585cb688d13fd40fbce7893cfeae51285b1d1ca9eec60f4dfe54a5f1537"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/sample_workspace_legacy.dart",
+      "gitBlob": "2317ab0e5c2283c15c52c1ec76dd6e63e7e71d45",
+      "sha256": "52fb9a12a9210cba836b8b3313236d2b6af1da84a8e4566a0f6d7353e8dc159b"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/sample_workspace_organization.dart",
+      "gitBlob": "df2d7f4f9c3f5ef454ad083c39ea61a48a2dc8f0",
+      "sha256": "dbbdcea64be05601b792fc459d66af466cbaff52a84e31cf962dac31affec309"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/sample_workspace_partial_recycle.dart",
+      "gitBlob": "5065444b174539089af7ef6c12ad11033704d9f9",
+      "sha256": "53d13f6f1440efad45125775a38990c727107e8ab8cca6e7460b126b4f0e08b4"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/sample_workspace_plugins.dart",
+      "gitBlob": "667fba43ea3601a8b04acfa87de94b2632621a34",
+      "sha256": "099a42e6a18bf040a1f83835f7618c8b95e270d38def88f2d6aa46dac108d940"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/sample_workspace_proposal_fields.dart",
+      "gitBlob": "550bd3dcefc5c94ddac358aa93b85ae2bf78016e",
+      "sha256": "40407b96b061d255fcc96599ee092198b466a6bb8c114da67241b360596a012c"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/sample_workspace_proposals.dart",
+      "gitBlob": "a618b48c5816c96064ead56ae1c06745918d4f6a",
+      "sha256": "44ff6b44673b2000e8df755a7c2db0b1c171b219ff9ffd14bc9835725dbcb2a3"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/sample_workspace_retention.dart",
+      "gitBlob": "f76e4c638f39a2e78e0f888faba7890c7e7f9c2d",
+      "sha256": "e4fc6a9b67625b1b9ee46dfb920a51d74e5730e7cf6ac3c4c708b280ba721f41"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/sample_workspace_runtime.dart",
+      "gitBlob": "cfc1b101255a2acdcf1d48f151af4b9423614317",
+      "sha256": "02d6ea5c00a3070dc1fe8b110d1392dc339b56b09759b92faadc3ef0a3211608"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/sample_workspace_settings.dart",
+      "gitBlob": "7a43319835b5bcfc227fd05543a7ad0a2514cba2",
+      "sha256": "2af4ff0e239dce6717df7c1f324296f412733312e9739a9428ff831e6da0ae3a"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/sample_workspace_source.dart",
+      "gitBlob": "31c4540397c5bc7284fa64cd4fb6e02c242b1223",
+      "sha256": "024ca1eb563e9fe963dc15f761043c7207bdbbc2ca9073cdb3d0026c789978e4"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/sample_workspace_stress_fixture.dart",
+      "gitBlob": "75ead1a4f66ecfa9e3d5b82ab693fc3a607533ee",
+      "sha256": "5063bc82af61c3880bc74c5765cdc2aef7d1e37b79798b0c1d46896ec7ad18d0"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/settings_controller.dart",
+      "gitBlob": "120bb7944d926b250849d1fc85e297d4c8994979",
+      "sha256": "333966c53502d24789f08cb74cf61739b8924ebbe63ad748a97e0275e141884a"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/settings_layout.dart",
+      "gitBlob": "7b3032a4b04b345ca5ecd6527387799a30a8957c",
+      "sha256": "efb77d8718581c8412b525d96734877c85c17b987e55f8bafbf37de0ab4a81df"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/settings_page.dart",
+      "gitBlob": "422b29986516164219c74ef10585aa0a46d04ea5",
+      "sha256": "943ca034e94e544015c4814314a3677c8f2d5a7780cf333152fd6b50a306fff8"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/template_package_decoder.dart",
+      "gitBlob": "4a9b3b2821dc644daf75af484252dff8807d8f6d",
+      "sha256": "bfe96072fd7b02352720a07bf335a6490b159951b3b9e2ca5849571d15caf27e"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/workspace_adoption.dart",
+      "gitBlob": "ff83b42f879222eb3e2f1afa69ea58d20fde7939",
+      "sha256": "d29df8e5b83416a76f1da6c1007242fdf110df35f3393e3acd3d6647903c78b7"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/workspace_agents.dart",
+      "gitBlob": "db186227039e892adb267f123a94f1b684a869c8",
+      "sha256": "a3adb2fd1e3f281d2518348ede9d31ce4cef037327c9072e260de257550d2449"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/workspace_approval_execution.dart",
+      "gitBlob": "f6fc42e176ff8ace2e6d52631f03a7d11bb2b845",
+      "sha256": "a607dc64b242496b6b25abd435797bae850fccd11d1ceed87f4748c3f5023292"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/workspace_approvals.dart",
+      "gitBlob": "1a0599e1dbb1e56a5eda23083c8002310ab41429",
+      "sha256": "1279c528d6abe21b4d49b34a9b097d9a736320f1a9ac56f2f10c419bc90c39dd"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/workspace_backups.dart",
+      "gitBlob": "6f5099fdd28e5f4737159eddb619662f0fc0048c",
+      "sha256": "c8bd2fe0e9b315edf45eceb1e5e7bb0be23df916b7c246a48eeb3fe61945a8f5"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/workspace_controller.dart",
+      "gitBlob": "b5f2396c9a780a6c4e3fa388b776f99ecb4d74fc",
+      "sha256": "b646d7568210d4e3dff6c43a6a1a804adaad6d91b44c30ff6e300d441596789f"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/workspace_credentials.dart",
+      "gitBlob": "838a99cb2575594460413dd4c28c24de5c7897c3",
+      "sha256": "3b152c59f437d4b4d43f1e7aed5f437d655584db9769970b7c8adf1af3a8af0e"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/workspace_entries.dart",
+      "gitBlob": "48e37ecc69cf29955a208c89b9049db63c6b1163",
+      "sha256": "49a9a20dbf0e883b2bf69a9601698152fa5cb67719d0d9c8a5426037d91e2281"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/workspace_files.dart",
+      "gitBlob": "1302ce5912f44d371bba1b0d2711f1351ff7a07e",
+      "sha256": "f0b9a72bb4572006f8352ba2eb5339b0688b1eb309df2e7bfe80d03affd67254"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/workspace_grant_history.dart",
+      "gitBlob": "0e81430220fde201b59d24da16759a70c8ab943b",
+      "sha256": "7040c0689bd43f311f03ee2e919bb7de3ab0439bcfc7a4b2b960f0c7fa41ec65"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/workspace_history.dart",
+      "gitBlob": "d86fdfd038bfa7df1eb0f29e7e37ef46fb713927",
+      "sha256": "c3fc28daedb19208cb4b7b48558168c34b87dd034c171b6d52397bc897da3025"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/workspace_host_imports.dart",
+      "gitBlob": "e2abbb36225f688f20cdb7cb84cd7d4ece6821ea",
+      "sha256": "328d7e54b8c023ead70f650afb24d799cc6f5eb6fbe03718b16c09f637b3d2d2"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/workspace_hosts.dart",
+      "gitBlob": "ae2d831984559363331daaea17e47124a10f27e8",
+      "sha256": "fe3b915ca65f5c01fa1a75173aeffcd824e2bd415849c70dd4b70c6b40bd8975"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/workspace_legacy_templates.dart",
+      "gitBlob": "a1d4625ad0e00e18327c8469d3996e6fd4a2fc9a",
+      "sha256": "51d29d69bd98f92bfc54666ee119459a2e7295cde235f816239ede34472009e2"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/workspace_operation.dart",
+      "gitBlob": "3d680637195adda9a03f1ea60f0b9c9c8e907401",
+      "sha256": "904a001558635751c6e836a36fa34926415aadc54353f98102943a7fa3d54b9b"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/workspace_order.dart",
+      "gitBlob": "b40ab18a644e1d727ee90fe122b843baa5342745",
+      "sha256": "0c26fc6febe05b34e13b24302fc96ac0e6a27fe237c66099ff44136a7414d67f"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/workspace_organization.dart",
+      "gitBlob": "2a4cf4810288146826f95e6e1a80270116b9be46",
+      "sha256": "ac2e5a71fc7f933a764e360f2fc4b59f82a439464d90e7d870df69d9db5fb97b"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/workspace_plugins.dart",
+      "gitBlob": "030f538e08c1d411e1f906836762d987ac75f964",
+      "sha256": "b1604f7d513a96f43acd58a1683cdeab799e8ce31180d583c17f3db2e8d6e464"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/workspace_proposals.dart",
+      "gitBlob": "663acceb79f5297619f7245dabfbbfd10603f0e4",
+      "sha256": "4032e9ee67aeaaaa8ed7bd2c99141d16a653647006c4a3b9476efd656b0b1723"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/workspace_records.dart",
+      "gitBlob": "47c7fad34cc5e952316f011dfc3cdb7cecf7c533",
+      "sha256": "dda5c01b5843301b9e53fe1459261204de379d7553cb014d953f420ede7d0cd1"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/workspace_records_controller.dart",
+      "gitBlob": "bca0320943024d72ac9ffe9e8d7fc477acb65616",
+      "sha256": "7c0bb641001af8b30a182029ce4edfafe224d9efcd5a0532e68a5d7c324f26ef"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/workspace_runtime.dart",
+      "gitBlob": "cc81ccecc9e9adbe5633117af695b144d66c3b4f",
+      "sha256": "f9c4b63e40b693e9ab4e2964647635a4d5a2cf012e22e84f75d663fd3f4cc482"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/workspace_settings.dart",
+      "gitBlob": "18abf78b985a379db5bc9972059c318b1fc4a13f",
+      "sha256": "4bdb5a2e2a7580d3a6741a4e8d4169e279dac1cd3cca51f4d2d9a25deea4f8f6"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/workspace_source.dart",
+      "gitBlob": "3a4e309dcba9e11d87a5fdd47b0708527f32738b",
+      "sha256": "db811aa873969ba763b08a9301d03b41763fee96934b528d39aa79f7a97a2b5c"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/zhiyu_app.dart",
+      "gitBlob": "6d29f6529a5b54354f6e9c344b12407555044b19",
+      "sha256": "2808df1e74a347c030fb89fdc73da4bf6d3fa980179ef28ed58923513f23ec6b"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/zhiyu_shell.dart",
+      "gitBlob": "1c15ff18a0b40ad7652f41ae52a208dd47aa1f1e",
+      "sha256": "e44b900c00831714f8278ffc22cd440c8022c84408c79ff03f2814cfadd14bca"
+    },
+    {
+      "path": "apps/desktop/lib/workspace/zhiyu_theme.dart",
+      "gitBlob": "40a860bf352255606eb0e4a84d0d5f281a7f95d1",
+      "sha256": "e32689eac58805b9603b7f79f65ee1d9302d6f398e598332462bd9401399496c"
+    },
+    {
+      "path": "apps/desktop/macos/Runner/AppDelegate.swift",
+      "gitBlob": "3e239d0888a40b5e5cd81c5e527b37d05880c68d",
+      "sha256": "51bb6ecd320b099c700cc1e4e9743b4ac40c639abc5875cf54b8221d652c1364"
+    },
+    {
+      "path": "apps/desktop/macos/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json",
+      "gitBlob": "a2ec33f19f110ebff51a23342d7bc29ec9a1aaa6",
+      "sha256": "bc6ba8105ca69651aeeb77358851590de295dca04681a1d58c0f449641c242f3"
+    },
+    {
+      "path": "apps/desktop/macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_1024.png",
+      "gitBlob": "2d9ae78d7cf805e9e3d1809013bdb6793c8fde8a",
+      "sha256": "7e31d6acf2a11dee53c45d2226cdcb63082f4b53b07abb509d73d1fae8d2c872"
+    },
+    {
+      "path": "apps/desktop/macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_128.png",
+      "gitBlob": "5343521290567815c6a8d7ce0e9d5bbad24d3bf9",
+      "sha256": "45d3a7e3db9a4d5869a264b3ca3a71e49911ce09139cb116191fdef83b00a712"
+    },
+    {
+      "path": "apps/desktop/macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_16.png",
+      "gitBlob": "ee76441799df7f828788903e21cc480c57fc6209",
+      "sha256": "db59abefe7c2fb71366e71cb6c0e393d350ce07a7c66686caf21a745605f47bb"
+    },
+    {
+      "path": "apps/desktop/macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_256.png",
+      "gitBlob": "488ec04b09cb0db02dd32f3b13c1c6961d9d4484",
+      "sha256": "bbd5288e6bb4f3edf0bea555d6eeb76ef8fea19ac13b44cf4be100fc078a5b13"
+    },
+    {
+      "path": "apps/desktop/macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_32.png",
+      "gitBlob": "e06b09a1285360d19bd964a4fe27ac8dbd52b066",
+      "sha256": "270bd0a0bc1cc2788db85d0fbe9f42b335c24286008c7e52bb5aebd1ca40a7cc"
+    },
+    {
+      "path": "apps/desktop/macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_512.png",
+      "gitBlob": "1a49f0cdd7642d0fe531e8d406f9408922450cb2",
+      "sha256": "3fa07073f8d36163b34bd23f79bd1e3c94b38a9b6504b589a5773185307477d1"
+    },
+    {
+      "path": "apps/desktop/macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_64.png",
+      "gitBlob": "f9a3b3f1f7f40fa8d4d0e2eda9e0771f070a692d",
+      "sha256": "b7a81e27e6bebc2170d44655b26572aee17da0629b88ed7ddebaab38563dd9fc"
+    },
+    {
+      "path": "apps/desktop/macos/Runner/Base.lproj/MainMenu.xib",
+      "gitBlob": "95fb3a69050bf800dc1dff4e69d7fd362079abd0",
+      "sha256": "17c519d10c53ccbc70e015cf25007ae0d8c5a546529978a556d5f90e479d6420"
+    },
+    {
+      "path": "apps/desktop/macos/Runner/Configs/AppInfo.xcconfig",
+      "gitBlob": "ed190ba15825420c2ed09d1133381acd5c13c468",
+      "sha256": "5b285feb38b8349990d5557af716a1f4e68e6963f43a72f68fc1554212ac7bda"
+    },
+    {
+      "path": "apps/desktop/macos/Runner/Configs/Debug.xcconfig",
+      "gitBlob": "36b0fd9464f45b33f482e64bea579787e142affa",
+      "sha256": "8067d533ef6593760baad9a9855a786a7a77470fcc3f0925ec04fe43bc1ac4b0"
+    },
+    {
+      "path": "apps/desktop/macos/Runner/Configs/Preview.xcconfig",
+      "gitBlob": "ecf01a7268344f7b05ce77185dd087fda87a348c",
+      "sha256": "8e0d1a15c3f9654cd1dfabcb777743928c4dd3d7d4f281afe0c8652cd685d60e"
+    },
+    {
+      "path": "apps/desktop/macos/Runner/Configs/Release.xcconfig",
+      "gitBlob": "dff4f49561c816f70eaea557d889d31cf63447ac",
+      "sha256": "7a6a4b4d973a23052fa0a0388dd261e32d311d7b66ba1bfc3b914b361808ac61"
+    },
+    {
+      "path": "apps/desktop/macos/Runner/Configs/Warnings.xcconfig",
+      "gitBlob": "42bcbf4780b187e80025b7917058bcb882012aa1",
+      "sha256": "0e341a392b16ad302d12890aa3dac9257a6c10ece685437604259a85341645a3"
+    },
+    {
+      "path": "apps/desktop/macos/Runner/DatabaseKeyStore.swift",
+      "gitBlob": "ed01997cdeea113df8449e5cd90b8fb53278d652",
+      "sha256": "d157f50972cac3da88df60846cc7a634afeaf02e787d1f486effd1fb56634ef4"
+    },
+    {
+      "path": "apps/desktop/macos/Runner/DebugProfile.entitlements",
+      "gitBlob": "24ad2aacfae74aa893cdc1383685b2df6f5e6475",
+      "sha256": "1fead877031f36eda09e9029ad8d9fb7032f70715510443684ed24dbb1ea1d6b"
+    },
+    {
+      "path": "apps/desktop/macos/Runner/Info.plist",
+      "gitBlob": "cc168a3b66b8bd2462a7ccf9d0435b5ed92906ac",
+      "sha256": "c86e27e5ca0d132272239a86fffbf7dd562a26e60d26c97ebecd480ae7dceaa9"
+    },
+    {
+      "path": "apps/desktop/macos/Runner/MainFlutterWindow.swift",
+      "gitBlob": "5a836266ccfee90dc2a3ea28936ba89c02ff769e",
+      "sha256": "f493210a046893773a18e8756b3617d1d614cad3698091c2ab6587adebe9eaee"
+    },
+    {
+      "path": "apps/desktop/macos/Runner/NativeSecretEditor.swift",
+      "gitBlob": "ed7859c0c208abd3b6cbf4b35dc584709ad984f6",
+      "sha256": "200c30ef0569b767f319e2866cd49239a98e24b8fa34ab12176ccf52772cfb14"
+    },
+    {
+      "path": "apps/desktop/macos/Runner/NativeTextEditingMenu.swift",
+      "gitBlob": "fc686113586cae6c790c6dff3009408071c1f326",
+      "sha256": "5aafc74399da83192160203cc8f49ba1de7c551e7278281fd669d819b4403109"
+    },
+    {
+      "path": "apps/desktop/macos/Runner/NativeTextFieldAccessibility.swift",
+      "gitBlob": "0fe288e94fd4df4b7f16a906da525ff17026010d",
+      "sha256": "25377a5350fae9d797b2b973b27b82095cd62382525942f8676295245f18e873"
+    },
+    {
+      "path": "apps/desktop/macos/Runner/Release.entitlements",
+      "gitBlob": "42a5b2ed867f8748cd6311992010e8a6d5fa19e3",
+      "sha256": "347f9ac78f9e449e6ae74757f5c339a525b8a5059d778f498edfd68f1af090ad"
+    },
+    {
+      "path": "apps/desktop/macos/Runner/ToolAccessStore.swift",
+      "gitBlob": "1f7ebfadba56b2f910ba489b293376621e0e7b79",
+      "sha256": "53ef0c61e3d89bc122984b31f3b2d25a39162de2fd1924de8c8727810f98c83e"
+    },
+    {
+      "path": "apps/desktop/macos/Runner/Worker.entitlements",
+      "gitBlob": "794eada1cad39093c2119501f29da8c556bb47b7",
+      "sha256": "def90a0f9a48b78e8aaa6812ed5ad35662b83645bd249d056db00aeeb14c0f30"
+    }
+  ],
+  "isolationTest": {
+    "commit": "560b8327",
+    "path": "apps/desktop/test/mac_preview_isolation_test.dart",
+    "gitBlob": "05a8eaf2b099ba2b5d04b892317f160a65dd9150",
+    "sha256": "eda9c5bc457cdc6500a88a55b4cad5bc776f856413146d7159b854e2c4207ac8"
+  }
+}

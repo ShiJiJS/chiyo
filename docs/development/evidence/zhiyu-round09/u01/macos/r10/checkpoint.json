@@ -1,0 +1,63 @@
+{
+  "date": "2026-10-30",
+  "productCommit": "728d5126",
+  "branch": "codex/zhiyu-macos",
+  "scope": [
+    "D01 bundled update preview",
+    "D02 isolated host-file import UI",
+    "M01 existing native recording review"
+  ],
+  "checks": {
+    "relatedRegression": 61,
+    "newFlowMatrix": 12,
+    "countsOverlapDoNotAdd": true,
+    "strictAnalysis": true,
+    "isolationGuardIncludingNewFlows": true,
+    "nativeStages": [
+      "u01-theme-roundtrip",
+      "u02-find-related-return-save-retry",
+      "u03-file-version-confirm-cancel",
+      "d01-bundled-update-keeps-record-snapshot",
+      "d02-host-file-import-original-receipt",
+      "u04-plugin-preview-install-adopt",
+      "u05-approval-result-in-shared-history",
+      "u06-proposal-result-current-return",
+      "u07-settings-failure-retry-eight-sections",
+      "all-primary-destinations-return"
+    ],
+    "ordinaryPreviewRestored": true,
+    "sharedMotionGatesReusedFromR9": 6,
+    "sharedMotionFilesUnchangedSince": "7b197ea2",
+    "fullS5": false,
+    "actualOSInput": false,
+    "realServices": false
+  },
+  "recording": {
+    "playbackSpeed": 1,
+    "sourceFrameCount": 183,
+    "encodedDurationMs": 6500,
+    "sourceGaps": {
+      "count": 182,
+      "maximumMs": 87,
+      "medianMs": 33.0,
+      "p95Ms": 57
+    }
+  },
+  "recordingScope": "D01/D02 only, same native walkthrough continues U01-U07 outside recording; Widget input, not OS input",
+  "reviewScope": "original-speed browser playback sampled; overview and representative frames viewed; not continuous human perception",
+  "knownAutonomousDevelopmentRemainingInBoundedList": 0,
+  "knownAutomaticCheckGapsRemainingInBoundedList": 0,
+  "manualRemaining": [
+    "M01-S1",
+    "H01",
+    "H02",
+    "H03"
+  ],
+  "overallAcceptanceComplete": false,
+  "productionScope": "no personal data, system trust configuration, actual file chooser, secrets, Keychain, notifications, hooks or real executions",
+  "windowsModified": false,
+  "computerUse": false,
+  "subagentsUsed": false,
+  "cleanupPending": true,
+  "isolationCheckCommit": "560b8327"
+}
