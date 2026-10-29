@@ -1,0 +1,28 @@
+{
+  "issue": 62,
+  "spaceId": 227,
+  "bodyExactReadback": true,
+  "checked": 10,
+  "total": 12,
+  "bodySha256": "9a1fc7356f61aac38bf35537607b7a4dcd8efb11143f27723c3c445b03005aac",
+  "completionConditionLinesUnchanged": true,
+  "state": "OPEN",
+  "blocking": [
+    63,
+    65,
+    66,
+    67,
+    68
+  ],
+  "labels": [
+    "enhancement",
+    "ready-for-agent"
+  ],
+  "comments": [
+    "https://github.com/ShiJiJS/agent-info-manage/issues/62#issuecomment-6406299110",
+    "https://github.com/ShiJiJS/agent-info-manage/issues/62#issuecomment-6406738669",
+    "https://github.com/ShiJiJS/agent-info-manage/issues/62#issuecomment-6406989045"
+  ],
+  "commentsAdded": 0,
+  "taskSpaceFinished": true
+}
