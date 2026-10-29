@@ -73,6 +73,28 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
+      final startupWindowSize = tester.view.physicalSize;
+      if (desktop != null) {
+        // List rows are lazy. Fix the S5 content viewport before looking up
+        // rows; an inherited small window may never construct the target.
+        const contentSize = Size(1440, 900);
+        await MacPreviewDesktop.channel.invokeMethod<void>('setContentSize', {
+          'width': contentSize.width,
+          'height': contentSize.height,
+        });
+        for (var frame = 0; frame < 60; frame++) {
+          await tester.pump(const Duration(milliseconds: 16));
+          if (tester.view.physicalSize / tester.view.devicePixelRatio ==
+              contentSize) {
+            break;
+          }
+        }
+        expect(
+          tester.view.physicalSize / tester.view.devicePixelRatio,
+          contentSize,
+        );
+        await tester.pumpAndSettle();
+      }
       final initial = tester.element(
         find.byKey(const ValueKey('preview-guide')),
       );
@@ -559,6 +581,10 @@ void main() {
       await File('$directory/native-checks.json').writeAsString(
         const JsonEncoder.withIndent('  ').convert({
           'platform': Platform.operatingSystem,
+          'startupWindowPhysicalSize': {
+            'width': startupWindowSize.width,
+            'height': startupWindowSize.height,
+          },
           'runtime': runtime,
           'nativeWindowStates': windowStates,
           'unrecordedNativeMotionPerformance':
