@@ -53,7 +53,10 @@ class _DesktopButtonState extends State<DesktopButton> {
   void initState() {
     super.initState();
     _states.addListener(_changed);
+    FocusManager.instance.addHighlightModeListener(_highlightModeChanged);
   }
+
+  void _highlightModeChanged(FocusHighlightMode _) => _changed();
 
   void _changed() {
     if (SchedulerBinding.instance.schedulerPhase ==
@@ -68,6 +71,7 @@ class _DesktopButtonState extends State<DesktopButton> {
 
   @override
   void dispose() {
+    FocusManager.instance.removeHighlightModeListener(_highlightModeChanged);
     _states.dispose();
     super.dispose();
   }
@@ -80,10 +84,12 @@ class _DesktopButtonState extends State<DesktopButton> {
     final menu = widget.kind == DesktopButtonKind.menu;
     final link = widget.kind == DesktopButtonKind.link;
     final quiet = widget.kind == DesktopButtonKind.quiet || menu || link;
-    final menuFocus =
-        menu &&
+    final round09 = DesktopMotion.enabled(context);
+    final focusVisible =
+        enabled &&
         _states.value.contains(WidgetState.focused) &&
         FocusManager.instance.highlightMode == FocusHighlightMode.traditional;
+    final menuFocus = menu && focusVisible;
     final menuActive =
         menu && (_states.value.contains(WidgetState.hovered) || menuFocus);
     final ink = primary
@@ -125,71 +131,78 @@ class _DesktopButtonState extends State<DesktopButton> {
           enabled && _states.value.contains(WidgetState.pressed) ? 1 : 0,
           0,
         ),
-        child: TextButton(
-          statesController: _states,
-          focusNode: widget.focusNode,
-          onPressed: enabled ? widget.onPressed : null,
-          style: ButtonStyle(
-            animationDuration: DesktopMotion.feedbackOf(context),
-            alignment: widget.alignment,
-            foregroundColor: WidgetStatePropertyAll(ink),
-            // Material does not tween this color on the pinned Flutter SDK.
-            // Keep the CSS ease transition in the shared animated surface.
-            backgroundColor: const WidgetStatePropertyAll(Colors.transparent),
-            overlayColor: const WidgetStatePropertyAll(Colors.transparent),
-            splashFactory: NoSplash.splashFactory,
-            padding: WidgetStatePropertyAll(widget.padding),
-            minimumSize: WidgetStatePropertyAll(widget.minimumSize),
-            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            textStyle: WidgetStatePropertyAll(
-              Theme.of(context).textTheme.bodyMedium!.copyWith(
-                fontSize: widget.fontSize,
-                fontWeight: FontWeight.w500,
+        child: CustomPaint(
+          // CSS outline does not consume the original border or change the
+          // hit area. Floating-menu items explicitly use outline:none.
+          foregroundPainter: round09 && focusVisible && !menu
+              ? _ButtonFocusOutline(c.accent, widget.radius)
+              : null,
+          child: TextButton(
+            statesController: _states,
+            focusNode: widget.focusNode,
+            onPressed: enabled ? widget.onPressed : null,
+            style: ButtonStyle(
+              animationDuration: DesktopMotion.feedbackOf(context),
+              alignment: widget.alignment,
+              foregroundColor: WidgetStatePropertyAll(ink),
+              // Material does not tween this color on the pinned Flutter SDK.
+              // Keep the CSS ease transition in the shared animated surface.
+              backgroundColor: const WidgetStatePropertyAll(Colors.transparent),
+              overlayColor: const WidgetStatePropertyAll(Colors.transparent),
+              splashFactory: NoSplash.splashFactory,
+              padding: WidgetStatePropertyAll(widget.padding),
+              minimumSize: WidgetStatePropertyAll(widget.minimumSize),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              textStyle: WidgetStatePropertyAll(
+                Theme.of(context).textTheme.bodyMedium!.copyWith(
+                  fontSize: widget.fontSize,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
+              shape: WidgetStateProperty.resolveWith((states) {
+                final focused =
+                    states.contains(WidgetState.focused) &&
+                    FocusManager.instance.highlightMode ==
+                        FocusHighlightMode.traditional;
+                return RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(widget.radius),
+                  side: focused && !round09
+                      ? BorderSide(color: c.accent, width: 2)
+                      : BorderSide(
+                          color: primary
+                              ? c.accent
+                              : widget.selected && widget.selectedBorder
+                              ? widget.selectedBorderColor ?? c.line
+                              : quiet &&
+                                    !(widget.selected && widget.selectedBorder)
+                              ? Colors.transparent
+                              : c.line,
+                        ),
+                );
+              }),
             ),
-            shape: WidgetStateProperty.resolveWith((states) {
-              final focused =
-                  states.contains(WidgetState.focused) &&
-                  FocusManager.instance.highlightMode ==
-                      FocusHighlightMode.traditional;
-              return RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(widget.radius),
-                side: focused
-                    ? BorderSide(color: c.accent, width: 2)
-                    : BorderSide(
-                        color: primary
-                            ? c.accent
-                            : widget.selected && widget.selectedBorder
-                            ? widget.selectedBorderColor ?? c.line
-                            : quiet &&
-                                  !(widget.selected && widget.selectedBorder)
-                            ? Colors.transparent
-                            : c.line,
-                      ),
-              );
-            }),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (widget.busy) ...[
-                SizedBox.square(
-                  dimension: 14,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 1.5,
-                    color: ink,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (widget.busy) ...[
+                  SizedBox.square(
+                    dimension: 14,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 1.5,
+                      color: ink,
+                    ),
                   ),
-                ),
-                SizedBox(width: widget.leadingGap),
-              ] else if (widget.leading != null) ...[
-                IconTheme(
-                  data: IconThemeData(size: 19, color: ink),
-                  child: widget.leading!,
-                ),
-                SizedBox(width: widget.leadingGap),
+                  SizedBox(width: widget.leadingGap),
+                ] else if (widget.leading != null) ...[
+                  IconTheme(
+                    data: IconThemeData(size: 19, color: ink),
+                    child: widget.leading!,
+                  ),
+                  SizedBox(width: widget.leadingGap),
+                ],
+                Flexible(child: widget.child),
               ],
-              Flexible(child: widget.child),
-            ],
+            ),
           ),
         ),
       ),
@@ -199,4 +212,29 @@ class _DesktopButtonState extends State<DesktopButton> {
     }
     return action;
   }
+}
+
+class _ButtonFocusOutline extends CustomPainter {
+  const _ButtonFocusOutline(this.color, this.radius);
+  final Color color;
+  final double radius;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    // A 2px stroke centered 4px outside leaves the frozen 3px clear gap.
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        (Offset.zero & size).inflate(4),
+        Radius.circular(radius + 4),
+      ),
+      Paint()
+        ..color = color
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_ButtonFocusOutline oldDelegate) =>
+      oldDelegate.color != color || oldDelegate.radius != radius;
 }
