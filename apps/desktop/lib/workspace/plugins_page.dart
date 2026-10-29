@@ -132,94 +132,164 @@ class _PluginsPageState extends State<PluginsPage> {
   Widget _list(BuildContext context) {
     final c = UiPalette.of(context);
     return ColoredBox(
+      key: const ValueKey('plugin-sidebar'),
       color: c.rail,
-      child: ListView(
-        padding: const EdgeInsets.fromLTRB(12, 18, 12, 20),
+      child: Column(
         children: [
-          Text('已安装', style: libraryText(context, 17, weight: FontWeight.w600)),
-          const SizedBox(height: 6),
-          Text(
-            model.catalog == null
-                ? (model.loading ? '正在读取…' : '暂不可用')
-                : '${model.catalog!.packages.length}个插件',
-            style: libraryText(context, 12, color: c.muted),
-          ),
-          const SizedBox(height: 14),
-          DesktopSelect<PluginFilter>(
-            key: const ValueKey('plugin-filter'),
-            value: model.filter,
-            items: [
-              for (final f in PluginFilter.values)
-                DropdownMenuItem(value: f, child: Text(f.label)),
-            ],
-            onChanged: (v) {
-              _top();
-              model.setFilter(v!);
-            },
-          ),
-          const SizedBox(height: 12),
-          for (final p in model.visible)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 4),
-              child: DesktopButton(
-                key: ValueKey('plugin-select-${p.id}'),
-                kind: DesktopButtonKind.quiet,
-                selected: model.selection == p.id,
-                alignment: Alignment.centerLeft,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 8,
-                  vertical: 16,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 18),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    '已安装',
+                    style: libraryText(
+                      context,
+                      17,
+                      weight: FontWeight.w700,
+                      height: 1.5,
+                    ),
+                  ),
                 ),
-                onPressed: () {
-                  _top();
-                  model.select(p.id);
-                },
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    RecordIcon(p.templates.first.type, size: 33),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                Text(
+                  model.catalog == null
+                      ? (model.loading ? '正在读取…' : '暂不可用')
+                      : '${model.catalog!.packages.length} 个插件',
+                  style: libraryText(context, 12, color: c.muted),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            key: const ValueKey('plugin-filter'),
+            margin: const EdgeInsets.fromLTRB(18, 0, 18, 15),
+            padding: const EdgeInsets.all(3),
+            decoration: BoxDecoration(
+              color: c.nav,
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: Row(
+              children: [
+                for (final f in PluginFilter.values)
+                  Expanded(
+                    child: DesktopButton(
+                      key: ValueKey('plugin-filter-${f.name}'),
+                      kind: DesktopButtonKind.quiet,
+                      selected: model.filter == f,
+                      selectedBackgroundColor: c.paper,
+                      radius: 4,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 7,
+                        vertical: 8,
+                      ),
+                      minimumSize: const Size(0, 0),
+                      fontSize: 13,
+                      onPressed: () {
+                        _top();
+                        model.setFilter(f);
+                      },
+                      child: Text(
+                        f.label,
+                        style: libraryText(
+                          context,
+                          13,
+                          color: model.filter == f ? c.ink : c.muted,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(10, 3, 10, 15),
+              children: [
+                for (final p in model.visible)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 3),
+                    child: DesktopButton(
+                      key: ValueKey('plugin-select-${p.id}'),
+                      kind: DesktopButtonKind.quiet,
+                      tooltip: p.description,
+                      selected: model.selection == p.id,
+                      selectedBorder: true,
+                      alignment: Alignment.centerLeft,
+                      radius: 8,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 13,
+                        vertical: 18,
+                      ),
+                      onPressed: () {
+                        _top();
+                        model.select(p.id);
+                      },
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            p.name,
-                            style: libraryText(
-                              context,
-                              14,
-                              weight: FontWeight.w600,
+                          RecordIcon(p.templates.first.type, size: 31),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Text(
+                                  p.name,
+                                  style: libraryText(
+                                    context,
+                                    15,
+                                    weight: FontWeight.w600,
+                                    color: model.selection == p.id
+                                        ? c.accent
+                                        : c.ink,
+                                  ),
+                                ),
+                                const SizedBox(height: 7),
+                                Text(
+                                  '${p.builtin ? '内置' : '本地安装'} · v${p.version} · ${p.enabled ? '已启用' : '已停用'}',
+                                  style: libraryText(
+                                    context,
+                                    12,
+                                    color: c.muted,
+                                    height: 1.7,
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            p.description,
-                            style: libraryText(context, 12, color: c.muted),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            '${p.builtin ? '内置' : '本地安装'} · v${p.version} · ${p.enabled ? '已启用' : '已停用'}',
-                            style: libraryText(context, 12, color: c.muted),
                           ),
                         ],
                       ),
                     ),
-                  ],
+                  ),
+                if (model.catalog != null && model.visible.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.all(14),
+                    child: Text(
+                      '没有这个状态的插件。',
+                      style: libraryText(context, 13, color: c.muted),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              border: Border(top: BorderSide(color: c.line)),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const PrototypeIcon(PrototypeIconGlyph.inbox, size: 16),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    '普通信息、文档、文件和凭据无需安装插件。',
+                    style: libraryText(context, 12, color: c.muted),
+                  ),
                 ),
-              ),
+              ],
             ),
-          if (model.catalog != null && model.visible.isEmpty)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 20),
-              child: Text(
-                '没有这个状态的插件。',
-                style: libraryText(context, 13, color: c.muted),
-              ),
-            ),
-          const SizedBox(height: 20),
-          Text(
-            '普通信息、文档、文件和凭据无需安装插件。',
-            style: libraryText(context, 12, color: c.muted),
           ),
         ],
       ),
@@ -257,29 +327,51 @@ class _PluginsPageState extends State<PluginsPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Wrap(
-              alignment: WrapAlignment.spaceBetween,
-              spacing: 16,
-              runSpacing: 16,
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    RecordIcon(template.type, size: 47),
-                    const SizedBox(width: 14),
-                    Flexible(
-                      child: Text(
-                        p.name,
-                        key: const ValueKey('plugin-selected-title'),
+                RecordIcon(template.type, size: 43),
+                const SizedBox(width: 15),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Wrap(
+                        spacing: 12,
+                        runSpacing: 8,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: [
+                          Text(
+                            p.name,
+                            key: const ValueKey('plugin-selected-title'),
+                            style: libraryHeading(context, 22),
+                          ),
+                          LibraryPill(
+                            p.enabled ? '已启用' : '已停用',
+                            color: p.enabled ? c.success : c.muted,
+                            background: p.enabled ? c.successSurface : c.nav,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 7),
+                      Text(
+                        p.description,
                         style: libraryText(
                           context,
-                          24,
-                          weight: FontWeight.w600,
+                          14,
+                          color: c.muted,
+                          height: 1.85,
                         ),
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 10),
+                      Text(
+                        '${p.author} · ${p.builtin ? '内置' : '本地安装'} · v${p.version}',
+                        style: libraryText(context, 12, color: c.muted),
+                      ),
+                    ],
+                  ),
                 ),
+                const SizedBox(width: 15),
                 DesktopButton(
                   key: const ValueKey('plugin-toggle'),
                   onPressed: ready
@@ -293,16 +385,6 @@ class _PluginsPageState extends State<PluginsPage> {
                 ),
               ],
             ),
-            const SizedBox(height: 12),
-            Text(
-              p.description,
-              style: libraryText(context, 14, color: c.muted),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              '${p.author} · ${p.builtin ? '内置' : '本地安装'} · v${p.version} · ${p.enabled ? '已启用' : '已停用'}',
-              style: libraryText(context, 13, color: c.muted),
-            ),
             if (p.legacySource case final source?)
               Padding(
                 padding: const EdgeInsets.only(top: 12),
@@ -312,23 +394,30 @@ class _PluginsPageState extends State<PluginsPage> {
                 ),
               ),
             Container(
-              margin: const EdgeInsets.symmetric(vertical: 22),
-              padding: const EdgeInsets.symmetric(vertical: 18),
+              margin: const EdgeInsets.only(top: 15, bottom: 16),
+              padding: const EdgeInsets.symmetric(vertical: 16),
               decoration: BoxDecoration(
-                border: Border(
-                  top: BorderSide(color: c.line),
-                  bottom: BorderSide(color: c.line),
-                ),
+                border: Border(bottom: BorderSide(color: c.line)),
               ),
-              child: Wrap(
-                spacing: 30,
-                runSpacing: 14,
-                children: [
-                  _fact(context, '提供模板', '${p.templates.length}个'),
-                  _fact(context, '已用于', '${p.affectedRecords}项资料'),
-                  _fact(context, '目录归属', '由每份资料自行选择'),
-                ],
-              ),
+              child: MediaQuery.textScalerOf(context).scale(1) >= 1.6
+                  ? Wrap(
+                      spacing: 10,
+                      runSpacing: 14,
+                      children: [
+                        _fact(context, '提供模板', '${p.templates.length} 个'),
+                        _fact(context, '已用于', '${p.affectedRecords} 项资料'),
+                        _fact(context, '目录归属', '由每份资料自行选择'),
+                      ],
+                    )
+                  : Row(
+                      children: [
+                        _fact(context, '提供模板', '${p.templates.length} 个'),
+                        const SizedBox(width: 10),
+                        _fact(context, '已用于', '${p.affectedRecords} 项资料'),
+                        const Spacer(),
+                        _fact(context, '目录归属', '由每份资料自行选择'),
+                      ],
+                    ),
             ),
             Container(
               decoration: BoxDecoration(
@@ -338,13 +427,19 @@ class _PluginsPageState extends State<PluginsPage> {
                 spacing: 18,
                 runSpacing: 8,
                 children: [
-                  for (final tab in PluginTab.values.where(
-                    (tab) =>
-                        tab != PluginTab.settings ||
-                        p.panels.contains(WorkspacePluginPanel.sshTrust) &&
-                            widget.hosts != null &&
-                            widget.hostChanges != null,
-                  ))
+                  for (final tab
+                      in [
+                        PluginTab.preview,
+                        PluginTab.structure,
+                        PluginTab.instructions,
+                        PluginTab.settings,
+                      ].where(
+                        (tab) =>
+                            tab != PluginTab.settings ||
+                            p.panels.contains(WorkspacePluginPanel.sshTrust) &&
+                                widget.hosts != null &&
+                                widget.hostChanges != null,
+                      ))
                     DecoratedBox(
                       decoration: BoxDecoration(
                         border: Border(
@@ -427,7 +522,7 @@ class _PluginsPageState extends State<PluginsPage> {
                   children: [
                     Text(
                       template.type.name,
-                      style: libraryText(context, 18, weight: FontWeight.w600),
+                      style: libraryText(context, 17, weight: FontWeight.w600),
                     ),
                     DesktopButton(
                       key: const ValueKey('plugin-create'),
@@ -439,11 +534,17 @@ class _PluginsPageState extends State<PluginsPage> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 18),
+                const SizedBox(height: 10),
+                Text(
+                  '按下方结构填写，目录和关联可以稍后补充。',
+                  style: libraryText(context, 13, color: c.muted, height: 1.8),
+                ),
+                const SizedBox(height: 20),
               ],
               PluginTemplatePreview(
                 template: template,
                 structure: model.tab == PluginTab.structure,
+                embedded: widget.embedded,
               ),
             ],
             const SizedBox(height: 18),
@@ -495,15 +596,15 @@ class _PluginsPageState extends State<PluginsPage> {
     );
   }
 
-  Widget _fact(BuildContext context, String label, String value) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _fact(BuildContext context, String label, String value) => Row(
+    mainAxisSize: MainAxisSize.min,
     children: [
       Text(
         label,
         style: libraryText(context, 12, color: UiPalette.of(context).muted),
       ),
-      const SizedBox(height: 4),
-      Text(value, style: libraryText(context, 14, weight: FontWeight.w500)),
+      const SizedBox(width: 12),
+      Text(value, style: libraryText(context, 12, weight: FontWeight.w500)),
     ],
   );
   @override
@@ -558,10 +659,10 @@ class _PluginsPageState extends State<PluginsPage> {
             Expanded(
               child: Padding(
                 padding: EdgeInsets.fromLTRB(
-                  bounds.maxWidth <= 1300 ? 18 : 24,
-                  22,
-                  bounds.maxWidth <= 1300 ? 18 : 24,
-                  18,
+                  MediaQuery.sizeOf(context).width <= 1300 ? 18 : 24,
+                  MediaQuery.sizeOf(context).width <= 1300 ? 22 : 26,
+                  MediaQuery.sizeOf(context).width <= 1300 ? 18 : 24,
+                  MediaQuery.sizeOf(context).width <= 1300 ? 22 : 18,
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -572,12 +673,23 @@ class _PluginsPageState extends State<PluginsPage> {
                       runSpacing: 12,
                       crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
-                        Text(
-                          model.showingLegacy ? '旧版模板' : '插件',
-                          style: libraryText(
-                            context,
-                            26,
-                            weight: FontWeight.w600,
+                        ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 400),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                model.showingLegacy ? '旧版模板' : '插件',
+                                style: libraryHeading(context, 25),
+                              ),
+                              const SizedBox(height: 7),
+                              Text(
+                                model.showingLegacy
+                                    ? '继续使用旧录入辅助，或明确转换为声明式插件。'
+                                    : '管理资料模板与插件专属设置。已有资料始终由信息库保存。',
+                                style: libraryText(context, 12, color: c.muted),
+                              ),
+                            ],
                           ),
                         ),
                         Wrap(
@@ -586,7 +698,11 @@ class _PluginsPageState extends State<PluginsPage> {
                           children: [
                             DesktopButton(
                               key: const ValueKey('plugin-authoring-guide'),
-                              kind: DesktopButtonKind.quiet,
+                              fontSize: 12,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 6,
+                              ),
                               onPressed: () async {
                                 widget.onModalChanged?.call(true);
                                 try {
@@ -603,6 +719,11 @@ class _PluginsPageState extends State<PluginsPage> {
                             if (!model.showingLegacy)
                               DesktopButton(
                                 key: const ValueKey('plugin-install'),
+                                fontSize: 12,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 6,
+                                ),
                                 kind: DesktopButtonKind.primary,
                                 leading: const PrototypeIcon(
                                   PrototypeIconGlyph.plus,
@@ -621,14 +742,7 @@ class _PluginsPageState extends State<PluginsPage> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      model.showingLegacy
-                          ? '继续使用旧录入辅助，或明确转换为声明式插件。'
-                          : '管理资料模板。已有资料始终由信息库保存。',
-                      style: libraryText(context, 13, color: c.muted),
-                    ),
-                    const SizedBox(height: 18),
+                    const SizedBox(height: 40),
                     if (model.failure case final failure?
                         when !model.showingLegacy) ...[
                       PluginFailureView(failure),
@@ -674,7 +788,11 @@ class _PluginsPageState extends State<PluginsPage> {
                                 crossAxisAlignment: CrossAxisAlignment.stretch,
                                 children: [
                                   SizedBox(
-                                    width: bounds.maxWidth <= 1300 ? 200 : 225,
+                                    width: widget.embedded
+                                        ? 250
+                                        : bounds.maxWidth <= 1300
+                                        ? 200
+                                        : 225,
                                     child: _list(context),
                                   ),
                                   VerticalDivider(

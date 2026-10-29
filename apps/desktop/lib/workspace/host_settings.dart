@@ -132,20 +132,85 @@ class _HostSettingsPanelState extends State<HostSettingsPanel> {
     super.dispose();
   }
 
+  Widget _row(BuildContext context, WorkspaceHostIdentity h) {
+    final c = UiPalette.of(context);
+    final details = Row(
+      children: [
+        const RecordIcon(WorkspaceType('server', '服务器', 'server'), size: 35),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                h.name,
+                style: libraryText(context, 14, weight: FontWeight.w600),
+              ),
+              const SizedBox(height: 5),
+              Text(
+                h.endpoint?.label ?? '地址或端口不完整',
+                style: libraryText(context, 12, color: c.muted),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+    final status = LibraryPill(
+      h.state.label,
+      key: ValueKey('host-state-${h.target.key}'),
+      color: h.state == WorkspaceHostState.changed ? c.danger : c.muted,
+    );
+    final action = DesktopButton(
+      key: ValueKey('host-open-${h.target.key}'),
+      onPressed: () => widget.onOpen(h.target),
+      child: const Text('查看身份'),
+    );
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 20),
+      decoration: BoxDecoration(
+        border: Border(bottom: BorderSide(color: c.line)),
+      ),
+      child: MediaQuery.textScalerOf(context).scale(1) >= 1.6
+          ? Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                details,
+                const SizedBox(height: 12),
+                Wrap(spacing: 12, runSpacing: 12, children: [status, action]),
+              ],
+            )
+          : Row(
+              children: [
+                Expanded(child: details),
+                const SizedBox(width: 12),
+                status,
+                const SizedBox(width: 12),
+                action,
+              ],
+            ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
       Text(
         'SSH 主机信任',
-        style: libraryText(context, 18, weight: FontWeight.w600),
+        style: libraryText(context, 17, weight: FontWeight.w700, height: 1.5),
       ),
-      const SizedBox(height: 12),
+      const SizedBox(height: 7),
       Text(
         '核对地址、端口和指纹后再确认主机。身份确认不代表批准使用登录凭据。',
-        style: libraryText(context, 13, color: UiPalette.of(context).muted),
+        style: libraryText(
+          context,
+          13,
+          color: UiPalette.of(context).muted,
+          height: 1.8,
+        ),
       ),
-      const SizedBox(height: 18),
+      const SizedBox(height: 20),
       FutureBuilder<AsyncSnapshot<List<WorkspaceHostIdentity>>>(
         future: _read,
         builder: (context, snapshot) {
@@ -181,62 +246,7 @@ class _HostSettingsPanelState extends State<HostSettingsPanel> {
                 ),
                 const SizedBox(height: 16),
               ],
-              for (final h in hosts)
-                Container(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  decoration: BoxDecoration(
-                    border: Border(
-                      bottom: BorderSide(color: UiPalette.of(context).line),
-                    ),
-                  ),
-                  child: Wrap(
-                    alignment: WrapAlignment.spaceBetween,
-                    spacing: 12,
-                    runSpacing: 12,
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            h.name,
-                            style: libraryText(
-                              context,
-                              14,
-                              weight: FontWeight.w600,
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            h.endpoint?.label ?? '地址或端口不完整',
-                            style: libraryText(
-                              context,
-                              13,
-                              color: UiPalette.of(context).muted,
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            h.state.label,
-                            key: ValueKey('host-state-${h.target.key}'),
-                            style: libraryText(
-                              context,
-                              13,
-                              color: h.state == WorkspaceHostState.changed
-                                  ? UiPalette.of(context).danger
-                                  : UiPalette.of(context).muted,
-                            ),
-                          ),
-                        ],
-                      ),
-                      DesktopButton(
-                        key: ValueKey('host-open-${h.target.key}'),
-                        onPressed: () => widget.onOpen(h.target),
-                        child: const Text('查看身份'),
-                      ),
-                    ],
-                  ),
-                ),
+              for (final h in hosts) _row(context, h),
             ],
           );
         },

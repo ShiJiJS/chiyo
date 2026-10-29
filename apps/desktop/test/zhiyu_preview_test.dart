@@ -11,6 +11,27 @@ import 'package:info_desktop/workspace/plugins_page.dart';
 import 'package:info_desktop/workspace/settings_page.dart';
 
 void main() {
+  for (final brightness in Brightness.values) {
+    test(
+      'Round09 semantic inks and popup elevation match the frozen theme ${brightness.name}',
+      () {
+        final c = UiPalette.zhiyu(brightness),
+            dark = brightness == Brightness.dark;
+        expect(c.success, Color(dark ? 0xff8ecfb2 : 0xff27765c));
+        expect(c.warning, Color(dark ? 0xffdfbc7d : 0xff865a20));
+        expect(c.danger, Color(dark ? 0xfff0a39d : 0xffab4c49));
+        expect(
+          c.popupElevation,
+          BoxShadow(
+            color: Color(dark ? 0x55000000 : 0x20243047),
+            offset: Offset(0, dark ? 12 : 9),
+            blurRadius: dark ? 36 : 32,
+          ),
+        );
+        expect(c.copyWith().danger, c.danger);
+      },
+    );
+  }
   Future<void> start(
     WidgetTester tester, {
     double width = 1440,

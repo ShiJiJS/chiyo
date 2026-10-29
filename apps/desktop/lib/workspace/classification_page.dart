@@ -8,6 +8,7 @@ import '../ui_palette.dart';
 import 'classification_controller.dart';
 import 'library_directory_dialog.dart';
 import 'library_widgets.dart';
+import 'settings_layout.dart';
 import 'workspace_source.dart';
 
 class ClassificationPage extends StatefulWidget {
@@ -190,15 +191,13 @@ class _ClassificationPageState extends State<ClassificationPage> {
       final keys = rows.map((r) => _rowKey(r.id)).toSet();
       _rowKeys.removeWhere((key, _) => !keys.contains(key));
       final header = <Widget>[
-        Text('目录与标签', style: libraryText(context, 26, weight: FontWeight.w600)),
-        const SizedBox(height: 10),
-        Text(
-          tag
+        SettingsPageHeading(
+          title: '目录与标签',
+          description: tag
               ? '标签用于跨目录查找。名称和归属默认对接入的Agent可见；内容仍需单独授权。'
               : '目录整理资料与凭据的层级归属。这里只管理资料分类，不操作本机文件夹。',
-          style: libraryText(context, 14, color: c.muted, height: 1.8),
         ),
-        const SizedBox(height: 22),
+        const SizedBox(height: 26),
         Wrap(
           spacing: 10,
           runSpacing: 10,
@@ -279,7 +278,6 @@ class _ClassificationPageState extends State<ClassificationPage> {
         thumbVisibility: true,
         child: SingleChildScrollView(
           controller: _scroll,
-          padding: const EdgeInsets.only(right: 14),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: children,
@@ -309,41 +307,54 @@ class _ClassificationPageState extends State<ClassificationPage> {
             );
       return DesktopEntrance(
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(30, 30, 30, 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Expanded(child: body),
-              const SizedBox(height: 12),
-              Wrap(
-                spacing: 12,
-                runSpacing: 8,
-                crossAxisAlignment: WrapCrossAlignment.center,
+          // Normal text keeps the header outside the list scroller; reserve
+          // ZhiyuApp's 9px lane here so it shares the other settings headings.
+          // Large text scrolls the header too, so that scroller owns the lane.
+          padding:
+              SettingsPageContent.paddingOf(context) +
+              EdgeInsets.only(right: large ? 0 : 9),
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: large ? 1029 : 1020),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text(
-                    '${m.total == 0 ? 0 : m.offset + 1}–${(m.offset + ClassificationController.limit).clamp(0, m.total)} / ${m.total}',
-                    style: libraryText(context, 13, color: c.muted),
-                  ),
-                  DesktopButton(
-                    key: const ValueKey('classification-previous'),
-                    onPressed: m.offset == 0
-                        ? null
-                        : () =>
-                              m.page(m.offset - ClassificationController.limit),
-                    child: const Text('上一页'),
-                  ),
-                  DesktopButton(
-                    key: const ValueKey('classification-next'),
-                    onPressed:
-                        m.offset + ClassificationController.limit >= m.total
-                        ? null
-                        : () =>
-                              m.page(m.offset + ClassificationController.limit),
-                    child: const Text('下一页'),
+                  Expanded(child: body),
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 12,
+                    runSpacing: 8,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      Text(
+                        '${m.total == 0 ? 0 : m.offset + 1}–${(m.offset + ClassificationController.limit).clamp(0, m.total)} / ${m.total}',
+                        style: libraryText(context, 13, color: c.muted),
+                      ),
+                      DesktopButton(
+                        key: const ValueKey('classification-previous'),
+                        onPressed: m.offset == 0
+                            ? null
+                            : () => m.page(
+                                m.offset - ClassificationController.limit,
+                              ),
+                        child: const Text('上一页'),
+                      ),
+                      DesktopButton(
+                        key: const ValueKey('classification-next'),
+                        onPressed:
+                            m.offset + ClassificationController.limit >= m.total
+                            ? null
+                            : () => m.page(
+                                m.offset + ClassificationController.limit,
+                              ),
+                        child: const Text('下一页'),
+                      ),
+                    ],
                   ),
                 ],
               ),
-            ],
+            ),
           ),
         ),
       );

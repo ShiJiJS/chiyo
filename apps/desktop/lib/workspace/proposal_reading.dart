@@ -56,23 +56,8 @@ class ProposalPill extends StatelessWidget {
   final String label;
   final Color? color, background;
   @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
-    decoration: BoxDecoration(
-      color: background ?? UiPalette.of(context).rail,
-      border: Border.all(color: UiPalette.of(context).line),
-      borderRadius: BorderRadius.circular(5),
-    ),
-    child: Text(
-      label,
-      style: libraryText(
-        context,
-        12,
-        color: color ?? UiPalette.of(context).muted,
-        height: 1.5,
-      ),
-    ),
-  );
+  Widget build(BuildContext context) =>
+      LibraryPill(label, color: color, background: background);
 }
 
 class ProposalDiff extends StatelessWidget {

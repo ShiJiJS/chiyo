@@ -827,10 +827,9 @@ class _ProposalsPageState extends State<ProposalsPage> {
                         const SizedBox(height: 20),
                         Text(
                           s.title,
-                          style: libraryText(
+                          style: libraryHeading(
                             context,
-                            26,
-                            weight: FontWeight.w700,
+                            MediaQuery.sizeOf(context).width <= 1300 ? 24 : 27,
                           ),
                         ),
                         const SizedBox(height: 13),

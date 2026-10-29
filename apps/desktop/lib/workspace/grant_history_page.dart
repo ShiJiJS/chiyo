@@ -128,23 +128,32 @@ class _GrantHistoryPageState extends State<GrantHistoryPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (widget.onWorkspaceBack != null)
-            DesktopButton(
-              key: const ValueKey('workspace-back'),
-              kind: DesktopButtonKind.quiet,
-              onPressed: m.frozen ? null : widget.onWorkspaceBack,
-              child: Text(widget.workspaceBackLabel),
-            ),
-          Text(
-            '授权历史',
-            style: libraryText(context, 26, weight: FontWeight.w700),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text('授权历史', style: libraryHeading(context, 25)),
+                    const SizedBox(height: 7),
+                    if (!large)
+                      Text(
+                        '查看批准范围、重复使用与结束原因',
+                        style: libraryText(context, 14, color: c.muted),
+                      ),
+                  ],
+                ),
+              ),
+              if (widget.onWorkspaceBack != null)
+                DesktopButton(
+                  key: const ValueKey('workspace-back'),
+                  kind: DesktopButtonKind.quiet,
+                  onPressed: m.frozen ? null : widget.onWorkspaceBack,
+                  child: Text(widget.workspaceBackLabel),
+                ),
+            ],
           ),
-          const SizedBox(height: 8),
-          if (!large)
-            Text(
-              '查看批准范围、重复使用与结束原因',
-              style: libraryText(context, 14, color: c.muted, height: 1.8),
-            ),
           const SizedBox(height: 20),
           DesktopTextField(
             key: const ValueKey('grant-history-search'),
@@ -285,15 +294,38 @@ class _GrantHistoryPageState extends State<GrantHistoryPage> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         ...heading,
+        Container(
+          margin: const EdgeInsets.only(left: 20, right: 29),
+          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
+          decoration: BoxDecoration(
+            color: c.rail,
+            border: Border(top: BorderSide(color: c.line)),
+          ),
+          child: DefaultTextStyle(
+            style: libraryText(context, 12, color: c.muted),
+            child: const Row(
+              children: [
+                Expanded(child: Text('请求与用途')),
+                SizedBox(width: 15),
+                SizedBox(width: 95, child: Text('状态')),
+                SizedBox(width: 15),
+                SizedBox(width: 105, child: Text('批准时间')),
+              ],
+            ),
+          ),
+        ),
         Expanded(
           child: r == null || r.items.isEmpty
               ? Center(child: empty)
-              : ListView.builder(
-                  key: const ValueKey('grant-history-list'),
-                  controller: _list,
-                  itemCount: r.items.length,
-                  itemBuilder: (context, index) =>
-                      _row(context, r.items[index], false),
+              : Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                  child: ListView.builder(
+                    key: const ValueKey('grant-history-list'),
+                    controller: _list,
+                    itemCount: r.items.length,
+                    itemBuilder: (context, index) =>
+                        _row(context, r.items[index], false),
+                  ),
                 ),
         ),
         if (r != null) _pager(context, r),
@@ -306,43 +338,55 @@ class _GrantHistoryPageState extends State<GrantHistoryPage> {
     final title = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(h.title, style: libraryText(context, 15, weight: FontWeight.w600)),
-        const SizedBox(height: 6),
+        Text(h.title, style: libraryText(context, 14, weight: FontWeight.w600)),
+        const SizedBox(height: 8),
         Text(
           '${h.kind.label} · ${h.agentClaim}',
           style: libraryText(context, 12, color: c.muted, height: 1.7),
         ),
       ],
     );
-    final status = Text(
-      h.state.label,
-      style: libraryText(context, 13, color: _color(context, h.state)),
+    final status = Align(
+      alignment: Alignment.centerLeft,
+      child: LibraryPill(
+        h.state.label,
+        color: _color(context, h.state),
+        background: h.state == WorkspaceGrantState.active
+            ? c.successSurface
+            : c.nav,
+      ),
     );
     final date = Text(
       libraryLocalDateTime(h.recordedAt),
       style: libraryText(context, 12, color: c.muted),
     );
-    return DesktopButton(
-      key: ValueKey('grant-row-${h.id}'),
-      kind: DesktopButtonKind.quiet,
-      selected: m.selection == h.id,
-      alignment: Alignment.centerLeft,
-      padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 18),
-      onPressed: m.frozen ? null : () => m.select(h.id),
-      child: large
-          ? Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [title, const SizedBox(height: 8), status, date],
-            )
-          : Row(
-              children: [
-                Expanded(child: title),
-                const SizedBox(width: 15),
-                SizedBox(width: 95, child: status),
-                const SizedBox(width: 15),
-                SizedBox(width: 135, child: date),
-              ],
-            ),
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        border: Border(bottom: BorderSide(color: c.line)),
+      ),
+      child: DesktopButton(
+        key: ValueKey('grant-row-${h.id}'),
+        kind: DesktopButtonKind.quiet,
+        selected: m.selection == h.id,
+        alignment: Alignment.centerLeft,
+        radius: 5,
+        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 21),
+        onPressed: m.frozen ? null : () => m.select(h.id),
+        child: large
+            ? Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [title, const SizedBox(height: 8), status, date],
+              )
+            : Row(
+                children: [
+                  Expanded(child: title),
+                  const SizedBox(width: 15),
+                  SizedBox(width: 95, child: status),
+                  const SizedBox(width: 15),
+                  SizedBox(width: 105, child: date),
+                ],
+              ),
+      ),
     );
   }
 
@@ -419,21 +463,27 @@ class _GrantHistoryPageState extends State<GrantHistoryPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
-              h.state.label,
-              style: libraryText(
-                context,
-                13,
+            Align(
+              alignment: Alignment.centerLeft,
+              child: LibraryPill(
+                h.state.label,
                 color: _color(context, h.state),
-                weight: FontWeight.w600,
+                background: h.state == WorkspaceGrantState.active
+                    ? c.successSurface
+                    : c.nav,
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
             Text(
               h.title,
-              style: libraryText(context, 24, weight: FontWeight.w700),
+              style: libraryText(
+                context,
+                21,
+                weight: FontWeight.w700,
+                height: 1.5,
+              ),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 8),
             Text(
               '${h.agentClaim} · ${h.chatClaim}',
               style: libraryText(context, 13, color: c.muted, height: 1.8),
@@ -673,7 +723,10 @@ class _GrantHistoryPageState extends State<GrantHistoryPage> {
           : MediaQuery.sizeOf(context).width <= 1300
           ? 335.0
           : 365.0;
-      final list = _listPane(context, large || bounds.maxWidth < 900),
+      final list = ColoredBox(
+            color: c.paper,
+            child: _listPane(context, large || bounds.maxWidth < 900),
+          ),
           detail = Container(
             decoration: BoxDecoration(
               color: c.rail,

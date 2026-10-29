@@ -85,11 +85,14 @@ class _DesktopFeedbackState extends State<DesktopFeedback> {
                         border: Border.all(color: c.line),
                         borderRadius: BorderRadius.circular(9),
                         boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: .12),
-                            blurRadius: 28,
-                            offset: const Offset(0, 7),
-                          ),
+                          if (DesktopMotion.enabled(context))
+                            c.popupElevation
+                          else
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: .12),
+                              blurRadius: 28,
+                              offset: const Offset(0, 7),
+                            ),
                         ],
                       ),
                       child: Text(

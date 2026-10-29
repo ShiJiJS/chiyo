@@ -388,7 +388,11 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
       ),
     );
     return Container(
-      padding: EdgeInsets.all(compact ? 18 : 23),
+      key: const ValueKey('approval-decision'),
+      padding: EdgeInsets.symmetric(
+        horizontal: compact ? 18 : 23,
+        vertical: compact ? 25 : 30,
+      ),
       decoration: BoxDecoration(
         color: c.selected,
         border: compact
@@ -536,6 +540,7 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
     }
     final fold = MediaQuery.textScalerOf(context).scale(14) > 20 || width < 650;
     final content = Padding(
+      key: const ValueKey('approval-content'),
       padding: EdgeInsets.all(width < 1000 ? 24 : 30),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -545,14 +550,14 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
             spacing: 10,
             runSpacing: 8,
             children: [
-              Text(
+              LibraryPill(
                 d.request.state.label,
-                style: libraryText(
-                  context,
-                  13,
-                  color: c.accent,
-                  weight: FontWeight.w600,
-                ),
+                color: d.request.state == WorkspaceApprovalState.pending
+                    ? c.warning
+                    : c.success,
+                background: d.request.state == WorkspaceApprovalState.pending
+                    ? c.credentialSurface
+                    : c.successSurface,
               ),
               Text(
                 '${d.request.agentClaim} · ${d.request.chatClaim}',
@@ -561,10 +566,7 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
             ],
           ),
           const SizedBox(height: 22),
-          Text(
-            d.request.title,
-            style: libraryText(context, 28, weight: FontWeight.w600),
-          ),
+          Text(d.request.title, style: libraryHeading(context, 28)),
           const SizedBox(height: 14),
           Text(
             d.request.purpose,
@@ -640,6 +642,7 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
     return DesktopEntrance(
       key: ValueKey(d.request.id),
       child: Container(
+        key: const ValueKey('approval-card'),
         clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
           color: c.paper,

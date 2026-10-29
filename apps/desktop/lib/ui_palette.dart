@@ -18,11 +18,15 @@ class UiPalette extends ThemeExtension<UiPalette> {
     this.brightness = Brightness.light,
     this.accentForeground,
     this.navigation,
+    this.successForeground,
+    this.warningForeground,
+    this.dangerForeground,
   });
   final Color accent, strong, selected, rail, canvas, paper, line, muted, ink;
   final Brightness brightness;
   final Color? accentForeground;
   final Color? navigation;
+  final Color? successForeground, warningForeground, dangerForeground;
   Color get nav => navigation ?? rail;
   Color get readingInk => brightness == Brightness.dark
       ? const Color(0xffc5cbd8)
@@ -31,18 +35,38 @@ class UiPalette extends ThemeExtension<UiPalette> {
   Color get brand => strong;
   // Frozen Round09 timeline ring, fixed in both themes.
   Color get timelineRing => const Color(0xffd5cbdf);
-  Color get success => brightness == Brightness.dark
-      ? const Color(0xff8ecfb2)
-      : const Color(0xff27735f);
+  Color get success =>
+      successForeground ??
+      (brightness == Brightness.dark
+          ? const Color(0xff8ecfb2)
+          : const Color(0xff27735f));
   Color get successSurface => brightness == Brightness.dark
       ? const Color(0xff253c35)
       : const Color(0xffe4f1eb);
-  Color get danger => brightness == Brightness.dark
-      ? const Color(0xfff0a39d)
-      : const Color(0xffb54143);
-  Color get warning => brightness == Brightness.dark
-      ? const Color(0xffdfbc7d)
-      : const Color(0xff8d651e);
+  Color get danger =>
+      dangerForeground ??
+      (brightness == Brightness.dark
+          ? const Color(0xfff0a39d)
+          : const Color(0xffb54143));
+  Color get warning =>
+      warningForeground ??
+      (brightness == Brightness.dark
+          ? const Color(0xffdfbc7d)
+          : const Color(0xff8d651e));
+  Color get lineStrong => brightness == Brightness.dark
+      ? const Color(0xff657086)
+      : const Color(0xffaab2c1);
+  BoxShadow get popupElevation => brightness == Brightness.dark
+      ? const BoxShadow(
+          color: Color(0x55000000),
+          offset: Offset(0, 12),
+          blurRadius: 36,
+        )
+      : const BoxShadow(
+          color: Color(0x20243047),
+          offset: Offset(0, 9),
+          blurRadius: 32,
+        );
   Color get credentialSurface => brightness == Brightness.dark
       ? const Color(0xff413828)
       : const Color(0xfff7efdf);
@@ -90,6 +114,9 @@ class UiPalette extends ThemeExtension<UiPalette> {
           ink: Color(0xff242936),
           accentForeground: Color(0xffffffff),
           navigation: Color(0xffe9ecf1),
+          successForeground: Color(0xff27765c),
+          warningForeground: Color(0xff865a20),
+          dangerForeground: Color(0xffab4c49),
         );
   static UiPalette forTheme(DesktopColorTheme theme) {
     final values = switch (theme) {
@@ -165,6 +192,9 @@ class UiPalette extends ThemeExtension<UiPalette> {
     Brightness? brightness,
     Color? accentForeground,
     Color? navigation,
+    Color? successForeground,
+    Color? warningForeground,
+    Color? dangerForeground,
   }) => UiPalette(
     accent: accent ?? this.accent,
     strong: strong ?? this.strong,
@@ -178,6 +208,9 @@ class UiPalette extends ThemeExtension<UiPalette> {
     brightness: brightness ?? this.brightness,
     accentForeground: accentForeground ?? this.accentForeground,
     navigation: navigation ?? this.navigation,
+    successForeground: successForeground ?? this.successForeground,
+    warningForeground: warningForeground ?? this.warningForeground,
+    dangerForeground: dangerForeground ?? this.dangerForeground,
   );
   @override
   UiPalette lerp(covariant UiPalette? other, double t) => other == null
@@ -195,5 +228,8 @@ class UiPalette extends ThemeExtension<UiPalette> {
           brightness: t < .5 ? brightness : other.brightness,
           accentForeground: Color.lerp(onAccent, other.onAccent, t),
           navigation: Color.lerp(nav, other.nav, t),
+          successForeground: Color.lerp(success, other.success, t),
+          warningForeground: Color.lerp(warning, other.warning, t),
+          dangerForeground: Color.lerp(danger, other.danger, t),
         );
 }

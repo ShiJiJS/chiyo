@@ -73,10 +73,13 @@ void main() {
   Future<SampleWorkspaceSource> start(
     WidgetTester t, {
     bool dark = false,
+    double? width,
+    double? scale,
   }) async {
-    t.view.physicalSize = dark ? const Size(1280, 800) : const Size(1440, 900);
+    final viewport = width ?? (dark ? 1280.0 : 1440.0);
+    t.view.physicalSize = Size(viewport, viewport == 1440 ? 900 : 800);
     t.view.devicePixelRatio = 1;
-    t.platformDispatcher.textScaleFactorTestValue = dark ? 2 : 1;
+    t.platformDispatcher.textScaleFactorTestValue = scale ?? (dark ? 2 : 1);
     addTearDown(t.view.resetPhysicalSize);
     addTearDown(t.view.resetDevicePixelRatio);
     addTearDown(t.platformDispatcher.clearTextScaleFactorTestValue);
@@ -96,6 +99,30 @@ void main() {
     }
     await tap(t, find.byKey(const ValueKey('workspace-nav-approvals')));
     return s;
+  }
+
+  for (final width in [1440.0, 1280.0]) {
+    for (final dark in [false, true]) {
+      testWidgets(
+        'R09 approval frame and decision rail match reference at $width dark=$dark',
+        (t) async {
+          await start(t, dark: dark, width: width, scale: 1);
+          final frame = t.getRect(find.byKey(const ValueKey('approval-card')));
+          expect(frame.left, closeTo(width == 1440 ? 324 : 294, 2));
+          expect(frame.top, closeTo(width == 1440 ? 90 : 85, 2));
+          expect(frame.width, closeTo(width == 1440 ? 1081 : 956, 2));
+          expect(
+            t.getSize(find.byKey(const ValueKey('approval-decision'))).width,
+            width == 1440 ? 234 : 210,
+          );
+          await capture(
+            t,
+            'matrix-approvals-${width.toInt()}-${dark ? 'dark' : 'light'}',
+          );
+          expect(t.takeException(), isNull);
+        },
+      );
+    }
   }
 
   testWidgets(

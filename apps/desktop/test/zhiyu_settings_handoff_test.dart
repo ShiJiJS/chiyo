@@ -16,6 +16,7 @@ import 'package:info_desktop/workspace/runtime_page.dart';
 import 'package:info_desktop/workspace/sample_workspace_source.dart';
 import 'package:info_desktop/workspace/settings_controller.dart';
 import 'package:info_desktop/workspace/settings_page.dart';
+import 'package:info_desktop/workspace/settings_layout.dart';
 import 'package:info_desktop/workspace/workspace_source.dart';
 
 void main() {
@@ -76,14 +77,20 @@ void main() {
     });
   }
 
-  for (final large in [false, true]) {
-    final prefix = large ? 'settings-1280-dark200' : 'settings-1440-light';
+  for (final (width, dark, large) in [
+    (1440.0, false, false),
+    (1280.0, false, false),
+    (1440.0, true, false),
+    (1280.0, true, false),
+    (1440.0, true, true),
+    (1280.0, true, true),
+  ]) {
+    final prefix =
+        'settings-handoff-${width.toInt()}-${dark ? 'dark' : 'light'}${large ? '200' : ''}';
     testWidgets(
       '$prefix all eight sidebar destinations share saved state without system effects or creating grants',
       (t) async {
-        t.view.physicalSize = large
-            ? const Size(1280, 800)
-            : const Size(1440, 900);
+        t.view.physicalSize = Size(width, width == 1440 ? 900 : 800);
         t.view.devicePixelRatio = 1;
         t.platformDispatcher.textScaleFactorTestValue = large ? 2 : 1;
         addTearDown(t.view.resetPhysicalSize);
@@ -99,7 +106,7 @@ void main() {
         final s =
             t.widget<LibraryPage>(find.byType(LibraryPage)).controller.source
                 as SampleWorkspaceSource;
-        if (large) {
+        if (dark) {
           await tap(t, 'preview-guide');
           await tap(t, 'preview-theme-dark');
         }
@@ -186,6 +193,55 @@ void main() {
             'preferencesVersion': page.controller.value!.version,
           };
           if (section != WorkspaceSettingsSection.plugins) {
+            final heading = find.byType(SettingsPageHeading).first;
+            final scrollers = find.ancestor(
+              of: heading,
+              matching: find.byType(Scrollable),
+            );
+            if (scrollers.evaluate().isNotEmpty) {
+              t.state<ScrollableState>(scrollers.first).position.jumpTo(0);
+            }
+            await ready(t);
+            final rect = t.getRect(heading);
+            final title = find
+                .descendant(of: heading, matching: find.byType(Text))
+                .first;
+            final paragraph = t.renderObject<RenderParagraph>(
+              find.descendant(of: title, matching: find.byType(RichText)),
+            );
+            observations['${section.name}-heading'] = {
+              'rect': [rect.left, rect.top, rect.width, rect.height],
+              'titleBaseline': paragraph
+                  .localToGlobal(
+                    Offset(
+                      0,
+                      paragraph.getDryBaseline(
+                        paragraph.constraints,
+                        TextBaseline.alphabetic,
+                      )!,
+                    ),
+                  )
+                  .dy,
+              'titleRect': [
+                t.getRect(title).left,
+                t.getRect(title).top,
+                t.getRect(title).width,
+                t.getRect(title).height,
+              ],
+            };
+            final actual = observations['${section.name}-heading']! as Map;
+            final appearance = observations['appearance-heading']! as Map;
+            for (var axis = 0; axis < 3; axis++) {
+              expect(
+                (actual['titleRect'] as List)[axis],
+                closeTo((appearance['titleRect'] as List)[axis] as num, 2),
+                reason: '${section.name} shares the settings title frame',
+              );
+            }
+            expect(
+              actual['titleBaseline'],
+              closeTo(appearance['titleBaseline'] as num, 2),
+            );
             await capture(t, '$prefix-${section.name}');
           }
         }
