@@ -256,7 +256,10 @@ class _DesktopSelectState<T> extends State<DesktopSelect<T>> {
     if (_open || widget.onChanged == null || widget.items.isEmpty) return;
     setState(() => _open = true);
     final scale = MediaQuery.textScalerOf(context).scale(1);
-    var width = widget.compact ? 230.0 : 180.0;
+    final minimumWidth = widget.compact || DesktopMotion.enabled(context)
+        ? 230.0
+        : 180.0;
+    var width = minimumWidth;
     for (final item in widget.items) {
       if (item.child case Text(:final data?)) {
         final text = TextPainter(
@@ -270,7 +273,7 @@ class _DesktopSelectState<T> extends State<DesktopSelect<T>> {
     final result = await showAnchoredSurface<_SelectedValue<T>>(
       triggerContext,
       controller: _popup,
-      width: width.clamp(widget.compact ? 230 : 180, 520),
+      width: width.clamp(minimumWidth, 520),
       alignToEnd: true,
       height: math.min(
         340 * scale,
@@ -308,11 +311,13 @@ class _DesktopSelectState<T> extends State<DesktopSelect<T>> {
             if (enabled) _show(triggerContext);
           },
         },
-        child: widget.compact
+        child: widget.compact || DesktopMotion.enabled(context)
             ? DesktopButton(
                 tooltip:
                     widget.tooltip ??
-                    (widget.triggerLabel == null && labelContent is Text
+                    (widget.compact &&
+                            widget.triggerLabel == null &&
+                            labelContent is Text
                         ? labelContent.data
                         : null),
                 focusNode: _buttonFocus,
@@ -322,7 +327,12 @@ class _DesktopSelectState<T> extends State<DesktopSelect<T>> {
                 kind: widget.quiet
                     ? DesktopButtonKind.quiet
                     : DesktopButtonKind.outline,
-                fontSize: widget.toolbar ? 12 : 13,
+                fontSize: !widget.compact
+                    ? 14
+                    : widget.toolbar
+                    ? 12
+                    : 13,
+                radius: 7,
                 leading: widget.leading,
                 leadingGap: widget.toolbar ? 5 : 7,
                 selected: widget.highlighted,
@@ -330,20 +340,27 @@ class _DesktopSelectState<T> extends State<DesktopSelect<T>> {
                 selectedBorderColor: UiPalette.of(context).accent,
                 padding:
                     widget.triggerPadding ??
-                    EdgeInsets.symmetric(
-                      horizontal: widget.toolbar ? 8 : 9,
-                      vertical: 6,
-                    ),
+                    (!widget.compact
+                        ? const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 7,
+                          )
+                        : EdgeInsets.symmetric(
+                            horizontal: widget.toolbar ? 8 : 9,
+                            vertical: 6,
+                          )),
                 minimumSize:
                     widget.minimumTriggerSize ??
-                    Size(
-                      0,
-                      widget.toolbar
-                          ? 32
-                          : widget.quiet
-                          ? 33
-                          : 34.8,
-                    ),
+                    (!widget.compact
+                        ? const Size(0, 36)
+                        : Size(
+                            0,
+                            widget.toolbar
+                                ? 32
+                                : widget.quiet
+                                ? 33
+                                : 34.8,
+                          )),
                 child:
                     widget.triggerLabel ??
                     Row(
@@ -356,7 +373,16 @@ class _DesktopSelectState<T> extends State<DesktopSelect<T>> {
                         else
                           Flexible(child: label),
                         const SizedBox(width: 7),
-                        const PrototypeSelectCaret(),
+                        if (widget.compact)
+                          const PrototypeSelectCaret()
+                        else
+                          const RotatedBox(
+                            quarterTurns: 1,
+                            child: PrototypeIcon(
+                              PrototypeIconGlyph.chev,
+                              size: 19,
+                            ),
+                          ),
                       ],
                     ),
               )
