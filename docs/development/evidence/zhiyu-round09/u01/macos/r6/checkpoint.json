@@ -40,10 +40,11 @@
   "fontFilesVerified": 3,
   "frozenFilesVerified": 15,
   "ordinaryPreviewRestored": true,
-  "cleanupPending": true,
+  "cleanupPending": false,
   "remaining": [
     "Form/menu contexts and remaining R07-R13 state visual/motion review across seven UI gates",
     "Owner: OS editing and IME; trackpad/window focus; accessibility and keyboard reachability",
     "Real services remain F01; Windows deferred"
-  ]
+  ],
+  "ordinaryPreviewRunningPid": 15586
 }
