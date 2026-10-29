@@ -1,0 +1,39 @@
+00:00 +0: loading /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_file_confirmation_test.dart
+00:00 +0: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_file_confirmation_test.dart: (setUpAll)
+00:00 +0: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_file_confirmation_test.dart: file restore identity and vanished/substituted target 1440.0 dark=false scale=1.0
+00:01 +1: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_test.dart: cold settings notification reading and failure never present an unconfirmed off switch
+00:01 +2: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile entry add/move/remove and failed save retain draft at 1440.0 dark=false
+00:01 +3: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile entry add/move/remove and failed save retain draft at 1440.0 dark=false
+00:01 +4: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile entry add/move/remove and failed save retain draft at 1440.0 dark=false
+00:02 +5: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile entry add/move/remove and failed save retain draft at 1440.0 dark=false
+00:02 +6: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile entry add/move/remove and failed save retain draft at 1440.0 dark=false
+00:02 +7: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile entry add/move/remove and failed save retain draft at 1440.0 dark=false
+00:02 +8: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile entry add/move/remove and failed save retain draft at 1440.0 dark=false
+00:03 +9: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile entry add/move/remove and failed save retain draft at 1440.0 dark=false
+00:03 +10: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile entry add/move/remove and failed save retain draft at 1440.0 dark=false
+00:04 +11: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile entry add/move/remove and failed save retain draft at 1440.0 dark=false
+00:04 +12: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile entry add/move/remove and failed save retain draft at 1440.0 dark=false
+00:05 +13: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile entry add/move/remove and failed save retain draft at 1440.0 dark=false
+00:05 +14: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credential_lifecycle_test.dart: material confirmation keeps selected version and list position 1440.0 dark=false scale=2.0
+00:06 +15: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credential_lifecycle_test.dart: material confirmation keeps selected version and list position 1440.0 dark=false scale=2.0
+00:06 +16: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile entry add/move/remove and failed save retain draft at 1440.0 dark=true
+00:06 +17: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile entry add/move/remove and failed save retain draft at 1440.0 dark=true
+00:07 +18: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credential_lifecycle_test.dart: material confirmation keeps selected version and list position 1440.0 dark=true scale=1.0
+00:07 +19: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credential_lifecycle_test.dart: material confirmation keeps selected version and list position 1440.0 dark=true scale=1.0
+00:08 +20: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile entry add/move/remove and failed save retain draft at 1280.0 dark=false
+00:08 +21: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile entry add/move/remove and failed save retain draft at 1280.0 dark=false
+00:09 +22: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credential_lifecycle_test.dart: material confirmation keeps selected version and list position 1440.0 dark=true scale=2.0
+00:09 +23: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile entry add/move/remove and failed save retain draft at 1280.0 dark=true
+00:10 +24: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile entry add/move/remove and failed save retain draft at 1280.0 dark=true
+00:10 +25: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credential_lifecycle_test.dart: material confirmation keeps selected version and list position 1280.0 dark=false scale=2.0
+00:10 +26: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: record name errors do not mark the separate personal name field
+00:11 +27: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credential_lifecycle_test.dart: material confirmation keeps selected version and list position 1280.0 dark=true scale=1.0
+00:11 +28: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credential_lifecycle_test.dart: material confirmation keeps selected version and list position 1280.0 dark=true scale=1.0
+00:11 +29: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: cancelling an entry removal discards the draft only
+00:12 +30: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credential_lifecycle_test.dart: material confirmation keeps selected version and list position 1280.0 dark=true scale=2.0
+00:12 +31: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_profile_test.dart: profile create is available from common add entry and supports an empty collection
+00:13 +32: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credential_lifecycle_test.dart: material list failure and explicit restore preserve metadata and create a disabled new head
+00:13 +33: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credential_lifecycle_test.dart: dark200 recycle unknown result is reconciled before explicit retry and shared recycle restores disabled
+00:14 +34: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credential_lifecycle_test.dart: permanent purge needs second confirmation and failed purge retains masked owner snapshot
+00:15 +35: /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credential_lifecycle_test.dart: (tearDownAll)
+00:15 +35: All tests passed!
