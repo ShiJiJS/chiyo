@@ -1,0 +1,17 @@
+{
+  "issue": 62,
+  "sourceCommit": "1d43ad6d32a55ab96f1bc45545fc8e754a912cce",
+  "evidenceCommit": "c085d919",
+  "bodyReadbackExact": true,
+  "bodySha256": "d7738964855bce434bf56cce77b31a7c6fd28baf00b318c5dbb493fe2c962e38",
+  "checklistUnchanged": true,
+  "checked": 10,
+  "total": 12,
+  "commentsObserved": 3,
+  "commentsAdded": 0,
+  "labels": [
+    "enhancementNew feature or request",
+    "ready-for-agentSpecification ready for agent work"
+  ],
+  "bodyOnlyChange": true
+}
