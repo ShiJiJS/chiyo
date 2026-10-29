@@ -25,6 +25,7 @@ Usage: ./scripts/dev-macos.sh <command> [arguments]
   run           Open the macOS app in debug mode (requires full Xcode)
   preview       Run the isolated Zhiyu UI with its own application identity
   preview-check [--library] Run the sandboxed native Zhiyu UI integration check
+  preview-profile-check <new-dir> [--runs 1..3] [--library] Check AOT, then restore preview
   preview-lifecycle <new-dir> Check native close/quit and restore the UI preview
   bundle <dir>  Compile CLI/hook installation materials into a NEW directory
   flutter ...   Run the project Flutter SDK in your current working directory
@@ -126,6 +127,11 @@ case "$command_name" in
       echo 'Desktop checks failed.' >&2
     fi
     exit "$checks_failed"
+    ;;
+  preview-profile-check)
+    require_sdk
+    require_xcode
+    python3 "$project_root/scripts/qa/run-zhiyu-profile.py" "$@"
     ;;
   preview|preview-check|preview-lifecycle)
     require_sdk

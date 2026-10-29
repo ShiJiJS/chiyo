@@ -14,6 +14,7 @@ import 'package:info_desktop/workspace/mac_preview_desktop.dart';
 import 'package:info_desktop/workspace/workspace_source.dart';
 import 'support/native_frame_recording.dart';
 import 'support/native_motion_probe.dart';
+import 'support/native_runtime.dart';
 
 void main() {
   final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -52,6 +53,7 @@ void main() {
         }
       }
       final root = Directory(directory);
+      final runtime = recordNativeRuntime(binding, directory);
       await root.create(recursive: true);
       // ignore: avoid_print
       print('ZHIYU_NATIVE_EVIDENCE=$directory');
@@ -87,7 +89,16 @@ void main() {
 
       Future<void> guide() => tap(find.byKey(const ValueKey('preview-guide')));
       Future<void> key(LogicalKeyboardKey value) async {
-        await tester.sendKeyEvent(value);
+        final physical = {
+          LogicalKeyboardKey.escape: PhysicalKeyboardKey.escape,
+          LogicalKeyboardKey.arrowDown: PhysicalKeyboardKey.arrowDown,
+          LogicalKeyboardKey.enter: PhysicalKeyboardKey.enter,
+        }[value];
+        if (physical == null) {
+          throw UnsupportedError('Unmapped native test key');
+        }
+        // SDK name-based inference uses debugName, which is absent in AOT.
+        await tester.sendKeyEvent(value, physicalKey: physical);
         await tester.pumpAndSettle();
         expect(tester.takeException(), isNull);
       }
@@ -111,9 +122,23 @@ void main() {
 
       final nativeMotion = <String, Object>{};
       final motionFailures = <String>[];
-      double opacity(Finder target) {
+      final windowStates = <String, Object?>{};
+      Element? Function() observeElement(Finder target) {
+        Element? current;
+        return () {
+          if (current == null || !current!.mounted) {
+            final matches = target.evaluate().toList(growable: false);
+            if (matches.isEmpty) return null;
+            // Keep the same unique-target requirement as Finder.single.
+            current = matches.single;
+          }
+          return current;
+        };
+      }
+
+      double opacity(Element target) {
         var value = 1.0;
-        target.evaluate().single.visitAncestorElements((element) {
+        target.visitAncestorElements((element) {
           if (element.widget case Opacity(:final opacity)) value *= opacity;
           if (element.widget case FadeTransition(:final opacity)) {
             value *= opacity.value;
@@ -148,8 +173,13 @@ void main() {
           'maximumFrameReadDelayMs': samples
               .map((s) => s['frameReadDelayMs']! as num)
               .reduce((a, b) => a > b ? a : b),
+          'maximumObserverReadMs': samples
+              .map((s) => s['observerReadMs']! as num)
+              .reduce((a, b) => a > b ? a : b),
           'samples': samples,
         };
+        windowStates[name] = await MacPreviewDesktop.channel
+            .invokeMapMethod<String, Object?>('windowState');
         await File('$directory/native-motion.json').writeAsString(
           const JsonEncoder.withIndent('  ').convert(nativeMotion),
         );
@@ -173,17 +203,19 @@ void main() {
         // Keep the stage in failed receipts as well as successful traces.
         // ignore: avoid_print
         print('ZHIYU_NATIVE_MOTION=$name');
+        final observed = observeElement(target);
         final pending = traceNativeMotion(
-          read: () => target.evaluate().isEmpty
-              ? null
-              : {
-                  'opacity': opacity(target),
-                  'y':
-                      (target.evaluate().single.findRenderObject()!
-                              as RenderBox)
-                          .localToGlobal(Offset.zero)
-                          .dy,
-                },
+          read: () {
+            final element = observed();
+            final box = element?.findRenderObject();
+            if (element == null || box is! RenderBox || !box.attached) {
+              return null;
+            }
+            return {
+              'opacity': opacity(element),
+              'y': box.localToGlobal(Offset.zero).dy,
+            };
+          },
           complete: (sample) => (sample['opacity']! as double) >= 1 - .000001,
         );
         await trigger();
@@ -196,7 +228,9 @@ void main() {
         );
       }
 
-      if (desktop != null) {
+      Future<void> nativeMotionChecks() async {
+        windowStates['before'] = await MacPreviewDesktop.channel
+            .invokeMapMethod<String, Object?>('windowState');
         await const MethodChannel(
           'agent_info_manage/secret_editor',
         ).invokeMethod<void>('cancel', {
@@ -305,27 +339,21 @@ void main() {
         final save = find.byKey(const ValueKey('preview-action'));
         await tester.ensureVisible(save);
         await tester.pumpAndSettle();
-        Color background() =>
-            ((find
-                                .descendant(
-                                  of: save,
-                                  matching: find.byType(DecoratedBox),
-                                )
-                                .first
-                                .evaluate()
-                                .single
-                                .findRenderObject()!
-                            as RenderDecoratedBox)
-                        .decoration
-                    as BoxDecoration)
-                .color!;
+        final observedBackground = observeElement(
+          find.descendant(of: save, matching: find.byType(DecoratedBox)).first,
+        );
         final hover = await tester.createGesture(
           kind: ui.PointerDeviceKind.mouse,
         );
         await hover.addPointer(location: Offset.zero);
         await tester.pumpAndSettle();
         final hovering = traceNativeMotion(
-          read: () => {'argb': background().toARGB32(), 'red': background().r},
+          read: () {
+            final box = observedBackground()?.findRenderObject();
+            if (box is! RenderDecoratedBox || !box.attached) return null;
+            final color = (box.decoration as BoxDecoration).color!;
+            return {'argb': color.toARGB32(), 'red': color.r};
+          },
           complete: (sample) =>
               ((sample['red']! as double) - const Color(0xffe9ecf1).r).abs() <
               .000000001,
@@ -334,14 +362,15 @@ void main() {
         await tester.pumpAndSettle();
         await checkTrace('hover', await hovering, 150);
         final label = find.text('保存');
-        final y = (label.evaluate().single.findRenderObject()! as RenderBox)
+        final observedLabel = observeElement(label);
+        final y = (observedLabel()!.findRenderObject()! as RenderBox)
             .localToGlobal(Offset.zero)
             .dy;
         final pressing = traceNativeMotion(
-          read: () => {
-            'y': (label.evaluate().single.findRenderObject()! as RenderBox)
-                .localToGlobal(Offset.zero)
-                .dy,
+          read: () {
+            final box = observedLabel()?.findRenderObject();
+            if (box is! RenderBox || !box.attached) return null;
+            return {'y': box.localToGlobal(Offset.zero).dy};
           },
           complete: (sample) => (sample['y']! as double) - y >= 1 - .000001,
         );
@@ -374,6 +403,19 @@ void main() {
         expect(find.text('已保存到预览资料'), findsNothing);
         if (motionFailures.isEmpty) {
           checks.add('native-frame-and-wall-clock-motion-contract');
+        }
+      }
+
+      if (desktop != null) {
+        if (runtime['profileMode'] == true) {
+          // This scope ends before framebuffer capture begins. Engine timing
+          // is diagnostic; the original per-motion 20ms gates remain intact.
+          await binding.watchPerformance(
+            nativeMotionChecks,
+            reportKey: 'unrecorded-native-motion',
+          );
+        } else {
+          await nativeMotionChecks();
         }
       }
 
@@ -414,7 +456,10 @@ void main() {
       // Match the deterministic rapid-close contract: dispatch during the
       // entrance (40ms of 180ms), after the new route has acquired focus.
       await tester.pump(const Duration(milliseconds: 40));
-      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+      await tester.sendKeyEvent(
+        LogicalKeyboardKey.escape,
+        physicalKey: PhysicalKeyboardKey.escape,
+      );
       await tester.pumpAndSettle();
       expect(find.byType(DesktopDialog), findsNothing);
       checks.add('rapid-close-removes-modal');
@@ -514,6 +559,10 @@ void main() {
       await File('$directory/native-checks.json').writeAsString(
         const JsonEncoder.withIndent('  ').convert({
           'platform': Platform.operatingSystem,
+          'runtime': runtime,
+          'nativeWindowStates': windowStates,
+          'unrecordedNativeMotionPerformance':
+              binding.reportData?['unrecorded-native-motion'],
           'fonts': fonts,
           'nativeIsolationChecked': desktop != null,
           'nativePreview': nativeState,

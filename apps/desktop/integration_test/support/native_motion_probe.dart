@@ -25,6 +25,7 @@ Future<List<Map<String, Object>>> traceNativeMotion({
   void capture(Duration frame) {
     if (!active) return;
     try {
+      final readStartedUs = clock.elapsedMicroseconds;
       final value = read();
       final readUs = clock.elapsedMicroseconds;
       if (value != null) {
@@ -39,6 +40,7 @@ Future<List<Map<String, Object>>> traceNativeMotion({
           'observerDelayMs': (clock.elapsedMicroseconds - frameStartUs) / 1000,
           'readWallMs': (readUs - firstReadUs!) / 1000,
           'frameReadDelayMs': (readUs - frameStartUs) / 1000,
+          'observerReadMs': (readUs - readStartedUs) / 1000,
           ...value,
         });
         if (samples.length > 1 && complete(value)) {
