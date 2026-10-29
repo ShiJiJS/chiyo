@@ -299,7 +299,9 @@ class _PluginChangeState extends State<_PluginChange> {
                 const SizedBox(height: 16),
                 if (_install) ...[
                   Text(
-                    '作者信息为包内自述，请核对来源与结构后安装。',
+                    p.builtin
+                        ? '来自随应用提供的内置定义，请核对版本与结构后更新。'
+                        : '作者信息为包内自述，请核对来源与结构后安装。',
                     style: libraryText(context, 13, color: c.muted),
                   ),
                   const SizedBox(height: 8),

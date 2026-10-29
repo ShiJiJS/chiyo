@@ -224,6 +224,8 @@ class SampleWorkspaceSource
   void observeHost(WorkspaceHostEndpoint endpoint, String? fingerprint) =>
       _hosts.observe(endpoint, fingerprint);
   set loseNextHostReply(bool value) => _hosts.loseNextReply = value;
+  set loseNextHostImportReply(bool value) => _hosts.loseNextImportReply = value;
+  Future<List<WorkspaceHostFile>> hostFileChoices() => _hosts.fileChoices();
   Future<void> demonstrateHost(SampleHostScenario scenario) async {
     await _readable();
     _hosts.demonstrate(scenario);

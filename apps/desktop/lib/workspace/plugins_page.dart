@@ -9,6 +9,7 @@ import 'plugin_widgets.dart';
 import 'plugins_controller.dart';
 import 'workspace_source.dart';
 import 'host_settings.dart';
+import 'host_import_dialog.dart';
 import 'legacy_templates_controller.dart';
 import 'legacy_templates_panel.dart';
 import 'plugin_authoring_guide.dart';
@@ -25,6 +26,7 @@ class PluginsPage extends StatefulWidget {
     this.onModalChanged,
     this.hosts,
     this.hostChanges,
+    this.hostFilePicker,
     this.onRecord,
     this.legacy,
     this.onLegacyCreate,
@@ -37,6 +39,7 @@ class PluginsPage extends StatefulWidget {
   final ValueChanged<bool>? onModalChanged;
   final WorkspaceHostSource? hosts;
   final Stream<WorkspaceRecordRef?>? hostChanges;
+  final WorkspaceHostFilePicker? hostFilePicker;
   final ValueChanged<WorkspaceRecordRef>? onRecord;
   final LegacyTemplatesController? legacy;
   final ValueChanged<WorkspaceLegacyTemplate>? onLegacyCreate;
@@ -83,6 +86,20 @@ class _PluginsPageState extends State<PluginsPage> {
     }
   }
 
+  Future<void> _importHostFile() async {
+    widget.onModalChanged?.call(true);
+    try {
+      final result = await showHostFileImport(
+        context,
+        widget.hosts!,
+        widget.hostFilePicker!,
+      );
+      if (mounted && result != null) await model.load();
+    } finally {
+      widget.onModalChanged?.call(false);
+    }
+  }
+
   void _syncSelection() {
     _consumeHostRequest();
     final next = (model.selection, model.tab, model.templateId);
@@ -106,11 +123,21 @@ class _PluginsPageState extends State<PluginsPage> {
     if (_detailScroll.hasClients) _detailScroll.jumpTo(0);
   }
 
-  Future<void> _operation(WorkspacePluginAction action) async {
+  Future<void> _operation(
+    WorkspacePluginAction action, {
+    WorkspacePluginUpdate? update,
+  }) async {
+    final version = model.catalog?.version;
     widget.onModalChanged?.call(true);
     try {
       final result = action == WorkspacePluginAction.install
-          ? await showPluginInstall(context, model.source, widget.picker)
+          ? await showPluginInstall(
+              context,
+              model.source,
+              update == null
+                  ? widget.picker
+                  : () => model.source.prepareUpdate(update, version!),
+            )
           : await showPluginMaintenance(
               context,
               model.source,
@@ -127,6 +154,68 @@ class _PluginsPageState extends State<PluginsPage> {
     } finally {
       widget.onModalChanged?.call(false);
     }
+  }
+
+  Widget _updateBanner(
+    BuildContext context,
+    WorkspacePluginUpdate update,
+    bool ready,
+  ) {
+    final c = UiPalette.of(context);
+    final action = DesktopButton(
+      key: const ValueKey('plugin-update'),
+      fontSize: 12,
+      onPressed: ready
+          ? () => _operation(WorkspacePluginAction.install, update: update)
+          : null,
+      child: const Text('查看更新'),
+    );
+    final text = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          'v${update.version} 可用',
+          style: libraryText(
+            context,
+            13,
+            weight: FontWeight.w600,
+            height: 22.4 / 13,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(update.summary, style: libraryText(context, 12, color: c.muted)),
+      ],
+    );
+    return Container(
+      key: const ValueKey('plugin-update-banner'),
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+      decoration: BoxDecoration(
+        color: c.rail,
+        borderRadius: BorderRadius.circular(7),
+      ),
+      child: MediaQuery.textScalerOf(context).scale(1) >= 1.6
+          ? Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                text,
+                const SizedBox(height: 12),
+                Align(alignment: Alignment.centerRight, child: action),
+              ],
+            )
+          : Row(
+              children: [
+                const RotatedBox(
+                  quarterTurns: 1,
+                  child: PrototypeIcon(PrototypeIconGlyph.arrow, size: 18),
+                ),
+                const SizedBox(width: 12),
+                Expanded(child: text),
+                const SizedBox(width: 12),
+                action,
+              ],
+            ),
+    );
   }
 
   Widget _list(BuildContext context) {
@@ -419,6 +508,8 @@ class _PluginsPageState extends State<PluginsPage> {
                       ],
                     ),
             ),
+            if (model.selectedUpdate case final update?)
+              _updateBanner(context, update, ready),
             Container(
               decoration: BoxDecoration(
                 border: Border(bottom: BorderSide(color: c.line)),
@@ -496,6 +587,9 @@ class _PluginsPageState extends State<PluginsPage> {
                 changes: widget.hostChanges!,
                 readGeneration: model.readGeneration,
                 onOpen: _openHost,
+                onImport: ready && p.enabled && widget.hostFilePicker != null
+                    ? _importHostFile
+                    : null,
               )
             else if (model.tab == PluginTab.instructions) ...[
               Text(

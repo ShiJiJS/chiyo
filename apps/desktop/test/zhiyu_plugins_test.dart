@@ -113,6 +113,138 @@ void main() {
     await t.pumpAndSettle();
   }
 
+  for (final (width, dark, scale) in [
+    (1440.0, false, 1.0),
+    (1280.0, false, 1.0),
+    (1440.0, true, 1.0),
+    (1280.0, true, 1.0),
+    (1440.0, true, 2.0),
+    (1280.0, true, 2.0),
+  ]) {
+    final prefix =
+        'closure-${width.toInt()}-${dark ? 'dark' : 'light'}${scale == 2 ? '200' : ''}';
+    testWidgets(
+      '$prefix bundled update banner uses the original review flow and retains snapshots',
+      (t) async {
+        final m = await start(t, dark: dark, width: width, scale: scale),
+            s = m.source;
+        final before = await s.readDetail(
+          const WorkspaceRecordRef(WorkspaceRecordKind.information, 'azure'),
+        );
+        expect(
+          find.byKey(const ValueKey('plugin-update-banner')),
+          findsOneWidget,
+        );
+        if (scale == 1) {
+          // Compare the painted CSS border box, excluding its 16px margin.
+          final paper = find
+              .descendant(
+                of: find.byKey(const ValueKey('plugin-update-banner')),
+                matching: find.byType(DecoratedBox),
+              )
+              .first;
+          expect(t.getSize(paper).height, closeTo(67.6, 2));
+        }
+        await capture(t, '$prefix-update-banner');
+        await tap(t, find.byKey(const ValueKey('plugin-update')));
+        expect(find.textContaining('随应用提供（示例）'), findsOneWidget);
+        expect(find.textContaining('新增字段：维护负责人'), findsOneWidget);
+        await capture(t, '$prefix-update-review');
+        await tap(t, find.text('取消').last);
+        expect(
+          find.byKey(const ValueKey('plugin-update-banner')),
+          findsOneWidget,
+        );
+        await tap(t, find.byKey(const ValueKey('plugin-update')));
+        s.nextSaveFailure = const WorkspaceFailure('disk_full', '合成更新失败，原定义保留');
+        await tap(t, find.byKey(const ValueKey('plugin-change-submit')));
+        expect(find.text('合成更新失败，原定义保留'), findsOneWidget);
+        expect((await s.plugins.load()).updates, hasLength(1));
+        await tap(t, find.byKey(const ValueKey('plugin-change-submit')));
+        expect(
+          find.byKey(const ValueKey('plugin-update-banner')),
+          findsNothing,
+        );
+        expect(
+          (await s.plugins.load()).packages
+              .firstWhere((p) => p.id == 'builtin.server')
+              .version,
+          '1.1.0',
+        );
+        expect(
+          (await s.readDetail(before.record.ref)).definition,
+          before.definition,
+        );
+        await tap(t, find.byKey(const ValueKey('plugin-create')));
+        expect(
+          find.byKey(const ValueKey('library-edit-maintainer')),
+          findsOneWidget,
+        );
+        await tap(t, find.text('取消').last);
+        await capture(t, '$prefix-update-complete');
+      },
+    );
+
+    testWidgets(
+      '$prefix host-file import cancels, rejects invalid input, preserves failed review and reads back unknown result',
+      (t) async {
+        final m = await start(t, dark: dark, width: width, scale: scale),
+            s = m.source;
+        await tap(t, find.byKey(const ValueKey('plugin-tab-settings')));
+        await tap(t, find.byKey(const ValueKey('host-import')));
+        await tap(t, find.byKey(const ValueKey('host-file-choice-cancel')));
+        expect(await s.hosts.importedFile(), isNull);
+        await tap(t, find.byKey(const ValueKey('host-import')));
+        await tap(t, find.textContaining('格式错误的主机记录.known_hosts').last);
+        expect(find.textContaining('主机记录格式无效'), findsOneWidget);
+        await capture(t, '$prefix-import-invalid');
+        expect(
+          t
+              .widget<DesktopButton>(
+                find.byKey(const ValueKey('host-import-submit')),
+              )
+              .onPressed,
+          isNull,
+        );
+        await tap(t, find.byKey(const ValueKey('host-import-pick')));
+        await tap(t, find.textContaining('合成主机记录.known_hosts').last);
+        expect(find.text('2 条主机记录'), findsOneWidget);
+        expect(await s.hosts.importedFile(), isNull);
+        await capture(t, '$prefix-import-review');
+        s.nextSaveFailure = const WorkspaceFailure('disk_full', '合成导入失败，选择保留');
+        await tap(t, find.byKey(const ValueKey('host-import-submit')));
+        expect(find.text('合成导入失败，选择保留'), findsOneWidget);
+        expect(find.text('2 条主机记录'), findsOneWidget);
+        expect(await s.hosts.importedFile(), isNull);
+        s.loseNextHostImportReply = true;
+        await tap(t, find.byKey(const ValueKey('host-import-submit')));
+        expect(
+          t
+              .widget<DesktopButton>(
+                find.byKey(const ValueKey('host-import-cancel')),
+              )
+              .onPressed,
+          isNull,
+        );
+        final committed = await s.hosts.importedFile();
+        await capture(t, '$prefix-import-unknown');
+        await tap(t, find.byKey(const ValueKey('host-import-reconcile')));
+        expect(
+          find.byKey(const ValueKey('host-import-status')),
+          findsOneWidget,
+        );
+        expect((await s.hosts.importedFile())!.version, committed!.version);
+        await capture(t, '$prefix-import-complete');
+        await tap(t, find.byKey(const ValueKey('workspace-nav-library')));
+        await tap(t, find.byKey(const ValueKey('workspace-nav-settings')));
+        expect(
+          find.byKey(const ValueKey('host-import-status')),
+          findsOneWidget,
+        );
+      },
+    );
+  }
+
   for (final width in [1440.0, 1280.0]) {
     for (final dark in [false, true]) {
       testWidgets(

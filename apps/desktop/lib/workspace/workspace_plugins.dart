@@ -89,10 +89,27 @@ class WorkspacePlugin {
 }
 
 class WorkspacePluginCatalog {
-  WorkspacePluginCatalog(this.version, Iterable<WorkspacePlugin> packages)
-    : packages = List.unmodifiable(packages);
+  WorkspacePluginCatalog(
+    this.version,
+    Iterable<WorkspacePlugin> packages, {
+    Iterable<WorkspacePluginUpdate> updates = const [],
+  }) : packages = List.unmodifiable(packages),
+       updates = List.unmodifiable(updates);
   final int version;
   final List<WorkspacePlugin> packages;
+  final List<WorkspacePluginUpdate> updates;
+}
+
+/// An offer from the host's bundled catalog, not an external JSON assertion.
+class WorkspacePluginUpdate {
+  const WorkspacePluginUpdate({
+    required this.packageId,
+    required this.version,
+    required this.digest,
+    required this.installedDigest,
+    required this.summary,
+  });
+  final String packageId, version, digest, installedDigest, summary;
 }
 
 /// Opaque host selection, never a path or executable capability.
@@ -158,6 +175,10 @@ class WorkspacePluginReceipt {
 
 abstract interface class WorkspacePluginSource {
   Future<WorkspacePluginCatalog> load();
+  Future<WorkspacePluginCandidate> prepareUpdate(
+    WorkspacePluginUpdate update,
+    int catalogVersion,
+  );
   Future<WorkspacePluginPreview> previewInstall(String selectionId);
 
   /// Releases the chooser/form lease; committed receipts remain queryable.

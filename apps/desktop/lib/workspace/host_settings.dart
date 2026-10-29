@@ -94,11 +94,13 @@ class HostSettingsPanel extends StatefulWidget {
     required this.source,
     required this.changes,
     required this.onOpen,
+    this.onImport,
     this.readGeneration = 0,
   });
   final WorkspaceHostSource source;
   final Stream<WorkspaceRecordRef?> changes;
   final ValueChanged<WorkspaceHostTarget> onOpen;
+  final VoidCallback? onImport;
   final int readGeneration;
   @override
   State<HostSettingsPanel> createState() => _HostSettingsPanelState();
@@ -106,9 +108,11 @@ class HostSettingsPanel extends StatefulWidget {
 
 class _HostSettingsPanelState extends State<HostSettingsPanel> {
   late Future<AsyncSnapshot<List<WorkspaceHostIdentity>>> _read;
+  late Future<AsyncSnapshot<WorkspaceHostImportStatus?>> _imported;
   late StreamSubscription<WorkspaceRecordRef?> _subscription;
   void _load() {
     _read = _hostRead(widget.source.load());
+    _imported = _hostRead(widget.source.importedFile());
   }
 
   @override
@@ -202,25 +206,107 @@ class _HostSettingsPanelState extends State<HostSettingsPanel> {
     );
   }
 
+  Widget _heading(BuildContext context) {
+    final label = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          'SSH 主机信任',
+          style: libraryText(context, 17, weight: FontWeight.w700, height: 1.5),
+        ),
+        const SizedBox(height: 7),
+        Text(
+          '核对地址、端口和指纹后再确认主机。身份确认不代表批准使用登录凭据。',
+          style: libraryText(
+            context,
+            13,
+            color: UiPalette.of(context).muted,
+            height: 1.8,
+          ),
+        ),
+      ],
+    );
+    final action = DesktopButton(
+      key: const ValueKey('host-import'),
+      onPressed: widget.onImport,
+      fontSize: 12,
+      child: const Text('导入 known_hosts'),
+    );
+    return MediaQuery.textScalerOf(context).scale(1) >= 1.6
+        ? Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              label,
+              const SizedBox(height: 12),
+              Align(alignment: Alignment.centerLeft, child: action),
+            ],
+          )
+        : Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(child: label),
+              const SizedBox(width: 16),
+              action,
+            ],
+          );
+  }
+
   @override
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
-      Text(
-        'SSH 主机信任',
-        style: libraryText(context, 17, weight: FontWeight.w700, height: 1.5),
-      ),
-      const SizedBox(height: 7),
-      Text(
-        '核对地址、端口和指纹后再确认主机。身份确认不代表批准使用登录凭据。',
-        style: libraryText(
-          context,
-          13,
-          color: UiPalette.of(context).muted,
-          height: 1.8,
-        ),
-      ),
+      _heading(context),
       const SizedBox(height: 20),
+      FutureBuilder<AsyncSnapshot<WorkspaceHostImportStatus?>>(
+        future: _imported,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState != ConnectionState.done) {
+            return const Text('正在读取导入记录…');
+          }
+          if (snapshot.data!.hasError) {
+            return Wrap(
+              spacing: 12,
+              children: [
+                const Text('已导入文件记录暂不可读。'),
+                DesktopButton(
+                  key: const ValueKey('host-import-status-retry'),
+                  onPressed: () => setState(_load),
+                  child: const Text('重新读取导入记录'),
+                ),
+              ],
+            );
+          }
+          final file = snapshot.data!.data;
+          if (file == null) return const SizedBox.shrink();
+          return Container(
+            key: const ValueKey('host-import-status'),
+            margin: const EdgeInsets.only(bottom: 20),
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: UiPalette.of(context).rail,
+              borderRadius: BorderRadius.circular(7),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  '已导入 ${file.name} · ${file.entryCount} 条记录',
+                  style: libraryText(context, 14, weight: FontWeight.w600),
+                ),
+                const SizedBox(height: 6),
+                SelectableText(
+                  'SHA256 ${file.digest}',
+                  style: libraryText(
+                    context,
+                    12,
+                    color: UiPalette.of(context).muted,
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
       FutureBuilder<AsyncSnapshot<List<WorkspaceHostIdentity>>>(
         future: _read,
         builder: (context, snapshot) {
